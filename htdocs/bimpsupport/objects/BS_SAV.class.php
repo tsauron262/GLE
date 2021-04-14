@@ -1183,6 +1183,17 @@ class BS_SAV extends BimpObject
             $html .= '</div>';
         }
 
+        // Temporaire, à suppr. lors mise en prod new API GSX: 
+        if ($this->isLoaded()) {
+            $centre_repa = (string) BimpCache::getBdb()->getValue('bs_sav', 'code_centre_repa', 'id = ' . $this->id);
+
+            if ($centre_repa && $centre_repa != $this->getData('code_centre')) {
+                $msg = 'Centre de réparation différent du centre de prise en charge.<br/>Le traitement de ce SAV ne doit être fait que sur la plateforme de test <a href="https://erp2.bimp.fr/bimpinv01042020/bimpsupport/index.php?fc=sav&id='.$this->id.'">bimpinv01042020</a>';
+                $html .= BimpRender::renderAlerts($msg, 'warning');
+            }
+        }
+        // ---
+
         return $html;
     }
 

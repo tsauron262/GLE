@@ -227,6 +227,8 @@ forms:
                 field: date_livraison
     
     contrat:
+        msgs:
+            callback: displayIfMessageFormContrat
         rows:
             - field: fk_soc
               show: 
@@ -289,6 +291,8 @@ forms:
               input:
                   type: date
                   display_now: 1
+              show:
+                  callback: isServiceAutorisedInContrat
             - custom: 1
               label: Durée en mois
               input_name: duree_mois
@@ -349,6 +353,8 @@ forms:
                           name: renouvellement_create
                           is_static: 1
             - field: fk_mode_reglement
+              show:
+                  callback: isServiceAutorisedInContrat
             - custom: 1
               show: 
                   callback: isNotRenouvellementContrat
@@ -391,6 +397,8 @@ forms:
                       method: getData
                       params:
                           - note_public
+              show:
+                  callback: isServiceAutorisedInContrat
             - custom: 1
               label: Note privée
               input_name: note_private
@@ -401,6 +409,8 @@ forms:
                       method: getData
                       params:
                           - note_private
+              show:
+                  callback: isServiceAutorisedInContrat
             
 fields_tables: 
     infos: 

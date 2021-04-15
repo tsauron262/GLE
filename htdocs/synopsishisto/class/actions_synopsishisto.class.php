@@ -112,25 +112,27 @@ class histoNavigation
 
     public static function isModeEco()
     {
-        if (!is_null(self::$mode_eco)) {
-            return self::$mode_eco;
-        }
-
-        if (defined('BIMP_LIB')) {
-            self::$mode_eco = (int) BimpCore::getConf('bimpcore_mode_eco', 0);
-        } else {
-            global $db;
-            $res = $db->query('SELECT value FROM llx_bimpcore_conf WHERE name = \'bimpcore_mode_eco\'');
-            if ($res && $db->num_rows($res)) {
-                $obj = $db->fetch_object($res);
-                self::$mode_eco = (int) $obj->value;
-                $db->free($res);
-            } else {
-                self::$mode_eco = 0;
-            }
-        }
-
-        return self::$mode_eco;
+//        if (!is_null(self::$mode_eco)) {
+//            return self::$mode_eco;
+//        }
+//
+//        if (defined('BIMP_LIB')) {
+//            self::$mode_eco = (int) BimpCore::getConf('bimpcore_mode_eco', 0);
+//        } else {
+//            global $db;
+//            $res = $db->query('SELECT value FROM llx_bimpcore_conf WHERE name = \'bimpcore_mode_eco\'');
+//            if ($res && $db->num_rows($res)) {
+//                $obj = $db->fetch_object($res);
+//                self::$mode_eco = (int) $obj->value;
+//                $db->free($res);
+//            } else {
+//                self::$mode_eco = 0;
+//            }
+//        }
+//
+//        return self::$mode_eco;
+        
+        return false;
     }
 
     static function getBlocHisto($context)
@@ -156,7 +158,7 @@ class histoNavigation
 
             $sql = $db->query($requete);
             while ($res = $db->fetch_object($sql)) {
-//print '<a href="#" class="vsmenu">'..'</a>';
+                //print '<a href="#" class="vsmenu">'..'</a>';
                 $ret = self::histoUser($res);
                 if ($ret)
                     $return .= "<div class='menu_contenu'>  " . $ret . "</div>";

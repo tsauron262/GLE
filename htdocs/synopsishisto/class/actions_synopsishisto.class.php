@@ -158,7 +158,7 @@ class histoNavigation
 
             $sql = $db->query($requete);
             while ($res = $db->fetch_object($sql)) {
-//print '<a href="#" class="vsmenu">'..'</a>';
+                //print '<a href="#" class="vsmenu">'..'</a>';
                 $ret = self::histoUser($res);
                 if ($ret)
                     $return .= "<div class='menu_contenu'>  " . $ret . "</div>";

@@ -1594,19 +1594,25 @@ class ObjectLine extends BimpObject
         if ($this->field_exists('remise_crt')) {
             if ((int) $this->getData('remise_crt')) {
                 $remise_percent = 0;
+                $eco_taxe = 0;
+                $copie_privee = 0;
+
                 if ($this->field_exists('remise_crt_percent')) {
                     $remise_percent = (float) $this->getData('remise_crt_percent');
                 }
 
-                if (!$remise_percent) {
-                    $product = $this->getProduct();
-                    if (BimpObject::objectLoaded($product)) {
+                $product = $this->getProduct();
+                if (BimpObject::objectLoaded($product)) {
+                    if (!$remise_percent) {
                         $remise_percent = (float) $product->getRemiseCrt();
                     }
+                    
+                    $eco_taxe = (float) $product->getData('rpcp');
+                    $copie_privee = (float) $product->getData('deee');
                 }
 
                 if ($remise_percent) {
-                    return (float) $this->pu_ht * ($remise_percent / 100);
+                    return (float) ($this->pu_ht - ($eco_taxe + $copie_privee)) * ($remise_percent / 100);
                 }
             }
         }
@@ -2596,7 +2602,7 @@ class ObjectLine extends BimpObject
                                 $ref_supplier = '';
                             }
 //                            addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1=0.0, $txlocaltax2=0.0, $fk_product=0, $fk_prod_fourn_price=0, $ref_supplier='', $remise_percent=0.0, $price_base_type='HT', $pu_ttc=0.0, $type=0, $info_bits=0, $notrigger=false, $date_start=null, $date_end=null, $array_options=0, $fk_unit=null, $pu_ht_devise=0, $origin='', $origin_id=0)
-                            $result = $object->addLine((string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->tva_tx, 0, 0, (int) $this->id_product, (int) $this->id_fourn_price, $ref_supplier, (float) $this->remise, 'HT', 0.0,$type, 0, false, $date_from, $date_to);
+                            $result = $object->addLine((string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->tva_tx, 0, 0, (int) $this->id_product, (int) $this->id_fourn_price, $ref_supplier, (float) $this->remise, 'HT', 0.0, $type, 0, false, $date_from, $date_to);
                             break;
 
                         case 'FactureFournisseur':
@@ -5366,7 +5372,7 @@ class ObjectLine extends BimpObject
 
         return BimpObject::getInstance('bimpcommercial', 'ObjectLine');
     }
-    
+
     public static function traiteSerialApple($serial)
     {
         if (stripos($serial, 'S') === 0) {

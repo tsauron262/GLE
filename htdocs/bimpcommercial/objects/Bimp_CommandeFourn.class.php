@@ -1154,8 +1154,8 @@ class Bimp_CommandeFourn extends BimpComm
 
     public function renderHeaderStatusExtra()
     {
-        $html = parent::renderHeaderStatusExtra();
-
+        $html = '';
+        
         $forced = $this->getData('status_forced');
 
         if (isset($forced['reception']) && (int) $forced['reception']) {
@@ -1163,7 +1163,7 @@ class Bimp_CommandeFourn extends BimpComm
         }
 
         if ((int) $this->getData('invoice_status') > 0) {
-            $html .= '<span>' . $this->displayData('invoice_status') . '</span>';
+            $html .= '<br/><span>' . $this->displayData('invoice_status') . '</span>';
 
             if (isset($forced['invoice']) && (int) $forced['invoice']) {
                 $html .= ' (forcé)';
@@ -1173,6 +1173,8 @@ class Bimp_CommandeFourn extends BimpComm
             $html .= '<br/><span class="warning">' . BimpRender::renderIcon('fas_hourglass-start', 'iconLeft') . 'Attente Infos</span>';
         }
 
+        $html .= parent::renderHeaderStatusExtra();
+        
         return $html;
     }
 

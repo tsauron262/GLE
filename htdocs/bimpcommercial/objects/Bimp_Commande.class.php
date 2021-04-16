@@ -899,7 +899,7 @@ class Bimp_Commande extends BimpComm
 
     public function renderHeaderStatusExtra()
     {
-        $html = parent::renderHeaderStatusExtra();
+        $html = '';
 
         if ($this->isLoaded()) {
             $forced = $this->getData('status_forced');
@@ -929,6 +929,8 @@ class Bimp_Commande extends BimpComm
                 }
             }
         }
+        
+        $html .= parent::renderHeaderStatusExtra();
 
         return $html;
     }

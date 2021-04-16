@@ -303,12 +303,14 @@ class Bimp_Propal extends BimpComm
         foreach($children as $id_child) {
             $child = $this->getChildObject("lines", $id_child);
             $fk_product = $this->db->getValue("propaldet", "fk_product", 'rowid = ' . $child->getData('id_line'));
-            $service = $this->getInstance('bimpcore', 'Bimp_Product', $fk_product);
-            
-            if(!in_array($service->getData('ref'), $services)) {
-                $id_services[] = $service->getData('ref');
-                
+            if($fk_product > 0) {
+                $service = $this->getInstance('bimpcore', 'Bimp_Product', $fk_product);
+                if(!in_array($service->getData('ref'), $services)) {
+                    $id_services[] = $service->getData('ref');
+
+                }
             }
+            
         }
         
         if(count($id_services) > 0 && !$return_array) {

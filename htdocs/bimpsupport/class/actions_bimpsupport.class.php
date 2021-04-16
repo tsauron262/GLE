@@ -67,16 +67,16 @@ class ActionsBimpsupport
         global $conf, $user, $db;
 
         $mode_eco = false;
-        if (defined('BIMP_LIB')) {
-            $mode_eco = (int) BimpCore::getConf('bimpcore_mode_eco', 0);
-        } else {
-            $res = $db->query('SELECT value FROM llx_bimpcore_conf WHERE name = \'bimpcore_mode_eco\'');
-            if ($res && $db->num_rows($res)) {
-                $obj = $db->fetch_object($res);
-                $mode_eco = (int) $obj->value;
-                $db->free($res);
-            }
-        }
+//        if (defined('BIMP_LIB')) {
+//            $mode_eco = (int) BimpCore::getConf('bimpcore_mode_eco', 0);
+//        } else {
+//            $res = $db->query('SELECT value FROM llx_bimpcore_conf WHERE name = \'bimpcore_mode_eco\'');
+//            if ($res && $db->num_rows($res)) {
+//                $obj = $db->fetch_object($res);
+//                $mode_eco = (int) $obj->value;
+//                $db->free($res);
+//            }
+//        }
 
         //consigne commande
         if ($element_id > 0 && ($element_type == "contrat" || $element_type == "commande" || $element_type == "DI" || $element_type == "FI" || $element_type == "expedition")) {

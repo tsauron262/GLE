@@ -5,9 +5,9 @@ class BS_ApplePart extends BimpObject
 
     private static $tabRefCommenceIos = array("661-05511", "DN661", "FD661", "NF661", "RA", "RB", "RC", "RD", "RE", "RG", "SA", "SB", "SC", "SD", "SE", "X661", "XB", "XC", "XD", "XE", "XF", "XG", "ZD661", "ZK661", "ZP661");
     private static $tabDescCommenceIos = array("SVC,IPOD", "Ipod nano");
-    private static $tabRefCommenceIosDouble = array("661", "Z661", "B661");
+    private static $tabRefCommenceIosDouble = array("661", "Z661", "B661", "J661");
     private static $tabDescCommenceIosDouble = array("iphone", "BAT,IPHONE", "SVC,IPHONE"); //design commence par
-    private static $tabDescContientIosDouble = array("Ipad", "Ipad Pro", "Ipad mini", "Apple Watc", "Ipad Air", "iPhone 7", "iPhone 8"); //design contient
+    private static $tabDescContientIosDouble = array("Ipad", "Ipad Pro", "Ipad mini", "Apple Watc", "Ipad Air", "iPhone 7", "iPhone 8", "iPhone XR"); //design contient
     private static $tabRefCommenceBatterie = array("661-04577", "661-04576", "661-08917", "661-02909", "661-04479", "661-04579", "661-04580", "661-04581", "661-04582", "661-05421", "661-05755", "661-08935", "661-8216", "661-04578"); //Prix a 59
     private static $tabRefCommenceBatterieX = array("661-08932", "661-10565", "661-10850", "661-11035", //X
         "661-13574", "661-13569", "661-13624"); //11   Prix a 84
@@ -298,12 +298,12 @@ class BS_ApplePart extends BimpObject
         //xception 
 //        $tabException1 = array("F661", "AB661", "SF661","B661",  "J661", "E661");
 //        foreach($tabException1 as $exception1){
-            if(/*stripos($ref, $exception1) !== false &&*/ $prix == 130.63)
-                    return (209/1.2);
+        if (/* stripos($ref, $exception1) !== false && */ $prix == 130.63)
+            return (209 / 1.2);
 //        }
-        
-        
-        
+
+
+
         $coefPrix = 1;
         $constPrix = 0;
         $newPrix = 0;
@@ -319,8 +319,7 @@ class BS_ApplePart extends BimpObject
             foreach (self::$tabRefCommencePrixEcran as $refT => $tabInfo)
                 if ($ref == $refT)
                     $newPrix = str_replace(",", ".", $tabInfo[0]);
-        }
-        else {
+        } else {
             if ($prix > 300)
                 $coefPrix = 0.8;
             elseif ($prix > 150)

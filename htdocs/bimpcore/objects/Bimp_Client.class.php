@@ -1204,7 +1204,7 @@ class Bimp_Client extends Bimp_Societe
                 break;
 
             case 'fi':
-                $list = new BC_ListTable(BimpObject::getInstance('bimpfichinter', 'Bimp_Fichinter'), 'client', 1, null, 'Fiche interventions du client "' . $client_label . '"', 'fas_ambulance');
+                $list = new BC_ListTable(BimpObject::getInstance('bimptechnique', 'BT_ficheInter'), 'client', 1, null, 'Fiche interventions du client "' . $client_label . '"', 'fas_ambulance');
                 $list->addFieldFilterValue('fk_soc', $this->id);
                 break;
         }

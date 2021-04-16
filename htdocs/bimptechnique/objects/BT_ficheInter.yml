@@ -195,6 +195,32 @@ fields:
         input:
             type: toggle
 lists:
+    client:
+       configurable: 1
+       page_btn: 1
+       filters_panel: default
+       sort_field: datei
+       modal_view: fi
+       cols:
+            ref:
+                field: ref
+            datei:
+            duree:
+                has_total: 1
+                total_type: timer
+            fk_statut:
+                field: fk_statut
+            fk_user_author:
+                field: fk_user_author
+                display: nom_url
+            urgent:
+                field: urgent
+            nombre_inter:
+                label: Nombre d'interventions
+                value:
+                    callback: displayNombreInters
+            datec:
+                field: datec
     default:
         configurable: 1
         total_row: 1

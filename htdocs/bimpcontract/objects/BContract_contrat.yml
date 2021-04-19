@@ -213,7 +213,7 @@ fields:
         type: int
         dol_extra_field: 1
         values:
-            array: renouvellement
+            array: renouvellement_edit
         default_value: 12
     denounce:
         label: Contrat dénoncé
@@ -988,6 +988,7 @@ forms:
             - field: fk_commercial_suivi
             - field: fk_commercial_signature
             - field: tacite
+              label: Renouvellement
             - field: denounce
             - field: note_public
             - field: note_private

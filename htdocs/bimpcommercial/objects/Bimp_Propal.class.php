@@ -1118,7 +1118,7 @@ class Bimp_Propal extends BimpComm
         }
 
         if($data['re_new'] == 0 && $autre_erreurs) {
-            $errors[] = "Un renouvellement doit être obligatoirement choisi.";
+            $errors[] = "Vous devez obligatoirement choisir un type de renouvellement.";
         }
 
 

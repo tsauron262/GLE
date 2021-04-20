@@ -341,8 +341,8 @@ forms:
                           is_static: 1       
             - custom: 1
               label: Renouvellement
-              show: 
-                  callback: isNotRenouvellementContrat
+              show:
+                  callback: isServiceAutorisedInContrat
               input_name: re_new
               required: 1
               input:

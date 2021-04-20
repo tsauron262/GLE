@@ -111,6 +111,16 @@ class BContract_contrat extends BimpDolObject
         self::CONTRAT_RENOUVELLEMENT_6_FOIS          => 'Tacite 6 fois',
         self::CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION => 'Sur proposition'
     );
+    
+    public static $renouvellement_edit = Array(
+        self::CONTRAT_RENOUVELLEMENT_1_FOIS          => 'Tacite 1 fois',
+        self::CONTRAT_RENOUVELLEMENT_2_FOIS          => 'Tacite 2 fois',
+        self::CONTRAT_RENOUVELLEMENT_3_FOIS          => 'Tacite 3 fois',
+        self::CONTRAT_RENOUVELLEMENT_4_FOIS          => 'Tacite 4 fois',
+        self::CONTRAT_RENOUVELLEMENT_5_FOIS          => 'Tacite 5 fois',
+        self::CONTRAT_RENOUVELLEMENT_6_FOIS          => 'Tacite 6 fois',
+        self::CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION => 'Sur proposition'
+    );
 
     public static $objet_contrat = [
         self::CONTRAT_GLOBAL                    => ['label' => "Contrat global", 'classes' => [], 'icon' => 'globe'],
@@ -813,7 +823,7 @@ class BContract_contrat extends BimpDolObject
 
     public function update(&$warnings = array(), $force_update = false)
     {
-
+        
         if (BimpTools::getValue('type_piece')) {
             $id = 0;
             switch (BimpTools::getValue('type_piece')) {
@@ -1969,8 +1979,12 @@ class BContract_contrat extends BimpDolObject
         );
     }
 
-    public function actionUnSign()
+    public function actionUnSign($data, &$success = Array())
     {
+        
+        $warnings = [];
+        $errors = [];
+        
         if ($this->updateField('date_contrat', null)) {
             $this->addLog('Contrat marqué comme non-signé');
             $success = 'Contrat dé-signer';

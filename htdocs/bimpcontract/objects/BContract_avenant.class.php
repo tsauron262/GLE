@@ -223,8 +223,10 @@ class BContract_avenant extends BContract_contrat {
                         $total_tva = $coup_ligne_tva + $ligne_du_contrat->getData('total_tva');
                         $total_ttc = $coup_ligne_ttc + $ligne_du_contrat->getData('total_ttc');
 
-
+                        
+                        $dejaChange = false;
                         if($coup_ligne_ht != 0) {
+                            $dejaChange = true;
                             $errors = BimpTools::merge_array($errors, $ligne_du_contrat->updateField('qty', $ligne_du_contrat->getData('qty') + $added_qty));
                             if(!count($errors))
                                 $errors = BimpTools::merge_array($errors, $ligne_du_contrat->updateField('total_ht', $total_ht));
@@ -235,7 +237,12 @@ class BContract_avenant extends BContract_contrat {
                             if(!count($errors))
                                 $errors = BimpTools::merge_array($errors, $ligne_du_contrat->updateField('serials', $infos['serials_in']));
                         }
-
+                        
+                        $serialsLigne = json_decode($ligne_du_contrat->getData('serials'));
+                        $newSerials = json_decode($infos['serials_in']);
+                        if(count(array_diff($serialsLigne, $newSerials)) > 0 && !$dejaChange) {
+                            $errors = BimpTools::merge_array($errors, $ligne_du_contrat->updateField('serials', $infos['serials_in']));
+                        }
                     }
                 }
             }

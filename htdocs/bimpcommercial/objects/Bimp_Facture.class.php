@@ -5823,7 +5823,7 @@ class Bimp_Facture extends BimpComm
         $boxObj->boxlabel .= ' '.$year;
         
         
-        $ln = $this->db->executeS("SELECT SUM(total_ttc) as tot, SUM(IF(paye = 0, `remain_to_pay`, 0)) as totIP, COUNT(*) as nb, SUM(IF(paye = 0 ,1,0)) as nbIP, SUM(IF(remain_to_pay != total_ttc && paye = 0 ,1,0)) as nbPart, SUM(IF(paye = 0 && `date_lim_reglement` < now() ,1,0)) as nbRetard, SUM(IF(paye = 0 && `date_lim_reglement` < now() ,remain_to_pay,0)) as totRetard FROM `llx_facture` WHERE YEAR( datef ) = '".$year."'");
+        $ln = BimpCache::getBdb()->executeS("SELECT SUM(total_ttc) as tot, SUM(IF(paye = 0, `remain_to_pay`, 0)) as totIP, COUNT(*) as nb, SUM(IF(paye = 0 ,1,0)) as nbIP, SUM(IF(remain_to_pay != total_ttc && paye = 0 ,1,0)) as nbPart, SUM(IF(paye = 0 && `date_lim_reglement` < now() ,1,0)) as nbRetard, SUM(IF(paye = 0 && `date_lim_reglement` < now() ,remain_to_pay,0)) as totRetard FROM `llx_facture` WHERE YEAR( datef ) = '".$year."'");
         $ln= $ln[0];
         
         $data = array(
@@ -5872,7 +5872,7 @@ class Bimp_Facture extends BimpComm
         $boxObj->boxlabel .= ' '.$year;
         
         
-        $lns = $this->db->executeS("SELECT SUM(total) as tot, COUNT(*) as nb, ae.type as secteur FROM `llx_facture` a, llx_facture_extrafields ae WHERE ae.fk_object = a.rowid AND YEAR(a.datef) = '".$year."' GROUP BY ae.type");
+        $lns = BimpCache::getBdb()->executeS("SELECT SUM(total) as tot, COUNT(*) as nb, ae.type as secteur FROM `llx_facture` a, llx_facture_extrafields ae WHERE ae.fk_object = a.rowid AND YEAR(a.datef) = '".$year."' GROUP BY ae.type");
         $field = new BC_Field($this, 'ef_type');
         $data = $data2 = array();
         $i = 0;

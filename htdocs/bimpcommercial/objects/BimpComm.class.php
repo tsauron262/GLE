@@ -3570,8 +3570,11 @@ class BimpComm extends BimpDolObject
             $errors[] = 'Erreur: cette action n\'est pas possible';
         } else {
             global $user;
+            BimpTools::cleanDolEventsMsgs();
             if ($this->dol_object->set_draft($user) <= 0) {
-                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la remise au statut "Brouillon"');
+                $obj_errors = BimpTools::getErrorsFromDolObject($this->dol_object);
+                $obj_errors = BimpTools::merge_array($obj_errors, BimpTools::getDolEventsMsgs(array('errors')));
+                $errors[] = BimpTools::getMsgFromArray($obj_errors, 'Echec de la remise au statut "Brouillon"');
             } else {
                 global $conf, $langs;
 

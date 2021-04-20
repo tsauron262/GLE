@@ -350,7 +350,8 @@ class Bimp_Commande extends BimpComm
 
     public function isUnvalidatable(&$errors = array())
     {
-        $this->isActionAllowed('modify', $errors);
+        // Laissé déco (Si appellée via trigger, la commande est déjà remise au statut 0) 
+//        $this->isActionAllowed('modify', $errors);
 
         if (!$this->canSetAction('modify')) {
             $errors[] = 'Vous n\'avez pas la permission';
@@ -929,7 +930,7 @@ class Bimp_Commande extends BimpComm
                 }
             }
         }
-        
+
         $html .= parent::renderHeaderStatusExtra();
 
         return $html;
@@ -3292,8 +3293,8 @@ class Bimp_Commande extends BimpComm
         $url = DOL_URL_ROOT . '/bimplogistique/index.php?fc=commande&id=' . $this->id;
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings,
+            'errors'           => $errors,
+            'warnings'         => $warnings,
             'success_callback' => 'window.location = \'' . $url . '\';'
         );
     }

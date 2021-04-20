@@ -1979,8 +1979,12 @@ class BContract_contrat extends BimpDolObject
         );
     }
 
-    public function actionUnSign()
+    public function actionUnSign($data, &$success = Array())
     {
+        
+        $warnings = [];
+        $errors = [];
+        
         if ($this->updateField('date_contrat', null)) {
             $this->addLog('Contrat marqué comme non-signé');
             $success = 'Contrat dé-signer';

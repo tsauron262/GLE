@@ -549,12 +549,12 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                     
                 }
                 $pdf->setY($pdf->getY() + 5);
-                $pdf->SetFont('', '', 10);
+                $pdf->SetFont('', '', 8);
                 $pdf->Cell($W, 4, "Article " . $current_article, "L", null, 'C', true);
                 $pdf->ln();
                 $pdf->SetFont('', '', 8);
                 $pdf1->setY($pdf1->getY() + 5);
-                $pdf1->SetFont('', '', 10);
+                $pdf1->SetFont('', '', 8);
                 $pdf1->Cell($W, 4, "Article " . $current_article, "L", null, 'C', true);
                 $pdf1->ln();
                 $pdf1->SetFont('', '', 8);

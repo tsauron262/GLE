@@ -357,7 +357,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 $pdf1->Cell($W, 4, "IL EST AINSI CONVENU CE QUI SUIT", 0, null, 'L', true);
                 $pdf1->Ln();
                 foreach($lignes_avenant as $id => $infos) {
-                    
+                    $new_qty = 0;
                     
                     $have_modif = false;
                     $line = $this->avenant->getChildObject('avenantdet', $id);

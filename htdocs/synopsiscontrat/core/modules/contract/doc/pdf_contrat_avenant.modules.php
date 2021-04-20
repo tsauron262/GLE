@@ -348,14 +348,12 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 $pdf->SetFont('', 'B', 9);
                 $pdf->Ln();
                 $pdf->Cell($W, 4, "IL EST AINSI CONVENU CE QUI SUIT", 0, null, 'L', true);
-                $pdf->Ln();
                 $pdf1->SetFont('', '', 9);
                 //$pdf1->Cell($W, 4, "Les parties ont conclu un ".$objet_contrat[$c->getData('objet_contrat')]['label']."  en date du ".$dateContrat->format('d/m/Y')." (ci-après le « Contrat »).", "L", null, 'L', true);
                  $pdf1->Cell($W, 4, "Les parties ont conclu un Contrat d'assistance et de maintenance informatique en date du ".$dateContrat->format('d/m/Y')." (ci-après le « Contrat »).", "L", null, 'L', true);
                 $pdf1->SetFont('', 'B', 9);
                 $pdf1->Ln();
                 $pdf1->Cell($W, 4, "IL EST AINSI CONVENU CE QUI SUIT", 0, null, 'L', true);
-                $pdf1->Ln();
                 foreach($lignes_avenant as $id => $infos) {
                     $new_qty = 0;
                     
@@ -402,13 +400,13 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                         if($line->getData('id_line_contrat')) {
                             if(!$print_article_modif){
                                 $pdf->setY($pdf->getY() + 2);
-                                $pdf->SetFont('', '', 10);
+                                $pdf->SetFont('', '', 8);
                                 $pdf->Cell($W, 4, "Article ".$current_article."", "L", null, 'L', true);
                                 $pdf->ln();
                                 $pdf->Cell($W, 4, "Les parties conviennent de modifier: ", 0, null, 'L', true);
                                 $pdf->setY($pdf->getY() + 5);
                                 $pdf1->setY($pdf1->getY() + 2);
-                                $pdf1->SetFont('', '', 10);
+                                $pdf1->SetFont('', '', 8);
                                 $pdf1->Cell($W, 4, "Article ".$current_article."", "L", null, 'L', true);
                                 $pdf1->ln();
                                 $pdf1->Cell($W, 4, "Les parties conviennent de modifier: ", 0, null, 'L', true);
@@ -564,13 +562,13 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 $pdf1->Cell($W*5, 4, "Le présent avenant entrera en vigueur à compter du " . $date->format('d/m/Y'), 0, null, 'L', false);
                 $current_article++;
                 $pdf->setY($pdf->getY() + 5);
-                $pdf->SetFont('', '', 10);
+                $pdf->SetFont('', '', 8);
                 $pdf->Cell($W, 4, "Article " . $current_article, "L", null, 'C', true);
                 $pdf->ln();
                 $pdf->SetFont('', '', 8);
                 $pdf->Cell($W*5, 4, "Les autres dispositions du Contrat qui n’ont pas été modifiées par le présent avenant demeurent inchangées.", 0, null, 'L', false);
                 $pdf1->setY($pdf1->getY() + 5);
-                $pdf1->SetFont('', '', 10);
+                $pdf1->SetFont('', '', 8);
                 $pdf1->Cell($W, 4, "Article " . $current_article, "L", null, 'C', true);
                 $pdf1->ln();
                 $pdf1->SetFont('', '', 8);

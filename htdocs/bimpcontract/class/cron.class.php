@@ -33,11 +33,11 @@
         
         function zu_gehen() {
             $this->autoClose();
-            //$this->relance_brouillon();
+            $this->relance_brouillon();
             //$this->echeance_contrat();
-            //$this->relance_demande();
-            //$this->tacite();
-            //$this->facturation_auto();
+            $this->relance_demande();
+            $this->tacite();
+            $this->facturation_auto();
             
             return "OK";
         }
@@ -56,6 +56,7 @@
                 $contrat->fetch($infos['rowid']);
                 $this->output .= $contrat->getRef() . " : " . (int) $contrat->getJourRestantReel() . ' => ';
                 if((int) $contrat->getJourRestantReel() < 0) {
+                    $contrat->closeFromCron();
                     $this->output .= "A  FERMER <br />";
                 } else {
                     $this->output .= "<br />";

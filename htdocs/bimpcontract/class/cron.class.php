@@ -37,6 +37,7 @@
             $this->relance_demande();
             $this->tacite();
             $this->facturation_auto();
+            $this->autoClose();
             
             return "OK";
         }
@@ -45,6 +46,23 @@
 
             $contrats = BimpObject::getInstance('bimpcontract', 'BContract_echeancier');
 
+        }
+        
+        public function autoClose() {
+            $this->output = "START auto close<br />";
+            $contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
+            $liste = $contrat->getList(Array('statut' => self::CONTRAT_ACTIF));
+            foreach($liste as $index => $infos) {
+                $contrat->fetch($infos['rowid']);
+                $this->output .= $contrat->getRef() . " : " . (int) $contrat->getJourRestantReel() . ' => ';
+                if((int) $contrat->getJourRestantReel() < 0) {
+                    $contrat->closeFromCron();
+                    $this->output .= "A  FERMER <br />";
+                } else {
+                    $this->output .= "<br />";
+                }
+            }
+            $this->output .= "STOP auto close<br />";
         }
         
         public function tacite() {

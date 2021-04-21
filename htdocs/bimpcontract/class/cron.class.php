@@ -32,11 +32,12 @@
         ];
         
         function zu_gehen() {
-            $this->relance_brouillon();
+            $this->autoClose();
+            //$this->relance_brouillon();
             //$this->echeance_contrat();
-            $this->relance_demande();
-            $this->tacite();
-            $this->facturation_auto();
+            //$this->relance_demande();
+            //$this->tacite();
+            //$this->facturation_auto();
             
             return "OK";
         }
@@ -45,6 +46,22 @@
 
             $contrats = BimpObject::getInstance('bimpcontract', 'BContract_echeancier');
 
+        }
+        
+        public function autoClose() {
+            $this->output = "START auto close<br />";
+            $contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
+            $liste = $contrat->getList(Array('statut' => self::CONTRAT_ACTIF));
+            foreach($liste as $index => $infos) {
+                $contrat->fetch($infos['rowid']);
+                $this->output .= $contrat->getRef() . " : " . (int) $contrat->getJourRestantReel() . ' => ';
+                if((int) $contrat->getJourRestantReel() < 0) {
+                    $this->output .= "A  FERMER <br />";
+                } else {
+                    $this->output .= "<br />";
+                }
+            }
+            $this->output .= "STOP auto close<br />";
         }
         
         public function tacite() {

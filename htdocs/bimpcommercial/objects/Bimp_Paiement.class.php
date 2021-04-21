@@ -54,6 +54,12 @@ class Bimp_Paiement extends BimpObject
         return ($user->rights->bimpcommercial->adminPaiement ? 1 : 0);
     }
 
+    public static function canCreateCheque()
+    {
+        global $user;
+        return ($user->rights->bimpcommercial->paiement_cheque ? 1 : 0);
+    }
+
     // Getters booléens: 
 
     public function isNormalementEditable($force_edit = false, &$errors = array())
@@ -739,8 +745,8 @@ class Bimp_Paiement extends BimpObject
         return null;
     }
 
-    // Traitements: 
-
+    // Traitements:
+    
     public function onDelete()
     {
         $errors = array();
@@ -756,7 +762,7 @@ class Bimp_Paiement extends BimpObject
                 $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
                 if (BimpObject::objectLoaded($facture)) {
                     $facture->checkIsPaid(false, $fac_amount);
-                    $facture->addNote('Paiement '.$this->getRef()." supprimée");
+                    $facture->addNote('Paiement ' . $this->getRef() . " supprimée");
                 }
             }
             if (!$this->isNormalementEditable()) {//mode forcage
@@ -908,8 +914,8 @@ class Bimp_Paiement extends BimpObject
 
                             if (!count($errors)) {
                                 $facTo->checkIsPaid();
-                                $facFrom->addNote('Paiement '.$this->getRef(). ' déplacé de '.$amount. ' €  vers '.$facTo->getRef());
-                                $facTo->addNote('Paiement '.$this->getRef(). ' déplacé de '.$amount. ' €  depuis '.$facFrom->getRef());
+                                $facFrom->addNote('Paiement ' . $this->getRef() . ' déplacé de ' . $amount . ' €  vers ' . $facTo->getRef());
+                                $facTo->addNote('Paiement ' . $this->getRef() . ' déplacé de ' . $amount . ' €  depuis ' . $facFrom->getRef());
 
                                 $mail .= 'Facture ' . $facTo->getRef() . ': ' . "\n";
                                 $mail .= "\t" . 'Montant initial du paiement: ' . BimpTools::displayFloatValue($init_dest_amount) . ' €' . "\n";
@@ -983,11 +989,11 @@ class Bimp_Paiement extends BimpObject
         $id_caisse = 0;
         $account = null;
         $use_caisse = false;
-        
-        
+
+
         $date_debut_ex = BimpCore::getConf('date_debut_exercice');
-        if($date_debut_ex){
-            if($this->getData('datep') < $date_debut_ex)
+        if ($date_debut_ex) {
+            if ($this->getData('datep') < $date_debut_ex)
                 $errors[] = 'Date antérieure au début d\'exercice';
         }
 
@@ -1040,6 +1046,8 @@ class Bimp_Paiement extends BimpObject
             $errors[] = 'Le réglement en espèce n\'est possible que pour un paiement en caisse';
         } elseif ($type_paiement === 'VIR' && !$this->canCreateVirement()) {
             $errors[] = 'Vous n\'avez pas la permission d\'enregistrer des paiements par virement';
+        } elseif ($type_paiement === 'CHQ' && !$this->canCreateCheque()) {
+            $errors[] = 'Vous n\'avez pas la permission d\'enregistrer des paiements par chèque';
         }
 
         if (count($errors)) {
@@ -1221,7 +1229,7 @@ class Bimp_Paiement extends BimpObject
                             }
                         }
                         $i++;
-                        
+
                         ini_set('max_execution_time', 1200);
                     }
                 }

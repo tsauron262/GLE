@@ -19,26 +19,32 @@ class Interfacevalidate extends BimpCommTriggers
         if (BimpObject::objectLoaded($bimpObject)) {
             switch ($action_name) {
                 case 'VALIDATE':
-                    if($bimpObject->isValidatable($errors)) {
-                        $validateur = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
-                        $can_validate = (int) $validateur->tryToValidate($bimpObject, $user, $errors, $success);
-                    }
-                    if (count($success)) {
-                        setEventMessages(BimpTools::getMsgFromArray($success), null, 'warnings');
+                    if (method_exists($bimpObject, 'isValidatable')) {
+                        if ($bimpObject->isValidatable($errors)) {
+                            $validateur = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+                            $can_validate = (int) $validateur->tryToValidate($bimpObject, $user, $errors, $success);
+                        }
+                        if (count($success)) {
+                            setEventMessages(BimpTools::getMsgFromArray($success), null, 'warnings');
+                        }
                     }
                     break;
 
                 case 'UNVALIDATE':
-                    $bimpObject->isUnvalidatable($errors);
+                    if (method_exists($bimpObject, 'isUnvalidatable')) {
+                        $bimpObject->isUnvalidatable($errors);
+                    }
                     break;
 
                 case 'DELETE':
-                    if (!$bimpObject->isDeletable()) {
-                        $errors[] = BimpTools::ucfirst($bimpObject->getLabel('this')) . ' ne peut pas être supprimé' . $bimpObject->e();
+                    if (method_exists($bimpObject, 'isDeletable')) {
+                        if (!$bimpObject->isDeletable()) {
+                            $errors[] = BimpTools::ucfirst($bimpObject->getLabel('this')) . ' ne peut pas être supprimé' . $bimpObject->e();
+                        }
                     }
                     break;
             }
-            
+
             if (count($errors)) {
                 // Attention toute la remontée des erreurs est basée là-dessus (pour les BimpComm): 
                 setEventMessages(BimpTools::getMsgFromArray($errors), null, 'errors');
@@ -47,9 +53,9 @@ class Interfacevalidate extends BimpCommTriggers
         } elseif (count($errors)) {
             setEventMessages(BimpTools::getMsgFromArray($errors), null, 'errors');
             return -1;
-        }        
-        
-        
+        }
+
+
         return 0;
     }
 }

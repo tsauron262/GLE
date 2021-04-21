@@ -3493,6 +3493,17 @@ class BContract_contrat extends BimpDolObject
         return $interval->days;
     }
     
+    public function getJourRestantReel(){
+        $now = new DateTime();
+        $diff = new DateTime($this->displayRealEndDate("Y-m-d"));
+        $interval = $now->diff($diff);
+        //print_r($interval);
+        
+        $signe = ($interval->invert == 1) ? "-" : "";
+        
+        return $signe . $interval->days;
+    }
+    
     public function getJourTotal(){
         $debut = new DateTime($this->getData('date_start'));
         $diff = new DateTime($this->displayRealEndDate("Y-m-d"));
@@ -3549,47 +3560,19 @@ class BContract_contrat extends BimpDolObject
             }
             if ($this->getData('statut') == self::CONTRAT_STATUS_VALIDE || $this->getData('statut') == self::CONTRAT_STATUS_ACTIVER) {
 
-
-                $intervale_days = $this->getJourRestant();
+                $intervale_days = $this->getJourRestantReel();
                 //$intervale_days = 14;
                 $renderAlert = true;
                 $hold = false;
-                if ($intervale_days < 365 && $interval->invert == 0) {
-                    $html .= '<div class="object_header_infos">';
-                    if ($intervale_days <= 365 && $intervale_days > 90) {
-                        $renderAlert = false;
-                        $alerte_type = 'info';
-                    } elseif ($intervale_days <= 90 && $intervale_days > 30) {
-                        $alerte_type = 'info';
-                    } elseif ($intervale_days <= 30 && $intervale_days > 15) {
-                        $alerte_type = 'warning';
-                    } else {
-                        $alerte_type = 'danger';
-                    }
-
-                    if (!$this->getData('duree_mois') || !$this->getData('date_start')) {
-
-                        $val = $this->db->getMax('contratdet', 'date_fin_validite', 'fk_contrat = ' . $this->id);
-
-                        $date_fin = new DateTime($val);
-
-                        $html .= BimpRender::renderAlerts('<h5>Ceci est un ancien contrat dont la date d\'expiration est le : <b> ' . $date_fin->format('d / m / Y') . ' </b></h5> ', 'info', false);
-                        $renderAlert = false;
-                        $hold = true;
-                    }
-
-                    if ($renderAlert)
-                        $html .= BimpRender::renderAlerts('Ce contrat expire dans <strong>' . $intervale_days . ' jours</strong>', $alerte_type, false);
-                    elseif (!$hold)
-                        $html .= 'Ce contrat expire dans <strong>' . $intervale_days . ' jours</strong>';
-                    $html .= '</div>';
+                
+                $html .= '<div class="object_header_infos">';
+                if($intervale_days > 0 || $intervale_days == 0) {
+                    $html .= '<strong>Ce contrat expire dans '.$intervale_days.' jours</strong>';
                 } else {
-                    if ($this->getData('statut') == 11 && $interval->invert == 1) {
-                        $html .= '<div class="object_header_infos">';
-                        $html .= BimpRender::renderAlerts("Ce contrat est expiré, merci de le clore", 'danger', false);
-                        $html .= '</div>';
-                    }
+                    $html .= BimpRender::renderAlerts("Ce contrat est expiré depuis ". abs($intervale_days)." jour.s, merci de le clore", 'danger', false);
                 }
+                $html .= '</div>';
+                
             }
         }
         return $html;

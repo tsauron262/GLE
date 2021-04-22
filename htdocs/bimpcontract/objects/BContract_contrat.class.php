@@ -3596,7 +3596,7 @@ class BContract_contrat extends BimpDolObject
                 
                 if($tms_start > $tms_today) {
                     $html .= '<div class="object_header_infos">';
-                    $html .= BimpRender::renderAlerts("Ce contrat est actif mais la date d'exécution n'a pas encore commencé. LE CLIENT DE CE CONTRAT N'EST DONC PAS ENCORE COUVERT", 'danger', false);
+                    $html .= BimpRender::renderAlerts("<h3>Ce contrat est actif mais la date d'exécution n'a pas encore commencé. LE CLIENT DE CE CONTRAT N'EST DONC PAS ENCORE COUVERT</h3>", 'danger', false);
                     
                     $html .= '</div>';
                 }

@@ -2240,8 +2240,15 @@ class BimpComm extends BimpDolObject
                             'type'     => (float) $r['type']
                         );
                     else {
-                        $this->erreurFatal ++;
-                        $errors[] = 'Ligne ' . $dol_lines[$r['id_line']]->desc . ' présente plusieurs fois !!!!!!!';
+                        // Ligne en double: on la supprime
+                        if ((int) $r['id_line']) {
+                            if ($this->db->delete($bimp_line->getTable(), 'id = ' . (int) $r['id']) <= 0) {
+                                $errors[] = 'Echec de la suppression de la ligne en double (ligne n° ' . $r['position'] . ') - ' . $this->db->err();
+                                $this->erreurFatal++;
+                            } else {
+                                $this->addLog('Suppression automatique d\'une ligne en double (ID: #' . $r['id'] . ' - DOL: ' . $r['id_line'] . ')');
+                            }
+                        }
                     }
                 }
             }

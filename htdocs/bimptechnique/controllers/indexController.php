@@ -91,25 +91,11 @@ class indexController extends BimpController {
             
             $html .= "<h3><b style='color:#EF7D00'>BIMP</b><b>technique</b> <sup style='color:grey' >Statistiques</sup>";
             
-            switch($current->format('m')) {
-                case "01":$m = "Janvier";break;
-                case "02":$m = "Février";break;
-                case "03":$m = "Mars";break;
-                case "04":$m = "Avril";break;
-                case "05":$m = "Mai";break;
-                case "06":$m = "Juin";break;
-                case "07":$m = "Juillet";break;
-                case "08":$m = "Aout";break;
-                case "09":$m = "Septembre";break;
-                case "10":$m = "Octobre";break;
-                case "11":$m = "Novembre";break;
-                case "12":$m = "Décembre";break;
-            }
-
-            $m_moin_un = (int) $current->format('m') - 1;
-            $m_plus_un = (int) $current->format('m') + 1;
+            
+            $a_moin_un = (int) $current->format('Y') - 1;
+            $a_plus_un = (int) $current->format('Y') + 1;
                         
-            $html .= "<b style='margin-left:50px; font-size:15px'>".BimpRender::renderIcon("arrow-left", "backButton")."<b style='font-size:20px; margin-left:20px; margin-right: 20px'>".$m . " " . $current->format('Y') . "</b>".BimpRender::renderIcon('arrow-right')."</b>";
+            $html .= "<b style='margin-left:50px; font-size:15px'>".BimpRender::renderIcon("arrow-left", "backButton")."<b style='font-size:20px; margin-left:20px; margin-right: 20px'>".$current->format('Y') . "</b>".BimpRender::renderIcon('arrow-right')."</b>";
             
             $html .= "</h3><hr>";
             

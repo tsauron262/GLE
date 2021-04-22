@@ -3588,6 +3588,21 @@ class BContract_contrat extends BimpDolObject
                 }
                 $html .= '</div>';
                 
+                $dt_today = New DateTime();
+                $dt_start = New DateTime($this->getData('date_start'));
+                
+                $tms_today = strtotime($dt_today->format('Y-m-d'));
+                $tms_start = strtotime($dt_start->format('Y-m-d'));
+                
+                if($tms_start > $tms_today) {
+                    $html .= '<div class="object_header_infos">';
+                    $html .= BimpRender::renderAlerts("Ce contrat est actif mais la date d'exécution n'a pas encore commencé. LE CLIENT DE CE CONTRAT N'EST DONC PAS ENCORE COUVERT", 'danger', false);
+                    
+                    $html .= '</div>';
+                }
+                
+                
+                
 //                if ($intervale_days < 365 && $interval->invert == 0) {
 //                    $html .= '<div class="object_header_infos">';
 //                    if ($intervale_days <= 365 && $intervale_days > 90) {

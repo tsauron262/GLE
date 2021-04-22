@@ -78,12 +78,41 @@ class BT_ficheInter_det extends BT_ficheInter {
         return parent::__construct($module, $object_name);
     }
     
+    public function showDateWithDetails() {
+        
+        $return = "";
+        
+        $date = new DateTime($this->getData('date'));
+        $return .= "<b>" . $date->format('d / m / Y') . "</b>";
+        
+        $startStopUnique = [];
+        $startStopX4 = [];
+        
+        if($this->getData('arrived') && $this->getData('departure')) {
+            $start = new DateTime($this->getData('arrived'));
+            $stop = new DateTime($this->getData('departure'));
+            $popover = $start->format("h:i") . " " . BimpRender::renderIcon('arrow-right') . " " . $stop->format("H:i");
+        } elseif($this->getData('arriverd_am')) {
+            $start_am = new DateTime($this->getData('arriverd_am'));
+            $start_pm = new DateTime($this->getData('arriverd_pm'));
+            $stop_am = new DateTime($this->getData('departure_am'));
+            $stop_pm = new DateTime($this->getData('departure_pm'));
+            $popover = "AM: " . $start_am->format("H:i") . " " . BimpRender::renderIcon('arrow-right') . " " . $stop_am->format("H:i") . "<br />";
+            $popover.= "PM: " .$start_pm->format("H:i") . " " . BimpRender::renderIcon('arrow-right') . " " . $stop_pm->format("H:i");
+        }
+        
+        $return .= " <small class='bs-popover' ".BimpRender::renderPopoverData($popover, 'top', true)." >".BimpRender::renderIcon('info-circle')."</small>";
+        
+        return $return;
+        
+    }
+    
     public function getDescRapide() {
         $html = "";
         
         if($this->getData('description') && $this->getData('description') != "<br>") {
             
-            $html .= "<h6 class='bs-popover' ".BimpRender::renderPopoverData(html_entity_decode(str_replace('<br>', "\n", $this->getData('description'))))." ><b class='success'>" . BimpRender::renderIcon("check") . "</b> Survoler pour voir la description</h6>";
+            $html .= "<h6 class='bs-popover' ".BimpRender::renderPopoverData($this->getData('description'), 'top', true)." ><b class='success'>" . BimpRender::renderIcon("check") . "</b> Survoler pour voir la description</h6>";
             
         } else {
             $html .= "<b class='danger'>" . BimpRender::renderIcon("times") . "</b>" . " Il n'y a pas de description";
@@ -140,6 +169,7 @@ class BT_ficheInter_det extends BT_ficheInter {
     
     public function displayTypeInter() {
         global $db;
+        $parent = $this->getParentInstance();
         if($this->getData('id_line_commande')) {
             BimpTools::loadDolClass('commande');
             $orderLine = new OrderLine($db);
@@ -149,6 +179,10 @@ class BT_ficheInter_det extends BT_ficheInter {
             if($product->getRef() == BimpCore::getConf("bimptechnique_ref_deplacement")) {
                 return "<strong class='important' >".BimpRender::renderIcon('car')." Déplacement</strong>";
             }
+        }
+        
+        if($this->getData('type') == $parent->getData('fk_soc')) {
+            return "<b>".BimpRender::renderIcon("inbox")." Service en interne</b>";
         }
         
         return $this->displaydata('type');
@@ -167,6 +201,7 @@ class BT_ficheInter_det extends BT_ficheInter {
     }
     
     public function display_service_ref() {
+        $parent = $this->getParentInstance();
         if($this->getData('id_line_contrat') > 0) {
             $obj = $this->getInstance("bimpcontract", "BContract_contratLine", $this->getData('id_line_contrat'));
             $fk_product = $obj->getData('fk_product');
@@ -188,6 +223,10 @@ class BT_ficheInter_det extends BT_ficheInter {
             $product = $this->getInstance('bimpcore', 'Bimp_Product', $fk_product);
             return $product->getNomUrl() . '<br /><strong>'.$element.'</strong><br /><strong>Vendu: ' . price($valeur) . '€ HT</strong>';
         } else {
+            if($this->getData('type') == $parent->getData('fk_soc')) {
+                $interne = BimpCache::getBimpObjectInstance('bimpcore', "Bimp_Societe", $parent->getData('fk_soc'));
+                return "<b>".BimpRender::renderIcon('inbox')." Service en interne</b><br /><p>Société: " . $interne->getNomUrl() . "</p>";
+            }
             return $this->displayData('type');
         }
 

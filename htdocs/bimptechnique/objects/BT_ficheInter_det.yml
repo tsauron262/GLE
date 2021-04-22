@@ -78,6 +78,24 @@ fields:
     total_ht:
         label: PU HT
         type: int
+    arrived:
+        label: Heure d'arrivée
+        type: datetime
+    departure:
+        label: Heure de départ
+        type: datetime
+    arriverd_am:
+        label: Heure d'arrivée (Matin)
+        type: datetime
+    departure_am:
+        label: Heure de départ (Matin)
+        type: datetime
+    arriverd_pm:
+        label: Heure d'arrivée (Après-Midi)
+        type: datetime
+    departure_pm:
+        label: Heure de départ (Après-Midi)
+        type: datetime
         
 lists:
     in_fiche:
@@ -95,8 +113,10 @@ lists:
                 label: Service
                 value:
                     callback: display_service_ref
-            date:
-                field: date
+            show_date:
+                label: Date
+                value:
+                    callback: showDateWithDetails
             duree_inter:
                 label: Durée
                 value:

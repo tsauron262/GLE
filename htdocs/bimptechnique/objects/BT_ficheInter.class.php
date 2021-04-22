@@ -71,7 +71,7 @@ class BT_ficheInter extends BimpDolObject {
     public static $actioncomm_code = "'AC_INT','RDV_EXT','RDV_INT','ATELIER','LIV','INTER','INTER_SG','FORM_INT','FORM_EXT','FORM_CERTIF','VIS_CTR','TELE','TACHE'";
     private $global_user;
     private $global_langs;
-    
+
     public $redirectMode = 4;
         
     public function __construct($module, $object_name) {
@@ -79,7 +79,6 @@ class BT_ficheInter extends BimpDolObject {
         $this->global_user = $user;
         $this->global_langs = $langs;
         return parent::__construct($module, $object_name);
-        
     }
 
     public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
@@ -937,6 +936,10 @@ class BT_ficheInter extends BimpDolObject {
                     $objects[$numInter[1]][$field] = $val;
                 }
             }    
+            
+            $startStopUnique = [];
+            $startStopX4 = [];
+            
             foreach($objects as $numeroInter => $value) {
                 
                 if(!$this->getData('fk_contrat') && !$this->getData('commandes') && !$this->getData('tickets') && $value['inter_' . $numeroInter . '_type'] == 0) {
@@ -951,10 +954,14 @@ class BT_ficheInter extends BimpDolObject {
                 if($value['inter_' . $numeroInter . '_temps_dep'] > 0) {
                     $duration = $value['inter_' . $numeroInter . '_temps_dep'];
                 } elseif($value['inter_' . $numeroInter . '_am_pm'] == 0) {
+                    // Arrivée/Départ unique
                     $arrived = strtotime($value['inter_' . $numeroInter . '_global_arrived']);
                     $departure = strtotime($value['inter_' . $numeroInter . '_global_quit']);
                     $duration = $departure - $arrived;
+                    $startStopUnique['arrived'] = $value['inter_' . $numeroInter . '_date'] . " " . ($value['inter_' . $numeroInter . '_global_arrived']);
+                    $startStopUnique['departure'] = $value['inter_' . $numeroInter . '_date'] . " " .  ($value['inter_' . $numeroInter . '_global_quit']);
                 } else {
+                    // Arrivée/ Départ x4
                     $arrived_am = strtotime($value['inter_' . $numeroInter . '_am_arrived']);
                     $departure_am = strtotime($value['inter_' . $numeroInter . '_am_quit']);
                     $duration_am = $departure_am - $arrived_am;
@@ -962,8 +969,18 @@ class BT_ficheInter extends BimpDolObject {
                     $departure_pm = strtotime($value['inter_' . $numeroInter . '_pm_quit']);
                     $duration_pm = $departure_pm - $arrived_pm;
                     $duration = $duration_am + $duration_pm;
+                    $startStopX4['arriverd_am'] = $value['inter_' . $numeroInter . '_date'] . " " . $value['inter_' . $numeroInter . '_am_arrived'];
+                    $startStopX4['departure_am'] = $value['inter_' . $numeroInter . '_date'] . " " . $value['inter_' . $numeroInter . '_am_quit'];
+                    $startStopX4['arriverd_pm'] = $value['inter_' . $numeroInter . '_date'] . " " . $value['inter_' . $numeroInter . '_pm_arrived'];
+                    $startStopX4['departure_pm'] = $value['inter_' . $numeroInter . '_date'] . " " . $value['inter_' . $numeroInter . '_pm_quit'];
                 }
-
+                
+                $timeArray = [];
+                if(count($startStopUnique) > 0) {
+                    $timeArray = $startStopUnique;
+                } else {
+                    $timeArray = $startStopX4;
+                }
                 if($duration >= 60) {
                     $desc = $value['inter_' . $numeroInter . '_description'];
 
@@ -980,11 +997,10 @@ class BT_ficheInter extends BimpDolObject {
                         $line->updateField($field, $exploded_service[1]);
                     }
 
-                    if($value['inter_' . $numeroInter . '_am_pm'] == 0) {
-                        $arrived = $value['inter_' . $numeroInter . '_global_arrived'];
-                        $departure = $value['inter_' . $numeroInter . '_global_quit'];
-                        $line->updateField('arrived', strtotime($arrived));
-                        $line->updateField('departure', strtotime($departure));
+                    if(count($timeArray)) {
+                        foreach($timeArray as $field => $time) {
+                            $line->updateField($field, $time);
+                        }
                     }
 
                     $mode = 0;
@@ -1352,8 +1368,9 @@ class BT_ficheInter extends BimpDolObject {
                 $html .= '<div class="row formRow">'
                     . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Attente client</div>'
                     . '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
+                        . '&Agrave; remplire uniquement si l\'intervention n\'a pas été terminée suite à un évènement dût au client.'
                     . '<div class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
-                    . '<textarea id="attente_client" name="note_private" rows="4" style="margin-top: 5px; width: 90%;" class="flat"></textarea>'
+                    . '<textarea id="attente_client" name="no_finish" rows="4" style="margin-top: 5px; width: 90%;" class="flat"></textarea>'
                     . '</div></div></div>';
                 
                 if(count($tickets) > 0) {

@@ -22,6 +22,8 @@ class BContract_contrat extends BimpDolObject
     CONST CONTRAT_STATUS_CLOS = 2;
     CONST CONTRAT_STATUS_WAIT = 10;
     CONST CONTRAT_STATUS_ACTIVER = 11;
+    CONST CONTRAT_STATUS_ATTENTE_EXEC = 12;
+    CONST CONTRAT_STATUS_ACTIVER_TMP  = 13;
     // Les périodicitées
     CONST CONTRAT_PERIOD_AUCUNE = 0;
     CONST CONTRAT_PERIOD_MENSUELLE = 1;
@@ -3594,7 +3596,7 @@ class BContract_contrat extends BimpDolObject
                 $tms_today = strtotime($dt_today->format('Y-m-d'));
                 $tms_start = strtotime($dt_start->format('Y-m-d'));
                 
-                if($tms_start > $tms_today) {
+                if($tms_start > $tms_today && $this->getData('statut') == self::CONTRAT_STATUS_ACTIVER) {
                     $html .= '<div class="object_header_infos">';
                     $html .= BimpRender::renderAlerts("<h3>Ce contrat est actif mais n'est pas encore en cours d'éxécution.<br /> <b>LE CLIENT DE CE CONTRAT N'EST DONC PAS ENCORE COUVERT</b></h3>", 'danger', false);
                     

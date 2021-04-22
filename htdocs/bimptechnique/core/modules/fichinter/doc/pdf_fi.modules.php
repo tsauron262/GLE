@@ -218,7 +218,10 @@ class pdf_fi {
                     $dateEmission = new DateTime($fiche->getData('date_signed'));
                     $emisStr = "Rapport émis le " . $dateEmission->format('d/m/Y') . " à " . $dateEmission->format('H:i'); 
                 } else {
-                    $emisStr = "Le rapport n'est pas généré de façon officiel et définitif";
+                    if($fiche->getData('fk_statut') == 0) {
+                        $emisStr = "Le rapport n'est pas généré de façon officiel et définitif";
+                    }
+                    
                 }
                 
                 

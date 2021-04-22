@@ -393,7 +393,6 @@ forms:
         rows:
     
     farSign:
-
         rows:
             - custom: 1
               label: Adresse mail du signataire

@@ -1,6 +1,6 @@
 bootstrap: 1
 #js: 
-#    0: /bimptechnique/views/js/indexControllerStats.js
+#    0: /bimptechnique/views/js/chart.js
 objects: 
     fi: 
         instance: 

@@ -34,6 +34,7 @@ class fiController extends BimpController {
         if(!count($errors)) {
             if($instance->isLoaded()) {
                 $instance->updateField('signed', 1);
+                $instance->updateField('date_signed', date('Y-m-d H:i:s'));
                 $instance->updateField('email_signature', $email);
                 if($isChecked == 'false') {
                     $instance->updateField('base_64_signature', $base64);
@@ -110,7 +111,7 @@ class fiController extends BimpController {
                     //envois au commecial
                     mailSyn2("Fiche d'intervention N°" . $instance->dol_object->ref . " - [COMMERCIAL UNIQUEMENT]", "$email_commercial", "gle@bimp.fr", $message . "<br />Lien vers la FI: " . $instance->getNomUrl() , array($file), array('application/pdf'), array($instance->dol_object->ref . '.pdf'), "", /* temporaire pour controle */ 'at.bernard@bimp.fr');
                     //envois au client
-                    mailSyn2("Fiche d'intervention N°" . $instance->dol_object->ref, "$email, $email_commercial", "gle@bimp.fr", $message, array($file), array('application/pdf'), array($instance->dol_object->ref . '.pdf'), "", $email_tech);
+                    mailSyn2("Fiche d'intervention N°" . $instance->dol_object->ref, "$email", "gle@bimp.fr", $message, array($file), array('application/pdf'), array($instance->dol_object->ref . '.pdf'), "", $email_tech);
                     
                     
                 }

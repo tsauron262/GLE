@@ -10,6 +10,10 @@ class fiController extends BimpController {
         $isChecked = BimpTools::getPostFieldValue('isChecked');
         $itsOkForSign = (is_null($controlle)) ? false : true;
         $email = BimpTools::getPostFieldValue('email');
+        $preco = BimpTools::getPostFieldValue('preco');
+        $attente_client = BimpTools::getPostFieldValue('attente');
+        $noFinish = BimpTools::getPostFieldValue("noFinish");
+        $contact_commercial = BimpTools::getPostFieldValue("contactCommercial");
         $success = "";
         $errors = array();
         if(!$itsOkForSign && $isChecked == 'false') { $errors[] = "Il doit y avoir une signature"; }
@@ -21,8 +25,7 @@ class fiController extends BimpController {
                 $errors[] = "Email invalide";
             }
         }
-        
-        
+
         $instance = BimpObject::getInstance('bimptechnique', 'BT_ficheInter', $_REQUEST['id']);
         
         if(!count($instance->getChildrenList("inters"))) {
@@ -41,6 +44,12 @@ class fiController extends BimpController {
                 }
                 $errors = $instance->updateField('signataire', $nom);
                 if(!count($errors)) {
+                    
+                    if(!empty($attente_client)){$instance->updateField("attente_client", $attente_client);}
+                    if(!empty($preco)){$instance->updateField('note_public', $preco);}
+                    if(!empty($noFinish)){$instance->updateField("no_finish_reason", $noFinish);}
+                    if($contact_commercial == "true"){$instance->updateField('client_want_contact', 1);}
+                    
                     $instance->dol_object->setValid($user);
                     
                     $today = date('Y-m-d');

@@ -10,6 +10,10 @@ class fiController extends BimpController {
         $isChecked = BimpTools::getPostFieldValue('isChecked');
         $itsOkForSign = (is_null($controlle)) ? false : true;
         $email = BimpTools::getPostFieldValue('email');
+        $preco = BimpTools::getPostFieldValue('preco');
+        $attente_client = BimpTools::getPostFieldValue('attente');
+        $noFinish = BimpTools::getPostFieldValue("noFinish");
+        $contact_commercial = BimpTools::getPostFieldValue("contactCommercial");
         $success = "";
         $errors = array();
         if(!$itsOkForSign && $isChecked == 'false') { $errors[] = "Il doit y avoir une signature"; }
@@ -21,8 +25,7 @@ class fiController extends BimpController {
                 $errors[] = "Email invalide";
             }
         }
-        
-        
+
         $instance = BimpObject::getInstance('bimptechnique', 'BT_ficheInter', $_REQUEST['id']);
         
         if(!count($instance->getChildrenList("inters"))) {
@@ -34,12 +37,19 @@ class fiController extends BimpController {
         if(!count($errors)) {
             if($instance->isLoaded()) {
                 $instance->updateField('signed', 1);
+                $instance->updateField('date_signed', date('Y-m-d H:i:s'));
                 $instance->updateField('email_signature', $email);
                 if($isChecked == 'false') {
                     $instance->updateField('base_64_signature', $base64);
                 }
                 $errors = $instance->updateField('signataire', $nom);
                 if(!count($errors)) {
+                    
+                    if(!empty($attente_client)){$instance->updateField("attente_client", $attente_client);}
+                    if(!empty($preco)){$instance->updateField('note_public', $preco);}
+                    if(!empty($noFinish)){$instance->updateField("no_finish_reason", $noFinish);}
+                    if($contact_commercial == "true"){$instance->updateField('client_want_contact', 1);}
+                    
                     $instance->dol_object->setValid($user);
                     
                     $today = date('Y-m-d');
@@ -110,7 +120,7 @@ class fiController extends BimpController {
                     //envois au commecial
                     mailSyn2("Fiche d'intervention N°" . $instance->dol_object->ref . " - [COMMERCIAL UNIQUEMENT]", "$email_commercial", "gle@bimp.fr", $message . "<br />Lien vers la FI: " . $instance->getNomUrl() , array($file), array('application/pdf'), array($instance->dol_object->ref . '.pdf'), "", /* temporaire pour controle */ 'at.bernard@bimp.fr');
                     //envois au client
-                    mailSyn2("Fiche d'intervention N°" . $instance->dol_object->ref, "$email, $email_commercial", "gle@bimp.fr", $message, array($file), array('application/pdf'), array($instance->dol_object->ref . '.pdf'), "", $email_tech);
+                    mailSyn2("Fiche d'intervention N°" . $instance->dol_object->ref, "$email", "gle@bimp.fr", $message, array($file), array('application/pdf'), array($instance->dol_object->ref . '.pdf'), "", $email_tech);
                     
                     
                 }

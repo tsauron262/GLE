@@ -438,7 +438,8 @@ class BT_ficheInter extends BimpDolObject {
         $errors = Array();
         $warnings = Array();
         $data = (object) $data;
-        
+//        echo '<pre>' . print_r($data, 1);
+//        die('c');
         $new_ref = $this->getNextNumRef($data->client);
         $linked_commandes = "";
         $linked_tickets = "";
@@ -496,8 +497,8 @@ class BT_ficheInter extends BimpDolObject {
             $actioncomm->userownerid = $data->techs;
             $actioncomm->elementtype = 'fichinter';
             $actioncomm->type_id = $data->type_planning;
-            $actioncomm->datep = $data->le . " " . $data->de;
-            $actioncomm->datef = $data->le . " " . $data->a;
+            $actioncomm->datep = strtotime($data->le . " " . $data->de);
+            $actioncomm->datef = strtotime($data->le . " " . $data->a);
             $actioncomm->socid = $data->client;
             $actioncomm->fk_element = $instance->id;
             $actioncomm->create($this->global_user);
@@ -655,8 +656,7 @@ class BT_ficheInter extends BimpDolObject {
                   <div>
                     <button id="save" class="btn btn-success btn-large">'.BimpRender::renderIcon("thumbs-up").' Signer la fiche d\'intervention</button>
                     <button id="clear" class="btn btn-danger btn-large" >'.BimpRender::renderIcon("retweet").' Refaire la signature</button>
-                    <button id="expand" class="btn btn-default btn-large" >'.BimpRender::renderIcon("expand").'</button>
-                  </div>
+</div>
                 ';
         return $html;
     }
@@ -1325,17 +1325,6 @@ class BT_ficheInter extends BimpDolObject {
         if(!$this->isOldFi()) {
             if($this->isNotSign()) {
                 $tickets = json_decode($this->getData('tickets'));
-                if(count($tickets) > 0) {
-//                    $html .= "<h3>Fermeture de tickets support</h3>";
-//                    foreach($tickets as $id_ticket) {
-//                        $ticket = $this->getInstance('bimpsupport', 'BS_Ticket', $id_ticket);
-//                        $html .= '<h3><div class="check_list_item" id="checkList" >'
-//                    . '<input type="checkbox" id="BimpTechniqueAttachedTicket_'.$id_ticket.'" class="check_list_item_input">'
-//                    . '<label for="BimpTechniqueAttachedTicket_'.$id_ticket.'">'
-//                    . $ticket->getRef()
-//                    . '</label></div></h3>';
-//                    }
-                }
 
                 $info = "<b>" . BimpRender::renderIcon('warning') . "</b> Si vous avez des tickets support et que vous ne les voyez pas dans le formulaire, rechargez la page en cliquant sur le boutton suivant: <a href='".DOL_URL_ROOT."/bimptechnique/?fc=fi&id=".$this->id."&navtab-maintabs=signature'><button class='btn btn-default'>Rafraîchire la page</button></a>";
                 $html .= "<h4>$info</h4>";
@@ -1363,14 +1352,21 @@ class BT_ficheInter extends BimpDolObject {
                     . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Préconisation technicien</div>'
                     . '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
                     . '<div class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
-                    . '<textarea id="note_private" name="note_private" rows="4" style="margin-top: 5px; width: 90%;" class="flat"></textarea>'
+                    . '<textarea id="note_public" name="note_public" rows="4" style="margin-top: 5px; width: 90%;" class="flat"></textarea>'
                     . '</div></div></div>';
                 $html .= '<div class="row formRow">'
                     . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Attente client</div>'
                     . '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
-                        . '&Agrave; remplire uniquement si l\'intervention n\'a pas été terminée suite à un évènement dût au client.'
+                        . '&Agrave; remplire obligatoirement uniquement si l\'intervention n\'a pas été terminée suite à un évènement dût au client. (Visible sur la FI)'
                     . '<div class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
-                    . '<textarea id="attente_client" name="no_finish" rows="4" style="margin-top: 5px; width: 90%;" class="flat"></textarea>'
+                    . '<textarea id="attente_client" name="attente_client" rows="4" style="margin-top: 5px; width: 90%;" class="flat"></textarea>'
+                    . '</div></div></div>';
+                $html .= '<div class="row formRow">'
+                    . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Intervention non terminer</div>'
+                    . '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
+                        . '&Agrave; remplire obligatoirement uniquement si l\'intervention n\'est pas terminée (Autre que attente client) (Visible sur la FI).'
+                    . '<div class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
+                    . '<textarea id="inter_no_finish" name="inter_no_finish" rows="4" style="margin-top: 5px; width: 90%;" class="flat"></textarea>'
                     . '</div></div></div>';
                 
                 if(count($tickets) > 0) {
@@ -1394,7 +1390,18 @@ class BT_ficheInter extends BimpDolObject {
                     $html .= '</div>';
                     
                 }
-                
+                $commercial = $this->getCommercialClient();
+                $html .= '<div class="row formRow" >';
+                $html .= '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Le client souhaite être contacté par son commercial</div>';
+                $html .= '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">Commercial client: ' . $commercial->getName();
+                $html .= '<h3><div class="check_list_item" id="checkList" >'
+                                    . '<input type="checkbox" id="BimpTechniqueContactCommercial" class="check_list_item_input">'
+                                        . '<label for="BimpTechniqueContactCommercial">'
+                                            . "OUI"
+                                        . '</label>'
+                                . '</div></h3>';
+                $html .= '</div>';
+                $html .= '</div>';
                 $html .= '<div class="row formRow" >'
                     . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Signature de la fiche</div>'
                     . '<div  class="formRowInput field col-xs-12 col-sm-6 col-md-9">'

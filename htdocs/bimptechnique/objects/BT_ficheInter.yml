@@ -194,6 +194,12 @@ fields:
         type: int
         input:
             type: toggle
+    client_want_contact:
+        label: Le client veux être contacté par son commercial.
+        type: bool
+    no_finish_reason:
+        label: Intervention non terminée
+        type:  html
 lists:
     client:
        configurable: 1

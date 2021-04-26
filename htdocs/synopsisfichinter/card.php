@@ -51,10 +51,14 @@
   \ingroup    ficheinter
   \version    $Id: card.php,v 1.100 2008/07/15 00:57:37 eldy Exp $
  */
+
+
 $afficherLigneContrat = false;
 
 
 require("../synopsisfichinter/pre.inc.php");
+header("Location: " . DOL_URL_ROOT . '/bimptechnique/?fc=fi&id=' . $_REQUEST['id']);
+die;
 
 
 require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';

@@ -252,7 +252,7 @@ class pdf_fi {
                 if($fiche->getData('client_want_contact')) {
                     $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Le client souhaite être recontacté par son commercial", 0, 'R');
                 } else {
-                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Le client ne souhaite être recontacté par son commercial", 0, 'R');
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Le client ne souhaite pas être recontacté par son commercial", 0, 'R');
                 }
                 $pdf->SetTextColor(0,0,0);
                 $pdf->SetFont('', 'B', 11);
@@ -332,10 +332,7 @@ class pdf_fi {
                 
                 if(count($tick) > 0 || count($comm) > 0 ||$fiche->getData('fk_contrat')) {
                     $pdf->ln();
-                    $pdf->ln();
-                    $pdf->ln();
-                    $pdf->ln();
-                    $pdf->ln();
+
 
                     $dir_output = DOL_DOCUMENT_ROOT . '/bimptechnique/views/images/';
                     if(count($comm) > 0) {
@@ -393,11 +390,11 @@ class pdf_fi {
                     $pdf->Cell($W, 4, $text, 0, null, 'C', 0);
                     $pdf->Ln();
 
-                    // Tableau des conditions du contrat
-                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, '', 0, 'C');
-                    $pdf->SetFont('', 'BU', 13);
-                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, $text, 0, 'C');
-                    $pdf->SetFont('', '', 9);
+//                    // Tableau des conditions du contrat
+//                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, '', 0, 'C');
+//                    $pdf->SetFont('', 'BU', 13);
+//                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, $text, 0, 'C');
+//                    $pdf->SetFont('', '', 9);
                     $pdf->Ln();
                 }
 

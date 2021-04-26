@@ -3744,3 +3744,4 @@ class Bimp_Commande extends BimpComm
         return "OK " . $ok . ' mails BAD ' . $err . ' mails dont ' . $mailDef . ' mail par default';
     }
 }
+// Message pour test push

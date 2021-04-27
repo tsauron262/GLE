@@ -89,7 +89,9 @@ lists:
         inline_view: unset
         modal_view: avenant
         extra_btn: unset
+        page_btn: 1
         cols:
+            id_contrat:
             coup: unset
                 
 forms:

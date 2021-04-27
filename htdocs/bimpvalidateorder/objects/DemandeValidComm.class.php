@@ -42,7 +42,7 @@ class DemandeValidComm extends BimpObject
     public function canDelete() {
         global $user;
         
-        if((int) $user->admin)
+        if((int) $user->admin or (int) $user->rights->bimpvalidateorder->demande_validation->delete)
             return 1;
         
         return 0;

@@ -118,6 +118,14 @@ class Bimp_Commande extends BimpComm
 //                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
 //                return (int) $facture->can('create');
                 return $user->rights->bimpcommercial->factureAnticipe;
+            case 'sendMailLatePayment':
+                $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+                $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, (int) $this->id, ValidComm::TYPE_FINANCE);
+
+                if(is_a($demande, 'DemandeValidComm')) {
+                    list($secteur, $class, , $val_euros) = $vc->getObjectParams($this, $errors);
+                    return $vc->userCanValidate((int) $user->id, $secteur, ValidComm::TYPE_FINANCE, $class, $val_euros, $this);
+                }
         }
         return parent::canSetAction($action);
     }
@@ -255,6 +263,38 @@ class Bimp_Commande extends BimpComm
                 }
                 if ($remain_amount) {
                     $errors[] = 'Le montant restant à facturer n\'est pas égal à 0';
+                    return 0;
+                }
+                return 1;
+                
+            case 'sendMailLatePayment':
+                if (!$this->isLoaded()) {
+                    $errors[] = 'ID de la commande absent';
+                    return 0;
+                }
+                if($status != Commande::STATUS_DRAFT) {
+                    $errors[] = $invalide_error;
+                    return 0;
+                }
+                // A une demande de validation financière
+                $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+                if($vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_FINANCE) == 0) {
+                    $errors[] = "Aucune demande de validation pour cette commande";
+                    return 0;
+                }
+                if ((int) $this->getData('fk_soc')) {
+                    $client = $this->getChildObject('client');
+                    if ($client->isLoaded()) {
+                        if(empty($client->getUnpaidFactures('2019-06-30'))) {
+                            $errors[] = "Ce client n'a pas de facture impayée";
+                            return 0;
+                        }
+                    } else {
+                        $errors[] = "Client mal chargé";
+                        return 0;
+                    }
+                } else {
+                    $errors[] = "Client inconnu " . (int) $this->getData('fk_soc');
                     return 0;
                 }
                 return 1;
@@ -699,6 +739,31 @@ class Bimp_Commande extends BimpComm
                 );
             }
         }
+        
+        // Envoyer mail à l'utilisateur qui a fait une demande de validation
+        // pour relancer le client si il y a des impayé
+        if ($this->isActionAllowed('sendMailLatePayment') /*&& $this->canSetAction('sendMailLatePayment')*/) {
+            $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+            $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_FINANCE);
+            if(is_a($demande, 'DemandeValidComm')) {
+                $user_ask = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $demande->getData('id_user_ask'));
+                $confirm_msg  = "Confirmer l\'envoie de mail à ";
+                $confirm_msg .= $user_ask->getData('firstname') . ' ' . $user_ask->getData('lastname');
+                if($user_ask->isLoaded()) {
+                    $buttons[] = array(
+                        'label'   => 'Signaler retard paiement',
+                        'icon'    => 'envelope',
+                        'onclick' => $this->getJsActionOnclick('sendMailLatePayment', array(
+                            'user_ask_firstname' => $user_ask->getData('firstname'),
+                            'user_ask_email'     => $user_ask->getData('email')
+                            ), array(
+                            'confirm_msg' => $confirm_msg
+                        ))
+                    );
+                }
+            }
+        }
+        
 
         return $buttons;
     }
@@ -3471,6 +3536,59 @@ class Bimp_Commande extends BimpComm
             'success_callback' => $success_callback
         );
     }
+    
+    public function actionSendMailLatePayment($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        if (!$this->isLoaded())
+            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+        else {
+            
+            if ((int) $this->getData('fk_soc')) {
+                $client = $this->getChildObject('client');
+                if ($client->isLoaded()) {
+                    $total_rtp = 0;
+                    $subject .= 'Retard de paiement - ' . $client->getData('code_client') . ' - ' . $client->getData('nom');
+                    
+                    $msg = 'Bonjour ' . $data['user_ask_firstname'] . ', <br/>';
+                    
+                    $unpaid_factures = $client->getUnpaidFactures('2019-06-30');
+                    
+                    foreach($unpaid_factures as $f) {
+                        $dates = $f->getRelanceDates();
+                        $rtp = $f->getRemainToPay(true);
+                        
+                        $detail .= $f->getNomUrl() . ' - date limite de règlement au ';
+                        $detail .= date('d / m / Y', strtotime($dates['lim']));
+                        $detail .= ' - reste à payer de ' . BimpTools::displayMoneyValue($rtp) . '<br/>';
+                        $total_rtp += $rtp;
+                    }
+                    
+                    $msg .= "Ce compte client présente un retard de paiement de ";
+                    $msg .= BimpTools::displayMoneyValue($total_rtp) . ", dont détail ci-après :<br/>";
+                    
+                    $success = 'Mail envoyé à l\'adresse ' . $data['user_ask_email'] . ' pour un total de ';
+                    $success .= BimpTools::displayMoneyValue($total_rtp) . ' impayé.';
+                            
+                    mailSyn2($subject, $data['user_ask_email'], null, $msg);
+                    
+                } else
+                    $errors[] = 'Client ' . $this->getLabel('of_the') . 'inconnu';
+            }
+
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings,
+            'success'  => $success
+        );
+    }
+
+
 
     // Overrides BimpComm:
 

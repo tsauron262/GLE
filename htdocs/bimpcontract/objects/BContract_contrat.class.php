@@ -520,6 +520,7 @@ class BContract_contrat extends BimpDolObject
                     $msg = "Votre contrat ".$this->getNomUrl()." pour le client ".$client->getNomUrl()." ".$client->getName()." est activé provisoirement car il n'est pas revenu signé. Il sera automatiquement désactivé le ".$dateForCloseNoSigned->format('d / m / Y')." si le nécessaire n'a pas été fait.";
                     //$errors[] = $msg;
                     mailSyn2("[CONTRAT] - Activation provisoire", $commercialContrat->getData('email'), null, $msg);
+                    $this->addLog('Activation provisoire');
                 } else {
                     $errors[] = "Ce contrat est déjà en activation provisoire";
                 } 

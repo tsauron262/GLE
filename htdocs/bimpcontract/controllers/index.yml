@@ -14,6 +14,9 @@ objects:
     echeancier:
         instance: 
             bimp_object: BContract_echeancier
+    avenant:
+        instance:
+            bimp_object: BContract_avenant
     
 sections:
     - type: tabs
@@ -46,6 +49,14 @@ sections:
                           params:
                               - renderTimeTableTab
                               - recap_contrat_echeancier
+        avenants:
+            label: Avenants
+            sections:
+                - type: list
+                  list:
+                      panel: 1
+                      object: avenant
+                      name: all
 #        deux:
 #    - type: nav_tabs
 #      nav_tabs: 

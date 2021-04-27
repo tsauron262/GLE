@@ -16,6 +16,9 @@
         CONST CONTRAT_BROUILLON = 0;
         CONST CONTRAT_DEMANDE = 10;
         CONST CONTRAT_ACTIF = 11;
+        CONST CONTRAT_WAIT_ACTIVER = 3;
+        CONST CONTRAT_ACTIVER_TMP = 12;
+        CONST CONTRAT_ACTIVER_SUP = 13;
         
         CONST CONTRAT_RENOUVELLEMENT_NON = 0;
         CONST CONTRAT_RENOUVELLEMENT_1_FOIS = 1;
@@ -32,14 +35,83 @@
         ];
         
         function zu_gehen() {
-            $this->relance_brouillon();
-            //$this->echeance_contrat();
+            $this->mailJourActivation();
+            $this->relanceActivationProvisoire();
+//            $this->relance_brouillon(); NE PAS DECOMMENTER
+//            $this->echeance_contrat();
             $this->relance_demande();
             $this->tacite();
             $this->facturation_auto();
             $this->autoClose();
             
             return "OK";
+        }
+        
+        public function mailJourActivation() {
+            $contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
+            $list  = $contrat->getList(['statut' => self::CONTRAT_WAIT_ACTIVER]);
+            $msg = "Bonjour, Voici la liste des contrats à activer:<br />";
+            $to_send = false;
+            foreach($list as $index => $i) {
+                $contrat->fetch($i['rowid']);
+                $date = New DateTime($contrat->getData('date_start'));
+                $now = New DateTime();
+                $tms_date = strtotime($date->format('Y-m-d'));
+                $tms_now = strtotime($now->format('Y-m-d'));
+                if($tms_date == $tms_now || $tms_date < $tms_now) { // PLUS AJOUTER SI LE CONTRAT  EST SIGNER AUSSI
+                    // Envoyer le mail pour activation aujoursd'hui
+                    $to_send = true;
+                    $this->output .= $contrat->getRef() . ": Relance jour<br />";
+                    $msg .= $contrat->getNomUrl() . " => date d'activation prévu: <b>" . $date->format('d/m/Y') . "</b><br />";
+                } 
+            }
+            if($to_send) {
+                $this->sendMailGroupeContrat("Contrats en attente de validation", $msg);
+            }
+        }
+        
+        public function relanceActivationProvisoire() {
+            $contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
+            $list  = $contrat->getList(['statut' => self::CONTRAT_ACTIVER_TMP]);
+            foreach($list as $index => $i) {
+                $contrat->fetch($i['rowid']);
+                $start_prov = New DateTime($contrat->getData('date_start_provisoire'));
+                $end_prov = New DateTime($contrat->getData('date_start_provisoire'));
+                $end_prov->add(new DateInterval("P14D"));
+                $this->output .= $contrat->getNomUrl() . "(Date: ".$start_prov->format('d/m/Y')." au ".$end_prov->format('d/m/Y').") ";
+                $today = new DateTime();
+                $diff = $today->diff($end_prov);
+                if($diff->invert == 1) {
+                    $this->output .= ": suspenssion du contrat";
+                    $commercial = $contrat->getCommercialClient(true);
+                    $client = BimpObject::getInstance('bimpcore',  'Bimp_Societe', $contrat->getData('fk_soc'));
+                    $msg = "L'activation provisoire de votre contrat ".$contrat->getNomUrl()." pour le client ".$client->getNomUrl()." ".$client->getName().", vient d'être suspendue. Il ne sera réactivé que lorsque nous recevrons la version dûment signée par le client";
+                    mailSyn2("Contrat suspendu", $commercial->getData('email'), null, $msg);
+                    $contrat->addLog("Contrat suspendu automatiquement pour cause de non signature");
+                    $contrat->updateField('statut', self::CONTRAT_ACTIVER_SUP);
+                } else {
+                    $this->output .= $diff->d . " jours avant la suspenssion automatique";
+                    if($diff->d%2 == 0 && $diff->d > 14 && $diff->d > 0) {
+                        $this->output .= ": Relance par mail";
+                        $commercial = $contrat->getCommercialClient(true);
+                        $client = BimpObject::getInstance('bimpcore',  'Bimp_Societe', $contrat->getData('fk_soc'));
+                        $msg = "Votre contrat ".$contrat->getNomUrl()." pour le client ".$client->getNomUrl()." ".$client->getName()." est activé provisoirement car il n'est pas revenu signé. Il sera automatiquement désactivé le ".$end_prov->format('d / m  / Y')." si le nécessaire n'a pas été fait.";
+                        mailSyn2("Contrat en attente de signature", $commercial->getData('email'), null, $msg);
+                    } elseif($diff->d > 0) {
+                        $this->output .= ": Pas de relance car tout les deux jours";
+                    } elseif($diff->d == 0 || $diff->d < 0){
+                        // C'est la suspenssion
+                        $this->output .= ": suspenssion du contrat";
+                        $commercial = $contrat->getCommercialClient(true);
+                        $client = BimpObject::getInstance('bimpcore',  'Bimp_Societe', $contrat->getData('fk_soc'));
+                        $msg = "L'activation provisoire de votre contrat ".$contrat->getNomUrl()." pour le client ".$client->getNomUrl()." ".$client->getName().", vient d'être suspendue. Il ne sera réactivé que lorsque nous recevrons la version dûment signée par le client";
+                        mailSyn2("Contrat suspendu", $commercial->getData('email'), null, $msg);
+                        $contrat->addLog("Contrat suspendu automatiquement pour cause de non signature");
+                        $contrat->updateField('statut', self::CONTRAT_ACTIVER_SUP);
+                    }
+                }
+                $this->output .= "<br />";
+            }
         }
 
         public function relanceContratResteAPayerPeriodiquementFinish() {
@@ -76,7 +148,7 @@
                     if(strtotime($contrats->displayRealEndDate('Y-m-d')) <= strtotime($date)) {
                         if($contrats->tacite(true)) {
                             $this->output .= "Contrat N°" . $contrats->getRef() . ' [Renouvellement TACITE]';
-                            
+
                             $commercial = BimpObject::getInstance('bimpcore', 'Bimp_User', $contrats->getData('fk_commercial_suivi'));
                             $client = BimpObject::getInstance('bimpcore', 'Bimp_Societe', $contrats->getData('fk_soc'));
                             $email_commercial = $commercial->getData('email');
@@ -343,5 +415,7 @@
             mailSyn2($sujet, 'contrats@bimp.fr', null, $message);
             
         }
+        
+        
        
     }

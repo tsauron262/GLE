@@ -37,8 +37,8 @@
         function zu_gehen() {
             $this->mailJourActivation();
             $this->relanceActivationProvisoire();
-//            $this->relance_brouillon(); NE PAS DECOMMENTER
-//            $this->echeance_contrat();
+            $this->relance_brouillon();
+            $this->echeance_contrat();
             $this->relance_demande();
             $this->tacite();
             $this->facturation_auto();
@@ -121,7 +121,7 @@
         }
         
         public function autoClose() {
-            $this->output = "START auto close<br />";
+            $this->output .= "START auto close<br />";
             $contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
             $liste = $contrat->getList(Array('statut' => self::CONTRAT_ACTIF));
             foreach($liste as $index => $infos) {
@@ -141,7 +141,7 @@
             $date = date('Y-m-d');
             $contrats = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
             $list = $contrats->getList(Array('statut' => self::CONTRAT_ACTIF));
-            $this->output = count($list) . " contrat(s) Actif.<br />";
+            $this->output .= count($list) . " contrat(s) Actif.<br />";
             foreach($list as $index => $c) {
                 $contrats->fetch($c['rowid']);
                 if($contrats->isLoaded() && in_array($contrats->getData('tacite'), $this->arrayTacite)) {
@@ -293,75 +293,39 @@
                 $send = false;
                 $c = BimpObject::getInstance('bimpcontract', 'BContract_contrat', $contrat->rowid);
                 $client = BimpObject::getInstance('bimpcore', 'Bimp_Societe', $c->getData('fk_soc'));
-//                
-//                $format_date_ = "";
-//                
-//                if($c->getData('current_renouvellement') > 0) {
-//                    $format_date_ = $c->displayRealEndDate("Y-m-d");
-//                } elseif($c->getData('end_date_contrat')) {
-//                    $format_date_ = $c->getData('end_date_contrat');
-//                }
-//                
-//                
-                if($c->getData('end_date_contrat')) {
-                    $endDate = new DateTime($c->getData('end_date_contrat'));
+
+                if($c->getData('periodicity')) {
+                    
+                    $endDate = new DateTime($c->displayRealEndDate("Y-m-d"));
+                    $this->output .= $c->getNomUrl() . " NEW - " . $endDate->format('d/m/Y');
                     $diff = $now->diff($endDate);
-
-                    //$this->output .= print_r($diff, 1);
-
                     if($diff->y == 0 && $diff->m == 0 && $diff->d <= 30 && $diff->d > 0 && $diff->invert == 0) {
                         $send = true;
-                        $this->output .= $c->getData('ref') . " (Relance)<br />";
+                        $this->output .= " relance";
                         $message = "Contrat " . $c->getData('ref') . "<br />Client ".$client->dol_object->getNomUrl()." <br /> dont vous êtes le commercial arrive à expiration dans <b>$diff->d jour.s</b>";
-                    } elseif($diff->invert == 1) {
-                        global $user;
-                        $this->output .= $c->getData('ref') . " (Clos)<br />";
-                        $logs = $c->getData('logs');
-                        $new_logs = $logs . "<br />" . "- <strong>Le ".date('d/m/Y')." à ".date('H:m')."</strong> Cloture automatique";
-                        
-                        if ($c->dol_object->closeAll($user) >= 1) {
-                            $echeancier = BimpObject::getInstance('bimpcontract', 'BContract_echeancier');
-                            $c->updateField('logs', $new_logs);
-                            $c->updateField('statut', 2);
-                            $c->updateField('date_cloture', date('Y-m-d H:i:s'));
-                            $c->updateField('fk_user_cloture', $user->id);
-                            if($echeancier->find(['id_contrat' => $c->id])) {
-                                $echeancier->updateField('statut', 0);
-                            }
-                        }
-                        
-
+                    } else {
+                        $this->output .= " pas de relance";
                     }
+                    $this->output  .= "<br />";
                 } else {
                     global $db, $user;
+                    
                     $bimp = new BimpDb($db);
                     $val = $bimp->getMax('contratdet', 'date_fin_validite', 'fk_contrat = ' . $c->id);
-                    $endDate = new DateTime($val);
-                    
-                    $diff = $now->diff($endDate);
-                    if($diff->y == 0 && $diff->m == 0 && $diff->d <= 30 && $diff->d > 0 && $diff->invert == 0) {
-                        $send = true;
-                        //$this->output .= $c->getData('ref') . " (Relance -> Vieux Contrat)<br />";
-                        $message = "Contrat " . $c->getNomUrl(). "<br />Client ".$client->dol_object->getNomUrl()." <br /> dont vous êtes le commercial arrive à expiration dans <b>$diff->d jour.s</b>";
-                    } elseif($diff->invert == 1 && ($c->getData('tacite') == 0 || $c->getData('tacite') == 12)) {
-                        //$this->output .= $c->getData('ref') . " (Clos)<br />";
-                        $logs = $c->getData('logs');
-                        $new_logs = $logs . "<br />" . "- <strong>Le ".date('d/m/Y')." à ".date('H:m')."</strong> Cloture automatique";
-                        if ($c->dol_object->closeAll($user) >= 1) {
-                            $echeancier = BimpObject::getInstance('bimpcontract', 'BContract_echeancier');
-                            $c->updateField('logs', $new_logs);
-                            $c->updateField('statut', 2);
-                            $c->updateField('date_cloture', date('Y-m-d H:i:s'));
-                            $c->updateField('fk_user_cloture', $user->id);
-                            if($echeancier->find(['id_contrat' => $c->id])) {
-                                $echeancier->updateField('statut', 0);
-                            }
+                    if($val) {
+                        $endDate = new DateTime($val);
+                            $this->output .= $c->getNomUrl() . " OLD - ".$endDate->format('d/m/Y')."";
+                            $diff = $now->diff($endDate);
+                            if($diff->y == 0 && $diff->m == 0 && $diff->d <= 30 && $diff->d > 0 && $diff->invert == 0) {
+                                $send = true;
+                                $this->output .= " relance";
+                                $message = "Contrat " . $c->getNomUrl(). "<br />Client ".$client->dol_object->getNomUrl()." <br /> dont vous êtes le commercial arrive à expiration dans <b>$diff->d jour.s</b>";
+                        }  else {
+                            $this->output .= " pas de relance";
                         }
-
+                        $this->output .= "<br />";
                     }
                     
-                    
-                }
                 
                 
                 if($this->send && $send && $c->getData('relance_renouvellement') == 1) {
@@ -372,7 +336,7 @@
             }
             if($nombre_relance > 0)
                 $this->output .= $nombre_relance . " relance echeances faites</br />";
-            
+            }
         }
         
         public function getListContratsWithStatut($statut) {
@@ -406,7 +370,7 @@
                 }
                 
             }
-            $this->output .= "Relance => " . $email . " -> " . $contrat->getData('ref') . '<br />';
+            $this->output .= "Relance => " . $email . " -> " . $contrat->s('ref') . '<br />';
             mailSyn2($sujet, $email, null, $message);
         }
         

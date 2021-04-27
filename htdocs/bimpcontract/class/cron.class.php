@@ -370,7 +370,7 @@
                 }
                 
             }
-            $this->output .= "Relance => " . $email . " -> " . $contrat->s('ref') . '<br />';
+            $this->output .= "Relance => " . $email . " -> " . $contrat->getData('ref') . '<br />';
             mailSyn2($sujet, $email, null, $message);
         }
         

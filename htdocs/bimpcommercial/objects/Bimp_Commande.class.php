@@ -3557,6 +3557,8 @@ class Bimp_Commande extends BimpComm
                     
                     $unpaid_factures = $client->getUnpaidFactures('2019-06-30');
                     
+                    $detail = '';
+                    
                     foreach($unpaid_factures as $f) {
                         $dates = $f->getRelanceDates();
                         $rtp = $f->getRemainToPay(true);

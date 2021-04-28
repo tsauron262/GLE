@@ -82,6 +82,17 @@ lists:
                 label: Coup de l'avenant au prorata
                 value:
                     callback: getTotalCoup
+    all:
+        extends: default
+        add_form_name: unset
+        delete_btn: 0
+        inline_view: unset
+        modal_view: avenant
+        extra_btn: unset
+        page_btn: 1
+        cols:
+            id_contrat:
+            coup: unset
                 
 forms:
     add:

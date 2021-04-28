@@ -34,6 +34,9 @@ class bimp_note extends AbstractNotification {
             super.init(this);
         }
     }
+    avatarIcone(text, color, classSup){
+            return '<span  style="background-color:' + color + '!important" class="badge badge-md badge-circle badge-floating badge-danger border-white' + classSup + '">' + text + '</span>';
+    }
     
     formatElement(element, key) {
                         
@@ -80,7 +83,8 @@ class bimp_note extends AbstractNotification {
         
         // Author
         html += '<span data-toggle="tooltip" data-placement="top" title="' + element.author.nom + '" class="chat-img pull-left">';
-        html += '<img src="https://placehold.it/' + (style === "petit" ? '35' : '55') + '/' + (element.type_author ? '55C1E7' : '5500E7') + '/fff&amp;text=' + author_initiale + '" alt="User Avatar" class="img-circle">';
+        //html += '<img src="http://placehold.it/' + (style === "petit" ? '35' : '55') + '/' + (element.type_author ? '55C1E7' : '5500E7') + '/fff&amp;text=' + author_initiale + '" alt="User Avatar" class="img-circle">';
+        html += this.avatarIcone(author_initiale, '#5500E7', '');
         html += '</span>';
         
         // Content
@@ -95,7 +99,9 @@ class bimp_note extends AbstractNotification {
         if (element.is_user_or_grp) {
             html += '<span data-toggle="tooltip" data-placement="top" title="' + element.dest.nom + '"';
             html += ' class="chat-img pull-left ' + (element.is_viewed ? "" : "nonLu") + (element.i_am_dest ? " my" : "") + '">';
-            html += '<img src="https://placehold.it/' + (style == "petit" ? '28' : '45') + '/' + (element.is_user ? '55C1E7' : '5500E7') + '/fff&amp;text=' + dest_initiale + '" alt="User Avatar" class="img-circle">';
+            //html += '<img src="http://placehold.it/' + (style == "petit" ? '28' : '45') + '/' + (element.is_user ? '55C1E7' : '5500E7') + '/fff&amp;text=' + dest_initiale + '" alt="User Avatar" class="img-circle">';
+         //   html += '<span  style="background-color:' + (element.i_am_dest ? '#55C1E7' : '#5500E7') + '!important" class="badge badge-md badge-circle badge-floating badge-danger border-white' + (element.is_viewed ? "" : "nonLu") + (element.i_am_dest ? " my" : "") + '">' + dest_initiale + '</span>';
+            html += this.avatarIcone(dest_initiale, (element.i_am_dest) ? '#55C1E7' : '#5500E7', (element.is_viewed ? "" : "nonLu") + (element.i_am_dest ? " my" : ""));
             html += '</span>';
         }
 

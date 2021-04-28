@@ -301,6 +301,8 @@ fields:
     relance_renouvellement:
         label: Relance Email pour renouvellement du contrat
         type: bool
+        input:
+            type: toggle
     facturation_echu:
         label: Facturation à terme échu
         type: bool
@@ -332,6 +334,8 @@ fields:
         label: Référence remplacée
         input: 
             help: Utiliser ce champ si perte des données de la pièce remplacée
+    date_start_provisoire:
+        label: Date d'activation provisoir
     
 fields_tables:
     contrat:
@@ -590,6 +594,25 @@ lists:
             fk_soc: unset
 
 forms:
+    have_signed:
+        title: Vérification signature
+        msgs:
+            - type: info
+              content: Si non est coché, le statut du contrat sera "Activation provisoire"
+        rows:
+            - custom: 1
+              label: Il y a t'il le contrat signé dans les fichiers de ce contrat ?
+              input_name: have_contrat_signed
+              value:
+                callback:
+                    method: getData
+                    params:
+                        - date_contrat
+              input:
+                  help: Merci de corriger si le curseur n'est pas sur le bon choix.
+                  type: toggle
+                  
+            
     renew_tacite:
         title: Créer un renouvellement
         msgs:

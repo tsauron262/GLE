@@ -215,10 +215,10 @@ class BIMP_Task extends BimpObject
         foreach (self::$valSrc as $src => $nom) {
             if ($src != "other") {
                 if ($user->rights->bimptask->$src->read)
-                    $tabDroit[] = '"' . $src . '"';
+                    $tabDroit[] = '' . $src . '';
                 else
-                    $tabPasDroit[] = '"' . $src . '"';
-                $tabTous[] = '"' . $src . '"';
+                    $tabPasDroit[] = '' . $src . '';
+                $tabTous[] = '' . $src . '';
                 
             }
         }

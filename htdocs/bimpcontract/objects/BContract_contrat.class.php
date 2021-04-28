@@ -20,10 +20,12 @@ class BContract_contrat extends BimpDolObject
     CONST CONTRAT_STATUS_BROUILLON = 0;
     CONST CONTRAT_STATUS_VALIDE = 1;
     CONST CONTRAT_STATUS_CLOS = 2;
+    CONST CONTRAT_STATUT_WAIT_ACTIVER = 3;
     CONST CONTRAT_STATUS_WAIT = 10;
     CONST CONTRAT_STATUS_ACTIVER = 11;
-    CONST CONTRAT_STATUS_ATTENTE_EXEC = 12;
-    CONST CONTRAT_STATUS_ACTIVER_TMP  = 13;
+    CONST CONTRAT_STATUS_ACTIVER_TMP = 12;
+    CONST CONTRAT_STATUS_ACTIVER_SUP  = 13;
+    
     // Les périodicitées
     CONST CONTRAT_PERIOD_AUCUNE = 0;
     CONST CONTRAT_PERIOD_MENSUELLE = 1;
@@ -61,16 +63,20 @@ class BContract_contrat extends BimpDolObject
     CONST MAIL_VALIDATION = 2;
     CONST MAIL_ACTIVATION = 3;
     CONST MAIL_SIGNED = 4;
+    CONST MAIL_TEMPORAIRE = 5;
     
     CONST PRORATA_PERIODE = false;
 
     public static $status_list = Array(
         self::CONTRAT_STATUT_ABORT     => Array('label' => 'Abandonné', 'classes' => Array('danger'), 'icon' => 'fas_times'),
         self::CONTRAT_STATUS_BROUILLON => Array('label' => 'Brouillon', 'classes' => Array('warning'), 'icon' => 'fas_trash-alt'),
-        self::CONTRAT_STATUS_VALIDE    => Array('label' => 'Attente signature client', 'classes' => Array('success'), 'icon' => 'fas_check'),
+        self::CONTRAT_STATUS_VALIDE    => Array('label' => 'Attente signature client', 'classes' => Array('success'), 'icon' => 'fas_retweet'),
         self::CONTRAT_STATUS_CLOS      => Array('label' => 'Clos', 'classes' => Array('danger'), 'icon' => 'fas_times'),
+        self::CONTRAT_STATUT_WAIT_ACTIVER      => Array('label' => 'Attente d\'activation', 'classes' => Array('important'), 'icon' => 'fas_retweet'),
         self::CONTRAT_STATUS_WAIT      => Array('label' => 'En attente de validation', 'classes' => Array('warning'), 'icon' => 'fas_refresh'),
         self::CONTRAT_STATUS_ACTIVER   => Array('label' => 'Actif', 'classes' => Array('important'), 'icon' => 'fas_play'),
+        self::CONTRAT_STATUS_ACTIVER_TMP   => Array('label' => 'Activation provisoire', 'classes' => Array('important'), 'icon' => 'fas_history'),
+        self::CONTRAT_STATUS_ACTIVER_SUP => Array('label' => 'Activation suspendue pour cause de non signature', 'classes' => Array('danger'), 'icon' => 'fas_stop')
     );
     public static $denounce = Array(
         self::CONTRAT_DENOUNCE_NON                => Array('label' => 'Non', 'classes' => Array('success'), 'icon' => 'fas_check'),
@@ -450,44 +456,74 @@ class BContract_contrat extends BimpDolObject
     {
         global $user;
         $errors = [];
-        if ($this->isLoaded()) {
-
-            $contratChhild = $this->getContratChild();
-            if ($contratChhild) {
-                $source = $this->getInstance('bimpcontract', 'BContract_contrat', $contratChhild->id);
-                $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
-                if ($source->dol_object->closeAll($user) >= 1) {
-                    $source->updateField('statut', self::CONTRAT_STATUS_CLOS);
-                    $source->updateField('date_cloture', date('Y-m-d H:i:s'));
-                    $source->updateField('fk_user_cloture', $user->id);
-                    $this->addLog('Contrat objet du renouvellement CLOS');
-                    $source->addLog('Contrat CLOS suite à l\'activation du contrat N°' . $this->getData('ref'));
-                    if ($echeancier->find(['id_contrat' => $source->id])) {
-                        $echeancier->updateField('statut', 0);
+        
+        $dateEffecte = new DateTime($this->getData('date_start'));
+        $date_now = new DateTime();
+        
+        $tms_effect = strtotime($dateEffecte->format('Y-m-d'));
+        $tms_now = strtotime($date_now->format('Y-m-d'));
+        
+        if($tms_effect > $tms_now) {
+            $errors[] = "Ce contrat ne peut pas encore être activé, car ça date d'effet n'est pas encore arrivée. Le groupe contrat recevra un mail automatiquement lorsque celui-ci sera activable.";
+        }
+        
+        if ($this->isLoaded() && !count($errors)) {
+            $signed_doc = ($data['have_contrat_signed']) ? true : false;
+            if($signed_doc) {
+                $contratChhild = $this->getContratChild();
+                if ($contratChhild) {
+                    $source = $this->getInstance('bimpcontract', 'BContract_contrat', $contratChhild->id);
+                    $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
+                    if ($source->dol_object->closeAll($user) >= 1) {
+                        $source->updateField('statut', self::CONTRAT_STATUS_CLOS);
+                        $source->updateField('date_cloture', date('Y-m-d H:i:s'));
+                        $source->updateField('fk_user_cloture', $user->id);
+                        $this->addLog('Contrat objet du renouvellement CLOS');
+                        $source->addLog('Contrat CLOS suite à l\'activation du contrat N°' . $this->getData('ref'));
+                        if ($echeancier->find(['id_contrat' => $source->id])) {
+                            $echeancier->updateField('statut', 0);
+                        }
                     }
                 }
-            }
 
-            $this->updateField('statut', self::CONTRAT_STATUS_ACTIVER);
+                $this->updateField('statut', self::CONTRAT_STATUS_ACTIVER);
 
-            $success = "Le contrat " . $this->getData('ref') . ' à été activé avec succès';
-            $this->addLog('Contrat activé');
-            if ($this->getEndDate() != '') {
-                $this->updateField('end_date_contrat', $this->getEndDate()->format('Y-m-d'));
-            }
-            $this->dol_object->activateAll($user);
-            $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
+                $success = "Le contrat " . $this->getData('ref') . ' à été activé avec succès';
+                $this->addLog('Contrat activé');
+                if ($this->getEndDate() != '') {
+                    $this->updateField('end_date_contrat', $this->getEndDate()->format('Y-m-d'));
+                }
+                $this->dol_object->activateAll($user);
+                $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
 
-            $commercial = $this->getInstance('bimpcore', 'Bimp_User', $this->getData('fk_commercial_suivi'));
-            $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
+                $commercial = $this->getInstance('bimpcore', 'Bimp_User', $this->getData('fk_commercial_suivi'));
+                $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
 
-            if ($commercial->isLoaded() && $this->getData('periodicity') != self::CONTRAT_PERIOD_AUCUNE) {
-                $this->mail($this->email_facturation, self::MAIL_ACTIVATION, $commercial->getData('email'));
-            } else {
-                $warnings[] = "Le mail n'a pas pu être envoyé, merci de contacter directement la personne concernée";
-            }
-            if (!$echeancier->find(['id_contrat' => $this->id]) && $this->getData('periodicity') != self::CONTRAT_PERIOD_AUCUNE) {
-                $this->createEcheancier();
+                if ($commercial->isLoaded() && $this->getData('periodicity') != self::CONTRAT_PERIOD_AUCUNE) {
+                    $this->mail($this->email_facturation, self::MAIL_ACTIVATION, $commercial->getData('email'));
+                } else {
+                    $warnings[] = "Le mail n'a pas pu être envoyé, merci de contacter directement la personne concernée";
+                }
+                if (!$echeancier->find(['id_contrat' => $this->id]) && $this->getData('periodicity') != self::CONTRAT_PERIOD_AUCUNE) {
+                    $this->createEcheancier();
+                }
+            }  else {
+                if($this->getData('statut') != self::CONTRAT_STATUS_ACTIVER_TMP)  {
+                    $this->dol_object->activateAll($user);
+                    $this->updateField('statut', self::CONTRAT_STATUS_ACTIVER_TMP);
+                    $this->updateField('date_start_provisoire', date('Y-m-d'));
+                    $dateForCloseNoSigned = new DateTime();
+                    $dateForCloseNoSigned->add(new DateInterval("P14D"));
+                    $this->addLog('Activation provisoire');
+                    $commercialContrat = $this->getInstance('bimpcore', 'Bimp_User', $this->getData('fk_commercial_suivi'));
+                    $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
+                    $msg = "Votre contrat ".$this->getNomUrl()." pour le client ".$client->getNomUrl()." ".$client->getName()." est activé provisoirement car il n'est pas revenu signé. Il sera automatiquement désactivé le ".$dateForCloseNoSigned->format('d / m / Y')." si le nécessaire n'a pas été fait.";
+                    //$errors[] = $msg;
+                    mailSyn2("[CONTRAT] - Activation provisoire", $commercialContrat->getData('email'), null, $msg);
+                    $this->addLog('Activation provisoire');
+                } else {
+                    $errors[] = "Ce contrat est déjà en activation provisoire";
+                } 
             }
         }
 
@@ -587,14 +623,16 @@ class BContract_contrat extends BimpDolObject
         }
     }
 
-    public function getCommercialClient()
+    public function getCommercialClient($object = false)
     {
         if ($this->isLoaded()) {
             $id_commercial = $this->db->getValue('societe_commerciaux', 'fk_user', 'fk_soc = ' . $this->getData('fk_soc'));
 
             $commercial = $this->getInstance('bimpcore', 'Bimp_User', $id_commercial);
-
-            return $commercial->id;
+            if(!$object)
+                return $commercial->id;
+            elseif($object)
+                return $commercial;
         }
     }
 
@@ -1491,7 +1529,7 @@ class BContract_contrat extends BimpDolObject
 
             $status = $this->getData('statut');
             $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
-//            
+
             if (BT_ficheInter::isActive() && $status == self::CONTRAT_STATUS_ACTIVER && $user->rights->bimptechnique->plannified) {
                 if ($user->admin == 1 || $user->id == 375) { // Pour les testes 
                     $buttons[] = array(
@@ -1503,7 +1541,6 @@ class BContract_contrat extends BimpDolObject
                     );
                 }
             }
-
             if($status == self::CONTRAT_STATUS_ACTIVER && $user->rights->bimpcontract->auto_billing) {
                 if($this->is_not_finish() && $this->reste_a_payer() > 0) {
                     $buttons[] = array(
@@ -1513,23 +1550,14 @@ class BContract_contrat extends BimpDolObject
                     );
                 }
             }
-
-
             if ($user->admin && $this->getData('tacite') != 12 && $this->getData('tacite') != 0) {
-            /*    $buttons[] = array(
-                    'label'   => 'NEW tacite (EN TEST)',
-                    'icon'    => 'fas_retweet',
-                    'onclick' => $this->getJsActionOnclick('tacite', array(), array())
-                );
-            */
                 $buttons[] = array(
                     "label"   => 'Annuler la reconduction tacite',
                     'icon'    => "fas_hand-paper",
                     'onclick' => $this->getJsActionOnclick('stopTacite', array(), array())
                 );
             }
-
-            if (($this->getData('tacite') == 12 || $this->getData('tacite') == 0) && !$this->getData('next_contrat')) {
+            if (($this->getData('tacite') == 12 || $this->getData('tacite') == 0) && !$this->getData('next_contrat') && $status == self::CONTRAT_STATUS_ACTIVER) {
                 $buttons[] = array(
                     'label'   => 'Renouvellement manuel',
                     'icon'    => 'fas_retweet',
@@ -1543,7 +1571,6 @@ class BContract_contrat extends BimpDolObject
             $e = $this->getInstance('bimpcontract', 'BContract_echeancier');
 
             if (!$this->getData('periodicity') && $this->getData('statut') == 1) {
-                //if(count($linked_factures)) {
                 $buttons[] = array(
                     'label'   => 'Ancienne vers Nouvelle version',
                     'icon'    => 'fas_info',
@@ -1551,7 +1578,6 @@ class BContract_contrat extends BimpDolObject
                         'form_name' => 'old_to_new'
                     ))
                 );
-                //}
             }
 
             if ($this->getData('statut') == self::CONTRAT_STATUS_ACTIVER && !$this->getContratChild()) {
@@ -1565,9 +1591,7 @@ class BContract_contrat extends BimpDolObject
                             'icon'    => $button_icone,
                             'onclick' => $this->getJsActionOnclick($button_action, array(), $button_form)
                     );
-                }
-
-                
+                } 
             }
 
 
@@ -1584,8 +1608,7 @@ class BContract_contrat extends BimpDolObject
                     );
                 }
             }
-
-            if (($this->getData('statut') == self::CONTRAT_STATUS_ACTIVER || $this->getData('statut') == self::CONTRAT_STATUS_VALIDE) && $user->rights->bimpcontract->to_anticipate) {
+            if (($this->getData('statut') == self::CONTRAT_STATUS_ACTIVER) && $user->rights->bimpcontract->to_anticipate) {
                 $buttons[] = array(
                     'label'   => 'Anticiper la cloture du contrat',
                     'icon'    => 'fas_clock',
@@ -1594,7 +1617,6 @@ class BContract_contrat extends BimpDolObject
                     ))
                 );
             }
-
             if (($user->rights->bimpcontract->to_validate || $user->admin) && $this->getData('statut') != self::CONTRAT_STATUT_ABORT && $this->getData('statut') != self::CONTRAT_STATUS_CLOS) {
                 $buttons[] = array(
                     'label'   => 'Abandonner le contrat',
@@ -1604,36 +1626,16 @@ class BContract_contrat extends BimpDolObject
                     ))
                 );
             }
-
-            if ($this->getData('statut') == self::CONTRAT_STATUS_WAIT && $user->rights->bimpcontract->to_validate) {
-                $message_for_validation = "Voulez vous valider ce contrat ?";
-                if ($this->getData('contrat_source') && $this->getData('ref_ext')) {
-
-                    $message_for_validation = "Ceci est un avenant, voullez vous le valider ? Cette action entrainera la cloture définitive du contrat " . $this->getData('ref_ext');
-                }
-
+            
+            if(($status == self::CONTRAT_STATUS_ACTIVER || $status == self::CONTRAT_STATUS_ACTIVER_TMP || $status == self::CONTRAT_STATUT_WAIT_ACTIVER) && $user->rights->contrat->desactiver) {
                 $buttons[] = array(
-                    'label'   => 'Valider le contrat',
-                    'icon'    => 'fas_check',
-                    'onclick' => $this->getJsActionOnclick('validation', array(), array(
-                        'confirm_msg'      => $message_for_validation,
-                        'success_callback' => $callback
-                    ))
-                );
+                    'label'   => 'Clore le contrat',
+                    'icon'    => 'fas_times',
+                    'onclick' => $this->getJsActionOnclick('close', array(), array(
+                        'confirm_msg' => "Voulez vous clore ce contrat ?",
+                )));
             }
-
-            if ($status == self::CONTRAT_STATUS_VALIDE || $status == self::CONTRAT_STATUS_ACTIVER) {
-
-                if (($user->rights->contrat->desactiver)) {
-
-                    $buttons[] = array(
-                        'label'   => 'Clore le contrat',
-                        'icon'    => 'fas_times',
-                        'onclick' => $this->getJsActionOnclick('close', array(), array(
-                            'confirm_msg' => "Voulez vous clore ce contrat ?",
-                    )));
-                }
-
+            if(($status == self::CONTRAT_STATUS_ACTIVER || $status == self::CONTRAT_STATUS_ACTIVER_TMP || $status == self::CONTRAT_STATUT_WAIT_ACTIVER)) {
                 $buttons[] = array(
                     'label'   => 'Envoyer par e-mail',
                     'icon'    => 'envelope',
@@ -1641,57 +1643,55 @@ class BContract_contrat extends BimpDolObject
                         'form_name' => 'email'
                     ))
                 );
-
-
-
-                if ($user->rights->bimpcontract->to_reopen) {
-
-                    $buttons[] = array(
-                        'label'   => 'Réouvrir le contrat',
-                        'icon'    => 'fas_folder-open',
-                        'onclick' => $this->getJsActionOnclick('reopen', array(), array())
-                    );
-
-                    $buttons[] = array(
-                        'label'   => 'Mettre à jours l\'indice Syntec',
-                        'icon'    => 'fas_sync',
-                        'onclick' => $this->getJsActionOnclick('updateSyntec', array(), array())
-                    );
-                }
-
-                if (($user->rights->bimpcontract->to_validate) && $status != self::CONTRAT_STATUS_ACTIVER) {
-                    $buttons[] = array(
-                        'label'   => 'Activer le contrat',
-                        'icon'    => 'fas_play',
-                        'onclick' => $this->getJsActionOnclick('activateContrat', array(), array(
-                            'confirm_msg' => "Voulez vous activer ce contrat ?",
-                    )));
-                }
-
-
-                if (!is_null($this->getData('date_contrat')) && $status != self::CONTRAT_STATUS_ACTIVER) {
-
-                    $buttons[] = array(
-                        'label'   => 'Dé-signer le contrat',
-                        'icon'    => 'fas_undo',
-                        'onclick' => $this->getJsActionOnclick('unSign', array(), array())
-                    );
-                }
-
-                if (is_null($this->getData('date_contrat'))) {
-                    $buttons[] = array(
-                        'label'   => 'Contrat signé',
-                        'icon'    => 'fas_signature',
-                        'onclick' => $this->getJsActionOnclick('signed', array(), array(
-                            'confirm_msg'      => "Voulez vous identifier ce contrat comme signé ?",
-                            'success_callback' => $callback
-                    )));
-                }
             }
+            if(($status == self::CONTRAT_STATUS_ACTIVER || $status == self::CONTRAT_STATUS_ACTIVER_TMP || $status == self::CONTRAT_STATUT_WAIT_ACTIVER) && $user->rights->bimpcontract->to_reopen) {
+                $buttons[] = array(
+                    'label'   => 'Réouvrir le contrat',
+                    'icon'    => 'fas_folder-open',
+                    'onclick' => $this->getJsActionOnclick('reopen', array(), array())
+                );
 
+                $buttons[] = array(
+                    'label'   => 'Mettre à jours l\'indice Syntec',
+                    'icon'    => 'fas_sync',
+                    'onclick' => $this->getJsActionOnclick('updateSyntec', array(), array())
+                );
+            }
+            if(($status  == self::CONTRAT_STATUS_WAIT || $status == self::CONTRAT_STATUS_ACTIVER_SUP || $status == self::CONTRAT_STATUS_ACTIVER_TMP || $status == self::CONTRAT_STATUT_WAIT_ACTIVER || $status == self::CONTRAT_STATUS_VALIDE) && $user->rights->bimpcontract->to_validate && $status != self::CONTRAT_STATUS_WAIT) {
+                $buttons[] = array(
+                    'label'   => 'Activer le contrat',
+                    'icon'    => 'fas_play',
+                    'onclick' => $this->getJsActionOnclick('activateContrat', array(), array(
+                        'form_name' => "have_signed",
+                )));
+            }
+            if($status == self::CONTRAT_STATUS_WAIT && $user->rights->bimpcontract->to_validate) {
+                $buttons[] = array(
+                    'label'   => 'Valider la conformitée du contrat',
+                    'icon'    => 'fas_check',
+                    'onclick' => $this->getJsActionOnclick('validation', array(), array())
+                );
+            }
+            if (!is_null($this->getData('date_contrat')) && $status != self::CONTRAT_STATUS_ACTIVER && $status != self::CONTRAT_STATUT_WAIT_ACTIVER) {
+                $buttons[] = array(
+                    'label'   => 'Dé-signer le contrat',
+                    'icon'    => 'fas_undo',
+                    'onclick' => $this->getJsActionOnclick('unSign', array(), array())
+                );
+            }
+            if (is_null($this->getData('date_contrat')) && 
+                    ($status == self::CONTRAT_STATUS_ACTIVER || $status == self::CONTRAT_STATUS_ACTIVER_SUP || $status == self::CONTRAT_STATUS_ACTIVER_TMP || $status == self::CONTRAT_STATUS_VALIDE || $status  == self::CONTRAT_STATUT_WAIT_ACTIVER)) {
+                $buttons[] = array(
+                    'label'   => 'Contrat signé',
+                    'icon'    => 'fas_signature',
+                    'onclick' => $this->getJsActionOnclick('signed', array(), array(
+                        'confirm_msg'      => "Voulez vous identifier ce contrat comme signé ?",
+                        'success_callback' => $callback
+                )));
+            }
             if ($status == self::CONTRAT_STATUS_BROUILLON || ($user->rights->bimpcontract->to_generate)) {
 
-                if ($status != self::CONTRAT_STATUS_ACTIVER || $user->admin) {
+                if ($status != self::CONTRAT_STATUS_CLOS && $status != self::CONTRAT_STATUS_ACTIVER && $status != self::CONTRAT_STATUS_ACTIVER_TMP && $status != self::CONTRAT_STATUS_ACTIVER_SUP) {
                     $buttons[] = array(
                         'label'   => 'Générer le PDF du contrat',
                         'icon'    => 'fas_file-pdf',
@@ -1699,7 +1699,7 @@ class BContract_contrat extends BimpDolObject
                     );
                 }
 
-                if ($status != self::CONTRAT_STATUS_CLOS) {
+                if ($status != self::CONTRAT_STATUS_CLOS && $status != self::CONTRAT_STATUS_ACTIVER && $status != self::CONTRAT_STATUS_ACTIVER_TMP && $status != self::CONTRAT_STATUS_ACTIVER_SUP) {
                     $buttons[] = array(
                         'label'   => 'Générer le PDF du courrier',
                         'icon'    => 'fas_file-pdf',
@@ -2159,9 +2159,14 @@ class BContract_contrat extends BimpDolObject
 
         $this->addLog('Contrat marqué comme signé');
         $this->updateField('date_contrat', date('Y-m-d HH:ii:ss'));
+        
+        if($this->getData('statut') == self::CONTRAT_STATUS_VALIDE) {
+             $this->updateField("statut", self::CONTRAT_STATUT_WAIT_ACTIVER);
+        }
 
-        if ($this->getData('statut') != self::CONTRAT_STATUS_ACTIVER)
+        if ($this->getData('statut') != self::CONTRAT_STATUS_ACTIVER) {
             $this->mail($this->email_group, self::MAIL_SIGNED);
+        }    
 
         return [
             'errors' => $errors,
@@ -3176,11 +3181,21 @@ class BContract_contrat extends BimpDolObject
         $extra = '';
         $notes = $this->getNotes();
         $nb = count($notes);
+        
+        if($this->getData('statut') == self::CONTRAT_STATUS_ACTIVER_TMP) {
+            $date = new DateTime($this->getData('date_start_provisoire')); 
+            $extra .= " depuis le ".$date->format('d/m/Y');
+            $end = new DateTime($this->getData('date_start_provisoire'));
+            $end->add(New DateInterval("P14D"));
+            $extra .= "<br />Si le contrat signé par le client ne nous parvient pas avant le <b class='bs-popover' ".BimpRender::renderPopoverData($date->format('d/m/Y') . " + 14 Jours", "top")." >" . $end->format('d/m/Y') . "</b> l’activation provisoire de ce contrat sera suspendue.";
+        }
+        
         if ($nb > 0)
             $extra .= '<br/><span class="warning"><span class="badge badge-warning">' . $nb . '</span> Note' . ($nb > 1 ? 's' : '') . '</span>';
 
         if (!is_null($this->getData('date_contrat'))) {
-            $extra .= '<br/><span class="important">' . BimpRender::renderIcon('fas_signature', 'iconLeft') . 'Contrat signé</span>';
+            $date = new DateTime($this->getData('date_contrat'));
+            $extra .= '<br/><span class="important">' . BimpRender::renderIcon('fas_signature', 'iconLeft') . 'Contrat marqué comme signé</span> depuis le ' . $date->format('d/m/Y');
         }
         if (!is_null($this->getData('end_date_reel')) && !is_null($this->getData('anticipate_close_note'))) {
             $date = new DateTime($this->getData('end_date_reel'));
@@ -3598,7 +3613,7 @@ class BContract_contrat extends BimpDolObject
                 
                 if($tms_start > $tms_today && $this->getData('statut') == self::CONTRAT_STATUS_ACTIVER) {
                     $html .= '<div class="object_header_infos">';
-                    $html .= BimpRender::renderAlerts("<h3>Ce contrat est actif mais n'est pas encore en cours d'éxécution.<br /> <b>LE CLIENT DE CE CONTRAT N'EST DONC PAS ENCORE COUVERT</b></h3>", 'danger', false);
+                    $html .= BimpRender::renderAlerts("<h3><b>Ce contrat a été activé par avance mais sa date de prise d'effet n'est pas encore atteinte</b><br />Date visible ci-dessous dans \"Information sur la durée de validité du contrat\"</h3>", 'danger', false);
                     
                     $html .= '</div>';
                 }

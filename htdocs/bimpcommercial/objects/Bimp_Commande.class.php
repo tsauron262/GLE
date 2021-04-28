@@ -3572,7 +3572,7 @@ class Bimp_Commande extends BimpComm
                     $msg .= "Ce compte client présente un retard de paiement de ";
                     $msg .= BimpTools::displayMoneyValue($total_rtp) . ", dont détail ci-après :<br/>";
                     $msg .= $detail;
-                    $msg .= '<br/><br/>Cette commande ne peut pas être validée.';
+                    $msg .= '<br/><br/>Vos commandes en cours ne peuvent donc pas recevoir la validation financière.';
                     
                     $success = 'Mail envoyé à l\'adresse ' . $data['user_ask_email'] . ' pour un total de ';
                     $success .= BimpTools::displayMoneyValue($total_rtp) . ' impayé.';

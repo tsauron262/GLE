@@ -131,6 +131,10 @@ class Session {
     // Nettoyage de la BDD
     public function session_nettoyage($sessionMaxLifetime) {
         if(is_object($this->db)){
+            if($sessionMaxLifetime < 43200)
+                $sessionMaxLifetime = 43200;
+            
+            
             $timestamp_expiration = time() - $sessionMaxLifetime;
             $date_expiration = new DateTime("@".$timestamp_expiration);
             $date_expiration->setTimezone(new DateTimeZone('Europe/Paris'));

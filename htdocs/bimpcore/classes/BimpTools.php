@@ -2262,10 +2262,6 @@ class BimpTools
 
         return 0;
     }
-    
-    public static function getAvatarImgSrc($text, $size, $color){
-        return 'http://placehold.it/' .$size . '/' . $color . '/fff&amp;text=' . $text;
-    }
 
     public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false, $no_html = false, $decimals = 2, $round_points = false, $separator = ',', $spaces = true)
     {

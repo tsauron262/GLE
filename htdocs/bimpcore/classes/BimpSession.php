@@ -109,7 +109,7 @@ class Session {
     // Destruction des sessions
     public function session_destruction($sessionID) {
         
-//        $resultat = $this->db->query("DELETE FROM ".$this->table." WHERE `id_session` = '".$sessionID."'");
+        $resultat = $this->db->query("DELETE FROM ".$this->table." WHERE `id_session` = '".$sessionID."'");
         return true;
         
         

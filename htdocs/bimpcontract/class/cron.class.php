@@ -126,12 +126,9 @@
             $liste = $contrat->getList(Array('statut' => self::CONTRAT_ACTIF));
             foreach($liste as $index => $infos) {
                 $contrat->fetch($infos['rowid']);
-                $this->output .= $contrat->getRef() . " : " . (int) $contrat->getJourRestantReel() . ' => ';
                 if((int) $contrat->getJourRestantReel() < 0) {
                     $contrat->closeFromCron();
-                    $this->output .= "A  FERMER <br />";
-                } else {
-                    $this->output .= "<br />";
+                    $this->output .= $contrat->getRef() . " : " . (int) $contrat->getJourRestantReel() . ' => FERMé';
                 }
             }
             $this->output .= "STOP auto close<br />";
@@ -298,7 +295,6 @@
                 if($c->getData('periodicity')) {
                     
                     $endDate = new DateTime($c->displayRealEndDate("Y-m-d"));
-                    $this->output .= $c->getNomUrl() . " NEW - " . $endDate->format('d/m/Y');
                     $diff = $now->diff($endDate);
                     if($diff->y == 0 && $diff->m == 0 && $diff->d <= 30 && $diff->d > 0 && $diff->invert == 0) {
                         $send = true;
@@ -314,7 +310,6 @@
                     $val = $bimp->getMax('contratdet', 'date_fin_validite', 'fk_contrat = ' . $c->id);
                     if($val) {
                         $endDate = new DateTime($val);
-                            $this->output .= $c->getNomUrl() . " OLD - ".$endDate->format('d/m/Y')."";
                             $diff = $now->diff($endDate);
                             if($diff->y == 0 && $diff->m == 0 && $diff->d <= 30 && $diff->d > 0 && $diff->invert == 0) {
                                 $send = true;

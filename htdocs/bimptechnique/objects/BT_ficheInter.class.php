@@ -80,6 +80,30 @@ class BT_ficheInter extends BimpDolObject {
         $this->global_langs = $langs;
         return parent::__construct($module, $object_name);
     }
+    
+    public function deleteDolObject(&$errors) {
+        global $user;
+        $actionCommList = $this->db->getRows("actioncomm", 'fk_soc = ' . $this->getData('fk_soc') . " AND elementtype = 'fichinter' AND fk_element = " . $this->id);
+        $emailControl  =  "v.gilbert@bimp.fr";
+        $tech = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_User", $this->getData('fk_user_author'));
+        BimpTools::loadDolClass("comm/action", "actioncomm");
+        
+        $actionCommClass = new ActionComm($this->db->db);
+        
+        foreach($actionCommList as $index => $object) {
+            $actionCommClass->fetch($object->id);
+            $actionCommClass->delete();
+        }
+        
+        $message = "Bonjour,<br />La fiche d'intervention " . $this->getRef() . " à été supprimé par " . $user->getNomUrl() . " ainsi que le ou les évènements dans l'agenda.";
+        $to = ($tech->getData('email') != $emailControl)  ? $tech->getData('email') . ',' . $emailControl : $tech->getData('email');
+        
+        mailSyn2("FI " . $this->getRef() . " supprimée", $to, null, $message);
+        
+        
+        return parent::deleteDolObject($errors);
+        
+    }
 
     public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
@@ -947,6 +971,9 @@ class BT_ficheInter extends BimpDolObject {
                 }
                 if($value['inter_' . $numeroInter . '_type'] == 0 && !$value['inter_' . $numeroInter . '_service']) {
                     $errors[] = "Vous ne pouvez pas faire une intervention vendu sans code service, si ceci est une erreur merci d'envoyer un email à: support-fi@bimp.fr";
+                }
+                if($value['inter_' . $numeroInter . '_service']  == 5 && (!$this->getData('fk_contrat') || $this->getData('fk_contrat')  == 0)) {
+                    $errors[] = "Vous ne pouvez pas utiliser un déplacement sous contrat sans contrat lié. Merci";
                 }
                 
                 if(!count($errors)) {

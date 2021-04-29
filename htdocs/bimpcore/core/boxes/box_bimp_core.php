@@ -168,7 +168,7 @@ class box_bimp_core extends ModeleBoxes
     }
         
         
-    function presenteBox($strGraph, $strText){
+    private function presenteBox($strGraph, $strText){
         global $langs, $conf, $user;
         $stringtoshow='';
         $stringtoshow.='<script type="text/javascript" language="javascript">
@@ -211,7 +211,7 @@ class box_bimp_core extends ModeleBoxes
         return $stringtoshow;
     }
     
-    function getCamemberre($clef, $dataGraph, $WIDTH, $HEIGHT){
+    private function getCamemberre($clef, $dataGraph, $WIDTH, $HEIGHT){
         $showpointvalue = 1; 
         $nocolor = 1;
         foreach($dataGraph['data'] as $temp)
@@ -275,7 +275,7 @@ class box_bimp_core extends ModeleBoxes
         $this->indicateurs[] = array('text'=>$text, 'value'=>$value, 'url'=>$url, 'title'=>$title, 'img'=>$img, 'alert'=>$alert, 'urlAlert'=>$urlAlert, 'titleAlert'=>$titleAlert);
     }
     
-    function getIndicateur($indicateur){//minimum text et value
+    private function getIndicateur($indicateur){//minimum text et value
         $return = '';
         $return .= '<div class="boxstatsindicator thumbstat150 nobold nounderline""><div class="boxstatsborder"><div class="boxstatscontent">';
         $return .= '';

@@ -157,10 +157,12 @@ class DemandeValidComm extends BimpObject
         return $this->getTable() . ":id=" . $this->id . " && status>" . self::STATUS_PROCESSING;
     }
 
-    public function beforeDelete(&$warnings, $force_delete = false) {        
+    public function beforeDelete(&$warnings) {        
         $task = BimpCache::findBimpObjectInstance('bimptask', 'BIMP_Task', array('test_ferme' => $this->getTestFerme()));
-        if(is_a($task, 'BIMP_Task'))
+        if($task->isLoaded())
             return $task->delete($warnings, true);
+        
+        return array();
     }
     
     

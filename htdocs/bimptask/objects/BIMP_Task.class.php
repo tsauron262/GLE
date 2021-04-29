@@ -140,7 +140,7 @@ class BIMP_Task extends BimpObject
 
     public function isEditable($force_edit = false, &$errors = array())
     {
-        return ($this->getInitData("status") < 4);
+        return ($this->getInitData("status") < 4) or $force_edit;
     }
 
     public function isDeletable($force_delete = false, &$errors = array())

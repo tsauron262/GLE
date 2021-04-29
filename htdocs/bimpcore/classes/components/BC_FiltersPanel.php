@@ -351,7 +351,7 @@ class BC_FiltersPanel extends BC_Panel
                         'onclick' => 'showAllFilters(\'' . $this->identifier . '\')'
                     )
         ));
-        
+
         $items[] = BimpRender::renderButton(array(
                     'classes'     => array('btn', 'btn-light-default'),
                     'label'       => 'Json Filtres courants',
@@ -457,5 +457,31 @@ class BC_FiltersPanel extends BC_Panel
         }
 
         return $html;
+    }
+
+    // Méthodes statiques: 
+    
+    public static function getObjectListIdsFromFilters($object, $filters_array)
+    {
+        $filters_panel = new BC_FiltersPanel($object);
+        $filters_panel->setFilters($filters_array);
+        
+        $filters = array();
+        $joins = array();
+
+        $filters_panel->getSqlFilters($filters, $joins);
+
+        $primary = $object->getPrimary();
+        $rows = $object->getList($filters, null, null, $primary, 'desc', 'array', array($primary), $joins);
+        
+        $list = array();
+        
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $list[] = $r[$primary];
+            }
+        }
+        
+        return $list;
     }
 }

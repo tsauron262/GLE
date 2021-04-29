@@ -13,6 +13,7 @@ class BS_SAV extends BimpObject
     private $allGarantie = true;
     public $useCaisseForPayments = false;
 
+    const BS_SAV_RESERVED = -1;
     const BS_SAV_NEW = 0;
     const BS_SAV_ATT_PIECE = 1;
     const BS_SAV_ATT_CLIENT = 2;
@@ -25,6 +26,7 @@ class BS_SAV extends BimpObject
     const BS_SAV_FERME = 999;
 
     public static $status_list = array(
+        self::BS_SAV_RESERVED               => array('label' => 'Réservé par client', 'icon' => 'fas_calendar-day', 'classes' => array('important')),
         self::BS_SAV_NEW               => array('label' => 'Nouveau', 'icon' => 'far_file', 'classes' => array('info')),
         self::BS_SAV_EXAM_EN_COURS     => array('label' => 'Examen en cours', 'icon' => 'hourglass-start', 'classes' => array('warning')),
         self::BS_SAV_ATT_CLIENT_ACTION => array('label' => 'Attente client', 'icon' => 'hourglass-start', 'classes' => array('warning')),
@@ -91,36 +93,56 @@ class BS_SAV extends BimpObject
 
     // Gestion des droits et autorisations: 
 
-    public function canCreate()
+    public function canView()
     {
-        return $this->can("view");
-    }
+        if (BimpCore::isContextPublic()) {
+            global $userClient;
 
-    protected function canEdit()
-    {
-        return $this->can("view");
-    }
+            if (!BimpObject::objectLoaded($userClient)) {
+                return 0;
+            }
 
-    protected function canView()
-    {
+            if ($this->isLoaded()) {
+                if ((int) $userClient->getData('id_client') == (int) $this->getData('id_client')) {
+                    return 1;
+                }
+
+                return 0;
+            }
+
+            return 1;
+        }
+
         global $user;
         return (int) $user->rights->BimpSupport->read;
     }
 
-    public function canDelete()
+    public function canCreate()
     {
-        global $user;
-        return (int) $user->rights->BimpSupport->delete;
-    }
-
-    public function canEditField($field_name)
-    {
-        switch ($field_name) {
-//            case 'status':
-//                return 0;
+        if (BimpCore::isContextPublic()) {
+            return 0;
         }
 
-        return parent::canEditField($field_name);
+        return $this->canView();
+    }
+
+    public function canEdit()
+    {
+        if (BimpCore::isContextPublic()) {
+            return 0;
+        }
+
+        return $this->canView();
+    }
+
+    public function canDelete()
+    {
+        if (BimpCore::isContextPublic()) {
+            return 0;
+        }
+
+        global $user;
+        return (int) $user->rights->BimpSupport->delete;
     }
 
     // Getters booléens:
@@ -468,6 +490,27 @@ class BS_SAV extends BimpObject
                     'icon'    => 'fas_file-pdf',
                     'onclick' => 'window.open(\'' . $url . '\')'
                 );
+            }
+        }
+
+        return $buttons;
+    }
+
+    public function getPublicListExtraButtons()
+    {
+        $buttons = array();
+
+        if ($this->isLoaded()) {
+            if ($this->canView()) {
+                $url = $this->getPublicUrl();
+
+                if ($url) {
+                    $buttons[] = array(
+                        'label'   => 'Voir le détail',
+                        'icon'    => 'fas_eye',
+                        'onclick' => 'window.location = \'' . $url . '\''
+                    );
+                }
             }
         }
 
@@ -843,6 +886,20 @@ class BS_SAV extends BimpObject
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
     }
 
+    public function getPublicUrl()
+    {
+        if ($this->isLoaded()) {
+            return DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=sav&content=card&id_sav=' . $this->id;
+        }
+
+        return '';
+    }
+
+    public function getPublicListPageUrl()
+    {
+        return DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=sav';
+    }
+
     // Getters array: 
 
     public function getClient_contactsArray()
@@ -1188,11 +1245,86 @@ class BS_SAV extends BimpObject
             $centre_repa = (string) BimpCache::getBdb()->getValue('bs_sav', 'code_centre_repa', 'id = ' . $this->id);
 
             if ($centre_repa && $centre_repa != $this->getData('code_centre')) {
-                $msg = 'Centre de réparation différent du centre de prise en charge.<br/>Le traitement de ce SAV ne doit être fait que sur la plateforme de test <a href="https://erp2.bimp.fr/bimpinv01042020/bimpsupport/index.php?fc=sav&id='.$this->id.'">bimpinv01042020</a>';
+                $msg = 'Centre de réparation différent du centre de prise en charge.<br/>Le traitement de ce SAV ne doit être fait que sur la plateforme de test <a href="https://erp2.bimp.fr/bimpinv01042020/bimpsupport/index.php?fc=sav&id=' . $this->id . '">bimpinv01042020</a>';
                 $html .= BimpRender::renderAlerts($msg, 'warning');
             }
         }
         // ---
+
+        return $html;
+    }
+
+    public function renderHeaderExtraRight()
+    {
+        $html = '';
+        if ((int) $this->getData('status') === self::BS_SAV_FERME) {
+            $url = DOL_URL_ROOT . '/bimpsupport/bon_restitution.php?id_sav= ' . $this->id;
+            $html .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\')">';
+            $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . 'Bon de restitution';
+            $html .= '</span>';
+
+            $facture = $this->getChildObject('facture');
+            if (BimpObject::objectLoaded($facture) && (int) $facture->getData('fk_statut')) {
+                $html .= $facture->displayPDFButton(0, 0, 'Facture');
+                $html .= $facture->displayPaiementsFacturesPdfButtons(0, 1);
+            }
+        }
+
+        return $html;
+    }
+
+    public function renderPublicHeaderExtraRight()
+    {
+        $html = '';
+
+        if ($this->isLoaded() && BimpCore::isContextPublic()) {
+            if (BimpCore::isModeDev()) {
+                $url_base = DOL_URL_ROOT . '/bimpcommercial/duplicata.php?';
+            } else {
+                $url_base = 'https://erp.bimp.fr/pdf_fact.php?';
+            }
+
+            $status = (int) $this->getData('status');
+            if (in_array($status, array(1, 2, 3, 4, 6, 7, 9))) {
+                $propal = $this->getChildObject('propal');
+
+                if (BimpObject::objectLoaded($propal)) {
+                    $ref = $propal->getRef();
+                    $fileName = dol_sanitizeFileName($ref) . '.pdf';
+                    $fileDir = $propal->getFilesDir();
+
+                    if (file_exists($fileDir . $fileName)) {
+                        $url = $url_base . 'r=' . urlencode($ref) . '&i=' . $propal->id . '&t=propale';
+                        $html .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\');">';
+                        $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . 'Devis';
+                        $html .= '</span>';
+                    } else {
+                        $html .= 'NO FILE';
+                    }
+                } else {
+                    $html .= 'NO PROP';
+                }
+            }
+
+            foreach (array(
+        'facture_acompte' => 'Facture d\'acompte',
+        'facture'         => 'Facture',
+        'facture_avoir'   => 'Avoir'
+            ) as $fac_type => $fac_label) {
+                $fac = $this->getChildObject($fac_type);
+
+                if (BimpObject::objectLoaded($fac)) {
+                    $ref = dol_sanitizeFileName($fac->getRef());
+
+                    if (file_exists($fac->getFilesDir() . $ref . '.pdf')) {
+                        $url = $url_base . 'r=' . urlencode($ref) . '&i=' . $fac->id . '&t=facture';
+                        $html .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\');">';
+                        $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . $fac_label;
+                        $html .= '</span>';
+                    }
+                }
+            }
+        }
 
         return $html;
     }
@@ -1327,25 +1459,6 @@ class BS_SAV extends BimpObject
             $list->addFieldFilterValue('id_entrepot', $this->getData('id_entrepot'));
 
             $html = $list->renderHtml();
-        }
-
-        return $html;
-    }
-
-    public function renderHeaderExtraRight()
-    {
-        $html = '';
-        if ((int) $this->getData('status') === self::BS_SAV_FERME) {
-            $url = DOL_URL_ROOT . '/bimpsupport/bon_restitution.php?id_sav= ' . $this->id;
-            $html .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\')">';
-            $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . 'Bon de restitution';
-            $html .= '</span>';
-
-            $facture = $this->getChildObject('facture');
-            if (BimpObject::objectLoaded($facture) && (int) $facture->getData('fk_statut')) {
-                $html .= $facture->displayPDFButton(0, 0, 'Facture');
-                $html .= $facture->displayPaiementsFacturesPdfButtons(0, 1);
-            }
         }
 
         return $html;

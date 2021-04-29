@@ -5,6 +5,7 @@ class BimpCore
 
     public static $conf_cache = null;
     public static $conf_cache_not_exist = array();
+    private static $context = '';
     public static $files = array(
         'js'  => array(
             '/includes/jquery/plugins/jpicker/jpicker-1.1.6.js',
@@ -69,22 +70,26 @@ class BimpCore
             $html .= '<script type="text/javascript">';
             $html .= ' var dol_url_root = \'' . DOL_URL_ROOT . '\';';
             $html .= ' var id_user = ' . (BimpObject::objectLoaded($user) ? $user->id : 0) . ';';
-            $html .= ' var context = "' . BimpTools::getContext() . '";';
+            $html .= ' var bimp_context = "' . self::getContext() . '";';
 
             // Inclusion notifications
-            $notification = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
-            $config_notification = $notification->getList();
-
             $html .= 'var notificationActive = {';
 
-            foreach ($config_notification as $cn) {
-                $html .= $cn['nom'] . ": {";
-                $html .= "module: '" . $cn['module'] . "',";
-                $html .= "class: '" . $cn['class'] . "' ,";
-                $html .= "method: '" . $cn['method'] . "' ,";
-                $html .= "obj: null},";
+            if (self::isContextPrivate()) {
+                $notification = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
+                $config_notification = $notification->getList();
+
+                foreach ($config_notification as $cn) {
+                    $html .= $cn['nom'] . ": {";
+                    $html .= "module: '" . $cn['module'] . "',";
+                    $html .= "class: '" . $cn['class'] . "' ,";
+                    $html .= "method: '" . $cn['method'] . "' ,";
+                    $html .= "obj: null},";
+                }
             }
+
             $html .= '};';
+
             // Fin inclusion notifications
             $html .= 'var theme="' . (isset($user->conf->MAIN_THEME)? $user->conf->MAIN_THEME : $conf->global->MAIN_THEME) . '";';
             $html .= '</script>';
@@ -363,6 +368,42 @@ class BimpCore
         }
 
         return 0;
+    }
+
+    // Gestion du contexte:
+
+    public static function getContext()
+    {
+        if (self::$context) {
+            return self::$context;
+        }
+
+        if (isset($_REQUEST['bimp_context'])) {
+            self::setContext($_REQUEST['bimp_context']);
+            return self::$context;
+        }
+
+        if (isset($_SESSION['bimp_context'])) {
+            return $_SESSION['bimp_context'];
+        }
+
+        return "";
+    }
+
+    public static function setContext($context)
+    {
+        self::$context = $context;
+        $_SESSION['bimp_context'] = $context;
+    }
+
+    public static function isContextPublic()
+    {
+        return (self::getContext() == 'public' ? 1 : 0);
+    }
+
+    public static function isContextPrivate()
+    {
+        return (self::getContext() != 'public' ? 1 : 0);
     }
 
     // Gestion des logs: 

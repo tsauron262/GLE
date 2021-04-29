@@ -414,7 +414,7 @@ class Bimp_CommandeFourn extends BimpComm
         return (int) ((int) $user->rights->fournisseur->commande->creer /* && (int) $user->rights->bimpcommercial->edit_comm_fourn_ref */);
     }
 
-    protected function canEdit()
+    public function canEdit()
     {
         return $this->can("create");
     }

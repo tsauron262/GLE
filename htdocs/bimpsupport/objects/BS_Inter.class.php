@@ -11,6 +11,20 @@ class BS_Inter extends BimpObject
         2 => array('label' => 'Terminée', 'classes' => array('danger'))
     );
 
+    // Droits users: 
+
+    public function canView()
+    {
+        if (BimpCore::isContextPublic()) {
+            if ($this->isLoaded()) {
+                return (int) $this->getData('is_public');
+            }
+            return 1;
+        }
+
+        return parent::canView();
+    }
+
     // Getters: 
 
     public function isCreatable($force_create = false, &$errors = array())
@@ -27,6 +41,24 @@ class BS_Inter extends BimpObject
         }
         return 0;
     }
+
+    public function isActionAllowed($action, &$errors = array())
+    {
+        switch ($action) {
+            case 'close':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
+                if ($this->getData('status') === self::BS_INTER_CLOSED) {
+                    $errors[] = 'Intervention déjà fermée';
+                    return 0;
+                }
+                return 1;
+        }
+        parent::isActionAllowed($action, $errors);
+    }
+
+    // Getters données: 
 
     public function getUserCurrentIntersFilters()
     {
@@ -71,6 +103,16 @@ class BS_Inter extends BimpObject
             }
         }
         return null;
+    }
+
+    public function getListFiltersInterfaceClient()
+    {
+        return Array(
+            Array(
+                'name'   => 'id_ticket',
+                'filter' => $_REQUEST['id']
+            )
+        );
     }
 
     // Rendus HTML:
@@ -165,14 +207,14 @@ class BS_Inter extends BimpObject
 
         if (!count($errors)) {
             $parent = $this->getParentInstance();
-            if($parent->getData('id_user_client') > 0) {
+            if ($parent->getData('id_user_client') > 0) {
                 $instance = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClient', $parent->getData('id_user_client'));
                 $liste_destinataires = Array($instance->getData('email'));
                 $liste_destinataires = BimpTools::merge_array($liste_destinataires, $instance->get_dest('admin'));
                 $liste_destinataires = BimpTools::merge_array($liste_destinataires, $instance->get_dest('commerciaux'));
                 mailSyn2("BIMP CLIENT : Intervention sur votre ticket : " . $parent->getData('ticket_number'), implode(', ', $liste_destinataires), null, "Une intervention a été créée sur votre ticket N°" . $parent->getData('ticket_number'));
             }
-            
+
             if ((int) BimpTools::getValue('start_timer', 0)) {
                 $timer = BimpObject::getInstance('bimpcore', 'BimpTimer');
                 if (!$timer->setObject($this, 'timer', true, (int) $this->getData('tech_id_user'))) {
@@ -231,36 +273,5 @@ class BS_Inter extends BimpObject
         }
 
         return $errors;
-    }
-
-    // Aurorisations:
-
-    public function isActionAllowed($action, &$errors = array())
-    {
-        switch ($action) {
-            case 'close':
-                if (!$this->isLoaded($errors)) {
-                    return 0;
-                }
-                if ($this->getData('status') === self::BS_INTER_CLOSED) {
-                    $errors[] = 'Intervention déjà fermée';
-                    return 0;
-                }
-                return 1;
-        }
-        parent::isActionAllowed($action, $errors);
-    }
-    
-    public function getListFiltersInterfaceClient(){
-        return Array(
-          Array(
-              'name' => 'id_ticket',
-              'filter' => $_REQUEST['id']
-          )  
-        );
-    }
-    
-    public function canClientView() {
-        return 1;
     }
 }

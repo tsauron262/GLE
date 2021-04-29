@@ -9,7 +9,7 @@ icon: far_id-card
 parent_object: Bimp_Societe
 parent_id_property: fk_soc
 
-name_syntaxe: <lastname> <firstname>
+name_syntaxe: <firstname> <lastname>
 nom_url: 
     syntaxe: <name>
     card: default

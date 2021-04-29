@@ -81,10 +81,16 @@ fields:
         input: 
             rows: 3
             auto_expand: 1
+            
+    is_public: 
+        label: Visible par le client
+        type: bool
+        default_value: 1
 
 forms: 
     default:
         rows: 
+            - field: is_public
             - field: tech_id_user
               show: 
                   callback: isNotLoaded
@@ -148,28 +154,23 @@ lists:
             timer:
             status:
                 edit: 1
+            is_public:
+                edit: 1
         
-    client_inters:
-        title: Liste des interventions
-        checkbox: 0
-        sort_field: id
+    public_client:
+        title: Interventions
+        icon: fas_user-clock
+        checkboxes: 0
+        configurable: 0
+        sort_field: date_create
         sort_way: desc
         n: 25
-        list_filters:
-            callback: getListFiltersInterfaceClient
-        add_btn: 0
-        edit_btn: 0
-        delete_btn: 0
-        inline_view: interface_client
-        inline_view_item: 
-            request: id_inter
-        page_btn: 1
         cols:
-            id:
-            status:
-            description:
             date_create:
             tech_id_user: 
+            status:
+            description:
+            resolution: 
 
 fields_tables: 
     infos: 
@@ -183,6 +184,8 @@ fields_tables:
 #            - field: priorite
 #              edit: 1
             - field: status
+              edit: 1
+            - field: is_public
               edit: 1
             - field: description
               edit: 1

@@ -12,7 +12,7 @@ objects:
     
     tickets:
         instance:
-            bimp_object: BIC_UserTickets
+            bimp_object: BIC_UserClientTicket
 
 sections:
     - type: object_header

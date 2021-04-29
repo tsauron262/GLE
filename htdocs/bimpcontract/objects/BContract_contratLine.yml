@@ -146,6 +146,7 @@ lists:
                 value:
                     callback: displayRenouvellementIn
 #            date_ouverture_prevue:
+    
     global: 
         title: Lignes du contrat
         filters_panel: default
@@ -193,13 +194,13 @@ lists:
         
     interface_client:
         edit_btn: 0
+        show: 0
         extends: default
         cols:
             fk_product: unset
             qty: unset
         list_filters: 
             callback: getListFilters
-        show: 0
         
 forms:
     default:

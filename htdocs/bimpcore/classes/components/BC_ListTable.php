@@ -712,6 +712,7 @@ class BC_ListTable extends BC_List
             $this->fetchItems();
         }
 
+        $is_public = BimpCore::isContextPublic();
         $this->rows = array();
         $rows = array();
 
@@ -827,7 +828,7 @@ class BC_ListTable extends BC_List
 
                             $row_content = $bc_field->renderHtml();
 
-                            if ((int) $col_params['object_link']) {
+                            if (!$is_public && (int) $col_params['object_link']) {
                                 $url = $object->getUrl();
 
                                 if ($url) {
@@ -1857,8 +1858,10 @@ class BC_ListTable extends BC_List
         $html = '';
         $content = '';
 
+        $isPublic = BimpCore::isContextPublic();
+
         // Rechargement liste: 
-        if ($this->params['configurable']) {
+        if (!$isPublic && $this->params['configurable']) {
             $content .= '<div style="text-align: center; margin-bottom: 15px;">';
             $content .= BimpRender::renderButton(array(
                         'classes'     => array('btn', 'btn-default'),
@@ -1883,179 +1886,183 @@ class BC_ListTable extends BC_List
             $content .= '</div>';
         }
 
+        $tools_html = '';
+
         // Config utilisateur: 
-        global $user;
-        if (BimpCore::isModuleActive('bimpuserconfig') && BimpObject::objectLoaded($user) && (int) $this->params['configurable']) {
-            $content .= '<div class="title">';
-            $content .= 'Paramètres utilisateur';
-            $content .= '</div>';
+        if (!$isPublic) {
+            global $user;
+            if (BimpCore::isModuleActive('bimpuserconfig') && BimpObject::objectLoaded($user) && (int) $this->params['configurable']) {
+                $content .= '<div class="title">';
+                $content .= 'Paramètres utilisateur';
+                $content .= '</div>';
 
-            $values = array(
-                'owner_type' => 2,
-                'id_owner'   => $user->id,
-                'list_name'  => $this->name,
-            );
+                $values = array(
+                    'owner_type' => 2,
+                    'id_owner'   => $user->id,
+                    'list_name'  => $this->name,
+                );
 
-            BimpObject::loadClass('bimpuserconfig', 'ListTableConfig');
-            $configs = ListTableConfig::getUserConfigsArray($user->id, $this->object, $this->name, false);
+                BimpObject::loadClass('bimpuserconfig', 'ListTableConfig');
+                $configs = ListTableConfig::getUserConfigsArray($user->id, $this->object, $this->name, false);
 
-            if (BimpObject::objectLoaded($this->userConfig)) {
-                $values['sort_field'] = $this->userConfig->getData('sort_field');
-                $values['sort_way'] = $this->userConfig->getData('sort_way');
-                $values['sort_option'] = $this->userConfig->getData('sort_option');
-                $values['nb_items'] = $this->userConfig->getData('nb_items');
-                $values['total_row'] = $this->userConfig->getData('total_row');
+                if (BimpObject::objectLoaded($this->userConfig)) {
+                    $values['sort_field'] = $this->userConfig->getData('sort_field');
+                    $values['sort_way'] = $this->userConfig->getData('sort_way');
+                    $values['sort_option'] = $this->userConfig->getData('sort_option');
+                    $values['nb_items'] = $this->userConfig->getData('nb_items');
+                    $values['total_row'] = $this->userConfig->getData('total_row');
 
-                $content .= '<div style="font-weight: normal; font-size: 11px">';
+                    $content .= '<div style="font-weight: normal; font-size: 11px">';
 
-                $content .= 'Configuration actuelle:<br/>';
-                $content .= '<div style="margin: 5px 0; font-weight: bold">';
-                $content .= $this->userConfig->getData('name');
+                    $content .= 'Configuration actuelle:<br/>';
+                    $content .= '<div style="margin: 5px 0; font-weight: bold">';
+                    $content .= $this->userConfig->getData('name');
 
-                $content .= '<div style="margin-top: 5px; text-align: center">';
-                if ($this->userConfig->can('edit')) {
-                    $content .= '<button class="btn btn-default btn-small" onclick="' . $this->userConfig->getJsLoadModalForm('default', 'Edition de la configuration #' . $this->userConfig->id) . '" style="margin-right: 4px">';
+                    $content .= '<div style="margin-top: 5px; text-align: center">';
+                    if ($this->userConfig->can('edit')) {
+                        $content .= '<button class="btn btn-default btn-small" onclick="' . $this->userConfig->getJsLoadModalForm('default', 'Edition de la configuration #' . $this->userConfig->id) . '" style="margin-right: 4px">';
+                        $content .= BimpRender::renderIcon('fas_edit', 'iconLeft') . 'Editer';
+                        $content .= '</button>';
+
+                        $content .= '<button class="btn btn-default btn-small" onclick="' . $this->userConfig->getJsLoadModalColsConfig() . '">';
+                        $content .= BimpRender::renderIcon('fas_columns', 'iconLeft') . 'Colonnes';
+                        $content .= '</button>';
+                    } else {
+                        $content .= '<span class="warning">Vous n\'avez pas la permission d\'éditer cette configuration</span>';
+                    }
+                    $content .= '</div>';
+
+                    $content .= '</div>';
+
+                    $content .= 'Nombre d\'éléments par page: <span class="bold">' . ((int) $values['nb_items'] ? $values['nb_items'] : BimpRender::renderIcon('fas_infinity')) . '</span><br/>';
+
+                    $sortable_fields = $this->object->getSortableFieldsArray();
+
+                    if (array_key_exists($values['sort_field'], $sortable_fields)) {
+                        $content .= 'Tri par défaut: <span class="bold">' . $sortable_fields[$values['sort_field']] . '</span><br/>';
+                        if ((string) $values['sort_option']) {
+                            $sort_options = $this->object->getSortOptionsArray($values['sort_field']);
+                            if (array_key_exists($values['sort_option'], $sort_options)) {
+                                $content .= 'Option de tri: <span class="bold">' . $sort_options[$values['sort_option']] . '</span><br/>';
+                            }
+                        }
+                    }
+                    $content .= 'Ordre de tri: <span class="bold">' . $this->userConfig->displayData('sort_way') . '</span><br/>';
+                    $content .= 'Afficher les totaux: <span class="bold">' . ((int) $values['total_row'] ? 'OUI' : 'NON') . '</span>';
+                    $content .= '</div>';
+                } else {
+                    $userConfig = BimpObject::getInstance('bimpuserconfig', 'ListTableConfig');
+
+                    $onclick = $userConfig->getJsLoadModalForm('default', 'Nouvelle configuration de liste', array(
+                        'fields' => array(
+                            'name'           => '',
+                            'obj_module'     => $this->object->module,
+                            'obj_name'       => $this->object->object_name,
+                            'component_name' => $this->name,
+                            'owner_type'     => UserConfig::OWNER_TYPE_USER,
+                            'id_owner'       => (int) $user->id,
+                            'nb_items'       => $this->params['n'],
+                            'sort_field'     => $this->params['sort_field'],
+                            'sort_way'       => $this->params['sort_way'],
+                            'sort_option'    => $this->params['sort_option'],
+                            'total_row'      => $this->params['total_row'],
+                            'is_default'     => 1
+                        )
+                    ));
+
+                    $content .= '<div style="margin: 5px 0 15px 0; text-align: center">';
+                    $content .= '<button class="btn btn-default btn-small" onclick="' . $onclick . '" style="margin-right: 4px">';
                     $content .= BimpRender::renderIcon('fas_edit', 'iconLeft') . 'Editer';
                     $content .= '</button>';
 
-                    $content .= '<button class="btn btn-default btn-small" onclick="' . $this->userConfig->getJsLoadModalColsConfig() . '">';
+                    $onclick = $userConfig->getJsActionOnclick('createUserDefault', array(
+                        'load_cols_config' => 1,
+                        'list_identifier'  => $this->identifier,
+                        'obj_module'       => $this->object->module,
+                        'obj_name'         => $this->object->object_name,
+                        'component_name'   => $this->name,
+                        'nb_items'         => $this->params['n'],
+                        'sort_field'       => $this->params['sort_field'],
+                        'sort_way'         => $this->params['sort_way'],
+                        'sort_option'      => $this->params['sort_option'],
+                        'total_row'        => $this->params['total_row'],
+                        'is_default'       => 1
+                    ));
+                    $content .= '<button class="btn btn-default btn-small" onclick="' . $onclick . '">';
                     $content .= BimpRender::renderIcon('fas_columns', 'iconLeft') . 'Colonnes';
                     $content .= '</button>';
-                } else {
-                    $content .= '<span class="warning">Vous n\'avez pas la permission d\'éditer cette configuration</span>';
+                    $content .= '</div>';
                 }
-                $content .= '</div>';
 
-                $content .= '</div>';
+                if (count($configs) > 0) {
+                    $content .= '<div style="margin-bottom: 15px; text-align: center">';
 
-                $content .= 'Nombre d\'éléments par page: <span class="bold">' . ((int) $values['nb_items'] ? $values['nb_items'] : BimpRender::renderIcon('fas_infinity')) . '</span><br/>';
+                    if (count($configs) > 1) {
+                        $items = array();
 
-                $sortable_fields = $this->object->getSortableFieldsArray();
-
-                if (array_key_exists($values['sort_field'], $sortable_fields)) {
-                    $content .= 'Tri par défaut: <span class="bold">' . $sortable_fields[$values['sort_field']] . '</span><br/>';
-                    if ((string) $values['sort_option']) {
-                        $sort_options = $this->object->getSortOptionsArray($values['sort_field']);
-                        if (array_key_exists($values['sort_option'], $sort_options)) {
-                            $content .= 'Option de tri: <span class="bold">' . $sort_options[$values['sort_option']] . '</span><br/>';
+                        foreach ($configs as $id_config => $config_label) {
+                            if ((int) $id_config === (int) $this->userConfig->id) {
+                                continue;
+                            }
+                            $items[] = '<span class="btn btn-light-default" onclick="loadListConfig($(this), ' . $id_config . ');">' . $config_label . '</span>';
                         }
+
+                        $content .= BimpRender::renderDropDownButton('Charger une configuration', $items, array(
+                                    'icon'       => 'fas_user-cog',
+                                    'menu_right' => 1
+                                )) . '<br/>';
                     }
+
+                    $userConfig = BimpObject::getInstance('bimpuserconfig', 'ListTableConfig');
+                    $onclick = 'loadBCUserConfigsModalList($(this), ' . $user->id . ', \'' . $this->identifier . '\', \'ListTableConfig\', \'Configurations\')';
+
+                    $content .= BimpRender::renderButton(array(
+                                'classes'     => array('btn', 'btn-default'),
+                                'label'       => 'Gérer les configurations',
+                                'icon_before' => 'fas_pen',
+                                'attr'        => array(
+                                    'onclick' => $onclick
+                                )
+                    ));
+                    $content .= '</div>';
                 }
-                $content .= 'Ordre de tri: <span class="bold">' . $this->userConfig->displayData('sort_way') . '</span><br/>';
-                $content .= 'Afficher les totaux: <span class="bold">' . ((int) $values['total_row'] ? 'OUI' : 'NON') . '</span>';
-                $content .= '</div>';
-            } else {
-                $userConfig = BimpObject::getInstance('bimpuserconfig', 'ListTableConfig');
-
-                $onclick = $userConfig->getJsLoadModalForm('default', 'Nouvelle configuration de liste', array(
-                    'fields' => array(
-                        'name'           => '',
-                        'obj_module'     => $this->object->module,
-                        'obj_name'       => $this->object->object_name,
-                        'component_name' => $this->name,
-                        'owner_type'     => UserConfig::OWNER_TYPE_USER,
-                        'id_owner'       => (int) $user->id,
-                        'nb_items'       => $this->params['n'],
-                        'sort_field'     => $this->params['sort_field'],
-                        'sort_way'       => $this->params['sort_way'],
-                        'sort_option'    => $this->params['sort_option'],
-                        'total_row'      => $this->params['total_row'],
-                        'is_default'     => 1
-                    )
-                ));
-
-                $content .= '<div style="margin: 5px 0 15px 0; text-align: center">';
-                $content .= '<button class="btn btn-default btn-small" onclick="' . $onclick . '" style="margin-right: 4px">';
-                $content .= BimpRender::renderIcon('fas_edit', 'iconLeft') . 'Editer';
-                $content .= '</button>';
-
-                $onclick = $userConfig->getJsActionOnclick('createUserDefault', array(
-                    'load_cols_config' => 1,
-                    'list_identifier'  => $this->identifier,
-                    'obj_module'       => $this->object->module,
-                    'obj_name'         => $this->object->object_name,
-                    'component_name'   => $this->name,
-                    'nb_items'         => $this->params['n'],
-                    'sort_field'       => $this->params['sort_field'],
-                    'sort_way'         => $this->params['sort_way'],
-                    'sort_option'      => $this->params['sort_option'],
-                    'total_row'        => $this->params['total_row'],
-                    'is_default'       => 1
-                ));
-                $content .= '<button class="btn btn-default btn-small" onclick="' . $onclick . '">';
-                $content .= BimpRender::renderIcon('fas_columns', 'iconLeft') . 'Colonnes';
-                $content .= '</button>';
-                $content .= '</div>';
             }
 
-            if (count($configs) > 0) {
-                $content .= '<div style="margin-bottom: 15px; text-align: center">';
+            // Génération fichier CSV:
 
-                if (count($configs) > 1) {
-                    $items = array();
-
-                    foreach ($configs as $id_config => $config_label) {
-                        if ((int) $id_config === (int) $this->userConfig->id) {
-                            continue;
-                        }
-                        $items[] = '<span class="btn btn-light-default" onclick="loadListConfig($(this), ' . $id_config . ');">' . $config_label . '</span>';
-                    }
-
-                    $content .= BimpRender::renderDropDownButton('Charger une configuration', $items, array(
-                                'icon'       => 'fas_user-cog',
-                                'menu_right' => 1
-                            )) . '<br/>';
-                }
-
-                $userConfig = BimpObject::getInstance('bimpuserconfig', 'ListTableConfig');
-                $onclick = 'loadBCUserConfigsModalList($(this), ' . $user->id . ', \'' . $this->identifier . '\', \'ListTableConfig\', \'Configurations\')';
-
-                $content .= BimpRender::renderButton(array(
+            if ($this->params['enable_csv']) {
+                $tools_html .= '<div style="text-align: center;">';
+                $tools_html .= BimpRender::renderButton(array(
                             'classes'     => array('btn', 'btn-default'),
-                            'label'       => 'Gérer les configurations',
-                            'icon_before' => 'fas_pen',
+                            'label'       => 'Générer fichier CSV',
+                            'icon_before' => 'fas_file-excel',
                             'attr'        => array(
-                                'onclick' => $onclick
+                                'onclick' => $this->object->getJsActionOnclick('generateListCsv', array(
+                                    'list_id'   => $this->identifier,
+                                    'list_name' => $this->name,
+                                    'list_type' => static::$type,
+                                    'file_name' => BimpTools::cleanStringForUrl($this->object->getLabel() . '_' . date('d-m-Y')),
+                                        ), array(
+                                    'form_name'      => 'list_csv',
+                                    'on_form_submit' => 'function($form, extra_data) {return onGenerateCsvFormSubmit($form, extra_data);}'
+                                ))
                             )
                 ));
-                $content .= '</div>';
+                $tools_html .= '</div>';
             }
-        }
 
-        // Génération fichier CSV:
-        $tools_html = '';
-        if ($this->params['enable_csv']) {
-            $tools_html .= '<div style="text-align: center;">';
-            $tools_html .= BimpRender::renderButton(array(
-                        'classes'     => array('btn', 'btn-default'),
-                        'label'       => 'Générer fichier CSV',
-                        'icon_before' => 'fas_file-excel',
-                        'attr'        => array(
-                            'onclick' => $this->object->getJsActionOnclick('generateListCsv', array(
-                                'list_id'   => $this->identifier,
-                                'list_name' => $this->name,
-                                'list_type' => static::$type,
-                                'file_name' => BimpTools::cleanStringForUrl($this->object->getLabel() . '_' . date('d-m-Y')),
-                                    ), array(
-                                'form_name'      => 'list_csv',
-                                'on_form_submit' => 'function($form, extra_data) {return onGenerateCsvFormSubmit($form, extra_data);}'
-                            ))
-                        )
-            ));
-            $tools_html .= '</div>';
-        }
-
-        if ($this->object->params['has_graph']) {
-            $tools_html .= '<div style="text-align: center;">';
-            $tools_html .= BimpRender::renderButton(array(
-                        'classes'     => array('btn', 'btn-default'),
-                        'label'       => 'Actualiser le graphique',
-                        'icon_before' => 'fas_chart-pie',
-                        'attr'        => array(
-                            'onclick' => "updateGraph('" . $this->identifier . "', '" . $this->name . "');"
-                        )
-            ));
-            $tools_html .= '</div>';
+            if ($this->object->params['has_graph']) {
+                $tools_html .= '<div style="text-align: center;">';
+                $tools_html .= BimpRender::renderButton(array(
+                            'classes'     => array('btn', 'btn-default'),
+                            'label'       => 'Actualiser le graphique',
+                            'icon_before' => 'fas_chart-pie',
+                            'attr'        => array(
+                                'onclick' => "updateGraph('" . $this->identifier . "', '" . $this->name . "');"
+                            )
+                ));
+                $tools_html .= '</div>';
+            }
         }
 
         if ($tools_html) {
@@ -2079,6 +2086,7 @@ class BC_ListTable extends BC_List
     {
         $html = '';
 
+        $is_public = BimpCore::isContextPublic();
         $this->setConfPath();
 
         if (!$this->isOk() || !count($this->cols)) {
@@ -2115,101 +2123,105 @@ class BC_ListTable extends BC_List
                 }
                 $html .= '>';
 
-                $html .= '<td style="text-align: center; ' . $item_params['td_style'] . '">';
-                if ($this->params['checkboxes']) {
-                    if ((int) $item_params['item_checkbox']) {
-                        $html .= '<input type="checkbox" id_="' . $this->object->object_name . '_check_' . $id_object . '"';
-                        $html .= ' name="' . $this->object->object_name . '_check"';
-                        $html .= ' class="item_check"';
-                        if ($selected) {
-                            $html .= ' checked="1"';
-                        }
-                        $html .= ' data-id_object="' . $id_object . '"/>';
-                    }
-                }
-                $html .= '</td>';
-
-                if ((int) $this->params['total_row']) {
-                    $html .= '<td style="width: 45px; min-width: 45px; ' . $item_params['td_style'] . '"></td>';
-                }
-
-                if ($this->params['positions']) {
-                    $html .= '<td class="positionHandle" style="' . (!$this->params['position'] ? 'display: none;' : '') . $item_params['td_style'] . '"><span></span></td>';
-                }
-
-                foreach ($this->cols as $col_name => $col_params) {
-                    if ($row['params']['single_cell'] && $col_name !== $this->params['single_cell']['col']) {
-                        continue;
-                    }
-
-                    $html .= '<td style="';
-                    if (BimpTools::getArrayValueFromPath($col_params, 'hidden', false)) {
-                        $html .= 'display: none;';
-                    }
-
-                    if (isset($col_params['min_width']) && $col_params['min_width']) {
-                        $html .= 'min-width: ' . $col_params['min_width'] . 'px;';
-                    }
-
-                    if ($item_params['td_style']) {
-                        $html .= $item_params['td_style'] . ';';
-                    }
-
-                    if (isset($col_params['col_style']) && (string) $col_params['col_style']) {
-                        $html .= $col_params['col_style'] . ';';
-                    }
-
-                    if (isset($col_params['align']) && in_array($col_params['align'], array('center', 'right'))) { // pas left puisque par défaut. 
-                        $html .= 'text-align: ' . $col_params['align'] . ';';
-                    }
-
-                    $html .= '"' . ($row['params']['single_cell'] ? ' colspan="' . count($this->cols) . '"' : '') . '>';
-                    $html .= (isset($row['cols'][$col_name]['content']) ? $row['cols'][$col_name]['content'] : '');
+                if (!(int) $row['params']['canView']) {
+                    $html .= '<td colspan="' . $this->colspan . '" class="fullrow">';
+                    $html .= BimpRender::renderAlerts('Vous n\'avez pas la permission de voir ' . $this->object->getLabel('this'), 'warning');
                     $html .= '</td>';
-                }
-
-                $rowButtons = array();
-
-                if ((int) $row['params']['canEdit']) {
-                    if ($this->params['enable_edit']) {
-                        $rowButtons[] = array(
-                            'class'   => 'cancelModificationsButton hidden',
-                            'icon'    => 'fas_undo',
-                            'label'   => 'Annuler les modifications',
-                            'onclick' => 'cancelObjectRowModifications(\'' . $this->identifier . '\', ' . $id_object . ', $(this))'
-                        );
-                        $rowButtons[] = array(
-                            'class'   => 'updateButton hidden',
-                            'label'   => 'Enregistrer',
-                            'onclick' => 'updateObjectFromRow(\'' . $this->identifier . '\', ' . $id_object . ', $(this))'
-                        );
-                    }
-                }
-
-                if (is_array($item_params['extra_btn']) && count($item_params['extra_btn'])) {
-                    foreach ($item_params['extra_btn'] as $btn_params) {
-                        $rowButtons[] = $btn_params;
-                    }
-                }
-
-                if ((int) $row['params']['canEdit']) {
-                    if ((int) $item_params['edit_btn']) {
-                        $title = '';
-                        if (!is_null($item_params['edit_form_title']) && $item_params['edit_form_title']) {
-                            $title = htmlentities(addslashes($item_params['edit_form_title']));
+                } else {
+                    $html .= '<td style="text-align: center; ' . $item_params['td_style'] . '">';
+                    if ($this->params['checkboxes']) {
+                        if ((int) $item_params['item_checkbox']) {
+                            $html .= '<input type="checkbox" id_="' . $this->object->object_name . '_check_' . $id_object . '"';
+                            $html .= ' name="' . $this->object->object_name . '_check"';
+                            $html .= ' class="item_check"';
+                            if ($selected) {
+                                $html .= ' checked="1"';
+                            }
+                            $html .= ' data-id_object="' . $id_object . '"/>';
                         }
-                        $onclick = 'loadModalFormFromList(';
-                        $onclick .= '\'' . $this->identifier . '\', \'' . $item_params['edit_form'] . '\'';
-                        $onclick .= ', $(this), ' . $id_object . ', ' . (!is_null($this->id_parent) ? $this->id_parent : 0) . ', \'' . $title . '\')';
-                        $rowButtons[] = array(
-                            'class'   => 'editButton',
-                            'label'   => 'Editer',
-                            'onclick' => $onclick
-                        );
                     }
-                }
+                    $html .= '</td>';
 
-                if ((int) $row['params']['canView']) {
+                    if ((int) $this->params['total_row']) {
+                        $html .= '<td style="width: 45px; min-width: 45px; ' . $item_params['td_style'] . '"></td>';
+                    }
+
+                    if ($this->params['positions']) {
+                        $html .= '<td class="positionHandle" style="' . (!$this->params['position'] ? 'display: none;' : '') . $item_params['td_style'] . '"><span></span></td>';
+                    }
+
+                    foreach ($this->cols as $col_name => $col_params) {
+                        if ($row['params']['single_cell'] && $col_name !== $this->params['single_cell']['col']) {
+                            continue;
+                        }
+
+                        $html .= '<td style="';
+                        if (BimpTools::getArrayValueFromPath($col_params, 'hidden', false)) {
+                            $html .= 'display: none;';
+                        }
+
+                        if (isset($col_params['min_width']) && $col_params['min_width']) {
+                            $html .= 'min-width: ' . $col_params['min_width'] . 'px;';
+                        }
+
+                        if ($item_params['td_style']) {
+                            $html .= $item_params['td_style'] . ';';
+                        }
+
+                        if (isset($col_params['col_style']) && (string) $col_params['col_style']) {
+                            $html .= $col_params['col_style'] . ';';
+                        }
+
+                        if (isset($col_params['align']) && in_array($col_params['align'], array('center', 'right'))) { // pas left puisque par défaut. 
+                            $html .= 'text-align: ' . $col_params['align'] . ';';
+                        }
+
+                        $html .= '"' . ($row['params']['single_cell'] ? ' colspan="' . count($this->cols) . '"' : '') . '>';
+                        $html .= (isset($row['cols'][$col_name]['content']) ? $row['cols'][$col_name]['content'] : '');
+                        $html .= '</td>';
+                    }
+
+                    $rowButtons = array();
+
+                    if ((int) $row['params']['canEdit']) {
+                        if ($this->params['enable_edit']) {
+                            $rowButtons[] = array(
+                                'class'   => 'cancelModificationsButton hidden',
+                                'icon'    => 'fas_undo',
+                                'label'   => 'Annuler les modifications',
+                                'onclick' => 'cancelObjectRowModifications(\'' . $this->identifier . '\', ' . $id_object . ', $(this))'
+                            );
+                            $rowButtons[] = array(
+                                'class'   => 'updateButton hidden',
+                                'label'   => 'Enregistrer',
+                                'onclick' => 'updateObjectFromRow(\'' . $this->identifier . '\', ' . $id_object . ', $(this))'
+                            );
+                        }
+                    }
+
+                    if (is_array($item_params['extra_btn']) && count($item_params['extra_btn'])) {
+                        foreach ($item_params['extra_btn'] as $btn_params) {
+                            $rowButtons[] = $btn_params;
+                        }
+                    }
+
+                    if ((int) $row['params']['canEdit']) {
+                        if ((int) $item_params['edit_btn']) {
+                            $title = '';
+                            if (!is_null($item_params['edit_form_title']) && $item_params['edit_form_title']) {
+                                $title = htmlentities(addslashes($item_params['edit_form_title']));
+                            }
+                            $onclick = 'loadModalFormFromList(';
+                            $onclick .= '\'' . $this->identifier . '\', \'' . $item_params['edit_form'] . '\'';
+                            $onclick .= ', $(this), ' . $id_object . ', ' . (!is_null($this->id_parent) ? $this->id_parent : 0) . ', \'' . $title . '\')';
+                            $rowButtons[] = array(
+                                'class'   => 'editButton',
+                                'label'   => 'Editer',
+                                'onclick' => $onclick
+                            );
+                        }
+                    }
+
                     if (!is_null($item_params['modal_view'])) {
                         $title = '';
                         if ($this->object->config->isDefined('views/' . $item_params['modal_view'] . '/title')) {
@@ -2246,31 +2258,31 @@ class BC_ListTable extends BC_List
                             'icon'    => 'fas_external-link-alt'
                         );
                     }
-                }
 
-                if ((int) $row['params']['canDelete']) {
-                    if ($item_params['delete_btn']) {
-                        $rowButtons[] = array(
-                            'class'   => 'deleteButton',
-                            'label'   => 'Supprimer',
-                            'onclick' => 'deleteObjects(\'' . $this->identifier . '\', [' . $id_object . '], $(this))'
-                        );
+                    if ((int) $row['params']['canDelete']) {
+                        if ($item_params['delete_btn']) {
+                            $rowButtons[] = array(
+                                'class'   => 'deleteButton',
+                                'label'   => 'Supprimer',
+                                'onclick' => 'deleteObjects(\'' . $this->identifier . '\', [' . $id_object . '], $(this))'
+                            );
+                        }
                     }
-                }
 
 
-                $min_width = ((count($rowButtons) * 36) + 12) . 'px';
-                $html .= '<td class="buttons" style="min-width: ' . $min_width . '; ' . $item_params['td_style'] . '">';
+                    $min_width = ((count($rowButtons) * 36) + 12) . 'px';
+                    $html .= '<td class="buttons" style="min-width: ' . $min_width . '; ' . $item_params['td_style'] . '">';
 
-                $i = 1;
-                foreach ($rowButtons as $btn_params) {
+                    $i = 1;
+                    foreach ($rowButtons as $btn_params) {
 //                    echo $i . '(' . count($rowButtons) . '): ' . $btn_params['label'] . ': ' . strlen($btn_params['label']) . '<br/>';
-                    $position = ($i === count($rowButtons) || ($i === (count($rowButtons) - 1) && strlen($btn_params['label']) > 18) || strlen($btn_params['label']) > 28 ? 'left' : 'top');
-                    $html .= $this->renderRowButton($btn_params, $position);
-                    $i++;
-                }
+                        $position = ($i === count($rowButtons) || ($i === (count($rowButtons) - 1) && strlen($btn_params['label']) > 18) || strlen($btn_params['label']) > 28 ? 'left' : 'top');
+                        $html .= $this->renderRowButton($btn_params, $position);
+                        $i++;
+                    }
 
-                $html .= '</td>';
+                    $html .= '</td>';
+                }
                 $html .= '</tr>';
             }
 

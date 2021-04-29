@@ -23,6 +23,7 @@ class BC_Card extends BimpComponent
         $this->params_def['status'] = array('default' => '');
         $this->params_def['logo'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['view_btn'] = array('data_type' => 'bool', 'default' => 1);
+        $this->params_def['check_view_right'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['fields'] = array('type' => 'keys');
 
         global $current_bc;
@@ -77,7 +78,7 @@ class BC_Card extends BimpComponent
         parent::__construct($object, $name, $path);
 
         if (!count($this->errors)) {
-            if (!$this->object->can("view")) {
+            if ((int) $this->params['check_view_right'] && !$this->object->can("view")) {
                 $this->errors[] = 'Vous n\'avez pas la permission de voir ' . $this->object->getLabel('this');
             }
         }
@@ -716,7 +717,7 @@ class BC_Card extends BimpComponent
         }
         $html .= '</tbody>';
         $html .= '</table>';
-        if ($view_btn && !is_null($object)) {
+        if ($view_btn && !is_null($object) && !BimpCore::isContextPublic()) {
             $url = BimpObject::getInstanceUrl($object);
 
             if ($url) {

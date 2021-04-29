@@ -10,6 +10,49 @@ class Bimp_Contact extends BimpObject
 
     // Getters booléens: 
 
+    public function canView()
+    {
+        if (BimpCore::isContextPublic()) {
+            global $userClient;
+
+            if (BimpObject::objectLoaded($userClient)) {
+                if ($this->isLoaded()) {
+                    if ((int) $this->getData('fk_soc') == (int) $userClient->getData('id_client')) {
+                        return 1;
+                    }
+                }
+
+                return 1;
+            }
+
+            return 0;
+        }
+
+        return parent::canView();
+    }
+
+    public function canCreate()
+    {
+        if (BimpCore::isContextPublic()) {
+            global $userClient;
+
+            if (BimpObject::objectLoaded($userClient)) {
+                if ((int) $this->getData('fk_soc') == (int) $userClient->getData('id_client')) {
+                    return 1;
+                }
+            }
+
+            return 0;
+        }
+
+        return parent::canCreate();
+    }
+
+    public function canEdit()
+    {
+        return $this->canCreate();
+    }
+
     public function canDelete()
     {
         global $user;
@@ -71,7 +114,7 @@ class Bimp_Contact extends BimpObject
         $lastname = $this->getData('lastname');
         $firstname = $this->getData('firstname');
 
-        return $lastname . (!is_null($firstname) && $firstname ? ' ' . $firstname : '');
+        return (!is_null($firstname) && $firstname ? $firstname .' ' : '') . $lastname;
     }
 
     public function getCardFields($card_name)

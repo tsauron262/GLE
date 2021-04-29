@@ -12,53 +12,40 @@ class BimpFile extends BimpObject
         2 => 'Membres BIMP',
     );
 
-    // CAN CONTEXTE CLIENT
+    // Droits users: 
 
-    public function canClientView()
+    public function canView()
     {
-        global $userClient;
-        if (isset($userClient)) {
-            return 1;
-        }
-        return 0;
-    }
-
-    public function canClientCreate()
-    {
-        $instance = $this->getInstance('bimpsupport', 'BS_Ticket', $this->getData('id_parent'));
-        if ($instance->getData('status') != 999) {
-            return 1;
-        }
-        return 0;
-    }
-
-    public function canClientEdit()
-    {
-        return $this->canClientCreate();
-    }
-
-    public function currentContext($default_value = null)
-    {
-        if (BimpTools::getContext() == 'public') {
-            if ($default_value == 'default_value')
+        if (BimpCore::isContextPublic()) {
+            global $userClient;
+            if (BimpObject::objectLoaded($userClient)) {
                 return 1;
+            }
             return 0;
         }
-        if ($default_value = 'default_value')
-            return 2;
-        return 1;
+
+        return parent::canView();
     }
 
-    public function getFilterListInterfaceClient()
+    public function canCreate()
     {
-        if (BimpTools::getContext() == 'public') {
-            return Array(
-                Array(
-                    'name'   => 'visibility',
-                    'filter' => 1
-                )
-            );
+        if (BimpCore::isContextPublic()) {
+            return $this->canView();
         }
+
+        return parent::canCreate();
+    }
+
+    // Getters booléens: 
+
+    public function isDeletable($force_delete = false, &$errors = array())
+    {
+        return (int) (!(int) $this->getData('deleted'));
+    }
+
+    public function isDownloadable()
+    {
+        return 1;
     }
 
     // Getters: 
@@ -120,16 +107,6 @@ class BimpFile extends BimpObject
         return DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($file);
     }
 
-    public function isDeletable($force_delete = false, &$errors = array())
-    {
-        return (int) (!(int) $this->getData('deleted'));
-    }
-
-    public function isDownloadable()
-    {
-        return 1;
-    }
-
     public function getDefaultListExtraButtons()
     {
         $buttons = array();
@@ -184,6 +161,32 @@ class BimpFile extends BimpObject
             }
         }
         return $buttons;
+    }
+
+    public function getFilterListInterfaceClient()
+    {
+        if (BimpCore::isContextPublic()) {
+            return Array(
+                Array(
+                    'name'   => 'visibility',
+                    'filter' => 1
+                )
+            );
+        }
+
+        return array();
+    }
+
+    public function currentContext($default_value = null)
+    {
+        if (BimpCore::isContextPublic()) {
+            if ($default_value == 'default_value')
+                return 1;
+            return 0;
+        }
+        if ($default_value = 'default_value')
+            return 2;
+        return 1;
     }
 
     // Getters - Overrides BimpObject: 

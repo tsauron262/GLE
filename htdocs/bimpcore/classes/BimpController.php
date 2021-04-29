@@ -19,23 +19,29 @@ class BimpController
 
     public static function getInstance($module, $controller = null)
     {
-        $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/';
+        $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/controllers/';
+
         if (is_null($controller)) {
             $controller = BimpTools::getValue('fc', 'index');
         }
-        if (BimpTools::getContext() == "public")
-            $controller = "public_" . $controller;
+
+        if (BimpCore::getContext() == "public" && file_exists($dir . 'public_' . $controller . 'Controller.php')) {
+            $controller = 'public_' . $controller;
+        }
 
         $controllerClass = $controller . 'Controller';
 
-        if (file_exists($dir . '/controllers/' . $controllerClass . '.php')) {
+        if (file_exists($dir . $controllerClass . '.php')) {
             if (!class_exists($controllerClass)) {
-                require_once $dir . '/controllers/' . $controllerClass . '.php';
+                require_once $dir . $controllerClass . '.php';
             }
             return new $controllerClass($module, $controller);
         }
-        if (BimpTools::getContext() == "public")
-            return new Bimp_user_client_controller($module, $controller);
+
+        if (BimpCore::getContext() == 'public') {
+            return new BimpPublicController($module, $controller);
+        }
+
         return new BimpController($module, $controller);
     }
 
@@ -75,6 +81,8 @@ class BimpController
             $this->errors = BimpTools::merge_array($this->errors, $this->config->errors);
         }
 
+        $this->init();
+
         $this->addJsFile('/bimpcore/views/js/controller.js');
 
         if (file_exists(DOL_DOCUMENT_ROOT . '/' . $module . '/views/js/' . $controller . '.js')) {
@@ -94,8 +102,6 @@ class BimpController
         foreach ($cssFiles as $cssFile) {
             $this->addCssFile($cssFile);
         }
-
-        $this->init();
     }
 
     public function init()
@@ -269,6 +275,21 @@ class BimpController
         return 1;
     }
 
+    public function getPageTitle()
+    {
+        $title = '';
+        global $user;
+        if ((int) $user->id === 1) {
+            $prefix = BimpCore::getConf('pages_titles_prefix', '');
+            if ($prefix) {
+                $title = '[' . $prefix . '] ';
+            }
+        }
+        $title .= $this->getConf('title', '');
+
+        return $title;
+    }
+
     // Affichages:
 
     public function displayHeaderFiles($echo = true)
@@ -304,6 +325,16 @@ class BimpController
         return $html;
     }
 
+    public function displayHeader()
+    {
+        llxHeader('', $this->getPageTitle(), '', false, false, false);
+    }
+
+    public function displayFooter()
+    {
+        llxFooter();
+    }
+
     public function display()
     {
         global $user;
@@ -311,10 +342,6 @@ class BimpController
         if (BimpTools::isSubmit('ajax')) {
             $this->ajaxProcess();
             return;
-        }
-
-        if ($user->id < 1) {
-            die("Pas de User <a href='" . DOL_URL_ROOT . "'> Allez à la page de login</a>");
         }
 
         global $main_controller;
@@ -328,15 +355,7 @@ class BimpController
             }
 
             if (!(int) $this->config->get('content_only', 0, false, 'bool')) {
-                $title = '';
-                if ((int) $user->id === 1) {
-                    $prefix = BimpCore::getConf('pages_titles_prefix', '');
-                    if ($prefix) {
-                        $title = '[' . $prefix . '] ';
-                    }
-                }
-                $title .= $this->getConf('title', '');
-                llxHeader('', $title, '', false, false, false);
+                $this->displayHeader();
             }
             $display_footer = true;
         } else {
@@ -362,7 +381,18 @@ class BimpController
         }
 
         echo '<div class="bimp_controller_content">';
-        if (count($this->errors)) {
+        if (!BimpObject::objectLoaded($user)) {
+            if (!BimpCore::isContextPublic()) {
+                echo BimpRender::renderAlerts('Aucun utilisateur connecté. Veuillez vous <a href="' . DOL_URL_ROOT . '">authentifier</a>');
+            } else {
+                echo 'Votre espace client n\'est pas accessible pour le moment.<br/>Veuillez nous excuser pour le désagrement occasionné et réessayer ultérieurement.';
+                BimpCore::addlog('Interface client - user par défaut non initialisé', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
+                    'module'     => $this->module,
+                    'controller' => $this->controller
+                ));
+                exit;
+            }
+        } elseif (count($this->errors)) {
             echo BimpRender::renderAlerts($this->errors);
             if (count($this->msgs)) {
                 foreach ($this->msgs as $msg) {
@@ -390,6 +420,7 @@ class BimpController
                 echo $this->renderSections('sections');
             }
         }
+
         echo '</div>';
 
         if ($display_footer) {
@@ -421,13 +452,11 @@ class BimpController
                 echo '</div>';
             }
 
-            llxFooter();
+            $this->displayFooter();
         }
-
-//        echo '<pre>';
-//        print_r(BimpConfig::$values_cache);
-//        exit;
     }
+
+    // Rendus HTML: 
 
     protected function renderSections($sections_path)
     {
@@ -1699,6 +1728,11 @@ class BimpController
                         $field = new BC_Field($object, $field_name, true);
                         $field->name_prefix = $field_prefix;
                         $field->display_card_mode = 'visible';
+
+//                        if ((int) $object->getConf('forms/'. $form_name.'/', $default_value, $required, $data_type)) {
+//                            $field->params['editable'] = 0;
+//                        }
+
                         if ($field->params['type'] === 'id_object' || ($field->params['type'] === 'items_list' && $field->params['items_data_type'] === 'id_object')) {
                             if ($field->params['create_form'])
                                 $html .= BC_Form::renderLoadFormObjectButton($object, $form_id, $field->params['object'], $field_prefix . $field_name, $field->params['create_form'], $field->params['create_form_values'], $field->params['create_form_label'], true);

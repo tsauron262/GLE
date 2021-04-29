@@ -384,7 +384,7 @@ class BimpNote extends BimpObject
         $author = $this->displayAuthor(false, true);
         $html .= '<div class="d-flex justify-content-' . ($this->i_am_dest() ? "start" : ($this->i_am_author() ? "end" : "")) . ($style == "petit" ? ' petit' : '') . ' mb-4">
             <span data-toggle="tooltip" data-placement="top" title="' . $author . '" class="chat-img pull-left">
-                <img src="https://placehold.it/' . ($style == "petit" ? '35' : '55') . '/' . ($this->getData('type_author') == self::BN_AUTHOR_USER ? '55C1E7' : '5500E7') . '/fff&amp;text=' . $this->getInitiale($author) . '" alt="User Avatar" class="img-circle">
+                <img src="'.BimpTools::getAvatarImgSrc($this->getInitiale($author), ($style == "petit" ? '35' : '55'), ($this->getData('type_author') == self::BN_AUTHOR_USER ? '55C1E7' : '5500E7')).'" alt="User Avatar" class="img-circle">
             </span>';
         $html .= '<div class="msg_cotainer">' . $this->getData("content");
         if ($style != "petit" && $this->getData('user_create') != $user->id)
@@ -396,7 +396,7 @@ class BimpNote extends BimpObject
             $dest = $this->displayDestinataire(false, true);
             if ($dest != "")
                 $html .= '    <span data-toggle="tooltip" data-placement="top" title="' . $dest . '" class="chat-img pull-left ' . ($this->getData("viewed") ? "" : "nonLu") . ($this->i_am_dest() ? " my" : "") . '">
-                                    <img src="https://placehold.it/' . ($style == "petit" ? '28' : '45') . '/' . ($this->getData('type_dest') == self::BN_DEST_USER ? '55C1E7' : '5500E7') . '/fff&amp;text=' . $this->getInitiale($dest) . '" alt="User Avatar" class="img-circle">
+                                    <img src="'.BimpTools::getAvatarImgSrc($this->getInitiale($author), ($style == "petit" ? '28' : '45'), ($this->getData('type_dest') == self::BN_DEST_USER ? '55C1E7' : '5500E7')).'" alt="User Avatar" class="img-circle">
                                 </span>';
         }
         $html .= "";

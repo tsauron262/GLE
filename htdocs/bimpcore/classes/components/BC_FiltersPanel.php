@@ -351,6 +351,15 @@ class BC_FiltersPanel extends BC_Panel
                         'onclick' => 'showAllFilters(\'' . $this->identifier . '\')'
                     )
         ));
+        
+        $items[] = BimpRender::renderButton(array(
+                    'classes'     => array('btn', 'btn-light-default'),
+                    'label'       => 'Json Filtres courants',
+                    'icon_before' => 'fas_code',
+                    'attr'        => array(
+                        'onclick' => 'displayFiltersJson(\'' . $this->identifier . '\')'
+                    )
+        ));
 
         $html .= '<div class="panelFooterButtons" style="text-align: right">';
         $html .= BimpRender::renderDropDownButton('Action', $items, array(

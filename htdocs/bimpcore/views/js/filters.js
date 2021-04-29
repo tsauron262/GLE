@@ -854,6 +854,17 @@ function showFiltersValues($container) {
     });
 }
 
+function displayFiltersJson(filters_id) {
+    var $filters = $('#' + filters_id);
+
+    if ($.isOk($filters)) {
+        var filters = getAllListFieldsFilters($filters, false);
+
+        bimpModal.newContent('JSON Filtres', '<pre>' + JSON.stringify(filters, null, ' ') + '</pre>');
+    } else {
+        bimp_msg('Une erreur est survenue. Opération abandonnée', 'danger', null, true);
+    }
+}
 // Gestion des événements: 
 
 function onListFiltersPanelLoaded($filters) {

@@ -618,7 +618,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
                 $bimpLine = isset($bimpLines[(int) $line->id]) ? $bimpLines[(int) $line->id] : null;
 
-                if ($this->object->type != 3 && BimpObject::objectLoaded($bimpLine) && !in_array((int) $bimpLine->getData('type'), array(ObjectLine::LINE_TEXT, ObjectLine::LINE_SUB_TOTAL)) && ($line->desc == "(DEPOSIT)" || stripos($line->desc, 'Acompte') === 0)) {
+                if ($this->object->type != 3 && BimpObject::objectLoaded($bimpLine) && !in_array((int) $bimpLine->getData('type'), array(ObjectLine::LINE_TEXT, ObjectLine::LINE_SUB_TOTAL)) && ($line->desc == "(DEPOSIT)" || stripos($line->desc, 'Acompte') || stripos($line->desc, 'Trop per') === 0)) {
 //                $acompteHt = $line->subprice * (float) $line->qty;
 //                $acompteTtc = BimpTools::calculatePriceTaxIn($acompteHt, (float) $line->tva_tx);
 
@@ -1296,7 +1296,7 @@ class BimpDocumentPDF extends BimpModelPDF
                 // TVA
                 foreach ($this->tva as $tvakey => $tvaval) {
                     $ht = $this->ht[$tvakey];
-                    if ($ht != 0) {
+                    if (($ht != 0 && $tvaval != 0) || $ht > 0) {
                         if (1) {
                             $tvacompl = '';
                             if (preg_match('/\*/', $tvakey)) {

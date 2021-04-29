@@ -170,9 +170,36 @@ fields_tables:
 forms:
     editinter:
         rows:
-            - field: date
-              input:
-                  type: date
+#            - field: date
+#              input:
+#                  type: date
+#            - field: description
+#              input:
+#                  type: html
+#            - custom: 1
+#              label: Arrivée
+#              input_name: arrived
+#              
+#              input:
+#                  type:  time
+#                  help: Si le champ est vide, aucune modificatons ne sera faite
+#              value:
+#                callback:
+#                    method: displayTime
+#                    params:
+#                        - arrived
+#              show:
+#                  callback: showOneHoraire
+#            - custom: 1
+#              label: Départ
+#              input_name: departure
+#              input:
+#                  type:  time
+#                  help: Si le champ est vide, aucune modificatons ne sera faite
+#              show:
+#                  callback: showOneHoraire
+              
+            
     add:
         rows:
             - field: type

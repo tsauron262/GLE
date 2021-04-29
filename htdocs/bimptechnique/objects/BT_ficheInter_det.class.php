@@ -78,6 +78,37 @@ class BT_ficheInter_det extends BT_ficheInter {
         return parent::__construct($module, $object_name);
     }
     
+    public function showOneHoraire() {
+        if($this->getData('arrived') && $this->getData('departure')) {
+            return 1;
+        }
+        return 0;
+    }
+    
+    public function showTwoHoraire() {
+        if($this->getData('arriverd_am') && $this->getData('departure_am') && $this->getData('arriverd_pm') && $this->getData('departure_pm')) {
+            return 1;
+        }
+        return 0;
+    }
+    
+    public function displayTime($field) {
+        $t = new DateTime($this->getData($field));
+        return($t->format('H:i:s'));
+    }
+    
+    public function updateDolObject(&$errors = array(), &$warnings = array()) {
+        
+        $data = BimpTools::getValue("arrived");
+        $errors[] = print_r($data, 1);
+        $errors[] = "fji";
+        return Array(
+            "success" => "",
+            "errors" => $errors,
+            'warnings' => $warnings
+        );
+    }
+    
     public function showDateWithDetails() {
         
         $return = "";
@@ -91,7 +122,7 @@ class BT_ficheInter_det extends BT_ficheInter {
         if($this->getData('arrived') && $this->getData('departure')) {
             $start = new DateTime($this->getData('arrived'));
             $stop = new DateTime($this->getData('departure'));
-            $popover = $start->format("h:i") . " " . BimpRender::renderIcon('arrow-right') . " " . $stop->format("H:i");
+            $popover = $start->format("H:i") . " " . BimpRender::renderIcon('arrow-right') . " " . $stop->format("H:i");
         } elseif($this->getData('arriverd_am')) {
             $start_am = new DateTime($this->getData('arriverd_am'));
             $start_pm = new DateTime($this->getData('arriverd_pm'));

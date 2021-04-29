@@ -160,7 +160,7 @@ class DemandeValidComm extends BimpObject
     public function beforeDelete(&$warnings, $force_delete = false) {        
         $task = BimpCache::findBimpObjectInstance('bimptask', 'BIMP_Task', array('test_ferme' => $this->getTestFerme()));
         if(is_a($task, 'BIMP_Task'))
-            return $task->delete($warnings, $force_delete);
+            return $task->delete($warnings, true);
     }
     
     

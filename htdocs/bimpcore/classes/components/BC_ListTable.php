@@ -1589,7 +1589,7 @@ class BC_ListTable extends BC_List
                 $field_object = self::getColFieldObject($this->object, $col_name, $field_name);
 
                 $html .= '<td>';
-                if (isset($field_name) && $field_name && !in_array($field_name, BimpObject::$common_fields)) {
+                if ($this->object->field_exists($field_name)) {
                     $bc_field = new BC_Field($field_object, $field_name, true);
                     $default_value = $bc_field->params['default_value'];
                     $bc_field->value = $default_value;

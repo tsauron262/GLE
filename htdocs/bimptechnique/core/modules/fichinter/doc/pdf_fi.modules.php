@@ -407,7 +407,7 @@ class pdf_fi {
                     $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Ligne #" . $nb, 0, 'L');
                     $pdf->SetFont(''/* 'Arial' */, 'B', 8);
 
-                    $date = new DateTime($child->getData('datei'));
+                    $date = new DateTime($child->getData('date'));
                     $add = "";
                     if($child->getData('arrived')) {
                         $arrived = new DateTime($child->getData('arrived'));

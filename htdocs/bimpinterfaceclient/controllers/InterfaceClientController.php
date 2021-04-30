@@ -223,11 +223,11 @@ class InterfaceClientController extends BimpPublicController
                 $html .= BimpRender::renderAlerts('Vous n\'avez aucun sav en cours', 'info');
             }
 
-            $html .= '<div class="buttonsContainer align-right" style="margin: 15px 0">';
-            $html .= '<span class="btn btn-default" onclick="window.location = \''.DOL_URL_ROOT.'/bimpinterfaceclient/client.php?fc=savForm\'">';
-            $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouveau SAV';
-            $html .= '</span>';
-            $html .= '</div>';
+//            $html .= '<div class="buttonsContainer align-right" style="margin: 15px 0">';
+//            $html .= '<span class="btn btn-default" onclick="window.location = \''.DOL_URL_ROOT.'/bimpinterfaceclient/client.php?fc=savForm\'">';
+//            $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouveau SAV';
+//            $html .= '</span>';
+//            $html .= '</div>';
 
             if (!empty($savs)) {
                 $headers = array(
@@ -431,6 +431,7 @@ class InterfaceClientController extends BimpPublicController
                 } else {
                     $list = new BC_ListTable($ticket, 'public_client');
                     $list->addFieldFilterValue('id_client', (int) $userClient->getData('id_client'));
+                    $list->params['add_form_values']['fields']['id_user_client'] = $userClient->id;
                     $html .= $list->renderHtml();
                 }
                 break;

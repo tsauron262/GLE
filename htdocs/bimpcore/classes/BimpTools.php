@@ -1770,27 +1770,25 @@ class BimpTools
 
     // Gestion des dates: 
 
-    public static function printDate($date, $balise = "span", $class = '', $format = 'd/m/Y H:i:s', $format_mini = 'd / m / Y')
+    public function printDate($date, $balise = "span", $class = '', $format = 'd/m/Y H:i:s', $format_mini = 'd / m / Y')
     {
         if (is_string($date) && stripos($date, '-') > 0) {
             $date = new DateTime($date);
         }
 
-        if (is_array($class)) {
-            $class = implode(" ", $class);
+        if (is_object($date)) {
+            $date = $date->getTimestamp();
         }
+
+        if (is_array($class))
+            $class = explode(" ", $class);
 
         $html = '<' . $balise;
-
-        if ($format != $format_mini) {
-            $html .= ' title="' . $date->format($format) . '"';
-        }
-
-        if ($class) {
+        if ($format != $format_mini)
+            $html .= ' title="' . date($format, $date) . '"';
+        if ($class != '')
             $html .= ' class="' . $class . '"';
-        }
-
-        $html .= '>' . $date->format($format_mini) . '</' . $balise . '>';
+        $html .= '>' . date($format_mini, $date) . '</' . $balise . '>';
         return $html;
     }
     

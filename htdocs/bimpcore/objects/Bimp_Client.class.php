@@ -10,6 +10,40 @@ class Bimp_Client extends Bimp_Societe
 
     // Droits user:
 
+    public function canView()
+    {
+        if (BimpCore::isContextPublic()) {
+            global $userClient;
+
+            if (BimpObject::objectLoaded($userClient)) {
+                if ($this->isLoaded() && $this->id == $userClient->getData('id_client')) {
+                    return 1;
+                }
+            }
+
+            return 0;
+        }
+
+        return parent::canView();
+    }
+
+    public function canEdit()
+    {
+        if (BimpCore::isContextPublic()) {
+            global $userClient;
+
+            if (BimpObject::objectLoaded($userClient)) {
+                if ($userClient->isAdmin() && $this->id == (int) $userClient->getData('id_client')) {
+                    return 1;
+                }
+            }
+
+            return 0;
+        }
+
+        return parent::canEdit();
+    }
+
     public function canSetAction($action)
     {
         global $user;
@@ -40,6 +74,19 @@ class Bimp_Client extends Bimp_Societe
         }
 
         return (int) parent::canSetAction($action);
+    }
+
+    public function canEditField($field_name)
+    {
+        if (BimpCore::isContextPublic()) {
+            if (in_array($field_name, array('nom', 'name_alias', 'address', 'zip', 'town', 'fk_pays', 'email', 'phone', 'fax', 'skype'))) {
+                return 1;
+            }
+
+            return 0;
+        }
+
+        return parent::canEditField($field_name);
     }
 
     // Getters booléens:
@@ -1121,8 +1168,8 @@ class Bimp_Client extends Bimp_Societe
                 break;
 
             case 'client_users':
-                $list = new BC_ListTable(BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClient'), 'full', 1, null, 'Utilisateurs du client "' . $client_label . '"', 'fas_users');
-                $list->addFieldFilterValue('attached_societe', (int) $this->id);
+                $list = new BC_ListTable(BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClient'), 'client', 1, null, 'Utilisateurs du client "' . $client_label . '"', 'fas_users');
+                $list->addFieldFilterValue('id_client', (int) $this->id);
                 break;
 
             case 'bank_accounts':

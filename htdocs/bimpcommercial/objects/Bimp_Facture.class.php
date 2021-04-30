@@ -49,13 +49,33 @@ class Bimp_Facture extends BimpComm
 
     // Gestion des droits: 
 
+    public function canView()
+    {
+        if (BimpCore::isContextPublic()) {
+            global $userClient;
+
+            if (BimpObject::objectLoaded($userClient)) {
+                if ($userClient->isLogged()) {
+                    if ($this->isLoaded() && (int) $this->getData('fk_soc') !== (int) $userClient->getData('id_client')) {
+                        return 0;
+                    }
+                    return 1;
+                }
+            }
+
+            return 0;
+        }
+        
+        return parent::canView();
+    }
+
     public function canCreate()
     {
         global $user;
         return $user->rights->facture->creer;
     }
 
-    protected function canEdit()
+    public function canEdit()
     {
         return $this->can("create");
     }
@@ -2406,6 +2426,23 @@ class Bimp_Facture extends BimpComm
         return $html;
     }
 
+    public function diplayDuplicataButton()
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+            $ref = dol_sanitizeFileName($this->getRef());
+            if ($this->getFileUrl($ref . '.pdf') != '') {
+                $url = 'https://erp.bimp.fr/pdf_fact.php?r=' . urlencode($this->getRef()) . '&i=' . $this->id;
+                $html .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\')">';
+                $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . 'Duplicata';
+                $html .= '</span>';
+            }
+        }
+
+        return $html;
+    }
+
     public function displayDateNextRelance($with_btn = true)
     {
         $html = '';
@@ -2542,6 +2579,11 @@ class Bimp_Facture extends BimpComm
         }
 
         return '<span class="badge badge-' . $class . '">' . $nb_relance . '</span>';
+    }
+
+    public function diplayDuplicata()
+    {
+        
     }
 
     //Rendus HTML: 

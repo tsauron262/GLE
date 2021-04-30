@@ -1,21 +1,21 @@
 <?php
 
-
 class productController extends BimpController
 {
+
     protected function ajaxProcessDisplayDetails()
     {
         $errors = array();
         $html = '';
         $id_product = (int) BimpTools::getValue('id');
         $type_of_object = BimpTools::getValue('typeofobject');
-        
+
         // Instance of object
-        if($type_of_object == 'BContract_contrat')
+        if ($type_of_object == 'BContract_contrat')
             $object = BimpObject::getInstance('bimpcontract', $type_of_object);
-        else{
+        else {
             $object = BimpObject::getInstance('bimpcommercial', $type_of_object);
-            if($id_product > 0){
+            if ($id_product > 0) {
                 $result = '';
                 $object->checkAllObjectLine($id_product, $result, 1000);
                 //voir peut etre un log dans quelques temps
@@ -31,7 +31,7 @@ class productController extends BimpController
 //            $object_child = BimpObject::getInstance('bimpcommercial', $object->config->params['objects']['lines']['instance']['bimp_object']);
 
         $list = new BC_ListTable($object);
-        
+
         switch ($type_of_object) {
             case 'Bimp_Propal': // customer and supplier
                 $condition = 'a.rowid = b.fk_propal';
@@ -60,13 +60,13 @@ class productController extends BimpController
                 $condition = 'a.rowid = b.fk_contrat';
                 break;
         }
-        
+
         $list->addJoin($object->dol_object->table_element_line, $condition, 'b');
         $list->addFieldFilterValue('b.fk_product', $id_product);
         $list->params['n'] = 30;
         $html .= $list->renderHtml();
-        
-        
+
+
         $list = new BC_ListTable($object_child, 'global');
         $list->addJoin($object->dol_object->table_element_line, 'a.id_line = b.rowid', 'b');
         $list->addFieldFilterValue('b.fk_product', $id_product);

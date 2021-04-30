@@ -17,6 +17,10 @@ class Bimp_User extends BimpObject
 
     public function canView()
     {
+        if (BimpCore::isContextPublic()) {
+            return 0;
+        }
+
         global $user;
 
         if ((int) $user->id === (int) $this->id) {
@@ -55,6 +59,16 @@ class Bimp_User extends BimpObject
     public function canDelete()
     {
         return $this->canCreate();
+    }
+
+    public function canViewField($field_name)
+    {
+        switch ($field_name) {
+            case 'office_phone':
+                return 1;
+        }
+
+        return parent::canViewField($field_name);
     }
 
     // Getters: 
@@ -113,6 +127,49 @@ class Bimp_User extends BimpObject
         }
 
         return parent::getLink($params);
+    }
+
+    public static function getUsersByShipto($shipTo)
+    {
+        if (!$shipTo) {
+            return array();
+        }
+
+        $shipTo = (int) $shipTo;
+
+        $cache_key = 'users_gsx_data_fro_shipto_' . $shipTo;
+
+        if (!isset(BimpCache::$cache[$cache_key])) {
+            BimpCache::$cache[$cache_key] = array();
+
+            $sql = 'SELECT u.`rowid` as id, u.email, ue.apple_techid as techid, ue.apple_centre as centre_sav FROM ' . MAIN_DB_PREFIX . 'user u';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'user_extrafields ue ON u.rowid = ue.fk_object';
+            $sql .= ' WHERE ue.apple_shipto = \'' . $shipTo . '\' AND ue.apple_techid IS NOT NULL AND u.statut = 1 AND ue.gsxresa = 1';
+
+            $rows = BimpCache::getBdb()->executeS($sql, 'array');
+
+            $centre_sav = '';
+
+            foreach ($rows as $r) {
+                if (!empty($r['centre_sav'])) {
+                    $centres = explode(' ', $r['centre_sav']);
+                    if (isset($centres[0]) && $centres[0] != "") {
+                        $centre_sav = $centres[0];
+                    } elseif (isset($centres[1]) && $centres[1] != "") {
+                        $centre_sav = $centres[1];
+                    }
+                }
+
+                BimpCache::$cache[$cache_key][] = array(
+                    'id'     => $r['id'],
+                    'techid' => $r['techid'],
+                    'email'  => $r['email'],
+                    'centre' => $centre_sav
+                );
+            }
+        }
+
+        return BimpCache::$cache[$cache_key];
     }
 
     // Getters params: 
@@ -267,6 +324,22 @@ class Bimp_User extends BimpObject
 
 
         return $html;
+    }
+
+    public function displayPublicEmail()
+    {
+        $emails = BimpTools::cleanEmailsStr($this->getData('email'));
+
+        if ($emails) {
+            $emails = explode(',', $emails);
+            foreach ($emails as $e) {
+                if (preg_match('/^.+@bimp\.fr$/', $e)) {
+                    return $e;
+                }
+            }
+        }
+
+        return '';
     }
 
     // Rendus HTML: 

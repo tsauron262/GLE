@@ -177,7 +177,7 @@ class BIMP_Task extends BimpObject
         return $list;
     }
 
-    protected function canView()
+    public function canView()
     {
         global $user;
         if ($this->isNotLoaded())
@@ -188,7 +188,7 @@ class BIMP_Task extends BimpObject
         return $this->getRight("read");
     }
 
-    protected function canEdit()
+    public function canEdit()
     {
         return $this->getRight("write");
     }

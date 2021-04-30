@@ -180,6 +180,7 @@ class BimpObject extends BimpCache
         $this->db = self::getBdb();
         $this->module = $module;
         $this->object_name = $object_name;
+
         $this->config = new BimpConfig(DOL_DOCUMENT_ROOT . '/' . $module . '/objects/', $object_name, $this);
 
         if ((int) $this->getConf('no_transaction_db', 0, false, 'bool')) {
@@ -204,6 +205,11 @@ class BimpObject extends BimpCache
         }
 
         $this->addConfigExtraParams();
+    }
+
+    public function __destruct()
+    {
+        unset($this->config);
     }
 
     public function isDolObject()
@@ -789,19 +795,6 @@ class BimpObject extends BimpCache
         }
 
         return $results;
-    }
-
-    public function getListPageUrl($list_name = 'default')
-    {
-        if (is_string($this->params['list_page_url'])) {
-            if ($this->params['list_page_url'] === 'list') {
-                return DOL_URL_ROOT . '/bimpcore/index.php?fc=list&module=' . $this->module . '&object_name=' . $this->object_name . '&list_name=' . $list_name;
-            }
-
-            return '';
-        }
-
-        return BimpTools::makeUrlFromConfig($this->config, 'list_page_url', $this->module, $this->getController());
     }
 
     public function getLinkFields($with_card = true)
@@ -1555,6 +1548,11 @@ class BimpObject extends BimpCache
             if ($ext && file_exists($dir . '/logos/' . $file_path)) {
                 $url = $this->getFileUrl('logos/' . $file_path, 'viewimage');
 
+                if (BimpCore::isContextPublic()) {
+                    $url .= '&hashp=1';
+                }
+                
+                
                 if ($url && $preview) {
                     $url = 'javascript:document_preview(\'' . $url . '\', \'image/' . $ext . '\', \'Aperçu\');';
                 }
@@ -1703,7 +1701,7 @@ class BimpObject extends BimpCache
     {
         // /!\ Cette méthode ne doit être appellée QUE par BimpCollection /!\
 
-        if ((int) $this->objects->id !== (int) $id) {
+        if ((int) $this->id != (int) $id) {
             $this->reset();
             $this->id = $id;
             $this->data = $data;
@@ -1712,6 +1710,7 @@ class BimpObject extends BimpCache
 
             if ($this->isDolObject()) {
                 $this->dol_object->id = $id;
+                $this->hydrateDolObject();
             }
         }
     }
@@ -5209,25 +5208,13 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         switch ($right) {
             case "view" :
-                if (BimpTools::getContext() == "public")
-                    return ($this->canView() && $this->canClientView());
-                else
-                    return $this->canView();
+                return $this->canView();
             case 'edit' :
-                if (BimpTools::getContext() == "public")
-                    return ($this->canEdit() && $this->canClientEdit());
-                else
-                    return $this->canEdit();
+                return $this->canEdit();
             case "create" :
-                if (BimpTools::getContext() == "public")
-                    return ($this->canCreate() && $this->canClientCreate());
-                else
-                    return $this->canCreate();
+                return $this->canCreate();
             case "delete" :
-                if (BimpTools::getContext() == "public")
-                    return ($this->canDelete() && $this->canClientDelete());
-                else
-                    return $this->canDelete();
+                return $this->canDelete();
 
             default:
                 return 0;
@@ -5242,15 +5229,15 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 return (int) $parent->canCreateChild($this->object_name);
             }
         }
+
+        if (BimpCore::isContextPublic()) {
+            return 0;
+        }
+
         return 1;
     }
 
-    public function canClientCreate()
-    {
-        return 0;
-    }
-
-    protected function canEdit()
+    public function canEdit()
     {
         if ($this->params['parent_object']) {
             $parent = $this->getParentInstance();
@@ -5258,15 +5245,15 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 return (int) $parent->canEditChild($this->object_name);
             }
         }
+
+        if (BimpCore::isContextPublic()) {
+            return 0;
+        }
+
         return $this->canCreate();
     }
 
-    public function canClientEdit()
-    {
-        return 0;
-    }
-
-    protected function canView()
+    public function canView()
     {
         if ($this->params['parent_object']) {
             $parent = $this->getParentInstance();
@@ -5274,12 +5261,12 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 return (int) $parent->canViewChild($this->object_name);
             }
         }
-        return 1;
-    }
 
-    public function canClientView()
-    {
-        return 0;
+        if (BimpCore::isContextPublic()) {
+            return 0;
+        }
+
+        return 1;
     }
 
     public function canDelete()
@@ -5290,46 +5277,46 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 return (int) $parent->canDeleteChild($this->object_name);
             }
         }
-        return $this->canEdit();
-    }
 
-    public function canClientDelete()
-    {
-        return 0;
+        return $this->canEdit();
     }
 
     public function canEditField($field_name)
     {
-        return (int) $this->can("edit");
+        return (int) $this->canEdit();
     }
 
     public function canViewField($field_name)
     {
-        return (int) $this->can("view");
+        return (int) $this->canView();
     }
 
     public function canCreateChild($child_name)
     {
-        return (int) $this->can("create");
+        return (int) $this->canCreate();
     }
 
     public function canEditChild($child_name)
     {
-        return (int) $this->can("edit");
+        return (int) $this->canEdit();
     }
 
     public function canViewChild($child_name)
     {
-        return (int) $this->can("view");
+        return (int) $this->canView();
     }
 
     public function canDeleteChild($child_name)
     {
-        return (int) $this->can("delete");
+        return (int) $this->canDelete();
     }
 
     public function canSetAction($action)
     {
+        if (BimpCore::isContextPublic()) {
+            return 0;
+        }
+
         global $user;
 
         switch ($action) {
@@ -5345,11 +5332,19 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
     public function canSetStatus($status)
     {
+        if (BimpCore::isContextPublic()) {
+            return 0;
+        }
+
         return 1;
     }
 
     public function canDeleteFiles()
     {
+        if (BimpCore::isContextPublic()) {
+            return 0;
+        }
+
         return 1;
     }
 
@@ -5619,6 +5614,10 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
     public function renderHeader($content_only = false, $params = array())
     {
+        if (BimpCore::isContextPublic()) {
+            return $this->renderPublicHeader($content_only, $params);
+        }
+
         $html = '';
         if ($this->isLoaded()) {
             if (!$content_only) {
@@ -5628,10 +5627,12 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
             $html .= '<div class="col-lg-6 col-sm-8 col-xs-12">';
 
+            // Menu objet:
             $html .= $this->renderObjectMenu();
 
             $html .= '<div style="display: inline-block">';
 
+            // Logo / image: 
             $logo_html = $this->renderLogo('mini', true);
 
             if ($logo_html) {
@@ -5640,6 +5641,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 $html .= '</div>';
             }
 
+            // Titre: 
             $html .= '<div class="object_header_title">';
             $html .= '<h1>';
             if ($this->params['icon']) {
@@ -5663,6 +5665,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             }
             $html .= '</div>';
 
+            // Infos création / màj: 
             if ($this->use_commom_fields) {
                 if ((int) $this->getData('user_create')) {
                     $html .= '<div class="object_header_infos">';
@@ -5678,12 +5681,15 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 }
             }
 
+            // Infos extra
             $html .= '<div class="header_extra">';
             if (method_exists($this, 'renderHeaderExtraLeft')) {
                 $html .= '<div style="margin: 10px 0;">';
                 $html .= $this->renderHeaderExtraLeft();
                 $html .= '</div>';
             }
+
+            // Messages: 
             $html .= $this->renderMsgs();
             $html .= '</div>';
             $html .= '</div>';
@@ -5691,25 +5697,26 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
             $html .= '<div class="col-lg-6 col-sm-4 col-xs-12" style="text-align: right">';
 
+            // Statut: 
             $status = '';
-            if ($this->field_exists('status')) {
-                $status = $this->displayData('status');
-            } elseif ($this->field_exists('statut')) {
-                $status = $this->displayData('statut');
-            } elseif ($this->field_exists('fk_statut')) {
-                $status = $this->displayData('fk_statut');
+            $status_prop = $this->getStatusProperty();
+            if ($this->field_exists($status_prop)) {
+                $status = $this->displayData($status_prop);
             }
 
             $html .= '<div class="header_status">';
             if ($status) {
                 $html .= $status;
             }
+
+            // Extra statut: 
             if (method_exists($this, 'renderHeaderStatusExtra')) {
                 $html .= $this->renderHeaderStatusExtra();
             }
             $html .= '</div>';
             $html .= '<div class="header_tools">';
 
+            // Boutons utilitaires: 
             $url = $this->getUrl();
             if ($url) {
                 $html .= '<span class="headerIconButton bs-popover copy_object_link_header_button" onclick="bimp_copyTabsUrl($(this), \'' . $url . '\', \'' . $_SERVER['SERVER_NAME'] . '\')"';
@@ -5753,6 +5760,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 ));
             }
 
+            // Bouton édition: 
             $html .= '<div style="display: inline-block">';
             if ($this->params['header_edit_form'] && $this->isEditable() && $this->can('edit')) {
                 $html .= '<span class="btn btn-primary bs-popover" onclick="' . $this->getJsLoadModalForm($this->params['header_edit_form'], addslashes("Edition " . $this->getLabel('of_the') . ' #' . $this->id)) . '"';
@@ -5762,6 +5770,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 $html .= '</span>';
             }
 
+            // Bouton suppression: 
             if ((int) $this->params['header_delete_btn'] && $this->isDeletable() && $this->can('delete')) {
                 $html .= '<span class="btn btn-danger bs-popover" onclick="' . $this->getJsDeleteOnClick(array(
                             'on_success' => 'reload'
@@ -5775,11 +5784,15 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             $html .= '</div>';
 
             $html .= '<div class="header_extra">';
+
+            // Extra right: 
             if (method_exists($this, 'renderHeaderExtraRight')) {
                 $html .= '<div style="margin: 10px 0;">';
                 $html .= $this->renderHeaderExtraRight();
                 $html .= '</div>';
             }
+
+            // Bouton redirection: 
             if (method_exists($this, 'renderHeaderBtnRedir')) {
                 $html .= '<div style="margin: 10px 0;">';
                 $html .= $this->renderHeaderBtnRedir();
@@ -5804,6 +5817,159 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 $html .= '<div class="buttonsContainer align-center">';
                 $html .= '<button class="btn btn-large btn-primary" onclick="window.location = \'' . $url . '\'">';
                 $html .= BimpRender::renderIcon('fas_list', 'iconLeft') . 'Liste des ' . $this->getLabel('name_plur');
+                $html .= '</button>';
+                $html .= '</div>';
+            }
+        }
+
+        return $html;
+    }
+
+    public function renderPublicHeader($content_only = false, $params = array())
+    {
+        $html = '';
+        if ($this->isLoaded()) {
+            if (!$content_only) {
+                $html .= '<div id="' . $this->object_name . '_' . $this->id . '_header" class="object_header container-fluid">';
+            }
+            $html .= '<div class="row">';
+
+            $html .= '<div class="col-lg-6 col-sm-8 col-xs-12">';
+
+            $html .= '<div style="display: inline-block">';
+
+            // todo: bug à résoudre
+            //Logo: 
+//            $logo_html = $this->renderLogo('mini', true);
+//            if ($logo_html) {
+//                $html .= '<div class="object_header_logo">';
+//                $html .= $logo_html;
+//                $html .= '</div>';
+//            }
+
+            // Titre: 
+            $html .= '<div class="object_header_title">';
+            $html .= '<h2>';
+            $icon = $this->getConf('public_icon', $this->params['icon']);
+            if ($icon) {
+                $html .= '<i class="' . BimpRender::renderIconClass($icon) . ' iconLeft"></i>';
+            }
+            $ref = $this->getRef(false);
+            $html .= BimpTools::ucfirst($this->getLabel()) . ($ref ? ' ' . $ref : '');
+            $html .= '</h2>';
+
+            $name = $this->getName(false);
+            if ($name) {
+                $html .= '<h4>';
+                $html .= $name;
+                $html .= '</h4>';
+            }
+            $html .= '</div>';
+
+            // Infos créa / màj: 
+            if ($this->use_commom_fields) {
+                if ((int) $this->getData('date_create')) {
+                    $html .= '<div class="object_header_infos">';
+                    $html .= 'Créé' . ($this->isLabelFemale() ? 'e' : '') . ' le <strong>' . $this->displayData('date_create') . '</strong>';
+                    $html .= '</div>';
+                }
+                if ((int) $this->getData('date_update')) {
+                    $html .= '<div class="object_header_infos">';
+                    $html .= 'Dernière mise à jour le <strong>' . $this->displayData('date_update') . '</strong>';
+                    $html .= '</div>';
+                }
+            }
+
+            // Extra left: 
+            $html .= '<div class="header_extra">';
+            if (method_exists($this, 'renderPublicHeaderExtraLeft')) {
+                $html .= '<div style="margin: 10px 0;">';
+                $html .= $this->renderPublicHeaderExtraLeft();
+                $html .= '</div>';
+            }
+            $html .= '</div>';
+            $html .= '</div>';
+            $html .= '</div>';
+
+            $html .= '<div class="col-lg-6 col-sm-4 col-xs-12" style="text-align: right">';
+
+            // Statut: 
+            $status = '';
+            $status_prop = $this->getStatusProperty();
+            if ($this->field_exists($status_prop)) {
+                $status = $this->displayData($status_prop);
+            }
+
+            $html .= '<div class="header_status">';
+            if ($status) {
+                $html .= $status;
+            }
+            if (method_exists($this, 'renderPublicHeaderStatusExtra')) {
+                $html .= $this->renderPublicHeaderStatusExtra();
+            }
+            $html .= '</div>';
+
+            $html .= '<div class="header_buttons">';
+
+            // Boutons actions: 
+            $header_buttons = $this->config->getCompiledParams('public_header_btn');
+            if (!empty($header_buttons)) {
+                $html .= BimpRender::renderButtonsGroup($header_buttons, array(
+                            'max'                 => 6,
+                            'dropdown_menu_right' => 1
+                ));
+            }
+            
+            $html .= '<div style="display: inline-block">';
+            
+            // Bouton édition: 
+            $form_name = $this->getConf('public_header_edit_form', '');
+            if ($form_name && $this->isEditable() && $this->canEdit()) {
+                $html .= '<span class="btn btn-primary bs-popover" onclick="' . $this->getJsLoadModalForm($form_name, addslashes("Edition " . $this->getLabel('of_the') . ($ref ? ' ' . $ref : ''))) . '"';
+                $html .= BimpRender::renderPopoverData('Editer');
+                $html .= '>';
+                $html .= BimpRender::renderIcon('fas_edit');
+                $html .= '</span>';
+            }
+
+            // Bouton suppression: 
+            if ((int) $this->params['header_delete_btn'] && $this->isDeletable() && $this->canDelete()) {
+                $html .= '<span class="btn btn-danger bs-popover" onclick="' . $this->getJsDeleteOnClick(array(
+                            'on_success' => 'reload'
+                        )) . '"';
+                $html .= BimpRender::renderPopoverData('Supprimer');
+                $html .= '>';
+                $html .= BimpRender::renderIcon('fas_trash-alt');
+                $html .= '</span>';
+            }
+            $html .= '</div>';
+            $html .= '</div>';
+
+            $html .= '<div class="header_extra">';
+            if (method_exists($this, 'renderPublicHeaderExtraRight')) {
+                $html .= '<div style="margin: 10px 0;">';
+                $html .= $this->renderPublicHeaderExtraRight();
+                $html .= '</div>';
+            }
+            $html .= '</div>';
+
+            $html .= '</div>';
+            $html .= '</div>';
+
+            $html .= '<div class="row header_bottom"></div>';
+
+            if (!$content_only) {
+                $html .= '</div>';
+            }
+        } else {
+            $html .= BimpRender::renderAlerts(BimpTools::ucfirst($this->getLabel('this')) . ' n\'existe plus');
+
+            $url = $this->getPublicListPageUrl();
+
+            if ($url) {
+                $html .= '<div class="buttonsContainer align-center">';
+                $html .= '<button class="btn btn-large btn-primary" onclick="window.location = \'' . $url . '\'">';
+                $html .= BimpRender::renderIcon('fas_list', 'iconLeft') . 'Retour à la Liste des ' . $this->getLabel('name_plur');
                 $html .= '</button>';
                 $html .= '</div>';
             }
@@ -7395,6 +7561,10 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
     public function getUrl()
     {
+        if (BimpCore::isContextPublic()) {
+            return $this->getPublicUrl();
+        }
+        
         if (!$this->isLoaded()) {
             return '';
         }
@@ -7408,6 +7578,11 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         }
 
         return DOL_URL_ROOT . '/' . $this->module . '/index.php?fc=' . $controller . '&id=' . $this->id;
+    }
+
+    public function getPublicUrl()
+    {
+        return '';
     }
 
     public function getNomUrl($withpicto = true, $ref_only = true, $page_link = false, $modal_view = '', $card = '')
@@ -7431,6 +7606,8 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     public function getLink($params = array())
     {
         // $params peut éventuellement être utilisé pour surcharger les paramères "nom_url" de l'objet. 
+
+        $is_public = BimpCore::isContextPublic();
 
         if (!$this->isLoaded()) {
             return '';
@@ -7524,8 +7701,18 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
         if (!$no_bimp_object_link_cards && !BimpCore::getConf('bimpcore_mode_eco', 0)) {
             $no_bimp_object_link_cards = true;
-            if (isset($params['card']) && (string) $params['card']) {
-                $card_html = BimpCache::getBimpObjectCardHtml($this, $params['card'], false);
+            $card_name = '';
+
+            if ($is_public) {
+                if ($this->config->isDefined('cards/public')) {
+                    $card_name = 'public';
+                }
+            } else {
+                $card_name = BimpTools::getArrayValueFromPath($params, 'card', '');
+            }
+
+            if ($card_name) {
+                $card_html = BimpCache::getBimpObjectCardHtml($this, $card_name, false);
             }
             $no_bimp_object_link_cards = false;
         }
@@ -7534,7 +7721,12 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             $label = '<strike>' . $label . '</strike>';
         }
 
-        $url = $this->getUrl();
+        if ($is_public) {
+            $url = $this->getPublicUrl();
+        } else {
+            $url = $this->getUrl();
+        }
+
         if ($url) {
             $html .= '<a href="' . $url . '"';
             if ($card_html) {
@@ -7547,17 +7739,20 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             $html .= '<span class="bs-popover card-popover"';
             $html .= BimpRender::renderPopoverData($card_html, 'bottom', 'true');
             $html .= '>';
-            $html .= $label;
+            $html .= $icon . $label;
             $html .= '</span>';
+            $html .= $status;
         } else {
             $html .= $icon . $label . $status;
         }
 
-        $external_link = (isset($params['external_link']) ? (int) $params['external_link'] : 1);
-        $modal_view = (isset($params['modal_view']) ? $params['modal_view'] : 'default');
+        if (!$is_public) {
+            $external_link = (isset($params['external_link']) ? (int) $params['external_link'] : 1);
+            $modal_view = (isset($params['modal_view']) ? $params['modal_view'] : 'default');
 
-        if (($url && $external_link) || $modal_view) {
-            $html .= BimpRender::renderObjectIcons($this, $external_link, $modal_view, $url);
+            if (($url && $external_link) || $modal_view) {
+                $html .= BimpRender::renderObjectIcons($this, $external_link, $modal_view, $url);
+            }
         }
 
         if ($card_html) {
@@ -7566,7 +7761,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             $html .= '</span>';
         }
 
-        if (method_exists($this, 'getNomUrlExtra')) {
+        if (!$is_public && method_exists($this, 'getNomUrlExtra')) {
             $html .= $this->getNomUrlExtra();
         }
 
@@ -7576,13 +7771,35 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
     public function getListUrl()
     {
+        return $this->getListPageUrl();
+    }
+    
+    public function getListPageUrl($list_name = 'default')
+    {
+        if (BimpCore::isContextPublic()) {
+            return $this->getPublicListPageUrl();
+        }
+
+        if (is_string($this->params['list_page_url'])) {
+            if ($this->params['list_page_url'] === 'list') {
+                return DOL_URL_ROOT . '/bimpcore/index.php?fc=list&module=' . $this->module . '&object_name=' . $this->object_name . '&list_name=' . $list_name;
+            }
+
+            return '';
+        }
+
         $url = BimpTools::makeUrlFromConfig($this->config, 'list_page_url', $this->module, $this->getController());
 
         if (!$url && $this->isDolObject()) {
             $url = BimpTools::getDolObjectListUrl($this->dol_object);
         }
-
+        
         return $url;
+    }
+
+    public function getPublicListPageUrl()
+    {
+        return '';
     }
 
     public function getCommonListUrl($list_name = 'default', $filters = array())
@@ -7614,13 +7831,19 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         if (is_a($instance, 'BimpObject')) {
             return $instance->getLink($params);
         } elseif (method_exists($instance, 'getNomUrl')) {
-            $with_icon = (isset($params['with_icon']) ? (int) $params['with_icon'] : 1);
-            $external_link = (isset($params['external_link']) ? (int) $params['external_link'] : 1);
             $html .= $instance->getNomUrl($with_icon);
-            if ($external_link) {
-                $url = self::getInstanceUrl($instance);
-                if ($url) {
-                    $html .= BimpRender::renderObjectIcons($instance, true, null, $url);
+
+            if (BimpCore::isContextPublic()) {
+                $html = strip_tags($html);
+            } else {
+                $with_icon = (isset($params['with_icon']) ? (int) $params['with_icon'] : 1);
+                $external_link = (isset($params['external_link']) ? (int) $params['external_link'] : 1);
+
+                if ($external_link) {
+                    $url = self::getInstanceUrl($instance);
+                    if ($url) {
+                        $html .= BimpRender::renderObjectIcons($instance, true, null, $url);
+                    }
                 }
             }
         } else {

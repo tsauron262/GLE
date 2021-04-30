@@ -184,7 +184,7 @@ fields:
         dol_extra_field: 1
         type: text
     echec_auth: 
-        label: Nombre d'echec d'authentification consecutif
+        label: Nombre d'echecs d'authentification consecutifs
         dol_extra_field: 1
         type: int
     comp:
@@ -478,3 +478,14 @@ cards:
                       method: displayFullContactInfos
                       params: 
                           - 1
+        
+    public: 
+        check_view_right: 0
+        fields: 
+            - field: office_phone
+              icon: fas_phone
+            - label: E-mail
+              icon: fas_at
+              value: 
+                  callback: displayPublicEmail
+        

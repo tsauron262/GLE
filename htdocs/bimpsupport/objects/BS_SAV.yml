@@ -1,6 +1,7 @@
 table: bs_sav
 controller: sav
 icon: fas_wrench
+public_icon: pe_tools
 
 list_page_url: 
     controller: index
@@ -102,15 +103,24 @@ objects:
             id_object: 
                 field_value: id_ticket
             
+    user_client: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpinterfaceclient
+                name: BIC_UserClient
+            id_object: 
+                field_value: id_user_client
+                
 associations: 
     propales:
         object: propal
         label: Devis
         
-fields: 
+fields:         
     ref:
         label: Référence
-        type: string
         required: 0
         search:
             input: 
@@ -210,6 +220,10 @@ fields:
             fields: 
                 fk_soc: 
                     field_value: id_client
+    id_user_client: 
+        label: Utilisateur client
+        type: id_object
+        object: user_client
     id_contrat:
         label: Contrat
         type: id_object
@@ -699,6 +713,7 @@ fields_tables:
               display: card
               show: 
                   field_value: id_contact
+            - field: id_user_client
             - field: contact_pref
               edit: 1
               
@@ -733,6 +748,42 @@ fields_tables:
               edit: 1
             - field: extra_infos
               edit: 1
+              
+    public_infos: 
+        panel: 0
+        rows: 
+            - field: code_centre
+            - field: id_user_tech
+            - field: id_equipment
+              label: Matériel
+              display: custom
+            - field: accessoires
+            - field: id_ticket
+              label: Ticket support
+              display: nom_url
+              show: 
+                  field_value: id_ticket
+            - field: id_contrat
+              display: card
+              show: 
+                  field_value: id_contrat
+            - field: id_contact
+              display: card
+              show: 
+                  field_value: id_contact
+            - field: contact_pref
+              edit: 1
+              
+    public_suivi: 
+        panel: 0
+        rows: 
+            - field: etat_materiel
+            - field: etat_materiel_desc
+            - field: symptomes
+            - field: diagnostic
+            - field: resolution
+            - field: extra_infos
+              label: Informations supplémentaires
               
 views: 
     default: 
@@ -841,6 +892,23 @@ views:
                     col_md: 6
                     fields_table: 
                         name: suivi
+                        
+    public_client: 
+        panel: 0
+        rows:
+            - cols: 
+                  - type: object_header
+            - cols: 
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table: 
+                        name: public_infos
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table: 
+                        name: public_suivi
     
 filters_panels: 
     default: 
@@ -904,6 +972,23 @@ lists:
         extends: default
         cols:
             client: unset
+            
+    public_client: 
+        title: Liste des SAV
+        configurable: 0
+        checkboxes: 0
+        sort_field: date_create
+        sort_way: desc
+        n: 10
+        extra_btn: 
+            callback: getPublicListExtraButtons
+        cols: 
+            ref:
+            date_create:
+            code_centre: 
+            status: 
+            id_user_tech:
+            id_equipment:
     
 cards:
     default:

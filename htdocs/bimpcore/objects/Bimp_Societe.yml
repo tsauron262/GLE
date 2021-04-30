@@ -665,7 +665,7 @@ fields_tables:
             
     contact: 
         title: Informations de contact
-        icon: phone
+        icon: fas_phone
         rows: 
             - field: email
             - field: phone
@@ -678,7 +678,7 @@ fields_tables:
             
     infos: 
         title: informations (entreprise)
-        icon: info-circle
+        icon: fas_info-circle
         rows: 
             - field: tva_assuj
             - field: tva_intra
@@ -688,7 +688,7 @@ fields_tables:
             
     identifiers: 
         title: Identifiants (entreprise)
-        icon: user
+        icon: fas_user
         rows: 
             - field: parent
             - field: siren

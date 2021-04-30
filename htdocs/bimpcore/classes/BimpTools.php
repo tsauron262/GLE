@@ -17,7 +17,6 @@ class BimpTools
             'no_html' => '$'
         )
     );
-    private static $context = "";
 
     // Gestion GET / POST
 
@@ -1792,6 +1791,41 @@ class BimpTools
         $html .= '>' . date($format_mini, $date) . '</' . $balise . '>';
         return $html;
     }
+    
+    public static function getDayOfWeekLabel($day)
+    {
+        switch ($day) {
+            case 1: 
+                return 'Lundi';
+                
+            case 2: 
+                return 'Mardi';
+                
+            case 3: 
+                return 'Mercredi';
+                
+            case 4: 
+                return 'Jeudi';
+                
+            case 5: 
+                return 'Vendredi';
+                
+            case 6: 
+                return 'Samedi';
+                
+            case 7: 
+                return 'Dimanche';
+        }
+        
+        return '';
+    }
+    
+    public static function getMonthLabel($month)
+    {
+        // todo
+        
+        return $month;
+    }
 
     // Devises / prix: 
 
@@ -2262,7 +2296,7 @@ class BimpTools
 
         return 0;
     }
-    
+
     public static function getAvatarImgSrc($text, $size, $color){
         return 'http://placehold.it/' .$size . '/' . $color . '/fff&amp;text=' . $text;
     }
@@ -2508,18 +2542,12 @@ class BimpTools
 
     public static function getContext()
     {
-        if (self::$context != "")
-            return self::$context;
+        return BimpCore::getContext();
+    }
 
-        if (isset($_REQUEST['context'])) {
-            self::setContext($_REQUEST['context']);
-        }
-
-        if (isset($_SESSION['context'])) {
-            return $_SESSION['context'];
-        }
-
-        return "";
+    public static function setContext($context)
+    {
+        BimpCore::setContext($context);
     }
 
     public static function getAlertColor($class)
@@ -2658,6 +2686,14 @@ class BimpTools
         if (!is_array($result))
             $result = array($result);
         return $result;
+    }
+
+    public static function randomPassword($length, $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789')
+    {
+        for ($i = 0, $z = strlen($chars) - 1, $s = $chars{rand(0, $z)}, $i = 1; $i != $length; $x = rand(0, $z), $s .= $chars{$x}, $s = ($s{$i} == $s{$i - 1} ? substr($s, 0, -1) : $s), $i = strlen($s)) {
+            
+        }
+        return $s;
     }
 
     public static function displayMemory(&$init_mem = null)
@@ -2885,12 +2921,6 @@ class BimpTools
     }
 
     // Autres:
-
-    public static function setContext($context)
-    {
-        self::$context = $context;
-        $_SESSION['context'] = $context;
-    }
 
     public static $nbMax = 10;
 

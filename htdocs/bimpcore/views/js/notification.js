@@ -551,8 +551,6 @@ function BimpNotification() {
     this.updateStorage = function () {
         bimp_storage.set('id_bn_actif', this.id);
     };
-    
-
 }
 
 class BimpStorage {

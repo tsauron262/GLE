@@ -921,7 +921,7 @@ class DoliDBMysqliC extends DoliDB
         dol_syslog('Query: '.$query, LOG_DEBUG);
         dol_syslog('Query type: '.$qtype, LOG_DEBUG);
         
-        if ($user->admin && defined('BIMP_PRINT_ADMIN_SQL')) {
+        if (is_object($user) && $user->admin && defined('BIMP_PRINT_ADMIN_SQL')) {
             $debugTime = true;
         }
         else

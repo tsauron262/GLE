@@ -911,45 +911,10 @@ L’équipe BIMP";
         return $this->current_reservations;
     }
 
-    public function getUsersByShipTo($shipTo)
+    public static function getUsersByShipTo($shipTo)
     {
-        if (!$shipTo) {
-            return array();
-        }
-
-        $cache_key = 'users_gsx_data_fro_shipto_' . $shipTo;
-
-        if (!isset(BimpCache::$cache[$cache_key])) {
-            BimpCache::$cache[$cache_key] = array();
-
-            $sql = 'SELECT u.`rowid` as id, u.email, ue.apple_techid as techid, ue.apple_centre as centre_sav FROM ' . MAIN_DB_PREFIX . 'user u';
-            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'user_extrafields ue ON u.rowid = ue.fk_object';
-            $sql .= ' WHERE ue.apple_shipto = \'' . $shipTo . '\' AND ue.apple_techid IS NOT NULL AND u.statut = 1 AND ue.gsxresa = 1';
-
-            $rows = BimpCache::getBdb()->executeS($sql, 'array');
-
-            $centre_sav = '';
-
-            foreach ($rows as $r) {
-                if (!empty($r['centre_sav'])) {
-                    $centres = explode(' ', $r['centre_sav']);
-                    if (isset($centres[0]) && $centres[0] != "") {
-                        $centre_sav = $centres[0];
-                    } elseif (isset($centres[1]) && $centres[1] != "") {
-                        $centre_sav = $centres[1];
-                    }
-                }
-
-                BimpCache::$cache[$cache_key][] = array(
-                    'id'     => $r['id'],
-                    'techid' => $r['techid'],
-                    'email'  => $r['email'],
-                    'centre' => $centre_sav
-                );
-            }
-        }
-
-        return BimpCache::$cache[$cache_key];
+        BimpObject::loadClass('bimpcore', 'Bimp_User');
+        return Bimp_User::getUsersByShipto($shipTo);
     }
 
     public function reservationExists($resId)

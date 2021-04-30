@@ -3,53 +3,63 @@
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpinterfaceclient/objects/BIC_UserClient.class.php';
 
-class BIC_UserClientContrats extends BimpObject {
+class BIC_UserClientContrats extends BimpObject
+{
 
-    public function canClientView() {
-        return true;
-    }
-
-    public function canClientEdit() {
-        global $userClient;
-        if ($userClient->it_is_admin()) {
-            return true;
-        }
-        return false;
-    }
-
-    public function canClientCreate() {
-        return $this->canClientEdit();
-    }
-        
-    public function canClientDelete() {
-        global $userClient;
-        if(isset($userClient) && $userClient->it_is_admin()) {
+    public function canView()
+    {
+        if (BimpCore::isContextPublic()) {
             return 1;
         }
-        return 0;
+
+        return parent::canView();
     }
-    
-    public function canDelete() {
+
+    public function canCreate()
+    {
+        if (BimpCore::isContextPublic()) {
+            global $userClient;
+            if (BimpObject::objectLoaded($userClient) && $userClient->isAdmin()) {
+                return 1;
+            }
+            return 0;
+        }
+
+        return parent::canCreate();
+    }
+
+    public function canDelete()
+    {
+        if (BimpCore::isContextPublic()) {
+            global $userClient;
+            if (BimpObject::objectLoaded($userClient) && $userClient->isAdmin()) {
+                return 1;
+            }
+            return 0;
+        }
+
         return 1;
     }
 
-    public function getContrats() {
+    public function getContrats()
+    {
         global $userClient;
         $return = array();
-        if(!isset($userClient))
+        if (!isset($userClient))
             $userClient = $this->getParentInstance();
         if (isset($userClient)) {
-            foreach ($userClient->getContratVisible(true) as $id_contrat => $contrat) {
+            foreach ($userClient->getContratsVisibles(true) as $id_contrat => $contrat) {
                 $return[$id_contrat] = $contrat->getData('ref');
             }
         }
         return $return;
     }
 
-    public function getFilterAssoContrat() {
+    public function getFilterAssoContrat()
+    {
         return Array(
             Array(
-                'name' => 'id_user',
+                'name'   => 'id_user',
                 'filter' => $_REQUEST['id']
             )
         );
@@ -72,5 +82,4 @@ class BIC_UserClientContrats extends BimpObject {
 //        }
 //        
 //    }
-
 }

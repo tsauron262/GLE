@@ -29,7 +29,7 @@ class BimpCache
     public static function getBdb($no_transactions = false)
     {
         global $db;
-        
+
         if (!$no_transactions) {
             if (is_null(self::$bdb)) {
                 self::$bdb = new BimpDb($db);
@@ -37,14 +37,14 @@ class BimpCache
 
             return self::$bdb;
         }
-        
+
         if (is_null(self::$bdb_noTransac)) {
             global $conf;
-            $db2 = getDoliDBInstance($conf->db->type,$conf->db->host,$conf->db->user,$db->database_pass,$conf->db->name,$conf->db->port);
-            
+            $db2 = getDoliDBInstance($conf->db->type, $conf->db->host, $conf->db->user, $db->database_pass, $conf->db->name, $conf->db->port);
+
             self::$bdb_noTransac = new BimpDb($db2);
         }
-        
+
         return self::$bdb_noTransac;
     }
 
@@ -1206,14 +1206,14 @@ class BimpCache
 
     // Sociétés: 
 
-    public static function getSocieteContactsArray($id_societe, $include_empty = false)
+    public static function getSocieteContactsArray($id_societe, $include_empty = true, $empty_label = '')
     {
         $cache_key = '';
 
         if ((int) $id_societe) {
             $cache_key = 'societe_' . $id_societe . '_contacts_array';
             if (!isset(self::$cache[$cache_key])) {
-                self::$cache[$cache_key] = array(0 => ""); // => Normalement on ne doit jamais inclure de valeurs vides dans le cache : c'est à ça que sert la variale $include_empty.
+//                self::$cache[$cache_key] = array(0 => ""); => Ne pas déco: on ne doit pas inclure de valeurs vides dans le cache, utiliser $include_empty.
                 $where = '`fk_soc` = ' . (int) $id_societe;
                 $rows = self::getBdb()->getRows('socpeople', $where, null, 'array', array('rowid', 'firstname', 'lastname'));
                 if (!is_null($rows)) {
@@ -1224,7 +1224,7 @@ class BimpCache
             }
         }
 
-        return self::getCacheArray($cache_key, $include_empty);
+        return self::getCacheArray($cache_key, $include_empty, 0, $empty_label);
     }
 
     public static function getSocieteContratsArray($id_societe)
@@ -2079,7 +2079,8 @@ class BimpCache
                     'zip'         => $centre[5],
                     'town'        => $centre[6],
                     'id_entrepot' => $centre[8],
-                    'shipTo'      => $centre[4]
+                    'shipTo'      => $centre[4],
+                    'active'      => $centre[9]
                 );
             }
         }
@@ -2087,17 +2088,21 @@ class BimpCache
         return self::$cache['centres'];
     }
 
-    public static function getCentresArray()
+    public static function getCentresArray($activ_only = false, $label_key = 'label', $include_empty = true)
     {
         if (!isset(self::$cache['centres_array'])) {
             self::$cache['centres_array'] = array();
 
             foreach (self::getCentres() as $code => $centre) {
-                self::$cache['centres_array'][$code] = $centre['label'];
+                if ($activ_only && !$centre['active']) {
+                    continue;
+                }
+
+                self::$cache['centres_array'][$code] = $centre[$label_key];
             }
         }
 
-        return self::getCacheArray('centres_array', true, '', '');
+        return self::getCacheArray('centres_array', $include_empty, '', '');
     }
 
     public static function getEntrepotsArray($include_empty = false, $has_commissions_only = false)

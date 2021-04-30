@@ -754,11 +754,15 @@ class BimpRender
 
     public static function renderIconClass($icon)
     {
-        if (preg_match('/^(.+)_(.+)$/', $icon, $matches)) {
-            return $matches[1] . ' fa5-' . $matches[2];
-        } else {
-            return 'fa fa-' . $icon;
+        if (strpos($icon, 'fa') === 0) {
+            if (preg_match('/^(.+)_(.+)$/', $icon, $matches)) {
+                return $matches[1] . ' fa5-' . $matches[2];
+            }
+        } elseif (strpos($icon, 'pe') === 0) {
+            return 'pe-7s-' . str_replace('pe_', '', $icon);
         }
+
+        return 'fa fa-' . $icon;
     }
 
     public static function renderObjectIcons($object, $page_link = true, $modal_view = null, $url = null)
@@ -1322,6 +1326,43 @@ class BimpRender
 
         $html .= '</tbody>';
         $html .= '</table>';
+
+        return $html;
+    }
+
+    public static function renderSideBar($items, $params = array())
+    {
+        $params = BimpTools::overrideArray(array(
+                    'active' => 'default'
+                        ), $params);
+        $html = '';
+
+        $html .= '<div class="sidebar" data-color="bimp">';
+        $html .= '<div class="sidebar-wrapper">';
+
+        $html .= '<ul class="nav">';
+
+        foreach ($items as $item) {
+            $html .= '<li' . ($item['id'] == $params['active'] ? ' class="active"' : '') . '>';
+            $html .= $item['content'];
+            $html .= '</li>';
+        }
+
+        $html .= '</ul>';
+
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    public static function renderStatusSequence($statusList, $sequence, $current)
+    {
+        $html = '';
+
+        $html .= '<div class="bimp_status_sequence">';
+
+        $html .= '</div>';
 
         return $html;
     }

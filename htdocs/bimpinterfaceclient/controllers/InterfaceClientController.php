@@ -165,7 +165,7 @@ class InterfaceClientController extends BimpPublicController
             }
 
             $html .= '<div class="buttonsContainer align-right" style="margin: 15px 0">';
-            $html .= '<span class="btn btn-default" onclick="">';
+            $html .= '<span class="btn btn-default" onclick="window.location = \''.DOL_URL_ROOT.'/bimpinterfaceclient/client.php?tab=tickets\';">';
             $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouveau ticket support';
             $html .= '</span>';
             $html .= '</div>';

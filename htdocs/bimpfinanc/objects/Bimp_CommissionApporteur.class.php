@@ -6,11 +6,17 @@ class Bimp_CommissionApporteur extends BimpObject{
         1 => array('label' => 'Validée', 'icon' => 'fas_check', 'classes' => array('success'))
     );
     
-    public function create(&$warnings = array(), $force_create = false): string {
+    public function create(&$warnings = array(), $force_create = false) {
         $errors = parent::create($warnings, $force_create);
         if(!count($errors))
             $errors = BimpTools::merge_array ($errors, $this->addNewFatureLine ());
         return $errors;
+    }
+    
+    public function delete(&$warnings = array(), $force_delete = false) {
+        $this->db->execute("UPDATE `llx_bimp_facture_line` SET `commission_apporteur` = 0  WHERE `commission_apporteur` LIKE '".$this->id."-%'");
+        
+        return parent::delete($warnings, $force_delete);
     }
     
     public function addNewFatureLine(){
@@ -18,16 +24,18 @@ class Bimp_CommissionApporteur extends BimpObject{
         
         
         $parent = $this->getParentInstance();
-        $tabsFiltres = $parent->getChildrenObjects('filtres');
+        $tabsFiltres = $parent->getChildrenObjects('filtres', array(), 'position', 'ASC');
         
         $factureLine = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
         
         foreach($tabsFiltres as $filtreObj){
-            $idProd = $filtreObj->getProductIds();
             $filters = array(
-                'f.fk_product' => array('IN' => $idProd),
-                'commission_apporteur' => array('<' => '0')
+                'commission_apporteur' => array('<' => '0'),
+                'f.fk_facture' => array('IN' => "SELECT DISTINCT(`element_id`) FROM `llx_element_contact` WHERE `fk_c_type_contact` = (SELECT rowid FROM `llx_c_type_contact`  WHERE `code` = 'APPORTEUR' and `source` = 'external' AND `element` = 'facture') AND `fk_socpeople` IN (SELECT `rowid` FROM `llx_socpeople` WHERE `fk_soc` = ".$parent->getData('id_fourn').")")
             );
+            $idProd = $filtreObj->getProductIds();
+            if($idProd != 'all')
+                $filters['f.fk_product'] = array('IN' => $idProd);
             
             
             $list = $factureLine->getList($filters, null, null, null, null, 'array', null, array('f' => array(
@@ -78,7 +86,7 @@ class Bimp_CommissionApporteur extends BimpObject{
     
     public function calcTotal(){
         $parent = $this->getParentInstance();
-        $tabsFiltres = $parent->getChildrenObjects('filtres');
+        $tabsFiltres = $parent->getChildrenObjects('filtres', array(), 'position', 'ASC');
         $tot = 0;
         foreach($tabsFiltres as $filtre){
             $res = $this->db->executeS("SELECT SUM(total_ht) as tot FROM `llx_facturedet` f, llx_bimp_facture_line bf WHERE bf.`id_line` = f.rowid AND `commission_apporteur` = '".$this->id."-".$filtre->id."'");
@@ -131,7 +139,7 @@ class Bimp_CommissionApporteur extends BimpObject{
         $html = '';
         
         $parent = $this->getParentInstance();
-        $tabsFiltres = $parent->getChildrenObjects('filtres');
+        $tabsFiltres = $parent->getChildrenObjects('filtres', array(), 'position', 'ASC');
         
         
         $factureLine = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');

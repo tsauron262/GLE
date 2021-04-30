@@ -8,8 +8,12 @@ class Bimp_ApporteurFilter extends BimpObject{
     
     public function getProductIds(){
         $filters_array = json_decode($this->getData('filter'), true);
-        $object = BimpObject::getInstance('bimpcore', 'Bimp_Product');
-        $list = BC_FiltersPanel::getObjectListIdsFromFilters($object, $filters_array);
-        return $list;
+        if(is_array($filters_array)){
+            $object = BimpObject::getInstance('bimpcore', 'Bimp_Product');
+            $list = BC_FiltersPanel::getObjectListIdsFromFilters($object, $filters_array);
+            return $list;
+        }
+        else
+            return 'all';
     }
 }

@@ -104,6 +104,26 @@ class Bimp_FactureLine extends ObjectLine
     }
 
     // Getters params: 
+    
+    public function getListExtraBtnApporteur(){
+        $buttons = array();
+
+        if ($this->isLoaded() && $this->isNotTypeText()) {
+            $tmp = $this->getData('commission_apporteur');
+            $tabTmp = explode("-", $tmp);
+            $idComm = $tabTmp[0];
+            $idFiltre = $tabTmp[1];
+            if ($idComm > 0 && $idFiltre > 0) {
+                $commission = BimpObject::getInstance('bimpfinanc', 'Bimp_CommissionApporteur', $idComm);
+                $buttons[] = array(
+                    'label'   => 'Supprimer de la commission',
+                    'icon'    => 'fas_trash',
+                    'onclick' => $commission->getJsActionOnclick('delLine', array('idLn'=>$this->id, 'idFiltre'=>$idFiltre))
+                );
+            }
+        }
+        return $buttons;
+    }
 
     public function getListExtraBtn()
     {
@@ -206,6 +226,16 @@ class Bimp_FactureLine extends ObjectLine
     }
 
     // Affichages: 
+    
+    public function displayCommissionApporteur(){
+        $temp = $this->getData('commission_apporteur');
+        $tabT = explode('-', $temp);
+        if(isset($tabT[0]) && $tabT[0] > 0){
+            $obj = BimpCache::getBimpObjectInstance('bimpfinanc', 'Bimp_CommissionApporteur', $tabT[0]);
+            return $obj->getLink();
+        }
+        return '';
+    }
 
     public function displayRevalorisations()
     {
@@ -652,7 +682,7 @@ class Bimp_FactureLine extends ObjectLine
     }
 
     // Actions: 
-
+    
     public function actionBulkCreateRevalorisation($data, &$success)
     {
         $errors = array();

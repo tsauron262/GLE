@@ -787,7 +787,8 @@ lists:
             tva:
             qty:
             remise_full:
-            total_ttc: 
+            dol_line:total_ht:
+            dol_line:total_ttc:
             pa_ht: 
             remise_crt:
             margin:
@@ -841,7 +842,8 @@ lists:
             tva:
             qty:
             remise_full:
-            total_ttc: 
+            dol_line:total_ht:
+            dol_line:total_ttc:
             pa_ht: 
             remise_crt:
             margin:

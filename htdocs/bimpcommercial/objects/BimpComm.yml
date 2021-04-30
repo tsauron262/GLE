@@ -263,7 +263,7 @@ forms:
               input_name: id_client
               input: 
                   type: search_societe
-                  societe_type: customer
+#                  societe_type: customer
               value: 
                   field_value: fk_soc
               display_if: 

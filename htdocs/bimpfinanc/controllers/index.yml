@@ -14,6 +14,13 @@ objects:
         instance:
             bimp_object: BimpRevalorisation
             
+    apporteur: 
+        instance:
+            bimp_object: Bimp_Apporteur
+    comm_apporteur: 
+        instance:
+            bimp_object: Bimp_CommissionApporteur
+            
 sections:
     - type: tabs
       tabs: 
@@ -39,3 +46,19 @@ sections:
                   list: 
                       panel: 1
                       object: PaiementInc
+        apporteur:
+            label: Apporteurs
+            icon: fas_handshake
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: apporteur
+        comm_apporteur:
+            label: Commissions Apporteur
+            icon: fas_handshake
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: comm_apporteur

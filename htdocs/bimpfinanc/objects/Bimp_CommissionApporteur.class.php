@@ -18,7 +18,7 @@ class Bimp_CommissionApporteur extends BimpObject{
         
         
         $parent = $this->getParentInstance();
-        $tabsFiltres = $parent->getChildrenObjects('filtres');
+        $tabsFiltres = $parent->getChildrenObjects('filtres', array(), 'position', 'ASC');
         
         $factureLine = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
         
@@ -79,7 +79,7 @@ class Bimp_CommissionApporteur extends BimpObject{
     
     public function calcTotal(){
         $parent = $this->getParentInstance();
-        $tabsFiltres = $parent->getChildrenObjects('filtres');
+        $tabsFiltres = $parent->getChildrenObjects('filtres', array(), 'position', 'ASC');
         $tot = 0;
         foreach($tabsFiltres as $filtre){
             $res = $this->db->executeS("SELECT SUM(total_ht) as tot FROM `llx_facturedet` f, llx_bimp_facture_line bf WHERE bf.`id_line` = f.rowid AND `commission_apporteur` = '".$this->id."-".$filtre->id."'");
@@ -132,7 +132,7 @@ class Bimp_CommissionApporteur extends BimpObject{
         $html = '';
         
         $parent = $this->getParentInstance();
-        $tabsFiltres = $parent->getChildrenObjects('filtres');
+        $tabsFiltres = $parent->getChildrenObjects('filtres', array(), 'position', 'ASC');
         
         
         $factureLine = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');

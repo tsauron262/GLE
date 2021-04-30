@@ -6,7 +6,7 @@ class Bimp_CommissionApporteur extends BimpObject{
         1 => array('label' => 'Validée', 'icon' => 'fas_check', 'classes' => array('success'))
     );
     
-    public function create(&$warnings = array(), $force_create = false): string {
+    public function create(&$warnings = array(), $force_create = false) {
         $errors = parent::create($warnings, $force_create);
         if(!count($errors))
             $errors = BimpTools::merge_array ($errors, $this->addNewFatureLine ());

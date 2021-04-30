@@ -791,8 +791,8 @@ lists:
         title: Logistique produits / services
         icon: fas_truck-loading
         configurable: 1
-        position: 1
-        position_open: 1
+        positions: 1
+        positions_open: 1
         enable_search: 1
         enable_sort: 1
         pagination: 0

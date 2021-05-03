@@ -624,7 +624,7 @@ class ObjectLine extends BimpObject
                 $onclick = 'loadModalList(\'bimpcommercial\', \'ObjectLineRemise\', \'default\', ' . $this->id . ', $(this), \'Remises\', {parent_object_type: \'' . static::$parent_comm_type . '\'})';
                 $buttons[] = array(
                     'label'   => 'Remises ligne',
-                    'icon'    => 'percent',
+                    'icon'    => 'fas_percent',
                     'onclick' => $onclick
                 );
             }

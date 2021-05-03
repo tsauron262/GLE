@@ -2145,7 +2145,7 @@ class BContract_contrat extends BimpDolObject
     public function canClientViewDetail()
     {
         global $userClient;
-        if ($userClient->isAdmin()) {
+        if (BimpObject::objectLoaded($userClient)  && $userClient->isAdmin()) {
             return 1;
         }
         return 0;

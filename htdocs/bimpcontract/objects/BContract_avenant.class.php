@@ -127,7 +127,11 @@ class BContract_avenant extends BContract_contrat {
         
         if(!$canValidate)
             $errors[] = "L'avenant ne peut pas être validé sans aucune ligne pour le contrat";
-
+        
+        $parent = $this->getParentInstance();
+        if($parent->getData('statut') != 11)
+            $errors[] = "Vous ne pouvez pas valider l'avenant car  le contrat n'est pas actif";
+        
         if(!count($errors)) {
             
             $errors = $this->updateField('statut', 1);

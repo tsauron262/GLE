@@ -448,7 +448,9 @@ forms:
               label: Adresse d'envoi
               input_name: adresse_envois
               input:
-                  type: text
+                  type: textarea
+                  rows: 2
+                  auto_expand: 1
             - custom: 1
               label: Adresse e-mail pour envoi du bon de retour
               input_name: email_bon_retour

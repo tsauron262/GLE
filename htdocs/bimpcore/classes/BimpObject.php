@@ -1125,6 +1125,18 @@ class BimpObject extends BimpCache
     {
         return (int) ($this->getData($field) !== $this->getInitData($field));
     }
+    
+    public function isContextPublic()
+    {
+        // pour callbacks: 
+        return BimpCore::isContextPublic();
+    }
+    
+    public function isContextPrivate()
+    {
+        // pour callbacks: 
+        return BimpCore::isContextPrivate();
+    }
 
     // Getters données: 
 

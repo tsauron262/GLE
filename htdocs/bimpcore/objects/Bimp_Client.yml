@@ -85,7 +85,13 @@ views:
                   col_lg: 6
                   col_md: 6
                   fields_table: 
-                      name: public_infos_company                  
+                      name: public_infos_company    
+            - cols: 
+                - type: list
+                  col_lg: 12
+                  list: 
+                      name: public
+                      children: contacts
                       
 forms:
     light: 
@@ -275,7 +281,6 @@ forms:
             - field: fax
             - field: skype
         
-            
 filters: 
     nb_notes_suivi: 
         label: Nb notes suivi recouvrement

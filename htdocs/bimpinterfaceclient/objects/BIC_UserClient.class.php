@@ -115,7 +115,7 @@ class BIC_UserClient extends BimpObject
 
                 case 'role':
                 case 'status':
-                case 'id_contact': 
+                case 'id_contact':
                     if (BimpObject::objectLoaded($userClient) && $userClient->isAdmin() && $userClient->id != $this->id) {
                         return 1;
                     }
@@ -249,7 +249,7 @@ class BIC_UserClient extends BimpObject
     {
         return array('email');
     }
-            
+
     public function getRefProperty()
     {
         return '';
@@ -322,6 +322,19 @@ class BIC_UserClient extends BimpObject
             );
         }
 
+        if ($this->isLoaded()) {
+            $userClientContrat = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClientContrat');
+            $buttons[] = array(
+                'label'   => 'Contrats associés',
+                'icon'    => 'fas_file-signature',
+                'onclick' => $this->getJsLoadModalList($contrats_list_name, array(
+                    'extra_filters' => array(
+                        'id_user' => (int) $this->id
+                    )
+                ))
+            );
+        }
+
         return $buttons;
     }
 
@@ -379,15 +392,32 @@ class BIC_UserClient extends BimpObject
 
             foreach ($list as $on_contrat) {
                 $instance = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $on_contrat['rowid']);
-                
+
                 if ((!$ouverts_only || $instance->isValide()) && (int) $instance->getData('statut') > 0) {
                     $return[$on_contrat['rowid']] = $instance;
                 }
-                
+
                 $instance = null;
             }
         }
         return $return;
+    }
+    
+    public function getAssociatedContratsList()
+    {
+        $contrats = array();
+        
+        if ($this->isLoaded()) {
+            $rows = $this->db->getRows('bic_user_contrat', 'id_user = ' . $this->id, null, 'array', array('id_contrats'));
+            
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    $contrats[] = (int) $r['id_contrat'];
+                }
+            }
+        }
+        
+        return $contrats;
     }
 
     // Affichage:
@@ -496,7 +526,6 @@ class BIC_UserClient extends BimpObject
         $errors = array();
 
         $mdp_clear = BimpTools::randomPassword(7);
-        $mdp_clear = '123456';
         $this->set('password', hash('sha256', $mdp_clear));
         $this->set('renew_required', 1);
 
@@ -600,12 +629,12 @@ class BIC_UserClient extends BimpObject
         if (!count($errors)) {
             if (!(int) $this->getData('role')) {
                 $nbAdmin = (int) $this->db->getCount('bic_user', 'id_client = ' . (int) $this->getData('id_client') . ' AND role = 1');
-                
+
                 if (!$nbAdmin) {
                     $this->set('role', 1);
                 }
             }
-            
+
             $errors = parent::create($warnings, $force_create);
 
             if (!count($errors)) {

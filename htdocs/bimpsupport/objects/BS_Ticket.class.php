@@ -262,7 +262,7 @@ class BS_Ticket extends BimpObject
         $id_client = (int) $this->getData('id_client');
 
         if ($id_client) {
-            $rows = $this->db->getRows('contrat', 'fk_soc = ' . $id_client . ' AND statut IN (1,11)', null, 'array', array('rowid', 'ref', 'label'));
+            $rows = $this->db->getRows('contrat', 'fk_soc = ' . $id_client . ' AND statut = 11', null, 'array', array('rowid', 'ref', 'label'));
 
             if (is_array($rows)) {
                 foreach ($rows as $r) {

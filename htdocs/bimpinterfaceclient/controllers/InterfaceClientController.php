@@ -328,8 +328,8 @@ class InterfaceClientController extends BimpPublicController
                             $html .= '<h3 style="color:#EF7D00" >Mes contrats en cours' . BimpRender::renderIcon('arrow-down', 'iconRight') . '</h3>';
 
                             $html .= '<div>';
-                            foreach ($contrats_ouverts as $id_contrat => $contrat) {
-                                $html .= $contrat->display_card();
+                            foreach ($contrats_ouverts as $id_contrat => $c) {
+                                $html .= $c->display_card();
                             }
                             $html .= '</div>';
                         } else {
@@ -341,14 +341,14 @@ class InterfaceClientController extends BimpPublicController
 
 
                         // Listes contrats échus: 
-                        $list = new BC_ListTable($contrat, 'public', 1, null, 'Tous mes contrats échus');
+                        $list = new BC_ListTable($contrat, 'public', 1, null, 'Contrats inactifs');
                         $list->addFieldFilterValue('fk_soc', $client->id);
-//                        $list->addFieldFilterValue('statut', array(
-//                            'and' => array(
-//                                array('operator' => '>', 'value' => 0),
-//                                array('operator' => '!=', 'value' => 11)
-//                            )
-//                        ));
+                        $list->addFieldFilterValue('statut', array(
+                            'and' => array(
+                                array('operator' => '>', 'value' => 0),
+                                array('operator' => '!=', 'value' => 11)
+                            )
+                        ));
 
                         $html .= $list->renderHtml();
                         $html .= '</div>';

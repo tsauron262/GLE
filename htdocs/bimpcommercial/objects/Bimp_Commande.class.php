@@ -3592,8 +3592,6 @@ class Bimp_Commande extends BimpComm
         );
     }
 
-
-
     // Overrides BimpComm:
 
     public function onCreate(&$warnings = array())

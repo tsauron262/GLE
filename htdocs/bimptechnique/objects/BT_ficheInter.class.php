@@ -970,7 +970,7 @@ class BT_ficheInter extends BimpDolObject {
     }
     
     public function getCommandesArrayWithDeplacement() {
-        $code = BimpCore::getConf("bimptechnique_ref_deplacement");
+        $codes = json_decode(BimpCore::getConf("bimptechnique_ref_deplacement"));
         $commandes = json_decode($this->getData('commandes'));
         $array = [];
         foreach($commandes as $id_commande) {
@@ -982,7 +982,7 @@ class BT_ficheInter extends BimpDolObject {
                 $fk_product = ($child->fk_product) ? ($child->fk_product) : 0;
                 if($fk_product > 0) {
                     $produit = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Product", $fk_product);
-                    if($produit->getData('ref') == $code) {
+                    if(in_array($produit->getData('ref'), $codes)) {
                         $array[$id_commande] = $commande->ref . " - " . $bimpCommande->getData('libelle');
                     }
                 }
@@ -1084,12 +1084,16 @@ class BT_ficheInter extends BimpDolObject {
                             if(!$value['inter_' . $numeroInter . '_dep_on_commande']) {
                                 $line->updateField('type', 3);
                             } else {
-                                $id_product = $this->db->getValue('product', 'rowid', 'ref = "'.BimpCore::getConf("bimptechnique_ref_deplacement").'"');
+                                $ids_product = [];
+                                $allCodesDeplacements = json_decode(BimpCore::getConf("bimptechnique_ref_deplacement"));
+                                foreach($allCodesDeplacements as $code) {
+                                    $ids_product[] = $this->db->getValue('product', 'rowid', 'ref = "'.$code.'"');
+                                }
                                 $commande = new Commande($this->db->db);
                                 $commande->fetch($value['inter_' . $numeroInter . '_dep_on_commande']);
                                 $find = false;
                                 foreach($commande->lines as $lineC) {
-                                    if(!$find && $lineC->fk_product == $id_product) {
+                                    if(!$find && in_array($lineC->fk_product, $ids_product)) {
                                         $find = true;
                                         $line->updateField('id_line_commande', $lineC->id);
                                     }
@@ -1279,6 +1283,7 @@ class BT_ficheInter extends BimpDolObject {
     public function getServicesArray() {
         $services = [];
         BimpTools::loadDolClass("commande");
+        $codes = json_decode(BimpCore::getConf("bimptechnique_ref_deplacement"));
         $commande = New Commande($this->db->db);
         $product = $this->getInstance('bimpcore', 'Bimp_Product');
         $allCommandes = ($this->getData('commandes')) ? json_decode($this->getData('commandes')) : [];
@@ -1289,10 +1294,9 @@ class BT_ficheInter extends BimpDolObject {
         }
         foreach($allCommandes as $id) {
             $commande->fetch($id);
-            
             foreach ($commande->lines as $line){
                 $product->fetch($line->fk_product);
-                if($product->isLoaded() && $product->getRef() != BimpCore::getConf("bimptechnique_ref_deplacement") && ($line->product_type == 1 || $product->getData('fk_product_type'))) {
+                if($product->isLoaded() && !in_array($product->getRef(), $codes) && ($line->product_type == 1 || $product->getData('fk_product_type'))) {
                     if(array_key_exists($product->getData('ref'), $tp)) {
                         $services['commande_' . $line->id] = $tp[$product->getRef()] . ' ('.price($line->total_ht).'€ HT) - <b>'.$commande->ref.'</b><br />' . $line->description;
                     } else {

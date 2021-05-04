@@ -806,7 +806,7 @@ class BimpInput
                 $js_format = 'HH:mm:ss';
                 $php_format = 'H:i:s';
                 if ($value) {
-                    if (preg_match('(\d{2}):(\d{2}):(\d{2})?$/', $value)) {
+                    if (preg_match('/^(\d{2}):(\d{2}):?(\d{2})?$/', $value)) {
                         $dt_value = new DateTime($value);
                     }
                 }
@@ -853,7 +853,7 @@ class BimpInput
         $html .= "locale: 'fr',";
         $html .= "format: '" . $display_js_format . "',";
         if (!is_null($dt_value)) {
-            $html .= "defaultDate: moment('" . $dt_value->format($php_format) . "'),";
+            $html .= "defaultDate: moment('" . $dt_value->format($php_format) . "', '".$js_format."'),";
         }
         $html .= "showTodayButton: " . (isset($options['display_now']) && $options['display_now'] ? "true" : "false");
         $html .= "}); ";

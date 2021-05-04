@@ -785,7 +785,7 @@ class BT_ficheInter extends BimpDolObject {
     
     public function canDelete() {
         global $user;
-        if((($this->getData('fk_statut') == 0) && $this->getData('fk_user_author') == $this->global_user->id && !$this->isOldFi()) || ($user->admin || $user->rights->bimptechnique->delete_fi)) {
+        if((($this->getData('fk_statut') == 0) && $this->getData('fk_user_author') == $this->global_user->id && !$this->isOldFi()) || ($user->admin || $user->rights->bimptechnique->delete)) {
            return 1;
         }
         

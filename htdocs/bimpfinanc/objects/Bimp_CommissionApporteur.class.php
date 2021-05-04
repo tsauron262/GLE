@@ -85,6 +85,7 @@ class Bimp_CommissionApporteur extends BimpObject{
     }
     
     public function calcTotal(){
+        $errors = array();
         $parent = $this->getParentInstance();
         $tabsFiltres = $parent->getChildrenObjects('filtres', array(), 'position', 'ASC');
         $tot = 0;
@@ -92,7 +93,8 @@ class Bimp_CommissionApporteur extends BimpObject{
             $res = $this->db->executeS("SELECT SUM(total_ht) as tot FROM `llx_facturedet` f, llx_bimp_facture_line bf WHERE bf.`id_line` = f.rowid AND `commission_apporteur` = '".$this->id."-".$filtre->id."'");
             $tot += $res[0]->tot * $filtre->getData('commition') / 100;
         }
-        $this->updateField('total', $tot);
+        $errors = BimpTools::merge_array($errors,$this->updateField('total', $tot));
+        return $errors;
     }
     
     public function actionAddNewFatureLine($data, &$success)

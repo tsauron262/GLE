@@ -322,7 +322,7 @@ class BIMP_Task extends BimpObject
    
         } else {
             $success = "Désattribué";
-            if($this->canView())
+            if($this->can('view'))
                 $success_callback = $instance_task . '.move(' . $this->id . ', ' . $this->getData('prio') . ', ' . $this->getData('id_user_owner') . ')';
             else
                 $success_callback = $instance_task . '.remove(' . $this->id . ')';

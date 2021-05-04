@@ -416,7 +416,7 @@ class Bimp_CommandeFourn extends BimpComm
 
     public function canEdit()
     {
-        return $this->can("create");
+        return $this->canCreate();
     }
 
     public function canDelete()

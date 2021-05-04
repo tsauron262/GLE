@@ -45,40 +45,30 @@ class BS_Ticket extends BimpObject
 
     // Droits users:
 
-    public function canView()
+    public function canClientView()
     {
-        if (BimpCore::isContextPublic()) {
-            if ($this->isLoaded()) {
-                global $userClient;
-                if (BimpObject::objectLoaded($userClient) && $userClient->getData("id_client") == $this->getData("id_client")) {
-                    return 1;
-                }
-
-                return 0;
+        if ($this->isLoaded()) {
+            global $userClient;
+            if (BimpObject::objectLoaded($userClient) && $userClient->getData("id_client") == $this->getData("id_client")) {
+                return 1;
             }
 
-            return 1;
+            return 0;
         }
 
-        return parent::canView();
+        return 1;
     }
 
-    public function canCreate()
+    public function canClientCreate()
     {
-        if (BimpCore::isContextPublic()) {
-            return 1;
-        }
-
-        return parent::canCreate();
+        return 1;
     }
 
-    public function canEdit()
+    public function canClientEdit()
     {
-        if ($this->isLoaded() && BimpCore::isContextPublic()) {
-            if ($this->canView()) {
-                if ($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT) {
-                    return 1;
-                }
+        if ($this->isLoaded()) {
+            if ($this->canClientView() && $this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT) {
+                return 1;
             }
 
             return 0;
@@ -285,7 +275,6 @@ class BS_Ticket extends BimpObject
             "onclick" => "window.location.href = '" . DOL_URL_ROOT . "/bimpinterfaceclient/?page=ticket&id=" . $this->getData('id') . "'"
         );
 
-
         return $buttons;
     }
 
@@ -382,7 +371,7 @@ class BS_Ticket extends BimpObject
         $buttons = array();
 
         if ($this->isLoaded()) {
-            if ($this->canView()) {
+            if ($this->can('view')) {
                 $url = $this->getPublicUrl();
                 $buttons[] = array(
                     'label'   => 'Voir le détail',
@@ -400,9 +389,10 @@ class BS_Ticket extends BimpObject
         if ($this->isLoaded()) {
             return DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=tickets&content=card&id_ticket=' . $this->id;
         }
-        
+
         return '';
     }
+
     public function getPublicListPageUrl()
     {
         return DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=tickets';

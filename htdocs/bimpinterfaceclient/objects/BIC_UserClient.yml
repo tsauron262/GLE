@@ -24,7 +24,7 @@ objects:
         instance:
             bimp_object: 
                 module: bimpinterfaceclient
-                name: BIC_UserClientContrats
+                name: BIC_UserClientContrat
     
     societe:
         instance:

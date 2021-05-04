@@ -14,26 +14,18 @@ class BimpFile extends BimpObject
 
     // Droits users: 
 
-    public function canView()
+    public function canClientView()
     {
-        if (BimpCore::isContextPublic()) {
-            global $userClient;
-            if (BimpObject::objectLoaded($userClient)) {
-                return 1;
-            }
-            return 0;
+        global $userClient;
+        if (BimpObject::objectLoaded($userClient)) {
+            return 1;
         }
-
-        return parent::canView();
+        return 0;
     }
 
-    public function canCreate()
+    public function canClientCreate()
     {
-        if (BimpCore::isContextPublic()) {
-            return $this->canView();
-        }
-
-        return parent::canCreate();
+        return $this->canClientView();
     }
 
     // Getters booléens: 
@@ -242,7 +234,6 @@ class BimpFile extends BimpObject
         }
 
         $_FILES['file']['name'] = $file_name . '.' . $file_ext;
-
 
         if (file_exists($file_dir . $_FILES['file']['name'])) {
             $errors[] = "Le Fichier existe déja";

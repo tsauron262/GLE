@@ -13,16 +13,12 @@ class BS_Inter extends BimpObject
 
     // Droits users: 
 
-    public function canView()
+    public function canClientView()
     {
-        if (BimpCore::isContextPublic()) {
-            if ($this->isLoaded()) {
-                return (int) $this->getData('is_public');
-            }
-            return 1;
+        if ($this->isLoaded()) {
+            return (int) $this->getData('is_public');
         }
-
-        return parent::canView();
+        return 1;
     }
 
     // Getters: 

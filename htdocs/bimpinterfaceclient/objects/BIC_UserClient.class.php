@@ -40,68 +40,56 @@ class BIC_UserClient extends BimpObject
 
     // Droits user: 
 
-    public function canView()
+    public function canClientView()
     {
-        if (BimpCore::isContextPublic()) {
-            global $userClient;
+        global $userClient;
 
-            if (!BimpObject::objectLoaded($userClient)) {
-                return 0;
-            }
-
-            if ($this->isLoaded()) {
-                if ($this->getData('id_client') == $userClient->getData('id_client') && ($userClient->getData('role') == 1 || $this->id == $userClient->id)) {
-                    return 1;
-                }
-
-                return 0;
-            }
-
-            return 1;
+        if (!BimpObject::objectLoaded($userClient)) {
+            return 0;
         }
 
-        return parent::canView();
-    }
-
-    public function canCreate()
-    {
-        if (BimpCore::isContextPublic()) {
-            global $userClient;
-
-            if (BimpObject::objectLoaded($userClient) && $userClient->isAdmin()) {
+        if ($this->isLoaded()) {
+            if ($this->getData('id_client') == $userClient->getData('id_client') && ($userClient->getData('role') == 1 || $this->id == $userClient->id)) {
                 return 1;
             }
 
             return 0;
         }
 
-        return parent::canCreate();
+        return 1;
     }
 
-    public function canEdit()
+    public function canClientCreate()
     {
-        if (BimpCore::isContextPublic()) {
-            if ($this->isLoaded()) {
-                global $userClient;
+        global $userClient;
 
-                if (BimpObject::objectLoaded($userClient) &&
-                        (($userClient->isAdmin() && (int) $this->getData('id_client') == (int) $userClient->getData('id_client')) ||
-                        ($this->id == $userClient->id))) {
-                    return 1;
-                }
-
-                return 0;
-            }
-
+        if (BimpObject::objectLoaded($userClient) && $userClient->isAdmin()) {
             return 1;
         }
 
-        return parent::canEdit();
+        return 0;
     }
 
-    public function canDelete()
+    public function canClientEdit()
     {
-        return $this->canEdit();
+        if ($this->isLoaded()) {
+            global $userClient;
+
+            if (BimpObject::objectLoaded($userClient) &&
+                    (($userClient->isAdmin() && (int) $this->getData('id_client') == (int) $userClient->getData('id_client')) ||
+                    ($this->id == $userClient->id))) {
+                return 1;
+            }
+
+            return 0;
+        }
+
+        return 1;
+    }
+
+    public function canClientDelete()
+    {
+        return $this->canClientEdit();
     }
 
     public function canEditField($field_name)
@@ -327,7 +315,7 @@ class BIC_UserClient extends BimpObject
             $buttons[] = array(
                 'label'   => 'Contrats associés',
                 'icon'    => 'fas_file-signature',
-                'onclick' => $this->getJsLoadModalList($contrats_list_name, array(
+                'onclick' => $userClientContrat->getJsLoadModalList('public_user_client', array(
                     'extra_filters' => array(
                         'id_user' => (int) $this->id
                     )
@@ -402,13 +390,13 @@ class BIC_UserClient extends BimpObject
         }
         return $return;
     }
-    
+
     public function getAssociatedContratsList()
     {
         $contrats = array();
-        
+
         if ($this->isLoaded()) {
-            $rows = $this->db->getRows('bic_user_contrat', 'id_user = ' . $this->id, null, 'array', array('id_contrats'));
+            $rows = $this->db->getRows('bic_user_contrat', 'id_user = ' . $this->id, null, 'array', array('id_contrat'));
             
             if (is_array($rows)) {
                 foreach ($rows as $r) {
@@ -416,7 +404,7 @@ class BIC_UserClient extends BimpObject
                 }
             }
         }
-        
+
         return $contrats;
     }
 

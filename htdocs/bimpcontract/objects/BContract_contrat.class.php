@@ -2103,36 +2103,32 @@ class BContract_contrat extends BimpDolObject
         return 1;
     }
 
-    public function canView()
+    public function canClientView()
     {
-        if (BimpCore::isContextPublic()) {
-            global $userClient;
+        global $userClient;
 
-            if (!BimpObject::objectLoaded($userClient)) {
+        if (!BimpObject::objectLoaded($userClient)) {
+            return 0;
+        }
+
+        if ($this->isLoaded()) {
+            if ((int) $userClient->getData('id_client') !== (int) $this->getData('fk_soc')) {
                 return 0;
             }
 
-            if ($this->isLoaded()) {
-                if ((int) $userClient->getData('id_client') !== (int) $this->getData('fk_soc')) {
-                    return 0;
-                }
-
-                if ($userClient->isAdmin()) {
-                    return 1;
-                }
-
-                $list = $userClient->getChildrenObjects('user_client_contrat');
-                foreach ($list as $obj) {
-                    if ($obj->getData('id_contrat') == $this->id) {
-                        return 1;
-                    }
-                }
+            if ($userClient->isAdmin()) {
+                return 1;
             }
 
-            return 1;
+            $list = $userClient->getChildrenObjects('user_client_contrat');
+            foreach ($list as $obj) {
+                if ($obj->getData('id_contrat') == $this->id) {
+                    return 1;
+                }
+            }
         }
 
-        return parent::canView();
+        return 1;
     }
 
     public function canClientViewDetail()
@@ -3949,7 +3945,7 @@ class BContract_contrat extends BimpDolObject
                         )
             ));
         }
-        
+
         return '';
     }
 
@@ -3971,7 +3967,7 @@ class BContract_contrat extends BimpDolObject
     {
         $buttons = array();
 
-        if ($this->canView()) {
+        if ($this->can('view')) {
             $url = $this->getPublicUrl();
 
             if ($url) {

@@ -119,7 +119,6 @@ class InterfaceClientController extends BimpPublicController
     {
         $html = '';
 
-
         if ($this->tabActive) {
             $method = 'renderTab' . ucfirst($this->tabActive);
             if (method_exists($this, $method)) {
@@ -164,8 +163,25 @@ class InterfaceClientController extends BimpPublicController
                 $html .= BimpRender::renderAlerts('Vous n\'avez aucun ticket support en cours', 'info');
             }
 
+            $contact = null;
+
+            if (BimpObject::objectLoaded($userClient) && (int) $userClient->getData('id_contact')) {
+                $contact = $userClient->getChildObject('contact');
+            }
+
+            $ticket = BimpObject::getInstance('bimpsupport', 'BS_Ticket');
+            $onclick = $ticket->getJsLoadModalForm('public_create', 'Nouveau ticket support', array(
+                'fields' => array(
+                    'id_client'        => (int) $userClient->getData('id_client'),
+                    'id_user_client'   => (BimpObject::objectLoaded($userClient) ? (int) $userClient->id : 0),
+                    'contact_in_soc'   => (BimpObject::objectLoaded($contact) ? $contact->getName() : ''),
+                    'adresse_envois'   => (BimpObject::objectLoaded($contact) ? BimpTools::replaceBr($contact->displayFullAddress()) : ''),
+                    'email_bon_retour' => (BimpObject::objectLoaded($userClient) ? $userClient->getData('email') : '')
+                )
+            ));
+
             $html .= '<div class="buttonsContainer align-right" style="margin: 15px 0">';
-            $html .= '<span class="btn btn-default" onclick="window.location = \''.DOL_URL_ROOT.'/bimpinterfaceclient/client.php?tab=tickets\';">';
+            $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
             $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouveau ticket support';
             $html .= '</span>';
             $html .= '</div>';
@@ -284,7 +300,7 @@ class InterfaceClientController extends BimpPublicController
         } else {
             if ($userClient->isAdmin()) {
                 $client = $userClient->getParentInstance();
-                if (BimpObject::objectLoaded($client) && $client->canView()) {
+                if (BimpObject::objectLoaded($client) && $client->can('view')) {
                     $view = new BC_View($client, 'public_client');
                     $html .= $view->renderHtml();
                 }
@@ -310,7 +326,7 @@ class InterfaceClientController extends BimpPublicController
                 $html .= '<h3>' . BimpRender::renderIcon('pe_news-paper', 'iconLeft') . 'Mes contrats</h3>';
                 $contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
 //
-                if (!BimpObject::objectLoaded($userClient) || !$contrat->canView()) {
+                if (!BimpObject::objectLoaded($userClient) || !$contrat->can('view')) {
                     $html .= BimpRender::renderAlerts('Vous n\'avez pas la permission d\'accéder à ce contenu');
                 } else {
                     $client = $userClient->getParentInstance();
@@ -338,7 +354,6 @@ class InterfaceClientController extends BimpPublicController
                         $html .= '</div>';
 
                         $html .= '<div class="row">';
-
 
                         // Listes contrats échus: 
                         $list = new BC_ListTable($contrat, 'public', 1, null, 'Contrats inactifs');
@@ -375,7 +390,7 @@ class InterfaceClientController extends BimpPublicController
                     if (!BimpObject::objectLoaded($contrat)) {
                         $html .= BimpRender::renderAlerts('Ce Contrat n\'existe plus');
                     } else {
-                        if (!$contrat->canView()) {
+                        if (!$contrat->can('view')) {
                             $html .= BimpRender::renderAlerts('Vous n\'avez pas la permission de voir ce contrat', 'warning');
                         } else {
                             $view = new BC_View($contrat, 'public_client');
@@ -400,7 +415,7 @@ class InterfaceClientController extends BimpPublicController
 
         $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
 
-        if (!BimpObject::objectLoaded($userClient) || !$facture->canView()) {
+        if (!BimpObject::objectLoaded($userClient) || !$facture->can('view')) {
             $html .= BimpRender::renderAlerts('Vous n\'avez pas la permission d\'accéder à ce contenu');
         } else {
             $list = new BC_ListTable($facture, 'public_client');
@@ -426,7 +441,7 @@ class InterfaceClientController extends BimpPublicController
                 $html .= '<h3>' . BimpRender::renderIcon('pe_headphones', 'iconLeft') . 'Tickets support</h3>';
                 $ticket = BimpObject::getInstance('bimpsupport', 'BS_Ticket');
 
-                if (!BimpObject::objectLoaded($userClient) || !$ticket->canView()) {
+                if (!BimpObject::objectLoaded($userClient) || !$ticket->can('view')) {
                     $html .= BimpRender::renderAlerts('Vous n\'avez pas la permission d\'accéder à ce contenu');
                 } else {
                     $list = new BC_ListTable($ticket, 'public_client');
@@ -455,7 +470,7 @@ class InterfaceClientController extends BimpPublicController
                     if (!BimpObject::objectLoaded($ticket)) {
                         $html .= BimpRender::renderAlerts('Ce ticket support n\'existe plus');
                     } else {
-                        if (!$ticket->canView()) {
+                        if (!$ticket->can('view')) {
                             $html .= BimpRender::renderAlerts('Vous n\'avez pas la permission de voir ce Ticket', 'warning');
                         } else {
                             $view = new BC_View($ticket, 'public_client');
@@ -500,7 +515,7 @@ class InterfaceClientController extends BimpPublicController
                 $html .= '<h3>' . BimpRender::renderIcon('pe_tools', 'iconLeft') . 'Suivis SAV</h3>';
                 $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV');
 
-                if (!BimpObject::objectLoaded($userClient) || !$sav->canView()) {
+                if (!BimpObject::objectLoaded($userClient) || !$sav->can('view')) {
                     $html .= BimpRender::renderAlerts('Vous n\'avez pas la permission d\'accéder à ce contenu');
                 } else {
                     $list = new BC_ListTable($sav, 'public_client');
@@ -528,7 +543,7 @@ class InterfaceClientController extends BimpPublicController
                     if (!BimpObject::objectLoaded($sav)) {
                         $html .= BimpRender::renderAlerts('Ce SAV n\'existe plus');
                     } else {
-                        if (!$sav->canView()) {
+                        if (!$sav->can('view')) {
                             $html .= BimpRender::renderAlerts('Vous n\'avez pas la permission de voir ce SAV', 'warning');
                         } else {
                             $view = new BC_View($sav, 'public_client');

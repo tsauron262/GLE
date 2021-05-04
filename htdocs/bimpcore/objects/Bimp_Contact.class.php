@@ -10,66 +10,56 @@ class Bimp_Contact extends BimpObject
 
     // Getters booléens: 
 
-    public function canView()
+    public function canClientView()
     {
-        if (BimpCore::isContextPublic()) {
-            global $userClient;
+        global $userClient;
 
-            if (BimpObject::objectLoaded($userClient)) {
-                if ($this->isLoaded()) {
-                    if ((int) $this->getData('fk_soc') == (int) $userClient->getData('id_client')) {
-                        return 1;
-                    }
+        if (BimpObject::objectLoaded($userClient)) {
+            if ($this->isLoaded()) {
+                if ((int) $this->getData('fk_soc') == (int) $userClient->getData('id_client')) {
+                    return 1;
                 }
 
-                return 1;
+                return 0;
             }
 
-            return 0;
+            return 1;
         }
 
-        return parent::canView();
+        return 0;
     }
 
-    public function canCreate()
+    public function canClientCreate()
     {
-        if (BimpCore::isContextPublic()) {
+        global $userClient;
+
+        if (BimpObject::objectLoaded($userClient)) {
+            if ((int) $this->getData('fk_soc') == (int) $userClient->getData('id_client')) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
+    public function canClientEdit()
+    {
+        if ($this->isLoaded()) {
             global $userClient;
 
             if (BimpObject::objectLoaded($userClient)) {
                 if ((int) $this->getData('fk_soc') == (int) $userClient->getData('id_client')) {
+                    if (!$userClient->isAdmin()) {
+                        if ((int) $userClient->getData('id_contact') != (int) $this->id) {
+                            return 0;
+                        }
+                    }
                     return 1;
                 }
             }
 
             return 0;
         }
-
-        return parent::canCreate();
-    }
-
-    public function canEdit()
-    {
-        if (BimpCore::isContextPublic()) {
-            if ($this->isLoaded()) {
-                global $userClient;
-
-                if (BimpObject::objectLoaded($userClient)) {
-                    if ((int) $this->getData('fk_soc') == (int) $userClient->getData('id_client')) {
-                        if (!$userClient->isAdmin()) {
-                            if ((int) $userClient->getData('id_contact') != (int) $this->id) {
-                                return 0;
-                            }
-                        }
-                        return 1;
-                    }
-                }
-
-                return 0;
-            }
-        }
-
-        return $this->canCreate();
     }
 
     public function canDelete()

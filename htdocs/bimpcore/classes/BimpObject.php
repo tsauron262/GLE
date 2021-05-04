@@ -238,7 +238,6 @@ class BimpObject extends BimpCache
             )
                 ), 'initial');
 
-
         if ($this->use_commom_fields) {
             $this->config->addParams('objects', array(
                 'user_create' => array(
@@ -1125,13 +1124,13 @@ class BimpObject extends BimpCache
     {
         return (int) ($this->getData($field) !== $this->getInitData($field));
     }
-    
+
     public function isContextPublic()
     {
         // pour callbacks: 
         return BimpCore::isContextPublic();
     }
-    
+
     public function isContextPrivate()
     {
         // pour callbacks: 
@@ -1356,8 +1355,7 @@ class BimpObject extends BimpCache
                 $value = intval($value);
                 if (is_array($info['values']['array']) && isset($info['values']['array'][$value]))
                     $value = $info['values']['array'][$value];
-            }
-            elseif ($info['type'] == "id_object") {
+            } elseif ($info['type'] == "id_object") {
                 continue; //Car on les retrouve enssuite de nouveau dans $this->params['objects']
 //                $obj = $this->getChildObject($info['object']);
 //                $value = $this->recursiveGetExport($niveau, $pref, $obj);
@@ -1423,8 +1421,7 @@ class BimpObject extends BimpCache
                         echo "ERR Objet non loadé";
                 else
                     echo "ERR Objet bizarre";
-            }
-            elseif (is_a($obj, "CommonObject")) {
+            } elseif (is_a($obj, "CommonObject")) {
                 $id = 0;
                 if (property_exists($obj, 'id'))
                     $id = $obj->id;
@@ -1442,8 +1439,7 @@ class BimpObject extends BimpCache
                             $value[$clef] = $val;
                     }
                 }
-            }
-            else {
+            } else {
                 echo "ERR Type objet inconnue " . get_class($obj);
                 $value = "ERR Type objet inconnue " . get_class($obj);
             }
@@ -1563,8 +1559,8 @@ class BimpObject extends BimpCache
                 if (BimpCore::isContextPublic()) {
                     $url .= '&hashp=1';
                 }
-                
-                
+
+
                 if ($url && $preview) {
                     $url = 'javascript:document_preview(\'' . $url . '\', \'image/' . $ext . '\', \'Aperçu\');';
                 }
@@ -2456,7 +2452,6 @@ class BimpObject extends BimpCache
         $error = '';
         $sqlKey = '';
 
-
         if (!is_null($child_name) && $child_name) {
             // Champ d'un objet enfant: 
 
@@ -3108,7 +3103,7 @@ class BimpObject extends BimpCache
         if (!$extra_order_by) {
             $extra_order_by = 'a.' . $primary;
         }
-        
+
         $sql = '';
         $sql .= BimpTools::getSqlSelect($fields);
         $sql .= BimpTools::getSqlFrom($table, $joins);
@@ -4974,7 +4969,6 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
         $result = call_user_func_array(array($this->dol_object, 'fetch'), $params);
 
-
         if ($result <= 0) {
             if (isset($this->dol_object->error) && $this->dol_object->error) {
                 $errors[] = $this->dol_object->error;
@@ -5220,21 +5214,36 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         switch ($right) {
             case "view" :
+                if (BimpCore::isContextPublic()) {
+                    return $this->canClientView();
+                }
                 return $this->canView();
             case 'edit' :
+                if (BimpCore::isContextPublic()) {
+                    return $this->canClientEdit();
+                }
                 return $this->canEdit();
             case "create" :
+                if (BimpCore::isContextPublic()) {
+                    return $this->canClientCreate();
+                }
                 return $this->canCreate();
             case "delete" :
+                if (BimpCore::isContextPublic()) {
+                    return $this->canClientDelete();
+                }
                 return $this->canDelete();
-
-            default:
-                return 0;
         }
+
+        return 0;
     }
 
     public function canCreate()
     {
+        if (BimpCore::isContextPublic()) {
+            $this->canClientCreate();
+        }
+
         if ($this->params['parent_object']) {
             $parent = $this->getParentInstance();
             if (is_a($parent, 'BimpObject')) {
@@ -5242,15 +5251,15 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             }
         }
 
-        if (BimpCore::isContextPublic()) {
-            return 0;
-        }
-
         return 1;
     }
 
     public function canEdit()
     {
+        if (BimpCore::isContextPublic()) {
+            return $this->canClientEdit();
+        }
+
         if ($this->params['parent_object']) {
             $parent = $this->getParentInstance();
             if (is_a($parent, 'BimpObject')) {
@@ -5258,15 +5267,15 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             }
         }
 
-        if (BimpCore::isContextPublic()) {
-            return 0;
-        }
-
         return $this->canCreate();
     }
 
     public function canView()
     {
+        if (BimpCore::isContextPublic()) {
+            return $this->canClientView();
+        }
+
         if ($this->params['parent_object']) {
             $parent = $this->getParentInstance();
             if (is_a($parent, 'BimpObject')) {
@@ -5274,15 +5283,15 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             }
         }
 
-        if (BimpCore::isContextPublic()) {
-            return 0;
-        }
-
         return 1;
     }
 
     public function canDelete()
     {
+        if (BimpCore::isContextPublic()) {
+            return $this->canClientDelete();
+        }
+
         if ($this->params['parent_object']) {
             $parent = $this->getParentInstance();
             if (is_a($parent, 'BimpObject')) {
@@ -5293,33 +5302,77 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         return $this->canEdit();
     }
 
+    public function canClientCreate()
+    {
+        return 0;
+    }
+
+    public function canClientEdit()
+    {
+        return 0;
+    }
+
+    public function canClientView()
+    {
+        return 0;
+    }
+
+    public function canClientDelete()
+    {
+        return 0;
+    }
+
     public function canEditField($field_name)
     {
+        if (BimpCore::isContextPublic()) {
+            return $this->canClientEdit();
+        }
+
         return (int) $this->canEdit();
     }
 
     public function canViewField($field_name)
     {
+        if (BimpCore::isContextPublic()) {
+            return $this->canClientView();
+        }
+
         return (int) $this->canView();
     }
 
     public function canCreateChild($child_name)
     {
+        if (BimpCore::isContextPublic()) {
+            return $this->canClientCreate();
+        }
+
         return (int) $this->canCreate();
     }
 
     public function canEditChild($child_name)
     {
+        if (BimpCore::isContextPublic()) {
+            return $this->canClientEdit();
+        }
+
         return (int) $this->canEdit();
     }
 
     public function canViewChild($child_name)
     {
+        if (BimpCore::isContextPublic()) {
+            return $this->canClientView();
+        }
+
         return (int) $this->canView();
     }
 
     public function canDeleteChild($child_name)
     {
+        if (BimpCore::isContextPublic()) {
+            return $this->canClientDelete();
+        }
+
         return (int) $this->canDelete();
     }
 
@@ -5425,9 +5478,9 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
             $table = $this->getTable();
             $primary = $this->getPrimary();
-            
+
             $items = $this->getList($filters, null, null, 'position', 'asc', 'array', array($primary, 'position'));
-            
+
             $check = true;
 
             if ($this->db->update($table, array(
@@ -5858,7 +5911,6 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 //                $html .= $logo_html;
 //                $html .= '</div>';
 //            }
-
             // Titre: 
             $html .= '<div class="object_header_title">';
             $html .= '<h2>';
@@ -5931,9 +5983,9 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                             'dropdown_menu_right' => 1
                 ));
             }
-            
+
             $html .= '<div style="display: inline-block">';
-            
+
             // Bouton édition: 
             $form_name = $this->getConf('public_header_edit_form', '');
             if ($form_name && $this->isEditable() && $this->canEdit()) {
@@ -5945,7 +5997,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             }
 
             // Bouton suppression: 
-            if ((int) $this->params['header_delete_btn'] && $this->isDeletable() && $this->canDelete()) {
+            if ((int) $this->params['header_delete_btn'] && $this->isDeletable() && $this->canClientDelete()) {
                 $html .= '<span class="btn btn-danger bs-popover" onclick="' . $this->getJsDeleteOnClick(array(
                             'on_success' => 'reload'
                         )) . '"';
@@ -6800,8 +6852,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             if ($nomTabs == '' || $nomTabs == "default") {
                 if (BimpTools::isSubmit('tab') && BimpTools::getValue('tab') != 'default')
                     return 'ne devrais jamais etre visible';
-            }
-            elseif (BimpTools::getValue('tab') != $nomTabs)
+            } elseif (BimpTools::getValue('tab') != $nomTabs)
                 return 'ne devrais jamais etre visible2';
         }
         if (method_exists($this, $fonction)) {
@@ -7576,7 +7627,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         if (BimpCore::isContextPublic()) {
             return $this->getPublicUrl();
         }
-        
+
         if (!$this->isLoaded()) {
             return '';
         }
@@ -7785,7 +7836,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         return $this->getListPageUrl();
     }
-    
+
     public function getListPageUrl($list_name = 'default')
     {
         if (BimpCore::isContextPublic()) {
@@ -7805,7 +7856,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         if (!$url && $this->isDolObject()) {
             $url = BimpTools::getDolObjectListUrl($this->dol_object);
         }
-        
+
         return $url;
     }
 
@@ -8299,9 +8350,7 @@ var options = {
 		yValueFormatString: "#,##0 €",
 		dataPoints: [';
 
-
             $success_callback .= $list->getPointsForGraph();
-
 
             $success_callback .= ']},';
             if (isset($data['data2'])) {
@@ -8316,10 +8365,7 @@ var options = {
                         visible: 0,
                         dataPoints: [';
 
-
-
                 $success_callback .= $list->getPointsForGraph(2);
-
 
                 $success_callback .= ']},';
             }
@@ -8335,9 +8381,7 @@ var options = {
                         yValueFormatString: "#,##0 €",
                         dataPoints: [';
 
-
                 $success_callback .= $list->getPointsForGraph(3);
-
 
                 $success_callback .= ']},';
             }
@@ -8352,16 +8396,13 @@ var options = {
                         yValueFormatString: "#,##0 €",
                         dataPoints: [';
 
-
                 $success_callback .= $list->getPointsForGraph(11);
-
 
                 $success_callback .= ']},';
             }
             $success_callback .= ']';
             $success_callback .= '};';
             $success_callback .= '$("#' . $list_id . '_chartContainer").CanvasJSChart(options);';
-
 
             $success_callback .= 'function toogleDataSeries(e){
                         if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {

@@ -118,6 +118,14 @@ class Bimp_Fournisseur extends Bimp_Societe
             'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#fourn_factures_list_tab .nav_tab_ajax_result\')', array('factures_fourn'), array('button' => ''))
         );
 
+        // product fourn: 
+        $tabs[] = array(
+            'id'            => 'fourn_factures_list_tab',
+            'title'         => BimpRender::renderIcon('fas_box', 'iconLeft') . 'Produits',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#fourn_factures_list_tab .nav_tab_ajax_result\')', array('products_fourn'), array('button' => ''))
+        );
+
         return BimpRender::renderNavTabs($tabs, 'commercial_view');
     }
 
@@ -178,6 +186,11 @@ class Bimp_Fournisseur extends Bimp_Societe
 
             case 'factures_fourn':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFourn'), 'fourn', 1, null, 'Factures du fournisseur "' . $fourn_label . '"', 'fas_file-invoice-dollar');
+                $list->addFieldFilterValue('fk_soc', (int) $this->id);
+                break;
+            
+            case 'products_fourn':
+                $list = new BC_ListTable(BimpObject::getInstance('bimpcore', 'Bimp_ProductFournisseurPrice'), 'fourn', 1, null, 'Produits du fournisseur "' . $fourn_label . '"', 'fas_file-invoice-dollar');
                 $list->addFieldFilterValue('fk_soc', (int) $this->id);
                 break;
         }

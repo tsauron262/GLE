@@ -301,6 +301,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                                 (is_null($stock) || (float) $stock === (float) $this->fournPrices[$id_pfp]['stock']) &&
                                 $refFourn == $this->fournPrices[$id_pfp]['ref_fourn']) {
                             // Pas de màj nécessaire: 
+                            $this->Alert('Pas de maj', $this->pfp_instance, $refFourn);
                             $this->incIgnored($this->pfp_instance);
                             continue;
                         }

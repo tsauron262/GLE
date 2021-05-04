@@ -11,6 +11,9 @@ if(!isset($_REQUEST['no_menu']))
     llxHeader();
 
 
+if(defined('PATH_TMP'))
+    echo '<h1>Serveur : '.PATH_TMP.'</h1>';
+
 curl_init();
 
 

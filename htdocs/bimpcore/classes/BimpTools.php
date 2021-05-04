@@ -2180,9 +2180,9 @@ class BimpTools
         if ($required && empty($current_value)) {
             $errors[] = ($missing_msg ? $missing_msg : 'Valeur absente: "' . $path . '"');
         }
-        if (defined('DOL_DATA_ROOT'))
+        if (stripos($current_value, 'DOL_DATA_ROOT') !== false && defined('DOL_DATA_ROOT'))
             $current_value = str_replace('DOL_DATA_ROOT', DOL_DATA_ROOT, $current_value);
-        if (defined('PATH_TMP'))
+        if (stripos($current_value, 'PATH_TMP') !== false && defined('PATH_TMP'))
             $current_value = str_replace('PATH_TMP', PATH_TMP, $current_value);
 
         return $current_value;

@@ -170,36 +170,94 @@ fields_tables:
 forms:
     editinter:
         rows:
-#            - field: date
-#              input:
-#                  type: date
-#            - field: description
-#              input:
-#                  type: html
-#            - custom: 1
-#              label: Arrivée
-#              input_name: arrived
-#              
-#              input:
-#                  type:  time
-#                  help: Si le champ est vide, aucune modificatons ne sera faite
-#              value:
-#                callback:
-#                    method: displayTime
-#                    params:
-#                        - arrived
-#              show:
-#                  callback: showOneHoraire
-#            - custom: 1
-#              label: Départ
-#              input_name: departure
-#              input:
-#                  type:  time
-#                  help: Si le champ est vide, aucune modificatons ne sera faite
-#              show:
-#                  callback: showOneHoraire
-              
-            
+            - field: date
+              input:
+                  type: date
+            - field: description
+              input:
+                  type: html
+            - custom: 1
+              label: Arrivée
+              input_name: arrived
+              input:
+                  type:  time
+                  help: Les secondes ne seront pas prises en compte
+              value:
+                callback:
+                    method: displayTime
+                    params:
+                        - arrived
+              show:
+                  callback: showOneHoraire
+            - custom: 1
+              label: Départ
+              input_name: departure
+              input:
+                  type:  time
+                  help: Les secondes ne seront pas prises en compte
+              value:
+                  callback:
+                      method: displayTime
+                      params:
+                          - departure
+              show:
+                  callback: showOneHoraire
+            - custom: 1
+              label: Arrivée (Matin)
+              input_name: arriverd_am
+              input:
+                  type: time
+                  help: Les secondes ne seront pas prises en compte
+              value:
+                  callback:
+                      method: displayTime
+                      params:
+                          - arriverd_am
+              show:
+                  callback: showTwoHoraire
+            - custom: 1
+              label: Départ (Matin)
+              input_name: departure_am
+              input:
+                  type: time
+                  help: Les secondes ne seront pas prises en compte
+              value:
+                  callback:
+                      method: displayTime
+                      params:
+                          - departure_am
+              show:
+                  callback: showTwoHoraire
+            - custom: 1
+              label: Arrivée (Après-Midi)
+              input_name: arriverd_pm
+              input:
+                  type: time
+                  help: Les secondes ne seront pas prises en compte
+              value:
+                  callback:
+                      method: displayTime
+                      params:
+                          - arriverd_pm
+              show:
+                  callback: showTwoHoraire
+            - custom: 1
+              label: Départ (Après-Midi)
+              input_name: departure_pm
+              input:
+                  type: time
+                  help: Les secondes ne seront pas prises en compte
+              value:
+                  callback:
+                      method: displayTime
+                      params:
+                          - departure_pm
+              show:
+                  callback: showTwoHoraire
+            - field: duree
+              show:
+                  callback: showTimerDeplacement
+
     add:
         rows:
             - field: type

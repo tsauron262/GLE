@@ -11,6 +11,9 @@ if(!isset($_REQUEST['no_menu']))
     llxHeader();
 
 
+if(defined('ID_ERP'))
+    echo '<h1>Serveur : '.ID_ERP.'</h1>';
+
 curl_init();
 
 

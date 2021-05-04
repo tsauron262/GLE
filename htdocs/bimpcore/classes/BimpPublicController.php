@@ -105,7 +105,7 @@ class BimpPublicController extends BimpController
 
     public function userClientLogout()
     {
-        $_SESSION['userClient'] = null;
+        $_SESSION['userClient'] = 'none';
         header("Location: " . $_SERVER['PHP_SELF']);
         exit;
     }

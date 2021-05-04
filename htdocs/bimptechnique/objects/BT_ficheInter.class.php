@@ -224,6 +224,10 @@ class BT_ficheInter extends BimpDolObject {
         return $html;
     }
     
+    public function onSave(&$errors = array(), &$warnings = array()) {
+        return parent::onSave($errors, $warnings);
+    }
+    
     public function displayRatioTotal($display = true, $want = "") {
         if($this->getData('new_fi')) {
             global $db;
@@ -382,7 +386,7 @@ class BT_ficheInter extends BimpDolObject {
     
     public function getCommandesClientArray($posted = true) {
         $commandes = [];
-        $commande = $this->getInstance('bimpcommercial', 'Bimp_Commande');
+        $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande');
         if(($posted))
             $list = $commande->getList(['fk_soc' => BimpTools::getPostFieldValue('client')]);
         else 
@@ -551,6 +555,32 @@ class BT_ficheInter extends BimpDolObject {
             'warnings' => $warnings,
             'success' => $success
         );
+        
+    }
+    
+    public function actionComm(string $action, dateTime $dt_start, dateTime $dt_stop, int $socid, int $type, Bimp_User $tech, BT_ficheInter $instance, Array $params = Array()): Int {
+        
+        global $user;
+
+        $actionComm = New ActionComm($this->db->db);
+        
+        switch($action) {
+            case 'create':
+                $actionCommAction = "create($user)";
+                $actionComm->label = "FI: " . $instance->getRef();
+                $actionComm->note = $instance->getData('description');
+                $actionComm->ponctual = 1;
+                $actionComm->userownerid = $tech->id;
+                $actionComm->elementtype = 'fichinter';
+                $actionComm->type_id = $type;
+                $actionComm->datep = strtotime($dt_start->format('Y-m-d H:i:s'));
+                $actionComm->datef = strtotime($dt_stop->format('Y-m-d H:i:s'));
+                $actionComm->socid = $socid;
+                break;
+            default:
+                return 0;
+                break;
+        }
         
     }
 
@@ -755,7 +785,7 @@ class BT_ficheInter extends BimpDolObject {
     
     public function canDelete() {
         global $user;
-        if((($this->getData('fk_statut') == 0) && $this->getData('fk_user_author') == $this->global_user->id && !$this->isOldFi()) || $user->admin ) {
+        if((($this->getData('fk_statut') == 0) && $this->getData('fk_user_author') == $this->global_user->id && !$this->isOldFi()) || ($user->admin || $user->rights->bimptechnique->delete)) {
            return 1;
         }
         
@@ -939,6 +969,29 @@ class BT_ficheInter extends BimpDolObject {
 
     }
     
+    public function getCommandesArrayWithDeplacement() {
+        $codes = json_decode(BimpCore::getConf("bimptechnique_ref_deplacement"));
+        $commandes = json_decode($this->getData('commandes'));
+        $array = [];
+        foreach($commandes as $id_commande) {
+            $commande = new Commande($this->db->db);
+            $commande->fetch($id_commande);
+            $bimpCommande = BimpCache::getBimpObjectInstance("bimpcommercial", "Bimp_Commande", $id_commande);
+            $children = $commande->lines;
+            foreach($children as $child) {
+                $fk_product = ($child->fk_product) ? ($child->fk_product) : 0;
+                if($fk_product > 0) {
+                    $produit = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Product", $fk_product);
+                    if(in_array($produit->getData('ref'), $codes)) {
+                        $array[$id_commande] = $commande->ref . " - " . $bimpCommande->getData('libelle');
+                    }
+                }
+            }
+            
+        }
+        return $array;
+    } 
+    
     public function actionAddInter($data, &$success) {
         global $user, $db;
         $errors = [];
@@ -950,7 +1003,7 @@ class BT_ficheInter extends BimpDolObject {
         $notField = array('inters_sub_object_idx_type', 'inters_sub_object_idx_date', 'inters_sub_object_idx_duree', 'inters_sub_object_idx_description');
         //return '<pre>' . print_r($data);
         $allCommandesLinked = getElementElement('commande', "fichinter", null, $this->id);
-        
+ 
         
 
         if(!count($errors)) {
@@ -965,97 +1018,125 @@ class BT_ficheInter extends BimpDolObject {
             $startStopX4 = [];
             
             foreach($objects as $numeroInter => $value) {
-                
+                //die($value['inter_' . $numeroInter . '_service'] . "hdiuodis");
                 if(!$this->getData('fk_contrat') && !$this->getData('commandes') && !$this->getData('tickets') && $value['inter_' . $numeroInter . '_type'] == 0) {
                     $errors[] = "Vous ne pouvez pas faire une intervention vendu alors qu'il n'y à rien de lié à votre FI";
                 }
                 if($value['inter_' . $numeroInter . '_type'] == 0 && !$value['inter_' . $numeroInter . '_service']) {
                     $errors[] = "Vous ne pouvez pas faire une intervention vendu sans code service, si ceci est une erreur merci d'envoyer un email à: support-fi@bimp.fr";
                 }
-                if($value['inter_' . $numeroInter . '_service']  == 5 && (!$this->getData('fk_contrat') || $this->getData('fk_contrat')  == 0)) {
+                if($value['inter_' . $numeroInter . '_type'] == 5 && (!$this->getData('fk_contrat') || $this->getData('fk_contrat')  == 0)) {
                     $errors[] = "Vous ne pouvez pas utiliser un déplacement sous contrat sans contrat lié. Merci";
+                }
+                if($value['inter_' . $numeroInter . '_type'] == 6 && !count(json_decode($this->getData('commandes')))) {
+                    $errors[] = "Ce type de service est réservé aux commandes";
                 }
                 
                 if(!count($errors)) {
                     $date = new DateTime($value['inter_' . $numeroInter . '_date']);
-                if($value['inter_' . $numeroInter . '_temps_dep'] > 0) {
-                    $duration = $value['inter_' . $numeroInter . '_temps_dep'];
-                } elseif($value['inter_' . $numeroInter . '_am_pm'] == 0) {
-                    // Arrivée/Départ unique
-                    $arrived = strtotime($value['inter_' . $numeroInter . '_global_arrived']);
-                    $departure = strtotime($value['inter_' . $numeroInter . '_global_quit']);
-                    $duration = $departure - $arrived;
-                    $startStopUnique['arrived'] = $value['inter_' . $numeroInter . '_date'] . " " . ($value['inter_' . $numeroInter . '_global_arrived']);
-                    $startStopUnique['departure'] = $value['inter_' . $numeroInter . '_date'] . " " .  ($value['inter_' . $numeroInter . '_global_quit']);
-                } else {
-                    // Arrivée/ Départ x4
-                    $arrived_am = strtotime($value['inter_' . $numeroInter . '_am_arrived']);
-                    $departure_am = strtotime($value['inter_' . $numeroInter . '_am_quit']);
-                    $duration_am = $departure_am - $arrived_am;
-                    $arrived_pm = strtotime($value['inter_' . $numeroInter . '_pm_arrived']);
-                    $departure_pm = strtotime($value['inter_' . $numeroInter . '_pm_quit']);
-                    $duration_pm = $departure_pm - $arrived_pm;
-                    $duration = $duration_am + $duration_pm;
-                    $startStopX4['arriverd_am'] = $value['inter_' . $numeroInter . '_date'] . " " . $value['inter_' . $numeroInter . '_am_arrived'];
-                    $startStopX4['departure_am'] = $value['inter_' . $numeroInter . '_date'] . " " . $value['inter_' . $numeroInter . '_am_quit'];
-                    $startStopX4['arriverd_pm'] = $value['inter_' . $numeroInter . '_date'] . " " . $value['inter_' . $numeroInter . '_pm_arrived'];
-                    $startStopX4['departure_pm'] = $value['inter_' . $numeroInter . '_date'] . " " . $value['inter_' . $numeroInter . '_pm_quit'];
-                }
-                
-                $timeArray = [];
-                if(count($startStopUnique) > 0) {
-                    $timeArray = $startStopUnique;
-                } else {
-                    $timeArray = $startStopX4;
-                }
-                if($duration >= 60) {
-                    $desc = $value['inter_' . $numeroInter . '_description'];
-
-                    $new->addline($user, $this->id, $desc, $date->getTimestamp(), $duration);
-                    $lastIdLine = $this->db->getMax('fichinterdet', 'rowid', 'fk_fichinter = ' . $this->id);
-                    $line = $this->getInstance('bimptechnique', 'BT_ficheInter_det', $lastIdLine);
-
-                    $exploded_service = explode("_", $value['inter_' . $numeroInter . '_service']);
-                    $field = 'id_line_' . $exploded_service[0];
-
-                    $line->updateField('type', $value['inter_' . $numeroInter . '_type']);
-
-                    if($value['inter_' . $numeroInter . '_type'] == 0) {
-                        $line->updateField($field, $exploded_service[1]);
+                    if($value['inter_' . $numeroInter . '_temps_dep'] > 0) {
+                        $duration = $value['inter_' . $numeroInter . '_temps_dep'];
+                    } elseif($value['inter_' . $numeroInter . '_am_pm'] == 0) {
+                        // Arrivée/Départ unique
+                        $arrived = strtotime($value['inter_' . $numeroInter . '_global_arrived']);
+                        $departure = strtotime($value['inter_' . $numeroInter . '_global_quit']);
+                        $duration = $departure - $arrived;
+                        $startStopUnique['arrived'] = $value['inter_' . $numeroInter . '_date'] . " " . ($value['inter_' . $numeroInter . '_global_arrived']);
+                        $startStopUnique['departure'] = $value['inter_' . $numeroInter . '_date'] . " " .  ($value['inter_' . $numeroInter . '_global_quit']);
+                    } else {
+                        // Arrivée/ Départ x4
+                        $arrived_am = strtotime($value['inter_' . $numeroInter . '_am_arrived']);
+                        $departure_am = strtotime($value['inter_' . $numeroInter . '_am_quit']);
+                        $duration_am = $departure_am - $arrived_am;
+                        $arrived_pm = strtotime($value['inter_' . $numeroInter . '_pm_arrived']);
+                        $departure_pm = strtotime($value['inter_' . $numeroInter . '_pm_quit']);
+                        $duration_pm = $departure_pm - $arrived_pm;
+                        $duration = $duration_am + $duration_pm;
+                        $startStopX4['arriverd_am'] = $value['inter_' . $numeroInter . '_date'] . " " . $value['inter_' . $numeroInter . '_am_arrived'];
+                        $startStopX4['departure_am'] = $value['inter_' . $numeroInter . '_date'] . " " . $value['inter_' . $numeroInter . '_am_quit'];
+                        $startStopX4['arriverd_pm'] = $value['inter_' . $numeroInter . '_date'] . " " . $value['inter_' . $numeroInter . '_pm_arrived'];
+                        $startStopX4['departure_pm'] = $value['inter_' . $numeroInter . '_date'] . " " . $value['inter_' . $numeroInter . '_pm_quit'];
                     }
 
-                    if(count($timeArray)) {
-                        foreach($timeArray as $field => $time) {
-                            $line->updateField($field, $time);
+                    $timeArray = [];
+                    if(count($startStopUnique) > 0) {
+                        $timeArray = $startStopUnique;
+                    } elseif(count($startStopX4)  > 0) {
+                        $timeArray = $startStopX4;
+                    }
+                    if($duration >= 60 || ($value['inter_' . $numeroInter . '_type'] == 2)) {
+                        $desc = $value['inter_' . $numeroInter . '_description'];
+
+                        $new->addline($user, $this->id, $desc, $date->getTimestamp(), $duration);
+                        $lastIdLine = $this->db->getMax('fichinterdet', 'rowid', 'fk_fichinter = ' . $this->id);
+                        $line = $this->getInstance('bimptechnique', 'BT_ficheInter_det', $lastIdLine);
+
+                        $exploded_service = explode("_", $value['inter_' . $numeroInter . '_service']);
+                        $field = 'id_line_' . $exploded_service[0];
+
+                        $line->updateField('type', $value['inter_' . $numeroInter . '_type']);
+
+                        if($value['inter_' . $numeroInter . '_type'] == 0) {
+                            $line->updateField($field, $exploded_service[1]);
                         }
-                    }
 
-                    $mode = 0;
-                    $facture = 0;
-                    switch($value['inter_'.$numeroInter.'_type']) {
-                        case 1:
-                        case 2:
-                        case 3:
-                        case 4:
-                        case 5:
-                            $mode = 0;
-                            $facture = 0;
-                            break;
-                        case 0:
-                            $facture = 1;
-                            if($exploded_service[0] == "contrat") {
-                                $mode = 1;
-                            } elseif($exploded_service[0] == "commande") {
-                                $mode = 2;
+                        if($value['inter_' . $numeroInter . '_type'] == 6)  {
+                            if(!$value['inter_' . $numeroInter . '_dep_on_commande']) {
+                                $line->updateField('type', 3);
+                            } else {
+                                $ids_product = [];
+                                $allCodesDeplacements = json_decode(BimpCore::getConf("bimptechnique_ref_deplacement"));
+                                foreach($allCodesDeplacements as $code) {
+                                    $ids_product[] = $this->db->getValue('product', 'rowid', 'ref = "'.$code.'"');
+                                }
+                                $commande = new Commande($this->db->db);
+                                $commande->fetch($value['inter_' . $numeroInter . '_dep_on_commande']);
+                                $find = false;
+                                foreach($commande->lines as $lineC) {
+                                    if(!$find && in_array($lineC->fk_product, $ids_product)) {
+                                        $find = true;
+                                        $line->updateField('id_line_commande', $lineC->id);
+                                    }
+                                }
                             }
-                            break;
-                    }
+                        }
 
-                    $line->updateField('forfait', $mode);
-                    $line->updateField('facturable', $facture);
-                } else {
-                    $errors[] = "Le temps renseigné ne semble pas correcte";
-                }
+                        if(count($timeArray)) {
+                            foreach($timeArray as $field => $time) {
+                                $line->updateField($field, $time);
+                            }
+                        }
+
+                        $mode = 0;
+                        $facture = 0;
+
+                        switch($value['inter_'.$numeroInter.'_type']) {
+                            case 1:
+                            case 2:
+                                $mode = 0;
+                                $facture = 0;
+                                break;
+                            case 0:
+                            case 6:
+                            case 5:
+                                $facture = 1;
+                                if($exploded_service[0] == "contrat" || $value['inter_'.$numeroInter.'_type'] == 5) {
+                                    $mode = 1;
+                                } else {
+                                    $mode = 2;
+                                }
+                                break;
+                            case 3:
+                            case 4:
+                                $mode = 2;
+                                break;
+                        }
+
+                        $line->updateField('forfait', $mode);
+                        $line->updateField('facturable', $facture);
+                    } else {
+                        $errors[] = "Le temps renseigné ne semble pas correcte";
+                    }
                 }
             }
         }
@@ -1066,8 +1147,11 @@ class BT_ficheInter extends BimpDolObject {
             'success' => $success
         ];
     }
-
     
+    public function chooseModeFacturation(){
+        
+    }
+
     public function getHtLine($type_line, $id_line) {
         switch($type_line) {
             case 'contrat':
@@ -1199,6 +1283,7 @@ class BT_ficheInter extends BimpDolObject {
     public function getServicesArray() {
         $services = [];
         BimpTools::loadDolClass("commande");
+        $codes = json_decode(BimpCore::getConf("bimptechnique_ref_deplacement"));
         $commande = New Commande($this->db->db);
         $product = $this->getInstance('bimpcore', 'Bimp_Product');
         $allCommandes = ($this->getData('commandes')) ? json_decode($this->getData('commandes')) : [];
@@ -1209,36 +1294,29 @@ class BT_ficheInter extends BimpDolObject {
         }
         foreach($allCommandes as $id) {
             $commande->fetch($id);
-            
             foreach ($commande->lines as $line){
                 $product->fetch($line->fk_product);
-                if($product->isLoaded() && ($line->product_type == 1 || $product->getData('fk_product_type'))) {
-                   
-                    if($product->getRef() == BimpCore::getConf("bimptechnique_ref_deplacement")) {
-                        $tp[$product->getRef()] = "Déplacement";
-                    }
+                if($product->isLoaded() && !in_array($product->getRef(), $codes) && ($line->product_type == 1 || $product->getData('fk_product_type'))) {
                     if(array_key_exists($product->getData('ref'), $tp)) {
-                        $services['commande_' . $line->id] = $tp[$product->getRef()] . ' - <b>'.$commande->ref.'</b>';
+                        $services['commande_' . $line->id] = $tp[$product->getRef()] . ' ('.price($line->total_ht).'€ HT) - <b>'.$commande->ref.'</b><br />' . $line->description;
                     } else {
-                        $services['commande_' . $line->id] = $product->getRef() . ' - <b>'.$commande->ref.'</b>';
+                        $services['commande_' . $line->id] = $product->getRef() . ' ('.price($line->total_ht).'€ HT) - <b>'.$commande->ref.'</b><br />' . $line->description;
                     }
                 }
             }
-            
         }
         
         if($this->getData('fk_contrat')) {
             $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getData('fk_contrat'));
             foreach($contrat->dol_object->lines as $line) {
                 $child = $contrat->getChildObject('lines', $line->id);
-                if($child->getData('product_type') == 1) {
+                if($child->getData('product_type') == 1 && $child->getData('statut') == 4) {
                     $product->fetch($line->fk_product);
-                    $services['contrat_'.$line->id] = 'Intervention sous contrat - <strong>'.$contrat->getRef().'</strong> - ' . $line->description;
+                    $services['contrat_'.$line->id] = 'Intervention sous contrat ('.price($child->getData('total_ht')).'€) - <strong>'.$contrat->getRef().'</strong> - ' . $line->description;
                 }
             }
         }
         
-       
         return $services;
     }
 
@@ -1275,7 +1353,7 @@ class BT_ficheInter extends BimpDolObject {
     public function displayAllTicketsCards() {
         $html = "";
         
-        $allTickets = json_decode($this->getData('tickets'));
+        $allTickets = (json_decode($this->getData('tickets'))) ? json_decode($this->getData('tickets')) : [];
         $ticket = $this->getInstance('bimpsupport', 'BS_Ticket');
         if(count($allTickets) > 0) {
             foreach($allTickets as $id) {
@@ -1351,7 +1429,7 @@ class BT_ficheInter extends BimpDolObject {
         $html = "";
         if(!$this->isOldFi()) {
             if($this->isNotSign()) {
-                $tickets = json_decode($this->getData('tickets'));
+                $tickets = (json_decode($this->getData('tickets'))) ? json_decode($this->getData('tickets')) : [];
 
                 $info = "<b>" . BimpRender::renderIcon('warning') . "</b> Si vous avez des tickets support et que vous ne les voyez pas dans le formulaire, rechargez la page en cliquant sur le boutton suivant: <a href='".DOL_URL_ROOT."/bimptechnique/?fc=fi&id=".$this->id."&navtab-maintabs=signature'><button class='btn btn-default'>Rafraîchire la page</button></a>";
                 $html .= "<h4>$info</h4>";
@@ -1485,6 +1563,23 @@ class BT_ficheInter extends BimpDolObject {
         //global $conf;
         //echo '<pre>' . print_r($conf->ficheinter);
         return parent::actionGeneratePdf(['model' => 'fi']);
+    }
+    
+    public function getFileUrl($file_name, $page = 'document') // A VERIFIER POUR LE PDF
+    {
+        $dir = $this->getFilesDir();
+        if ($dir) {
+            if (file_exists($dir . $file_name)) {
+                if (isset(static::$files_module_part)) {
+                    $module_part = static::$files_module_part;
+                } else {
+                    $module_part = static::$dol_module;
+                }
+                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=' . $module_part . '&file=' . urlencode($this->getRef()) . '/' . urlencode($file_name);
+            }
+        }
+
+        return '';
     }
     
     
@@ -1699,7 +1794,7 @@ class BT_ficheInter extends BimpDolObject {
                 foreach($children as $is_child) {
                     $child = $this->getChildObject('inters', $id_child);
                     foreach($children_contrat as $id_child_contrat) {
-                        $child_contrat = $contrat->getChildObject('lines', $id_child_contrat);
+                        $child_contrat = $contrat->getChildObject('inters', $id_child_contrat);
                         if($child->getData('id_line_contrat') == $child_contrat->id || $child->getData('type') == 5) {
                             $inter_on_the_contrat = true;
                         }

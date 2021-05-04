@@ -802,17 +802,17 @@ class BL_CommandeShipment extends BimpObject
         if (BimpObject::objectLoaded($commande)) {
             $users = $commande->dol_object->getIdContact('internal', 'SALESREPFOLL');
             if (isset($users[0]) && $users[0]) {
-                $comm_user = new User($this->db->db);
-                if ($comm_user->fetch((int) $users[0]) > 0) {
-                    return self::getInstanceNomUrlWithIcons($comm_user);
+                $comm_user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $users[0]);
+                if (BimpObject::objectLoaded($comm_user)) {
+                    return $comm_user->getLink();
                 }
             }
 
             $users = $commande->dol_object->getIdContact('internal', 'SALESREPFOLL');
             if (isset($users[0]) && $users[0]) {
-                $comm_user = new User($this->db->db);
-                if ($comm_user->fetch((int) $users[0]) > 0) {
-                    return self::getInstanceNomUrlWithIcons($comm_user);
+                $comm_user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $users[0]);
+                if (BimpObject::objectLoaded($comm_user)) {
+                    return $comm_user->getLink();
                 }
             }
         }

@@ -48,7 +48,7 @@ objects:
                 module: bimpcore
                 name: Bimp_User
             id_object:
-                field_value: id_user
+                field_value: id_user   
                 
     group: 
         relation: hasOne

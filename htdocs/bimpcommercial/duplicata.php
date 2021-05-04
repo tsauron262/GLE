@@ -1,18 +1,30 @@
 <?php
 
 $ref = '';
-$id_fac = 0;
+$id = 0;
+$type = '';
 
 if (isset($_GET['r'])) {
     $ref = trim(strip_tags(stripslashes($_GET['r'])));
 }
 
 if (isset($_GET['i'])) {
-    $id_fac = (int) $_GET['i'];
+    $id = (int) $_GET['i'];
 }
 
-if (!$ref || !$id_fac) {
-    echo 'Référence de la facture absente';
+if (isset($_GET['t'])) {
+    $type = trim(strip_tags(stripslashes($_GET['t'])));
+} else {
+    $type = 'facture';
+}
+
+if (!in_array($type, array('facture', 'propale', 'commande'))) {
+    echo 'Type de document invalide';
+    exit;
+}
+
+if (!$ref || !$id) {
+    echo 'Référence du document absente';
     exit;
 }
 
@@ -21,7 +33,20 @@ require_once __DIR__ . "/../main.inc.php";
 
 global $db;
 
-$sql = 'SELECT facnumber as ref FROM ' . MAIN_DB_PREFIX . 'facture WHERE rowid = ' . $id_fac . ' LIMIT 1';
+switch ($type) {
+    case 'propale':
+        $sql = 'SELECT ref FROM ' . MAIN_DB_PREFIX . 'propal WHERE rowid = ' . $id . ' LIMIT 1';
+        break;
+
+    case 'commande':
+        $sql = 'SELECT ref FROM ' . MAIN_DB_PREFIX . 'commande WHERE rowid = ' . $id . ' LIMIT 1';
+        break;
+
+    case 'facture':
+        $sql = 'SELECT facnumber as ref FROM ' . MAIN_DB_PREFIX . 'facture WHERE rowid = ' . $id . ' LIMIT 1';
+        break;
+}
+
 $result = $db->query($sql);
 
 $ref_check = '';
@@ -33,13 +58,15 @@ if ($result && $db->num_rows($result)) {
 $db->free($result);
 
 if ($ref_check !== $ref) {
-    echo 'Référence de la facture invalide';
+    echo 'Référence du document invalide';
     exit;
 }
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpPDF.php';
 
-$srcFile = DOL_DATA_ROOT . '/facture/' . $ref . '/' . $ref . '.pdf';
+$ref = dol_sanitizeFileName($ref);
+
+$srcFile = DOL_DATA_ROOT . '/' . $type . '/' . $ref . '/' . $ref . '.pdf';
 
 if (!file_exists($srcFile)) {
     echo 'Fichier absent. Veuillez contacter votre interlocuteur';

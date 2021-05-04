@@ -39,7 +39,7 @@ class userController extends BimpController {
         
         if(BimpTools::getValue("socid") > 0){
             $list = new BC_ListTable($instance, 'default', 1, null, '', 'far_user');
-            $list->addFieldFilterValue('attached_societe', BimpTools::getValue("socid"));
+            $list->addFieldFilterValue('id_client', BimpTools::getValue("socid"));
         }
         else{
             

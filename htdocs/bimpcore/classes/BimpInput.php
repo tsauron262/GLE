@@ -1429,6 +1429,10 @@ class BimpInput
             } else {
                 $label = $option_value;
             }
+            
+            if (isset($option['value'])) {
+                $option_value = $option['value'];
+            }
 
             if (isset($option['disabled']) && (int) $option['disabled']) {
                 $disabled = true;

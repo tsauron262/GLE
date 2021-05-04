@@ -606,6 +606,7 @@ function setCommonEvents($container) {
                 e.preventDefault();
                 $(this).tab('show');
             });
+            
             $(this).find('li > a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
                 var $link = $(e.target);
                 var $tabContent = $($(e.target).attr('href'));

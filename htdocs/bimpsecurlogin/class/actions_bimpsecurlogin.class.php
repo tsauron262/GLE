@@ -242,6 +242,11 @@ class securLogSms {
     }
 
     public function traiteMessageUser() {
+        if (defined('BIMP_LIB') && BimpCore::isContextPublic()) {
+            return;
+        }
+        
+        
         $to = $this->traitePhone();
         $toM = $this->traiteMail();
         if (!$this->isPhoneMobile($to) && !$this->isMAil($toM)) {

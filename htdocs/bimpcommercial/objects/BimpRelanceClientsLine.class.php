@@ -952,7 +952,7 @@ class BimpRelanceClientsLine extends BimpObject
 //                        } else {
 //                            $mail_body .= 'Vous pouvez utiliser le lien suivant pour télécharger le duplicata de la facture concernée: ';
 //                        }
-//
+//                        
 //                        $mail_body .= '<br/>';
 //
                         foreach ($facs_done as $id_facture) {

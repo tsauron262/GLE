@@ -1,0 +1,77 @@
+table: Bimp_ApporteurFilter
+primary: id
+
+
+positions: 1
+
+position_insert: after
+
+labels: 
+    name: filtre apporteur
+    name_plur: filtres apporteur
+    
+    
+parent_module: bimpfinanc
+parent_object: Bimp_Apporteur
+parent_id_property: id_rapporteur
+
+common_fields: 0
+     
+                
+fields: 
+    id_rapporteur:
+        label: Apporteur
+        type: id_parent
+    filter:
+        label: Filtre
+        type: text
+    commition: 
+        label: Commition
+        type: percent
+        default_value: 0
+    
+forms:
+    default: 
+        rows:
+            - field: filter
+            - field: commition
+    
+filters_panels: 
+    default: 
+        filters: 
+            filter:
+            commition:
+                
+lists:
+    default: 
+        positions: 1
+        positions_open: 1
+        add_object_row: 1
+        checkboxes: 1
+        configurable: 1
+        sort_field: position
+        sort_way: ASC
+        n: 25
+        delete_btn: 1
+        modal_view: default
+        add_form_name: default
+        filters_panel: default
+        edit_btn: 1
+        cols:
+            filter: 
+            commition:
+            nb_prod:
+                label: Nb Prod
+                value: 
+                    callback: getNbRsult 
+    
+
+                      
+lists_cols: 
+    position: 
+        label: N°
+        min_width: 40;
+                     
+        
+        
+

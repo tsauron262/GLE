@@ -12,30 +12,44 @@ echo '<body>';
 
 BimpCore::displayHeaderFiles();
 
+echo '<div style="padding: 15px">';
+
 global $db;
 $bdb = new BimpDb($db);
 
-require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_Reservation.php';
 
-//$_SESSION['gsx_acti_token'] = '1a8f3b0a-6a45-4730-b38b-bc2d9adfad2a';
+$gsx = new GSX_Reservation();
 
-GSX_v2::$debug_mode = true;
+require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
 
-$gsx = new GSX_v2();
+global $tabCentre;
+$shipTos = array();
 
-$result = $gsx->exec('componentIssue', array(
-    'componentCode' => 'SAFETY',
-//    'device' => array(
-//        'id' => 'C02PD3TVFVH6'
-//    )
-        ));
+foreach ($tabCentre as $centre) {
+    if (!in_array($centre[4], $shipTos)) {
+        $shipTos[] = $centre[4];
+    }
+}
 
-$gsx->displayErrors();
+foreach ($shipTos as $shipTo) {
+    $errors = array();
+    $debug = '';
+    $resas = $gsx->fetchAvailableSlots(897316, $shipTo, 'IPOD', $errors, $debug);
 
-echo '<pre>';
-print_r($result);
-echo '</pre>';
+    echo '*** DEBUG *** <br/><br/>' . $debug . '<br/>******<br/>';
 
+    if (count($errors)) {
+        echo BimpRender::renderAlerts($errors);
+    }
+
+    echo '<br/>RESULTS:<br/><br/>';
+    echo '<pre>';
+    print_r($resas);
+    echo '</pre>';
+}
+
+echo '</div>';
 echo '<br/>FIN';
 echo '</body></html>';
 

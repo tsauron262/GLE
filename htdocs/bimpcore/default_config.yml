@@ -11,3 +11,6 @@ colors:
         
 pdf:
     primary: EF7D00
+
+interface_client: 
+    primary: EF7D00

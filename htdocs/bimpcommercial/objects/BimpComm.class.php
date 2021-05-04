@@ -56,7 +56,7 @@ class BimpComm extends BimpDolObject
 
     // Gestion des droits: 
 
-    protected function canView()
+    public function canView()
     {
         global $user;
 

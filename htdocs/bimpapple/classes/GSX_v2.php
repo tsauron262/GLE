@@ -247,8 +247,6 @@ class GSX_v2 extends GSX_Const
             return 0;
         }
 
-
-
         $headers = array(
             'Accept: application/json',
             'Content-Type: application/json',

@@ -8,6 +8,9 @@ table: contrat
 primary: rowid
 controller: contrat
 icon: fas_file-signature
+public_icon: pe_news-paper
+
+
 list_page_url: 
     controller: index  
 header_btn: 
@@ -463,6 +466,29 @@ fields_tables:
                       method: showInFieldsTable
                       params:
                           - logs
+                          
+    public_infos: 
+        panel: 0
+        rows: 
+            - field: label
+            - field: date_start
+            - label: Date de fin du contrat
+              value: 
+                  callback: displayRealEndDate
+            - field: duree_mois
+            - field: periodicity
+            - field: facturation_echu
+            - label: Date de début de prochaine période de facturation
+              value:
+                  callback: displayDateNextFacture
+            - field: tacite
+            
+    public_commercial: 
+        panel: 0
+        rows: 
+            - field: fk_commercial_suivi
+            - field: fk_commercial_signature
+            - field: relance_renouvellement
           
 filters:
     end_date:
@@ -592,6 +618,32 @@ lists:
         n: 10
         cols:
             fk_soc: unset
+            
+    public: 
+        title: Tous mes contrats
+        configurable: 0
+        checkboxes: 0
+        icon: fas_bars
+        sort_field: datec
+        sort_way: desc
+        n: 10
+        extra_btn: 
+            callback: getPublicListExtraButtons
+        cols: 
+            ref:
+            objet_contrat:
+            datec:
+            statut:
+            nb_renouvellement:
+                label: Renouvellement
+                value:
+                    callback: displayNumberRenouvellement
+            date_start:
+            date_fin_contrat:
+                label: Date de fin
+                value: 
+                    callback: displayRealEndDate
+            fk_commercial_suivi:
 
 forms:
     have_signed:
@@ -612,7 +664,6 @@ forms:
                   help: Merci de corriger si le curseur n'est pas sur le bon choix.
                   type: toggle
                   
-            
     renew_tacite:
         title: Créer un renouvellement
         msgs:
@@ -1185,7 +1236,6 @@ forms:
                   show_values: 2 
                   
 views:
-    # La vue "default" est obligatoire. 
     default:
         extends: fiche_contrat 
         
@@ -1264,34 +1314,6 @@ views:
                   list: 
                       name: default
                       object: fiche_inter
-                      
-    interface_client:
-        title:
-            callback: displayRef
-        show: 
-            callback: canClientViewDetail
-        objects_change_reload: BContract_contract
-        delete_btn: 1
-        edit_form: edit_contrat
-        footer_extra_btn: 
-            callback: getActionsButtons
-        rows:
-            - cols: 
-                - type: rows
-                  col_lg: 12
-                  col_md: 12
-                  rows:                        
-                      - cols: 
-                          - type: fields_table
-                            col_lg: 12
-                            fields_table: 
-                                name: infos
-                      - cols:
-                          - type: list
-                            col_lg: 12
-                            list:
-                                object: lines
-                                name: interface_client
 
     file:
         title: Fichiers joint
@@ -1340,6 +1362,23 @@ views:
                 - type: list
                   list:
                       children: lines
+                      
+    public_client:
+        panel: 0
+        rows:
+            - cols: 
+                  - type: object_header
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: public_infos
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: public_commercial
 
 searches:
     default:

@@ -12,20 +12,12 @@ class BContract_Serials_Imei extends BimpObject {
         4 => 'Fichier CSV'
     ];
     
-    public function canClientView() {
+    public function canView() {
+        if ($this->isLoaded() && BimpCore::isContextPublic()) {
+            // Todo... 
+        }
+        
         return 1;
-    }
-    
-    public function canClientCreate() {
-        return 0;
-    }
-    
-    public function canClientDelete() {
-        return 0;
-    }
-    
-    public function canClientEdit() {
-        return 0;
     }
     
     public function contrat_is_open() {

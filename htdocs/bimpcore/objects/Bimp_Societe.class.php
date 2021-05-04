@@ -236,8 +236,9 @@ class Bimp_Societe extends BimpDolObject
             return 0;
         }
 
-        if (!BimpCore::getConf('siren_required', 0))
+        if (!BimpCore::getConf('siren_required', 0)) {
             return 0;
+        }
 
         $code = (string) $this->getData('siren');
         if (!$code) {
@@ -888,12 +889,18 @@ class Bimp_Societe extends BimpDolObject
 
     // Getters array: 
 
-    public function getContactsArray($include_empty = true)
+    public function getContactsArray($include_empty = true, $empty_label = '')
     {
         if ($this->isLoaded()) {
-            return self::getSocieteContactsArray($this->id, $include_empty);
+            return self::getSocieteContactsArray($this->id, $include_empty, $empty_label);
         }
 
+        if ($include_empty) {
+            return array(
+                0 => $empty_label
+            );
+        }
+        
         return array();
     }
 

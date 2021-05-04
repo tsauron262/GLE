@@ -745,8 +745,8 @@ class Bimp_Paiement extends BimpObject
         return null;
     }
 
-    // Traitements:
-    
+    // Traitements: 
+
     public function onDelete()
     {
         $errors = array();
@@ -989,8 +989,8 @@ class Bimp_Paiement extends BimpObject
         $id_caisse = 0;
         $account = null;
         $use_caisse = false;
-
-
+        
+        
         $date_debut_ex = BimpCore::getConf('date_debut_exercice');
         if ($date_debut_ex) {
             if ($this->getData('datep') < $date_debut_ex)
@@ -1229,7 +1229,7 @@ class Bimp_Paiement extends BimpObject
                             }
                         }
                         $i++;
-
+                        
                         ini_set('max_execution_time', 1200);
                     }
                 }

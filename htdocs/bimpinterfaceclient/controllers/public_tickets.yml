@@ -3,7 +3,7 @@ bootstrap: 1
 objects:
     tickets:
         instance:
-            bimp_object: BIC_UserTickets
+            bimp_object: BIC_UserClientTicket
       
 sections:
     - type: list

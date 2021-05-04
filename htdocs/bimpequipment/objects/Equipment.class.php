@@ -35,22 +35,34 @@ class Equipment extends BimpObject
     // Gestion des droits: 
     // Exeptionnelement les droit dans les isCre.. et isEdi... pour la creation des prod par les commerciaux
 
-    public function canDelete()
-    {
-        global $user;
-        return (int) $user->admin;
-    }
-
     public function canCreate()
     {
+        if (BimpCore::isContextPublic()) {
+            return 0;
+        }
+        
         return 1;
     }
 
     public function canEdit()
     {
+        if (BimpCore::isContextPublic()) {
+            return 0;
+        }
+        
         return 1;
     }
-    
+
+    public function canDelete()
+    {
+        if (BimpCore::isContextPublic()) {
+            return 0;
+        }
+        
+        global $user;
+        return (int) $user->admin;
+    }
+
     public function isCreatable($force_create = false, &$errors = array())
     {
         return $this->isEditable($force_create, $errors);
@@ -59,11 +71,11 @@ class Equipment extends BimpObject
     public function isEditable($force_edit = false, &$errors = array())
     {
         global $user;
-        if ($force_edit || $user->rights->admin or $user->rights->produit->creer){
+        if ($force_edit || $user->rights->admin or $user->rights->produit->creer) {
             return 1;
         }
     }
-    
+
     public function canEditField($field_name)
     {
         global $user;
@@ -80,7 +92,7 @@ class Equipment extends BimpObject
     }
 
     // Getters booléens:
-    
+
     public function isAvailable($id_entrepot = 0, &$errors = array(), $allowed = array(), $no_check = array())
     {
         // *** Valeurs possibles dans $allowed: ***
@@ -1211,6 +1223,36 @@ class Equipment extends BimpObject
         }
 
         return $equipments;
+    }
+
+    public static function findBySerial($serial)
+    {
+        if ((string) $serial) {
+            $serials = array($serial);
+
+            if (strpos($serial, 'S') !== 0) {
+                $serials[] = 'S' . $serial;
+            }
+
+            return BimpCache::findBimpObjectInstance('bimpequipment', 'Equipment', array(
+                        'or_serial' => array(
+                            'or' => array(
+                                'a.serial'              => array('in' => $serials),
+                                'concat("S", a.serial)' => $serial
+                            )
+                        )
+                            ), true);
+        }
+
+        return null;
+    }
+
+    public static function traiteSerialApple($serial)
+    {
+        if (stripos($serial, 'S') === 0) {
+            return substr($serial, 1);
+        }
+        return $serial;
     }
 
     public function checkAvailability($id_entrepot = 0, $allowed_id_reservation = 0)

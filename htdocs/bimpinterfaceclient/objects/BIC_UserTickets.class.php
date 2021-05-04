@@ -6,10 +6,10 @@ require_once DOL_DOCUMENT_ROOT . '/bimpsupport/objects/BS_Ticket.class.php';
 class BIC_UserTickets extends BS_Ticket
 {
 
-    public $arrayTypeSerialImei = array(
-        "serial" => "N° de série",
-        "imei"   => "N° IMEI",
-        "serv"   => "Service");
+//    public $arrayTypeSerialImei = array(
+//        "serial" => "N° de série",
+//        "imei"   => "N° IMEI",
+//        "serv"   => "Service");
 
     public function getListFiltersInterface($filter_send = null)
     {

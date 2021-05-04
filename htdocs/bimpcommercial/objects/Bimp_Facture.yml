@@ -874,6 +874,10 @@ lists_cols:
                 method: displayInfoSav
                 params:
                     - apple_number
+    duplicata: 
+        label: Duplicata
+        value: 
+            callback: diplayDuplicataButton
                    
 lists: 
     default: 
@@ -960,6 +964,23 @@ lists:
                 params: 
                     - 2
             
+    public_client: 
+        total_row: 1
+        configurable: 0
+        sort_field: datef
+        sort_way: desc
+        delete_btn: 0
+        cols: 
+            facnumber: 
+                display: default
+            type: 
+            datef: 
+            paiement_status:
+            commercial:
+                display: nom
+            total_ttc: 
+            duplicata:
+        
 cards: 
     default: 
         title: 

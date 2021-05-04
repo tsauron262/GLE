@@ -61,6 +61,12 @@ fields:
         type: bool
         default_value: 1
         
+    commission_apporteur:
+        label: Commission Apporteur
+        value:
+            callback: displayCommissionApporteur
+        
+        
 forms: 
     default: 
         rows: 
@@ -143,6 +149,10 @@ lists_cols:
         label: Revalorisations
         value: 
             callback: displayRevalorisations
+    commission_apporteur_link: 
+        label: Lien Commission Apporteur
+        value: 
+            callback: displayCommissionApporteur
         
 lists: 
     default: 
@@ -154,4 +164,10 @@ lists:
               icon: fas_search-dollar
               action: bulkCreateRevalorisation
               form_name: bulk_revalorisations
+    commission_apporteur:
+        extends: global
+        filters_panel_open: 0
+        list_actions: 
+        extra_btn: 
+            callback: getListExtraBtnApporteur
         

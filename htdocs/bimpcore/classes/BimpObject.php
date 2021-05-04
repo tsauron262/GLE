@@ -7831,12 +7831,12 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         if (is_a($instance, 'BimpObject')) {
             return $instance->getLink($params);
         } elseif (method_exists($instance, 'getNomUrl')) {
+            $with_icon = (isset($params['with_icon']) ? (int) $params['with_icon'] : 1);
             $html .= $instance->getNomUrl($with_icon);
 
             if (BimpCore::isContextPublic()) {
                 $html = strip_tags($html);
             } else {
-                $with_icon = (isset($params['with_icon']) ? (int) $params['with_icon'] : 1);
                 $external_link = (isset($params['external_link']) ? (int) $params['external_link'] : 1);
 
                 if ($external_link) {

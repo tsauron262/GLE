@@ -9,7 +9,9 @@ nom_url:
     syntaxe: <name>
     
 list_page_url: 
-    controller: bds_reports
+    controller: index
+    url_params: 
+        tab: reports
     
 objects: 
     lines: 

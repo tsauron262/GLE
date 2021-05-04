@@ -270,9 +270,7 @@ class BT_ficheInter_det extends BT_ficheInter {
             $orderLine->fetch($this->getData('id_line_commande'));
             
             $product = $this->getInstance('bimpcore', 'Bimp_Product', $orderLine->fk_product);
-            if($product->getRef() == BimpCore::getConf("bimptechnique_ref_deplacement")) {
-                return "<strong class='success' >".BimpRender::renderIcon('car')." Déplacement vendu</strong>";
-            }
+            
         }
         
         if($this->getData('type') == $parent->getData('fk_soc')) {
@@ -303,7 +301,6 @@ class BT_ficheInter_det extends BT_ficheInter {
             $element = "Contrat: " . $parent->getData('ref');
             $valeur = $obj->getData('subprice') * $obj->getData('qty');
         }elseif($this->getData('id_line_commande') > 0) {
-            $code_deplacement_commande = BimpCore::getConf("bimptechnique_ref_deplacement");
             BimpTools::loadDolClass('commande', 'commande', 'OrderLine');
             $obj = new OrderLine($this->db->db); $obj->fetch($this->getData('id_line_commande'));
             $parent = new Commande($this->db->db);

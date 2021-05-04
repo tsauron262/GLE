@@ -11,6 +11,7 @@ class BT_ficheInter_det extends BT_ficheInter {
     CONST TYPE_DEPLA = 3;
     CONST TYPE_PLUS = 4;
     CONST TYPE_DEPLACEMENT_CONTRAT = 5;
+    CONST TYPE_DEPLACEMENT_VENDU = 6;
     CONST MODE_FACT_AUCUN__ = 0;
     CONST MODE_FACT_FORFAIT = 1;
     CONST MODE_FACT_TEMPS_P = 2;
@@ -40,6 +41,26 @@ class BT_ficheInter_det extends BT_ficheInter {
                 'success'
             ], 'label' => "Intervention vendue", 'icon' => 'check'
         ],
+        self::TYPE_DEPLACEMENT_VENDU => [
+            'classes' => [
+                'success'
+            ], 'label' => "Déplacement vendu", 'icon' => 'car'
+        ],
+        self::TYPE_PLUS => [
+            'classes' => [
+                'info'
+            ], 'label' => "Intervention non prévue", 'icon' => 'plus'
+        ],
+        self::TYPE_DEPLA => [
+            'classes' => [
+                'important'
+            ], 'label' => "Déplacement non vendu", 'icon' => 'car'
+        ],
+        self::TYPE_DEPLACEMENT_CONTRAT => [
+            'classes' => [
+                'success',
+            ], 'label' => "Déplacement sous contrat", 'icon' => 'car'
+        ],
         self::TYPE_IMPON => [
             'classes' => [
                 'danger'
@@ -50,21 +71,6 @@ class BT_ficheInter_det extends BT_ficheInter {
                 'important'
             ], 'label' => "Ligne libre", 'icon' => 'paper-plane'
         ],
-        self::TYPE_DEPLA => [
-            'classes' => [
-                'important'
-            ], 'label' => "Déplacement non vendu", 'icon' => 'car'
-        ],
-        self::TYPE_PLUS => [
-            'classes' => [
-                'info'
-            ], 'label' => "Intervention non prévue", 'icon' => 'plus'
-        ],
-        self::TYPE_DEPLACEMENT_CONTRAT => [
-            'classes' => [
-                'important',
-            ], 'label' => "Déplacement sous contrat", 'icon' => 'car'
-        ]
     ];
     
     public $coup_horaire_tech = 0;
@@ -79,14 +85,21 @@ class BT_ficheInter_det extends BT_ficheInter {
     }
     
     public function showOneHoraire() {
-        if($this->getData('arrived') && $this->getData('departure')) {
+        if(($this->getData('arrived') && $this->getData('departure')) && $this->getData('type') != 2) {
             return 1;
         }
         return 0;
     }
     
     public function showTwoHoraire() {
-        if($this->getData('arriverd_am') && $this->getData('departure_am') && $this->getData('arriverd_pm') && $this->getData('departure_pm')) {
+        if($this->getData('arriverd_am') && $this->getData('departure_am') && $this->getData('arriverd_pm') && $this->getData('departure_pm') && $this->getData('type') != 2) {
+            return 1;
+        }
+        return 0;
+    }
+    
+    public function showTimerDeplacement() {
+        if($this->getData('type') == 5 || $this->getData('type') == 3 || $this->getData('type') == 6) {
             return 1;
         }
         return 0;
@@ -97,11 +110,58 @@ class BT_ficheInter_det extends BT_ficheInter {
         return($t->format('H:i:s'));
     }
     
-    public function updateDolObject(&$errors = array(), &$warnings = array()) {
+    protected function updateDolObject(&$errors = array(), &$warnings = Array()) {
         
-        $data = BimpTools::getValue("arrived");
-        $errors[] = print_r($data, 1);
-        $errors[] = "fji";
+        $data = new stdClass();
+        
+        $data->description = BimpTools::getPostFieldValue("description");
+
+        
+        if(BimpTools::getPostFieldValue('date')) {
+            $data->date = BimpTools::getValue("date");
+        } else {
+            $errors[] = "Vous devez choisir une date";
+        }
+        
+        if(!count($errors)) {
+            $total_hours = 0; 
+            if(BimpTools::getPostFieldValue("duree")) {
+                $total_hours = BimpTools::getValue('duree');
+            }
+            if(BimpTools::getPostFieldValue("arrived") && BimpTools::getPostFieldValue("departure")) {
+                $data->arrived = $data->date . " " . BimpTools::getValue("arrived");
+                $data->departure = $data->date . " " . BimpTools::getValue("departure");
+                $total_hours = strtotime(BimpTools::getValue("departure")) - strtotime(BimpTools::getValue("arrived"));
+            } elseif(BimpTools::getPostFieldValue("arriverd_am") && BimpTools::getPostFieldValue("departure_am") && BimpTools::getPostFieldValue("arriverd_pm") && BimpTools::getPostFieldValue("departure_pm")) {
+                $total_hous_am = 0;
+                $total_hours_pm = 0;
+                $data->arriverd_am = $data->date . " " . BimpTools::getValue("arriverd_am");
+                $data->departure_am = $data->date . " " . BimpTools::getValue("departure_am");
+                $total_hous_am = strtotime(BimpTools::getValue("departure_am")) - strtotime(BimpTools::getValue("arriverd_am"));
+                $data->arriverd_pm = $data->date . " " . BimpTools::getValue("arriverd_pm");
+                $data->departure_pm = $data->date . " " . BimpTools::getValue("departure_pm");
+                $total_hours_pm = strtotime(BimpTools::getValue("departure_pm")) - strtotime(BimpTools::getValue("arriverd_pm"));
+                $total_hours = $total_hous_am + $total_hours_pm;
+            }
+            if(($total_hours == 0 || $total_hours < 60) && $this->getData('type') != 2) {
+                $errors[] = "Il semble y avoir une erreur dans vos horaires. La durée minimal de l'intervention est de 1 minute = " . $total_hours;
+            } else {
+                $data->duree = $total_hours;
+            }
+                        
+        }
+        
+        if(!count($errors)) {
+            foreach($data as $field => $newValue) {
+                $this->updateField($field, $newValue);
+            }
+            $tt = $this->db->getSum('fichinterdet', 'duree', 'fk_fichinter = ' . $this->getData('fk_fichinter'));
+            $parent = BimpCache::getBimpObjectInstance('bimptechnique', "BT_ficheInter", $this->getData('fk_fichinter'));
+            $parent->set('duree', $tt);
+            $parent->update();
+            
+        }
+        
         return Array(
             "success" => "",
             "errors" => $errors,
@@ -109,6 +169,7 @@ class BT_ficheInter_det extends BT_ficheInter {
         );
     }
     
+
     public function showDateWithDetails() {
         
         $return = "";
@@ -131,8 +192,10 @@ class BT_ficheInter_det extends BT_ficheInter {
             $popover = "AM: " . $start_am->format("H:i") . " " . BimpRender::renderIcon('arrow-right') . " " . $stop_am->format("H:i") . "<br />";
             $popover.= "PM: " .$start_pm->format("H:i") . " " . BimpRender::renderIcon('arrow-right') . " " . $stop_pm->format("H:i");
         }
-        
-        $return .= " <small class='bs-popover' ".BimpRender::renderPopoverData($popover, 'top', true)." >".BimpRender::renderIcon('info-circle')."</small>";
+        $excludeTypeInfos = Array(2,3,5,6);
+       
+        if(!in_array($this->getData('type'), $excludeTypeInfos))
+            $return .= " <small class='bs-popover' ".BimpRender::renderPopoverData($popover, 'top', true)." >".BimpRender::renderIcon('info-circle')."</small>";
         
         return $return;
         
@@ -208,7 +271,7 @@ class BT_ficheInter_det extends BT_ficheInter {
             
             $product = $this->getInstance('bimpcore', 'Bimp_Product', $orderLine->fk_product);
             if($product->getRef() == BimpCore::getConf("bimptechnique_ref_deplacement")) {
-                return "<strong class='important' >".BimpRender::renderIcon('car')." Déplacement</strong>";
+                return "<strong class='success' >".BimpRender::renderIcon('car')." Déplacement vendu</strong>";
             }
         }
         
@@ -240,6 +303,7 @@ class BT_ficheInter_det extends BT_ficheInter {
             $element = "Contrat: " . $parent->getData('ref');
             $valeur = $obj->getData('subprice') * $obj->getData('qty');
         }elseif($this->getData('id_line_commande') > 0) {
+            $code_deplacement_commande = BimpCore::getConf("bimptechnique_ref_deplacement");
             BimpTools::loadDolClass('commande', 'commande', 'OrderLine');
             $obj = new OrderLine($this->db->db); $obj->fetch($this->getData('id_line_commande'));
             $parent = new Commande($this->db->db);
@@ -247,16 +311,27 @@ class BT_ficheInter_det extends BT_ficheInter {
             $valeur = $obj->subprice * $obj->qty;
             $fk_product = $obj->fk_product;
             $element = "Commande: " . $parent->ref;
-        } else {
+        }else {
             $fk_product = 0;
         }
         if($fk_product > 0) {
             $product = $this->getInstance('bimpcore', 'Bimp_Product', $fk_product);
-            return $product->getNomUrl() . '<br /><strong>'.$element.'</strong><br /><strong>Vendu: ' . price($valeur) . '€ HT</strong>';
+            $productName = $product->getNomUrl();
+            if($this->getData('type') == 6)  {
+                $productName = "<b class='success' >".BimpRender::renderIcon("car")." Déplacement vendu</b>";
+            }
+            return $productName . '<br /><strong>'.$element.'</strong><br /><strong>Vendu: ' . price($valeur) . '€ HT</strong>';
         } else {
             if($this->getData('type') == $parent->getData('fk_soc')) {
                 $interne = BimpCache::getBimpObjectInstance('bimpcore', "Bimp_Societe", $parent->getData('fk_soc'));
                 return "<b>".BimpRender::renderIcon('inbox')." Service en interne</b><br /><p>Société: " . $interne->getNomUrl() . "</p>";
+            }
+            if($this->getData('type') == 5) {
+                $render = "<b class='success'>".BimpRender::renderIcon("car")." Déplacement sous contrat</b><br />";
+                $obj = $this->getInstance("bimpcontract", "BContract_contrat", $parent->getData('fk_contrat'));
+                $render .= "<b>Contrat: ".$obj->getRef()."</b><br /><b>Total vendu: ".price($obj->getTotalContrat())."€</b>";
+                
+                return $render;
             }
             return $this->displayData('type');
         }

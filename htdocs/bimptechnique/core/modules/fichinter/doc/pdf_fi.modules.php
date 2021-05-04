@@ -404,7 +404,7 @@ class pdf_fi {
                     $child = $fiche->getChildObject("inters", $id);
                     $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 4;
                     $pdf->SetFont(''/* 'Arial' */, 'B', 9);
-                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Ligne #" . $nb, 0, 'L');
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Intervention #" . $nb, 0, 'L');
                     $pdf->SetFont(''/* 'Arial' */, 'B', 8);
 
                     $date = new DateTime($child->getData('date'));
@@ -412,14 +412,22 @@ class pdf_fi {
                     if($child->getData('arrived')) {
                         $arrived = new DateTime($child->getData('arrived'));
                         $departure = new DateTime($child->getData('departure'));
-                        $add = "de " . $arrived->format('H:i') . ' à ' . $departure->format('H:i');
+                        if($child->getData('type') == 2) {
+                            $add = "";
+                        } else {
+                            $add = "de " . $arrived->format('H:i') . ' à ' . $departure->format('H:i');
+                        }
                     }elseif($child->getData('arriverd_am'))  {
                         $arrived_am = new DateTime($child->getData('arriverd_am'));
                         $departure_am = new DateTime($child->getData('departure_am'));
                         $arrived_pm = new DateTime($child->getData('arriverd_pm'));
                         $departure_pm = new DateTime($child->getData('departure_pm'));
-                        $add = "de " . $arrived_am->format('H:i') . ' à ' . $departure_am->format('H:i') . " et de ";
-                        $add.= $arrived_pm->format('H:i') . " à " . $departure_pm->format('H:i');
+                        if($child->getData('type') == 2) {
+                            $add = "";
+                        } else {
+                            $add = "de " . $arrived_am->format('H:i') . ' à ' . $departure_am->format('H:i') . " et de ";
+                            $add.= $arrived_pm->format('H:i') . " à " . $departure_pm->format('H:i');
+                        }
                     }
                     
                     $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Le " . $date->format('d/m/Y') . " " . $add, 0, 'L');
@@ -449,7 +457,7 @@ class pdf_fi {
                             $type = "Intervention vendue";
                             break;
                         case 1:
-                            $type = "Imponderable";
+                            $type = "Impondérable";
                             break;
                         case 2:
                             $type = "Explications";
@@ -463,14 +471,21 @@ class pdf_fi {
                         case 5:
                             $type = "Déplacement sous contrat";
                             break;
+                        case 6:
+                            $type = "Déplacement vendu";
+                            break;
                         default:
                             $type = "Service en interne";
                             break;
                     }
-                    
                    
                     $pdf->Cell($W, 6, "$type" ,1, 0, 'C', 1);
-                    $pdf->Cell($W, 6, $child->displayDuree() ,1, 0, 'C', 1);
+                    if($child->getData('type') == 2) {
+                        $pdf->Cell($W, 6, "Pas de durée" ,1, 0, 'C', 1);
+                    } else {
+                        $pdf->Cell($W, 6, $child->displayDuree() ,1, 0, 'C', 1);
+                    }
+                    
                     
                     
                     $service = BimpObject::getInstance('bimpcore', "Bimp_Product");
@@ -497,39 +512,41 @@ class pdf_fi {
                     }
                     
                     if(!$have_pdf_ref) {
-                        $pdf->Cell($W, 6, "Aucune",1, 0, 'C', 1);
+                        $pdf->SetFont(''/* 'Arial' */, '', 7.5);
+                        $pdf->Cell($W, 6, "Ni commande, ni contrat, ni ticket",1, 0, 'C', 1);
+                        $pdf->SetFont(''/* 'Arial' */, '', 9);
+                        $pdf->Cell($W, 6, "Aucun",1, 0, 'C', 1);
                     }
                     
+                    $excludeDescriptionService = Array(4,5,1,2,3);
                     $pdf->Ln();
                     $pdf->setColor('fill', 255, 255, 255);
                     $pdf->setDrawColor(255, 255, 255);
                     $pdf->SetFont(''/* 'Arial' */, 'B', 9);
                     if($service->isLoaded()) {
-                        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "1 - Description du service " . $service->getRef(), 0, 'L');
+                        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Description du service " . $service->getRef(), 0, 'L');
                     } else {
-                        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "1 - Description du service ", 0, 'L');
+                        if(!in_array($child->getData('type'), $excludeDescriptionService)) {
+                            $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Description du service ", 0, 'L');
+                        }
+                        
                     }
                     $pdf->SetFont(''/* 'Arial' */, '', 9);
-                    $pdf->setX(20);
                     if($service->isLoaded()) {
                         $pdf->MultiCell(($this->page_largeur - $this->marge_droite - ($this->marge_gauche) + 50), 4, strip_tags($service->getData('description')), 0, 'L');
                     } else {
-                        $pdf->MultiCell(($this->page_largeur - $this->marge_droite - ($this->marge_gauche) + 50), 4, $type, 0, 'L');
+                        if(!in_array($child->getData('type'), $excludeDescriptionService)) {
+                            $pdf->MultiCell(($this->page_largeur - $this->marge_droite - ($this->marge_gauche) + 50), 4, $type, 0, 'L');
+                        }
                     }
                     
-                    $pdf->SetFont(''/* 'Arial' */, 'B', 9);
-                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "2 - Notes de " . $tech->getName(), 0, 'L');
-                    $pdf->SetFont(''/* 'Arial' */, '', 9);
-                    $pdf->setX(20);                    
-                    //$str = str_replace("<br>", ", ", $child->getData('description'));
-                    if($child->getData('description') == "<br>") {
-                        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Il n'y a pas de note supplémentaire", 0, 'L');
-                    } else {
-                        $pdf->writeHTML($child->getData('description'));
-                        //$pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, strip_tags($str), 0, 'L');
-                    }
-
-                    $pdf->Ln();
+                    if($child->getData('description') != "<br>" && $child->getData('description')  != "") {
+                        $pdf->SetFont(''/* 'Arial' */, 'B', 9);
+                        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Notes de " . $tech->getName(), 0, 'L');
+                        $pdf->SetFont(''/* 'Arial' */, '', 9);
+                        $pdf->setX(16);
+                            $pdf->writeHTML($child->getData('description'));
+                    } 
                     $pdf->Ln();
 
                 }

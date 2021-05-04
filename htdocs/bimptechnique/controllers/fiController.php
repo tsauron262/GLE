@@ -35,7 +35,24 @@ class fiController extends BimpController {
         $auto_terminer = in_array($instance->getData('fk_soc'), explode(',', BimpCore::getConf('bimptechnique_id_societe_auto_terminer'))) ? true : false;
         
         if(!count($errors)) {
-            if($instance->isLoaded()) {
+//            
+//            $errors[] = "Nouvelle fonctionnalité -> Update agenda tech";
+            
+            // Get current planning
+//            $children = $instance->getChildrenList("inters");
+//            $planningArray = [];
+//            $start_dateTime = 0;
+//            $plus_grand_dateTime = 0;
+//            foreach($children as $id_child) {
+//                $child = $instance->getChildObject('inters', $id_child);
+                
+                
+                //$planningArray[$child->getData('date')] = "";
+//            }
+            
+//            $errors[] = "<pre>".print_r($planningArray, 1)."</pre>";
+            
+            if($instance->isLoaded($errors) && !count($errors)) {
                 $instance->updateField('signed', 1);
                 $instance->updateField('date_signed', date('Y-m-d H:i:s'));
                 $instance->updateField('email_signature', $email);
@@ -124,8 +141,6 @@ class fiController extends BimpController {
                     
                     
                 }
-            } else {
-                $errors[] = "Erreur lors du load de la fiche d'intervention";
             }
         }
         

@@ -49,7 +49,7 @@ class BT_ficheInter_det extends BT_ficheInter {
         self::TYPE_PLUS => [
             'classes' => [
                 'info'
-            ], 'label' => "Intervention non prévue", 'icon' => 'plus'
+            ], 'label' => "Intervention non vendu", 'icon' => 'plus'
         ],
         self::TYPE_DEPLA => [
             'classes' => [

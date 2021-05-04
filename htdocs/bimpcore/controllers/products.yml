@@ -71,7 +71,10 @@ objects:
             bimp_object: Bimp_Entrepot     
     values8sens: 
         instance: 
-            bimp_object: BimpValues8Sens     
+            bimp_object: BimpValues8Sens  
+    productfourn: 
+        instance: 
+            bimp_object: Bimp_ProductFournisseurPrice 
             
 sections:
     - type: tabs
@@ -99,6 +102,14 @@ sections:
 #                      panel: 1
 #                      object: productentrepot
 #                      name: default
+        productfourn:
+            label: Produits Fournisseurs
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: productfourn
+                      name: default
                       
         productentrepotcustom:
             label: Stock / Entrepot

@@ -145,6 +145,8 @@ views:
         
 lists: 
     default: 
+        filters_panel: default
+        configurable: 1
         title: Liste des prix d'achat fournisseur
         sort_field: id
         sort_way: desc
@@ -162,6 +164,11 @@ lists:
             price:
             remise_percent:
             stockFourn:
+                
+    fourn:
+        extends: default
+        cols:
+            fk_soc: unset
             
 cards: 
     default: 
@@ -172,3 +179,15 @@ cards:
               display: nom_url
             - field: price
             - field: tva_tx
+            
+            
+filters_panels:
+    default: 
+        filters: 
+            fk_soc:
+            ref_fourn:
+            quantity:
+            tva_tx:
+            price:
+            remise_percent:
+            stockFourn:

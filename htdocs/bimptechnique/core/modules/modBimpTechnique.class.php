@@ -49,7 +49,13 @@ class modBimpTechnique extends DolibarrModules {
         $this->rights[$r][1] = 'Voir les stats';
         $this->rights[$r][3] = 0;
         $this->rights[$r][4] = 'view_stats';
+        $r++;
+        $this->rights[$r][0] = $this->numero + $r;
+        $this->rights[$r][1] = 'Supprimer une FI';
+        $this->rights[$r][3] = 0;
+        $this->rights[$r][4] = 'delete_fi';
         $r = 1;
+        
 
     }
 

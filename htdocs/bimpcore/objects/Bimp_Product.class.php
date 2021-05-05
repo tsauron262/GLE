@@ -12,6 +12,7 @@ class Bimp_Product extends BimpObject
         4 => 'Déplacement contrat',
         5 => 'Logiciel'
     );
+    public static $sousTypeDep = array(3,4);
     public static $product_type = array(
 //        "" => '',
         0 => array('label' => 'Produit', 'icon' => 'fas_box'),
@@ -429,6 +430,10 @@ class Bimp_Product extends BimpObject
     public function isAchetable(&$errors, $urgent = false, $mail = true)
     {
         return $this->isVendable($errors, $urgent, $mail);
+    }
+    
+    public function isDep(){
+        return (in_array($this->getData('type2'), static::$sousTypeDep));
     }
 
     public function hasFixePrices()

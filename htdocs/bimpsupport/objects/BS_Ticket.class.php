@@ -264,7 +264,7 @@ class BS_Ticket extends BimpObject
 
                     if (is_array($rows)) {
                         foreach ($rows as $r) {
-                            if (in_array((int) $r['rowid'], $userContrats)) {
+                            if ($userClient->isAdmin() || in_array((int) $r['rowid'], $userContrats)) {
                                 $tickets[(int) $r['rowid']] = $r['ref'] . ($r['label'] ? ' - ' . $r['label'] : '');
                             }
                         }

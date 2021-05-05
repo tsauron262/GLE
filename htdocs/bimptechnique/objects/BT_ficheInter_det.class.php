@@ -305,7 +305,7 @@ class BT_ficheInter_det extends BT_ficheInter {
             $obj = new OrderLine($this->db->db); $obj->fetch($this->getData('id_line_commande'));
             $parent = new Commande($this->db->db);
             $parent->fetch($obj->fk_commande);
-            $valeur = $obj->subprice * $obj->qty;
+            $valeur = $obj->total_ht;
             $fk_product = $obj->fk_product;
             $element = "Commande: " . $parent->ref;
         }else {

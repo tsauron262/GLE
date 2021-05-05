@@ -805,29 +805,14 @@ lists:
         sort_field: date_create
         sort_way: desc
         n: 10
-        add_btn: 1
-        add_form_name: public_create
-        add_btn_label: Nouveau ticket hotline
         edit_btn: 1
         edit_form: public_edit
         extra_btn: 
-            callback: getPublicListExtraButtons
-#        list_filters: 
-#            callback:
-#                method: getListFiltersInterface
-#                params:
-#                    - contrat
-#        add_form_values: 
-#            fields:
-#                id_user_client:
-#                    callback:
-#                        method: userClient
-#                        params:
-#                            - id
-                            
+            callback: getPublicListExtraButtons                            
         cols:
             ticket_number:
             date_create:
+            id_user_client: 
             status:
             sujetCall:
             id_user_resp:

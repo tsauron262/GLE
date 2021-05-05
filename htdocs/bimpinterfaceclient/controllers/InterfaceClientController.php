@@ -31,6 +31,8 @@ class InterfaceClientController extends BimpPublicController
 
             if ($userClient->isAdmin()) {
                 $this->sideTabs['users'] = array('url' => DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=users', 'label' => 'Utilisateurs', 'icon' => 'pe_users');
+            } else {
+                unset($this->sideTabs['factures']);
             }
         }
 
@@ -190,7 +192,7 @@ class InterfaceClientController extends BimpPublicController
                 $headers = array(
                     'ref'    => 'Ref.',
                     'datec'  => 'Créé le',
-                    'user'   => 'Créé Par',
+                    'user'   => 'Demandeur',
                     'status' => 'Statut',
                     'sujet'  => 'Description',
                     'tools'  => array('label' => '', 'col_style' => 'text-align: right')
@@ -355,8 +357,9 @@ class InterfaceClientController extends BimpPublicController
 
                         $html .= '<div class="row">';
 
-                        // Listes contrats échus: 
-                        $list = new BC_ListTable($contrat, 'public', 1, null, 'Contrats inactifs');
+                        // Listes contrats inactifs: 
+
+                        $list = new BC_ListTable($contrat, 'public', 1, null, 'Mes contrats inactifs', 'fas_times-circle');
                         $list->addFieldFilterValue('fk_soc', $client->id);
                         $list->addFieldFilterValue('statut', array(
                             'and' => array(
@@ -364,6 +367,12 @@ class InterfaceClientController extends BimpPublicController
                                 array('operator' => '!=', 'value' => 11)
                             )
                         ));
+
+                        if (!$userClient->isAdmin()) {
+                            $list->addFieldFilterValue('rowid', array(
+                                'in' => $userClient->getAssociatedContratsList()
+                            ));
+                        }
 
                         $html .= $list->renderHtml();
                         $html .= '</div>';
@@ -390,7 +399,7 @@ class InterfaceClientController extends BimpPublicController
                     if (!BimpObject::objectLoaded($contrat)) {
                         $html .= BimpRender::renderAlerts('Ce Contrat n\'existe plus');
                     } else {
-                        if (!$contrat->can('view')) {
+                        if (!$contrat->can('view') || !$contrat->canClientViewDetail()) {
                             $html .= BimpRender::renderAlerts('Vous n\'avez pas la permission de voir ce contrat', 'warning');
                         } else {
                             $view = new BC_View($contrat, 'public_client');
@@ -444,9 +453,32 @@ class InterfaceClientController extends BimpPublicController
                 if (!BimpObject::objectLoaded($userClient) || !$ticket->can('view')) {
                     $html .= BimpRender::renderAlerts('Vous n\'avez pas la permission d\'accéder à ce contenu');
                 } else {
+                    if ($ticket->can('create')) {
+                        $html .= '<div class="buttonsContainer align-right">';
+                        $contact = null;
+                        if ((int) $userClient->getData('id_contact')) {
+                            $contact = $userClient->getChildObject('contact');
+                        }
+
+                        $onclick = $ticket->getJsLoadModalForm('public_create', 'Nouveau ticket support', array(
+                            'fields' => array(
+                                'id_client'        => (int) $userClient->getData('id_client'),
+                                'id_user_client'   => (BimpObject::objectLoaded($userClient) ? (int) $userClient->id : 0),
+                                'contact_in_soc'   => (BimpObject::objectLoaded($contact) ? $contact->getName() : ''),
+                                'adresse_envois'   => (BimpObject::objectLoaded($contact) ? BimpTools::replaceBr($contact->displayFullAddress()) : ''),
+                                'email_bon_retour' => (BimpObject::objectLoaded($userClient) ? $userClient->getData('email') : '')
+                            )
+                        ));
+                        $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                        $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouveau ticket support';
+                        $html .= '</span>';
+                        $html .= '</div>';
+                    }
                     $list = new BC_ListTable($ticket, 'public_client');
                     $list->addFieldFilterValue('id_client', (int) $userClient->getData('id_client'));
-                    $list->params['add_form_values']['fields']['id_user_client'] = $userClient->id;
+                    if (!$userClient->isAdmin()) {
+                        $list->addFieldFilterValue('id_user_client', (int) $userClient->id);
+                    }
                     $html .= $list->renderHtml();
                 }
                 break;

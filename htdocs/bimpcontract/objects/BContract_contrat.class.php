@@ -2120,12 +2120,11 @@ class BContract_contrat extends BimpDolObject
                 return 1;
             }
 
-            $list = $userClient->getChildrenObjects('user_client_contrat');
-            foreach ($list as $obj) {
-                if ($obj->getData('id_contrat') == $this->id) {
-                    return 1;
-                }
+            if (in_array($this->id, $userClient->getAssociatedContratsList())) {
+                return 1;
             }
+
+            return 0;
         }
 
         return 1;
@@ -3967,7 +3966,7 @@ class BContract_contrat extends BimpDolObject
     {
         $buttons = array();
 
-        if ($this->can('view')) {
+        if ($this->can('view') && $this->canClientViewDetail()) {
             $url = $this->getPublicUrl();
 
             if ($url) {

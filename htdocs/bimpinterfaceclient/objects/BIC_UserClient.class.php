@@ -75,9 +75,7 @@ class BIC_UserClient extends BimpObject
         if ($this->isLoaded()) {
             global $userClient;
 
-            if (BimpObject::objectLoaded($userClient) &&
-                    (($userClient->isAdmin() && (int) $this->getData('id_client') == (int) $userClient->getData('id_client')) ||
-                    ($this->id == $userClient->id))) {
+            if (BimpObject::objectLoaded($userClient) && ($userClient->isAdmin() && (int) $this->getData('id_client') == (int) $userClient->getData('id_client'))) {
                 return 1;
             }
 
@@ -104,7 +102,7 @@ class BIC_UserClient extends BimpObject
                 case 'role':
                 case 'status':
                 case 'id_contact':
-                    if (BimpObject::objectLoaded($userClient) && $userClient->isAdmin() && $userClient->id != $this->id) {
+                    if (BimpObject::objectLoaded($userClient) && $userClient->isAdmin()) {
                         return 1;
                     }
                     return 0;
@@ -393,19 +391,24 @@ class BIC_UserClient extends BimpObject
 
     public function getAssociatedContratsList()
     {
-        $contrats = array();
-
         if ($this->isLoaded()) {
-            $rows = $this->db->getRows('bic_user_contrat', 'id_user = ' . $this->id, null, 'array', array('id_contrat'));
-            
-            if (is_array($rows)) {
-                foreach ($rows as $r) {
-                    $contrats[] = (int) $r['id_contrat'];
+            $cache_key = 'user_client_' . $this->id . '_associated_contrats_list';
+
+            if (!isset(self::$cache[$cache_key])) {
+                self::$cache[$cache_key] = array();
+                $rows = $this->db->getRows('bic_user_contrat', 'id_user = ' . $this->id, null, 'array', array('id_contrat'));
+
+                if (is_array($rows)) {
+                    foreach ($rows as $r) {
+                        self::$cache[$cache_key][] = (int) $r['id_contrat'];
+                    }
                 }
             }
+
+            return self::$cache[$cache_key];
         }
 
-        return $contrats;
+        return array();
     }
 
     // Affichage:

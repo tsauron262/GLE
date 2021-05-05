@@ -45,40 +45,33 @@ class BS_Ticket extends BimpObject
 
     // Droits users:
 
-    public function canView()
+    public function canClientView()
     {
-        if (BimpCore::isContextPublic()) {
-            if ($this->isLoaded()) {
-                global $userClient;
-                if (BimpObject::objectLoaded($userClient) && $userClient->getData("id_client") == $this->getData("id_client")) {
-                    return 1;
+        if ($this->isLoaded()) {
+            global $userClient;
+            if (BimpObject::objectLoaded($userClient) && $userClient->getData("id_client") == $this->getData("id_client")) {
+                if (!$userClient->isAdmin() && $userClient->id !== (int) $this->getData('id_user_client')) {
+                    return 0;
                 }
-
-                return 0;
+                return 1;
             }
 
-            return 1;
+            return 0;
         }
 
-        return parent::canView();
+        return 1;
     }
 
-    public function canCreate()
+    public function canClientCreate()
     {
-        if (BimpCore::isContextPublic()) {
-            return 1;
-        }
-
-        return parent::canCreate();
+        return 1;
     }
 
-    public function canEdit()
+    public function canClientEdit()
     {
-        if ($this->isLoaded() && BimpCore::isContextPublic()) {
-            if ($this->canView()) {
-                if ($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT) {
-                    return 1;
-                }
+        if ($this->isLoaded()) {
+            if ($this->canClientView() && $this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT) {
+                return 1;
             }
 
             return 0;
@@ -261,12 +254,31 @@ class BS_Ticket extends BimpObject
 
         $id_client = (int) $this->getData('id_client');
 
-        if ($id_client) {
-            $rows = $this->db->getRows('contrat', 'fk_soc = ' . $id_client . ' AND statut IN (1,11)', null, 'array', array('rowid', 'ref', 'label'));
+        if (BimpCore::isContextPublic()) {
+            global $userClient;
 
-            if (is_array($rows)) {
-                foreach ($rows as $r) {
-                    $tickets[(int) $r['rowid']] = $r['ref'] . ($r['label'] ? ' - ' . $r['label'] : '');
+            if (BimpObject::objectLoaded($userClient)) {
+                if ((int) $userClient->getData('id_client') === $id_client) {
+                    $userContrats = $userClient->getAssociatedContratsList();
+                    $rows = $this->db->getRows('contrat', 'fk_soc = ' . $id_client . ' AND statut = 11', null, 'array', array('rowid', 'ref', 'label'));
+
+                    if (is_array($rows)) {
+                        foreach ($rows as $r) {
+                            if (in_array((int) $r['rowid'], $userContrats)) {
+                                $tickets[(int) $r['rowid']] = $r['ref'] . ($r['label'] ? ' - ' . $r['label'] : '');
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            if ($id_client) {
+                $rows = $this->db->getRows('contrat', 'fk_soc = ' . $id_client . ' AND statut = 11', null, 'array', array('rowid', 'ref', 'label'));
+
+                if (is_array($rows)) {
+                    foreach ($rows as $r) {
+                        $tickets[(int) $r['rowid']] = $r['ref'] . ($r['label'] ? ' - ' . $r['label'] : '');
+                    }
                 }
             }
         }
@@ -284,7 +296,6 @@ class BS_Ticket extends BimpObject
             'icon'    => 'fas_file',
             "onclick" => "window.location.href = '" . DOL_URL_ROOT . "/bimpinterfaceclient/?page=ticket&id=" . $this->getData('id') . "'"
         );
-
 
         return $buttons;
     }
@@ -382,7 +393,7 @@ class BS_Ticket extends BimpObject
         $buttons = array();
 
         if ($this->isLoaded()) {
-            if ($this->canView()) {
+            if ($this->can('view')) {
                 $url = $this->getPublicUrl();
                 $buttons[] = array(
                     'label'   => 'Voir le détail',
@@ -400,9 +411,10 @@ class BS_Ticket extends BimpObject
         if ($this->isLoaded()) {
             return DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=tickets&content=card&id_ticket=' . $this->id;
         }
-        
+
         return '';
     }
+
     public function getPublicListPageUrl()
     {
         return DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=tickets';

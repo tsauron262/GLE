@@ -10,6 +10,7 @@ parent_object: Bimp_Societe
 parent_id_property: fk_soc
 
 name_syntaxe: <firstname> <lastname>
+
 nom_url: 
     syntaxe: <name>
     card: default
@@ -181,6 +182,47 @@ fields:
 #    default_lang
 #    no_email
 
+#address zip town fk_pays email phone phone_perso phone_mobile phone_mobile fax poste note_public
+
+forms: 
+    public_create: 
+        rows: 
+            civility: 
+                field: civility
+            firstname: 
+                field: firstname
+            lastname: 
+                field: lastname
+            address: 
+                field: address
+            address: 
+                field: address
+            zip: 
+                field: zip
+            town: 
+                field: town
+            fk_pays: 
+                field: fk_pays
+            email: 
+                field: email
+            phone: 
+                field: phone
+            phone_perso: 
+                field: phone_perso
+            phone_mobile: 
+                field: phone_mobile
+            fax: 
+                field: fax
+            poste: 
+                field: poste
+                
+    public_edit:
+        extends: public_create
+        msgs: 
+            - type: warning
+              content: Attention, si vous avez des commandes en cours <b>à livrer à ce contact</b>, toute modification de l'adresse affectera la livraison de ces commandes.<br/>Veuillez de préférence créer un nouveau contact si vous ne souhaitez pas modifier l'adresse de livraison des commandes en cours.
+                
+            
 fields_tables: 
     identity:
         title: Identité
@@ -220,11 +262,8 @@ fields_tables:
         rows: 
             - field: note_public
             - field: note_private
-            
 views: 
     default: 
-        title: 
-            callback: getName
         rows: 
             - cols: 
                 - type: fields_table
@@ -317,6 +356,15 @@ lists:
         add_form_name: default
         cols: 
             fk_soc: unset
+            
+    public: 
+        extends: soc
+        enable_search: 0
+        configurable: 0
+        delete_btn: 0
+        add_form_name: public_create
+        edit_form: public_edit
+        modal_view: unset
               
 cards: 
     default: 

@@ -62,7 +62,7 @@ class commandeController extends BimpController
 //            foreach ($errors as $error) {
 //                $mail_msg .= ' - ' . $error . "\n";
 //            }
-//            mailSyn2($subject, 'f.martinez@bimp.fr', 'BIMP<admin@bimp.fr>', $mail_msg);
+//            mailSyn2($subject, 'f.martinez@bimp.fr', '', $mail_msg);
 //        }
 
         $entrepôt = $commande->getChildObject('entrepot');

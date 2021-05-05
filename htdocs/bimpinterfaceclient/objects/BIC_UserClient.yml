@@ -1,6 +1,5 @@
 table: bic_user
 icon: fas_user
-controller: pageUser
 common_fields: 0
 
 parent_module: bimpcore
@@ -19,11 +18,13 @@ nom_url:
     syntaxe: <email>
                 
 objects:
-    user_client_contrat:
+    user_client_contrats:
         relation: hasMany
-        delete: 0
+        delete: 1
         instance:
-            bimp_object: BIC_UserClientContrats
+            bimp_object: 
+                module: bimpinterfaceclient
+                name: BIC_UserClientContrat
     
     societe:
         instance:
@@ -121,7 +122,7 @@ forms:
                     type: toggle
                 value: 1
             contrat: 
-                object: user_client_contrat
+                object: user_client_contrats
                 multiple: 1
               
     public: 
@@ -156,43 +157,16 @@ views:
                 - type: fields_table
                   col_lg: 6
                   col_md: 6
+                  col_sm: 12
                   fields_table: 
                       name: public
-            
-    pageUser: 
-        title: 
-            field_value: email
-        edit_form: default
-        delete_btn: 1
-        rows:
-            - cols: 
                 - type: list
-                  show:
-                      callback: isNotAdmin
-                  list:
-                        children: user_client_contrat
-    
-    for_controller:
-        rows:
-            title: infos
-            - cols:
-                - type: nav_tabs
-                  nav_tabs:
-                      - id: attached_contrat
-                        title: Contrats associés
-                        show:
-                            callback: isNotAdmin
-                        struct:
-                            type: list
-                            list:
-                                children: user_client_contrat
-                      - id: attached_tickets
-                        title: Tickets support
-                        struct: 
-                            type: list
-                            list:
-                                name: pageUser
-                                object: tickets
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  list: 
+                      name: public_user_client
+                      children: user_client_contrats
                                 
 lists:
     default:

@@ -26,7 +26,7 @@ class BS_SAV extends BimpObject
     const BS_SAV_FERME = 999;
 
     public static $status_list = array(
-        self::BS_SAV_RESERVED               => array('label' => 'Réservé par client', 'icon' => 'fas_calendar-day', 'classes' => array('important')),
+        self::BS_SAV_RESERVED          => array('label' => 'Réservé par client', 'icon' => 'fas_calendar-day', 'classes' => array('important')),
         self::BS_SAV_NEW               => array('label' => 'Nouveau', 'icon' => 'far_file', 'classes' => array('info')),
         self::BS_SAV_EXAM_EN_COURS     => array('label' => 'Examen en cours', 'icon' => 'hourglass-start', 'classes' => array('warning')),
         self::BS_SAV_ATT_CLIENT_ACTION => array('label' => 'Attente client', 'icon' => 'hourglass-start', 'classes' => array('warning')),
@@ -95,52 +95,41 @@ class BS_SAV extends BimpObject
 
     public function canView()
     {
-        if (BimpCore::isContextPublic()) {
-            global $userClient;
-
-            if (!BimpObject::objectLoaded($userClient)) {
-                return 0;
-            }
-
-            if ($this->isLoaded()) {
-                if ((int) $userClient->getData('id_client') == (int) $this->getData('id_client')) {
-                    return 1;
-                }
-
-                return 0;
-            }
-
-            return 1;
-        }
-
         global $user;
         return (int) $user->rights->BimpSupport->read;
     }
 
-    public function canCreate()
+    public function canClientView()
     {
-        if (BimpCore::isContextPublic()) {
+        global $userClient;
+
+        if (!BimpObject::objectLoaded($userClient)) {
             return 0;
         }
 
+        if ($this->isLoaded()) {
+            if ((int) $userClient->getData('id_client') == (int) $this->getData('id_client')) {
+                return 1;
+            }
+
+            return 0;
+        }
+
+        return 1;
+    }
+
+    public function canCreate()
+    {
         return $this->canView();
     }
 
     public function canEdit()
     {
-        if (BimpCore::isContextPublic()) {
-            return 0;
-        }
-
         return $this->canView();
     }
 
     public function canDelete()
     {
-        if (BimpCore::isContextPublic()) {
-            return 0;
-        }
-
         global $user;
         return (int) $user->rights->BimpSupport->delete;
     }
@@ -501,7 +490,7 @@ class BS_SAV extends BimpObject
         $buttons = array();
 
         if ($this->isLoaded()) {
-            if ($this->canView()) {
+            if ($this->can('view')) {
                 $url = $this->getPublicUrl();
 
                 if ($url) {
@@ -2594,7 +2583,6 @@ class BS_SAV extends BimpObject
         $errors = array();
         $error_msg = 'Echec de l\'envoi de la notification au client';
 
-
         if (!$msg_type) {
             if (BimpTools::isSubmit('msg_type')) {
                 $msg_type = BimpTools::getValue('msg_type');
@@ -2662,8 +2650,6 @@ class BS_SAV extends BimpObject
         }
 
         $textSuivie = "\n <a href='" . $this->getPublicLink() . "'>Vous pouvez suivre l'intervention ici.</a>";
-
-
 
         $subject = '';
         $mail_msg = '';
@@ -3835,7 +3821,6 @@ class BS_SAV extends BimpObject
 
         $current_status = (int) $this->getInitData('status');
 
-
         if ((int) $this->getData('id_propal')) {
             $propal = $this->getChildObject('propal');
 
@@ -4708,7 +4693,6 @@ class BS_SAV extends BimpObject
         $errors = array();
 
         $centre = $this->getCentreData();
-
 
         if ($this->getData("id_facture_acompte") > 0 && (int) $this->getData('id_contact') !== (int) $this->getInitData('id_contact')) {
             $errors[] = 'Facture d\'acompte, impossible de changer de client';

@@ -17,6 +17,9 @@ header_btn:
     callback: getActionsButtons
 header_edit_form: edit_contrat
 
+public_header_btn: 
+    callback: getPublicActionsButtons
+    
 labels: 
     name: contrat
                 

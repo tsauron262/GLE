@@ -13,22 +13,6 @@ class BS_Note extends BimpObject
 
     public function canView()
     {
-        if (BimpCore::isContextPublic()) {
-            global $userClient;
-
-            if (BimpObject::objectLoaded($userClient)) {
-                if ($this->isLoaded()) {
-                    if ($this->getData('visibility') > 1) {
-                        return 0;
-                    }
-                }
-
-                return 1;
-            }
-
-            return 0;
-        }
-
         if ($this->isLoaded() && (int) $this->getData('visibility') === 3) {
             global $user;
 
@@ -40,29 +24,50 @@ class BS_Note extends BimpObject
         return 1;
     }
 
-    public function canCreate()
+    public function canClientView()
     {
-        if (BimpCore::isContextPublic()) {
-            global $userClient;
+        global $userClient;
 
-            if (BimpObject::objectLoaded($userClient)) {
-                return 1;
+        if (BimpObject::objectLoaded($userClient)) {
+            if ($this->isLoaded()) {
+                if ($this->getData('visibility') > 1) {
+                    return 0;
+                }
             }
 
-            return 0;
+            return 1;
         }
 
-        return parent::canCreate();
+        return 0;
+    }
+
+    public function canClientCreate()
+    {
+        global $userClient;
+
+        if (BimpObject::objectLoaded($userClient)) {
+            return 1;
+        }
+
+        return 0;
     }
 
     public function canEdit()
     {
-        if (BimpCore::isContextPublic()) {
-            global $userClient;
+        if ((int) $this->getData('id_user_client')) {
+            return 0;
+        }
 
-            if ($this->isLoaded()) {
-                if (BimpObject::objectLoaded($userClient) && (int) $userClient->id == (int) $this->getData('id_user_client')) {
-                    // Code non fonctionnel: cette méthode doit pouvoir être appellée dans n'importe quel contexte (pas seulement lorsqu'on est sur la fiche ticket) => Donc $_REQUEST['id'] non valable. 
+        return 1;
+    }
+
+    public function canClientEdit()
+    {
+        global $userClient;
+
+        if ($this->isLoaded()) {
+            if (BimpObject::objectLoaded($userClient) && (int) $userClient->id == (int) $this->getData('id_user_client')) {
+                // Code non fonctionnel: cette méthode doit pouvoir être appellée dans n'importe quel contexte (pas seulement lorsqu'on est sur la fiche ticket) => Donc $_REQUEST['id'] non valable. 
 //                    $list_of_note_for_this_ticket = $this->getList(Array('id_ticket' => $_REQUEST['id']));
 //                    $good_array = array('id' => 0, 'date' => '2000-01-01');
 //                    foreach ($list_of_note_for_this_ticket as $note) {
@@ -74,16 +79,9 @@ class BS_Note extends BimpObject
 //                    if ($this->id == $good_array['id']) {
 //                        return 1;
 //                    }
-                    return 1;
-                }
-
-                return 0;
+                return 1;
             }
 
-            return 1;
-        }
-
-        if ((int) $this->getData('id_user_client')) {
             return 0;
         }
 
@@ -92,18 +90,6 @@ class BS_Note extends BimpObject
 
     public function canDelete()
     {
-        if (BimpCore::isContextPublic()) {
-            global $userClient;
-
-            if ($this->isLoaded()) {
-                if (BimpObject::objectLoaded($userClient) && (int) $userClient->id === (int) $this->getData('id_user_client')) {
-                    return 1;
-                }
-            }
-
-            return 0;
-        }
-
         if ((int) $this->getData('id_user_client')) {
             return 0;
         }
@@ -111,8 +97,21 @@ class BS_Note extends BimpObject
         return 1;
     }
 
+    public function canClientDelete()
+    {
+        global $userClient;
+
+        if ($this->isLoaded()) {
+            if (BimpObject::objectLoaded($userClient) && (int) $userClient->id === (int) $this->getData('id_user_client')) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
     // Getters: 
-    
+
     public function isCreatable($force_create = false, &$errors = array())
     {
         $parent = $this->getParentInstance();

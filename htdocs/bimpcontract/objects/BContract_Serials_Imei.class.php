@@ -13,10 +13,6 @@ class BContract_Serials_Imei extends BimpObject {
     ];
     
     public function canView() {
-        if ($this->isLoaded() && BimpCore::isContextPublic()) {
-            // Todo... 
-        }
-        
         return 1;
     }
     

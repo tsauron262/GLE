@@ -10,34 +10,71 @@ class Bimp_Contact extends BimpObject
 
     // Getters booléens: 
 
-    public function canView()
+    public function canClientView()
     {
-        if (BimpCore::isContextPublic()) {
-            global $userClient;
+        global $userClient;
 
-            if (BimpObject::objectLoaded($userClient)) {
-                if ($this->isLoaded()) {
-                    if ((int) $this->getData('fk_soc') == (int) $userClient->getData('id_client')) {
-                        return 1;
-                    }
+        if (BimpObject::objectLoaded($userClient)) {
+            if ($this->isLoaded()) {
+                if ((int) $this->getData('fk_soc') == (int) $userClient->getData('id_client')) {
+                    return 1;
                 }
 
-                return 1;
+                return 0;
             }
 
-            return 0;
+            return 1;
         }
 
-        return parent::canView();
+        return 0;
     }
 
-    public function canCreate()
+    public function canClientCreate()
     {
-        if (BimpCore::isContextPublic()) {
+        global $userClient;
+
+        if (BimpObject::objectLoaded($userClient)) {
+            if ((int) $this->getData('fk_soc') == (int) $userClient->getData('id_client')) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
+    public function canClientEdit()
+    {
+        if ($this->isLoaded()) {
             global $userClient;
 
             if (BimpObject::objectLoaded($userClient)) {
                 if ((int) $this->getData('fk_soc') == (int) $userClient->getData('id_client')) {
+                    if (!$userClient->isAdmin()) {
+                        if ((int) $userClient->getData('id_contact') != (int) $this->id) {
+                            return 0;
+                        }
+                    }
+                    return 1;
+                }
+            }
+
+            return 0;
+        }
+    }
+
+    public function canDelete()
+    {
+        global $user;
+        return (int) $user->admin;
+    }
+
+    public function canSetStatus($status)
+    {
+        if (BimpCore::isContextPublic()) {
+            global $userClient;
+
+            if (BimpObject::objectLoaded($userClient)) {
+                if ($userClient->isAdmin()) {
                     return 1;
                 }
             }
@@ -45,18 +82,7 @@ class Bimp_Contact extends BimpObject
             return 0;
         }
 
-        return parent::canCreate();
-    }
-
-    public function canEdit()
-    {
-        return $this->canCreate();
-    }
-
-    public function canDelete()
-    {
-        global $user;
-        return (int) $user->admin;
+        return parent::canSetStatus($status);
     }
 
     // Getters params: 
@@ -114,7 +140,7 @@ class Bimp_Contact extends BimpObject
         $lastname = $this->getData('lastname');
         $firstname = $this->getData('firstname');
 
-        return (!is_null($firstname) && $firstname ? $firstname .' ' : '') . $lastname;
+        return (!is_null($firstname) && $firstname ? $firstname . ' ' : '') . $lastname;
     }
 
     public function getCardFields($card_name)
@@ -167,12 +193,12 @@ class Bimp_Contact extends BimpObject
         return '';
     }
 
-    public function displayFullAddress()
+    public function displayFullAddress($singleLine = false)
     {
         $html = '';
 
         if ($this->getData('address')) {
-            $html .= $this->getData('address') . '<br/>';
+            $html .= $this->getData('address') . ($singleLine ? ' ' : '<br/>');
         }
 
         if ($this->getData('zip')) {
@@ -181,9 +207,9 @@ class Bimp_Contact extends BimpObject
             if ($this->getData('town')) {
                 $html .= ' ' . $this->getData('town');
             }
-            $html .= '<br/>';
+            $html .= ($singleLine ? ' ' : '<br/>');
         } elseif ($this->getData('town')) {
-            $html .= $this->getData('town') . '<br/>';
+            $html .= $this->getData('town') . ($singleLine ? ' ' : '<br/>');
         }
 
         if ($this->getData('fk_departement')) {

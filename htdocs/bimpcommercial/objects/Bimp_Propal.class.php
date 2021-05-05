@@ -34,7 +34,7 @@ class Bimp_Propal extends BimpComm
 
     public function canEdit()
     {
-        return $this->can("create");
+        return $this->canCreate();
     }
 
     public function canSetAction($action)

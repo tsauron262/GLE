@@ -2,13 +2,24 @@ table: bic_user_contrat
 icon: fas_file
 common_fields: 0
 
+parent_module: bimpinterfaceclient
 parent_id_property: id_user
 parent_object: BIC_UserClient
 
-
 labels: 
-    name: Contrats associés
+    name: contrat associé
+    name_plur: contrats associés
 
+objects: 
+    contrat: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcontract
+                name: BContract_contrat
+            id_object: 
+                field_value: id_contrat
 fields:
     id_user:
         label: Utilisateur
@@ -18,9 +29,16 @@ fields:
         required: 1
     id_contrat:
         label: Contrat
-        type: int
-        values:
-            callback: getContrats
+        type: id_object
+        object: contrat
+        required: 1
+        input: 
+            type: select
+            options: 
+                array: userClientAvailableContrats
+        search: 
+            input: 
+                type: search_object
     read_ticket_in_contrat:
         label: Voir tous les tickets du contrat
         type: bool
@@ -28,9 +46,8 @@ fields:
 
 lists:
     default:
-        object_change_reload: BIC_UserClientContrats
-        title: Liste des contrats associés
-        icon: file
+        title: Contrats associés
+        icon: fas_file-signature
         checkboxes: 1
         sort_field: date_create
         sort_way: desc
@@ -38,15 +55,19 @@ lists:
         add_btn: 1
         add_form_name: addAssoContrat
         add_btn_label: Associer un contrat à cet utilisateur
-        edit_form: editAssoContrat
-        list_filters: 
-            callback: getFilterAssoContrat
         delete_btn: 1
-        edit_btn: 1
         cols:
+            id_user: 
             id_contrat:
             read_ticket_in_contrat:
-
+                edit: 1
+                
+    public_user_client: 
+        extends: default
+        enable_search: 0
+        cols: 
+            id_user: unset
+        
 forms: 
     addAssoContrat:
         rows:

@@ -17,10 +17,6 @@ class Bimp_User extends BimpObject
 
     public function canView()
     {
-        if (BimpCore::isContextPublic()) {
-            return 0;
-        }
-
         global $user;
 
         if ((int) $user->id === (int) $this->id) {

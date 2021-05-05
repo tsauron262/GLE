@@ -502,7 +502,7 @@ class BimpCommission extends BimpObject
 
     public function displayTaux($type = "marque")
     {
-        if ($this->canView()) {
+        if ($this->can('view')) {
             $totM = (float) $this->getData('total_marges');
             $val = 0;
 
@@ -537,7 +537,7 @@ class BimpCommission extends BimpObject
 
     public function displayAmount($amount_type)
     {
-        if ($this->canView()) {
+        if ($this->can('view')) {
             $data = $this->getAmountsCacheData();
 
             if (isset($data[$amount_type])) {

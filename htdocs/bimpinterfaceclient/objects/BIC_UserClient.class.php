@@ -40,68 +40,54 @@ class BIC_UserClient extends BimpObject
 
     // Droits user: 
 
-    public function canView()
+    public function canClientView()
     {
-        if (BimpCore::isContextPublic()) {
-            global $userClient;
+        global $userClient;
 
-            if (!BimpObject::objectLoaded($userClient)) {
-                return 0;
-            }
-
-            if ($this->isLoaded()) {
-                if ($this->getData('id_client') == $userClient->getData('id_client') && ($userClient->getData('role') == 1 || $this->id == $userClient->id)) {
-                    return 1;
-                }
-
-                return 0;
-            }
-
-            return 1;
+        if (!BimpObject::objectLoaded($userClient)) {
+            return 0;
         }
 
-        return parent::canView();
-    }
-
-    public function canCreate()
-    {
-        if (BimpCore::isContextPublic()) {
-            global $userClient;
-
-            if (BimpObject::objectLoaded($userClient) && $userClient->isAdmin()) {
+        if ($this->isLoaded()) {
+            if ($this->getData('id_client') == $userClient->getData('id_client') && ($userClient->getData('role') == 1 || $this->id == $userClient->id)) {
                 return 1;
             }
 
             return 0;
         }
 
-        return parent::canCreate();
+        return 1;
     }
 
-    public function canEdit()
+    public function canClientCreate()
     {
-        if (BimpCore::isContextPublic()) {
-            if ($this->isLoaded()) {
-                global $userClient;
+        global $userClient;
 
-                if (BimpObject::objectLoaded($userClient) &&
-                        (($userClient->isAdmin() && (int) $this->getData('id_client') == (int) $userClient->getData('id_client')) ||
-                        ($this->id == $userClient->id))) {
-                    return 1;
-                }
-
-                return 0;
-            }
-
+        if (BimpObject::objectLoaded($userClient) && $userClient->isAdmin()) {
             return 1;
         }
 
-        return parent::canEdit();
+        return 0;
     }
 
-    public function canDelete()
+    public function canClientEdit()
     {
-        return $this->canEdit();
+        if ($this->isLoaded()) {
+            global $userClient;
+
+            if (BimpObject::objectLoaded($userClient) && ($userClient->isAdmin() && (int) $this->getData('id_client') == (int) $userClient->getData('id_client'))) {
+                return 1;
+            }
+
+            return 0;
+        }
+
+        return 1;
+    }
+
+    public function canClientDelete()
+    {
+        return $this->canClientEdit();
     }
 
     public function canEditField($field_name)
@@ -115,8 +101,8 @@ class BIC_UserClient extends BimpObject
 
                 case 'role':
                 case 'status':
-                case 'id_contact': 
-                    if (BimpObject::objectLoaded($userClient) && $userClient->isAdmin() && $userClient->id != $this->id) {
+                case 'id_contact':
+                    if (BimpObject::objectLoaded($userClient) && $userClient->isAdmin()) {
                         return 1;
                     }
                     return 0;
@@ -249,7 +235,7 @@ class BIC_UserClient extends BimpObject
     {
         return array('email');
     }
-            
+
     public function getRefProperty()
     {
         return '';
@@ -322,6 +308,19 @@ class BIC_UserClient extends BimpObject
             );
         }
 
+        if ($this->isLoaded()) {
+            $userClientContrat = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClientContrat');
+            $buttons[] = array(
+                'label'   => 'Contrats associés',
+                'icon'    => 'fas_file-signature',
+                'onclick' => $userClientContrat->getJsLoadModalList('public_user_client', array(
+                    'extra_filters' => array(
+                        'id_user' => (int) $this->id
+                    )
+                ))
+            );
+        }
+
         return $buttons;
     }
 
@@ -379,15 +378,37 @@ class BIC_UserClient extends BimpObject
 
             foreach ($list as $on_contrat) {
                 $instance = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $on_contrat['rowid']);
-                
+
                 if ((!$ouverts_only || $instance->isValide()) && (int) $instance->getData('statut') > 0) {
                     $return[$on_contrat['rowid']] = $instance;
                 }
-                
+
                 $instance = null;
             }
         }
         return $return;
+    }
+
+    public function getAssociatedContratsList()
+    {
+        if ($this->isLoaded()) {
+            $cache_key = 'user_client_' . $this->id . '_associated_contrats_list';
+
+            if (!isset(self::$cache[$cache_key])) {
+                self::$cache[$cache_key] = array();
+                $rows = $this->db->getRows('bic_user_contrat', 'id_user = ' . $this->id, null, 'array', array('id_contrat'));
+
+                if (is_array($rows)) {
+                    foreach ($rows as $r) {
+                        self::$cache[$cache_key][] = (int) $r['id_contrat'];
+                    }
+                }
+            }
+
+            return self::$cache[$cache_key];
+        }
+
+        return array();
     }
 
     // Affichage:
@@ -496,7 +517,6 @@ class BIC_UserClient extends BimpObject
         $errors = array();
 
         $mdp_clear = BimpTools::randomPassword(7);
-        $mdp_clear = '123456';
         $this->set('password', hash('sha256', $mdp_clear));
         $this->set('renew_required', 1);
 
@@ -600,12 +620,12 @@ class BIC_UserClient extends BimpObject
         if (!count($errors)) {
             if (!(int) $this->getData('role')) {
                 $nbAdmin = (int) $this->db->getCount('bic_user', 'id_client = ' . (int) $this->getData('id_client') . ' AND role = 1');
-                
+
                 if (!$nbAdmin) {
                     $this->set('role', 1);
                 }
             }
-            
+
             $errors = parent::create($warnings, $force_create);
 
             if (!count($errors)) {

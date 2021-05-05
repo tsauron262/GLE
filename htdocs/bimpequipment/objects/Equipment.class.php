@@ -37,19 +37,11 @@ class Equipment extends BimpObject
 
     public function canCreate()
     {
-        if (BimpCore::isContextPublic()) {
-            return 0;
-        }
-        
         return 1;
     }
 
     public function canEdit()
     {
-        if (BimpCore::isContextPublic()) {
-            return 0;
-        }
-        
         return 1;
     }
 

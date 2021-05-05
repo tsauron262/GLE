@@ -10,38 +10,30 @@ class Bimp_Client extends Bimp_Societe
 
     // Droits user:
 
-    public function canView()
+    public function canClientView()
     {
-        if (BimpCore::isContextPublic()) {
-            global $userClient;
+        global $userClient;
 
-            if (BimpObject::objectLoaded($userClient)) {
-                if ($this->isLoaded() && $this->id == $userClient->getData('id_client')) {
-                    return 1;
-                }
+        if (BimpObject::objectLoaded($userClient)) {
+            if ($this->isLoaded() && $this->id == $userClient->getData('id_client')) {
+                return 1;
             }
-
-            return 0;
         }
 
-        return parent::canView();
+        return 0;
     }
 
-    public function canEdit()
+    public function canClientEdit()
     {
-        if (BimpCore::isContextPublic()) {
-            global $userClient;
+        global $userClient;
 
-            if (BimpObject::objectLoaded($userClient)) {
-                if ($userClient->isAdmin() && $this->id == (int) $userClient->getData('id_client')) {
-                    return 1;
-                }
+        if (BimpObject::objectLoaded($userClient)) {
+            if ($userClient->isAdmin() && $this->id == (int) $userClient->getData('id_client')) {
+                return 1;
             }
-
-            return 0;
         }
 
-        return parent::canEdit();
+        return 0;
     }
 
     public function canSetAction($action)
@@ -1893,8 +1885,6 @@ class Bimp_Client extends Bimp_Societe
             $html .= '<textarea id="note"></textarea><br>';
 
             $html .= '<div class="buttonCustom">Valider</div>';
-
-
 
             $html .= '</div>';
         } else {

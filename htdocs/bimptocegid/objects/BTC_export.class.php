@@ -51,6 +51,10 @@ class BTC_export extends BimpObject {
         }
     }
     
+    public function getCodeJoural() {
+        
+    }
+    
     public function exportFromProcessus($element, &$process = Array()) {
         $now = new DateTime();
         $res = [];

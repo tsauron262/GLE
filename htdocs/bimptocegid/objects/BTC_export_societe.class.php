@@ -4,7 +4,7 @@ class BTC_export_societe extends BTC_export {
     
     const EXPORTED = 1;
     
-    public function export(Bimp_Societe $client, $want = 'c', $date_element) {
+    public function export(Bimp_Societe $client, $want = 'c', $date_element, &$export = Array()) {
         global $user;
         $file = $this->create_daily_file("tier", $date_element);
         $is_subsidiary = ($client->getData('is_subsidiary') ? true : false);
@@ -143,8 +143,21 @@ class BTC_export_societe extends BTC_export {
             $ecritures .= $this->struct($structure);
         }
         
+        $suivi['obj'] = $client;
+        $suivi['type'] = "TIERS";
         
-        if($this->write_tra($ecritures, $file)) {
+        $write = $this->write_tra($ecritures, $file);
+        
+        if($write) {
+            $suivi['file'] = $file;
+            $suivi['ecriture'] = true;
+        } else {
+            $suivi['ecriture'] = false;
+        }
+        
+        $export["C" . $client->id] = $suivi;
+        
+        if($write) {
             $this->write_logs("**TIERS** | " . date('d/m/Y H:i:s') . " | " . $user->login . " | " . $auxiliaire_client . " | " . $auxiliaire_fournisseur . " | " . $client->getData('code_client') . "\n", false);
             $client->updateField('exported', self::EXPORTED);
             $client->updateField('code_compta', $auxiliaire_client);

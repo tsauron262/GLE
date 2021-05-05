@@ -5,11 +5,12 @@ require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/BTC_export.class.php';
 class BTC_export_facture extends BTC_export
 {
 
-    public function export($id_facture, $forced, $confFile)
+    public function export($id_facture, $forced, $confFile,  &$export = Array())
     {
-
+        $suivi = [];
         $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
-
+        $suivi['obj'] = $facture;
+        $suivi['type'] = "VENTES";
         if (!empty($confFile['name']) && !empty($confFile['dir'])) {
             $file = $this->create_daily_file('vente', null, $confFile['name'], $confFile['dir']);
         } else {
@@ -46,8 +47,7 @@ class BTC_export_facture extends BTC_export
         $compte_general_tva_null = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_vente_tva_null'), $compte_general_411);
         $compte_refact_ht = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_refacturation_ht'), $compte_general_411);
         $compte_refact_ttc = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_refacturation_ttc'), $compte_general_411);
-        ;
-
+        
         switch ($facture->getData('zone_vente')) {
             case 1:
                 $compte_general_produit = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_vente_produit_fr'), $compte_general_411);
@@ -86,7 +86,7 @@ class BTC_export_facture extends BTC_export
             $code_auxiliaire = $societe->getData('code_compta');
         } else {
             $export_societe = $this->getInstance('bimptocegid', 'BTC_export_societe');
-            $code_auxiliaire = $export_societe->export($societe, 'c', $facture->getData('datef'));
+            $code_auxiliaire = $export_societe->export($societe, 'c', $facture->getData('datef'), $export);
         }
 
         $label = strtoupper($this->suppr_accents($societe->getData('nom')));
@@ -327,6 +327,9 @@ class BTC_export_facture extends BTC_export
                             $total_lignes += round($line->multicurrency_total_ht, 2);
                         }
                     }
+                } else {
+                    //$facture->updateField('ignore_compta', 1);
+                    $suivi['go_ignore'] = "Facture à 0";
                 }
             }
         }
@@ -355,8 +358,21 @@ class BTC_export_facture extends BTC_export
             $structure['vide'] = [$code_auxiliaire, 606];
             $ecritures .= $this->struct($structure);
         }
-
-        return $this->write_tra($ecritures, $file);
+        
+        
+        
+        $write = $this->write_tra($ecritures, $file);
+        
+        if($write) {
+            $suivi['ecriture'] = true;
+            $suivi['file'] = $file;
+        } else {
+            $suivi['ecriture'] = false;
+        }
+        
+        $export[$facture->getData('ref')] = $suivi;
+        
+        return $write;
     }
 
     public function export_v2($id_facture, $forced, $confFile)

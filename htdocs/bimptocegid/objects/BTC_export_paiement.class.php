@@ -5,12 +5,14 @@ class BTC_export_paiement extends BTC_export {
     const RETURNED_STATUS_NO = 0;
     const RETURNED_STATUS_OK = 1;
 
-    public function export($id, $paiement_id, $forced, $confFile) {
-        
+    public function export($id, $paiement_id, $forced, $confFile, &$process = Array()) {
+        $suivi = [];
         $error = 0;
         $ecritures = '';
         $liste_transactions = $this->db->getRows('paiement_facture', 'fk_paiement = ' . $id);
         $paiement = $this->getInstance('bimpcommercial', 'Bimp_Paiement', $id);
+        $suivi['obj'] = $paiement;
+        $suivi['type'] = "PAIEMENTS";
         $datec = new DateTime($paiement->getData('datec'));
 
         if(!empty($confFile['name']) && !empty($confFile['dir'])) {
@@ -54,7 +56,7 @@ class BTC_export_paiement extends BTC_export {
                     $client = $this->getInstance('bimpcore', 'Bimp_Client', $id_client);
                     if ($client->getData('exported') === 0) {
                         $export_societe = $this->getInstance('bimptocegid', 'BTC_export_societe');
-                        $auxiliaire_client = $export_societe->export($client, 'c', $datec->format("Y-m-d"));
+                        $auxiliaire_client = $export_societe->export($client, 'c', $datec->format("Y-m-d"), $process);
                     } else {
                         $auxiliaire_client = $client->getData('code_compta');
                     }
@@ -212,7 +214,18 @@ class BTC_export_paiement extends BTC_export {
 
         }
         
-        return $this->write_tra($ecritures, $file);
+        $write = $this->write_tra($ecritures, $file);
+        
+        if($write) {
+            $suivi['ecriture'] = true;
+            $suivi['file'] = $file;
+        } else {
+            $suivi['ecriture'] = false;
+        }
+        
+        $process[$paiement->getData('ref')] = $suivi;
+
+        return $write;
     }
 
 }

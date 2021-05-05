@@ -328,8 +328,8 @@ class BTC_export_facture extends BTC_export
                         }
                     }
                 } else {
-                    $facture->updateField('ignore_compta', 1);
-                    $suivi['go_ignore'] = "Facture à 0 donc facture marquée comme ignorée en compta";
+                    //$facture->updateField('ignore_compta', 1);
+                    $suivi['go_ignore'] = "Facture à 0";
                 }
             }
         }

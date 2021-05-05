@@ -51,6 +51,73 @@ class BTC_export extends BimpObject {
         }
     }
     
+    public function exportFromProcessus($element, &$process = Array()) {
+        $now = new DateTime();
+        $res = [];
+        switch($element) {
+            case 'facture_fourn':
+                $where = 'exported = 0 AND fk_statut IN(1,2) AND (datec < "'.$now->format('Y-m-d').' 00:00:00" OR date_valid < "'.$now->format('Y-m-d').' 00:00:00" OR datef < "'.$now->format('Y-m-d').' 00:00:00") AND (datec > "2021-05-01 00:00:00" OR date_valid > "2021-05-01 00:00:00" OR datef > "2021-05-01 00:00:00")';
+                $res = $this->db->getRows($element, $where);
+                break;
+            case 'facture':
+                $where = 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND (datec < "'.$now->format('Y-m-d').' 00:00:00" OR date_valid < "'.$now->format('Y-m-d').' 00:00:00" OR datef < "'.$now->format('Y-m-d').' 00:00:00") AND (datec > "2021-05-01 00:00:00" OR date_valid > "2021-05-01 00:00:00" OR datef > "2021-05-01 00:00:00")';
+                $res = $this->db->getRows($element, $where);
+                break;
+            case 'paiement':
+                $where = 'exported = 0 AND datec < "'.$now->format('Y-m-d').' 00:00:00" AND datec > "2021-05-01 00:00:00"';
+                $res = $this->db->getRows($element, $where);
+                break;
+        }
+        
+        if(count($res) > 0) {
+            $function = $element . "Process";
+            $this->$function($res, $process);
+        } else {
+            $process['no_export'] = "Il n'y à pas de ".$element." dont la date est inférieur à " .  $now->format('Y-m-d'). " 00:00:00";
+        }
+    }
+    
+    private function facture_fournProcess($res, &$process) {
+        global $user;
+        $instance = $this->getInstance('bimptocegid', 'BTC_export_facture_fourn');
+        foreach($res as $facture_fourn) {
+            $write = $instance->export($facture_fourn->rowid, false, ['name' => '', 'dir' => ''], $infos);
+            $process = $infos;
+            if($write) {
+                $facture = BimpCache::getBimpObjectInstance("bimpcommercial", "Bimp_FactureFourn", $facture_fourn->rowid);
+                $facture->updateField('exported', 1);
+            }
+        }
+    }
+    
+    private function factureProcess($res, &$process) {
+        global $user;
+        $instance = $this->getInstance('bimptocegid', 'BTC_export_facture');
+        foreach($res as $facture) {
+            $write = $instance->export($facture->rowid, false, ['name' => '', 'dir' => ''], $infos);
+            $process = $infos;
+            $facture = BimpCache::getBimpObjectInstance("bimpcommercial", "Bimp_Facture", $facture->rowid);
+            if($write) {
+                $facture->updateField('exported', 1);
+            } else {
+                $facture->updateField("exported", 204);
+            }
+        }
+    }
+    
+    private function paiementProcess($res, &$process) {
+        global $user;
+        $instance = $this->getInstance('bimptocegid', 'BTC_export_paiement');
+        foreach($res as $paiement) {
+            $write = $instance->export($paiement->rowid, $paiement->fk_paiement, false, ['name' => '', 'dir' => ''], $infos);
+            $process = $infos;
+            $pay = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Paiement', $paiement->rowid);
+            if($write) {
+                $pay->updateField('exported', 1);
+            }
+        }
+    }
+
     public function exportation($element, $origin, $data = []) {
         if($origin = 'interface') {
             $function_name = 'export_' . $element;

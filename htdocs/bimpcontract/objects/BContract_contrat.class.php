@@ -3933,9 +3933,9 @@ class BContract_contrat extends BimpDolObject
             }
 
             $ticket = BimpObject::getInstance('bimpsupport', 'BS_Ticket');
-            return $ticket->getJsLoadModalForm('public_create', 'Nouveau ticket support (contrat ' . $this->getRef() . ')', array(
+            return $ticket->getJsLoadModalForm('public_create_from_contrat', 'Nouveau ticket support (contrat ' . $this->getRef() . ')', array(
                         'fields' => array(
-                            'id_contrat'       => $this->id,
+                            'id_contrat'       => (int) $this->id,
                             'id_client'        => (int) $this->getData('fk_soc'),
                             'id_user_client'   => (BimpObject::objectLoaded($userClient) ? (int) $userClient->id : 0),
                             'contact_in_soc'   => (BimpObject::objectLoaded($contact) ? $contact->getName() : ''),

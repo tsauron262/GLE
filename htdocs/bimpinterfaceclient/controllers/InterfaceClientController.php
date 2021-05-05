@@ -142,7 +142,31 @@ class InterfaceClientController extends BimpPublicController
         if (!BimpObject::objectLoaded($userClient)) {
             $html .= BimpRender::renderAlerts('Vous n\'avez pas la permission d\'accéder à ce contenu');
         } else {
+            // Contrats en cours: 
+            $html .= '<div class="row" style="margin-bottom: 30px">';
+            $html .= '<div class="col-lg-12">';
+            $html .= '<h3>' . BimpRender::renderIcon('pe_news-paper', 'iconLeft') . 'Mes contrats en cours</h3>';
+
+            $contrats_ouverts = $userClient->getContratsVisibles(true);
+
+            $html .= '<div>';
+            if (!empty($contrats_ouverts)) {
+                foreach ($contrats_ouverts as $id_contrat => $c) {
+                    $html .= $c->display_card();
+                }
+            } else {
+                $html .= BimpRender::renderAlerts('Vous n\'avez aucun contrat en cours', 'info');
+            }
+            $html .= '</div>';
+
+            $html .= '</div>';
+            $html .= '</div>';
+
             // Tickets support: 
+            $html .= '<div class="row" style="margin-bottom: 30px">';
+            $html .= '<div class="col-lg-12">';
+            $html .= '<h3>' . BimpRender::renderIcon('pe_headphones', 'iconLeft') . 'Mes tickets supports en cours</h3>';
+
             $filters = array(
                 'id_client' => (int) $userClient->getData('id_client'),
                 'status'    => array(
@@ -156,10 +180,6 @@ class InterfaceClientController extends BimpPublicController
             }
 
             $tickets = BimpCache::getBimpObjectObjects('bimpsupport', 'BS_Ticket', $filters, 'date_create', 'desc');
-
-            $html .= '<div class="row" style="margin-bottom: 30px">';
-            $html .= '<div class="col_lg-12">';
-            $html .= '<h3>' . BimpRender::renderIcon('pe_headphones', 'iconLeft') . 'Mes tickets supports en cours</h3>';
 
             if (empty($tickets)) {
                 $html .= BimpRender::renderAlerts('Vous n\'avez aucun ticket support en cours', 'info');
@@ -234,7 +254,7 @@ class InterfaceClientController extends BimpPublicController
                             ), 'date_create', 'desc');
 
             $html .= '<div class="row" style="margin-bottom: 30px">';
-            $html .= '<div class="col_lg-12">';
+            $html .= '<div class="col-lg-12">';
             $html .= '<h3>' . BimpRender::renderIcon('pe_tools', 'iconLeft') . 'Mes SAV en cours</h3>';
 
             if (empty($savs)) {

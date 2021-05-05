@@ -76,7 +76,7 @@ class test_sav
         $this->output .= $this->nbOk . " resolu.";
         $this->output .= $this->nbMail . " mail.";
 
-        $this->fetchEquipmentsImei();
+        $this->fetchEquipmentsImei(100);
 
         if ($this->nbImei) {
             $this->output .= ' ' . $this->nbImei . ' n° IMEI corrigé(s).';
@@ -346,7 +346,8 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
                                 'value'    => '0'
                               )
                         );
-
+            if($nb > 1)//sinon c'est un test de reconnexion
+                $filtre['status_gsx'] = 0;
             $rows = $equipment->getList($filtre, $nb, 1, 'imei2', 'asc', 'array', array('id', 'serial'));
 
             if (!empty($rows)) {
@@ -358,38 +359,45 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
                     if (!$r['serial']) {
                         continue;
                     }
-
-                    $ids = Equipment::gsxFetchIdentifiers($r['serial'], $gsx);
-
-                    $imei = $ids['imei'];
-                    $imei2 = $ids['imei2'];
-                    $meid = $ids['meid'];
-                    $serial = $ids['serial'];
                     
-                    if (!$imei) {
-                        $imei = 'n/a';
-                    }
-                    if (!$imei2) {
-                        $imei2 = 'n/a';
-                    }
-                    if (!$meid) {
-                        $meid = 'n/a';
-                    }
+                    $equipment->fetch($r['id']);
+                    $errors = BimpTools::merge_array($errors, $equipment->majWithGsx());
 
-                    $data = array(
-                        'imei' => $imei,
-                        'imei2' => $imei2,
-                        'meid' => $meid
-                    );
-                    
-                    if($modeLabel)
-                        $data['product_label'] = ($ids['productDescription'] != '')? $ids['productDescription'] : 'N/A';
+//                    $ids = Equipment::gsxFetchIdentifiers($r['serial'], $gsx);
 
-                    if ($r['serial'] && $serial && $r['serial'] !== $serial) {
-                        $data['serial'] = $serial;
-                    }
-
-                    if ($bdb->update('be_equipment', $data, '`id` = ' . (int) $r['id']) <= 0) {
+//                    $imei = $ids['imei'];
+//                    $imei2 = $ids['imei2'];
+//                    $meid = $ids['meid'];
+//                    $serial = $ids['serial'];
+//                    
+//                    if (!$imei) {
+//                        $imei = 'n/a';
+//                    }
+//                    if (!$imei2) {
+//                        $imei2 = 'n/a';
+//                    }
+//                    if (!$meid) {
+//                        $meid = 'n/a';
+//                    }
+//
+//                    $data = array(
+//                        'imei' => $imei,
+//                        'imei2' => $imei2,
+//                        'meid' => $meid
+//                    );
+//                    
+//                    if($modeLabel)
+//                        $data['product_label'] = ($ids['productDescription'] != '')? $ids['productDescription'] : 'N/A';
+//
+//                    if ($r['serial'] && $serial && $r['serial'] !== $serial) {
+//                        $data['serial'] = $serial;
+//                    }
+//
+//                    if ($bdb->update('be_equipment', $data, '`id` = ' . (int) $r['id']) <= 0) {
+//                        break;
+//                    }
+                    if(count($errors)){
+                        print_r($errors);
                         break;
                     }
 

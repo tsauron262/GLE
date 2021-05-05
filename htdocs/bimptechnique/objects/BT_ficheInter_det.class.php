@@ -74,13 +74,11 @@ class BT_ficheInter_det extends BT_ficheInter {
     ];
     
     public $coup_horaire_tech = 0;
-    public $ref_deplacement = "";
     public $lastMargeLine = [];
     
     
     public function __construct($module, $object_name) {
         $this->coup_horaire_tech = BimpCore::getConf('bimptechnique_coup_horaire_technicien');
-        $this->ref_deplacement = BimpCore::getConf('bimptechnique_ref_deplacement');
         return parent::__construct($module, $object_name);
     }
     

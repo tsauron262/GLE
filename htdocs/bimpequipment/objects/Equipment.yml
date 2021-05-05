@@ -157,6 +157,11 @@ fields:
         label: Type
         values: 
             array: types
+            
+    status_gsx:
+        label: Status GSX
+        values:
+            array: list_status_gsx
         
     serial: 
         label: Numéro de série
@@ -322,6 +327,7 @@ fields_tables:
             - field: imei
             - field: imei2
             - field: meid
+            - field: status_gsx
             - field: ref_immo
             - field: date_immo
             - label: Disponibilité

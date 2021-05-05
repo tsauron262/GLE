@@ -22,6 +22,12 @@ class Equipment extends BimpObject
         2 => 'Client',
         3 => 'Commande Fournisseur'
     );
+    public static $list_status_gsx = array(
+        0 => 'Non vérifié',
+        1 => 'Ok',
+        2 => 'Non Apple',
+        3 => 'Localisé',
+    );
     protected $current_place = null;
 
     public function __construct($module, $object_name)
@@ -1430,14 +1436,36 @@ class Equipment extends BimpObject
         else
             $this->updateField('old_serial', $this->getData("old_serial") . "<br/>" . $oldS);
 
+        $this->set('serial', $serial);
 
-        $identifiers = static::gsxFetchIdentifiers($serial);
-        $this->updateField('serial', $serial);
-        $this->updateField('imei', $identifiers['imei']);
-        $this->updateField('imei2', $identifiers['imei2']);
-        $this->updateField('meid', $identifiers['meid']);
+        $this->majWithGsx();
 
         return $oldS;
+    }
+    
+    public function majWithGsx(&$warnings = array()){
+        $identifiers = static::gsxFetchIdentifiers($this->getData('serial'));
+        if($identifiers == 0)
+            return array('Probléme GSX');
+        if(isset($identifiers['nonApple'])){
+            $this->set('status_gsx', 2);
+        }
+        else{
+            if(isset($identifiers['serial']) && $identifiers['serial'] != '')
+                $this->set('serial', $identifiers['serial']);
+
+            $this->set('imei', $identifiers['imei']);
+            $this->set('imei2', $identifiers['imei2']);
+            $this->set('meid', $identifiers['meid']);
+            $this->set('product_label', $identifiers['productDescription']);
+            if(isset($identifiers['localise'])){
+                $this->set('status_gsx', 3);
+            }
+            else{
+                $this->set('status_gsx', 1);
+            }
+        }
+        return $this->update($warnings, 1);
     }
 
     public static function gsxFetchIdentifiers($serial, $gsx = null)
@@ -1461,6 +1489,20 @@ class Equipment extends BimpObject
 
             if ($gsx->logged) {
                 $data = $gsx->productDetailsBySerial($serial);
+                if(!is_array($data)){
+                    $identifiers['nonApple'] = true;
+                    return $identifiers;
+                }
+                $data2 = $gsx->serialEligibility($serial);
+                foreach($data2['eligibilityDetails']['outcome'] as $out){
+                    foreach($out['reasons'] as $reason){
+                        foreach($reason['messages'] as $msg){
+                            if(stripos($msg, 'Localiser mon appareil') !== false)
+                                    $identifiers['localise'] = true;
+                        }
+                    }
+                }
+                
 
                 if (isset($data['device'])) {
                     if (isset($data['device']['identifiers']['imei']) && $data['device']['identifiers']['imei']) {
@@ -1494,6 +1536,8 @@ class Equipment extends BimpObject
                     }
                 }
             }
+            else
+                return 0;
         }
 
         return $identifiers;

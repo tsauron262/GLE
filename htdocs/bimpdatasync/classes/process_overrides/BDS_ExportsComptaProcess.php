@@ -2,15 +2,14 @@
 
 require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSImportProcess.php');
 
-
 class BDS_ExportsComptaProcess extends BDSImportProcess {
         
     public static function install(&$errors = array(), &$warnings = array()) {
         
         $process = BimpObject::createBimpObject('bimpdatasync', 'BDS_Process', array(
             'name'        => 'ExportsCompta',
-            'title'       => 'Transfère FTP Compta',
-            'description' => 'Exporte les fichiers TRA du FTP BIMP au FTP LDLC',
+            'title'       => 'Processus comptabilité',
+            'description' => 'Exporte les pièces comptables + Exporte les fichiers TRA du FTP BIMP au FTP LDLC',
             'type'        => 'export',
             'active'      => 1
         ), true, $errors, $warnings);
@@ -68,8 +67,35 @@ class BDS_ExportsComptaProcess extends BDSImportProcess {
                 'active'      => 1,
                 'use_report'  => 1
             ), true, $warnings, $warnings);
-
+            
+            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
+                'id_process'  => (int) $process->id,
+                'title'       => 'Export des pièces comptables',
+                'name'        => 'export',
+                'description' => '',
+                'warning'     => '',
+                'active'      => 1,
+                'use_report'  => 1
+            ), true, $warnings, $warnings);
         }
+    }
+    
+    public function initExport(&$data, &$errors = array()) {
+        $data['steps']["ACHATS"] = array(
+            'label'                  => "Export des factures d'achats",
+            'on_error'               => 'stop',
+            'nbElementsPerIteration' => 0
+        );
+        $data['steps']["VENTES"] = array(
+            'label'                  => "Export des factures de ventes",
+            'on_error'               => 'stop',
+            'nbElementsPerIteration' => 0
+        );
+        $data['steps']["PAIEMENTS"] = array(
+            'label'                  => "Export des paiements clients",
+            'on_error'               => 'stop',
+            'nbElementsPerIteration' => 0
+        );
     }
     
     public function initSendOnFtp(&$data, &$errors = array())
@@ -81,6 +107,68 @@ class BDS_ExportsComptaProcess extends BDSImportProcess {
             'nbElementsPerIteration' => 0
         );
 
+    }
+    
+    public function executeExport($step_name,&$errors = Array()) {
+        
+        $exportClass = BimpCache::getBimpObjectInstance('bimptocegid', "BTC_export");
+        $process = Array();
+        switch($step_name) {
+            case 'ACHATS':
+                $exportClass->exportFromProcessus('facture_fourn', $process);
+                if(array_key_exists("no_export", $process)) {
+                    $this->Info($process['no_export'], $exportClass, $step_name);
+                } else {
+                    foreach($process as $uid => $infos) {
+                        if($infos['ecriture']) {
+                            $this->Success("Exportée avec succès => " . $infos['file'], $infos['obj'], $infos['type']);
+                        } else {
+                            $this->Alert("Erreur d'écriture dans le fichier TRA", $infos['obj'], $infos['type']);
+                        }
+                    }
+                }
+                break;
+            case 'VENTES':
+                $exportClass->exportFromProcessus('facture', $process);
+                if(array_key_exists("no_export", $process)) {
+                    $this->Info($process['no_export'], $exportClass, $step_name);
+                } else {
+                    foreach($process as $uid => $infos) {
+                        if($infos['ecriture']) {
+                            $this->Success("Exportée avec succès => " . $infos['file'], $infos['obj'], $infos['type']);
+                        }  else {
+                            $alert = ['go_ignore'];
+                            $fl = true;
+                            $a = "";
+                            foreach($alert as $code) {
+                                if(array_key_exists($code, $infos)) {
+                                    if($fl) {
+                                        $a .= $infos[$code];
+                                    } else {
+                                        $a .= "<br />"  . $infos[$code];
+                                    }
+                                }
+                            }
+                            $this->Alert($a, $infos['obj'], $infos['type']);
+                        }
+                    }
+                }
+                break;
+            case 'PAIEMENTS':
+                $exportClass->exportFromProcessus('paiement', $process);
+                if(array_key_exists("no_export", $process)) {
+                    $this->Info($process['no_export'], $exportClass, $step_name);
+                } else {
+                    foreach($process as $uid => $infos) {
+                        if($infos['ecriture']) {
+                            $this->Success("Exportée avec succès => " . $infos['file'], $infos['obj'], $infos['type']);
+                        } else {
+                            $this->Alert("Erreur d'écriture dans le fichier TRA", $infos['obj'], $infos['type']);
+                        }
+                    }
+                }
+                break;
+        }
     }
     
     public function executeSendOnFtp($step_name, &$errors = array()) {
@@ -136,9 +224,6 @@ class BDS_ExportsComptaProcess extends BDSImportProcess {
         
         return $errors;
     }
-    
-    public function maFonction() {
-        
-    }
+
 
 }

@@ -16,19 +16,15 @@ switch ($controllerName) {
         if ((int) BimpTools::getValue('id', 0)) {
             $_GET['content'] = 'card';
             $_GET['id_contrat'] = BimpTools::getValue('id');
-        } else {
-            
         }
         break;
 
     case 'ticket':
     case 'tickets':
-        if ($controllerName == 'ticket') {
-            $_GET['tab'] = 'tickets';
-            if ((int) BimpTools::getValue('id', 0)) {
-                $_GET['content'] = 'card';
-                $_GET['id_ticket'] = BimpTools::getValue('id');
-            }
+        $_GET['tab'] = 'tickets';
+        if ($controllerName == 'ticket' && (int) BimpTools::getValue('id', 0)) {
+            $_GET['content'] = 'card';
+            $_GET['id_ticket'] = BimpTools::getValue('id');
         }
         $controllerName = 'InterfaceClient';
         break;

@@ -9,6 +9,7 @@ BimpTools::setContext("private");
 $langs->load('bimp@bimpinterfaceclient');
 
 ini_set('display_errors', 0);
-$nameController = $_REQUEST['fc']? $_REQUEST['fc'] : 'user';
-$controller = BimpController::getInstance('bimpinterfaceclient', $nameController);
+//$nameController = $_REQUEST['fc']? $_REQUEST['fc'] : 'user';
+$_POST['tab'] = 'user_client';
+$controller = BimpController::getInstance('bimpcore', 'clients');
 $controller->display();

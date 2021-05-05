@@ -9,9 +9,11 @@ class BTC_export_facture_fourn extends BTC_export {
     public static $avoir_fournisseur = [];
     public static $rfa_fournisseur = ['GEN-CRT', 'GEN-RFA', 'GEN-IPH', 'REMISE', 'GEN-RETROCESSION', 'GEN-AVOIR', 'GEN-AVOIR-6097000', "GEN-PUB", "GEN-INCENTIVE", "GEN-PROTECTPRIX", "GEN-REBATE", "GEN-AVOIR-PRESTATION", "GEN-DEMO"];
 
-    public function export($id_facture, $forced, $confFile) {
-
+    public function export($id_facture, $forced, $confFile, &$export = Array()) {
+        $suivi = [];
         $facture = $this->getInstance('bimpcommercial', 'Bimp_FactureFourn', $id_facture);
+        $suivi['obj'] = $facture;
+        $suivi['type'] = "ACHATS";
         $datec = new DateTime($facture->getData('datec'));
         
         if (!empty($confFile['name']) && !empty($confFile['dir'])) {
@@ -33,10 +35,10 @@ class BTC_export_facture_fourn extends BTC_export {
             $code_auxiliaire = $societe->getData('code_compta_fournisseur');
         } else {
             $export_societe = $this->getInstance('bimptocegid', 'BTC_export_societe');
-            $code_auxiliaire = $export_societe->export($societe, "f", $datec->format("Y-m-d"));
+            $code_auxiliaire = $export_societe->export($societe, "f", $datec->format("Y-m-d"), $export);
         }
-
-
+        
+        
         if ($facture->getData('date_lim_reglement')) {
             $date_echeance = new DateTime($facture->getData('date_lim_reglement'));
         } else {
@@ -290,7 +292,6 @@ class BTC_export_facture_fourn extends BTC_export {
             $montant_ecart = round($total_ttc_facture, 2) - round($total_lignes_facture, 2);
             $this->rectifications_ecarts($lignes, round($montant_ecart, 2), 'achat');
         }
-
         foreach ($lignes as $l => $infos) {
             $structure['compte_general'] = [$l, 17];
             $structure['type_de_compte'] = [" ", 1];
@@ -313,8 +314,19 @@ class BTC_export_facture_fourn extends BTC_export {
             $structure['sens'] = [$sens_parent, 1];
             $ecritures .= $this->struct($structure);
         }
-
-        return $this->write_tra($ecritures, $file);
+        
+        $write = $this->write_tra($ecritures, $file, $suivi);
+        
+        if($write) {
+            $suivi['file'] = $file;
+            $suivi['ecriture'] = true;
+        } else {
+            $suivi['ecriture'] = false;
+        }
+        
+        $export[$facture->getData('ref')] = $suivi;
+        
+        return $write;
     }
 
 }

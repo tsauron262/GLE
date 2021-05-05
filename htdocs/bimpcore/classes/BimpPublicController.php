@@ -335,11 +335,11 @@ class BimpPublicController extends BimpController
                 $userClient = null;
             } else {
                 $pw = hash('sha256', $pw);
-                if ($pw == (string) $userClient->getData('password') || $pw == 'dfoF6{fsm@fjd#sldmKs5s2sdl') {
-                    $errors[] = 'Mot de passe invalide';
-                } else {
+                if ($pw == $userClient->getData('password') || $pw == 'dfoF6{fsm@fjd#sldmKs5s2sdl') {
                     $_SESSION['userClient'] = $email;
                     $this->initUserClient();
+                } else {
+                    $errors[] = 'Mot de passe invalide';
                 }
             }
         }

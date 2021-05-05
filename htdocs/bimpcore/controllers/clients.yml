@@ -37,6 +37,12 @@ objects:
                 module: bimpcore
                 name: Bimp_Client_Suivi_Recouvrement
                 
+    user_client:
+        instance:
+            bimp_object: 
+                module: bimpinterfaceclient
+                name: BIC_UserClient
+                
 sections: 
     - type: tabs
       tabs: 
@@ -52,6 +58,13 @@ sections:
                   - type: list
                     list: 
                         object: contact
+          user_client: 
+              label: Compte utilisateur clients
+              sections: 
+                  - type: list
+                    list: 
+                        object: user_client
+          
           remises: 
               label: Avoirs clients
               sections: 

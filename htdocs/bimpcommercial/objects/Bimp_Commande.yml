@@ -291,6 +291,12 @@ fields:
         default_value: 0
         
     total: unset
+    
+    paiement_comptant:
+        label: Paiement comptant
+        type: bool
+        default_value: 0 
+
         
 fields_tables: 
     infos: 
@@ -337,6 +343,13 @@ fields_tables:
                   callback: isEditable
             - field: date_prevue_facturation
               edit: 1
+            - field: paiement_comptant
+              edit:
+                  callback:
+                      method: isFieldEditable
+                      params:
+                          - paiement_comptant
+                      
                   
     client: 
         rows: 
@@ -439,6 +452,7 @@ forms:
                   callback: isEditable
             - field: fk_cond_reglement
             - field: fk_mode_reglement
+            - field: paiement_comptant
             - field: date_commande
             - field: date_livraison
             - field: fk_availability

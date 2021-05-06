@@ -138,9 +138,14 @@ class ValidComm extends BimpObject
             $valid_comm = (int) $this->tryValidateByType($user, self::TYPE_COMMERCIAL, $secteur, $class, $percent, $bimp_object, $errors);
         
         // Validation financière
-        if($val_euros != 0 && $this->getObjectClass($bimp_object) != self::OBJ_DEVIS)
-            $valid_finan = (int) $this->tryValidateByType($user, self::TYPE_FINANCE, $secteur, $class, $val_euros, $bimp_object, $errors);
-
+        if($val_euros != 0 && $this->getObjectClass($bimp_object) != self::OBJ_DEVIS) {
+            if($bimp_object->field_exists('paiement_comptant') and $bimp_object->getData('paiement_comptant')) {
+                $success[] = "Validation financière forcée par le champ \"Paiement comptant\".";
+                $valid_finan = 1;
+            } else
+                $valid_finan = (int) $this->tryValidateByType($user, self::TYPE_FINANCE, $secteur, $class, $val_euros, $bimp_object, $errors);
+        }
+            
         if(!$valid_comm)
                 $errors[] = "Vous ne pouvez pas valider commercialement " 
                 . $bimp_object->getLabel('this') . '. La demande de validation commerciale a été adressée au valideur attribué.<br/>';
@@ -151,7 +156,7 @@ class ValidComm extends BimpObject
                 $errors[] = $this->getErrorFinance($user, $bimp_object);
         else
             $success[] = "Validation financière effectuée.";
-        
+                
         return $valid_comm and $valid_finan;
     }
     

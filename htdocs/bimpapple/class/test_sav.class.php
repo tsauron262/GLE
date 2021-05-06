@@ -36,8 +36,9 @@ class test_sav
     public $nbImei = 0;
     public $useCache = false;
 
-    function __construct()
+    function __construct($db)
     {
+        $this->db = $db;
         require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
         require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
         require_once DOL_DOCUMENT_ROOT . '/bimpapple/objects/GSX_Repair.class.php';
@@ -84,6 +85,23 @@ class test_sav
 
 
         return 'END';
+    }
+    
+    function mailLocalise(){
+        $errors = array();
+        $sql = $this->db->query('SELECT DISTINCT a.id as id
+FROM llx_bs_sav a
+LEFT JOIN llx_be_equipment a___equipment ON a___equipment.id = a.id_equipment
+WHERE  a.status IN ("-1",0) AND a___equipment.status_gsx IN ("3")');
+        while ($ln = $this->db->fetch_object($sql)){
+            $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV', $ln->id);
+            $tmpErrors = $sav->sendMsg('localise');
+            if(!count($tmpErrors))
+                $ok++;
+            BimpTools::merge_array($errors, $tmpErrors);
+        }
+        
+        $this->output .= 'Terminé '.$ok.' mail envoyée '.print_r($errors,1);
     }
 
     function getReq($statut, $iTribu)

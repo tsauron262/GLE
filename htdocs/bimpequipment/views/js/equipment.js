@@ -96,6 +96,10 @@ function fetchEquipmentInfos($form, identifier) {
                     bimpAjax.$form.find('[name="date_purchase_picker"]').data("DateTimePicker").date(moment(result.data.date_purchase));
                     bimpAjax.$form.find('[name="date_purchase_picker"]').change();
                 }
+                if (typeof (result.data.status_gsx) === 'number' && result.data.status_gsx > 0) {
+                    bimpAjax.$form.find('[name="status_gsx"]').val(result.data.status_gsx);
+                    bimpAjax.$form.find('[name="status_gsx"]').change();
+                }
                 if (typeof (result.data.date_warranty_end) === 'string' && result.data.date_warranty_end) {
                     bimpAjax.$form.find('[name="date_warranty_end_picker"]').data("DateTimePicker").date(moment(result.data.date_warranty_end));
                     bimpAjax.$form.find('[name="date_warranty_end_picker"]').change();

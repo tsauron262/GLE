@@ -396,6 +396,20 @@ class Equipment extends BimpObject
 
         return $buttons;
     }
+    
+        public function getActionsButtons()
+    {
+
+        $onclick = $this->getJsActionOnclick('updateInfosGsx');
+
+        $buttons[] = array(
+            'label'   => 'Maj GSX',
+            'icon'    => 'fas_link',
+            'onclick' => $onclick
+        );
+
+        return $buttons;
+    }
 
     public function getPackageListExtraBtn()
     {
@@ -1447,10 +1461,8 @@ class Equipment extends BimpObject
         $identifiers = static::gsxFetchIdentifiers($this->getData('serial'));
         if($identifiers == 0)
             return array('Probléme GSX');
-        if(isset($identifiers['nonApple'])){
-            $this->set('status_gsx', 2);
-        }
-        else{
+        $this->set('status_gsx', $identifiers['status_gsx']);
+        if($identifiers['status_gsx'] != 2){
             if(isset($identifiers['serial']) && $identifiers['serial'] != '')
                 $this->set('serial', $identifiers['serial']);
 
@@ -1458,12 +1470,6 @@ class Equipment extends BimpObject
             $this->set('imei2', $identifiers['imei2']);
             $this->set('meid', $identifiers['meid']);
             $this->set('product_label', $identifiers['productDescription']);
-            if(isset($identifiers['localise'])){
-                $this->set('status_gsx', 3);
-            }
-            else{
-                $this->set('status_gsx', 1);
-            }
         }
         return $this->update($warnings, 1);
     }
@@ -1490,56 +1496,85 @@ class Equipment extends BimpObject
             if ($gsx->logged) {
                 $data = $gsx->productDetailsBySerial($serial);
                 if(!is_array($data)){
-                    $identifiers['nonApple'] = true;
-                    return $identifiers;
+                    $identifiers['status_gsx'] = 2;
                 }
-                $data2 = $gsx->serialEligibility($serial);
-                foreach($data2['eligibilityDetails']['outcome'] as $out){
-                    foreach($out['reasons'] as $reason){
-                        foreach($reason['messages'] as $msg){
-                            if(stripos($msg, 'Localiser mon appareil') !== false)
-                                    $identifiers['localise'] = true;
+                else{
+                    $identifiers['status_gsx'] = 1;
+                    $data2 = $gsx->serialEligibility($serial);
+                    foreach($data2['eligibilityDetails']['outcome'] as $out){
+                        foreach($out['reasons'] as $reason){
+                            foreach($reason['messages'] as $msg){
+                                if(stripos($msg, 'Localiser mon appareil') !== false)
+                                    $identifiers['status_gsx'] = 3;
+                            }
                         }
                     }
-                }
-                
-
-                if (isset($data['device'])) {
-                    if (isset($data['device']['identifiers']['imei']) && $data['device']['identifiers']['imei']) {
-                        $identifiers['imei'] = $data['device']['identifiers']['imei'];
-                    } else {
-                        $identifiers['imei'] = 'n/a';
-                    }
 
 
-                    if (isset($data['device']['productDescription']) && $data['device']['productDescription']) {
-                        $identifiers['productDescription'] = $data['device']['productDescription'];
-                    } else {
-                        $identifiers['productDescription'] = '';
-                    }
-
-                    if (isset($data['device']['identifiers']['imei2']) && $data['device']['identifiers']['imei2']) {
-                        $identifiers['imei2'] = $data['device']['identifiers']['imei2'];
-                    } else {
-                        $identifiers['imei2'] = 'n/a';
-                    }
-
-                    if (isset($data['device']['identifiers']['meid']) && $data['device']['identifiers']['meid']) {
-                        $identifiers['meid'] = $data['device']['identifiers']['meid'];
-                    } else {
-                        $identifiers['meid'] = 'n/a';
-                    }
+                    if (isset($data['device'])) {
+                        if (isset($data['device']['identifiers']['imei']) && $data['device']['identifiers']['imei']) {
+                            $identifiers['imei'] = $data['device']['identifiers']['imei'];
+                        } else {
+                            $identifiers['imei'] = 'n/a';
+                        }
 
 
-                    if (isset($data['device']['identifiers']['serial']) && $data['device']['identifiers']['serial']) {
-                        $identifiers['serial'] = $data['device']['identifiers']['serial'];
+                        if (isset($data['device']['productDescription']) && $data['device']['productDescription']) {
+                            $identifiers['productDescription'] = $data['device']['productDescription'];
+                        } else {
+                            $identifiers['productDescription'] = '';
+                        }
+
+                        if (isset($data['device']['identifiers']['imei2']) && $data['device']['identifiers']['imei2']) {
+                            $identifiers['imei2'] = $data['device']['identifiers']['imei2'];
+                        } else {
+                            $identifiers['imei2'] = 'n/a';
+                        }
+
+                        if (isset($data['device']['identifiers']['meid']) && $data['device']['identifiers']['meid']) {
+                            $identifiers['meid'] = $data['device']['identifiers']['meid'];
+                        } else {
+                            $identifiers['meid'] = 'n/a';
+                        }
+
+
+                        if (isset($data['device']['identifiers']['serial']) && $data['device']['identifiers']['serial']) {
+                            $identifiers['serial'] = $data['device']['identifiers']['serial'];
+                        }
+
+
+                        $identifiers['warranty_type'] = $data['device']['warrantyInfo']['warrantyStatusDescription'];
+
+                        if (isset($data['device']['warrantyInfo']['coverageEndDate'])){
+                            $dt = new DateTime($data['device']['warrantyInfo']['coverageEndDate']);
+                            $identifiers['date_warranty_end'] = $dt->format('Y-m-d H:i:s');
+                        }
+
+                        if (isset($data['device']['warrantyInfo']['purchaseDate'])){
+                            $dt = new DateTime($data['device']['warrantyInfo']['purchaseDate']);
+                            $identifiers['date_purchase'] = $dt->format('Y-m-d H:i:s');
+                        }
+
+                        if (preg_match('/^.+(.{4})$/', $identifiers['serial'], $matches)) {
+                            $product = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
+                                        'code_config' => $matches[1],
+                                        'ref'         => array(
+                                            'part'      => 'APP-',
+                                            'part_type' => 'beginning'
+                                        )
+                                            ), true);
+                            if (BimpObject::objectLoaded($product)) {
+                                $identifiers['id_product'] = (int) $product->id;
+                            }
+                        }
                     }
                 }
             }
             else
                 return 0;
         }
-
+        
+        
         return $identifiers;
     }
 
@@ -1550,6 +1585,15 @@ class Equipment extends BimpObject
         define('DONT_CHECK_SERIAL', true);
         $errors = $this->moveToPlace(BE_Place::BE_PLACE_FREE, 'Correction plus sérialisable', '', '', 1);
         return $errors;
+    }
+
+    public function actionUpdateInfosGsx($data, &$success)
+    {
+        $success = 'Maj';
+        $warnings = array();
+
+        $errors = $this->majWithGsx($warnings);
+        return array('warnings'=>$warnings, 'errors'=>$errors);
     }
 
     // Renders: 

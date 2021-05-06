@@ -7,6 +7,10 @@ header_edit_form: default
 
 list_page_url: 
     controller: index
+    
+    
+header_btn: 
+    callback: getActionsButtons
             
 nom_url: 
     syntaxe: <ref>
@@ -451,6 +455,8 @@ views:
 forms:
     default:
         rows: 
+            - field: status_gsx
+              hidden: 1
             - field: serial
             - field: imei
             - field: imei2

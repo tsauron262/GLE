@@ -61,6 +61,10 @@ function fetchEquipmentInfos($form, identifier) {
         $form.find('[name="date_purchase_picker"]').addClass('disabled');
         $form.find('[name="date_warranty_end_picker"]').addClass('disabled');
         $form.find('[name="warranty_type"]').addClass('disabled');
+        
+        $form.find('[name="status_gsx"]').val(0);
+        $form.find('[name="status_gsx"]').change();
+                    
         var params = {
             $form: $form,
             display_processing: true,

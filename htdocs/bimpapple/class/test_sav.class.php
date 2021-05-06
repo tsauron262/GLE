@@ -346,9 +346,13 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
                                 'value'    => '0'
                               )
                         );
-            if($nb > 1)//sinon c'est un test de reconnexion
+            if($nb > 1){//sinon c'est un test de reconnexion
                 $filtre['status_gsx'] = 0;
-            $rows = $equipment->getList($filtre, $nb, 1, 'imei2', 'asc', 'array', array('id', 'serial'));
+                $rows = $equipment->getList($filtre, $nb, 1, 'imei2', 'asc', 'array', array('id', 'serial'));
+            }
+            else{
+                $rows = $equipment->getList($filtre, $nb, 1, 'id', 'desc', 'array', array('id', 'serial'));
+            }
 
             if (!empty($rows)) {
                 foreach ($rows as $r) {

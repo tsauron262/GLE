@@ -315,7 +315,7 @@ class BTC_export_facture_fourn extends BTC_export {
             $ecritures .= $this->struct($structure);
         }
         
-        $write = $this->write_tra($ecritures, $file, $suivi);
+        $write = $this->write_tra($ecritures, $file);
         
         if($write) {
             $suivi['file'] = $file;

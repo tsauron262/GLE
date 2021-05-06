@@ -64,17 +64,17 @@ class test_sav
 
     function testGlobal($idUser = 0)
     {
-//        $_GET['envoieMail'] = "yes";
-//        session_write_close();
-//        $this->initGsx($idUser);
-//        $this->tentativeARestitueAuto(0);
-//
-//        $this->tentativeFermetureAuto(0);
-//
-//        if ($this->nbErr > 0)
-//            $this->output .= $this->nbErr . " posant prôbléme.";
-//        $this->output .= $this->nbOk . " resolu.";
-//        $this->output .= $this->nbMail . " mail.";
+        $_GET['envoieMail'] = "yes";
+        session_write_close();
+        $this->initGsx($idUser);
+        $this->tentativeARestitueAuto(0);
+
+        $this->tentativeFermetureAuto(0);
+
+        if ($this->nbErr > 0)
+            $this->output .= $this->nbErr . " posant prôbléme.";
+        $this->output .= $this->nbOk . " resolu.";
+        $this->output .= $this->nbMail . " mail.";
 
         $this->fetchEquipmentsImei(100);
 

@@ -1,9 +1,9 @@
 <?php
 
 $_REQUEST['bimp_context'] = 'public';
-header('x-frame-options: ALLOWALL',true);
 
 require_once '../bimpcore/main.php';
+header('x-frame-options: ALLOWALL',true);
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
 BimpCore::setContext("public");

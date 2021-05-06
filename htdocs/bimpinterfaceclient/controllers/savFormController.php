@@ -7,8 +7,6 @@ class savFormController extends BimpPublicController
 
     public function renderHtml()
     {
-        return BimpRender::renderAlerts('Chantier en cours');
-        
         global $userClient;
 
         $html = '';

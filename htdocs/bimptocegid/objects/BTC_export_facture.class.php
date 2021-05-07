@@ -116,10 +116,10 @@ class BTC_export_facture extends BTC_export
             $ref_libre = strtoupper($this->suppr_accents($facture->getData('libelle')));
         }
         
-        $code_journal = $this->getCodeJoural();
+        $code_journal = $this->getCodeJournal($facture->getData('ef_type'), "V", $is_client_interco);
         
         $structure = [
-            'journal'           => [($is_client_interco) ? 'VI' : "VTE", 3],
+            'journal'           => [$code_journal, 3],
             'date'              => [$date_facture->format('dmY'), 8],
             'type_piece'        => ['FC', 2],
             'compte_general'    => [$compte_general_411, 17],

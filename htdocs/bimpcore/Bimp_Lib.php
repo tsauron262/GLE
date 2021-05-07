@@ -1,7 +1,5 @@
 <?php
 
-//if(stripos($_SERVER['PHP_SELF'], 'bimpinterfaceclient') === false)
-//    BimpTools::setContext("private");
 
 if (!defined('BIMP_LIB')) {
     define('BIMP_LIB', 1);
@@ -70,6 +68,8 @@ if (!defined('BIMP_LIB')) {
     BimpConfig::initCacheServeur();
 }
 
+if(stripos($_SERVER['PHP_SELF'], 'bimpinterfaceclient') === false)
+    BimpTools::setContext("private");
 function checkBimpCoreVersion()
 {
     if (BimpTools::isSubmit('ajax')) {

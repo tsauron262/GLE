@@ -861,6 +861,7 @@ class gsxController extends BimpController
         $id_equipment = (isset($params['id_equipment']) ? (int) $params['id_equipment'] : 0);
         $serial = '';
 
+        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment');
         if ($id_equipment) {
             $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
             if (!BimpObject::objectLoaded($equipment)) {
@@ -889,70 +890,72 @@ class gsxController extends BimpController
         );
 
         if ($serial) {
-            $matches = array();
-            if (preg_match('/^S(.+)$/', $serial, $matches)) {
-                $serial = $matches[1];
-            }
-            $result = $this->gsx_v2->productDetailsBySerial($serial);
-            if (is_array($result)) {
-                if (isset($result['device']['productDescription'])) {
-                    $data['product_label'] = $result['device']['productDescription'];
-                }
-
-                if (isset($result['device']['identifiers']['serial'])) {
-                    $data['serial'] = $result['device']['identifiers']['serial'];
-
-                    if (isset($result['device']['identifiers']['imei'])) {
-                        $data['imei'] = $result['device']['identifiers']['imei'];
-                    } else {
-                        $data['imei'] = "n/a";
-                    }
-
-                    if (isset($result['device']['identifiers']['imei2'])) {
-                        $data['imei2'] = $result['device']['identifiers']['imei2'];
-                    } else {
-                        $data['imei2'] = "n/a";
-                    }
-
-                    if (isset($result['device']['identifiers']['meid'])) {
-                        $data['meid'] = $result['device']['identifiers']['meid'];
-                    } else {
-                        $data['meid'] = "n/a";
-                    }
-
-                    $matches = array();
-                    if (preg_match('/^.+(.{4})$/', $data['serial'], $matches)) {
-                        $product = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
-                                    'code_config' => $matches[1],
-                                    'ref'         => array(
-                                        'part'      => 'APP-',
-                                        'part_type' => 'beginning'
-                                    )
-                                        ), true);
-//                        
-                        if (BimpObject::objectLoaded($product)) {
-                            $data['id_product'] = (int) $product->id;
-                        }
-                    }
-                }
-
-                if (isset($result['device']['warrantyInfo']['warrantyStatusDescription'])) {
-                    $data['warranty_type'] = $result['device']['warrantyInfo']['warrantyStatusDescription'];
-                }
-
-                if (isset($result['device']['warrantyInfo']['coverageEndDate']) &&
-                        (string) $result['device']['warrantyInfo']['coverageEndDate'] &&
-                        !preg_match('/^1970\-01\-01.*$/', $result['device']['warrantyInfo']['coverageEndDate'])) {
-                    $dt = new DateTime($result['device']['warrantyInfo']['coverageEndDate']);
-                    $data['date_warranty_end'] = $dt->format('Y-m-d H:i:s');
-                }
-                if (isset($result['device']['warrantyInfo']['purchaseDate']) &&
-                        (string) $result['device']['warrantyInfo']['purchaseDate'] &&
-                        !preg_match('/^1970\-01\-01.*$/', $result['device']['warrantyInfo']['purchaseDate'])) {
-                    $dt = new DateTime($result['device']['warrantyInfo']['purchaseDate']);
-                    $data['date_purchase'] = $dt->format('Y-m-d H:i:s');
-                }
-            }
+            $data = $equipment->gsxFetchIdentifiers($serial);
+            $data['product_label'] = $data['productDescription'];
+//            $matches = array();
+//            if (preg_match('/^S(.+)$/', $serial, $matches)) {
+//                $serial = $matches[1];
+//            }
+//            $result = $this->gsx_v2->productDetailsBySerial($serial);
+//            if (is_array($result)) {
+//                if (isset($result['device']['productDescription'])) {
+//                    $data['product_label'] = $result['device']['productDescription'];
+//                }
+//
+//                if (isset($result['device']['identifiers']['serial'])) {
+//                    $data['serial'] = $result['device']['identifiers']['serial'];
+//
+//                    if (isset($result['device']['identifiers']['imei'])) {
+//                        $data['imei'] = $result['device']['identifiers']['imei'];
+//                    } else {
+//                        $data['imei'] = "n/a";
+//                    }
+//
+//                    if (isset($result['device']['identifiers']['imei2'])) {
+//                        $data['imei2'] = $result['device']['identifiers']['imei2'];
+//                    } else {
+//                        $data['imei2'] = "n/a";
+//                    }
+//
+//                    if (isset($result['device']['identifiers']['meid'])) {
+//                        $data['meid'] = $result['device']['identifiers']['meid'];
+//                    } else {
+//                        $data['meid'] = "n/a";
+//                    }
+//
+//                    $matches = array();
+//                    if (preg_match('/^.+(.{4})$/', $data['serial'], $matches)) {
+//                        $product = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
+//                                    'code_config' => $matches[1],
+//                                    'ref'         => array(
+//                                        'part'      => 'APP-',
+//                                        'part_type' => 'beginning'
+//                                    )
+//                                        ), true);
+////                        
+//                        if (BimpObject::objectLoaded($product)) {
+//                            $data['id_product'] = (int) $product->id;
+//                        }
+//                    }
+//                }
+//
+//                if (isset($result['device']['warrantyInfo']['warrantyStatusDescription'])) {
+//                    $data['warranty_type'] = $result['device']['warrantyInfo']['warrantyStatusDescription'];
+//                }
+//
+//                if (isset($result['device']['warrantyInfo']['coverageEndDate']) &&
+//                        (string) $result['device']['warrantyInfo']['coverageEndDate'] &&
+//                        !preg_match('/^1970\-01\-01.*$/', $result['device']['warrantyInfo']['coverageEndDate'])) {
+//                    $dt = new DateTime($result['device']['warrantyInfo']['coverageEndDate']);
+//                    $data['date_warranty_end'] = $dt->format('Y-m-d H:i:s');
+//                }
+//                if (isset($result['device']['warrantyInfo']['purchaseDate']) &&
+//                        (string) $result['device']['warrantyInfo']['purchaseDate'] &&
+//                        !preg_match('/^1970\-01\-01.*$/', $result['device']['warrantyInfo']['purchaseDate'])) {
+//                    $dt = new DateTime($result['device']['warrantyInfo']['purchaseDate']);
+//                    $data['date_purchase'] = $dt->format('Y-m-d H:i:s');
+//                }
+//            }
         }
 
         return array(

@@ -283,7 +283,9 @@ class Bimp_Commande extends BimpComm
                     return 0;
                 }
                 if ((int) $this->getData('fk_soc')) {
-                    $client = $this->getChildObject('client');
+                    
+                    $client = $this->getClientFacture();
+                    
                     if ($client->isLoaded()) {
                         if(empty($client->getUnpaidFactures('2019-06-30'))) {
                             $errors[] = "Ce client n'a pas de facture impayée";

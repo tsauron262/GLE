@@ -2790,6 +2790,18 @@ class BS_SAV extends BimpObject
 
             case 'sav_closed':
                 break;
+            
+            case 'localise':
+                $eq = $this->getChildObject("equipment");
+                if($eq->getData("status_gsx") != 3)
+                    $errors[] = "L'apraeil ".$eq->getLink().' ne semble pas localisé';
+                else{
+                    $subject = "Réparation " . $this->getData('ref');
+                    $mail_msg = "Bonjour, l'appareil concerné par votre SAV ".$this->getData('ref')." qui a pour serial ".$eq->getData('serial')." a la fonction localisée activée, nous ne pouvons pas procéder à la réparation tant que vous n'aurez pas désactivé cette option dans votre iCloud.\n";
+                    $mail_msg .= "Merci de votre compréhension.\n<a href='https://support.apple.com/fr-fr/guide/icloud/mmdc23b125f6/icloud'>Voici un lien explicatif sur le site Apple</a>";
+                    //$sms = "Bonjour, nous venons de recevoir la pièce ou le produit pour votre réparation, nous vous contacterons quand votre matériel sera prêt.\nL'Equipe BIMP.";
+                }
+                break;
         }
 
         $contact = $this->getChildObject('contact');

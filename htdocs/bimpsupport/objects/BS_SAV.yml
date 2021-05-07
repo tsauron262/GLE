@@ -536,6 +536,7 @@ forms:
                       repOk: Réparation terminée
                       revPropRefu: Devis refusé
                       pieceOk: Piéce reçue
+                      localise: Localisé
                       
     validate_propal: 
         rows: 

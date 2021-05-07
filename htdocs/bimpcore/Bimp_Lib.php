@@ -1,5 +1,8 @@
 <?php
 
+if(stripos($_SERVER['PHP_SELF'], 'bimpinterfaceclient') === false)
+    BimpTools::setContext("private");
+
 if (!defined('BIMP_LIB')) {
     define('BIMP_LIB', 1);
 

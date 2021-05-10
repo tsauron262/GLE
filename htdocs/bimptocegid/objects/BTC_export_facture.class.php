@@ -350,10 +350,10 @@ class BTC_export_facture extends BTC_export
             $lignes[$compte_general_d3e]['HT'] = $d3e;
         }
 
-        if (round($total_ttc_facture, 2) != round($total_lignes, 2)) {
-            $montant_ecart = round($total_ttc_facture, 2) - (round($total_lignes, 2));
-            $lignes = $this->rectifications_ecarts($lignes, round($montant_ecart, 2), 'vente');
-        }
+//        if (round($total_ttc_facture, 2) != round($total_lignes, 2)) {
+//            $montant_ecart = round($total_ttc_facture, 2) - (round($total_lignes, 2));
+//            $lignes = $this->rectifications_ecarts($lignes, round($montant_ecart, 2), 'vente');
+//        }
         foreach ($lignes as $l => $infos) {
             if ($l != 'REMISE') {
                 $structure['compte_general'] = [$l, 17];
@@ -643,7 +643,7 @@ class BTC_export_facture extends BTC_export
                     }
                 } else {
                     foreach ($facture_comptes['lines'] as $compte => $montant) {
-                        $montant_lignes += abs(round($montant, 2));
+                        $montant_lignes += abs($montant);
                     }
                 }
 

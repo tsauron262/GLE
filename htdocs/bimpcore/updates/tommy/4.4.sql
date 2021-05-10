@@ -3,6 +3,6 @@ UPDATE `llx_societe` SET fk_typent = 5 WHERE (`siret` LIKE '1%' || `siret` LIKE 
 UPDATE `llx_societe` SET fk_typent = 0 WHERE (`siret` NOT LIKE '1%' && `siret` NOT LIKE '2%') AND fk_typent = 5;
 UPDATE `llx_societe` SET `outstanding_limit` = 50000 WHERE fk_typent = 5;
 UPDATE `llx_societe` SET outstanding_limit = 0 WHERE fk_typent = 8 AND outstanding_limit > 0;
-UPDATE `llx_societe` SET `statut` = 0 WHERE fk_typent = 8 AND code_compta LIKE 'E%';
-UPDATE `llx_societe` SET `statut` = 0 WHERE fk_typent != 8 AND code_compta LIKE 'P%'
+UPDATE `llx_societe` SET `status` = 0 WHERE fk_typent = 8 AND code_compta LIKE 'E%';
+UPDATE `llx_societe` SET `status` = 0 WHERE fk_typent != 8 AND code_compta LIKE 'P%'
 

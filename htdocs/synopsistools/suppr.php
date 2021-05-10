@@ -36,24 +36,42 @@ llxHeader();
 //if (isset($_REQUEST['connect']))
 //    echo "<script>$(window).on('load', function() {initSynchServ(idActionMax);});</script>";
 
+//echo '
+//<script>
+//    jQuery("document").ready(function(){
+//        var iframe = document.createElement("iframe");
+//        iframe.src = "https://erp.bimp.fr/bimp8/bimpsupport/public/page.php"+window.location.search;
+//        /* style peut être modifiée */
+//        iframe.style["width"] = "80%";
+//        iframe.style["height"] = "80%";
+//        iframe.style["min-width"] = "900px";
+//        iframe.style["min-height"] = "500px";
+//        iframe.style.marginLeft = "10%";
+//        /* fin style */
+//        jQuery(".div_iframe").each(function(){
+//            this.appendChild(iframe);
+//        });
+//    });
+//</script>
+//<div class="div_iframe"></div>
+//';
+
+
 echo '
 <script>
     jQuery("document").ready(function(){
         var iframe = document.createElement("iframe");
-        iframe.src = "https://erp.bimp.fr/bimp8/bimpsupport/public/page.php"+window.location.search;
+        iframe.src = "https://erp.bimp.fr/bimp8/bimpinterfaceclient/client.php"+window.location.search;
         /* style peut être modifiée */
-        iframe.style["width"] = "80%";
-        iframe.style["height"] = "80%";
-        iframe.style["min-width"] = "900px";
-        iframe.style["min-height"] = "500px";
-        iframe.style.marginLeft = "10%";
+        iframe.style["width"] = "100%";
+        iframe.style["min-height"] = "1200px";
         /* fin style */
         jQuery(".div_iframe").each(function(){
             this.appendChild(iframe);
         });
     });
 </script>
-<div class="div_iframe"></div>
+<div class="div_iframe"></iframe></div>
 ';
 
 

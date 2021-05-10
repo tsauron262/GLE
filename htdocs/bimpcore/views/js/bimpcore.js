@@ -113,6 +113,11 @@ function onSocieteSiretOrSirenChange($input, field, value) {
                     if (typeof (result.data.siret) === 'string' && result.data.siret) {
                         $form.find('[name="siret"]').val(result.data.siret);
                     }
+                    
+                    if(result.data.siret.substr(0,1) == '1' || result.data.siret.substr(0,1) == '2'){
+                        $form.find('[name="fk_typent"]').val(5);
+                        $form.find('[name="fk_typent"]').change();
+                    }
 
                     if (typeof (result.data.nom) === 'string' && result.data.nom) {
                         $form.find('[name="nom"]').val(result.data.nom);

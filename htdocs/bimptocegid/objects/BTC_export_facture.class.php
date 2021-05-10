@@ -169,6 +169,7 @@ class BTC_export_facture extends BTC_export
             'date_debut'        => ['', 8],
             'date_fin'          => ['', 8]
         ];
+        $reste = round($total_ttc_facture, 2);
 
         $writing_ligne_client = false;
         $total_lignes_facture = 0;
@@ -354,6 +355,7 @@ class BTC_export_facture extends BTC_export
             $montant_ecart = round($total_ttc_facture, 2) - (round($total_lignes, 2));
             $lignes = $this->rectifications_ecarts($lignes, round($montant_ecart, 2), 'vente');
         }
+        $plusGrand = null;
         foreach ($lignes as $l => $infos) {
             if ($l != 'REMISE') {
                 $structure['compte_general'] = [$l, 17];
@@ -364,14 +366,25 @@ class BTC_export_facture extends BTC_export
             $structure['type_de_compte'] = [" ", 1];
             $structure['code_auxiliaire'] = ['', 16];
             $structure['montant'] = [abs(round($infos['HT'], 2)), 20, true];
+            $reste -= round($infos['HT'], 2);
             $structure['sens'] = [$this->get_sens($total_ttc_facture, 'facture', true, $sens_parent), 1];
 
             $structure['contre_partie'] = [$compte_general_411, 17];
             $structure['vide'] = [$code_auxiliaire, 606];
+            
+            if(!is_array($plusGrand) || abs($structure['montant']) > abs($plusGrand['montant']))
+                $plusGrand = $structure;
             $ecritures .= $this->struct($structure);
         }
         
         
+        if(round($reste,2 ) != 0){
+            if(is_array($plusGrand)){
+                $plusGrand['montant'] = [abs(round($reste, 2)), 20, true];
+                $plusGrand['sens'] = [$this->get_sens($reste, 'facture', true, $sens_parent), 1];
+                $ecritures .= $this->struct($plusGrand);
+            }
+        }
         
         $write = $this->write_tra($ecritures, $file);
         
@@ -381,7 +394,6 @@ class BTC_export_facture extends BTC_export
         } else {
             $suivi['ecriture'] = false;
         }
-        
         $export[$facture->getData('ref')] = $suivi;
         
         return $write;

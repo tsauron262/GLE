@@ -760,6 +760,7 @@ class Bimp_Commande extends BimpComm
                     $buttons[] = array(
                         'label'   => 'Signaler retard paiement',
                         'icon'    => 'envelope',
+                        'type' => 'danger',
                         'onclick' => $this->getJsActionOnclick('sendMailLatePayment', array(
                             'user_ask_firstname' => $user_ask->getData('firstname'),
                             'user_ask_email'     => $user_ask->getData('email')

@@ -655,7 +655,7 @@ class BTC_export_facture extends BTC_export
                     }
                 } else {
                     foreach ($facture_comptes['lines'] as $compte => $montant) {
-                        $montant_lignes += abs(round($montant, 2));
+                        $montant_lignes += abs($montant);
                     }
                 }
 

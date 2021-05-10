@@ -57,7 +57,7 @@ llxHeader();
 //';
 
 
-echo '
+echo ' 
 <script>
     jQuery("document").ready(function(){
         var iframe = document.createElement("iframe");

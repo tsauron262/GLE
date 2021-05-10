@@ -20,7 +20,7 @@ class Interfacevalidate extends BimpCommTriggers
             switch ($action_name) {
                 case 'VALIDATE':
                     if (method_exists($bimpObject, 'isValidatable')) {
-                        if ($bimpObject->isValidatable($errors)) {
+                        if ($bimpObject->isValidatable($errors)  && (int) $conf->global->MAIN_MODULE_BIMPVALIDATEORDER == 1) {
                             $validateur = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
                             $can_validate = (int) $validateur->tryToValidate($bimpObject, $user, $errors, $success);
                         }

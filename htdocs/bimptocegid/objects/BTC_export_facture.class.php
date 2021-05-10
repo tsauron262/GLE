@@ -217,7 +217,7 @@ class BTC_export_facture extends BTC_export
                         if ($frais_de_port = $this->db->getRow('categorie_product', 'fk_categorie = 9705 AND fk_product = ' . $produit->id) || $produit->id == 129950) {
                             $is_frais_de_port = true;
                             $lignes[$compte_general_port]['HT'] += $line->multicurrency_total_ht;
-                            $total_lignes += round($line->multicurrency_total_ht, 2);
+                            $total_lignes += $line->multicurrency_total_ht;
                             if ($use_tva && $line->tva_tx != 0) {
                                 $lignes[$compte_general_tva]['HT'] += $line->multicurrency_total_tva;
                                 $total_lignes += $line->multicurrency_total_tva;
@@ -281,12 +281,12 @@ class BTC_export_facture extends BTC_export
                             case "REFACT_FILIALES":
                                 $is_refact = true;
                                 $lignes[$compte_refact_ht]['HT'] += $line->multicurrency_total_ht;
-                                $total_lignes += round($line->multicurrency_total_ht, 2);
+                                $total_lignes += $line->multicurrency_total_ht;
                                 break;
                             case "REFACT_TTC_FILIALES":
                                 $is_refact = true;
                                 $lignes[$compte_refact_ttc]['HT'] += $line->multicurrency_total_ht;
-                                $total_lignes += round($line->multicurrency_total_ht, 2);
+                                $total_lignes += $line->multicurrency_total_ht;
                                 break;
                         }
 
@@ -301,12 +301,12 @@ class BTC_export_facture extends BTC_export
                                     }
 
                                     $lignes[$use_compte_general]['HT'] += $add_ht;
-                                    $total_lignes += round($line->multicurrency_total_ht, 2);
+                                    $total_lignes += $line->multicurrency_total_ht;
                                 }
                             } else {
                                 if (($facture->getData('zone_vente') == 1 && $line->tva_tx != 0) || $facture->getData('zone_vente') != 1) {
                                     $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht;
-                                    $total_lignes += round($line->multicurrency_total_ht, 2);
+                                    $total_lignes += $line->multicurrency_total_ht;
                                 }
                             }
                             
@@ -320,7 +320,7 @@ class BTC_export_facture extends BTC_export
                                 else {
                                     $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht;
                                 }
-                                $total_lignes += round($line->multicurrency_total_ht, 2);
+                                $total_lignes += $line->multicurrency_total_ht;
                             }
                         }
                     } else {
@@ -328,7 +328,7 @@ class BTC_export_facture extends BTC_export
                             $lignes[$compte_general_tva]['HT'] += $line->multicurrency_total_tva;
                             $total_lignes += $line->multicurrency_total_tva;
                             $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht;
-                            $total_lignes += round($line->multicurrency_total_ht, 2);
+                            $total_lignes += $line->multicurrency_total_ht;
                         } elseif ($use_tva && $line->tva_tx == 0) {
                             if($facture->getData('zone_vente') == 1) {
                                     $lignes[$compte_general_tva_null]['HT'] += $line->multicurrency_total_ht;
@@ -336,7 +336,7 @@ class BTC_export_facture extends BTC_export
                                 else {
                                     $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht;
                                 }
-                            $total_lignes += round($line->multicurrency_total_ht, 2);
+                            $total_lignes += $line->multicurrency_total_ht;
                         }
                     }
                 } else {
@@ -350,10 +350,10 @@ class BTC_export_facture extends BTC_export
             $lignes[$compte_general_d3e]['HT'] = $d3e;
         }
 
-        if (round($total_ttc_facture, 2) != round($total_lignes, 2)) {
-            $montant_ecart = round($total_ttc_facture, 2) - (round($total_lignes, 2));
-            $lignes = $this->rectifications_ecarts($lignes, round($montant_ecart, 2), 'vente');
-        }
+//        if (round($total_ttc_facture, 2) != round($total_lignes, 2)) {
+//            $montant_ecart = round($total_ttc_facture, 2) - (round($total_lignes, 2));
+//            $lignes = $this->rectifications_ecarts($lignes, round($montant_ecart, 2), 'vente');
+//        }
         foreach ($lignes as $l => $infos) {
             if ($l != 'REMISE') {
                 $structure['compte_general'] = [$l, 17];

@@ -382,6 +382,10 @@ fields:
         type: money
         default_value: 
             conf: societe_default_outstanding_limit
+    outstanding_limit_credit_safe: 
+        label: Limite recommandé par Crédit SAFE
+        type: money
+        edit: 0
         
     fk_account: 
         label: Compte bancaire
@@ -638,6 +642,8 @@ fields_tables:
               edit: 1
               show: 
                   callback: isClient
+            - field: outstanding_limit_credit_safe
+              edit: 0
             - label: Lettre Credit SAFE
               value:
                   callback: getCreditSafeLettre
@@ -809,6 +815,8 @@ forms:
                     show_values: 1
             outstanding_limit: 
                 field: outstanding_limit
+            outstanding_limit_credit_safe:
+                field: outstanding_limit_credit_safe
             notecreditsafe: 
                 field: notecreditsafe
             lettrecreditsafe:

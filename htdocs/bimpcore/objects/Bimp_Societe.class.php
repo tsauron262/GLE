@@ -85,7 +85,8 @@ class Bimp_Societe extends BimpDolObject
         switch ($field_name) {
             case 'outstanding_limit':
                 return ($user->rights->bimpcommercial->admin_financier ? 1 : 0);
-
+            case 'outstanding_limit_credit_safe':
+                return 0;
             case 'solvabilite_status':
             case 'status':
                 return ($user->admin || $user->rights->bimpcommercial->admin_recouvrement ? 1 : 0);
@@ -1852,7 +1853,7 @@ class Bimp_Societe extends BimpDolObject
                         "zip"               => "" . $codeP,
                         "town"              => "" . $ville,
                         "outstanding_limit" => "" . intval($limit),
-                        "capital"           => "" . str_replace(" Euros", "", $summary->sharecapital));
+                        "capital"           => "" . trim(str_replace(" Euros", "", $summary->sharecapital)));
                 }
             }
         }
@@ -2320,6 +2321,9 @@ class Bimp_Societe extends BimpDolObject
     public function validatePost()
     {
         $errors = parent::validatePost();
+        
+        if($_REQUEST['outstanding_limit_credit_safe'] != $this->getData('outstanding_limit_credit_safe'))
+            $this->updateField('outstanding_limit_credit_safe', $_REQUEST['outstanding_limit_credit_safe']);
 
         if (!count($errors)) {
             if (BimpTools::isSubmit('is_company')) {

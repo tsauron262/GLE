@@ -372,7 +372,8 @@ class BTC_export_facture extends BTC_export
             $structure['contre_partie'] = [$compte_general_411, 17];
             $structure['vide'] = [$code_auxiliaire, 606];
             
-            if(!is_array($plusGrand) || abs($structure['montant']) > abs($plusGrand['montant']))
+            // if(!is_array($plusGrand) || abs($structure['montant']) > abs($plusGrand['montant']))
+            if(!is_array($plusGrand) || intval($structure['montant']) > intval($plusGrand['montant']))
                 $plusGrand = $structure;
             $ecritures .= $this->struct($structure);
         }

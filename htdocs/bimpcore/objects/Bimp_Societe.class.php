@@ -1788,7 +1788,7 @@ class Bimp_Societe extends BimpDolObject
                 } elseif (stripos($result->header->reportinformation->reporttype, "Error") !== false) {
                     $errors[] = 'Erreur lors de la vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' (Code: ' . $result->body->errors->errordetail->code . ')';
                 } else {
-                    $note = "";
+                    $note = $alert = "";
                     $limit = 0;
 
                     $summary = $result->body->company->summary;
@@ -1799,6 +1799,7 @@ class Bimp_Societe extends BimpDolObject
 
                     if($summary->status == 'Fermé'){
                         $note = 'Fermé';
+                        $alert = 'Fermé';
                         $lettrecreditsafe = 0;
                     }
                     else{
@@ -1862,6 +1863,7 @@ class Bimp_Societe extends BimpDolObject
                         "tva_intra"         => "" . $base->vatnumber,
                         "phone"             => "" . $tel,
                         "ape"               => "" . $summary->activitycode,
+                        "alert"             => "" . $alert,
                         "notecreditsafe"    => "" . $note,
                         "lettrecreditsafe"  => "" . $lettrecreditsafe,
                         "address"           => "" . $adress,

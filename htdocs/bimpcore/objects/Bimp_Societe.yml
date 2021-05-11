@@ -5,6 +5,7 @@ dol_object:
 table: societe
 primary: rowid
 icon: fas_building
+common_fields: 1
 
 nom_url: 
     syntaxe: <ref> - <name>
@@ -64,12 +65,31 @@ objects:
         
     contact_relances: 
         extends: contact
-        extends: contact
         instance: 
             id_object: 
                 field_value: id_contact_relances
+    
+    user_author:
+        extends: user
+        instance: 
+            id_object: 
+                field_value: fk_user_creat
                 
 fields: 
+    datec: 
+        label: Créée le
+        type: datetime
+    fk_user_creat: 
+        label: Créée par
+        type: id_object
+        object: user_author
+        input: 
+            type: hidden
+        search: 
+            input: 
+                type: search_user
+        filter: 
+            type: user
     nom:
         dol_prop: name
         label: Nom

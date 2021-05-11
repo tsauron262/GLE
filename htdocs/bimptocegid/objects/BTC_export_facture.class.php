@@ -356,6 +356,7 @@ class BTC_export_facture extends BTC_export
 //            $lignes = $this->rectifications_ecarts($lignes, round($montant_ecart, 2), 'vente');
 //        }
         $plusGrand = null;
+        $testMontantPlusGrand = 0;
         foreach ($lignes as $l => $infos) {
             if ($l != 'REMISE') {
                 $structure['compte_general'] = [$l, 17];
@@ -366,15 +367,20 @@ class BTC_export_facture extends BTC_export
             $structure['type_de_compte'] = [" ", 1];
             $structure['code_auxiliaire'] = ['', 16];
             $structure['montant'] = [abs(round($infos['HT'], 2)), 20, true];
+            $testMontant = abs(round($infos['HT'], 2));
             $reste -= round($infos['HT'], 2);
             $structure['sens'] = [$this->get_sens($total_ttc_facture, 'facture', true, $sens_parent), 1];
 
             $structure['contre_partie'] = [$compte_general_411, 17];
             $structure['vide'] = [$code_auxiliaire, 606];
             
-            // if(!is_array($plusGrand) || abs($structure['montant']) > abs($plusGrand['montant']))
-            if(!is_array($plusGrand) || intval($structure['montant']) > intval($plusGrand['montant']))
+            if(!is_array($plusGrand) || $testMontant > $testMontantPlusGrand){
                 $plusGrand = $structure;
+                $testMontantPlusGrand  = $testMontant;
+            }
+                
+            //if(!is_array($plusGrand) || intval($structure['montant']) > intval($plusGrand['montant']))
+                
             $ecritures .= $this->struct($structure);
         }
         

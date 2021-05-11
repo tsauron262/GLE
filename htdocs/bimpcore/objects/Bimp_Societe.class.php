@@ -1781,7 +1781,6 @@ class Bimp_Societe extends BimpDolObject
                 $bimpLogPhpWarnings = false;
 
                 $result = simplexml_load_string($returnData);
-
                 $bimpLogPhpWarnings = $prevLogWarnings;
 
                 if (!is_object($result)) {
@@ -1797,48 +1796,64 @@ class Bimp_Societe extends BimpDolObject
                     $branches = $base->branches->branch;
                     $adress = "" . $summary->postaladdress->address . " " . $summary->postaladresse->additiontoaddress;
 
-                    $lettrecreditsafe = 0;
-                    foreach (array("", "2013") as $annee) {
-                        $champ = "rating" . $annee;
-                        if ($summary->$champ > 0) {
-                            $lettrecreditsafe = $summary->$champ;
-                            $note = dol_print_date(dol_now()) . ($annee == '' ? '' : '(Methode ' . $annee . ')') . " : " . $summary->$champ . "/100";
-                            foreach (array("", "desc1", "desc2") as $champ2) {
-                                $champT = $champ . $champ2;
-                                if (isset($summary->$champT))
-                                    $note .= " " . str_replace($summary->$champ, "", $summary->$champT);
+
+                    if($summary->status == 'Fermé'){
+                        $note = 'Fermé';
+                        $lettrecreditsafe = 0;
+                    }
+                    else{
+                        $lettrecreditsafe = 0;
+                        foreach (array("", "2013") as $annee) {
+                            $champ = "rating" . $annee;
+                            if ($summary->$champ > 0) {
+                                $lettrecreditsafe = $summary->$champ;
+                                $note = dol_print_date(dol_now()) . ($annee == '' ? '' : '(Methode ' . $annee . ')') . " : " . $summary->$champ . "/100";
+                                foreach (array("", "desc1", "desc2", 'commentaries') as $champ2) {
+                                    $champT = $champ . $champ2;
+                                    if (isset($summary->$champT))
+                                        $note .= " " . str_replace($summary->$champ, "", $summary->$champT);
+                                }
+                            }
+                            $champ2 = "creditlimit" . $annee;
+                            if (isset($summary->$champ2))
+                                $limit = $summary->$champ2;
+                        }
+
+                        $tabCodeP = explode(" ", $summary->postaladdress->distributionline);
+                        $codeP = $tabCodeP[0];
+                        $ville = str_replace($tabCodeP[0] . " ", "", $summary->postaladdress->distributionline);
+                        $tel = $summary->telephone;
+                        $nom = $summary->companyname;
+
+                        foreach ($branches as $branche) {
+                            if (($siret && $branche->companynumber == $siret) || (!$siret && stripos($branche->type, "Siège") !== false)) {
+                                $adress = $branche->full_address->address;
+                                $nom = $branche->full_address->name;
+                                $codeP = $branche->postcode;
+                                $ville = $branche->municipality;
+                                if (!$siret) {
+                                    $siret = (string) $branche->companynumber;
+                                }
+                                break;
                             }
                         }
-                        $champ2 = "creditlimit" . $annee;
-                        if (isset($summary->$champ2))
-                            $limit = $summary->$champ2;
-                    }
 
-                    $tabCodeP = explode(" ", $summary->postaladdress->distributionline);
-                    $codeP = $tabCodeP[0];
-                    $ville = str_replace($tabCodeP[0] . " ", "", $summary->postaladdress->distributionline);
-                    $tel = $summary->telephone;
-                    $nom = $summary->companyname;
-
-                    foreach ($branches as $branche) {
-                        if (($siret && $branche->companynumber == $siret) || (!$siret && stripos($branche->type, "Siège") !== false)) {
-                            $adress = $branche->full_address->address;
-                            $nom = $branche->full_address->name;
-                            $codeP = $branche->postcode;
-                            $ville = $branche->municipality;
-                            if (!$siret) {
-                                $siret = (string) $branche->companynumber;
-                            }
-                            break;
+                        if ($limit) {
+                            $note .= ($note ? ' - ' : '') . 'Limite: ' . price(intval($limit)) . ' €';
                         }
-                    }
 
-                    if ($limit) {
-                        $note .= ($note ? ' - ' : '') . 'Limite: ' . price(intval($limit)) . ' €';
+                        if ($limit < 1 && $lettrecreditsafe == 100)
+                            $limit = 10000000;
                     }
-
-                    if ($limit < 1 && $lettrecreditsafe == 100)
-                        $limit = 10000000;
+                    if(isset($result->body->company->ratings2013->commentaries->comment)){
+                        if(is_string($result->body->company->ratings2013->commentaries->comment))
+                            $note .= "
+".$result->body->company->ratings2013->commentaries->comment;
+                        else
+                            foreach($result->body->company->ratings2013->commentaries->comment as $comment)
+                                 $note .= "
+".$comment;
+                    }
 
                     $data = array(
                         'siren'             => $siren,

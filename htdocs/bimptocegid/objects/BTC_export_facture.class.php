@@ -388,7 +388,8 @@ class BTC_export_facture extends BTC_export
         if(round($reste,2 ) != 0){
             if(is_array($plusGrand)){
                 $plusGrand['montant'] = [abs(round($reste, 2)), 20, true];
-                $plusGrand['sens'] = [$this->get_sens($reste, 'facture', true, $sens_parent), 1];
+                $invert = (round($reste, 2) < 0) ? false : true;
+                $plusGrand['sens'] = [$this->get_sens($reste, 'facture', $invert, $sens_parent), 1];
                 $ecritures .= $this->struct($plusGrand);
             }
         }

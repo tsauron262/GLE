@@ -163,6 +163,10 @@ function onSocieteSiretOrSirenChange($input, field, value) {
                     if (typeof (result.data.lettrecreditsafe) === 'string' && result.data.lettrecreditsafe) {
                         $form.find('[name="lettrecreditsafe"]').val(result.data.lettrecreditsafe);
                     }
+                    
+                    if (typeof (result.data.alert) === 'string' && result.data.alert) {
+                        alert(result.data.alert)
+                    }
                 }
             },
             error: function (result, bimpAjax) {

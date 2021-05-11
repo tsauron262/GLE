@@ -133,10 +133,10 @@ if(!$is_paiement){
                 $array_ecart[$id_piece]['DETAILS'] = $infos['DETAILS_LIGNE'];
             }
             
-            if(empty($infos['CONTROLLE_AUXILIAIRE'])) {
-                $array_auxil[$id_piece]['LIGNE'] = $infos['LIGNE_FACTURE'];
-                $array_auxil[$id_piece]['TYPE'] = $infos['TYPE_EXPORT'];
-            }
+//            if(empty($infos['CONTROLLE_AUXILIAIRE'])) {
+//                $array_auxil[$id_piece]['LIGNE'] = $infos['LIGNE_FACTURE'];
+//                $array_auxil[$id_piece]['TYPE'] = $infos['TYPE_EXPORT'];
+//            }
             
         }
 

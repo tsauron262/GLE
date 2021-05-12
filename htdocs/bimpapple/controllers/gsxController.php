@@ -918,6 +918,7 @@ class gsxController extends BimpController
     {
         $errors = array();
 
+        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment');
         $id_equipment = (isset($params['id_equipment']) ? (int) $params['id_equipment'] : 0);
         $serial = '';
 
@@ -948,7 +949,7 @@ class gsxController extends BimpController
             'warning'           => ''
         );
 
-        if (is_object($equipment)) {
+        if ($serial) {
             $data = $equipment->gsxFetchIdentifiers($serial);
             $data['product_label'] = $data['productDescription'];
 

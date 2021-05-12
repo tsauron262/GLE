@@ -1642,7 +1642,8 @@ class gsxController extends BimpController
             $id_sav = (isset($params['id_sav']) ? (int) $params['id_sav'] : 0);
             $repairType = (isset($params['repairType']) ? $params['repairType'] : '');
             $coverageOption = (isset($params['coverageOption']) ? $params['coverageOption'] : '');
-            $consumerLaw = (isset($params['consumerLaw']) ? $params['consumerLaw'] : '');
+//            $consumerLaw = (isset($params['consumerLaw']) ? $params['consumerLaw'] : '');
+            $consumerLaw = '';
 
             if (!$id_sav) {
                 $errors[] = 'ID du SAV absent 63';

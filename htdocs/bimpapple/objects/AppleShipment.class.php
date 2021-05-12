@@ -578,7 +578,7 @@ class AppleShipment extends BimpObject
             foreach ($this->getChildrenObjects('parts') as $part) {
                 $parts[] = array(
                     'action'            => 'CREATE',
-                    'overPackId'        => 'INDIVIDUAL',
+                    'overPackId'        => 'Individual',
                     'partNumber'        => $part->getData('part_number'),
                     'repairId'          => $part->getData('repair_number'),
                     'returnOrderNumber' => $part->getData('return_order_number'),

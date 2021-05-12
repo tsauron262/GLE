@@ -918,6 +918,7 @@ class gsxController extends BimpController
     {
         $errors = array();
 
+        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment');
         $id_equipment = (isset($params['id_equipment']) ? (int) $params['id_equipment'] : 0);
         $serial = '';
 

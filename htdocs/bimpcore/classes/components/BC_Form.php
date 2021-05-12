@@ -383,7 +383,7 @@ class BC_Form extends BC_Panel
         $html .= '</div>';
 
         $html .= '<div class="formRowInput field col-xs-12 col-sm-6 col-md-' . (12 - (int) $label_cols) . '">';
-        
+
         if ($field->edit && $field->isEditable()) {
             if ($field->params['type'] === 'id_object' ||
                     ($field->params['type'] === 'items_list' && $field->params['items_data_type'] === 'id_object')) {

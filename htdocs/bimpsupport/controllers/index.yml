@@ -27,6 +27,12 @@ objects:
         instance: 
             bimp_object: BS_Pret
             
+    shipments: 
+        instance: 
+            bimp_object: 
+                module: bimpapple
+                name: AppleShipment            
+            
 sections:
     - type: tabs
       tabs: 
@@ -57,3 +63,11 @@ sections:
                 - type: list
                   list: 
                       object: sav_pret
+        shipments: 
+            label: Retours groupés
+            icon: fas_shipping-fast
+            sections:
+                - type: list
+                  list: 
+                      object: shipments
+                

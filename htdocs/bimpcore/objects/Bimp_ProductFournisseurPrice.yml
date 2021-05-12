@@ -164,7 +164,7 @@ lists:
             price:
             remise_percent:
             stockFourn:
-                
+            
     fourn:
         extends: default
         cols:

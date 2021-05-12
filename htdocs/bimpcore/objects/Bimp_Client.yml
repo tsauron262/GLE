@@ -12,7 +12,7 @@ icon: fas_user-circle
 header_list_name: default
 header_edit_form: default
 header_delete_btn: 1
-
+                    
 public_header_edit_form: public
            
 objects: 
@@ -32,7 +32,7 @@ fields:
         
     mode_reglement_supplier: unset
     cond_reglement_supplier: unset
-
+                    
 fields_tables: 
     public_infos: 
         panel: 0
@@ -67,7 +67,7 @@ views:
     client:
         extends: default
         objects_change_reload: BimpRelanceClientsLine
-        
+                      
     public_client: 
         title: Mon compte client
         rows: 
@@ -267,7 +267,7 @@ forms:
                     type: select
                     options: 
                         array: condReglements
-                        
+      
     public: 
         rows: 
             - field: nom

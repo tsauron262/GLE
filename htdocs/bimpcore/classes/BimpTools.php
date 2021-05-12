@@ -748,7 +748,6 @@ class BimpTools
         $prefix = str_replace("{AA}", date('y'), $prefix);
         $prefix = str_replace("{MM}", date('m'), $prefix);
 
-
         if ($prefix) {
             $where = '`' . $field . '` LIKE \'' . $prefix . '%\'';
         } else {
@@ -789,6 +788,16 @@ class BimpTools
     {
         if (is_null($root_dir)) {
             $root_dir = DOL_DATA_ROOT;
+        }
+
+        if (is_string($dir_tree)) {
+            if (preg_match('/^\/*' . preg_quote($root_dir, '/') . '\/+(.+)$/', $dir_tree, $matches)) {
+                $dir_tree = $matches[1];
+            }
+        }
+
+        if (empty($dir_tree)) {
+            return 'Nom du dossier à créer absent';
         }
 
         if (!file_exists($root_dir)) {
@@ -1705,6 +1714,10 @@ class BimpTools
             }
         }
 
+        if (is_array($value)) {
+            return BimpRender::renderRecursiveArrayContent($value);
+        }
+
         return $value;
     }
 
@@ -1791,39 +1804,39 @@ class BimpTools
         $html .= '>' . date($format_mini, $date) . '</' . $balise . '>';
         return $html;
     }
-    
+
     public static function getDayOfWeekLabel($day)
     {
         switch ($day) {
-            case 1: 
+            case 1:
                 return 'Lundi';
-                
-            case 2: 
+
+            case 2:
                 return 'Mardi';
-                
-            case 3: 
+
+            case 3:
                 return 'Mercredi';
-                
-            case 4: 
+
+            case 4:
                 return 'Jeudi';
-                
-            case 5: 
+
+            case 5:
                 return 'Vendredi';
-                
-            case 6: 
+
+            case 6:
                 return 'Samedi';
-                
-            case 7: 
+
+            case 7:
                 return 'Dimanche';
         }
-        
+
         return '';
     }
-    
+
     public static function getMonthLabel($month)
     {
         // todo
-        
+
         return $month;
     }
 
@@ -2297,8 +2310,9 @@ class BimpTools
         return 0;
     }
 
-    public static function getAvatarImgSrc($text, $size, $color){
-        return 'http://placehold.it/' .$size . '/' . $color . '/fff&amp;text=' . $text;
+    public static function getAvatarImgSrc($text, $size, $color)
+    {
+        return 'http://placehold.it/' . $size . '/' . $color . '/fff&amp;text=' . $text;
     }
 
     public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false, $no_html = false, $decimals = 2, $round_points = false, $separator = ',', $spaces = true)
@@ -2710,7 +2724,7 @@ class BimpTools
                 $html .= ' (<span class="bold">+0</span>)';
             }
         }
-        
+
         if (!is_null($init_mem)) {
             $init_mem = $mem;
         }
@@ -3013,7 +3027,6 @@ class BimpTools
     public static function htmlToText($html)
     {
         $html = preg_replace('/\<br(\s*)?\/?\>/i', "\n", $html);
-
 
         return $html;
     }

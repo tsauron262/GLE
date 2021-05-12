@@ -1,3 +1,4 @@
+
 <?php
 
 require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX.class.php';
@@ -15,6 +16,7 @@ class GSX_Repair extends BimpObject
     public $gsx_v2 = null;
     public $use_gsx_v2 = false;
     public $findInGsx = false;
+    public $shipTo = '';
     public static $lookupNumbers = array(
         'serialNumber' => 'Numéro de série',
         'repairNumber' => 'Numéro de réparation (repair #)',
@@ -47,7 +49,13 @@ class GSX_Repair extends BimpObject
     {
         if ($this->use_gsx_v2) {
             if (is_null($this->gsx_v2) || !$this->gsx_v2->logged) {
-                $this->gsx_v2 = GSX_v2::getInstance($force);
+                $this->gsx_v2 = new GSX_v2((string) $this->getData('ship_to'));
+            } else {
+                $repairShipTo = (string) $this->getData('ship_to');
+                if ($repairShipTo) {
+                    $repairShipTo = BimpTools::addZeros($repairShipTo, GSX_v2::$numbersNumChars);
+                    $this->gsx_v2->shipTo = $repairShipTo;
+                }
             }
             $this->gsx_v2->resetErrors();
             if (!$this->gsx_v2->logged) {
@@ -210,7 +218,7 @@ class GSX_Repair extends BimpObject
                     'onclick' => $onclick
                 );
             } elseif (!(int) $this->getData('ready_for_pick_up') && !(int) $this->getData('canceled')) {
-                $confirm = 'Attention, la réparation va être marquée &quote;Ready For Pick up&quote; (prête pour enlèvement) auprès du service GSX d\\\'Apple. Veuillez confirmer';
+                $confirm = 'Attention, la réparation va être marquée \\\'\\\'Ready For Pick up\\\'\\\' (prête pour enlèvement) auprès du service GSX d\\\'Apple. Veuillez confirmer';
                 $onclick = $this->getJsGsxAjaxOnClick('gsxRepairAction', array(
                     'id_repair' => (int) $this->id,
                     'action'    => 'readyForPickup'
@@ -237,15 +245,16 @@ class GSX_Repair extends BimpObject
                     'type'    => 'danger',
                     'onclick' => $onclick
                 );
-            } elseif (!(int) $this->getData('reimbursed') && !(int) $this->getData('canceled')) {
-                $confirm = 'Veuillez confirmer';
-                $onclick = '';
-                $buttons[] = array(
-                    'label'   => 'Marquer comme remboursée',
-                    'icon'    => 'fas_check',
-                    'onclick' => $onclick
-                );
             }
+//            elseif (!(int) $this->getData('reimbursed') && !(int) $this->getData('canceled')) {
+//                $confirm = 'Veuillez confirmer';
+//                $onclick = '';
+//                $buttons[] = array(
+//                    'label'   => 'Marquer comme remboursée',
+//                    'icon'    => 'fas_check',
+//                    'onclick' => $onclick
+//                );
+//            }
         }
 
         return $buttons;
@@ -270,10 +279,7 @@ class GSX_Repair extends BimpObject
                         'sequenceNumber'  => (int) $sequence_number,
                         'kgbDeviceDetail' => array(
                             'id' => $kgb_number
-                        ),
-//                        'kbbDeviceDetail' => array(
-//                            'id' => $kbb_number
-//                        )
+                        )
                     )
                 )
             );
@@ -298,8 +304,10 @@ class GSX_Repair extends BimpObject
 
                         $equipment = $sav->getChildObject('equipment');
                         if (BimpObject::objectLoaded($equipment)) {
-                            $note = $equipment->changeSerial($kgb_number);
-                            $sav->updateField('resolution', $sav->getData('resolution')."\n".'Ancien : '.$note);
+                            if ($equipment->getData('serial') == $kbb_number || $equipment->getData('serial') == 'S' . $kbb_number) {
+                                $note = $equipment->changeSerial($kgb_number);
+                                $sav->updateField('resolution', $sav->getData('resolution') . "\n" . 'Ancien : ' . $note);
+                            }
                         }
                     }
                 }
@@ -311,70 +319,68 @@ class GSX_Repair extends BimpObject
         return $errors;
     }
 
-    public function getPartReturnLabelFileUrl($part, &$errors = array())
+    public function fetchPartReturnLabel($partNumber, $returnOrderNumber, $returnType, $sequenceNumber, &$fileUrl = '', $shipTo = '')
     {
-        $fileName = '';
-        $filePath = '';
+        $errors = array();
 
-        if ($this->isLoaded($errors)) {
-            if (isset($part['returnOrderNumber']) && $part['returnOrderNumber'] && isset($part['number']) && $part['number']) {
-                $sav = $this->getChildObject('sav');
-                if (BimpObject::objectLoaded($sav)) {
-                    $dir = '/bimpcore/sav/' . $sav->id . '';
-                    $fileName = 'label_' . $part['number'] . '_' . $part['returnOrderNumber'] . '.pdf';
-                    $filePath = $dir . '/' . $fileName;
-                    $fileUrl = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . 'sav/' . $sav->id . '/' . $fileName;
+        if (!$this->isLoaded($errors)) {
+            return $errors;
+        }
 
-                    if (!file_exists(DOL_DATA_ROOT . $filePath)) {
-                        if (!is_dir(DOL_DATA_ROOT . $dir)) {
-                            BimpTools::makeDirectories('bimpcore/sav/' . $sav->id, DOL_DATA_ROOT);
+        $sav = $this->getChildObject('sav');
+        if (BimpObject::objectLoaded($sav)) {
+            $dir = '/bimpcore/sav/' . $sav->id;
+            $fileName = str_replace('/', '_', 'Etiquette_' . $partNumber . '_' . $returnOrderNumber . '_' . $sequenceNumber . '.pdf');
+            $filePath = DOL_DATA_ROOT . $dir . '/' . $fileName;
+
+            if (!file_exists($filePath)) {
+                if (!(string) $this->getData('repair_number')) {
+                    $errors[] = 'N° de répation absent';
+                    return $errors;
+                }
+
+                $result = '';
+
+                $gsx = GSX_v2::getInstance();
+                if ($gsx->logged) {
+                    $result = $gsx->getPartReturnLabel($shipTo, array(
+                        array(
+                            'returnOrderNumber' => (string) $returnOrderNumber,
+                            'sequenceNumber'    => (string) $sequenceNumber,
+                            'repairId'          => (string) $this->getData('repair_number'),
+                            'returnType'        => (string) $returnType
+                        )
+                    ));
+                }
+
+                if (!$result) {
+                    if (!$gsx->logged) {
+                        $errors[] = $gsx->displayNoLogged();
+                    }
+                } else {
+                    if (!is_dir(DOL_DATA_ROOT . $dir)) {
+                        $error = BimpTools::makeDirectories($dir, DOL_DATA_ROOT);
+                        if ($error) {
+                            $errors[] = 'Echec de la création du dossier - ' . $error;
                         }
+                    }
 
-                        $serial = $sav->getSerial();
-                        if ($serial) {
-                            $this->setSerial($serial);
+                    if (!count($errors)) {
+                        if (!file_put_contents($filePath, $result)) {
+                            $errors[] = 'Echec de la création du fichier';
                         }
-
-                        if ($this->isIphone) {
-                            $client = 'IPhoneReturnLabel';
-                        } else {
-                            $client = 'ReturnLabel';
-                        }
-                        $requestName = $client . 'Request';
-
-                        $use_gsx_v2 = $this->use_gsx_v2;
-                        $this->use_gsx_v2 = 0;
-
-                        if (is_null($this->gsx)) {
-                            $this->initGsx($errors);
-                        }
-
-                        if (!count($errors)) {
-                            $request = $this->gsx->_requestBuilder($requestName, '', array(
-                                'returnOrderNumber' => $part['returnOrderNumber'],
-                                'partNumber'        => $part['number']
-                            ));
-
-                            $labelResponse = $this->gsx->request($request, $client);
-                            if (isset($labelResponse[$client . 'Response']['returnLabelData']['returnLabelFileName'])) {
-                                if (!file_put_contents(DOL_DATA_ROOT . $filePath, $labelResponse[$client . 'Response']['returnLabelData']['returnLabelFileData'])) {
-                                    $errors[] = 'Echec de la récupération de l\'étiquette de retour pour le composant "' . $part['number'] . '"';
-                                }
-                            } else {
-                                $errors = $this->gsx->errors['soap'];
-                            }
-                        }
-                        $this->use_gsx_v2 = $use_gsx_v2;
                     }
                 }
             }
+
+            if (file_exists($filePath)) {
+                $fileUrl = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . 'sav/' . $sav->id . '/' . $fileName;
+            }
+        } else {
+            $errors[] = 'ID du SAV absent';
         }
 
-        if ($filePath && file_exists(DOL_DATA_ROOT . $filePath)) {
-            return $fileUrl;
-        }
-
-        return '';
+        return $errors;
     }
 
     // Méthodes V1 / V2: 
@@ -416,6 +422,15 @@ class GSX_Repair extends BimpObject
                     if (is_array($data) && !empty($data)) {
                         $this->findInGsx = true;
                         $this->repairLookUp = $data;
+
+                        $shipTo = BimpTools::getArrayValueFromPath($this->repairLookUp, '', '');
+                        if ($shipTo) {
+                            $shipTo = BimpTools::addZeros($shipTo, GSX_v2::$numbersNumChars);
+                            if ($shipTo != $this->getData('ship_to')) {
+                                $this->updateField('ship_to', $shipTo);
+                                $this->gsx_v2->shipTo = $shipTo;
+                            }
+                        }
 
                         // Check type: 
                         if (!(string) $this->getData('repair_type') && isset($this->repairLookUp['repairTypeCode']) && (string) $this->repairLookUp['repairTypeCode']) {
@@ -762,6 +777,173 @@ class GSX_Repair extends BimpObject
         return $errors;
     }
 
+    public function close($sendRequest = true, $checkRepair = 1, &$warnings = array(), &$modal_html = '')
+    {
+        if ($this->use_gsx_v2) {
+            $errors = array();
+            $warnings = array();
+            $modal_html = '';
+            if ($this->initGsx($errors)) {
+
+                if ((int) $this->getData('repair_complete')) {
+                    $errors[] = 'Cette réparation a déjà été fermée';
+                } elseif ((int) $this->getData('canceled')) {
+                    $errors[] = 'Cette réparation est annulée';
+                } else {
+                    $check = true;
+                    if ($checkRepair) {
+                        $part_errors = array();
+
+                        if (empty($this->repairLookUp)) {
+                            $lookup_errors = $this->lookup();
+                            if (count($lookup_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($lookup_errors, 'Echec récupération des données de la réparation');
+                            } else {
+                                if (isset($this->repairLookUp['parts']) && !empty($this->repairLookUp['parts'])) {
+                                    $codeReturnAttendKBB = array('KBB', 'ABU');
+                                }
+
+                                foreach ($this->repairLookUp['parts'] as $part) {
+                                    if (isset($part['returnStatusCode']) && in_array($part['returnStatusCode'], $codeReturnAttendKBB) &&
+                                            (!isset($part['kgbDeviceDetail']) || empty($part['kgbDeviceDetail']))) {
+                                        $part_errors[] = 'Le n° de série du composant "' . $part['number'] . '" n\'a pas été mis à jour';
+                                    }
+                                }
+                            }
+                        }
+
+                        $callback = 'function() {reloadRepairsViews(' . $this->getData('id_sav') . ');}';
+                        $onclick = $this->getJsGsxAjaxOnClick('gsxRepairAction', array(
+                                    'id_repair'    => (int) $this->id,
+                                    'action'       => 'closeRepair',
+                                    'check_repair' => 0
+                                        ), array(
+                                    'success_callback' => $callback
+                                        ), '$(\'#repair_' . $this->id . '_result\')') . ';';
+                        $onclick .= 'bimpModal.clearCurrentContent()';
+                        if ($part_errors) {
+                            $msg = BimpTools::getMsgFromArray($part_errors, 'La réparation ne peut pas être fermée');
+                            $modal_html .= BimpRender::renderAlerts($msg, 'warning');
+                            $modal_html .= '<p style="text-align: center; padding: 30px">';
+                            $modal_html .= '<span class="btn btn-default closeRepair" onclick="' . $onclick . '">Forcer la fermeture</span></p>';
+                            $check = false;
+                        } elseif (!(string) $this->getData('new_serial')) {
+                            $msg = 'Veuillez confirmer que plus aucune opération n\'est à effectuer sur cette réparation.';
+                            $modal_html .= BimpRender::renderAlerts($msg, 'warning');
+                            $modal_html .= '<p style="text-align: center; padding: 30px">';
+                            $modal_html .= '<span class="btn btn-default closeRepair" onclick="' . $onclick . '">Confirmer la fermeture</span></p>';
+                            $check = false;
+                        }
+                    }
+
+                    if ($check) {
+                        if ($sendRequest) {
+                            $errors = $this->updateStatus('SPCM', $warnings);
+                        }
+
+                        if (!count($errors)) {
+                            $this->set('repair_complete', 1);
+                            $this->set('closed', 1);
+                            $this->set('date_closed', date('Y-m-d'));
+
+                            $update_errors = $this->update();
+                            if (count($update_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($update_errors, 'Echec de l\'enregistrement de la fermeture de la réparation en base de données');
+                            }
+                        }
+                    }
+                }
+            }
+            return array(
+                'errors'     => $errors,
+                'warnings'   => $warnings,
+                'modal_html' => $modal_html
+            );
+        } else {
+            if (!$this->isLoaded()) {
+                $errors = $this->load();
+                if (count($errors)) {
+                    return $errors;
+                }
+            }
+
+            if (is_null($this->gsx) || $this->isIphone != $this->gsx->isIphone) {
+                $this->gsx = new GSX($this->isIphone);
+            }
+
+            if (!$this->gsx->connect) {
+                return array('Echec de la connexion à GSX (7)');
+            }
+
+            $repair_confirm_number = $this->getData('repair_confirm_number');
+            if (is_null($repair_confirm_number) || !$repair_confirm_number) {
+                return array('Erreur: n° de confirmation de la réparation absent');
+            }
+
+            if ((int) $this->getData('repair_complete')) {
+                return array('Cette réparation a déjà été fermée.');
+            }
+
+            if ($sendRequest) {
+                $confirm_number = $this->getData('repair_confirm_number');
+                if (is_null($confirm_number) || $confirm_number == '') {
+                    $this->addError('Erreur: aucun numéro de confirmation enregistré pour cette réparation.');
+                    return false;
+                }
+
+                if ($checkRepair) {
+                    $this->loadPartsPending();
+                    $callback = 'function() {reloadRepairsViews(' . $this->getData('id_sav') . ');}';
+                    $onclick = $this->getJsActionOnclick('closeRepair', array('check_repair' => 0), array(
+                        'result_container' => '$(\'#repair_' . $this->id . '_result\')',
+                        'success_callback' => $callback,
+                    ));
+                    if (count($this->partsPending) && !(string) $this->getData('new_serial')) {
+                        $html = 'La réparation ne peut pas être fermée, les numéros de série de certains composants semblent ne pas avoir été mis à jour';
+                        $html .= '<p style="text-align: center; padding: 30px">';
+                        $html .= '<span class="btn btn-default closeRepair" onclick="' . $onclick . '">Forcer la fermeture</span></p>';
+                        return array($html);
+                    } elseif (!(string) $this->getData('new_serial')) {
+                        $html = 'Veuillez confirmer que plus aucune opération n\'est à effectuer sur cette réparation.';
+                        $html .= '<p style="text-align: center; padding: 30px">';
+                        $html .= '<span class="button redHover closeRepair" onclick="' . $onclick . '">Confirmer la fermeture</span></p>';
+                        $this->gsx->resetSoapErrors();
+                        return array($html);
+                    }
+                }
+
+                $client = '';
+                $requestName = '';
+
+                if ($this->isIphone) {
+                    $client = 'IPhoneMarkRepairComplete';
+                    $requestName = 'IPhoneMarkRepairCompleteRequest';
+                } else {
+                    $client = 'MarkRepairComplete';
+                    $requestName = 'MarkRepairCompleteRequest';
+                }
+                $request = $this->gsx->_requestBuilder($requestName, '', array('repairConfirmationNumbers' => $this->getData('repair_confirm_number')));
+                $response = $this->gsx->request($request, $client);
+
+                if (!isset($response[$client . 'Response']['repairConfirmationNumbers'])) {
+                    return BimpTools::merge_array($this->gsx->errors['soap'], array('Echec de la requête de fermeture de la réparation'));
+                }
+            }
+
+            $this->set('repair_complete', 1);
+            $this->set('closed', 1);
+            $this->set('date_closed', date('Y-m-d'));
+
+            $update_errors = $this->update();
+            if (count($update_errors)) {
+                $errors[] = 'Echec de l\'enregistrement de la fermeture de la réparation en base de données';
+                return BimpTools::merge_array($errors, $update_errors);
+            }
+
+            return $this->repairDetails();
+        }
+    }
+
     // Méthodes V1: 
 
     public function import($id_sav, $number, $numberType)
@@ -817,6 +999,7 @@ class GSX_Repair extends BimpObject
         if ($this->use_gsx_v2) {
             return '';
         }
+
         if ($this->getData('canceled'))
             return array("Réparation annulée");
         if ($this->getData('closed') || $this->getData('repair_complete'))
@@ -1040,153 +1223,6 @@ class GSX_Repair extends BimpObject
         return array();
     }
 
-    public function close($sendRequest = true, $checkRepair = 1, &$warnings = array(), &$modal_html = '')
-    {
-        if ($this->use_gsx_v2) {
-            $errors = array();
-            $warnings = array();
-            $modal_html = '';
-            if ($this->initGsx($errors)) {
-                if ((int) $this->getData('repair_complete')) {
-                    $errors[] = 'Cette réparation a déjà été fermée';
-                } elseif ((int) $this->getData('canceled')) {
-                    $errors[] = 'Cette réparation est annulée';
-                } else {
-                    $check = true;
-                    if ($checkRepair) {
-                        $this->loadPartsPending();
-                        $callback = 'function() {reloadRepairsViews(' . $this->getData('id_sav') . ');}';
-                        $onclick = $this->getJsGsxAjaxOnClick('gsxRepairAction', array(
-                                    'id_repair'    => (int) $this->id,
-                                    'action'       => 'closeRepair',
-                                    'check_repair' => 0
-                                        ), array(
-                                    'success_callback' => $callback
-                                        ), '$(\'#repair_' . $this->id . '_result\')') . ';';
-                        $onclick .= 'bimpModal.clearCurrentContent()';
-                        if (count($this->partsPending) && !(string) $this->getData('new_serial')) {
-                            $msg = 'La réparation ne peut pas être fermée, les numéros de série de certains composants semblent ne pas avoir été mis à jour';
-                            $modal_html .= BimpRender::renderAlerts($msg, 'warning');
-                            $modal_html .= '<p style="text-align: center; padding: 30px">';
-                            $modal_html .= '<span class="btn btn-default closeRepair" onclick="' . $onclick . '">Forcer la fermeture</span></p>';
-                            $check = false;
-                        } elseif (!(string) $this->getData('new_serial')) {
-                            $msg = 'Veuillez confirmer que plus aucune opération n\'est à effectuer sur cette réparation.';
-                            $modal_html .= BimpRender::renderAlerts($msg, 'warning');
-                            $modal_html .= '<p style="text-align: center; padding: 30px">';
-                            $modal_html .= '<span class="btn btn-default closeRepair" onclick="' . $onclick . '">Confirmer la fermeture</span></p>';
-                            $check = false;
-                        }
-                    }
-
-                    if ($check) {
-                        if ($sendRequest) {
-                            $errors = $this->updateStatus('SPCM', $warnings);
-                        }
-
-                        if (!count($errors)) {
-                            $this->set('repair_complete', 1);
-                            $this->set('closed', 1);
-                            $this->set('date_closed', date('Y-m-d'));
-
-                            $update_errors = $this->update();
-                            if (count($update_errors)) {
-                                $errors[] = BimpTools::getMsgFromArray($update_errors, 'Echec de l\'enregistrement de la fermeture de la réparation en base de données');
-                            }
-                        }
-                    }
-                }
-            }
-            return array(
-                'errors'     => $errors,
-                'warnings'   => $warnings,
-                'modal_html' => $modal_html
-            );
-        } else {
-            if (!$this->isLoaded()) {
-                $errors = $this->load();
-                if (count($errors)) {
-                    return $errors;
-                }
-            }
-
-            if (is_null($this->gsx) || $this->isIphone != $this->gsx->isIphone) {
-                $this->gsx = new GSX($this->isIphone);
-            }
-
-            if (!$this->gsx->connect) {
-                return array('Echec de la connexion à GSX (7)');
-            }
-
-            $repair_confirm_number = $this->getData('repair_confirm_number');
-            if (is_null($repair_confirm_number) || !$repair_confirm_number) {
-                return array('Erreur: n° de confirmation de la réparation absent');
-            }
-
-            if ((int) $this->getData('repair_complete')) {
-                return array('Cette réparation a déjà été fermée.');
-            }
-
-            if ($sendRequest) {
-                $confirm_number = $this->getData('repair_confirm_number');
-                if (is_null($confirm_number) || $confirm_number == '') {
-                    $this->addError('Erreur: aucun numéro de confirmation enregistré pour cette réparation.');
-                    return false;
-                }
-
-                if ($checkRepair) {
-                    $this->loadPartsPending();
-                    $callback = 'function() {reloadRepairsViews(' . $this->getData('id_sav') . ');}';
-                    $onclick = $this->getJsActionOnclick('closeRepair', array('check_repair' => 0), array(
-                        'result_container' => '$(\'#repair_' . $this->id . '_result\')',
-                        'success_callback' => $callback,
-                    ));
-                    if (count($this->partsPending) && !(string) $this->getData('new_serial')) {
-                        $html = 'La réparation ne peut pas être fermée, les numéros de série de certains composants semblent ne pas avoir été mis à jour';
-                        $html .= '<p style="text-align: center; padding: 30px">';
-                        $html .= '<span class="btn btn-default closeRepair" onclick="' . $onclick . '">Forcer la fermeture</span></p>';
-                        return array($html);
-                    } elseif (!(string) $this->getData('new_serial')) {
-                        $html = 'Veuillez confirmer que plus aucune opération n\'est à effectuer sur cette réparation.';
-                        $html .= '<p style="text-align: center; padding: 30px">';
-                        $html .= '<span class="button redHover closeRepair" onclick="' . $onclick . '">Confirmer la fermeture</span></p>';
-                        $this->gsx->resetSoapErrors();
-                        return array($html);
-                    }
-                }
-
-                $client = '';
-                $requestName = '';
-
-                if ($this->isIphone) {
-                    $client = 'IPhoneMarkRepairComplete';
-                    $requestName = 'IPhoneMarkRepairCompleteRequest';
-                } else {
-                    $client = 'MarkRepairComplete';
-                    $requestName = 'MarkRepairCompleteRequest';
-                }
-                $request = $this->gsx->_requestBuilder($requestName, '', array('repairConfirmationNumbers' => $this->getData('repair_confirm_number')));
-                $response = $this->gsx->request($request, $client);
-
-                if (!isset($response[$client . 'Response']['repairConfirmationNumbers'])) {
-                    return BimpTools::merge_array($this->gsx->errors['soap'], array('Echec de la requête de fermeture de la réparation'));
-                }
-            }
-
-            $this->set('repair_complete', 1);
-            $this->set('closed', 1);
-            $this->set('date_closed', date('Y-m-d'));
-
-            $update_errors = $this->update();
-            if (count($update_errors)) {
-                $errors[] = 'Echec de l\'enregistrement de la fermeture de la réparation en base de données';
-                return BimpTools::merge_array($errors, $update_errors);
-            }
-
-            return $this->repairDetails();
-        }
-    }
-
     // Affichages:
 
     public function displayGsxStatus()
@@ -1298,21 +1334,26 @@ class GSX_Repair extends BimpObject
             $html .= '<table class="bimp_list_table">';
             $html .= '<tbody class="headers_col">';
 
+
             foreach (array(
-        'referenceNumber'           => 'Référence',
-        'purchaseOrderNumber'       => 'N° de commande',
-        'serviceNotificationNumber' => 'N° de notification du service',
-        'repairStatusCode'          => 'Code statut réparation',
-        'repairStatusDescription'   => 'Statut réparation',
-        'slaGroupDescription'       => 'Groupe SLA',
-        'coverageOption'            => 'Option de couverture',
-        'coverageStatusCode'        => 'Code statut couverture',
-        'coverageStatusDescription' => 'Statut couverture',
-        'acPlusIncidentConsumed'    => 'AppleCare+ consommé',
-        'shipment/deviceShipped'    => 'Matériel expédié',
-        'shipment/trackingNumber'   => 'N° de suivi de l\'expédition',
-        'invoiceAvailable'          => 'Facture disponible',
-        'csCode'                    => 'Code satisfaction client'
+        'referenceNumber'                  => 'Référence',
+        'repairClassificationDescription'  => 'Classification de la réparation',
+        'purchaseOrderNumber'              => 'N° de commande',
+        'serviceNotificationNumber'        => 'N° de notification du service',
+        'repairStatus'                     => 'Code statut réparation',
+        'repairStatusDescription'          => 'Statut réparation',
+        'repairFlags/requestReviewByApple' => 'Réparation vérifiée par Appel',
+        'slaGroupDescription'              => 'Groupe SLA',
+        'coverageOption'                   => 'Option de couverture',
+        'coverageOptionDescription'        => 'Description option de couverture',
+        'coverageStatusCode'               => 'Code statut couverture',
+        'coverageStatusDescription'        => 'Statut couverture',
+        'acPlusIncidentConsumed'           => 'AppleCare+ consommé',
+        'shipment/deviceShipped'           => 'Matériel expédié',
+        'shipment/trackingNumber'          => 'N° de suivi de l\'expédition',
+        'invoiceAvailable'                 => 'Facture disponible',
+        'csCode'                           => 'Code satisfaction client',
+        'consumerLawDescription'           => 'Loi consommation',
             ) as $path => $label) {
                 $value = BimpTools::getArrayValueFromPath($this->repairLookUp, $path, '', $errors, false, '', array(
                             'value2String' => true
@@ -1358,9 +1399,10 @@ class GSX_Repair extends BimpObject
                 'kgbDeviceDetail/identifiers/imei2'  => 'Nouveau IMEI2',
                 'kgbDeviceDetail/identifiers/meid'   => 'Nouveau MEID',
                 'partUsed'                           => 'Réf. composant utilisé',
-                'coverageOption'                     => 'Option de couverture',
                 'coverageCode'                       => 'Code couverture',
                 'coverageDescription'                => 'Couverture',
+                'coverageOption'                     => 'Code option de couverture',
+                'coverageOptionDescription'          => 'Option de couverture',
                 'fromConsignedStock'                 => 'Provient du stock consigné',
                 'netPrice'                           => 'Prix net',
                 'currency'                           => 'Devise',
@@ -1465,12 +1507,17 @@ class GSX_Repair extends BimpObject
                     $html = '<table class="bimp_list_table">';
                     $html .= '<tbody class="headers_col">';
                     foreach (array(
-                'returnStatusCode'       => 'Code raison du retour',
-                'returnOrderNumber'      => 'N° de retour',
-                'returnTrackingNumber'   => 'N° de suivi du retour',
-                'kgbDeviceDetail'        => 'KGB',
-                'kbbDeviceDetail'        => 'KBB',
-                'returnPartReceivedDate' => 'Date de réception du retour'
+                'returnOrderNumber'           => 'N° de retour',
+                'returnStatusReasonCode'      => 'Code raison du retour',
+                'returnStatusDescription'     => 'Raison du retour',
+                'returnStatusSubtypeCode'     => 'Code sous-status retour',
+                'returnTrackingNumber'        => 'N° de suivi du retour',
+                'returnCarrierCode'           => 'Code transporteur retour',
+                'returnCarrierName'           => 'Transporteur retour',
+                'returnCarrierUrl'            => 'URL transporteur retour',
+                'kgbDeviceDetail/identifiers' => 'KGB',
+                'kbbDeviceDetail/identifiers' => 'KBB',
+                'returnPartReceivedDate'      => 'Date de réception du retour'
                     ) as $path => $label) {
                         $value = BimpTools::getArrayValueFromPath($part, $path, '', $errors, false, '', array(
                                     'value2String' => true
@@ -1479,31 +1526,113 @@ class GSX_Repair extends BimpObject
                             $has_lines = true;
                             $html .= '<tr>';
                             $html .= '<th>' . $label . '</th>';
-                            if (is_array($value))
-                                $html .= '<td>' . print_r($value, 1) . '</td>';
-                            else
-                                $html .= '<td>' . $value . '</td>';
+                            $html .= '<td>' . $value . '</td>';
                             $html .= '</tr>';
                         }
                     }
 
                     if (isset($part['returnOrderNumber']) && $part['returnOrderNumber']) {
-                        $file_errors = array();
-                        $file_url = $this->getPartReturnLabelFileUrl($part, $file_errors);
+                        $shipmentPart = BimpCache::findBimpObjectInstance('bimpapple', 'AppleShipmentPart', array(
+                                    'repair_number'       => $this->getData('repair_number'),
+                                    'return_order_number' => $part['returnOrderNumber'],
+                                    'part_number'         => $part['number'],
+                                    'sequence_number'     => $part['sequenceNumber']
+                        ));
 
-                        $html .= '<tr>';
-                        $html .= '<th>Etiquette de retour</th>';
-                        $html .= '<td>';
-                        if (count($file_errors)) {
-                            $html .= BimpRender::renderAlerts($file_errors);
+                        if (BimpObject::objectLoaded($shipmentPart)) {
+                            $shipment = $shipmentPart->getParentInstance();
+
+                            if (BimpObject::objectLoaded($shipment)) {
+                                $html .= '<tr>';
+                                $html .= '<th>Retour groupé</th>';
+                                $html .= '<td>' . $shipment->getLink() . '</td>';
+                                $html .= '</tr>';
+                            }
+
+                            if ($shipmentPart->isActionAllowed('fetchReturnLabel')) {
+                                $onclick = '';
+                                $filePath = $shipmentPart->getReturnLabelFilePath();
+
+                                if ($filePath && file_exists($filePath)) {
+                                    $fileUrl = $shipmentPart->getReturnLabelFileUrl();
+
+                                    if ($fileUrl) {
+                                        $onclick = 'window.open(\'' . $fileUrl . '\');';
+                                    }
+                                }
+
+                                if (!$onclick) {
+                                    $onclick = $shipmentPart->getJsActionOnclick('fetchReturnLabel');
+                                }
+
+                                if ($onclick) {
+                                    $html .= '<tr>';
+                                    $html .= '<th>Etiquette de retour</th>';
+                                    $html .= '<td>';
+                                    $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                                    $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . 'Etiquette de retour';
+                                    $html .= '</span>';
+                                    $html .= '</td>';
+                                    $html .= '</tr>';
+                                }
+                            }
+                        } else {
+                            $sav = $this->getChildObject('sav');
+                            if (BimpObject::objectLoaded($sav)) {
+                                if (isset($part['returnOrderNumber']) && $part['returnOrderNumber'] &&
+                                        isset($part['number']) && $part['number'] &&
+                                        isset($part['sequenceNumber']) && $part['sequenceNumber']) {
+                                    $dir = '/bimpcore/sav/' . $sav->id;
+                                    $fileName = str_replace('/', '_', 'Etiquette_' . $part['number'] . '_' . $part['returnOrderNumber'] . '_' . $part['sequenceNumber'] . '.pdf');
+                                    $onclick = '';
+
+                                    if (file_exists($dir . '/' . $fileName)) {
+                                        $fileUrl = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . 'sav/' . $sav->id . '/' . $fileName;
+                                        $onclick = 'window.open(\'' . $fileUrl . '\');';
+                                    } elseif (isset($this->repairLookUp['repairType']) && $this->repairLookUp['repairType']) {
+                                        $return_type = '';
+                                        switch ($this->repairLookUp['repairType']) {
+                                            case 'CIN':
+                                            case 'CINR':
+                                            case 'CRBR':
+                                                $return_type = 'CI_ON_REPAIR_RETURN_KBB';
+                                                break;
+
+                                            case 'MINS':
+                                            case 'MINC':
+                                                $return_type = 'MI_REPAIR_RETURN';
+                                                break;
+
+                                            case 'WUMS':
+                                            case 'WUMC':
+                                                $return_type = 'WU_REPAIR_RETURN_KBB';
+                                                break;
+                                        }
+
+                                        if ($return_type) {
+                                            $onclick = $this->getJsActionOnclick('fetchPartReturlLabel', array(
+                                                'part_number'         => $part['number'],
+                                                'return_order_number' => $part['returnOrderNumber'],
+                                                'sequence_number'     => $part['sequenceNumber'],
+                                                'return_type'         => $return_type,
+                                                'ship_to'             => BimpTools::getArrayValueFromPath($this->repairLookUp, 'account/shipTo', '')
+                                            ));
+                                        }
+
+                                        if ($onclick) {
+                                            $html .= '<tr>';
+                                            $html .= '<th>Etiquette de retour</th>';
+                                            $html .= '<td>';
+                                            $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                                            $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . 'Etiquette de retour';
+                                            $html .= '</span>';
+                                            $html .= '</td>';
+                                            $html .= '</tr>';
+                                        }
+                                    }
+                                }
+                            }
                         }
-                        if ($file_url) {
-                            $html .= '<a class="btn btn-default" href="' . $file_url . '" target="_blank">';
-                            $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . 'Fichier PDF';
-                            $html .= '</a>';
-                        }
-                        $html .= '</td>';
-                        $html .= '</tr>';
                     }
 
                     $html .= '</tbody>';
@@ -1523,41 +1652,43 @@ class GSX_Repair extends BimpObject
                     $title = BimpRender::renderIcon('fas_box', 'iconLeft') . 'Composant ' . $part['number'];
                     $buttons = array();
 
+                    $maj_required = false;
                     $codeReturnAttendKBB = array('KBB', 'ABU', 'NRET');
                     if (isset($part['returnStatusCode']) && in_array($part['returnStatusCode'], $codeReturnAttendKBB) &&
                             (!isset($part['kgbDeviceDetail']) || empty($part['kgbDeviceDetail']))) {
+                        $maj_required = true;
+                    }
 
-                        $values = array(
-                            'fields' => array(
-                                'kbb_number'      => '',
-                                'kgb_number'      => '',
-                                'sequence_number' => isset($part['sequenceNumber']) ? (int) $part['sequenceNumber'] : 0,
-                            )
-                        );
+                    $values = array(
+                        'fields' => array(
+                            'kbb_number'      => '',
+                            'kgb_number'      => '',
+                            'sequence_number' => isset($part['sequenceNumber']) ? (int) $part['sequenceNumber'] : 0,
+                        )
+                    );
 
-                        foreach (array(
-                    'kbb_number' => 'kbbDeviceDetail',
-                    'kgb_number' => 'kgbDeviceDetail'
-                        ) as $number_type => $numberDataName) {
-                            foreach (GSX_Const::$deviceIdentifiers as $id_type => $id_label) {
-                                if (isset($part[$numberDataName]['identifiers'][$id_type]) && (string) $part[$numberDataName]['identifiers'][$id_type]) {
-                                    $values['fields'][$number_type] = $part[$numberDataName]['identifiers'][$id_type];
-                                    break;
-                                }
+                    foreach (array(
+                'kbb_number' => 'kbbDeviceDetail',
+                'kgb_number' => 'kgbDeviceDetail'
+                    ) as $number_type => $numberDataName) {
+                        foreach (GSX_Const::$deviceIdentifiers as $id_type => $id_label) {
+                            if (isset($part[$numberDataName]['identifiers'][$id_type]) && (string) $part[$numberDataName]['identifiers'][$id_type]) {
+                                $values['fields'][$number_type] = $part[$numberDataName]['identifiers'][$id_type];
+                                break;
                             }
                         }
-
-                        $values_str = htmlentities(json_encode($values));
-
-                        $buttons[] = array(
-                            'label'       => 'Mettre à jour le numéro de série',
-                            'icon_before' => 'fas_pen',
-                            'classes'     => array('btn', 'btn-default'),
-                            'attr'        => array(
-                                'onclick' => 'gsx_loadUpdatePartKgbForm($(this), ' . (int) $this->getData('id_sav') . ', ' . (int) $this->id . ', \'' . $part['number'] . '\', \'' . $values_str . '\')'
-                            )
-                        );
                     }
+
+                    $values_str = htmlentities(json_encode($values));
+
+                    $buttons[] = array(
+                        'label'       => ($maj_required ? 'Mettre à jour' : 'Corriger' ) . ' le numéro de série',
+                        'icon_before' => 'fas_pen',
+                        'classes'     => array('btn', 'btn-' . ($maj_required ? 'danger' : 'default')),
+                        'attr'        => array(
+                            'onclick' => 'gsx_loadUpdatePartKgbForm($(this), ' . (int) $this->getData('id_sav') . ', ' . (int) $this->id . ', \'' . $part['number'] . '\', \'' . $values_str . '\')'
+                        )
+                    );
 
                     $parts_html .= BimpRender::renderPanel($title, $part_html, '', array(
                                 'foldable'       => 1,
@@ -1603,8 +1734,8 @@ class GSX_Repair extends BimpObject
 
                                 if (BimpObject::objectLoaded($savPart)) {
                                     $savPartPrice = (float) $savPart->getPrice();
-                                    if (((float) $repairPart['netPrice'] > 0 && $savPartPrice !== (float) $repairPart['netPrice']) ||
-                                            !(float) $repairPart['netPrice'] && $savPartPrice !== 0 && (int) $savPart->getData('out_of_warranty')) {
+                                    if (((float) $repairPart['netPrice'] > 0 && $savPartPrice != (float) $repairPart['netPrice']) ||
+                                            !(float) $repairPart['netPrice'] && $savPartPrice != 0 && (int) $savPart->getData('out_of_warranty')) {
                                         $parts[] = array(
                                             'number'        => $repairPart['number'],
                                             'desc'          => (isset($repairPart['description']) ? $repairPart['description'] : ''),
@@ -2164,6 +2295,40 @@ class GSX_Repair extends BimpObject
         return 0;
     }
 
+    public function actionFetchPartReturlLabel($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $cb = '';
+
+        if ($this->isLoaded($errors)) {
+            $partNumber = BimpTools::getArrayValueFromPath($data, 'part_number', '', $errors, true, 'Ref composant absente');
+            $returnOrderNumber = BimpTools::getArrayValueFromPath($data, 'return_order_number', '', $errors, true, 'N° de retour absent');
+            $sequenceNumber = BimpTools::getArrayValueFromPath($data, 'sequence_number', '', $errors, true, 'N° de séquence absent');
+            $returnType = BimpTools::getArrayValueFromPath($data, 'return_type', '', $errors, true, 'Type de retour absent');
+            $shipTo = BimpTools::getArrayValueFromPath($data, 'ship_to', '');
+
+            if (!count($errors)) {
+                $fileUrl = '';
+                $errors = $this->fetchPartReturnLabel($partNumber, $returnOrderNumber, $returnType, $sequenceNumber, $fileUrl, $shipTo);
+                if (!count($errors)) {
+                    if ($fileUrl) {
+                        $cb = 'window.open(\'' . $fileUrl . '\');';
+                    } else {
+                        $errors[] = 'URL du fichier non trouvée';
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $cb
+        );
+    }
+
     // Overrides: 
 
     public function create(&$warnings = array(), $force_create = false)
@@ -2197,12 +2362,49 @@ class GSX_Repair extends BimpObject
 
     public function fetch($id, $parent = null)
     {
-        //$this->gsx->errors['soap'] = array();
         if (parent::fetch($id, $parent)) {
             $this->setSerial($this->getData('serial'));
-            $this->lookup();
+            $shipTo = $this->getData('ship_to');
+            if (!$shipTo) {
+                $this->lookup();
+            } elseif (is_a($this->gsx_v2, 'GSX_v2')) {
+                $this->gsx_v2->shipTo = BimpTools::addZeros($shipTo, GSX_v2::$numbersNumChars);
+            }
             return true;
         }
         return false;
+    }
+
+    // Méthodes statiques: 
+
+    public static function checkShipToAll()
+    {
+        $bdb = BimpCache::getBdb();
+
+        $sql = 'SELECT a.id, s.code_centre FROM ' . MAIN_DB_PREFIX . 'bimp_gsx_repair a';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav s ON s.id = a.id_sav';
+        $sql .= ' WHERE a.ship_to = \'\'';
+
+        $rows = $bdb->executeS($sql, 'array');
+
+        $nOk = 0;
+        if (is_array($rows)) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
+            global $tabCentre;
+
+            foreach ($rows as $r) {
+                if ($r['code_centre']) {
+                    if (isset($tabCentre[$r['code_centre']])) {
+                        if ($bdb->update('bimp_gsx_repair', array(
+                                    'ship_to' => $tabCentre[$r['code_centre']][4]
+                                        ), 'id = ' . $r['id']) > 0) {
+                            $nOk++;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $nOk;
     }
 }

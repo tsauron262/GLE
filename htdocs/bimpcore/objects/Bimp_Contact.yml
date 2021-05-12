@@ -356,7 +356,7 @@ lists:
         add_form_name: default
         cols: 
             fk_soc: unset
-            
+              
     public: 
         extends: soc
         enable_search: 0

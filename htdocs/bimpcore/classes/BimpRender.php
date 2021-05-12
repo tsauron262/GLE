@@ -755,12 +755,12 @@ class BimpRender
     public static function renderIconClass($icon)
     {
         if (strpos($icon, 'fa') === 0) {
-            if (preg_match('/^(.+)_(.+)$/', $icon, $matches)) {
-                return $matches[1] . ' fa5-' . $matches[2];
-            }
+        if (preg_match('/^(.+)_(.+)$/', $icon, $matches)) {
+            return $matches[1] . ' fa5-' . $matches[2];
+        }
         } elseif (strpos($icon, 'pe') === 0) {
             return 'pe-7s-' . str_replace('pe_', '', $icon);
-        }
+    }
 
         return 'fa fa-' . $icon;
     }
@@ -936,7 +936,7 @@ class BimpRender
         return $html;
     }
 
-    public static function renderRecursiveArrayContent($array, $params)
+    public static function renderRecursiveArrayContent($array, $params = array())
     {
         $html = '';
 
@@ -1105,23 +1105,6 @@ class BimpRender
         return $html;
     }
 
-    public static function renderFormRow($label, $input, $label_col = 3)
-    {
-        $html = '';
-
-        $html .= '<div class="row formRow operationOptionRow">';
-        $html .= '<div class="inputLabel col-xs-12 col-sm-6 col-md-' . $label_col . '">';
-        $html .= $label;
-        $html .= '</div>';
-
-        $html .= '<div class="formRowInput operationOptionInput field col-xs-12 col-sm-6 col-md-' . (12 - $label_col) . '">';
-        $html .= $input;
-        $html .= '</div>';
-        $html .= '</div>';
-
-        return $html;
-    }
-
     public static function renderBacktrace($bt_files)
     {
         $html = '';
@@ -1156,30 +1139,6 @@ class BimpRender
         }
 
         return $html;
-    }
-
-    public static function renderSql($sql)
-    {
-        $main_kw = array('SELECT ', 'UPDATE ', 'INSERT INTO ', 'DELETE ');
-        $sec_kw = array(' FROM ', 'LEFT JOIN', 'RIGHT JOIN', 'INNER JOIN', ' WHERE ', ' HAVING ', ' ORDER BY ', ' GROUP BY ', ' LIMIT ');
-        $kw = array(' AND ', ' OR ', ' ON ', ' AS ');
-
-        foreach ($main_kw as $word) {
-            $sql = str_replace($word, '<span class="danger">' . $word . '</span>', $sql);
-            $sql = str_replace(strtolower($word), '<span class="danger">' . strtolower($word) . '</span>', $sql);
-        }
-
-        foreach ($sec_kw as $word) {
-            $sql = str_replace($word, '<br/><span class="info">' . $word . '</span>', $sql);
-            $sql = str_replace(strtolower($word), '<br/><span class="info">' . strtolower($word) . '</span>', $sql);
-        }
-
-        foreach ($kw as $word) {
-            $sql = str_replace($word, '<b>' . $word . '</b>', $sql);
-            $sql = str_replace(strtolower($word), '<b>' . strtolower($word) . '</b>', $sql);
-        }
-
-        return $sql;
     }
 
     public static function renderBimpListTable($rows, $headers = array(), $params = array())
@@ -1330,6 +1289,30 @@ class BimpRender
         return $html;
     }
 
+    public static function renderSql($sql)
+    {
+        $main_kw = array('SELECT ', 'UPDATE ', 'INSERT INTO ', 'DELETE ');
+        $sec_kw = array(' FROM ', 'LEFT JOIN', 'RIGHT JOIN', 'INNER JOIN', ' WHERE ', ' HAVING ', ' ORDER BY ', ' GROUP BY ', ' LIMIT ');
+        $kw = array(' AND ', ' OR ', ' ON ', ' AS ');
+
+        foreach ($main_kw as $word) {
+            $sql = str_replace($word, '<span class="danger">' . $word . '</span>', $sql);
+            $sql = str_replace(strtolower($word), '<span class="danger">' . strtolower($word) . '</span>', $sql);
+        }
+
+        foreach ($sec_kw as $word) {
+            $sql = str_replace($word, '<br/><span class="info">' . $word . '</span>', $sql);
+            $sql = str_replace(strtolower($word), '<br/><span class="info">' . strtolower($word) . '</span>', $sql);
+        }
+
+        foreach ($kw as $word) {
+            $sql = str_replace($word, '<b>' . $word . '</b>', $sql);
+            $sql = str_replace(strtolower($word), '<b>' . strtolower($word) . '</b>', $sql);
+        }
+
+        return $sql;
+    }
+
     public static function renderSideBar($items, $params = array())
     {
         $params = BimpTools::overrideArray(array(
@@ -1366,8 +1349,72 @@ class BimpRender
 
         return $html;
     }
-
+    
     // Form elements: 
+
+    public static function renderSingleLineForm($inputs, $params = array())
+    {
+        $html .= '<div class="singleLineForm' . (isset($params['main_class']) ? ' ' . $params['main_class'] : '') . '"';
+        if (isset($params['data'])) {
+            $html .= BimpRender::renderTagData($data);
+        }
+        $html .= '>';
+
+        if (isset($params['title']) && (string) $params['title']) {
+            $html .= '<div class="singleLineFormCaption">';
+            $html .= '<h4>';
+            if (isset($params['icon']) && (string) $params['icon']) {
+                $html .= BimpRender::renderIcon($params['icon'], 'iconLeft');
+            }
+            $html .= $params['title'];
+            $html .= '</h4>';
+            $html .= '</div>';
+        }
+
+        $html .= '<div class="singleLineFormContent">';
+
+        foreach ($inputs as $input) {
+            $label = BimpTools::getArrayValueFromPath($input, 'label', '');
+            $input_content = BimpTools::getArrayValueFromPath($input, 'content', '');
+            $input_name = BimpTools::getArrayValueFromPath($input, 'input_name', '');
+            $value = BimpTools::getArrayValueFromPath($input, 'value', '');
+
+            if ($input_content && $input_name) {
+                if ($label) {
+                    $content .= '<label>' . $label . ': </label>';
+                }
+
+                $content .= $input_content;
+                $html .= BimpInput::renderInputContainer($input_name, $value, $content);
+            }
+        }
+
+        if (isset($params['after_html'])) {
+            $html .= $params['after_html'];
+        }
+
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
+    
+    public static function renderFormRow($label, $input, $label_col = 3)
+    {
+        $html = '';
+
+        $html .= '<div class="row formRow operationOptionRow">';
+        $html .= '<div class="inputLabel col-xs-12 col-sm-6 col-md-' . $label_col . '">';
+        $html .= $label;
+        $html .= '</div>';
+
+        $html .= '<div class="formRowInput operationOptionInput field col-xs-12 col-sm-6 col-md-' . (12 - $label_col) . '">';
+        $html .= $input;
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
 
     public static function renderFormGroupMultiple($items_contents, $inputName, $title, $params = array())
     {

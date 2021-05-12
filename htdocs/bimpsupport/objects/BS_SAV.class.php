@@ -105,12 +105,12 @@ class BS_SAV extends BimpObject
 
         if (!BimpObject::objectLoaded($userClient)) {
             return 0;
-        }
+    }
 
         if ($this->isLoaded()) {
             if ((int) $userClient->getData('id_client') == (int) $this->getData('id_client')) {
                 return 1;
-            }
+    }
 
             return 0;
         }
@@ -126,7 +126,7 @@ class BS_SAV extends BimpObject
     public function canEdit()
     {
         return $this->canView();
-    }
+            }
 
     public function canDelete()
     {
@@ -327,6 +327,21 @@ class BS_SAV extends BimpObject
         }
 
         return 0;
+    }
+
+    public function isFieldEditable($field, $force_edit = false)
+    {
+        if (!$force_edit) {
+            switch ($field) {
+                case 'code_centre_repa':
+                    if (!in_array((int) $this->getData('status'), array(0, 1, 2, 3, 5, 6, 7))) {
+                        return 0;
+                    }
+                    break;
+            }
+        }
+
+        return parent::isFieldEditable($field, $force_edit);
     }
 
     // Getters params: 
@@ -1007,9 +1022,19 @@ class BS_SAV extends BimpObject
         return '';
     }
 
-    public function getCentreData()
+    public function getCentreData($centre_repa = false)
     {
-        if ($code_centre = (string) $this->getData('code_centre')) {
+        $code_centre = '';
+
+        if ($centre_repa) {
+            $code_centre = (string) $this->getData('code_centre_repa');
+        }
+
+        if (!$code_centre) {
+            $code_centre = (string) $this->getData('code_centre');
+        }
+
+        if ($code_centre) {
             global $tabCentre;
 
             if (isset($tabCentre[$code_centre])) {
@@ -1017,6 +1042,7 @@ class BS_SAV extends BimpObject
                     'tel'         => $tabCentre[$code_centre][0],
                     'mail'        => $tabCentre[$code_centre][1],
                     'label'       => $tabCentre[$code_centre][2],
+                    'shipTo'      => $tabCentre[$code_centre][4],
                     'zip'         => $tabCentre[$code_centre][5],
                     'town'        => $tabCentre[$code_centre][6],
                     'address'     => $tabCentre[$code_centre][7],
@@ -1064,6 +1090,17 @@ class BS_SAV extends BimpObject
         $equipment = $this->getChildObject('equipment');
         if (BimpObject::objectLoaded($equipment)) {
             return (string) $equipment->getData('serial');
+        }
+
+        return '';
+    }
+
+    public function getShipTo()
+    {
+        $centre = $this->getCentreData(true);
+
+        if (isset($centre['shipTo'])) {
+            return $centre['shipTo'];
         }
 
         return '';
@@ -2416,7 +2453,6 @@ class BS_SAV extends BimpObject
         )) as $line) {
             if ((int) $line->pu_ht > 0) {
                 if (!(int) $line->getData('out_of_warranty')) {
-//                    echo $line->id . ' (' . $line->pu_ht . ')<br/>';
                     $line->fetch($line->id);
                     $remise = (float) $line->remise;
                     $coefRemise = (100 - $remise) / 100;
@@ -2800,7 +2836,7 @@ class BS_SAV extends BimpObject
                     $mail_msg = "Bonjour, l'appareil concerné par votre SAV ".$this->getData('ref')." qui a pour serial ".$eq->getData('serial')." a la fonction localisée activée, nous ne pouvons pas procéder à la réparation tant que vous n'aurez pas désactivé cette option dans votre iCloud.\n";
                     $mail_msg .= "Merci de votre compréhension.\n<a href='https://support.apple.com/fr-fr/guide/icloud/mmdc23b125f6/icloud'>Voici un lien explicatif sur le site Apple</a>";
                     //$sms = "Bonjour, nous venons de recevoir la pièce ou le produit pour votre réparation, nous vous contacterons quand votre matériel sera prêt.\nL'Equipe BIMP.";
-                }
+        }
                 break;
         }
 
@@ -2969,62 +3005,69 @@ class BS_SAV extends BimpObject
                     'linked_object_name' => ''
                 ));
 
-                foreach ($lines as $line) {
-                    if (BimpObject::objectLoaded($line)) {
-                        if (!(int) $line->id_product) {
-                            continue;
-                        }
-                        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $line->id_product);
-                        if ($product->isLoaded()) {
-                            if ((int) $product->getData('fk_product_type') === Product::TYPE_PRODUCT) {
-                                if ($product->isSerialisable()) {
-                                    $eq_lines = $line->getEquipmentLines();
-                                    foreach ($eq_lines as $eq_line) {
+                $centre_data = $this->getCentreData(true);
+                $id_entrepot = (int) BimpTools::getArrayValueFromPath($centre_data, 'id_entrepot', 0);
+
+                if (!$id_entrepot) {
+                    $errors[] = 'Entrepot absent';
+                } else {
+                    foreach ($lines as $line) {
+                        if (BimpObject::objectLoaded($line)) {
+                            if (!(int) $line->id_product) {
+                                continue;
+                            }
+                            $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $line->id_product);
+                            if ($product->isLoaded()) {
+                                if ((int) $product->getData('fk_product_type') === Product::TYPE_PRODUCT) {
+                                    if ($product->isSerialisable()) {
+                                        $eq_lines = $line->getEquipmentLines();
+                                        foreach ($eq_lines as $eq_line) {
+                                            $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
+                                            $res_errors = $reservation->validateArray(array(
+                                                'id_sav'             => (int) $this->id,
+                                                'id_sav_propal_line' => (int) $line->id,
+                                                'id_entrepot'        => (int) $id_entrepot,
+                                                'id_product'         => (int) $product->id,
+                                                'id_equipment'       => (int) $eq_line->getData('id_equipment'),
+                                                'type'               => BR_Reservation::BR_RESERVATION_SAV,
+                                                'status'             => 203,
+                                                'id_commercial'      => (int) $this->getData('id_user_tech'),
+                                                'id_client'          => (int) $this->getData('id_client'),
+                                                'qty'                => 1,
+                                                'date_from'          => date('Y-m-d H:i:s')
+                                            ));
+
+                                            if (!count($res_errors)) {
+                                                $res_errors = $reservation->create();
+                                            }
+
+                                            if (count($res_errors)) {
+                                                $msg = $error_msg . ' le produit "' . BimpObject::getInstanceNom($product) . '"';
+                                                $errors[] = BimpTools::getMsgFromArray($res_errors, $msg);
+                                            }
+                                        }
+                                    } else {
                                         $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
                                         $res_errors = $reservation->validateArray(array(
                                             'id_sav'             => (int) $this->id,
                                             'id_sav_propal_line' => (int) $line->id,
-                                            'id_entrepot'        => (int) $this->getData('id_entrepot'),
+                                            'id_entrepot'        => (int) $id_entrepot,
                                             'id_product'         => (int) $product->id,
-                                            'id_equipment'       => (int) $eq_line->getData('id_equipment'),
+                                            'id_equipment'       => 0,
                                             'type'               => BR_Reservation::BR_RESERVATION_SAV,
                                             'status'             => 203,
                                             'id_commercial'      => (int) $this->getData('id_user_tech'),
                                             'id_client'          => (int) $this->getData('id_client'),
-                                            'qty'                => 1,
+                                            'qty'                => (int) $line->qty,
                                             'date_from'          => date('Y-m-d H:i:s')
                                         ));
-
                                         if (!count($res_errors)) {
                                             $res_errors = $reservation->create();
                                         }
 
                                         if (count($res_errors)) {
-                                            $msg = $error_msg . ' le produit "' . BimpObject::getInstanceNom($product) . '"';
-                                            $errors[] = BimpTools::getMsgFromArray($res_errors, $msg);
+                                            $errors[] = BimpTools::getMsgFromArray($res_errors, $error_msg . ' pour le produit "' . BimpObject::getInstanceNom($product) . '"');
                                         }
-                                    }
-                                } else {
-                                    $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
-                                    $res_errors = $reservation->validateArray(array(
-                                        'id_sav'             => (int) $this->id,
-                                        'id_sav_propal_line' => (int) $line->id,
-                                        'id_entrepot'        => (int) $this->getData('id_entrepot'),
-                                        'id_product'         => (int) $product->id,
-                                        'id_equipment'       => 0,
-                                        'type'               => BR_Reservation::BR_RESERVATION_SAV,
-                                        'status'             => 203,
-                                        'id_commercial'      => (int) $this->getData('id_user_tech'),
-                                        'id_client'          => (int) $this->getData('id_client'),
-                                        'qty'                => (int) $line->qty,
-                                        'date_from'          => date('Y-m-d H:i:s')
-                                    ));
-                                    if (!count($res_errors)) {
-                                        $res_errors = $reservation->create();
-                                    }
-
-                                    if (count($res_errors)) {
-                                        $errors[] = BimpTools::getMsgFromArray($res_errors, $error_msg . ' pour le produit "' . BimpObject::getInstanceNom($product) . '"');
                                     }
                                 }
                             }
@@ -3866,9 +3909,10 @@ class BS_SAV extends BimpObject
                     if (!count($errors)) {
                         // Gestion des stocks et emplacements: 
                         $id_client = (int) $this->getData('id_client');
-                        $id_entrepot = (int) $this->getData('id_entrepot');
-//                        $codemove = dol_print_date(dol_now(), '%y%m%d%H%M%S');
+                        $centre_data = $this->getCentreData(true);
+                        $id_entrepot = (int) BimpTools::getArrayValueFromPath($centre_data, 'id_entrepot', 0);
                         $codemove = 'SAV' . $this->id . '_';
+                        
                         foreach ($this->getChildrenObjects('propal_lines') as $line) {
                             $product = $line->getProduct();
 
@@ -3885,45 +3929,6 @@ class BS_SAV extends BimpObject
                                                 $eq_line_errors[] = 'Erreur: cet équipment n\'existe plus';
                                             }
                                             $eq_line_errors = BimpTools::merge_array($eq_line_errors, $equipment->moveToPlace(BE_Place::BE_PLACE_CLIENT, (int) $id_client, $codemove . 'LN' . $line->id . '_EQ' . (int) $eq_line->getData('id_equipment'), 'Vente ' . $this->getRef(), 1, date('Y-m-d H:i:s'), 'sav', $this->id));
-                                            // Création du nouvel emplacement: 
-//                                            $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
-//                                            if ($id_client) {
-//                                                $place_errors = $place->validateArray(array(
-//                                                    'id_equipment' => (int) $eq_line->getData('id_equipment'),
-//                                                    'type'         => BE_Place::BE_PLACE_CLIENT,
-//                                                    'id_client'    => (int) $id_client,
-//                                                    'infos'        => 'Vente ' . $this->getRef(),
-//                                                    'date'         => date('Y-m-d H:i:s'),
-//                                                    'code_mvt'     => $codemove . 'LN' . $line->id . '_EQ' . (int) $eq_line->getData('id_equipment'),
-//                                                    'origin'       => 'sav',
-//                                                    'id_origin'    => (int) $this->id
-//                                                ));
-//                                            } else {
-//                                                $place_errors = $place->validateArray(array(
-//                                                    'id_equipment' => (int) $eq_line->getData('id_equipment'),
-//                                                    'type'         => BE_Place::BE_PLACE_FREE,
-//                                                    'place_name'   => 'Equipement vendu (client non renseigné)',
-//                                                    'infos'        => 'Vente ' . $this->getRef(),
-//                                                    'date'         => date('Y-m-d H:i:s'),
-//                                                    'code_mvt'     => $codemove . 'LN' . $line->id . '_EQ' . (int) $eq_line->getData('id_equipment'),
-//                                                    'origin'       => 'sav',
-//                                                    'id_origin'    => (int) $this->id
-//                                                ));
-//                                            }
-//                                            if (!count($place_errors)) {
-//                                                $place_warnings = array();
-//                                                $place_errors = $place->create($place_warnings, true);
-//                                            }
-//
-//                                            if (count($place_errors)) {
-//                                                $equipment = $line->getChildObject('equipment');
-//                                                if (BimpObject::objectLoaded($equipment)) {
-//                                                    $label = $equipment->getRef();
-//                                                } else {
-//                                                    $label = 'Erreur: cet équipment n\'existe plus';
-//                                                }
-//                                                $eq_line_errors[] = BimpTools::getMsgFromArray($place_errors, 'Echec de l\'enregistrement du nouvel emplacement pour le n° de série "' . $label . '"');
-//                                            }
                                         }
                                     }
                                     if (count($eq_line_errors)) {
@@ -4150,10 +4155,6 @@ class BS_SAV extends BimpObject
                                                     }
                                                 }
 
-//                                                $to_pay = (float) $bimpFacture->dol_object->total_ttc - ((float) $bimpFacture->dol_object->getSommePaiement() + (float) $bimpFacture->dol_object->getSumCreditNotesUsed() + (float) $bimpFacture->dol_object->getSumDepositsUsed());
-//                                                if ($to_pay >= -0.01 && $to_pay <= 0.1) {
-//                                                    $bimpFacture->dol_object->set_paid($user);
-//                                                }
                                                 $bimpFacture->checkIsPaid();
 
                                                 $propal->dol_object->cloture($user, 4, "Auto via SAV");
@@ -4559,9 +4560,13 @@ class BS_SAV extends BimpObject
                 $client_errors = $client->checkValidity();
                 if (count($client_errors)) {
                     $url = $client->getUrl();
-                    $msg = 'Le client sélectionné n\'est pas valide. Veuillez <a href="' . $url . '" target="_blank">corriger</a>';
+                    $msg = 'Le client sélectionné n\'est pas valide. Veuillez <a href="' . $url . '" target="_blank">Corriger</a>';
                     $errors[] = BimpTools::getMsgFromArray($client_errors, $msg);
                 }
+            }
+
+            if (!$this->getData('code_centre_repa')) {
+                $this->set('code_centre_repa', $this->getData('code_centre'));
             }
         }
 

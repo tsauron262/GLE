@@ -16,6 +16,8 @@ fields:
         label: SAV
         type: id_object
         object: sav
+    ship_to: 
+        label: N° shipTo        
     repair_number: 
         label: N° de réparation
     repair_confirm_number: 

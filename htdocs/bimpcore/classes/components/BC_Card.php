@@ -717,7 +717,7 @@ class BC_Card extends BimpComponent
         }
         $html .= '</tbody>';
         $html .= '</table>';
-        if ($view_btn && !is_null($object) && !BimpCore::isContextPublic()) {
+        if ($view_btn && !is_null($object)) {
             $url = BimpObject::getInstanceUrl($object);
 
             if ($url) {

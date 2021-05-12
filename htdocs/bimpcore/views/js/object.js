@@ -18,7 +18,7 @@ function saveObject(module, object_name, id_object, fields, $resultContainer, su
     }
 
     for (var i in fields) {
-        data[i] = fields[i]
+        data[i] = fields[i];
     }
 
     BimpAjax('saveObject', data, $resultContainer, {

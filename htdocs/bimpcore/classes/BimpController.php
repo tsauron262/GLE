@@ -356,7 +356,7 @@ class BimpController
 
             if (!(int) $this->config->get('content_only', 0, false, 'bool')) {
                 $this->displayHeader();
-            }
+                    }
             $display_footer = true;
         } else {
             $cssFiles = $this->getConf('css', array(), false, 'array');

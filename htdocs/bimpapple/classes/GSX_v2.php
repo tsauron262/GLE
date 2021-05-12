@@ -24,7 +24,7 @@ class GSX_v2 extends GSX_Const
     );
     public $n = 0;
 
-    public function __construct()
+    public function __construct($shipTo = '')
     {
         global $user;
 
@@ -49,7 +49,10 @@ class GSX_v2 extends GSX_Const
                 } else {
                     $this->applePword = self::$default_ids['apple_pword'];
                 }
-                if (isset($user->array_options['options_apple_shipto']) && (string) $user->array_options['options_apple_shipto']) {
+
+                if ($shipTo) {
+                    $this->shipTo = BimpTools::addZeros($shipTo, self::$numbersNumChars);
+                } elseif (isset($user->array_options['options_apple_shipto']) && (string) $user->array_options['options_apple_shipto']) {
                     $this->shipTo = BimpTools::addZeros($user->array_options['options_apple_shipto'], self::$numbersNumChars);
                 } else {
                     $this->shipTo = BimpTools::addZeros(self::$default_ids['ship_to'], self::$numbersNumChars);
@@ -91,10 +94,10 @@ class GSX_v2 extends GSX_Const
         }
     }
 
-    public static function getInstance($force_new = false)
+    public static function getInstance($force_new = false, $shipTo = '')
     {
         if (is_null(self::$instance) || $force_new) {
-            self::$instance = new GSX_v2();
+            self::$instance = new GSX_v2($shipTo);
         }
 
         return self::$instance;
@@ -195,7 +198,7 @@ class GSX_v2 extends GSX_Const
 
     // Traitements des requêtes CURL: 
 
-    protected function init($request_name, &$error = '', $url_params = array())
+    protected function init($request_name, &$error = '', $url_params = array(), $extra = array())
     {
         if ($this->ch) {
             curl_close($this->ch);
@@ -228,6 +231,12 @@ class GSX_v2 extends GSX_Const
 
         $url = $this->baseUrl . self::$urls['req'][$request_name];
 
+        if (isset($extra['url_params']) && is_array($extra['url_params'])) {
+            foreach ($extra['url_params'] as $name => $value) {
+                $url_params[$name] = $value;
+            }
+        }
+
         if (!empty($url_params)) {
             $url .= '?';
             $fl = true;
@@ -241,6 +250,8 @@ class GSX_v2 extends GSX_Const
             }
         }
 
+        $this->displayDebug($url);
+
         $this->ch = curl_init($url);
 
         if (!$this->ch) {
@@ -248,15 +259,23 @@ class GSX_v2 extends GSX_Const
         }
 
         $headers = array(
-            'Accept: application/json',
+            'Accept: application/json' . (in_array($request_name, self::$fileContentRequests) ? ',application/octet-stream' : ''),
             'Content-Type: application/json',
-            'Accept-Language: fr_FR',
+//            'Accept-Language: fr_FR', // OLD
+            'X-Apple-Client-Locale: fr-FR',
             'X-Apple-SoldTo: ' . $this->soldTo,
             'X-Apple-ShipTo: ' . $this->shipTo
         );
 
         if ($request_name !== 'authenticate') {
             $headers[] = 'X-Apple-Auth-Token: ' . $this->auth_token;
+            $headers[] = 'X-Apple-Service-Version: v2';
+        }
+
+        if (isset($extra['headers']) && is_array($extra['headers'])) {
+            foreach ($extra['headers'] as $extra_header) {
+                $headers[] = $extra_header;
+            }
         }
 
         curl_setopt($this->ch, CURLOPT_HTTPHEADER, $headers);
@@ -273,7 +292,7 @@ class GSX_v2 extends GSX_Const
         return 1;
     }
 
-    public function exec($request_name, $params, &$response_headers = array())
+    public function exec($request_name, $params, &$response_headers = array(), $extra = array())
     {
         if (!(string) $request_name) {
             $this->curlError('(inconnue)', 'Nom de la requête absent', '', true);
@@ -295,7 +314,7 @@ class GSX_v2 extends GSX_Const
         }
 
         $error = '';
-        if (!$this->init($request_name, $error, $url_params)) {
+        if (!$this->init($request_name, $error, $url_params, $extra)) {
             $this->curlError($request_name, 'Echec de l\'initialisation de CURL' . ($error ? ' - ' . $error : ''));
             return false;
         }
@@ -310,15 +329,30 @@ class GSX_v2 extends GSX_Const
 
         $data = curl_exec($this->ch);
 
-        if ($data === false) {
-            $this->curlError($request_name, 'Aucune réponse reçue');
-            if (self::$log_requests) {
+        $response_code = (int) curl_getinfo($this->ch, CURLINFO_RESPONSE_CODE);
+
+        if (!$data) {
+            $this->curlError($request_name, 'Aucune réponse reçue - Code HTTP: ' . $response_code);
+            if (self::$log_requests || self::$debug_mode || BimpDebug::isActive()) {
                 $information = curl_getinfo($this->ch);
 
-                $infos = "Header REQUEST : <br/>" . str_replace("\n", "<br/>", $information['request_header']);
-                $infos .= "Body REQUEST : <br/>" . str_replace("\n", "<br/>", print_r($params, 1)) . "<br/><br/>";
-                $infos .= 'AUCUNE REPONSE';
-                dol_syslog(str_replace('<br/>', "\n", str_replace('Array', "", $infos)), 3);
+                $infos = "<h4>Header REQUEST: </h4><br/>" . str_replace("\n", "<br/>", $information['request_header']);
+                $infos .= "<h4>Body REQUEST:  </h4><br/>" . str_replace("\n", "<br/>", '<pre>' . print_r($params, 1)) . "</pre><br/><br/>";
+                $infos .= '<b>JSON: </b></h4><br/><pre>' . json_encode($params) . '</pre><br/><br/>';
+                $infos .= '<span class="danger">AUCUNE REPONSE</span><br/>';
+                $infos .= '<b>Code réponse: </b>' . $response_code . '<br/><br/>';
+
+                if (self::$log_requests) {
+                    dol_syslog(str_replace('<br/>', "\n", str_replace('Array', "", $infos)), 3);
+                }
+
+                if (self::$debug_mode) {
+                    echo '<br/><br/>' . $infos;
+                }
+
+                if (BimpDebug::isActive()) {
+                    BimpDebug::addDebug('gsx', 'Requête "' . $request_name . '"', $infos);
+                }
             }
             return false;
         }
@@ -333,29 +367,48 @@ class GSX_v2 extends GSX_Const
             }
         }
 
-        $data = json_decode($data, 1);
-
-        if (self::$log_requests) {
-            $information = curl_getinfo($this->ch);
-
-            $infos = "Header REQUEST : <br/>" . str_replace("\n", "<br/>", $information['request_header']);
-            $infos .= "Body REQUEST : <br/>" . str_replace("\n", "<br/>", print_r($params, 1)) . "<br/><br/>";
-            $infos .= "Header RESPONSE : <br/>" . str_replace("\n", "<br/>", print_r($response_headers, 1)) . "<br/><br/>";
-            $infos .= "Body RESPONSE : <br/>" . str_replace("\n", "<br/>", print_r($data, 1));
-            dol_syslog(str_replace('<br/>', "\n", str_replace('Array', "", $infos)), 3);
+        if (!in_array($request_name, self::$fileContentRequests) || $response_code != 200) {
+            $data = json_decode($data, 1);
         }
 
-        if (isset($data['errors']) && count($data['errors'])) {
+        if (self::$log_requests || self::$debug_mode || BimpDebug::isActive()) {
+            $information = curl_getinfo($this->ch);
+
+            $infos = "<h4>Header REQUEST:</h4><br/>" . str_replace("\n", "<br/>", $information['request_header']);
+            $infos .= "<h4>Body REQUEST:</h4><br/>" . str_replace("\n", "<br/>", '<pre>' . print_r($params, 1)) . '</pre><br/><br/>';
+            $infos .= '<b>JSON: </b></h4><br/><pre>' . json_encode($params) . '</pre><br/><br/>';
+            $infos .= "<h4>Header RESPONSE:</h4><br/>" . str_replace("\n", "<br/>", '<pre>' . print_r($response_headers, 1)) . '</pre><br/>';
+            $infos .= '<b>Code réponse: </b>' . $response_code . '<br/><br/>';
+
+            if (is_array($data)) {
+                $infos .= "<h4>Body RESPONSE:</h4><br/>" . str_replace("\n", "<br/>", '<pre>' . print_r($data, 1)) . '</pre>';
+                $infos .= '<b>JSON: </b></h4><br/><pre>' . json_encode($data) . '</pre><br/><br/>';
+            }
+
+            if (self::$log_requests) {
+                dol_syslog(str_replace('<br/>', "\n", str_replace('Array', "", $infos)), 3);
+            }
+
+            if (self::$debug_mode) {
+                echo '<br/><br/>' . $infos;
+            }
+
+            if (BimpDebug::isActive()) {
+                BimpDebug::addDebug('gsx', 'Requête "' . $request_name . '"', $infos);
+            }
+        }
+
+        if (is_array($data) && isset($data['errors']) && count($data['errors'])) {
             $curl_errors = array();
             foreach ($data['errors'] as $error) {
                 $msg = '';
                 switch ($error['code']) {
-                    case 'UNAUTHORIZED':
+                    case 'SESSION_IDLE_TIMEOUT':
                         // On tente une nouvelle authentification: 
                         if ($request_name !== 'authenticate') {
                             $this->displayDebug('Non authentifié');
                             if ($this->reauthenticate()) {
-                                return $this->exec($request_name, $params);
+                                return $this->exec($request_name, $params, $response_headers, $extra_headers);
                             }
                             return false;
                         } else {
@@ -366,26 +419,38 @@ class GSX_v2 extends GSX_Const
                     default:
                         $msg = $error['message'];
                         $curl_errors[] = $msg . ($error['code'] ? ' (Code: ' . $error['code'] . ')' : '');
+                        $this->curlError($request_name, BimpTools::getArrayValueFromPath($error, 'message', 'Erreur inconnue'), BimpTools::getArrayValueFromPath($error, 'code', ''));
                         break;
                 }
             }
-            $this->curlError($request_name, BimpTools::getMsgFromArray($curl_errors));
             $data = false;
         }
 
         return $data;
     }
 
-    // Requêtes spécifiques 
+    // Requêtes - Equipements: 
 
-    public function productDetailsBySerial($serial)
+    public function productDetailsBySerial($serial, $requestType = 'repair')
     {
         return $this->exec('productDetails', array(
+                    'requestType' => 'REPAIR',
+                    'device'      => array(
+                        'id' => $this->traiteSerialApple($serial)
+                    )
+        ));
+    }
+
+    public function serialEligibility($serial)
+    {
+        return $this->exec('repairEligibility', array(
                     'device' => array(
                         'id' => $this->traiteSerialApple($serial)
                     )
         ));
     }
+
+    // Requêtes - Parts: 
 
     public function partsSummaryBySerial($serial)
     {
@@ -424,6 +489,17 @@ class GSX_v2 extends GSX_Const
         return $this->exec('partsSummary', $params);
     }
 
+    public function getIssueCodesBySerial($serial)
+    {
+        return $this->exec('componentIssue', array(
+                    'device' => array(
+                        'id' => $this->traiteSerialApple($serial)
+                    )
+        ));
+    }
+
+    // Requêtes - Repairs: 
+
     public function repairSummaryByIdentifier($identifier, $identifier_type)
     {
         $params = array();
@@ -458,7 +534,7 @@ class GSX_v2 extends GSX_Const
         ));
     }
 
-    public function repairQestions($serial, $repairType, $issues, $parts)
+    public function repairQestions($serial, $repairType, $issues, $parts, $coverageOption = '', $consumerLaw = '')
     {
         $params = array(
             'device'     => array(
@@ -466,6 +542,14 @@ class GSX_v2 extends GSX_Const
             ),
             'repairType' => $repairType
         );
+
+        if ($coverageOption) {
+            $params['coverageOption'] = $coverageOption;
+        }
+
+        if ($consumerLaw) {
+            $params['consumerLaw'] = $consumerLaw;
+        }
 
         if (isset($issues) && !empty($issues)) {
             $params['componentIssues'] = $issues;
@@ -478,16 +562,230 @@ class GSX_v2 extends GSX_Const
         return $this->exec('repairQuestions', $params);
     }
 
-    public function getIssueCodesBySerial($serial)
+    // Reqêtes - Diagnostiques: 
+
+    public function diagnosticSuites($serial)
     {
-        return $this->exec('componentIssue', array(
+        return $this->exec('diagnosticSuites', array(
+                    'deviceId' => $this->traiteSerialApple($serial)
+        ));
+    }
+
+    public function runDiagnostic($serial, $suiteId)
+    {
+        return $this->exec('diagnosticTest', array(
+                    'diagnostics' => array(
+                        'suiteId' => (string) $suiteId
+                    ),
+                    'device'      => array(
+                        'id' => $this->traiteSerialApple($serial)
+                    )
+        ));
+    }
+
+    public function diagnosticStatus($serial)
+    {
+        return $this->exec('diagnosticStatus', array(
                     'device' => array(
                         'id' => $this->traiteSerialApple($serial)
                     )
         ));
     }
 
-    public function filesUpload($serial, $files)
+    public function diagnosticsLookup($serial)
+    {
+        return $this->exec('diagnosticsLookup', array(
+                    'device' => array(
+                        'id' => $this->traiteSerialApple($serial)
+                    )
+        ));
+    }
+
+    // Requêtes - Retours groupés:
+
+    public function getPartsPendingReturnsForShipTo($shipto = '')
+    {
+        if (self::$mode === 'test') {
+            $shipto = BimpTools::addZeros('897316', 10);
+        }
+
+        if (!$shipto) {
+            return array();
+        }
+
+        $shipto = BimpTools::addZeros($shipto, 10);
+
+        return $this->exec('returnsLookup', array(
+                    'returnStatusType' => 'PENDING',
+                    'shipTo'           => $shipto
+        ));
+    }
+
+    public function createReturn($shipTo, $shipmentDetails, $parts)
+    {
+        if (self::$mode == 'test') {
+            $shipTo = self::$test_ids['ship_to'];
+        }
+
+        $params = array(
+            'shipTo'          => BimpTools::addZeros($shipTo, 10),
+            'shipmentDetails' => array(
+                'packageMeasurements' => array(
+                    'length' => BimpTools::getArrayValueFromPath($shipmentDetails, 'length', 0),
+                    'width'  => BimpTools::getArrayValueFromPath($shipmentDetails, 'width', 0),
+                    'height' => BimpTools::getArrayValueFromPath($shipmentDetails, 'height', 0),
+                    'weight' => BimpTools::getArrayValueFromPath($shipmentDetails, 'weight', 0)
+                )
+            ),
+            'parts'           => $parts
+        );
+
+        if (isset($shipmentDetails['notes']) && (string) $shipmentDetails['notes']) {
+            $params['shipmentDetails']['notes'] = (string) $shipmentDetails['notes'];
+        }
+
+        if (isset($shipmentDetails['carrierCode']) && (string) $shipmentDetails['carrierCode']) {
+            $params['shipmentDetails']['carrierCode'] = (string) $shipmentDetails['carrierCode'];
+        }
+
+        if (isset($shipmentDetails['trackingNumber']) && (string) $shipmentDetails['trackingNumber']) {
+            $params['shipmentDetails']['trackingNumber'] = (string) $shipmentDetails['trackingNumber'];
+        }
+
+        return $this->exec('returnsManage', $params);
+    }
+
+    public function updateReturn($shipTo, $bulkReturId, $parts = array(), $shipmentDetails = array())
+    {
+        if (self::$mode == 'test') {
+            $shipTo = self::$test_ids['ship_to'];
+        }
+
+        $params = array(
+            'bulkReturn' => $bulkReturId,
+            'shipTo'     => BimpTools::addZeros($shipTo, 10)
+        );
+
+        if (!empty($shipmentDetails)) {
+            $params['shipmentDetails'] = array();
+
+            if (isset($shipmentDetails['length'])) {
+                $params['shipmentDetails']['packageMeasurements']['length'] = $shipmentDetails['length'];
+            }
+            if (isset($shipmentDetails['width'])) {
+                $params['shipmentDetails']['packageMeasurements']['width'] = $shipmentDetails['width'];
+            }
+            if (isset($shipmentDetails['height'])) {
+                $params['shipmentDetails']['packageMeasurements']['height'] = $shipmentDetails['height'];
+            }
+            if (isset($shipmentDetails['weight'])) {
+                $params['shipmentDetails']['packageMeasurements']['weight'] = $shipmentDetails['weight'];
+            }
+
+            if (isset($shipmentDetails['notes']) && (string) $shipmentDetails['notes']) {
+                $params['shipmentDetails']['notes'] = (string) $shipmentDetails['notes'];
+            }
+
+            if (isset($shipmentDetails['carrierCode']) && (string) $shipmentDetails['carrierCode']) {
+                $params['shipmentDetails']['carrierCode'] = (string) $shipmentDetails['carrierCode'];
+            }
+
+            if (isset($shipmentDetails['trackingNumber']) && (string) $shipmentDetails['trackingNumber']) {
+                $params['shipmentDetails']['trackingNumber'] = (string) $shipmentDetails['trackingNumber'];
+            }
+        }
+        
+        if (!empty($parts)) {
+            $params['parts'] = $parts;
+        }
+
+        return $this->exec('returnsManage', $params);
+    }
+
+    public function getBulkReturnReport($shipTo, $returnId)
+    {
+        if (self::$mode === 'test') {
+            $shipTo = BimpTools::addZeros('897316', 10);
+        }
+
+        if (!$shipTo) {
+            return array();
+        }
+
+        $shipTo = BimpTools::addZeros($shipTo, 10);
+
+        return $this->exec('returnsLookup', array(
+                    'returnStatusType' => 'RETURN_REPORT',
+                    'shipTo'           => $shipTo,
+                    'bulkReturnId'     => $returnId
+        ));
+    }
+
+    public function getPartReturnLabel($shipTo, $parts)
+    {
+        if (self::$mode == 'test') {
+            $shipTo = self::$test_ids['ship_to'];
+        }
+
+        if ($shipTo) {
+            $shipTo = BimpTools::addZeros($shipTo, 10);
+
+            foreach ($parts as $key => $part) {
+                $parts[$key]['shipTo'] = $shipTo;
+            }
+        }
+
+        $response_headers = array();
+
+        return $this->exec('getFile', array(
+                    'identifiers' => $parts
+                        ), $response_headers, array('url_params' => array('documentType' => 'returnLabel'))
+        );
+    }
+
+    public function getBulkReturnLabel($shipTo, $bulkReturnId)
+    {
+        if (self::$mode == 'test') {
+            $shipTo = self::$test_ids['ship_to'];
+        }
+
+        $shipTo = BimpTools::addZeros($shipTo, 10);
+
+        $response_headers = array();
+
+        return $this->exec('getFile', array(
+                    'identifiers' => array(
+                        array(
+                            'bulkReturnId' => $bulkReturnId,
+                            'shipTo'       => $shipTo
+                        )
+                    )), $response_headers, array('url_params' => array('documentType' => 'bulkReturnLabel'))
+        );
+    }
+
+    public function getReturnPackingList($shipTo, $bulkReturnId)
+    {
+        if (self::$mode == 'test') {
+            $shipTo = self::$test_ids['ship_to'];
+        }
+
+        $shipTo = BimpTools::addZeros($shipTo, 10);
+
+        $response_headers = array();
+
+        return $this->exec('getFile', array(
+                    'identifiers' => array(
+                        array(
+                            'bulkReturnId' => $bulkReturnId,
+                            'shipTo'       => $shipTo
+                        )
+                    )), $response_headers, array('url_params' => array('documentType' => 'returnsPackingList'))
+        );
+    }
+
+    // Requêtes - Divers:
+
+    public function filesUpload($serial, $files, $module = '')
     {
         $params = array(
             'attachments' => array(),
@@ -503,8 +801,15 @@ class GSX_v2 extends GSX_Const
             );
         }
 
+        $extra = array();
+
+        if ($module) {
+            $extra['url_params'] = array(
+                'module' => $module
+            );
+        }
         $headers = array();
-        $data = $this->exec('filesUpload', $params, $headers);
+        $data = $this->exec('filesUpload', $params, $headers, $extra);
 
         if (!is_array($data) || empty($data) || !isset($data['attachments'])) {
             return false;
@@ -551,60 +856,7 @@ class GSX_v2 extends GSX_Const
         return $result;
     }
 
-    public function diagnosticSuites($serial)
-    {
-        return $this->exec('diagnosticSuites', array(
-                    'deviceId' => $this->traiteSerialApple($serial)
-        ));
-    }
-
-    public function runDiagnostic($serial, $suiteId)
-    {
-        return $this->exec('diagnosticTest', array(
-                    'diagnostics' => array(
-                        'suiteId' => (string) $suiteId
-                    ),
-                    'device'      => array(
-                        'id' => $this->traiteSerialApple($serial)
-                    )
-        ));
-    }
-
-    public function diagnosticStatus($serial)
-    {
-        return $this->exec('diagnosticStatus', array(
-                    'device' => array(
-                        'id' => $this->traiteSerialApple($serial)
-                    )
-        ));
-    }
-
-    public function diagnosticsLookup($serial)
-    {
-        return $this->exec('diagnosticsLookup', array(
-                    'device' => array(
-                        'id' => $this->traiteSerialApple($serial)
-                    )
-        ));
-    }
-    
-    public function traiteSerialApple($serial){
-        if(stripos($serial, 'S') === 0){
-            return substr($serial,1);
-        }
-        return $serial;
-    }
-
-    public function serialEligibility($serial)
-    {
-        return $this->exec('repairEligibility', array(
-                    'device' => array(
-                        'id' => $this->traiteSerialApple($serial)
-                    )
-        ));
-    }
-
-    // Gestion des erreurs: 
+    // Gestion des erreurs:
 
     public function initError($msg, $log_error = false)
     {
@@ -615,7 +867,13 @@ class GSX_v2 extends GSX_Const
         }
 
         if ($log_error && self::$log_errors) {
-            dol_syslog('[ERREUR INIT GSX]', LOG_ERR);
+            BimpCore::addlog('Erreur init GSX', Bimp_Log::BIMP_LOG_ERREUR, 'gsx', null, array(
+                'msg' => $msg
+            ));
+        }
+
+        if (BimpDebug::isActive()) {
+            BimpDebug::addDebug('gsx', '<span class="danger">ERREUR init GSX</span>', BimpRender::renderAlerts($msg));
         }
     }
 
@@ -635,7 +893,15 @@ class GSX_v2 extends GSX_Const
         }
 
         if ($log_error && self::$log_errors) {
-            dol_syslog('[ERREUR INIT GSX]', LOG_ERR);
+            BimpCore::addlog('Erreur CURL GSX', Bimp_Log::BIMP_LOG_ERREUR, 'gsx', null, array(
+                'request' => $request_name,
+                'msg'     => $msg,
+                'code'    => $code
+            ));
+        }
+
+        if (BimpDebug::isActive()) {
+            BimpDebug::addDebug('gsx', '<span class="danger">ERREUR requête "' . $request_name . '"</span>', BimpRender::renderAlerts($msg . ' (CODE: ' . $code . ')'));
         }
     }
 
@@ -691,5 +957,27 @@ class GSX_v2 extends GSX_Const
             'init' => array(),
             'curl' => array()
         );
+    }
+
+    public function displayNoLogged($msg = '', $callback = '')
+    {
+        if (!$msg) {
+            $msg = 'Non connecté à GSX. Veuillez vous connecter et réitérer l\'opération';
+        }
+        $msg .= '<script type="text/javascript">';
+        $msg .= 'gsx_open_login_modal($(\'\')' . ($callback ? ', ' . $callback : '') . ');';
+        $msg .= '</script>';
+
+        return $msg;
+    }
+
+    // Divers: 
+
+    public function traiteSerialApple($serial)
+    {
+        if (stripos($serial, 'S') === 0) {
+            return substr($serial, 1);
+        }
+        return $serial;
     }
 }

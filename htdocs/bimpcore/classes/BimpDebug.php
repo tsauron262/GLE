@@ -19,7 +19,8 @@ class BimpDebug
         'sql_count'   => 'Compteur SQL',
         'php'         => 'Erreurs PHP',
         'params'      => 'Paramètres requête',
-        'ajax_result' => 'Réponse ajax'
+        'ajax_result' => 'Réponse ajax',
+        'gsx'         => 'GSX'
     );
     public static $times = array();
     public static $sql_count = array();

@@ -48,7 +48,7 @@ fields:
         values: 
             array: visibilities
                     
-    content:
+    content: 
         label: Contenu
         type: text
         input:
@@ -121,7 +121,7 @@ lists:
         add_object_row: 0
         list_filters:
             callback: getListFilterNotesInterface
-            
+    
     public: 
         title: Messages
         icon: far_comments

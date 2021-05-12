@@ -1,0 +1,1 @@
+ALTER TABLE llx_bimp_gsx_repair ADD `ship_to` varchar(128) NOT NULL DEFAULT '' AFTER `id_sav`;

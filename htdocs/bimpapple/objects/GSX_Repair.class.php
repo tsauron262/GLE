@@ -357,6 +357,9 @@ class GSX_Repair extends BimpObject
                     if (!$gsx->logged) {
                         $errors[] = $gsx->displayNoLogged();
                     }
+                    else{
+                        $errors = BimpTools::merge_array($errors, $gsx->getErrors());
+                    }
                 } else {
                     if (!is_dir(DOL_DATA_ROOT . $dir)) {
                         $error = BimpTools::makeDirectories($dir, DOL_DATA_ROOT);
@@ -366,6 +369,7 @@ class GSX_Repair extends BimpObject
                     }
 
                     if (!count($errors)) {
+                        echo $filePath.'rrrr';
                         if (!file_put_contents($filePath, $result)) {
                             $errors[] = 'Echec de la création du fichier';
                         }
@@ -423,7 +427,7 @@ class GSX_Repair extends BimpObject
                         $this->findInGsx = true;
                         $this->repairLookUp = $data;
 
-                        $shipTo = BimpTools::getArrayValueFromPath($this->repairLookUp, '', '');
+                        $shipTo = BimpTools::getArrayValueFromPath($this->repairLookUp, 'account/shipTo', '');
                         if ($shipTo) {
                             $shipTo = BimpTools::addZeros($shipTo, GSX_v2::$numbersNumChars);
                             if ($shipTo != $this->getData('ship_to')) {
@@ -1615,7 +1619,7 @@ class GSX_Repair extends BimpObject
                                                 'return_order_number' => $part['returnOrderNumber'],
                                                 'sequence_number'     => $part['sequenceNumber'],
                                                 'return_type'         => $return_type,
-                                                'ship_to'             => BimpTools::getArrayValueFromPath($this->repairLookUp, 'account/shipTo', '')
+                                                'ship_to'             => (string) BimpTools::getArrayValueFromPath($this->repairLookUp, 'account/shipTo', '')
                                             ));
                                         }
 

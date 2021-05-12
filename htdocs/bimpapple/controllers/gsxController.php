@@ -948,7 +948,7 @@ class gsxController extends BimpController
             'warning'           => ''
         );
 
-        if ($serial) {
+        if (is_object($equipment)) {
             $data = $equipment->gsxFetchIdentifiers($serial);
             $data['product_label'] = $data['productDescription'];
 

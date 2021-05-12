@@ -39,7 +39,7 @@ foreach($res as $index => $array) {
                 $ok = true;
                 $client->set('lettrecreditsafe', $data['lettrecreditsafe']);
                 $client->set('notecreditsafe', $data['notecreditsafe']);
-                $client->set('outstanding_limit', $data['outstanding_limit']);
+                //$client->set('outstanding_limit', $data['outstanding_limit']);
                 $client->set('capital', $data['capital']);
                 $client->set('tva_intra', $data['tva_intra']);
                 $client->set('capital', $data['capital']);

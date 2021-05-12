@@ -77,7 +77,8 @@ if(!$is_paiement){
 //    echo '<pre>';
 //    echo $line[30] . '<br />';
 //    echo '</pre>';
-    
+                $sens = $line[129];
+                $typePiece =  $line[48];
                 $line = trim($line);
                 for ($i = 0; $i < $char_id[1]; $i++) {
                     $id_piece .= $line[$char_id[0] + $i];
@@ -93,15 +94,24 @@ if(!$is_paiement){
                     $array[intval($id_piece)]['TTC'] = doubleval($montant_ligne);
                 } elseif ($line[30] == " " || $line[30] == "-") {
                     $array[intval($id_piece)]['DETAILS_LIGNE']['NOMBRE'] ++;
-                    $array[intval($id_piece)]['DETAILS_LIGNE'][intval(substr($line, 13))] = doubleval($montant_ligne);
+                        $array[intval($id_piece)]['DETAILS_LIGNE'][intval(substr($line, 13))] += doubleval($montant_ligne);
+                    
+                    
                     if ($line[0] == 'A') {
+                        // FACTURE ACHAT
                         if (intval(substr($line, 13)) == intval("44571100") || intval(substr($line, 13)) == intval("44566600")) {
                             $array[intval($id_piece)]['AUTO_LIQUIDE'] += doubleval($montant_ligne);
                         } else {
                             $array[intval($id_piece)]['HT'] += doubleval($montant_ligne);
                         }
                     } else {
-                        $array[intval($id_piece)]['HT'] += doubleval($montant_ligne);
+                        $array[intval($id_piece)]['SENS'] = $sens_piece;
+                        if($sens == $sens_piece) {
+                            $array[intval($id_piece)]['HT'] -= doubleval($montant_ligne);
+                        } else {
+                            $array[intval($id_piece)]['HT'] += doubleval($montant_ligne);
+                        }
+                        
                     }
                 }
             }
@@ -123,10 +133,10 @@ if(!$is_paiement){
                 $array_ecart[$id_piece]['DETAILS'] = $infos['DETAILS_LIGNE'];
             }
             
-            if(empty($infos['CONTROLLE_AUXILIAIRE']) && $infos['CONTROLLE_AUXILIAIRE'] != "0") {
-                $array_auxil[$id_piece]['LIGNE'] = $infos['LIGNE_FACTURE'];
-                $array_auxil[$id_piece]['TYPE'] = $infos['TYPE_EXPORT'];
-            }
+//            if(empty($infos['CONTROLLE_AUXILIAIRE'])) {
+//                $array_auxil[$id_piece]['LIGNE'] = $infos['LIGNE_FACTURE'];
+//                $array_auxil[$id_piece]['TYPE'] = $infos['TYPE_EXPORT'];
+//            }
             
         }
 
@@ -154,6 +164,10 @@ if(!$is_paiement){
                 $message .= '<b>Facture : <i ' . $color . ' >' . $affichage_facture . '</i></b><br />';
                 $message .= '<b>Ligne fichier TRA : <i ' . $color . ' >#' . $infos['LIGNE'] . '</i></b><br />';
                 $message .= '<b>Montant de l\'écart : <i ' . $color . ' >' . $infos['MONTANT'] . '€</i></b><br />';
+                foreach($infos['DETAILS'] as $det =>$v) {
+                    if($det != "NOMBRE")
+                        $message .= $det . " => ".$v."<br />";
+                }
             }
         } else {
             $message .= "<b " . $color . ">Fichier comforme à l'export</b>";

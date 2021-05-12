@@ -257,7 +257,7 @@ class BimpRender
                 $classes = array('btn');
 
                 if ($max && count($buttons) > $max) {
-                    $classes[] = 'btn-light-default';
+                    $classes[] = 'btn-light-'.(isset($btn['type']) ? $btn['type'] : 'default');
                 } else {
                     $classes[] = (isset($btn['type']) ? 'btn-' . $btn['type'] : 'btn-default');
                 }

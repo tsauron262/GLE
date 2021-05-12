@@ -63,7 +63,7 @@ function onSocieteSiretOrSirenChange($input, field, value) {
         $form.find('[name="town"]').addClass('disabled');
         $form.find('[name="phone"]').addClass('disabled');
         $form.find('[name="tva_intra"]').addClass('disabled');
-//        $form.find('[name="outstanding_limit"]').addClass('disabled');
+//        $form.find('[name="outstanding_limit_credit_safe"]').addClass('disabled');
         $form.find('[name="capital"]').addClass('disabled');
         $form.find('[name="ape"]').addClass('disabled');
         $form.find('[name="notecreditsafe"]').addClass('disabled');
@@ -113,6 +113,11 @@ function onSocieteSiretOrSirenChange($input, field, value) {
                     if (typeof (result.data.siret) === 'string' && result.data.siret) {
                         $form.find('[name="siret"]').val(result.data.siret);
                     }
+                    
+                    if(result.data.siret.substr(0,1) == '1' || result.data.siret.substr(0,1) == '2'){
+                        $form.find('[name="fk_typent"]').val(5);
+                        $form.find('[name="fk_typent"]').change();
+                    }
 
                     if (typeof (result.data.nom) === 'string' && result.data.nom) {
                         $form.find('[name="nom"]').val(result.data.nom);
@@ -138,9 +143,10 @@ function onSocieteSiretOrSirenChange($input, field, value) {
                         $form.find('[name="tva_intra"]').val(result.data.tva_intra);
                     }
 
-//                    if (typeof (result.data.outstanding_limit) === 'string' && result.data.outstanding_limit) {
-//                        $form.find('[name="outstanding_limit"]').val(result.data.outstanding_limit);
-//                    }
+                    if (typeof (result.data.outstanding_limit) === 'string' && result.data.outstanding_limit) {
+                        $form.find('[name="outstanding_limit_credit_safe"]').val(result.data.outstanding_limit);
+                        $form.find('[name="outstanding_limit_credit_safe"]').parent().find('span').html(result.data.outstanding_limit+" €");
+                    }
 
                     if (typeof (result.data.capital) === 'string' && result.data.capital) {
                         $form.find('[name="capital"]').val(result.data.capital);
@@ -156,6 +162,10 @@ function onSocieteSiretOrSirenChange($input, field, value) {
 
                     if (typeof (result.data.lettrecreditsafe) === 'string' && result.data.lettrecreditsafe) {
                         $form.find('[name="lettrecreditsafe"]').val(result.data.lettrecreditsafe);
+                    }
+                    
+                    if (typeof (result.data.alert) === 'string' && result.data.alert) {
+                        alert(result.data.alert)
                     }
                 }
             },

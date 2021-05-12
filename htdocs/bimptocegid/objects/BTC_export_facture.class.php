@@ -116,10 +116,10 @@ class BTC_export_facture extends BTC_export
             $ref_libre = strtoupper($this->suppr_accents($facture->getData('libelle')));
         }
         
-        $code_journal = $this->getCodeJoural();
+        $code_journal = $this->getCodeJournal($facture->getData('ef_type'), "V", $is_client_interco);
         
         $structure = [
-            'journal'           => [($is_client_interco) ? 'VI' : "VTE", 3],
+            'journal'           => [$code_journal, 3],
             'date'              => [$date_facture->format('dmY'), 8],
             'type_piece'        => ['FC', 2],
             'compte_general'    => [$compte_general_411, 17],
@@ -169,6 +169,7 @@ class BTC_export_facture extends BTC_export
             'date_debut'        => ['', 8],
             'date_fin'          => ['', 8]
         ];
+        $reste = round($total_ttc_facture, 2);
 
         $writing_ligne_client = false;
         $total_lignes_facture = 0;
@@ -217,7 +218,7 @@ class BTC_export_facture extends BTC_export
                         if ($frais_de_port = $this->db->getRow('categorie_product', 'fk_categorie = 9705 AND fk_product = ' . $produit->id) || $produit->id == 129950) {
                             $is_frais_de_port = true;
                             $lignes[$compte_general_port]['HT'] += $line->multicurrency_total_ht;
-                            $total_lignes += round($line->multicurrency_total_ht, 2);
+                            $total_lignes += $line->multicurrency_total_ht;
                             if ($use_tva && $line->tva_tx != 0) {
                                 $lignes[$compte_general_tva]['HT'] += $line->multicurrency_total_tva;
                                 $total_lignes += $line->multicurrency_total_tva;
@@ -281,12 +282,12 @@ class BTC_export_facture extends BTC_export
                             case "REFACT_FILIALES":
                                 $is_refact = true;
                                 $lignes[$compte_refact_ht]['HT'] += $line->multicurrency_total_ht;
-                                $total_lignes += round($line->multicurrency_total_ht, 2);
+                                $total_lignes += $line->multicurrency_total_ht;
                                 break;
                             case "REFACT_TTC_FILIALES":
                                 $is_refact = true;
                                 $lignes[$compte_refact_ttc]['HT'] += $line->multicurrency_total_ht;
-                                $total_lignes += round($line->multicurrency_total_ht, 2);
+                                $total_lignes += $line->multicurrency_total_ht;
                                 break;
                         }
 
@@ -301,12 +302,12 @@ class BTC_export_facture extends BTC_export
                                     }
 
                                     $lignes[$use_compte_general]['HT'] += $add_ht;
-                                    $total_lignes += round($line->multicurrency_total_ht, 2);
+                                    $total_lignes += $line->multicurrency_total_ht;
                                 }
                             } else {
                                 if (($facture->getData('zone_vente') == 1 && $line->tva_tx != 0) || $facture->getData('zone_vente') != 1) {
                                     $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht;
-                                    $total_lignes += round($line->multicurrency_total_ht, 2);
+                                    $total_lignes += $line->multicurrency_total_ht;
                                 }
                             }
                             
@@ -320,7 +321,7 @@ class BTC_export_facture extends BTC_export
                                 else {
                                     $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht;
                                 }
-                                $total_lignes += round($line->multicurrency_total_ht, 2);
+                                $total_lignes += $line->multicurrency_total_ht;
                             }
                         }
                     } else {
@@ -328,7 +329,7 @@ class BTC_export_facture extends BTC_export
                             $lignes[$compte_general_tva]['HT'] += $line->multicurrency_total_tva;
                             $total_lignes += $line->multicurrency_total_tva;
                             $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht;
-                            $total_lignes += round($line->multicurrency_total_ht, 2);
+                            $total_lignes += $line->multicurrency_total_ht;
                         } elseif ($use_tva && $line->tva_tx == 0) {
                             if($facture->getData('zone_vente') == 1) {
                                     $lignes[$compte_general_tva_null]['HT'] += $line->multicurrency_total_ht;
@@ -336,7 +337,7 @@ class BTC_export_facture extends BTC_export
                                 else {
                                     $lignes[$use_compte_general]['HT'] += $line->multicurrency_total_ht;
                                 }
-                            $total_lignes += round($line->multicurrency_total_ht, 2);
+                            $total_lignes += $line->multicurrency_total_ht;
                         }
                     }
                 } else {
@@ -350,10 +351,12 @@ class BTC_export_facture extends BTC_export
             $lignes[$compte_general_d3e]['HT'] = $d3e;
         }
 
-        if (round($total_ttc_facture, 2) != round($total_lignes, 2)) {
-            $montant_ecart = round($total_ttc_facture, 2) - (round($total_lignes, 2));
-            $lignes = $this->rectifications_ecarts($lignes, round($montant_ecart, 2), 'vente');
-        }
+//        if (round($total_ttc_facture, 2) != round($total_lignes, 2)) {
+//            $montant_ecart = round($total_ttc_facture, 2) - (round($total_lignes, 2));
+//            $lignes = $this->rectifications_ecarts($lignes, round($montant_ecart, 2), 'vente');
+//        }
+        $plusGrand = null;
+        $testMontantPlusGrand = 0;
         foreach ($lignes as $l => $infos) {
             if ($l != 'REMISE') {
                 $structure['compte_general'] = [$l, 17];
@@ -364,14 +367,32 @@ class BTC_export_facture extends BTC_export
             $structure['type_de_compte'] = [" ", 1];
             $structure['code_auxiliaire'] = ['', 16];
             $structure['montant'] = [abs(round($infos['HT'], 2)), 20, true];
+            $testMontant = abs(round($infos['HT'], 2));
+            $reste -= round($infos['HT'], 2);
             $structure['sens'] = [$this->get_sens($total_ttc_facture, 'facture', true, $sens_parent), 1];
 
             $structure['contre_partie'] = [$compte_general_411, 17];
             $structure['vide'] = [$code_auxiliaire, 606];
+            
+            if(!is_array($plusGrand) || $testMontant > $testMontantPlusGrand){
+                $plusGrand = $structure;
+                $testMontantPlusGrand  = $testMontant;
+            }
+                
+            //if(!is_array($plusGrand) || intval($structure['montant']) > intval($plusGrand['montant']))
+                
             $ecritures .= $this->struct($structure);
         }
         
         
+        if(round($reste,2 ) != 0){
+            if(is_array($plusGrand)){
+                $plusGrand['montant'] = [abs(round($reste, 2)), 20, true];
+                $invert = (round($reste, 2) < 0) ? false : true;
+                $plusGrand['sens'] = [$this->get_sens($reste, 'facture', $invert, $sens_parent), 1];
+                $ecritures .= $this->struct($plusGrand);
+            }
+        }
         
         $write = $this->write_tra($ecritures, $file);
         
@@ -381,7 +402,6 @@ class BTC_export_facture extends BTC_export
         } else {
             $suivi['ecriture'] = false;
         }
-        
         $export[$facture->getData('ref')] = $suivi;
         
         return $write;
@@ -643,7 +663,7 @@ class BTC_export_facture extends BTC_export
                     }
                 } else {
                     foreach ($facture_comptes['lines'] as $compte => $montant) {
-                        $montant_lignes += abs(round($montant, 2));
+                        $montant_lignes += abs($montant);
                     }
                 }
 

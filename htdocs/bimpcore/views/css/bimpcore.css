@@ -1,3 +1,29 @@
+
+/*
+
+A modifié dans les SCSS
+
+
+
+*/
+.btn.btn-light-danger:hover {
+    color: #fff !important;
+    background-color: #A00000 !important;
+    border-color: #fff !important;
+}
+.btn.btn-light-danger {
+    color: #A00000 !important;
+    background-color: #fff !important;
+    border-color: #fff !important;
+}
+
+
+
+
+
+
+
+
 @charset "UTF-8";
 /*!
  * Font Awesome Free 5.10.0 by @fontawesome - https://fontawesome.com

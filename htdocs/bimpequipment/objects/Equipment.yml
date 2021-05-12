@@ -482,6 +482,8 @@ forms:
     light:
         force_edit: 1
         rows:
+            - field: status_gsx
+              hidden: 1
             - field: serial
             - field: imei
             - field: imei2

@@ -2266,7 +2266,7 @@ class Bimp_Societe extends BimpDolObject
                     $label = 'fournisseur';
                 }
 
-                $subject = 'Demande ' . $op . ' ' . $label;
+                $subject = 'Demande ' . $op . ' ' . $label.' '.$this->getRef();;
                 $msg = 'Bonjour, ' . "\n\n";
                 $msg .= 'L\'utilisateur ' . $user->getNomUrl() . ' demande ' . ($status ? 'la' : 'l\'') . ' ' . $op;
                 $msg .= ' du ' . $label . ' ' . $this->getLink();

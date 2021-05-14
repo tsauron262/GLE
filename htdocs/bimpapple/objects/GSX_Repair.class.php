@@ -369,7 +369,6 @@ class GSX_Repair extends BimpObject
                     }
 
                     if (!count($errors)) {
-                        echo $filePath.'rrrr';
                         if (!file_put_contents($filePath, $result)) {
                             $errors[] = 'Echec de la création du fichier';
                         }

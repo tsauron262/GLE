@@ -446,18 +446,18 @@ class GSX_Repair extends BimpObject
                         }
 
                         // Check du statut: 
-                        if (isset($this->repairLookUp['repairStatusCode']) && ($this->repairLookUp['repairStatusCode'] != '')) {
+                        if (isset($this->repairLookUp['repairStatus']) && ($this->repairLookUp['repairStatus'] != '')) {
                             $ready_for_pick_up = 0;
                             $complete = 0;
                             $cancelled = 0;
 
-                            if (in_array($this->repairLookUp['repairStatusCode'], self::$cancelCodes)) {
+                            if (in_array($this->repairLookUp['repairStatus'], self::$cancelCodes)) {
                                 $cancelled = 1;
                                 $ready_for_pick_up = 1;
-                            } elseif (in_array($this->repairLookUp['repairStatusCode'], self::$closeCodes)) {
+                            } elseif (in_array($this->repairLookUp['repairStatus'], self::$closeCodes)) {
                                 $complete = 1;
                                 $ready_for_pick_up = 1;
-                            } elseif (in_array($this->repairLookUp['repairStatusCode'], self::$readyForPickupCodes)) {
+                            } elseif (in_array($this->repairLookUp['repairStatus'], self::$readyForPickupCodes)) {
                                 $ready_for_pick_up = 1;
                             }
 
@@ -1231,8 +1231,8 @@ class GSX_Repair extends BimpObject
     public function displayGsxStatus()
     {
         if ($this->use_gsx_v2) {
-            if (isset($this->repairLookUp['repairStatusCode'])) {
-                $status .= $this->repairLookUp['repairStatusCode'];
+            if (isset($this->repairLookUp['repairStatus'])) {
+                $status .= $this->repairLookUp['repairStatus'];
             }
 
             if (isset($this->repairLookUp['repairStatusDescription'])) {

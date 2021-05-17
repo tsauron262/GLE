@@ -115,7 +115,6 @@ class BTC_export_facture extends BTC_export
         if($facture->getData('libelle')) {
             $ref_libre = strtoupper($this->suppr_accents($facture->getData('libelle')));
         }
-        
         $code_journal = $this->getCodeJournal($facture->getData('ef_type'), "V", $is_client_interco);
         
         $structure = [

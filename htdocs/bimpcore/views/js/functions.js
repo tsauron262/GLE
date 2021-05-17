@@ -370,7 +370,7 @@ function closeAllFoldable($container) {
 
 // Evenements: 
 
-function setCommonEvents($container) {
+function setCommonEvents($container) {    
     //Foldable custom: 
     $container.find('.foldable_container').each(function () {
         if (!parseInt($(this).data('foldable_container_event_init'))) {
@@ -579,6 +579,7 @@ function setCommonEvents($container) {
         });
         $container.data('auto_expand_event_init', 1);
     }
+    
     $container.find('.auto_expand').each(function () {
         var minRows = parseInt($(this).data('min_rows')), rows;
         if (!minRows) {
@@ -591,6 +592,7 @@ function setCommonEvents($container) {
             this.rows = rows + minRows;
         }
     });
+    // Select Color: 
     $container.find('select').each(function () {
         if (!parseInt($(this).data('color_event_init'))) {
             checkSelectColor($(this));
@@ -600,13 +602,13 @@ function setCommonEvents($container) {
             $(this).data('color_event_init', 1);
         }
     });
+    // Nav tabs
     $container.find('.nav-tabs').each(function () {
         if (!parseInt($(this).data('nav_tabs_event_init'))) {
             $(this).find('li > a[data-toggle="tab"]').click(function (e) {
                 e.preventDefault();
                 $(this).tab('show');
             });
-            
             $(this).find('li > a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
                 var $link = $(e.target);
                 var $tabContent = $($(e.target).attr('href'));
@@ -637,6 +639,7 @@ function setCommonEvents($container) {
             $(this).data('nav_tabs_event_init', 1);
         }
     });
+    // Hide on click out: 
     $container.find('.hideOnClickOut').each(function () {
         if (!parseInt($(this).data('hide_on_click_event_init'))) {
             $(this).click(function (e) {
@@ -667,6 +670,7 @@ function setCommonEvents($container) {
             $(this).data('hide_on_click_event_init', 1);
         }
     });
+    // Product stock button: 
     $container.find('.displayProductStocksBtn').each(function () {
         if (!parseInt($(this).data('on_click_event_init'))) {
             $(this).click(function (e) {
@@ -677,6 +681,7 @@ function setCommonEvents($container) {
             $(this).data('on_click_event_init', 1);
         }
     });
+    // Tab link: 
     $container.find('a[data-toggle="tab"]').each(function () {
         if (!parseInt($(this).data('toggle_tab_event_init'))) {
             $(this).on('shown.bs.tab', function (e) {
@@ -720,7 +725,7 @@ function setCommonEvents($container) {
             $(this).data('toggle_tab_event_init', 1);
         }
     });
-
+    // Dol tooltip: 
     $container.find('.classfortooltip').each(function () {
         $(this).removeClass('classfortooltip').addClass('bs-popover');
         $(this).popover({
@@ -731,7 +736,7 @@ function setCommonEvents($container) {
             content: $(this).data('title')
         });
     });
-
+    // Card popover icon: 
     $container.find('.cardPopoverIcon').each(function () {
         if (!parseInt($(this).data('bs_popover_click_event_init'))) {
             $(this).click(function (e) {
@@ -741,12 +746,11 @@ function setCommonEvents($container) {
             $(this).data('bs_popover_click_event_init', 1);
         }
     });
-
     // Bimp List Table: 
     $container.find('table.bimp_list_table').each(function () {
         BimpListTable.setEvents($(this));
     });
-
+    // Multiple values: 
     checkMultipleValues();
 }
 
@@ -1397,7 +1401,7 @@ function findParentByTag($element, tag) {
     return $element.findParentByTag(tag);
 }
 
-$(document).ready(function () {
+$(document).ready(function () {    
     $('body').click(function (e) {
         $(this).find('.hideOnClickOut').removeClass('locked').hide();
         $(this).find('.destroyPopoverOnClickOut').popover('destroy');

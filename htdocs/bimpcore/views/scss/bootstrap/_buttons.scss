@@ -141,43 +141,58 @@ a.btn {
     }
 }
 .btn-light-primary {
-    @include button-variant($btn-default-color, #fff, #fff);
+    color: $primary!important;
+    background-color: #fff!important;
+    border-color: #fff!important;
+
     &:hover {
-        color: $primary!important;
-        background-color: #fff!important;
-        border-color: #fff!important;
+        color: #fff!important;
+        background-color: $primary!important;
+        border-color: $primary!important;
     }
 }
 .btn-light-success {
-    @include button-variant($btn-default-color, #fff, #fff);
+    color: $success!important;
+    background-color: #fff!important;
+    border-color: #fff!important;
+
     &:hover {
-        color: $success!important;
-        background-color: #fff!important;
-        border-color: #fff!important;
+        color: #fff!important;
+        background-color: $success!important;
+        border-color: $success!important;
     }
 }
 .btn-light-info {
-    @include button-variant($btn-default-color, #fff, #fff);
+    color: $info!important;
+    background-color: #fff!important;
+    border-color: #fff!important;
+
     &:hover {
-        color: $info!important;
-        background-color: #fff!important;
-        border-color: #fff!important;
+        color: #fff!important;
+        background-color: $info!important;
+        border-color: $info!important;
     }
 }
 .btn-light-warning {
-    @include button-variant($btn-default-color, #fff, #fff);
+    color: $warning!important;
+    background-color: #fff!important;
+    border-color: #fff!important;
+
     &:hover {
-        color: $warning!important;
-        background-color: #fff!important;
-        border-color: #fff!important;
+        color: #fff!important;
+        background-color: $warning!important;
+        border-color: $warning!important;
     }
 }
 .btn-light-danger {
-    @include button-variant($btn-default-color, #fff, #fff);
+    color: $danger!important;
+    background-color: #fff!important;
+    border-color: #fff!important;
+
     &:hover {
-        color: $danger!important;
-        background-color: #fff!important;
-        border-color: #fff!important;
+        color: #fff!important;
+        background-color: $danger!important;
+        border-color: $danger!important;
     }
 }
 

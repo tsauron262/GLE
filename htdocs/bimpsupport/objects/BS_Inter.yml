@@ -81,7 +81,7 @@ fields:
         input: 
             rows: 3
             auto_expand: 1
-            
+
     is_public: 
         label: Visible par le client
         type: bool
@@ -230,7 +230,7 @@ views:
                     fields_table:
                         panel: 1
                         name: infos
-    
+                        
     interface_client:
         title: nom
         edit_form: default

@@ -1,0 +1,22 @@
+bootstrap: 1
+
+title: 
+    callback: 
+        object: shipment
+        method: getPageTitle
+        
+js:
+    - /bimpapple/views/js/gsx.js
+
+objects: 
+    shipment: 
+        instance: 
+            bimp_object: AppleShipment
+            id_object: 
+                request: id
+                
+sections:
+    - type: view
+      view: 
+          name: full
+          object: shipment

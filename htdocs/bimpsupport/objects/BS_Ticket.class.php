@@ -877,9 +877,9 @@ class BS_Ticket extends BimpObject
             $this->set('priorite_demande_client', $this->getData('priorite'));
             $this->set('impact_demande_client', $this->getData('impact'));
 
-            $errors = parent::create($warnings, $force_create);
+        $errors = parent::create($warnings, $force_create);
 
-            if (!count($errors)) {
+        if (!count($errors)) {
                 if ($isPublic) {
                     $liste_destinataires = Array($userClient->getData('email'));
                     $liste_destinataires = BimpTools::merge_array($liste_destinataires, Array('hotline@bimp.fr'));
@@ -907,13 +907,13 @@ class BS_Ticket extends BimpObject
                         $warnings[] = 'Echec de l\'envoi de l\'e-mail de confirmation';
                     }
                 } else {
-                    if ((int) BimpTools::getValue('start_timer', 0)) {
-                        $timer = BimpObject::getInstance('bimpcore', 'BimpTimer');
-                        if (!$timer->setObject($this, 'appels_timer', true)) {
-                            $warnings[] = 'Echec de l\'initialisation du chrono appel payant';
-                        }
-                    }
+            if ((int) BimpTools::getValue('start_timer', 0)) {
+                $timer = BimpObject::getInstance('bimpcore', 'BimpTimer');
+                if (!$timer->setObject($this, 'appels_timer', true)) {
+                    $warnings[] = 'Echec de l\'initialisation du chrono appel payant';
                 }
+            }
+        }
             }
         }
 

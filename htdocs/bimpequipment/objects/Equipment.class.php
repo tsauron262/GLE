@@ -753,6 +753,13 @@ class Equipment extends BimpObject
 
         return $reservations;
     }
+    
+    public function getCardFields($card_name) {
+        $fileds = parent::getCardFields($card_name);
+        $fileds[] = 'id_product';
+        $fileds[] = 'product_label';
+        return $fileds;
+    }
 
     public function getCurrentPlace()
     {
@@ -914,7 +921,7 @@ class Equipment extends BimpObject
 
             return $html;
         }
-
+        
         return $this->displayData('product_label', 'default', ($no_html ? 0 : 1), $no_html);
     }
 

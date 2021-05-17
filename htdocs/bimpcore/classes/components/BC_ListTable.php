@@ -2128,100 +2128,101 @@ class BC_ListTable extends BC_List
                     $html .= BimpRender::renderAlerts('Vous n\'avez pas la permission de voir ' . $this->object->getLabel('this'), 'warning');
                     $html .= '</td>';
                 } else {
-                    $html .= '<td style="text-align: center; ' . $item_params['td_style'] . '">';
-                    if ($this->params['checkboxes']) {
-                        if ((int) $item_params['item_checkbox']) {
-                            $html .= '<input type="checkbox" id_="' . $this->object->object_name . '_check_' . $id_object . '"';
-                            $html .= ' name="' . $this->object->object_name . '_check"';
-                            $html .= ' class="item_check"';
-                            if ($selected) {
-                                $html .= ' checked="1"';
-                            }
-                            $html .= ' data-id_object="' . $id_object . '"/>';
+                $html .= '<td style="text-align: center; ' . $item_params['td_style'] . '">';
+                if ($this->params['checkboxes']) {
+                    if ((int) $item_params['item_checkbox']) {
+                        $html .= '<input type="checkbox" id_="' . $this->object->object_name . '_check_' . $id_object . '"';
+                        $html .= ' name="' . $this->object->object_name . '_check"';
+                        $html .= ' class="item_check"';
+                        if ($selected) {
+                            $html .= ' checked="1"';
                         }
+                        $html .= ' data-id_object="' . $id_object . '"/>';
                     }
+                }
+                $html .= '</td>';
+
+                if ((int) $this->params['total_row']) {
+                    $html .= '<td style="width: 45px; min-width: 45px; ' . $item_params['td_style'] . '"></td>';
+                }
+
+                if ($this->params['positions']) {
+                    $html .= '<td class="positionHandle" style="' . (!$this->params['position'] ? 'display: none;' : '') . $item_params['td_style'] . '"><span></span></td>';
+                }
+
+                foreach ($this->cols as $col_name => $col_params) {
+                    if ($row['params']['single_cell'] && $col_name !== $this->params['single_cell']['col']) {
+                        continue;
+                    }
+
+                    $html .= '<td style="';
+                    if (BimpTools::getArrayValueFromPath($col_params, 'hidden', false)) {
+                        $html .= 'display: none;';
+                    }
+
+                    if (isset($col_params['min_width']) && $col_params['min_width']) {
+                        $html .= 'min-width: ' . $col_params['min_width'] . 'px;';
+                    }
+
+                    if ($item_params['td_style']) {
+                        $html .= $item_params['td_style'] . ';';
+                    }
+
+                    if (isset($col_params['col_style']) && (string) $col_params['col_style']) {
+                        $html .= $col_params['col_style'] . ';';
+                    }
+
+                    if (isset($col_params['align']) && in_array($col_params['align'], array('center', 'right'))) { // pas left puisque par défaut. 
+                        $html .= 'text-align: ' . $col_params['align'] . ';';
+                    }
+
+                    $html .= '"' . ($row['params']['single_cell'] ? ' colspan="' . count($this->cols) . '"' : '') . '>';
+                    $html .= (isset($row['cols'][$col_name]['content']) ? $row['cols'][$col_name]['content'] : '');
                     $html .= '</td>';
+                }
 
-                    if ((int) $this->params['total_row']) {
-                        $html .= '<td style="width: 45px; min-width: 45px; ' . $item_params['td_style'] . '"></td>';
+                $rowButtons = array();
+
+                if ((int) $row['params']['canEdit']) {
+                    if ($this->params['enable_edit']) {
+                        $rowButtons[] = array(
+                            'class'   => 'cancelModificationsButton hidden',
+                            'icon'    => 'fas_undo',
+                            'label'   => 'Annuler les modifications',
+                            'onclick' => 'cancelObjectRowModifications(\'' . $this->identifier . '\', ' . $id_object . ', $(this))'
+                        );
+                        $rowButtons[] = array(
+                            'class'   => 'updateButton hidden',
+                            'label'   => 'Enregistrer',
+                            'onclick' => 'updateObjectFromRow(\'' . $this->identifier . '\', ' . $id_object . ', $(this))'
+                        );
                     }
+                }
 
-                    if ($this->params['positions']) {
-                        $html .= '<td class="positionHandle" style="' . (!$this->params['position'] ? 'display: none;' : '') . $item_params['td_style'] . '"><span></span></td>';
+                if (is_array($item_params['extra_btn']) && count($item_params['extra_btn'])) {
+                    foreach ($item_params['extra_btn'] as $btn_params) {
+                        $rowButtons[] = $btn_params;
                     }
+                }
 
-                    foreach ($this->cols as $col_name => $col_params) {
-                        if ($row['params']['single_cell'] && $col_name !== $this->params['single_cell']['col']) {
-                            continue;
+                if ((int) $row['params']['canEdit']) {
+                    if ((int) $item_params['edit_btn']) {
+                        $title = '';
+                        if (!is_null($item_params['edit_form_title']) && $item_params['edit_form_title']) {
+                            $title = htmlentities(addslashes($item_params['edit_form_title']));
                         }
-
-                        $html .= '<td style="';
-                        if (BimpTools::getArrayValueFromPath($col_params, 'hidden', false)) {
-                            $html .= 'display: none;';
-                        }
-
-                        if (isset($col_params['min_width']) && $col_params['min_width']) {
-                            $html .= 'min-width: ' . $col_params['min_width'] . 'px;';
-                        }
-
-                        if ($item_params['td_style']) {
-                            $html .= $item_params['td_style'] . ';';
-                        }
-
-                        if (isset($col_params['col_style']) && (string) $col_params['col_style']) {
-                            $html .= $col_params['col_style'] . ';';
-                        }
-
-                        if (isset($col_params['align']) && in_array($col_params['align'], array('center', 'right'))) { // pas left puisque par défaut. 
-                            $html .= 'text-align: ' . $col_params['align'] . ';';
-                        }
-
-                        $html .= '"' . ($row['params']['single_cell'] ? ' colspan="' . count($this->cols) . '"' : '') . '>';
-                        $html .= (isset($row['cols'][$col_name]['content']) ? $row['cols'][$col_name]['content'] : '');
-                        $html .= '</td>';
+                        $onclick = 'loadModalFormFromList(';
+                        $onclick .= '\'' . $this->identifier . '\', \'' . $item_params['edit_form'] . '\'';
+                        $onclick .= ', $(this), ' . $id_object . ', ' . (!is_null($this->id_parent) ? $this->id_parent : 0) . ', \'' . $title . '\')';
+                        $rowButtons[] = array(
+                            'class'   => 'editButton',
+                            'label'   => 'Editer',
+                            'onclick' => $onclick
+                        );
                     }
+                }
 
-                    $rowButtons = array();
-
-                    if ((int) $row['params']['canEdit']) {
-                        if ($this->params['enable_edit']) {
-                            $rowButtons[] = array(
-                                'class'   => 'cancelModificationsButton hidden',
-                                'icon'    => 'fas_undo',
-                                'label'   => 'Annuler les modifications',
-                                'onclick' => 'cancelObjectRowModifications(\'' . $this->identifier . '\', ' . $id_object . ', $(this))'
-                            );
-                            $rowButtons[] = array(
-                                'class'   => 'updateButton hidden',
-                                'label'   => 'Enregistrer',
-                                'onclick' => 'updateObjectFromRow(\'' . $this->identifier . '\', ' . $id_object . ', $(this))'
-                            );
-                        }
-                    }
-
-                    if (is_array($item_params['extra_btn']) && count($item_params['extra_btn'])) {
-                        foreach ($item_params['extra_btn'] as $btn_params) {
-                            $rowButtons[] = $btn_params;
-                        }
-                    }
-
-                    if ((int) $row['params']['canEdit']) {
-                        if ((int) $item_params['edit_btn']) {
-                            $title = '';
-                            if (!is_null($item_params['edit_form_title']) && $item_params['edit_form_title']) {
-                                $title = htmlentities(addslashes($item_params['edit_form_title']));
-                            }
-                            $onclick = 'loadModalFormFromList(';
-                            $onclick .= '\'' . $this->identifier . '\', \'' . $item_params['edit_form'] . '\'';
-                            $onclick .= ', $(this), ' . $id_object . ', ' . (!is_null($this->id_parent) ? $this->id_parent : 0) . ', \'' . $title . '\')';
-                            $rowButtons[] = array(
-                                'class'   => 'editButton',
-                                'label'   => 'Editer',
-                                'onclick' => $onclick
-                            );
-                        }
-                    }
-
+//                if ((int) $row['params']['canView']) {
                     if (!is_null($item_params['modal_view'])) {
                         $title = '';
                         if ($this->object->config->isDefined('views/' . $item_params['modal_view'] . '/title')) {
@@ -2258,30 +2259,31 @@ class BC_ListTable extends BC_List
                             'icon'    => 'fas_external-link-alt'
                         );
                     }
+//                }
 
-                    if ((int) $row['params']['canDelete']) {
-                        if ($item_params['delete_btn']) {
-                            $rowButtons[] = array(
-                                'class'   => 'deleteButton',
-                                'label'   => 'Supprimer',
-                                'onclick' => 'deleteObjects(\'' . $this->identifier . '\', [' . $id_object . '], $(this))'
-                            );
-                        }
+                if ((int) $row['params']['canDelete']) {
+                    if ($item_params['delete_btn']) {
+                        $rowButtons[] = array(
+                            'class'   => 'deleteButton',
+                            'label'   => 'Supprimer',
+                            'onclick' => 'deleteObjects(\'' . $this->identifier . '\', [' . $id_object . '], $(this))'
+                        );
                     }
+                }
 
 
-                    $min_width = ((count($rowButtons) * 36) + 12) . 'px';
-                    $html .= '<td class="buttons" style="min-width: ' . $min_width . '; ' . $item_params['td_style'] . '">';
+                $min_width = ((count($rowButtons) * 36) + 12) . 'px';
+                $html .= '<td class="buttons" style="min-width: ' . $min_width . '; ' . $item_params['td_style'] . '">';
 
-                    $i = 1;
-                    foreach ($rowButtons as $btn_params) {
+                $i = 1;
+                foreach ($rowButtons as $btn_params) {
 //                    echo $i . '(' . count($rowButtons) . '): ' . $btn_params['label'] . ': ' . strlen($btn_params['label']) . '<br/>';
-                        $position = ($i === count($rowButtons) || ($i === (count($rowButtons) - 1) && strlen($btn_params['label']) > 18) || strlen($btn_params['label']) > 28 ? 'left' : 'top');
-                        $html .= $this->renderRowButton($btn_params, $position);
-                        $i++;
-                    }
+                    $position = ($i === count($rowButtons) || ($i === (count($rowButtons) - 1) && strlen($btn_params['label']) > 18) || strlen($btn_params['label']) > 28 ? 'left' : 'top');
+                    $html .= $this->renderRowButton($btn_params, $position);
+                    $i++;
+                }
 
-                    $html .= '</td>';
+                $html .= '</td>';
                 }
                 $html .= '</tr>';
             }
@@ -2603,7 +2605,7 @@ class BC_ListTable extends BC_List
                 $bdb = BimpCache::getBdb();
 
                 $order_by = '';
-                
+
                 if (!is_null($this->params['sort_field']) && (string) $this->params['sort_field']) {
                     $order_by = $this->getOrderBySqlKey($this->params['sort_field'], $this->getParam('sort_option', ''), $filters, $joins);
                 }
@@ -2629,7 +2631,7 @@ class BC_ListTable extends BC_List
                     $sql .= BimpTools::getSqlOrderBy($order_by, $this->params['sort_way'], 'a');
 
                     $result = $bdb->executeS($sql, 'array');
-                    
+
                     if (is_array($result)) {
                         foreach ($result as $r) {
                             $line = '';

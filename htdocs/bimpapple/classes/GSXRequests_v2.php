@@ -166,6 +166,10 @@ class GSX_Request_v2
         }
 
         $dataName = $dataNode->getAttribute('name');
+        $edit = 1;
+        if ($dataNode->hasAttribute('edit')) {
+            $edit = (int) $dataNode->getAttribute('edit');
+        }
 
         if ($dataNode->hasAttribute('multiple'))
             $multiple = $dataNode->getAttribute('multiple');
@@ -361,7 +365,7 @@ class GSX_Request_v2
 
             while (true) {
                 $html .= '<div class="inputContainer">';
-                if (isset($defs['edit']) && !(int) $defs['edit']) {
+                if (!$edit || (isset($defs['edit']) && !(int) $defs['edit'])) {
                     $html .= '<input type="hidden" name="' . $inputName . '" value="' . $inputValue . '"/>';
                     switch ($defs['type']) {
                         case 'text':
@@ -393,7 +397,16 @@ class GSX_Request_v2
 
                         case 'select':
                             if (isset($options[$inputValue])) {
-                                $html .= $options[$inputValue];
+                                if (is_string($options[$inputValue])) {
+                                    $html .= $options[$inputValue];
+                                } elseif (isset($options[$inputValue]['label'])) {
+                                    $classes = BimpTools::getArrayValueFromPath($options[$inputValue], 'classes', array());
+                                    if (!empty($classes)) {
+                                        $html .= '<span class="' . implode(' ', $classes) . '">' . $options[$inputValue]['label'] . '</span>';
+                                    } else {
+                                        $html .= $options[$inputValue]['label'];
+                                    }
+                                }
                             } else {
                                 $html .= $inputValue;
                             }

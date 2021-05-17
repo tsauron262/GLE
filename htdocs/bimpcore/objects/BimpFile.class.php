@@ -25,9 +25,26 @@ class BimpFile extends BimpObject
 
     public function canClientCreate()
     {
-        return $this->canClientView();
+        if (!$this->canClientView()) {
+            return 0;
+        }
+
+        if ($this->getData('parent_object_name') == 'BS_Ticket') {
+            $instance = $this->getInstance('bimpsupport', 'BS_Ticket', $this->getData('id_parent'));
+            if ($instance->getData('status') != 999) {
+                return 1;
+            }
+            return 0;
+        }
+        
+        return 1;
     }
 
+    public function canClientEdit()
+    {
+        return $this->canClientCreate();
+    }
+    
     // Getters booléens: 
 
     public function isDeletable($force_delete = false, &$errors = array())

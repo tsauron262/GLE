@@ -71,7 +71,7 @@ objects:
             bimp_object: Bimp_Entrepot     
     values8sens: 
         instance: 
-            bimp_object: BimpValues8Sens  
+            bimp_object: BimpValues8Sens     
     productfourn: 
         instance: 
             bimp_object: Bimp_ProductFournisseurPrice 

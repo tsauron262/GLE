@@ -132,8 +132,10 @@ class BTC_export_facture_fourn extends BTC_export {
         }
 
         $sens_parent = $this->get_sens($total_ttc_facture, 'facture_fourn', $inverse);
+        $code_journal = $this->getCodeJournal($facture->getData('ef_type'), "A", $is_fournisseur_interco);
+        
         $structure = [
-            'journal' => [($is_fournisseur_interco) ? 'AI' : 'ACM', 3],
+            'journal' => [$code_journal, 3],
             'date' => [$date_facture->format('dmY'), 8],
             'type_piece' => [$type_piece, 2],
             'compte_general' => [$compte_general_401, 17],

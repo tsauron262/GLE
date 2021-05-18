@@ -1009,13 +1009,13 @@ class savFormController extends BimpPublicController
 
                         $req_errors = array();
 
-//                        $result = GSX_Reservation::createReservation(897316, $centre['shipTo'], $params, $req_errors, $debug);
+                        $result = GSX_Reservation::createReservation(897316, $centre['shipTo'], $params, $req_errors, $debug);
                         // ********** POUR TESTS **************************************************
-                        $result = array(
-                            'response' => array(
-                                'reservationId' => '123456789'
-                            )
-                        );
+//                        $result = array(
+//                            'response' => array(
+//                                'reservationId' => '123456789'
+//                            )
+//                        );
                         // ************************************************************************
 
                         if (!empty($result)) {
@@ -1608,9 +1608,8 @@ L’équipe BIMP";
 
                         $success_html .= '</div>';
 
-                        // A suppr: 
-                        $success_html .= '<br/>DEBUG: <br/>';
-                        $success_html .= $debug;
+//                        $success_html .= '<br/>DEBUG: <br/>';
+//                        $success_html .= $debug;
                     }
                 }
             }

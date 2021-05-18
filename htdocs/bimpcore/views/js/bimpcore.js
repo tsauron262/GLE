@@ -229,6 +229,10 @@ function onClientAddFreeRelanceFormSubmit($form, extra_data) {
     return extra_data;
 }
 
+function getBadge(text, size, style){
+    return '<span class="badge badge-pill badge-'+style+'" style="size:'+size+'">'+text+'</span>';
+}
+
 $(document).ready(function () {
     $('body').on('formLoaded', function (e) {
         if ($.isOk(e.$form)) {

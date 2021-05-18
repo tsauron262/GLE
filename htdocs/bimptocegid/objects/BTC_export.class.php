@@ -71,8 +71,15 @@ class BTC_export extends BimpObject {
                 $endCode = "P";
                 break;
         }
-        
-        $middleCode = ($isInterco) ? "i" : ($AouV == "A") ? "C" : "E";
+        if($isInterco) {
+            $middleCode = "I";
+        } else  {
+            if($AouV == "A") {
+                $middleCode  = "C";
+            } else {
+                $middleCode = "E";
+            }
+        }
         
         return $AouV . $middleCode . $endCode;
         

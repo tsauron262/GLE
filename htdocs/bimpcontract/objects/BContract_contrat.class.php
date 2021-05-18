@@ -1623,7 +1623,7 @@ class BContract_contrat extends BimpDolObject
                         'confirm_msg' => "Voulez vous clore ce contrat ?",
                 )));
             }
-            if (($status == self::CONTRAT_STATUS_ACTIVER || $status == self::CONTRAT_STATUS_ACTIVER_TMP || $status == self::CONTRAT_STATUT_WAIT_ACTIVER)) {
+            if (($status == self::CONTRAT_STATUS_ACTIVER || $status == self::CONTRAT_STATUS_VALIDE || $status == self::CONTRAT_STATUS_ACTIVER_TMP || $status == self::CONTRAT_STATUT_WAIT_ACTIVER)) {
                 $buttons[] = array(
                     'label'   => 'Envoyer par e-mail',
                     'icon'    => 'envelope',

@@ -1618,7 +1618,7 @@ class GSX_Repair extends BimpObject
                                                 'return_order_number' => $part['returnOrderNumber'],
                                                 'sequence_number'     => $part['sequenceNumber'],
                                                 'return_type'         => $return_type,
-                                                'ship_to'             => (string) BimpTools::getArrayValueFromPath($this->repairLookUp, 'account/shipTo', '')
+                                                'ship_to'             => (string) ' '.BimpTools::getArrayValueFromPath($this->repairLookUp, 'account/shipTo', '')
                                             ));
                                         }
 

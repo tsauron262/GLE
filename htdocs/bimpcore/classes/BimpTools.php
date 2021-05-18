@@ -2314,6 +2314,10 @@ class BimpTools
     {
         return 'http://placehold.it/' . $size . '/' . $color . '/fff&amp;text=' . $text;
     }
+    
+    public function getBadge($text, $size = 35, $style = 'info', $popover = ''){
+        return '<span class="badge badge-pill badge-'.$style.(($popover != '')? ' bs-popover' : '').'" '.(($popover != '')? BimpRender::renderPopoverData($popover) : '').' style="size:'.$size.'">'.$text.'</span>';
+    }
 
     public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false, $no_html = false, $decimals = 2, $round_points = false, $separator = ',', $spaces = true)
     {

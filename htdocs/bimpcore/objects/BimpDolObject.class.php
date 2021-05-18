@@ -915,6 +915,10 @@ class BimpDolObject extends BimpObject
                             if (!BimpTools::getPostFieldValue('force_create_by_soc', 0)) {
                                 $errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $soc->getData('solvabilite_status')]['label'] . ')';
                             }
+                            else{
+                                global $user, $langs;
+                                $errors = array_merge($errors, $soc->addNote ('Création '.$this->getLabel().' forcé par '.$user->getFullName($langs)));
+                            }
                         }
                     } else {
                         $errors[] = 'Client absent';

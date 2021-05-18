@@ -39,6 +39,8 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
     public static $price_keys = array();
     public $pfp_instance = null;
     public $prod_import_instance = null;
+    
+    public $bimp_product_import_fourn = array();
 
     public function __construct(BDS_Process $process, $options = array(), $references = array())
     {
@@ -337,6 +339,8 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                     $this->addTableProdFourn($ref_fourn, $code_fourn, $pu_ht, $tva_tx, $pa_ht, $marque, $lib, $ref_manuf, $line);
                 }
             }
+            
+            $this->insertTableProdFourn();
 
 //            $this->DebugData($fourn_prices, 'Fourn Prices');
 
@@ -347,6 +351,23 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                 ));
             }
         }
+    }
+    
+    public function insertTableProdFourn(){
+        $tabs = array_chunk($this->bimp_product_import_fourn, 1000);
+        foreach($tabs as $tab){
+            if(count($tab) > 0){
+                if($this->db->db->query("INSERT INTO `" . MAIN_DB_PREFIX . "bimp_product_import_fourn`(id_fourn, `refLdLC`, `codeLdlc`, `pu_ht`, `tva_tx`, `pa_ht`, `marque`, `libelle`, `refFabriquant`, `data`) "
+                                . "VALUES (".implode('),(', $tab).")") > 0) {
+                    $this->Success(count($tab).' lignes insérées dans bimp_product_import_fourn');
+                }
+                else
+                    $this->Error ('Erreur sql '.$this->db->db->error());
+            }
+        }
+        
+        
+        
     }
 
     public function processFournStocks($lines, &$errors = array())
@@ -609,12 +630,13 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
         $refFabriquant = addslashes($refFabriquant);
 
         if ($this->updateSql) {
-            if ($this->db->db->query("INSERT INTO `" . MAIN_DB_PREFIX . "bimp_product_import_fourn`(id_fourn, `refLdLC`, `codeLdlc`, `pu_ht`, `tva_tx`, `pa_ht`, `marque`, `libelle`, `refFabriquant`, `data`) "
-                            . "VALUES (" . $this->params['id_fourn'] . ", '" . $refLdlc . "','" . $codeLdlc . "','" . $pu_ht . "','" . $tva_tx . "','" . $pa_ht . "','" . $marque . "','" . $lib . "','" . $refFabriquant . "','" . $data . "')") > 0) {
-                $this->incCreated($this->prod_import_instance);
-                $this->debug_content .= 'Ajout import prod OK<br/>';
-                return;
-            }
+            $this->bimp_product_import_fourn[] = "" . $this->params['id_fourn'] . ", '" . $refLdlc . "','" . $codeLdlc . "','" . $pu_ht . "','" . $tva_tx . "','" . $pa_ht . "','" . $marque . "','" . $lib . "','" . $refFabriquant . "','" . $data . "'";
+//            if ($this->db->db->query("INSERT INTO `" . MAIN_DB_PREFIX . "bimp_product_import_fourn`(id_fourn, `refLdLC`, `codeLdlc`, `pu_ht`, `tva_tx`, `pa_ht`, `marque`, `libelle`, `refFabriquant`, `data`) "
+//                            . "VALUES ()") > 0) {
+//                $this->incCreated($this->prod_import_instance);
+//                $this->debug_content .= 'Ajout import prod OK<br/>';
+//                return;
+//            }
         }
 
         $this->incIgnored($this->prod_import_instance);

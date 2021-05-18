@@ -113,10 +113,12 @@ fields:
         default_value: 1
         input: 
             type: search_country
-        displays: 
-            default: 
-                type: callback
-                method: displayCountry
+        values:
+            callback: getCountriesArray
+#        displays: 
+#            default: 
+#                type: callback
+#                method: displayCountry
     fk_departement:
         label: Département / Canton
         type: int

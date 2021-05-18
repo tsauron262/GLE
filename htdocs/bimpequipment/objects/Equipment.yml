@@ -654,7 +654,6 @@ lists:
         extends: default
         cols: 
             product: unset
-        
 
     client: 
         configurable: 1

@@ -27,7 +27,9 @@ class BTC_export_societe extends BTC_export {
         
         if($client->getData('fk_typent') != 8) {
            $auxiliaire_client = "E";
-           
+           if($client->getData('fk_typent') == 5) {
+               $auxiliaire_client = "A";
+           }
         } else {
             $auxiliaire_client = "P";
             $is_particulier = true;

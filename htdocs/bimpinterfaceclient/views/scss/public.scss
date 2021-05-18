@@ -6,6 +6,10 @@
 }
 
 .bic_container {
+    .small {
+        font-style: italic; 
+        font-size: 11px;
+    }
     .bic_content {
         padding: 15px;
     }
@@ -251,7 +255,7 @@
             border:none;
             border-bottom: 1px solid #FBD75C;
             box-shadow: 0 0 5px 0 rgba(60, 60, 60, 0.2);
-            
+
             &.value_missing {
                 box-shadow: 0 0 5px 0 #FF0000;
                 border: none;

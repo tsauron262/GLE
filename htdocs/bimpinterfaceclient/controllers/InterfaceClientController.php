@@ -261,11 +261,11 @@ class InterfaceClientController extends BimpPublicController
                 $html .= BimpRender::renderAlerts('Vous n\'avez aucun sav en cours', 'info');
             }
 
-//            $html .= '<div class="buttonsContainer align-right" style="margin: 15px 0">';
-//            $html .= '<span class="btn btn-default" onclick="window.location = \''.DOL_URL_ROOT.'/bimpinterfaceclient/client.php?fc=savForm\'">';
-//            $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouveau SAV';
-//            $html .= '</span>';
-//            $html .= '</div>';
+            $html .= '<div class="buttonsContainer align-right" style="margin: 15px 0">';
+            $html .= '<span class="btn btn-default" onclick="window.location = \'' . DOL_URL_ROOT . '/bimpinterfaceclient/client.php?fc=savForm\'">';
+            $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouveau SAV';
+            $html .= '</span>';
+            $html .= '</div>';
 
             if (!empty($savs)) {
                 $headers = array(
@@ -281,13 +281,23 @@ class InterfaceClientController extends BimpPublicController
                 $rows = array();
 
                 foreach ($savs as $sav) {
-                    $url = $sav->getPublicUrl();
                     $button = '';
-                    if ($url) {
+                    if ($sav->can('edit') && $sav->getData('resgsx') && $sav->getData('status') == -1) {
+                        $url = DOL_URL_ROOT . '/bimpinterfaceclient/client.php?fc=savForm&cancel_rdv=1&s=' . $sav->id . '&r=' . $sav->getRef() . '&res=' . $sav->getData('resgsx');
                         $button .= '<a class="btn btn-default" href="' . $url . '">';
-                        $button .= BimpRender::renderIcon('fas_eye', 'iconLeft') . 'Détail';
+                        $button .= BimpRender::renderIcon('fas_times', 'iconLeft') . 'Annuler';
                         $button .= '</a>';
                     }
+
+                    if ($sav->can('view')) {
+                        $url = $sav->getPublicUrl();
+                        if ($url) {
+                            $button .= '<a class="btn btn-default" href="' . $url . '">';
+                            $button .= BimpRender::renderIcon('fas_eye', 'iconLeft') . 'Détail';
+                            $button .= '</a>';
+                        }
+                    }
+
                     $rows[] = array(
                         'ref'    => $sav->getData('ref'),
                         'datec'  => $sav->displayData('date_create', 'default', false),
@@ -570,6 +580,12 @@ class InterfaceClientController extends BimpPublicController
                 if (!BimpObject::objectLoaded($userClient) || !$sav->can('view')) {
                     $html .= BimpRender::renderAlerts('Vous n\'avez pas la permission d\'accéder à ce contenu');
                 } else {
+                    $html .= '<div class="buttonsContainer align-right" style="margin: 15px 0">';
+                    $html .= '<span class="btn btn-default" onclick="window.location = \'' . DOL_URL_ROOT . '/bimpinterfaceclient/client.php?fc=savForm\'">';
+                    $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouveau SAV';
+                    $html .= '</span>';
+                    $html .= '</div>';
+
                     $list = new BC_ListTable($sav, 'public_client');
                     $list->addFieldFilterValue('id_client', (int) $userClient->getData('id_client'));
                     $html .= $list->renderHtml();
@@ -604,9 +620,6 @@ class InterfaceClientController extends BimpPublicController
                     }
                 }
 
-                break;
-
-            case 'new':
                 break;
         }
 

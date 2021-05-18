@@ -261,7 +261,7 @@ class BC_Form extends BC_Panel
         } else {
             foreach ($this->params['rows'] as $row) {
                 $row_params = parent::fetchParams($this->config_path . '/rows/' . $row, self::$row_params);
-
+                
                 if (!(int) $row_params['show']) {
                     continue;
                 }
@@ -564,8 +564,8 @@ class BC_Form extends BC_Panel
 
     public function renderObjectRow($object_name, $params = array())
     {
-        $html = '';
-
+        $html = '';        
+        
         if (!$this->object->object_exists($object_name)) {
             return BimpRender::renderAlerts('Erreur de configuration: sous-object "' . $object_name . '" non défini');
         }

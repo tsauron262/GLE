@@ -1,0 +1,1 @@
+ALTER TABLE llx_facture_extrafields ADD COLUMN litige1 int(1) DEFAULT 0

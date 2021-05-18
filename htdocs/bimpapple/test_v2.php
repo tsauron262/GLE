@@ -17,25 +17,22 @@ $bdb = new BimpDb($db);
 
 require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
 
-//$_SESSION['gsx_acti_token'] = '1a8f3b0a-6a45-4730-b38b-bc2d9adfad2a';
+$errors = array();
+$debug = '';
 
-GSX_v2::$debug_mode = true;
+$result = GSX_Reservation::cancelReservation(897316, 1046075, 'B1210512436068', $errors, $debug);
 
-$gsx = new GSX_v2();
+echo $debug .'<br/><br/>';
 
-$result = $gsx->exec('componentIssue', array(
-    'componentCode' => 'SAFETY',
-//    'device' => array(
-//        'id' => 'C02PD3TVFVH6'
-//    )
-        ));
+echo 'ERREURS: <pre>';
+print_r($errors);
+echo '</pre>';
 
-$gsx->displayErrors();
-
-echo '<pre>';
+echo 'Result: <pre>';
 print_r($result);
 echo '</pre>';
 
+echo '</div>';
 echo '<br/>FIN';
 echo '</body></html>';
 

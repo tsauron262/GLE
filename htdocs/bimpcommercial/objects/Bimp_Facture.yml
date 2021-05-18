@@ -254,6 +254,11 @@ fields:
         type: money
         default_value: 0
         
+    litige: 
+        label: Litige
+        dol_extra_field: 1
+        type: bool
+        
     ref: unset
     fk_availability: unset
     fk_input_reason: unset
@@ -674,7 +679,14 @@ fields_tables:
               edit: 1
             - field: douane_number
               edit: 1
-    
+            - field: litige
+              edit: 1
+#                  1
+#                  callback: canSetAsLitige
+#                        method: canSetAsLitige
+#                        params: 
+#                             - "factureLitige"
+                  
     client: 
         rows: 
             - field: fk_soc

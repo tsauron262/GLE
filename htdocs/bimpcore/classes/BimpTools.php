@@ -2193,10 +2193,13 @@ class BimpTools
         if ($required && empty($current_value)) {
             $errors[] = ($missing_msg ? $missing_msg : 'Valeur absente: "' . $path . '"');
         }
-        if (stripos($current_value, 'DOL_DATA_ROOT') !== false && defined('DOL_DATA_ROOT'))
-            $current_value = str_replace('DOL_DATA_ROOT', DOL_DATA_ROOT, $current_value);
-        if (stripos($current_value, 'PATH_TMP') !== false && defined('PATH_TMP'))
-            $current_value = str_replace('PATH_TMP', PATH_TMP, $current_value);
+
+        if (is_string($current_value)) {
+            if (stripos($current_value, 'DOL_DATA_ROOT') !== false && defined('DOL_DATA_ROOT'))
+                $current_value = str_replace('DOL_DATA_ROOT', DOL_DATA_ROOT, $current_value);
+            if (stripos($current_value, 'PATH_TMP') !== false && defined('PATH_TMP'))
+                $current_value = str_replace('PATH_TMP', PATH_TMP, $current_value);
+        }
 
         return $current_value;
     }
@@ -2785,7 +2788,7 @@ class BimpTools
     public static function hexToHsl($hex)
     {
         $hex = array($hex[0] . $hex[1], $hex[2] . $hex[3], $hex[4] . $hex[5]);
-        $rgb = array_map(function($part) {
+        $rgb = array_map(function ($part) {
             return hexdec($part) / 255;
         }, $hex);
 

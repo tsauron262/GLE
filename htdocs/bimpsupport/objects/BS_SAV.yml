@@ -120,7 +120,7 @@ associations:
         object: propal
         label: Devis
         
-fields: 
+fields:
     ref:
         label: Référence
         required: 0
@@ -465,10 +465,17 @@ forms:
             
     public_edit: 
         rows: 
+            - field: system
             - field: contact_pref
             - field: etat_materiel
             - field: symptomes
-            - field: system
+#            - object: client
+#              on_edit: 1
+#              form_name: public
+#            - object: contact
+#              on_edit: 1
+#              form_name: public_edit
+            
             
     send_msg: 
         title: Envoi de notification

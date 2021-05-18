@@ -281,13 +281,23 @@ class InterfaceClientController extends BimpPublicController
                 $rows = array();
 
                 foreach ($savs as $sav) {
-                    $url = $sav->getPublicUrl();
                     $button = '';
-                    if ($url) {
+                    if ($sav->can('edit') && $sav->getData('resgsx') && $sav->getData('status') == -1) {
+                        $url = DOL_URL_ROOT . '/bimpinterfaceclient/client.php?fc=savForm&cancel_rdv=1&s=' . $sav->id . '&r=' . $sav->getRef() . '&res=' . $sav->getData('resgsx');
                         $button .= '<a class="btn btn-default" href="' . $url . '">';
-                        $button .= BimpRender::renderIcon('fas_eye', 'iconLeft') . 'Détail';
+                        $button .= BimpRender::renderIcon('fas_times', 'iconLeft') . 'Annuler';
                         $button .= '</a>';
                     }
+
+                    if ($sav->can('view')) {
+                        $url = $sav->getPublicUrl();
+                        if ($url) {
+                            $button .= '<a class="btn btn-default" href="' . $url . '">';
+                            $button .= BimpRender::renderIcon('fas_eye', 'iconLeft') . 'Détail';
+                            $button .= '</a>';
+                        }
+                    }
+
                     $rows[] = array(
                         'ref'    => $sav->getData('ref'),
                         'datec'  => $sav->displayData('date_create', 'default', false),

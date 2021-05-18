@@ -107,12 +107,12 @@ class BS_SAV extends BimpObject
 
         if (!BimpObject::objectLoaded($userClient)) {
             return 0;
-    }
+        }
 
         if ($this->isLoaded()) {
             if ((int) $userClient->getData('id_client') == (int) $this->getData('id_client')) {
                 return 1;
-    }
+            }
 
             return 0;
         }
@@ -128,7 +128,7 @@ class BS_SAV extends BimpObject
     public function canEdit()
     {
         return $this->canView();
-            }
+    }
 
     public function canClientEdit()
     {
@@ -201,7 +201,7 @@ class BS_SAV extends BimpObject
                 if (!$this->isLoaded($errors)) {
                     return 0;
                 }
-                if (!in_array($status, array(self::BS_SAV_RESERVED, self::BS_SAV_NEW, self::BS_SAV_ATT_CLIENT_ACTION))) {
+                if (!in_array($status, array(self::BS_SAV_NEW, self::BS_SAV_ATT_CLIENT_ACTION))) {
                     $errors[] = $status_error;
                     return 0;
                 }
@@ -580,115 +580,122 @@ class BS_SAV extends BimpObject
                 }
             }
 
-            // Devis accepté / refusé: 
-            if ($this->isActionAllowed('propalAccepted')) {
+            if (in_array((int) $this->getData('status'), array(self::BS_SAV_RESERVED, self::BS_SAV_CANCELED))) {
                 $buttons[] = array(
-                    'label'   => 'Devis accepté',
-                    'icon'    => 'check',
-                    'onclick' => $this->getJsActionOnclick('propalAccepted')
+                    'label'   => 'Prendre en charge',
+                    'icon'    => 'fas_cogs',
+                    'onclick' => $this->getJsNewStatusOnclick(self::BS_SAV_NEW)
                 );
-            }
-
-            if ($this->isActionAllowed('propalRefused')) {
-                $buttons[] = array(
-                    'label'   => 'Devis refusé',
-                    'icon'    => 'times',
-                    'onclick' => $this->getJsActionOnclick('propalRefused')
-                );
-            }
-
-            // Mettre en attente client: 
-            if ($this->isActionAllowed('waitClient')) {
-                $buttons[] = array(
-                    'label'   => 'Mettre en attente client',
-                    'icon'    => 'hourglass-start',
-                    'onclick' => $this->getJsActionOnclick('waitClient', array(), array(
-                        'form_name' => 'wait_client'
-                    ))
-                );
-            }
-
-            // Commencer diagnostic: 
-            if ($this->isActionAllowed('start')) {
-                $buttons[] = array(
-                    'label'   => 'Commencer diagnostic',
-                    'icon'    => 'arrow-circle-right',
-                    'onclick' => $this->getJsActionOnclick('start', array(), array(
-                        'form_name' => 'send_msg'
-                    ))
-                );
-            }
-
-            // Pièce reçue: 
-            if (in_array($status, array(self::BS_SAV_ATT_PIECE))) {
-                $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_REP_EN_COURS . ', 1)';
-                $buttons[] = array(
-                    'label'   => 'Pièce reçue',
-                    'icon'    => 'check',
-                    'onclick' => $onclick
-                );
-            }
-
-            // Commande piece: 
-            if (in_array($status, array(self::BS_SAV_REP_EN_COURS, self::BS_SAV_DEVIS_ACCEPTE))) {
-                $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_ATT_PIECE . ', 1)';
-                $buttons[] = array(
-                    'label'   => 'Attente pièce',
-                    'icon'    => 'check',
-                    'onclick' => $onclick
-                );
-            }
-
-            // Réparation en cours: 
-            if (in_array($status, array(self::BS_SAV_DEVIS_ACCEPTE))) {
-                if (!is_null($propal) && $propal_status > 0) {
-                    $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_REP_EN_COURS . ', 0)';
+            } else {
+                // Devis accepté / refusé: 
+                if ($this->isActionAllowed('propalAccepted')) {
                     $buttons[] = array(
-                        'label'   => 'Réparation en cours',
-                        'icon'    => 'wrench',
-                        'onclick' => $this->getJsActionOnclick('startRepair')
+                        'label'   => 'Devis accepté',
+                        'icon'    => 'check',
+                        'onclick' => $this->getJsActionOnclick('propalAccepted')
                     );
                 }
-            }
 
-            // Réparation terminée: 
-            if ($this->isActionAllowed('toRestitute')) {
-                if (in_array($status, array(self::BS_SAV_REP_EN_COURS))) {
+                if ($this->isActionAllowed('propalRefused')) {
+                    $buttons[] = array(
+                        'label'   => 'Devis refusé',
+                        'icon'    => 'times',
+                        'onclick' => $this->getJsActionOnclick('propalRefused')
+                    );
+                }
+
+                // Mettre en attente client: 
+                if ($this->isActionAllowed('waitClient')) {
+                    $buttons[] = array(
+                        'label'   => 'Mettre en attente client',
+                        'icon'    => 'hourglass-start',
+                        'onclick' => $this->getJsActionOnclick('waitClient', array(), array(
+                            'form_name' => 'wait_client'
+                        ))
+                    );
+                }
+
+                // Commencer diagnostic: 
+                if ($this->isActionAllowed('start')) {
+                    $buttons[] = array(
+                        'label'   => 'Commencer diagnostic',
+                        'icon'    => 'arrow-circle-right',
+                        'onclick' => $this->getJsActionOnclick('start', array(), array(
+                            'form_name' => 'send_msg'
+                        ))
+                    );
+                }
+
+                // Pièce reçue: 
+                if (in_array($status, array(self::BS_SAV_ATT_PIECE))) {
+                    $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_REP_EN_COURS . ', 1)';
+                    $buttons[] = array(
+                        'label'   => 'Pièce reçue',
+                        'icon'    => 'check',
+                        'onclick' => $onclick
+                    );
+                }
+
+                // Commande piece: 
+                if (in_array($status, array(self::BS_SAV_REP_EN_COURS, self::BS_SAV_DEVIS_ACCEPTE))) {
+                    $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_ATT_PIECE . ', 1)';
+                    $buttons[] = array(
+                        'label'   => 'Attente pièce',
+                        'icon'    => 'check',
+                        'onclick' => $onclick
+                    );
+                }
+
+                // Réparation en cours: 
+                if (in_array($status, array(self::BS_SAV_DEVIS_ACCEPTE))) {
                     if (!is_null($propal) && $propal_status > 0) {
+                        $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_REP_EN_COURS . ', 0)';
                         $buttons[] = array(
-                            'label'   => 'Réparation terminée',
-                            'icon'    => 'check',
-                            'onclick' => $this->getJsActionOnclick('toRestitute', array(), array('form_name' => 'resolution'))
+                            'label'   => 'Réparation en cours',
+                            'icon'    => 'wrench',
+                            'onclick' => $this->getJsActionOnclick('startRepair')
                         );
                     }
                 }
 
-                // Fermer SAV (devis refusé) : 
-                if (in_array($status, array(self::BS_SAV_DEVIS_REFUSE))) {
-                    if (!is_null($propal)) {
-                        $frais = 0;
-                        foreach ($propal->dol_object->lines as $line) {
-                            if ($line->desc === 'Acompte') {
-                                $frais = -$line->total_ttc;
-                            }
+                // Réparation terminée: 
+                if ($this->isActionAllowed('toRestitute')) {
+                    if (in_array($status, array(self::BS_SAV_REP_EN_COURS))) {
+                        if (!is_null($propal) && $propal_status > 0) {
+                            $buttons[] = array(
+                                'label'   => 'Réparation terminée',
+                                'icon'    => 'check',
+                                'onclick' => $this->getJsActionOnclick('toRestitute', array(), array('form_name' => 'resolution'))
+                            );
                         }
+                    }
 
-                        $buttons[] = array(
-                            'label'   => 'Fermer le SAV',
-                            'icon'    => 'times-circle',
-                            'onclick' => $this->getJsActionOnclick('toRestitute', array(
-                                'frais' => $frais
-                                    ), array(
-                                'form_name' => 'close_refused'
-                            ))
-                        );
+                    // Fermer SAV (devis refusé) : 
+                    if (in_array($status, array(self::BS_SAV_DEVIS_REFUSE))) {
+                        if (!is_null($propal)) {
+                            $frais = 0;
+                            foreach ($propal->dol_object->lines as $line) {
+                                if ($line->desc === 'Acompte') {
+                                    $frais = -$line->total_ttc;
+                                }
+                            }
+
+                            $buttons[] = array(
+                                'label'   => 'Fermer le SAV',
+                                'icon'    => 'times-circle',
+                                'onclick' => $this->getJsActionOnclick('toRestitute', array(
+                                    'frais' => $frais
+                                        ), array(
+                                    'form_name' => 'close_refused'
+                                ))
+                            );
+                        }
                     }
                 }
-            }
 
-            // Restituer (payer) 
-            if ($this->isActionAllowed('close')) {
-                if (!is_null($propal)) {
+                // Restituer (payer) 
+                if ($this->isActionAllowed('close')) {
+                    if (!is_null($propal)) {
 //                    $cond_reglement = 0;
 //
 //                    if (BimpObject::objectLoaded($propal)) {
@@ -703,26 +710,26 @@ class BS_SAV extends BimpObject
 //                        }
 //                    }
 
-                    $buttons[] = array(
-                        'label'   => 'Restituer (Payer)',
-                        'icon'    => 'times-circle',
-                        'onclick' => $this->getJsActionOnclick('close', array(
-                            'restitute' => 1,
+                        $buttons[] = array(
+                            'label'   => 'Restituer (Payer)',
+                            'icon'    => 'times-circle',
+                            'onclick' => $this->getJsActionOnclick('close', array(
+                                'restitute' => 1,
 //                            'cond_reglement' => $cond_reglement
-                                ), array(
-                            'form_name' => 'restitute'
-                        ))
-                    );
-                } else {
-                    $buttons[] = array(
-                        'label'   => 'Restituer',
-                        'icon'    => 'times-circle',
-                        'onclick' => $this->getJsActionOnclick('close', array('restitute' => 1), array())
-                    );
+                                    ), array(
+                                'form_name' => 'restitute'
+                            ))
+                        );
+                    } else {
+                        $buttons[] = array(
+                            'label'   => 'Restituer',
+                            'icon'    => 'times-circle',
+                            'onclick' => $this->getJsActionOnclick('close', array('restitute' => 1), array())
+                        );
+                    }
                 }
-            }
 
-            //Générer devis 
+                //Générer devis 
 //            if (!is_null($propal) && $propal_status === 0 && $status !== self::BS_SAV_FERME) {
 //                $buttons[] = array(
 //                    'label'   => 'Générer devis',
@@ -732,7 +739,7 @@ class BS_SAV extends BimpObject
 //                    ))
 //                );
 //            }
-            // Attribuer un équipement
+                // Attribuer un équipement
 //            if ($this->needEquipmentAttribution()) {
 //                $buttons[] = array(
 //                    'label'   => 'Attribuer un équipement',
@@ -740,88 +747,89 @@ class BS_SAV extends BimpObject
 //                    'onclick' => $this->getJsActionOnclick('attibuteEquipment', array(), array('form_name' => 'equipment'))
 //                );
 //            }
-            // Créer Devis 
-            if (is_null($propal) && $status < 999) {
-                $buttons[] = array(
-                    'label'   => 'Créer Devis',
-                    'icon'    => 'plus-circle',
-                    'onclick' => 'createNewPropal($(this), ' . $this->id . ');'
-                );
-            }
-
-            // Réviser devis:  
-            if ($this->isActionAllowed('reviewPropal')) {
-//                $callback = 'function() {bimp_reloadPage();}';
-                $buttons[] = array(
-                    'label'   => 'Réviser Devis',
-                    'icon'    => 'edit',
-                    'onclick' => $this->getJsActionOnclick('reviewPropal', array(), array(
-//                        'success_callback' => $callback,
-                        'confirm_msg' => 'Veuillez confirmer la révision du devis'
-                    ))
-                );
-            }
-
-            // Envoyer devis: 
-            if ($this->isActionAllowed('validate_propal')) {
-//                $callback = 'function() {bimp_reloadPage();}';
-                $buttons[] = array(
-                    'label'   => 'Envoyer devis',
-                    'icon'    => 'arrow-circle-right',
-                    'onclick' => $this->getJsActionOnclick('validatePropal', array(), array(
-                        'form_name' => 'validate_propal',
-//                        'success_callback' => $callback
-                    ))
-                );
-            }
-
-            // Ajouter acompte: 
-            $onclick = '';
-
-            $err = array();
-
-            if ($this->isActionAllowed('validate_propal') && !(int) $this->getData('id_facture_acompte')) {
-                $onclick = $this->getJsActionOnclick('addAcompte', array(), array(
-                    'form_name' => 'add_acompte'
-                ));
-            } elseif (BimpObject::objectLoaded($propal) && $propal->isActionAllowed('addAcompte', $err)) {
-                $id_mode_paiement = 0;
-                $client = $propal->getChildObject('client');
-                if (BimpObject::objectLoaded($client)) {
-                    $id_mode_paiement = $client->dol_object->mode_reglement_id;
+                // Créer Devis 
+                if (is_null($propal) && $status < 999) {
+                    $buttons[] = array(
+                        'label'   => 'Créer Devis',
+                        'icon'    => 'plus-circle',
+                        'onclick' => 'createNewPropal($(this), ' . $this->id . ');'
+                    );
                 }
 
-                $onclick = $propal->getJsActionOnclick('addAcompte', array(
-                    'id_mode_paiement' => $id_mode_paiement
-                        ), array(
-                    'form_name' => 'acompte'
-                ));
-            }
-
-            if ($onclick) {
-                $buttons[] = array(
-                    'label'   => 'Ajouter un acompte',
-                    'icon'    => 'fas_hand-holding-usd',
-                    'onclick' => $onclick
-                );
-            }
-
-            // Payer facture: 
-            if ((int) $this->getData('id_facture')) {
-                $facture = $this->getChildObject('facture');
-                if (!(int) $facture->dol_object->paye) {
-                    $paiement = BimpObject::getInstance('bimpcommercial', 'Bimp_Paiement');
-                    $values = array(
-                        'fields' => array(
-                            'id_client'  => (int) $this->getData('id_client'),
-                            'id_facture' => (int) $this->getData('id_facture')
-                        )
-                    );
+                // Réviser devis:  
+                if ($this->isActionAllowed('reviewPropal')) {
+//                $callback = 'function() {bimp_reloadPage();}';
                     $buttons[] = array(
-                        'label'   => 'Payer facture',
-                        'icon'    => 'euro',
-                        'onclick' => $paiement->getJsLoadModalForm('default', 'Paiement de la facture ' . $facture->dol_object->ref, $values)
+                        'label'   => 'Réviser Devis',
+                        'icon'    => 'edit',
+                        'onclick' => $this->getJsActionOnclick('reviewPropal', array(), array(
+//                        'success_callback' => $callback,
+                            'confirm_msg' => 'Veuillez confirmer la révision du devis'
+                        ))
                     );
+                }
+
+                // Envoyer devis: 
+                if ($this->isActionAllowed('validate_propal')) {
+//                $callback = 'function() {bimp_reloadPage();}';
+                    $buttons[] = array(
+                        'label'   => 'Envoyer devis',
+                        'icon'    => 'arrow-circle-right',
+                        'onclick' => $this->getJsActionOnclick('validatePropal', array(), array(
+                            'form_name' => 'validate_propal',
+//                        'success_callback' => $callback
+                        ))
+                    );
+                }
+
+                // Ajouter acompte: 
+                $onclick = '';
+
+                $err = array();
+
+                if ($this->isActionAllowed('validate_propal') && !(int) $this->getData('id_facture_acompte')) {
+                    $onclick = $this->getJsActionOnclick('addAcompte', array(), array(
+                        'form_name' => 'add_acompte'
+                    ));
+                } elseif (BimpObject::objectLoaded($propal) && $propal->isActionAllowed('addAcompte', $err)) {
+                    $id_mode_paiement = 0;
+                    $client = $propal->getChildObject('client');
+                    if (BimpObject::objectLoaded($client)) {
+                        $id_mode_paiement = $client->dol_object->mode_reglement_id;
+                    }
+
+                    $onclick = $propal->getJsActionOnclick('addAcompte', array(
+                        'id_mode_paiement' => $id_mode_paiement
+                            ), array(
+                        'form_name' => 'acompte'
+                    ));
+                }
+
+                if ($onclick) {
+                    $buttons[] = array(
+                        'label'   => 'Ajouter un acompte',
+                        'icon'    => 'fas_hand-holding-usd',
+                        'onclick' => $onclick
+                    );
+                }
+
+                // Payer facture: 
+                if ((int) $this->getData('id_facture')) {
+                    $facture = $this->getChildObject('facture');
+                    if (!(int) $facture->dol_object->paye) {
+                        $paiement = BimpObject::getInstance('bimpcommercial', 'Bimp_Paiement');
+                        $values = array(
+                            'fields' => array(
+                                'id_client'  => (int) $this->getData('id_client'),
+                                'id_facture' => (int) $this->getData('id_facture')
+                            )
+                        );
+                        $buttons[] = array(
+                            'label'   => 'Payer facture',
+                            'icon'    => 'euro',
+                            'onclick' => $paiement->getJsLoadModalForm('default', 'Paiement de la facture ' . $facture->dol_object->ref, $values)
+                        );
+                    }
                 }
             }
         }
@@ -2867,17 +2875,17 @@ class BS_SAV extends BimpObject
 
             case 'sav_closed':
                 break;
-            
+
             case 'localise':
                 $eq = $this->getChildObject("equipment");
-                if($eq->getData("status_gsx") != 3)
-                    $errors[] = "L'apraeil ".$eq->getLink().' ne semble pas localisé';
-                else{
+                if ($eq->getData("status_gsx") != 3)
+                    $errors[] = "L'apraeil " . $eq->getLink() . ' ne semble pas localisé';
+                else {
                     $subject = "Réparation " . $this->getData('ref');
-                    $mail_msg = "Bonjour, l'appareil concerné par votre SAV ".$this->getData('ref')." qui a pour serial ".$eq->getData('serial')." a la fonction localisée activée, nous ne pouvons pas procéder à la réparation tant que vous n'aurez pas désactivé cette option dans votre iCloud.\n";
+                    $mail_msg = "Bonjour, l'appareil concerné par votre SAV " . $this->getData('ref') . " qui a pour serial " . $eq->getData('serial') . " a la fonction localisée activée, nous ne pouvons pas procéder à la réparation tant que vous n'aurez pas désactivé cette option dans votre iCloud.\n";
                     $mail_msg .= "Merci de votre compréhension.\n<a href='https://support.apple.com/fr-fr/guide/icloud/mmdc23b125f6/icloud'>Voici un lien explicatif sur le site Apple</a>";
                     //$sms = "Bonjour, nous venons de recevoir la pièce ou le produit pour votre réparation, nous vous contacterons quand votre matériel sera prêt.\nL'Equipe BIMP.";
-        }
+                }
                 break;
         }
 
@@ -3953,7 +3961,7 @@ class BS_SAV extends BimpObject
                         $centre_data = $this->getCentreData(true);
                         $id_entrepot = (int) BimpTools::getArrayValueFromPath($centre_data, 'id_entrepot', 0);
                         $codemove = 'SAV' . $this->id . '_';
-                        
+
                         foreach ($this->getChildrenObjects('propal_lines') as $line) {
                             $product = $line->getProduct();
 

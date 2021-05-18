@@ -1,0 +1,93 @@
+
+table: bimp_gsx_shipment_part
+primary: rowid
+common_fields: 0
+
+labels: 
+    name: composant
+    
+parent_module: bimpapple
+parent_object: AppleShipment
+parent_id_property: shipment_id
+                
+fields: 
+    shipment_id: 
+        label: Expédition
+        type: id_parent
+    serial: 
+        label: N° de série
+        displays: 
+            equipment: 
+                label: Lien Equipement
+                type: callback
+                method: displayEquipment
+    name: 
+        label: Nom
+    part_number: 
+        label: N° composant
+    part_new_number: 
+        label: Nouveau n° composant
+    part_po_number: 
+        label: N° de commande
+        displays: 
+            sav: 
+                label: Lien SAV
+                type: callback
+                method: displaySav
+    repair_number: 
+        label: N° de réparation
+    return_order_number: 
+        label: N° de retour
+    return_type: 
+        label: Type de retour
+    sequence_number: 
+        label: N° de séquence
+        type: int
+    pack_number: 
+        label: N° boîte de suremballage
+        user_edit: 1
+        type: qty
+        decimals: 0
+        min: 1
+        default_value: 1
+        
+#    A Suppr ?
+    expected_return: 
+        label: Retour attendu
+        type: date
+    
+lists: 
+    default: 
+        title: Composants
+        icon: fas_boxes
+        checkboxes: 1
+        sort_field: rowid
+        sort_way: desc
+        delete_btn: 1
+        item_checkbox: 
+            callback: isDeletable
+        bulk_actions:
+            - label: supprimer les composants sélectionnés
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        extra_btn: 
+            callback: getListExtraButtons
+        n: 0
+        cols: 
+            shipment_id: 
+            name: 
+            serial: 
+                display: equipment
+            part_number: 
+            part_po_number: 
+                display: sav
+            repair_number:
+            return_order_number: 
+            pack_number:
+                edit: 1
+                
+    shipment: 
+        extends: default
+        before_list_callback: renderQuickAddFormHtml
+        cols: 
+            shipment_id: unset

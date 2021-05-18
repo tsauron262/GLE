@@ -17,6 +17,7 @@ class Bimp_Log extends BimpObject
         'bimpcomm'   => 'Commercial',
         'stocks'     => 'Stocks',
         'email'      => 'E-mails',
+        'bds'        => 'BimpDataSync',
         'divers'     => 'Divers',
         'bds'        => 'Bimp Data Sync',
         'bic'        => 'Interface client'

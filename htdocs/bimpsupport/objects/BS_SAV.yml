@@ -120,7 +120,7 @@ associations:
         object: propal
         label: Devis
         
-fields:         
+fields: 
     ref:
         label: Référence
         required: 0
@@ -142,7 +142,7 @@ fields:
                 type: callback
                 method: displayStatusWithActions
     code_centre: 
-        label: Centre
+        label: Centre de prise en charge
         values: 
             array: centres
         input: 
@@ -151,6 +151,14 @@ fields:
         required: 1
         default_value: 
             callback: getDefaultCodeCentre
+    code_centre_repa: 
+        label: Centre de réparation
+        values: 
+            array: centres
+        input: 
+            help: Laisser vide si identique au centre de prise en charge
+            options: 
+                array: userCentres
     id_equipment: 
         label: Equipement
         type: id_object
@@ -389,6 +397,7 @@ forms:
         rows: 
             - field: replaced_ref
             - field: code_centre
+            - field: code_centre_repa
             - field: id_client
             - field: id_contact
             - field: id_equipment
@@ -441,6 +450,7 @@ forms:
         rows: 
             - field: replaced_ref
             - field: code_centre
+            - field: code_centre_repa
             - field: id_client
             - field: id_contact
             - field: id_equipment
@@ -548,6 +558,7 @@ forms:
                       repOk: Réparation terminée
                       revPropRefu: Devis refusé
                       pieceOk: Piéce reçue
+                      localise: Localisé
                       
     validate_propal: 
         rows: 
@@ -670,6 +681,7 @@ fields_tables:
             - field: status
               display: actions
             - field: code_centre
+            - field: code_centre_repa
             - field: id_entrepot
               display: nom_url
             - field: id_user_tech
@@ -682,8 +694,6 @@ fields_tables:
             - field: sav_pro
               edit: 1
             - field: prestataire_number
-#            - field: id_propal
-#              display: card
             - label: Autre
               value:
                  callback: displayExtraSav
@@ -905,7 +915,7 @@ views:
                     col_md: 6
                     fields_table: 
                         name: suivi
-                        
+    
     public_client: 
         panel: 0
         rows:
@@ -931,6 +941,7 @@ filters_panels:
             date_create:
             id_equipment:
             code_centre:
+            code_centre_repa: 
             id_user_tech:
             id_client:
             id_facture:
@@ -941,6 +952,10 @@ filters_panels:
             facture:facnumber:
         
 lists_cols: 
+    code_centre: 
+        label: Centre (PeC)
+    code_centre_repa: 
+        label: Centre (Rép.)
     id_equipment: 
         display: custom
         
@@ -985,7 +1000,7 @@ lists:
         extends: default
         cols:
             client: unset
-            
+    
     public_client: 
         title: Liste des SAV
         configurable: 0

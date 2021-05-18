@@ -204,7 +204,7 @@ class BDS_ImportsQtyLdlcProcess extends BDSImportFournCatalogProcess
 
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                         'id_process'    => (int) $process->id,
-                        'title'         => 'Mise à jour des prix d\'achat',
+                        'title'         => 'Mise à jour des stocks',
                         'name'          => 'updateFromFile',
                         'description'   => '',
                         'warning'       => '',

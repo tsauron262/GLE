@@ -293,6 +293,7 @@ class BimpNote extends BimpObject
                 $msg['is_grp'] = (int) $note->getData('type_dest') == self::BN_DEST_GROUP;
                 $msg['type_author'] = $this->getData('type_author') == self::BN_AUTHOR_USER;
                 $msg['i_am_dest'] = (int) $note->i_am_dest();
+                $msg['i_am_author'] = (int) $note->i_am_author();
 
                 $msg['obj_type'] = $note->getData('obj_type');
                 $msg['obj_module'] = $note->getData('obj_module');

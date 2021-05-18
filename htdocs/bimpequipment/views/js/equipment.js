@@ -61,6 +61,10 @@ function fetchEquipmentInfos($form, identifier) {
         $form.find('[name="date_purchase_picker"]').addClass('disabled');
         $form.find('[name="date_warranty_end_picker"]').addClass('disabled');
         $form.find('[name="warranty_type"]').addClass('disabled');
+        
+        $form.find('[name="status_gsx"]').val(0);
+        $form.find('[name="status_gsx"]').change();
+                    
         var params = {
             $form: $form,
             display_processing: true,
@@ -95,6 +99,10 @@ function fetchEquipmentInfos($form, identifier) {
                 if (typeof (result.data.date_purchase) === 'string' && result.data.date_purchase) {
                     bimpAjax.$form.find('[name="date_purchase_picker"]').data("DateTimePicker").date(moment(result.data.date_purchase));
                     bimpAjax.$form.find('[name="date_purchase_picker"]').change();
+                }
+                if (typeof (result.data.status_gsx) === 'number' && result.data.status_gsx > 0) {
+                    bimpAjax.$form.find('[name="status_gsx"]').val(result.data.status_gsx);
+                    bimpAjax.$form.find('[name="status_gsx"]').change();
                 }
                 if (typeof (result.data.date_warranty_end) === 'string' && result.data.date_warranty_end) {
                     bimpAjax.$form.find('[name="date_warranty_end_picker"]').data("DateTimePicker").date(moment(result.data.date_warranty_end));

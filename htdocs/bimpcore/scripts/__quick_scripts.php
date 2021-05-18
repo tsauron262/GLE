@@ -84,7 +84,7 @@ switch ($action) {
             $errors = BimpTools::merge_array($errors, $soc->checkSiren('siret', $soc->getData('siret'), $data));
             if (count($data) > 0) {
                 $soc->set('notecreditsafe', $data['notecreditsafe']);
-                $soc->set('outstanding_limit', $data['outstanding_limit']);
+                //$soc->set('outstanding_limit', $data['outstanding_limit']);
                 $soc->set('capital', $data['capital']);
                 $soc->set('tva_intra', $data['tva_intra']);
                 $soc->set('capital', $data['capital']);

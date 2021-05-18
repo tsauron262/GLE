@@ -1623,7 +1623,7 @@ class BContract_contrat extends BimpDolObject
                         'confirm_msg' => "Voulez vous clore ce contrat ?",
                 )));
             }
-            if (($status == self::CONTRAT_STATUS_ACTIVER || $status == self::CONTRAT_STATUS_ACTIVER_TMP || $status == self::CONTRAT_STATUT_WAIT_ACTIVER)) {
+            if (($status == self::CONTRAT_STATUS_ACTIVER || $status == self::CONTRAT_STATUS_VALIDE || $status == self::CONTRAT_STATUS_ACTIVER_TMP || $status == self::CONTRAT_STATUT_WAIT_ACTIVER)) {
                 $buttons[] = array(
                     'label'   => 'Envoyer par e-mail',
                     'icon'    => 'envelope',
@@ -2160,7 +2160,11 @@ class BContract_contrat extends BimpDolObject
             $this->updateField("statut", self::CONTRAT_STATUT_WAIT_ACTIVER);
         }
 
-        if ($this->getData('statut') != self::CONTRAT_STATUS_ACTIVER) {
+        $now = new DateTime();
+        $effect = new dateTime($this->getData('date_start'));
+        $sendMail = (strtotime($effect->format('Y-m-d')) > strtotime($now->format('Y-m-d'))) ? false : true;
+
+        if ($this->getData('statut') != self::CONTRAT_STATUS_ACTIVER  && $sendMail) {
             $this->mail($this->email_group, self::MAIL_SIGNED);
         }
 

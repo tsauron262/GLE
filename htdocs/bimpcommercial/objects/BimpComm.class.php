@@ -379,6 +379,9 @@ class BimpComm extends BimpDolObject
 
         if (BimpObject::objectLoaded($client) && is_a($client, 'Bimp_Societe')) {
             if (!$client->isSolvable($this->object_name)) {
+                global $user;
+//                echo '<pre>';print_r($user->rights);
+                if($user->rights->bimpcommercial->admin_financier)
                 return 1;
             }
         }

@@ -29,7 +29,7 @@ class BimpCache
     public static function getBdb($no_transactions = false)
     {
         global $db;
-
+        
         if (!$no_transactions) {
             if (is_null(self::$bdb)) {
                 self::$bdb = new BimpDb($db);
@@ -37,14 +37,14 @@ class BimpCache
 
             return self::$bdb;
         }
-
+        
         if (is_null(self::$bdb_noTransac)) {
             global $conf;
             $db2 = getDoliDBInstance($conf->db->type, $conf->db->host, $conf->db->user, $db->database_pass, $conf->db->name, $conf->db->port);
-
+            
             self::$bdb_noTransac = new BimpDb($db2);
         }
-
+        
         return self::$bdb_noTransac;
     }
 
@@ -2096,10 +2096,10 @@ class BimpCache
             foreach (self::getCentres() as $code => $centre) {
                 if ($activ_only && !$centre['active']) {
                     continue;
-                }
+            }
 
                 self::$cache['centres_array'][$code] = $centre[$label_key];
-            }
+        }
         }
 
         return self::getCacheArray('centres_array', $include_empty, '', '');

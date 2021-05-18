@@ -283,7 +283,9 @@ class Bimp_Commande extends BimpComm
                     return 0;
                 }
                 if ((int) $this->getData('fk_soc')) {
-                    $client = $this->getChildObject('client');
+                    
+                    $client = $this->getClientFacture();
+                    
                     if ($client->isLoaded()) {
                         if(empty($client->getUnpaidFactures('2019-06-30'))) {
                             $errors[] = "Ce client n'a pas de facture impayée";
@@ -313,6 +315,11 @@ class Bimp_Commande extends BimpComm
                         return 0;
                     }
                 }
+                return 1;
+                
+            case 'paiement_comptant':
+                if ((int) $this->getData('fk_statut') != 0)
+                    return 0;
                 return 1;
         }
 
@@ -753,6 +760,7 @@ class Bimp_Commande extends BimpComm
                     $buttons[] = array(
                         'label'   => 'Signaler retard paiement',
                         'icon'    => 'envelope',
+                        'type' => 'danger',
                         'onclick' => $this->getJsActionOnclick('sendMailLatePayment', array(
                             'user_ask_firstname' => $user_ask->getData('firstname'),
                             'user_ask_email'     => $user_ask->getData('email')
@@ -3663,7 +3671,18 @@ class Bimp_Commande extends BimpComm
         if (count($res_errors)) {
             $warnings[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la création des réservations');
         }
-
+        
+        if (empty($errors)) {
+            if($this->field_exists('paiement_comptant') and $this->getData('paiement_comptant')) {
+                $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+                $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_FINANCE);
+                if($demande)
+                    $demande->delete($warnings, 1);
+                $warnings[] = "Bonjour,<br/><br/>La commande " . $this->getNomUrl(1, true) . " a été validé.";
+                mailSyn2("Validation par paiement comptant", 'a.delauzun@bimp.fr', "gle@bimp.fr", "Bonjour,<br/><br/>La commande " . $this->getNomUrl(1, true) . " a été validé par paiement comptant, merci de vérifier le paiement ultérieurement.");
+            }
+        }
+        
         return $errors;
     }
 

@@ -12,7 +12,7 @@ class Bimp_Product extends BimpObject
         4 => 'Déplacement contrat',
         5 => 'Logiciel'
     );
-    public static $sousTypeDep = array(3,4);
+    public static $sousTypeDep = array(3, 4);
     public static $product_type = array(
 //        "" => '',
         0 => array('label' => 'Produit', 'icon' => 'fas_box'),
@@ -431,8 +431,9 @@ class Bimp_Product extends BimpObject
     {
         return $this->isVendable($errors, $urgent, $mail);
     }
-    
-    public function isDep(){
+
+    public function isDep()
+    {
         return (in_array($this->getData('type2'), static::$sousTypeDep));
     }
 
@@ -462,7 +463,6 @@ class Bimp_Product extends BimpObject
     public function getProductTypeCompta()
     {
         $type_compta = $this->getData('type_compta');
-
 
         if ($type_compta > 0) {
             $type = $type_compta - 1;
@@ -542,24 +542,21 @@ class Bimp_Product extends BimpObject
                 return BimpCore::getConf('BIMPTOCEGID_vente_produit_ue');
             elseif ($zone_vente == 3)
                 return BimpCore::getConf('BIMPTOCEGID_vente_produit_ex');
-        }
-        elseif ($type == 1) {//service
+        } elseif ($type == 1) {//service
             if ($zone_vente == 1)
                 return BimpCore::getConf('BIMPTOCEGID_vente_service_fr');
             elseif ($zone_vente == 2 || $zone_vente == 4)
                 return BimpCore::getConf('BIMPTOCEGID_vente_service_ue');
             elseif ($zone_vente == 3)
                 return BimpCore::getConf('BIMPTOCEGID_vente_service_ex');
-        }
-        elseif ($type == 2) {//Port
+        } elseif ($type == 2) {//Port
             if ($zone_vente == 1)
                 return BimpCore::getConf('BIMPTOCEGID_frais_de_port_vente_fr');
             elseif ($zone_vente == 2 || $zone_vente == 4)
                 return BimpCore::getConf('BIMPTOCEGID_frais_de_port_vente_ue');
             elseif ($zone_vente == 3)
                 return BimpCore::getConf('BIMPTOCEGID_frais_de_port_vente_ex');
-        }
-        elseif ($type == 3) {//commission
+        } elseif ($type == 3) {//commission
             if ($zone_vente == 1)
                 return BimpCore::getConf('BIMPTOCEGID_comissions_fr');
             elseif ($zone_vente == 2 || $zone_vente == 4)
@@ -803,7 +800,6 @@ class Bimp_Product extends BimpObject
         }
         $query = 'SELECT (total_ht / qty) as derPv, fk_product FROM `' . MAIN_DB_PREFIX . 'facturedet` l WHERE rowid IN (' . implode(",", $tabT) . ')';
         $sql = $db->query($query);
-
 
         $cache_key = $dateMin . "-" . $dateMax . 'derPv';
 
@@ -1970,7 +1966,6 @@ class Bimp_Product extends BimpObject
         $body .= '<th>Quantité totale</th>';
         $body .= '<thead/>';
 
-
         $stats_propale = $this->load_stats_propale();
 //        $stats_prop_supplier = $this->load_stats_proposal_supplier();
         $stats_command = $this->load_stats_commande();
@@ -2012,7 +2007,7 @@ class Bimp_Product extends BimpObject
 
     public function renderStatusRefuse()
     {
-        if (!$this->getData('tobuy') and ! $this->getData('tobuy')) {
+        if (!$this->getData('tobuy') && !$this->getData('tobuy')) {
             $color = 'danger';
             $text = 'OUI';
         } else {
@@ -2201,7 +2196,6 @@ class Bimp_Product extends BimpObject
             'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#stocks_equipment_tab .nav_tab_ajax_result\')', array('stocks_equipment'), array('button' => ''))
         );
 
-
         $html = BimpRender::renderNavTabs($tabs, 'stocks_view');
 
         return $html;
@@ -2296,7 +2290,6 @@ class Bimp_Product extends BimpObject
                     $list->addJoin('be_equipment_place', 'a.id = epl.id_equipment', 'epl');
                 }
                 break;
-
 
             case 'equipments':
                 if (!$this->isSerialisable()) {
@@ -2631,7 +2624,6 @@ class Bimp_Product extends BimpObject
             'rowid', 'ref'
         ));
 
-
         if (!is_null($rows)) {
             foreach ($rows as $r) {
                 $stocks = $this->getStocksForEntrepot((int) $r['rowid']);
@@ -2703,7 +2695,7 @@ class Bimp_Product extends BimpObject
 
             // Search responsible
             foreach ($list_contact as $contact) {
-                if ($contact['code'] == 'SALESREPFOLL' and ! $email_sent) {
+                if ($contact['code'] == 'SALESREPFOLL' && !$email_sent) {
                     $warnings = BimpTools::merge_array($warnings, $this->sendEmailCommandeValid($commande, $contact['email']));
                     $email_sent = true;
                     break;
@@ -2741,7 +2733,7 @@ class Bimp_Product extends BimpObject
 
             // Search responsible
             foreach ($list_contact as $contact) {
-                if ($contact['code'] == 'SALESREPFOLL' and ! $email_sent) {
+                if ($contact['code'] == 'SALESREPFOLL' && !$email_sent) {
                     $warnings = BimpTools::merge_array($warnings, $this->sendEmailPropalValid($propal, $contact['email']));
                     $email_sent = true;
                     break;
@@ -2813,7 +2805,6 @@ class Bimp_Product extends BimpObject
         $this->updateField('tosell', 0);
         $this->updateField('tobuy', 0);
 
-
         // COMMAND
         $commandes_c = $this->getCommandes();
         foreach ($commandes_c as $commande) {
@@ -2822,7 +2813,7 @@ class Bimp_Product extends BimpObject
 
             // Search responsible
             foreach ($list_contact as $contact) {
-                if ($contact['code'] == 'SALESREPFOLL' and ! $email_sent) {
+                if ($contact['code'] == 'SALESREPFOLL' && !$email_sent) {
                     $errors = BimpTools::merge_array($errors, $this->sendEmailCommandeRefuse($commande, $contact['email']));
                     $email_sent = true;
                     break;
@@ -2857,7 +2848,7 @@ class Bimp_Product extends BimpObject
 
             // Search responsible
             foreach ($list_contact as $contact) {
-                if ($contact['code'] == 'SALESREPFOLL' and ! $email_sent) {
+                if ($contact['code'] == 'SALESREPFOLL' && !$email_sent) {
                     $errors = BimpTools::merge_array($errors, $this->sendEmailPropalRefuse($propal, $contact['email']));
                     $email_sent = true;
                     break;

@@ -790,6 +790,16 @@ class BimpTools
             $root_dir = DOL_DATA_ROOT;
         }
 
+        if (is_string($dir_tree)) {
+            if (preg_match('/^\/*' . preg_quote($root_dir, '/') . '\/+(.+)$/', $dir_tree, $matches)) {
+                $dir_tree = $matches[1];
+            }
+        }
+
+        if (empty($dir_tree)) {
+            return 'Nom du dossier à créer absent';
+        }
+
         if (!file_exists($root_dir)) {
             if (!mkdir($root_dir, 0777)) {
                 return 'Echec de la création du dossier "' . $root_dir . '"';
@@ -1704,6 +1714,10 @@ class BimpTools
             }
         }
 
+        if (is_array($value)) {
+            return BimpRender::renderRecursiveArrayContent($value);
+        }
+
         return $value;
     }
 
@@ -2302,6 +2316,10 @@ class BimpTools
     public static function getAvatarImgSrc($text, $size, $color)
     {
         return 'http://placehold.it/' . $size . '/' . $color . '/fff&amp;text=' . $text;
+    }
+    
+    public function getBadge($text, $size = 35, $style = 'info', $popover = ''){
+        return '<span class="badge badge-pill badge-'.$style.(($popover != '')? ' bs-popover' : '').'" '.(($popover != '')? BimpRender::renderPopoverData($popover) : '').' style="size:'.$size.'">'.$text.'</span>';
     }
 
     public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false, $no_html = false, $decimals = 2, $round_points = false, $separator = ',', $spaces = true)

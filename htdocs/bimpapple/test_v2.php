@@ -12,12 +12,10 @@ echo '<body>';
 
 BimpCore::displayHeaderFiles();
 
-echo '<div style="padding: 15px">';
-
 global $db;
 $bdb = new BimpDb($db);
 
-require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_Reservation.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
 
 $errors = array();
 $debug = '';

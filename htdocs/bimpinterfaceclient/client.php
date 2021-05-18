@@ -1,5 +1,7 @@
 <?php
 
+header('x-frame-options: ALLOWALL',false);
+define('ALLOW_ALL_IFRAME', true);
 $_REQUEST['bimp_context'] = 'public';
 
 require_once '../bimpcore/main.php';

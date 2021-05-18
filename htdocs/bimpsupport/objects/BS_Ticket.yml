@@ -95,7 +95,7 @@ associations:
         list: 
             array: equipments
 
-fields: 
+fields:    
     id_contrat:
         label: Contrat
         type: id_object
@@ -245,7 +245,7 @@ fields:
         default_value: 1
         displays: 
             icon:
-                icon_only: 1
+                icon_only: 1    
     impact_demande_client:
         label: Impact lors de la demande client
         type: int
@@ -398,7 +398,7 @@ forms:
 #                  type: toggle
             - object: inters
               multiple: 1
-              
+    
     close_inters: 
         rows: 
             - custom: 1
@@ -425,7 +425,7 @@ forms:
             - field: priorite_demande_client
             - field: impact_demande_client
             - field: sujet
-            
+                                                        
     public_create:
         msgs:
             - content: Ne pas mettre d'informations confidentielles dans le sujet du ticket
@@ -540,7 +540,7 @@ fields_tables:
             - field: cover
               edit: 1
             - field: status
-              edit: 
+              edit:
                   callback: isProcessing
             - field: serial
               edit: 1
@@ -585,7 +585,7 @@ fields_tables:
             - field: impact_demande_client
             - field: id_contrat
             - field: id_user_client
-            
+              
     public_infos: 
         panel: 0
         rows: 
@@ -703,7 +703,7 @@ views:
     
     client_inters:
         rows:
-            
+    
     public_client: 
         panel: 0
         rows:
@@ -817,7 +817,7 @@ lists:
         cols:
             id_client: unset
             id_user_resp: unset
-            
+                
     public_client: 
         title: Liste des tickets
         icon: fas_bars

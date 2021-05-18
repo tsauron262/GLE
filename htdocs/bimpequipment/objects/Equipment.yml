@@ -7,6 +7,10 @@ header_edit_form: default
 
 list_page_url: 
     controller: index
+    
+    
+header_btn: 
+    callback: getActionsButtons
             
 nom_url: 
     syntaxe: <ref>
@@ -157,6 +161,11 @@ fields:
         label: Type
         values: 
             array: types
+            
+    status_gsx:
+        label: Status GSX
+        values:
+            array: list_status_gsx
         
     serial: 
         label: Numéro de série
@@ -322,6 +331,7 @@ fields_tables:
             - field: imei
             - field: imei2
             - field: meid
+            - field: status_gsx
             - field: ref_immo
             - field: date_immo
             - label: Disponibilité
@@ -445,6 +455,8 @@ views:
 forms:
     default:
         rows: 
+            - field: status_gsx
+              hidden: 1
             - field: serial
             - field: imei
             - field: imei2
@@ -470,6 +482,8 @@ forms:
     light:
         force_edit: 1
         rows:
+            - field: status_gsx
+              hidden: 1
             - field: serial
             - field: imei
             - field: imei2
@@ -640,7 +654,6 @@ lists:
         extends: default
         cols: 
             product: unset
-        
 
     client: 
         configurable: 1

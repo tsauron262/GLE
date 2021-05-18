@@ -1429,7 +1429,7 @@ class BimpInput
             } else {
                 $label = $option_value;
             }
-            
+
             if (isset($option['value'])) {
                 $option_value = $option['value'];
             }

@@ -883,6 +883,7 @@ class savFormController extends BimpPublicController
 
     public function ajaxProcessSavFormSubmit()
     {
+        return array('errors' => array('Fonctionnalité en cours de développement'));
         $errors = array();
         $warnings = array();
         $html = '';

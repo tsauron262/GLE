@@ -42,6 +42,15 @@ function check_user_password_ldap($usertotest,$passwordtotest,$entitytotest)
 	global $dolibarr_main_auth_ldap_admin_login,$dolibarr_main_auth_ldap_admin_pass;
 	global $dolibarr_main_auth_ldap_filter;
 	global $dolibarr_main_auth_ldap_debug;
+        
+        $caractInterdit = array("'", '"', '(', ')', '&', '|', ';');
+        foreach($caractInterdit as $carac){
+            if(stripos($usertotest, $carac) !== false){
+                    $_SESSION["dol_loginmesg"]= 'Caractére interdit : '.$carac;
+                    return;
+            }
+        }
+                
 
 	// Force master entity in transversal mode
 	$entity=$entitytotest;

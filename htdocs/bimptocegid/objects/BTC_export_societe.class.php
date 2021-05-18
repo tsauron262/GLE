@@ -25,7 +25,7 @@ class BTC_export_societe extends BTC_export {
             $ean = strtoupper('prdirection');
         }
         
-        if($client->getData('fk_typent') != 8 && $client->getData('fk_typent') != 0) {
+        if($client->getData('fk_typent') != 8) {
            $auxiliaire_client = "E";
            
         } else {

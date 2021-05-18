@@ -51,12 +51,48 @@ class BTC_export extends BimpObject {
         }
     }
     
+    public function getCodeJournal($secteur, $AouV, $isInterco) {
+        switch($secteur) {
+            case 'E': 
+            case 'CTE':
+                $endCode = "E"; 
+                break;
+            case 'S': $endCode = "S"; break;
+            case 'C': 
+            case 'CO':
+            case 'CTC':
+            case 'I':
+            case 'BP':
+            case 'X':
+                $endCode = "P"; 
+                break;
+            case 'M': $endCode = "B"; break;
+            default:
+                $endCode = "P";
+                break;
+        }
+        if($isInterco) {
+            $middleCode = "I";
+        } else  {
+            if($AouV == "A") {
+                $middleCode  = "C";
+            } else {
+                $middleCode = "E";
+            }
+        }
+        
+        return $AouV . $middleCode . $endCode;
+        
+    }
+    
     public function exportFromProcessus($element, &$process = Array()) {
         $now = new DateTime();
+        $hier = new DateTime();
+        $hier->sub(New DateInterval("P1D"));
         $res = [];
         switch($element) {
             case 'facture_fourn':
-                $where = 'exported = 0 AND fk_statut IN(1,2) AND (datec < "'.$now->format('Y-m-d').' 00:00:00" OR date_valid < "'.$now->format('Y-m-d').' 00:00:00" OR datef < "'.$now->format('Y-m-d').' 00:00:00") AND (datec > "2021-05-01 00:00:00" OR date_valid > "2021-05-01 00:00:00" OR datef > "2021-05-01 00:00:00")';
+                $where = 'exported = 0 AND fk_statut IN(1,2) AND (datec BETWEEN "'.$hier->format('Y-m-d').' 00:00:00" AND "'.$hier->format('Y-m-d').' 23:59:59" OR date_valid = "'.$hier->format('Y-m-d').'")';
                 $res = $this->db->getRows($element, $where);
                 break;
             case 'facture':

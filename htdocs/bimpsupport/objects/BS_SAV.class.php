@@ -201,7 +201,7 @@ class BS_SAV extends BimpObject
                 if (!$this->isLoaded($errors)) {
                     return 0;
                 }
-                if (!in_array($status, array(self::BS_SAV_NEW, self::BS_SAV_ATT_CLIENT_ACTION))) {
+                if (!in_array($status, array(self::BS_SAV_RESERVED, self::BS_SAV_NEW, self::BS_SAV_ATT_CLIENT_ACTION))) {
                     $errors[] = $status_error;
                     return 0;
                 }
@@ -4695,7 +4695,8 @@ class BS_SAV extends BimpObject
                             'id_origin'    => (int) $this->id
                         ));
                         if (!count($place_errors)) {
-                            $place_errors = $place->create();
+                            $w = array();
+                            $place_errors = $place->create($w, true);
                         }
 
                         if (count($place_errors)) {

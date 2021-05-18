@@ -184,7 +184,7 @@ class Bimp_Facture extends BimpComm
 
         return ($user->admin || $user->rights->bimpcommercial->adminPaiement ? 1 : 0);
     }
-
+    
     public function canEditField($field_name)
     {
         global $user;
@@ -214,6 +214,9 @@ class Bimp_Facture extends BimpComm
                     return 0;
                 }
                 break;
+            
+            case 'litige':
+                return (int) $user->rights->bimpcommercial->admin_recouvrement;
         }
 
         return parent::canEditField($field_name);
@@ -341,7 +344,11 @@ class Bimp_Facture extends BimpComm
 //                        $errors[] = BimpTools::ucfirst($this->getLabel('name_plur')) . ' positifs non autorisés';
 //                    }
 //                }
-
+//                
+                // Vérif des lignes: 
+                if ($this->getData('litige'))
+                    $errors[] = "Merci de régler le litige avant de valider " . $this->getLabel('the');
+                
                 return (count($errors) ? 0 : 1);
 
             case 'modify':
@@ -3464,7 +3471,7 @@ class Bimp_Facture extends BimpComm
             $neg_lines = 0;
 
             if (!count($lines)) {
-                $errors[] = 'Aucune ligne ajoutée à cette facture';
+                $errors[] = 'Aucune ligne ajoutée à cette facturdzadzadze';
                 return $errors;
             }
 
@@ -5232,7 +5239,7 @@ class Bimp_Facture extends BimpComm
             'warnings' => $warnings
         );
     }
-
+    
     // Overrides BimpObject:
 
     public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)

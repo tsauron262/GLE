@@ -704,7 +704,7 @@ class BC_List extends BC_Panel
 //        if (count($this->params['association_filters'])) {
 //            $html .= '<input type="hidden" name="param_associations_filters" value="' . htmlentities(json_encode($this->params['association_filters'])) . '"/>';
 //        }
-        if (isset($this->params['add_form_values'])) {
+        if (isset($this->params['add_form_values']) && !empty($this->params['add_form_values'])) {
             $name = isset($this->params['add_form_name']) ? $this->params['add_form_name'] : '';
             $name .= '_add_form_values';
             $html .= '<input type="hidden" name="' . $name . '" value="' . htmlentities(json_encode($this->params['add_form_values'])) . '">';

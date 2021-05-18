@@ -84,7 +84,8 @@ class bimp_note extends AbstractNotification {
         
         // Author
         html += '<span data-toggle="tooltip" data-placement="top" title="' + element.author.nom + '" class="chat-img pull-left">';
-        html += '<img src="https://placehold.it/' + (style === "petit" ? '35' : '55') + '/' + (element.type_author ? '55C1E7' : '5500E7') + '/fff&amp;text=' + author_initiale + '" alt="User Avatar" class="img-circle">';
+//        html += '<img src="https://placehold.it/' + (style === "petit" ? '35' : '55') + '/' + (element.type_author ? '55C1E7' : '5500E7') + '/fff&amp;text=' + author_initiale + '" alt="User Avatar" class="img-circle">';
+        html += getBadge(author_initiale, (style === "petit" ? '25' : '45'), (element.i_am_author ? 'warning' : 'info'));
         html += '</span>';
         
         // Content
@@ -99,7 +100,8 @@ class bimp_note extends AbstractNotification {
         if (element.is_user_or_grp) {
             html += '<span data-toggle="tooltip" data-placement="top" title="' + element.dest.nom + '"';
             html += ' class="chat-img pull-left ' + (element.is_viewed ? "" : "nonLu") + (element.i_am_dest ? " my" : "") + '">';
-            html += '<img src="https://placehold.it/' + (style == "petit" ? '28' : '45') + '/' + (element.is_user ? '55C1E7' : '5500E7') + '/fff&amp;text=' + dest_initiale + '" alt="User Avatar" class="img-circle">';
+//            html += '<img src="https://placehold.it/' + (style == "petit" ? '28' : '45') + '/' + (element.is_user ? '55C1E7' : '5500E7') + '/fff&amp;text=' + dest_initiale + '" alt="User Avatar" class="img-circle">';
+            html += getBadge(dest_initiale, (style === "petit" ? '25' : '45'), (element.i_am_dest ? 'warning' : 'info'));
             html += '</span>';
         }
 

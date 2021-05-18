@@ -3063,7 +3063,7 @@ class Bimp_Product extends BimpObject
         $sql = 'UPDATE ' . MAIN_DB_PREFIX . 'propaldet l';
         $sql .= ' SET l.fk_product = ' . (int) $this->id;
         $sql .= ' WHERE l.fk_product = ' . (int) $id_merged_product;
-        $sql .= ' AND l.fk_propal IN (SELECT p.rowid FROM ' . MAIN_DB_PREFIX . 'propal p WHERE p.fk_statut > 0)';
+//        $sql .= ' AND l.fk_propal IN (SELECT p.rowid FROM ' . MAIN_DB_PREFIX . 'propal p WHERE p.fk_statut > 0)';
 
         if ($this->db->execute($sql) <= 0) {
             $warnings[] = 'Erreurs lors du changement d\'ID pour les propales validées - ' . $this->db->db->lasterror();

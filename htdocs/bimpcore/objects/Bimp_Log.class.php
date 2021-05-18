@@ -18,7 +18,8 @@ class Bimp_Log extends BimpObject
         'stocks'     => 'Stocks',
         'email'      => 'E-mails',
         'divers'     => 'Divers',
-        'bds'        => 'Bimp Data Sync'
+        'bds'        => 'Bimp Data Sync',
+        'bic'        => 'Interface client'
     );
     public static $levels = array(
         self::BIMP_LOG_NOTIF  => array('label' => 'Notification', 'classes' => array('info')),
@@ -33,7 +34,7 @@ class Bimp_Log extends BimpObject
         'getimagesize(',
         'Declaration of BR_Reservation::setNewStatus('
     );
-    
+
     // Droits user: 
 
     public function canView()

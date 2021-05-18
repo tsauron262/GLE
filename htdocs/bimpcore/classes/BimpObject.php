@@ -5639,7 +5639,8 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         ));
 
         if (!count($errors)) {
-            $errors = $note->create();
+            $warnings = array();
+            $errors = $note->create($warnings, true);
         }
 
         return $errors;
@@ -5988,7 +5989,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
             // Bouton édition: 
             $form_name = $this->getConf('public_header_edit_form', '');
-            if ($form_name && $this->isEditable() && $this->canEdit()) {
+            if ($form_name && $this->isEditable() && $this->can('edit')) {
                 $html .= '<span class="btn btn-primary bs-popover" onclick="' . $this->getJsLoadModalForm($form_name, addslashes("Edition " . $this->getLabel('of_the') . ($ref ? ' ' . $ref : ''))) . '"';
                 $html .= BimpRender::renderPopoverData('Editer');
                 $html .= '>';
@@ -7622,9 +7623,9 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
     // Liens et url: 
 
-    public function getUrl()
+    public function getUrl($forced_context = '')
     {
-        if (BimpCore::isContextPublic()) {
+        if ($forced_context == 'public' || (!$forced_context && BimpCore::isContextPublic())) {
             return $this->getPublicUrl();
         }
 
@@ -7666,16 +7667,20 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         return $this->getLink($params);
     }
 
-    public function getLink($params = array())
+    public function getLink($params = array(), $forced_context = '')
     {
         // $params peut éventuellement être utilisé pour surcharger les paramères "nom_url" de l'objet. 
 
-        $is_public = BimpCore::isContextPublic();
+        if ($forced_context) {
+            $is_public = ($forced_context == 'public');
+        } else {
+            $is_public = BimpCore::isContextPublic();
+        }
 
         if (!$this->isLoaded()) {
             return '';
         }
-
+            
         $html = '';
         $html .= '<span class="objectLink">';
 
@@ -7787,7 +7792,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         if ($is_public) {
             $url = $this->getPublicUrl();
         } else {
-            $url = $this->getUrl();
+            $url = $this->getUrl('private');
         }
 
         if ($url) {

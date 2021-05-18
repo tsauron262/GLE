@@ -14,6 +14,7 @@ class BS_SAV extends BimpObject
     public $useCaisseForPayments = false;
 
     const BS_SAV_RESERVED = -1;
+    const BS_SAV_CANCELED = -2;
     const BS_SAV_NEW = 0;
     const BS_SAV_ATT_PIECE = 1;
     const BS_SAV_ATT_CLIENT = 2;
@@ -26,7 +27,8 @@ class BS_SAV extends BimpObject
     const BS_SAV_FERME = 999;
 
     public static $status_list = array(
-        self::BS_SAV_RESERVED          => array('label' => 'Réservé par client', 'icon' => 'fas_calendar-day', 'classes' => array('important')),
+        self::BS_SAV_RESERVED          => array('label' => 'Réservé par le client', 'icon' => 'fas_calendar-day', 'classes' => array('important')),
+        self::BS_SAV_CANCELED          => array('label' => 'Annulé par le client', 'icon' => 'fas_times', 'classes' => array('danger')),
         self::BS_SAV_NEW               => array('label' => 'Nouveau', 'icon' => 'far_file', 'classes' => array('info')),
         self::BS_SAV_EXAM_EN_COURS     => array('label' => 'Examen en cours', 'icon' => 'hourglass-start', 'classes' => array('warning')),
         self::BS_SAV_ATT_CLIENT_ACTION => array('label' => 'Attente client', 'icon' => 'hourglass-start', 'classes' => array('warning')),
@@ -126,6 +128,34 @@ class BS_SAV extends BimpObject
     public function canEdit()
     {
         return $this->canView();
+    }
+
+    public function canClientEdit()
+    {
+        global $userClient;
+
+        if (!$this->isLoaded()) {
+            return 1;
+        }
+
+        if (!(int) $this->getData('id_user_client') || (int) $this->getData('status') > 0 || (int) $this->getData('status') == -2) {
+            return 0;
+        }
+
+        if (BimpObject::objectLoaded($userClient)) {
+            if ($userClient->isAdmin()) {
+                $sav_userClient = $this->getChildObject('user_client');
+
+                if (BimpObject::objectLoaded($sav_userClient) &&
+                        ($sav_userClient->id == $userClient->id || $sav_userClient->getData('id_client') == $userClient->getData('id_client'))) {
+                    return 1;
+                }
+            } elseif ($userClient->id == $this->getData('id_user_client')) {
+                return 1;
+            }
+        }
+
+        return 0;
     }
 
     public function canDelete()
@@ -500,6 +530,16 @@ class BS_SAV extends BimpObject
                         'onclick' => 'window.location = \'' . $url . '\''
                     );
                 }
+            }
+
+            if ($this->canClientEdit() && $this->getData('resgsx') && $this->getData('status') == -1) {
+
+                $url = DOL_URL_ROOT . '/bimpinterfaceclient/client.php?fc=savForm&cancel_rdv=1&s=' . $this->id . '&r=' . $this->getRef() . '&res=' . $this->getData('resgsx');
+                $buttons[] = array(
+                    'label'   => 'Annuler le RDV',
+                    'icon'    => 'fas_times',
+                    'onclick' => 'window.location = \'' . $url . '\''
+                );
             }
         }
 
@@ -1020,7 +1060,8 @@ class BS_SAV extends BimpObject
                     'zip'         => $tabCentre[$code_centre][5],
                     'town'        => $tabCentre[$code_centre][6],
                     'address'     => $tabCentre[$code_centre][7],
-                    'id_entrepot' => $tabCentre[$code_centre][8]
+                    'id_entrepot' => $tabCentre[$code_centre][8],
+                    'ship_to'     => $tabCentre[$code_centre][4]
                 );
             }
         }

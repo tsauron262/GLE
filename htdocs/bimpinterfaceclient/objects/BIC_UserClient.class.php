@@ -308,7 +308,7 @@ class BIC_UserClient extends BimpObject
             );
         }
 
-        if ($this->isLoaded()) {
+        if ($this->isLoaded() && !$this->isAdmin()) {
             $userClientContrat = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClientContrat');
             $buttons[] = array(
                 'label'   => 'Contrats associés',
@@ -604,7 +604,6 @@ class BIC_UserClient extends BimpObject
         if (!$this->getData('password')) {
             $mdp_clear = BimpTools::randomPassword(7);
             $this->set('password', hash('sha256', $mdp_clear));
-            $this->set('renew_required', 1);
         }
 
         $email = $this->getData('email');
@@ -633,7 +632,7 @@ class BIC_UserClient extends BimpObject
                     if (stripos(DOL_URL_ROOT, $_SERVER['SERVER_NAME']) === false)
                         $url = $_SERVER['SERVER_NAME'] . DOL_URL_ROOT . '/bimpinterfaceclient/client.php';
                     else
-                        $url = DOL_URL_ROOT . '/bimpinterfaceclient/client.php';
+                        $url = DOL_URL_ROOT . '/bimpinterfaceclient/client.php?email=' . $this->getData('email');
                     $sujet = "Mot de passe BIMP ERP Interface Client";
 
                     $message = "Bonjour, <br /><br />";

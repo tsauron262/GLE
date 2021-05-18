@@ -261,11 +261,11 @@ class InterfaceClientController extends BimpPublicController
                 $html .= BimpRender::renderAlerts('Vous n\'avez aucun sav en cours', 'info');
             }
 
-//            $html .= '<div class="buttonsContainer align-right" style="margin: 15px 0">';
-//            $html .= '<span class="btn btn-default" onclick="window.location = \''.DOL_URL_ROOT.'/bimpinterfaceclient/client.php?fc=savForm\'">';
-//            $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouveau SAV';
-//            $html .= '</span>';
-//            $html .= '</div>';
+            $html .= '<div class="buttonsContainer align-right" style="margin: 15px 0">';
+            $html .= '<span class="btn btn-default" onclick="window.location = \'' . DOL_URL_ROOT . '/bimpinterfaceclient/client.php?fc=savForm\'">';
+            $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouveau SAV';
+            $html .= '</span>';
+            $html .= '</div>';
 
             if (!empty($savs)) {
                 $headers = array(
@@ -570,6 +570,12 @@ class InterfaceClientController extends BimpPublicController
                 if (!BimpObject::objectLoaded($userClient) || !$sav->can('view')) {
                     $html .= BimpRender::renderAlerts('Vous n\'avez pas la permission d\'accéder à ce contenu');
                 } else {
+                    $html .= '<div class="buttonsContainer align-right" style="margin: 15px 0">';
+                    $html .= '<span class="btn btn-default" onclick="window.location = \'' . DOL_URL_ROOT . '/bimpinterfaceclient/client.php?fc=savForm\'">';
+                    $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouveau SAV';
+                    $html .= '</span>';
+                    $html .= '</div>';
+
                     $list = new BC_ListTable($sav, 'public_client');
                     $list->addFieldFilterValue('id_client', (int) $userClient->getData('id_client'));
                     $html .= $list->renderHtml();
@@ -604,9 +610,6 @@ class InterfaceClientController extends BimpPublicController
                     }
                 }
 
-                break;
-
-            case 'new':
                 break;
         }
 

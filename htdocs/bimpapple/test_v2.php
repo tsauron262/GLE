@@ -19,35 +19,20 @@ $bdb = new BimpDb($db);
 
 require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_Reservation.php';
 
-$gsx = new GSX_Reservation();
+$errors = array();
+$debug = '';
 
-require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
+$result = GSX_Reservation::cancelReservation(897316, 1046075, 'B1210512436068', $errors, $debug);
 
-global $tabCentre;
-$shipTos = array();
+echo $debug .'<br/><br/>';
 
-foreach ($tabCentre as $centre) {
-    if (!in_array($centre[4], $shipTos)) {
-        $shipTos[] = $centre[4];
-    }
-}
+echo 'ERREURS: <pre>';
+print_r($errors);
+echo '</pre>';
 
-foreach ($shipTos as $shipTo) {
-    $errors = array();
-    $debug = '';
-    $resas = $gsx->fetchAvailableSlots(897316, $shipTo, 'IPOD', $errors, $debug);
-
-    echo '*** DEBUG *** <br/><br/>' . $debug . '<br/>******<br/>';
-
-    if (count($errors)) {
-        echo BimpRender::renderAlerts($errors);
-    }
-
-    echo '<br/>RESULTS:<br/><br/>';
-    echo '<pre>';
-    print_r($resas);
-    echo '</pre>';
-}
+echo 'Result: <pre>';
+print_r($result);
+echo '</pre>';
 
 echo '</div>';
 echo '<br/>FIN';

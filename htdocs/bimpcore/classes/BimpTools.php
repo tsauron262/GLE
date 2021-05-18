@@ -748,7 +748,6 @@ class BimpTools
         $prefix = str_replace("{AA}", date('y'), $prefix);
         $prefix = str_replace("{MM}", date('m'), $prefix);
 
-
         if ($prefix) {
             $where = '`' . $field . '` LIKE \'' . $prefix . '%\'';
         } else {
@@ -1791,39 +1790,39 @@ class BimpTools
         $html .= '>' . date($format_mini, $date) . '</' . $balise . '>';
         return $html;
     }
-    
+
     public static function getDayOfWeekLabel($day)
     {
         switch ($day) {
-            case 1: 
+            case 1:
                 return 'Lundi';
-                
-            case 2: 
+
+            case 2:
                 return 'Mardi';
-                
-            case 3: 
+
+            case 3:
                 return 'Mercredi';
-                
-            case 4: 
+
+            case 4:
                 return 'Jeudi';
-                
-            case 5: 
+
+            case 5:
                 return 'Vendredi';
-                
-            case 6: 
+
+            case 6:
                 return 'Samedi';
-                
-            case 7: 
+
+            case 7:
                 return 'Dimanche';
         }
-        
+
         return '';
     }
-    
+
     public static function getMonthLabel($month)
     {
         // todo
-        
+
         return $month;
     }
 
@@ -2180,10 +2179,13 @@ class BimpTools
         if ($required && empty($current_value)) {
             $errors[] = ($missing_msg ? $missing_msg : 'Valeur absente: "' . $path . '"');
         }
-        if (stripos($current_value, 'DOL_DATA_ROOT') !== false && defined('DOL_DATA_ROOT'))
-            $current_value = str_replace('DOL_DATA_ROOT', DOL_DATA_ROOT, $current_value);
-        if (stripos($current_value, 'PATH_TMP') !== false && defined('PATH_TMP'))
-            $current_value = str_replace('PATH_TMP', PATH_TMP, $current_value);
+
+        if (is_string($current_value)) {
+            if (stripos($current_value, 'DOL_DATA_ROOT') !== false && defined('DOL_DATA_ROOT'))
+                $current_value = str_replace('DOL_DATA_ROOT', DOL_DATA_ROOT, $current_value);
+            if (stripos($current_value, 'PATH_TMP') !== false && defined('PATH_TMP'))
+                $current_value = str_replace('PATH_TMP', PATH_TMP, $current_value);
+        }
 
         return $current_value;
     }
@@ -2297,8 +2299,9 @@ class BimpTools
         return 0;
     }
 
-    public static function getAvatarImgSrc($text, $size, $color){
-        return 'http://placehold.it/' .$size . '/' . $color . '/fff&amp;text=' . $text;
+    public static function getAvatarImgSrc($text, $size, $color)
+    {
+        return 'http://placehold.it/' . $size . '/' . $color . '/fff&amp;text=' . $text;
     }
 
     public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false, $no_html = false, $decimals = 2, $round_points = false, $separator = ',', $spaces = true)
@@ -2710,7 +2713,7 @@ class BimpTools
                 $html .= ' (<span class="bold">+0</span>)';
             }
         }
-        
+
         if (!is_null($init_mem)) {
             $init_mem = $mem;
         }
@@ -2767,7 +2770,7 @@ class BimpTools
     public static function hexToHsl($hex)
     {
         $hex = array($hex[0] . $hex[1], $hex[2] . $hex[3], $hex[4] . $hex[5]);
-        $rgb = array_map(function($part) {
+        $rgb = array_map(function ($part) {
             return hexdec($part) / 255;
         }, $hex);
 
@@ -3013,7 +3016,6 @@ class BimpTools
     public static function htmlToText($html)
     {
         $html = preg_replace('/\<br(\s*)?\/?\>/i', "\n", $html);
-
 
         return $html;
     }

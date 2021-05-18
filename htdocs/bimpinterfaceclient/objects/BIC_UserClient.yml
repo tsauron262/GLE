@@ -161,6 +161,8 @@ views:
                   fields_table: 
                       name: public
                 - type: list
+                  show: 
+                      callback: isNotAdmin
                   col_lg: 6
                   col_md: 6
                   col_sm: 12

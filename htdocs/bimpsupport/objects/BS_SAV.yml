@@ -13,6 +13,8 @@ list_page_url:
 header_list_name: default
 header_edit_form: edit
 
+public_header_edit_form: public_edit
+
 header_btn: 
     callback: getViewExtraBtn
         
@@ -379,7 +381,9 @@ fields:
         label: Référence remplacée
         input: 
             help: Utiliser ce champ si perte des données de la pièce remplacée
-            
+    resgsx: 
+        label: ID réservation GSX
+        
 forms: 
     default:
         rows: 
@@ -432,6 +436,7 @@ forms:
               value: 1
             - field: id_ticket
               hidden: 1
+              
     edit: 
         rows: 
             - field: replaced_ref
@@ -447,6 +452,13 @@ forms:
             - field: system
             - field: login_admin
             - field: pword_admin
+            
+    public_edit: 
+        rows: 
+            - field: contact_pref
+            - field: etat_materiel
+            - field: symptomes
+            - field: system
             
     send_msg: 
         title: Envoi de notification
@@ -654,6 +666,7 @@ fields_tables:
               show: 
                   field_value: replaced_ref
             - field: ref
+            - field: resgsx
             - field: status
               display: actions
             - field: code_centre
@@ -772,11 +785,11 @@ fields_tables:
               show: 
                   field_value: id_contact
             - field: contact_pref
-              edit: 1
               
     public_suivi: 
         panel: 0
         rows: 
+            - field: system
             - field: etat_materiel
             - field: etat_materiel_desc
             - field: symptomes
@@ -980,6 +993,8 @@ lists:
         sort_field: date_create
         sort_way: desc
         n: 10
+        edit_btn: 1
+        edit_form: public_edit
         extra_btn: 
             callback: getPublicListExtraButtons
         cols: 

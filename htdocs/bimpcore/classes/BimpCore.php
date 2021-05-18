@@ -383,9 +383,9 @@ class BimpCore
             return self::$context;
         }
 
-        if (isset($_SESSION['bimp_context'])) {
-            return $_SESSION['bimp_context'];
-        }
+//        if (isset($_SESSION['bimp_context'])) {
+//            return $_SESSION['bimp_context'];
+//        }
 
         return "";
     }
@@ -393,7 +393,7 @@ class BimpCore
     public static function setContext($context)
     {
         self::$context = $context;
-        $_SESSION['bimp_context'] = $context;
+//        $_SESSION['bimp_context'] = $context;
     }
 
     public static function isContextPublic()

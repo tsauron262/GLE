@@ -79,6 +79,9 @@ class GSX_Reservation
             }
 
             curl_close($ch);
+            if(stripos($data, '403 Forbidden')){
+                mailSyn2('Probléme GSX', 'dev@bimp.fr', null, 'Recuperation des slots de réservations impossible '.print_r($data, 1));
+            } 
 
             if ($data === false) {
                 $errors[] = 'Echec requête CURL';

@@ -5,7 +5,7 @@ if (!defined('BIMP_LIB')) {
 }
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/PropalPDF.php';
 
-class PropalRge2PDF extends PropalPDF
+class PropalRge3PDF extends PropalPDF
 {
     public static $label_prime = "Prime CEE";
     public static $label_prime2 = "MaPrimeRénov'";

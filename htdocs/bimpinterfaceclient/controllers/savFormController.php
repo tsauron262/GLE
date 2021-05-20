@@ -1068,8 +1068,8 @@ class savFormController extends BimpPublicController
                         $dateEnd = null;
 
                         if (isset($data['sav_slot']) && (string) $data['sav_slot']) {
-                            $dateBegin = new DateTime(date('d / m / Y H:i', strtotime($data['sav_slot'])));
-                            $dateEnd = new DateTime(date('d / m / Y H:i', strtotime($data['sav_slot'])));
+                            $dateBegin = new DateTime(strtotime($data['sav_slot']));
+                            $dateEnd = new DateTime(strtotime($data['sav_slot']));
 //                            $dateBegin = new DateTime($data['sav_slot']);
 //                            $dateEnd = new DateTime($data['sav_slot']);
                             $dateEnd->add(new DateInterval('PT20M'));

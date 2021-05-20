@@ -1310,6 +1310,7 @@ class savFormController extends BimpPublicController
                         }
 
                         $id_ac = 0;
+                        BimpObject::getBimpObjectInstance('bimpcore', 'Bimp_User');
                         $shipToUsers = Bimp_User::getUsersByShipto($centre['shipTo']);
 
                         if ($reservationId) {

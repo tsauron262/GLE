@@ -87,7 +87,6 @@ class Session {
             if($ln->login != '')
             $_SESSION['dol_login'] = $ln->login;
         }
-//        print_r($_SESSION);die;
     }
     // Ecriture des sessions
     public function session_ecriture($sessionID, $sessionData) {
@@ -100,7 +99,7 @@ class Session {
         unset($data['dol_login']);
         $data = addslashes(json_encode($data));
         if((isset($login) && $login != '') || (isset($_SESSION['userClient']) && $_SESSION['userClient'] != ''))
-            $this->db->query("INSERT INTO ".$this->table." (`id_session`, `data`, login, `update`) VALUES ('".$sessionID."', '".$data."', '".$login."', '".$datetime_actuel->format('Y-m-d H:i:s')."') ON DUPLICATE KEY UPDATE `data` = '".$data."'");
+            $this->db->query("INSERT INTO ".$this->table." (`id_session`, `data`, login, `update`) VALUES ('".$sessionID."', '".$data."', '".$login."', '".$datetime_actuel->format('Y-m-d H:i:s')."') ON DUPLICATE KEY UPDATE login = '".$login."', `data` = '".$data."'");
 //        else{
 //            echo '<pre>ecriture';print_r($_SESSION);
 //        }

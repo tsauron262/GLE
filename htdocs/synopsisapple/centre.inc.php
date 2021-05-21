@@ -1,6 +1,7 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT.'/bimpsupport/centre.inc.php';
+
 //global $tabCentre;
 //$tabCentre = array("V" => array("04 75 81 81 54", "sav07@bimp.fr", "Saint Peray (valence)", 19, "1000566", "07130", "Saint-Peray", "739 Avenue Gross Umstadt",25), 
 //    "M" => array("04 50 22 15 55", "sav74@bimp.fr", "Meythet", 58, "462140", "74960", "Meythet", "3 RUE DU VIEUX MOULIN", 21), 

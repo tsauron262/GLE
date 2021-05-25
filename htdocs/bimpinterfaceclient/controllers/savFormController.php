@@ -568,7 +568,7 @@ class savFormController extends BimpPublicController
         $html .= '</div>';
 
         $html .= '<div id="noReservationSubmit" style="margin-top: 20px; text-align: center;' . ($no_reservation_allowed ? '' : ' display: none') . '" data-never_hidden="' . ($no_reservation_allowed ? '1' : '0') . '">';
-        $html .= '<span class="btn btn-default" onclick="SavPublicForm.submit(1, \'Le client ne souhaite pas de rendez-vous\');">';
+        $html .= '<span class="btn btn-default" onclick="SavPublicForm.submit($(this), 1, \'Le client ne souhaite pas de rendez-vous\');">';
         $html .= 'OUVRIR LE SAV SANS RENDEZ-VOUS';
         $html .= '</span>';
         $html .= '</div>';
@@ -864,7 +864,7 @@ class savFormController extends BimpPublicController
 
             $html .= '<div style="text-align: center; margin: 30px 0">';
 
-            $html .= '<span id="savFormSubmit" class="btn btn-primary btn-large' . (!$validate_enable ? ' disabled' : '') . '" onclick="SavPublicForm.submit(' . ($force_validation ? '1, \'Aucun créneau horaire disponible\'' : '') . ')">';
+            $html .= '<span id="savFormSubmit" class="btn btn-primary btn-large' . (!$validate_enable ? ' disabled' : '') . '" onclick="SavPublicForm.submit($(this), ' . ($force_validation ? '1, \'Aucun créneau horaire disponible\'' : '') . ')">';
             $html .= BimpRender::renderIcon('fas_check', 'iconLeft') . ($force_validation ? 'OUVRIR LE SAV SANS RENDEZ-VOUS' : 'VALIDER');
             $html .= '</span>';
 
@@ -1310,7 +1310,7 @@ class savFormController extends BimpPublicController
                         }
 
                         $id_ac = 0;
-                        BimpObject::getBimpObjectInstance('bimpcore', 'Bimp_User');
+                        BimpObject::loadClass('bimpcore', 'Bimp_User');
                         $shipToUsers = Bimp_User::getUsersByShipto($centre['shipTo']);
 
                         if ($reservationId) {

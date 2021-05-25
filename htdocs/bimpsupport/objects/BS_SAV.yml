@@ -394,6 +394,10 @@ fields:
     date_rdv: 
         label: Date de rendez-vous
         type: datetime
+        displays: 
+            default: 
+                type: datetime
+                show_hour: 1
         
 forms: 
     default:

@@ -254,7 +254,7 @@ class Bimp_Propal extends BimpComm
     public function displayIfMessageFormContrat() {
         $array = $this->isServiceAutorisedInContrat(true);
         $msgs = [];
-        if(count($array) > 0) {
+        if(count($array) > 0 && BimpCore::getConf('bimpcontract_use_autorised_service')) {
             
             $content = "<h4><b>Vous ne pouvez pas créer de contrat à partir de ce devis car certains services ne sont pas autorisés dans un contrat<br /><br />";
             if(count($array) > 1) {
@@ -281,6 +281,9 @@ class Bimp_Propal extends BimpComm
     }
     
     public function isServiceAutorisedInContrat($return_array = false) {
+        
+        if(!BimpCore::getConf('bimpcontract_use_autorised_service'))
+            return 1;
         
         $children = $this->getChildrenList('lines');
         $id_services = [];

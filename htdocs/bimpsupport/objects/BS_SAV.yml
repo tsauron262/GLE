@@ -391,6 +391,9 @@ fields:
             help: Utiliser ce champ si perte des données de la pièce remplacée
     resgsx: 
         label: ID réservation GSX
+    date_rdv: 
+        label: Date de rendez-vous
+        type: datetime
         
 forms: 
     default:
@@ -684,6 +687,7 @@ fields_tables:
               show: 
                   field_value: replaced_ref
             - field: ref
+            - field: date_rdv
             - field: resgsx
             - field: status
               display: actions

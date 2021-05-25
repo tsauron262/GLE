@@ -28,28 +28,28 @@ $action = BimpTools::getValue('action', '');
 
 if (!$action) {
     $actions = array(
-        'correct_prod_cur_pa'                  => 'Corriger le champs "cur_pa_ht" des produits',
-        'check_facs_paiement'                  => 'Vérifier les statuts paiements des factures',
-        'check_facs_paiement_rap_inf_one_euro' => 'Vérifier les statuts paiements des factures (Restes à payer < 1€)',
-        'check_facs_remain_to_pay'             => 'Recalculer tous les restes à payer',
-        'check_clients_solvabilite'            => 'Vérifier les statuts solvabilité des clients',
-        'check_commandes_status'               => 'Vérifier les statuts des commandes client',
-        'check_commandes_fourn_status'         => 'Vérifier les statuts des commandes fournisseur',
-        'change_prods_refs'                    => 'Corriger refs produits',
+        'correct_prod_cur_pa'                       => 'Corriger le champs "cur_pa_ht" des produits',
+        'check_facs_paiement'                       => 'Vérifier les statuts paiements des factures',
+        'check_facs_paiement_rap_inf_one_euro'      => 'Vérifier les statuts paiements des factures (Restes à payer < 1€)',
+        'check_facs_remain_to_pay'                  => 'Recalculer tous les restes à payer',
+        'check_clients_solvabilite'                 => 'Vérifier les statuts solvabilité des clients',
+        'check_commandes_status'                    => 'Vérifier les statuts des commandes client',
+        'check_commandes_fourn_status'              => 'Vérifier les statuts des commandes fournisseur',
+        'change_prods_refs'                         => 'Corriger refs produits',
 //        'check_vente_paiements'        => 'Vérifier les paiements des ventes en caisse',
-        'check_factures_rg'                    => 'Vérification des Remmises globales factures',
-        'traite_obsolete'                      => 'Traitement des produit obsoléte hors stock',
-        'cancel_factures'                      => 'Annulation factures',
-        'refresh_count_shipped'                => 'Retraitement des lignes fact non livre et inversse',
-        'convert_user_configs'                 => 'Convertir les configurations utilisateur vers la nouvelle version',
-        'check_list_table_configs'             => 'Vérifier les configurations de liste',
-        'check_stocks_mouvements'              => 'Vérifier les mouvements de stock (doublons)',
-        'check_limit_client'                   => 'Vérifier les encours credit safe',
-        'check_facs_margin'                    => 'Vérifier les marges + revals OK factures',
-        'change_sn'                            => 'Changement de SN',
-        'secteur_facture_fourn_with_commande_fourn' => 'Secteur fact fourn with comm fourn'
+        'check_factures_rg'                         => 'Vérification des Remmises globales factures',
+        'traite_obsolete'                           => 'Traitement des produit obsoléte hors stock',
+        'cancel_factures'                           => 'Annulation factures',
+        'refresh_count_shipped'                     => 'Retraitement des lignes fact non livre et inversse',
+        'convert_user_configs'                      => 'Convertir les configurations utilisateur vers la nouvelle version',
+        'check_list_table_configs'                  => 'Vérifier les configurations de liste',
+        'check_stocks_mouvements'                   => 'Vérifier les mouvements de stock (doublons)',
+        'check_limit_client'                        => 'Vérifier les encours credit safe',
+        'check_facs_margin'                         => 'Vérifier les marges + revals OK factures',
+        'change_sn'                                 => 'Changement de SN',
+        'secteur_facture_fourn_with_commande_fourn' => 'Secteur fact fourn with comm fourn',
+        'correct_sav_dates_rdv'                     => 'Corriger dates RDV SAV'
     );
-
 
     $path = pathinfo(__FILE__);
 
@@ -70,11 +70,11 @@ switch ($action) {
     case 'secteur_facture_fourn_with_commande_fourn':
         global $db;
         $sql = $db->query("SELECT c.rowid, ref, ce.type, cfe.type as newType FROM `llx_facture_fourn` c, llx_facture_fourn_extrafields ce LEFT JOIN llx_element_element ee ON ee.sourcetype = 'order_supplier' AND targettype = 'invoice_supplier' AND ee.fk_target = ce.fk_object LEFT JOIN llx_commande_fournisseur_extrafields cfe ON ee.fk_source = cfe.fk_object WHERE c.rowid = ce.fk_object AND ce.type IS null AND c.`datec` > '2019-07-01' AND cfe.type != '';");
-        while($ln = $db->fetch_object($sql)){
-            $db->query("UPDATE llx_facture_fourn_extrafields SET type = '".$ln->newType."' WHERE type is NULL AND fk_object =".$ln->rowid);
+        while ($ln = $db->fetch_object($sql)) {
+            $db->query("UPDATE llx_facture_fourn_extrafields SET type = '" . $ln->newType . "' WHERE type is NULL AND fk_object =" . $ln->rowid);
         }
         break;
-    
+
     case 'check_limit_client':
         $errors = array();
         $socs = BimpObject::getBimpObjectList('bimpcore', 'Bimp_Societe', array('rowid' => array('custom' => 'a.rowid IN (SELECT DISTINCT(`fk_soc`)  FROM `llx_societe_commerciaux` WHERE `fk_user` = 7)')));
@@ -247,17 +247,22 @@ switch ($action) {
             echo '<span class="success">Aucune erreur</span>';
         }
         break;
-        
+
     case 'change_sn':
-        $sql = $db->query("SELECT a.serial, a.id FROM ".MAIN_DB_PREFIX."be_equipment a LEFT JOIN llx_be_equipment_place a___places ON a___places.id_equipment = a.id WHERE (a___places.infos LIKE '%FV202000952549%' ESCAPE '$')");
+        $sql = $db->query("SELECT a.serial, a.id FROM " . MAIN_DB_PREFIX . "be_equipment a LEFT JOIN llx_be_equipment_place a___places ON a___places.id_equipment = a.id WHERE (a___places.infos LIKE '%FV202000952549%' ESCAPE '$')");
         $i = 0;
-        $tabNew = array("DMPDKFVCQ1GC","DMPDKYZYQ1GC","DMQDK05PQ1GC","DMQDKDAPQ1GC","DMQDKDS9Q1GC","DMQDKERUQ1GC","DMPDKKZPQ1GC","DMPDKPX4Q1GC","DMPDKRLWQ1GC","DMPDKTDBQ1GC","DMPDKTNWQ1GC","DMPDKW79Q1GC","DMPDKWM1Q1GC","DMPDKY3NQ1GC","DMQDK0CVQ1GC","DMQDK0NAQ1GC","DMQDK2FVQ1GC","DMQDK6JYQ1GC","DMQDK6VVQ1GC","DMQDK72BQ1GC","DMQDK9EBQ1GC","DMQDK9Z3Q1GC","DMQDKA3VQ1GC","DMQDKBQ1Q1GC","DMQDKBS2Q1GC","DMQDKBSCQ1GC","DMQDKCF3Q1GC","DMQDKCVBQ1GC","DMQDKCVMQ1GC","DMQDKD5QQ1GC","DMQDKDPDQ1GC","DMQDKDSPQ1GC","DMQDKENUQ1GC","DMQDKEQEQ1GC","DMQDKHC0Q1GC","DMQDKHX8Q1GC","DMPDKSUMQ1GC","DMPDKWSGQ1GC","DMPDKX2KQ1GC","DMPDKY3EQ1GC","DMPDKYQ3Q1GC","DMPDKZY7Q1GC","DMQDK09WQ1GC","DMQDK0BHQ1GC","DMQDK2HHQ1GC","DMQDK3G6Q1GC","DMQDK3QLQ1GC","DMQDK5ZXQ1GC","DMQDK5ZZQ1GC","DMQDK681Q1GC","DMQDK6KDQ1GC","DMQDK7YBQ1GC","DMQDK7YNQ1GC","DMQDK87DQ1GC","DMQDK87JQ1GC","DMQDK8SYQ1GC","DMQDK8YTQ1GC","DMQDKAD2Q1GC","DMQDKALCQ1GC","DMQDKC4YQ1GC","DMQDKC67Q1GC","DMQDKCXNQ1GC","DMQDKEUDQ1GC","DMQDKJDVQ1GC","DMQDKJQEQ1GC","DMQDKLPWQ1GC","DMQDK47RQ1GC","DMQDK2UZQ1GC","DMPDKWQJQ1GC","DMPDKQUBQ1GC");
-        while ($ln = $db->fetch_object($sql)){
+        $tabNew = array("DMPDKFVCQ1GC", "DMPDKYZYQ1GC", "DMQDK05PQ1GC", "DMQDKDAPQ1GC", "DMQDKDS9Q1GC", "DMQDKERUQ1GC", "DMPDKKZPQ1GC", "DMPDKPX4Q1GC", "DMPDKRLWQ1GC", "DMPDKTDBQ1GC", "DMPDKTNWQ1GC", "DMPDKW79Q1GC", "DMPDKWM1Q1GC", "DMPDKY3NQ1GC", "DMQDK0CVQ1GC", "DMQDK0NAQ1GC", "DMQDK2FVQ1GC", "DMQDK6JYQ1GC", "DMQDK6VVQ1GC", "DMQDK72BQ1GC", "DMQDK9EBQ1GC", "DMQDK9Z3Q1GC", "DMQDKA3VQ1GC", "DMQDKBQ1Q1GC", "DMQDKBS2Q1GC", "DMQDKBSCQ1GC", "DMQDKCF3Q1GC", "DMQDKCVBQ1GC", "DMQDKCVMQ1GC", "DMQDKD5QQ1GC", "DMQDKDPDQ1GC", "DMQDKDSPQ1GC", "DMQDKENUQ1GC", "DMQDKEQEQ1GC", "DMQDKHC0Q1GC", "DMQDKHX8Q1GC", "DMPDKSUMQ1GC", "DMPDKWSGQ1GC", "DMPDKX2KQ1GC", "DMPDKY3EQ1GC", "DMPDKYQ3Q1GC", "DMPDKZY7Q1GC", "DMQDK09WQ1GC", "DMQDK0BHQ1GC", "DMQDK2HHQ1GC", "DMQDK3G6Q1GC", "DMQDK3QLQ1GC", "DMQDK5ZXQ1GC", "DMQDK5ZZQ1GC", "DMQDK681Q1GC", "DMQDK6KDQ1GC", "DMQDK7YBQ1GC", "DMQDK7YNQ1GC", "DMQDK87DQ1GC", "DMQDK87JQ1GC", "DMQDK8SYQ1GC", "DMQDK8YTQ1GC", "DMQDKAD2Q1GC", "DMQDKALCQ1GC", "DMQDKC4YQ1GC", "DMQDKC67Q1GC", "DMQDKCXNQ1GC", "DMQDKEUDQ1GC", "DMQDKJDVQ1GC", "DMQDKJQEQ1GC", "DMQDKLPWQ1GC", "DMQDK47RQ1GC", "DMQDK2UZQ1GC", "DMPDKWQJQ1GC", "DMPDKQUBQ1GC");
+        while ($ln = $db->fetch_object($sql)) {
             global $dolibarr_main_url_root;
             die($dolibarr_main_url_root);
 //           $db->query("UPDATE ".MAIN_DB_PREFIX."be_equipment SET serial = '".$tabNew[$i]."' WHERE serial = '".$ln->serial."' AND id = ".$ln->id.";");
             $i++;
         }
+        break;
+
+    case 'correct_sav_dates_rdv':
+        BimpObject::loadClass('bimpsupport', 'BS_SAV');
+        BS_SAV::correctDateRdvAll(true);
         break;
 
     default:
@@ -313,7 +318,6 @@ function convertListsConfigs($new_filters = array())
                     $new_cols = array();
                     $cols = explode(',', $r['cols']);
                     $cols_options = json_decode($r['cols_options'], 1);
-
 
                     foreach ($cols as $col_name) {
                         $list_path = 'lists/' . $list_name . '/cols/' . $col_name . '/';

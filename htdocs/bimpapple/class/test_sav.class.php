@@ -5,7 +5,7 @@ if (isset($_GET['actionTest'])) {
     llxHeader();
 
     session_write_close();
-    $class = new test_sav();
+    $class = new test_sav($db);
     if ($_GET['actionTest'] == "fermetureAuto") {
         $class->tentativeFermetureAuto();
     }
@@ -149,7 +149,7 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
                     if ($this->repair->getData('repair_complete')) {
                         echo "Fermée dans GSX maj dans GLE.<br/>";
                         $this->nbOk++;
-                    } elseif ($this->repair->repairLookUp['repairStatusCode'] == "SPCM") {//"Fermée et complétée"){
+                    } elseif ($this->repair->repairLookUp['repairStatus'] == "SPCM") {//"Fermée et complétée"){
                         echo "fermé dans GSX Impossible de Fermé dans GLE ";
                         $this->nbErr++;
                     } else {
@@ -161,7 +161,7 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
                                 $mailTech = $user->email;
                         }
 
-                        if ($this->repair->repairLookUp['repairStatusCode'] == "RFPU") {
+                        if ($this->repair->repairLookUp['repairStatus'] == "RFPU") {
                             $erreurSOAP = $this->repair->close(1, 0);
                             if (isset($erreurSOAP['errors']))
                                 $erreurSOAP = $erreurSOAP['errors'];
@@ -215,7 +215,7 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
     {
         $html = "<br/>" . $mess . "<br/> SAV :" . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " Depuis : " . $ligne->nbJ . " jours";
         if (isset($repair)) {
-            $html .= "<br/>Code repa : " . $repair->getData('repair_number') . "  Statut GSX : " . $repair->repairLookUp['repairStatusCode'];
+            $html .= "<br/>Code repa : " . $repair->getData('repair_number') . "  Statut GSX : " . $repair->repairLookUp['repairStatus'];
             $html .= "<br/>RFPU dans GLE ?" . $repair->getData('ready_for_pick_up') . " Fermé dans GLE ?" . $repair->getData('repair_complete');
         }
         if (is_array($tabError) && count($tabError) > 0)
@@ -242,7 +242,7 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
                 $erreurSOAP = $this->repair->lookup();
                 if (count($erreurSOAP) == 0) {
                     echo "Tentative de maj de " . $ligne->ref;
-                    if ($this->repair->repairLookUp['repairStatusCode'] == "RFPU" || $this->repair->getData('ready_for_pick_up')) {
+                    if ($this->repair->repairLookUp['repairStatus'] == "RFPU" || $this->repair->getData('ready_for_pick_up')) {
                         echo "Passage dans GLE a RFPU<br/>";
                         $this->repair->readyForPickUp = 1;
                         $this->repair->update();

@@ -1068,8 +1068,10 @@ class savFormController extends BimpPublicController
                         $dateEnd = null;
 
                         if (isset($data['sav_slot']) && (string) $data['sav_slot']) {
-                            $dateBegin = new DateTime($data['sav_slot']);
-                            $dateEnd = new DateTime($data['sav_slot']);
+                             $dateBegin = new DateTime(date('Y-m-d H:i:s', strtotime($data['sav_slot'])));
+                             $dateEnd = new DateTime(date('Y-m-d H:i:s', strtotime($data['sav_slot'])));
+//                            $dateBegin = new DateTime($data['sav_slot']);
+//                            $dateEnd = new DateTime($data['sav_slot']);
                             $dateEnd->add(new DateInterval('PT20M'));
                         }
 
@@ -1550,7 +1552,7 @@ class savFormController extends BimpPublicController
 Conditions particulières aux iPhones
 
 
-- Pour certains types de pannes sous garantie, un envoi de l’iPhone dans un centre Apple peut être nécessaire, entrainant un délai plus long (jusqu’à 10 jours ouvrés), dans ce cas un téléphone de prêt est possible (sous réserve de disponibilité). Si cela vous intéresse, merci de vous munir d’un chèque de caution.
+- Pour certains types de pannes sous garantie, un envoi de l’iPhone dans un centre Apple peut être nécessaire, entrainant un délai plus long (jusqu’à 10 jours ouvrés).
 
 La plupart de nos centres peuvent effectuer une réparation de votre écran d’iPhone sous 24h00. Pour savoir si votre centre SAV est éligible à ce type de réparation consultez nottre site internet.
 
@@ -1598,7 +1600,7 @@ L’équipe BIMP";
                             $success_html .= '- Le délai de traitement des réparations est habituellement de 7 jours.<br/><br/>';
 
                             $success_html .= 'Conditions particulières aux iPhones: <br/>';
-                            $success_html .= '- Pour certains types de pannes sous garantie, un envoi de l’iPhone dans un centre Apple peut être nécessaire, entrainant un délai plus long (jusqu’à 10 jours ouvrés), dans ce cas un téléphone de prêt est possible (sous réserve de disponibilité). Si cela vous intéresse, merci de vous munir d’un chèque de caution.<br/><br/>';
+                            $success_html .= '- Pour certains types de pannes sous garantie, un envoi de l’iPhone dans un centre Apple peut être nécessaire, entrainant un délai plus long (jusqu’à 10 jours ouvrés).<br/><br/>';
 
                             $success_html .= 'La plupart de nos centres peuvent effectuer une réparation de votre écran d’iPhone sous 24h00. Pour savoir si votre centre SAV est éligible à ce type de réparation consultez nottre site internet.<br/><br/>';
 

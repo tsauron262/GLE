@@ -298,7 +298,7 @@ class BimpPublicController extends BimpController
         return $html;
     }
 
-    public function renderChangePwInputsHtml()
+    public function renderChangePwFormInputsHtml()
     {
         $html = '';
 

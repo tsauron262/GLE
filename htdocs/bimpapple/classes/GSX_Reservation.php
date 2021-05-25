@@ -63,6 +63,13 @@ class GSX_Reservation
                 'Content-type: application/json',
                 'X-PARTNER-SOLDTO: ' . $soldTo
             );
+            
+//            require_once(DOL_DOCUMENT_ROOT.'/bimpapple/classes/GSX_v2.php');
+//            $certInfo = GSX_v2::getCertifInfo($soldTo);
+//            curl_setopt($ch, CURLOPT_SSLCERT, $certInfo['path']);
+//            curl_setopt($ch, CURLOPT_SSLKEY, $certInfo['pathKey']);
+//            curl_setopt($ch, CURLOPT_SSLCERTPASSWD, $certInfo['pass']);
+    
 
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             curl_setopt($ch, CURLOPT_SSLCERT, $certif_file_path);
@@ -79,6 +86,9 @@ class GSX_Reservation
             }
 
             curl_close($ch);
+            if(stripos($data, '403 Forbidden')){
+                mailSyn2('Probléme GSX', 'dev@bimp.fr', null, 'Recuperation des slots de réservations impossible '.print_r($data, 1));
+            } 
 
             if ($data === false) {
                 $errors[] = 'Echec requête CURL';

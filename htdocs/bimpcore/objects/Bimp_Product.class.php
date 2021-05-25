@@ -13,6 +13,7 @@ class Bimp_Product extends BimpObject
         5 => 'Logiciel'
     );
     public static $sousTypeDep = array(3, 4);
+    public static $sousTypeContrat = array(1, 2);
     public static $product_type = array(
 //        "" => '',
         0 => array('label' => 'Produit', 'icon' => 'fas_box'),
@@ -435,6 +436,10 @@ class Bimp_Product extends BimpObject
     public function isDep()
     {
         return (in_array($this->getData('type2'), static::$sousTypeDep));
+    }
+    
+    public function isInContrat() {
+        return (in_array($this->getData('type2'), static::$sousTypeContrat));
     }
 
     public function hasFixePrices()

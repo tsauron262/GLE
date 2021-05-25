@@ -254,7 +254,7 @@ class Bimp_Propal extends BimpComm
     public function displayIfMessageFormContrat() {
         $array = $this->isServiceAutorisedInContrat(true);
         $msgs = [];
-        if(count($array) > 0) {
+        if(count($array) > 0 && BimpCore::getConf('bimpcontract_use_autorised_service')) {
             
             $content = "<h4><b>Vous ne pouvez pas créer de contrat à partir de ce devis car certains services ne sont pas autorisés dans un contrat<br /><br />";
             if(count($array) > 1) {
@@ -271,20 +271,6 @@ class Bimp_Propal extends BimpComm
             
             $content .= "</p>";
             
-            $content.= "<br /><i><u>Liste des services autorisés</u></i>";
-            
-            $all = json_decode(BimpCore::getConf("bimpcontract_autorised_service_codes"));
-            
-            $content .= "<p>";
-            
-            foreach($all as $ref_service) {
-                $content .= "- " . $ref_service . "<br />";
-            }
-            
-            $content .= "</p>";
-            
-            $content .= "</b></h4>";
-            
             $msgs[] = Array(
                 'type' => 'warning',
                 'content' => $content
@@ -296,7 +282,9 @@ class Bimp_Propal extends BimpComm
     
     public function isServiceAutorisedInContrat($return_array = false) {
         
-        $services = json_decode(BimpCore::getConf('bimpcontract_autorised_service_codes'));
+        if(!BimpCore::getConf('bimpcontract_use_autorised_service'))
+            return 1;
+        
         $children = $this->getChildrenList('lines');
         $id_services = [];
 
@@ -305,9 +293,8 @@ class Bimp_Propal extends BimpComm
             $fk_product = $this->db->getValue("propaldet", "fk_product", 'rowid = ' . $child->getData('id_line'));
             if($fk_product > 0) {
                 $service = $this->getInstance('bimpcore', 'Bimp_Product', $fk_product);
-                if(!in_array($service->getData('ref'), $services)) {
+                if(!$service->isInContrat()) {
                     $id_services[] = $service->getData('ref');
-
                 }
             }
             

@@ -1704,6 +1704,14 @@ class BContract_contrat extends BimpDolObject
                 );
             }
         }
+        
+        if($user->id == 460) {
+            $buttons[] = array(
+                    'label'   => 'Ajouter un accompte',
+                    'icon'    => 'euro',
+                    'onclick' => $this->getJsActionOnclick('addAcompte', array(), array("form_name" => "addAcc"))
+                );
+        }
 
         return $buttons;
     }

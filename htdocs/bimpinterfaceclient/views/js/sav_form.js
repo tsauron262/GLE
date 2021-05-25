@@ -29,40 +29,20 @@ function SavPublicForm() {
     ];
 
     // Evénements: 
-    
+
     this.setEmailFormEvents = function () {
         var $form = $('#new_sav_form');
-        if ($form.length) {
+        if ($form.length && !parseInt($form.data('sav_form_events_init'))) {
             ptr.$form = $form;
 
             var $input = $form.find('[name="client_email"]');
             if ($input.length) {
                 $input.blur(function () {
-                    var val = $input.val();
-                    if (val) {
-                        var $cust_infos = $('#customer_infos');
-                        var cur_email = '';
-                        if ($cust_infos.length) {
-                            cur_email = $cust_infos.data('client_email');
-                        }
-
-                        if (!cur_email || cur_email !== val) {
-                            BimpAjax('loadPublicSavForm', {
-                                'client_email': val
-                            }, $('#client_email_ajax_result'), {
-                                'display_success': false,
-                                'display_processing': true,
-                                'processing_msg': '',
-                                'processing_padding': 20,
-                                'display_warnings_in_popup_only': false,
-                                'append_html': true
-                            });
-                        }
-                    } else {
-                        $('#client_email_ajax_result').slideDown(250);
-                    }
+                    ptr.emailSubmit($(this));
                 });
             }
+
+            $form.data('email_form_events_init', 1);
         }
     };
 
@@ -75,7 +55,7 @@ function SavPublicForm() {
 
                 if ($input.length) {
                     $input.change(function () {
-                        var val = parseInt($input.val());
+                        var val = parseInt($(this).val());
 
                         if (val === 0 || val === 8) {
                             $form.find('input[name="client_nom_societe"]').parent().stop().slideUp(250);
@@ -92,6 +72,12 @@ function SavPublicForm() {
                 if ($input.length) {
                     $input.change(function () {
                         ptr.loadClientContactInfos(parseInt($(this).val()));
+
+                        if (!parseInt($(this).val())) {
+                            $('#customer_infos').find('.editContactNotif').stop().slideUp(250);
+                        } else {
+                            $('#customer_infos').find('.editContactNotif').stop().slideDown(250);
+                        }
                     });
                 }
 
@@ -175,6 +161,43 @@ function SavPublicForm() {
     };
 
     // Requêtes ajax: 
+
+    this.emailSubmit = function ($input) {
+        if (typeof ($input) === 'undefined') {
+            $input = $('#new_sav_form').find('[name="client_email"]');
+        }
+
+        if ($.isOk($input)) {
+            var val = $input.val();
+            if (val) {
+                var $cust_infos = $('#customer_infos');
+                var cur_email = '';
+                if ($cust_infos.length) {
+                    cur_email = $cust_infos.data('client_email');
+                }
+
+                if (!cur_email || cur_email !== val) {
+                    BimpAjax('loadPublicSavForm', {
+                        'client_email': val
+                    }, $('#client_email_ajax_result'), {
+                        'display_success': false,
+                        'display_processing': true,
+                        'processing_msg': '',
+                        'processing_padding': 20,
+                        'display_warnings_in_popup_only': false,
+                        'append_html': true,
+                        success: function (result, bimpAjax) {
+                            if (result.html) {
+                                $('#new_sav_form').find('.emailFormSubmit').slideUp(250);
+                            }
+                        }
+                    });
+                }
+            } else {
+                $('#client_email_ajax_result').slideDown(250);
+            }
+        }
+    };
 
     this.loadClientContactInfos = function (id_contact) {
         var $form = $('#customer_infos');
@@ -395,9 +418,17 @@ function SavPublicForm() {
         return check;
     };
 
-    this.submit = function (force_validate) {
+    this.submit = function ($button, force_validate, force_validate_reason) {
+        if ($button.hasClass('disabled')) {
+            return;
+        }
+        
         if (typeof (force_validate) === 'undefined') {
-            force_validate = false;
+            force_validate = 0;
+        }
+
+        if (typeof (force_validate_reason) === 'undefined') {
+            force_validate = '';
         }
 
         $('#sav_form_submit_result').stop().html('').hide();
@@ -413,7 +444,8 @@ function SavPublicForm() {
         }
 
         var data = {
-            'force_validate': force_validate
+            'force_validate': force_validate,
+            'force_validate_reason': force_validate_reason
         };
 
         var $form = ptr.$form;
@@ -439,19 +471,64 @@ function SavPublicForm() {
             }
             data['sav_slot'] = slot;
 
+            $('#SlotNotAvailableNotif').stop().slideUp(250);
+            $('#reservationErrorNotif').stop().slideUp(250);
+            if (!force_validate && !parseInt($('#noReservationSubmit').data('never_hidden'))) {
+                $('#noReservationSubmit').stop().slideUp(250);
+            }
+
+            $('#debug').html('').hide();
+
             BimpAjax('savFormSubmit', data, $('#sav_form_submit_result'), {
+                $button: $button,
                 display_success: false,
                 display_processing: true,
                 processing_padding: 20,
                 append_html: true,
                 success: function (result, bimpAjax) {
+                    if (result.debug) {
+                        $('#debug').html(result.debug).stop().slideDown(250);
+                    }
 
+                    if (result.slot_not_available) {
+                        $('#SlotNotAvailableNotif').stop().slideDown(250);
+                        $('#noReservationSubmit').find('span.btn').attr('onclick', 'SavPublicForm.submit($(this), 1, \'' + result.force_validate_reason + '\')');
+                        $('#noReservationSubmit').stop().slideDown(250);
+                        ptr.fetchAvailableSlots();
+                    } else if (result.force_validate) {
+                        $('#reservationErrorNotif').stop().slideDown(250);
+                        $('#noReservationSubmit').find('span.btn').attr('onclick', 'SavPublicForm.submit($(this), 1, \'' + result.force_validate_reason + '\')');
+                        $('#noReservationSubmit').stop().slideDown(250);
+                    } else if (result.success_html) {
+                        $('#new_sav_form').stop().fadeOut(250, function () {
+                            $('#new_sav_form').html(result.success_html).fadeIn(250);
+                        });
+                    }
                 },
                 error: function (result, bimpAjax) {
-
                 }
             });
         }
+    };
+
+    this.cancelRDV = function ($btn, id_sav, ref_sav, reservation_id) {
+        BimpAjax('cancelSav', {
+            id_sav: id_sav,
+            ref_sav: ref_sav,
+            reservation_id: reservation_id
+        }, $('#cancelSavAjaxResult'), {
+            $button: $btn,
+            display_success: false,
+            display_processing: true,
+            processing_padding: 20,
+            success: function(result, bimpAjax) {
+                if (result.success_html) {
+                    $('#cancel_confirm').fadeOut(250, function() {
+                        $(this).html(result.success_html).fadeIn(250);
+                    });
+                }
+            }
+        });
     };
 }
 

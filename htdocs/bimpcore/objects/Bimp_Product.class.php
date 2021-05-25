@@ -13,6 +13,7 @@ class Bimp_Product extends BimpObject
         5 => 'Logiciel'
     );
     public static $sousTypeDep = array(3, 4);
+    public static $sousTypeContrat = array(1, 2);
     public static $product_type = array(
 //        "" => '',
         0 => array('label' => 'Produit', 'icon' => 'fas_box'),
@@ -435,6 +436,10 @@ class Bimp_Product extends BimpObject
     public function isDep()
     {
         return (in_array($this->getData('type2'), static::$sousTypeDep));
+    }
+    
+    public function isInContrat() {
+        return (in_array($this->getData('type2'), static::$sousTypeContrat));
     }
 
     public function hasFixePrices()
@@ -3063,7 +3068,7 @@ class Bimp_Product extends BimpObject
         $sql = 'UPDATE ' . MAIN_DB_PREFIX . 'propaldet l';
         $sql .= ' SET l.fk_product = ' . (int) $this->id;
         $sql .= ' WHERE l.fk_product = ' . (int) $id_merged_product;
-        $sql .= ' AND l.fk_propal IN (SELECT p.rowid FROM ' . MAIN_DB_PREFIX . 'propal p WHERE p.fk_statut > 0)';
+//        $sql .= ' AND l.fk_propal IN (SELECT p.rowid FROM ' . MAIN_DB_PREFIX . 'propal p WHERE p.fk_statut > 0)';
 
         if ($this->db->execute($sql) <= 0) {
             $warnings[] = 'Erreurs lors du changement d\'ID pour les propales validées - ' . $this->db->db->lasterror();

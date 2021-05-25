@@ -33,18 +33,6 @@ class InterfaceDolObjects extends DolibarrTriggers
 
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf)
     {
-        // Edit signature
-        if($action == 'USER_CREATE' or $action == 'USER_MODIFY') {
-            global $db;
-            // tab card and signature unset
-                require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
-                if ((int) $object->id > 0)
-                    define('ID_SELECTED_FOR_SIGNATURE', (int) $object->id); // used in next script
-                if(ID_SELECTED_FOR_SIGNATURE > 0) {
-                    require_once DOL_DOCUMENT_ROOT . '/bimpcore/scripts/edit_signature.php';
-                }
-        }
-        
         // On re-fetch() le BimpObject lié au DolObject afin d'être sûr que l'objet soit à jour dans le cache. 
         // (ou on le supprime du cache si l'action est de type DELETE. 
         if ((BimpObject::objectLoaded($object))) {

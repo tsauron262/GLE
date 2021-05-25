@@ -106,6 +106,7 @@ class BimpPublicController extends BimpController
     public function userClientLogout()
     {
         $_SESSION['userClient'] = 'none';
+//        $_SESSION['bimp_context'] = 'private';
         header("Location: " . $_SERVER['PHP_SELF']);
         exit;
     }
@@ -146,103 +147,100 @@ class BimpPublicController extends BimpController
 
     public function displayPublicForm($form_name, $params = array(), $form_errors = array())
     {
-        $file = DOL_DOCUMENT_ROOT . '/bimpinterfaceclient/views/html/' . $form_name . '.php';
+        $params = BimpTools::overrideArray(array(
+                    'page_title'     => 'BIMP - Espace client',
+                    'main_title'     => 'Espace client',
+                    'sub_title'      => '',
+                    'submit_label'   => 'Valider',
+                    'submit_enabled' => true,
+                    'js_files'       => array(),
+                    'css_files'      => array(),
+                    'success_msg'    => '',
+                    'back_url'       => $this->back_url,
+                    'back_label'     => $this->back_label
+                        ), $params);
 
-        if (file_exists($file)) {
-            $params = BimpTools::overrideArray(array(
-                        'page_title'     => 'BIMP - Espace client',
-                        'main_title'     => 'Espace client',
-                        'sub_title'      => '',
-                        'submit_label'   => 'Valider',
-                        'submit_enabled' => true,
-                        'js_files'       => array(),
-                        'css_files'      => array(),
-                        'success_msg'    => '',
-                        'back_url'       => $this->back_url,
-                        'back_label'     => $this->back_label
-                            ), $params);
+        $html = '<!DOCTYPE html>';
+        $html .= '<head>';
+        $html .= '<title>' . $params['page_title'] . '</title>';
+        $html .= '<meta charset="UTF-8">';
+        $html .= '<meta name="viewport" content="width=device-width, initial-scale=1">';
 
-            $html = '<!DOCTYPE html>';
-            $html .= '<head>';
-            $html .= '<title>' . $params['page_title'] . '</title>';
-            $html .= '<meta charset="UTF-8">';
-            $html .= '<meta name="viewport" content="width=device-width, initial-scale=1">';
-
-            foreach ($params['js_files'] as $jsFile) {
-                $url = BimpCore::getFileUrl($jsFile);
-                if ($url) {
-                    $html .= '<script type="text/javascript" src="' . $url . '"></script>';
-                }
+        foreach ($params['js_files'] as $jsFile) {
+            $url = BimpCore::getFileUrl($jsFile);
+            if ($url) {
+                $html .= '<script type="text/javascript" src="' . $url . '"></script>';
             }
+        }
 
-            $url = BimpCore::getFileUrl('/bimpinterfaceclient/views/css/public_form.css');
+        $url = BimpCore::getFileUrl('/bimpinterfaceclient/views/css/public_form.css');
+        if ($url) {
+            $html .= '<link type="text/css" rel="stylesheet" href="' . $url . '"/>';
+        }
+
+        foreach ($params['css_files'] as $cssFile) {
+            $url = BimpCore::getFileUrl($cssFile);
             if ($url) {
                 $html .= '<link type="text/css" rel="stylesheet" href="' . $url . '"/>';
             }
+        }
 
-            foreach ($params['css_files'] as $cssFile) {
-                $url = BimpCore::getFileUrl($cssFile);
-                if ($url) {
-                    $html .= '<link type="text/css" rel="stylesheet" href="' . $url . '"/>';
-                }
-            }
+        $html .= '<tbody>';
+        $html .= '<form method="POST">';
+        if ($params['main_title']) {
+            $html .= '<h2>' . $params['main_title'] . '</h2>';
+        }
 
-            $html .= '<tbody>';
-            $html .= '<form method="POST">';
-            if ($params['main_title']) {
-                $html .= '<h2>' . $params['main_title'] . '</h2>';
-            }
+        if ($params['sub_title']) {
+            $html .= '<h3 style="text-align: center">' . $params['sub_title'] . '</h3>';
+        }
 
-            if ($params['sub_title']) {
-                $html .= '<h3 style="text-align: center">' . $params['sub_title'] . '</h3>';
-            }
+        $html .= '<div id="erp_bimp">';
 
-            $html .= '<div id="erp_bimp">';
+        $method = 'render' . ucfirst($form_name) . 'FormInputsHtml';
 
-            if ($params['success_msg']) {
-                $html .= '<p class="success">';
-                $html .= $params['success_msg'];
-                $html .= '</p>';
-            } else {
-                $html .= '<input type="hidden" name="public_form_submit" value="1"/>';
-                $html .= '<input type="hidden" name="public_form" value="' . $form_name . '"/>';
-                if ($params['back_url']) {
-                    $html .= '<input type="hidden" name="public_form_back_url" value="' . $params['back_url'] . '"/>';
-                }
-
-                $html .= file_get_contents($file);
-
-                $html .= '<br/>';
-
-                if (count($form_errors)) {
-                    $html .= '<div class="errors">';
-                    foreach ($form_errors as $error) {
-                        $html .= $error . '<br/>';
-                    }
-                    $html .= '</div>';
-                }
-
-                $html .= '<br/>';
-
-                $html .= '<input id="public_form_submit" class="button submit" type="submit" value="' . $params['submit_label'] . '"' . (!$params['submit_enabled'] ? ' disabled' : '') . '/>';
-            }
-
+        if ($params['success_msg']) {
+            $html .= '<p class="success">';
+            $html .= $params['success_msg'];
+            $html .= '</p>';
+        } elseif (method_exists($this, $method)) {
+            $html .= '<input type="hidden" name="public_form_submit" value="1"/>';
+            $html .= '<input type="hidden" name="public_form" value="' . $form_name . '"/>';
             if ($params['back_url']) {
-                $html .= '<div style="margin-top: 30px; text-align: center">';
-                $html .= '<a href="' . $params['back_url'] . '">' . $params['back_label'] . '</a>';
+                $html .= '<input type="hidden" name="public_form_back_url" value="' . $params['back_url'] . '"/>';
+            }
+
+            $html .= $this->{$method}();
+
+            $html .= '<br/>';
+
+            if (count($form_errors)) {
+                $html .= '<div class="errors">';
+                foreach ($form_errors as $error) {
+                    $html .= $error . '<br/>';
+                }
                 $html .= '</div>';
             }
 
-            $html .= '</div>';
-            $html .= '</form>';
-            $html .= '</tbody>';
-            $html .= '</head>';
+            $html .= '<br/>';
 
-            echo $html;
+            $html .= '<input id="public_form_submit" class="button submit" type="submit" value="' . $params['submit_label'] . '"' . (!$params['submit_enabled'] ? ' disabled' : '') . '/>';
         } else {
-            echo 'NO FORM FILE <br/><br/>';
-            accessforbidden();
+            echo '<p class="error">Erreur: ce formulaire n\'existe pas</p>';
         }
+
+        if ($params['back_url']) {
+            $html .= '<div style="margin-top: 30px; text-align: center">';
+            $html .= '<a href="' . $params['back_url'] . '">' . $params['back_label'] . '</a>';
+            $html .= '</div>';
+        }
+
+        $html .= '</div>';
+        $html .= '</form>';
+        $html .= '</tbody>';
+        $html .= '</head>';
+
+        echo $html;
         exit;
     }
 
@@ -274,6 +272,61 @@ class BimpPublicController extends BimpController
                 ), $errors);
     }
 
+    // Rendus HTML: 
+
+    public function renderLoginFormInputsHtml()
+    {
+        $html = '';
+
+        $html .= '<label for="bic_login_email">Email</label><br/>';
+        $html .= '<input id="bic_login_email" type="email" name="bic_login_email" placeholder="Email" value="' . (BimpTools::getValue('email', '')) . '">';
+        $html .= '<br/><br/>';
+        $html .= '<label for="bic_login_pw">Mot de passe</label><br/>';
+        $html .= '<input id="bic_login_pw" type="password" name="bic_login_pw" placeholder="Mot de passe"><br/>';
+        $html .= '<p style="text-align: center"><a href="javascript: var email = document.getElementById(\'bic_login_email\').value; window.location = \'./client.php?display_public_form=1&public_form=reinitPw\' + (email ? \'&email=\' + email : \'\');">Mot de passe oublié</a></p>';
+
+        return $html;
+    }
+
+    public function renderReinitPwFormInputsHtml()
+    {
+        $html = '';
+
+        $html .= '<label for="email">Email</label><br/>';
+        $html .= '<input id="email" type="email" name="bic_reinit_pw_email" placeholder="Email" value="' . BimpTools::getValue('email', '') . '">';
+
+        return $html;
+    }
+
+    public function renderChangePwFormInputsHtml()
+    {
+        $html = '';
+
+        $html .= '<script ype="text/javascript">
+    function verif_for_active_button() {
+        var cur_pw = document.getElementById(\'cur_pw\').value;
+        var new_pw = document.getElementById(\'new_pw\').value;
+        var confirm_pw = document.getElementById(\'confirm_pw\').value;
+        var btn = document.getElementById(\'public_form_submit\');
+        if (cur_pw && new_pw && confirm_pw && new_pw == confirm_pw) {
+            btn.disabled = false;
+        } else {
+            btn.disabled = true;
+        }
+    }</script>';
+
+        $html .= '<label for="cur_pw">Mot de passe actuel</label><br/>';
+        $html .= '<input id="cur_pw" type="password" name="bic_cur_pw" onkeyup="verif_for_active_button()" placeholder="Mot de passe actuel">';
+
+        $html .= '<label for="new_pw">Nouveau mot de passe</label><br />';
+        $html .= '<input id="new_pw" type="password" name="bic_new_pw" onkeyup="verif_for_active_button()" placeholder="Nouveau mot de passe"><br />';
+
+        $html .= '<label for="confirm_pw">Confirmer votre nouveau mot de passe</label><br />';
+        $html .= '<input id="confirm_pw" onkeyup="verif_for_active_button()" type="password" name="bic_confirm_new_pw" placeholder="Confirmation">';
+
+        return $html;
+    }
+
     // Traitements forms publics: 
 
     public function processPublicForm()
@@ -301,7 +354,7 @@ class BimpPublicController extends BimpController
                 }
             }
         } else {
-            accessforbidden();
+            echo 'Erreur. Ce formulaire n\'existe pas';
             exit;
         }
     }

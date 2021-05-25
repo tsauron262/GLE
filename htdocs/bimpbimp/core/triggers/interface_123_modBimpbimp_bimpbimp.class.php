@@ -28,6 +28,18 @@ class InterfaceBimpbimp extends DolibarrTriggers {
 
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf) {
         global $conf, $user;
+        // Edit signature
+        if($action == 'USER_CREATE' or $action == 'USER_MODIFY') {
+            global $db;
+            // tab card and signature unset
+                require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
+                if ((int) $object->id > 0)
+                    define('ID_SELECTED_FOR_SIGNATURE', (int) $object->id); // used in next script
+                if(ID_SELECTED_FOR_SIGNATURE > 0) {
+                    require_once DOL_DOCUMENT_ROOT . '/bimpcore/scripts/edit_signature.php';
+                }
+        }
+        
         
         
         if($action == "USER_CREATE" && $object->array_options['options_mail_bienvenue']){

@@ -52,13 +52,13 @@ class test_sav
         if($idUser > 0 || !$this->repair->initGsx($error)){
             if($idUser == 0)
                 $idUser = 2;
-            global $user, $db, $conf;
+            global $user, $db, $conf, $langs;
             $conf->entity = 1;
             $user = new User($db);
             $user->fetch($idUser);
             $user->fetch_optionals($idUser);
             if(!$this->repair->initGsx($error, true)){
-                $this->output .= " Non authentifié sur GSX ! ";
+                $this->output .= " Non authentifié sur GSX ! ".$user->getFullName($langs);
             }
         }
     }
@@ -326,6 +326,7 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
         global $db;
         
         $sql = $db->query("SELECT MAX(u.rowid) as idUser, gsx_acti_token FROM `llx_user` u, llx_user_extrafields ue WHERE u.rowid = ue.`fk_object` and gsx_acti_token != '' GROUP by `gsx_acti_token`");
+        $nbcompte = $db->num_rows($sql);
         while($ln = $db->fetch_object($sql)) {
             $this->initGsx($ln->idUser);
 
@@ -334,7 +335,7 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
         
         
         
-        $this->output .= ' ' . $this->nbImei . ' n° IMEI corrigé(s).';
+        $this->output .= ' ' . $this->nbImei . ' compte réactivé sur '.$nbcompte;
     }
 
     function fetchEquipmentsImei($nb = 1, $modeLabel = 0)

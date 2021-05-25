@@ -421,6 +421,7 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
 //                    }
                     if(count($errors)){
                         print_r($errors);
+                        $this->output .= print_r($errors,1);
                         break;
                     }
 

@@ -418,7 +418,11 @@ function SavPublicForm() {
         return check;
     };
 
-    this.submit = function (force_validate, force_validate_reason) {
+    this.submit = function ($button, force_validate, force_validate_reason) {
+        if ($button.hasClass('disabled')) {
+            return;
+        }
+        
         if (typeof (force_validate) === 'undefined') {
             force_validate = 0;
         }
@@ -476,6 +480,7 @@ function SavPublicForm() {
             $('#debug').html('').hide();
 
             BimpAjax('savFormSubmit', data, $('#sav_form_submit_result'), {
+                $button: $button,
                 display_success: false,
                 display_processing: true,
                 processing_padding: 20,
@@ -487,12 +492,12 @@ function SavPublicForm() {
 
                     if (result.slot_not_available) {
                         $('#SlotNotAvailableNotif').stop().slideDown(250);
-                        $('#noReservationSubmit').find('span.btn').attr('onclick', 'SavPublicForm.submit(1, \'' + result.force_validate_reason + '\')');
+                        $('#noReservationSubmit').find('span.btn').attr('onclick', 'SavPublicForm.submit($(this), 1, \'' + result.force_validate_reason + '\')');
                         $('#noReservationSubmit').stop().slideDown(250);
                         ptr.fetchAvailableSlots();
                     } else if (result.force_validate) {
                         $('#reservationErrorNotif').stop().slideDown(250);
-                        $('#noReservationSubmit').find('span.btn').attr('onclick', 'SavPublicForm.submit(1, \'' + result.force_validate_reason + '\')');
+                        $('#noReservationSubmit').find('span.btn').attr('onclick', 'SavPublicForm.submit($(this), 1, \'' + result.force_validate_reason + '\')');
                         $('#noReservationSubmit').stop().slideDown(250);
                     } else if (result.success_html) {
                         $('#new_sav_form').stop().fadeOut(250, function () {

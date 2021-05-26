@@ -84,26 +84,28 @@
   border: none;
   width: 50px;
   border-radius: 50px;
-  margin-top: 30px;
+  margin: 30px 5px 0;
   font-size: 16px;
   font-weight: 700;
-  transition: 0.5s; }
-/* line 117, ../scss/public.scss */
+  transition: 0.5s;
+  display: inline-block;
+  cursor: pointer; }
+/* line 120, ../scss/public.scss */
 .bic_container .card_interface .button span {
   font-size: 20px;
   line-height: 1;
   vertical-align: top; }
-/* line 122, ../scss/public.scss */
+/* line 125, ../scss/public.scss */
 .bic_container .card_interface .button:hover {
   background: transparent;
   color: #EF7D00; }
-/* line 129, ../scss/public.scss */
+/* line 132, ../scss/public.scss */
 .bic_container .css-tooltip {
   position: relative;
   margin-top: 17px;
   display: inline-block;
   cursor: pointer; }
-/* line 135, ../scss/public.scss */
+/* line 138, ../scss/public.scss */
 .bic_container .css-tooltip .tt-content {
   position: absolute;
   color: #31708f;
@@ -117,11 +119,11 @@
   box-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
   border-radius: 8px;
   display: none; }
-/* line 149, ../scss/public.scss */
+/* line 152, ../scss/public.scss */
 .bic_container .css-tooltip .tt-content i {
   position: absolute;
   overflow: hidden; }
-/* line 153, ../scss/public.scss */
+/* line 156, ../scss/public.scss */
 .bic_container .css-tooltip .tt-content i:after {
   content: '';
   position: absolute;
@@ -129,91 +131,91 @@
   height: 12px;
   background-color: #d9edf7;
   box-shadow: 0 1px 8px rgba(0, 0, 0, 0.5); }
-/* line 161, ../scss/public.scss */
+/* line 164, ../scss/public.scss */
 .bic_container .css-tooltip.top .tt-content {
   top: -10px;
   left: 50%;
   transform: translate(-50%, -100%); }
-/* line 166, ../scss/public.scss */
+/* line 169, ../scss/public.scss */
 .bic_container .css-tooltip.top .tt-content i {
   top: 100%;
   left: 50%;
   margin-left: -12px;
   width: 24px;
   height: 12px; }
-/* line 173, ../scss/public.scss */
+/* line 176, ../scss/public.scss */
 .bic_container .css-tooltip.top .tt-content i:after {
   left: 50%;
   transform: translate(-50%, -50%) rotate(45deg); }
-/* line 177, ../scss/public.scss */
+/* line 180, ../scss/public.scss */
 .bic_container .css-tooltip.right .tt-content {
   top: 50%;
   left: 100%;
   margin-left: 10px;
   transform: translate(0, -50%); }
-/* line 183, ../scss/public.scss */
+/* line 186, ../scss/public.scss */
 .bic_container .css-tooltip.right .tt-content i {
   top: 50%;
   right: 100%;
   margin-top: -12px;
   width: 12px;
   height: 24px; }
-/* line 190, ../scss/public.scss */
+/* line 193, ../scss/public.scss */
 .bic_container .css-tooltip.right .tt-content i:after {
   left: 0;
   top: 50%;
   transform: translate(50%, -50%) rotate(-45deg); }
-/* line 195, ../scss/public.scss */
+/* line 198, ../scss/public.scss */
 .bic_container .css-tooltip.bottom .tt-content {
   top: 40px;
   left: 50%;
   transform: translate(-50%, 0); }
-/* line 200, ../scss/public.scss */
+/* line 203, ../scss/public.scss */
 .bic_container .css-tooltip.bottom .tt-content i {
   bottom: 100%;
   left: 50%;
   margin-left: -12px;
   width: 24px;
   height: 12px; }
-/* line 207, ../scss/public.scss */
+/* line 210, ../scss/public.scss */
 .bic_container .css-tooltip.bottom .tt-content i:after {
   left: 50%;
   transform: translate(-50%, 50%) rotate(45deg); }
-/* line 211, ../scss/public.scss */
+/* line 214, ../scss/public.scss */
 .bic_container .css-tooltip.left .tt-content {
   top: 50%;
   right: 100%;
   margin-right: 20px;
   transform: translate(0, -50%); }
-/* line 217, ../scss/public.scss */
+/* line 220, ../scss/public.scss */
 .bic_container .css-tooltip.left .tt-content i {
   top: 50%;
   left: 100%;
   margin-top: -12px;
   width: 12px;
   height: 24px; }
-/* line 224, ../scss/public.scss */
+/* line 227, ../scss/public.scss */
 .bic_container .css-tooltip.left .tt-content i:after {
   left: 0;
   top: 50%;
   transform: translate(-50%, -50%) rotate(-45deg); }
-/* line 229, ../scss/public.scss */
+/* line 232, ../scss/public.scss */
 .bic_container .css-tooltip:hover .tt-content {
   display: block; }
-/* line 234, ../scss/public.scss */
+/* line 237, ../scss/public.scss */
 .bic_container .bimp_public_form {
   color: #303233; }
-  /* line 237, ../scss/public.scss */
+  /* line 240, ../scss/public.scss */
   .bic_container .bimp_public_form h1, .bic_container .bimp_public_form h2 {
     text-align: center;
     margin-bottom: 30px; }
-  /* line 242, ../scss/public.scss */
+  /* line 245, ../scss/public.scss */
   .bic_container .bimp_public_form .form_section {
     background-color: #F9F9FA;
     padding: 20px;
     margin: 15px 0;
     box-shadow: 0 5px 15px -5px rgba(60, 60, 60, 0.2); }
-  /* line 249, ../scss/public.scss */
+  /* line 252, ../scss/public.scss */
   .bic_container .bimp_public_form input, .bic_container .bimp_public_form select, .bic_container .bimp_public_form textarea {
     background-color: #FFF;
     margin: 0 0 7px;
@@ -223,26 +225,26 @@
     border: none;
     border-bottom: 1px solid #FBD75C;
     box-shadow: 0 0 5px 0 rgba(60, 60, 60, 0.2); }
-    /* line 259, ../scss/public.scss */
+    /* line 262, ../scss/public.scss */
     .bic_container .bimp_public_form input.value_missing, .bic_container .bimp_public_form select.value_missing, .bic_container .bimp_public_form textarea.value_missing {
       box-shadow: 0 0 5px 0 #FF0000;
       border: none; }
-  /* line 265, ../scss/public.scss */
+  /* line 268, ../scss/public.scss */
   .bic_container .bimp_public_form .select2 {
     height: 33px;
     box-shadow: 0 0 5px 0 rgba(60, 60, 60, 0.2);
     margin: 0 0 7px;
     width: 100%; }
-  /* line 272, ../scss/public.scss */
+  /* line 275, ../scss/public.scss */
   .bic_container .bimp_public_form .select2-selection {
     font-size: 14px;
     border-bottom: 1px solid #FBD75C;
     padding: 2px 0;
     height: 33px; }
-  /* line 279, ../scss/public.scss */
+  /* line 282, ../scss/public.scss */
   .bic_container .bimp_public_form textarea:focus, .bic_container .bimp_public_form input:focus {
     outline: 0; }
-  /* line 283, ../scss/public.scss */
+  /* line 286, ../scss/public.scss */
   .bic_container .bimp_public_form .form_section_title {
     color: #303233;
     text-transform: uppercase;
@@ -250,14 +252,14 @@
     font-size: 12px;
     letter-spacing: 2px;
     margin-bottom: 15px; }
-  /* line 292, ../scss/public.scss */
+  /* line 295, ../scss/public.scss */
   .bic_container .bimp_public_form label {
     color: #82888C;
     text-transform: uppercase;
     font-size: 11px;
     font-weight: bold;
     margin-bottom: 2px; }
-  /* line 300, ../scss/public.scss */
+  /* line 303, ../scss/public.scss */
   .bic_container .bimp_public_form a {
     -webkit-transition: all 0.3s ease;
     -moz-transition: all 0.3s ease;
@@ -265,27 +267,27 @@
     transition: all 0.3s ease;
     font-weight: bold;
     color: #0077CC; }
-    /* line 305, ../scss/public.scss */
+    /* line 308, ../scss/public.scss */
     .bic_container .bimp_public_form a:hover {
       color: #EF7D00; }
-  /* line 310, ../scss/public.scss */
+  /* line 313, ../scss/public.scss */
   .bic_container .bimp_public_form .inputHelp {
     color: #484B4D; }
-  /* line 314, ../scss/public.scss */
+  /* line 317, ../scss/public.scss */
   .bic_container .bimp_public_form .inputHelp a {
     color: #0077CC; }
-    /* line 317, ../scss/public.scss */
+    /* line 320, ../scss/public.scss */
     .bic_container .bimp_public_form .inputHelp a:hover {
       color: #EF7D00; }
 
 /* START TOOLTIP STYLES */
-/* line 325, ../scss/public.scss */
+/* line 328, ../scss/public.scss */
 [tool] {
   position: relative;
   /* opinion 1 */ }
 
 /* Applies to all tooltips */
-/* line 330, ../scss/public.scss */
+/* line 333, ../scss/public.scss */
 [tool]::before,
 [tool]::after {
   text-transform: none;
@@ -299,7 +301,7 @@
   display: none;
   opacity: 0; }
 
-/* line 341, ../scss/public.scss */
+/* line 344, ../scss/public.scss */
 [tool]::before {
   content: '';
   border: 5px solid transparent;
@@ -307,7 +309,7 @@
   z-index: 1001;
   /* absurdity 1 */ }
 
-/* line 346, ../scss/public.scss */
+/* line 349, ../scss/public.scss */
 [tool]::after {
   content: attr(tool);
   /* magic! */
@@ -332,31 +334,31 @@
   /* absurdity 2 */ }
 
 /* Make the tooltips respond to hover */
-/* line 371, ../scss/public.scss */
+/* line 374, ../scss/public.scss */
 [tool]:hover::before,
 [tool]:hover::after {
   display: block; }
 
 /* don't show empty tooltips */
-/* line 377, ../scss/public.scss */
+/* line 380, ../scss/public.scss */
 [tool='']::before,
 [tool='']::after {
   display: none !important; }
 
 /* FLOW: UP */
-/* line 383, ../scss/public.scss */
+/* line 386, ../scss/public.scss */
 [tool]:not([flow])::before,
 [tool][flow^="up"]::before {
   bottom: 100%;
   border-bottom-width: 0;
   border-top-color: #333; }
 
-/* line 389, ../scss/public.scss */
+/* line 392, ../scss/public.scss */
 [tool]:not([flow])::after,
 [tool][flow^="up"]::after {
   bottom: calc(100% + 5px); }
 
-/* line 393, ../scss/public.scss */
+/* line 396, ../scss/public.scss */
 [tool]:not([flow])::before,
 [tool]:not([flow])::after,
 [tool][flow^="up"]::before,
@@ -365,24 +367,24 @@
   transform: translate(-50%, -0.5em); }
 
 /* FLOW: DOWN */
-/* line 402, ../scss/public.scss */
+/* line 405, ../scss/public.scss */
 [tool][flow^="down"]::before {
   top: 100%;
   border-top-width: 0;
   border-bottom-color: #333; }
 
-/* line 407, ../scss/public.scss */
+/* line 410, ../scss/public.scss */
 [tool][flow^="down"]::after {
   top: calc(100% + 5px); }
 
-/* line 410, ../scss/public.scss */
+/* line 413, ../scss/public.scss */
 [tool][flow^="down"]::before,
 [tool][flow^="down"]::after {
   left: 50%;
   transform: translate(-50%, 0.5em); }
 
 /* FLOW: LEFT */
-/* line 417, ../scss/public.scss */
+/* line 420, ../scss/public.scss */
 [tool][flow^="left"]::before {
   top: 50%;
   border-right-width: 0;
@@ -390,14 +392,14 @@
   left: calc(0em - 5px);
   transform: translate(-0.5em, -50%); }
 
-/* line 424, ../scss/public.scss */
+/* line 427, ../scss/public.scss */
 [tool][flow^="left"]::after {
   top: 50%;
   right: calc(100% + 5px);
   transform: translate(-0.5em, -50%); }
 
 /* FLOW: RIGHT */
-/* line 431, ../scss/public.scss */
+/* line 434, ../scss/public.scss */
 [tool][flow^="right"]::before {
   top: 50%;
   border-left-width: 0;
@@ -405,7 +407,7 @@
   right: calc(0em - 5px);
   transform: translate(0.5em, -50%); }
 
-/* line 438, ../scss/public.scss */
+/* line 441, ../scss/public.scss */
 [tool][flow^="right"]::after {
   top: 50%;
   left: calc(100% + 5px);
@@ -421,7 +423,7 @@
     opacity: .9;
     transform: translate(0, -50%); } }
 /* FX All The Things */
-/* line 461, ../scss/public.scss */
+/* line 464, ../scss/public.scss */
 [tool]:not([flow]):hover::before,
 [tool]:not([flow]):hover::after,
 [tool][flow^="up"]:hover::before,
@@ -430,7 +432,7 @@
 [tool][flow^="down"]:hover::after {
   animation: tooltips-vert 300ms ease-out forwards; }
 
-/* line 470, ../scss/public.scss */
+/* line 473, ../scss/public.scss */
 [tool][flow^="left"]:hover::before,
 [tool][flow^="left"]:hover::after,
 [tool][flow^="right"]:hover::before,

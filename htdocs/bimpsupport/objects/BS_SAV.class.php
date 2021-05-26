@@ -197,6 +197,13 @@ class BS_SAV extends BimpObject
         $status_error = 'Le statut actuel du SAV n\'est pas valide pour cette action';
 
         switch ($action) {
+            case 'setNew':
+                if (!in_array((int) $this->getData('status'), array(self::BS_SAV_RESERVED, self::BS_SAV_CANCELED))) {
+                    $errors[] = $status_error;
+                    return 0;
+                }
+                return 1;
+
             case 'start':
                 if (!$this->isLoaded($errors)) {
                     return 0;
@@ -580,12 +587,14 @@ class BS_SAV extends BimpObject
                 }
             }
 
-            if (in_array((int) $this->getData('status'), array(self::BS_SAV_RESERVED, self::BS_SAV_CANCELED))) {
-                $buttons[] = array(
-                    'label'   => 'Prendre en charge',
-                    'icon'    => 'fas_cogs',
-                    'onclick' => $this->getJsNewStatusOnclick(self::BS_SAV_NEW)
-                );
+            if ($this->isActionAllowed('setNew')) {
+                if ($this->canSetAction('setNew')) {
+                    $buttons[] = array(
+                        'label'   => 'Prendre en charge',
+                        'icon'    => 'fas_cogs',
+                        'onclick' => $this->getJsActionOnclick('setNew', array(), array())
+                    );
+                }
             } else {
                 // Devis accepté / refusé: 
                 if ($this->isActionAllowed('propalAccepted')) {
@@ -4595,6 +4604,27 @@ class BS_SAV extends BimpObject
         );
     }
 
+    public function actionSetNew($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Prise en charge effectuée';
+        $success_callback = '';
+
+        $this->set('status', self::BS_SAV_NEW);
+        $errors = $this->update($warnings, true);
+
+        if (!count($errors)) {
+            $success_callback = $this->getCreateJsCallback();
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
+
     // Overrides:
 
     public function validate()
@@ -4848,6 +4878,45 @@ class BS_SAV extends BimpObject
                     $errors[] = BimpTools::getMsgFromArray($res_warnings, 'Echec de la suppression ' . $reservation->getLabel('of_the') . ' #' . $id_reservation);
                 }
             }
+        }
+    }
+
+    // Méthodes statiques: 
+
+    public static function correctDateRdvAll($echo = false)
+    {
+        $bdb = BimpCache::getBdb();
+        $sql = 'SELECT ac.datep as date, s.id as id_sav FROM ' . MAIN_DB_PREFIX . 'bs_sav s';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'actioncomm_extrafields acef ON acef.resgsx = s.resgsx';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'actioncomm ac ON ac.id = acef.fk_object';
+        $sql .= ' WHERE s.resgsx IS NOT NULL AND s.resgsx != \'\' AND s.date_rdv IS NULL';
+
+        $rows = $bdb->executeS($sql, 'array');
+
+        if (is_array($rows)) {
+            if (count($rows)) {
+                foreach ($rows as $r) {
+                    if ($echo) {
+                        echo 'SAV #' . $r['id_sav'] . ' - ' . $r['date'] . ': ';
+                    }
+
+                    if ($bdb->update('bs_sav', array(
+                                'date_rdv' => $r['date']
+                                    ), 'id = ' . (int) $r['id_sav']) <= 0) {
+                        if ($echo) {
+                            echo $bdb->err() . '<br/>';
+                        }
+                    } else {
+                        if ($echo) {
+                            echo ' [OK]<br/>';
+                        }
+                    }
+                }
+            } elseif ($echo) {
+                echo 'Aucun SAV à traiter';
+            }
+        } elseif ($echo) {
+            echo $bdb->err();
         }
     }
 }

@@ -365,6 +365,17 @@ function SavPublicForm() {
                             $nomSoc.removeClass('value_missing');
                         }
                     }
+
+                    var $siret = $form.find('[name="client_siret"]');
+
+                    if ($siret.length) {
+                        if ($siret.val() === '') {
+                            $siret.addClass('value_missing');
+                            check = false;
+                        } else {
+                            $siret.removeClass('value_missing');
+                        }
+                    }
                 }
             }
 
@@ -422,7 +433,7 @@ function SavPublicForm() {
         if ($button.hasClass('disabled')) {
             return;
         }
-        
+
         if (typeof (force_validate) === 'undefined') {
             force_validate = 0;
         }
@@ -521,9 +532,9 @@ function SavPublicForm() {
             display_success: false,
             display_processing: true,
             processing_padding: 20,
-            success: function(result, bimpAjax) {
+            success: function (result, bimpAjax) {
                 if (result.success_html) {
-                    $('#cancel_confirm').fadeOut(250, function() {
+                    $('#cancel_confirm').fadeOut(250, function () {
                         $(this).html(result.success_html).fadeIn(250);
                     });
                 }

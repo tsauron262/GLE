@@ -2349,10 +2349,20 @@ class Bimp_Societe extends BimpDolObject
                         $errors[] = 'Il n\'est pas possible de sélectionner le type "particulier" pour les entreprises';
                     }
 
-                    if ($this->isSirenRequired()) {
-                        $siret = $this->getData('siret');
-                        $siren = $this->getData('siren');
+                    $siret = $this->getData('siret');
+                    $siren = $this->getData('siren');
 
+                    if ($siret) {
+                        if ((int) $this->getData('fk_typent') == 5 && !preg_match('/^[12].+$/', $siret)) {
+                            $errors[] = 'Le SIRET doit commencer par 1 ou 2 pour les clients de type "Administration"';
+                        }
+                    } elseif ($siren) {
+                        if ((int) $this->getData('fk_typent') == 5 && !preg_match('/^[12].+$/', $siren)) {
+                            $errors[] = 'Le SIREN doit commencer par 1 ou 2 pour les clients de type "Administration"';
+                        }
+                    }
+
+                    if ($this->isSirenRequired()) {
                         if ($siren === 'p') {
                             $siren = '';
                         }
@@ -2370,12 +2380,12 @@ class Bimp_Societe extends BimpDolObject
                         }
 
                         if (!count($errors)) {
-                            if ($siret !== $this->getInitData('siret')) {
+//                            if ($siret !== $this->getInitData('siret')) {
 //                                if (!(int) BimpTools::getValue('siren_ok', 0)) {
 //                                if(!$this->isSirenOk()){
 //                                    $errors[] = 'Veuillez saisir un n° SIRET valide : '.$this->getData('siret');
 //                                }
-                            }
+//                            }
                         }
                     }
                 } else {

@@ -20,6 +20,7 @@ class BT_ficheInter extends BimpDolObject {
     CONST STATUT_VALIDER_COMMERCIALEMENT = 3;
     CONST STATUT_TERMINER = 2;
     CONST STATUT_SIGANTURE_PAPIER = 4;
+    CONST STATUT_DEMANDE_FACT =  10;
     CONST URGENT_NON = 0;
     CONST URGENT_OUI = 1;
     CONST TYPE_NO = 0;
@@ -41,7 +42,8 @@ class BT_ficheInter extends BimpDolObject {
         self::STATUT_BROUILLON => ['label' => "En cours de renseignement", 'icon' => 'retweet', 'classes' => ['warning']],
         self::STATUT_VALIDER => ['label' => "Signée par le client", 'icon' => 'check', 'classes' => ['success']],
         self::STATUT_TERMINER => ['label' => "Terminée", 'icon' => 'thumbs-up', 'classes' => ['important']],
-        self::STATUT_SIGANTURE_PAPIER => ['label' => "Attente signature client", 'icon' => 'warning', 'classes' => ['important']]
+        self::STATUT_SIGANTURE_PAPIER => ['label' => "Attente signature client", 'icon' => 'warning', 'classes' => ['important']],
+        self::STATUT_DEMANDE_FACT => ['label' => "Demande de facturation", 'icon' => 'euro', 'classes' => ['important']],
     ];
     
     public static $urgent = [
@@ -785,7 +787,7 @@ class BT_ficheInter extends BimpDolObject {
     
     public function canDelete() {
         global $user;
-        if((($this->getData('fk_statut') == 0) && $this->getData('fk_user_author') == $this->global_user->id && !$this->isOldFi()) || ($user->admin || $user->rights->bimptechnique->delete)) {
+        if((($this->getData('fk_statut') == 0) && $this->getData('fk_user_author') == $this->global_user->id && !$this->isOldFi()) || ($user->admin || $user->rights->bimptechnique->delete) && $statut != 0) {
            return 1;
         }
         
@@ -858,11 +860,14 @@ class BT_ficheInter extends BimpDolObject {
         $statut = $this->getData('fk_statut');
         
         if(!$this->isOldFi()) {
-            $buttons[] = array(
-            'label' => 'Générer le PDF',
-            'icon' => 'fas_file-pdf',
-            'onclick' => $this->getJsActionOnclick('generatePdf', array(), array())
-        );
+            if($statut == 0) {
+                $buttons[] = array(
+                    'label' => 'Générer le PDF',
+                    'icon' => 'fas_file-pdf',
+                    'onclick' => $this->getJsActionOnclick('generatePdf', array(), array())
+                );
+            }
+            
         
         $interne_soc = explode(',', BimpCore::getConf('bimptechnique_id_societe_auto_terminer'));
         
@@ -937,27 +942,277 @@ class BT_ficheInter extends BimpDolObject {
             }
 
             }
-
-            if($statut == self::STATUT_VALIDER) {
+            
+//            if($this->haveSurplusFacturation() && $statut == self::STATUT_VALIDER) {
+//                $buttons[] = array(
+//                    'label' => 'Demander la facturation de cette fiche',
+//                    'icon' => 'euro',
+//                    'onclick' => $this->getJsActionOnclick('askFacturation', array(), array())
+//                );
+//            }
+            
+            if($statut == self::STATUT_DEMANDE_FACT && $user->rights->bimptechnique->billing) {
                 $buttons[] = array(
-                    'label' => "Prévenir la facturation",
+                    'label' => 'Facturer',
                     'icon' => 'euro',
-                    'onclick' => $this->getJsActionOnclick('sendFacturation', array(), array(
-                    ))
+                    'onclick' => $this->getJsActionOnclick('createFacture', array(), array())
                 );
             }
+            
+            
+//            if($statut == self::STATUT_VALIDER) {
+//                $buttons[] = array(
+//                    'label' => "Prévenir la facturation",
+//                    'icon' => 'euro',
+//                    'onclick' => $this->getJsActionOnclick('sendFacturation', array(), array(
+//                    ))
+//                );
+//            }
         }
         
 
         return $buttons;
     }
     
+    public function getTotalFacturableArray() {
+        
+        $executedArray = $this->getServicesExecutedArray();
+        $servicesNonVendu = $this->getServicesByTypeArray(4);
+        $deplacementNonVendu = $this->getServicesByTypeArray(3);
+        $imponderable = $this->getServicesByTypeArray(1);
+        
+        $total_facturable = [];
+        
+        foreach($executedArray as $id_line_commande => $informations) {
+            $total_facturable["vendu"] += ($informations['ht_executed'] - $informations['ht_vendu'] - $informations['pourcentage_commerncial']);
+        }
+        
+        foreach($servicesNonVendu as $index => $informations) {
+            $remise_en_euro = ($informations['remise'] * $informations['tarif'])/ 100;
+            $total_facturable['inter_non_vendu'] += ($informations['tarif'] * $informations['qty']) - $remise_en_euro;
+        }
+        
+        foreach($deplacementNonVendu as $index => $informations) {
+            $remise_en_euro = ($informations['remise'] * $informations['tarif'])/ 100;
+            $total_facturable['dep_non_vendu'] += ($informations['tarif'] * $informations['qty']) - $remise_en_euro;
+        }
+        
+        foreach($imponderable as $index => $informations) {
+            $remise_en_euro = ($informations['remise'] * $informations['tarif'])/ 100;
+            $total_facturable['imponderable'] += ($informations['tarif'] * $informations['qty']) - $remise_en_euro;
+        }
+        
+        return $total_facturable;
+    }
+
+
+    public function getServicesExecutedArray() {
+        
+        $children = $this->getChildrenList("inters");
+        $services_executed = [];
+        foreach($children as $id_child) {
+            $child = $this->getChildObject('inters', $id_child);
+            if($child->getData('id_line_commande')) {
+                $line = new OrderLine($this->db->db);
+                $line->fetch($child->getData('id_line_commande'));
+                $time = $this->timestamp_to_time($child->getData('duree'));
+                $qty = $this->time_to_qty($time);
+                $services_executed[$child->getData('id_line_commande')]['ht_executed'] += ($line->total_ht * $qty);
+                $services_executed[$child->getData('id_line_commande')]['pourcentage_commerncial'] += ($child->getData('pourcentage_commercial') * $line->total_ht) / 100;
+                if(!array_key_exists("ht_vendu", $services_executed[$child->getData('id_line_commande')]))
+                    $services_executed[$child->getData('id_line_commande')]['ht_vendu'] = ($line->total_ht);
+                $services_executed[$child->getData('id_line_commande')]['qty_executed'] += $qty;
+                if(!array_key_exists("commande", $services_executed[$child->getData('id_line_commande')]))
+                    $services_executed[$child->getData('id_line_commande')]['commande'] = $line->fk_commande;
+                if(!array_key_exists("date", $services_executed[$child->getData('id_line_commande')]))
+                    $services_executed[$child->getData('id_line_commande')]['date'] = $child->getData('date');
+            }
+        }
+        return $services_executed;
+    }
+    
+    public function getServicesByTypeArray($type) {
+        $children = $this->getChildrenList('inters', ["type" => $type]);
+        
+        
+        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', ($type == 3) ? BimpCore::getConf('bimptechnique_id_dep') : BimpCore::getConf('bimptechnique_id_serv19'));
+        $services = [];
+        $index = 1;
+        if(count($children)) {
+            foreach($children as $id_child) {
+                $child = $this->getChildObject("inters", $id_child);
+                $time = $this->timestamp_to_time($child->getData('duree'));
+                $qty = $this->time_to_qty($time);
+                $services[$index]["tarif"] = $product->getData('price');
+                $services[$index]['qty'] = $qty;
+                $services[$index]['duree'] = $time;
+                $services[$index]['remise'] = $child->getData('pourcentage_commercial');
+                $services[$index]['date'] = $child->getData('date');
+                $index++;
+            }
+        }
+        
+        return $services;
+    }
+    
+    public function renderFacturationTab() {
+        
+        global $user;
+        
+        $haveCommande = (count(json_decode($this->getData('commandes')))) ? true : false;
+        
+        $html = "";
+        $children = $this->getChildrenList("inters");
+        
+        if(!$user->admin && $user->id != 375)
+            return BimpRender::renderAlerts("Onglet en cours de développement, il y a donc un accès restreint. Merci de votre compréhension.", 'alert', false);
+        if($haveCommande) {
+            if(!count($children))  {
+                $msg = BimpRender::renderIcon("warning") . " Il n'y a aucune lignes dans le rapport d'intervention";
+                $html .= BimpRender::renderAlerts($msg, "warning", false);
+            } else {
+                $services_executed = $this->getServicesExecutedArray();
+                $product  = BimpCache::getBimpObjectInstance('bimpcore', "Bimp_Product");
+                $html .= '<div class="before_list_content" data-refresh="1">';
+                $current = 1;
+                $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande');
+                foreach($services_executed as $id_line_commande => $informations) {
+                    $commande->fetch($informations['commande']);
+                    $line = new OrderLine($this->db->db);
+                    $line->fetch($id_line_commande);
+                    $product->fetch($line->fk_product);
+                    $date = new DateTime($informations['date']);
+                    $html .= '<div class="bimp_info_card" style="border-color: #348C41">'
+                            . '<div class="bimp_info_card_icon" style="color: #348C41">'
+                                . $current
+                            . '</div>'
+                            . '<div class="bimp_info_card_content">'
+                                . '<div class="bimp_info_card_title" style="color: #EF7D00"><h4>'.$product->getRef().' <a href="'.$product->getUrl().'" target="_blank"><i class="fas fa5-external-link-alt"></i></a> </h4></div>'
+                                . '<div class="bimp_info_card_value">Date: '.$date->format('d M Y').'</div>'
+                                . '<div class="bimp_info_card_value">Commande: '.$commande->getNomUrl(true, false, true).'</div>'
+                                . '<div class="bimp_info_card_value">Total Vendu: '.price($informations['ht_vendu']).'€ HT</div>'
+                                . '<div class="bimp_info_card_value">Total Réalisé: '.price($informations['ht_executed']).'€ HT (qté: '.$informations['qty_executed'].')</div>'
+                                . '<div class="bimp_info_card_value">Remise commercial sur le reste: '.price($informations['pourcentage_commerncial']).'€ HT</div>'
+                                . '<div class="bimp_info_card_value" style="color: #EF7D00">Total à facturer: '. (price($informations['ht_executed']) - price($informations['pourcentage_commerncial']) - price($informations['ht_vendu'])).'€ HT</div>'
+                            . '</div>'
+                        . '</div>'
+                    ;
+                    $current++;
+                }
+
+                $inter_non_vendu = $this->getServicesByTypeArray(4);
+
+                if(count($inter_non_vendu)) {
+                    foreach($inter_non_vendu as $index => $informations) {
+                        $date = new DateTime($informations['date']);
+                        $remise_euro = ($informations['remise'] * $informations['tarif']) / 100;
+                        $html .= '<div class="bimp_info_card" style="border-color: #3B6EA0">'
+                            . '<div class="bimp_info_card_icon" style="color: #3B6EA0">'
+                                . $current
+                            . '</div>'
+                            . '<div class="bimp_info_card_content">'
+                                . '<div class="bimp_info_card_title" style="color: #EF7D00"><h4>Intervention non vendu #'.$index.'</h4></div>'
+                                . '<div class="bimp_info_card_value">Date: '.$date->format('d M Y').'</div>'
+                                . '<div class="bimp_info_card_value"><br /></div>'
+                                . '<div class="bimp_info_card_value">Tarif horaire: '.price($informations['tarif']).'€ HT</div>'
+                                . '<div class="bimp_info_card_value">Durée: '.$informations['duree'].' (H:m) Qté: '.$informations['qty'].'</div>'
+                                . '<div class="bimp_info_card_value">Remise commercial sur l\'intervention: '.$remise_euro.'€ HT ('.$informations['remise'].'%)</div>'
+                                . '<div class="bimp_info_card_value" style="color: #EF7D00">Total à facturer: '.price(($informations['tarif'] * $informations['qty']) - $remise_euro).'€ HT</div>'
+                            . '</div>'
+                        . '</div>'
+                    ;
+                    $current++;
+                    }
+                }
+
+                $dep_non_vendu = $this->getServicesByTypeArray(3);
+
+                if(count($dep_non_vendu)) {
+                    foreach($dep_non_vendu as $index => $informations) {
+                        $date = new DateTime($informations['date']);
+                        $remise_euro = ($informations['remise'] * $informations['tarif']) / 100;
+                        $html .= '<div class="bimp_info_card" style="border-color: #963E96">'
+                            . '<div class="bimp_info_card_icon" style="color: #963E96">'
+                                . $current
+                            . '</div>'
+                            . '<div class="bimp_info_card_content">'
+                                . '<div class="bimp_info_card_title" style="color: #EF7D00"><h4>Déplacement non vendu #'.$index.'</h4></div>'
+                                . '<div class="bimp_info_card_value">Date: '.$date->format('d M Y').'</div>'
+                                . '<div class="bimp_info_card_value"><br /></div>'
+                                . '<div class="bimp_info_card_value">Tarif horaire: '.price($informations['tarif']).'€ HT</div>'
+                                . '<div class="bimp_info_card_value">Durée: '.$informations['duree'].' (H:m) Qté: '.$informations['qty'].'</div>'
+                                . '<div class="bimp_info_card_value">Remise commercial sur l\'intervention: '.$remise_euro.'€ HT ('.$informations['remise'].'%)</div>'
+                                . '<div class="bimp_info_card_value" style="color: #EF7D00">Total à facturer: '.price(($informations['tarif'] * $informations['qty']) - $remise_euro).'€ HT</div>'
+                            . '</div>'
+                        . '</div>'
+                    ;
+                    $current++;
+                    }
+                }
+
+                $imponderable = $this->getServicesByTypeArray(1);
+
+                if(count($imponderable)) {
+                    foreach($imponderable as $index => $informations) {
+                        $date = new DateTime($informations['date']);
+                        $remise_euro = ($informations['remise'] * $informations['tarif']) / 100;
+                        $html .= '<div class="bimp_info_card" style="border-color: #A00000">'
+                            . '<div class="bimp_info_card_icon" style="color: #A00000">'
+                                . $current
+                            . '</div>'
+                            . '<div class="bimp_info_card_content">'
+                                . '<div class="bimp_info_card_title" style="color: #EF7D00"><h4>Impondérable #'.$index.'</h4></div>'
+                                . '<div class="bimp_info_card_value">Date: '.$date->format('d M Y').'</div>'
+                                . '<div class="bimp_info_card_value"><br /></div>'
+                                . '<div class="bimp_info_card_value">Tarif horaire: '.price($informations['tarif']).'€ HT</div>'
+                                . '<div class="bimp_info_card_value">Durée: '.$informations['duree'].' (H:m) Qté: '.$informations['qty'].'</div>'
+                                . '<div class="bimp_info_card_value">Remise commercial sur l\'intervention: '.$remise_euro.'€ HT ('.$informations['remise'].'%)</div>'
+                                . '<div class="bimp_info_card_value" style="color: #EF7D00">Total à facturer: '.price(($informations['tarif'] * $informations['qty']) - $remise_euro).'€ HT</div>'
+                            . '</div>'
+                        . '</div>'
+                    ;
+                    $current++;
+                    }
+                }
+
+
+                $html .= '</div>';
+            }
+        } else {
+            $html = BimpRender::renderAlerts("Cette fiche d'intevention ne concerne pas de commande donc pas de facturation.", 'warning', false);
+        }
+        return $html;
+    }
+    
+    public function url($tab = '') {
+        $url = DOL_URL_ROOT . '/' . "bimptechnique" . '/index.php?fc=' . "fi" . '&id=' . $this->id;
+        if(!empty($tab))
+            $url .= "&navtab-maintabs=" . $tab;
+        return $url;
+    }
+    
+    public function actionCreateFacture($data, &$success) {
+        $errors = [];
+        $warnings = [];
+        
+        $facture = BimpCache::getBimpObjectInstance("bimpcommercial", "Bimp_Facture");
+        
+        $errors = [];
+        
+        return Array(
+            "errors" => $errors,
+            "warnings" => $warnings,
+            "success" => $success
+        );
+    }
+
+    
     public function actionSendfacturation($data, &$success) {
         $errors = [];
         $warnings = [];
         $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
         $success = "Service facturation prévenu";
-        mailSyn2("[".$this->getref()."]", 'facturationclients@bimp.fr', "gle@bimp.fr", "Bonjour, Pour information la FI N°" . $this->getRef() . ' pour le client ' . $client->getdata('code_client') . ' - ' . $client->getName() . ' à été signée par le client');
+        mailSyn2("[".$this->getref()."]", 'facturationclients@bimp.fr', null, "Bonjour, Pour information la FI N°" . $this->getRef() . ' pour le client ' . $client->getdata('code_client') . ' - ' . $client->getName() . ' à été signée par le client');
         $this->addLog("Facturation client prévenue");
         $this->updateField('fk_statut', 2);
         
@@ -984,14 +1239,85 @@ class BT_ficheInter extends BimpDolObject {
                     $produit = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Product", $fk_product);
                     if($produit->isDep()){
 //                    if(in_array($produit->getData('ref'), $codes)) {
-                        $array[$id_commande] = $commande->ref . " - " . $bimpCommande->getData('libelle');
+                        $thisChildrenFilterArray = $this->getChildrenList("inters", ['id_line_commande' => $child->id]);
+                        if(!count($thisChildrenFilterArray)) {
+                            $array[$id_commande] = $commande->ref . " - " . $bimpCommande->getData('libelle');
+                        }
                     }
                 }
             }
             
         }
         return $array;
-    } 
+    }
+    
+ 
+    public function actionFarSign($data, &$success) {
+        $errors[] = "<pre>" . print_r($data, 1);
+        $public_url = md5($this->getData('ref'));
+                
+        $continue = true;
+        $loop = 1;
+        $haveFind = true;
+        while($continue) {
+            $new_password = $this->generateAleatoirePassword(5);
+            $compare = $this->db->getCount('fichinter', 'public_signature_code = "'.$new_password.'"', 'rowid');
+            
+            if($compare == 0) {
+                $continue  = false;
+            }
+            
+            if($loop == 20 && $continue) {
+                $continue = false;
+                $haveFind = false;
+            }  
+            $loop++;
+        }
+        
+        if($haveFind) {
+            $today = new DateTime();
+            $this->set('email_signature', $data['mail_signataire']);
+            $this->set('public_signature_url', $public_url);
+            $this->set('public_signature_code', $new_password);
+            $this->set('public_signature_date_delivrance', $today->format('Y-m-d H:i:s'));
+            $today->add(new DateInterval("P4D"));
+            $this->set('public_signature_date_cloture', $today->format('Y-m-d H:i:s'));
+            $errors[] = "<pre>".print_r($this->data,1)."</pre>";
+        } else {
+            $errors[] = "Merci de rééssayer pour trouver un mot de passe unique.";
+        }
+        
+        return Array(
+            'errors' => $errors,
+            'warnings' => $warnings,
+            'success' => $success
+        );
+    }
+    
+    public function generateAleatoirePassword($nombre_char) {
+        $password = "";
+        for($i = 0; $i < $nombre_char; $i++) {
+            $selecteur_type = rand(0,1000);
+            
+            
+            if($selecteur_type%2 == 0) {
+                // C'est un char
+                $char = chr(rand(65,90));
+                $selecteur_maj = rand(0,1000);
+                if($selecteur_maj%2 == 0) {
+                    // C'est une majuscule
+                    $password .= strtoupper($char);
+                } else {
+                    // C'est une minuscule
+                    $password .= strtolower($char);
+                }
+            }  else {
+                $password .= rand(0,9);
+            }
+            
+        }
+        return $password;
+    }
     
     public function actionAddInter($data, &$success) {
         global $user, $db;
@@ -1113,12 +1439,12 @@ class BT_ficheInter extends BimpDolObject {
                         $facture = 0;
 
                         switch($value['inter_'.$numeroInter.'_type']) {
-                            case 1:
                             case 2:
                                 $mode = 0;
                                 $facture = 0;
                                 break;
                             case 0:
+                            case 1:
                             case 6:
                             case 5:
                                 $facture = 1;
@@ -1133,7 +1459,7 @@ class BT_ficheInter extends BimpDolObject {
                                 $mode = 2;
                                 break;
                         }
-
+                        $callback = "window.location.href = '".DOL_URL_ROOT."/bimptechnique/?fc=fi&id=".$this->id."'";
                         $line->updateField('forfait', $mode);
                         $line->updateField('facturable', $facture);
                     } else {
@@ -1146,7 +1472,7 @@ class BT_ficheInter extends BimpDolObject {
         return [
             'errors' => $errors,
             'warnings' => $warnings,
-            'success' => $success
+            'success_callback' => $callback
         ];
     }
     
@@ -1259,6 +1585,7 @@ class BT_ficheInter extends BimpDolObject {
             $html .= '<div class="object_header_infos">';
             $html .= '<h4>Intervenant: ' . $tech->dol_object->getNomUrl(1,1,1) . ' </h4>';
             $html .= '<h4>Client: ' . $client->dol_object->getNomUrl(1) . ' </h4>';
+           
             $html .= '</div>';
         }
         
@@ -1270,7 +1597,7 @@ class BT_ficheInter extends BimpDolObject {
         $extra = '<br />';
         $u = $this->getData('urgent');
         $extra .= "<span>Interventions urgentes:<strong class='".self::$urgent[$u]['classes'][0]."'> ".self::$urgent[$u]['label']."</strong></span>";
-        
+        //$extra .= "<br /><a href='".$this->url('facturation')."'>TAB Facturation</a>"; // TEMPORAIRE
         
         return $extra;
     }
@@ -1297,7 +1624,7 @@ class BT_ficheInter extends BimpDolObject {
         foreach($allCommandes as $id) {
             $commande->fetch($id);
             foreach ($commande->lines as $line){
-                $product->fetch($line->fk_product);
+                $product->fetch($line->fk_product);                
                 if($product->isLoaded() && !$product->isDep() && ($line->product_type == 1 || $product->getData('fk_product_type'))) {
                     if(array_key_exists($product->getData('ref'), $tp)) {
                         $services['commande_' . $line->id] = $tp[$product->getRef()] . ' ('.price($line->total_ht).' € HT) - <b>'.$commande->ref.'</b> <br />' . $line->description;

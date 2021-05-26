@@ -901,7 +901,7 @@ class Bimp_Societe extends BimpDolObject
                 0 => $empty_label
             );
         }
-        
+
         return array();
     }
 
@@ -1796,13 +1796,11 @@ class Bimp_Societe extends BimpDolObject
                     $branches = $base->branches->branch;
                     $adress = "" . $summary->postaladdress->address . " " . $summary->postaladresse->additiontoaddress;
 
-
-                    if($summary->status == 'Fermé'){
+                    if ($summary->status == 'Fermé') {
                         $note = 'Fermé';
                         $alert = 'Fermé';
                         $lettrecreditsafe = 0;
-                    }
-                    else{
+                    } else {
                         $lettrecreditsafe = 0;
                         foreach (array("", "2013") as $annee) {
                             $champ = "rating" . $annee;
@@ -1846,14 +1844,14 @@ class Bimp_Societe extends BimpDolObject
                         if ($limit < 1 && $lettrecreditsafe == 100)
                             $limit = 10000000;
                     }
-                    if(isset($result->body->company->ratings2013->commentaries->comment)){
-                        if(is_string($result->body->company->ratings2013->commentaries->comment))
+                    if (isset($result->body->company->ratings2013->commentaries->comment)) {
+                        if (is_string($result->body->company->ratings2013->commentaries->comment))
                             $note .= "
-".$result->body->company->ratings2013->commentaries->comment;
+" . $result->body->company->ratings2013->commentaries->comment;
                         else
-                            foreach($result->body->company->ratings2013->commentaries->comment as $comment)
-                                 $note .= "
-".$comment;
+                            foreach ($result->body->company->ratings2013->commentaries->comment as $comment)
+                                $note .= "
+" . $comment;
                     }
 
                     $data = array(
@@ -2011,7 +2009,6 @@ class Bimp_Societe extends BimpDolObject
             $msg = 'L\'encours du client ' . $this->getLink() . ' a été modifié
 <br/>Nouvel encours : ' . $this->getData('outstanding_limit') . ' €
 <br/>Ancien encours : ' . $oldLimit . ' €';
-
 
             if ($emails != '')
                 mailSyn2($subject, $emails, '', $msg);
@@ -2266,7 +2263,8 @@ class Bimp_Societe extends BimpDolObject
                     $label = 'fournisseur';
                 }
 
-                $subject = 'Demande ' . $op . ' ' . $label.' '.$this->getRef();;
+                $subject = 'Demande ' . $op . ' ' . $label . ' ' . $this->getRef();
+                ;
                 $msg = 'Bonjour, ' . "\n\n";
                 $msg .= 'L\'utilisateur ' . $user->getNomUrl() . ' demande ' . ($status ? 'la' : 'l\'') . ' ' . $op;
                 $msg .= ' du ' . $label . ' ' . $this->getLink();
@@ -2338,8 +2336,8 @@ class Bimp_Societe extends BimpDolObject
     public function validatePost()
     {
         $errors = parent::validatePost();
-        
-        if($_REQUEST['outstanding_limit_credit_safe'] != $this->getData('outstanding_limit_credit_safe'))
+
+        if ($_REQUEST['outstanding_limit_credit_safe'] != $this->getData('outstanding_limit_credit_safe'))
             $this->updateField('outstanding_limit_credit_safe', $_REQUEST['outstanding_limit_credit_safe']);
 
         if (!count($errors)) {
@@ -2347,8 +2345,10 @@ class Bimp_Societe extends BimpDolObject
                 if ((int) BimpTools::getValue('is_company')) {
                     if (!(int) $this->getData('fk_typent')) {
                         $errors[] = 'Veuillez sélectionner le type de tiers';
+                    } elseif ((int) $this->getData('fk_typent') == 8) {
+                        $errors[] = 'Il n\'est pas possible de sélectionner le type "particulier" pour les entreprises';
                     }
-                    
+
                     if ($this->isSirenRequired()) {
                         $siret = $this->getData('siret');
                         $siren = $this->getData('siren');
@@ -2422,12 +2422,12 @@ class Bimp_Societe extends BimpDolObject
         $init_solv = (int) $this->getInitData('solvabilite_status');
         $init_status = (int) $this->getInitData('status');
         $init_outstanding_limit = $this->getInitData('outstanding_limit');
-        
-        if($this->getInitData('fk_typent') != $this->getData('fk_typent') && !$this->canEditField('status')){
-            if(stripos($this->getData('code_compta'), 'P') === 0 && $this->getData('fk_typent') != 8)
-                    return array("Code compta particulier, le type de tiers ne peut être différent.");
-            if(stripos($this->getData('code_compta'), 'E') === 0 && $this->getData('fk_typent') == 8)
-                    return array("Code compta entreprise, le type de tiers ne peut être différent.");
+
+        if ($this->getInitData('fk_typent') != $this->getData('fk_typent') && !$this->canEditField('status')) {
+            if (stripos($this->getData('code_compta'), 'P') === 0 && $this->getData('fk_typent') != 8)
+                return array("Code compta particulier, le type de tiers ne peut être différent.");
+            if (stripos($this->getData('code_compta'), 'E') === 0 && $this->getData('fk_typent') == 8)
+                return array("Code compta entreprise, le type de tiers ne peut être différent.");
         }
 
         if ($init_solv != $this->getData('solvabilite_status') && (int) $this->getData('solvabilite_status') === self::SOLV_A_SURVEILLER_FORCE) {
@@ -2436,12 +2436,12 @@ class Bimp_Societe extends BimpDolObject
                 return array('Vous n\'avez pas la permission de passer le statut solvabilité à "Client à surveiller (forcé)"');
             }
         }
-        
-        if($this->getData('fk_typent') == 5){
+
+        if ($this->getData('fk_typent') == 5) {
             $this->set('mode_reglement', 63);
             $this->set('cond_reglement', 7);
         }
-        
+
         $errors = parent::update($warnings, $force_update);
 
         if (!count($errors)) {

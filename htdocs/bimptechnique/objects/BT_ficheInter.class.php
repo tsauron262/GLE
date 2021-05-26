@@ -1059,7 +1059,7 @@ class BT_ficheInter extends BimpDolObject {
         
         global $user;
         
-        $haveCommande = (count(json_decode($this->getData('commandes')))) ? true : false;
+        $haveCommande = true;
         
         $html = "";
         $children = $this->getChildrenList("inters");

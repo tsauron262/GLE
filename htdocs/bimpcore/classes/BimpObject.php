@@ -2114,6 +2114,18 @@ class BimpObject extends BimpCache
         if ((int) $this->getConf('fields/' . $field . '/history', 0, false, 'bool')) {
             $current_value = $this->getInitData($field);
             if (!isset($this->id) || !$this->id || is_null($current_value) || ($current_value != $value)) {
+                // On vérifie que la valeur courante est bien enregistrée: 
+                $where = 'module = \'' . $this->module . '\' AND object = \'' . $this->object_name . '\'';
+                $where .= ' AND id_object = ' . (int) $this->id . ' AND field = \'' . $field . '\'';
+                if (!(int) $this->db->getValue($this->getTable(), $this->getPrimary(), $where, 'date', 'DESC')) {
+                    $this->db->insert('bimpcore_history', array(
+                        'module'    => $this->module,
+                        'object'    => $this->object_name,
+                        'id_object' => $this->id,
+                        'field'     => $field,
+                        'value'     => $this->getDbValue($field, $current_value)
+                    ));
+                }
                 $this->history[$field] = $value;
             }
         }

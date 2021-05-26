@@ -332,7 +332,29 @@ fields:
         type: int
         user_edit: 1
         values: 
-            array: types_ent
+            array:
+                callback: 
+                    method: getTypesSocietesArray
+                    params: 
+                        - 1
+                        - 0
+        input: 
+            type: select
+            options: 
+                callback: 
+                    method: getTypesSocietesArray
+                    params: 
+                        - 1
+                        - 1
+        search: 
+            input: 
+                type: select
+                options: 
+                    callback: 
+                        method: getTypesSocietesArray
+                        params: 
+                            - 1
+                            - 0
             
     fk_effectif:
         dol_prop: effectif_id

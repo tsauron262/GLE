@@ -2345,6 +2345,10 @@ class Bimp_Societe extends BimpDolObject
         if (!count($errors)) {
             if (BimpTools::isSubmit('is_company')) {
                 if ((int) BimpTools::getValue('is_company')) {
+                    if (!(int) $this->getData('fk_typent')) {
+                        $errors[] = 'Veuillez sélectionner le type de tiers';
+                    }
+                    
                     if ($this->isSirenRequired()) {
                         $siret = $this->getData('siret');
                         $siren = $this->getData('siren');

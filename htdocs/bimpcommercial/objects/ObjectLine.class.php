@@ -2997,7 +2997,7 @@ class ObjectLine extends BimpObject
         return $warnings;
     }
 
-    public function attributeEquipment($id_equipment, $id_equipment_line = 0, $recal_line_pa = true)
+    public function attributeEquipment($id_equipment, $id_equipment_line = 0, $recalc_line_pa = true, $check_equipment = true)
     {
         // Si $pa_ht défini, il est prioritaire sur id_fourn_price et $equipment->getData('prix_achat')
         // Sinon, si $equipment->getData('prix_achat') est défini (pas 0), il est prioritaire sur $id_fourn_price. 
@@ -3022,7 +3022,7 @@ class ObjectLine extends BimpObject
                 }
             }
 
-            if ($id_equipment) {
+            if ($id_equipment && $check_equipment) {
                 $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
                 if (is_null($line) || ((int) $line->getData('id_equipment') !== (int) $id_equipment)) {
                     $errors = $this->checkEquipment($equipment);
@@ -3052,7 +3052,7 @@ class ObjectLine extends BimpObject
                         $errors = $line->setEquipment((int) $id_equipment, false);
 
                         if (!count($errors)) {
-                            if ($recal_line_pa) {
+                            if ($recalc_line_pa) {
                                 $this->calcPaByEquipments();
                             }
 

@@ -2037,11 +2037,14 @@ class BContract_contrat extends BimpDolObject
             $card .= '<h2>Facturation : ' . self::$period[$this->getData('periodicity')] . '</h2>';
         }
 
+        $card .= '<div>';
         if ($this->canClientViewDetail())
             $card .= '<a tool="Voir le contrat" flow="down" class="button" href="' . DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=contrats&content=card&id_contrat=' . $this->id . '"><i class="fas fa-eye"></i></a>';
         if ($this->isValide()) {
             $card .= '<span tool="Nouveau ticket support" flow="down" class="button" onclick="' . $this->getNewTicketSupportOnClick() . '"><i class="fas fa-plus"></i></span>';
         }
+        $card .= '</div>';
+        
         //$card .= '<a tool="Statistiques du contrat" flow="down" class="button" href="https://instagram.com/chynodeluxe"><i class="fas fa-leaf"></i></a>';
         $card .= '</div></div>';
 

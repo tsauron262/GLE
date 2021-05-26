@@ -63,6 +63,13 @@ class GSX_Reservation
                 'Content-type: application/json',
                 'X-PARTNER-SOLDTO: ' . $soldTo
             );
+            
+//            require_once(DOL_DOCUMENT_ROOT.'/bimpapple/classes/GSX_v2.php');
+//            $certInfo = GSX_v2::getCertifInfo($soldTo);
+//            curl_setopt($ch, CURLOPT_SSLCERT, $certInfo['path']);
+//            curl_setopt($ch, CURLOPT_SSLKEY, $certInfo['pathKey']);
+//            curl_setopt($ch, CURLOPT_SSLCERTPASSWD, $certInfo['pass']);
+    
 
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             curl_setopt($ch, CURLOPT_SSLCERT, $certif_file_path);

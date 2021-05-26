@@ -216,7 +216,7 @@ class Bimp_Facture extends BimpComm
                 break;
             
             case 'litige':
-                return (int) $user->rights->bimpcommercial->admin_recouvrement;
+                return (int) $user->rights->bimpcommercial->admin_recouvrement or (int) $user->admin;
         }
 
         return parent::canEditField($field_name);
@@ -265,7 +265,7 @@ class Bimp_Facture extends BimpComm
                     'relance_active', 'nb_relance', 'date_relance', 'date_next_relance',
                     'close_code', 'close_note',
                     'date_irrecouvrable', 'id_user_irrecouvrable',
-                    'prelevement', 'ef_type', 'fk_mode_reglement', 'pdf_nb_decimal'
+                    'prelevement', 'ef_type', 'fk_mode_reglement', 'pdf_nb_decimal', 'litige'
                 ))) {
             return 1;
         }

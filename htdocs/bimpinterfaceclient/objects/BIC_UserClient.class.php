@@ -693,7 +693,6 @@ class BIC_UserClient extends BimpObject
             $errors = parent::update($warnings, $force_update);
         }
 
-
         return $errors;
     }
 }

@@ -1461,7 +1461,7 @@ class BimpCache
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
 
-            $rows = self::getBdb()->getRows('c_typent', ($active_only ? '`active` = 1' : '1'), null, 'array', array('id', 'libelle'));
+            $rows = self::getBdb()->getRows('c_typent', ($active_only ? '`active` = 1' : '1') . " ORDER BY libelle", null, 'array', array('id', 'libelle'));
 
             if (!is_null($rows)) {
                 foreach ($rows as $r) {

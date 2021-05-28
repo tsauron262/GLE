@@ -1717,11 +1717,7 @@ class BContract_contrat extends BimpDolObject
                     'onclick' => $this->getJsActionOnclick('addAcompte', array(), array("form_name" => "addAcc"))
                 );
         }
-$buttons[] = array(
-                    'label'   => 'TACITE',
-                    'icon'    => 'euro',
-                    'onclick' => $this->getJsActionOnclick('tacite', array(), array())
-                );
+
         return $buttons;
     }
 

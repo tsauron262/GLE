@@ -1450,6 +1450,11 @@ class BContract_contrat extends BimpDolObject
             $this->updateField('relance_renouvellement', 1);
             $this->addLog('Renouvellement tacite N°' . $next_renouvellement);
             $this->updateField('date_end_renouvellement', $new_date_end->format('Y-m-d'));
+            
+            $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
+            $echeancier->fetchBy('id_contrat', $this->id);
+            $echeancier->updateField('next_facture_date', $new_date_start->format('Y-m-d') . "  00:00:00");
+            
         }
 
         if ($auto) {
@@ -1712,7 +1717,11 @@ class BContract_contrat extends BimpDolObject
                     'onclick' => $this->getJsActionOnclick('addAcompte', array(), array("form_name" => "addAcc"))
                 );
         }
-
+$buttons[] = array(
+                    'label'   => 'TACITE',
+                    'icon'    => 'euro',
+                    'onclick' => $this->getJsActionOnclick('tacite', array(), array())
+                );
         return $buttons;
     }
 

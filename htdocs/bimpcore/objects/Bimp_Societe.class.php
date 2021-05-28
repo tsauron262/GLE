@@ -1274,9 +1274,11 @@ class Bimp_Societe extends BimpDolObject
 
             if ($this->dol_object->date_creation) {
                 $dt = new DateTime(BimpTools::getDateFromDolDate($this->dol_object->date_creation));
-
+                $date_regle_encoure  = new DateTime("2021-05-01");
                 $html .= '<div class="object_header_infos">';
-                $html .= 'Créé le ' . $dt->format('d / m / Y');
+                $html .= 'Créé le ';
+                $class = ($dt->getTimestamp() >= $date_regle_encoure->getTimestamp()) ? " class='danger'" : "";
+                $html .= "<strong" . $class . ">" . $dt->format('d / m / Y') . "</strong>";
 
                 if ((int) $this->dol_object->user_creation) {
                     $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_creation);

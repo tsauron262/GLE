@@ -120,7 +120,7 @@ class InvoiceStatementPDF extends BimpDocumentPDF
                 foreach($id_contacts as $id_contact)  {
                     if($id_contact > 0) {
                         $socp = $this->bimpDb->getRow('socpeople', 'rowid = ' . $id_contact);
-                        $html .= $socp->lastname . ' ' . $socp->firstname;
+                        $html .= $socp->lastname . ' ' . $socp->firstname . "<br />";
                     }
                 }
                 $html .= '</td>';

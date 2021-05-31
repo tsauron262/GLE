@@ -702,7 +702,7 @@ class BimpRender
         $html .= ' data-trigger="hover"';
         $html .= ' data-placement="bottom"';
         $html .= ' data-html="true"';
-        $html .= ' data-content="' . htmlentities($bimpHistory->renderCard($object, $field, 10, $display_user, false)) . '"';
+        $html .= ' data-content="' . htmlentities($bimpHistory->renderCard($object, $field, 15, $display_user, false)) . '"';
         $html .= '></span>';
 
         unset($bimpHistory);

@@ -455,7 +455,7 @@ class BContract_contrat extends BimpDolObject
         $tms_effect = strtotime($dateEffecte->format('Y-m-d'));
         $tms_now = strtotime($date_now->format('Y-m-d'));
         
-        if($tms_effect > $tms_now) {
+        if(($tms_effect > $tms_now) && !BimpCore::getConf("bimpcontract_activate_contrat_before")) {
             $errors[] = "Ce contrat ne peut pas être activé car sa date d'effet est trop éloignée. Le groupe contrat recevra une demande d'activation 10 jours avant cette date";
         }
 
@@ -1450,6 +1450,11 @@ class BContract_contrat extends BimpDolObject
             $this->updateField('relance_renouvellement', 1);
             $this->addLog('Renouvellement tacite N°' . $next_renouvellement);
             $this->updateField('date_end_renouvellement', $new_date_end->format('Y-m-d'));
+            
+            $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
+            $echeancier->fetchBy('id_contrat', $this->id);
+            $echeancier->updateField('next_facture_date', $new_date_start->format('Y-m-d') . "  00:00:00");
+            
         }
 
         if ($auto) {
@@ -2037,11 +2042,14 @@ class BContract_contrat extends BimpDolObject
             $card .= '<h2>Facturation : ' . self::$period[$this->getData('periodicity')] . '</h2>';
         }
 
+        $card .= '<div>';
         if ($this->canClientViewDetail())
             $card .= '<a tool="Voir le contrat" flow="down" class="button" href="' . DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=contrats&content=card&id_contrat=' . $this->id . '"><i class="fas fa-eye"></i></a>';
         if ($this->isValide()) {
             $card .= '<span tool="Nouveau ticket support" flow="down" class="button" onclick="' . $this->getNewTicketSupportOnClick() . '"><i class="fas fa-plus"></i></span>';
         }
+        $card .= '</div>';
+        
         //$card .= '<a tool="Statistiques du contrat" flow="down" class="button" href="https://instagram.com/chynodeluxe"><i class="fas fa-leaf"></i></a>';
         $card .= '</div></div>';
 
@@ -3456,13 +3464,13 @@ class BContract_contrat extends BimpDolObject
         if (!count($errors)) {
             foreach ($propal->dol_object->lines as $line) {
                 $produit = $this->getInstance('bimpcore', 'Bimp_Product', $line->fk_product);
-                if ($produit->getData('fk_product_type') == 1) {
-                    $description = ($line->desc) ? $line->desc : $line->libelle;
-                    $end_date = new DateTime($data['valid_start']);
-                    $end_date->add(new DateInterval("P" . $duree_mois . "M"));
-                    $new_contrat->dol_object->pa_ht = $line->pa_ht; // BUG DéBILE DOLIBARR
-                    $new_contrat->dol_object->addLine($description, $line->subprice, $line->qty, $line->tva_tx, 0, 0, $line->fk_product, $line->remise_percent, $data['valid_start'], $end_date->format('Y-m-d'), 'HT', 0.0, 0, null, (float) $line->pa_ht, 0, null, $line->rang);
-                }
+                //if ($produit->getData('fk_product_type') == 1) {
+                $description = ($line->desc) ? $line->desc : $line->libelle;
+                $end_date = new DateTime($data['valid_start']);
+                $end_date->add(new DateInterval("P" . $duree_mois . "M"));
+                $new_contrat->dol_object->pa_ht = $line->pa_ht; // BUG DéBILE DOLIBARR
+                $new_contrat->dol_object->addLine($description, $line->subprice, $line->qty, $line->tva_tx, 0, 0, $line->fk_product, $line->remise_percent, $data['valid_start'], $end_date->format('Y-m-d'), 'HT', 0.0, 0, null, (float) $line->pa_ht, 0, null, $line->rang);
+                //}
             }
 
             $contacts_suivi = $new_contrat->dol_object->liste_contact(-1, 'external', 0, 'BILLING2');

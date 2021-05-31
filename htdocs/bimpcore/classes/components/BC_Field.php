@@ -302,8 +302,8 @@ class BC_Field extends BimpComponent
         }
 
         if ($history_html) {
-            $html .= '<div style="padding-right: 45px;">';
-            $html .= '<div style="float: left; margin-left: -40px; margin-top: 4px">';
+            $html .= '<div style="padding-left: 28px;">';
+            $html .= '<div style="float: left; margin-left: -28px; margin-top: 4px">';
             $html .= $history_html;
             $html .= '</div>';
         }

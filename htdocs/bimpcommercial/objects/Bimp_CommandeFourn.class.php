@@ -310,8 +310,6 @@ class Bimp_CommandeFourn extends BimpComm
                     $result['name'] = $dataAdd[0];
                     $result['adress'] = $dataAdd[1];
 
-
-
                     if (count($dataAdd) >= 5 && count(explode(" ", $dataAdd[4])) > 1) {
                         $result['adress2'] = $dataAdd[2];
                         $result['adress3'] = $dataAdd[3];
@@ -319,14 +317,13 @@ class Bimp_CommandeFourn extends BimpComm
                         $town = str_replace($tabZipTown[0] . " ", "", $dataAdd[4]);
                         if (count($dataAdd) == 6)
                             $result['country'] = $dataAdd[5];
-                    }elseif (count($dataAdd) >= 4 && count(explode(" ", $dataAdd[3])) > 1) {
+                    } elseif (count($dataAdd) >= 4 && count(explode(" ", $dataAdd[3])) > 1) {
                         $result['adress2'] = $dataAdd[2];
                         $tabZipTown = explode(" ", $dataAdd[3]);
                         $town = str_replace($tabZipTown[0] . " ", "", $dataAdd[3]);
                         if (count($dataAdd) == 5)
                             $result['country'] = $dataAdd[4];
-                    }
-                    elseif ((count($dataAdd) >= 3 && count(explode(" ", $dataAdd[2])) > 1)) {
+                    } elseif ((count($dataAdd) >= 3 && count(explode(" ", $dataAdd[2])) > 1)) {
                         $tabZipTown = explode(" ", $dataAdd[2]);
                         $town = str_replace($tabZipTown[0] . " ", "", $dataAdd[2]);
                         if (count($dataAdd) == 4)
@@ -732,7 +729,6 @@ class Bimp_CommandeFourn extends BimpComm
                     'icon'    => 'fas_arrow-circle-right',
                     'onclick' => $onclick,
                 );
-
 
                 if ($this->getData('fk_soc') == $this->idLdlc) {
                     $onclick = $this->getJsActionOnclick('makeOrderEdi', array(), array(
@@ -1155,7 +1151,7 @@ class Bimp_CommandeFourn extends BimpComm
     public function renderHeaderStatusExtra()
     {
         $html = '';
-        
+
         $forced = $this->getData('status_forced');
 
         if (isset($forced['reception']) && (int) $forced['reception']) {
@@ -1174,7 +1170,7 @@ class Bimp_CommandeFourn extends BimpComm
         }
 
         $html .= parent::renderHeaderStatusExtra();
-        
+
         return $html;
     }
 
@@ -1466,8 +1462,6 @@ class Bimp_CommandeFourn extends BimpComm
 
         global $user, $conf, $langs;
 
-
-
         $lines = $this->getLines('not_text');
         foreach ($lines as $line) {
             $prod = $line->getChildObject('product');
@@ -1601,7 +1595,6 @@ class Bimp_CommandeFourn extends BimpComm
         $mdp = "MEDx33w+3u(";
         $folder = "/FTP-BIMP-ERP/tracing/";
 
-
 //            $url = "exportftp.techdata.fr";
 //            $login = "bimp";
 //            $mdp = "=bo#lys$2003";
@@ -1627,7 +1620,6 @@ class Bimp_CommandeFourn extends BimpComm
                             if (!stripos($fileEx, ".xml"))
                                 continue;
                             $data = simplexml_load_string(file_get_contents($dir . $file));
-
 
                             if (isset($data->attributes()['date'])) {
                                 $date = (string) $data->attributes()['date'];
@@ -1714,8 +1706,7 @@ class Bimp_CommandeFourn extends BimpComm
                                         $success .= "<br/>" . count($colis) . " Colis envoyées ";
 
                                     $success .= "<br/>Comm : " . $ref . "<br/>Status " . static::$edi_status[(int) $statusCode]['label'];
-                                }
-                                else {
+                                } else {
                                     $errorLn[] = 'pas de comm ' . $ref;
                                 }
                             } else {
@@ -1748,7 +1739,6 @@ class Bimp_CommandeFourn extends BimpComm
 
         $errors = array();
 
-
 //        $errors = BimpTools::merge_array($errors, $this->verifMajLdlc($data, $success));
         if ($this->getData("fk_soc") != $this->idLdlc)
             $errors[] = "Cette fonction n'est valable que pour LDLC";
@@ -1757,7 +1747,6 @@ class Bimp_CommandeFourn extends BimpComm
         if (!count($errors)) {
             require_once DOL_DOCUMENT_ROOT . '/bimpdatasync_old/classes/BDS_ArrayToXml.php';
             $arrayToXml = new BDS_ArrayToXml();
-
 
             $products = array();
 
@@ -1768,7 +1757,6 @@ class Bimp_CommandeFourn extends BimpComm
                 if (is_object($prod) && $prod->isLoaded()) {
                     $diference = 999;
                     $ref = $prod->findRefFournForPaHtPlusProche($line->getUnitPriceHTWithRemises(), $this->idLdlc, $diference);
-
 
                     if (strpos($ref, "AR") !== 0)
                         $errors[] = "La référence " . $ref . "ne semble pas être une ref LDLC correct  pour le produit " . $prod->getLink();
@@ -2268,17 +2256,21 @@ class Bimp_CommandeFourn extends BimpComm
                                         // Ajout des équipements: 
                                         if (!count($line_errors) && $isSerialisable) {
                                             $equipments = (isset($line_data['equipments']) ? $line_data['equipments'] : array());
-                                            foreach ($equipments as $id_equipment) {
-                                                $eq_errors = $fac_line->attributeEquipment((int) $id_equipment);
-                                                if (count($eq_errors)) {
-                                                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-                                                    if (BimpObject::objectLoaded($equipment)) {
-                                                        $eq_label = '"' . $equipment->getData('serial') . '"';
-                                                    } else {
-                                                        $eq_label = 'd\'ID ' . $id_equipment;
+
+                                            if (count($equipments)) {
+                                                foreach ($equipments as $id_equipment) {
+                                                    $eq_errors = $fac_line->attributeEquipment((int) $id_equipment, 0, false, false);
+                                                    if (count($eq_errors)) {
+                                                        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                                                        if (BimpObject::objectLoaded($equipment)) {
+                                                            $eq_label = '"' . $equipment->getData('serial') . '"';
+                                                        } else {
+                                                            $eq_label = 'd\'ID ' . $id_equipment;
+                                                        }
+                                                        $warnings[] = BimpTools::getMsgFromArray($eq_errors, 'Ligne n°' . $i . ': échec de l\'attribution de l\'équipement ' . $eq_label);
                                                     }
-                                                    $warnings[] = BimpTools::getMsgFromArray($eq_errors, 'Ligne n°' . $i . ': échec de l\'attribution de l\'équipement ' . $eq_label);
                                                 }
+                                                $fac_line->calcPaByEquipments();
                                             }
                                         }
                                     }
@@ -2316,7 +2308,6 @@ class Bimp_CommandeFourn extends BimpComm
         $errors = array();
         $warnings = array();
         $success = '';
-
 
         return array(
             'errors'   => $errors,
@@ -2437,8 +2428,7 @@ class Bimp_CommandeFourn extends BimpComm
                         $errors = BimpTools::merge_array($errors, $instance->actionForceStatus(array($data['type'] => $data['status']), $inut));
                     } else
                         $warnings[] = $instance->getLink() . ' à déja ce statut';
-                }
-                else {
+                } else {
                     $errors[] = 'Type de statut inconnue ' . $data['type'];
                 }
             }

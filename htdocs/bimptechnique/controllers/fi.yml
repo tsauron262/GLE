@@ -30,6 +30,15 @@ sections:
                 view: 
                     name: fi
                     object: fiche
+          - id: facturation
+            title: Facturation
+            struct: 
+                    type: custom
+                    custom: 
+                        callback: 
+                            method: renderFacturationTab
+                            object: fiche
+                
           - id: files
             title: Fichiers
             struct: 

@@ -83,7 +83,7 @@ class BimpHistory extends BimpObject
     }
 
     public function renderCard(BimpObject $object, $field, $limit = 15, $display_user = true, $display_title = true)
-    {
+    {        
         $list = $this->getHistory($object, $field);
 
         $html = '';

@@ -255,7 +255,8 @@ class BC_Field extends BimpComponent
 
         $history_html = '';
         if ($this->params['history'] && BimpObject::objectLoaded($this->object)) {
-            $history_html = BimpRender::renderObjectFieldHistoryPopoverButton($this->object, $this->name_prefix . $this->name);
+            $history_user = (int) $this->object->getConf('fields/' . $this->name . '/history_user', 0, false, 'bool');
+            $history_html = BimpRender::renderObjectFieldHistoryPopoverButton($this->object, $this->name_prefix . $this->name, 15, $history_user);
         }
 
         if ($history_html) {
@@ -298,7 +299,8 @@ class BC_Field extends BimpComponent
 
         $history_html = '';
         if ($this->params['history']) {
-            $history_html = BimpRender::renderObjectFieldHistoryPopoverButton($this->object, $this->name);
+            $history_user = (int) $this->object->getConf('fields/' . $this->name . '/history_user', 0, false, 'bool');
+            $history_html = BimpRender::renderObjectFieldHistoryPopoverButton($this->object, $this->name, 15, $history_user);
         }
 
         if ($history_html) {

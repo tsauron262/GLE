@@ -83,7 +83,7 @@ class BimpHistory extends BimpObject
     }
 
     public function renderCard(BimpObject $object, $field, $limit = 15, $display_user = true, $display_title = true)
-    {
+    {        
         $list = $this->getHistory($object, $field);
 
         $html = '';
@@ -126,7 +126,7 @@ class BimpHistory extends BimpObject
                     $html .= '</td>';
                 }
 
-                $html .= '<td><span class="badge">' . $item['value'] . '</span></td>';
+                $html .= '<td>&nbsp;&nbsp;<span class="badge">' . $item['value'] . '</span></td>';
                 $html .= '</tr>';
                 unset($DT);
                 $n++;

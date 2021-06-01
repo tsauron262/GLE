@@ -1,0 +1,1 @@
+INSERT INTO `llx_bimpcore_conf` (`name`, `value`) VALUES ('bimpcontract_activate_contrat_before', '0');

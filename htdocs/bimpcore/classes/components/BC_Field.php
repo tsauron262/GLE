@@ -255,7 +255,8 @@ class BC_Field extends BimpComponent
 
         $history_html = '';
         if ($this->params['history'] && BimpObject::objectLoaded($this->object)) {
-            $history_html = BimpRender::renderObjectFieldHistoryPopoverButton($this->object, $this->name_prefix . $this->name);
+            $history_user = (int) $this->object->getConf('fields/' . $this->name . '/history_user', 0, false, 'bool');
+            $history_html = BimpRender::renderObjectFieldHistoryPopoverButton($this->object, $this->name_prefix . $this->name, 15, $history_user);
         }
 
         if ($history_html) {
@@ -298,12 +299,13 @@ class BC_Field extends BimpComponent
 
         $history_html = '';
         if ($this->params['history']) {
-            $history_html = BimpRender::renderObjectFieldHistoryPopoverButton($this->object, $this->name);
+            $history_user = (int) $this->object->getConf('fields/' . $this->name . '/history_user', 0, false, 'bool');
+            $history_html = BimpRender::renderObjectFieldHistoryPopoverButton($this->object, $this->name, 15, $history_user);
         }
 
         if ($history_html) {
-            $html .= '<div style="padding-right: 45px;">';
-            $html .= '<div style="float: left; margin-left: -40px; margin-top: 4px">';
+            $html .= '<div style="padding-left: 28px;">';
+            $html .= '<div style="float: left; margin-left: -28px; margin-top: 4px">';
             $html .= $history_html;
             $html .= '</div>';
         }

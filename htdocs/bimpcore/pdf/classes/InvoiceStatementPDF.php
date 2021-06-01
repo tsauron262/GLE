@@ -111,11 +111,19 @@ class InvoiceStatementPDF extends BimpDocumentPDF
 
             $html .= '<td>' . Bimp_Facture::$paiement_status[(int) $instance->getData('paiement_status')]['label'] . '</td>';
 
-            $id_contact = $this->bimpDb->getValue('bl_commande_shipment', 'id_contact', 'id_facture = ' . $instance->id);
-
-            if ($id_contact) {
-                $socp = $this->bimpDb->getRow('socpeople', 'rowid = ' . $id_contact);
-                $html .= '<td>' . $socp->lastname . ' ' . $socp->firstname . '</td>';
+            $id_contacts = $this->bimpDb->getValues('bl_commande_shipment', 'id_contact', 'id_facture = ' . $instance->id);
+            
+            //die('<pre>' . print_r($id_contacts));
+            
+            if (count($id_contacts) > 1) {
+                $html .= '<td>';
+                foreach($id_contacts as $id_contact)  {
+                    if($id_contact > 0) {
+                        $socp = $this->bimpDb->getRow('socpeople', 'rowid = ' . $id_contact);
+                        $html .= $socp->lastname . ' ' . $socp->firstname . "<br />";
+                    }
+                }
+                $html .= '</td>';
             } else {
                 $html .= '<td>' . $this->object->nom . '</td>';
             }

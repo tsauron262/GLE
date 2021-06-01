@@ -346,7 +346,8 @@ class BT_ficheInter_det extends BT_ficheInter {
     public function deleteDolObject(&$errors) {
         global $user;
         if($this->dol_object->deleteLine($user) > 0) {
-            return ['success' => 'Ligne de la FI supprimée avec succès'];
+            $callback = "window.location.href = '".DOL_URL_ROOT."/bimptechnique/?fc=fi&id=".$this->id."'";
+            return ['success_callback' => $callback];
         }
     }
     
@@ -356,17 +357,101 @@ class BT_ficheInter_det extends BT_ficheInter {
         $parent = $this->getParentInstance();
         $facturable = ($this->getData('facturable')) ? true : false;
         
-        if($parent->getData('fk_statut') != 0) {
-            $buttons[] = array(
-                'label' => "Approuver commercialement la prestation",
-                'icon' => 'check',
-                'onclick' => $this->getJsActionOnclick('aprovFacturable', array(), array(
-                ))
-            );
+//        if($parent->getData('fk_statut') != 0) {
+//            $buttons[] = array(
+//                'label' => "Approuver commercialement la prestation",
+//                'icon' => 'check',
+//                'onclick' => $this->getJsActionOnclick('aprovFacturable', array(), array(
+//                ))
+//            );
+//        }
+        
+//        if($parent->getData('fk_statut') == 1 && $this->getSurplusFacturationHt(false) > 0) {
+//            $buttons[] = array(
+//                'label' => "Appliquer une remise",
+//                'icon' => 'fas_percent',
+//                'onclick' => $this->getJsActionOnclick('addRemise', array(), array(
+//                    'form_name' => "addRemise"
+//                ))
+//            );
+//        }
+
+        return $buttons;
+    }
+    
+    public function canEditField($field_name) {
+        $parent = $this->getParentInstance();
+        if($parent->getData('fk_statut') == 0)
+            return 1;
+        
+        switch ($field_name) {
+            case "pourcentage_commercial":
+                return 1;
+                break;
+            default:
+                return 0;
+                break;
+        }
+    }
+    
+    public function actionAddRemise($data, &$success) {
+        
+        $errors = [];
+        $warnings = [];
+        $errors = $this->updateField('pourcentage_commercial', $data["pourcentage_commercial"]);
+        
+        if(!count($errors)) {
+            $success_callback = 'window.location.href = "' . DOL_URL_ROOT . '/bimptechnique/index.php?fc=fi&id=' . $this->getParentId() . '"';
         }
         
+        return [
+            "errors" => $errors,
+            "warnings" => $warnings,
+            "success_callback" => $success_callback
+        ];
         
-        return $buttons;
+    }
+    
+    public function displaySurplusFacturation() {
+        $html = "";
+        
+        $surplus = $this->getSurplusFacturationHt();
+        $html .= $surplus . "€";
+        
+        return $html;
+    }
+    
+    public function getSurplusFacturationHt($avecPourcenatge = true) {
+        $parent  = $this->getParentInstance();
+        $array = [];
+        
+        $porcentage = $this->getData('pourcentage_commercial');
+        $product = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Product");
+        if($this->getData('id_line_commande')) {
+            // Service d'une commande
+            $line = new OrderLine($this->db->db);
+            $line->fetch($this->getData('id_line_commande'));
+            $product->fetch($line->fk_product);
+            $tarif = $product->getData('price');
+            $vendu = $line->total_ht;
+            $qty_in_commande = $line->qty;
+            $tms = $parent->timestamp_to_time($this->getData('duree'));
+            $qty = $parent->time_to_qty($tms);
+            
+            if($avecPourcenatge) {
+                if($qty > $qty_in_commande) {
+                    $surplus = ($qty*$tarif) - ($vendu);
+                    $surplus_pourcentage = ($porcentage * $surplus) / 100;
+                    return $surplus - $surplus_pourcentage;
+                }
+            } else {
+                return ($qty*$tarif) - ($vendu);
+            }
+
+        }
+        
+        return 0;
+        
     }
     
     public function actionChangeFacturable($data, &$success) {

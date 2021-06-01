@@ -1,7 +1,7 @@
 <?php
 
 class indexController extends BimpController {
-    
+
     public function getDataUser($attr, $if_right = "") {
         global $user;
         $u = BimpObject::getInstance('bimpcore', 'Bimp_User', $user->id);

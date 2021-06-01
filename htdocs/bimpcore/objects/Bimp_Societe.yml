@@ -79,6 +79,7 @@ fields:
     datec: 
         label: Créée le
         type: datetime
+        
     fk_user_creat: 
         label: Créée par
         type: id_object
@@ -90,6 +91,7 @@ fields:
                 type: search_user
         filter: 
             type: user
+            
     nom:
         dol_prop: name
         label: Nom
@@ -330,7 +332,29 @@ fields:
         type: int
         user_edit: 1
         values: 
-            array: types_ent
+            array:
+                callback: 
+                    method: getTypesSocietesArray
+                    params: 
+                        - 1
+                        - 0
+        input: 
+            type: select
+            options: 
+                callback: 
+                    method: getTypesSocietesArray
+                    params: 
+                        - 1
+                        - 1
+        search: 
+            input: 
+                type: select
+                options: 
+                    callback: 
+                        method: getTypesSocietesArray
+                        params: 
+                            - 1
+                            - 0
             
     fk_effectif:
         dol_prop: effectif_id
@@ -404,6 +428,10 @@ fields:
         type: money
         default_value: 
             conf: societe_default_outstanding_limit
+        history: 1
+        history_user: 1
+        
+            
     outstanding_limit_credit_safe: 
         label: Limite recommandé par Crédit SAFE
         type: money
@@ -1105,7 +1133,6 @@ lists_cols:
         label: Lettre Credit Safe
         value: 
             callback: getCreditSafeLettre
-        
         
 lists:
     default: 

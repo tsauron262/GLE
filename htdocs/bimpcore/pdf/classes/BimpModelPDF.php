@@ -322,8 +322,6 @@ Abstract class BimpModelPDF
         
         $date_new_account = BimpCore::getConf('new_bank_account_date', '');
         
-        $date_new_account = '2020-11-01';
-        
         if ($date_new_account) {
             $html .= '<span style="color: #A00000; font-weight: bold">';
             $html .= 'Attention: NOS COORDONNEES BANCAIRES depuis le ' . date('d / m / Y', strtotime($date_new_account));

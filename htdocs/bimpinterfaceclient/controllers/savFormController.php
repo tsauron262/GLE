@@ -1164,6 +1164,11 @@ class savFormController extends BimpPublicController
                         } else {
                             $debug .= '<span class="success">OK</span>';
                         }
+                    } elseif (!(int) $client->getData('status')) {
+                        $client->updateField('status', 1);
+                        $msg = 'Bonjour,' . "\n\n";
+                        $msg .= 'Le client ' . $client->getLink(array(), 'private') . ' a été réactivé automatiquement suite à sa prise de rendez-vous SAV en ligne';
+                        mailSyn2('Client activé automatiquement', 'a.delauzun@bimp.fr,f.martinez@bimp.fr,t.sauron@bimp.fr', '', $msg);
                     }
 
                     if (BimpObject::objectLoaded($client)) {

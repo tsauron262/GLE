@@ -147,7 +147,7 @@ class Bimp_Contact extends BimpObject
     {
         $fields = parent::getCardFields($card_name);
 
-        switch ($fields) {
+        switch ($card_name) {
             case 'default':
                 $fields[] = 'address';
                 $fields[] = 'zip';

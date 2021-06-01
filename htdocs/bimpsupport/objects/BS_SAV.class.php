@@ -1369,6 +1369,14 @@ class BS_SAV extends BimpObject
             $html .= '</div>';
         }
 
+        if (!$soc->isSolvable($this->object_name)) {
+            $html .= '<div style="font-size: 15px; margin-top: 10px">';
+            $html .= '<span class="danger">';
+            $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Attention ce client est au statut "' . Bimp_Societe::$solvabilites[(int) $soc->getData('solvabilite_status')]['label'] . '"';
+            $html .= '</span>';
+            $html .= '</div>';
+        }
+
         return $html;
     }
 
@@ -4751,7 +4759,7 @@ class BS_SAV extends BimpObject
         } else {
             if (!(int) $client->getData('status')) {
                 $errors[] = 'Ce client est désactivé';
-            } elseif (!$client->isSolvable($this->object_name, $warnings)) {
+            } elseif (!$force_create && !$client->isSolvable($this->object_name, $warnings)) {
                 $errors[] = 'Il n\'est pas possible d\'ouvrir un SAV pour ce client (' . Bimp_Societe::$solvabilites[(int) $client->getData('solvabilite_status')]['label'] . ')';
             }
         }

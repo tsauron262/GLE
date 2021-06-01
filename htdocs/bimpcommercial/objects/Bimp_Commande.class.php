@@ -3866,6 +3866,8 @@ class Bimp_Commande extends BimpComm
                 $soc = BimpObject::getInstance('bimpcore', 'Bimp_Societe', (int) $comm->getData('fk_soc'));
 
                 $idComm = $comm->getIdCommercial();
+                if($idComm == 0)
+                    $idComm = $comm->getIdContact($type = 'internal', $code = 'SALESREPSIGN');
                 $mail = BimpTools::getMailOrSuperiorMail($idComm, 'a.delauzun@bimp.fr');
                 if ($mail == 'a.delauzun@bimp.fr')
                     $mailDef++;

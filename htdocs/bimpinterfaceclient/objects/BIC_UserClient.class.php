@@ -684,8 +684,11 @@ class BIC_UserClient extends BimpObject
                 $errors[] = 'Adresse e-mail absente';
             } elseif (!BimpValidate::isEmail($email)) {
                 $errors[] = 'Adresse e-mail invalide';
-            } elseif ((int) $this->db->getValue($this->getTable(), 'id', 'email = \'' . $email . '\'')) {
-                $errors[] = 'Un compte utilisateur existe déjà pour cette adresse e-mail';
+            } else {
+                $id_user_client = (int) $this->db->getValue($this->getTable(), 'id', 'email = \'' . $email . '\'');
+                if ($id_user_client && $id_user_client !== (int) $this->id) {
+                    $errors[] = 'Un compte utilisateur existe déjà pour cette adresse e-mail';
+                }
             }
         }
 

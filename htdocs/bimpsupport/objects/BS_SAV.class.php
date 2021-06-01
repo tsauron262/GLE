@@ -14,7 +14,8 @@ class BS_SAV extends BimpObject
     public $useCaisseForPayments = false;
 
     const BS_SAV_RESERVED = -1;
-    const BS_SAV_CANCELED = -2;
+    const BS_SAV_CANCELED_BY_CUST = -2;
+    const BS_SAV_CANCELED_BY_USER = -3;
     const BS_SAV_NEW = 0;
     const BS_SAV_ATT_PIECE = 1;
     const BS_SAV_ATT_CLIENT = 2;
@@ -28,7 +29,8 @@ class BS_SAV extends BimpObject
 
     public static $status_list = array(
         self::BS_SAV_RESERVED          => array('label' => 'Réservé par le client', 'icon' => 'fas_calendar-day', 'classes' => array('important')),
-        self::BS_SAV_CANCELED          => array('label' => 'Annulé par le client', 'icon' => 'fas_times', 'classes' => array('danger')),
+        self::BS_SAV_CANCELED_BY_CUST  => array('label' => 'Annulé par le client', 'icon' => 'fas_times', 'classes' => array('danger')),
+        self::BS_SAV_CANCELED_BY_USER  => array('label' => 'Annulé par utilisateur', 'icon' => 'fas_times', 'classes' => array('danger')),
         self::BS_SAV_NEW               => array('label' => 'Nouveau', 'icon' => 'far_file', 'classes' => array('info')),
         self::BS_SAV_EXAM_EN_COURS     => array('label' => 'Examen en cours', 'icon' => 'hourglass-start', 'classes' => array('warning')),
         self::BS_SAV_ATT_CLIENT_ACTION => array('label' => 'Attente client', 'icon' => 'hourglass-start', 'classes' => array('warning')),
@@ -77,6 +79,14 @@ class BS_SAV extends BimpObject
     );
     public static $list_wait_infos = array(
         'Attente désactivation de la localisation'
+    );
+    public static $rdv_cancel_reasons = array(
+        'CUSTOMER_CANCELLED'    => 'RDV Annulé par le client',
+        'CUSTOMER_RESCHEDULED'  => 'RDV reprogrammé ultérieurement',
+        'STORE_CLOSURE'         => 'Fermeture boutique',
+        'STAFF_UNAVAILABILITY'  => 'Equipe technique non disponible',
+        'IMPROPER_RESERVATION'  => 'Réservation invalide',
+        'DUPLICATE_RESERVATION' => 'Réservation en doublon'
     );
     public static $check_on_create = 0;
     public static $check_on_update = 0;
@@ -198,11 +208,21 @@ class BS_SAV extends BimpObject
 
         switch ($action) {
             case 'setNew':
-                if (!in_array((int) $this->getData('status'), array(self::BS_SAV_RESERVED, self::BS_SAV_CANCELED))) {
+                if (!in_array($status, array(self::BS_SAV_RESERVED, self::BS_SAV_CANCELED_BY_CUST, self::BS_SAV_CANCELED_BY_USER))) {
                     $errors[] = $status_error;
                     return 0;
                 }
                 return 1;
+
+            case 'cancelRdv':
+                if ($status == self::BS_SAV_RESERVED) {
+                    return 1;
+                }
+                if ((string) $this->getData('date_rdv') && $status == self::BS_SAV_NEW) {
+                    return 1;
+                }
+                $errors[] = $status_error;
+                return 0;
 
             case 'start':
                 if (!$this->isLoaded($errors)) {
@@ -587,8 +607,18 @@ class BS_SAV extends BimpObject
                 }
             }
 
-            if ($this->isActionAllowed('setNew')) {
-                if ($this->canSetAction('setNew')) {
+            if ($this->isActionAllowed('cancelRdv') && $this->canSetAction('cancelRdv')) {
+                $buttons[] = array(
+                    'label'   => 'RDV annulé',
+                    'icon'    => 'fas_times',
+                    'onclick' => $this->getJsActionOnclick('cancelRdv', array(), array(
+                        'form_name' => 'cancel_rdv'
+                    ))
+                );
+            }
+
+            if ($status < 0) {
+                if ($this->isActionAllowed('setNew') && $this->canSetAction('setNew')) {
                     $buttons[] = array(
                         'label'   => 'Prendre en charge',
                         'icon'    => 'fas_cogs',
@@ -1324,16 +1354,20 @@ class BS_SAV extends BimpObject
             $html .= '</div>';
         }
 
-        // Temporaire, à suppr. lors mise en prod new API GSX: 
-//        if ($this->isLoaded()) {
-//            $centre_repa = (string) BimpCache::getBdb()->getValue('bs_sav', 'code_centre_repa', 'id = ' . $this->id);
-//
-//            if ($centre_repa && $centre_repa != $this->getData('code_centre')) {
-//                $msg = 'Centre de réparation différent du centre de prise en charge.<br/>Le traitement de ce SAV ne doit être fait que sur la plateforme de test <a href="https://erp2.bimp.fr/bimpinv01042020/bimpsupport/index.php?fc=sav&id=' . $this->id . '">bimpinv01042020</a>';
-//                $html .= BimpRender::renderAlerts($msg, 'warning');
-//            }
-//        }
-        // ---
+        if ((int) $this->getData('status') === self::BS_SAV_RESERVED) {
+            $html .= '<div style="font-size: 15px; margin-top: 10px;">';
+            $date = $this->getData('date_rdv');
+            if ($date) {
+                $html .= '<span class="success">';
+                $html .= 'Rendez-vous le ' . date('d / m / Y', strtotime($date));
+                $html .= '</span>';
+            } else {
+                $html .= '<span class="danger">';
+                $html .= 'Pas de rendez-vous fixé';
+                $html .= '</span>';
+            }
+            $html .= '</div>';
+        }
 
         return $html;
     }
@@ -1868,7 +1902,7 @@ class BS_SAV extends BimpObject
                     $errors[] = $error_msg . ' (Statut actuel invalide)';
                 } else {
                     if ($current_status === self::BS_SAV_ATT_PIECE) {
-                        $this->addNote('Pièce reçue le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
+                        $this->addNote('Pièce reçue le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
                         $msg_type = 'pieceOk';
                     }
                 }
@@ -3542,7 +3576,7 @@ class BS_SAV extends BimpObject
                 $note .= "\n\n" . $data['infos'];
             }
 
-            $this->addNote($note);
+            $this->addNote($note, 4);
         }
 
         return array(
@@ -3563,7 +3597,7 @@ class BS_SAV extends BimpObject
 
             if (!count($errors)) {
                 global $user, $langs;
-                $this->addNote('Diagnostic commencé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
+                $this->addNote('Diagnostic commencé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
                 $this->updateField('id_user_tech', (int) $user->id, null, true);
 
                 if (isset($data['send_msg']) && (int) $data['send_msg']) {
@@ -3615,7 +3649,7 @@ class BS_SAV extends BimpObject
             $new_status = null;
 
             if ($this->allGarantie) { // Déterminé par $this->generatePropal()
-                $this->addNote('Devis garantie validé auto le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
+                $this->addNote('Devis garantie validé auto le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
                 // Si on vient de commander les pieces sous garentie (On ne change pas le statut)
                 if ((int) $this->getData('status') !== self::BS_SAV_ATT_PIECE) {
                     $new_status = self::BS_SAV_DEVIS_ACCEPTE;
@@ -3629,7 +3663,7 @@ class BS_SAV extends BimpObject
                     $propal->dol_object->generateDocument(self::$propal_model_pdf, $langs);
                 }
             } else {
-                $this->addNote('Devis envoyé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
+                $this->addNote('Devis envoyé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
                 $new_status = self::BS_SAV_ATT_CLIENT;
 
                 if ($propal->dol_object->valid($user) < 1) {
@@ -3681,7 +3715,7 @@ class BS_SAV extends BimpObject
         if (!count($errors)) {
             global $user, $langs;
 
-            $this->addNote('Devis accepté le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
+            $this->addNote('Devis accepté le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
             $propal = $this->getChildObject('propal');
             $propal->dol_object->cloture($user, 2, "Auto via SAV");
             $this->createReservations();
@@ -3701,7 +3735,7 @@ class BS_SAV extends BimpObject
 
         if (!count($errors)) {
             global $user, $langs;
-            $this->addNote('Devis refusé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
+            $this->addNote('Devis refusé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
             $propal = $this->getChildObject('propal');
             $propal->dol_object->cloture($user, 3, "Auto via SAV");
             $this->removeReservations();
@@ -3723,7 +3757,7 @@ class BS_SAV extends BimpObject
         if (!count($errors)) {
             global $user, $langs;
 
-            $this->addNote('Réparation en cours depuis le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
+            $this->addNote('Réparation en cours depuis le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
         }
 
         return array(
@@ -3782,7 +3816,7 @@ class BS_SAV extends BimpObject
                 $revision = new BimpRevisionPropal($propal->dol_object);
                 $new_id_propal = $revision->reviserPropal(array(null, null), true, self::$propal_model_pdf, $errors);
 
-                $this->addNote('Devis fermé après refus par le client le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
+                $this->addNote('Devis fermé après refus par le client le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
 
                 if ($new_id_propal && !count($errors)) {
                     $client = $this->getChildObject('client');
@@ -3839,7 +3873,7 @@ class BS_SAV extends BimpObject
                 if (!(string) $this->getData('resolution')) {
                     $errors[] = 'Le champ "résolution" doit être complété';
                 } else {
-                    $this->addNote('Réparation terminée le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
+                    $this->addNote('Réparation terminée le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
                     $propal->dol_object->cloture($user, 2, "Auto via SAV");
                     $msg_type = 'repOk';
 
@@ -4274,9 +4308,9 @@ class BS_SAV extends BimpObject
 
         if (!count($errors)) {
             if (isset($data['restitute']) && (int) $data['restitute']) {
-                $this->addNote('Restitué le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
+                $this->addNote('Restitué le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
             } else {
-                $this->addNote('Fermé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
+                $this->addNote('Fermé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
             }
 
             if (!count($errors)) {
@@ -4452,7 +4486,7 @@ class BS_SAV extends BimpObject
         if (!count($errors)) {
             global $user, $langs;
 
-            $this->addNote('Attente pièce depuis le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
+            $this->addNote('Attente pièce depuis le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
 
             if (isset($data['send_msg']) && (int) $data['send_msg']) {
                 $warnings = BimpTools::merge_array($warnings, $this->sendMsg('commOk'));
@@ -4622,6 +4656,60 @@ class BS_SAV extends BimpObject
             'errors'           => $errors,
             'warnings'         => $warnings,
             'success_callback' => $success_callback
+        );
+    }
+
+    public function actionCancelRdv($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Rendez-vous annulé avec succès';
+
+        $res_id = $this->getData('resgsx');
+        $date_rdv = $this->getData('date_rdv');
+
+        if ($res_id && $date_rdv && $date_rdv > date('Y-m-d H:i:s')) {
+
+            // Annulation GSX: 
+            require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_Reservation.php';
+
+            $gsx_errors = array();
+            $centre = $this->getCentreData();
+
+            if (isset($centre['ship_to']) && $centre['ship_to']) {
+                $debug = '';
+                $result = GSX_Reservation::cancelReservation(897316, $centre['ship_to'], $res_id, $gsx_errors, $debug, array(
+                            'cancelReason' => BimpTools::getArrayValueFromPath($data, 'cancel_reason', 'CUSTOMER_CANCELLED')
+                ));
+
+                if (isset($result['faults']) && !empty($result['faults'])) {
+                    $request_errors = array();
+                    foreach ($result['faults'] as $fault) {
+                        $gsx_errors[] = $fault['message'] . ' (code: ' . $fault['code'] . ')';
+                    }
+                    $gsx_errors[] = BimpTools::getMsgFromArray($request_errors, 'Echec de l\'annulation de la réservation');
+                } elseif (is_null($result) && !count($gsx_errors)) {
+                    $gsx_errors[] = 'Echec de l\'annulation de la réservation pour une raison inconnue';
+                }
+
+                if (count($gsx_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($gsx_errors, 'Echec de l\'annulation de la réservation sur GSX');
+                } else {
+                    $success .= 'Annulation de la réservation sur GSX effectuée avec succès';
+                }
+            }
+        }
+
+        $this->set('status', self::BS_SAV_CANCELED_BY_USER);
+        $errors = $this->update($warnings, true);
+
+        if (!count($errors)) {
+            global $user, $langs;
+            $this->addNote('Rendez-vous annulé par ' . $user->getFullName($langs) . ' (Raison: ' . self::$rdv_cancel_reasons[BimpTools::getArrayValueFromPath($data, 'cancel_reason', 'CUSTOMER_CANCELLED')] . ')', 4);
+        }
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
         );
     }
 

@@ -319,6 +319,14 @@ Abstract class BimpModelPDF
         if (!$only_number) {
             $html .= '<span style="font-style: italic">' . $this->langs->transnoentities('PaymentByTransferOnThisBankAccount') . ':</span><br/><br/>';
         }
+        
+        $date_new_account = BimpCore::getConf('new_bank_account_date', '');
+        
+        if ($date_new_account) {
+            $html .= '<span style="color: #A00000; font-weight: bold">';
+            $html .= 'Attention: NOS COORDONNEES BANCAIRES depuis le ' . date('d / m / Y', strtotime($date_new_account));
+            $html .= '</span><br/><br/>';
+        }
 
         if ($usedetailedbban) {
             $html .= '<strong>' . $this->langs->transnoentities("Bank") . '</strong>: ';

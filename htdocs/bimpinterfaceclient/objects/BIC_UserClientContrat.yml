@@ -49,7 +49,7 @@ lists:
         title: Contrats associés
         icon: fas_file-signature
         checkboxes: 1
-        sort_field: date_create
+        sort_field: id
         sort_way: desc
         n: 10
         add_btn: 1

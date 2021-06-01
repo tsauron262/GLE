@@ -144,7 +144,7 @@ class GSX_v2 extends GSX_Const
             $this->displayDebug('OK (Auth token ' . $result['authToken'] . ')');
             $this->saveToken('auth', $result['authToken']);
             global $user, $langs;
-            mailSyn2('auth GSX', 'tommy@bimp.fr', null, $user->getFullName($langs).' auth OK');
+            mailSyn2('auth GSX', 'tommy@bimp.fr', null, $user->getFullName($langs).' auth OK' . date('l jS \of F Y h:i:s A'));
             $this->logged = true;
             return 1;
         }
@@ -153,7 +153,7 @@ class GSX_v2 extends GSX_Const
         $this->initError('Echec authentification (token ' . $this->acti_token . ')');
 
             global $user, $langs;
-            mailSyn2('auth GSX bad', 'tommy@bimp.fr', null, $user->getFullName($langs).' auth bad');
+            mailSyn2('auth GSX bad', 'tommy@bimp.fr', null, $user->getFullName($langs).' auth bad'. date('l jS \of F Y h:i:s A'));
         $this->logged = false;
         $this->saveToken('acti', '');
 

@@ -1359,7 +1359,7 @@ class BS_SAV extends BimpObject
             $date = $this->getData('date_rdv');
             if ($date) {
                 $html .= '<span class="success">';
-                $html .= 'Rendez-vous le ' . date('d / m / Y', strtotime($date));
+                $html .= 'Rendez-vous le ' . date('d / m / Y à H:i', strtotime($date));
                 $html .= '</span>';
             } else {
                 $html .= '<span class="danger">';

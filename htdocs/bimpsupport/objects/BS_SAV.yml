@@ -678,7 +678,18 @@ forms:
                   help: Veuillez vous athentifier sur le site Apple GSX puis copier-coller le token obtenu. 
                   extra_content: 
                       callback: renderGsxTokenInputExtraContent
-              required: 1          
+              required: 1  
+              
+    cancel_rdv: 
+        title: Annulation du RDV
+        rows: 
+            - custom: 1
+              label: Raison
+              input_name: cancel_reason
+              input: 
+                  type: select
+                  options: 
+                      array: rdv_cancel_reasons
               
 fields_tables: 
     infos: 

@@ -132,8 +132,13 @@ class DemandeValidComm extends BimpObject
         $subject_mail = "Demande de validation $type";
         
         if ((int) $bimp_object->getData('fk_soc')) {
-            $client = $bimp_object->getChildObject('client');
-            if (BimpObject::objectLoaded($client)) 
+            
+            if(method_exists($bimp_object, 'getClientFacture'))
+                $client = $bimp_object->getClientFacture();
+            else
+                $client = $bimp_object->getChildObject('client');
+            
+            if (BimpObject::objectLoaded($client))
                 $subject_mail .= ' - ' . $client->getData('code_client') . ' - ' . $client->getData('nom');
             else
                 $subject_mail .= ', client inconnu';

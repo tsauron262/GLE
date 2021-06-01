@@ -13,7 +13,9 @@ class BT_ficheInter extends BimpDolObject {
     public static $dol_module = 'fichinter';
     public static $files_module_part = 'ficheinter';
     public static $element_name = 'fichinter';
-
+    
+    public $tmp_facturable = [];
+    
     CONST STATUT_ABORT = -1;
     CONST STATUT_BROUILLON = 0;
     CONST STATUT_VALIDER = 1;
@@ -787,7 +789,7 @@ class BT_ficheInter extends BimpDolObject {
     
     public function canDelete() {
         global $user;
-        if((($this->getData('fk_statut') == 0) && $this->getData('fk_user_author') == $this->global_user->id && !$this->isOldFi()) || ($user->admin || $user->rights->bimptechnique->delete) && $statut != 0) {
+        if((($this->getData('fk_statut') == 0) && $this->getData('fk_user_author') == $this->global_user->id && !$this->isOldFi()) || ($user->admin || $user->rights->bimptechnique->delete)) {
            return 1;
         }
         
@@ -1004,6 +1006,30 @@ class BT_ficheInter extends BimpDolObject {
         
         return $total_facturable;
     }
+    
+    public function displayServicesForForm() {
+        
+    }
+    
+    public function getTotalByServicesArray() {
+        $executedArray = $this->getServicesExecutedArray();
+        $servicesNonVendu = $this->getServicesByTypeArray(4);
+        $deplacementNonVendu = $this->getServicesByTypeArray(3);
+        $imponderable = $this->getServicesByTypeArray(1);
+        
+        $finalExecutedServices = 0;
+        $finalServicesNonVendu = 0;
+        $finalDeplacementNonVendu = 0;
+        $finalImponderable  = 0;
+        
+        array_walk_recursive($servicesNonVendu, function($item, $key) use (&$finalServicesNonVendu){
+            //if($key == )
+            $finalServicesNonVendu++;
+        });
+        
+        echo $finalServicesNonVendu;
+        //print_r($executedArray);
+    }
 
 
     public function getServicesExecutedArray() {
@@ -1026,6 +1052,7 @@ class BT_ficheInter extends BimpDolObject {
                     $services_executed[$child->getData('id_line_commande')]['commande'] = $line->fk_commande;
                 if(!array_key_exists("date", $services_executed[$child->getData('id_line_commande')]))
                     $services_executed[$child->getData('id_line_commande')]['date'] = $child->getData('date');
+                $services_executed[$child->getData('id_line_commande')]["lines"][] = $child->id;
             }
         }
         return $services_executed;
@@ -1048,6 +1075,7 @@ class BT_ficheInter extends BimpDolObject {
                 $services[$index]['duree'] = $time;
                 $services[$index]['remise'] = $child->getData('pourcentage_commercial');
                 $services[$index]['date'] = $child->getData('date');
+                $services[$index]['line']  = $child->id;
                 $index++;
             }
         }
@@ -1071,17 +1099,27 @@ class BT_ficheInter extends BimpDolObject {
                 $msg = BimpRender::renderIcon("warning") . " Il n'y a aucune lignes dans le rapport d'intervention";
                 $html .= BimpRender::renderAlerts($msg, "warning", false);
             } else {
+                $buttons = [];
+                $total_by_service = [];
                 $services_executed = $this->getServicesExecutedArray();
+                $inter_non_vendu = $this->getServicesByTypeArray(4);
+                $dep_non_vendu = $this->getServicesByTypeArray(3);
+                $imponderable = $this->getServicesByTypeArray(1);
+
                 $product  = BimpCache::getBimpObjectInstance('bimpcore', "Bimp_Product");
                 $html .= '<div class="before_list_content" data-refresh="1">';
                 $current = 1;
                 $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande');
+                
+                
+                $html .= "<h3><b><u>Détail de la facturation</u></b></h3>";
                 foreach($services_executed as $id_line_commande => $informations) {
                     $commande->fetch($informations['commande']);
                     $line = new OrderLine($this->db->db);
                     $line->fetch($id_line_commande);
                     $product->fetch($line->fk_product);
                     $date = new DateTime($informations['date']);
+                    $total_ht_facturable = (price($informations['ht_executed']) - price($informations['pourcentage_commerncial']) - price($informations['ht_vendu']));
                     $html .= '<div class="bimp_info_card" style="border-color: #348C41">'
                             . '<div class="bimp_info_card_icon" style="color: #348C41">'
                                 . $current
@@ -1093,19 +1131,21 @@ class BT_ficheInter extends BimpDolObject {
                                 . '<div class="bimp_info_card_value">Total Vendu: '.price($informations['ht_vendu']).'€ HT</div>'
                                 . '<div class="bimp_info_card_value">Total Réalisé: '.price($informations['ht_executed']).'€ HT (qté: '.$informations['qty_executed'].')</div>'
                                 . '<div class="bimp_info_card_value">Remise commercial sur le reste: '.price($informations['pourcentage_commerncial']).'€ HT</div>'
-                                . '<div class="bimp_info_card_value" style="color: #EF7D00">Total à facturer: '. (price($informations['ht_executed']) - price($informations['pourcentage_commerncial']) - price($informations['ht_vendu'])).'€ HT</div>'
+                                . '<div class="bimp_info_card_value" style="color: #EF7D00">Total à facturer: '. $total_ht_facturable .'€ HT</div>'
                             . '</div>'
                         . '</div>'
                     ;
+                    if($total_ht_facturable != 0) {
+                        $total_by_service[$product->getRef() . "@@" . $commande->getRef()] += $total_ht_facturable;
+                    }
                     $current++;
                 }
-
-                $inter_non_vendu = $this->getServicesByTypeArray(4);
 
                 if(count($inter_non_vendu)) {
                     foreach($inter_non_vendu as $index => $informations) {
                         $date = new DateTime($informations['date']);
                         $remise_euro = ($informations['remise'] * $informations['tarif']) / 100;
+                        $total_ht_facturable = ($informations['tarif'] * $informations['qty']) - $remise_euro;
                         $html .= '<div class="bimp_info_card" style="border-color: #3B6EA0">'
                             . '<div class="bimp_info_card_icon" style="color: #3B6EA0">'
                                 . $current
@@ -1117,15 +1157,18 @@ class BT_ficheInter extends BimpDolObject {
                                 . '<div class="bimp_info_card_value">Tarif horaire: '.price($informations['tarif']).'€ HT</div>'
                                 . '<div class="bimp_info_card_value">Durée: '.$informations['duree'].' (H:m) Qté: '.$informations['qty'].'</div>'
                                 . '<div class="bimp_info_card_value">Remise commercial sur l\'intervention: '.$remise_euro.'€ HT ('.$informations['remise'].'%)</div>'
-                                . '<div class="bimp_info_card_value" style="color: #EF7D00">Total à facturer: '.price(($informations['tarif'] * $informations['qty']) - $remise_euro).'€ HT</div>'
+                                . '<div class="bimp_info_card_value" style="color: #EF7D00">Total à facturer: '.price($total_ht_facturable).'€ HT</div>'
                             . '</div>'
                         . '</div>'
                     ;
+                    if($total_ht_facturable != 0) {
+                        $total_by_service[$index . "@@" . "NV"] += $total_ht_facturable;
+                    }
                     $current++;
                     }
                 }
 
-                $dep_non_vendu = $this->getServicesByTypeArray(3);
+                
 
                 if(count($dep_non_vendu)) {
                     foreach($dep_non_vendu as $index => $informations) {
@@ -1150,8 +1193,6 @@ class BT_ficheInter extends BimpDolObject {
                     }
                 }
 
-                $imponderable = $this->getServicesByTypeArray(1);
-
                 if(count($imponderable)) {
                     foreach($imponderable as $index => $informations) {
                         $date = new DateTime($informations['date']);
@@ -1174,14 +1215,49 @@ class BT_ficheInter extends BimpDolObject {
                     $current++;
                     }
                 }
-
-
-                $html .= '</div>';
+                
+                $html .= '</div>'
+                        . '<br />';
+                $buttons[] = array(
+                    'label' => 'Facturer cette fiche d\'intervention',
+                    'icon' => 'euro',
+                    'onclick' => $this->getJsActionOnclick('factured', array(), array(
+                        'form_name' => 'factured'
+                    ))
+                );
+                $html .= "<h3><b><u>Facturation</u></b></h3>";
+                $html .= '<table class="noborder objectlistTable" style="border: none; min-width: 480px">';
+                $html .= '<thead>';
+                $html .= '<tr class="headerRow">';
+                $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">#</th>';
+                $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Service</th>';
+                $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Quantitée</th>';
+                $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Prix vendu HT</th>';
+                $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Total HT facturable</th>';
+                $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Remise</th>';
+                $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">Facture</th>';
+                $html .= '</tr>';
+                $html .= '</thead>';
+                
+                $html .= "<tbody class='listRows' >";
+                $html .= '<tr><td colspan="16" style="text-align: center" class="fullrow"><p class="alert alert-warning">Il n\' y à pas de lignes à facturer</p></td></tr>';
+                $html .= "</tbody>";
+                
+                $html .= "</table>";
+                $html .= BimpRender::renderButtonsGroup($buttons, []) . "<br />";
+                $this->tmp_facturable = $total_by_service;
+                $this->getTotalByServicesArray();
+                $html .= '<pre>'.print_r($this->tmp_facturable, 1).'</pre>';
+                
             }
         } else {
             $html = BimpRender::renderAlerts("Cette fiche d'intevention ne concerne pas de commande donc pas de facturation.", 'warning', false);
         }
         return $html;
+    }
+    
+    public function getLinesForBilling() {
+        return $this->tmp_facturable;
     }
     
     public function url($tab = '') {

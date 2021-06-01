@@ -366,7 +366,7 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
                               )
                         );
             if($nb > 1){//sinon c'est un test de reconnexion
-                $filtre['status_gsx'] = 0;
+                $filtre['status_gsx'] = array(0,3);
                 $rows = $equipment->getList($filtre, $nb, 1, 'id', 'desc', 'array', array('id', 'serial'));
             }
             else{

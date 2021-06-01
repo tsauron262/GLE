@@ -84,7 +84,11 @@ class savFormController extends BimpPublicController
 
         if (!BimpObject::objectLoaded($userClient)) {
             // Recherche d'un compte utilisateur client: 
+
             $userClient = BimpCache::findBimpObjectInstance('bimpinterfaceclient', 'BIC_UserClient', array(
+//                        'email_custom' => array(
+//                            'custom' => 'LOWER(email) = \'' . strtolower($email) . '\''
+//                        )
                         'email' => $email
             ));
 

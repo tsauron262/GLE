@@ -430,7 +430,6 @@ fields:
             conf: societe_default_outstanding_limit
         history: 1
         history_user: 1
-        
             
     outstanding_limit_credit_safe: 
         label: Limite recommandé par Crédit SAFE

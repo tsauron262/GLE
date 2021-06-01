@@ -1832,7 +1832,7 @@ class BimpObject extends BimpCache
                 $method = 'action' . ucfirst($action);
                 if (method_exists($instance, $method)) {
                     $result = $instance->{$method}($extra_data, $success);
-                    
+
                     if (!isset($result['errors'])) {
                         BimpCore::addlog('Retour d\'action invalide', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $instance, array(
                             'Action' => $action,
@@ -2114,7 +2114,32 @@ class BimpObject extends BimpCache
         if ((int) $this->getConf('fields/' . $field . '/history', 0, false, 'bool')) {
             $current_value = $this->getInitData($field);
             if (!isset($this->id) || !$this->id || is_null($current_value) || ($current_value != $value)) {
+                // On vérifie que la valeur courante est bien enregistrée: 
+                $where = 'module = \'' . $this->module . '\' AND object = \'' . $this->object_name . '\'';
+                $where .= ' AND id_object = ' . (int) $this->id . ' AND field = \'' . $field . '\'';
+                if (!(int) $this->db->getValue($this->getTable(), $this->getPrimary(), $where, 'date', 'DESC')) {
+                    $this->db->insert('bimpcore_history', array(
+                        'module'    => $this->module,
+                        'object'    => $this->object_name,
+                        'id_object' => $this->id,
+                        'field'     => $field,
+                        'value'     => $this->getDbValue($field, $current_value)
+                    ));
+                }
                 $this->history[$field] = $value;
+            }
+        }
+    }
+
+    protected function checkDolFieldsHistory()
+    {
+        if (!$this->isDolObject()) {
+            return;
+        }
+
+        foreach ($this->data as $field_name => $value) {
+            if ($this->isDolExtraField($field_name) || $this->isDolField($field_name)) {
+                $this->checkFieldHistory($field_name, $value);
             }
         }
     }
@@ -3103,7 +3128,7 @@ class BimpObject extends BimpCache
         if (!$extra_order_by) {
             $extra_order_by = 'a.' . $primary;
         }
-        
+
         $sql = '';
         $sql .= BimpTools::getSqlSelect($fields);
         $sql .= BimpTools::getSqlFrom($table, $joins);
@@ -4021,6 +4046,7 @@ class BimpObject extends BimpCache
                 }
 
                 if (!is_null($this->dol_object)) {
+                    $this->checkDolFieldsHistory();
                     $result = $this->createDolObject($errors, $warnings);
                 } else {
                     $table = $this->getTable('');
@@ -4129,6 +4155,7 @@ class BimpObject extends BimpCache
                     }
 
                     if ($this->isDolObject()) {
+                        $this->checkDolFieldsHistory();
                         $result = $this->updateDolObject($errors, $warnings);
                     } else {
                         $table = $this->getTable();
@@ -4188,7 +4215,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
                         if (!is_null($parent)) {
                             if (method_exists($parent, 'onChildUpdate')) {
-                                $parent->onChildCreate($this);
+                                $parent->onChildUpdate($this);
                             }
                             if (method_exists($parent, 'onChildSave')) {
                                 $warnings = BimpTools::merge_array($warnings, $parent->onChildSave($this));
@@ -4680,7 +4707,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         $sql = BimpTools::getSqlSelect(array($primary));
         $sql .= BimpTools::getSqlFrom($table);
         $sql .= BimpTools::getSqlWhere($filters);
-        
+
         $items = $this->db->executeS($sql, 'array');
 
         $check = true;
@@ -5220,26 +5247,26 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 if (BimpCore::isContextPublic()) {
                     return $this->canClientView();
                 }
-                    return $this->canView();
+                return $this->canView();
             case 'edit' :
                 if (BimpCore::isContextPublic()) {
                     return $this->canClientEdit();
                 }
-                    return $this->canEdit();
+                return $this->canEdit();
             case "create" :
                 if (BimpCore::isContextPublic()) {
                     return $this->canClientCreate();
                 }
-                    return $this->canCreate();
+                return $this->canCreate();
             case "delete" :
                 if (BimpCore::isContextPublic()) {
                     return $this->canClientDelete();
                 }
-                    return $this->canDelete();
+                return $this->canDelete();
         }
 
-                return 0;
-        }
+        return 0;
+    }
 
     public function canCreate()
     {
@@ -5261,7 +5288,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         if (BimpCore::isContextPublic()) {
             return $this->canClientEdit();
-    }
+        }
 
         if ($this->params['parent_object']) {
             $parent = $this->getParentInstance();
@@ -5277,7 +5304,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         if (BimpCore::isContextPublic()) {
             return $this->canClientView();
-    }
+        }
 
         if ($this->params['parent_object']) {
             $parent = $this->getParentInstance();
@@ -5293,7 +5320,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         if (BimpCore::isContextPublic()) {
             return $this->canClientDelete();
-    }
+        }
 
         if ($this->params['parent_object']) {
             $parent = $this->getParentInstance();
@@ -5329,7 +5356,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         if (BimpCore::isContextPublic()) {
             return $this->canClientEdit();
-    }
+        }
 
         return (int) $this->canEdit();
     }
@@ -5338,7 +5365,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         if (BimpCore::isContextPublic()) {
             return $this->canClientView();
-    }
+        }
 
         return (int) $this->canView();
     }
@@ -5347,7 +5374,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         if (BimpCore::isContextPublic()) {
             return $this->canClientCreate();
-    }
+        }
 
         return (int) $this->canCreate();
     }
@@ -5356,7 +5383,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         if (BimpCore::isContextPublic()) {
             return $this->canClientEdit();
-    }
+        }
 
         return (int) $this->canEdit();
     }
@@ -5365,7 +5392,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         if (BimpCore::isContextPublic()) {
             return $this->canClientView();
-    }
+        }
 
         return (int) $this->canView();
     }
@@ -5374,7 +5401,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         if (BimpCore::isContextPublic()) {
             return $this->canClientDelete();
-    }
+        }
 
         return (int) $this->canDelete();
     }
@@ -5481,9 +5508,9 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
             $table = $this->getTable();
             $primary = $this->getPrimary();
-            
+
             $items = $this->getList($filters, null, null, 'position', 'asc', 'array', array($primary, 'position'));
-            
+
             $check = true;
 
             if ($this->db->update($table, array(
@@ -7683,7 +7710,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         if (!$this->isLoaded()) {
             return '';
         }
-            
+
         $html = '';
         $html .= '<span class="objectLink">';
 
@@ -7777,7 +7804,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             if ($is_public) {
                 if ($this->config->isDefined('cards/public')) {
                     $card_name = 'public';
-            }
+                }
             } else {
                 $card_name = BimpTools::getArrayValueFromPath($params, 'card', '');
             }
@@ -7818,12 +7845,12 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         }
 
         if (!$is_public) {
-        $external_link = (isset($params['external_link']) ? (int) $params['external_link'] : 1);
-        $modal_view = (isset($params['modal_view']) ? $params['modal_view'] : 'default');
+            $external_link = (isset($params['external_link']) ? (int) $params['external_link'] : 1);
+            $modal_view = (isset($params['modal_view']) ? $params['modal_view'] : 'default');
 
-        if (($url && $external_link) || $modal_view) {
-            $html .= BimpRender::renderObjectIcons($this, $external_link, $modal_view, $url);
-        }
+            if (($url && $external_link) || $modal_view) {
+                $html .= BimpRender::renderObjectIcons($this, $external_link, $modal_view, $url);
+            }
         }
 
         if ($card_html) {
@@ -7908,14 +7935,14 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             if (BimpCore::isContextPublic()) {
                 $html = strip_tags($html);
             } else {
-            $external_link = (isset($params['external_link']) ? (int) $params['external_link'] : 1);
+                $external_link = (isset($params['external_link']) ? (int) $params['external_link'] : 1);
 
-            if ($external_link) {
-                $url = self::getInstanceUrl($instance);
-                if ($url) {
-                    $html .= BimpRender::renderObjectIcons($instance, true, null, $url);
+                if ($external_link) {
+                    $url = self::getInstanceUrl($instance);
+                    if ($url) {
+                        $html .= BimpRender::renderObjectIcons($instance, true, null, $url);
+                    }
                 }
-            }
             }
         } else {
             $html .= 'Objet "' . get_class($instance) . '"' . (isset($instance->id) ? ' #' . $instance->id : '');

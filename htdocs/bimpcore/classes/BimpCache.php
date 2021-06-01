@@ -29,7 +29,7 @@ class BimpCache
     public static function getBdb($no_transactions = false)
     {
         global $db;
-        
+
         if (!$no_transactions) {
             if (is_null(self::$bdb)) {
                 self::$bdb = new BimpDb($db);
@@ -37,14 +37,14 @@ class BimpCache
 
             return self::$bdb;
         }
-        
+
         if (is_null(self::$bdb_noTransac)) {
             global $conf;
             $db2 = getDoliDBInstance($conf->db->type, $conf->db->host, $conf->db->user, $db->database_pass, $conf->db->name, $conf->db->port);
-            
+
             self::$bdb_noTransac = new BimpDb($db2);
         }
-        
+
         return self::$bdb_noTransac;
     }
 
@@ -1461,7 +1461,7 @@ class BimpCache
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
 
-            $rows = self::getBdb()->getRows('c_typent', ($active_only ? '`active` = 1' : '1'), null, 'array', array('id', 'libelle'));
+            $rows = self::getBdb()->getRows('c_typent', ($active_only ? '`active` = 1' : '1') . " ORDER BY libelle", null, 'array', array('id', 'libelle'));
 
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
@@ -1470,7 +1470,13 @@ class BimpCache
             }
         }
 
-        return self::getCacheArray($cache_key, $include_empty);
+        $return = self::getCacheArray($cache_key, $include_empty);
+
+        if (!$include_empty && isset($return[0])) {
+            unset($return[0]);
+        }
+
+        return $return;
     }
 
     public static function getTypesSocietesCodesArray($include_empty = false, $active_only = false)
@@ -2096,10 +2102,10 @@ class BimpCache
             foreach (self::getCentres() as $code => $centre) {
                 if ($activ_only && !$centre['active']) {
                     continue;
-            }
+                }
 
                 self::$cache['centres_array'][$code] = $centre[$label_key];
-        }
+            }
         }
 
         return self::getCacheArray('centres_array', $include_empty, '', '');

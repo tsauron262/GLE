@@ -20,6 +20,7 @@ class BContract_contrat extends BimpDolObject
     CONST CONTRAT_STATUS_VALIDE = 1;
     CONST CONTRAT_STATUS_CLOS = 2;
     CONST CONTRAT_STATUT_WAIT_ACTIVER = 3;
+    CONST CONTRAT_STATUS_REFUSE = 4;
     CONST CONTRAT_STATUS_WAIT = 10;
     CONST CONTRAT_STATUS_ACTIVER = 11;
     CONST CONTRAT_STATUS_ACTIVER_TMP = 12;
@@ -69,6 +70,7 @@ class BContract_contrat extends BimpDolObject
         self::CONTRAT_STATUS_BROUILLON    => Array('label' => 'Brouillon', 'classes' => Array('warning'), 'icon' => 'fas_trash-alt'),
         self::CONTRAT_STATUS_VALIDE       => Array('label' => 'Attente signature client', 'classes' => Array('success'), 'icon' => 'fas_retweet'),
         self::CONTRAT_STATUS_CLOS         => Array('label' => 'Clos', 'classes' => Array('danger'), 'icon' => 'fas_times'),
+        self::CONTRAT_STATUS_REFUSE         => Array('label' => 'Refusé', 'classes' => Array('danger'), 'icon' => 'fas_times'),
         self::CONTRAT_STATUT_WAIT_ACTIVER => Array('label' => 'Attente d\'activation', 'classes' => Array('important'), 'icon' => 'fas_retweet'),
         self::CONTRAT_STATUS_WAIT         => Array('label' => 'En attente de validation', 'classes' => Array('warning'), 'icon' => 'fas_refresh'),
         self::CONTRAT_STATUS_ACTIVER      => Array('label' => 'Actif', 'classes' => Array('important'), 'icon' => 'fas_play'),
@@ -455,7 +457,7 @@ class BContract_contrat extends BimpDolObject
         $tms_effect = strtotime($dateEffecte->format('Y-m-d'));
         $tms_now = strtotime($date_now->format('Y-m-d'));
         
-        if($tms_effect > $tms_now) {
+        if(($tms_effect > $tms_now) && !BimpCore::getConf("bimpcontract_activate_contrat_before")) {
             $errors[] = "Ce contrat ne peut pas être activé car sa date d'effet est trop éloignée. Le groupe contrat recevra une demande d'activation 10 jours avant cette date";
         }
 
@@ -1107,6 +1109,27 @@ class BContract_contrat extends BimpDolObject
             ];
         }
     }
+    
+    public function actionRefuse($data = [], &$success)
+    {
+
+        if ($this->isLoaded()) {
+
+            $errors = $this->updateField('statut', self::CONTRAT_STATUS_REFUSE);
+
+            if (!count($errors)) {
+                $this->turnOffEcheancier();
+                $this->addLog("Contrat refusé par le client");
+                $success = "Le contrat à bien été notifié comme refusé";
+            }
+
+            return [
+                'errors'   => $errors,
+                'warnings' => [],
+                'success'  => $success
+            ];
+        }
+    }
 
     public function isFactAuto()
     {
@@ -1450,6 +1473,11 @@ class BContract_contrat extends BimpDolObject
             $this->updateField('relance_renouvellement', 1);
             $this->addLog('Renouvellement tacite N°' . $next_renouvellement);
             $this->updateField('date_end_renouvellement', $new_date_end->format('Y-m-d'));
+            
+            $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
+            $echeancier->fetchBy('id_contrat', $this->id);
+            $echeancier->updateField('next_facture_date', $new_date_start->format('Y-m-d') . "  00:00:00");
+            
         }
 
         if ($auto) {
@@ -1529,6 +1557,17 @@ class BContract_contrat extends BimpDolObject
                     );
                 }
             }
+            
+            if($status == self::CONTRAT_STATUS_VALIDE || $status == self::CONTRAT_STATUT_WAIT_ACTIVER) {
+                $buttons[] = array(
+                    'label'   => 'Contrat refusé par le client',
+                    'icon'    => 'fas_times',
+                    'onclick' => $this->getJsActionOnclick('refuse', array(), array(
+                        'confirm_msg' => "Cette action est irréverssible, continuer ?",
+                    ))
+                );
+            }
+            
             if ($status == self::CONTRAT_STATUS_ACTIVER && $user->rights->bimpcontract->auto_billing) {
                 if ($this->is_not_finish() && $this->reste_a_payer() > 0) {
                     $buttons[] = array(
@@ -1605,7 +1644,7 @@ class BContract_contrat extends BimpDolObject
                     ))
                 );
             }
-            if (($user->rights->bimpcontract->to_validate || $user->admin) && $this->getData('statut') != self::CONTRAT_STATUT_ABORT && $this->getData('statut') != self::CONTRAT_STATUS_CLOS) {
+            if (($user->rights->bimpcontract->to_validate || $user->admin) && $this->getData('statut') != self::CONTRAT_STATUT_ABORT && $this->getData('statut') != self::CONTRAT_STATUS_CLOS && $status != self::CONTRAT_STATUS_REFUSE) {
                 $buttons[] = array(
                     'label'   => 'Abandonner le contrat',
                     'icon'    => 'fas_times',
@@ -1660,7 +1699,7 @@ class BContract_contrat extends BimpDolObject
                     'onclick' => $this->getJsActionOnclick('validation', array(), array())
                 );
             }
-            if (!is_null($this->getData('date_contrat')) && $status != self::CONTRAT_STATUS_ACTIVER && $status != self::CONTRAT_STATUT_WAIT_ACTIVER) {
+            if (!is_null($this->getData('date_contrat')) && $status != self::CONTRAT_STATUS_ACTIVER && $status != self::CONTRAT_STATUT_WAIT_ACTIVER && $status != self::CONTRAT_STATUS_REFUSE) {
                 $buttons[] = array(
                     'label'   => 'Dé-signer le contrat',
                     'icon'    => 'fas_undo',
@@ -1677,7 +1716,7 @@ class BContract_contrat extends BimpDolObject
                         'success_callback' => $callback
                 )));
             }
-            if ($status == self::CONTRAT_STATUS_BROUILLON || ($user->rights->bimpcontract->to_generate)) {
+            if (($status == self::CONTRAT_STATUS_BROUILLON || $status == self::CONTRAT_STATUS_WAIT ) && ($user->rights->bimpcontract->to_generate)) {
 
                 if ($status != self::CONTRAT_STATUS_CLOS && $status != self::CONTRAT_STATUS_ACTIVER && $status != self::CONTRAT_STATUS_ACTIVER_TMP && $status != self::CONTRAT_STATUS_ACTIVER_SUP) {
                     $buttons[] = array(
@@ -1705,7 +1744,7 @@ class BContract_contrat extends BimpDolObject
             }
         }
         
-        if($user->id == 460) {
+        if($user->id == 460  && $status == self::CONTRAT_STATUS_ACTIVER) {
             $buttons[] = array(
                     'label'   => 'Ajouter un accompte',
                     'icon'    => 'euro',
@@ -2055,7 +2094,10 @@ class BContract_contrat extends BimpDolObject
     public function canEditField($field_name)
     {
         global $user;
-
+        
+        if($this->getData('statut') == self::CONTRAT_STATUS_REFUSE)
+            return 0;
+        
         if ($this->getData('statut') == self::CONTRAT_STATUS_CLOS)
             return 0;
 
@@ -3459,13 +3501,13 @@ class BContract_contrat extends BimpDolObject
         if (!count($errors)) {
             foreach ($propal->dol_object->lines as $line) {
                 $produit = $this->getInstance('bimpcore', 'Bimp_Product', $line->fk_product);
-                if ($produit->getData('fk_product_type') == 1) {
-                    $description = ($line->desc) ? $line->desc : $line->libelle;
-                    $end_date = new DateTime($data['valid_start']);
-                    $end_date->add(new DateInterval("P" . $duree_mois . "M"));
-                    $new_contrat->dol_object->pa_ht = $line->pa_ht; // BUG DéBILE DOLIBARR
-                    $new_contrat->dol_object->addLine($description, $line->subprice, $line->qty, $line->tva_tx, 0, 0, $line->fk_product, $line->remise_percent, $data['valid_start'], $end_date->format('Y-m-d'), 'HT', 0.0, 0, null, (float) $line->pa_ht, 0, null, $line->rang);
-                }
+                //if ($produit->getData('fk_product_type') == 1) {
+                $description = ($line->desc) ? $line->desc : $line->libelle;
+                $end_date = new DateTime($data['valid_start']);
+                $end_date->add(new DateInterval("P" . $duree_mois . "M"));
+                $new_contrat->dol_object->pa_ht = $line->pa_ht; // BUG DéBILE DOLIBARR
+                $new_contrat->dol_object->addLine($description, $line->subprice, $line->qty, $line->tva_tx, 0, 0, $line->fk_product, $line->remise_percent, $data['valid_start'], $end_date->format('Y-m-d'), 'HT', 0.0, 0, null, (float) $line->pa_ht, 0, null, $line->rang);
+                //}
             }
 
             $contacts_suivi = $new_contrat->dol_object->liste_contact(-1, 'external', 0, 'BILLING2');

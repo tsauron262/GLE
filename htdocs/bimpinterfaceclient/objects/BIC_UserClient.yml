@@ -174,7 +174,7 @@ lists:
     default:
         checkboxes: 0
         configurable: 1
-        sort_field: date_create
+        sort_field: id
         sort_way: desc
         n: 10
         delete_btn: 1

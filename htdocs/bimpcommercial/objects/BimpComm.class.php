@@ -1577,13 +1577,7 @@ class BimpComm extends BimpDolObject
 
     public function getIdCommercial()
     {
-        if ($this->isLoaded()) {
-            $contacts = $this->dol_object->getIdContact('internal', 'SALESREPFOLL');
-            if (isset($contacts[0]) && $contacts[0]) {
-                return $contacts[0];
-            }
-        }
-        return 0;
+        return $this->getIdContact($type = 'internal', $code = 'SALESREPFOLL');
     }
 
     public function displayCommercial()

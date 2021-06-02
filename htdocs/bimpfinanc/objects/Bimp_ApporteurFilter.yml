@@ -26,7 +26,7 @@ fields:
         label: Filtre
         type: text
     commition: 
-        label: Commition
+        label: Commission
         type: percent
         default_value: 0
     

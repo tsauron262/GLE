@@ -3556,7 +3556,12 @@ class Bimp_Commande extends BimpComm
         else {
             
             if ((int) $this->getData('fk_soc')) {
-                $client = $this->getChildObject('client');
+                
+                if(method_exists($this, 'getClientFacture'))
+                    $client = $this->getClientFacture();
+                else
+                    $client = $this->getChildObject('client');
+                
                 if ($client->isLoaded()) {
                     $total_rtp = 0;
                     $subject .= 'Retard de paiement - ' . $client->getData('code_client') . ' - ' . $client->getData('nom');

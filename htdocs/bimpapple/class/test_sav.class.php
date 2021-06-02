@@ -344,7 +344,7 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
             require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
         }
 
-        $gsx = GSX_v2::getInstance();
+        $gsx = GSX_v2::getInstance(true);
         $gsx->authenticate();
         $bdb = BimpCache::getBdb();
         

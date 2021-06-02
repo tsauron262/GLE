@@ -43,7 +43,7 @@ class test_sav
         require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
         require_once DOL_DOCUMENT_ROOT . '/bimpapple/objects/GSX_Repair.class.php';
         
-        $this->initGsx();
+//        $this->initGsx();
     }
     
     function initGsx($idUser = 0){

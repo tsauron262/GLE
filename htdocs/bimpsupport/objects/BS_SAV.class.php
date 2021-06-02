@@ -212,6 +212,15 @@ class BS_SAV extends BimpObject
                     $errors[] = $status_error;
                     return 0;
                 }
+                $client = $this->getChildObject('client');
+                if (!BimpObject::objectLoaded($client)) {
+                    $errors[] = 'Aucun client';
+                    return 0;
+                }
+                if (!$client->isSolvable($this->object_name)) {
+                    $errors[] = 'Client non solvable';
+                    return 0;
+                }
                 return 1;
 
             case 'cancelRdv':
@@ -618,11 +627,22 @@ class BS_SAV extends BimpObject
             }
 
             if ($status < 0) {
-                if ($this->isActionAllowed('setNew') && $this->canSetAction('setNew')) {
+                $errors = array();
+                if ($this->isActionAllowed('setNew', $errors)) {
+                    if ($this->canSetAction('setNew')) {
+                        $buttons[] = array(
+                            'label'   => 'Prendre en charge',
+                            'icon'    => 'fas_cogs',
+                            'onclick' => $this->getJsActionOnclick('setNew', array(), array())
+                        );
+                    }
+                } else {
                     $buttons[] = array(
-                        'label'   => 'Prendre en charge',
-                        'icon'    => 'fas_cogs',
-                        'onclick' => $this->getJsActionOnclick('setNew', array(), array())
+                        'label'    => 'Prendre en charge',
+                        'icon'     => 'fas_cogs',
+                        'onclick'  => '',
+                        'disabled' => 1,
+                        'popover'  => BimpTools::getMsgFromArray($errors)
                     );
                 }
             } else {

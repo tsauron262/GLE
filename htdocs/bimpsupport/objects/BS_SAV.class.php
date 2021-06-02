@@ -212,6 +212,15 @@ class BS_SAV extends BimpObject
                     $errors[] = $status_error;
                     return 0;
                 }
+                $client = $this->getChildObject('client');
+                if (!BimpObject::objectLoaded($client)) {
+                    $errors[] = 'Aucun client';
+                    return 0;
+                }
+                if (!$client->isSolvable($this->object_name)) {
+                    $errors[] = 'Client non solvable';
+                    return 0;
+                }
                 return 1;
 
             case 'cancelRdv':
@@ -618,11 +627,22 @@ class BS_SAV extends BimpObject
             }
 
             if ($status < 0) {
-                if ($this->isActionAllowed('setNew') && $this->canSetAction('setNew')) {
+                $errors = array();
+                if ($this->isActionAllowed('setNew', $errors)) {
+                    if ($this->canSetAction('setNew')) {
+                        $buttons[] = array(
+                            'label'   => 'Prendre en charge',
+                            'icon'    => 'fas_cogs',
+                            'onclick' => $this->getJsActionOnclick('setNew', array(), array())
+                        );
+                    }
+                } else {
                     $buttons[] = array(
-                        'label'   => 'Prendre en charge',
-                        'icon'    => 'fas_cogs',
-                        'onclick' => $this->getJsActionOnclick('setNew', array(), array())
+                        'label'    => 'Prendre en charge',
+                        'icon'     => 'fas_cogs',
+                        'onclick'  => '',
+                        'disabled' => 1,
+                        'popover'  => BimpTools::getMsgFromArray($errors)
                     );
                 }
             } else {
@@ -1359,13 +1379,21 @@ class BS_SAV extends BimpObject
             $date = $this->getData('date_rdv');
             if ($date) {
                 $html .= '<span class="success">';
-                $html .= 'Rendez-vous le ' . date('d / m / Y', strtotime($date));
+                $html .= 'Rendez-vous le ' . date('d / m / Y à H:i', strtotime($date));
                 $html .= '</span>';
             } else {
                 $html .= '<span class="danger">';
                 $html .= 'Pas de rendez-vous fixé';
                 $html .= '</span>';
             }
+            $html .= '</div>';
+        }
+
+        if (!$soc->isSolvable($this->object_name)) {
+            $html .= '<div style="font-size: 15px; margin-top: 10px">';
+            $html .= '<span class="danger">';
+            $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Attention ce client est au statut "' . Bimp_Societe::$solvabilites[(int) $soc->getData('solvabilite_status')]['label'] . '"';
+            $html .= '</span>';
             $html .= '</div>';
         }
 
@@ -4661,6 +4689,7 @@ class BS_SAV extends BimpObject
 
     public function actionCancelRdv($data, &$success)
     {
+        $debug = '';
         $errors = array();
         $warnings = array();
         $success = 'Rendez-vous annulé avec succès';
@@ -4668,7 +4697,7 @@ class BS_SAV extends BimpObject
         $res_id = $this->getData('resgsx');
         $date_rdv = $this->getData('date_rdv');
 
-        if ($res_id && $date_rdv && $date_rdv > date('Y-m-d H:i:s')) {
+        if ($res_id && $date_rdv /*&& $date_rdv > date('Y-m-d H:i:s')*/) {
 
             // Annulation GSX: 
             require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_Reservation.php';
@@ -4677,7 +4706,6 @@ class BS_SAV extends BimpObject
             $centre = $this->getCentreData();
 
             if (isset($centre['ship_to']) && $centre['ship_to']) {
-                $debug = '';
                 $result = GSX_Reservation::cancelReservation(897316, $centre['ship_to'], $res_id, $gsx_errors, $debug, array(
                             'cancelReason' => BimpTools::getArrayValueFromPath($data, 'cancel_reason', 'CUSTOMER_CANCELLED')
                 ));
@@ -4709,7 +4737,8 @@ class BS_SAV extends BimpObject
         }
         return array(
             'errors'   => $errors,
-            'warnings' => $warnings
+            'warnings' => $warnings,
+            'debug'    => $debug
         );
     }
 
@@ -4751,7 +4780,7 @@ class BS_SAV extends BimpObject
         } else {
             if (!(int) $client->getData('status')) {
                 $errors[] = 'Ce client est désactivé';
-            } elseif (!$client->isSolvable($this->object_name, $warnings)) {
+            } elseif (!$force_create && !$client->isSolvable($this->object_name, $warnings)) {
                 $errors[] = 'Il n\'est pas possible d\'ouvrir un SAV pour ce client (' . Bimp_Societe::$solvabilites[(int) $client->getData('solvabilite_status')]['label'] . ')';
             }
         }

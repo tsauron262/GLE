@@ -50,6 +50,25 @@ class equipmentController extends BimpController
         return $list->renderHtml();
     }
     
+    
+    
+    public function renderHotlineList(){
+        if (!BimpTools::isSubmit('id')) {
+            return BimpRender::renderAlerts('ID de l\'équipement absent');
+        }
+
+        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) BimpTools::getValue('id', 0));
+
+        if (!BimpObject::objectLoaded($equipment)) {
+            return BimpRender::renderAlerts('ID de l\'équipement invalide');
+        }
+
+        $list = new BC_ListTable(BimpObject::getInstance('bimpsupport', 'BS_Ticket'), 'default', 1, null, 'Tickets enregistrés pour cet équipement', 'wrench');
+        $list->addFieldFilterValue('serial', $equipment->getData('serial'));
+
+        return $list->renderHtml();
+    }
+    
     public function renderAchats(){
         $html = '';
         $id_equipment = (int) BimpTools::getValue('id', 0);

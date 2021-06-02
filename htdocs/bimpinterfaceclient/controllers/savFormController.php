@@ -1011,7 +1011,7 @@ class savFormController extends BimpPublicController
                 if ($isCompany) {
                     $nom_client = $data['client_nom_societe'];
                 } else {
-                    $nom_client = strtoupper($data['client_lastname']) . ' ' . BimpTools::ucfirst($data['client_firstname']);
+                    $nom_client = strtoupper($data['client_lastname']) . ' ' . BimpTools::ucfirst(strtolower($data['client_firstname']));
                 }
 
                 $client_errors = $client->validateArray(array(
@@ -1192,8 +1192,8 @@ class savFormController extends BimpPublicController
                         $contact_data = array(
                             'fk_soc'       => $client->id,
                             'civility'     => $data['client_civility'],
-                            'lastname'     => $data['client_lastname'],
-                            'firstname'    => $data['client_firstname'],
+                            'lastname'     => strtoupper($data['client_lastname']),
+                            'firstname'    => BimpTools::ucfirst(strtolower($data['client_firstname'])),
                             'address'      => $data['client_address'],
                             'zip'          => $data['client_zip'],
                             'town'         => $data['client_town'],

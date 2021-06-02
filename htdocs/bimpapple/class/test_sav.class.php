@@ -345,6 +345,7 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
         }
 
         $gsx = GSX_v2::getInstance();
+        $gsx->authenticate();
         $bdb = BimpCache::getBdb();
         
         if($nb < 1)

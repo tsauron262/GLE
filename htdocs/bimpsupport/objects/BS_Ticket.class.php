@@ -868,6 +868,7 @@ class BS_Ticket extends BimpObject
 
             $sujet .= $this->getData('sujet');
             $this->set('sujet', $sujet);
+            $this->set('serial', BimpTools::getValue('serial_imei'));
         } else {
             $this->set('id_user_resp', (int) $user->id);
         }

@@ -734,14 +734,16 @@ class BC_Card extends BimpComponent
                 $html .= '<i class="far fa5-file iconLeft"></i>';
                 $html .= 'Afficher</a>';
 
-                $html .= '<button type="button" class="btn btn-default bs-popover" ';
-                $html .= ' data-toggle="popover"';
-                $html .= ' data-trigger="hover"';
-                $html .= ' data-content="vue rapide"';
-                $html .= ' data-container="body"';
-                $html .= ' data-placement="top"';
-                $html .= 'onclick="loadModalObjectPage($(this), \'' . $url . '\', \'' . htmlentities(addslashes($title)) . '\')">';
-                $html .= '<i class="far fa5-eye"></i></button>';
+                if (!BimpCore::isContextPublic()) {
+                    $html .= '<button type="button" class="btn btn-default bs-popover" ';
+                    $html .= ' data-toggle="popover"';
+                    $html .= ' data-trigger="hover"';
+                    $html .= ' data-content="vue rapide"';
+                    $html .= ' data-container="body"';
+                    $html .= ' data-placement="top"';
+                    $html .= 'onclick="loadModalObjectPage($(this), \'' . $url . '\', \'' . htmlentities(addslashes($title)) . '\')">';
+                    $html .= '<i class="far fa5-eye"></i></button>';
+                }
 
                 $html .= '<a href="' . $url . '" class="btn btn-default bs-popover" target="_blank"';
                 $html .= 'data-toggle="popover"';

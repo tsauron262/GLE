@@ -2514,20 +2514,22 @@ class Bimp_Commande extends BimpComm
                     $equipments_set = array();
                     if (BimpObject::objectLoaded($product) && $product->isSerialisable()) {
                         if (isset($line_data['equipments']) && is_array($line_data['equipments'])) {
+                            $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment');
+                            $equipment->updateFieldsMasse($line_data['equipments'], array('prix_achat'=>$line->pa_ht, 'achat_tva_tx' => $line->tva_tx), array('prix_achat = 0'));
                             foreach ($line_data['equipments'] as $id_equipment) {
-                                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-
-                                if (!BimpObject::objectLoaded($equipment)) {
-                                    $errors[] = 'Ligne n°' . $line->getData('position') . ': l\'équipement d\'ID ' . $id_equipment . ' n\'existe plus';
-                                    continue;
-                                }
-
-                                if (!(float) $equipment->getData('prix_achat')) {
-                                    $equipment->set('prix_achat', $line->pa_ht);
-                                    $equipment->set('achat_tva_tx', $line->tva_tx);
-                                    $equipment->update();
-                                }
-
+//                                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+//
+//                                if (!BimpObject::objectLoaded($equipment)) {
+//                                    $errors[] = 'Ligne n°' . $line->getData('position') . ': l\'équipement d\'ID ' . $id_equipment . ' n\'existe plus';
+//                                    continue;
+//                                }
+//
+//                                if (!(float) $equipment->getData('prix_achat')) {
+//                                    $equipment->set('prix_achat', $line->pa_ht);
+//                                    $equipment->set('achat_tva_tx', $line->tva_tx);
+//                                    $equipment->update();
+//                                }
+//
                                 $line_equipments[] = array(
                                     'id_equipment' => (int) $id_equipment
                                 );

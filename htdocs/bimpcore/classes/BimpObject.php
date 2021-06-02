@@ -4121,17 +4121,19 @@ class BimpObject extends BimpCache
         return $errors;
     }
     
-    public function updateFieldsMasse($ids, $fields, $wheres = array()){
+    public function updateFieldsMasse($ids, $fields, $filters = array()){
         //A amélioré grandement
         
         $set = array();
         foreach($fields as $field => $val){
             $set[] = $this->getFieldSqlKey($field) .' = '.$this->getDbValue($field, $val);
         }
-        $wheres[] = $this->getPrimary(). ' IN ('.implode(',', $ids).')';
+        $filters = BimpTools::mergeSqlFilter($filters, $this->getPrimary(), array('in'=> $ids));
+
+        $where = BimpTools::getSqlWhere($filters);
         
-        $req = 'UPDATE '.MAIN_DB_PREFIX.$this->getTable(). ' SET '.implode(', ', $set);
-        $req .= ' WHERE '.implode(' AND ', $wheres);
+        $req = 'UPDATE '.MAIN_DB_PREFIX.$this->getTable(). ' SET '.implode(', ', $set). $where;
+
         $this->db->execute($req);
     }
 

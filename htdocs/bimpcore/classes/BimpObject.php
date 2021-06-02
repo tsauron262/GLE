@@ -4120,6 +4120,20 @@ class BimpObject extends BimpCache
         $this->noFetchOnTrigger = false;
         return $errors;
     }
+    
+    public function updateFieldsMasse($ids, $fields, $wheres = array()){
+        //A amélioré grandement
+        
+        $set = array();
+        foreach($fields as $field => $val){
+            $set[] = $this->getFieldSqlKey($field) .' = '.$this->getDbValue($field, $val);
+        }
+        $wheres[] = $this->getPrimary(). ' IN ('.implode(',', $ids).')';
+        
+        $req = 'UPDATE '.MAIN_DB_PREFIX.$this->getTable(). ' SET '.implode(', ', $set);
+        $req .= ' WHERE '.implode(' AND ', $wheres);
+        $this->db->execute($req);
+    }
 
     public function update(&$warnings = array(), $force_update = false)
     {

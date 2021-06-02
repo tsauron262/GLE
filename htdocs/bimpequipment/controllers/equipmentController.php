@@ -64,7 +64,7 @@ class equipmentController extends BimpController
         }
 
         $list = new BC_ListTable(BimpObject::getInstance('bimpsupport', 'BS_Ticket'), 'default', 1, null, 'Tickets enregistrés pour cet équipement', 'wrench');
-        $list->addFieldFilterValue('serial', $equipment->getData('serial'));
+        $list->addFieldFilterValue('serial', array('or_field' => array($equipment->getData('serial'), $equipment->getData('imei'))));
 
         return $list->renderHtml();
     }

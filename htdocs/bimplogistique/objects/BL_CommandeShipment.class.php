@@ -2702,8 +2702,8 @@ class BL_CommandeShipment extends BimpObject
             $asso = new BimpAssociation($comm, 'factures');
             $list = $asso->getAssociatesList();
 
-            if (!in_array($this->getData('id_facture'), $list)) {
-                return array('La facture ne fait pas partie des factures de la commande ' . $comm->getRef());
+            if ($this->getData('id_facture') > 0 && !in_array($this->getData('id_facture'), $list)) {
+                return array('La facture '.$this->getData('id_facture').' ne fait pas partie des factures de la commande ' . $comm->getRef());
             }
         }
 

@@ -61,6 +61,8 @@ objects:
                 name: BS_Inter
         
     bs_notes:
+        relation: hasMany
+        delete: 1
         instance:
             bimp_object: 
                 module: bimpsupport
@@ -486,13 +488,13 @@ forms:
             impact: 
                 field: impact
             notes: 
-                object: notes
-                form_name: addClientNote
+                object: bs_notes
+                form_name: public_client
                 multiple: 1
             files: 
                 object: files
                 multiple: 1
-                form_name: upload
+                form_name: public_upload
                 form_values:
                     fields:
                         parent_module: bimpsupport
@@ -507,6 +509,7 @@ forms:
                 field: id_contrat
                 input: unset
                 edit: 0
+                
     public_edit:
         rows:
             - field: id_contrat

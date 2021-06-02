@@ -2515,7 +2515,7 @@ class Bimp_Commande extends BimpComm
                     if (BimpObject::objectLoaded($product) && $product->isSerialisable()) {
                         if (isset($line_data['equipments']) && is_array($line_data['equipments'])) {
                             $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment');
-                            $equipment->updateFieldsMasse($line_data['equipments'], array('prix_achat'=>$line->pa_ht, 'achat_tva_tx' => $line->tva_tx), array('prix_achat = 0'));
+                            $equipment->updateFieldsMasse($line_data['equipments'], array('prix_achat'=>$line->pa_ht, 'achat_tva_tx' => $line->tva_tx), array('prix_achat'=> 0));
                             foreach ($line_data['equipments'] as $id_equipment) {
 //                                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
 //

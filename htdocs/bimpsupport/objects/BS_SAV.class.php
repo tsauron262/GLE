@@ -4669,6 +4669,7 @@ class BS_SAV extends BimpObject
 
     public function actionCancelRdv($data, &$success)
     {
+        $debug = '';
         $errors = array();
         $warnings = array();
         $success = 'Rendez-vous annulé avec succès';
@@ -4676,7 +4677,7 @@ class BS_SAV extends BimpObject
         $res_id = $this->getData('resgsx');
         $date_rdv = $this->getData('date_rdv');
 
-        if ($res_id && $date_rdv && $date_rdv > date('Y-m-d H:i:s')) {
+        if ($res_id && $date_rdv /*&& $date_rdv > date('Y-m-d H:i:s')*/) {
 
             // Annulation GSX: 
             require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_Reservation.php';
@@ -4685,7 +4686,6 @@ class BS_SAV extends BimpObject
             $centre = $this->getCentreData();
 
             if (isset($centre['ship_to']) && $centre['ship_to']) {
-                $debug = '';
                 $result = GSX_Reservation::cancelReservation(897316, $centre['ship_to'], $res_id, $gsx_errors, $debug, array(
                             'cancelReason' => BimpTools::getArrayValueFromPath($data, 'cancel_reason', 'CUSTOMER_CANCELLED')
                 ));
@@ -4717,7 +4717,8 @@ class BS_SAV extends BimpObject
         }
         return array(
             'errors'   => $errors,
-            'warnings' => $warnings
+            'warnings' => $warnings,
+            'debug'    => $debug
         );
     }
 

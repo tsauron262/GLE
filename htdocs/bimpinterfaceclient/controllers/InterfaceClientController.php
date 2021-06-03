@@ -553,6 +553,15 @@ class InterfaceClientController extends BimpPublicController
                             $html .= '<div style="margin-top: 30px">';
                             $html .= $list->renderHtml();
                             $html .= '</div>';
+
+                            $file = BimpObject::getInstance('bimpcore', 'BimpFile');
+                            $list = new BC_ListTable($file, 'public', 1, $id_ticket, 'Fichiers', 'fas_folder-open');
+                            $list->addFieldFilterValue('parent_module', 'bimpsupport');
+                            $list->addFieldFilterValue('parent_object_name', 'BS_Ticket');
+                            
+                            $html .= '<div style="margin-top: 30px">';
+                            $html .= $list->renderHtml();
+                            $html .= '</div>';
                         }
                     }
                 }

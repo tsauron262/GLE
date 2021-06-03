@@ -69,7 +69,7 @@ forms:
         title: Ajouter une note au ticket support
         rows: 
             - field: content
-              label: 
+              label: Message
         
 lists_cols: 
     date_create:

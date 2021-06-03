@@ -109,7 +109,7 @@ function SavPublicForm() {
 
         if ($form.length) {
             if (!parseInt($form.data('rdv_infos_form_events_init'))) {
-                var $input = $form.find('select[name="sav_centre"]');
+                var $input = $form.find('[name="sav_centre"]');
 
                 if ($input.length) {
                     $input.change(function () {
@@ -176,9 +176,16 @@ function SavPublicForm() {
                     cur_email = $cust_infos.data('client_email');
                 }
 
+                var code_centre = '';
+                var $code_centre = $('#client_email').find('[name="code_centre"]');
+                if ($code_centre.length) {
+                    code_centre = $code_centre.val();
+                }
+
                 if (!cur_email || cur_email !== val) {
                     BimpAjax('loadPublicSavForm', {
-                        'client_email': val
+                        'client_email': val,
+                        'code_centre': code_centre
                     }, $('#client_email_ajax_result'), {
                         'display_success': false,
                         'display_processing': true,
@@ -267,13 +274,17 @@ function SavPublicForm() {
     this.fetchAvailableSlots = function () {
         if (ptr.$form && ptr.$form.length) {
             var $code_prod = ptr.$form.find('select[name="eq_type"]');
-            var $centre = ptr.$form.find('select[name="sav_centre"]');
+            var $centre = ptr.$form.find('[name="sav_centre"]');
 
             if ($code_prod.length && $centre.length) {
                 var code_prod = $code_prod.val();
                 var centre = $centre.val();
 
                 if (code_prod && centre) {
+                    $('#rdv_form_ajax_result').stop().slideUp(250, function () {
+                        $(this).html('');
+                    });
+
                     BimpAjax('publicSavFormFetchAvailableSlots', {
                         'code_product': code_prod,
                         'code_centre': centre
@@ -286,10 +297,6 @@ function SavPublicForm() {
                     return;
                 }
             }
-
-            $('#rdv_form_ajax_result').stop().slideUp(250, function () {
-                $(this).html('');
-            });
         }
     };
 

@@ -22,6 +22,9 @@ fields:
     id_rapporteur:
         label: Apporteur
         type: id_parent
+    libelle:
+        label: Libelle
+        type: text
     filter:
         label: Filtre
         type: text
@@ -33,12 +36,14 @@ fields:
 forms:
     default: 
         rows:
+            - field: libelle
             - field: filter
             - field: commition
     
 filters_panels: 
     default: 
         filters: 
+            libelle:
             filter:
             commition:
                 
@@ -58,6 +63,7 @@ lists:
         filters_panel: default
         edit_btn: 1
         cols:
+            libelle:
             filter: 
             commition:
             nb_prod:

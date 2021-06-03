@@ -90,29 +90,47 @@ fields:
 forms:
     upload: 
         rows:
-            - field: parent_module
-            - field: parent_object_name
-            - field: id_parent
-            - label: Fichier
-              custom: 1
-              input_name: file
-              input:
-                  type: file_upload
-              required: 1
-            - field: file_name
-              label: Nom à donner au fichier
-            - field: description
-            - field: visibility
-              edit:
-                  callback: currentContext
-            - label: Notifier le service facturation ?   
-              custom: 1
-              input_name: taskFact
-              data_type: bool
-              input: 
-                  type: toggle
+            module: 
+                field: parent_module
+            obj_name: 
+                field: parent_object_name
+            id_parent: 
+                field: id_parent
+            file: 
+                label: Fichier
+                custom: 1
+                input_name: file
+                input:
+                    type: file_upload
+                required: 1
+            file_name: 
+                field: file_name
+                label: Nom à donner au fichier
+            desc:
+                field: description
+            visibility: 
+                field: visibility
+            notify: 
+                label: Notifier le service facturation ?   
+                custom: 1
+                input_name: taskFact
+                data_type: bool
+                input: 
+                    type: toggle
                   
-                          
+    public_upload: 
+        extends: upload
+        rows: 
+            visibility: 
+                field: unset
+                custom: 1
+                hidden: 1
+                input_name: visibility
+                value: 1
+                input: 
+                    type: hidden
+            notify: unset
+                                            
     edit:
         rows:
             - field: file_name
@@ -166,6 +184,24 @@ lists:
             date_create:
             description:
             visibility:                    
+        
+    public: 
+        title: Fichiers
+        icon: fas_folder-open
+        add_form_name: public_upload
+        list_filters:
+            callback: getFilterListInterfaceClient
+        delete_btn: 
+            callback: isDeletable
+        sort_field: date_create
+        sort_way: desc
+        n: 10
+        cols:
+            type: 
+            file_name:
+            file_size: 
+            date_create:
+            description:     
         
     associates: 
         title: Fichiers associés

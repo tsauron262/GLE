@@ -350,7 +350,16 @@ class BS_Ticket extends BimpObject
     {
         if ($this->getData('serial') != '') {
             $equipment = BimpObject::getBimpObjectInstance('bimpequipment', 'Equipment');
-            if ($equipment->find(array('serial' => $this->getData('serial'),), true)) {
+            if ($equipment->find(array(
+                'or_serial' => array(
+                    'or' => array(
+                        'serial' => $this->getData('serial'),
+                        'imei' => $this->getData('serial'),
+                        'imei2' => $this->getData('serial'),
+                        'meid' => $this->getData('serial')
+                    )
+                )
+            ), true)) {
                 if (!$in_the_client)
                     return $equipment;
                 $place = $equipment->getCurrentPlace();
@@ -868,6 +877,7 @@ class BS_Ticket extends BimpObject
 
             $sujet .= $this->getData('sujet');
             $this->set('sujet', $sujet);
+            $this->set('serial', BimpTools::getValue('serial_imei'));
         } else {
             $this->set('id_user_resp', (int) $user->id);
         }
@@ -877,9 +887,9 @@ class BS_Ticket extends BimpObject
             $this->set('priorite_demande_client', $this->getData('priorite'));
             $this->set('impact_demande_client', $this->getData('impact'));
 
-        $errors = parent::create($warnings, $force_create);
+            $errors = parent::create($warnings, $force_create);
 
-        if (!count($errors)) {
+            if (!count($errors)) {
                 if ($isPublic) {
                     $liste_destinataires = Array($userClient->getData('email'));
                     $liste_destinataires = BimpTools::merge_array($liste_destinataires, Array('hotline@bimp.fr'));
@@ -907,13 +917,13 @@ class BS_Ticket extends BimpObject
                         $warnings[] = 'Echec de l\'envoi de l\'e-mail de confirmation';
                     }
                 } else {
-            if ((int) BimpTools::getValue('start_timer', 0)) {
-                $timer = BimpObject::getInstance('bimpcore', 'BimpTimer');
-                if (!$timer->setObject($this, 'appels_timer', true)) {
-                    $warnings[] = 'Echec de l\'initialisation du chrono appel payant';
+                    if ((int) BimpTools::getValue('start_timer', 0)) {
+                        $timer = BimpObject::getInstance('bimpcore', 'BimpTimer');
+                        if (!$timer->setObject($this, 'appels_timer', true)) {
+                            $warnings[] = 'Echec de l\'initialisation du chrono appel payant';
+                        }
+                    }
                 }
-            }
-        }
             }
         }
 
@@ -1011,5 +1021,44 @@ class BS_Ticket extends BimpObject
         }
 
         return $errors;
+    }
+
+    // Méthodes statiques:
+    public static function correctSerialsAll($echo = false)
+    {
+        $bdb = self::getBdb();
+
+        $where = '(serial IS NULL OR serial = \'\') AND id_user_client > 0 AND sujet LIKE \'%N° de série:%\'';
+        $rows = $bdb->getRows('bs_ticket', $where, null, 'array', array('id', 'sujet', 'id_user_client'));
+
+        if (is_array($rows)) {
+            if ($echo) {
+                echo '<pre>';
+                print_r($rows);
+                echo '</pre>';
+            }
+            
+            foreach ($rows as $r) {
+                if (preg_match('/.+' . preg_quote('N° de série:</b> ', '/') . '(.+)' . '<br ?\/>/U', $r['sujet'], $matches)) {
+                    if ($echo) {
+                        echo 'MAJ #' . $r['id'] . ' => ' . $matches[1] . ': ';
+                    }
+                    if ($bdb->update('bs_ticket', array(
+                                'serial' => $matches[1]
+                                    ), 'id = ' . (int) $r['id']) <= 0) {
+                        if ($echo) {
+                            echo '<span class="danger">ECHEC - ' . $bdb->err() . '</span>';
+                        }
+                    } else {
+                        if ($echo) {
+                            echo '<span class="success">OK</span>';
+                        }
+                    }
+                    if ($echo) {
+                        echo '<br/>';
+                    }
+                }
+            }
+        }
     }
 }

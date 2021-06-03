@@ -85,6 +85,12 @@ sections:
                 callback:
                     method: useSav
                     object: equipment
+          - id: hotline
+            title: Hotline
+            struct: 
+                type: custom
+                custom: 
+                    callback: renderHotlineList
                     
           - id: inventory
             title: Inventaires

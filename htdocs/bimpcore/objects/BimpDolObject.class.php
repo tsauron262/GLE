@@ -858,6 +858,15 @@ class BimpDolObject extends BimpObject
             if (!count($errors)) {
                 $mail_object .= $data['mail_object'];
 
+                $id_model = (int) BimpTools::getPostFieldValue('id_model', 0);
+
+                if ($id_model) {
+                    global $langs;
+                    $template = self::getEmailTemplateData($id_model);
+                    $langs->tab_translate['InvoiceSentByEMail'] .= ' modéle : '.$template['label'];
+                }
+
+
                 $deliveryreceipt = (isset($data['confirm_reception']) ? (int) $data['confirm_reception'] : 0);
                 if (mailSyn2($mail_object, $to, $from, $data['msg_html'], $filename_list, $mimetype_list, $mimefilename_list, $cc, '', $deliveryreceipt)) {
                     if (static::$mail_event_code) {

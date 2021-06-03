@@ -301,6 +301,8 @@ class BS_ApplePart extends BimpObject
         if (/* stripos($ref, $exception1) !== false && */ $prix == 130.63)
             return (209 / 1.2);
 //        }
+        if ($prix == 88.67)
+            return (139 / 1.2);
 
 
 

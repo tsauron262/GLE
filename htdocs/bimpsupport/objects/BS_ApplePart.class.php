@@ -303,7 +303,6 @@ class BS_ApplePart extends BimpObject
 //        }
         if ($prix == 86.87)
             return (139 / 1.2);
-die('tt'.$prix);
 
 
         $coefPrix = 1;

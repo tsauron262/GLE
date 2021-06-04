@@ -1970,11 +1970,8 @@ class BT_ficheInter extends BimpDolObject {
                 $html .= '<br />';
             } elseif($this->isSign()) {
                 $html .= '<h3>Nom du signataire client: '.$this->displayDataTyped($this->getData('signataire')).'</h3>';
-                if($this->haveSignatureElectronique()) {
-                    $html .= '<h3>Type de signature: '.$this->displayDataTyped("Signature électronique").'</h3>';
-                } elseif($this->haveSignaturePapier()) {
-                    $html .= '<h3>Type de signature: '.$this->displayDataTyped("Signature papier").'</h3>';
-                }
+                $html .= '<h3>Type de signature: '.$this->displayDataTyped($this->displayTypeSignature()).'</h3>';
+               
                 global $conf;
                     $file =  DOL_URL_ROOT . "/document.php?modulepart=ficheinter&file=" . $this->getRef() . "/" . $this->getRef() . '.pdf';
                     $html .= '<embed src="'.$file.'" type="application/pdf"   height="1000px" width="100%">';

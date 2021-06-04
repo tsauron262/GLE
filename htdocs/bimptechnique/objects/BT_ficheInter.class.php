@@ -1839,7 +1839,7 @@ class BT_ficheInter extends BimpDolObject {
     
     public function displayTypeSignature() {
         if($this->getData('fk_statut') == 0) {
-            return "<strong class='warning'>".BimpRender::renderIcon("times")." Fiche d'intervention pas encote signée</strong>";
+            return "<strong class='warning'>".BimpRender::renderIcon("times")." Fiche d'intervention pas encore signée</strong>";
         } else {
             switch($this->getData('type_signature')) {
                 case 0:

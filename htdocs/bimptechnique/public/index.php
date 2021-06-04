@@ -157,7 +157,7 @@
 </div>
                 </div>
       <?php
-      if(isset($_GET['action']) && $_GET['action'] == "sign") {
+      if(isset($_GET['action']) && $_GET['action'] == "sign" && !$object->getData('signed')) {
           ?>
             
             <div class="wrapper"> 
@@ -178,9 +178,16 @@
                 ?>
                 
                     <iframe frameborder="0" importance="hight" src="<?= $file ?>" style="z-index: 9000;" type="application/pdf"   height="80%" width="60%"></iframe>
+                    <?php
+                        if(!$object->getdata('signed')) {
+                            ?>
                     <div  style="margin-left:20px" >
                         <a href="<?= $_SERVER['PHP_SELF'] ?>?key=<?= $_GET['key'] ?>&action=sign"><button id="sign__button__bimp" class="btn btn-success" >Signer le rapport</button></a>
                     </div>
+                    <?php
+                        }
+                    ?>
+                    
           <?php
       }
       

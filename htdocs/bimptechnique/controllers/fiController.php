@@ -8,6 +8,8 @@ class fiController extends BimpController {
         $base64 = BimpTools::getPostFieldValue('base64');
         $nom = BimpTools::getPostFieldValue('nom');
         $isChecked = BimpTools::getPostFieldValue('isChecked');
+        $farSign = BimpTools::getPostFieldValue("farSign");
+        $sign = BimpTools::getPostFieldValue("sign");
         $itsOkForSign = (is_null($controlle)) ? false : true;
         $email = BimpTools::getPostFieldValue('email');
         $preco = BimpTools::getPostFieldValue('preco');
@@ -16,8 +18,8 @@ class fiController extends BimpController {
         $contact_commercial = BimpTools::getPostFieldValue("contactCommercial");
         $success = "";
         $errors = array();
-        if(!$itsOkForSign && $isChecked == 'false') { $errors[] = "Il doit y avoir une signature"; }
-        if(empty($nom)) { $errors[] = "Il doit y avoir un nom de signataire"; }
+        if(!$itsOkForSign && $isChecked == 'false' && $farSign == 'false') { $errors[] = "Il doit y avoir une signature"; }
+        if(empty($nom) && $farSign == 'false') { $errors[] = "Il doit y avoir un nom de signataire"; }
         if(empty($email)) { $errors[] = "Il doit y avoir un email"; }
         
         if(!empty($email)) {
@@ -27,7 +29,18 @@ class fiController extends BimpController {
         }
 
         $instance = BimpObject::getInstance('bimptechnique', 'BT_ficheInter', $_REQUEST['id']);
+        $services_executed = $instance->getServicesExecutedArray();
+        $inter_non_vendu = $instance->getServicesByTypeArray(4);
+        $dep_non_vendu = $instance->getServicesByTypeArray(3);
+        $imponderable = $instance->getServicesByTypeArray(1);
         
+//        $errors[] = "<pre>" . print_r($services_executed, 1) . "</pre>";
+//        $errors[] = "<pre>" . print_r($inter_non_vendu, 1) . "</pre>";
+//        $errors[] = "<pre>" . print_r($dep_non_vendu, 1) . "</pre>";
+//        $errors[] = "<pre>" . print_r($imponderable, 1) . "</pre>";
+        
+        
+                
         if(!count($instance->getChildrenList("inters"))) {
             $errors[] = "Vous ne pouvez pas faire signer une fiche d'intervention sans intervention";
         }
@@ -54,12 +67,27 @@ class fiController extends BimpController {
             
             if($instance->isLoaded($errors) && !count($errors)) {
                 $instance->updateField('signed', 1);
+                if($farSign == 'true') {
+                    $instance->updateField('type_signature', 1);
+                    $instance->updateField('fk_statut', 4);
+                    // Envois mail + Générate code
+                    $instance->farSign($email);
+                }
+                if($isChecked == 'true') {
+                    $instance->updateField('type_signature', 2);
+                }
+                if($sign == 'true') {
+                    $instance->updateField('type_signature', 3);
+                }
                 $instance->updateField('date_signed', date('Y-m-d H:i:s'));
                 $instance->updateField('email_signature', $email);
-                if($isChecked == 'false') {
+                if($isChecked == 'false' && $farSign == 'false') {
                     $instance->updateField('base_64_signature', $base64);
                 }
-                $errors = $instance->updateField('signataire', $nom);
+                if($farSign == 'false') {
+                    $errors = $instance->updateField('signataire', $nom);
+                }
+                
                 if(!count($errors)) {
                     
                     if(!empty($attente_client)){$instance->updateField("attente_client", $attente_client);}
@@ -128,6 +156,69 @@ class fiController extends BimpController {
                     $message .= '<br/>Très courtoisement.';
                     
                     $message .= "<br /><br /><b>Le Service Technique</b><br />OLYS - 2 rue des Erables - CS21055 - 69760 LIMONEST<br />";
+                    
+                    $new_facturation_line = BimpCache::getBimpObjectInstance("bimptechnique", "BT_ficheInter_facturation");
+        
+        if(count($services_executed)) {
+            foreach($services_executed as $id_line_commande => $informations) {
+                $new_facturation_line->set('fk_fichinter', $instance->id);
+                $new_facturation_line->set('id_commande', $informations["commande"]);
+                $new_facturation_line->set('id_commande_line', $id_line_commande);
+                $new_facturation_line->set('fi_lines', json_encode($informations['lines']));
+                $new_facturation_line->set('is_vendu', 1);
+                $new_facturation_line->set('total_ht_vendu', $informations['ht_vendu']);
+                $new_facturation_line->set('tva_tx', 20);
+                $new_facturation_line->set('total_ht_depacement', ($informations['ht_executed'] - $informations['ht_vendu']));
+                $new_facturation_line->set('remise', 0);
+                $errors = $new_facturation_line->create($warnings);
+            }
+        }
+        
+        if(count($inter_non_vendu)) {
+            foreach($inter_non_vendu as $index => $informations) {
+                $new_facturation_line->set('fk_fichinter', $instance->id);
+                $new_facturation_line->set('id_commande', 0);
+                $new_facturation_line->set('id_commande_line', 0);
+                $new_facturation_line->set('fi_lines', json_encode(array($informations['line'])));
+                $new_facturation_line->set('is_vendu', 0);
+                $new_facturation_line->set('total_ht_vendu', 0);
+                $new_facturation_line->set('tva_tx', 20);
+                $new_facturation_line->set('total_ht_depacement', $informations['tarif']);
+                $new_facturation_line->set('remise', 0);
+                $errors = $new_facturation_line->create($warnings);
+            }
+        }
+        
+        if(count($dep_non_vendu)) {
+            foreach($dep_non_vendu as $index => $informations) {
+                $new_facturation_line->set('fk_fichinter', $instance->id);
+                $new_facturation_line->set('id_commande', 0);
+                $new_facturation_line->set('id_commande_line', 0);
+                $new_facturation_line->set('fi_lines', json_encode(array($informations['line'])));
+                $new_facturation_line->set('is_vendu', 0);
+                $new_facturation_line->set('total_ht_vendu', 0);
+                $new_facturation_line->set('tva_tx', 20);
+                $new_facturation_line->set('total_ht_depacement', $informations['tarif']);
+                $new_facturation_line->set('remise', 0);
+                $errors = $new_facturation_line->create($warnings);
+            }
+        }
+        
+        if(count($imponderable)) {
+            foreach($imponderable as $index => $informations) {
+                $new_facturation_line->set('fk_fichinter', $instance->id);
+                $new_facturation_line->set('id_commande', 0);
+                $new_facturation_line->set('id_commande_line', 0);
+                $new_facturation_line->set('fi_lines', json_encode(array($informations['line'])));
+                $new_facturation_line->set('is_vendu', 0);
+                $new_facturation_line->set('total_ht_vendu', 0);
+                $new_facturation_line->set('tva_tx', 20);
+                $new_facturation_line->set('total_ht_depacement', $informations['tarif']);
+                $new_facturation_line->set('remise', 0);
+                $errors = $new_facturation_line->create($warnings);
+            }
+        }
+                    
                     $logo = $mysoc->logo;
                     $testFile = str_replace(array(".jpg", ".png"), "_PRO.png", $logo);
                     if ($testFile != $logo)

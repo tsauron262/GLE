@@ -13,6 +13,20 @@ class savFormController extends BimpPublicController
         }
 
         global $userClient;
+        $centre = null;
+        $code_centre = '';
+
+        if (BimpTools::isSubmit('centre')) {
+            $code_centre = BimpTools::getValue('centre', '');
+
+            if ($code_centre) {
+                $centres = BimpCache::getCentres();
+
+                if (isset($centres[$code_centre])) {
+                    $centre = $centres[$code_centre];
+                }
+            }
+        }
 
         $html = '';
 
@@ -22,7 +36,13 @@ class savFormController extends BimpPublicController
 
         $html .= '<div id="new_sav_form" class="bimp_public_form">';
 
-        $html .= '<h2>Prendre un rendez-vous avec un de nos centre SAV</h2>';
+        $html .= '<h2>Prendre un rendez-vous dans ';
+        if (!is_null($centre)) {
+            $html .= 'notre centre SAV de ' . $centre['label'];
+        } else {
+            $html .= 'un de nos centre SAV';
+        }
+        $html .= '</h2>';
 
         $html .= '<div class="form_section" id="client_email" style="text-align: center">';
         $html .= '<div class="form_section_title">Votre adresse e-mail de contact</div>';
@@ -45,13 +65,17 @@ class savFormController extends BimpPublicController
             $html .= '</p>';
         }
 
+        if (!is_null($centre)) {
+            $html .= '<input type="hidden" name="code_centre" value="' . $code_centre . '"/>';
+        }
+
         $html .= '</div>';
         $html .= '</div>';
 
         if (BimpObject::objectLoaded($userClient)) {
             $html .= $this->renderCustomerInfosForm('');
             $html .= $this->renderEquipmentForm();
-            $html .= $this->renderRdvForm();
+            $html .= $this->renderRdvForm(!is_null($centre) ? $code_centre : '');
         } else {
             $html .= '<div id="client_email_ajax_result" style="display: none"></div>';
         }
@@ -71,7 +95,7 @@ class savFormController extends BimpPublicController
         return $html;
     }
 
-    public function renderCustomerInfosForm($email, &$errors = array(), &$warnings = array())
+    public function renderCustomerInfosForm($email, &$errors = array(), &$warnings = array(), $code_centre = '')
     {
         $html = '';
 
@@ -424,7 +448,7 @@ class savFormController extends BimpPublicController
 
         if (!BimpObject::objectLoaded($userClient)) {
             $html .= $this->renderEquipmentForm();
-            $html .= $this->renderRdvForm();
+            $html .= $this->renderRdvForm($code_centre);
         }
 
         return $html;
@@ -526,7 +550,7 @@ class savFormController extends BimpPublicController
         return $html;
     }
 
-    public function renderRdvForm()
+    public function renderRdvForm($code_centre = '')
     {
         $html = '';
 
@@ -545,7 +569,16 @@ class savFormController extends BimpPublicController
 
         $html .= '<div class="col-xs-12 col-md-4 col-lg-3">';
         $html .= '<label>Lieu</label><sup>*</sup><br/>';
-        $html .= BimpInput::renderInput('select', 'sav_centre', '', array('options' => $centres, 'extra_class' => 'required'));
+
+        if ($code_centre && isset($centres[$code_centre])) {
+            $html .= '<b>' . strtoupper($centres[$code_centre]) .'</b>';
+            $html .= '<input type="hidden" name="sav_centre" value="' . $code_centre . '"/>';
+        } else {
+            $centres = BimpCache::getCentresArray(true, 'label', true);
+            asort($centres);
+            $html .= BimpInput::renderInput('select', 'sav_centre', '', array('options' => $centres, 'extra_class' => 'required'));
+        }
+
         $html .= '</div>';
         $html .= '</div>';
 
@@ -706,7 +739,7 @@ class savFormController extends BimpPublicController
             if (!BimpValidate::isEmail($email)) {
                 $errors[] = 'Veuillez saisir une adresse e-mail valide';
             } else {
-                $html .= $this->renderCustomerInfosForm($email, $errors, $warnings);
+                $html .= $this->renderCustomerInfosForm($email, $errors, $warnings, BimpTools::getValue('code_centre', ''));
             }
         } else {
             $errors[] = 'Veuillez saisir une adresse e-mail';
@@ -887,7 +920,7 @@ class savFormController extends BimpPublicController
     }
 
     public function ajaxProcessSavFormSubmit()
-    {
+    {        
         global $userClient;
         $errors = array();
         $warnings = array();
@@ -1011,7 +1044,7 @@ class savFormController extends BimpPublicController
                 if ($isCompany) {
                     $nom_client = $data['client_nom_societe'];
                 } else {
-                    $nom_client = strtoupper($data['client_lastname']) . ' ' . BimpTools::ucfirst($data['client_firstname']);
+                    $nom_client = strtoupper($data['client_lastname']) . ' ' . BimpTools::ucfirst(strtolower($data['client_firstname']));
                 }
 
                 $client_errors = $client->validateArray(array(
@@ -1192,8 +1225,8 @@ class savFormController extends BimpPublicController
                         $contact_data = array(
                             'fk_soc'       => $client->id,
                             'civility'     => $data['client_civility'],
-                            'lastname'     => $data['client_lastname'],
-                            'firstname'    => $data['client_firstname'],
+                            'lastname'     => strtoupper($data['client_lastname']),
+                            'firstname'    => BimpTools::ucfirst(strtolower($data['client_firstname'])),
                             'address'      => $data['client_address'],
                             'zip'          => $data['client_zip'],
                             'town'         => $data['client_town'],

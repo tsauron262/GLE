@@ -552,14 +552,38 @@ class BS_SAV extends BimpObject
         $buttons = array();
 
         if ($this->isLoaded()) {
-            $ref = 'PC-' . $this->getData('ref');
-            if (file_exists(DOL_DATA_ROOT . '/bimpcore/sav/' . $this->id . '/' . $ref . '.pdf')) {
-                $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('sav/' . $this->id . '/' . $ref . '.pdf');
+            if ($this->isActionAllowed('cancelRdv') && $this->canSetAction('cancelRdv')) {
                 $buttons[] = array(
-                    'label'   => 'Bon de prise en charge',
-                    'icon'    => 'fas_file-pdf',
-                    'onclick' => 'window.open(\'' . $url . '\')'
+                    'label'   => 'RDV annulé',
+                    'icon'    => 'fas_times',
+                    'onclick' => $this->getJsActionOnclick('cancelRdv', array(), array(
+                        'form_name' => 'cancel_rdv'
+                    ))
                 );
+            }
+
+            if ((int) $this->getData('status') < 0) {
+                if ($this->isActionAllowed('setNew') && $this->canSetAction('setNew')) {
+                    $url = $this->getUrl();
+                    $buttons[] = array(
+                        'label'   => 'Prendre en charge',
+                        'icon'    => 'fas_cogs',
+                        'onclick' => $this->getJsActionOnclick('setNew', array(), array(
+                            'success_callback' => 'function() {window.open(\'' . $url . '\');}',
+                            'confirm_msg'      => 'Veuillez confirmer la prise en charge du ' . $this->getRef()
+                        ))
+                    );
+                }
+            } else {
+                $ref = 'PC-' . $this->getData('ref');
+                if (file_exists(DOL_DATA_ROOT . '/bimpcore/sav/' . $this->id . '/' . $ref . '.pdf')) {
+                    $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('sav/' . $this->id . '/' . $ref . '.pdf');
+                    $buttons[] = array(
+                        'label'   => 'Bon de prise en charge',
+                        'icon'    => 'fas_file-pdf',
+                        'onclick' => 'window.open(\'' . $url . '\')'
+                    );
+                }
             }
         }
 
@@ -4697,7 +4721,7 @@ class BS_SAV extends BimpObject
         $res_id = $this->getData('resgsx');
         $date_rdv = $this->getData('date_rdv');
 
-        if ($res_id && $date_rdv /*&& $date_rdv > date('Y-m-d H:i:s')*/) {
+        if ($res_id && $date_rdv /* && $date_rdv > date('Y-m-d H:i:s') */) {
 
             // Annulation GSX: 
             require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_Reservation.php';

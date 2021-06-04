@@ -350,7 +350,16 @@ class BS_Ticket extends BimpObject
     {
         if ($this->getData('serial') != '') {
             $equipment = BimpObject::getBimpObjectInstance('bimpequipment', 'Equipment');
-            if ($equipment->find(array('serial' => $this->getData('serial'),), true)) {
+            if ($equipment->find(array(
+                'or_serial' => array(
+                    'or' => array(
+                        'serial' => $this->getData('serial'),
+                        'imei' => $this->getData('serial'),
+                        'imei2' => $this->getData('serial'),
+                        'meid' => $this->getData('serial')
+                    )
+                )
+            ), true)) {
                 if (!$in_the_client)
                     return $equipment;
                 $place = $equipment->getCurrentPlace();

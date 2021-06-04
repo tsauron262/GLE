@@ -317,6 +317,25 @@ body { background-color: #FFF; }
   font-size: 1.4em;
 }
 
+#sign__button__bimp_close {
+    margin-bottom: 25px;
+    padding:10px;
+    border-radius: 5px;
+    border: 1px solid #EF7D00;
+    background: transparent;
+    color: #EF7D00;
+    font-weight: bold;
+    font-size: 25px;
+    cursor: pointer;
+    display: none;
+}
+
+#sign__button__bimp_close:hover {
+    border: none;
+    background: #EF7D00;
+    color: white;
+}
+
 #logout__button__bimp {
     margin-bottom: 25px;
     padding:10px;
@@ -435,4 +454,63 @@ body { background-color: #FFF; }
     border-radius: 10px;
     display:block;
     font-size: .9em;
+}
+
+.btn {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.btn-success {
+  font-family: Raleway-SemiBold;
+  font-size: 25px;
+  color: rgba(103, 192, 103, 0.75);
+  letter-spacing: 1px;
+  line-height: 225%;
+  border: 2px solid rgba(103, 192, 103, 0.75);
+  border-radius: 40px;
+  background: transparent;
+  transition: all 0.3s ease 0s;
+}
+
+.btn-success:hover {
+  color: #FFF;
+  background: rgb(103, 192, 103, 0.75);
+  border: 2px solid rgb(103, 192, 103, 0.75);
+}
+
+.btn-danger {
+  font-family: Raleway-SemiBold;
+  font-size: 25px;
+  color: rgba(217, 83, 78, 0.75);
+  letter-spacing: 1px;
+  line-height: 225%;
+  border: 2px solid rgba(217, 83, 78, 0.75);
+  border-radius: 40px;
+  background: transparent;
+  transition: all 0.3s ease 0s;
+}
+
+.btn-danger:hover {
+  color: #FFF;
+  background: rgba(217, 83, 78, 0.75);
+  border: 2px solid rgba(217, 83, 78, 0.75);
+}
+
+.btn-warning {
+  font-family: Raleway-SemiBold;
+  font-size: 25px;
+  color: rgba(240, 173, 78, 0.75);
+  letter-spacing: 1px;
+  line-height: 225%;
+  border: 2px solid rgba(240, 173, 78, 0.75);
+  border-radius: 40px;
+  background: transparent;
+  transition: all 0.3s ease 0s;
+}
+
+.btn-warning:hover {
+  color: #FFF;
+  background: rgb(240, 173, 78, 0.75);
+  border: 2px solid rgba(240, 173, 78, 0.75);
 }

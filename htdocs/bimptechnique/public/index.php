@@ -20,8 +20,10 @@
         <meta charset="utf-8">
         <title>Signature d'une fiche d'intervention</title>
         <link rel="stylesheet" href="css/css.css">
+        <link rel="stylesheet" href="<?= DOL_URL_ROOT ?>/bimptechnique/views/css/signature.css">
         <script type='text/javascript' src="<?= DOL_URL_ROOT ?>/bimptechnique/public/js/public_jquery.js"></script>
         <script type='text/javascript' src="<?= DOL_URL_ROOT ?>/bimptechnique/public/js/informations.js"></script>
+        <script type='text/javascript' src="<?= DOL_URL_ROOT ?>/bimptechnique/views/js/SignaturePad.object.js"></script>
     </head>
     <body>
         <div class="bimp_ldlc_page">
@@ -147,7 +149,6 @@
         Email du signataire: <br /><b class="text_bimp" ><?= $email ?></b><br /><br />
         
     </p>
-    <p style="cursor:pointer" >Télécharger le rapport d'intervention</p>
     <form method="POST" action="<?= DOL_URL_ROOT ?>/bimptechnique/public/?logout__button__bimp_validator=ok">
         <input name="logout__button__bimp_validator" type="hidden" value="">
         <button name="logout__button__bimp" id="logout__button__bimp" >Déconnexion</button>
@@ -156,11 +157,40 @@
 </div>
                 </div>
       <?php
-
-      $file =  DOL_URL_ROOT . "/bimptechnique/class/pdf.php?key=" . $_REQUEST['key'] . "&keyId=" . $client->id;
-        ?>
-            <iframe frameborder="0" importance="hight" src="<?= $file ?>" style="z-index: 9000" type="application/pdf"   height="80%" width="60%"></iframe>
-  <?php
+      if(isset($_GET['action']) && $_GET['action'] == "sign" && !$object->getData('signed')) {
+          ?>
+            
+            <div class="wrapper"> 
+                <h2 style="color:red" id='erreur'></h2>
+                <canvas id="signature-pad" class="signature-pad" style="border: solid 1px; z-index:9999" width="80%" height=200></canvas><br /><hr>
+                    Une fois votre fiche d'intervention signée, vous vous le recevrez par email.<br /><br />
+                    <button type="button" class="btn btn-success" id="signer" url="<?= DOL_URL_ROOT ?>/bimptechnique/class/public_signature.php" key='<?= $_GET['key'] ?>'>Signer</button>
+                    <button type="button" class="btn btn-danger" id='refaire'>Refaire la signature</button>
+                    <a href="<?= $_SERVER['PHP_SELF'] ?>?key=<?= $_GET['key'] ?>"><button type="button" id="back" class="btn btn-warning">Revenir en arrière</button></a>
+  </div>
+                  </div>
+            <script>
+                
+                </script>
+            <?php
+      } else {
+          $file =  DOL_URL_ROOT . "/bimptechnique/class/pdf.php?key=" . $_REQUEST['key'] . "&keyId=" . $client->id;
+                ?>
+                
+                    <iframe frameborder="0" importance="hight" src="<?= $file ?>" style="z-index: 9000;" type="application/pdf"   height="80%" width="60%"></iframe>
+                    <?php
+                        if(!$object->getdata('signed')) {
+                            ?>
+                    <div  style="margin-left:20px" >
+                        <a href="<?= $_SERVER['PHP_SELF'] ?>?key=<?= $_GET['key'] ?>&action=sign"><button id="sign__button__bimp" class="btn btn-success" >Signer le rapport</button></a>
+                    </div>
+                    <?php
+                        }
+                    ?>
+                    
+          <?php
+      }
+      
                 
             } else {
                 setcookie("bimp_ldlc_public_signature_bimptechnique", "", time());

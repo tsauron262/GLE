@@ -159,7 +159,7 @@ class pdf_fi {
                 $dir = $conf->ficheinter->dir_output;
                 $file = $dir . "/SPECIMEN.pdf";
             } else {
-                $propref = sanitize_string($fi->ref);
+                $propref = $fi->ref;
                 $dir = $conf->ficheinter->dir_output . "/" . $fi->ref;
                 $file = $dir . '/'.$fi->ref.'.pdf';
             }

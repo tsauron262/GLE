@@ -18,6 +18,13 @@ class BimpFile extends BimpObject
     {
         global $userClient;
         if (BimpObject::objectLoaded($userClient)) {
+            if ($this->isLoaded()) {
+                if ((int) $this->getData('visibility') === 1) {
+                    return 1;
+                }
+                
+                return 0;
+            }
             return 1;
         }
         return 0;

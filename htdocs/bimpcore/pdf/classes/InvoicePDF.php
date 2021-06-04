@@ -147,11 +147,6 @@ class InvoicePDF extends BimpDocumentPDF
                         }
                     }
                 }
-                if ($user->id == 270) {
-                    echo '<pre>';
-                    print_r($this->deliveries);
-                    exit;
-                }
             } else {
                 $this->errors[] = 'Facture invalide (ID absent)';
             }

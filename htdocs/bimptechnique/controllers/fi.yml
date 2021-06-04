@@ -64,16 +64,16 @@ sections:
                             callback: 
                               method: renderExtraFile
                               object: fiche
-          - id: actioncomm
-            title: Planning de la FI
-            struct: 
-                type: rows
-                rows:                                                                                  
-                    - cols: 
-                        - type: list
-                          list:
-                            object: actionComm
-                            name: ficheInter
+#          - id: actioncomm
+#            title: Planning de la FI
+#            struct: 
+#                type: rows
+#                rows:                                                                                  
+#                    - cols: 
+#                        - type: list
+#                          list:
+#                            object: actionComm
+#                            name: ficheInter
           - id: signature
             title: Signature
             struct: 

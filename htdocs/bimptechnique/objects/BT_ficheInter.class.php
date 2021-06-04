@@ -1328,8 +1328,7 @@ class BT_ficheInter extends BimpDolObject {
     }
     
  
-    public function actionFarSign($data, &$success) {
-        $errors[] = "<pre>" . print_r($data, 1);
+    public function farSign($mail_signataire) {
         $public_url = md5($this->getData('ref'));
                 
         $continue = true;
@@ -1352,13 +1351,20 @@ class BT_ficheInter extends BimpDolObject {
         
         if($haveFind) {
             $today = new DateTime();
-            $this->set('email_signature', $data['mail_signataire']);
-            $this->set('public_signature_url', $public_url);
-            $this->set('public_signature_code', $new_password);
-            $this->set('public_signature_date_delivrance', $today->format('Y-m-d H:i:s'));
+            $this->updateField('email_signature', $mail_signataire);
+            $this->updateField('public_signature_url', $public_url);
+            $this->updateField('public_signature_code', $new_password);
+            $this->updateField('public_signature_date_delivrance', $today->format('Y-m-d H:i:s'));
+            $this->updateField('fk_statut', self::STATUT_SIGANTURE_PAPIER);
             $today->add(new DateInterval("P4D"));
-            $this->set('public_signature_date_cloture', $today->format('Y-m-d H:i:s'));
-            $errors[] = "<pre>".print_r($this->data,1)."</pre>";
+            $this->updateField('public_signature_date_cloture', $today->format('Y-m-d H:i:s'));
+            
+            mailSyn2("BIMP - Rapport d'intervention - " . $this->getRef(), $email, null, "Bonjour, pouvez signer votre  rapport d'intervention à l'adresse suivante: "
+                    . "<a href='".DOL_URL_ROOT . "/bimptechnique/public'>" . DOL_URL_ROOT . "/bimptechnique/public</a> en entrant votre nom ainsi que le mot de passe suivant: <b>$new_password</b><br />Cet accès n'est valable que 4 Jours calandaire."
+                    . "<br /><br />Cordialement");
+            $commercial = $this->getCommercialClient();
+            mailSyn2("Signature à distance - FI", $commercial->getData('email'), null, "Pour information, la FI " . $this->getNomUrl() . " à été envoyée au client pour une signature à distance");
+            
         } else {
             $errors[] = "Merci de rééssayer pour trouver un mot de passe unique.";
         }
@@ -1673,6 +1679,7 @@ class BT_ficheInter extends BimpDolObject {
         $extra = '<br />';
         $u = $this->getData('urgent');
         $extra .= "<span>Interventions urgentes:<strong class='".self::$urgent[$u]['classes'][0]."'> ".self::$urgent[$u]['label']."</strong></span>";
+        $extra .= "<br /><span>".$this->displayTypeSignature()."</span>";
         //$extra .= "<br /><a href='".$this->url('facturation')."'>TAB Facturation</a>"; // TEMPORAIRE
         
         return $extra;
@@ -1830,6 +1837,38 @@ class BT_ficheInter extends BimpDolObject {
         return $html;
     }
     
+    public function displayTypeSignature() {
+        if($this->getData('fk_statut') == 0) {
+            return "<strong class='warning'>".BimpRender::renderIcon("times")." Fiche d'intervention pas encote signée</strong>";
+        } else {
+            switch($this->getData('type_signature')) {
+                case 0:
+                    if($this->getData('base_64_signature')) {
+                       $icon = "signature";
+                       $text = "Signature électronique";
+                    } else {
+                        $icon = "file";
+                        $text = "Signature papier";
+                    }
+                    break;
+                case 1:
+                    $icon = "sign";
+                    $text = "Signature à distance";
+                    break;
+                case 2:
+                    $icon = "file";
+                    $text = "Signature papier";
+                    break;
+                case 3:
+                    $icon = "signature";
+                    $text = "Signature papier";
+                    break;
+            }
+            return "<strong'>".BimpRender::renderIcon($icon)." $text</strong>";
+        }
+        
+    }
+    
     public function renderSignatureTab() {
         $html = "";
         if(!$this->isOldFi()) {
@@ -1839,15 +1878,25 @@ class BT_ficheInter extends BimpDolObject {
                 $info = "<b>" . BimpRender::renderIcon('warning') . "</b> Si vous avez des tickets support et que vous ne les voyez pas dans le formulaire, rechargez la page en cliquant sur le boutton suivant: <a href='".DOL_URL_ROOT."/bimptechnique/?fc=fi&id=".$this->id."&navtab-maintabs=signature'><button class='btn btn-default'>Rafraîchire la page</button></a>";
                 $html .= "<h4>$info</h4>";
                 
-                
-                
+                $html .= "<h3><u>Types de signature</u></h3>";
                 $html .= '<h3><div class="check_list_item" id="checkList" >'
+                    . '<input checked="true" type="checkbox" id="BimpTechniqueSign" class="check_list_item_input">'
+                    . '<label for="BimpTechniqueSign">'
+                    . BimpRender::renderIcon('fas_signature') . ' Signature électronique'
+                    . '</label></div></h3>';
+                $html .= '<h3><div class="check_list_item" id="checkListFar" >'
+                    . '<input type="checkbox" id="BimpTechniqueSignFar" class="check_list_item_input">'
+                    . '<label for="BimpTechniqueSignFar">'
+                    . BimpRender::renderIcon('fas_sign') . ' Signature à distance'
+                    . '</label></div></h3>';
+                $html .= '<h3><div class="check_list_item" id="checkListPaper" >'
                     . '<input type="checkbox" id="BimpTechniqueSignChoise" class="check_list_item_input">'
                     . '<label for="BimpTechniqueSignChoise">'
                     . BimpRender::renderIcon('paper-plane') . ' Signature papier'
-                    . '</label></div></h3>'
-                    . '<div class="row formRow">'
-                    . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Nom du signataire</div>'
+                    . '</label></div></h3>';
+                $html .= "<br /><h3><u>Formulaire de signature</u></h3>";
+                $html .= '<div class="row formRow" id="nomSignataireTitle">'
+                    . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1"  required>Nom du signataire</div>'
                     . '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
                     . '<div class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
                     . '<input style="font-size: 20px" type="text" id="BimpTechniqueFormName" name="label" value="" data-data_type="string" data-size="128" data-forbidden_chars="" data-regexp="" data-invalid_msg="" data-uppercase="0" data-lowercase="0">'
@@ -1986,21 +2035,7 @@ class BT_ficheInter extends BimpDolObject {
 
         return '';
     }
-    
-    
-    public function displayTypeSignature() {
-        $html = "";
-        global $user;
-        if($this->haveSignaturePapier()) {
-            $html .= 'Signature papier';
-        } elseif($this->haveSignatureElectronique()) {
-            $html .= "Signature Electronique";
-            if($this->userHaveRight('view_signature_infos_fi') || $user->admin) {
-                $html .= "\n" . '<img width="100%" src="'.$this->getData('base_64_signature').'">';
-            }
-        }
-        return $html;
-    }
+
     
     public function haveSignaturePapier() {
         if($this->getData('signataire') && $this->isNotSign()) {

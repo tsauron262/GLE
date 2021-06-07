@@ -158,7 +158,7 @@
                         
 </div>
                      <?php
-                        if(!$object->getdata('base_64_signature')) {
+                        if(!$object->getdata('base_64_signature') && !isset($_GET['action'])) {
                             ?>
                     <div  >
                         <br /><br />

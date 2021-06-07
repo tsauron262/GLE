@@ -1329,6 +1329,7 @@ class BT_ficheInter extends BimpDolObject {
     
  
     public function farSign($mail_signataire) {
+        global $user;
         $public_url = md5($this->getData('ref'));
                 
         $continue = true;
@@ -1350,6 +1351,7 @@ class BT_ficheInter extends BimpDolObject {
         }
         
         if($haveFind) {
+            $this->dol_object->setValid($user);
             $today = new DateTime();
             $this->updateField('email_signature', $mail_signataire);
             $this->updateField('public_signature_url', $public_url);
@@ -1878,22 +1880,27 @@ class BT_ficheInter extends BimpDolObject {
                 $info = "<b>" . BimpRender::renderIcon('warning') . "</b> Si vous avez des tickets support et que vous ne les voyez pas dans le formulaire, rechargez la page en cliquant sur le boutton suivant: <a href='".DOL_URL_ROOT."/bimptechnique/?fc=fi&id=".$this->id."&navtab-maintabs=signature'><button class='btn btn-default'>Rafraîchire la page</button></a>";
                 $html .= "<h4>$info</h4>";
                 
+                $interne = explode(",", BimpCore::getConf("bimptechnique_id_societe_auto_terminer"));
+
                 $html .= "<h3><u>Types de signature</u></h3>";
                 $html .= '<h3><div class="check_list_item" id="checkList" >'
                     . '<input checked="true" type="checkbox" id="BimpTechniqueSign" class="check_list_item_input">'
                     . '<label for="BimpTechniqueSign">'
                     . BimpRender::renderIcon('fas_signature') . ' Signature électronique'
                     . '</label></div></h3>';
-                $html .= '<h3><div class="check_list_item" id="checkListFar" >'
-                    . '<input type="checkbox" id="BimpTechniqueSignFar" class="check_list_item_input">'
-                    . '<label for="BimpTechniqueSignFar">'
-                    . BimpRender::renderIcon('fas_sign') . ' Signature à distance'
-                    . '</label></div></h3>';
-                $html .= '<h3><div class="check_list_item" id="checkListPaper" >'
-                    . '<input type="checkbox" id="BimpTechniqueSignChoise" class="check_list_item_input">'
-                    . '<label for="BimpTechniqueSignChoise">'
-                    . BimpRender::renderIcon('paper-plane') . ' Signature papier'
-                    . '</label></div></h3>';
+                //if(!in_array($this->getData('fk_soc'), $interne)) {
+                    $html .= '<h3><div class="check_list_item" id="checkListFar" >'
+                        . '<input type="checkbox" id="BimpTechniqueSignFar" class="check_list_item_input">'
+                        . '<label for="BimpTechniqueSignFar">'
+                        . BimpRender::renderIcon('fas_sign') . ' Signature à distance'
+                        . '</label></div></h3>';
+                    $html .= '<h3><div class="check_list_item" id="checkListPaper" >'
+                        . '<input type="checkbox" id="BimpTechniqueSignChoise" class="check_list_item_input">'
+                        . '<label for="BimpTechniqueSignChoise">'
+                        . BimpRender::renderIcon('paper-plane') . ' Signature papier'
+                        . '</label></div></h3>';
+                //}
+                
                 $html .= "<br /><h3><u>Formulaire de signature</u></h3>";
                 $html .= '<div class="row formRow" id="nomSignataireTitle">'
                     . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1"  required>Nom du signataire</div>'

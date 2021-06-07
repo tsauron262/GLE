@@ -855,11 +855,23 @@ class BT_ficheInter extends BimpDolObject {
             'success' => $success
         );
     }
+    
+    public function actionUnSign() {
+        
+    }
 
     public function getActionsButtons() {
         global $conf, $langs, $user;
         $buttons = Array();
         $statut = $this->getData('fk_statut');
+        
+        if($user->id == 460)  {
+            $buttons[] = array(
+                    'label' => 'un-sign',
+                    'icon' => 'fas_file-pdf',
+                    'onclick' => $this->getJsActionOnclick('unSign', array(), array())
+                );
+        } 
         
         if(!$this->isOldFi()) {
             if($statut == 0 || $user->id == 460) {
@@ -1888,7 +1900,7 @@ class BT_ficheInter extends BimpDolObject {
                     . '<label for="BimpTechniqueSign">'
                     . BimpRender::renderIcon('fas_signature') . ' Signature électronique'
                     . '</label></div></h3>';
-                //if(!in_array($this->getData('fk_soc'), $interne)) {
+                if(!in_array($this->getData('fk_soc'), $interne)) {
                     $html .= '<h3><div class="check_list_item" id="checkListFar" >'
                         . '<input type="checkbox" id="BimpTechniqueSignFar" class="check_list_item_input">'
                         . '<label for="BimpTechniqueSignFar">'
@@ -1899,7 +1911,7 @@ class BT_ficheInter extends BimpDolObject {
                         . '<label for="BimpTechniqueSignChoise">'
                         . BimpRender::renderIcon('paper-plane') . ' Signature papier'
                         . '</label></div></h3>';
-                //}
+                }
                 
                 $html .= "<br /><h3><u>Formulaire de signature</u></h3>";
                 $html .= '<div class="row formRow" id="nomSignataireTitle">'

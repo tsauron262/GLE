@@ -52,12 +52,10 @@
               if($strToTimeOut >= $strToTimeIn) {
                   setcookie("bimp_ldlc_public_signature_bimptechnique", $object->getData('fk_soc'), time()+3600);  /* Cookie valable 1 heure */
               
-                    if($object->getData('signataire') != $_POST['signataire']) {
+                    if($object->getData('signataire') != $_POST['signataire'] && !$object->getData('base_64_signature')) {
                         $object->updateField('signataire', $_POST['signataire']);
-                        
-                    }
-                    if(!$object->getData('base_64_signature')) {
                         $object->actionGeneratePdf([]);
+                        
                     }
                     
 

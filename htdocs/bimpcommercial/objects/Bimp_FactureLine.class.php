@@ -120,6 +120,11 @@ class Bimp_FactureLine extends ObjectLine
                     'icon'    => 'fas_trash',
                     'onclick' => $commission->getJsActionOnclick('delLine', array('idLn'=>$this->id, 'idFiltre'=>$idFiltre))
                 );
+                $buttons[] = array(
+                    'label'   => 'Changer de la commission',
+                    'icon'    => 'fas_exchange-alt',
+                    'onclick' => $commission->getJsActionOnclick('changeLine', array('idLn'=>$this->id, 'idFiltre'=>$idFiltre), array('form_name' => 'change'))
+                );
             }
         }
         return $buttons;

@@ -1885,6 +1885,7 @@ class BT_ficheInter extends BimpDolObject {
     
     public function renderSignatureTab() {
         $html = "";
+        global $user;
         if(!$this->isOldFi()) {
             if($this->isNotSign()) {
                 $tickets = (json_decode($this->getData('tickets'))) ? json_decode($this->getData('tickets')) : [];
@@ -1900,7 +1901,7 @@ class BT_ficheInter extends BimpDolObject {
                     . '<label for="BimpTechniqueSign">'
                     . BimpRender::renderIcon('fas_signature') . ' Signature électronique'
                     . '</label></div></h3>';
-                if(!in_array($this->getData('fk_soc'), $interne)) {
+                if(!in_array($this->getData('fk_soc'), $interne) || $user->admin) {
                     $html .= '<h3><div class="check_list_item" id="checkListFar" >'
                         . '<input type="checkbox" id="BimpTechniqueSignFar" class="check_list_item_input">'
                         . '<label for="BimpTechniqueSignFar">'

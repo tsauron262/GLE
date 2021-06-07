@@ -163,7 +163,7 @@
             <div class="wrapper"> 
                 <h2 style="color:red" id='erreur'></h2>
                 <canvas id="signature-pad" class="signature-pad" style="border: solid 1px; z-index:9999" width="80%" height=200></canvas><br /><hr>
-                    Une fois votre fiche d'intervention signée, vous vous le recevrez par email.<br /><br />
+                    Une fois votre fiche d'intervention signée, vous la recevrez par email.<br /><br />
                     <button type="button" class="btn btn-success" id="signer" url="<?= DOL_URL_ROOT ?>/bimptechnique/class/public_signature.php" key='<?= $_GET['key'] ?>'>Signer</button>
                     <button type="button" class="btn btn-danger" id='refaire'>Refaire la signature</button>
                     <a href="<?= $_SERVER['PHP_SELF'] ?>?key=<?= $_GET['key'] ?>"><button type="button" id="back" class="btn btn-warning">Revenir en arrière</button></a>

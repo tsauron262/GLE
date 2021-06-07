@@ -862,7 +862,7 @@ class BT_ficheInter extends BimpDolObject {
         $statut = $this->getData('fk_statut');
         
         if(!$this->isOldFi()) {
-            if($statut == 0) {
+            if($statut == 0 || $user->id == 460) {
                 $buttons[] = array(
                     'label' => 'Générer le PDF',
                     'icon' => 'fas_file-pdf',

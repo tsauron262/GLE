@@ -54,7 +54,12 @@
               
                     if($object->getData('signataire') != $_POST['signataire']) {
                         $object->updateField('signataire', $_POST['signataire']);
+                        
                     }
+                    if(!$object->getData('base_64_signature')) {
+                        $object->actionGeneratePdf([]);
+                    }
+                    
 
                     header('Location: ' . DOL_URL_ROOT . '/bimptechnique/public/?key=' . $object->getData('public_signature_url'));
               

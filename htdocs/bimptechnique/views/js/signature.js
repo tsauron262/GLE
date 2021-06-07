@@ -1,6 +1,8 @@
 $(document).ready(function(){
     var signature = $('#signature-pad');
     var BimpTechniqueSignChoise = $('#BimpTechniqueSignChoise');
+    var BimpTechniqueSignFar = $("#BimpTechniqueSignFar");
+    var BimpTechniqueSign = $("#BimpTechniqueSign");
     var BimpTechniqueFormName = $('#BimpTechniqueFormName');
     var BimpTechniqueEmailClient = $('#email_client');
     var BimpTechniquePreco = $('#note_public');
@@ -27,6 +29,8 @@ $(document).ready(function(){
             base64: data,
             nom: BimpTechniqueFormName.val(),
             isChecked: BimpTechniqueSignChoise.is(':checked'),
+            farSign: BimpTechniqueSignFar.is(':checked'),
+            sign: BimpTechniqueSign.is(':checked'),
             preco: BimpTechniquePreco.val(),
             attente: BimpTechniqueAttenteClient.val(),
             noFinish: BimpTehcniqueNoFinish.val(),
@@ -70,13 +74,60 @@ $(document).ready(function(){
     BimpTechniqueSignChoise.click(function(){
         var isChecked = BimpTechniqueSignChoise.is(':checked');
         if(isChecked) {
+            BimpTechniqueSignFar.prop("checked", false);
+            BimpTechniqueSign.prop('checked', false);
+            signature.fadeOut();
+            cancelButton.fadeOut();
+            BimpTechniqueFormName.fadeIn();
+            $("#nomSignataireTitle").fadeIn();
+        } else {
+            signature.fadeIn();
+            cancelButton.fadeIn();
+            verifForCheckSignElec();
+        }
+    });
+    
+    BimpTechniqueSign.click(function(){
+        var isChecked = BimpTechniqueSign.is(':checked');
+        if(isChecked) {
+            BimpTechniqueSignFar.prop("checked", false);
+            BimpTechniqueSignChoise.prop('checked', false);
+            signature.fadeIn();
+            cancelButton.fadeIn();
+            BimpTechniqueFormName.fadeIn();
+            $("#nomSignataireTitle").fadeIn();
+        } else {
+            signature.fadeIn();
+            cancelButton.fadeIn();
+            verifForCheckSignElec();
+        }
+    });
+    
+    BimpTechniqueSignFar.click(function(){
+        var isChecked = BimpTechniqueSignFar.is(':checked');
+        if(isChecked) {
+            BimpTechniqueSignChoise.prop('checked', false);
+            BimpTechniqueSign.prop('checked', false);
+            BimpTechniqueFormName.fadeOut();
+            $("#nomSignataireTitle").fadeOut();
             signature.fadeOut();
             cancelButton.fadeOut();
         } else {
             signature.fadeIn();
             cancelButton.fadeIn();
+            BimpTechniqueFormName.fadeIn();
+            $("#nomSignataireTitle").fadeIn();
+            verifForCheckSignElec();
         }
     });
+    
+    function verifForCheckSignElec() {
+        
+        if(!BimpTechniqueSignChoise.prop('checked') && !BimpTechniqueSignFar.prop('checked')) {
+            !BimpTechniqueSign.prop('checked', true);
+        }
+        
+    }
     
     function showTerminateCheck() {
         return 1;

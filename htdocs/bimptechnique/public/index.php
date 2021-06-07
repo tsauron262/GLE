@@ -157,7 +157,7 @@
 </div>
                 </div>
       <?php
-      if(isset($_GET['action']) && $_GET['action'] == "sign" && !$object->getData('signed')) {
+      if(isset($_GET['action']) && $_GET['action'] == "sign" && !$object->getData('base_64_signature')) {
           ?>
             
             <div class="wrapper"> 

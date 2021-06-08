@@ -1499,6 +1499,7 @@ class Equipment extends BimpObject
                 }
                 $gsx = GSX_v2::getInstance();
             }
+            dol_syslog('fetch serial with '.$gsx->appleId,3, 0, '_apple');
 
             if ($gsx->logged) {
                 $data = $gsx->productDetailsBySerial($serial);

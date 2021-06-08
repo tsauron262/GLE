@@ -371,7 +371,8 @@ class AppleShipmentPart extends BimpObject
                             'searchable' => true,
                             'sortable'   => true,
                             'checkboxes' => true,
-                            'positions'  => true
+                            'positions'  => true,
+                            'search_mode'=> 'show'
                 ));
 
                 if ($nToAttribute > 0) {

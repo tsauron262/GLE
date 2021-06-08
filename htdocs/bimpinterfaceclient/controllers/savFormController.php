@@ -739,11 +739,11 @@ class savFormController extends BimpPublicController
 
         if ($reservationId ||  BimpObject::objectLoaded($sav)) {
             $base_url = BimpCore::getConf('interface_client_base_url', '');
-            
+
             if ($base_url) {
                 $cancel_url = $base_url . '?fc=savForm&cancel_rdv=1';
                 if (BimpObject::objectLoaded($sav)) {
-                    $cancel_url .= '&s=' . $sav->id . '&r=' . $sav->getRef();
+                    $cancel_url .= '&sav=' . $sav->id . '&r=' . $sav->getRef();
                 }
                 if ($reservationId) {
                     $cancel_url .= '&res=' . $reservationId;
@@ -829,10 +829,10 @@ Nous proposons des services de sauvegarde des données, de protection de votre t
 Votre satisfaction est notre objectif, nous mettrons tout en œuvre pour vous satisfaire et réduire les délais d’immobilisation de votre produit Apple.\n\n";
 
         if ($cancel_url) {
-            $msg .= 'Vous pouvez annuler ce rendez-vous de puis votre <a href="'.$base_url.'">espace personnel</a>';
-            $msg .= ' ou en suivant <a href="'.$cancel_url.'">ce lien</a>' . "\n\n";
+            $msg .= 'Vous pouvez annuler ce rendez-vous depuis votre <a href="' . $base_url . '">espace personnel</a>';
+            $msg .= ' ou en suivant <a href="' . $cancel_url . '">ce lien</a>' . "\n\n";
         }
-        
+
         $msg .= 'Bien cordialement' . "\n\n";
         $msg .= 'L\'équipe BIMP' . "\n\n";
 
@@ -1231,13 +1231,13 @@ Votre satisfaction est notre objectif, nous mettrons tout en œuvre pour vous sa
 
                     $req_errors = array();
 
-//                    $result = GSX_Reservation::createReservation(897316, $centre['shipTo'], $params, $req_errors, $debug);
+                    $result = GSX_Reservation::createReservation(897316, $centre['shipTo'], $params, $req_errors, $debug);
                     // ********** POUR TESTS **************************************************
-                    $result = array(
-                        'response' => array(
-                            'reservationId' => '123456789'
-                        )
-                    );
+//                    $result = array(
+//                        'response' => array(
+//                            'reservationId' => '123456789'
+//                        )
+//                    );
                     // ************************************************************************
 
                     if (!empty($result)) {
@@ -1723,14 +1723,14 @@ Votre satisfaction est notre objectif, nous mettrons tout en œuvre pour vous sa
                             $msg .= 'N° de série: ' . $data['eq_serial'] . '<br/>';
                         }
 
-//                        mailSyn2('Nouveau SAV créé en ligne', $emails, '', $msg);
+                        mailSyn2('Nouveau SAV créé en ligne', $emails, '', $msg);
                     }
 
                     // Envoi e-mail client: 
-                    $email_client_ok = $this->sendRDVEmailToClient(BimpObject::objectLoaded($userClient) ? $userClient->getData('email') : $data['client_email'], $reservationId, $dateBegin, $sav, $centre, $data['eq_serial']);
+                    $email_client = BimpObject::objectLoaded($userClient) ? $userClient->getData('email') : $data['client_email'];
+                    $email_client_ok = $this->sendRDVEmailToClient($email_client, $reservationId, $dateBegin, $sav, $centre, $data['eq_serial']);
 
                     // HTML Succès: 
-
                     $success_html = '<div class="form_section" id="client_email" style="text-align: center">';
 
                     if (BimpObject::objectLoaded($sav)) {

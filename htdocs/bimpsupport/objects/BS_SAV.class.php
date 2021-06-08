@@ -609,7 +609,7 @@ class BS_SAV extends BimpObject
 
             if ($this->canClientEdit() && $this->getData('resgsx') && $this->getData('status') == -1) {
 
-                $url = DOL_URL_ROOT . '/bimpinterfaceclient/client.php?fc=savForm&cancel_rdv=1&s=' . $this->id . '&r=' . $this->getRef() . '&res=' . $this->getData('resgsx');
+                $url = DOL_URL_ROOT . '/bimpinterfaceclient/client.php?fc=savForm&cancel_rdv=1&sav=' . $this->id . '&r=' . $this->getRef() . '&res=' . $this->getData('resgsx');
                 $buttons[] = array(
                     'label'   => 'Annuler le RDV',
                     'icon'    => 'fas_times',

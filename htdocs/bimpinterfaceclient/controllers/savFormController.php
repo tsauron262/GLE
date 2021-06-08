@@ -628,7 +628,7 @@ class savFormController extends BimpPublicController
         $html .= '<div id="cancel_sav_form" class="bimp_public_form">';
         $html .= '<h2>Annulation de votre Rendez-vous</h2>';
 
-        $id_sav = (int) BimpTools::getValue('s', 0);
+        $id_sav = (int) BimpTools::getValue('sav', 0);
         $ref_sav = BimpTools::getValue('r', '');
         $res_id = BimpTools::getValue('res', '');
 

@@ -503,10 +503,11 @@ class BIC_UserClient extends BimpObject
             $errors[] = 'Echec de la mise à jour de votre mot de passe';
         }
 
-        $msg = 'Votre mot de passe a été changé, ';
-        $msg .= 'si vous n\'êtes pas à l\'origine de cette action veuillez contacter votre administrateur';
+        $msg = 'Bonjour, ' . "\n\n";
+        $msg .= 'Le mot de passe de votre espace client BIMP a été changé.' . "\n";
+        $msg .= 'Si vous n\'êtes pas à l\'origine de cette action veuillez contacter votre administrateur';
 
-        mailSyn2('Changement de votre mot de passe', $this->getData('email'), '', $msg);
+        mailSyn2('Espace client BIMP - Changement de votre mot de passe', $this->getData('email'), '', $msg);
         $this->updateField('renew_required', 0);
 
         return $errors;

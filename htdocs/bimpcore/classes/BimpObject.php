@@ -6660,7 +6660,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         $idHtml = 'object_divers_linked_list';
         $tabs[] = array(
             'id'            => $idHtml,
-            'title'         => BimpRender::renderIcon('fas_linked', 'iconLeft') . 'Tout les objets liées',
+            'title'         => BimpRender::renderIcon('fas_linked', 'iconLeft') . 'Tous les objets liés',
             'ajax'          => 1,
             'ajax_callback' => $this->getJsLoadCustomContent('renderBimpOjectLinked', '$(\'#' . $idHtml . ' .nav_tab_ajax_result\')', array(), array('button' => ''))
         );
@@ -6668,7 +6668,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         $idHtml = 'object_divers_linked_text';
         $tabs[] = array(
             'id'            => $idHtml,
-            'title'         => 'Tout les types d\'objets liés',
+            'title'         => 'Tous les types d\'objets liés',
             'ajax'          => 1,
             'ajax_callback' => $this->getJsLoadCustomContent('renderTypeOfBimpOjectLinked', '$(\'#' . $idHtml . ' .nav_tab_ajax_result\')', array(), array('button' => ''))
         );

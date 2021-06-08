@@ -891,7 +891,7 @@ class BT_ficheInter extends BimpDolObject {
             if($statut == self::STATUT_BROUILLON) {
                 if(!in_array($this->getData('fk_soc'), $interne_soc)) {
                     $buttons[] = array(
-                        'label' => 'Lier une ou plusieur commandes client',
+                        'label' => 'Lier une ou plusieurs commandes client',
                         'icon' => 'link',
                         'onclick' => $this->getJsActionOnclick('linked_commande_client', array(), array(
                             'form_name' => 'linked_commande_client'
@@ -908,7 +908,7 @@ class BT_ficheInter extends BimpDolObject {
                     }
                 }
                 $buttons[] = array(
-                    'label' => 'Lier un ou plusieur tickets support',
+                    'label' => 'Lier un ou plusieurs tickets support',
                     'icon' => 'link',
                     'onclick' => $this->getJsActionOnclick('linked_ticket_client', array(), array(
                         'form_name' => 'linked_ticket_client'
@@ -1801,7 +1801,7 @@ class BT_ficheInter extends BimpDolObject {
                 }
             }
         } else {
-            $html .= BimpRender::renderAlerts("Il n'y a pas de tickets liées sur cette fiche d'intervention", "info", false);
+            $html .= BimpRender::renderAlerts("Il n'y a pas de tickets liés sur cette fiche d'intervention", "info", false);
         }
 
         return $html;
@@ -1890,12 +1890,12 @@ class BT_ficheInter extends BimpDolObject {
             if($this->isNotSign()) {
                 $tickets = (json_decode($this->getData('tickets'))) ? json_decode($this->getData('tickets')) : [];
 
-                $info = "<b>" . BimpRender::renderIcon('warning') . "</b> Si vous avez des tickets support et que vous ne les voyez pas dans le formulaire, rechargez la page en cliquant sur le boutton suivant: <a href='".DOL_URL_ROOT."/bimptechnique/?fc=fi&id=".$this->id."&navtab-maintabs=signature'><button class='btn btn-default'>Rafraîchire la page</button></a>";
+                $info = "<b>" . BimpRender::renderIcon('warning') . "</b> Si vous avez des tickets support et que vous ne les voyez pas dans le formulaire, rechargez la page en cliquant sur le bouton suivant: <a href='".DOL_URL_ROOT."/bimptechnique/?fc=fi&id=".$this->id."&navtab-maintabs=signature'><button class='btn btn-default'>Rafraîchire la page</button></a>";
                 $html .= "<h4>$info</h4>";
                 
                 $interne = explode(",", BimpCore::getConf("bimptechnique_id_societe_auto_terminer"));
 
-                $html .= "<h3><u>Types de signature</u></h3>";
+                $html .= "<h3><u>Type de signature</u></h3>";
                 $html .= '<h3><div class="check_list_item" id="checkList" >'
                     . '<input checked="true" type="checkbox" id="BimpTechniqueSign" class="check_list_item_input">'
                     . '<label for="BimpTechniqueSign">'
@@ -1936,14 +1936,14 @@ class BT_ficheInter extends BimpDolObject {
                 $html .= '<div class="row formRow">'
                     . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Attente client</div>'
                     . '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
-                        . '&Agrave; remplire obligatoirement uniquement si l\'intervention n\'a pas été terminée suite à un évènement dût au client. (Visible sur la FI)'
+                        . '&Agrave; remplir obligatoirement si l\'intervention n\'a pas été terminée suite à un évènement dû au client. (Visible sur la FI)'
                     . '<div class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
                     . '<textarea id="attente_client" name="attente_client" rows="4" style="margin-top: 5px; width: 90%;" class="flat"></textarea>'
                     . '</div></div></div>';
                 $html .= '<div class="row formRow">'
-                    . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Intervention non terminer</div>'
+                    . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Intervention non terminée</div>'
                     . '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
-                        . '&Agrave; remplire obligatoirement uniquement si l\'intervention n\'est pas terminée (Autre que attente client) (Visible sur la FI).'
+                        . '&Agrave; remplir obligatoirement si l\'intervention n\'est pas terminée (Autre que attente client) (Visible sur la FI).'
                     . '<div class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
                     . '<textarea id="inter_no_finish" name="inter_no_finish" rows="4" style="margin-top: 5px; width: 90%;" class="flat"></textarea>'
                     . '</div></div></div>';

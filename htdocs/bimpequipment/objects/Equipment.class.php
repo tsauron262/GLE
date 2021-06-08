@@ -1464,7 +1464,7 @@ class Equipment extends BimpObject
         return $oldS;
     }
     
-    public function majWithGsx(&$warnings = array()){
+    public function majWithGsx(&$warnings = array(), $withUpdate = true){
         $identifiers = static::gsxFetchIdentifiers($this->getData('serial'));
         if($identifiers == 0)
             return array('Probléme GSX');
@@ -1478,7 +1478,8 @@ class Equipment extends BimpObject
             $this->set('meid', $identifiers['meid']);
             $this->set('product_label', $identifiers['productDescription']);
         }
-        return $this->update($warnings, 1);
+        if($withUpdate)
+            return $this->update($warnings, 1);
     }
 
     public static function gsxFetchIdentifiers($serial, $gsx = null)
@@ -1759,15 +1760,18 @@ class Equipment extends BimpObject
         $init_serial = (string) $this->getInitData('serial');
 
         if ($serial && (!(string) $this->getData('imei') || ($init_serial && $serial != $init_serial))) {
-            $identifiers = self::gsxFetchIdentifiers($serial);
-            $this->set('imei', $identifiers['imei']);
-            $this->set('imei2', $identifiers['imei2']);
-            $this->set('meid', $identifiers['meid']);
-
-            if ($identifiers['serial']) {
-                $this->set('serial', $identifiers['serial']);
-                $serial = $identifiers['serial'];
-            }
+//            $identifiers = self::gsxFetchIdentifiers($serial);
+//            $this->set('imei', $identifiers['imei']);
+//            $this->set('imei2', $identifiers['imei2']);
+//            $this->set('meid', $identifiers['meid']);
+//
+//            if ($identifiers['serial']) {
+//                $this->set('serial', $identifiers['serial']);
+//                $serial = $identifiers['serial'];
+//            }
+            $war = array();
+            $this->majWithGsx($war, false);
+            
         }
 
         if (!$id_product && $serial && (!$this->getInitData('serial') || $this->getInitData('serial') !== $serial)) {

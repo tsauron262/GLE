@@ -1468,6 +1468,8 @@ class Equipment extends BimpObject
         $identifiers = static::gsxFetchIdentifiers($this->getData('serial'));
         if($identifiers == 0)
             return array('Probléme GSX');
+        
+            dol_syslog('majWithGsx '.$this->getData('serial').' '.($withUpdate? 'yes' : 'no'),3, 0, '_apple');
         $this->set('status_gsx', $identifiers['status_gsx']);
         if($identifiers['status_gsx'] != 2){
             if(isset($identifiers['serial']) && $identifiers['serial'] != '')

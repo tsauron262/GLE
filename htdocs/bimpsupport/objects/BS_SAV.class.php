@@ -16,6 +16,7 @@ class BS_SAV extends BimpObject
     const BS_SAV_RESERVED = -1;
     const BS_SAV_CANCELED_BY_CUST = -2;
     const BS_SAV_CANCELED_BY_USER = -3;
+    const BS_SAV_RDV_EXPIRED = -4;
     const BS_SAV_NEW = 0;
     const BS_SAV_ATT_PIECE = 1;
     const BS_SAV_ATT_CLIENT = 2;
@@ -31,6 +32,7 @@ class BS_SAV extends BimpObject
         self::BS_SAV_RESERVED          => array('label' => 'Réservé par le client', 'icon' => 'fas_calendar-day', 'classes' => array('important')),
         self::BS_SAV_CANCELED_BY_CUST  => array('label' => 'Annulé par le client', 'icon' => 'fas_times', 'classes' => array('danger')),
         self::BS_SAV_CANCELED_BY_USER  => array('label' => 'Annulé par utilisateur', 'icon' => 'fas_times', 'classes' => array('danger')),
+        self::BS_SAV_RDV_EXPIRED       => array('label' => 'Date RDV Dépassée', 'icon' => 'fas_times', 'classes' => array('danger')),
         self::BS_SAV_NEW               => array('label' => 'Nouveau', 'icon' => 'far_file', 'classes' => array('info')),
         self::BS_SAV_EXAM_EN_COURS     => array('label' => 'Examen en cours', 'icon' => 'hourglass-start', 'classes' => array('warning')),
         self::BS_SAV_ATT_CLIENT_ACTION => array('label' => 'Attente client', 'icon' => 'hourglass-start', 'classes' => array('warning')),
@@ -5058,6 +5060,143 @@ class BS_SAV extends BimpObject
             }
         } elseif ($echo) {
             echo $bdb->err();
+        }
+    }
+
+    public static function checkSavToCancel()
+    {
+        $bdb = self::getBdb();
+        $centres = BimpCache::getCentres();
+
+        // Traitements des RDV dépassés: 
+        $dt = new DateTime();
+        $dt->sub(new DateInterval('P7D'));
+
+        $sql = 'SELECT id, ref, date_rdv, date_create, code_centre, id_client, id_contact, id_user_client FROM ' . MAIN_DB_PREFIX . 'bs_sav';
+        $sql .= ' WHERE status = ' . BS_SAV::BS_SAV_RESERVED;
+        $sql .= ' AND (date_rdv < \'' . date('Y-m-d') . ' 00:00:00\' OR (date_rdv IS NULL AND date_create < \'' . $dt->format('Y-m-d') . ' 00:00:00\'))';
+
+        $rows = $bdb->executeS($sql, 'array');
+
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                if ($bdb->update('bs_sav', array(
+                            'status' => BS_SAV::BS_SAV_RDV_EXPIRED
+                                ), 'id = ' . (int) $r['id']) > 0) {
+                    if ((string) $r['date_rdv']) {
+                        $to = '';
+
+                        if ((int) $r['id_user_client']) {
+                            $to = (string) $bdb->getValue('bic_user', 'email', 'id = ' . (int) $r['id_user_client']);
+                        }
+
+                        if (!$to && (int) $r['id_contact']) {
+                            $to = (string) $bdb->getValue('socpeople', 'email', 'rowid = ' . (int) $r['id_contact']);
+                        }
+
+                        if (!$to && (int) $r['id_client']) {
+                            $to = (string) $bdb->getValue('societe', 'email', 'rowid = ' . (int) $r['id_client']);
+                        }
+
+                        if ($to) {
+                            $subject = 'Votre rendez-vous Apple chez BIMP';
+                            $msg = 'Cher client' . "\n\n";
+                            $msg .= 'Sauf erreur de notre part, vous ne vous êtes pas présenté au rendez vous que vous aviez planifié dans notre boutique ';
+                            if (isset($centres[$r['code_centre']]['town'])) {
+                                if (preg_match('/^[AEIOUY].+$/', $centres[$r['code_centre']]['town'])) {
+                                    $msg .= ' d\'';
+                                } else {
+                                    $msg .= ' de ';
+                                }
+                                $msg .= $centres[$r['code_centre']]['town'];
+                            } else {
+                                $msg .= ' BIMP';
+                            }
+                            $msg .= ' le ' . date('d / m / Y à H:i', strtotime($r['date_rdv'])) . '. ' . "\n";
+                            $msg .= 'Celui-ci à été annulé.' . "\n\n";
+
+                            if ((string) $r['ref']) {
+                                $msg .= '<b>Référence: </b>' . $r['ref'] . "\n\n";
+                            }
+
+                            $msg .= 'Si vous avez toujours besoin d’une assistance, n’hésitez pas à reprendre un rendez vous sur votre <a href="https://www.bimp.fr/espace-client/">espace personnel</a> de notre site internet « www.bimp.fr »' . "\n\n";
+
+                            $msg .= 'L’équipe technique BIMP';
+
+                            mailSyn2($subject, $to, '', $msg);
+
+                            BimpCore::addlog('Annulation auto SAV réservé', Bimp_Log::BIMP_LOG_NOTIF, 'bic', null, array(
+                                'ID SAV' => $r['id']
+                            ));
+                        }
+                    }
+                } else {
+                    BimpCore::addlog('Echec de la mise l\'annulation automatique d\'un SAV', Bimp_Log::BIMP_LOG_ERREUR, 'bic', null, array(
+                        'ID SAV'     => $r['id'],
+                        'Erreyr SQL' => $bdb->err()
+                    ));
+                }
+            }
+        }
+
+        // Traitements des RDV dépassés: 
+        $dt = new DateTime();
+        $dt->sub(new DateInterval('P5D'));
+
+        $sql = 'SELECT id, ref, date_create, code_centre, id_client, id_contact, id_user_client FROM ' . MAIN_DB_PREFIX . 'bs_sav';
+        $sql .= ' WHERE status = ' . BS_SAV::BS_SAV_RESERVED;
+        $sql .= ' AND date_rdv IS NULL and date_create > \'' . $dt->format('Y-m-d') . ' 00:00:00\' AND date_create < \'' . $dt->format('Y-m-d') . ' 23:59:59\'';
+
+        $rows = $bdb->executeS($sql, 'array');
+        
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $to = '';
+
+                if ((int) $r['id_user_client']) {
+                    $to = (string) $bdb->getValue('bic_user', 'email', 'id = ' . (int) $r['id_user_client']);
+                }
+
+                if (!$to && (int) $r['id_contact']) {
+                    $to = (string) $bdb->getValue('socpeople', 'email', 'rowid = ' . (int) $r['id_contact']);
+                }
+
+                if (!$to && (int) $r['id_client']) {
+                    $to = (string) $bdb->getValue('societe', 'email', 'rowid = ' . (int) $r['id_client']);
+                }
+
+                if ($to) {
+                    $subject = 'Votre demande d’intervention chez BIMP';
+                    $msg = 'Cher client' . "\n\n";
+                    $msg .= 'Vous avez ouvert une demande d’intervention dans notre boutique ';
+                    if (isset($centres[$r['code_centre']]['town'])) {
+                        if (preg_match('/^[AEIOUY].+$/', $centres[$r['code_centre']]['town'])) {
+                            $msg .= ' d\'';
+                        } else {
+                            $msg .= ' de ';
+                        }
+                        $msg .= $centres[$r['code_centre']]['town'];
+                    } else {
+                        $msg .= ' BIMP';
+                    }
+                    $msg .= ' le ' . date('d / m / Y à H:i', strtotime($r['date_create'])) . '. ' . "\n\n";
+                    $msg .= 'Sauf erreur de notre part, vous n’avez pas déposé votre produit pour réparation. Sans nouvelle de votre part d’ci deux jours, votre demande sera clôturée.' . "\n\n";
+
+                    if ((string) $r['ref']) {
+                        $msg .= '<b>Référence: </b>' . $r['ref'] . "\n\n";
+                    }
+
+                    $msg .= 'Vous pourrez néanmoins accéder à votre <a href="https://www.bimp.fr/espace-client/">espace personnel</a> sur notre site internet «  www.bimp.fr », et si besoin, faire une nouvelle demande d’intervention.' . "\n\n";
+
+                    $msg .= 'L’équipe technique BIMP';
+
+                    mailSyn2($subject, $to, '', $msg);
+
+                    BimpCore::addlog('Annulation auto SAV réservé', Bimp_Log::BIMP_LOG_NOTIF, 'bic', null, array(
+                        'ID SAV' => $r['id']
+                    ));
+                }
+            }
         }
     }
 }

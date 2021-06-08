@@ -55,7 +55,7 @@ class BimpCoreCronExec
                                 if (BimpObject::objectLoaded($soc)) {
                                     $subject .= ' - Client: ' . $soc->getRef() . ' - ' . $soc->getName();
                                 }
-                                
+
                                 $comms = $bdb->getRows('societe_commerciaux', 'fk_soc = ' . (int) $facture->getData('fk_soc'), null, 'array', array(
                                     'fk_user'
                                 ));
@@ -85,6 +85,11 @@ class BimpCoreCronExec
             }
         }
 
+        // Vérifs des RDV SAV à annuler: 
+
+        BimpObject::loadClass('bimpsupport', 'BS_SAV');
+        BS_SAV::checkSavToCancel();
+        
         return 'OK';
     }
 }

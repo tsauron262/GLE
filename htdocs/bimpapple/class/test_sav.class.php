@@ -15,6 +15,11 @@ if (isset($_GET['actionTest'])) {
     if ($_GET['actionTest'] == "fetchEquipmentsImei") {
         $class->fetchEquipmentsImei((isset($_REQUEST['nb'])? $_REQUEST['nb'] : 10), false);
     }
+    if ($_GET['actionTest'] == "fetchImeiPetit") {
+        $class->fetchImeiPetit((isset($_REQUEST['nb'])? $_REQUEST['nb'] : 1));
+    }
+    
+    
 
 
     if ($_GET['actionTest'] == "global") {

@@ -737,7 +737,7 @@ class savFormController extends BimpPublicController
         $cancel_url = '';
         $base_url = '';
 
-        if ($reservationId ||  BimpObject::objectLoaded($sav)) {
+        if ($reservationId || BimpObject::objectLoaded($sav)) {
             $base_url = BimpCore::getConf('interface_client_base_url', '');
 
             if ($base_url) {

@@ -25,7 +25,7 @@ class Equipment extends BimpObject
     public static $list_status_gsx = array(
         0 => 'Non vérifié',
         1 => 'Ok',
-        2 => 'Non App_',
+        2 => 'Non Apple',
         3 => 'Localisé',
     );
     protected $current_place = null;

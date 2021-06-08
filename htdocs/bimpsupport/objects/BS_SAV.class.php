@@ -5127,7 +5127,7 @@ class BS_SAV extends BimpObject
 
                             BimpCore::addlog('Annulation auto SAV réservé', Bimp_Log::BIMP_LOG_NOTIF, 'bic', null, array(
                                 'ID SAV' => $r['id']
-                            ));
+                                    ), true);
                         }
                     }
                 } else {
@@ -5148,7 +5148,7 @@ class BS_SAV extends BimpObject
         $sql .= ' AND date_rdv IS NULL and date_create > \'' . $dt->format('Y-m-d') . ' 00:00:00\' AND date_create < \'' . $dt->format('Y-m-d') . ' 23:59:59\'';
 
         $rows = $bdb->executeS($sql, 'array');
-        
+
         if (is_array($rows)) {
             foreach ($rows as $r) {
                 $to = '';
@@ -5194,7 +5194,7 @@ class BS_SAV extends BimpObject
 
                     BimpCore::addlog('Annulation auto SAV réservé', Bimp_Log::BIMP_LOG_NOTIF, 'bic', null, array(
                         'ID SAV' => $r['id']
-                    ));
+                            ), true);
                 }
             }
         }

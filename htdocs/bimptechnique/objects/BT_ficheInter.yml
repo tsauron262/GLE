@@ -163,7 +163,7 @@ fields:
         input:
             type: toggle 
     description:
-        label: Un petit mot de la mama
+        label: Description
         type: html
     logs:
         label: Logs FI

@@ -290,7 +290,7 @@ class BT_ficheInter_det extends BT_ficheInter {
         return $this->canDelete();
     }
     
-    public function display_service_ref() {
+    public function display_service_ref($with_details_commande_line = true) {
         $parent = $this->getParentInstance();
         if($this->getData('id_line_contrat') > 0) {
             $obj = $this->getInstance("bimpcontract", "BContract_contratLine", $this->getData('id_line_contrat'));
@@ -315,7 +315,10 @@ class BT_ficheInter_det extends BT_ficheInter {
             if($this->getData('type') == 6)  {
                 $productName = "<b class='success' >".BimpRender::renderIcon("car")." Déplacement vendu</b>";
             }
-            return $productName . '<br /><strong>'.$element.'</strong><br /><strong>Vendu: ' . price($valeur) . '€ HT</strong>';
+            if($with_details_commande_line)
+                return $productName . '<br /><strong>'.$element.'</strong><br /><strong>Vendu: ' . price($valeur) . '€ HT</strong>';
+            else
+                return $productName;
         } else {
             if($this->getData('type') == $parent->getData('fk_soc')) {
                 $interne = BimpCache::getBimpObjectInstance('bimpcore', "Bimp_Societe", $parent->getData('fk_soc'));
@@ -366,15 +369,15 @@ class BT_ficheInter_det extends BT_ficheInter {
 //            );
 //        }
         
-//        if($parent->getData('fk_statut') == 1 && $this->getSurplusFacturationHt(false) > 0) {
-//            $buttons[] = array(
-//                'label' => "Appliquer une remise",
-//                'icon' => 'fas_percent',
-//                'onclick' => $this->getJsActionOnclick('addRemise', array(), array(
-//                    'form_name' => "addRemise"
-//                ))
-//            );
-//        }
+        if($parent->getData('fk_statut') == 1) {
+            $buttons[] = array(
+                'label' => "Appliquer une remise",
+                'icon' => 'fas_percent',
+                'onclick' => $this->getJsActionOnclick('addRemise', array(), array(
+                    'form_name' => "addRemise"
+                ))
+            );
+        }
 
         return $buttons;
     }

@@ -16,6 +16,11 @@ objects:
             bimp_object:
                 module: bimpcore
                 name: Bimp_ActionComm
+    facturation:
+        instance:
+            bimp_object:
+                module: bimptechnique
+                name: BT_ficheInter_facturation
 
 sections:
     - type: object_header
@@ -33,11 +38,12 @@ sections:
           - id: facturation
             title: Facturation
             struct: 
-                    type: custom
-                    custom: 
-                        callback: 
-                            method: renderFacturationTab
-                            object: fiche
+                    type: list
+                    list:
+                        object: facturation
+                        name: in_fiche
+                          
+                          
                 
           - id: files
             title: Fichiers
@@ -58,16 +64,16 @@ sections:
                             callback: 
                               method: renderExtraFile
                               object: fiche
-          - id: actioncomm
-            title: Planning de la FI
-            struct: 
-                type: rows
-                rows:                                                                                  
-                    - cols: 
-                        - type: list
-                          list:
-                            object: actionComm
-                            name: ficheInter
+#          - id: actioncomm
+#            title: Planning de la FI
+#            struct: 
+#                type: rows
+#                rows:                                                                                  
+#                    - cols: 
+#                        - type: list
+#                          list:
+#                            object: actionComm
+#                            name: ficheInter
           - id: signature
             title: Signature
             struct: 

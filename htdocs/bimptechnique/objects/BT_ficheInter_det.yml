@@ -96,10 +96,7 @@ fields:
     departure_pm:
         label: Heure de départ (Après-Midi)
         type: datetime
-    pourcentage_commercial:
-        label: Remise commercial
-        type: percent
-        
+
 lists:
     in_fiche:
         delete_btn: 1
@@ -134,7 +131,6 @@ lists:
                 label: Description rapide
                 value:
                     callback: getDescRapide
-            pourcentage_commercial:
 #            validation_commercial:
 #                label: Validation commercial
 #                value:

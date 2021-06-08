@@ -56,6 +56,12 @@ objects:
             bimp_object:
                 module: bimptechnique
                 name: BT_ficheInter_det
+    facturation:
+        relation: hasOne
+        instance:
+            bimp_object:
+                module: bimptechnique
+                name: BT_ficheInter_facturation
     files:
         relation: hasMany
         delete: 1
@@ -157,7 +163,7 @@ fields:
         input:
             type: toggle 
     description:
-        label: Un petit mot de la mama
+        label: Description
         type: html
     logs:
         label: Logs FI
@@ -203,6 +209,10 @@ fields:
     no_finish_reason:
         label: Intervention non terminée
         type:  html
+    type_signature:
+        label: Type de signature
+        value:
+            callback: displayTypeSignature
 lists:
     client:
        configurable: 1
@@ -340,9 +350,9 @@ fields_tables:
             - field: description
             - field: signed
             - custom: 1
-              label: Facturation du service
+              label: Type de signature
               value:
-                  callback: displayFacturationStat
+                  callback: displayTypeSignature
     client:
         title: Client
         icon: building
@@ -395,6 +405,15 @@ filters_panels:
           no_linked:
            
 forms:
+    factured:
+        rows:
+            - custom: 1
+              label: Lignes à facturer
+              input_name: lines
+              input: 
+                  type: check_list
+                  items: 
+                      callback: getLinesForBilling
     attenteSign_to_sign:
         msgs:
             - type: warning

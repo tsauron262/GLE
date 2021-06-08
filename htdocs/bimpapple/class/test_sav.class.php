@@ -13,8 +13,13 @@ if (isset($_GET['actionTest'])) {
         $class->tentativeARestitueAuto();
     }
     if ($_GET['actionTest'] == "fetchEquipmentsImei") {
-        $class->fetchEquipmentsImei((isset($_REQUEST['nb'])? $_REQUEST['nb'] : 10), true);
+        $class->fetchEquipmentsImei((isset($_REQUEST['nb'])? $_REQUEST['nb'] : 10), false);
     }
+    if ($_GET['actionTest'] == "fetchImeiPetit") {
+        $class->fetchImeiPetit((isset($_REQUEST['nb'])? $_REQUEST['nb'] : 1));
+    }
+    
+    
 
 
     if ($_GET['actionTest'] == "global") {
@@ -367,13 +372,14 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
                               )
                         );
             if($nb > 1){//sinon c'est un test de reconnexion
-                $filtre['status_gsx'] = array(0,3);
+//                $filtre['status_gsx'] = array(0,3);
+                $filtre['custom'] = array('custom'=>'(status_gsx = 0 || (status_gsx = 3 AND id IN (SELECT a.id_equipment FROM llx_bs_sav a WHERE status IN (-1,0))))');
                 $rows = $equipment->getList($filtre, $nb, 1, 'id', 'desc', 'array', array('id', 'serial'));
             }
             else{
                 $rows = $equipment->getList($filtre, $nb, 1, 'imei2', 'asc', 'array', array('id', 'serial'));
             }
-
+            
             if (!empty($rows)) {
                 foreach ($rows as $r) {
                     if (!$gsx->logged) {

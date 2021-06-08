@@ -798,7 +798,7 @@ class savFormController extends BimpPublicController
         $msg .= $centre['address'] . "\n";
         $msg .= $centre['zip'] . ' ' . $centre['town'] . "\n\n";
 
-        if (!is_a($dt_begin, 'DateTime')) {
+        if (is_a($dt_begin, 'DateTime')) {
             $msg .= '<b>Date du rendez-vous: </b>' . "\n";
             $msg .= 'Le ' . $dt_begin->format('d / m / Y à H:i') . "\n\n";
         }

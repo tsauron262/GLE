@@ -210,7 +210,7 @@ class BS_SAV extends BimpObject
 
         switch ($action) {
             case 'setNew':
-                if (!in_array($status, array(self::BS_SAV_RESERVED, self::BS_SAV_CANCELED_BY_CUST, self::BS_SAV_CANCELED_BY_USER))) {
+                if (!in_array($status, array(self::BS_SAV_RESERVED, self::BS_SAV_CANCELED_BY_CUST, self::BS_SAV_CANCELED_BY_USER, self::BS_SAV_RDV_EXPIRED))) {
                     $errors[] = $status_error;
                     return 0;
                 }

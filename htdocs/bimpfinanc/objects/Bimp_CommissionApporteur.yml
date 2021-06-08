@@ -46,6 +46,16 @@ forms:
     default: 
         rows:
             - field: id_apporteur
+    change:
+        rows: 
+            - custom: 1
+              label: Inclure dans
+              input_name: filtre
+              data_type: int
+              input: 
+                  type: select
+                  options:
+                     callback: getFiltres
     
 filters_panels: 
     default: 

@@ -1299,7 +1299,14 @@ class Bimp_Facture extends BimpComm
                 'action' => 'generateZipPdf'
             );
         }
-
+        global $user;
+        if($user->admin)
+            $actions[] = array(
+                'label'   => 'Aj contact UNADERE',
+                'icon'    => 'fas_file-pdf',
+                'action' => 'addContacts'
+            );
+                    
         return $actions;
     }
 
@@ -4549,6 +4556,33 @@ class Bimp_Facture extends BimpComm
         }
 
         return parent::actionAddContact($data, $success);
+    }
+    
+    public function actionAddContacts($data, &$success)
+    {
+        $errors = $warnings = array();
+        if (count($errors)) {
+            return array(
+                'errors'   => $errors,
+                'warnings' => $warnings
+            );
+        }
+        
+        $data2 = array();
+        $data2['id_contact'] = 212418;
+        $data2['type'] = 1;
+        $data2['tiers_type_contact'] = 832;
+        foreach($data['id_objects'] as $id){
+            $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id);
+            $result = $obj->actionAddContact($data2, $success);
+            $errors = BimpTools::merge_array($errors, $result['errors']);
+            $warnings = BimpTools::merge_array($warnings, $result['warnings']);
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 
     // Actions: 

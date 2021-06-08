@@ -6660,7 +6660,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         $idHtml = 'object_divers_linked_list';
         $tabs[] = array(
             'id'            => $idHtml,
-            'title'         => BimpRender::renderIcon('fas_linked', 'iconLeft') . 'Tout les objets liées',
+            'title'         => BimpRender::renderIcon('fas_linked', 'iconLeft') . 'Tout les objets liés',
             'ajax'          => 1,
             'ajax_callback' => $this->getJsLoadCustomContent('renderBimpOjectLinked', '$(\'#' . $idHtml . ' .nav_tab_ajax_result\')', array(), array('button' => ''))
         );

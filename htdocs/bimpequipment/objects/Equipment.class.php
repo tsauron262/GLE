@@ -25,10 +25,11 @@ class Equipment extends BimpObject
     public static $list_status_gsx = array(
         0 => 'Non vérifié',
         1 => 'Ok',
-        2 => 'Non Apple',
+        2 => 'Non App_',
         3 => 'Localisé',
     );
     protected $current_place = null;
+    public $majGsx = false;
 
     public function __construct($module, $object_name)
     {
@@ -1469,7 +1470,6 @@ class Equipment extends BimpObject
         if($identifiers == 0)
             return array('Probléme GSX');
         
-            dol_syslog('majWithGsx '.$this->getData('serial').' '.($withUpdate? 'yes' : 'no'),3, 0, '_apple');
         $this->set('status_gsx', $identifiers['status_gsx']);
         if($identifiers['status_gsx'] != 2){
             if(isset($identifiers['serial']) && $identifiers['serial'] != '')
@@ -1480,6 +1480,7 @@ class Equipment extends BimpObject
             $this->set('meid', $identifiers['meid']);
             $this->set('product_label', $identifiers['productDescription']);
         }
+        $this->majGsx = true;
         if($withUpdate)
             return $this->update($warnings, 1);
     }
@@ -1502,7 +1503,6 @@ class Equipment extends BimpObject
                 }
                 $gsx = GSX_v2::getInstance();
             }
-            dol_syslog('fetch serial with '.$gsx->appleId,3, 0, '_apple');
 
             if ($gsx->logged) {
                 $data = $gsx->productDetailsBySerial($serial);
@@ -1761,7 +1761,9 @@ class Equipment extends BimpObject
 
         $init_serial = (string) $this->getInitData('serial');
 
-        if ($serial && (!(string) $this->getData('imei') || ($init_serial && $serial != $init_serial))) {
+        if ($serial && 
+                (!(string) $this->getData('imei') || ($init_serial && $serial != $init_serial))
+                && !$this->majGsx) {
 //            $identifiers = self::gsxFetchIdentifiers($serial);
 //            $this->set('imei', $identifiers['imei']);
 //            $this->set('imei2', $identifiers['imei2']);

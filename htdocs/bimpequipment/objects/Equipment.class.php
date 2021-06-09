@@ -1,4 +1,4 @@
- <?php
+<?php
 
 require_once DOL_DOCUMENT_ROOT . "/bimpcore/Bimp_Lib.php";
 

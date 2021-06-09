@@ -197,8 +197,12 @@ class bimp_note extends AbstractNotification {
     }
     
     getInitiales(nom) {
+        console.log(nom);
         var full_name = nom.split(' ');
-        var initials = full_name.shift().charAt(0) + full_name.pop().charAt(0);
+        var initials = '';
+        for (var i = 0; i < full_name.length; i++) {
+            initials += full_name[i].charAt(0);
+        }
         return initials.toUpperCase();
     }
 

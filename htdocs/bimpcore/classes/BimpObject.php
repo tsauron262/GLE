@@ -3125,7 +3125,7 @@ class BimpObject extends BimpCache
             }
         }
 
-        if (!$extra_order_by) {
+        if (!$extra_order_by && $order_by != 'a.' . $primary) {
             $extra_order_by = 'a.' . $primary;
         }
 

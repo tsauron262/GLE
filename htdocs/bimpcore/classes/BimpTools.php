@@ -2317,9 +2317,10 @@ class BimpTools
     {
         return 'http://placehold.it/' . $size . '/' . $color . '/fff&amp;text=' . $text;
     }
-    
-    public function getBadge($text, $size = 35, $style = 'info', $popover = ''){
-        return '<span class="badge badge-pill badge-'.$style.(($popover != '')? ' bs-popover' : '').'" '.(($popover != '')? BimpRender::renderPopoverData($popover) : '').' style="size:'.$size.'">'.$text.'</span>';
+
+    public function getBadge($text, $size = 35, $style = 'info', $popover = '')
+    {
+        return '<span class="badge badge-pill badge-' . $style . (($popover != '') ? ' bs-popover' : '') . '" ' . (($popover != '') ? BimpRender::renderPopoverData($popover) : '') . ' style="size:' . $size . '">' . $text . '</span>';
     }
 
     public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false, $truncate = false, $no_html = false, $decimals = 2, $round_points = false, $separator = ',', $spaces = true)
@@ -2737,6 +2738,31 @@ class BimpTools
         }
 
         return $html;
+    }
+
+    public static function createQrCodeImg($data, $dir, $file_name)
+    {
+        require_once(DOL_DOCUMENT_ROOT . "/synopsisphpqrcode/qrlib.php");
+
+        if (!is_dir($dir)) {
+            $err = BimpTools::makeDirectories($dir);
+            
+            if ($err) {
+                return false;
+            }
+        }
+
+        if (!preg_match('/^.+\.png$/', $file_name)) {
+            $file_name .= '.png';
+        }
+
+        if (!preg_match('/^.+\/$/', $dir)) {
+            $dir .= '/';
+        }
+
+        QRcode::png($data
+                , $dir . $file_name
+                , "L", 4, 2);
     }
 
     // Gestion des couleurs: 

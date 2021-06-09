@@ -323,6 +323,7 @@ class AppleShipmentPart extends BimpObject
                         'returnOrderNumber'   => BimpTools::getArrayValueFromPath($part, 'returnOrderNumber', ''),
                         'repairId'            => BimpTools::getArrayValueFromPath($part, 'repairId', ''),
                         'repairStatusCode'    => BimpTools::getArrayValueFromPath($part, 'repairStatusCode', ''),
+                        'expectedReturnDate'    => BimpTools::printDate(BimpTools::getArrayValueFromPath($part, 'expectedReturnDate', '')),
                         'return'              => $return_str
                     );
                 }
@@ -363,6 +364,7 @@ class AppleShipmentPart extends BimpObject
                     'returnOrderNumber'   => array('label' => 'N° de retour', 'align' => 'center'),
                     'repairId'            => array('label' => 'N° réparation', 'align' => 'center'),
                     'repairStatusCode'    => array('label' => 'Statut réparation', 'align' => 'center'),
+                    'expectedReturnDate'    => array('label' => 'Date de retour attendue', 'align' => 'center'),
                     'return'              => 'Retour'
                 );
 
@@ -371,7 +373,8 @@ class AppleShipmentPart extends BimpObject
                             'searchable' => true,
                             'sortable'   => true,
                             'checkboxes' => true,
-                            'positions'  => true
+                            'positions'  => true,
+                            'search_mode'=> 'show'
                 ));
 
                 if ($nToAttribute > 0) {

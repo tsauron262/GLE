@@ -95,17 +95,20 @@ lists:
                 label: HT réellement facturé
                 value:
                     callback: displayHTfacture
-            displayFactureAssoc:
-                label: Facture associée
-                value:
-                    callback: displayFactureAssoc
             displayCommande:
                 label: Commande
                 value:
                     callback: displayCommande
+            displayAlertes:
+                label: Alertes
+                value:
+                    callback: displayAlertes
+            displayFactureAssoc:
+                label: Facture associée
+                value:
+                    callback: displayFactureAssoc
              
 forms:
-    addRemise:
-        title: Appliquer une remise sur la ligne de facturation
+    addRemisePercent:
         rows:
-            
+           - field: remise

@@ -57,7 +57,7 @@ objects:
                 module: bimptechnique
                 name: BT_ficheInter_det
     facturation:
-        relation: hasOne
+        relation: hasMany
         instance:
             bimp_object:
                 module: bimptechnique
@@ -405,6 +405,9 @@ filters_panels:
           no_linked:
            
 forms:
+    askFacturation:
+        msgs:
+            callback: displayIfMessageFormFi
     factured:
         rows:
             - custom: 1

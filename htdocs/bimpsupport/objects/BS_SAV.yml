@@ -167,6 +167,7 @@ fields:
         input: 
             card: default
         create_form: light
+        edit_form: light
         displays: 
             custom: 
                 label: Affichage étendu
@@ -226,6 +227,7 @@ fields:
                     fields_search: lastname,firstname
                     label_syntaxe: <label_1> <label_2>    
         create_form: default
+        edit_form: default
         create_form_values:
             fields: 
                 fk_soc: 
@@ -452,6 +454,50 @@ forms:
               value: 1
             - field: id_ticket
               hidden: 1
+              
+    prise_en_charge: 
+        rows: 
+            - field: code_centre
+              edit: 0
+            - field: code_centre_repa
+            - field: id_client
+            - field: id_contact
+            - field: id_equipment
+            - custom: 1
+              label: Conserver l'équipement dans son emplacement actuel
+              input_name: keep_equipment_current_place
+              data_type: bool
+              content: 
+                  callback: renderEquipmentPlaceOptionInput
+              display_if: 
+                  field_name: id_equipment
+                  hide_values: 0,
+              depends_on: id_equipment
+            - field: symptomes
+            - field: id_contrat
+            - field: prioritaire
+            - field: acompte
+            - label: Mode de paiement de l'acompte
+              custom: 1
+              data_type: int
+              input_name: mode_paiement_acompte
+              input: 
+                  type: select_payment
+                  include_empty: 1
+              display_if: 
+                  field_name: acompte
+                  hide_values: 0,
+              value: 6
+            - field: system
+            - field: login_admin
+            - field: pword_admin
+            - field: contact_pref
+            - field: accessoires
+            - field: etat_materiel
+            - field: etat_materiel_desc
+            - field: save_option
+            - field: sav_pro
+            - field: prestataire_number
               
     edit: 
         rows: 

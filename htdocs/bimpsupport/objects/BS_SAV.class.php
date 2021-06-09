@@ -402,6 +402,10 @@ class BS_SAV extends BimpObject
         if (!$force_edit) {
             switch ($field) {
                 case 'code_centre_repa':
+                    if ((int) $this->getData('status') < 0) {
+                        return 1;
+                    }
+
                     if (!in_array((int) $this->getData('status'), array(0, 1, 2, 3, 5, 6, 7))) {
                         return 0;
                     }
@@ -571,8 +575,8 @@ class BS_SAV extends BimpObject
                         'label'   => 'Prendre en charge',
                         'icon'    => 'fas_cogs',
                         'onclick' => $this->getJsActionOnclick('setNew', array(), array(
-                            'success_callback' => 'function() {window.open(\'' . $url . '\');}',
-                            'confirm_msg'      => 'Veuillez confirmer la prise en charge du ' . $this->getRef()
+                            'form_name'        => 'prise_en_charge',
+                            'success_callback' => 'function() {window.open(\'' . $url . '\');}'
                         ))
                     );
                 }
@@ -659,7 +663,9 @@ class BS_SAV extends BimpObject
                         $buttons[] = array(
                             'label'   => 'Prendre en charge',
                             'icon'    => 'fas_cogs',
-                            'onclick' => $this->getJsActionOnclick('setNew', array(), array())
+                            'onclick' => $this->getJsActionOnclick('setNew', array(), array(
+                                'form_name' => 'prise_en_charge'
+                            ))
                         );
                     }
                 } else {
@@ -1827,7 +1833,7 @@ class BS_SAV extends BimpObject
                 $this->resetMsgs();
 
                 // Vérif de l'existance de la propale: 
-                if ($this->getData("sav_pro") < 1) {
+                if ((int) $this->getData("sav_pro") < 1 && (int) $this->getData('status') >= 0) {
                     $propal = $this->getChildObject('propal');
                     if (!BimpObject::objectLoaded($propal)) {
                         if ($this->getData("id_propal") < 1) {
@@ -1870,9 +1876,13 @@ class BS_SAV extends BimpObject
                             $warnings = array();
                             $prop_errors = $propal->update($warnings, true);
                             if (count($prop_errors)) {
-                                dol_syslog(BimpTools::getMsgFromArray($prop_errors, 'Echec de la réparation automatique de la propale pour le SAV "' . $this->getRef() . '"'), LOG_ERR);
+//                                dol_syslog(BimpTools::getMsgFromArray($prop_errors, 'Echec de la réparation automatique de la propale pour le SAV "' . $this->getRef() . '"'), LOG_ERR);
+                                BimpCore::addlog('Echec de la réparation automatique de la propale pour le SAV "' . $this->getRef() . '"', Bimp_Log::BIMP_LOG_ERREUR, 'sav', $this, array(
+                                    'Erreurs' => $prop_errors
+                                ));
                             } else {
-                                dol_syslog('Correction automatique de la propale pour le SAV "' . $this->getRef() . '" effectuée avec succès', LOG_NOTICE);
+//                                dol_syslog('Correction automatique de la propale pour le SAV "' . $this->getRef() . '" effectuée avec succès', LOG_NOTICE);
+                                BimpCore::addlog('Correction automatique de la propale pour le SAV "' . $this->getRef() . '" effectuée avec succès', Bimp_Log::BIMP_LOG_NOTIF, 'sav', $this);
                             }
                         }
                     }
@@ -1972,7 +1982,7 @@ class BS_SAV extends BimpObject
         return $errors;
     }
 
-    public function createAccompte($acompte, $update = true)
+    public function createAccompte($acompte, $update = true, $id_mode_paiement = null)
     {
         global $user, $langs;
 
@@ -2006,6 +2016,10 @@ class BS_SAV extends BimpObject
             $errors[] = 'Aucun client sélectionné pour ce SAV';
         }
         if ($acompte > 0 && !count($errors)) {
+            if (is_null($id_mode_paiement)) {
+                $id_mode_paiement = (int) BimpTools::getValue('mode_paiement_acompte', 0);
+            }
+
             // Création de la facture: 
             BimpTools::loadDolClass('compta/facture', 'facture');
             $factureA = new Facture($this->db->db);
@@ -2029,7 +2043,7 @@ class BS_SAV extends BimpObject
                 $payement = new Paiement($this->db->db);
                 $payement->amounts = array($factureA->id => $acompte);
                 $payement->datepaye = dol_now();
-                $payement->paiementid = (int) BimpTools::getValue('mode_paiement_acompte', 0);
+                $payement->paiementid = (int) $id_mode_paiement;
                 if ($payement->create($user) <= 0) {
                     $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Des erreurs sont survenues lors de la création du paiement de la facture d\'acompte');
                 } else {
@@ -4699,10 +4713,127 @@ class BS_SAV extends BimpObject
         $success = 'Prise en charge effectuée';
         $success_callback = '';
 
-        $this->set('status', self::BS_SAV_NEW);
-        $errors = $this->update($warnings, true);
+        // Mise à jour du statut: 
+        $errors = $this->updateField('status', self::BS_SAV_NEW);
 
+        // Mise à jour des champs: 
         if (!count($errors)) {
+            if (isset($data['code_centre_repa'])) {
+                $this->set('code_centre_repa', $data['code_centre_repa']);
+            }
+            if (isset($data['id_client'])) {
+                $this->set('id_client', (int) $data['id_client']);
+            }
+            if (isset($data['id_contact'])) {
+                $this->set('id_contact', (int) $data['id_contact']);
+            }
+            if (isset($data['id_equipment'])) {
+                $this->set('id_equipment', (int) $data['id_equipment']);
+            }
+            if (isset($data['code_centre_repa'])) {
+                $this->set('code_centre_repa', $data['code_centre_repa']);
+            }
+            if (isset($data['code_centre_repa'])) {
+                $this->set('code_centre_repa', $data['code_centre_repa']);
+            }
+            if (isset($data['prioritaire'])) {
+                $this->set('code_centre_repa', (int) $data['prioritaire']);
+            }
+            if (isset($data['system'])) {
+                $this->set('system', $data['system']);
+            }
+            if (isset($data['login_admin'])) {
+                $this->set('login_admin', $data['login_admin']);
+            }
+            if (isset($data['pword_admin'])) {
+                $this->set('pword_admin', $data['pword_admin']);
+            }
+            if (isset($data['contact_pref'])) {
+                $this->set('contact_pref', $data['contact_pref']);
+            }
+            if (isset($data['accessoires'])) {
+                $this->set('accessoires', $data['accessoires']);
+            }
+            if (isset($data['etat_materiel'])) {
+                $this->set('etat_materiel', $data['etat_materiel']);
+            }
+            if (isset($data['etat_materiel_desc'])) {
+                $this->set('etat_materiel_desc', $data['etat_materiel_desc']);
+            }
+            if (isset($data['save_option'])) {
+                $this->set('save_option', (int) $data['save_option']);
+            }
+            if (isset($data['sav_pro'])) {
+                $this->set('sav_pro', (int) $data['sav_pro']);
+            }
+            if (isset($data['prestataire_number'])) {
+                $this->set('prestataire_number', $data['prestataire_number']);
+            }
+
+            $up_errors = $this->update($warnings, true);
+
+            if (!count($up_errors)) {
+                // Création de la facture d'acompte: 
+                if ((float) $data['acompte'] > 0) {
+                    if ((int) $this->getData('id_facture_acompte')) {
+                        $warnings[] = 'Attention: l\'acompte n\'a pas pu être créé car une facture d\'acompte existe déjà pour ce SAV. Veuillez utiliser le bouton "Ajouter un acompte"';
+                    } else {
+                        $fac_errors = $this->createAccompte((float) $data['acompte'], false, (int) BimpTools::getArrayValueFromPath($data, 'mode_paiement_acompte', 6));
+                        if (count($fac_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($fac_errors, 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
+                        } else {
+                            $this->updateField('acompte', (float) $data['acompte']);
+                        }
+                    }
+                }
+            } else {
+                $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour des champs depuis le formulaire');
+            }
+
+            // Création de la popale: 
+            if ($this->getData("id_propal") < 1 && $this->getData("sav_pro") < 1) {
+                $prop_errors = $this->createPropal();
+                if (count($prop_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($prop_errors, 'Des erreurs sont survenues lors de la création de la proposition commerciale');
+                }
+            }
+
+            // Emplacement de l'équipement: 
+            if ((int) $this->getData('id_equipment')) {
+                $equipment = $this->getChildObject('equipment');
+
+                if (!BimpObject::objectLoaded($equipment)) {
+                    $warnings[] = 'L\'équipement d\'ID ' . $this->getData('id_equipment') . ' n\'existe pas';
+                } else {
+                    $current_place = $equipment->getCurrentPlace();
+
+                    if (!BimpObject::objectLoaded($current_place) || !(int) BimpTools::getArrayValueFromPath($data, 'keep_equipment_current_place', 0)) {
+                        $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
+                        $place_errors = $place->validateArray(array(
+                            'id_equipment' => (int) $this->getData('id_equipment'),
+                            'type'         => BE_Place::BE_PLACE_SAV,
+                            'id_entrepot'  => (int) $this->getData('id_entrepot'),
+                            'infos'        => 'Ouverture du SAV ' . $this->getData('ref'),
+                            'date'         => date('Y-m-d H:i:s'),
+                            'code_mvt'     => 'SAV' . (int) $this->id . '_CREATE_EQ' . (int) $this->getData('id_equipment'),
+                            'origin'       => 'sav',
+                            'id_origin'    => (int) $this->id
+                        ));
+                        if (!count($place_errors)) {
+                            $w = array();
+                            $place_errors = $place->create($w, true);
+                        }
+
+                        if (count($place_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de la création de l\'emplacement de l\'équipement');
+                        }
+                    }
+                }
+            }
+
+            // Génération du bon de prise en charge: 
+            $this->generatePDF('pc', $warnings);
+
             $success_callback = $this->getCreateJsCallback();
         }
 
@@ -4854,7 +4985,6 @@ class BS_SAV extends BimpObject
         $errors = parent::create($warnings, $force_create);
 
         if (!count($errors) && !defined('DONT_CHECK_SERIAL')) {
-
             // Création de la facture d'acompte: 
             if ($this->getData("id_facture_acompte") < 1 && (float) $this->getData('acompte') > 0) {
                 $fac_errors = $this->createAccompte((float) $this->getData('acompte'), false);
@@ -4863,53 +4993,55 @@ class BS_SAV extends BimpObject
                 }
             }
 
-            // Création de la popale: 
-            if ($this->getData("id_propal") < 1 && $this->getData("sav_pro") < 1) {
-                $prop_errors = $this->createPropal();
-                if (count($prop_errors)) {
-                    $warnings[] = BimpTools::getMsgFromArray($prop_errors, 'Des erreurs sont survenues lors de la création de la proposition commerciale');
+            if (BimpCore::isContextPrivate()) {
+                // Création de la popale: 
+                if ($this->getData("id_propal") < 1 && $this->getData("sav_pro") < 1) {
+                    $prop_errors = $this->createPropal();
+                    if (count($prop_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($prop_errors, 'Des erreurs sont survenues lors de la création de la proposition commerciale');
+                    }
                 }
-            }
 
-            // Emplacement de l'équipement: 
-            if ((int) $this->getData('id_equipment')) {
-                $equipment = $this->getChildObject('equipment');
+                // Emplacement de l'équipement: 
+                if ((int) $this->getData('id_equipment')) {
+                    $equipment = $this->getChildObject('equipment');
 
-                if (!BimpObject::objectLoaded($equipment)) {
-                    $warnings[] = 'L\'équipement d\'ID ' . $this->getData('id_equipment') . ' n\'existe pas';
-                } else {
-                    $current_place = $equipment->getCurrentPlace();
+                    if (!BimpObject::objectLoaded($equipment)) {
+                        $warnings[] = 'L\'équipement d\'ID ' . $this->getData('id_equipment') . ' n\'existe pas';
+                    } else {
+                        $current_place = $equipment->getCurrentPlace();
 
-                    if (!BimpObject::objectLoaded($current_place) || !(int) BimpTools::getPostFieldValue('keep_equipment_current_place', 0)) {
-                        $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
-                        $place_errors = $place->validateArray(array(
-                            'id_equipment' => (int) $this->getData('id_equipment'),
-                            'type'         => BE_Place::BE_PLACE_SAV,
-                            'id_entrepot'  => (int) $this->getData('id_entrepot'),
-                            'infos'        => 'Ouverture du SAV ' . $this->getData('ref'),
-                            'date'         => date('Y-m-d H:i:s'),
-                            'code_mvt'     => 'SAV' . (int) $this->id . '_CREATE_EQ' . (int) $this->getData('id_equipment'),
-                            'origin'       => 'sav',
-                            'id_origin'    => (int) $this->id
-                        ));
-                        if (!count($place_errors)) {
-                            $w = array();
-                            $place_errors = $place->create($w, true);
-                        }
+                        if (!BimpObject::objectLoaded($current_place) || !(int) BimpTools::getPostFieldValue('keep_equipment_current_place', 0)) {
+                            $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
+                            $place_errors = $place->validateArray(array(
+                                'id_equipment' => (int) $this->getData('id_equipment'),
+                                'type'         => BE_Place::BE_PLACE_SAV,
+                                'id_entrepot'  => (int) $this->getData('id_entrepot'),
+                                'infos'        => 'Ouverture du SAV ' . $this->getData('ref'),
+                                'date'         => date('Y-m-d H:i:s'),
+                                'code_mvt'     => 'SAV' . (int) $this->id . '_CREATE_EQ' . (int) $this->getData('id_equipment'),
+                                'origin'       => 'sav',
+                                'id_origin'    => (int) $this->id
+                            ));
+                            if (!count($place_errors)) {
+                                $w = array();
+                                $place_errors = $place->create($w, true);
+                            }
 
-                        if (count($place_errors)) {
-                            $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de la création de l\'emplacement de l\'équipement');
+                            if (count($place_errors)) {
+                                $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de la création de l\'emplacement de l\'équipement');
+                            }
                         }
                     }
                 }
-            }
 
-            // Génération du bon de prise en charge: 
-            $this->generatePDF('pc', $warnings);
+                // Génération du bon de prise en charge: 
+                $this->generatePDF('pc', $warnings);
 
-            // Envoi du mail / sms:
-            if (BimpTools::getValue('send_msg', 0)) {
-                $warnings = BimpTools::merge_array($warnings, $this->sendMsg('debut'));
+                // Envoi du mail / sms:
+                if (BimpTools::getValue('send_msg', 0)) {
+                    $warnings = BimpTools::merge_array($warnings, $this->sendMsg('debut'));
+                }
             }
         }
 

@@ -17,10 +17,10 @@ class Bimp_Log extends BimpObject
         'bimpcomm'   => 'Commercial',
         'stocks'     => 'Stocks',
         'email'      => 'E-mails',
-        'bds'        => 'BimpDataSync',
         'divers'     => 'Divers',
         'bds'        => 'Bimp Data Sync',
-        'bic'        => 'Interface client'
+        'bic'        => 'Interface client',
+        'sav'        => 'SAV'
     );
     public static $levels = array(
         self::BIMP_LOG_NOTIF  => array('label' => 'Notification', 'classes' => array('info')),

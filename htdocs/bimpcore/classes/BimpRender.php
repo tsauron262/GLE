@@ -257,7 +257,7 @@ class BimpRender
                 $classes = array('btn');
 
                 if ($max && count($buttons) > $max) {
-                    $classes[] = 'btn-light-'.(isset($btn['type']) ? $btn['type'] : 'default');
+                    $classes[] = 'btn-light-' . (isset($btn['type']) ? $btn['type'] : 'default');
                 } else {
                     $classes[] = (isset($btn['type']) ? 'btn-' . $btn['type'] : 'btn-default');
                 }
@@ -474,7 +474,7 @@ class BimpRender
 //                    foreach ($paramsUrl as $clef => $val)
 //                        $paramsUrl2[] = $clef . '=' . $val;
 //                }
-                $html .= '<a href="' . /*(count($paramsUrl2) > 0 ? '?' . implode('&', $paramsUrl2) : '') .*/ '#' . $tab['id'] . '" aria-controls="' . $tab['id'] . '" role="tab" data-toggle="tab"';
+                $html .= '<a href="' . /* (count($paramsUrl2) > 0 ? '?' . implode('&', $paramsUrl2) : '') . */ '#' . $tab['id'] . '" aria-controls="' . $tab['id'] . '" role="tab" data-toggle="tab"';
                 if (isset($tab['ajax']) && (int) $tab['ajax']) {
                     $html .= ' data-ajax="1"';
                 }
@@ -755,12 +755,12 @@ class BimpRender
     public static function renderIconClass($icon)
     {
         if (strpos($icon, 'fa') === 0) {
-        if (preg_match('/^(.+)_(.+)$/', $icon, $matches)) {
-            return $matches[1] . ' fa5-' . $matches[2];
-        }
+            if (preg_match('/^(.+)_(.+)$/', $icon, $matches)) {
+                return $matches[1] . ' fa5-' . $matches[2];
+            }
         } elseif (strpos($icon, 'pe') === 0) {
             return 'pe-7s-' . str_replace('pe_', '', $icon);
-    }
+        }
 
         return 'fa fa-' . $icon;
     }
@@ -1246,7 +1246,10 @@ class BimpRender
 
         // Lignes: 
         foreach ($rows as $row) {
-            $html .= '<tr class="bimp_list_table_row"' . (isset($row['row_data']) ? BimpRender::renderTagData($row['row_data']) : '') . '>';
+            $html .= '<tr class="bimp_list_table_row"';
+            $html .= (isset($row['row_data']) ? BimpRender::renderTagData($row['row_data']) : '');
+            $html .= (isset($row['row_style']) ? ' style="' . $row['row_style'] . '"' : '');
+            $html .= '>';
             if ($empty_first_col) {
                 $html .= '<td>';
                 if ($params['checkboxes'] && (!isset($row['item_checkbox']) || (int) $row['item_checkbox'])) {
@@ -1349,7 +1352,7 @@ class BimpRender
 
         return $html;
     }
-    
+
     // Form elements: 
 
     public static function renderSingleLineForm($inputs, $params = array())
@@ -1398,7 +1401,7 @@ class BimpRender
 
         return $html;
     }
-    
+
     public static function renderFormRow($label, $input, $label_col = 3)
     {
         $html = '';
@@ -1523,7 +1526,6 @@ class BimpRender
         $html .= $inputs_content;
 
         $html .= '</div>';
-
 
         return $html;
     }

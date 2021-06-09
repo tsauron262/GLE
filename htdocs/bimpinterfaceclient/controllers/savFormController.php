@@ -1735,7 +1735,7 @@ Votre satisfaction est notre objectif, nous mettrons tout en œuvre pour vous sa
 
                     if (BimpObject::objectLoaded($sav)) {
                         $success_html .= '<h2 class="success">Votre dossier SAV a été ouvert avec succès</h2>';
-                        $success_html .= '<p>Référence: ' . $sav->getRef() . '</p>';
+                        $success_html .= '<p>Référence: <b>' . $sav->getRef() . '</b></p>';
                     } else {
                         $success_html = '<h3>En raison d\'une erreur technique, votre dossier SAV n\'a pas pu être créé.</h3>';
                         $success_html .= '<p>Toutefois, les techniciens du centre BIMP de ' . $centre['town'] . ' ont été alertés par e-mail de votre demande.<br/>';
@@ -1772,6 +1772,12 @@ Votre satisfaction est notre objectif, nous mettrons tout en œuvre pour vous sa
                     }
 
                     $success_html .= '</div>';
+
+                    if (BimpObject::objectLoaded($userClient)) {
+                        $success_html .= '<p style="text-align: center">';
+                        $success_html .= '<a href="' . DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=sav">Retour à votre espace client</a>';
+                        $success_html .= '</p>';
+                    }
 
 //                    $success_html .= '<br/>DEBUG: <br/>';
 //                    $success_html .= $debug;

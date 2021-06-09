@@ -5209,12 +5209,17 @@ class BS_SAV extends BimpObject
         $sql .= ' AND (date_rdv < \'' . date('Y-m-d') . ' 00:00:00\' OR (date_rdv IS NULL AND date_create < \'' . $dt->format('Y-m-d') . ' 00:00:00\'))';
 
         $rows = $bdb->executeS($sql, 'array');
-
+        
         if (is_array($rows)) {
+            $sav_instance = BimpObject::getInstance('bimpsupport', 'BS_SAV');
+            
             foreach ($rows as $r) {
                 if ($bdb->update('bs_sav', array(
                             'status' => BS_SAV::BS_SAV_RDV_EXPIRED
                                 ), 'id = ' . (int) $r['id']) > 0) {
+                    $sav_instance->id = (int) $r['id'];
+                    $sav_instance->addNote('Rendez-vous annulé automatiquement le ' . date('d / m / Y à H:i'), 4);
+
                     if ((string) $r['date_rdv']) {
                         $to = '';
 
@@ -5252,18 +5257,17 @@ class BS_SAV extends BimpObject
                             }
 
                             $msg .= 'Si vous avez toujours besoin d’une assistance, n’hésitez pas à reprendre un rendez vous sur votre <a href="https://www.bimp.fr/espace-client/">espace personnel</a> de notre site internet « www.bimp.fr »' . "\n\n";
-
                             $msg .= 'L’équipe technique BIMP';
 
                             mailSyn2($subject, $to, '', $msg);
 
-                            BimpCore::addlog('Annulation auto SAV réservé', Bimp_Log::BIMP_LOG_NOTIF, 'bic', null, array(
-                                'ID SAV' => $r['id']
-                                    ), true);
+//                            BimpCore::addlog('Annulation auto SAV réservé', Bimp_Log::BIMP_LOG_NOTIF, 'bic', null, array(
+//                                'ID SAV' => $r['id']
+//                                    ), true);
                         }
                     }
                 } else {
-                    BimpCore::addlog('Echec de la mise l\'annulation automatique d\'un SAV', Bimp_Log::BIMP_LOG_ERREUR, 'bic', null, array(
+                    BimpCore::addlog('Echec de l\'annulation automatique d\'un SAV', Bimp_Log::BIMP_LOG_ERREUR, 'bic', null, array(
                         'ID SAV'     => $r['id'],
                         'Erreyr SQL' => $bdb->err()
                     ));

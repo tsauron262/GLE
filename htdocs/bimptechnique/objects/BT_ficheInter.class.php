@@ -23,6 +23,7 @@ class BT_ficheInter extends BimpDolObject {
     CONST STATUT_TERMINER = 2;
     CONST STATUT_SIGANTURE_PAPIER = 4;
     CONST STATUT_DEMANDE_FACT =  10;
+    CONST STATUT_ATTENTE_VALIDATION = 11;
     CONST URGENT_NON = 0;
     CONST URGENT_OUI = 1;
     CONST TYPE_NO = 0;
@@ -45,7 +46,8 @@ class BT_ficheInter extends BimpDolObject {
         self::STATUT_VALIDER => ['label' => "Signée par le client", 'icon' => 'check', 'classes' => ['success']],
         self::STATUT_TERMINER => ['label' => "Terminée", 'icon' => 'thumbs-up', 'classes' => ['important']],
         self::STATUT_SIGANTURE_PAPIER => ['label' => "Attente signature client", 'icon' => 'warning', 'classes' => ['important']],
-        self::STATUT_DEMANDE_FACT => ['label' => "Demande de facturation", 'icon' => 'euro', 'classes' => ['important']],
+        self::STATUT_DEMANDE_FACT => ['label' => "Attente de facturation", 'icon' => 'euro', 'classes' => ['important']],
+        self::STATUT_ATTENTE_VALIDATION => ['label' => "Attente de validation commercial", 'icon' => 'thumbs-up', 'classes' => ['important']],
     ];
     
     public static $urgent = [
@@ -856,7 +858,25 @@ class BT_ficheInter extends BimpDolObject {
         );
     }
     
-    public function actionUnSign() {
+    public function displayIfMessageFormFi() {
+        $children = $this->getChildrenList("facturation");
+        $msgs = [];
+        
+        if(count($children) > 0) {
+            foreach($children as $id_child) {
+                $child = $this->getChildObject('facturation', $id_child);
+            }
+        }
+//            $msgs[] = Array(
+//                'type' => 'warning',
+//                'content' => print_r($children)
+//            );
+ 
+        
+        return $msgs;
+    }
+    
+    public function actionAskFacturation($data, &$success) {
         
     }
 
@@ -864,28 +884,34 @@ class BT_ficheInter extends BimpDolObject {
         global $conf, $langs, $user;
         $buttons = Array();
         $statut = $this->getData('fk_statut');
-        
-        if($user->id == 460)  {
-            $buttons[] = array(
-                    'label' => 'un-sign',
-                    'icon' => 'fas_file-pdf',
-                    'onclick' => $this->getJsActionOnclick('unSign', array(), array())
-                );
-        } 
-        
+
         if(!$this->isOldFi()) {
-            if($statut == 0 || $user->id == 460) {
-                $buttons[] = array(
-                    'label' => 'Générer le PDF',
-                    'icon' => 'fas_file-pdf',
-                    'onclick' => $this->getJsActionOnclick('generatePdf', array(), array())
-                );
-            }
-            
         
         $interne_soc = explode(',', BimpCore::getConf('bimptechnique_id_societe_auto_terminer'));
         
         $children = $this->getChildrenList("inters");
+        
+        if($statut == self::STATUT_VALIDER) {
+            
+            $buttons[] = array(
+                'label' => 'Demander la facturation',
+                'icon' => 'fas_hand-holding-usd',
+                'onclick' => $this->getJsActionOnclick('askFacturation', array(), array(
+                    'form_name' => 'askFacturation'
+                ))
+            );
+            
+        }
+        
+        if($statut  == self::STATUT_BROUILLON) {
+            $buttons[] = array(
+                'label' => 'Générer le PDF',
+                'icon' => 'file-pdf',
+                'onclick' => $this->getJsActionOnclick('generatePdf', array(), array(
+            ))
+        );
+        }
+        
         
         if($statut != self::STATUT_VALIDER) {
             if($statut == self::STATUT_BROUILLON) {

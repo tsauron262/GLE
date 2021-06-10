@@ -976,6 +976,19 @@ class Equipment extends BimpObject
 
         return 'ID de l\'équipement absent';
     }
+    
+    public function displayFactFourn(){
+        $result = $this->db->executeS("SELECT b.id_obj FROM ".MAIN_DB_PREFIX."object_line_equipment a, `".MAIN_DB_PREFIX."bimp_facture_fourn_line` b WHERE a.object_type = 'facture_fournisseur' AND a.id_equipment = ".$this->id." AND b.id = a.id_object_line", 'array');
+        foreach($result as $idF){
+            $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', $idF['id_obj']);
+            global $modeCSV;
+            if ($modeCSV) {
+                return $obj->getName();
+            } else {
+                return $obj->getLink();
+            }
+        }
+    }
 
     public function displayAvailability($id_entrepot = 0, $allowed = array())
     {

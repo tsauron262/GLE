@@ -44,6 +44,7 @@ class BS_SAV extends BimpObject
         self::BS_SAV_A_RESTITUER       => array('label' => 'A restituer', 'icon' => 'arrow-right', 'classes' => array('success')),
         self::BS_SAV_FERME             => array('label' => 'Fermé', 'icon' => 'times', 'classes' => array('danger'))
     );
+    public static $status_opened = array(self::BS_SAV_RESERVED,self::BS_SAV_NEW, self::BS_SAV_ATT_PIECE, self::BS_SAV_ATT_CLIENT, self::BS_SAV_DEVIS_ACCEPTE, self::BS_SAV_REP_EN_COURS, self::BS_SAV_EXAM_EN_COURS, self::BS_SAV_DEVIS_REFUSE, self::BS_SAV_ATT_CLIENT_ACTION, self::BS_SAV_A_RESTITUER);
     public static $need_propal_status = array(2, 3, 4, 5, 6, 9);
     public static $propal_reviewable_status = array(0, 1, 2, 3, 4, 6, 7, 9);
     public static $save_options = array(

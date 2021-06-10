@@ -2536,7 +2536,7 @@ class Bimp_Commande extends BimpComm
                             }
                         }
 
-                        $eq_errors = $fac_line->setEquipments($line_equipments, $equipments_set);
+                        $eq_errors = $fac_line->setEquipments($line_equipments, $equipments_set, false);
                         if (count($eq_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($eq_errors, 'Ligne n°' . $line->getData('position'));
                         }

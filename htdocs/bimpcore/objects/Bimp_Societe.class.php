@@ -2260,6 +2260,14 @@ class Bimp_Societe extends BimpDolObject
         $warnings = array();
         $success = 'Solvabilité vérifiée avec succès';
 
+        global $user;
+        
+        if ($user->id == 270) {
+            echo 'ici <br/>'; 
+        }
+        if ($user->id === 270) {
+            echo 'la <br/>'; 
+        }
         $this->checkSolvabiliteStatus();
 
         return array(

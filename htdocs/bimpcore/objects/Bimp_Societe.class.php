@@ -1905,30 +1905,17 @@ class Bimp_Societe extends BimpDolObject
         global $user;
         $echo = ($user->id == 270);
 
-        if ($echo) {
-            echo 'IN<br/>';
-        }
-
         if (!$this->isLoaded()) {
-            if ($echo) {
-                echo 'NO LOADED<br/>';
-            }
             return;
         }
 
         if (!(int) BimpCore::getConf('check_solvabilite_client', 0)) {
-            if ($echo) {
-                echo 'NO CONF<br/>';
-            }
             return;
         }
 
         $cur_status = (int) $this->getData('solvabilite_status');
 
         if (in_array($cur_status, array(self::SOLV_INSOLVABLE, self::SOLV_DOUTEUX_FORCE, self::SOLV_A_SURVEILLER_FORCE))) {
-            if ($echo) {
-                echo 'HERE<br/>';
-            }
             return;
         }
 
@@ -1957,6 +1944,10 @@ class Bimp_Societe extends BimpDolObject
         if (is_array($factures)) {
             foreach ($factures as $fac) {
                 $rap = $fac->getRemainToPay();
+
+                if ($echo) {
+                    echo 'FAC: ' . $fac->getRef() . ': ' . $rap . '<br/>';
+                }
 
                 if ($rap > 0) {
                     $total_unpaid += $rap;
@@ -2259,7 +2250,7 @@ class Bimp_Societe extends BimpDolObject
         $errors = array();
         $warnings = array();
         $success = 'Solvabilité vérifiée avec succès';
-        
+
         $this->checkSolvabiliteStatus();
 
         return array(

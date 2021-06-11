@@ -840,6 +840,7 @@ function onFactureFormSubmit($form, extra_data) {
 }
 
 function FactureLinesInputAddAll($button) {
+    bimp_msg('ici');
     var $container = $button.findParentByClass('facture_lines_inputContainer');
 
     if ($.isOk($container)) {

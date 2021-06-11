@@ -1905,11 +1905,21 @@ class Bimp_Societe extends BimpDolObject
         global $user;
         $echo = ($user->id === 270);
 
+        if ($echo) {
+            echo 'IN<br/>';
+        }
+
         if (!$this->isLoaded()) {
+            if ($echo) {
+                echo 'NO LOADED<br/>';
+            }
             return;
         }
 
         if (!(int) BimpCore::getConf('check_solvabilite_client', 0)) {
+            if ($echo) {
+                echo 'NO CONF<br/>';
+            }
             return;
         }
 

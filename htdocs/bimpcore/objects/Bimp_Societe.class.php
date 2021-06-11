@@ -548,7 +548,7 @@ class Bimp_Societe extends BimpDolObject
 
         return '';
     }
-    
+
     public function getCardFields($card_name)
     {
         $fields = parent::getCardFields($card_name);
@@ -1274,7 +1274,7 @@ class Bimp_Societe extends BimpDolObject
 
             if ($this->dol_object->date_creation) {
                 $dt = new DateTime(BimpTools::getDateFromDolDate($this->dol_object->date_creation));
-                $date_regle_encoure  = new DateTime("2021-05-01");
+                $date_regle_encoure = new DateTime("2021-05-01");
                 $html .= '<div class="object_header_infos">';
                 $html .= 'Créé le ';
                 $class = ($dt->getTimestamp() >= $date_regle_encoure->getTimestamp()) ? " class='danger'" : "";
@@ -1902,6 +1902,9 @@ class Bimp_Societe extends BimpDolObject
 
     public function checkSolvabiliteStatus()
     {
+        global $user;
+        $echo = ($user->id === 270);
+
         if (!$this->isLoaded()) {
             return;
         }
@@ -1913,6 +1916,9 @@ class Bimp_Societe extends BimpDolObject
         $cur_status = (int) $this->getData('solvabilite_status');
 
         if (in_array($cur_status, array(self::SOLV_INSOLVABLE, self::SOLV_DOUTEUX_FORCE, self::SOLV_A_SURVEILLER_FORCE))) {
+            if ($echo) {
+                echo 'HERE<br/>';
+            }
             return;
         }
 
@@ -1960,6 +1966,9 @@ class Bimp_Societe extends BimpDolObject
         $has_contentieux = (int) $this->db->getCount('bimp_relance_clients_line', 'id_client = ' . (int) $this->id . ' AND  relance_idx = 5 AND status = ' . BimpRelanceClientsLine::RELANCE_CONTENTIEUX);
 
         if ($total_unpaid > 0) {
+            if ($echo) {
+                echo 'UNPAID: ' . $total_unpaid . '<br/>';
+            }
             if ($total_contentieux > 0) {
                 $new_status = self::SOLV_DOUTEUX;
             } elseif ($cur_status !== self::SOLV_DOUTEUX) {
@@ -1972,10 +1981,19 @@ class Bimp_Societe extends BimpDolObject
                 }
             }
         } else {
+            if ($echo) {
+                echo 'PAS D\'UNPAID:<br/>';
+            }
             if ($has_contentieux) {
+                if ($echo) {
+                    echo 'ICI<br/>';
+                }
                 $new_status = self::SOLV_A_SURVEILLER;
             } else {
                 $new_status = self::SOLV_SOLVABLE;
+                if ($echo) {
+                    echo 'LA<br/>';
+                }
             }
         }
 

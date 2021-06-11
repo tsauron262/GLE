@@ -1,6 +1,7 @@
 // Traitements Ajax:
 
 var object_labels = {};
+var bimp_is_checkboxes_toggling = false;
 
 function getListData($list, params) {
     if (typeof (params) === 'undefined') {
@@ -1416,6 +1417,8 @@ function onListLoaded($list) {
             $list.find('tr.listFooterButtons').hide();
         }
 
+
+
         resetListSearchInputs(list_id, false);
 
 //        $tbody.find('a').each(function () {
@@ -1544,6 +1547,12 @@ function onListLoaded($list) {
 //        });
 
         $list.find('tbody.listRows').children('tr.objectListItemRow').each(function () {
+            var $checkbox = $(this).find('input.item_check');
+
+            if ($checkbox.length) {
+                setItemCheckboxEvents($checkbox);
+            }
+
             checkRowModifications($(this));
         });
 
@@ -1657,6 +1666,12 @@ function onListRefeshed($list) {
 //    });
 
     $list.find('tbody.listRows').children('tr.objectListItemRow').each(function () {
+        var $checkbox = $(this).find('input.item_check');
+
+        if ($checkbox.length) {
+            setItemCheckboxEvents($checkbox);
+        }
+
         checkRowModifications($(this));
     });
 
@@ -1685,7 +1700,6 @@ function onListRefeshed($list) {
 
     var $filters = $list.find('.object_filters_panel');
     if ($filters.length) {
-        00
         $filters.each(function () {
             onListFiltersPanelLoaded($(this));
         });
@@ -1696,6 +1710,60 @@ function onListRefeshed($list) {
     checkListWidth($list);
 
     updateGraph(list_id, $list.data('name'));
+}
+
+function setItemCheckboxEvents($checkbox) {
+    if (!parseInt($checkbox.data('bimp_list_chebox_events_init'))) {
+        $checkbox.change(function () {
+            if (bimp_is_checkboxes_toggling) {
+                return;
+            }
+            var $tr = $(this).findParentByClass('objectListItemRow');
+            var $list = $(this).findParentByClass('object_list_table');
+
+            if ($.isOk($tr) & $.isOk($list)) {
+                var last_item_toggled_id = parseInt($list.data('last_item_toggled_id'));
+                var item_id = parseInt($tr.data('id_object'));
+
+                if (shift_down && last_item_toggled_id && last_item_toggled_id !== item_id) {
+                    bimp_is_checkboxes_toggling = true;
+                    var obj_name = $list.data('object_name');
+                    if (obj_name) {
+                        var $last_toggle_checkbox = $list.find('#' + obj_name + '_check_' + last_item_toggled_id);
+
+                        if ($.isOk($last_toggle_checkbox)) {
+                            var checked = $last_toggle_checkbox.prop('checked');
+                            var toggle = false;
+                            $list.find('tr.' + obj_name + '_row').each(function () {
+                                var $row = $(this);
+                                var row_id_obj = parseInt($row.data('id_object'));
+
+                                if (row_id_obj === last_item_toggled_id) {
+                                    toggle = !toggle;
+                                } else {
+                                    if (toggle) {
+                                        $row.find('input[name="' + obj_name + '_check"]').prop('checked', checked).change();
+                                    }
+
+                                    if (row_id_obj === item_id) {
+                                        toggle = !toggle;
+                                    }
+                                }
+                            });
+                        }
+                    }
+                    
+                    bimp_is_checkboxes_toggling = false;
+                }
+
+                if (item_id) {
+                    $list.data('last_item_toggled_id', item_id);
+                }
+            }
+
+        });
+        $checkbox.data('bimp_list_chebox_events_init', 1);
+    }
 }
 
 function setSearchInputsEvents($list) {

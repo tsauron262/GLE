@@ -1266,7 +1266,7 @@ class Bimp_Commande extends BimpComm
         $html .= '<span class="btn btn-default" onclick="FactureLinesInputAddAll($(this));">';
         $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Tout Ajouter';
         $html .= '</span>';
-        $html .= '<span class="btn btn-default" onclick="bimp_msg(\'En cours de dev\', \'warning\');">';
+        $html .= '<span class="btn btn-default" onclick="FactureLinesInputRemoveAll($(this));">';
         $html .= BimpRender::renderIcon('fas_minus-circle', 'iconLeft') . 'Tout retirer';
         $html .= '</span>';
         $html .= '<span class="btn btn-default" onclick="reloadParentInput($(this), \'facture_lines\', [\'id_facture\',\'facture_lines_list\']);">';

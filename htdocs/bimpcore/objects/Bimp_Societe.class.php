@@ -1903,7 +1903,7 @@ class Bimp_Societe extends BimpDolObject
     public function checkSolvabiliteStatus()
     {
         global $user;
-        $echo = ($user->id === 270);
+        $echo = ($user->id == 270);
 
         if ($echo) {
             echo 'IN<br/>';
@@ -2259,15 +2259,7 @@ class Bimp_Societe extends BimpDolObject
         $errors = array();
         $warnings = array();
         $success = 'Solvabilité vérifiée avec succès';
-
-        global $user;
         
-        if ($user->id == 270) {
-            echo 'ici <br/>'; 
-        }
-        if ($user->id === 270) {
-            echo 'la <br/>'; 
-        }
         $this->checkSolvabiliteStatus();
 
         return array(

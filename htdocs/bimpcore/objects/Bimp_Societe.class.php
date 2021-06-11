@@ -1902,9 +1902,6 @@ class Bimp_Societe extends BimpDolObject
 
     public function checkSolvabiliteStatus()
     {
-        global $user;
-        $echo = ($user->id == 270);
-
         if (!$this->isLoaded()) {
             return;
         }
@@ -1945,10 +1942,6 @@ class Bimp_Societe extends BimpDolObject
             foreach ($factures as $fac) {
                 $rap = $fac->getRemainToPay();
 
-                if ($echo) {
-                    echo 'FAC: ' . $fac->getRef() . ': ' . $rap . '<br/>';
-                }
-
                 if ($rap > 0) {
                     $total_unpaid += $rap;
                 }
@@ -1967,9 +1960,6 @@ class Bimp_Societe extends BimpDolObject
         $has_contentieux = (int) $this->db->getCount('bimp_relance_clients_line', 'id_client = ' . (int) $this->id . ' AND  relance_idx = 5 AND status = ' . BimpRelanceClientsLine::RELANCE_CONTENTIEUX);
 
         if ($total_unpaid > 0) {
-            if ($echo) {
-                echo 'UNPAID: ' . $total_unpaid . '<br/>';
-            }
             if ($total_contentieux > 0) {
                 $new_status = self::SOLV_DOUTEUX;
             } elseif ($cur_status !== self::SOLV_DOUTEUX) {
@@ -1982,19 +1972,10 @@ class Bimp_Societe extends BimpDolObject
                 }
             }
         } else {
-            if ($echo) {
-                echo 'PAS D\'UNPAID:<br/>';
-            }
             if ($has_contentieux) {
-                if ($echo) {
-                    echo 'ICI<br/>';
-                }
                 $new_status = self::SOLV_A_SURVEILLER;
             } else {
                 $new_status = self::SOLV_SOLVABLE;
-                if ($echo) {
-                    echo 'LA<br/>';
-                }
             }
         }
 

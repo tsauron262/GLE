@@ -1263,6 +1263,12 @@ class Bimp_Commande extends BimpComm
         $colspan = 6;
 
         $html .= '<div class="align-right" style="margin-bottom: 5px">';
+        $html .= '<span class="btn btn-default" onclick="bimp_msg(\'En cours de dev\', \'warning\');">';
+        $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter tout';
+        $html .= '</span>';
+        $html .= '<span class="btn btn-default" onclick="bimp_msg(\'En cours de dev\', \'warning\');">';
+        $html .= BimpRender::renderIcon('fas_minus-circle', 'iconLeft') . 'Retirer toute';
+        $html .= '</span>';
         $html .= '<span class="btn btn-default" onclick="reloadParentInput($(this), \'facture_lines\', [\'id_facture\',\'facture_lines_list\']);">';
         $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
         $html .= '</span>';

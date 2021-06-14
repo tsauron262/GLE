@@ -565,15 +565,15 @@ class BC_List extends BC_Panel
 
         if (!is_null($this->params['sort_field']) && (string) $this->params['sort_field']) {
             $order_by = $this->getOrderBySqlKey($this->params['sort_field'], $this->getParam('sort_option', ''), $filters, $joins);
-            
+
 //            $extra_order_by = $this->object->getConf('fields/' . $this->params['sort_field'] . '/next_sort_field');
 //            $extra_order_way = $this->object->getConf('fields/' . $this->params['sort_field'] . '/next_sort_way');
         }
-        
+
         if (!$order_by) {
             $order_by = 'a.' . $primary;
         }
-        
+
         $this->nbItems = $this->object->getListCount($filters, $joins);
 
         if ($this->params['n'] > 0) {
@@ -633,7 +633,8 @@ class BC_List extends BC_Panel
     }
 
     public function getOrderBySqlKey($sort_field = '', $sort_option = '', &$filters = array(), &$joins = array())
-    {
+    {        
+        // Attention: fonction surchargée par BC_ListTable
         if ($sort_field == 'position') {
             return 'a.position';
         }
@@ -641,6 +642,9 @@ class BC_List extends BC_Panel
         if ($this->object->getConf('fields/' . $sort_field . '/type', 'string') === 'id_object') {
             $sort_obj = $this->object->config->getObject('fields/' . $sort_field . '/object');
             if (!is_null($sort_obj) && is_a($sort_obj, 'BimpObject')) {
+                if ($sort_option && $sort_option === $sort_obj->getPrimary()) {
+                    $sort_option = '';
+                }
                 if ($sort_obj->field_exists($sort_option)) {
                     if ((int) $sort_obj->getConf('fields/' . $this->params['sort_option'] . '/sortable', 1, false, 'bool')) {
                         $sqlKey = $sort_obj->getFieldSqlKey($sort_option, 'a', null, $filters, $joins);
@@ -662,6 +666,7 @@ class BC_List extends BC_Panel
         }
 
         return 'a.' . $this->object->getPrimary();
+        
     }
 
     // rendus HTML:

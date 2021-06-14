@@ -118,6 +118,7 @@ class BContract_contrat extends BimpDolObject
         self::CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION => 'Sur proposition'
     );
     public static $renouvellement_edit = Array(
+        0                                            => 'Aucun',
         self::CONTRAT_RENOUVELLEMENT_1_FOIS          => 'Tacite 1 fois',
         self::CONTRAT_RENOUVELLEMENT_2_FOIS          => 'Tacite 2 fois',
         self::CONTRAT_RENOUVELLEMENT_3_FOIS          => 'Tacite 3 fois',
@@ -2376,6 +2377,7 @@ class BContract_contrat extends BimpDolObject
             }
 
             $this->updateField('ref', $ref);
+            $this->updateField('initial_renouvellement', $this->getData('tacite'));
             $this->addLog('Contrat validé');
             $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
             $commercial = $this->getInstance("bimpcore", 'Bimp_User', $this->getData('fk_commercial_suivi'));

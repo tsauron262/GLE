@@ -890,6 +890,11 @@ lists_cols:
         label: Duplicata
         value: 
             callback: diplayDuplicataButton
+            
+    retard_paiment:
+        label: Retard paiement
+        value:
+            callback: displayRetard
                    
 lists: 
     default: 

@@ -408,9 +408,9 @@ class BimpCore
 
     // Gestion des logs: 
 
-    public static function addlog($msg, $level = 1, $type = 'bimpcore', $object = null, $extra_data = array())
+    public static function addlog($msg, $level = 1, $type = 'bimpcore', $object = null, $extra_data = array(), $force = false)
     {
-        if ($level < Bimp_Log::BIMP_LOG_ERREUR && (int) BimpCore::getConf('bimpcore_mode_eco', 0)) {
+        if (!$force && $level < Bimp_Log::BIMP_LOG_ERREUR && (int) BimpCore::getConf('bimpcore_mode_eco', 0)) {
             return array();
         }
 

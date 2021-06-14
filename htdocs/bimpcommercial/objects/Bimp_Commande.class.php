@@ -775,6 +775,27 @@ class Bimp_Commande extends BimpComm
 
         return $buttons;
     }
+    
+    public function getListExtraBulkActions()
+    {
+        $actions = array();
+
+        if ($this->canSetAction('sendEmail')) {
+            $actions[] = array(
+                'label'   => 'Fichiers PDF',
+                'icon'    => 'fas_file-pdf',
+                'onclick' => $this->getJsBulkActionOnclick('generateBulkPdf', array(), array('single_action' => true))
+            );
+            $actions[] = array(
+                'label'   => 'Fichiers Zip des PDF',
+                'icon'    => 'fas_file-pdf',
+                'onclick' => $this->getJsBulkActionOnclick('generateZipPdf', array(), array('single_action' => true))
+            );
+        }
+
+
+        return $actions;
+    }
 
     public function getFilteredListActions()
     {
@@ -785,6 +806,18 @@ class Bimp_Commande extends BimpComm
                 'label'  => 'Annuler',
                 'icon'   => 'fas_times',
                 'action' => 'cancel'
+            );
+        }
+        if ($this->canSetAction('sendEmail')) {
+            $actions[] = array(
+                'label'  => 'Fichiers PDF',
+                'icon'   => 'fas_file-pdf',
+                'action' => 'generateBulkPdf'
+            );
+            $actions[] = array(
+                'label'  => 'Fichiers Zip des PDF',
+                'icon'   => 'fas_file-pdf',
+                'action' => 'generateZipPdf'
             );
         }
 
@@ -1263,6 +1296,12 @@ class Bimp_Commande extends BimpComm
         $colspan = 6;
 
         $html .= '<div class="align-right" style="margin-bottom: 5px">';
+        $html .= '<span class="btn btn-default" onclick="FactureLinesInputAddAll($(this));">';
+        $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Tout Ajouter';
+        $html .= '</span>';
+        $html .= '<span class="btn btn-default" onclick="FactureLinesInputRemoveAll($(this));">';
+        $html .= BimpRender::renderIcon('fas_minus-circle', 'iconLeft') . 'Tout retirer';
+        $html .= '</span>';
         $html .= '<span class="btn btn-default" onclick="reloadParentInput($(this), \'facture_lines\', [\'id_facture\',\'facture_lines_list\']);">';
         $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
         $html .= '</span>';
@@ -2282,6 +2321,9 @@ class Bimp_Commande extends BimpComm
 
     public function addLinesToFacture($id_facture, $lines_data = null, $check_data = true, $new_qties = false)
     {
+        ini_set('max_execution_time', 2400);
+        ignore_user_abort(0);
+        
         $errors = array();
 
         if (!$this->isLoaded()) {
@@ -2536,7 +2578,7 @@ class Bimp_Commande extends BimpComm
                             }
                         }
 
-                        $eq_errors = $fac_line->setEquipments($line_equipments, $equipments_set);
+                        $eq_errors = $fac_line->setEquipments($line_equipments, $equipments_set, false);
                         if (count($eq_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($eq_errors, 'Ligne n°' . $line->getData('position'));
                         }

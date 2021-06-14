@@ -16,6 +16,7 @@ class BS_SAV extends BimpObject
     const BS_SAV_RESERVED = -1;
     const BS_SAV_CANCELED_BY_CUST = -2;
     const BS_SAV_CANCELED_BY_USER = -3;
+    const BS_SAV_RDV_EXPIRED = -4;
     const BS_SAV_NEW = 0;
     const BS_SAV_ATT_PIECE = 1;
     const BS_SAV_ATT_CLIENT = 2;
@@ -31,6 +32,7 @@ class BS_SAV extends BimpObject
         self::BS_SAV_RESERVED          => array('label' => 'Réservé par le client', 'icon' => 'fas_calendar-day', 'classes' => array('important')),
         self::BS_SAV_CANCELED_BY_CUST  => array('label' => 'Annulé par le client', 'icon' => 'fas_times', 'classes' => array('danger')),
         self::BS_SAV_CANCELED_BY_USER  => array('label' => 'Annulé par utilisateur', 'icon' => 'fas_times', 'classes' => array('danger')),
+        self::BS_SAV_RDV_EXPIRED       => array('label' => 'Date RDV Dépassée', 'icon' => 'fas_times', 'classes' => array('danger')),
         self::BS_SAV_NEW               => array('label' => 'Nouveau', 'icon' => 'far_file', 'classes' => array('info')),
         self::BS_SAV_EXAM_EN_COURS     => array('label' => 'Examen en cours', 'icon' => 'hourglass-start', 'classes' => array('warning')),
         self::BS_SAV_ATT_CLIENT_ACTION => array('label' => 'Attente client', 'icon' => 'hourglass-start', 'classes' => array('warning')),
@@ -42,6 +44,7 @@ class BS_SAV extends BimpObject
         self::BS_SAV_A_RESTITUER       => array('label' => 'A restituer', 'icon' => 'arrow-right', 'classes' => array('success')),
         self::BS_SAV_FERME             => array('label' => 'Fermé', 'icon' => 'times', 'classes' => array('danger'))
     );
+    public static $status_opened = array(self::BS_SAV_RESERVED,self::BS_SAV_NEW, self::BS_SAV_ATT_PIECE, self::BS_SAV_ATT_CLIENT, self::BS_SAV_DEVIS_ACCEPTE, self::BS_SAV_REP_EN_COURS, self::BS_SAV_EXAM_EN_COURS, self::BS_SAV_DEVIS_REFUSE, self::BS_SAV_ATT_CLIENT_ACTION, self::BS_SAV_A_RESTITUER);
     public static $need_propal_status = array(2, 3, 4, 5, 6, 9);
     public static $propal_reviewable_status = array(0, 1, 2, 3, 4, 6, 7, 9);
     public static $save_options = array(
@@ -208,7 +211,7 @@ class BS_SAV extends BimpObject
 
         switch ($action) {
             case 'setNew':
-                if (!in_array($status, array(self::BS_SAV_RESERVED, self::BS_SAV_CANCELED_BY_CUST, self::BS_SAV_CANCELED_BY_USER))) {
+                if (!in_array($status, array(self::BS_SAV_RESERVED, self::BS_SAV_CANCELED_BY_CUST, self::BS_SAV_CANCELED_BY_USER, self::BS_SAV_RDV_EXPIRED))) {
                     $errors[] = $status_error;
                     return 0;
                 }
@@ -400,6 +403,10 @@ class BS_SAV extends BimpObject
         if (!$force_edit) {
             switch ($field) {
                 case 'code_centre_repa':
+                    if ((int) $this->getData('status') < 0) {
+                        return 1;
+                    }
+
                     if (!in_array((int) $this->getData('status'), array(0, 1, 2, 3, 5, 6, 7))) {
                         return 0;
                     }
@@ -569,8 +576,8 @@ class BS_SAV extends BimpObject
                         'label'   => 'Prendre en charge',
                         'icon'    => 'fas_cogs',
                         'onclick' => $this->getJsActionOnclick('setNew', array(), array(
-                            'success_callback' => 'function() {window.open(\'' . $url . '\');}',
-                            'confirm_msg'      => 'Veuillez confirmer la prise en charge du ' . $this->getRef()
+                            'form_name'        => 'prise_en_charge',
+                            'success_callback' => 'function() {window.open(\'' . $url . '\');}'
                         ))
                     );
                 }
@@ -657,7 +664,9 @@ class BS_SAV extends BimpObject
                         $buttons[] = array(
                             'label'   => 'Prendre en charge',
                             'icon'    => 'fas_cogs',
-                            'onclick' => $this->getJsActionOnclick('setNew', array(), array())
+                            'onclick' => $this->getJsActionOnclick('setNew', array(), array(
+                                'form_name' => 'prise_en_charge'
+                            ))
                         );
                     }
                 } else {
@@ -1825,7 +1834,7 @@ class BS_SAV extends BimpObject
                 $this->resetMsgs();
 
                 // Vérif de l'existance de la propale: 
-                if ($this->getData("sav_pro") < 1) {
+                if ((int) $this->getData("sav_pro") < 1 && (int) $this->getData('status') >= 0) {
                     $propal = $this->getChildObject('propal');
                     if (!BimpObject::objectLoaded($propal)) {
                         if ($this->getData("id_propal") < 1) {
@@ -1868,9 +1877,13 @@ class BS_SAV extends BimpObject
                             $warnings = array();
                             $prop_errors = $propal->update($warnings, true);
                             if (count($prop_errors)) {
-                                dol_syslog(BimpTools::getMsgFromArray($prop_errors, 'Echec de la réparation automatique de la propale pour le SAV "' . $this->getRef() . '"'), LOG_ERR);
+//                                dol_syslog(BimpTools::getMsgFromArray($prop_errors, 'Echec de la réparation automatique de la propale pour le SAV "' . $this->getRef() . '"'), LOG_ERR);
+                                BimpCore::addlog('Echec de la réparation automatique de la propale pour le SAV "' . $this->getRef() . '"', Bimp_Log::BIMP_LOG_ERREUR, 'sav', $this, array(
+                                    'Erreurs' => $prop_errors
+                                ));
                             } else {
-                                dol_syslog('Correction automatique de la propale pour le SAV "' . $this->getRef() . '" effectuée avec succès', LOG_NOTICE);
+//                                dol_syslog('Correction automatique de la propale pour le SAV "' . $this->getRef() . '" effectuée avec succès', LOG_NOTICE);
+                                BimpCore::addlog('Correction automatique de la propale pour le SAV "' . $this->getRef() . '" effectuée avec succès', Bimp_Log::BIMP_LOG_NOTIF, 'sav', $this);
                             }
                         }
                     }
@@ -1970,7 +1983,7 @@ class BS_SAV extends BimpObject
         return $errors;
     }
 
-    public function createAccompte($acompte, $update = true)
+    public function createAccompte($acompte, $update = true, $id_mode_paiement = null)
     {
         global $user, $langs;
 
@@ -2004,6 +2017,10 @@ class BS_SAV extends BimpObject
             $errors[] = 'Aucun client sélectionné pour ce SAV';
         }
         if ($acompte > 0 && !count($errors)) {
+            if (is_null($id_mode_paiement)) {
+                $id_mode_paiement = (int) BimpTools::getValue('mode_paiement_acompte', 0);
+            }
+
             // Création de la facture: 
             BimpTools::loadDolClass('compta/facture', 'facture');
             $factureA = new Facture($this->db->db);
@@ -2027,7 +2044,7 @@ class BS_SAV extends BimpObject
                 $payement = new Paiement($this->db->db);
                 $payement->amounts = array($factureA->id => $acompte);
                 $payement->datepaye = dol_now();
-                $payement->paiementid = (int) BimpTools::getValue('mode_paiement_acompte', 0);
+                $payement->paiementid = (int) $id_mode_paiement;
                 if ($payement->create($user) <= 0) {
                     $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Des erreurs sont survenues lors de la création du paiement de la facture d\'acompte');
                 } else {
@@ -4697,10 +4714,127 @@ class BS_SAV extends BimpObject
         $success = 'Prise en charge effectuée';
         $success_callback = '';
 
-        $this->set('status', self::BS_SAV_NEW);
-        $errors = $this->update($warnings, true);
+        // Mise à jour du statut: 
+        $errors = $this->updateField('status', self::BS_SAV_NEW);
 
+        // Mise à jour des champs: 
         if (!count($errors)) {
+            if (isset($data['code_centre_repa'])) {
+                $this->set('code_centre_repa', $data['code_centre_repa']);
+            }
+            if (isset($data['id_client'])) {
+                $this->set('id_client', (int) $data['id_client']);
+            }
+            if (isset($data['id_contact'])) {
+                $this->set('id_contact', (int) $data['id_contact']);
+            }
+            if (isset($data['id_equipment'])) {
+                $this->set('id_equipment', (int) $data['id_equipment']);
+            }
+            if (isset($data['code_centre_repa'])) {
+                $this->set('code_centre_repa', $data['code_centre_repa']);
+            }
+            if (isset($data['code_centre_repa'])) {
+                $this->set('code_centre_repa', $data['code_centre_repa']);
+            }
+            if (isset($data['prioritaire'])) {
+                $this->set('code_centre_repa', (int) $data['prioritaire']);
+            }
+            if (isset($data['system'])) {
+                $this->set('system', $data['system']);
+            }
+            if (isset($data['login_admin'])) {
+                $this->set('login_admin', $data['login_admin']);
+            }
+            if (isset($data['pword_admin'])) {
+                $this->set('pword_admin', $data['pword_admin']);
+            }
+            if (isset($data['contact_pref'])) {
+                $this->set('contact_pref', $data['contact_pref']);
+            }
+            if (isset($data['accessoires'])) {
+                $this->set('accessoires', $data['accessoires']);
+            }
+            if (isset($data['etat_materiel'])) {
+                $this->set('etat_materiel', $data['etat_materiel']);
+            }
+            if (isset($data['etat_materiel_desc'])) {
+                $this->set('etat_materiel_desc', $data['etat_materiel_desc']);
+            }
+            if (isset($data['save_option'])) {
+                $this->set('save_option', (int) $data['save_option']);
+            }
+            if (isset($data['sav_pro'])) {
+                $this->set('sav_pro', (int) $data['sav_pro']);
+            }
+            if (isset($data['prestataire_number'])) {
+                $this->set('prestataire_number', $data['prestataire_number']);
+            }
+
+            $up_errors = $this->update($warnings, true);
+
+            if (!count($up_errors)) {
+                // Création de la facture d'acompte: 
+                if ((float) $data['acompte'] > 0) {
+                    if ((int) $this->getData('id_facture_acompte')) {
+                        $warnings[] = 'Attention: l\'acompte n\'a pas pu être créé car une facture d\'acompte existe déjà pour ce SAV. Veuillez utiliser le bouton "Ajouter un acompte"';
+                    } else {
+                        $fac_errors = $this->createAccompte((float) $data['acompte'], false, (int) BimpTools::getArrayValueFromPath($data, 'mode_paiement_acompte', 6));
+                        if (count($fac_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($fac_errors, 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
+                        } else {
+                            $this->updateField('acompte', (float) $data['acompte']);
+                        }
+                    }
+                }
+            } else {
+                $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour des champs depuis le formulaire');
+            }
+
+            // Création de la popale: 
+            if ($this->getData("id_propal") < 1 && $this->getData("sav_pro") < 1) {
+                $prop_errors = $this->createPropal();
+                if (count($prop_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($prop_errors, 'Des erreurs sont survenues lors de la création de la proposition commerciale');
+                }
+            }
+
+            // Emplacement de l'équipement: 
+            if ((int) $this->getData('id_equipment')) {
+                $equipment = $this->getChildObject('equipment');
+
+                if (!BimpObject::objectLoaded($equipment)) {
+                    $warnings[] = 'L\'équipement d\'ID ' . $this->getData('id_equipment') . ' n\'existe pas';
+                } else {
+                    $current_place = $equipment->getCurrentPlace();
+
+                    if (!BimpObject::objectLoaded($current_place) || !(int) BimpTools::getArrayValueFromPath($data, 'keep_equipment_current_place', 0)) {
+                        $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
+                        $place_errors = $place->validateArray(array(
+                            'id_equipment' => (int) $this->getData('id_equipment'),
+                            'type'         => BE_Place::BE_PLACE_SAV,
+                            'id_entrepot'  => (int) $this->getData('id_entrepot'),
+                            'infos'        => 'Ouverture du SAV ' . $this->getData('ref'),
+                            'date'         => date('Y-m-d H:i:s'),
+                            'code_mvt'     => 'SAV' . (int) $this->id . '_CREATE_EQ' . (int) $this->getData('id_equipment'),
+                            'origin'       => 'sav',
+                            'id_origin'    => (int) $this->id
+                        ));
+                        if (!count($place_errors)) {
+                            $w = array();
+                            $place_errors = $place->create($w, true);
+                        }
+
+                        if (count($place_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de la création de l\'emplacement de l\'équipement');
+                        }
+                    }
+                }
+            }
+
+            // Génération du bon de prise en charge: 
+            $this->generatePDF('pc', $warnings);
+
             $success_callback = $this->getCreateJsCallback();
         }
 
@@ -4852,7 +4986,6 @@ class BS_SAV extends BimpObject
         $errors = parent::create($warnings, $force_create);
 
         if (!count($errors) && !defined('DONT_CHECK_SERIAL')) {
-
             // Création de la facture d'acompte: 
             if ($this->getData("id_facture_acompte") < 1 && (float) $this->getData('acompte') > 0) {
                 $fac_errors = $this->createAccompte((float) $this->getData('acompte'), false);
@@ -4861,53 +4994,55 @@ class BS_SAV extends BimpObject
                 }
             }
 
-            // Création de la popale: 
-            if ($this->getData("id_propal") < 1 && $this->getData("sav_pro") < 1) {
-                $prop_errors = $this->createPropal();
-                if (count($prop_errors)) {
-                    $warnings[] = BimpTools::getMsgFromArray($prop_errors, 'Des erreurs sont survenues lors de la création de la proposition commerciale');
+            if (BimpCore::isContextPrivate()) {
+                // Création de la popale: 
+                if ($this->getData("id_propal") < 1 && $this->getData("sav_pro") < 1) {
+                    $prop_errors = $this->createPropal();
+                    if (count($prop_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($prop_errors, 'Des erreurs sont survenues lors de la création de la proposition commerciale');
+                    }
                 }
-            }
 
-            // Emplacement de l'équipement: 
-            if ((int) $this->getData('id_equipment')) {
-                $equipment = $this->getChildObject('equipment');
+                // Emplacement de l'équipement: 
+                if ((int) $this->getData('id_equipment')) {
+                    $equipment = $this->getChildObject('equipment');
 
-                if (!BimpObject::objectLoaded($equipment)) {
-                    $warnings[] = 'L\'équipement d\'ID ' . $this->getData('id_equipment') . ' n\'existe pas';
-                } else {
-                    $current_place = $equipment->getCurrentPlace();
+                    if (!BimpObject::objectLoaded($equipment)) {
+                        $warnings[] = 'L\'équipement d\'ID ' . $this->getData('id_equipment') . ' n\'existe pas';
+                    } else {
+                        $current_place = $equipment->getCurrentPlace();
 
-                    if (!BimpObject::objectLoaded($current_place) || !(int) BimpTools::getPostFieldValue('keep_equipment_current_place', 0)) {
-                        $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
-                        $place_errors = $place->validateArray(array(
-                            'id_equipment' => (int) $this->getData('id_equipment'),
-                            'type'         => BE_Place::BE_PLACE_SAV,
-                            'id_entrepot'  => (int) $this->getData('id_entrepot'),
-                            'infos'        => 'Ouverture du SAV ' . $this->getData('ref'),
-                            'date'         => date('Y-m-d H:i:s'),
-                            'code_mvt'     => 'SAV' . (int) $this->id . '_CREATE_EQ' . (int) $this->getData('id_equipment'),
-                            'origin'       => 'sav',
-                            'id_origin'    => (int) $this->id
-                        ));
-                        if (!count($place_errors)) {
-                            $w = array();
-                            $place_errors = $place->create($w, true);
-                        }
+                        if (!BimpObject::objectLoaded($current_place) || !(int) BimpTools::getPostFieldValue('keep_equipment_current_place', 0)) {
+                            $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
+                            $place_errors = $place->validateArray(array(
+                                'id_equipment' => (int) $this->getData('id_equipment'),
+                                'type'         => BE_Place::BE_PLACE_SAV,
+                                'id_entrepot'  => (int) $this->getData('id_entrepot'),
+                                'infos'        => 'Ouverture du SAV ' . $this->getData('ref'),
+                                'date'         => date('Y-m-d H:i:s'),
+                                'code_mvt'     => 'SAV' . (int) $this->id . '_CREATE_EQ' . (int) $this->getData('id_equipment'),
+                                'origin'       => 'sav',
+                                'id_origin'    => (int) $this->id
+                            ));
+                            if (!count($place_errors)) {
+                                $w = array();
+                                $place_errors = $place->create($w, true);
+                            }
 
-                        if (count($place_errors)) {
-                            $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de la création de l\'emplacement de l\'équipement');
+                            if (count($place_errors)) {
+                                $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de la création de l\'emplacement de l\'équipement');
+                            }
                         }
                     }
                 }
-            }
 
-            // Génération du bon de prise en charge: 
-            $this->generatePDF('pc', $warnings);
+                // Génération du bon de prise en charge: 
+                $this->generatePDF('pc', $warnings);
 
-            // Envoi du mail / sms:
-            if (BimpTools::getValue('send_msg', 0)) {
-                $warnings = BimpTools::merge_array($warnings, $this->sendMsg('debut'));
+                // Envoi du mail / sms:
+                if (BimpTools::getValue('send_msg', 0)) {
+                    $warnings = BimpTools::merge_array($warnings, $this->sendMsg('debut'));
+                }
             }
         }
 
@@ -5058,6 +5193,147 @@ class BS_SAV extends BimpObject
             }
         } elseif ($echo) {
             echo $bdb->err();
+        }
+    }
+
+    public static function checkSavToCancel()
+    {
+        $bdb = self::getBdb();
+        $centres = BimpCache::getCentres();
+
+        // Traitements des RDV dépassés: 
+        $dt = new DateTime();
+        $dt->sub(new DateInterval('P7D'));
+
+        $sql = 'SELECT id, ref, date_rdv, date_create, code_centre, id_client, id_contact, id_user_client FROM ' . MAIN_DB_PREFIX . 'bs_sav';
+        $sql .= ' WHERE status = ' . BS_SAV::BS_SAV_RESERVED;
+        $sql .= ' AND (date_rdv < \'' . date('Y-m-d') . ' 00:00:00\' OR (date_rdv IS NULL AND date_create < \'' . $dt->format('Y-m-d') . ' 00:00:00\'))';
+
+        $rows = $bdb->executeS($sql, 'array');
+        
+        if (is_array($rows)) {
+            $sav_instance = BimpObject::getInstance('bimpsupport', 'BS_SAV');
+            
+            foreach ($rows as $r) {
+                if ($bdb->update('bs_sav', array(
+                            'status' => BS_SAV::BS_SAV_RDV_EXPIRED
+                                ), 'id = ' . (int) $r['id']) > 0) {
+                    $sav_instance->id = (int) $r['id'];
+                    $sav_instance->addNote('Rendez-vous annulé automatiquement le ' . date('d / m / Y à H:i'), 4);
+
+                    if ((string) $r['date_rdv']) {
+                        $to = '';
+
+                        if ((int) $r['id_user_client']) {
+                            $to = (string) $bdb->getValue('bic_user', 'email', 'id = ' . (int) $r['id_user_client']);
+                        }
+
+                        if (!$to && (int) $r['id_contact']) {
+                            $to = (string) $bdb->getValue('socpeople', 'email', 'rowid = ' . (int) $r['id_contact']);
+                        }
+
+                        if (!$to && (int) $r['id_client']) {
+                            $to = (string) $bdb->getValue('societe', 'email', 'rowid = ' . (int) $r['id_client']);
+                        }
+
+                        if ($to) {
+                            $subject = 'Votre rendez-vous Apple chez BIMP';
+                            $msg = 'Cher client' . "\n\n";
+                            $msg .= 'Sauf erreur de notre part, vous ne vous êtes pas présenté au rendez vous que vous aviez planifié dans notre boutique ';
+                            if (isset($centres[$r['code_centre']]['town'])) {
+                                if (preg_match('/^[AEIOUY].+$/', $centres[$r['code_centre']]['town'])) {
+                                    $msg .= ' d\'';
+                                } else {
+                                    $msg .= ' de ';
+                                }
+                                $msg .= $centres[$r['code_centre']]['town'];
+                            } else {
+                                $msg .= ' BIMP';
+                            }
+                            $msg .= ' le ' . date('d / m / Y à H:i', strtotime($r['date_rdv'])) . '. ' . "\n";
+                            $msg .= 'Celui-ci à été annulé.' . "\n\n";
+
+                            if ((string) $r['ref']) {
+                                $msg .= '<b>Référence: </b>' . $r['ref'] . "\n\n";
+                            }
+
+                            $msg .= 'Si vous avez toujours besoin d’une assistance, n’hésitez pas à reprendre un rendez vous sur votre <a href="https://www.bimp.fr/espace-client/">espace personnel</a> de notre site internet « www.bimp.fr »' . "\n\n";
+                            $msg .= 'L’équipe technique BIMP';
+
+                            mailSyn2($subject, $to, '', $msg);
+
+//                            BimpCore::addlog('Annulation auto SAV réservé', Bimp_Log::BIMP_LOG_NOTIF, 'bic', null, array(
+//                                'ID SAV' => $r['id']
+//                                    ), true);
+                        }
+                    }
+                } else {
+                    BimpCore::addlog('Echec de l\'annulation automatique d\'un SAV', Bimp_Log::BIMP_LOG_ERREUR, 'bic', null, array(
+                        'ID SAV'     => $r['id'],
+                        'Erreyr SQL' => $bdb->err()
+                    ));
+                }
+            }
+        }
+
+        // Traitements des RDV dépassés: 
+        $dt = new DateTime();
+        $dt->sub(new DateInterval('P5D'));
+
+        $sql = 'SELECT id, ref, date_create, code_centre, id_client, id_contact, id_user_client FROM ' . MAIN_DB_PREFIX . 'bs_sav';
+        $sql .= ' WHERE status = ' . BS_SAV::BS_SAV_RESERVED;
+        $sql .= ' AND date_rdv IS NULL and date_create > \'' . $dt->format('Y-m-d') . ' 00:00:00\' AND date_create < \'' . $dt->format('Y-m-d') . ' 23:59:59\'';
+
+        $rows = $bdb->executeS($sql, 'array');
+
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $to = '';
+
+                if ((int) $r['id_user_client']) {
+                    $to = (string) $bdb->getValue('bic_user', 'email', 'id = ' . (int) $r['id_user_client']);
+                }
+
+                if (!$to && (int) $r['id_contact']) {
+                    $to = (string) $bdb->getValue('socpeople', 'email', 'rowid = ' . (int) $r['id_contact']);
+                }
+
+                if (!$to && (int) $r['id_client']) {
+                    $to = (string) $bdb->getValue('societe', 'email', 'rowid = ' . (int) $r['id_client']);
+                }
+
+                if ($to) {
+                    $subject = 'Votre demande d’intervention chez BIMP';
+                    $msg = 'Cher client' . "\n\n";
+                    $msg .= 'Vous avez ouvert une demande d’intervention dans notre boutique ';
+                    if (isset($centres[$r['code_centre']]['town'])) {
+                        if (preg_match('/^[AEIOUY].+$/', $centres[$r['code_centre']]['town'])) {
+                            $msg .= ' d\'';
+                        } else {
+                            $msg .= ' de ';
+                        }
+                        $msg .= $centres[$r['code_centre']]['town'];
+                    } else {
+                        $msg .= ' BIMP';
+                    }
+                    $msg .= ' le ' . date('d / m / Y à H:i', strtotime($r['date_create'])) . '. ' . "\n\n";
+                    $msg .= 'Sauf erreur de notre part, vous n’avez pas déposé votre produit pour réparation. Sans nouvelle de votre part d’ci deux jours, votre demande sera clôturée.' . "\n\n";
+
+                    if ((string) $r['ref']) {
+                        $msg .= '<b>Référence: </b>' . $r['ref'] . "\n\n";
+                    }
+
+                    $msg .= 'Vous pourrez néanmoins accéder à votre <a href="https://www.bimp.fr/espace-client/">espace personnel</a> sur notre site internet «  www.bimp.fr », et si besoin, faire une nouvelle demande d’intervention.' . "\n\n";
+
+                    $msg .= 'L’équipe technique BIMP';
+
+                    mailSyn2($subject, $to, '', $msg);
+
+                    BimpCore::addlog('Annulation auto SAV réservé', Bimp_Log::BIMP_LOG_NOTIF, 'bic', null, array(
+                        'ID SAV' => $r['id']
+                            ), true);
+                }
+            }
         }
     }
 }

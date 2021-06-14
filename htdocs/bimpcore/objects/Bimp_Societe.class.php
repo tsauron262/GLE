@@ -548,7 +548,7 @@ class Bimp_Societe extends BimpDolObject
 
         return '';
     }
-    
+
     public function getCardFields($card_name)
     {
         $fields = parent::getCardFields($card_name);
@@ -1274,7 +1274,7 @@ class Bimp_Societe extends BimpDolObject
 
             if ($this->dol_object->date_creation) {
                 $dt = new DateTime(BimpTools::getDateFromDolDate($this->dol_object->date_creation));
-                $date_regle_encoure  = new DateTime("2021-05-01");
+                $date_regle_encoure = new DateTime("2021-05-01");
                 $html .= '<div class="object_header_infos">';
                 $html .= 'Créé le ';
                 $class = ($dt->getTimestamp() >= $date_regle_encoure->getTimestamp()) ? " class='danger'" : "";

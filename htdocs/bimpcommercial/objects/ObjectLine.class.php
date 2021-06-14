@@ -1340,6 +1340,25 @@ class ObjectLine extends BimpObject
         return array();
     }
 
+    public function getCurrentEquipmentsLinesData()
+    {
+        $data = array();
+
+        if ($this->isLoaded()) {
+            $where = 'id_object_line = ' . (int) $this->id . ' AND object_type = \'' . static::$parent_comm_type . '\'';
+            $rows = $this->db->getRows('object_line_equipment', $where, null, 'array', array('id', 'id_equipment'));
+
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    $data[(int) $r['id']] = (int) $r['id_equipment'];
+                }
+                ksort($data, SORT_NUMERIC);
+            }
+        }
+
+        return $data;
+    }
+
     public function getRemises()
     {
         if ($this->isLoaded() && static::$parent_comm_type) {
@@ -1606,7 +1625,7 @@ class ObjectLine extends BimpObject
                     if (!$remise_percent) {
                         $remise_percent = (float) $product->getRemiseCrt();
                     }
-                    
+
                     $eco_taxe = (float) $product->getData('rpcp');
                     $copie_privee = (float) $product->getData('deee');
                 }
@@ -3003,45 +3022,50 @@ class ObjectLine extends BimpObject
         // Sinon, si $equipment->getData('prix_achat') est défini (pas 0), il est prioritaire sur $id_fourn_price. 
         // Si ni $id_fourn_price, ni $equipment->getData('prix_achat'), ni $pa_ht n'est défini, c'est le pa_ht de la ligne qui s'applique. 
 
-        if (!$this->isLoaded()) {
-            return array('ID ' . $this->getLabel('of_the') . ' absent');
-        }
-
         $errors = array();
 
-        if (!(int) $id_equipment && !$id_equipment_line) {
+        if (!$this->isLoaded($errors)) {
+            return $errors;
+        }
+
+        if (!(int) $id_equipment && !(int) $id_equipment_line) {
             $errors[] = 'Aucun équipement spécifié';
         } else {
-            $line = null;
-
-            if ($id_equipment_line) {
-                $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'ObjectLineEquipment', (int) $id_equipment_line);
-                if (!BimpObject::objectLoaded($line)) {
-                    $errors[] = 'La ligne d\'équipement d\'ID ' . $id_equipment_line . ' n\'existe pas';
+            if ($check_equipment) {
+                // Méthode via objet (interface utilisateur) 
+                $line = null;
+                if ((int) $id_equipment_line) {
+                    $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'ObjectLineEquipment', (int) $id_equipment_line);
+                    if (!BimpObject::objectLoaded($line)) {
+                        $errors[] = 'La ligne d\'équipement d\'ID ' . $id_equipment_line . ' n\'existe pas';
+                        return $errors;
+                    }
+                }
+                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                if (!BimpObject::objectLoaded($equipment)) {
+                    $errors[] = 'L\'équipement #' . $id_equipment . ' n\'existe pas';
                     return $errors;
                 }
-            }
 
-            if ($id_equipment && $check_equipment) {
-                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
                 if (is_null($line) || ((int) $line->getData('id_equipment') !== (int) $id_equipment)) {
                     $errors = $this->checkEquipment($equipment);
+
+                    if (count($errors)) {
+                        return $errors;
+                    }
                 }
-            }
 
-            if (!count($errors)) {
-                if (!$id_equipment_line) {
-                    $lines = $this->getEquipmentLines();
+                $lines = $this->getEquipmentLines();
 
-                    if (!count($lines)) {
-                        $errors[] = 'Aucune ligne d\'équipement n\'est enregistrée pour ' . $this->getLabel('this');
-                    } else {
-                        foreach ($lines as $l) {
-                            if (!(int) $l->getData('id_equipment')) {
-                                $line = $l;
-                                break;
-                            }
-                        }
+                if (!count($lines)) {
+                    $errors[] = 'Aucune ligne d\'équipement n\'est enregistrée pour ' . $this->getLabel('this');
+                    return $errors;
+                }
+
+                foreach ($lines as $l) {
+                    if (!(int) $l->getData('id_equipment')) {
+                        $line = $l;
+                        break;
                     }
                 }
 
@@ -3050,17 +3074,37 @@ class ObjectLine extends BimpObject
                 } else {
                     if ((int) $line->getData('id_equipment') !== (int) $id_equipment) {
                         $errors = $line->setEquipment((int) $id_equipment, false);
-
-                        if (!count($errors)) {
-                            if ($recalc_line_pa) {
-                                $this->calcPaByEquipments();
-                            }
-
-                            if (method_exists($this, 'onEquipmentAttributed')) {
-                                $this->onEquipmentAttributed((int) $id_equipment);
-                            }
-                        }
                     }
+                }
+            } else {
+                // Méthode simplifiée via requêtes SQL (attribution en série via PHP - on fait confiance à la validité des équipements) 
+
+                if (!$id_equipment_line) {
+                    $where = 'id_object_line = ' . (int) $this->id . ' AND object_type = \'' . static::$parent_comm_type . '\'';
+                    $where .= ' AND (id_equipment IS NULL OR id_equipment = 0)';
+                    $id_equipment_line = (int) $this->db->getValue('object_line_equipment', 'id', $where, 'id', 'asc');
+
+                    if (!$id_equipment_line) {
+                        $errors[] = 'Il n\'y a aucune unité en attente d\'attribution d\'un équipement';
+                    }
+                }
+
+                if ($id_equipment_line) {
+                    if ($this->db->update('object_line_equipment', array(
+                                'id_equipment' => $id_equipment
+                                    ), 'id = ' . (int) $id_equipment_line) <= 0) {
+                        $errors[] = 'Echec de l\'attribution de l\'équipement - ' . $this->db->err();
+                    }
+                }
+            }
+
+            if (!count($errors)) {
+                if ($recalc_line_pa) {
+                    $this->calcPaByEquipments();
+                }
+
+                if (method_exists($this, 'onEquipmentAttributed')) {
+                    $this->onEquipmentAttributed((int) $id_equipment);
                 }
             }
         }
@@ -3164,7 +3208,7 @@ class ObjectLine extends BimpObject
         return $errors;
     }
 
-    public function setEquipments($equipments, &$equipments_set = array())
+    public function setEquipments($equipments, &$equipments_set = array(), $check_equipments = true)
     {
         $errors = array();
         $equipments_set = array();
@@ -3177,12 +3221,19 @@ class ObjectLine extends BimpObject
         $current_equipments = array();
         $new_equipments = array();
 
-        $line_equipments = $this->getEquipmentLines();
+//        $line_equipments = $this->getEquipmentLines();
+        $line_equipments = $this->getCurrentEquipmentsLinesData();
 
-        foreach ($line_equipments as $line_equipment) {
-            $id_equipment = (int) $line_equipment->getData('id_equipment');
-            if ($id_equipment) {
-                $current_equipments[] = $id_equipment;
+//        foreach ($line_equipments as $line_equipment) {
+//            $id_equipment = (int) $line_equipment->getData('id_equipment');
+//            if ($id_equipment) {
+//                $current_equipments[] = $id_equipment;
+//            }
+//        }
+
+        foreach ($line_equipments as $id_line_eq => $id_equipment) {
+            if ((int) $id_equipment) {
+                $current_equipments[(int) $id_line_eq] = (int) $id_equipment;
             }
         }
 
@@ -3199,44 +3250,80 @@ class ObjectLine extends BimpObject
             return $errors;
         }
 
+        // Equipements à supprimer:         
+//        foreach ($line_equipments as $line_equipment) {
+//            $id_equipment = (int) $line_equipment->getData('id_equipment');
+//            if ($id_equipment && !in_array($id_equipment, $new_equipments)) {
+//                $line_errors = $line_equipment->removeEquipment();
+//                if (count($line_errors)) {
+//                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+//                    if (BimpObject::objectLoaded($equipment)) {
+//                        $eq_label = '"' . $equipment->getData('serial') . '"';
+//                    } else {
+//                        $eq_label = ' d\'ID ' . $id_equipment;
+//                    }
+//                    $errors[] = BimpTools::getMsgFromArray($line_errors, 'Erreurs lors de la désattribution de l\'équipement ' . $eq_label);
+//                }
+//            }
+//        }
+
+        $eq_lines_to_remove = array();
+        foreach ($line_equipments as $id_line_eq => $id_equipment) {
+            if ((int) $id_line_eq && (int) $id_equipment && !in_array($id_equipment, $new_equipments)) {
+                $eq_lines_to_remove[] = (int) $id_line_eq;
+                $line_equipments[(int) $id_line_eq] = 0;
+                unset($current_equipments[(int) $id_line_eq]);
+            }
+        }
+
+        if (count($eq_lines_to_remove)) {
+            $this->db->update('object_line_equipment', array(
+                'id_equipment' => 0
+                    ), 'id IN (' . implode(',', $eq_lines_to_remove) . ')');
+        }
+
+        // Equipments à ajouter: 
         foreach ($equipments as $equipment_data) {
             if (isset($equipment_data['id_equipment'])) {
                 if (!in_array((int) $equipment_data['id_equipment'], $current_equipments)) {
-                    $eq_errors = $this->attributeEquipment($equipment_data['id_equipment'], 0, false);
+                    $id_line_eq_to_attribute = 0;
+                    foreach ($line_equipments as $id_line_eq => $id_eq) {
+                        if (!(int) $id_eq) {
+                            $id_line_eq_to_attribute = (int) $id_line_eq;
+                            break;
+                        }
+                    }
+
+                    $eq_errors = $this->attributeEquipment($equipment_data['id_equipment'], $id_line_eq_to_attribute, false, $check_equipments);
 
                     if (count($eq_errors)) {
-                        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $equipment_data['id_equipment']);
-                        if (BimpObject::objectLoaded($equipment)) {
-                            $label = '"' . $equipment->getData('serial') . '" (ID: ' . $equipment_data['id_equipment'] . ')';
+                        if ($check_equipments) {
+                            $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $equipment_data['id_equipment']);
+                            if (BimpObject::objectLoaded($equipment)) {
+                                $label = '"' . $equipment->getData('serial') . '" (ID: ' . $equipment_data['id_equipment'] . ')';
+                            } else {
+                                $label = 'd\'ID ' . $equipment_data['id_equipment'];
+                            }
+                            $errors[] = BimpTools::getMsgFromArray($eq_errors, 'Erreurs lors de l\'attribution de l\'équipement ' . $label);
                         } else {
-                            $label = 'd\'ID ' . $equipment_data['id_equipment'];
+                            $errors[] = BimpTools::getMsgFromArray($eq_errors, 'Echec attribution équipement #' . $id_equipment);
                         }
-                        $errors[] = BimpTools::getMsgFromArray($eq_errors, 'Erreurs lors de l\'attribution de l\'équipement ' . $label);
-                    }
-                }
-            }
-        }
-
-        // Equipements à supprimer:         
-        foreach ($line_equipments as $line_equipment) {
-            $id_equipment = (int) $line_equipment->getData('id_equipment');
-            if ($id_equipment && !in_array($id_equipment, $new_equipments)) {
-                $line_errors = $line_equipment->removeEquipment();
-                if (count($line_errors)) {
-                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-                    if (BimpObject::objectLoaded($equipment)) {
-                        $eq_label = '"' . $equipment->getData('serial') . '"';
                     } else {
-                        $eq_label = ' d\'ID ' . $id_equipment;
+                        if ($id_line_eq_to_attribute) {
+                            $line_equipments[$id_line_eq_to_attribute] = (int) $equipment_data['id_equipment'];
+                        }
                     }
-                    $errors[] = BimpTools::getMsgFromArray($line_errors, 'Erreurs lors de la désattribution de l\'équipement ' . $eq_label);
                 }
             }
         }
 
-        $line_equipments = $this->getEquipmentLines();
-        foreach ($line_equipments as $line_equipment) {
-            $equipments_set[] = (int) $line_equipment->getData('id_equipment');
+//        $line_equipments = $this->getEquipmentLines();
+//        foreach ($line_equipments as $line_equipment) {
+//            $equipments_set[] = (int) $line_equipment->getData('id_equipment');
+//        }
+        $line_equipments = $this->getCurrentEquipmentsLinesData();
+        foreach ($line_equipments as $id_line_eq => $id_equipment) {
+            $equipments_set[] = (int) $id_equipment;
         }
 
         $this->calcPaByEquipments();
@@ -4377,7 +4464,6 @@ class ObjectLine extends BimpObject
             $content .= '<br/><span class="small">Remise client par défaut: ' . $remise . '%</span>';
         }
         $html .= BimpInput::renderInputContainer('quick_add_default_remise', $remise, $content, '', 0);
-
 
         $html .= '<button type="button" class="btn btn-primary" onclick="quickAddObjectLine($(this));">';
         $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter';

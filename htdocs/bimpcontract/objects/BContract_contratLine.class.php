@@ -82,13 +82,13 @@ class BContract_contratLine extends BContract_contrat {
                 );
             }
             if(($parent->getData('statut') == 11 || $parent->getData('statut') == 1) && $user->rights->bimpcontract->to_replace_serial) {
-                $buttons[] = array(
-                    'label'   => 'Remplacer un numéro de série',
-                    'icon'    => 'fas_retweet',
-                    'onclick' => $this->getJsActionOnclick('rebaseSerial', array(), array(
-                        'form_name' => 'rebase_serial'
-                    ))
-                );
+//                $buttons[] = array(
+//                    'label'   => 'Remplacer un numéro de série',
+//                    'icon'    => 'fas_retweet',
+//                    'onclick' => $this->getJsActionOnclick('rebaseSerial', array(), array(
+//                        'form_name' => 'rebase_serial'
+//                    ))
+//                );
                 $buttons[] = array(
                     'label'   => 'Ajouter les numéros de séries',
                     'icon'    => 'fas_plus',

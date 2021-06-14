@@ -1,6 +1,7 @@
 // Notifications:
 var bimp_msg_enable = true;
 var ctrl_down = false;
+var shift_down = false;
 var text_input_focused = false;
 var bimp_decode_textarea = null;
 
@@ -355,14 +356,14 @@ function displayObjectLinkCardPopover($button) {
 }
 
 function openAllFoldable($container) {
-    $container.find('.foldable_container.closed').each(function() {
+    $container.find('.foldable_container.closed').each(function () {
         $(this).removeClass('closed').addClass('open');
         $(this).children('.foldable_content').show();
     });
 }
 
 function closeAllFoldable($container) {
-    $container.find('.foldable_container.open').each(function() {
+    $container.find('.foldable_container.open').each(function () {
         $(this).removeClass('open').addClass('closed');
         $(this).children('.foldable_content').hide();
     });
@@ -370,7 +371,7 @@ function closeAllFoldable($container) {
 
 // Evenements: 
 
-function setCommonEvents($container) {    
+function setCommonEvents($container) {
     //Foldable custom: 
     $container.find('.foldable_container').each(function () {
         if (!parseInt($(this).data('foldable_container_event_init'))) {
@@ -579,7 +580,7 @@ function setCommonEvents($container) {
         });
         $container.data('auto_expand_event_init', 1);
     }
-    
+
     $container.find('.auto_expand').each(function () {
         var minRows = parseInt($(this).data('min_rows')), rows;
         if (!minRows) {
@@ -1401,7 +1402,7 @@ function findParentByTag($element, tag) {
     return $element.findParentByTag(tag);
 }
 
-$(document).ready(function () {    
+$(document).ready(function () {
     $('body').click(function (e) {
         $(this).find('.hideOnClickOut').removeClass('locked').hide();
         $(this).find('.destroyPopoverOnClickOut').popover('destroy');
@@ -1461,6 +1462,8 @@ $(document).ready(function () {
             $(this).find('.object_page_header').each(function () {
                 setObjectHeaderPosition($(this));
             });
+        } else if (e.key === 'Shift') {
+            shift_down = true;
         } else if (ctrl_down && !text_input_focused) {
             if (e.key === 'ArrowRight') {
                 navTabNext('maintabs');
@@ -1480,6 +1483,8 @@ $(document).ready(function () {
             $(this).find('.object_page_header').each(function () {
                 setObjectHeaderPosition($(this));
             });
+        } else if (e.key === 'Shift') {
+            shift_down = false;
         }
     });
 });

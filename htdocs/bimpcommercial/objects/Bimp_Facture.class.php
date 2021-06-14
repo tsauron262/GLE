@@ -2448,6 +2448,16 @@ class Bimp_Facture extends BimpComm
 
         return $html;
     }
+    
+    public function displayRetard(){
+        if($this->getRemainToPay() != 0){
+            $retard = floor((strtotime(date('Y-m-d')) - strtotime($this->getData('date_lim_reglement'))) / 86400);
+            if($retard > 0)
+                return $retard;
+        }
+        
+        return 0;
+    }
 
     public function displayDateNextRelance($with_btn = true)
     {

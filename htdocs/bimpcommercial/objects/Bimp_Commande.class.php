@@ -775,6 +775,27 @@ class Bimp_Commande extends BimpComm
 
         return $buttons;
     }
+    
+    public function getListExtraBulkActions()
+    {
+        $actions = array();
+
+        if ($this->canSetAction('sendEmail')) {
+            $actions[] = array(
+                'label'   => 'Fichiers PDF',
+                'icon'    => 'fas_file-pdf',
+                'onclick' => $this->getJsBulkActionOnclick('generateBulkPdf', array(), array('single_action' => true))
+            );
+            $actions[] = array(
+                'label'   => 'Fichiers Zip des PDF',
+                'icon'    => 'fas_file-pdf',
+                'onclick' => $this->getJsBulkActionOnclick('generateZipPdf', array(), array('single_action' => true))
+            );
+        }
+
+
+        return $actions;
+    }
 
     public function getFilteredListActions()
     {
@@ -785,6 +806,18 @@ class Bimp_Commande extends BimpComm
                 'label'  => 'Annuler',
                 'icon'   => 'fas_times',
                 'action' => 'cancel'
+            );
+        }
+        if ($this->canSetAction('sendEmail')) {
+            $actions[] = array(
+                'label'  => 'Fichiers PDF',
+                'icon'   => 'fas_file-pdf',
+                'action' => 'generateBulkPdf'
+            );
+            $actions[] = array(
+                'label'  => 'Fichiers Zip des PDF',
+                'icon'   => 'fas_file-pdf',
+                'action' => 'generateZipPdf'
             );
         }
 

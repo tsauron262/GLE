@@ -70,6 +70,7 @@ class test_sav
 
     function testGlobal($idUser = 0)
     {
+        global $db;
         $_GET['envoieMail'] = "yes";
         session_write_close();
         if($idUser == 0){

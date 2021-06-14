@@ -1111,6 +1111,11 @@ class BimpComm extends BimpDolObject
 
         return $this->margins_infos;
     }
+    
+    public function getProvLink()
+    {
+        return str_replace($this->getRef(), '(PROV'.$this->id.')', $this->getLink());
+    }
 
     public function getCondReglementBySociete()
     {

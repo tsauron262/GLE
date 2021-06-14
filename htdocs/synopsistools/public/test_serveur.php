@@ -27,7 +27,7 @@ foreach($sqls as $sql){
 
 if(count($error)){
     header($_SERVER["SERVER_PROTOCOL"]." 503 Service Temporarily Unavailable", true, 503);
-    dol_syslog(print_r($error,1));
+    dol_syslog('test serv err 503'.print_r($error,1));
     print_r($error);
 }
 else

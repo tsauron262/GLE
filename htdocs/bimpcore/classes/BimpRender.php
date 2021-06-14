@@ -1248,10 +1248,10 @@ class BimpRender
         foreach ($rows as $row) {
             $html .= '<tr class="bimp_list_table_row"';
             $html .= (isset($row['row_data']) ? BimpRender::renderTagData($row['row_data']) : '');
-            $html .= (isset($row['row_style']) ? ' style="' . $row['row_style'] . '"' : '');
+//            $html .= (isset($row['row_style']) ? ' style="' . $row['row_style'] . '"' : '');
             $html .= '>';
             if ($empty_first_col) {
-                $html .= '<td>';
+                $html .= '<td' . (isset($row['row_style']) ? ' style="' . $row['row_style'] . '"' : '') . '>';
                 if ($params['checkboxes'] && (!isset($row['item_checkbox']) || (int) $row['item_checkbox'])) {
                     $html .= '<input type="checkbox" class="bimp_list_table_row_check" name="row_check"/>';
                 }
@@ -1268,6 +1268,9 @@ class BimpRender
                 $html .= ' style="' . ($header['align'] !== 'left' ? 'text-align: ' . $header['align'] . ';' : '');
                 if ($header['col_style']) {
                     $html .= ' ' . $header['col_style'] . ';';
+                }
+                if (isset($row['row_style'])) {
+                    $html .= ' ' . $row['row_style'];
                 }
                 $html .= '">';
                 if (isset($row[$col_name])) {

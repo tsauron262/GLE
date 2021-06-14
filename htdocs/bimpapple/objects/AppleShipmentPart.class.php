@@ -310,7 +310,7 @@ class AppleShipmentPart extends BimpObject
                         $return_str .= '</span>';
                     }
 
-                    $rows[] = array(
+                    $tmp = array(
                         'item_checkbox'       => ((int) $part['id_shipment'] ? false : true),
                         'row_data'            => ((int) $part['id_shipment'] ? false : array(
                     'part_data' => htmlentities($part_data)
@@ -326,8 +326,17 @@ class AppleShipmentPart extends BimpObject
                         'expectedReturnDate'    => BimpTools::printDate(BimpTools::getArrayValueFromPath($part, 'expectedReturnDate', '')),
                         'return'              => $return_str
                     );
+                    
+                    $tabBatGonfle = array('QPBS5');
+                    if(BimpTools::getArrayValueFromPath($part, 'dangerousGoods', '') != ''){
+                        $tmp['row_style'] = 'background-color: rgba(231,166,44, .5)!important';
+                        if(in_array(BimpTools::getArrayValueFromPath($part, 'issueCode', ''),$tabBatGonfle)){
+                            $tmp['row_style'] = 'background-color: rgba(249,54,12, .5)!important';
+                        }
+                    }      
+                    $rows[] = $tmp;
+                    
                 }
-
                 if (count($parts_options) > 1) {
                     $inputs[] = array(
                         'label'      => 'Composant',

@@ -147,7 +147,7 @@ class Bimp_CommissionApporteur extends BimpObject{
         $factureLine = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
         $list_name = 'commission_apporteur';
         foreach($tabsFiltres as $filtre){
-            $bc_list = new BC_ListTable($factureLine, $list_name, 1, null, 'Ligne de facture commisionnée à '.$filtre->getData('commition').' %', 'fas_check');
+            $bc_list = new BC_ListTable($factureLine, $list_name, 1, null, 'Ligne de facture : '.$filtre->getFilterLabel(), 'fas_check');
             $bc_list->addFieldFilterValue('commission_apporteur', $this->id.'-'.$filtre->id);
             $bc_list->addIdentifierSuffix('comm_'.$filtre->id.'_' . $this->id);
 
@@ -164,7 +164,7 @@ class Bimp_CommissionApporteur extends BimpObject{
         $parent = $this->getParentInstance();
         $tabsFiltres = $parent->getChildrenObjects('filtres', array(), 'position', 'ASC');
         foreach($tabsFiltres as $filtre){
-            $result[$filtre->id] = $filtre->getData('libelle').' ('.$filtre->getData('commition').'%)';
+            $result[$filtre->id] = $filtre->getFilterLabel();
         }
         return $result;
     }

@@ -16,4 +16,13 @@ class Bimp_ApporteurFilter extends BimpObject{
         else
             return 'all';
     }
+    
+    
+    public function getFilterLabel(){
+        $label = $this->getData('libelle');
+        $comm = $this->getData('commition');
+        if(stripos($label, $comm.'%') === false && stripos($label, $comm.' %') === false)
+                $label .= ' ('.$comm.' %)';
+        return $label;
+    }
 }

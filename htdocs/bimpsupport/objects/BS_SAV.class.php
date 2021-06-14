@@ -44,6 +44,7 @@ class BS_SAV extends BimpObject
         self::BS_SAV_A_RESTITUER       => array('label' => 'A restituer', 'icon' => 'arrow-right', 'classes' => array('success')),
         self::BS_SAV_FERME             => array('label' => 'Fermé', 'icon' => 'times', 'classes' => array('danger'))
     );
+    public static $status_opened = array(self::BS_SAV_RESERVED,self::BS_SAV_NEW, self::BS_SAV_ATT_PIECE, self::BS_SAV_ATT_CLIENT, self::BS_SAV_DEVIS_ACCEPTE, self::BS_SAV_REP_EN_COURS, self::BS_SAV_EXAM_EN_COURS, self::BS_SAV_DEVIS_REFUSE, self::BS_SAV_ATT_CLIENT_ACTION, self::BS_SAV_A_RESTITUER);
     public static $need_propal_status = array(2, 3, 4, 5, 6, 9);
     public static $propal_reviewable_status = array(0, 1, 2, 3, 4, 6, 7, 9);
     public static $save_options = array(
@@ -5209,12 +5210,17 @@ class BS_SAV extends BimpObject
         $sql .= ' AND (date_rdv < \'' . date('Y-m-d') . ' 00:00:00\' OR (date_rdv IS NULL AND date_create < \'' . $dt->format('Y-m-d') . ' 00:00:00\'))';
 
         $rows = $bdb->executeS($sql, 'array');
-
+        
         if (is_array($rows)) {
+            $sav_instance = BimpObject::getInstance('bimpsupport', 'BS_SAV');
+            
             foreach ($rows as $r) {
                 if ($bdb->update('bs_sav', array(
                             'status' => BS_SAV::BS_SAV_RDV_EXPIRED
                                 ), 'id = ' . (int) $r['id']) > 0) {
+                    $sav_instance->id = (int) $r['id'];
+                    $sav_instance->addNote('Rendez-vous annulé automatiquement le ' . date('d / m / Y à H:i'), 4);
+
                     if ((string) $r['date_rdv']) {
                         $to = '';
 
@@ -5252,18 +5258,17 @@ class BS_SAV extends BimpObject
                             }
 
                             $msg .= 'Si vous avez toujours besoin d’une assistance, n’hésitez pas à reprendre un rendez vous sur votre <a href="https://www.bimp.fr/espace-client/">espace personnel</a> de notre site internet « www.bimp.fr »' . "\n\n";
-
                             $msg .= 'L’équipe technique BIMP';
 
                             mailSyn2($subject, $to, '', $msg);
 
-                            BimpCore::addlog('Annulation auto SAV réservé', Bimp_Log::BIMP_LOG_NOTIF, 'bic', null, array(
-                                'ID SAV' => $r['id']
-                                    ), true);
+//                            BimpCore::addlog('Annulation auto SAV réservé', Bimp_Log::BIMP_LOG_NOTIF, 'bic', null, array(
+//                                'ID SAV' => $r['id']
+//                                    ), true);
                         }
                     }
                 } else {
-                    BimpCore::addlog('Echec de la mise l\'annulation automatique d\'un SAV', Bimp_Log::BIMP_LOG_ERREUR, 'bic', null, array(
+                    BimpCore::addlog('Echec de l\'annulation automatique d\'un SAV', Bimp_Log::BIMP_LOG_ERREUR, 'bic', null, array(
                         'ID SAV'     => $r['id'],
                         'Erreyr SQL' => $bdb->err()
                     ));

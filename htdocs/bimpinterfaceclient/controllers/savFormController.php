@@ -1511,7 +1511,7 @@ Votre satisfaction est notre objectif, nous mettrons tout en œuvre pour vous sa
 
                                 $debug .= '<br/><br/>Ajout note SAV: ';
 
-                                $note_errors = $sav->addNote($msg);
+                                $note_errors = $sav->addNote($msg, 4);
 
                                 if (count($note_errors)) {
                                     $debug .= BimpRender::renderAlerts($note_errors);

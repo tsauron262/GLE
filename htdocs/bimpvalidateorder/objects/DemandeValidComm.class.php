@@ -109,7 +109,7 @@ class DemandeValidComm extends BimpObject
         $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', $class, (int) $this->getData('id_piece'));
         
         $subject = "Validation " . $bimp_object->getLabel() . ' '. $bimp_object->getData('ref');
-        $message = "Merci de valider " . $bimp_object->getLabel('the') . ' ' . str_replace("fc=commande","fc=commande&navtab-maintabs=content", $bimp_object->getNomUrl(1));
+        $message = "Merci de valider " . $bimp_object->getLabel('the') . ' ' . str_replace("fc=commande","fc=commande&navtab-maintabs=content", $bimp_object->getProvLink(1));
 
         $task = BimpObject::getInstance("bimptask", "BIMP_Task");
         $tasks = $task->getList(array('test_ferme' => $this->getTestFerme()));

@@ -2377,6 +2377,7 @@ class BContract_contrat extends BimpDolObject
             }
 
             $this->updateField('ref', $ref);
+            $this->updateField('initial_renouvellement', $this->getData('tacite'));
             $this->addLog('Contrat validé');
             $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
             $commercial = $this->getInstance("bimpcore", 'Bimp_User', $this->getData('fk_commercial_suivi'));

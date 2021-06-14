@@ -72,6 +72,16 @@ class test_sav
     {
         $_GET['envoieMail'] = "yes";
         session_write_close();
+        if($idUser == 0){
+            $sql = $db->query("SELECT MAX(u.rowid) as idUser, gsx_acti_token FROM `llx_user` u, llx_user_extrafields ue WHERE u.rowid = ue.`fk_object` and gsx_acti_token != '' GROUP by `gsx_acti_token`");
+            $nbcompte = $db->num_rows($sql);
+            if($nbcompte > 0){
+                $ln = $db->fetch_object($sql);
+                $idUser = $ln->idUser;
+            }
+        }
+        
+        
         $this->initGsx($idUser);
         $this->tentativeARestitueAuto(0);
 

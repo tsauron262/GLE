@@ -207,7 +207,7 @@ class ValidComm extends BimpObject
     }
 
     
-    public function userCanValidate($id_user, $secteur, $type, $object, $val, $bimp_object, &$valid_comm) {
+    public function userCanValidate($id_user, $secteur, $type, $object, $val, $bimp_object, &$valid_comm = 0) {
         
         if($type == self::TYPE_FINANCE) {
             $depassement_actuel = $this->getEncours($bimp_object);

@@ -5,15 +5,16 @@ require_once('../main.inc.php');
 llxHeader();
 
 
+dol_syslog('Git pull bimp', 3);
 
 $lien = '.bimp.fr/bimp8/synopsistools/git_pull.php?no_menu=1&nolog=ujgjhkhkfghgkvgkfdkshfiohf5453FF454FFDzelef';
 
 $array = array("erp1", "erp2", "erp3");
 
 foreach($array as $erp){
-echo '<h1>Serveur '.$erp.'</h1>';
-echo 'https://'.$erp.$lien;
-echo '<iframe style="width: 100%; height: 400px;" src="https://'.$erp.$lien.'"></iframe>';
+    echo '<h1>Serveur '.$erp.'</h1>';
+    echo 'https://'.$erp.$lien;
+    echo '<iframe style="width: 100%; height: 400px;" src="https://'.$erp.$lien.'"></iframe>';
 }
 
 

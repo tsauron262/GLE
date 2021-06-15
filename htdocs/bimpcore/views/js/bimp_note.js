@@ -10,7 +10,6 @@ class bimp_note extends AbstractNotification {
     }
     
     init() {
-        alert('init msg');
         if(typeof object_labels['BimpNote'] === 'undefined')
             object_labels['BimpNote'] = 'Note';
 

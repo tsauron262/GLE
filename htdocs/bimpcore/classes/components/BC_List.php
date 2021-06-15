@@ -461,9 +461,9 @@ class BC_List extends BC_Panel
     }
 
     protected function fetchItems()
-    {
+    {        
         $this->filters = $this->getSearchFilters($this->params['joins']);
-
+        
         if (method_exists($this->object, "beforeListFetchItems")) {
             $this->object->beforeListFetchItems($this);
         }
@@ -487,7 +487,7 @@ class BC_List extends BC_Panel
 
         // Jointures: 
         $joins = $this->params['joins'];
-
+        
         // Filtres: 
         if (count($this->params['list_filters'])) {
             foreach ($this->params['list_filters'] as $list_filter) {
@@ -510,7 +510,7 @@ class BC_List extends BC_Panel
                 $this->mergeFilter($name, $filter);
             }
         }
-
+        
         // Filtres selon objets associés:
         if (count($this->params['association_filters'])) {
             foreach ($this->params['association_filters'] as $asso_filter) {
@@ -596,7 +596,7 @@ class BC_List extends BC_Panel
         $this->items = $this->object->getList($filters, $this->params['n'], $this->params['p'], $order_by, $this->params['sort_way'], 'array', array(
             'DISTINCT (a.' . $primary . ')'
                 ), $joins, $extra_order_by, $extra_order_way);
-
+        
         if (method_exists($this->object, 'listItemsOverride')) {
             $this->object->listItemsOverride($this->name, $this->items);
         }

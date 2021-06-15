@@ -378,6 +378,10 @@ class BC_ListTable extends BC_List
         if ($sort_field == 'position') {
             return 'a.position';
         }
+        
+        if ($sort_option == 'default') {
+            $sort_option = '';
+        }
 
         $errors = array();
         $col_name = $sort_field;
@@ -631,6 +635,8 @@ class BC_ListTable extends BC_List
                 $field_object = self::getColFieldObject($base_object, $col_name, $field_name);
 
                 $col_children = explode(':', $col_name);
+                array_pop($col_children);
+                
                 $field_alias = 'a';
 
                 if (!empty($col_children)) {
@@ -2487,6 +2493,7 @@ class BC_ListTable extends BC_List
                         $sqlKey = $this->object->{'get' . ucfirst($col_name) . 'SqlKey'}($joins);
                     } else {
                         $col_children = explode('___', $col_name);
+                        array_pop($col_children);
                         $field_alias = 'a';
                         $col_errors = array();
 

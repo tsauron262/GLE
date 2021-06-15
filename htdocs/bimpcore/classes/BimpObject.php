@@ -379,7 +379,7 @@ class BimpObject extends BimpCache
         }
     }
 
-    // Getters configuation: 
+    // Getters configuation:
 
     public function getConf($path, $default_value = null, $required = false, $data_type = 'string')
     {

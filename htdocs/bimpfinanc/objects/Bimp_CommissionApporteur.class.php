@@ -383,4 +383,17 @@ class Bimp_CommissionApporteur extends BimpObject{
         );
     }
 
+        if(!$this->db->execute('UPDATE llx_bimp_facture_line SET commission_apporteur = "'.$this->id.'-'.$data['filtre'].'" WHERE id = '.$data['idLn']))
+                $errors[] = 'Erreur inconnue';
+        
+        
+        if(!count($errors))
+            $errors = $this->calcTotal ();
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
 }

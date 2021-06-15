@@ -10,7 +10,7 @@ class bimp_note extends AbstractNotification {
     }
     
     init() {
-        
+        alert('init msg');
         if(typeof object_labels['BimpNote'] === 'undefined')
             object_labels['BimpNote'] = 'Note';
 
@@ -197,7 +197,6 @@ class bimp_note extends AbstractNotification {
     }
     
     getInitiales(nom) {
-        console.log(nom);
         var full_name = nom.split(' ');
         var initials = '';
         for (var i = 0; i < full_name.length; i++) {

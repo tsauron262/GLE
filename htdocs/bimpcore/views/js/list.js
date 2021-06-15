@@ -1198,7 +1198,7 @@ function toggleCheckAll(list_id, $input) {
 function sortList(list_id, col_name) {
     var $row = $('#' + list_id).find('.headerRow');
     if ($row.length) {
-        var $span = $row.find('#' + col_name.replace(':', '___') + '_sortTitle');
+        var $span = $row.find('#' + col_name.replace(/:/g, '___') + '_sortTitle');
         if ($span.length) {
             var $list = $('#' + list_id);
             var prev_sort_field = $list.find('input[name=param_sort_field]').val();

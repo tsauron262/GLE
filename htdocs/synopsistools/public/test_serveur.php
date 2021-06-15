@@ -17,7 +17,7 @@ foreach($files as $file){
         $error[] = 'Pas d\'ecriture '.$file;
         
 }
-$sqls = array("SELECT count(*) FROM ".MAIN_DB_PREFIX.'user', 'CREATE TABLE IF NOT EXISTS `'.MAIN_DB_PREFIX.'test_serveur` (`test` int(11) unsigned NOT NULL)', 'INSERT INTO '.MAIN_DB_PREFIX.'test_serveur (test) VALUES (4)');
+$sqls = array("SELECT count(*) FROM ".MAIN_DB_PREFIX.'user', 'CREATE TABLE IF NOT EXISTS `'.MAIN_DB_PREFIX.'test_serveur` (`id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,`test` int(11) unsigned NOT NULL)', 'INSERT INTO '.MAIN_DB_PREFIX.'test_serveur (test) VALUES (4)');
 foreach($sqls as $sql){
     if(!$db->query($sql))
         $error[] = 'Erreur SQL '.$sql;

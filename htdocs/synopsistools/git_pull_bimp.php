@@ -6,6 +6,7 @@ llxHeader();
 
 
 dol_syslog('Git pull bimp', 3);
+
 $lien = '.bimp.fr/bimp8/synopsistools/git_pull.php?no_menu=1&nolog=ujgjhkhkfghgkvgkfdkshfiohf5453FF454FFDzelef';
 
 $array = array("erp1", "erp2", "erp3");

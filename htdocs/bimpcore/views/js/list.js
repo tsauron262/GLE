@@ -176,11 +176,19 @@ function getListSearchFilters($row) {
                         search_data = {};
                         var $from = $(this).find('[name=' + field_name + '_from]');
                         var $to = $(this).find('[name=' + field_name + '_to]');
+                        var from = '';
+                        var to = '';
+
                         if ($from.length) {
-                            search_data['from'] = $from.val();
+                            from = $from.val();
                         }
                         if ($to.length) {
-                            search_data['to'] = $to.val();
+                            to = $to.val();
+                        }
+
+                        if (from || to) {
+                            search_data['from'] = from;
+                            search_data['to'] = to;
                         }
                         break;
 
@@ -188,12 +196,21 @@ function getListSearchFilters($row) {
                         search_data = {};
                         var $min = $(this).find('[name=' + field_name + '_min]');
                         var $max = $(this).find('[name=' + field_name + '_max]');
+                        var min = '';
+                        var max = '';
+
                         if ($min.length) {
-                            search_data['min'] = $min.val();
+                            min = $min.val();
                         }
                         if ($max.length) {
-                            search_data['max'] = $max.val();
+                            max = $max.val();
                         }
+
+                        if (min || max) {
+                            search_data['min'] = min;
+                            search_data['max'] = max;
+                        }
+
                         break;
 
                     default:
@@ -203,7 +220,7 @@ function getListSearchFilters($row) {
                         }
                 }
 
-                if (search_data) {
+                if (search_data !== '') {
                     filters[field] = search_data;
                 }
             }
@@ -1752,7 +1769,7 @@ function setItemCheckboxEvents($checkbox) {
                             });
                         }
                     }
-                    
+
                     bimp_is_checkboxes_toggling = false;
                 }
 

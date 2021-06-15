@@ -27,10 +27,10 @@ class Bimp_ApporteurFilter extends BimpObject{
                 return $libelle;
 
             // Ne contient pas de pourcentage => on le rajoute
-            return $libelle . " " . $this->getData('commition') . "%";
+            return $libelle . " (" . $this->getData('commition') . "%)";
 
         } else
-            return "Commissionnée à " . $this->getData('commition') .  "  %";
+            return "Commissionnée à " . $this->getData('commition') .  "%";
     }
     
     public function isFieldEditable($field, $force_edit = false) {

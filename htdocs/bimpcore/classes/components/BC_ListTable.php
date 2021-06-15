@@ -631,6 +631,7 @@ class BC_ListTable extends BC_List
                 $field_object = self::getColFieldObject($base_object, $col_name, $field_name);
 
                 $col_children = explode(':', $col_name);
+                array_pop($col_children);
                 $field_alias = 'a';
 
                 if (!empty($col_children)) {

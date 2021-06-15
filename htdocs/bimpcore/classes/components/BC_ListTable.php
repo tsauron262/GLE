@@ -636,7 +636,6 @@ class BC_ListTable extends BC_List
 
                 $col_children = explode(':', $col_name);
                 array_pop($col_children);
-                
                 $field_alias = 'a';
 
                 if (!empty($col_children)) {

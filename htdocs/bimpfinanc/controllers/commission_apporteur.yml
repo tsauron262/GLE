@@ -2,7 +2,7 @@ bootstrap: 1
 
 title: 
     callback: 
-        object: apporteur
+        object: comm_apporteur
         method: getPageTitle
         
 objects: 

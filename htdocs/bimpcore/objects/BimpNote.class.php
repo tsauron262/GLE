@@ -267,14 +267,16 @@ class BimpNote extends BimpObject
             if (!$c['lu'])
                 $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $c['idNoteRef']);
             else {
-                $sql = 'SELECT MAX(id) AS id_max';
-                $sql .= ' FROM `' . MAIN_DB_PREFIX . 'bimpcore_note`';
-                $sql .= ' WHERE `obj_type` = "bimp_object" AND `obj_module` = "' . $c['obj']->module . '"';
-                $sql .= ' AND `obj_name` = "' . $c['obj']->object_name . '" AND `id_obj` = ' . $c['obj']->id;
-                $res = $this->db->db->query($sql);
-                if ($res) {
-                    $ln = $this->db->db->fetch_object($res);
-                    $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $ln->id_max);
+                if($c['obj']->id){
+                    $sql = 'SELECT MAX(id) AS id_max';
+                    $sql .= ' FROM `' . MAIN_DB_PREFIX . 'bimpcore_note`';
+                    $sql .= ' WHERE `obj_type` = "bimp_object" AND `obj_module` = "' . $c['obj']->module . '"';
+                    $sql .= ' AND `obj_name` = "' . $c['obj']->object_name . '" AND `id_obj` = ' . $c['obj']->id;
+                    $res = $this->db->db->query($sql);
+                    if ($res) {
+                        $ln = $this->db->db->fetch_object($res);
+                        $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $ln->id_max);
+                    }
                 }
             }
 

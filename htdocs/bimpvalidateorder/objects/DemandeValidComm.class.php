@@ -314,4 +314,43 @@ class DemandeValidComm extends BimpObject
         return '';
     }
     
+    
+    public function getDemandeValidCommExtraButtons() {
+        $buttons = array();
+        
+        if($this->getData('id_valid_comm')) {
+            if ($this->isLoaded()) {
+                            $buttons[] = array(
+                    'label'   => 'Validation',
+                    'icon'    => 'fas_check',
+                    'onclick' => $this->getJsLoadModalView('valid_comm', 'Règle de validation appliquée pour cette demande')
+                );
+            }
+        }
+        
+        return $buttons;
+    }
+    
+    
+    public function renderValidComm() {
+        if($this->getData('id_valid_comm')) {
+
+            $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm', (int) $this->getData('id_valid_comm'));
+            
+            if(!$valid_comm->isLoaded())
+                return BimpRender::renderAlerts("Erreur lors du chargement de la validation", 'danger');
+            
+            if($valid_comm->getData('date_update') > $this->getData('date_valid'))
+                $html .= BimpRender::renderAlerts("Cette règle de validation a été éditée après la validation de cette demande", 'danger');
+
+            $list = new BC_ListTable($valid_comm, 'default');
+            $list->addFieldFilterValue('id', $valid_comm->id);
+            $html .= $list->renderHtml();
+
+            return $html;
+        }
+        
+        return BimpRender::renderAlerts("Cette demande n'est pas validée", 'danger');
+    }
+    
 }

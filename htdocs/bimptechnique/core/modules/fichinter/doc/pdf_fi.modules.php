@@ -220,7 +220,7 @@ class pdf_fi {
                     $emisStr = "Rapport émis le " . $dateEmission->format('d/m/Y') . " à " . $dateEmission->format('H:i'); 
                 } else {
                     if($fiche->getData('fk_statut') == 0) {
-                        $emisStr = "Le rapport n'est pas généré de façon officiel et définitif";
+                        $emisStr = "Le rapport n'est pas généré de façon officielle et définitive";
                     }
                     
                 }
@@ -440,7 +440,14 @@ class pdf_fi {
                     $pdf->Cell($W, 8, "Type", 1, null, 'C', true);
                     $pdf->Cell($W, 8, "Durée", 1, null, 'C', true);
                     $pdf->Cell($W, 8, "Référence", 1, null, 'C', true);
-                    $pdf->Cell($W, 8, "Service", 1, null, 'C', true);
+                    
+                    if($child->getData('type') == 4 || $child->getData('type') == 3) {
+                        $pdf->Cell($W, 8, "Total HT en €", 1, null, 'C', true);
+                    }else {
+                        $pdf->Cell($W, 8, "Service", 1, null, 'C', true);
+                    }
+                    
+                    
                     $pdf->Ln();
                     $pdf->setColor('fill', 255, 255, 255);
                     $pdf->SetFont(''/* 'Arial' */, '', 9);
@@ -463,10 +470,10 @@ class pdf_fi {
                             $type = "Explications";
                             break;
                         case 3:
-                            $type = "Déplacement non vendu";
+                            $type = "Déplacement à facturer";
                             break;
                         case 4:
-                            $type = "Intervention non prévue";
+                            $type = "Intervention à facturer";
                             break;
                         case 5:
                             $type = "Déplacement sous contrat";
@@ -482,7 +489,10 @@ class pdf_fi {
                     $pdf->Cell($W, 6, "$type" ,1, 0, 'C', 1);
                     if($child->getData('type') == 2) {
                         $pdf->Cell($W, 6, "Pas de durée" ,1, 0, 'C', 1);
-                    } else {
+                    } elseif($child->getData('type') == 3) {
+                        $pdf->Cell($W, 6, "Forfait" ,1, 0, 'C', 1);
+                    }
+                    else {
                         $pdf->Cell($W, 6, $child->displayDuree() ,1, 0, 'C', 1);
                     }
                     
@@ -511,11 +521,40 @@ class pdf_fi {
                         $pdf->Cell($W, 6, $service->getData('ref'),1, 0, 'C', 1);
                     }
                     
-                    if(!$have_pdf_ref) {
+                    if(!$have_pdf_ref || $child->getData('type') == 5) {
                         $pdf->SetFont(''/* 'Arial' */, '', 7.5);
-                        $pdf->Cell($W, 6, "Ni commande, ni contrat, ni ticket",1, 0, 'C', 1);
+                        if($child->getData('type') == 5) {
+                            if($contrat->isLoaded()) {
+                                $pdf->Cell($W, 6, $contrat->getRef(),1, 0, 'C', 1);
+                            } else {
+                                $pdf->Cell($W, 6, "Contrat",1, 0, 'C', 1);
+                            }
+                        } else {
+                            $pdf->Cell($W, 6, "Ni commande, ni contrat, ni ticket",1, 0, 'C', 1);
+                        }
+                        
                         $pdf->SetFont(''/* 'Arial' */, '', 9);
-                        $pdf->Cell($W, 6, "Aucun",1, 0, 'C', 1);
+                        // Tarif
+                        $id_service = ($child->getData('type') == 3) ? BimpCore::getConf('bimptechnique_id_dep') : BimpCore::getConf('bimptechnique_id_serv19');
+                        $servicePlus = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Product", $id_service);
+                        
+                        $time = $fiche->timestamp_to_time($child->getData('duree'));
+                        $qty = $fiche->time_to_qty($time);
+                        
+                        $pareteze = "";
+                        $price = $servicePlus->getData('price') . "€";
+                        
+                        if(!$servicePlus->isDep()) {
+                            $pareteze = "(".$servicePlus->getData('price')."€HT/H)";
+                            $price = ($servicePlus->getData('price') * $qty) . "€";
+                        }
+                        
+                        if($child->getData('type') == 5) {
+                            $pareteze = "";
+                            $price = "Sous contrat";
+                        }
+                        
+                        $pdf->Cell($W, 6, $price . " $pareteze",1, 0, 'C', 1);
                     }
                     
                     $excludeDescriptionService = Array(4,5,1,2,3);
@@ -605,7 +644,7 @@ class pdf_fi {
                     $img_base64_encoded = $fiche->getData('base_64_signature');
                     $img = '<img src="@' . preg_replace('#^data:image/[^;]+;base64,#', '', $img_base64_encoded) . '" width="300px" >';
                     $pdf->writeHTML($img, true, false, true, false, '');
-                } else {
+                } elseif($fiche->getData('fk_statut') != 0) {
                     if($pdf->GetY() > 250) {
                         $pdf->addPage();
                     }

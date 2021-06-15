@@ -1098,6 +1098,11 @@ class gsxController extends BimpController
                 $html .= $data2['device']['productDescription'];
                 $html .= '</div>';
             }
+            $instance = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV');
+            
+            if($instance->find(array('status'=>$instance::$status_opened, 'id_equipment'=>$id_equipment), true))
+                $html .= '<div class="blink big">'.BimpRender::renderAlerts('Attention un SAV existe déja pour ce serial'.$instance->getLink()).'</div>';
+            
             $data = $this->gsx_v2->serialEligibility($serial);
 
             foreach ($data['eligibilityDetails']['outcome'] as $out) {

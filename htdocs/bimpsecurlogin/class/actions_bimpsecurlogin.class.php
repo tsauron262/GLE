@@ -219,6 +219,7 @@ class securLogSms {
                 }
             }
 
+            require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
             $groups = new UserGroup($this->db);
 //            $grps = $groups->listGroupsForUser($this->user->id, false);
 //            if (!isset($grps[3])) {
@@ -347,3 +348,4 @@ class securLogSms {
     }
 
 }
+// 

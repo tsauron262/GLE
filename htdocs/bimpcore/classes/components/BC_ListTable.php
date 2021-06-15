@@ -2131,7 +2131,7 @@ class BC_ListTable extends BC_List
                 $html .= '<td style="text-align: center; ' . $item_params['td_style'] . '">';
                 if ($this->params['checkboxes']) {
                     if ((int) $item_params['item_checkbox']) {
-                        $html .= '<input type="checkbox" id_="' . $this->object->object_name . '_check_' . $id_object . '"';
+                        $html .= '<input type="checkbox" id="' . $this->object->object_name . '_check_' . $id_object . '"';
                         $html .= ' name="' . $this->object->object_name . '_check"';
                         $html .= ' class="item_check"';
                         if ($selected) {

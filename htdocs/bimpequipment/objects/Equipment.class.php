@@ -29,6 +29,7 @@ class Equipment extends BimpObject
         3 => 'Localisé',
     );
     protected $current_place = null;
+    public $majGsx = false;
 
     public function __construct($module, $object_name)
     {
@@ -56,7 +57,7 @@ class Equipment extends BimpObject
         if (BimpCore::isContextPublic()) {
             return 0;
         }
-        
+
         global $user;
         return (int) $user->admin;
     }
@@ -87,6 +88,17 @@ class Equipment extends BimpObject
         }
 
         return parent::canEditField($field_name);
+    }
+
+    public function canClientView()
+    {
+        global $userClient;
+
+        if (BimpObject::objectLoaded($userClient)) {
+            return 1;
+        }
+
+        return 0;
     }
 
     // Getters booléens:
@@ -396,8 +408,8 @@ class Equipment extends BimpObject
 
         return $buttons;
     }
-    
-        public function getActionsButtons()
+
+    public function getActionsButtons()
     {
 
         $onclick = $this->getJsActionOnclick('updateInfosGsx');
@@ -753,8 +765,9 @@ class Equipment extends BimpObject
 
         return $reservations;
     }
-    
-    public function getCardFields($card_name) {
+
+    public function getCardFields($card_name)
+    {
         $fileds = parent::getCardFields($card_name);
         $fileds[] = 'id_product';
         $fileds[] = 'product_label';
@@ -921,7 +934,7 @@ class Equipment extends BimpObject
 
             return $html;
         }
-        
+
         return $this->displayData('product_label', 'default', ($no_html ? 0 : 1), $no_html);
     }
 
@@ -962,6 +975,19 @@ class Equipment extends BimpObject
         }
 
         return 'ID de l\'équipement absent';
+    }
+    
+    public function displayFactFourn(){
+        $result = $this->db->executeS("SELECT b.id_obj FROM ".MAIN_DB_PREFIX."object_line_equipment a, `".MAIN_DB_PREFIX."bimp_facture_fourn_line` b WHERE a.object_type = 'facture_fournisseur' AND a.id_equipment = ".$this->id." AND b.id = a.id_object_line", 'array');
+        foreach($result as $idF){
+            $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', $idF['id_obj']);
+            global $modeCSV;
+            if ($modeCSV) {
+                return $obj->getName();
+            } else {
+                return $obj->getLink();
+            }
+        }
     }
 
     public function displayAvailability($id_entrepot = 0, $allowed = array())
@@ -1339,7 +1365,6 @@ class Equipment extends BimpObject
             'fk_inventory' => $idI
                 ), null, null, 'id', 'desc', 'array', array('id'));
 
-
         if (!is_null($rows) && count($rows)) {
             foreach ($rows as $r) {
                 $obj = BimpCache::getBimpObjectInstance('bimplogistique', 'InventoryLine', $r['id']);
@@ -1463,14 +1488,16 @@ class Equipment extends BimpObject
 
         return $oldS;
     }
-    
-    public function majWithGsx(&$warnings = array()){
+
+    public function majWithGsx(&$warnings = array(), $withUpdate = true)
+    {
         $identifiers = static::gsxFetchIdentifiers($this->getData('serial'));
-        if($identifiers == 0)
+        if ($identifiers == 0)
             return array('Probléme GSX');
+
         $this->set('status_gsx', $identifiers['status_gsx']);
-        if($identifiers['status_gsx'] != 2){
-            if(isset($identifiers['serial']) && $identifiers['serial'] != '')
+        if ($identifiers['status_gsx'] != 2) {
+            if (isset($identifiers['serial']) && $identifiers['serial'] != '')
                 $this->set('serial', $identifiers['serial']);
 
             $this->set('imei', $identifiers['imei']);
@@ -1478,7 +1505,9 @@ class Equipment extends BimpObject
             $this->set('meid', $identifiers['meid']);
             $this->set('product_label', $identifiers['productDescription']);
         }
-        return $this->update($warnings, 1);
+        $this->majGsx = true;
+        if ($withUpdate)
+            return $this->update($warnings, 1);
     }
 
     public static function gsxFetchIdentifiers($serial, $gsx = null)
@@ -1502,16 +1531,15 @@ class Equipment extends BimpObject
 
             if ($gsx->logged) {
                 $data = $gsx->productDetailsBySerial($serial);
-                if(!is_array($data)){
+                if (!is_array($data)) {
                     $identifiers['status_gsx'] = 2;
-                }
-                else{
+                } else {
                     $identifiers['status_gsx'] = 1;
                     $data2 = $gsx->serialEligibility($serial);
-                    foreach($data2['eligibilityDetails']['outcome'] as $out){
-                        foreach($out['reasons'] as $reason){
-                            foreach($reason['messages'] as $msg){
-                                if(stripos($msg, 'Localiser mon appareil') !== false)
+                    foreach ($data2['eligibilityDetails']['outcome'] as $out) {
+                        foreach ($out['reasons'] as $reason) {
+                            foreach ($reason['messages'] as $msg) {
+                                if (stripos($msg, 'Localiser mon appareil') !== false)
                                     $identifiers['status_gsx'] = 3;
                             }
                         }
@@ -1552,12 +1580,12 @@ class Equipment extends BimpObject
 
                         $identifiers['warranty_type'] = $data['device']['warrantyInfo']['warrantyStatusDescription'];
 
-                        if (isset($data['device']['warrantyInfo']['coverageEndDate'])){
+                        if (isset($data['device']['warrantyInfo']['coverageEndDate'])) {
                             $dt = new DateTime($data['device']['warrantyInfo']['coverageEndDate']);
                             $identifiers['date_warranty_end'] = $dt->format('Y-m-d H:i:s');
                         }
 
-                        if (isset($data['device']['warrantyInfo']['purchaseDate'])){
+                        if (isset($data['device']['warrantyInfo']['purchaseDate'])) {
                             $dt = new DateTime($data['device']['warrantyInfo']['purchaseDate']);
                             $identifiers['date_purchase'] = $dt->format('Y-m-d H:i:s');
                         }
@@ -1576,12 +1604,11 @@ class Equipment extends BimpObject
                         }
                     }
                 }
-            }
-            else
+            } else
                 return 0;
         }
-        
-        
+
+
         return $identifiers;
     }
 
@@ -1600,7 +1627,7 @@ class Equipment extends BimpObject
         $warnings = array();
 
         $errors = $this->majWithGsx($warnings);
-        return array('warnings'=>$warnings, 'errors'=>$errors);
+        return array('warnings' => $warnings, 'errors' => $errors);
     }
 
     // Renders: 
@@ -1757,16 +1784,19 @@ class Equipment extends BimpObject
 
         $init_serial = (string) $this->getInitData('serial');
 
-        if ($serial && (!(string) $this->getData('imei') || ($init_serial && $serial != $init_serial))) {
-            $identifiers = self::gsxFetchIdentifiers($serial);
-            $this->set('imei', $identifiers['imei']);
-            $this->set('imei2', $identifiers['imei2']);
-            $this->set('meid', $identifiers['meid']);
-
-            if ($identifiers['serial']) {
-                $this->set('serial', $identifiers['serial']);
-                $serial = $identifiers['serial'];
-            }
+        if ($serial &&
+                (!(string) $this->getData('imei') || ($init_serial && $serial != $init_serial)) && !$this->majGsx) {
+//            $identifiers = self::gsxFetchIdentifiers($serial);
+//            $this->set('imei', $identifiers['imei']);
+//            $this->set('imei2', $identifiers['imei2']);
+//            $this->set('meid', $identifiers['meid']);
+//
+//            if ($identifiers['serial']) {
+//                $this->set('serial', $identifiers['serial']);
+//                $serial = $identifiers['serial'];
+//            }
+            $war = array();
+            $this->majWithGsx($war, false);
         }
 
         if (!$id_product && $serial && (!$this->getInitData('serial') || $this->getInitData('serial') !== $serial)) {

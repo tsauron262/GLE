@@ -354,5 +354,33 @@ class Bimp_CommissionApporteur extends BimpObject{
         return $html;
     }
     
+    public function getFiltres(){
+        $result = array();
+        $parent = $this->getParentInstance();
+        $tabsFiltres = $parent->getChildrenObjects('filtres', array(), 'position', 'ASC');
+        foreach($tabsFiltres as $filtre){
+            $result[$filtre->id] = $filtre->getFilterLabel();
+        }
+        return $result;
+    }
+    
+    public function actionChangeLine($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Ligne changé avec succès';
+
+        if(!$this->db->execute('UPDATE llx_bimp_facture_line SET commission_apporteur = "'.$this->id.'-'.$data['filtre'].'" WHERE id = '.$data['idLn']))
+                $errors[] = 'Erreur inconnue';
+        
+        
+        if(!count($errors))
+            $errors = $this->calcTotal ();
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
 
 }

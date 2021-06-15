@@ -57,7 +57,7 @@ objects:
                 module: bimptechnique
                 name: BT_ficheInter_det
     facturation:
-        relation: hasOne
+        relation: hasMany
         instance:
             bimp_object:
                 module: bimptechnique
@@ -163,7 +163,7 @@ fields:
         input:
             type: toggle 
     description:
-        label: Un petit mot de la mama
+        label: Description
         type: html
     logs:
         label: Logs FI
@@ -405,6 +405,9 @@ filters_panels:
           no_linked:
            
 forms:
+    askFacturation:
+        msgs:
+            callback: displayIfMessageFormFi
     factured:
         rows:
             - custom: 1

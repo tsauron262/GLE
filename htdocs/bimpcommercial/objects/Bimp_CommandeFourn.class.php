@@ -2258,8 +2258,18 @@ class Bimp_CommandeFourn extends BimpComm
                                             $equipments = (isset($line_data['equipments']) ? $line_data['equipments'] : array());
 
                                             if (count($equipments)) {
+                                                $eq_lines = $fac_line->getCurrentEquipmentsLinesData();
+                                                
                                                 foreach ($equipments as $id_equipment) {
-                                                    $eq_errors = $fac_line->attributeEquipment((int) $id_equipment, 0, false, false);
+                                                    $id_eq_line_to_attr = 0;
+                                                    foreach ($eq_lines as $id_eq_line => $id_eq) {
+                                                        if (!(int) $id_eq) {
+                                                            $id_eq_line_to_attr = (int) $id_eq_line;
+                                                            break;
+                                                        }
+                                                    }
+                                                    
+                                                    $eq_errors = $fac_line->attributeEquipment((int) $id_equipment, $id_eq_line_to_attr, false, false);
                                                     if (count($eq_errors)) {
                                                         $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
                                                         if (BimpObject::objectLoaded($equipment)) {
@@ -2268,6 +2278,10 @@ class Bimp_CommandeFourn extends BimpComm
                                                             $eq_label = 'd\'ID ' . $id_equipment;
                                                         }
                                                         $warnings[] = BimpTools::getMsgFromArray($eq_errors, 'Ligne n°' . $i . ': échec de l\'attribution de l\'équipement ' . $eq_label);
+                                                    } else {
+                                                        if ($id_eq_line_to_attr) {
+                                                            $eq_lines[$id_eq_line_to_attr] = $id_equipment;
+                                                        }
                                                     }
                                                 }
                                                 $fac_line->calcPaByEquipments();

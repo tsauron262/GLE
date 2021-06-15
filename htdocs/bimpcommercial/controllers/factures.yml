@@ -15,6 +15,12 @@ objects:
                 module: bimpcommercial
                 name: Bimp_FactureLine
                 
+    facture_line_equipment: 
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_FactureLineEquipment
+                
     paiement:
         instance: 
             bimp_object: 
@@ -26,21 +32,25 @@ objects:
             bimp_object: 
                 module: bimpcommercial
                 name: Bimp_Paiement_Facture
+                
     PaiementInc: 
         instance: 
             bimp_object:  
                 module: bimpfinanc
                 name: Bimp_PaiementInc 
+                
     commission:
         instance:
             bimp_object:  
                 module: bimpfinanc
                 name: BimpCommission
+                
     revalorisation: 
         instance:
             bimp_object:  
                 module: bimpfinanc
                 name: BimpRevalorisation     
+                
     statsDate: 
         instance: 
             bimp_object: 
@@ -84,6 +94,14 @@ sections:
                         params: 
                             - renderProdsTabs
                             - prods
+        equipments: 
+            label: Equipements en facture
+            sections: 
+                - type: list
+                  list: 
+                      object: facture_line_equipment
+                      name: globale
+                  
         statLnFact:
             label: Stats Lignes Factures
             sections:

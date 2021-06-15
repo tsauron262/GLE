@@ -23,6 +23,7 @@ class BT_ficheInter extends BimpDolObject {
     CONST STATUT_TERMINER = 2;
     CONST STATUT_SIGANTURE_PAPIER = 4;
     CONST STATUT_DEMANDE_FACT =  10;
+    CONST STATUT_ATTENTE_VALIDATION = 11;
     CONST URGENT_NON = 0;
     CONST URGENT_OUI = 1;
     CONST TYPE_NO = 0;
@@ -45,7 +46,8 @@ class BT_ficheInter extends BimpDolObject {
         self::STATUT_VALIDER => ['label' => "Signée par le client", 'icon' => 'check', 'classes' => ['success']],
         self::STATUT_TERMINER => ['label' => "Terminée", 'icon' => 'thumbs-up', 'classes' => ['important']],
         self::STATUT_SIGANTURE_PAPIER => ['label' => "Attente signature client", 'icon' => 'warning', 'classes' => ['important']],
-        self::STATUT_DEMANDE_FACT => ['label' => "Demande de facturation", 'icon' => 'euro', 'classes' => ['important']],
+        self::STATUT_DEMANDE_FACT => ['label' => "Attente de facturation", 'icon' => 'euro', 'classes' => ['important']],
+        self::STATUT_ATTENTE_VALIDATION => ['label' => "Attente de validation commercial", 'icon' => 'thumbs-up', 'classes' => ['important']],
     ];
     
     public static $urgent = [
@@ -855,31 +857,67 @@ class BT_ficheInter extends BimpDolObject {
             'success' => $success
         );
     }
+    
+    public function displayIfMessageFormFi() {
+        $children = $this->getChildrenList("facturation");
+        $msgs = [];
+        
+        if(count($children) > 0) {
+            foreach($children as $id_child) {
+                $child = $this->getChildObject('facturation', $id_child);
+            }
+        }
+//            $msgs[] = Array(
+//                'type' => 'warning',
+//                'content' => print_r($children)
+//            );
+ 
+        
+        return $msgs;
+    }
+    
+    public function actionAskFacturation($data, &$success) {
+        
+    }
 
     public function getActionsButtons() {
         global $conf, $langs, $user;
         $buttons = Array();
         $statut = $this->getData('fk_statut');
-        
+
         if(!$this->isOldFi()) {
-            if($statut == 0) {
-                $buttons[] = array(
-                    'label' => 'Générer le PDF',
-                    'icon' => 'fas_file-pdf',
-                    'onclick' => $this->getJsActionOnclick('generatePdf', array(), array())
-                );
-            }
-            
         
         $interne_soc = explode(',', BimpCore::getConf('bimptechnique_id_societe_auto_terminer'));
         
         $children = $this->getChildrenList("inters");
         
+        if($statut == self::STATUT_VALIDER) {
+            
+            $buttons[] = array(
+                'label' => 'Demander la facturation',
+                'icon' => 'fas_hand-holding-usd',
+                'onclick' => $this->getJsActionOnclick('askFacturation', array(), array(
+                    'form_name' => 'askFacturation'
+                ))
+            );
+            
+        }
+        
+        if($statut  == self::STATUT_BROUILLON) {
+            $buttons[] = array(
+                'label' => 'Générer le PDF',
+                'icon' => 'file-pdf',
+                'onclick' => $this->getJsActionOnclick('generatePdf', array(), array(
+            ))
+        );
+        }
+        
+        
         if($statut != self::STATUT_VALIDER) {
             if($statut == self::STATUT_BROUILLON) {
                 if(!in_array($this->getData('fk_soc'), $interne_soc)) {
                     $buttons[] = array(
-                        'label' => 'Lier une ou plusieur commandes client',
+                        'label' => 'Lier une ou plusieurs commandes client',
                         'icon' => 'link',
                         'onclick' => $this->getJsActionOnclick('linked_commande_client', array(), array(
                             'form_name' => 'linked_commande_client'
@@ -896,7 +934,7 @@ class BT_ficheInter extends BimpDolObject {
                     }
                 }
                 $buttons[] = array(
-                    'label' => 'Lier un ou plusieur tickets support',
+                    'label' => 'Lier un ou plusieurs tickets support',
                     'icon' => 'link',
                     'onclick' => $this->getJsActionOnclick('linked_ticket_client', array(), array(
                         'form_name' => 'linked_ticket_client'
@@ -1329,6 +1367,7 @@ class BT_ficheInter extends BimpDolObject {
     
  
     public function farSign($mail_signataire) {
+        global $user;
         $public_url = md5($this->getData('ref'));
                 
         $continue = true;
@@ -1350,6 +1389,7 @@ class BT_ficheInter extends BimpDolObject {
         }
         
         if($haveFind) {
+            $this->dol_object->setValid($user);
             $today = new DateTime();
             $this->updateField('email_signature', $mail_signataire);
             $this->updateField('public_signature_url', $public_url);
@@ -1787,7 +1827,7 @@ class BT_ficheInter extends BimpDolObject {
                 }
             }
         } else {
-            $html .= BimpRender::renderAlerts("Il n'y a pas de tickets liées sur cette fiche d'intervention", "info", false);
+            $html .= BimpRender::renderAlerts("Il n'y a pas de tickets liés sur cette fiche d'intervention", "info", false);
         }
 
         return $html;
@@ -1839,7 +1879,7 @@ class BT_ficheInter extends BimpDolObject {
     
     public function displayTypeSignature() {
         if($this->getData('fk_statut') == 0) {
-            return "<strong class='warning'>".BimpRender::renderIcon("times")." Fiche d'intervention pas encote signée</strong>";
+            return "<strong class='warning'>".BimpRender::renderIcon("times")." Fiche d'intervention pas encore signée</strong>";
         } else {
             switch($this->getData('type_signature')) {
                 case 0:
@@ -1871,29 +1911,35 @@ class BT_ficheInter extends BimpDolObject {
     
     public function renderSignatureTab() {
         $html = "";
+        global $user;
         if(!$this->isOldFi()) {
             if($this->isNotSign()) {
                 $tickets = (json_decode($this->getData('tickets'))) ? json_decode($this->getData('tickets')) : [];
 
-                $info = "<b>" . BimpRender::renderIcon('warning') . "</b> Si vous avez des tickets support et que vous ne les voyez pas dans le formulaire, rechargez la page en cliquant sur le boutton suivant: <a href='".DOL_URL_ROOT."/bimptechnique/?fc=fi&id=".$this->id."&navtab-maintabs=signature'><button class='btn btn-default'>Rafraîchire la page</button></a>";
+                $info = "<b>" . BimpRender::renderIcon('warning') . "</b> Si vous avez des tickets support et que vous ne les voyez pas dans le formulaire, rechargez la page en cliquant sur le bouton suivant: <a href='".DOL_URL_ROOT."/bimptechnique/?fc=fi&id=".$this->id."&navtab-maintabs=signature'><button class='btn btn-default'>Rafraîchire la page</button></a>";
                 $html .= "<h4>$info</h4>";
                 
-                $html .= "<h3><u>Types de signature</u></h3>";
+                $interne = explode(",", BimpCore::getConf("bimptechnique_id_societe_auto_terminer"));
+
+                $html .= "<h3><u>Type de signature</u></h3>";
                 $html .= '<h3><div class="check_list_item" id="checkList" >'
                     . '<input checked="true" type="checkbox" id="BimpTechniqueSign" class="check_list_item_input">'
                     . '<label for="BimpTechniqueSign">'
                     . BimpRender::renderIcon('fas_signature') . ' Signature électronique'
                     . '</label></div></h3>';
-                $html .= '<h3><div class="check_list_item" id="checkListFar" >'
-                    . '<input type="checkbox" id="BimpTechniqueSignFar" class="check_list_item_input">'
-                    . '<label for="BimpTechniqueSignFar">'
-                    . BimpRender::renderIcon('fas_sign') . ' Signature à distance'
-                    . '</label></div></h3>';
-                $html .= '<h3><div class="check_list_item" id="checkListPaper" >'
-                    . '<input type="checkbox" id="BimpTechniqueSignChoise" class="check_list_item_input">'
-                    . '<label for="BimpTechniqueSignChoise">'
-                    . BimpRender::renderIcon('paper-plane') . ' Signature papier'
-                    . '</label></div></h3>';
+                if(!in_array($this->getData('fk_soc'), $interne) || $user->admin) {
+                    $html .= '<h3><div class="check_list_item" id="checkListFar" >'
+                        . '<input type="checkbox" id="BimpTechniqueSignFar" class="check_list_item_input">'
+                        . '<label for="BimpTechniqueSignFar">'
+                        . BimpRender::renderIcon('fas_sign') . ' Signature à distance'
+                        . '</label></div></h3>';
+                    $html .= '<h3><div class="check_list_item" id="checkListPaper" >'
+                        . '<input type="checkbox" id="BimpTechniqueSignChoise" class="check_list_item_input">'
+                        . '<label for="BimpTechniqueSignChoise">'
+                        . BimpRender::renderIcon('paper-plane') . ' Signature papier'
+                        . '</label></div></h3>';
+                }
+                
                 $html .= "<br /><h3><u>Formulaire de signature</u></h3>";
                 $html .= '<div class="row formRow" id="nomSignataireTitle">'
                     . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1"  required>Nom du signataire</div>'
@@ -1916,14 +1962,14 @@ class BT_ficheInter extends BimpDolObject {
                 $html .= '<div class="row formRow">'
                     . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Attente client</div>'
                     . '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
-                        . '&Agrave; remplire obligatoirement uniquement si l\'intervention n\'a pas été terminée suite à un évènement dût au client. (Visible sur la FI)'
+                        . '&Agrave; remplir obligatoirement si l\'intervention n\'a pas été terminée suite à un évènement dû au client. (Visible sur la FI)'
                     . '<div class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
                     . '<textarea id="attente_client" name="attente_client" rows="4" style="margin-top: 5px; width: 90%;" class="flat"></textarea>'
                     . '</div></div></div>';
                 $html .= '<div class="row formRow">'
-                    . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Intervention non terminer</div>'
+                    . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Intervention non terminée</div>'
                     . '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
-                        . '&Agrave; remplire obligatoirement uniquement si l\'intervention n\'est pas terminée (Autre que attente client) (Visible sur la FI).'
+                        . '&Agrave; remplir obligatoirement si l\'intervention n\'est pas terminée (Autre que attente client) (Visible sur la FI).'
                     . '<div class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
                     . '<textarea id="inter_no_finish" name="inter_no_finish" rows="4" style="margin-top: 5px; width: 90%;" class="flat"></textarea>'
                     . '</div></div></div>';

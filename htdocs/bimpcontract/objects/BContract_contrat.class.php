@@ -118,6 +118,7 @@ class BContract_contrat extends BimpDolObject
         self::CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION => 'Sur proposition'
     );
     public static $renouvellement_edit = Array(
+        0                                            => 'Aucun',
         self::CONTRAT_RENOUVELLEMENT_1_FOIS          => 'Tacite 1 fois',
         self::CONTRAT_RENOUVELLEMENT_2_FOIS          => 'Tacite 2 fois',
         self::CONTRAT_RENOUVELLEMENT_3_FOIS          => 'Tacite 3 fois',
@@ -1716,7 +1717,21 @@ class BContract_contrat extends BimpDolObject
                         'success_callback' => $callback
                 )));
             }
-            if (($status == self::CONTRAT_STATUS_BROUILLON || $status == self::CONTRAT_STATUS_WAIT ) && ($user->rights->bimpcontract->to_generate)) {
+            
+            if($status == self::CONTRAT_STATUS_BROUILLON) {
+                $buttons[] = array(
+                        'label'   => 'Générer le PDF du contrat',
+                        'icon'    => 'fas_file-pdf',
+                        'onclick' => $this->getJsActionOnclick('generatePdf', array(), array())
+                    );
+                $buttons[] = array(
+                        'label'   => 'Générer le PDF du courrier',
+                        'icon'    => 'fas_file-pdf',
+                        'onclick' => $this->getJsActionOnclick('generatePdfCourrier', array(), array())
+                    );
+            }
+            
+            if (($status != self::CONTRAT_STATUS_BROUILLON || $status == self::CONTRAT_STATUS_WAIT ) && ($user->rights->bimpcontract->to_generate)) {
 
                 if ($status != self::CONTRAT_STATUS_CLOS && $status != self::CONTRAT_STATUS_ACTIVER && $status != self::CONTRAT_STATUS_ACTIVER_TMP && $status != self::CONTRAT_STATUS_ACTIVER_SUP) {
                     $buttons[] = array(
@@ -2362,6 +2377,7 @@ class BContract_contrat extends BimpDolObject
             }
 
             $this->updateField('ref', $ref);
+            $this->updateField('initial_renouvellement', $this->getData('tacite'));
             $this->addLog('Contrat validé');
             $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
             $commercial = $this->getInstance("bimpcore", 'Bimp_User', $this->getData('fk_commercial_suivi'));

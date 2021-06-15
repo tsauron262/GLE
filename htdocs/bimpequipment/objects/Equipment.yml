@@ -565,6 +565,10 @@ lists_cols:
             callback: displayCurrentPlace
         search: 
             type: value_part
+    factFourn: 
+        label: Facture d'achat
+        value:
+            callback: displayFactFourn
     place2: 
         label: Type emplacement
         value:

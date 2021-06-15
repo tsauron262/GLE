@@ -839,6 +839,57 @@ function onFactureFormSubmit($form, extra_data) {
     return extra_data;
 }
 
+function FactureLinesInputAddAll($button) {
+    var $container = $button.findParentByClass('facture_lines_inputContainer');
+
+    if ($.isOk($container)) {
+        $container.find('input.line_facture_qty').each(function () {
+            var max = $(this).data('max');
+            $(this).val(max).change();
+
+            var id_line = $(this).data('id_line');
+
+            var $tr = $container.find('#facture_line_' + id_line + '_equipments');
+            if ($.isOk($tr)) {
+                $tr.find('.check_list_item_input').each(function () {
+                    if (max > 0) {
+                        $(this).prop('checked', true).change();
+                        max--;
+                    } else {
+                        $(this).prop('checked', false).change();
+                    }
+                });
+            }
+        });
+        $container.find('input.line_facture_periods').each(function () {
+            var max = $(this).data('max');
+            $(this).val(max).change();
+        });
+    }
+}
+
+function FactureLinesInputRemoveAll($button) {
+    var $container = $button.findParentByClass('facture_lines_inputContainer');
+
+    if ($.isOk($container)) {
+        $container.find('input.line_facture_qty').each(function () {
+            $(this).val(0).change();
+
+            var id_line = $(this).data('id_line');
+
+            var $tr = $container.find('#facture_line_' + id_line + '_equipments');
+            if ($.isOk($tr)) {
+                $tr.find('.check_list_item_input').each(function () {
+                    $(this).prop('checked', false).change();
+                });
+            }
+        });
+        $container.find('input.line_facture_periods').each(function () {
+            $(this).val(0).change();
+        });
+    }
+}
+
 // Logistique commandes fournisseur: 
 
 function onCommandeFournReceptionDetailsViewLoaded($view) {

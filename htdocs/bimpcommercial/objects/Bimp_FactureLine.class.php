@@ -104,8 +104,9 @@ class Bimp_FactureLine extends ObjectLine
     }
 
     // Getters params: 
-    
-    public function getListExtraBtnApporteur(){
+
+    public function getListExtraBtnApporteur()
+    {
         $buttons = array();
 
         if ($this->isLoaded() && $this->isNotTypeText()) {
@@ -118,7 +119,12 @@ class Bimp_FactureLine extends ObjectLine
                 $buttons[] = array(
                     'label'   => 'Supprimer de la commission',
                     'icon'    => 'fas_trash',
-                    'onclick' => $commission->getJsActionOnclick('delLine', array('idLn'=>$this->id, 'idFiltre'=>$idFiltre))
+                    'onclick' => $commission->getJsActionOnclick('delLine', array('idLn' => $this->id, 'idFiltre' => $idFiltre))
+                );
+                $buttons[] = array(
+                    'label'   => 'Changer de la commission',
+                    'icon'    => 'fas_exchange-alt',
+                    'onclick' => $commission->getJsActionOnclick('changeLine', array('idLn' => $this->id, 'idFiltre' => $idFiltre), array('form_name' => 'change'))
                 );
             }
         }
@@ -226,11 +232,12 @@ class Bimp_FactureLine extends ObjectLine
     }
 
     // Affichages: 
-    
-    public function displayCommissionApporteur(){
+
+    public function displayCommissionApporteur()
+    {
         $temp = $this->getData('commission_apporteur');
         $tabT = explode('-', $temp);
-        if(isset($tabT[0]) && $tabT[0] > 0){
+        if (isset($tabT[0]) && $tabT[0] > 0) {
             $obj = BimpCache::getBimpObjectInstance('bimpfinanc', 'Bimp_CommissionApporteur', $tabT[0]);
             return $obj->getLink();
         }
@@ -327,13 +334,13 @@ class Bimp_FactureLine extends ObjectLine
                         $equipment->set('vente_tva_tx', (float) $this->tva_tx);
                         $equipment->set('date_vente', date('Y-m-d H:i:s'));
                         $equipment->set('id_facture', (int) $this->getData('id_obj'));
-                
-                        if(!static::useLogistique()){
+
+                        if (!static::useLogistique()) {
                             $facture = $this->getParentInstance();
                             $place = $equipment->getCurrentPlace();
                             if (BimpObject::ObjectLoaded($place) && BimpObject::ObjectLoaded($facture)) {
-                                if($place->getData('type') != BE_Place::BE_PLACE_CLIENT || $place->getData('id_client') != $facture->getData('fk_soc'))
-                                    $equipment->moveToPlace(BE_Place::BE_PLACE_CLIENT, $facture->getData('fk_soc'), 'Vente '.$facture->id, 'Vente : '.$facture->getRef(), 1);
+                                if ($place->getData('type') != BE_Place::BE_PLACE_CLIENT || $place->getData('id_client') != $facture->getData('fk_soc'))
+                                    $equipment->moveToPlace(BE_Place::BE_PLACE_CLIENT, $facture->getData('fk_soc'), 'Vente ' . $facture->id, 'Vente : ' . $facture->getRef(), 1);
                             }
                         }
 
@@ -392,12 +399,12 @@ class Bimp_FactureLine extends ObjectLine
                     $warnings = array();
                     $equipment->update($warnings, true);
                 }
-                
-                
-                if(!static::useLogistique()){
+
+
+                if (!static::useLogistique()) {
                     $place = $equipment->getCurrentPlace();
-                    if($place->getData('type') != BE_Place::BE_PLACE_CLIENT || $place->getData('id_client') != $facture->getData('fk_soc'))
-                        $equipment->moveToPlace(BE_Place::BE_PLACE_CLIENT, $facture->getData('fk_soc'), 'Vente '.$facture->id, 'Vente : '.$facture->getRef(), 1);
+                    if ($place->getData('type') != BE_Place::BE_PLACE_CLIENT || $place->getData('id_client') != $facture->getData('fk_soc'))
+                        $equipment->moveToPlace(BE_Place::BE_PLACE_CLIENT, $facture->getData('fk_soc'), 'Vente ' . $facture->id, 'Vente : ' . $facture->getRef(), 1);
                 }
             }
         }
@@ -682,7 +689,7 @@ class Bimp_FactureLine extends ObjectLine
     }
 
     // Actions: 
-    
+
     public function actionBulkCreateRevalorisation($data, &$success)
     {
         $errors = array();

@@ -69,8 +69,9 @@ class fiController extends BimpController {
                 $instance->updateField('signed', 1);
                 if($farSign == 'true') {
                     $instance->updateField('type_signature', 1);
-                    $instance->updateField('fk_statut', 4);
+                    //$instance->updateField('fk_statut', 4);
                     // Envois mail + Générate code
+                    $instance->dol_object->setValid($user);
                     $instance->farSign($email);
                 }
                 if($isChecked == 'true') {

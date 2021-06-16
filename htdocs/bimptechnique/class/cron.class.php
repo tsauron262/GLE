@@ -43,10 +43,11 @@
                 $tech->fetch($id_tech); 
                 foreach($information as $id_fi => $i) {
                     $fi->fetch($id_fi);
+                    $this->output .= $fi->getNomUrl() . " retard de " . $i['days'] .  " jours " . $tech->getData('email') . "<br />";
                     $mail .= $fi->getNomUrl() . " retard de " . $i['days'] .  " jours<br />";
                 }
                 $mail .= "<br />Si la régularisation a été faite entre temps, merci de ne pas tenir compte de cet email.<br />Cordialement.";
-                $this->output .= $mail;
+                mailSyn2("Fiches d'intervention en brouillon", $tech->getData('email'), null, $mail);
             }
         }
         

@@ -249,7 +249,7 @@ class BimpDolObject extends BimpObject
         return $topic;
     }
 
-    public function getBimpObjectsLinked()
+    public function getBimpObjectsLinked($not_for = '')
     {
         $objects = array();
         if ($this->isLoaded()) {
@@ -294,7 +294,13 @@ class BimpDolObject extends BimpObject
                         $objT = BimpCache::getBimpObjectInstance($module, $class, $id);
 //                        if ($objT->isLoaded()) { // Ne jamais faire ça: BimpCache renvoie null si l'objet n'existe pas => erreur fatale. 
                         if (BimpObject::objectLoaded($objT)) {
-                            $objects[] = $objT;
+                            $clef = $item['type'].$objT->id;
+                            if($not_for != $clef){
+                                $objects[$clef] = $objT;
+                                if($item['type'] == 'commande'){
+                                   $objects = BimpTools::merge_array($objects, $objT->getBimpObjectsLinked((isset($this->dol_object->element)? $this->dol_object->element.$this->id : ''))); 
+                                }
+                            }
                         }
                     }
                 }
@@ -303,7 +309,7 @@ class BimpDolObject extends BimpObject
             $client = $this->getChildObject('client');
 
             if ($client->isLoaded()) {
-                $objects[] = $client;
+                $objects['client'.$client->id] = $client;
             }
         }
 
@@ -365,9 +371,10 @@ class BimpDolObject extends BimpObject
 
     public function getAllFiles($withLink = true)
     {
-        $objects = $this->getBimpObjectsLinked();
         $list = $this->getFilesArray(0);
         if ($withLink) {
+            $objects = $this->getBimpObjectsLinked();
+//           echo '<pre>'; print_r($objects);
             foreach ($objects as $object) {
                 $list = $list + $object->getFilesArray(0);
             }

@@ -129,18 +129,24 @@ class Session {
     }
     // Nettoyage de la BDD
     public function session_nettoyage($sessionMaxLifetime) {
-        if(is_object($this->db)){
-            if($sessionMaxLifetime < 43200)
-                $sessionMaxLifetime = 43200;
-            
-            
-            $timestamp_expiration = time() - $sessionMaxLifetime;
-            $date_expiration = new DateTime("@".$timestamp_expiration);
-            $date_expiration->setTimezone(new DateTimeZone('Europe/Paris'));
+        if(!defined('NO_SESSION_NETTOYAGE') && class_exists('BimpCore')){
+            $date = BimpCore::getConf('date_nettoyage_session');
+            if(!$date || $date < time() - 60){
+                if(is_object($this->db)){
+                    if($sessionMaxLifetime < 43200)
+                        $sessionMaxLifetime = 43200;
 
-            $this->db->query("DELETE FROM ".$this->table." WHERE `update` <= '".$date_expiration->format('Y-m-d H:i:s')."'");
+
+                    $timestamp_expiration = time() - $sessionMaxLifetime;
+                    $date_expiration = new DateTime("@".$timestamp_expiration);
+                    $date_expiration->setTimezone(new DateTimeZone('Europe/Paris'));
+
+                    $this->db->query("DELETE FROM ".$this->table." WHERE `update` <= '".$date_expiration->format('Y-m-d H:i:s')."'");
+                    BimpCore::setConf('date_nettoyage_session', time());
+                }
+                return true;
+            }
         }
-        return true;
     }
     
     public function info($str){

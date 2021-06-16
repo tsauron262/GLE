@@ -25,7 +25,6 @@ class AbstractNotification {
      * Méthode doit être appelée avec super()
      */
     constructor (nom) {
-        
         if (this.constructor == AbstractNotification) {
             throw new Error('La classe abstraite "AbstractNotification" ne peut être instanciée.');
             return;
@@ -439,17 +438,19 @@ function BimpNotification() {
     this.onWindowLoaded = function () {
         
         var bn = this;
-                
-        navigator.permissions.query({name:'notifications'})
-          .then(function(permission_status) {
+              
+        if(typeof navigator.permissions === "object" ){
+            navigator.permissions.query({name:'notifications'})
+              .then(function(permission_status) {
 
-            permission_status.onchange = function() {
-                if(Notification.permission !== "granted")
-                    bn.addButtonAllowNotification();
-                else
-                    bn.removeButtonAllowNotification();
-            };
-        });
+                permission_status.onchange = function() {
+                    if(Notification.permission !== "granted")
+                        bn.addButtonAllowNotification();
+                    else
+                        bn.removeButtonAllowNotification();
+                };
+            });
+        }
 
         
         var now = new Date();

@@ -1,9 +1,13 @@
 <?php
 
 class Bimp_CommissionApporteur extends BimpObject{
+    
+    CONST STATUS_DRAFT = 0;
+    CONST STATUS_VALIDATED = 1;
+    
     public static $status_list = array(
-        0 => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
-        1 => array('label' => 'Validée', 'icon' => 'fas_check', 'classes' => array('success'))
+        self::STATUS_DRAFT      => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
+        self::STATUS_VALIDATED  => array('label' => 'Validée', 'icon' => 'fas_check', 'classes' => array('success'))
     );
     
     public function create(&$warnings = array(), $force_create = false) {
@@ -31,7 +35,7 @@ class Bimp_CommissionApporteur extends BimpObject{
         foreach($tabsFiltres as $filtreObj){
             $filters = array(
                 'commission_apporteur' => array('<' => '0'),
-                'f.fk_facture' => array('IN' => "SELECT DISTINCT(`element_id`) FROM `llx_element_contact` WHERE `fk_c_type_contact` = (SELECT rowid FROM `llx_c_type_contact`  WHERE `code` = 'APPORTEUR' and `source` = 'external' AND `element` = 'facture') AND `fk_socpeople` IN (SELECT `rowid` FROM `llx_socpeople` WHERE `fk_soc` = ".$parent->getData('id_fourn').")")
+                'f.fk_facture' => array('IN' => "SELECT rowid FROM llx_facture WHERE rowid IN (SELECT DISTINCT(`element_id`) FROM `llx_element_contact` WHERE `fk_c_type_contact` = (SELECT rowid FROM `llx_c_type_contact`  WHERE `code` = 'APPORTEUR' and `source` = 'external' AND `element` = 'facture') AND `fk_socpeople` IN (SELECT `rowid` FROM `llx_socpeople` WHERE `fk_soc` = " . $parent->getData('id_fourn') . ")) and fk_statut IN (1, 2)")
             );
             $idProd = $filtreObj->getProductIds();
             if($idProd != 'all')
@@ -84,6 +88,168 @@ class Bimp_CommissionApporteur extends BimpObject{
         );
     }
     
+    public function actionValidate($data, &$success){
+        $errors = array();
+        $warnings = array();
+        $success =  'Commission validée';
+        
+        $errors = BimpTools::merge_array($errors, $this->updateField('status', self::STATUS_VALIDATED)) ;
+        
+        
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+    
+    public function updateField($field, $value) {
+        
+        switch ($field) {
+            case 'status':
+                if($value == self::STATUS_VALIDATED) {
+                    $errors = $this->beforeValidate();
+                    if(count($errors))
+                        return $errors;
+                }
+                break;
+        }
+        
+        return parent::updateField($field, $value);
+    }
+    
+    
+    public function beforeValidate() {
+        
+        $errors = array();
+        $warnings = array();
+        
+        $parent = $this->getParentInstance();
+        
+        $this->createFactureFourn($parent, $new_facture);
+        
+        // Création des lignes
+        $filtres = $parent->getChildrenObjects('filtres', array(), 'position', 'ASC');
+
+        foreach($filtres as $filtre){
+
+            if($filtre->isLoaded()) {
+            
+                $lines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_FactureLine',
+                        array('commission_apporteur' => $this->id . '-' . $filtre->id));
+                                
+                if(count($lines))
+                    $this->createLineLabel($filtre, $new_facture->id);
+                    
+                foreach ($lines as $line)
+                    $errors = BimpTools::merge_array($errors, $this->createFactureFournLine($line, $new_facture, $filtre));
+
+            } else
+                $errors[] = "Erreur avec un des filtres de la commission";
+            
+        }
+        
+        
+        if (count($errors))
+            $errors = BimpTools::merge_array($errors, $new_facture->delete());
+        
+        return $errors;
+        
+    }
+    
+    public function createFactureFourn($parent, &$new_facture) {
+        
+        $fourn = $parent->getChildObject('fourn');
+                
+        $new_facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn');
+        
+        // TODO rajouter dan imp conf
+        
+        $errors = $new_facture->validateArray(array(
+            'entrepot'          => BimpCore::getConf('default_entrepot'),
+            'ef_type'           => 'C',
+            'fk_soc'            => $fourn->id,
+            'fk_cond_reglement' => (int) $new_facture->getCondReglementBySociete(),
+            'fk_mode_reglement' => (int) $new_facture->getModeReglementBySociete(),
+            'ref_supplier'      => 'commission-' . date('d/m/Y') ,
+            'datef'             => date('Y-m-d')
+        ));
+        
+        
+        if (count($errors))
+            return $errors;
+        
+        $errors = $new_facture->create($warnings, true);
+
+        return $errors;
+    }
+    
+    public function createLineLabel($filter, $id_facture) {
+        $errors = array();
+        $new_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFournLine');
+        $errors = BimpTools::merge_array($errors, $new_line->validateArray(array(
+            'type'       => ObjectLine::LINE_TEXT,
+            'id_obj'     => $id_facture,
+        )));
+        
+        $s = 's';
+        $new_line->desc = $filter->getLabel();
+        if(empty($errors))
+            $errors = BimpTools::merge_array($errors, $new_line->create($warnings, true));
+        
+        return $errors;
+    }
+    
+    public function createFactureFournLine($line, $new_facture, $filtre) {
+        
+        $errors = array();
+        
+        if($line->id_product < 1)
+            return $errors;
+        
+        $old_fac_parent = $line->getParentInstance();
+                                    
+        $new_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFournLine');
+
+        $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $line->id_product);
+
+        $errors = BimpTools::merge_array($errors, $new_line->validateArray(array(
+            'type'       => ObjectLine::LINE_FREE,
+            'id_obj'     => (int) $new_facture->getData('id'),
+            'editable'   => 0,
+        )));
+
+        $new_line->pu_ht = $line->pu_ht;
+        $new_line->qty = $line->qty;
+        $new_line->desc = $old_fac_parent->getRef() . " " . $prod->getRef();
+        
+        if(empty($errors))
+            $errors = BimpTools::merge_array($errors, $new_line->create($warnings, true));
+
+        if(empty($errors))
+            $errors = BimpTools::merge_array($errors, $this->createRemise(
+                    (int) $new_line->id, (100 - $filtre->getData('commition'))));
+        
+        return $errors;
+    }
+
+    public function createRemise($id_line, $a_payer) {
+        $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
+        $errors =  $remise->validateArray(array(
+            'id_object_line' => $id_line,
+            'object_type'    => 'facture_fournisseur',
+            'type'           => $remise::OL_REMISE_PERCENT,
+            'label'          => 'Issue d\'une commission apporteur',
+            'percent'        => $a_payer
+
+        ));
+        
+        if(empty($errors))
+            $errors = $remise->create();
+           
+        return $errors;
+    }
+    
+    
     public function calcTotal(){
         $errors = array();
         $parent = $this->getParentInstance();
@@ -110,6 +276,8 @@ class Bimp_CommissionApporteur extends BimpObject{
             'warnings' => $warnings
         );
     }
+    
+    
         
     public function getActionsButtons()
     {
@@ -127,11 +295,38 @@ class Bimp_CommissionApporteur extends BimpObject{
                     );
                 }
             }
+            
+            if ($this->isActionAllowed('validate', $errors)) {
+                if ($this->canSetAction('validate')) {
+                    $buttons[] = array(
+                        'label'   => 'Valider',
+                        'icon'    => 'fas_check',
+                        'onclick' => $this->getJsActionOnclick('validate', array(), array(
+                            'confirm_msg' => 'Veuillez confirmer la validation de cette commission'
+                        ))
+                    );
+                } else {
+                    $errors = 'Vous n\'avez pas la permission de valider cette commission';
+                }
+            }
         }
         return $buttons;
     }
     
-    
+    public function isActionAllowed($action, &$errors = array()) {
+        
+        switch ($action) {
+            case 'addNewFatureLine':
+            case 'validate':
+                return $this->getData('status') == self::STATUS_DRAFT;
+        }
+        
+        return parent::isActionAllowed($action, $errors);
+    }
+
+
+
+
     public function renderDetailsView()
     {
         if (!$this->isLoaded()) {
@@ -147,7 +342,7 @@ class Bimp_CommissionApporteur extends BimpObject{
         $factureLine = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
         $list_name = 'commission_apporteur';
         foreach($tabsFiltres as $filtre){
-            $bc_list = new BC_ListTable($factureLine, $list_name, 1, null, 'Ligne de facture : '.$filtre->getFilterLabel(), 'fas_check');
+            $bc_list = new BC_ListTable($factureLine, $list_name, 1, null, $filtre->getLabel(), 'fas_check');
             $bc_list->addFieldFilterValue('commission_apporteur', $this->id.'-'.$filtre->id);
             $bc_list->addIdentifierSuffix('comm_'.$filtre->id.'_' . $this->id);
 

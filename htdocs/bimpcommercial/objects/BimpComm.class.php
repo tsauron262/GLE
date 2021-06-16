@@ -381,8 +381,8 @@ class BimpComm extends BimpDolObject
             if (!$client->isSolvable($this->object_name)) {
                 global $user;
 //                echo '<pre>';print_r($user->rights);
-                if($user->rights->bimpcommercial->admin_financier)
-                return 1;
+                if ($user->rights->bimpcommercial->admin_financier)
+                    return 1;
             }
         }
 
@@ -1111,10 +1111,10 @@ class BimpComm extends BimpDolObject
 
         return $this->margins_infos;
     }
-    
+
     public function getProvLink()
     {
-        return str_replace($this->getRef(), '(PROV'.$this->id.')', $this->getLink());
+        return str_replace($this->getRef(), '(PROV' . $this->id . ')', $this->getLink());
     }
 
     public function getCondReglementBySociete()
@@ -1783,7 +1783,6 @@ class BimpComm extends BimpDolObject
                 $total_marge = $total_pv - $total_pa;
                 $tx = 0;
 
-
                 if (BimpCore::getConf('bimpcomm_tx_marque')) {
                     if ($total_pv) {
                         $tx = ($total_marge / $total_pv) * 100;
@@ -1833,7 +1832,6 @@ class BimpComm extends BimpDolObject
 
             $html .= '<tbody>';
 
-
             if (count($files_list)) {
                 $url = DOL_URL_ROOT . '/document.php?modulepart=' . static::$dol_module . '&file=' . dol_sanitizeFileName($this->getRef()) . urlencode('/');
                 foreach ($files_list as $file) {
@@ -1856,7 +1854,6 @@ class BimpComm extends BimpDolObject
                         $html .= date('d / m / Y H:i:s', $file['date']);
                     }
                     $html .= '</td>';
-
 
                     $html .= '<td class="buttons">';
                     $html .= BimpRender::renderRowButton('Aperçu', 'search', '', 'documentpreview', array(
@@ -2400,7 +2397,6 @@ class BimpComm extends BimpDolObject
             $params = array(
                 'is_clone' => true
             );
-
 
             if (isset($new_data['inverse_qty']))
                 $params['inverse_qty'] = $new_data['inverse_qty'];
@@ -3119,7 +3115,6 @@ class BimpComm extends BimpDolObject
                 $total_ttc = (float) $this->getTotalTtcWithoutRemises(true);
                 $total_lines = 0;
 
-
                 foreach ($lines as $line) {
                     if ($line->isRemisable()) {
                         $total_lines += (float) $line->getTotalTtcWithoutRemises();
@@ -3479,7 +3474,55 @@ class BimpComm extends BimpDolObject
 
     public function onDelete(&$warnings = array())
     {
-        return array();
+        $errors = array();
+
+        if ($this->isLoaded($warnings)) {
+            $lines = $this->getLines();
+
+            // Suppression des objectLines: 
+            foreach ($lines as $line) {
+                $line_pos = $line->getData('position');
+                $line_warnings = array();
+                $line->bimp_line_only = true;
+                $line_errors = $line->delete($line_warnings, true);
+
+                $line_errors = BimpTools::merge_array($line_warnings, $line_errors);
+                if (count($line_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Erreurs lors de la suppression de la ligne n°' . $line_pos);
+                }
+            }
+
+            // Suppression des remises globales: 
+            $remisesGlobales = $this->getRemisesGlobales();
+            foreach ($remisesGlobales as $rg) {
+                $rg_warnings = array();
+                $rg_errors = $rg->delete($rg_warnings, true);
+
+                if (count($rg_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($rg_errors, 'Echec de la suppression de la remise globale #' . $rg->id);
+                }
+            }
+
+            // Suppression des demandes de validation liées à cet objet
+            $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+            $type_de_piece = $valid_comm::getObjectClass($this);
+            $filters = array(
+                'type_de_piece' => (int) $type_de_piece,
+                'id_piece'      => (int) $this->id
+            );
+            $demandes_a_suppr = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filters);
+
+            foreach ($demandes_a_suppr as $d) {
+                $dem_warnings = array();
+                $dem_errors = $d->delete($dem_warnings, true);
+
+                if (count($dem_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($dem_errors, 'Echec de la suppression de la demande de validation #' . $rg->id);
+                }
+            }
+        }
+
+        return $errors;
     }
 
     public function onValidate(&$warnings = array())
@@ -3855,8 +3898,7 @@ class BimpComm extends BimpDolObject
             'warnings'         => array()
         ];
     }
-    
-    
+
     public function actionGenerateBulkPdf($data, &$success)
     {
         $errors = array();
@@ -3870,7 +3912,7 @@ class BimpComm extends BimpDolObject
             return array('Trop de PDF action impossible');
 
         if (!is_array($id_objs) || empty($id_objs)) {
-            $errors[] = 'Aucune '.$this->getLabel().' sélectionnée';
+            $errors[] = 'Aucune ' . $this->getLabel() . ' sélectionnée';
         } else {
             $files = array();
 
@@ -3878,7 +3920,7 @@ class BimpComm extends BimpDolObject
                 $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_obj);
 
                 if (!BimpObject::objectLoaded($obj)) {
-                    $warnings[] = ucfirst($this->getLabel('the')).' d\'ID ' . $id_obj . ' n\'existe pas';
+                    $warnings[] = ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_obj . ' n\'existe pas';
                     continue;
                 }
 
@@ -3886,7 +3928,7 @@ class BimpComm extends BimpDolObject
                 $filename = $obj->getRef() . '.pdf';
 
                 if (!file_exists($dir . $filename)) {
-                    $warnings[] = ucfirst($this->getLabel()).' ' . $obj->getLink() . ': fichier PDF absent (' . $dir . $filename . ')';
+                    $warnings[] = ucfirst($this->getLabel()) . ' ' . $obj->getLink() . ': fichier PDF absent (' . $dir . $filename . ')';
                     continue;
                 }
 
@@ -3896,7 +3938,7 @@ class BimpComm extends BimpDolObject
             if (!empty($files)) {
                 global $user;
                 require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpPDF.php';
-                $fileName = 'bulk_'.$this->dol_object->element.'_' . $user->id . '.pdf';
+                $fileName = 'bulk_' . $this->dol_object->element . '_' . $user->id . '.pdf';
                 $dir = PATH_TMP . '/bimpcore/';
 
                 $pdf = new BimpConcatPdf();
@@ -3929,7 +3971,7 @@ class BimpComm extends BimpDolObject
             return array('Trop de PDF action impossible');
 
         if (!is_array($id_objs) || empty($id_objs)) {
-            $errors[] = 'Aucune '.$this->getLabel().' sélectionnée';
+            $errors[] = 'Aucune ' . $this->getLabel() . ' sélectionnée';
         } else {
             $files = array();
 
@@ -3937,7 +3979,7 @@ class BimpComm extends BimpDolObject
                 $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_obj);
 
                 if (!BimpObject::objectLoaded($obj)) {
-                    $warnings[] = ucfirst($this->getLabel('the')).' d\'ID ' . $id_obj . ' n\'existe pas';
+                    $warnings[] = ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_obj . ' n\'existe pas';
                     continue;
                 }
 
@@ -3945,7 +3987,7 @@ class BimpComm extends BimpDolObject
                 $filename = $obj->getRef() . '.pdf';
 
                 if (!file_exists($dir . $filename)) {
-                    $warnings[] = ucfirst($this->getLabel()).' ' . $obj->getLink() . ': fichier PDF absent (' . $dir . $filename . ')';
+                    $warnings[] = ucfirst($this->getLabel()) . ' ' . $obj->getLink() . ': fichier PDF absent (' . $dir . $filename . ')';
                     continue;
                 }
 
@@ -3955,7 +3997,7 @@ class BimpComm extends BimpDolObject
             if (!empty($files)) {
                 global $user;
                 $dir = PATH_TMP . '/bimpcore/';
-                $fileName = 'zip_'.$this->dol_object->element.'_' . $user->id . '.zip';
+                $fileName = 'zip_' . $this->dol_object->element . '_' . $user->id . '.zip';
                 if (file_exists($dir . $fileName))
                     unlink($dir . $fileName);
                 $zip = new ZipArchive();
@@ -3979,7 +4021,6 @@ class BimpComm extends BimpDolObject
             'success_callback' => $success_callback
         );
     }
-
 
     // Overrides BimpObject:
 
@@ -4154,52 +4195,51 @@ class BimpComm extends BimpDolObject
 
     public function delete(&$warnings = array(), $force_delete = false)
     {
-        $lines = $this->getLines();
-        $remisesGlobales = $this->getRemisesGlobales();
-
-
-        // Suppression des demandes de validation liées à cet objet
-        $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
-        $type_de_piece = $valid_comm::getObjectClass($this);
-        $filters = array(
-            'type_de_piece' => (int) $type_de_piece,
-            'id_piece'      => (int) $this->id
-        );
-        $demandes_a_suppr = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filters);
+//        $lines = $this->getLines();
+//        $remisesGlobales = $this->getRemisesGlobales();
+//
+//        // Suppression des demandes de validation liées à cet objet
+//        $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+//        $type_de_piece = $valid_comm::getObjectClass($this);
+//        $filters = array(
+//            'type_de_piece' => (int) $type_de_piece,
+//            'id_piece'      => (int) $this->id
+//        );
+//        $demandes_a_suppr = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filters);
 
         $errors = parent::delete($warnings, $force_delete);
 
-        if (!count($errors)) {
-            foreach ($lines as $line) {
-                $line_pos = $line->getData('position');
-                $line_warnings = array();
-                $line->bimp_line_only = true;
-                $line_errors = $line->delete($line_warnings, true);
-
-                $line_errors = BimpTools::merge_array($line_warnings, $line_errors);
-                if (count($line_errors)) {
-                    $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Erreurs lors de la suppression de la ligne n°' . $line_pos);
-                }
-            }
-
-            foreach ($remisesGlobales as $rg) {
-                $rg_warnings = array();
-                $rg_errors = $rg->delete($rg_warnings, true);
-
-                if (count($rg_errors)) {
-                    $warnings[] = BimpTools::getMsgFromArray($rg_errors, 'Echec de la suppression de la remise globale #' . $rg->id);
-                }
-            }
-
-            foreach ($demandes_a_suppr as $d) {
-                $dem_warnings = array();
-                $dem_errors = $d->delete($dem_warnings, true);
-
-                if (count($dem_errors)) {
-                    $warnings[] = BimpTools::getMsgFromArray($dem_errors, 'Echec de la suppression de la demande de validation #' . $rg->id);
-                }
-            }
-        }
+//        if (!count($errors)) {
+//            foreach ($lines as $line) {
+//                $line_pos = $line->getData('position');
+//                $line_warnings = array();
+//                $line->bimp_line_only = true;
+//                $line_errors = $line->delete($line_warnings, true);
+//
+//                $line_errors = BimpTools::merge_array($line_warnings, $line_errors);
+//                if (count($line_errors)) {
+//                    $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Erreurs lors de la suppression de la ligne n°' . $line_pos);
+//                }
+//            }
+//
+//            foreach ($remisesGlobales as $rg) {
+//                $rg_warnings = array();
+//                $rg_errors = $rg->delete($rg_warnings, true);
+//
+//                if (count($rg_errors)) {
+//                    $warnings[] = BimpTools::getMsgFromArray($rg_errors, 'Echec de la suppression de la remise globale #' . $rg->id);
+//                }
+//            }
+//
+//            foreach ($demandes_a_suppr as $d) {
+//                $dem_warnings = array();
+//                $dem_errors = $d->delete($dem_warnings, true);
+//
+//                if (count($dem_errors)) {
+//                    $warnings[] = BimpTools::getMsgFromArray($dem_errors, 'Echec de la suppression de la demande de validation #' . $rg->id);
+//                }
+//            }
+//        }
 
         return $errors;
     }

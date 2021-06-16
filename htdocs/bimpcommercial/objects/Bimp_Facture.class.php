@@ -184,7 +184,7 @@ class Bimp_Facture extends BimpComm
 
         return ($user->admin || $user->rights->bimpcommercial->adminPaiement ? 1 : 0);
     }
-    
+
     public function canEditField($field_name)
     {
         global $user;
@@ -214,7 +214,7 @@ class Bimp_Facture extends BimpComm
                     return 0;
                 }
                 break;
-            
+
             case 'litige':
                 return (int) $user->rights->bimpcommercial->admin_recouvrement or (int) $user->admin;
         }
@@ -348,7 +348,7 @@ class Bimp_Facture extends BimpComm
                 // Vérif des lignes: 
                 if ($this->getData('litige'))
                     $errors[] = "Merci de régler le litige avant de valider " . $this->getLabel('the');
-                
+
                 return (count($errors) ? 0 : 1);
 
             case 'modify':
@@ -1300,13 +1300,13 @@ class Bimp_Facture extends BimpComm
             );
         }
         global $user;
-        if($user->admin)
+        if ($user->admin)
             $actions[] = array(
-                'label'   => 'Aj contact UNADERE',
-                'icon'    => 'fas_file-pdf',
+                'label'  => 'Aj contact UNADERE',
+                'icon'   => 'fas_file-pdf',
                 'action' => 'addContacts'
             );
-                    
+
         return $actions;
     }
 
@@ -2448,14 +2448,15 @@ class Bimp_Facture extends BimpComm
 
         return $html;
     }
-    
-    public function displayRetard(){
-        if($this->getRemainToPay() != 0){
+
+    public function displayRetard()
+    {
+        if ($this->getRemainToPay() != 0) {
             $retard = floor((strtotime(date('Y-m-d')) - strtotime($this->getData('date_lim_reglement'))) / 86400);
-            if($retard > 0)
+            if ($retard > 0)
                 return $retard;
         }
-        
+
         return 0;
     }
 
@@ -3732,9 +3733,11 @@ class Bimp_Facture extends BimpComm
                     $echeancier->onDeleteFacture($dateDebutFacture);
                 }
             }
+            
+            $this->majStatusOtherPiece();
         }
 
-        $this->majStatusOtherPiece();
+        $errors = BimpTools::merge_array($errors, parent::onDelete($warnings));
 
         return $errors;
     }
@@ -4567,7 +4570,7 @@ class Bimp_Facture extends BimpComm
 
         return parent::actionAddContact($data, $success);
     }
-    
+
     public function actionAddContacts($data, &$success)
     {
         $errors = $warnings = array();
@@ -4577,12 +4580,12 @@ class Bimp_Facture extends BimpComm
                 'warnings' => $warnings
             );
         }
-        
+
         $data2 = array();
         $data2['id_contact'] = 212418;
         $data2['type'] = 1;
         $data2['tiers_type_contact'] = 832;
-        foreach($data['id_objects'] as $id){
+        foreach ($data['id_objects'] as $id) {
             $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id);
             $result = $obj->actionAddContact($data2, $success);
             $errors = BimpTools::merge_array($errors, $result['errors']);
@@ -5160,7 +5163,7 @@ class Bimp_Facture extends BimpComm
             'warnings' => $warnings
         );
     }
-    
+
     // Overrides BimpObject:
 
     public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)

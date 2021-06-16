@@ -98,9 +98,9 @@ class ValidComm extends BimpObject
      * pour valider cet objet
      */
     public function tryToValidate($bimp_object, $user, &$errors, &$success) {
-        if (BimpCore::isModeDev()) {
-            return 1;
-        }
+//        if (BimpCore::isModeDev()) {
+//            return 1;
+//        }
         
         $valid_comm = 1;
         $valid_finan = 1;
@@ -529,8 +529,7 @@ class ValidComm extends BimpObject
         $filters = array(
             'type_de_piece' => $class,
             'id_piece'      => $id_object,
-            'type'          => $type,
-            'id_valid_comm' => $id_valid_comm
+            'type'          => $type
         );
         
         $demandes = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filters);
@@ -540,6 +539,7 @@ class ValidComm extends BimpObject
             $d->updateField('id_user_valid', $id_user);
             $d->updateField('date_valid', $now);
             $d->updateField('status', $status);
+            $d->updateField('id_valid_comm', $id_valid_comm);
             return 1;
         }
         

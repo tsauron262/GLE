@@ -782,6 +782,8 @@ lists:
                 label: Annuler
                 icon: fas_times
                 onclick: setSelectedObjectsAction($(this), 'list_id', 'cancel', {}, '', 'Veuillez confirmer', true)
+        extra_bulk_actions: 
+            callback: getListExtraBulkActions
         list_actions: 
             callback: getFilteredListActions
         sort_field: date_creation

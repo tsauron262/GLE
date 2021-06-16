@@ -133,7 +133,6 @@ class Bimp_FactureFourn extends BimpComm
                 }
                 break;
 
-
             case 'classifyPaid':
                 if ($status !== FactureFournisseur::STATUS_VALIDATED) {
                     $errors[] = $objLabel . ' doit être au statut "Validé' . $this->e() . '"';
@@ -220,7 +219,6 @@ class Bimp_FactureFourn extends BimpComm
     public function canSetAction($action)
     {
         global $conf, $user;
-
 
         switch ($action) {
             case 'modify':
@@ -406,7 +404,7 @@ class Bimp_FactureFourn extends BimpComm
                 $buttons[] = array(
                     'label'   => 'Cloner',
                     'icon'    => 'fas_copy',
-                    'onclick' => $this->getJsActionOnclick('duplicate', array( 'datef' => date('Y-m-d'), 'exported'=>0, 'fk_user_author' => $user->id), array(
+                    'onclick' => $this->getJsActionOnclick('duplicate', array('datef' => date('Y-m-d'), 'exported' => 0, 'fk_user_author' => $user->id), array(
                         'confirm_msg' => 'Etes-vous sûr de vouloir cloner ' . $this->getLabel('this'),
                         'form_name'   => 'duplicate_factfourn'
                     ))
@@ -602,7 +600,6 @@ class Bimp_FactureFourn extends BimpComm
             $html .= '<div class="object_header_infos">';
             $html .= 'Date facture <strong>' . $this->displayData('datef', 'default', false, true) . '</strong>';
             $html .= '</div>';
-
 
             $fourn = $this->getChildObject('fournisseur');
             if (BimpObject::objectLoaded($fourn)) {
@@ -846,7 +843,6 @@ class Bimp_FactureFourn extends BimpComm
             $mult = 1;
             $title = 'Paiements effectués';
 
-
             $rows = $this->db->getRows('paiementfourn_facturefourn', '`fk_facturefourn` = ' . (int) $this->id, null, 'array');
 
             $html = '<table class="bimp_list_table">';
@@ -1022,6 +1018,8 @@ class Bimp_FactureFourn extends BimpComm
 
     public function onDelete(&$warnings = array())
     {
+        $errors = array();
+
         if ($this->isLoaded($warnings)) {
             $receptions = BimpCache::getBimpObjectObjects('bimplogistique', 'BL_CommandeFournReception', array(
                         'id_facture' => (int) $this->id
@@ -1031,7 +1029,10 @@ class Bimp_FactureFourn extends BimpComm
                 $reception->updateField('id_facture', 0);
             }
         }
-        return array();
+        
+        $errors = BimpTools::merge_array($errors, parent::onDelete($warnings));
+
+        return $errors;
     }
 
     public function convertToReduc($validate = true)
@@ -1064,7 +1065,7 @@ class Bimp_FactureFourn extends BimpComm
                     $amount_ht[$line->tva_tx] += $line->total_ht;
                     $amount_tva[$line->tva_tx] += $line->total_tva;
                     $amount_ttc[$line->tva_tx] += $line->total_ttc;
-                    $i ++;
+                    $i++;
                 }
             }
 
@@ -1177,7 +1178,6 @@ class Bimp_FactureFourn extends BimpComm
         $infos = array();
 
         $success = 'Facture fournisseur validée avec succès';
-
 
         $errors = $this->checkDate();
 

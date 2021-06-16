@@ -2823,6 +2823,7 @@ class BS_SAV extends BimpObject
                     $tabFile3[] = "PC-" . $ref_propal . ".pdf";
                 }
 
+                if(!in_array($msg_type,array('debDiago', 'debut'))){
                 $fileProp = DOL_DATA_ROOT . "/propale/" . $ref_propal . "/" . $ref_propal . ".pdf";
                 if (is_file($fileProp)) {
                     $tabFile[] = $fileProp;
@@ -2830,7 +2831,8 @@ class BS_SAV extends BimpObject
                     $tabFile3[] = $ref_propal . ".pdf";
                 } elseif (in_array((int) $this->getData('status'), self::$need_propal_status)) {
                     $errors[] = 'Attention: PDF du devis non trouvé et donc non envoyé au client File : ' . $fileProp;
-                    dol_syslog('SAV "' . $this->getRef() . '" - ID ' . $this->id . ': échec envoi du devis au client ' . print_r($errors, 1), LOG_ERR, 0, "_devissav");
+                    dol_syslog('SAV "' . $this->getRef() . '" - ID ' . $this->id . ': échec envoi du devis au client msg '.$msg_type.' : ' . print_r($errors, 1), LOG_ERR, 0, "_devissav");
+                }
                 }
             } else {
                 unset($propal);

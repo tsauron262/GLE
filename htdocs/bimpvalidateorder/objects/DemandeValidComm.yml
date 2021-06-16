@@ -26,6 +26,17 @@ objects:
         instance: 
             id_object: 
                 field_value: id_user_valid
+                
+    valid_comm: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpvalidateorder
+                name: ValidComm
+            id_object: 
+                field_value: id_valid_comm
+                
 fields:
     status:
         label: Statut
@@ -67,7 +78,7 @@ fields:
     id_user_valid: 
         label: Valideur
         type: id_object
-        object: user_valid  
+        object: user_valid
         input: 
             type: search_user
             
@@ -77,7 +88,12 @@ fields:
         search:
             type: date_range
             
-            
+    id_valid_comm:
+        label: Validation
+        type: id_object
+        object: valid_comm
+        
+        
 fields_tables:
     default: 
         title: Informations
@@ -91,8 +107,8 @@ fields_tables:
                 field: date_create
             date_update:
                 field: date_update
-
-            
+                
+        
 views:
     default:
         rows:
@@ -103,6 +119,24 @@ views:
                     col_sm: 12
                     fields_table:
                         name: default
+                        
+                        
+    valid_comm_details: 
+        rows:     
+            - cols: 
+                - type: custom
+                  col_lg: 12
+                  col_md: 12
+                  col_sm: 12
+                  custom: 
+                      callback: renderValidComm
+                
+    valid_comm: 
+        rows:
+            - cols: 
+                - type: view
+                  view: 
+                      name: valid_comm_details
                             
 lists_cols:     
     piece: 
@@ -119,6 +153,10 @@ lists:
         # enlever delete btn
         delete_btn: 1 
         modal_view: default
+#        bulk_actions: 
+#            callback: getDemandeValidCommExtraButtons
+        extra_btn: 
+            callback: getDemandeValidCommExtraButtons
         cols:
             type:
             status:
@@ -135,3 +173,5 @@ lists:
             id_user_affected: unset
             id_user_valid: unset
             date_valid: unset
+            
+            

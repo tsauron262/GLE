@@ -98,9 +98,9 @@ class ValidComm extends BimpObject
      * pour valider cet objet
      */
     public function tryToValidate($bimp_object, $user, &$errors, &$success) {
-        if (BimpCore::isModeDev()) {
-            return 1;
-        }
+//        if (BimpCore::isModeDev()) {
+//            return 1;
+//        }
         
         $valid_comm = 1;
         $valid_finan = 1;
@@ -175,14 +175,14 @@ class ValidComm extends BimpObject
             if((int) $demande->getData('status') == (int) DemandeValidComm::STATUS_VALIDATED)
                 return 1;
 
-            // Je suis le valideur
-            elseif ((int) $demande->getData('id_user_affected') == (int) $user->id) {
-                $this->updateDemande ((int) $user->id, $class, (int) $bimp_object->id, $type, (int) DemandeValidComm::STATUS_VALIDATED);
-                return 1;
+//            // Je suis le valideur enlever pour ne pas court-circuiter la traçabilité
+//            elseif ((int) $demande->getData('id_user_affected') == (int) $user->id) {
+//                $this->updateDemande ((int) $user->id, $class, (int) $bimp_object->id, $type, (int) DemandeValidComm::STATUS_VALIDATED);
+//                return 1;
                 
             // Je peux valider (sans être le valideur)
-            } elseif($this->userCanValidate((int) $user->id, $secteur, $type, $class, $val, $bimp_object)) {
-                $this->updateDemande ((int) $user->id, $class, (int) $bimp_object->id, $type, (int) DemandeValidComm::STATUS_VALIDATED);
+            elseif($this->userCanValidate((int) $user->id, $secteur, $type, $class, $val, $bimp_object, $id_valid_comm)) {
+                $this->updateDemande ((int) $user->id, $class, (int) $bimp_object->id, $type, (int) DemandeValidComm::STATUS_VALIDATED, $id_valid_comm);
                 return 1;
             }
         
@@ -207,7 +207,7 @@ class ValidComm extends BimpObject
     }
 
     
-    public function userCanValidate($id_user, $secteur, $type, $object, $val, $bimp_object) {
+    public function userCanValidate($id_user, $secteur, $type, $object, $val, $bimp_object, &$valid_comm = 0) {
         
         if($type == self::TYPE_FINANCE) {
             $depassement_actuel = $this->getEncours($bimp_object);
@@ -248,8 +248,10 @@ class ValidComm extends BimpObject
         
         $valid_comms = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'ValidComm', $filters);
 
-        foreach($valid_comms as $vc)
+        foreach($valid_comms as $vc) {
+            $valid_comm = $vc->id;
             return 1;
+        }
 
         return 0;
     }
@@ -522,7 +524,7 @@ class ValidComm extends BimpObject
         return 0;
     }
     
-    public function updateDemande($id_user, $class, $id_object, $type, $status) {
+    public function updateDemande($id_user, $class, $id_object, $type, $status, $id_valid_comm = 0) {
         
         $filters = array(
             'type_de_piece' => $class,
@@ -537,6 +539,7 @@ class ValidComm extends BimpObject
             $d->updateField('id_user_valid', $id_user);
             $d->updateField('date_valid', $now);
             $d->updateField('status', $status);
+            $d->updateField('id_valid_comm', $id_valid_comm);
             return 1;
         }
         

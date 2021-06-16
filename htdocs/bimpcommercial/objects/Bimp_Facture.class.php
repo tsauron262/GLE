@@ -184,7 +184,7 @@ class Bimp_Facture extends BimpComm
 
         return ($user->admin || $user->rights->bimpcommercial->adminPaiement ? 1 : 0);
     }
-    
+
     public function canEditField($field_name)
     {
         global $user;
@@ -214,7 +214,7 @@ class Bimp_Facture extends BimpComm
                     return 0;
                 }
                 break;
-            
+
             case 'litige':
                 return (int) $user->rights->bimpcommercial->admin_recouvrement or (int) $user->admin;
         }
@@ -348,7 +348,7 @@ class Bimp_Facture extends BimpComm
                 // Vérif des lignes: 
                 if ($this->getData('litige'))
                     $errors[] = "Merci de régler le litige avant de valider " . $this->getLabel('the');
-                
+
                 return (count($errors) ? 0 : 1);
 
             case 'modify':
@@ -1300,13 +1300,13 @@ class Bimp_Facture extends BimpComm
             );
         }
         global $user;
-        if($user->admin)
+        if ($user->admin)
             $actions[] = array(
-                'label'   => 'Aj contact UNADERE',
-                'icon'    => 'fas_file-pdf',
+                'label'  => 'Aj contact UNADERE',
+                'icon'   => 'fas_file-pdf',
                 'action' => 'addContacts'
             );
-                    
+
         return $actions;
     }
 
@@ -2448,14 +2448,15 @@ class Bimp_Facture extends BimpComm
 
         return $html;
     }
-    
-    public function displayRetard(){
-        if($this->getRemainToPay() != 0){
+
+    public function displayRetard()
+    {
+        if ($this->getRemainToPay() != 0) {
             $retard = floor((strtotime(date('Y-m-d')) - strtotime($this->getData('date_lim_reglement'))) / 86400);
-            if($retard > 0)
+            if ($retard > 0)
                 return $retard;
         }
-        
+
         return 0;
     }
 
@@ -3732,9 +3733,11 @@ class Bimp_Facture extends BimpComm
                     $echeancier->onDeleteFacture($dateDebutFacture);
                 }
             }
+            
+            $this->majStatusOtherPiece();
         }
 
-        $this->majStatusOtherPiece();
+        $errors = BimpTools::merge_array($errors, parent::onDelete($warnings));
 
         return $errors;
     }
@@ -4567,7 +4570,7 @@ class Bimp_Facture extends BimpComm
 
         return parent::actionAddContact($data, $success);
     }
-    
+
     public function actionAddContacts($data, &$success)
     {
         $errors = $warnings = array();
@@ -4577,12 +4580,12 @@ class Bimp_Facture extends BimpComm
                 'warnings' => $warnings
             );
         }
-        
+
         $data2 = array();
         $data2['id_contact'] = 212418;
         $data2['type'] = 1;
         $data2['tiers_type_contact'] = 832;
-        foreach($data['id_objects'] as $id){
+        foreach ($data['id_objects'] as $id) {
             $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id);
             $result = $obj->actionAddContact($data2, $success);
             $errors = BimpTools::merge_array($errors, $result['errors']);
@@ -4934,129 +4937,6 @@ class Bimp_Facture extends BimpComm
         );
     }
 
-    public function actionGenerateBulkPdf($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Fichier généré avec succès';
-        $success_callback = '';
-
-        $id_factures = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
-
-        if (count($id_factures) > 50)
-            return array('Trop de PDF action impossible');
-
-        if (!is_array($id_factures) || empty($id_factures)) {
-            $errors[] = 'Aucune facture sélectionnée';
-        } else {
-            $files = array();
-
-            foreach ($id_factures as $id_facture) {
-                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
-
-                if (!BimpObject::objectLoaded($facture)) {
-                    $warnings[] = 'La facture d\'ID ' . $id_facture . ' n\'existe pas';
-                    continue;
-                }
-
-                $dir = $facture->getFilesDir();
-                $filename = $facture->getRef() . '.pdf';
-
-                if (!file_exists($dir . $filename)) {
-                    $warnings[] = 'Facture ' . $facture->getLink() . ': fichier PDF absent (' . $dir . $filename . ')';
-                    continue;
-                }
-
-                $files[] = $dir . $filename;
-            }
-
-            if (!empty($files)) {
-                global $user;
-                require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpPDF.php';
-                $fileName = 'bulk_factures_' . $user->id . '.pdf';
-                $dir = PATH_TMP . '/bimpcore/';
-
-                $pdf = new BimpConcatPdf();
-                $pdf->concatFiles($dir . $fileName, $files, 'F');
-
-                $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($fileName);
-                $success_callback = 'window.open(\'' . $url . '\');';
-            } else {
-                $errors[] = 'Aucun PDF trouvé';
-            }
-        }
-
-        return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
-            'success_callback' => $success_callback
-        );
-    }
-
-    public function actionGenerateZipPdf($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Fichier généré avec succès';
-        $success_callback = '';
-
-        $id_factures = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
-
-        if (count($id_factures) > 50)
-            return array('Trop de PDF action impossible');
-
-        if (!is_array($id_factures) || empty($id_factures)) {
-            $errors[] = 'Aucune facture sélectionnée';
-        } else {
-            $files = array();
-
-            foreach ($id_factures as $id_facture) {
-                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
-
-                if (!BimpObject::objectLoaded($facture)) {
-                    $warnings[] = 'La facture d\'ID ' . $id_facture . ' n\'existe pas';
-                    continue;
-                }
-
-                $dir = $facture->getFilesDir();
-                $filename = $facture->getRef() . '.pdf';
-
-                if (!file_exists($dir . $filename)) {
-                    $warnings[] = 'Facture ' . $facture->getLink() . ': fichier PDF absent (' . $dir . $filename . ')';
-                    continue;
-                }
-
-                $files[] = array($dir . $filename, $filename);
-            }
-
-            if (!empty($files)) {
-                global $user;
-                $dir = PATH_TMP . '/bimpcore/';
-                $fileName = 'zip_factures_' . $user->id . '.zip';
-                if (file_exists($dir . $fileName))
-                    unlink($dir . $fileName);
-                $zip = new ZipArchive();
-                if ($zip->open($dir . $fileName, ZipArchive::CREATE) === true) {
-                    foreach ($files as $tabFile) {
-                        $zip->addFile($tabFile[0], $tabFile[1]);
-                    }
-                }
-                $zip->close();
-
-                $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($fileName);
-                $success_callback = 'window.open(\'' . $url . '\');';
-            } else {
-                $errors[] = 'Aucun PDF trouvé';
-            }
-        }
-
-        return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
-            'success_callback' => $success_callback
-        );
-    }
-
     public function actionGeneratePDFDuplicata($data, &$success)
     {
         $errors = array();
@@ -5283,7 +5163,7 @@ class Bimp_Facture extends BimpComm
             'warnings' => $warnings
         );
     }
-    
+
     // Overrides BimpObject:
 
     public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)

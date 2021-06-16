@@ -12,7 +12,8 @@
             $export = BimpObject::getInstance('bimptocegid', 'BTC_export');
 
             $html = '<h3><b>BIMP</b><b class="warning" >to</b><b>CEGID</b></h3>';
-            $html .= "<b>Date de début de l'export: </b>" . $export->getStartTrimestreComptable() . ' (Début du trimestre) <br :>';
+            $html .= "<b>Date de début de l'export: </b>" . $export->getStartTrimestreComptable() . ' (Début du trimestre) <br :/>';
+            $html .= PATH_TMP . "<br />";
             if(isset($_POST['date']) || isset($_POST['ref']) || isset($_POST['since']) ) {
                 $erreur = "";
                 if(!isset($_REQUEST['element']) && empty($_REQUEST['element'])) {

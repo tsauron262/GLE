@@ -25,7 +25,8 @@ function SavPublicForm() {
         'eq_etat',
         'eq_system',
         'sav_centre',
-        'sav_day'
+        'sav_day',
+        'reservation_id'
     ];
 
     // Evénements: 
@@ -308,16 +309,27 @@ function SavPublicForm() {
         if ($btn.length) {
             $btn.addClass('disabled');
 
+            if ($.isOk(ptr.$form)) {
+                var $input = ptr.$form.find('[name="reservation_id"]');
+
+                if ($input.length) {
+                    if ($input.val()) {
+                        $btn.removeClass('disabled');
+                        return true;
+                    }
+                }
+            }
+
             // Check du slot: 
             var $form = $('#sav_slot');
             if ($form.length) {
-                var $day = $form.find('select[name="sav_day"]');
+                var $day = $form.find('[name="sav_day"]');
 
                 if ($day.length) {
                     var day = $day.val();
 
                     if (day) {
-                        var $slot = $form.find('select[name="sav_slot_' + day + '"]');
+                        var $slot = $form.find('[name="sav_slot_' + day + '"]');
 
                         if ($slot.length) {
                             var slot = $slot.val();
@@ -480,14 +492,18 @@ function SavPublicForm() {
                 data[ptr.inputs[i]] = val;
             }
 
-            var slot = '';
-            if (data['sav_day']) {
-                var $input = $form.find('[name="sav_slot_' + data['sav_day'] + '"]');
-                if ($input.length) {
-                    slot = $input.val();
+            if (typeof (data['reservation_id']) !== 'undefined' && data['reservation_id']) {
+                data['sav_slot'] = $form.find('[name="sav_slot"]').val();
+            } else {
+                var slot = '';
+                if (data['sav_day']) {
+                    var $input = $form.find('[name="sav_slot_' + data['sav_day'] + '"]');
+                    if ($input.length) {
+                        slot = $input.val();
+                    }
                 }
+                data['sav_slot'] = slot;
             }
-            data['sav_slot'] = slot;
 
             $('#SlotNotAvailableNotif').stop().slideUp(250);
             $('#reservationErrorNotif').stop().slideUp(250);

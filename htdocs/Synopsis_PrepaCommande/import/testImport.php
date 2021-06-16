@@ -22,8 +22,14 @@ $tempDeb = microtime(true);
 global $tabStat;
 $tabStat = array('c' => 0, 'd' => 0, 'pc' => 0, 'pd' => 0, 'pcd' => 0, 'ef' => 0);
 
-ini_set('max_execution_time', 40000);
-ini_set("memory_limit", "1200M");
+if (defined('BIMP_LIB')) {
+    BimpCore::setMaxExecutionTime(40000);
+    BimpCore::setMemoryLimit(1200);
+} else {
+    ini_set('max_execution_time', 40000);
+    ini_set("memory_limit", "1200M");
+}
+
 $displayHTML = true;
 if ($_REQUEST['modeCli'] == 1) {
     $displayHTML = false;
@@ -331,14 +337,14 @@ if (is_dir($dir)) {
 
     $mailContent .= "Liste des fichiers: ";
 
-
     $mailHeader = "<div><table border=0 width=700 cellpadding=20 style='border-collapse: collapse;'><tr><td><img height=100 src='" . DOL_URL_ROOT . "/theme/" . $conf->theme . "/Logo-72ppp.png'/></div>" . "\n";
     $mailHeader .= "<td valign=bottom><div style='color: #0073EA; font-size: 25pt;'>Rapport d'importation</div><br/>" . "\n";
     $mailHeader .= "</table>" . "\n";
     $mailHeader .= "<table  border=0 width=700 cellpadding=10 style='border-collapse: collapse;'>" . "\n";
     $mailHeader .= "<tr><th style='background-color: #0073EA; color: #fff;' colspan=3>Les commandes ajout&eacute;es / modifi&eacute;es" . "</td>" . "\n";
 
-    function fileToTab($file) {
+    function fileToTab($file)
+    {
         $tabVal = array();
         $tabEntete = array();
         $content = file_get_contents($file);
@@ -359,7 +365,6 @@ if (is_dir($dir)) {
         }
         return $tabVal;
     }
-
     $cntFile = -2;
     if (is_dir($dir)) {
         $tabImportOK = array('commande' => array(), 'propal' => array());
@@ -431,7 +436,7 @@ if (is_dir($dir)) {
                             $ligneNum = 0;
                             $arrDesc = array();
                             $arrConvNumcol2Nomcol = array();
-                            $mailSumUpContent['nbFile'] ++;
+                            $mailSumUpContent['nbFile']++;
                             foreach ($lines as $key => $val) {
                                 if (!strlen($val) > 10)
                                     continue;
@@ -485,7 +490,7 @@ if (is_dir($dir)) {
                             unlink($dir . "temp/" . $file . '.preparse');
                         }
                     } else {
-                        $webContent .= "<tdclass='ui-widget-content'>Erreur de conversion : ".$dir . "temp/" . $file . ".iconv Introuvable</td>";
+                        $webContent .= "<tdclass='ui-widget-content'>Erreur de conversion : " . $dir . "temp/" . $file . ".iconv Introuvable</td>";
                         $OKFile = false;
                     }
 
@@ -536,7 +541,7 @@ if (is_dir($dir)) {
                         if (!$internalUserId)
                             $OKFile = false;
                         else {
-                            $mailSumUpContent['nbLine'] ++;
+                            $mailSumUpContent['nbLine']++;
                             $webContent .= "<tr><th class='ui-state-default ui-widget-hover' colspan=2>Ligne: " . $key . "  " . ($typeLigne == "commande" ? "Commande" : "Propal") . ":" . $val["PcvCode"] . "</th>";
                             $mailContent .= "<tr><th style='color: #fff; background-color: #0073EA;' colspan=2>Ligne: " . $key . "  " . ($typeLigne == "commande" ? "Commande" : "Propal") . ":" . $val["PcvCode"] . "</th>" . "\n";
 
@@ -615,8 +620,6 @@ if (is_dir($dir)) {
                                 if ($db->num_rows($sql) > 0) {
                                     $res = fetchWithCache($sql);
                                     $socid = $res->rowid;
-
-
 
                                     $sqlUpt = array();
                                     if ($res->nom != $nomSoc)
@@ -776,7 +779,6 @@ if (is_dir($dir)) {
 
                                 $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Contact de la soci&eacute;t&eacute;</th>";
                                 $mailContent .= "<tr><th style='color:#fff; background-color: #0073EA;'>Contact de la soci&eacute;t&eacute;</th>" . "\n";
-
 
                                 $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "socpeople WHERE import_key = " . $socpeopleExternalId;
                                 $sql = requeteWithCache($requete);
@@ -946,7 +948,7 @@ if (is_dir($dir)) {
 //                                        echo "Changement de ref de ".$res->ref." en ".$val['PlvCode'];
 //                                    }
 
-                                    
+
                                     if (count($sqlUpt) > 0 || count($sqlUpt2) > 0) {
                                         $ok = true;
                                         if (count($sqlUpt) > 0) {
@@ -1021,7 +1023,7 @@ if (is_dir($dir)) {
                                      VALUES (now(),
                                     '" . $prodId . "',
                                     '" . $val['ArtDureeGar'] . "')
-                                    " /*. ($val['PlvPA'] > 0 ? $val['PlvPA'] : 0) . ") "*/;
+                                    " /* . ($val['PlvPA'] > 0 ? $val['PlvPA'] : 0) . ") " */;
 
                                     if ($sql) {
                                         $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation produit OK</td>";
@@ -1525,7 +1527,6 @@ if (is_dir($dir)) {
                                         //Creer la commande
                                         $comId = false;
 
-
                                         $mode = ""; //pour les trigger
 
                                         if (!$db->num_rows($sql) > 0) {
@@ -1538,7 +1539,7 @@ if (is_dir($dir)) {
                                             if ($sql) {
                                                 $tabImportOK['commande'][$val['PcvCode']] = array('id' => $comId, 'codeAff' => $val['AffCode']);
                                                 $mode = "ORDER_CREATE";
-                                                $webContent .= "<td  class='ui-widget-content'><a href='".DOL_URL_ROOT."/commande/card.php?id=".$comId."'>Cr&eacute;ation commande OK</a></td>";
+                                                $webContent .= "<td  class='ui-widget-content'><a href='" . DOL_URL_ROOT . "/commande/card.php?id=" . $comId . "'>Cr&eacute;ation commande OK</a></td>";
                                                 $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation commande OK</td>" . "\n";
                                             } else {
                                                 $webContent .= "<td  class='KOtd error  ui-widget-content'>Cr&eacute;ation commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
@@ -1677,7 +1678,6 @@ if (is_dir($dir)) {
                                         " . ($val['PlvPA'] > 0 ? $val['PlvPA'] : "NULL") . ",
                                         " . $prodType . ")";
 
-
                                         $sql = requeteWithCache($requete);
                                         if ($sql) {
                                             $remArrayComLigne[$comId][$db->last_insert_id("'" . MAIN_DB_PREFIX . "commandedet'")] = $db->last_insert_id("'" . MAIN_DB_PREFIX . "commandedet'");
@@ -1786,7 +1786,6 @@ if (is_dir($dir)) {
                                         " . ($val['PlvPA'] != 0 ? $val['PlvPA'] : "NULL") . ",
                                         " . $prodType . ")";
 
-
                                             $sql = requeteWithCache($requete);
                                             if ($sql) {
                                                 $remArrayComLigne[$comId][$db->last_insert_id("'" . MAIN_DB_PREFIX . "commandedet'")] = $db->last_insert_id("'" . MAIN_DB_PREFIX . "commandedet'");
@@ -1841,9 +1840,9 @@ if (is_dir($dir)) {
                         $webContent .= "<tr><th class='ui-state-default ui-widget-header'>deplacement fichier</th>";
                         $resultMv = rename($dir . "/" . $file, $dir . $imported . $file);
                         if ($resultMv)
-                            $webContent.= "<td class='ui-widget-content'>OK</td>";
+                            $webContent .= "<td class='ui-widget-content'>OK</td>";
                         else
-                            $webContent.= "<td class='ui-widget-content'>KO</td>";
+                            $webContent .= "<td class='ui-widget-content'>KO</td>";
 
                         $webContent .= "</table>";
 //                echo $webContent;
@@ -1868,8 +1867,6 @@ if (is_dir($dir)) {
         }
         closedir($dh);
 
-
-
         /*
           +--------------------------------------------------------------------------------------------------------------+
           |                                                                                                              |
@@ -1884,7 +1881,6 @@ if (is_dir($dir)) {
 
     echo $webContent;
     $webContent = '';
-
 
 //  var_dump($arrayImport);
 
@@ -1906,19 +1902,13 @@ jQuery(document).ready(function(){
 </script>
 EOF;
 
-
     $remCatGlob = false;
-
-
-
-
 
     foreach ($tabImportOK['commande'] as $ref => $tabT) {
         $id = $tabT['id'];
         $codeAff = $tabT['codeAff'];
         $com = new Synopsis_Commande($db);
         $com->fetch($id);
-
 
 //                            $mailSumUpContent['commande'][] = $com;
         $societe = new Societe($db);
@@ -2104,8 +2094,7 @@ EOF;
       +--------------------------------------------------------------------------------------------------------------+
      */
     unlink($filename);
-}
-else {
+} else {
     $webContent .= "<div class='ui-error error'> Pas de r&eacute;pertoire d'importation d&eacute;fini</div>";
     print $webContent;
 }
@@ -2114,7 +2103,8 @@ global $logLongTime;
 $logLongTime = false;
 llxFooter();
 
-function updateCategorie($ref, $prodId, $val) {
+function updateCategorie($ref, $prodId, $val)
+{
     if ($ref . 'x' != "x" && $prodId > 0) {
         global $remCatGlob, $db;
 
@@ -2318,7 +2308,8 @@ function updateCategorie($ref, $prodId, $val) {
     }
 }
 
-function sendMail($subject, $to, $from, $msg, $filename_list = array(), $mimetype_list = array(), $mimefilename_list = array(), $addr_cc = '', $addr_bcc = '', $deliveryreceipt = 0, $msgishtml = 1, $errors_to = '') {
+function sendMail($subject, $to, $from, $msg, $filename_list = array(), $mimetype_list = array(), $mimefilename_list = array(), $addr_cc = '', $addr_bcc = '', $deliveryreceipt = 0, $msgishtml = 1, $errors_to = '')
+{
     global $mysoc;
     global $langs;
     $mail = new CMailFile($subject, $to, $from, $msg, $filename_list, $mimetype_list, $mimefilename_list, $addr_cc, $addr_bcc, $deliveryreceipt, $msgishtml, $errors_to);
@@ -2330,7 +2321,8 @@ function sendMail($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
     }
 }
 
-function processPays($codePays) {
+function processPays($codePays)
+{
     global $db;
     if ($codePays . "x" != "x") {
         switch ($codePays) {
@@ -2372,7 +2364,8 @@ function processPays($codePays) {
     }
 }
 
-function processUser($import_key, $nomCom, $file, $val) {
+function processUser($import_key, $nomCom, $file, $val)
+{
 //    return 59;
     global $remUserArray, $db;
     if ($import_key > 0) {
@@ -2384,7 +2377,7 @@ function processUser($import_key, $nomCom, $file, $val) {
             return $result[0]['d'];
         else
             return 1;
-            affErreur("Pas de correspondance pour l'utilisateur dans BIMP-ERP : id 8Sens " . $import_key." non : ".print_r($val,1)." | commande ".$nomCom. " fichier ".$file);
+        affErreur("Pas de correspondance pour l'utilisateur dans BIMP-ERP : id 8Sens " . $import_key . " non : " . print_r($val, 1) . " | commande " . $nomCom . " fichier " . $file);
 //        if (!isset($remUserArray[$import_key])) {
 //            $requete = "SELECT rowid FROM " . MAIN_DB_PREFIX . "user WHERE ref_ext = " . $import_key;
 //            $sql = requeteWithCache($requete);
@@ -2401,41 +2394,42 @@ function processUser($import_key, $nomCom, $file, $val) {
         affErreur("Pas d'id pour l'user");
 }
 
-function affErreur($text) {
+function affErreur($text)
+{
     echo "<br/><h3 style='color:red;'>" . $text . "</h3><br/>";
 }
 
-function fetchWithCache($result) {
+function fetchWithCache($result)
+{
     global $db, $tabRequeteP, $tabStat;
     $tabRequete = $tabRequeteP;
     $resultStr = get_resource_id($result);
     if (isset($tabRequete[$resultStr]['result'])) {
-        $tabStat['pc'] ++;
+        $tabStat['pc']++;
         $tabRequete[$resultStr]['index'] = $tabRequete[$resultStr]['index'] + 1;
         $index = $tabRequete[$resultStr]['index'];
         if (isset($tabRequete[$resultStr]['result'][$index]))
             return $tabRequete[$resultStr]['result'][$index];
         else
             return false;
-    }
-    else {
-        $tabStat['pd'] ++;
+    } else {
+        $tabStat['pd']++;
         return $db->fetch_object($result);
     }
 }
-
 /*
  * Tab requete = array('requete'=>list des req avec tab et afface
  *                      ''
  */
 
-function requeteWithCache($requete) {
+function requeteWithCache($requete)
+{
     global $db, $tabRequeteP, $tabStat;
     $tabRequete = $tabRequeteP;
     $noCache = true;
 
     if ($noCache) {
-        $tabStat['d'] ++;
+        $tabStat['d']++;
         $result = $db->query($requete);
         if (!$result)
             die("Erreur SQL NO CACHE : " . $requete);
@@ -2469,22 +2463,21 @@ function requeteWithCache($requete) {
     $tab = $tabRequete[$requete]['tab'];
     $tabSuppr = $tabRequete[$requete]['tabSuppr'];
 
-
     if ($tabSuppr && isset($tabRequete[$tabSuppr])) {
         $tabRequete[$tabSuppr] = array();
-        $tabStat['ef'] ++;
+        $tabStat['ef']++;
     }
 
 
 
     if (isset($tabRequete[$tab][$requete])) {
-        $tabStat['c'] ++;
+        $tabStat['c']++;
         $result = $tabRequete[$tab][$requete];
         $strResult = get_resource_id($result);
         $tabRequete[$strResult]['index'] = -1;
         $result->data_seek(0);
     } else {
-        $tabStat['d'] ++;
+        $tabStat['d']++;
         $result = $db->query($requete);
         if (!$result)
             die("Erreur SQL : " . $requete);
@@ -2493,7 +2486,7 @@ function requeteWithCache($requete) {
             $tabRequete[$strResult]['result'] = array();
             $i = 0;
             while ($obj = $db->fetch_object($result)) {
-                $tabStat['pcd'] ++;
+                $tabStat['pcd']++;
 //            $tabRequete[$tab][$requete]['result'][$i] = $obj;
 //            $tabRequete[$tab][$requete]['count'] = $i;
 //            $tabRequete[$tab][$requete]['sql'] = $result;
@@ -2511,27 +2504,29 @@ function requeteWithCache($requete) {
     return $result;
 }
 
-function get_resource_id($resource) {
+function get_resource_id($resource)
+{
     return is_object($resource) ? spl_object_hash($resource /* strlen("Resource id #") */) : 'pas de ress';
 }
 
-function updateType($ref, $prodId) {
+function updateType($ref, $prodId)
+{
     global $db;
     if ($ref . 'x' != "x" && $prodId > 0) {
         $type = getProdType($ref);
         $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "product_extrafields WHERE fk_object = " . $prodId;
         $sql = $db->query($requete);
-        if($db->num_rows($sql) == 0){
-            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "product_extrafields (fk_object, type2) VALUES ('".$prodId."','".$type."')";
-        }
-        else{
+        if ($db->num_rows($sql) == 0) {
+            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "product_extrafields (fk_object, type2) VALUES ('" . $prodId . "','" . $type . "')";
+        } else {
             $requete = "UPDATE " . MAIN_DB_PREFIX . "product_extrafields SET type2 = '" . $type . "' WHERE fk_object = " . $prodId;
         }
         requeteWithCache($requete);
     }
 }
 
-function getProdType($ref) {
+function getProdType($ref)
+{
     if ($ref . 'x' != "x" && $ref != "0") {
         global $remTypeGlob;
         if (!is_array($remTypeGlob)) {
@@ -2551,7 +2546,8 @@ function getProdType($ref) {
     }
 }
 
-function getCat($label) {
+function getCat($label)
+{
     global $db;
     $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "categorie WHERE label = '" . $label . "'";
     $sql = requeteWithCache($requete);
@@ -2566,12 +2562,12 @@ function getCat($label) {
     return $catId;
 }
 
-function sizeofvar($var) {
+function sizeofvar($var)
+{
 
     $start_memory = memory_get_usage();
     $temp = unserialize(serialize($var));
     $taille = memory_get_usage() - $start_memory;
     return $taille;
 }
-
 ?>

@@ -5,8 +5,8 @@ require_once("../../main.inc.php");
 ini_set('display_errors', 1);
 require_once __DIR__ . '/../Bimp_Lib.php';
 set_time_limit(0);
-ini_set('max_execution_time', 9000);
-ini_set('memory_limit', '512M');
+BimpCore::setMaxExecutionTime(9000);
+BimpCore::setMemoryLimit(512);
 ignore_user_abort(0);
 ini_set('display_errors', 1);
 

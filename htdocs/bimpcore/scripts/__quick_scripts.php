@@ -64,8 +64,7 @@ if (!$action) {
     exit;
 }
 
-ini_set('max_execution_time', 300);
-set_time_limit(300);
+BimpCore::setMaxExecutionTime(2400);
 
 switch ($action) {
     case 'secteur_facture_fourn_with_commande_fourn':

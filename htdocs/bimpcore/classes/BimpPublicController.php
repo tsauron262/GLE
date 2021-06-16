@@ -15,6 +15,28 @@ class BimpPublicController extends BimpController
         switch (BimpTools::getValue('back', '')) {
             case 'savForm':
                 $this->back_url = DOL_URL_ROOT . '/bimpinterfaceclient/client.php?fc=savForm';
+                
+                if (BimpTools::isSubmit('resgsx')) {
+                    $res_id = BimpTools::getValue('resgsx', '');
+                    if ($res_id) {
+                        $this->back_url .= '&resgsx=' . $res_id;
+                    }
+                }
+                
+                if (BimpTools::isSubmit('resgsx')) {
+                    $res_id = BimpTools::getValue('resgsx', '');
+                    if ($res_id) {
+                        $this->back_url .= '&resgsx=' . $res_id;
+                    }
+                }
+                
+                if (BimpTools::isSubmit('centre_id')) {
+                    $shipTo = BimpTools::getValue('centre_id', '');
+                    if ($shipTo) {
+                        $this->back_url .= '&centre_id=' . $shipTo;
+                    }
+                }
+                
                 $this->back_label = 'Retour au formulaire RDV SAV';
                 break;
         }

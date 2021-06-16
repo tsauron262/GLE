@@ -2,7 +2,7 @@
 
 class controlleController extends BimpController {
 
-    private $dir = PATH_TMP . 'exportCegid/BY_DATE/';
+    private $dir = PATH_TMP . '/exportCegid/BY_DATE/';
 
     public function renderHtml() {
         

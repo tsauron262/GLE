@@ -8,9 +8,6 @@ if (!defined('BIMP_LIB')) {
         define('MOD_DEV', 0);
     }
 
-    ini_set('max_execution_time', 1200);
-    ini_set('memory_limit', '256M');
-
     global $bimp_start_time;
     $bimp_start_time = round(microtime(1), 4);
 
@@ -63,6 +60,9 @@ if (!defined('BIMP_LIB')) {
     require_once $dir . 'BimpController.php';
     require_once $dir . 'BimpPublicController.php';
 
+    BimpCore::setMaxExecutionTime(600);
+    BimpCore::setMemoryLimit(256);
+    
     BimpObject::loadClass('bimpcore', 'Bimp_Log');
 
     BimpConfig::initCacheServeur();

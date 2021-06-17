@@ -9,6 +9,7 @@ abstract class BDSProcess
     public static $process_name = null;
     public static $files_dir_name = '';
     public static $memory_limit = '1000M';
+    public static $max_execution_time = 3600;
     public static $objects = array();
     public $db = null;
     public $user = null;
@@ -37,7 +38,8 @@ abstract class BDSProcess
     public function __construct(BDS_Process $process, $options = array(), $references = array())
     {
         set_time_limit(0);
-        ini_set('memory_limit', static::$memory_limit);
+        BimpCore::setMaxExecutionTime(static::$max_execution_time);
+        BimpCore::setMemoryLimit(static::$memory_limit);
 
         global $db;
 

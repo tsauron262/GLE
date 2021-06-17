@@ -48,8 +48,7 @@ if (!$action) {
     exit;
 }
 
-ini_set('max_execution_time', 300);
-set_time_limit(300);
+BimpCore::setMaxExecutionTime(1200);
 
 switch ($action) {
     case 'import_stocks':

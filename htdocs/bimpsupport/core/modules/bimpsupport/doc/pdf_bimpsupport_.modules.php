@@ -19,7 +19,6 @@ require_once(DOL_DOCUMENT_ROOT . "/core/lib/company.lib.php");
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';
 
-
 /**
   \class      pdf_panier_babel
   \brief      Classe permettant de generer les paniers au modele babel
@@ -27,7 +26,11 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';
 if (!defined('EURO'))
     define('EURO', chr(128));
 
-ini_set('max_execution_time', 600);
+if (defined('BIMP_LIB')) {
+    BimpCore::setMaxExecutionTime(600);
+} else {
+    ini_set('max_execution_time', 600);
+}
 
 class pdf_synopsischrono_ extends ModeleSynopsischrono
 {
@@ -38,7 +41,6 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono
       \brief      Constructeur
       \param        db        Handler acces base de donnee
      */
-
     function __construct($db)
     {
 
@@ -66,6 +68,7 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono
         $this->emetteur = $mysoc;
         if (!$this->emetteur->pays_code)
             $this->emetteur->pays_code = substr($langs->defaultlang, -2);    // Par defaut, si n'etait pas defini
+
 
 
 
@@ -216,7 +219,6 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono
 
                 $this->_pagefoot($pdf, $chrono, $outputlangs);
 
-
                 if (method_exists($pdf, 'AliasNbPages'))
                     $pdf->AliasNbPages();
                 $pdf->Close();
@@ -291,34 +293,29 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono
         $object->client = $object->societe;
         $default_font_size = 12;
 
-
-
         $pdf->SetFont('', 'B', $default_font_size);
 
         $posx = 100;
         $posy = 10;
-        $posy+=5;
+        $posy += 5;
         $largCadre = 206 - $this->marge_gauche;
         $pdf->SetXY($posx, $posy);
         $pdf->SetTextColor(0, 0, 60);
         $pdf->MultiCell(100, 4, $outputlangs->transnoentities("Ref") . " : " . $outputlangs->convToOutputCharset($object->ref), '', 'R');
 
-        $posy+=1;
+        $posy += 1;
         $pdf->SetFont('', '', $default_font_size - 2);
         $pdf->SetTextColor(0, 0, 60);
 
-
         if ($object->client->code_client) {
-            $posy+=5;
+            $posy += 5;
             $pdf->SetXY($posx, $posy);
             $pdf->MultiCell(100, 3, $outputlangs->transnoentities("CustomerCode") . " : " . $outputlangs->transnoentities($object->client->code_client), '', 'R');
         }
 
-        $posy+=5;
+        $posy += 5;
         $pdf->SetXY($posx, $posy);
         $pdf->MultiCell(100, 3, $outputlangs->transnoentities("Type ") . " : " . $outputlangs->transnoentities($object->model->titre), '', 'R');
-
-
 
         if ($showadress) {
 
@@ -353,9 +350,6 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono
             $pdf->SetFont('', '', $default_font_size - 1);
             $pdf->MultiCell(80, 4, $carac_emetteur, 0, 'L');
 
-
-
-
             // Recipient name
             if (!empty($usecontact)) {
                 // On peut utiliser le nom de la societe du contact
@@ -364,8 +358,7 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono
                 else
                     $socname = $object->client->nom;
                 $carac_client_name = $outputlangs->convToOutputCharset($socname);
-            }
-            else {
+            } else {
                 $carac_client_name = $outputlangs->convToOutputCharset($object->client->nom);
             }
 
@@ -397,12 +390,9 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono
             $pdf->SetXY($posx + 2, $posy + 4 + (dol_nboflines_bis($carac_client_name, 50) * 4));
             $pdf->MultiCell($widthrecbox, 4, $carac_client, 0, 'L');
 
-
-
             $pdf->Rect($this->marge_gauche - 3, 89, $largCadre, 185);
             $pdf->SetXY($this->marge_gauche, 92);
-        }
-        else {
+        } else {
             $pdf->SetFont('', 'B', 10);
             //Société
             if ($this->marge_gauche > 45) {

@@ -5507,7 +5507,7 @@ class Bimp_Facture extends BimpComm
 
     public static function checkIsPaidAll($filters = array())
     {
-        ini_set('max_execution_time', 24000);
+        BimpCore::setMaxExecutionTime(24000);
 
         $filters['fk_statut'] = array(
             'operator' => '>',

@@ -6,6 +6,8 @@ class BimpCore
     public static $conf_cache = null;
     public static $conf_cache_not_exist = array();
     private static $context = '';
+    private static $max_execution_time = 0;
+    private static $memory_limit = 0;
     public static $files = array(
         'js'  => array(
             '/includes/jquery/plugins/jpicker/jpicker-1.1.6.js',
@@ -370,6 +372,26 @@ class BimpCore
         return 0;
     }
 
+    // Gestion ini: 
+    
+    public static function setMaxExecutionTime($time)
+    {
+        if ($time > self::$max_execution_time) {
+            ini_set('max_execution_time', $time);
+            self::$max_execution_time = $time;
+        }
+    }
+    
+    public static function setMemoryLimit($limit)
+    {
+        set_time_limit(0);
+        
+        if ($limit > self::$memory_limit) {
+            ini_set('memory_limit', $limit . 'M');
+            self::$memory_limit = $limit;
+        }
+    }
+    
     // Gestion du contexte:
 
     public static function getContext()

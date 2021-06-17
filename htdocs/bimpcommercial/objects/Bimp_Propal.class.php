@@ -77,7 +77,7 @@ class Bimp_Propal extends BimpComm
 
             case 'createOrder':
                 $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
-                return $commande->can("create") /*&& (int) $user->rights->bimpcommercial->edit_comm_fourn_ref*/;
+                return $commande->can("create") /* && (int) $user->rights->bimpcommercial->edit_comm_fourn_ref */;
 
             case 'createContract':
                 if ($user->rights->contrat->creer) {
@@ -96,10 +96,10 @@ class Bimp_Propal extends BimpComm
     }
 
     // Getters booléens: 
-
+    
     public function isActionAllowed($action, &$errors = array())
     {
-        if($this->erreurFatal)
+        if ($this->erreurFatal)
             return 0;
         global $conf;
         $status = $this->getData('fk_statut');
@@ -241,75 +241,45 @@ class Bimp_Propal extends BimpComm
 
     public function isNotRenouvellementContrat()
     {
-        if(!$this->isServiceAutorisedInContrat()) {
+        if (!$this->isServiceAutorisedInContrat()) {
             return 0;
         }
-        
+
         if (count(getElementElement("contrat", "propal", null, $this->id)) > 0) {
             return 0;
         }
         return 1;
     }
-    
-    public function displayIfMessageFormContrat() {
-        $array = $this->isServiceAutorisedInContrat(true);
-        $msgs = [];
-        if(count($array) > 0 && BimpCore::getConf('bimpcontract_use_autorised_service')) {
-            
-            $content = "<h4><b>Vous ne pouvez pas créer de contrat à partir de ce devis car certains services ne sont pas autorisés dans un contrat<br /><br />";
-            if(count($array) > 1) {
-                $content.= "<i><u>Liste des services en cause</u></i>";
-            } else {
-                $content.= "<i><u>Liste du service en cause</u></i><br />";
-            }            
-            
-            $content .= "<p>";
-            
-            foreach($array as $ref_service) {
-                $content .= "- " . $ref_service . "<br />";
-            }
-            
-            $content .= "</p>";
-            
-            $msgs[] = Array(
-                'type' => 'warning',
-                'content' => $content
-            );
-        }
-        
-        return $msgs;
-    }
-    
-    public function isServiceAutorisedInContrat($return_array = false) {
-        
-        if(!BimpCore::getConf('bimpcontract_use_autorised_service'))
+
+    public function isServiceAutorisedInContrat($return_array = false)
+    {
+
+        if (!BimpCore::getConf('bimpcontract_use_autorised_service'))
             return 1;
-        
+
         $children = $this->getChildrenList('lines');
         $id_services = [];
 
-        foreach($children as $id_child) {
+        foreach ($children as $id_child) {
             $child = $this->getChildObject("lines", $id_child);
             $fk_product = $this->db->getValue("propaldet", "fk_product", 'rowid = ' . $child->getData('id_line'));
-            if($fk_product > 0) {
+            if ($fk_product > 0) {
                 $service = $this->getInstance('bimpcore', 'Bimp_Product', $fk_product);
-                if(!$service->isInContrat()) {
+                if (!$service->isInContrat()) {
                     $id_services[] = $service->getData('ref');
                 }
             }
-            
         }
-        
-        if(count($id_services) > 0 && !$return_array) {
+
+        if (count($id_services) > 0 && !$return_array) {
             return 0;
         } else {
-            if($return_array) {
+            if ($return_array) {
                 return $id_services;
             } else {
                 return 1;
             }
         }
-
     }
 
     // Getters: 
@@ -358,6 +328,36 @@ class Bimp_Propal extends BimpComm
         }
 
         return $help;
+    }
+
+    public function displayIfMessageFormContrat()
+    {
+        $array = $this->isServiceAutorisedInContrat(true);
+        $msgs = [];
+        if (count($array) > 0 && BimpCore::getConf('bimpcontract_use_autorised_service')) {
+
+            $content = "<h4><b>Vous ne pouvez pas créer de contrat à partir de ce devis car certains services ne sont pas autorisés dans un contrat<br /><br />";
+            if (count($array) > 1) {
+                $content .= "<i><u>Liste des services en cause</u></i>";
+            } else {
+                $content .= "<i><u>Liste du service en cause</u></i><br />";
+            }
+
+            $content .= "<p>";
+
+            foreach ($array as $ref_service) {
+                $content .= "- " . $ref_service . "<br />";
+            }
+
+            $content .= "</p>";
+
+            $msgs[] = Array(
+                'type'    => 'warning',
+                'content' => $content
+            );
+        }
+
+        return $msgs;
     }
 
     // Getters - overrides BimpComm
@@ -522,11 +522,11 @@ class Bimp_Propal extends BimpComm
                         if ($msg != "")
                             $onclick .= "}";
                         if ($this->canSetAction('createOrder'))
-                        $buttons[] = array(
-                            'label'   => BimpRender::renderIcon('fas_dolly', 'iconLeft') . 'Accepter et créer commande',
-                            'icon'    => 'fas_check',
-                            'onclick' => $onclick
-                        );
+                            $buttons[] = array(
+                                'label'   => BimpRender::renderIcon('fas_dolly', 'iconLeft') . 'Accepter et créer commande',
+                                'icon'    => 'fas_check',
+                                'onclick' => $onclick
+                            );
                     } else {
                         $buttons[] = array(
                             'label'    => 'Fermer',
@@ -651,8 +651,7 @@ class Bimp_Propal extends BimpComm
                             'icon'    => 'fas_file-invoice-dollar',
                             'onclick' => $onclick
                         );
-                    }
-                    else {
+                    } else {
                         // Créer facture / avoir
                         if ($this->isActionAllowed('createInvoice') && $this->canSetAction('createInvoice')) {
                             $url = DOL_URL_ROOT . '/compta/facture/card.php?action=create&origin=propal&originid=' . $this->id . '&socid=' . (int) $this->getData('fk_soc');
@@ -692,7 +691,7 @@ class Bimp_Propal extends BimpComm
                         'label'   => 'Cloner',
                         'icon'    => 'copy',
                         'onclick' => $this->getJsActionOnclick('duplicate', array(
-                            'datep'             => date('Y-m-d')
+                            'datep' => date('Y-m-d')
                                 ), array(
                             'form_name' => 'duplicate_propal'
                         ))
@@ -730,7 +729,7 @@ class Bimp_Propal extends BimpComm
                     'label'   => $label,
                     'icon'    => 'fas_check',
                     'onclick' => $this->getJsActionOnclick('createContrat', array(), array(
-                        'form_name'   => "contrat")
+                        'form_name' => "contrat")
                     )
                 );
             } elseif ($user->rights->bimpcontract->to_create_from_propal_all_status && $this->getData('fk_statut') != 0 && !count($linked_contrat)) {
@@ -1092,19 +1091,19 @@ class Bimp_Propal extends BimpComm
         $instance = $this->getInstance('bimpcontract', 'BContract_contrat');
         $autre_erreurs = true;
         $id_new_contrat = 0;
-        
-        if(count($data) == 0){
+
+        if (count($data) == 0) {
             $autre_erreurs = false;
             $errors[] = "La création du contrat  est impossible en l'état. Si cela est une erreur merci d'envoyer un mail à debugerp@bimp.fr. Cordialement.";
-        } 
-        
+        }
+
         $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
         if (!$client->getData('contact_default') && $autre_erreurs) {
             //$errors[] = "Pour créer le contrat le client doit avoir un contact par défaut <br /> Client : " . $client->getNomUrl();
             $errors[] = "Le Contact email facturation par défaut doit exister dans la fiche client <br /> Client : <a href='" . $client->getUrl() . "' target='_blank' >" . $client->getData('code_client') . "</a> ";
         }
 
-        if($data['re_new'] == 0 && $autre_erreurs) {
+        if ($data['re_new'] == 0 && $autre_erreurs) {
             $errors[] = "Vous devez obligatoirement choisir un type de renouvellement.";
         }
 

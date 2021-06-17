@@ -166,6 +166,7 @@ fields:
         label: Status GSX
         values:
             array: list_status_gsx
+        default_value: 0
         
     serial: 
         label: Numéro de série

@@ -1951,7 +1951,7 @@ function displayInputChoices($input, choices, onItemSelected) {
             }
 
             if (label) {
-                html += '<span class="btn btn-light-primary input_choice';
+                html += '<span class="btn btn-light-default input_choice';
                 if (card) {
                     html += ' bs-popover';
                 }

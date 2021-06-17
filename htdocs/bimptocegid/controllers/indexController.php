@@ -1,7 +1,7 @@
 <?php 
 
     class indexController extends BimpController {
-        
+             
         public function renderHtml() {
             
             global $user;
@@ -12,7 +12,8 @@
             $export = BimpObject::getInstance('bimptocegid', 'BTC_export');
 
             $html = '<h3><b>BIMP</b><b class="warning" >to</b><b>CEGID</b></h3>';
-            $html .= "<b>Date de début de l'export: </b>" . $export->getStartTrimestreComptable() . ' (Début du trimestre) <br :>';
+            $html .= "<b>Date de début de l'export: </b>" . $export->getStartTrimestreComptable() . ' (Début du trimestre) <br :/>';
+            $html .= PATH_TMP . "<br />";
             if(isset($_POST['date']) || isset($_POST['ref']) || isset($_POST['since']) ) {
                 $erreur = "";
                 if(!isset($_REQUEST['element']) && empty($_REQUEST['element'])) {
@@ -80,7 +81,7 @@
             
             $html .= '<br /><br /><br />';
             
-            $dir = DIR_SYNCH_COMPTA . 'exportCegid/BY_DATE';
+            $dir = PATH_TMP . '/exportCegid/BY_DATE';
             $scanned_directory_by_date = array_diff(scandir($dir), array('..', '.', 'imported', 'imported_auto'));
             
             $html .= '<h3>Liste des fichiers TRA par date</h3>';
@@ -144,7 +145,7 @@
             $html .= '</tbody></table>';
             
             
-            $dir = DIR_SYNCH_COMPTA . 'exportCegid/BY_REF';
+            $dir = PATH_TMP . '/exportCegid/BY_REF';
             
             $scanned_directory_by_ref = array_diff(scandir($dir), array('..', '.', 'imported', 'imported_auto'));
             
@@ -217,7 +218,7 @@
             
             
             if(GETPOST('detail') == 'true'){
-                $dir = DIR_SYNCH_COMPTA . 'exportCegid/BY_REF/imported';
+                $dir = PATH_TMP . '/exportCegid/BY_REF/imported';
 
                 $scanned_directory_by_ref = array_diff(scandir($dir), array('..', '.', 'imported'));
 
@@ -277,7 +278,7 @@
                     $html .= '</tr>';
                 }
                 
-                $dir = DIR_SYNCH_COMPTA . 'exportCegid/BY_DATE/imported';
+                $dir = PATH_TMP . '/exportCegid/BY_DATE/imported';
                 $scanned_directory_by_ref = array_diff(scandir($dir), array('..', '.', 'imported'));
                 if($scanned_directory_by_ref) {
                     foreach ($scanned_directory_by_ref as $file => $name) {

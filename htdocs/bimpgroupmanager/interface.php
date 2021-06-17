@@ -21,7 +21,11 @@ switch (GETPOST('action')) {
             break;
         }
     case 'setAllUsers': {
-            ini_set('max_execution_time', 300);
+            if (defined('BIMP_LIB')) {
+                BimpCore::setMaxExecutionTime(1200);
+            } else {
+                ini_set('max_execution_time', 1200);
+            }
             $staticGM->setAllUsers();
             break;
         }

@@ -37,6 +37,137 @@ class GSX_Reservation
         return $certif_file_path;
     }
 
+    public static function fetchReservationsSummay($soldTo, $shipTo, $productCode, $from, $to, &$errors = array(), &$debug = '')
+    {
+        $certif_file_path = self::getCertif($soldTo, $errors);
+
+        if (!$certif_file_path) {
+            return array();
+        }
+
+        $soldTo = BimpTools::addZeros($soldTo, 10);
+        $shipTo = BimpTools::addZeros($shipTo, 10);
+
+        $url = self::$base_urls[self::$mode] . 'reservation/search';
+
+        $debug .= '<h4>Requête Fetch Reservations Summary</h4>';
+        $debug .= 'URL: <b>' . $url . '</b>';
+
+        $ch = curl_init($url);
+
+        if (!$ch) {
+            $errors[] = 'Echec connexion CURL';
+        } else {
+            $soldTo = BimpTools::addZeros($soldTo, 10);
+            $shipTo = BimpTools::addZeros($shipTo, 10);
+
+            $headers = array(
+                'Accept: application/json',
+                'Content-type: application/json',
+                'X-PARTNER-SOLDTO: ' . $soldTo
+            );
+
+            $params = array(
+                "shipToCode"    => $shipTo,
+                "fromDate"      => $from,
+                "toDate"        => $to,
+                "productCode"   => $productCode,
+                "currentStatus" => "RESERVED"
+            );
+
+//            $this->DebugData($headers, 'CURL REQUEST HEADER');
+//            $this->DebugData($params, 'CURL REQUEST PARAMS');
+
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
+            curl_setopt($ch, CURLOPT_SSLCERT, $certif_file_path);
+            curl_setopt($ch, CURLOPT_SSLCERTPASSWD, '');
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+
+            $data = curl_exec($ch);
+            $error_msg = '';
+
+            if (curl_errno($ch)) {
+                $error_msg = curl_error($ch);
+            }
+
+            curl_close($ch);
+
+            if ($data === false) {
+                $errors[] = 'Echec requête CURL <br/>URL: ' . $url . '<br/>Params: <pre>' . print_r($params, 1) . '</pre>';
+                if ($error_msg) {
+                    $errors[] = 'ERR CURL: ' . $error_msg;
+                }
+            } else {
+                return json_decode($data, 1);
+            }
+        }
+
+        return array();
+    }
+
+    public static function fetchReservation($soldTo, $shipTo, $reservation_id, &$errors = array(), &$debug = '')
+    {        
+        $certif_file_path = self::getCertif($soldTo, $errors);
+
+        if (!$certif_file_path) {
+            return array();
+        }
+
+        $soldTo = BimpTools::addZeros($soldTo, 10);
+        $shipTo = BimpTools::addZeros($shipTo, 10);
+
+        $url = self::$base_urls[self::$mode] . 'reservation/' . $shipTo.'/' . $reservation_id;
+
+        $debug .= '<h4>Requête Fetch Reservation</h4>';
+        $debug .= 'URL: <b>' . $url . '</b>';
+
+        $ch = curl_init($url);
+
+        if (!$ch) {
+            $errors[] = 'Echec connexion CURL';
+        } else {
+            $headers = array(
+                'Accept: application/json',
+                'Content-type: application/json',
+                'X-PARTNER-SOLDTO: ' . $soldTo
+            );
+
+//            $this->DebugData($headers, 'CURL REQUEST HEADER');
+
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($ch, CURLOPT_SSLCERT, $certif_file_path);
+            curl_setopt($ch, CURLOPT_SSLCERTPASSWD, '');
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+
+            $data = curl_exec($ch);
+
+            $error_msg = '';
+
+            if (curl_errno($ch)) {
+                $error_msg = curl_error($ch);
+            }
+
+            curl_close($ch);
+
+            if ($error_msg) {
+                $errors[] = 'ERREUR CURL: ' . $error_msg;
+            }
+
+            if ($data === false) {
+                $errors[] = 'Echec requête CURL';
+            } else {
+                return json_decode($data, 1);
+            }
+        }
+
+        return array();
+    }
+
     public static function fetchAvailableSlots($soldTo, $shipTo, $product_code, &$errors = array(), &$debug = '')
     {
         $certif_file_path = self::getCertif($soldTo, $errors);
@@ -63,13 +194,13 @@ class GSX_Reservation
                 'Content-type: application/json',
                 'X-PARTNER-SOLDTO: ' . $soldTo
             );
-            
+
 //            require_once(DOL_DOCUMENT_ROOT.'/bimpapple/classes/GSX_v2.php');
 //            $certInfo = GSX_v2::getCertifInfo($soldTo);
 //            curl_setopt($ch, CURLOPT_SSLCERT, $certInfo['path']);
 //            curl_setopt($ch, CURLOPT_SSLKEY, $certInfo['pathKey']);
 //            curl_setopt($ch, CURLOPT_SSLCERTPASSWD, $certInfo['pass']);
-    
+
 
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             curl_setopt($ch, CURLOPT_SSLCERT, $certif_file_path);
@@ -86,9 +217,9 @@ class GSX_Reservation
             }
 
             curl_close($ch);
-            if(stripos($data, '403 Forbidden')){
-                mailSyn2('Probléme GSX', 'dev@bimp.fr', null, 'Recuperation des slots de réservations impossible '.print_r($data, 1));
-            } 
+            if (stripos($data, '403 Forbidden')) {
+                mailSyn2('Probléme GSX', 'dev@bimp.fr', null, 'Recuperation des slots de réservations impossible ' . print_r($data, 1));
+            }
 
             if ($data === false) {
                 $errors[] = 'Echec requête CURL';

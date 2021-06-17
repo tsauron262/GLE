@@ -142,8 +142,18 @@ class ValidComm extends BimpObject
             if($bimp_object->field_exists('paiement_comptant') and $bimp_object->getData('paiement_comptant')) {
                 $success[] = "Validation financière forcée par le champ \"Paiement comptant\".";
                 $valid_finan = 1;
-            } else
-                $valid_finan = (int) $this->tryValidateByType($user, self::TYPE_FINANCE, $secteur, $class, $val_euros, $bimp_object, $errors);
+            } else {
+                if(method_exists($bimp_object, 'getClientFacture'))
+                    $client = $bimp_object->getClientFacture();
+                else
+                    $client = $bimp_object->getChildObject('client');
+                
+                if(!$client->getData('validation_financiere')) {
+                    $success[] = "Validation financière forcée par le champ \"Validation financière\".";
+                    $valid_finan = 1;
+                } else 
+                    $valid_finan = (int) $this->tryValidateByType($user, self::TYPE_FINANCE, $secteur, $class, $val_euros, $bimp_object, $errors);
+            }
         }
             
         if(!$valid_comm)

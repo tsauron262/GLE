@@ -3720,8 +3720,8 @@ class Bimp_Commande extends BimpComm
                 $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_FINANCE);
                 if ($demande)
                     $demande->delete($warnings, 1);
-                $warnings[] = "La commande " . $this->getNomUrl(1, true) . " a été validé.";
-                mailSyn2("Validation par paiement comptant", 'a.delauzun@bimp.fr', "gle@bimp.fr", "Bonjour,<br/><br/>La commande " . $this->getNomUrl(1, true) . " a été validé financièrement par paiement comptant, merci de vérifier le paiement ultérieurement.");
+                $warnings[] = "La commande " . $this->getNomUrl(1, true) . " a été validée.";
+                mailSyn2("Validation par paiement comptant", 'a.delauzun@bimp.fr', "gle@bimp.fr", "Bonjour,<br/><br/>La commande " . $this->getNomUrl(1, true) . " a été validée financièrement par paiement comptant, merci de vérifier le paiement ultérieurement.");
             } else {
                 $client_facture = $this->getClientFacture();
                 if(!$client_facture->getData('validation_financiere')) {
@@ -3729,8 +3729,8 @@ class Bimp_Commande extends BimpComm
                     $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_FINANCE);
                     if($demande)
                         $demande->delete($warnings, 1);
-                    $warnings[] = "La commande " . $this->getNomUrl(1, true) . " a été validé (validation financière automatique, voir configuration client)";
-                    mailSyn2("Validation financière forcée", 'a.delauzun@bimp.fr', "gle@bimp.fr", "Bonjour,<br/><br/>La commande " . $this->getNomUrl(1, true) . " a été validé financièrement par la configuration du client, merci de vérifier le paiement ultérieurement.");
+                    $warnings[] = "La commande " . $this->getNomUrl(1, true) . " a été validée (validation financière automatique, voir configuration client)";
+                    mailSyn2("Validation financière forcée " . $client_facture->getData('code_client') . ' - ' . $client_facture->getData('nom'), 'a.delauzun@bimp.fr', "gle@bimp.fr", "Bonjour,<br/><br/>La commande " . $this->getNomUrl(1, true) . " a été validée financièrement par la configuration du client, merci de vérifier le paiement ultérieurement.");
 
                 }
             }

@@ -220,14 +220,18 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
                 $pdf->MultiCell(100, 6, "N° de dossier prestataire : " . $sav->getData('prestataire_number'), 0, 'L');
             }
 
-
             // Produit: 
             $equipment = $sav->getChildObject('equipment');
             $product_label = '';
             if (!is_null($equipment) && $equipment->isLoaded()) {
                 $product_label = $equipment->displayProduct('nom', true);
                 if (strlen($product_label) > 50) {
-                    $product_label = substr($product_label, 0, 60) . '...';
+                    if ($user->id == 270) {
+                        echo 'ICI'; exit;
+                    }
+                    $product_label = substr($product_label, 0, 50) . '...';
+                } elseif ($user->id == 270) {
+                    echo 'LA'; exit;
                 }
                 $pdf->SetXY('121', '71.2');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);

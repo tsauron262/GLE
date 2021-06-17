@@ -7,7 +7,7 @@ labels:
 primary: rowid
 common_fields: 0
     
-objects:
+objects: 
     product: 
         instance: 
             id_object: 

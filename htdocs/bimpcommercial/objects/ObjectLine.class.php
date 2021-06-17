@@ -1459,7 +1459,7 @@ class ObjectLine extends BimpObject
 
                         case ObjectLineRemise::OL_REMISE_AMOUNT:
                             if ((int) $remise->getData('per_unit')) {
-                                $total_line_amounts += ((float) $remise->getData('montant') * $qty);
+                                $total_line_amounts += ((float) $remise->getData('montant') * abs($qty));
                             } else {
                                 $total_line_amounts += (float) $remise->getData('montant');
                             }

@@ -582,6 +582,12 @@ fields:
         type: id
         default_value: 0
         
+    validation_financiere:
+        label: Validation fnancière
+        type: bool
+        default_value: 1
+        dol_extra_field: 1
+        
 #    *** Champs non gérés: ***
 #    entity
 #    ref_ext
@@ -716,6 +722,10 @@ fields_tables:
                   callback: isClient
             - field: mail_licence
             - field: exported
+            - field: validation_financiere
+              edit:
+                  callback: iAmAdmin
+
             
     contact: 
         title: Informations de contact

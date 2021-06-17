@@ -36,6 +36,9 @@ fields:
         input: 
             type: hidden
         required: 1
+        search: 
+            input: 
+                type: text
             
     file_name:
         label: Nom
@@ -139,11 +142,24 @@ forms:
               edit:
                   callback: currentContext
       
+filters_panels: 
+    global: 
+        filters: 
+            parent_module: 
+            parent_object_name: 
+            id_parent: 
+            type: 
+            file_name: 
+            description: 
+                
 lists_cols: 
     parent: 
         label: Propriétaire
-        field: id_parent
-        display: nom_url
+        value: 
+            callback: 
+                method: displayData
+                params: 
+                    - id_parent
     type: 
         label: Type
         value: 
@@ -185,6 +201,37 @@ lists:
             description:
             visibility:                    
         
+    globale:
+        title: Tous les Fichiers
+        icon: fas_folder-open
+        checkboxes: 1
+        configurable: 1
+        filters_panel: global
+        bulk_actions: 
+            - label: Supprimer les fichiers sélectionnés
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this));
+              btn_class: deleteSelectedObjects
+        delete_btn: 
+            callback: isDeletable
+        sort_field: date_create
+        sort_way: desc
+        n: 10
+        extra_btn:
+            callback: getDefaultListExtraButtons
+        cols:
+            parent_module: 
+            parent_object_name: 
+            id_parent:
+                display: value
+            parent: 
+            type: 
+            file_name:
+            file_size: 
+            date_create:
+            description:
+            visibility:     
+                
     public: 
         title: Fichiers
         icon: fas_folder-open

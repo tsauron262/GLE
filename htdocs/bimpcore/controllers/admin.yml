@@ -13,12 +13,6 @@ objects:
     correctifs: 
         instance: 
             bimp_object: BimpCorrectif
-            
-    vente:
-        instance: 
-            bimp_object: 
-                module: bimpcommercial
-                name: Bimp_Vente
     droitUser:
         instance: 
             bimp_object: Bimp_User_Rights
@@ -26,19 +20,21 @@ objects:
     droitGroupUser:
         instance: 
             bimp_object: Bimp_UserGroup_Rights
-            
 #    lists_configs: 
 #        instance: 
 #            bimp_object: 
 #                module: bimpcore
 #                name: ListConfig
-
     lists_filters: 
         instance: 
             bimp_object: 
                 module: bimpcore
                 name: ListFilters
-                
+    files: 
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpFile
     remote_token: 
         instance: 
             bimp_object: 
@@ -77,14 +73,14 @@ sections:
                       panel: 1
                       object: correctifs
                       name: default
-        stats: 
-            label: Test stats
-            sections: 
-                - type: stats_list
-                  stats_list: 
-                      panel: 1
-                      object: vente
-                      name: default
+#        stats: 
+#            label: Test stats
+#            sections: 
+#                - type: stats_list
+#                  stats_list: 
+#                      panel: 1
+#                      object: vente
+#                      name: default
                       
         scripts: 
             label: Scripts
@@ -92,7 +88,13 @@ sections:
                 - type: custom
                   custom: 
                       callback: renderScriptsTabContent
-                      
+        files: 
+            label: Tous les Fichiers
+            sections: 
+                - type: list
+                  list: 
+                      object: files
+                      name: globale
         droit:
             label: Droits
             sections:
@@ -147,11 +149,11 @@ sections:
                       panel: 1
                       object: log
                       
-        test: 
-            label: Tests views list
-            sections: 
-                - type: views_list
-                  views_list: 
-                      object: users
+#        test: 
+#            label: Tests views list
+#            sections: 
+#                - type: views_list
+#                  views_list: 
+#                      object: users
            
                             

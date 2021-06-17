@@ -24,7 +24,8 @@
  *	\ingroup    stock
  *	\brief      Page fiche entrepot
  */
-ini_set('max_execution_time', 300);
+
+
 require '../../../main.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/product/stock/class/entrepot.class.php';
 require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
@@ -32,6 +33,12 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/stock.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/product.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT.'/product/class/html.formproduct.class.php';
+
+if (defined('BIMP_LIB')) {
+    BimpCore::setMaxExecutionTime(1200);
+} else {
+    ini_set('max_execution_time', 1200);
+}
 
 $langs->load("products");
 $langs->load("stocks");

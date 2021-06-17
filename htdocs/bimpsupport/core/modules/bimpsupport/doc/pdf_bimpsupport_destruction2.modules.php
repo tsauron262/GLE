@@ -18,7 +18,6 @@ require_once(DOL_DOCUMENT_ROOT . "/core/lib/company.lib.php");
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';
 
-
 /**
   \class      pdf_panier_babel
   \brief      Classe permettant de generer les paniers au modele babel
@@ -26,7 +25,11 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';
 if (!defined('EURO'))
     define('EURO', chr(128));
 
-ini_set('max_execution_time', 600);
+if (defined('BIMP_LIB')) {
+    BimpCore::setMaxExecutionTime(600);
+} else {
+    ini_set('max_execution_time', 600);
+}
 
 class pdf_bimpsupport_destruction2 extends ModeleBimpSupport
 {
@@ -37,7 +40,6 @@ class pdf_bimpsupport_destruction2 extends ModeleBimpSupport
       \brief      Constructeur
       \param        db        Handler acces base de donnee
      */
-
     function __construct($db)
     {
 
@@ -65,6 +67,7 @@ class pdf_bimpsupport_destruction2 extends ModeleBimpSupport
         $this->emetteur = $mysoc;
         if (!$this->emetteur->pays_code)
             $this->emetteur->pays_code = substr($langs->defaultlang, -2);    // Par defaut, si n'etait pas defini
+
 
 
 
@@ -196,17 +199,11 @@ class pdf_bimpsupport_destruction2 extends ModeleBimpSupport
                 $tplidx = $pdf->importPage(1, "/MediaBox");
                 $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
 
-
-
                 $equipment = $sav->getChildObject('equipment');
-
 
                 $pdf->SetXY('35', '82.6');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
                 $pdf->MultiCell(100, 6, $sav->getData('ref'), 0, 'L');
-
-
-
 
                 $code_entrepot = $sav->getData('code_centre');
                 //centre
@@ -246,23 +243,15 @@ BP 2321
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
                 $pdf->MultiCell(300, 6, $address, 0, 'L');
 
-
-
-
                 $pdf->SetXY('79', '147.3');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 8);
                 $pdf->MultiCell(50, 6, dol_print_date($sav->getData('date_create')), 0, 'L');
-
 
 //                //le prod
                 $product_label = $equipment->displayProduct('nom', true);
                 $pdf->SetXY('45', '154.4');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
                 $pdf->MultiCell(100, 6, $product_label . " - " . $equipment->getData('serial'), 0, 'L');
-
-
-
-
 
                 if (method_exists($pdf, 'AliasNbPages'))
                     $pdf->AliasNbPages();
@@ -338,34 +327,29 @@ BP 2321
         $object->client = $object->societe;
         $default_font_size = 12;
 
-
-
         $pdf->SetFont(pdf_getPDFFont($outputlangs), 'B', $default_font_size);
 
         $posx = 100;
         $posy = 10;
-        $posy+=5;
+        $posy += 5;
         $largCadre = 206 - $this->marge_gauche;
         $pdf->SetXY($posx, $posy);
         $pdf->SetTextColor(0, 0, 60);
         $pdf->MultiCell(100, 4, $outputlangs->transnoentities("Ref") . " : " . $outputlangs->convToOutputCharset($object->ref), '', 'R');
 
-        $posy+=1;
+        $posy += 1;
         $pdf->SetFont(pdf_getPDFFont($outputlangs), '', $default_font_size - 2);
         $pdf->SetTextColor(0, 0, 60);
 
-
         if ($object->client->code_client) {
-            $posy+=5;
+            $posy += 5;
             $pdf->SetXY($posx, $posy);
             $pdf->MultiCell(100, 3, $outputlangs->transnoentities("CustomerCode") . " : " . $outputlangs->transnoentities($object->client->code_client), '', 'R');
         }
 
-        $posy+=5;
+        $posy += 5;
         $pdf->SetXY($posx, $posy);
         $pdf->MultiCell(100, 3, $outputlangs->transnoentities("Type ") . " : " . $outputlangs->transnoentities($object->model->titre), '', 'R');
-
-
 
         if ($showadress) {
 
@@ -400,9 +384,6 @@ BP 2321
             $pdf->SetFont(pdf_getPDFFont($outputlangs), '', $default_font_size - 1);
             $pdf->MultiCell(80, 4, $carac_emetteur, 0, 'L');
 
-
-
-
             // Recipient name
             if (!empty($usecontact)) {
                 // On peut utiliser le nom de la societe du contact
@@ -411,8 +392,7 @@ BP 2321
                 else
                     $socname = $object->client->nom;
                 $carac_client_name = $outputlangs->convToOutputCharset($socname);
-            }
-            else {
+            } else {
                 $carac_client_name = $outputlangs->convToOutputCharset($object->client->nom);
             }
 
@@ -444,12 +424,9 @@ BP 2321
             $pdf->SetXY($posx + 2, $posy + 4 + (dol_nboflines_bis($carac_client_name, 50) * 4));
             $pdf->MultiCell($widthrecbox, 4, $carac_client, 0, 'L');
 
-
-
             $pdf->Rect($this->marge_gauche - 3, 89, $largCadre, 185);
             $pdf->SetXY($this->marge_gauche, 92);
-        }
-        else {
+        } else {
             $pdf->SetFont(pdf_getPDFFont($outputlangs), 'B', 10);
             //Société
             if ($this->marge_gauche > 45) {
@@ -543,4 +520,5 @@ BP 2321
         return $returnAsString ? implode($seperator, $rgbArray) : $rgbArray; // returns the rgb string or the associative array
     }
 }
+
 ?>

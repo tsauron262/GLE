@@ -48,8 +48,7 @@ if (!$type) {
     exit;
 }
 
-
-ini_set('max_execution_time', 12000);
+BimpCore::setMaxExecutionTime(12000);
 
 $filename = '';
 $headers = null;

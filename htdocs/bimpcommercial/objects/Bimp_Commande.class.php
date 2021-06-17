@@ -2318,7 +2318,7 @@ class Bimp_Commande extends BimpComm
 
     public function addLinesToFacture($id_facture, $lines_data = null, $check_data = true, $new_qties = false)
     {
-        ini_set('max_execution_time', 2400);
+        BimpCore::setMaxExecutionTime(2400);
         ignore_user_abort(0);
 
         $errors = array();

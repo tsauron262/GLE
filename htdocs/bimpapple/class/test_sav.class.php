@@ -64,8 +64,10 @@ class test_sav
             $user->fetch_optionals($idUser);
             if(!$this->repair->initGsx($error, true)){
                 $this->output .= " Non authentifié sur GSX ! ".$user->getFullName($langs);
+                return 0;
             }
         }
+        return 1;
     }
 
     function testGlobal($idUser = 0)
@@ -73,7 +75,7 @@ class test_sav
         global $db;
         $_GET['envoieMail'] = "yes";
         session_write_close();
-        if($idUser == 0){
+        if(!$this->initGsx($idUser) && $idUser == 0){
             $sql = $db->query("SELECT MAX(u.rowid) as idUser, gsx_acti_token FROM `llx_user` u, llx_user_extrafields ue WHERE u.rowid = ue.`fk_object` and gsx_acti_token != '' GROUP by `gsx_acti_token`");
             $nbcompte = $db->num_rows($sql);
             if($nbcompte > 0){
@@ -83,7 +85,7 @@ class test_sav
         }
         
         
-        $this->initGsx($idUser);
+        
         $this->tentativeARestitueAuto(0);
 
         $this->tentativeFermetureAuto(0);

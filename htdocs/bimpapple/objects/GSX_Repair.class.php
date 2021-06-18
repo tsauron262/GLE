@@ -170,7 +170,7 @@ class GSX_Repair extends BimpObject
                         }
 
                         //Patch pour faire une erreur des probléme de localisatioin
-                        if (stripos($msg, "La fonctionnalité Localiser mon appareil est activée") !== false) {
+                        if (stripos($msg, "Localiser mon") !== false) {
                             $action = "ERROR";
                             $msg .= "<script>alert('La fonctionnalité Localiser mon appareil est activée');</script>";
                         }

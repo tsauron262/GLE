@@ -5482,7 +5482,7 @@ class Bimp_Facture extends BimpComm
 
     // Méthodes statiques: 
 
-    public static function sendInvoiceDraftWhithMail()
+    public function sendInvoiceDraftWhithMail()
     {
         $date = new DateTime();
         $nbDay = 5;

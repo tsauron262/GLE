@@ -3064,7 +3064,7 @@ class BimpTools
         return $html;
     }
 
-    public static function envoieMailGrouper()
+    public function envoieMailGrouper()
     {
         $dir = PATH_TMP . "/bimpcore/mailsGrouper/";
         if (!is_dir($dir))

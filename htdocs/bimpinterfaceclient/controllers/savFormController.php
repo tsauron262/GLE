@@ -1035,6 +1035,8 @@ La plupart de nos centres peuvent effectuer une réparation de votre écran d’
 Nous proposons des services de sauvegarde des données, de protection de votre téléphone… venez nous rencontrer pour découvrir tous les services que nous pouvons vous proposer.
 Votre satisfaction est notre objectif, nous mettrons tout en œuvre pour vous satisfaire et réduire les délais d’immobilisation de votre produit Apple.\n\n";
 
+        $msg .= 'Lors de la prise en charge, si votre matériel est hors garantie OU si la garantie ne peut être applicable, un acompte de 49 euros ( 29 euros si iPhone / iPad ) vous sera demandé, cet acompte est déductible du devis en cas d’accord ou considéré comme frais de dossier en cas de refus.\n\n';
+        
         if ($cancel_url) {
             $msg .= 'Vous pouvez annuler ce rendez-vous depuis votre <a href="' . $base_url . '">espace personnel</a>';
             $msg .= ' ou en suivant <a href="' . $cancel_url . '">ce lien</a>' . "\n\n";

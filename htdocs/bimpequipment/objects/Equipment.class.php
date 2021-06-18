@@ -1539,7 +1539,7 @@ class Equipment extends BimpObject
                     foreach ($data2['eligibilityDetails']['outcome'] as $out) {
                         foreach ($out['reasons'] as $reason) {
                             foreach ($reason['messages'] as $msg) {
-                                if (stripos($msg, 'Localiser mon appareil') !== false)
+                                if (stripos($msg, 'Localiser mon ') !== false)
                                     $identifiers['status_gsx'] = 3;
                             }
                         }

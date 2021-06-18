@@ -3934,7 +3934,7 @@ class Bimp_Commande extends BimpComm
         }
     }
 
-    public static function sendEmailNotBilled()
+    public function sendEmailNotBilled()
     {
         $rows = self::getBdb()->getRows('commande', 'fk_statut IN ("1") AND total_ht != 0 AND (date_prevue_facturation < now() OR date_prevue_facturation IS NULL) AND (date_valid <= "' . date("Y-m-d", strtotime("-1 month")) . '") AND invoice_status IN ("0","1")', null, 'array', array('rowid'));
 

@@ -409,7 +409,7 @@ class ValidComm extends BimpObject
         if($d)
             return 2;
         
-        $id_user_affected = $this->findValidator($type, $val, $secteur, $object, $user_ask, $val_comm_demande);
+        $id_user_affected = $this->findValidator($type, $val, $secteur, $object, $user_ask, $bimp_object, $val_comm_demande);
         
         // Personne ne peut valider
         if(!$id_user_affected) {
@@ -459,7 +459,10 @@ class ValidComm extends BimpObject
     /**
      * Trouve le premier valideur disponible
      */
-    private function findValidator($type, $val, $secteur, $object, $user_ask, &$val_comm_demande = 0) {
+    private function findValidator($type, $val, $secteur, $object, $user_ask, $bimp_object, &$val_comm_demande = 0) {
+        
+        if($type == self::TYPE_FINANCE)
+            $val += $this->getEncours ($bimp_object);
         
         $can_valid_not_avaible = 0;
         $can_valid_avaible = 0;

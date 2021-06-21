@@ -16,11 +16,11 @@ class DemandeValidComm extends BimpObject
     );
 
     // Type
-    const TYPE_FINANCE = 0;
+    const TYPE_ENCOURS = 0;
     const TYPE_COMMERCIAL = 1;
     
     public static $types = Array(
-        self::TYPE_FINANCE    => Array('label' => 'Financière',  'icon' => 'fas_search-dollar'),
+        self::TYPE_ENCOURS    => Array('label' => 'Financière',  'icon' => 'fas_search-dollar'),
         self::TYPE_COMMERCIAL => Array('label' => 'Commerciale', 'icon' => 'fas_hand-holding-usd')
     );
   
@@ -128,7 +128,7 @@ class DemandeValidComm extends BimpObject
         $user_affected = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('id_user_affected'));
         $message_mail = 'Bonjour ' . $user_affected->getData('firstname') . ',<br/><br/>' . $message;
         
-        $type = ($this->getData('type') == self::TYPE_FINANCE) ? 'financière' : 'commerciale';
+        $type = ($this->getData('type') == self::TYPE_ENCOURS) ? 'financière' : 'commerciale';
         $subject_mail = "Demande de validation $type";
         
         if ((int) $bimp_object->getData('fk_soc')) {
@@ -272,7 +272,7 @@ class DemandeValidComm extends BimpObject
                     'date_create' => $d->getData('date_create')
                 );
 
-                if((int) $d->getData('type') == (int) self::TYPE_FINANCE)
+                if((int) $d->getData('type') == (int) self::TYPE_ENCOURS)
                     $new_demande['montant'] = $montant_piece;
                 else
                     $new_demande['remise'] = $percent;

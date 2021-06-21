@@ -4132,7 +4132,7 @@ class BimpObject extends BimpCache
 
         $where = BimpTools::getSqlWhere($filters);
         
-        $req = 'UPDATE '.MAIN_DB_PREFIX.$this->getTable(). ' SET '.implode(', ', $set). $where;
+        $req = 'UPDATE '.MAIN_DB_PREFIX.$this->getTable(). ' a SET '.implode(', ', $set). $where;
 
         $this->db->execute($req);
     }

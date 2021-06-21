@@ -471,12 +471,12 @@ class ValidComm extends BimpObject
                 'in' => array($object, self::OBJ_ALL)
             ),
             'val_max' => array(
-                'operator' => '>=',
-                'value'    => intval($val)
+                'operator' => '>',
+                'value'    => $val
             ),
             'val_min' => array(
                 'operator' => '<=',
-                'value'    => intval($val)
+                'value'    => $val
             ),
         );
         

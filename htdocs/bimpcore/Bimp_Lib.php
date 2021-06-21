@@ -1,6 +1,5 @@
 <?php
 
-
 if (!defined('BIMP_LIB')) {
     define('BIMP_LIB', 1);
 
@@ -59,17 +58,29 @@ if (!defined('BIMP_LIB')) {
     require_once $dir . 'FixeTabs.php';
     require_once $dir . 'BimpController.php';
     require_once $dir . 'BimpPublicController.php';
+    require_once $dir . 'BimpMailCore.php';
+
+    if (defined('PATH_EXTENDS')) {
+        if (file_exists(PATH_EXTENDS . '/bimpcore/classes/BimpMail.php')) {
+            require_once PATH_EXTENDS . '/bimpcore/classes/BimpMail.php';
+        }
+    }
+
+    if (!class_exists('BimpMail')) {
+        require_once $dir . 'BimpMail.php';
+    }
 
     BimpCore::setMaxExecutionTime(600);
     BimpCore::setMemoryLimit(256);
-    
+
     BimpObject::loadClass('bimpcore', 'Bimp_Log');
 
     BimpConfig::initCacheServeur();
 }
 
-if(stripos($_SERVER['PHP_SELF'], 'bimpinterfaceclient') === false)
+if (stripos($_SERVER['PHP_SELF'], 'bimpinterfaceclient') === false)
     BimpTools::setContext("private");
+
 function checkBimpCoreVersion()
 {
     if (BimpTools::isSubmit('ajax')) {

@@ -202,13 +202,42 @@ class BS_Inter extends BimpObject
         $errors = parent::create($warnings, $force_create);
 
         if (!count($errors)) {
-            $parent = $this->getParentInstance();
-            if ($parent->getData('id_user_client') > 0) {
-                $instance = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClient', $parent->getData('id_user_client'));
-                $liste_destinataires = Array($instance->getData('email'));
-                $liste_destinataires = BimpTools::merge_array($liste_destinataires, $instance->get_dest('admin'));
-                $liste_destinataires = BimpTools::merge_array($liste_destinataires, $instance->get_dest('commerciaux'));
-                mailSyn2("BIMP CLIENT : Intervention sur votre ticket : " . $parent->getData('ticket_number'), implode(', ', $liste_destinataires), null, "Une intervention a été créée sur votre ticket N°" . $parent->getData('ticket_number'));
+            $ticket = $this->getParentInstance();
+            if ($ticket->getData('id_user_client') > 0) {
+                $url = $ticket->getPublicUrl();
+                $userClient = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClient', $ticket->getData('id_user_client'));
+                $to = $userClient->getData('email');
+                $cc = implode(',', $userClient->get_dest('admin'));
+                $subject = 'BIMP - Intervention sur votre ticket ' . $ticket->getData('ticket_number');
+                
+                $msg = 'Bonjour,<br/><br/>';
+                $msg .= 'Une intervention a été créée sur votre ';
+                
+                if ($url) {
+                    '<a href="' . $url . '">';
+                }
+                
+                $msg .= 'ticket support N° ' . $ticket->getData('ticket_number');
+
+                if ($url) {
+                    '</a>';
+                }
+
+                $bimpMail = new BimpMail($subject, $to, '', $msg, '', $cc);
+                $mail_errors = array();
+                $bimpMail->send($mail_errors);
+
+                if (count($mail_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail de confirmation au client');
+                }
+
+                $to = implode(',', $userClient->get_dest('commerciaux'));
+
+                if ($to) {
+                    $link = $ticket->getLink(array(), 'private');
+                    $msg = 'Une intervention a été créée sur le ticket support ' . $link;
+                    mailSyn2("BIMP - Intervention sur le ticket : " . $ticket->getData('ticket_number'), $to, '', $msg);
+                }
             }
 
             if ((int) BimpTools::getValue('start_timer', 0)) {

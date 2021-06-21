@@ -200,11 +200,6 @@ class BS_Note extends BimpObject
             $client = $ticket->getChildObject('user_client');
         }
 
-        $url = '';
-        if (BimpObject::objectLoaded($ticket)) {
-            $url = $ticket->getLink();
-        }
-
         $dests = array();
         if (BimpCore::isContextPublic()) {
             if (BimpObject::objectLoaded($client)) {
@@ -217,26 +212,47 @@ class BS_Note extends BimpObject
             }
 
             if (count($dests)) {
-                $msg = 'Un message a été ajouté sur votre ticket support <b>' . $ticket->getData('ticket_number') . '</b>.<br/><br/>';
-                if ($url) {
-                    $msg .= 'Cliquez ici pour le lire et y répondre : ' . $url . '<br/><br/>';
+                $link = '';
+                if (BimpObject::objectLoaded($ticket)) {
+                    $link = $ticket->getLink(array(), 'private');
                 }
+
+                $msg = 'Un message a été ajouté sur votre ticket hotline ';
+                if ($link) {
+                    $msg .= $link;
+                } else {
+                    $msg .= '<b>' . $ticket->getData('ticket_number') . '</b>';
+                }
+
+                $msg .= '<br/><br/>';
                 $msg .= 'Message : ' . $this->getData('content');
 
-                mailSyn2('BIMP - nouveau message sur votre ticket support', implode(', ', $dests), '', $msg);
+                mailSyn2('BIMP - Message client sur ticket hotline #' . $ticket->id, implode(', ', $dests), '', $msg);
             }
         } elseif (BimpObject::objectLoaded($client) && $this->getData('visibility') == 1) {
-            $dests = Array($client->getData('email'));
-            $dests = BimpTools::merge_array($dests, $client->get_dest('admin'));
+            $to = $client->getData('email');
+            $cc = implode(',', $client->get_dest('admin'));
 
-            if (count($dests)) {
-                $msg = 'Nouveau message client ticket hotline #' . $ticket->id . ' - ' . $ticket->getData('ticket_number') . '<br/>';
-                if ($url) {
-                    $msg .= 'Accès au ticket: ' . $url;
+            if (!$to && $cc) {
+                $to = $cc;
+                $cc = '';
+            }
+            if ($to) {
+                $subject = 'BIMP - Nouveau message sur votre ticket support' . (BimpObject::objectLoaded($ticket) ? ' ' . $ticket->getData('ticket_number') : '');
+                $msg = 'Bonjour,<br/><br/>';
+                $msg = 'Nouveau message sur votre ticket support n° ' . $ticket->getData('ticket_number') . '<br/><br/>';
+
+                $msg .= '<b>Message : </b><br/>' . $this->getData('content');
+
+                if (BimpObject::objectLoaded($ticket)) {
+                    $url = $ticket->getPublicUrl();
                 }
-                $msg .= 'Message : ' . $this->getData('content');
+                if ($url) {
+                    $msg .= '<br/>------------------<br/><a href="' . $url . '">Cliquez ici</a> pour accéder au détail de votre ticket support depuis votre espace client BIMP';
+                }
 
-                mailSyn2('Message client sur ticket hotline #' . $ticket->id, implode(', ', $dests), '', $msg);
+                $bimpMail = new BimpMail($subject, $to, '', $msg, '', $cc);
+                $bimpMail->send();
             }
         }
     }

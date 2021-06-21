@@ -45,6 +45,8 @@ objects:
                 field_value: id_user_resp
                 
     user_client:
+        relation: hasOne
+        delete: 0
         instance:
             bimp_object:
                 module: bimpinterfaceclient

@@ -318,7 +318,7 @@ class DemandeValidComm extends BimpObject
     public function getDemandeValidCommExtraButtons() {
         $buttons = array();
         
-        if($this->getData('id_valid_comm')) {
+        if($this->getData('val_comm_demande') or $this->getData('val_comm_validation')) {
             if ($this->isLoaded()) {
                             $buttons[] = array(
                     'label'   => 'Validation',
@@ -333,24 +333,42 @@ class DemandeValidComm extends BimpObject
     
     
     public function renderValidComm() {
-        if($this->getData('id_valid_comm')) {
-
-            $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm', (int) $this->getData('id_valid_comm'));
+        if($this->getData('val_comm_demande') or $this->getData('val_comm_validation')) {
             
-            if(!$valid_comm->isLoaded())
-                return BimpRender::renderAlerts("Erreur lors du chargement de la validation", 'danger');
+            // Demande
+            $valid_comm_demande = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm', (int) $this->getData('val_comm_demande'));
             
-            if($valid_comm->getData('date_update') > $this->getData('date_valid'))
-                $html .= BimpRender::renderAlerts("Cette règle de validation a été éditée après la validation de cette demande", 'danger');
+            if(!$valid_comm_demande->isLoaded())
+                $html .= BimpRender::renderAlerts("Erreur lors du chargement de la règle de validation (lors de la demande)", 'danger');
+            else {
+                if($valid_comm_demande->getData('date_update') > $this->getData('date_create'))
+                    $html .= BimpRender::renderAlerts("Cette règle de validation a été éditée après la création de cette demande", 'danger');
 
-            $list = new BC_ListTable($valid_comm, 'default');
-            $list->addFieldFilterValue('id', $valid_comm->id);
-            $html .= $list->renderHtml();
+                    $list = new BC_ListTable($valid_comm_demande, 'default', 1, null, "Règle lors de la demande");
+                $list->addFieldFilterValue('id', $valid_comm_demande->id);
+                $html .= $list->renderHtml();
+            }
+            
+            // Validation
+            if($this->getData('date_valid')) {
+                $valid_comm_validation = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm', (int) $this->getData('val_comm_validation'));
+
+                if(!$valid_comm_validation->isLoaded())
+                $html .= BimpRender::renderAlerts("Erreur lors du chargement de la règle de validation (lors de la validation)", 'danger');
+                else {
+                    if($valid_comm_validation->getData('date_update') > $this->getData('date_valid'))
+                        $html .= BimpRender::renderAlerts("Cette règle de validation a été éditée après la validation de cette demande", 'danger');
+
+                    $list = new BC_ListTable($valid_comm_validation, 'default', 1, null, "Règle lors de la validation");
+                    $list->addFieldFilterValue('id', $valid_comm_validation->id);
+                    $html .= $list->renderHtml();
+                }
+            }
 
             return $html;
         }
         
-        return BimpRender::renderAlerts("Cette demande n'est pas validée", 'danger');
+        return BimpRender::renderAlerts("Erreur demande/validation", 'danger');
     }
     
 }

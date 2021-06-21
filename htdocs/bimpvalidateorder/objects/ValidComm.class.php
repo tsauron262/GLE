@@ -142,8 +142,18 @@ class ValidComm extends BimpObject
             if($bimp_object->field_exists('paiement_comptant') and $bimp_object->getData('paiement_comptant')) {
                 $success[] = "Validation financière forcée par le champ \"Paiement comptant\".";
                 $valid_finan = 1;
-            } else
-                $valid_finan = (int) $this->tryValidateByType($user, self::TYPE_FINANCE, $secteur, $class, $val_euros, $bimp_object, $errors);
+            } else {
+                if(method_exists($bimp_object, 'getClientFacture'))
+                    $client = $bimp_object->getClientFacture();
+                else
+                    $client = $bimp_object->getChildObject('client');
+                
+                if(!$client->getData('validation_financiere')) {
+                    $success[] = "Validation financière forcée par le champ \"Validation financière\".";
+                    $valid_finan = 1;
+                } else 
+                    $valid_finan = (int) $this->tryValidateByType($user, self::TYPE_FINANCE, $secteur, $class, $val_euros, $bimp_object, $errors);
+            }
         }
             
         if(!$valid_comm)
@@ -181,8 +191,8 @@ class ValidComm extends BimpObject
 //                return 1;
                 
             // Je peux valider (sans être le valideur)
-            elseif($this->userCanValidate((int) $user->id, $secteur, $type, $class, $val, $bimp_object, $id_valid_comm)) {
-                $this->updateDemande ((int) $user->id, $class, (int) $bimp_object->id, $type, (int) DemandeValidComm::STATUS_VALIDATED, $id_valid_comm);
+            elseif($this->userCanValidate((int) $user->id, $secteur, $type, $class, $val, $bimp_object, $val_comm_validation)) {
+                $this->updateDemande ((int) $user->id, $class, (int) $bimp_object->id, $type, (int) DemandeValidComm::STATUS_VALIDATED, $val_comm_validation);
                 return 1;
             }
         
@@ -399,7 +409,7 @@ class ValidComm extends BimpObject
         if($d)
             return 2;
         
-        $id_user_affected = $this->findValidator($type, $val, $secteur, $object, $user_ask);
+        $id_user_affected = $this->findValidator($type, $val, $secteur, $object, $user_ask, $bimp_object, $val_comm_demande);
         
         // Personne ne peut valider
         if(!$id_user_affected) {
@@ -433,6 +443,7 @@ class ValidComm extends BimpObject
                 'id_piece' =>         (int) $bimp_object->id,
                 'id_user_ask' =>      (int) $user_ask->id,
                 'id_user_affected' => (int) $id_user_affected,
+                'val_comm_demande' => (int) $val_comm_demande,
                 'type' =>             (int) $type
             )));
 
@@ -448,7 +459,10 @@ class ValidComm extends BimpObject
     /**
      * Trouve le premier valideur disponible
      */
-    private function findValidator($type, $val, $secteur, $object, $user_ask) {
+    private function findValidator($type, $val, $secteur, $object, $user_ask, $bimp_object, &$val_comm_demande = 0) {
+        
+        if($type == self::TYPE_FINANCE)
+            $val += $this->getEncours ($bimp_object);
         
         $can_valid_not_avaible = 0;
         $can_valid_avaible = 0;
@@ -460,44 +474,46 @@ class ValidComm extends BimpObject
                 'in' => array($object, self::OBJ_ALL)
             ),
             'val_max' => array(
-                'operator' => '>=',
-                'value'    => intval($val)
+                'operator' => '>',
+                'value'    => $val
             ),
             'val_min' => array(
                 'operator' => '<=',
-                'value'    => intval($val)
+                'value'    => $val
             ),
-//            'and' => array(
-//                'or' => array(
-//                    'only_child' => self::USER_ASK_ALL,
-//                    'and' => array(
-//                        'only_child' => self::USER_ASK_CHILD,
-//                        'user'       => $user_ask->fk_user
-//                    )
-//                )
-//            )
         );
         
-        $sql = BimpTools::getSqlSelect(array('user', 'val_max'));
+        $sql = BimpTools::getSqlSelect(array('id', 'user', 'val_max'));
         $sql .= BimpTools::getSqlFrom($this->getTable());
         $sql .= BimpTools::getSqlWhere($filters);
         $sql .= ' AND (only_child=' . self::USER_ASK_ALL . ' OR (only_child=' . self::USER_ASK_CHILD . ' AND user=' . $user_ask->fk_user . '))';
         $sql .= BimpTools::getSqlOrderBy('date_create', 'DESC');
-//        die($sql);
         $rows = self::getBdb()->executeS($sql, 'array');
 
         
         if (is_array($rows)) {
             foreach ($rows as $r) {
         
-                if($r['user'] == self::USER_SUP and $this->userIsAvaible($user_ask->fk_user))
-                    $can_valid_avaible = $user_ask->fk_user;
+                if($r['user'] == self::USER_SUP) {
+                    if($this->userIsAvaible($user_ask->fk_user)) {
+                        $can_valid_avaible = $user_ask->fk_user;
+                        $val_comm_demande = $r['id'];
+                    } else {
+                        $can_valid_not_avaible = $user_ask->fk_user;
+                        $val_comm_demande_not_avaible = $r['id'];
+                    }
+
+                }
                 
-                elseif($can_valid_avaible == 0 and $this->userIsAvaible($r['user']))
+                elseif($can_valid_avaible == 0 and $this->userIsAvaible($r['user'])) {
                     $can_valid_avaible = $r['user'];
+                    $val_comm_demande = $r['id'];
+                }
                 
-                elseif($can_valid_not_avaible == 0)
+                elseif($can_valid_not_avaible == 0) {
                     $can_valid_not_avaible = $r['user'];
+                    $val_comm_demande_not_avaible = $r['id'];
+                }
                     
             }
         }
@@ -505,6 +521,7 @@ class ValidComm extends BimpObject
         if($can_valid_avaible != 0)
             return $can_valid_avaible;
         
+        $val_comm_demande = $val_comm_demande_not_avaible;
         return $can_valid_not_avaible;
     }
     
@@ -524,7 +541,7 @@ class ValidComm extends BimpObject
         return 0;
     }
     
-    public function updateDemande($id_user, $class, $id_object, $type, $status, $id_valid_comm = 0) {
+    public function updateDemande($id_user, $class, $id_object, $type, $status, $val_comm_validation = 0) {
         
         $filters = array(
             'type_de_piece' => $class,
@@ -539,7 +556,7 @@ class ValidComm extends BimpObject
             $d->updateField('id_user_valid', $id_user);
             $d->updateField('date_valid', $now);
             $d->updateField('status', $status);
-            $d->updateField('id_valid_comm', $id_valid_comm);
+            $d->updateField('val_comm_validation', $val_comm_validation);
             return 1;
         }
         

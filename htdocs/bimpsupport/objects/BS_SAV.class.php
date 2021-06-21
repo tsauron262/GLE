@@ -1683,13 +1683,21 @@ class BS_SAV extends BimpObject
         $html .= '<strong>AppleId</strong>: ' . $gsx->appleId . '<br/>';
         if ($gsx->appleId === GSX_v2::$default_ids['apple_id']) {
             $html .= '<strong>Mot de passe</strong>: ' . GSX_v2::$default_ids['apple_pword'];
+            $html.= '<script>'
+                    . 'var idMaxMesg = 0;'
+                    . 'function checkCode(){'
+                    .   ' setObjectAction(null, {"module":"bimpsupport", "object_name":"BS_SAV"}, "getCodeApple", {"idMax":idMaxMesg});'
+                    . '}'
+                    . 'checkCode();'
+                    . '</script>';
         }
 
         $html .= '<p class="small" style="text-align: center; margin-top: 15px">';
-        $html .= 'Si la fenêtre d\authentification ne s\'ouvre pas, veuillez vérifier que votre navigateur ne bloque pas l\'ouverture des fenêtres pop-up';
+        $html .= 'Si la fenêtre d\'authentification ne s\'ouvre pas, veuillez vérifier que votre navigateur ne bloque pas l\'ouverture des fenêtres pop-up';
         $html .= '</p>';
 
         $html .= '</div>';
+        
 
         return $html;
     }
@@ -3012,8 +3020,9 @@ class BS_SAV extends BimpObject
                     $errors[] = "L'apraeil " . $eq->getLink() . ' ne semble pas localisé';
                 else {
                     $subject = "Réparation " . $this->getData('ref');
-                    $mail_msg = "Bonjour, l'appareil concerné par votre SAV " . $this->getData('ref') . " qui a pour serial " . $eq->getData('serial') . " a la fonction localisée activée, nous ne pouvons pas procéder à la réparation tant que vous n'aurez pas désactivé cette option dans votre iCloud.\n";
-                    $mail_msg .= "Merci de votre compréhension.\n<a href='https://support.apple.com/fr-fr/guide/icloud/mmdc23b125f6/icloud'>Voici un lien explicatif sur le site Apple</a>";
+                    $mail_msg = "Bonjour, l'appareil concerné par votre SAV " . $this->getData('ref') . " dont le numéro de série est " . $eq->getData('serial') . " a la fonction localisée d’activée.\nNous ne pourrons pas procéder à la réparation tant cette option ne sera pas désactivée.\n";
+                    $mail_msg .= "\n\n<a href='https://support.apple.com/fr-fr/guide/icloud/mmdc23b125f6/icloud'>Cliquez sur ce lien pour savoir comment désactiver l’option de géolocalisation</a>";
+                    $mail_msg .= "\n\nMerci de votre compréhension.";
                     //$sms = "Bonjour, nous venons de recevoir la pièce ou le produit pour votre réparation, nous vous contacterons quand votre matériel sera prêt.\nL'Equipe BIMP.";
                 }
                 break;
@@ -4599,6 +4608,44 @@ class BS_SAV extends BimpObject
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
+        );
+    }
+    
+    
+    
+    public function actionGetCodeApple($data, &$success){
+        $idMax = $data['idMax'];
+        $success = 'Code pas encore reçu';
+        
+        $result = $this->db->executeS("SELECT *
+FROM ".MAIN_DB_PREFIX."bimpcore_note a
+WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 'BIMP_Task' AND a.id_obj = '25350' ORDER by id DESC");
+        if(isset($result[0])){
+            $ln = $result[0];
+            $success_callback = "setTimeout(function(){checkCode();}, 2000);";
+            if($idMax == 0){
+                $success_callback .= 'idMaxMesg = '.$ln->id.';';
+            }
+            elseif($idMax == $ln->id){
+                //On fait rien pas recu
+            }
+            else{
+                $code = $ln->content;
+                $tabCode = explode('votre identifiant Apple est :', $code);
+                if(isset($tabCode[1]))
+                    $code = $tabCode[1];
+                $tabCode = explode('. Ne le', $code);
+                if(isset($tabCode[1]))
+                    $code = $tabCode[0];
+                $success_callback = "alert('". urlencode($code)."');";
+            }
+            
+        }
+        
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings,
+            'success_callback' => $success_callback
         );
     }
 

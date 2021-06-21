@@ -35,7 +35,7 @@ objects:
                 module: bimpvalidateorder
                 name: ValidComm
             id_object: 
-                field_value: id_valid_comm
+                field_value: val_comm_validation
                 
 fields:
     status:
@@ -88,8 +88,14 @@ fields:
         search:
             type: date_range
             
-    id_valid_comm:
-        label: Validation
+    val_comm_demande:
+        label: Validation config demande
+#        required: 1
+        type: id_object
+        object: valid_comm
+    
+    val_comm_validation:
+        label: Validation config validation
         type: id_object
         object: valid_comm
         
@@ -153,8 +159,6 @@ lists:
         # enlever delete btn
         delete_btn: 1 
         modal_view: default
-#        bulk_actions: 
-#            callback: getDemandeValidCommExtraButtons
         extra_btn: 
             callback: getDemandeValidCommExtraButtons
         cols:

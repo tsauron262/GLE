@@ -42,7 +42,7 @@ class securLogSms {
         $this->db = $db;
         $this->filename = PATH_TMP . "/bimpcore/white-ip.txt";
         
-        if (defined('MOD_DEV') && $this->debug > 1) {
+        if (defined('MOD_DEV') && MOD_DEV == 1 && $this->debug > 1) {
             $this->debug = 1;
         }
         

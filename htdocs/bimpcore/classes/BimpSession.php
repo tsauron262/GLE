@@ -131,7 +131,7 @@ class Session {
     public function session_nettoyage($sessionMaxLifetime) {
         if(!defined('NO_SESSION_NETTOYAGE') && class_exists('BimpCore')){
             $date = BimpCore::getConf('date_nettoyage_session');
-            if(!$date || $date < time() - 60){
+            if(!$date || $date < time() - 600){
                 if(is_object($this->db)){
                     if($sessionMaxLifetime < 43200)
                         $sessionMaxLifetime = 43200;

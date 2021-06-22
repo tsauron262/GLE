@@ -249,10 +249,10 @@ class ValidComm extends BimpObject
                 'operator' => '>=',
                 'value'    => (isset($val_max)) ? $val_max : $val
             ),
-            'val_min' => array(
-                'operator' => '<=',
-                'value'    => (isset($val_max)) ? $val_max : $val
-            )
+//            'val_min' => array(
+//                'operator' => '<=',
+//                'value'    => (isset($val_max)) ? $val_max : $val
+//            )
         );
         $valid_comms = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'ValidComm', $filters);
 

@@ -340,11 +340,16 @@ class BIC_UserClient extends BimpObject
                     break;
 
                 case 'admin':
-                    $listUser = $this->getList(array('id_client' => $this->getData('id_client')));
+                    $listUser = $this->getList(array(
+                        'id_client' => $this->getData('id_client'),
+                        'role'      => 1,
+                        'id'        => array(
+                            'operator' => '!=',
+                            'value'    => $this->id
+                    )));
+
                     foreach ($listUser as $user) {
-                        if ($user['id'] != $this->id && $user['role'] == 1) {
-                            $return[$user['email']] = $user['email'];
-                        }
+                        $return[$user['email']] = $user['email'];
                     }
                     break;
             }
@@ -503,12 +508,25 @@ class BIC_UserClient extends BimpObject
             $errors[] = 'Echec de la mise à jour de votre mot de passe';
         }
 
+        $url = BimpCore::getConf('interface_client_base_url', '');
         $msg = 'Bonjour, ' . "\n\n";
-        $msg .= 'Le mot de passe de votre espace client BIMP a été changé.' . "\n";
-        $msg .= 'Si vous n\'êtes pas à l\'origine de cette action veuillez contacter votre administrateur';
+        $msg .= 'Le mot de passe de votre <a href="' . $url . '">espace client BIMP</a> a été changé.' . "\n";
+        $msg .= 'Si vous n\'êtes pas à l\'origine de cette action veuillez contacter votre ';
 
-        mailSyn2('Espace client BIMP - Changement de votre mot de passe', $this->getData('email'), '', $msg);
-        $this->updateField('renew_required', 0);
+        if ($this->isAdmin()) {
+            $msg .= 'interlocuteur BIMP.';
+        } else {
+            $msg .= 'l\'administrateur de votre compte client BIMP.';
+        }
+
+        $subject = 'Espace client BIMP - Changement de votre mot de passe';
+
+//        mailSyn2($subject, $this->getData('email'), '', $msg);
+        $bimpMail = new BimpMail($subject, $this->getData('email'), '', $msg);
+
+        if ($bimpMail->send($errors)) {
+            $this->updateField('renew_required', 0);
+        }
 
         return $errors;
     }
@@ -524,15 +542,18 @@ class BIC_UserClient extends BimpObject
         $errors = $this->update($warnings, true);
 
         if (!count($errors)) {
-            $subject = 'Changement de mot de passe';
-            $msg = 'Bonjour,<br/><br/>Le mot de passe pour votre accès à l\'espace client BIMP a été réinitialisé<br />';
-            $msg .= 'Nouveau mot de passe: ' . $mdp_clear;
+            $url = BimpCore::getConf('interface_client_base_url', '');
+            $subject = 'Espace client BIMP - Nouveau mot de passe';
+            $msg = 'Bonjour,<br/><br/>Le mot de passe pour votre accès à votre <a href="' . $url . '">espace client BIMP</a> a été réinitialisé.<br/><br/>';
+            $msg .= '<b>Nouveau mot de passe : </b>' . $mdp_clear;
         }
 
-        if (!mailSyn2($subject, BimpTools::cleanEmailsStr($this->getData('email')), '', $msg)) {
-            $warnings[] = 'Echec de l\'envoi du mot de passe par e-mail';
-        }
+//        if (!mailSyn2($subject, BimpTools::cleanEmailsStr($this->getData('email')), '', $msg)) {
+//            $warnings[] = 'Echec de l\'envoi du mot de passe par e-mail';
+//        }
 
+        $bimpMail = new BimpMail($subject, $this->getData('email'), '', $msg);
+        $bimpMail->send($errors, $warnings);
         return $errors;
     }
 
@@ -568,12 +589,20 @@ class BIC_UserClient extends BimpObject
         $errors = $this->update($warnings, true);
 
         if (!count($errors)) {
+            $url = BimpCore::getConf('interface_client_base_url', '');
             $subject = 'Espace client BIMP - Vos identifiants';
-            $msg = 'Identifiant : ' . $this->getData('email') . '<br />Mot de passe (Généré automatiquement) : ' . $mdp_clear;
 
-            if (!mailSyn2($subject, BimpTools::cleanEmailsStr($this->getData('email')), '', $msg)) {
-                $warnings[] = 'Echec de l\'envoi du mot de passe par e-mail';
-            }
+            $msg .= 'Bonjour,<br/><br/>';
+            $msg .= 'Voici vos identifiants pour votre accès à votre <a href="' . $url . '"></a> sur notre site www.bimp.fr <br/><br/>';
+            $msg = '<b>Identifiant : </b>' . $this->getData('email') . '<br />';
+            $msg .= '<b>Mot de passe (Généré automatiquement) : </b>' . $mdp_clear;
+
+//            if (!mailSyn2($subject, BimpTools::cleanEmailsStr($this->getData('email')), '', $msg)) {
+//                $warnings[] = 'Echec de l\'envoi du mot de passe par e-mail';
+//            }
+
+            $bimpMail = new BimpMail($subject, $this->getData('email'), '', $msg);
+            $bimpMail->send($errors, $warnings);
         }
 
         return array(
@@ -666,7 +695,14 @@ class BIC_UserClient extends BimpObject
                     $url_notice = "https://r.emailing.bimp-groupe.fr/mk/cl/f/fjaJDCZiyHn3ixmdjVfLHPUSzRBzlYjsfpssdw_dklmhgN7Rlm7ztqBEXLbIKJtMnEQgq_c8PnFXMmE7kB1jjsugCTsEJ7RQFNYG0t5Ks3vd_8ZYmKBoRLUFdzaJ0xHmKqyZtY7pQaJAMxOhD1AEEmrWT3yc660gskTYZLe8VetnKI-LyDzSgxOPfNV9sML4h-Y_0mMwr1V8ltNqeEzbtdlUajs02Fnek4SHgHsktedp4Qn40gRovH788YIpeD1SdAb7Oav0KBONH487Exm1-FiwSDTsmzbKE3DrrrHG0mgmuisHe4F04sEhyWZZIyfXSfasmhwq1TEd33NhdA5aizTj9oXJnYW-JM3Ph5e1oavhKYsMEu2bAJBggH0e1w";
                     $message .= "<a href='" . $url_notice . "'>Notice d'utilisation</a>";
 
-                    mailSyn2($sujet, BimpTools::cleanEmailsStr($email), '', $message);
+//                    mailSyn2($sujet, BimpTools::cleanEmailsStr($email), '', $message);
+                    $bimpMail = new BimpMail($sujet, $this->getData('email'), '', $message);
+                    $mail_errors = array();
+                    $bimpMail->send($mail_errors);
+
+                    if (count($mail_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail de confirmation de l\'ouverture du compte client');
+                    }
                 }
             }
         }

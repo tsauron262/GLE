@@ -191,6 +191,35 @@ class BS_Ticket extends BimpObject
         return ($this->isUserClientRequest() == 0) ? 1 : 0;
     }
 
+    public function isActionAllowed($action, &$errors = array())
+    {
+        switch ($action) {
+            case 'prendre_en_compte':
+                if (BimpTools::getContext() == 'public') {
+                    $errors[] = 'Contexte public';
+                    return 0;
+                }
+                if ((int) $this->getData('status') != self::BS_TICKET_DEMANDE_CLIENT) {
+                    $errors[] = 'Statut actuel invalide pour cette opération';
+                    return 0;
+                }
+                return 1;
+
+            case 'closeInter':
+                if (BimpTools::getContext() == 'public') {
+                    $errors[] = 'Contexte public';
+                    return 0;
+                }
+                $openInters = $this->getOpenIntersArray();
+                if (!count($openInters)) {
+                    $errors[] = 'Aucune intervention ouverte';
+                    return 0;
+                }
+                return 1;
+        }
+        return parent::isActionAllowed($action, $errors);
+    }
+
     // Getters array: 
 
     public function getClient_contactsArray()
@@ -304,8 +333,7 @@ class BS_Ticket extends BimpObject
     {
         $buttons = array();
         if ($this->isLoaded()) {
-            $openInters = $this->getOpenIntersArray();
-            if (count($openInters) && BimpTools::getContext() != 'public') {
+            if ($this->isActionAllowed('closeInter') && $this->canSetAction('closeInter')) {
                 $buttons[] = array(
                     'label'   => 'Fermer des interventions',
                     'icon'    => 'fas_times',
@@ -314,12 +342,12 @@ class BS_Ticket extends BimpObject
                     ))
                 );
             }
-            if ($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT && BimpTools::getContext() != 'public') {
+            if ($this->isActionAllowed('prendre_en_compte') && $this->canSetAction('prendre_en_compte')) {
                 $buttons[] = array(
                     'label'   => 'Prendre en compte le ticket',
                     'icon'    => 'fas_thumbs-up',
                     'onclick' => $this->getJsActionOnclick('prendre_en_compte', array(), array(
-                        'success_callback' => $callback
+                        'confirm_mag' => 'Veuillez confirmer la prise en compte de ce ticket'
                     ))
                 );
             }
@@ -351,15 +379,15 @@ class BS_Ticket extends BimpObject
         if ($this->getData('serial') != '') {
             $equipment = BimpObject::getBimpObjectInstance('bimpequipment', 'Equipment');
             if ($equipment->find(array(
-                'or_serial' => array(
-                    'or' => array(
-                        'serial' => $this->getData('serial'),
-                        'imei' => $this->getData('serial'),
-                        'imei2' => $this->getData('serial'),
-                        'meid' => $this->getData('serial')
-                    )
-                )
-            ), true)) {
+                        'or_serial' => array(
+                            'or' => array(
+                                'serial' => $this->getData('serial'),
+                                'imei'   => $this->getData('serial'),
+                                'imei2'  => $this->getData('serial'),
+                                'meid'   => $this->getData('serial')
+                            )
+                        )
+                            ), true)) {
                 if (!$in_the_client)
                     return $equipment;
                 $place = $equipment->getCurrentPlace();
@@ -418,7 +446,11 @@ class BS_Ticket extends BimpObject
     public function getPublicUrl()
     {
         if ($this->isLoaded()) {
-            return DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=tickets&content=card&id_ticket=' . $this->id;
+            $base_url = BimpCore::getConf('interface_client_base_url', '');
+
+            if ($base_url) {
+                return $base_url . '?tab=tickets&content=card&id_ticket=' . $this->id;
+            }
         }
 
         return '';
@@ -752,17 +784,55 @@ class BS_Ticket extends BimpObject
 
     public function actionPrendre_en_compte($data, &$success)
     {
-        global $user, $userClient;
-        if ($this->getData('id_user_client') > 0) {
-            $instance = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClient', $this->getData('id_user_client'));
-            $liste_destinataires = Array($instance->getData('email'));
-            $liste_destinataires = BimpTools::merge_array($liste_destinataires, $instance->get_dest('admin'));
-            $liste_destinataires = BimpTools::merge_array($liste_destinataires, $instance->get_dest('commerciaux'));
-            mailSyn2("BIMP CLIENT : Prise en compte du ticket : " . $this->getData('ticket_number'), implode(', ', $liste_destinataires), null, "Votre ticket numéro " . $this->getData('ticket_number') . " à été pris en compte par nos équipes<br /> Responssable de votre demande : " . $user->firstname . ' ' . $user->lastname);
-        }
-        $this->updateField('id_user_resp', $user->id);
-        $this->updateField('status', self::BS_TICKET_EN_COURS);
+        $errors = array();
+        $warnings = array();
+
+        global $user;
+
+        $this->set('id_user_resp', $user->id);
+        $this->set('status', self::BS_TICKET_EN_COURS);
+
+        $errors = $this->update($warnings, true);
         $success = 'Ticket bien pris en compte';
+
+        if (!count($errors)) {
+            if ($this->getData('id_user_client') > 0) {
+                $userClient = $this->getChildObject('user_client');
+                if (BimpObject::objectLoaded($userClient)) {
+                    $to = $userClient->getData('email');
+                    $cc = implode(',', $userClient->get_dest('admin'));
+
+                    if (!$to && $cc) {
+                        $to = $cc;
+                        $cc = '';
+                    }
+
+                    if ($to) {
+                        $subject = 'BIMP - Prise en compte du ticket ' . $this->getData('ticket_number');
+                        $msg = 'Bonjour,<br/><br/>';
+                        $msg .= 'Nous vous confirmons que votre ticket support n° ' . $this->getData('ticket_number') . ' a été pris en compte par nos équipes.<br/>';
+                        $msg .= '<b>Responsable de votre demande : </b>' . $user->firstname . ' ' . $user->lastname . '<br/><br/>';
+                        $url = $this->getPublicUrl();
+
+                        if ($url) {
+                            $msg .= '<a href="' . $url . '">Cliquez ici</a> pour accéder au détail de ce ticket depuis notre site www.bimp.fr';
+                        }
+
+                        $bimpMail = new BimpMail($subject, $to, '', $msg, '', $cc);
+                        $mail_errors = array();
+                        $bimpMail->send($mail_errors);
+                        if (count($mail_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail de notification au client');
+                        }
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 
     // Overrides: 
@@ -934,7 +1004,6 @@ class BS_Ticket extends BimpObject
     {
         $errors = array();
 
-        global $userClient;
         if ((int) $this->getData('status') === self::BS_TICKET_CLOT) {
             $open_inters = $this->getOpenIntersArray();
             if (count($open_inters)) {
@@ -956,38 +1025,52 @@ class BS_Ticket extends BimpObject
             return array('Impossible de repasser le ticket en demande client');
         }
 
+        $init_status = (int) $this->getInitData('status');
+
         $errors = parent::update($warnings, $force_update);
 
-        if (!count($errors) && $this->getData('id_user_client') > 0) {
+        if (!count($errors) && (int) $this->getData('id_user_client')) {
+            $userClient = $this->getChildObject('user_client');
 
-            if (isset($userClient)) {
-                $this->updateField('priorite', $this->getData('priorite_demande_client'));
-                $this->updateField('impact', $this->getData('impact_demande_client'));
-            }
+            if (BimpObject::objectLoaded($userClient)) {
+                if ($this->getData('cover') == 3) {
+                    // On envois un mail au commercial
+                    $destinaitaire_commercial = $userClient->get_dest('commerciaux');
+                    $link = $this->getLink(array(), 'private');
+                    $msg = 'Bonjour,<br/>';
+                    $msg .= 'Le ticket ';
+                    if ($link) {
+                        $msg .= $link;
+                    } else {
+                        $msg .= 'n° ' . $this->getData('ticket_number');
+                    }
+                    $msg .= '<br/><b style="color:red" >N\'est pas couvert par le contrat</b>';
 
-            if ($this->getData('cover') == 3) {
-                // On envois un mail au commercial
-                $instance = $this->getInstance('bimpinterfaceclient', 'BIC_UserClient', $this->getData('id_user_client'));
-                $destinaitaire_commercial = $instance->get_dest('commerciaux');
-                $msg = 'Bonjour,<br />';
-                $msg .= 'Le ticket <a href="' . DOL_URL_ROOT . '/bimpsupport/index.php?fc=ticket&id=' . $this->id . '">' . $this->getData('ticket_number') . '</a>';
-                $msg .= '<br /><b style="color:red" >N\'est pas couvert par le contrat</b>';
-                mailSyn2('Demande client non couverte', implode(', ', $destinaitaire_commercial), null, $msg);
-            }
+                    mailSyn2('Demande support client non couverte', implode(', ', $destinaitaire_commercial), null, $msg);
+                }
 
-            $instance = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClient', $this->getData('id_user_client'));
-            $listDest = $instance->getData('email');
-            $id_soc = (int) $instance->getData('id_client');
+                if ($init_status !== (int) $this->getData('status')) {
+                    $to = $userClient->getData('email');
 
-            if ($id_soc) {
-                $commerciaux = BimpTools::getCommercialArray($instance->getData('id_client'));
-                foreach ($commerciaux as $id_commercial) {
-                    $listDest .= ', ' . $id_commercial->email;
+                    if ($to) {
+                        $subject = 'BIMP - Mise à jour de votre ticket support n°' . $this->getData('ticket_number');
+                        $msg = 'Bonjour,<br/><br/>';
+                        $msg .= 'Votre ticket support n°<b>' . $this->getData('ticket_number') . '</b> est passé au statut "' . self::$status_list[(int) $this->getData('status')]['label'] . '".<br/><br/>';
+                        $public_url = $this->$this->getPublicUrl();
+                        if ($public_url) {
+                            $msg .= '<a href="' . $public_url . '">Cliquez ici</a> pour accéder au détail de votre ticket support sur notre site www.bimp.fr';
+                        }
+
+                        $bimpMail = new BimpMail($subject, $to, '', $msg);
+                        $mail_errors = array();
+                        $bimpMail->send($mail_errors);
+                        
+                        if (count($mail_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail de notification au client');
+                        }
+                    }
                 }
             }
-
-            $listDest .= "," . implode(",", $instance->get_dest('admin'));
-            mailSyn2('BIMP-CLIENT - Modification de votre ticket', $listDest, null, 'Votre ticket ' . $this->getData('ticket_number') . ' a été modifié');
         }
 
         if (!count($errors) && (int) $this->getData('status') === self::BS_TICKET_CLOT) {
@@ -1037,7 +1120,7 @@ class BS_Ticket extends BimpObject
                 print_r($rows);
                 echo '</pre>';
             }
-            
+
             foreach ($rows as $r) {
                 if (preg_match('/.+' . preg_quote('N° de série:</b> ', '/') . '(.+)' . '<br ?\/>/U', $r['sujet'], $matches)) {
                     if ($echo) {

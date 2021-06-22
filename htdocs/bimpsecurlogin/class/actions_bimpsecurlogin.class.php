@@ -36,6 +36,7 @@ class securLogSms {
     var $max_tentative = 3;
     var $debug = 2; //0 pas de verif //1 pas de sms code ecran //2 normal
     var $message = array();
+    var $ip = '';
 
     public function __construct($db) {
         $this->db = $db;
@@ -88,8 +89,12 @@ class securLogSms {
         } elseif (is_object($id_user))
             $this->user = $id_user;
         $this->user->oldcopy = clone $this->user;
-
-        $this->nomCookie = "secu_erp" . $this->user->id . "_" . str_replace(".", "_", $_SERVER['REMOTE_ADDR']);
+        $this->ip = $_SERVER['REMOTE_ADDR'];
+        $tmp = explode(".", $ip);
+        if(count($tmp) < 4)
+            $this->ip = $_SERVER['HTTP_X_REAL_IP'];
+       
+        $this->nomCookie = "secu_erp" . $this->user->id . "_" . str_replace(".", "_", $this->ip);
 
         $this->testSecur();
     }
@@ -100,7 +105,7 @@ class securLogSms {
         if ($statut == 1) {
             if (is_null($codeR)) {
                 $codeR = rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9);
-                $this->db->query("INSERT INTO " . MAIN_DB_PREFIX . "bimp_secure_log (id_user, crypt, IP) VALUES (" . $this->user->id . ",'" . $codeR . "', '" . $_SERVER['REMOTE_ADDR'] . "')");
+                $this->db->query("INSERT INTO " . MAIN_DB_PREFIX . "bimp_secure_log (id_user, crypt, IP) VALUES (" . $this->user->id . ",'" . $codeR . "', '" . $this->ip. "')");
             }
 
             $this->setCookie($codeR);
@@ -120,7 +125,7 @@ class securLogSms {
     function asSecureCokie() {
         if (isset($_COOKIE[$this->nomCookie])) {//cokkie secur en place
             $crypt = $_COOKIE[$this->nomCookie];
-            $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "bimp_secure_log WHERE id_user = " . $this->user->id . " AND crypt = '" . $crypt . "' AND IP = '" . $_SERVER['REMOTE_ADDR'] . "'");
+            $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "bimp_secure_log WHERE id_user = " . $this->user->id . " AND crypt = '" . $crypt . "' AND IP = '" . $this->ip . "'");
 //            echo "<pre>"; print_r($_COOKIE);die($crypt);
             if ($this->db->num_rows($sql) > 0) {
                 $this->setSecure(1, $crypt);
@@ -142,7 +147,7 @@ class securLogSms {
             return 1;
 
 
-        if ($this->isIpWhite($_SERVER['REMOTE_ADDR']))
+        if ($this->isIpWhite($this->ip))
             return 1;
 
 
@@ -304,16 +309,15 @@ class securLogSms {
 //                    $phone = "+33" . substr($phone, 1);
 //            }
 //        }
-        
         $nums = array($this->user->user_mobile, $this->user->office_phone, $this->user->array_options['options_phone_perso']);
         foreach($nums as $phone){
             $phone = str_replace(array(" ", "-", ":"), "", $phone);
             if (stripos($phone, "+") === false) {
                 if (stripos($phone, "0") === 0)
                     $phone = "+33" . substr($phone, 1);
-                if($this->isPhoneMobile($phone))
-                    return $phone;
             }
+            if($this->isPhoneMobile($phone))
+                return $phone;
         }
         
         return '';

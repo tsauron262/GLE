@@ -4637,6 +4637,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $tabCode = explode('. Ne le', $code);
                 if(isset($tabCode[1]))
                     $code = $tabCode[0];
+                $code = str_replace(" ", "", $code);
                 $success_callback = "alert('". urlencode($code)."');";
             }
             

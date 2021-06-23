@@ -192,7 +192,7 @@ class Bimp_Facture extends BimpComm
         switch ($field_name) {
             case 'date_next_relance':
             case 'relance_active':
-                if ($user->admin || $user->rights->bimpcommercial->admin_deactivate_relances) {
+                if ($user->admin || $user->rights->bimpcommercial->admin_relance_individuelle) {
                     return 1;
                 }
                 return 0;

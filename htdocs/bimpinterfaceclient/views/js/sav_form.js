@@ -453,6 +453,8 @@ function SavPublicForm() {
             return;
         }
 
+        $button.addClass('disabled');
+
         if (typeof (force_validate) === 'undefined') {
             force_validate = 0;
         }
@@ -465,11 +467,13 @@ function SavPublicForm() {
 
         if (!force_validate) {
             if (!ptr.checkCanSubmit()) {
+                $button.removeClass('disabled');
                 return;
             }
         }
 
         if (!ptr.checkForm()) {
+            $button.removeClass('disabled');
             return;
         }
 
@@ -512,9 +516,9 @@ function SavPublicForm() {
             }
 
             $('#debug').html('').hide();
-
+            
             BimpAjax('savFormSubmit', data, $('#sav_form_submit_result'), {
-                $button: $button,
+                $btn: $button,
                 display_success: false,
                 display_processing: true,
                 processing_padding: 20,
@@ -529,19 +533,25 @@ function SavPublicForm() {
                         $('#noReservationSubmit').find('span.btn').attr('onclick', 'SavPublicForm.submit($(this), 1, \'' + result.force_validate_reason + '\')');
                         $('#noReservationSubmit').stop().slideDown(250);
                         ptr.fetchAvailableSlots();
+                        bimpAjax.$btn.removeClass('disabled');
                     } else if (result.force_validate) {
                         $('#reservationErrorNotif').stop().slideDown(250);
                         $('#noReservationSubmit').find('span.btn').attr('onclick', 'SavPublicForm.submit($(this), 1, \'' + result.force_validate_reason + '\')');
                         $('#noReservationSubmit').stop().slideDown(250);
+                        bimpAjax.$btn.removeClass('disabled');
                     } else if (result.success_html) {
                         $('#new_sav_form').stop().fadeOut(250, function () {
+                            bimpAjax.$btn.removeClass('disabled');
                             $('#new_sav_form').html(result.success_html).fadeIn(250);
                         });
                     }
                 },
                 error: function (result, bimpAjax) {
+                    bimpAjax.$btn.removeClass('disabled');
                 }
             });
+        } else {
+            $button.removeClass('disabled');
         }
     };
 

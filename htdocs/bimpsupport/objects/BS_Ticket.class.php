@@ -64,7 +64,17 @@ class BS_Ticket extends BimpObject
 
     public function canClientCreate()
     {
-        return 1;
+        global $userClient;
+
+        if (BimpObject::objectLoaded($userClient)) {
+            $contrats = $userClient->getContratsVisibles(true);
+
+            if (!empty($contrats)) {
+                return 1;
+            }
+        }
+
+        return 0;
     }
 
     public function canClientEdit()
@@ -914,6 +924,17 @@ class BS_Ticket extends BimpObject
         $isPublic = BimpCore::isContextPublic();
 
         if ($isPublic) {
+            if (!(int) $this->getData('id_contrat')) {
+                return array('Vous devez obligatoire sélectionner un contrat actif pour ouvrir un nouveau ticket support');
+            } else {
+                $contrat = $this->getChildObject('bimp_contrat');
+                
+                if (!BimpObject::objectLoaded($contrat)) {
+                    return array('Le contrat sélectionner n\'existe plus');
+                } elseif (!$contrat->isValide()) {
+                    return array('Le contrat ' . $contrat->getRef() .' n\'est plus actif');
+                }
+            }
             $this->set('id_user_resp', 0);
             $this->set('cover', 1);
             if (!$this->getData('is_user_client')) {
@@ -1064,7 +1085,7 @@ class BS_Ticket extends BimpObject
                         $bimpMail = new BimpMail($subject, $to, '', $msg);
                         $mail_errors = array();
                         $bimpMail->send($mail_errors);
-                        
+
                         if (count($mail_errors)) {
                             $warnings[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail de notification au client');
                         }

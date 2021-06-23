@@ -2889,8 +2889,13 @@ class Bimp_Facture extends BimpComm
                         break;
 
                     case Facture::TYPE_DEPOSIT:
-                        $label = 'Convertir en remise';
-                        $confirm_msg = strip_tags($langs->trans('ConfirmConvertToReduc', strtolower($langs->transnoentities('Deposit'))));
+                        BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+                        $discount = new DiscountAbsolute($this->db->db);
+                        $discount->fetch(0, $this->id);
+                        if (!BimpObject::objectLoaded($discount)) {
+                            $label = 'Convertir en remise';
+                            $confirm_msg = strip_tags($langs->trans('ConfirmConvertToReduc', strtolower($langs->transnoentities('Deposit'))));
+                        }
                         break;
                 }
 
@@ -4077,12 +4082,20 @@ class Bimp_Facture extends BimpComm
             $amount_ht = $amount_tva = $amount_ttc = array();
 
             $i = 0;
-            foreach ($this->dol_object->lines as $line) {
-                if ($line->total_ht != 0) {  // no need to create discount if amount is null
-                    $amount_ht[$line->tva_tx] += $line->total_ht;
-                    $amount_tva[$line->tva_tx] += $line->total_tva;
-                    $amount_ttc[$line->tva_tx] += $line->total_ttc;
-                    $i++;
+            BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+            $discount = new DiscountAbsolute($this->db->db);
+            $discount->fetch(0, $this->id);
+            if (BimpObject::objectLoaded($discount)) {
+                $errors[] = 'Cet Accompte a déja été converti';
+            }
+            else{
+                foreach ($this->dol_object->lines as $line) {
+                    if ($line->total_ht != 0) {  // no need to create discount if amount is null
+                        $amount_ht[$line->tva_tx] += $line->total_ht;
+                        $amount_tva[$line->tva_tx] += $line->total_tva;
+                        $amount_ttc[$line->tva_tx] += $line->total_ttc;
+                        $i++;
+                    }
                 }
             }
 

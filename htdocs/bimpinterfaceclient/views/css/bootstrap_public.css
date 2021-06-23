@@ -203,7 +203,7 @@ input:focus {
   bottom: 0;
   right: auto;
   left: 0;
-  width: 260px;
+  width: 280px;
   display: block;
   z-index: 1;
   color: #fff;
@@ -216,7 +216,7 @@ input:focus {
     max-height: calc(100vh - 75px);
     min-height: 100%;
     overflow: auto;
-    width: 260px;
+    width: 280px;
     z-index: 4;
     padding-bottom: 100px;
     background-color: #EF7D00; }
@@ -445,7 +445,7 @@ input:focus {
   position: relative;
   z-index: 2;
   float: right;
-  width: calc(100% - 260px); }
+  width: calc(100% - 280px); }
   /* line 234, ../scss/lbd/_sidebar-and-main-panel.scss */
   .bic_main-panel > .content {
     padding: 30px 15px;

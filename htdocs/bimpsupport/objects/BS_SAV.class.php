@@ -4611,8 +4611,6 @@ class BS_SAV extends BimpObject
         );
     }
     
-    
-    
     public function actionGetCodeApple($data, &$success){
         $idMax = $data['idMax'];
         $success = 'Code pas encore reçu';
@@ -4644,8 +4642,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         }
         
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings,
+            'errors'   => array(),
+            'warnings' => array(),
             'success_callback' => $success_callback
         );
     }

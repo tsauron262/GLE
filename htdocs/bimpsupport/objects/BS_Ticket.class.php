@@ -1077,7 +1077,7 @@ class BS_Ticket extends BimpObject
                         $subject = 'BIMP - Mise à jour de votre ticket support n°' . $this->getData('ticket_number');
                         $msg = 'Bonjour,<br/><br/>';
                         $msg .= 'Votre ticket support n°<b>' . $this->getData('ticket_number') . '</b> est passé au statut "' . self::$status_list[(int) $this->getData('status')]['label'] . '".<br/><br/>';
-                        $public_url = $this->$this->getPublicUrl();
+                        $public_url = $this->getPublicUrl();
                         if ($public_url) {
                             $msg .= '<a href="' . $public_url . '">Cliquez ici</a> pour accéder au détail de votre ticket support sur notre site www.bimp.fr';
                         }

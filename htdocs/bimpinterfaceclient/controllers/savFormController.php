@@ -927,9 +927,7 @@ class savFormController extends BimpPublicController
 
     public function sendRDVEmailToClient($email, $reservationId, $dt_begin, $sav, $centre, $serial, $reservation_exists = false)
     {
-        $tabFile = array();
-        $tabFile2 = array();
-        $tabFile3 = array();
+        $files = array();
 
         $cancel_url = '';
         $base_url = '';
@@ -960,9 +958,10 @@ class savFormController extends BimpPublicController
             }
         } elseif (BimpObject::objectLoaded($sav)) {
             $msg .= 'Nous vous confirmons l\'enregistrement de votre dossier SAV dans notre centre de Services Agrée Apple.' . "\n";
-            $msg .= 'Aucun rendez-vous n\'a été fixé. Vous pouvez donc déposer votre matériel dans notre centre BIMP quand vous le souhaitez.' . "\n";
+            $msg .= 'Aucun rendez-vous n\'a été fixé.' . "\n";
+            $msg .= 'Vous pouvez donc déposer votre matériel dans notre centre BIMP quand vous le souhaitez.' . "\n";
         } else {
-            $msg .= 'En raison d\'un problème technique, votre dossier SAV n\'a pas pu être enregistré.';
+            $msg .= 'En raison d\'un problème technique, votre dossier SAV n\'a pas pu être enregistré.' . "\n";
             $msg .= 'Toutefois, les techniciens du centre BIMP de ' . $centre['town'] . ' ont été alertés par e-mail de votre demande.' . "\n";
             $msg .= 'Vous pouvez donc passer à notre agence BIMP quand vous le souhaitez pour déposer votre matériel.' . "\n";
         }
@@ -976,9 +975,10 @@ class savFormController extends BimpPublicController
             BimpTools::createQrCodeImg($sav->getRef(), $dir, $file_name);
 
             if (file_exists($dir . $file_name)) {
-                $tabFile[] = $dir . $file_name;
-                $tabFile2[] = 'image/png';
-                $tabFile3[] = $file_name;
+                $files[] = array($dir . $file_name, 'image/png', $file_name);
+//                $tabFile[] = $dir . $file_name;
+//                $tabFile2[] = 'image/png';
+//                $tabFile3[] = $file_name;
 //                $file_url = 'https://erp2.bimp.fr/' . $sav->getFileUrl($file_name, 'viewimage');
 //                $file_url = 'http://10.192.20.122/' . $sav->getFileUrl($file_name, 'viewimage');
 //                $msg .= '<img src="' . $file_url . '"/><br/>';
@@ -997,7 +997,7 @@ class savFormController extends BimpPublicController
 //                $msg .= '<p style="font-size: 10px; font-style: italic;">Présentez ce QR Code le jour de votre rendez-vous pour faciliter la prise en charge de votre matériel.</p>';
             }
         }
-        $msg .= '<b>Adresse du centre BIMP: </b>' . "\n";
+        $msg .= '<b>Adresse du centre BIMP : </b>' . "\n";
         $msg .= $centre['address'] . "\n";
         $msg .= $centre['zip'] . ' ' . $centre['town'] . "\n\n";
 
@@ -1007,9 +1007,9 @@ class savFormController extends BimpPublicController
         }
 
         if (BimpObject::objectLoaded($sav)) {
-            $msg .= '<b>Référence SAV:</b> ' . $sav->getRef() . "\n";
+            $msg .= '<b>Référence SAV :</b> ' . $sav->getRef() . "\n";
         }
-        $msg .= '<b>N° de série du matériel concerné: </b>' . $serial;
+        $msg .= '<b>N° de série du matériel concerné : </b>' . $serial;
 
         $msg .= "\n\n";
 
@@ -1020,7 +1020,7 @@ class savFormController extends BimpPublicController
         $msg .= "Afin de préparer au mieux votre prise en charge, nous souhaitons attirer votre attention sur les points suivants :
 - Vous devez sauvegarder vos données car nous serons peut-être amenés à les effacer de votre appareil.
 
-- Vous devez désactiver la fonction « localiser » dans le menu iCloud avec votre mot de passe.
+- Vous devez désactiver la fonction « localiser » dans le menu iCloud avec l'aide de votre mot de passe.
 
 - Le délai de traitement des réparations est habituellement de 7 jours.
 
@@ -1035,18 +1035,26 @@ La plupart de nos centres peuvent effectuer une réparation de votre écran d’
 Nous proposons des services de sauvegarde des données, de protection de votre téléphone… venez nous rencontrer pour découvrir tous les services que nous pouvons vous proposer.
 Votre satisfaction est notre objectif, nous mettrons tout en œuvre pour vous satisfaire et réduire les délais d’immobilisation de votre produit Apple.\n\n";
 
+        $msg .= 'Lors du dépôt de votre matériel dans notre centre SAV, un acompte de 49 euros vous sera demandé si votre matériel est hors garantie ou si la garantie ne peut être applicable.
+Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit IOS.
+
+ Cet acompte sera déduit de la réparation en cas d’accord sur le devis ou considéré comme frais de diagnostic en cas de refus.\n\n';
+        
         if ($cancel_url) {
-            $msg .= 'Vous pouvez annuler ce rendez-vous depuis votre <a href="' . $base_url . '">espace personnel</a>';
+            $msg .= 'Vous pouvez annuler cette demande de prise en charge depuis votre <a href="' . $base_url . '">espace personnel</a>';
             $msg .= ' ou en suivant <a href="' . $cancel_url . '">ce lien</a>' . "\n\n";
         }
-
+        
         $msg .= 'Bien cordialement' . "\n\n";
         $msg .= 'L\'équipe BIMP' . "\n\n";
 
-        $msg .= '<p style="font-size: 10px; font-style: italic;">Présentez ce QR Code le jour de votre rendez-vous pour faciliter la prise en charge de votre matériel:</p>' . "\n";
+        $msg .= '<p style="font-size: 10px; font-style: italic;">Présentez le QR Code en pièce-jointe le jour de votre rendez-vous pour faciliter la prise en charge de votre matériel:</p>' . "\n";
 
-        $email = BimpTools::cleanEmailsStr($email);
-        return mailSyn2('RDV SAV BIMP - Confirmation', $email, '', $msg, $tabFile, $tabFile2, $tabFile3);
+//        $email = BimpTools::cleanEmailsStr($email);
+//        return mailSyn2('RDV SAV BIMP - Confirmation', $email, '', $msg, $tabFile, $tabFile2, $tabFile3);
+        $bimpMail = new BimpMail('BIMP - Confirmation de votre RDV SAV', $email, '', $msg, (isset($centre['mail']) ? $centre['mail'] : ''));
+        $bimpMail->addFiles($files);
+        return $bimpMail->send();
     }
 
     // Ajax Process:
@@ -2005,7 +2013,7 @@ Votre satisfaction est notre objectif, nous mettrons tout en œuvre pour vous sa
                             mailSyn2('Nouveau SAV créé en ligne', $emails, '', $msg);
                         }
                     }
-
+                    
                     // Envoi e-mail client: 
                     $email_client = BimpObject::objectLoaded($userClient) ? $userClient->getData('email') : $data['client_email'];
                     $email_client_ok = $this->sendRDVEmailToClient($email_client, $reservationId, $dateBegin, $sav, $centre, $data['eq_serial'], $reservation_exists);
@@ -2069,11 +2077,6 @@ Votre satisfaction est notre objectif, nous mettrons tout en œuvre pour vous sa
                         $success_html .= '<a href="' . DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=sav">Retour à votre espace client</a>';
                         $success_html .= '</p>';
                     }
-
-//                    if (BimpCore::isModeDev()) {
-//                        $success_html .= '<br/>DEBUG: <br/>';
-//                        $success_html .= $debug;
-//                    }
                 }
             }
         }

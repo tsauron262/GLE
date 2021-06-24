@@ -262,10 +262,10 @@ class ValidComm extends BimpObject
                 'operator' => '>=',
                 'value'    => (isset($val_max)) ? $val_max : $val
             ),
-            'val_min' => array(
-                'operator' => '<=',
-                'value'    => $val
-            )
+//            'val_min' => array(
+//                'operator' => '<=',
+//                'value'    => (isset($val_max)) ? $val_max : $val
+//            )
         );
         
         $valid_comms = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'ValidComm', $filters);
@@ -424,7 +424,7 @@ class ValidComm extends BimpObject
         if($d)
             return 2;
         
-        $id_user_affected = $this->findValidator($type, $val, $secteur, $object, $user_ask, $val_comm_demande);
+        $id_user_affected = $this->findValidator($type, $val, $secteur, $object, $user_ask, $bimp_object, $val_comm_demande);
         
         // Personne ne peut valider
         if(!$id_user_affected) {
@@ -487,7 +487,10 @@ class ValidComm extends BimpObject
     /**
      * Trouve le premier valideur disponible
      */
-    private function findValidator($type, $val, $secteur, $object, $user_ask, &$val_comm_demande = 0) {
+    private function findValidator($type, $val, $secteur, $object, $user_ask, $bimp_object, &$val_comm_demande = 0) {
+        
+        if($type == self::TYPE_FINANCE)
+            $val += $this->getEncours ($bimp_object);
         
         $can_valid_not_avaible = 0;
         $can_valid_avaible = 0;
@@ -499,7 +502,7 @@ class ValidComm extends BimpObject
                 'in' => array($object, self::OBJ_ALL)
             ),
             'val_max' => array(
-                'operator' => '>=',
+                'operator' => '>',
                 'value'    => $val
             ),
             'val_min' => array(

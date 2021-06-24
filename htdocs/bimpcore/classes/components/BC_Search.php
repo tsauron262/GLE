@@ -99,6 +99,9 @@ class BC_Search extends BimpComponent
                 }
             }
         }
+        elseif (count($items) > 1333) {
+            return BimpTools::getMsgFromArray('Trop de résultats : '.count($items).'. Affinez la recherche.');
+        }
 
         $primary = $this->object->getPrimary();
 

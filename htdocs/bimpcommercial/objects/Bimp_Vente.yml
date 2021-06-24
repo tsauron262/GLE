@@ -1,6 +1,8 @@
 table: facturedet
 primary: rowid
 
+common_fields: 0
+
 parent_module: bimpcommercial
 parent_object: Bimp_Facture
 parent_id_property: fk_facture

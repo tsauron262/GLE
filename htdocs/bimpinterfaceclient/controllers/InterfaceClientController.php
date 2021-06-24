@@ -25,8 +25,8 @@ class InterfaceClientController extends BimpPublicController
                 'infos'    => array('url' => DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=infos', 'label' => 'Mes informations', 'icon' => 'pe_id'),
                 'contrats' => array('url' => DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=contrats', 'label' => 'Mes contrats', 'icon' => 'pe_news-paper'),
                 'factures' => array('url' => DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=factures', 'label' => 'Mes factures', 'icon' => 'pe_file'),
-                'tickets'  => array('url' => DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=tickets', 'label' => 'Tickets support', 'icon' => 'pe_headphones'),
-                'sav'      => array('url' => DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=sav', 'label' => 'Suivis SAV', 'icon' => 'pe_tools')
+                'tickets'  => array('url' => DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=tickets', 'label' => 'Support téléphonique', 'icon' => 'pe_headphones'),
+                'sav'      => array('url' => DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=sav', 'label' => 'SAV - Réparations', 'icon' => 'pe_tools')
             );
 
             if ($userClient->isAdmin()) {
@@ -165,7 +165,7 @@ class InterfaceClientController extends BimpPublicController
             // Tickets support: 
             $html .= '<div class="row" style="margin-bottom: 30px">';
             $html .= '<div class="col-lg-12">';
-            $html .= '<h3>' . BimpRender::renderIcon('pe_headphones', 'iconLeft') . 'Mes tickets supports en cours</h3>';
+            $html .= '<h3>' . BimpRender::renderIcon('pe_headphones', 'iconLeft') . 'Mes tickets de support téléphonique en cours</h3>';
 
             $filters = array(
                 'id_client' => (int) $userClient->getData('id_client'),
@@ -182,7 +182,7 @@ class InterfaceClientController extends BimpPublicController
             $tickets = BimpCache::getBimpObjectObjects('bimpsupport', 'BS_Ticket', $filters, 'date_create', 'desc');
 
             if (empty($tickets)) {
-                $html .= BimpRender::renderAlerts('Vous n\'avez aucun ticket support en cours', 'info');
+                $html .= BimpRender::renderAlerts('Vous n\'avez aucun ticket de support téléphonique en cours', 'info');
             }
 
             $contact = null;
@@ -192,21 +192,24 @@ class InterfaceClientController extends BimpPublicController
             }
 
             $ticket = BimpObject::getInstance('bimpsupport', 'BS_Ticket');
-            $onclick = $ticket->getJsLoadModalForm('public_create', 'Nouveau ticket support', array(
-                'fields' => array(
-                    'id_client'        => (int) $userClient->getData('id_client'),
-                    'id_user_client'   => (BimpObject::objectLoaded($userClient) ? (int) $userClient->id : 0),
-                    'contact_in_soc'   => (BimpObject::objectLoaded($contact) ? $contact->getName() : ''),
-                    'adresse_envois'   => (BimpObject::objectLoaded($contact) ? BimpTools::replaceBr($contact->displayFullAddress()) : ''),
-                    'email_bon_retour' => (BimpObject::objectLoaded($userClient) ? $userClient->getData('email') : '')
-                )
-            ));
 
-            $html .= '<div class="buttonsContainer align-right" style="margin: 15px 0">';
-            $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
-            $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouveau ticket support';
-            $html .= '</span>';
-            $html .= '</div>';
+            if ($ticket->can('create')) {
+                $onclick = $ticket->getJsLoadModalForm('public_create', 'Nouveau ticket de support téléphonique', array(
+                    'fields' => array(
+                        'id_client'        => (int) $userClient->getData('id_client'),
+                        'id_user_client'   => (BimpObject::objectLoaded($userClient) ? (int) $userClient->id : 0),
+                        'contact_in_soc'   => (BimpObject::objectLoaded($contact) ? $contact->getName() : ''),
+                        'adresse_envois'   => (BimpObject::objectLoaded($contact) ? BimpTools::replaceBr($contact->displayFullAddress()) : ''),
+                        'email_bon_retour' => (BimpObject::objectLoaded($userClient) ? $userClient->getData('email') : '')
+                    )
+                ));
+
+                $html .= '<div class="buttonsContainer align-right" style="margin: 15px 0">';
+                $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouveau ticket';
+                $html .= '</span>';
+                $html .= '</div>';
+            }
 
             if (!empty($tickets)) {
                 $headers = array(
@@ -248,22 +251,30 @@ class InterfaceClientController extends BimpPublicController
             $savs = BimpCache::getBimpObjectObjects('bimpsupport', 'BS_SAV', array(
                         'id_client' => (int) $userClient->getData('id_client'),
                         'status'    => array(
-                            'operator' => '<',
-                            'value'    => 999
+                            'and' => array(
+                                array(
+                                    'operator' => '>',
+                                    'value'    => -2
+                                ),
+                                array(
+                                    'operator' => '<',
+                                    'value'    => 999
+                                )
+                            )
                         )
                             ), 'date_create', 'desc');
 
             $html .= '<div class="row" style="margin-bottom: 30px">';
             $html .= '<div class="col-lg-12">';
-            $html .= '<h3>' . BimpRender::renderIcon('pe_tools', 'iconLeft') . 'Mes SAV en cours</h3>';
+            $html .= '<h3>' . BimpRender::renderIcon('pe_tools', 'iconLeft') . 'Mes réparations en cours</h3>';
 
             if (empty($savs)) {
-                $html .= BimpRender::renderAlerts('Vous n\'avez aucun sav en cours', 'info');
+                $html .= BimpRender::renderAlerts('Vous n\'avez aucune réparation en cours', 'info');
             }
 
             $html .= '<div class="buttonsContainer align-right" style="margin: 15px 0">';
             $html .= '<span class="btn btn-default" onclick="window.location = \'' . DOL_URL_ROOT . '/bimpinterfaceclient/client.php?fc=savForm\'">';
-            $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouveau SAV';
+            $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouvelle demande de réparation';
             $html .= '</span>';
             $html .= '</div>';
 
@@ -477,7 +488,7 @@ class InterfaceClientController extends BimpPublicController
 
         switch ($content) {
             case 'list':
-                $html .= '<h3>' . BimpRender::renderIcon('pe_headphones', 'iconLeft') . 'Tickets support</h3>';
+                $html .= '<h3>' . BimpRender::renderIcon('pe_headphones', 'iconLeft') . 'Tickets de support téléphonique</h3>';
                 $ticket = BimpObject::getInstance('bimpsupport', 'BS_Ticket');
 
                 if (!BimpObject::objectLoaded($userClient) || !$ticket->can('view')) {
@@ -490,7 +501,7 @@ class InterfaceClientController extends BimpPublicController
                             $contact = $userClient->getChildObject('contact');
                         }
 
-                        $onclick = $ticket->getJsLoadModalForm('public_create', 'Nouveau ticket support', array(
+                        $onclick = $ticket->getJsLoadModalForm('public_create', 'Nouveau ticket de support téléphonique', array(
                             'fields' => array(
                                 'id_client'        => (int) $userClient->getData('id_client'),
                                 'id_user_client'   => (BimpObject::objectLoaded($userClient) ? (int) $userClient->id : 0),
@@ -500,7 +511,7 @@ class InterfaceClientController extends BimpPublicController
                             )
                         ));
                         $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
-                        $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouveau ticket support';
+                        $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouveau ticket';
                         $html .= '</span>';
                         $html .= '</div>';
                     }
@@ -518,7 +529,7 @@ class InterfaceClientController extends BimpPublicController
                 if ($list_url) {
                     $html .= '<div style="margin-bottom: 10px;">';
                     $html .= '<span class="btn btn-default" onclick="window.location = \'' . $list_url . '\';">';
-                    $html .= BimpRender::renderIcon('fas_arrow-left', 'iconLeft') . 'Retour à la liste de vos tickets support';
+                    $html .= BimpRender::renderIcon('fas_arrow-left', 'iconLeft') . 'Retour à la liste de vos tickets';
                     $html .= '</span>';
                     $html .= '</div>';
                 }
@@ -530,7 +541,7 @@ class InterfaceClientController extends BimpPublicController
                     $ticket = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_Ticket', $id_ticket);
 
                     if (!BimpObject::objectLoaded($ticket)) {
-                        $html .= BimpRender::renderAlerts('Ce ticket support n\'existe plus');
+                        $html .= BimpRender::renderAlerts('Ce ticket n\'existe plus');
                     } else {
                         if (!$ticket->can('view')) {
                             $html .= BimpRender::renderAlerts('Vous n\'avez pas la permission de voir ce Ticket', 'warning');
@@ -558,7 +569,7 @@ class InterfaceClientController extends BimpPublicController
                             $list = new BC_ListTable($file, 'public', 1, $id_ticket, 'Fichiers', 'fas_folder-open');
                             $list->addFieldFilterValue('parent_module', 'bimpsupport');
                             $list->addFieldFilterValue('parent_object_name', 'BS_Ticket');
-                            
+
                             $html .= '<div style="margin-top: 30px">';
                             $html .= $list->renderHtml();
                             $html .= '</div>';
@@ -583,7 +594,7 @@ class InterfaceClientController extends BimpPublicController
 
         switch ($content) {
             case 'list':
-                $html .= '<h3>' . BimpRender::renderIcon('pe_tools', 'iconLeft') . 'Suivis SAV</h3>';
+                $html .= '<h3>' . BimpRender::renderIcon('pe_tools', 'iconLeft') . 'Suivis réparations SAV</h3>';
                 $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV');
 
                 if (!BimpObject::objectLoaded($userClient) || !$sav->can('view')) {
@@ -591,11 +602,11 @@ class InterfaceClientController extends BimpPublicController
                 } else {
                     $html .= '<div class="buttonsContainer align-right" style="margin: 15px 0">';
                     $html .= '<span class="btn btn-default" onclick="window.location = \'' . DOL_URL_ROOT . '/bimpinterfaceclient/client.php?fc=savForm\'">';
-                    $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouveau SAV';
+                    $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouvelle demande de réparation';
                     $html .= '</span>';
                     $html .= '</div>';
 
-                    $list = new BC_ListTable($sav, 'public_client');
+                    $list = new BC_ListTable($sav, 'public_client', 1, null, 'Liste des réparations');
                     $list->addFieldFilterValue('id_client', (int) $userClient->getData('id_client'));
                     $html .= $list->renderHtml();
                 }
@@ -606,7 +617,7 @@ class InterfaceClientController extends BimpPublicController
                 if ($list_url) {
                     $html .= '<div style="margin-bottom: 10px;">';
                     $html .= '<span class="btn btn-default" onclick="window.location = \'' . $list_url . '\';">';
-                    $html .= BimpRender::renderIcon('fas_arrow-left', 'iconLeft') . 'Retour à la liste de vos SAV';
+                    $html .= BimpRender::renderIcon('fas_arrow-left', 'iconLeft') . 'Retour à la liste de vos réparations';
                     $html .= '</span>';
                     $html .= '</div>';
                 }
@@ -618,10 +629,10 @@ class InterfaceClientController extends BimpPublicController
                     $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id_sav);
 
                     if (!BimpObject::objectLoaded($sav)) {
-                        $html .= BimpRender::renderAlerts('Ce SAV n\'existe plus');
+                        $html .= BimpRender::renderAlerts('Cette réparation n\'existe plus');
                     } else {
                         if (!$sav->can('view')) {
-                            $html .= BimpRender::renderAlerts('Vous n\'avez pas la permission de voir ce SAV', 'warning');
+                            $html .= BimpRender::renderAlerts('Vous n\'avez pas la permission de voir cette réparation', 'warning');
                         } else {
                             $view = new BC_View($sav, 'public_client');
                             $html .= $view->renderHtml();

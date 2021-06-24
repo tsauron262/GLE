@@ -97,12 +97,15 @@ class Session {
 //        $sessionData = addslashes($sessionData);
 //        $this->db->query("INSERT INTO ".$this->table." (`id_session`, `data`, `update`) VALUES ('".$sessionID."', '".$sessionData."', '".$datetime_actuel->format('Y-m-d H:i:s')."') ON DUPLICATE KEY UPDATE `data` = '".$sessionData."'");
         
-        $diff1 = array_diff($_SESSION, self::$sessionBase);
-        $diff2 = array_diff(self::$sessionBase, $_SESSION);
+        $diff1 = $this->arrayRecursiveDiff($_SESSION, self::$sessionBase);
+        $diff2 = $this->arrayRecursiveDiff(self::$sessionBase, $_SESSION);
         unset($diff1['newtoken']);
+        unset($diff2['newtoken']);
+        unset($diff1['token']);
         unset($diff2['token']);
         
         if(count($diff1) > 0 || count($diff2) > 0){
+
             $data = $_SESSION;
             $login = $_SESSION['dol_login'];
             unset($data['dol_login']);
@@ -112,9 +115,32 @@ class Session {
     //        else{
     //            echo '<pre>ecriture';print_r($_SESSION);
     //        }
+            echo '<br/><br/><br/><pre>';
+            print_r($diff2);print_r($diff1);die('fiinifinfinfin');
             return true;
         }
     }
+    
+    function arrayRecursiveDiff($aArray1, $aArray2) {
+        $aReturn = array();
+
+        foreach ($aArray1 as $mKey => $mValue) {
+          if (array_key_exists($mKey, $aArray2)) {
+            if (is_array($mValue)) {
+              $aRecursiveDiff = $this->arrayRecursiveDiff($mValue, $aArray2[$mKey]);
+              if (count($aRecursiveDiff)) { $aReturn[$mKey] = $aRecursiveDiff; }
+            } else {
+              if ($mValue != $aArray2[$mKey]) {
+                $aReturn[$mKey] = $mValue;
+              }
+            }
+          } else {
+            $aReturn[$mKey] = $mValue;
+          }
+        }
+        return $aReturn;
+      } 
+    
     // Destruction des sessions
     public function session_destruction($sessionID) {
         

@@ -3082,7 +3082,7 @@ class BS_SAV extends BimpObject
 //                if (!mailSyn2($subject, $toMail, $fromMail, $mail_msg, $tabFile, $tabFile2, $tabFile3)) {
 //                    $errors[] = 'Echec envoi du mail';
 //                }
-                $bimpMail = new BimpMail($subject, $toMail, '', $mail_msg);
+                $bimpMail = new BimpMail($subject, $toMail, $fromMail, $mail_msg);
                 $bimpMail->addFiles($files);
                 $mail_errors = array();
                 $bimpMail->send($mail_errors);

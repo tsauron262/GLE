@@ -3,6 +3,7 @@ class Session {
     // Variable interne contenant la BDD
     private $_Connexion_BDD;
     private $table = "llx_bimp_php_session";
+    private static $sessionBase = array();
     private $sessionId = '';
     // Initialisation de la session lors de l'appel de la classe
     public function __construct($db){
@@ -87,6 +88,8 @@ class Session {
             if($ln->login != '')
             $_SESSION['dol_login'] = $ln->login;
         }
+        
+        self::$sessionBase = $_SESSION;
     }
     // Ecriture des sessions
     public function session_ecriture($sessionID, $sessionData) {
@@ -94,16 +97,23 @@ class Session {
 //        $sessionData = addslashes($sessionData);
 //        $this->db->query("INSERT INTO ".$this->table." (`id_session`, `data`, `update`) VALUES ('".$sessionID."', '".$sessionData."', '".$datetime_actuel->format('Y-m-d H:i:s')."') ON DUPLICATE KEY UPDATE `data` = '".$sessionData."'");
         
-        $data = $_SESSION;
-        $login = $_SESSION['dol_login'];
-        unset($data['dol_login']);
-        $data = addslashes(json_encode($data));
-        if((isset($login) && $login != '') || (isset($_SESSION['userClient']) && $_SESSION['userClient'] != ''))
-            $this->db->query("INSERT INTO ".$this->table." (`id_session`, `data`, login, `update`) VALUES ('".$sessionID."', '".$data."', '".$login."', '".$datetime_actuel->format('Y-m-d H:i:s')."') ON DUPLICATE KEY UPDATE login = '".$login."', `data` = '".$data."'");
-//        else{
-//            echo '<pre>ecriture';print_r($_SESSION);
-//        }
-        return true;
+        $diff1 = array_diff($_SESSION, self::$sessionBase);
+        $diff2 = array_diff(self::$sessionBase, $_SESSION);
+        unset($diff1['newtoken']);
+        unset($diff2['token']);
+        
+        if(count($diff1) > 0 || count($diff2) > 0){
+            $data = $_SESSION;
+            $login = $_SESSION['dol_login'];
+            unset($data['dol_login']);
+            $data = addslashes(json_encode($data));
+            if((isset($login) && $login != '') || (isset($_SESSION['userClient']) && $_SESSION['userClient'] != ''))
+                $this->db->query("INSERT INTO ".$this->table." (`id_session`, `data`, login, `update`) VALUES ('".$sessionID."', '".$data."', '".$login."', '".$datetime_actuel->format('Y-m-d H:i:s')."') ON DUPLICATE KEY UPDATE login = '".$login."', `data` = '".$data."'");
+    //        else{
+    //            echo '<pre>ecriture';print_r($_SESSION);
+    //        }
+            return true;
+        }
     }
     // Destruction des sessions
     public function session_destruction($sessionID) {

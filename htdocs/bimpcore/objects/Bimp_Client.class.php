@@ -2423,4 +2423,19 @@ class Bimp_Client extends Bimp_Societe
 
         parent::onSave($errors, $warnings);
     }
+    
+    
+    public function getTotalUnpayed($since = '2019-06-30') {
+        
+        $factures = $this->getUnpaidFactures($since);
+        $total_unpaid = 0;
+
+        foreach ($factures as $fac) {
+            $fac->checkIsPaid();
+            $rtp = (float) $fac->getRemainToPay(true);
+            $total_unpaid += $rtp;
+        }
+
+        return $total_unpaid;
+    }
 }

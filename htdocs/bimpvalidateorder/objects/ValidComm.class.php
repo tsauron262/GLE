@@ -135,7 +135,7 @@ class ValidComm extends BimpObject
         if(!empty($errors))
             return 0;
                 
-        // validation commerciale
+        // Validation commerciale
         if($percent != 0)
             $valid_comm = (int) $this->tryValidateByType($user, self::TYPE_COMMERCIAL, $secteur, $class, $percent, $bimp_object, $errors);
         
@@ -157,6 +157,11 @@ class ValidComm extends BimpObject
                     $valid_encours = (int) $this->tryValidateByType($user, self::TYPE_ENCOURS, $secteur, $class, $val_euros, $bimp_object, $errors);
             }
         }
+        
+        // Validation impayé
+        if($percent != 0)
+            $valid_comm = (int) $this->tryValidateByType($user, self::TYPE_IMPAYE, $secteur, $class, $percent, $bimp_object, $errors);
+        
             
         if(!$valid_comm)
                 $errors[] = "Vous ne pouvez pas valider commercialement " 
@@ -168,6 +173,12 @@ class ValidComm extends BimpObject
                 $errors[] = $this->getErrorEncours($user, $bimp_object);
         else
             $success[] = "Validation encours effectuée.";
+        
+        if(!$valid_comm)
+                $errors[] = "Vous ne pouvez pas valider les impayés " 
+                . $bimp_object->getLabel('of_the') . '. La demande de validation d\'impayé a été adressée au valideur attribué.<br/>';
+        else
+            $success[] = "Validation d'impayé effectuée.";
                 
         return $valid_comm and $valid_encours;
     }
@@ -385,6 +396,9 @@ class ValidComm extends BimpObject
         else
             $val = (float) $object->getData('total');
         
+        // Impayé
+        $unpaid_factures = $client->getUnpaidFactures('2019-06-30');
+        
         return array($secteur, $class, $percent, $val);
     }
     
@@ -423,14 +437,13 @@ class ValidComm extends BimpObject
                     $val_nom = 'montant HT de ' . $val . '€';
                     break;
                 case self::TYPE_COMMERCIAL:
-                    $val_nom = ' remise de ' . $val . '%';
+                    $val_nom = 'remise de ' . $val . '%';
                     break;
                 case self::TYPE_IMPAYE:
                     $val_nom = 'montant HT de ' . $val . '€';
                     break;
                 
             }
-//            $val_nom = (($type == self::TYPE_COMMERCIAL) ? ' remise de ' . $val . '%' : 'montant HT de ' . $val . '€');
             $secteur_nom = BimpCache::getSecteursArray()[$secteur];
             
             $message =  'Aucun utilisateur ne peut valider ' . $type_nom

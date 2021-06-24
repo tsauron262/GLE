@@ -115,8 +115,6 @@ class Session {
     //        else{
     //            echo '<pre>ecriture';print_r($_SESSION);
     //        }
-            echo '<br/><br/><br/><pre>';
-            print_r($diff2);print_r($diff1);die('fiinifinfinfin');
             return true;
         }
     }

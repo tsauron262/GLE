@@ -4053,7 +4053,7 @@ class BimpComm extends BimpDolObject
                     $zone = $this->getZoneByCountry($soc);
                     if ($this->getData('zone_vente') != $zone) {
                         $this->set('zone_vente', $zone);
-                        $this->addNote('Zone de vente changé en auto ' . $this->displayData('zone_vente', 'default', falsex, true));
+                        $this->addNote('Zone de vente changé en auto ' . $this->displayData('zone_vente', 'default', false, true));
                     }
                 }
             }

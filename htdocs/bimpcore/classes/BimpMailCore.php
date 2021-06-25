@@ -20,6 +20,7 @@ class BimpMailCore
     public $send_context = 'standard';
     public $title = '';
     public $subtitle = '';
+    public $files = array();
 
     function __construct($subject, $to, $from, $msg, $reply_to = '', $addr_cc = '', $addr_bcc = '', $deliveryreceipt = 0, $errors_to = '')
     {

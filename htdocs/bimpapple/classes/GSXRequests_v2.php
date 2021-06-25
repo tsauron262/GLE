@@ -216,7 +216,7 @@ class GSX_Request_v2
 
         $label = '';
         $nodes = XMLDoc::findChildElements($dataNode, 'label', null, array(), 1);
-        if (count($nodes) == 1) {
+        if (is_array($nodes) && count($nodes) == 1) {
             $label = XMLDoc::getElementInnerText($nodes[0]);
         } else {
             $label = (isset($defs['label']) ? $defs['label'] : $dataName);
@@ -349,7 +349,7 @@ class GSX_Request_v2
                     }
                 } else {
                     $nodes = XMLDoc::findChildElements($dataNode, 'values', null, array(), 1);
-                    if (count($nodes) == 1) {
+                    if (is_array($nodes) && count($nodes) == 1) {
                         $nodes = XMLDoc::filterElement($nodes[0], 'val', null);
                         foreach ($nodes as $node) {
                             $val = $node->getAttribute('val');

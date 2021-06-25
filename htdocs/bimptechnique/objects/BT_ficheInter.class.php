@@ -1838,7 +1838,7 @@ class BT_ficheInter extends BimpDolObject {
         
         $allCommandes = json_decode($this->getData('commandes'));
         $commande = $this->getInstance('bimpcommercial', 'Bimp_Commande');
-        if(count($allCommandes) > 0) {
+        if(is_array($allCommandes) && count($allCommandes) > 0) {
             foreach($allCommandes as $id) {
                 $commande->fetch($id);
                 $card = new BC_Card($commande);

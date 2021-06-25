@@ -40,6 +40,15 @@ class BIC_UserClient extends BimpObject
 
     // Droits user: 
 
+    public function canDelete()
+    {
+        if (BimpCore::isContextPrivate()) {
+            return 1;
+        }
+
+        return parent::canDelete();
+    }
+
     public function canClientView()
     {
         global $userClient;

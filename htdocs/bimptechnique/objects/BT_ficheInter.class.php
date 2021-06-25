@@ -1479,7 +1479,10 @@ class BT_ficheInter extends BimpDolObject {
                 if($value['inter_' . $numeroInter . '_type'] == 5 && (!$this->getData('fk_contrat') || $this->getData('fk_contrat')  == 0)) {
                     $errors[] = "Vous ne pouvez pas utiliser un déplacement sous contrat sans contrat lié. Merci";
                 }
-                if($value['inter_' . $numeroInter . '_type'] == 6 && !count(json_decode($this->getData('commandes')))) {
+                $commandes = json_decode($this->getData('commandes'));
+                if(!is_array($commandes))
+                    $commandes = array();
+                if($value['inter_' . $numeroInter . '_type'] == 6 && !count($commandes)) {
                     $errors[] = "Ce type de service est réservé aux commandes";
                 }
                 

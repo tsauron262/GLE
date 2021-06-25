@@ -448,6 +448,9 @@ class BimpCore
         if (is_null($bimp_logs_locked)) {
             $bimp_logs_locked = 0;
         }
+        
+        if(defined('ID_ERP'))
+            $extra_data['id_erp'] = ID_ERP;
 
         if (!$bimp_logs_locked) {
             $bimp_logs_locked = 1;

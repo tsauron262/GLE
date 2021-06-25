@@ -148,7 +148,10 @@ class BContract_avenantdet extends BContract_avenant {
     }
     
     public function getCurrentQtyDet() {
-        return count(json_decode($this->getData('serials_in')));
+        $serials = json_decode($this->getData('serials_in'));
+        if(is_array($serials))
+            return count($serials);
+        return 0;
     }
     
     public function getTotalAdded() {

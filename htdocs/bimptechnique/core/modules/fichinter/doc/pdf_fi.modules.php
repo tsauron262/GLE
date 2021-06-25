@@ -343,7 +343,7 @@ class pdf_fi {
                         $fileName = 'contrat_fi.png';
                         $pdf->Image($dir_output . $fileName, /* x */ 100, /* y */ 80, 0, 15, '', '', '', false, 250, '');
                     }
-                    if(count($tickets) > 0) {
+                    if(is_array($tickets) && count($tickets) > 0) {
                         $fileName = 'ticket_fi.png';
                         $pdf->Image($dir_output . $fileName, /* x */ 158, /* y */ 80, 0, 15, '', '', '', false, 250, '');
                     }
@@ -357,7 +357,7 @@ class pdf_fi {
                         $title = "Référence contrat";
                     $pdf->Cell($W, 4, $title, 0, null, 'C', true);
                     $title = '';
-                    if(count($tickets) > 0) {
+                    if(is_array($tickets) && count($tickets) > 0) {
                         $title = (count($tickets) > 1) ? "Références tickets" : "Référence ticket";
                     }
                     $pdf->Cell($W, 4, $title, 0, null, 'C', true);
@@ -382,7 +382,7 @@ class pdf_fi {
                     }
                     $pdf->Cell($W, 4, $text, 0, null, 'C', 0);
                     $text = '';
-                    if(count($tickets) > 0) {
+                    if(is_array($tickets) && count($tickets) > 0) {
                          $text = implode(',', $tick);
                     } else {
     //                    $pdf->Cell($W, 4, "Il n'y a pas de tickets support liés à ce rapport", 0, null, 'C', 0);

@@ -1822,7 +1822,7 @@ class Bimp_Facture extends BimpComm
                     $items[] = $item['id'];
                 }
             }
-            if (count($items == 0)) {
+            if (count($items) == 0) {
                 $contacts = $this->dol_object->liste_contact(-1, 'external', 0, 'BILLING');
                 $emails = array();
                 foreach ($contacts as $item) {

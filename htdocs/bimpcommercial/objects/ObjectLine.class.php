@@ -5046,6 +5046,7 @@ class ObjectLine extends BimpObject
 
     public function create(&$warnings = array(), $force_create = false)
     {
+        $errors = array();
         if (!static::$parent_comm_type) {
             $errors[] = 'Impossible de créer une ligne depuis une instance de la classe de base "ObjectLine"';
             return $errors;
@@ -5055,7 +5056,6 @@ class ObjectLine extends BimpObject
             return array('Création de la ligne impossible');
         }
 
-        $errors = array();
 
         if ((int) $this->getData('id_line')) {
             $id_bimp_line = (int) $this->db->getValue($this->getTable(), 'id', 'id_line = ' . (int) $this->getData('id_line'));
@@ -5164,6 +5164,7 @@ class ObjectLine extends BimpObject
 
     public function update(&$warnings = array(), $force_update = false)
     {
+        $errors = array();
         if (!static::$parent_comm_type) {
             $errors[] = 'Impossible de mettre à jour une ligne depuis une instance de la classe de base "ObjectLine"';
             return $errors;
@@ -5273,7 +5274,7 @@ class ObjectLine extends BimpObject
             }
         }
 
-        $errors = parent::update($warnings, $force_update);
+        $errors = BimpTools::merge_array($errors, parent::update($warnings, $force_update));
 
         if (!$isParentEditable) {
             if ((int) $this->getData('id_line')) {

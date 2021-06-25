@@ -76,7 +76,7 @@ class Session {
 //            return $ln->data;
 //        }
         
-        return '';
+        return true;
     }
     
     public function alimentSession(){
@@ -115,8 +115,8 @@ class Session {
     //        else{
     //            echo '<pre>ecriture';print_r($_SESSION);
     //        }
-            return true;
         }
+        return true;
     }
     
     function arrayRecursiveDiff($aArray1, $aArray2) {
@@ -178,9 +178,9 @@ class Session {
                     $this->db->query("DELETE FROM ".$this->table." WHERE `update` <= '".$date_expiration->format('Y-m-d H:i:s')."'");
                     BimpCore::setConf('date_nettoyage_session', time());
                 }
-                return true;
             }
         }
+        return true;
     }
     
     public function info($str){

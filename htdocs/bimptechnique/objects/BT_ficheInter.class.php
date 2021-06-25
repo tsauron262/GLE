@@ -310,7 +310,7 @@ class BT_ficheInter extends BimpDolObject {
             }
 
             if($display) {
-                if(count(json_decode($this->getData('commandes')))) {
+                if(is_array($commandes) && count($commandes) > 0) {
                     $html = "<strong>"
                         . "Commande: <strong class='$class' >" . BimpRender::renderIcon($icone) . " " . price($marge) . "€</strong><br />"
                         . "</strong>";
@@ -321,7 +321,7 @@ class BT_ficheInter extends BimpDolObject {
                     $html .= $contrat->renderThisStatsFi(true, false);
                 }
                 
-                if(!count(json_decode($this->getdata('commandes'))) && !$this->getData('fk_contrat')) {
+                if(!(is_array($commandes) && count($commandes) > 0) && !$this->getData('fk_contrat')) {
                     if(count($children) > 0) {
                         $duree = 0;
                         foreach($children as $id_child) {

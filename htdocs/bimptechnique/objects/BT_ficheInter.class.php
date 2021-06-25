@@ -245,7 +245,7 @@ class BT_ficheInter extends BimpDolObject {
 
             $coup_technicien = BimpCore::getConf("bimptechnique_coup_horaire_technicien");
             
-            if(count($commandes) > 0) {
+            if(is_array($commandes) && count($commandes) > 0) {
                 foreach($commandes as $id_commande) {
                     $commande->fetch($id_commande);
                     $first_loop = true;

@@ -1342,25 +1342,27 @@ class BT_ficheInter extends BimpDolObject {
 //        $codes = json_decode(BimpCore::getConf("bimptechnique_ref_deplacement"));
         $commandes = json_decode($this->getData('commandes'));
         $array = [];
-        foreach($commandes as $id_commande) {
-            $commande = new Commande($this->db->db);
-            $commande->fetch($id_commande);
-            $bimpCommande = BimpCache::getBimpObjectInstance("bimpcommercial", "Bimp_Commande", $id_commande);
-            $children = $commande->lines;
-            foreach($children as $child) {
-                $fk_product = ($child->fk_product) ? ($child->fk_product) : 0;
-                if($fk_product > 0) {
-                    $produit = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Product", $fk_product);
-                    if($produit->isDep()){
-//                    if(in_array($produit->getData('ref'), $codes)) {
-                        $thisChildrenFilterArray = $this->getChildrenList("inters", ['id_line_commande' => $child->id]);
-                        if(!count($thisChildrenFilterArray)) {
-                            $array[$id_commande] = $commande->ref . " - " . $bimpCommande->getData('libelle');
+        if(is_array($commandes)){
+            foreach($commandes as $id_commande) {
+                $commande = new Commande($this->db->db);
+                $commande->fetch($id_commande);
+                $bimpCommande = BimpCache::getBimpObjectInstance("bimpcommercial", "Bimp_Commande", $id_commande);
+                $children = $commande->lines;
+                foreach($children as $child) {
+                    $fk_product = ($child->fk_product) ? ($child->fk_product) : 0;
+                    if($fk_product > 0) {
+                        $produit = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Product", $fk_product);
+                        if($produit->isDep()){
+    //                    if(in_array($produit->getData('ref'), $codes)) {
+                            $thisChildrenFilterArray = $this->getChildrenList("inters", ['id_line_commande' => $child->id]);
+                            if(!count($thisChildrenFilterArray)) {
+                                $array[$id_commande] = $commande->ref . " - " . $bimpCommande->getData('libelle');
+                            }
                         }
                     }
                 }
+
             }
-            
         }
         return $array;
     }

@@ -874,7 +874,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
                 /* Pour les ecotaxe et copie privé */
                 $row['object'] = $product;
-                if (is_object($product)) {
+                if (is_object($product) && $row['qte']) {
                     if (isset($product->array_options['options_deee']) && $product->array_options['options_deee'] > 0)
                         $this->totals['DEEE'] += $product->array_options['options_deee'] * $row['qte'];
                     if (isset($product->array_options['options_rpcp']) && $product->array_options['options_rpcp'] > 0)

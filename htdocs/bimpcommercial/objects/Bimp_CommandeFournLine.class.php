@@ -2087,11 +2087,12 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
     public function unsetReception($id_reception)
     {
+        $errors = array();
         $receptions = $this->getData('receptions');
 
         if (isset($receptions[(int) $id_reception])) {
             unset($receptions[(int) $id_reception]);
-            $errors = $this->updateField('receptions', $receptions);
+            $errors = BimpTools::merge_array($errors, $this->updateField('receptions', $receptions));
         }
 
         $this->checkQties();

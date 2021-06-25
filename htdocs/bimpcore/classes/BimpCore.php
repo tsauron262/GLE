@@ -451,6 +451,9 @@ class BimpCore
         
         if(defined('ID_ERP'))
             $extra_data['id_erp'] = ID_ERP;
+        global $user;
+        if(is_object($user) && $user->id > 0)
+            $extra_data['user'] = $user->getNomUrl(1);
 
         if (!$bimp_logs_locked) {
             $bimp_logs_locked = 1;

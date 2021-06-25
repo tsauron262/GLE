@@ -1785,6 +1785,9 @@ class BimpTools
 
     public function printDate($date, $balise = "span", $class = '', $format = 'd/m/Y H:i:s', $format_mini = 'd / m / Y')
     {
+        if($date == '')
+            return '';
+        
         if (is_string($date) && stripos($date, '-') > 0) {
             $date = new DateTime($date);
         }

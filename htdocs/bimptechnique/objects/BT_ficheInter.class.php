@@ -245,7 +245,7 @@ class BT_ficheInter extends BimpDolObject {
 
             $coup_technicien = BimpCore::getConf("bimptechnique_coup_horaire_technicien");
             
-            if(count($commandes) > 0) {
+            if(is_array($commandes) && count($commandes) > 0) {
                 foreach($commandes as $id_commande) {
                     $commande->fetch($id_commande);
                     $first_loop = true;
@@ -310,7 +310,7 @@ class BT_ficheInter extends BimpDolObject {
             }
 
             if($display) {
-                if(count(json_decode($this->getData('commandes')))) {
+                if(is_array($commandes) && count($commandes) > 0) {
                     $html = "<strong>"
                         . "Commande: <strong class='$class' >" . BimpRender::renderIcon($icone) . " " . price($marge) . "€</strong><br />"
                         . "</strong>";
@@ -321,7 +321,7 @@ class BT_ficheInter extends BimpDolObject {
                     $html .= $contrat->renderThisStatsFi(true, false);
                 }
                 
-                if(!count(json_decode($this->getdata('commandes'))) && !$this->getData('fk_contrat')) {
+                if(!(is_array($commandes) && count($commandes) > 0) && !$this->getData('fk_contrat')) {
                     if(count($children) > 0) {
                         $duree = 0;
                         foreach($children as $id_child) {
@@ -1838,7 +1838,7 @@ class BT_ficheInter extends BimpDolObject {
         
         $allCommandes = json_decode($this->getData('commandes'));
         $commande = $this->getInstance('bimpcommercial', 'Bimp_Commande');
-        if(count($allCommandes) > 0) {
+        if(is_array($allCommandes) && count($allCommandes) > 0) {
             foreach($allCommandes as $id) {
                 $commande->fetch($id);
                 $card = new BC_Card($commande);

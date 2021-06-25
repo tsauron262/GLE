@@ -53,7 +53,7 @@ class GSX_Request_v2
         }
 
         ini_set('display_errors', 1);
-        error_reporting(E_All);
+        error_reporting(E_ALL);
 
         $doc = new DOMDocument();
         if (!$doc->load($fileName)) {

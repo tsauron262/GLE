@@ -116,13 +116,13 @@ class Bimp_User extends BimpObject
         return $this->getInstanceName();
     }
 
-    public function getLink($params = array())
+    public function getLink($params = array(), $forced_context = '')
     {
         if ($this->isLoaded() && $this->getData('statut') == 0) {
             $params['disabled'] = true;
         }
 
-        return parent::getLink($params);
+        return parent::getLink($params, $forced_context);
     }
 
     public static function getUsersByShipto($shipTo)

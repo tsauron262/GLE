@@ -3461,7 +3461,7 @@ class ObjectLine extends BimpObject
             if (count($remises)) {
                 foreach ($remises as $remise) {
                     $del_warnings = array();
-                    $remise->delete($del_warnings, true);
+                    $errors = BimpTools::merge_array($errors, $remise->delete($del_warnings, true));
                 }
                 unset($this->remises);
                 $this->remises = null;
@@ -3469,7 +3469,7 @@ class ObjectLine extends BimpObject
             if ((float) $this->remise || (float) $this->getData('remise')) {
                 $this->set('remise', 0);
                 $this->remise = 0;
-                $this->update();
+                $errors = BimpTools::merge_array($errors, $this->update());
             }
         } else {
 //            $remise_infos = $this->getRemiseTotalInfos();
@@ -3504,6 +3504,7 @@ class ObjectLine extends BimpObject
 //                $this->calcRemise();
 //            }
         }
+        return $errors;
     }
 
     public function setRemiseGlobalePart(RemiseGlobale $rg, $rate)

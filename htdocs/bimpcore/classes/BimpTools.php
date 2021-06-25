@@ -330,8 +330,9 @@ class BimpTools
     public static function getDateForDolDate($date)
     {
         if (is_null($date) || !$date) {
-            return '';
+            return 0;
         }
+        
         $DT = new DateTime($date);
         return (int) $DT->format('U');
     }

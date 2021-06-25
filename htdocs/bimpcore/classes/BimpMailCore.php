@@ -40,6 +40,14 @@ class BimpMailCore
             }
 
             $from .= '>';
+
+            if (!$reply_to) {
+                if (BimpCore::isContextPublic()) {
+                    $reply_to = BimpCore::getConf('public_default_reply_to_email', '');
+                } else {
+                    $reply_to = $user->email;
+                }
+            }
         }
 
         if (defined('MOD_DEV_SYN_MAIL')) {
@@ -54,14 +62,6 @@ class BimpMailCore
             $addr_bcc = '';
             $reply_to = MOD_DEV_SYN_MAIL;
             $to = MOD_DEV_SYN_MAIL;
-        }
-
-        if (!$reply_to) {
-            if (BimpCore::isContextPublic()) {
-                $reply_to = BimpCore::getConf('public_default_reply_to_email', '');
-            } else {
-                $reply_to = $user->email;
-            }
         }
 
         $this->subject = $subject;

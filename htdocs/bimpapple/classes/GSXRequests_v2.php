@@ -215,7 +215,7 @@ class GSX_Request_v2
         }
 
         $label = '';
-        $nodes = XMLDoc::findChildElements($dataNode, 'label', null, null, 1);
+        $nodes = XMLDoc::findChildElements($dataNode, 'label', null, array(), 1);
         if (count($nodes) == 1) {
             $label = XMLDoc::getElementInnerText($nodes[0]);
         } else {

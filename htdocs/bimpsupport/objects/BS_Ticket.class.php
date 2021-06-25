@@ -922,6 +922,8 @@ class BS_Ticket extends BimpObject
     {
         global $userClient, $user;
         $isPublic = BimpCore::isContextPublic();
+        
+        $errors = array();
 
         if ($isPublic) {
             if (!(int) $this->getData('id_contrat')) {

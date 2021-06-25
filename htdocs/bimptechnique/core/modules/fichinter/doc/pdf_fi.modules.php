@@ -317,13 +317,13 @@ class pdf_fi {
                 $pdf->SetFont('', 'B', 9); 
                 $comm = Array();
                 $tick = Array();
-                if(count($commandes) > 0) {
+                if(is_array($commandes) && count($commandes) > 0) {
                     foreach($commandes as $id) {
                         $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', $id);
                         $comm[] = $commande->getRef();
                     }
                 }
-                if(count($tickets) > 0) {
+                if(is_array($tickets) && count($tickets) > 0) {
                     foreach($tickets as $id) {
                         $ticket = BimpObject::getInstance('bimpsupport', "BS_Ticket", $id);
                         $tick[] = $ticket->getRef();

@@ -136,26 +136,20 @@ class BS_Ticket extends BimpObject
 
     public function isFieldEditable($field, $force_edit = false)
     {
-        $is_client_request = $this->isUserClientRequest();
-        $is_public = BimpCore::isContextPublic();
-        $is_processing = $this->isProcessing();
-
         switch ($field) {
             case 'sujet':
                 if (!$this->isLoaded()) {
                     return 1;
                 }
 
-                if ($is_processing) {
-                    return 0;
-                }
-                if ($is_public) {
-                    if ($is_client_request) {
+                if (BimpCore::isContextPublic()) {
+                    if ($this->isProcessing()) {
+                        return 0;
+                    }
+
+                    if ($this->isUserClientRequest()) {
                         return 1;
                     }
-                    return 0;
-                }
-                if ($is_client_request) {
                     return 0;
                 }
                 return 1;
@@ -928,11 +922,11 @@ class BS_Ticket extends BimpObject
                 return array('Vous devez obligatoire sélectionner un contrat actif pour ouvrir un nouveau ticket support');
             } else {
                 $contrat = $this->getChildObject('bimp_contrat');
-                
+
                 if (!BimpObject::objectLoaded($contrat)) {
                     return array('Le contrat sélectionner n\'existe plus');
                 } elseif (!$contrat->isValide()) {
-                    return array('Le contrat ' . $contrat->getRef() .' n\'est plus actif');
+                    return array('Le contrat ' . $contrat->getRef() . ' n\'est plus actif');
                 }
             }
             $this->set('id_user_resp', 0);

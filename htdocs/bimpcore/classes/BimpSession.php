@@ -3,6 +3,7 @@ class Session {
     // Variable interne contenant la BDD
     private $_Connexion_BDD;
     private $table = "llx_bimp_php_session";
+    private static $sessionBase = array();
     private $sessionId = '';
     // Initialisation de la session lors de l'appel de la classe
     public function __construct($db){
@@ -87,6 +88,8 @@ class Session {
             if($ln->login != '')
             $_SESSION['dol_login'] = $ln->login;
         }
+        
+        self::$sessionBase = $_SESSION;
     }
     // Ecriture des sessions
     public function session_ecriture($sessionID, $sessionData) {
@@ -94,17 +97,48 @@ class Session {
 //        $sessionData = addslashes($sessionData);
 //        $this->db->query("INSERT INTO ".$this->table." (`id_session`, `data`, `update`) VALUES ('".$sessionID."', '".$sessionData."', '".$datetime_actuel->format('Y-m-d H:i:s')."') ON DUPLICATE KEY UPDATE `data` = '".$sessionData."'");
         
-        $data = $_SESSION;
-        $login = $_SESSION['dol_login'];
-        unset($data['dol_login']);
-        $data = addslashes(json_encode($data));
-        if((isset($login) && $login != '') || (isset($_SESSION['userClient']) && $_SESSION['userClient'] != ''))
-            $this->db->query("INSERT INTO ".$this->table." (`id_session`, `data`, login, `update`) VALUES ('".$sessionID."', '".$data."', '".$login."', '".$datetime_actuel->format('Y-m-d H:i:s')."') ON DUPLICATE KEY UPDATE login = '".$login."', `data` = '".$data."'");
-//        else{
-//            echo '<pre>ecriture';print_r($_SESSION);
-//        }
-        return true;
+        $diff1 = $this->arrayRecursiveDiff($_SESSION, self::$sessionBase);
+        $diff2 = $this->arrayRecursiveDiff(self::$sessionBase, $_SESSION);
+        unset($diff1['newtoken']);
+        unset($diff2['newtoken']);
+        unset($diff1['token']);
+        unset($diff2['token']);
+        
+        if(count($diff1) > 0 || count($diff2) > 0){
+
+            $data = $_SESSION;
+            $login = $_SESSION['dol_login'];
+            unset($data['dol_login']);
+            $data = addslashes(json_encode($data));
+            if((isset($login) && $login != '') || (isset($_SESSION['userClient']) && $_SESSION['userClient'] != ''))
+                $this->db->query("INSERT INTO ".$this->table." (`id_session`, `data`, login, `update`) VALUES ('".$sessionID."', '".$data."', '".$login."', '".$datetime_actuel->format('Y-m-d H:i:s')."') ON DUPLICATE KEY UPDATE login = '".$login."', `data` = '".$data."'");
+    //        else{
+    //            echo '<pre>ecriture';print_r($_SESSION);
+    //        }
+            return true;
+        }
     }
+    
+    function arrayRecursiveDiff($aArray1, $aArray2) {
+        $aReturn = array();
+
+        foreach ($aArray1 as $mKey => $mValue) {
+          if (array_key_exists($mKey, $aArray2)) {
+            if (is_array($mValue)) {
+              $aRecursiveDiff = $this->arrayRecursiveDiff($mValue, $aArray2[$mKey]);
+              if (count($aRecursiveDiff)) { $aReturn[$mKey] = $aRecursiveDiff; }
+            } else {
+              if ($mValue != $aArray2[$mKey]) {
+                $aReturn[$mKey] = $mValue;
+              }
+            }
+          } else {
+            $aReturn[$mKey] = $mValue;
+          }
+        }
+        return $aReturn;
+      } 
+    
     // Destruction des sessions
     public function session_destruction($sessionID) {
         
@@ -131,7 +165,7 @@ class Session {
     public function session_nettoyage($sessionMaxLifetime) {
         if(!defined('NO_SESSION_NETTOYAGE') && class_exists('BimpCore')){
             $date = BimpCore::getConf('date_nettoyage_session');
-            if(!$date || $date < time() - 60){
+            if(!$date || $date < time() - 600){
                 if(is_object($this->db)){
                     if($sessionMaxLifetime < 43200)
                         $sessionMaxLifetime = 43200;

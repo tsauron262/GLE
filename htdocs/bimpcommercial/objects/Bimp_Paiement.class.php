@@ -1230,7 +1230,7 @@ class Bimp_Paiement extends BimpObject
                         }
                         $i++;
                         
-                        ini_set('max_execution_time', 1200);
+                        BimpCore::setMaxExecutionTime(1200);
                     }
                 }
 

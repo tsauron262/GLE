@@ -2318,7 +2318,7 @@ class Bimp_Commande extends BimpComm
 
     public function addLinesToFacture($id_facture, $lines_data = null, $check_data = true, $new_qties = false)
     {
-        ini_set('max_execution_time', 2400);
+        BimpCore::setMaxExecutionTime(2400);
         ignore_user_abort(0);
 
         $errors = array();
@@ -3720,8 +3720,19 @@ class Bimp_Commande extends BimpComm
                 $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_FINANCE);
                 if ($demande)
                     $demande->delete($warnings, 1);
-                $warnings[] = "Bonjour,<br/><br/>La commande " . $this->getNomUrl(1, true) . " a été validé.";
-                mailSyn2("Validation par paiement comptant", 'a.delauzun@bimp.fr', "gle@bimp.fr", "Bonjour,<br/><br/>La commande " . $this->getNomUrl(1, true) . " a été validé par paiement comptant, merci de vérifier le paiement ultérieurement.");
+                $warnings[] = "La commande " . $this->getNomUrl(1, true) . " a été validée.";
+                mailSyn2("Validation par paiement comptant", 'a.delauzun@bimp.fr', "gle@bimp.fr", "Bonjour,<br/><br/>La commande " . $this->getNomUrl(1, true) . " a été validée financièrement par paiement comptant, merci de vérifier le paiement ultérieurement.");
+            } else {
+                $client_facture = $this->getClientFacture();
+                if(!$client_facture->getData('validation_financiere')) {
+                    $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+                    $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_FINANCE);
+                    if($demande)
+                        $demande->delete($warnings, 1);
+                    $warnings[] = "La commande " . $this->getNomUrl(1, true) . " a été validée (validation financière automatique, voir configuration client)";
+                    mailSyn2("Validation financière forcée " . $client_facture->getData('code_client') . ' - ' . $client_facture->getData('nom'), 'a.delauzun@bimp.fr', "gle@bimp.fr", "Bonjour,<br/><br/>La commande " . $this->getNomUrl(1, true) . " a été validée financièrement par la configuration du client, merci de vérifier le paiement ultérieurement.");
+
+                }
             }
         }
 
@@ -3923,7 +3934,7 @@ class Bimp_Commande extends BimpComm
         }
     }
 
-    public static function sendEmailNotBilled()
+    public function sendEmailNotBilled()
     {
         $rows = self::getBdb()->getRows('commande', 'fk_statut IN ("1") AND total_ht != 0 AND (date_prevue_facturation < now() OR date_prevue_facturation IS NULL) AND (date_valid <= "' . date("Y-m-d", strtotime("-1 month")) . '") AND invoice_status IN ("0","1")', null, 'array', array('rowid'));
 

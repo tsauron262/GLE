@@ -1843,8 +1843,8 @@ class Bimp_Societe extends BimpDolObject
                             $note .= ($note ? ' - ' : '') . 'Limite: ' . price(intval($limit)) . ' €';
                         }
 
-                        if ($limit < 1 && $lettrecreditsafe == 100)
-                            $limit = 10000000;
+//                        if ($limit < 1 && $lettrecreditsafe == 100)
+//                            $limit = 10000000;
                     }
                     if (isset($result->body->company->ratings2013->commentaries->comment)) {
                         if (is_string($result->body->company->ratings2013->commentaries->comment))

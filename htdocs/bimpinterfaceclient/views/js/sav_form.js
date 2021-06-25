@@ -25,7 +25,8 @@ function SavPublicForm() {
         'eq_etat',
         'eq_system',
         'sav_centre',
-        'sav_day'
+        'sav_day',
+        'reservation_id'
     ];
 
     // Evénements: 
@@ -308,16 +309,27 @@ function SavPublicForm() {
         if ($btn.length) {
             $btn.addClass('disabled');
 
+            if ($.isOk(ptr.$form)) {
+                var $input = ptr.$form.find('[name="reservation_id"]');
+
+                if ($input.length) {
+                    if ($input.val()) {
+                        $btn.removeClass('disabled');
+                        return true;
+                    }
+                }
+            }
+
             // Check du slot: 
             var $form = $('#sav_slot');
             if ($form.length) {
-                var $day = $form.find('select[name="sav_day"]');
+                var $day = $form.find('[name="sav_day"]');
 
                 if ($day.length) {
                     var day = $day.val();
 
                     if (day) {
-                        var $slot = $form.find('select[name="sav_slot_' + day + '"]');
+                        var $slot = $form.find('[name="sav_slot_' + day + '"]');
 
                         if ($slot.length) {
                             var slot = $slot.val();
@@ -441,6 +453,8 @@ function SavPublicForm() {
             return;
         }
 
+        $button.addClass('disabled');
+
         if (typeof (force_validate) === 'undefined') {
             force_validate = 0;
         }
@@ -453,11 +467,13 @@ function SavPublicForm() {
 
         if (!force_validate) {
             if (!ptr.checkCanSubmit()) {
+                $button.removeClass('disabled');
                 return;
             }
         }
 
         if (!ptr.checkForm()) {
+            $button.removeClass('disabled');
             return;
         }
 
@@ -480,14 +496,18 @@ function SavPublicForm() {
                 data[ptr.inputs[i]] = val;
             }
 
-            var slot = '';
-            if (data['sav_day']) {
-                var $input = $form.find('[name="sav_slot_' + data['sav_day'] + '"]');
-                if ($input.length) {
-                    slot = $input.val();
+            if (typeof (data['reservation_id']) !== 'undefined' && data['reservation_id']) {
+                data['sav_slot'] = $form.find('[name="sav_slot"]').val();
+            } else {
+                var slot = '';
+                if (data['sav_day']) {
+                    var $input = $form.find('[name="sav_slot_' + data['sav_day'] + '"]');
+                    if ($input.length) {
+                        slot = $input.val();
+                    }
                 }
+                data['sav_slot'] = slot;
             }
-            data['sav_slot'] = slot;
 
             $('#SlotNotAvailableNotif').stop().slideUp(250);
             $('#reservationErrorNotif').stop().slideUp(250);
@@ -496,9 +516,9 @@ function SavPublicForm() {
             }
 
             $('#debug').html('').hide();
-
+            
             BimpAjax('savFormSubmit', data, $('#sav_form_submit_result'), {
-                $button: $button,
+                $btn: $button,
                 display_success: false,
                 display_processing: true,
                 processing_padding: 20,
@@ -513,19 +533,25 @@ function SavPublicForm() {
                         $('#noReservationSubmit').find('span.btn').attr('onclick', 'SavPublicForm.submit($(this), 1, \'' + result.force_validate_reason + '\')');
                         $('#noReservationSubmit').stop().slideDown(250);
                         ptr.fetchAvailableSlots();
+                        bimpAjax.$btn.removeClass('disabled');
                     } else if (result.force_validate) {
                         $('#reservationErrorNotif').stop().slideDown(250);
                         $('#noReservationSubmit').find('span.btn').attr('onclick', 'SavPublicForm.submit($(this), 1, \'' + result.force_validate_reason + '\')');
                         $('#noReservationSubmit').stop().slideDown(250);
+                        bimpAjax.$btn.removeClass('disabled');
                     } else if (result.success_html) {
                         $('#new_sav_form').stop().fadeOut(250, function () {
+                            bimpAjax.$btn.removeClass('disabled');
                             $('#new_sav_form').html(result.success_html).fadeIn(250);
                         });
                     }
                 },
                 error: function (result, bimpAjax) {
+                    bimpAjax.$btn.removeClass('disabled');
                 }
             });
+        } else {
+            $button.removeClass('disabled');
         }
     };
 

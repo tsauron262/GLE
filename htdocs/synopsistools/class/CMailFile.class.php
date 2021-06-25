@@ -500,7 +500,7 @@ function getValidAddress($adresses, $format) {
                 $newemail = $email;
             }
             if ($format == 1) {
-                $neweamil = '<' . $email . '>';
+                $newemail = '<' . $email . '>';
             }
             if ($format == 0) {
                 if ($conf->global->MAIN_MAIL_NO_FULL_EMAIL)

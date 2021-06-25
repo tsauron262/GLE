@@ -1,0 +1,2 @@
+ALTER TABLE `llx_demande_validate_comm` CHANGE `id_valid_comm` `val_comm_validation` INT(11) NULL DEFAULT NULL;
+ALTER TABLE `llx_demande_validate_comm` ADD `val_comm_demande` INT NOT NULL AFTER `type`;

@@ -44,7 +44,7 @@ class BS_SAV extends BimpObject
         self::BS_SAV_A_RESTITUER       => array('label' => 'A restituer', 'icon' => 'arrow-right', 'classes' => array('success')),
         self::BS_SAV_FERME             => array('label' => 'Fermé', 'icon' => 'times', 'classes' => array('danger'))
     );
-    public static $status_opened = array(self::BS_SAV_RESERVED,self::BS_SAV_NEW, self::BS_SAV_ATT_PIECE, self::BS_SAV_ATT_CLIENT, self::BS_SAV_DEVIS_ACCEPTE, self::BS_SAV_REP_EN_COURS, self::BS_SAV_EXAM_EN_COURS, self::BS_SAV_DEVIS_REFUSE, self::BS_SAV_ATT_CLIENT_ACTION, self::BS_SAV_A_RESTITUER);
+    public static $status_opened = array(self::BS_SAV_RESERVED, self::BS_SAV_NEW, self::BS_SAV_ATT_PIECE, self::BS_SAV_ATT_CLIENT, self::BS_SAV_DEVIS_ACCEPTE, self::BS_SAV_REP_EN_COURS, self::BS_SAV_EXAM_EN_COURS, self::BS_SAV_DEVIS_REFUSE, self::BS_SAV_ATT_CLIENT_ACTION, self::BS_SAV_A_RESTITUER);
     public static $need_propal_status = array(2, 3, 4, 5, 6, 9);
     public static $propal_reviewable_status = array(0, 1, 2, 3, 4, 6, 7, 9);
     public static $save_options = array(
@@ -1033,7 +1033,10 @@ class BS_SAV extends BimpObject
     public function getPublicUrl()
     {
         if ($this->isLoaded()) {
-            return DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=sav&content=card&id_sav=' . $this->id;
+            $base_url = BimpCore::getConf('interface_client_base_url', '');
+            if ($base_url) {
+                return $base_url . '?tab=sav&content=card&id_sav=' . $this->id; exit;
+            }
         }
 
         return '';
@@ -1041,7 +1044,12 @@ class BS_SAV extends BimpObject
 
     public function getPublicListPageUrl()
     {
-        return DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=sav';
+        $base_url = BimpCore::getConf('interface_client_base_url', '');
+        if ($base_url) {
+            return $base_url . '?tab=sav';
+        }
+
+        return '';
     }
 
     // Getters array: 
@@ -1675,13 +1683,21 @@ class BS_SAV extends BimpObject
         $html .= '<strong>AppleId</strong>: ' . $gsx->appleId . '<br/>';
         if ($gsx->appleId === GSX_v2::$default_ids['apple_id']) {
             $html .= '<strong>Mot de passe</strong>: ' . GSX_v2::$default_ids['apple_pword'];
+            $html.= '<script>'
+                    . 'var idMaxMesg = 0;'
+                    . 'function checkCode(){'
+                    .   ' setObjectAction(null, {"module":"bimpsupport", "object_name":"BS_SAV"}, "getCodeApple", {"idMax":idMaxMesg});'
+                    . '}'
+                    . 'checkCode();'
+                    . '</script>';
         }
 
         $html .= '<p class="small" style="text-align: center; margin-top: 15px">';
-        $html .= 'Si la fenêtre d\authentification ne s\'ouvre pas, veuillez vérifier que votre navigateur ne bloque pas l\'ouverture des fenêtres pop-up';
+        $html .= 'Si la fenêtre d\'authentification ne s\'ouvre pas, veuillez vérifier que votre navigateur ne bloque pas l\'ouverture des fenêtres pop-up';
         $html .= '</p>';
 
         $html .= '</div>';
+        
 
         return $html;
     }
@@ -2769,6 +2785,15 @@ class BS_SAV extends BimpObject
 
     public function getPublicLink()
     {
+        if ((int) $this->getData('id_user_client')) {
+            $url = $this->getPublicUrl();
+
+            if ($url) {
+                return $url;
+            }
+        } else {
+            
+        }
 //        return DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?serial=" . $this->getChildObject("equipment")->getData("serial") . "&id_sav=" . $this->id . "&user_name=" . substr($this->getChildObject("client")->dol_object->name, 0, 3);
         return "https://www.bimp.fr/nos-services/?serial=" . urlencode($this->getChildObject("equipment")->getData("serial")) . "&id_sav=" . $this->id . "&user_name=" . urlencode(str_replace(" ", "", substr($this->getChildObject("client")->dol_object->name, 0, 3))) . "#suivi-sav";
     }
@@ -2811,28 +2836,26 @@ class BS_SAV extends BimpObject
 
         $propal = $this->getChildObject('propal');
 
-        $tabFile = $tabFile2 = $tabFile3 = array();
+        $files = array();
 
         if (!is_null($propal)) {
             if ($propal->isLoaded()) {
                 $ref_propal = $propal->getSavedData("ref");
                 $fileProp = DOL_DATA_ROOT . "/bimpcore/sav/" . $this->id . "/PC-" . $ref_propal . ".pdf";
                 if (is_file($fileProp)) {
-                    $tabFile[] = $fileProp;
-                    $tabFile2[] = "application/pdf";
-                    $tabFile3[] = "PC-" . $ref_propal . ".pdf";
+                    $files[] = array($fileProp, 'application/pdf', 'PC-' . $ref_propal . '.pdf');
                 }
 
-                if(!in_array($msg_type,array('debDiago', 'debut'))){
-                $fileProp = DOL_DATA_ROOT . "/propale/" . $ref_propal . "/" . $ref_propal . ".pdf";
-                if (is_file($fileProp)) {
-                    $tabFile[] = $fileProp;
-                    $tabFile2[] = "application/pdf";
-                    $tabFile3[] = $ref_propal . ".pdf";
-                } elseif (in_array((int) $this->getData('status'), self::$need_propal_status)) {
-                    $errors[] = 'Attention: PDF du devis non trouvé et donc non envoyé au client File : ' . $fileProp;
-                    dol_syslog('SAV "' . $this->getRef() . '" - ID ' . $this->id . ': échec envoi du devis au client msg '.$msg_type.' : ' . print_r($errors, 1), LOG_ERR, 0, "_devissav");
-                }
+                if (!in_array($msg_type, array('debDiago', 'debut'))) {
+                    $fileProp = DOL_DATA_ROOT . "/propale/" . $ref_propal . "/" . $ref_propal . ".pdf";
+                    if (is_file($fileProp)) {
+                        $files[] = array($fileProp, 'application/pdf', $ref_propal . '.pdf');
+                    } elseif (in_array((int) $this->getData('status'), self::$need_propal_status)) {
+                        $errors[] = 'Attention: PDF du devis non trouvé et donc non envoyé au client File : ' . $fileProp;
+                        BimpCore::addlog('Echec envoi devis sav par e-mail au client - PDF non trouvé', Bimp_Log::BIMP_LOG_ERREUR, 'sav', $this, array(
+                            'Fichier' => $fileProp
+                        ));
+                    }
                 }
             } else {
                 unset($propal);
@@ -2861,7 +2884,7 @@ class BS_SAV extends BimpObject
         switch ($msg_type) {
             case 'Facture':
                 $facture = null;
-                $tabFile = $tabFile2 = $tabFile3 = array();
+                $files = array();
                 if ((int) $this->getData('id_facture')) {
                     $facture = $this->getChildObject('facture');
                     if (BimpObject::objectLoaded($facture)) {
@@ -2885,12 +2908,13 @@ class BS_SAV extends BimpObject
                 if (!is_null($facture)) {
                     $fileFact = DOL_DATA_ROOT . "/facture/" . $facture->ref . "/" . $facture->ref . ".pdf";
                     if (is_file($fileFact)) {
-                        $tabFile[] = $fileFact;
-                        $tabFile2[] = "application/pdf";
-                        $tabFile3[] = $facture->ref . ".pdf";
+                        $files[] = array($fileFact, 'application/pdf', $facture->ref . '.pdf');
                     } else {
                         $errors[] = 'Attention: PDF de la facture non trouvé et donc non envoyé au client';
                         dol_syslog('SAV "' . $this->getRef() . '" - ID ' . $this->id . ': échec envoi de la facture au client', LOG_ERR);
+                        BimpCore::addlog('Echec envoi facture sav par e-mail au client - PDF non trouvé', Bimp_Log::BIMP_LOG_ERREUR, 'sav', $this, array(
+                            'Fichier' => $fileFact
+                        ));
                     }
                 } else {
                     $errors[] = $error_msg . ' - Fichier PDF de la facture absent';
@@ -2996,8 +3020,9 @@ class BS_SAV extends BimpObject
                     $errors[] = "L'apraeil " . $eq->getLink() . ' ne semble pas localisé';
                 else {
                     $subject = "Réparation " . $this->getData('ref');
-                    $mail_msg = "Bonjour, l'appareil concerné par votre SAV " . $this->getData('ref') . " qui a pour serial " . $eq->getData('serial') . " a la fonction localisée activée, nous ne pouvons pas procéder à la réparation tant que vous n'aurez pas désactivé cette option dans votre iCloud.\n";
-                    $mail_msg .= "Merci de votre compréhension.\n<a href='https://support.apple.com/fr-fr/guide/icloud/mmdc23b125f6/icloud'>Voici un lien explicatif sur le site Apple</a>";
+                    $mail_msg = "Bonjour, l'appareil concerné par votre SAV " . $this->getData('ref') . " dont le numéro de série est " . $eq->getData('serial') . " a la fonction localisée d’activée.\nNous ne pourrons pas procéder à la réparation tant cette option ne sera pas désactivée.\n";
+                    $mail_msg .= "\n\n<a href='https://support.apple.com/fr-fr/guide/icloud/mmdc23b125f6/icloud'>Cliquez sur ce lien pour savoir comment désactiver l’option de géolocalisation</a>";
+                    $mail_msg .= "\n\nMerci de votre compréhension.";
                     //$sms = "Bonjour, nous venons de recevoir la pièce ou le produit pour votre réparation, nous vous contacterons quand votre matériel sera prêt.\nL'Equipe BIMP.";
                 }
                 break;
@@ -3020,6 +3045,14 @@ class BS_SAV extends BimpObject
 
                 if (BimpObject::objectLoaded($fac_contact)) {
                     $toMail = $fac_contact->getData('email');
+                }
+            }
+
+            if (!$toMail && (int) $this->getData('id_user_client')) {
+                $userClient = $this->getChildObject('user_client');
+
+                if (BimpObject::objectLoaded($userClient)) {
+                    $toMail = $userClient->getData('email');
                 }
             }
 
@@ -3046,8 +3079,16 @@ class BS_SAV extends BimpObject
             $toMail = BimpTools::cleanEmailsStr($toMail);
 
             if (BimpValidate::isEmail($toMail)) {
-                if (!mailSyn2($subject, $toMail, $fromMail, $mail_msg, $tabFile, $tabFile2, $tabFile3)) {
-                    $errors[] = 'Echec envoi du mail';
+//                if (!mailSyn2($subject, $toMail, $fromMail, $mail_msg, $tabFile, $tabFile2, $tabFile3)) {
+//                    $errors[] = 'Echec envoi du mail';
+//                }
+                $bimpMail = new BimpMail($subject, $toMail, $fromMail, $mail_msg);
+                $bimpMail->addFiles($files);
+                $mail_errors = array();
+                $bimpMail->send($mail_errors);
+
+                if (count($mail_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail');
                 }
             } else {
                 $errors[] = "Pas d'email correct " . $toMail;
@@ -4569,6 +4610,43 @@ class BS_SAV extends BimpObject
             'warnings' => $warnings
         );
     }
+    
+    public function actionGetCodeApple($data, &$success){
+        $idMax = $data['idMax'];
+        $success = 'Code pas encore reçu';
+        
+        $result = $this->db->executeS("SELECT *
+FROM ".MAIN_DB_PREFIX."bimpcore_note a
+WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 'BIMP_Task' AND a.id_obj = '25350' ORDER by id DESC");
+        if(isset($result[0])){
+            $ln = $result[0];
+            $success_callback = "setTimeout(function(){checkCode();}, 2000);";
+            if($idMax == 0){
+                $success_callback .= 'idMaxMesg = '.$ln->id.';';
+            }
+            elseif($idMax == $ln->id){
+                //On fait rien pas recu
+            }
+            else{
+                $code = $ln->content;
+                $tabCode = explode('votre identifiant Apple est :', $code);
+                if(isset($tabCode[1]))
+                    $code = $tabCode[1];
+                $tabCode = explode('. Ne le', $code);
+                if(isset($tabCode[1]))
+                    $code = $tabCode[0];
+                $code = str_replace(" ", "", $code);
+                $success_callback = "alert('". urlencode($code)."');";
+            }
+            
+        }
+        
+        return array(
+            'errors'   => array(),
+            'warnings' => array(),
+            'success_callback' => $success_callback
+        );
+    }
 
     public function actionAddAcompte($data, &$success)
     {
@@ -5212,10 +5290,10 @@ class BS_SAV extends BimpObject
         $sql .= ' AND (date_rdv < \'' . date('Y-m-d') . ' 00:00:00\' OR (date_rdv IS NULL AND date_create < \'' . $dt->format('Y-m-d') . ' 00:00:00\'))';
 
         $rows = $bdb->executeS($sql, 'array');
-        
+
         if (is_array($rows)) {
             $sav_instance = BimpObject::getInstance('bimpsupport', 'BS_SAV');
-            
+
             foreach ($rows as $r) {
                 if ($bdb->update('bs_sav', array(
                             'status' => BS_SAV::BS_SAV_RDV_EXPIRED
@@ -5259,10 +5337,12 @@ class BS_SAV extends BimpObject
                                 $msg .= '<b>Référence: </b>' . $r['ref'] . "\n\n";
                             }
 
-                            $msg .= 'Si vous avez toujours besoin d’une assistance, n’hésitez pas à reprendre un rendez vous sur votre <a href="https://www.bimp.fr/espace-client/">espace personnel</a> de notre site internet « www.bimp.fr »' . "\n\n";
+                            $msg .= 'Si vous avez toujours besoin d’une assistance, n’hésitez pas à reprendre un rendez vous sur votre <a href="' . BimpCore::getConf('interface_client_base_url', '') . '">espace personnel</a> de notre site internet « www.bimp.fr »' . "\n\n";
                             $msg .= 'L’équipe technique BIMP';
 
-                            mailSyn2($subject, $to, '', $msg);
+//                            mailSyn2($subject, $to, '', $msg);
+                            $bimpMail = new BimpMail($subject, $to, '', $msg);
+                            $bimpMail->send();
 
 //                            BimpCore::addlog('Annulation auto SAV réservé', Bimp_Log::BIMP_LOG_NOTIF, 'bic', null, array(
 //                                'ID SAV' => $r['id']
@@ -5329,7 +5409,9 @@ class BS_SAV extends BimpObject
 
                     $msg .= 'L’équipe technique BIMP';
 
-                    mailSyn2($subject, $to, '', $msg);
+//                    mailSyn2($subject, $to, '', $msg);
+                    $bimpMail = new BimpMail($subject, $to, '', $msg);
+                    $bimpMail->send();
 
                     BimpCore::addlog('Annulation auto SAV réservé', Bimp_Log::BIMP_LOG_NOTIF, 'bic', null, array(
                         'ID SAV' => $r['id']

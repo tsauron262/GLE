@@ -19,7 +19,6 @@ require_once(DOL_DOCUMENT_ROOT . "/core/lib/company.lib.php");
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';
 
-
 /**
   \class      pdf_panier_babel
   \brief      Classe permettant de generer les paniers au modele babel
@@ -27,7 +26,11 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';
 if (!defined('EURO'))
     define('EURO', chr(128));
 
-ini_set('max_execution_time', 600);
+if (defined('BIMP_LIB')) {
+    BimpCore::setMaxExecutionTime(600);
+} else {
+    ini_set('max_execution_time', 600);
+}
 
 class pdf_bimpsupport_pc extends ModeleBimpSupport
 {
@@ -67,6 +70,9 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
 
 
 
+
+
+
             
 // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;
@@ -80,7 +86,6 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
     function write_file($sav, $outputlangs = '')
     {
         global $user, $langs, $conf;
-
         global $tabCentre;
 
         if (!is_object($outputlangs)) {
@@ -198,7 +203,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
 
             $pdf->SetXY('20', '71');
             $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
-            $pdf->MultiCell(300, 6, $address . "\n" /*. $tel . "\n" . $mail*/, 0, 'L');
+            $pdf->MultiCell(300, 6, $address . "\n" /* . $tel . "\n" . $mail */, 0, 'L');
 
             $pdf->SetXY('16', '53.8');
             $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 8);
@@ -215,12 +220,15 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
                 $pdf->MultiCell(100, 6, "N° de dossier prestataire : " . $sav->getData('prestataire_number'), 0, 'L');
             }
 
-
             // Produit: 
             $equipment = $sav->getChildObject('equipment');
             $product_label = '';
             if (!is_null($equipment) && $equipment->isLoaded()) {
                 $product_label = $equipment->displayProduct('nom', true);
+                
+                if (strlen($product_label) > 50) {
+                    $product_label = substr($product_label, 0, 50) . '...';
+                }
                 $pdf->SetXY('121', '71.2');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
                 $pdf->MultiCell(100, 6, $product_label, 0, 'L');
@@ -272,36 +280,35 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
             $pdf->MultiCell(100, 6, $sav->displayData('save_option', 'default', false, true), 0, 'L');
 
             $cgv = "";
-            $cgv.= "-La société BIMP ne peut pas être tenue responsable de la perte éventuelle de données, quelque soit le support.\n\n";
+            $cgv .= "-La société BIMP ne peut pas être tenue responsable de la perte éventuelle de données, quelque soit le support.\n\n";
 
             $prixRefus = "49";
             if ($conf->global->MAIN_INFO_SOCIETE_NOM == "MY-MULTIMEDIA")
                 $prixRefus = "39";
 
-            
+
             $isIphone = false;
-            if (stripos($product_label, "Iphone") !== false || stripos($product_label, "IPAD") !== false  || stripos($product_label, "IPOD") !== false || stripos($product_label, "WATCH") !== false || stripos($product_label, "XXXX") !== false || stripos($product_label, "***") !== false) 
+            if (stripos($product_label, "Iphone") !== false || stripos($product_label, "IPAD") !== false || stripos($product_label, "IPOD") !== false || stripos($product_label, "WATCH") !== false || stripos($product_label, "XXXX") !== false || stripos($product_label, "***") !== false)
                 $isIphone = true;
-            if($isIphone)
+            if ($isIphone)
                 $prixRefus = "29";
-            
-            
-            $cgv .= "-Les frais de prise en charge diagnotic de ".$prixRefus."€ TTC sont à régler pour tout matériel  hors garantie. En cas d’acceptation du devis ces frais seront déduits.\n\n";
-            $cgv.="-Les problèmes logiciels, la récupération de données ou la réparation matériel liées à une mauvaise utilisation (liquide, chute, etc...), ne sont pas couverts par la GARANTIE APPLE; Un devis sera alors établi et des frais de ".$prixRefus."€ TTC seront facturés en cas de refus de celui-ci." . "\n\n";
-            $cgv.="-Des frais de ".$prixRefus."€ TTC seront automatiquement facturés, si lors de l’expertise il s’avère que  des pièces de contre façon ont été installées.\n\n";
-            $cgv.= "-Le client s’engage à venir récupérer son bien dans un délai d’un mois après mise à disposition,émission d’un devis. Après expiration de ce délai, ce dernier accepte des frais de garde de 4€ par jour.\n\n";
+
+
+            $cgv .= "-Les frais de prise en charge diagnotic de " . $prixRefus . "€ TTC sont à régler pour tout matériel  hors garantie. En cas d’acceptation du devis ces frais seront déduits.\n\n";
+            $cgv .= "-Les problèmes logiciels, la récupération de données ou la réparation matériel liées à une mauvaise utilisation (liquide, chute, etc...), ne sont pas couverts par la GARANTIE APPLE; Un devis sera alors établi et des frais de " . $prixRefus . "€ TTC seront facturés en cas de refus de celui-ci." . "\n\n";
+            $cgv .= "-Des frais de " . $prixRefus . "€ TTC seront automatiquement facturés, si lors de l’expertise il s’avère que  des pièces de contre façon ont été installées.\n\n";
+            $cgv .= "-Le client s’engage à venir récupérer son bien dans un délai d’un mois après mise à disposition,émission d’un devis. Après expiration de ce délai, ce dernier accepte des frais de garde de 4€ par jour.\n\n";
 
             $cgv .= "-Comme l’autorise la loi du 31 décembre 1903, modifiée le 22 juin 2016, les produits qui n'auront pas été retirés dans le délai de un an pourront être détruit, après accord du tribunal.\n\n";
             $cgv .= "-BIMP n’accepte plus les réglements par chèques. Les modes de réglements acceptés sont: en espèces (plafond maximun de 1000 €), en carte bleue.\n\n";
-
 
             if ((int) $sav->getData('prioritaire')) {
                 $pdf->SetXY('62', '111.5');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 20);
                 $pdf->SetTextColor(255, 102, 0);
                 $pdf->MultiCell(100, 6, "Prise en charge urgente", 0, 'L');
-                if($isIphone)
-                $cgv .= "-J'accepte les frais de 96 TTC de prise en charge urgente";
+                if ($isIphone)
+                    $cgv .= "-J'accepte les frais de 96 TTC de prise en charge urgente";
             }
 
 
@@ -330,7 +337,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 10);
                 $pdf->SetTextColor("black");
                 $pdf->SetXY($x, '278');
-                $pdf->MultiCell(38, 6, dol_trunc($client->nom,28), 0, 'C');
+                $pdf->MultiCell(38, 6, dol_trunc($client->nom, 28), 0, 'C');
             }
 //                $pdf->MultiCell(30, 6, $chrono->ref, 0, 'L');
 //                for($i=0;$i<1000;$i = $i+5){
@@ -339,7 +346,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
 //                
 //                }
             //QR suivie        
-            $qr_dir = $dir. "temp";
+            $qr_dir = $dir . "temp";
             $data = $sav->getPublicLink();
 //            $data = DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?serial=" . $sav->getChildObject("equipment")->getData("serial")."&id_sav=" . $sav->id . "&user_name=" . substr($client->name, 0, 3);
             $this->getQrCode($data, $qr_dir, "suivie.png");
@@ -424,24 +431,23 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
 
         $posx = 100;
         $posy = 10;
-        $posy+=5;
+        $posy += 5;
         $largCadre = 206 - $this->marge_gauche;
         $pdf->SetXY($posx, $posy);
         $pdf->SetTextColor(0, 0, 60);
         $pdf->MultiCell(100, 4, $outputlangs->transnoentities("Ref") . " : " . $outputlangs->convToOutputCharset($ref), '', 'R');
 
-        $posy+=1;
+        $posy += 1;
         $pdf->SetFont(pdf_getPDFFont($outputlangs), '', $default_font_size - 2);
         $pdf->SetTextColor(0, 0, 60);
 
-
         if ($client->code_client) {
-            $posy+=5;
+            $posy += 5;
             $pdf->SetXY($posx, $posy);
             $pdf->MultiCell(100, 3, $outputlangs->transnoentities("CustomerCode") . " : " . $outputlangs->transnoentities($client->code_client), '', 'R');
         }
 
-        $posy+=5;
+        $posy += 5;
         $pdf->SetXY($posx, $posy);
         $pdf->MultiCell(100, 3, $outputlangs->transnoentities("Type ") . " : " . $outputlangs->transnoentities('SAV'), '', 'R');
 
@@ -485,8 +491,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
                 else
                     $socname = $client->nom;
                 $carac_client_name = $outputlangs->convToOutputCharset($socname);
-            }
-            else {
+            } else {
                 $carac_client_name = $outputlangs->convToOutputCharset($client->nom);
             }
 
@@ -520,8 +525,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
 
             $pdf->Rect($this->marge_gauche - 3, 89, $largCadre, 185);
             $pdf->SetXY($this->marge_gauche, 92);
-        }
-        else {
+        } else {
             $pdf->SetFont(pdf_getPDFFont($outputlangs), 'B', 10);
             //Société
             if ($this->marge_gauche > 45) {

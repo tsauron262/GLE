@@ -55,12 +55,18 @@ class ActionsBimpcore
     }
     
     function incrementNbReq(){
-        if(defined('ID_ERP'))
-            $conf = 'nb_req_'.ID_ERP;
-        else
-            $conf = 'nb_req_'.$_SERVER['HTTP_HOST'];
-        $nb = BimpCore::getConf($conf, 0);
-        BimpCore::setConf($conf, $nb+1);
+        $mode_eco = true;
+        if (defined('BIMP_LIB')) {
+            $mode_eco = (int) BimpCore::getConf('bimpcore_mode_eco', 1);
+        }
+        if(!$mode_eco){
+            if(defined('ID_ERP'))
+                $conf = 'nb_req_'.ID_ERP;
+            else
+                $conf = 'nb_req_'.$_SERVER['HTTP_HOST'];
+            $nb = BimpCore::getConf($conf, 0);
+            BimpCore::setConf($conf, $nb+1);
+        }
     }
     
     function setContentSecurityPolicy($parameters, &$object, &$action, $hookmanager){

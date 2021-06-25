@@ -14,3 +14,8 @@ pdf:
 
 interface_client: 
     primary: EF7D00
+    
+public_email: 
+    primary: EF7D00
+        
+            

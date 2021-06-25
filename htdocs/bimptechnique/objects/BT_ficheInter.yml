@@ -148,7 +148,7 @@ fields:
         label: Note privée
         type: html
     fk_soc:
-        label: client
+        label: Client
         type: id_object
         object: client
         dol_prop: socid
@@ -395,6 +395,7 @@ filters:
 filters_panels: 
     default: 
         filters:
+          fk_statut:
           ref:
             show: 1
           fk_user_author:
@@ -403,6 +404,9 @@ filters_panels:
             show: 1
           linked:
           no_linked:
+          datec:
+          datei:
+          commandes:
            
 forms:
     askFacturation:

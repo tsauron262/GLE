@@ -1523,7 +1523,7 @@ class Bimp_FactureFourn extends BimpComm
         return $errors;
     }
 
-    public static function sendInvoiceDraftWhithMail()
+    public function sendInvoiceDraftWhithMail()
     {
         $date = new DateTime();
         $nbDay = 5;

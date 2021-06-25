@@ -5353,6 +5353,7 @@ class ObjectLine extends BimpObject
 
     public function delete(&$warnings = array(), $force_delete = false)
     {
+        $errors = array();
         if (!static::$parent_comm_type) {
             $errors[] = 'Impossible de supprimer une ligne depuis une instance de la classe de base "ObjectLine"';
             return $errors;

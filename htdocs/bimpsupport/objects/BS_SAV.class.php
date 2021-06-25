@@ -1035,7 +1035,8 @@ class BS_SAV extends BimpObject
         if ($this->isLoaded()) {
             $base_url = BimpCore::getConf('interface_client_base_url', '');
             if ($base_url) {
-                return $base_url . '?tab=sav&content=card&id_sav=' . $this->id; exit;
+                return $base_url . '?tab=sav&content=card&id_sav=' . $this->id;
+                exit;
             }
         }
 
@@ -1683,10 +1684,10 @@ class BS_SAV extends BimpObject
         $html .= '<strong>AppleId</strong>: ' . $gsx->appleId . '<br/>';
         if ($gsx->appleId === GSX_v2::$default_ids['apple_id']) {
             $html .= '<strong>Mot de passe</strong>: ' . GSX_v2::$default_ids['apple_pword'];
-            $html.= '<script>'
+            $html .= '<script>'
                     . 'var idMaxMesg = 0;'
                     . 'function checkCode(){'
-                    .   ' setObjectAction(null, {"module":"bimpsupport", "object_name":"BS_SAV"}, "getCodeApple", {"idMax":idMaxMesg});'
+                    . ' setObjectAction(null, {"module":"bimpsupport", "object_name":"BS_SAV"}, "getCodeApple", {"idMax":idMaxMesg});'
                     . '}'
                     . 'checkCode();'
                     . '</script>';
@@ -1697,7 +1698,6 @@ class BS_SAV extends BimpObject
         $html .= '</p>';
 
         $html .= '</div>';
-        
 
         return $html;
     }
@@ -3320,7 +3320,7 @@ class BS_SAV extends BimpObject
                     if ($reservation->isLoaded()) {
                         $qty = null;
                         $reservation->set('status', $status);
-                        $res_errors = $reservation->setNewStatus($status, $qty, $reservation->getData('id_equipment'));
+                        $res_errors = $reservation->setNewStatus($status, array('qty' => $qty, 'id_equipment' => $reservation->getData('id_equipment')));
                         if (!count($res_errors)) {
                             $w = array();
                             $res_errors = $reservation->update($w, true);
@@ -4610,40 +4610,38 @@ class BS_SAV extends BimpObject
             'warnings' => $warnings
         );
     }
-    
-    public function actionGetCodeApple($data, &$success){
+
+    public function actionGetCodeApple($data, &$success)
+    {
         $idMax = $data['idMax'];
         $success = 'Code pas encore reçu';
-        
+
         $result = $this->db->executeS("SELECT *
-FROM ".MAIN_DB_PREFIX."bimpcore_note a
+FROM " . MAIN_DB_PREFIX . "bimpcore_note a
 WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 'BIMP_Task' AND a.id_obj = '25350' ORDER by id DESC");
-        if(isset($result[0])){
+        if (isset($result[0])) {
             $ln = $result[0];
             $success_callback = "setTimeout(function(){checkCode();}, 2000);";
-            if($idMax == 0){
-                $success_callback .= 'idMaxMesg = '.$ln->id.';';
-            }
-            elseif($idMax == $ln->id){
+            if ($idMax == 0) {
+                $success_callback .= 'idMaxMesg = ' . $ln->id . ';';
+            } elseif ($idMax == $ln->id) {
                 //On fait rien pas recu
-            }
-            else{
+            } else {
                 $code = $ln->content;
                 $tabCode = explode('votre identifiant Apple est :', $code);
-                if(isset($tabCode[1]))
+                if (isset($tabCode[1]))
                     $code = $tabCode[1];
                 $tabCode = explode('. Ne le', $code);
-                if(isset($tabCode[1]))
+                if (isset($tabCode[1]))
                     $code = $tabCode[0];
                 $code = str_replace(" ", "", $code);
-                $success_callback = "alert('". urlencode($code)."');";
+                $success_callback = "alert('" . urlencode($code) . "');";
             }
-            
         }
-        
+
         return array(
-            'errors'   => array(),
-            'warnings' => array(),
+            'errors'           => array(),
+            'warnings'         => array(),
             'success_callback' => $success_callback
         );
     }

@@ -33,7 +33,6 @@ class Bimp_Log extends BimpObject
         'include_once(',
         'filesize()',
         'getimagesize(',
-        'Declaration of BR_Reservation::setNewStatus('
     );
 
     // Droits user: 

@@ -30,7 +30,7 @@ if (!count($errors)) {
 
 // Passer à transféré: 
 
-$errors = $reservation->setNewStatus(301, $qty); // $qty : quantités auxquelles attribuer le nouveau statut. Faculatif, seulement pour les produits non sérialisés
+$errors = $reservation->setNewStatus(301, array('qty' => $qty)); // $qty : quantités auxquelles attribuer le nouveau statut. Faculatif, seulement pour les produits non sérialisés
 
 if (!count($errors)) {
     $reservation->update();
@@ -38,12 +38,11 @@ if (!count($errors)) {
 
 
 // Annuler: idem que le statut transferé mais avec le code 303
-
 // Lister des résas avec un id_transfert: 
 
 $list = $reservation->getList(array(
     'id_transfert' => 123, // ID du transfert
-    'type' => 2
-), null, null, 'id', 'asc', 'array', array(
+    'type'         => 2
+        ), null, null, 'id', 'asc', 'array', array(
     'id' // Mettre ici la liste des champs à retourner. 
-));
+        ));

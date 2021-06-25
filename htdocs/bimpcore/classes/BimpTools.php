@@ -330,7 +330,7 @@ class BimpTools
     public static function getDateForDolDate($date)
     {
         if (is_null($date) || !$date) {
-            return 0;
+            return '';
         }
         
         $DT = new DateTime($date);

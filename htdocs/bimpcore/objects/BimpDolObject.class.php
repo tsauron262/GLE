@@ -448,7 +448,7 @@ class BimpDolObject extends BimpObject
 
             if ($display_generate) {
                 $models = $this->getModelsPdfArray();
-                if (count($models)) {
+                if (is_array($models) && count($models)) {
                     $html .= '<div class="' . static::$dol_module . 'PdfGenerateContainer" style="' . ($file_url ? 'margin-top: 15px; display: none;' : '') . '">';
                     $html .= BimpInput::renderInput('select', static::$dol_module . '_model_pdf', $this->getModelPdf(), array(
                                 'options' => $models

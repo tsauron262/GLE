@@ -825,7 +825,7 @@ class Bimp_Societe extends BimpDolObject
         return $return;
     }
 
-    public function getBimpObjectsLinked()
+    public function getBimpObjectsLinked($not_for = '')
     {
 
 //        echo '<pre>';

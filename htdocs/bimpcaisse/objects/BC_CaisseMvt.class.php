@@ -32,6 +32,7 @@ class BC_CaisseMvt extends BimpObject
 
     public function create(&$warnings = array(), $force_create = false)
     {
+        $errors = array();
         $msg = 'Echec de la mise à jour du fond de caisse';
         $caisse = $this->getChildObject('caisse');
 

@@ -40,12 +40,12 @@ class BS_SavPropal extends Bimp_Propal
         return $result;
     }
 
-    public function getUrl()
+    public function getUrl($forced_context = '')
     {
         if ($this->isLoaded()) {
             $sav = $this->getSav();
             if (BimpObject::objectLoaded($sav)) {
-                return $sav->getUrl() . '&navtab-maintabs=devis';
+                return $sav->getUrl($forced_context) . '&navtab-maintabs=devis';
             }
 
             return DOL_URL_ROOT . '/bimpcommercial/index.php?fc=propal&id=' . $this->id;

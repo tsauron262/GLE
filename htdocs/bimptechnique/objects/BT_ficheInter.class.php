@@ -245,7 +245,7 @@ class BT_ficheInter extends BimpDolObject {
 
             $coup_technicien = BimpCore::getConf("bimptechnique_coup_horaire_technicien");
             
-            if(count($commandes) > 0) {
+            if(is_array($commandes) && count($commandes) > 0) {
                 foreach($commandes as $id_commande) {
                     $commande->fetch($id_commande);
                     $first_loop = true;
@@ -310,7 +310,7 @@ class BT_ficheInter extends BimpDolObject {
             }
 
             if($display) {
-                if(count(json_decode($this->getData('commandes')))) {
+                if(is_array($commandes) && count($commandes) > 0) {
                     $html = "<strong>"
                         . "Commande: <strong class='$class' >" . BimpRender::renderIcon($icone) . " " . price($marge) . "€</strong><br />"
                         . "</strong>";
@@ -321,7 +321,7 @@ class BT_ficheInter extends BimpDolObject {
                     $html .= $contrat->renderThisStatsFi(true, false);
                 }
                 
-                if(!count(json_decode($this->getdata('commandes'))) && !$this->getData('fk_contrat')) {
+                if(!(is_array($commandes) && count($commandes) > 0) && !$this->getData('fk_contrat')) {
                     if(count($children) > 0) {
                         $duree = 0;
                         foreach($children as $id_child) {
@@ -1342,25 +1342,27 @@ class BT_ficheInter extends BimpDolObject {
 //        $codes = json_decode(BimpCore::getConf("bimptechnique_ref_deplacement"));
         $commandes = json_decode($this->getData('commandes'));
         $array = [];
-        foreach($commandes as $id_commande) {
-            $commande = new Commande($this->db->db);
-            $commande->fetch($id_commande);
-            $bimpCommande = BimpCache::getBimpObjectInstance("bimpcommercial", "Bimp_Commande", $id_commande);
-            $children = $commande->lines;
-            foreach($children as $child) {
-                $fk_product = ($child->fk_product) ? ($child->fk_product) : 0;
-                if($fk_product > 0) {
-                    $produit = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Product", $fk_product);
-                    if($produit->isDep()){
-//                    if(in_array($produit->getData('ref'), $codes)) {
-                        $thisChildrenFilterArray = $this->getChildrenList("inters", ['id_line_commande' => $child->id]);
-                        if(!count($thisChildrenFilterArray)) {
-                            $array[$id_commande] = $commande->ref . " - " . $bimpCommande->getData('libelle');
+        if(is_array($commandes)){
+            foreach($commandes as $id_commande) {
+                $commande = new Commande($this->db->db);
+                $commande->fetch($id_commande);
+                $bimpCommande = BimpCache::getBimpObjectInstance("bimpcommercial", "Bimp_Commande", $id_commande);
+                $children = $commande->lines;
+                foreach($children as $child) {
+                    $fk_product = ($child->fk_product) ? ($child->fk_product) : 0;
+                    if($fk_product > 0) {
+                        $produit = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Product", $fk_product);
+                        if($produit->isDep()){
+    //                    if(in_array($produit->getData('ref'), $codes)) {
+                            $thisChildrenFilterArray = $this->getChildrenList("inters", ['id_line_commande' => $child->id]);
+                            if(!count($thisChildrenFilterArray)) {
+                                $array[$id_commande] = $commande->ref . " - " . $bimpCommande->getData('libelle');
+                            }
                         }
                     }
                 }
+
             }
-            
         }
         return $array;
     }
@@ -1477,7 +1479,10 @@ class BT_ficheInter extends BimpDolObject {
                 if($value['inter_' . $numeroInter . '_type'] == 5 && (!$this->getData('fk_contrat') || $this->getData('fk_contrat')  == 0)) {
                     $errors[] = "Vous ne pouvez pas utiliser un déplacement sous contrat sans contrat lié. Merci";
                 }
-                if($value['inter_' . $numeroInter . '_type'] == 6 && !count(json_decode($this->getData('commandes')))) {
+                $commandes = json_decode($this->getData('commandes'));
+                if(!is_array($commandes))
+                    $commandes = array();
+                if($value['inter_' . $numeroInter . '_type'] == 6 && !count($commandes)) {
                     $errors[] = "Ce type de service est réservé aux commandes";
                 }
                 
@@ -1838,7 +1843,7 @@ class BT_ficheInter extends BimpDolObject {
         
         $allCommandes = json_decode($this->getData('commandes'));
         $commande = $this->getInstance('bimpcommercial', 'Bimp_Commande');
-        if(count($allCommandes) > 0) {
+        if(is_array($allCommandes) && count($allCommandes) > 0) {
             foreach($allCommandes as $id) {
                 $commande->fetch($id);
                 $card = new BC_Card($commande);

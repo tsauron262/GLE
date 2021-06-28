@@ -20,6 +20,7 @@ class BimpMailCore
     public $send_context = 'standard';
     public $title = '';
     public $subtitle = '';
+    public $files = array();
 
     function __construct($subject, $to, $from, $msg, $reply_to = '', $addr_cc = '', $addr_bcc = '', $deliveryreceipt = 0, $errors_to = '')
     {
@@ -40,6 +41,14 @@ class BimpMailCore
             }
 
             $from .= '>';
+
+            if (!$reply_to) {
+                if (BimpCore::isContextPublic()) {
+                    $reply_to = BimpCore::getConf('public_default_reply_to_email', '');
+                } else {
+                    $reply_to = $user->email;
+                }
+            }
         }
 
         if (defined('MOD_DEV_SYN_MAIL')) {
@@ -54,14 +63,6 @@ class BimpMailCore
             $addr_bcc = '';
             $reply_to = MOD_DEV_SYN_MAIL;
             $to = MOD_DEV_SYN_MAIL;
-        }
-
-        if (!$reply_to) {
-            if (BimpCore::isContextPublic()) {
-                $reply_to = BimpCore::getConf('public_default_reply_to_email', '');
-            } else {
-                $reply_to = $user->email;
-            }
         }
 
         $this->subject = $subject;

@@ -31,8 +31,8 @@ class BimpTest extends BimpObject{
         $timeFinFile = $this->microtime_float();
         $timeFile = $timeFinFile - $timeFinPhp;
         
-        
         global $db;
+        $tabTxt[] = $db->db->host_info;
         $db->query("SELECT * FROM llx_facture LIMIT 0,100000");
         $sql = $db->query("SELECT * FROM `llx_bimpcore_conf` WHERE `name` LIKE 'nb_req_%';");
         while($ln = $db->fetch_object($sql))

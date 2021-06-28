@@ -153,7 +153,7 @@ class BS_SavPropalLine extends Bimp_PropalLine
 //    }
     // overrides: 
 
-    public function attributeEquipment($id_equipment, $id_equipment_line = 0, $recal_line_pa = true)
+    public function attributeEquipment($id_equipment, $id_equipment_line = 0, $recal_line_pa = true, $check_equipment = true)
     {
         $current_id_equipment = 0;
         $equipment_line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLineEquipment');
@@ -162,7 +162,7 @@ class BS_SavPropalLine extends Bimp_PropalLine
             $current_id_equipment = (int) $equipment_line->getSavedData('id_equipment', $id_equipment_line);
         }
 
-        $errors = parent::attributeEquipment($id_equipment, $id_equipment_line);
+        $errors = parent::attributeEquipment($id_equipment, $id_equipment_line, $recal_line_pa, $check_equipment);
         if (count($errors)) {
             return $errors;
         }

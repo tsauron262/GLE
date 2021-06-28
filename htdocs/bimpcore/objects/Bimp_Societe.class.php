@@ -825,7 +825,7 @@ class Bimp_Societe extends BimpDolObject
         return $return;
     }
 
-    public function getBimpObjectsLinked()
+    public function getBimpObjectsLinked($not_for = '')
     {
 
 //        echo '<pre>';
@@ -1829,7 +1829,7 @@ class Bimp_Societe extends BimpDolObject
                         foreach ($branches as $branche) {
                             if (($siret && $branche->companynumber == $siret) || (!$siret && stripos($branche->type, "Siège") !== false)) {
                                 $adress = $branche->full_address->address;
-                                $nom = $branche->full_address->name;
+                                //$nom = $branche->full_address->name;
                                 $codeP = $branche->postcode;
                                 $ville = $branche->municipality;
                                 if (!$siret) {
@@ -1855,7 +1855,7 @@ class Bimp_Societe extends BimpDolObject
                                 $note .= "
 " . $comment;
                     }
-
+                    
                     $data = array(
                         'siren'             => $siren,
                         'siret'             => $siret,

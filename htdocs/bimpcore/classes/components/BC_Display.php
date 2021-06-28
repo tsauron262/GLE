@@ -949,7 +949,7 @@ class BC_Display extends BimpComponent
                     break;
 
                 case 'datetime':
-                    if ($this->value !== '0000-00-00 00:00:00') {
+                    if ($this->value && $this->value !== '0000-00-00 00:00:00') {
                         $format = $this->getParam('format', 'd / m / Y H:i:s');
                         $date = new DateTime($this->value);
                         if ($this->no_html) {

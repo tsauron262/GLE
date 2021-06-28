@@ -440,7 +440,7 @@ class BimpPublicController extends BimpController
             } else {
                 $warnings = array();
                 $errors = $userClient->reinitPassword($warnings);
-                if (count($$warnings)) {
+                if (count($warnings)) {
                     $errors = BimpTools::merge_array($errors, $warnings);
                 }
 

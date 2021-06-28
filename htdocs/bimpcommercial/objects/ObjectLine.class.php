@@ -3461,7 +3461,7 @@ class ObjectLine extends BimpObject
             if (count($remises)) {
                 foreach ($remises as $remise) {
                     $del_warnings = array();
-                    $remise->delete($del_warnings, true);
+                    $errors = BimpTools::merge_array($errors, $remise->delete($del_warnings, true));
                 }
                 unset($this->remises);
                 $this->remises = null;
@@ -3469,7 +3469,7 @@ class ObjectLine extends BimpObject
             if ((float) $this->remise || (float) $this->getData('remise')) {
                 $this->set('remise', 0);
                 $this->remise = 0;
-                $this->update();
+                $errors = BimpTools::merge_array($errors, $this->update());
             }
         } else {
 //            $remise_infos = $this->getRemiseTotalInfos();
@@ -3504,6 +3504,7 @@ class ObjectLine extends BimpObject
 //                $this->calcRemise();
 //            }
         }
+        return $errors;
     }
 
     public function setRemiseGlobalePart(RemiseGlobale $rg, $rate)
@@ -5045,6 +5046,7 @@ class ObjectLine extends BimpObject
 
     public function create(&$warnings = array(), $force_create = false)
     {
+        $errors = array();
         if (!static::$parent_comm_type) {
             $errors[] = 'Impossible de créer une ligne depuis une instance de la classe de base "ObjectLine"';
             return $errors;
@@ -5054,7 +5056,6 @@ class ObjectLine extends BimpObject
             return array('Création de la ligne impossible');
         }
 
-        $errors = array();
 
         if ((int) $this->getData('id_line')) {
             $id_bimp_line = (int) $this->db->getValue($this->getTable(), 'id', 'id_line = ' . (int) $this->getData('id_line'));
@@ -5163,6 +5164,7 @@ class ObjectLine extends BimpObject
 
     public function update(&$warnings = array(), $force_update = false)
     {
+        $errors = array();
         if (!static::$parent_comm_type) {
             $errors[] = 'Impossible de mettre à jour une ligne depuis une instance de la classe de base "ObjectLine"';
             return $errors;
@@ -5272,7 +5274,7 @@ class ObjectLine extends BimpObject
             }
         }
 
-        $errors = parent::update($warnings, $force_update);
+        $errors = BimpTools::merge_array($errors, parent::update($warnings, $force_update));
 
         if (!$isParentEditable) {
             if ((int) $this->getData('id_line')) {
@@ -5351,6 +5353,7 @@ class ObjectLine extends BimpObject
 
     public function delete(&$warnings = array(), $force_delete = false)
     {
+        $errors = array();
         if (!static::$parent_comm_type) {
             $errors[] = 'Impossible de supprimer une ligne depuis une instance de la classe de base "ObjectLine"';
             return $errors;

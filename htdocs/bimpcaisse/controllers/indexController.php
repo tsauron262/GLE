@@ -209,7 +209,7 @@ class indexController extends BimpController
 
             BimpObject::loadClass('bimpcaisse', 'BC_CaisseSession');
 
-            $id_session = (int) BC_CaisseSession::getUserLastClosedSession($user - id);
+            $id_session = (int) BC_CaisseSession::getUserLastClosedSession($user->id);
 
             if ($id_session) {
                 $recap_url = DOL_URL_ROOT . '/bimpcore/view.php?module=bimpcaisse&object_name=BC_CaisseSession&id_object=' . $id_session . '&view=recap';

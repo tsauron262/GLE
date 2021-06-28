@@ -102,7 +102,7 @@ class Bimp_CommissionApporteur extends BimpObject{
         );
     }
     
-    public function updateField($field, $value) {
+    public function updateField($field, $value, $id_object = null, $force_update = true, $do_not_validate = false) {
         
         switch ($field) {
             case 'status':
@@ -114,7 +114,7 @@ class Bimp_CommissionApporteur extends BimpObject{
                 break;
         }
         
-        return parent::updateField($field, $value);
+        return parent::updateField($field, $value, $id_object, $force_update, $do_not_validate);
     }
     
     

@@ -148,7 +148,7 @@ class BContract_avenantdet extends BContract_avenant {
     }
     
     public function getCurrentQtyDet() {
-        return count(json_decode($this->getData('serials_in')));
+        return count(BimpTools::json_decode_array($this->getData('serials_in')));
     }
     
     public function getTotalAdded() {
@@ -162,8 +162,8 @@ class BContract_avenantdet extends BContract_avenant {
     public function getQtyAdded() {
         if($this->getData('id_line_contrat')) {
             $line = $this->getInstance('bimpcontract', 'BContract_contratLine', $this->getData('id_line_contrat'));
-            $init_serials_array = json_decode($line->getData('serials'));
-            $current_serials_array = json_decode($this->getData('serials_in'));
+            $init_serials_array = BimpTools::json_decode_array($line->getData('serials'));
+            $current_serials_array = BimpTools::json_decode_array($this->getData('serials_in'));
             return  count(array_diff($current_serials_array, $init_serials_array));
         } else {
             return count(json_decode($this->getData('serials_in')));
@@ -171,7 +171,7 @@ class BContract_avenantdet extends BContract_avenant {
     }
     
     public function getQtyDeleted() {
-        return count(json_decode($this->getData('serials_out')));
+        return count(BimpTools::json_decode_array($this->getData('serials_out')));
     }
     
     public function getExtraBtn() {

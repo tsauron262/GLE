@@ -11,10 +11,10 @@ class TransferLine extends BimpObject
     {
         global $user;
         $transfer_status = $this->getParentStatus();
-        if ($field_name == 'quantity_received' and $transfer_status != Transfer::STATUS_RECEPTING and ! $user->rights->bimptransfer->admin)
+        if ($field_name == 'quantity_received' and $transfer_status != Transfer::STATUS_RECEPTING and!$user->rights->bimptransfer->admin)
             return false;
 
-        if ($field_name == 'quantity_sent' and $transfer_status != Transfer::STATUS_SENDING and ! $user->rights->bimptransfer->admin)
+        if ($field_name == 'quantity_sent' and $transfer_status != Transfer::STATUS_SENDING and!$user->rights->bimptransfer->admin)
             return false;
 
         return parent::canEditField($field_name);
@@ -79,7 +79,7 @@ class TransferLine extends BimpObject
                 $reservation->updateField('qty', 0);
             $i++;
             if ($new_status != $reservation->getInitData('status')) {
-                $errors = BimpTools::merge_array($errors, $reservation->setNewStatus($new_status, $nb_reservation)); // $qty : faculatif, seulement pour les produits non sérialisés
+                $errors = BimpTools::merge_array($errors, $reservation->setNewStatus($new_status, array('qty' => $nb_reservation))); // $qty : faculatif, seulement pour les produits non sérialisés
                 $errors = BimpTools::merge_array($errors, $reservation->update());
             }
             if (sizeof($errors) > 0)
@@ -92,7 +92,7 @@ class TransferLine extends BimpObject
         $errors = array();
         $is_product = $this->isProduct($input, $id_product);
         $is_equipment = $this->isEquipment($input, $id_equipment, $id_product);
-        if (!$is_equipment and ! $is_product)
+        if (!$is_equipment and!$is_product)
             $errors[] = "Produit inconnu";
         else if (/* rajout de ici */!$is_equipment and /* a la */$this->isSerialisable($id_product))
             $errors[] = "Veuillez scanner le numéro de série au lieu de la référence.";

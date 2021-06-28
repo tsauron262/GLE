@@ -432,7 +432,6 @@ class BR_Reservation extends BimpObject
                             )
                         );
 
-
                     case 2: // A réserver: 
                         // Appro interne en cours: 
                         if ($status !== 4) {
@@ -1102,7 +1101,7 @@ class BR_Reservation extends BimpObject
                         ),
                         'id_product'         => $id_product
                     ))) {
-                $errors = $reservation->setNewStatus(200, null, $equipment->id);
+                $errors = $reservation->setNewStatus(200, array('id_equipment' => $equipment->id));
                 if (!count($errors)) {
                     $errors = $reservation->update();
                     return $reservation->id;
@@ -1115,9 +1114,12 @@ class BR_Reservation extends BimpObject
         return 0;
     }
 
-    public function setNewStatus($status, $qty = null, $id_equipment = null)
+    public function setNewStatus($new_status, $extra_data = array(), &$warnings = array())
     {
-        $status = (int) $status;
+        $qty = BimpTools::getArrayValueFromPath($extra_data, 'qty', null);
+        $id_equipment = BimpTools::getArrayValueFromPath($extra_data, 'id_equipment', null);
+
+        $status = (int) $new_status;
         if (!$this->isLoaded()) {
             return array('ID de la réservation absent');
         }
@@ -1451,13 +1453,13 @@ class BR_Reservation extends BimpObject
                             if (BimpObject::objectLoaded($eq)) {
                                 // New place: 
                                 BimpObject::createBimpObject('bimpequipment', 'BE_Place', array(
-                                            'id_equipment' => $eq->id,
-                                            'type'         => BE_Place::BE_PLACE_ENTREPOT,
-                                            'date'         => date('Y-m-d H:i:s'),
-                                            'id_entrepot'  => $id_new_entrepot,
-                                            'infos'        => $mvt_label,
-                                            'code_mvt'     => $code_mvt
-                                                ), true, $errors);
+                                    'id_equipment' => $eq->id,
+                                    'type'         => BE_Place::BE_PLACE_ENTREPOT,
+                                    'date'         => date('Y-m-d H:i:s'),
+                                    'id_entrepot'  => $id_new_entrepot,
+                                    'infos'        => $mvt_label,
+                                    'code_mvt'     => $code_mvt
+                                        ), true, $errors);
                             } else {
                                 $errors[] = 'Equipement absent';
                             }
@@ -1484,7 +1486,7 @@ class BR_Reservation extends BimpObject
 
     // Actions: 
 
-    public function actionSetNewStatus($data, &$success)
+    public function actionSetNewStatus($data = array(), &$success = '')
     {
         $errors = array();
         $warnings = array();
@@ -1498,7 +1500,7 @@ class BR_Reservation extends BimpObject
                     $errors[] = 'Aucun équipement sélectionné';
                 } else {
                     foreach ($data['equipments'] as $id_equipment) {
-                        $res_errors = $this->setNewStatus((int) $data['status'], 1, $id_equipment);
+                        $res_errors = $this->setNewStatus((int) $data['status'], array('qty' => 1, 'id_equipment' => $id_equipment));
                         if (count($res_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($res_errors, 'Equipement ' . $id_equipment);
                         }
@@ -1508,7 +1510,7 @@ class BR_Reservation extends BimpObject
                 $qty = isset($data['qty']) ? (int) $data['qty'] : null;
                 $id_equipment = isset($data['id_equipment']) ? (int) $data['id_equipment'] : null;
 
-                $errors = $this->setNewStatus((int) $data['status'], $qty, $id_equipment);
+                $errors = $this->setNewStatus((int) $data['status'], array('qty' => $qty, 'id_equipment' => $id_equipment), $warnings);
             }
         }
 
@@ -1827,7 +1829,7 @@ class BR_Reservation extends BimpObject
     public function validatePost()
     {
         if ((int) BimpTools::getValue('new_status', 0)) {
-            return $this->setNewStatus(BimpTools::getValue('status'), BimpTools::getValue('qty'), BimpTools::getValue('id_equipment'));
+            return $this->setNewStatus(BimpTools::getValue('status'), array('qty' => BimpTools::getValue('qty'), 'id_equipment' => BimpTools::getValue('id_equipment')));
         }
 
         return parent::validatePost();

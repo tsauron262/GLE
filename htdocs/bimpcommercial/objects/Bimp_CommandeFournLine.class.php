@@ -723,7 +723,6 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         if ($link) {
                             $html .= ($html ? '<br/><br/>' : '') . $link;
 
-
                             $reservations = $line->getReservations();
                             $nb = 0;
                             foreach ($reservations as $resa) {
@@ -2041,7 +2040,9 @@ class Bimp_CommandeFournLine extends FournObjectLine
                                     'status'                  => $status
                                         ), true);
                         if (BimpObject::objectLoaded($reservation)) {
-                            $res_errors = $reservation->setNewStatus(100, (int) $reception_data['qty']);
+                            $res_errors = $reservation->setNewStatus(100, array(
+                                'qty' => (int) $reception_data['qty'],
+                            ));
 
                             if (count($errors)) {
                                 $errors[] = BimpTools::getMsgFromArray($res_errors, 'Erreurs lors de la mise à jour de la réservation correspondante');
@@ -2087,11 +2088,12 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
     public function unsetReception($id_reception)
     {
+        $errors = array();
         $receptions = $this->getData('receptions');
 
         if (isset($receptions[(int) $id_reception])) {
             unset($receptions[(int) $id_reception]);
-            $errors = $this->updateField('receptions', $receptions);
+            $errors = BimpTools::merge_array($errors, $this->updateField('receptions', $receptions));
         }
 
         $this->checkQties();

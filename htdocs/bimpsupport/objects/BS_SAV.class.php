@@ -1035,7 +1035,8 @@ class BS_SAV extends BimpObject
         if ($this->isLoaded()) {
             $base_url = BimpCore::getConf('interface_client_base_url', '');
             if ($base_url) {
-                return $base_url . '?tab=sav&content=card&id_sav=' . $this->id; exit;
+                return $base_url . '?tab=sav&content=card&id_sav=' . $this->id;
+                exit;
             }
         }
 
@@ -1683,10 +1684,10 @@ class BS_SAV extends BimpObject
         $html .= '<strong>AppleId</strong>: ' . $gsx->appleId . '<br/>';
         if ($gsx->appleId === GSX_v2::$default_ids['apple_id']) {
             $html .= '<strong>Mot de passe</strong>: ' . GSX_v2::$default_ids['apple_pword'];
-            $html.= '<script>'
+            $html .= '<script>'
                     . 'var idMaxMesg = 0;'
                     . 'function checkCode(){'
-                    .   ' setObjectAction(null, {"module":"bimpsupport", "object_name":"BS_SAV"}, "getCodeApple", {"idMax":idMaxMesg});'
+                    . ' setObjectAction(null, {"module":"bimpsupport", "object_name":"BS_SAV"}, "getCodeApple", {"idMax":idMaxMesg});'
                     . '}'
                     . 'checkCode();'
                     . '</script>';
@@ -1697,7 +1698,6 @@ class BS_SAV extends BimpObject
         $html .= '</p>';
 
         $html .= '</div>';
-        
 
         return $html;
     }
@@ -2791,8 +2791,6 @@ class BS_SAV extends BimpObject
             if ($url) {
                 return $url;
             }
-        } else {
-            
         }
 //        return DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?serial=" . $this->getChildObject("equipment")->getData("serial") . "&id_sav=" . $this->id . "&user_name=" . substr($this->getChildObject("client")->dol_object->name, 0, 3);
         return "https://www.bimp.fr/nos-services/?serial=" . urlencode($this->getChildObject("equipment")->getData("serial")) . "&id_sav=" . $this->id . "&user_name=" . urlencode(str_replace(" ", "", substr($this->getChildObject("client")->dol_object->name, 0, 3))) . "#suivi-sav";
@@ -2880,6 +2878,9 @@ class BS_SAV extends BimpObject
         $nomCentre = ($centre['label'] ? $centre['label'] : 'N/C');
         $tel = ($centre['tel'] ? $centre['tel'] : 'N/C');
         $fromMail = "SAV BIMP<" . ($centre['mail'] ? $centre['mail'] : 'no-replay@bimp.fr') . ">";
+
+        $contact = $this->getChildObject('contact');
+        $contact_pref = (int) $this->getData('contact_pref');
 
         switch ($msg_type) {
             case 'Facture':
@@ -3017,24 +3018,39 @@ class BS_SAV extends BimpObject
             case 'localise':
                 $eq = $this->getChildObject("equipment");
                 if ($eq->getData("status_gsx") != 3)
-                    $errors[] = "L'apraeil " . $eq->getLink() . ' ne semble pas localisé';
+                    $errors[] = "L'appareil " . $eq->getLink() . ' ne semble pas localisé';
                 else {
-                    $subject = "Réparation " . $this->getData('ref');
-                    $mail_msg = "Bonjour, l'appareil concerné par votre SAV " . $this->getData('ref') . " dont le numéro de série est " . $eq->getData('serial') . " a la fonction localisée d’activée.\nNous ne pourrons pas procéder à la réparation tant cette option ne sera pas désactivée.\n";
-                    $mail_msg .= "\n\n<a href='https://support.apple.com/fr-fr/guide/icloud/mmdc23b125f6/icloud'>Cliquez sur ce lien pour savoir comment désactiver l’option de géolocalisation</a>";
-                    $mail_msg .= "\n\nMerci de votre compréhension.";
-                    //$sms = "Bonjour, nous venons de recevoir la pièce ou le produit pour votre réparation, nous vous contacterons quand votre matériel sera prêt.\nL'Equipe BIMP.";
+                    $contact_pref = 1; // On force l'envoi par e-mail
+                    
+                    $subject = " Important, à propos de la réparation de votre appareil";
+
+                    $mail_msg = 'Bonjour,<br/><br/>Votre appareil déposé sous le dossier <b>' . $this->getRef() . '</b>, ';
+                    $mail_msg .= 'n° de série <b>' . $eq->getData('serial').'</b>';
+                    $mail_msg .= ' est toujours associé à votre compte Apple iCloud.<br/><br/>';
+
+                    $mail_msg .= 'Afin que nous puissions procéder à la réparation de votre matériel, <span style="text-decoration: underline">il est nécessaire que celui-ci soit supprimé de votre compte iCloud.</span><br/><br/>';
+                    $mail_msg .= 'Pour ce faire, vous pouvez suivre la procédure suivante depuis un navigateur internet : <br/><br/>';
+
+                    $mail_msg .= '<ul>';
+                    $mail_msg .= '<li>Connectez-vous au site <a href="https://www.icloud.com">www.icloud.com</a></li>';
+                    $mail_msg .= '<li>Identifiez-vous</li>';
+                    $mail_msg .= '<li>Cliquez sur « Localiser »</li>';
+                    $mail_msg .= '<li>Cliquez sur « Tous mes appareils » puis sur l’appareil concerné</li>';
+                    $mail_msg .= '<li>Enfin cliquez sur « Supprimer de mon compte »</li>';
+                    $mail_msg .= '</ul><br/>';
+
+                    $mail_msg .= 'Vous pouvez obtenir plus d’informations sur cette procédure en suivant <a href="https://support.apple.com/fr-fr/HT205064#remove">ce lien</a><br/><br/>';
+
+                    $mail_msg .= 'Si vous éprouvez des difficultés à effectuer cette opération, vous pouvez obtenir une assistance par téléphone en appelant ';
+                    $mail_msg .= 'AppleCare <br/>au <b>0805 540 003</b> (tarif local)<br/><br/>';
+
+                    $mail_msg .= '<p style="font-size: 15px; font-weight: bold; text-decoration: underline">';
+                    $mail_msg .= '<span style="color: red">!</span> IMPORTANT: Dès que votre appareil est supprimé de votre compte Apple iCloud, merci de nous tenir informés par retour de cet e-mail afin que nous puissions poursuivre la réparation de votre matériel';
+                    $mail_msg .= '</p><br/>';
+
+                    $mail_msg .= 'Merci de votre compréhension. <br/><br/>';
                 }
                 break;
-        }
-
-        $contact = $this->getChildObject('contact');
-
-        $contact_pref = (int) $this->getData('contact_pref');
-
-        //Perpignan demenagement
-        if ($nomCentre == "Perpignan") {
-            $mail_msg .= "<br/><br/>Attention le SAV est exceptionnellement fermé les matins  pour cause de travaux jusqu’au 30 septembre.<br/>";
         }
 
         if ($mail_msg) {
@@ -3074,7 +3090,7 @@ class BS_SAV extends BimpObject
                 $mail_msg .= "\n" . "Technicien en charge de la réparation : " . $tech;
             }
 
-            $mail_msg .= "\n" . $textSuivie . "\n Cordialement.\n\nL'équipe BIMP\n\n" . $signature;
+            $mail_msg .= "\n" . $textSuivie . "\n\n Cordialement.\n\nL'équipe BIMP\n\n" . $signature;
 
             $toMail = BimpTools::cleanEmailsStr($toMail);
 
@@ -3082,7 +3098,7 @@ class BS_SAV extends BimpObject
 //                if (!mailSyn2($subject, $toMail, $fromMail, $mail_msg, $tabFile, $tabFile2, $tabFile3)) {
 //                    $errors[] = 'Echec envoi du mail';
 //                }
-                $bimpMail = new BimpMail($subject, $toMail, '', $mail_msg);
+                $bimpMail = new BimpMail($subject, $toMail, $fromMail, $mail_msg);
                 $bimpMail->addFiles($files);
                 $mail_errors = array();
                 $bimpMail->send($mail_errors);
@@ -3093,7 +3109,7 @@ class BS_SAV extends BimpObject
             } else {
                 $errors[] = "Pas d'email correct " . $toMail;
             }
-        } else {
+        } elseif (!count($errors)) {
             $errors[] = 'pas de message';
         }
 
@@ -3320,7 +3336,7 @@ class BS_SAV extends BimpObject
                     if ($reservation->isLoaded()) {
                         $qty = null;
                         $reservation->set('status', $status);
-                        $res_errors = $reservation->setNewStatus($status, $qty, $reservation->getData('id_equipment'));
+                        $res_errors = $reservation->setNewStatus($status, array('qty' => $qty, 'id_equipment' => $reservation->getData('id_equipment')));
                         if (!count($res_errors)) {
                             $w = array();
                             $res_errors = $reservation->update($w, true);
@@ -4610,40 +4626,38 @@ class BS_SAV extends BimpObject
             'warnings' => $warnings
         );
     }
-    
-    public function actionGetCodeApple($data, &$success){
+
+    public function actionGetCodeApple($data, &$success)
+    {
         $idMax = $data['idMax'];
         $success = 'Code pas encore reçu';
-        
+
         $result = $this->db->executeS("SELECT *
-FROM ".MAIN_DB_PREFIX."bimpcore_note a
+FROM " . MAIN_DB_PREFIX . "bimpcore_note a
 WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 'BIMP_Task' AND a.id_obj = '25350' ORDER by id DESC");
-        if(isset($result[0])){
+        if (isset($result[0])) {
             $ln = $result[0];
             $success_callback = "setTimeout(function(){checkCode();}, 2000);";
-            if($idMax == 0){
-                $success_callback .= 'idMaxMesg = '.$ln->id.';';
-            }
-            elseif($idMax == $ln->id){
+            if ($idMax == 0) {
+                $success_callback .= 'idMaxMesg = ' . $ln->id . ';';
+            } elseif ($idMax == $ln->id) {
                 //On fait rien pas recu
-            }
-            else{
+            } else {
                 $code = $ln->content;
                 $tabCode = explode('votre identifiant Apple est :', $code);
-                if(isset($tabCode[1]))
+                if (isset($tabCode[1]))
                     $code = $tabCode[1];
                 $tabCode = explode('. Ne le', $code);
-                if(isset($tabCode[1]))
+                if (isset($tabCode[1]))
                     $code = $tabCode[0];
                 $code = str_replace(" ", "", $code);
-                $success_callback = "alert('". urlencode($code)."');";
+                $success_callback = "alert('" . urlencode($code) . "');";
             }
-            
         }
-        
+
         return array(
-            'errors'   => array(),
-            'warnings' => array(),
+            'errors'           => array(),
+            'warnings'         => array(),
             'success_callback' => $success_callback
         );
     }

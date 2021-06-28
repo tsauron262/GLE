@@ -153,7 +153,7 @@ class BimpController
                         $txt .= '<pre>' . print_r($_POST, 1) . '</pre>';
                     }
 
-                    mailSyn2('ERREUR FATALE', "dev@bimp.fr", null, $txt);
+                    mailSyn2('ERREUR FATALE - ' . str_replace('/', '', DOL_URL_ROOT), "dev@bimp.fr", null, $txt);
                 }
 
                 if (strpos($msg, 'Allowed memory size') !== false) {
@@ -356,7 +356,7 @@ class BimpController
 
             if (!(int) $this->config->get('content_only', 0, false, 'bool')) {
                 $this->displayHeader();
-                    }
+            }
             $display_footer = true;
         } else {
             $cssFiles = $this->getConf('css', array(), false, 'array');
@@ -690,8 +690,7 @@ class BimpController
             if ($nomTabs == '' || $nomTabs == "default") {
                 if (BimpTools::isSubmit('tab') && BimpTools::getValue('tab') != 'default')
                     return 'ne devrais jamais etre visible';
-            }
-            elseif (BimpTools::getValue('tab') != $nomTabs)
+            } elseif (BimpTools::getValue('tab') != $nomTabs)
                 return 'ne devrais jamais etre visible2';
         }
 
@@ -879,8 +878,7 @@ class BimpController
                 'html'       => $returnHtml,
                 'request_id' => BimpTools::getValue('request_id', 0)
             );
-        }
-        else {
+        } else {
             session_write_close(); //Pour eviter les blockages navigateur
             usleep(930000 * 2); //un tous petit peu moins d'une seconde + temps d'execution = 1s
             return $this->ajaxProcessLoadFixeTabs($i);
@@ -2826,7 +2824,6 @@ class BimpController
         $errors = array();
 
         $notifs = BimpTools::getPostFieldValue('notificationActive');
-
 
         $notification = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
         $notifs_for_user = $notification->getNotificationForUser((int) $user->id, $notifs, $errors);

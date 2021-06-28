@@ -2791,8 +2791,6 @@ class BS_SAV extends BimpObject
             if ($url) {
                 return $url;
             }
-        } else {
-            
         }
 //        return DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?serial=" . $this->getChildObject("equipment")->getData("serial") . "&id_sav=" . $this->id . "&user_name=" . substr($this->getChildObject("client")->dol_object->name, 0, 3);
         return "https://www.bimp.fr/nos-services/?serial=" . urlencode($this->getChildObject("equipment")->getData("serial")) . "&id_sav=" . $this->id . "&user_name=" . urlencode(str_replace(" ", "", substr($this->getChildObject("client")->dol_object->name, 0, 3))) . "#suivi-sav";
@@ -3038,7 +3036,7 @@ class BS_SAV extends BimpObject
                     $mail_msg .= '<li>Identifiez-vous</li>';
                     $mail_msg .= '<li>Cliquez sur « Localiser »</li>';
                     $mail_msg .= '<li>Cliquez sur « Tous mes appareils » puis sur l’appareil concerné</li>';
-                    $mail_msg .= '<li>Enfin cliquez « Supprimer de mon compte »</li>';
+                    $mail_msg .= '<li>Enfin cliquez sur « Supprimer de mon compte »</li>';
                     $mail_msg .= '</ul><br/>';
 
                     $mail_msg .= 'Vous pouvez obtenir plus d’informations sur cette procédure en suivant <a href="https://support.apple.com/fr-fr/HT205064#remove">ce lien</a><br/><br/>';
@@ -3111,7 +3109,7 @@ class BS_SAV extends BimpObject
             } else {
                 $errors[] = "Pas d'email correct " . $toMail;
             }
-        } else {
+        } elseif (!count($errors)) {
             $errors[] = 'pas de message';
         }
 

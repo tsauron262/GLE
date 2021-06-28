@@ -106,7 +106,6 @@ lists:
                 edit: 1
             id_user_client:
         
-        
     client:
         extends: default
         cols:

@@ -1825,7 +1825,7 @@ class BimpObject extends BimpCache
             if (!$force_action && !$instance->canSetAction($action)) {
                 $result['errors'][] = 'Vous n\'avez pas la permission d\'effectuer cette action (' . $action . ')';
             } elseif (!$instance->isActionAllowed($action, $result['errors'])) {
-                $result['errors'] = BimpTools::merge_array($result['errors'], 'Action impossible');
+                $result['errors'][] = 'Action impossible';
             }
 
             if (!count($result['errors'])) {

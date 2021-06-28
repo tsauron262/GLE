@@ -2709,6 +2709,8 @@ class BimpTools
     public static function json_decode_array($json)
     {
         $result = json_decode($json);
+        if($result == '')
+            return array();
         if (!is_array($result))
             $result = array($result);
         return $result;

@@ -2028,19 +2028,21 @@ class Bimp_Product extends BimpObject
 
     public function renderValidationDuration()
     {
-        $date_ask_valid = new DateTime($this->getData('date_ask_valid'));
-        $date_valid = new DateTime($this->getData('date_valid'));
+        if($this->getData('date_ask_valid') && $this->getData('date_valid')){
+            $date_ask_valid = new DateTime($this->getData('date_ask_valid'));
+            $date_valid = new DateTime($this->getData('date_valid'));
 
-        $diff = $date_ask_valid->diff($date_valid);
+            $diff = $date_ask_valid->diff($date_valid);
 
-        $nb_jour = (int) $diff->format('%D');
-        $html = '<strong>';
-        if ($nb_jour > 1)
-            $html .= $diff->format('%D jours et %H:%I');
-        else
-            $html .= $diff->format('%D jours et %H:%I');
-        $html .= '</strong>';
-        return $html;
+            $nb_jour = (int) $diff->format('%D');
+            $html = '<strong>';
+            if ($nb_jour > 1)
+                $html .= $diff->format('%D jours et %H:%I');
+            else
+                $html .= $diff->format('%D jours et %H:%I');
+            $html .= '</strong>';
+            return $html;
+        }
     }
 
     public function renderMergeKeptProductInput()

@@ -3019,12 +3019,12 @@ class BS_SAV extends BimpObject
 
             case 'localise':
                 $eq = $this->getChildObject("equipment");
-//                if ($eq->getData("status_gsx") != 3)
-//                    $errors[] = "L'appareil " . $eq->getLink() . ' ne semble pas localisé';
-//                else {
+                if ($eq->getData("status_gsx") != 3)
+                    $errors[] = "L'appareil " . $eq->getLink() . ' ne semble pas localisé';
+                else {
                     $contact_pref = 1; // On force l'envoi par e-mail
                     
-                    $subject = "Réparation " . $this->getData('ref');
+                    $subject = " Important, à propos de la réparation de votre appareil";
 
                     $mail_msg = 'Bonjour,<br/><br/>Votre appareil déposé sous le dossier <b>' . $this->getRef() . '</b>, ';
                     $mail_msg .= 'n° de série <b>' . $eq->getData('serial').'</b>';
@@ -3051,13 +3051,8 @@ class BS_SAV extends BimpObject
                     $mail_msg .= '</p><br/>';
 
                     $mail_msg .= 'Merci de votre compréhension. <br/><br/>';
-//                }
+                }
                 break;
-        }
-
-        //Perpignan demenagement
-        if ($nomCentre == "Perpignan") {
-            $mail_msg .= "<br/><br/>Attention le SAV est exceptionnellement fermé les matins  pour cause de travaux jusqu’au 30 septembre.<br/>";
         }
 
         if ($mail_msg) {

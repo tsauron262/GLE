@@ -375,7 +375,7 @@ class BimpTransfer {
 
             $reservation->fetch($product['id_reservation']);
 
-            $errors1 = $reservation->setNewStatus(301, $product['added_qty']); // $qty : faculatif, seulement pour les produits non sérialisés
+            $errors1 = $reservation->setNewStatus(301, array('qty' => $product['added_qty'])); // $qty : faculatif, seulement pour les produits non sérialisés
             if (sizeof($errors1) != 0) {
                 $this->errors = BimpTools::merge_array($this->errors, $errors1);
                 $nb_update--;

@@ -2791,8 +2791,6 @@ class BS_SAV extends BimpObject
             if ($url) {
                 return $url;
             }
-        } else {
-            
         }
 //        return DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?serial=" . $this->getChildObject("equipment")->getData("serial") . "&id_sav=" . $this->id . "&user_name=" . substr($this->getChildObject("client")->dol_object->name, 0, 3);
         return "https://www.bimp.fr/nos-services/?serial=" . urlencode($this->getChildObject("equipment")->getData("serial")) . "&id_sav=" . $this->id . "&user_name=" . urlencode(str_replace(" ", "", substr($this->getChildObject("client")->dol_object->name, 0, 3))) . "#suivi-sav";
@@ -2880,6 +2878,9 @@ class BS_SAV extends BimpObject
         $nomCentre = ($centre['label'] ? $centre['label'] : 'N/C');
         $tel = ($centre['tel'] ? $centre['tel'] : 'N/C');
         $fromMail = "SAV BIMP<" . ($centre['mail'] ? $centre['mail'] : 'no-replay@bimp.fr') . ">";
+
+        $contact = $this->getChildObject('contact');
+        $contact_pref = (int) $this->getData('contact_pref');
 
         switch ($msg_type) {
             case 'Facture':
@@ -3017,24 +3018,39 @@ class BS_SAV extends BimpObject
             case 'localise':
                 $eq = $this->getChildObject("equipment");
                 if ($eq->getData("status_gsx") != 3)
-                    $errors[] = "L'apraeil " . $eq->getLink() . ' ne semble pas localisé';
+                    $errors[] = "L'appareil " . $eq->getLink() . ' ne semble pas localisé';
                 else {
-                    $subject = "Réparation " . $this->getData('ref');
-                    $mail_msg = "Bonjour, l'appareil concerné par votre SAV " . $this->getData('ref') . " dont le numéro de série est " . $eq->getData('serial') . " a la fonction localisée d’activée.\nNous ne pourrons pas procéder à la réparation tant cette option ne sera pas désactivée.\n";
-                    $mail_msg .= "\n\n<a href='https://support.apple.com/fr-fr/guide/icloud/mmdc23b125f6/icloud'>Cliquez sur ce lien pour savoir comment désactiver l’option de géolocalisation</a>";
-                    $mail_msg .= "\n\nMerci de votre compréhension.";
-                    //$sms = "Bonjour, nous venons de recevoir la pièce ou le produit pour votre réparation, nous vous contacterons quand votre matériel sera prêt.\nL'Equipe BIMP.";
+                    $contact_pref = 1; // On force l'envoi par e-mail
+                    
+                    $subject = " Important, à propos de la réparation de votre appareil";
+
+                    $mail_msg = 'Bonjour,<br/><br/>Votre appareil déposé sous le dossier <b>' . $this->getRef() . '</b>, ';
+                    $mail_msg .= 'n° de série <b>' . $eq->getData('serial').'</b>';
+                    $mail_msg .= ' est toujours associé à votre compte Apple iCloud.<br/><br/>';
+
+                    $mail_msg .= 'Afin que nous puissions procéder à la réparation de votre matériel, <span style="text-decoration: underline">il est nécessaire que celui-ci soit supprimé de votre compte iCloud.</span><br/><br/>';
+                    $mail_msg .= 'Pour ce faire, vous pouvez suivre la procédure suivante depuis un navigateur internet : <br/><br/>';
+
+                    $mail_msg .= '<ul>';
+                    $mail_msg .= '<li>Connectez-vous au site <a href="https://www.icloud.com">www.icloud.com</a></li>';
+                    $mail_msg .= '<li>Identifiez-vous</li>';
+                    $mail_msg .= '<li>Cliquez sur « Localiser »</li>';
+                    $mail_msg .= '<li>Cliquez sur « Tous mes appareils » puis sur l’appareil concerné</li>';
+                    $mail_msg .= '<li>Enfin cliquez sur « Supprimer de mon compte »</li>';
+                    $mail_msg .= '</ul><br/>';
+
+                    $mail_msg .= 'Vous pouvez obtenir plus d’informations sur cette procédure en suivant <a href="https://support.apple.com/fr-fr/HT205064#remove">ce lien</a><br/><br/>';
+
+                    $mail_msg .= 'Si vous éprouvez des difficultés à effectuer cette opération, vous pouvez obtenir une assistance par téléphone en appelant ';
+                    $mail_msg .= 'AppleCare <br/>au <b>0805 540 003</b> (tarif local)<br/><br/>';
+
+                    $mail_msg .= '<p style="font-size: 15px; font-weight: bold; text-decoration: underline">';
+                    $mail_msg .= '<span style="color: red">!</span> IMPORTANT: Dès que votre appareil est supprimé de votre compte Apple iCloud, merci de nous tenir informés par retour de cet e-mail afin que nous puissions poursuivre la réparation de votre matériel';
+                    $mail_msg .= '</p><br/>';
+
+                    $mail_msg .= 'Merci de votre compréhension. <br/><br/>';
                 }
                 break;
-        }
-
-        $contact = $this->getChildObject('contact');
-
-        $contact_pref = (int) $this->getData('contact_pref');
-
-        //Perpignan demenagement
-        if ($nomCentre == "Perpignan") {
-            $mail_msg .= "<br/><br/>Attention le SAV est exceptionnellement fermé les matins  pour cause de travaux jusqu’au 30 septembre.<br/>";
         }
 
         if ($mail_msg) {
@@ -3074,7 +3090,7 @@ class BS_SAV extends BimpObject
                 $mail_msg .= "\n" . "Technicien en charge de la réparation : " . $tech;
             }
 
-            $mail_msg .= "\n" . $textSuivie . "\n Cordialement.\n\nL'équipe BIMP\n\n" . $signature;
+            $mail_msg .= "\n" . $textSuivie . "\n\n Cordialement.\n\nL'équipe BIMP\n\n" . $signature;
 
             $toMail = BimpTools::cleanEmailsStr($toMail);
 
@@ -3093,7 +3109,7 @@ class BS_SAV extends BimpObject
             } else {
                 $errors[] = "Pas d'email correct " . $toMail;
             }
-        } else {
+        } elseif (!count($errors)) {
             $errors[] = 'pas de message';
         }
 

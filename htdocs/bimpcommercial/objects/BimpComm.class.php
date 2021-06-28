@@ -310,7 +310,7 @@ class BimpComm extends BimpDolObject
                 return 1;
         }
 
-        return 1;
+        return parent::isActionAllowed($action, $errors);
     }
 
     public function areLinesEditable()

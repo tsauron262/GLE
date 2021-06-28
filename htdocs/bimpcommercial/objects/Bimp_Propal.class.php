@@ -461,7 +461,7 @@ class Bimp_Propal extends BimpComm
                             $errors = 'Vous n\'avez pas la permission';
                         }
                     }
-                    if (count($errors)) {
+                    if (is_array($errors) && count($errors)) {
                         $buttons[] = array(
                             'label'    => 'Réviser',
                             'icon'     => 'fas_undo',

@@ -2431,9 +2431,8 @@ class Bimp_Client extends Bimp_Societe
         $total_unpaid = 0;
 
         foreach ($factures as $fac) {
-            $fac->checkIsPaid();
-            $rtp = (float) $fac->getRemainToPay(true);
-            $total_unpaid += $rtp;
+            $fac->checkIsPaid(); // TODO laisser ?
+            $total_unpaid += (float) $fac->getRemainToPay(true);
         }
 
         return $total_unpaid;

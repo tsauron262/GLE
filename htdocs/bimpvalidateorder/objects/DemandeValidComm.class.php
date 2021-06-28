@@ -18,10 +18,12 @@ class DemandeValidComm extends BimpObject
     // Type
     const TYPE_ENCOURS = 0;
     const TYPE_COMMERCIAL = 1;
+    const TYPE_IMPAYE = 2;
     
     public static $types = Array(
-        self::TYPE_ENCOURS    => Array('label' => 'Financière',  'icon' => 'fas_search-dollar'),
-        self::TYPE_COMMERCIAL => Array('label' => 'Commerciale', 'icon' => 'fas_hand-holding-usd')
+        self::TYPE_ENCOURS    => Array('label' => 'Encours',     'icon' => 'fas_search-dollar'),
+        self::TYPE_COMMERCIAL => Array('label' => 'Commerciale', 'icon' => 'fas_hand-holding-usd'),
+        self::TYPE_IMPAYE     => Array('label' => 'Impayé',      'icon' => 'fas_dollar-sign')
     );
   
     // Piece
@@ -128,7 +130,18 @@ class DemandeValidComm extends BimpObject
         $user_affected = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('id_user_affected'));
         $message_mail = 'Bonjour ' . $user_affected->getData('firstname') . ',<br/><br/>' . $message;
         
-        $type = ($this->getData('type') == self::TYPE_ENCOURS) ? 'financière' : 'commerciale';
+            switch ($type) {
+                case self::TYPE_COMMERCIAL:
+                    $type = 'commerciale';
+                    break;
+                case self::TYPE_ENCOURS:
+                    $type = 'encours';
+                    break;
+                case self::TYPE_IMPAYE:
+                    $type = 'd\'impayé';
+                    break;
+            }
+        
         $subject_mail = "Demande de validation $type";
         
         if ((int) $bimp_object->getData('fk_soc')) {
@@ -224,7 +237,7 @@ class DemandeValidComm extends BimpObject
                 }
             } else {
                 if (class_exists('BimpCore')) {
-                    BimpCore::addlog('Echec envoi email lors de validation commerciale ou financière', Bimp_Log::BIMP_LOG_ALERTE, 'bimpvalidateorder', NULL, array(
+                    BimpCore::addlog('Echec envoi email lors de validation commerciale/encours/impayé', Bimp_Log::BIMP_LOG_ALERTE, 'bimpvalidateorder', NULL, array(
                         'id_user_ask' => $this->getData('id_user_ask')
                     ));
                 }

@@ -1039,12 +1039,12 @@ Votre satisfaction est notre objectif, nous mettrons tout en œuvre pour vous sa
 Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit IOS.
 
  Cet acompte sera déduit de la réparation en cas d’accord sur le devis ou considéré comme frais de diagnostic en cas de refus.\n\n';
-        
+
         if ($cancel_url) {
             $msg .= 'Vous pouvez annuler cette demande de prise en charge depuis votre <a href="' . $base_url . '">espace personnel</a>';
             $msg .= ' ou en suivant <a href="' . $cancel_url . '">ce lien</a>' . "\n\n";
         }
-        
+
         $msg .= 'Bien cordialement' . "\n\n";
         $msg .= 'L\'équipe BIMP' . "\n\n";
 
@@ -1252,10 +1252,6 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
 
     public function ajaxProcessSavFormSubmit()
     {
-//        echo '<pre>';
-//        print_r($_POST);
-//        exit;
-
         global $userClient;
         $errors = array();
         $warnings = array();
@@ -1426,45 +1422,47 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
 
                     $debug .= 'Réservation déjà existante: ' . $reservationId . '<br/>';
                 } elseif (!(int) BimpTools::getValue('force_validate', 0)) {
-                    // Création de la réservation: 
-                    require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_Reservation.php';
-
-                    $countries = BimpCache::getCountriesArray();
-
-                    $params = array(
-                        'reservationDate' => $data['sav_slot'],
-                        'product'         => array(
-                            'productCode'   => $data['eq_type'],
-                            'issueReported' => substr($data['eq_symptomes'], 0, 250),
-                        ),
-                        'customer'        => array(
-                            'firstName'   => substr($data['client_firstname'], 0, 30),
-                            'lastName'    => substr($data['client_lastname'], 0, 30),
-                            'emailId'     => (BimpObject::objectLoaded($userClient) ? $userClient->getData('email') : $data['client_email']),
-                            'phoneNumber' => ($data['client_phone_mobile'] ? $data['client_phone_mobile'] : ($data['client_phone_pro'] ? $data['client_phone_pro'] : $data['client_phone_perso'])),
-                            'address'     => array(
-                                'addressLine1' => substr($data['client_address'], 0, 60),
-                                'postalCode'   => $data['client_zip'],
-                                'city'         => substr($data['town'], 0, 40),
-                                'country'      => (isset($countries[$data['client_pays']]) ? $countries[$data['client_pays']] : 'France')
-                            )
-                        )
-                    );
-
-                    if (!$isImei) {
-                        $params['product']['serialNumber'] = $data['eq_serial'];
-                    }
-
                     $req_errors = array();
 
-                    $result = GSX_Reservation::createReservation(897316, $centre['shipTo'], $params, $req_errors, $debug);
-                    // ********** POUR TESTS **************************************************
-//                    $result = array(
-//                        'response' => array(
-//                            'reservationId' => '123456789'
-//                        )
-//                    );
-                    // ************************************************************************
+                    if (BimpCore::isModeDev()) {
+                        // POUR TESTS
+                        $result = array(
+                            'response' => array(
+                                'reservationId' => '123456789'
+                            )
+                        );
+                    } else {
+                        // Création de la réservation: 
+                        require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_Reservation.php';
+
+                        $countries = BimpCache::getCountriesArray();
+
+                        $params = array(
+                            'reservationDate' => $data['sav_slot'],
+                            'product'         => array(
+                                'productCode'   => $data['eq_type'],
+                                'issueReported' => substr($data['eq_symptomes'], 0, 250),
+                            ),
+                            'customer'        => array(
+                                'firstName'   => substr($data['client_firstname'], 0, 30),
+                                'lastName'    => substr($data['client_lastname'], 0, 30),
+                                'emailId'     => (BimpObject::objectLoaded($userClient) ? $userClient->getData('email') : $data['client_email']),
+                                'phoneNumber' => ($data['client_phone_mobile'] ? $data['client_phone_mobile'] : ($data['client_phone_pro'] ? $data['client_phone_pro'] : $data['client_phone_perso'])),
+                                'address'     => array(
+                                    'addressLine1' => substr($data['client_address'], 0, 60),
+                                    'postalCode'   => $data['client_zip'],
+                                    'city'         => substr($data['town'], 0, 40),
+                                    'country'      => (isset($countries[$data['client_pays']]) ? $countries[$data['client_pays']] : 'France')
+                                )
+                            )
+                        );
+
+                        if (!$isImei) {
+                            $params['product']['serialNumber'] = $data['eq_serial'];
+                        }
+
+                        $result = GSX_Reservation::createReservation(897316, $centre['shipTo'], $params, $req_errors, $debug);
+                    }
 
                     if (!empty($result)) {
                         if (isset($result['response']['reservationId'])) {
@@ -2013,7 +2011,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                             mailSyn2('Nouveau SAV créé en ligne', $emails, '', $msg);
                         }
                     }
-                    
+
                     // Envoi e-mail client: 
                     $email_client = BimpObject::objectLoaded($userClient) ? $userClient->getData('email') : $data['client_email'];
                     $email_client_ok = $this->sendRDVEmailToClient($email_client, $reservationId, $dateBegin, $sav, $centre, $data['eq_serial'], $reservation_exists);

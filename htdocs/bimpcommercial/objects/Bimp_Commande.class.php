@@ -750,7 +750,8 @@ class Bimp_Commande extends BimpComm
         // Envoyer mail à l'utilisateur qui a fait une demande de validation
         // pour relancer le client si il y a des impayé
         if ($this->isActionAllowed('sendMailLatePayment') /* && $this->canSetAction('sendMailLatePayment') */) {
-            $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'DemandeValidComm');
+            BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
+            $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
             $demande = $vc->demandeExists(DemandeValidComm::OBJ_COMMANDE, $this->id, DemandeValidComm::TYPE_ENCOURS);
             if (is_a($demande, 'DemandeValidComm') and $demande->getData('status') == DemandeValidComm::STATUS_PROCESSING) {
                 $user_ask = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $demande->getData('id_user_ask'));

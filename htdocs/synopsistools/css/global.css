@@ -506,6 +506,8 @@ input, input.flat, textarea, textarea.flat, form.flat select, select, select.fla
 
 /* z-index modal au dessus du reste*/
 /*Note Flo: z-index corrigés pour fullscreen bimpcaisse - ne pas mettre de valeurs inféreieures*/
+
+
 .ui-widget-overlay{
     z-index: 11250!important;
 }

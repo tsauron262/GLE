@@ -193,7 +193,7 @@ class BimpDocumentPDF extends BimpModelPDF
         $doc_ref = "";
         if (is_object($this->object) && isset($this->object->ref))
             $doc_ref = $this->object->ref;
-        
+
         $this->pdf->topMargin = 44;
 
         $ref_extra = '';
@@ -887,6 +887,10 @@ class BimpDocumentPDF extends BimpModelPDF
                     unset($row['pu_ht']);
                 }
 
+                if (isset($row['desc']) && $row['desc']) {
+                    $row['desc'] = $this->replaceHtmlStyles($row['desc']);
+                }
+
                 $table->rows[] = $row;
             }
         }
@@ -942,8 +946,11 @@ class BimpDocumentPDF extends BimpModelPDF
     {
         if ((int) $this->periodicity && (int) $this->nbPeriods > 0) {
             foreach ($champs as $nomChamp) {
-                if (isset($row[$nomChamp]))
+                if (isset($row[$nomChamp])){
+                    $row[$nomChamp] = str_replace(' ', '', $row[$nomChamp]);
+//                echo $row[$nomChamp].'pp';
                     $row[$nomChamp] = BimpTools::displayMoneyValue(str_replace(",", ".", $row[$nomChamp]) / $this->nbPeriods, '', 0, 0, 1);
+                }
             }
         }
         return $row;
@@ -978,7 +985,6 @@ class BimpDocumentPDF extends BimpModelPDF
             $html .= 'La Société ' . $this->fromCompany->name . ' ne peut être tenue pour responsable de la perte éventuelles de données informatiques. ';
             $html .= ' Il appartient au client d’effectuer des sauvegardes régulières de ses informations. En aucun cas les soucis systèmes, logiciels, paramétrages internet';
             $html .= ' et périphériques et les déplacements ne rentrent dans le cadre de la garantie constructeur.';
-
 
             $html .= '<span style="font-weight: bold;">';
             $html .= ' Aucun escompte pour paiement anticipé ne sera accordé.';
@@ -1207,7 +1213,6 @@ class BimpDocumentPDF extends BimpModelPDF
         $html .= '</td>';
         $html .= '</tr>';
 
-
         // Total DEEE
         if ($this->totals['DEEE'] > 0) {
             $total_deee = $this->totals['DEEE'];
@@ -1319,7 +1324,6 @@ class BimpDocumentPDF extends BimpModelPDF
                             $html .= '</td>';
                             $html .= '</tr>';
 
-
                             //todo phrase suivant tva 
 //                            $infos =  array();
 //                                    $infos[] ="mmmffff30";
@@ -1415,23 +1419,21 @@ class BimpDocumentPDF extends BimpModelPDF
                 $html .= '</td>';
                 $html .= '</tr>';
 
-
-
-                if (isset($this->object->array_options['options_prime'])  || isset($this->object->array_options['options_prime2'])) {
+                if (isset($this->object->array_options['options_prime']) || isset($this->object->array_options['options_prime2'])) {
                     $prime = $prime2 = 0;
-                    if(isset($this->object->array_options['options_prime']))
+                    if (isset($this->object->array_options['options_prime']))
                         $prime = $this->object->array_options['options_prime'];
-                    if(isset($this->object->array_options['options_prime2']))
+                    if (isset($this->object->array_options['options_prime2']))
                         $prime2 = $this->object->array_options['options_prime2'];
 
-                    if($prime > 0){
+                    if ($prime > 0) {
                         $html .= '<tr>';
                         $html .= '<td style="background-color: #F0F0F0;">' . static::$label_prime . '</td>';
                         $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue(-$prime, '', 0, 0, 1, $modeDecimalTotal);
                         $html .= '</td>';
                         $html .= '</tr>';
                     }
-                    if($prime2 > 0){
+                    if ($prime2 > 0) {
                         $html .= '<tr>';
                         $html .= '<td style="background-color: #F0F0F0;">' . static::$label_prime2 . '</td>';
                         $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . BimpTools::displayMoneyValue(-$prime2, '', 0, 0, 1, $modeDecimalTotal);
@@ -1439,7 +1441,7 @@ class BimpDocumentPDF extends BimpModelPDF
                         $html .= '</tr>';
                     }
 
-                    if($prime > 0 || $prime2 > 0){
+                    if ($prime > 0 || $prime2 > 0) {
                         $html .= '<tr>';
                         $html .= '<td style="background-color: #DCDCDC;">Reste à charge</td>';
                         $html .= '<td style="background-color: #DCDCDC; text-align: right;">' . BimpTools::displayMoneyValue($total_ttc - $prime - $prime2, '', 0, 0, 1, $modeDecimalTotal);
@@ -1534,7 +1536,6 @@ class BimpDocumentPDF extends BimpModelPDF
     public function getAfterTotauxHtml($blocSignature = true)
     {
         $html .= '<table style="width: 95%" cellpadding="3">';
-
 
         global $mysoc, $langs;
         // If France, show VAT mention if not applicable

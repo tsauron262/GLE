@@ -90,7 +90,7 @@ fields:
             
     val_comm_demande:
         label: Validation config demande
-#        required: 1
+        required: 1
         type: id_object
         object: valid_comm
     

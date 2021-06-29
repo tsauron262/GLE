@@ -2445,6 +2445,32 @@ class BimpCache
 
         return self::$cache['secteurs_array'];
     }
+    
+    // Comme getSecteursArray avec l'option "Tous" en plus
+    public function getSecteurAllArray() {
+        if (!BimpCore::getConf("USE_SECTEUR")) {
+            return array();
+        }
+
+        if (!isset(self::$cache['secteurs_all_array'])) {
+            self::$cache['secteurs_all_array'] = array(
+                '' => ''
+            );
+
+            $rows = self::getBdb()->getRows('bimp_c_secteur');
+
+            if (is_array($rows)) {
+                self::$cache['secteurs_all_array']['ALL'] = "Tous";
+                foreach ($rows as $r) {
+                    self::$cache['secteurs_all_array'][$r->clef] = $r->valeur;
+                }
+            }
+        }
+        
+        
+
+        return self::$cache['secteurs_all_array'];
+    }
 
     public static function getSystemsArray()
     {

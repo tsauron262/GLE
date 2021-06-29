@@ -16,12 +16,14 @@ class DemandeValidComm extends BimpObject
     );
 
     // Type
-    const TYPE_FINANCE = 0;
+    const TYPE_ENCOURS = 0;
     const TYPE_COMMERCIAL = 1;
+    const TYPE_IMPAYE = 2;
     
     public static $types = Array(
-        self::TYPE_FINANCE    => Array('label' => 'Financière',  'icon' => 'fas_search-dollar'),
-        self::TYPE_COMMERCIAL => Array('label' => 'Commerciale', 'icon' => 'fas_hand-holding-usd')
+        self::TYPE_ENCOURS    => Array('label' => 'Encours',     'icon' => 'fas_search-dollar'),
+        self::TYPE_COMMERCIAL => Array('label' => 'Commerciale', 'icon' => 'fas_hand-holding-usd'),
+        self::TYPE_IMPAYE     => Array('label' => 'Impayé',      'icon' => 'fas_dollar-sign')
     );
   
     // Piece
@@ -128,7 +130,18 @@ class DemandeValidComm extends BimpObject
         $user_affected = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('id_user_affected'));
         $message_mail = 'Bonjour ' . $user_affected->getData('firstname') . ',<br/><br/>' . $message;
         
-        $type = ($this->getData('type') == self::TYPE_FINANCE) ? 'financière' : 'commerciale';
+            switch ($type) {
+                case self::TYPE_COMMERCIAL:
+                    $type = 'commerciale';
+                    break;
+                case self::TYPE_ENCOURS:
+                    $type = 'encours';
+                    break;
+                case self::TYPE_IMPAYE:
+                    $type = 'de retard de paiement';
+                    break;
+            }
+        
         $subject_mail = "Demande de validation $type";
         
         if ((int) $bimp_object->getData('fk_soc')) {
@@ -224,7 +237,7 @@ class DemandeValidComm extends BimpObject
                 }
             } else {
                 if (class_exists('BimpCore')) {
-                    BimpCore::addlog('Echec envoi email lors de validation commerciale ou financière', Bimp_Log::BIMP_LOG_ALERTE, 'bimpvalidateorder', NULL, array(
+                    BimpCore::addlog('Echec envoi email lors de validation commerciale/encours/impayé', Bimp_Log::BIMP_LOG_ALERTE, 'bimpvalidateorder', NULL, array(
                         'id_user_ask' => $this->getData('id_user_ask')
                     ));
                 }
@@ -272,7 +285,7 @@ class DemandeValidComm extends BimpObject
                     'date_create' => $d->getData('date_create')
                 );
 
-                if((int) $d->getData('type') == (int) self::TYPE_FINANCE)
+                if((int) $d->getData('type') == (int) self::TYPE_ENCOURS)
                     $new_demande['montant'] = $montant_piece;
                 else
                     $new_demande['remise'] = $percent;

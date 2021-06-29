@@ -403,6 +403,8 @@ class ValidComm extends BimpObject
         else
             $client = $object->getChildObject('client');
         $rtp = $client->getTotalUnpayed();
+        if($rtp < 0)
+            $rtp = 0;
         
         return array($secteur, $class, $percent, $val, $rtp);
     }

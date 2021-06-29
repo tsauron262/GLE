@@ -125,7 +125,7 @@ Abstract class BimpModelPDF
         $this->pdf->newPage();
 
         $this->renderContent();
-        
+
         return $this->pdf->render($file_name, $display, $display_only, $this->watermark);
     }
 
@@ -319,9 +319,9 @@ Abstract class BimpModelPDF
         if (!$only_number) {
             $html .= '<span style="font-style: italic">' . $this->langs->transnoentities('PaymentByTransferOnThisBankAccount') . ':</span><br/><br/>';
         }
-        
+
         $date_new_account = BimpCore::getConf('new_bank_account_date', '');
-        
+
         if ($date_new_account) {
             $html .= '<span style="color: #A00000; font-weight: bold">';
             $html .= 'Attention: NOS COORDONNEES BANCAIRES depuis le ' . date('d / m / Y', strtotime($date_new_account));
@@ -433,7 +433,7 @@ Abstract class BimpModelPDF
             elseif (isset($this->object->id))
                 $name .= "_" . dol_sanitizeFileName($this->object->id);
         }
-        return $this->prefName . $name.'.pdf';
+        return $this->prefName . $name . '.pdf';
     }
 
     public function write_file($object, $outputlangs, $srctemplatepath = '', $hidedetails = 0, $hidedesc = 0, $hideref = 0)
@@ -472,5 +472,15 @@ Abstract class BimpModelPDF
             $height = $maxHeight;
         }
         return array($width, $height);
+    }
+
+    public function replaceHtmlStyles($html)
+    {
+        for ($i = 6; $i < 30; $i++) {
+            $html = str_replace('font-size: ' . $i . 'px', 'font-size: ' . ($i - 3) . 'px', $html);
+            $html = str_replace('font-size:' . $i . 'px', 'font-size:' . ($i - 3) . 'px', $html);
+        }
+
+        return $html;
     }
 }

@@ -138,7 +138,7 @@ class DemandeValidComm extends BimpObject
                     $type = 'encours';
                     break;
                 case self::TYPE_IMPAYE:
-                    $type = 'd\'impayé';
+                    $type = 'de retard de paiement';
                     break;
             }
         

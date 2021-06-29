@@ -43,7 +43,7 @@ class BT_ficheInter extends BimpDolObject {
     public static $statut_list = [
         self::STATUT_ABORT => ['label' => "Abandonée", 'icon' => 'times', 'classes' => ['danger']],
         self::STATUT_BROUILLON => ['label' => "En cours de renseignement", 'icon' => 'retweet', 'classes' => ['warning']],
-        self::STATUT_VALIDER => ['label' => "Signée par le client", 'icon' => 'check', 'classes' => ['success']],
+        self::STATUT_VALIDER => ['label' => "Validée", 'icon' => 'check', 'classes' => ['success']],
         self::STATUT_TERMINER => ['label' => "Terminée", 'icon' => 'thumbs-up', 'classes' => ['important']],
         self::STATUT_SIGANTURE_PAPIER => ['label' => "Attente signature client", 'icon' => 'warning', 'classes' => ['important']],
         self::STATUT_DEMANDE_FACT => ['label' => "Attente de facturation", 'icon' => 'euro', 'classes' => ['important']],
@@ -1402,10 +1402,21 @@ class BT_ficheInter extends BimpDolObject {
             $today->add(new DateInterval("P4D"));
             $this->set('public_signature_date_cloture', $today->format('Y-m-d H:i:s'));
             $this->update();
-            mailSyn2("BIMP - Rapport d'intervention - " . $this->getRef(), $mail_signataire, null, "Bonjour, merci de signer votre  rapport d'intervention à l'adresse suivante: "
-                    . "<a href='".DOL_URL_ROOT . "/bimptechnique/public'>" . DOL_URL_ROOT . "/bimptechnique/public</a> en entrant votre nom ainsi que le mot de passe suivant: <b>$new_password</b><br />Cet accès n'est valable que 4 Jours calandaire."
-                    . "<br /><br />Cordialement");
+            
             $commercial = $this->getCommercialClient();
+            $bimpMail = new BimpMail("BIMP - Rapport d'intervention - " . $this->getRef(), 
+                    $mail_signataire, '', "Bonjour, merci de signer votre rapport d'intervention à l'adresse suivante: "
+                    . "<a href='".DOL_URL_ROOT . "/bimptechnique/public'>" . DOL_URL_ROOT . "/bimptechnique/public</a> en entrant votre nom ainsi que le mot de passe suivant: <b>$new_password</b><br />Cet accès n'est valable que 4 Jours calandaire."
+                    . "<br /><br />Cordialement", $commercial->getData('email'));
+            global $conf;
+            $files = array();
+            $files[] = array($conf->ficheinter->dir_output . '/' . $this->dol_object->ref . '/' . $this->dol_object->ref . '.pdf', 'application/pdf', $this->dol_object->ref . '.pdf');
+            $bimpMail->addFiles($files);
+            $mail_errors = array();
+            $bimpMail->send($mail_errors);
+            
+            
+            
             mailSyn2("Signature à distance - FI", $commercial->getData('email'), null, "Pour information, la FI " . $this->getNomUrl() . " à été envoyée au client pour une signature à distance");
             
         } else {
@@ -1723,8 +1734,8 @@ class BT_ficheInter extends BimpDolObject {
     public function renderHeaderStatusExtra() {
 
         $extra = '<br />';
-        $u = $this->getData('urgent');
-        $extra .= "<span>Interventions urgentes:<strong class='".self::$urgent[$u]['classes'][0]."'> ".self::$urgent[$u]['label']."</strong></span>";
+        $extra .= 'Signée :'.$this->displayData('signed').'<br/>';
+        $extra .= "<span>Interventions urgentes:'".$this->displayData('urgent')."</span>";
         $extra .= "<br /><span>".$this->displayTypeSignature()."</span>";
         //$extra .= "<br /><a href='".$this->url('facturation')."'>TAB Facturation</a>"; // TEMPORAIRE
         
@@ -1920,113 +1931,120 @@ class BT_ficheInter extends BimpDolObject {
         global $user;
         if(!$this->isOldFi()) {
             if($this->isNotSign()) {
-                $tickets = (json_decode($this->getData('tickets'))) ? json_decode($this->getData('tickets')) : [];
-
-                $info = "<b>" . BimpRender::renderIcon('warning') . "</b> Si vous avez des tickets support et que vous ne les voyez pas dans le formulaire, rechargez la page en cliquant sur le bouton suivant: <a href='".DOL_URL_ROOT."/bimptechnique/?fc=fi&id=".$this->id."&navtab-maintabs=signature'><button class='btn btn-default'>Rafraîchire la page</button></a>";
-                $html .= "<h4>$info</h4>";
-                
-                $interne = explode(",", BimpCore::getConf("bimptechnique_id_societe_auto_terminer"));
-
-                $html .= "<h3><u>Type de signature</u></h3>";
-                $html .= '<h3><div class="check_list_item" id="checkList" >'
-                    . '<input checked="true" type="checkbox" id="BimpTechniqueSign" class="check_list_item_input">'
-                    . '<label for="BimpTechniqueSign">'
-                    . BimpRender::renderIcon('fas_signature') . ' Signature électronique'
-                    . '</label></div></h3>';
-                if(!in_array($this->getData('fk_soc'), $interne) || $user->admin) {
-                    $html .= '<h3><div class="check_list_item" id="checkListFar" >'
-                        . '<input type="checkbox" id="BimpTechniqueSignFar" class="check_list_item_input">'
-                        . '<label for="BimpTechniqueSignFar">'
-                        . BimpRender::renderIcon('fas_sign') . ' Signature à distance'
-                        . '</label></div></h3>';
-                    $html .= '<h3><div class="check_list_item" id="checkListPaper" >'
-                        . '<input type="checkbox" id="BimpTechniqueSignChoise" class="check_list_item_input">'
-                        . '<label for="BimpTechniqueSignChoise">'
-                        . BimpRender::renderIcon('paper-plane') . ' Signature papier'
-                        . '</label></div></h3>';
+                if($this->getData('fk_statut') == SELF::STATUT_SIGANTURE_PAPIER){
+                    $html .= $this->displayData('fk_statut');
                 }
-                
-                $html .= "<br /><h3><u>Formulaire de signature</u></h3>";
-                $html .= '<div class="row formRow" id="nomSignataireTitle">'
-                    . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1"  required>Nom du signataire</div>'
-                    . '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
-                    . '<div class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
-                    . '<input style="font-size: 20px" type="text" id="BimpTechniqueFormName" name="label" value="" data-data_type="string" data-size="128" data-forbidden_chars="" data-regexp="" data-invalid_msg="" data-uppercase="0" data-lowercase="0">'
-                    . '</div></div></div>';
-                $html .= '<div class="row formRow">'
-                    . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Email client</div>'
-                    . '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
-                    . '<div class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
-                    . '<input style="font-size: 20px" type="text" id="email_client" name="label" data-data_type="string" data-size="128" data-forbidden_chars="" data-regexp="" data-invalid_msg="" data-uppercase="0" data-lowercase="0" value="'.$this->getDataClient('email').'">'
-                    . '</div></div></div>';
-                $html .= '<div class="row formRow">'
-                    . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Préconisation technicien</div>'
-                    . '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
-                    . '<div class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
-                    . '<textarea id="note_public" name="note_public" rows="4" style="margin-top: 5px; width: 90%;" class="flat"></textarea>'
-                    . '</div></div></div>';
-                $html .= '<div class="row formRow">'
-                    . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Attente client</div>'
-                    . '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
-                        . '&Agrave; remplir obligatoirement si l\'intervention n\'a pas été terminée suite à un évènement dû au client. (Visible sur la FI)'
-                    . '<div class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
-                    . '<textarea id="attente_client" name="attente_client" rows="4" style="margin-top: 5px; width: 90%;" class="flat"></textarea>'
-                    . '</div></div></div>';
-                $html .= '<div class="row formRow">'
-                    . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Intervention non terminée</div>'
-                    . '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
-                        . '&Agrave; remplir obligatoirement si l\'intervention n\'est pas terminée (Autre que attente client) (Visible sur la FI).'
-                    . '<div class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
-                    . '<textarea id="inter_no_finish" name="inter_no_finish" rows="4" style="margin-top: 5px; width: 90%;" class="flat"></textarea>'
-                    . '</div></div></div>';
-                
-                if(count($tickets) > 0) {
-                    
-                    $html .= '<div class="row formRow" >';
-                    $html .= '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Fermeture des tickets support</div>';
-                    $html .= '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">';
-                    
-                    foreach($tickets as $id_ticket) {
-                        $ticket = $this->getInstance('bimpsupport', 'BS_Ticket', $id_ticket);
-                        $html .= '<h3><div class="check_list_item" id="checkList" >'
-                                    . '<input type="checkbox" id="BimpTechniqueAttachedTicket_'.$id_ticket.'" class="check_list_item_input">'
-                                        . '<label for="BimpTechniqueAttachedTicket_'.$id_ticket.'">'
-                                            . $ticket->getRef()
-                                        . '</label>'
-                                . '</div></h3>';
+                else{
+                    $tickets = (json_decode($this->getData('tickets'))) ? json_decode($this->getData('tickets')) : [];
+
+                    $info = "<b>" . BimpRender::renderIcon('warning') . "</b> Si vous avez des tickets support et que vous ne les voyez pas dans le formulaire, rechargez la page en cliquant sur le bouton suivant: <a href='".DOL_URL_ROOT."/bimptechnique/?fc=fi&id=".$this->id."&navtab-maintabs=signature'><button class='btn btn-default'>Rafraîchire la page</button></a>";
+                    $html .= "<h4>$info</h4>";
+
+                    $interne = explode(",", BimpCore::getConf("bimptechnique_id_societe_auto_terminer"));
+
+                    $html .= "<h3><u>Type de signature</u></h3>";
+                    $html .= '<h3><div class="check_list_item" id="checkList" >'
+                        . '<input checked="true" type="checkbox" id="BimpTechniqueSign" class="check_list_item_input">'
+                        . '<label for="BimpTechniqueSign">'
+                        . BimpRender::renderIcon('fas_signature') . ' Signature électronique'
+                        . '</label></div></h3>';
+                    if(!in_array($this->getData('fk_soc'), $interne) || $user->admin) {
+                        $html .= '<h3><div class="check_list_item" id="checkListFar" >'
+                            . '<input type="checkbox" id="BimpTechniqueSignFar" class="check_list_item_input">'
+                            . '<label for="BimpTechniqueSignFar">'
+                            . BimpRender::renderIcon('fas_sign') . ' Signature à distance'
+                            . '</label></div></h3>';
+                        $html .= '<h3><div class="check_list_item" id="checkListPaper" >'
+                            . '<input type="checkbox" id="BimpTechniqueSignChoise" class="check_list_item_input">'
+                            . '<label for="BimpTechniqueSignChoise">'
+                            . BimpRender::renderIcon('paper-plane') . ' Signature papier'
+                            . '</label></div></h3>';
                     }
-                    
-                    
+
+                    $html .= "<br /><h3><u>Formulaire de signature</u></h3>";
+                    $html .= '<div class="row formRow" id="nomSignataireTitle">'
+                        . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1"  required>Nom du signataire</div>'
+                        . '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
+                        . '<div class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
+                        . '<input style="font-size: 20px" type="text" id="BimpTechniqueFormName" name="label" value="" data-data_type="string" data-size="128" data-forbidden_chars="" data-regexp="" data-invalid_msg="" data-uppercase="0" data-lowercase="0">'
+                        . '</div></div></div>';
+                    $html .= '<div class="row formRow">'
+                        . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Email client</div>'
+                        . '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
+                        . '<div class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
+                        . '<input style="font-size: 20px" type="text" id="email_client" name="label" data-data_type="string" data-size="128" data-forbidden_chars="" data-regexp="" data-invalid_msg="" data-uppercase="0" data-lowercase="0" value="'.$this->getDataClient('email').'">'
+                        . '</div></div></div>';
+                    $html .= '<div class="row formRow">'
+                        . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Préconisation technicien</div>'
+                        . '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
+                        . '<div class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
+                        . '<textarea id="note_public" name="note_public" rows="4" style="margin-top: 5px; width: 90%;" class="flat"></textarea>'
+                        . '</div></div></div>';
+                    $html .= '<div class="row formRow">'
+                        . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Attente client</div>'
+                        . '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
+                            . '&Agrave; remplir obligatoirement si l\'intervention n\'a pas été terminée suite à un évènement dû au client. (Visible sur la FI)'
+                        . '<div class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
+                        . '<textarea id="attente_client" name="attente_client" rows="4" style="margin-top: 5px; width: 90%;" class="flat"></textarea>'
+                        . '</div></div></div>';
+                    $html .= '<div class="row formRow">'
+                        . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Intervention non terminée</div>'
+                        . '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
+                            . '&Agrave; remplir obligatoirement si l\'intervention n\'est pas terminée (Autre que attente client) (Visible sur la FI).'
+                        . '<div class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
+                        . '<textarea id="inter_no_finish" name="inter_no_finish" rows="4" style="margin-top: 5px; width: 90%;" class="flat"></textarea>'
+                        . '</div></div></div>';
+
+                    if(count($tickets) > 0) {
+
+                        $html .= '<div class="row formRow" >';
+                        $html .= '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Fermeture des tickets support</div>';
+                        $html .= '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">';
+
+                        foreach($tickets as $id_ticket) {
+                            $ticket = $this->getInstance('bimpsupport', 'BS_Ticket', $id_ticket);
+                            $html .= '<h3><div class="check_list_item" id="checkList" >'
+                                        . '<input type="checkbox" id="BimpTechniqueAttachedTicket_'.$id_ticket.'" class="check_list_item_input">'
+                                            . '<label for="BimpTechniqueAttachedTicket_'.$id_ticket.'">'
+                                                . $ticket->getRef()
+                                            . '</label>'
+                                    . '</div></h3>';
+                        }
+
+
+                        $html .= '</div>';
+                        $html .= '</div>';
+
+                    }
+                    $commercial = $this->getCommercialClient();
+                    $html .= '<div class="row formRow" >';
+                    $html .= '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Le client souhaite être contacté par son commercial</div>';
+                    $html .= '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">Commercial client: ' . $commercial->getName();
+                    $html .= '<h3><div class="check_list_item" id="checkList" >'
+                                        . '<input type="checkbox" id="BimpTechniqueContactCommercial" class="check_list_item_input">'
+                                            . '<label for="BimpTechniqueContactCommercial">'
+                                                . "OUI"
+                                            . '</label>'
+                                    . '</div></h3>';
                     $html .= '</div>';
                     $html .= '</div>';
-                    
+                    $html .= '<div class="row formRow" >'
+                        . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Signature de la fiche</div>'
+                        . '<div  class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
+                        . '<div  class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
+                        . $this->renderSignaturePad()
+                        . '</div></div></div>';
+                    $html .= '<br />';
                 }
-                $commercial = $this->getCommercialClient();
-                $html .= '<div class="row formRow" >';
-                $html .= '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Le client souhaite être contacté par son commercial</div>';
-                $html .= '<div class="formRowInput field col-xs-12 col-sm-6 col-md-9">Commercial client: ' . $commercial->getName();
-                $html .= '<h3><div class="check_list_item" id="checkList" >'
-                                    . '<input type="checkbox" id="BimpTechniqueContactCommercial" class="check_list_item_input">'
-                                        . '<label for="BimpTechniqueContactCommercial">'
-                                            . "OUI"
-                                        . '</label>'
-                                . '</div></h3>';
-                $html .= '</div>';
-                $html .= '</div>';
-                $html .= '<div class="row formRow" >'
-                    . '<div class="inputLabel col-xs-2 col-sm-2 col-md-1" required>Signature de la fiche</div>'
-                    . '<div  class="formRowInput field col-xs-12 col-sm-6 col-md-9">'
-                    . '<div  class="inputContainer label_inputContainer " data-field_name="label" data-initial_value="" data-multiple="0" data-field_prefix="" data-required="0" data-data_type="string">'
-                    . $this->renderSignaturePad()
-                    . '</div></div></div>';
-                $html .= '<br />';
             } elseif($this->isSign()) {
                 $html .= '<h3>Nom du signataire client: '.$this->displayDataTyped($this->getData('signataire')).'</h3>';
                 $html .= '<h3>Type de signature: '.$this->displayDataTyped($this->displayTypeSignature()).'</h3>';
                
                 global $conf;
-                    $file =  DOL_URL_ROOT . "/document.php?modulepart=ficheinter&file=" . $this->getRef() . "/" . $this->getRef() . '.pdf';
-                    $html .= '<embed src="'.$file.'" type="application/pdf"   height="1000px" width="100%">';
+                    $file =    $this->getRef() . "/" . $this->getRef() . '_sign_e.pdf';
+                    if(!is_file(DOL_DATA_ROOT.'/ficheinter/'.$file))
+                    $file =   $this->getRef() . "/" . $this->getRef() . '.pdf';
+                    $html .= '<embed src="'.DOL_URL_ROOT."/document.php?modulepart=ficheinter&file=".$file.'" type="application/pdf"   height="1000px" width="100%">';
             }
         } else {
             $html .= "<center><h3>Cette <strong style='color:#EF7D00' >Fiche d'intervention</strong> est une ancienne <strong style='color:#EF7D00' >version</strong></h3></center>";

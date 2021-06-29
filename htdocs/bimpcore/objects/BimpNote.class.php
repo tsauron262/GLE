@@ -16,7 +16,7 @@ class BimpNote extends BimpObject
     const BN_DEST_NO = 0;
     const BN_DEST_USER = 1;
     const BN_DEST_GROUP = 2;
-    // Id GR:
+    // ID GR:
     const BN_GROUPID_LOGISTIQUE = 108;
     const BN_GROUPID_FACT = 408;
 
@@ -56,6 +56,23 @@ class BimpNote extends BimpObject
             return 1;
         if ($this->getData("user_create") == $user->id && !$this->getInitData("viewed") && !$this->getData("auto"))
             return 1;
+        return 0;
+    }
+
+    public function canClientView()
+    {
+        global $userClient;
+
+        if (BimpObject::objectLoaded($userClient)) {
+            if ($this->isLoaded()) {
+                if ($this->getData('visibility') < 4) {
+                    return 0;
+                }
+            }
+
+            return 1;
+        }
+
         return 0;
     }
 
@@ -100,7 +117,6 @@ class BimpNote extends BimpObject
             return 1;
 
         $listIdGr = self::getGroupIds($user->id);
-
 
         if ($this->getData("type_dest") == self::BN_DEST_GROUP && in_array($this->getData("fk_group_dest"), $listIdGr))
             return 1;
@@ -267,7 +283,7 @@ class BimpNote extends BimpObject
             if (!$c['lu'])
                 $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $c['idNoteRef']);
             else {
-                if($c['obj']->id){
+                if ($c['obj']->id) {
                     $sql = 'SELECT MAX(id) AS id_max';
                     $sql .= ' FROM `' . MAIN_DB_PREFIX . 'bimpcore_note`';
                     $sql .= ' WHERE `obj_type` = "bimp_object" AND `obj_module` = "' . $c['obj']->module . '"';
@@ -303,12 +319,11 @@ class BimpNote extends BimpObject
                 $msg['id_obj'] = (int) $note->getData('id_obj');
                 $msg['is_viewed'] = (int) $c['lu'];
 
-
                 // Obj
                 $msg['obj']['nom_url'] = $c['obj']->getNomUrl();
                 if (method_exists($c['obj'], "getChildObject")) {
                     $soc = $c['obj']->getChildObject("societe");
-                    if (!$soc or ! $soc->isLoaded())
+                    if (!$soc or!$soc->isLoaded())
                         $soc = $c['obj']->getChildObject("client");
 
                     if ($soc && $soc->isLoaded())
@@ -366,6 +381,10 @@ class BimpNote extends BimpObject
     {
         switch ((int) $this->getData('type_author')) {
             case self::BN_AUTHOR_USER:
+                $user = $this->getChildObject('user_create');
+                if (BimpObject::objectLoaded($user) && strtolower($user->getData('login')) === 'client_user') {
+                    return '';
+                }
                 return $this->displayData('user_create', 'nom_url', $display_input_value, $no_html);
 
             case self::BN_AUTHOR_SOC:
@@ -383,11 +402,10 @@ class BimpNote extends BimpObject
         global $user;
         $html = "";
 
-
         $author = $this->displayAuthor(false, true);
         $html .= '<div class="d-flex justify-content-' . ($this->i_am_dest() ? "start" : ($this->i_am_author() ? "end" : "")) . ($style == "petit" ? ' petit' : '') . ' mb-4">
             <span data-toggle="tooltip" data-placement="top" title="' . $author . '" class="chat-img pull-left">
-                <img src="'.BimpTools::getAvatarImgSrc($this->getInitiale($author), ($style == "petit" ? '35' : '55'), ($this->getData('type_author') == self::BN_AUTHOR_USER ? '55C1E7' : '5500E7')).'" alt="User Avatar" class="img-circle">
+                <img src="' . BimpTools::getAvatarImgSrc($this->getInitiale($author), ($style == "petit" ? '35' : '55'), ($this->getData('type_author') == self::BN_AUTHOR_USER ? '55C1E7' : '5500E7')) . '" alt="User Avatar" class="img-circle">
             </span>';
         $html .= '<div class="msg_cotainer">' . $this->getData("content");
         if ($style != "petit" && $this->getData('user_create') != $user->id)
@@ -399,13 +417,12 @@ class BimpNote extends BimpObject
             $dest = $this->displayDestinataire(false, true);
             if ($dest != "")
                 $html .= '    <span data-toggle="tooltip" data-placement="top" title="' . $dest . '" class="chat-img pull-left ' . ($this->getData("viewed") ? "" : "nonLu") . ($this->i_am_dest() ? " my" : "") . '">
-                                    <img src="'.BimpTools::getAvatarImgSrc($this->getInitiale($author), ($style == "petit" ? '28' : '45'), ($this->getData('type_dest') == self::BN_DEST_USER ? '55C1E7' : '5500E7')).'" alt="User Avatar" class="img-circle">
+                                    <img src="' . BimpTools::getAvatarImgSrc($this->getInitiale($author), ($style == "petit" ? '28' : '45'), ($this->getData('type_dest') == self::BN_DEST_USER ? '55C1E7' : '5500E7')) . '" alt="User Avatar" class="img-circle">
                                 </span>';
         }
         $html .= "";
 
         $html .= '</div>';
-
 
         if ($checkview) {
             $this->i_view();
@@ -431,7 +448,7 @@ class BimpNote extends BimpObject
         $data["viewed"] = 0;
 
         BimpObject::createBimpObject($this->module, $this->object_name, $data, true, $errors, $warnings);
-        
+
         return array(
             'errors'   => $errors,
             'warnings' => $warnings

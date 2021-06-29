@@ -28,6 +28,8 @@ class BimpMailCore
 
         $subject = str_replace(array($dolibarr_main_url_root, $_SERVER['SERVER_NAME'] . DOL_URL_ROOT), DOL_URL_ROOT, $subject);
         $subject = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $subject);
+        $msg = str_replace(array($dolibarr_main_url_root, $_SERVER['SERVER_NAME'] . DOL_URL_ROOT), DOL_URL_ROOT, $msg);
+        $msg = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $msg);
 
         if ($from == '') {
             $from = 'Application BIMP-ERP ' . $conf->global->MAIN_INFO_SOCIETE_NOM . ' <';

@@ -56,7 +56,7 @@ $(document).ready(function(){
                 console.log("Erreur PHP");
             },
             success: function (data) {
-                window.location.href = back.click();
+                document.location.reload();
             }
         });
         }

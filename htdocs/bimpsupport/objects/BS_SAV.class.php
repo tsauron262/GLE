@@ -1675,6 +1675,7 @@ class BS_SAV extends BimpObject
         }
 
         $onclick = 'window.open(\'' . GSX_v2::$urls['login'][GSX_v2::$mode] . '\', \'Authentification GSX\', \'menubar=no, status=no, width=800, height=600\')';
+        $html .= '<script>'.$onclick.'</script>';
         $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
         $html .= 'Réouvrir fenêtre d\'authentification' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
         $html .= '</span>';

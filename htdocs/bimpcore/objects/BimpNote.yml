@@ -208,6 +208,22 @@ lists:
             viewed:
                 edit: 1
                 
+    public: 
+        title: Suivi
+        icon: fas_history
+        checkboxes: 0
+        configurable: 0
+        enable_search: 0
+        sort_field: date_create
+        sort_way: asc
+        n: 50
+        cols:
+            author: 
+            date_create: 
+            content:
+                label: Message
+                edit: 1
+             
     message:
         extends: default
         title: Messages

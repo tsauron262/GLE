@@ -67,6 +67,8 @@ lists:
     default:
         title: Liste des lignes de l'avenant
         edit_btn: 1
+        sort_field: id
+        sort_way: asc
         panel: 0
         object_change_reload: BContract_avenant
         extra_btn:

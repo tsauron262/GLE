@@ -116,7 +116,7 @@ lists:
     default: 
         title: Lignes du contrat
         sort_field: rowid
-        sort_way: desc
+        sort_way: asc
         n: 20
         checkbox: 1
         edit_btn: 1

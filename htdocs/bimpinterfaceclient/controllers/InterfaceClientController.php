@@ -636,6 +636,18 @@ class InterfaceClientController extends BimpPublicController
                         } else {
                             $view = new BC_View($sav, 'public_client');
                             $html .= $view->renderHtml();
+
+                            $note = BimpObject::getInstance('bimpcore', 'BimpNote');
+                            $list = new BC_ListTable($note, 'public');
+                            $list->addFieldFilterValue('obj_type', 'bimp_object');
+                            $list->addFieldFilterValue('obj_module', 'bimpsupport');
+                            $list->addFieldFilterValue('obj_name', 'BS_SAV');
+                            $list->addFieldFilterValue('id_obj', (int) $sav->id);
+                            $list->addFieldFilterValue('visibility', 4);
+
+                            $html .= '<div style="margin-top: 30px">';
+                            $html .= $list->renderHtml();
+                            $html .= '</div>';
                         }
                     }
                 }

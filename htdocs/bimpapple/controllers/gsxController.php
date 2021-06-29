@@ -1105,12 +1105,14 @@ class gsxController extends BimpController
             
             $data = $this->gsx_v2->serialEligibility($serial);
 
-            foreach ($data['eligibilityDetails']['outcome'] as $out) {
-                if ($out['action'] == 'WARNING') {
-                    foreach ($out['reasons'] as $warn) {
-                        if ($warn['type'] == 'WARNING') {
-                            foreach ($warn['messages'] as $msg)
-                                $html .= '<div class="blink big">' . BimpRender::renderAlerts($msg) . '</div>';
+            if(isset($data['eligibilityDetails']['outcome']) && is_array($data['eligibilityDetails']['outcome'])){
+                foreach ($data['eligibilityDetails']['outcome'] as $out) {
+                    if ($out['action'] == 'WARNING') {
+                        foreach ($out['reasons'] as $warn) {
+                            if ($warn['type'] == 'WARNING') {
+                                foreach ($warn['messages'] as $msg)
+                                    $html .= '<div class="blink big">' . BimpRender::renderAlerts($msg) . '</div>';
+                            }
                         }
                     }
                 }

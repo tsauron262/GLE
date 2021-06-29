@@ -78,7 +78,7 @@ class Bimp_Vente extends BimpObject
         return $buttons;
     }
 
-    public function getLink($params = array())
+    public function getLink($params = Array(), $forced_context = '')
     {
         if ($this->isLoaded()) {
             $fac = $this->getChildObject('facture');

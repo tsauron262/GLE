@@ -93,7 +93,7 @@ if (BimpObject::objectLoaded($line)) {
                         ));
 
                         if (BimpObject::objectLoaded($res)) {
-                            $err = $res->setNewStatus(200, 1, $id_eq);
+                            $err = $res->setNewStatus(200, array('qty' => 1, 'id_equipment' => $id_eq));
 
                             if (count($err)) {
                                 echo 'ECHEC MAJ RESA<pre>';

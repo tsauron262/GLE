@@ -108,7 +108,7 @@ class BC_View extends BC_Panel
 
             $buttons = $this->object->config->getCompiledParams($this->config_path . '/buttons');
             
-            if (count($buttons)) {
+            if (is_array($buttons) && count($buttons)) {
                 foreach ($buttons as $button) {
                     if (!isset($button['data'])) {
                         $button['data'] = array();

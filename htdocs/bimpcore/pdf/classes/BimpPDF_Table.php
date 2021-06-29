@@ -232,9 +232,9 @@ class BimpPDF_Table
             $content .= $htmlAv . 'Dont écotaxe' . $htmlAp;
         if ($key == "pu_ht" && $eco > 0)
             $content .= $htmlAv . price($eco) . $htmlAp;
-        if ($key == "total_ht" && $eco > 0)
+        if ($key == "total_ht" && $eco > 0 && $qty)
             $content .= $htmlAv . price($eco * $qty) . $htmlAp;
-        if ($key == "total_ttc" && $eco > 0)
+        if ($key == "total_ttc" && $eco > 0 && $qty)
             $content .= $htmlAv . price($eco * $qty * $coefTaxe) . $htmlAp;
 
 
@@ -246,9 +246,9 @@ class BimpPDF_Table
             $content .= $htmlAv . 'Dont droit copie privé' . $htmlAp;
         if ($key == "pu_ht" && $rpcp > 0)
             $content .= $htmlAv . price($rpcp) . $htmlAp;
-        if ($key == "total_ht" && $rpcp > 0)
+        if ($key == "total_ht" && $rpcp > 0 && $qty)
             $content .= $htmlAv . price($rpcp * $qty) . $htmlAp;
-        if ($key == "total_ttc" && $rpcp > 0)
+        if ($key == "total_ttc" && $rpcp > 0 && $qty)
             $content .= $htmlAv . price($rpcp * $qty * $coefTaxe) . $htmlAp;
         return $content;
     }

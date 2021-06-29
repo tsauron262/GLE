@@ -825,5 +825,6 @@ class BimpRevalorisation extends BimpObject
         if (!count($errors) && BimpObject::objectLoaded($facture)) {
             $facture->onChildDelete($this);
         }
+        return $errors;
     }
 }

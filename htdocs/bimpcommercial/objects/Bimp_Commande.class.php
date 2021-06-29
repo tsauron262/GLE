@@ -3763,6 +3763,7 @@ class Bimp_Commande extends BimpComm
         }
 
         $errors = BimpTools::merge_array($errors, parent::onDelete($warnings));
+        return $errors;
     }
 
     public function checkObject($context = '', $field = '')

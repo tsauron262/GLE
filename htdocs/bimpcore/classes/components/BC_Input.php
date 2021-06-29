@@ -593,18 +593,20 @@ class BC_Input extends BimpComponent
                 }
             }
 
-            foreach ($this->value as $value) {
-                if (isset($this->field_params['values'][$value])) {
-                    if (is_array($this->field_params['values'][$value])) {
-                        if (isset($this->field_params['values'][$value]['label'])) {
-                            $values[$value] = $this->field_params['values'][$value]['label'];
+            if (is_array($this->value) && !empty($this->value)) {
+                foreach ($this->value as $value) {
+                    if (isset($this->field_params['values'][$value])) {
+                        if (is_array($this->field_params['values'][$value])) {
+                            if (isset($this->field_params['values'][$value]['label'])) {
+                                $values[$value] = $this->field_params['values'][$value]['label'];
+                            }
+                        } else {
+                            $values[$value] = $this->field_params['values'][$value];
                         }
-                    } else {
-                        $values[$value] = $this->field_params['values'][$value];
                     }
-                }
-                if (!isset($values[$value])) {
-                    $values[$value] = $value;
+                    if (!isset($values[$value])) {
+                        $values[$value] = $value;
+                    }
                 }
             }
             $content = BimpInput::renderMultipleValuesInput($this->object, $this->name_prefix . $this->input_name, $content, $values, $label_input_suffixe, $autosave, $required, $sortable, 'none', '', array(), $add_all_btn);

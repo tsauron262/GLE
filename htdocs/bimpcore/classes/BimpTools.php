@@ -332,6 +332,7 @@ class BimpTools
         if (is_null($date) || !$date) {
             return '';
         }
+        
         $DT = new DateTime($date);
         return (int) $DT->format('U');
     }
@@ -1785,6 +1786,9 @@ class BimpTools
 
     public function printDate($date, $balise = "span", $class = '', $format = 'd/m/Y H:i:s', $format_mini = 'd / m / Y')
     {
+        if($date == '')
+            return '';
+        
         if (is_string($date) && stripos($date, '-') > 0) {
             $date = new DateTime($date);
         }
@@ -2705,6 +2709,8 @@ class BimpTools
     public static function json_decode_array($json)
     {
         $result = json_decode($json);
+        if($result == '')
+            return array();
         if (!is_array($result))
             $result = array($result);
         return $result;

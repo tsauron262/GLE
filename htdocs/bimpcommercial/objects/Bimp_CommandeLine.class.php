@@ -30,7 +30,7 @@ class Bimp_CommandeLine extends ObjectLine
     );
 
     // droits users: 
-    
+
     public function canSetAction($action)
     {
         switch ($action) {
@@ -40,7 +40,7 @@ class Bimp_CommandeLine extends ObjectLine
         }
         return parent::canSetAction($action);
     }
-    
+
     // Getters booléens:
 
     public function isRemiseEditable()
@@ -404,14 +404,14 @@ class Bimp_CommandeLine extends ObjectLine
                         }
 
 //                        if (!$commande->hasRemisesGlobales()) {
-                            $buttons[] = array(
-                                'label'   => $label,
-                                'icon'    => 'fas_arrow-circle-left',
-                                'onclick' => $this->getJsActionOnclick('addReturnsFromLines', array(), array(
-                                    'form_name'      => 'returns_from_lines',
-                                    'on_form_submit' => 'function($form, extra_data) {return onAddReturnsFromLinesFormSubmit($form, extra_data);}'
-                                ))
-                            );
+                        $buttons[] = array(
+                            'label'   => $label,
+                            'icon'    => 'fas_arrow-circle-left',
+                            'onclick' => $this->getJsActionOnclick('addReturnsFromLines', array(), array(
+                                'form_name'      => 'returns_from_lines',
+                                'on_form_submit' => 'function($form, extra_data) {return onAddReturnsFromLinesFormSubmit($form, extra_data);}'
+                            ))
+                        );
 //                        }
                     }
                 }
@@ -1146,8 +1146,7 @@ class Bimp_CommandeLine extends ObjectLine
         if ($field == 'date') {
             if ($date > 0)
                 return date('Y-m-d H:i:s', $date);
-        }
-        elseif ($field == 'ref')
+        } elseif ($field == 'ref')
             return $ref;
         elseif ($field == 'nbBrouillon')
             return $nbBrouillon;
@@ -1179,8 +1178,7 @@ class Bimp_CommandeLine extends ObjectLine
         if ($field == 'date') {
             if ($date > 0)
                 return date('Y-m-d H:i:s', $date);
-        }
-        elseif ($field == 'ref')
+        } elseif ($field == 'ref')
             return $ref;
         return '';
     }
@@ -1765,7 +1763,6 @@ class Bimp_CommandeLine extends ObjectLine
 
             $product = $this->getProduct();
 
-
             if (BimpObject::objectLoaded($product) && $product->isTypeProduct()) {
                 $round_unit = round($base_unit);
 
@@ -2055,7 +2052,6 @@ class Bimp_CommandeLine extends ObjectLine
 
         $has_exp_periods = ((int) $this->getData('exp_periodicity') ? true : false);
         $has_fac_periods = ((int) $this->getData('fac_periodicity') ? true : false);
-
 
         // Qté totale
         if ($modif_qty) {
@@ -3301,7 +3297,6 @@ class Bimp_CommandeLine extends ObjectLine
             'extra_class' => 'line_facture_periods',
             'max_label'   => 1
         );
-
 
         if ($with_total_max) {
             $options['data']['total_max_value'] = (int) $this->getData('fac_nb_periods');
@@ -4628,7 +4623,10 @@ class Bimp_CommandeLine extends ObjectLine
                 if (is_null($id_equipment) || !(int) $id_equipment) {
                     continue;
                 }
-                $res_errors = $reservation->setNewStatus(200, 1, (int) $id_equipment);
+                $res_errors = $reservation->setNewStatus(200, array(
+                    'qty'          => 1,
+                    'id_equipment' => (int) $id_equipment
+                ));
                 if (count($res_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($res_errors, 'Echec de l\'attribution de l\'équipement ' . $id_equipment . ' à la réservation ' . $reservation->id);
                 } else {
@@ -4681,7 +4679,7 @@ class Bimp_CommandeLine extends ObjectLine
             }
             $remain_qty -= $res_qty;
 
-            $res_errors = $reservation->setNewStatus($new_status, $res_qty);
+            $res_errors = $reservation->setNewStatus($new_status, array('qty' => $res_qty));
             if (count($res_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la mise à jour du statut de la réservation d\'ID ' . $reservation->id);
             }
@@ -4738,7 +4736,6 @@ class Bimp_CommandeLine extends ObjectLine
 
             $product = $this->getProduct();
             $isSerialisable = 0;
-
 
             if (BimpObject::objectLoaded($product)) {
                 if ($product->isSerialisable()) {
@@ -4912,7 +4909,6 @@ class Bimp_CommandeLine extends ObjectLine
         $id_contact = (int) $shipment->getcontact();
         $id_entrepot = (int) $shipment->getData('id_entrepot');
 
-
         if (!BimpObject::objectLoaded($commande)) {
             return array('ID de la commande client absent ou invalide');
         }
@@ -4949,7 +4945,7 @@ class Bimp_CommandeLine extends ObjectLine
                                 if (!BimpObject::objectLoaded($equipment)) {
                                     $errors[] = 'L\'équipement d\'ID ' . $id_equipment . ' n\'existe pas';
                                 } else {
-                                    $res_errors = $reservation->setNewStatus(300, 1, $id_equipment);
+                                    $res_errors = $reservation->setNewStatus(300, array('qty' => 1, 'id_equipment' => $id_equipment));
                                     if (count($res_errors)) {
                                         $errors[] = BimpTools::getMsgFromArray($res_errors, 'Echec de la mise à jour du statut pour l\'équipement ' . $equipment->getData('serial'));
                                     } else {
@@ -4982,7 +4978,7 @@ class Bimp_CommandeLine extends ObjectLine
                             $qty = (int) $reservation->getData(('qty'));
                             $remain_qty -= $qty;
                         }
-                        $res_errors = $reservation->setNewStatus(300, $qty);
+                        $res_errors = $reservation->setNewStatus(300, array('qty' => $qty));
                         if (count($res_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($res_errors, 'Echec de la mise à jour du statut de la réservation d\'ID ' . $reservation->id);
                         } else {
@@ -5160,7 +5156,7 @@ class Bimp_CommandeLine extends ObjectLine
                             if (!BimpObject::objectLoaded($equipment)) {
                                 $errors[] = 'L\'équipement d\'ID ' . $id_equipment . ' n\'existe pas';
                             } else {
-                                $res_errors = $reservation->setNewStatus(200, 1, $id_equipment);
+                                $res_errors = $reservation->setNewStatus(200, array('qty' => 1, 'id_equipment' => $id_equipment));
                                 if (count($res_errors)) {
                                     $errors[] = BimpTools::getMsgFromArray($res_errors, 'Echec de la mise à jour du statut pour l\'équipement ' . $equipment->getData('serial'));
                                 } else {
@@ -5205,7 +5201,7 @@ class Bimp_CommandeLine extends ObjectLine
                         $qty = (int) $reservation->getData(('qty'));
                         $remain_qty -= $qty;
                     }
-                    $res_errors = $reservation->setNewStatus(200, $qty);
+                    $res_errors = $reservation->setNewStatus(200, array('qty' => $qty));
                     if (count($res_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($res_errors, 'Echec de la mise à jour du statut de la réservation d\'ID ' . $reservation->id);
                     } else {
@@ -5768,7 +5764,7 @@ class Bimp_CommandeLine extends ObjectLine
     }
 
     public function checkQties()
-    {        
+    {
         if ($this->isLoaded()) {
             $commande = $this->getParentInstance();
 
@@ -5814,8 +5810,7 @@ class Bimp_CommandeLine extends ObjectLine
                             $qty_billed_not_shipped = 0;
                         else
                             $qty_shipped_not_billed = 0;
-                    }
-                    else {
+                    } else {
                         if ($qty_billed_not_shipped < 0)
                             $qty_billed_not_shipped = 0;
                         else
@@ -5881,7 +5876,7 @@ class Bimp_CommandeLine extends ObjectLine
     }
 
     public function checkPeriodicityData($type = 'all')
-    {        
+    {
         if (!in_array($type, array('all', 'exp', 'fac', 'achat'))) {
             return;
         }
@@ -6104,7 +6099,6 @@ class Bimp_CommandeLine extends ObjectLine
                     $line->id_product = (int) $product->id;
                     $line->qty = (float) $qty;
 
-
                     switch ($type_price) {
                         case 1:
                             $id_fourn_price = isset($data['id_fourn_price']) ? (int) $data['id_fourn_price'] : 0;
@@ -6222,7 +6216,7 @@ class Bimp_CommandeLine extends ObjectLine
                                             $remain_qty = 0;
                                         }
 
-                                        $res_errors = $reservation->setNewStatus(100, $res_qty);
+                                        $res_errors = $reservation->setNewStatus(100, array('qty' => $res_qty));
 
                                         if (count($res_errors)) {
                                             $warnings[] = BimpTools::getMsgFromArray($res_errors, 'Echec de la mise à jour du statut des produits pour ' . $res_qty . ' unité(s)');
@@ -6277,7 +6271,7 @@ class Bimp_CommandeLine extends ObjectLine
                                 $remain_qty = 0;
                             }
 
-                            $res_errors = $reservation->setNewStatus(0, $res_qty);
+                            $res_errors = $reservation->setNewStatus(0, array('qty' => $res_qty));
 
                             if (count($res_errors)) {
                                 $warnings[] = BimpTools::getMsgFromArray($res_errors, 'Echec de la mise à jour du statut des produits pour ' . $res_qty . ' unité(s)');

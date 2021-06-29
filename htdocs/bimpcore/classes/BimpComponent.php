@@ -237,7 +237,7 @@ abstract class BimpComponent
                     if (!is_null($path)) {
                         $values = $config->get($path . '/' . $name, array(), $required, 'array');
                         $param = array();
-                        if (!is_null($values)) {
+                        if (is_array($values) && !empty($values)) {
                             foreach ($values as $key => $val) {
                                 $param[] = $key;
                             }

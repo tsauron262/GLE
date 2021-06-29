@@ -461,7 +461,7 @@ class Bimp_Propal extends BimpComm
                             $errors = 'Vous n\'avez pas la permission';
                         }
                     }
-                    if (count($errors)) {
+                    if (is_array($errors) && count($errors)) {
                         $buttons[] = array(
                             'label'    => 'Réviser',
                             'icon'     => 'fas_undo',
@@ -954,7 +954,7 @@ class Bimp_Propal extends BimpComm
 
         $date_diff = 0;
         if (isset($new_data['date_livraison']) && $new_data['date_livraison'] !== $this->getData('date_livraison')) {
-            $date_diff = (int) BimpTools::getDateForDolDate($new_data['date_livraison']) - (BimpTools::getDateForDolDate($this->getData('date_livraison')));
+            $date_diff = (int) BimpTools::getDateForDolDate($new_data['date_livraison']) - (int) BimpTools::getDateForDolDate($this->getData('date_livraison'));
         }
 
         $now = date('Y-m-d H:i:s');

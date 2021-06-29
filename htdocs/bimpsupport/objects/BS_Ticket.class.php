@@ -136,26 +136,20 @@ class BS_Ticket extends BimpObject
 
     public function isFieldEditable($field, $force_edit = false)
     {
-        $is_client_request = $this->isUserClientRequest();
-        $is_public = BimpCore::isContextPublic();
-        $is_processing = $this->isProcessing();
-
         switch ($field) {
             case 'sujet':
                 if (!$this->isLoaded()) {
                     return 1;
                 }
 
-                if ($is_processing) {
-                    return 0;
-                }
-                if ($is_public) {
-                    if ($is_client_request) {
+                if (BimpCore::isContextPublic()) {
+                    if ($this->isProcessing()) {
+                        return 0;
+                    }
+
+                    if ($this->isUserClientRequest()) {
                         return 1;
                     }
-                    return 0;
-                }
-                if ($is_client_request) {
                     return 0;
                 }
                 return 1;
@@ -922,17 +916,19 @@ class BS_Ticket extends BimpObject
     {
         global $userClient, $user;
         $isPublic = BimpCore::isContextPublic();
+        
+        $errors = array();
 
         if ($isPublic) {
             if (!(int) $this->getData('id_contrat')) {
                 return array('Vous devez obligatoire sélectionner un contrat actif pour ouvrir un nouveau ticket support');
             } else {
                 $contrat = $this->getChildObject('bimp_contrat');
-                
+
                 if (!BimpObject::objectLoaded($contrat)) {
                     return array('Le contrat sélectionner n\'existe plus');
                 } elseif (!$contrat->isValide()) {
-                    return array('Le contrat ' . $contrat->getRef() .' n\'est plus actif');
+                    return array('Le contrat ' . $contrat->getRef() . ' n\'est plus actif');
                 }
             }
             $this->set('id_user_resp', 0);
@@ -1077,7 +1073,7 @@ class BS_Ticket extends BimpObject
                         $subject = 'BIMP - Mise à jour de votre ticket support n°' . $this->getData('ticket_number');
                         $msg = 'Bonjour,<br/><br/>';
                         $msg .= 'Votre ticket support n°<b>' . $this->getData('ticket_number') . '</b> est passé au statut "' . self::$status_list[(int) $this->getData('status')]['label'] . '".<br/><br/>';
-                        $public_url = $this->$this->getPublicUrl();
+                        $public_url = $this->getPublicUrl();
                         if ($public_url) {
                             $msg .= '<a href="' . $public_url . '">Cliquez ici</a> pour accéder au détail de votre ticket support sur notre site www.bimp.fr';
                         }

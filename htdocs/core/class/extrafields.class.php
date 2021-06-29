@@ -887,12 +887,16 @@ class ExtraFields
                             if (!BimpCache::cacheServerExists($cache_key)) {
                                 $rows = array();     
                                 
-                                foreach ($this->attributes[$elementtype] as $field_name => $extrafields) {
-                                    foreach ($extrafields as $name => $value) {
-                                        if (!isset($rows[$name])) {
-                                            $rows[$name] = array();
+                                if (is_array($this->attributes[$elementtype]) && !empty($this->attributes[$elementtype])) {
+                                    foreach ($this->attributes[$elementtype] as $field_name => $extrafields) {
+                                        if($field_name != 'loaded'){
+                                            foreach ($extrafields as $name => $value) {
+                                                if (!isset($rows[$name])) {
+                                                    $rows[$name] = array();
+                                                }
+                                                $rows[$name][$field_name] = $value;
+                                            }
                                         }
-                                        $rows[$name][$field_name] = $value;
                                     }
                                 }
                                 

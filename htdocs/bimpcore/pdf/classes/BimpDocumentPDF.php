@@ -942,8 +942,11 @@ class BimpDocumentPDF extends BimpModelPDF
     {
         if ((int) $this->periodicity && (int) $this->nbPeriods > 0) {
             foreach ($champs as $nomChamp) {
-                if (isset($row[$nomChamp]))
+                if (isset($row[$nomChamp])){
+                    $row[$nomChamp] = str_replace(' ', '', $row[$nomChamp]);
+//                echo $row[$nomChamp].'pp';
                     $row[$nomChamp] = BimpTools::displayMoneyValue(str_replace(",", ".", $row[$nomChamp]) / $this->nbPeriods, '', 0, 0, 1);
+                }
             }
         }
         return $row;

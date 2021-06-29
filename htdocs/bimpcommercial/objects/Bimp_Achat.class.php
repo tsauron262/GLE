@@ -43,7 +43,7 @@ class Bimp_Achat extends BimpObject
         return BimpRender::renderAlerts('ID ' . $this->getLabel('of_the') . ' absent');
     }
 
-    public function getLink($params = array())
+    public function getLink($params = array(), $forced_context = '')
     {
         if ($this->isLoaded()) {
             $fac = $this->getChildObject('facture_fourn');

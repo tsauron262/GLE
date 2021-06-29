@@ -473,4 +473,14 @@ Abstract class BimpModelPDF
         }
         return array($width, $height);
     }
+
+    public function replaceHtmlStyles($html)
+    {
+        for ($i = 6; $i < 30; $i++) {
+            $html = str_replace('font-size: ' . $i . 'px', 'font-size: ' . ($i - 3) . 'px', $html);
+            $html = str_replace('font-size:' . $i . 'px', 'font-size:' . ($i - 3) . 'px', $html);
+        }
+
+        return $html;
+    }
 }

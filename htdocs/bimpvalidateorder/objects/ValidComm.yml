@@ -16,7 +16,7 @@ fields:
     secteur:
         label: Secteur
         values: 
-            array: secteurs
+            array: secteurAll
         required: 1
             
     type:

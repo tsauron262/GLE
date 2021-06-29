@@ -3029,7 +3029,7 @@ class BS_SAV extends BimpObject
                     $mail_msg .= ' est toujours associé à votre compte Apple iCloud.<br/><br/>';
 
                     $mail_msg .= 'Afin que nous puissions procéder à la réparation de votre matériel, <span style="text-decoration: underline">il est nécessaire que celui-ci soit supprimé de votre compte iCloud.</span><br/><br/>';
-                    $mail_msg .= 'Pour ce faire, vous pouvez suivre la procédure suivante depuis un navigateur internet : <br/><br/>';
+                    $mail_msg .= 'Pour se faire, vous pouvez suivre la procédure suivante depuis un navigateur internet : <br/><br/>';
 
                     $mail_msg .= '<ul>';
                     $mail_msg .= '<li>Connectez-vous au site <a href="https://www.icloud.com">www.icloud.com</a></li>';

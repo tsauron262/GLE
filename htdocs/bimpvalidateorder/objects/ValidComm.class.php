@@ -106,6 +106,7 @@ class ValidComm extends BimpObject
         
         $valid_comm = 1;
         $valid_encours = 1;
+        $valid_impaye = 1;
         
 //        return 1;
                        
@@ -187,7 +188,7 @@ class ValidComm extends BimpObject
     
     private function tryValidateByType($user, $type, $secteur, $class, $val, $bimp_object, &$errors) {
 //return 1; TODO
-        
+
         global $conf;
         if (!isset($conf->global->MAIN_MODULE_BIMPVALIDATEORDER))
             return 1;
@@ -254,9 +255,11 @@ class ValidComm extends BimpObject
             'user'    => array(
                 'in' => $user_groups
             ),
-            'secteur' => $secteur,
+            'secteur'  => array(
+                'in' => array($secteur, 'ALL')
+            ),
             'type'    => $type,
-            'type_de_piece'  => array(
+            'type_de_piece' => array(
                 'in' => array($object, self::OBJ_ALL)
             ),
             'val_max' => array(
@@ -311,7 +314,9 @@ class ValidComm extends BimpObject
             'user'    => array(
                 'in' => $user_groups
             ),
-            'secteur' => $secteur,
+            'secteur' => array(
+                'in' => array($secteur, 'ALL')
+            ),
             'type'    => self::TYPE_ENCOURS,
             'type_de_piece'  => array(
                 'in' => array($class, self::OBJ_ALL)
@@ -428,9 +433,8 @@ class ValidComm extends BimpObject
         
         // Personne ne peut valider
         if(!$id_user_affected) {
-            
+                        
             $type_nom = lcfirst(self::$types[$type]);
-//            $type_nom = (($type == self::TYPE_COMMERCIAL) ? 'commercialement': 'financièrement');
             
             switch ($type) {
                 case self::TYPE_COMMERCIAL:
@@ -443,7 +447,7 @@ class ValidComm extends BimpObject
                     break;
                 case self::TYPE_IMPAYE:
                     $val_nom = 'montant HT de ' . $val . '€';
-                    $type_nom = 'les impayé';
+                    $type_nom = 'les impayés de ';
                     break;
             }
             $secteur_nom = BimpCache::getSecteursArray()[$secteur];
@@ -452,7 +456,7 @@ class ValidComm extends BimpObject
                 . ' ' . $bimp_object->getLabel('the') . ' (pour le secteur ' . $secteur_nom
                 . ', ' . $val_nom . ', utilisateur ' . $user_ask->firstname . ' ' . $user_ask->lastname . ')';
             
-            $errors[] = $message . ". L'équipe de de débug est informée et va nommé un chargé de validation.";
+            $errors[] = $message . ". L'équipe de débug est informée et va nommé un chargé de validation.";
                       
             $lien = DOL_MAIN_URL_ROOT . '/' . $this->module;
             $message_mail = "Bonjour,<br/>" . $message;
@@ -460,7 +464,7 @@ class ValidComm extends BimpObject
             $message_mail .= "<br/><a href='$lien'>Module de validation</a>";
             $message_mail .= "<br/>Demandeur : " . $user_ask->firstname . ' ' . $user_ask->lastname;
   
-//            mailSyn2("Droits validation commerciale recquis", "dev@bimp.fr", null, $message_mail);
+            mailSyn2("Droits validation commerciale recquis", "dev@bimp.fr", null, $message_mail);
             return 0;
         }
                     
@@ -490,7 +494,7 @@ class ValidComm extends BimpObject
      * Trouve le premier valideur disponible
      */
     private function findValidator($type, $val, $secteur, $object, $user_ask, $bimp_object, &$val_comm_demande = 0) {
-        
+                
         if($type == self::TYPE_ENCOURS)
             $val += $this->getEncours ($bimp_object);
         
@@ -498,7 +502,9 @@ class ValidComm extends BimpObject
         $can_valid_avaible = 0;
         
         $filters = array(
-            'secteur' => $secteur,
+            'secteur' => array(
+                'in' => array($secteur, 'ALL')
+            ),
             'type'    => $type,
             'type_de_piece'  => array(
                 'in' => array($object, self::OBJ_ALL)
@@ -754,6 +760,8 @@ class DoliValidComm extends CommonObject {
         
         return print_r($errors, 1);
     }
+    
+    
 
     
 }

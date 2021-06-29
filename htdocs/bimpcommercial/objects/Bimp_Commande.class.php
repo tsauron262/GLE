@@ -120,11 +120,11 @@ class Bimp_Commande extends BimpComm
                 return $user->rights->bimpcommercial->factureAnticipe;
             case 'sendMailLatePayment':
                 $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
-                $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, (int) $this->id, ValidComm::TYPE_FINANCE);
+                $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, (int) $this->id, ValidComm::TYPE_ENCOURS);
 
                 if (is_a($demande, 'DemandeValidComm')) {
                     list($secteur, $class,, $val_euros) = $vc->getObjectParams($this, $errors);
-                    return $vc->userCanValidate((int) $user->id, $secteur, ValidComm::TYPE_FINANCE, $class, $val_euros, $this);
+                    return $vc->userCanValidate((int) $user->id, $secteur, ValidComm::TYPE_ENCOURS, $class, $val_euros, $this);
                 }
         }
         return parent::canSetAction($action);
@@ -278,7 +278,7 @@ class Bimp_Commande extends BimpComm
                 }
                 // A une demande de validation financière
                 $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
-                if ($vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_FINANCE) == 0) {
+                if ($vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_IMPAYE) == 0) {
                     $errors[] = "Aucune demande de validation pour cette commande";
                     return 0;
                 }
@@ -750,9 +750,9 @@ class Bimp_Commande extends BimpComm
         // Envoyer mail à l'utilisateur qui a fait une demande de validation
         // pour relancer le client si il y a des impayé
         if ($this->isActionAllowed('sendMailLatePayment') /* && $this->canSetAction('sendMailLatePayment') */) {
-            $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
-            $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_FINANCE);
-            if (is_a($demande, 'DemandeValidComm')) {
+            $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'DemandeValidComm');
+            $demande = $vc->demandeExists(DemandeValidComm::OBJ_COMMANDE, $this->id, DemandeValidComm::TYPE_ENCOURS);
+            if (is_a($demande, 'DemandeValidComm') and $demande->getData('status') == DemandeValidComm::STATUS_PROCESSING) {
                 $user_ask = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $demande->getData('id_user_ask'));
                 $confirm_msg = "Confirmer l\'envoie de mail à ";
                 $confirm_msg .= $user_ask->getData('firstname') . ' ' . $user_ask->getData('lastname');
@@ -3717,7 +3717,7 @@ class Bimp_Commande extends BimpComm
         if (empty($errors)) {
             if ($this->field_exists('paiement_comptant') and $this->getData('paiement_comptant')) {
                 $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
-                $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_FINANCE);
+                $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_ENCOURS);
                 if ($demande)
                     $demande->delete($warnings, 1);
                 $warnings[] = "La commande " . $this->getNomUrl(1, true) . " a été validée.";
@@ -3726,7 +3726,7 @@ class Bimp_Commande extends BimpComm
                 $client_facture = $this->getClientFacture();
                 if(!$client_facture->getData('validation_financiere')) {
                     $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
-                    $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_FINANCE);
+                    $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_ENCOURS);
                     if($demande)
                         $demande->delete($warnings, 1);
                     $warnings[] = "La commande " . $this->getNomUrl(1, true) . " a été validée (validation financière automatique, voir configuration client)";

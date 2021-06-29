@@ -80,10 +80,10 @@ class fiController extends BimpController {
                     $mailOk = true;
                     $isChecked = 'true';
                 }
-                if ($isChecked == 'true') {
+                elseif ($isChecked == 'true') {
                     $instance->updateField('type_signature', 2);
                 }
-                if ($sign == 'true') {
+                elseif ($sign == 'true') {
                     $instance->updateField('type_signature', 3);
                 }
                 $instance->updateField('date_signed', date('Y-m-d H:i:s'));

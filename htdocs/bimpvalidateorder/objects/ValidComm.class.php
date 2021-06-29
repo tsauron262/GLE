@@ -11,12 +11,14 @@ class ValidComm extends BimpObject
     const USER_SUP = -2;
 
     // Type
-    const TYPE_FINANCE = 0;
+    const TYPE_ENCOURS = 0;
     const TYPE_COMMERCIAL = 1;
+    const TYPE_IMPAYE = 2;
     
     public static $types = Array(
-        self::TYPE_FINANCE    => Array('label' => 'Financière',  'icon' => 'fas_search-dollar'),
-        self::TYPE_COMMERCIAL => Array('label' => 'Commerciale', 'icon' => 'fas_hand-holding-usd')
+        self::TYPE_ENCOURS    => Array('label' => 'Encours',     'icon' => 'fas_search-dollar'),
+        self::TYPE_COMMERCIAL => Array('label' => 'Commerciale', 'icon' => 'fas_hand-holding-usd'),
+        self::TYPE_IMPAYE     => Array('label' => 'Impayé',      'icon' => 'fas_dollar-sign')
     );
   
     // Piece
@@ -46,7 +48,7 @@ class ValidComm extends BimpObject
     
     public function getUnity() {
         
-        if((int) $this->getData('type') === self::TYPE_FINANCE)
+        if((int) $this->getData('type') === self::TYPE_ENCOURS)
             return 'float';
         
         return 'float';
@@ -103,7 +105,8 @@ class ValidComm extends BimpObject
 //        }
         
         $valid_comm = 1;
-        $valid_finan = 1;
+        $valid_encours = 1;
+        $valid_impaye = 1;
         
 //        return 1;
                        
@@ -128,20 +131,20 @@ class ValidComm extends BimpObject
         $errors = BimpTools::merge_array($errors, $bimp_object->checkContacts());
         $bimp_object->db = $this->db;
         
-        list($secteur, $class, $percent, $val_euros) = $this->getObjectParams($bimp_object, $errors);
+        list($secteur, $class, $percent, $val_euros, $rtp) = $this->getObjectParams($bimp_object, $errors);
         
         if(!empty($errors))
             return 0;
                 
-        // validation commerciale
+        // Validation commerciale
         if($percent != 0)
             $valid_comm = (int) $this->tryValidateByType($user, self::TYPE_COMMERCIAL, $secteur, $class, $percent, $bimp_object, $errors);
         
-        // Validation financière
+        // Validation encours
         if($val_euros != 0 && $this->getObjectClass($bimp_object) != self::OBJ_DEVIS) {
             if($bimp_object->field_exists('paiement_comptant') and $bimp_object->getData('paiement_comptant')) {
-                $success[] = "Validation financière forcée par le champ \"Paiement comptant\".";
-                $valid_finan = 1;
+                $success[] = "Validation encours forcée par le champ \"Paiement comptant\".";
+                $valid_encours = 1;
             } else {
                 if(method_exists($bimp_object, 'getClientFacture'))
                     $client = $bimp_object->getClientFacture();
@@ -149,31 +152,43 @@ class ValidComm extends BimpObject
                     $client = $bimp_object->getChildObject('client');
                 
                 if(!$client->getData('validation_financiere')) {
-                    $success[] = "Validation financière forcée par le champ \"Validation financière\".";
-                    $valid_finan = 1;
+                    $success[] = "Validation encours forcée par le champ \"Validation encours\".";
+                    $valid_encours = 1;
                 } else 
-                    $valid_finan = (int) $this->tryValidateByType($user, self::TYPE_FINANCE, $secteur, $class, $val_euros, $bimp_object, $errors);
+                    $valid_encours = (int) $this->tryValidateByType($user, self::TYPE_ENCOURS, $secteur, $class, $val_euros, $bimp_object, $errors);
             }
         }
             
+        // Validation impayé
+        if($rtp != 0 && $this->getObjectClass($bimp_object) != self::OBJ_DEVIS)
+            $valid_impaye = (int) $this->tryValidateByType($user, self::TYPE_IMPAYE, $secteur, $class, $rtp, $bimp_object, $errors);
+        
+        
+        // Ajout des erreurs/sucess
         if(!$valid_comm)
                 $errors[] = "Vous ne pouvez pas valider commercialement " 
                 . $bimp_object->getLabel('this') . '. La demande de validation commerciale a été adressée au valideur attribué.<br/>';
         else
             $success[] = "Validation commerciale effectuée.";
         
-        if(!$valid_finan)
-                $errors[] = $this->getErrorFinance($user, $bimp_object);
+        if(!$valid_encours)
+                $errors[] = $this->getErrorEncours($user, $bimp_object);
         else
-            $success[] = "Validation financière effectuée.";
+            $success[] = "Validation encours effectuée.";
+        
+        if(!$valid_impaye)
+                $errors[] = "Vous ne pouvez pas valider les impayés " 
+                . $bimp_object->getLabel('of_the') . '. La demande de validation d\'impayé a été adressée au valideur attribué.<br/>';
+        else
+            $success[] = "Validation d'impayé effectuée.";
                 
-        return $valid_comm and $valid_finan;
+        return $valid_comm and $valid_encours;
     }
     
     
     private function tryValidateByType($user, $type, $secteur, $class, $val, $bimp_object, &$errors) {
 //return 1; TODO
-        
+
         global $conf;
         if (!isset($conf->global->MAIN_MODULE_BIMPVALIDATEORDER))
             return 1;
@@ -219,7 +234,7 @@ class ValidComm extends BimpObject
     
     public function userCanValidate($id_user, $secteur, $type, $object, $val, $bimp_object, &$valid_comm = 0) {
         
-        if($type == self::TYPE_FINANCE) {
+        if($type == self::TYPE_ENCOURS) {
             $depassement_actuel = $this->getEncours($bimp_object);
             $val_max = $val + $depassement_actuel;
             
@@ -240,9 +255,11 @@ class ValidComm extends BimpObject
             'user'    => array(
                 'in' => $user_groups
             ),
-            'secteur' => $secteur,
+            'secteur'  => array(
+                'in' => array($secteur, 'ALL')
+            ),
             'type'    => $type,
-            'type_de_piece'  => array(
+            'type_de_piece' => array(
                 'in' => array($object, self::OBJ_ALL)
             ),
             'val_max' => array(
@@ -254,6 +271,7 @@ class ValidComm extends BimpObject
 //                'value'    => (isset($val_max)) ? $val_max : $val
 //            )
         );
+        
         $valid_comms = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'ValidComm', $filters);
 
         foreach($valid_comms as $vc) {
@@ -279,9 +297,9 @@ class ValidComm extends BimpObject
     }
     
     
-    private function getErrorFinance($user, $bimp_object) {
+    private function getErrorEncours($user, $bimp_object) {
         $id_user = (int) $user->id;
-        list($secteur, $class, $percent, $montant_piece) = $this->getObjectParams($bimp_object);
+        list($secteur, $class, $percent, $montant_piece, $rtp) = $this->getObjectParams($bimp_object);
         $error = '';
         
         $depassement_actuel = $this->getEncours($bimp_object);
@@ -296,8 +314,10 @@ class ValidComm extends BimpObject
             'user'    => array(
                 'in' => $user_groups
             ),
-            'secteur' => $secteur,
-            'type'    => self::TYPE_FINANCE,
+            'secteur' => array(
+                'in' => array($secteur, 'ALL')
+            ),
+            'type'    => self::TYPE_ENCOURS,
             'type_de_piece'  => array(
                 'in' => array($class, self::OBJ_ALL)
             )
@@ -310,17 +330,12 @@ class ValidComm extends BimpObject
             $error .= 'Dépassement de l\'encours du client ' . $depassement_actuel . '€<br/>';
             $error .= 'Montant ' . $bimp_object->getLabel('the') . ' ' . $montant_piece . '€<br/>';
             $error .= 'Dépassement après la validation ' . $depassement_futur . '€<br/>';
-            $error .= 'La demande de validation financière a été adressée au valideur attribué.<br/>';
+            $error .= 'La demande de validation d\'encours a été adressée au valideur attribué.<br/>';
             
             return $error;
         }
-        
-        $error .= 'Dépassement de l\'encours du client ' . $depassement_actuel . '€<br/>';
-        $error .= 'Montant ' . $bimp_object->getLabel('the') . ' ' . $montant_piece . '€<br/>';
-        $error .= 'Dépassement après la validation ' . $depassement_futur . '€<br/>';
-        $error .= 'La demande de validation financière a été adressée au valideur attribué.<br/>';
 
-        return $error;
+        return "";
     }
 
     private function isSupHierarchique($id_user) {
@@ -382,7 +397,16 @@ class ValidComm extends BimpObject
         else
             $val = (float) $object->getData('total');
         
-        return array($secteur, $class, $percent, $val);
+        // Impayé
+        if(method_exists($object, 'getClientFacture'))
+            $client = $object->getClientFacture();
+        else
+            $client = $object->getChildObject('client');
+        $rtp = $client->getTotalUnpayed();
+        if($rtp < 0)
+            $rtp = 0;
+        
+        return array($secteur, $class, $percent, $val, $rtp);
     }
     
     public static function getObjectClass($object) {
@@ -411,16 +435,30 @@ class ValidComm extends BimpObject
         
         // Personne ne peut valider
         if(!$id_user_affected) {
+                        
+            $type_nom = lcfirst(self::$types[$type]);
             
-            $type_nom = (($type == self::TYPE_COMMERCIAL) ? 'commercialement': 'financièrement');
-            $val_nom = (($type == self::TYPE_COMMERCIAL) ? ' remise de ' . $val . '%' : 'montant HT de ' . $val . '€');
+            switch ($type) {
+                case self::TYPE_COMMERCIAL:
+                    $val_nom = 'remise de ' . $val . '%';
+                    $type_nom = 'commercialement';
+                    break;
+                case self::TYPE_ENCOURS:
+                    $val_nom = 'montant HT de ' . $val . '€';
+                    $type_nom = 'financièrement';
+                    break;
+                case self::TYPE_IMPAYE:
+                    $val_nom = 'montant HT de ' . $val . '€';
+                    $type_nom = 'les impayés de ';
+                    break;
+            }
             $secteur_nom = BimpCache::getSecteursArray()[$secteur];
             
             $message =  'Aucun utilisateur ne peut valider ' . $type_nom
                 . ' ' . $bimp_object->getLabel('the') . ' (pour le secteur ' . $secteur_nom
                 . ', ' . $val_nom . ', utilisateur ' . $user_ask->firstname . ' ' . $user_ask->lastname . ')';
             
-            $errors[] = $message;
+            $errors[] = $message . ". L'équipe de débug est informée et va nommé un chargé de validation.";
                       
             $lien = DOL_MAIN_URL_ROOT . '/' . $this->module;
             $message_mail = "Bonjour,<br/>" . $message;
@@ -458,15 +496,17 @@ class ValidComm extends BimpObject
      * Trouve le premier valideur disponible
      */
     private function findValidator($type, $val, $secteur, $object, $user_ask, $bimp_object, &$val_comm_demande = 0) {
-        
-        if($type == self::TYPE_FINANCE)
+                
+        if($type == self::TYPE_ENCOURS)
             $val += $this->getEncours ($bimp_object);
         
         $can_valid_not_avaible = 0;
         $can_valid_avaible = 0;
-
+        
         $filters = array(
-            'secteur' => $secteur,
+            'secteur' => array(
+                'in' => array($secteur, 'ALL')
+            ),
             'type'    => $type,
             'type_de_piece'  => array(
                 'in' => array($object, self::OBJ_ALL)
@@ -568,9 +608,9 @@ class ValidComm extends BimpObject
             if(0 < (int) $item['id_object'] and $item['type'] == 'propal') {
                 $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', (int) $item['id_object']);
 
-                list($secteur, $class, $percent, $val_euros) = $this->getObjectParams($propal);
+                list($secteur, $class, $percent, $val_euros, $rtp) = $this->getObjectParams($propal);
 
-                /*if((int) $current_type == self::TYPE_FINANCE and $current_val <= $val_euros and in_array((int) $propal->getData('fk_statut'), array(1, 2, 4)))
+                /*if((int) $current_type == self::TYPE_ENCOURS and $current_val <= $val_euros and in_array((int) $propal->getData('fk_statut'), array(1, 2, 4)))
                     return 1;
                 else*/if((int) $current_type == self::TYPE_COMMERCIAL and $current_val <= $percent and in_array((int) $propal->getData('fk_statut'), array(1, 2, 4)))
                     return 1;
@@ -578,9 +618,9 @@ class ValidComm extends BimpObject
             } elseif(0 < (int) $item['id_object'] and $item['type'] == 'facture') {
                 $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $item['id_object']);
 
-                list($secteur, $class, $percent, $val_euros) = $this->getObjectParams($facture);
+                list($secteur, $class, $percent, $val_euros, $rtp) = $this->getObjectParams($facture);
                 
-                if((int) $current_type == self::TYPE_FINANCE  and $current_val <= $val_euros and in_array((int) $facture->getData('fk_statut'), array(1, 2)))
+                if((int) $current_type == self::TYPE_ENCOURS  and $current_val <= $val_euros and in_array((int) $facture->getData('fk_statut'), array(1, 2)))
                     return 1;
                 elseif((int) $current_type == self::TYPE_COMMERCIAL and $current_val <= $percent and in_array((int) $facture->getData('fk_statut'), array(1, 2)))
                     return 1;
@@ -588,9 +628,9 @@ class ValidComm extends BimpObject
             } elseif(0 < (int) $item['id_object'] and $item['type'] == 'commande') {
                 $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $item['id_object']);
 
-                list($secteur, $class, $percent, $val_euros) = $this->getObjectParams($commande);
+                list($secteur, $class, $percent, $val_euros, $rtp) = $this->getObjectParams($commande);
                 
-                if((int) $current_type == self::TYPE_FINANCE  and $current_val <= $val_euros and in_array((int) $commande->getData('fk_statut'), array(1, 3)))
+                if((int) $current_type == self::TYPE_ENCOURS  and $current_val <= $val_euros and in_array((int) $commande->getData('fk_statut'), array(1, 3)))
                     return 1;
                 elseif((int) $current_type == self::TYPE_COMMERCIAL and $current_val <= $percent and in_array((int) $commande->getData('fk_statut'), array(1, 3)))
                     return 1;                
@@ -722,6 +762,8 @@ class DoliValidComm extends CommonObject {
         
         return print_r($errors, 1);
     }
+    
+    
 
     
 }

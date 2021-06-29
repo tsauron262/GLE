@@ -1395,7 +1395,7 @@ class BT_ficheInter extends BimpDolObject {
             $today = new DateTime();
             $this->set('email_signature', $mail_signataire);
             $this->set('public_signature_url', $public_url);
-            $this->set('type_signature', 0);
+            $this->set('type_signature', 1);
             $this->set('public_signature_code', $new_password);
             $this->set('public_signature_date_delivrance', $today->format('Y-m-d H:i:s'));
             $this->set('fk_statut', self::STATUT_SIGANTURE_PAPIER);
@@ -1735,7 +1735,7 @@ class BT_ficheInter extends BimpDolObject {
 
         $extra = '<br />';
         $extra .= 'Signée :'.$this->displayData('signed').'<br/>';
-        $extra .= "<span>Interventions urgentes:'".$this->displayData('urgent')."</span>";
+        $extra .= "<span>Interventions urgentes :".$this->displayData('urgent')."</span>";
         $extra .= "<br /><span>".$this->displayTypeSignature()."</span>";
         //$extra .= "<br /><a href='".$this->url('facturation')."'>TAB Facturation</a>"; // TEMPORAIRE
         
@@ -1898,27 +1898,23 @@ class BT_ficheInter extends BimpDolObject {
         if($this->getData('fk_statut') == 0) {
             return "<strong class='warning'>".BimpRender::renderIcon("times")." Fiche d'intervention pas encore signée</strong>";
         } else {
+            if($this->getData('signed'))
+                $icon = "vimeo";
+            else 
+                $icon = "file";
+                
             switch($this->getData('type_signature')) {
                 case 0:
-                    if($this->getData('base_64_signature')) {
-                       $icon = "signature";
-                       $text = "Signature électronique";
-                    } else {
-                        $icon = "file";
-                        $text = "Signature électronique";
-                    }
+                    $text = "Signature électronique";
                     break;
                 case 1:
-                    $icon = "sign";
                     $text = "Signature à distance";
                     break;
                 case 2:
-                    $icon = "file";
                     $text = "Signature papier";
                     break;
                 case 3:
-                    $icon = "signature";
-                    $text = "Signature papier";
+                    $text = "Signature électronique";
                     break;
             }
             return "<strong'>".BimpRender::renderIcon($icon)." $text</strong>";

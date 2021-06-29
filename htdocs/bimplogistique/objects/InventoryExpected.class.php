@@ -184,7 +184,7 @@ class InventoryExpected extends BimpObject {
         return $errors;
     }
     
-    public function isDeletable() {
+    public function isDeletable($force_delete = false, &$errors = Array()) {
         
         if($this->getData('qty_scanned') != 0)
             return 0;

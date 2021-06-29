@@ -1905,7 +1905,7 @@ class BT_ficheInter extends BimpDolObject {
                 
             switch($this->getData('type_signature')) {
                 case 0:
-                    $text = "Signature électroniqueee";
+                    $text = "Signature électronique";
                     break;
                 case 1:
                     $text = "Signature à distance";

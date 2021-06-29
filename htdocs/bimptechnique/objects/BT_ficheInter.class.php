@@ -1393,15 +1393,16 @@ class BT_ficheInter extends BimpDolObject {
         if($haveFind) {
             $this->dol_object->setValid($user);
             $today = new DateTime();
-            $this->updateField('email_signature', $mail_signataire);
-            $this->updateField('public_signature_url', $public_url);
-            $this->updateField('public_signature_code', $new_password);
-            $this->updateField('public_signature_date_delivrance', $today->format('Y-m-d H:i:s'));
-            $this->updateField('fk_statut', self::STATUT_SIGANTURE_PAPIER);
+            $this->set('email_signature', $mail_signataire);
+            $this->set('public_signature_url', $public_url);
+            $this->set('type_signature', 0);
+            $this->set('public_signature_code', $new_password);
+            $this->set('public_signature_date_delivrance', $today->format('Y-m-d H:i:s'));
+            $this->set('fk_statut', self::STATUT_SIGANTURE_PAPIER);
             $today->add(new DateInterval("P4D"));
-            $this->updateField('public_signature_date_cloture', $today->format('Y-m-d H:i:s'));
-            
-            mailSyn2("BIMP - Rapport d'intervention - " . $this->getRef(), $email, null, "Bonjour, pouvez signer votre  rapport d'intervention à l'adresse suivante: "
+            $this->set('public_signature_date_cloture', $today->format('Y-m-d H:i:s'));
+            $this->update();
+            mailSyn2("BIMP - Rapport d'intervention - " . $this->getRef(), $mail_signataire, null, "Bonjour, merci de signer votre  rapport d'intervention à l'adresse suivante: "
                     . "<a href='".DOL_URL_ROOT . "/bimptechnique/public'>" . DOL_URL_ROOT . "/bimptechnique/public</a> en entrant votre nom ainsi que le mot de passe suivant: <b>$new_password</b><br />Cet accès n'est valable que 4 Jours calandaire."
                     . "<br /><br />Cordialement");
             $commercial = $this->getCommercialClient();
@@ -1893,7 +1894,7 @@ class BT_ficheInter extends BimpDolObject {
                        $text = "Signature électronique";
                     } else {
                         $icon = "file";
-                        $text = "Signature papier";
+                        $text = "Signature électronique";
                     }
                     break;
                 case 1:

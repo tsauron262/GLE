@@ -12,7 +12,8 @@ class Bimp_Product_Entrepot extends BimpObject
 
     public function __construct($module, $object_name)
     {
-        ini_set('memory_limit','1024M');
+        BimpCore::setMemoryLimit(1024);
+        
 //        $this->dateBilan = date('2019-10-01 00:00:01');
         $this->dateBilan = date('2021-05-01 00:00:01');
 //        $this->dateBilan = date('2019-06-30 00:00:01');

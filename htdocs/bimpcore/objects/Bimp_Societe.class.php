@@ -85,18 +85,22 @@ class Bimp_Societe extends BimpDolObject
         switch ($field_name) {
             case 'outstanding_limit':
                 return ($user->rights->bimpcommercial->admin_financier ? 1 : 0);
+                
             case 'outstanding_limit_credit_safe':
                 return 0;
+                
             case 'solvabilite_status':
             case 'status':
-                return ($user->admin || $user->rights->bimpcommercial->admin_recouvrement ? 1 : 0);
+                return (($user->admin || $user->rights->bimpcommercial->admin_recouvrement) ? 1 : 0);
 
             case 'commerciaux':
                 if ($user->rights->bimpcommercial->commerciauxToSoc)
                     return 1;
+                
                 $comm = $this->getCommercial(false);
                 if (!is_object($comm) || $comm->id == $user->id)
                     return 1;
+                
                 return 0;
 
             case 'relances_actives':

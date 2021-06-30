@@ -8716,8 +8716,9 @@ var options = {
                         continue;
                     }
 
-                    foreach ($instance->params['objects'] as $obj_conf_name => $obj_params) {
-                        if (!$obj_params['relation'] === 'hasOne') {
+                    foreach ($instance->params['objects'] as $obj_conf_name) {
+                        $obj_params = $instance->config->getParams('objects/' . $obj_conf_name);
+                        if ($obj_params['relation'] !== 'hasOne') {
                             continue;
                         }
 

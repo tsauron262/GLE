@@ -242,7 +242,7 @@ class BC_Panel extends BimpComponent
 
     public function renderFooterExtraBtn()
     {
-        if (count($this->params['footer_extra_btn'])) {
+        if (is_array($this->params['footer_extra_btn']) && count($this->params['footer_extra_btn'])) {
             $items = array();
 
             foreach ($this->params['footer_extra_btn'] as $action_params) {

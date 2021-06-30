@@ -85,9 +85,16 @@ class Bimp_Societe extends BimpDolObject
         switch ($field_name) {
             case 'outstanding_limit':
                 return ($user->rights->bimpcommercial->admin_financier ? 1 : 0);
+                
             case 'outstanding_limit_credit_safe':
                 return 0;
+                
             case 'solvabilite_status':
+                return ($user->admin || 
+                    $user->rights->bimpcommercial->gestion_recouvrement || 
+                    $user->rights->bimpcommercial->admin_recouvrement
+                    ? 1 : 0);
+                
             case 'status':
                 return ($user->admin || $user->rights->bimpcommercial->admin_recouvrement ? 1 : 0);
 

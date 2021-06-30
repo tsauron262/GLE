@@ -2853,6 +2853,8 @@ class BimpComm extends BimpDolObject
             $factureA->date = ($date_paiement) ? strtotime($date_paiement) : dol_now();
             $factureA->socid = $id_client;
             $factureA->cond_reglement_id = 1;
+            $factureA->mode_reglement_id = $this->getData('fk_mode_reglement');
+            $factureA->ref_client = $this->getData('ref_client');
             $factureA->modelpdf = 'bimpfact';
             $factureA->fk_account = $id_bank_account;
 

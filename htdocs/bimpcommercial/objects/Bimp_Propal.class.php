@@ -476,6 +476,7 @@ class Bimp_Propal extends BimpComm
                 // Accepter / Refuser
                 if ($this->isActionAllowed('close')) {
                     if ($this->canSetAction('close')) {
+                        $clientFact = $this->getClientFacture();
                         $buttons[] = array(
                             'label'   => 'Fermer (Accepter/Refuser)',
                             'icon'    => 'times',
@@ -489,7 +490,7 @@ class Bimp_Propal extends BimpComm
                             'fields' => array(
                                 'entrepot'           => (int) $this->getData('entrepot'),
                                 'ef_type'            => $this->getData('ef_type'),
-                                'fk_soc'             => (int) $this->getData('fk_soc'),
+                                'fk_soc'             => (int) $clientFact->id,
                                 'ref_client'         => $this->getData('ref_client'),
                                 'fk_cond_reglement'  => (int) $this->getData('fk_cond_reglement'),
                                 'fk_mode_reglement'  => (int) $this->getData('fk_mode_reglement'),
@@ -575,11 +576,12 @@ class Bimp_Propal extends BimpComm
                 // Créer commande: 
                 if ($this->isActionAllowed('createOrder') && $this->canSetAction('createOrder')) {
                     $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
+                    $clientFact = $this->getClientFacture();
                     $values = array(
                         'fields' => array(
                             'entrepot'          => (int) $this->getData('entrepot'),
                             'ef_type'           => $this->getData('ef_type'),
-                            'fk_soc'            => (int) $this->getData('fk_soc'),
+                            'fk_soc'            => (int) $clientFact->id,
                             'ref_client'        => $this->getData('ref_client'),
                             'fk_cond_reglement' => (int) $this->getData('fk_cond_reglement'),
                             'fk_mode_reglement' => (int) $this->getData('fk_mode_reglement'),

@@ -503,6 +503,13 @@ forms:
               value: 
                   conf: use_caisse_for_payments
             - custom: 1
+              label: Payée
+              input_name: payee
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 1
+            - custom: 1
               label: Paiement en caisse
               input_name: use_caisse
               data_type: bool
@@ -511,7 +518,9 @@ forms:
               value: 
                   conf: use_caisse_for_payments
               display_if: 
-                  field_name: caisse_active
+                - field_name: caisse_active
+                  hide_values: 0
+                - field_name: payee
                   hide_values: 0
             - custom: 1
               label: Caisse
@@ -539,6 +548,9 @@ forms:
                   type: select_payment
                   value_type: code
                   include_empty: 1
+              display_if: 
+                  field_name: payee
+                  hide_values: 0
             - custom: 1
               label: N° (chèque ou virement)
               input_name: num_paiement
@@ -572,6 +584,9 @@ forms:
               input:
                   type: date
                   display_now: 1
+              display_if: 
+                  field_name: payee
+                  hide_values: 0
             - custom: 1
               label: Montant
               input_name: amount

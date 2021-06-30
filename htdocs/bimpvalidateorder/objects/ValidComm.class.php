@@ -323,19 +323,20 @@ class ValidComm extends BimpObject
             )
         );
         
+        $maxUser = 0;
         $valid_comms = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'ValidComm', $filters, 'val_max', 'DESC');
-        
         foreach($valid_comms as $vc) {
-            $error .= 'Votre validation max ' . $vc->getData('val_max') . '€<br/>';
-            $error .= 'Dépassement de l\'encours du client ' . $depassement_actuel . '€<br/>';
-            $error .= 'Montant ' . $bimp_object->getLabel('the') . ' ' . $montant_piece . '€<br/>';
-            $error .= 'Dépassement après la validation ' . $depassement_futur . '€<br/>';
-            $error .= 'La demande de validation d\'encours a été adressée au valideur attribué.<br/>';
-            
-            return $error;
+            $maxUser = $vc->getData('val_max');
         }
+        
+        
+        $error .= 'Votre validation max ' . $maxUser . '€<br/>';
+        $error .= 'Dépassement de l\'encours du client ' . $depassement_actuel . '€<br/>';
+        $error .= 'Montant ' . $bimp_object->getLabel('the') . ' ' . $montant_piece . '€<br/>';
+        $error .= 'Dépassement après la validation ' . $depassement_futur . '€<br/>';
+        $error .= 'La demande de validation d\'encours a été adressée au valideur attribué.<br/>';
 
-        return "";
+        return $error;
     }
 
     private function isSupHierarchique($id_user) {

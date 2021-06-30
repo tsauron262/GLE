@@ -2790,7 +2790,7 @@ class BimpComm extends BimpDolObject
             return $errors;
         }
 
-        if ($use_caisse) {
+        if ($paye && $use_caisse) {
             $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
             $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
             if (!$id_caisse) {

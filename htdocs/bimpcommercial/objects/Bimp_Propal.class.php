@@ -614,13 +614,14 @@ class Bimp_Propal extends BimpComm
 
                 // Créer facture: 
                 if ($this->isActionAllowed('createInvoice') && $this->canSetAction('createInvoice')) {
+                    $clientFact = $this->getClientFacture();
                     if (!BimpCore::getConf('force_use_commande')) {
                         $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
                         $values = array(
                             'fields' => array(
                                 'entrepot'          => (int) $this->getData('entrepot'),
                                 'ef_type'           => $this->getData('ef_type'),
-                                'fk_soc'            => (int) $this->getData('fk_soc'),
+                                'fk_soc'            => (int) $clientFact->id,
                                 'ref_client'        => $this->getData('ref_client'),
                                 'fk_cond_reglement' => (int) $this->getData('fk_cond_reglement'),
                                 'fk_mode_reglement' => (int) $this->getData('fk_mode_reglement'),
@@ -654,7 +655,7 @@ class Bimp_Propal extends BimpComm
                     } else {
                         // Créer facture / avoir
                         if ($this->isActionAllowed('createInvoice') && $this->canSetAction('createInvoice')) {
-                            $url = DOL_URL_ROOT . '/compta/facture/card.php?action=create&origin=propal&originid=' . $this->id . '&socid=' . (int) $this->getData('fk_soc');
+                            $url = DOL_URL_ROOT . '/compta/facture/card.php?action=create&origin=propal&originid=' . $this->id . '&socid=' . (int) $clientFact->id;
                             $buttons[] = array(
                                 'label'   => 'Créer une facture ou un avoir',
                                 'icon'    => 'fas_file-invoice-dollar',

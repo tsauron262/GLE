@@ -899,42 +899,7 @@ class Bimp_Commande extends BimpComm
         return array();
     }
 
-    public function getClientFacture()
-    {
-        if ((int) $this->getData('id_client_facture')) {
-            $client = $this->getChildObject('client_facture');
-            if (BimpObject::objectLoaded($client)) {
-                return $client;
-            }
-        }
 
-        if ((int) $this->getData('fk_soc')) {
-            $client = $this->getChildObject('client');
-            if (BimpObject::objectLoaded($client)) {
-                return $client;
-            }
-        }
-
-        return null;
-    }
-
-    public function getClientFactureContactsArray()
-    {
-        $id_client_facture = BimpTools::getValue('id_client_facture');
-
-        if (is_null($id_client_facture)) {
-            $client = $this->getClientFacture();
-            if (BimpObject::objectLoaded($client)) {
-                $id_client_facture = $client->id;
-            }
-        }
-
-        if (!(int) $id_client_facture) {
-            return array();
-        }
-
-        return self::getSocieteContactsArray($id_client_facture);
-    }
 
     public function getPropalesOriginList()
     {

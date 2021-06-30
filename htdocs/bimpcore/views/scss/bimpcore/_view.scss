@@ -340,3 +340,9 @@
         padding: 10px;
     }
 }
+
+table.objectFieldHistoryTable {
+    & > tbody > tr > td {
+        padding: 2px 3px;
+    }
+}

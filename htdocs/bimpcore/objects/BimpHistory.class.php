@@ -77,13 +77,17 @@ class BimpHistory extends BimpObject
                     'object'    => $object->object_name,
                     'id_object' => (int) $object->id,
                     'field'     => $field
-                        ), null, null, 'date', 'desc', 'array', array(
+                        ), null, null, 'id', 'desc', 'array', array(
                     'id', 'id_user', 'date', 'value'
         ));
     }
 
     public function renderCard(BimpObject $object, $field, $limit = 15, $display_user = true, $display_title = true)
-    {        
+    {
+        if (!$object->field_exists($field)) {
+            return '';
+        }
+
         $list = $this->getHistory($object, $field);
 
         $html = '';
@@ -100,6 +104,8 @@ class BimpHistory extends BimpObject
             $html .= '<h5>' . $title . '</h5>';
         }
 
+        $values = $object->getConf('fields/' . $field . '/values', array(), false, 'array');
+
         $n = 1;
         if (count($list)) {
             global $db;
@@ -115,18 +121,36 @@ class BimpHistory extends BimpObject
                 $html .= ' à <span class="time">' . $DT->format('H:i:s') . '</span></td>';
 
                 if ($display_user) {
-                    $html .= '<td>';
+                    $html .= '<td style="padding-left: 5px">';
                     if (!is_null($item['id_user']) && $item['id_user']) {
                         if (!array_key_exists((int) $item['id_user'], $users)) {
                             $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $item['id_user']);
-                            $users[(int) $item['id_user']] = $user->getLink(array('card' => ''));
+                            $users[(int) $item['id_user']] = $user->getName();
                         }
                         $html .= $users[(int) $item['id_user']];
                     }
                     $html .= '</td>';
                 }
 
-                $html .= '<td>&nbsp;&nbsp;<span class="badge">' . $item['value'] . '</span></td>';
+                $html .= '<td style="padding-left: 5px">';
+                if (isset($values[$item['value']])) {
+                    $html .= '<span class="' . (isset($values[$item['value']]['classes']) ? implode(' ', $values[$item['value']]['classes']) : 'bold') . '">';
+                    if (isset($values[$item['value']]['icon'])) {
+                        $html .= BimpRender::renderIcon($values[$item['value']]['icon'], 'iconLeft');
+                    }
+                    if (is_string($values[$item['value']])) {
+                        $html .= $values[$item['value']];
+                    } elseif (isset($values[$item['value']]['label'])) {
+                        $html .= $values[$item['value']]['label'];
+                    } else {
+                        $html .= $item['value'];
+                    }
+                    $html .= '</span>';
+                } else {
+                    $html .= '<span class="badge">' . $item['value'] . '</span>';
+                }
+
+                $html .= '</td>';
                 $html .= '</tr>';
                 unset($DT);
                 $n++;

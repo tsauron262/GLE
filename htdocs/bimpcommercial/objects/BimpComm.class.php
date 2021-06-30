@@ -2771,7 +2771,7 @@ class BimpComm extends BimpDolObject
         return count($errors) ? 0 : 1;
     }
 
-    public function createAcompte($amount, $id_mode_paiement, $id_bank_account = 0, $date_paiement = null, $use_caisse = false, $num_paiement = '', $nom_emetteur = '', $banque_emetteur = '', &$warnings = array())
+    public function createAcompte($amount, $id_mode_paiement, $id_bank_account = 0, $paye = 1, $date_paiement = null, $use_caisse = false, $num_paiement = '', $nom_emetteur = '', $banque_emetteur = '', &$warnings = array())
     {
 
         global $user, $langs;
@@ -2782,7 +2782,6 @@ class BimpComm extends BimpDolObject
 
         $type_paiement = $id_mode_paiement;
 
-        $id_mode_paiement = $this->db->getValue('c_paiement', 'id', '`code` = \'' . $id_mode_paiement . '\'');
 
         if (!$this->useCaisseForPayments) {
             $use_caisse = false;
@@ -2791,7 +2790,7 @@ class BimpComm extends BimpDolObject
             return $errors;
         }
 
-        if ($use_caisse) {
+        if ($paye && $use_caisse) {
             $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
             $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
             if (!$id_caisse) {
@@ -2837,7 +2836,7 @@ class BimpComm extends BimpDolObject
             return $errors;
         }
 
-        $client = $this->getChildObject('client');
+        $client = $this->getClientFacture();
 
         if (!BimpObject::objectLoaded($client)) {
             $errors[] = 'Client absent';
@@ -2866,31 +2865,36 @@ class BimpComm extends BimpDolObject
             if ($factureA->create($user) <= 0) {
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($factureA), 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
             } else {
-                $factureA->addline("Acompte", $amount / 1.2, 1, 20, null, null, null, 0, null, null, null, null, null, 'HT', null, 1, null, null, null, null, null, null, $amount / 1.2);
+                $tva = BimpCore::getConf('tva_acompte', 0);
+                $ht = $amount / (100+$tva)*100;
+                $factureA->addline("Acompte", $ht, 1, $tva, null, null, null, 0, null, null, null, null, null, 'HT', null, 1, null, null, null, null, null, null, $ht);
                 $user->rights->facture->creer = 1;
                 $factureA->validate($user);
 
-                // Création du paiement: 
-                BimpTools::loadDolClass('compta/paiement', 'paiement');
-                $payement = new Paiement($this->db->db);
-                $payement->amounts = array($factureA->id => $amount);
-                $payement->datepaye = ($date_paiement ? BimpTools::getDateForDolDate($date_paiement) : dol_now());
-                $payement->paiementid = (int) $id_mode_paiement;
-                $payement->num_paiement = $num_paiement;
-                if ($payement->create($user) <= 0) {
-                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Des erreurs sont survenues lors de la création du paiement de la facture d\'acompte');
-                } else {
-                    // Ajout du paiement au compte bancaire: 
-                    if ($payement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_bank_account, $nom_emetteur, $banque_emetteur) < 0) {
-                        $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Echec de l\'ajout de l\'acompte au compte bancaire ' . $bank_account->bank);
-                    }
+                // Création du paiement:
+                if($paye){
+                    BimpTools::loadDolClass('compta/paiement', 'paiement');
+                    $payement = new Paiement($this->db->db);
+                    $payement->amounts = array($factureA->id => $amount);
+                    $payement->datepaye = ($date_paiement ? BimpTools::getDateForDolDate($date_paiement) : dol_now());
+                    $id_mode_paiement = $this->db->getValue('c_paiement', 'id', '`code` = \'' . $id_mode_paiement . '\'');
+                    $payement->paiementid = (int) $id_mode_paiement;
+                    $payement->num_paiement = $num_paiement;
+                    if ($payement->create($user) <= 0) {
+                        $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Des erreurs sont survenues lors de la création du paiement de la facture d\'acompte');
+                    } else {
+                        // Ajout du paiement au compte bancaire: 
+                        if ($payement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_bank_account, $nom_emetteur, $banque_emetteur) < 0) {
+                            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Echec de l\'ajout de l\'acompte au compte bancaire ' . $bank_account->bank);
+                        }
 
-                    // Enregistrement du paiement caisse: 
-                    if ($use_caisse) {
-                        $errors = BimpTools::merge_array($errors, $caisse->addPaiement($payement, $factureA->id));
-                    }
+                        // Enregistrement du paiement caisse: 
+                        if ($use_caisse) {
+                            $errors = BimpTools::merge_array($errors, $caisse->addPaiement($payement, $factureA->id));
+                        }
 
-                    $factureA->set_paid($user);
+                        $factureA->set_paid($user);
+                    }
                 }
 
                 // Création de la remise client: 
@@ -2899,10 +2903,10 @@ class BimpComm extends BimpDolObject
                 $discount->description = "Acompte";
                 $discount->fk_soc = $factureA->socid;
                 $discount->fk_facture_source = $factureA->id;
-                $discount->amount_ht = $amount / 1.2;
+                $discount->amount_ht = $ht;
                 $discount->amount_ttc = $amount;
-                $discount->amount_tva = $amount - ($amount / 1.2);
-                $discount->tva_tx = 20;
+                $discount->amount_tva = $amount - ($ht);
+                $discount->tva_tx = $tva;
                 if ($discount->create($user) <= 0) {
                     $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($discount), 'Des erreurs sont survenues lors de la création de la remise sur acompte');
                 } else {
@@ -2924,6 +2928,44 @@ class BimpComm extends BimpDolObject
         }
 
         return $errors;
+    }
+    
+    
+    public function getClientFacture()
+    {
+        if ((int) $this->getData('id_client_facture')) {
+            $client = $this->getChildObject('client_facture');
+            if (BimpObject::objectLoaded($client)) {
+                return $client;
+            }
+        }
+
+        if ((int) $this->getData('fk_soc')) {
+            $client = $this->getChildObject('client');
+            if (BimpObject::objectLoaded($client)) {
+                return $client;
+            }
+        }
+
+        return null;
+    }
+    
+    public function getClientFactureContactsArray()
+    {
+        $id_client_facture = BimpTools::getValue('id_client_facture');
+
+        if (is_null($id_client_facture)) {
+            $client = $this->getClientFacture();
+            if (BimpObject::objectLoaded($client)) {
+                $id_client_facture = $client->id;
+            }
+        }
+
+        if (!(int) $id_client_facture) {
+            return array();
+        }
+
+        return self::getSocieteContactsArray($id_client_facture);
     }
 
     public function removeLinesTvaTx()
@@ -3787,6 +3829,7 @@ class BimpComm extends BimpDolObject
         $warnings = array();
         $success = 'Acompte créé avec succès';
 
+        $paye = isset($data['payee']) ? $data['payee'] : 0;
         $id_mode_paiement = isset($data['id_mode_paiement']) ? $data['id_mode_paiement'] : '';
         $id_bank_account = isset($data['bank_account']) ? (int) $data['bank_account'] : 0;
         $amount = isset($data['amount']) ? (float) $data['amount'] : 0;
@@ -3804,7 +3847,7 @@ class BimpComm extends BimpDolObject
             }
         }
 
-        if (!$id_mode_paiement) {
+        if ($paye && !$id_mode_paiement) {
             $errors[] = 'Mode de paiement absent';
         }
         if (!$amount) {
@@ -3833,7 +3876,7 @@ class BimpComm extends BimpDolObject
         }
 
         if (!count($errors)) {
-            $errors = $this->createAcompte($amount, $id_mode_paiement, $id_bank_account, $data['date'], $use_caisse, $num_paiement, $nom_emetteur, $banque_emetteur, $warnings);
+            $errors = $this->createAcompte($amount, $id_mode_paiement, $id_bank_account, $paye, $data['date'], $use_caisse, $num_paiement, $nom_emetteur, $banque_emetteur, $warnings);
         }
 
         return array(

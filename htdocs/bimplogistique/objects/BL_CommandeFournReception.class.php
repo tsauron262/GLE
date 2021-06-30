@@ -899,7 +899,7 @@ class BL_CommandeFournReception extends BimpObject
                         // *** Affichage équipements reçus: ***
                         $html .= '<tr>';
                         $html .= '<td colspan="4">';
-                        if (count($reception_data['equipments'])) {
+                        if (is_array($reception_data['equipments']) && count($reception_data['equipments'])) {
                             $html .= '<span class="bold">' . count($reception_data['equipments']) . ' équipements ajouté(s)</span>';
                         } else {
                             $html .= BimpRender::renderAlerts('Aucun équipement ajouté', 'info');

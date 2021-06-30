@@ -47,6 +47,12 @@ objects:
                 module: bimpcontract
                 name: BContract_contrat
                 
+    client_facture: 
+        extends: client
+        instance: 
+            id_object: 
+                field_value: id_client_facture
+                
 fields:
     datec: 
         label: Créée le
@@ -67,6 +73,17 @@ fields:
         input:
             help:
                 callback: getHelpDateRenouvellementContrat
+    id_client_facture: 
+        label: Client facturation
+        type: id_object
+        object: client_facture
+        default_value: 
+            field_value: 0
+        input: 
+            type: search_societe
+            societe_type: customer
+            card: default
+            help: Laissez vide si même client
     marge: 
         label: Marge
         type: money
@@ -147,6 +164,7 @@ forms:
                       object: 
                           global: user
                       name: id
+            - field: id_client_facture
             - field: entrepot
             - field: ef_type
             - field: fk_soc
@@ -447,6 +465,10 @@ fields_tables:
         rows: 
             - field: fk_soc
               display: card
+            - field: id_client_facture
+              display: card
+              show: 
+                  field_value: id_client_facture
             - field: ref_client
               edit: 
                   callback: isEditable

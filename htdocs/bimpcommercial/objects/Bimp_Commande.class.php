@@ -750,8 +750,12 @@ class Bimp_Commande extends BimpComm
         // Envoyer mail à l'utilisateur qui a fait une demande de validation
         // pour relancer le client si il y a des impayé
         if ($this->isActionAllowed('sendMailLatePayment') /* && $this->canSetAction('sendMailLatePayment') */) {
-            $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'DemandeValidComm');
+            BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
+            $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
             $demande = $vc->demandeExists(DemandeValidComm::OBJ_COMMANDE, $this->id, DemandeValidComm::TYPE_ENCOURS);
+            if (!is_a($demande, 'DemandeValidComm') || $demande->getData('status') != DemandeValidComm::STATUS_PROCESSING) {
+                $demande = $vc->demandeExists(DemandeValidComm::OBJ_COMMANDE, $this->id, DemandeValidComm::TYPE_IMPAYE);
+            }
             if (is_a($demande, 'DemandeValidComm') and $demande->getData('status') == DemandeValidComm::STATUS_PROCESSING) {
                 $user_ask = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $demande->getData('id_user_ask'));
                 $confirm_msg = "Confirmer l\'envoie de mail à ";
@@ -895,42 +899,7 @@ class Bimp_Commande extends BimpComm
         return array();
     }
 
-    public function getClientFacture()
-    {
-        if ((int) $this->getData('id_client_facture')) {
-            $client = $this->getChildObject('client_facture');
-            if (BimpObject::objectLoaded($client)) {
-                return $client;
-            }
-        }
 
-        if ((int) $this->getData('fk_soc')) {
-            $client = $this->getChildObject('client');
-            if (BimpObject::objectLoaded($client)) {
-                return $client;
-            }
-        }
-
-        return null;
-    }
-
-    public function getClientFactureContactsArray()
-    {
-        $id_client_facture = BimpTools::getValue('id_client_facture');
-
-        if (is_null($id_client_facture)) {
-            $client = $this->getClientFacture();
-            if (BimpObject::objectLoaded($client)) {
-                $id_client_facture = $client->id;
-            }
-        }
-
-        if (!(int) $id_client_facture) {
-            return array();
-        }
-
-        return self::getSocieteContactsArray($id_client_facture);
-    }
 
     public function getPropalesOriginList()
     {

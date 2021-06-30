@@ -28,6 +28,7 @@ class BimpObject extends BimpCache
     public $use_positions = false;
     public $params_defs = array(
         'abstract'                 => array('data_type' => 'bool', 'default' => 0),
+        'use_clones'               => array('data_type' => 'bool', 'default' => 1),
         'table'                    => array('default' => ''),
         'controller'               => array('default' => ''),
         'icon'                     => array('default' => ''),
@@ -84,22 +85,40 @@ class BimpObject extends BimpCache
 
     public static function getInstance($module, $object_name, $id_object = null, $parent = null)
     {
-        $file = DOL_DOCUMENT_ROOT . '/' . $module . '/objects/' . $object_name . '.class.php';
-        if (file_exists($file)) {
-            if (!class_exists($object_name)) {
-                require_once $file;
-            }
-            $className = $object_name;
-            $fileEx = PATH_EXTENDS . "/" . $module . '/objects/' . $object_name . '.class.php';
-            if (file_exists($fileEx)) {
-                require_once $fileEx;
-                if (class_exists($object_name . "Ex")) {
+        $className = 'BimpObject';
+
+        if ($module && $object_name) {
+            $file = DOL_DOCUMENT_ROOT . '/' . $module . '/objects/' . $object_name . '.class.php';
+            if (file_exists($file)) {
+                if (!class_exists($object_name)) {
+                    require_once $file;
+                }
+                $className = $object_name;
+
+                $fileEx = PATH_EXTENDS . "/" . $module . '/objects/' . $object_name . '.class.php';
+                if (file_exists($fileEx)) {
+                    if (!class_exists($object_name . "Ex")) {
+                        require_once $fileEx;
+                    }
                     $className = $object_name . "Ex";
                 }
             }
+        }
+
+        $instance = null;
+
+        if ($module && $object_name && (int) BimpCore::getConf('bimpcore_use_bimp_object_instances_clones', 0)) {
+            $cache_key = $module . '_' . $object_name . '_base_instance';
+            if (!isset(self::$cache[$cache_key])) {
+                self::$cache[$cache_key] = new $className($module, $object_name);
+            }
+            if (is_a(self::$cache[$cache_key], 'BimpObject') && (int) self::$cache[$cache_key]->params['use_clones']) {
+                $instance = clone self::$cache[$cache_key];
+            }
+        }
+
+        if (is_null($instance)) {
             $instance = new $className($module, $object_name);
-        } else {
-            $instance = new BimpObject($module, $object_name);
         }
 
         if (!is_null($id_object)) {
@@ -205,6 +224,12 @@ class BimpObject extends BimpCache
         }
 
         $this->addConfigExtraParams();
+    }
+
+    public function __clone()
+    {
+        $this->config = clone $this->config;
+        $this->config->instance = $this;
     }
 
     public function __destruct()
@@ -4120,19 +4145,20 @@ class BimpObject extends BimpCache
         $this->noFetchOnTrigger = false;
         return $errors;
     }
-    
-    public function updateFieldsMasse($ids, $fields, $filters = array()){
+
+    public function updateFieldsMasse($ids, $fields, $filters = array())
+    {
         //A amélioré grandement
-        
+
         $set = array();
-        foreach($fields as $field => $val){
-            $set[] = $this->getFieldSqlKey($field) .' = '.$this->getDbValue($field, $val);
+        foreach ($fields as $field => $val) {
+            $set[] = $this->getFieldSqlKey($field) . ' = ' . $this->getDbValue($field, $val);
         }
-        $filters = BimpTools::mergeSqlFilter($filters, $this->getPrimary(), array('in'=> $ids));
+        $filters = BimpTools::mergeSqlFilter($filters, $this->getPrimary(), array('in' => $ids));
 
         $where = BimpTools::getSqlWhere($filters);
-        
-        $req = 'UPDATE '.MAIN_DB_PREFIX.$this->getTable(). ' a SET '.implode(', ', $set). $where;
+
+        $req = 'UPDATE ' . MAIN_DB_PREFIX . $this->getTable() . ' a SET ' . implode(', ', $set) . $where;
 
         $this->db->execute($req);
     }
@@ -8690,8 +8716,9 @@ var options = {
                         continue;
                     }
 
-                    foreach ($instance->params['objects'] as $obj_conf_name => $obj_params) {
-                        if (!$obj_params['relation'] === 'hasOne') {
+                    foreach ($instance->params['objects'] as $obj_conf_name) {
+                        $obj_params = $instance->config->getParams('objects/' . $obj_conf_name);
+                        if ($obj_params['relation'] !== 'hasOne') {
                             continue;
                         }
 

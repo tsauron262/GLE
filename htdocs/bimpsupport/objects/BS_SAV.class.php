@@ -1322,6 +1322,7 @@ class BS_SAV extends BimpObject
     {
         if ((int) $this->getData('id_equipment')) {
             $equipement = $this->getChildObject('equipment');
+//            $equipement = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $this->getData('id_equipment'));
 
             if (!BimpObject::objectLoaded($equipement)) {
                 return $this->renderChildUnfoundMsg('id_equipment', $equipement);

@@ -53,7 +53,7 @@ class BimpCore
         global $noBootstrap, $conf;
         if ($noBootstrap)
             unset(static::$files['js'][2]);
-        if(BimpTools::getContext() != 'public')
+        if (BimpTools::getContext() != 'public')
             static::$files['js'][] = '/bimpcore/views/js/notification.js';
 
 
@@ -93,7 +93,7 @@ class BimpCore
             $html .= '};';
 
             // Fin inclusion notifications
-            $html .= 'var theme="' . (isset($user->conf->MAIN_THEME)? $user->conf->MAIN_THEME : $conf->global->MAIN_THEME) . '";';
+            $html .= 'var theme="' . (isset($user->conf->MAIN_THEME) ? $user->conf->MAIN_THEME : $conf->global->MAIN_THEME) . '";';
             $html .= '</script>';
 
             foreach (self::$files['js'] as $js_file) {
@@ -373,25 +373,25 @@ class BimpCore
     }
 
     // Gestion ini: 
-    
+
     public static function setMaxExecutionTime($time)
     {
+        set_time_limit(0);
+
         if ($time > self::$max_execution_time) {
             ini_set('max_execution_time', $time);
             self::$max_execution_time = $time;
         }
     }
-    
+
     public static function setMemoryLimit($limit)
     {
-        set_time_limit(0);
-        
         if ($limit > self::$memory_limit) {
             ini_set('memory_limit', $limit . 'M');
             self::$memory_limit = $limit;
         }
     }
-    
+
     // Gestion du contexte:
 
     public static function getContext()
@@ -448,8 +448,8 @@ class BimpCore
         if (is_null($bimp_logs_locked)) {
             $bimp_logs_locked = 0;
         }
-        
-        if(defined('ID_ERP'))
+
+        if (defined('ID_ERP'))
             $extra_data['id_erp'] = ID_ERP;
 
         if (!$bimp_logs_locked) {

@@ -96,14 +96,16 @@ class Bimp_Societe extends BimpDolObject
                     ? 1 : 0);
                 
             case 'status':
-                return ($user->admin || $user->rights->bimpcommercial->admin_recouvrement ? 1 : 0);
+                return (($user->admin || $user->rights->bimpcommercial->admin_recouvrement) ? 1 : 0);
 
             case 'commerciaux':
                 if ($user->rights->bimpcommercial->commerciauxToSoc)
                     return 1;
+                
                 $comm = $this->getCommercial(false);
                 if (!is_object($comm) || $comm->id == $user->id)
                     return 1;
+                
                 return 0;
 
             case 'relances_actives':

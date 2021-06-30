@@ -240,7 +240,7 @@ class BimpConfig
         if (BimpCache::getCacheServerType() != 'server') {
             return;
         }
-        
+
         switch (self::$cache_mode) {
             case 'per_file':
                 foreach (self::$params_cache_changes as $cache_key => $value) {
@@ -333,7 +333,7 @@ class BimpConfig
         // Récup depuis le cache s'il existe: 
         if (isset(self::$values_cache[$this->cache_key][$full_path])) {
             if (BimpDebug::isActive()) {
-                BimpDebug::$cache_infos['counts']['yml']['s'] ++;
+                BimpDebug::$cache_infos['counts']['yml']['s']++;
             }
 
             if (self::$values_cache[$this->cache_key][$full_path] === 'NOT_DEF') {
@@ -391,7 +391,7 @@ class BimpConfig
         self::$values_cache_changes[$this->cache_key] = 1;
 
         if (BimpDebug::isActive()) {
-            BimpDebug::$cache_infos['counts']['yml']['n'] ++;
+            BimpDebug::$cache_infos['counts']['yml']['n']++;
         }
 
         if (is_null($current)) {

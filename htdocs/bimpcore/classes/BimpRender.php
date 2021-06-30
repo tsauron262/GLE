@@ -246,51 +246,54 @@ class BimpRender
         $max = (isset($params['max']) ? (int) $params['max'] : 0);
 
         $buttons_html = array();
-        foreach ($buttons as $btn) {
-            $label = isset($btn['label']) ? $btn['label'] : '';
-            $icon = isset($btn['icon']) ? $btn['icon'] : '';
 
-            if ($label || $icon) {
-                $onclick = isset($btn['onclick']) ? $btn['onclick'] : '';
-                $disabled = isset($btn['disabled']) ? (int) $btn['disabled'] : 0;
-                $popover = isset($btn['popover']) ? (string) $btn['popover'] : '';
-                $classes = array('btn');
+        if (is_array($buttons) && !empty($buttons)) {
+            foreach ($buttons as $btn) {
+                $label = isset($btn['label']) ? $btn['label'] : '';
+                $icon = isset($btn['icon']) ? $btn['icon'] : '';
 
-                if ($max && count($buttons) > $max) {
-                    $classes[] = 'btn-light-' . (isset($btn['type']) ? $btn['type'] : 'default');
-                } else {
-                    $classes[] = (isset($btn['type']) ? 'btn-' . $btn['type'] : 'btn-default');
+                if ($label || $icon) {
+                    $onclick = isset($btn['onclick']) ? $btn['onclick'] : '';
+                    $disabled = isset($btn['disabled']) ? (int) $btn['disabled'] : 0;
+                    $popover = isset($btn['popover']) ? (string) $btn['popover'] : '';
+                    $classes = array('btn');
+
+                    if ($max && count($buttons) > $max) {
+                        $classes[] = 'btn-light-' . (isset($btn['type']) ? $btn['type'] : 'default');
+                    } else {
+                        $classes[] = (isset($btn['type']) ? 'btn-' . $btn['type'] : 'btn-default');
+                    }
+
+                    if ($disabled) {
+                        $classes[] = 'disabled';
+                    }
+
+                    if ($popover) {
+                        $classes[] = 'bs-popover';
+                    }
+
+                    $button = array(
+                        'classes' => $classes,
+                        'label'   => $label,
+                        'attr'    => array(
+                            'type'    => 'button',
+                            'onclick' => $onclick
+                        )
+                    );
+                    if ($icon) {
+                        $button['icon_before'] = $icon;
+                    }
+                    if ($popover) {
+                        $button['data']['toggle'] = 'popover';
+                        $button['data']['trigger'] = 'hover';
+                        $button['data']['container'] = 'body';
+                        $button['data']['placement'] = 'top';
+                        $button['data']['html'] = 'true';
+                        $button['data']['content'] = htmlentities($popover);
+                    }
+
+                    $buttons_html[] = BimpRender::renderButton($button, 'button');
                 }
-
-                if ($disabled) {
-                    $classes[] = 'disabled';
-                }
-
-                if ($popover) {
-                    $classes[] = 'bs-popover';
-                }
-
-                $button = array(
-                    'classes' => $classes,
-                    'label'   => $label,
-                    'attr'    => array(
-                        'type'    => 'button',
-                        'onclick' => $onclick
-                    )
-                );
-                if ($icon) {
-                    $button['icon_before'] = $icon;
-                }
-                if ($popover) {
-                    $button['data']['toggle'] = 'popover';
-                    $button['data']['trigger'] = 'hover';
-                    $button['data']['container'] = 'body';
-                    $button['data']['placement'] = 'top';
-                    $button['data']['html'] = 'true';
-                    $button['data']['content'] = htmlentities($popover);
-                }
-
-                $buttons_html[] = BimpRender::renderButton($button, 'button');
             }
         }
 

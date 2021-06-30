@@ -17924,6 +17924,10 @@ td.buttons {
     border: 1px solid #B4B4B4;
     padding: 10px; }
 
+/* line 345, ../scss/bimpcore/_view.scss */
+table.objectFieldHistoryTable > tbody > tr > td {
+  padding: 2px 3px; }
+
 @media print {
   /* line 2, ../scss/bimpcore/_print.scss */
   .no_print,

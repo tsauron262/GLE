@@ -2155,13 +2155,17 @@ function toggleInputDisplay($container, $input) {
             }
         }
     } else {
+        // Règle pour display_if sur plusieurs inputs: 
+        //      - Tous les show_values doivent être vrai pour afficher. 
+        //      - Si un seul hide_values vrai : champ masqué. 
+        
         var inputs_names = $container.data('inputs_names');
         if (inputs_names) {
             inputs_names += '';
             inputs_names = inputs_names.split(',');
             var $form = $container.findParentByClass('object_form');
             if ($.isOk($form)) {
-                show = false;
+                show = true;
                 var hide = false;
                 for (var i in inputs_names) {
                     $input = $form.find('[name="' + inputs_names[i] + '"]');
@@ -2171,13 +2175,17 @@ function toggleInputDisplay($container, $input) {
                         hide_values = $container.data('hide_values_' + inputs_names[i]);
 
                         if (typeof (show_values) !== 'undefined') {
+                            var input_check = false;
                             show_values += '';
                             show_values = show_values.split(',');
                             for (var j in show_values) {
                                 if (input_val == show_values[j]) {
-                                    show = true;
+                                    input_check = true;
                                     break;
                                 }
+                            }
+                            if (!input_check) {
+                                show = false;
                             }
                         }
                         if (typeof (hide_values) !== 'undefined') {
@@ -2192,6 +2200,7 @@ function toggleInputDisplay($container, $input) {
                         }
                     }
                 }
+                
                 if (hide) {
                     show = false;
                 }

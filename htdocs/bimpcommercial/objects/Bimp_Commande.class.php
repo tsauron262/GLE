@@ -753,6 +753,9 @@ class Bimp_Commande extends BimpComm
             BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
             $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
             $demande = $vc->demandeExists(DemandeValidComm::OBJ_COMMANDE, $this->id, DemandeValidComm::TYPE_ENCOURS);
+            if (!is_a($demande, 'DemandeValidComm') || $demande->getData('status') != DemandeValidComm::STATUS_PROCESSING) {
+                $demande = $vc->demandeExists(DemandeValidComm::OBJ_COMMANDE, $this->id, DemandeValidComm::TYPE_IMPAYE);
+            }
             if (is_a($demande, 'DemandeValidComm') and $demande->getData('status') == DemandeValidComm::STATUS_PROCESSING) {
                 $user_ask = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $demande->getData('id_user_ask'));
                 $confirm_msg = "Confirmer l\'envoie de mail à ";

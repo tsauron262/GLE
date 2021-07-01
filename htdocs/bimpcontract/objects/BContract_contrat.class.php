@@ -2296,7 +2296,7 @@ class BContract_contrat extends BimpDolObject
 
         foreach ($lines as $line) {
 
-            $serials = json_decode($line['serials']);
+            $serials = BimpTools::json_decode_array($line['serials']);
 
             if (count($serials))
                 $have_serial = true;

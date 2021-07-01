@@ -490,7 +490,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $client->fetch($contrat->socid);
                 $pdf = "";
                 $pdf1 = "";
-                $nblignes = sizeof($contrat->lignes);
+//                $nblignes = sizeof($contrat->lignes);
                 $pdf = pdf_getInstance($this->format);
                 $pdf1 = pdf_getInstance($this->format);
                 if (class_exists('TCPDF')) {

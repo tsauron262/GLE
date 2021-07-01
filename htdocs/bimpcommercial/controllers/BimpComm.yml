@@ -86,9 +86,9 @@ sections:
                           - id: divers
                             title: Divers (admin)
                             show: 
-                                  callback:
-                                      method: iAmAdmin
-                                      object: client
+                                callback:
+                                    method: iAmAdmin
+                                    object: bimp_comm
                             struct: 
                                   type: custom
                                   custom: 

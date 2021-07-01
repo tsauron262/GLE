@@ -746,8 +746,7 @@ class Bimp_Client extends Bimp_Societe
                     'in' => array(0, 1, 2, 3)
                 ),
                 'fk_statut'          => array(
-                    'operator' => '>',
-                    'value'    => 0
+                    'in' => array(1, 2)
                 ),
                 'date_lim_reglement' => array(
                     'operator' => '<',

@@ -160,7 +160,7 @@ class BContract_contratLine extends BContract_contrat {
     }
 
     public function displaySerialsList($textarea = false) {
-        $array = json_decode($this->getData('serials'));
+        $array = BimpTools::json_decode_array($this->getData('serials'));
         $html = '';
 
         if (!$textarea) {

@@ -522,6 +522,7 @@ abstract class BimpComponent
             'Composant'      => $this->component_name,
             'Type composant' => static::$type,
             'Nom'            => $this->name,
+            'Objet'          => $this->object->getLabel(),
             'Msg'            => $msg
         ));
     }

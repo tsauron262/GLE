@@ -938,6 +938,10 @@ class GSX_v2 extends GSX_Const
                 }
 
                 $errors[] = $msg;
+                if (isset($error['code']) && $error['code'] == 'UNAUTHORIZED'){
+                    $onclick = 'gsxLogOut();';
+                    $errors[] = '<a onclick="'.$onclick.'">Cliquez ici pour vous déconnecté de GSX.</a>';
+                }
             }
         }
 

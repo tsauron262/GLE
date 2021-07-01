@@ -3,7 +3,7 @@
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 require_once DOL_DOCUMENT_ROOT . '/bimptechnique/objects/BT_ficheInter.class.php';
 
-class BT_ficheInter_det extends BT_ficheInter {
+class BT_ficheInter_det extends BimpDolObject {
     
     CONST TYPE_INTER = 0;
     CONST TYPE_IMPON = 1;

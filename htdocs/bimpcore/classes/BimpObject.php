@@ -8740,7 +8740,7 @@ var options = {
                             }
                         }
 
-                        if ($obj_name && $obj_module) {//C'est bien un bimp object
+                        if ($obj_name && $obj_module && is_string($obj_name) && is_string($obj_module)) {//C'est bien un bimp object
                             $objTmp = BimpObject::getInstance($obj_module, $obj_name);
                             if ($obj_module === $module && is_a($objTmp, $object_name)) {
                                 //                        if ($obj_module === $module && $object_name == $obj_name) {
@@ -8940,6 +8940,7 @@ var options = {
         global $user;
         if ($user->admin)
             return 1;
+        return 0;
     }
 
     public static function priceToCsv($price)

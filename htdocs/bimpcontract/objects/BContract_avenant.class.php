@@ -93,10 +93,12 @@ class BContract_avenant extends BContract_contrat {
                     foreach($parent->dol_object->lines as $line) {
                         $laLigne->fetch($line->id);
                         if($laLigne->getData('renouvellement') == $parent->getData('current_renouvellement')) {
+                            $nbSerial = count(BimpTools::json_decode_array($laLigne->getData('serials')));
+                            
                             $det->set('id_avenant', $this->id);
                             $det->set('id_line_contrat', $laLigne->id);
                             $det->set('qty', $laLigne->getData('qty'));
-                            $det->set('ht', $laLigne->getData('subprice'));
+                            $det->set('ht', $laLigne->getData('subprice')/$nbSerial*$laLigne->getData('qty'));
                             $det->set('remise', $laLigne->getData('remise_percent'));
                             $det->set('description', $laLigne->getData('description'));
                             $det->set('serials_in', $laLigne->getData('serials'));

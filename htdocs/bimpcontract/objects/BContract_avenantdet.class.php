@@ -197,23 +197,23 @@ class BContract_avenantdet extends BContract_avenant {
                 );
             }
             
-            if($this->getData('in_contrat')) {
-                $buttons[] = array(
-                    'label'   => 'Supprimer la ligne de l\'avenant',
-                    'icon'    => 'fas_trash',
-                    'onclick' => $this->getJsActionOnclick('delLine', array(), array(
-
-                    ))
-                );
-            } else {
-                $buttons[] = array(
-                    'label'   => 'Remettre la ligne sur l\'avenant',
-                    'icon'    => 'fas_arrow-left',
-                    'onclick' => $this->getJsActionOnclick('reLine', array(), array(
-
-                    ))
-                );
-            }
+//            if($this->getData('in_contrat')) {
+//                $buttons[] = array(
+//                    'label'   => 'Supprimer la ligne de l\'avenant',
+//                    'icon'    => 'fas_trash',
+//                    'onclick' => $this->getJsActionOnclick('delLine', array(), array(
+//
+//                    ))
+//                );
+//            } else {
+//                $buttons[] = array(
+//                    'label'   => 'Remettre la ligne sur l\'avenant',
+//                    'icon'    => 'fas_arrow-left',
+//                    'onclick' => $this->getJsActionOnclick('reLine', array(), array(
+//
+//                    ))
+//                );
+//            }
             
         }
         

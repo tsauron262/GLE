@@ -648,7 +648,7 @@ class BL_CommandeShipment extends BimpObject
                     if ($note) {
                         $note .= '<br/>';
                     }
-                    if (count($commandes > 1)) {
+                    if (count($commandes) > 1) {
                         $note .= 'Commande ' . $commande->getRef() . ': <br/>';
                     }
                     $note .= $commande_note;

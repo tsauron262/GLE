@@ -177,8 +177,9 @@ class ValidComm extends BimpObject
             $success[] = "Validation encours effectuée.";
         
         if(!$valid_impaye)
-                $errors[] = "Vous ne pouvez pas valider les impayés " 
-                . $bimp_object->getLabel('of_the') . '. La demande de validation d\'impayé a été adressée au valideur attribué.<br/>';
+                $errors[] = "Votre " . $bimp_object->getLabel() .  
+                " n'est pas encore validée car le compte client présente des retards de paiement " .
+                '. La demande de validation d\'impayé a été adressée au valideur attribué.<br/>';
         else
             $success[] = "Validation d'impayé effectuée.";
                 

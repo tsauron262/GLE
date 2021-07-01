@@ -136,7 +136,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
 
             if (file_exists($dir)) {   
                 $pdf = "";
-                $nblignes = sizeof($contrat->lignes);
+//                $nblignes = sizeof($contrat->lignes);
                 $pdf = pdf_getInstance($this->format);
                 if (class_exists('TCPDF')) {
                     $pdf->setPrintHeader(false);
@@ -144,7 +144,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 }
                 
                 $pdf1 = "";
-                $nblignes = sizeof($contrat->lignes);
+//                $nblignes = sizeof($contrat->lignes);
                 $pdf1 = pdf_getInstance($this->format);
                 if (class_exists('TCPDF')) {
                     $pdf1->setPrintHeader(false);
@@ -467,19 +467,19 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                         $old_serials = BimpTools::json_decode_array($line->getData('serials_out'));
 
                         if(is_object($contrat_line))
-                            $serials_in_contratLine = json_decode($contrat_line->getData('serials'));
+                            $serials_in_contratLine = BimpTools::json_decode_array($contrat_line->getData('serials'));
                         else
                             $serials_in_contratLine = array();
                         $pdf->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
                         $pdf->SetX(20);
                         $pdf1->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
                         $pdf1->SetX(20);
-                        $diff_add = array_diff(json_decode($line->getData('serials_in')), $serials_in_contratLine);
-                        $new_qty += count(json_decode($line->getData('serials_in')));
+                        $diff_add = array_diff(BimpTools::json_decode_array($line->getData('serials_in')), $serials_in_contratLine);
+                        $new_qty += count(BimpTools::json_decode_array($line->getData('serials_in')));
                         if(count($diff_add) > 0) {
                             $have_modif = true;
                             //$new_qty += count($diff_add);
-                            if(count($diff_array) > 1) {
+                            if(count($diff_add) > 1) {
                                 $pdf->Cell($W*5, 4, "- Numéros de séries ajoutés à ce contrat pour ce service", 0, null, 'L', false);
                                 $pdf1->Cell($W*5, 4, "- Numéros de séries ajoutés à ce contrat pour ce service", 0, null, 'L', false);
                             } else {

@@ -84,7 +84,7 @@ lists:
 #                value:
 #                    callback: getHtServ
             remise:
-            in_contrat:
+#            in_contrat:
             serials_in_:
                 label: Numéro de série conservés dans le contrat
                 value:

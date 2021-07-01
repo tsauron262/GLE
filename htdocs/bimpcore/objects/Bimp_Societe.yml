@@ -107,6 +107,7 @@ fields:
         type: int
         values: 
             array: status_list
+        history: 1
         user_edit: 1
         default_value: 1
         
@@ -387,6 +388,7 @@ fields:
         dol_prop: mode_reglement_id
         type: int
         user_edit: 1
+        history: 1
         values: 
             array: modeReglements
         default_value: 
@@ -398,6 +400,7 @@ fields:
         dol_prop: cond_reglement_id
         type: id
         user_edit: 1
+        history: 1
         values: 
             array: condReglements
         default_value: 

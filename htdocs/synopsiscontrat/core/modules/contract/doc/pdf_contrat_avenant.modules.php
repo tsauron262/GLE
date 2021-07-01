@@ -136,7 +136,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
 
             if (file_exists($dir)) {   
                 $pdf = "";
-                $nblignes = sizeof($contrat->lignes);
+//                $nblignes = sizeof($contrat->lignes);
                 $pdf = pdf_getInstance($this->format);
                 if (class_exists('TCPDF')) {
                     $pdf->setPrintHeader(false);
@@ -144,7 +144,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 }
                 
                 $pdf1 = "";
-                $nblignes = sizeof($contrat->lignes);
+//                $nblignes = sizeof($contrat->lignes);
                 $pdf1 = pdf_getInstance($this->format);
                 if (class_exists('TCPDF')) {
                     $pdf1->setPrintHeader(false);
@@ -324,7 +324,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 $client->fetch($contrat->socid);
                 
                 
-                $lignes_avenant = $this->avenant->getChildrenListArray('avenantdet');
+                $lignes_avenant = $this->avenant->getChildrenListArray('avenantdet', array(), 0,'id', 'asc');
                 $num_article = 1;
                 $print_article_modif = false;
                 $print_article_new = false;
@@ -360,7 +360,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                     $have_modif = false;
                     $line = $this->avenant->getChildObject('avenantdet', $id);
                     $current_ligne++;
-                    $need = 100; // En tete + Marge du bas + nombre de ligne contenu dans le service
+                    $need = 50; // En tete + Marge du bas + nombre de ligne contenu dans le service
                     
                     $currentY = (int) $pdf->getY();
                     $currentY = (int) $pdf1->getY();
@@ -438,7 +438,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                         $pdf1->Ln();
     //                    $pdf1->Cell($W * 2, 4, "- Service: " . $p->getData('ref'), 0, null, 'L', false);
     //                    $pdf1->Ln();
-                        if($line->getData('description')) {
+                        if($line->getData('description') != $contrat_line->getData('description')) {
                             $have_modif = true;
                             $pdf->Cell($W, 4, "- Nouvelle description du service", 0, null, 'L', false);
                             $pdf->Ln();$pdf->SetX(24);
@@ -464,22 +464,22 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                             $pdf1->Ln();$pdf1->SetX(20);
                         }
 
-                        $old_serials = json_decode($line->getData('serials_out'));
+                        $old_serials = BimpTools::json_decode_array($line->getData('serials_out'));
 
                         if(is_object($contrat_line))
-                            $serials_in_contratLine = json_decode($contrat_line->getData('serials'));
+                            $serials_in_contratLine = BimpTools::json_decode_array($contrat_line->getData('serials'));
                         else
                             $serials_in_contratLine = array();
                         $pdf->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
                         $pdf->SetX(20);
                         $pdf1->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
                         $pdf1->SetX(20);
-                        $diff_add = array_diff(json_decode($line->getData('serials_in')), $serials_in_contratLine);
-                        $new_qty += count(json_decode($line->getData('serials_in')));
+                        $diff_add = array_diff(BimpTools::json_decode_array($line->getData('serials_in')), $serials_in_contratLine);
+                        $new_qty += count(BimpTools::json_decode_array($line->getData('serials_in')));
                         if(count($diff_add) > 0) {
                             $have_modif = true;
                             //$new_qty += count($diff_add);
-                            if(count($diff_array) > 1) {
+                            if(count($diff_add) > 1) {
                                 $pdf->Cell($W*5, 4, "- Numéros de séries ajoutés à ce contrat pour ce service", 0, null, 'L', false);
                                 $pdf1->Cell($W*5, 4, "- Numéros de séries ajoutés à ce contrat pour ce service", 0, null, 'L', false);
                             } else {
@@ -511,6 +511,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                             $pdf->MultiCell($W * 10, 4, implode(',', json_decode($line->getData('serials_out'))) , 0, null, 'L', false);
                             $pdf1->Ln();$pdf1->SetX(24);
                             $pdf1->MultiCell($W * 10, 4, implode(',', json_decode($line->getData('serials_out'))) , 0, null, 'L', false);
+                            $pdf->Ln(); $pdf1->Ln();
                         }
 
                         if(!$have_modif) {
@@ -519,12 +520,11 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                             $pdf->MultiCell($W * 10, 4, "Aucun changement sur ce service" , 0, null, 'L', false);
                             $pdf1->MultiCell($W * 10, 4, "Aucun changement sur ce service" , 0, null, 'L', false);
                         } else {
-                            $pdf->Ln(); $pdf1->Ln();
                             $pdf->SetX(20); $pdf1->SetX(20);
                             $pdf->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
                             $pdf->MultiCell($W * 10, 4, "Nombre de numéro de série couvert par ce service: " . $new_qty , 0, null, 'L', false);
                             $pdf1->MultiCell($W * 10, 4, "Nombre de numéros de série couvert par ce service: " . $new_qty , 0, null, 'L', false);
-
+                            
                         }
                     
                     } 
@@ -544,7 +544,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
 //                        }
 //                    }
                     
-                    
+                    $pdf->Ln(); $pdf1->Ln();
                 }
                 $pdf->setY($pdf->getY() + 5);
                 $pdf->SetFont('', '', 8);

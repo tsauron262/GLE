@@ -2352,12 +2352,12 @@ class BimpObject extends BimpCache
 
         $child = $this->getChildObject($child_name);
         if (!is_a($child, 'BimpObject')) {
-            $errors[] = 'Objet endant "' . $child_name . '" invalide';
+            $errors[] = 'Objet enfant "' . $child_name . '" invalide';
         } else {
             switch ($relation) {
                 case 'hasOne':
                     if (!$child_id_prop) {
-                        $errors[] = 'Champ contenant l\'ID absent';
+                        $errors[] = 'Champ contenant l\'ID absent class '. get_class($this).' enfant '.$child_name;
                     } else {
                         $child_id_prop_sql_key = $this->getFieldSqlKey($child_id_prop, $main_alias, null, $filters, $joins, $errors);
 

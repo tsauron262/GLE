@@ -90,6 +90,11 @@ class Bimp_Societe extends BimpDolObject
                 return 0;
                 
             case 'solvabilite_status':
+                return ($user->admin || 
+                    $user->rights->bimpcommercial->gestion_recouvrement || 
+                    $user->rights->bimpcommercial->admin_recouvrement
+                    ? 1 : 0);
+                
             case 'status':
                 return (($user->admin || $user->rights->bimpcommercial->admin_recouvrement) ? 1 : 0);
 

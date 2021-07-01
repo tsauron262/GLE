@@ -162,6 +162,8 @@ class ValidComm extends BimpObject
         // Validation impayé
         if($rtp != 0 && $this->getObjectClass($bimp_object) != self::OBJ_DEVIS)
             $valid_impaye = (int) $this->tryValidateByType($user, self::TYPE_IMPAYE, $secteur, $class, $rtp, $bimp_object, $errors);
+        else
+            $this->validatePayed($class, $bimp_object);
         
         
         // Ajout des erreurs/sucess
@@ -407,7 +409,7 @@ class ValidComm extends BimpObject
         $rtp = $client->getTotalUnpayed();
         if($rtp < 0)
             $rtp = 0;
-        
+                
         return array($secteur, $class, $percent, $val, $rtp);
     }
     
@@ -642,6 +644,19 @@ class ValidComm extends BimpObject
         
         return 0;
     }
+    
+    public function validatePayed($class, $bimp_object) {
+        $demande = $this->demandeExists($class, $bimp_object->id, self::TYPE_IMPAYE);
+        
+        if($demande) {
+            $this->updateDemande($demande->getData('id_user_ask'), $class, $bimp_object->id,
+                    self::TYPE_IMPAYE, DemandeValidComm::STATUS_VALIDATED, -1);
+            return 1;
+        }
+        
+        return 0;
+    }
+
     
 }
 

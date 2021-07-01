@@ -4083,9 +4083,9 @@ class Bimp_Facture extends BimpComm
 
             $i = 0;
             BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
-            $discount = new DiscountAbsolute($this->db->db);
-            $discount->fetch(0, $this->id);
-            if (BimpObject::objectLoaded($discount)) {
+            $discountTest = new DiscountAbsolute($this->db->db);
+            $discountTest->fetch(0, $this->id);
+            if (BimpObject::objectLoaded($discountTest)) {
                 $errors[] = 'Cet Accompte a déja été converti';
             }
             else{
@@ -4107,7 +4107,7 @@ class Bimp_Facture extends BimpComm
 
                 $result = $discount->create($user);
                 if ($result < 0) {
-                    $msg = 'Echec de la création de la remise client';
+                    $msg = 'Echec de la création de la remise client '.$discount->error;
                     $sqlError = $db->lasterror();
                     if ($sqlError) {
                         $msg .= ' - ' . $sqlError;

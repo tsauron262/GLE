@@ -312,13 +312,13 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
             $array_services[$service['id']] = array('titre' => $service['titre'], 'description' => $service['content']);
         }
 
-        $nombre_lignes = (int) count($contrat->lines);
+//        $nombre_lignes = (int) count($contrat->lines);
         foreach ($contrat->lines as $line) {
             BimpTools::loadDolClass('product');
             $p = new Product($db);
             $p->fetch($line->fk_product);
             $current_ligne++;
-            $need = 10 + 60 + ((int) count($content_service)); // En tete + Marge du bas + nombre de ligne contenu dans le service
+            $need = 10 + 60;// + ((int) count($content_service)); // En tete + Marge du bas + nombre de ligne contenu dans le service
 
             $currentY = (int) $pdf->getY();
             $hauteur = (int) $this->page_hauteur;

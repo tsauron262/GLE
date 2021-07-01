@@ -464,7 +464,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                             $pdf1->Ln();$pdf1->SetX(20);
                         }
 
-                        $old_serials = json_decode($line->getData('serials_out'));
+                        $old_serials = BimpTools::json_decode_array($line->getData('serials_out'));
 
                         if(is_object($contrat_line))
                             $serials_in_contratLine = json_decode($contrat_line->getData('serials'));

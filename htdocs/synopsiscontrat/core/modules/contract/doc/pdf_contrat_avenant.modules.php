@@ -324,7 +324,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 $client->fetch($contrat->socid);
                 
                 
-                $lignes_avenant = $this->avenant->getChildrenListArray('avenantdet');
+                $lignes_avenant = $this->avenant->getChildrenListArray('avenantdet', array(), 0,'id', 'asc');
                 $num_article = 1;
                 $print_article_modif = false;
                 $print_article_new = false;

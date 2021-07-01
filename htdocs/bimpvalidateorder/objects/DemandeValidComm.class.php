@@ -130,7 +130,7 @@ class DemandeValidComm extends BimpObject
         $user_affected = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('id_user_affected'));
         $message_mail = 'Bonjour ' . $user_affected->getData('firstname') . ',<br/><br/>' . $message;
         
-            switch ($type) {
+            switch ($this->getData('type')) {
                 case self::TYPE_COMMERCIAL:
                     $type = 'commerciale';
                     break;
@@ -143,7 +143,7 @@ class DemandeValidComm extends BimpObject
             }
         
         $subject_mail = "Demande de validation $type";
-        
+                
         if ((int) $bimp_object->getData('fk_soc')) {
             
             if(method_exists($bimp_object, 'getClientFacture'))

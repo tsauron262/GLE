@@ -162,7 +162,7 @@ class ValidComm extends BimpObject
         // Validation impayé
         if($rtp != 0 && $this->getObjectClass($bimp_object) != self::OBJ_DEVIS)
             $valid_impaye = (int) $this->tryValidateByType($user, self::TYPE_IMPAYE, $secteur, $class, $rtp, $bimp_object, $errors);
-        else
+        elseif(!$rtp)
             $this->validatePayed($class, $bimp_object);
         
         

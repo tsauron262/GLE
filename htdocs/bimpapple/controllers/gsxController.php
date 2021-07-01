@@ -3904,6 +3904,17 @@ class gsxController extends BimpController
 
     // GSX Ajax V2:
 
+    protected function ajaxProcessGsxLogout()
+    {
+        global $user;
+        if (is_null($this->gsx_v2)) {
+            $this->gsx_v2 = GSX_v2::getInstance();
+        }
+        $this->gsx_v2->saveToken('acti', '');
+        $this->gsx_v2->saveToken('auth', '');
+        return '';
+    }
+
     protected function ajaxProcessGsxRequest()
     {
         if ((int) BimpTools::getValue('gsx_requestForm', 0)) {

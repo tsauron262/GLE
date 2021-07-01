@@ -33,6 +33,9 @@ var partDataType = {
 };
 
 // GSX V2:
+function gsxLogOut(){
+    new BimpAjax("gsxLogOut", {}, null, {url: dol_url_root + '/bimpapple/index.php'});
+}
 
 function GsxAjax(method, data, $resultContainer, params) {
 

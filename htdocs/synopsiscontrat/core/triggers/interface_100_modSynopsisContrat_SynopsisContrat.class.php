@@ -103,7 +103,7 @@ class InterfaceSynopsisContrat {
         global $db, $infoEvent;
         if ($action == "CONTRACT_MODIFY") {
             $object->fetch($object->id);
-            $date = date("Y-m-d H:i:s", $object->date_contrat);
+            $date = date("Y-m-d H:i:s", strtotime($object->date_contrat));
             $this->setDate($date, $date,$object);
         }
     }

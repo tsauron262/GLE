@@ -5251,6 +5251,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 }
             }
         }
+        return $errors;
     }
 
     // Méthodes statiques: 

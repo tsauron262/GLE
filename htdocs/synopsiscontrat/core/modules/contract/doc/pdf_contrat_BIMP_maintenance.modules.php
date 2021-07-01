@@ -382,7 +382,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
             
             $L = BimpObject::getInstance('bimpcontract', 'BContract_contratLine', $line->id);
             
-            $serials_tab = json_decode($L->getData('serials'));
+            $serials_tab = BimpTools::json_decode_array($L->getData('serials'));
             if(count($serials_tab) > 0) {
                 foreach ($serials_tab as $serial) {
                     $chaine_serial .= ", " . $serial;

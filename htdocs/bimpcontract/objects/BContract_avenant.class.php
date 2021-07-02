@@ -311,7 +311,7 @@ class BContract_avenant extends BContract_contrat {
         
         if($this->getData('statut') == 0) {
             $buttons[] = array(
-                'label'   => 'Validé l\'avenant',
+                'label'   => 'Valider l\'avenant',
                 'icon'    => 'fas_check',
                 'onclick' => $this->getJsActionOnclick('validate', array(), array(
                 ))

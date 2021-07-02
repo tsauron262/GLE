@@ -2612,6 +2612,8 @@ class BimpCache
         if (isset($logs[$type][$level])) {
             foreach ($logs[$type][$level] as $id_log => $log_data) {
                 if (isset($log_data['msg']) && $log_data['msg'] === (string) $msg) {
+                    unset($log_data['extra_data']['id_erp']);
+                    unset($extra_data['id_erp']);
                     if (isset($log_data['extra_data']) && $log_data['extra_data'] === (is_array($extra_data) ? json_encode($extra_data) : (string) $extra_data)) {
                         return (int) $id_log;
                     }

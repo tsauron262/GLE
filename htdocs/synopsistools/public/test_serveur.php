@@ -7,7 +7,7 @@ define("NOCSRFCHECK", 1); // We accept to go on this page from external web site
 require_once('../../main.inc.php');
 ini_set("display_errors", 1);
 
-if(defined('CLOSE_FOR_PROXY'))
+if(!defined('CLOSE_FOR_PROXY'))
     $error[] = 'Fermé par le fichier de conf';
 
 if(!count($error)){

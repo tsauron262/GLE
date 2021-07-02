@@ -174,7 +174,7 @@ class pdf_fi {
             
             if (file_exists($dir)) {                
                 $pdf = "";
-                $nblignes = sizeof($fi->lignes);
+//                $nblignes = sizeof($fi->lignes);
                 $pdf = pdf_getInstance($this->format);
                 if (class_exists('TCPDF')) {
                     $pdf->setPrintHeader(false);

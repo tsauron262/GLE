@@ -1819,6 +1819,9 @@ function main_area($title = '')
 
     print '<!-- Begin div class="fiche" -->' . "\n" . '<div class="fiche">' . "\n";
 
+    if(function_exists('hookDebutFiche'))
+        echo hookDebutFiche();
+    
     if (!empty($conf->global->MAIN_ONLY_LOGIN_ALLOWED))
         print info_admin($langs->trans("WarningYouAreInMaintenanceMode", $conf->global->MAIN_ONLY_LOGIN_ALLOWED));
 }

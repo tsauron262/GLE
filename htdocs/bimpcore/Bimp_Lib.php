@@ -234,3 +234,8 @@ function checkBimpCoreVersion()
         }
     }
 }
+
+function hookDebutFiche(){
+    BimpObject::loadClass('bimpcore', 'BimpAlert');
+    echo BimpAlert::getMsgs();
+}

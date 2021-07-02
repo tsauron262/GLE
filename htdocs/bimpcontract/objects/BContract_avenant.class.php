@@ -217,8 +217,11 @@ class BContract_avenant extends BContract_contrat {
                         $coup_ligne_tva = (20 * $coup_ligne_ht) / 100;
                         $coup_ligne_ttc = $coup_ligne_ht + $coup_ligne_tva;
 
+                        $cout = 0;
+                        if($added_qty > 0)
+                            $cout = $coup_ligne_ht / $added_qty;
                         $modifs_string = 
-                            'Coup 1: ' . $coup_ligne_ht / $added_qty . '<br />' . 
+                            'Coup 1 : ' . $cout . '<br />' . 
                             'Qty: ' . $ligne_du_contrat->getData('qty') . ' + ' . $added_qty . "<br />" .
                             'HT: ' . $ligne_du_contrat->getdata('total_ht') . " + " . $coup_ligne_ht . "€" . "<br />" .
                             'TVA: ' . $ligne_du_contrat->getData('total_tva') . " + " . $coup_ligne_tva . "€ <br />" .

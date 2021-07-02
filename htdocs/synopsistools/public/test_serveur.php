@@ -1,5 +1,4 @@
 <?php
-$error = array();
 
 define("NOLOGIN", 1);  // This means this output page does not require to be logged.
 define("NOCSRFCHECK", 1); // We accept to go on this page from external web site.
@@ -7,7 +6,8 @@ define("NOCSRFCHECK", 1); // We accept to go on this page from external web site
 require_once('../../main.inc.php');
 ini_set("display_errors", 1);
 
-if(!defined('CLOSE_FOR_PROXY'))
+$error = array();
+if(defined('CLOSE_FOR_PROXY'))
     $error[] = 'Fermé par le fichier de conf';
 
 if(!count($error)){

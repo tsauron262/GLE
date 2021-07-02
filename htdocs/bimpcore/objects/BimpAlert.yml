@@ -1,0 +1,60 @@
+table: bimpcore_alert
+common_fields: 0
+
+
+labels: 
+    name: alert
+    is_female: 1
+    
+    
+positions: 1
+
+position_insert: after
+
+fields: 
+    label: 
+        label: Titre
+    status:
+        label: Status
+        type: int
+        values: 
+            array: status_list
+        default_value: 0
+    conditionExec:
+        label: Code de condition
+        type: text
+        input: 
+            auto_expand: 1
+            help: Positionné $exec a 1 pour activer l'alert
+    execution:
+        label: Code a exécuter
+        type: text
+        input: 
+            auto_expand: 1
+    niveau:
+        label: Niveau d'alert
+        type: int
+        values: 
+            array: niveaux
+    msg: 
+        label: Message
+        
+        
+lists:
+    default:
+        positions: 1
+        positions_open: 1
+        title: Alerts
+        add_form_name: default
+        edit_form_name: default
+        delete_btn: 1
+        edit_btn: 1
+        sort_field: position
+        sort_way: asc
+        n: 10
+        cols:
+            status:
+            label:
+            niveau:
+            msg:
+                

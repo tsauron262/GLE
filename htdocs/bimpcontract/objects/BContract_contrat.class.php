@@ -3039,7 +3039,10 @@ class BContract_contrat extends BimpDolObject
                 $totalReste += $interval->d / 30;
             }
 //                dol_syslog('contrat d '.$interval->d,3);
-            $return = ($totalReste / $this->getData('periodicity'));
+            if($this->getData('periodicity') > 0)
+                $return = ($totalReste / $this->getData('periodicity'));
+            else
+                $return = $totalReste;
             //}
 
             return $return;

@@ -164,9 +164,11 @@ if(!$is_paiement){
                 $message .= '<b>Facture : <i ' . $color . ' >' . $affichage_facture . '</i></b><br />';
                 $message .= '<b>Ligne fichier TRA : <i ' . $color . ' >#' . $infos['LIGNE'] . '</i></b><br />';
                 $message .= '<b>Montant de l\'écart : <i ' . $color . ' >' . $infos['MONTANT'] . '€</i></b><br />';
-                foreach($infos['DETAILS'] as $det =>$v) {
-                    if($det != "NOMBRE")
-                        $message .= $det . " => ".$v."<br />";
+                if(isset($infos['DETAILS'])){
+                    foreach($infos['DETAILS'] as $det =>$v) {
+                        if($det != "NOMBRE")
+                            $message .= $det . " => ".$v."<br />";
+                    }
                 }
             }
         } else {

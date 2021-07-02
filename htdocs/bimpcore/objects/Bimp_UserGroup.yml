@@ -6,6 +6,9 @@ primary: rowid
 labels: 
     name: Groupe d'utilisateur
     
+nom_url: 
+    modal_view: ''
+    
 fields: 
     nom: 
         label: Nom

@@ -1646,16 +1646,27 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                                 $_POST = $post_tmp;
 
                                 if (!BimpObject::objectLoaded($userClient)) {
-                                    $debug .= BimpRender::renderAlerts($uc_errors);
-                                    BimpCore::addlog('RDV SAV CLIENT: Echec création utilisateur client', Bimp_Log::BIMP_LOG_URGENT, 'bic', null, array(
-                                        'Erreurs'  => $uc_errors,
-                                        'Warnings' => $uc_warnings,
-                                        'Données'  => $uc_data
+                                    // On recherche à nouveau le userClient: 
+                                    $userClient = BimpCache::findBimpObjectInstance('bimpinterfaceclient', 'BIC_UserClient', array(
+                                                'email_custom' => array(
+                                                    'custom' => 'LOWER(email) = \'' . strtolower($data['client_email']) . '\''
+                                                )
                                     ));
+
+                                    if (!BimpObject::objectLoaded($userClient)) {
+                                        $debug .= BimpRender::renderAlerts($uc_errors);
+                                        BimpCore::addlog('RDV SAV CLIENT: Echec création utilisateur client', Bimp_Log::BIMP_LOG_URGENT, 'bic', null, array(
+                                            'Erreurs'  => $uc_errors,
+                                            'Warnings' => $uc_warnings,
+                                            'Données'  => $uc_data
+                                        ));
+                                    }
                                 } else {
                                     $debug .= '<span class="success">OK</span>';
                                 }
-                            } elseif ($userClient->getData('id_client') !== (int) $client->id) {
+                            } 
+                            
+                            if (BimpObject::objectLoaded($userClient) && $userClient->getData('id_client') !== (int) $client->id) {
                                 $old_id_client = (int) $userClient->getData('id_client');
                                 $debug .= '<br/><br/><b>Mise à jour du client pour le userClient: </b>';
 

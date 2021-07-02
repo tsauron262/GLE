@@ -247,8 +247,8 @@ class BContract_avenant extends BContract_contrat {
                                 $errors = BimpTools::merge_array($errors, $ligne_du_contrat->updateField('serials', $infos['serials_in']));
                         }
 
-                        $serialsLigne = json_decode($ligne_du_contrat->getData('serials'));
-                        $newSerials = json_decode($infos['serials_in']);
+                        $serialsLigne = BimpTools::json_decode_array($ligne_du_contrat->getData('serials'));
+                        $newSerials = BimpTools::json_decode_array($infos['serials_in']);
                         if(count(array_diff($serialsLigne, $newSerials)) > 0 && !$dejaChange) {
                             $errors = BimpTools::merge_array($errors, $ligne_du_contrat->updateField('serials', $infos['serials_in']));
                     }

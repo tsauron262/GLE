@@ -166,7 +166,7 @@ if (count($savs)) {
 
             $etat = $sav::$status_list[$sav->getData("status")]['label'];
             $savsList[] = array(
-                'etat' => $idSav,
+                'etat' => $etat,
                 'id_sav' => $idSav,
                 'ref' => ((isset($sav->ref) && !empty($sav->ref)) ? $sav->ref : 'inconnu'),
                 'date_create' => $sav->getData("date_create"),

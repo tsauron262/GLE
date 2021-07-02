@@ -204,6 +204,13 @@ views:
                 - type: fields_table
                   fields_table: 
                       name: resolution
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderNotesList
+                          params:
+                              - 1
         
 filters_panels: 
     default: 

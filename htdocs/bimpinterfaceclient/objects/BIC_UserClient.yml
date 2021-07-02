@@ -1,6 +1,6 @@
 table: bic_user
 icon: fas_user
-common_fields: 0
+common_fields: 1
 
 parent_module: bimpcore
 parent_object: Bimp_Client

@@ -1646,7 +1646,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                                 $_POST = $post_tmp;
 
                                 if (!BimpObject::objectLoaded($userClient)) {
-                                    // ON recherche à nouveau le userClient: 
+                                    // On recherche à nouveau le userClient: 
                                     $userClient = BimpCache::findBimpObjectInstance('bimpinterfaceclient', 'BIC_UserClient', array(
                                                 'email_custom' => array(
                                                     'custom' => 'LOWER(email) = \'' . strtolower($data['client_email']) . '\''

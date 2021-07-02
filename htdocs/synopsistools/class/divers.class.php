@@ -186,15 +186,19 @@ class synopsisHook {//FA1506-0369
         self::$timeDeb = microtime(true);
         self::$timeDebRel = microtime(true);
         
-        
         $admin = false;
         if(defined('IP_ADMIN')){
+            $ipUser = $_SERVER['REMOTE_ADDR'];
+            $tmp = explode(".", $ip);
+            if(count($tmp) < 4)
+                $ipUser = $_SERVER['HTTP_X_REAL_IP'];
             if(is_array(IP_ADMIN)){
-                foreach(IP_ADMIN as $ip)
-                    if($ip == $_SERVER['REMOTE_ADDR'])
+                foreach(IP_ADMIN as $ip){
+                    if($ip == $ipUser)
                         $admin =true;
+                }
             }
-            elseif(IP_ADMIN == $_SERVER['REMOTE_ADDR'])
+            elseif(IP_ADMIN == $ipUser)
                 $admin = true;
         }
 

@@ -1536,12 +1536,14 @@ class Equipment extends BimpObject
                 } else {
                     $identifiers['status_gsx'] = 1;
                     $data2 = $gsx->serialEligibility($serial);
-                    foreach ($data2['eligibilityDetails']['outcome'] as $out) {
-                        foreach ($out['reasons'] as $reason) {
-                            if(isset($reason['messages'])){
-                                foreach ($reason['messages'] as $msg) {
-                                    if (stripos($msg, 'Localiser mon ') !== false || stripos($msg, 'OP987') !== false)
-                                        $identifiers['status_gsx'] = 3;
+                    if(isset($data2['eligibilityDetails']['outcome'])){
+                        foreach ($data2['eligibilityDetails']['outcome'] as $out) {
+                            foreach ($out['reasons'] as $reason) {
+                                if(isset($reason['messages'])){
+                                    foreach ($reason['messages'] as $msg) {
+                                        if (stripos($msg, 'Localiser mon ') !== false || stripos($msg, 'OP987') !== false)
+                                            $identifiers['status_gsx'] = 3;
+                                    }
                                 }
                             }
                         }

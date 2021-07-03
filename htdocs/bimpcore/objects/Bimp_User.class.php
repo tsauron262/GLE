@@ -67,21 +67,12 @@ class Bimp_User extends BimpObject
         return parent::canViewField($field_name);
     }
 
-    // Getters: 
-//    public function getName($withGeneric = true)
-//    {
-//        return $this->getInstanceName();
-//    }
-//
-//    public function getInstanceName()
-//    {
-//        if ($this->isLoaded()) {
-//            return dolGetFirstLastname($this->getData('firstname'), $this->getData('lastname'));
-//        }
-//
-//        return ' ';
-//    }
+    public function canViewUserCommissions()
+    {
+        return 0;
+    }
 
+    // Getters: 
 
     public function getCardFields($card_name)
     {
@@ -357,7 +348,16 @@ class Bimp_User extends BimpObject
 
     public function renderPageView()
     {
+        if (!$this->isLoaded()) {
+            return BimpRender::renderAlerts('ID de l\'utilisateur absent');
+        }
+
+        global $user;
+
         $tabs = array();
+
+        $isAdmin = $user->admin;
+        $isItself = ($user->id == $this->id);
 
         $tabs[] = array(
             'id'      => 'default',
@@ -365,95 +365,103 @@ class Bimp_User extends BimpObject
             'content' => $this->renderView('default', false)
         );
 
-        $tabs[] = array(
-            'id'      => 'params',
-            'title'   => BimpRender::renderIcon('fas_cog', 'iconLeft') . 'Paramètres',
-            'content' => $this->renderParamsView()
-        );
+        if ($isAdmin || $isItself) {
+            $tabs[] = array(
+                'id'      => 'params',
+                'title'   => BimpRender::renderIcon('fas_cog', 'iconLeft') . 'Paramètres',
+                'content' => $this->renderParamsView()
+            );
+        }
 
-//        $tabs[] = array(
-//            'id'      => 'conges',
-//            'title'   => BimpRender::renderIcon('fas_umbrella-beach', 'iconLeft') . 'Congés',
-//            'content' => $this->renderCongesView()
-//        );
+        if ($isAdmin) {
+            $tabs[] = array(
+                'id'            => 'perms',
+                'title'         => BimpRender::renderIcon('fas_check', 'iconLeft') . 'Permissions',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderPermsView', '$(\'#perms .nav_tab_ajax_result\')', array(''), array('button' => ''))
+            );
+            $tabs[] = array(
+                'id'            => 'groups',
+                'title'         => BimpRender::renderIcon('fas_users', 'iconLeft') . 'Groupes',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#groups .nav_tab_ajax_result\')', array('user_groups'), array('button' => ''))
+            );
+        }
 
-        $tabs[] = array(
-            'id'            => 'commissions',
-            'title'         => BimpRender::renderIcon('fas_comment-dollar', 'iconLeft') . 'Commissions',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#commissions .nav_tab_ajax_result\')', array('commissions'), array('button' => ''))
-        );
+        if ($isAdmin || $isItself || $this->canViewUserCommissions()) {
+            $tabs[] = array(
+                'id'            => 'commissions',
+                'title'         => BimpRender::renderIcon('fas_comment-dollar', 'iconLeft') . 'Commissions',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#commissions .nav_tab_ajax_result\')', array('commissions'), array('button' => ''))
+            );
+        }
 
         $tabs[] = array(
             'id'      => 'commercial',
             'title'   => BimpRender::renderIcon('fas_briefcase', 'iconLeft') . 'Commercial',
             'content' => $this->renderCommercialView()
         );
-
         return BimpRender::renderNavTabs($tabs);
     }
 
     public function renderParamsView()
     {
-        $tabs = array();
+        if (!$this->isLoaded()) {
+            return BimpRender::renderAlerts('ID de l\'utilisateur absent');
+        }
 
-//        $tabs[] = array(
-//            'id'            => 'perms_tab',
-//            'title'         => 'Permissisons',
-//            'ajax'          => 1,
-//            'ajax_callback' => $this->getJsLoadCustomContent('renderPermsView', '$(\'#perms_tab .nav_tab_ajax_result\')', array(), array('button' => ''))
-//        );
-//
-//        $tabs[] = array(
-//            'id'            => 'interface_tab',
-//            'title'         => 'Interface',
-//            'ajax'          => 1,
-//            'ajax_callback' => $this->getJsLoadCustomContent('renderInterfaceView', '$(\'#interface_tab .nav_tab_ajax_result\')', array(), array('button' => ''))
-//        );
+        global $user;
 
-        $tabs[] = array(
-            'id'            => 'lists_configs_tab',
-            'title'         => 'Configuration des listes',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#lists_configs_tab .nav_tab_ajax_result\')', array('lists_configs'), array('button' => ''))
-        );
+        if ($user->admin || $user->id === $this->id) {
+            $tabs = array();
 
-        return BimpRender::renderNavTabs($tabs, 'params_tabs');
+            $tabs[] = array(
+                'id'            => 'interface_tab',
+                'title'         => 'Interface',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderInterfaceView', '$(\'#interface_tab .nav_tab_ajax_result\')', array(), array('button' => ''))
+            );
+
+            $tabs[] = array(
+                'id'            => 'lists_configs_tab',
+                'title'         => 'Configuration des listes',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#lists_configs_tab .nav_tab_ajax_result\')', array('lists_configs'), array('button' => ''))
+            );
+            
+            $tabs[] = array(
+                'id'            => 'filters_configs_tab',
+                'title'         => 'Configuration des filtres',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#filters_configs_tab .nav_tab_ajax_result\')', array('filters_configs'), array('button' => ''))
+            );
+            
+            $tabs[] = array(
+                'id'            => 'lists_filters_tab',
+                'title'         => 'Filtres enregistrés',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#lists_filters_tab .nav_tab_ajax_result\')', array('lists_filters'), array('button' => ''))
+            );
+
+            return BimpRender::renderNavTabs($tabs, 'params_tabs');
+        }
+
+        return BimpRender::renderAlerts('Vous n\'avez pas la permission de voir ce contenu');
     }
 
     public function renderPermsView()
     {
-        $html = 'TEST';
+        $html = 'Permission - en cours de développement';
 
         return $html;
     }
 
     public function renderInterfaceView()
     {
-        $html = 'TEST';
+        $html = 'Interface utilisateur - en cours de développement';
 
         return $html;
-    }
-
-    public function renderCongesView()
-    {
-        $tabs = array();
-
-        $tabs[] = array(
-            'id'            => 'conges_persos_tab',
-            'title'         => 'Congés personnels',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#conges_persos_tab .nav_tab_ajax_result\')', array('conges_persos'), array('button' => ''))
-        );
-
-        $tabs[] = array(
-            'id'            => 'conges_groups_tab',
-            'title'         => 'Congés collectifs',
-            'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#conges_groups_tab .nav_tab_ajax_result\')', array('conges_groups'), array('button' => ''))
-        );
-
-        return BimpRender::renderNavTabs($tabs, 'conges_tabs');
     }
 
     public function renderCommercialView()
@@ -485,41 +493,32 @@ class Bimp_User extends BimpObject
         $user_label = $this->getName();
 
         switch ($list_type) {
-//            case 'lists_configs':
+            // Onglet "Groupes": 
+            case 'user_groups':
+                return 'Groupes - en cours de développement';
+
+            // Onglet "Params": 
+            case 'lists_configs':
 //                $list = new BC_ListTable(BimpObject::getInstance('bimpcore', 'ListConfig'), 'user', 1, null, 'Configurations de liste de "' . $user_label . '"', 'fas_cog');
 //                $list->addFieldFilterValue('owner_type', ListConfig::TYPE_USER);
 //                $list->addFieldFilterValue('id_owner', $this->id);
 //                break;
+                return 'Configurations des liste - en cours de développement';
+                
+            case 'filters_configs': 
+                return 'Configuration des filtres - en cours de développement';
+                
+            case 'lists_filters': 
+                return 'Filtres enregistrés - en cours de développement';
 
+            // Onglet "Commission": 
             case 'commissions':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpfinanc', 'BimpCommission'), 'user', 1, null, 'Commissions de "' . $user_label . '"', 'fas_comment-dollar');
                 $list->addFieldFilterValue('type', BimpCommission::TYPE_USER);
                 $list->addFieldFilterValue('id_user', $this->id);
                 break;
 
-            case 'conges_persos':
-                $list = new BC_ListTable(BimpObject::getInstance('bimprh', 'BRH_Holiday'), 'user', 1, null, 'Congés personnels de "' . $user_label . '"', 'fas_umbrella-beach');
-                $list->addFieldFilterValue('fk_user', $this->id);
-                $list->addFieldFilterValue('group_custom', array(
-                    'custom' => 'IFNULL(fk_group, 0) = 0'
-                ));
-                break;
-
-            case 'conges_groups':
-                $list = new BC_ListTable(BimpObject::getInstance('bimprh', 'BRH_Holiday'), 'group', 1, null, 'Congés de groupe de "' . $user_label . '"', 'fas_umbrella-beach');
-//                $groups = $this->getUserUserGroupsList();
-//                echo '<pre>';
-//                print_r($groups);
-//                echo '</pre>';
-//                exit;
-
-                $list->addFieldFilterValue('fk_group', array(
-                    'in' => $this->getUserUserGroupsList()
-                ));
-                break;
-
-            // Onglet commercial: 
-
+            // Onglet "Commercial": 
             case 'clients':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcore', 'Bimp_Client'), 'default', 1, null, 'Clients dont "' . $user_label . '" est le commercial', 'fas_user-circle');
                 $sql = $this->id . ' IN (SELECT sc.fk_user FROM ' . MAIN_DB_PREFIX . 'societe_commerciaux sc WHERE sc.fk_soc = a.rowid)';
@@ -536,7 +535,6 @@ class Bimp_User extends BimpObject
         } elseif (!$html) {
             $html .= BimpRender::renderAlerts('Type de liste non spécifié');
         }
-
 
         return $html;
     }

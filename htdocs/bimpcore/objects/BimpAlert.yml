@@ -31,6 +31,7 @@ fields:
         type: text
         input: 
             auto_expand: 1
+            help: Vous pouvez positionné $msg et $niveau
     niveau:
         label: Niveau d'alert
         type: int

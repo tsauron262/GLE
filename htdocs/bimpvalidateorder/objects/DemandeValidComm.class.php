@@ -231,7 +231,17 @@ class DemandeValidComm extends BimpObject
                         $message_mail .= ', client inconnu ';;
                     $message_mail .= ' a été ' . lcfirst(self::$status_list[(int) $value]['label']);
                     $message_mail .= ($bimp_obj->isLabelFemale()) ? 'e' : '';
-                    $message_mail .= ' ' . lcfirst(self::$types[(int) $this->getData('type')]['label']) . 'ment.';
+                    
+                    switch ($this->getData('type')) {
+                        case self::TYPE_COMMERCIAL:
+                            $message_mail .= ' commercialement';break;
+                        case self::TYPE_ENCOURS:
+                            $message_mail .= ' malgré le dépassement d\'encours du client';break;
+                        case self::TYPE_IMPAYE:
+                            $message_mail .= ' malgré les retards de paiement du client';break;
+                    }
+                    
+                    die($message_mail);
 
                     mailSyn2($subject, $user_ask->getData('email'), null, $message_mail);
                 }

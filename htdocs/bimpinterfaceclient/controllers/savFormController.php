@@ -207,7 +207,7 @@ class savFormController extends BimpPublicController
                             'custom' => 'LOWER(email) = \'' . strtolower($email) . '\''
                         )
 //                        'email' => $email
-            ));
+            ), true);
 
             if (BimpObject::objectLoaded($userClient)) {
                 $html .= '<h3 style="text-align: center; font-weight: bold" class="info">';
@@ -229,7 +229,7 @@ class savFormController extends BimpPublicController
                 // Recherche d'un contact client:                 
                 $contact = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Contact', array(
                             'email' => $email
-                ));
+                ), true);
 
                 if (BimpObject::objectLoaded($contact)) {
                     $client = $contact->getParentInstance();
@@ -237,7 +237,7 @@ class savFormController extends BimpPublicController
                     // Recheche d'un client: 
                     $client = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Societe', array(
                                 'email' => $email
-                    ));
+                    ), true);
                 }
 
                 if (BimpObject::objectLoaded($client)) {
@@ -1253,6 +1253,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
     public function ajaxProcessSavFormSubmit()
     {
         global $userClient;
+
         $errors = array();
         $warnings = array();
         $data = array();
@@ -1623,7 +1624,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                                             'custom' => 'LOWER(email) = \'' . strtolower($data['client_email']) . '\''
                                         )
 //                                        'email' => $data['client_email']
-                            ));
+                            ), true);
 
                             if (!BimpObject::objectLoaded($userClient)) {
                                 $post_tmp = $_POST;
@@ -1651,21 +1652,21 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                                                 'email_custom' => array(
                                                     'custom' => 'LOWER(email) = \'' . strtolower($data['client_email']) . '\''
                                                 )
-                                    ));
+                                    ), true);
 
                                     if (!BimpObject::objectLoaded($userClient)) {
                                         $debug .= BimpRender::renderAlerts($uc_errors);
                                         BimpCore::addlog('RDV SAV CLIENT: Echec création utilisateur client', Bimp_Log::BIMP_LOG_URGENT, 'bic', null, array(
-                                            'Erreurs'  => $uc_errors,
-                                            'Warnings' => $uc_warnings,
-                                            'Données'  => $uc_data
+                                            'Erreurs'            => $uc_errors,
+                                            'Warnings'           => $uc_warnings,
+                                            'Données userClient' => $uc_data
                                         ));
                                     }
                                 } else {
                                     $debug .= '<span class="success">OK</span>';
                                 }
-                            } 
-                            
+                            }
+
                             if (BimpObject::objectLoaded($userClient) && $userClient->getData('id_client') !== (int) $client->id) {
                                 $old_id_client = (int) $userClient->getData('id_client');
                                 $debug .= '<br/><br/><b>Mise à jour du client pour le userClient: </b>';

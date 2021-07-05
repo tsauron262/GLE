@@ -166,7 +166,7 @@ class BContract_avenantdet extends BContract_avenant {
             $current_serials_array = BimpTools::json_decode_array($this->getData('serials_in'));
             return  count(array_diff($current_serials_array, $init_serials_array));
         } else {
-            return count(json_decode($this->getData('serials_in')));
+            return count(BimpTools::json_decode_array($this->getData('serials_in')));
         }
     }
     
@@ -247,7 +247,7 @@ class BContract_avenantdet extends BContract_avenant {
         foreach($toOld as $serial) { // Ajouter serial dans out et supprimer de in
             if(!in_array($serial, $out)) {
                 $contratLine = $this->getInstance('bimpcontract', 'BContract_contratLine', $this->getData('id_line_contrat'));
-                $serials_in_contratLine = (json_decode($contratLine->getData('serials')) ? json_decode($contratLine->getData('serials')) : []);
+                $serials_in_contratLine = (BimpTools::json_decode_array($contratLine->getData('serials')) ? BimpTools::json_decode_array($contratLine->getData('serials')) : []);
                 if(in_array($serial, $serials_in_contratLine)) // Si le serial enlever est pas dans les serials de la ligne de base du contrat
                     $out[] = $serial;
             }
@@ -300,7 +300,7 @@ class BContract_avenantdet extends BContract_avenant {
     
     public function getLineSerials($sens = null) {
         
-        $all = json_decode($this->getData('serials_' . $sens));
+        $all = BimpTools::json_decode_array($this->getData('serials_' . $sens));
 
         $toSend = [];
         foreach($all as $serial) {

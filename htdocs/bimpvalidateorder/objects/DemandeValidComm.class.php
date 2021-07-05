@@ -241,8 +241,6 @@ class DemandeValidComm extends BimpObject
                             $message_mail .= ' malgré les retards de paiement du client';break;
                     }
                     
-                    die($message_mail);
-
                     mailSyn2($subject, $user_ask->getData('email'), null, $message_mail);
                 }
             } else {

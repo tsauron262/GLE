@@ -50,6 +50,7 @@ lists_cols:
 lists:
     default: 
         configurable: 0
+        delete_btn: 1
         enable_search: 1
         enable_sort: 1
         pagination: 1

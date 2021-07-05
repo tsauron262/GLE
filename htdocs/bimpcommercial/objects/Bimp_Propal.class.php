@@ -420,7 +420,7 @@ class Bimp_Propal extends BimpComm
                                 ))
                             );
                         } else {
-                            $errors = 'Vous n\'avez pas la permission de valider cette proposition commerciale';
+                            $errors[] = 'Vous n\'avez pas la permission de valider cette proposition commerciale';
                         }
                     }
                     if (count($errors)) {

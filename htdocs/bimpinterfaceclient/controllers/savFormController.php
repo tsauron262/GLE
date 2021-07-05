@@ -1627,8 +1627,6 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                             ), true);
 
                             if (!BimpObject::objectLoaded($userClient)) {
-                                echo 'NOT FOUND';
-                                exit;
                                 $post_tmp = $_POST;
                                 $_POST = array(
                                     'send_mail' => 1
@@ -1667,8 +1665,6 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                                 } else {
                                     $debug .= '<span class="success">OK</span>';
                                 }
-                            } else {
-                                echo 'FOUND'; exit;
                             }
 
                             if (BimpObject::objectLoaded($userClient) && $userClient->getData('id_client') !== (int) $client->id) {

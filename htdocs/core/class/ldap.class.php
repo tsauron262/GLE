@@ -106,10 +106,10 @@ class Ldap
 	 */
 	function __construct()
 	{
-		global $conf;
+		global $conf, $dolibarr_main_auth_ldap_host;
 
 		// Server
-		if (! empty($conf->global->LDAP_SERVER_HOST))       $this->server[] = $conf->global->LDAP_SERVER_HOST;
+		if (! empty($conf->global->LDAP_SERVER_HOST))       $this->server[] = str_replace('$dolibarr_main_auth_ldap_host', $dolibarr_main_auth_ldap_host, $conf->global->LDAP_SERVER_HOST);
 		if (! empty($conf->global->LDAP_SERVER_HOST_SLAVE)) $this->server[] = $conf->global->LDAP_SERVER_HOST_SLAVE;
 		$this->serverPort          = $conf->global->LDAP_SERVER_PORT;
 		$this->ldapProtocolVersion = $conf->global->LDAP_SERVER_PROTOCOLVERSION;

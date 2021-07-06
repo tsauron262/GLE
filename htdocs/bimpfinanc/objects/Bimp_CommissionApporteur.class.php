@@ -125,7 +125,10 @@ class Bimp_CommissionApporteur extends BimpObject{
         
         $parent = $this->getParentInstance();
         
-        $this->createFactureFourn($parent, $new_facture);
+        $errors = BimpTools::merge_array($errors, $this->createFactureFourn($parent, $new_facture));
+        
+        if(count($errors))
+            return $errors;
         
         // Création des lignes
         $filtres = $parent->getChildrenObjects('filtres', array(), 'position', 'ASC');
@@ -218,36 +221,36 @@ class Bimp_CommissionApporteur extends BimpObject{
             'editable'   => 0,
         )));
 
-        $new_line->pu_ht = $line->pu_ht;
+        $new_line->pu_ht = $line->getTotalHTWithRemises(true) / $line->qty * $filtre->getData('commition') / 100;
         $new_line->qty = $line->qty;
         $new_line->desc = $old_fac_parent->getRef() . " " . $prod->getRef();
         
         if(empty($errors))
             $errors = BimpTools::merge_array($errors, $new_line->create($warnings, true));
 
-        if(empty($errors))
-            $errors = BimpTools::merge_array($errors, $this->createRemise(
-                    (int) $new_line->id, (100 - $filtre->getData('commition'))));
+//        if(empty($errors))
+//            $errors = BimpTools::merge_array($errors, $this->createRemise(
+//                    (int) $new_line->id, (100 - $filtre->getData('commition'))));
         
         return $errors;
     }
 
-    public function createRemise($id_line, $a_payer) {
-        $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
-        $errors =  $remise->validateArray(array(
-            'id_object_line' => $id_line,
-            'object_type'    => 'facture_fournisseur',
-            'type'           => $remise::OL_REMISE_PERCENT,
-            'label'          => 'Issue d\'une commission apporteur',
-            'percent'        => $a_payer
-
-        ));
-        
-        if(empty($errors))
-            $errors = $remise->create();
-           
-        return $errors;
-    }
+//    public function createRemise($id_line, $a_payer) {
+//        $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
+//        $errors =  $remise->validateArray(array(
+//            'id_object_line' => $id_line,
+//            'object_type'    => 'facture_fournisseur',
+//            'type'           => $remise::OL_REMISE_PERCENT,
+//            'label'          => 'Issue d\'une commission apporteur',
+//            'percent'        => $a_payer
+//
+//        ));
+//        
+//        if(empty($errors))
+//            $errors = $remise->create();
+//           
+//        return $errors;
+//    }
     
     
     public function calcTotal(){

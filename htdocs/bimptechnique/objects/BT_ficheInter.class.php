@@ -239,7 +239,7 @@ class BT_ficheInter extends BimpDolObject {
             global $db;
             BimpTools::loadDolClass('commande');
             $commande = new Commande($db);
-            $commandes = json_decode($this->getData('commandes'));
+            $commandes = BimpTools::json_decode_array($this->getData('commandes'));
             $service = $this->getInstance('bimpcore', 'Bimp_Product');
             $renta = [];
 
@@ -504,13 +504,13 @@ class BT_ficheInter extends BimpDolObject {
             $instance->updateField('new_fi', 1);
             $instance->updateField('datei', $data->le);
             if($linked_commandes != "") {
-                foreach(json_decode($linked_commandes) as $current_commande_id) {
+                foreach(BimpTools::json_decode_array($linked_commandes) as $current_commande_id) {
                     setElementElement("commande", "fichinter", $current_commande_id, $instance->id);
                 }
             }
             
             if($linked_tickets != "") {
-                foreach(json_decode($linked_tickets) as $current_ticket_id) {
+                foreach(BimpTools::json_decode_array($linked_tickets) as $current_ticket_id) {
                     setElementElement('bimp_ticket', 'fichinter', $current_ticket_id, $instance->id);
                 }
             }
@@ -1341,7 +1341,7 @@ class BT_ficheInter extends BimpDolObject {
     
     public function getCommandesArrayWithDeplacement() {
 //        $codes = json_decode(BimpCore::getConf("bimptechnique_ref_deplacement"));
-        $commandes = json_decode($this->getData('commandes'));
+        $commandes = BimpTools::json_decode_array($this->getData('commandes'));
         $array = [];
         if(is_array($commandes)){
             foreach($commandes as $id_commande) {
@@ -1492,7 +1492,7 @@ class BT_ficheInter extends BimpDolObject {
                 if($value['inter_' . $numeroInter . '_type'] == 5 && (!$this->getData('fk_contrat') || $this->getData('fk_contrat')  == 0)) {
                     $errors[] = "Vous ne pouvez pas utiliser un déplacement sous contrat sans contrat lié. Merci";
                 }
-                $commandes = json_decode($this->getData('commandes'));
+                $commandes = BimpTools::json_decode_array($this->getData('commandes'));
                 if(!is_array($commandes))
                     $commandes = array();
                 if($value['inter_' . $numeroInter . '_type'] == 6 && !count($commandes)) {
@@ -1698,7 +1698,7 @@ class BT_ficheInter extends BimpDolObject {
         $obj = $this->getInstance('bimpcontract', 'BContract_contratLine');
         foreach($list as $id) {
             $det = $parent->getChildObject("lines", $id);
-            if(in_array($this->getData('fk_user_author'), json_decode($det->getData('techs')))) {
+            if(in_array($this->getData('fk_user_author'), BimpTools::json_decode_array($det->getData('techs')))) {
                 if($det->getData('fk_contratdet')) {
                     $obj->fetch($det->getData('fk_contratdet'));
                     $id_product = $obj->getData('fk_product');
@@ -1756,7 +1756,7 @@ class BT_ficheInter extends BimpDolObject {
 //        $codes = json_decode(BimpCore::getConf("bimptechnique_ref_deplacement"));
         $commande = New Commande($this->db->db);
         $product = $this->getInstance('bimpcore', 'Bimp_Product');
-        $allCommandes = ($this->getData('commandes')) ? json_decode($this->getData('commandes')) : [];
+        $allCommandes = ($this->getData('commandes')) ? BimpTools::json_decode_array($this->getData('commandes')) : [];
         $array = explode(',', BimpCore::getConf('bimptechnique_ref_temps_passe'));
         $tp = [];
         foreach($array as $code) {
@@ -1823,7 +1823,7 @@ class BT_ficheInter extends BimpDolObject {
     public function displayAllTicketsCards() {
         $html = "";
         
-        $allTickets = (json_decode($this->getData('tickets'))) ? json_decode($this->getData('tickets')) : [];
+        $allTickets = (BimpTools::json_decode_array($this->getData('tickets'))) ? BimpTools::json_decode_array($this->getData('tickets')) : [];
         $ticket = $this->getInstance('bimpsupport', 'BS_Ticket');
         if(count($allTickets) > 0) {
             foreach($allTickets as $id) {
@@ -1854,7 +1854,7 @@ class BT_ficheInter extends BimpDolObject {
     public function displayAllCommandesCards() {
         $html = "";
         
-        $allCommandes = json_decode($this->getData('commandes'));
+        $allCommandes = BimpTools::json_decode_array($this->getData('commandes'));
         $commande = $this->getInstance('bimpcommercial', 'Bimp_Commande');
         if(is_array($allCommandes) && count($allCommandes) > 0) {
             foreach($allCommandes as $id) {
@@ -1932,7 +1932,7 @@ class BT_ficheInter extends BimpDolObject {
                     $html .= $this->displayData('fk_statut');
                 }
                 else{
-                    $tickets = (json_decode($this->getData('tickets'))) ? json_decode($this->getData('tickets')) : [];
+                    $tickets = (BimpTools::json_decode_array($this->getData('tickets'))) ? BimpTools::json_decode_array($this->getData('tickets')) : [];
 
                     $info = "<b>" . BimpRender::renderIcon('warning') . "</b> Si vous avez des tickets support et que vous ne les voyez pas dans le formulaire, rechargez la page en cliquant sur le bouton suivant: <a href='".DOL_URL_ROOT."/bimptechnique/?fc=fi&id=".$this->id."&navtab-maintabs=signature'><button class='btn btn-default'>Rafraîchire la page</button></a>";
                     $html .= "<h4>$info</h4>";
@@ -2192,7 +2192,7 @@ class BT_ficheInter extends BimpDolObject {
     public function getCommandeClient() {
         
         $commandes = [];
-        $my_commandes = ($this->getData('commandes')) ? json_decode($this->getData('commandes')) : [];
+        $my_commandes = ($this->getData('commandes')) ? BimpTools::json_decode_array($this->getData('commandes')) : [];
         $excludeStatut = 3;
         $commande = $this->getInstance('bimpcommercial', 'Bimp_Commande');
         $search_commandes = $commande->getList(['fk_soc' => $this->getData('fk_soc')]);
@@ -2226,7 +2226,7 @@ class BT_ficheInter extends BimpDolObject {
     
     public function getTicketClient() {
         $tickets = [];
-        $my_tickets = ($this->getData('tickets')) ? json_decode($this->getData('tickets')) : [];
+        $my_tickets = ($this->getData('tickets')) ? BimpTools::json_decode_array($this->getData('tickets')) : [];
         $excludeStatut = 999;
         $ticket = $this->getInstance('bimpsupport', 'BS_Ticket');
         $search_tickets = $ticket->getList(['id_client' => $this->getData('fk_soc')]);
@@ -2257,7 +2257,7 @@ class BT_ficheInter extends BimpDolObject {
         $errors = [];
         $warnings = [];
         $new_tickets = [];
-        $my_tickets = json_decode($this->getData('tickets'));
+        $my_tickets = BimpTools::json_decode_array($this->getData('tickets'));
         
         if(!in_array($my_tickets, $data['id_ticket'])) {
             foreach($my_tickets as $id_current_ticket) {
@@ -2330,7 +2330,7 @@ class BT_ficheInter extends BimpDolObject {
         $errors = [];
         $warnings = [];
         $new_commandes = [];
-        $my_commandes = json_decode($this->getData('commandes'));
+        $my_commandes = BimpTools::json_decode_array($this->getData('commandes'));
         
         $inter_on_the_commande = false;
         
@@ -2416,7 +2416,7 @@ class BT_ficheInter extends BimpDolObject {
         $warnings = [];
         
         if($data['linked']) {
-            $my_commandes = json_decode($this->getData('commandes'));
+            $my_commandes = BimpTools::json_decode_array($this->getData('commandes'));
             
             foreach($data['linked'] as $id) {
                 $my_commandes[] = $id;
@@ -2445,7 +2445,7 @@ class BT_ficheInter extends BimpDolObject {
         $warnings = [];
         
         if($data['linked']) {
-            $my_tickets = json_decode($this->getData('tickets'));
+            $my_tickets = BimpTools::json_decode_array($this->getData('tickets'));
             foreach($data['linked'] as $id) {
                 $my_tickets[] = $id;
             }

@@ -90,7 +90,7 @@ class BimpRevalorisation extends BimpObject
     public function actionSetStatus($data, &$success)
     {
         $success = 'Maj status OK';
-        $errors = array();
+        $errors = $warnings = array();
         if ($this->canSetAction('process')) {
             if ($data['status'] == 1 || $data['status'] == 2) {
                 foreach ($data['id_objects'] as $nb => $idT) {
@@ -114,7 +114,7 @@ class BimpRevalorisation extends BimpObject
         } else {
             $errors[] = 'Vous n\'avez pas la permission';
         }
-        return $errors;
+        return array('errors' => $errors, 'warnings' => $warnings);
     }
 
     // Getters booléens: 

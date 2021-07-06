@@ -2641,8 +2641,10 @@ class BContract_contrat extends BimpDolObject
     public function actionGeneratePdfCourrier($data, &$success)
     {
         global $langs;
+        $errors = $warnings = array();
         $success = "PDF courrier généré avec Succes";
         $this->dol_object->generateDocument('contrat_courrier_BIMP_renvois', $langs);
+        return array('errors' => $errors, 'warnings' => $warnings);
     }
 
     public function actionGeneratePdfEcheancier($data, &$success)

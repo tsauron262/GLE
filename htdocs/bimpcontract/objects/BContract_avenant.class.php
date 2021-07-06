@@ -94,6 +94,8 @@ class BContract_avenant extends BContract_contrat {
                         $laLigne->fetch($line->id);
                         if($laLigne->getData('renouvellement') == $parent->getData('current_renouvellement')) {
                             $nbSerial = count(BimpTools::json_decode_array($laLigne->getData('serials')));
+                            if($nbSerial < 1)
+                                $nbSerial = 1;
                             
                             $det->set('id_avenant', $this->id);
                             $det->set('id_line_contrat', $laLigne->id);

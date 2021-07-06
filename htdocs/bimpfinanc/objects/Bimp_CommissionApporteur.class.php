@@ -378,16 +378,29 @@ class Bimp_CommissionApporteur extends BimpObject{
             $html .= $bc_list->renderHtml();
         }
         
+        $tabs[] = array(
+            'id'      => 'facture',
+            'title'   => 'Ligne de facture',
+            'content' => $html
+        );
         
-        
-        $reval = BimpObject::getInstance('bimpfinanc', 'BimpRevalorisation');
-        $list_name = 'default';
-        $bc_list = new BC_ListTable($reval, $list_name, 1, null, 'Revalorisation', 'fas_check');
-        $bc_list->addFieldFilterValue('id_commission_apporteur', $this->id);
+        if($this->getData('status') == 1){
+            $reval = BimpObject::getInstance('bimpfinanc', 'BimpRevalorisation');
+            $bc_list = new BC_ListTable($reval, 'default', 1, null, 'Revalorisation', 'fas_check');
+            $bc_list->addFieldFilterValue('id_commission_apporteur', $this->id);
+            $html = $bc_list->renderHtml();
 
-            $html .= $bc_list->renderHtml();
-        
-//        $html .= BimpRender::renderNavTabs($tabs, 'commission_details');
+
+            $tabs[] = array(
+                'id'      => 'revalorisations',
+                'title'   => 'Revalorisations',
+                'content' => $html
+            );
+        }
+            
+        $html = BimpRender::renderNavTabs($tabs, 'commission_details');
+            
+            
 
         return $html;
     }

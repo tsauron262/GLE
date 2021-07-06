@@ -180,6 +180,20 @@ class synopsisHook {//FA1506-0369
         if (self::$reload)
             header("Location: " . $_SERVER['PHP_SELF'] . "?" . (isset($_REQUEST['id']) ? "id=" . $_REQUEST['id'] : ""));
     }
+    
+    static function getUserIp(){
+        if(isset($_SERVER['HTTP_X_FORWARDED_FOR'])){
+            $tmp = explode(", ", $_SERVER['HTTP_X_FORWARDED_FOR']);
+            $ipUser = $tmp[0];
+        }
+        $tmp = explode(".", $ipUser);
+        if(count($tmp) < 4)
+            $ipUser = $_SERVER['REMOTE_ADDR'];
+        $tmp = explode(".", $ipUser);
+        if(count($tmp) < 4)
+            $ipUser = $_SERVER['HTTP_X_REAL_IP'];
+        return $ipUser;
+    }
 
     static function getHeader() {
         global $db, $langs, $isMobile, $conf, $user;
@@ -188,11 +202,8 @@ class synopsisHook {//FA1506-0369
         
         $admin = false;
         if(defined('IP_ADMIN')){
-            $ipUser = $_SERVER['REMOTE_ADDR'];
-            $tmp = explode(".", $ip);
-            if(count($tmp) < 4)
-                $ipUser = $_SERVER['HTTP_X_REAL_IP'];
             if(is_array(IP_ADMIN)){
+                $ipUser = static::getUserIp();
                 foreach(IP_ADMIN as $ip){
                     if($ip == $ipUser)
                         $admin =true;

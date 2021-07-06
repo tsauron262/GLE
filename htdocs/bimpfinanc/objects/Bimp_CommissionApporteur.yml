@@ -27,6 +27,16 @@ parent_id_property: id_apporteur
 #    syntaxe: Apporteur <id_apporteur>
 #    external_link: 1
 
+objects: 
+    facture_fourn: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_FactureFourn
+            id_object: 
+                field_value: id_facture_fourn
      
                 
 fields: 
@@ -41,6 +51,10 @@ fields:
     total:
         label: Total
         type: money
+    id_facture_fourn:
+        label: Facture Apporteur
+        type: id_object
+        object: facture_fourn
     
 forms:
     default: 
@@ -118,3 +132,4 @@ fields_tables:
         rows: 
             - field: id_apporteur
             - field: total
+            - field: id_facture_fourn

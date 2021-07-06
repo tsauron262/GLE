@@ -349,7 +349,7 @@ class Bimp_CommissionApporteur extends BimpObject{
             $html .= $bc_list->renderHtml();
         }
         
-        $html .= BimpRender::renderNavTabs($tabs, 'commission_details');
+//        $html .= BimpRender::renderNavTabs($tabs, 'commission_details');
 
         return $html;
     }

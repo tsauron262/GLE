@@ -877,7 +877,8 @@ class BT_ficheInter extends BimpDolObject {
     }
     
     public function actionAskFacturation($data, &$success) {
-        
+        $errors = $warnings = array();
+        return array('errors' => $errors, 'warnings' => $warnings);
     }
 
     public function getActionsButtons() {

@@ -106,7 +106,7 @@ class savFormController extends BimpPublicController
             if (!is_null($centre)) {
                 $html .= 'notre centre SAV de ' . $centre['town'];
             } else {
-                $html .= 'un de nos centre SAV';
+                $html .= 'un de nos centres SAV';
             }
             $html .= '</h2>';
         }

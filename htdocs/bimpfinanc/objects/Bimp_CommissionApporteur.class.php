@@ -359,7 +359,7 @@ class Bimp_CommissionApporteur extends BimpObject{
         $parent = $this->getParentInstance();
         $tabsFiltres = $parent->getChildrenObjects('filtres', array(), 'position', 'ASC');
         foreach($tabsFiltres as $filtre){
-            $result[$filtre->id] = $filtre->getFilterLabel();
+            $result[$filtre->id] = $filtre->getLabel();
         }
         return $result;
     }

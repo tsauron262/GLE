@@ -13,6 +13,7 @@ class BimpRevalorisation extends BimpObject
         'crt'           => 'Remise CRT',
         'correction_pa' => 'Correction du prix d\'achat',
         'achat_sup'     => 'Achat complémentaire',
+        'commission_app'     => 'Commission Apporteur',
         'oth'           => 'Autre'
     );
 

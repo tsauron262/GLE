@@ -143,8 +143,11 @@ class Bimp_CommissionApporteur extends BimpObject{
                 if(count($lines))
                     $this->createLineLabel($filtre, $new_facture->id);
                     
-                foreach ($lines as $line)
-                    $errors = BimpTools::merge_array($errors, $this->createFactureFournLine($line, $new_facture, $filtre));
+                foreach ($lines as $line){
+                    $amount = $line->getTotalHTWithRemises(true) / $line->qty * $filtre->getData('commition') / 100;
+                    $errors = BimpTools::merge_array($errors, $this->createFactureFournLine($line, $new_facture, $amount));
+                    $errors = BimpTools::merge_array($errors, $this->createRevalorisation($line, $amount));
+                }
 
             } else
                 $errors[] = "Erreur avec un des filtres de la commission";
@@ -152,11 +155,33 @@ class Bimp_CommissionApporteur extends BimpObject{
         }
         
         
-        if (count($errors))
-            $errors = BimpTools::merge_array($errors, $new_facture->delete());
+//        if (count($errors))
+//            $errors = BimpTools::merge_array($errors, $new_facture->delete());
         
         return $errors;
         
+    }
+    
+    public function createRevalorisation($line, $amount){
+        
+        // Créa nouvelle revalorisation: 
+        $reval = BimpObject::getInstance('bimpfinanc', 'BimpRevalorisation');
+        $reval_errors = $reval->validateArray(array(
+            'id_facture'      => (int) $line->getData('id_obj'),
+            'id_facture_line' => (int) $line->id,
+            'type'            => 'commission_app',
+            'qty'             => (float) $line->qty,
+            'amount'          => (float) $amount,
+            'date'            => date('Y-m-d'),
+            'id_commission_apporteur' => $this->id,
+            'note'            => 'Correction du prix d\'achat suite au commissionnement apporteur '.$this->getLink()
+        ));
+        
+        if (!count($reval_errors)) {
+            $reval_warnings = array();
+            $reval_errors = $reval->create($reval_warnings, true);
+        }
+        return $reval_errors;
     }
     
     public function createFactureFourn($parent, &$new_facture) {
@@ -202,7 +227,7 @@ class Bimp_CommissionApporteur extends BimpObject{
         return $errors;
     }
     
-    public function createFactureFournLine($line, $new_facture, $filtre) {
+    public function createFactureFournLine($line, $new_facture, $amount) {
         
         $errors = array();
         
@@ -221,9 +246,10 @@ class Bimp_CommissionApporteur extends BimpObject{
             'editable'   => 0,
         )));
 
-        $new_line->pu_ht = $line->getTotalHTWithRemises(true) / $line->qty * $filtre->getData('commition') / 100;
+        $new_line->pu_ht = $amount;
         $new_line->qty = $line->qty;
         $new_line->desc = $old_fac_parent->getRef() . " " . $prod->getRef();
+        $new_line->tva_tx = 20;
         
         if(empty($errors))
             $errors = BimpTools::merge_array($errors, $new_line->create($warnings, true));

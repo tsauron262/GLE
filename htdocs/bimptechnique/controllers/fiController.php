@@ -69,12 +69,14 @@ class fiController extends BimpController {
 
             $mailOk = false;
             if ($instance->isLoaded($errors) && !count($errors)) {
+                $ref = $instance->getData('ref');
                 $instance->updateField('signed', 1);
                 if ($farSign == 'true') {
                     $instance->updateField('type_signature', 1);
                     //$instance->updateField('fk_statut', 4);
                     // Envois mail + Générate code
                     $instance->dol_object->setValid($user);
+                    $ref = $instance->dol_object->ref;
                     $instance->updateField('signed', 0);
                     $instance->farSign($email);
                     $mailOk = true;
@@ -110,6 +112,7 @@ class fiController extends BimpController {
                     }
 
                     $instance->dol_object->setValid($user);
+                    $ref = $instance->dol_object->ref;
 
                     $today = date('Y-m-d');
 
@@ -239,7 +242,6 @@ class fiController extends BimpController {
                             $logo = $testFile;
                         $message .= '<img width="25%" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=mycompany&file=' . $logo . '">';
 
-                        $ref = $instance->getData('ref');
                         $file = $conf->ficheinter->dir_output . '/' . $ref . '/' . $ref . '.pdf';
                         //envois au commecial
                         mailSyn2("Fiche d'intervention N°" . $ref . " - [COMMERCIAL UNIQUEMENT]", "$email_commercial", "gle@bimp.fr", $message . "<br />Lien vers la FI: " . $instance->getNomUrl(), array($file), array('application/pdf'), array($ref . '.pdf'), "", /* temporaire pour controle */ 'at.bernard@bimp.fr, t.sauron@bimp.fr');

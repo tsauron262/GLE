@@ -976,16 +976,20 @@ class Equipment extends BimpObject
 
         return 'ID de l\'équipement absent';
     }
-    
-    public function displayFactFourn(){
-        $result = $this->db->executeS("SELECT b.id_obj FROM ".MAIN_DB_PREFIX."object_line_equipment a, `".MAIN_DB_PREFIX."bimp_facture_fourn_line` b WHERE a.object_type = 'facture_fournisseur' AND a.id_equipment = ".$this->id." AND b.id = a.id_object_line", 'array');
-        foreach($result as $idF){
-            $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', $idF['id_obj']);
-            global $modeCSV;
-            if ($modeCSV) {
-                return $obj->getName();
-            } else {
-                return $obj->getLink();
+
+    public function displayFactFourn()
+    {
+        $result = $this->db->executeS("SELECT b.id_obj FROM " . MAIN_DB_PREFIX . "object_line_equipment a, `" . MAIN_DB_PREFIX . "bimp_facture_fourn_line` b WHERE a.object_type = 'facture_fournisseur' AND a.id_equipment = " . $this->id . " AND b.id = a.id_object_line", 'array');
+
+        if (is_array($result) && !empty($result)) {
+            foreach ($result as $idF) {
+                $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', $idF['id_obj']);
+                global $modeCSV;
+                if ($modeCSV) {
+                    return $obj->getName();
+                } else {
+                    return $obj->getLink();
+                }
             }
         }
     }
@@ -1536,10 +1540,10 @@ class Equipment extends BimpObject
                 } else {
                     $identifiers['status_gsx'] = 1;
                     $data2 = $gsx->serialEligibility($serial);
-                    if(isset($data2['eligibilityDetails']['outcome'])){
+                    if (isset($data2['eligibilityDetails']['outcome'])) {
                         foreach ($data2['eligibilityDetails']['outcome'] as $out) {
                             foreach ($out['reasons'] as $reason) {
-                                if(isset($reason['messages'])){
+                                if (isset($reason['messages'])) {
                                     foreach ($reason['messages'] as $msg) {
                                         if (stripos($msg, 'Localiser mon ') !== false || stripos($msg, 'OP987') !== false)
                                             $identifiers['status_gsx'] = 3;

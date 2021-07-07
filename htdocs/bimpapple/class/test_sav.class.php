@@ -101,6 +101,8 @@ class test_sav
             $this->output .= ' ' . $this->nbImei . ' n° IMEI corrigé(s).';
         }
 
+        global $user;
+        $user->fetch(1);
 
         return 'END';
     }

@@ -474,11 +474,11 @@ Preferred Field
                                                 $line_data['position'], // J
                                                 $dt_fac->format('Ymd'),
                                                 '',
-                                                ($customer_code == '1R' ? $soc_data['nom'] : ($customer_code != 'EN' ? 'XXX' : '')), // M
-                                                ($customer_code == '1R' ? $soc_data['address'] : ($customer_code != 'EN' ? 'XXX' : '')), // N
-                                                ($customer_code == '1R' ? $soc_data['town'] : ($customer_code != 'EN' ? 'XXX' : '')), // O
+                                                ($customer_code == '1R' ? str_replace('"', '', $soc_data['nom']) : ($customer_code != 'EN' ? 'XXX' : '')), // M
+                                                ($customer_code == '1R' ? str_replace('"', '', $soc_data['address']) : ($customer_code != 'EN' ? 'XXX' : '')), // N
+                                                ($customer_code == '1R' ? str_replace('"', '', $soc_data['town']) : ($customer_code != 'EN' ? 'XXX' : '')), // O
                                                 '',
-                                                ($customer_code == '1R' ? $soc_data['zip'] : ''), // Q
+                                                ($customer_code == '1R' ? str_replace('"', '', $soc_data['zip']) : ''), // Q
                                                 $country_code, // R
                                                 $customer_code // S
                                             )) . '"' . "\n";

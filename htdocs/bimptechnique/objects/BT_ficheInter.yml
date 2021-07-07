@@ -213,6 +213,9 @@ fields:
         label: Type de signature
         value:
             callback: displayTypeSignature
+    old_status:
+        label: Status avant modif
+        type: int
 lists:
     client:
        configurable: 1

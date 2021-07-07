@@ -3165,7 +3165,7 @@ class BimpObject extends BimpCache
         else
             $sql .= BimpTools::getSqlOrderBy($order_by, $order_way, 'a', $extra_order_by, $extra_order_way);
         $sql .= BimpTools::getSqlLimit($n, $p);
-echo $sql;
+
         $rows = $this->db->executeS($sql, $return);
 
         if (is_null($rows)) {

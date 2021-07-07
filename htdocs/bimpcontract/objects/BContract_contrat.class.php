@@ -3940,10 +3940,10 @@ class BContract_contrat extends BimpDolObject
 //                if (stripos($elem, "signe"))
 //                    $idSepaSigne = $id;
 //            }
-            if (stripos($elem, "_Ex_Bimp") !== FALSE) {
+            if (stripos($elem, $this->getRef()."_Ex_Olys") !== FALSE) {
                 $values[] = $id;
             }
-            if (stripos($elem, "_Ex_Client") !== FALSE) {
+            if (stripos($elem, $this->getRef()."_Ex_Client") !== FALSE) {
                 $values[] = $id;
             }
         }

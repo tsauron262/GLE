@@ -3119,6 +3119,8 @@ class BimpObject extends BimpCache
         // Vérification du champ "order_by": 
         if ($order_by === 'id') {
             $order_by = 'a.' . $primary;
+        } elseif ($order_by == 'rand') {
+            $order_by = 'rand';
         } elseif (preg_match('/^a\.(.+)$/', $order_by, $matches)) {
             $order_by = '';
             if ($this->field_exists($matches[1])) {
@@ -3158,7 +3160,10 @@ class BimpObject extends BimpCache
         $sql .= BimpTools::getSqlSelect($fields);
         $sql .= BimpTools::getSqlFrom($table, $joins);
         $sql .= BimpTools::getSqlWhere($filters);
-        $sql .= BimpTools::getSqlOrderBy($order_by, $order_way, 'a', $extra_order_by, $extra_order_way);
+        if($order_by == 'rand')
+            $sql .= ' ORDER BY rand() ';
+        else
+            $sql .= BimpTools::getSqlOrderBy($order_by, $order_way, 'a', $extra_order_by, $extra_order_way);
         $sql .= BimpTools::getSqlLimit($n, $p);
 
         $rows = $this->db->executeS($sql, $return);

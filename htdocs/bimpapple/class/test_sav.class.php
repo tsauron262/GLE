@@ -101,6 +101,8 @@ class test_sav
             $this->output .= ' ' . $this->nbImei . ' n° IMEI corrigé(s).';
         }
 
+        global $user;
+        $user->fetch(1);
 
         return 'END';
     }
@@ -390,7 +392,8 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
                 $rows = $equipment->getList($filtre, $nb, 1, 'id', 'desc', 'array', array('id', 'serial'));
             }
             else{
-                $rows = $equipment->getList($filtre, $nb, 1, 'imei2', 'asc', 'array', array('id', 'serial'));
+//                $rows = $equipment->getList($filtre, $nb, 1, 'imei2', 'asc', 'array', array('id', 'serial'));
+                $rows = $equipment->getList($filtre, $nb, 1, 'rand', 'asc', 'array', array('id', 'serial'));
             }
             
             if (!empty($rows)) {

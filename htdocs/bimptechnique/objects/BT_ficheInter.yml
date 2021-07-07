@@ -98,7 +98,7 @@ fields:
         label: Statut
         type: int
         values:
-            array: statut_list
+            array: status_list
     fk_contrat:
         label: Contrat lié
         type: id_object

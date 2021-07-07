@@ -40,7 +40,7 @@ class BT_ficheInter extends BimpDolObject {
     CONST NATURE_SUIVI = 6;
     CONST NATURE_DELEG = 7;
     
-    public static $statut_list = [
+    public static $status_list = [
         self::STATUT_ABORT => ['label' => "Abandonée", 'icon' => 'times', 'classes' => ['danger']],
         self::STATUT_BROUILLON => ['label' => "En cours de renseignement", 'icon' => 'retweet', 'classes' => ['warning']],
         self::STATUT_VALIDER => ['label' => "Validée", 'icon' => 'check', 'classes' => ['success']],
@@ -85,6 +85,10 @@ class BT_ficheInter extends BimpDolObject {
         $this->global_user = $user;
         $this->global_langs = $langs;
         return parent::__construct($module, $object_name);
+    }
+    
+    public function canSetActionAdmin(){
+        return $this->canDelete();
     }
     
     public function deleteDolObject(&$errors) {
@@ -908,9 +912,22 @@ class BT_ficheInter extends BimpDolObject {
             $buttons[] = array(
                 'label' => 'Générer le PDF',
                 'icon' => 'file-pdf',
-                'onclick' => $this->getJsActionOnclick('generatePdf', array(), array(
-            ))
-        );
+                'onclick' => $this->getJsActionOnclick('generatePdf', array(), array())
+            );
+        }        
+        if($statut  != self::STATUT_BROUILLON && $this->canSetActionAdmin()) {
+            $buttons[] = array(
+                'label' => 'Remettre en brouillon',
+                'icon' => 'file-pdf',
+                'onclick' => $this->getJsActionOnclick('setStatusAdmin', array('status'=>self::STATUT_BROUILLON), array())
+            );
+        }        
+        if($statut  == self::STATUT_BROUILLON && $this->canSetActionAdmin()) {
+            $buttons[] = array(
+                'label' => 'Validé',
+                'icon' => 'file-pdf',
+                'onclick' => $this->getJsActionOnclick('setStatusAdmin', array('status'=>self::STATUT_VALIDER), array())
+            );
         }
         
         
@@ -1013,6 +1030,15 @@ class BT_ficheInter extends BimpDolObject {
         
 
         return $buttons;
+    }
+    
+    public function actionSetStatusAdmin($data){
+        $errors = $warnings = array();
+        if(!$this->canSetActionAdmin())
+            $errors[] = 'Vous n\'avez pas la permission';
+        if(!count($errors))
+            $errors = BimpTools::merge_array($errors, $this->setNewStatus($data['status']));
+        return array('errors'=>$errors, 'warnings'=>$warnings);
     }
     
     public function getTotalFacturableArray() {

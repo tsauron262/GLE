@@ -433,9 +433,9 @@ Preferred Field
                                     continue;
                                 }
 
-                                $soc_data = $this->db->getRow('societe', 'rowid = ' . (int) $fac_data['fk_soc'], array('fk_typent', 'fk_pays'), 'array');
+                                $soc_data = $this->db->getRow('societe', 'rowid = ' . (int) $fac_data['fk_soc'], array('fk_typent', 'fk_pays', 'nom', 'address', 'town', 'zip'), 'array');
 
-                                if ($secteur == 'E') {
+                                if ($secteur == 'E' || in_array((int) $fac_data['fk_soc'], array(527782, 8786))) {
                                     $customer_code = '1R';
 //                                } elseif ($secteur == 'BP') {
 //                                    $customer_code = 'BB';
@@ -461,7 +461,7 @@ Preferred Field
                                 $dt_fac = new DateTime($fac_data['datef']);
 
                                 foreach ($fac_lines as $id_line => $line_data) {
-                                    $file_str .= implode(';', array(
+                                    $file_str .= '"' . implode('";"', array(
                                                 $shipTo, // A
                                                 substr($prod_ref, 0, 30), // B
                                                 '',
@@ -474,14 +474,14 @@ Preferred Field
                                                 $line_data['position'], // J
                                                 $dt_fac->format('Ymd'),
                                                 '',
-                                                ($customer_code != 'EN' ? 'XXX' : ''), // M
-                                                ($customer_code != 'EN' ? 'XXX' : ''), // N
-                                                ($customer_code != 'EN' ? 'XXX' : ''), // O
+                                                ($customer_code == '1R' ? $soc_data['nom'] : ($customer_code != 'EN' ? 'XXX' : '')), // M
+                                                ($customer_code == '1R' ? $soc_data['address'] : ($customer_code != 'EN' ? 'XXX' : '')), // N
+                                                ($customer_code == '1R' ? $soc_data['town'] : ($customer_code != 'EN' ? 'XXX' : '')), // O
                                                 '',
-                                                '',
+                                                ($customer_code == '1R' ? $soc_data['zip'] : ''), // Q
                                                 $country_code, // R
                                                 $customer_code // S
-                                            )) . "\n";
+                                            )) . '"' . "\n";
                                 }
                             }
                         }
@@ -715,7 +715,7 @@ Preferred Field
 
                                 unset($v1_shipTos[$v1_idx]['fac_ids'][$id_fac_idx]);
                                 sort($v1_shipTos[$v1_idx]['fac_ids']);
-                                $v1_shipTos[$v1_idx]['nFacs'] --;
+                                $v1_shipTos[$v1_idx]['nFacs']--;
 
                                 $shipTosData[$v1_shipTo]['total_ca'] -= $total_fac;
                                 $shipTosData[$v2_shipTo]['total_ca'] += $total_fac;

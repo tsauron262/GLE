@@ -478,7 +478,7 @@ Preferred Field
                                                 ($customer_code == '1R' ? str_replace('"', '', $soc_data['address']) : ($customer_code != 'EN' ? 'XXX' : '')), // N
                                                 ($customer_code == '1R' ? str_replace('"', '', $soc_data['town']) : ($customer_code != 'EN' ? 'XXX' : '')), // O
                                                 '',
-                                                ($customer_code == '1R' ? str_replace('"', '', $soc_data['zip']) : ''), // Q
+                                                ($customer_code == '1R' ? str_replace('"', '', (string) $soc_data['zip']) : ''), // Q
                                                 $country_code, // R
                                                 $customer_code // S
                                             )) . '"' . "\n";

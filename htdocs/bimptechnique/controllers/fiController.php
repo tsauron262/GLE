@@ -243,10 +243,17 @@ class fiController extends BimpController {
                         $message .= '<img width="25%" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=mycompany&file=' . $logo . '">';
 
                         $file = $conf->ficheinter->dir_output . '/' . $ref . '/' . $ref . '.pdf';
-                        //envois au commecial
-                        mailSyn2("Fiche d'intervention N°" . $ref . " - [COMMERCIAL UNIQUEMENT]", "$email_commercial", "gle@bimp.fr", $message . "<br />Lien vers la FI: " . $instance->getNomUrl(), array($file), array('application/pdf'), array($ref . '.pdf'), "", /* temporaire pour controle */ 'at.bernard@bimp.fr, t.sauron@bimp.fr');
-                        //envois au client
-                        mailSyn2("Fiche d'intervention N°" . $ref, "$email", "gle@bimp.fr", $message, array($file), array('application/pdf'), array($ref . '.pdf'), "", $email_tech);
+                        
+                        if(is_file($file)){
+                            //envois au commecial
+                            mailSyn2("Fiche d'intervention N°" . $ref . " - [COMMERCIAL UNIQUEMENT]", "$email_commercial", "gle@bimp.fr", $message . "<br />Lien vers la FI: " . $instance->getNomUrl(), array($file), array('application/pdf'), array($ref . '.pdf'), "", /* temporaire pour controle */ 'at.bernard@bimp.fr, t.sauron@bimp.fr');
+                            //envois au client
+                            mailSyn2("Fiche d'intervention N°" . $ref, "$email", "gle@bimp.fr", $message, array($file), array('application/pdf'), array($ref . '.pdf'), "", $email_tech);
+                        }
+                        else{
+                            BimpCore::addlog('Probléme de fichier '.$file, 1, 'bimptechnique', null, array('dol_object'=>print_r($instance->dol_object,1)));
+                            $errors[]= 'Mail non envoyé PDF non trouvé';
+                        }
                     }
                 }
             }

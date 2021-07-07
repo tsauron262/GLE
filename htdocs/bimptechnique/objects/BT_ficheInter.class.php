@@ -915,18 +915,18 @@ class BT_ficheInter extends BimpDolObject {
                 'onclick' => $this->getJsActionOnclick('generatePdf', array(), array())
             );
         }        
-        if($statut  != self::STATUT_BROUILLON && $this->canSetActionAdmin()) {
+        if($statut  == self::STATUT_BROUILLON && $this->canSetActionAdmin() && $this->getData('old_status') > 0) {
             $buttons[] = array(
-                'label' => 'Remettre en brouillon',
+                'label' => 'Remettre au satut '.self::$status_list[$this->getData('old_status')]['label'],
                 'icon' => 'file-pdf',
-                'onclick' => $this->getJsActionOnclick('setStatusAdmin', array('status'=>self::STATUT_BROUILLON), array())
+                'onclick' => $this->getJsActionOnclick('setStatusAdmin', array('status'=>$this->getData('old_status')), array())
             );
         }        
-        if($statut  == self::STATUT_BROUILLON && $this->canSetActionAdmin()) {
+        if($statut  != self::STATUT_BROUILLON && $this->canSetActionAdmin()) {
             $buttons[] = array(
-                'label' => 'Validé',
+                'label' => 'Remmetre en brouillon',
                 'icon' => 'file-pdf',
-                'onclick' => $this->getJsActionOnclick('setStatusAdmin', array('status'=>self::STATUT_VALIDER), array())
+                'onclick' => $this->getJsActionOnclick('setStatusAdmin', array('status'=>self::STATUT_BROUILLON), array())
             );
         }
         
@@ -1034,10 +1034,13 @@ class BT_ficheInter extends BimpDolObject {
     
     public function actionSetStatusAdmin($data){
         $errors = $warnings = array();
+        $status = $data['status'];
+        if($status == self::STATUT_BROUILLON)
+            $this->updateField ('old_status', $this->getData('fk_statut'));
         if(!$this->canSetActionAdmin())
             $errors[] = 'Vous n\'avez pas la permission';
         if(!count($errors))
-            $errors = BimpTools::merge_array($errors, $this->setNewStatus($data['status']));
+            $errors = BimpTools::merge_array($errors, $this->setNewStatus($status));
         return array('errors'=>$errors, 'warnings'=>$warnings);
     }
     
@@ -2360,7 +2363,7 @@ class BT_ficheInter extends BimpDolObject {
         
         $inter_on_the_commande = false;
         
-        if(!in_array($my_commandes, $data['id_commande'])) {            
+        if(!in_array($data['id_commande'], $my_commandes)) {            
             
             
             // Vérification si pas d'inter avec cette commande

@@ -438,7 +438,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                         $pdf1->Ln();
     //                    $pdf1->Cell($W * 2, 4, "- Service: " . $p->getData('ref'), 0, null, 'L', false);
     //                    $pdf1->Ln();
-                        if($line->getData('description') != $contrat_line->getData('description')) {
+                        if(!is_object($contrat_line) || $line->getData('description') != $contrat_line->getData('description')) {
                             $have_modif = true;
                             $pdf->Cell($W, 4, "- Nouvelle description du service", 0, null, 'L', false);
                             $pdf->Ln();$pdf->SetX(24);

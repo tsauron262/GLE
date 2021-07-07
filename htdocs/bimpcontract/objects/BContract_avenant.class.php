@@ -64,7 +64,7 @@ class BContract_avenant extends BContract_contrat {
         
         foreach($children as $id => $v) {
             $child = $parent->getChildObject('lines', $id);
-            $serials = json_decode($child->getData("serials"));
+            $serials = BimpTools::json_decode_array($child->getData("serials"));
             foreach($serials as $serial) {
                 if(!in_array($serial, $allSerials)) {
                     $allSerials[$serial] = $serial;
@@ -94,6 +94,8 @@ class BContract_avenant extends BContract_contrat {
                         $laLigne->fetch($line->id);
                         if($laLigne->getData('renouvellement') == $parent->getData('current_renouvellement')) {
                             $nbSerial = count(BimpTools::json_decode_array($laLigne->getData('serials')));
+                            if($nbSerial < 1)
+                                $nbSerial = 1;
                             
                             $det->set('id_avenant', $this->id);
                             $det->set('id_line_contrat', $laLigne->id);
@@ -190,7 +192,7 @@ class BContract_avenant extends BContract_contrat {
                     //print_r($list);
                     foreach($list as $nb => $i) {
                         $service = BimpObject::getInstance('bimpcore', 'Bimp_Product', $i['id_serv']);
-                        $qty = count(json_decode($i['serials_in']));
+                        $qty = count(BimpTools::json_decode_array($i['serials_in']));
                         $ligne_de_l_avenant = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_avenantdet', $i['id']);
                         $id_line = $parent->dol_object->addLine(
                                     $service->getData('description'),
@@ -217,8 +219,11 @@ class BContract_avenant extends BContract_contrat {
                         $coup_ligne_tva = (20 * $coup_ligne_ht) / 100;
                         $coup_ligne_ttc = $coup_ligne_ht + $coup_ligne_tva;
 
+                        $cout = 0;
+                        if($added_qty > 0)
+                            $cout = $coup_ligne_ht / $added_qty;
                         $modifs_string = 
-                            'Coup 1: ' . $coup_ligne_ht / $added_qty . '<br />' . 
+                            'Coup 1 : ' . $cout . '<br />' . 
                             'Qty: ' . $ligne_du_contrat->getData('qty') . ' + ' . $added_qty . "<br />" .
                             'HT: ' . $ligne_du_contrat->getdata('total_ht') . " + " . $coup_ligne_ht . "€" . "<br />" .
                             'TVA: ' . $ligne_du_contrat->getData('total_tva') . " + " . $coup_ligne_tva . "€ <br />" .
@@ -244,8 +249,8 @@ class BContract_avenant extends BContract_contrat {
                                 $errors = BimpTools::merge_array($errors, $ligne_du_contrat->updateField('serials', $infos['serials_in']));
                         }
 
-                        $serialsLigne = json_decode($ligne_du_contrat->getData('serials'));
-                        $newSerials = json_decode($infos['serials_in']);
+                        $serialsLigne = BimpTools::json_decode_array($ligne_du_contrat->getData('serials'));
+                        $newSerials = BimpTools::json_decode_array($infos['serials_in']);
                         if(count(array_diff($serialsLigne, $newSerials)) > 0 && !$dejaChange) {
                             $errors = BimpTools::merge_array($errors, $ligne_du_contrat->updateField('serials', $infos['serials_in']));
                     }
@@ -311,7 +316,7 @@ class BContract_avenant extends BContract_contrat {
         
         if($this->getData('statut') == 0) {
             $buttons[] = array(
-                'label'   => 'Validé l\'avenant',
+                'label'   => 'Valider l\'avenant',
                 'icon'    => 'fas_check',
                 'onclick' => $this->getJsActionOnclick('validate', array(), array(
                 ))

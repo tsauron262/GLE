@@ -164,7 +164,9 @@ if (count($savs)) {
                 $savStr .= $idSav;
             }
 
+            $etat = $sav::$status_list[$sav->getData("status")]['label'];
             $savsList[] = array(
+                'etat' => $etat,
                 'id_sav' => $idSav,
                 'ref' => ((isset($sav->ref) && !empty($sav->ref)) ? $sav->ref : 'inconnu'),
                 'date_create' => $sav->getData("date_create"),
@@ -299,6 +301,7 @@ if ($id_sav) {
 
                         echo '<p class="infos">Vous avez ' . count($savsList) . ' suivis SAV enregistrés pour le n° de série <strong>"' . $serial . '"</strong></p>';
                         echo '<table><thead><tr>';
+                        echo '<th>Etat</th>';
                         echo '<th>Référence</th>';
                         echo '<th>Date de création</th>';
                         echo '<th>Symptômes</th>';
@@ -306,6 +309,7 @@ if ($id_sav) {
                         echo '</tr></thead><tbody>';
                         foreach ($savsList as $savInfos) {
                             echo '<tr>';
+                            echo '<td>' . $savInfos['etat'] . '</td>';
                             echo '<td>' . $savInfos['ref'] . '</td>';
                             echo '<td>' . $savInfos['date_create'] . '</td>';
                             echo '<td>' . $savInfos['symptom'] . '</td>';

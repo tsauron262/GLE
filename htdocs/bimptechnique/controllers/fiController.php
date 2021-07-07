@@ -140,7 +140,6 @@ class fiController extends BimpController {
                     $commercial = $instance->getCommercialClient();
                     $email_commercial = $commercial->getData('email');
                     $instance->actionGeneratePdf([]);
-                    $file = $conf->ficheinter->dir_output . '/' . $instance->dol_object->ref . '/' . $instance->dol_object->ref . '.pdf';
 
                     $message = "Bonjour,<br />Veuillez trouver ci-joint notre Fiche d'Intervention<br />";
                     $instance->fetch($instance->id);
@@ -240,10 +239,12 @@ class fiController extends BimpController {
                             $logo = $testFile;
                         $message .= '<img width="25%" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=mycompany&file=' . $logo . '">';
 
+                        $ref = $instance->getData('ref');
+                        $file = $conf->ficheinter->dir_output . '/' . $ref . '/' . $ref . '.pdf';
                         //envois au commecial
-                        mailSyn2("Fiche d'intervention N°" . $instance->dol_object->ref . " - [COMMERCIAL UNIQUEMENT]", "$email_commercial", "gle@bimp.fr", $message . "<br />Lien vers la FI: " . $instance->getNomUrl(), array($file), array('application/pdf'), array($instance->dol_object->ref . '.pdf'), "", /* temporaire pour controle */ 'at.bernard@bimp.fr');
+                        mailSyn2("Fiche d'intervention N°" . $ref . " - [COMMERCIAL UNIQUEMENT]", "$email_commercial", "gle@bimp.fr", $message . "<br />Lien vers la FI: " . $instance->getNomUrl(), array($file), array('application/pdf'), array($ref . '.pdf'), "", /* temporaire pour controle */ 'at.bernard@bimp.fr, t.sauron@bimp.fr');
                         //envois au client
-                        mailSyn2("Fiche d'intervention N°" . $instance->dol_object->ref, "$email", "gle@bimp.fr", $message, array($file), array('application/pdf'), array($instance->dol_object->ref . '.pdf'), "", $email_tech);
+                        mailSyn2("Fiche d'intervention N°" . $ref, "$email", "gle@bimp.fr", $message, array($file), array('application/pdf'), array($ref . '.pdf'), "", $email_tech);
                     }
                 }
             }

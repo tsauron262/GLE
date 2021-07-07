@@ -303,11 +303,11 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
         } else {
             // Recherche via UserClient: 
             $userClient = BimpCache::findBimpObjectInstance('bimpinterfaceclient', 'BIC_UserClient', array(
-//                        'email_custom' => array(
-//                            'custom' => 'LOWER(email) = \'' . strtolower($email) . '\''
-//                        )
-                        'email' => $email
-            ));
+                        'email_custom' => array(
+                            'custom' => 'LOWER(email) = \'' . strtolower($email) . '\''
+                        )
+//                        'email' => $email
+            ), true);
 
             if (BimpObject::objectLoaded($userClient)) {
                 $client = $userClient->getParentInstance();
@@ -321,7 +321,7 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
             // Recherche via contact client: 
             $contact = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Contact', array(
                         'email' => $email
-            ));
+            ), true);
 
             if (BimpObject::objectLoaded($contact)) {
                 $client = $contact->getParentInstance();
@@ -412,7 +412,7 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
         } else {
             $equipment = BimpCache::findBimpObjectInstance('bimpequipment', 'Equipment', array(
                         'serial' => $serial
-                            ), false);
+                            ), true);
 
             if (BimpObject::objectLoaded($equipment)) {
                 $this->debug_content .= BimpRender::renderAlerts('Equipement #' . $equipment->id . ' trouvé pour le serial ' . $serial, 'info');

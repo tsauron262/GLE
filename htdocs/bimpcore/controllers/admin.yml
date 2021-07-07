@@ -45,6 +45,11 @@ objects:
             bimp_object: 
                 module: bimpcore
                 name: Bimp_Log
+    alert: 
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpAlert
     
                 
 sections:
@@ -148,6 +153,13 @@ sections:
                   list: 
                       panel: 1
                       object: log
+        alert:
+            label: Alert
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: alert
                       
 #        test: 
 #            label: Tests views list

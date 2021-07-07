@@ -1,6 +1,6 @@
 table: bic_user
 icon: fas_user
-common_fields: 0
+common_fields: 1
 
 parent_module: bimpcore
 parent_object: Bimp_Client
@@ -46,10 +46,9 @@ fields:
         label: Client
         type: id_parent
         required: 1
+        default_value: 0
         input: 
-            type: search_societe
-            societe_type: customer
-        default_value: 1
+            card: default
         
     id_contact: 
         label: Contact client associé

@@ -3906,13 +3906,17 @@ class gsxController extends BimpController
 
     protected function ajaxProcessGsxLogout()
     {
-        global $user;
         if (is_null($this->gsx_v2)) {
             $this->gsx_v2 = GSX_v2::getInstance();
         }
         $this->gsx_v2->saveToken('acti', '');
         $this->gsx_v2->saveToken('auth', '');
-        return '';
+        return array(
+                    'errors'        => array(),
+                    'warnings'      => array(),
+                    'gsx_no_logged' => 1,
+                    'success_callback'      => 'gsx_open_login_modal();'
+                );
     }
 
     protected function ajaxProcessGsxRequest()

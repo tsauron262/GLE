@@ -63,7 +63,7 @@ class test_sav
             $user->fetch($idUser);
             $user->fetch_optionals($idUser);
             if(!$this->repair->initGsx($error, true)){
-                $this->output .= " Non authentifié sur GSX ! ".$user->getFullName($langs);
+                $this->output .= " Non authentifié sur GSX ! ".$user->getFullName($langs).'<br/>';
                 return 0;
             }
         }

@@ -338,7 +338,9 @@ class BContract_contrat extends BimpDolObject
         }
 
         $total_fis = $ficheInter->time_to_qty($ficheInter->timestamp_to_time($total_tms)) * BimpCore::getConf("bimptechnique_coup_horaire_technicien");
-        $previsionelle = $total_fis / ($this->getJourTotal() - $this->getJourRestant()) * $this->getJourRestant();
+        $previsionelle = 0;
+        if($this->getJourTotal() > 0)
+            $previsionelle = $total_fis / ($this->getJourTotal() - $this->getJourRestant()) * $this->getJourRestant();
 
         $marge = ($this->getTotalContrat() - $total_fis);
         $marge_previsionelle = ($this->getTotalContrat() - $previsionelle);
@@ -2296,7 +2298,7 @@ class BContract_contrat extends BimpDolObject
 
         foreach ($lines as $line) {
 
-            $serials = json_decode($line['serials']);
+            $serials = BimpTools::json_decode_array($line['serials']);
 
             if (count($serials))
                 $have_serial = true;
@@ -2639,8 +2641,10 @@ class BContract_contrat extends BimpDolObject
     public function actionGeneratePdfCourrier($data, &$success)
     {
         global $langs;
+        $errors = $warnings = array();
         $success = "PDF courrier généré avec Succes";
         $this->dol_object->generateDocument('contrat_courrier_BIMP_renvois', $langs);
+        return array('errors' => $errors, 'warnings' => $warnings);
     }
 
     public function actionGeneratePdfEcheancier($data, &$success)
@@ -3037,7 +3041,10 @@ class BContract_contrat extends BimpDolObject
                 $totalReste += $interval->d / 30;
             }
 //                dol_syslog('contrat d '.$interval->d,3);
-            $return = ($totalReste / $this->getData('periodicity'));
+            if($this->getData('periodicity') > 0)
+                $return = ($totalReste / $this->getData('periodicity'));
+            else
+                $return = $totalReste;
             //}
 
             return $return;
@@ -3933,10 +3940,10 @@ class BContract_contrat extends BimpDolObject
 //                if (stripos($elem, "signe"))
 //                    $idSepaSigne = $id;
 //            }
-            if (stripos($elem, "_Ex_Bimp") !== FALSE) {
+            if (stripos($elem, $this->getRef()."_Ex_Olys") !== FALSE) {
                 $values[] = $id;
             }
-            if (stripos($elem, "_Ex_Client") !== FALSE) {
+            if (stripos($elem, $this->getRef()."_Ex_Client") !== FALSE) {
                 $values[] = $id;
             }
         }

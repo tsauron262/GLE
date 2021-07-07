@@ -442,7 +442,7 @@ class ValidComm extends BimpObject
         // Personne ne peut valider
         if(!$id_user_affected) {
                         
-            $type_nom = lcfirst(self::$types[$type]);
+            $type_nom = lcfirst(self::$types[$type]['label']);
             
             switch ($type) {
                 case self::TYPE_COMMERCIAL:

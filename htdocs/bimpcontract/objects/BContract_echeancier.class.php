@@ -656,8 +656,8 @@ class BContract_echeancier extends BimpObject {
                 $html .= '<tr class="objectListItemRow" >';
                 $dateDebut = New DateTime();
                 $dateFin = New DateTime();
-                $dateDebut->setTimestamp($facture->dol_object->lines[0]->date_start);
-                $dateFin->setTimestamp($facture->dol_object->lines[0]->date_end);
+                $dateDebut->setTimestamp((int)$facture->dol_object->lines[0]->date_start);
+                $dateFin->setTimestamp((int)$facture->dol_object->lines[0]->date_end);
                 
                 if($this->getData('old_to_new'))
                     $html .= '<td style="text-align:center" ><b>Ancienne facturation</b></td>';

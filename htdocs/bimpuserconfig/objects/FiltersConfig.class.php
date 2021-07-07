@@ -190,7 +190,7 @@ class FiltersConfig extends BCUserConfig
         $html .= '<span class="btn btn-default loadDefaultFiltersButton" onclick="FiltersConfig.userDefaultFilters($(this))">';
         $html .= BimpRender::renderIcon('fas_undo', 'iconLeft') . 'Filtres par défaut';
         $html .= '</span>';
-        $html .= '<span class="btn btn-default removeAllFiltersButton" onclick="FiltersConfig.removeAllFilters($(this))"' . (count($filters) > 1 ? '' : ' style="display: none"') . '>';
+        $html .= '<span class="btn btn-default removeAllFiltersButton" onclick="FiltersConfig.removeAllFilters($(this))"' . (is_array($filters) && count($filters) > 1 ? '' : ' style="display: none"') . '>';
         $html .= BimpRender::renderIcon('fas_times-circle', 'iconLeft') . 'Retirer tous les filtres';
         $html .= '</span>';
         $html .= '</div>';

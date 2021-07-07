@@ -2158,7 +2158,7 @@ function toggleInputDisplay($container, $input) {
         // Règle pour display_if sur plusieurs inputs: 
         //      - Tous les show_values doivent être vrai pour afficher. 
         //      - Si un seul hide_values vrai : champ masqué. 
-        
+
         var inputs_names = $container.data('inputs_names');
         if (inputs_names) {
             inputs_names += '';
@@ -2200,7 +2200,7 @@ function toggleInputDisplay($container, $input) {
                         }
                     }
                 }
-                
+
                 if (hide) {
                     show = false;
                 }
@@ -2287,6 +2287,30 @@ function onFormLoaded($form) {
                 e.stopPropagation();
             });
         }
+
+        var focus_done = false;
+
+        $form.find('.inputContainer').each(function () {
+            if (!focus_done) {
+                var field_name = $(this).data('field_name');
+                if (field_name) {
+                    var $input = $(this).find('[name="' + field_name + '"]');
+                    if ($input.length) {
+                        var $row = $input.findParentByClass('formRow');
+                        if ($.isOk($row) && $row.css('display') !== 'none') {
+                            var tag = $input.tagName();
+
+                            if (tag === 'textarea' || (tag === 'input' && $input.attr('type') === 'text')) {
+                                $input.focus();
+                                focus_done = true;
+                            } else if (tag !== 'input' || $input.attr('type') !== 'hidden') {
+                                focus_done = true;
+                            }
+                        }
+                    }
+                }
+            }
+        });
     }
 }
 

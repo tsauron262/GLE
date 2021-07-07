@@ -2363,7 +2363,7 @@ class BT_ficheInter extends BimpDolObject {
         
         $inter_on_the_commande = false;
         
-        if(!in_array($my_commandes, $data['id_commande'])) {            
+        if(!in_array($data['id_commande'], $my_commandes)) {            
             
             
             // Vérification si pas d'inter avec cette commande

@@ -208,7 +208,7 @@ class ValidComm extends BimpObject
 //                $this->updateDemande ((int) $user->id, $class, (int) $bimp_object->id, $type, (int) DemandeValidComm::STATUS_VALIDATED);
 //                return 1;
                 
-            // Je peux valider (sans être le valideur)
+            // Je peux valider 
             elseif($this->userCanValidate((int) $user->id, $secteur, $type, $class, $val, $bimp_object, $val_comm_validation)) {
                 $this->updateDemande ((int) $user->id, $class, (int) $bimp_object->id, $type, (int) DemandeValidComm::STATUS_VALIDATED, $val_comm_validation);
                 return 1;
@@ -245,8 +245,10 @@ class ValidComm extends BimpObject
             if($val < 0)
                 $val_max = $val;
             
-            elseif($val_max < 0)
+            elseif($val_max < 0) {
+                $valid_comm = -2;
                 return 1;
+            }
 
         }
         

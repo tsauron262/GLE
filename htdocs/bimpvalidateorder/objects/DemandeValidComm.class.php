@@ -375,11 +375,13 @@ class DemandeValidComm extends BimpObject
                 
                 if($this->getData('val_comm_validation') == -1)
                     $html .= BimpRender::renderAlerts("La demande a été validée automatiquement car le compte client ne présente plus de retards de paiement.", 'info');
+                elseif($this->getData('val_comm_validation') == -2)
+                    $html .= BimpRender::renderAlerts("L'encours du client a été modifié entre la création et la validation de la demande.", 'info');
                 else {
                     $valid_comm_validation = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm', (int) $this->getData('val_comm_validation'));
 
                     if(!$valid_comm_validation->isLoaded())
-                    $html .= BimpRender::renderAlerts("Erreur lors du chargement de la règle de validation (lors de la validation)", 'danger');
+                        $html .= BimpRender::renderAlerts("Erreur lors du chargement de la règle de validation (lors de la validation)", 'danger');
                     else {
                         if($valid_comm_validation->getData('date_update') > $this->getData('date_valid'))
                             $html .= BimpRender::renderAlerts("Cette règle de validation a été éditée après la validation de cette demande", 'danger');

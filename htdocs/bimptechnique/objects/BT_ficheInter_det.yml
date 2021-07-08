@@ -33,6 +33,16 @@ objects:
             bimp_object: BT_ficheInter_det
         id_object:
             request: id
+    commande_line:
+        instance:
+            bimp_object:
+                module: bimpcommercial
+                name: Bimp_CommandeLine
+    contrat_line:
+        instance:
+            bimp_object:
+                module: bimpcontract
+                name: BContract_contratLine
 fields:
     fk_fichinter:
         label: Fiche d'intervention
@@ -63,10 +73,13 @@ fields:
             type: toggle
     id_line_commande:
         label: Ligne de la commande
-        type: int
+        type: id_object
+        object: commande_line
     id_line_contrat:
         label: Ligne du contrat
-        type: int
+        type: id_object
+        object: contrat_line
+        
     id_set_facturable:
         label: Mis facturable par
         type: int
@@ -173,6 +186,10 @@ forms:
             - field: pourcentage_commercial
     editinter:
         rows:
+            - field: type
+              required: 1
+            - field: id_line_contrat
+            - field: id_line_commande
             - field: date
               input:
                   type: date

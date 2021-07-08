@@ -1107,17 +1107,18 @@ class BT_ficheInter extends BimpDolObject {
         foreach($children as $id_child) {
             $child = $this->getChildObject('inters', $id_child);
             if($child->getData('id_line_commande')) {
-                $line = new OrderLine($this->db->db);
-                $line->fetch($child->getData('id_line_commande'));
+                $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $child->getData('id_line_commande'));
+//                $line = new OrderLine($this->db->db);
+//                $line->fetch($child->getData('id_line_commande'));
                 $time = $this->timestamp_to_time($child->getData('duree'));
                 $qty = $this->time_to_qty($time);
-                $services_executed[$child->getData('id_line_commande')]['ht_executed'] += ($line->total_ht * $qty);
+                $services_executed[$child->getData('id_line_commande')]['ht_executed'] += ($line->getTotalHt(1) * $qty);
                 $services_executed[$child->getData('id_line_commande')]['pourcentage_commerncial'] += ($child->getData('pourcentage_commercial') * $line->total_ht) / 100;
                 if(!array_key_exists("ht_vendu", $services_executed[$child->getData('id_line_commande')]))
-                    $services_executed[$child->getData('id_line_commande')]['ht_vendu'] = ($line->total_ht);
+                    $services_executed[$child->getData('id_line_commande')]['ht_vendu'] = ($line->getTotalHt(1));
                 $services_executed[$child->getData('id_line_commande')]['qty_executed'] += $qty;
                 if(!array_key_exists("commande", $services_executed[$child->getData('id_line_commande')]))
-                    $services_executed[$child->getData('id_line_commande')]['commande'] = $line->fk_commande;
+                    $services_executed[$child->getData('id_line_commande')]['commande'] = $line->getData('id_obj');
                 if(!array_key_exists("date", $services_executed[$child->getData('id_line_commande')]))
                     $services_executed[$child->getData('id_line_commande')]['date'] = $child->getData('date');
                 $services_executed[$child->getData('id_line_commande')]["lines"][] = $child->id;
@@ -1183,9 +1184,10 @@ class BT_ficheInter extends BimpDolObject {
                 $html .= "<h3><b><u>Détail de la facturation</u></b></h3>";
                 foreach($services_executed as $id_line_commande => $informations) {
                     $commande->fetch($informations['commande']);
-                    $line = new OrderLine($this->db->db);
-                    $line->fetch($id_line_commande);
-                    $product->fetch($line->fk_product);
+                    $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $id_line_commande);
+//                    $line = new OrderLine($this->db->db);
+//                    $line->fetch($id_line_commande);
+                    $product->fetch($line->id_product);
                     $date = new DateTime($informations['date']);
                     $total_ht_facturable = (price($informations['ht_executed']) - price($informations['pourcentage_commerncial']) - price($informations['ht_vendu']));
                     $html .= '<div class="bimp_info_card" style="border-color: #348C41">'
@@ -1656,10 +1658,11 @@ class BT_ficheInter extends BimpDolObject {
                 return $obj->getData('total_ht');
                 break;
             case 'commande':
-                BimpTools::loadDolClass('commande', 'commande');
-                $obj = New OrderLine($this->db->db);
-                $obj->fetch($id_line);
-                return $obj->total_ht;
+                $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $id_line);
+//                BimpTools::loadDolClass('commande', 'commande');
+//                $obj = New OrderLine($this->db->db);
+//                $obj->fetch($id_line);
+                return $obj->getTotalHt(1);
                 break;
             default:
                 return 0;
@@ -1674,10 +1677,11 @@ class BT_ficheInter extends BimpDolObject {
                 return $obj->getData('fk_product');
                 break;
             case 'commande':
-                BimpTools::loadDolClass('commande', 'commande');
-                $obj = New OrderLine($this->db->db);
-                $obj->fetch($id_line);
-                return $obj->fk_product;
+                $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $id_line);
+//                BimpTools::loadDolClass('commande', 'commande');
+//                $obj = New OrderLine($this->db->db);
+//                $obj->fetch($id_line);
+                return $obj->id_product;
                 break;
             default:
                 return 0;
@@ -1732,10 +1736,11 @@ class BT_ficheInter extends BimpDolObject {
                     $obj->fetch($det->getData('fk_contratdet'));
                     $id_product = $obj->getData('fk_product');
                 } else {
-                    BimpTools::loadDolClass('commande', 'OrderLine');
-                    $obj = new OrderLine($thhis->db->db);
-                    $obj->fetch($det->getData('fk_commandedet'));
-                    $id_product = $obj->fk_product;
+                    $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $det->getData('fk_commandedet'));
+//                    BimpTools::loadDolClass('commande', 'OrderLine');
+//                    $obj = new OrderLine($thhis->db->db);
+//                    $obj->fetch($det->getData('fk_commandedet'));
+                    $id_product = $obj->id_product;
                 }
                 $product->fetch($id_product);
                 $return[$det->id] = $det->getData('date') . ' - ' . $product->getData('ref');

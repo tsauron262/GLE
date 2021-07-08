@@ -227,23 +227,23 @@ class BT_ficheInter_det extends BimpDolObject {
     }
     
     
-    public function getTotalLineSell($type_line) {
-        switch($type_line) {
-            case 'commande':
-                BimpTools::loadDolClass('commande');
-                $line = new OrderLine($this->db->db);
-                $line->fetch($this->getData('id_line_commande'));
-                return $line->subprice * $line->qty;
-                break;
-            case 'contrat':
-                $line = $this->getInstance('bimpcontract', 'BContract_contratLine', $this->getData('id_line_contrat'));
-                return $line->getData('subprice') * $line->getData('qty');
-                break;
-            default:
-                return 0;
-                break;
-        }
-    }
+//    public function getTotalLineSell($type_line) {
+//        switch($type_line) {
+//            case 'commande':
+//                BimpTools::loadDolClass('commande');
+//                $line = new OrderLine($this->db->db);
+//                $line->fetch($this->getData('id_line_commande'));
+//                return $line->subprice * $line->qty;
+//                break;
+//            case 'contrat':
+//                $line = $this->getInstance('bimpcontract', 'BContract_contratLine', $this->getData('id_line_contrat'));
+//                return $line->getData('subprice') * $line->getData('qty');
+//                break;
+//            default:
+//                return 0;
+//                break;
+//        }
+//    }
     
     public function canCreate() {
         return 1;
@@ -262,14 +262,15 @@ class BT_ficheInter_det extends BimpDolObject {
     public function displayTypeInter() {
         global $db;
         $parent = $this->getParentInstance();
-        if($this->getData('id_line_commande')) {
-            BimpTools::loadDolClass('commande');
-            $orderLine = new OrderLine($db);
-            $orderLine->fetch($this->getData('id_line_commande'));
-            
-            $product = $this->getInstance('bimpcore', 'Bimp_Product', $orderLine->fk_product);
-            
-        }
+//        if($this->getData('id_line_commande')) {
+//            $orderLine = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $id_line);
+//            BimpTools::loadDolClass('commande');
+//            $orderLine = new OrderLine($db);
+//            $orderLine->fetch($this->getData('id_line_commande'));
+//            
+//            $product = $this->getInstance('bimpcore', 'Bimp_Product', $orderLine->fk_product);
+//            
+//        }
         
         if($this->getData('type') == $parent->getData('fk_soc')) {
             return "<b>".BimpRender::renderIcon("inbox")." Service en interne</b>";
@@ -296,16 +297,20 @@ class BT_ficheInter_det extends BimpDolObject {
             $obj = $this->getInstance("bimpcontract", "BContract_contratLine", $this->getData('id_line_contrat'));
             $fk_product = $obj->getData('fk_product');
             $parent = $obj->getParentInstance();
-            $element = "Contrat: " . $parent->getData('ref');
+            $element = "Contrat: " . $parent->getLink();
             $valeur = $obj->getData('subprice') * $obj->getData('qty');
         }elseif($this->getData('id_line_commande') > 0) {
-            BimpTools::loadDolClass('commande', 'commande', 'OrderLine');
-            $obj = new OrderLine($this->db->db); $obj->fetch($this->getData('id_line_commande'));
-            $parent = new Commande($this->db->db);
-            $parent->fetch($obj->fk_commande);
-            $valeur = $obj->total_ht;
-            $fk_product = $obj->fk_product;
-            $element = "Commande: " . $parent->ref;
+//            BimpTools::loadDolClass('commande', 'commande', 'OrderLine');
+            $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $this->getData('id_line_commande'));
+            $parent = $obj->getParentInstance();
+            
+//            $obj = new OrderLine($this->db->db); $obj->fetch($this->getData('id_line_commande'));
+//            $parent = new Commande($this->db->db);
+//            $parent->fetch($obj->fk_commande);
+            $valeur = $obj->getTotalHt(1);
+//            die('p'.$obj->printData().print_r($obj,1));
+            $fk_product = $obj->id_product;
+            $element = "Commande: " . $parent->getLink();
         }else {
             $fk_product = 0;
         }
@@ -415,47 +420,48 @@ class BT_ficheInter_det extends BimpDolObject {
         
     }
     
-    public function displaySurplusFacturation() {
-        $html = "";
-        
-        $surplus = $this->getSurplusFacturationHt();
-        $html .= $surplus . "€";
-        
-        return $html;
-    }
+//    public function displaySurplusFacturation() {
+//        $html = "";
+//        
+//        $surplus = $this->getSurplusFacturationHt();
+//        $html .= $surplus . "€";
+//        
+//        return $html;
+//    }
     
-    public function getSurplusFacturationHt($avecPourcenatge = true) {
-        $parent  = $this->getParentInstance();
-        $array = [];
-        
-        $porcentage = $this->getData('pourcentage_commercial');
-        $product = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Product");
-        if($this->getData('id_line_commande')) {
-            // Service d'une commande
-            $line = new OrderLine($this->db->db);
-            $line->fetch($this->getData('id_line_commande'));
-            $product->fetch($line->fk_product);
-            $tarif = $product->getData('price');
-            $vendu = $line->total_ht;
-            $qty_in_commande = $line->qty;
-            $tms = $parent->timestamp_to_time($this->getData('duree'));
-            $qty = $parent->time_to_qty($tms);
-            
-            if($avecPourcenatge) {
-                if($qty > $qty_in_commande) {
-                    $surplus = ($qty*$tarif) - ($vendu);
-                    $surplus_pourcentage = ($porcentage * $surplus) / 100;
-                    return $surplus - $surplus_pourcentage;
-                }
-            } else {
-                return ($qty*$tarif) - ($vendu);
-            }
-
-        }
-        
-        return 0;
-        
-    }
+//    public function getSurplusFacturationHt($avecPourcenatge = true) {
+//        $parent  = $this->getParentInstance();
+//        $array = [];
+//        
+//        $porcentage = $this->getData('pourcentage_commercial');
+//        $product = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Product");
+//        if($this->getData('id_line_commande')) {
+//            // Service d'une commande
+//            $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $this->getData('id_line_commande'));
+////            $line = new OrderLine($this->db->db);
+////            $line->fetch($this->getData('id_line_commande'));
+//            $product->fetch($line->fk_product);
+//            $tarif = $product->getData('price');
+//            $vendu = $line->total_ht;
+//            $qty_in_commande = $line->qty;
+//            $tms = $parent->timestamp_to_time($this->getData('duree'));
+//            $qty = $parent->time_to_qty($tms);
+//            
+//            if($avecPourcenatge) {
+//                if($qty > $qty_in_commande) {
+//                    $surplus = ($qty*$tarif) - ($vendu);
+//                    $surplus_pourcentage = ($porcentage * $surplus) / 100;
+//                    return $surplus - $surplus_pourcentage;
+//                }
+//            } else {
+//                return ($qty*$tarif) - ($vendu);
+//            }
+//
+//        }
+//        
+//        return 0;
+//        
+//    }
     
     public function actionChangeFacturable($data, &$success) {
         global $user;
@@ -525,33 +531,33 @@ class BT_ficheInter_det extends BimpDolObject {
         }
     }
     
-    public function display_total($search = 'HT') {
-        return print_r($this->getTotal(), 1) ;
-    }
+//    public function display_total($search = 'HT') {
+//        return print_r($this->getTotal(), 1) ;
+//    }
     
-    public function getTotal() {
-        $mode_facturation = $this->getData('forfait');
-        $price = Array();
-        if($mode_facturation == 0){ // Aucune
-            return "0";
-        } else {
-            if($this->getData('id_line_commande') || $this->getData('id_line_contrat')) {
-                if($this->getData('id_line_commande')) {
-                    BimpTools::loadDolClass('commande');
-                    $obj = new OrderLine($this->db->db);
-                    $obj->fetch($this->getData('id_line_commande'));
-                    
-                } elseif($this->getData('id_line_contrat')) {
-                    $obj = $this->getInstance('bimpcontract', 'BContract_contratLine', $this->getData('id_line_contrat'));
-                }
-                $product = $this->getInstance('bimpcore', 'Bimp_Product', $fk_product);
-                if($mode_facturation == 1) { // Forfait
-                    //$price['HT'] = 
-                }
-                return $price;
-            } else {
-                return 'NULL';
-            }
-        }
-    }
+//    public function getTotal() {
+//        $mode_facturation = $this->getData('forfait');
+//        $price = Array();
+//        if($mode_facturation == 0){ // Aucune
+//            return "0";
+//        } else {
+//            if($this->getData('id_line_commande') || $this->getData('id_line_contrat')) {
+//                if($this->getData('id_line_commande')) {
+//                    BimpTools::loadDolClass('commande');
+//                    $obj = new OrderLine($this->db->db);
+//                    $obj->fetch($this->getData('id_line_commande'));
+//                    
+//                } elseif($this->getData('id_line_contrat')) {
+//                    $obj = $this->getInstance('bimpcontract', 'BContract_contratLine', $this->getData('id_line_contrat'));
+//                }
+//                $product = $this->getInstance('bimpcore', 'Bimp_Product', $fk_product);
+//                if($mode_facturation == 1) { // Forfait
+//                    //$price['HT'] = 
+//                }
+//                return $price;
+//            } else {
+//                return 'NULL';
+//            }
+//        }
+//    }
 }

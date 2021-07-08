@@ -1440,6 +1440,7 @@ class BT_ficheInter extends BimpDolObject {
                     . "<br /><br />Cordialement", $commercial->getData('email'));
             global $conf;
             $files = array();
+            $this->dol_object->fetch($this->dol_object->id);
             $files[] = array($conf->ficheinter->dir_output . '/' . $this->dol_object->ref . '/' . $this->dol_object->ref . '.pdf', 'application/pdf', $this->dol_object->ref . '.pdf');
             $bimpMail->addFiles($files);
             $mail_errors = array();

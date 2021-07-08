@@ -387,7 +387,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                         $contrat_line = BimpObject::getInstance('bimpcontract', 'BContract_contratLine', $line->getData('id_line_contrat'));
                         $p = BimpObject::getInstance('bimpcore', 'Bimp_Product', $contrat_line->getData('fk_product'));
                     } else {
-                        $p = BimpObject::getInstance('bimpcore', 'Bimp_Product', $this->avenant->getData('id_serv'));
+                        $p = BimpObject::getInstance('bimpcore', 'Bimp_Product', $line->getData('id_serv'));
                     }
                     
                     $old_qty = 0;
@@ -445,6 +445,8 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                             $pdf1->Cell($W, 4, "- Nouvelle description du service", 0, null, 'L', false);
                             $pdf1->Ln();$pdf1->SetX(24);
                             $chaine_description = $line->getData('description');
+                            if($chaine_description == '')
+                                $chaine_description = $p->getData('description');
                             //$chaine_description = strip_tags($chaine_description,"<b><u><i><a><img><p><strong><em><font><tr><blockquote>");
                             $chaine_description = str_replace(":&nbsp;", ' ', $chaine_description);  
                             $chaine_description = str_replace("<li>", '', $chaine_description);

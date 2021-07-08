@@ -386,7 +386,7 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
                                 'value'    => '0'
                               )
                         );
-            if($nb > 1){//sinon c'est un test de reconnexion
+            if($nb > 5){//sinon c'est un test de reconnexion
 //                $filtre['status_gsx'] = array(0,3);
                 $filtre['custom'] = array('custom'=>'(status_gsx = 0 || (status_gsx = 3 AND id IN (SELECT a.id_equipment FROM llx_bs_sav a WHERE status IN (-1,0))))');
                 $rows = $equipment->getList($filtre, $nb, 1, 'id', 'desc', 'array', array('id', 'serial'));

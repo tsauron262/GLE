@@ -175,7 +175,7 @@ class Bimp_Vente extends BimpObject
         ));
 
         BimpObject::loadClass('bimpcore', 'BimpProductCurPa');
-        $entrepots = BimpCache::getEntrepotsShipTos();
+        $entrepots = BimpCache::getEntrepotsShipTos(true);
         $entrepots[-9999] = "1683245";
         $shiptos_data = array();
 

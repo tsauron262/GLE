@@ -735,13 +735,15 @@ class BContract_echeancier extends BimpObject {
                     $amount = $data->reste_a_payer / ($data->reste_periode / $morceauPeriode);
                     $tva = $amount * 0.2;
                     $nb_periode = ceil($parent->getData('duree_mois') / $parent->getData('periodicity'));
+                    $pa = ($parent->getTotalPa()- $parent->getTotalDejaPayer(false, 'pa')) /  ($data->reste_periode * $morceauPeriode); 
                 } else {
                     $amount = $data->reste_a_payer;
                     $tva = $amount * 0.2;
                     $nb_periode = 1;
+                    $pa = ($parent->getTotalPa()- $parent->getTotalDejaPayer(false, 'pa')); 
                 }
                 
-                $pa = ($parent->getTotalPa()- $parent->getTotalDejaPayer(false, 'pa')) /  ($data->reste_periode * $morceauPeriode); 
+                
                 if(!$display) {
                     $none_display = [
                         'total_ht' => $amount,

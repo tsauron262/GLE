@@ -1345,7 +1345,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         foreach ($reception_data['serials'] as $serial_data) {
                             if (in_array((string) $serial_data['serial'], $serials_checked)) {
                                 $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_r);
-//                                $errors[] = 'Le numéro de série "' . $serial_data['serial'] . '" a déjà été utilisé pour la réception n°' . $reception->getData('num_reception') . ' (' . $reception->getRef() . ') de la ligne n°' . $line->getData('position');
+                                $errors[] = 'Le numéro de série "' . $serial_data['serial'] . '" a déjà été utilisé pour la réception n°' . $reception->getData('num_reception') . ' (' . $reception->getRef() . ') de la ligne n°' . $line->getData('position');
                             }
                         }
                     }

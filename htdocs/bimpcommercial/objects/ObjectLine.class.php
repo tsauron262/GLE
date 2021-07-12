@@ -1374,7 +1374,7 @@ class ObjectLine extends BimpObject
                     $remise->delete($del_warnings, true);
                 }
                 unset($this->remises);
-                $this->remises = null;
+                $this->remises = array();
             }
 
             return $this->remises;

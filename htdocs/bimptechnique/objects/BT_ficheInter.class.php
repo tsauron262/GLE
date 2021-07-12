@@ -1434,7 +1434,7 @@ class BT_ficheInter extends BimpDolObject {
             $this->update();
             
             $commercial = $this->getCommercialClient();
-            $bimpMail = new BimpMail("BIMP - Rapport d'intervention - " . $this->getRef(), 
+            $bimpMail = new BimpMail("BIMP - Rapport d'intervention - " . $this->dol_object->ref, 
                     $mail_signataire, '', "Bonjour, merci de signer votre rapport d'intervention à l'adresse suivante: "
                     . "<a href='".DOL_URL_ROOT . "/bimptechnique/public'>" . DOL_URL_ROOT . "/bimptechnique/public</a> en entrant votre nom ainsi que le mot de passe suivant: <b>$new_password</b><br />Cet accès n'est valable que 4 Jours calandaire."
                     . "<br /><br />Cordialement", $commercial->getData('email'));

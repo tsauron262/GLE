@@ -48,11 +48,11 @@ class BS_SAV extends BimpObject
     public static $need_propal_status = array(2, 3, 4, 5, 6, 9);
     public static $propal_reviewable_status = array(0, 1, 2, 3, 4, 6, 7, 9);
     public static $save_options = array(
-        1 => 'Dispose d\'une sauvegarde',
+        1 => 'Ne désire pas de sauvegarde',
         2 => 'Désire une sauvegarde si celle-ci est possible',
-        0 => 'Non applicable',
-        3 => 'Dispose d\'une sauvegarde Time machine',
-        4 => 'Ne dispose pas de sauvegarde et n\'en désire pas'
+        0 => 'Produit non concerné par une sauvegarde',
+//        3 => 'Ne désire pas de sauvegarde (Dispose d\'une sauvegarde Time machine)',
+//        4 => 'Ne désire pas de sauvegarde (Ne dispose pas de sauvegarde et n\'en désire pas)'
     );
     public static $contact_prefs = array(
         3 => 'SMS + E-mail',

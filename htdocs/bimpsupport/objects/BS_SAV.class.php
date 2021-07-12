@@ -2846,7 +2846,7 @@ class BS_SAV extends BimpObject
                     $files[] = array($fileProp, 'application/pdf', 'PC-' . $ref_propal . '.pdf');
                 }
 
-                if (!in_array($msg_type, array('debDiago', 'debut'))) {
+                if (!in_array($msg_type, array('debDiago', 'debut', 'localise'))) {
                     $fileProp = DOL_DATA_ROOT . "/propale/" . $ref_propal . "/" . $ref_propal . ".pdf";
                     if (is_file($fileProp)) {
                         $files[] = array($fileProp, 'application/pdf', $ref_propal . '.pdf');

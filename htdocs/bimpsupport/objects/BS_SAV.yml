@@ -300,6 +300,7 @@ fields:
         values: 
             array: save_options
         user_edit: 1
+        default_value: 1
     contact_pref: 
         label: Préférence de contact retour
         type: int

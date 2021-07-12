@@ -115,7 +115,7 @@ class InvoiceStatementPDF extends BimpDocumentPDF
             
             //die('<pre>' . print_r($id_contacts));
             
-            if (count($id_contacts) > 1) {
+            if (is_array($id_contacts) && count($id_contacts) > 1) {
                 $html .= '<td>';
                 foreach($id_contacts as $id_contact)  {
                     if($id_contact > 0) {

@@ -315,8 +315,10 @@ if ($id_sav) {
                             echo '<td>' . $savInfos['ref'] . '</td>';
                             echo '<td>' . $savInfos['date_create'] . '</td>';
                             
+                            echo "<td>";
                              if(isset($tabTextEtat[$etat]))
-                                echo "<td>".$tabTextEtat[$etat] . "</td>";
+                                echo $tabTextEtat[$etat];
+                             echo "</td>";
 //                            echo '<td>' . $savInfos['symptom'] . '</td>';
                             echo '<td><a class="butAction" href="./' . $page . '?id_sav=' . $savInfos['id_sav'];
                             if (!empty($savStr) && $serial) {

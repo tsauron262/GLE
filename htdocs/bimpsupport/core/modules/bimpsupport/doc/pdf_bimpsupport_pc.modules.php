@@ -273,11 +273,17 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
             $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
 
             $save = (int) $sav->getData('save_option');
-            if ($save === 2)
+            if ($save === 2 || $save == 1)
                 $pdf->SetTextColor(256, 0, 0);
 
             $pdf->SetXY('28.5', '160.3');
-            $pdf->MultiCell(100, 6, $sav->displayData('save_option', 'default', false, true), 0, 'L');
+            
+            $text = $sav->displayData('save_option', 'default', false, true);
+            if($save == 1)
+                $text = "Le client donne son accord pour que toutes ses données soient effacées. Son produit lui sera restitué en configuration usine, aucune de ses données personnelles ne sera présentes.";
+            elseif($save == 2)
+                $text = "Le client autorise BIMP à essayer de sauvegarder ses données personnelles. Si cela s’avère impossible aucune intervention ne sera réalisée sur le produit sans accord préalable du client. Le délai d’intervention pourra en être augmenté.";
+            $pdf->MultiCell(175, 6, $text, 0, 'L');
 
             $cgv = "";
             $cgv .= "-La société BIMP ne peut pas être tenue responsable de la perte éventuelle de données, quelque soit le support.\n\n";

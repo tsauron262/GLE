@@ -102,11 +102,13 @@ class BContract_echeancier extends BimpObject {
                 if($facture->getData('type') == 0) {
                     $dateDebut = New DateTime();
                     $dateFin = New DateTime();
-                    $dateDebut->setTimestamp($facture->dol_object->lines[0]->date_start);
-                    $dateFin->setTimestamp($facture->dol_object->lines[0]->date_end);
-                    if($dateDebut->format('Y-m-d') == $date_start && $dateFin->format('Y-m-d') == $date_end) {
-                        $parent->addLog("Facturation de la même periode stopée automatiquement");
-                        return true;
+                    if(is_int($facture->dol_object->lines[0]->date_start) && is_int($facture->dol_object->lines[0]->date_end)){
+                        $dateDebut->setTimestamp($facture->dol_object->lines[0]->date_start);
+                        $dateFin->setTimestamp($facture->dol_object->lines[0]->date_end);
+                        if($dateDebut->format('Y-m-d') == $date_start && $dateFin->format('Y-m-d') == $date_end) {
+                            $parent->addLog("Facturation de la même periode stopée automatiquement");
+                            return true;
+                        }
                     }
                 }
             }

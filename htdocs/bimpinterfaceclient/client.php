@@ -11,7 +11,7 @@ if(!isset($_COOKIE[$sessionname])){
     setcookie($sessionname, session_id(), array('SameSite' => 'None', 'Secure'=>true));
 }
 if(!isset($_COOKIE['SERVID']) && defined('ID_ERP'))
-    setcookie('SERVID', urlencode('erp'.ID_ERP.''), array('SameSite' => 'None', 'Secure'=>true));
+    setcookie('SERVID2', 'erp'.ID_ERP.'', array('SameSite' => 'None', 'Secure'=>true));
 
 BimpCore::setContext("public");
 

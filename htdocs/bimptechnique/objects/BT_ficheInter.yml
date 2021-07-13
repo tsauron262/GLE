@@ -14,6 +14,13 @@ labels:
     name: Fiche d'intervention
     name_plur: Fiches d'interventions
     is_female: 1
+    
+    
+nom_url: 
+    syntaxe: <ref>
+    external_link: 1
+    modal_view: fi
+    
 objects:
     contrat:
         instance:

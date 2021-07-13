@@ -544,7 +544,7 @@ class Bimp_Commande extends BimpComm
                             ))
                         );
                     } else {
-                        $errors = 'Vous n\'avez pas la permission';
+                        $errors[] = 'Vous n\'avez pas la permission';
                     }
                 }
                 if (count($errors)) {

@@ -5,7 +5,7 @@ if (!defined('BIMP_LIB')) {
 }
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/InvoicePDF.php';
 
-class InvoiceRge4PDF extends InvoicePDF
+class InvoiceRge5PDF extends InvoicePDF
 {
     public static $label_prime = "Prime CEE";
     protected function initHeader()

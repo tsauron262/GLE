@@ -701,9 +701,13 @@ class BContract_echeancier extends BimpObject {
                 }
             }
         }
+        if ($this->getData('next_facture_date') == 0 && $parent->getTotalContrat() - $parent->getTotalDejaPayer() > 0) {
+            $this->updateField('next_facture_date', $dateFin->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00'));
+            die('Echéancier corrigé, rafraichir la page');
+        }
         if ($this->getData('next_facture_date') != 0) {
-            $startedDate = new DateTime($this->getInitData('next_facture_date'));
-            $enderDate = new DateTime($this->getInitData('next_facture_date'));
+            $startedDate = new DateTime($this->getData('next_facture_date'));
+            $enderDate = new DateTime($this->getData('next_facture_date'));
             $enderDate->add(new DateInterval("P" . $data->periodicity . "M"))->sub(new DateInterval("P1D"));
             $firstPassage = true;
             $firstDinamycLine = true;

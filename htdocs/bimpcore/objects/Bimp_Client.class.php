@@ -1922,6 +1922,8 @@ class Bimp_Client extends Bimp_Societe
                             ), true, $errors, $warnings);
 
             if (BimpObject::objectLoaded($relance)) {
+                $acomptes = array();
+
                 foreach ($clients as $id_client => $client_data) {
                     $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $id_client);
 
@@ -1961,6 +1963,11 @@ class Bimp_Client extends Bimp_Societe
                             $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
                             if (!BimpObject::objectLoaded($fac)) {
                                 $warnings[] = 'La facture d\'ID ' . $id_fac . ' n\'existe plus';
+                                continue;
+                            }
+
+                            if ($fac->getData('type') == Facture::TYPE_DEPOSIT) {
+                                $acomptes[(int) $fac->id] = $fac;
                                 continue;
                             }
 
@@ -2048,6 +2055,36 @@ class Bimp_Client extends Bimp_Societe
                     $pdf_errors = array_merge($pdf_errors, $pdf_warnings);
                     if (count($pdf_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($pdf_errors, 'Erreurs lors de la génération des PDF de relance par courrier');
+                    }
+                }
+
+                if (!empty($acomptes)) {
+                    foreach ($acomptes as $id_fac => $fac) {
+                        if (BimpObject::objectLoaded($fac)) {
+                            $client = $fac->getChildObject('client');
+                            $subject = 'ACOMPTE IMPAYE - Client : ';
+                            if (BimpObject::objectLoaded($client)) {
+                                $subject .= $client->getRef() . ' ' . $client->getName();
+                            } else {
+                                $subject = 'inconnu';
+                            }
+
+                            $msg = 'Bonjour, <br/><br/>';
+                            $msg .= 'L\'acompte ' . $fac->getRef();
+
+                            if (BimpObject::objectLoaded($client)) {
+                                $msg .= 'Pour le client ' . $client->getRef() . ' ' . $client->getName();
+                            }
+                            $msg .= ' est impayé.<br/>';
+                            $msg .= 'Merci d\'en vérifier la raison et de procéder à sa régularisation.<br/>';
+                            $msg .= 'Lien acompte: ' . $fac->getLink();
+
+                            if (mailSyn2($subject, 'recouvrementolys@bimp.fr', '', $msg)) {
+                                $fac->updateField('relance_active', 0);
+                            } else {
+                                $warnings[] = 'Echec de l\'envoi du mail de notification au service recouvrement pour l\'acompte ' . $fac->getRef();
+                            }
+                        }
                     }
                 }
             }
@@ -2422,10 +2459,10 @@ class Bimp_Client extends Bimp_Societe
 
         parent::onSave($errors, $warnings);
     }
-    
-    
-    public function getTotalUnpayed($since = '2019-06-30') {
-        
+
+    public function getTotalUnpayed($since = '2019-06-30')
+    {
+
         $factures = $this->getUnpaidFactures($since);
         $total_unpaid = 0;
 

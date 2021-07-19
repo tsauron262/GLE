@@ -586,7 +586,13 @@ fields:
         default_value: 0
         
     validation_financiere:
-        label: Validation financière
+        label: Validation encours
+        type: bool
+        default_value: 1
+        dol_extra_field: 1 
+        
+    validation_impaye:
+        label: Validation impayé
         type: bool
         default_value: 1
         dol_extra_field: 1
@@ -726,6 +732,9 @@ fields_tables:
             - field: mail_licence
             - field: exported
             - field: validation_financiere
+              edit:
+                  callback: iAmAdmin
+            - field: validation_impaye
               edit:
                   callback: iAmAdmin
 

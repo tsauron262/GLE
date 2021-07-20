@@ -125,7 +125,7 @@ class Bimp_CommissionApporteur extends BimpObject{
         
         $parent = $this->getParentInstance();
         
-        $errors = BimpTools::merge_array($errors, $this->createFactureFourn($parent, $new_facture));
+        $errors = BimpTools::merge_array($errors, $this->createFactureFourn($parent, $new_facture, $warnings));
         
         if(count($errors))
             return $errors;
@@ -186,7 +186,7 @@ class Bimp_CommissionApporteur extends BimpObject{
         return $reval_errors;
     }
     
-    public function createFactureFourn($parent, &$new_facture) {
+    public function createFactureFourn($parent, &$new_facture, &$warnings) {
         
         $fourn = $parent->getChildObject('fourn');
                 
@@ -208,7 +208,7 @@ class Bimp_CommissionApporteur extends BimpObject{
         if (count($errors))
             return $errors;
         
-        $errors = $new_facture->create($warnings, true);
+        $errors = BimpTools::merge_array($errors, $new_facture->create($warnings, true));
 
         return $errors;
     }

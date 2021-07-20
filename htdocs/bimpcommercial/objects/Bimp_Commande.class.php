@@ -3712,7 +3712,7 @@ class Bimp_Commande extends BimpComm
                 $client_facture = $this->getClientFacture();
             
             if(!$client_facture->getData('validation_impaye')) {
-                if(!$vc->isLoaded())
+                if(!BimpObject::objectLoaded($vc))
                     $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
                 
                 $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_IMPAYE);

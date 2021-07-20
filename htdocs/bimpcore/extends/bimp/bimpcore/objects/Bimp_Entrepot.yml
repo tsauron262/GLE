@@ -51,7 +51,7 @@ fields:
             include_empty: 1
             
     close_msg:
-        label: Message de fermeture
+        label: Message clients
         type: text
                 
 fields_tables: 

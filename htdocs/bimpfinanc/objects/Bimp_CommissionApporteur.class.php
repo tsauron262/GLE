@@ -135,7 +135,7 @@ class Bimp_CommissionApporteur extends BimpObject{
 
         foreach($filtres as $filtre){
 
-            if($filtre->isLoaded()) {
+            if($filtre->isLoaded() && $filtre->getData('commition') != 0) {
             
                 $lines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_FactureLine',
                         array('commission_apporteur' => $this->id . '-' . $filtre->id));
@@ -145,8 +145,10 @@ class Bimp_CommissionApporteur extends BimpObject{
                     
                 foreach ($lines as $line){
                     $amount = $line->getTotalHTWithRemises(true) / $line->qty * $filtre->getData('commition') / 100;
-                    $errors = BimpTools::merge_array($errors, $this->createFactureFournLine($line, $new_facture, $amount));
-                    $errors = BimpTools::merge_array($errors, $this->createRevalorisation($line, $amount));
+                    if($amount != 0){
+                        $errors = BimpTools::merge_array($errors, $this->createFactureFournLine($line, $new_facture, $amount));
+                        $errors = BimpTools::merge_array($errors, $this->createRevalorisation($line, $amount));
+                    }
                 }
 
             } else

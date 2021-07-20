@@ -3698,10 +3698,15 @@ class ObjectLine extends BimpObject
                     ), null, null, 'position', 'asc', 'array', array(
                 'id_line', 'position'
             ));
-
+            
+            $tabRang = array();
+            $tabTemp = $this->db->execute('SELECT '.$primary.' as id, rang FROM llx_'.$table. ' WHERE '.$this::$dol_line_parent_field.' = '.$parent->id, 'array');
+            foreach($tabTemp as $lnTemp)
+                $tabRang[$lnTemp['id']] = $lnTemp['rang'];
+            
             if (!is_null($lines) && count($lines)) {
                 foreach ($lines as $line) {
-                    if ($this->db->update($table, array(
+                    if ($line['position'] != $tabRang[$line['id_line']] && $this->db->update($table, array(
                                 'rang' => (int) $line['position']
                                     ), '`' . $primary . '` = ' . (int) $line['id_line']) <= 0) {
                         $msg = 'Echec de la mise à jour de la position de la ligne d\'ID ' . $line['id_line'];

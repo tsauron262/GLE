@@ -47,7 +47,4 @@ $controller->display();
 
 
 
-
-if(!isset($_COOKIE['SERVID']) && defined('ID_ERP'))
-    setcookie('SERVID', 'erp'.ID_ERP.'', array('SameSite' => 'None', 'Secure'=>true));
 ?>

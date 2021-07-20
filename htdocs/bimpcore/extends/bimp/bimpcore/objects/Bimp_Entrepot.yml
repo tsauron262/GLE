@@ -4,7 +4,6 @@ extends:
     module: bimpcore
     object_name: Bimp_Entrepot
     
-    
 objects: 
     entrepot_pro:
         relation: hasOne
@@ -50,16 +49,19 @@ fields:
         input: 
             type: search_entrepot
             include_empty: 1
-        
-        
+            
+    close_msg:
+        label: Message clients
+        type: text
+                
 fields_tables: 
     infos: 
         rows: 
-            cjc: 
+            cjc:
                 field: code_journal_compta
             ccb: 
                 field: compte_comptable_banque
-            code_compta: 
+            code_compta:
                 field: compte_comptable
             compte_aux: 
                 field: compte_aux
@@ -76,6 +78,9 @@ fields_tables:
                 field: has_entrepot_commissions
             has_users_commissions: 
                 field: has_users_commissions
+            close_msg: 
+                field: close_msg
+                edit: 1
             
 views: 
     default: 

@@ -2357,7 +2357,7 @@ class BimpObject extends BimpCache
             switch ($relation) {
                 case 'hasOne':
                     if (!$child_id_prop) {
-                        $errors[] = 'Champ contenant l\'ID absent class '. get_class($this).' enfant '.$child_name;
+                        $errors[] = 'Champ contenant l\'ID absent class ' . get_class($this) . ' enfant ' . $child_name;
                     } else {
                         $child_id_prop_sql_key = $this->getFieldSqlKey($child_id_prop, $main_alias, null, $filters, $joins, $errors);
 
@@ -3160,7 +3160,7 @@ class BimpObject extends BimpCache
         $sql .= BimpTools::getSqlSelect($fields);
         $sql .= BimpTools::getSqlFrom($table, $joins);
         $sql .= BimpTools::getSqlWhere($filters);
-        if($order_by == 'rand')
+        if ($order_by == 'rand')
             $sql .= ' ORDER BY rand() ';
         else
             $sql .= BimpTools::getSqlOrderBy($order_by, $order_way, 'a', $extra_order_by, $extra_order_way);
@@ -5070,8 +5070,9 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                     $this->data[$field_name] = $value;
                 }
             } else {
-                BimpCore::addlog('Echec obtention champs supplémentaires : '.print_r($bimpObjectFields,1), Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
-                    'Erreur SQL' => $this->db->err()
+                BimpCore::addlog('Echec obtention champs supplémentaires', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
+                    'Erreur SQL' => $this->db->err(),
+                    'Champs suppl.'     => $bimpObjectFields
                 ));
             }
         }

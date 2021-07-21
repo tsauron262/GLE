@@ -544,7 +544,7 @@ class Bimp_Commande extends BimpComm
                             ))
                         );
                     } else {
-                        $errors = 'Vous n\'avez pas la permission';
+                        $errors[] = 'Vous n\'avez pas la permission';
                     }
                 }
                 if (count($errors)) {
@@ -3683,13 +3683,14 @@ class Bimp_Commande extends BimpComm
             $warnings[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la création des réservations');
         }
 
+        // Validation encours
         if (empty($errors)) {
             if ($this->field_exists('paiement_comptant') and $this->getData('paiement_comptant')) {
                 $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
                 $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_ENCOURS);
                 if ($demande)
                     $demande->delete($warnings, 1);
-                $warnings[] = "La commande " . $this->getNomUrl(1, true) . " a été validée.";
+                $warnings[] = ucfirst($this->getLabel('the')) . ' ' .  $this->getNomUrl(1, true) . " a été validée.";
                 mailSyn2("Validation par paiement comptant", 'a.delauzun@bimp.fr', "gle@bimp.fr", "Bonjour,<br/><br/>La commande " . $this->getNomUrl(1, true) . " a été validée financièrement par paiement comptant, merci de vérifier le paiement ultérieurement.");
             } else {
                 $client_facture = $this->getClientFacture();
@@ -3698,10 +3699,28 @@ class Bimp_Commande extends BimpComm
                     $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_ENCOURS);
                     if($demande)
                         $demande->delete($warnings, 1);
-                    $warnings[] = "La commande " . $this->getNomUrl(1, true) . " a été validée (validation financière automatique, voir configuration client)";
-                    mailSyn2("Validation financière forcée " . $client_facture->getData('code_client') . ' - ' . $client_facture->getData('nom'), 'a.delauzun@bimp.fr', "gle@bimp.fr", "Bonjour,<br/><br/>La commande " . $this->getNomUrl(1, true) . " a été validée financièrement par la configuration du client, merci de vérifier le paiement ultérieurement.");
+                    $warnings[] = ucfirst($this->getLabel('the')) . ' ' . $this->getNomUrl(1, true) . " a été validée (validation financière automatique, voir configuration client)";
+                    mailSyn2("Validation financière forcée " . $client_facture->getData('code_client') . ' - ' . $client_facture->getData('nom'), 'a.delauzun@bimp.fr', "gle@bimp.fr", "Bonjour,<br/><br/>La commande " . $this->getNomUrl(1, true) . " a été validée financièrement par la configuration du client.");
 
                 }
+            }
+        }
+
+        // Validation retards de paiements
+        if (empty($errors)) {
+            if(!$client_facture)
+                $client_facture = $this->getClientFacture();
+            
+            if(!$client_facture->getData('validation_impaye')) {
+                if(!BimpObject::objectLoaded($vc))
+                    $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+                
+                $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_IMPAYE);
+                if($demande)
+                    $demande->delete($warnings, 1);
+                $warnings[] = "La commande " . $this->getNomUrl(1, true) . " a été validée (validation de retard de paiement automatique, voir configuration client)";
+                mailSyn2("Validation impayé forcée " . $client_facture->getData('code_client') . ' - ' . $client_facture->getData('nom'), 'a.delauzun@bimp.fr', "gle@bimp.fr", "Bonjour,<br/><br/>Les retard de paiement de la commande " . $this->getNomUrl(1, true) . "ont été validée financièrement par la configuration du client.");
+
             }
         }
 

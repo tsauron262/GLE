@@ -2593,6 +2593,9 @@ class BContract_contrat extends BimpDolObject
             if ($user->id == $this->getCommercialClient())
                 return 1;
         }
+        
+        if(isset($user->rights->synopsiscontrat->renouveller) && $user->rights->synopsiscontrat->renouveller)
+            return 1;
 
         return 0;
     }

@@ -632,7 +632,7 @@ class Bimp_Log extends BimpObject
 
         $params = array();
 
-        foreach (explode('&', $_SERVER['QUERY_STRING']) as $param) {
+        foreach (explode('&', $_REQUEST) as $param) {
             if (preg_match('/^(.+)=(.+)$/', $param, $matches)) {
                 $params[$matches[1]] = $matches[2];
             }

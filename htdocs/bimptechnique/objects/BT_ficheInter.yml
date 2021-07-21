@@ -25,6 +25,11 @@ labels:
     name_plur: fiches d'interventions
     is_female: 1
     
+nom_url: 
+    syntaxe: <ref>
+    external_link: 1
+    modal_view: default
+    
 objects:
     contrat:
         instance:

@@ -1835,16 +1835,18 @@ class Bimp_Societe extends BimpDolObject
                         $tel = $summary->telephone;
                         $nom = $summary->companyname;
 
-                        foreach ($branches as $branche) {
-                            if (($siret && $branche->companynumber == $siret) || (!$siret && stripos($branche->type, "Siège") !== false)) {
-                                $adress = $branche->full_address->address;
-                                //$nom = $branche->full_address->name;
-                                $codeP = $branche->postcode;
-                                $ville = $branche->municipality;
-                                if (!$siret) {
-                                    $siret = (string) $branche->companynumber;
+                        if(is_array($branches)){
+                            foreach ($branches as $branche) {
+                                if (($siret && $branche->companynumber == $siret) || (!$siret && stripos($branche->type, "Siège") !== false)) {
+                                    $adress = $branche->full_address->address;
+                                    //$nom = $branche->full_address->name;
+                                    $codeP = $branche->postcode;
+                                    $ville = $branche->municipality;
+                                    if (!$siret) {
+                                        $siret = (string) $branche->companynumber;
+                                    }
+                                    break;
                                 }
-                                break;
                             }
                         }
 

@@ -102,11 +102,13 @@ class BContract_echeancier extends BimpObject {
                 if($facture->getData('type') == 0) {
                     $dateDebut = New DateTime();
                     $dateFin = New DateTime();
-                    $dateDebut->setTimestamp($facture->dol_object->lines[0]->date_start);
-                    $dateFin->setTimestamp($facture->dol_object->lines[0]->date_end);
-                    if($dateDebut->format('Y-m-d') == $date_start && $dateFin->format('Y-m-d') == $date_end) {
-                        $parent->addLog("Facturation de la même periode stopée automatiquement");
-                        return true;
+                    if(is_int($facture->dol_object->lines[0]->date_start) && is_int($facture->dol_object->lines[0]->date_end)){
+                        $dateDebut->setTimestamp($facture->dol_object->lines[0]->date_start);
+                        $dateFin->setTimestamp($facture->dol_object->lines[0]->date_end);
+                        if($dateDebut->format('Y-m-d') == $date_start && $dateFin->format('Y-m-d') == $date_end) {
+                            $parent->addLog("Facturation de la même periode stopée automatiquement");
+                            return true;
+                        }
                     }
                 }
             }
@@ -699,9 +701,13 @@ class BContract_echeancier extends BimpObject {
                 }
             }
         }
+        if ($this->getData('next_facture_date') == 0 && $parent->getTotalContrat() - $parent->getTotalDejaPayer() > 0) {
+            $this->updateField('next_facture_date', $dateFin->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00'));
+            die('Echéancier corrigé, rafraichir la page');
+        }
         if ($this->getData('next_facture_date') != 0) {
-            $startedDate = new DateTime($this->getInitData('next_facture_date'));
-            $enderDate = new DateTime($this->getInitData('next_facture_date'));
+            $startedDate = new DateTime($this->getData('next_facture_date'));
+            $enderDate = new DateTime($this->getData('next_facture_date'));
             $enderDate->add(new DateInterval("P" . $data->periodicity . "M"))->sub(new DateInterval("P1D"));
             $firstPassage = true;
             $firstDinamycLine = true;
@@ -735,13 +741,15 @@ class BContract_echeancier extends BimpObject {
                     $amount = $data->reste_a_payer / ($data->reste_periode / $morceauPeriode);
                     $tva = $amount * 0.2;
                     $nb_periode = ceil($parent->getData('duree_mois') / $parent->getData('periodicity'));
+                    $pa = ($parent->getTotalPa()- $parent->getTotalDejaPayer(false, 'pa')) /  ($data->reste_periode * $morceauPeriode); 
                 } else {
                     $amount = $data->reste_a_payer;
                     $tva = $amount * 0.2;
                     $nb_periode = 1;
+                    $pa = ($parent->getTotalPa()- $parent->getTotalDejaPayer(false, 'pa')); 
                 }
                 
-                $pa = ($parent->getTotalPa()- $parent->getTotalDejaPayer(false, 'pa')) /  ($data->reste_periode * $morceauPeriode); 
+                
                 if(!$display) {
                     $none_display = [
                         'total_ht' => $amount,

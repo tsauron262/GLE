@@ -7,6 +7,10 @@ $_REQUEST['bimp_context'] = 'public';
 require_once '../bimpcore/main.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
+if(!isset($_COOKIE[$sessionname])){
+    setcookie($sessionname, session_id(), array('SameSite' => 'None', 'Secure'=>true));
+}
+
 BimpCore::setContext("public");
 
 $controllerName = BimpTools::getValue('fc', 'InterfaceClient');
@@ -40,4 +44,7 @@ switch ($controllerName) {
 
 $controller = BimpController::getInstance('bimpinterfaceclient', $controllerName);
 $controller->display();
+
+
+
 ?>

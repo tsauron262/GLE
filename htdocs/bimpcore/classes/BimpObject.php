@@ -2221,10 +2221,9 @@ class BimpObject extends BimpCache
         }
 
         if ($type) {
-
             // Ajustement du format des dates dans le cas des objets Dolibarr:
-            if ($this->isDolObject()) {
-                if (in_array($type, array('datetime', 'date', 'time'))) {
+            if ($this->isDolField($field)) {
+                if (in_array($type, array('datetime', 'date'/* , 'time' */))) {
                     if ((string) $value) {
                         if (stripos($value, "-") || stripos($value, "/")) {
                             $value = $this->db->db->jdate($value);
@@ -2241,9 +2240,9 @@ class BimpObject extends BimpCache
                                     $value = $matches[1] . '-' . $matches[2] . '-' . $matches[3];
                                     break;
 
-                                case 'time':
-                                    $value = $matches[4] . ':' . $matches[5] . ':' . $matches[6];
-                                    break;
+//                                case 'time':
+//                                    $value = $matches[4] . ':' . $matches[5] . ':' . $matches[6];
+//                                    break;
                             }
                         }
                     }
@@ -2357,7 +2356,7 @@ class BimpObject extends BimpCache
             switch ($relation) {
                 case 'hasOne':
                     if (!$child_id_prop) {
-                        $errors[] = 'Champ contenant l\'ID absent class '. get_class($this).' enfant '.$child_name;
+                        $errors[] = 'Champ contenant l\'ID absent class ' . get_class($this) . ' enfant ' . $child_name;
                     } else {
                         $child_id_prop_sql_key = $this->getFieldSqlKey($child_id_prop, $main_alias, null, $filters, $joins, $errors);
 
@@ -3160,7 +3159,7 @@ class BimpObject extends BimpCache
         $sql .= BimpTools::getSqlSelect($fields);
         $sql .= BimpTools::getSqlFrom($table, $joins);
         $sql .= BimpTools::getSqlWhere($filters);
-        if($order_by == 'rand')
+        if ($order_by == 'rand')
             $sql .= ' ORDER BY rand() ';
         else
             $sql .= BimpTools::getSqlOrderBy($order_by, $order_way, 'a', $extra_order_by, $extra_order_way);
@@ -4140,6 +4139,11 @@ class BimpObject extends BimpCache
                         $msg .= ' - Erreur SQL: ' . $sqlError;
                     }
                     $errors[] = $msg;
+
+                    if ($this->isDolObject()) {
+                        $errors[] = 'RES: ' . $result;
+                        $errors = BimpTools::merge_array($errors, BimpTools::getErrorsFromDolObject($this->dol_object));
+                    }
                 }
             }
         }
@@ -4894,7 +4898,9 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 $params = array($user);
             }
 
-            $result = call_user_func_array(array($this->dol_object, 'create'), $params);
+            $create_method_name = $this->getConf('dol_create_method', 'create');
+
+            $result = call_user_func_array(array($this->dol_object, $create_method_name), $params);
             if ($result <= 0) {
                 if (isset($this->dol_object->error) && $this->dol_object->error) {
                     $errors[] = $this->dol_object->error;
@@ -4912,10 +4918,15 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                         $fields[] = $field_name;
                     }
 
-                    $data = $this->getDbData($fields);
+                    if (isset($this->dol_object->id) && (int) $this->dol_object->id) {
+                        $id = (int) $this->dol_object->id;
+                    } else {
+                        $id = $result;
+                    }
 
+                    $data = $this->getDbData($fields);
                     if (!empty($data)) {
-                        $up_result = $this->db->update($this->getTable(), $data, '`' . $this->getPrimary() . '` = ' . (int) $result);
+                        $up_result = $this->db->update($this->getTable(), $data, '`' . $this->getPrimary() . '` = ' . (int) $id);
 
                         if ($up_result <= 0) {
                             $msg = 'Echec de l\'insertion des champs additionnels';
@@ -5070,7 +5081,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                     $this->data[$field_name] = $value;
                 }
             } else {
-                BimpCore::addlog('Echec obtention champs supplémentaires : '.print_r($bimpObjectFields,1), Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
+                BimpCore::addlog('Echec obtention champs supplémentaires : ' . print_r($bimpObjectFields, 1), Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
                     'Erreur SQL' => $this->db->err()
                 ));
             }
@@ -5107,11 +5118,23 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             $params = array($user);
         }
 
-        $result = call_user_func_array(array($this->dol_object, 'delete'), $params);
+        $delete_method = $this->getConf('dol_delete_method', 'delete');
+
+        if (method_exists($this->dol_object, $delete_method)) {
+            $result = call_user_func_array(array($this->dol_object, $delete_method), $params);
+        } else {
+            $errors[] = 'La méthode "' . $delete_method . '" n\'existe pas dans l\'objet "' . get_class($this->dol_object) . '"';
+            return 0;
+        }
 
         if ($result <= 0) {
             if (isset($this->dol_object->error) && $this->dol_object->error) {
                 $errors[] = $this->dol_object->error;
+            }
+
+            $err_sql = $this->dol_object->db->lasterror();
+            if ($err_sql) {
+                $errors[] = $err_sql;
             }
 
             return 0;

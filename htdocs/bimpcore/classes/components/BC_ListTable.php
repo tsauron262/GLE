@@ -76,6 +76,23 @@ class BC_ListTable extends BC_List
         $this->params_def['enable_csv'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['search_open'] = array('data_type' => 'bool', 'default' => 0);
 
+        $html .= '<table>';
+        $html .= '<thead>';
+        $html .= '<tr>';
+        $html .= '<td>COL 1</td>';
+        $html .= '<td>COL 2</td>';
+        $html .= '<td>COL 3</td>';
+        $html .= '<td>COL 4</td>';
+        $html .= '</tr>';
+        $html .= '</thead>';
+        
+        $html .= '<tbody>';
+        $html .= '<tr>';
+        $html .= '<td style="display: none">TEST TEST</td>';
+        $html .= '</tr>';
+        $html .= '</tbody>';
+        $html .= '</table>';
+        
         global $current_bc;
         if (!is_object($current_bc)) {
             $current_bc = null;

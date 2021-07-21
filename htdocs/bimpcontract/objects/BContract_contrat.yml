@@ -1315,7 +1315,7 @@ views:
                           object: fiche_inter
                           is_static: 1
                   list: 
-                      name: default
+                      name: contrat
                       object: fiche_inter
 
     file:

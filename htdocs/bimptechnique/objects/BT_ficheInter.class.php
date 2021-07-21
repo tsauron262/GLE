@@ -141,12 +141,12 @@ class BT_ficheInter extends BimpDolObject
             $errors[] = 'Ancienne version des FI';
             return 0;
         }
-        if ($this->getData('fk_statut') == 0) {
+        if ($this->getData('fk_statut') != 0) {
             $errors[] = 'Cette FI n\'est plus en brouillon';
-            return 1;
+            return 0;
         }
 
-        return 0;
+        return 1;
     }
 
     public function isActionAllowed($action, &$errors = array())
@@ -2129,6 +2129,8 @@ class BT_ficheInter extends BimpDolObject
 
     public static function convertAllNewFi()
     {
+        echo 'Script désactivé';
+        return; 
         $bdb = self::getBdb();
 
         // Conversion Tickets / Commandes: 

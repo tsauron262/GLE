@@ -891,59 +891,60 @@ class BT_ficheInter extends BimpDolObject
 
     public function displayRatioTotal($display = true, $want = "")
     {
-        if ($this->getData('new_fi')) {
-            global $db;
-            BimpTools::loadDolClass('commande');
-            $commande = new Commande($db);
-            $commandes = BimpTools::json_decode_array($this->getData('commandes'));
-            $service = $this->getInstance('bimpcore', 'Bimp_Product');
+        if ((int) $this->getData('new_fi')) {
             $renta = [];
-
             $coup_technicien = BimpCore::getConf("bimptechnique_coup_horaire_technicien");
 
-            if (is_array($commandes) && count($commandes) > 0) {
+            $commandes = $this->getData('commandes');
+            if (!empty($commandes)) {
                 foreach ($commandes as $id_commande) {
-                    $commande->fetch($id_commande);
-                    $first_loop = true;
-                    foreach ($commande->lines as $line) {
-                        $service->fetch($line->fk_product);
+                    $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id_commande);
 
-                        $children = $this->getChildrenList("inters", ['id_line_commande' => $line->id]);
-                        $qty = 0;
-                        foreach ($children as $id_child) {
-                            $child = $this->getChildObject("inters", $id_child);
-                            $duration = $child->getData('duree');
-                            $time = $this->timestamp_to_time($duration);
-                            $qty += $this->time_to_qty($time);
-                        }
+                    if (BimpObject::objectLoaded($commande)) {
+                        $commande_ref = $commande->getRef();
+                        foreach ($commande->getLines('not_text') as $line) {
+                            if ($line->id_product) {
+                                $service = $line->getProduct();
 
-                        $renta[$commande->ref][$line->fk_product]['service'] = $service->getRef();
-                        $renta[$commande->ref][$line->fk_product]['vendu'] += $line->total_ht;
-                        $renta[$commande->ref][$line->fk_product]['cout'] += $qty * $coup_technicien;
-                    }
-                }
-            }
+                                if (BimpObject::objectLoaded($service)) {
+                                    $qty = 0;
 
+                                    foreach ($this->getChildrenObjects("inters", ['id_line_commande' => $line->id]) as $inter) {
+                                        $duration = $inter->getData('duree');
+                                        $time = $this->timestamp_to_time($duration);
+                                        $qty += $this->time_to_qty($time);
+                                    }
 
-            $children = $this->getChildrenList("inters");
-            if (count($children) > 0) {
-                foreach ($children as $id_child) {
-                    $child = $this->getChildObject('inters', $id_child);
-                    if (!$child->getData('id_line_commande') && !$child->getData('id_line_contrat')) {
-                        if ($child->getData('type') != 2) { // Exclude ligne libre (Juste ligne de commentaire)
-                            $renta['hors_vente'][$child->getData('type')]['service'] = $child->displayData('type', 'default', true, true);
-                            $renta['hors_vente'][$child->getData('type')]['vendu'] = 0;
-                            $duration = $child->getData('duree');
-                            $time = $this->timestamp_to_time($duration);
-                            $qty += $this->time_to_qty($time);
-                            $renta['hors_vente'][$child->getData('type')]['coup'] += $qty * $coup_technicien;
+                                    $renta[$commande_ref][$service->id] = array(
+                                        'service' => $service->getRef(),
+                                        'vendu'   => $line->getTotalHT(true),
+                                        'cout'    => $qty * $coup_technicien
+                                    );
+                                }
+                            }
                         }
                     }
                 }
             }
+
+            $inters = $this->getChildrenObjects('inters');
+            foreach ($inters as $inter) {
+                if (!(int) $inter->getData('id_line_commande') && !(int) $inter->getData('id_line_contrat')) {
+                    if ($inter->getData('type') != 2) { // Exclude ligne libre (Juste ligne de commentaire)
+                        $renta['hors_vente'][$inter->getData('type')]['service'] = $inter->displayData('type', 'default', true, true);
+                        $renta['hors_vente'][$inter->getData('type')]['vendu'] = 0;
+                        $duration = $inter->getData('duree');
+                        $time = $this->timestamp_to_time($duration);
+                        $qty += $this->time_to_qty($time);
+                        $renta['hors_vente'][$inter->getData('type')]['cout'] += $qty * $coup_technicien;
+                    }
+                }
+            }
+
             $total_vendu_commande = 0;
             $total_coup_commande = 0;
-            if (count($renta) > 0) {
+
+            if (count($renta)) {
                 foreach ($renta as $title => $infos) {
                     foreach ($infos as $i) {
                         $total_vendu_commande += $i['vendu'];
@@ -966,46 +967,47 @@ class BT_ficheInter extends BimpDolObject
             }
 
             if ($display) {
-                if (is_array($commandes) && count($commandes) > 0) {
+                if (!empty($commandes)) {
                     $html = "<strong>"
-                            . "Commande: <strong class='$class' >" . BimpRender::renderIcon($icone) . " " . price($marge) . "€</strong><br />"
+                            . "Commandes: <strong class='$class' >" . BimpRender::renderIcon('fas_' . $icone) . " " . price($marge) . "€</strong><br />"
                             . "</strong>";
                 }
-                //$html .= '<pre>' . print_r($renta, 1) . '</pre>';
+
                 if ($this->getData('fk_contrat')) {
                     $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getData('fk_contrat'));
-                    $html .= $contrat->renderThisStatsFi(true, false);
+
+                    if (BimpObject::objectLoaded($contrat)) {
+                        $html .= $contrat->renderThisStatsFi(true, false);
+                    }
                 }
 
-                if (!(is_array($commandes) && count($commandes) > 0) && !$this->getData('fk_contrat')) {
-                    if (count($children) > 0) {
-                        $duree = 0;
-                        foreach ($children as $id_child) {
-                            $child = $this->getChildObject('inters', $id_child);
-                            if ($child->getdata('type') != 2) {
-                                $duree += $child->getData('duree');
-                            }
+                if (empty($commandes) && !(int) $this->getData('fk_contrat') && !empty($inters)) {
+                    $duree = 0;
+                    foreach ($inters as $inter) {
+                        if ($inter->getdata('type') != 2) {
+                            $duree += $inter->getData('duree');
                         }
-                        $tms = $this->timestamp_to_time($duree);
-                        $qty = $this->time_to_qty($tms);
-
-                        $marge = ($qty * $coup_technicien);
-                        $class = 'warning';
-                        $icone = 'arrow-right';
-                        $signe = "-";
-                        if ($marge < 0) {
-                            $class = 'success';
-                            $icone = 'arrow-up';
-                            $signe = "";
-                        } elseif ($marge > 0) {
-                            $class = 'danger';
-                            $icone = 'arrow-down';
-                        }
-
-                        $html .= "<strong>"
-                                . "FI non liée: <strong class='$class' >" . BimpRender::renderIcon($icone) . " $signe" . price($marge) . "€</strong>"
-                                . "</strong>";
                     }
+
+                    $tms = $this->timestamp_to_time($duree);
+                    $qty = $this->time_to_qty($tms);
+
+                    $marge = ($qty * $coup_technicien);
+                    $class = 'warning';
+                    $icone = 'arrow-right';
+                    $signe = "-";
+                    if ($marge < 0) {
+                        $class = 'success';
+                        $icone = 'arrow-up';
+                        $signe = "";
+                    } elseif ($marge > 0) {
+                        $class = 'danger';
+                        $icone = 'arrow-down';
+                    }
+
+                    $html .= "<strong>"
+                            . "FI non liée: <strong class='$class' >" . BimpRender::renderIcon('fas_' . $icone) . " $signe" . price($marge) . "€</strong>"
+                            . "</strong>";
                 }
 
                 return $html;
@@ -2128,6 +2130,8 @@ class BT_ficheInter extends BimpDolObject
     public static function convertAllNewFi()
     {
         $bdb = self::getBdb();
+
+        // Conversion Tickets / Commandes: 
         $where = 'new_fi = 1';
         $where .= ' AND ((commandes IS NOT NULL AND commandes != \'\')';
         $where .= ' OR (tickets IS NOT NULL AND tickets != \'\'))';
@@ -2175,10 +2179,11 @@ class BT_ficheInter extends BimpDolObject
             }
         }
 
+        // Conversion lignes FI dans Lignes facturation: 
         $sql = 'SELECT a.id, a.fi_lines FROM llx_fichinter_facturation a';
         $sql .= ' LEFT JOIN llx_fichinter f ON a.fk_fichinter = f.rowid';
-        $sql .= ' WHERE f.new_fi = 1 AND ';
-        $sql .= ' WHERE a.fi_lines IS NOT NULL AND a.fi_lines != \'\'';
+        $sql .= ' WHERE f.new_fi = 1';
+        $sql .= ' AND a.fi_lines IS NOT NULL AND a.fi_lines != \'\'';
 
         $rows = $bdb->executeS($sql, 'array');
 
@@ -2199,6 +2204,45 @@ class BT_ficheInter extends BimpDolObject
                                 ), 'id = ' . $r['id']);
                     }
                 }
+            }
+        }
+
+
+        // Conversion ID lignes de commandes dans Inters:     
+        $sql = 'SELECT a.rowid, a.id_line_commande as id_dol_line, cl.id as id_bimp_line FROM llx_fichinterdet a';
+        $sql .= ' LEFT JOIN llx_fichinter f ON a.fk_fichinter = f.rowid';
+        $sql .= ' LEFT JOIN llx_bimp_commande_line cl ON a.id_line_commande = cl.id_line';
+        $sql .= ' WHERE f.new_fi = 1';
+        $sql .= ' AND a.id_line_commande > 0';
+        $sql .= ' AND (a.id_dol_line_commande = 0 OR a.id_dol_line_commande = a.id_line_commande)';
+
+        $rows = $bdb->executeS($sql, 'array');
+
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $bdb->update('fichinterdet', array(
+                    'id_line_commande'     => ($r['id_bimp_line'] ? (int) $r['id_bimp_line'] : 0),
+                    'id_dol_line_commande' => (int) $r['id_dol_line']
+                        ), 'rowid = ' . $r['rowid']);
+            }
+        }
+
+        // Conversion ID lignes de commandes dans facturation:    
+        $sql = 'SELECT a.id, a.id_commande_line as id_dol_line, cl.id as id_bimp_line FROM llx_fichinter_facturation a';
+        $sql .= ' LEFT JOIN llx_fichinter f ON a.fk_fichinter = f.rowid';
+        $sql .= ' LEFT JOIN llx_bimp_commande_line cl ON a.id_commande_line = cl.id_line';
+        $sql .= ' WHERE f.new_fi = 1';
+        $sql .= ' AND a.id_commande_line > 0';
+        $sql .= ' AND (a.id_dol_line_commande = 0 OR a.id_dol_line_commande = a.id_commande_line)';
+
+        $rows = $bdb->executeS($sql, 'array');
+
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $bdb->update('fichinter_facturation', array(
+                    'id_commande_line'     => ($r['id_bimp_line'] ? (int) $r['id_bimp_line'] : 0),
+                    'id_dol_line_commande' => (int) $r['id_dol_line']
+                        ), 'id = ' . $r['id']);
             }
         }
     }

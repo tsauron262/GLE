@@ -328,7 +328,7 @@ class BT_ficheInter_det extends BimpDolObject
                 $fk_product = $line->id_product;
 
                 if ($with_details_commande_line) {
-                    $valeur = $line->getTotalHt(1);
+                    $valeur = $line->getTotalHT(1);
 
                     $commande = $line->getParentInstance();
                     if (BimpObject::objectLoaded($commande)) {
@@ -664,7 +664,6 @@ class BT_ficheInter_det extends BimpDolObject
 
                                 if (BimpObject::objectLoaded($produit) && $produit->isDep()) {
                                     $id_commande_line = $line->id;
-                                    echo 'trouvée: ' . $id_commande_line . '<br/>';
                                     break;
                                 }
                             }

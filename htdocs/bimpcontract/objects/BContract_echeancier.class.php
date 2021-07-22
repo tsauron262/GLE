@@ -701,7 +701,7 @@ class BContract_echeancier extends BimpObject {
                 }
             }
         }
-        if ($this->getData('next_facture_date') == 0 && $parent->getTotalContrat() - $parent->getTotalDejaPayer() > 0) {
+        if ($this->getData('next_facture_date') == 0 && (intval($parent->getTotalContrat()) - intval($parent->getTotalDejaPayer())) > 0) {
             $this->updateField('next_facture_date', $dateFin->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00'));
             die('Echéancier corrigé, rafraichir la page');
         }

@@ -756,7 +756,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf->SetFont('', 'B', 7);
                 $pdf->Cell($W * 2.5, 8, "Reconduction : ", 1, null, 'L', true);
                 $pdf->SetFont('', '', 7);
-                $pdf->Cell($W * 1.5, 8, (is_null($extra->options_tacite)) ? "Non" : self::$tacite[$extra->options_tacite], 1, null, 'L', true);
+                $pdf->Cell($W * 1.5, 8, (is_null($extra->options_tacite)) ? "Non" : $bimp_contract::$renouvellement[$extra->options_tacite], 1, null, 'L', true);
                 $pdf1->SetFont('', 'B', 7);
                 $pdf1->Cell($W * 2, 8, "Délai d'intervention :", 1, null, 'L', true);
                 $pdf1->SetFont('', '', 7);
@@ -768,7 +768,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf1->SetFont('', 'B', 7);
                 $pdf1->Cell($W * 2.5, 8, "Reconduction : ", 1, null, 'L', true);
                 $pdf1->SetFont('', '', 7);
-                $pdf1->Cell($W * 1.5, 8, (is_null($extra->options_tacite)) ? "Non" : self::$tacite[$extra->options_tacite], 1, null, 'L', true);
+                $pdf1->Cell($W * 1.5, 8, (is_null($extra->options_tacite)) ? "Non" : $bimp_contract::$renouvellement[$extra->options_tacite], 1, null, 'L', true);
                 
                 $pdf->SetFont('', 'BU', 13);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, '', 0, 'C');

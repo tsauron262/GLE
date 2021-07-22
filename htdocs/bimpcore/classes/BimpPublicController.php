@@ -433,7 +433,7 @@ class BimpPublicController extends BimpController
         } else {
             $userClient = BimpCache::findBimpObjectInstance('bimpinterfaceclient', 'BIC_UserClient', array(
                         'email' => $email
-            ));
+            ), true);
 
             if (!BimpObject::objectLoaded($userClient)) {
                 $errors[] = 'Il n\'y a aucun compte client enregistré pour cette adresse e-mail';

@@ -3708,6 +3708,8 @@ class Bimp_Facture extends BimpComm
     public function onDelete(&$warnings = array())
     {
         $errors = array();
+        $prevDeleting = $this->isDeleting;
+        $this->isDeleting = true;
 
         if ($this->isLoaded($warnings)) {
             $lines = $this->getChildrenObjects('lines', array(
@@ -3744,6 +3746,7 @@ class Bimp_Facture extends BimpComm
 
         $errors = BimpTools::merge_array($errors, parent::onDelete($warnings));
 
+        $this->isDeleting = $prevDeleting;
         return $errors;
     }
 
@@ -3755,7 +3758,7 @@ class Bimp_Facture extends BimpComm
             $errors = array();
         }
 
-        if ($this->isLoaded()) {
+        if ($this->isLoaded() && !$this->isDeleting) {
             if (is_a($child, 'objectLine')) {
                 $errors = BimpTools::merge_array($errors, $this->checkMargin());
                 $errors = BimpTools::merge_array($errors, $this->checkTotalAchat());
@@ -3776,7 +3779,7 @@ class Bimp_Facture extends BimpComm
             $errors = array();
         }
 
-        if ($this->isLoaded()) {
+        if ($this->isLoaded() && !$this->isDeleting) {
             if (is_a($child, 'objectLine')) {
                 $errors = BimpTools::merge_array($errors, $this->checkMargin());
                 $errors = BimpTools::merge_array($errors, $this->checkTotalAchat());

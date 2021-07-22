@@ -1,7 +1,13 @@
 bootstrap: 1
+title: 
+    callback: 
+        object: fiche
+        method: getPageTitle
+        
 js: 
     0: /bimptechnique/views/js/SignaturePad.object.js
     1: /bimptechnique/views/js/signature.js
+    
 css: 
     0: /bimptechnique/views/css/signature.css
     
@@ -11,16 +17,12 @@ objects:
             bimp_object: BT_ficheInter
             id_object:
                 request: id
+                
     actionComm:
         instance:
             bimp_object:
                 module: bimpcore
                 name: Bimp_ActionComm
-    facturation:
-        instance:
-            bimp_object:
-                module: bimptechnique
-                name: BT_ficheInter_facturation
 
 sections:
     - type: object_header
@@ -33,18 +35,16 @@ sections:
             struct: 
                 type: view
                 view: 
-                    name: fi
+                    name: default
                     object: fiche
           - id: facturation
             title: Facturation
             struct: 
                     type: list
                     list:
-                        object: facturation
+                        object: fiche
+                        children: facturation
                         name: in_fiche
-                          
-                          
-                
           - id: files
             title: Fichiers
             struct: 

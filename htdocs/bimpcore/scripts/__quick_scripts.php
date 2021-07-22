@@ -49,7 +49,8 @@ if (!$action) {
         'change_sn'                                 => 'Changement de SN',
         'secteur_facture_fourn_with_commande_fourn' => 'Secteur fact fourn with comm fourn',
         'correct_sav_dates_rdv'                     => 'Corriger dates RDV SAV',
-        'correct_tickets_serials'                   => 'Récupérer serials tickets depuis sujet'
+        'correct_tickets_serials'                   => 'Récupérer serials tickets depuis sujet',
+        'convert_fi'                                => 'Convertir FI'
     );
 
     $path = pathinfo(__FILE__);
@@ -268,6 +269,11 @@ switch ($action) {
     case 'correct_tickets_serials':
         BimpObject::loadClass('bimpsupport', 'BS_Ticket');
         BS_Ticket::correctSerialsAll(true);
+        break;
+
+    case 'convert_fi':
+        BimpObject::loadClass('bimptechnique', 'BT_ficheInter');
+        BT_ficheInter::convertAllNewFi();
         break;
 
     default:

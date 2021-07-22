@@ -28,13 +28,21 @@ class BC_Input extends BimpComponent
             'max_label' => array('data_type' => 'bool', 'default' => 0),
         ),
         'time'                        => array(
-            'display_now' => array('data_type' => 'bool', 'default' => 0)
+            'display_now'     => array('data_type' => 'bool', 'default' => 0),
+            'with_secondes' => array('data_type' => 'bool', 'default' => 1)
         ),
         'date'                        => array(
             'display_now' => array('data_type' => 'bool', 'default' => 0)
         ),
         'datetime'                    => array(
-            'display_now' => array('data_type' => 'bool', 'default' => 0)
+            'display_now'  => array('data_type' => 'bool', 'default' => 0),
+            'with_secondes' => array('data_type' => 'bool', 'default' => 1)
+        ),
+        'timer'                       => array(
+            'with_days'     => array('data_type' => 'bool', 'default' => 1), // A implémenter
+            'with_hours'    => array('data_type' => 'bool', 'default' => 1), // A implémenter
+            'with_minutes'  => array('data_type' => 'bool', 'default' => 1), // A implémenter
+            'with_secondes' => array('data_type' => 'bool', 'default' => 1)
         ),
         'textarea'                    => array(
             'rows'             => array('data_type' => 'int', 'default' => 3),
@@ -320,9 +328,17 @@ class BC_Input extends BimpComponent
                 break;
 
             case 'time':
-            case 'date':
             case 'datetime':
+                $options['with_secondes'] = isset($this->params['with_secondes']) ? $this->params['with_secondes'] : 1;
+            case 'date':
                 $options['display_now'] = isset($this->params['display_now']) ? $this->params['display_now'] : 0;
+                break;
+
+            case 'timer':
+                $options['with_days'] = isset($this->params['with_days']) ? $this->params['with_days'] : 1;
+                $options['with_hours'] = isset($this->params['with_hours']) ? $this->params['with_hours'] : 1;
+                $options['with_minutes'] = isset($this->params['with_minutes']) ? $this->params['with_minutes'] : 1;
+                $options['with_secondes'] = isset($this->params['with_secondes']) ? $this->params['with_secondes'] : 1;
                 break;
 
             case 'textarea':

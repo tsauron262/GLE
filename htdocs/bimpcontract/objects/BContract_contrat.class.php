@@ -1181,24 +1181,22 @@ class BContract_contrat extends BimpDolObject
         ];
     }
 
-    public function actionPlanningInter($data, &$success)
+    public function actionPlanningInter($data, &$success = '')
     {
-
         $errors = [];
-        $warnings = [];
-        //print_r($data);
+        $success = 'Fiche inter créée avec succès';
+        
         if (count($data['techs'])) {
-            $errors[] = "Vous ne pouvez pas plannifier une intervention sans au moin un techhnicien";
+            $errors[] = "Vous ne pouvez pas plannifier une intervention sans au moins un techhnicien";
+        } else {
+            $instance = $this->getInstance('bimptechnique', 'BT_ficheInter');
+            $errors = $instance->createFromContrat($this, $data);
         }
-        $id_new_fi = 0;
-        //if(!count($errors)) {
-        $instance = $this->getInstance('bimptechnique', 'BT_ficheInter');
-        //$this->getCommandesClientArray();
-        //
-        //echo '<pre>' . print_r($data);
-        $id_new_fi = $instance->createFromContrat($this, $data);
-        //}
-        //return $id_new_fi;
+        
+        return array(
+            'errors' => $errors,
+            'warnings' => array()
+        );
     }
 
     public function getTicketsSupportClientArray()

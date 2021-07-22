@@ -46,7 +46,7 @@ class Cron
                 $mail .= $fi->getLink() . " retard de " . $i['days'] . " jours<br />";
             }
             $mail .= "<br />Si la régularisation a été faite entre temps, merci de ne pas tenir compte de cet email.<br />Cordialement.";
-            mailSyn2("Fiches d'intervention en brouillon", $tech->getData('email'), null, $mail);
+            mailSyn2("Fiches d'intervention en brouillon", BimpTools::cleanEmailsStr($tech->getData('email')), null, $mail);
         }
     }
 }

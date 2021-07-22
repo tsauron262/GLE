@@ -19,6 +19,11 @@ if ($fi->find(['public_signature_url' => $_POST['key']], 1)) {
 
     if (BimpObject::objectLoaded($commercial)) {
         $email_comm = BimpTools::cleanEmailsStr($commercial->getData('email'));
+    } else {
+        $tech = $fi->getChildObject('user_tech');
+        if (BimpObject::objectLoaded($tech)) {
+            $email_comm = BimpTools::cleanEmailsStr($tech->getData('email'));
+        }
     }
 
     $email_cli = BimpTools::cleanEmailsStr($fi->getData('email_signature'));

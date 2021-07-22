@@ -250,8 +250,9 @@ class BT_ficheInter_det extends BimpDolObject
             }
         }
 
-        if ((int) $this->getData('fk_contrat')) {
-            $contrat = $this->getChildObject('contrat');
+        if ((int) $fi->getData('fk_contrat')) {
+            $contrat = $fi->getChildObject('contrat');
+
             foreach ($contrat->dol_object->lines as $line) {
                 $bimpline = $contrat->getChildObject('lines', $line->id);
                 if ($bimpline->getData('product_type') == 1 && $bimpline->getData('statut') == 4) {

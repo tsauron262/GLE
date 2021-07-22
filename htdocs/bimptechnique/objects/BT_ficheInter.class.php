@@ -701,7 +701,7 @@ class BT_ficheInter extends BimpDolObject
         $services = [];
         BimpTools::loadDolClass("commande");
         $codes = json_decode(BimpCore::getConf("bimptechnique_ref_deplacement", ''));
-        
+
         $commande = New Commande($this->db->db);
         $product = $this->getInstance('bimpcore', 'Bimp_Product');
         $allCommandes = ($this->getData('commandes')) ? BimpTools::json_decode_array($this->getData('commandes')) : [];
@@ -1361,6 +1361,7 @@ class BT_ficheInter extends BimpDolObject
     public function createFromContrat($contrat, $data)
     {
         global $user;
+        $errors = array();
 
         foreach (BimpTools::getArrayValueFromPath($data, 'techs', array()) as $id_tech) {
             $fi = BimpCache::findBimpObjectInstance($this->module, $this->object_name, array(
@@ -1390,9 +1391,13 @@ class BT_ficheInter extends BimpDolObject
                 if (!count($fi_errors)) {
                     $fi_errors = $fi->create($fi_warnings, true);
                 }
+                
+                if (count($fi_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($fi_errors, 'Echec de la création de la Fiche Inter');
+                }
             }
 
-            if (BimpObject::objectLoaded($fi)) {
+            if (!count($errors) && BimpObject::objectLoaded($fi)) {
                 $actioncomm = new ActionComm($this->db->db);
 
                 $actioncomm->label = $fi->getRef();
@@ -1407,7 +1412,7 @@ class BT_ficheInter extends BimpDolObject
                 $actioncomm->fk_element = $fi->id;
 
                 $sujet = "L\'intervention " . $this->getRef() . " vous à été attribuée";
-                
+
                 $message = "<h3><b>Bimp</b><b style='color:#EF7D00' >Technique</b></h3>";
                 $message .= "<p>Fiche Inter: " . $fi->getLink() . "</p>";
                 $message .= "<a href='" . DOL_URL_ROOT . "/bimptechnique/?fc=fi&id=" . $fi->id . "&navtab-maintabs=actioncomm' class='btn btn-primary'>Prendre en charge l'intervention</a>";
@@ -1422,7 +1427,7 @@ class BT_ficheInter extends BimpDolObject
             }
         }
 
-        return $id_fi;
+        return $errors;
     }
 
     public function addLog($text)
@@ -1619,7 +1624,7 @@ class BT_ficheInter extends BimpDolObject
                                     $message .= '<br/>Très courtoisement.';
                                     $message .= "<br/><br/><b>Le Service Technique</b>";
 
-                                    $bimpMail = new BimpMail($subject, $to, '', $message, $email_tech, /* temporaire pour controle  'at.bernard@bimp.fr, t.sauron@bimp.fr, */ 'f.martinez@bimp.fr');
+                                    $bimpMail = new BimpMail($subject, $to, '', $message, $email_tech/*, temporaire pour controle  'at.bernard@bimp.fr, t.sauron@bimp.fr, f.martinez@bimp.fr'*/);
                                     $bimpMail->addFile(array($pdf_file, 'application/pdf', $ref . '.pdf'));
                                     $mail_errors = array();
                                     $bimpMail->send($mail_errors);
@@ -1666,6 +1671,8 @@ class BT_ficheInter extends BimpDolObject
                                                 $message .= ' pour signature papier à renvoyer par e-mail.';
                                                 break;
                                         }
+
+                                        $message .= '<br/><br/>';
                                     }
 
                                     mailSyn2($subject, $email_commercial, '', $message, array($pdf_file), array('application/pdf'), array($ref . '.pdf'), "", /* temporaire pour controle 'at.bernard@bimp.fr, t.sauron@bimp.fr, */ 'f.martinez@bimp.fr');
@@ -1826,7 +1833,7 @@ class BT_ficheInter extends BimpDolObject
             $msg .= ' pour le client ' . $client->getRef() . ' ' . $client->getName();
         }
 
-        $msg .= ' a été signée par le client';
+        $msg .= ' a été signée par le client.<br/><br/>';
 
         mailSyn2($subject, 'facturationclients@bimp.fr', '', $msg, array(), array(), array(), 'f.martinez@bimp.fr');
 
@@ -1989,6 +1996,7 @@ class BT_ficheInter extends BimpDolObject
                 $message .= "<br /><br />";
                 $message .= 'Fiche d\'intervention: ' . $this->getLink() . '<br />';
                 $message .= 'Date prévue de l\'intervention: <strong>Le ' . $de->format('d/m/Y H:i') . ' au ' . $a->format('d/m/Y H:i') . '</strong>';
+                $message .= '<br/><br/>';
 
                 $this->addLog("Fiche d'intervention créée");
                 mailSyn2($sujet, BimpTools::cleanEmailsStr($tech->getData('email')), "gle@bimp.fr", $message);
@@ -2012,7 +2020,7 @@ class BT_ficheInter extends BimpDolObject
         $init_id_tech = (int) $this->getInitData('fk_user_tech');
 
         $errors = parent::update($warnings, $force_update);
-        
+
         if (!$this->no_update_process && !count($errors)) {
             if ((int) BimpTools::getValue('signature_set', 0)) {
                 $this->setSigned($warnings);
@@ -2081,7 +2089,7 @@ class BT_ficheInter extends BimpDolObject
                     $prev_tech = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $init_id_tech);
                     if (BimpObject::objectLoaded($prev_tech)) {
                         $subject = 'FI ' . $this->getRef() . ' assignée à un autre technicien';
-                        $msg = "Bonjour,<br />La fiche d'intervention " . $this->getLink() . " a été attribuée à un autre utilisateur par " . $user->getNomUrl();
+                        $msg = "Bonjour,<br />La fiche d'intervention " . $this->getLink() . " a été attribuée à un autre utilisateur par " . $user->getNomUrl() . '<br/><br/>';
                         $to = BimpTools::cleanEmailsStr($prev_tech->getData('email'));
 
                         if ($to) {
@@ -2095,7 +2103,7 @@ class BT_ficheInter extends BimpDolObject
                     $tech = $this->getChildObject('');
                     if (BimpObject::objectLoaded($tech)) {
                         $subject = '[FI] ' . $this->getRef() . ' à traiter';
-                        $msg = "Bonjour,<br />La fiche d'intervention " . $this->getLink() . " vous a été attribuée par " . $user->getNomUrl();
+                        $msg = "Bonjour,<br />La fiche d'intervention " . $this->getLink() . " vous a été attribuée par " . $user->getNomUrl() . '<br/><br/>';
                         $to = BimpTools::cleanEmailsStr($tech->getData('email'));
 
                         if ($to) {
@@ -2105,7 +2113,7 @@ class BT_ficheInter extends BimpDolObject
                 }
             }
         }
-        
+
         return $errors;
     }
 
@@ -2132,7 +2140,7 @@ class BT_ficheInter extends BimpDolObject
                 $actionCommClass->delete();
             }
 
-            $message = "Bonjour,<br />La fiche d'intervention " . $this->getLink() . " à été supprimé par " . $user->getNomUrl() . " ainsi que le ou les évènements dans l'agenda.";
+            $message = "Bonjour,<br />La fiche d'intervention " . $this->getLink() . " à été supprimé par " . $user->getNomUrl() . " ainsi que le ou les évènements dans l'agenda.<br/><br/>";
             $to = ($tech->getData('email') != $emailControl) ? $tech->getData('email') . ',' . $emailControl : $tech->getData('email');
 
             mailSyn2("[FI] " . $this->getRef() . " supprimée", $to, null, $message);

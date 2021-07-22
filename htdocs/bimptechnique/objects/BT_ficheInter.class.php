@@ -2012,6 +2012,7 @@ class BT_ficheInter extends BimpDolObject
         $init_id_tech = (int) $this->getInitData('fk_user_tech');
 
         $errors = parent::update($warnings, $force_update);
+        
         if (!$this->no_update_process && !count($errors)) {
             if ((int) BimpTools::getValue('signature_set', 0)) {
                 $this->setSigned($warnings);
@@ -2104,6 +2105,8 @@ class BT_ficheInter extends BimpDolObject
                 }
             }
         }
+        
+        return $errors;
     }
 
     public function delete(&$warnings = [], $force_delete = false)

@@ -80,6 +80,7 @@ class BimpObject extends BimpCache
     public $redirectMode = 5; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public $noFetchOnTrigger = false;
     public $fieldsWithAddNoteOnUpdate = array();
+    public $isDeleting = false;
 
     // Gestion instance:
 
@@ -4607,7 +4608,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         // Suppression de la ligne en base: 
         if (method_exists($this, 'deleteProcess')) {
             $result = $this->deleteProcess();
-        } elseif (!is_null($this->dol_object)) {
+        } elseif ($this->isDolObject()) {
             $result = $this->deleteDolObject($errors);
         } else {
             $table = $this->getTable();
@@ -4630,6 +4631,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             $errors[] = $msg;
         } elseif (!count($errors)) {
             $id = $this->id;
+            $this->isDeleting = true;
 
             // Suppr des extras fields: 
             $extra_errors = $this->deleteExtraFields();
@@ -4713,6 +4715,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             self::unsetBimpObjectInstance($this->module, $this->object_name, $id);
 
             // Réinitialisation de l'instance:
+            $this->isDeleting = false;
             $this->reset();
         }
 
@@ -5082,8 +5085,8 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 }
             } else {
                 BimpCore::addlog('Echec obtention champs supplémentaires', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
-                    'Erreur SQL' => $this->db->err(),
-                    'Champs suppl.'     => $bimpObjectFields
+                    'Erreur SQL'    => $this->db->err(),
+                    'Champs suppl.' => $bimpObjectFields
                 ));
             }
         }
@@ -5519,6 +5522,13 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     public function resetPositions()
     {
         if ($this->getConf('positions', false, false, 'bool')) {
+            $parent = $this->getParentInstance();
+
+            if (is_a($parent, 'BimpObject')) {
+                if ($parent->isDeleting) {
+                    return;
+                }
+            }
             $parent_id_property = $this->getParentIdProperty();
             if (method_exists($this, 'getPositionsFilters')) {
                 $filters = $this->getPositionsFilters();
@@ -5657,6 +5667,10 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         if ($this->isLoaded()) {
             if ($this->config->isDefined('objects/' . $children_name . '/instance/bimp_object')) {
                 if ($this->getConf('objects/' . $children_name . '/relation', 'none') === 'hasMany') {
+                    if ($this->isDeleting && (int) $this->getConf('objects/' . $children_name . '/delete', 0, false, 'bool')) {
+                        return;
+                    }
+
                     $instance_def = $this->getConf('objects/' . $children_name . '/instance/bimp_object', '', false, 'any');
                     if (empty($instance_def)) {
                         return;

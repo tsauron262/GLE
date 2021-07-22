@@ -116,7 +116,7 @@ class Bimp_FactureLine extends ObjectLine
             $idFiltre = $tabTmp[1];
             if ($idComm > 0 && $idFiltre > 0) {
                 $commission = BimpObject::getInstance('bimpfinanc', 'Bimp_CommissionApporteur', $idComm);
-                if($commission->getData('status') == 0){
+                if ($commission->getData('status') == 0) {
                     $buttons[] = array(
                         'label'   => 'Supprimer de la commission',
                         'icon'    => 'fas_trash',
@@ -810,9 +810,14 @@ class Bimp_FactureLine extends ObjectLine
         $errors = parent::delete($warnings, $force_delete);
 
         if (!count($errors)) {
+            $prevDeleting = $this->isDeleting;
+            $this->isDeleting = true;
+
             if (BimpObject::objectLoaded($commLine)) {
                 $commLine->onFactureDelete($id_facture);
             }
+
+            $this->isDeleting = $prevDeleting;
         }
 
         return $errors;

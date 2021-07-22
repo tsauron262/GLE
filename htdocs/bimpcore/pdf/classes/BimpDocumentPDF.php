@@ -669,9 +669,9 @@ class BimpDocumentPDF extends BimpModelPDF
 //                            }
 //                            if (count($equipments)) {
                         $desc .= '<br/>';
-                        $desc .= '<span style="font-size: 6px;">N° de série: </span>';
+                        $desc .= '<span style="font-size: 9px;">N° de série: </span>';
                         $fl = true;
-                        $desc .= '<span style="font-size: 6px; font-style: italic">';
+                        $desc .= '<span style="font-size: 9px; font-style: italic">';
 //                                if (count($equipments) > (int) $this->max_line_serials && (int) $user->id === 1) {
                         if (count($serials) > (int) $this->max_line_serials/* && (int) $user->id === 1 */) {
                             $desc .= 'voir annexe';

@@ -104,7 +104,7 @@ lists:
                 value:
                     callback: displayAllMouvementDeThune
             coup_ligne:
-                label: Coup de la ligne au prorata
+                label: Coût de la ligne au prorata
                 value:
                     callback: getCoup
 

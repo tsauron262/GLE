@@ -79,7 +79,7 @@ lists:
             date_signed:
             statut:
             coup:
-                label: Coup de l'avenant au prorata
+                label: Coût de l'avenant au prorata
                 value:
                     callback: getTotalCoup
     all:

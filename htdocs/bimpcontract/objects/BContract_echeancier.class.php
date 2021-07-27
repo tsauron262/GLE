@@ -491,7 +491,10 @@ class BContract_echeancier extends BimpObject {
                     'type' => ObjectLine::LINE_FREE,
                     'id_obj' => (int) $instance->id
                 )));
-            $new_first_line->desc = "Facturation pour la période du <b>" . $dateStart->format('d/m/Y') . "</b> au <b>" . $dateEnd->format('d/m/Y') . "</b>";
+            if(!isset($data['label']))
+                $new_first_line->desc = "Facturation pour la période du <b>" . $dateStart->format('d/m/Y') . "</b> au <b>" . $dateEnd->format('d/m/Y') . "</b>";
+            else
+                $new_first_line->desc = $data['label'];
             $new_first_line->date_from = $data['date_start'];
             $new_first_line->date_to = $data['date_end'];
             $new_first_line->pu_ht = (double) $data['total_ht'];
@@ -807,7 +810,7 @@ class BContract_echeancier extends BimpObject {
 //                }
             }
             if($user->rights->facture->creer && $reste_periodeEntier == 0 && $parent->getTotalContrat() - $parent->getTotalDejaPayer() > 0)
-                $html .= '<div class="btn-group"><button type="button" class="btn btn-danger bs-popover" '.BimpRender::renderPopoverData('Facturation suplémentaire').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick("createFacture", array('total_ht' => $parent->getTotalContrat() - $parent->getTotalDejaPayer(), 'pa' => ($parent->getTotalPa() - $parent->getTotalDejaPayer(false, 'pa'))), array("success_callback" => $callback)) . '"><i class="fa fa-times"></i> Facturation supplémentaire</button></div>';
+                $html .= '<div class="btn-group"><button type="button" class="btn btn-danger bs-popover" '.BimpRender::renderPopoverData('Facturation supplémentaire').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick("createFacture", array('label'=> 'Facturation supplémentaire', 'total_ht' => $parent->getTotalContrat() - $parent->getTotalDejaPayer(), 'pa' => ($parent->getTotalPa() - $parent->getTotalDejaPayer(false, 'pa'))), array("success_callback" => $callback)) . '"><i class="fa fa-times"></i> Facturation supplémentaire</button></div>';
             $html .= '</div>';
         }
 

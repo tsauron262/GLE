@@ -34,35 +34,45 @@ fields:
         label: Avenant
         type: id_object
         object: avenant
+        
     id_line_contrat:
         label: Ligne du contrat
         type: id_object
         object: line
+        
     serials_in:
         label: Numéro de série conservés dans le contrat
         type: text
+        
     serials_out:
         label: Numéros de série supprimés du contrat
         type: text
+        
     in_contrat:
         label: Statut ligne après avenant
         type: bool
+        
     id_serv:
         label: Service associé
         type: id_object
         object: serv
+        
     remise:
         label: Remise
         type: percent
+        
     ht:
         label: Montant HT
         type: money
+        
     qty:
         label: Quantité
         type: qty
+        
     description:
         label: Libellé
         type: text
+        
 lists:
     default:
         title: Liste des lignes de l'avenant
@@ -104,7 +114,7 @@ lists:
                 value:
                     callback: displayAllMouvementDeThune
             coup_ligne:
-                label: Coup de la ligne au prorata
+                label: Coût de la ligne au prorata
                 value:
                     callback: getCoup
 

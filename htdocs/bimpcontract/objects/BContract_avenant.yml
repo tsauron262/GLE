@@ -13,6 +13,7 @@ objects:
         relation: hasMany
         instance:
             bimp_object: BContract_avenantdet
+            
     service:
         instance:
             bimp_object:
@@ -20,6 +21,7 @@ objects:
                 name: Bimp_Product
             id_object:
                 field_value: id_serv
+                
     contrat:
         instance:
             bimp_object:
@@ -79,7 +81,7 @@ lists:
             date_signed:
             statut:
             coup:
-                label: Coup de l'avenant au prorata
+                label: Coût de l'avenant au prorata
                 value:
                     callback: getTotalCoup
     all:

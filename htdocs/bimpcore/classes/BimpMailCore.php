@@ -166,7 +166,7 @@ class BimpMailCore
             BimpCore::addlog('Echec envoi email '.$cmail->error, Bimp_Log::BIMP_LOG_ALERTE, 'email', NULL, array(
                 'Destinataire' => $to,
                 'Sujet'        => $this->subject,
-                'Message'      => $$this->msg
+                'Message'      => $this->msg
             ));
 
             $lastMailFailedTms = (int) BimpCore::getConf('bimpcore_last_mail_failed_tms', 0);

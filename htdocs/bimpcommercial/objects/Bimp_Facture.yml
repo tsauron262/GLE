@@ -868,6 +868,13 @@ lists_cols:
                 method: displayInfoSav
                 params:
                     - product
+    sav_product_info: 
+        label: Produit label
+        value: 
+            callback: 
+                method: displayInfoSav
+                params:
+                    - productInfo
     sav_equipment_waranty: 
         label: Garantie SAV
         value: 

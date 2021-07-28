@@ -2067,7 +2067,7 @@ class Bimp_Facture extends BimpComm
                 else
                     $result[] = $sav->getRef();
             }
-            if (in_array($field, array('equipment', 'product', 'waranty'))) {
+            if (in_array($field, array('equipment', 'product', 'productInfo', 'waranty'))) {
                 $equipment = $sav->getChildObject('equipment');
                 if ($field == 'equipment') {
                     if (!$modeCsv)
@@ -2085,6 +2085,15 @@ class Bimp_Facture extends BimpComm
                             $result[] = $prod->getNomUrl();
                         else
                             $result[] = $prod->ref;
+                    }
+                }
+                if ($field == 'productInfo') {
+                    $prod = $equipment->getChildObject('product');
+                    if (BimpObject::objectLoaded($prod)) {
+                            $result[] = $prod->label;
+                    }
+                    else{
+                        $result[] = $equipment->getData('product_label');
                     }
                 }
             }

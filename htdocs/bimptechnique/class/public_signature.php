@@ -16,14 +16,15 @@ if ($fi->find(['public_signature_url' => $_POST['key']], 1)) {
     $commercial = $fi->getCommercialClient();
 
     $email_comm = '';
+    $email_tech = '';
 
     if (BimpObject::objectLoaded($commercial)) {
         $email_comm = BimpTools::cleanEmailsStr($commercial->getData('email'));
-    } else {
-        $tech = $fi->getChildObject('user_tech');
-        if (BimpObject::objectLoaded($tech)) {
-            $email_comm = BimpTools::cleanEmailsStr($tech->getData('email'));
-        }
+    }
+
+    $tech = $fi->getChildObject('user_tech');
+    if (BimpObject::objectLoaded($tech)) {
+        $email_tech = BimpTools::cleanEmailsStr($tech->getData('email'));
     }
 
     $email_cli = BimpTools::cleanEmailsStr($fi->getData('email_signature'));
@@ -39,10 +40,19 @@ if ($fi->find(['public_signature_url' => $_POST['key']], 1)) {
     $message .= '<br/>Très courtoisement.';
     $message .= "<br /><br /><b>Le Service Technique</b><br />OLYS - 2 rue des Erables - CS21055 - 69760 LIMONEST<br />";
 
-    $bm = new BimpMail($subject, $email_cli, '', $message, $email_comm, $email_comm);
+    $reply_to = ($email_comm ? $email_comm : $email_tech);
+    $cc = /*$email_comm . ($email_comm ? ', ' : '') . $email_tech . ($email_tech ? ', ' : '') .*/ 't.sauron@bimp.fr, f.martinez@bimp.fr';
+
+    $bm = new BimpMail($subject, $email_cli, '', $message, $reply_to, $cc);
 
     if (file_exists($file)) {
         $bm->addFile(array($file, 'application/pdf', $ref . '.pdf'));
     }
-    $bm->send();
+    
+    $mail_errors = array();
+    $bm->send($mail_errors);
+    
+    if (!count($mail_errors)) {
+        $fi->addLog("FI envoyée au client avec succès");
+    }
 }

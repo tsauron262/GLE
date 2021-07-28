@@ -1391,7 +1391,7 @@ class BT_ficheInter extends BimpDolObject
                 if (!count($fi_errors)) {
                     $fi_errors = $fi->create($fi_warnings, true);
                 }
-                
+
                 if (count($fi_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($fi_errors, 'Echec de la création de la Fiche Inter');
                 }
@@ -1594,95 +1594,135 @@ class BT_ficheInter extends BimpDolObject
                     }
 
                     // Envoi mails: 
-                    if ($type_signature !== self::TYPE_SIGN_DIST) {
-                        global $conf;
-                        $ref = $this->getRef();
-                        $pdf_file = $conf->ficheinter->dir_output . '/' . $ref . '/' . $ref . '.pdf';
+                    global $conf;
 
-                        $subject = "Fiche d'intervention " . $ref;
+                    $mail_cli_errors = array();
+                    $ref = $this->getRef();
+                    $email_tech = '';
+                    $email_comm = '';
 
-                        if (is_file($pdf_file)) {
+                    if (BimpObject::objectLoaded($tech)) {
+                        $email_tech = BimpTools::cleanEmailsStr($tech->getData('email'));
+                    }
 
-                            // Envoi au client: 
-                            if (!$auto_terminer) {
-                                $email_tech = BimpTools::cleanEmailsStr($tech->getData('email'));
-                                $to = BimpTools::cleanEmailsStr($this->getData('email_signature'));
+                    $commercial = $this->getCommercialClient();
+                    if (BimpObject::objectLoaded($commercial)) {
+                        $email_comm = BimpTools::cleanEmailsStr($commercial->getData('email'));
+                    }
 
-                                if ($to) {
-                                    $message = "Bonjour,<br/><br/>Veuillez trouver ci-joint votre Fiche d'Intervention<br/><br/>";
+                    $pdf_file = $conf->ficheinter->dir_output . '/' . $ref . '/' . $ref . '.pdf';
 
-                                    if ($type_signature !== self::TYPE_SIGN_ELEC) {
-                                        $message .= "Merci de bien vouloir l'envoyer par email à votre interlocuteur commercial, dûment complétée et signée.<br/>";
-                                    }
+                    $client = $this->getChildObject('client');
+                    $email_cli = BimpTools::cleanEmailsStr($this->getData('email_signature'));
+                    if (!$email_cli) {
+                        if (BimpObject::objectLoaded($client)) {
+                            $email_cli = BimpTools::cleanEmailsStr($email_cli);
+                        }
+                    }
 
-                                    $message .= "Vous souhaitant bonne réception de ces éléments, nous restons à votre disposition pour tout complément d'information.<br/>";
-
-                                    if ($type_signature !== self::TYPE_SIGN_ELEC) {
-                                        $message .= "Dans l'attente de votre retour.<br/>";
-                                    }
-
-                                    $message .= '<br/>Très courtoisement.';
-                                    $message .= "<br/><br/><b>Le Service Technique</b>";
-
-                                    $bimpMail = new BimpMail($subject, $to, '', $message, $email_tech/*, temporaire pour controle  'at.bernard@bimp.fr, t.sauron@bimp.fr, f.martinez@bimp.fr'*/);
-                                    $bimpMail->addFile(array($pdf_file, 'application/pdf', $ref . '.pdf'));
-                                    $mail_errors = array();
-                                    $bimpMail->send($mail_errors);
-
-                                    if (count($mail_errors)) {
-                                        $warnings[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail au client');
-                                    }
-                                }
-                            }
-
-                            // Envoi au commecial
-
-                            $commercial = $this->getCommercialClient();
-
-                            if (BimpObject::objectLoaded($commercial)) {
-                                $email_commercial = BimpTools::cleanEmailsStr($commercial->getData('email'));
-
-                                if ($email_commercial) {
-                                    $client = $this->getChildObject('client');
-
-                                    $subject = '[FI] ' . $this->getRef();
-                                    if (BimpObject::objectLoaded($client)) {
-                                        $subject .= ' - Client ' . $client->getRef() . ' ' . $client->getName();
-                                    }
-
-                                    $message = "Bonjour, pour informations : <br/><br/>";
-                                    $message .= "L'intervention " . $this->getLink() . ' ';
-
-                                    if ($auto_terminer) {
-                                        $message .= "en interne a été signée par le technicien et terminée. La FI à été marquée comme terminée automatiquement.";
-                                    } else {
-                                        $message .= 'a été envoyée par e-mail au client ';
-
-                                        switch ($type_signature) {
-                                            case self::TYPE_SIGN_DIST:
-                                                $message .= 'pour signature électronique à distance.';
-                                                break;
-
-                                            case self::TYPE_SIGN_ELEC:
-                                                $message .= ' suite à sa signature électronique.';
-                                                break;
-
-                                            case self::TYPE_SIGN_PAPIER:
-                                                $message .= ' pour signature papier à renvoyer par e-mail.';
-                                                break;
-                                        }
-
-                                        $message .= '<br/><br/>';
-                                    }
-
-                                    mailSyn2($subject, $email_commercial, '', $message, array($pdf_file), array('application/pdf'), array($ref . '.pdf'), "", /* temporaire pour controle 'at.bernard@bimp.fr, t.sauron@bimp.fr, */ 'f.martinez@bimp.fr');
-                                }
-                            }
-                        } else {
+                    // Envoi au client: 
+                    if (!$auto_terminer && $type_signature !== self::TYPE_SIGN_DIST) {
+                        if (!is_file($pdf_file)) {
+                            $mail_cli_errors[] = 'Fichier PDF de la Fiche Inter absent';
                             BimpCore::addlog('PDF Fiche Inter absent pour envoi par mail suite à signature', Bimp_Log::BIMP_LOG_ERREUR, 'bimptechnique', $this, array(
                                 'Fichier' => $pdf_file
                             ));
-                            $errors[] = 'Mail non envoyé PDF non trouvé';
+                        }
+
+                        if (!$email_cli) {
+                            $mail_cli_errors[] = 'Adresse e-mail du client non renseignée';
+                        }
+
+                        if (!count($mail_cli_errors)) {
+                            $subject = "Fiche d'intervention " . $ref;
+
+                            $message = "Bonjour,<br/><br/>Veuillez trouver ci-joint votre Fiche d'Intervention<br/><br/>";
+
+                            if ($type_signature == self::TYPE_SIGN_PAPIER) {
+                                $message .= "Merci de bien vouloir l'envoyer par email à votre interlocuteur commercial, dûment complétée et signée.<br/>";
+                            }
+
+                            $message .= "Vous souhaitant bonne réception de ces éléments, nous restons à votre disposition pour tout complément d'information.<br/>";
+
+                            if ($type_signature == self::TYPE_SIGN_PAPIER) {
+                                $message .= "Dans l'attente de votre retour.<br/>";
+                            }
+
+                            $message .= '<br/>Très courtoisement.';
+                            $message .= "<br/><br/><b>Le Service Technique</b>";
+
+                            $reply_to = $email_comm ? $email_comm : $email_tech;
+                            $cc = /*$email_comm . ($email_comm ? ', ' : '') . $email_tech . ($email_tech ? ', ' : '') .*/ 't.sauron@bimp.fr, f.martinez@bimp.fr';
+
+                            $bimpMail = new BimpMail($subject, $email_cli, '', $message, $reply_to, $cc);
+                            $bimpMail->addFile(array($pdf_file, 'application/pdf', $ref . '.pdf'));
+                            $bimpMail->send($mail_cli_errors);
+                            
+                            if (!count($mail_cli_errors)) {
+                                $this->addLog("FI envoyée au client avec succès");
+                            }
+                        }
+
+                        if (count($mail_cli_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($mail_cli_errors, 'Echec de l\'envoi de la FI par e-mail au client');
+                        }
+                    }
+
+                    // Envoi au commecial / tech
+                    if ($email_comm || $email_tech) {
+                        $subject = '[FI] ' . $this->getRef();
+
+                        if (count($mail_cli_errors)) {
+                            $subject .= ' [ECHEC ENVOI E-MAIL AU CLIENT]';
+                        }
+
+                        if (BimpObject::objectLoaded($client)) {
+                            $subject .= ' - Client ' . $client->getRef() . ' ' . $client->getName();
+                        }
+
+                        $message = "Bonjour, pour informations : <br/><br/>";
+                        $message .= "L'intervention " . $this->getLink() . ' pour le client ' . $client->getLink() . ' ';
+
+                        if ($auto_terminer) {
+                            $message .= "en interne a été signée par le technicien. La FI à été marquée comme terminée automatiquement.";
+                        } else {
+                            if (count($mail_cli_errors)) {
+                                $message .= 'n\'a pas pu être envoyée par e-mail au client ';
+                            } else {
+                                $message .= 'a été envoyée par e-mail au client ';
+                            }
+
+                            switch ($type_signature) {
+                                case self::TYPE_SIGN_DIST:
+                                    $message .= 'pour signature électronique à distance.';
+                                    break;
+
+                                case self::TYPE_SIGN_ELEC:
+                                    $message .= ' suite à sa signature électronique.';
+                                    break;
+
+                                case self::TYPE_SIGN_PAPIER:
+                                    $message .= ' pour signature papier à renvoyer par e-mail.';
+                                    break;
+                            }
+
+                            if (count($mail_cli_errors)) {
+                                $message . '<br/><br/>';
+                                $message .= BimpTools::getMsgFromArray($mail_cli_errors, 'Erreurs');
+                            }
+
+                            if ($email_cli) {
+                                $message .= '<br/><br/>Adresse e-mail du client: ' . $email_cli;
+                            }
+
+                            $message .= '<br/><br/>';
+                        }
+
+                        $to = $email_comm ? $email_comm : $email_tech;
+                        $cc = ($email_comm ? $email_tech . ', ' : '') . 't.sauron@bimp.fr, f.martinez@bimp.fr';
+
+                        if (!mailSyn2($subject, $to, '', $message, array($pdf_file), array('application/pdf'), array($ref . '.pdf'), $cc)) {
+                            $warnings[] = 'Echec de l\'envoi de l\'e-mail de notification au commercial du client';
                         }
                     }
                 }
@@ -1720,7 +1760,8 @@ class BT_ficheInter extends BimpDolObject
             if (count($up_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement du mot de passe');
             } else {
-                $subject = 'BIMP - Rapport d\'intervention - ' . $this->getRef();
+                $subject = 'Fiche d\'intervention - ' . $this->getRef();
+                
                 $msg = 'Bonjour,<br/><br/>';
                 $msg .= 'Merci de signer votre rapport d\'intervention à l\'adresse suivante: ';
                 $msg .= '<a href="' . DOL_URL_ROOT . '/bimptechnique/public">' . DOL_URL_ROOT . '/bimptechnique/public</a>';
@@ -1731,16 +1772,35 @@ class BT_ficheInter extends BimpDolObject
                 $to = BimpTools::cleanEmailsStr($this->getData('email_signature'));
                 $commercial = $this->getCommercialClient();
                 $tech = $this->getChildObject('user_tech');
-                $reply_to = (BimpObject::objectLoaded($commercial) ? $commercial->getData('email') : BimpObject::objectLoaded($tech) ? $tech->getData('email') : '');
-                $bimpMail = new BimpMail($subject, $to, '', $msg, $reply_to);
+
+                $email_tech = '';
+                $email_comm = '';
+
+                if (BimpObject::objectLoaded($tech)) {
+                    $email_tech = $tech->getData('email');
+                }
+
+                if (BimpObject::objectLoaded($commercial)) {
+                    $email_comm = $commercial->getData('email');
+                }
+
+                $reply_to = ($email_comm ? $email_comm : $email_tech);
+                $cc = /*($email_comm ? $email_tech . ', ' : '') . */'t.sauron@bimp.fr, f.martinez@bimp.fr';
+
+                $bimpMail = new BimpMail($subject, $to, '', $msg, $reply_to, $cc);
 
                 global $conf;
-                $files = array();
-                $files[] = array($conf->ficheinter->dir_output . '/' . $this->dol_object->ref . '/' . $this->dol_object->ref . '.pdf', 'application/pdf', $this->dol_object->ref . '.pdf');
-                $bimpMail->addFiles($files);
+
+                $file = $conf->ficheinter->dir_output . '/' . $this->dol_object->ref . '/' . $this->dol_object->ref . '.pdf';
+                if (file_exists($file)) {
+                    $bimpMail->addFile(array($file, 'application/pdf', $this->dol_object->ref . '.pdf'));
+                }
+                
                 $mail_errors = array();
                 $bimpMail->send($mail_errors);
 
+                sleep(3);
+                
                 if (count($mail_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail au client pour la signature à distance');
                 }

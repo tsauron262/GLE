@@ -361,7 +361,7 @@ class BContract_echeancier extends BimpObject {
         $instance = $this->getInstance('bimpcommercial', 'Bimp_Facture');
         $instance->set('fk_soc', ($parent->getData('fk_soc_facturation')) ? $parent->getData('fk_soc_facturation') : $parent->getData('fk_soc'));
         
-        $bill_label = (isset($data['labelLn'])? $data['labelLn'].' ': '')."Facture " . $parent->getPeriodeString();
+        $bill_label = (isset($data['label'])? $data['label'].' ': '')."Facture " . $parent->getPeriodeString();
         $bill_label.= " du contrat N°" . $parent->getData('ref');
         $bill_label.= ' - ' . $parent->getData('label');
         $instance->set('libelle', $bill_label);

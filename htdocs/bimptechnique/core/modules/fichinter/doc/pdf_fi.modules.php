@@ -578,10 +578,10 @@ class pdf_fi
                     }
                     $pdf->SetFont(''/* 'Arial' */, '', 9);
                     if (BimpObject::objectLoaded($service)) {
-                        $pdf->MultiCell(($this->page_largeur - $this->marge_droite - ($this->marge_gauche) + 50), 4, strip_tags($service->getData('description')), 0, 'L');
+                        $pdf->MultiCell(($this->page_largeur - $this->marge_droite - $this->marge_gauche), 4, strip_tags($service->getData('description')), 0, 'L');
                     } else {
                         if (!in_array($child->getData('type'), $excludeDescriptionService)) {
-                            $pdf->MultiCell(($this->page_largeur - $this->marge_droite - ($this->marge_gauche) + 50), 4, $type, 0, 'L');
+                            $pdf->MultiCell(($this->page_largeur - $this->marge_droite - $this->marge_gauche), 4, $type, 0, 'L');
                         }
                     }
 

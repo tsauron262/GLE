@@ -50,7 +50,8 @@ if (!$action) {
         'secteur_facture_fourn_with_commande_fourn' => 'Secteur fact fourn with comm fourn',
         'correct_sav_dates_rdv'                     => 'Corriger dates RDV SAV',
         'correct_tickets_serials'                   => 'Récupérer serials tickets depuis sujet',
-        'convert_fi'                                => 'Convertir FI'
+        'convert_fi'                                => 'Convertir FI',
+        'check_margin_commande'                     => 'Marge commande'
     );
 
     $path = pathinfo(__FILE__);
@@ -75,6 +76,15 @@ switch ($action) {
             $db->query("UPDATE llx_facture_fourn_extrafields SET type = '" . $ln->newType . "' WHERE type is NULL AND fk_object =" . $ln->rowid);
         }
         break;
+        
+        
+    case 'check_margin_commande':
+        global $db;
+        $sql = $db->query('SELECT c.rowid, c.marge, SUM(cd.total_ht - (cd.buy_price_ht * cd.qty)) as margeCalc FROM llx_commande c LEFT JOIN llx_commandedet cd ON cd.`fk_commande` = c.`rowid` WHERE 1 GROUP BY c.rowid HAVING SUM(cd.total_ht - (cd.buy_price_ht * cd.qty)) - c.marge > 1 || SUM(cd.total_ht - (cd.buy_price_ht * cd.qty)) - c.marge < -1');
+        
+        while ($ln = $db->fetch_object($sql)) {
+            $db->query("UPDATE llx_commandedet SET test = 1 WHERE fk_commande = ". $ln->rowid);
+        }
 
     case 'check_limit_client':
         $errors = array();

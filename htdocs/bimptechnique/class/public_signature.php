@@ -41,7 +41,7 @@ if ($fi->find(['public_signature_url' => $_POST['key']], 1)) {
     $message .= "<br /><br /><b>Le Service Technique</b><br />OLYS - 2 rue des Erables - CS21055 - 69760 LIMONEST<br />";
 
     $reply_to = ($email_comm ? $email_comm : $email_tech);
-    $cc = $email_comm . ($email_comm ? ', ' : '') . $email_tech . ($email_tech ? ', ' : '') . 't.sauron@bimp.fr, f.martinez@bimp.fr';
+    $cc = /*$email_comm . ($email_comm ? ', ' : '') . $email_tech . ($email_tech ? ', ' : '') .*/ 't.sauron@bimp.fr, f.martinez@bimp.fr';
 
     $bm = new BimpMail($subject, $email_cli, '', $message, $reply_to, $cc);
 

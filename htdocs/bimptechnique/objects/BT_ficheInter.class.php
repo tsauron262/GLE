@@ -1652,7 +1652,7 @@ class BT_ficheInter extends BimpDolObject
                             $message .= "<br/><br/><b>Le Service Technique</b>";
 
                             $reply_to = $email_comm ? $email_comm : $email_tech;
-                            $cc = $email_comm . ($email_comm ? ', ' : '') . $email_tech . ($email_tech ? ', ' : '') . 't.sauron@bimp.fr, f.martinez@bimp.fr';
+                            $cc = /*$email_comm . ($email_comm ? ', ' : '') . $email_tech . ($email_tech ? ', ' : '') .*/ 't.sauron@bimp.fr, f.martinez@bimp.fr';
 
                             $bimpMail = new BimpMail($subject, $email_cli, '', $message, $reply_to, $cc);
                             $bimpMail->addFile(array($pdf_file, 'application/pdf', $ref . '.pdf'));
@@ -1785,7 +1785,7 @@ class BT_ficheInter extends BimpDolObject
                 }
 
                 $reply_to = ($email_comm ? $email_comm : $email_tech);
-                $cc = ($email_comm ? $email_tech . ', ' : '') . 't.sauron@bimp.fr, f.martinez@bimp.fr';
+                $cc = /*($email_comm ? $email_tech . ', ' : '') . */'t.sauron@bimp.fr, f.martinez@bimp.fr';
 
                 $bimpMail = new BimpMail($subject, $to, '', $msg, $reply_to, $cc);
 

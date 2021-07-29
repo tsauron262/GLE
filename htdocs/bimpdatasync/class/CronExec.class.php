@@ -7,13 +7,6 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpCron.php';
 class CronExec extends BimpCron
 {
 
-    public function __construct($db)
-    {
-        $this->db = $db;
-
-        parent::__construct($db);
-    }
-
     public function executeProcessOperation($id_process_cron)
     {
         $error = '';

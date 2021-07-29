@@ -11,6 +11,8 @@ class BimpCron
     {
         $this->db = $db;
 
+        BimpCore::setMaxExecutionTime(static::$timeout);
+        
         register_shutdown_function(array($this, 'onExit'));
     }
 

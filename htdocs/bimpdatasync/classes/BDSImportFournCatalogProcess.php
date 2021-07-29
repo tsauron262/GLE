@@ -39,11 +39,14 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
     public static $price_keys = array();
     public $pfp_instance = null;
     public $prod_import_instance = null;
-    
     public $bimp_product_import_fourn = array();
 
     public function __construct(BDS_Process $process, $options = array(), $references = array())
     {
+        if (!defined('PATH_TMP')) {
+            define('PATH_TMP', DOL_DATA_ROOT);
+        }
+
         parent::__construct($process, $options, $references);
 
         if (isset($this->params['local_dir']) && $this->params['local_dir']) {
@@ -258,10 +261,10 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                 $id_product = $this->findIdProductFromLineData($line);
                 if ($id_product) {
                     $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_product);
-                    if($line['url'] && $prod->getData('url') != $line['url']){
+                    if ($line['url'] && $prod->getData('url') != $line['url']) {
                         $prod->updateField('url', $line['url']);
                     }
-                    if($line['ean'] && $prod->getData('barcode') != $line['ean']){
+                    if ($line['ean'] && $prod->getData('barcode') != $line['ean']) {
                         $prod->updateField('barcode', $line['ean']);
                     }
                     // recherche d'un pfp existant et check de la ref fourn: 
@@ -298,8 +301,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                     // Check changement du pa, stock et/ou ref_fourn
                     if ($id_pfp) {
 //                        if ((int) $this->fournPrices[$id_pfp]['price']*100 === (int) $pa_ht*100 
-                        if (round((float)$this->fournPrices[$id_pfp]['price'],2) === round((float) $pa_ht,2) 
-                                && (float) $this->fournPrices[$id_pfp]['tva_tx'] === (float) $tva_tx &&
+                        if (round((float) $this->fournPrices[$id_pfp]['price'], 2) === round((float) $pa_ht, 2) && (float) $this->fournPrices[$id_pfp]['tva_tx'] === (float) $tva_tx &&
                                 (is_null($stock) || (float) $stock === (float) $this->fournPrices[$id_pfp]['stock']) &&
                                 $refFourn == $this->fournPrices[$id_pfp]['ref_fourn']) {
                             // Pas de màj nécessaire: 
@@ -339,7 +341,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                     $this->addTableProdFourn($ref_fourn, $code_fourn, $pu_ht, $tva_tx, $pa_ht, $marque, $lib, $ref_manuf, $line);
                 }
             }
-            
+
             $this->insertTableProdFourn();
 
 //            $this->DebugData($fourn_prices, 'Fourn Prices');
@@ -352,22 +354,19 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
             }
         }
     }
-    
-    public function insertTableProdFourn(){
+
+    public function insertTableProdFourn()
+    {
         $tabs = array_chunk($this->bimp_product_import_fourn, 1000);
-        foreach($tabs as $tab){
-            if(count($tab) > 0){
-                if($this->db->db->query("INSERT INTO `" . MAIN_DB_PREFIX . "bimp_product_import_fourn`(id_fourn, `refLdLC`, `codeLdlc`, `pu_ht`, `tva_tx`, `pa_ht`, `marque`, `libelle`, `refFabriquant`, `data`) "
-                                . "VALUES (".implode('),(', $tab).")") > 0) {
-                    $this->Success(count($tab).' lignes insérées dans bimp_product_import_fourn');
-                }
-                else
-                    $this->Error ('Erreur sql '.$this->db->db->error());
+        foreach ($tabs as $tab) {
+            if (count($tab) > 0) {
+                if ($this->db->db->query("INSERT INTO `" . MAIN_DB_PREFIX . "bimp_product_import_fourn`(id_fourn, `refLdLC`, `codeLdlc`, `pu_ht`, `tva_tx`, `pa_ht`, `marque`, `libelle`, `refFabriquant`, `data`) "
+                                . "VALUES (" . implode('),(', $tab) . ")") > 0) {
+                    $this->Success(count($tab) . ' lignes insérées dans bimp_product_import_fourn');
+                } else
+                    $this->Error('Erreur sql ' . $this->db->db->error());
             }
         }
-        
-        
-        
     }
 
     public function processFournStocks($lines, &$errors = array())
@@ -470,7 +469,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                 }
 
                 if (!$check) {
-                    $errors[] = 'Echec du téléchargement du fichier "' . $fileName . '" dans "'.$this->local_dir . $fileName.'"';
+                    $errors[] = 'Echec du téléchargement du fichier "' . $fileName . '" dans "' . $this->local_dir . $fileName . '"';
                 }
             }
         }
@@ -499,16 +498,16 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                     $tabOk[] = $this->refProdToIdProd[$ref];
             }
         }
-        if(count($tabOk) == 0 && $line['ean']){//test avec ean
+        if (count($tabOk) == 0 && $line['ean']) {//test avec ean
             global $db;
-            $sql = $db->query('SELECT rowid FROM llx_product WHERE barcode = "'.$line['ean'].'"');
+            $sql = $db->query('SELECT rowid FROM llx_product WHERE barcode = "' . $line['ean'] . '"');
             while ($ln = $db->fetch_object($sql))
-                    $tabOk[] = $ln->rowid;
-            if(count($tabOk) > 0)
-                $this->Info("Code EAN reconnue ".$line['ean'], null, $line['ref_fourn']);
+                $tabOk[] = $ln->rowid;
+            if (count($tabOk) > 0)
+                $this->Info("Code EAN reconnue " . $line['ean'], null, $line['ref_fourn']);
         }
-        
-        
+
+
         if (count($tabOk) == 1)
             return $tabOk[0];
 

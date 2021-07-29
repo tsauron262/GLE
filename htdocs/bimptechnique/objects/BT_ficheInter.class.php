@@ -1652,7 +1652,7 @@ class BT_ficheInter extends BimpDolObject
                             $message .= "<br/><br/><b>Le Service Technique</b>";
 
                             $reply_to = $email_comm ? $email_comm : $email_tech;
-                            $cc = /*$email_comm . ($email_comm ? ', ' : '') . $email_tech . ($email_tech ? ', ' : '') .*/ 't.sauron@bimp.fr, f.martinez@bimp.fr';
+                            $cc = ''; //$email_comm . ($email_comm ? ', ' : '') . $email_tech . ($email_tech ? ', ' : '') . t.sauron@bimp.fr, f.martinez@bimp.fr';
 
                             $bimpMail = new BimpMail($subject, $email_cli, '', $message, $reply_to, $cc);
                             $bimpMail->addFile(array($pdf_file, 'application/pdf', $ref . '.pdf'));
@@ -1719,7 +1719,7 @@ class BT_ficheInter extends BimpDolObject
                         }
 
                         $to = $email_comm ? $email_comm : $email_tech;
-                        $cc = ($email_comm ? $email_tech . ', ' : '') . 't.sauron@bimp.fr, f.martinez@bimp.fr';
+                        $cc = ($email_comm ? $email_tech : ''); // . 't.sauron@bimp.fr, f.martinez@bimp.fr';
 
                         if (!mailSyn2($subject, $to, '', $message, array($pdf_file), array('application/pdf'), array($ref . '.pdf'), $cc)) {
                             $warnings[] = 'Echec de l\'envoi de l\'e-mail de notification au commercial du client';
@@ -1785,7 +1785,7 @@ class BT_ficheInter extends BimpDolObject
                 }
 
                 $reply_to = ($email_comm ? $email_comm : $email_tech);
-                $cc = /*($email_comm ? $email_tech . ', ' : '') . */'t.sauron@bimp.fr, f.martinez@bimp.fr';
+                $cc = ''; //($email_comm ? $email_tech . ', ' : '') . 't.sauron@bimp.fr, f.martinez@bimp.fr';
 
                 $bimpMail = new BimpMail($subject, $to, '', $msg, $reply_to, $cc);
 
@@ -1895,7 +1895,7 @@ class BT_ficheInter extends BimpDolObject
 
         $msg .= ' a été signée par le client.<br/><br/>';
 
-        mailSyn2($subject, 'facturationclients@bimp.fr', '', $msg, array(), array(), array(), 'f.martinez@bimp.fr');
+        mailSyn2($subject, 'facturationclients@bimp.fr', '', $msg);
 
         $this->addLog("Facturation client prévenue");
         $this->updateField('fk_statut', 2);

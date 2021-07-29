@@ -38,20 +38,21 @@ if ($fi->find(['public_signature_url' => $_POST['key']], 1)) {
     $message = "Bonjour,<br />Veuillez trouver ci-joint notre Fiche d'Intervention<br />";
     $message .= "Vous souhaitant bonne réception de ces éléments, nous restons à votre disposition pour tout complément d'information.<br />";
     $message .= '<br/>Très courtoisement.';
-    $message .= "<br /><br /><b>Le Service Technique</b><br />OLYS - 2 rue des Erables - CS21055 - 69760 LIMONEST<br />";
+    $message .= "<br /><br /><b>Le Service Technique</b><br/>";
 
     $reply_to = ($email_comm ? $email_comm : $email_tech);
-    $cc = /*$email_comm . ($email_comm ? ', ' : '') . $email_tech . ($email_tech ? ', ' : '') .*/ 't.sauron@bimp.fr, f.martinez@bimp.fr';
+    $cc = '';
+    $email_comm . ($email_comm ? ', ' : '') . $email_tech . ($email_tech ? ', ' : '') . 't.sauron@bimp.fr, f.martinez@bimp.fr';
 
     $bm = new BimpMail($subject, $email_cli, '', $message, $reply_to, $cc);
 
     if (file_exists($file)) {
         $bm->addFile(array($file, 'application/pdf', $ref . '.pdf'));
     }
-    
+
     $mail_errors = array();
     $bm->send($mail_errors);
-    
+
     if (!count($mail_errors)) {
         $fi->addLog("FI envoyée au client avec succès");
     }

@@ -631,7 +631,7 @@ class pdf_fi
                 }
                 $pdf->SetFont(''/* 'Arial' */, 'B', 9);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Mentions", 0, 'L');
-                $pdf->SetFont(''/* 'Arial' */, '', 9);
+                $pdf->SetFont(''/* 'Arial' */, 'I', 8);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "La société Bimp/OLYS ne peut en aucun cas être tenue pour responsable de la perte éventuelle de données informatiques. Il appartient au client d'effectuer des sauvegardes régulières de ses informations et de vérifier la conformité de celles-ci", 0, 'L');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Veuillez noter que conformément à nos devis en coût horaire, la première heure est indivisible et que toute demi-heure entamée est due", 0, 'L');
 

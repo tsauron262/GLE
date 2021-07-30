@@ -327,7 +327,7 @@ class BContract_echeancier extends BimpObject {
         ];
     }
 
-    public function actionValidateFacture($data, &$success = Array()) {
+    public function actionValidateFacture($data, &$success = '') {
         global $user;
 
         $instance = $this->getInstance('bimpcommercial', 'Bimp_Facture', $data['id_facture']);
@@ -344,11 +344,11 @@ class BContract_echeancier extends BimpObject {
         );
     }
 
-    public function actionCreateFacture($data, &$success = Array()) {
+    public function actionCreateFacture($data, &$success = '') {
         $errors = $warnings = [];
         
         if($this->isDejaFactured($data['date_start'], $data['date_end'])) {
-            return  array("Contrat déjà facturé pour cette période, merci de refresh la page pour voir cette facture dans l'échéancier");
+            return  array('errors' => array("Contrat déjà facturé pour cette période, merci de refresh la page pour voir cette facture dans l'échéancier"));
         }
 
         $parent = $this->getParentInstance();
@@ -369,7 +369,7 @@ class BContract_echeancier extends BimpObject {
 //        $instance->set('fk_account', 1);
         
         if(!$parent->getData('entrepot') && $parent->useEntrepot()) {
-            return array("La facture ne peut pas être crée car le contrat n'a pas d'entrepôt");
+            return array('errors' => array("La facture ne peut pas être crée car le contrat n'a pas d'entrepôt"));
         }
         if($parent->useEntrepot())
             $instance->set('entrepot', $parent->getData('entrepot'));

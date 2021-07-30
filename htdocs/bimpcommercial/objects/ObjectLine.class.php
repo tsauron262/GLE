@@ -2535,7 +2535,7 @@ class ObjectLine extends BimpObject
                 }
             } else {
                 $this->fetch($id);
-                BimpCore::addlog('Tentative de création ' . $this->getLabel('of_a') . ' existant déjà', Bimp_Log::BIMP_LOG_URGENT, 'bimpcommercial', $this, array(
+                BimpCore::addlog('Tentative de création ' . $this->getLabel('of_a') . ' existant déjà', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', $this, array(
                     'Context'                  => 'createFromDolLine()',
                     'ID ' . $this->object_name => $id,
                     'ID ligne dolibarr'        => (int) $line->id
@@ -5081,7 +5081,7 @@ class ObjectLine extends BimpObject
 
             if ($id_bimp_line) {
                 $this->fetch($id_bimp_line);
-                BimpCore::addlog('Tentative de création ' . $this->getLabel('of_a') . ' existant déjà', Bimp_Log::BIMP_LOG_URGENT, 'bimpcommercial', $this, array(
+                BimpCore::addlog('Tentative de création ' . $this->getLabel('of_a') . ' existant déjà', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', $this, array(
                     'context'                  => 'create()',
                     'ID ' . $this->object_name => $id_bimp_line,
                     'ID ligne dolibarr'        => (int) $this->getData('id_line'),

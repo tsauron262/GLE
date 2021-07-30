@@ -2,27 +2,27 @@
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpdatasync/BDS_Lib.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpCron.php';
 
-class CronExec
+class CronExec extends BimpCron
 {
-
-    public $db;
-
-    public function __construct($db)
-    {
-        $this->db = $db;
-    }
 
     public function executeProcessOperation($id_process_cron)
     {
         $error = '';
 
+        $this->current_cron_name = 'Opération BDS';
+
         if (!(int) $id_process_cron) {
             $error = 'ID de la tâche planifiée absent';
         } else {
+            $this->current_cron_name .= ' - CRON #' . $id_process_cron;
+
             $cron = BimpCache::getBimpObjectInstance('bimpdatasync', 'BDS_ProcessCron', (int) $id_process_cron);
 
             if (BimpObject::objectLoaded($cron)) {
+                $this->current_cron_name .= ' - ' . $cron->getData('title');
+
                 $cron_errors = array();
                 $cron->executeOperation($cron_errors);
 
@@ -66,6 +66,8 @@ class CronExec
 
     public function cleanReports()
     {
+        $this->current_cron_name = 'Nettoyage des rapports BDS';
+
         BimpObject::loadClass('bimpdatasync', 'BDS_Report');
 
         $errors = array();

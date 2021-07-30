@@ -4013,51 +4013,52 @@ class BimpComm extends BimpDolObject
 
         $id_objs = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
 
-        if (count($id_objs) > 50)
-            return array('Trop de PDF action impossible');
-
-        if (!is_array($id_objs) || empty($id_objs)) {
-            $errors[] = 'Aucune ' . $this->getLabel() . ' sélectionnée';
+        if (count($id_objs) > 50) {
+            $errors[] = 'Trop de PDF action impossible';
         } else {
-            $files = array();
-
-            foreach ($id_objs as $id_obj) {
-                $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_obj);
-
-                if (!BimpObject::objectLoaded($obj)) {
-                    $warnings[] = ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_obj . ' n\'existe pas';
-                    continue;
-                }
-
-                $dir = $obj->getFilesDir();
-                $filename = $obj->getRef() . '.pdf';
-
-                if (!file_exists($dir . $filename)) {
-                    $warnings[] = ucfirst($this->getLabel()) . ' ' . $obj->getLink() . ': fichier PDF absent (' . $dir . $filename . ')';
-                    continue;
-                }
-
-                $files[] = array($dir . $filename, $filename);
-            }
-
-            if (!empty($files)) {
-                global $user;
-                $dir = PATH_TMP . '/bimpcore/';
-                $fileName = 'zip_' . $this->dol_object->element . '_' . $user->id . '.zip';
-                if (file_exists($dir . $fileName))
-                    unlink($dir . $fileName);
-                $zip = new ZipArchive();
-                if ($zip->open($dir . $fileName, ZipArchive::CREATE) === true) {
-                    foreach ($files as $tabFile) {
-                        $zip->addFile($tabFile[0], $tabFile[1]);
-                    }
-                }
-                $zip->close();
-
-                $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($fileName);
-                $success_callback = 'window.open(\'' . $url . '\');';
+            if (!is_array($id_objs) || empty($id_objs)) {
+                $errors[] = 'Aucune ' . $this->getLabel() . ' sélectionnée';
             } else {
-                $errors[] = 'Aucun PDF trouvé';
+                $files = array();
+
+                foreach ($id_objs as $id_obj) {
+                    $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_obj);
+
+                    if (!BimpObject::objectLoaded($obj)) {
+                        $warnings[] = ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_obj . ' n\'existe pas';
+                        continue;
+                    }
+
+                    $dir = $obj->getFilesDir();
+                    $filename = $obj->getRef() . '.pdf';
+
+                    if (!file_exists($dir . $filename)) {
+                        $warnings[] = ucfirst($this->getLabel()) . ' ' . $obj->getLink() . ': fichier PDF absent (' . $dir . $filename . ')';
+                        continue;
+                    }
+
+                    $files[] = array($dir . $filename, $filename);
+                }
+
+                if (!empty($files)) {
+                    global $user;
+                    $dir = PATH_TMP . '/bimpcore/';
+                    $fileName = 'zip_' . $this->dol_object->element . '_' . $user->id . '.zip';
+                    if (file_exists($dir . $fileName))
+                        unlink($dir . $fileName);
+                    $zip = new ZipArchive();
+                    if ($zip->open($dir . $fileName, ZipArchive::CREATE) === true) {
+                        foreach ($files as $tabFile) {
+                            $zip->addFile($tabFile[0], $tabFile[1]);
+                        }
+                    }
+                    $zip->close();
+
+                    $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($fileName);
+                    $success_callback = 'window.open(\'' . $url . '\');';
+                } else {
+                    $errors[] = 'Aucun PDF trouvé';
+                }
             }
         }
 

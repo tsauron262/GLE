@@ -581,7 +581,8 @@ class Bimp_Propal extends BimpComm
                         'fields' => array(
                             'entrepot'          => (int) $this->getData('entrepot'),
                             'ef_type'           => $this->getData('ef_type'),
-                            'fk_soc'            => (int) $clientFact->id,
+                            'id_client_facture'            => (int) $clientFact->id,
+                            'fk_soc'            => (int) $this->getData('fk_soc'),
                             'ref_client'        => $this->getData('ref_client'),
                             'fk_cond_reglement' => (int) $this->getData('fk_cond_reglement'),
                             'fk_mode_reglement' => (int) $this->getData('fk_mode_reglement'),

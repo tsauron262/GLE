@@ -899,8 +899,6 @@ class Bimp_Commande extends BimpComm
         return array();
     }
 
-
-
     public function getPropalesOriginList()
     {
         if ($this->isLoaded()) {
@@ -3690,37 +3688,35 @@ class Bimp_Commande extends BimpComm
                 $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_ENCOURS);
                 if ($demande)
                     $demande->delete($warnings, 1);
-                $warnings[] = ucfirst($this->getLabel('the')) . ' ' .  $this->getNomUrl(1, true) . " a été validée.";
+                $warnings[] = ucfirst($this->getLabel('the')) . ' ' . $this->getNomUrl(1, true) . " a été validée.";
                 mailSyn2("Validation par paiement comptant", 'a.delauzun@bimp.fr', "gle@bimp.fr", "Bonjour,<br/><br/>La commande " . $this->getNomUrl(1, true) . " a été validée financièrement par paiement comptant, merci de vérifier le paiement ultérieurement.");
             } else {
                 $client_facture = $this->getClientFacture();
-                if(!$client_facture->getData('validation_financiere')) {
+                if (!$client_facture->getData('validation_financiere')) {
                     $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
                     $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_ENCOURS);
-                    if($demande)
+                    if ($demande)
                         $demande->delete($warnings, 1);
                     $warnings[] = ucfirst($this->getLabel('the')) . ' ' . $this->getNomUrl(1, true) . " a été validée (validation financière automatique, voir configuration client)";
                     mailSyn2("Validation financière forcée " . $client_facture->getData('code_client') . ' - ' . $client_facture->getData('nom'), 'a.delauzun@bimp.fr', "gle@bimp.fr", "Bonjour,<br/><br/>La commande " . $this->getNomUrl(1, true) . " a été validée financièrement par la configuration du client.");
-
                 }
             }
         }
 
         // Validation retards de paiements
         if (empty($errors)) {
-            if(!$client_facture)
+            if (!$client_facture)
                 $client_facture = $this->getClientFacture();
-            
-            if(!$client_facture->getData('validation_impaye')) {
-                if(!$vc->isLoaded())
+
+            if (!$client_facture->getData('validation_impaye')) {
+                if (!BimpObject::objectLoaded($vc))
                     $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
-                
+
                 $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_IMPAYE);
-                if($demande)
+                if ($demande)
                     $demande->delete($warnings, 1);
                 $warnings[] = "La commande " . $this->getNomUrl(1, true) . " a été validée (validation de retard de paiement automatique, voir configuration client)";
                 mailSyn2("Validation impayé forcée " . $client_facture->getData('code_client') . ' - ' . $client_facture->getData('nom'), 'a.delauzun@bimp.fr', "gle@bimp.fr", "Bonjour,<br/><br/>Les retard de paiement de la commande " . $this->getNomUrl(1, true) . "ont été validée financièrement par la configuration du client.");
-
             }
         }
 
@@ -3730,6 +3726,8 @@ class Bimp_Commande extends BimpComm
     public function onDelete(&$warnings = array())
     {
         $errors = array();
+        $prevDeleteting = $this->isDeleting;
+        $this->isDeleting = true;
 
         if ($this->isLoaded($warnings)) {
             // Suppression des réservations: 
@@ -3751,6 +3749,8 @@ class Bimp_Commande extends BimpComm
         }
 
         $errors = BimpTools::merge_array($errors, parent::onDelete($warnings));
+
+        $this->isDeleting = $prevDeleteting;
         return $errors;
     }
 
@@ -3872,34 +3872,6 @@ class Bimp_Commande extends BimpComm
                 $this->db->db->query($sql);
             }
         }
-
-        return $errors;
-    }
-
-    public function delete(&$warnings = array(), $force_delete = false)
-    {
-//        $id_commande = (int) $this->id;
-
-        $errors = parent::delete($warnings, $force_delete);
-
-//        if (!count($errors)) {
-//            // Suppression des réservations: 
-//            $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
-//
-//            $reservations = $reservation->getListObjects(array(
-//                'id_commande_client' => $id_commande
-//            ));
-//
-//            foreach ($reservations as $res) {
-//                $res_warnings = array();
-//                $res_errors = $res->delete($res_warnings, true);
-//                $res_errors = BimpTools::merge_array($res_errors, $res_warnings);
-//
-//                if (count($res_errors)) {
-//                    $warnings[] = BimpTools::getMsgFromArray($res_errors, 'Erreur lors de la suppression d\'une réservation');
-//                }
-//            }
-//        }
 
         return $errors;
     }

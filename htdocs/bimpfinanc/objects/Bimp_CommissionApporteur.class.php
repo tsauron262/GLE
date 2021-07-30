@@ -125,7 +125,7 @@ class Bimp_CommissionApporteur extends BimpObject{
         
         $parent = $this->getParentInstance();
         
-        $errors = BimpTools::merge_array($errors, $this->createFactureFourn($parent, $new_facture));
+        $errors = BimpTools::merge_array($errors, $this->createFactureFourn($parent, $new_facture, $warnings));
         
         if(count($errors))
             return $errors;
@@ -136,17 +136,20 @@ class Bimp_CommissionApporteur extends BimpObject{
         foreach($filtres as $filtre){
 
             if($filtre->isLoaded()) {
-            
-                $lines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_FactureLine',
-                        array('commission_apporteur' => $this->id . '-' . $filtre->id));
-                                
-                if(count($lines))
-                    $this->createLineLabel($filtre, $new_facture->id);
-                    
-                foreach ($lines as $line){
-                    $amount = $line->getTotalHTWithRemises(true) / $line->qty * $filtre->getData('commition') / 100;
-                    $errors = BimpTools::merge_array($errors, $this->createFactureFournLine($line, $new_facture, $amount));
-                    $errors = BimpTools::merge_array($errors, $this->createRevalorisation($line, $amount));
+                if($filtre->getData('commition') != 0){
+                    $lines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_FactureLine',
+                            array('commission_apporteur' => $this->id . '-' . $filtre->id));
+
+                    if(count($lines))
+                        $this->createLineLabel($filtre, $new_facture->id);
+
+                    foreach ($lines as $line){
+                        $amount = $line->getTotalHTWithRemises(true) / $line->qty * $filtre->getData('commition') / 100;
+                        if($amount != 0){
+                            $errors = BimpTools::merge_array($errors, $this->createFactureFournLine($line, $new_facture, $amount));
+                            $errors = BimpTools::merge_array($errors, $this->createRevalorisation($line, $amount));
+                        }
+                    }
                 }
 
             } else
@@ -184,7 +187,7 @@ class Bimp_CommissionApporteur extends BimpObject{
         return $reval_errors;
     }
     
-    public function createFactureFourn($parent, &$new_facture) {
+    public function createFactureFourn($parent, &$new_facture, &$warnings) {
         
         $fourn = $parent->getChildObject('fourn');
                 
@@ -206,7 +209,7 @@ class Bimp_CommissionApporteur extends BimpObject{
         if (count($errors))
             return $errors;
         
-        $errors = $new_facture->create($warnings, true);
+        $errors = BimpTools::merge_array($errors, $new_facture->create($warnings, true));
 
         return $errors;
     }

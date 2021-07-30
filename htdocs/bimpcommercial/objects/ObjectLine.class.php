@@ -2535,7 +2535,7 @@ class ObjectLine extends BimpObject
                 }
             } else {
                 $this->fetch($id);
-                BimpCore::addlog('Tentative de création ' . $this->getLabel('of_a') . ' existant déjà', Bimp_Log::BIMP_LOG_URGENT, 'bimpcommercial', $this, array(
+                BimpCore::addlog('Tentative de création ' . $this->getLabel('of_a') . ' existant déjà', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', $this, array(
                     'Context'                  => 'createFromDolLine()',
                     'ID ' . $this->object_name => $id,
                     'ID ligne dolibarr'        => (int) $line->id
@@ -3654,7 +3654,7 @@ class ObjectLine extends BimpObject
 
     public function onChildSave($child)
     {
-        if (is_a($child, 'ObjectLineRemise')) {
+        if (is_a($child, 'ObjectLineRemise') && !$this->isDeleting) {
             if (!$this->isLoaded()) {
                 $instance = self::getInstanceByParentType($child->getData('object_type'), (int) $child->getData('id_object_line'));
                 if ($instance->isLoaded()) {
@@ -3672,6 +3672,11 @@ class ObjectLine extends BimpObject
     protected function setLinesPositions()
     {
         $errors = array();
+
+        $parent = $this->getParentInstance();
+        if (is_a($parent, 'BimpObject') && $parent->isDeleting) {
+            return;
+        }
 
         $table = $this::$dol_line_table;
         $primary = $this::$dol_line_primary;
@@ -3699,17 +3704,26 @@ class ObjectLine extends BimpObject
                 'id_line', 'position'
             ));
 
+            $tabRang = array();
+            $tabTemp = $this->db->executeS('SELECT ' . $primary . ' as id, rang FROM llx_' . $table . ' WHERE ' . $this::$dol_line_parent_field . ' = ' . $parent->id, 'array');
+
+            foreach ($tabTemp as $lnTemp) {
+                $tabRang[$lnTemp['id']] = $lnTemp['rang'];
+            }
+
             if (!is_null($lines) && count($lines)) {
                 foreach ($lines as $line) {
-                    if ($this->db->update($table, array(
-                                'rang' => (int) $line['position']
-                                    ), '`' . $primary . '` = ' . (int) $line['id_line']) <= 0) {
-                        $msg = 'Echec de la mise à jour de la position de la ligne d\'ID ' . $line['id_line'];
-                        $sqlError = $this->db->db->lasterror();
-                        if ($sqlError) {
-                            $msg .= ' - ' . $sqlError;
+                    if (!isset($tabRang[$line['id_line']]) || $line['position'] != $tabRang[$line['id_line']]) {
+                        if ($this->db->update($table, array(
+                                    'rang' => (int) $line['position']
+                                        ), '`' . $primary . '` = ' . (int) $line['id_line']) <= 0) {
+                            $msg = 'Echec de la mise à jour de la position de la ligne d\'ID ' . $line['id_line'];
+                            $sqlError = $this->db->db->lasterror();
+                            if ($sqlError) {
+                                $msg .= ' - ' . $sqlError;
+                            }
+                            $errors[] = $msg;
                         }
-                        $errors[] = $msg;
                     }
                 }
             }
@@ -3720,6 +3734,11 @@ class ObjectLine extends BimpObject
 
     public function checkPosition($position)
     {
+        $parent = $this->getParentInstance();
+        if (is_a($parent, 'BimpObject') && $parent->isDeleting) {
+            return;
+        }
+
         if ((int) $this->getData('id_parent_line')) {
             // Vérification de la nouvelle position de la ligne si elle est enfant d'une autre ligne.
             $parent_line = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $this->getData('id_parent_line'));
@@ -5062,7 +5081,7 @@ class ObjectLine extends BimpObject
 
             if ($id_bimp_line) {
                 $this->fetch($id_bimp_line);
-                BimpCore::addlog('Tentative de création ' . $this->getLabel('of_a') . ' existant déjà', Bimp_Log::BIMP_LOG_URGENT, 'bimpcommercial', $this, array(
+                BimpCore::addlog('Tentative de création ' . $this->getLabel('of_a') . ' existant déjà', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', $this, array(
                     'context'                  => 'create()',
                     'ID ' . $this->object_name => $id_bimp_line,
                     'ID ligne dolibarr'        => (int) $this->getData('id_line'),
@@ -5373,6 +5392,9 @@ class ObjectLine extends BimpObject
         if (!count($errors)) {
             $errors = parent::delete($warnings, $force_delete);
             if (!count($errors)) {
+                $prevDeleting = $this->isDeleting;
+                $this->isDeleting = true;
+                
                 if (count($lines)) {
                     foreach ($lines as $line) {
                         $del_warnings = array();
@@ -5387,6 +5409,8 @@ class ObjectLine extends BimpObject
                     unset($this->remises);
                     $this->remise = null;
                 }
+                
+                $this->isDeleting = $prevDeleting;
             }
         }
 

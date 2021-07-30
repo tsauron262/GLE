@@ -490,7 +490,7 @@ class Bimp_Propal extends BimpComm
                             'fields' => array(
                                 'entrepot'           => (int) $this->getData('entrepot'),
                                 'ef_type'            => $this->getData('ef_type'),
-                                'fk_soc'             => (int) $clientFact->id,
+                                'fk_soc'             => (int) $this->getData('fk_soc'),
                                 'ref_client'         => $this->getData('ref_client'),
                                 'fk_cond_reglement'  => (int) $this->getData('fk_cond_reglement'),
                                 'fk_mode_reglement'  => (int) $this->getData('fk_mode_reglement'),
@@ -512,6 +512,8 @@ class Bimp_Propal extends BimpComm
                                 'close_propal'       => 1
                             )
                         );
+                        if($clientFact->id != $this->getData('fk_soc'))
+                            $values['fields']['id_client_facture'] = $clientFact->id;
                         $onclick = "";
                         $msg = "";
                         $files = $this->getFilesArray();
@@ -581,7 +583,7 @@ class Bimp_Propal extends BimpComm
                         'fields' => array(
                             'entrepot'          => (int) $this->getData('entrepot'),
                             'ef_type'           => $this->getData('ef_type'),
-                            'fk_soc'            => (int) $clientFact->id,
+                            'fk_soc'            => (int) $this->getData('fk_soc'),
                             'ref_client'        => $this->getData('ref_client'),
                             'fk_cond_reglement' => (int) $this->getData('fk_cond_reglement'),
                             'fk_mode_reglement' => (int) $this->getData('fk_mode_reglement'),
@@ -596,6 +598,8 @@ class Bimp_Propal extends BimpComm
                             'origin_id'         => (int) $this->id,
                         )
                     );
+                    if($clientFact->id != $this->getData('fk_soc'))
+                        $values['fields']['id_client_facture'] = $clientFact->id;
                     $onclick = "";
                     $msg = "";
                     $files = $this->getFilesArray();

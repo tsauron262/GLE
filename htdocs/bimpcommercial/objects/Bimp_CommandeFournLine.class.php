@@ -34,6 +34,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
             return $errors;
         }
 
+        BimpObject::loadClass('bimpreservation', 'BR_Reservation');
         $reception_data = $this->getReceptionData($id_reception);
 
         if ((int) $reception_data['received']) {

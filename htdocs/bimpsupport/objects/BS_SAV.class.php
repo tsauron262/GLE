@@ -5429,9 +5429,10 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $msg .= 'Vous pourrez néanmoins accéder à votre <a href="https://www.bimp.fr/espace-client/">espace personnel</a> sur notre site internet «  www.bimp.fr », et si besoin, faire une nouvelle demande d’intervention.' . "\n\n";
 
                     $msg .= 'L’équipe technique BIMP';
-
-//                    mailSyn2($subject, $to, '', $msg);
-                    $bimpMail = new BimpMail($subject, $to, '', $msg);
+                    
+                    $from = (isset($centres[$r['code_centre']]['mail']) ? $centres[$r['code_centre']]['mail'] : '');
+                    
+                    $bimpMail = new BimpMail($subject, $to, $from, $msg);
                     $bimpMail->send();
 
                     BimpCore::addlog('Annulation auto SAV réservé', Bimp_Log::BIMP_LOG_NOTIF, 'bic', null, array(

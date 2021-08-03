@@ -420,9 +420,6 @@ lists:
         checkboxes: 1
         configurable: 1
         filters_panel: default
-        list_filters: 
-            - name: test
-              filter: 1
         bulk_actions:
             - label: supprimer les utilisateurs sélectionnés
               icon: fas_trash-alt

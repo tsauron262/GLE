@@ -320,11 +320,6 @@ class Bimp_Societe extends BimpDolObject
     {
         $buttons = array();
 
-        $buttons[] = array(
-            'label'   => 'Test filters',
-            'onclick' => $this->getJsLoadModalForm('test', 'TEST FILTRES')
-        );
-
         if ($this->isLoaded()) {
             if ($this->can('edit') && $this->isEditable()) {
                 $buttons[] = array(
@@ -2353,31 +2348,6 @@ class Bimp_Societe extends BimpDolObject
             'errors'           => $errors,
             'warnings'         => array()
         ];
-    }
-
-    public function actionTestFilters($data, &$success = '')
-    {
-        $filters = BimpTools::getArrayValueFromPath($data, 'filters', '');
-
-        if (is_string($filters)) {
-            $filters = json_decode($filters, 1);
-
-            if (json_last_error()) {
-                $errors[] = 'Erreur encodage des filtres : ' . json_last_error_msg();
-            }
-        }
-
-        echo '<pre>';
-        print_r($filters);
-        exit;
-
-        $errors = array();
-        $warnings = array();
-
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
     }
 
     // Overrides: 

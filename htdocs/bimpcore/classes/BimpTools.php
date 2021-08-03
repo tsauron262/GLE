@@ -1562,7 +1562,7 @@ class BimpTools
                 return false;
 
             case 'json':
-                case 'object_filters':
+            case 'object_filters':
                 $value = BimpTools::json_decode_array($value, $errors);
                 return is_array($value);
         }
@@ -2701,6 +2701,10 @@ class BimpTools
 
     public static function json_decode_array($json, &$errors = array())
     {
+        if ($json === '') {
+            return array();
+        }
+        
         if (is_array($json)) {
             return $json;
         }

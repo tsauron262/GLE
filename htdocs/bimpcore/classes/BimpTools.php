@@ -2712,7 +2712,7 @@ class BimpTools
         $result = json_decode($json, 1);
 
         if (json_last_error()) {
-            $errors[] = 'Erreur décodage JSON: ' . json_last_error_msg() . ' (' . $json .')';
+            $errors[] = 'Erreur décodage JSON: ' . json_last_error_msg();
             return array();
         }
 

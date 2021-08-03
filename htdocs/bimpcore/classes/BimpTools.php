@@ -2701,7 +2701,7 @@ class BimpTools
 
     public static function json_decode_array($json, &$errors = array())
     {
-        if ($json === '') {
+        if (is_null($json) || $json === '') {
             return array();
         }
         
@@ -2712,7 +2712,7 @@ class BimpTools
         $result = json_decode($json, 1);
 
         if (json_last_error()) {
-            $errors[] = 'Erreur décodage JSON: ' . json_last_error_msg();
+            $errors[] = 'Erreur décodage JSON: ' . json_last_error_msg() . ' (' . $json .')';
             return array();
         }
 

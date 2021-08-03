@@ -332,7 +332,7 @@ class BimpTools
         if (is_null($date) || !$date) {
             return '';
         }
-        
+
         $DT = new DateTime($date);
         return (int) $DT->format('U');
     }
@@ -1444,7 +1444,7 @@ class BimpTools
 
     // Gestion de données:
 
-    public static function checkValueByType($type, &$value)
+    public static function checkValueByType($type, &$value, &$errors = array())
     {
         if (is_null($value)) {
             return true;
@@ -1561,16 +1561,8 @@ class BimpTools
                 return false;
 
             case 'json':
-                if (!is_array($value)) {
-                    if (is_string($value)) {
-                        $value = json_decode($value, true);
-                    } elseif (!empty($value)) {
-                        $value = array($value);
-                    }
-                    if (empty($value)) {
-                        $value = array();
-                    }
-                }
+                case 'object_filters':
+                $value = BimpTools::json_decode_array($value, $errors);
                 return is_array($value);
         }
         return true;
@@ -1786,9 +1778,9 @@ class BimpTools
 
     public function printDate($date, $balise = "span", $class = '', $format = 'd/m/Y H:i:s', $format_mini = 'd / m / Y')
     {
-        if($date == '')
+        if ($date == '')
             return '';
-        
+
         if (is_string($date) && stripos($date, '-') > 0) {
             $date = new DateTime($date);
         }
@@ -2706,13 +2698,27 @@ class BimpTools
         return BimpCache::getSocieteCommerciauxObjectsList($socid);
     }
 
-    public static function json_decode_array($json)
+    public static function json_decode_array($json, &$errors = array())
     {
-        $result = json_decode($json);
-        if($result == '')
+        if (is_array($json)) {
+            return $json;
+        }
+
+        $result = json_decode($json, 1);
+
+        if (json_last_error()) {
+            $errors[] = 'Erreur décodage JSON: ' . json_last_error_msg();
             return array();
-        if (!is_array($result))
+        }
+
+        if ($result == '') {
+            return array();
+        }
+
+        if (!is_array($result)) {
             $result = array($result);
+        }
+
         return $result;
     }
 
@@ -2752,7 +2758,7 @@ class BimpTools
 
         if (!is_dir($dir)) {
             $err = BimpTools::makeDirectories($dir);
-            
+
             if ($err) {
                 return false;
             }

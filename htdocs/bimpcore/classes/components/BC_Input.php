@@ -17,6 +17,8 @@ class BC_Input extends BimpComponent
     public $extraData = array();
     public $name_prefix = '';
     public $display_card_mode = 'none'; // hint / visible
+    protected $input_extra_classes = array();
+    protected $input_extra_data = array();
     public static $type_params_def = array(
         'text'                        => array(
             'values'       => array('data_type' => 'array', 'compile' => true, 'default' => array()),
@@ -126,6 +128,11 @@ class BC_Input extends BimpComponent
             'card'            => array('default', ''),
             'max_results'     => array('data_type' => 'int', 'default' => 200),
             'display_results' => array('data_type' => 'bool', 'default' => 1)
+        ),
+        'object_filters'              => array(
+            'obj_input_name' => array('default' => ''),
+            'obj_module'     => array('default' => ''),
+            'obj_name'       => array('default' => '')
         )
     );
 
@@ -195,6 +202,7 @@ class BC_Input extends BimpComponent
                     case 'date':
                     case 'datetime':
                     case 'password':
+                    case 'object_filters':
                         $this->params['type'] = $this->data_type;
                         break;
 
@@ -240,10 +248,22 @@ class BC_Input extends BimpComponent
             }
         }
 
+        // Ajustement finaux: 
         switch ($this->params['type']) {
             case 'check_list':
                 if (is_string($this->value) && preg_match('/^\[.*\]$/', $this->value)) {
                     $this->value = json_decode($this->value, 1);
+                }
+                break;
+
+            case 'object_filters':
+                if (!$this->params['obj_input_name']) {
+                    if (!$this->params['obj_module']) {
+                        $this->params['obj_module'] = BimpTools::getArrayValueFromPath($this->field_params, 'obj_module', '');
+                    }
+                    if (!$this->params['obj_name']) {
+                        $this->params['obj_name'] = BimpTools::getArrayValueFromPath($this->field_params, 'obj_name', '');
+                    }
                 }
                 break;
         }
@@ -259,6 +279,16 @@ class BC_Input extends BimpComponent
             $this->input_id .= '_' . $this->object->id;
         }
         $this->input_id .= '_' . $prefix . $this->input_name;
+    }
+
+    public function addInputExtraClass($class)
+    {
+        $this->input_extra_classes[] = $class;
+    }
+
+    public function addInputExtraData($data_name, $data_value)
+    {
+        $this->input_extra_data[$data_name] = $data_value;
     }
 
     public function getOptions()
@@ -461,6 +491,12 @@ class BC_Input extends BimpComponent
                 $options['include_empty'] = isset($this->params['include_empty']) ? $this->params['include_empty'] : 0;
                 $options['has_commissions_only'] = isset($this->params['has_commissions_only']) ? $this->params['has_commissions_only'] : 0;
                 break;
+
+            case 'object_filters':
+                $options['obj_input_name'] = isset($this->params['obj_input_name']) ? $this->params['obj_input_name'] : '';
+                $options['obj_module'] = isset($this->params['obj_module']) ? $this->params['obj_module'] : '';
+                $options['obj_name'] = isset($this->params['obj_input_name']) ? $this->params['obj_name'] : '';
+                break;
         }
 
         return $options;
@@ -488,7 +524,7 @@ class BC_Input extends BimpComponent
         $input_value = $this->value;
 
         if (is_array($input_value)) {
-            if ($this->data_type === 'json') {
+            if (in_array($this->data_type, array('json', 'object_filters'))) {
                 $input_value = json_encode($input_value);
             } else {
                 $input_value = implode(',', $input_value);
@@ -498,7 +534,7 @@ class BC_Input extends BimpComponent
         if (is_null($this->new_value)) {
             $this->new_value = $input_value;
         } elseif (is_array($this->new_value)) {
-            if ($this->data_type === 'json') {
+            if (in_array($this->data_type, array('json', 'object_filters'))) {
                 $this->new_value = json_encode($this->new_value);
             } else {
                 $this->new_value = implode(',', $this->new_value);
@@ -541,6 +577,24 @@ class BC_Input extends BimpComponent
                 $options['addon_left'] = $this->params['addon_left']['text'];
             } elseif (isset($this->params['addon_left']['icon'])) {
                 $options['addon_left'] = '<i class="fa fa-' . $this->params['addon_left']['icon'] . '"></i>';
+            }
+        }
+
+        if (!empty($this->input_extra_classes)) {
+            if (!isset($options['extra_class'])) {
+                $options['extra_class'] = '';
+            }
+
+            $options['extra_class'] = ($options['extra_class'] ? ' ' : implode(' ', $this->input_extra_classes));
+        }
+
+        if (!empty($this->input_extra_data)) {
+            if (!isset($options['data'])) {
+                $options['data'] = array();
+            }
+
+            foreach ($this->input_extra_data as $data_name => $data_value) {
+                $options['data'][$data_name] = $data_value;
             }
         }
 

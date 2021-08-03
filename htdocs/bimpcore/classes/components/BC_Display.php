@@ -20,28 +20,29 @@ class BC_Display extends BimpComponent
         'H:i'   => 'H:min'
     );
     public static $types = array(
-        'value'       => 'Valeur brute',
-        'syntaxe'     => 'Syntaxe personnalisée',
-        'callback'    => 'Affichage personnalisé',
-        'array_value' => 'Valeur prédéfinie',
-        'int'         => 'Nombre entier',
-        'decimal'     => 'Nombre décimal',
-        'percent'     => 'Pourcentage',
-        'money'       => 'Valeur monétaire',
-        'password'    => 'Mot de passe',
-        'date'        => 'Date',
-        'time'        => 'Heure',
-        'datetime'    => 'Date et heure',
-        'timer'       => 'Durée',
-        'yes_no'      => 'OUI/NON',
-        'check'       => 'OUI/NON (icônes)',
-        'ref'         => 'Reférence objet',
-        'nom'         => 'Nom objet',
-        'ref_nom'     => 'Référence et nom objet',
-        'nom_url'     => 'Lien objet',
-        'card'        => 'Mini-fiche objet',
-        'color'       => 'color',
-        'json'        => 'Ensemble de sous-données'
+        'value'          => 'Valeur brute',
+        'syntaxe'        => 'Syntaxe personnalisée',
+        'callback'       => 'Affichage personnalisé',
+        'array_value'    => 'Valeur prédéfinie',
+        'int'            => 'Nombre entier',
+        'decimal'        => 'Nombre décimal',
+        'percent'        => 'Pourcentage',
+        'money'          => 'Valeur monétaire',
+        'password'       => 'Mot de passe',
+        'date'           => 'Date',
+        'time'           => 'Heure',
+        'datetime'       => 'Date et heure',
+        'timer'          => 'Durée',
+        'yes_no'         => 'OUI/NON',
+        'check'          => 'OUI/NON (icônes)',
+        'ref'            => 'Reférence objet',
+        'nom'            => 'Nom objet',
+        'ref_nom'        => 'Référence et nom objet',
+        'nom_url'        => 'Lien objet',
+        'card'           => 'Mini-fiche objet',
+        'color'          => 'color',
+        'json'           => 'Ensemble de sous-données',
+        'object_filters' => 'Filtres objet'
     );
     public static $types_per_data_types = array(
         'values'     => array('array_value'/* , 'syntaxe' */),
@@ -284,7 +285,8 @@ class BC_Display extends BimpComponent
                             case 'money':
                             case 'percent':
                             case 'items_list':
-                                $type = $bc_field->params ['type'];
+                            case 'object_filters':
+                                $type = $bc_field->params['type'];
                                 break;
                         }
                     }
@@ -1097,7 +1099,7 @@ class BC_Display extends BimpComponent
 
                             case 'card':
                                 $card_name = BimpTools::getArrayValueFromPath($this->params, 'card', 'default');
-                                $with_buttons = BimpTools::getArrayValueFromPath($this->params, 'view_btn', 1);                                
+                                $with_buttons = BimpTools::getArrayValueFromPath($this->params, 'view_btn', 1);
                                 $html .= $collection->getCardHtml($this->value, $card_name, $with_buttons);
                                 break;
                         }
@@ -1164,7 +1166,7 @@ class BC_Display extends BimpComponent
                             case 'card':
                                 $card_name = BimpTools::getArrayValueFromPath($this->params, 'crad', 'default');
                                 $with_buttons = BimpTools::getArrayValueFromPath($this->params, 'biew_btn', 1);
-                                
+
                                 if (is_a($instance, 'BimpObject')) {
                                     $html .= BimpCache::getBimpObjectCardHtml($instance, $card_name, $with_buttons);
                                 } else {
@@ -1198,6 +1200,30 @@ class BC_Display extends BimpComponent
                             ));
                         } else {
                             $html .= (string) $this->value;
+                        }
+                    }
+                    break;
+
+                case 'object_filters':
+                    $json_errors = array();
+                    $values = BimpTools::json_decode_array($this->value, $json_errors);
+
+                    if (!empty($json_errors)) {
+                        $html .= BimpRender::renderAlerts(BimpTools::getMsgFromArray($json_errors));
+                    } elseif (!empty($values)) {
+                        $module = BimpTools::getArrayValueFromPath($this->field_params, 'obj_module', '');
+                        $object_name = BimpTools::getArrayValueFromPath($this->field_params, 'obj_name', '');
+
+                        if (!$module || !$object_name) {
+                            $html .= BimpRender::renderAlerts('Type d\'objet absent');
+                        } else {
+                            $object = BimpObject::getInstance($module, $object_name);
+
+                            $bc_panel = new BC_FiltersPanel($object);
+                            $bc_panel->setFilters($values);
+                            $html .= '<div class="obj_filters_input_values">';
+                            $html .= $bc_panel->renderActiveFilters(true, true, 'field_display');
+                            $html .= '</div>';
                         }
                     }
                     break;

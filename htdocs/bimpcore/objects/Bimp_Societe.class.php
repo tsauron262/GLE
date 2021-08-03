@@ -85,27 +85,26 @@ class Bimp_Societe extends BimpDolObject
         switch ($field_name) {
             case 'outstanding_limit':
                 return ($user->rights->bimpcommercial->admin_financier ? 1 : 0);
-                
+
             case 'outstanding_limit_credit_safe':
                 return 0;
-                
+
             case 'solvabilite_status':
-                return ($user->admin || 
-                    $user->rights->bimpcommercial->gestion_recouvrement || 
-                    $user->rights->bimpcommercial->admin_recouvrement
-                    ? 1 : 0);
-                
+                return ($user->admin ||
+                        $user->rights->bimpcommercial->gestion_recouvrement ||
+                        $user->rights->bimpcommercial->admin_recouvrement ? 1 : 0);
+
             case 'status':
                 return (($user->admin || $user->rights->bimpcommercial->admin_recouvrement) ? 1 : 0);
 
             case 'commerciaux':
                 if ($user->rights->bimpcommercial->commerciauxToSoc)
                     return 1;
-                
+
                 $comm = $this->getCommercial(false);
                 if (!is_object($comm) || $comm->id == $user->id)
                     return 1;
-                
+
                 return 0;
 
             case 'relances_actives':
@@ -320,6 +319,11 @@ class Bimp_Societe extends BimpDolObject
     public function getActionsButtons()
     {
         $buttons = array();
+
+        $buttons[] = array(
+            'label'   => 'Test filters',
+            'onclick' => $this->getJsLoadModalForm('test', 'TEST FILTRES')
+        );
 
         if ($this->isLoaded()) {
             if ($this->can('edit') && $this->isEditable()) {
@@ -1864,7 +1868,7 @@ class Bimp_Societe extends BimpDolObject
                                 $note .= "
 " . $comment;
                     }
-                    
+
                     $data = array(
                         'siren'             => $siren,
                         'siret'             => $siret,
@@ -2332,6 +2336,31 @@ class Bimp_Societe extends BimpDolObject
             'errors'           => $errors,
             'warnings'         => array()
         ];
+    }
+
+    public function actionTestFilters($data, &$success = '')
+    {
+        $filters = BimpTools::getArrayValueFromPath($data, 'filters', '');
+
+        if (is_string($filters)) {
+            $filters = json_decode($filters, 1);
+
+            if (json_last_error()) {
+                $errors[] = 'Erreur encodage des filtres : ' . json_last_error_msg();
+            }
+        }
+
+        echo '<pre>';
+        print_r($filters);
+        exit;
+
+        $errors = array();
+        $warnings = array();
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 
     // Overrides: 

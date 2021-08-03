@@ -12,7 +12,7 @@ class BC_VenteReturn extends BimpObject
         self::TYPE_RACHAT => 'Rachat'
     );
 
-    public function getLabel($with_type = false)
+    public function getReturnLabel($with_type = false)
     {
         $label = '';
 

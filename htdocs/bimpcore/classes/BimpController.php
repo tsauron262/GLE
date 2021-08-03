@@ -941,6 +941,7 @@ class BimpController
     protected function ajaxProcessSaveObjectField()
     {
         $errors = array();
+        $warnings = array();
         $success = '';
 
         $id_object = BimpTools::getValue('id_object', null);
@@ -973,7 +974,7 @@ class BimpController
                 $errors = $object->set($field, $value);
 
                 if (!count($errors)) {
-                    $errors = $object->update();
+                    $errors = $object->update($warnings);
                     if (!count($errors)) {
                         $field_name = $object->config->get('fields/' . $field . '/label', $field);
                         $success = 'Mise à jour du champ "' . $field_name . '" pour ' . $object->getLabel('the') . ' ' . $object->getRef() . ' effectuée avec succès';
@@ -984,6 +985,7 @@ class BimpController
 
         return array(
             'errors'      => $errors,
+            'warnings'    => $warnings,
             'success'     => $success,
             'module'      => $module,
             'object_name' => $object_name,
@@ -1762,6 +1764,122 @@ class BimpController
             'object_name' => $object_name,
             'id_object'   => $id_object,
             'field_name'  => $field_name,
+            'request_id'  => BimpTools::getValue('request_id', 0)
+        );
+    }
+
+    protected function ajaxProcessGetFiltersInputAddFiltersInput()
+    {
+        $errors = array();
+        $html = '';
+
+        $module = BimpTools::getValue('module', '');
+        $object_name = BimpTools::getValue('object_name', '');
+
+        if ($module && $object_name) {
+            $params = array();
+
+            $obj = BimpObject::getInstance($module, $object_name);
+            $child_name = BimpTools::getValue('child_name', '');
+
+            if ($child_name) {
+                $child = $obj->getChildObject($child_name);
+
+                if (!is_a($child, 'BimpObject')) {
+                    $html .= BimpRender::renderAlerts('L\'objet lié "' . BimpTools::getValue('object_label', $child_name) . '" n\'existe pas pour les ' . $obj->getLabel('name_plur'));
+                } else {
+                    $params['child_name'] = $child_name;
+                    $params['object_label'] = BimpTools::getValue('object_label', '');
+                    $params['fields_prefixe'] = BimpTools::getValue('fields_prefixe', '');
+
+                    $html .= $child->renderFiltersSelect($params);
+                }
+            } else {
+                $html .= $obj->renderFiltersSelect($params);
+            }
+        } else {
+            $errors[] = 'Type d\'objet absent';
+        }
+
+        return array(
+            'errors'     => $errors,
+            'html'       => $html,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        );
+    }
+
+    protected function ajaxProcessGetFiltersInputAddFilterForm()
+    {
+        $errors = array();
+        $html = '';
+
+        $module = BimpTools::getValue('module', '');
+        $object_name = BimpTools::getValue('object_name', '');
+        $filter = BimpTools::getValue('filter', '');
+
+        if ($module && $object_name) {
+            if ($filter) {
+                $obj = BimpObject::getInstance($module, $object_name);
+
+                $bc_filter = new BC_Filter($obj, $filter, '');
+                if ($bc_filter->params['type'] === 'check_list') {
+                    $bc_filter->params['type'] = 'value';
+                }
+
+                if (count($bc_filter->errors)) {
+                    $errors = $bc_filter->errors;
+                } else {
+                    $title = $bc_filter->getParam('label', $bc_filter->filter_name) . '<br/>';
+                    $sub_title = BC_Filter::getFilterTitle($obj, $filter);
+                    if (!$sub_title) {
+                        $sub_title = str_replace(':', ' > ', $filter);
+                    }
+                    $title .= '<span class="smallInfo" style="font-weight: normal">' . $sub_title . '</span>';
+
+                    $html .= '<div class="bimp_filter_input_container">';
+                    $html .= $bc_filter->renderHtml('filters_input');
+                    $html .= '</div>';
+
+                    $html = BimpRender::renderPanel($title, $html, '', array(
+                                'foldable' => false,
+                                'type'     => 'default'
+                    ));
+                }
+            } else {
+                $errors[] = 'Nom du champ absent';
+            }
+        } else {
+            $errors[] = 'Type d\'objet absent';
+        }
+
+        return array(
+            'errors'     => $errors,
+            'html'       => $html,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        );
+    }
+
+    protected function ajaxProcessGetFiltersInputValuesHtml()
+    {
+        $errors = array();
+        $html = '';
+
+        $module = BimpTools::getValue('module', '');
+        $object_name = BimpTools::getValue('object_name', '');
+        $filters = BimpTools::getValue('filters', array());
+
+        BimpTools::json_decode_array($filters, $errors);
+
+        if ($module && $object_name) {
+            $html = BimpInput::renderFiltersInputValues($module, $object_name, $filters, true);
+        } else {
+            $errors[] = 'Type d\'objet absent';
+        }
+
+        return array(
+            'errors'      => $errors,
+            'html'        => $html,
+            'values_json' => json_encode($filters),
             'request_id'  => BimpTools::getValue('request_id', 0)
         );
     }

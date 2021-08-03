@@ -226,7 +226,7 @@ class BC_Vente extends BimpObject
 
             $returns[] = array(
                 'id_return'     => (int) $return->id,
-                'label'         => $return->getLabel(true),
+                'label'         => $return->getReturnLabel(true),
                 'qty'           => $qty,
                 'unit_price'    => BimpTools::displayMoneyValue($price_ttc, 'EUR'),
                 'unit_price_ht' => BimpTools::displayMoneyValue((float) $return->getData('unit_price_tax_ex'), 'EUR'),

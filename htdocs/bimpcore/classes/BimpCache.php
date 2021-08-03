@@ -858,7 +858,11 @@ class BimpCache
                         if (preg_match('/^(.+)\.yml$/', $objFile, $matches)) {
                             $object_name = $matches[1];
                             $instance = BimpObject::getInstance($f, $object_name);
-                            if (is_a($instance, 'BimpObject') && is_a($instance, $object_name)) {
+                            if (is_a($instance, 'BimpObject')) {
+                                if ($instance->getConf('abstract', 0, false, 'bool')) {
+                                    continue;
+                                }
+                                
                                 $option = array();
                                 if ($with_icons && (string) $instance->params['icon']) {
                                     $option['icon'] = $instance->params['icon'];

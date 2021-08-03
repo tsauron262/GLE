@@ -465,6 +465,11 @@ class BS_Ticket extends BimpObject
         return DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=tickets';
     }
 
+    public function getRefProperty()
+    {
+        return 'ticket_number';
+    }
+
     // Getters données:
 
     public function getPostIdClient()
@@ -916,7 +921,7 @@ class BS_Ticket extends BimpObject
     {
         global $userClient, $user;
         $isPublic = BimpCore::isContextPublic();
-        
+
         $errors = array();
 
         if ($isPublic) {

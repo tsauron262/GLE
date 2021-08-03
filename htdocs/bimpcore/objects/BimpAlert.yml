@@ -3,7 +3,7 @@ common_fields: 0
 
 
 labels: 
-    name: alert
+    name: alerte
     is_female: 1
     
     

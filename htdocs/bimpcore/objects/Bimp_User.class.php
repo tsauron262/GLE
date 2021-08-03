@@ -211,13 +211,6 @@ class Bimp_User extends BimpObject
         return $buttons;
     }
 
-    public function getActionsButtons()
-    {
-        $buttons = array();
-
-        return $buttons;
-    }
-
     // Affichage: 
 
     public function displayCountry()
@@ -429,14 +422,14 @@ class Bimp_User extends BimpObject
                 'ajax'          => 1,
                 'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#lists_configs_tab .nav_tab_ajax_result\')', array('lists_configs'), array('button' => ''))
             );
-            
+
             $tabs[] = array(
                 'id'            => 'filters_configs_tab',
                 'title'         => 'Configuration des filtres',
                 'ajax'          => 1,
                 'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#filters_configs_tab .nav_tab_ajax_result\')', array('filters_configs'), array('button' => ''))
             );
-            
+
             $tabs[] = array(
                 'id'            => 'lists_filters_tab',
                 'title'         => 'Filtres enregistrés',
@@ -504,11 +497,11 @@ class Bimp_User extends BimpObject
 //                $list->addFieldFilterValue('id_owner', $this->id);
 //                break;
                 return 'Configurations des liste - en cours de développement';
-                
-            case 'filters_configs': 
+
+            case 'filters_configs':
                 return 'Configuration des filtres - en cours de développement';
-                
-            case 'lists_filters': 
+
+            case 'lists_filters':
                 return 'Filtres enregistrés - en cours de développement';
 
             // Onglet "Commission": 
@@ -608,7 +601,7 @@ class Bimp_User extends BimpObject
 
     // Actions: 
 
-    public function actionExportConges($data, &$success)
+    public function actionExportConges($data, &$success = '')
     {
         $errors = array();
         $warnings = array();

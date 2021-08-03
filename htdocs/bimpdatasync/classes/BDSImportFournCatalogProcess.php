@@ -305,7 +305,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                                 (is_null($stock) || (float) $stock === (float) $this->fournPrices[$id_pfp]['stock']) &&
                                 $refFourn == $this->fournPrices[$id_pfp]['ref_fourn']) {
                             // Pas de màj nécessaire: 
-                            $this->Alert('Pas de maj', $this->pfp_instance, $refFourn);
+//                            $this->Alert('Pas de maj', $this->pfp_instance, $refFourn);
                             $this->incIgnored($this->pfp_instance);
                             continue;
                         }
@@ -489,30 +489,34 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
             }
         }
 
-        $tabRef = $this->getPossibleProductsRefs($line);
+        $tabRefs = $this->getPossibleProductsRefs($line);
 
         $tabOk = array();
-        foreach ($tabRef as $ref) {
+        foreach ($tabRefs as $ref) {
             if ($ref) {
-                if (isset($this->refProdToIdProd[$ref]))
+                if (isset($this->refProdToIdProd[$ref])) {
                     $tabOk[] = $this->refProdToIdProd[$ref];
+                }
             }
         }
         if (count($tabOk) == 0 && $line['ean']) {//test avec ean
-            global $db;
-            $sql = $db->query('SELECT rowid FROM llx_product WHERE barcode = "' . $line['ean'] . '"');
-            while ($ln = $db->fetch_object($sql))
+            $rowid = (int) $this->db->getValue('product', 'rowid', 'barcode = "' . $line['ean'] . '"');
+
+            if ($rowid) {
                 $tabOk[] = $ln->rowid;
-            if (count($tabOk) > 0)
-                $this->Info("Code EAN reconnue " . $line['ean'], null, $line['ref_fourn']);
+            }
+
+            if (count($tabOk) > 0) {
+                $this->Info("Code EAN reconnu " . $line['ean'], null, $line['ref_fourn']);
+            }
         }
 
 
-        if (count($tabOk) == 1)
+        if (count($tabOk) == 1) {
             return $tabOk[0];
-
-        elseif (count($tabOk) > 1)
-            $this->Alert("Plusieurs résultats côté BIMP pour les refs : " . print_r($tabRef, 1));
+        } elseif (count($tabOk) > 1) {
+            $this->Alert("Plusieurs résultats côté BIMP pour les refs : " . print_r($tabRefs, 1));
+        }
 
         return 0;
     }
@@ -630,15 +634,16 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
 
         if ($this->updateSql) {
             $this->bimp_product_import_fourn[] = "" . $this->params['id_fourn'] . ", '" . $refLdlc . "','" . $codeLdlc . "','" . $pu_ht . "','" . $tva_tx . "','" . $pa_ht . "','" . $marque . "','" . $lib . "','" . $refFabriquant . "','" . $data . "'";
+            $this->incCreated($this->prod_import_instance);
 //            if ($this->db->db->query("INSERT INTO `" . MAIN_DB_PREFIX . "bimp_product_import_fourn`(id_fourn, `refLdLC`, `codeLdlc`, `pu_ht`, `tva_tx`, `pa_ht`, `marque`, `libelle`, `refFabriquant`, `data`) "
 //                            . "VALUES ()") > 0) {
 //                $this->incCreated($this->prod_import_instance);
 //                $this->debug_content .= 'Ajout import prod OK<br/>';
 //                return;
 //            }
+        } else {
+            $this->incIgnored($this->prod_import_instance);
         }
-
-        $this->incIgnored($this->prod_import_instance);
     }
 
     function majPriceFourn($id, $prix, $tva_tx, $ref = null)

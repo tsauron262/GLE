@@ -530,7 +530,6 @@ class BIC_UserClient extends BimpObject
 
         $subject = 'Espace client BIMP - Changement de votre mot de passe';
 
-//        mailSyn2($subject, $this->getData('email'), '', $msg);
         $bimpMail = new BimpMail($subject, $this->getData('email'), '', $msg);
 
         if ($bimpMail->send($errors)) {

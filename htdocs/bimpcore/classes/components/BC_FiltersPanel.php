@@ -78,6 +78,7 @@ class BC_FiltersPanel extends BC_Panel
         $this->filters = array();
 
         foreach ($filters as $filter_name => $filter) {
+
             $filter_name = str_replace('___', ':', $filter_name);
             $this->filters[$filter_name] = $filter;
         }
@@ -371,7 +372,7 @@ class BC_FiltersPanel extends BC_Panel
         return $html;
     }
 
-    public function renderActiveFilters($content_only = false, $remove_buttons = true)
+    public function renderActiveFilters($content_only = false, $remove_buttons = true, $context = 'filters_panel')
     {
         $html = '';
 
@@ -386,15 +387,29 @@ class BC_FiltersPanel extends BC_Panel
                             $label = $value;
                         }
 
-                        $values_html .= '<div class="filter_value">';
+                        if (is_array($value)) {
+                            $value_str = htmlentities(json_encode($value));
+                        } else {
+                            $value_str = htmlentities($value);
+                        }
+
+                        $onclick = '';
 
                         if ($remove_buttons) {
-                            if (is_array($value)) {
-                                $value_str = htmlentities(json_encode($value));
-                            } else {
-                                $value_str = htmlentities($value);
+                            switch ($context) {
+                                case 'filters_panel':
+                                    $onclick = 'removeBimpFilterValueFromActiveFilters($(this), \'' . $this->identifier . '\', \'' . $filter_name . '\', \'' . $value_str . '\', false)';
+                                    break;
+
+                                case 'filters_input':
+                                    $onclick = 'removeFiltersInputFilter($(this))';
+                                    break;
                             }
-                            $onclick = 'removeBimpFilterValueFromActiveFilters($(this), \'' . $this->identifier . '\', \'' . $filter_name . '\', \'' . $value_str . '\', false)';
+                        }
+
+                        $values_html .= '<div class="filter_value' . (!$onclick ? ' no-buttons' : '') . '"' . ($context === 'filters_input' ? ' data-filter="' . $value_str . '"' : '') . '>';
+
+                        if ($onclick) {
                             $values_html .= '<span class="remove_btn" onclick="' . $onclick . '">';
                             $values_html .= BimpRender::renderIcon('fas_times');
                             $values_html .= '</span>';
@@ -417,15 +432,29 @@ class BC_FiltersPanel extends BC_Panel
                             $label = $value;
                         }
 
-                        $excluded_values_html .= '<div class="filter_value">';
+                        if (is_array($value)) {
+                            $value_str = htmlentities(json_encode($value));
+                        } else {
+                            $value_str = htmlentities($value);
+                        }
+
+                        $onclick = '';
 
                         if ($remove_buttons) {
-                            if (is_array($value)) {
-                                $value_str = htmlentities(json_encode($value));
-                            } else {
-                                $value_str = htmlentities($value);
+                            switch ($context) {
+                                case 'filters_panel':
+                                    $onclick = 'removeBimpFilterValueFromActiveFilters($(this), \'' . $this->identifier . '\', \'' . $filter_name . '\', \'' . $value_str . '\', true)';
+                                    break;
+
+                                case 'filters_input':
+                                    $onclick = 'removeFiltersInputFilter($(this))';
+                                    break;
                             }
-                            $onclick = 'removeBimpFilterValueFromActiveFilters($(this), \'' . $this->identifier . '\', \'' . $filter_name . '\', \'' . $value_str . '\', true)';
+                        }
+
+                        $excluded_values_html .= '<div class="filter_value' . (!$onclick ? ' no-buttons' : '') . '"' . ($context === 'filters_input' ? ' data-filter="' . $value_str . '"' : '') . '>';
+
+                        if ($onclick) {
                             $excluded_values_html .= '<span class="remove_btn" onclick="' . $onclick . '">';
                             $excluded_values_html .= BimpRender::renderIcon('fas_times');
                             $excluded_values_html .= '</span>';
@@ -441,9 +470,10 @@ class BC_FiltersPanel extends BC_Panel
                 }
 
                 if ($filters_html) {
-                    $html .= '<div class="filter_active_values">';
+                    $html .= '<div class="filter_active_values" data-filter_name="' . $filter_name . '">';
                     $html .= '<div class="filter_label">';
-                    $html .= $bc_filter->params['label'];
+                    $err = array();
+                    $html .= $bc_filter->getFilterTitle($bc_filter->base_object, $bc_filter->name, $err, false);
                     $html .= '</div>';
 
                     $html .= $filters_html;
@@ -460,12 +490,12 @@ class BC_FiltersPanel extends BC_Panel
     }
 
     // Méthodes statiques: 
-    
+
     public static function getObjectListIdsFromFilters($object, $filters_array)
     {
         $filters_panel = new BC_FiltersPanel($object);
         $filters_panel->setFilters($filters_array);
-        
+
         $filters = array();
         $joins = array();
 
@@ -473,15 +503,15 @@ class BC_FiltersPanel extends BC_Panel
 
         $primary = $object->getPrimary();
         $rows = $object->getList($filters, null, null, $primary, 'desc', 'array', array($primary), $joins);
-        
+
         $list = array();
-        
+
         if (is_array($rows)) {
             foreach ($rows as $r) {
                 $list[] = $r[$primary];
             }
         }
-        
+
         return $list;
     }
 }

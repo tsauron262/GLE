@@ -39,12 +39,17 @@ class BimpMailCore
             } elseif (isset($conf->global->MAIN_INFO_SOCIETE_MAIL) && $conf->global->MAIN_INFO_SOCIETE_MAIL != '') {
                 $from .= $conf->global->MAIN_INFO_SOCIETE_MAIL;
             } else {
-                $from .= 'admin@' . strtolower(str_replace(" ", "", $conf->global->MAIN_INFO_SOCIETE_NOM)) . '.fr';
+                $from .= 'no-reply@' . strtolower(str_replace(" ", "", $conf->global->MAIN_INFO_SOCIETE_NOM)) . '.fr';
+                if (!$reply_to) {
+                    $reply_to = 'none';
+                }
             }
 
             $from .= '>';
 
-            if (!$reply_to) {
+            if ($reply_to === 'none') {
+                $reply_to = '';
+            } elseif (!$reply_to) {
                 if (BimpCore::isContextPublic()) {
                     $reply_to = BimpCore::getConf('public_default_reply_to_email', '');
                 } else {

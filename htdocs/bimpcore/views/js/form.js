@@ -19,7 +19,7 @@ function addInputEvent(form_id, input_name, event, callback) {
 
 // Enregistrements ajax des objets:
 
-function saveObjectFromForm(form_id, $button, successCallback, on_save) {
+function saveObjectFromForm(form_id, $button, successCallback, on_save, on_submit) {
     var $resultContainer = $('#' + form_id + '_result');
     var $form = $('#' + form_id);
 
@@ -37,6 +37,12 @@ function saveObjectFromForm(form_id, $button, successCallback, on_save) {
     if (!$formular.length) {
         bimp_msg('Erreur. Formulaire absent ou invalide', 'danger');
         return;
+    }
+    
+    if (typeof(on_submit) === 'function') {
+        if (!on_submit($form)) {
+            return;
+        }
     }
 
     prepareFormSubmit($form);
@@ -1847,34 +1853,53 @@ function calcTotalCompteurCaisse($container) {
     $container.find('.compteur_caisse_total_input').val(total).change();
 }
 
-function selectChecklistItem($container, label) {
+function selectChecklistItem($container, value, value_type) {
     if (!$.isOk($container)) {
         bimp_msg('Erreur: liste de choix non trouvée', 'danger');
         return;
     }
 
+    if (typeof (value_type) === 'undefined') {
+        value_type = 'label';
+    }
     var check = false;
 
     $container.find('.check_list_item').each(function () {
-        var $item = $(this);
-        if ($item.find('label').text().toLowerCase().indexOf(label.toLowerCase()) !== -1 || ("S" + $item.find('label').text()).toLowerCase().indexOf(label.toLowerCase()) !== -1) {
-            if (!check) {
-                var $cb = $item.find('input[type=checkbox]');
-                if ($cb.length) {
-                    if ($cb.prop('checked')) {
-                        bimp_msg('L\'option "' + label + '" est déjà sélectionnée', 'warning', null, true);
-                    } else {
-                        $cb.prop('checked', true);
-                        $container.children('.check_list_search_input').children('input').change();
+        if (!check) {
+            var $item = $(this);
+            var $cb = null;
+
+            switch (value_type) {
+                case 'label':
+                    var label = value;
+                    if ($item.find('label').text().toLowerCase().indexOf(label.toLowerCase()) !== -1 || ("S" + $item.find('label').text()).toLowerCase().indexOf(label.toLowerCase()) !== -1) {
+                        $cb = $item.find('input.check_list_item_input');
                     }
+                    break;
+
+                case 'value':
+                    $cb = $item.find('input.check_list_item_input');
+
+                    if (!$cb.length || $cb.val() != value) {
+                        $cb = null;
+                    }
+                    break;
+            }
+
+            if ($.isOk($cb)) {
+                if ($cb.prop('checked')) {
+                    bimp_msg('L\'option "' + label + '" est déjà sélectionnée', 'warning', null, true);
+                } else {
+                    $cb.prop('checked', true);
+                    $container.children('.check_list_search_input').children('input').change();
+                    check = true;
                 }
-                check = true;
             }
         }
     });
 
     if (!check) {
-        bimp_msg('Option "' + label + '" non trouvée', 'warning', null, true);
+        bimp_msg('Option "' + value + '" non trouvée', 'warning', null, true);
     }
 }
 
@@ -1892,25 +1917,46 @@ function onChecklistSearchInputChange($input) {
                 }
                 $container.findParentByClass('check_list_container').find('.check_list_item').each(function () {
                     if (!$(this).children('input[type=checkbox]').prop('checked')) {
+                        var choice = {
+                            'label': '',
+                            'value': ''
+                        };
+
                         var text = $(this).children('label').text();
                         if (text) {
                             if (regex1.test(text)) {
-                                choices.push(text.replace(regex1, '$1<strong>$2</strong>$3'));
+                                choice.label = text.replace(regex1, '$1<strong>$2</strong>$3');
                             } else if (regex2 && regex2.test(text)) {
-                                choices.push(text.replace(regex2, '$1<strong>$2</strong>$3'));
+                                choice.label = text.replace(regex2, '$1<strong>$2</strong>$3');
                             }
+
+                            var $item_input = $(this).find('input.check_list_item_input');
+                            if ($item_input.length) {
+                                choice.value = $item_input.val();
+                            }
+                        }
+
+                        if (choice.label || choice.value) {
+                            choices.push(choice);
                         }
                     }
                 });
                 if (choices.length) {
                     displayInputChoices($input, choices, function ($btn) {
                         if ($.isOk($btn)) {
-                            var label = $btn.html();
-                            label = label.replace('<strong>', '');
-                            label = label.replace('</strong>', '');
+                            var value = $btn.data('item_value');
+                            var value_type = 'value';
+
+                            if (typeof (value) === 'undefined') {
+                                value = $btn.html();
+                                value = value.replace('<strong>', '');
+                                value = value.replace('</strong>', '');
+                                value_type = 'label';
+                            }
+
                             var $checkList = $btn.findParentByClass('check_list_container');
                             $input.addClass('noEnterCheck');
-                            selectChecklistItem($checkList, label);
+                            selectChecklistItem($checkList, value, value_type);
                         }
                     });
                 }
@@ -1937,6 +1983,7 @@ function displayInputChoices($input, choices, onItemSelected) {
             var label = '';
             var data = [];
             var card = '';
+            var value = 'undefined';
 
             if (typeof (choices[i]) === 'string') {
                 label = choices[i];
@@ -1947,6 +1994,9 @@ function displayInputChoices($input, choices, onItemSelected) {
                 }
                 if (typeof (choices[i].card) !== 'undefined') {
                     card = choices[i].card;
+                }
+                if (typeof (choices[i].value) !== 'undefined') {
+                    value = choices[i].value;
                 }
             }
 
@@ -1968,6 +2018,10 @@ function displayInputChoices($input, choices, onItemSelected) {
 
                 for (var name in data) {
                     html += ' data-' + name + '="' + data[name] + '"';
+                }
+
+                if (value !== 'undefined') {
+                    html += ' data-item_value="' + value + '"';
                 }
 
                 html += '>' + label + '</span>';
@@ -2562,6 +2616,30 @@ function onFormLoaded($form) {
                 e.stopPropagation();
             });
         }
+
+        var focus_done = false;
+
+        $form.find('.inputContainer').each(function () {
+            if (!focus_done) {
+                var field_name = $(this).data('field_name');
+                if (field_name) {
+                    var $input = $(this).find('[name="' + field_name + '"]');
+                    if ($input.length) {
+                        var $row = $input.findParentByClass('formRow');
+                        if ($.isOk($row) && $row.css('display') !== 'none') {
+                            var tag = $input.tagName();
+
+                            if (tag === 'textarea' || (tag === 'input' && $input.attr('type') === 'text')) {
+                                $input.focus();
+                                focus_done = true;
+                            } else if (tag !== 'input' || $input.attr('type') !== 'hidden') {
+                                focus_done = true;
+                            }
+                        }
+                    }
+                }
+            }
+        });
     }
 }
 

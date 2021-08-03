@@ -331,6 +331,8 @@ class CMailFile
 			{
 				foreach ($filename_list as $i => $val)
 				{
+                                        if(!is_file($filename_list[$i]))
+                                            BimpCore::addlog ('Fichie rpour mail introuvable '.$filename_list[$i]);
 					$content=file_get_contents($filename_list[$i]);
 					$smtps->setAttachment($content,$mimefilename_list[$i],$mimetype_list[$i]);
 				}

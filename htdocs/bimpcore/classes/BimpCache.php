@@ -2143,20 +2143,26 @@ class BimpCache
         return self::getCacheArray($cache_key, $include_empty);
     }
 
-    public static function getEntrepotsShipTos($include_empty = false)
+    public static function getEntrepotsShipTos($include_empty = false, $default = '53884')
     {
-        if (!isset(self::$cache['entrepots_ship_tos'])) {
-            self::$cache['entrepots_ship_tos'] = array();
+        $key = 'entrepots_ship_tos'.($include_empty?'withempty' : '');
+        if (!isset(self::$cache[$key])) {
+            self::$cache[$key] = array();
 
-            $rows = self::getBdb()->getRows('entrepot', '`ship_to` != \'\' AND `ship_to` IS NOT NULL', null, 'object', array('rowid', 'ship_to'), 'ref', 'asc');
+            if($include_empty)
+                $rows = self::getBdb()->getRows('entrepot', '1', null, 'object', array('rowid', 'ship_to'), 'ref', 'asc');
+            else
+                $rows = self::getBdb()->getRows('entrepot', '`ship_to` != \'\' AND `ship_to` IS NOT NULL', null, 'object', array('rowid', 'ship_to'), 'ref', 'asc');
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
-                    self::$cache['entrepots_ship_tos'][(int) $r->rowid] = $r->ship_to;
+                    $shipTo = $r->ship_to;
+                    if($shipTo == '')
+                        $shipTo = $default;
+                    self::$cache[$key][(int) $r->rowid] = $shipTo;
                 }
             }
         }
-
-        return self::getCacheArray('entrepots_ship_tos', $include_empty);
+        return self::getCacheArray($key, $include_empty);
     }
 
     public static function getCondReglementsArray()

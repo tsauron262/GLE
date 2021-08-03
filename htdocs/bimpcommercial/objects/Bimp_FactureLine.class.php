@@ -116,16 +116,18 @@ class Bimp_FactureLine extends ObjectLine
             $idFiltre = $tabTmp[1];
             if ($idComm > 0 && $idFiltre > 0) {
                 $commission = BimpObject::getInstance('bimpfinanc', 'Bimp_CommissionApporteur', $idComm);
-                $buttons[] = array(
-                    'label'   => 'Supprimer de la commission',
-                    'icon'    => 'fas_trash',
-                    'onclick' => $commission->getJsActionOnclick('delLine', array('idLn' => $this->id, 'idFiltre' => $idFiltre))
-                );
-                $buttons[] = array(
-                    'label'   => 'Changer de la commission',
-                    'icon'    => 'fas_exchange-alt',
-                    'onclick' => $commission->getJsActionOnclick('changeLine', array('idLn' => $this->id, 'idFiltre' => $idFiltre), array('form_name' => 'change'))
-                );
+                if ($commission->getData('status') == 0) {
+                    $buttons[] = array(
+                        'label'   => 'Supprimer de la commission',
+                        'icon'    => 'fas_trash',
+                        'onclick' => $commission->getJsActionOnclick('delLine', array('idLn' => $this->id, 'idFiltre' => $idFiltre))
+                    );
+                    $buttons[] = array(
+                        'label'   => 'Changer de la commission',
+                        'icon'    => 'fas_exchange-alt',
+                        'onclick' => $commission->getJsActionOnclick('changeLine', array('idLn' => $this->id, 'idFiltre' => $idFiltre), array('form_name' => 'change'))
+                    );
+                }
             }
         }
         return $buttons;
@@ -808,9 +810,14 @@ class Bimp_FactureLine extends ObjectLine
         $errors = parent::delete($warnings, $force_delete);
 
         if (!count($errors)) {
+            $prevDeleting = $this->isDeleting;
+            $this->isDeleting = true;
+
             if (BimpObject::objectLoaded($commLine)) {
                 $commLine->onFactureDelete($id_facture);
             }
+
+            $this->isDeleting = $prevDeleting;
         }
 
         return $errors;

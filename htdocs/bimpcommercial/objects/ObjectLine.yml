@@ -883,3 +883,30 @@ stats_lists:
             pu:
             soc:
             collection:
+
+fields_tables: 
+    default: 
+        panel_header: 0
+        rows: 
+            - field: desc
+            - field: id
+            - field: id_obj
+            - field: id_product
+#            - field: id_line
+#            - field: type
+#            - field: id_parent_line
+            - field: linked_id_object
+            - field: remise
+            - field: remise_pa
+            - field: remise_crt
+            - field: remise_crt_percent
+            - field: hide_product_label
+
+views: 
+    default: 
+        modal_format: small
+        rows: 
+            - cols: 
+                - type: fields_table
+                  fields_table: 
+                      name: default

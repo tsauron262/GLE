@@ -764,7 +764,7 @@ class BimpInput
                 break;
 
             case 'timer':
-                $html = self::renderTimerInput($field_name, $value);
+                $html = self::renderTimerInput($field_name, $value, $options);
                 break;
 
             case 'file_upload':
@@ -830,8 +830,14 @@ class BimpInput
         $dt_value = null;
         switch ($type) {
             case 'time':
-                $display_js_format = 'HH:mm:ss';
-                $js_format = 'HH:mm:ss';
+                if (BimpTools::getArrayValueFromPath($options, 'with_secondes', 1)) {
+                    $display_js_format = 'HH:mm:ss';
+                    $js_format = 'HH:mm:ss';
+                } else {
+                    $display_js_format = 'HH:mm';
+                    $js_format = 'HH:mm';
+                }
+
                 $php_format = 'H:i:s';
                 if ($value) {
                     if (preg_match('/^(\d{2}):(\d{2}):?(\d{2})?$/', $value)) {
@@ -852,8 +858,14 @@ class BimpInput
                 break;
 
             case 'datetime':
-                $display_js_format = 'Do MMMM YYYY HH:mm:ss';
-                $js_format = 'YYYY-MM-DD HH:mm:ss';
+                if (BimpTools::getArrayValueFromPath($options, 'with_secondes', 1)) {
+                    $display_js_format = 'Do MMMM YYYY HH:mm';
+                    $js_format = 'YYYY-MM-DD HH:mm';
+                } else {
+                    $display_js_format = 'Do MMMM YYYY HH:mm:ss';
+                    $js_format = 'YYYY-MM-DD HH:mm:ss';
+                }
+
                 $php_format = 'Y-m-d H:i:s';
                 if ($value) {
                     if (preg_match('/^(\d{4})\-(\d{2})\-(\d{2}) (\d{2}):(\d{2}):(\d{2})?$/', $value)) {
@@ -1207,7 +1219,7 @@ class BimpInput
         return $html;
     }
 
-    public static function renderTimerInput($field_name, $value)
+    public static function renderTimerInput($field_name, $value, $options, $input_id = '')
     {
         if (is_null($value)) {
             $value = 0;
@@ -1216,7 +1228,7 @@ class BimpInput
 
         $html = '';
         $html .= '<div class="timer_input">';
-        $html .= '<input type="hidden" name="' . $field_name . '" id="' . $input_id . '" value="' . $value . '"/>';
+        $html .= '<input type="hidden" name="' . $field_name . '"' . ($input_id ? ' id="' . $input_id . '"' : '') . ' value="' . $value . '"/>';
 
         $html .= '<input type="text" class="' . $field_name . '_time_value time_input_value" value="' . (int) $timer['days'] . '" name="' . $field_name . '_days"/>';
         $html .= '<span>j</span>';
@@ -1235,12 +1247,17 @@ class BimpInput
         $html .= '</select>';
         $html .= '<span>min</span>';
 
-        $html .= '<select name="' . $field_name . '_secondes" class="' . $field_name . '_time_value time_input_value no_select2">';
-        for ($i = 0; $i < 60; $i++) {
-            $html .= '<option value="' . $i . '"' . ((int) $i === (int) ($timer['secondes']) ? ' selected' : '') . '>' . $i . '</option>';
+        if (BimpTools::getArrayValueFromPath($options, 'with_secondes', 1)) {
+            $html .= '<select name="' . $field_name . '_secondes" class="' . $field_name . '_time_value time_input_value no_select2">';
+            for ($i = 0; $i < 60; $i++) {
+                $html .= '<option value="' . $i . '"' . ((int) $i === (int) ($timer['secondes']) ? ' selected' : '') . '>' . $i . '</option>';
+            }
+            $html .= '</select>';
+            $html .= '<span>sec</span>';
+        } else {
+            $html .= '<input type="hidden" name="' . $field_name . '_secondes" value="' . (int) $timer['secondes'] . '"/>';
         }
-        $html .= '</select>';
-        $html .= '<span>sec</span>';
+
         $html .= '</div>';
 
         $html .= '<script type="text/javascript">';

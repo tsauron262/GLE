@@ -64,7 +64,7 @@ class BContract_avenant extends BContract_contrat {
         
         foreach($children as $id => $v) {
             $child = $parent->getChildObject('lines', $id);
-            $serials = json_decode($child->getData("serials"));
+            $serials = BimpTools::json_decode_array($child->getData("serials"));
             foreach($serials as $serial) {
                 if(!in_array($serial, $allSerials)) {
                     $allSerials[$serial] = $serial;
@@ -94,6 +94,8 @@ class BContract_avenant extends BContract_contrat {
                         $laLigne->fetch($line->id);
                         if($laLigne->getData('renouvellement') == $parent->getData('current_renouvellement')) {
                             $nbSerial = count(BimpTools::json_decode_array($laLigne->getData('serials')));
+                            if($nbSerial < 1)
+                                $nbSerial = 1;
                             
                             $det->set('id_avenant', $this->id);
                             $det->set('id_line_contrat', $laLigne->id);
@@ -190,7 +192,7 @@ class BContract_avenant extends BContract_contrat {
                     //print_r($list);
                     foreach($list as $nb => $i) {
                         $service = BimpObject::getInstance('bimpcore', 'Bimp_Product', $i['id_serv']);
-                        $qty = count(json_decode($i['serials_in']));
+                        $qty = count(BimpTools::json_decode_array($i['serials_in']));
                         $ligne_de_l_avenant = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_avenantdet', $i['id']);
                         $id_line = $parent->dol_object->addLine(
                                     $service->getData('description'),

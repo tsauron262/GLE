@@ -106,7 +106,7 @@ class savFormController extends BimpPublicController
             if (!is_null($centre)) {
                 $html .= 'notre centre SAV de ' . $centre['town'];
             } else {
-                $html .= 'un de nos centre SAV';
+                $html .= 'un de nos centres SAV';
             }
             $html .= '</h2>';
         }
@@ -207,7 +207,7 @@ class savFormController extends BimpPublicController
                             'custom' => 'LOWER(email) = \'' . strtolower($email) . '\''
                         )
 //                        'email' => $email
-            ), true);
+                            ), true);
 
             if (BimpObject::objectLoaded($userClient)) {
                 $html .= '<h3 style="text-align: center; font-weight: bold" class="info">';
@@ -229,7 +229,7 @@ class savFormController extends BimpPublicController
                 // Recherche d'un contact client:                 
                 $contact = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Contact', array(
                             'email' => $email
-                ), true);
+                                ), true);
 
                 if (BimpObject::objectLoaded($contact)) {
                     $client = $contact->getParentInstance();
@@ -237,7 +237,7 @@ class savFormController extends BimpPublicController
                     // Recheche d'un client: 
                     $client = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Societe', array(
                                 'email' => $email
-                    ), true);
+                                    ), true);
                 }
 
                 if (BimpObject::objectLoaded($client)) {
@@ -1227,9 +1227,24 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                 $html .= '<span class="info">Il n\'y a aucun créneau horaire disponible dans les 7 prochains jours pour ce centre BIMP</span><br/><br/>';
                 $html .= '<p>Vous pouvez toutefois valider ce formulaire et déposer votre matériel quand vous le souhaitez sans rendez-vous</p>';
                 $html .= '</div>';
+
                 $validate_enable = true;
                 $force_validation = 1;
             }
+            
+            if (isset($centres[$code_centre]['id_entrepot']) && (int) $centres[$code_centre]['id_entrepot']) {
+                    $entrepot = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Entrepot', (int) $centres[$code_centre]['id_entrepot']);
+
+                    if (BimpObject::objectLoaded($entrepot)) {
+                        $close_msg = $entrepot->getData('close_msg');
+
+                        if ($close_msg) {
+                            $html .= '<div style="margin: 15px 0">';
+                            $html .= BimpRender::renderAlerts($close_msg, 'warning');
+                            $html .= '</div>';
+                        }
+                    }
+                }
 
             $html .= '<div style="text-align: center; margin: 30px 0">';
 
@@ -1624,7 +1639,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                                             'custom' => 'LOWER(email) = \'' . strtolower($data['client_email']) . '\''
                                         )
 //                                        'email' => $data['client_email']
-                            ), true);
+                                            ), true);
 
                             if (!BimpObject::objectLoaded($userClient)) {
                                 $post_tmp = $_POST;
@@ -1652,7 +1667,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                                                 'email_custom' => array(
                                                     'custom' => 'LOWER(email) = \'' . strtolower($data['client_email']) . '\''
                                                 )
-                                    ), true);
+                                                    ), true);
 
                                     if (!BimpObject::objectLoaded($userClient)) {
                                         $debug .= BimpRender::renderAlerts($uc_errors);

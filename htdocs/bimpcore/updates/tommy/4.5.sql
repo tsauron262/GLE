@@ -7,6 +7,4 @@ CREATE TABLE `llx_bimpcore_alert` (
   `niveau` int(11) NOT NULL,
   `position` int(11) NOT NULL,
   `msg` varchar(200) NOT NULL,
-    PRIMARY KEY (`id_session`)
-);
-
+    PRIMARY KEY (`id`));

@@ -128,7 +128,7 @@ class pdf_contrat_courrier_BIMP_renvois extends ModeleSynopsiscontrat {
 
             if (file_exists($dir)) {   
                 $pdf = "";
-                $nblignes = sizeof($contrat->lignes);
+//                $nblignes = sizeof($contrat->lignes);
                 $pdf = pdf_getInstance($this->format);
                 if (class_exists('TCPDF')) {
                     $pdf->setPrintHeader(false);

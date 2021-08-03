@@ -23,7 +23,6 @@ class BimpAlert extends BimpObject
         if(!BimpTools::getValue('ajax')){
             $objs = BimpCache::getBimpObjectObjects('bimpcore', 'BimpAlert', array('status'=>1), 'position');
             $html = '';
-            echo($_REQUEST['SERVER_NAME']);
             foreach($objs as $alert){
                 if($alert->getData('conditionExec') != '')
                     $exec = 0;
@@ -31,10 +30,12 @@ class BimpAlert extends BimpObject
                     $exec = 1;
                 eval($alert->getData('conditionExec'));
                 if($exec){
-                    if($alert->getData('msg') != '')
-                        $html .= BimpRender::renderAlerts($alert->getData('msg'), self::$niveaux[$alert->getData('niveau')]['classes'][0]);
+                    $msg = $alert->getData('msg');
                     if($alert->getData('execution') != '')
                         $html .= eval($alert->getData('execution'));
+                    if($msg != '')
+                        $html .= BimpRender::renderAlerts($msg, self::$niveaux[$alert->getData('niveau')]['classes'][0]);
+                    
                 }
 
             }

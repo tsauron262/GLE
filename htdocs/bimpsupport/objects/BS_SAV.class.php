@@ -48,11 +48,11 @@ class BS_SAV extends BimpObject
     public static $need_propal_status = array(2, 3, 4, 5, 6, 9);
     public static $propal_reviewable_status = array(0, 1, 2, 3, 4, 6, 7, 9);
     public static $save_options = array(
-        1 => 'Dispose d\'une sauvegarde',
+        1 => 'Ne désire pas de sauvegarde',
         2 => 'Désire une sauvegarde si celle-ci est possible',
-        0 => 'Non applicable',
-        3 => 'Dispose d\'une sauvegarde Time machine',
-        4 => 'Ne dispose pas de sauvegarde et n\'en désire pas'
+        0 => 'Produit non concerné par une sauvegarde',
+//        3 => 'Ne désire pas de sauvegarde (Dispose d\'une sauvegarde Time machine)',
+//        4 => 'Ne désire pas de sauvegarde (Ne dispose pas de sauvegarde et n\'en désire pas)'
     );
     public static $contact_prefs = array(
         3 => 'SMS + E-mail',
@@ -2846,7 +2846,7 @@ class BS_SAV extends BimpObject
                     $files[] = array($fileProp, 'application/pdf', 'PC-' . $ref_propal . '.pdf');
                 }
 
-                if (!in_array($msg_type, array('debDiago', 'debut'))) {
+                if (!in_array($msg_type, array('debDiago', 'debut', 'localise'))) {
                     $fileProp = DOL_DATA_ROOT . "/propale/" . $ref_propal . "/" . $ref_propal . ".pdf";
                     if (is_file($fileProp)) {
                         $files[] = array($fileProp, 'application/pdf', $ref_propal . '.pdf');
@@ -3031,7 +3031,7 @@ class BS_SAV extends BimpObject
                     $mail_msg .= ' est toujours associé à votre compte Apple iCloud.<br/><br/>';
 
                     $mail_msg .= 'Afin que nous puissions procéder à la réparation de votre matériel, <span style="text-decoration: underline">il est nécessaire que celui-ci soit supprimé de votre compte iCloud.</span><br/><br/>';
-                    $mail_msg .= 'Pour se faire, vous pouvez suivre la procédure suivante depuis un navigateur internet : <br/><br/>';
+                    $mail_msg .= 'Pour ce faire, vous pouvez suivre la procédure suivante depuis un navigateur internet : <br/><br/>';
 
                     $mail_msg .= '<ul>';
                     $mail_msg .= '<li>Connectez-vous au site <a href="https://www.icloud.com">www.icloud.com</a></li>';
@@ -4866,6 +4866,9 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             if (isset($data['prestataire_number'])) {
                 $this->set('prestataire_number', $data['prestataire_number']);
             }
+            if (isset($data['symptomes'])) {
+                $this->set('symptomes', $data['symptomes']);
+            }
 
             $up_errors = $this->update($warnings, true);
 
@@ -5426,9 +5429,10 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $msg .= 'Vous pourrez néanmoins accéder à votre <a href="https://www.bimp.fr/espace-client/">espace personnel</a> sur notre site internet «  www.bimp.fr », et si besoin, faire une nouvelle demande d’intervention.' . "\n\n";
 
                     $msg .= 'L’équipe technique BIMP';
-
-//                    mailSyn2($subject, $to, '', $msg);
-                    $bimpMail = new BimpMail($subject, $to, '', $msg);
+                    
+                    $from = (isset($centres[$r['code_centre']]['mail']) ? $centres[$r['code_centre']]['mail'] : '');
+                    
+                    $bimpMail = new BimpMail($subject, $to, $from, $msg);
                     $bimpMail->send();
 
                     BimpCore::addlog('Annulation auto SAV réservé', Bimp_Log::BIMP_LOG_NOTIF, 'bic', null, array(

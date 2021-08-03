@@ -14,13 +14,17 @@ class Bimp_Entrepot extends BimpObject
     public function canCreate()
     {
         global $user;
-
-        return ($user->admin ? 1 : 0);
+        return (isset($user->rights->stock->creer) && $user->rights->stock->creer);
     }
 
     public function canDelete()
     {
-        return $this->canCreate();
+        global $user;
+        return (isset($user->rights->stock->supprimer) && $user->rights->stock->supprimer);
+    }
+    
+    public function iAmAdminRedirect() {
+        return $this->canEdit();
     }
 
     // Getters: 

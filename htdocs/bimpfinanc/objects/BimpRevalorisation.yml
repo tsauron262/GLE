@@ -39,6 +39,16 @@ objects:
             id_object: 
                 field_value: id_user_commission
                 
+    commission_apporteur:
+        relation: hasOne
+        delete: 0
+        instance:
+            bimp_object: 
+                module: bimpfinanc
+                name: Bimp_CommissionApporteur
+            id_object: 
+                field_value: id_commission_apporteur
+                
     entrepot_commission: 
         extends: commission
         instance: 
@@ -72,6 +82,12 @@ fields:
         label: Commission utilisateur
         type: id_object
         object: user_commission
+        default_value: 0
+
+    id_commission_apporteur: 
+        label: Commission apporteur
+        type: id_object
+        object: commission_apporteur
         default_value: 0
         
     id_entrepot_commission: 
@@ -201,6 +217,9 @@ fields_tables:
               display: nom_url
               show: 
                   field_value: id_entrepot_commission
+            - field: id_commission_apporteur
+              show: 
+                  field_value: id_commission_apporteur
             
     elements: 
         title: Eléments liés

@@ -8,6 +8,7 @@ class BimpCore
     private static $context = '';
     private static $max_execution_time = 0;
     private static $memory_limit = 0;
+    private static $logs_extra_data = array();
     public static $files = array(
         'js'  => array(
             '/includes/jquery/plugins/jpicker/jpicker-1.1.6.js',
@@ -42,10 +43,11 @@ class BimpCore
     public static $filesInit = false;
     public static $config = null;
     public static $dev_mails = array(
-        'tommy'   => 'tommy@bimp.fr',
+        'tommy'   => 't.sauron@bimp.fr',
         'florian' => 'f.martinez@bimp.fr',
         'alexis'  => 'al.bernard@bimp.fr',
-        'romain'  => 'r.PELEGRIN@bimp.fr'
+        'romain'  => 'r.PELEGRIN@bimp.fr',
+        'peter'   => 'p.tkatchenko@bimp.fr'
     );
 
     public static function displayHeaderFiles($echo = true)
@@ -428,10 +430,16 @@ class BimpCore
         return (self::getContext() != 'public' ? 1 : 0);
     }
 
-    // Gestion des logs: 
+    // Gestion des logs:
+    
+    public static function addLogs_extra_data($array){
+        static::$logs_extra_data = BimpTools::merge_array(static::$logs_extra_data, $array);
+    }
 
     public static function addlog($msg, $level = 1, $type = 'bimpcore', $object = null, $extra_data = array(), $force = false)
     {
+//        die('LOG : '.$msg." ".print_r($extra_data,1));
+        $extra_data = BimpTools::merge_array(static::$logs_extra_data, $extra_data);
         if (!$force && $level < Bimp_Log::BIMP_LOG_ERREUR && (int) BimpCore::getConf('bimpcore_mode_eco', 0)) {
             return array();
         }

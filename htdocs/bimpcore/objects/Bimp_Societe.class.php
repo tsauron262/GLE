@@ -1839,16 +1839,18 @@ class Bimp_Societe extends BimpDolObject
                         $tel = $summary->telephone;
                         $nom = $summary->companyname;
 
-                        foreach ($branches as $branche) {
-                            if (($siret && $branche->companynumber == $siret) || (!$siret && stripos($branche->type, "Siège") !== false)) {
-                                $adress = $branche->full_address->address;
-                                //$nom = $branche->full_address->name;
-                                $codeP = $branche->postcode;
-                                $ville = $branche->municipality;
-                                if (!$siret) {
-                                    $siret = (string) $branche->companynumber;
+                        if (is_array($branches)) {
+                            foreach ($branches as $branche) {
+                                if (($siret && $branche->companynumber == $siret) || (!$siret && stripos($branche->type, "Siège") !== false)) {
+                                    $adress = $branche->full_address->address;
+                                    //$nom = $branche->full_address->name;
+                                    $codeP = $branche->postcode;
+                                    $ville = $branche->municipality;
+                                    if (!$siret) {
+                                        $siret = (string) $branche->companynumber;
+                                    }
+                                    break;
                                 }
-                                break;
                             }
                         }
 
@@ -1913,19 +1915,21 @@ class Bimp_Societe extends BimpDolObject
         
     }
 
-    public function checkSolvabiliteStatus()
+    public function checkSolvabiliteStatus(&$warnings = array(), &$errors = array())
     {
         if (!$this->isLoaded()) {
             return;
         }
 
         if (!(int) BimpCore::getConf('check_solvabilite_client', 0)) {
+            $warnings[] = 'Vérification de la solvabilité désactivée';
             return;
         }
 
         $cur_status = (int) $this->getData('solvabilite_status');
 
         if (in_array($cur_status, array(self::SOLV_INSOLVABLE, self::SOLV_DOUTEUX_FORCE, self::SOLV_A_SURVEILLER_FORCE))) {
+            $warnings[] = 'Statut actuel non modifiable automatiquement';
             return;
         }
 
@@ -1973,37 +1977,50 @@ class Bimp_Societe extends BimpDolObject
         $has_contentieux = (int) $this->db->getCount('bimp_relance_clients_line', 'id_client = ' . (int) $this->id . ' AND  relance_idx = 5 AND status = ' . BimpRelanceClientsLine::RELANCE_CONTENTIEUX);
 
         if ($total_unpaid > 0) {
+            $warnings[] = 'Total impayés: ' . $total_unpaid;
             if ($total_contentieux > 0) {
+                $warnings[] = 'Total contentieux: ' . $total_contentieux;
                 $new_status = self::SOLV_DOUTEUX;
             } elseif ($cur_status !== self::SOLV_DOUTEUX) {
                 if ($total_med > 0) {
+                    $warnings[] = 'Total mises en demeure : ' . $total_med;
                     $new_status = self::SOLV_MIS_EN_DEMEURE;
                 } elseif ($has_contentieux) {
+                    $warnings[] = 'A surveiller car dispose d\'au moins un contentieux';
                     $new_status = self::SOLV_A_SURVEILLER;
                 } else {
+                    $warnings[] = 'Pas de contentieux ni de mises en demeure';
                     $new_status = self::SOLV_SOLVABLE;
                 }
+            } else {
+                $warnings[] = 'Client déjà mis en douteux';
             }
         } else {
             if ($has_contentieux) {
+                $warnings[] = 'Pas d\'impayé mais possède au moins un contentieux';
                 $new_status = self::SOLV_A_SURVEILLER;
             } else {
+                $warnings[] = 'Aucun contentieux ni impayé';
                 $new_status = self::SOLV_SOLVABLE;
             }
         }
 
         if ($new_status !== $cur_status) {
+            $warnings[] = 'Nouveau statut: ' . self::$solvabilites[$new_status]['label'];
             $err = $this->updateField('solvabilite_status', $new_status, null, true, true);
 
             if (!count($err)) {
                 $this->onNewSolvabiliteStatus('auto');
             } else {
+                $errors[] = BimpTools::getMsgFromArray($err, 'Echec mise à jour du statut solvabilité');
                 BimpCore::addlog('Echec de l\'enregistrement du nouveau statut de solvabilité d\'un client', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
                     'Statut courant' => $cur_status . ' (' . self::$solvabilites[$cur_status]['label'] . ')',
                     'Nouveau statut' => $new_status . ' (' . self::$solvabilites[$new_status]['label'] . ')',
                     'Erreurs'        => $err
                 ));
             }
+        } else {
+            $warnings[] = 'Pas de changement du statut';
         }
     }
 
@@ -2245,7 +2262,7 @@ class Bimp_Societe extends BimpDolObject
         $warnings = array();
         $success = 'Solvabilité vérifiée avec succès';
 
-        $this->checkSolvabiliteStatus();
+        $this->checkSolvabiliteStatus($warnings, $errors);
 
         return array(
             'errors'   => $errors,
@@ -2482,7 +2499,7 @@ class Bimp_Societe extends BimpDolObject
 
         if ($init_solv != $this->getData('solvabilite_status') && (int) $this->getData('solvabilite_status') === self::SOLV_A_SURVEILLER_FORCE) {
             global $user;
-            if (!$user->admin) {
+            if (!$user->admin || $user->id == 1499) {
                 return array('Vous n\'avez pas la permission de passer le statut solvabilité à "Client à surveiller (forcé)"');
             }
         }

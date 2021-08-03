@@ -495,7 +495,7 @@ class BimpDolObject extends BimpObject
                                 $icon = $propal_instance->params['icon'];
                                 $objects[] = array(
                                     'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($propal_instance->getLabel()),
-                                    'ref'      => $propal_instance->getNomUrl(0, true, true, 'full'),
+                                    'ref'      => $propal_instance->getNomUrl(0, true, true, null),
                                     'date'     => $propal_instance->displayData('datep'),
                                     'total_ht' => $propal_instance->displayData('total_ht'),
                                     'status'   => $propal_instance->displayData('fk_statut')
@@ -509,7 +509,7 @@ class BimpDolObject extends BimpObject
                                 $icon = $facture_instance->params['icon'];
                                 $objects[] = array(
                                     'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($facture_instance->getLabel()),
-                                    'ref'      => $facture_instance->getNomUrl(0, true, true, 'full'),
+                                    'ref'      => $facture_instance->getNomUrl(0, true, true, null),
                                     'date'     => $facture_instance->displayData('datef'),
                                     'total_ht' => $facture_instance->displayData('total'),
                                     'status'   => $facture_instance->displayData('fk_statut')
@@ -523,7 +523,7 @@ class BimpDolObject extends BimpObject
                                 $icon = $commande_instance->params['icon'];
                                 $objects[] = array(
                                     'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($commande_instance->getLabel()),
-                                    'ref'      => $commande_instance->getNomUrl(0, true, true, 'full'),
+                                    'ref'      => $commande_instance->getNomUrl(0, true, true, null),
                                     'date'     => $commande_instance->displayData('date_commande'),
                                     'total_ht' => $commande_instance->displayData('total_ht'),
                                     'status'   => $commande_instance->displayData('fk_statut')
@@ -537,7 +537,7 @@ class BimpDolObject extends BimpObject
                                 $icon = $commande_fourn_instance->params['icon'];
                                 $objects[] = array(
                                     'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($commande_fourn_instance->getLabel()),
-                                    'ref'      => $commande_fourn_instance->getNomUrl(0, true, true, 'full'),
+                                    'ref'      => $commande_fourn_instance->getNomUrl(0, true, true, null),
                                     'date'     => $commande_fourn_instance->displayData('date_commande'),
                                     'total_ht' => $commande_fourn_instance->displayData('total_ht'),
                                     'status'   => $commande_fourn_instance->displayData('fk_statut')
@@ -551,7 +551,7 @@ class BimpDolObject extends BimpObject
                                 $icon = $facture_fourn_instance->params['icon'];
                                 $objects[] = array(
                                     'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($facture_fourn_instance->getLabel()),
-                                    'ref'      => $facture_fourn_instance->getNomUrl(0, true, true, 'full'),
+                                    'ref'      => $facture_fourn_instance->getNomUrl(0, true, true, null),
                                     'date'     => $facture_fourn_instance->displayData('datef'),
                                     'total_ht' => $facture_fourn_instance->displayData('total_ht'),
                                     'status'   => $facture_fourn_instance->displayData('fk_statut')
@@ -589,7 +589,7 @@ class BimpDolObject extends BimpObject
                                 $icon = $fi_instance->params['icon'];
                                 $objects[] = array(
                                     'type'   => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($fi_instance->getLabel()),
-                                    'ref'    => $fi_instance->getNomUrl(0, true, true, 'infos'),
+                                    'ref'    => $fi_instance->getNomUrl(0, true, true, null),
                                     'date'   => $fi_instance->displayData('datec'),
                                     'status' => $fi_instance->displayData('fk_statut')
                                 );

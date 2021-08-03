@@ -1019,6 +1019,8 @@ class Bimp_FactureFourn extends BimpComm
     public function onDelete(&$warnings = array())
     {
         $errors = array();
+        $prevDeleting = $this->isDeleting;
+        $this->isDeleting = true;
 
         if ($this->isLoaded($warnings)) {
             $receptions = BimpCache::getBimpObjectObjects('bimplogistique', 'BL_CommandeFournReception', array(
@@ -1032,6 +1034,7 @@ class Bimp_FactureFourn extends BimpComm
         
         $errors = BimpTools::merge_array($errors, parent::onDelete($warnings));
 
+        $this->isDeleting = $prevDeleting;
         return $errors;
     }
 

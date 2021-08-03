@@ -1181,24 +1181,22 @@ class BContract_contrat extends BimpDolObject
         ];
     }
 
-    public function actionPlanningInter($data, &$success)
+    public function actionPlanningInter($data, &$success = '')
     {
-
         $errors = [];
-        $warnings = [];
-        //print_r($data);
+        $success = 'Fiche inter créée avec succès';
+        
         if (count($data['techs'])) {
-            $errors[] = "Vous ne pouvez pas plannifier une intervention sans au moin un techhnicien";
+            $errors[] = "Vous ne pouvez pas plannifier une intervention sans au moins un techhnicien";
+        } else {
+            $instance = $this->getInstance('bimptechnique', 'BT_ficheInter');
+            $errors = $instance->createFromContrat($this, $data);
         }
-        $id_new_fi = 0;
-        //if(!count($errors)) {
-        $instance = $this->getInstance('bimptechnique', 'BT_ficheInter');
-        //$this->getCommandesClientArray();
-        //
-        //echo '<pre>' . print_r($data);
-        $id_new_fi = $instance->createFromContrat($this, $data);
-        //}
-        //return $id_new_fi;
+        
+        return array(
+            'errors' => $errors,
+            'warnings' => array()
+        );
     }
 
     public function getTicketsSupportClientArray()
@@ -2595,6 +2593,9 @@ class BContract_contrat extends BimpDolObject
             if ($user->id == $this->getCommercialClient())
                 return 1;
         }
+        
+        if(isset($user->rights->synopsiscontrat->renouveller) && $user->rights->synopsiscontrat->renouveller)
+            return 1;
 
         return 0;
     }
@@ -2641,8 +2642,10 @@ class BContract_contrat extends BimpDolObject
     public function actionGeneratePdfCourrier($data, &$success)
     {
         global $langs;
+        $errors = $warnings = array();
         $success = "PDF courrier généré avec Succes";
         $this->dol_object->generateDocument('contrat_courrier_BIMP_renvois', $langs);
+        return array('errors' => $errors, 'warnings' => $warnings);
     }
 
     public function actionGeneratePdfEcheancier($data, &$success)
@@ -3938,10 +3941,10 @@ class BContract_contrat extends BimpDolObject
 //                if (stripos($elem, "signe"))
 //                    $idSepaSigne = $id;
 //            }
-            if (stripos($elem, "_Ex_Bimp") !== FALSE) {
+            if (stripos($elem, $this->getRef()."_Ex_Olys") !== FALSE) {
                 $values[] = $id;
             }
-            if (stripos($elem, "_Ex_Client") !== FALSE) {
+            if (stripos($elem, $this->getRef()."_Ex_Client") !== FALSE) {
                 $values[] = $id;
             }
         }

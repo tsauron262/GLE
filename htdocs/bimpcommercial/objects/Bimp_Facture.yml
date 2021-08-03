@@ -433,6 +433,8 @@ forms:
                 field: douane_number
             prime:
                 field: prime
+            prime2:
+                field: prime2
             relance_active: 
                 field: relance_active
             
@@ -757,6 +759,7 @@ fields_tables:
             - field: tva
             - field: total_ttc
             - field: prime
+            - field: prime2
             
     notes:
         rows:
@@ -865,6 +868,13 @@ lists_cols:
                 method: displayInfoSav
                 params:
                     - product
+    sav_product_info: 
+        label: Produit label
+        value: 
+            callback: 
+                method: displayInfoSav
+                params:
+                    - productInfo
     sav_equipment_waranty: 
         label: Garantie SAV
         value: 

@@ -125,7 +125,10 @@ class Bimp_CommissionApporteur extends BimpObject{
         
         $parent = $this->getParentInstance();
         
-        $this->createFactureFourn($parent, $new_facture);
+        $errors = BimpTools::merge_array($errors, $this->createFactureFourn($parent, $new_facture, $warnings));
+        
+        if(count($errors))
+            return $errors;
         
         // Création des lignes
         $filtres = $parent->getChildrenObjects('filtres', array(), 'position', 'ASC');
@@ -133,15 +136,21 @@ class Bimp_CommissionApporteur extends BimpObject{
         foreach($filtres as $filtre){
 
             if($filtre->isLoaded()) {
-            
-                $lines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_FactureLine',
-                        array('commission_apporteur' => $this->id . '-' . $filtre->id));
-                                
-                if(count($lines))
-                    $this->createLineLabel($filtre, $new_facture->id);
-                    
-                foreach ($lines as $line)
-                    $errors = BimpTools::merge_array($errors, $this->createFactureFournLine($line, $new_facture, $filtre));
+                if($filtre->getData('commition') != 0){
+                    $lines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_FactureLine',
+                            array('commission_apporteur' => $this->id . '-' . $filtre->id));
+
+                    if(count($lines))
+                        $this->createLineLabel($filtre, $new_facture->id);
+
+                    foreach ($lines as $line){
+                        $amount = $line->getTotalHTWithRemises(true) / $line->qty * $filtre->getData('commition') / 100;
+                        if($amount != 0){
+                            $errors = BimpTools::merge_array($errors, $this->createFactureFournLine($line, $new_facture, $amount));
+                            $errors = BimpTools::merge_array($errors, $this->createRevalorisation($line, $amount));
+                        }
+                    }
+                }
 
             } else
                 $errors[] = "Erreur avec un des filtres de la commission";
@@ -149,14 +158,36 @@ class Bimp_CommissionApporteur extends BimpObject{
         }
         
         
-        if (count($errors))
-            $errors = BimpTools::merge_array($errors, $new_facture->delete());
+//        if (count($errors))
+//            $errors = BimpTools::merge_array($errors, $new_facture->delete());
         
         return $errors;
         
     }
     
-    public function createFactureFourn($parent, &$new_facture) {
+    public function createRevalorisation($line, $amount){
+        
+        // Créa nouvelle revalorisation: 
+        $reval = BimpObject::getInstance('bimpfinanc', 'BimpRevalorisation');
+        $reval_errors = $reval->validateArray(array(
+            'id_facture'      => (int) $line->getData('id_obj'),
+            'id_facture_line' => (int) $line->id,
+            'type'            => 'commission_app',
+            'qty'             => (float) $line->qty,
+            'amount'          => (float) $amount,
+            'date'            => date('Y-m-d'),
+            'id_commission_apporteur' => $this->id,
+            'note'            => 'Correction du prix d\'achat suite au commissionnement apporteur '.$this->getLink()
+        ));
+        
+        if (!count($reval_errors)) {
+            $reval_warnings = array();
+            $reval_errors = $reval->create($reval_warnings, true);
+        }
+        return $reval_errors;
+    }
+    
+    public function createFactureFourn($parent, &$new_facture, &$warnings) {
         
         $fourn = $parent->getChildObject('fourn');
                 
@@ -178,7 +209,7 @@ class Bimp_CommissionApporteur extends BimpObject{
         if (count($errors))
             return $errors;
         
-        $errors = $new_facture->create($warnings, true);
+        $errors = BimpTools::merge_array($errors, $new_facture->create($warnings, true));
 
         return $errors;
     }
@@ -199,7 +230,7 @@ class Bimp_CommissionApporteur extends BimpObject{
         return $errors;
     }
     
-    public function createFactureFournLine($line, $new_facture, $filtre) {
+    public function createFactureFournLine($line, $new_facture, $amount) {
         
         $errors = array();
         
@@ -218,36 +249,37 @@ class Bimp_CommissionApporteur extends BimpObject{
             'editable'   => 0,
         )));
 
-        $new_line->pu_ht = $line->pu_ht;
+        $new_line->pu_ht = $amount;
         $new_line->qty = $line->qty;
         $new_line->desc = $old_fac_parent->getRef() . " " . $prod->getRef();
+        $new_line->tva_tx = 20;
         
         if(empty($errors))
             $errors = BimpTools::merge_array($errors, $new_line->create($warnings, true));
 
-        if(empty($errors))
-            $errors = BimpTools::merge_array($errors, $this->createRemise(
-                    (int) $new_line->id, (100 - $filtre->getData('commition'))));
+//        if(empty($errors))
+//            $errors = BimpTools::merge_array($errors, $this->createRemise(
+//                    (int) $new_line->id, (100 - $filtre->getData('commition'))));
         
         return $errors;
     }
 
-    public function createRemise($id_line, $a_payer) {
-        $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
-        $errors =  $remise->validateArray(array(
-            'id_object_line' => $id_line,
-            'object_type'    => 'facture_fournisseur',
-            'type'           => $remise::OL_REMISE_PERCENT,
-            'label'          => 'Issue d\'une commission apporteur',
-            'percent'        => $a_payer
-
-        ));
-        
-        if(empty($errors))
-            $errors = $remise->create();
-           
-        return $errors;
-    }
+//    public function createRemise($id_line, $a_payer) {
+//        $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
+//        $errors =  $remise->validateArray(array(
+//            'id_object_line' => $id_line,
+//            'object_type'    => 'facture_fournisseur',
+//            'type'           => $remise::OL_REMISE_PERCENT,
+//            'label'          => 'Issue d\'une commission apporteur',
+//            'percent'        => $a_payer
+//
+//        ));
+//        
+//        if(empty($errors))
+//            $errors = $remise->create();
+//           
+//        return $errors;
+//    }
     
     
     public function calcTotal(){
@@ -349,7 +381,29 @@ class Bimp_CommissionApporteur extends BimpObject{
             $html .= $bc_list->renderHtml();
         }
         
-        $html .= BimpRender::renderNavTabs($tabs, 'commission_details');
+        $tabs[] = array(
+            'id'      => 'facture',
+            'title'   => 'Ligne de facture',
+            'content' => $html
+        );
+        
+        if($this->getData('status') == 1){
+            $reval = BimpObject::getInstance('bimpfinanc', 'BimpRevalorisation');
+            $bc_list = new BC_ListTable($reval, 'default', 1, null, 'Revalorisation', 'fas_check');
+            $bc_list->addFieldFilterValue('id_commission_apporteur', $this->id);
+            $html = $bc_list->renderHtml();
+
+
+            $tabs[] = array(
+                'id'      => 'revalorisations',
+                'title'   => 'Revalorisations',
+                'content' => $html
+            );
+        }
+            
+        $html = BimpRender::renderNavTabs($tabs, 'commission_details');
+            
+            
 
         return $html;
     }
@@ -359,7 +413,7 @@ class Bimp_CommissionApporteur extends BimpObject{
         $parent = $this->getParentInstance();
         $tabsFiltres = $parent->getChildrenObjects('filtres', array(), 'position', 'ASC');
         foreach($tabsFiltres as $filtre){
-            $result[$filtre->id] = $filtre->getFilterLabel();
+            $result[$filtre->id] = $filtre->getLabel();
         }
         return $result;
     }

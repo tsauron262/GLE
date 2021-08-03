@@ -89,10 +89,7 @@ class securLogSms {
         } elseif (is_object($id_user))
             $this->user = $id_user;
         $this->user->oldcopy = clone $this->user;
-        $this->ip = $_SERVER['REMOTE_ADDR'];
-        $tmp = explode(".", $ip);
-        if(count($tmp) < 4)
-            $this->ip = $_SERVER['HTTP_X_REAL_IP'];
+        $this->ip = synopsisHook::getUserIp();
        
         $this->nomCookie = "secu_erp" . $this->user->id . "_" . str_replace(".", "_", $this->ip);
 

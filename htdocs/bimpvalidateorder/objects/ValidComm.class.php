@@ -160,24 +160,40 @@ class ValidComm extends BimpObject
         }
             
         // Validation impayé
-        if($rtp != 0 && $this->getObjectClass($bimp_object) != self::OBJ_DEVIS)
-            $valid_impaye = (int) $this->tryValidateByType($user, self::TYPE_IMPAYE, $secteur, $class, $rtp, $bimp_object, $errors);
-        elseif(!$rtp)
+        if($rtp != 0 && $this->getObjectClass($bimp_object) != self::OBJ_DEVIS) {
+            
+            if(!$client) {
+                if(method_exists($bimp_object, 'getClientFacture'))
+                    $client = $bimp_object->getClientFacture();
+                else
+                    $client = $bimp_object->getChildObject('client');
+            }
+            
+            if(!$client->getData('validation_impaye')) {
+                $success[] = "Validation des retards de paiement forcée par le champ \"Validation impayé\".";
+                $valid_impaye = 1;
+            } else
+                $valid_impaye = (int) $this->tryValidateByType($user, self::TYPE_IMPAYE, $secteur, $class, $rtp, $bimp_object, $errors);
+
+        } elseif (!$rtp)
             $this->validatePayed($class, $bimp_object);
         
         
         // Ajout des erreurs/sucess
+        // Commerciales
         if(!$valid_comm)
                 $errors[] = "Vous ne pouvez pas valider commercialement " 
                 . $bimp_object->getLabel('this') . '. La demande de validation commerciale a été adressée au valideur attribué.<br/>';
         else
             $success[] = "Validation commerciale effectuée.";
         
+        // Encours
         if(!$valid_encours)
                 $errors[] = $this->getErrorEncours($user, $bimp_object);
         else
             $success[] = "Validation encours effectuée.";
         
+        // Impayé
         if(!$valid_impaye)
                 $errors[] = "Votre " . $bimp_object->getLabel() .  
                 " n'est pas encore validée car le compte client présente des retards de paiement " .
@@ -208,7 +224,7 @@ class ValidComm extends BimpObject
 //                $this->updateDemande ((int) $user->id, $class, (int) $bimp_object->id, $type, (int) DemandeValidComm::STATUS_VALIDATED);
 //                return 1;
                 
-            // Je peux valider (sans être le valideur)
+            // Je peux valider 
             elseif($this->userCanValidate((int) $user->id, $secteur, $type, $class, $val, $bimp_object, $val_comm_validation)) {
                 $this->updateDemande ((int) $user->id, $class, (int) $bimp_object->id, $type, (int) DemandeValidComm::STATUS_VALIDATED, $val_comm_validation);
                 return 1;
@@ -245,8 +261,10 @@ class ValidComm extends BimpObject
             if($val < 0)
                 $val_max = $val;
             
-            elseif($val_max < 0)
+            elseif($val_max < 0) {
+                $valid_comm = -2;
                 return 1;
+            }
 
         }
         

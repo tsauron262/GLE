@@ -80,6 +80,7 @@ class BimpObject extends BimpCache
     public $redirectMode = 5; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public $noFetchOnTrigger = false;
     public $fieldsWithAddNoteOnUpdate = array();
+    public $isDeleting = false;
 
     // Gestion instance:
 
@@ -2233,10 +2234,9 @@ class BimpObject extends BimpCache
         }
 
         if ($type) {
-
             // Ajustement du format des dates dans le cas des objets Dolibarr:
-            if ($this->isDolObject()) {
-                if (in_array($type, array('datetime', 'date', 'time'))) {
+            if ($this->isDolField($field)) {
+                if (in_array($type, array('datetime', 'date'/* , 'time' */))) {
                     if ((string) $value) {
                         if (stripos($value, "-") || stripos($value, "/")) {
                             $value = $this->db->db->jdate($value);
@@ -2253,9 +2253,9 @@ class BimpObject extends BimpCache
                                     $value = $matches[1] . '-' . $matches[2] . '-' . $matches[3];
                                     break;
 
-                                case 'time':
-                                    $value = $matches[4] . ':' . $matches[5] . ':' . $matches[6];
-                                    break;
+//                                case 'time':
+//                                    $value = $matches[4] . ':' . $matches[5] . ':' . $matches[6];
+//                                    break;
                             }
                         }
                     }
@@ -3131,6 +3131,8 @@ class BimpObject extends BimpCache
         // Vérification du champ "order_by": 
         if ($order_by === 'id') {
             $order_by = 'a.' . $primary;
+        } elseif ($order_by == 'rand') {
+            $order_by = 'rand';
         } elseif (preg_match('/^a\.(.+)$/', $order_by, $matches)) {
             $order_by = '';
             if ($this->field_exists($matches[1])) {
@@ -3170,7 +3172,10 @@ class BimpObject extends BimpCache
         $sql .= BimpTools::getSqlSelect($fields);
         $sql .= BimpTools::getSqlFrom($table, $joins);
         $sql .= BimpTools::getSqlWhere($filters);
-        $sql .= BimpTools::getSqlOrderBy($order_by, $order_way, 'a', $extra_order_by, $extra_order_way);
+        if ($order_by == 'rand')
+            $sql .= ' ORDER BY rand() ';
+        else
+            $sql .= BimpTools::getSqlOrderBy($order_by, $order_way, 'a', $extra_order_by, $extra_order_way);
         $sql .= BimpTools::getSqlLimit($n, $p);
 
         $rows = $this->db->executeS($sql, $return);
@@ -4149,6 +4154,11 @@ class BimpObject extends BimpCache
                         $msg .= ' - Erreur SQL: ' . $sqlError;
                     }
                     $errors[] = $msg;
+
+                    if ($this->isDolObject()) {
+                        $errors[] = 'RES: ' . $result;
+                        $errors = BimpTools::merge_array($errors, BimpTools::getErrorsFromDolObject($this->dol_object));
+                    }
                 }
             }
         }
@@ -4612,7 +4622,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         // Suppression de la ligne en base: 
         if (method_exists($this, 'deleteProcess')) {
             $result = $this->deleteProcess();
-        } elseif (!is_null($this->dol_object)) {
+        } elseif ($this->isDolObject()) {
             $result = $this->deleteDolObject($errors);
         } else {
             $table = $this->getTable();
@@ -4635,6 +4645,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             $errors[] = $msg;
         } elseif (!count($errors)) {
             $id = $this->id;
+            $this->isDeleting = true;
 
             // Suppr des extras fields: 
             $extra_errors = $this->deleteExtraFields();
@@ -4718,6 +4729,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             self::unsetBimpObjectInstance($this->module, $this->object_name, $id);
 
             // Réinitialisation de l'instance:
+            $this->isDeleting = false;
             $this->reset();
         }
 
@@ -4903,7 +4915,9 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 $params = array($user);
             }
 
-            $result = call_user_func_array(array($this->dol_object, 'create'), $params);
+            $create_method_name = $this->getConf('dol_create_method', 'create');
+
+            $result = call_user_func_array(array($this->dol_object, $create_method_name), $params);
             if ($result <= 0) {
                 if (isset($this->dol_object->error) && $this->dol_object->error) {
                     $errors[] = $this->dol_object->error;
@@ -4921,10 +4935,15 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                         $fields[] = $field_name;
                     }
 
-                    $data = $this->getDbData($fields);
+                    if (isset($this->dol_object->id) && (int) $this->dol_object->id) {
+                        $id = (int) $this->dol_object->id;
+                    } else {
+                        $id = $result;
+                    }
 
+                    $data = $this->getDbData($fields);
                     if (!empty($data)) {
-                        $up_result = $this->db->update($this->getTable(), $data, '`' . $this->getPrimary() . '` = ' . (int) $result);
+                        $up_result = $this->db->update($this->getTable(), $data, '`' . $this->getPrimary() . '` = ' . (int) $id);
 
                         if ($up_result <= 0) {
                             $msg = 'Echec de l\'insertion des champs additionnels';
@@ -5079,8 +5098,9 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                     $this->data[$field_name] = $value;
                 }
             } else {
-                BimpCore::addlog('Echec obtention champs supplémentaires : ' . print_r($bimpObjectFields, 1), Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
-                    'Erreur SQL' => $this->db->err()
+                BimpCore::addlog('Echec obtention champs supplémentaires', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
+                    'Erreur SQL'    => $this->db->err(),
+                    'Champs suppl.' => $bimpObjectFields
                 ));
             }
         }
@@ -5116,11 +5136,23 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             $params = array($user);
         }
 
-        $result = call_user_func_array(array($this->dol_object, 'delete'), $params);
+        $delete_method = $this->getConf('dol_delete_method', 'delete');
+
+        if (method_exists($this->dol_object, $delete_method)) {
+            $result = call_user_func_array(array($this->dol_object, $delete_method), $params);
+        } else {
+            $errors[] = 'La méthode "' . $delete_method . '" n\'existe pas dans l\'objet "' . get_class($this->dol_object) . '"';
+            return 0;
+        }
 
         if ($result <= 0) {
             if (isset($this->dol_object->error) && $this->dol_object->error) {
                 $errors[] = $this->dol_object->error;
+            }
+
+            $err_sql = $this->dol_object->db->lasterror();
+            if ($err_sql) {
+                $errors[] = $err_sql;
             }
 
             return 0;
@@ -5504,6 +5536,13 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     public function resetPositions()
     {
         if ($this->getConf('positions', false, false, 'bool')) {
+            $parent = $this->getParentInstance();
+
+            if (is_a($parent, 'BimpObject')) {
+                if ($parent->isDeleting) {
+                    return;
+                }
+            }
             $parent_id_property = $this->getParentIdProperty();
             if (method_exists($this, 'getPositionsFilters')) {
                 $filters = $this->getPositionsFilters();
@@ -5642,6 +5681,10 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         if ($this->isLoaded()) {
             if ($this->config->isDefined('objects/' . $children_name . '/instance/bimp_object')) {
                 if ($this->getConf('objects/' . $children_name . '/relation', 'none') === 'hasMany') {
+                    if ($this->isDeleting && (int) $this->getConf('objects/' . $children_name . '/delete', 0, false, 'bool')) {
+                        return;
+                    }
+
                     $instance_def = $this->getConf('objects/' . $children_name . '/instance/bimp_object', '', false, 'any');
                     if (empty($instance_def)) {
                         return;

@@ -1,0 +1,328 @@
+bootstrap: 1
+dol_object: 
+    instance: 
+        dol_object: 
+            module: fichinter
+            file: fichinter
+            class: fichinterLigne
+            
+table: fichinterdet
+primary: rowid
+
+#controller: di
+# Quand qty forcé à 1 = forfait
+
+icon: fas_ambulance
+header_btn: 
+    callback: getActionsButton
+    
+parent_module: bimptechnique
+parent_id_property: fk_fichinter
+parent_object: BT_ficheInter
+
+labels:
+    name: Ligne
+    name_plur: Lignes
+    is_female: 1
+
+objects:
+    fk_parent:
+        instance:
+            bimp_object: BT_ficheInter
+        id_object:
+            field_value: fk_fichinter
+    this:
+        instance:
+            bimp_object: BT_ficheInter_det
+        id_object:
+            request: id
+    commande_line:
+        instance:
+            bimp_object:
+                module: bimpcommercial
+                name: Bimp_CommandeLine
+    contrat_line:
+        instance:
+            bimp_object:
+                module: bimpcontract
+                name: BContract_contratLine
+                
+fields:
+    fk_fichinter:
+        label: Fiche d'intervention
+        type: id_object
+        object: fk_parent
+    date:
+        label: Date de l'intervention
+        type: date
+    description:
+        label: Description de l'intervention
+        type: text
+        input:
+            type: html
+    duree:
+        label: Durée de l'intervention
+        type: int
+        input:
+            type: timer
+    type:
+        label: Type de l'intervention
+        type: int
+        values:
+            callback: getTypeArray
+    facturable:
+        label: Facturé
+        type: bool
+        input:
+            type: toggle
+    id_line_commande:
+        label: Ligne de la commande
+        type: id_object
+        object: commande_line
+    id_line_contrat:
+        label: Ligne du contrat
+        type: id_object
+        object: contrat_line
+        
+    id_set_facturable:
+        label: Mis facturable par
+        type: int
+    forfait:
+        label: Mode de facturation
+        type: int
+        values:
+            array: mode_facturation
+    total_ht:
+        label: PU HT
+        type: int
+    arrived:
+        label: Heure d'arrivée
+        type: datetime
+    departure:
+        label: Heure de départ
+        type: datetime
+    arriverd_am:
+        label: Heure d'arrivée (Matin)
+        type: datetime
+    departure_am:
+        label: Heure de départ (Matin)
+        type: datetime
+    arriverd_pm:
+        label: Heure d'arrivée (Après-Midi)
+        type: datetime
+    departure_pm:
+        label: Heure de départ (Après-Midi)
+        type: datetime
+
+forms:
+#    addRemise:
+#        rows:
+#            - field: pourcentage_commercial => N'existe pas !! 
+
+    editinter:
+        rows:
+            - field: type
+              required: 1
+            - field: id_line_contrat
+            - field: id_line_commande
+            - field: date
+              input:
+                  type: date
+            - field: description
+              input:
+                  type: html
+            - custom: 1
+              label: Arrivée
+              input_name: arrived
+              input:
+                  type:  time
+                  help: Les secondes ne seront pas prises en compte
+              value:
+                callback:
+                    method: displayTime
+                    params:
+                        - arrived
+              show:
+                  callback: showOneHoraire
+            - custom: 1
+              label: Départ
+              input_name: departure
+              input:
+                  type:  time
+                  help: Les secondes ne seront pas prises en compte
+              value:
+                  callback:
+                      method: displayTime
+                      params:
+                          - departure
+              show:
+                  callback: showOneHoraire
+            - custom: 1
+              label: Arrivée (Matin)
+              input_name: arriverd_am
+              input:
+                  type: time
+                  help: Les secondes ne seront pas prises en compte
+              value:
+                  callback:
+                      method: displayTime
+                      params:
+                          - arriverd_am
+              show:
+                  callback: showTwoHoraire
+            - custom: 1
+              label: Départ (Matin)
+              input_name: departure_am
+              input:
+                  type: time
+                  help: Les secondes ne seront pas prises en compte
+              value:
+                  callback:
+                      method: displayTime
+                      params:
+                          - departure_am
+              show:
+                  callback: showTwoHoraire
+            - custom: 1
+              label: Arrivée (Après-Midi)
+              input_name: arriverd_pm
+              input:
+                  type: time
+                  help: Les secondes ne seront pas prises en compte
+              value:
+                  callback:
+                      method: displayTime
+                      params:
+                          - arriverd_pm
+              show:
+                  callback: showTwoHoraire
+            - custom: 1
+              label: Départ (Après-Midi)
+              input_name: departure_pm
+              input:
+                  type: time
+                  help: Les secondes ne seront pas prises en compte
+              value:
+                  callback:
+                      method: displayTime
+                      params:
+                          - departure_pm
+              show:
+                  callback: showTwoHoraire
+            - field: duree
+              show:
+                  callback: showTimerDeplacement
+
+    add:
+        rows:
+            - field: type
+              required: 1
+            - field: date
+              display_now: 1
+              required: 1
+            - field: duree
+              required: 1
+            - field: description
+            
+    form:
+        rows:
+            - object: this
+              multiple: 1
+              form_name: add
+              on_edit: 1
+              delete: 0
+              
+lists_cols: 
+    service:
+        label: Service
+        value:
+            callback: display_service_ref
+    show_date:
+        label: Date
+        value:
+            callback: displayDateWithDetails
+    duree_inter:
+        label: Durée
+        value:
+            callback: displayDuree
+    forfait:
+        field: forfait
+    type_intervention:
+        label: Type d'intervention
+        value:
+            callback: displayTypeInter
+    plus_plus:
+        label: Description rapide
+        value:
+            callback: getDescRapide
+
+lists:
+    default:
+        title: Liste des interventions
+        objects_change_reload: BT_ficheInter, BT_ficheInter_det
+        
+        delete_btn: 1
+        edit_btn: 1
+        edit_form: editinter
+        
+        n: 100
+        modal_view: description
+        extra_btn:
+            callback: getListExtraButtons
+        cols:
+            service:
+            show_date:
+            duree_inter:
+            forfait:
+            type_intervention:
+            plus_plus:
+            
+fields_tables:
+    default:
+        title: Infos de l'intervention
+        rows:
+            - field: date
+            - custom: 1
+              label: Service
+              value:
+                    callback: display_service_ref
+#            - custom: 1
+#              label: Facturable
+#              value:
+#                    callback: displayFacturable
+            - custom: 1
+              label: Durée de l'intervention
+              value:
+                  callback: displayDuree
+                  
+    client:
+        title: Infos client
+        rows:
+            - custom: 1
+              label: Client
+              value:
+                  callback: displayClient
+ 
+views:
+    default:
+        title: description
+        rows:
+            - cols:
+                - type: rows
+                  rows:                        
+                      - cols: 
+                          - type: fields_table
+                            col_lg: 6
+                            fields_table: 
+                                name: modal_view_1
+                          - type: fields_table
+                            col_lg: 6
+                            fields_table: 
+                                name: modal_view_client
+                - type: custom
+                  custom:
+                      callback:
+                            method: renderDescription
+        
+            
+            

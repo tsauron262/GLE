@@ -178,7 +178,7 @@ class BimpRevisionPropal extends BimpRevision
                     if(!is_dir($dir2))
                         mkdir ($dir2);
                     
-                    if (!in_array($value,array(".","..")))
+                    if (!in_array($value,array(".","..")) && stripos($value, "/") !== false)
                     {
                         link($dir.$value, $dir2.$value);
                     }

@@ -19,6 +19,12 @@
 
 require("../main.inc.php");
 
+llxHeader();
+
+BimpCore::addlog('Message de test des logs');
+
+die('fin');
+
 
 $ldaphost = "ldaps://91.211.164.250:636/";
 

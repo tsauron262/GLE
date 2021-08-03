@@ -1545,7 +1545,8 @@ class BimpTools
                     $value = null;
                     return true;
                 }
-                if (preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $value)) {
+                if (preg_match('/^(\d{2}):(\d{2}):?(\d{2})?$/', $value, $matches)) {
+                    $value = $matches[1] . ':' . $matches[2] . (isset($matches[3]) ? ':' . $matches[3] : ':00');
                     return true;
                 }
                 return false;
@@ -2724,7 +2725,7 @@ class BimpTools
 
     public static function randomPassword($length, $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789')
     {
-        for ($i = 0, $z = strlen($chars) - 1, $s = $chars{rand(0, $z)}, $i = 1; $i != $length; $x = rand(0, $z), $s .= $chars{$x}, $s = ($s{$i} == $s{$i - 1} ? substr($s, 0, -1) : $s), $i = strlen($s)) {
+        for ($i = 0, $z = strlen($chars) - 1, $s = $chars[rand(0, $z)], $i = 1; $i != $length; $x = rand(0, $z), $s .= $chars[$x], $s = ($s[$i] == $s[$i - 1] ? substr($s, 0, -1) : $s), $i = strlen($s)) {
             
         }
         return $s;

@@ -247,6 +247,15 @@ if ($id_sav) {
                     
                     echo '<h1>Suivi SAV&nbsp;&nbsp;<i class="fa fa-hand-o-right"></i></h1>';
 
+                    
+                    $tabTextEtat = array("Nouveau" => "Nous allons bientot commencer le diagnostic de votre machine.",
+                        "Examen en cours" => "Nous avons commencé le diagnostic de votre produit",
+                        "Attente client" => "Nous attendons une information de votre part. Merci de nous contacter",
+                        "Attente Pièce" => "Nous avons commandé une pièce ou un produit et nous l’attendons",
+                        "Pièce reçu" => "Nous avons reçu la pièce commandée et elle est en cous de remontage",
+                        "Terminé" => "Votre produit est terminé et à votre disposition",
+                        "Fermé" => "Ce dossier est pour nous clôturé");
+                    
                     /* si liste des SAV*/
                     if (count($savRows)) {// si sav seul
                         if(isset($sav->societe) && is_object($sav->societe))
@@ -263,13 +272,6 @@ if ($id_sav) {
                         echo '<div class="row">';
                         
                         if(isset($etat)){
-                            $tabTextEtat = array("Nouveau" => "Nous allons bientot commencer le diagnostic de votre machine.",
-                                "Examen en cours" => "Nous avons commencé le diagnostic de votre produit",
-                                "Attente client" => "Nous attendons une information de votre part. Merci de nous contacter",
-                                "Attente Pièce" => "Nous avons commandé une pièce ou un produit et nous l’attendons",
-                                "Pièce reçu" => "Nous avons reçu la pièce commandée et elle est en cous de remontage",
-                                "Terminé" => "Votre produit est terminé et à votre disposition",
-                                "Fermé" => "Ce dossier est pour nous clôturé");
                             if(isset($tabTextEtat[$etat]))
                                 echo "<h3>ETAT d'avancement : ".$tabTextEtat[$etat] . " </h3><br/><br/>";
                         }
@@ -304,7 +306,7 @@ if ($id_sav) {
                         echo '<th>Etat</th>';
                         echo '<th>Référence</th>';
                         echo '<th>Date de création</th>';
-                        echo '<th>Symptômes</th>';
+                        echo '<th>Etat d\'avancement</th>';
                         echo '<th></th>';
                         echo '</tr></thead><tbody>';
                         foreach ($savsList as $savInfos) {
@@ -312,12 +314,17 @@ if ($id_sav) {
                             echo '<td>' . $savInfos['etat'] . '</td>';
                             echo '<td>' . $savInfos['ref'] . '</td>';
                             echo '<td>' . $savInfos['date_create'] . '</td>';
-                            echo '<td>' . $savInfos['symptom'] . '</td>';
+                            
+                            echo "<td>";
+                             if(isset($tabTextEtat[$etat]))
+                                echo $tabTextEtat[$etat];
+                             echo "</td>";
+//                            echo '<td>' . $savInfos['symptom'] . '</td>';
                             echo '<td><a class="butAction" href="./' . $page . '?id_sav=' . $savInfos['id_sav'];
                             if (!empty($savStr) && $serial) {
                                 echo '&savs_str=' . $savStr . '&serial=' . $serial;
                             }
-                            echo '"><i class="fa fa-bars left"></i>Afficher</a></td>';
+                            echo '"><i class="fa fa-bars left"></i>Afficher détails</a></td>';
                             echo '</tr>';
                         }
                         echo '</tbody></table></div>';

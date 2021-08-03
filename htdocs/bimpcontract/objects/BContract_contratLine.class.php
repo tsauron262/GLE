@@ -274,7 +274,7 @@ class BContract_contratLine extends BContract_contrat {
         
         $errors = [];
         $parent = $this->getParentInstance();
-        $liste_exist_serials = json_decode($this->getData('serials'));
+        $liste_exist_serials = BimpTools::json_decode_array($this->getData('serials'));
         $old_serial = $liste_exist_serials[$data['old_serial']];
         if(in_array(strtoupper($data['new_serial']), $liste_exist_serials)) {
             return "Le numéro de série <b>".$data['new_serial']."</b> est déjà présent dans le contrat";
@@ -318,7 +318,7 @@ class BContract_contratLine extends BContract_contrat {
     // UPDATE `llx_contratdet` SET `serials` = '["AZERTYUI2","AZERTYUI3","AZERTYUI1"]' WHERE `llx_contratdet`.`rowid` = 16010; 
     
     public function getArraySerials() {
-        return json_decode($this->getData('serials'));
+        return BimpTools::json_decode_array($this->getData('serials'));
     }
     
     public function actionSetSerial($data, &$success) {

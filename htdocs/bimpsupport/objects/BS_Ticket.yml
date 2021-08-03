@@ -856,15 +856,24 @@ cards:
     default:
         title: nom
         fields: 
-            - label: N°
-              field: ticket_number
-            - label: Contrat
-              field: id_contrat
-              display: nom_url
-            - label: Client
-              field: id_client
-              display: nom_url
+            num:
+                label: N°
+                field: ticket_number
+            contrat: 
+                label: Contrat
+                field: id_contrat
+                display: nom_url
+            client: 
+                label: Client
+                field: id_client
+                display: nom_url
         view_btn: 1
+        
+    with_sujet: 
+        extends: default
+        fields: 
+            sujet: 
+                field: sujet        
 
 views_lists: 
     default:

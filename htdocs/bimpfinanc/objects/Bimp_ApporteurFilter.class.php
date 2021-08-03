@@ -3,6 +3,8 @@
 class Bimp_ApporteurFilter extends BimpObject{
     function getNbRsult(){
         $list = $this->getProductIds();
+        if($list == 'all')
+            return 'All';
         return count($list);
     }
     

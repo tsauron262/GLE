@@ -593,6 +593,7 @@ class BC_List extends BC_Panel
         $this->final_extra_order_by = $extra_order_by;
         $this->final_order_way = $extra_order_way;
 
+        BimpCore::addLogs_extra_data(array('filtre' => $filters, 'joins' => $joins));
         $this->items = $this->object->getList($filters, $this->params['n'], $this->params['p'], $order_by, $this->params['sort_way'], 'array', array(
             'DISTINCT (a.' . $primary . ')'
                 ), $joins, $extra_order_by, $extra_order_way);

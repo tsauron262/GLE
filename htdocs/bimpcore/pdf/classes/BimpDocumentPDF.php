@@ -669,9 +669,9 @@ class BimpDocumentPDF extends BimpModelPDF
 //                            }
 //                            if (count($equipments)) {
                         $desc .= '<br/>';
-                        $desc .= '<span style="font-size: 6px;">N° de série: </span>';
+                        $desc .= '<span style="font-size: 9px;">N° de série: </span>';
                         $fl = true;
-                        $desc .= '<span style="font-size: 6px; font-style: italic">';
+                        $desc .= '<span style="font-size: 9px; font-style: italic">';
 //                                if (count($equipments) > (int) $this->max_line_serials && (int) $user->id === 1) {
                         if (count($serials) > (int) $this->max_line_serials/* && (int) $user->id === 1 */) {
                             $desc .= 'voir annexe';
@@ -946,10 +946,21 @@ class BimpDocumentPDF extends BimpModelPDF
     {
         if ((int) $this->periodicity && (int) $this->nbPeriods > 0) {
             foreach ($champs as $nomChamp) {
-                if (isset($row[$nomChamp])){
-                    $row[$nomChamp] = str_replace(' ', '', $row[$nomChamp]);
-//                echo $row[$nomChamp].'pp';
-                    $row[$nomChamp] = BimpTools::displayMoneyValue(str_replace(",", ".", $row[$nomChamp]) / $this->nbPeriods, '', 0, 0, 1);
+                if (isset($row[$nomChamp])) {
+                    $value = '';
+
+                    if (is_string($row[$nomChamp])) {
+                        $value = $row[$nomChamp];
+                    } elseif (isset($row[$nomChamp]['content'])) {
+                        $value = $row[$nomChamp]['content'];
+                    }
+
+                    if ($value) {
+                        $value = str_replace(' ', '', $value);
+                        $value = str_replace(",", ".", $value);
+
+                        $row[$nomChamp] = BimpTools::displayMoneyValue($value / $this->nbPeriods, '', 0, 0, 1);
+                    }
                 }
             }
         }

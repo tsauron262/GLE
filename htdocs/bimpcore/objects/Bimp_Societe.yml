@@ -586,16 +586,16 @@ fields:
         default_value: 0
         
     validation_financiere:
-        label: Validation financière
+        label: Validation encours
+        type: bool
+        default_value: 1
+        dol_extra_field: 1 
+        
+    validation_impaye:
+        label: Validation impayé
         type: bool
         default_value: 1
         dol_extra_field: 1
-        
-    test_filters:
-        label: TEST Filtres
-        type: object_filters
-        obj_module: bimpsupport
-        obj_name: BS_SAV
             
 #    *** Champs non gérés: ***
 #    entity
@@ -672,7 +672,6 @@ fields_tables:
         title: Informations commerciales
         icon: fas_briefcase
         rows: 
-            - field: test_filters
             - field: solvabilite_status
               edit: 1
               show: 
@@ -735,7 +734,11 @@ fields_tables:
             - field: validation_financiere
               edit:
                   callback: iAmAdmin
-                  
+            - field: validation_impaye
+              edit:
+                  callback: iAmAdmin
+
+            
     contact: 
         title: Informations de contact
         icon: fas_phone
@@ -834,22 +837,6 @@ views:
                       panel: 0
                       
 forms: 
-    test: 
-        title: TEST Ajouts filtres
-        rows: 
-#            - custom: 1
-#              label: Objet
-#              input_name: obj_defs
-#              input: 
-#                  type: select
-#                  options: 
-#                      callback: 
-#                          method: getBimpObjectsArray
-#                          params: 
-#                              - 1
-#                              - 1
-#                              - 1
-            - field: test_filters
             
     light: 
         title: Ajout d'une société

@@ -318,7 +318,15 @@ class BS_ApplePart extends BimpObject
         $constPrix = 0;
         $newPrix = 0;
         //Application des coef et constantes
-        if ($equipment->isIphone()) {
+        if ($type == "batt" && $price_type == "EXCHANGE") {
+            $newPrix = 49.16666666;
+        } elseif ($type == "battX" && $price_type == "EXCHANGE") {
+            $newPrix = 70;
+        } elseif ($type == "ecran" && $price_type == "EXCHANGE") {
+            foreach (self::$tabRefCommencePrixEcran as $refT => $tabInfo)
+                if ($ref == $refT)
+                    $newPrix = str_replace(",", ".", $tabInfo[0]);
+        } elseif ($equipment->isIphone()) {
 //            $constPrix = 45;
             if ($prix > 400)
                 $constPrix = $prix * 0.1;
@@ -347,14 +355,6 @@ class BS_ApplePart extends BimpObject
                 $constPrix = $prix * 0.17 + 24.17;
             elseif ($prix > 200)
                 $constPrix = $prix * 0.2 + 24.17;
-        } elseif ($type == "batt" && $price_type == "EXCHANGE") {
-            $newPrix = 49.16666666;
-        } elseif ($type == "battX" && $price_type == "EXCHANGE") {
-            $newPrix = 70;
-        } elseif ($type == "ecran" && $price_type == "EXCHANGE") {
-            foreach (self::$tabRefCommencePrixEcran as $refT => $tabInfo)
-                if ($ref == $refT)
-                    $newPrix = str_replace(",", ".", $tabInfo[0]);
         } else {
             if ($prix > 300)
                 $coefPrix = 0.8;

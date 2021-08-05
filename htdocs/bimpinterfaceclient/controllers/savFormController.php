@@ -1231,20 +1231,20 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                 $validate_enable = true;
                 $force_validation = 1;
             }
-            
+
             if (isset($centres[$code_centre]['id_entrepot']) && (int) $centres[$code_centre]['id_entrepot']) {
-                    $entrepot = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Entrepot', (int) $centres[$code_centre]['id_entrepot']);
+                $entrepot = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Entrepot', (int) $centres[$code_centre]['id_entrepot']);
 
-                    if (BimpObject::objectLoaded($entrepot)) {
-                        $close_msg = $entrepot->getData('close_msg');
+                if (BimpObject::objectLoaded($entrepot)) {
+                    $close_msg = $entrepot->getData('close_msg');
 
-                        if ($close_msg) {
-                            $html .= '<div style="margin: 15px 0">';
-                            $html .= BimpRender::renderAlerts($close_msg, 'warning');
-                            $html .= '</div>';
-                        }
+                    if ($close_msg) {
+                        $html .= '<div style="margin: 15px 0">';
+                        $html .= BimpRender::renderAlerts($close_msg, 'warning');
+                        $html .= '</div>';
                     }
                 }
+            }
 
             $html .= '<div style="text-align: center; margin: 30px 0">';
 
@@ -1386,6 +1386,8 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                     $isCompany = $client->isCompany();
                 }
             } else {
+                $client_errors = array();
+
                 $client = BimpObject::getInstance('bimpcore', 'Bimp_Client');
 
                 $isCompany = (!in_array((int) $data['client_type'], array(0, 8)));
@@ -1395,24 +1397,36 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                     $nom_client = strtoupper($data['client_lastname']) . ' ' . BimpTools::ucfirst(strtolower($data['client_firstname']));
                 }
 
-                $client_errors = $client->validateArray(array(
-                    'nom'            => $nom_client,
-                    'siret'          => ($isCompany ? $data['client_siret'] : ''),
-                    'address'        => $data['client_address'],
-                    'zip'            => $data['client_zip'],
-                    'town'           => $data['client_town'],
-                    'fk_pays'        => $data['client_pays'],
-                    'phone'          => ($isCompany && $data['client_phone_pro'] ? $data['client_phone_pro'] : $data['client_phone_mobile'] ? $data['client_phone_mobile'] : $data['client_phone_perso'] ? $data['client_phone_perso'] : $data['client_phone_pro']),
-                    'email'          => (BimpObject::objectLoaded($userClient) ? $userClient->getData('email') : $data['client_email']),
-                    'fk_typent'      => ($isCompany ? (int) $data['client_type'] : 8),
-                    'marche'         => array(18),
-                    'note_private'   => 'Fiche client créée automatiquement suite à prise de rendez-vous SAV en ligne',
-                    'mode_reglement' => 6,
-                    'cond_reglement' => 1
-                ));
+                if ($isCompany) {
+                    $id_client_siret_exists = (int) BimpCache::getBdb()->getValue('societe', 'rowid', 'siret = \'' . $data['client_siret'] . '\'');
+
+                    if ($id_client_siret_exists) {
+                        $msg = 'Nous avons déjà un compte client enregistré pour le numéro SIRET "' . $data['client_siret'] . '".<br/>';
+                        $msg .= 'Veuillez utiliser une adresse e-mail associée à ce compte client.';
+                        $client_errors[] = $msg;
+                    }
+                }
 
                 if (!count($client_errors)) {
-                    $client_errors = $client->validate();
+                    $client_errors = $client->validateArray(array(
+                        'nom'            => $nom_client,
+                        'siret'          => ($isCompany ? $data['client_siret'] : ''),
+                        'address'        => $data['client_address'],
+                        'zip'            => $data['client_zip'],
+                        'town'           => $data['client_town'],
+                        'fk_pays'        => $data['client_pays'],
+                        'phone'          => ($isCompany && $data['client_phone_pro'] ? $data['client_phone_pro'] : $data['client_phone_mobile'] ? $data['client_phone_mobile'] : $data['client_phone_perso'] ? $data['client_phone_perso'] : $data['client_phone_pro']),
+                        'email'          => (BimpObject::objectLoaded($userClient) ? $userClient->getData('email') : $data['client_email']),
+                        'fk_typent'      => ($isCompany ? (int) $data['client_type'] : 8),
+                        'marche'         => array(18),
+                        'note_private'   => 'Fiche client créée automatiquement suite à prise de rendez-vous SAV en ligne',
+                        'mode_reglement' => 6,
+                        'cond_reglement' => 1
+                    ));
+
+                    if (!count($client_errors)) {
+                        $client_errors = $client->validate();
+                    }
                 }
 
                 if (count($client_errors)) {

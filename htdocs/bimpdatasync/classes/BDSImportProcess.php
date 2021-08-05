@@ -58,7 +58,7 @@ abstract class BDSImportProcess extends BDSProcess
             $ref_prop = $instance->getRefProperty();
             $this->setCurrentObject($instance);
 
-            $cleanCache = (count($objects_data > 1000) ? true : false);
+//            $cleanCache = (count($objects_data) > 1000 ? true : false);
             foreach ($objects_data as $idx => $data) {
                 $obj = null;
                 $this->incProcessed();
@@ -158,9 +158,9 @@ abstract class BDSImportProcess extends BDSProcess
                     }
                 }
 
-                if ($cleanCache) {
-                    BimpCache::$cache = array();
-                }
+//                if ($cleanCache) {
+//                    BimpCache::$cache = array();
+//                }
             }
         }
     }
@@ -230,7 +230,7 @@ abstract class BDSImportProcess extends BDSProcess
 
             $this->debug_content .= 'Fichier traité: ' . $file . '<br/>';
 
-            $rows = file($file, FILE_IGNORE_NEW_LINES |  FILE_SKIP_EMPTY_LINES);
+            $rows = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
 //            $this->DebugData($rows, 'Lignes fichier');
 

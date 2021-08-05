@@ -51,7 +51,7 @@ class BDS_ImportsQtyLdlcProcess extends BDSImportFournCatalogProcess
 
                             $donnee = file($file);
                             $fichier = fopen($file, "w");
-                            fputs('');
+                            fputs($fichier, '');
                             $i = 0;
 
                             foreach ($donnee as $d) {

@@ -261,6 +261,12 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                 $id_product = $this->findIdProductFromLineData($line);
                 if ($id_product) {
                     $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_product);
+                    
+                    if ($prod->getRef() === 'GEN-N/A') {
+                        $this->incIgnored($this->pfp_instance);
+                        continue;
+                    }
+                    
                     if ($line['url'] && $prod->getData('url') != $line['url']) {
                         $prod->updateField('url', $line['url']);
                     }

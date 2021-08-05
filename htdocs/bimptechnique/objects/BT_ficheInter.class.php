@@ -349,7 +349,7 @@ class BT_ficheInter extends BimpDolObject
 
             if ($this->isActionAllowed('resendFarSignEmail') && $this->canSetAction('resendFarSignEmail')) {
                 $buttons[] = array(
-                    'label'   => 'Envoyer un nouvel e-mail pour sigature à distance',
+                    'label'   => 'Envoyer un nouvel e-mail pour signature à distance',
                     'icon'    => 'fas_envelope',
                     'onclick' => $this->getJsActionOnclick('resendFarSignEmail', array(), array(
                         'confirm_msg' => 'Attention, un nouveau code d\\\'accès pour la signature à distance sera envoyé au client (le code envoyé précédemment ne sera plus valable). Veuillez confirmer.'

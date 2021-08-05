@@ -17,28 +17,29 @@ class BC_Field extends BimpComponent
     public $display_card_mode = 'none'; // hint / visible
     public $force_edit = false;
     public static $types = array(
-        'string'     => 'Chaîne de caractères',
-        'text'       => 'Text long',
-        'html'       => 'HTML',
-        'password'   => 'Mot de passe',
-        'int'        => 'Nombre entier',
-        'float'      => 'Nombre décimal',
-        'bool'       => 'Booléen (valeur OUI/NON)',
-        'qty'        => 'Quantité',
-        'money'      => 'Valeur monétaire',
-        'percent'    => 'Pourcentage',
-        'id'         => 'Identifiant numérique',
-        'id_parent'  => 'Objet parent',
-        'id_object'  => 'Objet lié',
-        'items_list' => 'Liste',
-        'color'      => 'Couleur',
-        'json'       => 'Ensemble de données au format JSON',
-        'date'       => 'Date',
-        'time'       => 'Heure',
-        'datetime'   => 'Date et heure'
+        'string'      => 'Chaîne de caractères',
+        'text'        => 'Text long',
+        'html'        => 'HTML',
+        'password'    => 'Mot de passe',
+        'int'         => 'Nombre entier',
+        'float'       => 'Nombre décimal',
+        'bool'        => 'Booléen (valeur OUI/NON)',
+        'qty'         => 'Quantité',
+        'money'       => 'Valeur monétaire',
+        'percent'     => 'Pourcentage',
+        'id'          => 'Identifiant numérique',
+        'id_parent'   => 'Objet parent',
+        'id_object'   => 'Objet lié',
+        'items_list'  => 'Liste',
+        'color'       => 'Couleur',
+        'json'        => 'Ensemble de données au format JSON',
+        'date'        => 'Date',
+        'time'        => 'Heure',
+        'datetime'    => 'Date et heure',
+        'obj_filters' => 'Filtres objet'
     );
     public static $type_params_def = array(
-        'id_parent'  => array(
+        'id_parent'      => array(
             'object'             => array('default' => ''),
             'create_form'        => array('default' => ''),
             'create_form_values' => array('data_type' => 'array'),
@@ -47,7 +48,7 @@ class BC_Field extends BimpComponent
             'edit_form_values'   => array('data_type' => 'array'),
             'edit_form_label'    => array('default' => 'Editer')
         ),
-        'id_object'  => array(
+        'id_object'      => array(
             'object'             => array('default' => ''),
             'create_form'        => array('default' => ''),
             'create_form_values' => array('data_type' => 'array'),
@@ -56,29 +57,33 @@ class BC_Field extends BimpComponent
             'edit_form_values'   => array('data_type' => 'array'),
             'edit_form_label'    => array('default' => 'Editer')
         ),
-        'items_list' => array(
+        'items_list'     => array(
             'items_data_type'   => array('default' => 'string'),
             'items_sortable'    => array('data_type' => 'bool', 'default' => 0),
             'items_delimiter'   => array('default' => ','),
             'items_braces'      => array('data_type' => 'bool', 'default' => 0),
             'items_add_all_btn' => array('data_type' => 'bool', 'default' => 0)
         ),
-        'number'     => array(
+        'number'         => array(
             'min'      => array('data_type' => 'string'),
             'max'      => array('data_type' => 'string'),
             'unsigned' => array('data_type' => 'bool', 'default' => 0),
             'decimals' => array('data_type' => 'int', 'default' => 2)
         ),
-        'money'      => array(
+        'money'          => array(
             'currency' => array('default' => 'EUR')
         ),
-        'string'     => array(
+        'string'         => array(
             'size'            => array('data_type' => 'int', 'default' => 128),
             'forbidden_chars' => array('default' => ''),
             'regexp'          => array('default' => ''),
             'invalid_msg'     => array('default' => ''),
             'uppercase'       => array('data_type' => 'bool', 'default' => 0),
             'lowercase'       => array('data_type' => 'bool', 'default' => 0),
+        ),
+        'object_filters' => array(
+            'obj_module' => array('default' => ''),
+            'obj_name'   => array('default' => '')
         )
     );
     public static $missing_if_empty_types = array(
@@ -454,6 +459,7 @@ class BC_Field extends BimpComponent
             case 'date':
             case 'datetime':
             case 'password':
+            case 'object_filters':
                 return $data_type;
         }
 

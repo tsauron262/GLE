@@ -1,0 +1,16 @@
+
+abstract: 0
+table: buc_page_config
+icon: fas_th-list
+
+labels:
+    name: page personnalisée
+    name_plur: pages personnalisées
+    is_female: 1
+    
+fields: 
+    structure: 
+        label: Structure
+        type: json
+        
+        

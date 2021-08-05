@@ -3707,8 +3707,10 @@ class ObjectLine extends BimpObject
             $tabRang = array();
             $tabTemp = $this->db->executeS('SELECT ' . $primary . ' as id, rang FROM llx_' . $table . ' WHERE ' . $this::$dol_line_parent_field . ' = ' . $parent->id, 'array');
 
-            foreach ($tabTemp as $lnTemp) {
-                $tabRang[$lnTemp['id']] = $lnTemp['rang'];
+            if (is_array($tabTemp)) {
+                foreach ($tabTemp as $lnTemp) {
+                    $tabRang[$lnTemp['id']] = $lnTemp['rang'];
+                }
             }
 
             if (!is_null($lines) && count($lines)) {
@@ -4344,8 +4346,8 @@ class ObjectLine extends BimpObject
                     }
                 }
 
-                if ($total_remises) {
-                    $line_total_ttc = BimpTools::calculatePriceTaxIn($line_pu, (float) $line_tva_tx) * (float) $line_qty;
+                if ((float) $total_remises) {
+                    $line_total_ttc = (float) BimpTools::calculatePriceTaxIn($line_pu, (float) $line_tva_tx) * (float) $line_qty;
 
                     if ($line_total_ttc) {
                         $line_remise += (float) (($total_remises / $line_total_ttc) * 100);
@@ -5394,7 +5396,7 @@ class ObjectLine extends BimpObject
             if (!count($errors)) {
                 $prevDeleting = $this->isDeleting;
                 $this->isDeleting = true;
-                
+
                 if (count($lines)) {
                     foreach ($lines as $line) {
                         $del_warnings = array();
@@ -5409,7 +5411,7 @@ class ObjectLine extends BimpObject
                     unset($this->remises);
                     $this->remise = null;
                 }
-                
+
                 $this->isDeleting = $prevDeleting;
             }
         }

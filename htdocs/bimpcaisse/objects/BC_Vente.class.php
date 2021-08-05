@@ -1803,7 +1803,7 @@ class BC_Vente extends BimpObject
             if (count($equipements)) {
                 $current_equipments = $this->getCurrentEquipments();
 
-                if (count($equipements === 1) && !count($products) && !count($products_warnings)) {
+                if (count($equipements) === 1 && !count($products) && !count($products_warnings)) {
                     // un seul équipement trouvé, ajout direct au panier:
                     if (array_key_exists($equipements[0], $current_equipments)) {
                         $result_html .= BimpRender::renderAlerts('L\'équipement #' . $equipements[0] . ' "' . $search . '" a déjà été ajouté au panier', 'warning');

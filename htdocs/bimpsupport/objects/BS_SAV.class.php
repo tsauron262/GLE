@@ -1676,7 +1676,7 @@ class BS_SAV extends BimpObject
         }
 
         $onclick = 'window.open(\'' . GSX_v2::$urls['login'][GSX_v2::$mode] . '\', \'Authentification GSX\', \'menubar=no, status=no, width=800, height=600\')';
-        $html .= '<script>'.$onclick.'</script>';
+        $html .= '<script>' . $onclick . '</script>';
         $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
         $html .= 'Réouvrir fenêtre d\'authentification' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
         $html .= '</span>';
@@ -3023,11 +3023,11 @@ class BS_SAV extends BimpObject
                     $errors[] = "L'appareil " . $eq->getLink() . ' ne semble pas localisé';
                 else {
                     $contact_pref = 1; // On force l'envoi par e-mail
-                    
+
                     $subject = " Important, à propos de la réparation de votre appareil";
 
                     $mail_msg = 'Bonjour,<br/><br/>Votre appareil déposé sous le dossier <b>' . $this->getRef() . '</b>, ';
-                    $mail_msg .= 'n° de série <b>' . $eq->getData('serial').'</b>';
+                    $mail_msg .= 'n° de série <b>' . $eq->getData('serial') . '</b>';
                     $mail_msg .= ' est toujours associé à votre compte Apple iCloud.<br/><br/>';
 
                     $mail_msg .= 'Afin que nous puissions procéder à la réparation de votre matériel, <span style="text-decoration: underline">il est nécessaire que celui-ci soit supprimé de votre compte iCloud.</span><br/><br/>';
@@ -3779,14 +3779,14 @@ class BS_SAV extends BimpObject
             $new_status = null;
 
             if ($this->allGarantie) { // Déterminé par $this->generatePropal()
-                $this->addNote('Devis garantie validé auto le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
+                $this->addNote('Devis garanti validé auto le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
                 // Si on vient de commander les pieces sous garentie (On ne change pas le statut)
                 if ((int) $this->getData('status') !== self::BS_SAV_ATT_PIECE) {
                     $new_status = self::BS_SAV_DEVIS_ACCEPTE;
                 }
 
                 if ($propal->dol_object->valid($user) < 1)
-                    $errors[] = "Validation de devis impossible !!!" . BimpTools::getMsgFromArray($propal->dol_object->errors);
+                    $errors[] = "Echec de la validation du devis " . BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($propal->dol_object));
                 else {
                     $propal->dol_object->cloture($user, 2, "Auto via SAV sous garantie");
                     $propal->fetch($propal->id);
@@ -5429,15 +5429,15 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $msg .= 'Vous pourrez néanmoins accéder à votre <a href="https://www.bimp.fr/espace-client/">espace personnel</a> sur notre site internet «  www.bimp.fr », et si besoin, faire une nouvelle demande d’intervention.' . "\n\n";
 
                     $msg .= 'L’équipe technique BIMP';
-                    
+
                     $from = (isset($centres[$r['code_centre']]['mail']) ? $centres[$r['code_centre']]['mail'] : '');
-                    
+
                     $bimpMail = new BimpMail($subject, $to, $from, $msg);
                     $bimpMail->send();
 
-                    BimpCore::addlog('Annulation auto SAV réservé', Bimp_Log::BIMP_LOG_NOTIF, 'bic', null, array(
-                        'ID SAV' => $r['id']
-                            ), true);
+//                    BimpCore::addlog('Annulation auto SAV réservé', Bimp_Log::BIMP_LOG_NOTIF, 'bic', null, array(
+//                        'ID SAV' => $r['id']
+//                            ), true);
                 }
             }
         }

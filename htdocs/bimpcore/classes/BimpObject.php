@@ -1346,22 +1346,34 @@ class BimpObject extends BimpCache
 
             $field_type = $this->getConf('fields/' . $field_name . '/type', 'string');
 
-            if ($field_type === 'items_list') {
-                if ((int) $this->getConf('fields/' . $field_name . '/items_braces', 0)) {
-                    if (!is_array($value)) {
-                        $value = array($value);
+            switch ($field_type) {
+                case 'json': 
+                case 'object_filters':
+                    if (!$value) {
+                        $value = array();
                     }
-
-                    $values = $value;
-                    $value = '';
-
-                    foreach ($values as $val) {
-                        $value .= '[' . $val . ']';
+                    if (is_array($value)) {
+                        $value = json_encode($value);
                     }
-                } elseif (is_array($value)) {
-                    $delimiter = $this->getConf('fields/' . $field_name . '/items_delimiter', ',');
-                    $value = implode($delimiter, $value);
-                }
+                    break;
+                
+                case 'items_list':
+                    if ((int) $this->getConf('fields/' . $field_name . '/items_braces', 0)) {
+                        if (!is_array($value)) {
+                            $value = array($value);
+                        }
+
+                        $values = $value;
+                        $value = '';
+
+                        foreach ($values as $val) {
+                            $value .= '[' . $val . ']';
+                        }
+                    } elseif (is_array($value)) {
+                        $delimiter = $this->getConf('fields/' . $field_name . '/items_delimiter', ',');
+                        $value = implode($delimiter, $value);
+                    }
+                    break;
             }
         }
 
@@ -2194,7 +2206,7 @@ class BimpObject extends BimpCache
         // Utiliser $context pour connaître l'origine de l'appel à cette fonction (create, update, updateField, fetch (uniquement via BimpCache::getBimpObjectInstance())). 
     }
 
-    public function checkFieldValueType($field, &$value)
+    public function checkFieldValueType($field, &$value, &$errors = array())
     {
         $type = '';
         if (in_array($field, self::$common_fields)) {
@@ -2276,7 +2288,7 @@ class BimpObject extends BimpCache
                             continue;
                         }
                     }
-                    if (!BimpTools::checkValueByType($item_type, $item_value)) {
+                    if (!BimpTools::checkValueByType($item_type, $item_value, $errors)) {
                         $check = false;
                     }
                 }
@@ -2284,7 +2296,7 @@ class BimpObject extends BimpCache
             }
 
             // Vérification et ajustement de la valeur selon son type: 
-            return BimpTools::checkValueByType($type, $value);
+            return BimpTools::checkValueByType($type, $value, $errors);
         }
 
         return false;
@@ -3669,9 +3681,11 @@ class BimpObject extends BimpCache
 
         $missing = false;
 
-        if ($type === 'json') {
-            if (is_string($value)) {
-                $value = json_decode($value, 1);
+        if (in_array($type, array('json', 'object_filters'))) {
+            $value = BimpTools::json_decode_array($value, $errors);
+
+            if (empty($value)) {
+                $missing = true;
             }
         } elseif ($type === 'items_list') {
             if (!is_array($value)) {

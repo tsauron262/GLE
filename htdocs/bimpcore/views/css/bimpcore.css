@@ -16760,6 +16760,11 @@ input[type=text].large_input {
 .bimp_filter_input_container .check_list_search_input {
   display: none !important; }
 
+/*Filters Input*/
+/* line 959, ../scss/bimpcore/_form.scss */
+.obj_filters_input_container input {
+  max-width: 350px !important; }
+
 /* line 1, ../scss/bimpcore/_list.scss */
 table.bimp_list_table,
 table.objectlistTable {
@@ -17545,58 +17550,78 @@ td.buttons {
   .list_active_filters .list_active_filters_title {
     font-size: 13px;
     font-weight: bold; }
-  /* line 871, ../scss/bimpcore/_list.scss */
-  .list_active_filters .filter_active_values {
-    display: inline-block;
-    vertical-align: top;
-    margin: 0 3px;
-    padding: 4px;
-    font-size: 11px; }
-    /* line 878, ../scss/bimpcore/_list.scss */
-    .list_active_filters .filter_active_values .filter_label {
-      font-weight: bold;
-      font-size: 12px; }
-    /* line 883, ../scss/bimpcore/_list.scss */
-    .list_active_filters .filter_active_values .relation {
-      font-weight: bold;
-      font-size: 10px; }
-    /* line 890, ../scss/bimpcore/_list.scss */
-    .list_active_filters .filter_active_values .included_values .filter_value,
-    .list_active_filters .filter_active_values .excluded_values .filter_value {
-      color: #fff;
-      padding: 5px 15px 5px 5px;
-      margin: 2px 0; }
-      /* line 895, ../scss/bimpcore/_list.scss */
-      .list_active_filters .filter_active_values .included_values .filter_value .remove_btn,
-      .list_active_filters .filter_active_values .excluded_values .filter_value .remove_btn {
-        margin-left: 5px;
-        cursor: pointer;
-        float: right;
-        margin-right: -10px; }
-        /* line 901, ../scss/bimpcore/_list.scss */
-        .list_active_filters .filter_active_values .included_values .filter_value .remove_btn:hover,
-        .list_active_filters .filter_active_values .excluded_values .filter_value .remove_btn:hover {
-          color: #fff; }
-    /* line 909, ../scss/bimpcore/_list.scss */
-    .list_active_filters .filter_active_values .included_values .filter_value {
-      background-color: #3E88D2; }
-      /* line 912, ../scss/bimpcore/_list.scss */
-      .list_active_filters .filter_active_values .included_values .filter_value .remove_btn {
-        color: #9EC5E6; }
+
+/* line 874, ../scss/bimpcore/_list.scss */
+.list_active_filters .filter_active_values,
+.obj_filters_input_values .filter_active_values {
+  display: inline-block;
+  vertical-align: top;
+  margin: 0 3px;
+  padding: 4px;
+  font-size: 11px; }
+  /* line 881, ../scss/bimpcore/_list.scss */
+  .list_active_filters .filter_active_values .filter_label,
+  .obj_filters_input_values .filter_active_values .filter_label {
+    font-weight: bold;
+    font-size: 12px; }
+  /* line 886, ../scss/bimpcore/_list.scss */
+  .list_active_filters .filter_active_values .relation,
+  .obj_filters_input_values .filter_active_values .relation {
+    font-weight: bold;
+    font-size: 10px; }
+  /* line 893, ../scss/bimpcore/_list.scss */
+  .list_active_filters .filter_active_values .included_values .filter_value,
+  .list_active_filters .filter_active_values .excluded_values .filter_value,
+  .obj_filters_input_values .filter_active_values .included_values .filter_value,
+  .obj_filters_input_values .filter_active_values .excluded_values .filter_value {
+    color: #fff;
+    padding: 5px 15px 5px 5px;
+    margin: 2px 0; }
+    /* line 898, ../scss/bimpcore/_list.scss */
+    .list_active_filters .filter_active_values .included_values .filter_value.no-buttons,
+    .list_active_filters .filter_active_values .excluded_values .filter_value.no-buttons,
+    .obj_filters_input_values .filter_active_values .included_values .filter_value.no-buttons,
+    .obj_filters_input_values .filter_active_values .excluded_values .filter_value.no-buttons {
+      padding-right: 5px; }
+    /* line 902, ../scss/bimpcore/_list.scss */
+    .list_active_filters .filter_active_values .included_values .filter_value .remove_btn,
+    .list_active_filters .filter_active_values .excluded_values .filter_value .remove_btn,
+    .obj_filters_input_values .filter_active_values .included_values .filter_value .remove_btn,
+    .obj_filters_input_values .filter_active_values .excluded_values .filter_value .remove_btn {
+      margin-left: 5px;
+      cursor: pointer;
+      float: right;
+      margin-right: -10px; }
+      /* line 908, ../scss/bimpcore/_list.scss */
+      .list_active_filters .filter_active_values .included_values .filter_value .remove_btn:hover,
+      .list_active_filters .filter_active_values .excluded_values .filter_value .remove_btn:hover,
+      .obj_filters_input_values .filter_active_values .included_values .filter_value .remove_btn:hover,
+      .obj_filters_input_values .filter_active_values .excluded_values .filter_value .remove_btn:hover {
+        color: #fff; }
+  /* line 916, ../scss/bimpcore/_list.scss */
+  .list_active_filters .filter_active_values .included_values .filter_value,
+  .obj_filters_input_values .filter_active_values .included_values .filter_value {
+    background-color: #3E88D2; }
     /* line 919, ../scss/bimpcore/_list.scss */
-    .list_active_filters .filter_active_values .excluded_values .filter_value {
-      background-color: #A60000; }
-      /* line 922, ../scss/bimpcore/_list.scss */
-      .list_active_filters .filter_active_values .excluded_values .filter_value .remove_btn {
-        color: #DBAFAF; }
+    .list_active_filters .filter_active_values .included_values .filter_value .remove_btn,
+    .obj_filters_input_values .filter_active_values .included_values .filter_value .remove_btn {
+      color: #9EC5E6; }
+  /* line 926, ../scss/bimpcore/_list.scss */
+  .list_active_filters .filter_active_values .excluded_values .filter_value,
+  .obj_filters_input_values .filter_active_values .excluded_values .filter_value {
+    background-color: #A60000; }
+    /* line 929, ../scss/bimpcore/_list.scss */
+    .list_active_filters .filter_active_values .excluded_values .filter_value .remove_btn,
+    .obj_filters_input_values .filter_active_values .excluded_values .filter_value .remove_btn {
+      color: #DBAFAF; }
 
 /*Stats listes*/
-/* line 932, ../scss/bimpcore/_list.scss */
+/* line 939, ../scss/bimpcore/_list.scss */
 .subStatsListTitle {
   margin: 10px;
   font-weight: bold; }
 
-/* line 937, ../scss/bimpcore/_list.scss */
+/* line 944, ../scss/bimpcore/_list.scss */
 .subStatsListContent {
   margin-left: 10px;
   padding-left: 0;

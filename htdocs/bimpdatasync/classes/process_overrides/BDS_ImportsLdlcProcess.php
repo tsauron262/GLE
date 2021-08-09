@@ -127,6 +127,7 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
                     $errors[] = 'Nom du fichier stock fournisseur absent';
                 }
                 break;
+                
             case 'make_prices_file_parts':
                 if (isset($this->nameFile) && $this->nameFile) {
                     $this->makeCsvFileParts($this->local_dir, $this->nameFile, $errors, 3000, 1);

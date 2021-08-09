@@ -331,8 +331,13 @@ class CMailFile
 			{
 				foreach ($filename_list as $i => $val)
 				{
-                                        if(!is_file($filename_list[$i]))
-                                            BimpCore::addlog ('Fichie rpour mail introuvable '.$filename_list[$i]);
+                                        if(!is_file($filename_list[$i])){
+                                            if (!defined('BIMP_LIB')) {
+                                                require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+                                            }
+                                            
+                                            BimpCore::addlog ('Fichier pour e-mail introuvable: "'.$filename_list[$i].'"', Bimp_Log::BIMP_LOG_ALERTE, 'email');
+                                        }
 					$content=file_get_contents($filename_list[$i]);
 					$smtps->setAttachment($content,$mimefilename_list[$i],$mimetype_list[$i]);
 				}

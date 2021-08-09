@@ -58,7 +58,7 @@ class securLogSms {
             if ($this->user->array_options['options_echec_auth'] < $this->max_tentative) {
                 $dateFinBloquage = time() - (60 * 5);
 
-                $secondeRestante = $this->user->array_options['options_heure_sms'] - $dateFinBloquage;
+                $secondeRestante = (int) $this->user->array_options['options_heure_sms'] - $dateFinBloquage;
 
 
                 if (!empty($code))

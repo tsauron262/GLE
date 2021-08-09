@@ -196,6 +196,12 @@ class BS_ApplePart extends BimpObject
                         $type = "ios";
             }
         }
+        
+        
+        //rer systéme 
+        if (stripos($desc, 'REAR SYSTEM') !== false)
+            $type = "rear";
+        
 
 
         //deuxieme cas les Batterie
@@ -290,10 +296,12 @@ class BS_ApplePart extends BimpObject
 
     public function convertPrix($type, $prix, $ref, $desc = '')
     {
-        return self::convertPrixStatic($type, $prix, $ref, $this->getData('price_type'));
+        $sav = $this->getParentInstance();
+        $equipment = $sav->getChildObject('equipment');
+        return self::convertPrixStatic($type, $prix, $ref, $equipment, $this->getData('price_type'));
     }
 
-    public static function convertPrixStatic($type, $prix, $ref, $price_type = 'STOCK')
+    public static function convertPrixStatic($type, $prix, $ref, $equipment, $price_type = 'STOCK')
     {
         //xception 
 //        $tabException1 = array("F661", "AB661", "SF661","B661",  "J661", "E661");
@@ -303,16 +311,14 @@ class BS_ApplePart extends BimpObject
 //        }
         if ($prix == 86.87)
             return (139 / 1.2);
-
+        if ($prix == 65.87)
+            return 82.5;
 
         $coefPrix = 1;
         $constPrix = 0;
         $newPrix = 0;
-
         //Application des coef et constantes
-        if ($type == "ios") {
-            $constPrix = 45;
-        } elseif ($type == "batt" && $price_type == "EXCHANGE") {
+        if ($type == "batt" && $price_type == "EXCHANGE") {
             $newPrix = 49.16666666;
         } elseif ($type == "battX" && $price_type == "EXCHANGE") {
             $newPrix = 70;
@@ -320,6 +326,35 @@ class BS_ApplePart extends BimpObject
             foreach (self::$tabRefCommencePrixEcran as $refT => $tabInfo)
                 if ($ref == $refT)
                     $newPrix = str_replace(",", ".", $tabInfo[0]);
+        } elseif ($equipment->isIphone()) {
+//            $constPrix = 45;
+            if ($prix > 400)
+                $constPrix = $prix * 0.1;
+            elseif ($prix > 350)
+                $constPrix = $prix * 0.13;
+            elseif ($prix > 300)
+                $constPrix = $prix * 0.15;
+            elseif ($prix > 250)
+                $constPrix = $prix * 0.17;
+            elseif ($prix > 200)
+                $constPrix = $prix * 0.2;
+            elseif ($prix > 150)
+                $constPrix = $prix * 0.25;
+            elseif ($prix > 100)
+                $constPrix = $prix * 0.4;
+            else
+                $constPrix = $prix * 0.5 + 24.17;
+        } elseif ($type == 'rear'){
+            if ($prix > 400)
+                $constPrix = $prix * 0.1 + 24.17;
+            elseif ($prix > 350)
+                $constPrix = $prix * 0.13 + 24.17;
+            elseif ($prix > 300)
+                $constPrix = $prix * 0.15 + 24.17;
+            elseif ($prix > 250)
+                $constPrix = $prix * 0.17 + 24.17;
+            elseif ($prix > 200)
+                $constPrix = $prix * 0.2 + 24.17;
         } else {
             if ($prix > 300)
                 $coefPrix = 0.8;

@@ -1749,10 +1749,10 @@ class gsxController extends BimpController
                             );
 
                             if (isset($t['questions']) && !empty($t['questions'])) {
-                                $ok = true;
                                 $responses = $this->gsxProcessRepairQuestionsInputs($t['questions'], $prefixe, $errors);
 
                                 if (!empty($responses)) {
+                                $ok = true;
                                     $tree['questions'] = $responses;
                                 }
                             }
@@ -1783,7 +1783,6 @@ class gsxController extends BimpController
 //                exit;
             }
         }
-
         return array(
             'errors' => $errors,
             'result' => $result

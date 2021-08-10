@@ -29,6 +29,13 @@ objects:
                 name: BContract_contrat
             id_object:
                 request: id
+    user_avenant:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_User
+            id_object:
+                field_value: user_create
 
 fields:
     id_contrat:
@@ -57,6 +64,13 @@ fields:
     signed:
         label: Avenant signé
         type: bool
+    user_create:
+        label: Créé par
+        type: id_object
+        object: user_avenant
+    date_create:
+        label: Créé le
+        type: datetime
 
 lists:
     default:
@@ -84,6 +98,8 @@ lists:
                 label: Coût de l'avenant au prorata
                 value:
                     callback: getTotalCoup
+            user_create:
+            date_create:
     all:
         extends: default
         add_form_name: unset
@@ -97,6 +113,15 @@ lists:
             coup: unset
                 
 forms:
+    delete_avenant:
+        title: Supprimer l'avenant
+        rows:
+            - custom: 1
+              label: Modifications dû à la suppression de l'avenant
+              input:
+                type: custom
+                content: EN ATTENTE
+                    #callback: displayModifSuppAvenant
     add:
         title: Création d'un avenant
         rows:

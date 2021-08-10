@@ -1738,6 +1738,8 @@ class gsxController extends BimpController
                         'templateId' => $qd['templateId']
                     );
                     $trees = array();
+                    
+                    $ok = false;
 
                     if (isset($qd['trees']) && !empty($qd['trees'])) {
                         foreach ($qd['trees'] as $t) {
@@ -1747,6 +1749,7 @@ class gsxController extends BimpController
                             );
 
                             if (isset($t['questions']) && !empty($t['questions'])) {
+                                $ok = true;
                                 $responses = $this->gsxProcessRepairQuestionsInputs($t['questions'], $prefixe, $errors);
 
                                 if (!empty($responses)) {
@@ -1761,7 +1764,8 @@ class gsxController extends BimpController
                         $tpl['trees'] = $trees;
                     }
 
-                    $result['questionDetails'][] = $tpl;
+                    if($ok)
+                        $result['questionDetails'][] = $tpl;
                 }
 
 //                $array = array(

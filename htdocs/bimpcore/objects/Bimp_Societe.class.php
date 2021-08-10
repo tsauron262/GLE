@@ -2336,6 +2336,15 @@ class Bimp_Societe extends BimpDolObject
         $this->dol_object->borne_debut = $debut;
         $this->dol_object->borne_fin = $fin;
 
+//        $files = BimpCache::getBimpObjectObjects('bimpcore', 'BimpFile', array(
+//                    'parent_module'      => 'bimpcore',
+//                    'parent_object_name' => array(
+//                        'in' => array('Bimp_Societe', 'Bimp_Client')
+//                    ),
+//                    'id_parent'          => $this->id,
+//                    'file_name'          => 'Releve_facturation'
+//        ));
+
         if ($this->dol_object->generateDocument('invoiceStatement', $langs) > 0) {
             $success = "Relevé de facturation généré avec succès";
         } else {

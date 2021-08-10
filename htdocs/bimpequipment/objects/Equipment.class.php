@@ -1161,6 +1161,13 @@ class Equipment extends BimpObject
 
         return $html;
     }
+    
+    public function isIphone(){
+        $product_label = $this->displayProduct('nom', true);
+        if (stripos($product_label, "Iphone") !== false || stripos($product_label, "IPAD") !== false || stripos($product_label, "IPOD") !== false || stripos($product_label, "WATCH") !== false || stripos($product_label, "XXXX") !== false || stripos($product_label, "***") !== false)
+            return true;
+        return false;
+    }
 
     public function gsxLookup($serial, &$errors)
     {

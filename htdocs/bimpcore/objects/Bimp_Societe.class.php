@@ -2336,12 +2336,21 @@ class Bimp_Societe extends BimpDolObject
         $this->dol_object->borne_debut = $debut;
         $this->dol_object->borne_fin = $fin;
 
+//        $files = BimpCache::getBimpObjectObjects('bimpcore', 'BimpFile', array(
+//                    'parent_module'      => 'bimpcore',
+//                    'parent_object_name' => array(
+//                        'in' => array('Bimp_Societe', 'Bimp_Client')
+//                    ),
+//                    'id_parent'          => $this->id,
+//                    'file_name'          => 'Releve_facturation'
+//        ));
+
         if ($this->dol_object->generateDocument('invoiceStatement', $langs) > 0) {
             $success = "Relevé de facturation généré avec succès";
         } else {
             $errors[] = "Echec de la génération du relevé de facturation";
         }
-        $callback = "window.open('" . DOL_URL_ROOT . "/document.php?modulepart=company&file=" . $this->id . "%2FRelevé_facturation.pdf&entity=1', '_blank');";
+        $callback = "window.open('" . DOL_URL_ROOT . "/document.php?modulepart=company&file=" . $this->id . "%2FReleve_facturation.pdf&entity=1', '_blank');";
 
         return [
             'success_callback' => $callback,
@@ -2469,7 +2478,7 @@ class Bimp_Societe extends BimpDolObject
 
         if ($init_solv != $this->getData('solvabilite_status') && (int) $this->getData('solvabilite_status') === self::SOLV_A_SURVEILLER_FORCE) {
             global $user;
-            if (!$user->admin || $user->id == 1499) {
+            if (!$user->admin && $user->id != 1499) {
                 return array('Vous n\'avez pas la permission de passer le statut solvabilité à "Client à surveiller (forcé)"');
             }
         }

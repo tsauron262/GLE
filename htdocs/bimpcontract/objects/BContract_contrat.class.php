@@ -1387,49 +1387,26 @@ class BContract_contrat extends BimpDolObject
         $new_date_end->add(new DateInterval("P" . $duree_contrat . "M"));
         $new_date_end->sub(new DateInterval('P1D'));
 
-        $renouvellementTacite = 0;
         switch ($this->getData('tacite')) {
             case self::CONTRAT_RENOUVELLEMENT_1_FOIS:
-                $renouvellementTacite = 1;
+                $new_renouvellementTacite = self::CONTRAT_RENOUVELLEMENT_NON;
                 break;
             case self::CONTRAT_RENOUVELLEMENT_2_FOIS:
-                $renouvellementTacite = 3;
+                $new_renouvellementTacite = self::CONTRAT_RENOUVELLEMENT_1_FOIS;
                 break;
             case self::CONTRAT_RENOUVELLEMENT_3_FOIS:
-                $renouvellementTacite = 6;
+                $new_renouvellementTacite = self::CONTRAT_RENOUVELLEMENT_2_FOIS;
                 break;
             case self::CONTRAT_RENOUVELLEMENT_4_FOIS:
-                $renouvellementTacite = 4;
+                $new_renouvellementTacite = self::CONTRAT_RENOUVELLEMENT_3_FOIS;
                 break;
             case self::CONTRAT_RENOUVELLEMENT_5_FOIS:
-                $renouvellementTacite = 5;
+                $new_renouvellementTacite = self::CONTRAT_RENOUVELLEMENT_4_FOIS;
                 break;
             case self::CONTRAT_RENOUVELLEMENT_6_FOIS:
-                $renouvellementTacite = 7;
+                $new_renouvellementTacite = self::CONTRAT_RENOUVELLEMENT_5_FOIS;
                 break;
         }
-        $new_renouvellementTacite = $renouvellementTacite - 1;
-        switch ($new_renouvellementTacite) {
-            case 1:
-                $to_tacite = self::CONTRAT_RENOUVELLEMENT_1_FOIS;
-                break;
-            case 3:
-                $to_tacite = self::CONTRAT_RENOUVELLEMENT_2_FOIS;
-                break;
-            case 6:
-                $to_tacite = self::CONTRAT_RENOUVELLEMENT_3_FOIS;
-                break;
-            case 4:
-                $to_tacite = self::CONTRAT_RENOUVELLEMENT_4_FOIS;
-                break;
-            case 5:
-                $to_tacite = self::CONTRAT_RENOUVELLEMENT_5_FOIS;
-                break;
-            case 7:
-                $to_tacite = self::CONTRAT_RENOUVELLEMENT_6_FOIS;
-                break;
-        }
-
         $errors[] = "SYNTEC: " . $current_indice_syntec;
         $errors[] = "NEW SYNTEC: " . $new_indice_syntec;
         $errors[] = "USE SYNTEC: " . $syntec_for_use_this_renouvellement;

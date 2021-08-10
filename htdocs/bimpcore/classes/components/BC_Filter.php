@@ -112,13 +112,25 @@ class BC_Filter extends BimpComponent
 
         $items = null;
 
+        $input_type = $this->object->getConf('fields/' . $this->bc_field->name . '/input/type', '');
+        if ($input_type === 'search_user') {
+            $this->params['type'] = 'user';
+        } elseif ($this->bc_field->params['type'] == 'id_object') {
+            $field_child_name = BimpTools::getArrayValueFromPath($this->bc_field->params, 'object', '');
+
+            if ($field_child_name) {
+                $field_obj_name = $this->object->getConf('objects/' . $field_child_name . '/instance/bimp_object/name', '', false, 'string');
+
+                if ($field_obj_name == 'Bimp_User') {
+                    $this->params['type'] = 'user';
+                }
+            }
+        }
+
         if (is_null($this->params['type']) || !(string) $this->params['type']) {
             if (!is_null($this->bc_field)) {
                 // Type de filtre selon paramètre du champ: 
-                $input_type = $this->object->getConf('fields/' . $this->bc_field->name . '/input/type', '');
-                if ($input_type === 'search_user') {
-                    $this->params['type'] = 'user';
-                } elseif (isset($this->bc_field->params['values']) && !empty($this->bc_field->params['values'])) {
+                if (isset($this->bc_field->params['values']) && !empty($this->bc_field->params['values'])) {
                     if (count($this->bc_field->params['values']) <= 10) {
                         $this->params['type'] = 'check_list';
                         $items = $this->bc_field->params['values'];
@@ -224,7 +236,9 @@ class BC_Filter extends BimpComponent
                 break;
 
             case 'user':
-                if ($value === 'current') {
+                if (is_array($value) && isset($value['id_filters'])) {
+                    $label = $this->getObjectChildIdFiltersLabel($value['id_filters']);
+                } elseif ($value === 'current') {
                     $label = 'Utilisateur connecté';
                 } else {
                     $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $value);
@@ -840,7 +854,7 @@ class BC_Filter extends BimpComponent
 
     // Rendus HTML:
 
-    public function renderHtml()
+    public function renderHtml($context = 'filters_panel')
     {
         if (!$this->isOk() || !$this->isObjectValid()) {
             return '';
@@ -891,39 +905,43 @@ class BC_Filter extends BimpComponent
         }
         $html .= '>';
 
-        $html .= '<div class="bimp_filter_caption foldable_caption">';
-        $html .= $this->getParam('label', $this->filter_name) . '<br/>';
-        $title = self::getFilterTitle($this->base_object, $this->name);
-        if (!$title) {
-            $title = str_replace(':', ' > ', $this->name);
+        if ($context === 'filters_panel') {
+            $html .= '<div class="bimp_filter_caption foldable_caption">';
+            $html .= $this->getParam('label', $this->filter_name) . '<br/>';
+            $title = self::getFilterTitle($this->base_object, $this->name);
+            if (!$title) {
+                $title = str_replace(':', ' > ', $this->name);
+            }
+            $html .= '<span class="smallInfo" style="font-weight: normal">' . $title . '</span>';
+            $html .= '<span class="foldable-caret"></span>';
+            $html .= '</div>';
         }
-        $html .= '<span class="smallInfo" style="font-weight: normal">' . $title . '</span>';
-        $html .= '<span class="foldable-caret"></span>';
-        $html .= '</div>';
 
-        $html .= '<div class="bimp_filter_content foldable_content"' . (!$open ? ' style="display: none"' : '') . '>';
+        $html .= '<div class="bimp_filter_content' . ($context === 'filters_panel' ? ' foldable_content"' . (!$open ? ' style="display: none"' : '') : '"') . '>';
 
         $html .= '<div class="bimp_filter_input_container">';
-        $html .= $this->renderAddInput();
+        $html .= $this->renderAddInput($context);
         $html .= '</div>';
 
         $html .= '</div>';
 
         $values_hidden = false;
 
-        if ($this->params['type'] === 'check_list' && $this->params['open']) {
-            $values_hidden = true;
-        }
+        if ($context === 'filters_panel') {
+            if ($this->params['type'] === 'check_list' && $this->params['open']) {
+                $values_hidden = true;
+            }
 
-        $html .= '<div class="bimp_filter_values_container"' . ($values_hidden ? ' style="display: none"' : '') . '>';
-        foreach ($this->values as $value) {
-            $html .= $this->renderFilterValue($value, false);
-        }
+            $html .= '<div class="bimp_filter_values_container"' . ($values_hidden ? ' style="display: none"' : '') . '>';
+            foreach ($this->values as $value) {
+                $html .= $this->renderFilterValue($value, false);
+            }
 
-        foreach ($this->excluded_values as $value) {
-            $html .= $this->renderFilterValue($value, true);
+            foreach ($this->excluded_values as $value) {
+                $html .= $this->renderFilterValue($value, true);
+            }
+            $html .= '</div>';
         }
-        $html .= '</div>';
 
         $html .= '</div>';
 
@@ -973,7 +991,7 @@ class BC_Filter extends BimpComponent
         return $html;
     }
 
-    public function renderAddInput()
+    public function renderAddInput($context = 'filters_panel')
     {
         if (!$this->params['show']) {
             return '';
@@ -1009,12 +1027,14 @@ class BC_Filter extends BimpComponent
 
         $add_btn_html = '<div style="text-align: right; margin: 2px 0">';
         if ((int) $this->params['exclude_btn']) {
-            $add_btn_html .= '<button type="button" class="btn btn-default-danger btn-small" onclick="addFieldFilterValue($(this), true);">';
+            $onclick = 'addFieldFilterValue($(this), true, \'' . $context . '\');';
+            $add_btn_html .= '<button type="button" class="btn btn-default-danger btn-small filter_submit_btn" onclick="' . $onclick . '">';
             $add_btn_html .= BimpRender::renderIcon('fas_times-circle', 'iconLeft') . 'Exclure';
             $add_btn_html .= '</button>';
         }
         if ((int) $this->params['add_btn']) {
-            $add_btn_html .= '<button type="button" class="btn btn-default btn-small" onclick="addFieldFilterValue($(this), false);">';
+            $onclick = 'addFieldFilterValue($(this), false, \'' . $context . '\');';
+            $add_btn_html .= '<button type="button" class="btn btn-default btn-small filter_submit_btn" onclick="' . $onclick . '">';
             $add_btn_html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter';
             $add_btn_html .= '</button>';
         }
@@ -1023,7 +1043,7 @@ class BC_Filter extends BimpComponent
         switch ($this->params['type']) {
             case 'user':
             case 'value':
-                $html .= $this->renderValueInput($input_name, $add_btn_html, $input_path, $field_params);
+                $html .= $this->renderValueInput($input_name, $add_btn_html, $input_path, $field_params, $context);
                 break;
 
             case 'value_part':
@@ -1035,20 +1055,21 @@ class BC_Filter extends BimpComponent
                 if ($input_type === 'datetime') {
                     $input_type = 'date';
                 }
-                $html .= $this->renderDateRangeInput($input_type . '_range', $input_name, $add_btn_html);
+                $html .= $this->renderDateRangeInput($input_type . '_range', $input_name, $add_btn_html, $context);
                 break;
 
             case 'range':
                 $input_options = array(
-                    'data' => array(
+                    'data'        => array(
                         'data_type' => 'number',
                         'decimals'  => 8,
                         'min'       => 'none',
                         'max'       => 'none'
-                    )
+                    ),
+                    'extra_class' => 'bimp_filter_input'
                 );
 
-                $html .= '<b>Min:</b><br/>' . BimpInput::renderInput('text', $input_name . '_min', '', $input_options);
+                $html .= '<b>Min:</b><br/>' . BimpInput::renderInput('text', $input_name . '_min', '', $input_options) . '<br/>';
                 $html .= '<b>Max:</b><br/>' . BimpInput::renderInput('text', $input_name . '_max', '', $input_options);
 
                 $html .= $add_btn_html;
@@ -1069,8 +1090,10 @@ class BC_Filter extends BimpComponent
         return $html;
     }
 
-    public function renderValueInput($input_name, $add_btn_html, $input_path, $field_params)
+    public function renderValueInput($input_name, $add_btn_html, $input_path, $field_params, $context = 'filters_panel')
     {
+        BimpObject::loadClass('bimpuserconfig', 'ListFilters');
+
         $html = '';
         $child_instance = $this->getChildInstance();
 
@@ -1098,6 +1121,7 @@ class BC_Filter extends BimpComponent
             // Type recherche d'objet: 
             $html .= '<div class="bimp_filter_type_container bimp_filter_type_">';
             $bc_input = new BC_Input($this->object, $this->params['data_type'], $input_name, $input_path, null, $field_params);
+            $bc_input->addInputExtraClass('bimp_filter_input');
             $html .= $bc_input->renderHtml();
             $html .= $add_btn_html;
             $html .= '</div>';
@@ -1110,16 +1134,16 @@ class BC_Filter extends BimpComponent
             $html .= '</div>';
             $html .= '<div style="margin-top: 5px">';
             $html .= '<b>Liste d\'IDs:</b><br/>';
-            $html .= '<input type="text" name="' . $input_name . '_ids_list" value="" class="bimp_filter_object_ids_list"/>';
+            $html .= '<input type="text" name="' . $input_name . '_ids_list" value="" class="bimp_filter_input bimp_filter_object_ids_list"/>';
             $html .= '</div>';
             $html .= '<div style="text-align: right; margin-top: 2px">';
             if ((int) $this->params['exclude_btn']) {
-                $html .= '<button type="button" class="btn btn-default-danger btn-small" onclick="addFieldFilterObjectIDs($(this), true)">';
+                $html .= '<button type="button" class="btn btn-default-danger btn-small filter_submit_btn" onclick="addFieldFilterObjectIDs($(this), true, \'' . $context . '\')">';
                 $html .= BimpRender::renderIcon('fas_times-circle', 'iconLeft') . 'Exclure';
                 $html .= '</button>';
             }
             if ((int) $this->params['add_btn']) {
-                $html .= '<button type="button" class="btn btn-default btn-small" onclick="addFieldFilterObjectIDs($(this), false)">';
+                $html .= '<button type="button" class="btn btn-default btn-small filter_submit_btn" onclick="addFieldFilterObjectIDs($(this), false, \'' . $context . '\')">';
                 $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter';
                 $html .= '</button>';
             }
@@ -1135,21 +1159,35 @@ class BC_Filter extends BimpComponent
                 $list_page_url = $child_instance->getListPageUrl();
                 if ($list_page_url) {
                     $html .= '<a href="' . $list_page_url . '" target="_blank">Définir des filtres pour ' . $child_instance->getLabel('the_plur') . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a><br/>';
-                    $html .= '<span class="smallInfo">Actualisez la liste pour rafraîchir</span>';
+
+                    switch ($context) {
+                        case 'filters_panel':
+                            $html .= '<span class="smallInfo">Actualisez la liste pour rafraîchir</span>';
+                            break;
+
+                        case 'filters_input':
+                            $html .= '<span class="btn btn-default" onclick="reloadFiltersInputAddFilterInput($(this))">';
+                            $html .= BimpRender::renderIcon('fas_undo', 'iconLeft') . 'Actualiser';
+                            $html .= '</span>';
+                            break;
+                    }
                 }
             } else {
                 $html .= BimpInput::renderInput('select', $input_name . '_child_filters', 0, array(
-                            'extra_class' => 'bimp_filter_child_id_filters',
-                            'options'     => $userChildFilters
+                            'extra_class' => 'bimp_filter_input bimp_filter_child_id_filters',
+                            'options'     => $userChildFilters,
+                            'data'        => array(
+                                'default_value' => 0
+                            )
                 ));
                 $html .= '<div style="text-align: right; margin-top: 2px">';
                 if ((int) $this->params['exclude_btn']) {
-                    $html .= '<button type="button" class="btn btn-default-danger btn-small" onclick="addFieldFilterObjectFilters($(this), true)">';
+                    $html .= '<button type="button" class="btn btn-default-danger btn-small filter_submit_btn" onclick="addFieldFilterObjectFilters($(this), true, \'' . $context . '\')">';
                     $html .= BimpRender::renderIcon('fas_times-circle', 'iconLeft') . 'Exclure';
                     $html .= '</button>';
                 }
                 if ((int) $this->params['add_btn']) {
-                    $html .= '<button type="button" class="btn btn-default btn-small" onclick="addFieldFilterObjectFilters($(this), false)">';
+                    $html .= '<button type="button" class="btn btn-default btn-small filter_submit_btn" onclick="addFieldFilterObjectFilters($(this), false, \'' . $context . '\')">';
                     $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter';
                     $html .= '</button>';
                 }
@@ -1161,12 +1199,12 @@ class BC_Filter extends BimpComponent
             if ($this->params['type'] === 'user') {
                 $html .= '<div class="bimp_filter_type_container bimp_filter_type_current" style="text-align: right">';
                 if ((int) $this->params['exclude_btn']) {
-                    $html .= '<span class="btn btn-default-danger btn-small" onclick="addFieldFilterCustomValue($(this), \'current\', true)">';
+                    $html .= '<span class="btn btn-default-danger btn-small filter_submit_btn" onclick="addFieldFilterCustomValue($(this), \'current\', true, \'' . $context . '\')">';
                     $html .= BimpRender::renderIcon('fas_times-circle', 'iconLeft') . 'Exclure';
                     $html .= '</span>';
                 }
                 if ((int) $this->params['add_btn']) {
-                    $html .= '<span class="btn btn-default btn-small" onclick="addFieldFilterCustomValue($(this), \'current\', false)">';
+                    $html .= '<span class="btn btn-default btn-small filter_submit_btn" onclick="addFieldFilterCustomValue($(this), \'current\', false, \'' . $context . '\')">';
                     $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter';
                     $html .= '</span>';
                 }
@@ -1174,6 +1212,7 @@ class BC_Filter extends BimpComponent
             }
         } else {
             $bc_input = new BC_Input($this->object, $this->params['data_type'], $input_name, $input_path, null, $field_params);
+            $bc_input->addInputExtraClass('bimp_filter_input');
             $html .= $bc_input->renderHtml();
             $html .= $add_btn_html;
         }
@@ -1191,20 +1230,23 @@ class BC_Filter extends BimpComponent
                         'full'      => 'Est égal à',
                         'beginning' => 'Commence par',
                         'end'       => 'Fini par'
-                    )
+                    ),
         ));
 
-        $html .= BimpInput::renderInput('text', $input_name, '');
+        $html .= '<br/>' . BimpInput::renderInput('text', $input_name, '', array(
+                    'extra_class' => 'bimp_filter_input'
+        ));
         $html .= $add_btn_html;
 
         return $html;
     }
 
-    public function renderDateRangeInput($input_type, $input_name, $add_btn_html)
+    public function renderDateRangeInput($input_type, $input_name, $add_btn_html, $context = 'filters_panel')
     {
         $html = '';
 
         if ($input_type === 'date_range') {
+            // Sélection du type: 
             $html .= '<div class="bimp_filter_type_select">';
             $html .= 'Type: <br/>';
             $html .= BimpInput::renderInput('select', $input_name . '_filter_type', ($this->cur_value_type ? $this->cur_value_type : 'min_max'), array(
@@ -1216,84 +1258,98 @@ class BC_Filter extends BimpComponent
             ));
             $html .= '</div>';
 
+            // Type période relative:
             $html .= '<div class="bimp_filter_type_container bimp_filter_type_period bimp_filter_date_range_period">';
             $html .= '<div>';
             $html .= '<b>Période passée:</b> <br/>';
             $html .= BimpInput::renderInput('qty', $input_name . '_period_qty', 0, array(
-                        'extra_class' => 'bimp_filter_date_range_period_qty',
+                        'extra_class' => 'bimp_filter_input bimp_filter_date_range_period_qty',
                         'data'        => array(
-                            'data_type' => 'number',
-                            'min'       => 0,
-                            'max'       => 'none',
-                            'unsigned'  => 1,
-                            'decimals'  => 0
+                            'data_type'     => 'number',
+                            'min'           => 0,
+                            'max'           => 'none',
+                            'unsigned'      => 1,
+                            'decimals'      => 0,
+                            'default_value' => 0
                         )
             ));
-            $html .= BimpInput::renderInput('select', $input_name . '_period_unit', 'y', array(
-                        'extra_class' => 'bimp_filter_date_range_period_unit ',
+            $html .= BimpInput::renderInput('select', $input_name . '_period_unit', 'n', array(
+                        'extra_class' => 'bimp_filter_input bimp_filter_date_range_period_unit ',
                         'options'     => array(
                             'n' => 'Année(s)',
                             'm' => 'Mois',
                             'j' => 'Jour(s)',
+                        ),
+                        'data'        => array(
+                            'default_value' => 'n'
                         )
             ));
             $html .= '</div>';
             $html .= '<div style="margin-top: 5px">';
             $html .= '<b>Décalage (-):</b> <br/>';
             $html .= BimpInput::renderInput('qty', $input_name . '_period_offset_qty', 0, array(
-                        'extra_class' => 'bimp_filter_date_range_offset_qty',
+                        'extra_class' => 'bimp_filter_input bimp_filter_date_range_offset_qty',
                         'data'        => array(
-                            'data_type' => 'number',
-                            'min'       => 'none',
-                            'max'       => 'none',
-                            'unsigned'  => 0,
-                            'decimals'  => 0
+                            'data_type'     => 'number',
+                            'min'           => 'none',
+                            'max'           => 'none',
+                            'unsigned'      => 0,
+                            'decimals'      => 0,
+                            'default_value' => 0
                         )
             ));
-            $html .= BimpInput::renderInput('select', $input_name . '_period_offset_unit', 'y', array(
-                        'extra_class' => 'bimp_filter_date_range_offset_unit ',
+            $html .= BimpInput::renderInput('select', $input_name . '_period_offset_unit', 'n', array(
+                        'extra_class' => 'bimp_filter_input bimp_filter_date_range_offset_unit ',
                         'options'     => array(
                             'n' => 'Année(s)',
                             'm' => 'Mois',
                             'j' => 'Jour(s)',
+                        ),
+                        'data'        => array(
+                            'default_value' => 'n'
                         )
             ));
             $html .= '</div>';
             $html .= '<div style="margin-top: 5px">';
             $html .= '<b>Mode:</b>';
             $html .= BimpInput::renderInput('select', $input_name . '_period_mode', 'abs', array(
-                        'extra_class' => 'bimp_filter_date_range_period_mode ',
+                        'extra_class' => 'bimp_filter_input bimp_filter_date_range_period_mode ',
                         'options'     => array(
                             'abs' => 'Absolu',
                             'rel' => 'Relatif'
+                        ),
+                        'data'        => array(
+                            'default_value' => 'abs'
                         )
             ));
             $html .= '</div>';
             $html .= '<div class="date_range_limits_container" style="margin-top: 5px">';
             $html .= '<b>Limites:</b><br/>';
             $html .= BimpInput::renderInput($input_type, $input_name . '_period_limit', '', array(
-                        'from_label' => 'Min',
-                        'to_label'   => 'Max'
+                        'from_label'  => 'Min',
+                        'to_label'    => 'Max',
+                        'extra_class' => 'bimp_filter_input'
             ));
             $html .= '</div>';
 
             $html .= '<div style="text-align: right; margin-top: 2px">';
             if ((int) $this->params['exclude_btn']) {
-                $html .= '<button type="button" class="btn btn-default-danger btn-small" onclick="addFieldFilterDateRangePeriod($(this), true)">';
+                $html .= '<button type="button" class="btn btn-default-danger btn-small filter_submit_btn" onclick="addFieldFilterDateRangePeriod($(this), true, \'' . $context . '\')">';
                 $html .= BimpRender::renderIcon('fas_times-circle', 'iconLeft') . 'Exclure';
                 $html .= '</button>';
             }
             if ((int) $this->params['add_btn']) {
-                $html .= '<button type="button" class="btn btn-default btn-small" onclick="addFieldFilterDateRangePeriod($(this), false)">';
+                $html .= '<button type="button" class="btn btn-default btn-small filter_submit_btn" onclick="addFieldFilterDateRangePeriod($(this), false, \'' . $context . '\')">';
                 $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter';
                 $html .= '</button>';
             }
             $html .= '</div>';
             $html .= '</div>';
 
+            // Type date relative à aujourd'hui:  
             $html .= '<div class="bimp_filter_type_container bimp_filter_type_option bimp_filter_date_range_option">';
             $html .= BimpInput::renderInput('select', $input_name . 'date_range_option', '', array(
-                        'extra_class' => 'bimp_filter_date_range_option',
+                        'extra_class' => 'bimp_filter_input bimp_filter_date_range_option',
                         'options'     => array(
                             ''          => '',
                             'max_today' => '<= Aujourd\'hui',
@@ -1304,24 +1360,29 @@ class BC_Filter extends BimpComponent
             ));
             $html .= '<div style="text-align: right; margin-top: 2px">';
             if ((int) $this->params['exclude_btn']) {
-                $html .= '<button type="button" class="btn btn-default-danger btn-small" onclick="addFieldFilterDateRangeOption($(this), true)">';
+                $html .= '<button type="button" class="btn btn-default-danger btn-small filter_submit_btn" onclick="addFieldFilterDateRangeOption($(this), true, \'' . $context . '\')">';
                 $html .= BimpRender::renderIcon('fas_times-circle', 'iconLeft') . 'Exclure';
                 $html .= '</button>';
             }
             if ((int) $this->params['add_btn']) {
-                $html .= '<button type="button" class="btn btn-default btn-small" onclick="addFieldFilterDateRangeOption($(this), false)">';
+                $html .= '<button type="button" class="btn btn-default btn-small filter_submit_btn" onclick="addFieldFilterDateRangeOption($(this), false, \'' . $context . '\')">';
                 $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter';
                 $html .= '</button>';
             }
             $html .= '</div>';
             $html .= '</div>';
 
+            // Type Min / Max: 
             $html .= '<div class="bimp_filter_type_container bimp_filter_type_min_max">';
-            $html .= BimpInput::renderInput($input_type, $input_name);
+            $html .= BimpInput::renderInput($input_type, $input_name, '', array(
+                        'extra_class' => 'bimp_filter_input'
+            ));
             $html .= $add_btn_html;
             $html .= '</div>';
         } else {
-            $html .= BimpInput::renderInput($input_type, $input_name);
+            $html .= BimpInput::renderInput($input_type, $input_name, '', array(
+                        'extra_class' => 'bimp_filter_input'
+            ));
             $html .= $add_btn_html;
         }
 
@@ -1400,14 +1461,16 @@ class BC_Filter extends BimpComponent
         return $label;
     }
 
-    public static function getFilterTitle($base_object, $full_name, &$errors = array())
+    public static function getFilterTitle($base_object, $full_name, &$errors = array(), $with_base_object = true)
     {
         $full_name = str_replace('___', ':', $full_name);
 
         $title = '';
 
         if (is_a($base_object, 'BimpObject')) {
-            $title = BimpTools::ucfirst($base_object->getLabel()) . ' > ';
+            if ($with_base_object) {
+                $title = BimpTools::ucfirst($base_object->getLabel()) . ' > ';
+            }
             $children = explode(':', $full_name);
             $filter_name = array_pop($children);
             $filter_obj = $base_object;
@@ -1738,7 +1801,7 @@ class BC_Filter extends BimpComponent
                             $to_day = $day_max;
                         }
                         $dt_to = new DateTime($to_year . '-' . $to_month . '-' . $to_day);
-                        
+
                         $from_month = (int) $dt_from->format('m') - $nMonth;
                         $from_year = (int) $dt_from->format('Y');
                         $from_day = (int) $dt_from->format('d');

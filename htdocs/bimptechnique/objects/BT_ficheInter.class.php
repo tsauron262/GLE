@@ -349,7 +349,7 @@ class BT_ficheInter extends BimpDolObject
 
             if ($this->isActionAllowed('resendFarSignEmail') && $this->canSetAction('resendFarSignEmail')) {
                 $buttons[] = array(
-                    'label'   => 'Envoyer un nouvel e-mail pour sigature à distance',
+                    'label'   => 'Envoyer un nouvel e-mail pour signature à distance',
                     'icon'    => 'fas_envelope',
                     'onclick' => $this->getJsActionOnclick('resendFarSignEmail', array(), array(
                         'confirm_msg' => 'Attention, un nouveau code d\\\'accès pour la signature à distance sera envoyé au client (le code envoyé précédemment ne sera plus valable). Veuillez confirmer.'
@@ -897,7 +897,7 @@ class BT_ficheInter extends BimpDolObject
             $coup_technicien = BimpCore::getConf("bimptechnique_coup_horaire_technicien");
 
             $commandes = $this->getData('commandes');
-            if (!empty($commandes)) {
+            if (is_array($commandes) && !empty($commandes)) {
                 foreach ($commandes as $id_commande) {
                     $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id_commande);
 
@@ -1657,7 +1657,7 @@ class BT_ficheInter extends BimpDolObject
                             $bimpMail = new BimpMail($subject, $email_cli, '', $message, $reply_to, $cc);
                             $bimpMail->addFile(array($pdf_file, 'application/pdf', $ref . '.pdf'));
                             $bimpMail->send($mail_cli_errors);
-                            
+
                             if (!count($mail_cli_errors)) {
                                 $this->addLog("FI envoyée au client avec succès");
                             }
@@ -1761,7 +1761,7 @@ class BT_ficheInter extends BimpDolObject
                 $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement du mot de passe');
             } else {
                 $subject = 'Fiche d\'intervention - ' . $this->getRef();
-                
+
                 $msg = 'Bonjour,<br/><br/>';
                 $msg .= 'Merci de signer votre rapport d\'intervention à l\'adresse suivante: ';
                 $msg .= '<a href="' . DOL_URL_ROOT . '/bimptechnique/public">' . DOL_URL_ROOT . '/bimptechnique/public</a>';
@@ -1795,12 +1795,12 @@ class BT_ficheInter extends BimpDolObject
                 if (file_exists($file)) {
                     $bimpMail->addFile(array($file, 'application/pdf', $this->dol_object->ref . '.pdf'));
                 }
-                
+
                 $mail_errors = array();
                 $bimpMail->send($mail_errors);
 
                 sleep(3);
-                
+
                 if (count($mail_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail au client pour la signature à distance');
                 }
@@ -2010,12 +2010,18 @@ class BT_ficheInter extends BimpDolObject
         $errors = parent::create($warnings, $force_create);
 
         if (!count($errors)) {
-            foreach ($this->getData('commandes') as $id_commande) {
-                addElementElement("commande", "fichinter", $id_commande, $this->id);
+            $commandes = $this->getData('commandes');
+            if (is_array($commandes)) {
+                foreach ($commandes as $id_commande) {
+                    addElementElement("commande", "fichinter", $id_commande, $this->id);
+                }
             }
 
-            foreach ($this->getData('tickets') as $id_ticket) {
-                addElementElement('bimp_ticket', 'fichinter', $id_ticket, $this->id);
+            $tickets = $this->getData('tickets');
+            if (is_array($tickets)) {
+                foreach ($tickets as $id_ticket) {
+                    addElementElement('bimp_ticket', 'fichinter', $id_ticket, $this->id);
+                }
             }
 
             if ((int) $this->getData('fk_contrat')) {

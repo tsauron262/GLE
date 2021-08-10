@@ -596,7 +596,7 @@ fields:
         type: bool
         default_value: 1
         dol_extra_field: 1
-        
+            
 #    *** Champs non gérés: ***
 #    entity
 #    ref_ext
@@ -837,6 +837,7 @@ views:
                       panel: 0
                       
 forms: 
+            
     light: 
         title: Ajout d'une société
         rows: 

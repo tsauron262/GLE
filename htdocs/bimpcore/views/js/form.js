@@ -132,7 +132,7 @@ function prepareFormSubmit($form) {
             if (field_name) {
                 switch (data_type) {
                     case 'json':
-                        var $input = $(this).find('[name="' + field_name + '"]');
+                        var $input = $(this).find('[name="' + field_prefix + field_name + '"]');
                         if (!$input.length) {
                             var values = getJsonInputSubValues($(this), field_name, true);
                             var val_str = JSON.stringify(values);
@@ -2305,6 +2305,281 @@ function resetInputDisplay($form) {
     });
 }
 
+// Actions Filters Input: 
+
+function setFiltersInputObjectData($filtersInputContainer, module, object_name) {
+    if ($.isOk($filtersInputContainer)) {
+        var cur_module = $filtersInputContainer.data('obj_module');
+        var cur_object_name = $filtersInputContainer.data('obj_name');
+
+        if (cur_module && cur_object_name && cur_module === module && cur_object_name === object_name) {
+            return;
+        }
+
+        $filtersInputContainer.data('obj_module', module);
+        $filtersInputContainer.data('obj_name', object_name);
+
+        if (module && object_name) {
+            $filtersInputContainer.find('.no_object_notif').stop().slideUp(250);
+            $filtersInputContainer.find('.obj_filters_input_values').find('.panel-body').html('<div class="info">Aucun filtre ajouté</div>');
+            BimpAjax('getFiltersInputAddFiltersInput', {
+                module: module,
+                object_name: object_name
+            }, $filtersInputContainer.find('.filters_input_add_filter_form'), {
+                display_success: false,
+                display_processing: true,
+                processing_msg: '',
+                processing_padding: 10,
+                append_html: true,
+                success: function (result, bimpAjax) {
+                    setFiltersInputAddFilterFormEvents(bimpAjax.$resultContainer);
+                }
+            });
+        } else {
+            $filtersInputContainer.find('.filters_input_add_filter_form').hide().html('');
+            $filtersInputContainer.find('.no_object_notif').stop().slideDown(250);
+        }
+    }
+}
+
+function reloadFiltersInputValue($filtersInputContainer, filters, success_callback, error_callback) {
+    var module = $filtersInputContainer.data('obj_module');
+    var object_name = $filtersInputContainer.data('obj_name');
+
+    BimpAjax('getFiltersInputValuesHtml', {
+        module: module,
+        object_name: object_name,
+        filters: filters
+    }, $filtersInputContainer.find('.obj_filters_input_values').children('.panel').children('.panel-body'), {
+        display_success: false,
+        display_processing: true,
+        processing_msg: '',
+        processing_padding: 10,
+        append_html: true,
+        success: function (result, bimpAjax) {
+            if (typeof (success_callback) === 'function') {
+                success_callback(result, bimpAjax);
+            }
+        },
+        error: function (result, bimpAjax) {
+            if (typeof (error_callback) === 'function') {
+                error_callback(result, bimpAjax);
+            }
+        }
+    });
+}
+
+function reloadFiltersInputAddFilterInput($button) {
+    if ($.isOk($button)) {
+        var $container = $button.findParentByClass('objectFilterItemsSelectContainer');
+
+        if ($.isOk($container)) {
+            var $select = $container.children('select.field_select');
+
+            if ($select.length) {
+                $select.change();
+                return;
+            }
+        }
+    }
+
+    bimp_msg('Une erreur est survenue. Actualisation impossible', 'danger', null, true);
+}
+
+function addFiltersInputFilter($button, filter_name, filter, exclude) {
+    if (typeof (exclude) === 'undefined') {
+        exclude = false;
+    }
+
+    var $filtersInputContainer = $button.findParentByClass('obj_filters_input_container');
+
+    if ($.isOk($filtersInputContainer)) {
+        var filters = getFiltersInputFilters($filtersInputContainer);
+
+        if (typeof (filters[filter_name]) === 'undefined') {
+            filters[filter_name] = {
+                values: [],
+                excluded_values: []
+            };
+        }
+
+        if (exclude) {
+            filters[filter_name].excluded_values.push(filter);
+        } else {
+            filters[filter_name].values.push(filter);
+        }
+
+        reloadFiltersInputValue($filtersInputContainer, filters, function (result, bimpAjax) {
+            resetFiltersInputInputs($button);
+
+            if (typeof (result.values_json) !== 'undefined') {
+                var $inputContainer = $button.findParentByClass('obj_filters_input_container');
+
+                if ($.isOk($inputContainer)) {
+                    var field_name = $inputContainer.data('field_name');
+
+                    if (field_name) {
+                        var $input = $inputContainer.find('input[name="' + field_name + '"]');
+
+                        if ($input.length) {
+                            $input.val(result.values_json);
+                        }
+                    }
+                }
+            }
+
+            $filtersInputContainer.find('.filter_submit_btn').removeClass('disabled');
+        }, function (result, bimpAjax) {
+            $filtersInputContainer.find('.filter_submit_btn').removeClass('disabled');
+        });
+    } else {
+        bimp_msg('Une erreur est survenue (conteneur absent) - Ajout du filtre impossible');
+    }
+}
+
+function removeFiltersInputFilter($button) {
+    if ($.isOk($button)) {
+        var $value = $button.findParentByClass('filter_value');
+
+        if ($.isOk($value)) {
+            var $container = $value.findParentByClass('filter_active_values');
+            $value.remove();
+
+            if ($.isOk($container)) {
+                var $valuesContainer = $container.findParentByClass('obj_filters_input_values');
+
+                var has_inc = false;
+                var has_exc = false;
+
+                var $inc = $container.children('.included_values');
+
+                if ($inc.length) {
+                    if ($inc.find('.filter_value').length) {
+                        has_inc = true;
+                    }
+                }
+
+                if (!has_inc) {
+                    var $exc = $container.children('.excluded_values');
+
+                    if ($exc.length) {
+                        if ($exc.find('.filter_value').length) {
+                            has_exc = true;
+                        }
+                    }
+                }
+
+                if (!has_inc && !has_exc) {
+                    $container.remove();
+                }
+
+                if ($.isOk($valuesContainer)) {
+                    var filters = '';
+                    var $panel = $valuesContainer.children('.panel').children('.panel-body');
+
+                    if ($panel.length) {
+                        if (!$panel.find('.filter_active_values').length) {
+                            $panel.html('<div class="info">Aucun filtre ajouté</div>');
+                            filters = {};
+                        }
+                    }
+
+                    var $filtersInputContainer = $valuesContainer.findParentByClass('obj_filters_input_container');
+
+                    if ($.isOk($filtersInputContainer)) {
+                        var field_name = $filtersInputContainer.data('field_name');
+
+                        if (field_name) {
+                            var $input = $filtersInputContainer.find('input[name="' + field_name + '"]');
+
+                            if ($input.length) {
+                                if (filters === '') {
+                                    filters = getFiltersInputFilters($filtersInputContainer);
+                                }
+                                
+                                $input.val(JSON.stringify(filters));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+function getFiltersInputFilters($filtersInputContainer) {
+    var filters = {};
+
+    if ($.isOk($filtersInputContainer)) {
+        $filtersInputContainer.find('.obj_filters_input_values').find('.filter_active_values').each(function () {
+            var filter_name = $(this).data('filter_name');
+
+            if (filter_name) {
+                var filter = {
+                    values: [],
+                    excluded_values: []
+                };
+
+                var $included_values = $(this).children('.included_values');
+
+                if ($included_values.length) {
+                    $included_values.children('.filter_value').each(function () {
+                        var filter_value = $(this).data('filter');
+
+                        if (typeof (filter_value) !== 'undefined') {
+                            filter.values.push(filter_value);
+                        }
+                    });
+                }
+
+                var $excluded_values = $(this).children('.excluded_values');
+
+                if ($excluded_values.length) {
+                    $excluded_values.children('.filter_value').each(function () {
+                        var filter_value = $(this).data('filter');
+
+                        if (typeof (filter_value) !== 'undefined') {
+                            filter.excluded_values.push(filter_value);
+                        }
+                    });
+                }
+
+                if (filter.values.length || filter.excluded_values.length) {
+                    filters[filter_name] = filter;
+                }
+            }
+        });
+    }
+
+    return filters;
+}
+
+function resetFiltersInputInputs($button) {
+    if ($.isOk($button)) {
+        var $container = $button.findParentByClass('bimp_filter_input_container');
+
+        if ($.isOk($container)) {
+            $container.find('.bimp_filter_input').each(function () {
+                var default_value = $(this).data('default_value');
+
+                if (typeof (default_value) === 'undefined') {
+                    default_value = '';
+                }
+
+                $(this).val(default_value).change();
+
+                if ($(this).hasClass('datepicker_value')) {
+                    var input_id = $(this).attr('id');
+
+                    if (input_id) {
+                        $('#' + input_id + '_bs_dt_picker').data('DateTimePicker').clear();
+                    }
+                }
+            });
+        }
+    }
+}
+
 // Gestion des événements: 
 
 function onFormLoaded($form) {
@@ -3046,6 +3321,57 @@ function setInputsEvents($container) {
             $(this).data('search_object_input_events_init', 1);
         }
     });
+    $container.find('.obj_filters_input_container').each(function () {
+        if (!parseInt($(this).data('obj_filters_input_events_init'))) {
+            var $filters_container = $(this);
+            var obj_input_name = $filters_container.data('obj_input_name');
+
+            if (obj_input_name) {
+                var $input = $container.find('[name="' + obj_input_name + '"]');
+
+                if ($input.length) {
+                    $input.change(function () {
+                        var module = '';
+                        var object_name = '';
+                        var val = $input.val();
+
+                        if (val) {
+                            var obj_data = val.split('-');
+
+                            if (obj_data[0] && obj_data[1]) {
+                                module = obj_data[0];
+                                object_name = obj_data[1];
+                            }
+                        }
+
+                        setFiltersInputObjectData($filters_container, module, object_name);
+                    });
+                }
+            }
+
+            setFiltersInputAddFilterFormEvents($filters_container);
+
+            $(this).data('obj_filters_input_events_init', 1);
+        }
+    });
+    $container.find('.search_object_input_container').each(function () {
+        var $search_container = $(this);
+        var $value_input = $(this).children('input.search_object_input_value');
+
+        if ($value_input.length) {
+            $value_input.change(function () {
+                var val = $(this).val();
+
+                if (val === '' || parseInt(val) === 0) {
+                    var $search_input = $search_container.children('.search_object_input').children('input.search_object_search_input');
+
+                    if ($search_input.length) {
+                        $search_input.val('');
+                    }
+                }
+            });
+        }
+    });
 }
 
 function setInputEvents($form, $input) {
@@ -3401,6 +3727,114 @@ function setInputChoicesEvents($input, onItemSelected) {
             }
         }
     }
+}
+
+function setFiltersInputAddFilterFormEvents($container) {
+    $container.find('select.filter_type_select').each(function () {
+        if (!parseInt($(this).data('filers_input_events_init'))) {
+            $(this).data('filers_input_events_init', 1);
+
+            $(this).change(function () {
+                var $parent = $(this).findParentByClass('objectFiltersTypeSelect_content');
+                if ($.isOk($parent)) {
+                    var type = $(this).val();
+                    $parent.children('.objectFilterItemsSelectContainer').each(function () {
+                        if ($(this).data('type') === type) {
+                            $(this).stop().slideDown(250);
+                        } else {
+                            $(this).stop().slideUp(250);
+                        }
+                        $(this).children('select').val('').change();
+//                        $(this).children('.filter_item_options').html('').hide(); // A remplacer par contenu filtre? 
+                    });
+                }
+            });
+        }
+    });
+
+    $container.find('.objectFilterItemsSelectContainer').each(function () {
+        if (!parseInt($(this).data('filers_input_events_init'))) {
+            $(this).data('filers_input_events_init', 1);
+
+            var type = $(this).data('type');
+            var $select = $(this).children('select');
+            var $itemOptions = $(this).children('.filter_item_options');
+
+            if ($select.length) {
+                $select.change(function () {
+                    var item = $(this).val();
+                    if (item) {
+                        var $selectContainer = $(this).findParentByClass('objectFiltersSelect_container');
+
+                        if ($.isOk($selectContainer)) {
+                            var fields_prefixe = $selectContainer.data('fields_prefixe');
+                            if (typeof (fields_prefixe) === 'undefined') {
+                                fields_prefixe = '';
+                            }
+
+                            switch (type) {
+                                case 'fields':
+                                    // Sélection d'un champ objet:
+                                    var $filtersInputContainer = $(this).findParentByClass('obj_filters_input_container');
+
+                                    if ($.isOk($filtersInputContainer)) {
+                                        var module = $filtersInputContainer.data('obj_module');
+                                        var object_name = $filtersInputContainer.data('obj_name');
+                                        BimpAjax('getFiltersInputAddFilterForm', {
+                                            module: module,
+                                            object_name: object_name,
+                                            filter: fields_prefixe + item
+                                        }, $itemOptions, {
+                                            display_success: false,
+                                            display_processing: true,
+                                            processing_msg: '',
+                                            processing_padding: 10,
+                                            append_html: true,
+                                            success: function (result, bimpAjax) {
+                                                setBimpFiltersEvents(bimpAjax.$resultContainer);
+                                            }
+                                        });
+                                    }
+                                    break;
+
+                                    // Sélection d'un objet lié; 
+                                case 'linked_objects':
+                                    var module = $selectContainer.data('module');
+                                    var object_name = $selectContainer.data('object_name');
+                                    var object_label = $(this).find('option[value="' + item + '"]').text();
+
+                                    BimpAjax('getFiltersInputAddFiltersInput', {
+                                        module: module,
+                                        object_name: object_name,
+                                        child_name: item,
+                                        object_label: object_label,
+                                        fields_prefixe: fields_prefixe
+                                    }, $itemOptions, {
+                                        display_success: false,
+                                        display_processing: true,
+                                        processing_msg: '',
+                                        processing_padding: 10,
+                                        append_html: true,
+                                        success: function (result, bimpAjax) {
+                                            setFiltersInputAddFilterFormEvents(bimpAjax.$resultContainer);
+                                        }
+                                    });
+                                    break;
+                            }
+                        }
+                    } else {
+                        // Pour annuler un éventuel chargement ajax en cours: 
+                        var ajax_refresh_idx = parseInt($itemOptions.data('ajax_refresh_idx'));
+                        if (typeof (ajax_refresh_idx) !== 'undefined') {
+                            ajax_refresh_idx++;
+                            $itemOptions.data('ajax_refresh_idx', ajax_refresh_idx);
+                        }
+                        $itemOptions.html('').hide();
+                    }
+                });
+            }
+        }
+    });
 }
 
 $(document).ready(function () {

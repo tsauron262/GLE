@@ -2341,7 +2341,7 @@ class Bimp_Societe extends BimpDolObject
         } else {
             $errors[] = "Echec de la génération du relevé de facturation";
         }
-        $callback = "window.open('" . DOL_URL_ROOT . "/document.php?modulepart=company&file=" . $this->id . "%2FRelevé_facturation.pdf&entity=1', '_blank');";
+        $callback = "window.open('" . DOL_URL_ROOT . "/document.php?modulepart=company&file=" . $this->id . "%2FReleve_facturation.pdf&entity=1', '_blank');";
 
         return [
             'success_callback' => $callback,

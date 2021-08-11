@@ -113,7 +113,7 @@ class ValidComm extends BimpObject
         // Object non géré
         if($this->getObjectClass($bimp_object) == -2)
             return 1;
-        
+
 //        $this->db2 = new DoliDBMysqli('mysql', $this->db->db->database_host,
 //                $this->db->db->database_user, $this->db->db->database_pass,
 //                $this->db->db->database_name, $this->db->db->database_port);
@@ -139,6 +139,9 @@ class ValidComm extends BimpObject
         // Validation commerciale
         if($percent != 0)
             $valid_comm = (int) $this->tryValidateByType($user, self::TYPE_COMMERCIAL, $secteur, $class, $percent, $bimp_object, $errors);
+        elseif(is_a($this->demandeExists($class, (int) $bimp_object->id, self::TYPE_COMMERCIAL), 'DemandeValidComm'))
+            $this->updateDemande($user->id, $class, $bimp_object->id, self::TYPE_COMMERCIAL,
+                    DemandeValidComm::STATUS_VALIDATED, DemandeValidComm::NO_VAL_COMM);
         
         // Validation encours
         if($val_euros != 0 && $this->getObjectClass($bimp_object) != self::OBJ_DEVIS) {
@@ -201,13 +204,14 @@ class ValidComm extends BimpObject
         else
             $success[] = "Validation d'impayé effectuée.";
         
+        $ret = ($valid_comm == 1 and $valid_encours == 1 and $valid_impaye  == 1);
+        
         
         // Mail si il y a eu au moins une demande de validation traitée
         if($this->nb_validation > 0)
-           $errors[] = $this->sendMailValidation($bimp_object);
+           $this->sendMailValidation($bimp_object);
         
-                
-        return $valid_comm and $valid_encours and $valid_impaye;
+        return $ret;
     }
     
     
@@ -748,7 +752,8 @@ class ValidComm extends BimpObject
         $subject = "Validation " . count($demandes_valider) . '/' . (count($demandes_en_cours) + count($demandes_valider)) . ' ';
         $subject .= $bimp_object->getRef();
         
-        return mailSyn2($subject, $user->getData('email'), null, $m);
+        mailSyn2($subject, $user->getData('email'), null, $m);
+        return 1;
     }
     
 }
@@ -783,7 +788,7 @@ class DoliValidComm extends CommonObject {
         $user_demands = array();
         if(!BimpObject::loadClass('bimpvalidateorder', 'DemandeValidComm')) {
             $errors[] = "Impossile de charger la classe DemandeValidComm";
-            return '<pre>'. print_r($errors, 1);
+            return $errors;
         }
         
         $sql = BimpTools::getSqlSelect(array('type_de_piece', 'id_piece', 'id_user_ask', 'id_user_affected', 'type', 'date_create'));

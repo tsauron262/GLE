@@ -40,7 +40,8 @@ class DemandeValidComm extends BimpObject
     );
     
     const LIMIT_DEMANDE = 10;
-    
+    const NO_VAL_COMM = -3; // Validé toute seule (ex: retrait des remise)
+   
     public function canDelete() {
         global $user;
         
@@ -389,7 +390,9 @@ class DemandeValidComm extends BimpObject
                     $html .= BimpRender::renderAlerts("La demande a été validée automatiquement car le compte client ne présente plus de retards de paiement.", 'info');
                 elseif($this->getData('val_comm_validation') == -2)
                     $html .= BimpRender::renderAlerts("L'encours du client a été modifié entre la création et la validation de la demande.", 'info');
-                else {
+                elseif($this->getData('val_comm_validation') == self::NO_VAL_COMM) {
+                    $html .= BimpRender::renderAlerts("La demande n'a plus lieu d'être (exemple: suppression de remise, retrait de ligne).", 'info');
+                } else {
                     $valid_comm_validation = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm', (int) $this->getData('val_comm_validation'));
 
                     if(!$valid_comm_validation->isLoaded())

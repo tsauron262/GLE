@@ -122,9 +122,14 @@ class Bimp_Commande extends BimpComm
                 $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
                 $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, (int) $this->id, ValidComm::TYPE_ENCOURS);
 
+                if($demande === 0)
+                    $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, (int) $this->id, ValidComm::TYPE_IMPAYE);
+                
+                // Encours
                 if (is_a($demande, 'DemandeValidComm')) {
                     list($secteur, $class,, $val_euros) = $vc->getObjectParams($this, $errors);
-                    return $vc->userCanValidate((int) $user->id, $secteur, ValidComm::TYPE_ENCOURS, $class, $val_euros, $this);
+                    return $vc->userCanValidate((int) $user->id, $secteur, ValidComm::TYPE_ENCOURS, $class, $val_euros, $this)
+                        or $vc->userCanValidate((int) $user->id, $secteur, ValidComm::TYPE_IMPAYE, $class, $val_euros, $this);
                 }
         }
         return parent::canSetAction($action);
@@ -276,9 +281,9 @@ class Bimp_Commande extends BimpComm
                     $errors[] = $invalide_error;
                     return 0;
                 }
-                // A une demande de validation financière
+                // A une demande de validation de retard de paiement
                 $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
-                if ($vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_IMPAYE) == 0) {
+                if ($vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_IMPAYE) === 0) {
                     $errors[] = "Aucune demande de validation pour cette commande";
                     return 0;
                 }
@@ -745,35 +750,37 @@ class Bimp_Commande extends BimpComm
                     'onclick' => 'window.open(\'' . BimpObject::getInstanceUrl($this->dol_object) . '\')'
                 );
             }
-        }
 
-        // Envoyer mail à l'utilisateur qui a fait une demande de validation
-        // pour relancer le client si il y a des impayé
-        if ($this->isActionAllowed('sendMailLatePayment') /* && $this->canSetAction('sendMailLatePayment') */) {
-            BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
-            $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
-            $demande = $vc->demandeExists(DemandeValidComm::OBJ_COMMANDE, $this->id, DemandeValidComm::TYPE_ENCOURS);
-            if (!is_a($demande, 'DemandeValidComm') || $demande->getData('status') != DemandeValidComm::STATUS_PROCESSING) {
-                $demande = $vc->demandeExists(DemandeValidComm::OBJ_COMMANDE, $this->id, DemandeValidComm::TYPE_IMPAYE);
-            }
-            if (is_a($demande, 'DemandeValidComm') and $demande->getData('status') == DemandeValidComm::STATUS_PROCESSING) {
-                $user_ask = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $demande->getData('id_user_ask'));
-                $confirm_msg = "Confirmer l\'envoie de mail à ";
-                $confirm_msg .= $user_ask->getData('firstname') . ' ' . $user_ask->getData('lastname');
-                if ($user_ask->isLoaded()) {
-                    $buttons[] = array(
-                        'label'   => 'Signaler retard paiement',
-                        'icon'    => 'envelope',
-                        'type'    => 'danger',
-                        'onclick' => $this->getJsActionOnclick('sendMailLatePayment', array(
-                            'user_ask_firstname' => $user_ask->getData('firstname'),
-                            'user_ask_email'     => $user_ask->getData('email')
-                                ), array(
-                            'confirm_msg' => $confirm_msg
-                        ))
-                    );
+            // Envoyer mail à l'utilisateur qui a fait une demande de validation
+            // pour relancer le client si il y a des impayé
+            if ($this->isActionAllowed('sendMailLatePayment') /* && $this->canSetAction('sendMailLatePayment') */) {
+                BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
+                BimpObject::loadClass('bimpvalidateorder', 'DemandeValidComm');
+                $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+                $demande = $vc->demandeExists(DemandeValidComm::OBJ_COMMANDE, $this->id, DemandeValidComm::TYPE_ENCOURS);
+                if (!is_a($demande, 'DemandeValidComm') || $demande->getData('status') != DemandeValidComm::STATUS_PROCESSING) {
+                    $demande = $vc->demandeExists(DemandeValidComm::OBJ_COMMANDE, $this->id, DemandeValidComm::TYPE_IMPAYE);
+                }
+                if (is_a($demande, 'DemandeValidComm') and $demande->getData('status') == DemandeValidComm::STATUS_PROCESSING) {
+                    $user_ask = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $demande->getData('id_user_ask'));
+                    $confirm_msg = "Confirmer l\'envoie de mail à ";
+                    $confirm_msg .= $user_ask->getData('firstname') . ' ' . $user_ask->getData('lastname');
+                    if ($user_ask->isLoaded()) {
+                        $buttons[] = array(
+                            'label'   => 'Signaler retard paiement',
+                            'icon'    => 'envelope',
+                            'type'    => 'danger',
+                            'onclick' => $this->getJsActionOnclick('sendMailLatePayment', array(
+                                'user_ask_firstname' => $user_ask->getData('firstname'),
+                                'user_ask_email'     => $user_ask->getData('email')
+                                    ), array(
+                                'confirm_msg' => $confirm_msg
+                            ))
+                        );
+                    }
                 }
             }
+            
         }
 
 

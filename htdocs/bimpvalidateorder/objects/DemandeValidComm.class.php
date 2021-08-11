@@ -211,38 +211,11 @@ class DemandeValidComm extends BimpObject
         $errors = parent::updateField($field, $value, $id_object, $force_update, $do_not_validate);
         
         if($field == 'status') {
-            
-            
+                        
             if(0 < (int) $this->getData('id_user_ask')) {
-                $user_ask = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('id_user_ask'));
                 
-                $bimp_obj = $this->getObject($this->getData('type_de_piece'), $this->getData('id_piece'));
-                $soc = $bimp_obj->getChildObject('client');
-                
-                if(is_object($bimp_obj) && $bimp_obj->isLoaded()){
-                    $subject = ((int) $value == self::STATUS_VALIDATED) ? 'Validation' : 'Refus';
-                    $subject .= ' ' . $bimp_obj->getRef();
+                $this->onValidate();
 
-                    $message_mail = 'Bonjour ' . $user_ask->getData('firstname') .',<br/><br/>';
-                    $message_mail .= ucfirst($bimp_obj->getLabel('the')) . ' ' . $bimp_obj->getNomUrl() . ' ';
-                    if($soc->isLoaded())
-                        $message_mail .= $soc->getRef() . ' - ' . $soc->getName() . ' ';
-                    else
-                        $message_mail .= ', client inconnu ';;
-                    $message_mail .= ' a été ' . lcfirst(self::$status_list[(int) $value]['label']);
-                    $message_mail .= ($bimp_obj->isLabelFemale()) ? 'e' : '';
-                    
-                    switch ($this->getData('type')) {
-                        case self::TYPE_COMMERCIAL:
-                            $message_mail .= ' commercialement';break;
-                        case self::TYPE_ENCOURS:
-                            $message_mail .= ' malgré le dépassement d\'encours du client';break;
-                        case self::TYPE_IMPAYE:
-                            $message_mail .= ' malgré les retards de paiement du client';break;
-                    }
-                    
-                    mailSyn2($subject, $user_ask->getData('email'), null, $message_mail);
-                }
             } else {
                 if (class_exists('BimpCore')) {
                     BimpCore::addlog('Echec envoi email lors de validation commerciale/encours/impayé', Bimp_Log::BIMP_LOG_ALERTE, 'bimpvalidateorder', NULL, array(
@@ -253,6 +226,44 @@ class DemandeValidComm extends BimpObject
         }
 
         return $errors;
+    }
+    
+    public function onValidate() {
+        
+        if(in_array($this->getData('type_de_piece'), array(self::OBJ_DEVIS, self::OBJ_FACTURE, self::OBJ_COMMANDE))) {
+            return 1;
+        
+        } else {
+            $user_ask = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('id_user_ask'));
+
+            $bimp_obj = $this->getObject($this->getData('type_de_piece'), $this->getData('id_piece'));
+            $soc = $bimp_obj->getChildObject('client');
+
+            if(is_object($bimp_obj) && $bimp_obj->isLoaded()){
+                $subject = ((int) $value == self::STATUS_VALIDATED) ? 'Validation' : 'Refus';
+                $subject .= ' ' . $bimp_obj->getRef();
+
+                $message_mail = 'Bonjour ' . $user_ask->getData('firstname') .',<br/><br/>';
+                $message_mail .= ucfirst($bimp_obj->getLabel('the')) . ' ' . $bimp_obj->getNomUrl() . ' ';
+                if($soc->isLoaded())
+                    $message_mail .= $soc->getRef() . ' - ' . $soc->getName() . ' ';
+                else
+                    $message_mail .= ', client inconnu ';;
+                $message_mail .= ' a été ' . lcfirst(self::$status_list[(int) $value]['label']);
+                $message_mail .= ($bimp_obj->isLabelFemale()) ? 'e' : '';
+
+                switch ($this->getData('type')) {
+                    case self::TYPE_COMMERCIAL:
+                        $message_mail .= ' commercialement';break;
+                    case self::TYPE_ENCOURS:
+                        $message_mail .= ' malgré le dépassement d\'encours du client';break;
+                    case self::TYPE_IMPAYE:
+                        $message_mail .= ' malgré les retards de paiement du client';break;
+                }
+
+                mailSyn2($subject, $user_ask->getData('email'), null, $message_mail);
+            }
+        }
     }
     
     
@@ -364,10 +375,11 @@ class DemandeValidComm extends BimpObject
             else {
                 if($valid_comm_demande->getData('date_update') > $this->getData('date_create'))
                     $html .= BimpRender::renderAlerts("Cette règle de validation a été éditée après la création de cette demande", 'danger');
-
+                else {
                     $list = new BC_ListTable($valid_comm_demande, 'default', 1, null, "Règle lors de la demande");
-                $list->addFieldFilterValue('id', $valid_comm_demande->id);
-                $html .= $list->renderHtml();
+                    $list->addFieldFilterValue('id', $valid_comm_demande->id);
+                    $html .= $list->renderHtml();
+                }
             }
             
             // Validation
@@ -385,10 +397,11 @@ class DemandeValidComm extends BimpObject
                     else {
                         if($valid_comm_validation->getData('date_update') > $this->getData('date_valid'))
                             $html .= BimpRender::renderAlerts("Cette règle de validation a été éditée après la validation de cette demande", 'danger');
-
-                        $list = new BC_ListTable($valid_comm_validation, 'default', 1, null, "Règle lors de la validation");
-                        $list->addFieldFilterValue('id', $valid_comm_validation->id);
-                        $html .= $list->renderHtml();
+                        else {
+                            $list = new BC_ListTable($valid_comm_validation, 'default', 1, null, "Règle lors de la validation");
+                            $list->addFieldFilterValue('id', $valid_comm_validation->id);
+                            $html .= $list->renderHtml();
+                        }
                     }
                 }
             }

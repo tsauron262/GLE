@@ -179,7 +179,7 @@ class ValidComm extends BimpObject
             $this->validatePayed($class, $bimp_object);
         
         
-        // Ajout des erreurs/sucess
+        // Ajout des erreurs/success
         // Commerciales
         if(!$valid_comm)
                 $errors[] = "Vous ne pouvez pas valider commercialement " 
@@ -200,8 +200,15 @@ class ValidComm extends BimpObject
                 '. La demande de validation d\'impayé a été adressée au valideur attribué.<br/>';
         else
             $success[] = "Validation d'impayé effectuée.";
+        
+        
+        // Mail si il y a eu au moins une demande de validation traitée
+        if($this->nb_validation > 0)
+//           $errors[] = $this->sendMailValidation($bimp_object);
+            $this->sendMailValidation($bimp_object);
+        
                 
-        return $valid_comm and $valid_encours;
+        return $valid_comm and $valid_encours and $valid_impaye;
     }
     
     
@@ -585,13 +592,19 @@ class ValidComm extends BimpObject
         return $can_valid_not_avaible;
     }
     
-    public function demandeExists($class, $id_object, $type) {
+    public function demandeExists($class, $id_object, $type = null) {
         
-        $filters = array(
-            'type_de_piece' => $class,
-            'id_piece'      => $id_object,
-            'type'          => $type
-        );
+        if($type == null) 
+            $filters = array(
+                'type_de_piece' => $class,
+                'id_piece'      => $id_object
+            );
+        else
+            $filters = array(
+                'type_de_piece' => $class,
+                'id_piece'      => $id_object,
+                'type'          => $type
+            );
         
         $demandes = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filters);
 
@@ -617,6 +630,7 @@ class ValidComm extends BimpObject
             $d->updateField('date_valid', $now);
             $d->updateField('status', $status);
             $d->updateField('val_comm_validation', $val_comm_validation);
+            $this->nb_validation++;
             return 1;
         }
         
@@ -675,8 +689,71 @@ class ValidComm extends BimpObject
         return 0;
     }
 
+    public function sendMailValidation($bimp_object) {
+        
+        $filters = array(
+            'type_de_piece' => $this->getObjectClass($bimp_object),
+            'id_piece'      => $bimp_object->getData('id'),
+            'status'        => 1,
+        );
+        
+        $demandes_valider = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filters);
+
+        // Validé
+        if(!empty($demandes_valider)) {
+
+            foreach($demandes_valider as $d) {
+                
+                if($m == '') {
+                    
+                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $d->getData('id_user_ask'));
+                    
+                    $m .= "Bonjour " . $user->getData('firstname') . ",<br/><br/>";
+                    $m .= "Liste des demandes validées pour " . $bimp_object->getNomUrl() . ":<br/>";
+                }
+                
+                switch ($d->getData('type')) {
+                    case self::TYPE_ENCOURS:
+                        $m .= "- validation d'encours<br/>"; break;
+                    case self::TYPE_COMMERCIAL:
+                        $m .= "- validation commerciale<br/>"; break;
+                    case self::TYPE_IMPAYE:
+                        $m .= "- validation des retards de paiement du client<br/>"; break;
+                }                
+            }
+        } else 
+            return 0;
+        
+        // En cours
+        $filters['status'] = 0;
+        $demandes_en_cours = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filters);
+
+        if(!empty($demandes_en_cours)) {
+            $m .= "<br/>Liste des demandes en attente de validation:<br/>";
+
+            foreach($demandes_en_cours as $d) {
+                
+                switch ($d->getData('type')) {
+                    case self::TYPE_ENCOURS:
+                        $m .= "- validation d'encours<br/>"; break;
+                    case self::TYPE_COMMERCIAL:
+                        $m .= "- validation commerciale<br/>"; break;
+                    case self::TYPE_IMPAYE:
+                        $m .= "- validation des retards de paiement du client<br/>"; break;
+                }                
+            }
+        } else {
+            $m .= '<br/>' . ucfirst($bimp_object->getLabel('the')) . " est maintenant validé" . ($bimp_object->isLabelFemale() ? 'e' : '');
+        }
+        
+        $subject = "Validation " . count($demandes_valider) . '/' . (count($demandes_en_cours) + count($demandes_valider)) . ' ';
+        $subject .= $bimp_object->getRef();
+        
+        return mailSyn2($subject, $user->getData('email'), null, $m);
+    }
     
 }
+
 
 class DoliValidComm extends CommonObject {
     

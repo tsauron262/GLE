@@ -209,7 +209,7 @@ class ValidComm extends BimpObject
         
         // Mail si il y a eu au moins une demande de validation traitée
         if($this->nb_validation > 0)
-           $this->sendMailValidation($bimp_object);
+            $this->sendMailValidation($bimp_object);
         
         return $ret;
     }

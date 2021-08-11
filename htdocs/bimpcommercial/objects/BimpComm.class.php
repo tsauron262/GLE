@@ -3936,18 +3936,24 @@ class BimpComm extends BimpDolObject
             $societe->borne_debut = $data['date_debut'];
             $societe->borne_fin = $data['date_fin'];
 
-//            $files = BimpCache::getBimpObjectObjects('bimpcore', 'BimpFile', array(
-//                        'parent_module'      => 'bimpcore',
-//                        'parent_object_name' => array(
-//                            'in' => array('Bimp_Societe', 'Bimp_Client')
-//                        ),
-//                        'id_parent'          => $societe->id,
-//                        'file_name'          => 'Releve_facturation'
-//            ));
-//            
-//            $errors[] = 'N: ' . count($files);
+            $files = BimpCache::getBimpObjectObjects('bimpcore', 'BimpFile', array(
+                        'parent_module'      => 'bimpcore',
+                        'parent_object_name' => array(
+                            'in' => array('Bimp_Societe', 'Bimp_Client')
+                        ),
+                        'id_parent'          => $societe->id,
+                        'file_name'          => 'Releve_facturation',
+                        'deleted'            => 0
+            ));
 
             if ($societe->generateDocument('invoiceStatement', $langs) > 0) {
+                if (!empty($files)) {
+                    foreach ($files as $file) {
+                        $file->updateField('date_create', date('Y-m-d h:i:s'));
+                        $file->updateField('date_update', date('Y-m-d h:i:s'));
+                    }
+                }
+
                 $success = "Relevé de facturation généré avec succès";
             } else {
                 $errors[] = "Echec de la génération du relevé de facturation";

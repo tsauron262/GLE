@@ -204,7 +204,8 @@ class ValidComm extends BimpObject
         
         // Mail si il y a eu au moins une demande de validation traitée
         if($this->nb_validation > 0)
-           $errors[] = $this->sendMailValidation($bimp_object);
+//           $errors[] = $this->sendMailValidation($bimp_object);
+            $this->sendMailValidation($bimp_object);
         
                 
         return $valid_comm and $valid_encours and $valid_impaye;

@@ -20,7 +20,6 @@ class InvoiceStatementPDF extends BimpDocumentPDF
         parent::__construct($db);
         $this->bimpDb = new BimpDb($db);
 
-
         $this->langs->load("bills");
         $this->langs->load("products");
         $this->typeObject = "societe";
@@ -63,11 +62,10 @@ class InvoiceStatementPDF extends BimpDocumentPDF
 
         $html .= '</table>';
 
-
         $html .= '<table style="width: 100%" cellspacing="0" cellpadding="10px">';
         $html .= '<tr>';
         $html .= '<td class="sender_address" style="width: 40%">';
-        $html .= 'Relevé du '. $this->date_debut->format('d / m / Y').' au ' . $this->date_fin->format('d / m / Y') .'<br/>';
+        $html .= 'Relevé du ' . $this->date_debut->format('d / m / Y') . ' au ' . $this->date_fin->format('d / m / Y') . '<br/>';
         $html .= 'Emis en date du ' . date('d / m / Y');
         $html .= '</td>';
         $html .= '<td style="width: 5%"></td>';
@@ -111,15 +109,24 @@ class InvoiceStatementPDF extends BimpDocumentPDF
             $html .= '<td>' . Bimp_Facture::$paiement_status[(int) $instance->getData('paiement_status')]['label'] . '</td>';
 
             $id_contacts = $this->bimpDb->getValues('bl_commande_shipment', 'id_contact', 'id_facture = ' . $instance->id);
-            
-            //die('<pre>' . print_r($id_contacts));
-            
-            if (is_array($id_contacts) && count($id_contacts) > 1) {
+
+            if (is_array($id_contacts) && count($id_contacts) > 0) {
                 $html .= '<td>';
-                foreach($id_contacts as $id_contact)  {
-                    if($id_contact > 0) {
+                $fl = true;
+                foreach ($id_contacts as $id_contact) {
+                    if ($id_contact > 0) {
+                        if (!$fl) {
+                            $html .= '<br/>';
+                        } else {
+                            $fl = false;
+                        }
+
                         $socp = $this->bimpDb->getRow('socpeople', 'rowid = ' . $id_contact);
-                        $html .= $socp->lastname . ' ' . $socp->firstname . "<br />";
+                        if (!is_null($socp)) {
+                            $html .= ' - ' . $socp->lastname . ' ' . $socp->firstname;
+                        } else {
+                            $html .= ' - Contact #' . $id_contact . ' supprimé';
+                        }
                     }
                 }
                 $html .= '</td>';

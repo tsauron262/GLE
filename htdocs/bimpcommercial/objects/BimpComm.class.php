@@ -3929,15 +3929,38 @@ class BimpComm extends BimpDolObject
         BimpTools::loadDolClass('societe');
         $societe = new Societe($this->db->db);
         $societe->fetch($this->getData('fk_soc'));
-        $societe->borne_debut = $data['date_debut'];
-        $societe->borne_fin = $data['date_fin'];
 
-        if ($societe->generateDocument('invoiceStatement', $langs) > 0) {
-            $success = "Relevé de facturation généré avec succès";
+        if (!BimpObject::objectLoaded($societe)) {
+            $errors[] = 'Le client #' . $this->getData('fk_soc') . ' n\'existe plus';
         } else {
-            $errors[] = "Echec de la génération du relevé de facturation";
+            $societe->borne_debut = $data['date_debut'];
+            $societe->borne_fin = $data['date_fin'];
+
+            $files = BimpCache::getBimpObjectObjects('bimpcore', 'BimpFile', array(
+                        'parent_module'      => 'bimpcore',
+                        'parent_object_name' => array(
+                            'in' => array('Bimp_Societe', 'Bimp_Client')
+                        ),
+                        'id_parent'          => $societe->id,
+                        'file_name'          => 'Releve_facturation',
+                        'deleted'            => 0
+            ));
+
+            if ($societe->generateDocument('invoiceStatement', $langs) > 0) {
+                if (!empty($files)) {
+                    foreach ($files as $file) {
+                        $file->updateField('date_create', date('Y-m-d h:i:s'));
+                        $file->updateField('date_update', date('Y-m-d h:i:s'));
+                    }
+                }
+
+                $success = "Relevé de facturation généré avec succès";
+            } else {
+                $errors[] = "Echec de la génération du relevé de facturation";
+            }
+            $callback = "window.open('" . DOL_URL_ROOT . "/document.php?modulepart=company&file=" . $societe->id . "%2FReleve_facturation.pdf&entity=1', '_blank');";
         }
-        $callback = "window.open('" . DOL_URL_ROOT . "/document.php?modulepart=company&file=" . $societe->id . "%2FRelevé_facturation.pdf&entity=1', '_blank');";
+
         return [
             'success_callback' => $callback,
             'errors'           => $errors,

@@ -298,6 +298,9 @@ class Bimp_Societe extends BimpDolObject
     {
         if ($this->isLoaded()) {
             return DOL_DATA_ROOT . '/societe/' . $this->id . '/';
+        } else {
+            echo 'NOT LOADED';
+            exit;
         }
     }
 
@@ -2315,6 +2318,7 @@ class Bimp_Societe extends BimpDolObject
     {
         global $langs;
         $errors = array();
+        $warnings = array();
 
         $debut = BimpTools::getArrayValueFromPath($data, 'date_debut', '');
 
@@ -2336,16 +2340,23 @@ class Bimp_Societe extends BimpDolObject
         $this->dol_object->borne_debut = $debut;
         $this->dol_object->borne_fin = $fin;
 
-//        $files = BimpCache::getBimpObjectObjects('bimpcore', 'BimpFile', array(
-//                    'parent_module'      => 'bimpcore',
-//                    'parent_object_name' => array(
-//                        'in' => array('Bimp_Societe', 'Bimp_Client')
-//                    ),
-//                    'id_parent'          => $this->id,
-//                    'file_name'          => 'Releve_facturation'
-//        ));
+        $files = BimpCache::getBimpObjectObjects('bimpcore', 'BimpFile', array(
+                    'parent_module'      => 'bimpcore',
+                    'parent_object_name' => array(
+                        'in' => array('Bimp_Societe', 'Bimp_Client')
+                    ),
+                    'id_parent'          => $this->id,
+                    'file_name'          => 'Releve_facturation',
+                    'deleted'            => 0
+        ));
 
         if ($this->dol_object->generateDocument('invoiceStatement', $langs) > 0) {
+            if (!empty($files)) {
+                foreach ($files as $file) {
+                    $file->updateField('date_create', date('Y-m-d h:i:s'));
+                    $file->updateField('date_update', date('Y-m-d h:i:s'));
+                }
+            }
             $success = "Relevé de facturation généré avec succès";
         } else {
             $errors[] = "Echec de la génération du relevé de facturation";
@@ -2355,7 +2366,7 @@ class Bimp_Societe extends BimpDolObject
         return [
             'success_callback' => $callback,
             'errors'           => $errors,
-            'warnings'         => array()
+            'warnings'         => $warnings
         ];
     }
 

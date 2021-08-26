@@ -1767,6 +1767,9 @@ class gsxController extends BimpController
                     if($ok)
                         $result['questionDetails'][] = $tpl;
                 }
+                
+                if(count($result['questionDetails']) == 0)
+                    unset($result['questionDetails']);
 
 //                $array = array(
 //                    'questionDetails' => $result['questionDetails']

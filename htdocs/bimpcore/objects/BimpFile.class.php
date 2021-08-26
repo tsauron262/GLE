@@ -22,7 +22,7 @@ class BimpFile extends BimpObject
                 if ((int) $this->getData('visibility') === 1) {
                     return 1;
                 }
-                
+
                 return 0;
             }
             return 1;
@@ -43,7 +43,7 @@ class BimpFile extends BimpObject
             }
             return 0;
         }
-        
+
         return 1;
     }
 
@@ -51,7 +51,7 @@ class BimpFile extends BimpObject
     {
         return $this->canClientCreate();
     }
-    
+
     // Getters booléens: 
 
     public function isDeletable($force_delete = false, &$errors = array())
@@ -313,7 +313,7 @@ class BimpFile extends BimpObject
 
         $files = array();
 
-        if (file_exists($file_dir)) {
+        if ($file_dir && file_exists($file_dir)) {
             $files = scandir($file_dir);
 
             foreach ($files as $f) {
@@ -376,14 +376,14 @@ class BimpFile extends BimpObject
                     }
                 }
             }
-        }
 
-        foreach ($current_files as $id_file => $file_name) {
-            if (!in_array($file_name, $files)) {
-                if ($this->fetch((int) $id_file)) {
-                    $warnings = array();
-                    $this->delete($warnings, true);
-                    $this->reset();
+            foreach ($current_files as $id_file => $file_name) {
+                if (!in_array($file_name, $files)) {
+                    if ($this->fetch((int) $id_file)) {
+                        $warnings = array();
+                        $this->delete($warnings, true);
+                        $this->reset();
+                    }
                 }
             }
         }

@@ -2664,6 +2664,10 @@ class Bimp_Commande extends BimpComm
                     if ($total_lines_ttc) {
                         $lines_rate = ($rg_amount_ttc / $total_lines_ttc) * 100;
                     }
+                    
+                    if($rg->getData('type') == 'percent'){
+                        $lines_rate = $rg->getData('percent');
+                    }
                     // Assignation du nouveau taux pour chaque ligne de facture brouillon: 
 
                     foreach ($lines as $line) {

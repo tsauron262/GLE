@@ -137,7 +137,7 @@ class InvoiceStatementPDF extends BimpDocumentPDF
             $html .= '</tr>';
         }
 
-        $html .= '<tr><td></td><td></td><td></td><td></td><td><td></td><b>TOTAL TTC des factures:</b></td><td style="text-align: right"><b>' . BimpTools::displayMoneyValue($total_facture, 'EUR', 0, 0, 1, 2, 0, ',', 1) . '</b></td></tr>';
+        $html .= '<tr><td></td><td></td><td></td><td></td><td><br /><br /><b>TOTAL TTC des factures:</b></td><td><b><br />' . BimpTools::displayMoneyValue($total_facture, 'EUR', 0, 0, 1, 2, 0, ',', 1) . '</b></td></tr>';
 
         $html .= '</table>';
         $html .= '</div>';

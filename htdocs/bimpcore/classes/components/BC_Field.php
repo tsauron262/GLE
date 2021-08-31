@@ -378,7 +378,7 @@ class BC_Field extends BimpComponent
         return 'Inconnu';
     }
 
-    public function displayCreateObjectButton($success_callback = '')
+    public function displayCreateObjectButton($trigger_obj_change = false, $auto_save = false)
     {
         $data_type = $this->params['type'];
 
@@ -400,15 +400,39 @@ class BC_Field extends BimpComponent
 
         $create_form = $this->getParam('create_form', '');
         $edit_form = $this->getParam('edit_form', '');
+        
         if ($create_form || $edit_form) {
 
-            $html .= '<div class="buttonsContainer">';
+            $success_callback = 'null';
+
+            if ($trigger_obj_change || $auto_save) {
+                $success_callback = 'function(result) {';
+
+                if ($auto_save && BimpObject::objectLoaded($this->object)) {
+                    $success_callback .= 'if (result.id_object) {saveObjectField(\'' . $this->object->module . '\'';
+                    $success_callback .= ', \'' . $this->object->object_name . '\'';
+                    $success_callback .= ', ' . $this->object->id;
+                    $success_callback .= ', \'' . $this->name . '\'';
+                    $success_callback .= ', result.id_object';
+                    $success_callback .= ', null';
+                    $success_callback .= ');}';
+                } elseif ($trigger_obj_change) {
+                    $success_callback .= 'triggerObjectChange(\'' . $this->object->module . '\'';
+                    $success_callback .= ', \'' . $this->object->object_name . '\'';
+                    $success_callback .= ', ' . (BimpObject::objectLoaded($this->object) ? $this->object->id : 0);
+                    $success_callback .= ');';
+                }
+
+                $success_callback .= '}';
+            }
+
+            $html .= '<div class="buttonsContainer align-right">';
 
             if ($edit_form && $instance->isLoaded()) {
                 $form_values = $this->getParam('edit_form_values', array());
                 $btn_label = $this->getParam('edit_form_label', 'Editer') . ' ' . $instance->getLabel('the');
 
-                $onclick = $instance->getJsLoadModalForm($edit_form, $btn_label, $form_values, $success_callback, 'close');
+                $onclick = $instance->getJsLoadModalForm($edit_form, $btn_label, $form_values, '', 'close', 0, '$(this)', $success_callback);
 
                 $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
                 $html .= BimpRender::renderIcon('fas_edit', 'iconLeft') . $btn_label;
@@ -423,7 +447,7 @@ class BC_Field extends BimpComponent
                 $form_values = $this->getParam('create_form_values', array());
                 $btn_label = $this->getParam('create_form_label', 'Ajouter') . ' ' . $instance->getLabel('a');
 
-                $onclick = $instance->getJsLoadModalForm($create_form, $btn_label, $form_values, $success_callback, 'close');
+                $onclick = $instance->getJsLoadModalForm($create_form, $btn_label, $form_values, '', 'close', 0, '$(this)', $success_callback);
 
                 $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
                 $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . $btn_label;

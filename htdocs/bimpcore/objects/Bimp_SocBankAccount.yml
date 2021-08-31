@@ -18,8 +18,8 @@ parent_id_property: fk_soc
 header_edit_form: default
 
 labels: 
-    name: compte bancaire
-    name_plur: comptes bancaires
+    name: RIB
+    name_plur: RIBs
     
 fields: 
     fk_soc: 

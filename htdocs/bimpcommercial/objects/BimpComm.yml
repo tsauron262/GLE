@@ -259,6 +259,7 @@ fields:
         type: id_object
         object: rib_client 
         create_form: default
+        create_form_label: Ajouter
         create_form_values:
             fields:
                 fk_soc:

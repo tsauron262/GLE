@@ -4959,7 +4959,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             }
 
             $this->noFetchOnTrigger = false;
-            return $result;
+            return $id;
         }
 
         $this->noFetchOnTrigger = false;

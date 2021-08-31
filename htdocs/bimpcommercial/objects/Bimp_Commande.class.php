@@ -347,7 +347,7 @@ class Bimp_Commande extends BimpComm
 
     public function isValidatable(&$errors = array())
     {
-        $errors = parent::isValidatable($errors);
+        parent::isValidatable($errors);
         if (!count($errors)) {
             $this->areLinesValid($errors);
 

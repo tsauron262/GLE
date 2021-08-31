@@ -1383,9 +1383,13 @@ class ObjectLine extends BimpObject
         return array();
     }
 
-    public function getRemiseTotalInfos($recalculate = false)
+    public function getRemiseTotalInfos($recalculate = false, $force_qty_mode = -1)
     {
-        if ($recalculate || is_null($this->remises_total_infos)) {
+//        $force_qty_mode : -1 aucun forçage / 0 : forcer qtés initiales / 1 : forcer qtés finales (qty + qty_modif). 
+        
+        $qty_modif_exists = $this->field_exists('qty_modif');
+        
+        if (($qty_modif_exists && $force_qty_mode >= 0) || $recalculate || is_null($this->remises_total_infos)) {
             $this->remises_total_infos = array(
                 'line_percent'              => 0,
                 'line_amount_ht'            => 0,
@@ -1408,11 +1412,17 @@ class ObjectLine extends BimpObject
                 return $this->remises_total_infos;
             }
 
-            if ((float) $this->qty == 0 && $this->field_exists('qty_modif')) {
-                $full_qty = true;
+            $full_qty = 0;
+            
+            if ($force_qty_mode >= 0) {
+                $full_qty = $force_qty_mode;
+            } elseif ((float) $this->qty == 0 && $qty_modif_exists) {
+                $full_qty = 1;
+            }
+
+            if ($full_qty) {
                 $qty = (float) $this->getFullQty();
             } else {
-                $full_qty = false;
                 $qty = (float) $this->qty;
             }
 

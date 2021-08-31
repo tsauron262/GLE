@@ -784,7 +784,7 @@ lists_cols:
         
 lists: 
     default: 
-        objects_change_reload: ObjectLineRemise,Bimp_Commande
+        objects_change_reload: ObjectLineRemise,Bimp_Commande,RemiseGlobale
             
     logistique:
         checkboxes: 1

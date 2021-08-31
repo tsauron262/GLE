@@ -297,7 +297,6 @@ fields:
         type: bool
         default_value: 0 
 
-        
 fields_tables: 
     infos: 
         rows: 
@@ -349,7 +348,6 @@ fields_tables:
                       method: isFieldEditable
                       params:
                           - paiement_comptant
-                      
                   
     client: 
         rows: 
@@ -389,15 +387,41 @@ fields_tables:
             - label: Remises
               value: 
                   callback: displayTotalRemises
-            - field: total_ht
-            - field: tva
-            - field: total_ttc
+            - label: Total HT
+              value: 
+                  callback: 
+                      method: displayValueWithFullQty
+                      params: 
+                          - total_ht
+            - label: Total TVA
+              value: 
+                  callback: 
+                      method: displayFullQtyValue
+                      params: 
+                          - tva
+            - label: Total TTC
+              value: 
+                  callback: 
+                      method: displayFullQtyValue
+                      params: 
+                          - total_ttc
                   
 views: 
     default: 
         objects_change_reload: Bimp_CommandeLine,ObjectLineRemise,BimpFile,RemiseGlobale
     content_infos: 
         objects_change_reload: Bimp_CommandeLine,ObjectLineRemise,BimpFile,RemiseGlobale
+        rows: 
+            0: 
+                cols: 
+                    0: 
+                        rows: 
+                            0: 
+                                cols: 
+                                    1: 
+                                        type: custom
+                                        custom: 
+                                            callback: renderTotalsPanel
     full: 
         objects_change_reload: Bimp_CommandeLine,ObjectLineRemise,BimpFile,RemiseGlobale
     commandes_fourn: 

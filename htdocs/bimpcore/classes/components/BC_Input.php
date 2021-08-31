@@ -211,7 +211,7 @@ class BC_Input extends BimpComponent
                     case 'datetime':
                     case 'password':
                     case 'object_filters':
-                        $this->params['type'] = $this->data_type;
+                        $this->params['type'] = $data_type;
                         break;
 
                     case 'id_object':

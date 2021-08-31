@@ -403,6 +403,8 @@ forms:
                 field: fk_mode_reglement
                 show: 
                     callback: isEditable
+            rib_client:
+                field: rib_client
 #            date_lim_reglement: 
 #                field: date_lim_reglement
             account: 
@@ -707,6 +709,9 @@ fields_tables:
               edit: 
                   callback: isEditable
             - field: fk_mode_reglement
+              edit: 
+                  callback: isEditable
+            - field: rib_client
               edit: 
                   callback: isEditable
             - field: prelevement

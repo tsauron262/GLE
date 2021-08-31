@@ -341,6 +341,9 @@ fields_tables:
             - field: fk_mode_reglement
               edit: 
                   callback: isEditable
+            - field: rib_client
+              edit: 
+                  callback: isEditable
             - field: date_prevue_facturation
               edit: 1
             - field: paiement_comptant
@@ -452,6 +455,7 @@ forms:
                   callback: isEditable
             - field: fk_cond_reglement
             - field: fk_mode_reglement
+            - field: rib_client
             - field: paiement_comptant
             - field: date_commande
             - field: date_livraison

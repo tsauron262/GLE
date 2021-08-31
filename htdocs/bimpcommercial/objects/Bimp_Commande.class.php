@@ -347,7 +347,8 @@ class Bimp_Commande extends BimpComm
 
     public function isValidatable(&$errors = array())
     {
-        if (parent::isValidatable($errors)) {
+        $errors = parent::isValidatable($errors);
+        if (!count($errors)) {
             $this->areLinesValid($errors);
 
             $client = $this->getChildObject('client');
@@ -396,6 +397,7 @@ class Bimp_Commande extends BimpComm
 //                }
             }
         }
+        
 
         return (count($errors) ? 0 : 1);
     }

@@ -71,6 +71,12 @@ objects:
         instance: 
             id_object:
                 field_value: entrepot
+        
+    rib_client: 
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_SocBankAccount
                 
 fields:
     entrepot: 
@@ -245,6 +251,22 @@ fields:
         label: Référence remplacée
         input: 
             help: Utiliser ce champ si perte des données de la pièce remplacée
+    rib_client:
+        label: Rib Client
+        dol_extra_field: 1
+        type: id_object
+        object: rib_client 
+        create_form: default
+        create_form_values:
+            fields:
+                fk_soc:
+                    field_value: fk_soc
+        depends_on: fk_soc
+        input:
+            type: select
+            options:
+                callback: getRibArray
+        default_value: 0
     
 forms: 
     contact:

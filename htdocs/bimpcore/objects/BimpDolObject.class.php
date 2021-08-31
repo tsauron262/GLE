@@ -99,6 +99,13 @@ class BimpDolObject extends BimpObject
 
         return $emails;
     }
+    
+    public function extrafieldsIsConfig($name){
+        $result = $this->db->getValue('extrafields', 'rowid', "`name` = '".$name."' AND `elementtype` = '".static::$dol_module."'");
+        if($result > 0)
+            return 1;
+        return 0;
+    }
 
     public function getMailsToArray()
     {

@@ -77,6 +77,8 @@ objects:
             bimp_object: 
                 module: bimpcore
                 name: Bimp_SocBankAccount
+            id_object:
+                field_value: rib_client
                 
 fields:
     entrepot: 

@@ -112,7 +112,10 @@ class BC_FieldsTable extends BC_Panel
                 if (!$label) {
                     $label = $field->params['label'];
                 }
+                
                 $content = $field->renderHtml();
+                $content .= $field->displayCreateObjectButton();
+                
                 unset($field);
             } elseif ($row_params['association']) {
                 $asso = new BimpAssociation($this->object, $row_params['association']);

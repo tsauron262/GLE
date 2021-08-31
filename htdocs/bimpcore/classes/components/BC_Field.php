@@ -378,6 +378,64 @@ class BC_Field extends BimpComponent
         return 'Inconnu';
     }
 
+    public function displayCreateObjectButton($success_callback = '')
+    {
+        $data_type = $this->params['type'];
+
+        if ($data_type === 'items_list') {
+            $data_type = $this->getParam('items_data_type', 'string');
+        }
+
+        if (!in_array($data_type, array('id_parent', 'id_object'))) {
+            return '';
+        }
+
+        $instance = $this->object->config->getObject('fields/' . $this->name . '/object');
+
+        if (is_null($instance)) {
+            return '';
+        }
+
+        $html = '';
+
+        $create_form = $this->getParam('create_form', '');
+        $edit_form = $this->getParam('edit_form', '');
+        if ($create_form || $edit_form) {
+
+            $html .= '<div class="buttonsContainer">';
+
+            if ($edit_form && $instance->isLoaded()) {
+                $form_values = $this->getParam('edit_form_values', array());
+                $btn_label = $this->getParam('edit_form_label', 'Editer') . ' ' . $instance->getLabel('the');
+
+                $onclick = $instance->getJsLoadModalForm($edit_form, $btn_label, $form_values, $success_callback, 'close');
+
+                $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                $html .= BimpRender::renderIcon('fas_edit', 'iconLeft') . $btn_label;
+                $html .= '</span>';
+            }
+
+            if ($create_form) {
+                if ($instance->isLoaded()) {
+                    $instance = BimpObject::getInstance($instance->module, $instance->object_name);
+                }
+
+                $form_values = $this->getParam('create_form_values', array());
+                $btn_label = $this->getParam('create_form_label', 'Ajouter') . ' ' . $instance->getLabel('a');
+
+                $onclick = $instance->getJsLoadModalForm($create_form, $btn_label, $form_values, $success_callback, 'close');
+
+                $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . $btn_label;
+                $html .= '</span>';
+            }
+
+            $html .= '</div>';
+        }
+
+        return $html;
+    }
+
     // Getters: 
 
     public function getLinkedObject()

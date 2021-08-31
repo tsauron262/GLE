@@ -390,6 +390,15 @@ class BimpComm extends BimpDolObject
     }
 
     // Getters array: 
+    
+    public function getRibArray()
+    {
+        $result = $this->db->getRows('societe_rib', '`fk_soc` ='.$this->getData("fk_soc"), null, 'object', null, 'default_rib', 'DESC');
+        $return = array(0=>'');
+        foreach($result as $row)
+            $return[$row->rowid] = $row->label;
+        return $return;
+    }
 
     public function getClientContactsArray()
     {

@@ -431,14 +431,18 @@ class BimpCore
     }
 
     // Gestion des logs:
-    
-    public static function addLogs_extra_data($array){
+
+    public static function addLogs_extra_data($array)
+    {
         static::$logs_extra_data = BimpTools::merge_array(static::$logs_extra_data, $array);
     }
 
     public static function addlog($msg, $level = 1, $type = 'bimpcore', $object = null, $extra_data = array(), $force = false)
     {
-//        die('LOG : '.$msg." ".print_r($extra_data,1));
+        if (BimpCore::isModeDev()) {
+            die('LOG : ' . $msg . " " . print_r($extra_data, 1));
+        }
+
         $extra_data = BimpTools::merge_array(static::$logs_extra_data, $extra_data);
         if (!$force && $level < Bimp_Log::BIMP_LOG_ERREUR && (int) BimpCore::getConf('bimpcore_mode_eco', 0)) {
             return array();

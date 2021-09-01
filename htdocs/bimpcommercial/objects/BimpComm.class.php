@@ -1568,7 +1568,7 @@ class BimpComm extends BimpDolObject
                     $html .= BimpTools::displayFloatValue($infos['remises_lines_percent'], 4) . ' %';
                     if (!is_null($infos_fq) && $infos['remises_lines_percent'] != $infos_fq['remises_lines_percent']) {
                         $html .= '<br/><span class="important">';
-                        $html .= BimpTools::displayFloatValue($infos_fq['remises_lines_percent'], ' %', 0, 0, 0, 2, 1);
+                        $html .= BimpTools::displayFloatValue($infos_fq['remises_lines_percent'], 4) . ' %';
                         $html .= '</span>';
                     }
                     $html .= '</td>';
@@ -1602,7 +1602,7 @@ class BimpComm extends BimpDolObject
                     $html .= BimpTools::displayFloatValue($infos['remises_globales_percent'], 4) . ' %';
                     if (!is_null($infos_fq) && $infos['remises_globales_percent'] != $infos_fq['remises_globales_percent']) {
                         $html .= '<br/><span class="important">';
-                        $html .= BimpTools::displayFloatValue($infos_fq['remises_globales_percent'], ' %', 0, 0, 0, 2, 1);
+                        $html .= BimpTools::displayFloatValue($infos_fq['remises_globales_percent'], 4) . ' %';
                         $html .= '</span>';
                     }
                     $html .= '</td>';
@@ -1635,7 +1635,7 @@ class BimpComm extends BimpDolObject
                     $html .= BimpTools::displayFloatValue($infos['ext_remises_globales_percent'], 4) . ' %';
                     if (!is_null($infos_fq) && $infos['ext_remises_globales_percent'] != $infos_fq['ext_remises_globales_percent']) {
                         $html .= '<br/><span class="important">';
-                        $html .= BimpTools::displayFloatValue($infos_fq['ext_remises_globales_percent'], ' %', 0, 0, 0, 2, 1);
+                        $html .= BimpTools::displayFloatValue($infos_fq['ext_remises_globales_percent'], 4) . ' %';
                         $html .= '</span>';
                     }
                     $html .= '</td>';
@@ -1669,7 +1669,7 @@ class BimpComm extends BimpDolObject
                 $html .= BimpTools::displayFloatValue($infos['remise_total_percent'], 4) . ' %';
                 if (!is_null($infos_fq) && $infos['remise_total_percent'] != $infos_fq['remise_total_percent']) {
                     $html .= '<br/><span class="important">';
-                    $html .= BimpTools::displayFloatValue($infos_fq['remise_total_percent'], ' %', 0, 0, 0, 2, 1);
+                    $html .= BimpTools::displayFloatValue($infos_fq['remise_total_percent'], 4) . ' %';
                     $html .= '</span>';
                 }
                 $html .= '</td>';

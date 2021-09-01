@@ -1741,7 +1741,7 @@ class BimpController
                             if ($field->params['edit_form'])
                                 $html .= BC_Form::renderLoadFormObjectButton($object, $form_id, $field->params['object'], $field_prefix . $field_name, $field->params['edit_form'], $field->params['edit_form_values'], $field->params['edit_form_label'], true, null, '', -1);
                         }
-                        $html .= $field->renderInput();
+                        $html .= $field->renderHtml();
                         unset($field);
                     } elseif ($object->config->isDefined('associations/' . $field_name)) {
                         $form = new BC_Form($object, $id_parent, $form_name, 1, true);

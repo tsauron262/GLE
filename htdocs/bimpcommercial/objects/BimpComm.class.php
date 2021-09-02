@@ -400,7 +400,7 @@ class BimpComm extends BimpDolObject
     {        
         $return = array(0=>'');
         $client = $this->getClientFacture();
-        if($client->isLoaded()){
+        if($client && $client->isLoaded()){
             $result = $this->db->getRows('societe_rib', '`fk_soc` ='.$client->id, null, 'object', null, 'default_rib', 'DESC');
 
             foreach($result as $row)

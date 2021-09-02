@@ -899,42 +899,44 @@ class BimpDocumentPDF extends BimpModelPDF
         // Remise globale
         if (!empty($remises_globales)) {
             foreach ($remises_globales as $id_rg => $rg_amount_ttc) {
-                $rg = BimpCache::getBimpObjectInstance('bimpcommercial', 'RemiseGlobale', (int) $id_rg);
-                if (BimpObject::objectLoaded($rg)) {
-                    $remise_label = $rg->getData('label');
+                if($rg_amount_ttc != 0){
+                    $rg = BimpCache::getBimpObjectInstance('bimpcommercial', 'RemiseGlobale', (int) $id_rg);
+                    if (BimpObject::objectLoaded($rg)) {
+                        $remise_label = $rg->getData('label');
 
-                    if ($rg->getData('obj_type') !== $this->bimpCommObject::$element_name ||
-                            (int) $rg->getData('id_obj') !== (int) $this->bimpCommObject->id) {
-                        $rg_obj = $rg->getParentObject();
-                        if (BimpObject::objectLoaded($rg_obj)) {
-                            $remise_label .= ' (' . BimpTools::ucfirst($rg_obj->getLabel()) . ' ' . $rg_obj->getRef() . ')';
+                        if ($rg->getData('obj_type') !== $this->bimpCommObject::$element_name ||
+                                (int) $rg->getData('id_obj') !== (int) $this->bimpCommObject->id) {
+                            $rg_obj = $rg->getParentObject();
+                            if (BimpObject::objectLoaded($rg_obj)) {
+                                $remise_label .= ' (' . BimpTools::ucfirst($rg_obj->getLabel()) . ' ' . $rg_obj->getRef() . ')';
+                            }
                         }
                     }
+
+                    if (!$remise_label) {
+                        $remise_label = 'Remise exceptionnelle';
+                    }
+
+                    $row = array(
+                        'desc'     => $remise_label,
+                        'qte'      => '',
+                        'tva'      => '',
+                        'pu_ht'    => '', //BimpTools::displayMoneyValue(-$rg_amount_ttc, ''),
+                        'total_ht' => '', //BimpTools::displayMoneyValue(-$rg_amount_ttc, '')
+                    );
+                    if (!$this->hideTtc)
+                        $row['total_ttc'] = BimpTools::displayMoneyValue(-$rg_amount_ttc, '', 0, 0, 1);
+                    if (isset($remises_globalesHt[$id_rg]))
+                        $row['total_ht'] = BimpTools::displayMoneyValue(-$remises_globalesHt[$id_rg], '', 0, 0, 1);
+    //                if (!$this->hideReduc)
+    //                    $row['pu_remise'] = BimpTools::displayMoneyValue(-$rg_amount_ttc, '');
+
+                    if ($this->hide_pu) {
+                        unset($row['pu_ht']);
+                    }
+
+                    $table->rows[] = $row;
                 }
-
-                if (!$remise_label) {
-                    $remise_label = 'Remise exceptionnelle';
-                }
-
-                $row = array(
-                    'desc'     => $remise_label,
-                    'qte'      => '',
-                    'tva'      => '',
-                    'pu_ht'    => '', //BimpTools::displayMoneyValue(-$rg_amount_ttc, ''),
-                    'total_ht' => '', //BimpTools::displayMoneyValue(-$rg_amount_ttc, '')
-                );
-                if (!$this->hideTtc)
-                    $row['total_ttc'] = BimpTools::displayMoneyValue(-$rg_amount_ttc, '', 0, 0, 1);
-                if (isset($remises_globalesHt[$id_rg]))
-                    $row['total_ht'] = BimpTools::displayMoneyValue(-$remises_globalesHt[$id_rg], '', 0, 0, 1);
-//                if (!$this->hideReduc)
-//                    $row['pu_remise'] = BimpTools::displayMoneyValue(-$rg_amount_ttc, '');
-
-                if ($this->hide_pu) {
-                    unset($row['pu_ht']);
-                }
-
-                $table->rows[] = $row;
             }
         }
 

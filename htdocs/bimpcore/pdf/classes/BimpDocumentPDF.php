@@ -16,7 +16,7 @@ class BimpDocumentPDF extends BimpModelPDF
     public $localtax2 = array();
     public $acompteHt = 0;
     public $acompteTtc = 0;
-    public $acompteTva20 = 0;
+    public $acompteTva = array();
     public $tva = array();
     public $ht = array();
     public $hide_pu = false;
@@ -627,7 +627,9 @@ class BimpDocumentPDF extends BimpModelPDF
 
                     $this->acompteHt -= $line->total_ht;
                     $this->acompteTtc -= $line->total_ttc;
-                    $this->acompteTva20 -= $line->total_tva;
+                    
+                    $this->acompteTva[$line->tva_tx] -= $line->total_tva;
+                    
                     continue;
                 }
 
@@ -1164,8 +1166,10 @@ class BimpDocumentPDF extends BimpModelPDF
                 $i++;
             }
         }
-
-        $this->tva["20.000"] += $this->acompteTva20;
+        foreach($this->acompteTva as $rate => $montant){
+            $this->tva[$rate] += $montant;
+            $this->ht[$rate] += $montant * 100 / $rate;
+        }
     }
 
     public function getTotauxRowsHtml()

@@ -531,6 +531,13 @@ lists_cols:
         label: Nb d'interventions
         value:
             callback: displayNombreInters
+    commercialclient:
+        label: Commercial Client
+        value:
+            callback: displayCommercialClient
+        search:
+            input: 
+                type: search_user
        
 filters:
     linked:
@@ -554,12 +561,19 @@ filters_panels:
           fk_user_author:
           fk_user_tech:
           fk_soc:
+          commercialclient:
           linked:
           no_linked:
           datec:
           datei:
           commandes:
-              
+filters:
+    commercialclient:
+        label: Commercial client
+        input:
+            type: search_user
+        data_type: id_object
+        type: user
 lists: 
     default:
         configurable: 1
@@ -584,6 +598,7 @@ lists:
             type_signature:
             fk_user_tech:
             fk_soc: 
+            commercialclient:
             datei:
             duree:
             urgent:

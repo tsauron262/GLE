@@ -128,6 +128,7 @@ lists:
         extra_btn:
             callback: getListExtraButtons
         cols: 
+            statut:
             description:
             fk_product:
             subprice:

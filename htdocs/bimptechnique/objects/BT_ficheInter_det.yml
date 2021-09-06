@@ -338,7 +338,7 @@ filters_panels:
         filters:
           parent:ref:
           parent:datei:
-          fk_user_tech:
+          parent:fk_user_tech:
           type_of:
               label: Type d'intervention
               type: check_list
@@ -366,7 +366,6 @@ lists:
                 label: Référence de la FI
             parent:fk_soc:
             parent:fk_user_tech:
-                label: Technicien
             parent:datei:
             duree_inter:
     in_fiche:

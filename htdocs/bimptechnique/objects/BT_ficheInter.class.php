@@ -501,6 +501,29 @@ class BT_ficheInter extends BimpDolObject
 
         return null;
     }
+public function getCommercialclientSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
+    {
+
+        $alias = 'sc';
+        $joins[$alias] = array(
+            'alias' => $alias,
+            'table' => 'societe_commerciaux',
+            'on'    => $alias . '.fk_soc = a.fk_soc'
+        );
+        $filters[$alias . '.fk_user'] = $value;
+    }
+    
+    public function displayCommercialClient()
+    {
+
+        if ($this->isLoaded()) {
+            $id_commercial = $this->db->getValue('societe_commerciaux', 'fk_user', 'fk_soc = ' . $this->getData('fk_soc'));
+
+            $commercial = $this->getInstance('bimpcore', 'Bimp_User', $id_commercial);
+
+            return $commercial->dol_object->getNomUrl();
+        }
+    }
 
     public function getDataCommercialClient($field)
     {

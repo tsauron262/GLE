@@ -302,7 +302,7 @@
                         $send = true;
                         $nombre_relance++;
                         $message = "Contrat " . $c->getData('ref') . "<br />Client ".$client->dol_object->getNomUrl()." <br /> dont vous êtes le commercial arrive à expiration dans <b>$diff->d jour.s</b>";
-                        if($c->getData('relance_renouvellement') && !in_array($c->getData('tacite'), $not_tacite)){
+                        if($c->getData('relance_renouvellement') && in_array($c->getData('tacite'), $not_tacite)){
                             $this->sendMailCommercial('ECHEANCE - Contrat ' . $c->getData('ref') . "[".$client->getData('code_client')."]", $c->getData('fk_commercial_suivi'), $message, $c);
                         }
                             
@@ -318,7 +318,7 @@
                         $endDate = new DateTime($val);
                             $diff = $now->diff($endDate);
                             if($diff->y == 0 && $diff->m == 0 && $diff->d <= 30 && $diff->d > 0 && $diff->invert == 0) {
-                                if($c->getData('relance_renouvellement') && !in_array($c->getData('tacite'), $not_tacite)){
+                                if($c->getData('relance_renouvellement') && in_array($c->getData('tacite'), $not_tacite)){
                                     $this->sendMailCommercial('ECHEANCE - Contrat ' . $c->getData('ref') . "[".$client->getData('code_client')."]", $c->getData('fk_commercial_suivi'), $message, $c);
                                 }
                                     

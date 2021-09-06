@@ -12,6 +12,7 @@
         public $send = true;
         
         public $id_relance_for_pineri = [260, 358, 154, 111, 97, 19];
+        public $id_relance_for_romain = [195];
 
         CONST CONTRAT_BROUILLON = 0;
         CONST CONTRAT_DEMANDE = 10;
@@ -35,14 +36,14 @@
         ];
         
         function zu_gehen() {
-            $this->autoClose();
-            $this->mailJourActivation();
-            $this->relanceActivationProvisoire();
-            $this->relance_brouillon();
+//            $this->autoClose();
+//            $this->mailJourActivation();
+//            $this->relanceActivationProvisoire();
+//            $this->relance_brouillon();
             $this->echeance_contrat();
-            $this->relance_demande();
-            $this->tacite();
-            $this->facturation_auto();
+//            $this->relance_demande();
+//            $this->tacite();
+//            $this->facturation_auto();
             return "OK";
         }
         
@@ -290,7 +291,7 @@
                 $send = false;
                 $c = BimpObject::getInstance('bimpcontract', 'BContract_contrat', $contrat->rowid);
                 $client = BimpObject::getInstance('bimpcore', 'Bimp_Societe', $c->getData('fk_soc'));
-
+                $commercial_suivi = $c->getData('fk_commercial_suivi');
                 if($c->getData('periodicity')) {
                     
                     $endDate = new DateTime($c->displayRealEndDate("Y-m-d"));
@@ -318,19 +319,19 @@
                             $nombre_pas_relance++;
                         }
                     }
-                    
                 
-                
+                $this->output.= $email_comm . " => ".$c->getNomUrl()."<br />";
                 if($this->send && $send && $c->getData('relance_renouvellement') == 1) {
                     $this->sendMailCommercial('ECHEANCE - Contrat ' . $c->getData('ref') . "[".$client->getData('code_client')."]", $c->getData('fk_commercial_suivi'), $message, $c);
                 }
                 
             }
-            if($nombre_relance > 0)
-                $this->output .= $nombre_relance . " relance echeances faites</br />";
+        }
+            if($nombre_relance > 0)  {
+                    $this->output .= $nombre_relance . " relance echeances faites</br />";
             }
-            if($nombre_pas_relance) {
-                $this->output .= $nombre_pas_relance . " de contrats non relancés</br />";
+            if($nombre_pas_relance > 0) {
+                $this->output .= $nombre_relance . " relance echeances PAS faites</br />";
             }
         }
         

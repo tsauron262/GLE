@@ -46,7 +46,7 @@ objects:
         instance: 
             id_object: 
                 field_value: id_set_facturable
-                
+
 fields:
     # Champs Dol object: 
         
@@ -333,8 +333,35 @@ lists_cols:
         label: Description rapide
         value:
             callback: displayDescLight
-
+filters_panels: 
+    default: 
+        filters:
+          parent:ref:
+              # EN COURS
+#          type_of:
+#              label: Type d'intervention
+#              type: check_list
+#              items:
+#                    0: Contrat
+#                    1: Commande(s)
+#                    2: Ticket(s) support
 lists:
+    all:
+        title: Listes des interventions
+        filters_panel: default
+        sort_field: fk_fichinter
+        n: 20
+        cols:
+            type_of:
+                label: Type d'intervention
+                value:
+                    callback: displayTypeInList
+            parent:ref:
+                label: Référence de la FI
+            parent:fk_soc:
+            parent:fk_user_author:
+                label: Technicien
+            duree_inter:
     in_fiche:
         title: Liste des interventions
         objects_change_reload: BT_ficheInter

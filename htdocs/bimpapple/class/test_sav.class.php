@@ -353,6 +353,8 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
             $this->fetchEquipmentsImei($nbParUser);
         }
         
+        global $user;
+        $user->fetch(1);
         
         
         $this->output .= ' ' . $this->nbImei . ' compte réactivé sur '.$nbcompte;

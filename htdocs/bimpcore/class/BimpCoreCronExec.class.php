@@ -89,7 +89,87 @@ class BimpCoreCronExec
 
         BimpObject::loadClass('bimpsupport', 'BS_SAV');
         BS_SAV::checkSavToCancel();
-        
+
+        return 'OK';
+    }
+
+    public function generateAppleReport()
+    {
+        $vente = BimpObject::getInstance('bimpcommercial', 'Bimp_Vente');
+
+        $dt = new DateTime();
+        $dow = (int) $dt->format('w');
+        if ($dow > 0) {
+            $dt->sub(new DateInterval('P' . $dow . 'D')); // Premier dimanche précédent. 
+        }
+        $date_to = $dt->format('Y-m-d');
+
+        $dt->sub(new DateInterval('P7D'));
+        $date_from = $dt->format('Y-m-d');
+
+        $csv_types = array(
+            'inventory' => 1,
+            'sales'     => 1,
+        );
+
+        // Génération des fichiers: 
+
+        $errors = array();
+        $result = $vente->generateAppleCSV($csv_types, $date_from, $date_to, false, $errors, true);
+
+        if (!count($errors) && (!isset($result['files']) || empty($result['files']))) {
+            $errors[] = 'Echec de la génération des rapports Apple pour une raison inconnue';
+        }
+
+        if (count($errors)) {
+            BimpCore::addlog('Echec génération auto rapports Apple', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', null, array(
+                'Erreurs' => $errors
+            ));
+
+            return 'Echec génération (cf log)';
+        }
+
+        // Envoi FTP: 
+        $host = 'ftp-edi.groupe-ldlc.com';
+        $port = 21;
+        $login = 'bimp-erp';
+        $pword = 'MEDx33w+3u(';
+
+        $ftp = ftp_connect($host, $port);
+
+        if ($ftp === false) {
+            $errors[] = 'Echec de la connexion FTP avec le serveur "' . $host . '"';
+        } else {
+            if (!ftp_login($ftp, $login, $pword)) {
+                $errors[] = 'Echec de la connexion FTP - Identifiant ou mot de passe incorrect';
+            } else {
+                if (defined('FTP_SORTANT_MODE_PASSIF')) {
+                    ftp_pasv($ftp, true);
+                } else {
+                    ftp_pasv($ftp, false);
+                }
+
+                $local_dir = DOL_DATA_ROOT . '/bimpcore/apple_csv/' . date('Y') . '/';
+                $ftp_dir = '/FTP-BIMP-ERP/statsapple/' . date('Y') . '/';
+
+                foreach ($result['files'] as $fileName) {
+                    if (!ftp_put($ftp, $ftp_dir . $fileName, $local_dir . $fileName)) {
+                        $errors[] = 'Echec de l\'envoi du fichier "' . $fileName . '"';
+                    }
+                }
+            }
+            
+            ftp_close($ftp);
+        }
+
+        if (count($errors)) {
+            BimpCore::addlog('Echec de l\'envoi FTP des rapports Apple', Bimp_Log::BIMP_LOG_URGENT, 'bimpcomm', null, array(
+                'Erreurs' => $errors
+            ));
+            
+            return 'Echec envoi ftp (cf log)';
+        }
+
         return 'OK';
     }
 }

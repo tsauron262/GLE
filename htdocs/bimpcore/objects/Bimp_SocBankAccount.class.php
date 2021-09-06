@@ -60,11 +60,21 @@ class Bimp_SocBankAccount extends BimpObject
 
     public function create(&$warnings = array(), $force_create = false)
     {
+        
+        
         $errors = parent::create($warnings, $force_create);
 
         if (!count($errors)) {
             // Le create du dol_object n'insert pas les valeurs...
             $errors = $this->update($warnings, $force_create);
+        }
+        if(isset($_FILES['file'])){
+            $soc = $this->getChildObject('societe');
+            $file_dir = $soc->getFilesDir();
+            
+            require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+            
+            dol_add_file_process($file_dir, 0, 0, 'file');
         }
 
         return $errors;

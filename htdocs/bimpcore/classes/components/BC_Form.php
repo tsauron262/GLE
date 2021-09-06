@@ -15,6 +15,7 @@ class BC_Form extends BC_Panel
     public static $row_params = array(
         'show'               => array('data_type' => 'bool', 'default' => 1),
         'field'              => array('default' => ''),
+        'info_header'        => array('default' => ''),
         'association'        => array('default' => ''),
         'object'             => array('default' => ''),
         'custom'             => array('data_type' => 'bool', 'default' => 0),
@@ -67,6 +68,7 @@ class BC_Form extends BC_Panel
         $this->params_def['force_edit'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['cancel_btn'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['on_submit'] = array('default' => 'null');
+        $this->params_def['info_header'] = array('default' => 'null');
 
         global $current_bc;
         if (!is_object($current_bc)) {
@@ -258,7 +260,7 @@ class BC_Form extends BC_Panel
             $html .= '<input type="hidden" name="' . $this->fields_prefix . $parent_id_property . '" value="' . $this->id_parent . '"/>';
         }
 
-        if (is_null($this->config_path)) {
+        if (is_null($this->config_path) || !isset($this->params['rows']) || count($this->params['rows']) == 0) {
             $fields = $this->object->getConf('fields', array(), true, 'array');
             foreach ($fields as $field_name => $field_params) {
                 if ($field_name === $parent_id_property) {

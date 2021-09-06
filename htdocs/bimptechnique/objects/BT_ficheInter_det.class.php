@@ -299,6 +299,20 @@ class BT_ficheInter_det extends BimpDolObject
         $t = new DateTime($this->getData($field));
         return($t->format('H:i' . ($with_secondes ? ':s' : '')));
     }
+    
+    public function displayTypeInList() {
+        $type  = $this->getData('type');
+        if(array_key_exists($type,self::$types)) {
+            return $this->displayData("type");
+        }
+        $parent = $this->getParentInstance();
+        $fk_soc = $parent->getData('fk_soc');
+        $soc = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Societe", $fk_soc);
+        if($type == $fk_soc) {
+            return "<b>Intervention interne (".$soc->getName().")</b>";
+        }
+        
+    }
 
     public function display_service_ref($with_details_commande_line = true)
     {
@@ -743,7 +757,7 @@ class BT_ficheInter_det extends BimpDolObject
     }
 
     // Outils:
-
+    
     public function time_to_qty($time)
     {
         $timeArr = explode(':', $time);
@@ -755,5 +769,44 @@ class BT_ficheInter_det extends BimpDolObject
             $decTime = $time;
         }
         return $decTime;
+    }
+    
+    // Filters
+    
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false){
+        switch($field_name) {
+            case 'type_of':
+                $in = [];
+                $sql = "SELECT rowid FROM llx_fichinterdet";
+                if(count($values) > 0) {
+                    $sql .= " WHERE ";
+                    $for_or = Array();
+                    foreach($values as $value) {
+                        if($value != 7){
+                            $for_or[] = $value;
+                        }
+                        else {
+                            $intern_societe = explode(',', BimpCore::getConf("bimptechnique_id_societe_auto_terminer"));
+                            foreach($intern_societe as $id) {
+                                $for_or[] = $id;
+                            }
+                        }
+                    }
+                }
+                $first_loop = true;
+                foreach($for_or as $type_of) {
+                    $sql .= ($first_loop) ? "type = $type_of" : " OR type = $type_of";
+                    $first_loop = false;
+                }
+                
+                if ($sql != "") {
+                    $res = $this->db->executeS($sql, 'array');
+                    foreach ($res as $nb => $i) {
+                        $in[] = $i['rowid'];
+                    }
+                }
+                $filters['a.rowid'] = ['in' => $in];
+                break;
+        }
     }
 }

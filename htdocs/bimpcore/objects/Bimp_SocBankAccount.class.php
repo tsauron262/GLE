@@ -29,16 +29,52 @@ class Bimp_SocBankAccount extends BimpObject
 
         return $html;
     }
+    
+    // return boolean:
+    
+    public function isValid(Array &$errors):bool {
+
+        $rib = Array(
+            "banque"        => (int) $this->getData('code_banque'),
+            "agence"        => (int) $this->getData('code_guichet'),
+            "compte"        => (string) $this->getData('number'),
+            "compte_strtr"  => (int) strtr(strtoupper($this->getData("number")), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", '12345678912345678923456789'),
+            "clerib"        => (int) $this->getData('cle_rib')
+        );
+        
+        $cbX89 = 89 * $rib['banque'];
+        $cgX15 = 15 * $rib['agence'];
+        $ncX3 = 3 * $rib['compte_strtr'];
+        
+        $verif_key = (int) 97 - (($cbX89 + $cgX15 + $ncX3) % 97);
+        
+        if((int) $verif_key !== $rib['clerib']) {
+            $errors[] = "Le RIB n'est pas valide";
+            return (bool) 0;
+        }
+        
+        return (bool) 1;
+    }
 
     // overrides: 
 
     public function create(&$warnings = array(), $force_create = false)
     {
+        
+        
         $errors = parent::create($warnings, $force_create);
 
         if (!count($errors)) {
             // Le create du dol_object n'insert pas les valeurs...
             $errors = $this->update($warnings, $force_create);
+        }
+        if(isset($_FILES['file'])){
+            $soc = $this->getChildObject('societe');
+            $file_dir = $soc->getFilesDir();
+            
+            require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+            
+            dol_add_file_process($file_dir, 0, 0, 'file');
         }
 
         return $errors;

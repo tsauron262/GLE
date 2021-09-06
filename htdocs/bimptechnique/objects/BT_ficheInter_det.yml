@@ -337,14 +337,20 @@ filters_panels:
     default: 
         filters:
           parent:ref:
-              # EN COURS
-#          type_of:
-#              label: Type d'intervention
-#              type: check_list
-#              items:
-#                    0: Contrat
-#                    1: Commande(s)
-#                    2: Ticket(s) support
+          parent:datei:
+          fk_user_tech:
+          type_of:
+              label: Type d'intervention
+              type: check_list
+              items:
+                    0: Intervention vendue
+                    1: Impondérable
+                    2: Ligne libre
+                    3: Déplacement non vendu
+                    4: Intervention non vendu
+                    5: Déplacement sous contrat
+                    6: Déplacement vendu
+                    7: Intervention en interne
 lists:
     all:
         title: Listes des interventions
@@ -359,8 +365,9 @@ lists:
             parent:ref:
                 label: Référence de la FI
             parent:fk_soc:
-            parent:fk_user_author:
+            parent:fk_user_tech:
                 label: Technicien
+            parent:datei:
             duree_inter:
     in_fiche:
         title: Liste des interventions

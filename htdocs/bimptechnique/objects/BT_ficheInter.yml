@@ -581,6 +581,7 @@ lists:
             ref:
             datec:
             fk_statut:
+            type_signature:
             fk_user_tech:
             fk_soc: 
             datei:

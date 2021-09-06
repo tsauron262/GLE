@@ -397,6 +397,17 @@ class BT_ficheInter extends BimpDolObject
     public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
+            case 'commercialclient':
+                $alias = 'sc';
+                $joins[$alias] = array(
+                    'alias' => $alias,
+                    'table' => 'societe_commerciaux',
+                    'on'    => $alias . '.fk_soc = a.fk_soc'
+                );
+                $filters[$alias . '.fk_user'] = array(
+                    ($excluded ? 'not_' : '') . 'in' => $values
+                );
+                break;
             case 'linked':
                 $in = [];
                 $sql = "SELECT rowid FROM llx_fichinter WHERE ";

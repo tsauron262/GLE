@@ -557,6 +557,7 @@ filters_panels:
     default: 
         filters:
           fk_statut:
+          type_signature:
           ref:
           fk_user_author:
           fk_user_tech:

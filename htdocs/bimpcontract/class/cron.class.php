@@ -36,14 +36,14 @@
         ];
         
         function zu_gehen() {
-//            $this->autoClose();
-//            $this->mailJourActivation();
-//            $this->relanceActivationProvisoire();
-//            $this->relance_brouillon();
+            $this->autoClose();
+            $this->mailJourActivation();
+            $this->relanceActivationProvisoire();
+            $this->relance_brouillon();
             $this->echeance_contrat();
-//            $this->relance_demande();
-//            $this->tacite();
-//            $this->facturation_auto();
+            $this->relance_demande();
+            $this->tacite();
+            $this->facturation_auto();
             return "OK";
         }
         

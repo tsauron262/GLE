@@ -135,6 +135,8 @@ fields:
         edit_form: default
         input: 
             card: default
+        search:
+            type: search_societe
             
     fk_statut:
         label: Statut

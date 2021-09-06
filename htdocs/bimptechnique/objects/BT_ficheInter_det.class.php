@@ -776,7 +776,36 @@ class BT_ficheInter_det extends BimpDolObject
     public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false){
         switch($field_name) {
             case 'type_of':
-                print_r($values);
+                $in = [];
+                $sql = "SELECT rowid FROM llx_fichinterdet";
+                if(count($values) > 0) {
+                    $sql .= " WHERE ";
+                    $for_or = Array();
+                    foreach($values as $value) {
+                        if($value != 7){
+                            $for_or[] = $value;
+                        }
+                        else {
+                            $intern_societe = explode(',', BimpCore::getConf("bimptechnique_id_societe_auto_terminer"));
+                            foreach($intern_societe as $id) {
+                                $for_or[] = $id;
+                            }
+                        }
+                    }
+                }
+                $first_loop = true;
+                foreach($for_or as $type_of) {
+                    $sql .= ($first_loop) ? "type = $type_of" : " OR type = $type_of";
+                    $first_loop = false;
+                }
+                
+                if ($sql != "") {
+                    $res = $this->db->executeS($sql, 'array');
+                    foreach ($res as $nb => $i) {
+                        $in[] = $i['rowid'];
+                    }
+                }
+                $filters['a.rowid'] = ['in' => $in];
                 break;
         }
     }

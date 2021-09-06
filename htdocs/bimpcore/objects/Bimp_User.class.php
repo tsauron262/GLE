@@ -364,7 +364,7 @@ class Bimp_User extends BimpObject
             'title'   => BimpRender::renderIcon('fas_info-circle', 'iconLeft') . 'Infos',
             'content' => $this->renderView('default', false)
         );
-
+        
         if ($isAdmin || $isItself) {
             $tabs[] = array(
                 'id'      => 'params',
@@ -383,8 +383,7 @@ class Bimp_User extends BimpObject
             $tabs[] = array(
                 'id'            => 'groups',
                 'title'         => BimpRender::renderIcon('fas_users', 'iconLeft') . 'Groupes',
-                'ajax'          => 1,
-                'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#groups .nav_tab_ajax_result\')', array('user_groups'), array('button' => ''))
+                'content'       => $this->renderUserGroups()
             );
         }
 
@@ -456,14 +455,111 @@ class Bimp_User extends BimpObject
 
         return $html;
     }
-
-    public function renderInterfaceView()
+    
+    function showUserTheme($object, $edit = 0, $foruserprofile = false) 
     {
-        $html = 'Interface utilisateur - en cours de développement';
+        global $conf, $langs;
+        
+        $dirthemes = array('/theme');
+	if (! empty($conf->modules_parts['theme']))		// Using this feature slow down application
+	{
+            foreach($conf->modules_parts['theme'] as $reldir)
+            {
+                $dirthemes=array_merge($dirthemes,(array) ($reldir.'theme'));
+            }
+	}
+        $dirthemes = array_unique($dirthemes);
+        
+        $selected_theme = '';
+        $title = '';
+        
+	if (empty($foruserprofile)) $selected_theme=$conf->global->MAIN_THEME;
+	else $selected_theme=((is_object($object) && ! empty($object->conf->MAIN_THEME))?$object->conf->MAIN_THEME:'');  
+        
+        $i = 0;
+	foreach($dirthemes as $dir) {
+            $dirtheme = dol_buildpath($dir,0);	// This include loop on $conf->file->dol_document_root
+            $urltheme = dol_buildpath($dir,1);
+	    if (is_dir($dirtheme)) {
+                $handle = opendir($dirtheme);
+	        if (is_resource($handle)) {
+                    while (($subdir = readdir($handle)) !== false) {
+                        if (is_dir($dirtheme."/".$subdir) && substr($subdir, 0, 1) <> '.' && substr($subdir, 0, 3) <> 'CVS' && ! preg_match('/common|phones/i',$subdir)) {
+                            // Disable not stable themes (dir ends with _exp or _dev)
+                            if ($conf->global->MAIN_FEATURES_LEVEL < 2 && preg_match('/_dev$/i',$subdir)) continue;
+                            if ($conf->global->MAIN_FEATURES_LEVEL < 1 && preg_match('/_exp$/i',$subdir)) continue;
 
+                            $html .=  '<div class="inline-block" style="margin-top: 10px; margin-bottom: 10px; margin-right: 20px; margin-left: 20px;">';
+
+                            $file = $dirtheme."/".$subdir."/thumb.png";
+                            $url = $urltheme."/".$subdir."/thumb.png";
+
+                            if (! file_exists($file)) $url=DOL_URL_ROOT.'/public/theme/common/nophoto.png';
+
+                            $html .=  '<a href="'.$_SERVER["PHP_SELF"].($edit?'?action=edit&theme=':'?theme=').$subdir.(GETPOST('optioncss','alpha',1)?'&optioncss='.GETPOST('optioncss','alpha',1):'').($object?'&id='.$object->id:'').'" style="font-weight: normal;" alt="'.$langs->trans("Preview").'">';
+
+                            if ($subdir == $conf->global->MAIN_THEME) $title=$langs->trans("ThemeCurrentlyActive");
+                            else $title=$langs->trans("ShowPreview");
+
+                            $html .=  '<img src="'.$url.'" border="0" width="80" height="60" alt="'.$title.'" title="'.$title.'" style="margin-bottom: 5px;">';
+                            $html .=  '</a><br>';
+
+                            if ($subdir == $selected_theme) {
+                                $html .=  '<input '.($edit?'':'disabled').' type="radio" class="themethumbs" style="border: 0px;" checked name="main_theme" value="'.$subdir.'"> <b>'.$subdir.'</b>';
+                            } else {
+                                $html .=  '<input '.($edit?'':'disabled').' type="radio" class="themethumbs" style="border: 0px;" name="main_theme" value="'.$subdir.'"> '.$subdir;
+                            }
+                            $html .=  '</div>';
+
+                            $i++;
+                        }
+                    }
+		}
+            }
+	}
+        
         return $html;
     }
 
+    public function renderInterfaceView()
+    {        
+        global $conf, $langs, $db;
+        BimpTools::loadDolClass("user");
+        $object = new User($db);
+        $object->fetch(GETPOST('id'), "", "", 1);
+        $object->getrights();
+        
+        // Load translation files required by page
+        $langs->loadLangs(array('companies', 'products', 'admin', 'users', 'languages', 'projects', 'members'));
+        
+        $tmparray = array('index.php'=>'Dashboard');
+                                
+        $html .=  '<table class="noborder" width="100%">';
+        $html .=  '<tr class="liste_titre"><td width="50%">'.$langs->trans("Parameter").'</td><td width="50%">'.$langs->trans("DefaultValue").'</td></tr>';
+
+        // Language
+        $html .= '<tr class="oddeven"><td>'.$langs->trans("Language").'</td>';
+        $html .= '<td>';
+        $s=picto_from_langcode($conf->global->MAIN_LANG_DEFAULT);
+        $html .= ($s?$s.' ':'');
+        $html .= (isset($conf->global->MAIN_LANG_DEFAULT) && $conf->global->MAIN_LANG_DEFAULT=='auto'?$langs->trans("AutoDetectLang"):$langs->trans("Language_".$conf->global->MAIN_LANG_DEFAULT));
+        $html .= '</td>';
+        $html .= '</tr>';
+
+        $html .=  '<tr class="oddeven"><td>'.$langs->trans("MaxSizeList").'</td>';
+        $html .=  '<td>'.(! empty($conf->global->MAIN_SIZE_LISTE_LIMIT)?$conf->global->MAIN_SIZE_LISTE_LIMIT:'&nbsp;').'</td></tr>';
+
+        // Taille max des listes
+        $html .= '<tr class="oddeven"><td>'.$langs->trans("MaxSizeList").'</td>';
+        $html .= '<td>'.$conf->global->MAIN_SIZE_LISTE_LIMIT.'</td></tr>';
+        $html .=  '</table><br>';
+        
+        //Thème
+        $html .= $this->showUserTheme($object,0,true);
+                        
+        return $html;
+    }
+    
     public function renderCommercialView()
     {
         $tabs = array();
@@ -477,9 +573,64 @@ class Bimp_User extends BimpObject
 
         return BimpRender::renderNavTabs($tabs, 'conges_tabs');
     }
+    
+    public function renderUserGroups() {
+        
+        global $db;
+        
+        //$id_group = $this->getIdGroup();
+                
+        $form = new Form($db);
+        $exclude = array();
+        
+        $html = '';
+       
+        $rows = BimpCache::getUserUserGroupsArray($this->id, 0, 0);  
+        
+        $html .= '<form action="'.$_SERVER['PHP_SELF'].'?id='.$this->id.'" method="POST">'."\n";
+        $html .= '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'" />';
+        $html .= '<input type="hidden" name="action" value="addgroup" />';
+        
+        $html .= '<table class="noborder" width="100%">'
+            .'<tbody>'
+            .'<tr class="liste_titre"><th class="liste_titre">Groupes</th>'
+            .'<th class="liste_titre" align="right">';
+        
+        $html .= $form->select_dolgroups('', 'usergroup', 1, $exclude, 0, '', '', $this->entity, 0, 0, '', 0, '', 'maxwidth300');
+        
+        //$html .= BimpInput::renderInput('search_group', 'id_group', $id_group);
+        
+        $keys = array_keys($rows);     
+        $i = -1;
+        foreach ($rows as $row) {
+            $i++;
+            $html .= '<tr class="oddeven">'
+                    . '<td>'
+                    . '<img src="'.DOL_URL_ROOT.'/theme/BimpTheme/img/object_group.png" alt="" title="Afficher groupe" class="inline-block">'
+                    . '<a href="'.DOL_URL_ROOT.'/user/group/card.php?id='. $keys[$i] .'"> '. $row . ' </a>'
+                    . '</td>'
+                    .'<td align="right">'
+                    . '<a href="'.DOL_URL_ROOT.'/user/card.php?id='. $this->id .'&amp;action=removegroup&amp;group='. $keys[$i] .'">'
+                    . '<span class="fa fa-chain-broken marginleftonly valignmiddle" style=" color: #555;" alt="Supprimer du groupe" title="Supprimer du groupe">'
+                    . '</span>'
+                    . '</a>'
+                    . '</td>'
+                    . '</tr>';           
+        }
+        
+        $html .= '</th>'
+                . '</tr>'
+                . '</tbody>'
+                . '</table>'
+                .'</form>';
+        
+        return $html;        
+    }
 
     public function renderLinkedObjectsList($list_type)
-    {
+    {   
+        global $db;
+        
         $html = '';
 
         $errors = array();
@@ -487,29 +638,43 @@ class Bimp_User extends BimpObject
             return BimpRender::renderAlerts($errors);
         }
 
-        $html = '';
-
         $list = null;
         $user_label = $this->getName();
 
         switch ($list_type) {
             // Onglet "Groupes": 
-            case 'user_groups':
-                return 'Groupes - en cours de développement';
+//            case 'user_groups':
 
-            // Onglet "Params": 
-            case 'lists_configs':
-//                $list = new BC_ListTable(BimpObject::getInstance('bimpcore', 'ListConfig'), 'user', 1, null, 'Configurations de liste de "' . $user_label . '"', 'fas_cog');
-//                $list->addFieldFilterValue('owner_type', ListConfig::TYPE_USER);
-//                $list->addFieldFilterValue('id_owner', $this->id);
-//                break;
-                return 'Configurations des liste - en cours de développement';
+//                $bdd = new BimpDb($db);
+//                $res = $bdd->getRows('usergroup_user', 'fk_user = '.$this->id);
+//                $userGroup = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_UserGroup');
+//                foreach($res as $field => $value) {
+//                    $userGroup->fetch($value->rowid); 
+//                    print_r($userGroup);
+//                    //$html .= $userGroup->nom.'</br>';
+//                }
+                //break;
                 
+//              return "Groupes aux quel appartient l'utilisateur";
+
+            // Onglet "Liste des configurations de listes": 
+            case 'lists_configs':
+                $list = new BC_ListTable(BimpObject::getInstance('bimpuserconfig', 'ListConfig'), 'default', 1, null, 'Liste des configurations de listes de "' . $user_label . '"', 'fas_cog');
+                //$list->addFieldFilterValue('id_owner', $this->id);
+                break;
+            
+            // Onglet "'Liste des configuration de filtres": 
             case 'filters_configs': 
-                return 'Configuration des filtres - en cours de développement';
+                $list = new BC_ListTable(BimpObject::getInstance('bimpuserconfig', 'ListTableConfig'), 'default', 1, null, 'Liste des configuration de filtres de "' . $user_label . '"', 'fas_cog');
+                $list->addFieldFilterValue('owner_type', ListTableConfig::OWNER_TYPE_USER);
+                $list->addFieldFilterValue('id_owner', $this->id);
+                break;
                 
             case 'lists_filters': 
-                return 'Filtres enregistrés - en cours de développement';
+                $list = new BC_ListTable(BimpObject::getInstance('bimpuserconfig', 'ListFilters'), 'default', 1, null, 'Filtres enregistrés de "' . $user_label . '"', 'fas_cog');
+                $list->addFieldFilterValue('owner_type', ListFilters::OWNER_TYPE_USER);
+                $list->addFieldFilterValue('id_owner', $this->id);
+                break;
 
             // Onglet "Commission": 
             case 'commissions':

@@ -339,6 +339,7 @@ filters_panels:
           parent:ref:
           parent:datei:
           parent:fk_user_tech:
+          parent:fk_soc:
           type_of:
               label: Type d'intervention
               type: check_list

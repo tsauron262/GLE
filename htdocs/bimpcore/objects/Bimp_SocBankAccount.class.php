@@ -78,16 +78,11 @@ class Bimp_SocBankAccount extends BimpObject
             // Le create du dol_object n'insert pas les valeurs...
             $errors = $this->update($warnings, $force_create);
         }
-        if(isset($_FILES['file'])){
-            $soc = $this->getChildObject('societe');
-            $file_dir = $soc->getFilesDir();
-            
-            require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
-            
-            dol_add_file_process($file_dir, 0, 0, 'file');
-        }
-
         return $errors;
+    }
+    
+    public function getFileName($signe = false, $ext = '.pdf'){
+        return $this->getData('fk_soc').'_'.$this->id.'_sepa'.($signe? '_signe' : '').$ext;
     }
     
     public function isFieldEditable($field, $force_edit = false) {
@@ -101,8 +96,26 @@ class Bimp_SocBankAccount extends BimpObject
     {
         $this->set('rum', $this->getNumSepa());
         $def = (int) $this->getData('default_rib');
+        
+        
+        if(isset($_FILES['file'])){
+            $soc = $this->getChildObject('societe');
+            $file_dir = $soc->getFilesDir();
+            
+            $oldName =  $_FILES['file']['name'];
+            $name = $this->getFileName(true, '.'.pathinfo($oldName, PATHINFO_EXTENSION));
+            $_FILES['file']['name']= $name;
+            if(file_exists($file_dir.$_FILES['file']['name']))
+                    $errors[] = 'Fichier '.$_FILES['file']['name']. ' existe déja';
+            
+            
+            
+            require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+            
+            dol_add_file_process($file_dir, 0, 0, 'file');
+        }
 
-        $errors = parent::update($warnings, $force_update);
+        $errors = BimpTools::merge_array($errors, parent::update($warnings, $force_update));
 
         if (!count($errors)) {
             if ($def) {

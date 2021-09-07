@@ -31,12 +31,22 @@ class Bimp_SocBankAccount extends BimpObject
     }
 
     // overrides: 
+    
+    
+    public function getNumSepa()
+    {
+        if ($this->getData('rum') == "") {
+            $new = BimpTools::getNextRef('societe_rib', 'rum', 'FR02ZZZ008801-', 7);
+            return $new;
+        }
+        return $this->getData('rum');
+    }
 
     public function create(&$warnings = array(), $force_create = false)
     {
-        
-        
+        $this->set('rum', $this->getNumSepa());
         $errors = parent::create($warnings, $force_create);
+        
 
         if (!count($errors)) {
             // Le create du dol_object n'insert pas les valeurs...
@@ -53,9 +63,17 @@ class Bimp_SocBankAccount extends BimpObject
 
         return $errors;
     }
-
+    
+    public function isFieldEditable($field, $force_edit = false) {
+        if($field == 'rum')
+            return 0;
+        
+        return parent::isFieldEditable($field, $force_edit);
+    }
+    
     public function update(&$warnings = array(), $force_update = false)
     {
+        $this->set('rum', $this->getNumSepa());
         $def = (int) $this->getData('default_rib');
 
         $errors = parent::update($warnings, $force_update);

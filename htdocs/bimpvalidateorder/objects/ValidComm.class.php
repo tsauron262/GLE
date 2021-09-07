@@ -559,7 +559,10 @@ class ValidComm extends BimpObject
         $sql = BimpTools::getSqlSelect(array('id', 'user', 'val_max'));
         $sql .= BimpTools::getSqlFrom($this->getTable());
         $sql .= BimpTools::getSqlWhere($filters);
-        $sql .= ' AND (only_child=' . self::USER_ASK_ALL . ' OR (only_child=' . self::USER_ASK_CHILD . ' AND user=' . $user_ask->fk_user . '))';
+        $sql .= ' AND (only_child=' . self::USER_ASK_ALL;
+        if($user_ask->fk_user > 0)
+            $sql .= ' OR (only_child=' . self::USER_ASK_CHILD . ' AND user=' . $user_ask->fk_user . ')';
+        $sql .= ')';
         $sql .= BimpTools::getSqlOrderBy('date_create', 'DESC');
         $rows = self::getBdb()->executeS($sql, 'array');
 

@@ -216,8 +216,14 @@ class BimpComm extends BimpDolObject
         }
         
         
-//        if($this->getData('fk_mode_reglement') == 3 && $this->getData('rib_client') < 1 && $this->extrafieldsIsConfig('rib_client'))
-//            $errors[] = 'Pour les prélèvements CEPA, le RIB est obligatoire';
+//        if($this->getData('fk_mode_reglement') == 3 &&  $this->extrafieldsIsConfig('rib_client')){
+//            if($this->getData('rib_client') < 1)
+//                $errors[] = 'Pour les prélèvements CEPA, le RIB est obligatoire';
+//            else{
+//                $rib = $this->getChildObject('rib_client');
+//                $rib->isValid($errors);
+//            }
+//        }
 //        $errors[] = 'TODO A suppr';
 
         return (count($errors) ? 0 : 1);
@@ -403,8 +409,9 @@ class BimpComm extends BimpDolObject
         if($client && $client->isLoaded()){
             $result = $this->db->getRows('societe_rib', '`fk_soc` ='.$client->id, null, 'object', null, 'default_rib', 'DESC');
 
-            foreach($result as $row)
+            foreach($result as $row){
                 $return[$row->rowid] = $row->label;
+            }
         }
         return $return;
     }

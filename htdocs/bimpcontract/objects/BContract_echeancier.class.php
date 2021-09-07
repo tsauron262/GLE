@@ -327,7 +327,7 @@ class BContract_echeancier extends BimpObject {
         ];
     }
 
-    public function actionValidateFacture($data, &$success = Array()) {
+    public function actionValidateFacture($data, &$success = '') {
         global $user;
 
         $instance = $this->getInstance('bimpcommercial', 'Bimp_Facture', $data['id_facture']);
@@ -344,11 +344,11 @@ class BContract_echeancier extends BimpObject {
         );
     }
 
-    public function actionCreateFacture($data, &$success = Array()) {
+    public function actionCreateFacture($data, &$success = '') {
         $errors = $warnings = [];
         
         if($this->isDejaFactured($data['date_start'], $data['date_end'])) {
-            return  array("Contrat déjà facturé pour cette période, merci de refresh la page pour voir cette facture dans l'échéancier");
+            return  array('errors' => array("Contrat déjà facturé pour cette période, merci de refresh la page pour voir cette facture dans l'échéancier"));
         }
 
         $parent = $this->getParentInstance();
@@ -361,7 +361,7 @@ class BContract_echeancier extends BimpObject {
         $instance = $this->getInstance('bimpcommercial', 'Bimp_Facture');
         $instance->set('fk_soc', ($parent->getData('fk_soc_facturation')) ? $parent->getData('fk_soc_facturation') : $parent->getData('fk_soc'));
         
-        $bill_label = "Facture " . $parent->getPeriodeString();
+        $bill_label = (isset($data['label'])? $data['label'].' ': '')."Facture " . $parent->getPeriodeString();
         $bill_label.= " du contrat N°" . $parent->getData('ref');
         $bill_label.= ' - ' . $parent->getData('label');
         $instance->set('libelle', $bill_label);
@@ -369,7 +369,7 @@ class BContract_echeancier extends BimpObject {
 //        $instance->set('fk_account', 1);
         
         if(!$parent->getData('entrepot') && $parent->useEntrepot()) {
-            return array("La facture ne peut pas être crée car le contrat n'a pas d'entrepôt");
+            return array('errors' => array("La facture ne peut pas être crée car le contrat n'a pas d'entrepôt"));
         }
         if($parent->useEntrepot())
             $instance->set('entrepot', $parent->getData('entrepot'));
@@ -491,7 +491,10 @@ class BContract_echeancier extends BimpObject {
                     'type' => ObjectLine::LINE_FREE,
                     'id_obj' => (int) $instance->id
                 )));
-            $new_first_line->desc = "Facturation pour la période du <b>" . $dateStart->format('d/m/Y') . "</b> au <b>" . $dateEnd->format('d/m/Y') . "</b>";
+            if(!isset($data['labelLn']))
+                $new_first_line->desc = "Facturation pour la période du <b>" . $dateStart->format('d/m/Y') . "</b> au <b>" . $dateEnd->format('d/m/Y') . "</b>";
+            else
+                $new_first_line->desc = $data['labelLn'];
             $new_first_line->date_from = $data['date_start'];
             $new_first_line->date_to = $data['date_end'];
             $new_first_line->pu_ht = (double) $data['total_ht'];
@@ -701,7 +704,7 @@ class BContract_echeancier extends BimpObject {
                 }
             }
         }
-        if ($this->getData('next_facture_date') == 0 && $parent->getTotalContrat() - $parent->getTotalDejaPayer() > 0) {
+        if ($this->getData('next_facture_date') == 0 && (intval($parent->getTotalContrat()) - intval($parent->getTotalDejaPayer())) > 0) {
             $this->updateField('next_facture_date', $dateFin->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00'));
             die('Echéancier corrigé, rafraichir la page');
         }
@@ -790,20 +793,25 @@ class BContract_echeancier extends BimpObject {
             }
             $html .= '</tbody>';
             $html .= '</table>';
-
+            
+            $html .= '<div class="panel-footer">';
             if (($parent->is_not_finish() && $user->rights->facture->creer) || ($user->admin || $user->id == 460)) {
-                $html .= '<div class="panel-footer">';
+                
                 if(($user->admin) && $this->canEdit()) {
                     $html .= '<div class="btn-group"><button type="button" class="btn btn-danger bs-popover" '.BimpRender::renderPopoverData('Supprimer l\'échéancier').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick('delete') . '"><i class="fa fa-times"></i></button></div>';
                 }
                 if($user->admin) {
                     $html .= '<div class="btn-group"><button type="button" class="btn btn-danger bs-popover" '.BimpRender::renderPopoverData('Refaire l\'échéancier suite à un avoir (ADMIN)').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick('unlinkLastFacture', [], ['form_name' => 'unlinkLastFacture']) . '"><i class="fa fa-times"></i> Refaire l\'échéancier suite à un avoir (ADMIN)</button></div>';
                 }
+                
+//                        $html .= '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Facturer la période" onclick="' . $this->getJsActionOnclick("createFacture", array('total_ht' => $parent->getTotalContrat() - $parent->getTotalDejaPayer(), 'pa' => ($parent->getTotalPa() - $parent->getTotalDejaPayer(false, 'pa'))), array("success_callback" => $callback)) . '")"><i class="fa fa-plus" >Facturation suplémentaire</i></span>';
 //                if($this->canEdit()) {
 //                    $html .= '<div class="btn-group"><button type="button" class="btn btn-default" aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsLoadModalForm('create_perso', "Créer une facture personnalisée ou une facturation de plusieurs périodes") . '"><i class="fa fa-plus-square-o iconLeft"></i>Créer une facture personalisée ou une facturation de plusieurs périodes</button></div>';
 //                }
-                $html .= '</div>';
             }
+            if($user->rights->facture->creer && $reste_periodeEntier == 0 && $parent->getTotalContrat() - $parent->getTotalDejaPayer() > 0)
+                $html .= '<div class="btn-group"><button type="button" class="btn btn-danger bs-popover" '.BimpRender::renderPopoverData('Facturation supplémentaire').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick("createFacture", array('labelLn'=> 'Facturation supplémentaire', 'label'=> 'Complément à', 'total_ht' => $parent->getTotalContrat() - $parent->getTotalDejaPayer(), 'pa' => ($parent->getTotalPa() - $parent->getTotalDejaPayer(false, 'pa'))), array("success_callback" => $callback)) . '"><i class="fa fa-times"></i> Facturation supplémentaire</button></div>';
+            $html .= '</div>';
         }
 
         $html .= "<br/>"

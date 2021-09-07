@@ -34,6 +34,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
             return $errors;
         }
 
+        BimpObject::loadClass('bimpreservation', 'BR_Reservation');
         $reception_data = $this->getReceptionData($id_reception);
 
         if ((int) $reception_data['received']) {
@@ -1371,60 +1372,69 @@ class Bimp_CommandeFournLine extends FournObjectLine
                                 ), true)) {
                     $place = $equipment->getCurrentPlace();
 
-                    // On autorise l'existence de l'équipement s'il a été précédemment retourné au fournisseur
-                    if ((int) $place->getData('type') === BE_Place::BE_PLACE_FREE) {
-                        continue;
-                    }
+                    if (BimpObject::objectLoaded($place)) {
+                        // On autorise l'existence de l'équipement s'il a été précédemment retourné au fournisseur
+                        if ((int) $place->getData('type') === BE_Place::BE_PLACE_FREE) {
+                            continue;
+                        }
 
-                    if ((int) $place->getData('type') === BE_Place::BE_PLACE_CLIENT && ((int) $place->getData('id_client') === (int) $commande->getData('fk_soc'))) {
-                        continue;
+                        if ((int) $place->getData('type') === BE_Place::BE_PLACE_CLIENT && ((int) $place->getData('id_client') === (int) $commande->getData('fk_soc'))) {
+                            continue;
+                        }
                     }
 
                     $err = '';
 
                     // Ou s'il est dispo dans l'entrepôt (Echec suppr. lors de l'annulation de cette même réception). 
-                    if ($id_reception) {
-                        $recep = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_reception);
-                        if (BimpObject::objectLoaded($recep)) {
-                            $id_entrepot = (int) $commande->getData('entrepot');
-                            $id_comm_line = 0;
-                            $id_reservation = 0;
-                            if ($id_entrepot) {
-                                if (preg_match('/^Réception n°' . $recep->getData('num_reception') . ' BR: ' . preg_quote($recep->getRef()) . '(.*)$/', $place->getData('infos'))) {
-                                    $allowed = array(
-                                        'id_commande_fourn' => (int) $this->getData('id_obj')
-                                    );
-                                    $eq_errors = array();
+                    if (BimpObject::objectLoaded($place)) {
+                        if ($id_reception) {
+                            $recep = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_reception);
+                            if (BimpObject::objectLoaded($recep)) {
+                                $id_entrepot = (int) $commande->getData('entrepot');
+                                $id_comm_line = 0;
+                                $id_reservation = 0;
+                                if ($id_entrepot) {
+                                    if (preg_match('/^Réception n°' . preg_quote($recep->getData('num_reception'), '/') . ' BR: ' . preg_quote($recep->getRef(), '/') . '(.*)$/', $place->getData('infos'))) {
+                                        $allowed = array(
+                                            'id_commande_fourn' => (int) $this->getData('id_obj')
+                                        );
+                                        $eq_errors = array();
 
-                                    if ($this->getData('linked_object_name') == 'commande_line') {
-                                        $id_comm_line = (int) $this->getData('linked_id_object');
-                                        if ($id_comm_line) {
-                                            $id_reservation = (int) $this->db->getValue('br_reservation', 'id', 'id_commande_client_line = ' . (int) $id_comm_line . ' AND id_equipment = ' . (int) $equipment->id, 'id', 'desc');
-                                            if ($id_reservation) {
-                                                $allowed['id_reservation'] = $id_reservation;
+                                        if ($this->getData('linked_object_name') == 'commande_line') {
+                                            $id_comm_line = (int) $this->getData('linked_id_object');
+                                            if ($id_comm_line) {
+                                                $id_reservation = (int) $this->db->getValue('br_reservation', 'id', 'id_commande_client_line = ' . (int) $id_comm_line . ' AND id_equipment = ' . (int) $equipment->id, 'id', 'desc');
+                                                if ($id_reservation) {
+                                                    $allowed['id_reservation'] = $id_reservation;
+                                                }
                                             }
                                         }
-                                    }
 
-                                    if ($equipment->isAvailable($id_entrepot, $eq_errors, $allowed)) {
-                                        continue;
+                                        if ($equipment->isAvailable($id_entrepot, $eq_errors, $allowed)) {
+                                            continue;
+                                        } else {
+                                            $err = BimpTools::getMsgFromArray($eq_errors) . ' - ID ligne de commande: ' . $id_comm_line . ' - ID réservation: ' . $id_reservation;
+                                        }
                                     } else {
-                                        $err = BimpTools::getMsgFromArray($eq_errors) . ' - commLine: ' . $id_comm_line . ' - Résa: ' . $id_reservation;
+                                        $err = 'L\'intitulé de l\'emplacement ne correspond pas à celui attendu. (Attendu: "Réception n°' . $recep->getData('num_reception') . ' BR: ' . $recep->getRef() . '" - Actuellement: "' . $place->getData('infos') . '")';
                                     }
                                 } else {
-                                    $err = 'PLACE REF KO (Attendu: "Réception n°' . $recep->getData('num_reception') . ' BR: ' . $recep->getRef() . '" - Place infos: "' . $place->getData('infos') . '")';
+                                    $err = 'Pas d\'entrepôt';
                                 }
                             } else {
-                                $err = 'NO ENTREPOT';
+                                $err = 'La réception #' . $id_reception . ' n\'existe plus';
                             }
                         } else {
-                            $err = 'RECEP #' . $id_reception . ' KO';
+                            $err = 'Pas de réception';
                         }
                     } else {
-                        $err = 'NO RECEP';
+                        $err = 'Aucun emplacement actuel';
                     }
 
-                    $errors[] = 'Un équipement existe déjà pour le numéro de série "' . $serial . '": ' . $equipment->getLink() . ($err ? ' - ' : '') . $err;
+                    $msg = 'Un équipement existe déjà pour le numéro de série "' . $serial . '": ' . $equipment->getLink();
+                    $msg .= '. Mais il n\'est pas possible de l\'attribuer à cette réception';
+                    $msg .= ($err ? '. Raison: ' . $err : ' pour une raison inconnue');
+                    $errors[] = $msg;
                 }
             }
         }

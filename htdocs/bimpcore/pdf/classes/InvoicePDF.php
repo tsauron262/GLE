@@ -726,7 +726,7 @@ class InvoicePDF extends BimpDocumentPDF
                         }
 
                         $html .= '<span style="font-weight: bold">';
-                        $html .= pdf_build_address($this->langs, $this->fromCompany, $client->dol_object, $contact->dol_object, !is_null($contact) ? 1 : 0, 'target');
+                        $html .= pdf_build_address($this->langs, $this->fromCompany, $client->dol_object, (!is_null($contact)? $contact->dol_object : null), (!is_null($contact) ? 1 : 0), 'target');
                         $html .= '</span>';
 
                         $html .= '</td>';

@@ -75,7 +75,7 @@ class BC_ListTable extends BC_List
         $this->params_def['refresh_after_content'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['enable_csv'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['search_open'] = array('data_type' => 'bool', 'default' => 0);
-
+        
         global $current_bc;
         if (!is_object($current_bc)) {
             $current_bc = null;

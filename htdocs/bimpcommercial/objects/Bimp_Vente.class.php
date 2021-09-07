@@ -181,57 +181,59 @@ class Bimp_Vente extends BimpObject
 
         $total_ca = 0;
         foreach ($products_list as $p) {
-            $entrepots_data = $product->getAppleCsvData($dateFrom, $dateTo, $entrepots, $p['rowid']);
+            if(stripos($p['ref'], 'SAVAPPLE') === false && stripos($p['ref'], 'SAV-DIAG')===false && stripos($p['ref'], 'Opération')===false && stripos($p['ref'], 'MYL92NF/A-')===false){
+                $entrepots_data = $product->getAppleCsvData($dateFrom, $dateTo, $entrepots, $p['rowid']);
 
-            if ((int) $p['no_fixe_prices']) {
-                $pa_ht = 0;
-            } else {
-                $pa_ht = (float) $p['cur_pa_ht'];
+                if ((int) $p['no_fixe_prices']) {
+                    $pa_ht = 0;
+                } else {
+                    $pa_ht = (float) $p['cur_pa_ht'];
 
-                if (is_null($pa_ht)) {
-                    if (!$pa_ht) {
-                        $sql = 'SELECT price FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price WHERE';
-                        $sql .= ' fk_product = ' . (int) $p['rowid'];
-                        $sql .= ' ORDER BY tms DESC LIMIT 1';
+                    if (is_null($pa_ht)) {
+                        if (!$pa_ht) {
+                            $sql = 'SELECT price FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price WHERE';
+                            $sql .= ' fk_product = ' . (int) $p['rowid'];
+                            $sql .= ' ORDER BY tms DESC LIMIT 1';
 
-                        $result = $this->db->executeS($sql);
-                        if (isset($result[0]->price)) {
-                            $pa_ht = (float) $result[0]->price;
-                        } elseif (isset($p['pmp'])) {
-                            $pa_ht = (float) $p['pmp'];
-                        } else {
-                            $pa_ht = 0;
+                            $result = $this->db->executeS($sql);
+                            if (isset($result[0]->price)) {
+                                $pa_ht = (float) $result[0]->price;
+                            } elseif (isset($p['pmp'])) {
+                                $pa_ht = (float) $p['pmp'];
+                            } else {
+                                $pa_ht = 0;
+                            }
                         }
                     }
                 }
-            }
 
-            foreach ($entrepots_data as $ship_to => $data) {
-                if ($data['stock'] < 0)
-                    $data['stock'] = 0;
-                if ($data['stock_showroom'] < 0)
-                    $data['stock_showroom'] = 0;
+                foreach ($entrepots_data as $ship_to => $data) {
+                    if ($data['stock'] < 0)
+                        $data['stock'] = 0;
+                    if ($data['stock_showroom'] < 0)
+                        $data['stock_showroom'] = 0;
 
-                if (!isset($shiptos_data[$ship_to])) {
-                    $shiptos_data[$ship_to] = array(
-                        'total_ca' => 0,
-                        'products' => array()
+                    if (!isset($shiptos_data[$ship_to])) {
+                        $shiptos_data[$ship_to] = array(
+                            'total_ca' => 0,
+                            'products' => array()
+                        );
+                    }
+
+                    $shiptos_data[$ship_to]['products'][(int) $p['rowid']] = array(
+                        'ref'            => $p['ref'],
+                        'pu_ht'          => $p['price'],
+                        'pa_ht'          => $pa_ht,
+                        'ventes'         => $data['ventes'],
+                        'stock'          => $data['stock'],
+                        'stock_showroom' => $data['stock_showroom'],
+                        'factures'       => (isset($data['factures']) ? $data['factures'] : array())
                     );
+
+                    $product_ca = (float) $data['ventes'] * (float) $pa_ht;
+                    $shiptos_data[$ship_to]['total_ca'] += $product_ca;
+                    $total_ca += $product_ca;
                 }
-
-                $shiptos_data[$ship_to]['products'][(int) $p['rowid']] = array(
-                    'ref'            => $p['ref'],
-                    'pu_ht'          => $p['price'],
-                    'pa_ht'          => $pa_ht,
-                    'ventes'         => $data['ventes'],
-                    'stock'          => $data['stock'],
-                    'stock_showroom' => $data['stock_showroom'],
-                    'factures'       => (isset($data['factures']) ? $data['factures'] : array())
-                );
-
-                $product_ca = (float) $data['ventes'] * (float) $pa_ht;
-                $shiptos_data[$ship_to]['total_ca'] += $product_ca;
-                $total_ca += $product_ca;
             }
         }
 
@@ -280,28 +282,30 @@ Preferred Field
 (10)";"Errors"' . "\n";
 
             foreach ($products_list as $p) {
-                foreach ($shiptos_data as $shipTo => $shipToData) {
-                    if (isset($shipToData['products'][(int) $p['rowid']])) {
-                        $prod = $shipToData['products'][(int) $p['rowid']];
-                        $prod_ref = preg_replace('/^APP\-(.*)$/', '$1', $prod['ref']);
-                        if (preg_match('/^(Z[^\/]+)$/', $prod_ref, $matches)) {
-                            $prod_ref = substr($matches[1], 0, 4);
-                        }
-                        if ((int) $prod['stock'] || (int) $prod['stock_showroom']) {
-                            $file_str .= implode(';', array(
-                                        $shipTo, // A
-                                        substr($prod_ref, 0, 30), // B
-                                        '',
-                                        '',
-                                        $prod['stock'], // E
-                                        $prod['stock_showroom'], // F
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        0,
-                                        '',
-                                    )) . "\n";
+                if(stripos($p['ref'], 'SAVAPPLE') === false && stripos($p['ref'], 'SAV-DIAG')===false && stripos($p['ref'], 'Opération')===false && stripos($p['ref'], 'MYL92NF/A-')===false){
+                    foreach ($shiptos_data as $shipTo => $shipToData) {
+                        if (isset($shipToData['products'][(int) $p['rowid']])) {
+                            $prod = $shipToData['products'][(int) $p['rowid']];
+                            $prod_ref = preg_replace('/^APP\-(.*)$/', '$1', $prod['ref']);
+                            if (preg_match('/^(Z[^\/]+)$/', $prod_ref, $matches)) {
+                                $prod_ref = substr($matches[1], 0, 4);
+                            }
+                            if ((int) $prod['stock'] || (int) $prod['stock_showroom']) {
+                                $file_str .= implode(';', array(
+                                            $shipTo, // A
+                                            substr($prod_ref, 0, 30), // B
+                                            '',
+                                            '',
+                                            $prod['stock'], // E
+                                            $prod['stock_showroom'], // F
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            '',
+                                        )) . "\n";
+                            }
                         }
                     }
                 }
@@ -417,71 +421,75 @@ Preferred Field
             $countries = BimpCache::getCountriesCodesArray();
 
             foreach ($products_list as $p) {
-                foreach ($shiptos_data as $shipTo => $shipToData) {
-                    if (isset($shipToData['products'][(int) $p['rowid']])) {
-                        $prod = $shipToData['products'][(int) $p['rowid']];
-                        $prod_ref = preg_replace('/^APP\-(.*)$/', '$1', $prod['ref']);
-                        if (preg_match('/^(Z[^\/]+)$/', $prod_ref, $matches)) {
-                            $prod_ref = substr($matches[1], 0, 4);
-                        }
-                        if (isset($prod['factures']) && !empty($prod['factures'])) {
-                            foreach ($prod['factures'] as $id_fac => $fac_lines) {
-                                $secteur = (string) $this->db->getValue('facture_extrafields', 'type', 'fk_object = ' . (int) $id_fac);
-                                $fac_data = $this->db->getRow('facture', 'rowid = ' . (int) $id_fac, array('fk_soc', 'facnumber', 'datef'), 'array');
+                if(stripos($p['ref'], 'SAVAPPLE') === false && stripos($p['ref'], 'SAV-DIAG')===false && stripos($p['ref'], 'Opération')===false && stripos($p['ref'], 'MYL92NF/A-')===false){
+                    foreach ($shiptos_data as $shipTo => $shipToData) {
+                        if (isset($shipToData['products'][(int) $p['rowid']])) {
+                            $prod = $shipToData['products'][(int) $p['rowid']];
+                            $prod_ref = preg_replace('/^APP\-(.*)$/', '$1', $prod['ref']);
+                            if (preg_match('/^(Z[^\/]+)$/', $prod_ref, $matches)) {
+                                $prod_ref = substr($matches[1], 0, 4);
+                            }
+                            if (isset($prod['factures']) && !empty($prod['factures'])) {
+                                foreach ($prod['factures'] as $id_fac => $fac_lines) {
+                                    $secteur = (string) $this->db->getValue('facture_extrafields', 'type', 'fk_object = ' . (int) $id_fac);
+                                    $fac_data = $this->db->getRow('facture', 'rowid = ' . (int) $id_fac, array('fk_soc', 'facnumber', 'datef'), 'array');
 
-                                if (is_null($fac_data)) {
-                                    continue;
-                                }
-
-                                $soc_data = $this->db->getRow('societe', 'rowid = ' . (int) $fac_data['fk_soc'], array('fk_typent', 'fk_pays', 'nom', 'address', 'town', 'zip'), 'array');
-
-                                if ($secteur == 'E' || in_array((int) $fac_data['fk_soc'], array(527782, 8786))) {
-                                    $customer_code = '1R';
-//                                } elseif ($secteur == 'BP') {
-//                                    $customer_code = 'BB';
-                                } else {
-                                    $id_soc_type = isset($soc_data['fk_typent']) ? (int) $soc_data['fk_typent'] : 0;
-                                    if (!$id_soc_type) {
-                                        $customer_code = 'EN';
-                                    } else {
-                                        $customer_code = ($id_soc_type === $id_soc_type_particulier ? 'EN' : '21');
+                                    if (is_null($fac_data)) {
+                                        continue;
                                     }
-                                }
 
-                                if (isset($soc_data['fk_pays']) && array_key_exists((int) $soc_data['fk_pays'], $countries)) {
-                                    $country_code = $countries[(int) $soc_data['fk_pays']];
-                                } else {
-                                    $country_code = 'FR';
-                                }
+                                    $soc_data = $this->db->getRow('societe', 'rowid = ' . (int) $fac_data['fk_soc'], array('fk_typent', 'fk_pays', 'nom', 'address', 'town', 'zip'), 'array');
 
-                                if (!$include_part_soc && $customer_code == 'EN') {
-                                    continue;
-                                }
+                                    if ($secteur == 'E' || in_array((int) $fac_data['fk_soc'], array(527782, 8786))) {
+                                        $customer_code = '1R';
+    //                                } elseif ($secteur == 'BP') {
+    //                                    $customer_code = 'BB';
+                                    } else {
+                                        $id_soc_type = isset($soc_data['fk_typent']) ? (int) $soc_data['fk_typent'] : 0;
+                                        if (!$id_soc_type) {
+                                            $customer_code = 'EN';
+                                        } else {
+                                            $customer_code = ($id_soc_type === $id_soc_type_particulier ? 'EN' : '21');
+                                        }
+                                    }
 
-                                $dt_fac = new DateTime($fac_data['datef']);
+                                    if (isset($soc_data['fk_pays']) && array_key_exists((int) $soc_data['fk_pays'], $countries)) {
+                                        $country_code = $countries[(int) $soc_data['fk_pays']];
+                                    } else {
+                                        $country_code = 'FR';
+                                    }
 
-                                foreach ($fac_lines as $id_line => $line_data) {
-                                    $file_str .= '"' . implode('";"', array(
-                                                $shipTo, // A
-                                                substr($prod_ref, 0, 30), // B
-                                                '',
-                                                '',
-                                                ($line_data['qty'] >= 0 ? $line_data['qty'] : 0), // E
-                                                ($line_data['qty'] < 0 ? abs($line_data['qty']) : 0), // F
-                                                '',
-                                                '',
-                                                $id_fac, // I
-                                                $line_data['position'], // J
-                                                $dt_fac->format('Ymd'),
-                                                '',
-                                                ($customer_code == '1R' ? str_replace('"', '', $soc_data['nom']) : ($customer_code != 'EN' ? 'XXX' : '')), // M
-                                                ($customer_code == '1R' ? str_replace('"', '', $soc_data['address']) : ($customer_code != 'EN' ? 'XXX' : '')), // N
-                                                ($customer_code == '1R' ? str_replace('"', '', $soc_data['town']) : ($customer_code != 'EN' ? 'XXX' : '')), // O
-                                                '',
-                                                ($customer_code == '1R' ? str_replace('"', '', (string) $soc_data['zip']) : ''), // Q
-                                                $country_code, // R
-                                                $customer_code // S
-                                            )) . '"' . "\n";
+                                    if (!$include_part_soc && $customer_code == 'EN') {
+                                        continue;
+                                    }
+
+                                    $dt_fac = new DateTime($fac_data['datef']);
+
+                                    foreach ($fac_lines as $id_line => $line_data) {
+                                        $file_str .= '"' . implode('";"', array(
+                                                    $shipTo, // A
+                                                    substr($prod_ref, 0, 30), // B
+                                                    '',
+                                                    '',
+                                                    ($line_data['qty'] >= 0 ? $line_data['qty'] : 0), // E
+                                                    ($line_data['qty'] < 0 ? abs($line_data['qty']) : 0), // F
+                                                    '',
+                                                    '',
+                                                    $id_fac, // I
+                                                    $line_data['position'], // J
+                                                    $dt_fac->format('Ymd'),
+                                                    '',
+                                                    ($customer_code == '1R' ? str_replace('"', '', $soc_data['nom']) : ($customer_code != 'EN' ? 'XXX' : '')), // M
+                                                    ($customer_code == '1R' ? str_replace(array('"', "
+", '
+', "\n", "\r", 'Hotel'), '', $soc_data['address']) : ($customer_code != 'EN' ? 'XXX' : '')), // N
+                                                    ($customer_code == '1R' ? str_replace('"', '', substr($soc_data['town'], 0, 19)) : ($customer_code != 'EN' ? 'XXX' : '')), // O
+                                                    '',
+                                                    ($customer_code == '1R' ? str_replace('"', '', (string) $soc_data['zip']) : ''), // Q
+                                                    $country_code, // R
+                                                    $customer_code // S
+                                                )) . '"' . "\n";
+                                    }
                                 }
                             }
                         }

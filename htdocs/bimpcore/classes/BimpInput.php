@@ -21,7 +21,7 @@ class BimpInput
         if (is_null($input_id)) {
             $input_id = $field_name;
         }
-        
+
         $html = '';
         if (is_null($form)) {
             global $db;
@@ -86,6 +86,17 @@ class BimpInput
                     }
                     $html .= $data;
                     $html .= '/>';
+                }
+
+                if (isset($options['min_label']) && $options['min_label']) {
+                    $html .= '<div style="display: inline-block">';
+                    $html .= '&nbsp;&nbsp;<span class="small min_label">' . ((isset($options['data']['min']) && $option['data']['min'] !== 'none') ? 'Min: ' . $options['data']['min'] : '') . '</span>';
+                    $html .= '</div>';
+                }
+                if (isset($options['max_label']) && $options['max_label']) {
+                    $html .= '<div style="display: inline-block">';
+                    $html .= '&nbsp;&nbsp;<span class="small max_label">' . ((isset($options['data']['max']) && $option['data']['max'] !== 'none') ? 'Max: ' . $options['data']['max'] : '') . '</span>';
+                    $html .= '</div>';
                 }
 
                 if (isset($options['values']) && count($options['values'])) {
@@ -491,7 +502,6 @@ class BimpInput
                 }
                 $filter[] = 'status=1';
 
-
                 $html .= $form->select_company((int) $value, $field_name, implode(" AND ", $filter), '', 0, 0, array(), 20);
                 break;
 
@@ -765,11 +775,40 @@ class BimpInput
                 break;
 
             case 'timer':
-                $html = self::renderTimerInput($field_name, $value);
+                $html = self::renderTimerInput($field_name, $value, $options);
                 break;
 
             case 'file_upload':
                 $html = '<input type="file" name="' . $field_name . '" id="' . $input_id . '"' . $data . '/>';
+                break;
+
+            case 'object_filters':
+                $obj_input_name = BimpTools::getArrayValueFromPath($options, 'obj_input_name', '');
+                $obj_module = BimpTools::getArrayValueFromPath($options, 'obj_module', '');
+                $obj_name = BimpTools::getArrayValueFromPath($options, 'obj_name', '');
+
+                $html .= '<div class="obj_filters_input_container"';
+                $html .= ' data-field_name="' . $field_name . '"';
+                $html .= ' data-obj_input_name="' . $obj_input_name . '"';
+                $html .= ' data-obj_module="' . $obj_module . '"';
+                $html .= ' data-obj_name="' . $obj_name . '"';
+                $html .= '>';
+
+                $html .= '<div class="obj_filters_input_add_filter_container">';
+                $html .= self::renderFiltersInputAddFilterInput($obj_module, $obj_name, ($obj_input_name ? true : false));
+                $html .= '</div>';
+
+                $html .= '<div class="obj_filters_input_values">';
+                $html .= self::renderFiltersInputValues($obj_module, $obj_name, $value);
+                $html .= '</div>';
+
+                if (is_array($value)) {
+                    $value = json_encode($value);
+                }
+
+                $html .= self::renderInput('hidden', $field_name, htmlentities($value), $options, $form, $option, $input_id);
+
+                $html .= '</div>';
                 break;
 
             default:
@@ -802,8 +841,14 @@ class BimpInput
         $dt_value = null;
         switch ($type) {
             case 'time':
-                $display_js_format = 'HH:mm:ss';
-                $js_format = 'HH:mm:ss';
+                if (BimpTools::getArrayValueFromPath($options, 'with_secondes', 1)) {
+                    $display_js_format = 'HH:mm:ss';
+                    $js_format = 'HH:mm:ss';
+                } else {
+                    $display_js_format = 'HH:mm';
+                    $js_format = 'HH:mm';
+                }
+
                 $php_format = 'H:i:s';
                 if ($value) {
                     if (preg_match('/^(\d{2}):(\d{2}):?(\d{2})?$/', $value)) {
@@ -824,8 +869,14 @@ class BimpInput
                 break;
 
             case 'datetime':
-                $display_js_format = 'Do MMMM YYYY HH:mm:ss';
-                $js_format = 'YYYY-MM-DD HH:mm:ss';
+                if (BimpTools::getArrayValueFromPath($options, 'with_secondes', 1)) {
+                    $display_js_format = 'Do MMMM YYYY HH:mm';
+                    $js_format = 'YYYY-MM-DD HH:mm';
+                } else {
+                    $display_js_format = 'Do MMMM YYYY HH:mm:ss';
+                    $js_format = 'YYYY-MM-DD HH:mm:ss';
+                }
+
                 $php_format = 'Y-m-d H:i:s';
                 if ($value) {
                     if (preg_match('/^(\d{4})\-(\d{2})\-(\d{2}) (\d{2}):(\d{2}):(\d{2})?$/', $value)) {
@@ -853,7 +904,7 @@ class BimpInput
         $html .= "locale: 'fr',";
         $html .= "format: '" . $display_js_format . "',";
         if (!is_null($dt_value)) {
-            $html .= "defaultDate: moment('" . $dt_value->format($php_format) . "', '".$js_format."'),";
+            $html .= "defaultDate: moment('" . $dt_value->format($php_format) . "', '" . $js_format . "'),";
         }
         $html .= "showTodayButton: " . (isset($options['display_now']) && $options['display_now'] ? "true" : "false");
         $html .= "}); ";
@@ -1129,8 +1180,10 @@ class BimpInput
             $data .= BimpRender::renderTagData($params['data']);
         }
 
+        $extra_class = BimpTools::getArrayValueFromPath($params, 'extra_class', '');
+
         $html .= '<div class="search_object_input_container" data-input_name="' . $input_name . '">';
-        $html .= '<input type="hidden" name="' . $input_name . '" value="' . $value . '"' . $data . '/>';
+        $html .= '<input type="hidden" name="' . $input_name . '" value="' . $value . '"' . $data . ' class="search_object_input_value' . ($extra_class ? ' ' . $extra_class : '') . '"/>';
 
         $html .= '<div class="search_object_input">';
         $html .= '<span class="search_icon">' . BimpRender::renderIcon('fas_search') . '</span>';
@@ -1143,7 +1196,7 @@ class BimpInput
                     'max_results' => $max_results
                 ))) . '"';
         $html .= ' data-display_results="' . $display_results . '"';
-        $html .= ' autocomplete="off"/>';
+        $html .= ' autocomplete="off" class="search_object_search_input"/>';
         $html .= '<span class="spinner"><i class="fa fa-spinner fa-spin"></i></span>';
         $html .= '</div>';
 
@@ -1177,7 +1230,7 @@ class BimpInput
         return $html;
     }
 
-    public static function renderTimerInput($field_name, $value)
+    public static function renderTimerInput($field_name, $value, $options, $input_id = '')
     {
         if (is_null($value)) {
             $value = 0;
@@ -1186,7 +1239,7 @@ class BimpInput
 
         $html = '';
         $html .= '<div class="timer_input">';
-        $html .= '<input type="hidden" name="' . $field_name . '" id="' . $input_id . '" value="' . $value . '"/>';
+        $html .= '<input type="hidden" name="' . $field_name . '"' . ($input_id ? ' id="' . $input_id . '"' : '') . ' value="' . $value . '"/>';
 
         $html .= '<input type="text" class="' . $field_name . '_time_value time_input_value" value="' . (int) $timer['days'] . '" name="' . $field_name . '_days"/>';
         $html .= '<span>j</span>';
@@ -1205,12 +1258,17 @@ class BimpInput
         $html .= '</select>';
         $html .= '<span>min</span>';
 
-        $html .= '<select name="' . $field_name . '_secondes" class="' . $field_name . '_time_value time_input_value no_select2">';
-        for ($i = 0; $i < 60; $i++) {
-            $html .= '<option value="' . $i . '"' . ((int) $i === (int) ($timer['secondes']) ? ' selected' : '') . '>' . $i . '</option>';
+        if (BimpTools::getArrayValueFromPath($options, 'with_secondes', 1)) {
+            $html .= '<select name="' . $field_name . '_secondes" class="' . $field_name . '_time_value time_input_value no_select2">';
+            for ($i = 0; $i < 60; $i++) {
+                $html .= '<option value="' . $i . '"' . ((int) $i === (int) ($timer['secondes']) ? ' selected' : '') . '>' . $i . '</option>';
+            }
+            $html .= '</select>';
+            $html .= '<span>sec</span>';
+        } else {
+            $html .= '<input type="hidden" name="' . $field_name . '_secondes" value="' . (int) $timer['secondes'] . '"/>';
         }
-        $html .= '</select>';
-        $html .= '<span>sec</span>';
+
         $html .= '</div>';
 
         $html .= '<script type="text/javascript">';
@@ -1637,5 +1695,66 @@ class BimpInput
         }
 
         return $html;
+    }
+
+    public static function renderFiltersInputAddFilterInput($module = '', $object_name = '', $has_depends_on = false)
+    {
+        $html .= '';
+
+        $html .= '<div class="filters_input_add_filter_form"' . ((!$module || !$object_name) ? ' style="display: none"' : '') . '>';
+        if ($module && $object_name) {
+            $obj = BimpObject::getInstance($module, $object_name);
+            $html .= $obj->renderFiltersSelect();
+        }
+        $html .= '</div>';
+
+        $html .= '<div class="no_object_notif"' . ($module && $object_name ? ' style="display: none"' : '') . '>';
+
+        if ($has_depends_on) {
+            $html .= BimpRender::renderAlerts('Veuillez sélectionner un type d\'objet', 'warning');
+        } else {
+            $html .= BimpRender::renderAlerts('Erreur: aucun type d\'objet spécifié');
+        }
+
+        $html .= '</div>';
+
+        return BimpRender::renderPanel(BimpRender::renderIcon('fas_plus-circle') . 'Ajouter un filtre', $html, '', array(
+                    'foldable' => 1,
+                    'type'     => 'secondary'
+        ));
+    }
+
+    public static function renderFiltersInputValues($module = '', $object_name = '', $values = array(), $content_only = false)
+    {
+        $html = '';
+
+        $json_errors = array();
+
+        $values = BimpTools::json_decode_array($values, $json_errors);
+
+        if (!empty($json_errors)) {
+            $html .= BimpRender::renderAlerts(BimpTools::getMsgFromArray($json_errors));
+        } elseif (empty($values)) {
+            $html .= '<div class="info">';
+            $html .= 'Aucun filtre ajouté';
+            $html .= '</div>';
+        } elseif (!$module || !$object_name) {
+            $html .= '<div class="danger">Type d\'objet absent</div>';
+        } else {
+            $object = BimpObject::getInstance($module, $object_name);
+
+            $bc_panel = new BC_FiltersPanel($object);
+            $bc_panel->setFilters($values);
+            $html = $bc_panel->renderActiveFilters(true, true, 'filters_input');
+        }
+
+        if ($content_only) {
+            return $html;
+        }
+
+        return BimpRender::renderPanel(BimpRender::renderIcon('fas_filter') . 'Filtres ajoutés', $html, '', array(
+                    'foldable' => 1,
+                    'type'     => 'secondary'
+        ));
     }
 }

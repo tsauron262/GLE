@@ -30,8 +30,10 @@ fields:
         type: id_object
         object: option
         required: 1
-        values: 
-            array: availableOptions
+        input:
+            type: select
+            options: 
+                array: availableOptions
         
     value: 
         label: Valeur

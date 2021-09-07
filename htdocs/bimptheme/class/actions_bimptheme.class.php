@@ -9,8 +9,11 @@ function initHeaderBimp(){
         if(!function_exists('llxHeader')){
             function llxHeader($head = '', $title = '', $help_url = '', $target = '', $disablejs = 0, $disablehead = 0, $arrayofjs = '', $arrayofcss = '', $morequerystring = '', $morecssonbody = '', $replacemainareaby = '') {
                 include_once(DOL_DOCUMENT_ROOT . "/theme/BimpTheme/views/header.php");
-
+              
                 include_once(DOL_DOCUMENT_ROOT . "/theme/BimpTheme/views/menu.php");
+                
+                if(function_exists('hookDebutFiche'))
+                    echo hookDebutFiche();
             }
         }
         else {

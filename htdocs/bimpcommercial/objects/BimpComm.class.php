@@ -214,6 +214,11 @@ class BimpComm extends BimpDolObject
                 }
             }
         }
+        
+        
+//        if($this->getData('fk_mode_reglement') == 3 && $this->getData('rib_client') < 1 && $this->extrafieldsIsConfig('rib_client'))
+//            $errors[] = 'Pour les prélèvements CEPA, le RIB est obligatoire';
+//        $errors[] = 'TODO A suppr';
 
         return (count($errors) ? 0 : 1);
     }
@@ -390,6 +395,19 @@ class BimpComm extends BimpDolObject
     }
 
     // Getters array: 
+    
+    public function getRibArray()
+    {        
+        $return = array(0=>'');
+        $client = $this->getClientFacture();
+        if($client && $client->isLoaded()){
+            $result = $this->db->getRows('societe_rib', '`fk_soc` ='.$client->id, null, 'object', null, 'default_rib', 'DESC');
+
+            foreach($result as $row)
+                $return[$row->rowid] = $row->label;
+        }
+        return $return;
+    }
 
     public function getClientContactsArray()
     {
@@ -865,7 +883,7 @@ class BimpComm extends BimpDolObject
         return 0;
     }
 
-    public function getTotalTtcWithoutRemises($exclude_discounts = false)
+    public function getTotalTtcWithoutRemises($exclude_discounts = false, $full_qty = false)
     {
         $total = 0;
 
@@ -876,7 +894,7 @@ class BimpComm extends BimpDolObject
                     continue;
                 }
 
-                $total += $line->getTotalTtcWithoutRemises();
+                $total += $line->getTotalTtcWithoutRemises($full_qty);
             }
         }
         return $total;
@@ -917,7 +935,7 @@ class BimpComm extends BimpDolObject
         return "";
     }
 
-    public function getRemisesInfos()
+    public function getRemisesInfos($force_qty_mode = -1)
     {
         $infos = array(
             'remises_lines_percent'           => 0,
@@ -937,10 +955,10 @@ class BimpComm extends BimpDolObject
         if ($this->isLoaded()) {
             $total_ttc_without_remises = 0;
 
-            $lines = $this->getChildrenObjects('lines');
+            $lines = $this->getLines('not_text');
 
             foreach ($lines as $line) {
-                $line_infos = $line->getRemiseTotalInfos();
+                $line_infos = $line->getRemiseTotalInfos(false, $force_qty_mode);
                 $infos['remises_lines_amount_ttc'] += (float) $line_infos['line_amount_ttc'];
                 $infos['remises_lines_amount_ht'] += (float) $line_infos['line_amount_ht'];
                 $infos['remises_globales_amount_ht'] += (float) $line_infos['global_amount_ht'];
@@ -1507,9 +1525,14 @@ class BimpComm extends BimpDolObject
         $html = '';
 
         if ($this->isLoaded()) {
-            $infos = $this->getRemisesInfos();
+            $infos = $this->getRemisesInfos(0);
+            $infos_fq = null;
 
-            if ($infos['remise_total_amount_ttc']) {
+            if (in_array($this->object_name, array('Bimp_Commande'))) {
+                $infos_fq = $this->getRemisesInfos(1);
+            }
+
+            if ($infos['remise_total_amount_ttc'] || (!is_null($infos_fq) && $infos_fq['remise_total_amount_ttc'])) {
                 $html .= '<table class="bimp_list_table">';
 
                 $html .= '<thead>';
@@ -1523,30 +1546,103 @@ class BimpComm extends BimpDolObject
 
                 $html .= '<tbody>';
 
-                if ($infos['remises_lines_amount_ttc']) {
+                if ($infos['remises_lines_amount_ttc'] || (!is_null($infos_fq) && $infos_fq['remises_lines_amount_ttc'])) {
                     $html .= '<tr>';
                     $html .= '<td style="font-weight: bold;width: 160px;">Remises lignes: </td>';
-                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['remises_lines_amount_ht'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
-                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['remises_lines_amount_ttc'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
-                    $html .= '<td>' . BimpTools::displayFloatValue($infos['remises_lines_percent'], 4) . ' %</td>';
+
+                    $html .= '<td>';
+                    $html .= BimpTools::displayMoneyValue($infos['remises_lines_amount_ht'], 'EUR', 0, 0, 0, 2, 1);
+                    if (!is_null($infos_fq) && $infos['remises_lines_amount_ht'] != $infos_fq['remises_lines_amount_ht']) {
+                        $html .= '<br/><span class="important">';
+                        $html .= BimpTools::displayMoneyValue($infos_fq['remises_lines_amount_ht'], 'EUR', 0, 0, 0, 2, 1);
+                        $html .= '</span>';
+                    }
+                    $html .= '</td>';
+
+                    $html .= '<td>';
+                    $html .= BimpTools::displayMoneyValue($infos['remises_lines_amount_ttc'], 'EUR', 0, 0, 0, 2, 1);
+                    if (!is_null($infos_fq) && $infos['remises_lines_amount_ttc'] != $infos_fq['remises_lines_amount_ttc']) {
+                        $html .= '<br/><span class="important">';
+                        $html .= BimpTools::displayMoneyValue($infos_fq['remises_lines_amount_ttc'], 'EUR', 0, 0, 0, 2, 1);
+                        $html .= '</span>';
+                    }
+                    $html .= '</td>';
+
+                    $html .= '<td>';
+                    $html .= BimpTools::displayFloatValue($infos['remises_lines_percent'], 4) . ' %';
+                    if (!is_null($infos_fq) && $infos['remises_lines_percent'] != $infos_fq['remises_lines_percent']) {
+                        $html .= '<br/><span class="important">';
+                        $html .= BimpTools::displayFloatValue($infos_fq['remises_lines_percent'], 4) . ' %';
+                        $html .= '</span>';
+                    }
+                    $html .= '</td>';
+
                     $html .= '</tr>';
                 }
 
-                if ($infos['remises_globales_amount_ttc']) {
+                if ($infos['remises_globales_amount_ttc'] || (!is_null($infos_fq) && $infos_fq['remises_globales_amount_ttc'])) {
                     $html .= '<tr>';
                     $html .= '<td style="font-weight: bold;width: 160px;">Remises globales: </td>';
-                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['remises_globales_amount_ht'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
-                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['remises_globales_amount_ttc'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
-                    $html .= '<td>' . BimpTools::displayFloatValue($infos['remises_globales_percent'], 4) . ' %</td>';
+
+                    $html .= '<td>';
+                    $html .= BimpTools::displayMoneyValue($infos['remises_globales_amount_ht'], 'EUR', 0, 0, 0, 2, 1);
+                    if (!is_null($infos_fq) && $infos['remises_globales_amount_ht'] != $infos_fq['remises_globales_amount_ht']) {
+                        $html .= '<br/><span class="important">';
+                        $html .= BimpTools::displayMoneyValue($infos_fq['remises_globales_amount_ht'], 'EUR', 0, 0, 0, 2, 1);
+                        $html .= '</span>';
+                    }
+                    $html .= '</td>';
+
+                    $html .= '<td>';
+                    $html .= BimpTools::displayMoneyValue($infos['remises_globales_amount_ttc'], 'EUR', 0, 0, 0, 2, 1);
+                    if (!is_null($infos_fq) && $infos['remises_globales_amount_ttc'] != $infos_fq['remises_globales_amount_ttc']) {
+                        $html .= '<br/><span class="important">';
+                        $html .= BimpTools::displayMoneyValue($infos_fq['remises_globales_amount_ttc'], 'EUR', 0, 0, 0, 2, 1);
+                        $html .= '</span>';
+                    }
+                    $html .= '</td>';
+
+                    $html .= '<td>';
+                    $html .= BimpTools::displayFloatValue($infos['remises_globales_percent'], 4) . ' %';
+                    if (!is_null($infos_fq) && $infos['remises_globales_percent'] != $infos_fq['remises_globales_percent']) {
+                        $html .= '<br/><span class="important">';
+                        $html .= BimpTools::displayFloatValue($infos_fq['remises_globales_percent'], 4) . ' %';
+                        $html .= '</span>';
+                    }
+                    $html .= '</td>';
                     $html .= '</tr>';
                 }
 
-                if ($infos['ext_remises_globales_amount_ttc']) {
+                if ($infos['ext_remises_globales_amount_ttc'] || (!is_null($infos_fq) && $infos_fq['ext_remises_globales_amount_ttc'])) {
                     $html .= '<tr>';
                     $html .= '<td style="font-weight: bold;width: 160px;">Parts de remises globales externes: </td>';
-                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['ext_remises_globales_amount_ht'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
-                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['ext_remises_globales_amount_ttc'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
-                    $html .= '<td>' . BimpTools::displayFloatValue($infos['ext_remises_globales_percent'], 4) . ' %</td>';
+                    
+                    $html .= '<td>';
+                    $html .= BimpTools::displayMoneyValue($infos['ext_remises_globales_amount_ht'], 'EUR', 0, 0, 0, 2, 1);
+                    if (!is_null($infos_fq) && $infos['ext_remises_globales_amount_ht'] != $infos_fq['ext_remises_globales_amount_ht']) {
+                        $html .= '<br/><span class="important">';
+                        $html .= BimpTools::displayMoneyValue($infos_fq['ext_remises_globales_amount_ht'], 'EUR', 0, 0, 0, 2, 1);
+                        $html .= '</span>';
+                    }
+                    $html .= '</td>';
+
+                    $html .= '<td>';
+                    $html .= BimpTools::displayMoneyValue($infos['ext_remises_globales_amount_ttc'], 'EUR', 0, 0, 0, 2, 1);
+                    if (!is_null($infos_fq) && $infos['ext_remises_globales_amount_ttc'] != $infos_fq['ext_remises_globales_amount_ttc']) {
+                        $html .= '<br/><span class="important">';
+                        $html .= BimpTools::displayMoneyValue($infos_fq['ext_remises_globales_amount_ttc'], 'EUR', 0, 0, 0, 2, 1);
+                        $html .= '</span>';
+                    }
+                    $html .= '</td>';
+
+                    $html .= '<td>';
+                    $html .= BimpTools::displayFloatValue($infos['ext_remises_globales_percent'], 4) . ' %';
+                    if (!is_null($infos_fq) && $infos['ext_remises_globales_percent'] != $infos_fq['ext_remises_globales_percent']) {
+                        $html .= '<br/><span class="important">';
+                        $html .= BimpTools::displayFloatValue($infos_fq['ext_remises_globales_percent'], 4) . ' %';
+                        $html .= '</span>';
+                    }
+                    $html .= '</td>';
                     $html .= '</tr>';
                 }
 
@@ -1554,9 +1650,33 @@ class BimpComm extends BimpDolObject
 
                 $html .= '<tfoot>';
                 $html .= '<td style="font-weight: bold;width: 160px;">Total Remises: </td>';
-                $html .= '<td>' . BimpTools::displayMoneyValue($infos['remise_total_amount_ht'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
-                $html .= '<td>' . BimpTools::displayMoneyValue($infos['remise_total_amount_ttc'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
-                $html .= '<td>' . BimpTools::displayFloatValue($infos['remise_total_percent'], 4) . ' %</td>';
+
+                $html .= '<td>';
+                $html .= BimpTools::displayMoneyValue($infos['remise_total_amount_ht'], 'EUR', 0, 0, 0, 2, 1);
+                if (!is_null($infos_fq) && $infos['remise_total_amount_ht'] != $infos_fq['remise_total_amount_ht']) {
+                    $html .= '<br/><span class="important">';
+                    $html .= BimpTools::displayMoneyValue($infos_fq['remise_total_amount_ht'], 'EUR', 0, 0, 0, 2, 1);
+                    $html .= '</span>';
+                }
+                $html .= '</td>';
+
+                $html .= '<td>';
+                $html .= BimpTools::displayMoneyValue($infos['remise_total_amount_ttc'], 'EUR', 0, 0, 0, 2, 1);
+                if (!is_null($infos_fq) && $infos['remise_total_amount_ttc'] != $infos_fq['remise_total_amount_ttc']) {
+                    $html .= '<br/><span class="important">';
+                    $html .= BimpTools::displayMoneyValue($infos_fq['remise_total_amount_ttc'], 'EUR', 0, 0, 0, 2, 1);
+                    $html .= '</span>';
+                }
+                $html .= '</td>';
+
+                $html .= '<td>';
+                $html .= BimpTools::displayFloatValue($infos['remise_total_percent'], 4) . ' %';
+                if (!is_null($infos_fq) && $infos['remise_total_percent'] != $infos_fq['remise_total_percent']) {
+                    $html .= '<br/><span class="important">';
+                    $html .= BimpTools::displayFloatValue($infos_fq['remise_total_percent'], 4) . ' %';
+                    $html .= '</span>';
+                }
+                $html .= '</td>';
                 $html .= '</tfoot>';
                 $html .= '</table>';
             } else {
@@ -2782,7 +2902,6 @@ class BimpComm extends BimpDolObject
 
         $type_paiement = $id_mode_paiement;
 
-
         if (!$this->useCaisseForPayments) {
             $use_caisse = false;
         } elseif (!$use_caisse && in_array($type_paiement, array('LIQ'))) {
@@ -2868,13 +2987,13 @@ class BimpComm extends BimpDolObject
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($factureA), 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
             } else {
                 $tva = BimpCore::getConf('tva_acompte', 0);
-                $ht = $amount / (100+$tva)*100;
+                $ht = $amount / (100 + $tva) * 100;
                 $factureA->addline("Acompte", $ht, 1, $tva, null, null, null, 0, null, null, null, null, null, 'HT', null, 1, null, null, null, null, null, null, $ht);
                 $user->rights->facture->creer = 1;
                 $factureA->validate($user);
 
                 // Création du paiement:
-                if($paye){
+                if ($paye) {
                     BimpTools::loadDolClass('compta/paiement', 'paiement');
                     $payement = new Paiement($this->db->db);
                     $payement->amounts = array($factureA->id => $amount);
@@ -2931,8 +3050,7 @@ class BimpComm extends BimpDolObject
 
         return $errors;
     }
-    
-    
+
     public function getClientFacture()
     {
         if ((int) $this->getData('id_client_facture')) {
@@ -2951,7 +3069,7 @@ class BimpComm extends BimpDolObject
 
         return null;
     }
-    
+
     public function getClientFactureContactsArray()
     {
         $id_client_facture = BimpTools::getValue('id_client_facture');
@@ -3519,6 +3637,8 @@ class BimpComm extends BimpDolObject
     public function onDelete(&$warnings = array())
     {
         $errors = array();
+        $prev_deleting = $this->isDeleting;
+        $this->isDeleting = true;
 
         if ($this->isLoaded($warnings)) {
             $lines = $this->getLines();
@@ -3566,6 +3686,7 @@ class BimpComm extends BimpDolObject
             }
         }
 
+        $this->isDeleting = $prev_deleting;
         return $errors;
     }
 
@@ -3581,7 +3702,7 @@ class BimpComm extends BimpDolObject
 
     public function onChildSave($child)
     {
-        if ($this->isLoaded()) {
+        if ($this->isLoaded() && !$this->isDeleting) {
             if (is_a($child, 'objectLine')) {
                 $this->processRemisesGlobales();
             }
@@ -3591,7 +3712,7 @@ class BimpComm extends BimpDolObject
 
     public function onChildDelete($child)
     {
-        if ($this->isLoaded()) {
+        if ($this->isLoaded() && !$this->isDeleting) {
             if (is_a($child, 'objectLine')) {
                 $this->processRemisesGlobales();
             }
@@ -3928,15 +4049,38 @@ class BimpComm extends BimpDolObject
         BimpTools::loadDolClass('societe');
         $societe = new Societe($this->db->db);
         $societe->fetch($this->getData('fk_soc'));
-        $societe->borne_debut = $data['date_debut'];
-        $societe->borne_fin = $data['date_fin'];
 
-        if ($societe->generateDocument('invoiceStatement', $langs) > 0) {
-            $success = "Relevé de facturation généré avec succès";
+        if (!BimpObject::objectLoaded($societe)) {
+            $errors[] = 'Le client #' . $this->getData('fk_soc') . ' n\'existe plus';
         } else {
-            $errors[] = "Echec de la génération du relevé de facturation";
+            $societe->borne_debut = $data['date_debut'];
+            $societe->borne_fin = $data['date_fin'];
+
+            $files = BimpCache::getBimpObjectObjects('bimpcore', 'BimpFile', array(
+                        'parent_module'      => 'bimpcore',
+                        'parent_object_name' => array(
+                            'in' => array('Bimp_Societe', 'Bimp_Client')
+                        ),
+                        'id_parent'          => $societe->id,
+                        'file_name'          => 'Releve_facturation',
+                        'deleted'            => 0
+            ));
+
+            if ($societe->generateDocument('invoiceStatement', $langs) > 0) {
+                if (!empty($files)) {
+                    foreach ($files as $file) {
+                        $file->updateField('date_create', date('Y-m-d h:i:s'));
+                        $file->updateField('date_update', date('Y-m-d h:i:s'));
+                    }
+                }
+
+                $success = "Relevé de facturation généré avec succès";
+            } else {
+                $errors[] = "Echec de la génération du relevé de facturation";
+            }
+            $callback = "window.open('" . DOL_URL_ROOT . "/document.php?modulepart=company&file=" . $societe->id . "%2FReleve_facturation.pdf&entity=1', '_blank');";
         }
-        $callback = "window.open('" . DOL_URL_ROOT . "/document.php?modulepart=company&file=" . $societe->id . "%2FRelevé_facturation.pdf&entity=1', '_blank');";
+
         return [
             'success_callback' => $callback,
             'errors'           => $errors,
@@ -4012,51 +4156,52 @@ class BimpComm extends BimpDolObject
 
         $id_objs = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
 
-        if (count($id_objs) > 50)
-            return array('Trop de PDF action impossible');
-
-        if (!is_array($id_objs) || empty($id_objs)) {
-            $errors[] = 'Aucune ' . $this->getLabel() . ' sélectionnée';
+        if (count($id_objs) > 50) {
+            $errors[] = 'Trop de PDF action impossible';
         } else {
-            $files = array();
-
-            foreach ($id_objs as $id_obj) {
-                $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_obj);
-
-                if (!BimpObject::objectLoaded($obj)) {
-                    $warnings[] = ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_obj . ' n\'existe pas';
-                    continue;
-                }
-
-                $dir = $obj->getFilesDir();
-                $filename = $obj->getRef() . '.pdf';
-
-                if (!file_exists($dir . $filename)) {
-                    $warnings[] = ucfirst($this->getLabel()) . ' ' . $obj->getLink() . ': fichier PDF absent (' . $dir . $filename . ')';
-                    continue;
-                }
-
-                $files[] = array($dir . $filename, $filename);
-            }
-
-            if (!empty($files)) {
-                global $user;
-                $dir = PATH_TMP . '/bimpcore/';
-                $fileName = 'zip_' . $this->dol_object->element . '_' . $user->id . '.zip';
-                if (file_exists($dir . $fileName))
-                    unlink($dir . $fileName);
-                $zip = new ZipArchive();
-                if ($zip->open($dir . $fileName, ZipArchive::CREATE) === true) {
-                    foreach ($files as $tabFile) {
-                        $zip->addFile($tabFile[0], $tabFile[1]);
-                    }
-                }
-                $zip->close();
-
-                $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($fileName);
-                $success_callback = 'window.open(\'' . $url . '\');';
+            if (!is_array($id_objs) || empty($id_objs)) {
+                $errors[] = 'Aucune ' . $this->getLabel() . ' sélectionnée';
             } else {
-                $errors[] = 'Aucun PDF trouvé';
+                $files = array();
+
+                foreach ($id_objs as $id_obj) {
+                    $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_obj);
+
+                    if (!BimpObject::objectLoaded($obj)) {
+                        $warnings[] = ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_obj . ' n\'existe pas';
+                        continue;
+                    }
+
+                    $dir = $obj->getFilesDir();
+                    $filename = $obj->getRef() . '.pdf';
+
+                    if (!file_exists($dir . $filename)) {
+                        $warnings[] = ucfirst($this->getLabel()) . ' ' . $obj->getLink() . ': fichier PDF absent (' . $dir . $filename . ')';
+                        continue;
+                    }
+
+                    $files[] = array($dir . $filename, $filename);
+                }
+
+                if (!empty($files)) {
+                    global $user;
+                    $dir = PATH_TMP . '/bimpcore/';
+                    $fileName = 'zip_' . $this->dol_object->element . '_' . $user->id . '.zip';
+                    if (file_exists($dir . $fileName))
+                        unlink($dir . $fileName);
+                    $zip = new ZipArchive();
+                    if ($zip->open($dir . $fileName, ZipArchive::CREATE) === true) {
+                        foreach ($files as $tabFile) {
+                            $zip->addFile($tabFile[0], $tabFile[1]);
+                        }
+                    }
+                    $zip->close();
+
+                    $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($fileName);
+                    $success_callback = 'window.open(\'' . $url . '\');';
+                } else {
+                    $errors[] = 'Aucun PDF trouvé';
+                }
             }
         }
 
@@ -4098,7 +4243,7 @@ class BimpComm extends BimpDolObject
                     $zone = $this->getZoneByCountry($soc);
                     if ($this->getData('zone_vente') != $zone) {
                         $this->set('zone_vente', $zone);
-                        $this->addNote('Zone de vente changé en auto ' . $this->displayData('zone_vente', 'default', false, true));
+                        $this->addNote('Zone de vente changée en auto ' . $this->displayData('zone_vente', 'default', false, true));
                     }
                 }
             }
@@ -4234,57 +4379,6 @@ class BimpComm extends BimpDolObject
                 }
             }
         }
-
-        return $errors;
-    }
-
-    public function delete(&$warnings = array(), $force_delete = false)
-    {
-//        $lines = $this->getLines();
-//        $remisesGlobales = $this->getRemisesGlobales();
-//
-//        // Suppression des demandes de validation liées à cet objet
-//        $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
-//        $type_de_piece = $valid_comm::getObjectClass($this);
-//        $filters = array(
-//            'type_de_piece' => (int) $type_de_piece,
-//            'id_piece'      => (int) $this->id
-//        );
-//        $demandes_a_suppr = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filters);
-
-        $errors = parent::delete($warnings, $force_delete);
-
-//        if (!count($errors)) {
-//            foreach ($lines as $line) {
-//                $line_pos = $line->getData('position');
-//                $line_warnings = array();
-//                $line->bimp_line_only = true;
-//                $line_errors = $line->delete($line_warnings, true);
-//
-//                $line_errors = BimpTools::merge_array($line_warnings, $line_errors);
-//                if (count($line_errors)) {
-//                    $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Erreurs lors de la suppression de la ligne n°' . $line_pos);
-//                }
-//            }
-//
-//            foreach ($remisesGlobales as $rg) {
-//                $rg_warnings = array();
-//                $rg_errors = $rg->delete($rg_warnings, true);
-//
-//                if (count($rg_errors)) {
-//                    $warnings[] = BimpTools::getMsgFromArray($rg_errors, 'Echec de la suppression de la remise globale #' . $rg->id);
-//                }
-//            }
-//
-//            foreach ($demandes_a_suppr as $d) {
-//                $dem_warnings = array();
-//                $dem_errors = $d->delete($dem_warnings, true);
-//
-//                if (count($dem_errors)) {
-//                    $warnings[] = BimpTools::getMsgFromArray($dem_errors, 'Echec de la suppression de la demande de validation #' . $rg->id);
-//                }
-//            }
-//        }
 
         return $errors;
     }

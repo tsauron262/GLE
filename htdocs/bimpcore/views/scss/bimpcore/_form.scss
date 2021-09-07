@@ -954,3 +954,8 @@ input[type=text].large_input {
         display: none!important;
     }   
 }
+
+/*Filters Input*/
+.obj_filters_input_container input {
+    max-width: 350px!important;
+}

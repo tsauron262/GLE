@@ -54,7 +54,8 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
         foreach (array(
     'pa_apple_file'  => array('import_apple_prices', 'Traitement des prix d\'achat Apple'),
     'pa_td_file'     => array('import_td_prices', 'Traitement des prix d\'achat TechData'),
-    'pa_ingram_file' => array('import_ingram_prices', 'Traitement des prix d\'achat Ingram')
+    'pa_ingram_file' => array('import_ingram_prices', 'Traitement des prix d\'achat Ingram'),
+    'pa_prokov_file' => array('import_prokov_prices', 'Traitement des prix d\'achat PROKOV')
         ) as $opt_name => $step) {
             if (isset($this->options[$opt_name]) && (string) $this->options[$opt_name]) {
                 $file_errors = array();
@@ -166,6 +167,14 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
                 $prices_file = (isset($this->options['pa_ingram_file']) ? $this->options['pa_ingram_file'] : '');
                 if (!$prices_file) {
                     $errors[] = 'Fichier des prix Ingram absent';
+                }
+                break;
+
+            case 'import_prokov_prices':
+                $id_fourn = (int) $this->params['id_fourn_prokov'];
+                $prices_file = (isset($this->options['pa_prokov_file']) ? $this->options['pa_prokov_file'] : '');
+                if (!$prices_file) {
+                    $errors[] = 'Fichier des prix PROKOV absent';
                 }
                 break;
         }
@@ -391,6 +400,13 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
                 'value'      => ''
                     ), true, $warnings, $warnings);
 
+            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
+                'id_process' => (int) $process->id,
+                'name'       => 'id_fourn_prokov',
+                'label'      => 'ID PROKOV',
+                'value'      => ''
+                    ), true, $warnings, $warnings);
+
             // Options: 
 
             $options = array();
@@ -441,6 +457,20 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
                         'id_process'    => (int) $process->id,
                         'label'         => 'Prix d\'achat Ingram',
                         'name'          => 'pa_ingram_file',
+                        'info'          => '',
+                        'type'          => 'file',
+                        'default_value' => '',
+                        'required'      => 0
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($opt)) {
+                $options[] = (int) $opt->id;
+            }
+
+            $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                        'id_process'    => (int) $process->id,
+                        'label'         => 'Prix d\'achat PROKOV',
+                        'name'          => 'pa_prokov_file',
                         'info'          => '',
                         'type'          => 'file',
                         'default_value' => '',

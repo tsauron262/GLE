@@ -185,6 +185,7 @@ table.objectlistTable {
         background-color: $primary;
         text-align: right;
         padding: 5px 12px 5px 6px;
+        vertical-align: top;
     }
 
     & > tfoot > tr > td {
@@ -827,12 +828,12 @@ td.buttons {
                 width: 30px!important;
             }
         }
-        
+
         .date_range_limits_container {
             input {
                 width: 100%!important;
-    }
-}
+            }
+        }
     }
 }
 
@@ -867,7 +868,10 @@ td.buttons {
         font-size: 13px;
         font-weight: bold;
     }
+}
 
+.list_active_filters,
+.obj_filters_input_values {
     .filter_active_values {
         display: inline-block;
         vertical-align: top;
@@ -892,6 +896,10 @@ td.buttons {
                 padding: 5px 15px 5px 5px;
                 margin: 2px 0;
 
+                &.no-buttons {
+                    padding-right: 5px;
+                }
+                
                 .remove_btn {
                     margin-left: 5px;
                     cursor: pointer;

@@ -15,6 +15,7 @@ class BC_Form extends BC_Panel
     public static $row_params = array(
         'show'               => array('data_type' => 'bool', 'default' => 1),
         'field'              => array('default' => ''),
+        'info_header'        => array('default' => ''),
         'association'        => array('default' => ''),
         'object'             => array('default' => ''),
         'custom'             => array('data_type' => 'bool', 'default' => 0),
@@ -65,6 +66,9 @@ class BC_Form extends BC_Panel
         $this->params_def['sub_objects'] = array('type' => 'keys');
         $this->params_def['no_auto_submit'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['force_edit'] = array('data_type' => 'bool', 'default' => 0);
+        $this->params_def['cancel_btn'] = array('data_type' => 'bool', 'default' => 1);
+        $this->params_def['on_submit'] = array('default' => 'null');
+        $this->params_def['info_header'] = array('default' => 'null');
 
         global $current_bc;
         if (!is_object($current_bc)) {
@@ -86,12 +90,6 @@ class BC_Form extends BC_Panel
             }
         } else {
             $path = 'forms';
-        }
-
-        if ($object->isLoaded()) {
-            $title = 'Edition ' . $object->getLabel('of_the') . ' ' . $object->getInstanceName();
-        } else {
-            $title = 'Ajout ' . $object->getLabel('of_a');
         }
 
         if ((is_null($id_parent) || !$id_parent) && !is_null($object)) {
@@ -116,7 +114,19 @@ class BC_Form extends BC_Panel
             $this->params['on_save'] = $on_save;
         }
 
-        parent::__construct($object, $name, $path, $content_only, $level, $title, 'edit');
+        parent::__construct($object, $name, $path, $content_only, $level);
+
+        if (!$this->params['title']) {
+            if ($object->isLoaded()) {
+                $this->params['title'] = 'Edition ' . $object->getLabel('of_the') . ' ' . $object->getInstanceName();
+            } else {
+                $this->params['title'] = 'Ajout ' . $object->getLabel('of_a');
+            }
+        }
+
+        if (!$this->params['icon']) {
+            $this->params['icon'] = 'fas_edit';
+        }
 
         if (isset($this->params['values']) && !is_null($this->params['values'])) {
             if (isset($this->params['values']['fields'])) {
@@ -250,7 +260,7 @@ class BC_Form extends BC_Panel
             $html .= '<input type="hidden" name="' . $this->fields_prefix . $parent_id_property . '" value="' . $this->id_parent . '"/>';
         }
 
-        if (is_null($this->config_path)) {
+        if (is_null($this->config_path) || !isset($this->params['rows']) || count($this->params['rows']) == 0) {
             $fields = $this->object->getConf('fields', array(), true, 'array');
             foreach ($fields as $field_name => $field_params) {
                 if ($field_name === $parent_id_property) {
@@ -261,7 +271,7 @@ class BC_Form extends BC_Panel
         } else {
             foreach ($this->params['rows'] as $row) {
                 $row_params = parent::fetchParams($this->config_path . '/rows/' . $row, self::$row_params);
-                
+
                 if (!(int) $row_params['show']) {
                     continue;
                 }
@@ -300,20 +310,24 @@ class BC_Form extends BC_Panel
     public function renderHtmlFooter()
     {
         $html = '';
-        $html .= BimpRender::renderButton(array(
-                    'label'       => 'Annuler',
-                    'icon_before' => 'times',
-                    'classes'     => array('btn', 'btn-default'),
-                    'attr'        => array(
-                        'onclick' => 'closeObjectForm(\'' . $this->object->object_name . '\')'
-                    )
-                        ), 'button');
+
+        if ((int) $this->params['cancel_btn']) {
+            $html .= BimpRender::renderButton(array(
+                        'label'       => 'Annuler',
+                        'icon_before' => 'times',
+                        'classes'     => array('btn', 'btn-default'),
+                        'attr'        => array(
+                            'onclick' => 'closeObjectForm(\'' . $this->object->object_name . '\')'
+                        )
+                            ), 'button');
+        }
+
         $html .= BimpRender::renderButton(array(
                     'label'       => 'Enregistrer',
                     'icon_before' => 'fas_save',
                     'classes'     => array('btn', 'btn-primary', 'pull-right', 'save_object_button'),
                     'attr'        => array(
-                        'onclick' => 'saveObjectFromForm(\'' . $this->identifier . '\')'
+                        'onclick' => 'saveObjectFromForm(\'' . $this->identifier . '\', $(this), null, null, ' . $this->params['on_submit'] . ')'
                     )
                         ), 'button');
         return $html;
@@ -564,8 +578,8 @@ class BC_Form extends BC_Panel
 
     public function renderObjectRow($object_name, $params = array())
     {
-        $html = '';        
-        
+        $html = '';
+
         if (!$this->object->object_exists($object_name)) {
             return BimpRender::renderAlerts('Erreur de configuration: sous-object "' . $object_name . '" non défini');
         }

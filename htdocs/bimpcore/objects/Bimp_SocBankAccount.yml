@@ -18,8 +18,8 @@ parent_id_property: fk_soc
 header_edit_form: default
 
 labels: 
-    name: compte bancaire
-    name_plur: comptes bancaires
+    name: RIB
+    name_plur: RIBs
     
 fields: 
     fk_soc: 
@@ -31,6 +31,7 @@ fields:
     default_rib: 
         label: Compte par défaut
         type: bool
+        default_value: 1
         
     type: 
         label: type
@@ -131,6 +132,7 @@ lists:
         sort_field: rowid
         sort_way: desc
         add_btn: 1
+        delete_btn: 1
         add_form_name: default
         modal_view: default
         edit_btn: 1

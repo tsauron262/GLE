@@ -93,7 +93,7 @@ class BC_FieldsTable extends BC_Panel
                         continue;
                     }
                 }
-                
+
                 $field = new BC_Field($this->object, $row_params['field'], (int) $row_params['edit']);
                 $field->display_name = $row_params['display'];
 
@@ -112,7 +112,13 @@ class BC_FieldsTable extends BC_Panel
                 if (!$label) {
                     $label = $field->params['label'];
                 }
+
                 $content = $field->renderHtml();
+
+                if ($field->edit && $field->isEditable()) {
+                    $content .= $field->displayCreateObjectButton(true, true);
+                }
+
                 unset($field);
             } elseif ($row_params['association']) {
                 $asso = new BimpAssociation($this->object, $row_params['association']);

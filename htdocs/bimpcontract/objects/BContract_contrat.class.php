@@ -1181,24 +1181,22 @@ class BContract_contrat extends BimpDolObject
         ];
     }
 
-    public function actionPlanningInter($data, &$success)
+    public function actionPlanningInter($data, &$success = '')
     {
-
         $errors = [];
-        $warnings = [];
-        //print_r($data);
+        $success = 'Fiche inter créée avec succès';
+        
         if (count($data['techs'])) {
-            $errors[] = "Vous ne pouvez pas plannifier une intervention sans au moin un techhnicien";
+            $errors[] = "Vous ne pouvez pas plannifier une intervention sans au moins un techhnicien";
+        } else {
+            $instance = $this->getInstance('bimptechnique', 'BT_ficheInter');
+            $errors = $instance->createFromContrat($this, $data);
         }
-        $id_new_fi = 0;
-        //if(!count($errors)) {
-        $instance = $this->getInstance('bimptechnique', 'BT_ficheInter');
-        //$this->getCommandesClientArray();
-        //
-        //echo '<pre>' . print_r($data);
-        $id_new_fi = $instance->createFromContrat($this, $data);
-        //}
-        //return $id_new_fi;
+        
+        return array(
+            'errors' => $errors,
+            'warnings' => array()
+        );
     }
 
     public function getTicketsSupportClientArray()
@@ -1389,49 +1387,26 @@ class BContract_contrat extends BimpDolObject
         $new_date_end->add(new DateInterval("P" . $duree_contrat . "M"));
         $new_date_end->sub(new DateInterval('P1D'));
 
-        $renouvellementTacite = 0;
         switch ($this->getData('tacite')) {
             case self::CONTRAT_RENOUVELLEMENT_1_FOIS:
-                $renouvellementTacite = 1;
+                $new_renouvellementTacite = self::CONTRAT_RENOUVELLEMENT_NON;
                 break;
             case self::CONTRAT_RENOUVELLEMENT_2_FOIS:
-                $renouvellementTacite = 3;
+                $new_renouvellementTacite = self::CONTRAT_RENOUVELLEMENT_1_FOIS;
                 break;
             case self::CONTRAT_RENOUVELLEMENT_3_FOIS:
-                $renouvellementTacite = 6;
+                $new_renouvellementTacite = self::CONTRAT_RENOUVELLEMENT_2_FOIS;
                 break;
             case self::CONTRAT_RENOUVELLEMENT_4_FOIS:
-                $renouvellementTacite = 4;
+                $new_renouvellementTacite = self::CONTRAT_RENOUVELLEMENT_3_FOIS;
                 break;
             case self::CONTRAT_RENOUVELLEMENT_5_FOIS:
-                $renouvellementTacite = 5;
+                $new_renouvellementTacite = self::CONTRAT_RENOUVELLEMENT_4_FOIS;
                 break;
             case self::CONTRAT_RENOUVELLEMENT_6_FOIS:
-                $renouvellementTacite = 7;
+                $new_renouvellementTacite = self::CONTRAT_RENOUVELLEMENT_5_FOIS;
                 break;
         }
-        $new_renouvellementTacite = $renouvellementTacite - 1;
-        switch ($new_renouvellementTacite) {
-            case 1:
-                $to_tacite = self::CONTRAT_RENOUVELLEMENT_1_FOIS;
-                break;
-            case 3:
-                $to_tacite = self::CONTRAT_RENOUVELLEMENT_2_FOIS;
-                break;
-            case 6:
-                $to_tacite = self::CONTRAT_RENOUVELLEMENT_3_FOIS;
-                break;
-            case 4:
-                $to_tacite = self::CONTRAT_RENOUVELLEMENT_4_FOIS;
-                break;
-            case 5:
-                $to_tacite = self::CONTRAT_RENOUVELLEMENT_5_FOIS;
-                break;
-            case 7:
-                $to_tacite = self::CONTRAT_RENOUVELLEMENT_6_FOIS;
-                break;
-        }
-
         $errors[] = "SYNTEC: " . $current_indice_syntec;
         $errors[] = "NEW SYNTEC: " . $new_indice_syntec;
         $errors[] = "USE SYNTEC: " . $syntec_for_use_this_renouvellement;
@@ -2595,6 +2570,9 @@ class BContract_contrat extends BimpDolObject
             if ($user->id == $this->getCommercialClient())
                 return 1;
         }
+        
+        if(isset($user->rights->synopsiscontrat->renouveller) && $user->rights->synopsiscontrat->renouveller)
+            return 1;
 
         return 0;
     }

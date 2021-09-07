@@ -150,7 +150,7 @@ fields:
         label: Référence client
     datec:
         label: Créé le
-        type: date
+        type: datetime
     date_contrat:
         label: Date de signature
         type: date
@@ -1315,7 +1315,7 @@ views:
                           object: fiche_inter
                           is_static: 1
                   list: 
-                      name: default
+                      name: contrat
                       object: fiche_inter
 
     file:

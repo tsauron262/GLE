@@ -211,13 +211,6 @@ class Bimp_User extends BimpObject
         return $buttons;
     }
 
-    public function getActionsButtons()
-    {
-        $buttons = array();
-
-        return $buttons;
-    }
-
     // Affichage: 
 
     public function displayCountry()
@@ -779,7 +772,7 @@ class Bimp_User extends BimpObject
 
     // Actions: 
 
-    public function actionExportConges($data, &$success)
+    public function actionExportConges($data, &$success = '')
     {
         $errors = array();
         $warnings = array();

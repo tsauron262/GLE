@@ -12,6 +12,7 @@
         public $send = true;
         
         public $id_relance_for_pineri = [260, 358, 154, 111, 97, 19];
+        public $id_relance_for_romain = [195];
 
         CONST CONTRAT_BROUILLON = 0;
         CONST CONTRAT_DEMANDE = 10;
@@ -35,6 +36,7 @@
         ];
         
         function zu_gehen() {
+            $this->autoClose();
             $this->mailJourActivation();
             $this->relanceActivationProvisoire();
             $this->relance_brouillon();
@@ -42,8 +44,6 @@
             $this->relance_demande();
             $this->tacite();
             $this->facturation_auto();
-            $this->autoClose();
-            
             return "OK";
         }
         
@@ -282,16 +282,18 @@
         }
         
         public function echeance_contrat() {
+            $this->output .= "***ECHEANCE***";
             $list = $this->getListContratsWithStatut(self::CONTRAT_ACTIF);
 
             $now = new DateTime();
             $nombre_relance = 0;
             $nombre_pas_relance = 0;
+            $not_tacite = [0,12];
             foreach($list as $i => $contrat) {
                 $send = false;
                 $c = BimpObject::getInstance('bimpcontract', 'BContract_contrat', $contrat->rowid);
                 $client = BimpObject::getInstance('bimpcore', 'Bimp_Societe', $c->getData('fk_soc'));
-
+                $commercial_suivi = $c->getData('fk_commercial_suivi');
                 if($c->getData('periodicity')) {
                     
                     $endDate = new DateTime($c->displayRealEndDate("Y-m-d"));
@@ -300,6 +302,10 @@
                         $send = true;
                         $nombre_relance++;
                         $message = "Contrat " . $c->getData('ref') . "<br />Client ".$client->dol_object->getNomUrl()." <br /> dont vous êtes le commercial arrive à expiration dans <b>$diff->d jour.s</b>";
+                        if($c->getData('relance_renouvellement') && in_array($c->getData('tacite'), $not_tacite)){
+                            $this->sendMailCommercial('ECHEANCE - Contrat ' . $c->getData('ref') . "[".$client->getData('code_client')."]", $c->getData('fk_commercial_suivi'), $message, $c);
+                        }
+                            
                     } else {
                         $nombre_pas_relance++;
                     }
@@ -312,27 +318,25 @@
                         $endDate = new DateTime($val);
                             $diff = $now->diff($endDate);
                             if($diff->y == 0 && $diff->m == 0 && $diff->d <= 30 && $diff->d > 0 && $diff->invert == 0) {
-                                $send = true;
+                                if($c->getData('relance_renouvellement') && in_array($c->getData('tacite'), $not_tacite)){
+                                    $this->sendMailCommercial('ECHEANCE - Contrat ' . $c->getData('ref') . "[".$client->getData('code_client')."]", $c->getData('fk_commercial_suivi'), $message, $c);
+                                }
+                                    
+
                                 $nombre_relance++;
                                 $message = "Contrat " . $c->getNomUrl(). "<br />Client ".$client->dol_object->getNomUrl()." <br /> dont vous êtes le commercial arrive à expiration dans <b>$diff->d jour.s</b>";
                         }  else {
                             $nombre_pas_relance++;
                         }
                     }
+                
+                
                     
                 
                 
-                if($this->send && $send && $c->getData('relance_renouvellement') == 1) {
-                    $this->sendMailCommercial('ECHEANCE - Contrat ' . $c->getData('ref') . "[".$client->getData('code_client')."]", $c->getData('fk_commercial_suivi'), $message, $c);
-                }
-                
             }
-            if($nombre_relance > 0)
-                $this->output .= $nombre_relance . " relance echeances faites</br />";
-            }
-            if($nombre_pas_relance) {
-                $this->output .= $nombre_pas_relance . " de contrats non relancés</br />";
-            }
+        }
+        $this->output .= "///ECHEANCE///";
         }
         
         public function getListContratsWithStatut($statut) {

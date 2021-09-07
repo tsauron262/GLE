@@ -258,7 +258,8 @@ fields:
         dol_extra_field: 1
         type: id_object
         object: rib_client 
-        create_form: default
+        edit_form: default
+        create_form: add
         create_form_label: Ajouter
         create_form_values:
             fields:

@@ -159,6 +159,9 @@ fields:
             help: Laisser vide si identique au centre de prise en charge
             options: 
                 array: userCentres
+        default_value: 
+            callback: getDefaultCodeCentreRepa
+        depends_on: code_centre
     id_equipment: 
         label: Equipement
         type: id_object

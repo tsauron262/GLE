@@ -637,17 +637,17 @@ class Bimp_Societe extends BimpDolObject
         return $label;
     }
 
-    public function getNumSepa()
-    {
-
-
-        if ($this->getData('num_sepa') == "") {
-            $new = BimpTools::getNextRef('societe_extrafields', 'num_sepa', 'FR02ZZZ008801-', 7);
-            $this->updateField('num_sepa', $new);
-            $this->update();
-        }
-        return $this->getData('num_sepa');
-    }
+//    public function getNumSepa()
+//    {
+//
+//
+//        if ($this->getData('num_sepa') == "") {
+//            $new = BimpTools::getNextRef('societe_extrafields', 'num_sepa', 'FR02ZZZ008801-', 7);
+//            $this->updateField('num_sepa', $new);
+//            $this->update();
+//        }
+//        return $this->getData('num_sepa');
+//    }
 
     public function getCountryCode()
     {

@@ -11,6 +11,7 @@ class CepaPDF extends BimpDocumentPDF
 
     public static $type = 'societe';
     public $propal = null;
+    public $rib = null;
     public $mode = "normal";
     public $after_totaux_label = 'Bon pour commande';
 
@@ -29,7 +30,6 @@ class CepaPDF extends BimpDocumentPDF
 
     protected function initData()
     {
-        
         require_once DOL_DOCUMENT_ROOT . '/includes/tcpdi/tcpdi.php';
         require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/src/fpdf2.php';
         require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/src/autoload.php';
@@ -42,12 +42,17 @@ class CepaPDF extends BimpDocumentPDF
                 $this->pdf2->useTemplate($tplidx, 0, 0, 0, 0, true);
 //        $size = $this->pdf2->getTemplateSize($tplidx);
 //        $this->pdf2->useTemplate($tplidx, null, null, $size['w'], $size['h'], true);
-        $file = $this->getFilePath() . $this->getFileName().'_sepa.pdf';
         
         $soc = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Societe", $this->object->id);
         
+        $rib = $soc->getDefaultRib();
+        $rum = $rib->getData('rum');
+        $file = $this->getFilePath() . $rib->getFileName();;
+        
+        
+        
         $this->pdf2->setXY(120,107.3);
-        $this->pdf2->Cell(70,8, $soc->getNumSepa(), 0);
+        $this->pdf2->Cell(70,8, $rum, 0);
         
         
         $this->pdf2->setXY(60,40);

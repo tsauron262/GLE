@@ -3,6 +3,22 @@
 class Bimp_UserGroup extends BimpObject
 {
 
+    // Droits user: 
+
+    public function canSetAction($action): int
+    {
+        global $user;
+
+        switch ($action) {
+            case 'deassociateUser':
+                if ($user->admin) {
+                    return 1;
+                }
+                return 0;
+        }
+        return parent::canSetAction($action);
+    }
+
     // Getters booléens: 
 
     public function isActionAllowed($action, &$errors = array())
@@ -25,7 +41,6 @@ class Bimp_UserGroup extends BimpObject
         if (BimpTools::getValue('fc', '') === 'user') {
             $id_user = (int) BimpTools::getValue('id', 0);
             if ($id_user && $this->isActionAllowed('deassociateUser') && $this->canSetAction('deassociateUser')) {
-
                 $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
 
                 if (BimpObject::objectLoaded($user)) {
@@ -43,5 +58,30 @@ class Bimp_UserGroup extends BimpObject
         }
 
         return $buttons;
+    }
+
+    // Actions: 
+    
+    public function actionDeassociateUser($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'L\'utilisateur a été retiré du groupe avec succès';
+
+        $id_user = (int) BimpTools::getArrayValueFromPath($data, 'id_user', 0);
+
+        if (!$id_user) {
+            $errors[] = 'Aucun utilisateur sélectionné';
+        } else {
+            $where = 'fk_user = ' . $id_user . ' AND fk_usergroup = ' . $this->id;
+            if ($this->db->delete('usergroup_user', $where) <= 0) {
+                $errors[] = 'Echec du retrait de l\'utilisateur du groupe "' . $this->getName() . '" - ' . $this->db->err();
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 }

@@ -2,7 +2,13 @@ table: usergroup
 primary: rowid
 common_fields: 0
 
-
+dol_object: 
+    instance: 
+        dol_object: 
+            module: user
+            file: usergroup
+            class: UserGroup
+            
 labels: 
     name: Groupe d'utilisateur
     

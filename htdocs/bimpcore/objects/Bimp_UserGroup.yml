@@ -1,6 +1,6 @@
-
 table: usergroup
 primary: rowid
+common_fields: 0
 
 
 labels: 
@@ -36,3 +36,35 @@ fields:
         dol_extra_field: 1
         values: 
             array: secteurs
+
+filters_panels: 
+    default: 
+        filters: 
+            nom: 
+            mail: 
+            alias: 
+            note: 
+            secteur:
+    
+lists: 
+    default: 
+        configurable: 1
+        filters_panel: default
+        sort_field: rowid
+        sort_way: desc
+        n: 10
+        cols: 
+            nom:
+            mail: 
+            alias: 
+            secteur: 
+            note:
+                
+    user: 
+        extends: default
+        joins: 
+            - table: usergroup_user
+              on: ugu.fk_usergroup = a.rowid
+              alias: ugu
+        extra_btn: 
+            callback: getUserListExtraButtons

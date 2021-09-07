@@ -21,3 +21,6 @@ while ($ln = $db->fetch_object($sql)){
     $rib->set('rum', $ln->num_sepa);
     $rib->create();
 }
+
+
+echo 'fin';

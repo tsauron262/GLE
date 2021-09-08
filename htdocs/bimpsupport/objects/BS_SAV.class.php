@@ -1140,6 +1140,13 @@ class BS_SAV extends BimpObject
 
         return($tmp->getNextValue($objsoc, $this, $mask));
     }
+    
+    public function getDefaultCodeCentreRepa()
+    {
+        global $tabCentre;
+        if(isset($tabCentre[$this->getData('code_centre')]) && isset($tabCentre[$this->getData('code_centre')][10]))
+            return $tabCentre[$this->getData('code_centre')][10];
+    }
 
     public function getDefaultCodeCentre()
     {

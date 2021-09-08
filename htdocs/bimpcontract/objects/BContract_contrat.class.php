@@ -1513,6 +1513,22 @@ class BContract_contrat extends BimpDolObject
             'success'  => $success
         ];
     }
+    
+    public function actionStopTacite($data, &$success) {
+        
+        $errors = [];
+        $warnings = [];
+        
+        $this->set("tacite", 0);
+        $this->set("relance_renouvellement", 0);
+        $this->set('initial_renouvellement', 0);
+        if($this->update($warnings)) {
+            $success = "La reconduction tacite à été annulée";
+        }
+        
+        return Array('errors' => $errors, 'warnings' => $warnings, 'success' => $success);
+        
+    }
 
     public function getActionsButtons()
     {
@@ -1559,7 +1575,9 @@ class BContract_contrat extends BimpDolObject
                 $buttons[] = array(
                     "label"   => 'Annuler la reconduction tacite',
                     'icon'    => "fas_hand-paper",
-                    'onclick' => $this->getJsActionOnclick('stopTacite', array(), array())
+                    'onclick' => $this->getJsActionOnclick('stopTacite', array(), array(
+                        'confirm_msg' => "Etes-vous sûr ? Cette action est  irréversible"
+                    ))
                 );
             }
             if (($this->getData('tacite') == 12 || $this->getData('tacite') == 0) && !$this->getData('next_contrat') && $status == self::CONTRAT_STATUS_ACTIVER) {

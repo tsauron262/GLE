@@ -52,6 +52,12 @@ class BimpRelanceClientsLine extends BimpObject
                     return 1;
                 }
                 return 0;
+
+            case 'editDateSend':
+                if ($user->admin) {
+                    return 1;
+                }
+                return 0;
         }
         return parent::canSetAction($action);
     }
@@ -125,6 +131,13 @@ class BimpRelanceClientsLine extends BimpObject
             case 'cancelContentieux':
                 if ((int) $this->getData('status') !== self::RELANCE_CONTENTIEUX) {
                     $errors[] = $err_label . ': cette relance n\'a pas le statut "Dépôt contentieux"';
+                    return 0;
+                }
+                return 1;
+
+            case 'editDateSend':
+                if ($this->isLoaded() && (int) $this->getData('status') < 10) {
+                    $errors[] = 'Le statut actuel de cette relance ne permet pas d\'éditer la date d\'envoi / abandon';
                     return 0;
                 }
                 return 1;
@@ -421,6 +434,16 @@ class BimpRelanceClientsLine extends BimpObject
                         }
                     }
                 }
+
+                if ($this->isActionAllowed('editDateSend') && $this->canSetAction('editDateSend')) {
+                    $buttons[] = array(
+                        'label'   => 'Changer la date réelle d\'envoi / abandon',
+                        'icon'    => 'fas_calendar-day',
+                        'onclick' => $this->getJsActionOnclick('editDateSend', array(), array(
+                            'form_name' => 'edit_date_send'
+                        ))
+                    );
+                }
             }
         }
 
@@ -498,6 +521,16 @@ class BimpRelanceClientsLine extends BimpObject
             );
         }
 
+        if ($this->canSetAction('editDateSend')) {
+            $actions[] = array(
+                'label'   => 'Changer date réelle d\'envoi / abandon',
+                'icon'    => 'fas_calendar-day',
+                'onclick' => $this->getJsBulkActionOnclick('editDateSend', array(), array(
+                    'form_name'     => 'edit_date_send',
+                    'single_action' => true
+                ))
+            );
+        }
         return $actions;
     }
 
@@ -1149,6 +1182,39 @@ class BimpRelanceClientsLine extends BimpObject
         }
     }
 
+    public function editDateSend($new_date_send)
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            if ($this->getData('date_send') !== $new_date_send) {
+                $err = $this->updateField('date_send', $new_date_send);
+
+                if (count($err)) {
+                    $errors[] = BimpTools::getMsgFromArray($err, 'Echec de la mise à jour de la date d\'envoi / abandon');
+                } else {
+                    if ((int) $this->getData('status') >= 10 && $this->getData('status') < 20) {
+                        $factures = $this->getData('factures');
+                        $relance_idx = (int) $this->getData('relance_idx');
+                        $facs_new_date = date('Y-m-d', strtotime($new_date_send));
+
+                        foreach ($factures as $id_fac) {
+                            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_fac);
+
+                            if (BimpObject::objectLoaded($facture)) {
+                                if ((int) $facture->getData('nb_relance') === (int) $relance_idx) {
+                                    $facture->updateField('date_relance', $facs_new_date);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
     // Actions: 
 
     public function actionGeneratePdf($data, &$success)
@@ -1162,7 +1228,6 @@ class BimpRelanceClientsLine extends BimpObject
 
         $facs_done = array();
         $pdf = $this->generatePdf($errors, $warnings, $facs_done, $force);
-
 
         if (!is_null($pdf) && !count($errors)) {
             $url = $this->getPdfFileUrl();
@@ -1342,6 +1407,62 @@ class BimpRelanceClientsLine extends BimpObject
         );
     }
 
+    public function actionEditDateSend($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $new_date_send = BimpTools::getArrayValueFromPath($data, 'date_send', '');
+
+        if ($new_date_send) {
+            if ($this->isLoaded()) {
+                $errors = $this->editDateSend($new_date_send);
+                $success = 'Mise à jour de la date d\'envoi / abandon effectuée avec succès';
+            } else {
+                $id_objects = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+
+                if (is_array($id_objects) && !empty($id_objects)) {
+                    $nOk = 0;
+
+                    foreach ($id_objects as $id_relance_line) {
+                        $line = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id_relance_line);
+
+                        if (BimpObject::objectLoaded($line)) {
+                            $line_errors = array();
+                            if ($line->isActionAllowed('editDateSend', $line_errors)) {
+                                $line_errors = $line->editDateSend($new_date_send);
+                            }
+
+                            if (count($line_errors)) {
+                                $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Ligne de relance #' . $id_relance_line);
+                            } else {
+                                $nOk++;
+                            }
+                        } else {
+                            $errors[] = 'La ligne de relance #' . $id_relance_line . ' n\'existe plus';
+                        }
+                    }
+
+                    if ($$nOk > 1) {
+                        $success .= $nOk . ' lignes de relance ont été mises à jour avec succès';
+                    } elseif ($nOk > 0) {
+                        $success = '1 ligne de relance a été mise à jour avec succès';
+                    }
+                } else {
+                    $errors[] = 'Aucune ligne de relance sélectionnée';
+                }
+            }
+        } else {
+            $errors[] = 'Veuillez spécifier une date d\'envoi / abandon';
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
     // Overrides: 
 
     public function validate()
@@ -1356,7 +1477,7 @@ class BimpRelanceClientsLine extends BimpObject
                 $this->set('status', self::RELANCE_ATTENTE_COURRIER);
             }
         }
-        
+
         if (!(int) $this->getData('method')) {
             if ($relance_idx <= 3) {
                 $this->set('method', 2);

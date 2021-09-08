@@ -565,6 +565,7 @@ fields:
         type: bool
         user_edit: 1
         default_value: 1
+        history: 1
         
     relances_infos: 
         label: Motif relances désactivées

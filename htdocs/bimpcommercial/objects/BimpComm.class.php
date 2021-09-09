@@ -216,14 +216,14 @@ class BimpComm extends BimpDolObject
         }
         
         
-//        if($this->getData('fk_mode_reglement') == 3 &&  $this->extrafieldsIsConfig('rib_client')){
-//            if($this->getData('rib_client') < 1)
-//                $errors[] = 'Pour les prélèvements CEPA, le RIB est obligatoire';
-//            else{
-//                $rib = $this->getChildObject('rib_client');
-//                $rib->isValid($errors);
-//            }
-//        }
+        if($this->getData('fk_mode_reglement') == 3 &&  $this->extrafieldsIsConfig('rib_client')){
+            if($this->getData('rib_client') < 1)
+                $errors[] = 'Pour les prélèvements CEPA, le RIB est obligatoire';
+            else{
+                $rib = $this->getChildObject('rib_client');
+                $rib->isValid($errors);
+            }
+        }
 //        $errors[] = 'TODO A suppr';
 
         return (count($errors) ? 0 : 1);

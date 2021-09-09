@@ -592,6 +592,10 @@ fields:
         type: bool
         default_value: 1
         dol_extra_field: 1
+        
+    date_last_active:
+        label: Date derniére activitée
+        type: date
             
 #    *** Champs non gérés: ***
 #    entity

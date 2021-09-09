@@ -171,7 +171,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                             }
                         }
                     }
-                } elseif (BimpObject::objectLoaded($line)) {
+                } elseif (BimpObject::objectLoaded($line) && $line->getFullQty() != 0) {
                     $shipped_qty = (float) $line->getShippedQty();
                     $available_qty = (float) $line->getFullQty() - $shipped_qty;
 

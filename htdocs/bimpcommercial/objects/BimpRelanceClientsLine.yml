@@ -127,6 +127,10 @@ forms:
         rows: 
             - field: date_prevue
             
+    edit_date_send: 
+        rows: 
+            - field: date_send
+            
     cancel_contentieux: 
         rows: 
             - custom: 1

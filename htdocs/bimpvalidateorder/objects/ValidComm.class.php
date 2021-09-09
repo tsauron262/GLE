@@ -716,9 +716,9 @@ class ValidComm extends BimpObject
                 if($m == '') {
                     
                     $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $d->getData('id_user_ask'));
-                    
-                    $m .= "Bonjour " . $user->getData('firstname') . ",<br/><br/>";
-                    $m .= "Liste des demandes validées pour " . $bimp_object->getNomUrl() . ":<br/>";
+                    $client = $bimp_object->getChildObject('client');
+//                    $m .= "Bonjour " . $user->getData('firstname') . ",<br/><br/>";
+                    $m .= "Liste des demandes validées pour " . $bimp_object->getNomUrl() . " : du client ".$client->getLink()."<br/>";
                 }
                 
                 switch ($d->getData('type')) {

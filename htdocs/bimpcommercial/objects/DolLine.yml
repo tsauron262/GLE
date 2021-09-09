@@ -23,9 +23,6 @@ fields:
         label: Produit
         type: id_object
         object: product
-        displays: 
-            default: 
-                type: nom_url
             
     label: 
         label: Libellé

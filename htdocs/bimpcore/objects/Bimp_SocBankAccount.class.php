@@ -30,6 +30,16 @@ class Bimp_SocBankAccount extends BimpObject
         return $html;
     }
     
+    // Rights
+    
+    public function isEditable($force_edit = false, &$errors = array()) {
+        return !$this->getData('exported');
+    }
+    
+    public function isDeletable($force_delete = false, &$errors = array()) {
+        return !$this->getData('exported');
+    }
+    
     // return boolean:
     
     public function isValid(Array &$errors):bool {

@@ -1974,14 +1974,7 @@ public function getCommercialclientSearchFilters(&$filters, $value, &$joins = ar
 
     // Actions: 
     
-    public function actionAdjust($data, &$success) {
-        
-        $errors = Array();
-        
-        $this->adjustTimeCalendar($errors);
-        
-        return ["errors" => $errors, "warnings" => [], "success" => $success];
-    }
+
 
     public function actionSetStatusAdmin($data, &$success = '')
     {

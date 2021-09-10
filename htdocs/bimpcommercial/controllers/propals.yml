@@ -34,5 +34,6 @@ sections:
                 - type: list
                   list: 
                       object: propal_line
+                      name: global
                             
 

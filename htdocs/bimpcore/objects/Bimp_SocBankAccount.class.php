@@ -96,7 +96,10 @@ class Bimp_SocBankAccount extends BimpObject
     }
     
     public function isFieldEditable($field, $force_edit = false) {
-        if($field == 'rum')
+        global $user;
+        if($field == 'rum' && $user->id != 7 && !$user->admin)
+            return 0;
+        if($field == 'exported')
             return 0;
         
         return parent::isFieldEditable($field, $force_edit);

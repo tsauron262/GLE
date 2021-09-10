@@ -63,6 +63,12 @@ class Bimp_SocBankAccount extends BimpObject
             return (bool) 0;
         }
         
+        if($this->getData('rum') == ''){
+            $errors[] = "Le RIB n'est pas valide (RUM absent)";
+            return (bool) 0;
+        }
+            
+        
         return (bool) 1;
     }
 
@@ -96,7 +102,10 @@ class Bimp_SocBankAccount extends BimpObject
     }
     
     public function isFieldEditable($field, $force_edit = false) {
-        if($field == 'rum')
+        global $user;
+        if($field == 'rum' && $user->id != 7 && !$user->admin)
+            return 0;
+        if($field == 'exported')
             return 0;
         
         return parent::isFieldEditable($field, $force_edit);

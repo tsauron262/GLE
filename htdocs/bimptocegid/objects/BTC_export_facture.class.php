@@ -1,6 +1,7 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/BTC_export.class.php';
+require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/BTC_exportRibAndMandat.class.php';
 
 class BTC_export_facture extends BTC_export
 {
@@ -394,6 +395,31 @@ class BTC_export_facture extends BTC_export
         }
         
         $write = $this->write_tra($ecritures, $file);
+        
+        if($facture->getData('fk_mode_reglement') == 3) {
+
+            if($facture->getData('rib_client')) {
+                $file_rib = $this->create_daily_file('rib', $facture->getData('datef'));
+                $file_mandat = $this->create_daily_file('mandat', $facture->getData('datef'));
+                
+                $ribANDmandat = BimpCache::getBimpObjectInstance('bimptocegid', "BTC_exportRibAndMandat");
+                
+                $ecriture_rib = $ribANDmandat->export_rib($facture, $societe);
+                $ecriture_mdt = $ribANDmandat->export_mandat($facture, $societe);
+                if(!empty($ecriture_mdt) && !empty($ecriture_rib)) {
+                    $this->write_tra($ecriture_rib, $file_rib);
+                    $this->write_tra($ecriture_mdt, $file_mandat);
+                    $ribANDmandat->passTo_exported($facture);
+                }
+                
+                
+            }  else {
+                $subject = "EXPORT COMPTA - RIB MANQUANT";
+                $msg = "La facture " . $facture->getNomUrl() . " a été exportée avec comme mode de règlement mandat de prélèvement SEPA mais n'a pas de RIB";
+                $mail = new BimpMail($subject, "dev@bimp.fr", null, $msg);
+                $mail->send();
+            }
+        }
         
         if($write) {
             $suivi['ecriture'] = true;

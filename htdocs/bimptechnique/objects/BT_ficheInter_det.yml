@@ -137,6 +137,9 @@ fields:
     departure_pm:
         label: Heure de départ (Après-Midi)
         type: datetime
+    actioncomm:
+        label: IDs des events
+        type: text
         
 forms:
     default: 

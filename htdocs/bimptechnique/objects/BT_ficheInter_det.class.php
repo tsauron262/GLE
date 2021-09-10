@@ -516,7 +516,7 @@ class BT_ficheInter_det extends BimpDolObject
         BimpTools::loadDolClass("user");
         $admin = new User($this->db->db);
         $admin->fetch(1);
-        $actionCommList = json_decode($this->getData('actioncomm'));
+        $actionCommList = ($this->getData('actioncomm') != "") ? json_decode($this->getData('actioncomm')) : [];
         $actionCommClass = new ActionComm($this->db->db);
         
         if(count($actionCommList) > 0) {

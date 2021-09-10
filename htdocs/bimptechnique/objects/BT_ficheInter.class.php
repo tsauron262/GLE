@@ -2172,7 +2172,7 @@ public function getCommercialclientSearchFilters(&$filters, $value, &$joins = ar
             $actioncomm = new ActionComm($this->db->db);
 
             //$actioncomm->userassigned = Array($data->techs);
-            $actioncomm->label = $this->getRef();
+            $actioncomm->label = "(PROV$this->id)";
             $actioncomm->note = '';
             $actioncomm->punctual = 1;
             $actioncomm->userownerid = (int) $this->getData('fk_user_tech');

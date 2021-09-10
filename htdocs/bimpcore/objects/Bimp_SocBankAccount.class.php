@@ -63,6 +63,12 @@ class Bimp_SocBankAccount extends BimpObject
             return (bool) 0;
         }
         
+        if($this->getData('rum') == ''){
+            $errors[] = "Le RIB n'est pas valide (RUM absent)";
+            return (bool) 0;
+        }
+            
+        
         return (bool) 1;
     }
 

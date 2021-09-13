@@ -20,6 +20,9 @@ objects:
     comm_apporteur: 
         instance:
             bimp_object: Bimp_CommissionApporteur
+    import_paiement: 
+        instance:
+            bimp_object: Bimp_ImportPaiement
             
 sections:
     - type: tabs
@@ -62,3 +65,13 @@ sections:
                   list: 
                       panel: 1
                       object: comm_apporteur
+                      
+        import_paiement:
+            label: Import Paiement
+            icon: fas_file-import
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: import_paiement
+                      

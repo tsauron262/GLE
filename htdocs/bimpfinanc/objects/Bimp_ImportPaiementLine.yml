@@ -1,0 +1,113 @@
+table: Bimp_ImportPaiementLine
+primary: id
+
+
+
+labels: 
+    name: ligne d'import
+    name_plur: lignes d'import
+    
+    
+parent_module: bimpfinanc
+parent_object: Bimp_ImportPaiement
+parent_id_property: id_import
+
+common_fields: 0
+
+objects:
+    factures:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object:
+                module: bimpcommercial
+                name: Bimp_Facture
+     
+                
+fields: 
+    id_import:
+        label: Import
+        type: id_parent
+    factures:
+        label: Facture(s)
+        type: items_list
+        items_data_type: id_object
+        object: factures
+        items_braces: 1
+    data:
+        label: Data
+        type: text
+    type:
+        label: Type
+        values: 
+            array: types
+    price:
+        label: Montant
+        type: money
+    name:
+        label: Nom du client
+        type: text
+    traite:
+        label: Traité
+        type: bool
+    
+forms:
+    default: 
+        rows:
+            - field: factures
+            - field: data
+            - field: commition
+    
+filters_panels: 
+    default: 
+        filters: 
+            type:
+            traite:
+                
+lists:
+    default: 
+        checkboxes: 1
+        configurable: 1
+        n: 25
+        filters_panel: default
+        extra_btn: 
+            callback: getListExtraButtons
+        update_btn: 1
+        cols:
+            type:
+            factures:
+            name:
+                edit: 1
+            dataLight: 
+            fact_reconnue:
+            priceDet:
+            fact_possible:
+            fact_client:
+    
+
+                      
+lists_cols: 
+    dataLight:
+        label: Data
+        value: 
+            callback: getDataInfo
+    fact_reconnue: 
+        label: Facture(s) reconnue
+        value: 
+            callback: displayFactReconnue
+    fact_possible: 
+        label: Facture(s) par montants
+        value: 
+            callback: getFactPossible
+    fact_client: 
+        label: Facture(s) par client
+        value: 
+            callback: getFactClient
+    priceDet: 
+        label: Montant
+        value: 
+            callback: getPrice
+                     
+        
+        
+

@@ -44,6 +44,18 @@ class BS_SAV extends BimpObject
         self::BS_SAV_A_RESTITUER       => array('label' => 'A restituer', 'icon' => 'arrow-right', 'classes' => array('success')),
         self::BS_SAV_FERME             => array('label' => 'Fermé', 'icon' => 'times', 'classes' => array('danger'))
     );
+    
+    public static $bon_restit_raison = array(
+        "",
+        "Refus de devis offert",
+        "Produit obsolète",
+        "Pas de problème constaté",
+        "Réparation interne",
+        "Rendu en l’état sans réparation",
+        "Intervention sous garantie sans pièce",
+        "Contrat", 
+        99 => "Autre",
+    );
     public static $status_opened = array(self::BS_SAV_RESERVED, self::BS_SAV_NEW, self::BS_SAV_ATT_PIECE, self::BS_SAV_ATT_CLIENT, self::BS_SAV_DEVIS_ACCEPTE, self::BS_SAV_REP_EN_COURS, self::BS_SAV_EXAM_EN_COURS, self::BS_SAV_DEVIS_REFUSE, self::BS_SAV_ATT_CLIENT_ACTION, self::BS_SAV_A_RESTITUER);
     public static $need_propal_status = array(2, 3, 4, 5, 6, 9);
     public static $propal_reviewable_status = array(0, 1, 2, 3, 4, 6, 7, 9);
@@ -189,6 +201,21 @@ class BS_SAV extends BimpObject
             }
         }
         return 1;
+    }
+    
+    public function isGratuit(){
+        $montant = 0;
+        $factureAc = $this->getChildObject('facture_acompte');
+        if($factureAc->isLoaded()){
+            $montant += $factureAc->getData('total');
+        }
+        $propal = $this->getChildObject('propal');
+        if($propal->isLoaded()){
+            $montant += $propal->getData('total');
+        }
+        if($montant < 1 && $montant > -1)
+            return 1;
+        return 0;
     }
 
     public function isActionAllowed($action, &$errors = array())
@@ -4072,6 +4099,17 @@ class BS_SAV extends BimpObject
 //                $errors[] = 'Le prêt "' . $pret->getData('ref') . '" n\'est pas restitué';
 //            }
 //        }
+        
+        if($this->isGratuit()){
+            if($data['bon_resti_raison'] == 0)
+                return array('Raison de la non facturation obligatoire');
+            elseif($data['bon_resti_raison'] == 99){
+                if($data['bon_resti_raison_detail'] == '')
+                    return array('Détail de la non facturation obligatoire');
+                else
+                    $this->addNote($data['bon_resti_raison_detail']);
+            }
+        }
 
         if ($payment_set) {
             if ($this->useCaisseForPayments) {

@@ -404,6 +404,11 @@ fields:
             default: 
                 type: datetime
                 show_hour: 1
+    bon_resti_raison:
+        label: Raison de la non facturation
+        type: int
+        values: 
+            array: bon_restit_raison
         
 forms: 
     default:
@@ -576,6 +581,18 @@ forms:
               data_type: bool
               content: 
                   callback: renderEquipmentPlaceOptionInput
+            - field: bon_resti_raison
+              show:
+                  callback: isGratuit
+            - custom: 1
+              label: Raison détail
+              input_name: bon_resti_raison_detail
+              data_type: text
+              input: 
+                  type: textarea
+              display_if: 
+                  field_name: bon_resti_raison
+                  show_values: 99,
                   
     close_refused: 
         title: Fermeture
@@ -777,6 +794,9 @@ fields_tables:
             - label: Lien publique
               value:
                  callback: displayPublicLink
+            - field: bon_resti_raison
+              show: 
+                  callback: isGratuit
                  
     facturation:
         title: Facturation

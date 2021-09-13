@@ -126,7 +126,6 @@ class Bimp_ImportPaiementLine extends BimpObject{
     
     
     function getFactPossible(){
-        return;
         global $db;
         $return = array();
         if(!$this->ok && $this->getData('price') > 0){
@@ -145,7 +144,6 @@ class Bimp_ImportPaiementLine extends BimpObject{
     }
     
     function getFactClient(){
-        return;
         $return = array();
         if(!$this->ok && $this->getData('price') > 0 && $this->getData('name') != ''){
             $cli = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe');

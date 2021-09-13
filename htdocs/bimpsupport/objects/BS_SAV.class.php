@@ -4105,7 +4105,7 @@ class BS_SAV extends BimpObject
                 return array('Raison de la non facturation obligatoire');
             elseif($data['bon_resti_raison'] == 99){
                 if($data['bon_resti_raison_detail'] == '')
-                    return array('Détail de la non facturation obligatoire');
+                    return array('errors'=>'Détail de la non facturation obligatoire', 'warnings'=>aray());
                 else
                     $this->addNote($data['bon_resti_raison_detail']);
             }

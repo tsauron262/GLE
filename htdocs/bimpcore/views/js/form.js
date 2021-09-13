@@ -38,8 +38,8 @@ function saveObjectFromForm(form_id, $button, successCallback, on_save, on_submi
         bimp_msg('Erreur. Formulaire absent ou invalide', 'danger');
         return;
     }
-    
-    if (typeof(on_submit) === 'function') {
+
+    if (typeof (on_submit) === 'function') {
         if (!on_submit($form)) {
             return;
         }
@@ -146,13 +146,17 @@ function prepareFormSubmit($form) {
     }
 }
 
-function loadModalForm($button, data, title, successCallback, on_save, modal_format) {
+function loadModalForm($button, data, title, successCallback, on_save, modal_format, on_save_success_callback) {
     if (typeof (on_save) !== 'string') {
         on_save = '';
     }
 
     if (typeof (modal_format) !== 'string') {
         modal_format = 'medium';
+    }
+
+    if (typeof (on_save_success_callback) === 'undefined') {
+        on_save_success_callback = 'null';
     }
 
     if (typeof (title) === 'undefined' || !title) {
@@ -184,7 +188,7 @@ function loadModalForm($button, data, title, successCallback, on_save, modal_for
         var modal_idx = parseInt(bimpAjax.$resultContainer.data('idx'));
         $form.data('modal_idx', modal_idx);
         bimpModal.removeComponentContent($form.attr('id'));
-        bimpModal.addButton('<i class="fas fa5-save iconLeft"></i>Enregistrer', 'saveObjectFromForm(\'' + result.form_id + '\', $(this), null, \'' + on_save + '\');', 'primary', 'save_object_button', modal_idx);
+        bimpModal.addButton('<i class="fas fa5-save iconLeft"></i>Enregistrer', 'saveObjectFromForm(\'' + result.form_id + '\', $(this), ' + on_save_success_callback + ', \'' + on_save + '\');', 'primary', 'save_object_button', modal_idx);
         bimpModal.addlink('<i class="far fa5-file iconLeft"></i>Afficher', '', 'primary', 'hidden objectViewLink', modal_idx);
 
         if ($form.length) {
@@ -2496,7 +2500,7 @@ function removeFiltersInputFilter($button) {
                                 if (filters === '') {
                                     filters = getFiltersInputFilters($filtersInputContainer);
                                 }
-                                
+
                                 $input.val(JSON.stringify(filters));
                             }
                         }

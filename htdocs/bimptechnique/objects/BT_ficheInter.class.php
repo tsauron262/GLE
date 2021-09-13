@@ -298,7 +298,13 @@ class BT_ficheInter extends BimpDolObject
     public function getActionsButtons()
     {
         $buttons = Array();
-
+        
+        $buttons[] = array(
+            'label'   => 'Planning de la FI',
+            'icon'    => 'fas_clock',
+            'onclick' => $this->getJsLoadModalView("events")
+        );
+        
         if (!$this->isOldFi()) {
             if ($this->isActionAllowed('askFacturation') && $this->canSetAction('askFacturation')) {
 //                $buttons[] = array(
@@ -397,6 +403,17 @@ class BT_ficheInter extends BimpDolObject
     public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
+            case 'commercialclient':
+                $alias = 'sc';
+                $joins[$alias] = array(
+                    'alias' => $alias,
+                    'table' => 'societe_commerciaux',
+                    'on'    => $alias . '.fk_soc = a.fk_soc'
+                );
+                $filters[$alias . '.fk_user'] = array(
+                    ($excluded ? 'not_' : '') . 'in' => $values
+                );
+                break;
             case 'linked':
                 $in = [];
                 $sql = "SELECT rowid FROM llx_fichinter WHERE ";
@@ -500,6 +517,30 @@ class BT_ficheInter extends BimpDolObject
         }
 
         return null;
+    }
+    
+public function getCommercialclientSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
+    {
+
+        $alias = 'sc';
+        $joins[$alias] = array(
+            'alias' => $alias,
+            'table' => 'societe_commerciaux',
+            'on'    => $alias . '.fk_soc = a.fk_soc'
+        );
+        $filters[$alias . '.fk_user'] = $value;
+    }
+    
+    public function displayCommercialClient()
+    {
+
+        if ($this->isLoaded()) {
+            $id_commercial = $this->db->getValue('societe_commerciaux', 'fk_user', 'fk_soc = ' . $this->getData('fk_soc'));
+
+            $commercial = $this->getInstance('bimpcore', 'Bimp_User', $id_commercial);
+
+            return $commercial->dol_object->getNomUrl();
+        }
     }
 
     public function getDataCommercialClient($field)
@@ -1242,6 +1283,101 @@ class BT_ficheInter extends BimpDolObject
     }
 
     // Rendus HTML: 
+    
+    public function renderEventsTable()
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+            if (!class_exists('FormActions')) {
+                require_once DOL_DOCUMENT_ROOT . '/core/class/html.formactions.class.php';
+            }
+
+            BimpTools::loadDolClass('comm/action', 'actioncomm', 'ActionComm');
+
+            $fk_soc = (int) $this->getData('fk_soc');
+          
+            $list = ActionComm::getActions($this->db->db, $fk_soc, $this->id, static::$dol_module, '', 'a.id', 'ASC');
+
+            if (!is_array($list)) {
+                $html .= BimpRender::renderAlerts('Echec de la récupération de la liste des événements');
+            } else {
+                global $conf;
+
+                $urlBack = DOL_URL_ROOT . '/' . $this->module . '/index.php?fc=' . $this->getController() . '&id=' . $this->id;
+                $href = DOL_URL_ROOT . '/comm/action/card.php?action=create&datep=' . dol_print_date(dol_now(), 'dayhourlog');
+                $href .= '&origin=' . $type_element . '&originid=' . $this->id . '&socid=' . (int) $this->getData('fk_soc');
+                $href .= '&backtopage=' . urlencode($urlBack);
+
+                if (isset($this->dol_object->fk_project) && (int) $this->dol_object->fk_project) {
+                    $href .= '&projectid=' . $this->dol_object->fk_project;
+                }
+
+                $html .= '<table class="bimp_list_table">';
+                $html .= '<thead>';
+                $html .= '<tr>';
+                $html .= '<th>Réf.</th>';
+                $html .= '<th>Action</th>';
+                $html .= '<th>Type</th>';
+                $html .= '<th>Date</th>';
+                $html .= '<th>Par</th>';
+                $html .= '</tr>';
+                $html .= '</thead>';
+
+                $html .= '<tbody>';
+
+                if (count($list)) {
+                    $userstatic = new User($this->db->db);
+
+                    foreach ($list as $action) {
+                            $html .= '<tr>';
+                            $html .= '<td>' . $action->getNomUrl(1, -1) . '</td>';
+                            $html .= '<td>' . $action->getNomUrl(0, 0) . '</td>';
+                            $html .= '<td>';
+                            if (!empty($conf->global->AGENDA_USE_EVENT_TYPE)) {
+                                $html .= $action->type;
+                            }
+                            $html .= '</td>';
+                            $html .= '<td align="center">';
+                            $html .= dol_print_date($action->datep, 'dayhour');
+                            if ($action->datef) {
+                                $tmpa = dol_getdate($action->datep);
+                                $tmpb = dol_getdate($action->datef);
+                                if ($tmpa['mday'] == $tmpb['mday'] && $tmpa['mon'] == $tmpb['mon'] && $tmpa['year'] == $tmpb['year']) {
+                                    if ($tmpa['hours'] != $tmpb['hours'] || $tmpa['minutes'] != $tmpb['minutes'] && $tmpa['seconds'] != $tmpb['seconds']) {
+                                        $html .= '-' . dol_print_date($action->datef, 'hour');
+                                    }
+                                } else {
+                                    $html .= '-' . dol_print_date($action->datef, 'dayhour');
+                                }
+                            }
+                            $html .= '</td>';
+                            $html .= '<td>';
+                            if (!empty($action->author->id)) {
+                                $userstatic->id = $action->author->id;
+                                $userstatic->firstname = $action->author->firstname;
+                                $userstatic->lastname = $action->author->lastname;
+                                $html .= $userstatic->getNomUrl();
+                            }
+                            $html .= '</td>';
+
+                            $html .= '</tr>';
+                    }
+                } else {
+                    $html .= '<tr>';
+                    $html .= '<td colspan="6">';
+                    $html .= BimpRender::renderAlerts('Aucun événement enregistré', 'info');
+                    $html .= '</td>';
+                    $html .= '</tr>';
+                }
+
+                $html .= '</tbody>';
+                $html .= '</table>';
+            }
+        }
+
+        return $html;
+    }
 
     public function renderSignaturePad($addClass = '')
     {
@@ -1837,6 +1973,8 @@ class BT_ficheInter extends BimpDolObject
     }
 
     // Actions: 
+    
+
 
     public function actionSetStatusAdmin($data, &$success = '')
     {
@@ -2073,6 +2211,8 @@ class BT_ficheInter extends BimpDolObject
 
         return $errors;
     }
+    
+    
 
     public function update(&$warnings = array(), $force_update = false)
     {

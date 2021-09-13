@@ -467,11 +467,6 @@ fields:
         input: 
             note: 1
             
-    num_sepa:
-        label: Numéro SEPA
-        type: string
-        user_edit: 1
-        dol_extra_field: 1
         
     secteuractivite:
         label: Secteur d'activité
@@ -570,6 +565,7 @@ fields:
         type: bool
         user_edit: 1
         default_value: 1
+        history: 1
         
     relances_infos: 
         label: Motif relances désactivées
@@ -596,6 +592,10 @@ fields:
         type: bool
         default_value: 1
         dol_extra_field: 1
+        
+    date_last_active:
+        label: Date derniére activitée
+        type: date
             
 #    *** Champs non gérés: ***
 #    entity
@@ -647,8 +647,7 @@ fields_tables:
                   callback: isClient
             - field: code_compta_fournisseur
               show: 
-                  callback: isFournisseur
-            - field: num_sepa     
+                  callback: isFournisseur 
             - field: accounting_account
               show: 
                   callback: isClient
@@ -975,8 +974,6 @@ forms:
         rows:   
             barcode: 
                 field: barcode
-            num_sepa: 
-                field: num_sepa
             code_compta: 
                 field: code_compta
             code_compta_fournisseur: 
@@ -1119,7 +1116,6 @@ filters_panels:
             siren:
             siret:
             ape:
-            num_sepa:
             code_compta:
             code_compta_fournisseur:
             commerciaux:

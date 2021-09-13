@@ -258,6 +258,23 @@ fields:
         label: Litige
         dol_extra_field: 1
         type: bool
+#    rib_client:
+#        label: Rib Client
+#        dol_extra_field: 1
+#        type: id_object
+#        object: rib_client 
+#        create_form: default
+#        create_form_label: Ajouter
+#        create_form_values:
+#            fields:
+#                fk_soc:
+#                    field_value: fk_soc
+#        depends_on: fk_soc
+#        input:
+#            type: select
+#            options:
+#                callback: getRibArray
+#        default_value: 0
         
     ref: unset
     fk_availability: unset
@@ -403,6 +420,8 @@ forms:
                 field: fk_mode_reglement
                 show: 
                     callback: isEditable
+            rib_client:
+                field: rib_client
 #            date_lim_reglement: 
 #                field: date_lim_reglement
             account: 
@@ -707,6 +726,9 @@ fields_tables:
               edit: 
                   callback: isEditable
             - field: fk_mode_reglement
+              edit: 
+                  callback: isEditable
+            - field: rib_client
               edit: 
                   callback: isEditable
             - field: prelevement

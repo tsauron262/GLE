@@ -135,6 +135,8 @@ fields:
         edit_form: default
         input: 
             card: default
+        search:
+            type: search_societe
             
     fk_statut:
         label: Statut
@@ -484,6 +486,15 @@ fields_tables:
                     callback: displayAllTicketsCards
                     
 views: 
+    events:
+        rows:
+            - cols:
+                - type: rows
+                  rows:
+                      - cols:
+                          - type: custom
+                            custom: 
+                                callback: renderEventsTable
     default:
         rows:
             - cols: 
@@ -522,7 +533,6 @@ views:
                           method: renderNotesList
                           params:
                               - 1
-        
 lists_cols: 
     duree:
         has_total: 1
@@ -531,6 +541,13 @@ lists_cols:
         label: Nb d'interventions
         value:
             callback: displayNombreInters
+    commercialclient:
+        label: Commercial Client
+        value:
+            callback: displayCommercialClient
+        search:
+            input: 
+                type: search_user
        
 filters:
     linked:
@@ -550,16 +567,24 @@ filters_panels:
     default: 
         filters:
           fk_statut:
+          type_signature:
           ref:
           fk_user_author:
           fk_user_tech:
           fk_soc:
+          commercialclient:
           linked:
           no_linked:
           datec:
           datei:
           commandes:
-              
+filters:
+    commercialclient:
+        label: Commercial client
+        input:
+            type: search_user
+        data_type: id_object
+        type: user
 lists: 
     default:
         configurable: 1
@@ -581,8 +606,10 @@ lists:
             ref:
             datec:
             fk_statut:
+            type_signature:
             fk_user_tech:
             fk_soc: 
+            commercialclient:
             datei:
             duree:
             urgent:

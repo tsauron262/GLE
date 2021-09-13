@@ -214,6 +214,17 @@ class BimpComm extends BimpDolObject
                 }
             }
         }
+        
+        
+        if($this->getData('fk_mode_reglement') == 3 &&  $this->extrafieldsIsConfig('rib_client')){
+            if($this->getData('rib_client') < 1)
+                $errors[] = 'Pour les prélèvements CEPA, le RIB est obligatoire';
+            else{
+                $rib = $this->getChildObject('rib_client');
+                $rib->isValid($errors);
+            }
+        }
+//        $errors[] = 'TODO A suppr';
 
         return (count($errors) ? 0 : 1);
     }
@@ -390,6 +401,20 @@ class BimpComm extends BimpDolObject
     }
 
     // Getters array: 
+    
+    public function getRibArray()
+    {        
+        $return = array(0=>'');
+        $client = $this->getClientFacture();
+        if($client && $client->isLoaded()){
+            $result = $this->db->getRows('societe_rib', '`fk_soc` ='.$client->id, null, 'object', null, 'default_rib', 'DESC');
+
+            foreach($result as $row){
+                $return[$row->rowid] = $row->label;
+            }
+        }
+        return $return;
+    }
 
     public function getClientContactsArray()
     {
@@ -865,7 +890,7 @@ class BimpComm extends BimpDolObject
         return 0;
     }
 
-    public function getTotalTtcWithoutRemises($exclude_discounts = false)
+    public function getTotalTtcWithoutRemises($exclude_discounts = false, $full_qty = false)
     {
         $total = 0;
 
@@ -876,7 +901,7 @@ class BimpComm extends BimpDolObject
                     continue;
                 }
 
-                $total += $line->getTotalTtcWithoutRemises();
+                $total += $line->getTotalTtcWithoutRemises($full_qty);
             }
         }
         return $total;
@@ -917,7 +942,7 @@ class BimpComm extends BimpDolObject
         return "";
     }
 
-    public function getRemisesInfos()
+    public function getRemisesInfos($force_qty_mode = -1)
     {
         $infos = array(
             'remises_lines_percent'           => 0,
@@ -937,10 +962,10 @@ class BimpComm extends BimpDolObject
         if ($this->isLoaded()) {
             $total_ttc_without_remises = 0;
 
-            $lines = $this->getChildrenObjects('lines');
+            $lines = $this->getLines('not_text');
 
             foreach ($lines as $line) {
-                $line_infos = $line->getRemiseTotalInfos();
+                $line_infos = $line->getRemiseTotalInfos(false, $force_qty_mode);
                 $infos['remises_lines_amount_ttc'] += (float) $line_infos['line_amount_ttc'];
                 $infos['remises_lines_amount_ht'] += (float) $line_infos['line_amount_ht'];
                 $infos['remises_globales_amount_ht'] += (float) $line_infos['global_amount_ht'];
@@ -1507,9 +1532,14 @@ class BimpComm extends BimpDolObject
         $html = '';
 
         if ($this->isLoaded()) {
-            $infos = $this->getRemisesInfos();
+            $infos = $this->getRemisesInfos(0);
+            $infos_fq = null;
 
-            if ($infos['remise_total_amount_ttc']) {
+            if (in_array($this->object_name, array('Bimp_Commande'))) {
+                $infos_fq = $this->getRemisesInfos(1);
+            }
+
+            if ($infos['remise_total_amount_ttc'] || (!is_null($infos_fq) && $infos_fq['remise_total_amount_ttc'])) {
                 $html .= '<table class="bimp_list_table">';
 
                 $html .= '<thead>';
@@ -1523,30 +1553,103 @@ class BimpComm extends BimpDolObject
 
                 $html .= '<tbody>';
 
-                if ($infos['remises_lines_amount_ttc']) {
+                if ($infos['remises_lines_amount_ttc'] || (!is_null($infos_fq) && $infos_fq['remises_lines_amount_ttc'])) {
                     $html .= '<tr>';
                     $html .= '<td style="font-weight: bold;width: 160px;">Remises lignes: </td>';
-                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['remises_lines_amount_ht'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
-                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['remises_lines_amount_ttc'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
-                    $html .= '<td>' . BimpTools::displayFloatValue($infos['remises_lines_percent'], 4) . ' %</td>';
+
+                    $html .= '<td>';
+                    $html .= BimpTools::displayMoneyValue($infos['remises_lines_amount_ht'], 'EUR', 0, 0, 0, 2, 1);
+                    if (!is_null($infos_fq) && $infos['remises_lines_amount_ht'] != $infos_fq['remises_lines_amount_ht']) {
+                        $html .= '<br/><span class="important">';
+                        $html .= BimpTools::displayMoneyValue($infos_fq['remises_lines_amount_ht'], 'EUR', 0, 0, 0, 2, 1);
+                        $html .= '</span>';
+                    }
+                    $html .= '</td>';
+
+                    $html .= '<td>';
+                    $html .= BimpTools::displayMoneyValue($infos['remises_lines_amount_ttc'], 'EUR', 0, 0, 0, 2, 1);
+                    if (!is_null($infos_fq) && $infos['remises_lines_amount_ttc'] != $infos_fq['remises_lines_amount_ttc']) {
+                        $html .= '<br/><span class="important">';
+                        $html .= BimpTools::displayMoneyValue($infos_fq['remises_lines_amount_ttc'], 'EUR', 0, 0, 0, 2, 1);
+                        $html .= '</span>';
+                    }
+                    $html .= '</td>';
+
+                    $html .= '<td>';
+                    $html .= BimpTools::displayFloatValue($infos['remises_lines_percent'], 4) . ' %';
+                    if (!is_null($infos_fq) && $infos['remises_lines_percent'] != $infos_fq['remises_lines_percent']) {
+                        $html .= '<br/><span class="important">';
+                        $html .= BimpTools::displayFloatValue($infos_fq['remises_lines_percent'], 4) . ' %';
+                        $html .= '</span>';
+                    }
+                    $html .= '</td>';
+
                     $html .= '</tr>';
                 }
 
-                if ($infos['remises_globales_amount_ttc']) {
+                if ($infos['remises_globales_amount_ttc'] || (!is_null($infos_fq) && $infos_fq['remises_globales_amount_ttc'])) {
                     $html .= '<tr>';
                     $html .= '<td style="font-weight: bold;width: 160px;">Remises globales: </td>';
-                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['remises_globales_amount_ht'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
-                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['remises_globales_amount_ttc'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
-                    $html .= '<td>' . BimpTools::displayFloatValue($infos['remises_globales_percent'], 4) . ' %</td>';
+
+                    $html .= '<td>';
+                    $html .= BimpTools::displayMoneyValue($infos['remises_globales_amount_ht'], 'EUR', 0, 0, 0, 2, 1);
+                    if (!is_null($infos_fq) && $infos['remises_globales_amount_ht'] != $infos_fq['remises_globales_amount_ht']) {
+                        $html .= '<br/><span class="important">';
+                        $html .= BimpTools::displayMoneyValue($infos_fq['remises_globales_amount_ht'], 'EUR', 0, 0, 0, 2, 1);
+                        $html .= '</span>';
+                    }
+                    $html .= '</td>';
+
+                    $html .= '<td>';
+                    $html .= BimpTools::displayMoneyValue($infos['remises_globales_amount_ttc'], 'EUR', 0, 0, 0, 2, 1);
+                    if (!is_null($infos_fq) && $infos['remises_globales_amount_ttc'] != $infos_fq['remises_globales_amount_ttc']) {
+                        $html .= '<br/><span class="important">';
+                        $html .= BimpTools::displayMoneyValue($infos_fq['remises_globales_amount_ttc'], 'EUR', 0, 0, 0, 2, 1);
+                        $html .= '</span>';
+                    }
+                    $html .= '</td>';
+
+                    $html .= '<td>';
+                    $html .= BimpTools::displayFloatValue($infos['remises_globales_percent'], 4) . ' %';
+                    if (!is_null($infos_fq) && $infos['remises_globales_percent'] != $infos_fq['remises_globales_percent']) {
+                        $html .= '<br/><span class="important">';
+                        $html .= BimpTools::displayFloatValue($infos_fq['remises_globales_percent'], 4) . ' %';
+                        $html .= '</span>';
+                    }
+                    $html .= '</td>';
                     $html .= '</tr>';
                 }
 
-                if ($infos['ext_remises_globales_amount_ttc']) {
+                if ($infos['ext_remises_globales_amount_ttc'] || (!is_null($infos_fq) && $infos_fq['ext_remises_globales_amount_ttc'])) {
                     $html .= '<tr>';
                     $html .= '<td style="font-weight: bold;width: 160px;">Parts de remises globales externes: </td>';
-                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['ext_remises_globales_amount_ht'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
-                    $html .= '<td>' . BimpTools::displayMoneyValue($infos['ext_remises_globales_amount_ttc'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
-                    $html .= '<td>' . BimpTools::displayFloatValue($infos['ext_remises_globales_percent'], 4) . ' %</td>';
+                    
+                    $html .= '<td>';
+                    $html .= BimpTools::displayMoneyValue($infos['ext_remises_globales_amount_ht'], 'EUR', 0, 0, 0, 2, 1);
+                    if (!is_null($infos_fq) && $infos['ext_remises_globales_amount_ht'] != $infos_fq['ext_remises_globales_amount_ht']) {
+                        $html .= '<br/><span class="important">';
+                        $html .= BimpTools::displayMoneyValue($infos_fq['ext_remises_globales_amount_ht'], 'EUR', 0, 0, 0, 2, 1);
+                        $html .= '</span>';
+                    }
+                    $html .= '</td>';
+
+                    $html .= '<td>';
+                    $html .= BimpTools::displayMoneyValue($infos['ext_remises_globales_amount_ttc'], 'EUR', 0, 0, 0, 2, 1);
+                    if (!is_null($infos_fq) && $infos['ext_remises_globales_amount_ttc'] != $infos_fq['ext_remises_globales_amount_ttc']) {
+                        $html .= '<br/><span class="important">';
+                        $html .= BimpTools::displayMoneyValue($infos_fq['ext_remises_globales_amount_ttc'], 'EUR', 0, 0, 0, 2, 1);
+                        $html .= '</span>';
+                    }
+                    $html .= '</td>';
+
+                    $html .= '<td>';
+                    $html .= BimpTools::displayFloatValue($infos['ext_remises_globales_percent'], 4) . ' %';
+                    if (!is_null($infos_fq) && $infos['ext_remises_globales_percent'] != $infos_fq['ext_remises_globales_percent']) {
+                        $html .= '<br/><span class="important">';
+                        $html .= BimpTools::displayFloatValue($infos_fq['ext_remises_globales_percent'], 4) . ' %';
+                        $html .= '</span>';
+                    }
+                    $html .= '</td>';
                     $html .= '</tr>';
                 }
 
@@ -1554,9 +1657,33 @@ class BimpComm extends BimpDolObject
 
                 $html .= '<tfoot>';
                 $html .= '<td style="font-weight: bold;width: 160px;">Total Remises: </td>';
-                $html .= '<td>' . BimpTools::displayMoneyValue($infos['remise_total_amount_ht'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
-                $html .= '<td>' . BimpTools::displayMoneyValue($infos['remise_total_amount_ttc'], 'EUR', 0, 0, 0, 2, 1) . '</td>';
-                $html .= '<td>' . BimpTools::displayFloatValue($infos['remise_total_percent'], 4) . ' %</td>';
+
+                $html .= '<td>';
+                $html .= BimpTools::displayMoneyValue($infos['remise_total_amount_ht'], 'EUR', 0, 0, 0, 2, 1);
+                if (!is_null($infos_fq) && $infos['remise_total_amount_ht'] != $infos_fq['remise_total_amount_ht']) {
+                    $html .= '<br/><span class="important">';
+                    $html .= BimpTools::displayMoneyValue($infos_fq['remise_total_amount_ht'], 'EUR', 0, 0, 0, 2, 1);
+                    $html .= '</span>';
+                }
+                $html .= '</td>';
+
+                $html .= '<td>';
+                $html .= BimpTools::displayMoneyValue($infos['remise_total_amount_ttc'], 'EUR', 0, 0, 0, 2, 1);
+                if (!is_null($infos_fq) && $infos['remise_total_amount_ttc'] != $infos_fq['remise_total_amount_ttc']) {
+                    $html .= '<br/><span class="important">';
+                    $html .= BimpTools::displayMoneyValue($infos_fq['remise_total_amount_ttc'], 'EUR', 0, 0, 0, 2, 1);
+                    $html .= '</span>';
+                }
+                $html .= '</td>';
+
+                $html .= '<td>';
+                $html .= BimpTools::displayFloatValue($infos['remise_total_percent'], 4) . ' %';
+                if (!is_null($infos_fq) && $infos['remise_total_percent'] != $infos_fq['remise_total_percent']) {
+                    $html .= '<br/><span class="important">';
+                    $html .= BimpTools::displayFloatValue($infos_fq['remise_total_percent'], 4) . ' %';
+                    $html .= '</span>';
+                }
+                $html .= '</td>';
                 $html .= '</tfoot>';
                 $html .= '</table>';
             } else {

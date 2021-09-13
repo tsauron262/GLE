@@ -17,9 +17,20 @@ if ($fi->find(['public_signature_url' => $_POST['key']], 1)) {
 
     $email_comm = '';
     $email_tech = '';
-
+    $reply_to = ($email_comm ? $email_comm : $email_tech);
+    $cc = '';
+    $ref = $fi->getRef();
+    $client = BimpObject::getInstance('bimpcore', "Bimp_Societe", $fi->getData('fk_soc'));
     if (BimpObject::objectLoaded($commercial)) {
         $email_comm = BimpTools::cleanEmailsStr($commercial->getData('email'));
+        $bmCommercial = new BimpMail(
+                $ref . " signée à distance par le client",
+                $email_comm, 
+                '',
+                "Bonjour, le client ".$client->getName()." (" . $client->getNomUrl() . ") a signé à distance la FI N°" . $fi->getNomUrl(), $reply_to, $cc
+                );
+        $mail_errors = array();
+        $bmCommercial->send($mail_errors);
     }
 
     $tech = $fi->getChildObject('user_tech');
@@ -29,7 +40,7 @@ if ($fi->find(['public_signature_url' => $_POST['key']], 1)) {
 
     $email_cli = BimpTools::cleanEmailsStr($fi->getData('email_signature'));
 
-    $ref = $fi->getRef();
+    
 
     $file = $conf->ficheinter->dir_output . '/' . $ref . '/' . $ref . '.pdf';
     $fi->actionGeneratePdf([]);
@@ -40,8 +51,8 @@ if ($fi->find(['public_signature_url' => $_POST['key']], 1)) {
     $message .= '<br/>Très courtoisement.';
     $message .= "<br /><br /><b>Le Service Technique</b><br/>";
 
-    $reply_to = ($email_comm ? $email_comm : $email_tech);
-    $cc = '';
+    
+    
     $email_comm . ($email_comm ? ', ' : '') . $email_tech . ($email_tech ? ', ' : '') . 't.sauron@bimp.fr, f.martinez@bimp.fr';
 
     $bm = new BimpMail($subject, $email_cli, '', $message, $reply_to, $cc);

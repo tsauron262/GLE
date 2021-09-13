@@ -27,7 +27,10 @@ fields:
         type: text
     filter:
         label: Filtre
-        type: text
+#        type: text
+        type: object_filters
+        obj_module: bimpcore
+        obj_name: Bimp_Product
     commition: 
         label: Commission
         type: percent

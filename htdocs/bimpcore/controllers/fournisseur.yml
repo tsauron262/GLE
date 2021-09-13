@@ -65,12 +65,12 @@ sections:
                               panel: 1
                               object: fournisseur
                               children: files                            
-                    - cols: 
-                        - type: custom
-                          custom:
-                            callback: 
-                              method: displayBimpOjectLinked
-                              object: fournisseur 
+#                    - cols: 
+#                        - type: custom
+#                          custom:
+#                            callback: 
+#                              method: displayBimpOjectLinked
+#                              object: fournisseur 
             
           - id: divers
             title: Divers (admin)

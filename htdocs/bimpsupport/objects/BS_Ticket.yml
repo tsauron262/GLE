@@ -165,8 +165,8 @@ fields:
                 join_on: a.soc_id = s.rowid
                 join_return_label: s.nom
                 fields_search: s.nom,s.code_client
-                filters: 
-                    callback: getServiceInputFilters
+#                filters: 
+#                    callback: getServiceInputFilters
                 
         display_if: 
             field_name: no_contrat

@@ -230,6 +230,7 @@ class Commande extends CommonOrder
                 $dir = dol_buildpath($reldir."core/modules/commande/");
 
                 // Load file with numbering class (if found)
+                if(is_file($dir.$file))
                 $mybool|=@include_once $dir.$file;
             }
 

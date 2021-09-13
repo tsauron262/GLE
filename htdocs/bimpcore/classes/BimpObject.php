@@ -1347,7 +1347,7 @@ class BimpObject extends BimpCache
             $field_type = $this->getConf('fields/' . $field_name . '/type', 'string');
 
             switch ($field_type) {
-                case 'json': 
+                case 'json':
                 case 'object_filters':
                     if (!$value) {
                         $value = array();
@@ -1356,7 +1356,7 @@ class BimpObject extends BimpCache
                         $value = json_encode($value);
                     }
                     break;
-                
+
                 case 'items_list':
                     if ((int) $this->getConf('fields/' . $field_name . '/items_braces', 0)) {
                         if (!is_array($value)) {
@@ -4959,7 +4959,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             }
 
             $this->noFetchOnTrigger = false;
-            return $result;
+            return $id;
         }
 
         $this->noFetchOnTrigger = false;
@@ -7009,7 +7009,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         return $js;
     }
 
-    public function getJsLoadModalForm($form_name = 'default', $title = '', $values = array(), $success_callback = '', $on_save = '', $force_edit = 0, $button = '$(this)')
+    public function getJsLoadModalForm($form_name = 'default', $title = '', $values = array(), $success_callback = '', $on_save = '', $force_edit = 0, $button = '$(this)', $on_save_success_callback = 'null')
     {
         $id_parent = 0;
         $parent_id_property = $this->getParentIdProperty();
@@ -7039,7 +7039,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
         $data .= '}';
 
-        $js = 'loadModalForm(' . $button . ', ' . htmlentities($data) . ', \'' . htmlentities($title) . '\', \'' . htmlentities($success_callback) . '\', \'' . $on_save . '\')';
+        $js = 'loadModalForm(' . $button . ', ' . htmlentities($data) . ', \'' . htmlentities($title) . '\', \'' . htmlentities($success_callback) . '\', \'' . $on_save . '\', null, ' . $on_save_success_callback . ')';
         return $js;
     }
 

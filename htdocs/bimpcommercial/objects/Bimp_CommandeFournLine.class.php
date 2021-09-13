@@ -171,7 +171,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                             }
                         }
                     }
-                } elseif (BimpObject::objectLoaded($line)) {
+                } elseif (BimpObject::objectLoaded($line) && $line->getFullQty() != 0) {
                     $shipped_qty = (float) $line->getShippedQty();
                     $available_qty = (float) $line->getFullQty() - $shipped_qty;
 
@@ -1394,7 +1394,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                                 $id_comm_line = 0;
                                 $id_reservation = 0;
                                 if ($id_entrepot) {
-                                    if (preg_match('/^Réception n°' . $recep->getData('num_reception') . ' BR: ' . preg_quote($recep->getRef()) . '(.*)$/', $place->getData('infos'))) {
+                                    if (preg_match('/^Réception n°' . preg_quote($recep->getData('num_reception'), '/') . ' BR: ' . preg_quote($recep->getRef(), '/') . '(.*)$/', $place->getData('infos'))) {
                                         $allowed = array(
                                             'id_commande_fourn' => (int) $this->getData('id_obj')
                                         );
@@ -1417,7 +1417,6 @@ class Bimp_CommandeFournLine extends FournObjectLine
                                         }
                                     } else {
                                         $err = 'L\'intitulé de l\'emplacement ne correspond pas à celui attendu. (Attendu: "Réception n°' . $recep->getData('num_reception') . ' BR: ' . $recep->getRef() . '" - Actuellement: "' . $place->getData('infos') . '")';
-                                        ;
                                     }
                                 } else {
                                     $err = 'Pas d\'entrepôt';

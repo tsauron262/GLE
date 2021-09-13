@@ -88,6 +88,17 @@ class BimpInput
                     $html .= '/>';
                 }
 
+                if (isset($options['min_label']) && $options['min_label']) {
+                    $html .= '<div style="display: inline-block">';
+                    $html .= '&nbsp;&nbsp;<span class="small min_label">' . ((isset($options['data']['min']) && $option['data']['min'] !== 'none') ? 'Min: ' . $options['data']['min'] : '') . '</span>';
+                    $html .= '</div>';
+                }
+                if (isset($options['max_label']) && $options['max_label']) {
+                    $html .= '<div style="display: inline-block">';
+                    $html .= '&nbsp;&nbsp;<span class="small max_label">' . ((isset($options['data']['max']) && $option['data']['max'] !== 'none') ? 'Max: ' . $options['data']['max'] : '') . '</span>';
+                    $html .= '</div>';
+                }
+
                 if (isset($options['values']) && count($options['values'])) {
                     $allow_custom = (isset($options['allow_custom']) ? (int) $options['allow_custom'] : 1);
                     $html .= '<div style="margin-top: 15px">';
@@ -1716,11 +1727,11 @@ class BimpInput
     public static function renderFiltersInputValues($module = '', $object_name = '', $values = array(), $content_only = false)
     {
         $html = '';
-        
+
         $json_errors = array();
-        
+
         $values = BimpTools::json_decode_array($values, $json_errors);
-        
+
         if (!empty($json_errors)) {
             $html .= BimpRender::renderAlerts(BimpTools::getMsgFromArray($json_errors));
         } elseif (empty($values)) {

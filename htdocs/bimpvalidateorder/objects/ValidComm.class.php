@@ -100,9 +100,9 @@ class ValidComm extends BimpObject
      * pour valider cet objet
      */
     public function tryToValidate($bimp_object, $user, &$errors, &$success) {
-//        if (BimpCore::isModeDev()) {
-//            return 1;
-//        }
+        if (defined('NO_VALID_COMM') && NO_VALID_COMM) {
+            return 1;
+        }
         
         $valid_comm = 1;
         $valid_encours = 1;
@@ -559,7 +559,10 @@ class ValidComm extends BimpObject
         $sql = BimpTools::getSqlSelect(array('id', 'user', 'val_max'));
         $sql .= BimpTools::getSqlFrom($this->getTable());
         $sql .= BimpTools::getSqlWhere($filters);
-        $sql .= ' AND (only_child=' . self::USER_ASK_ALL . ' OR (only_child=' . self::USER_ASK_CHILD . ' AND user=' . $user_ask->fk_user . '))';
+        $sql .= ' AND (only_child=' . self::USER_ASK_ALL;
+        if($user_ask->fk_user > 0)
+            $sql .= ' OR (only_child=' . self::USER_ASK_CHILD . ' AND user=' . $user_ask->fk_user . ')';
+        $sql .= ')';
         $sql .= BimpTools::getSqlOrderBy('date_create', 'DESC');
         $rows = self::getBdb()->executeS($sql, 'array');
 
@@ -719,9 +722,9 @@ class ValidComm extends BimpObject
                 if($m == '') {
                     
                     $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $d->getData('id_user_ask'));
-                    
-                    $m .= "Bonjour " . $user->getData('firstname') . ",<br/><br/>";
-                    $m .= "Liste des demandes validées pour " . $bimp_object->getNomUrl() . ":<br/>";
+                    $client = $bimp_object->getChildObject('client');
+//                    $m .= "Bonjour " . $user->getData('firstname') . ",<br/><br/>";
+                    $m .= "Liste des demandes validées pour " . $bimp_object->getNomUrl() . " : du client ".$client->getLink()."<br/>";
                 }
                 
                 switch ($d->getData('type')) {

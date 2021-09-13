@@ -581,18 +581,6 @@ forms:
               data_type: bool
               content: 
                   callback: renderEquipmentPlaceOptionInput
-            - field: bon_resti_raison
-              show:
-                  callback: isGratuit
-            - custom: 1
-              label: Raison détail
-              input_name: bon_resti_raison_detail
-              data_type: text
-              input: 
-                  type: textarea
-              display_if: 
-                  field_name: bon_resti_raison
-                  show_values: 99,
                   
     close_refused: 
         title: Fermeture
@@ -681,6 +669,18 @@ forms:
               input_name: inut
               content: 
                   callback: displayFactureAmountToPay
+            - field: bon_resti_raison
+              show:
+                  callback: isGratuit
+            - custom: 1
+              label: Raison détail
+              input_name: bon_resti_raison_detail
+              data_type: text
+              input: 
+                  type: textarea
+              display_if: 
+                  field_name: bon_resti_raison
+                  show_values: 99
               
     equipment: 
         rows: 

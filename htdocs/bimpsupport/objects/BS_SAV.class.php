@@ -3968,6 +3968,20 @@ class BS_SAV extends BimpObject
         $propal = $this->getChildObject('propal');
 
         global $user, $langs;
+        
+        
+        
+        if($this->isGratuit()){
+            if($data['bon_resti_raison'] == 0)
+                return array('Raison de la non facturation obligatoire');
+            elseif($data['bon_resti_raison'] == 99){
+                if($data['bon_resti_raison_detail'] == '')
+                    return array('errors'=>'Détail de la non facturation obligatoire', 'warnings'=>array());
+                else
+                    $this->addNote($data['bon_resti_raison_detail']);
+            }
+        }
+        
 
         // Si refus du devis: 
         if ((int) $this->getData('status') === self::BS_SAV_DEVIS_REFUSE) {
@@ -4099,17 +4113,6 @@ class BS_SAV extends BimpObject
 //                $errors[] = 'Le prêt "' . $pret->getData('ref') . '" n\'est pas restitué';
 //            }
 //        }
-        
-        if($this->isGratuit()){
-            if($data['bon_resti_raison'] == 0)
-                return array('Raison de la non facturation obligatoire');
-            elseif($data['bon_resti_raison'] == 99){
-                if($data['bon_resti_raison_detail'] == '')
-                    return array('errors'=>'Détail de la non facturation obligatoire', 'warnings'=>aray());
-                else
-                    $this->addNote($data['bon_resti_raison_detail']);
-            }
-        }
 
         if ($payment_set) {
             if ($this->useCaisseForPayments) {

@@ -703,6 +703,12 @@ class ValidComm extends BimpObject
             'status'        => 1,
         );
         
+        // Client
+        if(method_exists($bimp_object, 'getClientFacture'))
+            $client = $bimp_object->getClientFacture();
+        else
+            $client = $bimp_object->getChildObject('client');
+        
         $demandes_valider = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filters);
 
         // Validé
@@ -753,7 +759,7 @@ class ValidComm extends BimpObject
         }
         
         $subject = "Validation " . count($demandes_valider) . '/' . (count($demandes_en_cours) + count($demandes_valider)) . ' ';
-        $subject .= $bimp_object->getRef();
+        $subject .= $bimp_object->getRef() . ' - ' . $client->getData('code_client') . ' - ' . $client->getData('nom');;
         
         mailSyn2($subject, $user->getData('email'), null, $m);
         return 1;

@@ -62,7 +62,7 @@ class Bimp_ImportPaiementLine extends BimpObject{
     {
         $buttons = array();
 
-        if ($this->isLoaded()) {
+        if ($this->isLoaded() && $this->isEditable()) {
 
             $buttons[] = array(
                 'label'   => 'Reinitialiser la ligne',
@@ -119,8 +119,14 @@ class Bimp_ImportPaiementLine extends BimpObject{
         $this->updateField('factures', $tab2);
     }
     
+    function getRowStyle(){
+        if($this->ok)
+        return 'background-color:green!important;opacity: 0.2;';
+    }
+    
     
     function getFactPossible(){
+        return;
         global $db;
         $return = array();
         if(!$this->ok && $this->getData('price') > 0){
@@ -139,6 +145,7 @@ class Bimp_ImportPaiementLine extends BimpObject{
     }
     
     function getFactClient(){
+        return;
         $return = array();
         if(!$this->ok && $this->getData('price') > 0 && $this->getData('name') != ''){
             $cli = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe');
@@ -172,11 +179,13 @@ class Bimp_ImportPaiementLine extends BimpObject{
     }
     
     function getButtonAdd($id){
-        $html .= '<span type="button" class="btn btn-default btn-small" onclick="';
-        $html .= $this->getJsActionOnclick('addFact', array('id'=>$id)).'">';
-        $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft').' Ajouter';
-        $html .= '</span>';
-        return $html;
+        if($this->isEditable()){
+            $html .= '<span type="button" class="btn btn-default btn-small" onclick="';
+            $html .= $this->getJsActionOnclick('addFact', array('id'=>$id)).'">';
+            $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft').' Ajouter';
+            $html .= '</span>';
+            return $html;
+        }
     }
     
     function getFactReconnue(){
@@ -207,12 +216,18 @@ class Bimp_ImportPaiementLine extends BimpObject{
         return implode(' - ', $refs );
     }
     
+    function isEditable($force_edit = false, &$errors = array()): int {
+        return !$this->getData('traite');
+    }
+    
     function getPrice(){
         if($this->getData('type') == 'vir'){
-            $manque = ($this->getData('price') - $this->total_reste_a_paye);
-
-
-            return BimpRender::renderAlerts($this->getData('price') . ' - ' . $this->total_reste_a_paye . ' = ' .$manque, ($manque == 0? 'success' : 'danger'));
+            if($this->getData('traite') == 0){
+                $manque = ($this->getData('price') - $this->total_reste_a_paye);
+                return BimpRender::renderAlerts($this->getData('price') . ' € - ' . $this->total_reste_a_paye . ' € = ' .$manque .' €', ($manque == 0? 'success' : 'danger'));
+            }
+            else
+                return BimpRender::renderAlerts($this->getData('price') . ' €', ($manque == 0? 'success' : 'danger'));
         }
         return 'Non géré';
     }

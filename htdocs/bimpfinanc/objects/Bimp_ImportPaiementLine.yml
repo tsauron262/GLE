@@ -67,6 +67,8 @@ filters_panels:
 lists:
     default: 
         checkboxes: 1
+        row_style:
+            callback: getRowStyle
         configurable: 1
         n: 25
         filters_panel: default
@@ -78,7 +80,6 @@ lists:
             factures:
             name:
                 edit: 1
-            dataLight: 
             fact_reconnue:
             priceDet:
             fact_possible:

@@ -212,6 +212,13 @@ class BS_SAV extends BimpObject
         $propal = $this->getChildObject('propal');
         if($propal->isLoaded()){
             $montant += $propal->getData('total');
+            $lines = $this->getChildrenObjects('propal_lines');
+            foreach($lines as $lineS){
+                if($lineS->getData('linked_object_name') == 'sav_garantie'){
+                    $montant -= $lineS->getTotalHT(true);
+                }
+            }
+            
         }
         if($montant < 1 && $montant > -1)
             return 1;

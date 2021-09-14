@@ -99,7 +99,8 @@ class Bimp_ImportPaiementLine extends BimpObject{
     
     function fetch($id, $parent = null) {
         parent::fetch($id, $parent);
-        $this->calc();
+        if($this->isLoaded())
+            $this->calc();
     }
     
     function actionAddFact($data){

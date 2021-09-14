@@ -30,6 +30,16 @@ class Bimp_SocBankAccount extends BimpObject
         return $html;
     }
     
+    // Rights
+    
+    public function isEditable($force_edit = false, &$errors = array()) {
+        return !$this->getData('exported');
+    }
+    
+    public function isDeletable($force_delete = false, &$errors = array()) {
+        return !$this->getData('exported');
+    }
+    
     // return boolean:
     
     public function isValid(Array &$errors):bool {
@@ -52,6 +62,12 @@ class Bimp_SocBankAccount extends BimpObject
             $errors[] = "Le RIB n'est pas valide";
             return (bool) 0;
         }
+        
+        if($this->getData('rum') == ''){
+            $errors[] = "Le RIB n'est pas valide (RUM absent)";
+            return (bool) 0;
+        }
+            
         
         return (bool) 1;
     }
@@ -86,7 +102,10 @@ class Bimp_SocBankAccount extends BimpObject
     }
     
     public function isFieldEditable($field, $force_edit = false) {
-        if($field == 'rum')
+        global $user;
+        if($field == 'rum' && $user->id != 7 && !$user->admin)
+            return 0;
+        if($field == 'exported')
             return 0;
         
         return parent::isFieldEditable($field, $force_edit);
@@ -97,8 +116,7 @@ class Bimp_SocBankAccount extends BimpObject
         $this->set('rum', $this->getNumSepa());
         $def = (int) $this->getData('default_rib');
         
-        
-        if(isset($_FILES['file'])){
+        if(isset($_FILES['file']) && $_FILES['file']['name'] != ''){
             $soc = $this->getChildObject('societe');
             $file_dir = $soc->getFilesDir();
             

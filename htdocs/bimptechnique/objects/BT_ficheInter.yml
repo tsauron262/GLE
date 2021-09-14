@@ -486,6 +486,15 @@ fields_tables:
                     callback: displayAllTicketsCards
                     
 views: 
+    events:
+        rows:
+            - cols:
+                - type: rows
+                  rows:
+                      - cols:
+                          - type: custom
+                            custom: 
+                                callback: renderEventsTable
     default:
         rows:
             - cols: 
@@ -524,7 +533,6 @@ views:
                           method: renderNotesList
                           params:
                               - 1
-        
 lists_cols: 
     duree:
         has_total: 1

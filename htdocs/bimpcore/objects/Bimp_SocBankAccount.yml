@@ -100,6 +100,9 @@ fields:
         dol_prop: datem
         input: 
             type: hidden
+    exported:
+        label: Exporté en  compta
+        type: bool
         
 fields_table: 
     default: 
@@ -107,6 +110,7 @@ fields_table:
         rows: 
             - field: fk_soc
               display: nom_url
+            - field: exported
             - field: default_rib
             - field: type
             - field: label
@@ -148,6 +152,7 @@ lists:
         modal_view: default
         edit_btn: 1
         cols:
+            exported:
             fk_soc: 
             label: 
             rum:

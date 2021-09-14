@@ -1,5 +1,7 @@
 <?php 
 
+require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/BTC_exportRibAndMandat.class.php';
+
     class indexController extends BimpController {
              
         public function renderHtml() {

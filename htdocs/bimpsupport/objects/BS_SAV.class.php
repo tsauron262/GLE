@@ -4141,7 +4141,7 @@ class BS_SAV extends BimpObject
         }
 
         if (count($errors)) {
-            return array('errors' => $errors);
+            return array('errors' => $errors, 'warnings' => $warnings);
         }
 
         $current_status = (int) $this->getInitData('status');

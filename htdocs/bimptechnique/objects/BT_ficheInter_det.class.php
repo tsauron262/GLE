@@ -571,7 +571,7 @@ class BT_ficheInter_det extends BimpDolObject
             $parent->update($w, true);
         }
 
-        $errors = parent::onSave($errors, $warnings);
+        parent::onSave($errors, $warnings);
         
         if(!count($errors) && 
                 $this->getData('type') != self::TYPE_DEPLA && 
@@ -582,7 +582,6 @@ class BT_ficheInter_det extends BimpDolObject
             $errors = $this->adjustCalendar();
         }
 
-        return $errors;
     }
 
     // Actions: 

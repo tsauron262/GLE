@@ -192,8 +192,8 @@ class BimpComm extends BimpDolObject
                 if (!BimpObject::objectLoaded($client)) {
                     $errors[] = 'Client absent';
                 } else {
-                    if($client->getData('fk_typent') == 0)
-                        $errors[] = 'Type de tier obligatoire';
+//                    if($client->getData('fk_typent') == 0)
+//                        $errors[] = 'Type de tier obligatoire';
                     
 
                     // Module de validation activé

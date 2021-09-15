@@ -133,7 +133,7 @@ class Bimp_ImportPaiementLine extends BimpObject{
         global $db;
         $return = array();
         if(!$this->ok && $this->getData('price') > 0){
-            $sql = $db->query('SELECT SUM(remain_to_pay) as remain_to_pay_tot, fk_soc FROM `llx_facture` WHERE paye = 0 GROUP BY fk_soc HAVING remain_to_pay_tot = '.$this->getData('price'));
+            $sql = $db->query('SELECT SUM(remain_to_pay) as remain_to_pay_tot, fk_soc FROM `llx_facture` WHERE fk_statut = 1 AND paye = 0 GROUP BY fk_soc HAVING remain_to_pay_tot = '.$this->getData('price'));
             while($ln = $db->fetch_object($sql)){
                 $cli = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $ln->fk_soc);
                 $facts = array();
@@ -154,21 +154,23 @@ class Bimp_ImportPaiementLine extends BimpObject{
             $results = $cli->getSearchResults('default', $this->getData('name'));
             if($results){
                 foreach($results as $result){
+                    $total = 0;
                     $cli = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $result['id']);
               
                     $facts = array();
                     $list = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', array('paye'=>0, 'fk_soc'=>$cli->id));
                     foreach($list as $fact){
                         $facts[] = $fact->getLink() . $this->getButtonAdd($fact->id); 
+                        $total += $fact->getData('remain_to_pay');
                     }
-                    $return[] = $cli->getLink().' ('.implode(' - ', $facts).')';
+                    $return[] = $cli->getLink().' ('.implode(' - ', $facts).') Total : '.price($total);
                 }
             }
             else{
                 $return[] = $name;
             }
         }
-        return implode('<br/>', $return); 
+        return implode('<br/><br/>', $return); 
     }
     
     function getDataInfo(){
@@ -226,10 +228,10 @@ class Bimp_ImportPaiementLine extends BimpObject{
         if($this->getData('type') == 'vir'){
             if($this->getData('traite') == 0){
                 $manque = ($this->getData('price') - $this->total_reste_a_paye);
-                return BimpRender::renderAlerts($this->getData('price') . ' € - ' . $this->total_reste_a_paye . ' € = ' .$manque .' €', ($manque == 0? 'success' : 'danger'));
+                return BimpRender::renderAlerts(price($this->getData('price')) . ' € - ' . price($this->total_reste_a_paye) . ' € = ' .price($manque) .' €', ($manque == 0? 'success' : 'danger'));
             }
             else
-                return BimpRender::renderAlerts($this->getData('price') . ' €', ($manque == 0? 'success' : 'danger'));
+                return BimpRender::renderAlerts(price($this->getData('price')) . ' €', ($manque == 0? 'success' : 'danger'));
         }
         return 'Non géré';
     }

@@ -67,9 +67,7 @@ class Bimp_ImportPaiement extends BimpObject{
     
     
     function traiteData($datas, $errors){
-        $marqueurPrice = 'MMOEUR2';
         $separateurecriture = '04178';
-        $codeVirement = '0517806000000669EUR2E0416135704405080921';
                     
         $tabLn = explode($separateurecriture, $datas);
         

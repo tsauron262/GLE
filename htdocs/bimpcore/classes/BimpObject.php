@@ -3835,7 +3835,8 @@ class BimpObject extends BimpCache
                     BimpCore::addlog('Retour d\'erreurs absent', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
                         'méthode' => 'update()',
                         'Module'  => $this->module,
-                        'Object'  => $this->object_name
+                        'Object'  => $this->object_name,
+                        'Class_name'=> get_class($this)
                     ));
                     $errors = array();
                 }
@@ -3853,7 +3854,8 @@ class BimpObject extends BimpCache
                     BimpCore::addlog('Retour d\'erreurs absent', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
                         'méthode' => 'create()',
                         'Module'  => $this->module,
-                        'Object'  => $this->object_name
+                        'Object'  => $this->object_name,
+                        'Class_name'=> get_class($this)
                     ));
 
                     $errors = array();

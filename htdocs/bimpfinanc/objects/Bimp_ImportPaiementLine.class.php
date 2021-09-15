@@ -31,8 +31,11 @@ class Bimp_ImportPaiementLine extends BimpObject{
         
         
         $name = '';
-        if (preg_match('/ 080921 *(.+) *[0-9]{22}/', $this->getData('data'), $matches)) {
-            $name = $matches[1];   
+//        if (preg_match('/ [0-9]{6} *(.+) *[0-9]{22}/', $this->getData('data'), $matches)) {
+//            $name = $matches[1];   
+//        }
+        if (preg_match('/0517806000000669EUR2E0416135704405[0-9]{6}(.+)/', $this->getData('data'), $matches)) {
+            $name = str_replace('NPY', '', trim($matches[1]));
         }
         
         $this->set('factures', array());

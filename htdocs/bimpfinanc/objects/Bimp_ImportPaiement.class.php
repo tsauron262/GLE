@@ -41,18 +41,26 @@ class Bimp_ImportPaiement extends BimpObject{
         $errors = $wanings = array();
         $list = $this->getChildrenObjects('lignes', array('traite'=>0, 'type'=>'vir'));
         foreach($list as $child){
+            $totP = $child->getData('price');
             if($child->ok == true){
                 foreach($child->getData('factures') as $idFact){
-                    $fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $idFact); 
-                    $paiement = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Paiement');
-                    $_POST['single_amount'] = $fact->getData('remain_to_pay');
-                    $_POST['id_facture'] = $idFact;
-                    $_POST['id_account'] = $this->getData('banque');
-                    $_POST['id_mode_paiement'] = 2;//$this->id_mode_paiement;
-                    
-                    $errors = BimpTools::merge_array($errors,$paiement->validateArray(array('datep' => date("Y-m-d"))));
-                    $errors = BimpTools::merge_array($errors,$paiement->validatePost());
-                    $errors = BimpTools::merge_array($errors,$paiement->create());
+                    if($fact->getData('remain_to_pay') < $totP)
+                        $montant = $fact->getData('remain_to_pay');
+                    else
+                        $montant = $totP;
+                    $totP -= $montant;
+                    if($montant > 0){
+                        $fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $idFact); 
+                        $paiement = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Paiement');
+                        $_POST['single_amount'] = $fact->getData('remain_to_pay');
+                        $_POST['id_facture'] = $idFact;
+                        $_POST['id_account'] = $this->getData('banque');
+                        $_POST['id_mode_paiement'] = 2;//$this->id_mode_paiement;
+
+                        $errors = BimpTools::merge_array($errors,$paiement->validateArray(array('datep' => date("Y-m-d"))));
+                        $errors = BimpTools::merge_array($errors,$paiement->validatePost());
+                        $errors = BimpTools::merge_array($errors,$paiement->create());
+                    }
                 }
                 $child->updateField('traite', 1);
             }

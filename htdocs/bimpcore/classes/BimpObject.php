@@ -8432,6 +8432,10 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             'success_callback' => $success_callback
         );
     }
+    
+    public function isLight_exportActif(){
+        return $this->getConf('export_light',1);
+    }
 
     public function actionGetGraphData($data, &$success)
     {

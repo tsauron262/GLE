@@ -496,6 +496,8 @@ forms:
                 input_name: light_export
                 data_type: bool
                 value: 1
+                show:
+                    callback: isLight_exportActif
                 input: 
                     type: toggle
                     help: Plus rapide mais certaines colonnes peuvent ne pas être disponibles si cette option est activée

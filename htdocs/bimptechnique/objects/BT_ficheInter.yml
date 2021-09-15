@@ -133,10 +133,9 @@ fields:
         required: 1
         create_form: light
         edit_form: default
-        input: 
-            card: default
-        search:
+        input:
             type: search_societe
+            card: default
             
     fk_statut:
         label: Statut

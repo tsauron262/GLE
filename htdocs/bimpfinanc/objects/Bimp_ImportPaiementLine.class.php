@@ -1,7 +1,7 @@
 <?php
 
 class Bimp_ImportPaiementLine extends BimpObject{
-    var $types = array('' => '', 'vir' => 'Virement');
+    var $types = array('' => 'N/C', 'vir' => 'Virement');
     var $refs = array();
     var $total_reste_a_paye = 0;
     var $ok = false;
@@ -103,6 +103,7 @@ class Bimp_ImportPaiementLine extends BimpObject{
     }
     
     function fetch($id, $parent = null) {
+//        global $modeCSV; $modeCSV = true;
         parent::fetch($id, $parent);
         if($this->isLoaded())
             $this->calc();
@@ -132,56 +133,76 @@ class Bimp_ImportPaiementLine extends BimpObject{
     
     
     function getFactPossible(){
-        global $db;
+        global $modeCSV;
         $return = array();
         if(!$this->ok && $this->getData('price') > 0){
-            $sql = $db->query('SELECT SUM(remain_to_pay) as remain_to_pay_tot, fk_soc FROM `llx_facture` WHERE fk_statut = 1 AND paye = 0 GROUP BY fk_soc HAVING remain_to_pay_tot = '.$this->getData('price'));
-            while($ln = $db->fetch_object($sql)){
+            $sql = $this->db->db->query('SELECT SUM(remain_to_pay) as remain_to_pay_tot, fk_soc FROM `llx_facture` WHERE fk_statut = 1 AND paye = 0 GROUP BY fk_soc HAVING remain_to_pay_tot = '.$this->getData('price'));
+            while($ln = $this->db->db->fetch_object($sql)){
                 $cli = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $ln->fk_soc);
                 $facts = array();
                 $list = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', array('paye'=>0, 'fk_soc'=>$ln->fk_soc));
                 foreach($list as $fact){
-                    $facts[] = $fact->getLink() . $this->getButtonAdd($fact->id);
+                    if ($modeCSV)
+                        $facts[] = $fact->getRef(); 
+                    else
+                        $facts[] = $fact->getLink() . $this->getButtonAdd($fact->id); 
                 }
-                $return[] = $cli->getLink().' ('.implode(' - ', $facts).')';
+                if ($modeCSV)
+                    $return[] = $cli->getData('nom').' ('.implode(' - ', $facts).')';
+                else
+                    $return[] = $cli->getLink().' ('.implode(' - ', $facts).')';
             }
         }
         return implode('<br/>', $return); 
     }
     
     function getFactClient(){
-        $return = array();
-        if(!$this->ok && $this->getData('price') > 0 && $this->getData('name') != ''){
-            $cli = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe');
-            $results = $cli->getSearchResults('default', $this->getData('name'));
-            if($results){
-                foreach($results as $result){
-                    $total = 0;
-                    $cli = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $result['id']);
-              
-                    $facts = array();
-                    $list = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', array('paye'=>0, 'fk_soc'=>$cli->id));
-                    foreach($list as $fact){
-                        $facts[] = $fact->getLink() . $this->getButtonAdd($fact->id); 
-                        $total += $fact->getData('remain_to_pay');
+        global $modeCSV;
+            $return = array();
+            if(!$this->ok && $this->getData('price') > 0 && $this->getData('name') != ''){
+                $cli = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe');
+                $results = $cli->getSearchResults('default', $this->getData('name'));
+                if($results){
+                    foreach($results as $result){
+                        $total = 0;
+                        $cli = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $result['id']);
+
+                        $facts = array();
+                        $list = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', array('paye'=>0, 'fk_soc'=>$cli->id));
+                        foreach($list as $fact){
+                            if ($modeCSV)
+                                $facts[] = $fact->getRef(); 
+                            else
+                                $facts[] = $fact->getLink() . $this->getButtonAdd($fact->id); 
+                            $total += $fact->getData('remain_to_pay');
+                        }
+                        if ($modeCSV)
+                            $return[] = $cli->getData('nom').' ('.implode(' - ', $facts).') Total : '.price($total);
+                        else
+                            $return[] = $cli->getLink().' ('.implode(' - ', $facts).') Total : '.price($total);
+                            
                     }
-                    $return[] = $cli->getLink().' ('.implode(' - ', $facts).') Total : '.price($total);
+                }
+                else{
+                    $return[] = $name;
                 }
             }
-            else{
-                $return[] = $name;
-            }
-        }
         return implode('<br/><br/>', $return); 
     }
     
     function getDataInfo(){
-        $return = '<span class=" bs-popover"';
-        $return .= BimpRender::renderPopoverData($this->getData('data'), 'top', true);
-        $return .= '>';
-        $return .= substr($this->getData('data'), 0, 30).'...';
-        $return .= '</span>';
-        return $return;
+        global $modeCSV;
+        if ($modeCSV) {
+            return $this->getData('data');
+        }
+        else{
+            $return = '<span class=" bs-popover"';
+            $return .= BimpRender::renderPopoverData($this->getData('data'), 'top', true);
+            $return .= '>';
+            $return .= substr($this->getData('data'), 0, 5).'...';
+            $return .= '</span>';
+            return $return;
+        }
     }
     
     function getButtonAdd($id){
@@ -208,14 +229,17 @@ class Bimp_ImportPaiementLine extends BimpObject{
     
     function displayFactReconnue(){
         $refs =$this->refs;
-        foreach($refs as $ref){
-            $obj = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_Facture', array('facnumber' => $ref));
-            if($obj && $obj->isLoaded()){
-                $html = $obj->getLink();
-                $html .= $this->getButtonAdd($obj->id);
-                
-                
-                $refs[$ref] = $html;
+        global $modeCSV;
+        if (!$modeCSV) {
+            foreach($refs as $ref){
+                $obj = BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_Facture', array('facnumber' => $ref));
+                if($obj && $obj->isLoaded()){
+                    $html = $obj->getLink();
+                    $html .= $this->getButtonAdd($obj->id);
+
+
+                    $refs[$ref] = $html;
+                }
             }
         }
         
@@ -227,13 +251,19 @@ class Bimp_ImportPaiementLine extends BimpObject{
     }
     
     function getPrice(){
-        if($this->getData('type') == 'vir'){
-            if($this->getData('traite') == 0){
-                return BimpRender::renderAlerts(price($this->getData('price')) . ' € - ' . price($this->total_reste_a_paye) . ' € = ' .price($manque) .' €', ($this->ok? 'success' : 'danger'));
-            }
-            else
-                return BimpRender::renderAlerts(price($this->getData('price')) . ' €', ($manque == 0? 'success' : 'danger'));
+        global $modeCSV;
+        if ($modeCSV) {
+            return $this->getData('price');
         }
-        return 'Non géré';
+        else{
+            if($this->getData('type') == 'vir'){
+                if($this->getData('traite') == 0){
+                    return BimpRender::renderAlerts(price($this->getData('price')) . ' € - ' . price($this->total_reste_a_paye) . ' € = ' .price($manque) .' €', ($this->ok? 'success' : 'danger'));
+                }
+                else
+                    return BimpRender::renderAlerts(price($this->getData('price')) . ' €', ($manque == 0? 'success' : 'danger'));
+            }
+            return 'Non géré';
+        }
     }
 }

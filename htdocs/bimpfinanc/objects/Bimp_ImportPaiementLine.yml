@@ -7,6 +7,8 @@ labels:
     name: ligne d'import
     name_plur: lignes d'import
     
+export_light: 0
+    
     
 parent_module: bimpfinanc
 parent_object: Bimp_ImportPaiement
@@ -79,6 +81,7 @@ lists:
         cols:
             type:
             factures:
+            dataLight:
             name:
                 edit: 1
             fact_reconnue:
@@ -90,7 +93,7 @@ lists:
                       
 lists_cols: 
     dataLight:
-        label: Data
+        label: Data light
         value: 
             callback: getDataInfo
     fact_reconnue: 

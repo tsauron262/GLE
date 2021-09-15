@@ -5102,7 +5102,8 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             } else {
                 BimpCore::addlog('Echec obtention champs supplémentaires', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
                     'Erreur SQL'    => $this->db->err(),
-                    'Champs suppl.' => $bimpObjectFields
+                    'Champs suppl.' => $bimpObjectFields,
+                    'Param SQL'     => implode("<br/>", array($this->getTable(), '`' . $this->getPrimary() . '` = ' . (int) $id, $bimpObjectFields))
                 ));
             }
         }

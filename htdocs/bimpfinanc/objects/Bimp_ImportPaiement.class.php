@@ -44,8 +44,8 @@ class Bimp_ImportPaiement extends BimpObject{
             $totP = $child->getData('price');
             if($child->ok == true){
                 foreach($child->getData('factures') as $idFact){
-                    if($fact->getData('remain_to_pay') < $totP)
-                        $montant = $fact->getData('remain_to_pay');
+                    if($child->getData('remain_to_pay') < $totP)
+                        $montant = $child->getData('remain_to_pay');
                     else
                         $montant = $totP;
                     $totP -= $montant;

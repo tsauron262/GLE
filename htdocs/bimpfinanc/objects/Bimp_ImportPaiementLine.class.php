@@ -25,7 +25,7 @@ class Bimp_ImportPaiementLine extends BimpObject{
         }
 
         $type = '';
-        if(stripos($this->getData('data'), '0517806000000669EUR2E0416135704405080921') !== false){
+        if(stripos($this->getData('data'), '0517806000000669EUR2E0416135704405') !== false){
             $type = 'vir';
         }
         

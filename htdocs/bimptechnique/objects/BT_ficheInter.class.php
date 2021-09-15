@@ -1493,7 +1493,7 @@ public function getCommercialclientSearchFilters(&$filters, $value, &$joins = ar
     }
 
     // Traitements: 
-
+    
     public function createFromContrat($contrat, $data)
     {
         global $user;
@@ -1659,6 +1659,9 @@ public function getCommercialclientSearchFilters(&$filters, $value, &$joins = ar
                     } else {
                         $this->updateField('fk_statut', self::STATUT_ATTENTE_SIGNATURE);
                     }
+                    
+                    // Changement du titre de tous les events
+                    
 
                     // Création des lignes de facturation: 
                     $services_executed = $this->getServicesExecutedArray();
@@ -2090,7 +2093,7 @@ public function getCommercialclientSearchFilters(&$filters, $value, &$joins = ar
     public function validate()
     {
         $errors = parent::validate();
-
+        
         if (!count($errors)) {
             if ($this->getData('time_from') && $this->getData('time_to') &&
                     $this->getData('time_to') < $this->getData('time_from')) {

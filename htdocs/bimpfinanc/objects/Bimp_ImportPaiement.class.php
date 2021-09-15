@@ -37,32 +37,53 @@ class Bimp_ImportPaiement extends BimpObject{
     }
     
     function actionCreate_paiement($data, &$success){
+        global $user;
         $success = 'Paiment(s) crée(s)';
         $errors = $wanings = array();
         $list = $this->getChildrenObjects('lignes', array('traite'=>0, 'type'=>'vir'));
         foreach($list as $child){
+            $errorsLn = array();
             $totP = $child->getData('price');
             if($child->ok == true){
                 foreach($child->getData('factures') as $idFact){
-                    if($child->getData('remain_to_pay') < $totP)
-                        $montant = $child->getData('remain_to_pay');
+                    $fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $idFact); 
+                    if($fact->getData('remain_to_pay') < $totP)
+                        $montant = $fact->getData('remain_to_pay');
                     else
                         $montant = $totP;
                     $totP -= $montant;
                     if($montant > 0){
-                        $fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $idFact); 
-                        $paiement = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Paiement');
-                        $_POST['single_amount'] = $fact->getData('remain_to_pay');
-                        $_POST['id_facture'] = $idFact;
-                        $_POST['id_account'] = $this->getData('banque');
-                        $_POST['id_mode_paiement'] = 2;//$this->id_mode_paiement;
+                        if (!class_exists('Paiement')) {
+                            require_once DOL_DOCUMENT_ROOT . '/compta/paiement/class/paiement.class.php';
+                        }
+                        $p = new Paiement($this->db->db);
+                        $p->datepaye = dol_now();
+                        $p->amounts = array(
+                            $idFact => $montant
+                        );
+                        $p->paiementid = (int) dol_getIdFromCode($this->db->db, $this->id_mode_paiement, 'c_paiement');
+                        $p->facid = (int) $idFact;
 
-                        $errors = BimpTools::merge_array($errors,$paiement->validateArray(array('datep' => date("Y-m-d"))));
-                        $errors = BimpTools::merge_array($errors,$paiement->validatePost());
-                        $errors = BimpTools::merge_array($errors,$paiement->create());
+                        if ($p->create($user) < 0) {
+                            $msg = 'Echec de l\'ajout à la facture du paiement n°' . $n;
+                            $msg .= ' (' . BC_VentePaiement::$codes[$code]['label'] . ': ' . BimpTools::displayMoneyValue($montant, 'EUR') . ')';
+                            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($p), $msg);
+                        } else {
+                            if (!empty($conf->banque->enabled)) {
+                                if ($p->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $this->getData('banque'), '', '') < 0) {
+                                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($p), 'Echec de l\'ajout du paiement n°' . $p->id . ' au compte bancaire ' . $this->getData('banque'));
+                                }
+                            }
+                        }
                     }
+                    else{
+                        $errorsLn[] = 'Impossible de créer le paiment : '.$montant;
+                    }
+                    $fact->checkIsPaid();
                 }
-                $child->updateField('traite', 1);
+                if(!count($errorsLn))
+                    $child->updateField('traite', 1);
+                $errors = BimpTools::merge_array($errors, $errorsLn);
             }
         }
         

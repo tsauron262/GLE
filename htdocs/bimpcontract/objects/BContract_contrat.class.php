@@ -339,7 +339,7 @@ class BContract_contrat extends BimpDolObject
 
         $total_fis = $ficheInter->time_to_qty($ficheInter->timestamp_to_time($total_tms)) * BimpCore::getConf("bimptechnique_coup_horaire_technicien");
         $previsionelle = 0;
-        if($this->getJourTotal() > 0)
+        if($this->getJourTotal() > 0 && $this->getJourTotal() > $this->getJourRestant())
             $previsionelle = $total_fis / ($this->getJourTotal() - $this->getJourRestant()) * $this->getJourRestant();
 
         $marge = ($this->getTotalContrat() - $total_fis);

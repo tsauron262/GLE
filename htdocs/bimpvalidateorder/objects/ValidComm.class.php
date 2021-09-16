@@ -115,13 +115,13 @@ class ValidComm extends BimpObject
             return 1;
 
        global $conf;
-//        $this->db2 = getDoliDBInstance($conf->db->type,$conf->db->host,$conf->db->user,$this->db->db->database_pass,$conf->db->name,$conf->db->port);
+        $this->db2 = getDoliDBInstance($conf->db->type,$conf->db->host,$conf->db->user,$this->db->db->database_pass,$conf->db->name,$conf->db->port);
         
         // Création contact
         /* TODO Pourquoi ici ? TODO */
-//        $bimp_object->dol_object->db = $this->db2;
+        $bimp_object->dol_object->db = $this->db2;
         $errors = BimpTools::merge_array($errors, $bimp_object->checkContacts());
-//        $bimp_object->db = $this->db;
+        $bimp_object->dol_object->db = $this->db->db;
         
         list($secteur, $class, $percent, $val_euros, $rtp) = $this->getObjectParams($bimp_object, $errors);
         

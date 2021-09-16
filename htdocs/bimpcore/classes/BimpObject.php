@@ -1916,6 +1916,13 @@ class BimpObject extends BimpCache
         if ($use_db_transactions) {
             if (isset($result['errors']) && count($result['errors'])) {
                 $this->db->db->rollback();
+
+                if ((int) BimpCore::getConf('bimpcore_log_actions_rollbacks', 0)) {
+                    BimpCore::addlog('Rollback suite à action', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $this, array(
+                        'Action'  => $action,
+                        'Erreurs' => $result['errors']
+                            ), true);
+                }
             } else {
                 if ($this->db->db->has_rollback) {
                     if (isset($result['errors'])) {
@@ -1927,17 +1934,12 @@ class BimpObject extends BimpCache
                         $result['errors'][] = 'Une erreur inconnue est survenue - opération annulée';
                     }
                     $this->db->db->rollback();
+
+                    BimpCore::addlog('Rollback suite à action - erreur inconnue', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $this, array(
+                        'Action' => $action
+                            ), true);
                 } else {
                     $this->db->db->commit();
-                }
-            }
-
-            if ((int) BimpCore::getConf('bimpcore_log_actions_rollbacks', 0)) {
-                if (isset($result['errors']) && count($result['errors'])) {
-                    BimpCore::addlog('Rollback suite à action', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $this, array(
-                        'Action'  => $action,
-                        'Erreurs' => $result['errors']
-                            ), true);
                 }
             }
         }

@@ -417,7 +417,7 @@ class BimpObject extends BimpCache
             $this->dol_object->db = $this->db->db;
         }
     }
-    
+
     public function useTransactionsDb()
     {
         $this->db = BimpCache::getBdb(false);
@@ -1908,7 +1908,7 @@ class BimpObject extends BimpCache
                 }
             }
         }
-        
+
         $result['errors'] = BimpTools::merge_array($result['errors'], BimpTools::getDolEventsMsgs(array('errors')));
 
 //        BimpLog::actionEnd('bimpobject_action', (isset($errors['errors']) ? $errors['errors'] : $errors), (isset($errors['warnings']) ? $errors['warnings'] : array()));
@@ -1933,7 +1933,10 @@ class BimpObject extends BimpCache
             }
 
             if (isset($result['errors']) && count($result['errors'])) {
-                BimpCore::addlog($msg, $level, $type, $object, $extra_data, $force);
+                BimpCore::addlog('Rollback suite à action', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $this, array(
+                    'Action' => $action,
+                    'Erreurs' => $result['errors']
+                        ), true);
             }
         }
 
@@ -8476,9 +8479,10 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             'success_callback' => $success_callback
         );
     }
-    
-    public function isLight_exportActif(){
-        return $this->getConf('export_light',1);
+
+    public function isLight_exportActif()
+    {
+        return $this->getConf('export_light', 1);
     }
 
     public function actionGetGraphData($data, &$success)

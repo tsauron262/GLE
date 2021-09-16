@@ -1882,6 +1882,8 @@ class BimpObject extends BimpCache
                 }
             }
         }
+        
+        $result['errors'] = BimpTools::merge_array($result['errors'], BimpTools::getDolEventsMsgs(array('errors')));
 
 //        BimpLog::actionEnd('bimpobject_action', (isset($errors['errors']) ? $errors['errors'] : $errors), (isset($errors['warnings']) ? $errors['warnings'] : array()));
 
@@ -8431,6 +8433,10 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             'warnings'         => $warnings,
             'success_callback' => $success_callback
         );
+    }
+    
+    public function isLight_exportActif(){
+        return $this->getConf('export_light',1);
     }
 
     public function actionGetGraphData($data, &$success)

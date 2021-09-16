@@ -3410,7 +3410,8 @@ class Propal extends CommonObject
 				$dir = dol_buildpath($reldir."core/modules/propale/");
 
 				// Load file with numbering class (if found)
-				$mybool|=@include_once $dir.$file;
+                                if(is_file($dir.$file))
+                                    $mybool|=@include_once $dir.$file;
 			}
 
 			if (! $mybool)

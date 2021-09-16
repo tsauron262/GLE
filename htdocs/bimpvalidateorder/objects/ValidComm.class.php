@@ -108,6 +108,8 @@ class ValidComm extends BimpObject
         $valid_encours = 1;
         $valid_impaye = 1;
         
+        $this->updateCreditSafe($bimp_object);
+        
 //        return 1;
                        
         // Object non géré
@@ -786,7 +788,37 @@ class ValidComm extends BimpObject
         return 1;
     }
     
+    private function updateCreditSafe($bimp_object) {
+        
+        // Client
+        if(method_exists($bimp_object, 'getClientFacture'))
+            $client = $bimp_object->getClientFacture();
+        else
+            $client = $bimp_object->getChildObject('client');
+        
+        
+        
+    }
+    
 }
+//Bonjour
+// 
+//Afin d'alléger mes tâches quotidiennes j'aimerais que l'on automatise une partie des validations financières
+// 
+//Exemple avec demande ci-dessous
+//Pour un cas comme celui-ci il faudrait que le système cherche la limite recommandée par Credit Safe et remplisse automatiquement le champ "encours autorisé"
+//NB : toutefois, il doit être de 100 000 € maximum, même si CréditSafe nous donne une limite supérieure
+//Si le nouvel encours autorisé le permet, valider automatiquement la commande
+// 
+//Mais attention, doivent être exclus de cet automatisme :
+//
+//    Les clients ouverts à partir du 1er mai 2021
+//    Les clients pour lesquels il y a un retard de paiement (nous gardons donc la validation spécifique à ces retards)
+//    Les clients dont le statut n'est pas en "client solvable"
+//
+// 
+//Si cette amélioration est réalisable, merci de m'informer de sa mise en place
+
 
 
 class DoliValidComm extends CommonObject {
@@ -913,3 +945,30 @@ class DoliValidComm extends CommonObject {
 
     
 }
+
+
+
+
+//2021-09-16 13:45:57 ERR     109.190.233.25, 10.192.20.142->unix:  | j.brych | Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36
+//http://erp.bimp.fr/bimp8//bimpcommercial/index.php?fc=commande&id=192704&ajax=1&action=setObjectAction&request_id=1&bimp_context=private | https://erp.bimp.fr/bimp8/bimpcommercial/index.php?fc=commande&id=192704
+//Array
+//(
+//    [module] => bimpcommercial
+//    [object_name] => Bimp_Commande
+//    [id_object] => 192704
+//    [object_action] => validate
+//)
+//
+//DoliDBMysqliC::close Closing a connection with an opened transaction depth=1
+//
+//2021-09-16 13:45:57 WARNING 109.190.233.25, 10.192.20.142->unix:  | j.brych | Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36
+//http://erp.bimp.fr/bimp8//bimpcommercial/index.php?fc=commande&id=192704&ajax=1&action=setObjectAction&request_id=1&bimp_context=private | https://erp.bimp.fr/bimp8/bimpcommercial/index.php?fc=commande&id=192704
+//Array
+//(
+//    [module] => bimpcommercial
+//    [object_name] => Bimp_Commande
+//    [id_object] => 192704
+//    [object_action] => validate
+//)
+//
+//--- End access to /bimp8/bimpcommercial/index.php (Warn: db disconnection forced, transaction depth was 1)

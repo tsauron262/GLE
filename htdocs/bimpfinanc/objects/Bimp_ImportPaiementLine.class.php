@@ -110,12 +110,12 @@ class Bimp_ImportPaiementLine extends BimpObject{
     }
     
     function actionAddFact($data){
+        $errors = $warnings = array();
         $this->addFact($data['id']);
         return array('errors' => $errors, 'warnings' => $warnings);
     }
     
     function addFact($ids){
-        $errors = $warnings = array();
         if(!is_array($ids))
             $ids = array($ids);
         $tab1 = BimpTools::merge_array($this->getData('factures'), $ids);

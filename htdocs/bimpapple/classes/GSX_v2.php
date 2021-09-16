@@ -143,8 +143,8 @@ class GSX_v2 extends GSX_Const
         if (isset($result['authToken'])) {
             $this->displayDebug('OK (Auth token ' . $result['authToken'] . ')');
             $this->saveToken('auth', $result['authToken']);
-            global $user, $langs;
-            mailSyn2('auth GSX', 'tommy@bimp.fr', null, $user->getFullName($langs).' id : '.$this->appleId.' auth OK' . date('l jS \of F Y h:i:s A'));
+//            global $user, $langs;
+//            mailSyn2('auth GSX', 'tommy@bimp.fr', null, $user->getFullName($langs).' id : '.$this->appleId.' auth OK' . date('l jS \of F Y h:i:s A'));
             $this->logged = true;
             return 1;
         }
@@ -152,8 +152,8 @@ class GSX_v2 extends GSX_Const
         $this->displayDebug('échec');
         $this->initError('Echec authentification (token ' . $this->acti_token . ')');
 
-            global $user, $langs;
-            mailSyn2('auth GSX bad', 'tommy@bimp.fr', null, $user->getFullName($langs).' id : '.$this->appleId.' auth bad'. date('l jS \of F Y h:i:s A'));
+//            global $user, $langs;
+//            mailSyn2('auth GSX bad', 'tommy@bimp.fr', null, $user->getFullName($langs).' id : '.$this->appleId.' auth bad'. date('l jS \of F Y h:i:s A'));
         $this->logged = false;
         $this->saveToken('acti', '');
 

@@ -116,8 +116,7 @@ class Bimp_SocBankAccount extends BimpObject
         $this->set('rum', $this->getNumSepa());
         $def = (int) $this->getData('default_rib');
         
-        
-        if(isset($_FILES['file'])){
+        if(isset($_FILES['file']) && $_FILES['file']['name'] != ''){
             $soc = $this->getChildObject('societe');
             $file_dir = $soc->getFilesDir();
             

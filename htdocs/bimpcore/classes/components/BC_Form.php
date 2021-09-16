@@ -268,31 +268,33 @@ class BC_Form extends BC_Panel
                 $html .= $this->renderFieldRow($field_name);
             }
         }
-        
-        foreach ($this->params['rows'] as $row) {
-            $row_params = parent::fetchParams($this->config_path . '/rows/' . $row, self::$row_params);
 
-            if (!(int) $row_params['show']) {
-                continue;
-            }
-            if ($row_params['field']) {
-                $html .= $this->renderFieldRow($row_params['field'], $row_params);
-            } elseif ($row_params['association']) {
-                $row_params = BimpTools::merge_array($row_params, parent::fetchParams($this->config_path . '/rows/' . $row, self::$association_params));
-                $html .= $this->renderAssociationRow($row_params);
-            } elseif ((int) $row_params['custom']) {
-                $html .= $this->renderCustomRow($row, $row_params);
-            } elseif ($row_params['object']) {
-                $row_params = BimpTools::merge_array($row_params, parent::fetchParams($this->config_path . '/rows/' . $row, self::$object_params));
-                if (!(int) $row_params['on_edit'] && $this->object->isLoaded()) {
+        if (is_array($this->params['rows'])) {
+            foreach ($this->params['rows'] as $row) {
+                $row_params = parent::fetchParams($this->config_path . '/rows/' . $row, self::$row_params);
+
+                if (!(int) $row_params['show']) {
                     continue;
                 }
-                if (!(int) $row_params['on_create'] && !$this->object->isLoaded()) {
-                    continue;
+                if ($row_params['field']) {
+                    $html .= $this->renderFieldRow($row_params['field'], $row_params);
+                } elseif ($row_params['association']) {
+                    $row_params = BimpTools::merge_array($row_params, parent::fetchParams($this->config_path . '/rows/' . $row, self::$association_params));
+                    $html .= $this->renderAssociationRow($row_params);
+                } elseif ((int) $row_params['custom']) {
+                    $html .= $this->renderCustomRow($row, $row_params);
+                } elseif ($row_params['object']) {
+                    $row_params = BimpTools::merge_array($row_params, parent::fetchParams($this->config_path . '/rows/' . $row, self::$object_params));
+                    if (!(int) $row_params['on_edit'] && $this->object->isLoaded()) {
+                        continue;
+                    }
+                    if (!(int) $row_params['on_create'] && !$this->object->isLoaded()) {
+                        continue;
+                    }
+                    $html .= '<div>';
+                    $html .= $this->renderObjectRow($row_params['object'], $row_params);
+                    $html .= '</div>';
                 }
-                $html .= '<div>';
-                $html .= $this->renderObjectRow($row_params['object'], $row_params);
-                $html .= '</div>';
             }
         }
 

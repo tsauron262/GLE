@@ -510,13 +510,13 @@ class BT_ficheInter_det extends BimpDolObject
     // Traitements: 
 
     private function adjustCalendar($delete = false) {
-        
+        $errors = array();
         $parent = $this->getParentInstance();
         BimpTools::loadDolClass("comm/action", "actioncomm");
         BimpTools::loadDolClass("user");
         $admin = new User($this->db->db);
         $admin->fetch(1);
-        $actionCommList = json_decode($this->getData('actioncomm'));
+        $actionCommList = ($this->getData('actioncomm') != "") ? json_decode($this->getData('actioncomm')) : [];
         $actionCommClass = new ActionComm($this->db->db);
         
         if(count($actionCommList) > 0) {
@@ -553,7 +553,8 @@ class BT_ficheInter_det extends BimpDolObject
                 $sql = "UPDATE `".MAIN_DB_PREFIX."fichinterdet` SET `actioncomm` = '[\"$actionCommClass->id\", \"$actionCommClass2->id\"]' WHERE rowid = $this->id";
             }
 
-            $errors = $this->db->execute($sql);
+            if(!$this->db->execute($sql))
+                $errors[] = 'Probléme SQL calendar FI';
         }
 
         return $errors;
@@ -571,7 +572,7 @@ class BT_ficheInter_det extends BimpDolObject
             $parent->update($w, true);
         }
 
-        $errors = parent::onSave($errors, $warnings);
+        parent::onSave($errors, $warnings);
         
         if(!count($errors) && 
                 $this->getData('type') != self::TYPE_DEPLA && 
@@ -582,7 +583,6 @@ class BT_ficheInter_det extends BimpDolObject
             $errors = $this->adjustCalendar();
         }
 
-        return $errors;
     }
 
     // Actions: 

@@ -1882,6 +1882,8 @@ class BimpObject extends BimpCache
                 }
             }
         }
+        
+        $result['errors'] = BimpTools::merge_array($result['errors'], BimpTools::getDolEventsMsgs(array('errors')));
 
 //        BimpLog::actionEnd('bimpobject_action', (isset($errors['errors']) ? $errors['errors'] : $errors), (isset($errors['warnings']) ? $errors['warnings'] : array()));
 
@@ -3835,7 +3837,8 @@ class BimpObject extends BimpCache
                     BimpCore::addlog('Retour d\'erreurs absent', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
                         'méthode' => 'update()',
                         'Module'  => $this->module,
-                        'Object'  => $this->object_name
+                        'Object'  => $this->object_name,
+                        'Class_name'=> get_class($this)
                     ));
                     $errors = array();
                 }
@@ -3853,7 +3856,8 @@ class BimpObject extends BimpCache
                     BimpCore::addlog('Retour d\'erreurs absent', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
                         'méthode' => 'create()',
                         'Module'  => $this->module,
-                        'Object'  => $this->object_name
+                        'Object'  => $this->object_name,
+                        'Class_name'=> get_class($this)
                     ));
 
                     $errors = array();
@@ -5100,7 +5104,8 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             } else {
                 BimpCore::addlog('Echec obtention champs supplémentaires', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
                     'Erreur SQL'    => $this->db->err(),
-                    'Champs suppl.' => $bimpObjectFields
+                    'Champs suppl.' => $bimpObjectFields,
+                    'Param SQL'     => implode("<br/>", array($this->getTable(), '`' . $this->getPrimary() . '` = ' . (int) $id, $bimpObjectFields))
                 ));
             }
         }
@@ -8428,6 +8433,10 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             'warnings'         => $warnings,
             'success_callback' => $success_callback
         );
+    }
+    
+    public function isLight_exportActif(){
+        return $this->getConf('export_light',1);
     }
 
     public function actionGetGraphData($data, &$success)

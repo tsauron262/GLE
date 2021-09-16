@@ -2373,11 +2373,11 @@ class Facture extends CommonInvoice
 	                        $listoffiles=dol_dir_list($conf->facture->dir_output.'/'.$newref, 'files', 1, '^'.preg_quote($oldref,'/'));
 	                        foreach($listoffiles as $fileentry)
 	                        {
-	                        	$dirsource=$fileentry['name'];
-	                        	$dirdest=preg_replace('/^'.preg_quote($oldref,'/').'/',$newref, $dirsource);
-	                        	$dirsource=$fileentry['path'].'/'.$dirsource;
-	                        	$dirdest=$fileentry['path'].'/'.$dirdest;
-	                        	@rename($dirsource, $dirdest);
+//	                        	$dirsource=$fileentry['name'];
+//	                        	$dirdest=preg_replace('/^'.preg_quote($oldref,'/').'/',$newref, $dirsource);
+//	                        	$dirsource=$fileentry['path'].'/'.$dirsource;
+//	                        	$dirdest=$fileentry['path'].'/'.$dirdest;
+//	                        	@rename($dirsource, $dirdest);
 	                        }
 						}
 					}

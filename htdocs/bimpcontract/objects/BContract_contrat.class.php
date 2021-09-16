@@ -70,7 +70,7 @@ class BContract_contrat extends BimpDolObject
         self::CONTRAT_STATUS_BROUILLON    => Array('label' => 'Brouillon', 'classes' => Array('warning'), 'icon' => 'fas_trash-alt'),
         self::CONTRAT_STATUS_VALIDE       => Array('label' => 'Attente signature client', 'classes' => Array('success'), 'icon' => 'fas_retweet'),
         self::CONTRAT_STATUS_CLOS         => Array('label' => 'Clos', 'classes' => Array('danger'), 'icon' => 'fas_times'),
-        self::CONTRAT_STATUS_REFUSE         => Array('label' => 'Refusé', 'classes' => Array('danger'), 'icon' => 'fas_times'),
+        self::CONTRAT_STATUS_REFUSE       => Array('label' => 'Refusé', 'classes' => Array('danger'), 'icon' => 'fas_times'),
         self::CONTRAT_STATUT_WAIT_ACTIVER => Array('label' => 'Attente d\'activation', 'classes' => Array('important'), 'icon' => 'fas_retweet'),
         self::CONTRAT_STATUS_WAIT         => Array('label' => 'En attente de validation', 'classes' => Array('warning'), 'icon' => 'fas_refresh'),
         self::CONTRAT_STATUS_ACTIVER      => Array('label' => 'Actif', 'classes' => Array('important'), 'icon' => 'fas_play'),
@@ -339,7 +339,7 @@ class BContract_contrat extends BimpDolObject
 
         $total_fis = $ficheInter->time_to_qty($ficheInter->timestamp_to_time($total_tms)) * BimpCore::getConf("bimptechnique_coup_horaire_technicien");
         $previsionelle = 0;
-        if($this->getJourTotal() > 0)
+        if($this->getJourTotal() > 0 && $this->getJourTotal() > $this->getJourRestant())
             $previsionelle = $total_fis / ($this->getJourTotal() - $this->getJourRestant()) * $this->getJourRestant();
 
         $marge = ($this->getTotalContrat() - $total_fis);
@@ -1386,7 +1386,9 @@ class BContract_contrat extends BimpDolObject
         $new_date_end = new dateTime($new_date_start->format('Y-m-d'));
         $new_date_end->add(new DateInterval("P" . $duree_contrat . "M"));
         $new_date_end->sub(new DateInterval('P1D'));
-
+        
+        $new_renouvellementTacite = self::CONTRAT_RENOUVELLEMENT_NON;
+        
         switch ($this->getData('tacite')) {
             case self::CONTRAT_RENOUVELLEMENT_1_FOIS:
                 $new_renouvellementTacite = self::CONTRAT_RENOUVELLEMENT_NON;

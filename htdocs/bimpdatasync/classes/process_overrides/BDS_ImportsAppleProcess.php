@@ -192,7 +192,7 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
                         if (isset($price_data['ref_prod'])) {
                             $this->Error('Aucun produit trouvé pour cette référence', $instance, $price_data['ref_prod']);
                         } else {
-                            $this->Error('Ligne n° ' . $idx + 2 . ': référence produit absente', $instance, '');
+                            $this->Error('Ligne n° ' . ($idx + 2) . ': référence produit absente', $instance, '');
                         }
 
                         $this->incIgnored();

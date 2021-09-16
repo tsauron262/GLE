@@ -72,6 +72,11 @@ class Bimp_ImportPaiementLine extends BimpObject{
                 'icon'    => 'fas_undo',
                 'onclick' => $this->getJsActionOnclick('init')
             );
+            $buttons[] = array(
+                'label'   => 'Lettrage manuel',
+                'icon'    => 'fas_check',
+                'onclick' => $this->getJsActionOnclick('traiteManuel')
+            );
         }
         return $buttons;
     }
@@ -112,6 +117,12 @@ class Bimp_ImportPaiementLine extends BimpObject{
     function actionAddFact($data){
         $errors = $warnings = array();
         $this->addFact($data['id']);
+        return array('errors' => $errors, 'warnings' => $warnings);
+    }
+    
+    function actionTraiteManuel($data){
+        $errors = $warnings = array();
+        $errors = $this->updateField('traite', 1);
         return array('errors' => $errors, 'warnings' => $warnings);
     }
     

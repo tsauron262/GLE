@@ -1932,11 +1932,13 @@ class BimpObject extends BimpCache
                 }
             }
 
-            if (isset($result['errors']) && count($result['errors'])) {
-                BimpCore::addlog('Rollback suite à action', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $this, array(
-                    'Action' => $action,
-                    'Erreurs' => $result['errors']
-                        ), true);
+            if ((int) BimpCore::getConf('bimpcore_log_actions_rollbacks', 0)) {
+                if (isset($result['errors']) && count($result['errors'])) {
+                    BimpCore::addlog('Rollback suite à action', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $this, array(
+                        'Action'  => $action,
+                        'Erreurs' => $result['errors']
+                            ), true);
+                }
             }
         }
 

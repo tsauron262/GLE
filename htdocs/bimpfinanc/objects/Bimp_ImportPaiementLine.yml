@@ -84,8 +84,8 @@ lists:
             dataLight:
             name:
                 edit: 1
-            fact_reconnue:
             priceDet:
+            fact_reconnue:
             fact_possible:
             fact_client:
     

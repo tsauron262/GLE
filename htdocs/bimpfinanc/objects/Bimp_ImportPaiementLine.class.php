@@ -176,11 +176,12 @@ class Bimp_ImportPaiementLine extends BimpObject{
                                 $facts[] = $fact->getLink() . $this->getButtonAdd($fact->id); 
                             $total += $fact->getData('remain_to_pay');
                         }
-                        if ($modeCSV)
-                            $return[] = $cli->getData('nom').' ('.implode(' - ', $facts).') Total : '.price($total);
-                        else
-                            $return[] = $cli->getLink().' ('.implode(' - ', $facts).') Total : '.price($total);
-                            
+                        if(count($facts)){
+                            if ($modeCSV)
+                                $return[] = $cli->getData('nom').' ('.implode(' - ', $facts).') Total : '.price($total);
+                            else
+                                $return[] = $cli->getLink().' ('.implode(' - ', $facts).') Total : '.price($total);
+                        }  
                     }
                 }
                 else{

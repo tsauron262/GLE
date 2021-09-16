@@ -84,6 +84,7 @@ lists:
         edit_btn: 1
         page_btn: 1
         cols:
+            date_create:
             banque:
             user_create:
                 

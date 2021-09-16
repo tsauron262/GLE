@@ -114,22 +114,14 @@ class ValidComm extends BimpObject
         if($this->getObjectClass($bimp_object) == -2)
             return 1;
 
-//        $this->db2 = new DoliDBMysqli('mysql', $this->db->db->database_host,
-//                $this->db->db->database_user, $this->db->db->database_pass,
-//                $this->db->db->database_name, $this->db->db->database_port);
-//        mysqli-10.192.20.203-root-ERP_PROD_BIMP-3306
-//        global $conf;
-//        
-//        print_r($conf);
-//        die;
-//        echo $conf->db->type.'-'.$conf->db->host.'-'.$conf->db->user.'-'.$conf->db->name.'-'.$conf->db->port;
        global $conf;
         $this->db2 = getDoliDBInstance($conf->db->type,$conf->db->host,$conf->db->user,$this->db->db->database_pass,$conf->db->name,$conf->db->port);
         
         // Création contact
-        $bimp_object->dol_object->db = $this->db2;
+        /* TODO Pourquoi ici ? TODO */
+//        $bimp_object->dol_object->db = $this->db2;
         $errors = BimpTools::merge_array($errors, $bimp_object->checkContacts());
-        $bimp_object->db = $this->db;
+//        $bimp_object->db = $this->db;
         
         list($secteur, $class, $percent, $val_euros, $rtp) = $this->getObjectParams($bimp_object, $errors);
         
@@ -508,7 +500,7 @@ class ValidComm extends BimpObject
         if((int) $bimp_object->id > 0) {
 
             $demande = BimpObject::getInstance('bimpvalidateorder', 'DemandeValidComm');
-            $demande->db->db = $this->db2;
+//            $demande->db->db = $this->db2;
             $errors = BimpTools::merge_array($errors, $demande->validateArray(array(
                 'type_de_piece' =>    (int) $object,
                 'id_piece' =>         (int) $bimp_object->id,
@@ -633,7 +625,7 @@ class ValidComm extends BimpObject
         
         $demandes = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filters);
         foreach($demandes as $d) {
-            $d->db->db = $this->db2;
+//            $d->db->db = $this->db2;
             $now = date('Y-m-d H:i:s');
             $d->updateField('id_user_valid', $id_user);
             $d->updateField('date_valid', $now);

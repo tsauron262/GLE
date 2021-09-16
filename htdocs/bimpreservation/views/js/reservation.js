@@ -226,6 +226,11 @@ function onReserveEquipmentsFormLoaded($form) {
                             addMultipleInputCurrentValue($btn, 'equipments_add_value', 'equipments_add_value', false);
                         });
                     }
+                    else{
+                        var $select = $container.find('[name="equipments_add_value"]');
+                        if($select.val() > 0)
+                            addMultipleInputCurrentValue($btn, 'equipments_add_value', 'equipments_add_value', false);
+                    }
                 });
             }
 

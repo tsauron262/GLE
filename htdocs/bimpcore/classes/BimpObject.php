@@ -212,6 +212,10 @@ class BimpObject extends BimpCache
 
         if ($this->config->isDefined('dol_object')) {
             $this->dol_object = $this->config->getObject('dol_object');
+
+            if (is_object($this->dol_object)) {
+                $this->dol_object->db = $this->db->db;
+            }
             $this->use_commom_fields = 0;
         }
 
@@ -402,6 +406,24 @@ class BimpObject extends BimpCache
                     )
                 )
                     ), 'initial');
+        }
+    }
+
+    public function useNoTransactionsDb()
+    {
+        $this->db = BimpCache::getBdb(true);
+
+        if (is_object($this->dol_object)) {
+            $this->dol_object->db = $this->db->db;
+        }
+    }
+    
+    public function useTransactionsDb()
+    {
+        $this->db = BimpCache::getBdb(false);
+
+        if (is_object($this->dol_object)) {
+            $this->dol_object->db = $this->db->db;
         }
     }
 
@@ -1728,7 +1750,11 @@ class BimpObject extends BimpCache
 
         if (!is_null($this->dol_object)) {
             unset($this->dol_object);
-            $this->dol_object = $this->config->getObject('dol_object');
+        }
+
+        $this->dol_object = $this->config->getObject('dol_object');
+        if (is_object($this->dol_object)) {
+            $this->dol_object->db = $this->db->db;
         }
 
         $this->resetMsgs();
@@ -1902,6 +1928,10 @@ class BimpObject extends BimpCache
                 } else {
                     $this->db->db->commit();
                 }
+            }
+
+            if (isset($result['errors']) && count($result['errors'])) {
+                BimpCore::addlog($msg, $level, $type, $object, $extra_data, $force);
             }
         }
 
@@ -3833,10 +3863,10 @@ class BimpObject extends BimpCache
 
                 if (!is_array($errors)) {
                     BimpCore::addlog('Retour d\'erreurs absent', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
-                        'méthode' => 'update()',
-                        'Module'  => $this->module,
-                        'Object'  => $this->object_name,
-                        'Class_name'=> get_class($this)
+                        'méthode'    => 'update()',
+                        'Module'     => $this->module,
+                        'Object'     => $this->object_name,
+                        'Class_name' => get_class($this)
                     ));
                     $errors = array();
                 }
@@ -3852,10 +3882,10 @@ class BimpObject extends BimpCache
 
                 if (!is_array($errors)) {
                     BimpCore::addlog('Retour d\'erreurs absent', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
-                        'méthode' => 'create()',
-                        'Module'  => $this->module,
-                        'Object'  => $this->object_name,
-                        'Class_name'=> get_class($this)
+                        'méthode'    => 'create()',
+                        'Module'     => $this->module,
+                        'Object'     => $this->object_name,
+                        'Class_name' => get_class($this)
                     ));
 
                     $errors = array();
@@ -4809,6 +4839,10 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
         if (!is_object($this->dol_object)) {
             $this->dol_object = $this->config->getObject('dol_object');
+
+            if (is_object($this->dol_object)) {
+                $this->dol_object->db = $this->db->db;
+            }
         }
 
         foreach ($this->params['fields'] as $field) {
@@ -4894,6 +4928,10 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         if (!is_null($this->dol_object) && isset($this->dol_object->id) && $this->dol_object->id) {
             unset($this->dol_object);
             $this->dol_object = $this->config->getObject('dol_object');
+
+            if (is_object($this->dol_object)) {
+                $this->dol_object->db = $this->db->db;
+            }
         }
 
         if (is_null($this->dol_object)) {
@@ -5061,6 +5099,10 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         if (!is_null($this->dol_object) && isset($this->dol_object->id) && $this->dol_object->id) {
             unset($this->dol_object);
             $this->dol_object = $this->config->getObject('dol_object');
+
+            if (is_object($this->dol_object)) {
+                $this->dol_object->db = $this->db->db;
+            }
         }
 
         if (is_null($this->dol_object)) {

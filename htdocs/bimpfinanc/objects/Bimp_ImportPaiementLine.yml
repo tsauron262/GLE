@@ -31,7 +31,7 @@ fields:
         label: Import
         type: id_parent
     factures:
-        label: Facture(s)
+        label: Facture(s) liée(s)
         type: items_list
         items_data_type: id_object
         object: factures

@@ -2438,6 +2438,10 @@ class BC_ListTable extends BC_List
                         } elseif (isset($item_params['value'])) {
                             $content = $item_params['value'];
                         }
+                        
+                        if(is_array($content)){//champ json
+                            $content = implode("\n", $content);
+                        }
 
                         $content = BimpTools::replaceBr($content);
                         $content = strip_tags($content);

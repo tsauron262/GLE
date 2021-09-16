@@ -294,6 +294,79 @@ class BT_ficheInter extends BimpDolObject
     }
 
     // Getters Params: 
+    
+    public function getListExtraBulkActions()
+    {
+        $actions = array();
+
+        $actions[] = array(
+            'label'   => 'Fichiers PDF',
+            'icon'    => 'fas_file-pdf',
+            'onclick' => $this->getJsBulkActionOnclick('generateBulkPdf', array(), array('single_action' => true))
+        );
+        
+        return $actions;
+    }
+    
+    // Fonction de BIMPCOMM
+    public function actionGenerateBulkPdf($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Fichier généré avec succès';
+        $success_callback = '';
+
+        $id_objs = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+
+        if (count($id_objs) > 50)
+            return array('Trop de PDF action impossible');
+
+        if (!is_array($id_objs) || empty($id_objs)) {
+            $errors[] = 'Aucune ' . $this->getLabel() . ' sélectionnée';
+        } else {
+            $files = array();
+
+            foreach ($id_objs as $id_obj) {
+                $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_obj);
+
+                if (!BimpObject::objectLoaded($obj)) {
+                    $warnings[] = ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_obj . ' n\'existe pas';
+                    continue;
+                }
+
+                $dir = $obj->getFilesDir();
+                $filename = $obj->getRef() . '.pdf';
+
+                if (!file_exists($dir . $filename)) {
+                    $warnings[] = ucfirst($this->getLabel()) . ' ' . $obj->getLink() . ': fichier PDF absent (' . $dir . $filename . ')';
+                    continue;
+                }
+
+                $files[] = $dir . $filename;
+            }
+
+            if (!empty($files)) {
+                global $user;
+                require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpPDF.php';
+                $fileName = 'bulk_' . $this->dol_object->element . '_' . $user->id . '.pdf';
+                $dir = PATH_TMP . '/bimpcore/';
+
+                $pdf = new BimpConcatPdf();
+                $pdf->concatFiles($dir . $fileName, $files, 'F');
+
+                $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($fileName);
+                $success_callback = 'window.open(\'' . $url . '\');';
+            } else {
+                $errors[] = 'Aucun PDF trouvé';
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
 
     public function getActionsButtons()
     {

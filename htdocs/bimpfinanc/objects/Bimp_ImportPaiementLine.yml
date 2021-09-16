@@ -7,6 +7,8 @@ labels:
     name: ligne d'import
     name_plur: lignes d'import
     
+export_light: 0
+    
     
 parent_module: bimpfinanc
 parent_object: Bimp_ImportPaiement
@@ -29,7 +31,7 @@ fields:
         label: Import
         type: id_parent
     factures:
-        label: Facture(s)
+        label: Facture(s) liée(s)
         type: items_list
         items_data_type: id_object
         object: factures
@@ -67,6 +69,7 @@ filters_panels:
 lists:
     default: 
         checkboxes: 1
+        modal_view: default
         row_style:
             callback: getRowStyle
         configurable: 1
@@ -78,10 +81,11 @@ lists:
         cols:
             type:
             factures:
+            dataLight:
             name:
                 edit: 1
-            fact_reconnue:
             priceDet:
+            fact_reconnue:
             fact_possible:
             fact_client:
     
@@ -89,7 +93,7 @@ lists:
                       
 lists_cols: 
     dataLight:
-        label: Data
+        label: Data light
         value: 
             callback: getDataInfo
     fact_reconnue: 
@@ -110,5 +114,57 @@ lists_cols:
             callback: getPrice
                      
         
+views: 
+    default: 
+        objects_change_reload: Bimp_ImportPaiementLine
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table: 
+                        name: infos
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table: 
+                        name: data
+                  - type: fields_table
+                    col_lg: 12
+                    col_md: 12
+                    fields_table: 
+                        name: search
         
-
+fields_tables: 
+    infos: 
+        title: Informations
+        icon: fas_info-circle
+        rows: 
+            - field: name
+              edit: 1
+            - field: type
+            - field: factures
+            - label: Montant
+              value: 
+                callback: getPrice
+            - field: traite
+    data: 
+        title: Informations
+        icon: fas_info-circle
+        rows: 
+            - field: data
+    search: 
+        title: Possibilitée
+        icon: fas_info-circle
+        rows: 
+            - label: Facture(s) reconnue
+              value: 
+                callback: displayFactReconnue
+            - label: Facture(s) par montants
+              value: 
+                callback: getFactPossible
+            - label: Facture(s) par client
+              value: 
+                callback: getFactClient

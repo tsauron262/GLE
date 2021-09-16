@@ -4402,6 +4402,7 @@ class BS_SAV extends BimpObject
                                             if ($bimpFacture->dol_object->validate($user, '') <= 0) { //pas d'entrepot pour pas de destock
                                                 $msg = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($bimpFacture->dol_object), 'Echec de la validation de la facture');
                                                 $warnings[] = $msg;
+                                                $errors = BimpTools::merge_array($errors, BimpTools::getDolEventsMsgs(array('errors')));
                                                 dol_syslog('SAV "' . $this->getRef() . '": ' . $msg, LOG_ERR);
                                             } else {
                                                 $bimpFacture->fetch($facture->id);

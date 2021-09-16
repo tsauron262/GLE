@@ -192,6 +192,9 @@ class BimpComm extends BimpDolObject
                 if (!BimpObject::objectLoaded($client)) {
                     $errors[] = 'Client absent';
                 } else {
+                    if($client->getData('fk_typent') == 0)
+                        $errors[] = 'Type de tier obligatoire';
+                    
 
                     // Module de validation activé
                     if ((int) $conf->global->MAIN_MODULE_BIMPVALIDATEORDER == 1) {
@@ -224,7 +227,6 @@ class BimpComm extends BimpDolObject
                 $rib->isValid($errors);
             }
         }
-//        $errors[] = 'TODO A suppr';
 
         return (count($errors) ? 0 : 1);
     }

@@ -46,7 +46,7 @@ fields:
         default_value: ban
         
     label: 
-        label: Intitulé du compte
+        label: Intitulé du compte (interne a l'ERP)
         required: 1
         
     rum:

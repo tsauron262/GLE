@@ -115,7 +115,7 @@ class ValidComm extends BimpObject
             return 1;
 
        global $conf;
-        $this->db2 = getDoliDBInstance($conf->db->type,$conf->db->host,$conf->db->user,$this->db->db->database_pass,$conf->db->name,$conf->db->port);
+//        $this->db2 = getDoliDBInstance($conf->db->type,$conf->db->host,$conf->db->user,$this->db->db->database_pass,$conf->db->name,$conf->db->port);
         
         // Création contact
         /* TODO Pourquoi ici ? TODO */

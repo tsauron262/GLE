@@ -1939,7 +1939,8 @@ class BimpObject extends BimpCache
                         'Action' => $action
                             ), true);
                 } else {
-                    $this->db->db->commit();
+                    if(!$this->db->db->commit())
+                        $result['errors'][] = 'Une erreur inconnue est survenue - opération annulée';
                 }
             }
         }

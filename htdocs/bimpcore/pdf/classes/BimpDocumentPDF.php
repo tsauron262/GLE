@@ -1170,7 +1170,7 @@ class BimpDocumentPDF extends BimpModelPDF
         }
         foreach($this->acompteTva as $rate => $montant){
             $this->tva[$rate] += $montant;
-            $this->ht[$rate] += $montant * 100 / $rate;
+            $this->ht[$rate] += $this->acompteHt;//$montant * 100 / $rate;
         }
     }
 

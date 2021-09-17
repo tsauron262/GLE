@@ -306,6 +306,11 @@ class Commande extends CommonOrder
         // Define new ref
         if (! $error && (preg_match('/^[\(]?PROV/i', $this->ref) || empty($this->ref))) // empty should not happened, but when it occurs, the test save life
         {
+            /* mod drsi*/
+            BimpTools::sleppIfBloqued("numPropal");
+            BimpTools::bloqueDebloque("numPropal");
+            $bloqued = true;
+            /*fmoddrsi*/
             $num = $this->getNextNumRef($soc);
         }
         else
@@ -418,11 +423,19 @@ class Commande extends CommonOrder
 
         if (! $error)
         {
+            /*moddrsi*/
+            if($bloqued)
+                BimpTools::bloqueDebloque("numPropal", 0);
+            /*fmoddrsi*/
             $this->db->commit();
             return 1;
         }
         else
 		{
+            /*moddrsi*/
+            if($bloqued)
+                BimpTools::bloqueDebloque("numPropal", 0);
+            /*fmoddrsi*/
             $this->db->rollback();
             return -1;
         }

@@ -14,11 +14,12 @@ class CronSynopsis {
     }
 
     public function netoyage() {
+        ini_set('display_errors', 1);
         $this->db->query("DELETE FROM " . MAIN_DB_PREFIX . "element_element WHERE  `sourcetype` LIKE  'resa'");
         $this->db->query("DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_Histo_User WHERE  `tms` <  '" . $this->db->idate(strtotime("-3 day")) . "'");
         
         
-        $sql = $this->db->query('SELECT rowid, `total_ttc` != (SELECT SUM(`total_ttc`) as dif FROM `llx_facture` f WHERE `total_ttc` != (SELECT SUM(`total_ttc`) FROM `llx_facturedet` WHERE `fk_facture` = f.rowid GROUP BY `fk_facture`)');
+        $sql = $this->db->query('SELECT rowid, SUM(`total_ttc`) as dif FROM `llx_facture` f WHERE `total_ttc` != (SELECT SUM(`total_ttc`) FROM `llx_facturedet` WHERE `fk_facture` = f.rowid GROUP BY `fk_facture`)');
         while ($ln = $this->db->fetch_object($sql)){
             if($ln->dif > 0.02 || $ln->dif < -0.02)
             mailSyn2("prob  total fact", 'tommy@bimp.fr, f.martinez@bimp.fr', null, "ID facture total faux ".$ln->rowid);

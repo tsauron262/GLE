@@ -1026,6 +1026,11 @@ function dol_syslog($message, $level = LOG_INFO, $ident = 0, $suffixinfilename='
                     $message .= synGetDebug();
                 $suffixinfilename = "_deprecated";
             }
+            if(stripos($message, "Redis") !== false){
+                if(function_exists("synGetDebug"))
+                    $message .= synGetDebug();
+                $suffixinfilename = "_redis";
+            }
             if(stripos($message, "Forbidden") !== false || stripos($message, "Duplicate") !== false || stripos($message, "a déjà le statut") !== false || stripos($message, "Doublon") !== false){
                 if(function_exists("synGetDebug"))
                     $message .= synGetDebug();

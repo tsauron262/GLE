@@ -110,6 +110,8 @@ class ValidComm extends BimpObject
         
         $this->updateCreditSafe($bimp_object);
         
+        die('FIIIIIIIIIIIIIIIN');
+        
 //        return 1;
                        
         // Object non géré
@@ -437,7 +439,10 @@ class ValidComm extends BimpObject
             return;
         }
         
-        $rtp = $client->getTotalUnpayed();
+        if(isset($this->client_rtp))
+            $rtp = $this->client_rtp;
+        else
+            $rtp = $client->getTotalUnpayed();
         if($rtp < 0)
             $rtp = 0;
                 
@@ -788,6 +793,40 @@ class ValidComm extends BimpObject
         else
             $client = $bimp_object->getChildObject('client');
         
+        echo 'solvable ?<br/>';
+        // Non solvable
+        if($client->getData('solvabilite_status') != Bimp_Societe::SOLV_SOLVABLE)
+            return 0;
+        
+        echo 'Créer après le 1er mai 2021 ?<br/>';
+        // Créer après le 1er mai 2021
+        if('2021-05-1' < $client->getData('datec'))
+            return 0;
+
+        echo 'Avec retard de paiement ?<br/>';
+
+        // Avec retard de paiement
+        if(isset($this->client_rtp))
+            $rtp = $this->client_rtp;
+        else
+            $rtp = $client->getTotalUnpayed();
+
+        if($rtp != 0)
+            return 0;
+        
+        // Les 3 conditions sont satifaites, update limite
+        $previous_limit = $client->getdata('outstanding_limit');
+        
+        // data Crédit Safe
+        $d_cf = $client->checkSiren('siret', $client->getData('siret'));
+        
+        print_r($d_cf);
+        die();
+        
+        
+        
+        
+        
         
         
     }
@@ -801,7 +840,7 @@ class ValidComm extends BimpObject
 //Pour un cas comme celui-ci il faudrait que le système cherche la limite recommandée par Credit Safe et remplisse automatiquement le champ "encours autorisé"
 //NB : toutefois, il doit être de 100 000 € maximum, même si CréditSafe nous donne une limite supérieure
 //Si le nouvel encours autorisé le permet, valider automatiquement la commande
-// 
+//  
 //Mais attention, doivent être exclus de cet automatisme :
 //
 //    Les clients ouverts à partir du 1er mai 2021
@@ -941,26 +980,4 @@ class DoliValidComm extends CommonObject {
 
 
 
-//2021-09-16 13:45:57 ERR     109.190.233.25, 10.192.20.142->unix:  | j.brych | Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36
-//http://erp.bimp.fr/bimp8//bimpcommercial/index.php?fc=commande&id=192704&ajax=1&action=setObjectAction&request_id=1&bimp_context=private | https://erp.bimp.fr/bimp8/bimpcommercial/index.php?fc=commande&id=192704
-//Array
-//(
-//    [module] => bimpcommercial
-//    [object_name] => Bimp_Commande
-//    [id_object] => 192704
-//    [object_action] => validate
-//)
-//
-//DoliDBMysqliC::close Closing a connection with an opened transaction depth=1
-//
-//2021-09-16 13:45:57 WARNING 109.190.233.25, 10.192.20.142->unix:  | j.brych | Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36
-//http://erp.bimp.fr/bimp8//bimpcommercial/index.php?fc=commande&id=192704&ajax=1&action=setObjectAction&request_id=1&bimp_context=private | https://erp.bimp.fr/bimp8/bimpcommercial/index.php?fc=commande&id=192704
-//Array
-//(
-//    [module] => bimpcommercial
-//    [object_name] => Bimp_Commande
-//    [id_object] => 192704
-//    [object_action] => validate
-//)
-//
-//--- End access to /bimp8/bimpcommercial/index.php (Warn: db disconnection forced, transaction depth was 1)
+

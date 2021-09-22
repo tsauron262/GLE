@@ -1792,14 +1792,15 @@ class Bimp_Societe extends BimpDolObject
                 $link = 'https://www.creditsafe.fr/getdata/service/CSFRServices.asmx';
 
                 $sClient = new SoapClient($link . "?wsdl", array('trace' => 1));
-                $returnData = $sClient->GetData(array("requestXmlStr" => str_replace("SIREN", ($siret ? $siret : $siren), $xml_data)));
+                $objReturn = $sClient->GetData(array("requestXmlStr" => str_replace("SIREN", ($siret ? $siret : $siren), $xml_data)));
 
-                $returnData = htmlspecialchars_decode($returnData->GetDataResult);
-
-                $returnData = BimpTools::replaceBr($returnData, '<br/>');
-                $returnData = str_replace("&", "et", $returnData);
-                $returnData = str_replace(" < ", " ", $returnData);
-                $returnData = str_replace(" > ", " ", $returnData);
+                $returnData = $objReturn->GetDataResult;
+//                $returnData = htmlspecialchars_decode($returnData);
+//
+//                $returnData = BimpTools::replaceBr($returnData, '<br/>');
+//                $returnData = str_replace("&", "et", $returnData);
+//                $returnData = str_replace(" < ", " ", $returnData);
+//                $returnData = str_replace(" > ", " ", $returnData);
 
                 global $bimpLogPhpWarnings;
                 if (is_null($bimpLogPhpWarnings)) {

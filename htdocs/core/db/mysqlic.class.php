@@ -1928,6 +1928,7 @@ class DoliDBMysqliC extends DoliDB
                 ));
             }
         }
+        return $res;
     }
     
     public function rollback($log = '')

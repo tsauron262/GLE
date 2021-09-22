@@ -69,7 +69,8 @@ $tabPrefixe = array("" => "Général", "_deprecated" => "Deprecated",
     "_caldav" => "CalDav", "_caldav2" => "CalDav2", "_ldap" => "Ldap", "_caldavLog" => "Log Caldav", 
     "_sauv" => "Sauv", "_admin" => "Log Admin", "_extract" => "Export", "_devissav" => "Devis SAV",
     "_charge_sql" => "Charge SQL",
-    "_duplicate" => "Duplicate/Forbiden"
+    "_duplicate" => "Duplicate/Forbiden",
+    "_redis" => "Redis"
     );
 
 

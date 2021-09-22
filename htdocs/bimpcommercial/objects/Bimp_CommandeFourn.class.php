@@ -288,8 +288,8 @@ class Bimp_CommandeFourn extends BimpComm
                 global $mysoc;
                 if (is_object($mysoc)) {
                     if ($mysoc->name) {
-                        $result['name'] = 'AGENCE'.$mysoc->name;
-                        $result['contact'] = 'AGENCE'.$mysoc->name;
+                        $result['name'] = 'AGENCE '.$mysoc->name;
+                        $result['contact'] = 'AGENCE '.$mysoc->name;
                     }
                     if ($mysoc->address) {
                         $result['adress'] = $mysoc->address;

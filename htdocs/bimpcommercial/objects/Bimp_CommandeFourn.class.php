@@ -1780,9 +1780,10 @@ class Bimp_CommandeFourn extends BimpComm
             $adresseFact = array("tag"      => "Address", "attrs"    => array("type" => "billing"),
                 "children" => array(
                     "ContactName"  => $mysoc->name,
-                    "AddressLine1" => $arrayToXml->xmlentities($mysoc->address),
-                    "AddressLine2" => "",
+                    "AddressLine1"  => $mysoc->name,
+                    "AddressLine2" => $arrayToXml->xmlentities($mysoc->address),
                     "AddressLine3" => "",
+//                    "AddressLine3" => "",
                     "City"         => $mysoc->town,
                     "ZipCode"      => $mysoc->zip,
                     "CountryCode"  => "FR",

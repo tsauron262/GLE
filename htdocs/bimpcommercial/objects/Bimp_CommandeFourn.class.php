@@ -255,12 +255,14 @@ class Bimp_CommandeFourn extends BimpComm
                 $entrepot = $this->getChildObject('entrepot');
                 if (BimpObject::objectLoaded($entrepot)) {
                     if ($entrepot->address) {
+                        $result['name'] = 'BIMP';
+                        $result['contact'] = 'BIMP';
                         $tabAdd = explode("<br/>", $entrepot->address);
                         $result['adress'] = $tabAdd[0];
                         if (isset($tabAdd[1]))
                             $result['adress2'] = $tabAdd[1];
-                        if (isset($tabAdd[2]))
-                            $result['adress3'] = $tabAdd[2];
+//                        if (isset($tabAdd[2]))
+//                            $result['adress3'] = $tabAdd[2];
                         if ($entrepot->zip) {
                             $result['zip'] = $entrepot->zip;
                         } else {
@@ -286,6 +288,7 @@ class Bimp_CommandeFourn extends BimpComm
                 if (is_object($mysoc)) {
                     if ($mysoc->name) {
                         $result['name'] = $mysoc->name;
+                        $result['contact'] = $mysoc->name;
                     }
                     if ($mysoc->address) {
                         $result['adress'] = $mysoc->address;
@@ -308,27 +311,28 @@ class Bimp_CommandeFourn extends BimpComm
                     $dataAdd = explode("\n", $address);
 
                     $result['name'] = $dataAdd[0];
-                    $result['adress'] = $dataAdd[1];
+                    $result['contact'] = $dataAdd[1];
+                    $result['adress'] = $dataAdd[2];
 
                     if (count($dataAdd) >= 5 && count(explode(" ", $dataAdd[4])) > 1) {
-                        $result['adress2'] = $dataAdd[2];
-                        $result['adress3'] = $dataAdd[3];
+                        $result['adress2'] = $dataAdd[3];
+//                        $result['adress3'] = $dataAdd[3];
                         $tabZipTown = explode(" ", $dataAdd[4]);
                         $town = str_replace($tabZipTown[0] . " ", "", $dataAdd[4]);
                         if (count($dataAdd) == 6)
                             $result['country'] = $dataAdd[5];
                     } elseif (count($dataAdd) >= 4 && count(explode(" ", $dataAdd[3])) > 1) {
-                        $result['adress2'] = $dataAdd[2];
+//                        $result['adress2'] = $dataAdd[2];
                         $tabZipTown = explode(" ", $dataAdd[3]);
                         $town = str_replace($tabZipTown[0] . " ", "", $dataAdd[3]);
                         if (count($dataAdd) == 5)
                             $result['country'] = $dataAdd[4];
-                    } elseif ((count($dataAdd) >= 3 && count(explode(" ", $dataAdd[2])) > 1)) {
+                    } /*elseif ((count($dataAdd) >= 3 && count(explode(" ", $dataAdd[2])) > 1)) {
                         $tabZipTown = explode(" ", $dataAdd[2]);
                         $town = str_replace($tabZipTown[0] . " ", "", $dataAdd[2]);
                         if (count($dataAdd) == 4)
                             $result['country'] = $dataAdd[3];
-                    } else
+                    } */else
                         $warnings[] = "Impossible de parser l'adresse personalisée";
                     if (count($tabZipTown) > 1) {
                         $result['zip'] = $tabZipTown[0];
@@ -349,6 +353,9 @@ class Bimp_CommandeFourn extends BimpComm
                         $soc = $contact->getParentInstance();
                         if (BimpObject::objectLoaded($soc) && $soc->isCompany()) {
                             $result['name'] = $soc->getData('nom');
+                        }
+                        else{
+                            $result['name'] = $contact->getData('firstname') . ' ' . $contact->getData('lastname');
                         }
                         $result['contact'] = $contact->getData('firstname') . ' ' . $contact->getData('lastname');
                         $result['adress'] = $contact->getData('address');
@@ -1784,15 +1791,18 @@ class Bimp_CommandeFourn extends BimpComm
             $dataLiv = $this->getAdresseLivraison($errors);
 //            echo "<pre>";print_r($dataLiv);
 
-            $name = ($dataLiv['name'] != '' ? $dataLiv['name'] . ' ' : '') . $dataLiv['contact'];
-            if ($name == "")
-                $name = "BIMP";
+//            $name = ($dataLiv['name'] != '' ? $dataLiv['name'] . ' ' : '') . $dataLiv['contact'];
+            $name = $dataLiv['name'];
+            $contact = $dataLiv['contact'];
+//            if ($name == "")
+//                $name = "BIMP";
             $adresseLiv = array("tag"      => "Address", "attrs"    => array("type" => "shipping"),
                 "children" => array(
                     "ContactName"  => substr($name, 0, 49),
-                    "AddressLine1" => $arrayToXml->xmlentities($dataLiv['adress']),
-                    "AddressLine2" => $arrayToXml->xmlentities($dataLiv['adress2']),
-                    "AddressLine3" => $arrayToXml->xmlentities($dataLiv['adress3']),
+                    "AddressLine1"  => substr($contact, 0, 49),
+                    "AddressLine2" => $arrayToXml->xmlentities($dataLiv['adress']),
+                    "AddressLine3" => $arrayToXml->xmlentities($dataLiv['adress2']),
+//                    "AddressLine3" => $arrayToXml->xmlentities($dataLiv['adress3']),
                     "City"         => $arrayToXml->xmlentities($dataLiv['town']),
                     "ZipCode"      => $dataLiv['zip'],
                     "CountryCode"  => ($dataLiv['country'] != "FR" && $dataLiv['country'] != "") ? strtoupper(substr($dataLiv['country'], 0, 2)) : "FR",

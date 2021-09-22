@@ -991,9 +991,9 @@ class BimpDocumentPDF extends BimpModelPDF
         if (BimpCore::getConf("CGV_BIMP") && static::$use_cgv) {
             $html .= '<span style="font-weight: bold;">';
             if ($this->pdf->addCgvPages)
-                $html .= 'La signature de ce document vaut acceptation de nos Conditions Générales de Vente annexées et disponibles sur www.bimp.fr';
+                $html .= 'La signature de ce document vaut acceptation de nos Conditions Générales de Vente annexées et consultables sur le site www.bimp-pro.fr pour les professionnels et sur www.bimp.fr pour les particuliers.';
             else
-                $html .= 'Nos Conditions Générales de Vente sont consultables sur le site www.bimp.fr';
+                $html .= 'Nos Conditions Générales de Vente sont consultables sur le site www.bimp-pro.fr pour les professionnels et sur www.bimp.fr pour les particuliers.';
             $html .= "</span>";
             $html .= '<br/>Les marchandises vendues sont soumises à une clause de réserve de propriété.
    En cas de retard de paiement, taux de pénalité de cinq fois le taux d’intérêt légal et indemnité forfaitaire pour frais de recouvrement de 40€ (article L.441-6 du code de commerce).';
@@ -1170,7 +1170,7 @@ class BimpDocumentPDF extends BimpModelPDF
         }
         foreach($this->acompteTva as $rate => $montant){
             $this->tva[$rate] += $montant;
-            $this->ht[$rate] += $montant * 100 / $rate;
+            $this->ht[$rate] += $this->acompteHt;//$montant * 100 / $rate;
         }
     }
 

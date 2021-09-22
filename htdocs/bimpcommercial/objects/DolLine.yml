@@ -23,9 +23,6 @@ fields:
         label: Produit
         type: id_object
         object: product
-        displays: 
-            default: 
-                type: nom_url
             
     label: 
         label: Libellé
@@ -58,10 +55,10 @@ fields:
         label: Prix fournisseur
         type: id_object
         object: fourn_price
-        displays: 
-            default: 
-                type: callback
-                method: displayLabel
+#        displays: 
+#            default: 
+#                type: callback
+#                method: displayLabel
         
     total_ht: 
         label: Total HT

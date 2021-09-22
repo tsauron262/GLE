@@ -1861,10 +1861,10 @@ class BC_StatsList extends BC_List
                                 break;
                         }
                     } else {
-                        $field = BimpTools::getArrayValueFromPath($col_params, 'field', '');
+                        $fieldName = BimpTools::getArrayValueFromPath($col_params, 'field', '');
                         $child = BimpTools::getArrayValueFromPath($col_params, 'child', '');
 
-                        if ($field) {
+                        if ($fieldName) {
                             if ($child) {
                                 if ($child === 'parent') {
                                     $obj = $this->object->getParentInstance();
@@ -1876,14 +1876,16 @@ class BC_StatsList extends BC_List
                             }
 
                             if (is_a($obj, 'BimpObject')) {
-                                $obj->set($field, $item[$col_name]);
+                                $obj->set($fieldName, $item[$col_name]);
 
-                                if ($field === $obj->getPrimary()) {
+
+                                $field = new BC_Field($obj, $fieldName);
+                                
+                                if ($fieldName === $obj->getPrimary()) {
                                     $field->params['type'] = 'id_object';
                                     $field->params['object'] = $obj;
                                 }
-
-                                $field = new BC_Field($obj, $field);
+                                
                                 $content = $field->getNoHtmlValue($option);
                             }
                         }

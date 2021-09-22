@@ -94,12 +94,12 @@ sections:
                               panel: 1
                               object: client
                               children: files                                  
-                    - cols: 
-                        - type: custom
-                          custom:
-                            callback: 
-                              method: displayBimpOjectLinked
-                              object: client 
+#                    - cols: 
+#                        - type: custom
+#                          custom:
+#                            callback: 
+#                              method: displayBimpOjectLinked
+#                              object: client 
             
           - id: divers
             title: Divers (admin)

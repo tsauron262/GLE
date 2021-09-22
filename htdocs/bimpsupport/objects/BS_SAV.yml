@@ -159,6 +159,9 @@ fields:
             help: Laisser vide si identique au centre de prise en charge
             options: 
                 array: userCentres
+        default_value: 
+            callback: getDefaultCodeCentreRepa
+        depends_on: code_centre
     id_equipment: 
         label: Equipement
         type: id_object
@@ -401,6 +404,11 @@ fields:
             default: 
                 type: datetime
                 show_hour: 1
+    bon_resti_raison:
+        label: Raison de la non facturation
+        type: int
+        values: 
+            array: bon_restit_raison
         
 forms: 
     default:
@@ -661,6 +669,18 @@ forms:
               input_name: inut
               content: 
                   callback: displayFactureAmountToPay
+            - field: bon_resti_raison
+              show:
+                  callback: isGratuit
+            - custom: 1
+              label: Raison détail
+              input_name: bon_resti_raison_detail
+              data_type: text
+              input: 
+                  type: textarea
+              display_if: 
+                  field_name: bon_resti_raison
+                  show_values: 99
               
     equipment: 
         rows: 
@@ -774,6 +794,9 @@ fields_tables:
             - label: Lien publique
               value:
                  callback: displayPublicLink
+            - field: bon_resti_raison
+              show: 
+                  callback: isGratuit
                  
     facturation:
         title: Facturation

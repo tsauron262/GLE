@@ -306,6 +306,11 @@ class Commande extends CommonOrder
         // Define new ref
         if (! $error && (preg_match('/^[\(]?PROV/i', $this->ref) || empty($this->ref))) // empty should not happened, but when it occurs, the test save life
         {
+            /* mod drsi*/
+            BimpTools::sleppIfBloqued("numCommande");
+            BimpTools::bloqueDebloque("numCommande");
+            $bloqued = true;
+            /*fmoddrsi*/
             $num = $this->getNextNumRef($soc);
         }
         else
@@ -384,6 +389,12 @@ class Commande extends CommonOrder
                 if (file_exists($dirsource))
                 {
                     dol_syslog(get_class($this)."::valid() rename dir ".$dirsource." into ".$dirdest);
+                    
+                    if(is_dir($dirdest)){
+                        $dirErreur = DOL_DATA_ROOT.'/problemes/commande'.$this->id.'-'.$newref;
+                        rename($dirdest, $dirErreur);
+                        BimpCore::addlog('Probléme grave de déplacment de fichier', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', null, array('source'=>$dirsource, 'dest'=>$dirdest, 'dossier deja existant déplacé'=>$dirErreur));
+                    }
 
                     if (@rename($dirsource, $dirdest))
                     {
@@ -412,11 +423,19 @@ class Commande extends CommonOrder
 
         if (! $error)
         {
+            /*moddrsi*/
+            if($bloqued)
+                BimpTools::bloqueDebloque("numCommande", 0);
+            /*fmoddrsi*/
             $this->db->commit();
             return 1;
         }
         else
 		{
+            /*moddrsi*/
+            if($bloqued)
+                BimpTools::bloqueDebloque("numCommande", 0);
+            /*fmoddrsi*/
             $this->db->rollback();
             return -1;
         }

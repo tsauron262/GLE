@@ -172,7 +172,7 @@ class BContract_contratLine extends BContract_contrat {
                 foreach ($array as $serial) {
                     $html .= '<tr>';
                     $equipment = $this->getInstance('bimpequipment', 'Equipment');
-                    if ($equipment->find(['serial' => $serial], true) && BimpTools::getContext() != 'public') {
+                    if (BimpTools::getContext() != 'public' && $equipment->find(['serial' => addslashes($serial)], true)) {
                             $html .= '<td>';
                             $html .= $equipment->getNomUrl(true, true, true);
                             $html .= '</td>';
@@ -182,7 +182,7 @@ class BContract_contratLine extends BContract_contrat {
                             }
                             $html .= '</td>';
                         
-                    } elseif($equipment->find(['serial' => substr($serial, 1)], true) && BimpTools::getContext() != 'public') { 
+                    } elseif(BimpTools::getContext() != 'public' && $equipment->find(['serial' => addslashes(substr($serial, 1))], true)) { 
                         $html .= '<td>';
                             $html .= $equipment->getNomUrl(true, true, true);
                             $html .= '</td>';
@@ -196,7 +196,7 @@ class BContract_contratLine extends BContract_contrat {
                         $html .= $serial;
                         $html .= '</td>';
                         $html .= '<td>';
-                        if ($equipment->find(['serial' => $serial])) {
+                        if ($equipment->find(['serial' => addslashes($serial)])) {
                             if($equipment->getData('imei')) {
                                 $html .= $equipment->getData('imei');
                             }

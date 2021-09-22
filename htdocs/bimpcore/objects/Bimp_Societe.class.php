@@ -412,6 +412,22 @@ class Bimp_Societe extends BimpDolObject
             $user
         );
     }
+    
+    public function getDefaultRib($createIfNotExist = true){
+        $ribs = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_SocBankAccount', array('default_rib'=>1, 'fk_soc'=>$this->id));
+        if(count($ribs) == 0){
+            $rib = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_SocBankAccount');
+            $rib->set('fk_soc', $this->id);
+            $rib->set('label', 'Default');
+            $errors = $rib->create();
+            return $rib;
+        }
+        else{
+            foreach($ribs as $rib){
+                return $rib;
+            }
+        }
+    }
 
     public function getPdfModelFileName($model)
     {
@@ -421,7 +437,8 @@ class Bimp_Societe extends BimpDolObject
 
         switch ($model) {
             case 'cepa':
-                return $this->id . '_sepa';
+                $rib = $this->getDefaultRib(false);
+                return $rib->getFileName(false, '');
         }
 
         return '';
@@ -620,17 +637,17 @@ class Bimp_Societe extends BimpDolObject
         return $label;
     }
 
-    public function getNumSepa()
-    {
-
-
-        if ($this->getData('num_sepa') == "") {
-            $new = BimpTools::getNextRef('societe_extrafields', 'num_sepa', 'FR02ZZZ008801-', 7);
-            $this->updateField('num_sepa', $new);
-            $this->update();
-        }
-        return $this->getData('num_sepa');
-    }
+//    public function getNumSepa()
+//    {
+//
+//
+//        if ($this->getData('num_sepa') == "") {
+//            $new = BimpTools::getNextRef('societe_extrafields', 'num_sepa', 'FR02ZZZ008801-', 7);
+//            $this->updateField('num_sepa', $new);
+//            $this->update();
+//        }
+//        return $this->getData('num_sepa');
+//    }
 
     public function getCountryCode()
     {
@@ -1775,14 +1792,15 @@ class Bimp_Societe extends BimpDolObject
                 $link = 'https://www.creditsafe.fr/getdata/service/CSFRServices.asmx';
 
                 $sClient = new SoapClient($link . "?wsdl", array('trace' => 1));
-                $returnData = $sClient->GetData(array("requestXmlStr" => str_replace("SIREN", ($siret ? $siret : $siren), $xml_data)));
+                $objReturn = $sClient->GetData(array("requestXmlStr" => str_replace("SIREN", ($siret ? $siret : $siren), $xml_data)));
 
-                $returnData = htmlspecialchars_decode($returnData->GetDataResult);
-
-                $returnData = BimpTools::replaceBr($returnData, '<br/>');
-                $returnData = str_replace("&", "et", $returnData);
-                $returnData = str_replace(" < ", " ", $returnData);
-                $returnData = str_replace(" > ", " ", $returnData);
+                $returnData = $objReturn->GetDataResult;
+//                $returnData = htmlspecialchars_decode($returnData);
+//
+//                $returnData = BimpTools::replaceBr($returnData, '<br/>');
+//                $returnData = str_replace("&", "et", $returnData);
+//                $returnData = str_replace(" < ", " ", $returnData);
+//                $returnData = str_replace(" > ", " ", $returnData);
 
                 global $bimpLogPhpWarnings;
                 if (is_null($bimpLogPhpWarnings)) {

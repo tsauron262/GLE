@@ -212,6 +212,10 @@ class BimpObject extends BimpCache
 
         if ($this->config->isDefined('dol_object')) {
             $this->dol_object = $this->config->getObject('dol_object');
+
+            if (is_object($this->dol_object)) {
+                $this->dol_object->db = $this->db->db;
+            }
             $this->use_commom_fields = 0;
         }
 
@@ -402,6 +406,24 @@ class BimpObject extends BimpCache
                     )
                 )
                     ), 'initial');
+        }
+    }
+
+    public function useNoTransactionsDb()
+    {
+        $this->db = BimpCache::getBdb(true);
+
+        if (is_object($this->dol_object)) {
+            $this->dol_object->db = $this->db->db;
+        }
+    }
+
+    public function useTransactionsDb()
+    {
+        $this->db = BimpCache::getBdb(false);
+
+        if (is_object($this->dol_object)) {
+            $this->dol_object->db = $this->db->db;
         }
     }
 
@@ -1728,7 +1750,11 @@ class BimpObject extends BimpCache
 
         if (!is_null($this->dol_object)) {
             unset($this->dol_object);
-            $this->dol_object = $this->config->getObject('dol_object');
+        }
+
+        $this->dol_object = $this->config->getObject('dol_object');
+        if (is_object($this->dol_object)) {
+            $this->dol_object->db = $this->db->db;
         }
 
         $this->resetMsgs();
@@ -1883,11 +1909,20 @@ class BimpObject extends BimpCache
             }
         }
 
+        $result['errors'] = BimpTools::merge_array($result['errors'], BimpTools::getDolEventsMsgs(array('errors')));
+
 //        BimpLog::actionEnd('bimpobject_action', (isset($errors['errors']) ? $errors['errors'] : $errors), (isset($errors['warnings']) ? $errors['warnings'] : array()));
 
         if ($use_db_transactions) {
             if (isset($result['errors']) && count($result['errors'])) {
                 $this->db->db->rollback();
+
+                if ((int) BimpCore::getConf('bimpcore_log_actions_rollbacks', 0)) {
+                    BimpCore::addlog('Rollback suite à action', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $this, array(
+                        'Action'  => $action,
+                        'Erreurs' => $result['errors']
+                            ), true);
+                }
             } else {
                 if ($this->db->db->has_rollback) {
                     if (isset($result['errors'])) {
@@ -1899,8 +1934,17 @@ class BimpObject extends BimpCache
                         $result['errors'][] = 'Une erreur inconnue est survenue - opération annulée';
                     }
                     $this->db->db->rollback();
+
+                    BimpCore::addlog('Rollback suite à action - erreur inconnue', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $this, array(
+                        'Action' => $action
+                            ), true);
                 } else {
-                    $this->db->db->commit();
+                    if(!$this->db->db->commit()){
+                        $result['errors'][] = 'Une erreur inconnue est survenue - opération annulée';
+                        BimpCore::addlog('Commit echec - erreur inconnue', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $this, array(
+                            'Action' => $action
+                                ), true);
+                    }
                 }
             }
         }
@@ -3833,9 +3877,10 @@ class BimpObject extends BimpCache
 
                 if (!is_array($errors)) {
                     BimpCore::addlog('Retour d\'erreurs absent', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
-                        'méthode' => 'update()',
-                        'Module'  => $this->module,
-                        'Object'  => $this->object_name
+                        'méthode'    => 'update()',
+                        'Module'     => $this->module,
+                        'Object'     => $this->object_name,
+                        'Class_name' => get_class($this)
                     ));
                     $errors = array();
                 }
@@ -3851,9 +3896,10 @@ class BimpObject extends BimpCache
 
                 if (!is_array($errors)) {
                     BimpCore::addlog('Retour d\'erreurs absent', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
-                        'méthode' => 'create()',
-                        'Module'  => $this->module,
-                        'Object'  => $this->object_name
+                        'méthode'    => 'create()',
+                        'Module'     => $this->module,
+                        'Object'     => $this->object_name,
+                        'Class_name' => get_class($this)
                     ));
 
                     $errors = array();
@@ -4807,6 +4853,10 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
         if (!is_object($this->dol_object)) {
             $this->dol_object = $this->config->getObject('dol_object');
+
+            if (is_object($this->dol_object)) {
+                $this->dol_object->db = $this->db->db;
+            }
         }
 
         foreach ($this->params['fields'] as $field) {
@@ -4892,6 +4942,10 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         if (!is_null($this->dol_object) && isset($this->dol_object->id) && $this->dol_object->id) {
             unset($this->dol_object);
             $this->dol_object = $this->config->getObject('dol_object');
+
+            if (is_object($this->dol_object)) {
+                $this->dol_object->db = $this->db->db;
+            }
         }
 
         if (is_null($this->dol_object)) {
@@ -5059,6 +5113,10 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         if (!is_null($this->dol_object) && isset($this->dol_object->id) && $this->dol_object->id) {
             unset($this->dol_object);
             $this->dol_object = $this->config->getObject('dol_object');
+
+            if (is_object($this->dol_object)) {
+                $this->dol_object->db = $this->db->db;
+            }
         }
 
         if (is_null($this->dol_object)) {
@@ -5100,7 +5158,8 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             } else {
                 BimpCore::addlog('Echec obtention champs supplémentaires', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
                     'Erreur SQL'    => $this->db->err(),
-                    'Champs suppl.' => $bimpObjectFields
+                    'Champs suppl.' => $bimpObjectFields,
+                    'Param SQL'     => implode("<br/>", array($this->getTable(), '`' . $this->getPrimary() . '` = ' . (int) $id, $bimpObjectFields))
                 ));
             }
         }
@@ -8428,6 +8487,11 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             'warnings'         => $warnings,
             'success_callback' => $success_callback
         );
+    }
+
+    public function isLight_exportActif()
+    {
+        return $this->getConf('export_light', 1);
     }
 
     public function actionGetGraphData($data, &$success)

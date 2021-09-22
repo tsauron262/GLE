@@ -133,10 +133,9 @@ fields:
         required: 1
         create_form: light
         edit_form: default
-        input: 
-            card: default
-        search:
+        input:
             type: search_societe
+            card: default
             
     fk_statut:
         label: Statut
@@ -486,6 +485,15 @@ fields_tables:
                     callback: displayAllTicketsCards
                     
 views: 
+    events:
+        rows:
+            - cols:
+                - type: rows
+                  rows:
+                      - cols:
+                          - type: custom
+                            custom: 
+                                callback: renderEventsTable
     default:
         rows:
             - cols: 
@@ -524,7 +532,6 @@ views:
                           method: renderNotesList
                           params:
                               - 1
-        
 lists_cols: 
     duree:
         has_total: 1
@@ -579,6 +586,11 @@ filters:
         type: user
 lists: 
     default:
+        checkboxes: 1
+        extra_bulk_actions: 
+            callback: getListExtraBulkActions
+        list_actions: 
+            callback: getListExtraListActions
         configurable: 1
         filters_panel: default
         total_row: 1

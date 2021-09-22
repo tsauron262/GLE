@@ -782,15 +782,15 @@ lists:
         cols:
             id_obj:
             parent:fk_soc:
-            desc:
-            pu_ht: 
-            tva:
-            qty:
-            remise_full:
+            dol_line:fk_product:
+            dol_line:description:
+            dol_line:pu_ht: 
+            dol_line:tva:
+            dol_line:qty:
+            dol_line:remise_percent:
             dol_line:total_ht:
             dol_line:total_ttc:
             pa_ht: 
-            remise_crt:
             margin:
                 
     product: 

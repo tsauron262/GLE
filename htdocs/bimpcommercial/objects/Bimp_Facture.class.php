@@ -3491,9 +3491,9 @@ class Bimp_Facture extends BimpComm
             $this->dol_object->fetch((int) $this->id);
             $this->hydrateFromDolObject();
 
-            if (!$this->isValidatable($errors)) {
-                return $errors;
-            }
+//            if (!$this->isValidatable($errors)) {
+//                return $errors;
+//            }
 
             $lines = $this->getLines('not_text');
             $total_ttc_wo_discounts = (float) $this->getTotalTtcWithoutDiscountsAbsolutes();

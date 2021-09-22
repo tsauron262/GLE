@@ -1813,8 +1813,8 @@ class Bimp_CommandeFourn extends BimpComm
 
             $portHt = $portTtc = 0;
             $shipping_mode = "";
-            if (in_array($this->getData('delivery_type'), array(Bimp_CommandeFourn::DELIV_ENTREPOT, Bimp_CommandeFourn::DELIV_SIEGE)))
-                $shipping_mode = "PNS6";
+//            if (in_array($this->getData('delivery_type'), array(Bimp_CommandeFourn::DELIV_ENTREPOT, Bimp_CommandeFourn::DELIV_SIEGE)))
+//                $shipping_mode = "PNS6";
             $tab = array(
                 array("tag"      => "Stream", "attrs"    => array("type" => "order", 'version' => "1.0"),
                     "children" => array(

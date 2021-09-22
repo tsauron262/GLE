@@ -390,7 +390,10 @@ fields:
         user_edit: 1
         history: 1
         values: 
-            array: modeReglements
+            callback:
+                method: getModeReglements
+                params:
+                    - 0
         default_value: 
             callback: getDefautlModeReglement
         depends_on: fk_typent
@@ -413,10 +416,13 @@ fields:
         type: id
         user_edit: 1
         values: 
-            array: modeReglements
-        input: 
-            type: select_payment
-            include_empty: 1
+            callback:
+                method: getModeReglements
+                params:
+                    - 1
+#        input: 
+#            type: select_payment
+#            include_empty: 1
             
     cond_reglement_supplier:
         label: Conditions de réglement

@@ -121,8 +121,12 @@ class Bimp_ImportPaiementLine extends BimpObject{
     }
     
     function actionTraiteManuel($data){
+        global $user;
         $errors = $warnings = array();
         $errors = $this->updateField('traite', 1);
+        $errors = $this->updateField('id_user_traite', $user->id);
+        
+        
         return array('errors' => $errors, 'warnings' => $warnings);
     }
     

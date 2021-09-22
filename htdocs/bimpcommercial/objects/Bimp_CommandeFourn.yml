@@ -227,6 +227,12 @@ fields:
     fk_availability: unset
     fk_input_reason: unset
     replaced_ref: unset
+    fk_mode_reglement: 
+        values: 
+            callback:
+                method: getModeReglements
+                params:
+                    - 1
     
 forms: 
     default: 

@@ -255,8 +255,9 @@ class Bimp_CommandeFourn extends BimpComm
                 $entrepot = $this->getChildObject('entrepot');
                 if (BimpObject::objectLoaded($entrepot)) {
                     if ($entrepot->address) {
-                        $result['name'] = 'BIMP';
-                        $result['contact'] = 'BIMP';
+                        $name = 'AGENCE BIMP';
+                        $result['name'] = $name;
+                        $result['contact'] = $name;
                         $tabAdd = explode("<br/>", $entrepot->address);
                         $result['adress'] = $tabAdd[0];
                         if (isset($tabAdd[1]))
@@ -287,8 +288,8 @@ class Bimp_CommandeFourn extends BimpComm
                 global $mysoc;
                 if (is_object($mysoc)) {
                     if ($mysoc->name) {
-                        $result['name'] = $mysoc->name;
-                        $result['contact'] = $mysoc->name;
+                        $result['name'] = 'AGENCE'.$mysoc->name;
+                        $result['contact'] = 'AGENCE'.$mysoc->name;
                     }
                     if ($mysoc->address) {
                         $result['adress'] = $mysoc->address;

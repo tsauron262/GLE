@@ -59,7 +59,7 @@ class Bimp_SocBankAccount extends BimpObject
         $verif_key = (int) 97 - (($cbX89 + $cgX15 + $ncX3) % 97);
         
         if((int) $verif_key !== $rib['clerib']) {
-            $errors[] = "Le RIB n'est pas valide";
+            $errors[] = "Le RIB sélectionné n'est pas valide, veuillez vérifier qu'il ne comporte pas d'erreurs";
             return (bool) 0;
         }
         

@@ -250,15 +250,31 @@ div.alert {
 .objectIcon {
     @include transition(all 0.3s ease);
 
-    margin-left: 10px;
+    margin-left: 8px;
     cursor: pointer;
     display: inline-block;
-    font-size: 11px;
+    font-size: 10px;
 
     color: $gray-dark;
 
     &:hover {
         color: $primary;
+    }
+}
+
+.infoIcon {
+    @include transition(all 0.3s ease);
+
+    display: inline-block;
+    margin: 0 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+    text-align: center;
+    color: $gray;
+
+    &:hover {
+        color: $info
     }
 }
 

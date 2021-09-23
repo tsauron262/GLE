@@ -314,6 +314,7 @@ fields:
         required: 0
         sortable: 0
         searchable: 0
+        hashtags: 1
         
     id_package: 
         label: Package

@@ -36,3 +36,11 @@ fields:
         dol_extra_field: 1
         values: 
             array: secteurs
+
+searches: 
+    default: 
+        fields_search: 
+            - a.nom
+        fields_return: 
+            - a.nom
+        label_syntaxe: '<a.nom>'

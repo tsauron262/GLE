@@ -22,7 +22,8 @@ class BC_Input extends BimpComponent
     public static $type_params_def = array(
         'text'                        => array(
             'values'       => array('data_type' => 'array', 'compile' => true, 'default' => array()),
-            'allow_custom' => array('data_type' => 'bool', 'default' => 1)
+            'allow_custom' => array('data_type' => 'bool', 'default' => 1),
+            'hashtags'     => array('data_type' => 'bool', 'default' => 0)
         ),
         'qty'                         => array(
             'step'      => array('data_type' => 'float', 'default' => 1),
@@ -30,14 +31,14 @@ class BC_Input extends BimpComponent
             'max_label' => array('data_type' => 'bool', 'default' => 0),
         ),
         'time'                        => array(
-            'display_now'     => array('data_type' => 'bool', 'default' => 0),
+            'display_now'   => array('data_type' => 'bool', 'default' => 0),
             'with_secondes' => array('data_type' => 'bool', 'default' => 1)
         ),
         'date'                        => array(
             'display_now' => array('data_type' => 'bool', 'default' => 0)
         ),
         'datetime'                    => array(
-            'display_now'  => array('data_type' => 'bool', 'default' => 0),
+            'display_now'   => array('data_type' => 'bool', 'default' => 0),
             'with_secondes' => array('data_type' => 'bool', 'default' => 1)
         ),
         'timer'                       => array(
@@ -53,6 +54,10 @@ class BC_Input extends BimpComponent
             'tab_key_as_enter' => array('data_type' => 'bool', 'default' => 0),
             'maxlength'        => array('data_type' => 'int'),
             'values'           => array('data_type' => 'array', 'default' => array()),
+            'hashtags'         => array('data_type' => 'bool', 'default' => 0)
+        ),
+        'html' => array(
+            'hashtags'         => array('data_type' => 'bool', 'default' => 0)
         ),
         'select'                      => array(
             'options'      => array('data_type' => 'array', 'compile' => true, 'default' => array()),
@@ -275,7 +280,7 @@ class BC_Input extends BimpComponent
                 }
                 break;
         }
-
+        
         $current_bc = $prev_bc;
     }
 
@@ -304,9 +309,11 @@ class BC_Input extends BimpComponent
         $options = array();
 
         switch ($this->params['type']) {
-            case 'text':
+            case 'text':                
                 $options['values'] = isset($this->params['values']) ? $this->params['values'] : array();
                 $options['allow_custom'] = (int) (isset($this->params['allow_custom']) ? $this->params['allow_custom'] : 1);
+                $options['hashtags'] = ((isset($this->params['hashtags']) && (int) $this->params['hashtags']) ? (int) $this->params['hashtags'] : (isset($this->field_params['hashtags']) ? (int) $this->field_params['hashtags'] : 0));
+                
             case 'qty':
                 $options['data'] = array();
                 $options['step'] = isset($this->params['step']) ? $this->params['step'] : 1;
@@ -371,6 +378,7 @@ class BC_Input extends BimpComponent
                 $options['with_secondes'] = isset($this->params['with_secondes']) ? $this->params['with_secondes'] : 1;
                 break;
 
+            case 'html':                 
             case 'textarea':
                 $options['rows'] = isset($this->params['rows']) ? $this->params['rows'] : 3;
                 $options['auto_expand'] = isset($this->params['auto_expand']) ? $this->params['auto_expand'] : 0;
@@ -378,6 +386,7 @@ class BC_Input extends BimpComponent
                 $options['tab_key_as_enter'] = isset($this->params['tab_key_as_enter']) ? $this->params['tab_key_as_enter'] : 0;
                 $options['maxlength'] = isset($this->params['maxlength']) ? $this->params['maxlength'] : '';
                 $options['values'] = isset($this->params['values']) ? $this->params['values'] : array();
+                $options['hashtags'] = (int) (isset($this->params['hashtags']) && (int) $this->params['hashtags'] ? $this->params['hashtags'] : isset($this->field_params['hashtags']) ? $this->field_params['hashtags'] : 0);
                 break;
 
             case 'select':

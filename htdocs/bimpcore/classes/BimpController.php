@@ -1886,6 +1886,100 @@ class BimpController
         );
     }
 
+    protected function ajaxProcessGetHastagsAutocompleteModalContent()
+    {
+        $errors = array();
+        $html = '';
+
+        $html .= '<div id="bih_autocomplete_modal_content">';
+        $msg = '1 - Entrez un mot-clé correspondant au type d\'élément à rechercher (produit, commande, facture, etc.).<br/>';
+        $msg .= '2 - Saisissez un terme de recherche (Référence, Nom, Libellé, etc.)<br/>';
+        $msg .= '3 - Sélectionnez l\'élément souhaité parmi les résultats de recherche avec les <b>flèches haut et bas</b> puis taper sur <b>Entrée</b> pour valider votre choix.<br/>';
+        $msg .= 'Vous pouvez utiliser la touche <b>Tab</b> ou <b>Entrée</b> pour sélectionner automatiquement le premier choix parmi les résultats de recherche.<br/>';
+        $msg .= 'Appuyez sur <b>Echap</b> pour annuler.';
+
+        $html .= '<p class="inputHelp">' . $msg . '</p>';
+
+        $html .= '<div style="margin: 40px 0; text-align: center">';
+
+        $html .= '<div id="bih_search_form">';
+
+        $html .= '<div id="bihObjectTypeContainer">';
+        $html .= '<label>Type d\'élément</label><br/>';
+        $html .= '<input type="text" value="" name="bih_search_object_input"/>';
+        $html .= '<span id="bihObjectLabel"></span>';
+        $html .= '</div>';
+
+        $html .= '<div id="bihSearchInputContainer">';
+        $html .= '<label>Recherche</label><br/>';
+        $html .= '<input type="text" name="bih_search_input" value="" class=""/>';
+        $html .= '<div class="spinner"><i class="fa fa-spinner fa-spin"></i></div>';
+        $html .= '</div>';
+
+        $html .= '</div>';
+        $html .= '<div id="bihCurValueLabel"></div>';
+        $html .= '<div id="bihValidateMsg" class="info">';
+        $html .= 'Tapez "Entrée" pour valider';
+        $html .= '</div>';
+
+        $html .= '<div id="bihAddHastagFormContainer">';
+        $footer = '<div class="buttonsContainer align-right">';
+        $footer .= '<span class="btn btn-primary" onclick="BIH.addHashtag()">';
+        $footer .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter';
+        $footer .= '</span>';
+        $footer .= '</div>';
+        $html .= BimpRender::renderSingleLineForm(array(
+                    array(
+                        'label'      => 'Mot-clé',
+                        'content'    => BimpInput::renderInput('text', 'bih_new_ht_code', ''),
+                        'input_name' => 'bih_new_ht_code',
+                    ),
+                    array(
+                        'label'      => 'Libellé',
+                        'content'    => BimpInput::renderInput('text', 'bih_new_ht_label', ''),
+                        'input_name' => 'bih_new_ht_label',
+                    ),
+                    array(
+                        'label'      => 'Description',
+                        'content'    => BimpInput::renderInput('textarea', 'bih_new_ht_description', ''),
+                        'input_name' => 'bih_new_ht_description',
+                    )
+                        ), array(
+                    'icon'       => 'fas_plus-circle',
+                    'title'      => 'Ajouter un Hashtag',
+                    'after_html' => $footer
+        ));
+        $html .= '</div>';
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return array(
+            'errors'     => $errors,
+            'html'       => $html,
+            'objects'    => ObjectsDef::getObjectsArray(),
+            'aliases'    => ObjectsDef::$aliases,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        );
+    }
+
+    protected function ajaxProcessFindHashtagResults()
+    {
+        $choices = array();
+
+        $search = BimpTools::getValue('search', '');
+        $obj_kw = BimpTools::getValue('obj_kw', '');
+
+        if ($obj_kw && $search) {
+            $choices = BimpObject::getHastagsObjectSearchChoices($obj_kw, $search);
+        }
+
+        return array(
+            'obj_kw'     => $obj_kw,
+            'choices'    => $choices,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        );
+    }
+
     // Lists:
 
     protected function ajaxProcessLoadObjectList()

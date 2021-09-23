@@ -727,94 +727,116 @@ class BimpObject extends BimpCache
         $results = array();
 
         if ((string) $search_value) {
+            $searches = array();
+
+            if (is_array($search_name)) {
+                $searches = $search_name;
+            } elseif ($search_name === 'all') {
+                foreach ($this->config->getCompiledParams('searches') as $name => $search_params) {
+                    $searches[] = $name;
+                }
+            } elseif ($search_name) {
+                $searches[] = $search_name;
+            }
+
+            if (empty($searches)) {
+                $searches[] = 'default';
+            }
+
             $search_value = $this->db->db->escape(strtolower($search_value));
 
-            $params = $this->getSearchParams($search_name);
+            foreach ($searches as $search_name) {
+                $params = $this->getSearchParams($search_name);
 
-            $card = (isset($options['card']) ? $options['card'] : '');
-            $filters = (isset($params['filters']) && is_array($params['filters']) ? $params['filters'] : array());
-            $joins = (isset($params['joins']) && is_array($params['joins']) ? $params['joins'] : array());
-            $primary = $this->getPrimary();
+                $card = (isset($options['card']) ? $options['card'] : '');
+                $filters = (isset($params['filters']) && is_array($params['filters']) ? $params['filters'] : array());
+                $joins = (isset($params['joins']) && is_array($params['joins']) ? $params['joins'] : array());
+                $primary = $this->getPrimary();
 
-            $search_filter = '';
+                $search_filter = '';
 
-            foreach (explode(' ', $search_value) as $search) {
-                $or_sql = '';
+                foreach (explode(' ', $search_value) as $search) {
+                    $or_sql = '';
 
-                foreach ($params['fields_search'] as $field) {
-                    $or_sql .= ($or_sql ? ' OR ' : '') . 'LOWER(' . $field . ') LIKE \'%' . $search . '%\'';
+                    foreach ($params['fields_search'] as $field) {
+                        $or_sql .= ($or_sql ? ' OR ' : '') . 'LOWER(' . $field . ') LIKE \'%' . $search . '%\'';
+                    }
+
+                    if ($or_sql) {
+                        $search_filter .= ($search_filter ? ' AND ' : '') . '(' . $or_sql . ')';
+                    }
                 }
 
-                if ($or_sql) {
-                    $search_filter .= ($search_filter ? ' AND ' : '') . '(' . $or_sql . ')';
-                }
-            }
-
-            if ($search_filter) {
-                $filters['search_custom'] = array(
-                    'custom' => '(' . $search_filter . ')'
-                );
-            }
-
-            $max_results = (isset($options['max_results']) ? (int) $options['max_results'] : 200);
-
-            $rows = $this->getList($filters, $max_results, 1, $params['order_by'], $params['order_way'], 'array', $params['fields_return'], $joins);
-
-            if (is_array($rows)) {
-                foreach ($rows as $r) {
-                    $label = $params['label_syntaxe'];
-                    $card_html = '';
-
-                    foreach ($params['fields_return'] as $field) {
-                        $field_name = $field;
-                        if (preg_match('/^.* as (.*)$/', $field, $matches)) {
-                            $field_name = $matches[1];
-                        } elseif (preg_match('/^.+\.(.+)$/', $field, $matches)) {
-                            $field_name = $matches[1];
-                        }
-                        if ($params['label_syntaxe']) {
-                            if (strpos($label, '<' . $field . '>') !== false) {
-                                if (isset($r[$field_name])) {
-                                    $label = str_replace('<' . $field . '>', $r[$field_name], $label);
-                                } else {
-                                    $label = str_replace('<' . $field . '>', '', $label);
-                                }
-                            } elseif (strpos($label, '<' . $field_name . '>') !== false) {
-                                if (isset($r[$field_name])) {
-                                    $label = str_replace('<' . $field_name . '>', $r[$field_name], $label);
-                                } else {
-                                    $label = str_replace('<' . $field_name . '>', '', $label);
-                                }
-                            }
-                        } elseif ($field_name !== $primary) {
-                            if (isset($r[$field_name]) && !empty($r[$field_name])) {
-                                $label .= ($label ? ' - ' : '') . $r[$field_name];
-                            }
-                        }
-                    }
-
-                    if (preg_match('/^(.*)\[REDIFNEG\](.*)\[\/REDIFNEG\](.*)$/U', $label, $matches)) {
-                        if ((float) $matches[2] < 0) {
-                            $label = $matches[1] . '<span class="danger">' . (float) $matches[2] . '</span>' . $matches[3];
-                        } else {
-                            $label = $matches[1] . (float) $matches[2] . $matches[3];
-                        }
-                    }
-
-                    if ($card) {
-                        $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $r[$primary]);
-                        if (BimpObject::objectLoaded($instance)) {
-                            $bc_card = new BC_Card($instance, null, $card);
-//                            $bc_card->setParam('view_btn', 0);
-                            $card_html = addslashes(htmlentities($bc_card->renderHtml()));
-                        }
-                    }
-
-                    $results[(int) $r[$primary]] = array(
-                        'id'    => (int) $r[$primary],
-                        'label' => $label,
-                        'card'  => $card_html
+                if ($search_filter) {
+                    $filters['search_custom'] = array(
+                        'custom' => '(' . $search_filter . ')'
                     );
+                }
+
+                $max_results = (isset($options['max_results']) ? (int) $options['max_results'] : 200);
+
+                $rows = $this->getList($filters, $max_results, 1, $params['order_by'], $params['order_way'], 'array', $params['fields_return'], $joins);
+
+                if (is_array($rows)) {
+                    foreach ($rows as $r) {
+                        if (isset($results[(int) $r[$primary]])) {
+                            continue;
+                        }
+
+                        $label = $params['label_syntaxe'];
+                        $card_html = '';
+
+                        foreach ($params['fields_return'] as $field) {
+                            $field_name = $field;
+                            if (preg_match('/^.* as (.*)$/', $field, $matches)) {
+                                $field_name = $matches[1];
+                            } elseif (preg_match('/^.+\.(.+)$/', $field, $matches)) {
+                                $field_name = $matches[1];
+                            }
+                            if ($params['label_syntaxe']) {
+                                if (strpos($label, '<' . $field . '>') !== false) {
+                                    if (isset($r[$field_name])) {
+                                        $label = str_replace('<' . $field . '>', $r[$field_name], $label);
+                                    } else {
+                                        $label = str_replace('<' . $field . '>', '', $label);
+                                    }
+                                } elseif (strpos($label, '<' . $field_name . '>') !== false) {
+                                    if (isset($r[$field_name])) {
+                                        $label = str_replace('<' . $field_name . '>', $r[$field_name], $label);
+                                    } else {
+                                        $label = str_replace('<' . $field_name . '>', '', $label);
+                                    }
+                                }
+                            } elseif ($field_name !== $primary) {
+                                if (isset($r[$field_name]) && !empty($r[$field_name])) {
+                                    $label .= ($label ? ' - ' : '') . $r[$field_name];
+                                }
+                            }
+                        }
+
+                        if (preg_match('/^(.*)\[REDIFNEG\](.*)\[\/REDIFNEG\](.*)$/U', $label, $matches)) {
+                            if ((float) $matches[2] < 0) {
+                                $label = $matches[1] . '<span class="danger">' . (float) $matches[2] . '</span>' . $matches[3];
+                            } else {
+                                $label = $matches[1] . (float) $matches[2] . $matches[3];
+                            }
+                        }
+
+                        if ($card) {
+                            $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $r[$primary]);
+                            if (BimpObject::objectLoaded($instance)) {
+                                $bc_card = new BC_Card($instance, null, $card);
+//                            $bc_card->setParam('view_btn', 0);
+                                $card_html = addslashes(htmlentities($bc_card->renderHtml()));
+                            }
+                        }
+
+                        $results[(int) $r[$primary]] = array(
+                            'id'    => (int) $r[$primary],
+                            'label' => $label,
+                            'card'  => $card_html
+                        );
+                    }
                 }
             }
         }
@@ -2324,6 +2346,45 @@ class BimpObject extends BimpCache
         }
 
         return false;
+    }
+
+    public function checkFieldsHashtags($fields = null)
+    {
+        $errors = array();
+
+        if ($this->isLoaded()) {
+            if (is_null($fields) || !is_array($fields)) {
+                $fields = $this->params['fields'];
+            }
+
+            foreach ($fields as $field_name) {
+                if ($this->field_exists($field_name)) {
+                    $type = $this->getConf('fields/' . $field_name . '/type', 'string');
+
+                    if (in_array($type, array('string', 'text', 'html'))) {
+                        if ($this->getConf('fields/' . $field_name . '/hashtags', 0, false, 'bool')) {
+                            $hashtags = array();
+
+                            $value = $this->getData($field_name);
+
+                            if ($value && preg_match_all('/\{\{(.+):([0-9]+)\}\}/U', $value, $matches, PREG_SET_ORDER)) {
+                                foreach ($matches as $match) {
+                                    $hashtags[] = array(
+                                        'obj_kw' => $match[1],
+                                        'id'     => $match[2]
+                                    );
+                                }
+                            }
+
+                            BimpObject::loadClass('bimpcore', 'BimpLink');
+                            $errors = BimpLink::setLinksForSource($this, $field_name, $hashtags);
+                        }
+                    }
+                }
+            }
+        }
+
+        return $errors;
     }
 
     // Gestion SQL: 
@@ -4131,6 +4192,7 @@ class BimpObject extends BimpCache
 
                     $warnings = BimpTools::merge_array($warnings, $this->updateAssociations());
                     $warnings = BimpTools::merge_array($warnings, $this->saveHistory());
+                    $warnings = BimpTools::merge_array($warnings, $this->checkFieldsHashtags());
 
                     $parent = $this->getParentInstance();
                     if (!is_null($parent)) {
@@ -4172,7 +4234,7 @@ class BimpObject extends BimpCache
 
     public function updateFieldsMasse($ids, $fields, $filters = array())
     {
-        //A amélioré grandement
+        // A amélioré grandement
 
         $set = array();
         foreach ($fields as $field => $val) {
@@ -4276,6 +4338,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
                         $warnings = BimpTools::merge_array($warnings, $this->updateAssociations());
                         $warnings = BimpTools::merge_array($warnings, $this->saveHistory());
+                        $warnings = BimpTools::merge_array($warnings, $this->checkFieldsHashtags());
 
                         $parent = $this->getParentInstance();
 
@@ -4409,6 +4472,9 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                         ));
                         $history->create($warnings, true);
                     }
+
+                    // Check des hastags: 
+                    $warnings = BimpTools::merge_array($warnings, $this->checkFieldsHashtags(array($field)));
 
                     $parent = $this->getParentInstance();
 
@@ -5848,14 +5914,14 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             $ref = $this->getRef(false);
             if ($ref) {
                 $html .= '<h2>';
-                $html .= $ref;
+                $html .= self::replaceHastags($ref);
                 $html .= '</h2>';
             }
 
             $name = $this->getName(false);
             if ($name) {
                 $html .= '<h4>';
-                $html .= $name;
+                $html .= self::replaceHastags($name);
                 $html .= '</h4>';
             }
             $html .= '</div>';
@@ -5875,6 +5941,26 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                     $html .= '</div>';
                 }
             }
+
+            // Hashtags: 
+            BimpObject::loadClass('bimpcore', 'BimpLink');
+            $links = BimpLink::getLinksForSource($this, '', 'bimpcore', 'BimpHashtag');
+
+            if (!empty($links)) {
+                $html .= '<div class="object_header_infos">';
+                foreach ($links as $link) {
+                    $html .= '<span class="hashtag">';
+                    $hashtag = $link->getLinkedObject();
+
+                    if (BimpObject::objectLoaded($hashtag)) {
+                        $html .= '<a href="' . $hashtag->getUrl() . '" target="_blank">#' . $hashtag->getData('code') . '</a>';
+                        $html .= BimpRender::renderObjectIcons($hashtag, false, 'default');
+                    }
+                    $html .= '</span>';
+                }
+                $html .= '</div>';
+            }
+
 
             // Infos extra
             $html .= '<div class="header_extra">';
@@ -5975,6 +6061,16 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 $html .= BimpRender::renderIcon('fas_trash-alt');
                 $html .= '</span>';
             }
+
+            // Bouton objets liés par citation: 
+            $onclick = $this->getJsLoadModalCustomContent('renderLinkedObjectsLists', 'Objets liés par citation');
+            $html .= '<span class="btn btn-default bs-popover"';
+            $html .= ' onclick="' . $onclick . '"';
+            $html .= BimpRender::renderPopoverData('Objets liés par citation');
+            $html .= '>';
+            $html .= BimpRender::renderIcon('fas_comments');
+            $html .= '</span>';
+
             $html .= '</div>';
             $html .= '</div>';
 
@@ -6994,6 +7090,16 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 return $this->$fonction();
         }
         return 'fonction : ' . $fonction . " inexistante";
+    }
+
+    public function renderLinkedObjectsLists()
+    {
+        if ($this->isLoaded()) {
+            self::loadClass('bimpcore', 'BimpLink');
+            return BimpLink::renderObjectLinkedObjectsLists($this);
+        }
+
+        return '';
     }
 
     // Générations javascript: 
@@ -8872,6 +8978,207 @@ var options = {
         }
 
         return $tabResult;
+    }
+
+    // Gestion des hashtags: 
+
+    public static function getHahstagsObjectTypeSearchChoices(&$search, &$new_kw = '')
+    {
+        $choices = array();
+
+        $search = strtolower($search);
+
+        foreach (ObjectsDef::$keywords as $kw => $defs) {
+            if (preg_match('/^(.*)(' . preg_quote($search, '/') . ')(.*)$/', strtolower($kw), $matches)) {
+                $icon = '';
+
+                if (isset($defs['icon']) && $defs['icon']) {
+                    $icon = BimpRender::renderIcon($defs['icon'], 'iconLeft');
+                }
+
+                $choices[$kw] = array(
+                    'label' => $icon . $matches[1] . '<b>' . $matches[2] . '</b>' . $matches[3],
+                    'data'  => array(
+                        'obj_kw' => $kw
+                    )
+                );
+            }
+        }
+
+        foreach (ObjectsDef::$aliases as $alias => $kw) {
+            if (preg_match('/^(.*)(' . preg_quote($search, '/') . ')(.*)$/', strtolower($alias), $matches)) {
+                if (isset($choices[$kw])) {
+                    if (preg_match('/^(.*) \(Alias: (.*)\)(.*)$/', $choices[$kw]['label'], $matches2)) {
+                        $choices[$kw]['label'] = $matches2[1] . ' (Alias: ' . $matches2[2] . ' ' . $matches[1] . '<b>' . $matches[2] . '</b>' . $matches[3] . ')' . $matches2[3];
+                    } else {
+                        $choices[$kw]['label'] .= ' (Alias: ' . $matches[1] . '<b>' . $matches[2] . '</b>' . $matches[3] . ')';
+                    }
+                } else {
+                    $icon = '';
+
+                    if (isset(ObjectsDef::$keywords[$kw]['icon']) && ObjectsDef::$keywords[$kw]['icon']) {
+                        $icon = BimpRender::renderIcon(ObjectsDef::$keywords[$kw]['icon'], 'iconLeft');
+                    }
+
+                    $choices[$kw] = array(
+                        'label' => $icon . $kw . ' (Alias: ' . $matches[1] . '<b>' . $matches[2] . '</b>' . $matches[3] . ')',
+                        'data'  => array(
+                            'obj_kw' => $kw
+                        )
+                    );
+                }
+            }
+        }
+
+        if (empty($choices)) {
+            // On recherche par début de référence:
+            foreach (ObjectsDef::$refs_prefixes as $prefixe => $kw) {
+                if (preg_match('/^' . preg_quote($prefixe, '/') . '(.*)$/i', $search, $matches3)) {
+                    $new_kw = $kw;
+                    return array();
+                }
+            }
+        }
+
+        if (!empty($choices)) {
+            $choices_tmp = $choices;
+
+            $choices = array();
+
+            foreach ($choices_tmp as $choice) {
+                $choices[] = $choice;
+            }
+        }
+
+        return $choices;
+    }
+
+    public static function getHastagsObjectSearchChoices($keyword, $search)
+    {
+        $choices = array();
+
+        if (isset(ObjectsDef::$keywords[$keyword])) {
+            $def = explode('/', ObjectsDef::$keywords[$keyword]['def']);
+
+            switch ($def[0]) {
+                case 'BO':
+                    $module = (isset($def[1]) ? $def[1] : '');
+                    $object_name = (isset($def[2]) ? $def[2] : '');
+
+                    if ($module && $object_name) {
+                        $instance = BimpObject::getInstance($module, $object_name);
+
+                        $card = BimpTools::getArrayValueFromPath($instance->params, 'nom_url/card', '');
+
+                        $results = $instance->getSearchResults('all', $search, array(
+                            'card'        => $card,
+                            'max_results' => 30
+                        ));
+
+                        foreach ($results as $id_object => $data) {
+                            $label = $data['label'];
+
+                            $words = explode(' ', $search);
+
+                            foreach ($words as $word) {
+                                if (preg_match('/^(.*)(' . preg_quote($word, '/') . ')(.*)$/i', $label, $matches)) {
+                                    $label = $matches[1] . '<b>' . $matches[2] . '</b>' . $matches[3];
+                                }
+                            }
+
+                            $choices[] = array(
+                                'label' => $label,
+                                'value' => $keyword . ':' . $id_object,
+                                'card'  => $data['card']
+                            );
+                        }
+                    }
+                    break;
+
+                case 'DO':
+                    $module = (isset($def[1]) ? $def[1] : '');
+                    $file = (isset($def[2]) ? $def[2] : '');
+                    $class_name = (isset($def[3]) ? $def[3] : '');
+
+                    if ($module) {
+                        if (!$file) {
+                            $file = $module;
+                        }
+
+                        if (!$class_name) {
+                            $class_name = ucfirst($file);
+                        }
+
+                        BimpTools::loadDolClass($module, $file, $class_name);
+
+                        if (class_exists($class_name)) {
+                            $instance = new $class_name($db);
+                        }
+
+                        // todo
+                    }
+
+                    break;
+            }
+        }
+
+        return $choices;
+    }
+
+    public static function replaceHastags($text, $no_html = false)
+    {
+        if (is_string($text)) {
+            if (preg_match_all('/\{\{(.+):([0-9]+)\}\}/U', $text, $matches, PREG_SET_ORDER)) {                
+                foreach ($matches as $match) {
+                    $obj_kw = (string) $match[1];
+                    $id = (int) $match[2];
+
+                    if ($obj_kw && $id && isset(ObjectsDef::$keywords[$obj_kw]['def'])) {
+                        $defs = explode('/', ObjectsDef::$keywords[$obj_kw]['def']);
+
+                        switch ($defs[0]) {
+                            case 'BO':
+                                $module = $defs[1];
+                                $object_name = $defs[2];
+
+                                $instance = BimpCache::getBimpObjectInstance($module, $object_name, $id);
+
+                                $label = '';
+
+                                if (BimpObject::objectLoaded($instance)) {
+                                    if ($no_html) {
+                                        $label = $instance->display('ref_nom');
+                                    } else {
+                                        $label = $instance->getLink();
+                                    }
+                                } else {
+                                    $instance = BimpObject::getInstance($module, $object_name);
+
+                                    $label = '';
+                                    if (!$no_html) {
+                                        $label .= '<span class="danger">';
+                                    }
+
+                                    $label .= $instance->getLabel('the') . ' #' . $id . ' n\'existe plus';
+
+                                    if (!$no_html) {
+                                        $label .= '</span>';
+                                    }
+                                }
+
+                                $text = str_replace($match[0], $label, $text);
+                                break;
+
+                            case 'DO':
+                                // todo
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $text;
     }
 
     // Divers: 

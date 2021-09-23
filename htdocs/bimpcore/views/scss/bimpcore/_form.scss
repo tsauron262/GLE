@@ -956,6 +956,130 @@ input[type=text].large_input {
 }
 
 /*Filters Input*/
+
 .obj_filters_input_container input {
     max-width: 350px!important;
+}
+
+/*Input Hastags*/
+
+#bih_autocomplete_modal {
+    #bih_autocomplete_modal_body {
+        overflow: visible;
+    }
+
+    #bihCurValueLabel {
+        background-color: #fff;
+        padding: 15px;
+        display: inline-block;
+        display: none;
+        margin: auto;
+        margin-top: 15px;
+        max-width: 500px;
+        text-align: left;
+    }
+
+    #bihValidateMsg {
+        display: inline-block;
+        margin: auto;
+        margin-top: 20px;
+        display: none;
+        text-align: center;
+        font-size: 16px;
+    }
+
+    .modal-body {
+        padding: 15px!important;
+        background-color: #F7F7F7;
+        max-height: none!important;
+    }
+
+    p {
+        margin-bottom: 20px;
+    }
+
+    #bih_search_form {
+        display: inline-block;
+        margin: auto;
+    }
+
+    #bihObjectTypeContainer {
+        display: inline-block;
+        margin-right: 10px;
+        text-align: left;
+    }
+
+    #bihSearchInputContainer {
+        display: inline-block;
+        text-align: left;
+
+        .spinner {
+            opacity: 0;
+            display: inline-block;
+            margin-left: 8px;
+            font-size: 16px;
+        }
+    }
+
+    #bihObjectLabel {
+        @include transition(all 0.3s ease);
+        display: none;
+        padding: 7px;
+        font-weight: bold;
+
+        &:hover {
+            color: #fff;
+            background-color: #A00000;
+            cursor: pointer;
+        }
+    }
+
+    label {
+        font-size: 11px;
+        text-transform: uppercase;
+        font-weight: bold;
+    }
+
+    input {
+        @include transition(all 0.3s ease);
+        border: 1px solid #6C6C6C;
+        padding: 5px 10px!important; 
+        font-size: 14px;
+
+        &:focus {
+            border-color: #3B6EA0;
+            box-shadow: 0 0 8px 0 #559EE6;
+        }
+
+        &.no_results {
+            color: #CC0000;
+            border-color: #CC0000;
+            box-shadow: 0 0 8px 0 #E67373;
+        }
+
+        &[name="bih_search_object_input"] {
+            width: 180px!important;
+        }
+
+        &[name="bih_search_input"] {
+            width: 350px!important;
+        }
+    }
+
+    #bihAddHastagFormContainer {
+        display: none;
+        margin-top: 30px;
+
+        .singleLineForm {
+            text-align: left;
+
+            input {
+                min-width: 160px;
+            }
+
+            textarea {
+                min-width: 300px;
+            }
+        }
+    }
 }

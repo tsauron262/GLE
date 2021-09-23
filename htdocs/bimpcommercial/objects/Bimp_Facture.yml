@@ -1065,7 +1065,8 @@ searches:
         fields_return: 
             - a.facnumber
             - s.nom
-        label_syntaxe: '<a.facnumber> (Client: <s.nom>)'
+            - ef.libelle
+        label_syntaxe: '<a.facnumber> - <ef.libelle> (Client: <s.nom>)'
         
 stats_lists_cols: 
     marge:

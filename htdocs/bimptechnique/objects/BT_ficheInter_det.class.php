@@ -480,7 +480,7 @@ class BT_ficheInter_det extends BimpDolObject
             $parent->update($w, true);
         }
 
-        return parent::onSave($errors, $warnings);
+        parent::onSave($errors, $warnings);
     }
 
     // Actions: 

@@ -457,6 +457,7 @@ fields:
         label: Note privée
         type: text
         user_edit: 1
+        hashtags: 1
         input: 
             note: 1   
             
@@ -464,6 +465,7 @@ fields:
         label: Note publique
         type: text
         user_edit: 1
+        hashtags: 1
         input: 
             note: 1
             

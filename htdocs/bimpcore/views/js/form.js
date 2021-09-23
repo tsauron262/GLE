@@ -1,5 +1,4 @@
 var inputsEvents = [];
-
 function addInputEvent(form_id, input_name, event, callback) {
     for (i in inputsEvents) {
         if (inputsEvents[i].form_id === form_id &&
@@ -22,7 +21,6 @@ function addInputEvent(form_id, input_name, event, callback) {
 function saveObjectFromForm(form_id, $button, successCallback, on_save, on_submit) {
     var $resultContainer = $('#' + form_id + '_result');
     var $form = $('#' + form_id);
-
     if (!$form.length) {
         var msg = 'Erreur technique: formulaire non trouvé';
         bimp_msg(msg, 'danger', $resultContainer);
@@ -31,9 +29,7 @@ function saveObjectFromForm(form_id, $button, successCallback, on_save, on_submi
 
     var module = $form.data('module');
     var object_name = $form.data('object_name');
-
     var $formular = $form.find('form.' + object_name + '_form');
-
     if (!$formular.length) {
         bimp_msg('Erreur. Formulaire absent ou invalide', 'danger');
         return;
@@ -46,19 +42,16 @@ function saveObjectFromForm(form_id, $button, successCallback, on_save, on_submi
     }
 
     prepareFormSubmit($form);
-
     if (!validateForm($form)) {
         return;
     }
 
     var data = new FormData($formular.get(0));
-
     if (!on_save || typeof (on_save) === 'undefined') {
         on_save = $form.data('on_save');
     }
 
     console.log(data);
-
     BimpAjax('saveObject', data, $resultContainer, {
         $form: $form,
         form_id: form_id,
@@ -75,7 +68,6 @@ function saveObjectFromForm(form_id, $button, successCallback, on_save, on_submi
                 bimpAjax.$resultContainer.slideUp(250, function () {
                     $(this).html('');
                 });
-
                 switch (bimpAjax.on_save) {
                     case 'reload':
                         if ((typeof (result.object_view_url) !== 'undefined') && result.object_view_url) {
@@ -86,23 +78,19 @@ function saveObjectFromForm(form_id, $button, successCallback, on_save, on_submi
                         }
                         reloadForm(bimpAjax.form_id);
                         break;
-
                     case 'close':
                         closeForm(bimpAjax.form_id);
                         break;
-
                     case 'redirect':
                         if (result.object_view_url) {
                             window.location = result.object_view_url;
                         }
                         break;
-
                     case 'open':
                         if (result.object_view_url) {
                             window.open(result.object_view_url);
                         }
                         break;
-
                     case 'none':
                         break;
                 }
@@ -114,7 +102,6 @@ function saveObjectFromForm(form_id, $button, successCallback, on_save, on_submi
             }
 
             triggerObjectChange(result.module, result.object_name, result.id_object);
-
             if (typeof (successCallback) === 'function') {
                 successCallback(result);
             }
@@ -128,7 +115,6 @@ function prepareFormSubmit($form) {
             var data_type = $(this).data('data_type');
             var field_name = $(this).data('field_name');
             var field_prefix = $(this).data('field_prefix');
-
             if (field_name) {
                 switch (data_type) {
                     case 'json':
@@ -182,7 +168,6 @@ function loadModalForm($button, data, title, successCallback, on_save, modal_for
         data.id_object = 0;
     }
     data.full_panel = 0;
-
     bimpModal.loadAjaxContent($button, 'loadObjectForm', data, title, 'Chargement du formulaire', function (result, bimpAjax) {
         var $form = bimpAjax.$resultContainer.find('.object_form');
         var modal_idx = parseInt(bimpAjax.$resultContainer.data('idx'));
@@ -190,7 +175,6 @@ function loadModalForm($button, data, title, successCallback, on_save, modal_for
         bimpModal.removeComponentContent($form.attr('id'));
         bimpModal.addButton('<i class="fas fa5-save iconLeft"></i>Enregistrer', 'saveObjectFromForm(\'' + result.form_id + '\', $(this), ' + on_save_success_callback + ', \'' + on_save + '\');', 'primary', 'save_object_button', modal_idx);
         bimpModal.addlink('<i class="far fa5-file iconLeft"></i>Afficher', '', 'primary', 'hidden objectViewLink', modal_idx);
-
         if ($form.length) {
             $form.each(function () {
                 onFormLoaded($form);
@@ -226,13 +210,11 @@ function appendModalForm(html, form_id, buttons, title) {
     }
 
     bimpModal.newContent(title, html);
-
     var modal_idx = bimpModal.idx;
     var $form = bimpModal.$contents.find('#modal_content_' + modal_idx).find('#' + form_id);
     if ($.isOk($form)) {
         $form.data('modal_idx', modal_idx);
         bimpModal.removeComponentContent($form.attr('id'));
-
         for (var i in buttons) {
             if (buttons[i].type === 'undefined') {
                 buttons[i].type = 'primary';
@@ -261,7 +243,6 @@ function reloadForm(form_id) {
         'form_name': $form.data('name'),
         'full_panel': 0
     };
-
     var $params = $('#' + form_id + '_params');
     if ($params.length) {
         $params.find('input.object_component_param').each(function () {
@@ -270,7 +251,6 @@ function reloadForm(form_id) {
     }
 
     $form.find('.object_form_content').hide();
-
     var $panel = $('#' + form_id + '_panel');
     var $modal = $();
     if (!$.isOk($panel)) {
@@ -380,23 +360,19 @@ function loadObjectFormFromForm(title, result_input_name, parent_form_id, module
     var $form = $('#' + parent_form_id);
     if (typeof (id_obj) == 'undefined')
         id_obj = 0;
-
     if (!$form.length) {
         bimp_msg('Une erreur est survenue. Impossible de charger le formulaire (1)', 'danger');
         return;
     }
 
     var $resultContainer = $form.find('#' + parent_form_id + '_result');
-
     if (!$resultContainer) {
         bimp_msg('Une erreur est survenue. Impossible de charger le formulaire (2)', 'danger');
         return;
     }
 
     $resultContainer.html('').hide();
-
     var $parentFormSubmit = null;
-
     var $panel = $form.findParentByClass('panel');
     if ($panel && $panel.length) {
         $parentFormSubmit = $panel.find('.panel-footer').find('.save_object_button');
@@ -430,7 +406,6 @@ function loadObjectFormFromForm(title, result_input_name, parent_form_id, module
         'id_object': id_obj,
         'id_parent': id_parent
     };
-
     if (typeof (values) !== 'undefined' && values) {
         data['param_values'] = values;
     }
@@ -453,24 +428,20 @@ function loadObjectFormFromForm(title, result_input_name, parent_form_id, module
                 var $formContent = bimpAjax.$parentForm.find('.object_form_content');
                 $formContent.slideUp(250, function () {
                     var html = '<div class="panel panel-default">';
-
                     html += '<div class="panel-heading">';
                     html += '<div class="panel-title">';
                     html += bimpAjax.title;
                     html += '</div>';
                     html += '</div>';
-
                     html += '<div class="panel-body">';
                     html += result.html;
                     html += '</div>';
-
                     html += '<div class="panel-footer" style="text-align: right">';
                     html += '<button class="cancel_button btn btn-default">';
                     html += '<i class="fa fa-times iconLeft"></i>Annuler';
                     html += '<button class="save_object_button btn btn-primary">';
                     html += '<i class="fas fa5-save iconLeft"></i>Enregistrer';
                     html += '</div>';
-
                     html += '</div>';
                     bimpAjax.$resultContainer.html(html).slideDown(function () {
                         var $newForm = bimpAjax.$resultContainer.find('#' + result.form_id);
@@ -534,7 +505,6 @@ function addObjectMultipleValuesItem(module, object_name, id_object, field, item
         field: field,
         item_value: item_value
     };
-
     BimpAjax('addObjectMultipleValuesItem', data, $resultContainer, {
         success: function (result) {
             if (typeof (successCallback) === 'function') {
@@ -557,8 +527,6 @@ function deleteObjectMultipleValuesItem(module, object_name, id_object, field, i
         field: field,
         item_value: item_value
     };
-
-
     BimpAjax('deleteObjectMultipleValuesItem', data, $resultContainer, {
         success: function (result) {
             if (typeof (successCallback) === 'function') {
@@ -579,7 +547,6 @@ function saveAssociations(operation, associations, $resultContainer, successCall
         operation: operation,
         associations: associations
     };
-
     BimpAjax('saveAssociations', data, $resultContainer, {
         success: function (result) {
             if (typeof (successCallBack) === 'function') {
@@ -605,9 +572,8 @@ function validateForm($form) {
         var $template = $(this).findParentByClass('subObjectFormTemplate');
         if (!$.isOk($template)) {
             var field_name = $(this).data('field_name');
-
             if (field_name) {
-                // Patch: (problème avec l'éditeur html => le textarea n'est pas alimenté depuis l'éditeur) 
+// Patch: (problème avec l'éditeur html => le textarea n'est pas alimenté depuis l'éditeur) 
                 if ($(this).find('.cke').length) {
                     var html_value = $('#cke_' + field_name).find('iframe').contents().find('body').html();
                     if (html_value === '<br>') {
@@ -692,9 +658,7 @@ function reloadObjectInput(form_id, input_name, fields, keep_new_value) {
     var custom = 0;
     var is_object = 0;
     var value = '';
-
     var $container = $form.find('.' + input_name + '_inputContainer');
-
     if ($container.length) {
         if ($container.hasClass('customField')) {
             custom = 1;
@@ -737,7 +701,6 @@ function reloadObjectInput(form_id, input_name, fields, keep_new_value) {
         field_prefix: $container.data('field_prefix'),
         is_object: is_object
     };
-
     if (keep_new_value) {
         data.value = value;
     }
@@ -773,7 +736,6 @@ function reloadObjectInput(form_id, input_name, fields, keep_new_value) {
                 $parent.html(result.html).slideDown(250, function () {
                     $parent.removeAttr('style');
                 });
-
                 setCommonEvents($parent);
                 setInputContainerEvents($parent.find('.inputContainer'));
                 setInputsEvents($parent);
@@ -794,21 +756,18 @@ function reloadObjectInput(form_id, input_name, fields, keep_new_value) {
 
 function reloadParentInput($button, input_name, depends_on_fields) {
     var $inputContainer = $button.findParentByClass('inputContainer');
-
     if (!$.isOk($inputContainer)) {
         bimp_msg('Erreur technique (conteneur absent)', 'danger', null, true);
         return;
     }
 
     var field_name = $inputContainer.data('field_name');
-
     if (field_name !== input_name) {
         bimp_msg('Erreur technique (Nom de champ invalide)', null, true);
         return;
     }
 
     var $form = $inputContainer.findParentByClass('object_form');
-
     if (!$.isOk($form)) {
         bimp_msg('Erreur technique (formulaire non trouvé)', null, true);
         return;
@@ -832,7 +791,6 @@ function searchObjectList($input) {
     }
 
     var $container = $input.findParentByClass('inputContainer');
-
     if (!$.isOk($container)) {
         $container = $input.findParentByClass('searchInputContainer');
         if (!$.isOk($container)) {
@@ -843,7 +801,6 @@ function searchObjectList($input) {
     }
 
     var value = $input.val();
-
     if (!value) {
         $container.find('[name=' + $container.data('field_name') + ']').val('0').change();
         $container.find('.search_input_selected_label').slideUp(250, function () {
@@ -864,13 +821,10 @@ function searchObjectList($input) {
         'filters': $input.data('filters'),
         'value': value
     };
-
     var $spinner = $container.find('.loading');
     var $result = $container.find('.search_input_results');
-
     $spinner.addClass('active');
     $result.html('').hide();
-
     BimpAjax('searchObjectlist', data, null, {
         $input: $input,
         $container: $container,
@@ -976,7 +930,6 @@ function getInputValue($inputContainer) {
         }
     }
     var value = '';
-
     if (multiple || check_list) {
         value = [];
         if (check_list) {
@@ -1022,7 +975,6 @@ function getInputValue($inputContainer) {
             case 'json':
                 value = getJsonInputSubValues($inputContainer, field_name, false);
                 break;
-
             default:
                 value = $inputContainer.find('[name="' + field_name + '"]').val();
                 break;
@@ -1037,18 +989,15 @@ function getJsonInputSubValues($container, parent_name, remove_inputs) {
         remove_inputs = false;
     }
     var value = {};
-
     if ($.isOk($container)) {
         $container.find('tr.bimp_json_input_value.' + parent_name + '_value').each(function () {
             var value_name = $(this).data('value_name');
             var input_name = $(this).data('input_name');
-
             if (value_name) {
                 if (input_name) {
                     var $input = $(this).find('[name="' + input_name + '"]');
                     if ($input.length) {
                         value[value_name] = $input.val();
-
                         if (remove_inputs) {
                             $input.remove();
                         }
@@ -1086,12 +1035,9 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
 
     var $value_input = $inputContainer.find('[name=' + value_input_name + ']');
     var $label_input = $inputContainer.find('[name=' + label_input_name + ']');
-
-
     var max_values = $container.data('max_values');
     if (max_values !== 'none') {
         max_values = parseInt(max_values);
-
         var $items = $container.find('tbody.multipleValuesList').find('tr.itemRow');
         if ($items.length >= max_values) {
             var msg = 'Vous ne pouvez sélectionner qu\'au maximum ' + max_values + ' élément';
@@ -1105,7 +1051,6 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
 
     var value = '';
     var label = '';
-
     if ($value_input.length) {
         value = $value_input.val();
     }
@@ -1127,7 +1072,6 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
                 check = false;
             }
         });
-
         if (!check) {
             return;
         }
@@ -1142,14 +1086,12 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
 
         var item_options_html = '';
         var item_options = '';
-
         if ($value_input.get(0).tagName.toLowerCase() === 'select') {
             item_options = $value_input.find('[value="' + value + '"]').data('item_options');
         }
 
         if (item_options) {
             var $optionsContainer = $container.find('.multiple_values_items_options');
-
             if ($.isOk($optionsContainer)) {
                 item_options = item_options.split(',');
                 for (var i in item_options) {
@@ -1184,7 +1126,6 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
         }
         html += '"><i class="fas fa5-trash-alt"></i></button></td>';
         html += '</tr>';
-
         $value_input.val('');
         $label_input.val('');
         if ($inputContainer.find('.search_input_selected_label').length) {
@@ -1255,7 +1196,6 @@ function addMultipeInputAllValues($button, value_input_name, label_input_name, a
     }
 
     var $input = $inputContainer.find('[name=' + value_input_name + ']');
-
     if (!$input.length) {
         bimp_msg('Une erreur technique est survenue ("input" absent). opération impossible', 'danger', null, true);
         return;
@@ -1267,14 +1207,12 @@ function addMultipeInputAllValues($button, value_input_name, label_input_name, a
     }
 
     var $options = $input.children('option');
-
     if (!$options.length) {
         bimp_msg('Aucune valeur à ajouter trouvée', 'warning', null, true);
         return;
     }
 
     var $addBtn = $button.parent().find('.addValueBtn');
-
     $options.each(function () {
         var $option = $(this);
         $input.val($option.attr('value'));
@@ -1285,7 +1223,6 @@ function addMultipeInputAllValues($button, value_input_name, label_input_name, a
 function removeMultipleInputValue($button, value_input_name) {
     var $inputContainer = $button.findParentByClass('inputContainer');
     var $multipleValues = $inputContainer.find('.inputMultipleValuesContainer');
-
     $button.parent('td').parent('tr').fadeOut(250, function () {
         $(this).remove();
         checkMultipleValues();
@@ -1374,7 +1311,6 @@ function checkTextualInput($input, skip_min) {
                     }
                     var decimals = parseInt($input.data('decimals'));
                     var unsigned = parseInt($input.data('unsigned'));
-
                     var is_neg = /^\-.*$/.test(value);
                     value = value.replace(/[^0-9\.,]/g, '');
                     value = value.replace(',', '.');
@@ -1429,7 +1365,6 @@ function checkTextualInput($input, skip_min) {
                         msg = 'Max: ' + max;
                     }
                     break;
-
                 case 'string':
                     var size = $input.data('size');
                     var forbidden_chars = $input.data('forbidden_chars');
@@ -1456,7 +1391,6 @@ function checkTotalMaxQtyInput($input) {
     if ($.isOk($input) && $input.hasClass('total_max')) {
         var total_max_value = $input.data('total_max_value');
         var inputs_class = $input.data('total_max_inputs_class');
-
         if (typeof (total_max_value) !== 'undefined' && typeof (inputs_class) !== 'undefined') {
             total_max_value = parseFloat(total_max_value);
             if (!isNaN(total_max_value) && inputs_class !== '') {
@@ -1470,7 +1404,6 @@ function checkTotalMaxQtyInput($input) {
                             total_set += val;
                         }
                     });
-
                     if (total_set > total_max_value) {
                         var diff = total_set - total_max_value;
                         var cur_val = parseFloat($input.val());
@@ -1504,7 +1437,6 @@ function checkTotalMinQtyInput($input) {
     if ($.isOk($input) && $input.hasClass('total_min')) {
         var total_min_value = $input.data('total_min_value');
         var inputs_class = $input.data('total_min_inputs_class');
-
         if (typeof (total_min_value) !== 'undefined' && typeof (inputs_class) !== 'undefined') {
             total_min_value = parseFloat(total_min_value);
             if (!isNaN(total_min_value) && inputs_class !== '') {
@@ -1518,7 +1450,6 @@ function checkTotalMinQtyInput($input) {
                             total_set += val;
                         }
                     });
-
                     if (total_set < total_min_value) {
                         var diff = total_min_value - total_set;
                         var cur_val = parseFloat($input.val());
@@ -1602,16 +1533,12 @@ function addSubObjectForm($button, object_name) {
 
 function removeSubObjectForm($button) {
     var $container = $button.findParentByClass('formInputGroup');
-
     if ($.isOk($container)) {
         var $form = $container.findParentByClass('object_form');
-
         var id_form = $form.data('identifier');
         var object_name = $container.data('object_name');
         var idx = $container.data('idx');
-
         $container.remove();
-
         $('body').trigger($.Event('subObjectFormRemoved', {
             id_form: id_form,
             object_name: object_name,
@@ -1635,7 +1562,6 @@ function addFormGroupMultipleItem($button, inputName) {
     }
 
     var max_items = parseInt($container.data('max_items'));
-
     if (!isNaN(max_items) && max_items > 0) {
         if ($container.children('.formGroupMultipleItems').children('.formGroupMultipleItem').length >= max_items) {
             bimp_msg('Vous ne pouvez ajouter que ' + max_items + ' élément(s)', 'warning', null, true);
@@ -1672,7 +1598,6 @@ function addFormGroupMultipleItem($button, inputName) {
 function removeFormGroupMultipleItem($button) {
     if ($.isOk($button)) {
         var $container = $button.findParentByClass('formGroupMultipleItem');
-
         if ($.isOk($container)) {
             $container.remove();
             return;
@@ -1694,9 +1619,7 @@ function searchZipTown($input) {
 
     var data = {};
     data[field_type] = $input.val();
-
     $input.parent().find('.loading').show();
-
     BimpAjax('searchZipTown', data, null, {
         $input: $input,
         field_type: field_type,
@@ -1722,13 +1645,10 @@ function selectZipTown($button) {
     var zip = $button.data('zip');
     var state = $button.data('state');
     var country = $button.data('country');
-
     var $container = $button.findParentByClass('searchZipTownResults');
     $container.html('').hide();
     var $input = $container.parent().find('input.search_ziptown');
-
     var field_type = $input.data('field_type');
-
     if (zip && field_type === 'zip') {
         $input.val(zip);
     }
@@ -1742,7 +1662,6 @@ function selectZipTown($button) {
         var zip_field = $input.data('zip_field');
         var state_field = $input.data('state_field');
         var country_field = $input.data('country_field');
-
         if (town_field && town) {
             var $townInput = $form.find('[name="' + town_field + '"]');
             if ($townInput.length) {
@@ -1775,12 +1694,10 @@ function selectZipTown($button) {
 
 function resetInputValue($container) {
     var input_name = $container.data('field_name');
-
     if (!input_name) {
         return;
     }
     var initial_value = $container.data('initial_value');
-
     if (typeof (initial_value) !== 'undefined') {
         if (typeof (initial_value) === 'string' && initial_value) {
             initial_value = bimp_htmlDecode(initial_value);
@@ -1789,7 +1706,6 @@ function resetInputValue($container) {
         var $input = $container.find('[name="' + input_name + '"]');
         if ($input.length) {
             $input.val(initial_value);
-
             if (initial_value === 0 || initial_value === '') {
                 $container.find('.ui-autocomplete-input').val('');
                 if ($container.find('.search_list_input').length) {
@@ -1806,12 +1722,9 @@ function resetInputValue($container) {
 
 function checkCheckList($container) {
     var max = $container.data('max');
-
     if (typeof (max) !== 'undefined' && max !== 'none') {
         max = parseInt(max);
-
         var $selected = $container.find('.check_list_item_input:checked');
-
         if ($selected.length > max) {
             $container.find('span.check_list_nb_items_to_unselect').text($selected.length - max);
             $container.find('.check_list_max_alert').stop().slideDown(250);
@@ -1850,9 +1763,7 @@ function calcTotalCompteurCaisse($container) {
             total += val * parseFloat($(this).data('value'));
         }
     });
-
     total = Math.round10(total, -2);
-
     $container.find('.compteur_caisse_total').text(total);
     $container.find('.compteur_caisse_total_input').val(total).change();
 }
@@ -1867,12 +1778,10 @@ function selectChecklistItem($container, value, value_type) {
         value_type = 'label';
     }
     var check = false;
-
     $container.find('.check_list_item').each(function () {
         if (!check) {
             var $item = $(this);
             var $cb = null;
-
             switch (value_type) {
                 case 'label':
                     var label = value;
@@ -1880,10 +1789,8 @@ function selectChecklistItem($container, value, value_type) {
                         $cb = $item.find('input.check_list_item_input');
                     }
                     break;
-
                 case 'value':
                     $cb = $item.find('input.check_list_item_input');
-
                     if (!$cb.length || $cb.val() != value) {
                         $cb = null;
                     }
@@ -1901,7 +1808,6 @@ function selectChecklistItem($container, value, value_type) {
             }
         }
     });
-
     if (!check) {
         bimp_msg('Option "' + value + '" non trouvée', 'warning', null, true);
     }
@@ -1925,7 +1831,6 @@ function onChecklistSearchInputChange($input) {
                             'label': '',
                             'value': ''
                         };
-
                         var text = $(this).children('label').text();
                         if (text) {
                             if (regex1.test(text)) {
@@ -1950,7 +1855,6 @@ function onChecklistSearchInputChange($input) {
                         if ($.isOk($btn)) {
                             var value = $btn.data('item_value');
                             var value_type = 'value';
-
                             if (typeof (value) === 'undefined') {
                                 value = $btn.html();
                                 value = value.replace('<strong>', '');
@@ -1978,21 +1882,23 @@ function displayInputChoices($input, choices, onItemSelected) {
         return;
     }
 
-    if (typeof (choices) !== 'undefined' && choices.length) {
-        var input_name = $input.attr('name');
-        var container_id = input_name + '_input_choices';
-        var html = '<div class="input_choices hideOnClickOut" id="' + container_id + '">';
+    var input_name = $input.attr('name');
+    var container_id = input_name + '_input_choices';
 
+    $input.parent().find('#' + container_id).remove();
+
+    if (typeof (choices) !== 'undefined' && choices.length) {
+        var html = '<div class="input_choices hideOnClickOut" id="' + container_id + '">';
         for (var i in choices) {
             var label = '';
             var data = [];
             var card = '';
             var value = 'undefined';
-
             if (typeof (choices[i]) === 'string') {
                 label = choices[i];
             } else if (typeof (choices[i]) === 'object') {
                 label = choices[i].label;
+
                 if (typeof (choices[i].data) !== 'undefined') {
                     data = choices[i].data;
                 }
@@ -2010,7 +1916,6 @@ function displayInputChoices($input, choices, onItemSelected) {
                     html += ' bs-popover';
                 }
                 html += '"';
-
                 if (card) {
                     data['toggle'] = 'popover';
                     data['trigger'] = 'hover';
@@ -2034,7 +1939,6 @@ function displayInputChoices($input, choices, onItemSelected) {
 
         html += '</div>';
 
-        $input.parent().find('#' + container_id).remove();
         $input.after(html);
         setInputChoicesEvents($input, onItemSelected);
     }
@@ -2074,10 +1978,8 @@ function loadSearchObjectResults($input, idx) {
                                 }
                                 $parent.children('.spinner').animate({'opacity': 0}, {'duration': 50});
                                 bimpAjax.$parent.find('.input_choices').remove();
-
                                 if (typeof (result.results) === 'object') {
                                     var choices = [];
-
                                     for (var i in result.results) {
                                         choices.push({
                                             label: result.results[i].label,
@@ -2103,7 +2005,6 @@ function loadSearchObjectResults($input, idx) {
                                                         var html = '';
                                                         var card = '';
                                                         var label = '';
-
                                                         if ($btn.hasClass('bs-popover')) {
                                                             card = $btn.data('content');
                                                         }
@@ -2125,7 +2026,6 @@ function loadSearchObjectResults($input, idx) {
 
                                                         if (bimpAjax.display_results) {
                                                             var $result = $container.children('.search_object_result');
-
                                                             if ($result.length) {
                                                                 if ($container.children('.no_item_selected').css('display') !== 'none') {
                                                                     $container.children('.no_item_selected').fadeOut(250, function () {
@@ -2142,7 +2042,6 @@ function loadSearchObjectResults($input, idx) {
                                                         var input_name = $container.data('input_name');
                                                         if (input_name) {
                                                             $container.find('[name="' + input_name + '"]').val(id_object).change();
-
                                                             if (bimpAjax.display_results) {
                                                                 $container.find('[name="' + input_name + '_search"]').val('');
                                                             } else {
@@ -2173,7 +2072,7 @@ function loadSearchObjectResults($input, idx) {
                                     $container.children('.no_item_selected').fadeIn(250);
                                 });
                             } else {
-                                // Par précaution: 
+// Par précaution: 
                                 $container.children('.search_object_result').html('').hide();
                             }
                         }
@@ -2189,10 +2088,8 @@ function loadSearchObjectResults($input, idx) {
 function toggleInputDisplay($container, $input) {
     var input_val = $input.val();
     var show = false;
-
     var show_values = $container.data('show_values');
     var hide_values = $container.data('hide_values');
-
     if (typeof (show_values) !== 'undefined') {
         show_values += '';
         show_values = show_values.split(',');
@@ -2213,9 +2110,9 @@ function toggleInputDisplay($container, $input) {
             }
         }
     } else {
-        // Règle pour display_if sur plusieurs inputs: 
-        //      - Tous les show_values doivent être vrai pour afficher. 
-        //      - Si un seul hide_values vrai : champ masqué. 
+// Règle pour display_if sur plusieurs inputs: 
+//      - Tous les show_values doivent être vrai pour afficher. 
+//      - Si un seul hide_values vrai : champ masqué. 
 
         var inputs_names = $container.data('inputs_names');
         if (inputs_names) {
@@ -2231,7 +2128,6 @@ function toggleInputDisplay($container, $input) {
                         input_val = $input.val();
                         show_values = $container.data('show_values_' + inputs_names[i]);
                         hide_values = $container.data('hide_values_' + inputs_names[i]);
-
                         if (typeof (show_values) !== 'undefined') {
                             var input_check = false;
                             show_values += '';
@@ -2315,14 +2211,12 @@ function setFiltersInputObjectData($filtersInputContainer, module, object_name) 
     if ($.isOk($filtersInputContainer)) {
         var cur_module = $filtersInputContainer.data('obj_module');
         var cur_object_name = $filtersInputContainer.data('obj_name');
-
         if (cur_module && cur_object_name && cur_module === module && cur_object_name === object_name) {
             return;
         }
 
         $filtersInputContainer.data('obj_module', module);
         $filtersInputContainer.data('obj_name', object_name);
-
         if (module && object_name) {
             $filtersInputContainer.find('.no_object_notif').stop().slideUp(250);
             $filtersInputContainer.find('.obj_filters_input_values').find('.panel-body').html('<div class="info">Aucun filtre ajouté</div>');
@@ -2349,7 +2243,6 @@ function setFiltersInputObjectData($filtersInputContainer, module, object_name) 
 function reloadFiltersInputValue($filtersInputContainer, filters, success_callback, error_callback) {
     var module = $filtersInputContainer.data('obj_module');
     var object_name = $filtersInputContainer.data('obj_name');
-
     BimpAjax('getFiltersInputValuesHtml', {
         module: module,
         object_name: object_name,
@@ -2376,10 +2269,8 @@ function reloadFiltersInputValue($filtersInputContainer, filters, success_callba
 function reloadFiltersInputAddFilterInput($button) {
     if ($.isOk($button)) {
         var $container = $button.findParentByClass('objectFilterItemsSelectContainer');
-
         if ($.isOk($container)) {
             var $select = $container.children('select.field_select');
-
             if ($select.length) {
                 $select.change();
                 return;
@@ -2396,10 +2287,8 @@ function addFiltersInputFilter($button, filter_name, filter, exclude) {
     }
 
     var $filtersInputContainer = $button.findParentByClass('obj_filters_input_container');
-
     if ($.isOk($filtersInputContainer)) {
         var filters = getFiltersInputFilters($filtersInputContainer);
-
         if (typeof (filters[filter_name]) === 'undefined') {
             filters[filter_name] = {
                 values: [],
@@ -2415,16 +2304,12 @@ function addFiltersInputFilter($button, filter_name, filter, exclude) {
 
         reloadFiltersInputValue($filtersInputContainer, filters, function (result, bimpAjax) {
             resetFiltersInputInputs($button);
-
             if (typeof (result.values_json) !== 'undefined') {
                 var $inputContainer = $button.findParentByClass('obj_filters_input_container');
-
                 if ($.isOk($inputContainer)) {
                     var field_name = $inputContainer.data('field_name');
-
                     if (field_name) {
                         var $input = $inputContainer.find('input[name="' + field_name + '"]');
-
                         if ($input.length) {
                             $input.val(result.values_json);
                         }
@@ -2444,19 +2329,14 @@ function addFiltersInputFilter($button, filter_name, filter, exclude) {
 function removeFiltersInputFilter($button) {
     if ($.isOk($button)) {
         var $value = $button.findParentByClass('filter_value');
-
         if ($.isOk($value)) {
             var $container = $value.findParentByClass('filter_active_values');
             $value.remove();
-
             if ($.isOk($container)) {
                 var $valuesContainer = $container.findParentByClass('obj_filters_input_values');
-
                 var has_inc = false;
                 var has_exc = false;
-
                 var $inc = $container.children('.included_values');
-
                 if ($inc.length) {
                     if ($inc.find('.filter_value').length) {
                         has_inc = true;
@@ -2465,7 +2345,6 @@ function removeFiltersInputFilter($button) {
 
                 if (!has_inc) {
                     var $exc = $container.children('.excluded_values');
-
                     if ($exc.length) {
                         if ($exc.find('.filter_value').length) {
                             has_exc = true;
@@ -2480,7 +2359,6 @@ function removeFiltersInputFilter($button) {
                 if ($.isOk($valuesContainer)) {
                     var filters = '';
                     var $panel = $valuesContainer.children('.panel').children('.panel-body');
-
                     if ($panel.length) {
                         if (!$panel.find('.filter_active_values').length) {
                             $panel.html('<div class="info">Aucun filtre ajouté</div>');
@@ -2489,13 +2367,10 @@ function removeFiltersInputFilter($button) {
                     }
 
                     var $filtersInputContainer = $valuesContainer.findParentByClass('obj_filters_input_container');
-
                     if ($.isOk($filtersInputContainer)) {
                         var field_name = $filtersInputContainer.data('field_name');
-
                         if (field_name) {
                             var $input = $filtersInputContainer.find('input[name="' + field_name + '"]');
-
                             if ($input.length) {
                                 if (filters === '') {
                                     filters = getFiltersInputFilters($filtersInputContainer);
@@ -2513,23 +2388,18 @@ function removeFiltersInputFilter($button) {
 
 function getFiltersInputFilters($filtersInputContainer) {
     var filters = {};
-
     if ($.isOk($filtersInputContainer)) {
         $filtersInputContainer.find('.obj_filters_input_values').find('.filter_active_values').each(function () {
             var filter_name = $(this).data('filter_name');
-
             if (filter_name) {
                 var filter = {
                     values: [],
                     excluded_values: []
                 };
-
                 var $included_values = $(this).children('.included_values');
-
                 if ($included_values.length) {
                     $included_values.children('.filter_value').each(function () {
                         var filter_value = $(this).data('filter');
-
                         if (typeof (filter_value) !== 'undefined') {
                             filter.values.push(filter_value);
                         }
@@ -2537,11 +2407,9 @@ function getFiltersInputFilters($filtersInputContainer) {
                 }
 
                 var $excluded_values = $(this).children('.excluded_values');
-
                 if ($excluded_values.length) {
                     $excluded_values.children('.filter_value').each(function () {
                         var filter_value = $(this).data('filter');
-
                         if (typeof (filter_value) !== 'undefined') {
                             filter.excluded_values.push(filter_value);
                         }
@@ -2561,20 +2429,16 @@ function getFiltersInputFilters($filtersInputContainer) {
 function resetFiltersInputInputs($button) {
     if ($.isOk($button)) {
         var $container = $button.findParentByClass('bimp_filter_input_container');
-
         if ($.isOk($container)) {
             $container.find('.bimp_filter_input').each(function () {
                 var default_value = $(this).data('default_value');
-
                 if (typeof (default_value) === 'undefined') {
                     default_value = '';
                 }
 
                 $(this).val(default_value).change();
-
                 if ($(this).hasClass('datepicker_value')) {
                     var input_id = $(this).attr('id');
-
                     if (input_id) {
                         $('#' + input_id + '_bs_dt_picker').data('DateTimePicker').clear();
                     }
@@ -2593,7 +2457,6 @@ function onFormLoaded($form) {
 
     if (!parseInt($form.data('loaded_event_processed'))) {
         $form.data('loaded_event_processed', 1);
-
         $form.find('.subObjectFormTemplate').each(function () {
             $(this).find('.inputContainer').each(function () {
                 var field_name = $(this).data('field_name');
@@ -2605,14 +2468,11 @@ function onFormLoaded($form) {
                 }
             });
         });
-
         setCommonEvents($form);
         setFormEvents($form);
-
         $('body').trigger($.Event('formLoaded', {
             $form: $form
         }));
-
         var $modal = $form.findParentByClass('modal');
         if ($.isOk) {
             $modal.focus(function (e) {
@@ -2622,7 +2482,6 @@ function onFormLoaded($form) {
         }
 
         var focus_done = false;
-
         $form.find('.inputContainer').each(function () {
             if (!focus_done) {
                 var field_name = $(this).data('field_name');
@@ -2632,7 +2491,6 @@ function onFormLoaded($form) {
                         var $row = $input.findParentByClass('formRow');
                         if ($.isOk($row) && $row.css('display') !== 'none') {
                             var tag = $input.tagName();
-
                             if (tag === 'textarea' || (tag === 'input' && $input.attr('type') === 'text')) {
                                 $input.focus();
                                 focus_done = true;
@@ -2653,16 +2511,12 @@ function setFormEvents($form) {
     }
 
     setContainerDisplayIfEvents($form, $form);
-
     resetInputDisplay($form);
     setInputsEvents($form);
-
     var form_id = $form.attr('id');
-
     $form.find('.inputContainer').each(function () {
         setInputContainerEvents($(this));
     });
-
     for (var i in inputsEvents) {
         if (inputsEvents[i].form_id === form_id) {
             var $input = $form.find('[name=' + inputsEvents[i].input_name + ']');
@@ -2691,12 +2545,12 @@ function setFormEvents($form) {
 }
 
 function setContainerDisplayIfEvents($form, $container) {
-    // Gestion automatique des affichages d'options supplémentaires lorsque certains input prennent certaines valeurs.
-    // placer les champs optionnels dans un container avec class="display_if". 
-    // Et Attributs: 
-    // data-input_name=nom_input_a_checker (string)
-    // data-show_values=valeur(s)_pour_afficher_container (string ou objet)
-    // data-hide_values=valeur(s)_pour_masquer_container (string ou objet)
+// Gestion automatique des affichages d'options supplémentaires lorsque certains input prennent certaines valeurs.
+// placer les champs optionnels dans un container avec class="display_if". 
+// Et Attributs: 
+// data-input_name=nom_input_a_checker (string)
+// data-show_values=valeur(s)_pour_afficher_container (string ou objet)
+// data-hide_values=valeur(s)_pour_masquer_container (string ou objet)
 
     if (!$.isOk($container) || !$.isOk($form)) {
         return;
@@ -2883,7 +2737,6 @@ function setInputsEvents($container) {
                         }
 
                         var $option = $(data.element);
-
                         if ($option.css('display') === 'none') {
                             $(container).remove();
                             return;
@@ -2907,7 +2760,6 @@ function setInputsEvents($container) {
                     },
                     templateSelection: function (selection) {
                         var $option = $(selection.element);
-
                         var html = '<span style="';
                         if ($option.data('color')) {
                             html += 'color: #' + $option.data('color') + '; font-weight: bold;';
@@ -2928,7 +2780,6 @@ function setInputsEvents($container) {
                     options.dropdownParent = $('#page_modal');
                 }
                 $(this).select2(options);
-
                 // Hack pour correction bug d'affichage:
                 $(this).on('select2:close', function (e) {
                     var $options = $(this).find('option');
@@ -3066,7 +2917,6 @@ function setInputsEvents($container) {
             }).focus(function () {
                 $(this).select();
             });
-
             $(this).data('qty_event_init', 1);
         }
     });
@@ -3150,7 +3000,6 @@ function setInputsEvents($container) {
                     e.preventDefault();
                 }
             });
-
             $(this).data('input_choices_events_init', 1);
         }
     });
@@ -3175,7 +3024,6 @@ function setInputsEvents($container) {
                     }
                 });
             });
-
             var max_input_name = $(this).data('max_input_name');
             if (max_input_name) {
                 var $form = $(this).findParentByClass('object_form');
@@ -3207,7 +3055,6 @@ function setInputsEvents($container) {
                         }
                     }
                 });
-
                 $(this).find('.check_list_group_title').click(function (e) {
                     e.stopPropagation();
                     var $parent = $(this).findParentByClass('check_list_group');
@@ -3224,19 +3071,15 @@ function setInputsEvents($container) {
                     }
                 });
             });
-
             var $input = $checkListContainer.find('.check_list_search_input').find('input');
-
             if ($input.length) {
                 $input.change(function () {
                     onChecklistSearchInputChange($(this));
                 });
-
                 $input.click(function (e) {
                     e.stopPropagation();
                     $input.change();
                 });
-
                 $input.keyup(function (e) {
                     if ($(this).hasClass('noEnterCheck')) {
                         $(this).removeClass('noEnterCheck');
@@ -3294,14 +3137,12 @@ function setInputsEvents($container) {
                     calcTotalCompteurCaisse($compteurContainer);
                 });
             });
-
             $(this).data('compteur_event_init', 1);
         }
     });
     $container.find('.search_object_input_container').each(function () {
         if (!parseInt($(this).data('search_object_input_events_init'))) {
             var $input = $(this).children('.search_object_input').children('input');
-
             if ($input.length) {
                 $input.keyup(function (e) {
                     if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp' && e.key !== 'Enter') {
@@ -3329,19 +3170,15 @@ function setInputsEvents($container) {
         if (!parseInt($(this).data('obj_filters_input_events_init'))) {
             var $filters_container = $(this);
             var obj_input_name = $filters_container.data('obj_input_name');
-
             if (obj_input_name) {
                 var $input = $container.find('[name="' + obj_input_name + '"]');
-
                 if ($input.length) {
                     $input.change(function () {
                         var module = '';
                         var object_name = '';
                         var val = $input.val();
-
                         if (val) {
                             var obj_data = val.split('-');
-
                             if (obj_data[0] && obj_data[1]) {
                                 module = obj_data[0];
                                 object_name = obj_data[1];
@@ -3354,27 +3191,26 @@ function setInputsEvents($container) {
             }
 
             setFiltersInputAddFilterFormEvents($filters_container);
-
             $(this).data('obj_filters_input_events_init', 1);
         }
     });
     $container.find('.search_object_input_container').each(function () {
         var $search_container = $(this);
         var $value_input = $(this).children('input.search_object_input_value');
-
         if ($value_input.length) {
             $value_input.change(function () {
                 var val = $(this).val();
-
                 if (val === '' || parseInt(val) === 0) {
                     var $search_input = $search_container.children('.search_object_input').children('input.search_object_search_input');
-
                     if ($search_input.length) {
                         $search_input.val('');
                     }
                 }
             });
         }
+    });
+    $container.find('.allow_hashtags').each(function () {
+        BIH.setEvents($(this));
     });
 }
 
@@ -3416,7 +3252,6 @@ function setInputEvents($form, $input) {
             }
         }
     });
-
     var form_id = $form.attr('id');
     for (var i in inputsEvents) {
         if (inputsEvents[i].form_id === form_id) {
@@ -3463,7 +3298,6 @@ function setSwitchInputEvents($input) {
             });
         }
     });
-
     $input.data('event_init', 1);
 }
 
@@ -3496,14 +3330,12 @@ function setToggleInputEvent($input) {
             }
         }
     });
-
     $input.data('event_init', 1);
 }
 
 function setDateRangeEvents($container, input_name) {
     var $from = $container.find('[name=' + input_name + '_from_picker]');
     var $to = $container.find('[name=' + input_name + '_to_picker]');
-
     if (!$from.length || !$to.length) {
         return;
     }
@@ -3622,7 +3454,6 @@ function setSortableMultipleValuesHandlesEvents($container) {
     var $tbody = $container.find('tbody.multipleValuesList');
     var $handles = $tbody.find('td.positionHandle');
     var $rows = $handles.parent('tr');
-
     if ($tbody.hasClass('ui-sortable')) {
         $tbody.sortable('destroy');
     }
@@ -3646,8 +3477,13 @@ function setSortableMultipleValuesHandlesEvents($container) {
 function setInputChoicesEvents($input, onItemSelected) {
     if ($.isOk($input)) {
         if (!parseInt($input.data('input_choices_events_init'))) {
-            $input.unbind('keydown');
+//            $input.unbind('keydown');
             $input.keydown(function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }).keyup(function (e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     e.stopPropagation();
@@ -3701,11 +3537,6 @@ function setInputChoicesEvents($input, onItemSelected) {
                         }
                     }
                 }
-            }).keyup(function (e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                }
             });
             $input.data('input_choices_events_init', 1);
         }
@@ -3716,7 +3547,6 @@ function setInputChoicesEvents($input, onItemSelected) {
                 $choices.find('.btn').each(function () {
                     $(this).click(function (e) {
                         e.stopPropagation();
-
                         if (typeof (onItemSelected) === 'function') {
                             onItemSelected($(this));
                         } else {
@@ -3725,7 +3555,6 @@ function setInputChoicesEvents($input, onItemSelected) {
                         $choices.remove();
                     });
                 });
-
                 setCommonEvents($choices.parent());
                 $choices.data('input_choices_events_init', 1);
             }
@@ -3737,7 +3566,6 @@ function setFiltersInputAddFilterFormEvents($container) {
     $container.find('select.filter_type_select').each(function () {
         if (!parseInt($(this).data('filers_input_events_init'))) {
             $(this).data('filers_input_events_init', 1);
-
             $(this).change(function () {
                 var $parent = $(this).findParentByClass('objectFiltersTypeSelect_content');
                 if ($.isOk($parent)) {
@@ -3755,21 +3583,17 @@ function setFiltersInputAddFilterFormEvents($container) {
             });
         }
     });
-
     $container.find('.objectFilterItemsSelectContainer').each(function () {
         if (!parseInt($(this).data('filers_input_events_init'))) {
             $(this).data('filers_input_events_init', 1);
-
             var type = $(this).data('type');
             var $select = $(this).children('select');
             var $itemOptions = $(this).children('.filter_item_options');
-
             if ($select.length) {
                 $select.change(function () {
                     var item = $(this).val();
                     if (item) {
                         var $selectContainer = $(this).findParentByClass('objectFiltersSelect_container');
-
                         if ($.isOk($selectContainer)) {
                             var fields_prefixe = $selectContainer.data('fields_prefixe');
                             if (typeof (fields_prefixe) === 'undefined') {
@@ -3780,7 +3604,6 @@ function setFiltersInputAddFilterFormEvents($container) {
                                 case 'fields':
                                     // Sélection d'un champ objet:
                                     var $filtersInputContainer = $(this).findParentByClass('obj_filters_input_container');
-
                                     if ($.isOk($filtersInputContainer)) {
                                         var module = $filtersInputContainer.data('obj_module');
                                         var object_name = $filtersInputContainer.data('obj_name');
@@ -3800,13 +3623,11 @@ function setFiltersInputAddFilterFormEvents($container) {
                                         });
                                     }
                                     break;
-
                                     // Sélection d'un objet lié; 
                                 case 'linked_objects':
                                     var module = $selectContainer.data('module');
                                     var object_name = $selectContainer.data('object_name');
                                     var object_label = $(this).find('option[value="' + item + '"]').text();
-
                                     BimpAjax('getFiltersInputAddFiltersInput', {
                                         module: module,
                                         object_name: object_name,
@@ -3841,13 +3662,623 @@ function setFiltersInputAddFilterFormEvents($container) {
     });
 }
 
+// Gestion des Hashtags: 
+
+function BimpInputHashtags() {
+    var bih = this;
+    this.$curInput = $();
+    this.curInputCursorPos = 0;
+
+    this.$modal = $();
+    this.$objInput = $();
+    this.$searchInput = $();
+    this.$curValueLabel = $();
+    this.$validateMsg = $();
+    this.modalOpen = false;
+    this.objects = {};
+    this.aliases = {};
+    this.refreshIdx = 0;
+    this.curSearchIdx = 0;
+    this.lastSearch = '';
+    this.curObjKw = '';
+    this.curValue = '';
+
+    // Actions: 
+
+    this.openModal = function ($input) {
+        if (bih.modalOpen) {
+            return;
+        }
+
+        bih.reset();
+        bih.modalOpen = true;
+        bih.$curInput = $input;
+        bih.insertModal();
+        bih.$modal.modal('show');
+    };
+
+    this.insertModal = function () {
+        if (bih.$modal.length) {
+            return;
+        }
+
+        var html = '';
+        html += '<div class="modal ajax-modal" tabindex="-1" role="dialog" id="bih_autocomplete_modal">';
+        html += '<div class="modal-dialog modal-md" role="document">';
+        html += '<div class="modal-content">';
+
+        html += '<div class="modal-header">';
+        html += '<h4 class="modal-titles_container"><i class="fas fa5-link iconLeft"></i>Ajout d\'un lien objet</h4>';
+        html += '</div>';
+
+        html += '<div id="bih_autocomplete_modal_body" class="modal-body">';
+        html += '</div>';
+
+        html += '</div>';
+        html += '</div>';
+        html += '</div>';
+
+        $('body').append(html);
+
+        bih.$modal = $('#bih_autocomplete_modal');
+
+        bih.$modal.on('shown.bs.modal', function (e) {
+            if (bih.$modal.find('#bih_autocomplete_modal_content').length) {
+                bih.$modal.find('#bihObjectLabel').html('').hide();
+                bih.$objInput.val('').removeClass('no_results').show().focus();
+                bih.$searchInput.val('').removeClass('no_results');
+                bih.$curValueLabel.stop().html('').hide();
+                bih.$validateMsg.hide();
+            } else {
+                BimpAjax('getHastagsAutocompleteModalContent', {}, $('#bih_autocomplete_modal_body'), {
+                    display_success: false,
+                    display_processing: true,
+                    processing_msg: 'Chargement du formulaire',
+                    processing_padding: 30,
+                    append_html: true,
+                    success: function (result, bimpAjax) {
+                        if (result.html) {
+                            if (typeof (result.objects) !== 'undefined') {
+                                bih.objects = result.objects;
+                            }
+                            if (typeof (result.aliases) !== 'undefined') {
+                                bih.aliases = result.aliases;
+                            }
+
+                            bih.$objInput = bih.$modal.find('input[name="bih_search_object_input"]');
+                            bih.$searchInput = bih.$modal.find('input[name="bih_search_input"]');
+                            bih.$curValueLabel = bih.$modal.find('#bihCurValueLabel');
+                            bih.$validateMsg = bih.$modal.find('#bihValidateMsg');
+
+                            bih.$objInput.focus();
+                            bih.$objInput.keyup(function (e) {
+                                if (e.key === 'Tab' || e.key === 'Enter') {
+                                    if (e.key !== 'Enter' || !bih.$modal.find('#bih_search_object_input_input_choices').find('.selected').length) {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+
+                                        if ($('#bih_search_object_input_input_choices').find('.input_choice').length) {
+                                            $('#bih_search_object_input_input_choices').find('.input_choice').first().click();
+                                        }
+                                    }
+                                } else if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') {
+                                    var val = $(this).val();
+                                    if (val.length > 0) {
+                                        bih.searchObj();
+                                    }
+                                }
+                            }).keydown(function (e) {
+                                if (e.key === 'Tab') {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                }
+                            });
+
+                            bih.$modal.find('#bihObjectLabel').click(function (e) {
+                                bih.cancelObjKeyword();
+                            });
+
+                            bih.$searchInput.keyup(function (e) {
+                                if (e.key === 'Enter' && bih.curValue) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    bih.validate();
+                                } else {
+                                    var val = $(this).val();
+                                    if (val.length > 1) {
+                                        bih.curSearchIdx++;
+                                        var searchIdx = bih.curSearchIdx;
+                                        setTimeout(function () {
+                                            if (bih.curSearchIdx === searchIdx) {
+                                                bih.search();
+                                            }
+                                        }, 500);
+                                    }
+                                }
+                            })
+                        }
+                    }
+                });
+            }
+        });
+
+        bih.$modal.on('hidden.bs.modal', function (e) {
+            if (bih.modalOpen) {
+                bih.modalOpen = false;
+                bih.cancel();
+            }
+
+            if (bih.$curInput.length) {
+                var inputTag = bih.$curInput.tagName();
+
+                if (inputTag === 'input' || inputTag === 'textarea') {
+                    bih.$curInput.focus();
+                    if (!bih.curInputCursorPos) {
+                        bih.curInputCursorPos = bih.$curInput.val().length;
+                    }
+
+                    if (bih.curInputCursorPos) {
+                        setInputCursorPos(bih.$curInput, bih.curInputCursorPos);
+                    }
+                } else {
+                    // Ne fonctionne pas... 
+//                    var input_name = bih.$curInput.data('bih_input_name');
+//                    if (input_name && typeof (CKEDITOR.instances[input_name]) !== 'undefined') {
+//                        CKEDITOR.instances[input_name].focus();
+//                        setCKEditorCursorPos(input_name, bih.curInputCursorPos);
+//                    }
+                }
+            }
+
+            bih.$curInput = $();
+            bih.curInputCursorPos = 0;
+            bih.reset();
+        });
+
+        $('body').keyup(function (e) {
+            if (e.key === 'Escape') {
+                if (bih.modalOpen) {
+                    bih.cancel();
+                }
+            } else if (e.key === 'Enter') {
+                if (bih.modalOpen && bih.curValue) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    bih.validate();
+                }
+            }
+        });
+    };
+    this.searchObj = function () {
+        bih.$objInput.removeClass('no_results');
+        var val = bih.$objInput.val();
+        var choices = [];
+        var results = {};
+
+        if (/^[^ ]+ +$/.test(val)) {
+            val = val.replace(/^([^ ]+) +$/, '$1');
+        }
+
+        if (val) {
+            if (val === '#') {
+                $('#bih_search_object_input_input_choices').remove();
+                bih.setObjKeyword('Hashtag');
+                return;
+            }
+
+            var regex = new RegExp('^(.*)(' + val + ')(.*)$', 'i');
+            for (var obj in bih.objects) {
+                if (regex.test(obj)) {
+                    var label = obj.replace(regex, '$1<b>$2</b>$3');
+
+                    results[obj] = bih.objects[obj] + label;
+                }
+            }
+
+            for (var alias in bih.aliases) {
+                if (regex.test(alias)) {
+                    var alias_label = alias.replace(regex, '$1<b>$2</b>$3');
+
+                    if (typeof (results[bih.aliases[alias]]) !== 'undefined') {
+                        var obj_label = results[bih.aliases[alias]];
+
+                        if (/^(.+) \(Alias: (.+)\)(.*)$/.test(obj_label)) {
+                            alias_label = obj_label.replace(/^(.+) \(Alias: (.+)\)(.*)$/, '$1 (Alias: $2 - ' + alias_label + ')$3');
+                        } else {
+                            alias_label = obj_label + ' (Alias: ' + alias_label + ')';
+                        }
+                    } else {
+                        alias_label = bih.objects[bih.aliases[alias]] + bih.aliases[alias] + ' (Alias: ' + alias_label + ')';
+                    }
+
+                    results[bih.aliases[alias]] = alias_label;
+                }
+            }
+        }
+
+        for (var obj_kw in results) {
+            choices.push({
+                'label': results[obj_kw],
+                'value': obj_kw
+            });
+        }
+
+        if (choices.length) {
+            displayInputChoices(bih.$objInput, choices, function ($btn) {
+                var value = $btn.data('item_value');
+
+                if (value) {
+                    bih.setObjKeyword(value);
+                }
+            });
+            return;
+        } else if (val) {
+            bih.$objInput.addClass('no_results');
+        }
+
+        $('#bih_search_object_input_input_choices').remove();
+    };
+    this.setObjKeyword = function (obj_kw) {
+        if (obj_kw === bih.curObjKw) {
+            return;
+        }
+
+        bih.lastSearch = '';
+        bih.curObjKw = obj_kw;
+        bih.$objInput.val('').hide();
+
+        bih.$modal.find('#bihObjectLabel').html(bih.objects[obj_kw] + obj_kw).css('display', 'inline-block');
+        bih.$searchInput.focus();
+    };
+    this.cancelObjKeyword = function () {
+        bih.curObjKw = '';
+        bih.curValue = '';
+        bih.lastSearch = '';
+        bih.$modal.find('#bihObjectLabel').html('').hide();
+        bih.$validateMsg.stop().slideUp(250);
+        bih.$curValueLabel.stop().slideUp(250, function() {
+            bih.$curValueLabel.html('');
+        });
+        bih.$objInput.val('').show().focus();
+    };
+    this.search = function () {
+        if (bih.modalOpen) {
+            var val = bih.$searchInput.val();
+
+            if (val.replace(/^(.+) *$/, '$1') === bih.lastSearch) {
+                return;
+            }
+
+            bih.curValue = '';
+            bih.$curValueLabel.stop().slideUp(250, function () {
+                bih.$curValueLabel.html('');
+            });
+            bih.$validateMsg.stop().slideUp(250);
+
+            bih.refreshIdx++;
+
+            if (val.length > 1) {
+                bih.$modal.find('.spinner').css('opacity', 1);
+                bih.lastSearch = val;
+
+                bih.$searchInput.removeClass('no_results');
+
+                BimpAjax('findHashtagResults', {
+                    'search': val,
+                    'obj_kw': bih.curObjKw
+                }, null, {
+                    refreshIdx: bih.refreshIdx,
+                    display_success: false,
+                    display_errors: true,
+                    display_warnings: false,
+                    success: function (result, bimpAjax) {
+                        if (bih.refreshIdx !== bimpAjax.refreshIdx) {
+                            return;
+                        }
+                        bih.$modal.find('.spinner').css('opacity', 0);
+
+                        if (result.obj_kw !== bih.curObjKw) {
+                            bih.setObjKeyword(result.obj_kw);
+                        }
+
+                        if (result.choices.length) {
+                            bih.closeNewHashtagForm();
+                            displayInputChoices(bih.$searchInput, result.choices, function ($btn) {
+                                var value = $btn.data('item_value');
+
+                                if (value) {
+                                    bih.curValue = value;
+                                    var label_html = '';
+
+                                    if ($btn.hasClass('bs-popover')) {
+                                        label_html = $btn.data('content');
+                                    }
+
+                                    if (!label_html) {
+                                        label_html = '<span class="success"><i class="fas fa5-check"></i></span>&nbsp;&nbsp;';
+                                        label_html += $btn.text();
+                                    }
+
+                                    bih.$curValueLabel.html(label_html).stop().slideDown(250);
+                                    bih.$validateMsg.stop().slideDown(250);
+                                }
+
+                                $('#bih_search_input_input_choices').remove();
+                            });
+                        } else {
+                            bih.$searchInput.addClass('no_results');
+                            $('#bih_search_input_input_choices').remove();
+
+                            if (bih.curObjKw === 'Hashtag') {
+                                bih.openNewHashtagForm();
+                            }
+                        }
+                    },
+                    error: function (result, bimpAjax) {
+                        if (bih.refreshIdx === bimpAjax.refreshIdx) {
+                            bih.$modal.find('.spinner').css('opacity', 0);
+                        }
+                    }
+                });
+            }
+        }
+    };
+    this.validate = function () {
+        if (bih.curValue) {
+            if (bih.$curInput.length) {
+                var inputTag = bih.$curInput.tagName();
+
+                var val = '';
+                if (inputTag === 'input' || inputTag === 'textarea') {
+                    val = bih.$curInput.val();
+                } else {
+                    val = bih.$curInput.html();
+                }
+
+                if (/^(.* )?#(.*)$/.test(val)) {
+                    var newValBegin = val.replace(/^(.* )?#(.*)$/, '$1');
+                    newValBegin += '{{' + bih.curValue + '}} ';
+
+                    var newValEnd = val.replace(/^(.* )?#(.*)$/, '$2');
+
+                    if (newValEnd) {
+                        newValEnd = ' ' + newValEnd;
+                    }
+
+                    if (inputTag === 'input' || inputTag === 'textarea') {
+                        bih.$curInput.val(newValBegin + newValEnd);
+                    } else {
+                        bih.$curInput.html(newValBegin + newValEnd);
+                    }
+
+                    bih.curInputCursorPos = newValBegin.length;
+
+                    bih.modalOpen = false;
+                    bih.$modal.modal('hide');
+
+                    bih.reset();
+                }
+            }
+        }
+    };
+    this.cancel = function () {
+        if (bih.$curInput.length) {
+            var inputTag = bih.$curInput.tagName();
+
+            var val = '';
+            if (inputTag === 'input' || inputTag === 'textarea') {
+                val = bih.$curInput.val();
+            } else {
+                val = bih.$curInput.html();
+            }
+
+            var val_before = val.replace(/^(.* )?#.*$/, '$1');
+            if (val_before) {
+                bih.curInputCursorPos = val_before.length;
+            } else {
+                bih.curInputCursorPos = 0;
+            }
+
+            val = val.replace(/(.* )?#/g, '$1');
+
+            if (inputTag === 'input' || inputTag === 'textarea') {
+                bih.$curInput.val(val);
+            } else {
+                bih.$curInput.html(val);
+            }
+        }
+
+        if (bih.modalOpen) {
+            bih.modalOpen = false;
+            bih.$modal.modal('hide');
+        }
+    };
+    this.reset = function () {
+        bih.lastSearch = '';
+        bih.curObjKw = '';
+        bih.curValue = '';
+
+        if (bih.$objInput.length) {
+            bih.$objInput.val('').show().removeClass('no_results');
+        }
+
+        if (bih.$searchInput.length) {
+            bih.$searchInput.val('').removeClass('no_results');
+        }
+
+        if (bih.$modal.length) {
+            bih.$modal.find('#bihObjectLabel').html('').hide();
+        }
+
+        if (bih.$curValueLabel) {
+            bih.$curValueLabel.stop().hide().html('');
+        }
+
+        if (bih.$validateMsg) {
+            bih.$validateMsg.stop().hide();
+        }
+
+        bih.closeNewHashtagForm();
+    };
+
+    // Form New Hastag: 
+
+    this.openNewHashtagForm = function () {
+        if (bih.modalOpen && bih.$modal.length) {
+            bih.resetNewHashtagForm();
+            bih.$modal.find('#bihAddHastagFormContainer').stop().slideDown(250);
+        }
+    };
+    this.closeNewHashtagForm = function () {
+        if (bih.$modal.length) {
+            bih.$modal.find('#bihAddHastagFormContainer').stop().slideUp(250);
+            bih.resetNewHashtagForm();
+        }
+    };
+    this.resetNewHashtagForm = function () {
+        if (bih.$modal.length) {
+            bih.$modal.find('input[name="bih_new_ht_code"]').val('');
+            bih.$modal.find('input[name="bih_new_ht_label"]').val('');
+            bih.$modal.find('input[name="bih_new_ht_description"]').val('');
+        }
+    };
+    this.addHashtag = function () {
+        if (bih.modalOpen && bih.$modal.length) {
+            var fields = {};
+
+            fields.code = bih.$modal.find('input[name="bih_new_ht_code"]').val();
+
+            if (!fields.code) {
+                bimp_msg('Veuillez saisir un mot-clé', 'danger', null, true);
+            } else {
+                fields.label = bih.$modal.find('input[name="bih_new_ht_label"]').val();
+                fields.description = bih.$modal.find('input[name="bih_new_ht_description"]').val();
+
+                saveObject('bimpcore', 'BimpHashtag', 0, fields, null, function (result) {
+                    if (result.id_object) {
+                        bih.closeNewHashtagForm();
+
+                        if (bih.curObjKw === 'Hashtag') {
+                            bih.curValue = 'Hastag:' + result.id_object;
+                            bih.validate();
+                        }
+                    }
+                }, false);
+            }
+        }
+    };
+
+    // Evénements: 
+
+    this.setEvents = function ($input) {
+        if (!parseInt($input.data('bih_events_init'))) {
+            if ($input.hasClass('html_editor_hashtags')) {
+                // Editeur HTML: 
+                var field_name = $input.attr('name');
+
+                if (field_name) {
+                    var $container = $input.parent().find('#cke_' + field_name);
+
+                    if (!$container.length) {
+                        setTimeout(function () {
+                            bih.setEvents($input);
+                        }, 500);
+                        return;
+                    } else {
+                        var input_name = $container.attr('id').replace(/^cke_(.+)$/, '$1');
+
+                        // On réintialise les events sur chaque click du bouton "Source": 
+                        var $btn = $container.find('.cke_button__source');
+                        if ($btn.length) {
+                            if (!parseInt($btn.data('bih_events_init'))) {
+                                $btn.data('bih_input_name', input_name);
+                                $btn.click(function (e) {
+                                    var $container2 = $(this).findParentByClass('cke_editor_' + $btn.data('bih_input_name'));
+
+                                    if ($.isOk($container2)) {
+                                        var $input2 = $container2.parent().children('.html_editor_hashtags');
+
+                                        if ($input2.length) {
+                                            bih.setEvents($input2);
+                                        }
+                                    }
+                                });
+
+                                $btn.data('bih_events_init', 1);
+                            }
+
+                            if ($btn.hasClass('cke_button_off')) {
+                                var $iframe_body = $container.find('iframe').contents().find('body');
+                                if ($iframe_body.length) {
+                                    if (!parseInt($iframe_body.data('bih_events_init'))) {
+                                        $iframe_body.data('bih_input_name', input_name);
+
+                                        $iframe_body.keyup(function (e) {
+                                            var text = $(this).html();
+
+                                            if (/^(.* )?#([ \s\r\t\n].*)?/.test(text)) {
+                                                bih.openModal($(this));
+                                            }
+                                        });
+
+                                        $iframe_body.data('bih_events_init', 1);
+                                    }
+                                } else {
+                                    setTimeout(function () {
+                                        bih.setEvents($input);
+                                    }, 250);
+                                    return;
+                                }
+                            } else {
+                                var $src_input = $container.find('textarea.cke_source');
+
+                                if ($src_input.length) {
+                                    if (!parseInt($src_input.data('bih_events_init'))) {
+                                        $src_input.data('bih_input_name', input_name);
+
+                                        $src_input.keyup(function (e) {
+                                            var text = $(this).val();
+
+                                            if (/^(.* )?#( .*)?$/.test(text)) {
+                                                bih.openModal($(this));
+                                            }
+                                        });
+
+                                        $src_input.data('bih_events_init', 1);
+                                    }
+                                } else {
+                                    setTimeout(function () {
+                                        bih.setEvents($input);
+                                    }, 250);
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                // Input ou textarea classique: 
+                $input.keyup(function (e) {
+                    var text = $(this).val();
+
+                    // Si un hashtag vient d'être frappé:
+                    if (/^(.* )?#( .*)?$/.test(text)) {
+                        bih.openModal($(this));
+                    }
+                });
+                $input.data('bih_events_init', 1);
+            }
+        }
+    };
+}
+
+var BIH = new BimpInputHashtags();
+
 $(document).ready(function () {
     $('.object_form').each(function () {
         onFormLoaded($(this));
     });
-
     $.datepicker.setDefaults($.datepicker.regional[ "fr" ]);
-
     $('body').on('contentLoaded', function (e) {
         if (e.$container.length) {
             setInputsEvents(e.$container);

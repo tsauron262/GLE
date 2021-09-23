@@ -972,6 +972,39 @@ function uncheckAll($container, filter) {
     }
 }
 
+function setInputCursorPos($input, pos) {
+    if ($.isOk($input)) {
+        var tagName = $input.tagName();
+        if (tagName === 'input' || tagName === 'textarea') {
+            var elem = $input.get(0);
+
+            if (elem.setSelectionRange) {
+                elem.setSelectionRange(pos, pos);
+            } else if (elem.createTextRange) {
+                var range = elem.createTextRange();
+                range.collapse(true);
+                range.moveEnd('character', pos);
+                range.moveStart('character', pos);
+                range.select();
+            }
+        }
+    }
+}
+
+function setCKEditorCursorPos(instance_name, pos) {
+    if (typeof (CKEDITOR.instances[instance_name]) !== 'undefined') {
+        var editor = CKEDITOR.instances[instance_name];
+        editor.focus();
+
+        var selection = editor.getSelection();
+        var range = selection.getRanges()[0];
+        var pCon = range.startContainer.getAscendant({p: 2}, true); //getAscendant('p',true);
+        var newRange = new CKEDITOR.dom.range(range.document);
+        newRange.moveToPosition(pCon, pos);
+        newRange.select();
+    }
+}
+
 // Components: 
 
 function getComponentParams($component) {

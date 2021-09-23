@@ -9,7 +9,9 @@ objects:
     entrepots: 
         instance: 
             bimp_object: Bimp_Entrepot
-            
+    hashtags: 
+        instance: 
+            bimp_object: BimpHashtag
     correctifs: 
         instance: 
             bimp_object: BimpCorrectif
@@ -69,6 +71,14 @@ sections:
                   list: 
                       panel: 1
                       object: entrepots
+                      name: default
+        hashtags: 
+            label: Hashtags
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: hashtags
                       name: default
         correctifs: 
             label: Correctifs

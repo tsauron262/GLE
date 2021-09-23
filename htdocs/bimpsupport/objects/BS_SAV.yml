@@ -358,6 +358,7 @@ fields:
             auto_expand: 1
             rows: 4
         user_edit: 1
+        hashtags: 1
     extra_infos:
         label: Informations supplémentaires devis
         type: text
@@ -365,6 +366,7 @@ fields:
             auto_expand: 1
             rows: 4
         user_edit: 1
+        hashtags: 1
     system: 
         label: Système
         type: int

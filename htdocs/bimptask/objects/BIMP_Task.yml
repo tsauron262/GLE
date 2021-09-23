@@ -209,3 +209,19 @@ views:
                   - type: custom
                     custom: 
                         callback: renderNotesList
+
+searches: 
+    default: 
+        fields_search: 
+            - a.id
+            - u.firstname
+            - u.lastname
+        fields_return: 
+            - a.id
+            - u.firstname
+            - u.lastname
+        label_syntaxe: 'Tâche #<a.id> (a.subj) - Utilisateur: <u.firstname> <u.lastname>'
+        joins: 
+            - table: user
+              on: a.id_user_owner = u.rowid
+              alias: u

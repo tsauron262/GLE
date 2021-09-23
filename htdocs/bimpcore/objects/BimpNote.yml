@@ -70,6 +70,7 @@ fields:
     content: 
         label: Texte
         type: text
+        hashtags: 1
         input: 
             auto_expand: 1
             rows: 1
@@ -108,7 +109,6 @@ fields:
             array: userGroups
     auto:
         label: Note Auto
-#        type: boolean => n'existe pas !! 
         type: bool
         default_value: 0
         
@@ -127,6 +127,12 @@ forms:
             - field: fk_user_dest
             - field: fk_group_dest
             - field: content
+            
+    edit: 
+        rows: 
+            - field: visibility
+            - field: content
+            
     msg: 
         rows: 
             - field: obj_type
@@ -191,7 +197,8 @@ lists:
         sort_field: date_create
         sort_way: desc
         n: 50
-        update_btn: 1
+        edit_btn: 1
+        edit_form: edit
         delete_btn: 1
         add_form_name: default
         extra_btn: 
@@ -202,11 +209,15 @@ lists:
             visibility:
                 edit: 1
             content:
-                edit: 1
                 min_width: 400
             to:
             viewed:
                 edit: 1
+                
+    global: 
+        extends: default
+        add_form_name: unset
+        add_btn: 0
                 
     public: 
         title: Suivi
@@ -249,5 +260,10 @@ lists:
                 value: 
                     callback: displayChatmsg
             
-            
-        
+searches: 
+    default: 
+        fields_search: 
+            - a.id
+        fields_return: 
+            - a.id
+        label_syntaxe: 'Note #<a.id>'

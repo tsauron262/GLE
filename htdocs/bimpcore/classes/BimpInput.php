@@ -42,6 +42,10 @@ class BimpInput
                 break;
 
             case 'text':
+                if (isset($options['hashtags']) && (int) $options['hashtags']) {
+                    $extra_class .= ($extra_class ? ' ' : '') . 'allow_hashtags';
+                }
+
                 $value = htmlentities($value);
                 if ((isset($options['addon_left']) && $options['addon_left']) ||
                         (isset($options['addon_right']) && $options['addon_right'])) {
@@ -86,6 +90,10 @@ class BimpInput
                     }
                     $html .= $data;
                     $html .= '/>';
+                }
+
+                if (isset($options['hashtags']) && (int) $options['hashtags']) {
+                    $html .= BimpRender::renderInfoIcon('fas_hashtag', 'Vous pouvez utiliser le symbole # pour inclure un lien objet');
                 }
 
                 if (isset($options['min_label']) && $options['min_label']) {
@@ -199,6 +207,10 @@ class BimpInput
                 break;
 
             case 'textarea':
+                if (isset($options['hashtags']) && (int) $options['hashtags']) {
+                    $extra_class .= ($extra_class ? ' ' : '') . 'allow_hashtags';
+                }
+
                 $value = htmlentities($value);
 
                 if (!isset($options['rows'])) {
@@ -218,14 +230,40 @@ class BimpInput
                     $html .= '<p class="smallInfo">Max ' . $options['maxlength'] . ' caractères</p>';
                 }
 
+                if (isset($options['hashtags']) && (int) $options['hashtags']) {
+                    $html .= '<p class="inputHelp">';
+                    $html .= 'Vous pouvez utiliser le symbole # pour inclure un lien objet';
+                    $html .= '</p>';
+                }
+
                 $html .= '<textarea id="' . $input_id . '" rows="' . $options['rows'] . '" name="' . $field_name . '"';
-                if ($options['auto_expand'] || $options['note']) {
-                    $html .= ' class="' . ($options['auto_expand'] ? 'auto_expand' : '') . ($options['note'] ? ' note' : '') . ($options['tab_key_as_enter'] ? ' tab_key_as_enter' : '') . ' ' . $extra_class . '"';
+                $classes = array();
+
+                if (isset($options['auto_expand']) && (int) $options['auto_expand']) {
+                    $classes[] = 'auto_expand ';
+                }
+                if (isset($options['note']) && $options['note']) {
+                    $classes[] = 'note';
+                }
+                if (isset($options['tab_key_as_enter']) && $options['tab_key_as_enter']) {
+                    $classes[] = 'tab_key_as_enter';
+                }
+                if ($extra_class) {
+                    $classes[] = $extra_class;
+                }
+
+                if (!empty($classes)) {
+                    $html .= ' class="' . implode(' ', $classes) . '"';
+                }
+
+                if (isset($options['rows'])) {
                     $html .= ' data-min_rows="' . $options['rows'] . '"';
                 }
+
                 if (isset($options['maxlength']) && $options['maxlength']) {
                     $html .= ' maxlength="' . (int) $options['maxlength'] . '"';
                 }
+
                 $html .= $data . '>' . $value . '</textarea>';
 
                 if (isset($options['values']) && is_array($options['values']) && count($options['values'])) {
@@ -242,6 +280,15 @@ class BimpInput
                     require_once DOL_DOCUMENT_ROOT . '/core/class/doleditor.class.php';
                 }
                 $doleditor = new DolEditor($field_name, $value, '', 160, 'dolibarr_details', '', false, true, true, ROWS_4, '90%');
+
+                if (isset($options['hashtags']) && (int) $options['hashtags']) {
+                    $doleditor->extra_class = 'allow_hashtags';
+
+                    $html .= '<p class="inputHelp">';
+                    $html .= 'Vous pouvez utiliser le symbole # pour inclure un lien objet';
+                    $html .= '</p>';
+                }
+
                 $html .= $doleditor->Create(1);
                 break;
 

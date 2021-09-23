@@ -39,6 +39,7 @@ fields:
             array: niveaux
     msg: 
         label: Message
+        hashtags: 1
         
         
 lists:

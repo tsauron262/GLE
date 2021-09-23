@@ -128,6 +128,7 @@ fields:
             note: 1
             auto_expand: 1
             rows: 3
+        hashtags: 1
             
     total_ht: 
         label: Total HT
@@ -677,6 +678,7 @@ searches:
             - a.ref
             - c.ref
             - s.nom
+        label_syntaxe: 'BL n°<a.ref> - Commande: <c.ref> - Client: <s.nom>'
         joins:
             commande: 
                 table: commande

@@ -96,7 +96,6 @@ fields:
         type: id_object
         object: user
         
-        
 fields_tables: 
     default: 
         footer_extra_btn:
@@ -118,7 +117,6 @@ fields_tables:
             - field: user_valid
               display: nom_url
 
-            
 views:
     default:
         objects_change_reload: lines
@@ -150,6 +148,7 @@ views:
                     list: 
                         name: default
                         children: lines
+                        
 forms:
     add:
         on_save: redirect
@@ -217,3 +216,26 @@ cards:
             - label: Fermé le
               field: date_closing
         view_btn: 1
+
+searches: 
+    default: 
+        fields_search: 
+            - a.id
+            - es.ref
+            - es.lieu
+            - ed.ref
+            - ed.lieu
+        fields_return: 
+            - a.id
+            - es.ref
+            - es.lieu
+            - ed.ref
+            - ed.lieu
+        label_syntaxe: 'Transfert #<a.id> - De <es.ref> (<es.lieu>) Vers <ed.ref> (ed.lieu)'
+        joins: 
+            - table: entrepot
+              on: a.id_warehouse_source = es.rowid
+              alias: es
+            - table: entrepot
+              on: a.id_warehouse_dest = ed.rowid
+              alias: ed

@@ -468,6 +468,12 @@ class ObjectLine extends BimpObject
                     return 1;
             }
         }
+        else{
+            $line = $this->getChildObject('line');
+            $type = $line->product_type ? $line->product_type : $line->fk_product_type;
+            if($type == 1)
+                return 1;
+        }
         return 0;
     }
 

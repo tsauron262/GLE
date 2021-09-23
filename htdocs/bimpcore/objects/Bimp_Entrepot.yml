@@ -90,6 +90,10 @@ lists_cols:
         label: Adresse complète
         value: 
             callback: displayFullAdress
+    mail:
+        label: Mail
+        value:
+            callback: getMail
             
 lists: 
     default: 

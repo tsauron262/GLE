@@ -52,6 +52,13 @@ fields:
     traite:
         label: Traité
         type: bool
+    id_user_traite:
+        label: Traité manuellement par
+        type: id_object
+        object: user
+        input:
+            type: search_user
+        
     
 forms:
     default: 
@@ -88,6 +95,7 @@ lists:
             fact_reconnue:
             fact_possible:
             fact_client:
+            id_user_traite:
     
 
                       

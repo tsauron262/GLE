@@ -1101,14 +1101,13 @@ class BimpComm extends BimpDolObject
                         $marginInfos['pv_total'] += $pv;
                     }
                 } else {
-                    $type = $line->product_type ? $line->product_type : $line->fk_product_type;
-                    if ($type == 0) {  // product
+                    if (!$bimp_line->isService()) {  // product
                         $marginInfos['pa_products'] += $pa;
                         $marginInfos['pv_products'] += $pv;
                         $marginInfos['pa_total'] += $pa;
                         $marginInfos['pv_total'] += $pv;
                         $marginInfos['margin_on_products'] += $pv - $pa;
-                    } elseif ($type == 1) {  // service
+                    } else{  // service
                         $marginInfos['pa_services'] += $pa;
                         $marginInfos['pv_services'] += $pv;
                         $marginInfos['pa_total'] += $pa;

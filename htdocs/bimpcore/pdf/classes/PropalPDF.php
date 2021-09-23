@@ -213,4 +213,84 @@ class PropalPDF extends BimpDocumentPDF
 
         return $html;
     }
+
+    public function getTargetInfosHtml()
+    {
+        $html = parent::getTargetInfosHtml();
+
+        $contacts = $this->object->getIdContact('external', 'SHIPPING');
+
+        if (is_array($contacts) && !empty($contacts)) {
+            if (count($contacts) > 1) {
+                $html .= '<br/><div class="section_title" style="width: 40%; border-top: solid 1px #' . $this->primary . '; ">';
+                $html .= '<span style="color: #' . $this->primary . '">' . 'Livraisons à :' . '</span></div>';
+                $html .= 'Voir annexe';
+            } else {
+                $id_contact = (isset($contacts[0]) ? (int) $contacts[0] : 0);
+
+                if ($id_contact) {
+                    $html .= '<br/><div class="section_title" style="width: 40%; border-top: solid 1px #' . $this->primary . '; ">';
+                    $html .= '<span style="color: #' . $this->primary . '">' . 'Livraison à :' . '</span></div>';
+
+                    $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
+
+                    if (BimpObject::objectLoaded($contact)) {
+                        $html .= str_replace("\n", "<br/>", $this->thirdparty->nom . '<br/>' . pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, $contact->dol_object, 1, 'target'));
+                    } else {
+                        $html .= '<span class="danger">Erreur: le contact #' . $id_contact . ' n\'existe plus</span>';
+                    }
+                }
+            }
+        }
+
+        return $html;
+    }
+
+    public function renderAnnexes()
+    {
+        $contacts = $this->object->getIdContact('external', 'SHIPPING');
+
+        if (is_array($contacts) && count($contacts) > 1) {
+            $html = '';
+
+            $html .= '<div style="font-size: 8px">';
+            $html .= '<table cellspacing="10px">';
+            
+            $html .= '<tr>';
+            $html .= '<td style="width: 50%">';
+
+            $html .= '<table style="width: 100%" cellspacing="0" cellpadding="3px">';
+            $html .= '<tr>';
+            $html .= '<td class="section_title" style="font-weight: bold; color: #' . $this->primary . '; border-top: solid 1px #' . $this->primary . '; border-bottom: solid 1px #' . $this->primary . '">Annexe : adresses de livraison</td>';
+            $html .= '</tr>';
+
+            foreach ($contacts as $id_contact) {
+                $html .= '<tr>';
+                $html .= '<td style="border-bottom: solid 1px #3D3D3D">';
+
+                $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', (int) $id_contact);
+                if (!BimpObject::objectLoaded($contact)) {
+                    $html .= '<span class="danger">Erreur: le contact #' . $id_contact . ' n\'existe plus</span>';
+                    continue;
+                } else {
+                    $html .= '<span style="font-weight: bold">';
+                    $html .= pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, $contact->dol_object, 1, 'target');
+                    $html .= '</span>';
+                }
+
+                $html .= '</td>';
+                $html .= '</tr>';
+            }
+            
+            $html .= '</table>';
+            
+            $html .= '</td>';
+            $html .= '</tr>';
+            
+            $html .= '</table>';
+            $html .= '</div>';
+
+            $this->writeContent($html);
+        }
+    }
 }

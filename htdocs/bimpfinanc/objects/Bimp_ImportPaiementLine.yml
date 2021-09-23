@@ -1,8 +1,6 @@
 table: Bimp_ImportPaiementLine
 primary: id
 
-
-
 labels: 
     name: ligne d'import
     name_plur: lignes d'import
@@ -58,6 +56,9 @@ fields:
         object: user
         input:
             type: search_user
+    date: 
+        label: Date
+        type: date
         
     
 forms:
@@ -96,8 +97,7 @@ lists:
             fact_possible:
             fact_client:
             id_user_traite:
-    
-
+            date: 
                       
 lists_cols: 
     dataLight:
@@ -120,7 +120,6 @@ lists_cols:
         label: Montant
         value: 
             callback: getPrice
-                     
         
 views: 
     default: 

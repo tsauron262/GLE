@@ -766,3 +766,15 @@ cards:
             - label: Package nouveau
               field: id_package_nouveau
         view_btn: 1
+        
+searches: 
+    default: 
+        fields_search: 
+            - a.id
+            - e.ref
+            - e.lieu
+        fields_return: 
+            - a.id
+            - e.ref
+            - e.lieu
+        label_syntaxe: 'Inventaire #<a.id> - Entrepôt: <e.ref> <e.lieu>'

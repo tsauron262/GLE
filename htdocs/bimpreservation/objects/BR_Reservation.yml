@@ -280,6 +280,8 @@ fields:
         input: 
             note: 1
             auto_expand: 1
+        hashtags: 1
+        user_edit: 1
             
 forms: 
     equipment:

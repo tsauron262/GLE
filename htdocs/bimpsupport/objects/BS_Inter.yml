@@ -265,3 +265,16 @@ views_lists:
         list_filters: 
             callback: getUserCurrentIntersFilters
         
+searches: 
+    default: 
+        fields_search: 
+            - a.id
+            - t.ticket_number
+        fields_return: 
+            - a.id
+            - t.ticket_number
+        label_syntaxe: 'Inter #<a.id> - Ticket <t.ticket_number>'
+        joins: 
+            - table: bs_ticket
+              on: a.id_ticket = t.id
+              alias: t

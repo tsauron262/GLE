@@ -488,3 +488,15 @@ cards:
               value: 
                   callback: displayPublicEmail
         
+searches: 
+    default: 
+        fields_search: 
+            - a.rowid
+            - a.login
+            - a.firstname
+            - a.lastname
+            - a.email
+        fields_return: 
+            - a.firstname
+            - a.lastname
+        label_syntaxe: '<a.firstname> <a.lastname>'

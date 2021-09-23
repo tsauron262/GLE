@@ -38,7 +38,7 @@ objects:
 fields: 
     label: 
         label: Libellé
-    
+        
     ref: 
         label: Référence
         

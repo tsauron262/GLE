@@ -74,12 +74,19 @@ class BC_Field extends BimpComponent
             'currency' => array('default' => 'EUR')
         ),
         'string'         => array(
+            'hashtags'        => array('data_type' => 'bool', 'default' => 0),
             'size'            => array('data_type' => 'int', 'default' => 128),
             'forbidden_chars' => array('default' => ''),
             'regexp'          => array('default' => ''),
             'invalid_msg'     => array('default' => ''),
             'uppercase'       => array('data_type' => 'bool', 'default' => 0),
             'lowercase'       => array('data_type' => 'bool', 'default' => 0),
+        ),
+        'text' => array(
+            'hashtags'        => array('data_type' => 'bool', 'default' => 0)
+        ),
+        'html' => array(
+            'hashtags'        => array('data_type' => 'bool', 'default' => 0)
         ),
         'object_filters' => array(
             'obj_module' => array('default' => ''),
@@ -400,7 +407,7 @@ class BC_Field extends BimpComponent
 
         $create_form = $this->getParam('create_form', '');
         $edit_form = $this->getParam('edit_form', '');
-        
+
         if ($create_form || $edit_form) {
 
             $success_callback = 'null';

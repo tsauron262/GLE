@@ -444,6 +444,11 @@ fields:
         label: Limite recommandé par Crédit SAFE
         type: money
         edit: 0
+            
+    outstanding_limit_atradius: 
+        label: Limite recommandé par Atradius
+        type: money
+        edit: 0
         
     fk_account: 
         label: Compte bancaire
@@ -707,6 +712,8 @@ fields_tables:
                   callback: displayOutstanding
               show: 
                   callback: isClient
+            - field: outstanding_limit_atradius
+              edit: 1
             - field: outstanding_limit
               edit: 1
               show: 
@@ -892,6 +899,8 @@ forms:
                     show_values: 1
             outstanding_limit: 
                 field: outstanding_limit
+            outstanding_limit_atradius:
+                field: outstanding_limit_atradius
             outstanding_limit_credit_safe:
                 field: outstanding_limit_credit_safe
             notecreditsafe: 

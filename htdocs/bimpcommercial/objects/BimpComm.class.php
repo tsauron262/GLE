@@ -192,6 +192,9 @@ class BimpComm extends BimpDolObject
                 if (!BimpObject::objectLoaded($client)) {
                     $errors[] = 'Client absent';
                 } else {
+                    if($client->getData('fk_typent') == 0)
+                        $errors[] = 'Type de tier obligatoire';
+                    
 
                     // Module de validation activé
                     if ((int) $conf->global->MAIN_MODULE_BIMPVALIDATEORDER == 1) {
@@ -216,9 +219,14 @@ class BimpComm extends BimpDolObject
         }
         
         
-//        if($this->getData('fk_mode_reglement') == 3 && $this->getData('rib_client') < 1 && $this->extrafieldsIsConfig('rib_client'))
-//            $errors[] = 'Pour les prélèvements CEPA, le RIB est obligatoire';
-//        $errors[] = 'TODO A suppr';
+        if($this->getData('fk_mode_reglement') == 3 &&  $this->extrafieldsIsConfig('rib_client')){
+            if($this->getData('rib_client') < 1)
+                $errors[] = 'Pour les prélèvements SEPA, le RIB est obligatoire';
+            else{
+                $rib = $this->getChildObject('rib_client');
+                $rib->isValid($errors);
+            }
+        }
 
         return (count($errors) ? 0 : 1);
     }
@@ -397,11 +405,16 @@ class BimpComm extends BimpDolObject
     // Getters array: 
     
     public function getRibArray()
-    {
-        $result = $this->db->getRows('societe_rib', '`fk_soc` ='.$this->getData("fk_soc"), null, 'object', null, 'default_rib', 'DESC');
+    {        
         $return = array(0=>'');
-        foreach($result as $row)
-            $return[$row->rowid] = $row->label;
+        $client = $this->getClientFacture();
+        if($client && $client->isLoaded()){
+            $result = $this->db->getRows('societe_rib', '`fk_soc` ='.$client->id, null, 'object', null, 'default_rib', 'DESC');
+
+            foreach($result as $row){
+                $return[$row->rowid] = $row->label;
+            }
+        }
         return $return;
     }
 
@@ -1088,14 +1101,13 @@ class BimpComm extends BimpDolObject
                         $marginInfos['pv_total'] += $pv;
                     }
                 } else {
-                    $type = $line->product_type ? $line->product_type : $line->fk_product_type;
-                    if ($type == 0) {  // product
+                    if (!$bimp_line->isService()) {  // product
                         $marginInfos['pa_products'] += $pa;
                         $marginInfos['pv_products'] += $pv;
                         $marginInfos['pa_total'] += $pa;
                         $marginInfos['pv_total'] += $pv;
                         $marginInfos['margin_on_products'] += $pv - $pa;
-                    } elseif ($type == 1) {  // service
+                    } else{  // service
                         $marginInfos['pa_services'] += $pa;
                         $marginInfos['pv_services'] += $pv;
                         $marginInfos['pa_total'] += $pa;

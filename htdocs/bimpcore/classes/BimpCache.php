@@ -2180,8 +2180,12 @@ class BimpCache
 
         return self::getCacheArray('cond_reglements_array', 1, '', '');
     }
+    
+    public static function getModeReglements($type = 2){
+        return static::getModeReglementsArray('id', true, $type);
+    }
 
-    public static function getModeReglementsArray($key = 'id', $active_only = false)
+    public static function getModeReglementsArray($key = 'id', $active_only = false, $type = 2)
     {
         $cache_key = 'mode_reglements_by_' . $key;
         if ($active_only) {
@@ -2199,15 +2203,17 @@ class BimpCache
             self::$cache[$cache_key] = array();
 
             foreach ($form->cache_types_paiements as $id_payment => $payment_data) {
-                if (!$active_only || ($active_only && (int) $payment_data['active'])) {
-                    switch ($key) {
-                        case 'id':
-                            self::$cache[$cache_key][(int) $payment_data['id']] = $payment_data['label'];
-                            break;
+                if($type == 2 || $type == $payment_data['type'] || $payment_data['type'] == 2){
+                    if (!$active_only || ($active_only && (int) $payment_data['active'])) {
+                        switch ($key) {
+                            case 'id':
+                                self::$cache[$cache_key][(int) $payment_data['id']] = $payment_data['label'];
+                                break;
 
-                        case 'code':
-                            self::$cache[$cache_key][$payment_data['code']] = $payment_data['label'];
-                            break;
+                            case 'code':
+                                self::$cache[$cache_key][$payment_data['code']] = $payment_data['label'];
+                                break;
+                        }
                     }
                 }
             }

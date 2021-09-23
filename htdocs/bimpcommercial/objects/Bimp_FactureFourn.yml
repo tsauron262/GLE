@@ -153,6 +153,12 @@ fields:
     total: unset
     tx_marge: unset
     tx_marque: unset
+    fk_mode_reglement: 
+        values: 
+            callback:
+                method: getModeReglements
+                params:
+                    - 1
     
 forms:
     default: 

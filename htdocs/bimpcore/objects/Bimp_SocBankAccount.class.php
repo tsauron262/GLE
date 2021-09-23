@@ -29,26 +29,111 @@ class Bimp_SocBankAccount extends BimpObject
 
         return $html;
     }
+    
+    // Rights
+    
+    public function isEditable($force_edit = false, &$errors = array()) {
+        return !$this->getData('exported');
+    }
+    
+    public function isDeletable($force_delete = false, &$errors = array()) {
+        return !$this->getData('exported');
+    }
+    
+    // return boolean:
+    
+    public function isValid(Array &$errors):bool {
+
+        $rib = Array(
+            "banque"        => (int) $this->getData('code_banque'),
+            "agence"        => (int) $this->getData('code_guichet'),
+            "compte"        => (string) $this->getData('number'),
+            "compte_strtr"  => (int) strtr(strtoupper($this->getData("number")), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", '12345678912345678923456789'),
+            "clerib"        => (int) $this->getData('cle_rib')
+        );
+        
+        $cbX89 = 89 * $rib['banque'];
+        $cgX15 = 15 * $rib['agence'];
+        $ncX3 = 3 * $rib['compte_strtr'];
+        
+        $verif_key = (int) 97 - (($cbX89 + $cgX15 + $ncX3) % 97);
+        
+        if((int) $verif_key !== $rib['clerib']) {
+            $errors[] = "Le RIB sélectionné n'est pas valide, veuillez vérifier qu'il ne comporte pas d'erreurs";
+            return (bool) 0;
+        }
+        
+        if($this->getData('rum') == ''){
+            $errors[] = "Le RIB n'est pas valide (RUM absent)";
+            return (bool) 0;
+        }
+            
+        
+        return (bool) 1;
+    }
 
     // overrides: 
+    
+    
+    public function getNumSepa()
+    {
+        if ($this->getData('rum') == "") {
+            $new = BimpTools::getNextRef('societe_rib', 'rum', 'FR02ZZZ008801-', 7);
+            return $new;
+        }
+        return $this->getData('rum');
+    }
 
     public function create(&$warnings = array(), $force_create = false)
     {
+        $this->set('rum', $this->getNumSepa());
         $errors = parent::create($warnings, $force_create);
+        
 
         if (!count($errors)) {
             // Le create du dol_object n'insert pas les valeurs...
             $errors = $this->update($warnings, $force_create);
         }
-
         return $errors;
     }
-
+    
+    public function getFileName($signe = false, $ext = '.pdf'){
+        return $this->getData('fk_soc').'_'.$this->id.'_sepa'.($signe? '_signe' : '').$ext;
+    }
+    
+    public function isFieldEditable($field, $force_edit = false) {
+        global $user;
+        if($field == 'rum' && $user->id != 7 && !$user->admin)
+            return 0;
+        if($field == 'exported')
+            return 0;
+        
+        return parent::isFieldEditable($field, $force_edit);
+    }
+    
     public function update(&$warnings = array(), $force_update = false)
     {
+        $this->set('rum', $this->getNumSepa());
         $def = (int) $this->getData('default_rib');
+        
+        if(isset($_FILES['file']) && $_FILES['file']['name'] != ''){
+            $soc = $this->getChildObject('societe');
+            $file_dir = $soc->getFilesDir();
+            
+            $oldName =  $_FILES['file']['name'];
+            $name = $this->getFileName(true, '.'.pathinfo($oldName, PATHINFO_EXTENSION));
+            $_FILES['file']['name']= $name;
+            if(file_exists($file_dir.$_FILES['file']['name']))
+                    $errors[] = 'Fichier '.$_FILES['file']['name']. ' existe déja';
+            
+            
+            
+            require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+            
+            dol_add_file_process($file_dir, 0, 0, 'file');
+        }
 
-        $errors = parent::update($warnings, $force_update);
+        $errors = BimpTools::merge_array($errors, parent::update($warnings, $force_update));
 
         if (!count($errors)) {
             if ($def) {

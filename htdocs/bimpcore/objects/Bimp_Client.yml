@@ -258,7 +258,11 @@ forms:
                 input: 
                     type: select
                     options: 
-                        array: modeReglements
+#                        array: modeReglements
+                        callback:
+                            method: getModeReglements
+                            params:
+                                - 0
                     
               - custom: 1
                 label: Conditions de réglement

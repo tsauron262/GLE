@@ -148,10 +148,13 @@ fields:
         required : 1
         type: id
         values: 
-            array: modeReglements
-        input: 
-            type: select_payment
-            include_empty: 1
+            callback:
+                method: getModeReglements
+                params:
+                    - 0
+#        input: 
+#            type: select_payment
+#            include_empty: 1
         default_value: 
             callback: getModeReglementBySociete
         depends_on: fk_soc
@@ -261,7 +264,8 @@ fields:
         dol_extra_field: 1
         type: id_object
         object: rib_client 
-        create_form: default
+        edit_form: default
+        create_form: add
         create_form_label: Ajouter
         create_form_values:
             fields:
@@ -388,7 +392,10 @@ forms:
                 input: 
                     type: select
                     options: 
-                        array: modeReglements
+                        callback:
+                            method: getModeReglements
+                            params:
+                                - 0
                 input_name: fk_mode_reglement
                 value: 
                     callback: getModeReglementBySociete

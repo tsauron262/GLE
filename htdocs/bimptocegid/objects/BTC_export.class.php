@@ -244,6 +244,12 @@ class BTC_export extends BimpObject {
             case 'paiement':
                 $file = '2_'.$entitie.'_(PAIEMENTS)_' . $complementFileName . "_" . BimpCore::getConf('BIMPTOCEGID_version_tra') . ".tra";
                 break;
+            case 'rib':
+                $file = '4_'.$entitie.'_(RIBS)_' . $complementFileName . "_" . BimpCore::getConf('BIMPTOCEGID_version_tra') . ".tra";
+                break;
+            case 'mandat':
+                $file = '5_'.$entitie.'_(MANDATS)_' . $complementFileName . "_" . BimpCore::getConf('BIMPTOCEGID_version_tra') . ".tra";
+                break;
         }
         
         if(!is_dir($export_dir)) {

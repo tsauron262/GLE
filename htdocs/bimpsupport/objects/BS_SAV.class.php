@@ -44,6 +44,18 @@ class BS_SAV extends BimpObject
         self::BS_SAV_A_RESTITUER       => array('label' => 'A restituer', 'icon' => 'arrow-right', 'classes' => array('success')),
         self::BS_SAV_FERME             => array('label' => 'Fermé', 'icon' => 'times', 'classes' => array('danger'))
     );
+    
+    public static $bon_restit_raison = array(
+        "",
+        "Refus de devis offert",
+        "Produit obsolète",
+        "Pas de problème constaté",
+        "Réparation interne",
+        "Rendu en l’état sans réparation",
+        "Intervention sous garantie sans pièce",
+        "Contrat", 
+        99 => "Autre",
+    );
     public static $status_opened = array(self::BS_SAV_RESERVED, self::BS_SAV_NEW, self::BS_SAV_ATT_PIECE, self::BS_SAV_ATT_CLIENT, self::BS_SAV_DEVIS_ACCEPTE, self::BS_SAV_REP_EN_COURS, self::BS_SAV_EXAM_EN_COURS, self::BS_SAV_DEVIS_REFUSE, self::BS_SAV_ATT_CLIENT_ACTION, self::BS_SAV_A_RESTITUER);
     public static $need_propal_status = array(2, 3, 4, 5, 6, 9);
     public static $propal_reviewable_status = array(0, 1, 2, 3, 4, 6, 7, 9);
@@ -189,6 +201,28 @@ class BS_SAV extends BimpObject
             }
         }
         return 1;
+    }
+    
+    public function isGratuit(){
+        $montant = 0;
+        $factureAc = $this->getChildObject('facture_acompte');
+        if($factureAc->isLoaded()){
+            $montant += $factureAc->getData('total');
+        }
+        $propal = $this->getChildObject('propal');
+        if($propal->isLoaded()){
+            $montant += $propal->getData('total');
+            $lines = $this->getChildrenObjects('propal_lines');
+            foreach($lines as $lineS){
+                if($lineS->getData('linked_object_name') == 'sav_garantie'){
+                    $montant -= $lineS->getTotalHT(true);
+                }
+            }
+            
+        }
+        if($montant < 1 && $montant > -1)
+            return 1;
+        return 0;
     }
 
     public function isActionAllowed($action, &$errors = array())
@@ -1139,6 +1173,13 @@ class BS_SAV extends BimpObject
         $mask = str_replace('{CENTRE}', (string) $this->getData('code_centre'), $mask);
 
         return($tmp->getNextValue($objsoc, $this, $mask));
+    }
+    
+    public function getDefaultCodeCentreRepa()
+    {
+        global $tabCentre;
+        if(isset($tabCentre[$this->getData('code_centre')]) && isset($tabCentre[$this->getData('code_centre')][10]))
+            return $tabCentre[$this->getData('code_centre')][10];
     }
 
     public function getDefaultCodeCentre()
@@ -3934,94 +3975,110 @@ class BS_SAV extends BimpObject
         $propal = $this->getChildObject('propal');
 
         global $user, $langs;
+        
+        
+        
+        if($this->isGratuit()){
+            if($data['bon_resti_raison'] == 0)
+                $errors[] = 'Raison de la non facturation obligatoire';
+            elseif($data['bon_resti_raison'] == 99){
+                if($data['bon_resti_raison_detail'] == '')
+                    $errors[] = 'Détail de la non facturation obligatoire';
+                else
+                    $this->addNote($data['bon_resti_raison_detail']);
+            }
+        }
+        
 
         // Si refus du devis: 
-        if ((int) $this->getData('status') === self::BS_SAV_DEVIS_REFUSE) {
-            if (is_null($propal) || !$propal->isLoaded()) {
-                $errors[] = 'Proposition commerciale absente';
-            } else {
-                require_once(DOL_DOCUMENT_ROOT . "/bimpcore/classes/BimpRevision.php");
-
-                $old_id_propal = $propal->id;
-                $revision = new BimpRevisionPropal($propal->dol_object);
-                $new_id_propal = $revision->reviserPropal(array(null, null), true, self::$propal_model_pdf, $errors);
-
-                $this->addNote('Devis fermé après refus par le client le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
-
-                if ($new_id_propal && !count($errors)) {
-                    $client = $this->getChildObject('client');
-
-                    if (is_null($client) || !$client->isLoaded()) {
-                        $errors[] = 'Client absent';
-                    } else {
-                        //Anulation du montant de la propal
-                        $totHt = $propal->dol_object->total_ht;
-                        $totTtc = $propal->dol_object->total_ttc;
-                        if ($totHt == 0)
-                            $tTva = 0;
-                        else {
-                            $tTva = (($totTtc / ($totHt != 0 ? $totHt : 1) - 1) * 100);
-                        }
-                        $propal->fetch($old_id_propal);
-
-                        $propal->dol_object->statut = 0;
-                        $propal->dol_object->addline("Devis refusé", -($totHt) / (100 - $client->dol_object->remise_percent) * 100, 1, $tTva, 0, 0, 0, $client->dol_object->remise_percent, 'HT', 0, 0, 1, -1, 0, 0, 0, 0); //-$totPa);
-
-                        $this->set('id_propal', $new_id_propal);
-                        $propal->fetch($new_id_propal);
-
-                        $frais = (float) (isset($data['frais']) ? $data['frais'] : 0);
-                        $propal->dol_object->addline(
-                                "Machine(s) : " . $this->getNomMachine() .
-                                "\n" . "Frais de gestion devis refusé.", $frais / 1.20, 1, 20, 0, 0, 3470, $client->dol_object->remise_percent, 'HT', null, null, 1);
-
-                        $propal->fetch($propal->id);
-                        $propal->dol_object->valid($user);
-
-                        $propal->dol_object->generateDocument(self::$propal_model_pdf, $langs);
-                        $propal->dol_object->cloture($user, 2, "Auto via SAV");
-                        $this->removeReservations();
-//                        $apple_part = BimpObject::getInstance('bimpsupport', 'BS_ApplePart');
-//                        $apple_part->deleteBy(array(
-//                            'id_sav' => (int) $this->id
-//                        ));
-                        $msg_type = 'revPropRefu';
-                    }
+        if(!count($errors)){
+            if ((int) $this->getData('status') === self::BS_SAV_DEVIS_REFUSE) {
+                if (is_null($propal) || !$propal->isLoaded()) {
+                    $errors[] = 'Proposition commerciale absente';
                 } else {
-                    $errors[] = 'Echec de la fermeture de la proposition commerciale';
-                }
-            }
-        } else {
-            if (isset($data['resolution'])) {
-                $this->updateField('resolution', (string) $data['resolution'], null, true);
-            }
-            if ((int) $this->getData('status') !== self::BS_SAV_REP_EN_COURS) {
-                $errors[] = 'Statut actuel invalide';
-            } elseif ($this->needEquipmentAttribution()) {
-                $errors[] = 'Certains produits nécessitent encore l\'attribution d\'un équipement';
-            } else {
-                if (!(string) $this->getData('resolution')) {
-                    $errors[] = 'Le champ "résolution" doit être complété';
-                } else {
-                    $this->addNote('Réparation terminée le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
-                    $propal->dol_object->cloture($user, 2, "Auto via SAV");
-                    $msg_type = 'repOk';
+                    require_once(DOL_DOCUMENT_ROOT . "/bimpcore/classes/BimpRevision.php");
 
-                    $repair = BimpObject::getInstance('bimpapple', 'GSX_Repair');
-                    $list = $repair->getList(array(
-                        'id_sav'            => (int) $this->id,
-                        'ready_for_pick_up' => 0
-                            ), null, null, 'id', 'asc', 'array', array('id'));
-                    if (!is_null($list)) {
-                        foreach ($list as $item) {
-                            $repair = BimpCache::getBimpObjectInstance('bimpapple', 'GSX_Repair', (int) $item['id']);
-                            if ($repair->isLoaded()) {
-                                $rep_errors = $repair->updateStatus();
-                            } else {
-                                $rep_errors = array('Réparation d\'id ' . $item['id'] . ' non trouvée');
+                    $old_id_propal = $propal->id;
+                    $revision = new BimpRevisionPropal($propal->dol_object);
+                    $new_id_propal = $revision->reviserPropal(array(null, null), true, self::$propal_model_pdf, $errors);
+
+                    $this->addNote('Devis fermé après refus par le client le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
+
+                    if ($new_id_propal && !count($errors)) {
+                        $client = $this->getChildObject('client');
+
+                        if (is_null($client) || !$client->isLoaded()) {
+                            $errors[] = 'Client absent';
+                        } else {
+                            //Anulation du montant de la propal
+                            $totHt = $propal->dol_object->total_ht;
+                            $totTtc = $propal->dol_object->total_ttc;
+                            if ($totHt == 0)
+                                $tTva = 0;
+                            else {
+                                $tTva = (($totTtc / ($totHt != 0 ? $totHt : 1) - 1) * 100);
                             }
-                            if (count($rep_errors)) {
-                                $warnings[] = BimpTools::getMsgFromArray($rep_errors, 'Echec de la fermeture de la réparation (2) d\'ID ' . $item['id']);
+                            $propal->fetch($old_id_propal);
+
+                            $propal->dol_object->statut = 0;
+                            $propal->dol_object->addline("Devis refusé", -($totHt) / (100 - $client->dol_object->remise_percent) * 100, 1, $tTva, 0, 0, 0, $client->dol_object->remise_percent, 'HT', 0, 0, 1, -1, 0, 0, 0, 0); //-$totPa);
+
+                            $this->set('id_propal', $new_id_propal);
+                            $propal->fetch($new_id_propal);
+
+                            $frais = (float) (isset($data['frais']) ? $data['frais'] : 0);
+                            $propal->dol_object->addline(
+                                    "Machine(s) : " . $this->getNomMachine() .
+                                    "\n" . "Frais de gestion devis refusé.", $frais / 1.20, 1, 20, 0, 0, 3470, $client->dol_object->remise_percent, 'HT', null, null, 1);
+
+                            $propal->fetch($propal->id);
+                            $propal->dol_object->valid($user);
+
+                            $propal->dol_object->generateDocument(self::$propal_model_pdf, $langs);
+                            $propal->dol_object->cloture($user, 2, "Auto via SAV");
+                            $this->removeReservations();
+    //                        $apple_part = BimpObject::getInstance('bimpsupport', 'BS_ApplePart');
+    //                        $apple_part->deleteBy(array(
+    //                            'id_sav' => (int) $this->id
+    //                        ));
+                            $msg_type = 'revPropRefu';
+                        }
+                    } else {
+                        $errors[] = 'Echec de la fermeture de la proposition commerciale';
+                    }
+                }
+            } else {
+                if (isset($data['resolution'])) {
+                    $this->updateField('resolution', (string) $data['resolution'], null, true);
+                }
+                if ((int) $this->getData('status') !== self::BS_SAV_REP_EN_COURS) {
+                    $errors[] = 'Statut actuel invalide';
+                } elseif ($this->needEquipmentAttribution()) {
+                    $errors[] = 'Certains produits nécessitent encore l\'attribution d\'un équipement';
+                } else {
+                    if (!(string) $this->getData('resolution')) {
+                        $errors[] = 'Le champ "résolution" doit être complété';
+                    } else {
+                        $this->addNote('Réparation terminée le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
+                        $propal->dol_object->cloture($user, 2, "Auto via SAV");
+                        $msg_type = 'repOk';
+
+                        $repair = BimpObject::getInstance('bimpapple', 'GSX_Repair');
+                        $list = $repair->getList(array(
+                            'id_sav'            => (int) $this->id,
+                            'ready_for_pick_up' => 0
+                                ), null, null, 'id', 'asc', 'array', array('id'));
+                        if (!is_null($list)) {
+                            foreach ($list as $item) {
+                                $repair = BimpCache::getBimpObjectInstance('bimpapple', 'GSX_Repair', (int) $item['id']);
+                                if ($repair->isLoaded()) {
+                                    $rep_errors = $repair->updateStatus();
+                                } else {
+                                    $rep_errors = array('Réparation d\'id ' . $item['id'] . ' non trouvée');
+                                }
+                                if (count($rep_errors)) {
+                                    $warnings[] = BimpTools::getMsgFromArray($rep_errors, 'Echec de la fermeture de la réparation (2) d\'ID ' . $item['id']);
+                                }
                             }
                         }
                     }
@@ -4093,7 +4150,7 @@ class BS_SAV extends BimpObject
         }
 
         if (count($errors)) {
-            return array('errors' => $errors);
+            return array('errors' => $errors, 'warnings' => $warnings);
         }
 
         $current_status = (int) $this->getInitData('status');
@@ -4347,6 +4404,7 @@ class BS_SAV extends BimpObject
                                             if ($bimpFacture->dol_object->validate($user, '') <= 0) { //pas d'entrepot pour pas de destock
                                                 $msg = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($bimpFacture->dol_object), 'Echec de la validation de la facture');
                                                 $warnings[] = $msg;
+                                                $errors = BimpTools::merge_array($errors, BimpTools::getDolEventsMsgs(array('errors')));
                                                 dol_syslog('SAV "' . $this->getRef() . '": ' . $msg, LOG_ERR);
                                             } else {
                                                 $bimpFacture->fetch($facture->id);

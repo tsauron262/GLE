@@ -390,7 +390,10 @@ fields:
         user_edit: 1
         history: 1
         values: 
-            array: modeReglements
+            callback:
+                method: getModeReglements
+                params:
+                    - 0
         default_value: 
             callback: getDefautlModeReglement
         depends_on: fk_typent
@@ -413,10 +416,13 @@ fields:
         type: id
         user_edit: 1
         values: 
-            array: modeReglements
-        input: 
-            type: select_payment
-            include_empty: 1
+            callback:
+                method: getModeReglements
+                params:
+                    - 1
+#        input: 
+#            type: select_payment
+#            include_empty: 1
             
     cond_reglement_supplier:
         label: Conditions de réglement
@@ -435,7 +441,12 @@ fields:
         history_user: 1
             
     outstanding_limit_credit_safe: 
-        label: Limite recommandé par Crédit SAFE
+        label: Limite recommandée par Crédit SAFE
+        type: money
+        edit: 0
+            
+    outstanding_limit_atradius: 
+        label: Limite recommandée par Atradius
         type: money
         edit: 0
         
@@ -469,11 +480,6 @@ fields:
         input: 
             note: 1
             
-    num_sepa:
-        label: Numéro SEPA
-        type: string
-        user_edit: 1
-        dol_extra_field: 1
         
     secteuractivite:
         label: Secteur d'activité
@@ -572,6 +578,7 @@ fields:
         type: bool
         user_edit: 1
         default_value: 1
+        history: 1
         
     relances_infos: 
         label: Motif relances désactivées
@@ -598,6 +605,10 @@ fields:
         type: bool
         default_value: 1
         dol_extra_field: 1
+        
+    date_last_active:
+        label: Date derniére activitée
+        type: date
             
 #    *** Champs non gérés: ***
 #    entity
@@ -649,8 +660,7 @@ fields_tables:
                   callback: isClient
             - field: code_compta_fournisseur
               show: 
-                  callback: isFournisseur
-            - field: num_sepa     
+                  callback: isFournisseur 
             - field: accounting_account
               show: 
                   callback: isClient
@@ -704,6 +714,8 @@ fields_tables:
                   callback: displayOutstanding
               show: 
                   callback: isClient
+            - field: outstanding_limit_atradius
+              edit: 1
             - field: outstanding_limit
               edit: 1
               show: 
@@ -889,6 +901,8 @@ forms:
                     show_values: 1
             outstanding_limit: 
                 field: outstanding_limit
+            outstanding_limit_atradius:
+                field: outstanding_limit_atradius
             outstanding_limit_credit_safe:
                 field: outstanding_limit_credit_safe
             notecreditsafe: 
@@ -977,8 +991,6 @@ forms:
         rows:   
             barcode: 
                 field: barcode
-            num_sepa: 
-                field: num_sepa
             code_compta: 
                 field: code_compta
             code_compta_fournisseur: 
@@ -1121,7 +1133,6 @@ filters_panels:
             siren:
             siret:
             ape:
-            num_sepa:
             code_compta:
             code_compta_fournisseur:
             commerciaux:

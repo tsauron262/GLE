@@ -294,11 +294,90 @@ class BT_ficheInter extends BimpDolObject
     }
 
     // Getters Params: 
+    
+    public function getListExtraBulkActions()
+    {
+        $actions = array();
+
+        $actions[] = array(
+            'label'   => 'Fichiers PDF',
+            'icon'    => 'fas_file-pdf',
+            'onclick' => $this->getJsBulkActionOnclick('generateBulkPdf', array(), array('single_action' => true))
+        );
+        
+        return $actions;
+    }
+    
+    // Fonction de BIMPCOMM
+    public function actionGenerateBulkPdf($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Fichier généré avec succès';
+        $success_callback = '';
+
+        $id_objs = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+
+        if (count($id_objs) > 50)
+            return array('Trop de PDF action impossible');
+
+        if (!is_array($id_objs) || empty($id_objs)) {
+            $errors[] = 'Aucune ' . $this->getLabel() . ' sélectionnée';
+        } else {
+            $files = array();
+
+            foreach ($id_objs as $id_obj) {
+                $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_obj);
+
+                if (!BimpObject::objectLoaded($obj)) {
+                    $warnings[] = ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_obj . ' n\'existe pas';
+                    continue;
+                }
+
+                $dir = $obj->getFilesDir();
+                $filename = $obj->getRef() . '.pdf';
+
+                if (!file_exists($dir . $filename)) {
+                    $warnings[] = ucfirst($this->getLabel()) . ' ' . $obj->getLink() . ': fichier PDF absent (' . $dir . $filename . ')';
+                    continue;
+                }
+
+                $files[] = $dir . $filename;
+            }
+
+            if (!empty($files)) {
+                global $user;
+                require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpPDF.php';
+                $fileName = 'bulk_' . $this->dol_object->element . '_' . $user->id . '.pdf';
+                $dir = PATH_TMP . '/bimpcore/';
+
+                $pdf = new BimpConcatPdf();
+                $pdf->concatFiles($dir . $fileName, $files, 'F');
+
+                $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($fileName);
+                $success_callback = 'window.open(\'' . $url . '\');';
+            } else {
+                $errors[] = 'Aucun PDF trouvé';
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
 
     public function getActionsButtons()
     {
         $buttons = Array();
-
+        
+        $buttons[] = array(
+            'label'   => 'Planning de la FI',
+            'icon'    => 'fas_clock',
+            'onclick' => $this->getJsLoadModalView("events")
+        );
+        
         if (!$this->isOldFi()) {
             if ($this->isActionAllowed('askFacturation') && $this->canSetAction('askFacturation')) {
 //                $buttons[] = array(
@@ -397,6 +476,17 @@ class BT_ficheInter extends BimpDolObject
     public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
+            case 'commercialclient':
+                $alias = 'sc';
+                $joins[$alias] = array(
+                    'alias' => $alias,
+                    'table' => 'societe_commerciaux',
+                    'on'    => $alias . '.fk_soc = a.fk_soc'
+                );
+                $filters[$alias . '.fk_user'] = array(
+                    ($excluded ? 'not_' : '') . 'in' => $values
+                );
+                break;
             case 'linked':
                 $in = [];
                 $sql = "SELECT rowid FROM llx_fichinter WHERE ";
@@ -500,6 +590,30 @@ class BT_ficheInter extends BimpDolObject
         }
 
         return null;
+    }
+    
+public function getCommercialclientSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
+    {
+
+        $alias = 'sc';
+        $joins[$alias] = array(
+            'alias' => $alias,
+            'table' => 'societe_commerciaux',
+            'on'    => $alias . '.fk_soc = a.fk_soc'
+        );
+        $filters[$alias . '.fk_user'] = $value;
+    }
+    
+    public function displayCommercialClient()
+    {
+
+        if ($this->isLoaded()) {
+            $id_commercial = $this->db->getValue('societe_commerciaux', 'fk_user', 'fk_soc = ' . $this->getData('fk_soc'));
+
+            $commercial = $this->getInstance('bimpcore', 'Bimp_User', $id_commercial);
+
+            return $commercial->dol_object->getNomUrl();
+        }
     }
 
     public function getDataCommercialClient($field)
@@ -1242,6 +1356,101 @@ class BT_ficheInter extends BimpDolObject
     }
 
     // Rendus HTML: 
+    
+    public function renderEventsTable()
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+            if (!class_exists('FormActions')) {
+                require_once DOL_DOCUMENT_ROOT . '/core/class/html.formactions.class.php';
+            }
+
+            BimpTools::loadDolClass('comm/action', 'actioncomm', 'ActionComm');
+
+            $fk_soc = (int) $this->getData('fk_soc');
+          
+            $list = ActionComm::getActions($this->db->db, $fk_soc, $this->id, static::$dol_module, '', 'a.id', 'ASC');
+
+            if (!is_array($list)) {
+                $html .= BimpRender::renderAlerts('Echec de la récupération de la liste des événements');
+            } else {
+                global $conf;
+
+                $urlBack = DOL_URL_ROOT . '/' . $this->module . '/index.php?fc=' . $this->getController() . '&id=' . $this->id;
+                $href = DOL_URL_ROOT . '/comm/action/card.php?action=create&datep=' . dol_print_date(dol_now(), 'dayhourlog');
+                $href .= '&origin=' . $type_element . '&originid=' . $this->id . '&socid=' . (int) $this->getData('fk_soc');
+                $href .= '&backtopage=' . urlencode($urlBack);
+
+                if (isset($this->dol_object->fk_project) && (int) $this->dol_object->fk_project) {
+                    $href .= '&projectid=' . $this->dol_object->fk_project;
+                }
+
+                $html .= '<table class="bimp_list_table">';
+                $html .= '<thead>';
+                $html .= '<tr>';
+                $html .= '<th>Réf.</th>';
+                $html .= '<th>Action</th>';
+                $html .= '<th>Type</th>';
+                $html .= '<th>Date</th>';
+                $html .= '<th>Par</th>';
+                $html .= '</tr>';
+                $html .= '</thead>';
+
+                $html .= '<tbody>';
+
+                if (count($list)) {
+                    $userstatic = new User($this->db->db);
+
+                    foreach ($list as $action) {
+                            $html .= '<tr>';
+                            $html .= '<td>' . $action->getNomUrl(1, -1) . '</td>';
+                            $html .= '<td>' . $action->getNomUrl(0, 0) . '</td>';
+                            $html .= '<td>';
+                            if (!empty($conf->global->AGENDA_USE_EVENT_TYPE)) {
+                                $html .= $action->type;
+                            }
+                            $html .= '</td>';
+                            $html .= '<td align="center">';
+                            $html .= dol_print_date($action->datep, 'dayhour');
+                            if ($action->datef) {
+                                $tmpa = dol_getdate($action->datep);
+                                $tmpb = dol_getdate($action->datef);
+                                if ($tmpa['mday'] == $tmpb['mday'] && $tmpa['mon'] == $tmpb['mon'] && $tmpa['year'] == $tmpb['year']) {
+                                    if ($tmpa['hours'] != $tmpb['hours'] || $tmpa['minutes'] != $tmpb['minutes'] && $tmpa['seconds'] != $tmpb['seconds']) {
+                                        $html .= '-' . dol_print_date($action->datef, 'hour');
+                                    }
+                                } else {
+                                    $html .= '-' . dol_print_date($action->datef, 'dayhour');
+                                }
+                            }
+                            $html .= '</td>';
+                            $html .= '<td>';
+                            if (!empty($action->author->id)) {
+                                $userstatic->id = $action->author->id;
+                                $userstatic->firstname = $action->author->firstname;
+                                $userstatic->lastname = $action->author->lastname;
+                                $html .= $userstatic->getNomUrl();
+                            }
+                            $html .= '</td>';
+
+                            $html .= '</tr>';
+                    }
+                } else {
+                    $html .= '<tr>';
+                    $html .= '<td colspan="6">';
+                    $html .= BimpRender::renderAlerts('Aucun événement enregistré', 'info');
+                    $html .= '</td>';
+                    $html .= '</tr>';
+                }
+
+                $html .= '</tbody>';
+                $html .= '</table>';
+            }
+        }
+
+        return $html;
+    }
 
     public function renderSignaturePad($addClass = '')
     {
@@ -1357,7 +1566,7 @@ class BT_ficheInter extends BimpDolObject
     }
 
     // Traitements: 
-
+    
     public function createFromContrat($contrat, $data)
     {
         global $user;
@@ -1523,6 +1732,9 @@ class BT_ficheInter extends BimpDolObject
                     } else {
                         $this->updateField('fk_statut', self::STATUT_ATTENTE_SIGNATURE);
                     }
+                    
+                    // Changement du titre de tous les events
+                    
 
                     // Création des lignes de facturation: 
                     $services_executed = $this->getServicesExecutedArray();
@@ -1837,6 +2049,8 @@ class BT_ficheInter extends BimpDolObject
     }
 
     // Actions: 
+    
+
 
     public function actionSetStatusAdmin($data, &$success = '')
     {
@@ -1952,7 +2166,7 @@ class BT_ficheInter extends BimpDolObject
     public function validate()
     {
         $errors = parent::validate();
-
+        
         if (!count($errors)) {
             if ($this->getData('time_from') && $this->getData('time_to') &&
                     $this->getData('time_to') < $this->getData('time_from')) {
@@ -2034,7 +2248,7 @@ class BT_ficheInter extends BimpDolObject
             $actioncomm = new ActionComm($this->db->db);
 
             //$actioncomm->userassigned = Array($data->techs);
-            $actioncomm->label = $this->getRef();
+            $actioncomm->label = "(PROV$this->id)";
             $actioncomm->note = '';
             $actioncomm->punctual = 1;
             $actioncomm->userownerid = (int) $this->getData('fk_user_tech');
@@ -2073,6 +2287,8 @@ class BT_ficheInter extends BimpDolObject
 
         return $errors;
     }
+    
+    
 
     public function update(&$warnings = array(), $force_update = false)
     {

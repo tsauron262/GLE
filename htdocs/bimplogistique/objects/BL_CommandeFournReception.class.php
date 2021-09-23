@@ -466,11 +466,18 @@ class BL_CommandeFournReception extends BimpObject
         return $html;
     }
 
-    public function renderLineSerialInputs($line, $serial, $pu_ht, $tva_tx, $code_config = '')
+    public function renderLineSerialInputs($line, $serial, $pu_ht, $tva_tx, $code_config = '', $product = null)
     {
         $html = '';
         $html .= '<td style="width: 220px" class="serial" data-serial="' . $serial . '">';
         $html .= $serial;
+        
+        if($product && $product->getData('barcode') == $serial){
+            $html .= '<br/>';
+            $html .= '<span class="danger">';
+            $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Le numéro de série ne peut être identique au code-bar du produit';
+            $html .= '</span>';
+        }
 
         $isImei = (!preg_match("/[a-zA-Z]/", $serial)) ? true : false;
 
@@ -684,7 +691,7 @@ class BL_CommandeFournReception extends BimpObject
                                     $pu_ht = (isset($serial_data['pu_ht']) ? (float) $serial_data['pu_ht'] : $line_pu_ht);
                                     $tva_tx = (isset($serial_data['tva_tx']) ? (float) $serial_data['tva_tx'] : (float) $line->tva_tx);
                                     $html .= '<tr class="line_' . $line->id . '_serial_data">';
-                                    $html .= $this->renderLineSerialInputs($line, $serial_data['serial'], $pu_ht, $tva_tx, $code_config);
+                                    $html .= $this->renderLineSerialInputs($line, $serial_data['serial'], $pu_ht, $tva_tx, $code_config, $product);
                                     $html .= '</tr>';
                                 }
                             }

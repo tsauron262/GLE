@@ -441,12 +441,12 @@ fields:
         history_user: 1
             
     outstanding_limit_credit_safe: 
-        label: Limite recommandé par Crédit SAFE
+        label: Limite recommandée par Crédit SAFE
         type: money
         edit: 0
             
     outstanding_limit_atradius: 
-        label: Limite recommandé par Atradius
+        label: Limite recommandée par Atradius
         type: money
         edit: 0
         

@@ -88,6 +88,7 @@ fields:
         label: Note Publique
         type: text
         user_edit: 1
+        hashtags: 1
         input: 
             rows: 3
             auto_expand: 1

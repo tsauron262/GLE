@@ -95,6 +95,7 @@ fields:
     libelle: 
         label: Libellé
         dol_extra_field: 1
+        hashtags: 1
 #        required: 1
     ef_type: 
         label: Secteur (Canal de Vente)
@@ -147,10 +148,13 @@ fields:
         required : 1
         type: id
         values: 
-            array: modeReglements
-        input: 
-            type: select_payment
-            include_empty: 1
+            callback:
+                method: getModeReglements
+                params:
+                    - 0
+#        input: 
+#            type: select_payment
+#            include_empty: 1
         default_value: 
             callback: getModeReglementBySociete
         depends_on: fk_soc
@@ -223,11 +227,13 @@ fields:
         type: html
         sortable: 0
         user_edit: 1
+        hashtags: 1
     note_public: 
         label: Note publique
         type: html  
         sortable: 0
         user_edit: 1
+        hashtags: 1
     zone_vente: 
         label: Zone de vente
         type: int
@@ -386,7 +392,10 @@ forms:
                 input: 
                     type: select
                     options: 
-                        array: modeReglements
+                        callback:
+                            method: getModeReglements
+                            params:
+                                - 0
                 input_name: fk_mode_reglement
                 value: 
                     callback: getModeReglementBySociete

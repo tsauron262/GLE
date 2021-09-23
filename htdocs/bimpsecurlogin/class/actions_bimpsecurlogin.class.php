@@ -49,7 +49,7 @@ class securLogSms {
         if(class_exists("BimpCore") && BimpCore::getConf('mode_securlogin', "")!= "")
             $this->debug = BimpCore::getConf('mode_securlogin');
         
-        
+        $this->debug = 0;
     }
 
     public function testSecur() {

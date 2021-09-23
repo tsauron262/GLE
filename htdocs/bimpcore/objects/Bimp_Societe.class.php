@@ -84,6 +84,7 @@ class Bimp_Societe extends BimpDolObject
         global $user;
         switch ($field_name) {
             case 'outstanding_limit':
+            case 'outstanding_limit_atradius':
                 return ($user->rights->bimpcommercial->admin_financier ? 1 : 0);
 
             case 'outstanding_limit_credit_safe':

@@ -51,31 +51,43 @@ class DemandeValidComm extends BimpObject
         return 0;
     }
     
-    public function displayObject() {
-        
-        $html = '';
+    public function getThisObject(){
         $obj = (int) $this->getData('type_de_piece');
         $id_obj = (int) $this->getData('id_piece');
         if (!is_null($id_obj)) {
             switch ($obj) {
                 case self::OBJ_DEVIS:
                     $devis = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_obj);
-                    $html .= $devis->getNomUrl(true, true, true, '', 'default');
-                    break;
+                    return $devis;
 
                 case self::OBJ_FACTURE:
                     $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_obj);
-                    $html .= $facture->getNomUrl(true, true, true, '', 'default');
-                    break;
+                    return $facture;
                 
                 case self::OBJ_COMMANDE:
                     $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id_obj);
-                    $html .= $commande->getNomUrl(true, true, true, '', 'default');
-                    break;
+                    return $commande;
             }
-        } else {
-            $html .= 'Id pièce non définit';
+        } 
+        return null;
+    }
+    
+    public function displayClient(){
+        $html = '';
+        $obj = $this->getThisObject();
+        if($obj){
+            $client = $obj->getChildObject('client');
+            $html .= $client->getLink();
         }
+        
+        return $html;
+    }
+    
+    public function displayObject() {
+        $html = '';
+        $obj = $this->getThisObject();
+        if($obj)
+            $html .= $obj->getLink();
         
         return $html;
     }

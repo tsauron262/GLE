@@ -116,6 +116,7 @@ fields:
             rows: 1
             auto_expand: 1
             note: 1
+        hashtags: 1
         sortable: 0
         searchable: 0
             

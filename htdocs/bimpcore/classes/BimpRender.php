@@ -27,6 +27,19 @@ class BimpRender
         return '<i class="' . self::renderIconClass($icon) . ($class ? ' ' . $class : '') . '"></i>';
     }
 
+    public static function renderInfoIcon($icon, $info)
+    {
+        $html = '';
+
+        $html .= '<span class="infoIcon bs-popover"';
+        $html .= self::renderPopoverData($info, 'top', true);
+        $html .= '>';
+        $html .= self::renderIcon($icon);
+        $html .= '</span>';
+
+        return $html;
+    }
+
     public static function displayTagAttrs($params)
     {
         // Obsolète / A suppr... 
@@ -1383,6 +1396,7 @@ class BimpRender
         $html .= '<div class="singleLineFormContent">';
 
         foreach ($inputs as $input) {
+            $content = '';
             $label = BimpTools::getArrayValueFromPath($input, 'label', '');
             $input_content = BimpTools::getArrayValueFromPath($input, 'content', '');
             $input_name = BimpTools::getArrayValueFromPath($input, 'input_name', '');
@@ -1390,7 +1404,7 @@ class BimpRender
 
             if ($input_content && $input_name) {
                 if ($label) {
-                    $content .= '<label>' . $label . ': </label>';
+                    $content .= '<label>' . $label . ': </label><br/>';
                 }
 
                 $content .= $input_content;

@@ -744,6 +744,10 @@ class BC_Display extends BimpComponent
                     } else {
                         $html .= str_replace("\n", '<br/>', $this->value);
                     }
+
+                    if ((int) BimpTools::getArrayValueFromPath($this->field_params, 'hashtags', 0)) {
+                        $html = BimpObject::replaceHastags($html, $this->no_html);
+                    }
                     break;
 
                 case 'syntaxe':

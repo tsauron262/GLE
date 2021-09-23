@@ -1,5 +1,6 @@
 table: bimpcore_file
 common_fields: 1
+icon: fas_file
 
 parent_module: 
     field_value: parent_module
@@ -59,6 +60,7 @@ fields:
     description:
         label: Description
         type: text
+        hashtags: 1
         input:
             auto_expand: 1
             rows: 1
@@ -275,4 +277,12 @@ lists:
             date_create:
             description: 
                 
-    
+searches: 
+    default: 
+        fields_search: 
+            - a.file_name
+            - a.file_ext
+        fields_return: 
+            - a.file_name
+            - a.file_ext
+        label_syntaxe: '<a.file_name>.<a.file_ext>'

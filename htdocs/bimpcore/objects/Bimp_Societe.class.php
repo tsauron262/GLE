@@ -412,18 +412,18 @@ class Bimp_Societe extends BimpDolObject
             $user
         );
     }
-    
-    public function getDefaultRib($createIfNotExist = true){
-        $ribs = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_SocBankAccount', array('default_rib'=>1, 'fk_soc'=>$this->id));
-        if(count($ribs) == 0){
+
+    public function getDefaultRib($createIfNotExist = true)
+    {
+        $ribs = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_SocBankAccount', array('default_rib' => 1, 'fk_soc' => $this->id));
+        if (count($ribs) == 0) {
             $rib = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_SocBankAccount');
             $rib->set('fk_soc', $this->id);
             $rib->set('label', 'Default');
             $errors = $rib->create();
             return $rib;
-        }
-        else{
-            foreach($ribs as $rib){
+        } else {
+            foreach ($ribs as $rib) {
                 return $rib;
             }
         }

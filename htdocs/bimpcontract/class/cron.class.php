@@ -282,7 +282,7 @@
         }
         
         public function echeance_contrat() {
-            $this->output .= "***ECHEANCE***";
+            $this->output .= "***ECHEANCE***<br />";
             $list = $this->getListContratsWithStatut(self::CONTRAT_ACTIF);
 
             $now = new DateTime();
@@ -293,9 +293,11 @@
                 $send = false;
                 $c = BimpObject::getInstance('bimpcontract', 'BContract_contrat', $contrat->rowid);
                 $client = BimpObject::getInstance('bimpcore', 'Bimp_Societe', $c->getData('fk_soc'));
+                
                 $commercial_suivi = $c->getData('fk_commercial_suivi');
+                $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User',$commercial_suivi);
+                $email_comm = BimpTools::cleanEmailsStr($commercial->getData('email'));
                 if($c->getData('periodicity')) {
-                    
                     $endDate = new DateTime($c->displayRealEndDate("Y-m-d"));
                     $diff = $now->diff($endDate);
                     if($diff->y == 0 && $diff->m == 0 && $diff->d <= 30 && $diff->d > 0 && $diff->invert == 0) {
@@ -303,7 +305,11 @@
                         $nombre_relance++;
                         $message = "Contrat " . $c->getData('ref') . "<br />Client ".$client->dol_object->getNomUrl()." <br /> dont vous êtes le commercial arrive à expiration dans <b>$diff->d jour.s</b>";
                         if($c->getData('relance_renouvellement') && in_array($c->getData('tacite'), $not_tacite)){
-                            $this->sendMailCommercial('ECHEANCE - Contrat ' . $c->getData('ref') . "[".$client->getData('code_client')."]", $c->getData('fk_commercial_suivi'), $message, $c);
+                            //$this->sendMailCommercial('ECHEANCE - Contrat ' . $c->getData('ref') . "[".$client->getData('code_client')."]", $c->getData('fk_commercial_suivi'), $message, $c);
+                            $sujet = "Echéance contrat - " . $c->getRef() . " - " . $client->getData('code_client');
+                            $bimp_mail = new BimpMail($sujet, $email_comm, '', $message, '', '', 'at.bernard@bimp.fr');
+                            $bimp_mail->send();
+                            $this->output .= "Mail envoyé à <b>$email_comm</b> pour le contrat <b>".$c->getRef()."</b><br />" ;
                         }
                             
                     } else {

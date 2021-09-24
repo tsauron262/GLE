@@ -147,9 +147,9 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $p = new Product($db);
                 $p->fetch($line->fk_product);
                 
-                if($p->ref = "SERV19-ASS" && !$this->have_ass) { $this->have_ass = true;}
-                if($p->ref = "OVH-SAUVEGARDEBIMP1TOMENSUELLE" &&  !$this->have_save_mensuelle) { $this->have_save_mensuelle = true; }
-                if($p->ref = "OVH-SAUVEGARDEBIMP1TOANNUELLE" && !$this->have_save_annuelle) { $this->have_save_annuelle = true; }
+                if($p->ref == "SERV19-ASS" && !$this->have_ass) { $this->have_ass = true;}
+                if($p->ref == "OVH-SAUVEGARDEBIMP1TOMENSUELLE" &&  !$this->have_save_mensuelle) { $this->have_save_mensuelle = true; }
+                if($p->ref == "OVH-SAUVEGARDEBIMP1TOANNUELLE" && !$this->have_save_annuelle) { $this->have_save_annuelle = true; }
                 
                 //echo '<pre>';print_r($p);
                 $pdf->Cell($W * 5, 6, (strlen($p->label) > 60) ? substr($p->label, 0, 60) . " ..." : $p->label, 1, null, 'L', true);

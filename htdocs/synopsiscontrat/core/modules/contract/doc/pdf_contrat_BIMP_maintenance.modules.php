@@ -920,7 +920,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $classAnnexe->getAnnexeContrat($contrat);
                 }
 
-                if(!BimpCore::getConf('bimpcontract_pdf_use_cgc')) {
+                if(BimpCore::getConf('bimpcontract_pdf_use_cgc')) {
                     $cgv_print = false;
                     if($this->have_ass && ($this->have_save_annuelle || $this->have_save_mensuelle)) {
                         $this->display_cgv($pdf, 'services_hebergement_monitoring', 41);

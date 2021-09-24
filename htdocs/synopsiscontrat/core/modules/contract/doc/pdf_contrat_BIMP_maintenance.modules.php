@@ -922,10 +922,17 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
 
                 if(BimpCore::getConf('bimpcontract_pdf_use_cgc')) {
                     $cgv_print = false;
-                    if($this->have_ass && ($this->have_save_annuelle || $this->have_save_mensuelle)) {
-                        $this->display_cgv($pdf, 'services_hebergement_monitoring', 41);
-                        $this->display_cgv($pdf1, 'services_hebergement_monitoring', 41);
-                        $cgv_print = true;
+                    if($this->have_ass) {
+                        if($this->have_save_annuelle || $this->have_save_mensuelle) {
+                            $this->display_cgv($pdf, 'services_hebergement_monitoring', 41);
+                            $this->display_cgv($pdf1, 'services_hebergement_monitoring', 41);
+                            $cgv_print = true;
+                        } else {
+                            $this->display_cgv($pdf);
+                            $this->display_cgv($pdf1);
+                            $cgv_print = true;
+                        }
+                        
                     } elseif($this->have_save_annuelle || $this->have_save_mensuelle) {
                         $this->display_cgv($pdf, 'services_hebergement', 41);
                         $this->display_cgv($pdf1, 'services_hebergement', 41);

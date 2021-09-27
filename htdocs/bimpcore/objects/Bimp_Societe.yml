@@ -1170,6 +1170,10 @@ lists_cols:
         label: Lettre Credit Safe
         value: 
             callback: getCreditSafeLettre
+    region:
+        label: Région  
+        value: 
+            callback: displayRegion
         
 lists:
     default: 

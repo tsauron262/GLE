@@ -2090,9 +2090,8 @@ class Bimp_Facture extends BimpComm
                 if ($field == 'productInfo') {
                     $prod = $equipment->getChildObject('product');
                     if (BimpObject::objectLoaded($prod)) {
-                            $result[] = $prod->label;
-                    }
-                    else{
+                        $result[] = $prod->label;
+                    } else {
                         $result[] = $equipment->getData('product_label');
                     }
                 }
@@ -3749,7 +3748,7 @@ class Bimp_Facture extends BimpComm
                     $echeancier->onDeleteFacture($dateDebutFacture);
                 }
             }
-            
+
             $this->majStatusOtherPiece();
         }
 
@@ -4099,8 +4098,7 @@ class Bimp_Facture extends BimpComm
             $discountTest->fetch(0, $this->id);
             if (BimpObject::objectLoaded($discountTest)) {
                 $errors[] = 'Cet Accompte a déja été converti';
-            }
-            else{
+            } else {
                 foreach ($this->dol_object->lines as $line) {
                     if ($line->total_ht != 0) {  // no need to create discount if amount is null
                         $amount_ht[$line->tva_tx] += $line->total_ht;
@@ -4119,7 +4117,7 @@ class Bimp_Facture extends BimpComm
 
                 $result = $discount->create($user);
                 if ($result < 0) {
-                    $msg = 'Echec de la création de la remise client '.$discount->error;
+                    $msg = 'Echec de la création de la remise client ' . $discount->error;
                     $sqlError = $db->lasterror();
                     if ($sqlError) {
                         $msg .= ' - ' . $sqlError;

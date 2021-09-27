@@ -1810,13 +1810,6 @@ class Bimp_Societe extends BimpDolObject
                 $link = 'https://www.creditsafe.fr/getdata/service/CSFRServices.asmx';
 
                 $sClient = new SoapClient($link . "?wsdl", array('trace' => 1));
-
-                if (method_exists($sClient, 'GetData')) {
-                    
-                } elseif (!BimpCore::isModeDev()) {
-                    BimpCore::addlog('Echec connexion SOAP pour Credit SAFE', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', $this);
-                }
-
                 $objReturn = $sClient->GetData(array("requestXmlStr" => str_replace("SIREN", ($siret ? $siret : $siren), $xml_data)));
 
                 $returnData = $objReturn->GetDataResult;

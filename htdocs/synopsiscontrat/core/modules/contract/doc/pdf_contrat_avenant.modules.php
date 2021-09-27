@@ -487,8 +487,8 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                             //$new_qty += count($diff_add);
                             if(count($diff_add) > 1) {
                                 if($isDP) {
-                                    $pdf->Cell($W*5, 4, "- Description des jours de délégation", 0, null, 'L', false);
-                                    $pdf1->Cell($W*5, 4, "- Description des jours de délégation", 0, null, 'L', false);
+                                    $pdf->Cell($W*5, 4, "- Description des jours de délégation ajoutés", 0, null, 'L', false);
+                                    $pdf1->Cell($W*5, 4, "- Description des jours de délégation ajoutés", 0, null, 'L', false);
                                 } else {
                                     $pdf->Cell($W*5, 4, "- Numéros de séries ajoutés à ce contrat pour ce service", 0, null, 'L', false);
                                     $pdf1->Cell($W*5, 4, "- Numéros de séries ajoutés à ce contrat pour ce service", 0, null, 'L', false);

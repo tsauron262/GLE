@@ -83,8 +83,10 @@ class Bimp_Societe extends BimpDolObject
     {
         global $user;
         switch ($field_name) {
-            case 'outstanding_limit':
             case 'outstanding_limit_atradius':
+                return 0;
+
+            case 'outstanding_limit':
                 return ($user->rights->bimpcommercial->admin_financier ? 1 : 0);
 
             case 'outstanding_limit_credit_safe':
@@ -119,6 +121,21 @@ class Bimp_Societe extends BimpDolObject
         }
 
         return parent::canEditField($field_name);
+    }
+
+    public function canViewField($field_name)
+    {
+        global $user;
+
+        switch ($field_name) {
+            case 'outstanding_limit_atradius':
+                if ($user->admin) {
+                    return 1;
+                }
+
+                return 0;
+        }
+        return parent::canViewField($field_name);
     }
 
     public function canSetAction($action)
@@ -1793,6 +1810,13 @@ class Bimp_Societe extends BimpDolObject
                 $link = 'https://www.creditsafe.fr/getdata/service/CSFRServices.asmx';
 
                 $sClient = new SoapClient($link . "?wsdl", array('trace' => 1));
+
+                if (method_exists($sClient, 'GetData')) {
+                    
+                } elseif (!BimpCore::isModeDev()) {
+                    BimpCore::addlog('Echec connexion SOAP pour Credit SAFE', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', $this);
+                }
+
                 $objReturn = $sClient->GetData(array("requestXmlStr" => str_replace("SIREN", ($siret ? $siret : $siren), $xml_data)));
 
                 $returnData = $objReturn->GetDataResult;

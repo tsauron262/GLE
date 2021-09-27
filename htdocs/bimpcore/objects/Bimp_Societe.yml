@@ -448,7 +448,6 @@ fields:
     outstanding_limit_atradius: 
         label: Limite recommandée par Atradius
         type: money
-        edit: 0
         
     fk_account: 
         label: Compte bancaire
@@ -479,8 +478,7 @@ fields:
         hashtags: 1
         input: 
             note: 1
-            
-        
+           
     secteuractivite:
         label: Secteur d'activité
         type: int
@@ -716,6 +714,11 @@ fields_tables:
                   callback: isClient
             - field: outstanding_limit_atradius
               edit: 1
+              show: 
+                  callback: 
+                      method: canViewField
+                      params: 
+                          - outstanding_limit_atradius
             - field: outstanding_limit
               edit: 1
               show: 
@@ -751,8 +754,7 @@ fields_tables:
             - field: validation_impaye
               edit:
                   callback: iAmAdmin
-
-            
+ 
     contact: 
         title: Informations de contact
         icon: fas_phone

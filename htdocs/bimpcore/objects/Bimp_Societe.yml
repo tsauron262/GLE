@@ -448,6 +448,7 @@ fields:
     outstanding_limit_atradius: 
         label: Limite de crédit Atradius
         type: money
+        history: 1
         
     fk_account: 
         label: Compte bancaire

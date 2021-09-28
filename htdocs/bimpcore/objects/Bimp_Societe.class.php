@@ -975,6 +975,27 @@ class Bimp_Societe extends BimpDolObject
         return BimpCore::getConf('societe_id_default_cond_reglement', 0);
     }
 
+    public static function getRegionCsvValue($needed_fields = array())
+    {
+        if (isset($needed_fields['zip']) && isset($needed_fields['fk_pays'])) {
+            if ((int) $needed_fields['fk_pays'] !== 1) {
+                return 'Hors France';
+            }
+            
+            $dpt = substr($needed_fields['zip'], 0, 2);
+
+            if ($dpt) {
+                foreach (self::$regions as $region => $codes) {
+                    if (in_array($dpt, $codes)) {
+                        return $region;
+                    }
+                }
+            }
+        }
+        
+        return 'nc';
+    }
+    
     // Getters array: 
 
     public function getContactsArray($include_empty = true, $empty_label = '')
@@ -1317,6 +1338,10 @@ class Bimp_Societe extends BimpDolObject
 
     public function displayRegion()
     {
+        if ((int) $this->getData('fk_pays') !== 1) {
+            return 'Hors France';
+        }
+        
         $zip = $this->getData('zip');
 
         if ($zip) {

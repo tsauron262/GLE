@@ -1174,6 +1174,9 @@ lists_cols:
         label: Région  
         value: 
             callback: displayRegion
+        csv_needed_fields: 
+            - zip
+            - fk_pays
         
 lists:
     default: 

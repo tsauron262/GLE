@@ -99,6 +99,9 @@ class Bimp_Societe extends BimpDolObject
         global $user;
         switch ($field_name) {
             case 'outstanding_limit_atradius':
+                if ($user->admin) {
+                    return 1;
+                }
                 return 0;
 
             case 'outstanding_limit':

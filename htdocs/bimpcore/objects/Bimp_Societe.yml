@@ -446,7 +446,7 @@ fields:
         edit: 0
             
     outstanding_limit_atradius: 
-        label: Limite recommandée par Atradius
+        label: Limite de crédit Atradius
         type: money
         
     fk_account: 

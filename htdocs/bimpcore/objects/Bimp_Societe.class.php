@@ -977,11 +977,11 @@ class Bimp_Societe extends BimpDolObject
 
     public static function getRegionCsvValue($needed_fields = array())
     {
-        if (isset($needed_fields['zip']) && isset($needed_fields['fk_pays'])) {
-            if ((int) $needed_fields['fk_pays'] !== 1) {
-                return 'Hors France';
-            }
-            
+        if (isset($needed_fields['fk_pays'])  && (int) $needed_fields['fk_pays'] !== 1) {
+            return 'Hors France';
+        }
+        
+        if (isset($needed_fields['zip'])) {
             $dpt = substr($needed_fields['zip'], 0, 2);
 
             if ($dpt) {
@@ -992,10 +992,10 @@ class Bimp_Societe extends BimpDolObject
                 }
             }
         }
-        
+
         return 'nc';
     }
-    
+
     // Getters array: 
 
     public function getContactsArray($include_empty = true, $empty_label = '')
@@ -1341,7 +1341,7 @@ class Bimp_Societe extends BimpDolObject
         if ((int) $this->getData('fk_pays') !== 1) {
             return 'Hors France';
         }
-        
+
         $zip = $this->getData('zip');
 
         if ($zip) {

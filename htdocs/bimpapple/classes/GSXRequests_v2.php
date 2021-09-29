@@ -461,12 +461,7 @@ class GSX_Request_v2
                             ));
                             break;
 
-                        case 'select':
-//                            echo 'val: ' . $inputValue;
-//                            echo '<pre>';
-//                            print_r($options);
-//                            echo '</pre>';
-                            
+                        case 'select':                            
                             $html .= BimpInput::renderInput('select', $inputName, $inputValue, array(
                                         'options' => $options
                             ));

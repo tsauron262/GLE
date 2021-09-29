@@ -427,16 +427,16 @@ class gsxController extends BimpController
                 $errors = $this->gsxRequestFormResultOverride($requestName, $result, $params, $warnings);
 
                 if (!count($errors)) {
-//                    if (is_array($result) && !empty($result)) {
-//                        $response = $this->gsx_v2->exec($requestName, $result);
-//                        if ($response === false) {
-//                            $errors = $this->gsx_v2->getErrors();
-//                        } else {
-//                            return $this->gsxOnRequestSuccess($requestName, $response, $params);
-//                        }
-//                    } else {
-//                        $errors[] = BimpTools::getMsgFromArray($gsxRequests->errors, 'Erreurs lors du traitement des données');
-//                    }
+                    if (is_array($result) && !empty($result)) {
+                        $response = $this->gsx_v2->exec($requestName, $result);
+                        if ($response === false) {
+                            $errors = $this->gsx_v2->getErrors();
+                        } else {
+                            return $this->gsxOnRequestSuccess($requestName, $response, $params);
+                        }
+                    } else {
+                        $errors[] = BimpTools::getMsgFromArray($gsxRequests->errors, 'Erreurs lors du traitement des données');
+                    }
                 }
             }
         }

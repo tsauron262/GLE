@@ -110,14 +110,20 @@ class ValidComm extends BimpObject
         $valid_encours = 1;
         $valid_impaye = 1;
         
+        // Object non géré
+        if($this->getObjectClass($bimp_object) == -2)
+            return 1;
+        
+        if(method_exists($bimp_object, 'getClientFacture'))
+            $client = $bimp_object->getClientFacture();
+        else
+            $client = $bimp_object->getChildObject('client');
+        
         $errors = BimpTools::merge_array($errors, $this->updateCreditSafe($bimp_object));
         
         
 //        return 1;
                        
-        // Object non géré
-        if($this->getObjectClass($bimp_object) == -2)
-            return 1;
 
        global $conf;
         $this->db2 = getDoliDBInstance($conf->db->type,$conf->db->host,$conf->db->user,$this->db->db->database_pass,$conf->db->name,$conf->db->port);
@@ -146,10 +152,6 @@ class ValidComm extends BimpObject
                 $success[] = "Validation encours forcée par le champ \"Paiement comptant\".";
                 $valid_encours = 1;
             } else {
-                if(method_exists($bimp_object, 'getClientFacture'))
-                    $client = $bimp_object->getClientFacture();
-                else
-                    $client = $bimp_object->getChildObject('client');
                 
                 if(!$client->getData('validation_financiere')) {
                     $success[] = "Validation encours forcée par le champ \"Validation encours\".";

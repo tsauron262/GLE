@@ -826,7 +826,7 @@ class ValidComm extends BimpObject
             $code = (string) $client->getData('siret');
         }
         
-        if($code != '') {
+        if($code != '' and $code != 'p') {
             $errors = BimpTools::merge_array($errors, $client->checkSiren('siret', $code));
         }
 

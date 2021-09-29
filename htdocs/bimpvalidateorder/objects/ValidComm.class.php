@@ -822,12 +822,12 @@ class ValidComm extends BimpObject
         
         // data Crédit Safe
         $code = (string) $client->getData('siren');
-        if ($code == '') {
+        if ($code != '' and $code != 'p') {
+            $errors = BimpTools::merge_array($errors, $client->checkSiren('siren', $code));
+        } else {
             $code = (string) $client->getData('siret');
-        }
-        
-        if($code != '' and $code != 'p') {
-            $errors = BimpTools::merge_array($errors, $client->checkSiren('siret', $code));
+            if($code != '' and $code != 'p')
+                $errors = BimpTools::merge_array($errors, $client->checkSiren('siret', $code));
         }
 
         return $errors;

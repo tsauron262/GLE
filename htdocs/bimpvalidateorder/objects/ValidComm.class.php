@@ -820,11 +820,11 @@ class ValidComm extends BimpObject
         
         // data Crédit Safe
         $code = (string) $client->getData('siren');
-        if (!$code) {
+        if ($code == '') {
             $code = (string) $client->getData('siret');
         }
         
-        if($code) {
+        if($code != '') {
             $errors = BimpTools::merge_array($errors, $client->checkSiren('siret', $code));
         }
 

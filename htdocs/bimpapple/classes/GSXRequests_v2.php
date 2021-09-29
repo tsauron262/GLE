@@ -126,6 +126,11 @@ class GSX_Request_v2
                     $defs['infos'] = XMLDoc::getElementInnerText($nodes[0]);
                 }
 
+                $nodes = XMLDoc::findChildElements($defsNode, 'warning', null, array(), 1);
+                if (count($nodes) == 1) {
+                    $defs['warning'] = XMLDoc::getElementInnerText($nodes[0]);
+                }
+
                 $data = $defsNode->getAttribute('values');
                 if (isset($data) && $data !== '') {
                     if (property_exists($this->gsx, $data)) {
@@ -145,9 +150,7 @@ class GSX_Request_v2
                         $nodes = XMLDoc::filterElement($nodes[0], 'val', null);
                         foreach ($nodes as $node) {
                             $val = $node->getAttribute('val');
-                            if ($val !== '') {
-                                $defs['values'][$val] = XMLDoc::getElementInnerText($node);
-                            }
+                            $defs['values'][$val] = XMLDoc::getElementInnerText($node);
                         }
                     }
                 }
@@ -221,6 +224,8 @@ class GSX_Request_v2
         } else {
             $label = (isset($defs['label']) ? $defs['label'] : $dataName);
         }
+
+        $warning = (isset($defs['warning']) ? $defs['warning'] : '');
 
         $display_if = null;
         $nodes = XMLDoc::findChildElements($dataNode, 'display_if', null, array(), 1);
@@ -316,6 +321,11 @@ class GSX_Request_v2
             $inputValue = (isset($values[$valuesName]) ? $values[$valuesName] : $default);
 
             $html .= '<div class="formRowInput col-xs-12 col-sm-6 col-md-9">';
+
+            if ($warning) {
+                $html .= BimpRender::renderAlerts($warning, 'warning');
+            }
+
             if ($multiple) {
                 $valuesArray = null;
                 if (isset($values[$valuesName])) {
@@ -452,6 +462,11 @@ class GSX_Request_v2
                             break;
 
                         case 'select':
+//                            echo 'val: ' . $inputValue;
+//                            echo '<pre>';
+//                            print_r($options);
+//                            echo '</pre>';
+                            
                             $html .= BimpInput::renderInput('select', $inputName, $inputValue, array(
                                         'options' => $options
                             ));

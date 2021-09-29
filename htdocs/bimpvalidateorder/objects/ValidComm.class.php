@@ -38,6 +38,8 @@ class ValidComm extends BimpObject
     const USER_ASK_ALL = 0;
     const USER_ASK_CHILD = 1;
     
+    private $valideur = array();
+    
     public function canEdit() {
         global $user;
         if($user->id == 330)
@@ -108,9 +110,8 @@ class ValidComm extends BimpObject
         $valid_encours = 1;
         $valid_impaye = 1;
         
-        $this->updateCreditSafe($bimp_object);
+        $errors = BimpTools::merge_array($errors, $this->updateCreditSafe($bimp_object));
         
-        die('FIIIIIIIIIIIIIIIN');
         
 //        return 1;
                        
@@ -182,7 +183,7 @@ class ValidComm extends BimpObject
         // Commerciales
         if(!$valid_comm)
                 $errors[] = "Vous ne pouvez pas valider commercialement " 
-                . $bimp_object->getLabel('this') . '. La demande de validation commerciale a été adressée au valideur attribué.<br/>';
+                . $bimp_object->getLabel('this') . '. La demande de validation commerciale a été adressée à ' . $this->valideur[self::TYPE_COMMERCIAL] . '.<br/>';
         else
             $success[] = "Validation commerciale effectuée.";
         
@@ -196,7 +197,7 @@ class ValidComm extends BimpObject
         if(!$valid_impaye)
                 $errors[] = "Votre " . $bimp_object->getLabel() .  
                 " n'est pas encore validée car le compte client présente des retards de paiement " .
-                '. La demande de validation d\'impayé a été adressée au valideur attribué.<br/>';
+                '. La demande de validation d\'impayé a été adressée à ' . $this->valideur[self::TYPE_IMPAYE] . '.<br/>';
         else
             $success[] = "Validation d'impayé effectuée.";
         
@@ -360,11 +361,11 @@ class ValidComm extends BimpObject
         }
         
         
-        $error .= 'Votre validation max ' . $maxUser . '€<br/>';
-        $error .= 'Dépassement de l\'encours du client ' . $depassement_actuel . '€<br/>';
-        $error .= 'Montant ' . $bimp_object->getLabel('the') . ' ' . $montant_piece . '€<br/>';
-        $error .= 'Dépassement après la validation ' . $depassement_futur . '€<br/>';
-        $error .= 'La demande de validation d\'encours a été adressée au valideur attribué.<br/>';
+        $error .= 'Votre validation max ' . price($maxUser) . '€<br/>';
+        $error .= 'Dépassement de l\'encours du client ' . price($depassement_actuel) . '€<br/>';
+        $error .= 'Montant ' . $bimp_object->getLabel('the') . ' ' . price($montant_piece) . '€<br/>';
+        $error .= 'Dépassement après la validation ' . price($depassement_futur) . '€<br/>';
+        $error .= 'La demande de validation d\'encours a été adressée à ' . $this->valideur[self::TYPE_ENCOURS] . '.<br/>';
 
         return $error;
     }
@@ -498,7 +499,7 @@ class ValidComm extends BimpObject
                 . ' ' . $bimp_object->getLabel('the') . ' (pour le secteur ' . $secteur_nom
                 . ', ' . $val_nom . ', utilisateur ' . $user_ask->firstname . ' ' . $user_ask->lastname . ')';
             
-            $errors[] = $message . ". L'équipe de débug est informée et va nommé un chargé de validation.";
+            $errors[] = $message . ". L'équipe de débug est informée et va nommer un chargé de validation.";
                       
             $lien = DOL_MAIN_URL_ROOT . '/' . $this->module;
             $message_mail = "Bonjour,<br/>" . $message;
@@ -525,6 +526,9 @@ class ValidComm extends BimpObject
                 'val_comm_demande' => (int) $val_comm_demande,
                 'type' =>             (int) $type
             )));
+            
+            $user_aff = BimpCache::getBimpObjectInstance("bimpcore", 'Bimp_User', $id_user_affected);
+            $this->valideur[$type] = ucfirst($user_aff->getData('firstname')) . ' ' . ucfirst($user_aff->getData('lastname'));
 
             $errors = BimpTools::merge_array($errors, $demande->create());
             return 1;
@@ -609,20 +613,19 @@ class ValidComm extends BimpObject
         return $can_valid_not_avaible;
     }
     
-    public function demandeExists($class, $id_object, $type = null) {
+    public function demandeExists($class, $id_object, $type = null, $status = null) {
         
-        if($type == null) 
-            $filters = array(
-                'type_de_piece' => $class,
-                'id_piece'      => $id_object
-            );
-        else
-            $filters = array(
-                'type_de_piece' => $class,
-                'id_piece'      => $id_object,
-                'type'          => $type
-            );
+        $filters = array(
+            'type_de_piece' => $class,
+            'id_piece'      => $id_object
+        );
         
+        if($type !== null)
+            $filters['type'] = $type;
+        
+        if($status !== null)
+            $filters['status'] = $status;
+
         $demandes = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filters);
 
         foreach($demandes as $key => $val)
@@ -787,23 +790,21 @@ class ValidComm extends BimpObject
     
     private function updateCreditSafe($bimp_object) {
         
+        $errors = array();
+        
         // Client
         if(method_exists($bimp_object, 'getClientFacture'))
             $client = $bimp_object->getClientFacture();
         else
             $client = $bimp_object->getChildObject('client');
         
-        echo 'solvable ?<br/>';
         // Non solvable
         if($client->getData('solvabilite_status') != Bimp_Societe::SOLV_SOLVABLE)
-            return 0;
+            return $errors;
         
-        echo 'Créer après le 1er mai 2021 ?<br/>';
         // Créer après le 1er mai 2021
         if('2021-05-1' < $client->getData('datec'))
-            return 0;
-
-        echo 'Avec retard de paiement ?<br/>';
+            return $errors;
 
         // Avec retard de paiement
         if(isset($this->client_rtp))
@@ -812,44 +813,25 @@ class ValidComm extends BimpObject
             $rtp = $client->getTotalUnpayed();
 
         if($rtp != 0)
-            return 0;
+            return $errors;
         
         // Les 3 conditions sont satifaites, update limite
-        $previous_limit = $client->getdata('outstanding_limit');
+//        $old_limit = $client->getdata('outstanding_limit');
         
         // data Crédit Safe
-        $d_cf = $client->checkSiren('siret', $client->getData('siret'));
+        $code = (string) $client->getData('siren');
+        if (!$code) {
+            $code = (string) $client->getData('siret');
+        }
         
-        print_r($d_cf);
-        die();
-        
-        
-        
-        
-        
-        
-        
+        if($code) {
+            $errors = BimpTools::merge_array($errors, $client->checkSiren('siret', $code));
+        }
+
+        return $errors;
     }
     
 }
-//Bonjour
-// 
-//Afin d'alléger mes tâches quotidiennes j'aimerais que l'on automatise une partie des validations financières
-// 
-//Exemple avec demande ci-dessous
-//Pour un cas comme celui-ci il faudrait que le système cherche la limite recommandée par Credit Safe et remplisse automatiquement le champ "encours autorisé"
-//NB : toutefois, il doit être de 100 000 € maximum, même si CréditSafe nous donne une limite supérieure
-//Si le nouvel encours autorisé le permet, valider automatiquement la commande
-//  
-//Mais attention, doivent être exclus de cet automatisme :
-//
-//    Les clients ouverts à partir du 1er mai 2021
-//    Les clients pour lesquels il y a un retard de paiement (nous gardons donc la validation spécifique à ces retards)
-//    Les clients dont le statut n'est pas en "client solvable"
-//
-// 
-//Si cette amélioration est réalisable, merci de m'informer de sa mise en place
-
 
 
 class DoliValidComm extends CommonObject {

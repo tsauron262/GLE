@@ -614,6 +614,9 @@ forms:
             - field: bon_resti_raison
               show:
                   callback: isGratuit
+              display_if: 
+                  field_name: frais
+                  show_values: 0
             - custom: 1
               label: Raison détail
               input_name: bon_resti_raison_detail

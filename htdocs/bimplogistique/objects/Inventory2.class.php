@@ -749,6 +749,7 @@ HAVING scan_exp != scan_det";
     
     public function actionSetSatus($data = array(), &$success = '') {
         $errors = array();
+        $warnings = array();
         $status = (int) $data['status'];
 
         $init_status = $this->getInitData('status');
@@ -778,7 +779,10 @@ HAVING scan_exp != scan_det";
             $this->updateField("status", $init_status);
 
 
-        return $errors;
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
     
     public function canCreate() {

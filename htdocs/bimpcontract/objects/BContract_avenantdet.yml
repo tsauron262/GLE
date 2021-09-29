@@ -62,7 +62,7 @@ fields:
         type: percent
         
     ht:
-        label: Montant HT
+        label: Montant HT vendu dans le contrat
         type: money
         
     qty:

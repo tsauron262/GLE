@@ -121,7 +121,7 @@ class BContract_avenantdet extends BContract_avenant {
             $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $_REQUEST['id']);            
         }
         
-        $price = $this->getData('ht')*(100-$this->getData('remise'))/100;
+        $price = $this->getData('ht');
         
         if(is_object($contrat)) {
             if($contrat->isLoaded()) {

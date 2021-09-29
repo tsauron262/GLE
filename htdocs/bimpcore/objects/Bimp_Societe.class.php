@@ -1873,7 +1873,7 @@ class Bimp_Societe extends BimpDolObject
 
                 $sClient = new SoapClient($link . "?wsdl", array('trace' => 1));
                 
-                if (method_exists($sClient, 'GetData')) {
+//                if (method_exists($sClient, 'GetData')) { TODO remettre en place pour les dev qui n'ont pas php-soap
                     $objReturn = $sClient->GetData(array("requestXmlStr" => str_replace("SIREN", ($siret ? $siret : $siren), $xml_data)));
 
                     $returnData = $objReturn->GetDataResult;
@@ -1985,9 +1985,9 @@ class Bimp_Societe extends BimpDolObject
                             "outstanding_limit" => "" . intval($limit),
                             "capital"           => "" . trim(str_replace(" Euros", "", $summary->sharecapital)));
                     }
-                } elseif (!BimpCore::isModeDev()) {
-                    BimpCore::addlog('Echec connexion SOAP pour Credit SAFE', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', $this);
-                }
+//                } elseif (!BimpCore::isModeDev()) {
+//                    BimpCore::addlog('Echec connexion SOAP pour Credit SAFE', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', $this);
+//                }
             }
         }
 

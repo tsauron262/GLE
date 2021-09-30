@@ -584,11 +584,11 @@ class gsxController extends BimpController
                         } else {
                             switch ($part['fromConsignedStock']) {
                                 case 'oui':
-                                    $result['parts'][$key]['fromConsignedStock'] = 1;
+                                    $result['parts'][$key]['fromConsignedStock'] = 'true';
                                     break;
 
                                 case 'non':
-                                    $result['parts'][$key]['fromConsignedStock'] = 0;
+                                    $result['parts'][$key]['fromConsignedStock'] = 'false';
                                     break;
                             }
                         }
@@ -632,7 +632,7 @@ class gsxController extends BimpController
                 }
                 break;
         }
-
+echo '<pre>';print_r($result);
         return $errors;
     }
 

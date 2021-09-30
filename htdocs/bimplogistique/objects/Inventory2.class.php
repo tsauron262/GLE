@@ -743,8 +743,10 @@ HAVING scan_exp != scan_det";
         return $html;
     }
     
-    public function actionCreateExpected(){
-        return $this->createExpected();
+    public function actionCreateExpected($data, &$success) {
+        return array(
+            'errors' => $this->createExpected(),
+            'warnings' => $warnings);
     }
     
     public function actionSetSatus($data = array(), &$success = '') {

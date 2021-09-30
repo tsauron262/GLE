@@ -323,7 +323,7 @@ class Bimp_Commande extends BimpComm
                 return 1;
 
             case 'paiement_comptant':
-                if ((int) $this->getData('fk_statut') != 0)
+                if ((int) $this->getData('fk_statut') != 0 and !$user->admin)
                     return 0;
                 return 1;
         }

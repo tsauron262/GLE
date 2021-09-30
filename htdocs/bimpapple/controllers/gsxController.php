@@ -292,6 +292,8 @@ class gsxController extends BimpController
 
                             if ($is_company) {
                                 $company_name = (string) $client_data['nom'];
+                                $firstname = (string) $client_data['nom'];
+                                $lastname = (string) $client_data['nom'];
                             } elseif (preg_match(('/^(.+) (.+)$/U'), $client_data['nom'], $matches)) {
                                 $lastname = $matches[1];
                                 $firstname = $matches[2];

@@ -61,7 +61,7 @@ fields:
         type: string
                 
 lists_cols: 
-    fk_warehouse_type:
+    fk_warehouse_type_text:
         label: Entrepôt/Type
         value:
             callback: renderWarehouseTypeName
@@ -79,7 +79,7 @@ lists:
            fk_product: 
            fk_equipment: 
            qty: 
-           fk_warehouse_type:                   
+           fk_warehouse_type_text:                   
            fk_package:
                show: 
                    callback: isAdmin

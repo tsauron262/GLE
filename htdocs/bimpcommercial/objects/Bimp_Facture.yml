@@ -1067,6 +1067,7 @@ cards:
 searches:
     default: 
         fields_search: 
+            - a.rowid
             - a.facnumber
             - ef.libelle
             - s.nom

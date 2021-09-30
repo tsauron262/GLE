@@ -1378,7 +1378,7 @@ class BC_ListTable extends BC_List
                 $tools_html .= '></span>';
                 $tools_width += 44;
             }
-            if ($this->params['checkboxes'] && count($this->params['bulk_actions'])) {
+        if ($this->params['checkboxes'] && (count($this->params['bulk_actions']) || count($this->params['extra_bulk_actions']))) {
                 $tools_html .= '<span class="headerButton displayPopupButton openBulkActionsPopupButton"';
                 $tools_html .= ' data-popup_id="' . $this->identifier . '_bulkActionsPopup"></span>';
                 $tools_html .= $this->renderBulkActionsPopup();

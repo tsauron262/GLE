@@ -292,6 +292,8 @@ class gsxController extends BimpController
 
                             if ($is_company) {
                                 $company_name = (string) $client_data['nom'];
+                                $firstname = (string) $client_data['nom'];
+                                $lastname = (string) $client_data['nom'];
                             } elseif (preg_match(('/^(.+) (.+)$/U'), $client_data['nom'], $matches)) {
                                 $lastname = $matches[1];
                                 $firstname = $matches[2];
@@ -570,6 +572,7 @@ class gsxController extends BimpController
                         }
                     }
                 }
+                
 
                 if (isset($result['parts']) && !empty($result['parts'])) {
                     foreach ($result['parts'] as $key => $part) {
@@ -578,9 +581,23 @@ class gsxController extends BimpController
                                 unset($result['parts'][$key]['componentIssue']);
                             }
                         }
+                        if (!isset($part['fromConsignedStock']) || !in_array($part['fromConsignedStock'], array('oui', 'non'))) {
+                            $errors[] = 'Veuillez renseigner si le composant "' . BimpTools::getArrayValueFromPath($part, 'number', 'n°' . $key) . '" est pris depuis le stock consigné ou non';
+                        } else {
+                            unset($result['parts'][$key]['fromConsignedStock']);
+                            switch ($part['fromConsignedStock']) {
+                                case 'oui':
+                                    $result['parts'][$key]['fromConsignedStock'] = true;
+                                    break;
+
+                                case 'non':
+                                    $result['parts'][$key]['fromConsignedStock'] = false;
+                                    break;
+                            }
+                        }
                     }
                 }
-
+                
                 // Traitement des questions: 
                 if (!isset($params['repairType']) && isset($result['repairType'])) {
                     $params['repairType'] = $result['repairType'];
@@ -618,7 +635,7 @@ class gsxController extends BimpController
                 }
                 break;
         }
-
+//echo '<pre>';print_r($result);
         return $errors;
     }
 
@@ -1099,13 +1116,13 @@ class gsxController extends BimpController
                 $html .= '</div>';
             }
             $instance = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV');
-            
-            if($instance->find(array('status'=>$instance::$status_opened, 'id_equipment'=>$id_equipment), true))
-                $html .= '<div class="blink big">'.BimpRender::renderAlerts('Attention un SAV existe déja pour ce serial'.$instance->getLink()).'</div>';
-            
+
+            if ($instance->find(array('status' => $instance::$status_opened, 'id_equipment' => $id_equipment), true))
+                $html .= '<div class="blink big">' . BimpRender::renderAlerts('Attention un SAV existe déja pour ce serial' . $instance->getLink()) . '</div>';
+
             $data = $this->gsx_v2->serialEligibility($serial);
 
-            if(isset($data['eligibilityDetails']['outcome']) && is_array($data['eligibilityDetails']['outcome'])){
+            if (isset($data['eligibilityDetails']['outcome']) && is_array($data['eligibilityDetails']['outcome'])) {
                 foreach ($data['eligibilityDetails']['outcome'] as $out) {
                     if ($out['action'] == 'WARNING') {
                         foreach ($out['reasons'] as $warn) {
@@ -1738,7 +1755,7 @@ class gsxController extends BimpController
                         'templateId' => $qd['templateId']
                     );
                     $trees = array();
-                    
+
                     $ok = false;
 
                     if (isset($qd['trees']) && !empty($qd['trees'])) {
@@ -1752,7 +1769,7 @@ class gsxController extends BimpController
                                 $responses = $this->gsxProcessRepairQuestionsInputs($t['questions'], $prefixe, $errors);
 
                                 if (!empty($responses)) {
-                                $ok = true;
+                                    $ok = true;
                                     $tree['questions'] = $responses;
                                 }
                             }
@@ -1764,11 +1781,11 @@ class gsxController extends BimpController
                         $tpl['trees'] = $trees;
                     }
 
-                    if($ok)
+                    if ($ok)
                         $result['questionDetails'][] = $tpl;
                 }
-                
-                if(count($result['questionDetails']) == 0)
+
+                if (count($result['questionDetails']) == 0)
                     unset($result['questionDetails']);
 
 //                $array = array(
@@ -3918,11 +3935,11 @@ class gsxController extends BimpController
         $this->gsx_v2->saveToken('acti', '');
         $this->gsx_v2->saveToken('auth', '');
         return array(
-                    'errors'        => array(),
-                    'warnings'      => array(),
-                    'gsx_no_logged' => 1,
-                    'success_callback'      => 'gsx_open_login_modal();'
-                );
+            'errors'           => array(),
+            'warnings'         => array(),
+            'gsx_no_logged'    => 1,
+            'success_callback' => 'gsx_open_login_modal();'
+        );
     }
 
     protected function ajaxProcessGsxRequest()

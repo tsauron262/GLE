@@ -854,6 +854,7 @@ searches:
     default: 
         fields_search: 
             - a.ref
+            - a.rowid
             - ef.libelle
             - s.nom
             - a.replaced_ref

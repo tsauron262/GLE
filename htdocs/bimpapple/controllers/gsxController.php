@@ -292,6 +292,8 @@ class gsxController extends BimpController
 
                             if ($is_company) {
                                 $company_name = (string) $client_data['nom'];
+                                $firstname = (string) $client_data['nom'];
+                                $lastname = (string) $client_data['nom'];
                             } elseif (preg_match(('/^(.+) (.+)$/U'), $client_data['nom'], $matches)) {
                                 $lastname = $matches[1];
                                 $firstname = $matches[2];
@@ -585,12 +587,12 @@ class gsxController extends BimpController
                             unset($result['parts'][$key]['fromConsignedStock']);
                             switch ($part['fromConsignedStock']) {
                                 case 'oui':
-                                    $result['parts'][$key]['fromConsignedStock'] = 'true';
+                                    $result['parts'][$key]['fromConsignedStock'] = true;
                                     break;
 
-//                                case 'non':
-//                                    $result['parts'][$key]['fromConsignedStock'] = (int)0;
-//                                    break;
+                                case 'non':
+                                    $result['parts'][$key]['fromConsignedStock'] = false;
+                                    break;
                             }
                         }
                     }

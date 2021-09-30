@@ -591,6 +591,7 @@ cards:
 searches:
     default: 
         fields_search: 
+            - a.rowid
             - a.ref
             - ef.libelle
             - s.nom

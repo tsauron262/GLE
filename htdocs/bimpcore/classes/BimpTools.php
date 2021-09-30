@@ -3113,4 +3113,18 @@ class BimpTools
             return 1;
         return 0;
     }
+    
+    public static function sendSmsAdmin($text, $tels = array('0628335081', '06 86 69 18 14')){    
+        $errors = array();
+        require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
+        foreach ($tels as $tel){
+            $tel = traiteNumMobile($tel);
+            $smsfile = new CSMSFile($tel, 'BIMP ADMIN', $text);
+            if (!$smsfile->sendfile()) {
+                $errors[] = 'Echec de l\'envoi du sms';
+            }
+        }
+        
+        return $errors;
+    }
 }

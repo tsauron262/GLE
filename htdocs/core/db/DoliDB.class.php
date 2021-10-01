@@ -163,7 +163,9 @@ abstract class DoliDB implements Database
 			}
 			else
 			{
-                            BimpCore::addlog('COMMIT ERREUR', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore');
+                            BimpCore::addlog('COMMIT ERREUR', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
+                                'Dernière Erreur SQL' => $this->lasterror()
+                            ));
 				return 0;
 			}
 		}

@@ -108,16 +108,20 @@ class BimpComm extends BimpDolObject
         }
         return 0;
     }
-    
+
     public function isEditable()
     {
-        $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
-        $type_de_piece = ValidComm::getObjectClass($this);
-        
-        // Soumis à des validations et possède des demandes de validation en brouillon
-        if($type_de_piece != -2 and $valid_comm->demandeExists($type_de_piece, $this->id, null, 0))
-            return 0;
-        
+        global $user;
+
+        if (!$user->admin) {
+            $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+            $type_de_piece = ValidComm::getObjectClass($this);
+
+            // Soumis à des validations et possède des demandes de validation en brouillon
+            if ($type_de_piece != -2 and $valid_comm->demandeExists($type_de_piece, $this->id, null, 0))
+                return 0;
+        }
+
         return parent::isEditable();
     }
 
@@ -204,9 +208,9 @@ class BimpComm extends BimpDolObject
                 if (!BimpObject::objectLoaded($client)) {
                     $errors[] = 'Client absent';
                 } else {
-                    if($client->getData('fk_typent') == 0)
+                    if ($client->getData('fk_typent') == 0)
                         $errors[] = 'Type de tier obligatoire';
-                    
+
 
                     // Module de validation activé
                     if ((int) $conf->global->MAIN_MODULE_BIMPVALIDATEORDER == 1) {
@@ -229,12 +233,12 @@ class BimpComm extends BimpDolObject
                 }
             }
         }
-        
-        
-        if($this->getData('fk_mode_reglement') == 3 &&  $this->extrafieldsIsConfig('rib_client')){
-            if($this->getData('rib_client') < 1)
+
+
+        if ($this->getData('fk_mode_reglement') == 3 && $this->extrafieldsIsConfig('rib_client')) {
+            if ($this->getData('rib_client') < 1)
                 $errors[] = 'Pour les prélèvements SEPA, le RIB est obligatoire';
-            else{
+            else {
                 $rib = $this->getChildObject('rib_client');
                 $rib->isValid($errors);
             }
@@ -282,10 +286,10 @@ class BimpComm extends BimpDolObject
                 return 1;
 
             case 'useRemise':
-                
-                if(!$this->isEditable())
+
+                if (!$this->isEditable())
                     return 0;
-                
+
                 if ($this->object_name === 'Bimp_Facture') {
                     if ((int) $this->getData('fk_statut') === 0) {
                         return 1;
@@ -349,8 +353,8 @@ class BimpComm extends BimpDolObject
                 return 0;
             }
         }
-        
-        if(!$this->isEditable())
+
+        if (!$this->isEditable())
             return 0;
 
         return 1;
@@ -422,15 +426,15 @@ class BimpComm extends BimpDolObject
     }
 
     // Getters array: 
-    
-    public function getRibArray()
-    {        
-        $return = array(0=>'');
-        $client = $this->getClientFacture();
-        if($client && $client->isLoaded()){
-            $result = $this->db->getRows('societe_rib', '`fk_soc` ='.$client->id, null, 'object', null, 'default_rib', 'DESC');
 
-            foreach($result as $row){
+    public function getRibArray()
+    {
+        $return = array(0 => '');
+        $client = $this->getClientFacture();
+        if ($client && $client->isLoaded()) {
+            $result = $this->db->getRows('societe_rib', '`fk_soc` =' . $client->id, null, 'object', null, 'default_rib', 'DESC');
+
+            foreach ($result as $row) {
                 $return[$row->rowid] = $row->label;
             }
         }
@@ -1126,7 +1130,7 @@ class BimpComm extends BimpDolObject
                         $marginInfos['pa_total'] += $pa;
                         $marginInfos['pv_total'] += $pv;
                         $marginInfos['margin_on_products'] += $pv - $pa;
-                    } else{  // service
+                    } else {  // service
                         $marginInfos['pa_services'] += $pa;
                         $marginInfos['pv_services'] += $pv;
                         $marginInfos['pa_total'] += $pa;
@@ -1643,7 +1647,7 @@ class BimpComm extends BimpDolObject
                 if ($infos['ext_remises_globales_amount_ttc'] || (!is_null($infos_fq) && $infos_fq['ext_remises_globales_amount_ttc'])) {
                     $html .= '<tr>';
                     $html .= '<td style="font-weight: bold;width: 160px;">Parts de remises globales externes: </td>';
-                    
+
                     $html .= '<td>';
                     $html .= BimpTools::displayMoneyValue($infos['ext_remises_globales_amount_ht'], 'EUR', 0, 0, 0, 2, 1);
                     if (!is_null($infos_fq) && $infos['ext_remises_globales_amount_ht'] != $infos_fq['ext_remises_globales_amount_ht']) {
@@ -1803,17 +1807,17 @@ class BimpComm extends BimpDolObject
 
         return $html;
     }
-    
+
     public function renderHeaderExtraRight()
-    {    
+    {
         $html = '';
         $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
         $type_de_piece = ValidComm::getObjectClass($this);
-        
+
         // Soumis à des validations et possède des demandes de validation en brouillon
-        if($type_de_piece != -2 and $valid_comm->demandeExists($type_de_piece, $this->id, null, 0))
+        if ($type_de_piece != -2 and $valid_comm->demandeExists($type_de_piece, $this->id, null, 0))
             $html = '<span class="warning"><i class="fas fa5-exclamation-triangle iconLeft"></i>En cours de validation</span>';
-        
+
         return $html;
     }
 

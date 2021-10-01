@@ -523,6 +523,7 @@ class BimpProductMouvement extends BimpObject
     public function revertMouvement(&$warnings = array())
     {
 
+        echo '<br/>mv '.$this->id.'<br/>';
         $errors = array();
 
         BimpObject::loadClass('bimpequipment', 'BE_Package');
@@ -540,26 +541,43 @@ class BimpProductMouvement extends BimpObject
 
 
             // enlève
-        } elseif (preg_match("/Ajout au package #(\d+)/", $this->getData('label'), $m)) {
-            echo 'Retrait de ' . $m[1] . $this->getData('fk_product') . '<br/>';
-            $package = BimpObject::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $m[1]);
-            $errors = BimpTools::merge_array($errors, $package->addProduct($this->getData('fk_product'), $this->getData('value'), $this->getData('fk_entrepot'), $warnings, $this->getData('inventorycode'), 'Revert ' . $this->getData('label'), $this->getData('bimp_origin'), $this->getData('bimp_id_origin')));
-        } /* elseif(preg_match("/Retrait du package #(\d+)/", $this->getData('label'), $m)) {
-
+        } elseif (preg_match("/^Ajout au package #(\d+)/", $this->getData('label'), $m)) {
+            if($this->getData('value') < 0){//il est dans un package hors stock
+                $package = BimpObject::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $m[1]);
+                $errors = BimpTools::merge_array($errors, $package->addProduct($this->getData('fk_product'), $this->getData('value'), $this->getData('fk_entrepot'), $warnings, $this->getData('inventorycode'), 'Revert '.$this->id.' | ' . $this->getData('label'), $this->getData('bimp_origin'), $this->getData('bimp_id_origin')));
+            }
+            else{
+                $package = BimpObject::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $m[1]);
+                $errors = BimpTools::merge_array($errors, $package->addProduct($this->getData('fk_product'), -$this->getData('value'), -1, $warnings, $this->getData('inventorycode'), 'Revert '.$this->id.' | ' . $this->getData('label'), $this->getData('bimp_origin'), $this->getData('bimp_id_origin')));
+                
+            }
+            
+            echo 'Retrait de ' . $m[1] .' '. $this->getData('fk_product') . '<br/>';
+        }  elseif(preg_match("/^Retrait du package #(\d+)/", $this->getData('label'), $m)) {
+            if($this->getData('value') < 0){//package en stock
+                echo 'Ajout de '.$this->getData('value').' dans pkg ' . $m[1] .' '. $this->getData('fk_product') . '<br/>';
+                $package = BimpObject::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $m[1]);
+                $errors = BimpTools::merge_array($errors, $package->addProduct($this->getData('fk_product'), -$this->getData('value'), -1, $warnings, $this->getData('inventorycode'), 'Revert '.$this->id.' | ' . $this->getData('label'), $this->getData('bimp_origin'), $this->getData('bimp_id_origin')));
+            }
+            else{//package hors stock
+                echo 'Ajout de '.$this->getData('value').' dans pkg ' . $m[1] .' '. $this->getData('fk_product') . '<br/>';
+                $package = BimpObject::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $m[1]);
+                $errors = BimpTools::merge_array($errors, $package->addProduct($this->getData('fk_product'), $this->getData('value'), $this->getData('fk_entrepot'), $warnings, $this->getData('inventorycode'), 'Revert '.$this->id.' | ' . $this->getData('label'), $this->getData('bimp_origin'), $this->getData('bimp_id_origin')));
+            }
           //            print_r($m);
 
           //            $package = BimpObject::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $m[1]);
           //            $package->addProduct($this->getData('fk_product'), $this->getData('value'), 0, $warnings,
           //                    $this->getData('inventorycode'), 'Revert ' . $this->getData('label'), $this->getData('bimp_origin'), $this->getData('bimp_id_origin'));
-         */
+         
 //        } elseif((int) $this->getData('fk_entrepot') > 0) {
 //            
 //            echo ' ATTENTION ' . $this->getData('label') . '<br/>';
 //            
-//        } 
+        } 
         else {
 
-            echo ' ATTENTION ' . $this->getData('label') . ' n\'est pas géré !<br/>';
+            echo ' ATTENTION mv id '.$this->id.' | ' . $this->getData('label') . ' n\'est pas géré !<br/>';
 
 //            die('"Type inconnue');
         }
@@ -610,6 +628,7 @@ class BimpProductMouvement extends BimpObject
                     $doublons = $bdb->getRows('stock_mouvement', $where, null, 'array', array('rowid', 'datem', 'label', 'inventorycode'), 'datem', 'asc');
 
                     if (is_array($doublons) && count($doublons) > 1) {
+                        echo 'rrrrrr';
                         $cancels = array();
 
                         foreach ($doublons as $mvt) {

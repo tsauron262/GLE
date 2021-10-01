@@ -84,7 +84,7 @@ class BTC_exportRibAndMandat extends BTC_export {
      */
     
     private function printMANDATtra(Bimp_SocBankAccount $rib, Bimp_Societe $client, Bimp_Facture $facture):string {
-        $now = new DateTime();
+        $date = new DateTime($rib->getData('datec'));
         $this->structure_mandat = Array(
             "FIXE" => $this->sizing("***", 3),
             "IDENTIFIANT" => $this->sizing("MDT", 3),
@@ -98,7 +98,7 @@ class BTC_exportRibAndMandat extends BTC_export {
             "PAIEMENT" => $this->sizing($this->recurrentORponctuel($facture->getData('ef_type')), 3),
             "TYPE" => $this->sizing($this->parORpro($client), 3),
             "STATUT" => $this->sizing("1FI", 3),
-            "DATECREATION" => $this->sizing($now->format('dmY'), 8),
+            "DATECREATION" => $this->sizing($date->format('dmY'), 8),
             "DATEENVOICLI" => $this->sizing("", 8),
             "DATESIGNATURE" => $this->sizing("", 8),
             "DATEMVTENVOI" => $this->sizing("", 8),

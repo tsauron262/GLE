@@ -227,6 +227,11 @@ class ValidComm extends BimpObject
 
             if((int) $demande->getData('status') == (int) DemandeValidComm::STATUS_VALIDATED)
                 return 1;
+            else {
+//                $this->valideur[$type] = $demande->getData('id_user_affected');
+                $user_aff = BimpCache::getBimpObjectInstance("bimpcore", 'Bimp_User', $demande->getData('id_user_affected'));
+                $this->valideur[$type] = ucfirst($user_aff->getData('firstname')) . ' ' . ucfirst($user_aff->getData('lastname'));
+            }
 
 //            // Je suis le valideur enlever pour ne pas court-circuiter la traçabilité
 //            elseif ((int) $demande->getData('id_user_affected') == (int) $user->id) {
@@ -234,7 +239,7 @@ class ValidComm extends BimpObject
 //                return 1;
                 
             // Je peux valider 
-            elseif($this->userCanValidate((int) $user->id, $secteur, $type, $class, $val, $bimp_object, $val_comm_validation)) {
+            if($this->userCanValidate((int) $user->id, $secteur, $type, $class, $val, $bimp_object, $val_comm_validation)) {
                 $this->updateDemande ((int) $user->id, $class, (int) $bimp_object->id, $type, (int) DemandeValidComm::STATUS_VALIDATED, $val_comm_validation);
                 return 1;
             }
@@ -801,8 +806,10 @@ class ValidComm extends BimpObject
             $client = $bimp_object->getChildObject('client');
         
         // Non solvable
-        if($client->getData('solvabilite_status') != Bimp_Societe::SOLV_SOLVABLE)
+        if($client->getData('solvabilite_status') != Bimp_Societe::SOLV_SOLVABLE) {
+            $errors[] = "Client insolvable";
             return $errors;
+        }
         
         // Créer après le 1er mai 2021
         if('2021-05-1' < $client->getData('datec'))

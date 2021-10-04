@@ -806,7 +806,7 @@ class ValidComm extends BimpObject
             $client = $bimp_object->getChildObject('client');
         
         // Non solvable
-        if($client->getData('solvabilite_status') != Bimp_Societe::SOLV_SOLVABLE) {
+        if($client->getData('solvabilite_status') != Bimp_Societe::SOLV_INSOLVABLE) {
             $errors[] = "Client insolvable";
             return $errors;
         }
@@ -828,13 +828,15 @@ class ValidComm extends BimpObject
 //        $old_limit = $client->getdata('outstanding_limit');
         
         // data Crédit Safe
-        $code = (string) $client->getData('siren');
-        if ($code != '' and $code != 'p') {
-            $errors = BimpTools::merge_array($errors, $client->checkSiren('siren', $code));
-        } else {
-            $code = (string) $client->getData('siret');
-            if($code != '' and $code != 'p')
-                $errors = BimpTools::merge_array($errors, $client->checkSiren('siret', $code));
+        if($client->isSirenRequired()) {
+            $code = (string) $client->getData('siren');
+            if ($code != '' and $code != 'p') {
+                $errors = BimpTools::merge_array($errors, $client->checkSiren('siren', $code));
+            } else {
+                $code = (string) $client->getData('siret');
+                if($code != '' and $code != 'p')
+                    $errors = BimpTools::merge_array($errors, $client->checkSiren('siret', $code));
+            }
         }
 
         return $errors;

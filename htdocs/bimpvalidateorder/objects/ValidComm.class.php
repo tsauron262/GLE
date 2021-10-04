@@ -806,7 +806,7 @@ class ValidComm extends BimpObject
             $client = $bimp_object->getChildObject('client');
         
         // Non solvable
-        if($client->getData('solvabilite_status') != Bimp_Societe::SOLV_INSOLVABLE) {
+        if($client->getData('solvabilite_status') == Bimp_Societe::SOLV_INSOLVABLE) {
             $errors[] = "Client insolvable";
             return $errors;
         }

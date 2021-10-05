@@ -116,7 +116,7 @@ class BimpNote extends BimpObject
         if ($this->getData("type_dest") == self::BN_DEST_USER && $this->getData("fk_user_dest") == $user->id)
             return 1;
 
-        $listIdGr = self::getGroupIds($user->id);
+        $listIdGr = self::getUserUserGroupsList($user->id);
 
         if ($this->getData("type_dest") == self::BN_DEST_GROUP && in_array($this->getData("fk_group_dest"), $listIdGr))
             return 1;
@@ -203,7 +203,7 @@ class BimpNote extends BimpObject
     public static function getMyConversations($notViewedInFirst = true, $limit = 10)
     {
         global $user;
-        $listIdGr = self::getGroupIds($user->id);
+        $listIdGr = self::getUserUserGroupsList($user->id);
         $reqDeb = "SELECT `obj_type`,`obj_module`,`obj_name`,`id_obj`, MIN(viewed) as mviewed, MAX(date_create) as mdate_create, MAX(id) as idNoteRef FROM `" . MAIN_DB_PREFIX . "bimpcore_note` "
                 . "WHERE auto = 0 AND ";
         $where = "(type_dest = 1 AND fk_user_dest = " . $user->id . ") "
@@ -533,7 +533,7 @@ class BimpNote extends BimpObject
     public static function getMyNewConversations($id_max, $notViewedInFirst = true, $limit = 10)
     {
         global $user;
-        $listIdGr = self::getGroupIds($user->id);
+        $listIdGr = self::getUserUserGroupsList($user->id);
         $reqDeb = "SELECT `obj_type`,`obj_module`,`obj_name`,`id_obj`, MIN(viewed) as mviewed, MAX(date_create) as mdate_create, MAX(id) as idNoteRef"
                 . " FROM `" . MAIN_DB_PREFIX . "bimpcore_note` "
                 . "WHERE auto = 0 AND id>" . $id_max . ' AND ';

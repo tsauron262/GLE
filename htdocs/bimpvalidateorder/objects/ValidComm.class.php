@@ -42,7 +42,7 @@ class ValidComm extends BimpObject
     
     public function canEdit() {
         global $user;
-        if($user->id == 330)
+        if($user->admin)
             return 1;
         $right = 'validationcommande@bimp-groupe.net';
         return $user->rights->bimptask->$right->write;

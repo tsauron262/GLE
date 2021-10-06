@@ -42,7 +42,7 @@ class ValidComm extends BimpObject
     
     public function canEdit() {
         global $user;
-        if($user->id == 330)
+        if($user->admin)
             return 1;
         $right = 'validationcommande@bimp-groupe.net';
         return $user->rights->bimptask->$right->write;
@@ -830,11 +830,11 @@ class ValidComm extends BimpObject
         // data Crédit Safe
         if($client->isSirenRequired()) {
             $code = (string) $client->getData('siren');
-            if ($code != '' and $code != 'p') {
+            if ($code != '') {
                 $errors = BimpTools::merge_array($errors, $client->checkSiren('siren', $code));
             } else {
                 $code = (string) $client->getData('siret');
-                if($code != '' and $code != 'p')
+                if($code != '')
                     $errors = BimpTools::merge_array($errors, $client->checkSiren('siret', $code));
             }
         }

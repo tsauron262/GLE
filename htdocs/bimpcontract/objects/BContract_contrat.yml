@@ -652,8 +652,11 @@ forms:
     have_signed:
         title: Vérification signature
         msgs:
-            - type: info
-              content: Si non est coché, le statut du contrat sera "Activation provisoire"
+            callback: displayMessagesFormActivate
+#            - type: info
+#              content: Si non est coché, le statut du contrat sera "Activation provisoire"
+#            - type: danger
+#              content: dddddd
         rows:
             - custom: 1
               label: Le contrat dûment signé est-il bien présent en PJ ?

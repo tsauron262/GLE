@@ -186,6 +186,7 @@ class Bimp_ImportPaiementLine extends BimpObject
     function getFactClient()
     {
         global $modeCSV;
+        $max = 10;
         $return = array();
         if (!$this->ok && $this->getData('price') > 0 && $this->getData('name') != '') {
             $cli = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe');
@@ -196,7 +197,7 @@ class Bimp_ImportPaiementLine extends BimpObject
                     $cli = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $result['id']);
 
                     $facts = array();
-                    $list = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', array('paye' => 0, 'fk_soc' => $cli->id));
+                    $list = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', array('paye' => 0, 'fk_soc' => $cli->id), 'id', 'asc', array(), $max);
                     foreach ($list as $fact) {
                         if ($modeCSV)
                             $facts[] = $fact->getRef();
@@ -210,6 +211,8 @@ class Bimp_ImportPaiementLine extends BimpObject
                         else
                             $return[] = $cli->getLink() . ' (' . implode(' - ', $facts) . ') Total : ' . price($total);
                     }
+                    if(count($list) == $max)
+                        $return[] = '...';
                 }
             } else {
                 $return[] = $name;

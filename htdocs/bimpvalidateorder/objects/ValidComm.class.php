@@ -119,7 +119,7 @@ class ValidComm extends BimpObject
         else
             $client = $bimp_object->getChildObject('client');
         
-        $errors = BimpTools::merge_array($errors, $this->updateCreditSafe($bimp_object));
+//        $errors = BimpTools::merge_array($errors, $this->updateCreditSafe($bimp_object));
         
         
 //        return 1;

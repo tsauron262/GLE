@@ -903,10 +903,10 @@ forms:
                 display_if: 
                     field_name: is_company
                     show_values: 1
-            outstanding_limit: 
-                field: outstanding_limit
             outstanding_limit_atradius:
                 field: outstanding_limit_atradius
+            outstanding_limit: 
+                field: outstanding_limit
             outstanding_limit_credit_safe:
                 field: outstanding_limit_credit_safe
             notecreditsafe: 

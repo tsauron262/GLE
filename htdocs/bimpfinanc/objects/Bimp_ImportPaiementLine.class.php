@@ -34,38 +34,35 @@ class Bimp_ImportPaiementLine extends BimpObject
         foreach ($codes as $data){
             $code = $data[0];
             
-            if(isset($data[1]['price'])){
-                if($data[1]['price'] == 'methode2'){
-                    $price = (substr(trim($this->getData('data')), -10, 10));
-                    $lettre = substr($price, -1,1);
-                    $price = intval(str_replace($lettre, $this->lettreToChiffre($lettre), $price)) / 100;
-                }
-            }
             if (stripos($this->getData('data'), $code) !== false) {
                 $type = 'vir';
-            }
-
-
-
-
-
-            $name = '';
-    //        if (preg_match('/ [0-9]{6} *(.+) *[0-9]{22}/', $this->getData('data'), $matches)) {
-    //            $name = $matches[1];   
-    //        }
-            if (preg_match('/'.str_replace("", "", $code).'([0-9]{2})([0-9]{2})([0-9]{2})(.+)/', $this->getData('data'), $matches)) {
-                $date = '20' . $matches[3] . '-' . $matches[2] . '-' . $matches[1];
-                $datebrut = $matches[1].$matches[2].$matches[3];
-            }
-
-            if (preg_match('/'.$code.'[0-9]{6}(.+)/', $this->getData('data'), $matches)) {
-                if(stripos($matches[1], '0000000100000') !== false){
-                    $tmp = explode('0000000100000', $matches[1]);
-                    $matches[1] = $tmp[0];
+                if(isset($data[1]['price'])){
+                    if($data[1]['price'] == 'methode2'){
+                        $price = (substr(trim($this->getData('data')), -10, 10));
+                        $lettre = substr($price, -1,1);
+                        $price = intval(str_replace($lettre, $this->lettreToChiffre($lettre), $price)) / 100;
+                    }
                 }
-                
-                
-                $name = trim(str_replace(array('NPY', 'VIR'), '', str_replace($datebrut, '', trim($matches[1]))));
+
+
+
+
+
+                if (preg_match('/'.str_replace("", "", $code).'([0-9]{2})([0-9]{2})([0-9]{2})(.+)/', $this->getData('data'), $matches)) {
+                    $date = '20' . $matches[3] . '-' . $matches[2] . '-' . $matches[1];
+                    $datebrut = $matches[1].$matches[2].$matches[3];
+                }
+
+                $name = '';
+                if (preg_match('/'.$code.'[0-9]{6}(.+)/', $this->getData('data'), $matches)) {
+                    if(stripos($matches[1], '0000000100000') !== false){
+                        $tmp = explode('0000000100000', $matches[1]);
+                        $matches[1] = $tmp[0];
+                    }
+
+
+                    $name = trim(str_replace(array('NPY', 'VIR'), '', str_replace($datebrut, '', trim($matches[1]))));
+                }
             }
         }
 

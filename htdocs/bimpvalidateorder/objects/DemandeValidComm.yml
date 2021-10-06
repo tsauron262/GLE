@@ -183,5 +183,6 @@ lists:
             id_user_affected: unset
             id_user_valid: unset
             date_valid: unset
+            date_create:
             
             

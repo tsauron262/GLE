@@ -465,6 +465,9 @@ class BContract_contrat extends BimpDolObject
         }
 
         if ($this->isLoaded() && !count($errors)) {
+            
+            
+            
             $signed_doc = ($data['have_contrat_signed']) ? true : false;
             if ($signed_doc) {
                 $contratChhild = $this->getContratChild();
@@ -2149,6 +2152,7 @@ class BContract_contrat extends BimpDolObject
             case 'fk_soc_facturation':
             case 'denounce':
             case 'fk_commercial_suivi':
+            case 'fk_commercial_signature':
             case 'moderegl':
             case 'objet_contrat':
             case 'ref_customer':
@@ -3723,6 +3727,26 @@ class BContract_contrat extends BimpDolObject
             }
         }
         return $html;
+    }
+    
+    public function displayMessagesFormActivate()
+    {
+        $msgs = [];
+        
+        $date = new DateTime($this->getData('date_start'));
+        $now = new DateTime();
+        
+        $diff = $date->diff($now);
+        
+        if($diff->invert) {
+            $msgs[] = Array(
+                'type' => 'danger',                
+                'content' => "Le contrat dûment signé doit être obligatoirement présent dans les fichiers pour une activation maintenant"
+            );
+        }
+        
+        
+        return $msgs;
     }
 
     public function displayCommercial()

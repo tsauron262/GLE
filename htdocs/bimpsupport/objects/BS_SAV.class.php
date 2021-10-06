@@ -3866,7 +3866,7 @@ class BS_SAV extends BimpObject
         }
 
         if (count($errors)) {
-            BimpCore::addlog('Echec validation propale SAV', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcommercial', $this, array(
+            BimpCore::addlog('Echec validation propale SAV', Bimp_Log::BIMP_LOG_ERREUR, 'sav', $this, array(
                 'Erreurs' => $errors
             ));
         }

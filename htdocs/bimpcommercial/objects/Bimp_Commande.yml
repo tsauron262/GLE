@@ -335,22 +335,15 @@ fields_tables:
     payment:
         rows:
             - field: fk_cond_reglement
-              edit: 
-                  callback: isEditable
+              edit: 1
             - field: fk_mode_reglement
-              edit: 
-                  callback: isEditable
+              edit: 1
             - field: rib_client
-              edit: 
-                  callback: isEditable
+              edit: 1
             - field: date_prevue_facturation
               edit: 1
             - field: paiement_comptant
-              edit:
-                  callback:
-                      method: isFieldEditable
-                      params:
-                          - paiement_comptant
+              edit: 1
                   
     client: 
         rows: 

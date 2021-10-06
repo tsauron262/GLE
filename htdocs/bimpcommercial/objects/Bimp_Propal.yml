@@ -35,10 +35,10 @@ objects:
                 fields: 
                     parent_object_name: Bimp_Propal
                     
-    user_close: 
+    user_close:
         extends: user
-        instance: 
-            id_object: 
+        instance:
+            id_object:
                 field_value: fk_user_cloture
     
     contrat:
@@ -49,22 +49,22 @@ objects:
                 
     client_facture: 
         extends: client
-        instance: 
-            id_object: 
+        instance:
+            id_object:
                 field_value: id_client_facture
                 
 fields:
-    datec: 
+    datec:
         label: Créée le
         type: datetime
-    datep: 
+    datep:
         label: Date
         dol_prop: date
         type: date
-        input: 
+        input:
             display_now: 1
         required: 1
-    fin_validite: 
+    fin_validite:
         label: Date de fin de validité
         type: date
     date_livraison: 
@@ -73,13 +73,13 @@ fields:
         input:
             help:
                 callback: getHelpDateRenouvellementContrat
-    id_client_facture: 
+    id_client_facture:
         label: Client facturation
         type: id_object
         object: client_facture
         default_value: 
             field_value: 0
-        input: 
+        input:
             type: search_societe
             societe_type: customer
             card: default
@@ -445,19 +445,15 @@ fields_tables:
             - field: ef_type
               edit: 1
             - field: fk_input_reason
-              edit: 
-                  callback: isEditable
+              edit: 1
             - field: datep
-              edit: 
-                  callback: isEditable
+              edit: 1
             - field: fin_validite
-              edit: 
-                  callback: isEditable
+              edit: 1
             - field: date_livraison
               edit: 1
             - field: fk_availability
-              edit: 
-                  callback: isEditable
+              edit: 1
             - field: zone_vente
               edit: 1
     
@@ -470,8 +466,7 @@ fields_tables:
               show: 
                   field_value: id_client_facture
             - field: ref_client
-              edit: 
-                  callback: isEditable
+              edit: 1
             - label: Remises client
               value: 
                   callback: displayRemisesClient
@@ -479,11 +474,9 @@ fields_tables:
     payment:
         rows:
             - field: fk_cond_reglement
-              edit: 
-                  callback: isEditable
+              edit: 1
             - field: fk_mode_reglement
-              edit: 
-                  callback: isEditable
+              edit: 1
                 
     pdf: 
         rows: 

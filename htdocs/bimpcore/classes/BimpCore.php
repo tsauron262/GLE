@@ -440,9 +440,9 @@ class BimpCore
     public static function addlog($msg, $level = 1, $type = 'bimpcore', $object = null, $extra_data = array(), $force = false)
     {
         if (BimpCore::isModeDev() && (int) self::getConf('bimpcore_print_logs', 1)) {
-            $infos = debug_backtrace();
-            unset($infos[0]);
-            die('LOG : ' . $msg . " " . print_r($extra_data, 1).'<pre>'.print_r($infos,1));
+//            $infos = debug_backtrace();
+//            unset($infos[0]);
+//            die('LOG : ' . $msg . " " . print_r($extra_data, 1).'<pre>'.print_r($infos,1));
         }
 
         $extra_data = BimpTools::merge_array(static::$logs_extra_data, $extra_data);
@@ -457,7 +457,7 @@ class BimpCore
         $errors = array();
 
         // $bimp_logs_locked: Eviter boucles infinies 
-        global $bimp_logs_locked;
+        global $bimp_logs_locked, $user;
 
         if (is_null($bimp_logs_locked)) {
             $bimp_logs_locked = 0;
@@ -479,33 +479,36 @@ class BimpCore
             if ($check) {
                 // On vérifie qu'on n'a pas déjà un log similaire:
                 $id_current_log = BimpCache::bimpLogExists($type, $level, $msg, $extra_data);
+                
+                
+                $mod = '';
+                $obj = '';
+                $id = 0;
+
+                if (is_a($object, 'BimpObject')) {
+                    $mod = $object->module;
+                    $obj = $object->object_name;
+                    $id = (int) $object->id;
+                }
+                
+                $bt = debug_backtrace(null, 15);
+                    
+                $datas = array(
+                    'id_user'    => (BimpObject::objectLoaded($user) ? (int) $user->id : 1),
+                    'obj_module' => $mod,
+                    'obj_name'   => $obj,
+                    'id_object'  => $id,
+                    'backtrace'  => BimpTools::getBacktraceArray($bt)
+                );
 
                 if (!$id_current_log) {
-                    global $user;
-
-                    $mod = '';
-                    $obj = '';
-                    $id = 0;
-
-                    if (is_a($object, 'BimpObject')) {
-                        $mod = $object->module;
-                        $obj = $object->object_name;
-                        $id = (int) $object->id;
-                    }
-
-                    $bt = debug_backtrace(null, 15);
-
-                    $log = BimpObject::createBimpObject('bimpcore', 'Bimp_Log', array(
-                                'id_user'    => (BimpObject::objectLoaded($user) ? (int) $user->id : 1),
-                                'type'       => $type,
-                                'level'      => $level,
-                                'msg'        => $msg,
-                                'obj_module' => $mod,
-                                'obj_name'   => $obj,
-                                'id_object'  => $id,
-                                'extra_data' => $extra_data,
-                                'backtrace'  => BimpTools::getBacktraceArray($bt)
-                                    ), true, $errors);
+                    $datas = BimpTools::merge_array($datas, array(
+                        'type'       => $type,
+                        'level'      => $level,
+                        'msg'        => $msg,
+                        'extra_data' => $extra_data,
+                    ));
+                    $log = BimpObject::createBimpObject('bimpcore', 'Bimp_Log', $datas, true, $errors);
 
                     if (BimpObject::objectLoaded($log)) {
                         BimpCache::addBimpLog((int) $log->id, $type, $level, $msg, $extra_data);
@@ -517,11 +520,11 @@ class BimpCore
                     if (BimpDebug::isActive()) {
                         BimpDebug::incCacheInfosCount('logs', false);
                     }
-                    $sql = 'UPDATE ' . MAIN_DB_PREFIX . 'bimpcore_log SET';
-                    $sql .= ' nb_occurence = (nb_occurence + 1)';
-                    $sql .= ', last_occurence = \'' . date('Y-m-d H:i:d') . '\'';
-                    $sql .= ' WHERE id = ' . $id_current_log;
-                    BimpCache::getBdb()->execute($sql);
+                    $log = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Log', $id_current_log);
+                    $log->set('last_occurence', date('Y-m-d H:i:d'));
+                    $log->set('nb_occurence', $log->getData('nb_occurence')+1);
+                    $log->update();
+                    $log->addNote('<pre>'.print_r($datas,1).'</pre>');
                 }
             }
 

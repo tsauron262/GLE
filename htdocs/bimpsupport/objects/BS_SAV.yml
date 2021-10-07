@@ -612,8 +612,6 @@ forms:
                   type: toggle
               value: 0
             - field: bon_resti_raison
-              show:
-                  callback: isGratuit
               display_if: 
                   field_name: frais
                   show_values: 0

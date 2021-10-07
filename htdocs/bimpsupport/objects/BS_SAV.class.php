@@ -3979,7 +3979,7 @@ class BS_SAV extends BimpObject
         
         
         $frais = (float) (isset($data['frais']) ? $data['frais'] : 0);
-        if($this->isGratuit() && $frais == 0){
+        if(($this->getData('status') !== self::BS_SAV_DEVIS_REFUSE && $this->isGratuit()) || ($this->getData('status') === self::BS_SAV_DEVIS_REFUSE && $frais == 0)){
             if($data['bon_resti_raison'] == 0)
                 $errors[] = 'Raison de la non facturation obligatoire';
             else{

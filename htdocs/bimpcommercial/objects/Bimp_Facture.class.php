@@ -1487,6 +1487,9 @@ class Bimp_Facture extends BimpComm
             'inf_one_euro'     => array(
                 'label' => 'Le reste à payer (' . BimpTools::displayMoneyValue($remainToPay) . ') est inférieur à 1€'
             ),
+            'paid_cfr'         => array(
+                'label' => 'Le reste à payer (' . BimpTools::displayMoneyValue($remainToPay) . ') a été encaissé directement via CFR'
+            ),
             'paid'             => array(
                 'label' => 'Autre'
             )

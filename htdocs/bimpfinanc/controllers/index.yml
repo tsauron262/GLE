@@ -89,4 +89,5 @@ sections:
                                 list: 
                                   panel: 1
                                   object: import_paiement_line
+                                  name: global
                       

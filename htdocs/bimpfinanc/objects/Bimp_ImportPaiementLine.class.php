@@ -117,6 +117,33 @@ class Bimp_ImportPaiementLine extends BimpObject
         }
         return $buttons;
     }
+    
+    function getGlobalBtn(){
+        $buttons = array();
+        $parent = $this->getParentInstance();
+        if ($parent->isActionAllowed('validate')) {
+            if ($parent->canSetAction('validate')) {
+                $buttons[] = array(
+                    'label'   => 'Traiter les paiements rattachés',
+                    'icon'    => 'fas_check',
+                    'onclick' => $parent->getJsActionOnclick('create_all_paiement')
+                );
+            }
+        }
+
+        return $buttons;
+    }
+
+    function getButtonAdd($id)
+    {
+        if ($this->isEditable()) {
+            $html .= '<span type="button" class="btn btn-default btn-small" onclick="';
+            $html .= $this->getJsActionOnclick('addFact', array('id' => $id)) . '">';
+            $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . ' Ajouter';
+            $html .= '</span>';
+            return $html;
+        }
+    }
 
     function calc()
     {
@@ -208,6 +235,24 @@ class Bimp_ImportPaiementLine extends BimpObject
                 else
                     $return[] = $cli->getLink() . ' (' . implode(' - ', $facts) . ')';
             }
+            
+            
+            $sql = $this->db->db->query('SELECT remain_to_pay, rowid, fk_soc FROM `llx_facture` WHERE fk_statut = 1 AND paye = 0 AND remain_to_pay = ' . $this->getData('price'));
+            while ($ln = $this->db->db->fetch_object($sql)) {
+                $cli = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $ln->fk_soc);
+                $fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $ln->rowid);
+                $facts = array();
+                if ($modeCSV)
+                    $facts[] = $fact->getRef();
+                else
+                    $facts[] = $fact->getLink() . $this->getButtonAdd($fact->id);
+                if ($modeCSV)
+                    $return[] = $cli->getData('nom') . ' (' . implode(' - ', $facts) . ')';
+                else
+                    $return[] = $cli->getLink() . ' (' . implode(' - ', $facts) . ')';
+            }
+            
+            
         }
         return implode('<br/>', $return);
     }
@@ -262,17 +307,6 @@ class Bimp_ImportPaiementLine extends BimpObject
             $return .= substr($this->getData('data'), 0, 5) . '...';
             $return .= '</span>';
             return $return;
-        }
-    }
-
-    function getButtonAdd($id)
-    {
-        if ($this->isEditable()) {
-            $html .= '<span type="button" class="btn btn-default btn-small" onclick="';
-            $html .= $this->getJsActionOnclick('addFact', array('id' => $id)) . '">';
-            $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . ' Ajouter';
-            $html .= '</span>';
-            return $html;
         }
     }
 

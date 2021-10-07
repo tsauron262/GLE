@@ -39,13 +39,10 @@ class Bimp_ImportPaiement extends BimpObject
 
         return $errors;
     }
-
-    function actionCreate_paiement($data, &$success)
-    {
+    
+    function create_paiement_from_list($list){
         global $user;
-        $success = 'Paiment(s) crée(s)';
-        $errors = $wanings = array();
-        $list = $this->getChildrenObjects('lignes', array('traite' => 0, 'type' => 'vir'));
+        $errors = array();
         foreach ($list as $child) {
             $errorsLn = array();
             $totP = $child->getData('price');
@@ -97,6 +94,24 @@ class Bimp_ImportPaiement extends BimpObject
                 $errors = BimpTools::merge_array($errors, $errorsLn);
             }
         }
+        return $errors;
+    }
+
+    function actionCreate_paiement($data, &$success)
+    {
+        $success = 'Paiment(s) crée(s)';
+        $wanings = array();
+        $list = $this->getChildrenObjects('lignes', array('traite' => 0, 'type' => 'vir'));
+        $errors = $this->create_paiement_from_list($list);
+
+        return array('errors' => $errors, 'warnings' => $wanings);
+    }
+    
+    function actionCreate_all_paiement($data, &$success){
+        $success = 'Paiment(s) crée(s)';
+        $wanings = array();
+        $list = BimpCache::getBimpObjectObjects($this->module, 'Bimp_ImportPaiementLine', array('traite' => 0, 'type' => 'vir'));
+        $errors = $this->create_paiement_from_list($list);
 
         return array('errors' => $errors, 'warnings' => $wanings);
     }

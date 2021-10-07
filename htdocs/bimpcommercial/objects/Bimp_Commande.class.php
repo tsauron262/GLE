@@ -53,7 +53,7 @@ class Bimp_Commande extends BimpComm
     );
     public static $logistique_active_status = array(1, 2, 3);
 
-    // Gestion des droits et autorisations: 
+    // Gestion des droits et autorisations:
 
     public function canCreate()
     {
@@ -397,7 +397,7 @@ class Bimp_Commande extends BimpComm
 //                }
             }
         }
-        
+
 
         return (count($errors) ? 0 : 1);
     }
@@ -552,6 +552,20 @@ class Bimp_Commande extends BimpComm
                         );
                     } else {
                         $errors[] = 'Vous n\'avez pas la permission';
+                    }
+                    
+                    global $user;
+                    
+                    if (in_array((int) $user->login, array('admin', 'f.martinez', 't.sauron'))) {
+                        $buttons[] = array(
+                            'label'   => 'Forcer Validation (no triggers)',
+                            'icon'    => 'fas_check',
+                            'onclick' => $this->getJsActionOnclick('validate', array(
+                                'forced_by_dev' => 1
+                            ), array(
+                                'confirm_msg' => 'Veuillez confirmer la validation de cette commande - Mode forcé pour dev uniquement (pas de triggers)'
+                            ))
+                        );
                     }
                 }
                 if (count($errors)) {
@@ -734,7 +748,7 @@ class Bimp_Commande extends BimpComm
                 }
             }
 
-            // Marqueer entièrement facturée: 
+            // Marquer entièrement facturée: 
             if ($this->isActionAllowed('forceFacturee') && $this->canSetAction('forceFacturee')) {
                 $buttons[] = array(
                     'label'   => 'Marquer "Entièrement facturée"',
@@ -1888,26 +1902,26 @@ class Bimp_Commande extends BimpComm
     public function renderTotalsPanel()
     {
         $html = '';
-        
+
         $total_ht_fq = 0;
         $total_tva_fq = 0;
         $total_ttc_fq = 0;
-        
+
         $check_qty_modif = ($this->getData('fk_statut') > 0 && $this->getData('logistique_status') > 0);
-        
+
         if ($check_qty_modif) {
             $lines = $this->getLines('not_text');
-            
+
             foreach ($lines as $line) {
                 $line_total_ht = $line->getTotalHTWithRemises(true);
                 $line_total_ttc = $line->getTotalTTC(true);
-                
+
                 $total_ht_fq += $line_total_ht;
                 $total_ttc_fq += $line_total_ttc;
                 $total_tva_fq += ($line_total_ttc - $line_total_ht);
             }
         }
-        
+
         $html .= '<table class="bimp_list_table">';
         $html .= '<tbody class="headers_col">';
         $html .= '<tr>';
@@ -1916,52 +1930,52 @@ class Bimp_Commande extends BimpComm
         $html .= $this->displayTotalRemises();
         $html .= '</td>';
         $html .= '</tr>';
-        
+
         $html .= '<tr>';
         $html .= '<th>Total HT</th>';
         $html .= '<td>';
-        $html .= $this->displayData('total_ht', 'default', false);        
-        
+        $html .= $this->displayData('total_ht', 'default', false);
+
         if ($check_qty_modif && (float) $this->getData('total_ht') !== $total_ht_fq) {
             $html .= '<br/><span class="important">';
             $html .= BimpTools::displayMoneyValue($total_ht_fq, 'EUR', 0, 0, 0, 2, 1);
             $html .= '</span>';
         }
-        
+
         $html .= '</td>';
         $html .= '</tr>';
-        
+
         $html .= '<tr>';
         $html .= '<th>Total TVA</th>';
         $html .= '<td>';
-        $html .= $this->displayData('tva', 'default', false);        
-        
+        $html .= $this->displayData('tva', 'default', false);
+
         if ($check_qty_modif && (float) $this->getData('tva') !== $total_tva_fq) {
             $html .= '<br/><span class="important">';
             $html .= BimpTools::displayMoneyValue($total_tva_fq, 'EUR', 0, 0, 0, 2, 1);
             $html .= '</span>';
         }
-        
+
         $html .= '</td>';
         $html .= '</tr>';
-        
+
         $html .= '<tr>';
         $html .= '<th>Total TTC</th>';
         $html .= '<td>';
-        $html .= $this->displayData('total_ttc', 'default', false);        
-        
+        $html .= $this->displayData('total_ttc', 'default', false);
+
         if ($check_qty_modif && (float) $this->getData('total_ttc') !== $total_ttc_fq) {
             $html .= '<br/><span class="important">';
             $html .= BimpTools::displayMoneyValue($total_ttc_fq, 'EUR', 0, 0, 0, 2, 1);
             $html .= '</span>';
         }
-        
+
         $html .= '</td>';
         $html .= '</tr>';
         $html .= '</tbody>';
         $html .= '</table>';
         $title = BimpRender::renderIcon('fas_euro-sign', 'iconLeft');
-        
+
         return BimpRender::renderPanel($title, $html, '', array(
                     'type'     => 'secondary',
                     'foldable' => true
@@ -2912,12 +2926,13 @@ class Bimp_Commande extends BimpComm
 
             $hasShipment = 0;
             $isFullyShipped = 0;
-            $hasOnlyPeriodicity = 1;
+            $hasOnlyPeriodicity = 0;
 
             $current_status = (int) $this->getInitData('shipment_status');
 
             if (!empty($lines)) {
                 $isFullyShipped = 1;
+                $hasOnlyPeriodicity = 1;
                 foreach ($lines as $line) {
                     $shipped_qty = (float) $line->getShippedQty(null, true);
                     if ($shipped_qty) {
@@ -3067,6 +3082,8 @@ class Bimp_Commande extends BimpComm
         $warnings = array();
         $infos = array();
 
+        $forced_by_dev = (int) BimpTools::getArrayValueFromPath($data, 'forced_by_dev', 0);
+
         $success = BimpTools::ucfirst($this->getLabel('')) . ' validé';
         if ($this->isLabelFemale()) {
             $success .= 'e';
@@ -3076,7 +3093,16 @@ class Bimp_Commande extends BimpComm
 
         global $conf, $langs, $user;
 
-        $result = $this->dol_object->valid($user, (int) $this->getData('entrepot'));
+        if (!$forced_by_dev) {
+            $result = $this->dol_object->valid($user, (int) $this->getData('entrepot'));
+        } else {
+            $result = 1;
+            $errors = $this->onValidate($warnings);
+
+            if (!count($errors)) {
+                $this->updateField('fk_statut', 1);
+            }
+        }
 
         $comm_errors = BimpTools::getDolEventsMsgs(array('errors'));
         $comm_warnings = BimpTools::getDolEventsMsgs(array('warnings'));

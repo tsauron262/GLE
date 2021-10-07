@@ -555,7 +555,7 @@ class BContract_echeancier extends BimpObject {
     public function actionDelete($data, &$success) {
         $parent = $this->getParentInstance();
         if(count(getElementElement('contrat', 'facture', $parent->id))) {
-            $errors = "Vous ne pouvez pas supprimer cet échéancier car il y à une facture dans celui-ci";
+            $errors = "Vous ne pouvez pas supprimer cet échéancier car il contient une ou plusieurs factures";
         } else {
             if($this->db->delete('bcontract_prelevement', 'id = ' . $this->id)) {
                 $success = "Echéancier supprimé avec succès";

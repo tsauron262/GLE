@@ -451,18 +451,34 @@ class Bimp_Societe extends BimpDolObject
 
     public function getDefaultRib($createIfNotExist = true)
     {
-        $ribs = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_SocBankAccount', array('default_rib' => 1, 'fk_soc' => $this->id));
-        if (count($ribs) == 0) {
-            $rib = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_SocBankAccount');
-            $rib->set('fk_soc', $this->id);
-            $rib->set('label', 'Default');
-            $errors = $rib->create();
+        $rib = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_SocBankAccount', array('default_rib' => 1, 'fk_soc' => $this->id), true, false);
+
+        if (BimpObject::objectLoaded($rib)) {
             return $rib;
-        } else {
-            foreach ($ribs as $rib) {
+        }
+
+        if ($createIfNotExist) {
+            $rib = BimpObject::createBimpObject('bimpcore', 'Bimp_SocBankAccount', array(
+                        'fk_soc'      => $this->id,
+                        'label'       => 'Default',
+                        'default_rib' => 1
+                            ), true);
+
+            if (BimpObject::objectLoaded($rib)) {
                 return $rib;
             }
         }
+
+        return null;
+    }
+    
+    public function getDefaultRibId()
+    {
+        if ($this->isLoaded()) {
+            return (int) $this->db->getValue('societe_rib', 'rowid', 'fk_soc = ' . (int) $this->id.' AND default_rib = 1', 'rowid', 'desc');
+        }
+        
+        return 0;
     }
 
     public function getPdfModelFileName($model)
@@ -473,8 +489,11 @@ class Bimp_Societe extends BimpDolObject
 
         switch ($model) {
             case 'cepa':
-                $rib = $this->getDefaultRib(false);
-                return $rib->getFileName(false, '');
+                $rib = $this->getDefaultRib(true);
+                if (BimpObject::objectLoaded($rib)) {
+                    return $rib->getFileName(false, '');
+                }
+                break;
         }
 
         return '';
@@ -977,10 +996,10 @@ class Bimp_Societe extends BimpDolObject
 
     public static function getRegionCsvValue($needed_fields = array())
     {
-        if (isset($needed_fields['fk_pays'])  && (int) $needed_fields['fk_pays'] !== 1) {
+        if (isset($needed_fields['fk_pays']) && (int) $needed_fields['fk_pays'] !== 1) {
             return 'Hors France';
         }
-        
+
         if (isset($needed_fields['zip'])) {
             $dpt = substr($needed_fields['zip'], 0, 2);
 
@@ -1872,119 +1891,119 @@ class Bimp_Societe extends BimpDolObject
                 $link = 'https://www.creditsafe.fr/getdata/service/CSFRServices.asmx';
 
                 $sClient = new SoapClient($link . "?wsdl", array('trace' => 1));
-                
+
 //                if (method_exists($sClient, 'GetData')) { TODO remettre en place pour les dev qui n'ont pas php-soap
-                    $objReturn = $sClient->GetData(array("requestXmlStr" => str_replace("SIREN", ($siret ? $siret : $siren), $xml_data)));
+                $objReturn = $sClient->GetData(array("requestXmlStr" => str_replace("SIREN", ($siret ? $siret : $siren), $xml_data)));
 
-                    $returnData = $objReturn->GetDataResult;
-    //                $returnData = htmlspecialchars_decode($returnData);
-    //
-    //                $returnData = BimpTools::replaceBr($returnData, '<br/>');
-    //                $returnData = str_replace("&", "et", $returnData);
-    //                $returnData = str_replace(" < ", " ", $returnData);
-    //                $returnData = str_replace(" > ", " ", $returnData);
+                $returnData = $objReturn->GetDataResult;
+                //                $returnData = htmlspecialchars_decode($returnData);
+                //
+                //                $returnData = BimpTools::replaceBr($returnData, '<br/>');
+                //                $returnData = str_replace("&", "et", $returnData);
+                //                $returnData = str_replace(" < ", " ", $returnData);
+                //                $returnData = str_replace(" > ", " ", $returnData);
 
-                    global $bimpLogPhpWarnings;
-                    if (is_null($bimpLogPhpWarnings)) {
-                        $bimpLogPhpWarnings = true;
-                    }
+                global $bimpLogPhpWarnings;
+                if (is_null($bimpLogPhpWarnings)) {
+                    $bimpLogPhpWarnings = true;
+                }
 
-                    // On déactive les logs warnings php (Trop de logs). 
-                    $prevLogWarnings = $bimpLogPhpWarnings;
-                    $bimpLogPhpWarnings = false;
+                // On déactive les logs warnings php (Trop de logs). 
+                $prevLogWarnings = $bimpLogPhpWarnings;
+                $bimpLogPhpWarnings = false;
 
-                    $result = simplexml_load_string($returnData);
-                    $bimpLogPhpWarnings = $prevLogWarnings;
+                $result = simplexml_load_string($returnData);
+                $bimpLogPhpWarnings = $prevLogWarnings;
 
-                    if (!is_object($result)) {
-                        $warnings[] = 'Le service CreditSafe semble indisponible. Le n° ' . $field . ' ne peut pas être vérifié pour le moment';
-                    } elseif (stripos($result->header->reportinformation->reporttype, "Error") !== false) {
-                        $errors[] = 'Erreur lors de la vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' (Code: ' . $result->body->errors->errordetail->code . ')';
+                if (!is_object($result)) {
+                    $warnings[] = 'Le service CreditSafe semble indisponible. Le n° ' . $field . ' ne peut pas être vérifié pour le moment';
+                } elseif (stripos($result->header->reportinformation->reporttype, "Error") !== false) {
+                    $errors[] = 'Erreur lors de la vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' (Code: ' . $result->body->errors->errordetail->code . ')';
+                } else {
+                    $note = $alert = "";
+                    $limit = 0;
+
+                    $summary = $result->body->company->summary;
+                    $base = $result->body->company->baseinformation;
+                    $branches = $base->branches->branch;
+                    $adress = "" . $summary->postaladdress->address . " " . $summary->postaladresse->additiontoaddress;
+
+                    if ($summary->status == 'Fermé') {
+                        $note = 'Fermé';
+                        $alert = 'Fermé';
+                        $lettrecreditsafe = 0;
                     } else {
-                        $note = $alert = "";
-                        $limit = 0;
-
-                        $summary = $result->body->company->summary;
-                        $base = $result->body->company->baseinformation;
-                        $branches = $base->branches->branch;
-                        $adress = "" . $summary->postaladdress->address . " " . $summary->postaladresse->additiontoaddress;
-
-                        if ($summary->status == 'Fermé') {
-                            $note = 'Fermé';
-                            $alert = 'Fermé';
-                            $lettrecreditsafe = 0;
-                        } else {
-                            $lettrecreditsafe = 0;
-                            foreach (array("", "2013") as $annee) {
-                                $champ = "rating" . $annee;
-                                if ($summary->$champ > 0) {
-                                    $lettrecreditsafe = $summary->$champ;
-                                    $note = dol_print_date(dol_now()) . ($annee == '' ? '' : '(Methode ' . $annee . ')') . " : " . $summary->$champ . "/100";
-                                    foreach (array("", "desc1", "desc2", 'commentaries') as $champ2) {
-                                        $champT = $champ . $champ2;
-                                        if (isset($summary->$champT))
-                                            $note .= " " . str_replace($summary->$champ, "", $summary->$champT);
-                                    }
-                                }
-                                $champ2 = "creditlimit" . $annee;
-                                if (isset($summary->$champ2))
-                                    $limit = $summary->$champ2;
-                            }
-
-                            $tabCodeP = explode(" ", $summary->postaladdress->distributionline);
-                            $codeP = $tabCodeP[0];
-                            $ville = str_replace($tabCodeP[0] . " ", "", $summary->postaladdress->distributionline);
-                            $tel = $summary->telephone;
-                            $nom = $summary->companyname;
-
-                            if (is_array($branches)) {
-                                foreach ($branches as $branche) {
-                                    if (($siret && $branche->companynumber == $siret) || (!$siret && stripos($branche->type, "Siège") !== false)) {
-                                        $adress = $branche->full_address->address;
-                                        //$nom = $branche->full_address->name;
-                                        $codeP = $branche->postcode;
-                                        $ville = $branche->municipality;
-                                        if (!$siret) {
-                                            $siret = (string) $branche->companynumber;
-                                        }
-                                        break;
-                                    }
+                        $lettrecreditsafe = 0;
+                        foreach (array("", "2013") as $annee) {
+                            $champ = "rating" . $annee;
+                            if ($summary->$champ > 0) {
+                                $lettrecreditsafe = $summary->$champ;
+                                $note = dol_print_date(dol_now()) . ($annee == '' ? '' : '(Methode ' . $annee . ')') . " : " . $summary->$champ . "/100";
+                                foreach (array("", "desc1", "desc2", 'commentaries') as $champ2) {
+                                    $champT = $champ . $champ2;
+                                    if (isset($summary->$champT))
+                                        $note .= " " . str_replace($summary->$champ, "", $summary->$champT);
                                 }
                             }
+                            $champ2 = "creditlimit" . $annee;
+                            if (isset($summary->$champ2))
+                                $limit = $summary->$champ2;
+                        }
 
-                            if ($limit) {
-                                $note .= ($note ? ' - ' : '') . 'Limite: ' . price(intval($limit)) . ' €';
+                        $tabCodeP = explode(" ", $summary->postaladdress->distributionline);
+                        $codeP = $tabCodeP[0];
+                        $ville = str_replace($tabCodeP[0] . " ", "", $summary->postaladdress->distributionline);
+                        $tel = $summary->telephone;
+                        $nom = $summary->companyname;
+
+                        if (is_array($branches)) {
+                            foreach ($branches as $branche) {
+                                if (($siret && $branche->companynumber == $siret) || (!$siret && stripos($branche->type, "Siège") !== false)) {
+                                    $adress = $branche->full_address->address;
+                                    //$nom = $branche->full_address->name;
+                                    $codeP = $branche->postcode;
+                                    $ville = $branche->municipality;
+                                    if (!$siret) {
+                                        $siret = (string) $branche->companynumber;
+                                    }
+                                    break;
+                                }
                             }
-
-    //                        if ($limit < 1 && $lettrecreditsafe == 100)
-    //                            $limit = 10000000;
-                        }
-                        if (isset($result->body->company->ratings2013->commentaries->comment)) {
-                            if (is_string($result->body->company->ratings2013->commentaries->comment))
-                                $note .= "
-    " . $result->body->company->ratings2013->commentaries->comment;
-                            else
-                                foreach ($result->body->company->ratings2013->commentaries->comment as $comment)
-                                    $note .= "
-    " . $comment;
                         }
 
-                        $data = array(
-                            'siren'             => $siren,
-                            'siret'             => $siret,
-                            "nom"               => "" . $nom,
-                            "tva_intra"         => "" . $base->vatnumber,
-                            "phone"             => "" . $tel,
-                            "ape"               => "" . $summary->activitycode,
-                            "alert"             => "" . $alert,
-                            "notecreditsafe"    => "" . $note,
-                            "lettrecreditsafe"  => "" . $lettrecreditsafe,
-                            "address"           => "" . $adress,
-                            "zip"               => "" . $codeP,
-                            "town"              => "" . $ville,
-                            "outstanding_limit" => "" . intval($limit),
-                            "capital"           => "" . trim(str_replace(" Euros", "", $summary->sharecapital)));
+                        if ($limit) {
+                            $note .= ($note ? ' - ' : '') . 'Limite: ' . price(intval($limit)) . ' €';
+                        }
+
+                        //                        if ($limit < 1 && $lettrecreditsafe == 100)
+                        //                            $limit = 10000000;
                     }
+                    if (isset($result->body->company->ratings2013->commentaries->comment)) {
+                        if (is_string($result->body->company->ratings2013->commentaries->comment))
+                            $note .= "
+    " . $result->body->company->ratings2013->commentaries->comment;
+                        else
+                            foreach ($result->body->company->ratings2013->commentaries->comment as $comment)
+                                $note .= "
+    " . $comment;
+                    }
+
+                    $data = array(
+                        'siren'             => $siren,
+                        'siret'             => $siret,
+                        "nom"               => "" . $nom,
+                        "tva_intra"         => "" . $base->vatnumber,
+                        "phone"             => "" . $tel,
+                        "ape"               => "" . $summary->activitycode,
+                        "alert"             => "" . $alert,
+                        "notecreditsafe"    => "" . $note,
+                        "lettrecreditsafe"  => "" . $lettrecreditsafe,
+                        "address"           => "" . $adress,
+                        "zip"               => "" . $codeP,
+                        "town"              => "" . $ville,
+                        "outstanding_limit" => "" . intval($limit),
+                        "capital"           => "" . trim(str_replace(" Euros", "", $summary->sharecapital)));
+                }
 //                } elseif (!BimpCore::isModeDev()) {
 //                    BimpCore::addlog('Echec connexion SOAP pour Credit SAFE', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', $this);
 //                }

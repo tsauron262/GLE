@@ -28,21 +28,42 @@ class Bimp_ImportPaiementLine extends BimpObject
         }
 
         $type = '';
-        if (stripos($this->getData('data'), '0517806000000669EUR2E0416135704405') !== false) {
-            $type = 'vir';
-        }
-
-
-        $name = '';
-//        if (preg_match('/ [0-9]{6} *(.+) *[0-9]{22}/', $this->getData('data'), $matches)) {
-//            $name = $matches[1];   
-//        }
-        if (preg_match('/0417806000000669EUR2E0416135704405([0-9]{2})([0-9]{2})([0-9]{2})(.+)/', $this->getData('data'), $matches)) {
-            $date = '20' . $matches[3] . '-' . $matches[2] . '-' . $matches[1];
-        }
         
-        if (preg_match('/0517806000000669EUR2E0416135704405[0-9]{6}(.+)/', $this->getData('data'), $matches)) {
-            $name = str_replace('NPY', '', trim($matches[1]));
+        $codes = array(array('0517806000000669EUR2E0416135704405'), array('0417806000000669EUR2E04161357044C2', array('price' => 'methode2'))/*virement trés peut d'info*/);
+        
+        foreach ($codes as $data){
+            $code = $data[0];
+            
+            if (stripos($this->getData('data'), $code) !== false) {
+                $type = 'vir';
+                if(isset($data[1]['price'])){
+                    if($data[1]['price'] == 'methode2'){
+                        $price = (substr(trim($this->getData('data')), -10, 10));
+                        $lettre = substr($price, -1,1);
+                        $price = intval(str_replace($lettre, $this->lettreToChiffre($lettre), $price)) / 100;
+                    }
+                }
+
+
+
+
+
+                if (preg_match('/'.str_replace("", "", $code).'([0-9]{2})([0-9]{2})([0-9]{2})(.+)/', $this->getData('data'), $matches)) {
+                    $date = '20' . $matches[3] . '-' . $matches[2] . '-' . $matches[1];
+                    $datebrut = $matches[1].$matches[2].$matches[3];
+                }
+
+                $name = '';
+                if (preg_match('/'.$code.'[0-9]{6}(.+)/', $this->getData('data'), $matches)) {
+                    if(stripos($matches[1], '0000000100000') !== false){
+                        $tmp = explode('0000000100000', $matches[1]);
+                        $matches[1] = $tmp[0];
+                    }
+
+
+                    $name = trim(str_replace(array('NPY', 'VIR'), '', str_replace($datebrut, '', trim($matches[1]))));
+                }
+            }
         }
 
         $this->set('factures', array());
@@ -67,6 +88,14 @@ class Bimp_ImportPaiementLine extends BimpObject
         }
 
         return array('errors' => $errors, 'warnings' => $warnings);
+    }
+    
+    private function lettreToChiffre($find){
+        $array = array('}', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I');
+        foreach($array as $chiffre => $lettre)
+            if($lettre == $find)
+                return $chiffre;
+        return 0;
     }
 
     public function getListExtraButtons()
@@ -186,6 +215,7 @@ class Bimp_ImportPaiementLine extends BimpObject
     function getFactClient()
     {
         global $modeCSV;
+        $max = 10;
         $return = array();
         if (!$this->ok && $this->getData('price') > 0 && $this->getData('name') != '') {
             $cli = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe');
@@ -196,7 +226,7 @@ class Bimp_ImportPaiementLine extends BimpObject
                     $cli = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $result['id']);
 
                     $facts = array();
-                    $list = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', array('paye' => 0, 'fk_soc' => $cli->id));
+                    $list = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', array('paye' => 0, 'fk_soc' => $cli->id), 'id', 'asc', array(), $max);
                     foreach ($list as $fact) {
                         if ($modeCSV)
                             $facts[] = $fact->getRef();
@@ -210,6 +240,8 @@ class Bimp_ImportPaiementLine extends BimpObject
                         else
                             $return[] = $cli->getLink() . ' (' . implode(' - ', $facts) . ') Total : ' . price($total);
                     }
+                    if(count($list) == $max)
+                        $return[] = '...';
                 }
             } else {
                 $return[] = $name;

@@ -398,9 +398,9 @@ forms:
                     callback: isNotLoaded
             ef_type: 
                 field: ef_type
-            entrepot: 
+            entrepot:
                 field: entrepot
-                show: 
+                show:
                     callback: isEditable
             centre: 
                 field: centre
@@ -673,11 +673,9 @@ fields_tables:
             - field: entrepot
               display: nom_url
             - field: ef_type
-              edit: 
-                  callback: isEditable
+              edit: 1
             - field: datef
-              edit: 
-                  callback: isEditable
+              edit: 1
             - field: zone_vente
               edit: 1
             - label: Commercial
@@ -723,14 +721,11 @@ fields_tables:
             - field: fk_account    
               edit: 1
             - field: fk_cond_reglement
-              edit: 
-                  callback: isEditable
+              edit: 1
             - field: fk_mode_reglement
-              edit: 
-                  callback: isEditable
+              edit: 1
             - field: rib_client
-              edit: 
-                  callback: isEditable
+              edit: 1
             - field: prelevement
               edit: 1
               show: 

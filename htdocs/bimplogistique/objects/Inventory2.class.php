@@ -744,9 +744,16 @@ HAVING scan_exp != scan_det";
     }
     
     public function actionCreateExpected($data, &$success) {
+        
+        $errors = $this->createExpected();
+        
+        if(is_array($errors) and !count($errors))
+            $success = "Les lignes attendus ont été créer avec succès";
+        
         return array(
-            'errors' => $this->createExpected(),
-            'warnings' => $warnings);
+            'errors' => $errors,
+            'warnings' => $warnings,
+            'success' => $success);
     }
     
     public function actionSetSatus($data = array(), &$success = '') {
@@ -762,8 +769,10 @@ HAVING scan_exp != scan_det";
         if ($status == self::STATUS_OPEN) {
             $errors = BimpTools::merge_array($errors, $this->createExpected());
 //            $errors = BimpTools::merge_array($errors, $this->createScanNegative());
-            if(empty($errors))
+            if(empty($errors)) {
                 $this->updateField("date_opening", date("Y-m-d H:i:s"));
+                $success = "Inventaire ouvert avec succès";
+            }
             
         // Close
         } elseif($status == self::STATUS_CLOSED) {
@@ -771,6 +780,8 @@ HAVING scan_exp != scan_det";
             $date_mouvement = BimpTools::getPostFieldValue('date_mouvement');
             if (!$this->setDateMouvement($date_mouvement))
                 $errors[] = "Erreur lors de la définition de la date du mouvement";
+            else
+                $success = "Inventaire fermé avec succès";
             
             $this->updateField("date_closing", date("Y-m-d H:i:s"));
         } else {

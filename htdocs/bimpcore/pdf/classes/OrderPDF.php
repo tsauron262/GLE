@@ -504,6 +504,8 @@ class BLPDF extends OrderPDF
     public $total_ht = 0;
     public $total_ttc = 0;
     public $num_bl = '';
+    public $chiffre = 1;
+    public $detail = 1;
 
     public function __construct($db, $shipment = null)
     {
@@ -559,7 +561,7 @@ class BLPDF extends OrderPDF
         $table->cols_def['qte']['style'] = 'text-align: center;';
         $table->cols_def['qte']['head_style'] = 'text-align: center;';
 
-        if (!isset($_GET['chiffre']) || $_GET['chiffre'] == 1)
+        if ($this->chiffre)
             $table->setCols(array('code_article', 'desc', 'pu_ht', 'tva', 'total_ht', 'qte', 'dl', 'ral'));
         else {
             $table->setCols(array('code_article', 'desc', 'qte', 'dl', 'ral'));
@@ -657,7 +659,6 @@ class BLPDF extends OrderPDF
                     'pu_ht' => pdf_getlineupexcltax($this->object, $i, $this->langs),
                 );
 
-
                 if ($this->hideReduc && $line->remise_percent) {
                     $pu_ht = (float) ($line->subprice - ($line->subprice * ($line->remise_percent / 100)));
                     $row['pu_ht'] = price($pu_ht, 0, $this->langs);
@@ -748,8 +749,9 @@ class BLPDF extends OrderPDF
                 }
             }
 
-            if (!isset($_GET['detail']) || $_GET['detail'] == 1 || $row['qte'] != 0)
+            if ($this->detail || $row['qte'] != 0) {
                 $table->rows[] = $row;
+            }
 
             unset($product);
             $product = null;

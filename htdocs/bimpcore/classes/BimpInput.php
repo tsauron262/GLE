@@ -858,6 +858,29 @@ class BimpInput
                 $html .= '</div>';
                 break;
 
+            case 'signature_pad':
+                $displayStyle = '';
+                $prefix = rand(111111, 999999);
+
+                if ((int) BimpTools::getArrayValueFromPath($options, 'expand', 0)) {
+                    $displayStyle .= ' display: none;';
+                }
+
+                $id = $prefix . '_signature-pad';
+
+                $html .= '<div class="signaturePadContainer" data-pad_id="' . $id . '">';
+                $html .= '<div class="signature_wrapper">';
+                $html .= '<canvas id="' . $id . '" class="signature-pad ' . $extra_class . '" style="border: solid 1px;' . $displayStyle . '" width=400 height=200></canvas>';
+                $html .= '</div>';
+
+                $html .= '<div class="buttonsContainer align-center">';
+                $html .= '<sapn class="clearSignaturePadBtn btn btn-danger btn-large" >' . BimpRender::renderIcon("fas_undo") . ' Refaire la signature</span>';
+                $html .= '</div>';
+
+                $html .= '<input type="hidden" name="' . $field_name . '" value=""/>';
+                $html .= '</div>';
+                break;
+
             default:
                 $html .= '<p class="alert alert-danger">Erreur technique: type d\'input invalide pour le champ "' . $field_name . '"</p>';
                 break;

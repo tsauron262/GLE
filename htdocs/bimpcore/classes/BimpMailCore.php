@@ -168,7 +168,7 @@ class BimpMailCore
         $result = $cmail->sendfile();
 
         if (!$result) {
-            BimpCore::addlog('Echec envoi email '.$cmail->error, Bimp_Log::BIMP_LOG_ALERTE, 'email', NULL, array(
+            BimpCore::addlog('Echec envoi email ' . $cmail->error, Bimp_Log::BIMP_LOG_ALERTE, 'email', NULL, array(
                 'Destinataire' => $to,
                 'Sujet'        => $this->subject,
                 'Message'      => $this->msg

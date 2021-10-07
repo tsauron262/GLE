@@ -95,7 +95,6 @@ fields:
     libelle: 
         label: Libellé
         dol_extra_field: 1
-        hashtags: 1
 #        required: 1
     ef_type: 
         label: Secteur (Canal de Vente)

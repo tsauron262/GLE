@@ -1978,7 +1978,7 @@ public function getCommercialclientSearchFilters(&$filters, $value, &$joins = ar
                 $msg .= 'Merci de signer votre rapport d\'intervention à l\'adresse suivante: ';
                 $msg .= '<a href="' . DOL_URL_ROOT . '/bimptechnique/public">' . DOL_URL_ROOT . '/bimptechnique/public</a>';
                 $msg .= ' en entrant votre nom ainsi que le mot de passe suivant: <b>' . $new_password . '</b>.<br/><br/>';
-                $msg .= 'Cet accès n\'est valable que 4 Jours calandaire.<br/><br/>';
+                $msg .= 'Cet accès n\'est valable que 4 Jours calandaires.<br/><br/>';
                 $msg .= 'Cordialement';
 
                 $to = BimpTools::cleanEmailsStr($this->getData('email_signature'));

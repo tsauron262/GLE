@@ -27,7 +27,36 @@ objects:
         extends: facture
         instance: 
             id_object: 
-                field_value: id_avoir
+                field_value: id_avoir            
+                
+    signature: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpSignature
+            id_object: 
+                field_value: id_signature
+                
+    files:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpFile
+        list: 
+            filters:
+                parent_module: bimplogistique
+                parent_object_name: BL_CommandeShipment
+                deleted: 0
+        add_form: 
+            name: upload
+            values:
+                fields: 
+                    parent_module: bimplogistique
+                    parent_object_name: BL_CommandeShipment
                 
 fields: 
     id_commande_client: 
@@ -152,6 +181,16 @@ fields:
                 name: id
                 object: 
                     global: user
+                    
+    id_signature: 
+        label: Signature
+        type: id_object
+        object: signature
+        displays: 
+            default: 
+                label: Lien signature
+                type: callback
+                method: displaySignature
         
 forms: 
     default: 
@@ -194,6 +233,20 @@ forms:
                   type: hidden
               value: 1
             - field: date_shipped
+            - custom: 1
+              label: PDF BL Chiffré
+              data_type: bool
+              input_name: pdf_chiffre
+              input: 
+                  type: toggle
+              value: 1
+            - custom: 1
+              label: PDF BL Detail
+              data_type: bool
+              input_name: pdf_detail
+              input: 
+                  type: toggle
+              value: 1
             - custom: 1
               label: Produits / Services inclus
               input_name: lines
@@ -457,6 +510,7 @@ fields_tables:
     data: 
         panel_header: 0
         rows: 
+            - field: id_commande_client
             - field: num_livraison
             - field: status
             - field: id_entrepot
@@ -492,6 +546,12 @@ views:
                   col_sm: 12
                   fields_table: 
                       name: data
+            - cols: 
+                - type: list
+                  list: 
+                      title: Fichier joints
+                      name: default
+                      children: files   
                       
     lines: 
         title: Produits / services inclus dans l'expédition
@@ -622,6 +682,7 @@ lists:
             signed: 
             pdf:
             user_create:
+            id_signature: 
         
     client: 
         extends: default
@@ -654,9 +715,10 @@ lists:
             contact: 
             date_shipped: 
             total_ht: 
-            signed: 
             id_facture: 
             pdf:
+            signed:
+            id_signature:             
                     
 cards: 
     default: 
@@ -688,3 +750,7 @@ searches:
                 table: societe
                 on: c.fk_soc = s.rowid
                 alias: s
+
+signatures: 
+    bl: 
+        label: Bon de livraison

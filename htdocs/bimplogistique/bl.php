@@ -29,7 +29,9 @@ if (!$id_shipment) {
             $errors[] = 'ID de la commande client absent';
         } else {
             $pdf = new BLPDF($db, $shipment);
-
+            $pdf->chiffre = BimpTools::getValue('chiffre', 1);
+            $pdf->detail = BimpTools::getValue('detail', 1);
+            
             $pdf->init($commande->dol_object);
             $file = $pdf->getFilePath() . $pdf->getFileName();
             $pdf->render($file, true);

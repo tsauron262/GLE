@@ -862,7 +862,7 @@ class BimpCache
                                 if ($instance->getConf('abstract', 0, false, 'bool')) {
                                     continue;
                                 }
-                                
+
                                 $option = array();
                                 if ($with_icons && (string) $instance->params['icon']) {
                                     $option['icon'] = $instance->params['icon'];
@@ -2145,18 +2145,18 @@ class BimpCache
 
     public static function getEntrepotsShipTos($include_empty = false, $default = '53884')
     {
-        $key = 'entrepots_ship_tos'.($include_empty?'withempty' : '');
+        $key = 'entrepots_ship_tos' . ($include_empty ? 'withempty' : '');
         if (!isset(self::$cache[$key])) {
             self::$cache[$key] = array();
 
-            if($include_empty)
+            if ($include_empty)
                 $rows = self::getBdb()->getRows('entrepot', '1', null, 'object', array('rowid', 'ship_to'), 'ref', 'asc');
             else
                 $rows = self::getBdb()->getRows('entrepot', '`ship_to` != \'\' AND `ship_to` IS NOT NULL', null, 'object', array('rowid', 'ship_to'), 'ref', 'asc');
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
                     $shipTo = $r->ship_to;
-                    if($shipTo == '')
+                    if ($shipTo == '')
                         $shipTo = $default;
                     self::$cache[$key][(int) $r->rowid] = $shipTo;
                 }
@@ -2180,8 +2180,9 @@ class BimpCache
 
         return self::getCacheArray('cond_reglements_array', 1, '', '');
     }
-    
-    public static function getModeReglements($type = 2){
+
+    public static function getModeReglements($type = 2)
+    {
         return static::getModeReglementsArray('id', true, $type);
     }
 
@@ -2203,7 +2204,7 @@ class BimpCache
             self::$cache[$cache_key] = array();
 
             foreach ($form->cache_types_paiements as $id_payment => $payment_data) {
-                if($type == 2 || $type == $payment_data['type'] || $payment_data['type'] == 2){
+                if ($type == 2 || $type == $payment_data['type'] || $payment_data['type'] == 2) {
                     if (!$active_only || ($active_only && (int) $payment_data['active'])) {
                         switch ($key) {
                             case 'id':
@@ -2461,9 +2462,10 @@ class BimpCache
 
         return self::$cache['secteurs_array'];
     }
-    
+
     // Comme getSecteursArray avec l'option "Tous" en plus
-    public function getSecteurAllArray() {
+    public function getSecteurAllArray()
+    {
         if (!BimpCore::getConf("USE_SECTEUR")) {
             return array();
         }
@@ -2482,8 +2484,8 @@ class BimpCache
                 }
             }
         }
-        
-        
+
+
 
         return self::$cache['secteurs_all_array'];
     }

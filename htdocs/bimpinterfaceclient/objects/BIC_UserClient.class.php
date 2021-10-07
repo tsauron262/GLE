@@ -425,6 +425,63 @@ class BIC_UserClient extends BimpObject
         return array();
     }
 
+    public function getDefaultEmail()
+    {
+        if ((int) $this->getData('id_contact')) {
+            $email = (string) $this->db->getValue('socpeople', 'email', 'rowid = ' . (int) $this->getData('id_contact'));
+
+            if ($email) {
+                return $email;
+            }
+        }
+
+        if ($this->data['email']) {
+            return $this->data['email'];
+        }
+
+        return '';
+    }
+
+    // Getters Statics: 
+
+    public static function getClientUsersArray($id_client, $include_empty = false)
+    {
+        if ((int) $id_client) {
+            $cache_key = 'bic_users_client_' . $id_client;
+
+            if (!isset(self::$cache[$cache_key])) {
+                $userClient = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClient');
+
+                $rows = $userClient->getList(array(
+                    'status'    => 1,
+                    'id_client' => $id_client
+                        ), null, null, 'id', 'asc', 'array', array('a.id', 'a.email', 'a.role', 'c.firstname', 'c.lastname'), array(
+                    'c' => array(
+                        'table' => 'socpeople',
+                        'on'    => 'c.rowid = a.id_contact',
+                        'alias' => 'c'
+                    )
+                ));
+
+                if (is_array($rows)) {
+                    foreach ($rows as $r) {
+                        $contact = '';
+
+                        if ($r['firstname'] || $r['lastname']) {
+                            $contact .= ' (Contact: ' . $r['firstname'] . ($r['lastname'] ? ($r['firstname'] ? ' ' : '') . $r['lastname'] : '') . ')';
+                        }
+
+                        self::$cache[$cache_key][(int) $r['id']] = $r['email'] . $contact . ((int) $r['role'] === self::USER_CLIENT_ROLE_ADMIN ? ' - Admin' : '');
+                    }
+                }
+            }
+
+            return self::getCacheArray($cache_key, $include_empty);
+        }
+
+        return array();
+    }
+
     // Affichage:
 
     public function displayHeader()
@@ -650,10 +707,9 @@ class BIC_UserClient extends BimpObject
             $errors[] = 'Adresse e-mail absente';
         } elseif (!BimpValidate::isEmail($email)) {
             $errors[] = 'Adresse e-mail invalide';
-        } 
-//        elseif ((int) $this->db->getValue($this->getTable(), 'id', 'LOWER(email) = \'' . strtolower($email) . '\'')) {
-//            $errors[] = 'Un compte utilisateur existe déjà pour cette adresse e-mail';
-//        }
+        } elseif ((int) $this->db->getValue($this->getTable(), 'id', 'LOWER(email) = \'' . strtolower($email) . '\'')) {
+            $errors[] = 'Un compte utilisateur existe déjà pour cette adresse e-mail';
+        }
 
         if (!count($errors)) {
             if (!(int) $this->getData('role')) {
@@ -668,10 +724,12 @@ class BIC_UserClient extends BimpObject
 
             if (!count($errors)) {
                 if ($this->use_email && BimpTools::getPostFieldValue('send_mail', 0)) {
-                    if (stripos(DOL_URL_ROOT, $_SERVER['SERVER_NAME']) === false)
-                        $url = $_SERVER['SERVER_NAME'] . DOL_URL_ROOT . '/bimpinterfaceclient/client.php';
-                    else
+                    if (stripos(DOL_URL_ROOT, $_SERVER['SERVER_NAME']) === false) {
+                        $url = $_SERVER['SERVER_NAME'] . DOL_URL_ROOT . '/bimpinterfaceclient/client.php?email=' . $this->getData('email');
+                    } else {
                         $url = DOL_URL_ROOT . '/bimpinterfaceclient/client.php?email=' . $this->getData('email');
+                    }
+
                     $sujet = "Mot de passe BIMP ERP Interface Client";
 
                     $message = "Bonjour, <br /><br />";
@@ -695,7 +753,7 @@ class BIC_UserClient extends BimpObject
                         $message .= "Voici votre accès à votre espace client <br /><br />";
                     }
 
-                    $message .= '<a href="' . $url . '">Espace client BIMP ERP</a><br />';
+                    $message .= '<a href="' . $url . '">Votre Espace client BIMP ERP</a><br/><br/>';
                     $message .= 'Identifiant : ' . $email . '<br />';
                     if ($mdp_clear) {
                         $message .= 'Mot de passe (Généré automatiquement) : ' . $mdp_clear;

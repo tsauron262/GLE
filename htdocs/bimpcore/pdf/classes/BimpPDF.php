@@ -62,7 +62,6 @@ class BimpPDF extends TCPDF
         $tabT = explode("/", $filename);
         $nomPure = $tabT[count($tabT) - 1];
 
-
         if ($display === true) {
             $display = 'I';
         } elseif ($display === false) {

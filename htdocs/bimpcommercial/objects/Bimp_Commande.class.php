@@ -930,14 +930,14 @@ class Bimp_Commande extends BimpComm
             $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $this->dol_object->user_author_id);
 
             $html .= '<div class="object_header_infos">';
-            $html .= 'Créée le ' . $this->displayData('date_creation');
+            $html .= 'Créée le ' . BimpTools::printDate($this->getData('date_creation'), 'strong');
             $html .= ' par ' . $user->getLink();
             $html .= '</div>';
 
             $status = (int) $this->getData('fk_statut');
             if ($status >= 1 && (int) $this->getData('fk_user_valid')) {
                 $html .= '<div class="object_header_infos">';
-                $html .= 'Validée le ' . $this->displayData('date_valid');
+                $html .= 'Validée le ' . BimpTools::printDate($this->getData('date_valid'), 'strong');
                 $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $this->getData('fk_user_valid'));
                 $html .= ' par ' . $user->getLink();
                 $html .= '</div>';

@@ -524,7 +524,7 @@ class Bimp_CommandeFourn extends BimpComm
                 return 0;
 
             case 'forceStatus':
-                if ((int) $user->admin || $user->bimpcommercial->forcerStatus) {
+                if ((int) $user->admin || $user->rights->bimpcommercial->forcerStatus) {
                     return 1;
                 }
                 return 0;

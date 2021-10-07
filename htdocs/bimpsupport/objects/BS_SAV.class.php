@@ -3982,11 +3982,14 @@ class BS_SAV extends BimpObject
         if($this->isGratuit() && $frais == 0){
             if($data['bon_resti_raison'] == 0)
                 $errors[] = 'Raison de la non facturation obligatoire';
-            elseif($data['bon_resti_raison'] == 99){
-                if($data['bon_resti_raison_detail'] == '')
-                    $errors[] = 'Détail de la non facturation obligatoire';
-                else
-                    $this->addNote($data['bon_resti_raison_detail']);
+            else{
+                $this->updateField('bon_resti_raison', $data['bon_resti_raison']);
+                if($data['bon_resti_raison'] == 99){
+                    if($data['bon_resti_raison_detail'] == '')
+                        $errors[] = 'Détail de la non facturation obligatoire';
+                    else
+                        $this->addNote($data['bon_resti_raison_detail']);
+                }
             }
         }
 

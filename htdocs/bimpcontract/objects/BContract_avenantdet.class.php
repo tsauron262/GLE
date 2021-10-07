@@ -121,7 +121,7 @@ class BContract_avenantdet extends BContract_avenant {
             $contrat = $this->getInstance('bimpcontract', 'BContract_contrat', $_REQUEST['id']);            
         }
         
-        $price = $this->getData('ht')*(100-$this->getData('remise'))/100;
+        $price = $this->getData('ht');
         
         if(is_object($contrat)) {
             if($contrat->isLoaded()) {
@@ -197,28 +197,18 @@ class BContract_avenantdet extends BContract_avenant {
                 );
             }
             
-//            if($this->getData('in_contrat')) {
-//                $buttons[] = array(
-//                    'label'   => 'Supprimer la ligne de l\'avenant',
-//                    'icon'    => 'fas_trash',
-//                    'onclick' => $this->getJsActionOnclick('delLine', array(), array(
-//
-//                    ))
-//                );
-//            } else {
-//                $buttons[] = array(
-//                    'label'   => 'Remettre la ligne sur l\'avenant',
-//                    'icon'    => 'fas_arrow-left',
-//                    'onclick' => $this->getJsActionOnclick('reLine', array(), array(
-//
-//                    ))
-//                );
-//            }
+            if(!$this->getData('id_line_contrat')) {
+                $buttons[] = array(
+                    'label'   => 'Annuler  l\'ajout de cette ligne',
+                    'icon'    => 'fas_times',
+                    'onclick' => $this->getJsActionOnclick('delLine', array(), array(
+
+                    ))
+                );
+            }
             
         }
-        
-        
-        
+
         return $buttons;
     }
     
@@ -351,10 +341,10 @@ class BContract_avenantdet extends BContract_avenant {
         $warnings = [];
         $success = "";
         
-        $errors = $this->updateField('in_contrat', 0);
+        $errors = $this->delete();
         
         if(!count($errors)) {
-            $success = "La ligne ne sera pas pris en compte dans l'avenant"; 
+            $success = "La ligne à été supprimée avec succès"; 
         }
         
         return [

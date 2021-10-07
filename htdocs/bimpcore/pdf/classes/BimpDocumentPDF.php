@@ -343,12 +343,12 @@ class BimpDocumentPDF extends BimpModelPDF
         $contacts = array();
         if (method_exists($this->object, 'getIdContact')) {
             $contacts = $this->object->getIdContact('internal', 'SALESREPFOLL');
-            if (count($contacts)) {
+            if (is_array($contacts) && count($contacts)) {
                 $comm1 = $contacts[0];
             }
 
             $contacts = $this->object->getIdContact('internal', 'SALESREPSIGN');
-            if (count($contacts)) {
+            if (is_array($contacts) && count($contacts)) {
                 $comm2 = $contacts[0];
             }
         }

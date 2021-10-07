@@ -369,7 +369,7 @@ class BimpLink extends BimpObject
 
             // Ajouts des notes: 
             $notes = array();
-            if (in_array($object->object_name, array('BS_Ticket', 'BS_SAV'))) {
+            if (in_array($object->object_name, array('BS_Ticket', 'BS_Inter'))) {
                 $notes = $object->getChildrenObjects('notes');
             } else {
                 $notes = $object->getNotes();

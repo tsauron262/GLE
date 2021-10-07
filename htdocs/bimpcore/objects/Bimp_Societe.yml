@@ -446,9 +446,10 @@ fields:
         edit: 0
             
     outstanding_limit_atradius: 
-        label: Limite recommandée par Atradius
+        label: Limite de crédit Atradius
         type: money
-        edit: 0
+        history: 1
+        default_value: -1
         
     fk_account: 
         label: Compte bancaire
@@ -479,8 +480,7 @@ fields:
         hashtags: 1
         input: 
             note: 1
-            
-        
+           
     secteuractivite:
         label: Secteur d'activité
         type: int
@@ -716,6 +716,11 @@ fields_tables:
                   callback: isClient
             - field: outstanding_limit_atradius
               edit: 1
+              show: 
+                  callback: 
+                      method: canViewField
+                      params: 
+                          - outstanding_limit_atradius
             - field: outstanding_limit
               edit: 1
               show: 
@@ -751,8 +756,7 @@ fields_tables:
             - field: validation_impaye
               edit:
                   callback: iAmAdmin
-
-            
+ 
     contact: 
         title: Informations de contact
         icon: fas_phone
@@ -899,10 +903,10 @@ forms:
                 display_if: 
                     field_name: is_company
                     show_values: 1
-            outstanding_limit: 
-                field: outstanding_limit
             outstanding_limit_atradius:
                 field: outstanding_limit_atradius
+            outstanding_limit: 
+                field: outstanding_limit
             outstanding_limit_credit_safe:
                 field: outstanding_limit_credit_safe
             notecreditsafe: 
@@ -1168,6 +1172,13 @@ lists_cols:
         label: Lettre Credit Safe
         value: 
             callback: getCreditSafeLettre
+    region:
+        label: Région  
+        value: 
+            callback: displayRegion
+        csv_needed_fields: 
+            - zip
+            - fk_pays
         
 lists:
     default: 

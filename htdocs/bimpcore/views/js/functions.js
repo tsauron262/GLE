@@ -1328,6 +1328,9 @@ function bimp_copyTabsUrl($button, url, server) {
     if (typeof (server) === 'string') {
         var regex = new RegExp('^' + server + '(.*)$', 'i');
         if (!regex.test(url_base)) {
+            var protocol = window.location.protocol;
+            if(protocol != '')
+                server = protocol + '//' + server;
             url += server;
         }
     }

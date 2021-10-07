@@ -375,6 +375,33 @@ class OrderPDF extends BimpDocumentPDF
                 }
 
                 $address = str_replace("\n", '<br/>', $address);
+
+//                if (!is_null($this->contact_shipment)) {
+//                    if ($this->contact_shipment->phone_mobile || $this->contact_shipment->phone_perso) {
+//                        $address .= '<br/>';
+//
+//                        if ($this->contact_shipment->phone_mobile) {
+//                            $address .= 'Mobile: ' . $this->contact_shipment->phone_mobile;
+//                        }
+//                        if ($this->contact_shipment->phone_perso) {
+//                            $address .= ($this->contact_shipment->phone_mobile ? ' - ' : '') . 'Tel.: ' . $this->contact_shipment->phone_perso;
+//                        }
+//                    }
+//
+//                    if ($this->contact_shipment->phone_pro) {
+//                        $address .= '<br/>Tél. pro: ' . $this->contact_shipment->phone_pro;
+//                    }
+//                    if ($this->contact_shipment->email) {
+//                        $address .= '<br/>' . $this->contact_shipment->email;
+//                    }
+//                } elseif (!is_null($this->thirdparty)) {
+//                    if ($this->thirdparty->phone) {
+//                        $address .= '<br/>Tel.: ' . $this->thirdparty->phone;
+//                    }
+//                    if ($this->thirdparty->email) {
+//                        $address .= '<br/>' . $this->thirdparty->email;
+//                    }
+//                }
                 break;
         }
 
@@ -545,6 +572,13 @@ class BLPDF extends OrderPDF
                 }
             }
         }
+    }
+
+    public function getTargetInfosHtml()
+    {
+        $html = parent::getTargetInfosHtml();
+
+        return $html;
     }
 
     public function renderLines()

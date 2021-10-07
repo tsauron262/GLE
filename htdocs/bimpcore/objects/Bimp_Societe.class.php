@@ -41,6 +41,21 @@ class Bimp_Societe extends BimpDolObject
         1  => array('D', 'warning', 'Risque très Elevé'),
         0  => array('E', 'danger', 'Entreprise en situation de défaillance et ayant un très fort risque de radiation')
     );
+    public static $regions = array(
+        'HDF'                     => array(62, 59, 80, 60, 2),
+        'IDF'                     => array(95, 78, 91, 77, 93, 75, 92, 94),
+        'Bourgogne Franche-Comte' => array(25, 39, 71, 58, 21, 89, 70),
+        'Centre'                  => array(37, 36, 18, 41, 28, 45),
+        'Auvergne'                => array(3, 15, 43, 63, 42),
+        'Rhône'                   => array(1, 69),
+        'Alpes'                   => array(73, 74, 38),
+        'Drôme Ardèche'           => array(7, 26),
+        'Provence-Azur'           => array(4, 5, 6, 13, 83, 84, '2A', '2B'),
+        'Occitanie'               => array(65, 32, 31, 9, 82, 46, 81, 11, 66, 34, 12, 48, 30),
+        'Normandie'               => array(50, 14, 61, 27, 76),
+        'Bretagne'                => array(56, 22, 29, 35),
+        'Nouvelle Aquitaine'      => array(79, 17, 86, 87, 16, 23, 19, 24, 47, 33, 40, 64)
+    );
 
 //    public $fieldsWithAddNoteOnUpdate = array('solvabilite_status');
 
@@ -83,8 +98,13 @@ class Bimp_Societe extends BimpDolObject
     {
         global $user;
         switch ($field_name) {
-            case 'outstanding_limit':
             case 'outstanding_limit_atradius':
+                if ($user->admin) {
+                    return 1;
+                }
+                return 0;
+
+            case 'outstanding_limit':
                 return ($user->rights->bimpcommercial->admin_financier ? 1 : 0);
 
             case 'outstanding_limit_credit_safe':
@@ -119,6 +139,21 @@ class Bimp_Societe extends BimpDolObject
         }
 
         return parent::canEditField($field_name);
+    }
+
+    public function canViewField($field_name)
+    {
+        global $user;
+
+        switch ($field_name) {
+            case 'outstanding_limit_atradius':
+                if ($user->admin) {
+                    return 1;
+                }
+
+                return 0;
+        }
+        return parent::canViewField($field_name);
     }
 
     public function canSetAction($action)
@@ -282,7 +317,7 @@ class Bimp_Societe extends BimpDolObject
     public function isSolvable($object_name = '', &$warnings = array())
     {
         if (in_array($object_name, array('Bimp_Propal')) && in_array((int) $this->getData('solvabilite_status'), array(Bimp_Societe::SOLV_DOUTEUX, Bimp_Societe::SOLV_DOUTEUX_FORCE, Bimp_Societe::SOLV_MIS_EN_DEMEURE))) {
-            $warnings[] = "Attention ce client à le statut : " . static::$solvabilites[$this->getData('solvabilite_status')]['label'];
+            $warnings[] = "Attention ce client a le statut : " . static::$solvabilites[$this->getData('solvabilite_status')]['label'];
             return 1;
         }
 
@@ -416,18 +451,34 @@ class Bimp_Societe extends BimpDolObject
 
     public function getDefaultRib($createIfNotExist = true)
     {
-        $ribs = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_SocBankAccount', array('default_rib' => 1, 'fk_soc' => $this->id));
-        if (count($ribs) == 0) {
-            $rib = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_SocBankAccount');
-            $rib->set('fk_soc', $this->id);
-            $rib->set('label', 'Default');
-            $errors = $rib->create();
+        $rib = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_SocBankAccount', array('default_rib' => 1, 'fk_soc' => $this->id), true, false);
+
+        if (BimpObject::objectLoaded($rib)) {
             return $rib;
-        } else {
-            foreach ($ribs as $rib) {
+        }
+
+        if ($createIfNotExist) {
+            $rib = BimpObject::createBimpObject('bimpcore', 'Bimp_SocBankAccount', array(
+                        'fk_soc'      => $this->id,
+                        'label'       => 'Default',
+                        'default_rib' => 1
+                            ), true);
+
+            if (BimpObject::objectLoaded($rib)) {
                 return $rib;
             }
         }
+
+        return null;
+    }
+    
+    public function getDefaultRibId()
+    {
+        if ($this->isLoaded()) {
+            return (int) $this->db->getValue('societe_rib', 'rowid', 'fk_soc = ' . (int) $this->id.' AND default_rib = 1', 'rowid', 'desc');
+        }
+        
+        return 0;
     }
 
     public function getPdfModelFileName($model)
@@ -438,8 +489,11 @@ class Bimp_Societe extends BimpDolObject
 
         switch ($model) {
             case 'cepa':
-                $rib = $this->getDefaultRib(false);
-                return $rib->getFileName(false, '');
+                $rib = $this->getDefaultRib(true);
+                if (BimpObject::objectLoaded($rib)) {
+                    return $rib->getFileName(false, '');
+                }
+                break;
         }
 
         return '';
@@ -940,6 +994,27 @@ class Bimp_Societe extends BimpDolObject
         return BimpCore::getConf('societe_id_default_cond_reglement', 0);
     }
 
+    public static function getRegionCsvValue($needed_fields = array())
+    {
+        if (isset($needed_fields['fk_pays']) && (int) $needed_fields['fk_pays'] !== 1) {
+            return 'Hors France';
+        }
+
+        if (isset($needed_fields['zip'])) {
+            $dpt = substr($needed_fields['zip'], 0, 2);
+
+            if ($dpt) {
+                foreach (self::$regions as $region => $codes) {
+                    if (in_array($dpt, $codes)) {
+                        return $region;
+                    }
+                }
+            }
+        }
+
+        return 'nc';
+    }
+
     // Getters array: 
 
     public function getContactsArray($include_empty = true, $empty_label = '')
@@ -1278,6 +1353,29 @@ class Bimp_Societe extends BimpDolObject
             return implode("\n", $return);
         else
             return implode("<br/>", $return);
+    }
+
+    public function displayRegion()
+    {
+        if ((int) $this->getData('fk_pays') !== 1) {
+            return 'Hors France';
+        }
+
+        $zip = $this->getData('zip');
+
+        if ($zip) {
+            $dpt = substr($zip, 0, 2);
+
+            if ($dpt) {
+                foreach (self::$regions as $region => $codes) {
+                    if (in_array($dpt, $codes)) {
+                        return $region;
+                    }
+                }
+            }
+        }
+
+        return 'nc';
     }
 
     // Rendus HTML: 
@@ -1793,15 +1891,17 @@ class Bimp_Societe extends BimpDolObject
                 $link = 'https://www.creditsafe.fr/getdata/service/CSFRServices.asmx';
 
                 $sClient = new SoapClient($link . "?wsdl", array('trace' => 1));
+
+//                if (method_exists($sClient, 'GetData')) { TODO remettre en place pour les dev qui n'ont pas php-soap
                 $objReturn = $sClient->GetData(array("requestXmlStr" => str_replace("SIREN", ($siret ? $siret : $siren), $xml_data)));
 
                 $returnData = $objReturn->GetDataResult;
-//                $returnData = htmlspecialchars_decode($returnData);
-//
-//                $returnData = BimpTools::replaceBr($returnData, '<br/>');
-//                $returnData = str_replace("&", "et", $returnData);
-//                $returnData = str_replace(" < ", " ", $returnData);
-//                $returnData = str_replace(" > ", " ", $returnData);
+                //                $returnData = htmlspecialchars_decode($returnData);
+                //
+                //                $returnData = BimpTools::replaceBr($returnData, '<br/>');
+                //                $returnData = str_replace("&", "et", $returnData);
+                //                $returnData = str_replace(" < ", " ", $returnData);
+                //                $returnData = str_replace(" > ", " ", $returnData);
 
                 global $bimpLogPhpWarnings;
                 if (is_null($bimpLogPhpWarnings)) {
@@ -1875,17 +1975,17 @@ class Bimp_Societe extends BimpDolObject
                             $note .= ($note ? ' - ' : '') . 'Limite: ' . price(intval($limit)) . ' €';
                         }
 
-//                        if ($limit < 1 && $lettrecreditsafe == 100)
-//                            $limit = 10000000;
+                        //                        if ($limit < 1 && $lettrecreditsafe == 100)
+                        //                            $limit = 10000000;
                     }
                     if (isset($result->body->company->ratings2013->commentaries->comment)) {
                         if (is_string($result->body->company->ratings2013->commentaries->comment))
                             $note .= "
-" . $result->body->company->ratings2013->commentaries->comment;
+    " . $result->body->company->ratings2013->commentaries->comment;
                         else
                             foreach ($result->body->company->ratings2013->commentaries->comment as $comment)
                                 $note .= "
-" . $comment;
+    " . $comment;
                     }
 
                     $data = array(
@@ -1904,6 +2004,9 @@ class Bimp_Societe extends BimpDolObject
                         "outstanding_limit" => "" . intval($limit),
                         "capital"           => "" . trim(str_replace(" Euros", "", $summary->sharecapital)));
                 }
+//                } elseif (!BimpCore::isModeDev()) {
+//                    BimpCore::addlog('Echec connexion SOAP pour Credit SAFE', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', $this);
+//                }
             }
         }
 

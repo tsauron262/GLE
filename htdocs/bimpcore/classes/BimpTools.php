@@ -2992,22 +2992,23 @@ class BimpTools
     {
         $file = static::getFileBloqued($type);
         if ($bloque) {
-            $random = rand(0, 10000000);
-            $text = "Yes" . $random;
-            if (!file_put_contents($file, $text))
-                die('droit sur fichier incorrect : ' . $file);
-            sleep(0.400);
-            $text2 = file_get_contents($file);
-            if ($text == $text2)
-                return 1;
-            else {//conflit
-                mailSyn2("Conflit de ref évité", "dev@bimp.fr", null, "Attention : Un conflit de ref de type " . $type . " a été évité");
-                $nb++;
-                if ($nb > static::$nbMax)
-                    die('On arrete tout erreur 445834834857');
-                self::sleppIfBloqued($type, $nb);
-                return static::bloqueDebloque($type, $bloque, $nb);
+            if(!is_file($file)){
+                $random = rand(0, 10000000);
+                $text = "Yes" . $random;
+                if (!file_put_contents($file, $text))
+                    die('droit sur fichier incorrect : ' . $file);
+                sleep(0.400);
+                $text2 = file_get_contents($file);
+                if ($text == $text2)
+                    return 1;
             }
+            //conflit
+            mailSyn2("Conflit de ref évité", "dev@bimp.fr", null, "Attention : Un conflit de ref de type " . $type . " a été évité");
+            $nb++;
+            if ($nb > static::$nbMax)
+                die('On arrete tout erreur 445834834857');
+            self::sleppIfBloqued($type, $nb);
+            return static::bloqueDebloque($type, $bloque, $nb);
         } elseif (is_file($file))
             return unlink($file);
     }
@@ -3112,5 +3113,19 @@ class BimpTools
         if (isset($conf->global->$module) && $conf->global->$module)
             return 1;
         return 0;
+    }
+    
+    public static function sendSmsAdmin($text, $tels = array('0628335081', '06 86 69 18 14')){    
+        $errors = array();
+        require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
+        foreach ($tels as $tel){
+            $tel = traiteNumMobile($tel);
+            $smsfile = new CSMSFile($tel, 'BIMP ADMIN', $text);
+            if (!$smsfile->sendfile()) {
+                $errors[] = 'Echec de l\'envoi du sms';
+            }
+        }
+        
+        return $errors;
     }
 }

@@ -611,6 +611,19 @@ forms:
               input: 
                   type: toggle
               value: 0
+            - field: bon_resti_raison
+              display_if: 
+                  field_name: frais
+                  show_values: 0
+            - custom: 1
+              label: Raison détail
+              input_name: bon_resti_raison_detail
+              data_type: text
+              input: 
+                  type: textarea
+              display_if: 
+                  field_name: bon_resti_raison
+                  show_values: 99
               
     contact: 
         title: Recontacter

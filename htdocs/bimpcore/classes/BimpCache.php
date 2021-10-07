@@ -942,7 +942,7 @@ class BimpCache
         return $list;
     }
 
-    public static function getBimpObjectObjects($module, $object_name, $filters = array(), $order_by = 'id', $sortorder = 'asc', $joins = array())
+    public static function getBimpObjectObjects($module, $object_name, $filters = array(), $order_by = 'id', $sortorder = 'asc', $joins = array(), $n = null)
     {
         $instance = BimpObject::getInstance($module, $object_name);
 
@@ -950,7 +950,7 @@ class BimpCache
             return array();
         }
 
-        $rows = $instance->getList($filters, null, null, $order_by, $sortorder, 'array', array($instance->getPrimary()), $joins);
+        $rows = $instance->getList($filters, $n, null, $order_by, $sortorder, 'array', array($instance->getPrimary()), $joins);
         $items = array();
 
         foreach ($rows as $r) {
@@ -1554,6 +1554,45 @@ class BimpCache
         return self::getCacheArray($cache_key, $include_empty, 0, $empty_label);
     }
 
+    public static function getUserCentresArray()
+    {
+
+        $centres = array(
+            '' => ''
+        );
+
+        global $user;
+        if (BimpObject::objectLoaded($user)) {
+            $cache_key = 'user_' . $user->id . '_centres_array';
+            if (!isset(self::$cache[$cache_key])) {
+                $userCentres = explode(' ', $user->array_options['options_apple_centre']);
+                $centres = self::getCentres();
+
+                if (count($userCentres)) {
+                    foreach ($userCentres as $code) {
+                        if (preg_match('/^ ?([A-Z]+) ?$/', $code, $matches)) {
+                            if (isset($centres[$matches[1]])) {
+                                self::$cache[$cache_key][$matches[1]] = $centres[$matches[1]]['label'];
+                            }
+                        }
+                    }
+                }
+
+                if (count($centres) <= 1) {
+                    foreach ($centres as $code => $centre) {
+                        self::$cache[$cache_key][$code] = $centre['label'];
+                    }
+                }
+            }
+
+            return self::$cache[$cache_key];
+        }
+
+        return array();
+    }
+
+    // User Groups: 
+
     public static function getUserGroupsArray($include_empty = 1, $nom_url = 0)
     {
         $cache_key = 'users_groups';
@@ -1631,59 +1670,6 @@ class BimpCache
         }
 
         return self::$cache[$cache_key];
-    }
-
-    public static function getUserCentresArray()
-    {
-
-        $centres = array(
-            '' => ''
-        );
-
-        global $user;
-        if (BimpObject::objectLoaded($user)) {
-            $cache_key = 'user_' . $user->id . '_centres_array';
-            if (!isset(self::$cache[$cache_key])) {
-                $userCentres = explode(' ', $user->array_options['options_apple_centre']);
-                $centres = self::getCentres();
-
-                if (count($userCentres)) {
-                    foreach ($userCentres as $code) {
-                        if (preg_match('/^ ?([A-Z]+) ?$/', $code, $matches)) {
-                            if (isset($centres[$matches[1]])) {
-                                self::$cache[$cache_key][$matches[1]] = $centres[$matches[1]]['label'];
-                            }
-                        }
-                    }
-                }
-
-                if (count($centres) <= 1) {
-                    foreach ($centres as $code => $centre) {
-                        self::$cache[$cache_key][$code] = $centre['label'];
-                    }
-                }
-            }
-
-            return self::$cache[$cache_key];
-        }
-
-        return array();
-    }
-
-    // User Groups: 
-
-    public static function getGroupIds($idUser)
-    {
-        $cache_key = 'groupsIduser' . $idUser;
-        if (!isset(self::$cache[$cache_key])) {
-            require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
-            $userGroup = new UserGroup(self::getBdb()->db);
-
-            foreach ($userGroup->listGroupsForUser($idUser, false) as $obj) {
-                self::$cache[$cache_key][] = $obj->id;
-            }
-        }
-        return self::getCacheArray($cache_key);
     }
 
     public static function getGroupUsersList($id_group)

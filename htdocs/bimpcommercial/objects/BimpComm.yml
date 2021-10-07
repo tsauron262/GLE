@@ -557,7 +557,6 @@ forms:
                         hide_values: 0
                     payee:
                         show_values: 1
-
             - custom: 1
               label: Caisse
               input_name: id_caisse
@@ -590,6 +589,16 @@ forms:
               display_if: 
                   field_name: payee
                   hide_values: 0
+            - custom: 1
+              label: RIB Client
+              input_name: id_rib
+              input: 
+                  type: select
+                  options: 
+                      callback: getRibArray
+              display_if: 
+                  field_name: id_mode_paiement
+                  show_values: PRE
             - custom: 1
               label: N° (chèque ou virement)
               input_name: num_paiement

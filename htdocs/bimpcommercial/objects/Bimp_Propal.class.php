@@ -779,7 +779,7 @@ class Bimp_Propal extends BimpComm
 
         if ($this->isLoaded()) {
             $html .= '<div class="object_header_infos">';
-            $html .= 'Créée le <strong>' . date('d / m / Y', $this->dol_object->datec) . '</strong>';
+            $html .= 'Créée le <strong>' . BimpTools::printDate($this->getData('datec'), 'strong') . '</strong>';
 
             $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_author_id);
             if (BimpObject::objectLoaded($user)) {
@@ -791,7 +791,7 @@ class Bimp_Propal extends BimpComm
             $status = (int) $this->getData('fk_statut');
             if ($status >= 1 && (int) $this->dol_object->user_valid_id) {
                 $html .= '<div class="object_header_infos">';
-                $html .= 'Validée le <strong>' . date('d / m / Y', $this->dol_object->datev) . '</strong>';
+                $html .= 'Validée le <strong>' . BimpTools::printDate($this->dol_object->datev, 'strong') . '</strong>';
 
                 $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->dol_object->user_valid_id);
                 if (BimpObject::objectLoaded($user)) {

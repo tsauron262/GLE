@@ -146,7 +146,7 @@ class ObjectLine extends BimpObject
             return 0;
         }
 
-        return 1;
+        return $parent->isEditable();
     }
 
     public function isParentDraft()
@@ -265,7 +265,7 @@ class ObjectLine extends BimpObject
     {
         $parent = $this->getParentInstance();
 
-        if (BimpObject::objectLoaded($parent)) {
+        if (BimpObject::objectLoaded($parent) and $parent->isEditable()) {
             if ($parent->field_exists('fk_statut') && $parent->getData('fk_statut') === 0) {
                 return 1;
             } elseif (isset($parent->dol_object->statut) && (int) $parent->dol_object->statut === 0) {

@@ -76,6 +76,7 @@ filters_panels:
                 
 lists:
     default: 
+        objects_change_reload: Bimp_ImportPaiement
         checkboxes: 1
         modal_view: default
         row_style:
@@ -98,6 +99,11 @@ lists:
             fact_client:
             id_user_traite:
             date: 
+                
+    global:
+        extends: default
+        header_buttons:
+            callback: getGlobalBtn
                       
 lists_cols: 
     dataLight:

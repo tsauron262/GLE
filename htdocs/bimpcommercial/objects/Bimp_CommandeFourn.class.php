@@ -1766,6 +1766,8 @@ class Bimp_CommandeFourn extends BimpComm
                     $diference = 999;
                     $ref = $prod->findRefFournForPaHtPlusProche($line->getUnitPriceHTWithRemises(), $this->idLdlc, $diference);
 
+                    $ref = str_replace(' ', '', $ref);
+                    
                     if (strpos($ref, "AR") !== 0)
                         $errors[] = "La référence " . $ref . "ne semble pas être une ref LDLC correct  pour le produit " . $prod->getLink();
                     elseif ($diference > 0.08)
@@ -1843,8 +1845,7 @@ class Bimp_CommandeFourn extends BimpComm
                 )
             );
         }
-
-
+        
         if (!count($errors)) {
             $arrayToXml->writeNodes($tab);
 

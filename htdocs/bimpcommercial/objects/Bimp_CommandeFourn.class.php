@@ -524,7 +524,7 @@ class Bimp_CommandeFourn extends BimpComm
                 return 0;
 
             case 'forceStatus':
-                if ((int) $user->admin) {
+                if ((int) $user->admin || $user->rights->bimpcommercial->forcerStatus) {
                     return 1;
                 }
                 return 0;
@@ -1041,7 +1041,7 @@ class Bimp_CommandeFourn extends BimpComm
             $html .= '</div>';
 
             $html .= '<div class="object_header_infos">';
-            $html .= 'Créée le <strong>' . $this->displayData('date_creation', 'default', false, true) . '</strong>';
+            $html .= 'Créée le <strong>' . BimpTools::printDate($this->getData('date_creation'), 'strong') . '</strong>';
 
             $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('fk_user_author'));
             if (BimpObject::objectLoaded($user)) {
@@ -1052,7 +1052,7 @@ class Bimp_CommandeFourn extends BimpComm
 
             if ((int) $this->getData('fk_user_valid')) {
                 $html .= '<div class="object_header_infos">';
-                $html .= 'Validée le <strong>' . $this->displayData('date_valid', 'default', false, true) . '</strong>';
+                $html .= 'Validée le <strong>' . BimpTools::printDate($this->getData('date_valid'), 'strong') . '</strong>';
                 $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('fk_user_valid'));
                 if (BimpObject::objectLoaded($user)) {
                     $html .= ' par&nbsp;&nbsp;' . $user->getLink();
@@ -1061,7 +1061,7 @@ class Bimp_CommandeFourn extends BimpComm
             }
             if ((int) $this->getData('fk_user_approve')) {
                 $html .= '<div class="object_header_infos">';
-                $html .= '1ère approbation le <strong>' . $this->displayData('date_approve', 'default', false, true) . '</strong>';
+                $html .= '1ère approbation le <strong>' . BimpTools::printDate($this->getData('date_approve'), 'strong') . '</strong>';
                 $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $this->getData('fk_user_approve'));
                 if (BimpObject::objectLoaded($user)) {
                     $html .= ' par&nbsp;&nbsp;' . $user->getLink();
@@ -1766,6 +1766,8 @@ class Bimp_CommandeFourn extends BimpComm
                     $diference = 999;
                     $ref = $prod->findRefFournForPaHtPlusProche($line->getUnitPriceHTWithRemises(), $this->idLdlc, $diference);
 
+                    $ref = str_replace(' ', '', $ref);
+                    
                     if (strpos($ref, "AR") !== 0)
                         $errors[] = "La référence " . $ref . "ne semble pas être une ref LDLC correct  pour le produit " . $prod->getLink();
                     elseif ($diference > 0.08)
@@ -1843,8 +1845,7 @@ class Bimp_CommandeFourn extends BimpComm
                 )
             );
         }
-
-
+        
         if (!count($errors)) {
             $arrayToXml->writeNodes($tab);
 

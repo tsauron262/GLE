@@ -2992,22 +2992,23 @@ class BimpTools
     {
         $file = static::getFileBloqued($type);
         if ($bloque) {
-            $random = rand(0, 10000000);
-            $text = "Yes" . $random;
-            if (!file_put_contents($file, $text))
-                die('droit sur fichier incorrect : ' . $file);
-            sleep(0.400);
-            $text2 = file_get_contents($file);
-            if ($text == $text2)
-                return 1;
-            else {//conflit
-                mailSyn2("Conflit de ref évité", "dev@bimp.fr", null, "Attention : Un conflit de ref de type " . $type . " a été évité");
-                $nb++;
-                if ($nb > static::$nbMax)
-                    die('On arrete tout erreur 445834834857');
-                self::sleppIfBloqued($type, $nb);
-                return static::bloqueDebloque($type, $bloque, $nb);
+            if(!is_file($file)){
+                $random = rand(0, 10000000);
+                $text = "Yes" . $random;
+                if (!file_put_contents($file, $text))
+                    die('droit sur fichier incorrect : ' . $file);
+                sleep(0.400);
+                $text2 = file_get_contents($file);
+                if ($text == $text2)
+                    return 1;
             }
+            //conflit
+            mailSyn2("Conflit de ref évité", "dev@bimp.fr", null, "Attention : Un conflit de ref de type " . $type . " a été évité");
+            $nb++;
+            if ($nb > static::$nbMax)
+                die('On arrete tout erreur 445834834857');
+            self::sleppIfBloqued($type, $nb);
+            return static::bloqueDebloque($type, $bloque, $nb);
         } elseif (is_file($file))
             return unlink($file);
     }

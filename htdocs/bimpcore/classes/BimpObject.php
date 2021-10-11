@@ -1890,7 +1890,7 @@ class BimpObject extends BimpCache
         $use_db_transactions = (int) BimpCore::getConf('bimpcore_use_db_transactions', 0);
 
         if ($use_db_transactions) {
-            $this->db->db->begin();
+            $instance->db->db->begin();
         }
 
 //        BimpLog::actionStart('bimpobject_action', 'Action "' . $action . '"', $instance);
@@ -1937,16 +1937,16 @@ class BimpObject extends BimpCache
 
         if ($use_db_transactions) {
             if (isset($result['errors']) && count($result['errors'])) {
-                $this->db->db->rollback();
+                $instance->db->db->rollback();
 
                 if ((int) BimpCore::getConf('bimpcore_log_actions_rollbacks', 0)) {
-                    BimpCore::addlog('Rollback suite à action', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $this, array(
+                    BimpCore::addlog('Rollback suite à action', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $instance, array(
                         'Action'  => $action,
                         'Erreurs' => $result['errors']
                             ), true);
                 }
             } else {
-                if ($this->db->db->has_rollback) {
+                if ($instance->db->db->has_rollback) {
                     if (isset($result['errors'])) {
                         $result['errors'][] = 'Une erreur inconnue est survenue - opération annulée';
                     } else {
@@ -1955,15 +1955,15 @@ class BimpObject extends BimpCache
                         }
                         $result['errors'][] = 'Une erreur inconnue est survenue - opération annulée';
                     }
-                    $this->db->db->rollback();
+                    $instance->db->db->rollback();
 
-                    BimpCore::addlog('Rollback suite à action - erreur inconnue', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $this, array(
+                    BimpCore::addlog('Rollback suite à action - erreur inconnue', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $instance, array(
                         'Action' => $action
                             ), true);
                 } else {
-                    if(!$this->db->db->commit()){
+                    if(!$instance->db->db->commit()){
                         $result['errors'][] = 'Une erreur inconnue est survenue - opération annulée';
-                        BimpCore::addlog('Commit echec - erreur inconnue', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $this, array(
+                        BimpCore::addlog('Commit echec - erreur inconnue', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $instance, array(
                             'Action' => $action
                                 ), true);
                     }

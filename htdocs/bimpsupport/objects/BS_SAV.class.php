@@ -3866,7 +3866,7 @@ class BS_SAV extends BimpObject
         }
 
         if (count($errors)) {
-            BimpCore::addlog('Echec validation propale SAV', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcommercial', $this, array(
+            BimpCore::addlog('Echec validation propale SAV', Bimp_Log::BIMP_LOG_ERREUR, 'sav', $this, array(
                 'Erreurs' => $errors
             ));
         }
@@ -3979,14 +3979,17 @@ class BS_SAV extends BimpObject
         
         
         $frais = (float) (isset($data['frais']) ? $data['frais'] : 0);
-        if($this->isGratuit() && $frais == 0){
+        if(($this->getData('status') !== self::BS_SAV_DEVIS_REFUSE && $this->isGratuit()) || ($this->getData('status') === self::BS_SAV_DEVIS_REFUSE && $frais == 0)){
             if($data['bon_resti_raison'] == 0)
                 $errors[] = 'Raison de la non facturation obligatoire';
-            elseif($data['bon_resti_raison'] == 99){
-                if($data['bon_resti_raison_detail'] == '')
-                    $errors[] = 'Détail de la non facturation obligatoire';
-                else
-                    $this->addNote($data['bon_resti_raison_detail']);
+            else{
+                $this->updateField('bon_resti_raison', $data['bon_resti_raison']);
+                if($data['bon_resti_raison'] == 99){
+                    if($data['bon_resti_raison_detail'] == '')
+                        $errors[] = 'Détail de la non facturation obligatoire';
+                    else
+                        $this->addNote($data['bon_resti_raison_detail']);
+                }
             }
         }
 

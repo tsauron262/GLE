@@ -158,6 +158,8 @@ class Bimp_CommissionApporteur extends BimpObject
             } else
                 $errors[] = "Erreur avec un des filtres de la commission";
         }
+        
+        $this->updateField('id_facture_fourn', $new_facture->id);
 
 
 //        if (count($errors))

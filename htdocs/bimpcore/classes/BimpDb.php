@@ -354,6 +354,11 @@ class BimpDb
         return $rows;
     }
 
+    public function rowExists($table, $id, $primary = 'id')
+    {
+        return ((int) $this->getCount($table, $primary . ' = ' . $id, $primary) > 0 ? true : false);
+    }
+
     public function delete($table, $where)
     {
         if (!(string) $where || (string) $where == '1') {

@@ -173,6 +173,10 @@ class BS_ApplePart extends BimpObject
     }
 
     // Getters données
+    
+    public function getThisCategProdApple(){
+        return $this->getCategProdApple($this->getData('part_number'), $this->getData('label'));
+    }
 
     public static function getCategProdApple($ref, $desc)
     {

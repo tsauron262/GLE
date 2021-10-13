@@ -1577,7 +1577,7 @@ class BimpInput
         }
 
         $html .= '<option value="' . $option_value . '"';
-        if ($value == $option_value) {
+        if ((string) $value == (string) $option_value) {
             $html .= ' selected="1"';
         }
         if (!is_null($color)) {

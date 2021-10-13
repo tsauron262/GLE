@@ -52,7 +52,7 @@ class Bimp_Rights extends BimpObject
         if (!isset(BimpCache::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
 
-            $rows = self::getBdb()->getRows('rights_def', '1', 3, 'array');
+            $rows = self::getBdb()->getRows('rights_def', '1', null, 'array');
 
             if (is_array($rows)) {
                 foreach ($rows as $r) {

@@ -7,6 +7,11 @@ class Bimp_ImportPaiementLine extends BimpObject
     var $refs = array();
     var $total_reste_a_paye = 0;
     var $ok = false;
+    var $raisonManu = array(
+        1 => 'C2BO',
+        2 => 'Fournisseur',
+        99 => 'Autre'
+    );
 
     function create(&$warnings = array(), $force_create = false)
     {
@@ -112,7 +117,7 @@ class Bimp_ImportPaiementLine extends BimpObject
             $buttons[] = array(
                 'label'   => 'Lettrage manuel',
                 'icon'    => 'fas_check',
-                'onclick' => $this->getJsActionOnclick('traiteManuel')
+                'onclick' => $this->getJsActionOnclick('traiteManuel', array(), array('form_name' => 'lettrage_man'))
             );
         }
         return $buttons;
@@ -174,9 +179,10 @@ class Bimp_ImportPaiementLine extends BimpObject
     function fetch($id, $parent = null)
     {
 //        global $modeCSV; $modeCSV = true;
-        parent::fetch($id, $parent);
+        $return = parent::fetch($id, $parent);
         if ($this->isLoaded())
             $this->calc();
+        return $return;
     }
 
     function actionAddFact($data)
@@ -190,8 +196,32 @@ class Bimp_ImportPaiementLine extends BimpObject
     {
         global $user;
         $errors = $warnings = array();
-        $errors = $this->updateField('traite', 1);
-        $errors = $this->updateField('id_user_traite', $user->id);
+        
+        
+        $code = $data['raison'];
+        $detail = $data['raison_detail'];
+        $infos = $this->getData('infos');
+        if($infos != '')
+            $infos .= '<br/>';
+        $infos .= $this->raisonManu[$code];
+        
+        if($code == 99){
+            if(isset($detail) && $detail != '')
+                $infos .= ' ('. $data['raison_detail'].')';
+            else
+                $errors[] = 'Raison obligatoire';
+        }
+        
+        if(!count($errors)){
+            $errors = BimpTools::merge_array($errors, $this->set('infos', $infos));
+            $errors = BimpTools::merge_array($errors, $this->set('traite', 1));
+            $errors = BimpTools::merge_array($errors, $this->set('id_user_traite', $user->id));
+
+
+            $errors = BimpTools::merge_array($errors, $this->update());
+        }
+        
+        
 
         return array('errors' => $errors, 'warnings' => $warnings);
     }
@@ -344,7 +374,7 @@ class Bimp_ImportPaiementLine extends BimpObject
 
     function isEditable($force_edit = false, &$errors = array()): int
     {
-        return !$this->getData('traite');
+        return !$this->getInitData('traite');
     }
 
     function getPrice()

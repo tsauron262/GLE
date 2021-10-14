@@ -620,7 +620,7 @@ class ValidComm extends BimpObject
         return $can_valid_not_avaible;
     }
     
-    public function demandeExists($class, $id_object, $type = null, $status = null) {
+    public function demandeExists($class, $id_object, $type = null, $status = null, $return_all = false) {
         
         $filters = array(
             'type_de_piece' => $class,
@@ -635,8 +635,11 @@ class ValidComm extends BimpObject
 
         $demandes = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filters);
 
-        foreach($demandes as $key => $val)
-            return $demandes[$key];
+        if(!$return_all) {
+            foreach($demandes as $key => $val)
+                return $demandes[$key];
+        } elseif(count($demandes))
+            return $demandes;
         
         return 0;
     }

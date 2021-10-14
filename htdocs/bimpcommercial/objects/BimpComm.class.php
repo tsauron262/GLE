@@ -3710,6 +3710,7 @@ class BimpComm extends BimpDolObject
         $prev_deleting = $this->isDeleting;
         $this->isDeleting = true;
 
+        $this->startLineTransaction();
         if ($this->isLoaded($warnings)) {
             $lines = $this->getLines();
 
@@ -3755,6 +3756,8 @@ class BimpComm extends BimpDolObject
                 }
             }
         }
+        
+        $this->stopLineTransaction();
 
         $this->isDeleting = $prev_deleting;
         return $errors;

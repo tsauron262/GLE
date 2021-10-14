@@ -63,6 +63,9 @@ fields:
     infos:
         label: Infos
         type: text
+    num:
+        label: Numéro
+        type: text
         
     
 forms:
@@ -123,6 +126,7 @@ lists:
             id_user_traite:
             date: 
             infos:
+            num:
                 
     global:
         extends: default

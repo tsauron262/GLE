@@ -134,15 +134,17 @@ class BimpComm extends BimpDolObject
             
             $demands = $valid_comm->demandeExists($type_de_piece, $this->id, null, 0, true);
             
-            foreach ($demands as $d) {
-                if((int) $d->getData('id_user_affected') == (int) $user->id)
-                    return 1;
-            }
+            if($demands){
+                foreach ($demands as $d) {
+                    if((int) $d->getData('id_user_affected') == (int) $user->id)
+                        return 1;
+                }
 
-            // Soumis à des validations et possède des demandes de validation en brouillon
-            if ($type_de_piece != -2 and $demands) {
-                $errors[] = 'Une demande de validation est en attente';
-                return 0;
+                // Soumis à des validations et possède des demandes de validation en brouillon
+                if ($type_de_piece != -2 and $demands) {
+                    $errors[] = 'Une demande de validation est en attente';
+                    return 0;
+                }
             }
         }
 

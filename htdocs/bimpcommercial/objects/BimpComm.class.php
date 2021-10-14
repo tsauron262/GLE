@@ -128,12 +128,19 @@ class BimpComm extends BimpDolObject
     {
         global $user;
 
-        if (!$force_edit && !$user->admin) {
+        if (!$force_edit/* && !$user->admin*/) {
             $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
             $type_de_piece = ValidComm::getObjectClass($this);
+            
+            $demands = $valid_comm->demandeExists($type_de_piece, $this->id, null, 0, true);
+            
+            foreach ($demands as $d) {
+                if((int) $d->getData('id_user_affected') == (int) $user->id)
+                    return 1;
+            }
 
             // Soumis à des validations et possède des demandes de validation en brouillon
-            if ($type_de_piece != -2 and $valid_comm->demandeExists($type_de_piece, $this->id, null, 0)) {
+            if ($type_de_piece != -2 and $demands) {
                 $errors[] = 'Une demande de validation est en attente';
                 return 0;
             }

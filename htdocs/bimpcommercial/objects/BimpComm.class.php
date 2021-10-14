@@ -9,6 +9,8 @@ class BimpComm extends BimpDolObject
     const BC_ZONE_UE = 2;
     const BC_ZONE_HORS_UE = 3;
     const BC_ZONE_UE_SANS_TVA = 4;
+    
+    public static $dont_check_parent_on_update = false;
 
     public static $element_name = '';
     public static $external_contact_type_required = true;
@@ -47,6 +49,19 @@ class BimpComm extends BimpDolObject
         self::BC_ZONE_HORS_UE => 'Hors UE'
     );
     protected $margins_infos = null;
+    
+    public function startLineTransaction(){
+        static::$dont_check_parent_on_update = true;
+    }
+    
+    public function stopLineTransaction(){
+        static::$dont_check_parent_on_update = false;
+        $lines = $this->getLines();
+        if(count($lines)){
+            $lines[count($lines)-1]->resetPositions();
+            $lines[count($lines)-1]->update();
+        }
+    }
 
     public function __construct($module, $object_name)
     {
@@ -3757,7 +3772,7 @@ class BimpComm extends BimpDolObject
 
     public function onChildSave($child)
     {
-        if ($this->isLoaded() && !$this->isDeleting) {
+        if ($this->isLoaded() && !$this->isDeleting && !static::$dont_check_parent_on_update) {
             if (is_a($child, 'objectLine')) {
                 $this->processRemisesGlobales();
             }

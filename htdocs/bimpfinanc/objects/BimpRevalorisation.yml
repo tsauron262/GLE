@@ -313,8 +313,8 @@ lists:
             - label: Refuser les revalorisations sélectionnées
               icon: fas_trash-alt
               onclick: setSelectedObjectsAction($(this), 'list_id', 'setStatus', {'status':'2'}, '', 'Refuser les revalorisations', true)
-        list_filters: 
-            callback: getListFilters
+#        list_filters: 
+#            callback: getListFilters
         filters_panel: default
         sort_field: id
         sort_way: desc

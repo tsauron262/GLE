@@ -128,7 +128,7 @@ class BimpComm extends BimpDolObject
     {
         global $user;
 
-        if (!$force_edit/* && !$user->admin*/) {
+        if (!$force_edit && !$user->admin) {
             $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
             $type_de_piece = ValidComm::getObjectClass($this);
             

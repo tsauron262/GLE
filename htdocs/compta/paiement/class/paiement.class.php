@@ -206,8 +206,9 @@ class Paiement extends CommonObject
                 BimpTools::sleppIfBloqued("numFact");
                 BimpTools::bloqueDebloque("numFact");
                 $bloqued = true;
+                if($this->ref == '')
+                    $this->ref = $this->getNextNumRef('');
                 /*fmoddrsi*/
-		$this->ref = $this->getNextNumRef('');
 
 		if ($way == 'dolibarr')
 		{

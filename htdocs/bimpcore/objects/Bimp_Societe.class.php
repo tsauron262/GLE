@@ -1288,7 +1288,7 @@ class Bimp_Societe extends BimpDolObject
     {
         $html = '';
 
-        $users = $this->getCommerciauxArray(false);
+        $users = $this->getCommerciauxArray(false);        
         $default_id_commercial = (int) BimpCore::getConf('default_id_commercial');
 
         $edit = $this->canEditField('commerciaux');

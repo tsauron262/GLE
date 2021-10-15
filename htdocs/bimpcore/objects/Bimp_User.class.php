@@ -72,7 +72,35 @@ class Bimp_User extends BimpObject
         return 0;
     }
 
-    // Getters: 
+    public function canSetAction($action)
+    {
+        global $user;
+
+        switch ($action) {
+            case 'addRight':
+            case 'removeRight':
+                if ($user->admin) {
+                    return 1;
+                }
+                return 0;
+        }
+        return parent::canSetAction($action);
+    }
+
+    // Getters booléens: 
+
+    public function isActionAllowed($action, &$errors = [])
+    {
+        if (in_array($action, array('addRight', 'removeRight'))) {
+            if (!$this->isLoaded($errors)) {
+                return 0;
+            }
+        }
+
+        return parent::isActionAllowed($action, $errors);
+    }
+
+    // Getters données: 
 
     public function getCardFields($card_name)
     {
@@ -114,6 +142,86 @@ class Bimp_User extends BimpObject
         }
 
         return parent::getLink($params, $forced_context);
+    }
+
+    public function getGroupsRights()
+    {
+        if ($this->isLoaded()) {
+            return self::getUserGroupsRights($this->id);
+        }
+
+        return array();
+    }
+
+    public function getRights()
+    {
+        if ($this->isLoaded()) {
+            return self::getUserRights($this->id);
+        }
+
+        return array();
+    }
+
+    public function getAllRights()
+    {
+        return array(
+            'rights'        => $this->getRights(),
+            'groups_rights' => $this->getGroupsRights()
+        );
+    }
+
+    // Getters Statics: 
+
+    public static function getUserGroupsRights($id_user)
+    {
+        if ((int) $id_user) {
+            $cache_key = 'user_' . $id_user . '_groups_rights';
+
+            if (!isset(self::$cache[$cache_key])) {
+                self::$cache[$cache_key] = array();
+
+                $groups = BimpCache::getUserUserGroupsList($id_user);
+
+                if (!empty($groups)) {
+                    $rows = self::getBdb()->getRows('usergroup_rights', 'fk_usergroup IN (' . implode(',', $groups) . ')', null, 'array', array('fk_usergroup', 'fk_id'));
+
+                    foreach ($rows as $r) {
+                        if (!isset(self::$cache[$cache_key][(int) $r['fk_id']])) {
+                            self::$cache[$cache_key][(int) $r['fk_id']] = array();
+                        }
+
+                        self::$cache[$cache_key][(int) $r['fk_id']][] = $r['fk_usergroup'];
+                    }
+                }
+            }
+
+            return self::$cache[$cache_key];
+        }
+
+        return array();
+    }
+
+    public static function getUserRights($id_user)
+    {
+        if ((int) $id_user) {
+            $cache_key = 'user_' . $id_user . '_rights';
+
+            if (!isset(self::$cache[$cache_key])) {
+                self::$cache[$cache_key] = array();
+
+                $rows = self::getBdb()->getRows('user_rights', 'fk_user = ' . $id_user, null, 'array', array('fk_id'));
+
+                if (is_array($rows)) {
+                    foreach ($rows as $r) {
+                        self::$cache[$cache_key][] = (int) $r['fk_id'];
+                    }
+                }
+            }
+
+            return self::$cache[$cache_key];
+        }
+
+        return array();
     }
 
     public static function getUsersByShipto($shipTo)
@@ -451,12 +559,156 @@ class Bimp_User extends BimpObject
 
     public function renderPermsView()
     {
-        $html = 'Permission - en cours de développement';
+        global $langs;
+        $langs->loadLangs(array('users', 'admin'));
 
-        return $html;
+        $html = '';
+
+        $rows = array();
+
+        $headers = array(
+            'module'  => array('label' => 'Module', 'search_values' => array()),
+            'right'   => 'Droit',
+            'active'  => array(
+                'label'         => 'Actif',
+                'align'         => 'center',
+                'search_values' => array(
+                    'no'      => array('label' => 'NON', 'classes' => array('danger'), 'icon' => 'fas_times'),
+                    'yes'     => array('label' => 'OUI', 'classes' => array('success'), 'icon' => 'fas_check'),
+                    'inherit' => array('label' => 'Hérité', 'classes' => array('info'), 'icon' => 'fas_arrow-circle-down')
+                )
+            ),
+            'actions' => array('label' => 'Actions', 'align' => 'center', 'searchable' => 0),
+            'groups'  => 'Groupes ayant le droit',
+            'libelle' => 'Libellé',
+        );
+
+        self::loadClass('bimpcore', 'Bimp_Rights');
+
+        $rights = Bimp_Rights::getFullRightsDefs(true);
+        $user_rights = $this->getAllRights();
+        $user_groups = BimpCache::getUserUserGroupsList($this->id);
+
+        $modules_list = array();
+
+        $add_allowed = ($this->isActionAllowed('addRight') && $this->canSetAction('addRight'));
+        $remove_allowed = ($this->isActionAllowed('removeRight') && $this->canSetAction('removeRight'));
+
+        foreach ($rights as $module => $rights) {
+            $modules_list[$module] = $module;
+            foreach ($rights as $id_right => $data) {
+                $has_groups_right = false;
+                $active = '';
+                $groups = '';
+                $actions = '';
+
+                if (isset($user_rights['groups_rights'][(int) $id_right])) {
+                    foreach ($user_groups as $id_group) {
+                        if (in_array((int) $id_group, $user_rights['groups_rights'][(int) $id_right])) {
+                            $group = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_UserGroup', $id_group);
+
+                            if (BimpObject::objectLoaded($group)) {
+                                $groups .= ($groups ? '<br/>' : '') . $group->getLink();
+                                $has_groups_right = true;
+                            }
+                        }
+                    }
+                }
+
+                if (in_array($id_right, $user_rights['rights'])) {
+                    if ($add_allowed) {
+                        $onclick = 'BimpUserRightsTable.addUserRights($(this), ' . $this->id . ', [' . $id_right . '])';
+                        $actions .= BimpRender::renderRowButton('Ajouter', 'fas_plus', $onclick, 'add_right_button', array(
+                                    'styles' => array('display' => 'none')
+                        ));
+                    }
+
+                    if ($remove_allowed) {
+                        $onclick = 'BimpUserRightsTable.removeUserRights($(this), ' . $this->id . ', [' . $id_right . '])';
+                        $actions .= BimpRender::renderRowButton('Retirer', 'fas_minus', $onclick, 'remove_right_button');
+                    }
+
+                    $active = array(
+                        'content' => '<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'OUI</span>',
+                        'value'   => 'yes'
+                    );
+                } else {
+                    if ($add_allowed) {
+                        $onclick = 'BimpUserRightsTable.addUserRights($(this), ' . $this->id . ', [' . $id_right . '])';
+                        $actions .= BimpRender::renderRowButton('Ajouter', 'fas_plus', $onclick, 'add_right_button');
+                    }
+
+                    if ($remove_allowed) {
+                        $onclick = 'BimpUserRightsTable.removeUserRights($(this), ' . $this->id . ', [' . $id_right . '])';
+                        $actions .= BimpRender::renderRowButton('Retirer', 'fas_minus', $onclick, 'remove_right_button', array(
+                                    'styles' => array('display' => 'none')
+                        ));
+                    }
+
+                    if ($has_groups_right) {
+                        $active = array(
+                            'content' => '<span class="info">' . BimpRender::renderIcon('fas_arrow-circle-down', 'iconLeft') . 'Hérité</span>',
+                            'value'   => 'inherit'
+                        );
+                    } else {
+                        $active = array(
+                            'content' => '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'NON</span>',
+                            'value'   => 'no'
+                        );
+                    }
+                }
+
+                $rows[] = array(
+                    'row_data' => array(
+                        'id_right' => $id_right
+                    ),
+                    'module'   => array('value' => $module),
+                    'right'    => ($data['perms'] . (!empty($data['subperms']) ? '->' . $data['subperms'] : '')),
+                    'libelle'  => $langs->trans($data['libelle']),
+                    'active'   => $active,
+                    'groups'   => $groups,
+                    'actions'  => $actions
+                );
+            }
+        }
+
+        $headers['module']['search_values'] = $modules_list;
+
+        $buttons = '';
+
+        if ($add_allowed || $remove_allowed) {
+            $buttons .= '<div class="buttonsContainer">';
+            if ($add_allowed) {
+                $buttons .= '<span class="btn btn-default" onclick="BimpUserRightsTable.addSelectedRights($(this), ' . $this->id . ')">';
+                $buttons .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter les droits sélectionnés';
+                $buttons .= '</span>';
+            }
+            if ($remove_allowed) {
+                $buttons .= '<span class="btn btn-default" onclick="BimpUserRightsTable.removeSelectedRights($(this), ' . $this->id . ')">';
+                $buttons .= BimpRender::renderIcon('fas_minus-circle', 'iconLeft') . 'Retirer les droits sélectionnés';
+                $buttons .= '</span>';
+            }
+            $buttons .= '</div>';
+        }
+
+        $html .= $buttons;
+
+        $html .= BimpRender::renderBimpListTable($rows, $headers, array(
+                    'main_class' => 'bimp_user_rights_table',
+                    'searchable' => true,
+                    'sortable'   => true,
+                    'checkboxes' => true
+        ));
+
+        $html .= $buttons;
+
+        return BimpRender::renderPanel('Liste des droits', $html, '', array(
+                    'foldable' => true,
+                    'type'     => 'secondary'
+        ));
     }
 
-    function showUserTheme($object, $edit = 0, $foruserprofile = false)
+    public function showUserTheme($object, $edit = 0, $foruserprofile = false)
     {
         global $conf, $langs;
 
@@ -899,6 +1151,80 @@ class Bimp_User extends BimpObject
         );
     }
 
+    public function actionAddRight($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $id_rights = BimpTools::getArrayValueFromPath($data, 'id_rights', array());
+        $results = array();
+
+        if (empty($id_rights)) {
+            $errors[] = 'Aucun droit sélectionné';
+        } else {
+            $nOk = 0;
+
+            foreach ($id_rights as $id_right) {
+                $right_def = $this->db->getRow('rights_def', 'id = ' . $id_right, null, 'array');
+
+                if (is_null($right_def)) {
+                    $warnings[] = 'Le droit #' . $id_right . ' n\'existe plus';
+                } else {
+                    if (!(int) $this->db->getValue('user_rights', 'rowid', 'fk_user = ' . $this->id . ' AND fk_id = ' . $id_right)) {
+                        if ($this->db->insert('user_rights', array(
+                                    'entity'  => 1,
+                                    'fk_user' => $this->id,
+                                    'fk_id'   => $id_right
+                                )) > 0) {
+                            $nOk++;
+                            $results[$id_right] = 1;
+                        } else {
+                            $sql_err = $this->db->err();
+                            $label = $right_def['module'] . '->' . $right_def['perms'] . (!empty($right_def['subperms']) ? '->' . $right_def['subperms'] : '');
+                            $warnings[] = 'Echec de l\'ajout du droit "' . $label . '"' . ($sql_err ? ' - ' . $sql_err : '');
+
+                            $results[$id_right] = 0;
+                        }
+                    }
+
+                    if ($nOk === 1) {
+                        $success = 'Droit ajouté avec succès';
+                    } elseif ($nOk > 1) {
+                        $success = $nOk . ' droits ont été ajoutés avec succès';
+                    }
+                }
+            }
+        }
+
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings,
+            'results'  => $results
+        );
+    }
+
+    public function actionRemoveRight($data, &$success)
+    {
+        // Toujours déclarer ces trois variables en début des fonctions actions (utile pour toute insertion de code ultérieure) 
+        $errors = array();
+        $warnings = array();
+        $success = ''; // Message affiché en cas de succès : toujours définir (sinon l'utilisateur ne sais pas si l'opération a réussie). 
+        // A faire : prendre actionAddRight comme modèle. 
+        // Attention: $results devra être sous la forme: 
+//        $results[$id_right] = array(
+//            'ok' => 1/0 : l'opération a réussi ou non
+//            'active' => 'no' ou 'inherit' (vérifier que le user possède un droit hérité d'un groupe) 
+//        )
+        // Toujours retourner $errors et $warnings (même vides) 
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
     // Overrides
 
     public function update(&$warnings = array(), $force_update = false)
@@ -943,4 +1269,283 @@ class Bimp_User extends BimpObject
 
         return $html;
     }
+    
+    // Groupe compté comme 1 user !!
+// En construction !!
+    public static function getUsersAvaible($id_user, &$errors = array(), &$warnings = array(), $users_in = array(
+        'Commerciaux341 - Maugio',
+        'parent'
+    ), $max_user = 1, $return_array = false, $fetch = false, $from = null, $to = null) {
+        
+        if(is_null($id_user) or $id_user < 0)
+            $errors[] = "ID de l'utilisateur absent ou mal renseigné";
+
+        if(is_null($id_user) or $max_user < 1)
+            $errors[] = "Nombre d'utilisateur à renvoyé null ou négatif";
+        
+        if(1 < $max_user and $return_array)
+            $errors[] = "Impossible de renvoyer plusieurs utilisateurs sans utiliser les tableaux !";
+        
+        if(1 == $max_user and !$return_array)
+            $warnings[] = "Il est recommandé d'utilisé un retour unique plutôt qu'un tableau";
+        
+        if(count($errors))
+            return -1;
+        
+        
+        $users_out = array();
+        $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
+        
+        
+        print_r($users_out);
+        
+        foreach($users_in as $u) {
+            
+            // Il s'agit d'un utilisateur, donc de ''id user
+            if(0 < $u) {
+                
+                if(self::isUserAvaible($u, $errors, $from, $to))
+                    $users_out[] = $u;
+                
+            // Supérieur hiérarchique
+            } elseif($u == 'parent') {
+                
+                $id_parent = $user->getData('fk_user');
+
+                if(self::isUserAvaible($id_parent, $errors, $from, $to))
+                    $users_out[] = $id_parent;
+                
+            // Code d'un groupe d'utilisateur
+            } else {
+                
+                
+                $ids_user = self::getUsersInGroup($u);
+                
+                foreach ($ids_user as $id) {
+                    if(self::isUserAvaible($id, $errors, $from, $to))
+                        $users_out[] = $id;
+                }
+                
+                
+            }
+            
+            if(count($users_out) >= $max_user)
+                break;
+            
+        }
+        
+        echo '<pre> FIN';
+        print_r($users_out);
+        die();
+        
+        
+        if(empty($user)) {
+            $warnings[] = "Personne n'est disponible, l'utilisateur par défaut a été selectionné automatiquement";
+            
+            if($fetch)
+                $user = BimpCache::getBimpObjectInstance ('bimpcore', 'Bimp_User', (int) $id_user);
+            else
+                $user = $id_user;
+            
+            if($return_array)
+                return array($user);
+            else
+                return $user;
+            
+        }
+
+        if(!$return_array)
+            return array($max_user);
+
+        return $max_user;
+        
+        // array_shift()
+    }
+    
+    // En construction !!
+    public static function getUsersInGroup($group_name) {
+        
+        $users = array();
+        
+        $sql = 'SELECT ugu.fk_user as id_user';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'usergroup_user ugu';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'usergroup ug ON ug.rowid = ugu.fk_usergroup';
+        $sql .= ' WHERE ug.nom = "' . $group_name . '"';
+
+        $rows = self::getBdb()->executeS($sql, 'object');
+        
+        foreach ($rows as $r)
+            $users[$r->id_user] = $r->id_user;
+
+        return $users;
+    }
+    
+    
+    // TODO description de cette fonction
+//    public static function getUsersAvaible($id_user, &$errors = array(), &$warnings = array(), $users_in = array(
+//        'parent',
+//        'user'    => 0,
+//        'grp'     => 0
+//    ), $max_user = 1, $return_array = false, $fetch = false, $from = null, $to = null) {
+//        
+//        if(is_null($id_user) or $id_user < 0)
+//            $errors[] = "ID de l'utilisateur absent ou mal renseigné";
+//
+//        if(is_null($id_user) or $max_user < 1)
+//            $errors[] = "Nombre d'utilisateur à renvoyé null ou négatif";
+//        
+//        if(1 < $max_user and $return_array)
+//            $errors[] = "Impossible de renvoyer plusieurs utilisateurs sans utiliser les tableaux !";
+//        
+//        if(1 == $max_user and !$return_array)
+//            $warnings[] = "Il est recommandé d'utilisé un retour unique plutôt qu'un tabbleau";
+//        
+//        if(count($errors))
+//            return -1;
+//        
+//        
+//        $users_out = array();
+//        $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
+//        
+//        foreach($users_in as $key => $u) {
+//            
+//            // Autorise l'utilisation des clé même si aucune valeur n'est
+//            // définit dans le cas des supérieurs hiérarchiques
+//            if(is_null($key) and $u == 'parent')
+//                $key = $u;
+//            
+//            switch ($key) {
+//                // Supérieur hiérarchique
+//                case 'parent':
+//                    $id_parent = $user->getData('fk_user');
+//                    
+//                    if(self::isUserAvaible($id_parent, $errors, $from, $to))
+//                        $users_out[] = $id_parent;
+//                    
+//                    break;
+//                    
+//                // Utilisateurs définits par défaut
+//                case 'user':
+//                    if(is_array($u)) {
+//                        
+//                        if(!count($u)) {
+//                            $errors[] = "Tableau d'utilisateur vide";
+//                            return -2;
+//                        } else {
+//                            
+//                        }
+//                        
+//                    } elseif (0 < $u) {
+//                        
+//                        
+//                    } else {
+//                        $errors[] = "Paramètre \"user\" mal renseigné dans le tableau \"\$users_in\"";
+//                    }
+//                    break;
+//                        
+//                // Groupe d'utilisateur
+//                case 'grp':
+////                    if(is_array($u)) {
+////                        if(!count($u)) {
+////                            $errors[] = "Tableau de groupe vide";
+////                            return -3;
+////                        }
+////                        
+////                        
+////                    } elseif ($ok) {
+////                        $errors[] = "FFFFFFFFFFFFF";
+////                    } else {
+////                        $errors[] = "Paramètre \"user\" mal renseigné dans le tableau \"\$users_in\"";
+////                    }
+////                    
+//                    break;
+//                
+//            }
+//            
+//            // Sécurité: enlever tous les utilisateurs rajouté en excès
+//            while($max_user < count($users_out))
+//                array_pop ($max_user);
+//            
+//            // Stop ajout d'utilisateur si on a atteint la limite
+//            if($max_user == count($users_out))
+//                break;
+//            
+//        }
+//        
+//        echo '<pre>';
+//        print_r($users_out);
+//        die();
+//        
+//        
+//        if(empty($user)) {
+//            $warnings[] = "Personne n'est disponible, l'utilisateur par défaut a été selectionné automatiquement";
+//            
+//            if($fetch)
+//                $user = BimpCache::getBimpObjectInstance ('bimpcore', 'Bimp_User', (int) $id_user);
+//            else
+//                $user = $id_user;
+//            
+//            if($return_array)
+//                return array($user);
+//            else
+//                return $user;
+//            
+//        }
+//
+//        if(!$return_array)
+//            return array($max_user);
+//
+//        return $max_user;
+//        
+//        // array_shift()
+//    }
+    
+// En construction !!
+    public static function isUserAvaible($id_user, &$errors = array(), $from = null, $to = null) {
+        
+        if(is_null($id_user) or $id_user < 0) {
+            $errors[] = "ID de l'utilisateur absent ou mal renseigné";
+            return -1;
+        }
+        
+        $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+        if(!$user->getData('statut'))
+            return 0;
+        
+        $joins['c_a_comm'] = array(
+            'table' => 'c_actioncomm',
+            'on'    => 'c_a_comm.element_id = a.fk_action',
+            'alias' => 'c_a_comm'
+        );
+        
+        $filters = array(
+            'or' => array(
+                'a.datep'     => array(
+                    'operator' => '!=',
+                    'value'    => 0
+                ),
+                'a.datep2' => array(
+                    'operator' => '!=',
+                    'value'    => 0
+                ),
+            ),
+            'c_a_comm.code' => array( 'in' => array('CONGES', 'RTT_DEM'))
+        );
+        
+        
+        $out = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_ActionComm', $filters, 'id', 'asc', $joins);
+        
+        return !count($out);
+    }
+    
+
+//elle renverra soit son id soit l'objet bimp fetché (paramètre optionnel)
+//
+//Si l'utilisateur n'est pas disponible (désactiver ou en vacances) il cherchera un utilisateur disponible, par défaut le n+1, ou un autre membre du groupe (paramètre optionnel).
+//
+//Tommy et moi pensons que cette fonction a des chances d'être utilisé ailleurs, du coup :
+//1/ Est-ce qu'une fonction similaire existe déjà ?
+//2/ Est-ce que tu as des remarques à faire (paramètre à ajouter, fonction sur laquelle s'appuyer, etc) ?
+
+    
 }

@@ -9,6 +9,8 @@ class BimpComm extends BimpDolObject
     const BC_ZONE_UE = 2;
     const BC_ZONE_HORS_UE = 3;
     const BC_ZONE_UE_SANS_TVA = 4;
+    
+    public static $dont_check_parent_on_update = false;
 
     public static $element_name = '';
     public static $external_contact_type_required = true;
@@ -47,6 +49,19 @@ class BimpComm extends BimpDolObject
         self::BC_ZONE_HORS_UE => 'Hors UE'
     );
     protected $margins_infos = null;
+    
+    public function startLineTransaction(){
+        static::$dont_check_parent_on_update = true;
+    }
+    
+    public function stopLineTransaction(){
+        static::$dont_check_parent_on_update = false;
+        $lines = $this->getLines();
+        if(count($lines)){
+            $lines[count($lines)-1]->resetPositions();
+            $lines[count($lines)-1]->update();
+        }
+    }
 
     public function __construct($module, $object_name)
     {
@@ -116,11 +131,20 @@ class BimpComm extends BimpDolObject
         if (!$force_edit && !$user->admin) {
             $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
             $type_de_piece = ValidComm::getObjectClass($this);
+            
+            $demands = $valid_comm->demandeExists($type_de_piece, $this->id, null, 0, true);
+            
+            if($demands){
+                foreach ($demands as $d) {
+                    if((int) $d->getData('id_user_affected') == (int) $user->id)
+                        return 1;
+                }
 
-            // Soumis à des validations et possède des demandes de validation en brouillon
-            if ($type_de_piece != -2 and $valid_comm->demandeExists($type_de_piece, $this->id, null, 0)) {
-                $errors[] = 'Une demande de validation est en attente';
-                return 0;
+                // Soumis à des validations et possède des demandes de validation en brouillon
+                if ($type_de_piece != -2 and $demands) {
+                    $errors[] = 'Une demande de validation est en attente';
+                    return 0;
+                }
             }
         }
 
@@ -3695,6 +3719,7 @@ class BimpComm extends BimpDolObject
         $prev_deleting = $this->isDeleting;
         $this->isDeleting = true;
 
+        $this->startLineTransaction();
         if ($this->isLoaded($warnings)) {
             $lines = $this->getLines();
 
@@ -3740,6 +3765,8 @@ class BimpComm extends BimpDolObject
                 }
             }
         }
+        
+        $this->stopLineTransaction();
 
         $this->isDeleting = $prev_deleting;
         return $errors;
@@ -3757,7 +3784,7 @@ class BimpComm extends BimpDolObject
 
     public function onChildSave($child)
     {
-        if ($this->isLoaded() && !$this->isDeleting) {
+        if ($this->isLoaded() && !$this->isDeleting && !static::$dont_check_parent_on_update) {
             if (is_a($child, 'objectLine')) {
                 $this->processRemisesGlobales();
             }

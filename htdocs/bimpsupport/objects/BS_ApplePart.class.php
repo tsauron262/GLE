@@ -173,6 +173,10 @@ class BS_ApplePart extends BimpObject
     }
 
     // Getters données
+    
+    public function getThisCategProdApple(){
+        return $this->getCategProdApple($this->getData('part_number'), $this->getData('label'));
+    }
 
     public static function getCategProdApple($ref, $desc)
     {
@@ -326,6 +330,17 @@ class BS_ApplePart extends BimpObject
             foreach (self::$tabRefCommencePrixEcran as $refT => $tabInfo)
                 if ($ref == $refT)
                     $newPrix = str_replace(",", ".", $tabInfo[0]);
+        }  elseif ($type == 'rear'){
+            if ($prix > 400)
+                $constPrix = $prix * 0.1 + 24.17;
+            elseif ($prix > 350)
+                $constPrix = $prix * 0.13 + 24.17;
+            elseif ($prix > 300)
+                $constPrix = $prix * 0.15 + 24.17;
+            elseif ($prix > 250)
+                $constPrix = $prix * 0.17 + 24.17;
+            elseif ($prix > 200)
+                $constPrix = $prix * 0.2 + 24.17;
         } elseif ($equipment->isIphone()) {
 //            $constPrix = 45;
             if ($prix > 400)
@@ -344,17 +359,6 @@ class BS_ApplePart extends BimpObject
                 $constPrix = $prix * 0.4;
             else
                 $constPrix = $prix * 0.5 + 24.17;
-        } elseif ($type == 'rear'){
-            if ($prix > 400)
-                $constPrix = $prix * 0.1 + 24.17;
-            elseif ($prix > 350)
-                $constPrix = $prix * 0.13 + 24.17;
-            elseif ($prix > 300)
-                $constPrix = $prix * 0.15 + 24.17;
-            elseif ($prix > 250)
-                $constPrix = $prix * 0.17 + 24.17;
-            elseif ($prix > 200)
-                $constPrix = $prix * 0.2 + 24.17;
         } else {
             if ($prix > 300)
                 $coefPrix = 0.8;

@@ -104,6 +104,11 @@ class InvoiceStatementPDF extends BimpDocumentPDF
         return 'Releve_facturation'; //_' . $this->date_debut->format('d_m_Y') .'_a_'. $this->date_fin->format('d_m_Y');
     }
 
+    public function renderTop()
+    {
+        
+    }
+    
     public function renderLines()
     {
 

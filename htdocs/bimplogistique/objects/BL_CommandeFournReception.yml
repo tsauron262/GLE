@@ -84,6 +84,7 @@ fields:
         input: 
             auto_expand: 1
             rows: 1
+        hashtags: 1
             
     assign_lines_to_commandes_client:
         label: Assigner les équipements reçus aux commandes client d'origine
@@ -374,6 +375,7 @@ searches:
             - a.ref
             - cf.ref
             - s.nom
+        label_syntaxe: 'BR n°<a.ref> - Commande: <cf.ref> - Fournisseur: <s.nom>'
         joins:
             commande_fourn: 
                 table: commande_fournisseur

@@ -302,4 +302,18 @@ lists:
             tracking_number: 
             identification_number: 
             gsx_confirmation: 
-            gsx_return_id: 
+            gsx_return_id:
+          
+searches: 
+    default: 
+        fields_search: 
+            - a.rowid
+            - a.ship_to
+            - a.tracking_number
+            - a.gsx_return_id
+        fields_return: 
+            - a.rowid
+            - a.ship_to
+            - a.tracking_number
+            - a.gsx_return_id
+        label_syntaxe: 'Retour #<a.rowid> - Shipto: <a.ship_to> - N° de suivi: <a.tracking_number> - N° de retour: <a.gsx_return_id>'

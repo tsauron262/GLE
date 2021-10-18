@@ -82,8 +82,8 @@ views:
         objects_change_reload: BimpFile,BimpNote,RemiseGlobale
         delete_btn: 1
         edit_form: default
-        footer_extra_btn: 
-            callback: getActionsButtons
+#        footer_extra_btn: 
+#            callback: getActionsButtons
         rows: 
             - cols: 
                 - type: object_header

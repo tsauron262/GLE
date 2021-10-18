@@ -1,5 +1,7 @@
 bootstrap: 1
 table: bcontract_avenant
+icon: fas_file-medical
+
 labels:
     name: Avenant
     name_plur: Avenants

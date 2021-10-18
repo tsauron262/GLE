@@ -113,8 +113,8 @@ function onSocieteSiretOrSirenChange($input, field, value) {
                     if (typeof (result.data.siret) === 'string' && result.data.siret) {
                         $form.find('[name="siret"]').val(result.data.siret);
                     }
-                    
-                    if(result.data.siret.substr(0,1) == '1' || result.data.siret.substr(0,1) == '2'){
+
+                    if (result.data.siret.substr(0, 1) == '1' || result.data.siret.substr(0, 1) == '2') {
                         $form.find('[name="fk_typent"]').val(5);
                         $form.find('[name="fk_typent"]').change();
                     }
@@ -145,7 +145,7 @@ function onSocieteSiretOrSirenChange($input, field, value) {
 
                     if (typeof (result.data.outstanding_limit) === 'string' && result.data.outstanding_limit) {
                         $form.find('[name="outstanding_limit_credit_safe"]').val(result.data.outstanding_limit);
-                        $form.find('[name="outstanding_limit_credit_safe"]').parent().find('span').html(result.data.outstanding_limit+" €");
+                        $form.find('[name="outstanding_limit_credit_safe"]').parent().find('span').html(result.data.outstanding_limit + " €");
                     }
 
                     if (typeof (result.data.capital) === 'string' && result.data.capital) {
@@ -163,7 +163,7 @@ function onSocieteSiretOrSirenChange($input, field, value) {
                     if (typeof (result.data.lettrecreditsafe) === 'string' && result.data.lettrecreditsafe) {
                         $form.find('[name="lettrecreditsafe"]').val(result.data.lettrecreditsafe);
                     }
-                    
+
                     if (typeof (result.data.alert) === 'string' && result.data.alert) {
                         alert(result.data.alert)
                     }
@@ -229,8 +229,116 @@ function onClientAddFreeRelanceFormSubmit($form, extra_data) {
     return extra_data;
 }
 
-function getBadge(text, size, style){
-    return '<span class="badge badge-pill badge-'+style+'" style="size:'+size+'">'+text+'</span>';
+// UserRights: 
+
+function BimpUserRightsTable() {
+    var ptr = this;
+    this.getTable = function ($element) {
+        if (!$.isOk($element)) {
+            return null;
+        }
+
+        return $element.findParentByClass('panel-body').find('table.bimp_user_rights_table');
+    };
+
+    this.getRow = function ($table, id_right) {
+        if ($.isOk($table)) {
+            return $table.find('tr.bimp_list_table_row[data-id_right=' + id_right + ']');
+        }
+
+        return null;
+    };
+
+    this.addUserRights = function ($button, id_user, id_rights) {
+        if ($button.hasClass('disabled')) {
+            return;
+        }
+
+        var $table = ptr.getTable($button);
+
+        setObjectAction($button, {
+            module: 'bimpcore',
+            object_name: 'Bimp_User',
+            id_object: id_user
+        }, 'addRight', {
+            id_rights: id_rights
+        }, '', null, function (result) {
+            if (typeof (result.results) !== 'undefined') {
+                for (var id_right in result.results) {
+                    if (parseInt(result.results[id_right])) {
+                        var $row = ptr.getRow($table, id_right);
+                        if ($.isOk($row)) {
+                            $row.find('.add_right_button').hide();
+                            $row.find('.remove_right_button').show();
+
+                            var $col = $row.find('td.col_active');
+
+                            if ($col.length) {
+                                $col.data('value', 'yes');
+                                $col.html('<span class="success"><i class="fas fa5-check iconLeft"></i>OUI</span>');
+                            }
+
+                            // On déselectionne toutes les lignes: 
+                            if (id_rights.length > 1) {
+                                BimpListTable.uncheckAll($table);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    };
+
+    this.removeUserRights = function ($button, id_user, id_rights) {
+
+    };
+
+    this.addSelectedRights = function ($button, id_user) {
+        if ($button.hasClass('disabled')) {
+            return;
+        }
+
+        $button.hasClass('disbaled');
+        var $table = ptr.getTable($button);
+
+        if ($.isOk($table)) {
+            var $selected = $table.find('tbody').find('input.bimp_list_table_row_check:checked');
+
+            if (!$selected.length) {
+                bimp_msg('Aucun droit sélectionné', 'warning', null, true);
+                return;
+            }
+
+            var id_rights = [];
+
+            $selected.each(function () {
+                var $row = $(this).findParentByClass('bimp_list_table_row');
+
+                if ($.isOk($row)) {
+                    var id_right = parseInt($row.data('id_right'));
+
+                    if (!isNaN(id_right) && id_right) {
+                        id_rights.push(id_right);
+                    }
+                }
+            });
+
+            $button.removeClass('disbaled'); // On doit réactiver le bouton sinon la suite va planter.
+            ptr.addUserRights($button, id_user, id_rights);
+        }
+    };
+
+    this.removeSelectedRights = function ($button, id_user) {
+
+    };
+}
+
+var BimpUserRightsTable = new BimpUserRightsTable();
+
+// Divers: 
+
+function getBadge(text, size, style) {
+    return '<span class="badge badge-pill badge-' + style + '" style="size:' + size + '">' + text + '</span>';
 }
 
 $(document).ready(function () {

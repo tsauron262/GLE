@@ -655,3 +655,17 @@ lists:
         delete_btn: 0
         cols: 
             fk_user_tech: unset
+
+searches: 
+    default: 
+        fields_search: 
+            - a.ref
+            - s.nom
+        fields_return: 
+            - a.ref
+            - s.nom
+        label_syntaxe: 'FI <a.ref> - Client: <s.nom>'
+        joins: 
+            - table: societe
+              on: a.fk_soc = s.rowid
+              alias: s

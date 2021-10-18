@@ -862,7 +862,7 @@ class BimpCache
                                 if ($instance->getConf('abstract', 0, false, 'bool')) {
                                     continue;
                                 }
-                                
+
                                 $option = array();
                                 if ($with_icons && (string) $instance->params['icon']) {
                                     $option['icon'] = $instance->params['icon'];
@@ -942,7 +942,7 @@ class BimpCache
         return $list;
     }
 
-    public static function getBimpObjectObjects($module, $object_name, $filters = array(), $order_by = 'id', $sortorder = 'asc', $joins = array())
+    public static function getBimpObjectObjects($module, $object_name, $filters = array(), $order_by = 'id', $sortorder = 'asc', $joins = array(), $n = null)
     {
         $instance = BimpObject::getInstance($module, $object_name);
 
@@ -950,7 +950,7 @@ class BimpCache
             return array();
         }
 
-        $rows = $instance->getList($filters, null, null, $order_by, $sortorder, 'array', array($instance->getPrimary()), $joins);
+        $rows = $instance->getList($filters, $n, null, $order_by, $sortorder, 'array', array($instance->getPrimary()), $joins);
         $items = array();
 
         foreach ($rows as $r) {
@@ -1554,6 +1554,45 @@ class BimpCache
         return self::getCacheArray($cache_key, $include_empty, 0, $empty_label);
     }
 
+    public static function getUserCentresArray()
+    {
+
+        $centres = array(
+            '' => ''
+        );
+
+        global $user;
+        if (BimpObject::objectLoaded($user)) {
+            $cache_key = 'user_' . $user->id . '_centres_array';
+            if (!isset(self::$cache[$cache_key])) {
+                $userCentres = explode(' ', $user->array_options['options_apple_centre']);
+                $centres = self::getCentres();
+
+                if (count($userCentres)) {
+                    foreach ($userCentres as $code) {
+                        if (preg_match('/^ ?([A-Z]+) ?$/', $code, $matches)) {
+                            if (isset($centres[$matches[1]])) {
+                                self::$cache[$cache_key][$matches[1]] = $centres[$matches[1]]['label'];
+                            }
+                        }
+                    }
+                }
+
+                if (count($centres) <= 1) {
+                    foreach ($centres as $code => $centre) {
+                        self::$cache[$cache_key][$code] = $centre['label'];
+                    }
+                }
+            }
+
+            return self::$cache[$cache_key];
+        }
+
+        return array();
+    }
+
+    // User Groups: 
+
     public static function getUserGroupsArray($include_empty = 1, $nom_url = 0)
     {
         $cache_key = 'users_groups';
@@ -1631,59 +1670,6 @@ class BimpCache
         }
 
         return self::$cache[$cache_key];
-    }
-
-    public static function getUserCentresArray()
-    {
-
-        $centres = array(
-            '' => ''
-        );
-
-        global $user;
-        if (BimpObject::objectLoaded($user)) {
-            $cache_key = 'user_' . $user->id . '_centres_array';
-            if (!isset(self::$cache[$cache_key])) {
-                $userCentres = explode(' ', $user->array_options['options_apple_centre']);
-                $centres = self::getCentres();
-
-                if (count($userCentres)) {
-                    foreach ($userCentres as $code) {
-                        if (preg_match('/^ ?([A-Z]+) ?$/', $code, $matches)) {
-                            if (isset($centres[$matches[1]])) {
-                                self::$cache[$cache_key][$matches[1]] = $centres[$matches[1]]['label'];
-                            }
-                        }
-                    }
-                }
-
-                if (count($centres) <= 1) {
-                    foreach ($centres as $code => $centre) {
-                        self::$cache[$cache_key][$code] = $centre['label'];
-                    }
-                }
-            }
-
-            return self::$cache[$cache_key];
-        }
-
-        return array();
-    }
-
-    // User Groups: 
-
-    public static function getGroupIds($idUser)
-    {
-        $cache_key = 'groupsIduser' . $idUser;
-        if (!isset(self::$cache[$cache_key])) {
-            require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
-            $userGroup = new UserGroup(self::getBdb()->db);
-
-            foreach ($userGroup->listGroupsForUser($idUser, false) as $obj) {
-                self::$cache[$cache_key][] = $obj->id;
-            }
-        }
-        return self::getCacheArray($cache_key);
     }
 
     public static function getGroupUsersList($id_group)
@@ -2145,18 +2131,18 @@ class BimpCache
 
     public static function getEntrepotsShipTos($include_empty = false, $default = '53884')
     {
-        $key = 'entrepots_ship_tos'.($include_empty?'withempty' : '');
+        $key = 'entrepots_ship_tos' . ($include_empty ? 'withempty' : '');
         if (!isset(self::$cache[$key])) {
             self::$cache[$key] = array();
 
-            if($include_empty)
+            if ($include_empty)
                 $rows = self::getBdb()->getRows('entrepot', '1', null, 'object', array('rowid', 'ship_to'), 'ref', 'asc');
             else
                 $rows = self::getBdb()->getRows('entrepot', '`ship_to` != \'\' AND `ship_to` IS NOT NULL', null, 'object', array('rowid', 'ship_to'), 'ref', 'asc');
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
                     $shipTo = $r->ship_to;
-                    if($shipTo == '')
+                    if ($shipTo == '')
                         $shipTo = $default;
                     self::$cache[$key][(int) $r->rowid] = $shipTo;
                 }
@@ -2181,7 +2167,12 @@ class BimpCache
         return self::getCacheArray('cond_reglements_array', 1, '', '');
     }
 
-    public static function getModeReglementsArray($key = 'id', $active_only = false)
+    public static function getModeReglements($type = 2)
+    {
+        return static::getModeReglementsArray('id', true, $type);
+    }
+
+    public static function getModeReglementsArray($key = 'id', $active_only = false, $type = 2)
     {
         $cache_key = 'mode_reglements_by_' . $key;
         if ($active_only) {
@@ -2199,15 +2190,17 @@ class BimpCache
             self::$cache[$cache_key] = array();
 
             foreach ($form->cache_types_paiements as $id_payment => $payment_data) {
-                if (!$active_only || ($active_only && (int) $payment_data['active'])) {
-                    switch ($key) {
-                        case 'id':
-                            self::$cache[$cache_key][(int) $payment_data['id']] = $payment_data['label'];
-                            break;
+                if ($type == 2 || $type == $payment_data['type'] || $payment_data['type'] == 2) {
+                    if (!$active_only || ($active_only && (int) $payment_data['active'])) {
+                        switch ($key) {
+                            case 'id':
+                                self::$cache[$cache_key][(int) $payment_data['id']] = $payment_data['label'];
+                                break;
 
-                        case 'code':
-                            self::$cache[$cache_key][$payment_data['code']] = $payment_data['label'];
-                            break;
+                            case 'code':
+                                self::$cache[$cache_key][$payment_data['code']] = $payment_data['label'];
+                                break;
+                        }
                     }
                 }
             }
@@ -2455,9 +2448,10 @@ class BimpCache
 
         return self::$cache['secteurs_array'];
     }
-    
+
     // Comme getSecteursArray avec l'option "Tous" en plus
-    public function getSecteurAllArray() {
+    public function getSecteurAllArray()
+    {
         if (!BimpCore::getConf("USE_SECTEUR")) {
             return array();
         }
@@ -2476,8 +2470,8 @@ class BimpCache
                 }
             }
         }
-        
-        
+
+
 
         return self::$cache['secteurs_all_array'];
     }

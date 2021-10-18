@@ -1,0 +1,1 @@
+DELETE FROM `llx_bl_inventory_expected` WHERE `llx_bl_inventory_expected`.`id` = 160480

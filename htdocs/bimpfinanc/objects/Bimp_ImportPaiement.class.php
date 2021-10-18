@@ -1,63 +1,73 @@
 <?php
 
-class Bimp_ImportPaiement extends BimpObject{
+class Bimp_ImportPaiement extends BimpObject
+{
+
     var $id_mode_paiement = 'VIR';
-    function create(&$warnings = array(), $force_create = false) {
-        if(isset($_FILES['file']) && $_FILES['file']['name'] != ''){
+
+    function create(&$warnings = array(), $force_create = false)
+    {
+
+        if (isset($_FILES['file']) && $_FILES['file']['name'] != '') {
+
             $errors = parent::create($warnings, $force_create);
-            if(!count($errors)){
+
+            if (!count($errors)) {
                 $file_dir = $this->getFilesDir();
 
-                $oldName =  $_FILES['file']['name'];
+                $oldName = $_FILES['file']['name'];
                 $name = $this->getFileName();
-                $_FILES['file']['name']= $name;
-                if(file_exists($file_dir.$_FILES['file']['name']))
-                        $errors[] = 'Fichier '.$_FILES['file']['name']. ' existe déja';
-                else{
+                $_FILES['file']['name'] = $name;
+                if (file_exists($file_dir . $_FILES['file']['name']))
+                    $errors[] = 'Fichier ' . $_FILES['file']['name'] . ' existe déja';
+                else {
                     require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 
                     dol_add_file_process($file_dir, 0, 0, 'file');
 
-
-                    if(!count($errors)){
-                        $datas = file_get_contents($file_dir.$_FILES['file']['name']);
+                    if (!count($errors)) {
+                        $datas = file_get_contents($file_dir . $_FILES['file']['name']);
 
                         $this->traiteData($datas, $errors);
-
                     }
                 }
             }
-        }
-        else
+        } else
             $errors[] = 'Fichier introuvable';
-        
-        
-        
+
+
+
         return $errors;
     }
     
-    function actionCreate_paiement($data, &$success){
+    function create_paiement_from_list($list){
         global $user;
-        $success = 'Paiment(s) crée(s)';
-        $errors = $wanings = array();
-        $list = $this->getChildrenObjects('lignes', array('traite'=>0, 'type'=>'vir'));
-        foreach($list as $child){
+        $errors = array();
+        foreach ($list as $child) {
             $errorsLn = array();
             $totP = $child->getData('price');
-            if($child->ok == true){
-                foreach($child->getData('factures') as $idFact){
-                    $fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $idFact); 
-                    if($fact->getData('remain_to_pay') < $totP)
+            if ($child->ok == true) {
+                foreach ($child->getData('factures') as $idFact) {
+                    $fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $idFact);
+                    if ($fact->getData('remain_to_pay') < $totP)
                         $montant = $fact->getData('remain_to_pay');
                     else
                         $montant = $totP;
                     $totP -= $montant;
-                    if($montant > 0){
+                    if ($montant > 0) {
                         if (!class_exists('Paiement')) {
                             require_once DOL_DOCUMENT_ROOT . '/compta/paiement/class/paiement.class.php';
                         }
                         $p = new Paiement($this->db->db);
-                        $p->datepaye = dol_now();
+
+                        if ((string) $child->getData('date')) {
+                            $p->datepaye = strtotime($child->getData('date'));
+                        } else {
+                            $p->datepaye = dol_now();
+                        }
+
+                        $p->ref = $child->getData('num');
+                        
                         $p->amounts = array(
                             $idFact => $montant
                         );
@@ -76,47 +86,72 @@ class Bimp_ImportPaiement extends BimpObject{
                                 }
                             }
                         }
-                    }
-                    else{
-                        $errorsLn[] = 'Impossible de créer le paiment : '.$montant;
+                    } else {
+                        $errorsLn[] = 'Impossible de créer le paiment : ' . $montant;
                     }
                     $fact->checkIsPaid();
                 }
-                if(!count($errorsLn))
+                if (!count($errorsLn))
                     $child->updateField('traite', 1);
                 $errors = BimpTools::merge_array($errors, $errorsLn);
             }
         }
-        
-        return array('errors'=>$errors, 'warnings'=>$wanings);
+        return $errors;
+    }
+
+    function actionCreate_paiement($data, &$success)
+    {
+        $success = 'Paiment(s) crée(s)';
+        $wanings = array();
+        $list = $this->getChildrenObjects('lignes', array('traite' => 0, 'type' => 'vir'));
+        $errors = $this->create_paiement_from_list($list);
+
+        return array('errors' => $errors, 'warnings' => $wanings);
     }
     
-    function getFileName(){
-        return 'origine'.$this->id.'.csv';
+    function actionCreate_all_paiement($data, &$success){
+        $success = 'Paiment(s) crée(s)';
+        $wanings = array();
+        $list = BimpCache::getBimpObjectObjects($this->module, 'Bimp_ImportPaiementLine', array('traite' => 0, 'type' => 'vir'));
+        $errors = $this->create_paiement_from_list($list);
+
+        return array('errors' => $errors, 'warnings' => $wanings);
     }
-    
-    
-    function traiteData($datas, $errors){
+
+    function getFileName()
+    {
+        return 'origine' . $this->id . '.csv';
+    }
+
+    function traiteData($datas, $errors)
+    {
         $separateurecriture = '04178';
-                    
+
         $tabLn = explode($separateurecriture, $datas);
-        
+
         unset($tabLn[0]);
-        
-        foreach ($tabLn as $ln){
-            $ln = $separateurecriture.$ln;
-            
-            
+
+        foreach ($tabLn as $ln) {
+            $ln = $separateurecriture . $ln;
+
             $line = BimpCache::getBimpObjectInstance($this->module, 'Bimp_ImportPaiementLine');
             $line->set('id_import', $this->id);
             $line->set('data', $ln);
             $errors = BimpTools::merge_array($errors, $line->create());
-            
-           
         }
     }
     
     
+    public static function toCompteAttente(){
+        $return = array();
+        $list = BimpCache::getBimpObjectObjects('bimpfinanc', 'Bimp_ImportPaiementLine', array('traite' => 0, 'type' => 'vir', 'num' => ''));
+        foreach ($list as $payin){
+            $num = BimpTools::getNextRef('Bimp_ImportPaiementLine', 'num', 'PAYIN{AA}{MM}-', 5);
+            $payin->updateField('num', $num);
+            $return[] = array('num' => $num, 'amount' => $payin->getData('price'));
+        }
+        return $return;
+    }
 
     public function isDeletable($force_delete = false, &$errors = array())
     {
@@ -138,7 +173,7 @@ class Bimp_ImportPaiement extends BimpObject{
         if ($this->isActionAllowed('validate')) {
             if ($this->canSetAction('validate')) {
                 $buttons[] = array(
-                    'label'   => 'Traiter les paiements rataché',
+                    'label'   => 'Traiter les paiements rattachés',
                     'icon'    => 'fas_check',
                     'onclick' => $this->getJsActionOnclick('create_paiement')
                 );

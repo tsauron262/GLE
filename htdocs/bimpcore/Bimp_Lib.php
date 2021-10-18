@@ -16,6 +16,7 @@ if (!defined('BIMP_LIB')) {
 
     require_once __DIR__ . '/libs/spyc/Spyc.php';
 
+    require_once $dir . 'Objects.php';
     require_once $dir . 'BimpLog.php';
     require_once $dir . 'BimpDb.php';
     require_once $dir . 'BimpValidate.php';
@@ -235,7 +236,8 @@ function checkBimpCoreVersion()
     }
 }
 
-function hookDebutFiche(){
+function hookDebutFiche()
+{
     BimpObject::loadClass('bimpcore', 'BimpAlert');
     echo BimpAlert::getMsgs();
 }

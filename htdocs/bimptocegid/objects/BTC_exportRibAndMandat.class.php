@@ -84,20 +84,21 @@ class BTC_exportRibAndMandat extends BTC_export {
      */
     
     private function printMANDATtra(Bimp_SocBankAccount $rib, Bimp_Societe $client, Bimp_Facture $facture):string {
+        $date = new DateTime($rib->getData('datec'));
         $this->structure_mandat = Array(
             "FIXE" => $this->sizing("***", 3),
             "IDENTIFIANT" => $this->sizing("MDT", 3),
             "ICS" => $this->sizing('FR02ZZZ008801', 35),
             "RUM" => $this->sizing($rib->getData('rum'), 35),
-            "LIBELLE" => $this->sizing("", 35),
-            "IBAN" => $this->sizing("", 70),
-            "BIC" => $this->sizing("", 35),
+            "LIBELLE" => $this->sizing(strtoupper($this->suppr_accents($client->getName())), 35),
+            "IBAN" => $this->sizing($rib->getData('iban_prefix'), 70),
+            "BIC" => $this->sizing($rib->getData('bic'), 35),
             "GENERAL" => $this->sizing("", 17),
-            "AUXILIAIRE" => $this->sizing("", 17),
+            "AUXILIAIRE" => $this->sizing($client->getData('code_compta'), 17),
             "PAIEMENT" => $this->sizing($this->recurrentORponctuel($facture->getData('ef_type')), 3),
             "TYPE" => $this->sizing($this->parORpro($client), 3),
             "STATUT" => $this->sizing("1FI", 3),
-            "DATECREATION" => $this->sizing("", 8),
+            "DATECREATION" => $this->sizing($date->format('dmY'), 8),
             "DATEENVOICLI" => $this->sizing("", 8),
             "DATESIGNATURE" => $this->sizing("", 8),
             "DATEMVTENVOI" => $this->sizing("", 8),

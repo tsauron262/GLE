@@ -150,6 +150,10 @@ lists_cols:
         label: Pièce
         value: 
             callback: displayObject
+    client: 
+        label: Client
+        value: 
+            callback: displayClient
             
 lists:
     default:
@@ -165,7 +169,8 @@ lists:
         cols:
             type:
             status:
-            piece:            
+            piece:   
+            client:
             id_user_ask: 
             id_user_affected: 
             id_user_valid: 
@@ -178,5 +183,6 @@ lists:
             id_user_affected: unset
             id_user_valid: unset
             date_valid: unset
+            date_create:
             
             

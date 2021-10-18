@@ -24,21 +24,22 @@ class BC_ListTable extends BC_List
         'item_checkbox'   => array('data_type' => 'bool', 'default' => 1)
     );
     public static $col_params = array(
-        'label'           => array('default' => ''),
-        'show'            => array('data_type' => 'bool', 'default' => 1),
-        'display'         => array('default' => ''),
-        'display_options' => array('data_type' => 'array', 'default' => array(), 'compile' => true),
-        'edit'            => array('data_type' => 'bool', 'default' => 0),
-        'history'         => array('data_type' => 'bool', 'default' => 0),
-        'available_csv'   => array('data_type' => 'bool', 'default' => 1),
-        'min_width'       => array('default' => null),
-        'search_list'     => array('data_type' => 'array', 'compile' => true, 'default' => null),
-        'search'          => array('type' => 'definitions', 'defs_type' => 'search', 'default' => null),
-        'col_style'       => array('default' => ''),
-        'has_total'       => array('data_type' => 'bool', 'default' => 0),
-        'total_type'      => array('default' => null),
-        'align'           => array('default' => 'left'),
-        'object_link'     => array('data_type' => 'bool', 'default' => 0)
+        'label'             => array('default' => ''),
+        'show'              => array('data_type' => 'bool', 'default' => 1),
+        'display'           => array('default' => ''),
+        'display_options'   => array('data_type' => 'array', 'default' => array(), 'compile' => true),
+        'edit'              => array('data_type' => 'bool', 'default' => 0),
+        'history'           => array('data_type' => 'bool', 'default' => 0),
+        'available_csv'     => array('data_type' => 'bool', 'default' => 1),
+        'min_width'         => array('default' => null),
+        'search_list'       => array('data_type' => 'array', 'compile' => true, 'default' => null),
+        'search'            => array('type' => 'definitions', 'defs_type' => 'search', 'default' => null),
+        'col_style'         => array('default' => ''),
+        'has_total'         => array('data_type' => 'bool', 'default' => 0),
+        'total_type'        => array('default' => null),
+        'align'             => array('default' => 'left'),
+        'object_link'       => array('data_type' => 'bool', 'default' => 0),
+        'csv_needed_fields' => array('data_type' => 'array', 'compile' => true, 'default' => array())
     );
     public static $item_col_params = array(
         'value'      => array('default' => null),
@@ -75,7 +76,7 @@ class BC_ListTable extends BC_List
         $this->params_def['refresh_after_content'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['enable_csv'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['search_open'] = array('data_type' => 'bool', 'default' => 0);
-        
+
         global $current_bc;
         if (!is_object($current_bc)) {
             $current_bc = null;
@@ -378,7 +379,7 @@ class BC_ListTable extends BC_List
         if ($sort_field == 'position') {
             return 'a.position';
         }
-        
+
         if ($sort_option == 'default') {
             $sort_option = '';
         }
@@ -1057,6 +1058,8 @@ class BC_ListTable extends BC_List
                         $label = $bc_field->getParam('label', $field_name);
                     }
                     $content = $bc_field->renderCsvOptionsInput('col_' . $col_name . '_option', (isset($user_config_cols_options[$col_name]['csv_option']) ? $user_config_cols_options[$col_name]['csv_option'] : ''));
+                } elseif (method_exists($field_object, 'get' . ucfirst($field_name) . 'csvValue')) {
+                    $content = 'Valeur affichée';
                 }
 
                 if (!$label) {
@@ -1375,7 +1378,7 @@ class BC_ListTable extends BC_List
                 $tools_html .= '></span>';
                 $tools_width += 44;
             }
-            if ($this->params['checkboxes'] && count($this->params['bulk_actions'])) {
+        if ($this->params['checkboxes'] && (count($this->params['bulk_actions']) || count($this->params['extra_bulk_actions']))) {
                 $tools_html .= '<span class="headerButton displayPopupButton openBulkActionsPopupButton"';
                 $tools_html .= ' data-popup_id="' . $this->identifier . '_bulkActionsPopup"></span>';
                 $tools_html .= $this->renderBulkActionsPopup();
@@ -2367,7 +2370,7 @@ class BC_ListTable extends BC_List
                 $field_object = self::getColFieldObject($this->object, $col_name, $field_name);
 
                 if ($light_export) {
-                    if (!is_a($field_object, 'BimpObject') || !$field_object->field_exists($field_name)) {
+                    if (!is_a($field_object, 'BimpObject') || (!$field_object->field_exists($field_name) && !method_exists($field_object, 'get' . ucfirst($field_name) . 'csvValue'))) {
                         continue;
                     }
                 }
@@ -2438,8 +2441,8 @@ class BC_ListTable extends BC_List
                         } elseif (isset($item_params['value'])) {
                             $content = $item_params['value'];
                         }
-                        
-                        if(is_array($content)){//champ json
+
+                        if (is_array($content)) {//champ json
                             $content = implode("\n", $content);
                         }
 
@@ -2613,6 +2616,45 @@ class BC_ListTable extends BC_List
                     } else {
                         $errors[] = 'Champ invalide pour la colonne "' . self::getColFullTitle($this->object, $col_name) . '"';
                     }
+                } elseif (method_exists($field_object, 'get' . ucfirst($field_name) . 'csvValue')) {
+                    $fields[$col_name] = array(
+                        'class'         => get_class($field_object),
+                        'field'         => $field_name,
+                        'needed_fields' => array()
+                    );
+
+                    $needed_fields = BimpTools::getArrayValueFromPath($col_params, 'csv_needed_fields', array());
+
+                    if (!empty($needed_fields)) {
+                        $col_children = explode('___', $col_name);
+                        array_pop($col_children);
+                        $field_alias = 'a';
+                        $col_errors = array();
+
+                        if (!empty($col_children)) {
+                            $col_errors = $this->object->getRecursiveChildrenJoins($col_children, $filters, $joins, 'a', $field_alias);
+                        }
+
+                        if (count($col_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($col_errors, 'Colonne "' . self::getColFullTitle($this->object, $col_name) . '"');
+                        } else {
+                            foreach ($needed_fields as $needed_field) {
+                                if ($field_object->field_exists($needed_field)) {
+                                    $col_errors = array();
+                                    $sqlKey = $field_object->getFieldSqlKey($needed_field, $field_alias, null, $filters, $joins, $col_errors);
+
+                                    if ($sqlKey) {
+                                        $return_fields[] = $sqlKey . ' as ' . $col_name . '_needed_field_' . $needed_field;
+                                        $fields[$col_name]['needed_fields'][] = $needed_field;
+                                    } elseif (count($col_errors)) {
+                                        $errors[] = BimpTools::getMsgFromArray($col_errors, 'Colonne "' . self::getColFullTitle($this->object, $col_name) . '" (Champ requis: "' . $field_object->getConf('fields/' . $needed_field . '/label', $needed_field) . '")');
+                                    } else {
+                                        $errors[] = 'Champ invalide pour la colonne "' . self::getColFullTitle($this->object, $col_name) . '" (Champ requis: "' . $field_object->getConf('fields/' . $needed_field . '/label', $needed_field) . '")';
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -2653,16 +2695,35 @@ class BC_ListTable extends BC_List
                             foreach ($fields as $col_name => $bc_field) {
                                 $value = '';
 
-                                if (isset($children_fields[$col_name])) {
-                                    foreach ($children_fields[$col_name] as $child_field) {
-                                        if (isset($r[$col_name . '___' . $child_field])) {
-                                            $value .= ($value ? ' ' : '') . $r[$col_name . '___' . $child_field];
+                                if (is_a($bc_field, 'BC_Field')) {
+                                    if (isset($children_fields[$col_name])) {
+                                        foreach ($children_fields[$col_name] as $child_field) {
+                                            if (isset($r[$col_name . '___' . $child_field])) {
+                                                $value .= ($value ? ' ' : '') . $r[$col_name . '___' . $child_field];
+                                            }
+                                        }
+                                    } else {
+                                        if (isset($r[$col_name])) {
+                                            $bc_field->value = $r[$col_name];
+                                            $value = $bc_field->getNoHtmlValue(BimpTools::getArrayValueFromPath($col_options, $cols[$col_name], ''));
                                         }
                                     }
-                                } else {
-                                    if (isset($r[$col_name])) {
-                                        $bc_field->value = $r[$col_name];
-                                        $value = $bc_field->getNoHtmlValue(BimpTools::getArrayValueFromPath($col_options, $cols[$col_name], ''));
+                                } elseif (is_array($bc_field) && isset($bc_field['class']) && isset($bc_field['field'])) {
+                                    $method = 'get' . ucfirst($bc_field['field']) . 'csvValue';
+                                    if (class_exists($bc_field['class']) && method_exists($bc_field['class'], $method)) {
+                                        $needed = array();
+                                        
+                                        if (!empty($bc_field['needed_fields'])) {                                            
+                                            foreach ($bc_field['needed_fields'] as $needed_field) {
+                                                if (isset($r[$col_name . '_needed_field_' . $needed_field])) {
+                                                    $needed[$needed_field] = $r[$col_name . '_needed_field_' . $needed_field];
+                                                }
+                                            }
+                                        }
+                                        
+                                        $value = forward_static_call_array(array(
+                                            $bc_field['class'], $method
+                                                ), array($needed));
                                     }
                                 }
 

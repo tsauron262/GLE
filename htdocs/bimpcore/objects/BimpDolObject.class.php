@@ -33,6 +33,15 @@ class BimpDolObject extends BimpObject
         if (!empty($user->email)) {
             $emails[$user->email] = $user->getFullName($langs) . ' (' . $user->email . ')';
         }
+        
+        $id_ent = $this->getData('entrepot');
+        if($id_ent > 0){
+            $ent = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Entrepot', $id_ent);
+            if(is_object($ent) && $ent->isLoaded()){
+                $mail = $ent->getMail();
+                $emails[$mail] = $mail;
+            }
+        }
 
         if (!$user->admin)
             return $emails;

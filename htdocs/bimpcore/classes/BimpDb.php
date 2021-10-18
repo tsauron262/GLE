@@ -101,18 +101,18 @@ class BimpDb
     public function execute($sql)
     {
         $transac = (stripos(trim($sql), "SELECT") === 0) ? 0 : 1;
-        if ($transac)
-            $this->db->begin();
+//        if ($transac)
+//            $this->db->begin();
 
         $result = $this->db->query($sql);
 
-        if ($transac) {
-            if ($result > 0) {
-                $this->db->commit();
-            } else {
-                $this->db->rollback();
-            }
-        }
+//        if ($transac) {
+//            if ($result > 0) {
+//                $this->db->commit();
+//            } else {
+//                $this->db->rollback();
+//            }
+//        }
         if (!$result)
             $this->logSqlError($sql);
 
@@ -352,6 +352,11 @@ class BimpDb
         }
         $this->db->free($result);
         return $rows;
+    }
+
+    public function rowExists($table, $id, $primary = 'id')
+    {
+        return ((int) $this->getCount($table, $primary . ' = ' . $id, $primary) > 0 ? true : false);
     }
 
     public function delete($table, $where)

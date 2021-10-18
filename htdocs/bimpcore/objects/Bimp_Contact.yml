@@ -169,10 +169,12 @@ fields:
         label: Note privée
         type: text
         user_edit: 1
+        hashtags: 1
     note_public:
         label: Note publique
         type: text
         user_edit: 1
+        hashtags: 1
         
 #Champs non gérés:
 #    ref_ext
@@ -385,3 +387,19 @@ cards:
                 value: 
                     callback: displayContactInfos
         view_btn: 1
+        
+searches: 
+    default: 
+        fields_search: 
+            - a.firstname
+            - a.lastname
+            - s.nom
+        fields_return: 
+            - a.firstname
+            - a.lastname
+            - s.nom
+        label_syntaxe: '<a.firstname> - <a.lastname> (<s.nom>)'
+        joins: 
+            - table: societe
+              on: a.fk_soc = s.rowid
+              alias: s

@@ -1557,4 +1557,16 @@ class BimpRender
 
         return $html;
     }
+    
+    public static function renderCustomForm($rows, $values = array(), $params = array())
+    {
+        $html = '';
+        
+        
+    }
+    
+    public static function renderCustomFormFromConfigFile($file, $object = null, $values = array(), $params = array())
+    {
+        
+    }
 }

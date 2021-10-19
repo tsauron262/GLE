@@ -438,6 +438,11 @@ forms:
                   type: select
                   options: 
                       array: emailUsersFrom
+              value: 
+                  prop: 
+                      name: email
+                      object: 
+                          global: user
                       
             - custom: 1
               label: Destinataires

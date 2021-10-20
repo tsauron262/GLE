@@ -101,6 +101,8 @@ class DoliDBMysqliC extends DoliDB
     public $countReq = 0;
     public $countReq2 = 0;
     public $timeReconnect = 0;
+    
+    public $thread_id = 0;
 
     /* fmoddrsi */
 
@@ -955,10 +957,18 @@ class DoliDBMysqliC extends DoliDB
         }
         /* fmoddrsi */
 
-        if($this->transaction_opened == 0 && !$this->connect_server($qtype))
-        {
-            dol_syslog(get_class($this)."::query: Fatal error - cannot connect to database server for request type: ".$qtype, LOG_ERR);
-            return FALSE;
+        if($this->transaction_opened == 0){//On est pas dans une transaction.
+            if(!$this->connect_server($qtype))
+            {
+                dol_syslog(get_class($this)."::query: Fatal error - cannot connect to database server for request type: ".$qtype, LOG_ERR);
+                return FALSE;
+            }
+        }
+        else{
+            if($this->getThreadId() != $this->thread_id){//gros probléme id transaction changée
+                BimpCore::addlog('Gros probléme changement de thread Id');
+                die('Gros probléme changement de thread Id');
+            }
         }
         
         /* fmoddrsi */
@@ -990,6 +1000,11 @@ class DoliDBMysqliC extends DoliDB
                 $this->lastqueryerror = $query;
                 $this->lasterror = $this->error();
                 $this->lasterrno = $this->errno();
+                
+//                if($this->transaction_opened > 0)
+//                    $this->rollback();
+//                
+//                BimpCore::addlog('Erreur SQL '.$query.($this->transaction_opened > 0 ? ' ayant provoqué le rollback de la transaction' : ''));
 
                 $debug = "";
                 if (function_exists("synGetDebug"))
@@ -1054,6 +1069,12 @@ class DoliDBMysqliC extends DoliDB
         /* fmoddrsi */
 
         return $ret;
+    }
+    
+    function getThreadId(){    
+        $sql = $this->db->query('SELECT CONNECTION_ID() as id;');
+        $res = $this->fetch_object($sql);
+        return $res->id;
     }
 
     /**
@@ -1907,6 +1928,8 @@ class DoliDBMysqliC extends DoliDB
                 ));
             }
         }
+        
+        $this->thread_id = $this->getThreadId();
     }
     
     public function commit($log = '')

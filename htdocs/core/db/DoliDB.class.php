@@ -142,7 +142,7 @@ abstract class DoliDB implements Database
 	function commit($log='')
 	{
 		dol_syslog('',0,-1);
-		if ($this->transaction_opened<=1)
+		if ($this->transaction_opened==1)
 		{
                         /* moddrsi */
                         if ($this->has_rollback) {
@@ -171,11 +171,14 @@ abstract class DoliDB implements Database
 				return 0;
 			}
 		}
-		else
+		elseif($this->transaction_opened > 1)
 		{
 			$this->transaction_opened--;
 			return 1;
 		}
+                else{
+                        BimpCore::addlog('Tentative de COMMIT transaction deja fermé', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore');
+                }
 	}
 
 	/**

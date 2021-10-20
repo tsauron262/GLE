@@ -139,6 +139,10 @@ class mod_syslog_file extends LogHandler implements LogHandlerInterface
 
 		$logfile = $this->getFilename($suffixinfilename);
 
+                $dir = str_replace(basename($logfile), '', $logfile);
+                if(!is_dir($dir))
+                    mkdir ($dir);
+                
 		// Test constant SYSLOG_FILE_NO_ERROR (should stay a constant defined with define('SYSLOG_FILE_NO_ERROR',1);
 		if (defined('SYSLOG_FILE_NO_ERROR')) $filefd = @fopen($logfile, 'a+');
 		else $filefd = fopen($logfile, 'a+');

@@ -2590,6 +2590,16 @@ class Bimp_Societe extends BimpDolObject
                     $this->set('siren', substr($siret, 0, 9));
                 }
             }
+            
+            $have_already_code_comptable = (BimpTools::getValue('has_already_code_comptable_client') == 1) ? true : false;
+            if($have_already_code_comptable && empty(BimpTools::getValue('code_compta'))) {
+                $errors[] = "Vous devez rensseigner un code comptable client";
+            }
+
+            if(!count($errors) && $have_already_code_comptable) {
+                $this->set('exported', 1);
+            }
+
         }
         return $errors;
     }
@@ -2608,7 +2618,7 @@ class Bimp_Societe extends BimpDolObject
             if (stripos($this->getData('code_compta'), 'E') === 0 && $this->getData('fk_typent') == 8)
                 return array("Code compta entreprise, le type de tiers ne peut être différent.");
         }
-
+        
         if ($init_solv != $this->getData('solvabilite_status') && (int) $this->getData('solvabilite_status') === self::SOLV_A_SURVEILLER_FORCE) {
             global $user;
             if (!$user->admin && $user->id != 1499) {

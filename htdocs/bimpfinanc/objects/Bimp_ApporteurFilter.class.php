@@ -10,9 +10,18 @@ class Bimp_ApporteurFilter extends BimpObject{
     
     public function getProductIds(){
         $filters_array = BimpTools::json_decode_array($this->getData('filter'));
-        if(is_array($filters_array) && count($filters_array)){
+        
+        $filtersProd = array();
+        $prefProd = 'dol_line___product___';
+        foreach($filters_array as $filter => $dataFilter){
+            if(stripos($filter, $prefProd) !== false){
+                $filtersProd[str_replace($prefProd, '', $filter)] = $dataFilter;
+            }
+        }
+        
+        if(is_array($filtersProd) && count($filtersProd)){
             $object = BimpObject::getInstance('bimpcore', 'Bimp_Product');
-            $list = BC_FiltersPanel::getObjectListIdsFromFilters($object, $filters_array);
+            $list = BC_FiltersPanel::getObjectListIdsFromFilters($object, $filtersProd);
             return $list;
         }
         else

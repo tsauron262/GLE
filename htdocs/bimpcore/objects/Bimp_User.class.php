@@ -1207,6 +1207,7 @@ class Bimp_User extends BimpObject
 
     public function actionRemoveRight($data, &$success)
     {
+
         // Toujours déclarer ces trois variables en début des fonctions actions (utile pour toute insertion de code ultérieure) 
         $errors = array();
         $warnings = array();
@@ -1218,12 +1219,58 @@ class Bimp_User extends BimpObject
 //            'active' => 'no' ou 'inherit' (vérifier que le user possède un droit hérité d'un groupe) 
 //        )
         // Toujours retourner $errors et $warnings (même vides) 
+        
+        $id_rights = BimpTools::getArrayValueFromPath($data, 'id_rights', array());
+        $results = array();
 
+        if (empty($id_rights)) {
+            $errors[] = 'Aucun droit sélectionné';
+        } else {
+            $nOk = 0;
+
+            foreach ($id_rights as $id_right) {
+                $right_def = $this->db->getRow('rights_def', 'id = ' . $id_right, null, 'array');
+
+                if (is_null($right_def)) {
+                    $warnings[] = 'Le droit #' . $id_right . ' n\'existe plus';
+                } else {
+                        if((int) $this->db->getValue('user_rights', 'rowid', 'fk_user = ' . $this->id . ' AND fk_id = ' . $id_right)) {
+                            if ($this->db->delete('user_rights', "entity = 1 AND fk_user = " . $this->id . " AND fk_id = ". $id_right)) {
+                                $nOk++;
+
+                                $results[$id_right] = array(
+                                    'ok' => 1,
+                                    'active' => 'inherit' 
+                                );
+                                                    
+                        } else {
+                            $sql_err = $this->db->err();
+                            $label = $right_def['module'] . '->' . $right_def['perms'] . (!empty($right_def['subperms']) ? '->' . $right_def['subperms'] : '');
+                            $warnings[] = 'Echec de la suppression du droit "' . $label . '"' . ($sql_err ? ' - ' . $sql_err : '');
+
+                            $results[$id_right] = array(
+                                'ok' => 0,
+                                'active' => 'no' 
+                            );                 
+                        }
+                    }
+
+                    if ($nOk === 1) {
+                        $success = 'Droit retiré avec succès';
+                    } elseif ($nOk > 1) {
+                        $success = $nOk . ' droits ont été retirés avec succès';
+                    }
+                }
+            }
+        }      
+                
         return array(
             'errors'   => $errors,
-            'warnings' => $warnings
+            'warnings' => $warnings,
+            'results'  => $results
         );
     }
+
 
     // Overrides
 

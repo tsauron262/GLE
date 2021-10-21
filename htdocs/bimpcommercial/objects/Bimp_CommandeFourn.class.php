@@ -335,12 +335,17 @@ class Bimp_CommandeFourn extends BimpComm
                             $result['country'] = $dataAdd[3];
                     } */else
                         $warnings[] = "Impossible de parser l'adresse personalisée";
-                    if (count($tabZipTown) > 1) {
-                        $result['zip'] = $tabZipTown[0];
-                        $result['town'] = $town;
+                    if(!is_array($tabZipTown)){
+                        $warnings[] = 'Consitution de l\'adresse incorrect';
                     }
-                    if (strlen($result['zip']) != 5)
-                        $warnings[] = "Code postal : " . $result['zip'] . ' incorrect';
+                    else{
+                        if (count($tabZipTown) > 1) {
+                            $result['zip'] = $tabZipTown[0];
+                            $result['town'] = $town;
+                        }
+                        if (strlen($result['zip']) != 5)
+                            $warnings[] = "Code postal : " . $result['zip'] . ' incorrect';
+                    }
                 } else {
                     $warnings[] = 'Adresse non renseignée';
                 }

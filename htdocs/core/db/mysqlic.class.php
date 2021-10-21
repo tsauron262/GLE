@@ -967,7 +967,7 @@ class DoliDBMysqliC extends DoliDB
         else{
             if(stripos($query, 'SELECT') !== 0 && $this->getThreadId() != $this->thread_id){//gros probléme id transaction changée
                 if(class_exists('BimpCore')){
-                    BimpCore::addlog('Gros probléme changement de thread Id', 1, 'sql', null, array('query' => $query, 'oldId' => $this->thread_id, 'newId' => $this->getThreadId()));
+                    BimpCore::addlog('Gros probléme changement de thread Id', 4, 'sql', null, array('query' => $query, 'oldId' => $this->thread_id, 'newId' => $this->getThreadId()));
                 
                     $errors = array('Problème réseau, merci de relancer l\'opération');
                 

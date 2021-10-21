@@ -1931,6 +1931,10 @@ class DoliDBMysqliC extends DoliDB
 
     public function begin()
     {
+        if (! $this->transaction_opened)
+            $firstBegin = true;
+        else
+            $firstBegin = false;
         $res = parent::begin();
 
         if (defined('BIMP_LIB') && BimpDebug::isActive()) {
@@ -1947,7 +1951,8 @@ class DoliDBMysqliC extends DoliDB
             }
         }
         
-        $this->thread_id = $this->getThreadId();
+        if($firstBegin)
+            $this->thread_id = $this->getThreadId();
     }
     
     public function commit($log = '')

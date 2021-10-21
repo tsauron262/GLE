@@ -308,6 +308,20 @@ class BT_ficheInter extends BimpDolObject
         return $actions;
     }
     
+    public function getListExtraListActions()
+    {
+        $actions = array();
+
+        $actions[] = array(
+            'label'  => 'Fichiers PDF',
+            'icon'   => 'fas_file-pdf',
+            'action' => 'generateBulkPdf',
+            'confirm_msg' => "Etes-vous sûr d\'avoir sélectionné les bons filtres"
+        );
+        
+        return $actions;
+    }
+    
     // Fonction de BIMPCOMM
     public function actionGenerateBulkPdf($data, &$success)
     {
@@ -318,7 +332,7 @@ class BT_ficheInter extends BimpDolObject
 
         $id_objs = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
 
-        if (count($id_objs) > 70)
+        if (count($id_objs) > 160)
             $errors[] = 'Trop de PDF action impossible';
 
         if(!count($errors)){

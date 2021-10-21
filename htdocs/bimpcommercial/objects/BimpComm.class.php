@@ -1026,7 +1026,7 @@ class BimpComm extends BimpDolObject
             $lines = $this->getLines('not_text');
 
             foreach ($lines as $line) {
-                if($line->getData('linked_object_name') != 'discount'){
+                if($line->getData('linked_object_name') != 'discount' && $line->desc != 'Acompte'){
                     $line_infos = $line->getRemiseTotalInfos(false, $force_qty_mode);
                     $infos['remises_lines_amount_ttc'] += (float) $line_infos['line_amount_ttc'];
                     $infos['remises_lines_amount_ht'] += (float) $line_infos['line_amount_ht'];

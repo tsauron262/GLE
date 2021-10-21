@@ -131,11 +131,20 @@ class BimpComm extends BimpDolObject
         if (!$force_edit && !$user->admin) {
             $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
             $type_de_piece = ValidComm::getObjectClass($this);
+            
+            $demands = $valid_comm->demandeExists($type_de_piece, $this->id, null, 0, true);
+            
+            if($demands){
+                foreach ($demands as $d) {
+                    if((int) $d->getData('id_user_affected') == (int) $user->id)
+                        return 1;
+                }
 
-            // Soumis à des validations et possède des demandes de validation en brouillon
-            if ($type_de_piece != -2 and $valid_comm->demandeExists($type_de_piece, $this->id, null, 0)) {
-                $errors[] = 'Une demande de validation est en attente';
-                return 0;
+                // Soumis à des validations et possède des demandes de validation en brouillon
+                if ($type_de_piece != -2 and $demands) {
+                    $errors[] = 'Une demande de validation est en attente';
+                    return 0;
+                }
             }
         }
 
@@ -573,6 +582,7 @@ class BimpComm extends BimpDolObject
             );
         }
 
+        // Message logistique: 
         $note = BimpObject::getInstance("bimpcore", "BimpNote");
         $buttons[] = array(
             'label'   => 'Message logistique',
@@ -580,12 +590,14 @@ class BimpComm extends BimpDolObject
             'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => $note::BN_GROUPID_LOGISTIQUE, "content" => ""), array('form_name' => 'rep'))
         );
 
+        // Message facturation: 
         $buttons[] = array(
             'label'   => 'Message facturation',
             'icon'    => 'far_paper-plane',
             'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => $note::BN_GROUPID_FACT, "content" => "Bonjour, merci de bien vouloir facturer cette commande."), array('form_name' => 'rep'))
         );
 
+        // Relevé facturation: 
         if ((int) $this->getData('fk_soc')) {
             $sql = 'SELECT datef FROM ' . MAIN_DB_PREFIX . 'facture WHERE fk_soc = ' . (int) $this->getData('fk_soc') . ' AND fk_statut IN (1,2,3)';
             $sql .= ' ORDER BY datef ASC LIMIT 1';
@@ -3710,6 +3722,7 @@ class BimpComm extends BimpDolObject
         $prev_deleting = $this->isDeleting;
         $this->isDeleting = true;
 
+        $this->startLineTransaction();
         if ($this->isLoaded($warnings)) {
             $lines = $this->getLines();
 
@@ -3755,6 +3768,8 @@ class BimpComm extends BimpDolObject
                 }
             }
         }
+        
+        $this->stopLineTransaction();
 
         $this->isDeleting = $prev_deleting;
         return $errors;

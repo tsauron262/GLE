@@ -440,9 +440,9 @@ class BimpCore
     public static function addlog($msg, $level = 1, $type = 'bimpcore', $object = null, $extra_data = array(), $force = false)
     {
         if (BimpCore::isModeDev() && (int) self::getConf('bimpcore_print_logs', 1)) {
-//            $infos = debug_backtrace();
-//            unset($infos[0]);
-//            die('LOG : ' . $msg . " " . print_r($extra_data, 1).'<pre>'.print_r($infos,1));
+            $infos = debug_backtrace();
+            unset($infos[0]);
+            die('LOG : ' . $msg . " " . print_r($extra_data, 1).'<pre>'.print_r($infos,1));
         }
 
         $extra_data = BimpTools::merge_array(static::$logs_extra_data, $extra_data);

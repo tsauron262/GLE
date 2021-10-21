@@ -219,8 +219,8 @@ class BDS_ExportsComptaProcess extends BDSImportProcess {
                         $this->Alert("Fichier <b>".$file."</b> non transféré car déjà présent sur le FTP de cégid", $this, "TRANSFERT");
                     }
                 }
-                $this->Info(implode("<br />", $on_ftp_ldlc), $this, "FICHIERS DISTANT APRES TRANSFERT");
-                $this->Info(implode("<br />", $scanned_directory), $this, "FICHIERS LOCAUX APRES TRANSFERT");
+                $this->Info(implode("<br />", ftp_nlist($ftp, $this->params['ftp_dir'])), $this, "FICHIERS DISTANT APRES TRANSFERT");
+                $this->Info(implode("<br />", array_diff(scandir($local_folder), array('..', '.', 'imported', 'imported_auto'))), $this, "FICHIERS LOCAUX APRES TRANSFERT");
             }
         }
         

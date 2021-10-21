@@ -7,6 +7,11 @@ class Bimp_ImportPaiementLine extends BimpObject
     var $refs = array();
     var $total_reste_a_paye = 0;
     var $ok = false;
+    var $raisonManu = array(
+        1 => 'C2BO',
+        2 => 'Fournisseur',
+        99 => 'Autre'
+    );
 
     function create(&$warnings = array(), $force_create = false)
     {
@@ -112,7 +117,7 @@ class Bimp_ImportPaiementLine extends BimpObject
             $buttons[] = array(
                 'label'   => 'Lettrage manuel',
                 'icon'    => 'fas_check',
-                'onclick' => $this->getJsActionOnclick('traiteManuel')
+                'onclick' => $this->getJsActionOnclick('traiteManuel', array(), array('form_name' => 'lettrage_man'))
             );
         }
         return $buttons;
@@ -174,9 +179,10 @@ class Bimp_ImportPaiementLine extends BimpObject
     function fetch($id, $parent = null)
     {
 //        global $modeCSV; $modeCSV = true;
-        parent::fetch($id, $parent);
+        $return = parent::fetch($id, $parent);
         if ($this->isLoaded())
             $this->calc();
+        return $return;
     }
 
     function actionAddFact($data)
@@ -190,8 +196,32 @@ class Bimp_ImportPaiementLine extends BimpObject
     {
         global $user;
         $errors = $warnings = array();
-        $errors = $this->updateField('traite', 1);
-        $errors = $this->updateField('id_user_traite', $user->id);
+        
+        
+        $code = $data['raison'];
+        $detail = $data['raison_detail'];
+        $infos = $this->getData('infos');
+        if($infos != '')
+            $infos .= '<br/>';
+        $infos .= $this->raisonManu[$code];
+        
+        if($code == 99){
+            if(isset($detail) && $detail != '')
+                $infos .= ' ('. $data['raison_detail'].')';
+            else
+                $errors[] = 'Raison obligatoire';
+        }
+        
+        if(!count($errors)){
+            $errors = BimpTools::merge_array($errors, $this->set('infos', $infos));
+            $errors = BimpTools::merge_array($errors, $this->set('traite', 1));
+            $errors = BimpTools::merge_array($errors, $this->set('id_user_traite', $user->id));
+
+
+            $errors = BimpTools::merge_array($errors, $this->update());
+        }
+        
+        
 
         return array('errors' => $errors, 'warnings' => $warnings);
     }
@@ -218,6 +248,7 @@ class Bimp_ImportPaiementLine extends BimpObject
     {
         global $modeCSV;
         $return = array();
+        $factIds = array();
         if (!$this->ok && $this->getData('price') > 0) {
             $sql = $this->db->db->query('SELECT SUM(remain_to_pay) as remain_to_pay_tot, fk_soc FROM `llx_facture` WHERE fk_statut = 1 AND paye = 0 GROUP BY fk_soc HAVING remain_to_pay_tot = ' . $this->getData('price'));
             while ($ln = $this->db->db->fetch_object($sql)) {
@@ -225,6 +256,7 @@ class Bimp_ImportPaiementLine extends BimpObject
                 $facts = array();
                 $list = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', array('paye' => 0, 'fk_soc' => $ln->fk_soc));
                 foreach ($list as $fact) {
+                    $factIds[] = $fact->id;
                     if ($modeCSV)
                         $facts[] = $fact->getRef();
                     else
@@ -239,17 +271,19 @@ class Bimp_ImportPaiementLine extends BimpObject
             
             $sql = $this->db->db->query('SELECT remain_to_pay, rowid, fk_soc FROM `llx_facture` WHERE fk_statut = 1 AND paye = 0 AND remain_to_pay = ' . $this->getData('price'));
             while ($ln = $this->db->db->fetch_object($sql)) {
-                $cli = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $ln->fk_soc);
-                $fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $ln->rowid);
-                $facts = array();
-                if ($modeCSV)
-                    $facts[] = $fact->getRef();
-                else
-                    $facts[] = $fact->getLink() . $this->getButtonAdd($fact->id);
-                if ($modeCSV)
-                    $return[] = $cli->getData('nom') . ' (' . implode(' - ', $facts) . ')';
-                else
-                    $return[] = $cli->getLink() . ' (' . implode(' - ', $facts) . ')';
+                if(!in_array($ln->rowid, $factIds)){
+                    $cli = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $ln->fk_soc);
+                    $fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $ln->rowid);
+                    $facts = array();
+                    if ($modeCSV)
+                        $facts[] = $fact->getRef();
+                    else
+                        $facts[] = $fact->getLink() . $this->getButtonAdd($fact->id);
+                    if ($modeCSV)
+                        $return[] = $cli->getData('nom') . ' (' . implode(' - ', $facts) . ')';
+                    else
+                        $return[] = $cli->getLink() . ' (' . implode(' - ', $facts) . ')';
+                }
             }
             
             
@@ -344,7 +378,7 @@ class Bimp_ImportPaiementLine extends BimpObject
 
     function isEditable($force_edit = false, &$errors = array()): int
     {
-        return !$this->getData('traite');
+        return !$this->getInitData('traite');
     }
 
     function getPrice()
@@ -354,6 +388,7 @@ class Bimp_ImportPaiementLine extends BimpObject
             return $this->getData('price');
         } else {
             if ($this->getData('type') == 'vir') {
+                $manque = $this->getData('price') - $this->total_reste_a_paye;
                 if ($this->getData('traite') == 0) {
                     return BimpRender::renderAlerts(price($this->getData('price')) . ' € - ' . price($this->total_reste_a_paye) . ' € = ' . price($manque) . ' €', ($this->ok ? 'success' : 'danger'));
                 } else

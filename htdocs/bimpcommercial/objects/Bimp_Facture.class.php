@@ -39,9 +39,9 @@ class Bimp_Facture extends BimpComm
         3 => array('label' => 'Non déclarable'),
     );
     public static $paiement_status = array(
-        0 => array('label' => 'Aucun paiement', 'classes' => array('danger'), 'icon' => 'fas_times'),
-        1 => array('label' => 'Paiement partiel', 'classes' => array('warning'), 'icon' => 'fas_exclamation-circle'),
-        2 => array('label' => 'Paiement complet', 'classes' => array('success'), 'icon' => 'fas_check'),
+        0 => array('label' => 'Aucun paiement', 'classes' => array('danger'), 'icon' => 'fas_times', 'short' => 'Aucun'),
+        1 => array('label' => 'Paiement partiel', 'classes' => array('warning'), 'icon' => 'fas_exclamation-circle', 'short' => 'Partiel'),
+        2 => array('label' => 'Paiement complet', 'classes' => array('success'), 'icon' => 'fas_check', 'short' => 'Complet'),
         3 => array('label' => 'Trop perçu', 'classes' => array('important'), 'icon' => 'fas_exclamation-triangle'),
         4 => array('label' => 'Trop remboursé', 'classes' => array('important'), 'icon' => 'fas_exclamation-triangle'),
         5 => array('label' => 'Irrécouvrable', 'classes' => array('danger'), 'icon' => 'fas_times-circle')

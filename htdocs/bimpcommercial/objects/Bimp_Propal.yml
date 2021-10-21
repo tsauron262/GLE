@@ -147,7 +147,7 @@ fields:
                 
 forms: 
     default: 
-#        on_save: redirect
+        on_save: redirect
         rows: 
             - field: replaced_ref
             - custom: 1

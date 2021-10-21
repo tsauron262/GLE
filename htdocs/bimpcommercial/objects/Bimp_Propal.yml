@@ -80,8 +80,6 @@ fields:
         default_value: 
             field_value: 0
         input:
-            type: search_societe
-            societe_type: customer
             card: default
             help: Laissez vide si même client
     marge: 
@@ -149,7 +147,7 @@ fields:
                 
 forms: 
     default: 
-        on_save: redirect
+#        on_save: redirect
         rows: 
             - field: replaced_ref
             - custom: 1
@@ -164,11 +162,11 @@ forms:
                       object: 
                           global: user
                       name: id
+            - field: fk_soc
+            - field: ref_client
             - field: id_client_facture
             - field: entrepot
             - field: ef_type
-            - field: fk_soc
-            - field: ref_client
             - field: libelle
             - field: fk_input_reason
               show: 

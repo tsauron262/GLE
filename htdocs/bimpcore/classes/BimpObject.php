@@ -1961,7 +1961,7 @@ class BimpObject extends BimpCache
                         'Action' => $action
                             ), true);
                 } else {
-                    if(!$instance->db->db->commit()){
+                    if (!$instance->db->db->commit()) {
                         $result['errors'][] = 'Une erreur inconnue est survenue - opération annulée';
                         BimpCore::addlog('Commit echec - erreur inconnue', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $instance, array(
                             'Action' => $action
@@ -3933,6 +3933,12 @@ class BimpObject extends BimpCache
         $force_edit = (int) BimpTools::getPostFieldValue('force_edit', 0);
 
         if (!count($errors)) {
+            $use_db_transactions = (int) BimpCore::getConf('bimpcore_use_db_transactions', 0);
+
+            if ($use_db_transactions) {
+                $this->db->db->begin();
+            }
+
             if ($this->isLoaded()) {
                 $errors = $this->update($warnings, $force_edit);
 
@@ -3973,30 +3979,45 @@ class BimpObject extends BimpCache
                     }
                 }
             }
-        }
 
-        if (!count($errors)) {
-            // Associations: 
-            $warnings = BimpTools::merge_array($warnings, $this->saveAssociationsFromPost());
+            if (!count($errors)) {
+                // Associations: 
+                $warnings = BimpTools::merge_array($warnings, $this->saveAssociationsFromPost());
 
-            // Sous-objets ajoutés: 
-            $sub_result = $this->checkSubObjectsPost($force_edit);
-            if (count($sub_result['errors'])) {
-                $warnings = BimpTools::merge_array($warnings, $sub_result['errors']);
-            }
-            if ($sub_result['success_callback']) {
-                $success_callback .= $sub_result['success_callback'];
-            }
-        }
+                // Sous-objets ajoutés: 
+                $sub_result = $this->checkSubObjectsPost($force_edit);
+                if (count($sub_result['errors'])) {
+                    $warnings = BimpTools::merge_array($warnings, $sub_result['errors']);
+                }
+                if ($sub_result['success_callback']) {
+                    $success_callback .= $sub_result['success_callback'];
+                }
 
-        if ($this->isLoaded()) {
-            // Champs des sous-objets mis à jour: 
-            $sub_result = $this->checkChildrenUpdatesFromPost();
-            if (count($sub_result['errors'])) {
-                $warnings = BimpTools::merge_array($warnings, $sub_result['errors']);
+                if ($this->isLoaded()) {
+                    // Champs des sous-objets mis à jour: 
+                    $sub_result = $this->checkChildrenUpdatesFromPost();
+                    if (count($sub_result['errors'])) {
+                        $warnings = BimpTools::merge_array($warnings, $sub_result['errors']);
+                    }
+                    if ($sub_result['success_callback']) {
+                        $success_callback .= $sub_result['success_callback'];
+                    }
+                }
             }
-            if ($sub_result['success_callback']) {
-                $success_callback .= $sub_result['success_callback'];
+
+            if ($use_db_transactions) {
+                if (count($errors)) {
+                    $this->db->db->rollback();
+                } else {
+                    if ($this->db->db->has_rollback) {
+                        $errors[] = 'Une erreur inconnue est survenue - opération annulée';
+                        $this->db->db->rollback();
+                    } else {
+                        if (!$this->db->db->commit()) {
+                            $errors[] = 'Echec de l\'enregistrement des données - opération annulée';
+                        }
+                    }
+                }
             }
         }
 
@@ -6680,8 +6701,8 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             }
 
             $search = new BC_Search($this, $search_name, $search_value);
-            if(!count($search->searchItems()) && stripos($search_value, 'prov') !== false)
-                $search = new BC_Search($this, $search_name, str_ireplace ('prov', '', $search_value));
+            if (!count($search->searchItems()) && stripos($search_value, 'prov') !== false)
+                $search = new BC_Search($this, $search_name, str_ireplace('prov', '', $search_value));
             $html = $list_button;
             $html .= $search->renderHtml();
             $html .= $list_button;
@@ -9194,7 +9215,7 @@ var options = {
     public static function replaceHastags($text, $no_html = false)
     {
         if (is_string($text)) {
-            if (preg_match_all('/\{\{(.+):([0-9]+)\}\}/U', $text, $matches, PREG_SET_ORDER)) {                
+            if (preg_match_all('/\{\{(.+):([0-9]+)\}\}/U', $text, $matches, PREG_SET_ORDER)) {
                 foreach ($matches as $match) {
                     $obj_kw = (string) $match[1];
                     $id = (int) $match[2];

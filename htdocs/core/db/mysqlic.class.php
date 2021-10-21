@@ -1957,45 +1957,13 @@ class DoliDBMysqliC extends DoliDB
     
     public function commit($log = '')
     {
-        $id_trans = $this->transaction_opened;
-        
         $res = parent::commit($log);
-
-        if (defined('BIMP_LIB') && BimpDebug::isActive()) {
-            if ($res <= 0) {
-                $content = BimpRender::renderAlerts('Echec COMMIT #' . $id_trans . ' - ' . $this->lasterror());
-                BimpDebug::addDebug('sql', '', $content, array(
-                    'foldable' => false
-                ));
-            } else {
-                $content = '<span class="success">COMMIT #' . $id_trans . '</span><br/><br/>';
-                BimpDebug::addDebug('sql', '', $content, array(
-                    'foldable' => false
-                ));
-            }
-        }
         return $res;
     }
     
     public function rollback($log = '')
     {
-        $id_trans = $this->transaction_opened;
-        
         $res = parent::rollback($log);
-
-        if (defined('BIMP_LIB') && BimpDebug::isActive()) {
-            if ($res <= 0) {
-                $content = BimpRender::renderAlerts('Echec ROLLBACK #' . $id_trans . ' - ' . $this->lasterror());
-                BimpDebug::addDebug('sql', '', $content, array(
-                    'foldable' => false
-                ));
-            } else {
-                $content = '<span class="danger">ROLLBACK #' . $id_trans . '</span><br/><br/>';
-                BimpDebug::addDebug('sql', '', $content, array(
-                    'foldable' => false
-                ));
-            }
-        }
     }
     /* fmoddrsi */
     

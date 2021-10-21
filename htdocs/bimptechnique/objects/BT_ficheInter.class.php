@@ -318,46 +318,48 @@ class BT_ficheInter extends BimpDolObject
 
         $id_objs = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
 
-        if (count($id_objs) > 50)
-            return array('Trop de PDF action impossible');
+        if (count($id_objs) > 70)
+            $errors[] = 'Trop de PDF action impossible';
 
-        if (!is_array($id_objs) || empty($id_objs)) {
-            $errors[] = 'Aucune ' . $this->getLabel() . ' sélectionnée';
-        } else {
-            $files = array();
-
-            foreach ($id_objs as $id_obj) {
-                $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_obj);
-
-                if (!BimpObject::objectLoaded($obj)) {
-                    $warnings[] = ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_obj . ' n\'existe pas';
-                    continue;
-                }
-
-                $dir = $obj->getFilesDir();
-                $filename = $obj->getRef() . '.pdf';
-
-                if (!file_exists($dir . $filename)) {
-                    $warnings[] = ucfirst($this->getLabel()) . ' ' . $obj->getLink() . ': fichier PDF absent (' . $dir . $filename . ')';
-                    continue;
-                }
-
-                $files[] = $dir . $filename;
-            }
-
-            if (!empty($files)) {
-                global $user;
-                require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpPDF.php';
-                $fileName = 'bulk_' . $this->dol_object->element . '_' . $user->id . '.pdf';
-                $dir = PATH_TMP . '/bimpcore/';
-
-                $pdf = new BimpConcatPdf();
-                $pdf->concatFiles($dir . $fileName, $files, 'F');
-
-                $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($fileName);
-                $success_callback = 'window.open(\'' . $url . '\');';
+        if(!count($errors)){
+            if (!is_array($id_objs) || empty($id_objs)) {
+                $errors[] = 'Aucune ' . $this->getLabel() . ' sélectionnée';
             } else {
-                $errors[] = 'Aucun PDF trouvé';
+                $files = array();
+
+                foreach ($id_objs as $id_obj) {
+                    $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_obj);
+
+                    if (!BimpObject::objectLoaded($obj)) {
+                        $warnings[] = ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_obj . ' n\'existe pas';
+                        continue;
+                    }
+
+                    $dir = $obj->getFilesDir();
+                    $filename = $obj->getRef() . '.pdf';
+
+                    if (!file_exists($dir . $filename)) {
+                        $warnings[] = ucfirst($this->getLabel()) . ' ' . $obj->getLink() . ': fichier PDF absent (' . $dir . $filename . ')';
+                        continue;
+                    }
+
+                    $files[] = $dir . $filename;
+                }
+
+                if (!empty($files)) {
+                    global $user;
+                    require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpPDF.php';
+                    $fileName = 'bulk_' . $this->dol_object->element . '_' . $user->id . '.pdf';
+                    $dir = PATH_TMP . '/bimpcore/';
+
+                    $pdf = new BimpConcatPdf();
+                    $pdf->concatFiles($dir . $fileName, $files, 'F');
+
+                    $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($fileName);
+                    $success_callback = 'window.open(\'' . $url . '\');';
+                } else {
+                    $errors[] = 'Aucun PDF trouvé';
+                }
             }
         }
 

@@ -1946,27 +1946,11 @@ class BimpObject extends BimpCache
                             ), true);
                 }
             } else {
-                if ($instance->db->db->has_rollback) {
-                    if (isset($result['errors'])) {
-                        $result['errors'][] = 'Une erreur inconnue est survenue - opération annulée';
-                    } else {
-                        if (!is_array($result)) {
-                            $result = array('errors' => array(), 'warnings' => array());
-                        }
-                        $result['errors'][] = 'Une erreur inconnue est survenue - opération annulée';
-                    }
-                    $instance->db->db->rollback();
-
-                    BimpCore::addlog('Rollback suite à action - erreur inconnue', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $instance, array(
+                if(!$instance->db->db->commit()){
+                    $result['errors'][] = 'Une erreur inconnue est survenue - opération annulée';
+                    BimpCore::addlog('Commit echec - erreur inconnue', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $instance, array(
                         'Action' => $action
                             ), true);
-                } else {
-                    if(!$instance->db->db->commit()){
-                        $result['errors'][] = 'Une erreur inconnue est survenue - opération annulée';
-                        BimpCore::addlog('Commit echec - erreur inconnue', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $instance, array(
-                            'Action' => $action
-                                ), true);
-                    }
                 }
             }
         }

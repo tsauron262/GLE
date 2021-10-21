@@ -199,6 +199,7 @@ abstract class DoliDB implements Database
 		}
                 else{
                         BimpCore::addlog('Tentative de COMMIT transaction deja fermé', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore');
+                        return 0;
                 }
 	}
 

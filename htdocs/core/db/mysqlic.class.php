@@ -965,9 +965,24 @@ class DoliDBMysqliC extends DoliDB
             }
         }
         else{
-            if($this->getThreadId() != $this->thread_id){//gros probléme id transaction changée
-                BimpCore::addlog('Gros probléme changement de thread Id');
-                die('Gros probléme changement de thread Id');
+            if(stripos($query, 'SELECT') !== 0 && $this->getThreadId() != $this->thread_id){//gros probléme id transaction changée
+                if(class_exists('BimpCore')){
+                    BimpCore::addlog('Gros probléme changement de thread Id', 1, 'sql', null, array('query' => $query, 'oldId' => $this->thread_id, 'newId' => $this->getThreadId()));
+                
+                    $errors = array('Problème réseau, merci de relancer l\'opération');
+                
+                    if (BimpTools::isSubmit('ajax')) {
+                        echo json_encode(array(
+                            'errors'           => $errors,
+                            'request_id'       => BimpTools::getValue('request_id', 0)
+                        ));
+                    }
+                    else{
+                        echo 'Oupppps   '.print_r($errors,1);
+                    }
+                    die();
+                    exit;
+                }
             }
         }
         
@@ -1073,8 +1088,11 @@ class DoliDBMysqliC extends DoliDB
     
     function getThreadId(){    
         $sql = $this->db->query('SELECT CONNECTION_ID() as id;');
-        $res = $this->fetch_object($sql);
-        return $res->id;
+        if($sql){
+            $res = $this->fetch_object($sql);
+            return $res->id;
+        }
+        return 0;
     }
 
     /**

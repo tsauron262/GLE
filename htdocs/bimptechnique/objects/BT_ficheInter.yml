@@ -589,8 +589,8 @@ lists:
         checkboxes: 1
         extra_bulk_actions: 
             callback: getListExtraBulkActions
-        list_actions: 
-            callback: getListExtraListActions
+#        list_actions: 
+#            callback: getListExtraListActions
         configurable: 1
         filters_panel: default
         total_row: 1

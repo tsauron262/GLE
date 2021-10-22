@@ -2101,10 +2101,12 @@ class Bimp_Facture extends BimpComm
             }
             if ($field == 'apple_number') {
                 if (!isset($cacheInstance['repas'])) {
-                    $cacheInstance['repas'] = BimpObject::getBimpObjectObjects('bimpapple', 'GSX_Repair', array('id_sav' => $sav->id));
+                    $cacheInstance['repas'] = BimpObject::getBimpObjectObjects('bimpapple', 'GSX_Repair', array('id_sav' => $sav->id), 'id', 'desc');
                 }
+
                 foreach ($cacheInstance['repas'] as $repa) {
                     $result[] = $repa->getData('repair_number');
+                    break;
                 }
             }
         }

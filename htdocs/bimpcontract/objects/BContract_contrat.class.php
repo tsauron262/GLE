@@ -935,7 +935,7 @@ class BContract_contrat extends BimpDolObject
     
     public function onSave(&$errors = array(), &$warnings = array()) {
         global $langs;
-        $this->dol_object->generateDocument('contrat_BIMP_maintenance', $langs);
+        //$this->dol_object->generateDocument('contrat_BIMP_maintenance', $langs);
     }
 
     public function getListClient($object)

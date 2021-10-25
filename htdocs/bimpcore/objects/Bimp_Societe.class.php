@@ -1844,6 +1844,33 @@ class Bimp_Societe extends BimpDolObject
 
         return $errors;
     }
+    
+    public function majEncourscreditSafe($majOutstandingLimit = false, $maxOutstandingLimit = 100000){
+        $data = $errors = $w = array();
+        
+        $code = (string) $this->getData('siret');
+        if ($code != '') {
+            $errors = BimpTools::merge_array($errors, $this->checkSiren('siret', $code, $data));
+        } else {
+            $code = (string) $client->getData('siren');
+            if($code != '')
+                $errors = BimpTools::merge_array($errors, $this->checkSiren('siren', $code, $data));
+        }
+        $this->set('lettrecreditsafe', $data['lettrecreditsafe']);
+        $this->set('notecreditsafe', $data['notecreditsafe']);
+        if($majOutstandingLimit){
+            if($data['outstanding_limit'] > $maxOutstandingLimit)
+                $data['outstanding_limit'] = $maxOutstandingLimit;
+            $this->set('outstanding_limit', $data['outstanding_limit']);
+        }
+        $this->set('capital', $data['capital']);
+        $this->set('tva_intra', $data['tva_intra']);
+        $this->set('capital', $data['capital']);
+        $this->set('siret', $data['siret']);
+        $this->set('siren', $data['siren']);
+        $errors = BimpTools::merge_array($errors, $this->update($w, true));
+        return $errors;
+    }
 
     public function checkSiren($field, $value, &$data = array(), &$warnings = array())
     {
@@ -1959,6 +1986,7 @@ class Bimp_Societe extends BimpDolObject
                         if (is_array($branches)) {
                             foreach ($branches as $branche) {
                                 if (($siret && $branche->companynumber == $siret) || (!$siret && stripos($branche->type, "Siège") !== false)) {
+                                    die('gggggg');
                                     $adress = $branche->full_address->address;
                                     //$nom = $branche->full_address->name;
                                     $codeP = $branche->postcode;

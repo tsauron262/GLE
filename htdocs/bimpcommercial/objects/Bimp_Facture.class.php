@@ -2101,10 +2101,12 @@ class Bimp_Facture extends BimpComm
             }
             if ($field == 'apple_number') {
                 if (!isset($cacheInstance['repas'])) {
-                    $cacheInstance['repas'] = BimpObject::getBimpObjectObjects('bimpapple', 'GSX_Repair', array('id_sav' => $sav->id));
+                    $cacheInstance['repas'] = BimpObject::getBimpObjectObjects('bimpapple', 'GSX_Repair', array('id_sav' => $sav->id), 'id', 'desc');
                 }
+
                 foreach ($cacheInstance['repas'] as $repa) {
                     $result[] = $repa->getData('repair_number');
+                    break;
                 }
             }
         }
@@ -5773,7 +5775,7 @@ class Bimp_Facture extends BimpComm
         ini_set('max_execution_time', 3600);
 
         $errors = array();
-        $rows = self::getBdb()->getRows('facture', "`datec` > '2021-01-14 00:00:00'", null, 'array', array('rowid', 'marge_finale_ok', 'total_achat_reval_ok'), 'rowid', 'desc');
+        $rows = self::getBdb()->getRows('facture', "`datec` > '2021-01-14 00:00:00' AND `datec` < '2021-05-01 00:00:00'", null, 'array', array('rowid', 'marge_finale_ok', 'total_achat_reval_ok'), 'rowid', 'desc');
 
         if (is_array($rows)) {
             $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');

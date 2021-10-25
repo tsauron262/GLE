@@ -261,6 +261,10 @@ fields:
         label: Note de cloture anticipée
         dol_extra_field: 1
         type: string
+    show_fact_line_in_pdf:
+        label: Afficher tarification par période
+        dol_extra_field: 1
+        type: bool
     fk_soc_facturation:
         label: Client pour facturation
         type: id_object
@@ -400,6 +404,12 @@ fields_tables:
               edit: 0
             - field: gti
               edit: 0
+    options_pdf:
+        panel: 1
+        title: Options PDF
+        rows:
+            - field: show_fact_line_in_pdf
+              edit: 1
     facturation:
         panel: 1
         title: Informations sur la facturation du contrat
@@ -1279,6 +1289,10 @@ views:
                   col_md: 6
                   rows:
                       - cols:
+                          - type: fields_table
+                            col_lg: 12
+                            fields_table:
+                                name: options_pdf
                           - type: fields_table
                             col_lg: 12
                             fields_table:

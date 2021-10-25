@@ -95,6 +95,7 @@ fields:
     libelle: 
         label: Libellé
         dol_extra_field: 1
+        hashtags: 1
 #        required: 1
     ef_type: 
         label: Secteur (Canal de Vente)
@@ -147,10 +148,13 @@ fields:
         required : 1
         type: id
         values: 
-            array: modeReglements
-        input: 
-            type: select_payment
-            include_empty: 1
+            callback:
+                method: getModeReglements
+                params:
+                    - 0
+#        input: 
+#            type: select_payment
+#            include_empty: 1
         default_value: 
             callback: getModeReglementBySociete
         depends_on: fk_soc
@@ -223,11 +227,13 @@ fields:
         type: html
         sortable: 0
         user_edit: 1
+        hashtags: 1
     note_public: 
         label: Note publique
         type: html  
         sortable: 0
         user_edit: 1
+        hashtags: 1
     zone_vente: 
         label: Zone de vente
         type: int
@@ -258,7 +264,8 @@ fields:
         dol_extra_field: 1
         type: id_object
         object: rib_client 
-        create_form: default
+        edit_form: default
+        create_form: add
         create_form_label: Ajouter
         create_form_values:
             fields:
@@ -385,7 +392,10 @@ forms:
                 input: 
                     type: select
                     options: 
-                        array: modeReglements
+                        callback:
+                            method: getModeReglements
+                            params:
+                                - 0
                 input_name: fk_mode_reglement
                 value: 
                     callback: getModeReglementBySociete
@@ -428,6 +438,11 @@ forms:
                   type: select
                   options: 
                       array: emailUsersFrom
+              value: 
+                  prop: 
+                      name: email
+                      object: 
+                          global: user
                       
             - custom: 1
               label: Destinataires
@@ -548,7 +563,6 @@ forms:
                         hide_values: 0
                     payee:
                         show_values: 1
-
             - custom: 1
               label: Caisse
               input_name: id_caisse
@@ -581,6 +595,16 @@ forms:
               display_if: 
                   field_name: payee
                   hide_values: 0
+            - custom: 1
+              label: RIB Client
+              input_name: id_rib
+              input: 
+                  type: select
+                  options: 
+                      callback: getRibArray
+              display_if: 
+                  field_name: id_mode_paiement
+                  show_values: PRE
             - custom: 1
               label: N° (chèque ou virement)
               input_name: num_paiement

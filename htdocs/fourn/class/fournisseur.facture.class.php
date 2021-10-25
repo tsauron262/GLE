@@ -1680,7 +1680,11 @@ class FactureFournisseur extends CommonInvoice
             if (! empty($fk_parent_line)) $this->line_order(true,'DESC');
 
             // Mise a jour informations denormalisees au niveau de la facture meme
-            $result=$this->update_price(1,'auto',0,$this->thirdparty);	// The addline method is designed to add line from user input so total calculation with update_price must be done using 'auto' mode.
+            /*mod drsi*/
+            BimpObject::loadClass('bimpcommercial', 'BimpComm');
+            if(!BimpComm::$dont_check_parent_on_update)
+                $result=$this->update_price(1,'auto',0,$this->thirdparty);	// The addline method is designed to add line from user input so total calculation with update_price must be done using 'auto' mode.
+            /*fmoddrsi*/
             if ($result > 0)
             {
                 $this->db->commit();

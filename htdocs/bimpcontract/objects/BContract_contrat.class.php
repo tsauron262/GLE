@@ -70,7 +70,7 @@ class BContract_contrat extends BimpDolObject
         self::CONTRAT_STATUS_BROUILLON    => Array('label' => 'Brouillon', 'classes' => Array('warning'), 'icon' => 'fas_trash-alt'),
         self::CONTRAT_STATUS_VALIDE       => Array('label' => 'Attente signature client', 'classes' => Array('success'), 'icon' => 'fas_retweet'),
         self::CONTRAT_STATUS_CLOS         => Array('label' => 'Clos', 'classes' => Array('danger'), 'icon' => 'fas_times'),
-        self::CONTRAT_STATUS_REFUSE         => Array('label' => 'Refusé', 'classes' => Array('danger'), 'icon' => 'fas_times'),
+        self::CONTRAT_STATUS_REFUSE       => Array('label' => 'Refusé', 'classes' => Array('danger'), 'icon' => 'fas_times'),
         self::CONTRAT_STATUT_WAIT_ACTIVER => Array('label' => 'Attente d\'activation', 'classes' => Array('important'), 'icon' => 'fas_retweet'),
         self::CONTRAT_STATUS_WAIT         => Array('label' => 'En attente de validation', 'classes' => Array('warning'), 'icon' => 'fas_refresh'),
         self::CONTRAT_STATUS_ACTIVER      => Array('label' => 'Actif', 'classes' => Array('important'), 'icon' => 'fas_play'),
@@ -339,7 +339,7 @@ class BContract_contrat extends BimpDolObject
 
         $total_fis = $ficheInter->time_to_qty($ficheInter->timestamp_to_time($total_tms)) * BimpCore::getConf("bimptechnique_coup_horaire_technicien");
         $previsionelle = 0;
-        if($this->getJourTotal() > 0)
+        if($this->getJourTotal() > 0 && $this->getJourTotal() > $this->getJourRestant())
             $previsionelle = $total_fis / ($this->getJourTotal() - $this->getJourRestant()) * $this->getJourRestant();
 
         $marge = ($this->getTotalContrat() - $total_fis);
@@ -465,6 +465,9 @@ class BContract_contrat extends BimpDolObject
         }
 
         if ($this->isLoaded() && !count($errors)) {
+            
+            
+            
             $signed_doc = ($data['have_contrat_signed']) ? true : false;
             if ($signed_doc) {
                 $contratChhild = $this->getContratChild();
@@ -873,7 +876,6 @@ class BContract_contrat extends BimpDolObject
 
     public function update(&$warnings = array(), $force_update = false)
     {
-
         if (BimpTools::getValue('type_piece')) {
             $id = 0;
             switch (BimpTools::getValue('type_piece')) {
@@ -926,8 +928,14 @@ class BContract_contrat extends BimpDolObject
                 }
                 $this->addLog("Date d'effet du contrat changer à " . BimpTools::getValue('date_start'));
             }
+            
             return parent::update($warnings, $force_update);
         }
+    }
+    
+    public function onSave(&$errors = array(), &$warnings = array()) {
+        global $langs;
+        //$this->dol_object->generateDocument('contrat_BIMP_maintenance', $langs);
     }
 
     public function getListClient($object)
@@ -1386,7 +1394,9 @@ class BContract_contrat extends BimpDolObject
         $new_date_end = new dateTime($new_date_start->format('Y-m-d'));
         $new_date_end->add(new DateInterval("P" . $duree_contrat . "M"));
         $new_date_end->sub(new DateInterval('P1D'));
-
+        
+        $new_renouvellementTacite = self::CONTRAT_RENOUVELLEMENT_NON;
+        
         switch ($this->getData('tacite')) {
             case self::CONTRAT_RENOUVELLEMENT_1_FOIS:
                 $new_renouvellementTacite = self::CONTRAT_RENOUVELLEMENT_NON;
@@ -1513,6 +1523,22 @@ class BContract_contrat extends BimpDolObject
             'success'  => $success
         ];
     }
+    
+    public function actionStopTacite($data, &$success) {
+        
+        $errors = [];
+        $warnings = [];
+        
+        $this->set("tacite", 0);
+        $this->set("relance_renouvellement", 0);
+        $this->set('initial_renouvellement', 0);
+        if($this->update($warnings)) {
+            $success = "La reconduction tacite à été annulée";
+        }
+        
+        return Array('errors' => $errors, 'warnings' => $warnings, 'success' => $success);
+        
+    }
 
     public function getActionsButtons()
     {
@@ -1559,7 +1585,9 @@ class BContract_contrat extends BimpDolObject
                 $buttons[] = array(
                     "label"   => 'Annuler la reconduction tacite',
                     'icon'    => "fas_hand-paper",
-                    'onclick' => $this->getJsActionOnclick('stopTacite', array(), array())
+                    'onclick' => $this->getJsActionOnclick('stopTacite', array(), array(
+                        'confirm_msg' => "Etes-vous sûr ? Cette action est  irréversible"
+                    ))
                 );
             }
             if (($this->getData('tacite') == 12 || $this->getData('tacite') == 0) && !$this->getData('next_contrat') && $status == self::CONTRAT_STATUS_ACTIVER) {
@@ -2100,6 +2128,11 @@ class BContract_contrat extends BimpDolObject
             return 1;
 
         switch ($field_name) {
+            case 'show_fact_line_in_pdf':
+                if($user->rights->bimpcontract->to_validate && ($this->getData("statut") != self::CONTRAT_STATUS_ACTIVER && $this->getData('statut') != self::CONTRAT_STATUS_ACTIVER_TMP && $this->getData('statut') !=  self::CONTRAT_STATUS_ACTIVER_SUP))
+                    return 1;
+                return 0;
+                break;
             case 'periodicity':
                 $linked_factures = getElementElement('contrat', 'facture', $this->id);
                 if ($user->rights->bimpcontract->change_periodicity && !count($linked_factures))
@@ -2129,6 +2162,7 @@ class BContract_contrat extends BimpDolObject
             case 'fk_soc_facturation':
             case 'denounce':
             case 'fk_commercial_suivi':
+            case 'fk_commercial_signature':
             case 'moderegl':
             case 'objet_contrat':
             case 'ref_customer':
@@ -3703,6 +3737,26 @@ class BContract_contrat extends BimpDolObject
             }
         }
         return $html;
+    }
+    
+    public function displayMessagesFormActivate()
+    {
+        $msgs = [];
+        
+        $date = new DateTime($this->getData('date_start'));
+        $now = new DateTime();
+        
+        $diff = $date->diff($now);
+        
+        if($diff->invert) {
+            $msgs[] = Array(
+                'type' => 'danger',                
+                'content' => "Le contrat dûment signé doit être obligatoirement présent dans les fichiers pour une activation maintenant"
+            );
+        }
+        
+        
+        return $msgs;
     }
 
     public function displayCommercial()

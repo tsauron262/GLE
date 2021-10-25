@@ -1,12 +1,20 @@
 table: usergroup
 primary: rowid
 common_fields: 0
+icon: fas_users
 
-
+dol_object: 
+    instance: 
+        dol_object: 
+            module: user
+            file: usergroup
+            class: UserGroup
+            
 labels: 
     name: Groupe d'utilisateur
     
 nom_url: 
+    syntaxe: <nom>
     modal_view: ''
     
 fields: 
@@ -29,6 +37,7 @@ fields:
     displayedinglobaladdressbook: 
         label: Dans l'annuaire
         type: bool
+        dol_extra_field: 1
         default_value: 0
         
     secteur: 
@@ -36,7 +45,7 @@ fields:
         dol_extra_field: 1
         values: 
             array: secteurs
-
+        
 filters_panels: 
     default: 
         filters: 
@@ -68,3 +77,11 @@ lists:
               alias: ugu
         extra_btn: 
             callback: getUserListExtraButtons
+            
+searches: 
+    default: 
+        fields_search: 
+            - a.nom
+        fields_return: 
+            - a.nom
+        label_syntaxe: '<a.nom>'

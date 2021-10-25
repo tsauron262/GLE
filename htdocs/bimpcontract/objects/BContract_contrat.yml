@@ -261,6 +261,10 @@ fields:
         label: Note de cloture anticipée
         dol_extra_field: 1
         type: string
+    show_fact_line_in_pdf:
+        label: Afficher tarification par période
+        dol_extra_field: 1
+        type: bool
     fk_soc_facturation:
         label: Client pour facturation
         type: id_object
@@ -372,10 +376,10 @@ fields_tables:
               edit: 0
             - field: tacite
               edit: 0
-            - label: Renouvellement initial
-              edit: 0
-              value:
-                  callback: renderInitialRenouvellement
+#            - label: Renouvellement initial
+#              edit: 0
+#              value:
+#                  callback: renderInitialRenouvellement
             - field: ref_ext
               edit: 0
               show:
@@ -400,6 +404,12 @@ fields_tables:
               edit: 0
             - field: gti
               edit: 0
+    options_pdf:
+        panel: 1
+        title: Options PDF
+        rows:
+            - field: show_fact_line_in_pdf
+              edit: 1
     facturation:
         panel: 1
         title: Informations sur la facturation du contrat
@@ -652,11 +662,14 @@ forms:
     have_signed:
         title: Vérification signature
         msgs:
-            - type: info
-              content: Si non est coché, le statut du contrat sera "Activation provisoire"
+            callback: displayMessagesFormActivate
+#            - type: info
+#              content: Si non est coché, le statut du contrat sera "Activation provisoire"
+#            - type: danger
+#              content: dddddd
         rows:
             - custom: 1
-              label: Il y a t'il le contrat signé dans les fichiers de ce contrat ?
+              label: Le contrat dûment signé est-il bien présent en PJ ?
               input_name: have_contrat_signed
               value:
                 callback:
@@ -1276,6 +1289,10 @@ views:
                   col_md: 6
                   rows:
                       - cols:
+                          - type: fields_table
+                            col_lg: 12
+                            fields_table:
+                                name: options_pdf
                           - type: fields_table
                             col_lg: 12
                             fields_table:

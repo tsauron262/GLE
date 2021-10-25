@@ -221,6 +221,15 @@ forms:
         extends: fournline
         force_edit: 1
         rows: 
+            pa_except: 
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - pa_except
+                            - 0
+                            - ''
+                            - 1  
             product: 
                 content: 
                     callback: 

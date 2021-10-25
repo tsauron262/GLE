@@ -101,6 +101,8 @@ class DoliDBMysqliC extends DoliDB
     public $countReq = 0;
     public $countReq2 = 0;
     public $timeReconnect = 0;
+    
+    public $thread_id = 0;
 
     /* fmoddrsi */
 
@@ -955,10 +957,36 @@ class DoliDBMysqliC extends DoliDB
         }
         /* fmoddrsi */
 
-        if($this->transaction_opened == 0 && !$this->connect_server($qtype))
-        {
-            dol_syslog(get_class($this)."::query: Fatal error - cannot connect to database server for request type: ".$qtype, LOG_ERR);
-            return FALSE;
+        if($this->transaction_opened == 0){//On est pas dans une transaction.
+            if(!$this->connect_server($qtype))
+            {
+                dol_syslog(get_class($this)."::query: Fatal error - cannot connect to database server for request type: ".$qtype, LOG_ERR);
+                return FALSE;
+            }
+        }
+        else{
+            if(stripos($query, 'SELECT') !== 0){
+                $thread_id = $this->getThreadId();
+                if($thread_id != $this->thread_id){//gros probléme id transaction changée
+                    if(class_exists('BimpCore')){
+                        BimpCore::addlog('Gros probléme changement de thread Id', 4, 'sql', null, array('query' => $query, 'oldId' => $this->thread_id, 'newId' => $thread_id));
+
+                        $errors = array('Problème réseau, merci de relancer l\'opération');
+
+                        if (BimpTools::isSubmit('ajax')) {
+                            echo json_encode(array(
+                                'errors'           => $errors,
+                                'request_id'       => BimpTools::getValue('request_id', 0)
+                            ));
+                        }
+                        else{
+                            echo 'Oupppps   '.print_r($errors,1);
+                        }
+                    }
+                    die();
+                    exit;
+                }
+            }
         }
         
         /* fmoddrsi */
@@ -990,6 +1018,11 @@ class DoliDBMysqliC extends DoliDB
                 $this->lastqueryerror = $query;
                 $this->lasterror = $this->error();
                 $this->lasterrno = $this->errno();
+                
+//                if($this->transaction_opened > 0)
+//                    $this->rollback();
+//                
+//                BimpCore::addlog('Erreur SQL '.$query.($this->transaction_opened > 0 ? ' ayant provoqué le rollback de la transaction' : ''));
 
                 $debug = "";
                 if (function_exists("synGetDebug"))
@@ -1054,6 +1087,15 @@ class DoliDBMysqliC extends DoliDB
         /* fmoddrsi */
 
         return $ret;
+    }
+    
+    function getThreadId(){    
+        $sql = $this->db->query('SELECT CONNECTION_ID() as id;');
+        if($sql){
+            $res = $this->fetch_object($sql);
+            return $res->id;
+        }
+        return 0;
     }
 
     /**
@@ -1892,6 +1934,10 @@ class DoliDBMysqliC extends DoliDB
 
     public function begin()
     {
+        if (! $this->transaction_opened)
+            $firstBegin = true;
+        else
+            $firstBegin = false;
         $res = parent::begin();
 
         if (defined('BIMP_LIB') && BimpDebug::isActive()) {
@@ -1907,48 +1953,20 @@ class DoliDBMysqliC extends DoliDB
                 ));
             }
         }
+        
+        if($firstBegin)
+            $this->thread_id = $this->getThreadId();
     }
     
     public function commit($log = '')
     {
-        $id_trans = $this->transaction_opened;
-        
         $res = parent::commit($log);
-
-        if (defined('BIMP_LIB') && BimpDebug::isActive()) {
-            if ($res <= 0) {
-                $content = BimpRender::renderAlerts('Echec COMMIT #' . $id_trans . ' - ' . $this->lasterror());
-                BimpDebug::addDebug('sql', '', $content, array(
-                    'foldable' => false
-                ));
-            } else {
-                $content = '<span class="success">COMMIT #' . $id_trans . '</span><br/><br/>';
-                BimpDebug::addDebug('sql', '', $content, array(
-                    'foldable' => false
-                ));
-            }
-        }
+        return $res;
     }
     
     public function rollback($log = '')
     {
-        $id_trans = $this->transaction_opened;
-        
         $res = parent::rollback($log);
-
-        if (defined('BIMP_LIB') && BimpDebug::isActive()) {
-            if ($res <= 0) {
-                $content = BimpRender::renderAlerts('Echec ROLLBACK #' . $id_trans . ' - ' . $this->lasterror());
-                BimpDebug::addDebug('sql', '', $content, array(
-                    'foldable' => false
-                ));
-            } else {
-                $content = '<span class="danger">ROLLBACK #' . $id_trans . '</span><br/><br/>';
-                BimpDebug::addDebug('sql', '', $content, array(
-                    'foldable' => false
-                ));
-            }
-        }
     }
     /* fmoddrsi */
     

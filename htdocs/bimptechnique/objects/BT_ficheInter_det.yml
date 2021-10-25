@@ -46,7 +46,7 @@ objects:
         instance: 
             id_object: 
                 field_value: id_set_facturable
-                
+
 fields:
     # Champs Dol object: 
         
@@ -137,6 +137,9 @@ fields:
     departure_pm:
         label: Heure de départ (Après-Midi)
         type: datetime
+    actioncomm:
+        label: IDs des events
+        type: text
         
 forms:
     default: 
@@ -333,8 +336,42 @@ lists_cols:
         label: Description rapide
         value:
             callback: displayDescLight
-
+filters_panels: 
+    default: 
+        filters:
+          parent:ref:
+          parent:datei:
+          parent:fk_user_tech:
+          parent:fk_soc:
+          type_of:
+              label: Type d'intervention
+              type: check_list
+              items:
+                    0: Intervention vendue
+                    1: Impondérable
+                    2: Ligne libre
+                    3: Déplacement non vendu
+                    4: Intervention non vendu
+                    5: Déplacement sous contrat
+                    6: Déplacement vendu
+                    7: Intervention en interne
 lists:
+    all:
+        title: Listes des interventions
+        filters_panel: default
+        sort_field: fk_fichinter
+        n: 20
+        cols:
+            type_of:
+                label: Type d'intervention
+                value:
+                    callback: displayTypeInList
+            parent:ref:
+                label: Référence de la FI
+            parent:fk_soc:
+            parent:fk_user_tech:
+            parent:datei:
+            duree_inter:
     in_fiche:
         title: Liste des interventions
         objects_change_reload: BT_ficheInter

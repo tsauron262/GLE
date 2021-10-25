@@ -159,6 +159,12 @@
         font-style: italic;
         color: #787878;
         font-size: 11px;
+        
+        .hashtag {
+            display: inline-block;
+            margin-right: 12px;
+            font-size: 12px;
+        }
     }
 
     .header_status {

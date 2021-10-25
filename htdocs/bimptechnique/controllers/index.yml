@@ -8,6 +8,9 @@ objects:
     fi: 
         instance: 
             bimp_object: BT_ficheInter
+    fi_det:
+        instance:
+            bimp_object: BT_ficheInter_det
 
 sections:
     - type: nav_tabs
@@ -26,10 +29,10 @@ sections:
                 list: 
                     name: default
                     object: fi
-#          - id: stats
-#            title: Statistiques
-#            struct:
-#                type: custom
-#                custom:
-#                    callback:
-#                        method: renderStats
+          - id: stats
+            title: Liste des lignes des FIs
+            struct:
+                type: list
+                list:
+                    name: all
+                    object: fi_det

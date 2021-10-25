@@ -21,6 +21,12 @@ labels:
     name: RIB
     name_plur: RIBs
     
+objects:  
+    societe: 
+        instance: 
+            id_object: 
+                field_value: fk_soc
+    
 fields: 
     fk_soc: 
         label: Societe
@@ -40,12 +46,17 @@ fields:
         default_value: ban
         
     label: 
-        label: Intitulé du compte
+        label: Intitulé du compte (interne a l'ERP)
         required: 1
+        
+    rum:
+        label: Code RUM
+        edit: 0
+#        required: 1
         
     bank: 
         label: Banque
-        required: 1
+#        required: 1
         
     code_banque: 
         label: Code banque
@@ -89,6 +100,9 @@ fields:
         dol_prop: datem
         input: 
             type: hidden
+    exported:
+        label: Exporté en  compta
+        type: bool
         
 fields_table: 
     default: 
@@ -96,6 +110,7 @@ fields_table:
         rows: 
             - field: fk_soc
               display: nom_url
+            - field: exported
             - field: default_rib
             - field: type
             - field: label
@@ -133,12 +148,14 @@ lists:
         sort_way: desc
         add_btn: 1
         delete_btn: 1
-        add_form_name: default
+        add_form_name: add
         modal_view: default
         edit_btn: 1
         cols:
+            exported:
             fk_soc: 
             label: 
+            rum:
             bank: 
             rib: 
             iban_prefix:
@@ -160,7 +177,25 @@ lists:
     fourn: 
         extends: soc
         title: Comptes bancaires du fournisseur
-            
+        
+forms: 
+    default:
+        msgs: 
+            - content: Attention, ne rentrer un RIB qu'une fois le mandat signé en votre possession
+              type: danger
+        all_fields: 1
+        rows: 
+            file:
+                custom: 1
+                label: Mandat SEPA signé
+                custom: 1
+                input_name: file
+                input:
+                    type: file_upload
+    add:
+        rows:
+            label:
+                field: label
             
             
             

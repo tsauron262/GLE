@@ -2120,9 +2120,19 @@ function BimpListTable() {
                 // Search: 
                 if (parseInt($table.data('sortable'))) {
                     $table.children('thead').children('tr.listSearchRow').find('.bimp_list_table_search_input').each(function () {
-                        $(this).keyup(function () {
-                            blt.search($table);
-                        });
+                        switch ($(this).tagName()) {
+                            case 'input':
+                                $(this).keyup(function () {
+                                    blt.search($table);
+                                });
+                                break;
+
+                            case 'select':
+                                $(this).change(function () {
+                                    blt.search($table);
+                                });
+                                break;
+                        }
                     });
                 }
             }
@@ -2144,6 +2154,13 @@ function BimpListTable() {
                 $(this).removeAttr('checked').prop('checked', false).change();
             });
         }
+    };
+
+    this.uncheckAll = function ($table) {
+        $table.find('input.bimp_list_table_check_all').removeAttr('checked').prop('checked', false).change();
+        $table.find('tbody').find('input.bimp_list_table_row_check').each(function () {
+            $(this).removeAttr('checked').prop('checked', false).change();
+        });
     };
 
     this.sort = function ($table, sort_col, sort_way) {
@@ -2219,7 +2236,7 @@ function BimpListTable() {
             return;
         }
 
-        var $inputs = $table.children('thead').children('tr.listSearchRow').find('input.bimp_list_table_search_input');
+        var $inputs = $table.children('thead').children('tr.listSearchRow').find('.bimp_list_table_search_input');
         if (!$inputs.length) {
             return;
         }
@@ -2247,18 +2264,39 @@ function BimpListTable() {
         $inputs.each(function () {
             var $input = $(this);
             var col_name = $input.data('col');
-            var value = $input.val();
+            var search_value = $input.val();
 
-            if (value !== '') {
-                var regex = new RegExp('^(.*)' + value + '(.*)$', 'i');
+            if (search_value !== '') {
+                var input_tag = $input.tagName();
+                var regex = new RegExp('^(.*)' + search_value + '(.*)$', 'i');
 
                 $rows.each(function () {
                     var $row = $(this);
                     if ((search_mode === 'lighten' && !$row.hasClass('deactivated')) ||
                             (search_mode === 'show') && $row.css('display') !== 'none') {
-                        var text = $row.find('.col_' + col_name).text();
+                        var check = false;
 
-                        if (!regex.test(text)) {
+                        switch (input_tag) {
+                            case 'input':
+                                var text = $row.find('.col_' + col_name).text();
+
+                                if (regex.test(text)) {
+                                    check = true;
+                                }
+                                break;
+
+                            case 'select':
+                                var value = $row.find('.col_' + col_name).data('value');
+
+                                if (typeof (value) !== 'undefined') {
+                                    if (value == search_value) {
+                                        check = true;
+                                    }
+                                }
+                                break;
+                        }
+
+                        if (!check) {
                             switch (search_mode) {
                                 case 'lighten':
                                     $row.addClass('deactivated');

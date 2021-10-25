@@ -1215,6 +1215,7 @@ class DoliDBMysqli extends DoliDB
                 ));
             }
         }
+        return $res;
     }
     
     public function rollback($log = '')

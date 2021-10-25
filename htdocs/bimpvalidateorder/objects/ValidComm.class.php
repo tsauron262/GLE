@@ -38,9 +38,11 @@ class ValidComm extends BimpObject
     const USER_ASK_ALL = 0;
     const USER_ASK_CHILD = 1;
     
+    private $valideur = array();
+    
     public function canEdit() {
         global $user;
-        if($user->id == 330)
+        if($user->admin)
             return 1;
         $right = 'validationcommande@bimp-groupe.net';
         return $user->rights->bimptask->$right->write;
@@ -108,28 +110,29 @@ class ValidComm extends BimpObject
         $valid_encours = 1;
         $valid_impaye = 1;
         
-//        return 1;
-                       
         // Object non géré
         if($this->getObjectClass($bimp_object) == -2)
             return 1;
+        
+        if(method_exists($bimp_object, 'getClientFacture'))
+            $client = $bimp_object->getClientFacture();
+        else
+            $client = $bimp_object->getChildObject('client');
+        
+//        $errors = BimpTools::merge_array($errors, $this->updateCreditSafe($bimp_object));
+        
+        
+//        return 1;
+                       
 
-//        $this->db2 = new DoliDBMysqli('mysql', $this->db->db->database_host,
-//                $this->db->db->database_user, $this->db->db->database_pass,
-//                $this->db->db->database_name, $this->db->db->database_port);
-//        mysqli-10.192.20.203-root-ERP_PROD_BIMP-3306
-//        global $conf;
-//        
-//        print_r($conf);
-//        die;
-//        echo $conf->db->type.'-'.$conf->db->host.'-'.$conf->db->user.'-'.$conf->db->name.'-'.$conf->db->port;
        global $conf;
         $this->db2 = getDoliDBInstance($conf->db->type,$conf->db->host,$conf->db->user,$this->db->db->database_pass,$conf->db->name,$conf->db->port);
         
         // Création contact
+        /* TODO Pourquoi ici ? TODO */
         $bimp_object->dol_object->db = $this->db2;
         $errors = BimpTools::merge_array($errors, $bimp_object->checkContacts());
-        $bimp_object->db = $this->db;
+        $bimp_object->dol_object->db = $this->db->db;
         
         list($secteur, $class, $percent, $val_euros, $rtp) = $this->getObjectParams($bimp_object, $errors);
         
@@ -149,10 +152,6 @@ class ValidComm extends BimpObject
                 $success[] = "Validation encours forcée par le champ \"Paiement comptant\".";
                 $valid_encours = 1;
             } else {
-                if(method_exists($bimp_object, 'getClientFacture'))
-                    $client = $bimp_object->getClientFacture();
-                else
-                    $client = $bimp_object->getChildObject('client');
                 
                 if(!$client->getData('validation_financiere')) {
                     $success[] = "Validation encours forcée par le champ \"Validation encours\".";
@@ -186,7 +185,7 @@ class ValidComm extends BimpObject
         // Commerciales
         if(!$valid_comm)
                 $errors[] = "Vous ne pouvez pas valider commercialement " 
-                . $bimp_object->getLabel('this') . '. La demande de validation commerciale a été adressée au valideur attribué.<br/>';
+                . $bimp_object->getLabel('this') . '. La demande de validation commerciale a été adressée à ' . $this->valideur[self::TYPE_COMMERCIAL] . '.<br/>';
         else
             $success[] = "Validation commerciale effectuée.";
         
@@ -200,7 +199,7 @@ class ValidComm extends BimpObject
         if(!$valid_impaye)
                 $errors[] = "Votre " . $bimp_object->getLabel() .  
                 " n'est pas encore validée car le compte client présente des retards de paiement " .
-                '. La demande de validation d\'impayé a été adressée au valideur attribué.<br/>';
+                '. La demande de validation d\'impayé a été adressée à ' . $this->valideur[self::TYPE_IMPAYE] . '.<br/>';
         else
             $success[] = "Validation d'impayé effectuée.";
         
@@ -228,6 +227,11 @@ class ValidComm extends BimpObject
 
             if((int) $demande->getData('status') == (int) DemandeValidComm::STATUS_VALIDATED)
                 return 1;
+            else {
+//                $this->valideur[$type] = $demande->getData('id_user_affected');
+                $user_aff = BimpCache::getBimpObjectInstance("bimpcore", 'Bimp_User', $demande->getData('id_user_affected'));
+                $this->valideur[$type] = ucfirst($user_aff->getData('firstname')) . ' ' . ucfirst($user_aff->getData('lastname'));
+            }
 
 //            // Je suis le valideur enlever pour ne pas court-circuiter la traçabilité
 //            elseif ((int) $demande->getData('id_user_affected') == (int) $user->id) {
@@ -235,7 +239,7 @@ class ValidComm extends BimpObject
 //                return 1;
                 
             // Je peux valider 
-            elseif($this->userCanValidate((int) $user->id, $secteur, $type, $class, $val, $bimp_object, $val_comm_validation)) {
+            if($this->userCanValidate((int) $user->id, $secteur, $type, $class, $val, $bimp_object, $val_comm_validation)) {
                 $this->updateDemande ((int) $user->id, $class, (int) $bimp_object->id, $type, (int) DemandeValidComm::STATUS_VALIDATED, $val_comm_validation);
                 return 1;
             }
@@ -244,7 +248,7 @@ class ValidComm extends BimpObject
         } else {
 
             // Dépendant d'un autre object déja validé/fermé (avec même montant ou remise)
-            if($this->linkedWithValidateObject($bimp_object, $type, $val)) {
+            if($this->linkedWithValidateObject($bimp_object, $type, $val, $errors)) {
                 return 1;
             }
             
@@ -330,8 +334,11 @@ class ValidComm extends BimpObject
     
     private function getErrorEncours($user, $bimp_object) {
         $id_user = (int) $user->id;
-        list($secteur, $class, $percent, $montant_piece, $rtp) = $this->getObjectParams($bimp_object);
+        list($secteur, $class, $percent, $montant_piece, $rtp) = $this->getObjectParams($bimp_object, $errors);
         $error = '';
+        
+        if(!empty($errors))
+            $error .= print_r($errors);
         
         $depassement_actuel = $this->getEncours($bimp_object);
         $depassement_futur = $montant_piece + $depassement_actuel;
@@ -361,11 +368,11 @@ class ValidComm extends BimpObject
         }
         
         
-        $error .= 'Votre validation max ' . $maxUser . '€<br/>';
-        $error .= 'Dépassement de l\'encours du client ' . $depassement_actuel . '€<br/>';
-        $error .= 'Montant ' . $bimp_object->getLabel('the') . ' ' . $montant_piece . '€<br/>';
-        $error .= 'Dépassement après la validation ' . $depassement_futur . '€<br/>';
-        $error .= 'La demande de validation d\'encours a été adressée au valideur attribué.<br/>';
+        $error .= 'Votre validation max ' . price($maxUser) . '€<br/>';
+        $error .= 'Dépassement de l\'encours du client ' . price($depassement_actuel) . '€<br/>';
+        $error .= 'Montant ' . $bimp_object->getLabel('the') . ' ' . price($montant_piece) . '€<br/>';
+        $error .= 'Dépassement après la validation ' . price($depassement_futur) . '€<br/>';
+        $error .= 'La demande de validation d\'encours a été adressée à ' . $this->valideur[self::TYPE_ENCOURS] . '.<br/>';
 
         return $error;
     }
@@ -434,7 +441,16 @@ class ValidComm extends BimpObject
             $client = $object->getClientFacture();
         else
             $client = $object->getChildObject('client');
-        $rtp = $client->getTotalUnpayed();
+        
+        if(is_null($client)) {
+            $errors[] = "Le client de cette pièce a mal été chargé, merci de réitéré la requête";
+            return;
+        }
+        
+        if(isset($this->client_rtp))
+            $rtp = $this->client_rtp;
+        else
+            $rtp = $client->getTotalUnpayed();
         if($rtp < 0)
             $rtp = 0;
                 
@@ -490,7 +506,7 @@ class ValidComm extends BimpObject
                 . ' ' . $bimp_object->getLabel('the') . ' (pour le secteur ' . $secteur_nom
                 . ', ' . $val_nom . ', utilisateur ' . $user_ask->firstname . ' ' . $user_ask->lastname . ')';
             
-            $errors[] = $message . ". L'équipe de débug est informée et va nommé un chargé de validation.";
+            $errors[] = $message . ". L'équipe de débug est informée et va nommer un chargé de validation.";
                       
             $lien = DOL_MAIN_URL_ROOT . '/' . $this->module;
             $message_mail = "Bonjour,<br/>" . $message;
@@ -508,7 +524,7 @@ class ValidComm extends BimpObject
         if((int) $bimp_object->id > 0) {
 
             $demande = BimpObject::getInstance('bimpvalidateorder', 'DemandeValidComm');
-            $demande->db->db = $this->db2;
+//            $demande->db->db = $this->db2;
             $errors = BimpTools::merge_array($errors, $demande->validateArray(array(
                 'type_de_piece' =>    (int) $object,
                 'id_piece' =>         (int) $bimp_object->id,
@@ -517,6 +533,9 @@ class ValidComm extends BimpObject
                 'val_comm_demande' => (int) $val_comm_demande,
                 'type' =>             (int) $type
             )));
+            
+            $user_aff = BimpCache::getBimpObjectInstance("bimpcore", 'Bimp_User', $id_user_affected);
+            $this->valideur[$type] = ucfirst($user_aff->getData('firstname')) . ' ' . ucfirst($user_aff->getData('lastname'));
 
             $errors = BimpTools::merge_array($errors, $demande->create());
             return 1;
@@ -559,7 +578,10 @@ class ValidComm extends BimpObject
         $sql = BimpTools::getSqlSelect(array('id', 'user', 'val_max'));
         $sql .= BimpTools::getSqlFrom($this->getTable());
         $sql .= BimpTools::getSqlWhere($filters);
-        $sql .= ' AND (only_child=' . self::USER_ASK_ALL . ' OR (only_child=' . self::USER_ASK_CHILD . ' AND user=' . $user_ask->fk_user . '))';
+        $sql .= ' AND (only_child=' . self::USER_ASK_ALL;
+        if($user_ask->fk_user > 0)
+            $sql .= ' OR (only_child=' . self::USER_ASK_CHILD . ' AND user=' . $user_ask->fk_user . ')';
+        $sql .= ')';
         $sql .= BimpTools::getSqlOrderBy('date_create', 'DESC');
         $rows = self::getBdb()->executeS($sql, 'array');
 
@@ -598,24 +620,26 @@ class ValidComm extends BimpObject
         return $can_valid_not_avaible;
     }
     
-    public function demandeExists($class, $id_object, $type = null) {
+    public function demandeExists($class, $id_object, $type = null, $status = null, $return_all = false) {
         
-        if($type == null) 
-            $filters = array(
-                'type_de_piece' => $class,
-                'id_piece'      => $id_object
-            );
-        else
-            $filters = array(
-                'type_de_piece' => $class,
-                'id_piece'      => $id_object,
-                'type'          => $type
-            );
+        $filters = array(
+            'type_de_piece' => $class,
+            'id_piece'      => $id_object
+        );
         
+        if($type !== null)
+            $filters['type'] = $type;
+        
+        if($status !== null)
+            $filters['status'] = $status;
+
         $demandes = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filters);
 
-        foreach($demandes as $key => $val)
-            return $demandes[$key];
+        if(!$return_all) {
+            foreach($demandes as $key => $val)
+                return $demandes[$key];
+        } elseif(count($demandes))
+            return $demandes;
         
         return 0;
     }
@@ -630,7 +654,7 @@ class ValidComm extends BimpObject
         
         $demandes = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filters);
         foreach($demandes as $d) {
-            $d->db->db = $this->db2;
+//            $d->db->db = $this->db2;
             $now = date('Y-m-d H:i:s');
             $d->updateField('id_user_valid', $id_user);
             $d->updateField('date_valid', $now);
@@ -643,14 +667,17 @@ class ValidComm extends BimpObject
         return 0;
     }
     
-    public function linkedWithValidateObject($current_bimp_object, $current_type, $current_val) {        
+    public function linkedWithValidateObject($current_bimp_object, $current_type, $current_val, &$errors) {        
         
         foreach (BimpTools::getDolObjectLinkedObjectsList($current_bimp_object->dol_object, $this->db) as $item) {
             
             if(0 < (int) $item['id_object'] and $item['type'] == 'propal') {
                 $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', (int) $item['id_object']);
 
-                list($secteur, $class, $percent, $val_euros, $rtp) = $this->getObjectParams($propal);
+                list($secteur, $class, $percent, $val_euros, $rtp) = $this->getObjectParams($propal, $errors);
+                
+                if(count($errors))
+                    return 0;
 
                 /*if((int) $current_type == self::TYPE_ENCOURS and $current_val <= $val_euros and in_array((int) $propal->getData('fk_statut'), array(1, 2, 4)))
                     return 1;
@@ -660,7 +687,10 @@ class ValidComm extends BimpObject
             } elseif(0 < (int) $item['id_object'] and $item['type'] == 'facture') {
                 $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $item['id_object']);
 
-                list($secteur, $class, $percent, $val_euros, $rtp) = $this->getObjectParams($facture);
+                list($secteur, $class, $percent, $val_euros, $rtp) = $this->getObjectParams($facture, $errors);
+                
+                if(count($errors))
+                    return 0;
                 
                 if((int) $current_type == self::TYPE_ENCOURS  and $current_val <= $val_euros and in_array((int) $facture->getData('fk_statut'), array(1, 2)))
                     return 1;
@@ -670,7 +700,10 @@ class ValidComm extends BimpObject
             } elseif(0 < (int) $item['id_object'] and $item['type'] == 'commande') {
                 $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $item['id_object']);
 
-                list($secteur, $class, $percent, $val_euros, $rtp) = $this->getObjectParams($commande);
+                list($secteur, $class, $percent, $val_euros, $rtp) = $this->getObjectParams($commande, $errors);
+                
+                if(count($errors))
+                    return 0;
                 
                 if((int) $current_type == self::TYPE_ENCOURS  and $current_val <= $val_euros and in_array((int) $commande->getData('fk_statut'), array(1, 3)))
                     return 1;
@@ -703,6 +736,12 @@ class ValidComm extends BimpObject
             'status'        => 1,
         );
         
+        // Client
+        if(method_exists($bimp_object, 'getClientFacture'))
+            $client = $bimp_object->getClientFacture();
+        else
+            $client = $bimp_object->getChildObject('client');
+        
         $demandes_valider = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filters);
 
         // Validé
@@ -713,9 +752,9 @@ class ValidComm extends BimpObject
                 if($m == '') {
                     
                     $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $d->getData('id_user_ask'));
-                    
-                    $m .= "Bonjour " . $user->getData('firstname') . ",<br/><br/>";
-                    $m .= "Liste des demandes validées pour " . $bimp_object->getNomUrl() . ":<br/>";
+                    $client = $bimp_object->getChildObject('client');
+//                    $m .= "Bonjour " . $user->getData('firstname') . ",<br/><br/>";
+                    $m .= "Liste des demandes validées pour " . $bimp_object->getNomUrl() . " : du client ".$client->getLink()."<br/>";
                 }
                 
                 switch ($d->getData('type')) {
@@ -753,10 +792,57 @@ class ValidComm extends BimpObject
         }
         
         $subject = "Validation " . count($demandes_valider) . '/' . (count($demandes_en_cours) + count($demandes_valider)) . ' ';
-        $subject .= $bimp_object->getRef();
+        $subject .= $bimp_object->getRef() . ' - ' . $client->getData('code_client') . ' - ' . $client->getData('nom');;
         
         mailSyn2($subject, $user->getData('email'), null, $m);
         return 1;
+    }
+    
+    private function updateCreditSafe($bimp_object) {
+        
+        $errors = array();
+        
+        // Client
+        if(method_exists($bimp_object, 'getClientFacture'))
+            $client = $bimp_object->getClientFacture();
+        else
+            $client = $bimp_object->getChildObject('client');
+        
+        // Non solvable
+        if($client->getData('solvabilite_status') == Bimp_Societe::SOLV_INSOLVABLE) {
+            $errors[] = "Client insolvable";
+            return $errors;
+        }
+        
+        // Créer après le 1er mai 2021
+        if('2021-05-1' < $client->getData('datec'))
+            return $errors;
+
+        // Avec retard de paiement
+        if(isset($this->client_rtp))
+            $rtp = $this->client_rtp;
+        else
+            $rtp = $client->getTotalUnpayed();
+
+        if($rtp != 0)
+            return $errors;
+        
+        // Les 3 conditions sont satifaites, update limite
+//        $old_limit = $client->getdata('outstanding_limit');
+        
+        // data Crédit Safe
+        if($client->isSirenRequired()) {
+            $code = (string) $client->getData('siren');
+            if ($code != '') {
+                $errors = BimpTools::merge_array($errors, $client->checkSiren('siren', $code));
+            } else {
+                $code = (string) $client->getData('siret');
+                if($code != '')
+                    $errors = BimpTools::merge_array($errors, $client->checkSiren('siret', $code));
+            }
+        }
+
+        return $errors;
     }
     
 }
@@ -886,3 +972,8 @@ class DoliValidComm extends CommonObject {
 
     
 }
+
+
+
+
+

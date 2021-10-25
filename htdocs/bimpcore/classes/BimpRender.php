@@ -27,6 +27,19 @@ class BimpRender
         return '<i class="' . self::renderIconClass($icon) . ($class ? ' ' . $class : '') . '"></i>';
     }
 
+    public static function renderInfoIcon($icon, $info)
+    {
+        $html = '';
+
+        $html .= '<span class="infoIcon bs-popover"';
+        $html .= self::renderPopoverData($info, 'top', true);
+        $html .= '>';
+        $html .= self::renderIcon($icon);
+        $html .= '</span>';
+
+        return $html;
+    }
+
     public static function displayTagAttrs($params)
     {
         // Obsolète / A suppr... 
@@ -1152,7 +1165,7 @@ class BimpRender
                     'main_class'  => '',
                     'data'        => array(),
                     'searchable'  => false,
-                    'search_mode' => 'lighten', // lighten (surbrillance des éléments trouvés) / show (affichage uniquement des élements trouvés)  
+                    'search_mode' => 'show', // lighten (surbrillance des éléments trouvés) / show (affichage uniquement des élements trouvés)  
                     'sortable'    => false,
                     'sort_col'    => '',
                     'sort_way'    => 'asc', // asc / desc
@@ -1234,7 +1247,15 @@ class BimpRender
                     $html .= '<td class="col_search">';
                     $html .= '<div class="searchInputContainer">';
                     if ($header['searchable']) {
-                        $html .= '<input type="text" class="bimp_list_table_search_input" value="" name="search_col_' . $col_name . '" data-col="' . $col_name . '"/>';
+                        if (isset($header['search_values'])) {
+                            $html .= BimpInput::renderInput('select', 'search_col_' . $col_name, 'empty_value', array(
+                                        'options'     => array_merge(array('' => ''), $header['search_values']),
+                                        'extra_class' => 'bimp_list_table_search_input',
+                                        'data'        => array('col' => $col_name)
+                            ));
+                        } else {
+                            $html .= '<input type="text" class="bimp_list_table_search_input" value="" name="search_col_' . $col_name . '" data-col="' . $col_name . '"/>';
+                        }
                     }
                     $html .= '</div>';
                     $html .= '</td>';
@@ -1383,6 +1404,7 @@ class BimpRender
         $html .= '<div class="singleLineFormContent">';
 
         foreach ($inputs as $input) {
+            $content = '';
             $label = BimpTools::getArrayValueFromPath($input, 'label', '');
             $input_content = BimpTools::getArrayValueFromPath($input, 'content', '');
             $input_name = BimpTools::getArrayValueFromPath($input, 'input_name', '');
@@ -1390,7 +1412,7 @@ class BimpRender
 
             if ($input_content && $input_name) {
                 if ($label) {
-                    $content .= '<label>' . $label . ': </label>';
+                    $content .= '<label>' . $label . ': </label><br/>';
                 }
 
                 $content .= $input_content;

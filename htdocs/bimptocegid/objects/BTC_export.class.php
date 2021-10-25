@@ -244,6 +244,12 @@ class BTC_export extends BimpObject {
             case 'paiement':
                 $file = '2_'.$entitie.'_(PAIEMENTS)_' . $complementFileName . "_" . BimpCore::getConf('BIMPTOCEGID_version_tra') . ".tra";
                 break;
+            case 'rib':
+                $file = '4_'.$entitie.'_(RIBS)_' . $complementFileName . "_" . BimpCore::getConf('BIMPTOCEGID_version_tra') . ".tra";
+                break;
+            case 'mandat':
+                $file = '5_'.$entitie.'_(MANDATS)_' . $complementFileName . "_" . BimpCore::getConf('BIMPTOCEGID_version_tra') . ".tra";
+                break;
         }
         
         if(!is_dir($export_dir)) {
@@ -630,10 +636,17 @@ class BTC_export extends BimpObject {
     
     public function actionDeleteTra($data, &$success) {
         global $user;
+        $errors = [];
+        $warnings = [];
         $fromFolder = PATH_TMP . "/" . $this->project_directory . $data['folder'];
         if(unlink($fromFolder . $data['nom'])) {
             $this->write_logs("***SUPPRESSION*** " . date('d/m/Y H:i:s') . " => USER : " . $user->login . " => TRA:  " . $data['nom'] . "\n", true);
         }
+        return [
+            'errors'   => $errors,
+            'warnings' => $warnings,
+            'success'  => $success
+        ];
     }
     
     public function actionImported($data, &$success) {

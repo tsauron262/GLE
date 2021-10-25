@@ -146,7 +146,7 @@ class ObjectLine extends BimpObject
             return 0;
         }
 
-        return 1;
+        return $parent->isEditable();
     }
 
     public function isParentDraft()
@@ -265,7 +265,7 @@ class ObjectLine extends BimpObject
     {
         $parent = $this->getParentInstance();
 
-        if (BimpObject::objectLoaded($parent)) {
+        if (BimpObject::objectLoaded($parent) and $parent->isEditable()) {
             if ($parent->field_exists('fk_statut') && $parent->getData('fk_statut') === 0) {
                 return 1;
             } elseif (isset($parent->dol_object->statut) && (int) $parent->dol_object->statut === 0) {
@@ -467,6 +467,12 @@ class ObjectLine extends BimpObject
                 if ((int) $product->getData('fk_product_type') == 1)
                     return 1;
             }
+        }
+        else{
+            $line = $this->getChildObject('line');
+            $type = $line->product_type ? $line->product_type : $line->fk_product_type;
+            if($type == 1)
+                return 1;
         }
         return 0;
     }
@@ -4545,7 +4551,7 @@ class ObjectLine extends BimpObject
 
     public function resetPositions()
     {
-        if ($this->getConf('positions', false, false, 'bool')) {
+        if ($this->getConf('positions', false, false, 'bool') && !BimpComm::$dont_check_parent_on_update) {
             $filters = array();
             $parent_id_property = $this->getParentIdProperty();
             if (is_null($parent_id_property)) {
@@ -4591,9 +4597,9 @@ class ObjectLine extends BimpObject
                     }
                 }
             }
+            $this->setLinesPositions();
         }
 
-        $this->setLinesPositions();
     }
 
     public function setPosition($position)
@@ -4604,7 +4610,7 @@ class ObjectLine extends BimpObject
 
         if (!isset($this->id) || !(int) $this->id) {
             $check = false;
-        } elseif ($this->getConf('positions', false, false, 'bool')) {
+        } elseif ($this->getConf('positions', false, false, 'bool') && !BimpComm::$dont_check_parent_on_update) {
             $filters = array();
             $parent_id_property = $this->getParentIdProperty();
             if (is_null($parent_id_property)) {
@@ -4727,7 +4733,7 @@ class ObjectLine extends BimpObject
 
     public function getNextPosition()
     {
-        if ($this->getConf('positions', false, false, 'bool')) {
+        if ($this->getConf('positions', false, false, 'bool') && !BimpComm::$dont_check_parent_on_update) {
             $filters = array();
 
             $parent_id_property = $this->getParentIdProperty();

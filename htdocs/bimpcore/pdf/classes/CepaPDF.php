@@ -11,6 +11,7 @@ class CepaPDF extends BimpDocumentPDF
 
     public static $type = 'societe';
     public $propal = null;
+    public $rib = null;
     public $mode = "normal";
     public $after_totaux_label = 'Bon pour commande';
 
@@ -29,38 +30,40 @@ class CepaPDF extends BimpDocumentPDF
 
     protected function initData()
     {
-        
         require_once DOL_DOCUMENT_ROOT . '/includes/tcpdi/tcpdi.php';
         require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/src/fpdf2.php';
         require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/src/autoload.php';
         //$this->pdf2 = new BimpConcatPdf();
-                $this->pdf2 = pdf_getInstance($this->format);
+        $this->pdf2 = pdf_getInstance($this->format);
         $this->pdf2->addPage();
         $this->pdf2->SetFont('Times');
         $pagecountTpl = $this->pdf2->setSourceFile(DOL_DOCUMENT_ROOT . '/bimpcore/pdf/templates/SEPA.pdf');
         $tplidx = $this->pdf2->importPage(1, "/MediaBox");
-                $this->pdf2->useTemplate($tplidx, 0, 0, 0, 0, true);
+        $this->pdf2->useTemplate($tplidx, 0, 0, 0, 0, true);
 //        $size = $this->pdf2->getTemplateSize($tplidx);
 //        $this->pdf2->useTemplate($tplidx, null, null, $size['w'], $size['h'], true);
-        $file = $this->getFilePath() . $this->getFileName().'_sepa.pdf';
-        
+
         $soc = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Societe", $this->object->id);
-        
-        $this->pdf2->setXY(120,107.3);
-        $this->pdf2->Cell(70,8, $soc->getNumSepa(), 0);
-        
-        
-        $this->pdf2->setXY(60,40);
-        $this->pdf2->Cell(70,8, $soc->getData('code_client'), 0);
-        
-        
-        $this->pdf2->Close();
-            
-        $this->pdf2->Output($file, 'F');
 
+        $rib = $soc->getDefaultRib(true);
+
+        if (BimpObject::objectLoaded($rib)) {
+            $rum = $rib->getData('rum');
+            $file = $this->getFilePath() . $rib->getFileName();
+
+            $this->pdf2->setXY(120, 107.3);
+            $this->pdf2->Cell(70, 8, $rum, 0);
+
+            $this->pdf2->setXY(60, 40);
+            $this->pdf2->Cell(70, 8, $soc->getData('code_client'), 0);
+
+            $this->pdf2->Close();
+
+            $this->pdf2->Output($file, 'F');
+        } else {
+            $this->errors[] = 'Aucun RIB par défaut pour ce client';
+        }
     }
-
-    
 //    public function write_file($object, $outputlangs, $srctemplatepath = '', $hidedetails = 0, $hidedesc = 0, $hideref = 0) {
 //        
 //        $this->init($object);

@@ -263,6 +263,32 @@ class BT_ficheInter_det extends BimpDolObject
 
         return $services;
     }
+    
+    private function getTypePlanningCode():int {
+        
+        $code = "";
+        $parent = $this->getParentInstance();
+        $fk_soc = (int) $parent->getData('fk_soc');
+        $type = (int) $this->getData('type');
+        
+        switch ($this->getData('type')) {
+            case 0:
+            case 4:
+                $code = "INTER";
+                break;
+            case 1:
+            case 2:
+                $code = "AC_OTH";
+                break;
+        }
+        
+        if(empty($code) && $fk_soc === $type) {
+            $code = "ATELIER";
+        }
+        
+        return (int) $this->db->getValue("c_actioncomm", "id", "code = '$code'");
+        
+    }
 
     // Getters données: 
 
@@ -298,6 +324,20 @@ class BT_ficheInter_det extends BimpDolObject
     {
         $t = new DateTime($this->getData($field));
         return($t->format('H:i' . ($with_secondes ? ':s' : '')));
+    }
+    
+    public function displayTypeInList() {
+        $type  = $this->getData('type');
+        if(array_key_exists($type,self::$types)) {
+            return $this->displayData("type");
+        }
+        $parent = $this->getParentInstance();
+        $fk_soc = $parent->getData('fk_soc');
+        $soc = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Societe", $fk_soc);
+        if($type == $fk_soc) {
+            return "<b>Intervention interne (".$soc->getName().")</b>";
+        }
+        
     }
 
     public function display_service_ref($with_details_commande_line = true)
@@ -469,6 +509,58 @@ class BT_ficheInter_det extends BimpDolObject
 
     // Traitements: 
 
+    private function adjustCalendar($delete = false) {
+        $errors = array();
+        $parent = $this->getParentInstance();
+        BimpTools::loadDolClass("comm/action", "actioncomm");
+        BimpTools::loadDolClass("user");
+        $admin = new User($this->db->db);
+        $admin->fetch(1);
+        $actionCommList = ($this->getData('actioncomm') != "") ? json_decode($this->getData('actioncomm')) : [];
+        $actionCommClass = new ActionComm($this->db->db);
+        
+        if(count($actionCommList) > 0) {
+            foreach ($actionCommList as $id_actionComm) {
+                $actionCommClass->fetch($id_actionComm);
+                $actionCommClass->delete();
+            }
+        }
+        
+        if(!$delete) {
+            $actionCommClass->label = $parent->getRef() . " - " . BT_ficheInter_det::$types[$this->getData('type')]['label'];
+            $actionCommClass->note = addslashes($this->getData('description'));
+            $actionCommClass->punctual = 1;
+            $actionCommClass->userownerid = (int) $parent->getData('fk_user_tech');
+            $actionCommClass->elementtype = 'fichinter';
+            $actionCommClass->type_id = $this->getTypePlanningCode();
+            $actionCommClass->percentage = 100;
+            $actionCommClass->socid = $parent->getData('fk_soc');
+            $actionCommClass->fk_element = $parent->id;
+
+            if($this->getData('arrived')) {
+                $actionCommClass->datep = strtotime($this->getData('arrived'));
+                $actionCommClass->datef = strtotime($this->getData('departure'));
+                $actionCommClass->create($admin);
+                $sql = "UPDATE `".MAIN_DB_PREFIX."fichinterdet` SET `actioncomm` = '[\"$actionCommClass->id\"]' WHERE  rowid = $this->id";
+            } else {
+                $actionCommClass2 = clone $actionCommClass;
+                $actionCommClass->datep = strtotime($this->getData('arriverd_am'));
+                $actionCommClass->datef = strtotime($this->getData('departure_am'));
+                $actionCommClass->create($admin);
+                $actionCommClass2->datep = strtotime($this->getData('arriverd_pm'));
+                $actionCommClass2->datef = strtotime($this->getData('departure_pm'));
+                $actionCommClass2->create($admin);
+                $sql = "UPDATE `".MAIN_DB_PREFIX."fichinterdet` SET `actioncomm` = '[\"$actionCommClass->id\", \"$actionCommClass2->id\"]' WHERE rowid = $this->id";
+            }
+
+            if(!$this->db->execute($sql))
+                $errors[] = 'Probléme SQL calendar FI';
+        }
+
+        return $errors;
+        
+    }
+    
     public function onSave(&$errors = [], &$warnings = [])
     {
         $parent = $this->getParentInstance();
@@ -480,7 +572,17 @@ class BT_ficheInter_det extends BimpDolObject
             $parent->update($w, true);
         }
 
-        return parent::onSave($errors, $warnings);
+        parent::onSave($errors, $warnings);
+        
+        if(!count($errors) && 
+                $this->getData('type') != self::TYPE_DEPLA && 
+                $this->getData('type') != self::TYPE_DEPLACEMENT_VENDU && 
+                $this->getData('type') != self::TYPE_DEPLACEMENT_CONTRAT &&
+                $this->getData('type') != self::TYPE_LIBRE
+        ) {
+            $errors = $this->adjustCalendar();
+        }
+
     }
 
     // Actions: 
@@ -540,6 +642,11 @@ class BT_ficheInter_det extends BimpDolObject
     }
 
     // Overrides: 
+    
+    public function delete(&$warnings = array(), $force_delete = false) {
+        $this->adjustCalendar(true);
+        return parent::delete($warnings, $force_delete);
+    }
 
     public function validatePost()
     {
@@ -743,7 +850,7 @@ class BT_ficheInter_det extends BimpDolObject
     }
 
     // Outils:
-
+    
     public function time_to_qty($time)
     {
         $timeArr = explode(':', $time);
@@ -755,5 +862,44 @@ class BT_ficheInter_det extends BimpDolObject
             $decTime = $time;
         }
         return $decTime;
+    }
+    
+    // Filters
+    
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false){
+        switch($field_name) {
+            case 'type_of':
+                $in = [];
+                $sql = "SELECT rowid FROM llx_fichinterdet";
+                if(count($values) > 0) {
+                    $sql .= " WHERE ";
+                    $for_or = Array();
+                    foreach($values as $value) {
+                        if($value != 7){
+                            $for_or[] = $value;
+                        }
+                        else {
+                            $intern_societe = explode(',', BimpCore::getConf("bimptechnique_id_societe_auto_terminer"));
+                            foreach($intern_societe as $id) {
+                                $for_or[] = $id;
+                            }
+                        }
+                    }
+                }
+                $first_loop = true;
+                foreach($for_or as $type_of) {
+                    $sql .= ($first_loop) ? "type = $type_of" : " OR type = $type_of";
+                    $first_loop = false;
+                }
+                
+                if ($sql != "") {
+                    $res = $this->db->executeS($sql, 'array');
+                    foreach ($res as $nb => $i) {
+                        $in[] = $i['rowid'];
+                    }
+                }
+                $filters['a.rowid'] = ['in' => $in];
+                break;
+        }
     }
 }

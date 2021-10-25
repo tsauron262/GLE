@@ -1413,12 +1413,21 @@ class Ldap
 
 		//Parse flags to text
 		$retval = array();
-		while (list($flag, $val) = each($flags)) {
+                /*moddrsi*/
+//		while (list($flag, $val) = each($flags)) {
+//			if ($uacf >= $val) {
+//				$uacf -= $val;
+//				$retval[$val] = $flag;
+//			}
+//		}
+                
+		foreach ($flags as $flag => $val) {
 			if ($uacf >= $val) {
 				$uacf -= $val;
 				$retval[$val] = $flag;
 			}
 		}
+                /*fmoddrsi*/
 
 		//Return human friendly flags
 		return($retval);

@@ -9,6 +9,8 @@ class BimpComm extends BimpDolObject
     const BC_ZONE_UE = 2;
     const BC_ZONE_HORS_UE = 3;
     const BC_ZONE_UE_SANS_TVA = 4;
+    
+    public static $dont_check_parent_on_update = false;
 
     public static $element_name = '';
     public static $external_contact_type_required = true;
@@ -47,6 +49,19 @@ class BimpComm extends BimpDolObject
         self::BC_ZONE_HORS_UE => 'Hors UE'
     );
     protected $margins_infos = null;
+    
+    public function startLineTransaction(){
+        static::$dont_check_parent_on_update = true;
+    }
+    
+    public function stopLineTransaction(){
+        static::$dont_check_parent_on_update = false;
+        $lines = $this->getLines();
+        if(count($lines)){
+            $lines[count($lines)-1]->resetPositions();
+            $lines[count($lines)-1]->update();
+        }
+    }
 
     public function __construct($module, $object_name)
     {
@@ -107,6 +122,33 @@ class BimpComm extends BimpDolObject
             return 1;
         }
         return 0;
+    }
+
+    public function isEditable($force_edit = false, &$errors = Array())
+    {
+        global $user;
+
+        if (!$force_edit && !$user->admin) {
+            $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+            $type_de_piece = ValidComm::getObjectClass($this);
+            
+            $demands = $valid_comm->demandeExists($type_de_piece, $this->id, null, 0, true);
+            
+            if($demands){
+                foreach ($demands as $d) {
+                    if((int) $d->getData('id_user_affected') == (int) $user->id)
+                        return 1;
+                }
+
+                // Soumis à des validations et possède des demandes de validation en brouillon
+                if ($type_de_piece != -2 and $demands) {
+                    $errors[] = 'Une demande de validation est en attente';
+                    return 0;
+                }
+            }
+        }
+
+        return parent::isEditable();
     }
 
     public function isFieldActivated($field_name)
@@ -192,6 +234,9 @@ class BimpComm extends BimpDolObject
                 if (!BimpObject::objectLoaded($client)) {
                     $errors[] = 'Client absent';
                 } else {
+                    if ($client->getData('fk_typent') == 0)
+                        $errors[] = 'Type de tier obligatoire';
+
 
                     // Module de validation activé
                     if ((int) $conf->global->MAIN_MODULE_BIMPVALIDATEORDER == 1) {
@@ -214,11 +259,16 @@ class BimpComm extends BimpDolObject
                 }
             }
         }
-        
-        
-//        if($this->getData('fk_mode_reglement') == 3 && $this->getData('rib_client') < 1 && $this->extrafieldsIsConfig('rib_client'))
-//            $errors[] = 'Pour les prélèvements CEPA, le RIB est obligatoire';
-//        $errors[] = 'TODO A suppr';
+
+
+        if ($this->getData('fk_mode_reglement') == 3 && $this->extrafieldsIsConfig('rib_client')) {
+            if ($this->getData('rib_client') < 1)
+                $errors[] = 'Pour les prélèvements SEPA, le RIB est obligatoire';
+            else {
+                $rib = $this->getChildObject('rib_client');
+                $rib->isValid($errors);
+            }
+        }
 
         return (count($errors) ? 0 : 1);
     }
@@ -262,6 +312,10 @@ class BimpComm extends BimpDolObject
                 return 1;
 
             case 'useRemise':
+
+                if (!$this->isEditable())
+                    return 0;
+
                 if ($this->object_name === 'Bimp_Facture') {
                     if ((int) $this->getData('fk_statut') === 0) {
                         return 1;
@@ -325,6 +379,9 @@ class BimpComm extends BimpDolObject
                 return 0;
             }
         }
+
+        if (!$this->isEditable())
+            return 0;
 
         return 1;
     }
@@ -395,13 +452,18 @@ class BimpComm extends BimpDolObject
     }
 
     // Getters array: 
-    
+
     public function getRibArray()
     {
-        $result = $this->db->getRows('societe_rib', '`fk_soc` ='.$this->getData("fk_soc"), null, 'object', null, 'default_rib', 'DESC');
-        $return = array(0=>'');
-        foreach($result as $row)
-            $return[$row->rowid] = $row->label;
+        $return = array(0 => '');
+        $client = $this->getClientFacture();
+        if ($client && $client->isLoaded()) {
+            $result = $this->db->getRows('societe_rib', '`fk_soc` =' . $client->id, null, 'object', null, 'default_rib', 'DESC');
+
+            foreach ($result as $row) {
+                $return[$row->rowid] = $row->label;
+            }
+        }
         return $return;
     }
 
@@ -498,21 +560,29 @@ class BimpComm extends BimpDolObject
         // Ajout acompte: 
         if ($this->isActionAllowed('addAcompte') && $this->canSetAction('addAcompte')) {
             $id_mode_paiement = 0;
+            $id_rib = (int) $this->getData('rib_client');
             $client = $this->getChildObject('client');
             if (BimpObject::objectLoaded($client)) {
                 $id_mode_paiement = $client->dol_object->mode_reglement_id;
+
+                if (!$id_rib) {
+                    $id_rib = (int) $client->getDefaultRibId();
+                }
             }
+
             $buttons[] = array(
                 'label'   => 'Ajouter un acompte',
                 'icon'    => 'fas_hand-holding-usd',
                 'onclick' => $this->getJsActionOnclick('addAcompte', array(
-                    'id_mode_paiement' => $id_mode_paiement
+                    'id_mode_paiement' => $id_mode_paiement,
+                    'id_rib'           => $id_rib
                         ), array(
                     'form_name' => 'acompte'
                 ))
             );
         }
 
+        // Message logistique: 
         $note = BimpObject::getInstance("bimpcore", "BimpNote");
         $buttons[] = array(
             'label'   => 'Message logistique',
@@ -520,12 +590,14 @@ class BimpComm extends BimpDolObject
             'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => $note::BN_GROUPID_LOGISTIQUE, "content" => ""), array('form_name' => 'rep'))
         );
 
+        // Message facturation: 
         $buttons[] = array(
             'label'   => 'Message facturation',
             'icon'    => 'far_paper-plane',
             'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => $note::BN_GROUPID_FACT, "content" => "Bonjour, merci de bien vouloir facturer cette commande."), array('form_name' => 'rep'))
         );
 
+        // Relevé facturation: 
         if ((int) $this->getData('fk_soc')) {
             $sql = 'SELECT datef FROM ' . MAIN_DB_PREFIX . 'facture WHERE fk_soc = ' . (int) $this->getData('fk_soc') . ' AND fk_statut IN (1,2,3)';
             $sql .= ' ORDER BY datef ASC LIMIT 1';
@@ -954,14 +1026,16 @@ class BimpComm extends BimpDolObject
             $lines = $this->getLines('not_text');
 
             foreach ($lines as $line) {
-                $line_infos = $line->getRemiseTotalInfos(false, $force_qty_mode);
-                $infos['remises_lines_amount_ttc'] += (float) $line_infos['line_amount_ttc'];
-                $infos['remises_lines_amount_ht'] += (float) $line_infos['line_amount_ht'];
-                $infos['remises_globales_amount_ht'] += (float) $line_infos['global_amount_ht'];
-                $infos['remises_globales_amount_ttc'] += (float) $line_infos['global_amount_ttc'];
-                $infos['ext_remises_globales_amount_ht'] += (float) $line_infos['ext_global_amount_ht'];
-                $infos['ext_remises_globales_amount_ttc'] += (float) $line_infos['ext_global_amount_ttc'];
-                $total_ttc_without_remises += $line_infos['total_ttc_without_remises'];
+                if($line->getData('linked_object_name') != 'discount' && $line->desc != 'Acompte'){
+                    $line_infos = $line->getRemiseTotalInfos(false, $force_qty_mode);
+                    $infos['remises_lines_amount_ttc'] += (float) $line_infos['line_amount_ttc'];
+                    $infos['remises_lines_amount_ht'] += (float) $line_infos['line_amount_ht'];
+                    $infos['remises_globales_amount_ht'] += (float) $line_infos['global_amount_ht'];
+                    $infos['remises_globales_amount_ttc'] += (float) $line_infos['global_amount_ttc'];
+                    $infos['ext_remises_globales_amount_ht'] += (float) $line_infos['ext_global_amount_ht'];
+                    $infos['ext_remises_globales_amount_ttc'] += (float) $line_infos['ext_global_amount_ttc'];
+                    $total_ttc_without_remises += $line_infos['total_ttc_without_remises'];
+                }
             }
 
             if ($total_ttc_without_remises && $infos['remises_lines_amount_ttc']) {
@@ -1088,14 +1162,13 @@ class BimpComm extends BimpDolObject
                         $marginInfos['pv_total'] += $pv;
                     }
                 } else {
-                    $type = $line->product_type ? $line->product_type : $line->fk_product_type;
-                    if ($type == 0) {  // product
+                    if (!$bimp_line->isService()) {  // product
                         $marginInfos['pa_products'] += $pa;
                         $marginInfos['pv_products'] += $pv;
                         $marginInfos['pa_total'] += $pa;
                         $marginInfos['pv_total'] += $pv;
                         $marginInfos['margin_on_products'] += $pv - $pa;
-                    } elseif ($type == 1) {  // service
+                    } else {  // service
                         $marginInfos['pa_services'] += $pa;
                         $marginInfos['pv_services'] += $pv;
                         $marginInfos['pa_total'] += $pa;
@@ -1612,7 +1685,7 @@ class BimpComm extends BimpDolObject
                 if ($infos['ext_remises_globales_amount_ttc'] || (!is_null($infos_fq) && $infos_fq['ext_remises_globales_amount_ttc'])) {
                     $html .= '<tr>';
                     $html .= '<td style="font-weight: bold;width: 160px;">Parts de remises globales externes: </td>';
-                    
+
                     $html .= '<td>';
                     $html .= BimpTools::displayMoneyValue($infos['ext_remises_globales_amount_ht'], 'EUR', 0, 0, 0, 2, 1);
                     if (!is_null($infos_fq) && $infos['ext_remises_globales_amount_ht'] != $infos_fq['ext_remises_globales_amount_ht']) {
@@ -1769,6 +1842,19 @@ class BimpComm extends BimpDolObject
             $html .= '<span class="warning" style="font-size: 15px">Annule et remplace ' . $this->getLabel('the') . ' "' . $this->getData('replaced_ref') . '" (données perdues)</span>';
             $html .= '</div>';
         }
+
+        return $html;
+    }
+
+    public function renderHeaderExtraRight()
+    {
+        $html = '';
+        $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+        $type_de_piece = ValidComm::getObjectClass($this);
+
+        // Soumis à des validations et possède des demandes de validation en brouillon
+        if ($type_de_piece != -2 and $valid_comm->demandeExists($type_de_piece, $this->id, null, 0))
+            $html = '<span class="warning"><i class="fas fa5-exclamation-triangle iconLeft"></i>En cours de validation</span>';
 
         return $html;
     }
@@ -2887,9 +2973,8 @@ class BimpComm extends BimpDolObject
         return count($errors) ? 0 : 1;
     }
 
-    public function createAcompte($amount, $id_mode_paiement, $id_bank_account = 0, $paye = 1, $date_paiement = null, $use_caisse = false, $num_paiement = '', $nom_emetteur = '', $banque_emetteur = '', &$warnings = array())
+    public function createAcompte($amount, $id_mode_paiement, $id_bank_account = 0, $paye = 1, $date_paiement = null, $use_caisse = false, $num_paiement = '', $nom_emetteur = '', $banque_emetteur = '', &$warnings = array(), $id_rib = 0)
     {
-
         global $user, $langs;
         $errors = array();
 
@@ -2973,6 +3058,9 @@ class BimpComm extends BimpDolObject
             $factureA->modelpdf = 'bimpfact';
             $factureA->fk_account = $id_bank_account;
 
+            if ($id_rib && $this->field_exists('rib_client') && $this->dol_field_exists('rib_client')) {
+                $factureA->array_options['options_rib_client'] = $id_rib;
+            }
             if ($this->field_exists('ef_type') && $this->dol_field_exists('ef_type')) {
                 $factureA->array_options['options_type'] = $this->getData('ef_type');
             }
@@ -3636,6 +3724,7 @@ class BimpComm extends BimpDolObject
         $prev_deleting = $this->isDeleting;
         $this->isDeleting = true;
 
+        $this->startLineTransaction();
         if ($this->isLoaded($warnings)) {
             $lines = $this->getLines();
 
@@ -3681,6 +3770,8 @@ class BimpComm extends BimpDolObject
                 }
             }
         }
+        
+        $this->stopLineTransaction();
 
         $this->isDeleting = $prev_deleting;
         return $errors;
@@ -3698,7 +3789,7 @@ class BimpComm extends BimpDolObject
 
     public function onChildSave($child)
     {
-        if ($this->isLoaded() && !$this->isDeleting) {
+        if ($this->isLoaded() && !$this->isDeleting && !static::$dont_check_parent_on_update) {
             if (is_a($child, 'objectLine')) {
                 $this->processRemisesGlobales();
             }
@@ -3952,6 +4043,7 @@ class BimpComm extends BimpDolObject
         $id_mode_paiement = isset($data['id_mode_paiement']) ? $data['id_mode_paiement'] : '';
         $id_bank_account = isset($data['bank_account']) ? (int) $data['bank_account'] : 0;
         $amount = isset($data['amount']) ? (float) $data['amount'] : 0;
+        $id_rib = 0;
 
         if (!$data['date']) {
             $errors[] = 'Date de paiement absent';
@@ -3963,6 +4055,12 @@ class BimpComm extends BimpDolObject
                 $errors[] = 'Vous n\'avez pas la permission d\'enregistrer des paiements par virement';
             } elseif (!$id_bank_account) {
                 $errors[] = "Le compte banqaire est obligatoire pour un virement bancaire";
+            }
+        } elseif ($data['id_mode_paiement'] == 'PRE') {
+            $id_rib = (int) BimpTools::getArrayValueFromPath($data, 'id_rib', 0);
+            
+            if (!$id_rib) {
+                $errors[] = 'Le RIB Client est obligatoire pour le mode de paiement par prélèvement';
             }
         }
 
@@ -3995,7 +4093,7 @@ class BimpComm extends BimpDolObject
         }
 
         if (!count($errors)) {
-            $errors = $this->createAcompte($amount, $id_mode_paiement, $id_bank_account, $paye, $data['date'], $use_caisse, $num_paiement, $nom_emetteur, $banque_emetteur, $warnings);
+            $errors = $this->createAcompte($amount, $id_mode_paiement, $id_bank_account, $paye, $data['date'], $use_caisse, $num_paiement, $nom_emetteur, $banque_emetteur, $warnings, $id_rib);
         }
 
         return array(

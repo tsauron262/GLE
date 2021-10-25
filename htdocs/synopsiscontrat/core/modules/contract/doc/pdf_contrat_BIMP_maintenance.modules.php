@@ -17,6 +17,9 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
     var $pdf;
     public $db;
     var $margin_bottom = 2;
+    private $have_save_mensuelle = false;
+    private $have_save_annuelle = false;
+    private $have_ass = false;
 
     function __construct($db) {
         global $conf, $langs, $mysoc;
@@ -143,6 +146,11 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 BimpTools::loadDolClass('product');
                 $p = new Product($db);
                 $p->fetch($line->fk_product);
+                
+                if($p->ref == "SERV19-ASS" && !$this->have_ass) { $this->have_ass = true;}
+                if($p->ref == "OVH-SAUVEGARDEBIMP1TOMENSUELLE" &&  !$this->have_save_mensuelle) { $this->have_save_mensuelle = true; }
+                if($p->ref == "OVH-SAUVEGARDEBIMP1TOANNUELLE" && !$this->have_save_annuelle) { $this->have_save_annuelle = true; }
+                
                 //echo '<pre>';print_r($p);
                 $pdf->Cell($W * 5, 6, (strlen($p->label) > 60) ? substr($p->label, 0, 60) . " ..." : $p->label, 1, null, 'L', true);
                 $pdf->Cell($W, 6, number_format($line->tva_tx, 0, '', '') . "%", 1, null, 'C', true);
@@ -197,8 +205,31 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         $pdf->setColor('fill', 235, 235, 235);
         $pdf->setFont('', 'B', 6);
         $liste_mode_reglement = BimpObject::getModeReglementsArray();
-       
-        $pdf->Cell($W * 4, 6, "Mode de règlement : " . $liste_mode_reglement[$contrat->array_options['options_moderegl']], 1, null, 'L', true);
+        $pdf->Cell($W * 4, 6, "Mode de règlement : " . $liste_mode_reglement[$contrat->array_options['options_moderegl']], 1, 1, 'L', true);
+        
+        if($contrat->array_options['options_periodicity'] != 0 && $contrat->array_options['options_periodicity'] != 1200) {
+            $pdf->setColor('fill', 255, 255, 255);
+            $pdf->Cell($W * 5, 7, "", 1, null, 'L', true);
+            $pdf->Cell($W, 7, "", 1, null, 'C', true);
+            $pdf->Cell($W * 2, 7, "", 1, null, 'C', true);
+            $pdf->Cell($W, 7, "", 1, null, 'C', true);
+            $pdf->setColor('fill', 235, 235, 235);
+            $pdf->setFont('', 'B', 6);
+
+            switch($contrat->array_options['options_periodicity']) {
+                case 1: $display_par = "mois"; break;
+                case 2: $display_par = "bimestre"; break;
+                case 3: $display_par = "trimestre"; break;
+                case 6: $display_par = "semestre"; break;
+                case 12: $display_par = "année"; break;
+            }
+
+            $total_periode = 0;
+            $nombre_periode = $contrat->array_options['options_duree_mois'] / $contrat->array_options['options_periodicity'];
+            $pdf->Cell($W * 4, 6, "Coût par " . $display_par . ": " . price($total->HT  / $nombre_periode) . "€ HT", 1, null, 'L', true);
+        }
+        
+        
         
         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 7, "", 0, 'C');
     }
@@ -913,8 +944,28 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 }
 
                 if(BimpCore::getConf('bimpcontract_pdf_use_cgc')) {
-                    $this->display_cgv($pdf);
-                    $this->display_cgv($pdf1);
+                    $cgv_print = false;
+                    if($this->have_ass) {
+                        if($this->have_save_annuelle || $this->have_save_mensuelle) {
+                            $this->display_cgv($pdf, 'services_hebergement_monitoring', 41);
+                            $this->display_cgv($pdf1, 'services_hebergement_monitoring', 41);
+                            $cgv_print = true;
+                        } else {
+                            $this->display_cgv($pdf);
+                            $this->display_cgv($pdf1);
+                            $cgv_print = true;
+                        }
+                        
+                    } elseif($this->have_save_annuelle || $this->have_save_mensuelle) {
+                        $this->display_cgv($pdf, 'services_hebergement', 41);
+                        $this->display_cgv($pdf1, 'services_hebergement', 41);
+                        $cgv_print = true;
+                    } else {
+                        $this->display_cgv($pdf);
+                        $this->display_cgv($pdf1);
+                        $cgv_print = true;
+                    }
+
                 }
 
                 if (method_exists($pdf, 'AliasNbPages'))
@@ -940,12 +991,12 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         return 0;
     }
     
-    public function display_cgv($pdf, $nb = 9) {
+    public function display_cgv($pdf,$name = 'cgv', $nb = 9) {
         $current = 1;
         for($i=1; $i <= $nb; $i++) {
             $affiche_paraphe = true;
             $pdf->AddPage();
-            $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/bimpcontract/core/doc/cgv.pdf');
+            $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/bimpcontract/core/doc/'.$name.'.pdf');
 
             $tplidx = $pdf->importPage($i, "/MediaBox");
             $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);

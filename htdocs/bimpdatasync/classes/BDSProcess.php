@@ -555,7 +555,10 @@ abstract class BDSProcess
 
     protected function ftpConnect($host, $login, $pword, $port = 21, $passive = true, &$errors = null)
     {
-        $ftp = ftp_connect($host, $port);
+        if($port == 22)
+            $ftp = ftp_ssl_connect($host, $port);
+        else
+            $ftp = ftp_connect($host, $port);
 
         if ($ftp === false) {
             $msg = 'Echec de la connexion FTP avec le serveur "' . $host . '"';

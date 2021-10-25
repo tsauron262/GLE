@@ -165,8 +165,8 @@ fields:
                 join_on: a.soc_id = s.rowid
                 join_return_label: s.nom
                 fields_search: s.nom,s.code_client
-                filters: 
-                    callback: getServiceInputFilters
+#                filters: 
+#                    callback: getServiceInputFilters
                 
         display_if: 
             field_name: no_contrat
@@ -304,10 +304,12 @@ fields:
         label: Sujet ticket
         type: html
         required: 1
+        hashtags: 1
     sujetInterne:
         label: Sujet ticket interne
         type: text
         required: 0
+        hashtags: 1
     date_create:
         displays: 
             default: 

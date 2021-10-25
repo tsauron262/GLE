@@ -91,8 +91,14 @@
             <val val="DOA">HS à l'arrivée</val>
         </values>
     </def>
-    <def name="fromConsignedStock" type="bool">
+    <def name="fromConsignedStock" type="select">
         <label>Pris dans le stock consigné</label>
+        <warning>Veuillez vérifier impérativement la présence de la pièce dans le stock consigné Apple</warning>
+        <values>
+            <val val="">Veuillez choisir</val>
+            <val val="oui">OUI</val>
+            <val val="non">NON</val>
+        </values>
     </def>
     
     <!--device-->

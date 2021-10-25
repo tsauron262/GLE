@@ -41,7 +41,8 @@ fields:
         
     note: 
         label: Note
-        type: text                
+        type: text          
+        hashtags: 1
      
 forms: 
     edit: 

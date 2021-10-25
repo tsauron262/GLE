@@ -79,12 +79,11 @@ class BContract_avenant extends BContract_contrat {
         
         $parent = $this->getParentInstance();
         $errors = [];
-        $success = '';
                 
         if(!count($errors)) {
             $errors = parent::create($warnings, $force_create);
             if(!count($errors)) {
-                $success = "Avenant créer avec succès";
+//                $success = "Avenant créer avec succès";
                 $number = count($this->getList(['id_contrat' => $_REQUEST['id']]));
                 
                 $det = $this->getInstance('bimpcontract', 'BContract_avenantdet');
@@ -100,7 +99,7 @@ class BContract_avenant extends BContract_contrat {
                             $det->set('id_avenant', $this->id);
                             $det->set('id_line_contrat', $laLigne->id);
                             $det->set('qty', $laLigne->getData('qty'));
-                            $det->set('ht', $laLigne->getData('subprice')/$nbSerial*$laLigne->getData('qty'));
+                            $det->set('ht', $laLigne->getData('price_ht'));
                             $det->set('remise', $laLigne->getData('remise_percent'));
                             $det->set('description', $laLigne->getData('description'));
                             $det->set('serials_in', $laLigne->getData('serials'));
@@ -115,11 +114,7 @@ class BContract_avenant extends BContract_contrat {
             }
         }
         
-        return [
-            'success' => $success,
-            'errors' => $errors,
-            'warnings' => $warnings
-        ];
+        return $errors;
     }
     
     public function actionValidate() {
@@ -355,8 +350,71 @@ class BContract_avenant extends BContract_contrat {
             );
         }
         
+//        $lastAvenantId = $this->db->getMax('bcontract_avenant', 'id', 'id_contrat = ' . $this->getData('id_contrat'));
+        
+//        if($this->getData('statut') == 2  && $this->id == $lastAvenantId) {
+//            $buttons[] = array(
+//                'label'   => 'Supprimer  l\'avenant',
+//                'icon'    => 'fas_trash',
+//                'onclick' => $this->getJsActionOnclick('goBackAvenant', array(), array(
+//                     "form_name" => 'delete_avenant'
+//                ))
+//            );
+//        }
+        
         return $buttons;
     }
+    
+//    public function actionGoBackAvenant($data, &$success) {
+//        
+//        $errors = [];
+//        $warnings = [];
+//        $parent = $this->getParentInstance();
+//        
+//        $lines = $parent->getChildrenList("lines");
+//        if(count($children) > 0) {
+//           foreach($children as $id_child) {
+//               $line = $parent->getChildObject('lines', $id_child);
+//           }
+//        }
+//        
+//        $children = $this->getChildrenList("avenantdet");
+//        if(count($children) > 0) {
+//            foreach($children as $id_child) {
+//                $child = $this->getChildObject("avenantdet", $id_child);
+//                $back_description = $child->getData('save_line_description');
+//                $back_serials = json_decode($child->getData('save_line_serials'));
+//                
+//            }
+//        }
+//
+//        return [
+//            'errors' => $errors,
+//            'warnings'  => $warnings,
+//            'success' => $success
+//        ];
+//        
+//    }
+//    
+//    public function displayModifSuppAvenant() {
+//        
+//        $txt = "";
+//        $children = $this->getChildrenList("avenantdet");
+//        $parent = $this->getParentInstance();
+//        
+//        if(count($children) > 0) {
+//            foreach($children as $id_child)  {
+//                $child = $this->getChildObject('avenantdet', $id_child);
+//                if($child->getData('id_line_contrat')) {
+//                    $line = $parent->getChildObject('lines', $child->getData('id_line_contrat'));
+//                } else {
+//                    
+//                }
+//            }
+//        }
+//        
+//        return $txt;
+//    }
     
     public function actionAbort($data = [], &$success) {
         $errors = [];
@@ -464,6 +522,14 @@ class BContract_avenant extends BContract_contrat {
             'errors' => $errors
         ];
         
+    }
+    
+    public function isLeDernier() {
+        
+    }
+    
+    public function isDeletable($force_delete = false, &$errors = array()) {
+        return 1;
     }
     
     

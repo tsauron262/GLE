@@ -39,9 +39,9 @@ class Bimp_Facture extends BimpComm
         3 => array('label' => 'Non déclarable'),
     );
     public static $paiement_status = array(
-        0 => array('label' => 'Aucun paiement', 'classes' => array('danger'), 'icon' => 'fas_times'),
-        1 => array('label' => 'Paiement partiel', 'classes' => array('warning'), 'icon' => 'fas_exclamation-circle'),
-        2 => array('label' => 'Paiement complet', 'classes' => array('success'), 'icon' => 'fas_check'),
+        0 => array('label' => 'Aucun paiement', 'classes' => array('danger'), 'icon' => 'fas_times', 'short' => 'Aucun'),
+        1 => array('label' => 'Paiement partiel', 'classes' => array('warning'), 'icon' => 'fas_exclamation-circle', 'short' => 'Partiel'),
+        2 => array('label' => 'Paiement complet', 'classes' => array('success'), 'icon' => 'fas_check', 'short' => 'Complet'),
         3 => array('label' => 'Trop perçu', 'classes' => array('important'), 'icon' => 'fas_exclamation-triangle'),
         4 => array('label' => 'Trop remboursé', 'classes' => array('important'), 'icon' => 'fas_exclamation-triangle'),
         5 => array('label' => 'Irrécouvrable', 'classes' => array('danger'), 'icon' => 'fas_times-circle')
@@ -1484,6 +1484,9 @@ class Bimp_Facture extends BimpComm
             'paiementnotsaved' => array(
                 'label' => 'Le paiement a été effectué mais non enregistré'
             ),
+            'cfr' => array(
+                'label' => 'Le reste à payer (' . BimpTools::displayMoneyValue($remainToPay) . ') a été encaissé directement via CFR'
+            ),
             'inf_one_euro'     => array(
                 'label' => 'Le reste à payer (' . BimpTools::displayMoneyValue($remainToPay) . ') est inférieur à 1€'
             ),
@@ -2090,19 +2093,20 @@ class Bimp_Facture extends BimpComm
                 if ($field == 'productInfo') {
                     $prod = $equipment->getChildObject('product');
                     if (BimpObject::objectLoaded($prod)) {
-                            $result[] = $prod->label;
-                    }
-                    else{
+                        $result[] = $prod->label;
+                    } else {
                         $result[] = $equipment->getData('product_label');
                     }
                 }
             }
             if ($field == 'apple_number') {
                 if (!isset($cacheInstance['repas'])) {
-                    $cacheInstance['repas'] = BimpObject::getBimpObjectObjects('bimpapple', 'GSX_Repair', array('id_sav' => $sav->id));
+                    $cacheInstance['repas'] = BimpObject::getBimpObjectObjects('bimpapple', 'GSX_Repair', array('id_sav' => $sav->id), 'id', 'desc');
                 }
+
                 foreach ($cacheInstance['repas'] as $repa) {
                     $result[] = $repa->getData('repair_number');
+                    break;
                 }
             }
         }
@@ -3491,9 +3495,9 @@ class Bimp_Facture extends BimpComm
             $this->dol_object->fetch((int) $this->id);
             $this->hydrateFromDolObject();
 
-            if (!$this->isValidatable($errors)) {
-                return $errors;
-            }
+//            if (!$this->isValidatable($errors)) {
+//                return $errors;
+//            }
 
             $lines = $this->getLines('not_text');
             $total_ttc_wo_discounts = (float) $this->getTotalTtcWithoutDiscountsAbsolutes();
@@ -3749,7 +3753,7 @@ class Bimp_Facture extends BimpComm
                     $echeancier->onDeleteFacture($dateDebutFacture);
                 }
             }
-            
+
             $this->majStatusOtherPiece();
         }
 
@@ -4099,8 +4103,7 @@ class Bimp_Facture extends BimpComm
             $discountTest->fetch(0, $this->id);
             if (BimpObject::objectLoaded($discountTest)) {
                 $errors[] = 'Cet Accompte a déja été converti';
-            }
-            else{
+            } else {
                 foreach ($this->dol_object->lines as $line) {
                     if ($line->total_ht != 0) {  // no need to create discount if amount is null
                         $amount_ht[$line->tva_tx] += $line->total_ht;
@@ -4119,7 +4122,7 @@ class Bimp_Facture extends BimpComm
 
                 $result = $discount->create($user);
                 if ($result < 0) {
-                    $msg = 'Echec de la création de la remise client '.$discount->error;
+                    $msg = 'Echec de la création de la remise client ' . $discount->error;
                     $sqlError = $db->lasterror();
                     if ($sqlError) {
                         $msg .= ' - ' . $sqlError;
@@ -5772,7 +5775,7 @@ class Bimp_Facture extends BimpComm
         ini_set('max_execution_time', 3600);
 
         $errors = array();
-        $rows = self::getBdb()->getRows('facture', "`datec` > '2021-01-14 00:00:00'", null, 'array', array('rowid', 'marge_finale_ok', 'total_achat_reval_ok'), 'rowid', 'desc');
+        $rows = self::getBdb()->getRows('facture', "`datec` > '2021-01-14 00:00:00' AND `datec` < '2021-05-01 00:00:00'", null, 'array', array('rowid', 'marge_finale_ok', 'total_achat_reval_ok'), 'rowid', 'desc');
 
         if (is_array($rows)) {
             $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');

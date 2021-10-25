@@ -1600,7 +1600,7 @@ class BimpController
             }
             if ($id_object) {
                 if (!$object->fetch($id_object)) {
-                    $errors[] = ucfirst($object->getLabel('')) . ' d\'ID ' . $id_object . ' non trouvé';
+                    $errors[] = ucfirst($object->getLabel('')) . ' d\'ID ' . $id_object . ' non trouvé (form)';
                 }
             }
 

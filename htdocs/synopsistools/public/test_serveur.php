@@ -12,8 +12,18 @@ if(defined('CLOSE_FOR_PROXY'))
 
 if(!count($error)){
     define('NO_SESSION_NETTOYAGE', true);
-    $files = array(DOL_DATA_ROOT."/test_serveur.txt", PATH_TMP."/test_serveur.txt");
+    $files = array(DOL_DATA_ROOT."/test_serveur.txt");
 
+    foreach($files as $file){
+        if(!file_get_contents($file)){
+            $error[] = 'Pas de lecture '.$file;
+        }
+        $file = str_replace('.txt', '_eciture.txt', $file);
+        if(!file_put_contents($file, 'ok'))
+            $error[] = 'Pas d\'ecriture '.$file;
+
+    }
+    $files = array(PATH_TMP."/test_serveur.txt");
     foreach($files as $file){
         if(!file_get_contents($file)){
             $error[] = 'Pas de lecture '.$file;

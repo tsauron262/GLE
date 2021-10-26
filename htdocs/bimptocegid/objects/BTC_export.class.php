@@ -308,7 +308,7 @@ class BTC_export extends BimpObject {
         $ecriture = "";
         foreach($list as $data) {
             $ecriture .= $export->constructTRA($data) . "\n";
-            $export->setTraite($data['id']);
+            //$export->setTraite($data['id']);
         }
         $this->write_tra($ecriture, $file);
     }

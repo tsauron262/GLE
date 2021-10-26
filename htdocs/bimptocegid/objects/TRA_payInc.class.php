@@ -39,7 +39,7 @@ class TRA_payInc {
         $structure['LABEL']             = sizing(suppr_accents($data['name']), 35);
         $structure['MODE_REGLEMENT']    = sizing('VIR', 3, true);
         $structure['DATE_REGLEMENT']    = sizing($date->format('dmY'), 8);
-        $structure['SENS']              = sizing('C', 1);
+        $structure['SENS']              = sizing('D', 1);
         $structure['MONTANT']           = sizing(abs(round($data['amount'], 2)), 20, true);
         $structure['TYPE_ECRITURE']     = sizing('N',1);
         $structure['NUMERO_PIECE']      = sizing($data['id'], 8, true);
@@ -90,7 +90,7 @@ class TRA_payInc {
         $structure['CONTRE_PARTIE']     = sizing("51240900", 17);
         $structure['VIDE']              = sizing("", 34);
         $structure['LETTRAGE']          = sizing("-XRI", 4);
-        $structure['SENS']              = sizing('D', 1);
+        $structure['SENS']              = sizing('C', 1);
         
         $ecriture .= implode("", $structure);
         

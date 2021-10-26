@@ -2098,6 +2098,22 @@ class BimpTools
         return $phone;
     }
 
+    public static function cleanStringMultipleNewLines($string, $html = false)
+    {
+        $string = str_replace("\n\n", "\n", $string);
+        $string = str_replace("\r\r", "\n", $string);
+        $string = str_replace(CHR(13).CHR(13), "\n", $string);
+        $string = str_replace(CHR(10).CHR(10), "\n", $string);
+        $string = str_replace(PHP_EOL.PHP_EOL, "\n", $string);
+        
+        if ($html) {
+            $string = self::replaceBr($string, '<br/>');
+            $string = str_replace('<br/><br/>', '<br/>', $string);
+        }
+        
+        return $string;
+    }
+
     // Traitements sur des array: 
 
     public static function getMsgFromArray($msgs, $title = '', $no_html = false)
@@ -2704,7 +2720,7 @@ class BimpTools
         if (is_null($json) || $json === '') {
             return array();
         }
-        
+
         if (is_array($json)) {
             return $json;
         }
@@ -2992,7 +3008,7 @@ class BimpTools
     {
         $file = static::getFileBloqued($type);
         if ($bloque) {
-            if(!is_file($file)){
+            if (!is_file($file)) {
                 $random = rand(0, 10000000);
                 $text = "Yes" . $random;
                 if (!file_put_contents($file, $text))
@@ -3114,18 +3130,19 @@ class BimpTools
             return 1;
         return 0;
     }
-    
-    public static function sendSmsAdmin($text, $tels = array('0628335081', '06 86 69 18 14')){    
+
+    public static function sendSmsAdmin($text, $tels = array('0628335081', '06 86 69 18 14'))
+    {
         $errors = array();
         require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
-        foreach ($tels as $tel){
+        foreach ($tels as $tel) {
             $tel = traiteNumMobile($tel);
             $smsfile = new CSMSFile($tel, 'BIMP ADMIN', $text);
             if (!$smsfile->sendfile()) {
                 $errors[] = 'Echec de l\'envoi du sms';
             }
         }
-        
+
         return $errors;
     }
 }

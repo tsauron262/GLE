@@ -9,9 +9,8 @@ class BimpComm extends BimpDolObject
     const BC_ZONE_UE = 2;
     const BC_ZONE_HORS_UE = 3;
     const BC_ZONE_UE_SANS_TVA = 4;
-    
-    public static $dont_check_parent_on_update = false;
 
+    public static $dont_check_parent_on_update = false;
     public static $element_name = '';
     public static $external_contact_type_required = true;
     public static $internal_contact_type_required = true;
@@ -49,19 +48,6 @@ class BimpComm extends BimpDolObject
         self::BC_ZONE_HORS_UE => 'Hors UE'
     );
     protected $margins_infos = null;
-    
-    public function startLineTransaction(){
-        static::$dont_check_parent_on_update = true;
-    }
-    
-    public function stopLineTransaction(){
-        static::$dont_check_parent_on_update = false;
-        $lines = $this->getLines();
-        if(count($lines)){
-            $lines[count($lines)-1]->resetPositions();
-            $lines[count($lines)-1]->update();
-        }
-    }
 
     public function __construct($module, $object_name)
     {
@@ -131,12 +117,12 @@ class BimpComm extends BimpDolObject
         if (!$force_edit && !$user->admin) {
             $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
             $type_de_piece = ValidComm::getObjectClass($this);
-            
+
             $demands = $valid_comm->demandeExists($type_de_piece, $this->id, null, 0, true);
-            
-            if($demands){
+
+            if ($demands) {
                 foreach ($demands as $d) {
-                    if((int) $d->getData('id_user_affected') == (int) $user->id)
+                    if ((int) $d->getData('id_user_affected') == (int) $user->id)
                         return 1;
                 }
 
@@ -656,6 +642,16 @@ class BimpComm extends BimpDolObject
                         'onclick' => $product->getJsLoadModalForm('lightFourn', 'Nouveau produit')
                     )
                 );
+
+                global $user;
+
+                if ($user->admin) {
+                    $buttons[] = array(
+                        'label'   => 'Importer des lignes',
+                        'icon'    => 'fas_download',
+                        'onclick' => $this->getJsLoadModalForm('import_lines_csv', 'Importer des lignes depuis un fichier CSV')
+                    );
+                }
             }
 
             if ($this->isActionAllowed('useRemise') && $this->canSetAction('useRemise')) {
@@ -1026,7 +1022,7 @@ class BimpComm extends BimpDolObject
             $lines = $this->getLines('not_text');
 
             foreach ($lines as $line) {
-                if($line->getData('linked_object_name') != 'discount' && $line->desc != 'Acompte'){
+                if ($line->getData('linked_object_name') != 'discount' && $line->desc != 'Acompte') {
                     $line_infos = $line->getRemiseTotalInfos(false, $force_qty_mode);
                     $infos['remises_lines_amount_ttc'] += (float) $line_infos['line_amount_ttc'];
                     $infos['remises_lines_amount_ht'] += (float) $line_infos['line_amount_ht'];
@@ -2412,6 +2408,21 @@ class BimpComm extends BimpDolObject
 
     // Traitements:
 
+    public function startLineTransaction()
+    {
+        static::$dont_check_parent_on_update = true;
+    }
+
+    public function stopLineTransaction()
+    {
+        static::$dont_check_parent_on_update = false;
+        $lines = $this->getLines();
+        if (count($lines)) {
+            $lines[count($lines) - 1]->resetPositions();
+            $lines[count($lines) - 1]->update();
+        }
+    }
+
     public function checkLines()
     {
         $errors = array();
@@ -3711,6 +3722,84 @@ class BimpComm extends BimpDolObject
         return 1;
     }
 
+    public function importLinesFromFile(&$warnings = array(), &$success = '')
+    {
+        $errors = array();
+
+        if (!$this->isLoaded($errors)) {
+            return $errors;
+        }
+
+        if ((int) $this->getData('fk_statut') !== 0) {
+            $errors[] = $this->getLabel('this') . ' n\'est plus au statut brouillon';
+            return $errors;
+        }
+
+        if (isset($_FILES['csv_file'])) {
+            $rows = file($_FILES['csv_file']['tmp_name'], FILE_SKIP_EMPTY_LINES | FILE_IGNORE_NEW_LINES);
+
+            if (empty($rows)) {
+                $errors[] = 'Aucune ligne trouvée dans le fichier';
+                return $errors;
+            }
+
+            $line_instance = $this->getChildObject('lines');
+            $i = 0;
+            $position = (int) $this->db->getMax($line_instance->getTable(), 'position', 'id_obj = ' . (int) $this->id);
+            $position += 1;
+            
+            $this->startLineTransaction();
+            
+            foreach ($rows as $r) {
+                $i++;
+                $data = explode(';', $r);
+
+                $ref = $data[0];
+                $qty = (int) $data[1];
+                $pu_ht = (float) str_replace(',', '.', $data[2]);
+
+                if ($ref) {
+                    $product = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
+                                'ref' => $ref
+                    ));
+
+                    if (BimpObject::objectLoaded($product)) {
+                        $line = clone $line_instance;
+
+                        $line->id_product = $product->id;
+                        $line->qty = $qty;
+                        $line->pu_ht = $pu_ht;
+
+                        $line->validateArray(array(
+                            'id_obj'   => (int) $this->id,
+                            'type'     => ObjectLine::LINE_PRODUCT,
+                            'position' => $position
+                        ));
+
+                        $line_warnings = array();
+                        $line_errors = $line->create($line_warnings, true);
+
+                        if (count($line_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Echec création de la ligne n° ' . $i);
+                        } else {
+                            $position++;
+                        }
+                    } else {
+                        $warnings[] = 'Ligne n° ' . $i . ' : aucun produit trouvé pour la référence "' . $ref . '"';
+                    }
+                } else {
+                    $warnings[] = 'Ligne n° ' . $i . ' : référence produit absente';
+                }
+            }
+            
+            $this->stopLineTransaction();
+        } else {
+            $errors[] = 'Fichier CSV absent';
+        }
+
+        return $errors;
+    }
+
     // post process: 
 
     public function onCreate(&$warnings = array())
@@ -3770,7 +3859,7 @@ class BimpComm extends BimpDolObject
                 }
             }
         }
-        
+
         $this->stopLineTransaction();
 
         $this->isDeleting = $prev_deleting;
@@ -4058,7 +4147,7 @@ class BimpComm extends BimpDolObject
             }
         } elseif ($data['id_mode_paiement'] == 'PRE') {
             $id_rib = (int) BimpTools::getArrayValueFromPath($data, 'id_rib', 0);
-            
+
             if (!$id_rib) {
                 $errors[] = 'Le RIB Client est obligatoire pour le mode de paiement par prélèvement';
             }
@@ -4454,6 +4543,11 @@ class BimpComm extends BimpDolObject
 
     public function update(&$warnings = array(), $force_update = false)
     {
+        if (BimpTools::isSubmit('import_lines_csv')) {
+            // On doit passer par un update à cause de l'envoi de fichier (non possible via une action). 
+            return $this->importLinesFromFile($warnings);
+        }
+
         $init_zone = '';
         if ($this->dol_field_exists('zone_vente')) {
             $init_zone = (int) $this->getInitData('zone_vente');

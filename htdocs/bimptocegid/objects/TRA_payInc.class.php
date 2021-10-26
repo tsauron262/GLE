@@ -85,11 +85,12 @@ class TRA_payInc {
         
         $ecriture .= implode("", $structure) . "\n";
         
-        $structure['COMPTE']            = sizing('47100000', 17);
+        $structure['COMPTE']            = sizing('41100000', 17);
         $structure['CODE_COMPTA']       = sizing('CATTEN0000000000', 16);
         $structure['CONTRE_PARTIE']     = sizing("51240900", 17);
         $structure['VIDE']              = sizing("", 34);
         $structure['LETTRAGE']          = sizing("-XRI", 4);
+        $structure['SENS']              = sizing('D', 1);
         
         $ecriture .= implode("", $structure);
         

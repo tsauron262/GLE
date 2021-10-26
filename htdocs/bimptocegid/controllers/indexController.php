@@ -29,7 +29,7 @@ class indexController extends BimpController
             }
 
             if (isset($_REQUEST['element'])) {
-                $element = ['facture', 'facture_fourn', 'paiement'];
+                $element = ['facture', 'facture_fourn', 'paiement', 'payni'];
                 if (!in_array($_REQUEST['element'], $element)) {
                     $erreur = "L'élément " . $_REQUEST['element'] . " n'existe pas";
                 }
@@ -67,6 +67,7 @@ class indexController extends BimpController
                 . "<option value='facture'>Facture client</option>"
                 . "<option value='facture_fourn'>Facture fournisseur</option>"
                 . "<option value='paiement'>Paiement client</option>"
+                . "<option value='payni'>Payements non identifiés</option>"
                 . "</select>";
 
         $msgs = "Il y à plusieur méthodes pour obtenir des fichiers TRA (Il est obligatoire d'indiquer l'élément souhaité)<br />";
@@ -316,7 +317,6 @@ class indexController extends BimpController
             }
             $html .= '</tbody></table>';
         }
-
         return $html;
     }
 }

@@ -965,20 +965,23 @@ class DoliDBMysqliC extends DoliDB
             }
         }
         else{
-            if(stripos($query, 'SELECT') !== 0 && $this->getThreadId() != $this->thread_id){//gros probléme id transaction changée
-                if(class_exists('BimpCore')){
-                    BimpCore::addlog('Gros probléme changement de thread Id', 4, 'sql', null, array('query' => $query, 'oldId' => $this->thread_id, 'newId' => $this->getThreadId()));
-                
-                    $errors = array('Problème réseau, merci de relancer l\'opération');
-                
-                    if (BimpTools::isSubmit('ajax')) {
-                        echo json_encode(array(
-                            'errors'           => $errors,
-                            'request_id'       => BimpTools::getValue('request_id', 0)
-                        ));
-                    }
-                    else{
-                        echo 'Oupppps   '.print_r($errors,1);
+            if(stripos($query, 'SELECT') !== 0){
+                $thread_id = $this->getThreadId();
+                if($thread_id != $this->thread_id){//gros probléme id transaction changée
+                    if(class_exists('BimpCore')){
+                        BimpCore::addlog('Gros probléme changement de thread Id', 4, 'sql', null, array('query' => $query, 'oldId' => $this->thread_id, 'newId' => $thread_id));
+
+                        $errors = array('Problème réseau, merci de relancer l\'opération');
+
+                        if (BimpTools::isSubmit('ajax')) {
+                            echo json_encode(array(
+                                'errors'           => $errors,
+                                'request_id'       => BimpTools::getValue('request_id', 0)
+                            ));
+                        }
+                        else{
+                            echo 'Oupppps   '.print_r($errors,1);
+                        }
                     }
                     die();
                     exit;

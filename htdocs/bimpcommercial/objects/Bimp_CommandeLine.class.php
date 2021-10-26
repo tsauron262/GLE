@@ -2130,8 +2130,8 @@ class Bimp_CommandeLine extends ObjectLine
         $shipments_qty = (float) $this->getShipmentsQty();
 
         if ($shipments_qty) {
-            $qty_shipped = (float) $this->getShippedQty();
-            $qty_shipped_valid = (float) $this->getShippedQty(null, true);
+            $qty_shipped = round((float) $this->getShippedQty(), 6);
+            $qty_shipped_valid = round((float) $this->getShippedQty(null, true), 6);
 
             if (!abs($qty_shipped_valid)) {
                 $class = 'danger';
@@ -2185,8 +2185,8 @@ class Bimp_CommandeLine extends ObjectLine
         }
 
         // Qté facturée: 
-        $qty_billed = (float) $this->getBilledQty();
-        $qty_billed_valid = (float) $this->getBilledQty(null, true);
+        $qty_billed = round((float) $this->getBilledQty(), 6);
+        $qty_billed_valid = round((float) $this->getBilledQty(null, true), 6);
         if (!abs($qty_billed_valid)) {
             $class = 'danger';
         } elseif (abs($qty_billed_valid) < abs($total_qty)) {

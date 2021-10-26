@@ -300,6 +300,13 @@ class Commande extends CommonOrder
         $soc = new Societe($this->db);
         $soc->fetch($this->socid);
 
+        if (! $error && ! $notrigger)
+        {
+            // Call trigger
+            $result=$this->call_trigger('ORDER_VALIDATE',$user);
+            if ($result < 0) $error++;
+            // End call triggers
+        }
         // Class of company linked to order
         $result=$soc->set_as_client();
 
@@ -365,13 +372,6 @@ class Commande extends CommonOrder
             }
         }
 
-        if (! $error && ! $notrigger)
-        {
-            // Call trigger
-            $result=$this->call_trigger('ORDER_VALIDATE',$user);
-            if ($result < 0) $error++;
-            // End call triggers
-        }
 
         if (! $error)
         {

@@ -11,7 +11,7 @@ class BimpDolObject extends BimpObject
     public static $mail_event_code = '';
     public static $email_type = '';
 
-    // Getters array: 
+    // Getters array:
 
     public function getEmailModelsArray()
     {
@@ -371,6 +371,9 @@ class BimpDolObject extends BimpObject
 
         $id_main_pdf_file = (int) $this->getDocumentFileId();
 
+        if($id_main_pdf_file < 1)
+            BimpController::addAjaxWarnings('Attention fichier PDF introuvable');
+        
         if (!in_array($id_main_pdf_file, $values)) {
             $values[] = $id_main_pdf_file;
         }

@@ -396,7 +396,7 @@ fields:
                     - 0
         default_value: 
             callback: getDefautlModeReglement
-        depends_on: fk_typent
+        depends_on: fk_typent,is_company
         
     cond_reglement: 
         label: Conditions de réglement
@@ -408,7 +408,7 @@ fields:
             array: condReglements
         default_value: 
             callback: getDefaultCondReglement
-        depends_on: fk_typent
+        depends_on: fk_typent,is_company
             
     mode_reglement_supplier:
         label: Mode de réglement
@@ -472,6 +472,8 @@ fields:
         hashtags: 1
         input: 
             note: 1   
+            auto_expand: 1
+            rows: 3
             
     note_public: 
         label: Note publique
@@ -480,6 +482,8 @@ fields:
         hashtags: 1
         input: 
             note: 1
+            auto_expand: 1
+            rows: 3
            
     secteuractivite:
         label: Secteur d'activité

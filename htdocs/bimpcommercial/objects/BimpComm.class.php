@@ -3756,7 +3756,7 @@ class BimpComm extends BimpDolObject
 
                 $ref = $data[0];
                 $qty = (int) $data[1];
-                $pu_ht = (float) str_replace(',', '.', $data[2]);
+                $pu_ht = (float) str_replace(',', '.', str_replace(' ', '', $data[2]));
 
                 if ($ref) {
                     $product = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(

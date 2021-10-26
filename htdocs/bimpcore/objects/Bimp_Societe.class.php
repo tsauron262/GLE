@@ -471,13 +471,13 @@ class Bimp_Societe extends BimpDolObject
 
         return null;
     }
-    
+
     public function getDefaultRibId()
     {
         if ($this->isLoaded()) {
-            return (int) $this->db->getValue('societe_rib', 'rowid', 'fk_soc = ' . (int) $this->id.' AND default_rib = 1', 'rowid', 'desc');
+            return (int) $this->db->getValue('societe_rib', 'rowid', 'fk_soc = ' . (int) $this->id . ' AND default_rib = 1', 'rowid', 'desc');
         }
-        
+
         return 0;
     }
 
@@ -1288,7 +1288,7 @@ class Bimp_Societe extends BimpDolObject
     {
         $html = '';
 
-        $users = $this->getCommerciauxArray(false);        
+        $users = $this->getCommerciauxArray(false);
         $default_id_commercial = (int) BimpCore::getConf('default_id_commercial');
 
         $edit = $this->canEditField('commerciaux');
@@ -2589,6 +2589,18 @@ class Bimp_Societe extends BimpDolObject
                 } else {
                     $this->set('siren', substr($siret, 0, 9));
                 }
+            }
+
+            $note = $this->getData('note_private');
+            if ($note) {
+                $note = BimpTools::cleanStringMultipleNewLines($note);
+                $this->set('note_private', $note);
+            }
+
+            $note = $this->getData('note_public');
+            if ($note) {
+                $note = BimpTools::cleanStringMultipleNewLines($note);
+                $this->set('note_public', $note);
             }
         }
         return $errors;

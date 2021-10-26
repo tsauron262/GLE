@@ -11,7 +11,7 @@ class BimpDolObject extends BimpObject
     public static $mail_event_code = '';
     public static $email_type = '';
 
-    // Getters array: 
+    // Getters array:
 
     public function getEmailModelsArray()
     {

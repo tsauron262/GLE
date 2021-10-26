@@ -472,6 +472,8 @@ fields:
         hashtags: 1
         input: 
             note: 1   
+            auto_expand: 1
+            rows: 3
             
     note_public: 
         label: Note publique
@@ -480,6 +482,8 @@ fields:
         hashtags: 1
         input: 
             note: 1
+            auto_expand: 1
+            rows: 3
            
     secteuractivite:
         label: Secteur d'activité

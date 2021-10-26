@@ -4714,7 +4714,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 if (isset($tabCode[1]))
                     $code = $tabCode[0];
                 $code = str_replace(" ", "", $code);
-                $success_callback = "alert('" . urlencode($code) . "');";
+                $success_callback = "text = '" . urlencode($code) . "'; alert(text); const notification = new Notification('Code Apple', { body: text });";
+                
             }
         }
 

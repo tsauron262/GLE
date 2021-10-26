@@ -1026,14 +1026,16 @@ class BimpComm extends BimpDolObject
             $lines = $this->getLines('not_text');
 
             foreach ($lines as $line) {
-                $line_infos = $line->getRemiseTotalInfos(false, $force_qty_mode);
-                $infos['remises_lines_amount_ttc'] += (float) $line_infos['line_amount_ttc'];
-                $infos['remises_lines_amount_ht'] += (float) $line_infos['line_amount_ht'];
-                $infos['remises_globales_amount_ht'] += (float) $line_infos['global_amount_ht'];
-                $infos['remises_globales_amount_ttc'] += (float) $line_infos['global_amount_ttc'];
-                $infos['ext_remises_globales_amount_ht'] += (float) $line_infos['ext_global_amount_ht'];
-                $infos['ext_remises_globales_amount_ttc'] += (float) $line_infos['ext_global_amount_ttc'];
-                $total_ttc_without_remises += $line_infos['total_ttc_without_remises'];
+                if($line->getData('linked_object_name') != 'discount' && $line->desc != 'Acompte'){
+                    $line_infos = $line->getRemiseTotalInfos(false, $force_qty_mode);
+                    $infos['remises_lines_amount_ttc'] += (float) $line_infos['line_amount_ttc'];
+                    $infos['remises_lines_amount_ht'] += (float) $line_infos['line_amount_ht'];
+                    $infos['remises_globales_amount_ht'] += (float) $line_infos['global_amount_ht'];
+                    $infos['remises_globales_amount_ttc'] += (float) $line_infos['global_amount_ttc'];
+                    $infos['ext_remises_globales_amount_ht'] += (float) $line_infos['ext_global_amount_ht'];
+                    $infos['ext_remises_globales_amount_ttc'] += (float) $line_infos['ext_global_amount_ttc'];
+                    $total_ttc_without_remises += $line_infos['total_ttc_without_remises'];
+                }
             }
 
             if ($total_ttc_without_remises && $infos['remises_lines_amount_ttc']) {

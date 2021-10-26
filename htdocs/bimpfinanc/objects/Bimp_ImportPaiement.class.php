@@ -146,9 +146,9 @@ class Bimp_ImportPaiement extends BimpObject
         $return = array();
         $list = BimpCache::getBimpObjectObjects('bimpfinanc', 'Bimp_ImportPaiementLine', array('traite' => 0, 'type' => 'vir', 'num' => ''));
         foreach ($list as $payin){
-            $num = BimpTools::getNextRef('Bimp_ImportPaiementLine', 'num', 'PAYIN{AA}{MM}-', 5);
+            $num = BimpTools::getNextRef('Bimp_ImportPaiementLine', 'num', 'PAYNI{AA}{MM}-', 5);
             $payin->updateField('num', $num);
-            $return[] = array('num' => $num, 'amount' => $payin->getData('price'));
+            $return[] = array('num' => $num, 'amount' => $payin->getData('price'), 'date' => $payin->getData('date'), 'name' => $payin->getData('name'), 'id' => $payin->id);
         }
         return $return;
     }

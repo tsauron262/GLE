@@ -1844,6 +1844,33 @@ class Bimp_Societe extends BimpDolObject
 
         return $errors;
     }
+    
+    public function majEncourscreditSafe($majOutstandingLimit = false, $maxOutstandingLimit = 100000){
+        $data = $errors = $w = array();
+        
+        $code = (string) $this->getData('siret');
+        if ($code != '') {
+            $errors = BimpTools::merge_array($errors, $this->checkSiren('siret', $code, $data));
+        } else {
+            $code = (string) $client->getData('siren');
+            if($code != '')
+                $errors = BimpTools::merge_array($errors, $this->checkSiren('siren', $code, $data));
+        }
+        $this->set('lettrecreditsafe', $data['lettrecreditsafe']);
+        $this->set('notecreditsafe', $data['notecreditsafe']);
+        if($majOutstandingLimit){
+            if($data['outstanding_limit'] > $maxOutstandingLimit)
+                $data['outstanding_limit'] = $maxOutstandingLimit;
+            $this->set('outstanding_limit', $data['outstanding_limit']);
+        }
+        $this->set('capital', $data['capital']);
+        $this->set('tva_intra', $data['tva_intra']);
+        $this->set('capital', $data['capital']);
+        $this->set('siret', $data['siret']);
+        $this->set('siren', $data['siren']);
+        $errors = BimpTools::merge_array($errors, $this->update($w, true));
+        return $errors;
+    }
 
     public function checkSiren($field, $value, &$data = array(), &$warnings = array())
     {
@@ -1959,6 +1986,7 @@ class Bimp_Societe extends BimpDolObject
                         if (is_array($branches)) {
                             foreach ($branches as $branche) {
                                 if (($siret && $branche->companynumber == $siret) || (!$siret && stripos($branche->type, "Siège") !== false)) {
+                                    die('gggggg');
                                     $adress = $branche->full_address->address;
                                     //$nom = $branche->full_address->name;
                                     $codeP = $branche->postcode;
@@ -2602,6 +2630,16 @@ class Bimp_Societe extends BimpDolObject
                 $note = BimpTools::cleanStringMultipleNewLines($note);
                 $this->set('note_public', $note);
             }
+            
+            $have_already_code_comptable = (BimpTools::getValue('has_already_code_comptable_client') == 1) ? true : false;
+            if($have_already_code_comptable && empty(BimpTools::getValue('code_compta'))) {
+                $errors[] = "Vous devez rensseigner un code comptable client";
+            }
+
+            if(!count($errors) && $have_already_code_comptable) {
+                $this->set('exported', 1);
+            }
+
         }
         return $errors;
     }
@@ -2620,7 +2658,7 @@ class Bimp_Societe extends BimpDolObject
             if (stripos($this->getData('code_compta'), 'E') === 0 && $this->getData('fk_typent') == 8)
                 return array("Code compta entreprise, le type de tiers ne peut être différent.");
         }
-
+        
         if ($init_solv != $this->getData('solvabilite_status') && (int) $this->getData('solvabilite_status') === self::SOLV_A_SURVEILLER_FORCE) {
             global $user;
             if (!$user->admin && $user->id != 1499) {

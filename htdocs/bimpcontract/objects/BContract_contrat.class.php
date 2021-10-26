@@ -876,7 +876,6 @@ class BContract_contrat extends BimpDolObject
 
     public function update(&$warnings = array(), $force_update = false)
     {
-
         if (BimpTools::getValue('type_piece')) {
             $id = 0;
             switch (BimpTools::getValue('type_piece')) {
@@ -929,8 +928,14 @@ class BContract_contrat extends BimpDolObject
                 }
                 $this->addLog("Date d'effet du contrat changer à " . BimpTools::getValue('date_start'));
             }
+            
             return parent::update($warnings, $force_update);
         }
+    }
+    
+    public function onSave(&$errors = array(), &$warnings = array()) {
+        global $langs;
+        //$this->dol_object->generateDocument('contrat_BIMP_maintenance', $langs);
     }
 
     public function getListClient($object)
@@ -2123,6 +2128,11 @@ class BContract_contrat extends BimpDolObject
             return 1;
 
         switch ($field_name) {
+            case 'show_fact_line_in_pdf':
+                if($user->rights->bimpcontract->to_validate && ($this->getData("statut") != self::CONTRAT_STATUS_ACTIVER && $this->getData('statut') != self::CONTRAT_STATUS_ACTIVER_TMP && $this->getData('statut') !=  self::CONTRAT_STATUS_ACTIVER_SUP))
+                    return 1;
+                return 0;
+                break;
             case 'periodicity':
                 $linked_factures = getElementElement('contrat', 'facture', $this->id);
                 if ($user->rights->bimpcontract->change_periodicity && !count($linked_factures))

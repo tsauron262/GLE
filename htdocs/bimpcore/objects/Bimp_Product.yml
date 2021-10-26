@@ -550,7 +550,7 @@ fields:
             array: type_compta
             
     duree: 
-        label: Durée limitée (em mois)
+        label: Durée limitée (en mois)
         type: int
         min: 0
         default_value: 0

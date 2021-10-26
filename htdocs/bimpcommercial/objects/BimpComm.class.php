@@ -3755,7 +3755,7 @@ class BimpComm extends BimpDolObject
                 $data = explode(';', $r);
 
                 $ref = $data[0];
-                $qty = (int) $data[1];
+                $qty = (float) str_replace(',', '.', str_replace(' ', '', $data[1]));
                 $pu_ht = (float) str_replace(',', '.', str_replace(' ', '', $data[2]));
 
                 if ($ref) {

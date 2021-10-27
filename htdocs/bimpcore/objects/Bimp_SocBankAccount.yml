@@ -164,8 +164,6 @@ lists:
             rum:
             bank: 
             rib: 
-            iban:
-            iban_prefix:
             bic: 
             
     soc: 

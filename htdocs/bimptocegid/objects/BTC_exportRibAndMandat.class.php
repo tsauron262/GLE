@@ -7,6 +7,18 @@ class BTC_exportRibAndMandat extends BTC_export {
     private $structure_rib;
     private $structure_mandat;
     
+    public function export_rib_exported(int $id_rib) {
+        $errors = [];
+        $rib = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_SocBankAccount", $id_rib);
+        $client = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Societe", $rib->getData('fk_soc'));
+        if(!$rib->isValid()) {
+            return $this->printRIBtra($rib, $client);
+        } else {
+            mailSyn2("Compta RIB", 'al.bernard@bimp.fr', null, $rib->getNomUrl() . " non valide");
+        }
+        
+    }
+    
     /**
      * 
      * @param Bimp_Facture $facture
@@ -47,7 +59,7 @@ class BTC_exportRibAndMandat extends BTC_export {
      * @return string
      */
     
-    private function printRIBtra(Bimp_SocBankAccount $rib, Bimp_Societe $client, Bimp_Facture $facture):string {
+    private function printRIBtra(Bimp_SocBankAccount $rib, Bimp_Societe $client):string {
         $this->structure_rib = Array(
             "FIXE" => $this->sizing("***", 3),
             "IDENTIFIANT" => $this->sizing("RIB", 3),
@@ -67,7 +79,7 @@ class BTC_exportRibAndMandat extends BTC_export {
             "SALAIRE" => $this->sizing("", 1),
             "ACOMPTE" => $this->sizing("", 1),
             "FRAISPROF" => $this->sizing("", 1),
-            "CODEIBAN" => $this->sizing(str_replace(" ", "", $rib->getData('iban_prefix')), 70),
+            "CODEIBAN" => $this->sizing($rib->getIban(false), 70),
             "NATECO" => $this->sizing('', 3),
             "TYPEPAYS" => $this->sizing('', 1),
             "ETABBQ_1" => $this->sizing($rib->getData('code_banque'), 8),
@@ -91,7 +103,7 @@ class BTC_exportRibAndMandat extends BTC_export {
             "ICS" => $this->sizing('FR02ZZZ008801', 35),
             "RUM" => $this->sizing($rib->getData('rum'), 35),
             "LIBELLE" => $this->sizing(strtoupper($this->suppr_accents($client->getName())), 35),
-            "IBAN" => $this->sizing(str_replace(" ", "", $rib->getData('iban_prefix')), 70),
+            "IBAN" => $this->sizing(str_replace(" ", "", $rib->getIban(false)), 70),
             "BIC" => $this->sizing($rib->getData('bic'), 35),
             "GENERAL" => $this->sizing("", 17),
             "AUXILIAIRE" => $this->sizing($client->getData('code_compta'), 17),

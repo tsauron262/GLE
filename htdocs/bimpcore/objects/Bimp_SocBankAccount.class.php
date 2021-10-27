@@ -76,7 +76,7 @@ class Bimp_SocBankAccount extends BimpObject
         return $return;
     }
     
-    public function isValid(Array &$errors):bool {
+    public function isValid(Array &$errors = Array()):bool {
 
         $rib = Array(
             "banque"        => (int) $this->getData('code_banque'),

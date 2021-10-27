@@ -515,7 +515,7 @@ class BTC_export extends BimpObject {
         return $this->db->getRow('entrepot', 'rowid = ' . $id_entrepot);
     }
 
-    protected function head_tra() {
+    public function head_tra() {
         $head = "";
         $jump = "\n";
         $head .= $this->sizing("***", 3);

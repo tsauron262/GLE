@@ -16,7 +16,7 @@ class BimpController
     private $nbBouclePush = 2;
 //    private $maxBouclePush = 40;
     private $maxBouclePush = 1;
-    static private $ajax_warnings = array();
+    static public $ajax_warnings = array();
 
     public static function getInstance($module, $controller = null)
     {
@@ -805,7 +805,7 @@ class BimpController
         )));
     }
     
-    private static function getAndResetAjaxWarnings(){
+    public static function getAndResetAjaxWarnings(){
         $warnings = static::$ajax_warnings;
         static::$ajax_warnings = array();
         return $warnings;

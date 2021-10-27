@@ -1960,16 +1960,6 @@ class DoliDBMysqliC extends DoliDB
             $this->thread_id = $this->getThreadId();
     }
     
-    public function commit($log = '')
-    {
-        $res = parent::commit($log);
-        return $res;
-    }
-    
-    public function rollback($log = '')
-    {
-        $res = parent::rollback($log);
-    }
     /* fmoddrsi */
     
 }

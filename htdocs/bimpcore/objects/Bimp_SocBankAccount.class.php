@@ -7,9 +7,26 @@ class Bimp_SocBankAccount extends BimpObject
     {
         $html = '';
 
-        $html .= '<table class="objectSubList">';
+        $err = array();
+        $this->isValid($err);
+        $class = 'objectSubList';
+        
+                
+        $htmlSup = '';     
+        if(count($err)){     
+            $class = 'danger';
+            $htmlSup .= '<span class="objectIcon bs-popover"';
+            $htmlSup .= BimpRender::renderPopoverData(implode(' - ', $err));
+            $htmlSup .= '>';
+            $htmlSup .= BimpRender::renderIcon('fas_exclamation-triangle', 'danger');
+            $htmlSup .= '</span>';
+        }
+        $html .= $htmlSup;
+
+        $html .= '<table class="'.$class.'">';
         $html .= '<thead>';
         $html .= '<tr>';
+        $html .= '<th>Prefix</th>';
         $html .= '<th>Banque</th>';
         $html .= '<th>Guichet</th>';
         $html .= '<th>N°</th>';
@@ -19,6 +36,7 @@ class Bimp_SocBankAccount extends BimpObject
 
         $html .= '<tbody>';
         $html .= '<tr>';
+        $html .= '<td>' . $this->getData('iban_prefix') . '</td>';
         $html .= '<td>' . $this->getData('code_banque') . '</td>';
         $html .= '<td>' . $this->getData('code_guichet') . '</td>';
         $html .= '<td>' . $this->getData('number') . '</td>';
@@ -26,7 +44,9 @@ class Bimp_SocBankAccount extends BimpObject
         $html .= '</tr>';
         $html .= '</tbody>';
         $html .= '</table>';
-
+                    
+        $html .= $htmlSup;   
+        
         return $html;
     }
     
@@ -41,6 +61,20 @@ class Bimp_SocBankAccount extends BimpObject
     }
     
     // return boolean:
+    
+    public function getIban($withEspace = true){
+        if($withEspace)
+            $sep = ' ';
+        else
+            $sep = '';
+        $return = substr(str_replace(" ", "", $this->getData('iban_prefix')),0,40).$sep;
+        $return .= str_replace(" ", "", $this->getData('code_banque')).$sep;
+        $return .= str_replace(" ", "", $this->getData('code_guichet')).$sep;
+        $return .= str_replace(" ", "", $this->getData('number')).$sep;
+        $return .= str_replace(" ", "", $this->getData('cle_rib')).$sep;
+        
+        return $return;
+    }
     
     public function isValid(Array &$errors):bool {
 
@@ -60,16 +94,19 @@ class Bimp_SocBankAccount extends BimpObject
         
         if((int) $verif_key !== $rib['clerib']) {
             $errors[] = "Le RIB sélectionné n'est pas valide, veuillez vérifier qu'il ne comporte pas d'erreurs";
-            return (bool) 0;
         }
         
         if($this->getData('rum') == ''){
             $errors[] = "Le RIB n'est pas valide (RUM absent)";
-            return (bool) 0;
+        }
+        $iban = $this->getIban(false);
+        if(strlen($iban) < 27 || strlen($iban) > 34){
+            $errors[] = "Longeur IBAN invalide";
         }
             
-        
-        return (bool) 1;
+        if(count($errors))
+            return (bool) 1;
+        return 0;
     }
 
     // overrides: 

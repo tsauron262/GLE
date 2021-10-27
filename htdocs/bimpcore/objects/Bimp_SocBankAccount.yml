@@ -58,6 +58,12 @@ fields:
         label: Banque
 #        required: 1
         
+    iban_prefix: 
+        label: IBAN Prefix
+        dol_prop: iban
+        input: 
+            help: ex FR76
+        
     code_banque: 
         label: Code banque
         
@@ -69,10 +75,6 @@ fields:
         
     cle_rib: 
         label: Clé RIB
-        
-    iban_prefix: 
-        label: IBAN
-        dol_prop: iban
         
     bic: 
         label: BIC/SWIFT
@@ -137,9 +139,13 @@ views:
                  
 lists_cols: 
     rib: 
-        label: RIB
+        label: IBAN
         value: 
             callback: displayRib
+    iban:
+        label: Iban
+        value:
+            callback: getIban
                     
 lists: 
     default: 
@@ -158,6 +164,7 @@ lists:
             rum:
             bank: 
             rib: 
+            iban:
             iban_prefix:
             bic: 
             

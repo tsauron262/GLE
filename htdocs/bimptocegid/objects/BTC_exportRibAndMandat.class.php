@@ -67,7 +67,7 @@ class BTC_exportRibAndMandat extends BTC_export {
             "SALAIRE" => $this->sizing("", 1),
             "ACOMPTE" => $this->sizing("", 1),
             "FRAISPROF" => $this->sizing("", 1),
-            "CODEIBAN" => $this->sizing($rib->getData('iban_prefix'), 70),
+            "CODEIBAN" => $this->sizing(str_replace(" ", "", $rib->getData('iban_prefix')), 70),
             "NATECO" => $this->sizing('', 3),
             "TYPEPAYS" => $this->sizing('', 1),
             "ETABBQ_1" => $this->sizing($rib->getData('code_banque'), 8),
@@ -91,7 +91,7 @@ class BTC_exportRibAndMandat extends BTC_export {
             "ICS" => $this->sizing('FR02ZZZ008801', 35),
             "RUM" => $this->sizing($rib->getData('rum'), 35),
             "LIBELLE" => $this->sizing(strtoupper($this->suppr_accents($client->getName())), 35),
-            "IBAN" => $this->sizing($rib->getData('iban_prefix'), 70),
+            "IBAN" => $this->sizing(str_replace(" ", "", $rib->getData('iban_prefix')), 70),
             "BIC" => $this->sizing($rib->getData('bic'), 35),
             "GENERAL" => $this->sizing("", 17),
             "AUXILIAIRE" => $this->sizing($client->getData('code_compta'), 17),
@@ -100,8 +100,8 @@ class BTC_exportRibAndMandat extends BTC_export {
             "STATUT" => $this->sizing("1FI", 3),
             "DATECREATION" => $this->sizing($date->format('dmY'), 8),
             "DATEENVOICLI" => $this->sizing("", 8),
-            "DATESIGNATURE" => $this->sizing("", 8),
-            "DATEMVTENVOI" => $this->sizing("", 8),
+            "DATESIGNATURE" => $this->sizing($date->format('dmY'), 8),
+            "DATEMVTENVOI" => $this->sizing($date->format('dmY'), 8),
             "DATEMVTREJET" => $this->sizing("", 8),
             "OLDIBAN" => $this->sizing("", 70),
             "OLDBIC" => $this->sizing("", 35),
@@ -131,7 +131,7 @@ class BTC_exportRibAndMandat extends BTC_export {
     }
     
     private function parORpro(Bimp_Societe $client):string {
-        return ($client->getData('type') == 8) ? '1PD' : 'B2B';
+        return ($client->getData('type') == 8) ? '1PD' : '2PI';
     }
     
 }

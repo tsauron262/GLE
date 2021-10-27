@@ -188,6 +188,7 @@ fields:
         default_value: 0
         displays: 
             badge:
+                label: Qté Totale
                 type: callback
                 method: displayQty
                 params: 

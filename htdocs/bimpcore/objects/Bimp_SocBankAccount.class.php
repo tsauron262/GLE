@@ -104,7 +104,7 @@ class Bimp_SocBankAccount extends BimpObject
             $errors[] = "Longeur IBAN invalide";
         }
             
-        if(count($errors))
+        if(!count($errors))
             return (bool) 1;
         return 0;
     }

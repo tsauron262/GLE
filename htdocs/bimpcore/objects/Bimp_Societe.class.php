@@ -970,11 +970,18 @@ class Bimp_Societe extends BimpDolObject
 
     public function getDefautlModeReglement()
     {
+        $code = '';
         if ((int) $this->getData('fk_typent')) {
             $code = $this->db->getValue('c_typent', 'code', 'id = ' . (int) $this->getData('fk_typent'));
-
+        }
+        if(BimpTools::getPostFieldValue('is_company') == '0')
+            $code = 'TE_PRIVATE';
+        if($code != ''){
             if ($code == 'TE_ADMIN') {
                 return BimpCore::getConf('societe_id_default_mode_reglement_admin', BimpCore::getConf('societe_id_default_mode_reglement', 0));
+            }
+            if ($code === 'TE_PRIVATE') {
+                return BimpCore::getConf('particulier_id_default_mode_reglement', BimpCore::getConf('societe_id_default_mode_reglement', 0));
             }
         }
 
@@ -983,13 +990,21 @@ class Bimp_Societe extends BimpDolObject
 
     public function getDefaultCondReglement()
     {
+        $code = '';
         if ((int) $this->getData('fk_typent')) {
             $code = $this->db->getValue('c_typent', 'code', 'id = ' . (int) $this->getData('fk_typent'));
-
+        }
+        if(BimpTools::getPostFieldValue('is_company') == '0')
+            $code = 'TE_PRIVATE';
+        if($code != ''){
             if ($code === 'TE_ADMIN') {
                 return BimpCore::getConf('societe_id_default_cond_reglement_admin', BimpCore::getConf('societe_id_default_cond_reglement', 0));
             }
+            if ($code === 'TE_PRIVATE') {
+                return BimpCore::getConf('particulier_id_default_cond_reglement', BimpCore::getConf('societe_id_default_cond_reglement', 0));
+            }
         }
+//            die($code.'pppppp');
 
         return BimpCore::getConf('societe_id_default_cond_reglement', 0);
     }

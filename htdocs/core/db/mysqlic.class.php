@@ -971,17 +971,8 @@ class DoliDBMysqliC extends DoliDB
                     if(class_exists('BimpCore')){
                         BimpCore::addlog('Gros probléme changement de thread Id', 4, 'sql', null, array('query' => $query, 'oldId' => $this->thread_id, 'newId' => $thread_id));
 
-                        $errors = array('Problème réseau, merci de relancer l\'opération');
 
-                        if (BimpTools::isSubmit('ajax')) {
-                            echo json_encode(array(
-                                'errors'           => $errors,
-                                'request_id'       => BimpTools::getValue('request_id', 0)
-                            ));
-                        }
-                        else{
-                            echo 'Oupppps   '.print_r($errors,1);
-                        }
+                        $this->stopAll();
                     }
                     die();
                     exit;
@@ -1032,6 +1023,10 @@ class DoliDBMysqliC extends DoliDB
                 dol_syslog(get_class($this)."::query SQL Error message: ".$this->lasterrno." ".$this->lasterror .' serveur : '.$this->database_host.'<br/>'.$query, LOG_ERR);
                 if(class_exists('BimpCore'))
                     BimpCore::addlog(get_class($this)."::query SQL Error message: ".$this->lasterrno." ".$this->lasterror .' serveur : '.$this->database_host.'<br/>'.$query, 3,'mysql');
+                
+                if(stripos($this->lasterror, 'Deadlock') !== false)
+                        $this->stopAll ();
+                        
             }
             $this->lastquery=$query;
             $this->_results = $ret;
@@ -1089,6 +1084,19 @@ class DoliDBMysqliC extends DoliDB
         /* fmoddrsi */
 
         return $ret;
+    }
+    
+    function stopAll(){
+        $errors = array('Problème réseau, merci de relancer l\'opération');
+        if (BimpTools::isSubmit('ajax')) {
+            echo json_encode(array(
+                'errors'           => $errors,
+                'request_id'       => BimpTools::getValue('request_id', 0)
+            ));
+        }
+        else{
+            echo 'Oupppps   '.print_r($errors,1);
+        }
     }
     
     function getThreadId(){    

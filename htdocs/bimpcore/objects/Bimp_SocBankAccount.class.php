@@ -61,12 +61,16 @@ class Bimp_SocBankAccount extends BimpObject
     }
     
     public function getCodePays(){
-        return substr(str_replace(" ", "", $this->getData('iban_prefix')),0,2);
+        $code = substr(str_replace(" ", "", $this->getData('iban_prefix')),0,2);
+        if($code == 'FR')
+            return 'FR';
+        elseif($code == 'BE')
+            return 'BEL';
     }
     
     public function getDevise(){
         $codeP = $this->getCodePays();
-        $zone_euro = array('FR', 'BE');
+        $zone_euro = array('FRA', 'BEL');
         if(in_array($codeP, $zone_euro))
             return 'EUR';
         else
@@ -117,7 +121,7 @@ class Bimp_SocBankAccount extends BimpObject
         }
         $iban = $this->getIban(false);
         if(strlen($iban) < 27 || strlen($iban) > 34){
-            $errors[] = "Longeur IBAN invalide";
+            $errors[] = "Longueur IBAN invalide";
         }
             
         if(!count($errors))

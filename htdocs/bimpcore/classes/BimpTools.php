@@ -3097,9 +3097,8 @@ class BimpTools
 
         return $html;
     }
-
-    public function envoieMailGrouper()
-    {
+    
+    public static function sendMailGrouper(){
         $dir = PATH_TMP . "/bimpcore/mailsGrouper/";
         if (!is_dir($dir))
             mkdir($dir);
@@ -3117,7 +3116,12 @@ class BimpTools
                 }
             }
         }
-        $this->output = "OK " . $i . ' mails envoyés';
+        return "OK " . $i . ' mails envoyés';
+    }
+
+    public function envoieMailGrouper()
+    {
+        $this->output = static::sendMailGrouper();
         return 0;
     }
 

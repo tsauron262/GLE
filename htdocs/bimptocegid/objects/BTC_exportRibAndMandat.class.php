@@ -11,7 +11,7 @@ class BTC_exportRibAndMandat extends BTC_export {
         $errors = [];
         $rib = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_SocBankAccount", $id_rib);
         $client = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Societe", $rib->getData('fk_soc'));
-        if(!$rib->isValid()) {
+        if($rib->isValid()) {
             return $this->printRIBtra($rib, $client);
         } else {
             mailSyn2("Compta RIB", 'al.bernard@bimp.fr', null, $rib->getNomUrl() . " non valide");

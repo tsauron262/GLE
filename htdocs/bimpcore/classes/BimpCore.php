@@ -523,7 +523,9 @@ class BimpCore
                     $log = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Log', $id_current_log);
                     $log->set('last_occurence', date('Y-m-d H:i:d'));
                     $log->set('nb_occurence', $log->getData('nb_occurence')+1);
-                    $log->update();
+                    $errUpdate = $log->update();
+                    if(count($errUpdate))
+                        $datas['erreur_maj_log'] = $errUpdate;
                     $log->addNote('<pre>'.print_r($datas,1).'</pre>');
                 }
             }

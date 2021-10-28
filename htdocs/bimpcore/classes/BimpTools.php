@@ -1441,6 +1441,31 @@ class BimpTools
 
         return $filters;
     }
+    
+    public static function getSqlSelectFullQuery($table, $fields, $filters = array(), $joins = array(), $params = array())
+    {
+        $params = self::overrideArray(array(
+                    'order_by'        => null,
+                    'order_way'       => 'ASC',
+                    'extra_order_by'  => null,
+                    'extra_order_way' => 'ASC',
+                    'n'               => 0,
+                    'p'               => 1,
+                    'default_alias'   => 'a',
+                    'where_operator'  => 'WHERE'
+                        ), $params);
+        
+        
+        $sql = self::getSqlSelect($fields, $params['default_alias']);
+        $sql .= self::getSqlFrom($table, $joins, $params['default_alias']);
+        
+        if (!empty($filters)) {
+            $sql .= self::getSqlWhere($filters, $params['default_alias'], $params['where_operator']);
+        }
+        
+        $sql .= self::getSqlOrderBy($params['order_by'], $params['order_way'], $params['default_alias'], $params['extra_order_by'], $params['extra_order_way']);
+        $sql .= self::getSqlLimit($params['n'], $params['p']);
+    }
 
     // Gestion de données:
 

@@ -4473,6 +4473,9 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                     $errors[] = 'Ce champ n\'est pas éditable';
                 }
             }
+
+            $init_data = $this->getData($field);
+
             if (!$do_not_validate) {
                 $errors = BimpTools::merge_array($errors, $this->validateValue($field, $value));
             } else {
@@ -4512,7 +4515,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
                 $warnings = array();
                 if (!count($errors)) {
-                    $this->initData[$field] = $this->data[$field];
+                    $this->initData[$field] = $init_data;
                     if ($this->getConf('fields/' . $field . '/history', false, false, 'bool')) {
                         // Mise à jour de l'historique du champ: 
                         global $user;

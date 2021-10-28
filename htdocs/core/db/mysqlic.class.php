@@ -1060,7 +1060,7 @@ class DoliDBMysqliC extends DoliDB
 
 
             if ($tabReq[$query] > 2)
-                echo 'attention req identique ' . $tabReq[$query] . " foix.";
+                echo 'attention req identique ' . $tabReq[$query] . " fois.";
 
             if ($difference_ms > 0.00 || $difference_ms3 > 0.1) {
                 echo $this->countReq . " ";

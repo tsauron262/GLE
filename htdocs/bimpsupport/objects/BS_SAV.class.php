@@ -44,7 +44,6 @@ class BS_SAV extends BimpObject
         self::BS_SAV_A_RESTITUER       => array('label' => 'A restituer', 'icon' => 'arrow-right', 'classes' => array('success')),
         self::BS_SAV_FERME             => array('label' => 'Fermé', 'icon' => 'times', 'classes' => array('danger'))
     );
-    
     public static $bon_restit_raison = array(
         "",
         "Refus de devis offert",
@@ -53,7 +52,7 @@ class BS_SAV extends BimpObject
         "Réparation interne",
         "Rendu en l’état sans réparation",
         "Intervention sous garantie sans pièce",
-        "Contrat", 
+        "Contrat",
         99 => "Autre",
     );
     public static $status_opened = array(self::BS_SAV_RESERVED, self::BS_SAV_NEW, self::BS_SAV_ATT_PIECE, self::BS_SAV_ATT_CLIENT, self::BS_SAV_DEVIS_ACCEPTE, self::BS_SAV_REP_EN_COURS, self::BS_SAV_EXAM_EN_COURS, self::BS_SAV_DEVIS_REFUSE, self::BS_SAV_ATT_CLIENT_ACTION, self::BS_SAV_A_RESTITUER);
@@ -202,25 +201,25 @@ class BS_SAV extends BimpObject
         }
         return 1;
     }
-    
-    public function isGratuit(){
+
+    public function isGratuit()
+    {
         $montant = 0;
         $factureAc = $this->getChildObject('facture_acompte');
-        if($factureAc->isLoaded()){
+        if ($factureAc->isLoaded()) {
             $montant += $factureAc->getData('total');
         }
         $propal = $this->getChildObject('propal');
-        if($propal->isLoaded()){
+        if ($propal->isLoaded()) {
             $montant += $propal->getData('total');
             $lines = $this->getChildrenObjects('propal_lines');
-            foreach($lines as $lineS){
-                if($lineS->getData('linked_object_name') == 'sav_garantie'){
+            foreach ($lines as $lineS) {
+                if ($lineS->getData('linked_object_name') == 'sav_garantie') {
                     $montant -= $lineS->getTotalHT(true);
                 }
             }
-            
         }
-        if($montant < 1 && $montant > -1)
+        if ($montant < 1 && $montant > -1)
             return 1;
         return 0;
     }
@@ -1174,11 +1173,11 @@ class BS_SAV extends BimpObject
 
         return($tmp->getNextValue($objsoc, $this, $mask));
     }
-    
+
     public function getDefaultCodeCentreRepa()
     {
         global $tabCentre;
-        if(isset($tabCentre[$this->getData('code_centre')]) && isset($tabCentre[$this->getData('code_centre')][10]))
+        if (isset($tabCentre[$this->getData('code_centre')]) && isset($tabCentre[$this->getData('code_centre')][10]))
             return $tabCentre[$this->getData('code_centre')][10];
     }
 
@@ -3975,17 +3974,15 @@ class BS_SAV extends BimpObject
         $propal = $this->getChildObject('propal');
 
         global $user, $langs;
-        
-        
-        
+
         $frais = (float) (isset($data['frais']) ? $data['frais'] : 0);
-        if(($this->getData('status') !== self::BS_SAV_DEVIS_REFUSE && $this->isGratuit()) || ($this->getData('status') === self::BS_SAV_DEVIS_REFUSE && $frais == 0)){
-            if($data['bon_resti_raison'] == 0)
+        if (($this->getData('status') !== self::BS_SAV_DEVIS_REFUSE && $this->isGratuit()) || ($this->getData('status') === self::BS_SAV_DEVIS_REFUSE && $frais == 0)) {
+            if ($data['bon_resti_raison'] == 0)
                 $errors[] = 'Raison de la non facturation obligatoire';
-            else{
+            else {
                 $this->updateField('bon_resti_raison', $data['bon_resti_raison']);
-                if($data['bon_resti_raison'] == 99){
-                    if($data['bon_resti_raison_detail'] == '')
+                if ($data['bon_resti_raison'] == 99) {
+                    if ($data['bon_resti_raison_detail'] == '')
                         $errors[] = 'Détail de la non facturation obligatoire';
                     else
                         $this->addNote($data['bon_resti_raison_detail']);
@@ -3994,7 +3991,7 @@ class BS_SAV extends BimpObject
         }
 
         // Si refus du devis: 
-        if(!count($errors)){
+        if (!count($errors)) {
             if ((int) $this->getData('status') === self::BS_SAV_DEVIS_REFUSE) {
                 if (is_null($propal) || !$propal->isLoaded()) {
                     $errors[] = 'Proposition commerciale absente';
@@ -4040,10 +4037,10 @@ class BS_SAV extends BimpObject
                             $propal->dol_object->generateDocument(self::$propal_model_pdf, $langs);
                             $propal->dol_object->cloture($user, 2, "Auto via SAV");
                             $this->removeReservations();
-    //                        $apple_part = BimpObject::getInstance('bimpsupport', 'BS_ApplePart');
-    //                        $apple_part->deleteBy(array(
-    //                            'id_sav' => (int) $this->id
-    //                        ));
+                            //                        $apple_part = BimpObject::getInstance('bimpsupport', 'BS_ApplePart');
+                            //                        $apple_part->deleteBy(array(
+                            //                            'id_sav' => (int) $this->id
+                            //                        ));
                             $msg_type = 'revPropRefu';
                         }
                     } else {
@@ -4405,10 +4402,19 @@ class BS_SAV extends BimpObject
                                             }
 
                                             if ($bimpFacture->dol_object->validate($user, '') <= 0) { //pas d'entrepot pour pas de destock
-                                                $msg = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($bimpFacture->dol_object), 'Echec de la validation de la facture');
-                                                $warnings[] = $msg;
-                                                $errors = BimpTools::merge_array($errors, BimpTools::getDolEventsMsgs(array('errors')));
-                                                dol_syslog('SAV "' . $this->getRef() . '": ' . $msg, LOG_ERR);
+                                                $validate_errors = BimpTools::getErrorsFromDolObject($bimpFacture->dol_object);
+                                                $validate_errors = BimpTools::merge_array($validate_errors, BimpTools::getErrorsFromDolObject($bimpFacture->dol_object));
+
+                                                if (empty($validate_errors)) {
+                                                    $validate_errors[] = 'Erreur inconnue';
+                                                }
+
+                                                $msg = BimpTools::getMsgFromArray($validate_errors, 'Echec de la validation de la facture');
+                                                $errors[] = $msg;
+
+                                                BimpCore::addlog('Erreur validation facture SAV', Bimp_Log::BIMP_LOG_ERREUR, 'sav', $this, array(
+                                                    'Erreurs' => $validate_errors
+                                                ));
                                             } else {
                                                 $bimpFacture->fetch($facture->id);
 
@@ -4504,41 +4510,59 @@ class BS_SAV extends BimpObject
                 $this->addNote('Fermé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
             }
 
-            if (!count($errors)) {
-                $errors = $this->setNewStatus(self::BS_SAV_FERME);
-            }
+            $errors = $this->setNewStatus(self::BS_SAV_FERME);
+        }
 
-            // Fermeture des réparations GSX: 
-            $repair = BimpObject::getInstance('bimpapple', 'GSX_Repair');
-            $list = $repair->getList(array(
-                'id_sav'            => (int) $this->id,
-                'ready_for_pick_up' => 1
-                    ), null, null, 'id', 'asc', 'array', array('id'));
+        $use_db_transactions = (int) BimpCore::getConf('bimpcore_use_db_transactions', 0);
 
-            if (!is_null($list)) {
-                foreach ($list as $item) {
-                    $repair = BimpCache::getBimpObjectInstance('bimpapple', 'GSX_Repair', (int) $item['id']);
-                    if ($repair->isLoaded()) {
-                        if ($repair->getData('ready_for_pick_up'))
-                            $tmp = $repair->close(true, false);
-                        else//on passe d'abord en RFPU
-                            $rep_errors = $repair->updateStatus();
-                        if (isset($tmp['errors']))
-                            $rep_errors = $tmp['errors'];
-                        else {
-                            $rep_errors = $tmp;
-                        }
-                    } else {
-                        $rep_errors = array('Réparation d\'id ' . $item['id'] . ' non trouvée');
-                    }
-                    if (count($rep_errors)) {
-                        $warnings[] = BimpTools::getMsgFromArray($rep_errors, 'Echec de la fermeture de la réparation (1) d\'ID ' . $item['id']);
+        if (!count($errors)) {
+            if ($use_db_transactions) {
+                if (count($errors)) {
+                    $this->db->db->rollback();
+                } else {
+                    if (!$this->db->db->commit()) {
+                        $errors[] = 'Une erreur inconnue est survenue - opération annulée';
                     }
                 }
             }
-        }
 
-        if (count($errors)) {
+            // Opération hors transactions: 
+            
+            if (!count($errors)) {
+                // Fermeture des réparations GSX: 
+                $repair = BimpObject::getInstance('bimpapple', 'GSX_Repair');
+                $list = $repair->getList(array(
+                    'id_sav'            => (int) $this->id,
+                    'ready_for_pick_up' => 1
+                        ), null, null, 'id', 'asc', 'array', array('id'));
+
+                if (!is_null($list)) {
+                    foreach ($list as $item) {
+                        $repair = BimpCache::getBimpObjectInstance('bimpapple', 'GSX_Repair', (int) $item['id']);
+                        if ($repair->isLoaded()) {
+                            if ($repair->getData('ready_for_pick_up'))
+                                $tmp = $repair->close(true, false);
+                            else//on passe d'abord en RFPU
+                                $rep_errors = $repair->updateStatus();
+                            if (isset($tmp['errors']))
+                                $rep_errors = $tmp['errors'];
+                            else {
+                                $rep_errors = $tmp;
+                            }
+                        } else {
+                            $rep_errors = array('Réparation d\'id ' . $item['id'] . ' non trouvée');
+                        }
+                        if (count($rep_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($rep_errors, 'Echec de la fermeture de la réparation (1) d\'ID ' . $item['id']);
+                        }
+                    }
+                }
+            }
+            
+            if ($use_db_transactions) {
+                $this->db->db->begin();
+            }
+        } elseif (!$use_db_transactions) {
             $this->setNewStatus($current_status);
         }
 
@@ -4715,7 +4739,6 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $code = $tabCode[0];
                 $code = str_replace(" ", "", $code);
                 $success_callback = "text = '" . urlencode($code) . "'; alert(text); const notification = new Notification('Code Apple', { body: text });";
-                
             }
         }
 

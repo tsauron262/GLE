@@ -14,7 +14,7 @@ class BTC_exportRibAndMandat extends BTC_export {
         if($rib->isValid()) {
             return $this->printRIBtra($rib, $client);
         } else {
-            mailSyn2("Compta RIB", 'al.bernard@bimp.fr', null, $rib->getNomUrl() . " non valide");
+            BimpTools::mailGrouper('dev@bimp.fr', null, $rib->getNomUrl() . " non valide");
         }
         
     }

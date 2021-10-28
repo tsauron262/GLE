@@ -40,7 +40,7 @@ class InvoiceStatementPDF extends BimpDocumentPDF
         $filters = array(
             'fk_soc'    => $this->object->id,
             'fk_statut' => array(
-                'in' => array(1, 2, 3)
+                'in' => array(1, 2)
             ),
             'datef'     => array(
                 'min' => $this->object->borne_debut,

@@ -146,6 +146,10 @@ lists_cols:
         label: Iban
         value:
             callback: getIban
+    devise:
+        label: Devise
+        value:
+            callback: getdevise
                     
 lists: 
     default: 
@@ -165,6 +169,7 @@ lists:
             bank: 
             rib: 
             bic: 
+            devise:
             
     soc: 
         extends: default

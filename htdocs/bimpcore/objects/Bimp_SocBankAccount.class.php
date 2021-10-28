@@ -60,6 +60,19 @@ class Bimp_SocBankAccount extends BimpObject
         return !$this->getData('exported');
     }
     
+    public function getCodePays(){
+        return substr(str_replace(" ", "", $this->getData('iban_prefix')),0,2);
+    }
+    
+    public function getDevise(){
+        $codeP = $this->getCodePays();
+        $zone_euro = array('FR', 'BE');
+        if(in_array($codeP, $zone_euro))
+            return 'EUR';
+        else
+            return '';
+    }
+    
     // return boolean:
     
     public function getIban($withEspace = true){
@@ -85,6 +98,9 @@ class Bimp_SocBankAccount extends BimpObject
             "compte_strtr"  => (int) strtr(strtoupper($this->getData("number")), "ABCDEFGHIJKLMNOPQRSTUVWXYZ", '12345678912345678923456789'),
             "clerib"        => (int) $this->getData('cle_rib')
         );
+        
+        if($this->getDevise() == '')
+            $errors[] = 'Devise inconnue';
         
         $cbX89 = 89 * $rib['banque'];
         $cgX15 = 15 * $rib['agence'];

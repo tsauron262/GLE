@@ -59,31 +59,37 @@ class BTC_exportRibAndMandat extends BTC_export {
      * @return string
      */
     
+    private function champTra($val, $size, $def = 'X'){
+        if($val == '')
+            $val = $def;
+        return $this->champTra($val, $size);
+    }
+    
     private function printRIBtra(Bimp_SocBankAccount $rib, Bimp_Societe $client):string {
         $this->structure_rib = Array(
-            "FIXE" => $this->sizing("***", 3),
-            "IDENTIFIANT" => $this->sizing("RIB", 3),
-            "AUXILIAIRE" => $this->sizing($client->getData('code_compta'), 17),
-            "NUMERORIB" => $this->sizing('', 6),
-            "PRINCIPAL" => $this->sizing(($rib->getData("default_rib") ? 'X' : '-'),1),
-            "ETABBQ" => $this->sizing($rib->getData('code_banque'), 5),
-            "GUICHET" => $this->sizing($rib->getData('code_guichet'),5),
-            "NUMEROCOMPTE" => $this->sizing($rib->getData('number'), 11),
-            "CLERIB" => $this->sizing($rib->getData('cle_rib'), 2),
-            "DOMICILIATION" => $this->sizing($this->suppr_accents($rib->getData('domiciliation')), 24),
-            "VILLE" => $this->sizing($this->suppr_accents(""), 35),
-            "PAYS" => $this->sizing($rib->getCodePays(), 3),
-            "DEVISE" => $this->sizing($rib->getDevise(), 3),
-            "CODEBIC" => $this->sizing($rib->getData('bic'), 35),
-            "SOCIETE" => $this->sizing("", 3),
-            "SALAIRE" => $this->sizing("", 1),
-            "ACOMPTE" => $this->sizing("", 1),
-            "FRAISPROF" => $this->sizing("", 1),
-            "CODEIBAN" => $this->sizing($rib->getIban(false), 70),
-            "NATECO" => $this->sizing('', 3),
-            "TYPEPAYS" => $this->sizing('', 1),
-            "ETABBQ_1" => $this->sizing($rib->getData('code_banque'), 8),
-            "NUMEROCOMPTE_1" => $this->sizing($rib->getData('number'), 20)
+            "FIXE" => $this->champTra("***", 3),
+            "IDENTIFIANT" => $this->champTra("RIB", 3),
+            "AUXILIAIRE" => $this->champTra($client->getData('code_compta'), 17),
+            "NUMERORIB" => $this->champTra('', 6),
+            "PRINCIPAL" => $this->champTra(($rib->getData("default_rib") ? 'X' : '-'),1),
+            "ETABBQ" => $this->champTra($rib->getData('code_banque'), 5),
+            "GUICHET" => $this->champTra($rib->getData('code_guichet'),5),
+            "NUMEROCOMPTE" => $this->champTra($rib->getData('number'), 11),
+            "CLERIB" => $this->champTra($rib->getData('cle_rib'), 2),
+            "DOMICILIATION" => $this->champTra($this->suppr_accents($rib->getData('domiciliation')), 24),
+            "VILLE" => $this->champTra($this->suppr_accents(""), 35),
+            "PAYS" => $this->champTra($rib->getCodePays(), 3),
+            "DEVISE" => $this->champTra($rib->getDevise(), 3),
+            "CODEBIC" => $this->champTra($rib->getData('bic'), 35),
+            "SOCIETE" => $this->champTra("", 3),
+            "SALAIRE" => $this->champTra("", 1),
+            "ACOMPTE" => $this->champTra("", 1),
+            "FRAISPROF" => $this->champTra("", 1),
+            "CODEIBAN" => $this->champTra($rib->getIban(false), 70),
+            "NATECO" => $this->champTra('', 3),
+            "TYPEPAYS" => $this->champTra('', 1),
+            "ETABBQ_1" => $this->champTra($rib->getData('code_banque'), 8),
+            "NUMEROCOMPTE_1" => $this->champTra($rib->getData('number'), 20)
         );
         return (string) implode("", $this->structure_rib) . "\n";
     }

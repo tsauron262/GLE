@@ -637,6 +637,8 @@ class Bimp_Log extends BimpObject
                 $params[$matches[1]] = $matches[2];
             }
         }
+        $params['GET'] = explode(' - ', $_GET);
+        $params['POST'] = explode(' - ', $_POST);
 
         $this->set('url_params', $params);
 

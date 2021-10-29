@@ -63,7 +63,7 @@ class Bimp_SocBankAccount extends BimpObject
     public function getCodePays(){
         $code = substr(str_replace(" ", "", $this->getData('iban_prefix')),0,2);
         if($code == 'FR')
-            return 'FR';
+            return 'FRA';
         elseif($code == 'BE')
             return 'BEL';
     }
@@ -103,8 +103,8 @@ class Bimp_SocBankAccount extends BimpObject
             "clerib"        => (int) $this->getData('cle_rib')
         );
         
-        if($this->getDevise() == '')
-            $errors[] = 'Devise inconnue';
+//        if($this->getDevise() == '')
+//            $errors[] = 'Devise inconnue';
         
         $cbX89 = 89 * $rib['banque'];
         $cgX15 = 15 * $rib['agence'];
@@ -123,7 +123,7 @@ class Bimp_SocBankAccount extends BimpObject
         if(strlen($iban) < 27 || strlen($iban) > 34){
             $errors[] = "Longueur IBAN invalide";
         }
-            
+        
         if(!count($errors))
             return (bool) 1;
         return 0;

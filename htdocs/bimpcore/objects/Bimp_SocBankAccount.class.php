@@ -103,8 +103,8 @@ class Bimp_SocBankAccount extends BimpObject
             "clerib"        => (int) $this->getData('cle_rib')
         );
         
-//        if($this->getDevise() == '')
-//            $errors[] = 'Devise inconnue';
+        if($this->getDevise() == '')
+            $errors[] = 'Devise inconnue';
         
         $cbX89 = 89 * $rib['banque'];
         $cgX15 = 15 * $rib['agence'];

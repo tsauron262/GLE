@@ -7,16 +7,15 @@ class BTC_exportRibAndMandat extends BTC_export {
     private $structure_rib;
     private $structure_mandat;
     
-    public function export_rib_exported(int $id_rib) {
-        $errors = [];
+    public function export_rib_exported(int $id_rib, $errors = []) {
         $rib = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_SocBankAccount", $id_rib);
         $client = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Societe", $rib->getData('fk_soc'));
-        if($rib->isValid()) {
+        if($rib->isValid($errors)) {
+            $rib->updateField('exported', 1);
             return $this->printRIBtra($rib, $client);
         } else {
             BimpTools::mailGrouper('dev@bimp.fr', null, $rib->getNomUrl() . " non valide");
         }
-        
     }
     
     /**
@@ -62,7 +61,7 @@ class BTC_exportRibAndMandat extends BTC_export {
     private function champTra($val, $size, $def = 'X'){
         if($val == '')
             $val = $def;
-        return $this->champTra($val, $size);
+        return $this->sizing($val, $size);
     }
     
     private function printRIBtra(Bimp_SocBankAccount $rib, Bimp_Societe $client):string {

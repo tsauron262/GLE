@@ -2668,8 +2668,8 @@ class Bimp_Societe extends BimpDolObject
         $init_outstanding_limit = $this->getInitData('outstanding_limit');
 
         if ($this->getInitData('fk_typent') != $this->getData('fk_typent') && !$this->canEditField('status')) {
-            if (stripos($this->getData('code_compta'), 'P') === 0 && $this->getData('fk_typent') != 8)
-                return array("Code compta particulier, le type de tiers ne peut être différent.");
+//            if (stripos($this->getData('code_compta'), 'P') === 0 && $this->getData('fk_typent') != 8)
+//                return array("Code compta particulier, le type de tiers ne peut être différent.");
             if (stripos($this->getData('code_compta'), 'E') === 0 && $this->getData('fk_typent') == 8)
                 return array("Code compta entreprise, le type de tiers ne peut être différent.");
         }

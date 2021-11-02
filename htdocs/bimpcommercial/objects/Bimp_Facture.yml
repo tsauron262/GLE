@@ -825,6 +825,7 @@ filters_panels:
             datef: 
                 
 lists_cols:
+    total_ht: unset
     facnumber: 
         object_link: 1
     ref: unset

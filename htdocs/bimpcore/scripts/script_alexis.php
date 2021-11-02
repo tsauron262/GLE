@@ -22,9 +22,9 @@ $export_project_dir = PATH_TMP . "/" . 'exportCegid' . '/';
     $create_file = fopen($export_dir . $file, 'w');
     fwrite($create_file, $export->head_tra());
 //}
+$errors = array();
 
-
-$list = $bdd->getRows("societe_rib", "exported = 1");
+$list = $bdd->getRows("societe_rib", "exported = 5");
 
 foreach($list as $rib) {
     $ecriture .= $export->export_rib_exported($rib->rowid);
@@ -35,5 +35,5 @@ echo $ecriture;
     fwrite($create_file, $ecriture);
     fclose($create_file);
 
-
+print_r($errors);
 echo BimpTools::sendMailGrouper();

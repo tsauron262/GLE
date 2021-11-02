@@ -72,7 +72,7 @@ else{
         $style = 'color: red;';
         if($servSql == $bestServ)
             $style = 'color: green;';
-        echo '<button><a  style="'.$style.'" href="?active='.$servSql.'">Activer</a></button>';
+        echo '<button style="'.$style.'" onclick="location.href = \'?active='.$servSql.'\'">Activer</button>';
         echo '</div>';
     }
     echo '</div>';

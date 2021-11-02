@@ -55,7 +55,7 @@ else{
     }
         
     foreach($result as $servSql => $dataSql){
-        echo '<div style="float:left;"><h2>Mysql : '.$servSql.'</h2>';
+        echo '<div style="float:left; margin: 10px"><h2>Mysql : '.$servSql.'</h2>';
         foreach($dataSql as $var => $val){
             $style = '';
             if($var == 'wsrep_cluster_status'){

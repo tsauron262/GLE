@@ -2493,7 +2493,7 @@ class BimpComm extends BimpDolObject
                 $tot = $this->getData('total');
             if (round((float) $tot, 3) != round($totalHt, 3)) {
                 $this->erreurFatal++;
-                $errors[] = 'Ecart entre le total des lignes et le total ' . $this->getLabel('of_the') . '. Total lignes : ' . round($totalHt, 3) . ', total ' . $this->getLabel() . ': ' . round($this->getData('total_ht'), 3);
+                $errors[] = 'Ecart entre le total des lignes et le total ' . $this->getLabel('of_the') . '. Total lignes : ' . round($totalHt, 3) . ', total ' . $this->getLabel() . ': ' . round($tot, 3);
             }
 
             // Création des lignes absentes de l'objet bimp: 

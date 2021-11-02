@@ -57,13 +57,22 @@ else{
     foreach($result as $servSql => $dataSql){
         echo '<div style="float:left;"><h2>Mysql : '.$servSql.'</h2>';
         foreach($dataSql as $var => $val){
-            echo $var.' => '.$val.'<br/>';
+            $style = '';
+            if($var == 'wsrep_cluster_status'){
+                if($val == 'Primary'){
+                    $style = 'color:green';
+                }
+                else{
+                    $style = 'color:red';
+                }
+            }
+            echo '<div style="'.$style.'">'.$var.' => '.$val.'</div><br/>';
         }
 
         $style = 'color: red;';
         if($servSql == $bestServ)
             $style = 'color: green;';
-        echo '<a style="'.$style.'"  href="?active='.$servSql.'">Activer</a>';
+        echo '<button style="'.$style.'"  href="?active='.$servSql.'">Activer</button>';
         echo '</div>';
     }
     echo '</div>';

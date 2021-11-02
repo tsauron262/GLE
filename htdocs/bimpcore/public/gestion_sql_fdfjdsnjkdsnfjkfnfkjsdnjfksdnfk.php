@@ -78,6 +78,3 @@ else{
     echo '</div>';
 }
 
-
-
-echo '<br/><br/>Fin';

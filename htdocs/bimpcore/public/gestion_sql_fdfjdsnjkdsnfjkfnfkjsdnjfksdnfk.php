@@ -16,7 +16,7 @@ if(isset($_REQUEST['active'])){
             echo 'Attention probléme de connexion '.$dbT->error;
         }
         $req = "SET GLOBAL wsrep_provider_options='pc.bootstrap=YES';";
-//        $sql = $dbT->query($req);
+        $sql = $dbT->query($req);
         echo $req.' sur '.$_REQUEST['active'];
 }
 else{

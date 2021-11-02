@@ -333,7 +333,7 @@ class DoliDBMysqliC extends DoliDB
         $this->_svc_read = array(); // Clean arrays
         $this->_svc_write = array();
 
-        if(!$force)
+        if(!$force && (time() - $this->_last_discover_time) < ($this->CONSUL_REDIS_CACHE_TTL))
         {
             if($this->read_svc_from_redis())
                 return TRUE;
@@ -662,7 +662,7 @@ class DoliDBMysqliC extends DoliDB
      * 
      * If success - IP address and port of the currently connected server will be set in $this->database_host and $this->database_port
      */
-    function connect_server($query_type=0)
+    function connect_server($query_type=0, $tentative = 0)
     {        
         $timestamp_debut = 0.0;
         
@@ -770,7 +770,11 @@ class DoliDBMysqliC extends DoliDB
                             $this->countReq2 ++;
                         }
                     }
-                    $this->db = new mysqli($arr_server[0], $this->database_user, $this->database_pass, $this->database_name, $port);
+                    
+                    $this->db = mysqli_init();
+//                    $this->db->options(MYSQL_OPT_RECONNECT,false);
+                    
+                    $this->db->real_connect($arr_server[0], $this->database_user, $this->database_pass, $this->database_name, $port);
                     if( ($this->db!=FALSE) && (!$this->db->connect_error) )
                     {
                         $this->database_host = $arr_server[0];
@@ -845,7 +849,11 @@ class DoliDBMysqliC extends DoliDB
                     $this->countReq2 ++;
                 }
             }
-            $this->db = new mysqli($arr_server[0], $this->database_user, $this->database_pass, $this->database_name, $port);
+            $this->db = mysqli_init();
+//            $this->db->options(MYSQL_OPT_RECONNECT,false);
+
+            $this->db->real_connect($arr_server[0], $this->database_user, $this->database_pass, $this->database_name, $port);
+//            $this->db = new mysqli($arr_server[0], $this->database_user, $this->database_pass, $this->database_name, $port);
             if( ($this->db!=FALSE) && (!$this->db->connect_error) )
             {
                 $this->database_host = $arr_server[0];
@@ -889,7 +897,10 @@ class DoliDBMysqliC extends DoliDB
     //                unset($this->_svc_read[$ind_srv]);     // Should always be true                        
             }
 
-            return $this->connect_server($query_type);
+            if($tentative < 20)
+                return $this->connect_server($query_type, $tentative+1);
+            else
+                die('impossible de se connecté au serveur');
         }
         
         return FALSE;
@@ -1944,7 +1955,7 @@ class DoliDBMysqliC extends DoliDB
 
     public function begin()
     {
-        if(!$this->connected)
+        if(!$this->connected && ! $this->transaction_opened)
             $this->connect_server (2);
         
         if (! $this->transaction_opened)

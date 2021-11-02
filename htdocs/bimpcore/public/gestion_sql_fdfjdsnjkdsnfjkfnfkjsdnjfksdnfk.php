@@ -7,11 +7,6 @@ require_once('../../main.inc.php');
 ini_set("display_errors", 1);
 
 
-echo '<br/><br/>';
-
-
-
-echo '<pre>';
 if(!defined('CONSUL_SERVERS') || !defined('CONSUL_SERVICE_DATABASE'))
     die('Consul mal configurée');
 

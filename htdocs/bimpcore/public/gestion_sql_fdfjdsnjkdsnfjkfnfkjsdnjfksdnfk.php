@@ -41,7 +41,7 @@ else{
     foreach($datasServ as $servSql => $port){
         $dbT = new DoliDBMysqli('mysql', $servSql, $db->database_user, $db->database_pass, $db->database_name, $port);
         if(!$dbT->connected){
-            echo 'Attention probléme de connexion '.$dbT->error;
+            echo 'Attention probléme de connexion serv : '.$servSql.' '.$dbT->error;
         }
         $sql = $dbT->query("SHOW GLOBAL STATUS LIKE 'wsrep_%';");
         while($ln = $db->fetch_object($sql)){

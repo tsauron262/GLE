@@ -1944,6 +1944,9 @@ class DoliDBMysqliC extends DoliDB
 
     public function begin()
     {
+        if(!$this->connected)
+            $this->connect_server (2);
+        
         if (! $this->transaction_opened)
             $firstBegin = true;
         else

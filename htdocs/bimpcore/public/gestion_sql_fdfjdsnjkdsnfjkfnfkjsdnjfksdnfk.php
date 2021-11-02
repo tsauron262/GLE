@@ -8,7 +8,7 @@ ini_set("display_errors", 1);
 
 
 
-            require_once(DOL_DOCUMENT_ROOT.'/core/db/mysqli.class.php');
+require_once(DOL_DOCUMENT_ROOT.'/core/db/mysqli.class.php');
 
 if(isset($_REQUEST['active'])){
         $dbT = new DoliDBMysqli('mysql', $_REQUEST['active'], $db->database_user, $db->database_pass, $db->database_name, $db->database_port);

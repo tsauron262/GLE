@@ -117,6 +117,7 @@ fields:
         displays: 
             icon: 
                 icon_only: 1
+                label: Statut
     fk_soc: 
         label: Client
         dol_prop: socid

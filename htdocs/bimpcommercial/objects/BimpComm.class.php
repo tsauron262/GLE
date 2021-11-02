@@ -2487,7 +2487,11 @@ class BimpComm extends BimpDolObject
                 $totalHt += $dol_lines[$id_dol_line]->total_ht;
             }
 
-            if (round((float) $this->getData('total_ht'), 3) != round($totalHt, 3)) {
+            if($this->field_exists('total_ht'))
+                $tot = $this->getData('total_ht');
+            else
+                $tot = $this->getData('total');
+            if (round((float) $tot, 3) != round($totalHt, 3)) {
                 $this->erreurFatal++;
                 $errors[] = 'Ecart entre le total des lignes et le total ' . $this->getLabel('of_the') . '. Total lignes : ' . round($totalHt, 3) . ', total ' . $this->getLabel() . ': ' . round($this->getData('total_ht'), 3);
             }

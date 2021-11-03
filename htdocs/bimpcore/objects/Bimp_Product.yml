@@ -557,12 +557,17 @@ fields:
         input: 
             type: text
             help: Uniquement pour les prestations réalisées au fil du temps
+            
+    lock_admin:
+        label: Blocage Admin
+        type: bool
         
 forms: 
     # Utiliser plutôt "default" que "card" pour le formulaire principal 
     # Important car tout objet doit avoir un formulaire par défaut s'il est éditable.
     default: 
         rows:
+            - field: lock_admin
             - field: ref
             - field: code_config
             - field: label
@@ -771,6 +776,8 @@ fields_tables:
         title: Informations
         icon: fas_info-circle
         rows:  
+            - field: lock_admin
+              edit: 1
             - field: ref
             - field: code_config
             - field: label

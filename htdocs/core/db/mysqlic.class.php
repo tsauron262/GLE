@@ -428,7 +428,8 @@ class DoliDBMysqliC extends DoliDB
                     }
                 }
                 if (($id = array_search($min_ind, $ind_svc_all)) !== false) 
-                    unset($ind_svc_all[$id]);
+                    array_splice($ind_svc_all, $id, 1);
+//                    unset($ind_svc_all[$id]);
                 else
                     break;  // If we cannot remove the value already used - the same server will be choosen during the next loop iteration
             }
@@ -762,6 +763,8 @@ class DoliDBMysqliC extends DoliDB
                     {
                         if( ($this->database_host === $arr_server[0]) && ($this->database_port === $port) && $this->db->ping() )
                             return TRUE;   // Already connected to this server, nothing to do
+                        if( $this->transaction_opened && $this->db->ping())
+                            return TRUE;   // No reconnect inside a transaction
                         else
                         {
                             $timestamp_debut = microtime(true);

@@ -11,7 +11,7 @@ fields:
     id_societe: 
         label: Client
         type: id_object
-        object: societe
+        object: client
         input: 
             type: search_societe
         required: 1

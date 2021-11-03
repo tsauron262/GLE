@@ -100,7 +100,10 @@ class BTC_exportRibAndMandat extends BTC_export {
      * @return string
      */
     
-    private function printMANDATtra(Bimp_SocBankAccount $rib, Bimp_Societe $client, Bimp_Facture $facture):string {
+    private function printMANDATtra(Bimp_SocBankAccount $rib, Bimp_Societe $client, Bimp_Facture $facture = null, $force_ef_type = "C"):string {
+        
+        $ef_type = (is_object($facture)) ? $facture-getData('ef_type') : $force_ef_type;
+        
         $date = new DateTime($rib->getData('datec'));
         $this->structure_mandat = Array(
             "FIXE" => $this->sizing("***", 3),
@@ -112,7 +115,7 @@ class BTC_exportRibAndMandat extends BTC_export {
             "BIC" => $this->sizing($rib->getData('bic'), 35),
             "GENERAL" => $this->sizing("", 17),
             "AUXILIAIRE" => $this->sizing($client->getData('code_compta'), 17),
-            "PAIEMENT" => $this->sizing($this->recurrentORponctuel($facture->getData('ef_type')), 3),
+            "PAIEMENT" => $this->sizing($this->recurrentORponctuel($ef_type), 3),
             "TYPE" => $this->sizing($this->parORpro($client), 3),
             "STATUT" => $this->sizing("1FI", 3),
             "DATECREATION" => $this->sizing($date->format('dmY'), 8),
@@ -149,6 +152,57 @@ class BTC_exportRibAndMandat extends BTC_export {
     
     private function parORpro(Bimp_Societe $client):string {
         return ($client->getData('type') == 8) ? '1PD' : '2PI';
+    }
+    
+    // Getters
+    protected function getListByExportedStatut($want_exported_statut = 0) {        
+        return BimpCache::getBimpObjectObjects("bimpcore", "Bimp_SocBankAccount", ['exported' => $want_exported_statut]);
+    }
+
+
+    // Actions
+    public function actionExportExportedMandat($data, &$success) {
+        
+        $warnings = Array();
+        $errors = Array();
+        
+        $list = $this->getListByExportedStatut(1);
+        $client = BimpCache::getBimpObjectInstance("bimpcore", 'Bimp_Societe');
+        
+        $ecriture = $this->head_tra();
+        foreach($list as $rib) {
+            $client->fetch($rib->getData('fk_soc'));
+            $ecriture .= $this->printMANDATtra($rib, $client);
+            
+        }
+        
+        $export_dir = PATH_TMP  ."/" . 'exportCegid' . '/' . "BY_DATE" . '/';
+        $export_project_dir = PATH_TMP . "/" . 'exportCegid' . '/';
+        $file = fopen($export_dir . "/exported_mandats.tra", "w");
+        fwrite($file, $ecriture);        
+        
+        fclose($file);
+        
+        $success = "Exportés";
+        
+        return Array(
+            'errors' => $errors,
+            'warnings' => $warnings,
+            'success' => $success
+        );
+        
+    }
+    
+    // display
+    public function displayExportedRib() {
+        $instance = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_SocBankAccount");
+        $html .= PATH_TMP  ."/" . 'exportCegid' . '/' . "BY_DATE" . '/';
+        $html .= $instance->renderList("default", true, "Liste des RIBs exportés en compta", null, ['exported' => 1]);
+                
+       $html .= '<span class="btn btn-default" data-trigger="hover" data-placement="top"  data-content="Supprimer la facture" onclick="' . $this->getJsActionOnclick("exportExportedMandat", array(), array()) . '")">Exporter les mandats déjà exportés</span>';
+
+        
+        return $html;
     }
     
 }

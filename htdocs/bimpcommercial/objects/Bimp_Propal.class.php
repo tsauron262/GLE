@@ -241,45 +241,52 @@ class Bimp_Propal extends BimpComm
 
     public function isNotRenouvellementContrat()
     {
-        if (!$this->isServiceAutorisedInContrat()) {
-            return 0;
-        }
+        $clef = $this->id.'isNotRenouvellementContrat';
+        if(!isset(BimpCache::$cache[$clef])){
+            BimpCache::$cache[$clef] = 1;
+            if (!$this->isServiceAutorisedInContrat()) {
+                BimpCache::$cache[$clef] = 0;
+            }
 
-        if (count(getElementElement("contrat", "propal", null, $this->id)) > 0) {
-            return 0;
+            if (count(getElementElement("contrat", "propal", null, $this->id)) > 0) {
+                BimpCache::$cache[$clef] = 0;
+            }
         }
-        return 1;
+        return BimpCache::$cache[$clef];
     }
 
     public function isServiceAutorisedInContrat($return_array = false)
     {
+        $clef = $this->id.'isServiceAutorisedInContrat'.$return_array;
+        if(!isset(BimpCache::$cache[$clef])){
+            if (!BimpCore::getConf('bimpcontract_use_autorised_service'))
+                BimpCache::$cache[$clef] = 1;
 
-        if (!BimpCore::getConf('bimpcontract_use_autorised_service'))
-            return 1;
+            $children = $this->getChildrenList('lines');
+            $id_services = [];
 
-        $children = $this->getChildrenList('lines');
-        $id_services = [];
+            foreach ($children as $id_child) {
+                $child = $this->getChildObject("lines", $id_child);
+                $dol_line = $child->getChildObject('dol_line');
+                if ($dol_line->getData('fk_product') > 0) {
+                    $service = $this->getInstance('bimpcore', 'Bimp_Product', $dol_line->getData('fk_product'));
+                    if (!$service->isInContrat() && $dol_line->getData('total_ht') != 0) {
+                        $id_services[] = $service->getData('ref');
+                    }
+                }
+            }
 
-        foreach ($children as $id_child) {
-            $child = $this->getChildObject("lines", $id_child);
-            $fk_product = $this->db->getValue("propaldet", "fk_product", 'rowid = ' . $child->getData('id_line'));
-            if ($fk_product > 0) {
-                $service = $this->getInstance('bimpcore', 'Bimp_Product', $fk_product);
-                if (!$service->isInContrat()) {
-                    $id_services[] = $service->getData('ref');
+            if (count($id_services) > 0 && !$return_array) {
+                BimpCache::$cache[$clef] = 0;
+            } else {
+                if ($return_array) {
+                    BimpCache::$cache[$clef] = $id_services;
+                } else {
+                    BimpCache::$cache[$clef] = 1;
                 }
             }
         }
-
-        if (count($id_services) > 0 && !$return_array) {
-            return 0;
-        } else {
-            if ($return_array) {
-                return $id_services;
-            } else {
-                return 1;
-            }
-        }
+        return BimpCache::$cache[$clef];
     }
 
     // Getters: 

@@ -177,6 +177,7 @@ class BTC_exportRibAndMandat extends BTC_export {
         }
         
         $export_dir = PATH_TMP  ."/" . 'exportCegid' . '/BY_DATE/' ;
+        shell_exec("chmod -R 777 " . $export_dir);
         $file = $export_dir . "exported_mandats.tra";
         if($this->write_tra_w($ecriture, $file)) {
             $success = "Exportés";

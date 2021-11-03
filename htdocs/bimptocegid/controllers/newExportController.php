@@ -1,6 +1,6 @@
 <?php
 
-require_once DOL_DOCUMENT_ROOT . "/bimptocegid/class/export.class.php";
+//require_once DOL_DOCUMENT_ROOT . "/bimptocegid/class/export.class.php";
 
 class newExportController extends BimpController {
              

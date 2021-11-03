@@ -1,0 +1,1 @@
+ALTER TABLE `llx_product` ADD `lock_admin` boolean DEFAULT 0 NOT NULL;

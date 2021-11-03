@@ -194,18 +194,22 @@ class BimpObject extends BimpCache
 
         return 0;
     }
+    
+    public function initBdd($mode = -1){
+        if($mode < 0)
+            $mode = (int) $this->getConf('no_transaction_db', 0, false, 'bool');
+        $this->db = self::getBdb($mode);
+    }
 
     public function __construct($module, $object_name)
     {
-        $this->db = self::getBdb();
         $this->module = $module;
         $this->object_name = $object_name;
 
         $this->config = new BimpConfig(DOL_DOCUMENT_ROOT . '/' . $module . '/objects/', $object_name, $this);
+        
+        $this->initBdd(); 
 
-        if ((int) $this->getConf('no_transaction_db', 0, false, 'bool')) {
-            $this->db = self::getBdb(true);
-        }
 
         $this->use_commom_fields = (int) $this->getConf('common_fields', 1, false, 'bool');
         $this->use_positions = (int) $this->getConf('positions', 0, false, 'bool');
@@ -5887,6 +5891,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             return array('ID ' . $this->getLabel('of_the') . ' absent');
         }
         $note = BimpObject::getInstance('bimpcore', 'BimpNote');
+        $note->initBdd($this->getConf('no_transaction_db', 0, false, 'bool'));
 
         if (is_null($visibility)) {
             $visibility = BimpNote::BIMP_NOTE_MEMBERS;
@@ -5909,6 +5914,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             $warnings = array();
             $errors = $note->create($warnings, true);
         }
+        $note->initBdd();
 
         return $errors;
     }

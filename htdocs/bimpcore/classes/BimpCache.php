@@ -47,6 +47,21 @@ class BimpCache
 
         return self::$bdb_noTransac;
     }
+    
+    public static function getIpFromDns($host){
+        if (filter_var($host, FILTER_VALIDATE_IP))
+            return $host;
+        
+        $cache_key = 'ipFromDns'.$host;
+        if (!isset(self::$cache[$cache_key])) {
+            $dnsData = dns_get_record($host);
+            $i = rand(0, count($dnsData)-1);
+            $ip = $dnsData[$i]['ip'];
+            self::$cache[$cache_key] = $ip;
+        }
+
+        return self::$cache[$cache_key];
+    }
 
     public static function getCacheArray($cache_key, $include_empty = false, $empty_value = 0, $empty_label = '')
     {

@@ -155,6 +155,7 @@ lists:
     default: 
         n: 10
         sort_field: rowid
+        filters_panel: default
         sort_way: desc
         add_btn: 1
         delete_btn: 1
@@ -208,6 +209,15 @@ forms:
                 field: label
             
             
+filters_panel: 
+    default: 
+        filters: 
+            exported:
+            fk_soc: 
+            label: 
+            rum:
+            bank: 
+            bic: 
             
         
     

@@ -8171,7 +8171,9 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             return '';
         }
 
-        $url = BimpTools::makeUrlFromConfig($this->config, 'list_page_url', $this->module, $this->getController());
+        $url = false;
+        if($this->config->isDefined('list_page_url'))
+            $url = BimpTools::makeUrlFromConfig($this->config, 'list_page_url', $this->module, $this->getController());
 
         if (!$url && $this->isDolObject()) {
             $url = BimpTools::getDolObjectListUrl($this->dol_object);

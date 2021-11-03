@@ -565,6 +565,15 @@ class BTC_export extends BimpObject {
         }
     }
     
+    public function write_tra_w($ecriture, $file) {
+        $opened_file = fopen($file, 'w');
+        if(fwrite($opened_file, $ecriture)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
     protected function log($element, $ref, $file) {
         $log = date('d/m/Y') . '::' . $element . ' : Ref : ' . $ref . " à été ecrit dans le fichier " . $file . "\n";
         $this->write_logs($log);

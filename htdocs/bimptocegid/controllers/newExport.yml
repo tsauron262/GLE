@@ -1,0 +1,32 @@
+bootstrap: 1
+
+objects:
+    rib:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_SocBankAccount
+    TRA_RIB:
+        instance:
+            bimp_object:
+                module: bimptocegid
+                name: BTC_exportRibAndMandat
+
+sections:
+    - type: tabs
+      tabs: 
+        default:
+            label: Elements
+            sections:
+                - type: nav_tabs
+                  nav_tabs: 
+                    - id: fiche_contrat
+                      title: RIB / MANDAT
+                      struct: 
+                        type: custom
+                        custom: 
+                            callback: 
+                                method: displayExportedRib
+                                object: TRA_RIB
+                                   
+                      

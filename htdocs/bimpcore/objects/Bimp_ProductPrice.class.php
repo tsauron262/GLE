@@ -7,6 +7,11 @@ class Bimp_ProductPrice extends BimpObject
         'HT'  => 'HT',
         'TTC' => 'TTC'
     );
+    
+    public function isCreatable($force_create = false, &$errors = array()): int {
+        $parent = $this->getParentInstance();
+        return $parent->isEditable();
+    }
 
     public function isEditable($force_edit = false, &$errors = array())
     {

@@ -138,6 +138,7 @@ class Bimp_Product extends BimpObject
 
         switch ($field_name) {
             case 'validate':
+            case 'lock_admin':
             case 'cur_pa_ht':
                 if ($user->admin) {
                     return 1;
@@ -192,7 +193,10 @@ class Bimp_Product extends BimpObject
     public function isEditable($force_edit = false, &$errors = array())
     {
         global $user;
-        if ($force_edit || $user->rights->admin or $user->rights->produit->creer)
+        if($this->getData('lock_admin') && !$user->admin)
+            return 0;
+        
+        if ($force_edit || $user->admin or $user->rights->produit->creer)
             return 1;
     }
 
@@ -229,6 +233,8 @@ class Bimp_Product extends BimpObject
                 return 1;
 
             case 'validate':
+                if(!$this->isEditable())
+                    return 0;
                 if (!$this->isLoaded($errors)) {
                     return 0;
                 }
@@ -242,11 +248,15 @@ class Bimp_Product extends BimpObject
                 }
                 return 1;
             case 'merge':
+                if(!$this->isEditable())
+                    return 0;
                 if (!$this->isLoaded($errors)) {
                     return 0;
                 }
                 return 1;
             case 'refuse':
+                if(!$this->isEditable())
+                    return 0;
                 if (!$this->isLoaded($errors)) {
                     return 0;
                 }
@@ -259,6 +269,8 @@ class Bimp_Product extends BimpObject
                 return 1;
 
             case 'updatePrice':
+                if(!$this->isEditable())
+                    return 0;
                 if (!$this->isLoaded($errors)) {
                     return 0;
                 }

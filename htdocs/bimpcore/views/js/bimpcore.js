@@ -305,7 +305,7 @@ function BimpUserRightsTable() {
         }, '', null, function (result) {
             if (typeof (result.results) !== 'undefined') {
                 for (var id_right in result.results) {
-                    if (parseInt(result.results[id_right])) {
+                    if (parseInt(result.results[id_right]['ok'])) {
                         var $row = ptr.getRow($table, id_right);
                         if ($.isOk($row)) {
                             $row.find('.remove_right_button').hide();

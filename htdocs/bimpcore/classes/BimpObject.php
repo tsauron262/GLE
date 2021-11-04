@@ -1954,7 +1954,7 @@ class BimpObject extends BimpCache
                 }
             }
         }
-
+        
         return $result;
     }
 

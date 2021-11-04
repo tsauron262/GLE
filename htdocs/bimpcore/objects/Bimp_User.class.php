@@ -1209,8 +1209,8 @@ class Bimp_User extends BimpObject
     {
         $errors = array();
         $warnings = array();
-        $success = ''; 
-        
+        $success = '';
+
         $id_rights = BimpTools::getArrayValueFromPath($data, 'id_rights', array());
         $results = array();
 
@@ -1225,25 +1225,27 @@ class Bimp_User extends BimpObject
                 if (is_null($right_def)) {
                     $warnings[] = 'Le droit #' . $id_right . ' n\'existe plus';
                 } else {
-                        if((int) $this->db->getValue('user_rights', 'rowid', 'fk_user = ' . $this->id . ' AND fk_id = ' . $id_right)) {
-                            if ($this->db->delete('user_rights', "entity = 1 AND fk_user = " . $this->id . " AND fk_id = ". $id_right)) {
-                                $nOk++;
+                    if ((int) $this->db->getValue('user_rights', 'rowid', 'fk_user = ' . $this->id . ' AND fk_id = ' . $id_right)) {
+                        if ($this->db->delete('user_rights', "entity = 1 AND fk_user = " . $this->id . " AND fk_id = " . $id_right)) {
+                            $nOk++;
 
-                                $results[$id_right] = array(
-                                    'ok' => 1,
-                                    'active' => 'inherit' 
-                                );
-                                                    
+                            $results[$id_right] = array(
+                                'ok'     => 1,
+                                'active' => 'inherit'
+                            );
                         } else {
                             $sql_err = $this->db->err();
                             $label = $right_def['module'] . '->' . $right_def['perms'] . (!empty($right_def['subperms']) ? '->' . $right_def['subperms'] : '');
                             $warnings[] = 'Echec de la suppression du droit "' . $label . '"' . ($sql_err ? ' - ' . $sql_err : '');
 
                             $results[$id_right] = array(
-                                'ok' => 0,
-                                'active' => 'no' 
-                            );                 
+                                'ok'     => 0,
+                                'active' => 'no'
+                            );
                         }
+                    } else {
+                        $label = $right_def['module'] . '->' . $right_def['perms'] . (!empty($right_def['subperms']) ? '->' . $right_def['subperms'] : '');
+                        $warnings[] = 'L\'utilisateur ne possède pas le droit ' . $label;
                     }
 
                     if ($nOk === 1) {
@@ -1253,15 +1255,14 @@ class Bimp_User extends BimpObject
                     }
                 }
             }
-        }      
-                
+        }
+
         return array(
             'errors'   => $errors,
             'warnings' => $warnings,
             'results'  => $results
         );
     }
-
 
     // Overrides
 
@@ -1307,118 +1308,113 @@ class Bimp_User extends BimpObject
 
         return $html;
     }
-    
+
     // Groupe compté comme 1 user !!
 // En construction !!
     public static function getUsersAvaible($id_user, &$errors = array(), &$warnings = array(), $users_in = array(
-        'Commerciaux341 - Maugio',
-        'parent'
-    ), $max_user = 1, $return_array = false, $fetch = false, $from = null, $to = null) {
-        
-        if(is_null($id_user) or $id_user < 0)
+                'Commerciaux341 - Maugio',
+                'parent'
+            ), $max_user = 1, $return_array = false, $fetch = false, $from = null, $to = null)
+    {
+
+        if (is_null($id_user) or $id_user < 0)
             $errors[] = "ID de l'utilisateur absent ou mal renseigné";
 
-        if(is_null($id_user) or $max_user < 1)
+        if (is_null($id_user) or $max_user < 1)
             $errors[] = "Nombre d'utilisateur à renvoyé null ou négatif";
-        
-        if(1 < $max_user and $return_array)
+
+        if (1 < $max_user and $return_array)
             $errors[] = "Impossible de renvoyer plusieurs utilisateurs sans utiliser les tableaux !";
-        
-        if(1 == $max_user and !$return_array)
+
+        if (1 == $max_user and!$return_array)
             $warnings[] = "Il est recommandé d'utilisé un retour unique plutôt qu'un tableau";
-        
-        if(count($errors))
+
+        if (count($errors))
             return -1;
-        
-        
+
+
         $users_out = array();
         $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
-        
-        
+
         print_r($users_out);
-        
-        foreach($users_in as $u) {
-            
+
+        foreach ($users_in as $u) {
+
             // Il s'agit d'un utilisateur, donc de ''id user
-            if(0 < $u) {
-                
-                if(self::isUserAvaible($u, $errors, $from, $to))
+            if (0 < $u) {
+
+                if (self::isUserAvaible($u, $errors, $from, $to))
                     $users_out[] = $u;
-                
-            // Supérieur hiérarchique
-            } elseif($u == 'parent') {
-                
+
+                // Supérieur hiérarchique
+            } elseif ($u == 'parent') {
+
                 $id_parent = $user->getData('fk_user');
 
-                if(self::isUserAvaible($id_parent, $errors, $from, $to))
+                if (self::isUserAvaible($id_parent, $errors, $from, $to))
                     $users_out[] = $id_parent;
-                
-            // Code d'un groupe d'utilisateur
+
+                // Code d'un groupe d'utilisateur
             } else {
-                
-                
+
+
                 $ids_user = self::getUsersInGroup($u);
-                
+
                 foreach ($ids_user as $id) {
-                    if(self::isUserAvaible($id, $errors, $from, $to))
+                    if (self::isUserAvaible($id, $errors, $from, $to))
                         $users_out[] = $id;
                 }
-                
-                
             }
-            
-            if(count($users_out) >= $max_user)
+
+            if (count($users_out) >= $max_user)
                 break;
-            
         }
-        
+
         echo '<pre> FIN';
         print_r($users_out);
         die();
-        
-        
-        if(empty($user)) {
+
+        if (empty($user)) {
             $warnings[] = "Personne n'est disponible, l'utilisateur par défaut a été selectionné automatiquement";
-            
-            if($fetch)
-                $user = BimpCache::getBimpObjectInstance ('bimpcore', 'Bimp_User', (int) $id_user);
+
+            if ($fetch)
+                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
             else
                 $user = $id_user;
-            
-            if($return_array)
+
+            if ($return_array)
                 return array($user);
             else
                 return $user;
-            
         }
 
-        if(!$return_array)
+        if (!$return_array)
             return array($max_user);
 
         return $max_user;
-        
+
         // array_shift()
     }
-    
+
     // En construction !!
-    public static function getUsersInGroup($group_name) {
-        
+    public static function getUsersInGroup($group_name)
+    {
+
         $users = array();
-        
+
         $sql = 'SELECT ugu.fk_user as id_user';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'usergroup_user ugu';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'usergroup ug ON ug.rowid = ugu.fk_usergroup';
         $sql .= ' WHERE ug.nom = "' . $group_name . '"';
 
         $rows = self::getBdb()->executeS($sql, 'object');
-        
+
         foreach ($rows as $r)
             $users[$r->id_user] = $r->id_user;
 
         return $users;
     }
-    
-    
+
     // TODO description de cette fonction
 //    public static function getUsersAvaible($id_user, &$errors = array(), &$warnings = array(), $users_in = array(
 //        'parent',
@@ -1537,28 +1533,28 @@ class Bimp_User extends BimpObject
 //        
 //        // array_shift()
 //    }
-    
 // En construction !!
-    public static function isUserAvaible($id_user, &$errors = array(), $from = null, $to = null) {
-        
-        if(is_null($id_user) or $id_user < 0) {
+    public static function isUserAvaible($id_user, &$errors = array(), $from = null, $to = null)
+    {
+
+        if (is_null($id_user) or $id_user < 0) {
             $errors[] = "ID de l'utilisateur absent ou mal renseigné";
             return -1;
         }
-        
+
         $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
-        if(!$user->getData('statut'))
+        if (!$user->getData('statut'))
             return 0;
-        
+
         $joins['c_a_comm'] = array(
             'table' => 'c_actioncomm',
             'on'    => 'c_a_comm.element_id = a.fk_action',
             'alias' => 'c_a_comm'
         );
-        
+
         $filters = array(
-            'or' => array(
-                'a.datep'     => array(
+            'or'            => array(
+                'a.datep'  => array(
                     'operator' => '!=',
                     'value'    => 0
                 ),
@@ -1567,16 +1563,13 @@ class Bimp_User extends BimpObject
                     'value'    => 0
                 ),
             ),
-            'c_a_comm.code' => array( 'in' => array('CONGES', 'RTT_DEM'))
+            'c_a_comm.code' => array('in' => array('CONGES', 'RTT_DEM'))
         );
-        
-        
+
         $out = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_ActionComm', $filters, 'id', 'asc', $joins);
-        
+
         return !count($out);
     }
-    
-
 //elle renverra soit son id soit l'objet bimp fetché (paramètre optionnel)
 //
 //Si l'utilisateur n'est pas disponible (désactiver ou en vacances) il cherchera un utilisateur disponible, par défaut le n+1, ou un autre membre du groupe (paramètre optionnel).
@@ -1584,6 +1577,4 @@ class Bimp_User extends BimpObject
 //Tommy et moi pensons que cette fonction a des chances d'être utilisé ailleurs, du coup :
 //1/ Est-ce qu'une fonction similaire existe déjà ?
 //2/ Est-ce que tu as des remarques à faire (paramètre à ajouter, fonction sur laquelle s'appuyer, etc) ?
-
-    
 }

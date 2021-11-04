@@ -2598,7 +2598,7 @@ class BimpController
                 $return['errors'] = $errors;
             }
         }
-
+        
         return $return;
     }
 

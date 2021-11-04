@@ -102,7 +102,7 @@ class BTC_exportRibAndMandat extends BTC_export {
     
     private function printMANDATtra(Bimp_SocBankAccount $rib, Bimp_Societe $client, Bimp_Facture $facture = null, $force_ef_type = "C"):string {
         
-        $ef_type = (is_object($facture)) ? $facture-getData('ef_type') : $force_ef_type;
+        $ef_type = (is_object($facture)) ? $facture->getData('ef_type') : $force_ef_type;
         
         $date = new DateTime($rib->getData('datec'));
         $this->structure_mandat = Array(

@@ -2,7 +2,7 @@
 
 class Bimp_User extends BimpObject
 {
-
+            
     public static $status_list = array(
         0 => array('label' => 'Désactivé', 'icon' => 'fas_times', 'classes' => array('danger')),
         1 => array('label' => 'Actif', 'icon' => 'fas_check', 'classes' => array('success'))
@@ -83,10 +83,11 @@ class Bimp_User extends BimpObject
                     return 1;
                 }
                 return 0;
+           
         }
         return parent::canSetAction($action);
     }
-
+    
     // Getters booléens: 
 
     public function isActionAllowed($action, &$errors = [])
@@ -708,6 +709,7 @@ class Bimp_User extends BimpObject
         ));
     }
 
+    
     public function showUserTheme($object, $edit = 0, $foruserprofile = false)
     {
         global $conf, $langs;
@@ -1173,10 +1175,10 @@ class Bimp_User extends BimpObject
                 } else {
                     if (!(int) $this->db->getValue('user_rights', 'rowid', 'fk_user = ' . $this->id . ' AND fk_id = ' . $id_right)) {
                         if ($this->db->insert('user_rights', array(
-                                    'entity'  => 1,
-                                    'fk_user' => $this->id,
-                                    'fk_id'   => $id_right
-                                )) > 0) {
+                                'entity'  => 1,
+                                'fk_user' => $this->id,
+                                'fk_id'   => $id_right
+                            )) > 0) {
                             $nOk++;
                             $results[$id_right] = 1;
                         } else {
@@ -1207,33 +1209,24 @@ class Bimp_User extends BimpObject
 
     public function actionRemoveRight($data, &$success)
     {
-
-        // Toujours déclarer ces trois variables en début des fonctions actions (utile pour toute insertion de code ultérieure) 
+        global $user;
         $errors = array();
         $warnings = array();
-        $success = ''; // Message affiché en cas de succès : toujours définir (sinon l'utilisateur ne sais pas si l'opération a réussie). 
-        // A faire : prendre actionAddRight comme modèle. 
-        // Attention: $results devra être sous la forme: 
-//        $results[$id_right] = array(
-//            'ok' => 1/0 : l'opération a réussi ou non
-//            'active' => 'no' ou 'inherit' (vérifier que le user possède un droit hérité d'un groupe) 
-//        )
-        // Toujours retourner $errors et $warnings (même vides) 
+        $success = ''; 
         
         $id_rights = BimpTools::getArrayValueFromPath($data, 'id_rights', array());
         $results = array();
-
+        
         if (empty($id_rights)) {
             $errors[] = 'Aucun droit sélectionné';
         } else {
             $nOk = 0;
-
-            foreach ($id_rights as $id_right) {
-                $right_def = $this->db->getRow('rights_def', 'id = ' . $id_right, null, 'array');
-
-                if (is_null($right_def)) {
-                    $warnings[] = 'Le droit #' . $id_right . ' n\'existe plus';
-                } else {
+            if((int) $user->rights->user->user->creer || $user->admin) {
+                foreach ($id_rights as $id_right) {
+                    $right_def = $this->db->getRow('rights_def', 'id = ' . $id_right, null, 'array');
+                    if (is_null($right_def)) {
+                        $warnings[] = 'Le droit #' . $id_right . ' n\'existe plus';
+                    } else {
                         if((int) $this->db->getValue('user_rights', 'rowid', 'fk_user = ' . $this->id . ' AND fk_id = ' . $id_right)) {
                             if ($this->db->delete('user_rights', "entity = 1 AND fk_user = " . $this->id . " AND fk_id = ". $id_right)) {
                                 $nOk++;
@@ -1242,27 +1235,30 @@ class Bimp_User extends BimpObject
                                     'ok' => 1,
                                     'active' => 'inherit' 
                                 );
-                                                    
-                        } else {
-                            $sql_err = $this->db->err();
-                            $label = $right_def['module'] . '->' . $right_def['perms'] . (!empty($right_def['subperms']) ? '->' . $right_def['subperms'] : '');
-                            $warnings[] = 'Echec de la suppression du droit "' . $label . '"' . ($sql_err ? ' - ' . $sql_err : '');
+                            } else {
+                                $sql_err = $this->db->err();
+                                $label = $right_def['module'] . '->' . $right_def['perms'] . (!empty($right_def['subperms']) ? '->' . $right_def['subperms'] : '');
+                                $warnings[] = 'Echec de la suppression du droit "' . $label . '"' . ($sql_err ? ' - ' . $sql_err : '');
 
-                            $results[$id_right] = array(
-                                'ok' => 0,
-                                'active' => 'no' 
-                            );                 
+                                $results[$id_right] = array(
+                                    'ok' => 0,
+                                    'active' => 'no' 
+                                );      
+                            }
+                        }
+
+                        if ($nOk === 1) {
+                            $success = 'Droit retiré avec succès';
+                        } elseif ($nOk > 1) {
+                            $success = $nOk . ' droits ont été retirés avec succès';
                         }
                     }
-
-                    if ($nOk === 1) {
-                        $success = 'Droit retiré avec succès';
-                    } elseif ($nOk > 1) {
-                        $success = $nOk . ' droits ont été retirés avec succès';
-                    }
                 }
+            } else {
+                $warnings[] = "Vous n'êtes pas autorisé à effectuer cette action.";
             }
-        }      
+        }   
+        
                 
         return array(
             'errors'   => $errors,

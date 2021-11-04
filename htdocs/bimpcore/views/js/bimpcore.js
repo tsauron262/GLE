@@ -305,6 +305,8 @@ function BimpUserRightsTable() {
         }, '', null, function (result) {
             if (typeof (result.results) !== 'undefined') {
                 for (var id_right in result.results) {
+                    console.log("id_right => " + id_right);
+                    console.log(result.results[id_right]['ok']);
                     if (parseInt(result.results[id_right])) {
                         var $row = ptr.getRow($table, id_right);
                         if ($.isOk($row)) {
@@ -312,17 +314,20 @@ function BimpUserRightsTable() {
                             $row.find('.add_right_button').show();
 
                             var $col = $row.find('td.col_active');
-
-                            if ($col.length) {
+                            
+                            if ($col.length && result.results[id_right]['ok'] === 1) {
                                 $col.data('value', 'inherit');
                                 $col.html('<span class="info"><i class="fas fa5-arrow-circle-down iconLeft"></i>Hérité</span>');
+                            } else if ($col.length && result.results[id_right]['ok'] === 0) {
+                                $col.data('value', 'inherit');
+                                $col.html('<span class="info"><i class="fas fa5-arrow-circle-down iconLeft"></i>NON</span>');                            
                             }
 
                             // On déselectionne toutes les lignes: 
                             if (id_rights.length > 1) {
                                 BimpListTable.uncheckAll($table);
                             }
-                        }
+                        } 
                     }
                 }
             }
@@ -372,10 +377,12 @@ function BimpUserRightsTable() {
 
         $button.addClass('disabled');
         var $table = ptr.getTable($button);
-        
+                
         if ($.isOk($table)) {
             var $selected = $table.find('tbody').find('input.bimp_list_table_row_check:checked');
-
+            
+            console.log($selected.length);
+                       
             if (!$selected.length) {
                 bimp_msg('Aucun droit sélectionné', 'warning', null, true);
                 return;
@@ -386,6 +393,8 @@ function BimpUserRightsTable() {
             $selected.each(function () {
                 var $row = $(this).findParentByClass('bimp_list_table_row');
                 
+                console.log($row);
+                                
                 if ($.isOk($row)) {
                     var id_right = parseInt($row.data('id_right'));
 

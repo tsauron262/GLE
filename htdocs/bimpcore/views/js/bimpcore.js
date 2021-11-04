@@ -292,10 +292,10 @@ function BimpUserRightsTable() {
     this.removeUserRights = function ($button, id_user, id_rights) {
         if ($button.hasClass('disabled')) {
             return;
-        }  
-        
+        }
+
         var $table = ptr.getTable($button);
-        
+
         setObjectAction($button, {
             module: 'bimpcore',
             object_name: 'Bimp_User',
@@ -314,8 +314,18 @@ function BimpUserRightsTable() {
                             var $col = $row.find('td.col_active');
 
                             if ($col.length) {
-                                $col.data('value', 'inherit');
-                                $col.html('<span class="info"><i class="fas fa5-arrow-circle-down iconLeft"></i>Hérité</span>');
+                                $col.data('value', result.results[id_right]['active']);
+
+                                switch (result.results[id_right]['active']) {
+                                    case 'inherit':
+                                        $col.html('<span class="info"><i class="fas fa5-arrow-circle-down iconLeft"></i>Hérité</span>');
+                                        break;
+
+                                    case 'no':
+                                        $col.html('<span class="danger"><i class="fas fa5-times iconLeft"></i>NON</span>');
+                                        break;
+                                }
+
                             }
 
                             // On déselectionne toutes les lignes: 
@@ -327,7 +337,7 @@ function BimpUserRightsTable() {
                 }
             }
         });
-        
+
     };
 
     this.addSelectedRights = function ($button, id_user) {
@@ -372,7 +382,7 @@ function BimpUserRightsTable() {
 
         $button.addClass('disabled');
         var $table = ptr.getTable($button);
-        
+
         if ($.isOk($table)) {
             var $selected = $table.find('tbody').find('input.bimp_list_table_row_check:checked');
 
@@ -382,10 +392,10 @@ function BimpUserRightsTable() {
             }
 
             var id_rights = [];
-            
+
             $selected.each(function () {
                 var $row = $(this).findParentByClass('bimp_list_table_row');
-                
+
                 if ($.isOk($row)) {
                     var id_right = parseInt($row.data('id_right'));
 
@@ -395,9 +405,9 @@ function BimpUserRightsTable() {
                 }
             });
 
-            $button.removeClass('disabled'); // On doit réactiver le bouton sinon la suite va planter.
+            $button.removeClass('disabled');
             ptr.removeUserRights($button, id_user, id_rights);
-        }    
+        }
     };
 }
 

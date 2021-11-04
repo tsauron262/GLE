@@ -79,7 +79,7 @@ class Bimp_User extends BimpObject
         switch ($action) {
             case 'addRight':
             case 'removeRight':
-                if ($user->admin) {
+                if ((int) $user->rights->user->user->creer || $user->admin) {
                     return 1;
                 }
                 return 0;
@@ -1219,9 +1219,10 @@ class Bimp_User extends BimpObject
         } else {
             $nOk = 0;
 
+            $groupsRights = $this->getGroupsRights();
+            
             foreach ($id_rights as $id_right) {
                 $right_def = $this->db->getRow('rights_def', 'id = ' . $id_right, null, 'array');
-
                 if (is_null($right_def)) {
                     $warnings[] = 'Le droit #' . $id_right . ' n\'existe plus';
                 } else {
@@ -1231,7 +1232,7 @@ class Bimp_User extends BimpObject
 
                             $results[$id_right] = array(
                                 'ok'     => 1,
-                                'active' => 'inherit'
+                                'active' => (isset($groupsRights[$id_right]) ? 'inherit' : 'no')
                             );
                         } else {
                             $sql_err = $this->db->err();
@@ -1239,13 +1240,9 @@ class Bimp_User extends BimpObject
                             $warnings[] = 'Echec de la suppression du droit "' . $label . '"' . ($sql_err ? ' - ' . $sql_err : '');
 
                             $results[$id_right] = array(
-                                'ok'     => 0,
-                                'active' => 'no'
+                                'ok'     => 0
                             );
                         }
-                    } else {
-                        $label = $right_def['module'] . '->' . $right_def['perms'] . (!empty($right_def['subperms']) ? '->' . $right_def['subperms'] : '');
-                        $warnings[] = 'L\'utilisateur ne possède pas le droit ' . $label;
                     }
 
                     if ($nOk === 1) {
@@ -1256,6 +1253,7 @@ class Bimp_User extends BimpObject
                 }
             }
         }
+
 
         return array(
             'errors'   => $errors,

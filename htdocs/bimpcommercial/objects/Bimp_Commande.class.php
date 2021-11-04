@@ -2934,14 +2934,14 @@ class Bimp_Commande extends BimpComm
                 $isFullyShipped = 1;
                 $hasOnlyPeriodicity = 1;
                 foreach ($lines as $line) {
-                    $shipped_qty = (float) $line->getShippedQty(null, true);
+                    $shipped_qty = round((float) $line->getShippedQty(null, true), 6);
                     if ($shipped_qty) {
                         $hasShipment = 1;
                     } else {
                         $hasOnlyPeriodicity = 0;
                     }
 
-                    if (abs($shipped_qty) < abs((float) $line->getShipmentsQty())) {
+                    if (abs($shipped_qty) < abs(round((float) $line->getShipmentsQty(), 6))) {
                         $isFullyShipped = 0;
 
                         if ($hasOnlyPeriodicity && !(int) $line->getData('exp_periodicity')) {
@@ -2998,14 +2998,15 @@ class Bimp_Commande extends BimpComm
                     $hasOnlyPeriodicity = 1;
 
                     foreach ($lines as $line) {
-                        $billed_qty = (float) $line->getBilledQty(null, false);
+                        $billed_qty = abs(round((float) $line->getBilledQty(null, false), 6));
+                        $full_qty = abs(round((float) $line->getFullQty(), 6));
                         if ($billed_qty) {
                             $hasInvoice = 1;
                         } else {
                             $hasOnlyPeriodicity = 0;
                         }
 
-                        if (abs($billed_qty) < abs((float) $line->getFullQty())) {
+                        if ($billed_qty < $full_qty) {
                             $isFullyAddedToInvoice = 0;
 
                             if ($hasOnlyPeriodicity && !(int) $line->getData('fac_periodicity')) {
@@ -3014,7 +3015,7 @@ class Bimp_Commande extends BimpComm
                         }
 
                         if ($isFullyInvoiced) {
-                            if (abs((float) $line->getBilledQty(null, true)) < abs((float) $line->getFullQty())) {
+                            if (abs(round((float) $line->getBilledQty(null, true), 6)) < $full_qty) {
                                 $isFullyInvoiced = 0;
                             }
                         }

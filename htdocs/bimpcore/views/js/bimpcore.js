@@ -298,7 +298,7 @@ function BimpUserRightsTable() {
             return;
         }
 
-        $button.hasClass('disbaled');
+        $button.addClass('disbaled');
         var $table = ptr.getTable($button);
 
         if ($.isOk($table)) {

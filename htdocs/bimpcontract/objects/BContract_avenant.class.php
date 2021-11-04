@@ -79,12 +79,11 @@ class BContract_avenant extends BContract_contrat {
         
         $parent = $this->getParentInstance();
         $errors = [];
-        $success = '';
                 
         if(!count($errors)) {
             $errors = parent::create($warnings, $force_create);
             if(!count($errors)) {
-                $success = "Avenant créer avec succès";
+//                $success = "Avenant créer avec succès";
                 $number = count($this->getList(['id_contrat' => $_REQUEST['id']]));
                 
                 $det = $this->getInstance('bimpcontract', 'BContract_avenantdet');
@@ -115,11 +114,7 @@ class BContract_avenant extends BContract_contrat {
             }
         }
         
-        return [
-            'success' => $success,
-            'errors' => $errors,
-            'warnings' => $warnings
-        ];
+        return $errors;
     }
     
     public function actionValidate() {

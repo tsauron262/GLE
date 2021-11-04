@@ -396,7 +396,7 @@ fields:
                     - 0
         default_value: 
             callback: getDefautlModeReglement
-        depends_on: fk_typent
+        depends_on: fk_typent,is_company
         
     cond_reglement: 
         label: Conditions de réglement
@@ -408,7 +408,7 @@ fields:
             array: condReglements
         default_value: 
             callback: getDefaultCondReglement
-        depends_on: fk_typent
+        depends_on: fk_typent,is_company
             
     mode_reglement_supplier:
         label: Mode de réglement
@@ -472,6 +472,8 @@ fields:
         hashtags: 1
         input: 
             note: 1   
+            auto_expand: 1
+            rows: 3
             
     note_public: 
         label: Note publique
@@ -480,6 +482,8 @@ fields:
         hashtags: 1
         input: 
             note: 1
+            auto_expand: 1
+            rows: 3
            
     secteuractivite:
         label: Secteur d'activité
@@ -878,6 +882,18 @@ forms:
                     callback: isCompany
                 input: 
                     type: toggle
+            has_already_code_comptable_client:
+                custom: 1
+                label: A déjà un code comptable client
+                input_name: has_already_code_comptable_client
+                data_type: int
+                input:
+                    type: toggle
+            code_compta:
+                field: code_compta
+                display_if:
+                    field_name: has_already_code_comptable_client
+                    show_values: 1
             siren_ok: 
                 custom: 1
                 hidden: 1
@@ -992,7 +1008,8 @@ forms:
         
     default: 
         extends: light
-        rows:   
+        rows:
+            has_already_code_comptable_client: unset
             barcode: 
                 field: barcode
             code_compta: 

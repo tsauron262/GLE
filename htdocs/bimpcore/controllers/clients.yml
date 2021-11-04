@@ -42,6 +42,13 @@ objects:
             bimp_object: 
                 module: bimpinterfaceclient
                 name: BIC_UserClient
+        
+    ribs:
+        instance:
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_SocBankAccount
+        
                 
 sections: 
     - type: tabs
@@ -99,3 +106,9 @@ sections:
                     list: 
                         object: suivi_rec
                         name: globale
+          ribs:
+              label: Rib
+              sections:
+                  - type: list
+                    list:
+                        object: ribs

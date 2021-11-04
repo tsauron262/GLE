@@ -117,6 +117,7 @@ fields:
         displays: 
             icon: 
                 icon_only: 1
+                label: Statut
     fk_soc: 
         label: Client
         dol_prop: socid
@@ -652,7 +653,22 @@ forms:
     logs: 
         rows: 
             - field: logs
-
+            
+    import_lines_csv: 
+        rows: 
+            - custom: 1
+              hidden: 1
+              label: tag
+              input_name: import_lines_csv
+              input: 
+                  type: hidden
+            - custom: 1
+              label: Fichier
+              input_name: csv_file
+              input: 
+                  type: file_upload
+                  help: "Le fichier doit être au format CSV (séparateur: ;)<br/>Colonne 1: Ref produit<br/>Colonne 2: Qté<br/>Colonne 3: PU HT<br/>NE PAS METTRE D'EN-TETE"
+                  
 fields_tables: 
     infos: 
         title: Informations

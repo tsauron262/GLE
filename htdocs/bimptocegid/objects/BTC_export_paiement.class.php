@@ -201,6 +201,15 @@ class BTC_export_paiement extends BTC_export {
                     'vide_6' => ['', 59],
                     'fin' => ['0', 2]
                 ];
+                
+                if(strpos($paiement->getData('ref'), "PAYNI") !== false) {
+                    $compte_g = $compte_general_411;
+                    $structure['journal'] = ['OD', 3];
+                    $structure['compte'] = [$compte_g, 17];
+                    $structure['vide'] = ["CATTEN0000000000", 34];
+                    $structure['code_compta'] = ["CATTEN0000000000", 16];
+                    
+                } 
 
                 $ecritures .= $this->struct($structure);
 
@@ -210,6 +219,7 @@ class BTC_export_paiement extends BTC_export {
                 $structure['contre_partie'] = [$compte_g, 17];
                 $structure['vide'] = ['', 34];
                 $structure['lettrage'] = ['-XAL', 4];
+
                 $ecritures .= $this->struct($structure);
 
         }

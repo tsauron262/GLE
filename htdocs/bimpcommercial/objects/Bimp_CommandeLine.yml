@@ -188,6 +188,7 @@ fields:
         default_value: 0
         displays: 
             badge:
+                label: Qté Totale
                 type: callback
                 method: displayQty
                 params: 
@@ -788,6 +789,7 @@ lists:
             
     logistique:
         checkboxes: 1
+        filters_panel: default
         title: Logistique produits / services
         icon: fas_truck-loading
         configurable: 1

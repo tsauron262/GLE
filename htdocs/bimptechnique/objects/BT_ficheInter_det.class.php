@@ -233,8 +233,8 @@ class BT_ficheInter_det extends BimpDolObject
 
                     foreach ($lines as $line) {
                         if ((int) $line->id_product) {
-                            $product = $line->getProduct();
-
+                            //$product = $line->getProduct(); // Supprimé sinon les  produits à 0 ne sortent pas (On en a quand même besoin)
+                            $product  = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Product", $line->id_product);
                             if (BimpObject::objectLoaded($product)) {
                                 if (!$product->isDep() && $product->isTypeService()) {
                                     if (array_key_exists($product->getRef(), $tp)) {

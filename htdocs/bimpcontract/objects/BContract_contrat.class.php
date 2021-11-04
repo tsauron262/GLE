@@ -3643,7 +3643,7 @@ class BContract_contrat extends BimpDolObject
                     $idAvenantActif = $this->getIdAvenantActif();
                     if ($idAvenantActif > 0) {
                         $child = $this->getChildObject('avenant', $idAvenantActif);
-                        $message = "Ce contrat fait l'objet d'un avenant actif, Merci de faire les vérifications nécéssaires avant toute intervention. Merci";
+                        $message = "Ce contrat fait l'objet d'un avenant actif, Merci de faire les vérifications nécessaires avant toute intervention. Merci";
                         $html .= '<h4><b class="warning" ><i class="fas fa-warning" ></i> ' . $message . '</b></h4>';
                     }
                 }

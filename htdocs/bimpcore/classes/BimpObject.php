@@ -194,18 +194,22 @@ class BimpObject extends BimpCache
 
         return 0;
     }
+    
+    public function initBdd($mode = -1){
+        if($mode < 0)
+            $mode = (int) $this->getConf('no_transaction_db', 0, false, 'bool');
+        $this->db = self::getBdb($mode);
+    }
 
     public function __construct($module, $object_name)
     {
-        $this->db = self::getBdb();
         $this->module = $module;
         $this->object_name = $object_name;
 
         $this->config = new BimpConfig(DOL_DOCUMENT_ROOT . '/' . $module . '/objects/', $object_name, $this);
+        
+        $this->initBdd(); 
 
-        if ((int) $this->getConf('no_transaction_db', 0, false, 'bool')) {
-            $this->db = self::getBdb(true);
-        }
 
         $this->use_commom_fields = (int) $this->getConf('common_fields', 1, false, 'bool');
         $this->use_positions = (int) $this->getConf('positions', 0, false, 'bool');
@@ -4473,6 +4477,9 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                     $errors[] = 'Ce champ n\'est pas éditable';
                 }
             }
+
+            $init_data = $this->getData($field);
+
             if (!$do_not_validate) {
                 $errors = BimpTools::merge_array($errors, $this->validateValue($field, $value));
             } else {
@@ -4512,7 +4519,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
                 $warnings = array();
                 if (!count($errors)) {
-                    $this->initData[$field] = $this->data[$field];
+                    $this->initData[$field] = $init_data;
                     if ($this->getConf('fields/' . $field . '/history', false, false, 'bool')) {
                         // Mise à jour de l'historique du champ: 
                         global $user;
@@ -5884,6 +5891,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             return array('ID ' . $this->getLabel('of_the') . ' absent');
         }
         $note = BimpObject::getInstance('bimpcore', 'BimpNote');
+        $note->initBdd($this->getConf('no_transaction_db', 0, false, 'bool'));
 
         if (is_null($visibility)) {
             $visibility = BimpNote::BIMP_NOTE_MEMBERS;
@@ -5906,6 +5914,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             $warnings = array();
             $errors = $note->create($warnings, true);
         }
+        $note->initBdd();
 
         return $errors;
     }
@@ -8162,7 +8171,9 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             return '';
         }
 
-        $url = BimpTools::makeUrlFromConfig($this->config, 'list_page_url', $this->module, $this->getController());
+        $url = false;
+        if($this->config->isDefined('list_page_url'))
+            $url = BimpTools::makeUrlFromConfig($this->config, 'list_page_url', $this->module, $this->getController());
 
         if (!$url && $this->isDolObject()) {
             $url = BimpTools::getDolObjectListUrl($this->dol_object);

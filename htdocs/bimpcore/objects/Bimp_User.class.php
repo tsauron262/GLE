@@ -87,7 +87,7 @@ class Bimp_User extends BimpObject
         return parent::canSetAction($action);
     }
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isActionAllowed($action, &$errors = [])
     {
@@ -658,12 +658,23 @@ class Bimp_User extends BimpObject
                     }
                 }
 
+                $right = '';
+                $is_lire = (in_array($data['perms'], array('lire', 'read')) || in_array($data['subperms'], array('lire', 'read')));
+
+                if ($is_lire) {
+                    $right .= '<b>';
+                }
+                $right .= ($data['perms'] . (!empty($data['subperms']) ? '->' . $data['subperms'] : ''));
+                if ($is_lire) {
+                    $right .= '</b>';
+                }
+
                 $rows[] = array(
                     'row_data' => array(
                         'id_right' => $id_right
                     ),
                     'module'   => array('value' => $module),
-                    'right'    => ($data['perms'] . (!empty($data['subperms']) ? '->' . $data['subperms'] : '')),
+                    'right'    => $right,
                     'libelle'  => $langs->trans($data['libelle']),
                     'active'   => $active,
                     'groups'   => $groups,
@@ -914,8 +925,6 @@ class Bimp_User extends BimpObject
                 $list->addFieldFilterValue('owner_type', ListTableConfig::OWNER_TYPE_USER);
                 $list->addFieldFilterValue('id_owner', $this->id);
                 break;
-
-
 
             // Onglet "'Liste des configuration de filtres":
             case 'filters_configs':
@@ -1182,6 +1191,35 @@ class Bimp_User extends BimpObject
                                 )) > 0) {
                             $nOk++;
                             $results[$id_right] = 1;
+
+                            // Ajout du droit lire si nécessaire: 
+                            if (!in_array($right_def['perms'], array('lire', 'read')) && !in_array($right_def['subperms'], array('lire', 'read'))) {
+                                $where = 'module = \'' . $right_def['module'] . '\'';
+                                if ($right_def['subperms']) {
+                                    $where .= ' AND perms = \'' . $right_def['perms'] . '\' AND subperms IN (\'lire\', \'read\')';
+                                } else {
+                                    $where .= ' AND perms IN (\'lire\', \'read\')';
+                                }
+                                $id_right_lire = (int) $this->db->getValue('rights_def', 'id', $where);
+
+                                if ($id_right_lire) {
+                                    if (!(int) $this->db->getValue('user_rights', 'rowid', 'fk_user = ' . $this->id . ' AND fk_id = ' . $id_right_lire)) {
+                                        if ($this->db->insert('user_rights', array(
+                                                    'entity'  => 1,
+                                                    'fk_user' => $this->id,
+                                                    'fk_id'   => $id_right_lire
+                                                )) > 0) {
+                                            $nOk++;
+                                            $results[$id_right_lire] = 1;
+                                        } else {
+                                            $sql_err = $this->db->err();
+                                            $right_lire_def = $this->db->getRow('rights_def', 'id = ' . $id_right_lire, null, 'array');
+                                            $label = $right_def['module'] . '->' . $right_lire_def['perms'] . (!empty($right_lire_def['subperms']) ? '->' . $right_lire_def['subperms'] : '');
+                                            $warnings[] = 'Echec de l\'ajout du droit "' . $label . '"' . ($sql_err ? ' - ' . $sql_err : '');
+                                        }
+                                    }
+                                }
+                            }
                         } else {
                             $sql_err = $this->db->err();
                             $label = $right_def['module'] . '->' . $right_def['perms'] . (!empty($right_def['subperms']) ? '->' . $right_def['subperms'] : '');
@@ -1189,6 +1227,9 @@ class Bimp_User extends BimpObject
 
                             $results[$id_right] = 0;
                         }
+                    } else {
+                        $label = $right_def['module'] . '->' . $right_def['perms'] . (!empty($right_def['subperms']) ? '->' . $right_def['subperms'] : '');
+                        $warnings[] = 'l\'utilisateur possède déjà le droit "' . $label . '"';
                     }
 
                     if ($nOk === 1) {
@@ -1223,13 +1264,18 @@ class Bimp_User extends BimpObject
             $nOk = 0;
 
             $groupsRights = $this->getGroupsRights();
-            
+
             foreach ($id_rights as $id_right) {
                 $right_def = $this->db->getRow('rights_def', 'id = ' . $id_right, null, 'array');
+
                 if (is_null($right_def)) {
                     $warnings[] = 'Le droit #' . $id_right . ' n\'existe plus';
                 } else {
                     if ((int) $this->db->getValue('user_rights', 'rowid', 'fk_user = ' . $this->id . ' AND fk_id = ' . $id_right)) {
+                        $module = BimpTools::getArrayValueFromPath($right_def, 'module', '');
+                        $subperms = BimpTools::getArrayValueFromPath($right_def, 'subperms', '');
+                        $perms = BimpTools::getArrayValueFromPath($right_def, 'perms', '');
+
                         if ($this->db->delete('user_rights', "entity = 1 AND fk_user = " . $this->id . " AND fk_id = " . $id_right)) {
                             $nOk++;
 
@@ -1237,26 +1283,72 @@ class Bimp_User extends BimpObject
                                 'ok'     => 1,
                                 'active' => (isset($groupsRights[$id_right]) ? 'inherit' : 'no')
                             );
+
+                            if ($module) {
+                                // Si droit lire, suppr des droits du même ensemble: 
+                                if (in_array($subperms, array('lire', 'read')) || in_array($perms, array('lire', 'read'))) {
+                                    $filters = array(
+                                        'a.fk_user' => $this->id,
+                                        'r.module'  => $module,
+                                    );
+
+                                    if (in_array($subperms, array('lire', 'read'))) {
+                                        $filters['r.perms'] = $perms;
+                                        $filters['r.subperms'] = 'IS_NOT_NULL';
+                                    }
+
+                                    $sql = BimpTools::getSqlFullSelectQuery('user_rights', array('a.rowid, r.id as id_right'), $filters, array(
+                                                'r' => array(
+                                                    'table' => 'rights_def',
+                                                    'on'    => 'r.id = a.fk_id',
+                                                    'alias' => 'r'
+                                                )
+                                    ));
+
+                                    $extra_rights = $this->db->executeS($sql, 'array');
+
+                                    if (is_array($extra_rights)) {
+                                        foreach ($extra_rights as $er) {
+                                            if (!in_array((int) $er['id_right'], $id_rights)) {
+                                                if ($this->db->delete('user_rights', 'rowid = ' . (int) $er['rowid']) <= 0) {
+                                                    $sql_err = $this->db->err();
+                                                    $extra_right_def = $this->db->getRow('rights_def', 'id = ' . (int) $er['id_right'], null, 'array');
+                                                    $label = $extra_right_def['module'] . '->' . $extra_right_def['perms'] . (!empty($extra_right_def['subperms']) ? '->' . $extra_right_def['subperms'] : '');
+                                                    $warnings[] = 'Echec de la suppression du droit "' . $label . '"' . ($sql_err ? ' - ' . $sql_err : '');
+                                                } else {
+                                                    $nOk++;
+                                                    $results[$er['id_right']] = array(
+                                                        'ok'     => 1,
+                                                        'active' => (isset($groupsRights[$id_right]) ? 'inherit' : 'no')
+                                                    );
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         } else {
                             $sql_err = $this->db->err();
                             $label = $right_def['module'] . '->' . $right_def['perms'] . (!empty($right_def['subperms']) ? '->' . $right_def['subperms'] : '');
                             $warnings[] = 'Echec de la suppression du droit "' . $label . '"' . ($sql_err ? ' - ' . $sql_err : '');
 
                             $results[$id_right] = array(
-                                'ok'     => 0
+                                'ok' => 0
                             );
                         }
-                    }
-
-                    if ($nOk === 1) {
-                        $success = 'Droit retiré avec succès';
-                    } elseif ($nOk > 1) {
-                        $success = $nOk . ' droits ont été retirés avec succès';
+                    } else {
+                        $label = $right_def['module'] . '->' . $right_def['perms'] . (!empty($right_def['subperms']) ? '->' . $right_def['subperms'] : '');
+                        $warnings[] = 'L\'utilisteur ne possède déjà pas le droit "' . $label . '"';
                     }
                 }
             }
-        }
 
+            if ($nOk === 1) {
+                $success = 'Droit retiré avec succès';
+            } elseif ($nOk > 1) {
+                $success = $nOk . ' droits ont été retirés avec succès';
+            }
+        }
 
         return array(
             'errors'   => $errors,

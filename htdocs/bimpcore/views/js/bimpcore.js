@@ -353,6 +353,7 @@ function BimpUserRightsTable() {
 
             if (!$selected.length) {
                 bimp_msg('Aucun droit sélectionné', 'warning', null, true);
+                $button.removeClass('disabled');
                 return;
             }
 
@@ -388,6 +389,7 @@ function BimpUserRightsTable() {
 
             if (!$selected.length) {
                 bimp_msg('Aucun droit sélectionné', 'warning', null, true);
+                $button.removeClass('disabled');
                 return;
             }
 

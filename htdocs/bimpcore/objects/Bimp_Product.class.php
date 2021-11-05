@@ -198,6 +198,7 @@ class Bimp_Product extends BimpObject
         
         if ($force_edit || $user->admin or $user->rights->produit->creer)
             return 1;
+        return 0;
     }
 
     public function isSerialisable()

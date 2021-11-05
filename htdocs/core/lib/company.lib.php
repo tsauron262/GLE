@@ -428,11 +428,11 @@ function getCountry($searchkey, $withcode='', $dbtouse=0, $outputlangs='', $entc
 {
     global $db,$langs;
     
-    if(class_exists('BimpCache')){
-        $clef = 'getCountry'.$searchkey.$withcode.$dbtouse. $outputlangs. $entconv.$searchlabel;
-        if(isset(BimpCache::$cache[$clef]))
-            return BimpCache::$cache[$clef];
-    }
+//    if(class_exists('BimpCache')){
+//        $clef = 'getCountry'.$searchkey.$withcode.$dbtouse. $outputlangs. $entconv.$searchlabel;
+//        if(isset(BimpCache::$cache[$clef]))
+//            return BimpCache::$cache[$clef];
+//    }
 
     $result='';
 

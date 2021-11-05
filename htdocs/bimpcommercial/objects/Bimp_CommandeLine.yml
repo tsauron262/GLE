@@ -799,10 +799,10 @@ lists:
         positions_open: 1
         enable_search: 1
         enable_sort: 1
-        pagination: 0
+        pagination: 1
         sort_field: position
         sort_way: asc
-        n: 0
+        n: 30
         add_btn: 0
         edit_btn: 0
         update_btn: 0

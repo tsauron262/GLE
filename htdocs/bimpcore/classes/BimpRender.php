@@ -1249,7 +1249,7 @@ class BimpRender
                     if ($header['searchable']) {
                         if (isset($header['search_values'])) {
                             $html .= BimpInput::renderInput('select', 'search_col_' . $col_name, '', array(
-                                        'options'     => $header['search_values'],
+                                        'options'     => array_merge(array('' => ''), $header['search_values']),
                                         'extra_class' => 'bimp_list_table_search_input',
                                         'data'        => array('col' => $col_name)
                             ));

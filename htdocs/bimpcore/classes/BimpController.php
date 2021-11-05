@@ -16,6 +16,7 @@ class BimpController
     private $nbBouclePush = 2;
 //    private $maxBouclePush = 40;
     private $maxBouclePush = 1;
+    static public $ajax_warnings = array();
 
     public static function getInstance($module, $controller = null)
     {
@@ -745,6 +746,7 @@ class BimpController
                     $result['debug_content'] = BimpDebug::renderDebug('ajax_' . $req_id);
                 }
 
+                $result['warnings'] = static::getAndResetAjaxWarnings();
                 $json = json_encode($result);
 
                 if ($json === false) {
@@ -754,7 +756,7 @@ class BimpController
                     if ($json_err_code == JSON_ERROR_UTF8) {
                         // On tente un encodage utf-8. 
                         $result = BimpTools::utf8_encode($result);
-
+                        $result['warnings'] = static::getAndResetAjaxWarnings();
                         $json = json_encode($result);
 
                         if ($json !== false) {
@@ -773,6 +775,7 @@ class BimpController
 
                     die(json_encode(array(
                         'errors'     => array('Echec de l\'encodage JSON - ' . $json_err),
+                        'warnings'      => static::getAndResetAjaxWarnings(),
                         'request_id' => $req_id
                     )));
                 }
@@ -792,12 +795,24 @@ class BimpController
             BimpDebug::addDebug('ajax_result', 'Erreurs', '<pre>' . htmlentities(print_r($errors, 1)) . '</pre>', array('foldable' => false));
             $debug_content = BimpDebug::renderDebug('ajax_' . $req_id);
         }
+        
 
         die(json_encode(array(
+            'warnings'      => static::getAndResetAjaxWarnings(),
             'errors'        => $errors,
             'request_id'    => $req_id,
             'debug_content' => $debug_content
         )));
+    }
+    
+    public static function getAndResetAjaxWarnings(){
+        $warnings = static::$ajax_warnings;
+        static::$ajax_warnings = array();
+        return $warnings;
+    }
+    
+    public static function addAjaxWarnings($msg){
+        static::$ajax_warnings[] = $msg;
     }
 
     // Controller:
@@ -1600,7 +1615,7 @@ class BimpController
             }
             if ($id_object) {
                 if (!$object->fetch($id_object)) {
-                    $errors[] = ucfirst($object->getLabel('')) . ' d\'ID ' . $id_object . ' non trouvé';
+                    $errors[] = ucfirst($object->getLabel('')) . ' d\'ID ' . $id_object . ' non trouvé (form)';
                 }
             }
 
@@ -2598,7 +2613,7 @@ class BimpController
                 $return['errors'] = $errors;
             }
         }
-
+        
         return $return;
     }
 

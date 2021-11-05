@@ -1,6 +1,7 @@
 table: usergroup
 primary: rowid
 common_fields: 0
+icon: fas_users
 
 dol_object: 
     instance: 
@@ -13,6 +14,7 @@ labels:
     name: Groupe d'utilisateur
     
 nom_url: 
+    syntaxe: <nom>
     modal_view: ''
     
 fields: 

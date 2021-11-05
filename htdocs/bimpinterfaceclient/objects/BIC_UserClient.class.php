@@ -383,7 +383,7 @@ class BIC_UserClient extends BimpObject
 
     public function getAllContrats($ouverts_only = false)
     {
-        //renvoie tous les contrat de nottre soc avec suivant $ouvert que les actifs ou tous
+        //renvoie tous les contrat de notre soc avec suivant $ouvert que les actifs ou tous
         $return = Array();
 
         if ((int) $this->getData('id_client')) {

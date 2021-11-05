@@ -10,6 +10,7 @@ class BimpComm extends BimpDolObject
     const BC_ZONE_HORS_UE = 3;
     const BC_ZONE_UE_SANS_TVA = 4;
 
+    public static $dont_check_parent_on_update = false;
     public static $element_name = '';
     public static $external_contact_type_required = true;
     public static $internal_contact_type_required = true;
@@ -117,10 +118,19 @@ class BimpComm extends BimpDolObject
             $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
             $type_de_piece = ValidComm::getObjectClass($this);
 
-            // Soumis à des validations et possède des demandes de validation en brouillon
-            if ($type_de_piece != -2 and $valid_comm->demandeExists($type_de_piece, $this->id, null, 0)) {
-                $errors[] = 'Une demande de validation est en attente';
-                return 0;
+            $demands = $valid_comm->demandeExists($type_de_piece, $this->id, null, 0, true);
+
+            if ($demands) {
+                foreach ($demands as $d) {
+                    if ((int) $d->getData('id_user_affected') == (int) $user->id)
+                        return 1;
+                }
+
+                // Soumis à des validations et possède des demandes de validation en brouillon
+                if ($type_de_piece != -2 and $demands) {
+                    $errors[] = 'Une demande de validation est en attente';
+                    return 0;
+                }
             }
         }
 
@@ -558,6 +568,7 @@ class BimpComm extends BimpDolObject
             );
         }
 
+        // Message logistique: 
         $note = BimpObject::getInstance("bimpcore", "BimpNote");
         $buttons[] = array(
             'label'   => 'Message logistique',
@@ -565,12 +576,14 @@ class BimpComm extends BimpDolObject
             'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => $note::BN_GROUPID_LOGISTIQUE, "content" => ""), array('form_name' => 'rep'))
         );
 
+        // Message facturation: 
         $buttons[] = array(
             'label'   => 'Message facturation',
             'icon'    => 'far_paper-plane',
             'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => $note::BN_GROUPID_FACT, "content" => "Bonjour, merci de bien vouloir facturer cette commande."), array('form_name' => 'rep'))
         );
 
+        // Relevé facturation: 
         if ((int) $this->getData('fk_soc')) {
             $sql = 'SELECT datef FROM ' . MAIN_DB_PREFIX . 'facture WHERE fk_soc = ' . (int) $this->getData('fk_soc') . ' AND fk_statut IN (1,2,3)';
             $sql .= ' ORDER BY datef ASC LIMIT 1';
@@ -629,6 +642,16 @@ class BimpComm extends BimpDolObject
                         'onclick' => $product->getJsLoadModalForm('lightFourn', 'Nouveau produit')
                     )
                 );
+
+                global $user;
+
+                if ($user->admin) {
+                    $buttons[] = array(
+                        'label'   => 'Importer des lignes',
+                        'icon'    => 'fas_download',
+                        'onclick' => $this->getJsLoadModalForm('import_lines_csv', 'Importer des lignes depuis un fichier CSV')
+                    );
+                }
             }
 
             if ($this->isActionAllowed('useRemise') && $this->canSetAction('useRemise')) {
@@ -999,14 +1022,16 @@ class BimpComm extends BimpDolObject
             $lines = $this->getLines('not_text');
 
             foreach ($lines as $line) {
-                $line_infos = $line->getRemiseTotalInfos(false, $force_qty_mode);
-                $infos['remises_lines_amount_ttc'] += (float) $line_infos['line_amount_ttc'];
-                $infos['remises_lines_amount_ht'] += (float) $line_infos['line_amount_ht'];
-                $infos['remises_globales_amount_ht'] += (float) $line_infos['global_amount_ht'];
-                $infos['remises_globales_amount_ttc'] += (float) $line_infos['global_amount_ttc'];
-                $infos['ext_remises_globales_amount_ht'] += (float) $line_infos['ext_global_amount_ht'];
-                $infos['ext_remises_globales_amount_ttc'] += (float) $line_infos['ext_global_amount_ttc'];
-                $total_ttc_without_remises += $line_infos['total_ttc_without_remises'];
+                if ($line->getData('linked_object_name') != 'discount' && $line->desc != 'Acompte') {
+                    $line_infos = $line->getRemiseTotalInfos(false, $force_qty_mode);
+                    $infos['remises_lines_amount_ttc'] += (float) $line_infos['line_amount_ttc'];
+                    $infos['remises_lines_amount_ht'] += (float) $line_infos['line_amount_ht'];
+                    $infos['remises_globales_amount_ht'] += (float) $line_infos['global_amount_ht'];
+                    $infos['remises_globales_amount_ttc'] += (float) $line_infos['global_amount_ttc'];
+                    $infos['ext_remises_globales_amount_ht'] += (float) $line_infos['ext_global_amount_ht'];
+                    $infos['ext_remises_globales_amount_ttc'] += (float) $line_infos['ext_global_amount_ttc'];
+                    $total_ttc_without_remises += $line_infos['total_ttc_without_remises'];
+                }
             }
 
             if ($total_ttc_without_remises && $infos['remises_lines_amount_ttc']) {
@@ -2383,6 +2408,21 @@ class BimpComm extends BimpDolObject
 
     // Traitements:
 
+    public function startLineTransaction()
+    {
+        static::$dont_check_parent_on_update = true;
+    }
+
+    public function stopLineTransaction()
+    {
+        static::$dont_check_parent_on_update = false;
+        $lines = $this->getLines();
+        if (count($lines)) {
+            $lines[count($lines) - 1]->resetPositions();
+            $lines[count($lines) - 1]->update();
+        }
+    }
+
     public function checkLines()
     {
         $errors = array();
@@ -2447,9 +2487,13 @@ class BimpComm extends BimpDolObject
                 $totalHt += $dol_lines[$id_dol_line]->total_ht;
             }
 
-            if (round((float) $this->getData('total_ht'), 3) != round($totalHt, 3)) {
+            if($this->field_exists('total_ht'))
+                $tot = $this->getData('total_ht');
+            else
+                $tot = $this->getData('total');
+            if (round((float) $tot, 3) != round($totalHt, 3)) {
                 $this->erreurFatal++;
-                $errors[] = 'Ecart entre le total des lignes et le total ' . $this->getLabel('of_the') . '. Total lignes : ' . round($totalHt, 3) . ', total ' . $this->getLabel() . ': ' . round($this->getData('total_ht'), 3);
+                $errors[] = 'Ecart entre le total des lignes et le total ' . $this->getLabel('of_the') . '. Total lignes : ' . round($totalHt, 3) . ', total ' . $this->getLabel() . ': ' . round($tot, 3);
             }
 
             // Création des lignes absentes de l'objet bimp: 
@@ -3682,6 +3726,84 @@ class BimpComm extends BimpDolObject
         return 1;
     }
 
+    public function importLinesFromFile(&$warnings = array(), &$success = '')
+    {
+        $errors = array();
+
+        if (!$this->isLoaded($errors)) {
+            return $errors;
+        }
+
+        if ((int) $this->getData('fk_statut') !== 0) {
+            $errors[] = $this->getLabel('this') . ' n\'est plus au statut brouillon';
+            return $errors;
+        }
+
+        if (isset($_FILES['csv_file'])) {
+            $rows = file($_FILES['csv_file']['tmp_name'], FILE_SKIP_EMPTY_LINES | FILE_IGNORE_NEW_LINES);
+
+            if (empty($rows)) {
+                $errors[] = 'Aucune ligne trouvée dans le fichier';
+                return $errors;
+            }
+
+            $line_instance = $this->getChildObject('lines');
+            $i = 0;
+            $position = (int) $this->db->getMax($line_instance->getTable(), 'position', 'id_obj = ' . (int) $this->id);
+            $position += 1;
+            
+            $this->startLineTransaction();
+            
+            foreach ($rows as $r) {
+                $i++;
+                $data = explode(';', $r);
+
+                $ref = $data[0];
+                $qty = (float) str_replace(',', '.', str_replace(' ', '', str_replace(' ', '', $data[1])));
+                $pu_ht = (float) str_replace(',', '.', str_replace(' ', '', str_replace(' ', '', $data[2])));
+
+                if ($ref) {
+                    $product = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
+                                'ref' => $ref
+                    ));
+
+                    if (BimpObject::objectLoaded($product)) {
+                        $line = clone $line_instance;
+
+                        $line->id_product = $product->id;
+                        $line->qty = $qty;
+                        $line->pu_ht = $pu_ht;
+
+                        $line->validateArray(array(
+                            'id_obj'   => (int) $this->id,
+                            'type'     => ObjectLine::LINE_PRODUCT,
+                            'position' => $position
+                        ));
+
+                        $line_warnings = array();
+                        $line_errors = $line->create($line_warnings, true);
+
+                        if (count($line_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Echec création de la ligne n° ' . $i);
+                        } else {
+                            $position++;
+                        }
+                    } else {
+                        $warnings[] = 'Ligne n° ' . $i . ' : aucun produit trouvé pour la référence "' . $ref . '"';
+                    }
+                } else {
+                    $warnings[] = 'Ligne n° ' . $i . ' : référence produit absente';
+                }
+            }
+            
+            $this->stopLineTransaction();
+        } else {
+            $errors[] = 'Fichier CSV absent';
+        }
+
+        return $errors;
+    }
+
     // post process: 
 
     public function onCreate(&$warnings = array())
@@ -3695,6 +3817,7 @@ class BimpComm extends BimpDolObject
         $prev_deleting = $this->isDeleting;
         $this->isDeleting = true;
 
+        $this->startLineTransaction();
         if ($this->isLoaded($warnings)) {
             $lines = $this->getLines();
 
@@ -3741,6 +3864,8 @@ class BimpComm extends BimpDolObject
             }
         }
 
+        $this->stopLineTransaction();
+
         $this->isDeleting = $prev_deleting;
         return $errors;
     }
@@ -3757,7 +3882,7 @@ class BimpComm extends BimpDolObject
 
     public function onChildSave($child)
     {
-        if ($this->isLoaded() && !$this->isDeleting) {
+        if ($this->isLoaded() && !$this->isDeleting && !static::$dont_check_parent_on_update) {
             if (is_a($child, 'objectLine')) {
                 $this->processRemisesGlobales();
             }
@@ -4026,7 +4151,7 @@ class BimpComm extends BimpDolObject
             }
         } elseif ($data['id_mode_paiement'] == 'PRE') {
             $id_rib = (int) BimpTools::getArrayValueFromPath($data, 'id_rib', 0);
-            
+
             if (!$id_rib) {
                 $errors[] = 'Le RIB Client est obligatoire pour le mode de paiement par prélèvement';
             }
@@ -4422,6 +4547,11 @@ class BimpComm extends BimpDolObject
 
     public function update(&$warnings = array(), $force_update = false)
     {
+        if (BimpTools::isSubmit('import_lines_csv')) {
+            // On doit passer par un update à cause de l'envoi de fichier (non possible via une action). 
+            return $this->importLinesFromFile($warnings);
+        }
+
         $init_zone = '';
         if ($this->dol_field_exists('zone_vente')) {
             $init_zone = (int) $this->getInitData('zone_vente');

@@ -11,7 +11,7 @@ class BimpDolObject extends BimpObject
     public static $mail_event_code = '';
     public static $email_type = '';
 
-    // Getters array: 
+    // Getters array:
 
     public function getEmailModelsArray()
     {
@@ -24,80 +24,86 @@ class BimpDolObject extends BimpObject
 
     public function getEmailUsersFromArray()
     {
-        global $user, $langs, $conf;
+        $cache_key = $this->module . '_' . $this->object_name . ($this->isLoaded() ? '_' . $this->id : '') . '_email_users_array';
 
-        $emails = array();
+        if (!isset(self::$cache[$cache_key])) {
+            global $user, $langs, $conf;
 
-        // User connecté: 
+            self::$cache[$cache_key] = array();
 
-        if (!empty($user->email)) {
-            $emails[$user->email] = $user->getFullName($langs) . ' (' . $user->email . ')';
-        }
-        
-        $id_ent = $this->getData('entrepot');
-        if($id_ent > 0){
-            $ent = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Entrepot', $id_ent);
-            if(is_object($ent) && $ent->isLoaded()){
-                $mail = $ent->getMail();
-                $emails[$mail] = $mail;
+            // User connecté: 
+            if (!empty($user->email)) {
+                self::$cache[$cache_key][$user->email] = $user->getFullName($langs) . ' (' . $user->email . ')';
             }
-        }
 
-        if (!$user->admin)
-            return $emails;
+            // E-mail entrepôt: 
+            $id_ent = $this->getData('entrepot');
+            if ($id_ent > 0) {
+                $ent = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Entrepot', $id_ent);
+                if (BimpObject::objectLoaded($ent)) {
+                    $mail = $ent->getMail();
 
-        if (!empty($user->email_aliases)) {
-            foreach (explode(',', $user->email_aliases) as $alias) {
-                $alias = trim($alias);
-                if ($alias) {
-                    $alias = str_replace('/</', '', $alias);
-                    $alias = str_replace('/>/', '', $alias);
-                    if (!isset($emails[$alias])) {
-                        $emails[$alias] = $user->getFullName($langs) . ' (' . $alias . ')';
+                    if ($mail) {
+                        self::$cache[$cache_key][$mail] = $mail;
                     }
                 }
             }
-        }
 
-        // Société: 
-
-        if (!empty($conf->global->MAIN_INFO_SOCIETE_MAIL)) {
-            $emails[$conf->global->MAIN_INFO_SOCIETE_MAIL] = $conf->global->MAIN_INFO_SOCIETE_NOM . ' (' . $conf->global->MAIN_INFO_SOCIETE_MAIL . ')';
-        }
-
-        if (!empty($conf->global->MAIN_INFO_SOCIETE_MAIL_ALIASES)) {
-            foreach (explode(',', $conf->global->MAIN_INFO_SOCIETE_MAIL_ALIASES) as $alias) {
-                $alias = trim($alias);
-                if ($alias) {
-                    $alias = str_replace('/</', '', $alias);
-                    $alias = str_replace('/>/', '', $alias);
-                    if (!isset($emails[$alias])) {
-                        $emails[$alias] = $conf->global->MAIN_INFO_SOCIETE_NOM . ' (' . $alias . ')';
+            if ($user->admin) {
+                if (!empty($user->email_aliases)) {
+                    foreach (explode(',', $user->email_aliases) as $alias) {
+                        $alias = trim($alias);
+                        if ($alias) {
+                            $alias = str_replace('/</', '', $alias);
+                            $alias = str_replace('/>/', '', $alias);
+                            if (!isset(self::$cache[$cache_key][$alias])) {
+                                self::$cache[$cache_key][$alias] = $user->getFullName($langs) . ' (' . $alias . ')';
+                            }
+                        }
                     }
                 }
-            }
-        }
 
-        // Contacts pièce: 
+                // Société: 
 
-        if ($this->isLoaded()) {
-            $c_user = new User($this->db->db);
-            $contacts = $this->dol_object->liste_contact(-1, 'internal');
-            foreach ($contacts as $item) {
-                $c_user->fetch($item['id']);
-                if (BimpObject::objectLoaded($c_user)) {
-                    if (!empty($c_user->email) && !isset($emails[$c_user->email])) {
-                        $emails[$c_user->email] = $item['libelle'] . ': ' . $c_user->getFullName($langs) . ' (' . $c_user->email . ')';
+                if (!empty($conf->global->MAIN_INFO_SOCIETE_MAIL)) {
+                    self::$cache[$cache_key][$conf->global->MAIN_INFO_SOCIETE_MAIL] = $conf->global->MAIN_INFO_SOCIETE_NOM . ' (' . $conf->global->MAIN_INFO_SOCIETE_MAIL . ')';
+                }
+
+                if (!empty($conf->global->MAIN_INFO_SOCIETE_MAIL_ALIASES)) {
+                    foreach (explode(',', $conf->global->MAIN_INFO_SOCIETE_MAIL_ALIASES) as $alias) {
+                        $alias = trim($alias);
+                        if ($alias) {
+                            $alias = str_replace('/</', '', $alias);
+                            $alias = str_replace('/>/', '', $alias);
+                            if (!isset(self::$cache[$cache_key][$alias])) {
+                                self::$cache[$cache_key][$alias] = $conf->global->MAIN_INFO_SOCIETE_NOM . ' (' . $alias . ')';
+                            }
+                        }
                     }
+                }
 
-                    if (!empty($c_user->email_aliases)) {
-                        foreach (explode(',', $c_user->email_aliases) as $alias) {
-                            $alias = trim($alias);
-                            if ($alias) {
-                                $alias = str_replace('/</', '', $alias);
-                                $alias = str_replace('/>/', '', $alias);
-                                if (!isset($emails[$alias])) {
-                                    $emails[$alias] = $item['libelle'] . ': ' . $c_user->getFullName($langs) . ' (' . $alias . ')';
+                // Contacts pièce: 
+
+                if ($this->isLoaded()) {
+                    $c_user = new User($this->db->db);
+                    $contacts = $this->dol_object->liste_contact(-1, 'internal');
+                    foreach ($contacts as $item) {
+                        $c_user->fetch($item['id']);
+                        if (BimpObject::objectLoaded($c_user)) {
+                            if (!empty($c_user->email) && !isset(self::$cache[$cache_key][$c_user->email])) {
+                                self::$cache[$cache_key][$c_user->email] = $item['libelle'] . ': ' . $c_user->getFullName($langs) . ' (' . $c_user->email . ')';
+                            }
+
+                            if (!empty($c_user->email_aliases)) {
+                                foreach (explode(',', $c_user->email_aliases) as $alias) {
+                                    $alias = trim($alias);
+                                    if ($alias) {
+                                        $alias = str_replace('/</', '', $alias);
+                                        $alias = str_replace('/>/', '', $alias);
+                                        if (!isset(self::$cache[$cache_key][$alias])) {
+                                            self::$cache[$cache_key][$alias] = $item['libelle'] . ': ' . $c_user->getFullName($langs) . ' (' . $alias . ')';
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -106,12 +112,13 @@ class BimpDolObject extends BimpObject
             }
         }
 
-        return $emails;
+        return self::$cache[$cache_key];
     }
-    
-    public function extrafieldsIsConfig($name){
-        $result = $this->db->getValue('extrafields', 'rowid', "`name` = '".$name."' AND `elementtype` = '".static::$dol_module."'");
-        if($result > 0)
+
+    public function extrafieldsIsConfig($name)
+    {
+        $result = $this->db->getValue('extrafields', 'rowid', "`name` = '" . $name . "' AND `elementtype` = '" . static::$dol_module . "'");
+        if ($result > 0)
             return 1;
         return 0;
     }
@@ -310,11 +317,11 @@ class BimpDolObject extends BimpObject
                         $objT = BimpCache::getBimpObjectInstance($module, $class, $id);
 //                        if ($objT->isLoaded()) { // Ne jamais faire ça: BimpCache renvoie null si l'objet n'existe pas => erreur fatale. 
                         if (BimpObject::objectLoaded($objT)) {
-                            $clef = $item['type'].$objT->id;
-                            if($not_for != $clef){
+                            $clef = $item['type'] . $objT->id;
+                            if ($not_for != $clef) {
                                 $objects[$clef] = $objT;
-                                if($item['type'] == 'commande'){
-                                   $objects = BimpTools::merge_array($objects, $objT->getBimpObjectsLinked((isset($this->dol_object->element)? $this->dol_object->element.$this->id : ''))); 
+                                if ($item['type'] == 'commande') {
+                                    $objects = BimpTools::merge_array($objects, $objT->getBimpObjectsLinked((isset($this->dol_object->element) ? $this->dol_object->element . $this->id : '')));
                                 }
                             }
                         }
@@ -325,7 +332,7 @@ class BimpDolObject extends BimpObject
             $client = $this->getChildObject('client');
 
             if ($client->isLoaded()) {
-                $objects['client'.$client->id] = $client;
+                $objects['client' . $client->id] = $client;
             }
         }
 
@@ -341,10 +348,10 @@ class BimpDolObject extends BimpObject
 
         $ref = dol_sanitizeFileName($this->getRef());
         $ref = BimpTools::cleanStringForUrl($ref);
-        
+
         $where = '`parent_module` = \'' . $this->module . '\' AND `parent_object_name` = \'' . $this->object_name . '\' AND `id_parent` = ' . (int) $this->id;
         $where .= ' AND `file_name` = \'' . $ref . '\' AND `file_ext` = \'pdf\'';
-        
+
         return (int) $this->db->getValue('bimpcore_file', 'id', $where);
     }
 
@@ -364,6 +371,9 @@ class BimpDolObject extends BimpObject
 
         $id_main_pdf_file = (int) $this->getDocumentFileId();
 
+        if($id_main_pdf_file < 1)
+            BimpController::addAjaxWarnings('Attention fichier PDF introuvable');
+        
         if (!in_array($id_main_pdf_file, $values)) {
             $values[] = $id_main_pdf_file;
         }
@@ -699,7 +709,6 @@ class BimpDolObject extends BimpObject
                     'extra_class' => 'emails_select principal'
         ));
 
-
         $html .= '<p class="inputHelp selectMailHelp">';
         $html .= 'Sélectionnez une adresse e-mail puis cliquez sur "Ajouter"';
         $html .= '</p>';
@@ -886,7 +895,7 @@ class BimpDolObject extends BimpObject
                 if ($id_model) {
                     global $langs;
                     $template = self::getEmailTemplateData($id_model);
-                    $langs->tab_translate['InvoiceSentByEMail'] .= ' modéle : '.$template['label'];
+                    $langs->tab_translate['InvoiceSentByEMail'] .= ' modéle : ' . $template['label'];
                 }
 
 
@@ -946,10 +955,9 @@ class BimpDolObject extends BimpObject
                         } elseif ((int) !$soc->isSolvable($this->object_name, $warnings)) {
                             if (!BimpTools::getPostFieldValue('force_create_by_soc', 0)) {
                                 $errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $soc->getData('solvabilite_status')]['label'] . ')';
-                            }
-                            else{
+                            } else {
                                 global $user, $langs;
-                                $errors = array_merge($errors, $soc->addNote ('Création '.$this->getLabel().' forcé par '.$user->getFullName($langs)));
+                                $errors = array_merge($errors, $soc->addNote('Création ' . $this->getLabel() . ' forcé par ' . $user->getFullName($langs)));
                             }
                         }
                     } else {

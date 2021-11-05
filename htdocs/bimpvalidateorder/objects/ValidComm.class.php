@@ -119,7 +119,7 @@ class ValidComm extends BimpObject
         else
             $client = $bimp_object->getChildObject('client');
         
-//        $errors = BimpTools::merge_array($errors, $this->updateCreditSafe($bimp_object));
+        $errors = BimpTools::merge_array($errors, $this->updateCreditSafe($bimp_object));
         
         
 //        return 1;
@@ -620,7 +620,7 @@ class ValidComm extends BimpObject
         return $can_valid_not_avaible;
     }
     
-    public function demandeExists($class, $id_object, $type = null, $status = null) {
+    public function demandeExists($class, $id_object, $type = null, $status = null, $return_all = false) {
         
         $filters = array(
             'type_de_piece' => $class,
@@ -635,8 +635,11 @@ class ValidComm extends BimpObject
 
         $demandes = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filters);
 
-        foreach($demandes as $key => $val)
-            return $demandes[$key];
+        if(!$return_all) {
+            foreach($demandes as $key => $val)
+                return $demandes[$key];
+        } elseif(count($demandes))
+            return $demandes;
         
         return 0;
     }
@@ -816,27 +819,23 @@ class ValidComm extends BimpObject
             return $errors;
 
         // Avec retard de paiement
-        if(isset($this->client_rtp))
-            $rtp = $this->client_rtp;
-        else
-            $rtp = $client->getTotalUnpayed();
-
-        if($rtp != 0)
-            return $errors;
+//        if(isset($this->client_rtp))
+//            $rtp = $this->client_rtp;
+//        else
+//            $rtp = $client->getTotalUnpayed();
+//
+//        if($rtp != 0)
+//            return $errors;
         
         // Les 3 conditions sont satifaites, update limite
 //        $old_limit = $client->getdata('outstanding_limit');
         
         // data Crédit Safe
         if($client->isSirenRequired()) {
-            $code = (string) $client->getData('siren');
-            if ($code != '') {
-                $errors = BimpTools::merge_array($errors, $client->checkSiren('siren', $code));
-            } else {
-                $code = (string) $client->getData('siret');
-                if($code != '')
-                    $errors = BimpTools::merge_array($errors, $client->checkSiren('siret', $code));
-            }
+            $client->useNoTransactionsDb();
+            $errors = BimpTools::merge_array($errors, $client->majEncourscreditSafe(true));
+            $client->useTransactionsDb();
+            
         }
 
         return $errors;

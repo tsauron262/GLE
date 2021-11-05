@@ -5,7 +5,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
 class Bimp_Commande extends BimpComm
 {
 
-    public $no_check_reservations = false;
+    public static $no_check_reservations = false;
     public $acomptes_allowed = true;
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public static $dol_module = 'commande';
@@ -2848,7 +2848,7 @@ class Bimp_Commande extends BimpComm
 
     public function checkLogistiqueStatus($log_change = false)
     {
-        if ($this->isLoaded() && (int) $this->getData('fk_statut') >= 0) {
+        if ($this->isLoaded() && (int) $this->getData('fk_statut') >= 0 && !self::$no_check_reservations) {
             $status_forced = $this->getData('status_forced');
 
             if (isset($status_forced['logistique']) && (int) $status_forced['logistique']) {
@@ -2934,14 +2934,14 @@ class Bimp_Commande extends BimpComm
                 $isFullyShipped = 1;
                 $hasOnlyPeriodicity = 1;
                 foreach ($lines as $line) {
-                    $shipped_qty = (float) $line->getShippedQty(null, true);
+                    $shipped_qty = round((float) $line->getShippedQty(null, true), 6);
                     if ($shipped_qty) {
                         $hasShipment = 1;
                     } else {
                         $hasOnlyPeriodicity = 0;
                     }
 
-                    if (abs($shipped_qty) < abs((float) $line->getShipmentsQty())) {
+                    if (abs($shipped_qty) < abs(round((float) $line->getShipmentsQty(), 6))) {
                         $isFullyShipped = 0;
 
                         if ($hasOnlyPeriodicity && !(int) $line->getData('exp_periodicity')) {
@@ -2998,14 +2998,15 @@ class Bimp_Commande extends BimpComm
                     $hasOnlyPeriodicity = 1;
 
                     foreach ($lines as $line) {
-                        $billed_qty = (float) $line->getBilledQty(null, false);
+                        $billed_qty = abs(round((float) $line->getBilledQty(null, false), 6));
+                        $full_qty = abs(round((float) $line->getFullQty(), 6));
                         if ($billed_qty) {
                             $hasInvoice = 1;
                         } else {
                             $hasOnlyPeriodicity = 0;
                         }
 
-                        if (abs($billed_qty) < abs((float) $line->getFullQty())) {
+                        if ($billed_qty < $full_qty) {
                             $isFullyAddedToInvoice = 0;
 
                             if ($hasOnlyPeriodicity && !(int) $line->getData('fac_periodicity')) {
@@ -3014,7 +3015,7 @@ class Bimp_Commande extends BimpComm
                         }
 
                         if ($isFullyInvoiced) {
-                            if (abs((float) $line->getBilledQty(null, true)) < abs((float) $line->getFullQty())) {
+                            if (abs(round((float) $line->getBilledQty(null, true), 6)) < $full_qty) {
                                 $isFullyInvoiced = 0;
                             }
                         }
@@ -3084,48 +3085,43 @@ class Bimp_Commande extends BimpComm
 
         $forced_by_dev = (int) BimpTools::getArrayValueFromPath($data, 'forced_by_dev', 0);
 
-        $success = BimpTools::ucfirst($this->getLabel('')) . ' validé';
-        if ($this->isLabelFemale()) {
-            $success .= 'e';
-        }
+        $success = BimpTools::ucfirst($this->getLabel('')) . ' validé' . $this->e();
         $success .= ' avec succès';
         $success_callback = 'bimp_reloadPage();';
 
         global $conf, $langs, $user;
 
+        $comm_errors = array();
+        $comm_warnings = array();
+        $comm_infos = array();
+
         if (!$forced_by_dev) {
             $result = $this->dol_object->valid($user, (int) $this->getData('entrepot'));
+
+            $comm_errors = BimpTools::getDolEventsMsgs(array('errors'));
+            $comm_warnings = BimpTools::getDolEventsMsgs(array('warnings'));
+            $comm_infos = BimpTools::getDolEventsMsgs(array('mesgs'));
         } else {
+            $result = 0;
             $client = $this->getChildObject('client');
 
             if (!BimpObject::objectLoaded($client)) {
-                $errors[] = 'Client invalide';
+                $errors[] = 'Client absent';
             } else {
                 $ref = $this->getRef();
-                if (empty($ref) || preg_match('/^[\(]?PROV/i', $ref)) {
+                if (preg_match('/^[\(]?PROV/i', $ref) || $ref) {
                     $ref = $this->dol_object->getNextNumRef($client->dol_object);
-
-                    if (!$ref) {
-                        $errors[] = 'Echec new ref';
-                    } else {
-                        $this->updateField('ref', $ref);
-                    }
+                    $this->set('ref', $ref);
                 }
-            }
+                $comm_errors = $this->onValidate($comm_warnings);
 
-            if (!count($errors)) {
-                $result = 1;
-                $errors = $this->onValidate($warnings);
-
-                if (!count($errors)) {
+                if (!count($comm_errors)) {
+                    $result = 1;
+                    $this->updateField('ref', $ref);
                     $this->updateField('fk_statut', 1);
                 }
             }
         }
-
-        $comm_errors = BimpTools::getDolEventsMsgs(array('errors'));
-        $comm_warnings = BimpTools::getDolEventsMsgs(array('warnings'));
-        $comm_infos = BimpTools::getDolEventsMsgs(array('mesgs'));
 
         if ($result > 0) {
             if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) {
@@ -3904,7 +3900,7 @@ class Bimp_Commande extends BimpComm
 
     public function checkObject($context = '', $field = '')
     {
-        if ($context === 'fetch') {
+        if ($context === 'fetch' && !self::$no_check_reservations) {
             global $current_bc, $modeCSV;
             if (is_null($current_bc) || !is_a($current_bc, 'BC_List') &&
                     (is_null($modeCSV) || !$modeCSV)) {

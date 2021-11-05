@@ -1,5 +1,7 @@
 <?php
 
+require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_payInc.class.php';
+
 class BTC_export extends BimpObject {
 
     private $sql_limit = 1; // Nombre de résultats dans la requete SQL: null = unlimited
@@ -250,6 +252,9 @@ class BTC_export extends BimpObject {
             case 'mandat':
                 $file = '5_'.$entitie.'_(MANDATS)_' . $complementFileName . "_" . BimpCore::getConf('BIMPTOCEGID_version_tra') . ".tra";
                 break;
+            case 'payni':
+                $file = '6_'.$entitie.'_(PAYNI)_' . $complementFileName . "_" . BimpCore::getConf('BIMPTOCEGID_version_tra') . ".tra";
+                break;
         }
         
         if(!is_dir($export_dir)) {
@@ -292,6 +297,20 @@ class BTC_export extends BimpObject {
             $this->errors = BimpTools::merge_array($this->errors, $task->validateArray($tab));
             $this->errors = BimpTools::merge_array($this->errors, $task->createIfNotActif());
         }
+    }
+    
+    private function export_payni($ref = null, $since = false, $name = '', $dir = ''){
+        global $db;
+        $bdd = new BimpDb($db);
+        $file = $this->create_daily_file('payni', date('d-m-Y'));
+        $export = new TRA_payInc($bdd);
+        $list = $export->getAllForThisDay();
+        $ecriture = "";
+        foreach($list as $data) {
+            $ecriture .= $export->constructTRA($data) . "\n";
+            //$export->setTraite($data['id']);
+        }
+        $this->write_tra($ecriture, $file);
     }
     
     /**
@@ -496,7 +515,7 @@ class BTC_export extends BimpObject {
         return $this->db->getRow('entrepot', 'rowid = ' . $id_entrepot);
     }
 
-    protected function head_tra() {
+    public function head_tra() {
         $head = "";
         $jump = "\n";
         $head .= $this->sizing("***", 3);
@@ -539,6 +558,15 @@ class BTC_export extends BimpObject {
     
     protected function write_tra($ecriture, $file) {
         $opened_file = fopen($file, 'a+');
+        if(fwrite($opened_file, $ecriture)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    public function write_tra_w($ecriture, $file) {
+        $opened_file = fopen($file, 'w');
         if(fwrite($opened_file, $ecriture)) {
             return true;
         } else {
@@ -636,10 +664,17 @@ class BTC_export extends BimpObject {
     
     public function actionDeleteTra($data, &$success) {
         global $user;
+        $errors = [];
+        $warnings = [];
         $fromFolder = PATH_TMP . "/" . $this->project_directory . $data['folder'];
         if(unlink($fromFolder . $data['nom'])) {
             $this->write_logs("***SUPPRESSION*** " . date('d/m/Y H:i:s') . " => USER : " . $user->login . " => TRA:  " . $data['nom'] . "\n", true);
         }
+        return [
+            'errors'   => $errors,
+            'warnings' => $warnings,
+            'success'  => $success
+        ];
     }
     
     public function actionImported($data, &$success) {

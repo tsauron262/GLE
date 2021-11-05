@@ -1041,6 +1041,32 @@ class BimpTools
 
     // Gestion SQL:
 
+    public static function getSqlFullSelectQuery($table, $fields, $filters = array(), $joins = array(), $params = array())
+    {
+        $params = self::overrideArray(array(
+                    'order_by'        => null,
+                    'order_way'       => 'ASC',
+                    'extra_order_by'  => null,
+                    'extra_order_way' => 'ASC',
+                    'n'               => 0,
+                    'p'               => 1,
+                    'default_alias'   => 'a',
+                    'where_operator'  => 'WHERE'
+                        ), $params);
+
+        $sql = self::getSqlSelect($fields, $params['default_alias']);
+        $sql .= self::getSqlFrom($table, $joins, $params['default_alias']);
+
+        if (!empty($filters)) {
+            $sql .= self::getSqlWhere($filters, $params['default_alias'], $params['where_operator']);
+        }
+
+        $sql .= self::getSqlOrderBy($params['order_by'], $params['order_way'], $params['default_alias'], $params['extra_order_by'], $params['extra_order_way']);
+        $sql .= self::getSqlLimit($params['n'], $params['p']);
+
+        return $sql;
+    }
+    
     public static function getSqlSelect($return_fields = null, $default_alias = 'a')
     {
         $sql = 'SELECT ';
@@ -1440,6 +1466,31 @@ class BimpTools
         }
 
         return $filters;
+    }
+    
+    public static function getSqlSelectFullQuery($table, $fields, $filters = array(), $joins = array(), $params = array())
+    {
+        $params = self::overrideArray(array(
+                    'order_by'        => null,
+                    'order_way'       => 'ASC',
+                    'extra_order_by'  => null,
+                    'extra_order_way' => 'ASC',
+                    'n'               => 0,
+                    'p'               => 1,
+                    'default_alias'   => 'a',
+                    'where_operator'  => 'WHERE'
+                        ), $params);
+        
+        
+        $sql = self::getSqlSelect($fields, $params['default_alias']);
+        $sql .= self::getSqlFrom($table, $joins, $params['default_alias']);
+        
+        if (!empty($filters)) {
+            $sql .= self::getSqlWhere($filters, $params['default_alias'], $params['where_operator']);
+        }
+        
+        $sql .= self::getSqlOrderBy($params['order_by'], $params['order_way'], $params['default_alias'], $params['extra_order_by'], $params['extra_order_way']);
+        $sql .= self::getSqlLimit($params['n'], $params['p']);
     }
 
     // Gestion de données:
@@ -2098,6 +2149,22 @@ class BimpTools
         return $phone;
     }
 
+    public static function cleanStringMultipleNewLines($string, $html = false)
+    {
+        $string = str_replace("\n\n", "\n", $string);
+        $string = str_replace("\r\r", "\n", $string);
+        $string = str_replace(CHR(13).CHR(13), "\n", $string);
+        $string = str_replace(CHR(10).CHR(10), "\n", $string);
+        $string = str_replace(PHP_EOL.PHP_EOL, "\n", $string);
+        
+        if ($html) {
+            $string = self::replaceBr($string, '<br/>');
+            $string = str_replace('<br/><br/>', '<br/>', $string);
+        }
+        
+        return $string;
+    }
+
     // Traitements sur des array: 
 
     public static function getMsgFromArray($msgs, $title = '', $no_html = false)
@@ -2704,10 +2771,11 @@ class BimpTools
         if (is_null($json) || $json === '') {
             return array();
         }
-        
+
         if (is_array($json)) {
             return $json;
         }
+        $json = str_replace('\%', '%', $json);
 
         $result = json_decode($json, 1);
 
@@ -2992,7 +3060,7 @@ class BimpTools
     {
         $file = static::getFileBloqued($type);
         if ($bloque) {
-            if(!is_file($file)){
+            if (!is_file($file)) {
                 $random = rand(0, 10000000);
                 $text = "Yes" . $random;
                 if (!file_put_contents($file, $text))
@@ -3081,9 +3149,8 @@ class BimpTools
 
         return $html;
     }
-
-    public function envoieMailGrouper()
-    {
+    
+    public static function sendMailGrouper(){
         $dir = PATH_TMP . "/bimpcore/mailsGrouper/";
         if (!is_dir($dir))
             mkdir($dir);
@@ -3101,7 +3168,12 @@ class BimpTools
                 }
             }
         }
-        $this->output = "OK " . $i . ' mails envoyés';
+        return "OK " . $i . ' mails envoyés';
+    }
+
+    public function envoieMailGrouper()
+    {
+        $this->output = static::sendMailGrouper();
         return 0;
     }
 
@@ -3114,18 +3186,19 @@ class BimpTools
             return 1;
         return 0;
     }
-    
-    public static function sendSmsAdmin($text, $tels = array('0628335081', '06 86 69 18 14')){    
+
+    public static function sendSmsAdmin($text, $tels = array('0628335081', '06 86 69 18 14'))
+    {
         $errors = array();
         require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
-        foreach ($tels as $tel){
+        foreach ($tels as $tel) {
             $tel = traiteNumMobile($tel);
             $smsfile = new CSMSFile($tel, 'BIMP ADMIN', $text);
             if (!$smsfile->sendfile()) {
                 $errors[] = 'Echec de l\'envoi du sms';
             }
         }
-        
+
         return $errors;
     }
 }

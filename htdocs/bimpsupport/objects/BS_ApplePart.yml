@@ -116,6 +116,11 @@ fields_tables:
               edit: 1
             - field: is_tier
             - field: not_invoiced
+            - field: type_for_price
+            - custom: 1
+              label: Type pour tarification
+              value: 
+                callback: getThisCategProdApple
 
 views: 
     default: 

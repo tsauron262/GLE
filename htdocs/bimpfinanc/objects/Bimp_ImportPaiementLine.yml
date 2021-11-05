@@ -60,6 +60,13 @@ fields:
         label: Date
         type: date
         
+    infos:
+        label: Infos
+        type: text
+    num:
+        label: Numéro
+        type: text
+        
     
 forms:
     default: 
@@ -67,6 +74,25 @@ forms:
             - field: factures
             - field: data
             - field: commition
+    lettrage_man:
+        rows:
+            - custom: 1
+              label: Raison
+              input_name: raison
+              data_type: text
+              input: 
+                  type: select
+              values:
+                  array: raisonManu
+            - custom: 1
+              label: Raison détail
+              input_name: raison_detail
+              data_type: text
+              input: 
+                  type: textarea
+              display_if: 
+                  field_name: raison
+                  show_values: 99
     
 filters_panels: 
     default: 
@@ -99,6 +125,8 @@ lists:
             fact_client:
             id_user_traite:
             date: 
+            infos:
+            num:
                 
     global:
         extends: default

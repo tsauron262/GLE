@@ -172,7 +172,9 @@ class BimpMailCore
         $result = $cmail->sendfile();
 
         if (!$result) {
-            BimpCore::addlog('Echec envoi email ' . $cmail->error, Bimp_Log::BIMP_LOG_ALERTE, 'email', NULL, array(
+            $ip = BimpCache::getIpFromDns($cmail->smtps->_smtpsHost);
+            BimpCore::addlog('Echec envoi email '.$cmail->error, Bimp_Log::BIMP_LOG_ALERTE, 'email', NULL, array(
+                'IP'           => $ip,
                 'Destinataire' => $to,
                 'Sujet'        => $this->subject,
                 'Message'      => $this->msg

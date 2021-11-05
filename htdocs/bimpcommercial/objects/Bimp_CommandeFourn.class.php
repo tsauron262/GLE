@@ -328,19 +328,34 @@ class Bimp_CommandeFourn extends BimpComm
                         $town = str_replace($tabZipTown[0] . " ", "", $dataAdd[3]);
                         if (count($dataAdd) == 5)
                             $result['country'] = $dataAdd[4];
-                    } /*elseif ((count($dataAdd) >= 3 && count(explode(" ", $dataAdd[2])) > 1)) {
+                    }
+                    elseif (count($dataAdd) >= 3 && count(explode(" ", $dataAdd[2])) > 1) {
+//                        $result['adress2'] = $dataAdd[2];
+                        $tabZipTown = explode(" ", $dataAdd[2]);
+                        $town = str_replace($tabZipTown[0] . " ", "", $dataAdd[2]);
+                        $result['contact'] = $dataAdd[0];
+                        $result['adress'] = $dataAdd[1];
+                        if (count($dataAdd) == 5)
+                            $result['country'] = $dataAdd[4];
+                    }
+                    /*elseif ((count($dataAdd) >= 3 && count(explode(" ", $dataAdd[2])) > 1)) {
                         $tabZipTown = explode(" ", $dataAdd[2]);
                         $town = str_replace($tabZipTown[0] . " ", "", $dataAdd[2]);
                         if (count($dataAdd) == 4)
                             $result['country'] = $dataAdd[3];
                     } */else
                         $warnings[] = "Impossible de parser l'adresse personalisée";
-                    if (count($tabZipTown) > 1) {
-                        $result['zip'] = $tabZipTown[0];
-                        $result['town'] = $town;
+                    if(!is_array($tabZipTown)){
+                        $warnings[] = 'Consitution de l\'adresse incorrect';
                     }
-                    if (strlen($result['zip']) != 5)
-                        $warnings[] = "Code postal : " . $result['zip'] . ' incorrect';
+                    else{
+                        if (count($tabZipTown) > 1) {
+                            $result['zip'] = $tabZipTown[0];
+                            $result['town'] = $town;
+                        }
+                        if (strlen($result['zip']) != 5)
+                            $warnings[] = "Code postal : " . $result['zip'] . ' incorrect';
+                    }
                 } else {
                     $warnings[] = 'Adresse non renseignée';
                 }
@@ -1766,6 +1781,8 @@ class Bimp_CommandeFourn extends BimpComm
                     $diference = 999;
                     $ref = $prod->findRefFournForPaHtPlusProche($line->getUnitPriceHTWithRemises(), $this->idLdlc, $diference);
 
+                    $ref = str_replace(' ', '', $ref);
+                    
                     if (strpos($ref, "AR") !== 0)
                         $errors[] = "La référence " . $ref . "ne semble pas être une ref LDLC correct  pour le produit " . $prod->getLink();
                     elseif ($diference > 0.08)
@@ -1843,8 +1860,7 @@ class Bimp_CommandeFourn extends BimpComm
                 )
             );
         }
-
-
+        
         if (!count($errors)) {
             $arrayToXml->writeNodes($tab);
 

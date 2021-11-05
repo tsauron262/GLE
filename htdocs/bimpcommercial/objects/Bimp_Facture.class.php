@@ -39,9 +39,9 @@ class Bimp_Facture extends BimpComm
         3 => array('label' => 'Non déclarable'),
     );
     public static $paiement_status = array(
-        0 => array('label' => 'Aucun paiement', 'classes' => array('danger'), 'icon' => 'fas_times'),
-        1 => array('label' => 'Paiement partiel', 'classes' => array('warning'), 'icon' => 'fas_exclamation-circle'),
-        2 => array('label' => 'Paiement complet', 'classes' => array('success'), 'icon' => 'fas_check'),
+        0 => array('label' => 'Aucun paiement', 'classes' => array('danger'), 'icon' => 'fas_times', 'short' => 'Aucun'),
+        1 => array('label' => 'Paiement partiel', 'classes' => array('warning'), 'icon' => 'fas_exclamation-circle', 'short' => 'Partiel'),
+        2 => array('label' => 'Paiement complet', 'classes' => array('success'), 'icon' => 'fas_check', 'short' => 'Complet'),
         3 => array('label' => 'Trop perçu', 'classes' => array('important'), 'icon' => 'fas_exclamation-triangle'),
         4 => array('label' => 'Trop remboursé', 'classes' => array('important'), 'icon' => 'fas_exclamation-triangle'),
         5 => array('label' => 'Irrécouvrable', 'classes' => array('danger'), 'icon' => 'fas_times-circle')
@@ -2101,10 +2101,12 @@ class Bimp_Facture extends BimpComm
             }
             if ($field == 'apple_number') {
                 if (!isset($cacheInstance['repas'])) {
-                    $cacheInstance['repas'] = BimpObject::getBimpObjectObjects('bimpapple', 'GSX_Repair', array('id_sav' => $sav->id));
+                    $cacheInstance['repas'] = BimpObject::getBimpObjectObjects('bimpapple', 'GSX_Repair', array('id_sav' => $sav->id), 'id', 'desc');
                 }
+
                 foreach ($cacheInstance['repas'] as $repa) {
                     $result[] = $repa->getData('repair_number');
+                    break;
                 }
             }
         }
@@ -5773,7 +5775,7 @@ class Bimp_Facture extends BimpComm
         ini_set('max_execution_time', 3600);
 
         $errors = array();
-        $rows = self::getBdb()->getRows('facture', "`datec` > '2021-01-14 00:00:00'", null, 'array', array('rowid', 'marge_finale_ok', 'total_achat_reval_ok'), 'rowid', 'desc');
+        $rows = self::getBdb()->getRows('facture', "`datec` > '2021-10-01 00:00:00'", null, 'array', array('rowid', 'marge_finale_ok', 'total_achat_reval_ok'), 'rowid', 'desc');
 
         if (is_array($rows)) {
             $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');

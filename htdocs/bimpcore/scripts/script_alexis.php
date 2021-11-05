@@ -4,27 +4,36 @@
  *  Script Alexis
  * 
  */
-//
-//require_once("../../main.inc.php");
-//require_once __DIR__ . '/../Bimp_Lib.php';
-////$extrafields = new ExtraFields($db);
-////$extrafields->addExtraField('entrepot', 'Entrepot', 'varchar', 104, 8, 'contrat');
-//ini_set('display_errors', 1);
-//$can_execute = ($user->admin) ? true : false;
-//
-//if($can_execute) {
-//
-//    $contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
-//    $list = $contrat->getList(['statut' => 11]);
-//    foreach($list as $id) {
-//        $contrat->fetch($id['rowid']);
-//        if(!$contrat->getData('initial_renouvellement')) {
-//            $contrat->updateField('initial_renouvellement', $contrat->getData('tacite'));
-//            echo "MAJ<br />";
-//        }
-//    }
-//    
-//    
-//} else {
-//    
+
+require_once("../../main.inc.php");
+require_once __DIR__ . '/../Bimp_Lib.php';
+
+
+$export = BimpCache::getBimpObjectInstance('bimptocegid', "BTC_exportRibAndMandat");
+
+$bdd = new BimpDb($db);
+
+$file = '4_'."BIMP".'_(RIBS)_' . "UNIQUE" . "_" . "Y2" . ".tra";
+
+$export_dir = PATH_TMP  ."/" . 'exportCegid' . '/' . $complementDirectory . '/';
+$export_project_dir = PATH_TMP . "/" . 'exportCegid' . '/';
+
+//if(!file_exists($export_dir . $file)) {
+    $create_file = fopen($export_dir . $file, 'w');
+    fwrite($create_file, $export->head_tra());
 //}
+$errors = array();
+
+$list = $bdd->getRows("societe_rib", "exported = 5");
+
+foreach($list as $rib) {
+    $ecriture .= $export->export_rib_exported($rib->rowid);
+}
+echo 'Fichier : '.$export_dir . $file;
+echo "<pre>";
+echo $ecriture;
+    fwrite($create_file, $ecriture);
+    fclose($create_file);
+
+print_r($errors);
+echo BimpTools::sendMailGrouper();

@@ -237,7 +237,16 @@ if (!defined('NOSESSION')) {
         
         require_once DOL_DOCUMENT_ROOT.'/bimpcore/classes/BimpSession.php';
     // Démarrage de la session
-        $session = new Session($db);
+        if(class_exists('BimpCache')){
+            $bdb = BimpCache::getBdb(true);
+            $dbNoTransac = $bdb->db;
+        }
+        else{
+            $dbNoTransac = $db;
+        }
+        
+        
+        $session = new Session($dbNoTransac);
     }
     
     

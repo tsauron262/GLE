@@ -20,7 +20,9 @@ class Bimp_Log extends BimpObject
         'divers'     => 'Divers',
         'bds'        => 'Bimp Data Sync',
         'bic'        => 'Interface client',
-        'sav'        => 'SAV'
+        'sav'        => 'SAV',
+        'deadLock'   => 'DeadLock',
+        'sql_duplicate'=>'Doublons champ bdd'
     );
     public static $levels = array(
         self::BIMP_LOG_NOTIF  => array('label' => 'Notification', 'classes' => array('info')),
@@ -632,6 +634,8 @@ class Bimp_Log extends BimpObject
 
         $params = array();
 
+        $params['GET'] = $_GET;
+        $params['POST'] = $_POST;
         foreach (explode('&', $_REQUEST) as $param) {
             if (preg_match('/^(.+)=(.+)$/', $param, $matches)) {
                 $params[$matches[1]] = $matches[2];

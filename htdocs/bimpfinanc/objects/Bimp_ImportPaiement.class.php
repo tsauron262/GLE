@@ -61,11 +61,13 @@ class Bimp_ImportPaiement extends BimpObject
                         $p = new Paiement($this->db->db);
 
                         if ((string) $child->getData('date')) {
-                            $p->datepaye = $child->getData('date');
+                            $p->datepaye = strtotime($child->getData('date'));
                         } else {
                             $p->datepaye = dol_now();
                         }
 
+                        $p->ref = $child->getData('num');
+                        
                         $p->amounts = array(
                             $idFact => $montant
                         );
@@ -137,6 +139,18 @@ class Bimp_ImportPaiement extends BimpObject
             $line->set('data', $ln);
             $errors = BimpTools::merge_array($errors, $line->create());
         }
+    }
+    
+    
+    public static function toCompteAttente(){
+        $return = array();
+        $list = BimpCache::getBimpObjectObjects('bimpfinanc', 'Bimp_ImportPaiementLine', array('traite' => 0, 'type' => 'vir', 'num' => ''));
+        foreach ($list as $payin){
+            $num = BimpTools::getNextRef('Bimp_ImportPaiementLine', 'num', 'PAYNI{AA}{MM}-', 5);
+            $payin->updateField('num', $num);
+            $return[] = array('num' => $num, 'amount' => $payin->getData('price'), 'date' => $payin->getData('date'), 'name' => $payin->getData('name'), 'id' => $payin->id);
+        }
+        return $return;
     }
 
     public function isDeletable($force_delete = false, &$errors = array())

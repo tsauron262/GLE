@@ -1237,6 +1237,10 @@ class DoliDBMysqliC extends DoliDB
      */
     function escape($stringtoencode)
     {
+        if(!$this->connected && ! $this->transaction_opened)
+            $this->connect_server (0);
+            
+            
         if(!$this->connected)
         {
             dol_syslog("Call to escape when server is disconnected", LOG_WARNING);

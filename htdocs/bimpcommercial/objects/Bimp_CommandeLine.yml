@@ -200,6 +200,7 @@ fields:
         default_value: 0
         displays: 
             badge:
+                label: Qté expédiée
                 type: callback
                 method: displayQty
                 params: 
@@ -211,6 +212,7 @@ fields:
         default_value: 0
         displays: 
             badge:
+                label: Qté à expédier
                 type: callback
                 method: displayQty
                 params: 

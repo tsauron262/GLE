@@ -4453,7 +4453,7 @@ class Bimp_CommandeLine extends ObjectLine
             if (!BimpObject::objectLoaded($commande)) {
                 $errors[] = 'ID de la commande absent';
             } else {
-                if ($commande->no_check_reservations) {
+                if ($commande::$no_check_reservations) {
                     return array();
                 }
 
@@ -5973,6 +5973,15 @@ class Bimp_CommandeLine extends ObjectLine
                 $this->updateField('next_date_achat', $dateNextAchat);
             }
         }
+    }
+    
+    public function fetch($id, $parent = null, $bimp_line_only = false) {
+        if($id != 1649848){
+            $bt = debug_backtrace(null, 600);
+            $infos = BimpTools::getBacktraceArray($bt);
+            echo '<pre>'; print_r($infos); die;
+        }
+        return parent::fetch($id, $parent, $bimp_line_only);
     }
 
     // Actions:

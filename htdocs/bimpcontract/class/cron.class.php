@@ -44,6 +44,7 @@
             $this->relance_demande();
             $this->tacite();
             $this->facturation_auto();
+            //$this->relance_echeance_tacite();
             return "OK";
         }
         
@@ -169,7 +170,6 @@
                 $c = BimpObject::getInstance('bimpcontract', 'BContract_contrat', $infos['id_contrat']);
                 $echeanciers->fetch($infos['id']);
                 //$data = $c->renderEcheancier(false);
-                
                 $data = Array(
                     'factures_send' => getElementElement('contrat', 'facture', $c->id),
                     'reste_a_payer' => $c->reste_a_payer(),
@@ -206,10 +206,10 @@
                         $msg.= "Contrat : " . $c->dol_object->getNomUrl() . "<br/>Commercial : ".$comm->dol_object->getFullName($langs)."<br />";
                         //$msg.= "Facture : " . $f->getRef();
                         //$this->output .= $msg;
-                        mailSyn2("Facturation Contrat [".$c->getRef()."]", "facturationclients@bimp.fr", null, $msg);
+                        mailSyn2("Facturation Contrat [".$c->getRef()."] client " . $s->getRef() . " ". $s->getName(), "facturationclients@bimp.fr", null, $msg);
                     }
                 }
-            }        
+            }
         }
         
         public function relance_demande() {
@@ -269,15 +269,17 @@
         }
 
         public function relance_echeance_tacite() {
-
-            $now = new DateTime();
-            $contrat = BimpObject::getInstance('bimpcontract', 'BContract_echeancier');
-            $list = $this->getListContratsWithStatut(self::CONTRAT_ACTIF);
-            foreach($list as $index => $object) {
-                $contrat->fetch($object->rowid);
-                $client = BimpObject::getInstance('bimpcore', 'Bimp_Societe', $contrat->getDate('fk_soc'));
-                
-            }            
+            
+            // 28 jours => 21 Jours => 14 Jours => 7 Jours => Jours de renouvellement
+            
+            $filters = Array(['statut' => 11]);
+            $list = BimpCache::getBimpObjectInstance("bimpcontract", "BContract_contrat");
+            
+//            foreach($list as $object) {
+//                
+//            }
+            
+            $this->output = count($list);
 
         }
         

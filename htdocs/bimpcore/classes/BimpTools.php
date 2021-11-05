@@ -2775,6 +2775,7 @@ class BimpTools
         if (is_array($json)) {
             return $json;
         }
+        $json = str_replace('\%', '%', $json);
 
         $result = json_decode($json, 1);
 

@@ -290,6 +290,53 @@ function BimpUserRightsTable() {
     };
 
     this.removeUserRights = function ($button, id_user, id_rights) {
+        if ($button.hasClass('disabled')) {
+            return;
+        }
+
+        var $table = ptr.getTable($button);
+
+        setObjectAction($button, {
+            module: 'bimpcore',
+            object_name: 'Bimp_User',
+            id_object: id_user
+        }, 'removeRight', {
+            id_rights: id_rights
+        }, '', null, function (result) {
+            if (typeof (result.results) !== 'undefined') {
+                for (var id_right in result.results) {
+                    if (parseInt(result.results[id_right]['ok'])) {
+                        var $row = ptr.getRow($table, id_right);
+                        if ($.isOk($row)) {
+                            $row.find('.remove_right_button').hide();
+                            $row.find('.add_right_button').show();
+
+                            var $col = $row.find('td.col_active');
+
+                            if ($col.length) {
+                                $col.data('value', result.results[id_right]['active']);
+
+                                switch (result.results[id_right]['active']) {
+                                    case 'inherit':
+                                        $col.html('<span class="info"><i class="fas fa5-arrow-circle-down iconLeft"></i>Hérité</span>');
+                                        break;
+
+                                    case 'no':
+                                        $col.html('<span class="danger"><i class="fas fa5-times iconLeft"></i>NON</span>');
+                                        break;
+                                }
+
+                            }
+
+                            // On déselectionne toutes les lignes: 
+                            if (id_rights.length > 1) {
+                                BimpListTable.uncheckAll($table);
+                            }
+                        }
+                    }
+                }
+            }
+        });
 
     };
 
@@ -298,7 +345,7 @@ function BimpUserRightsTable() {
             return;
         }
 
-        $button.addClass('disbaled');
+        $button.addClass('disabled');
         var $table = ptr.getTable($button);
 
         if ($.isOk($table)) {
@@ -306,6 +353,7 @@ function BimpUserRightsTable() {
 
             if (!$selected.length) {
                 bimp_msg('Aucun droit sélectionné', 'warning', null, true);
+                $button.removeClass('disabled');
                 return;
             }
 
@@ -323,13 +371,45 @@ function BimpUserRightsTable() {
                 }
             });
 
-            $button.removeClass('disbaled'); // On doit réactiver le bouton sinon la suite va planter.
+            $button.removeClass('disabled'); // On doit réactiver le bouton sinon la suite va planter.
             ptr.addUserRights($button, id_user, id_rights);
         }
     };
 
     this.removeSelectedRights = function ($button, id_user) {
+        if ($button.hasClass('disabled')) {
+            return;
+        }
 
+        $button.addClass('disabled');
+        var $table = ptr.getTable($button);
+
+        if ($.isOk($table)) {
+            var $selected = $table.find('tbody').find('input.bimp_list_table_row_check:checked');
+
+            if (!$selected.length) {
+                bimp_msg('Aucun droit sélectionné', 'warning', null, true);
+                $button.removeClass('disabled');
+                return;
+            }
+
+            var id_rights = [];
+
+            $selected.each(function () {
+                var $row = $(this).findParentByClass('bimp_list_table_row');
+
+                if ($.isOk($row)) {
+                    var id_right = parseInt($row.data('id_right'));
+
+                    if (!isNaN(id_right) && id_right) {
+                        id_rights.push(id_right);
+                    }
+                }
+            });
+
+            $button.removeClass('disabled');
+            ptr.removeUserRights($button, id_user, id_rights);
+        }
     };
 }
 

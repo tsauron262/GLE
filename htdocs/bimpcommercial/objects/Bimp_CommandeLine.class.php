@@ -4434,6 +4434,15 @@ class Bimp_CommandeLine extends ObjectLine
         }
         return '<input type="hidden" value="custom" name="achat_periodicity_same_values"/>Personnalisés';
     }
+    
+    public function hasMoresLine(){
+        $parent = $this->getParentInstance();
+        $instance = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
+        $rows = $instance->getList(array('id_obj'=> $parent->id));
+        
+        
+        return ($rows > 100)? 1 : 0;
+    }
 
     // Traitements réservations:
 

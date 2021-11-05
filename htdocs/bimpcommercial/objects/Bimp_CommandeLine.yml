@@ -799,7 +799,8 @@ lists:
         positions_open: 1
         enable_search: 1
         enable_sort: 1
-        pagination: 1
+        pagination: 
+            callback: hasMoresLine
         sort_field: position
         sort_way: asc
         n: 30

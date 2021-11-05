@@ -51,6 +51,30 @@ class BR_Reservation extends BimpObject
         return (int) $user->admin;
 //        return 0;
     }
+    
+//    public function getList($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null, $joins = array(), $extra_order_by = null, $extra_order_way = 'ASC'): array {
+//        if($return == 'array' &&count($filters) == 3 && isset($filters['type']) && isset($filters['id_commande_client']) && isset($filters['id_commande_client_line'])){
+////            $bt = debug_backtrace(null, 600);
+////            $infos = BimpTools::getBacktraceArray($bt);
+////            echo '<pre>'; print_r($infos); die;
+//            $return_fields[] = 'id_commande_client_line';
+//            $idLine = $filters['id_commande_client_line'];
+//            unset($filters['id_commande_client_line']);
+//            $clef = 'reservations_get_list'.implode('-', array($filters, $n, $p, $order_by, $order_way, $return, $return_fields, $joins, $extra_order_by, $extra_order_way));
+//            if(isset(BimpCache::$cache[$clef]))
+//                $result = BimpCache::$cache[$clef];
+//            else{
+//                $result = parent::getList($filters, $n, $p, $order_by, $order_way, $return, $return_fields, $joins, $extra_order_by, $extra_order_way);
+//                BimpCache::$cache[$clef] = $result;
+//            }
+//            foreach($result as $id => $data)
+//                if($data['id_commande_client_line'] != $idLine)
+//                    unset($result[$id]);
+//        }
+//        else
+//            $result = parent::getList($filters, $n, $p, $order_by, $order_way, $return, $return_fields, $joins, $extra_order_by, $extra_order_way);
+//        return $result;
+//    }
 
     public function canEdit()
     {
@@ -1176,10 +1200,9 @@ class BR_Reservation extends BimpObject
 
         $commande = null;
         if ((int) $this->getData('id_commande_client')) {
+            BimpObject::loadClass('bimpcommercial', 'Bimp_Commande');
+            Bimp_Commande::$no_check_reservations = true;
             $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
-            if (BimpObject::objectLoaded($commande)) {
-                $commande->no_check_reservations = true;
-            }
         }
 
         $current_qty = (int) $this->getSavedData('qty');
@@ -1336,7 +1359,7 @@ class BR_Reservation extends BimpObject
         }
 
         if (BimpObject::objectLoaded($commande)) {
-            $commande->no_check_reservations = false;
+            $commande::$no_check_reservations = false;
         }
         return $errors;
     }
@@ -1686,11 +1709,11 @@ class BR_Reservation extends BimpObject
             $this->set('id_product', (int) $equipment->getData('id_product'));
         }
 
-        $lines = $this->getCommandeClientLinesArray();
-        if (!isset($lines[$id_line])) {
-            $errors[] = 'ID de la ligne de commande client invalide';
-            return $errors;
-        }
+//        $lines = $this->getCommandeClientLinesArray();
+//        if (!isset($lines[$id_line])) {
+//            $errors[] = 'ID de la ligne de commande client invalide';
+//            return $errors;
+//        }
 
         $id_product = (int) $this->getData('id_product');
 
@@ -1704,6 +1727,10 @@ class BR_Reservation extends BimpObject
                     $errors[] = 'Le produit sélectionné ne correspond pas à la ligne de commande sélectionnée';
                 }
             }
+        }
+        else{
+            $errors[] = 'ID de la ligne de commande client invalide';
+            return $errors;
         }
 
         $product = $this->getChildObject('product');

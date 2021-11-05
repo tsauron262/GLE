@@ -86,7 +86,7 @@ class EquipmentPDF extends BimpEtiquettePDF
             $this->writeContent($html);
 
             if ($serial) {
-                 $this->pdf->setY();
+                 $this->pdf->setY(0);
                 $this->pdf->write1DBarcode($serial, 'C128', 19, 22, 50, 10, '', array('text' => false));
             }
         }

@@ -152,12 +152,17 @@ class GSX_v2 extends GSX_Const
         $this->displayDebug('échec');
         $this->initError('Echec authentification (token ' . $this->acti_token . ')');
 
-        if($this->appleId == 'admin.gle@bimp.fr'){
-            global $user, $langs;
-            mailSyn2('auth GSX bad', 'tommy@bimp.fr, f.martinez@bimp.fr', null, $user->getFullName($langs).' id : '.$this->appleId.' auth bad'. date('l jS \of F Y h:i:s A'));
-            BimpTools::sendSmsAdmin('Attention Compte admin.gle déconnecté de GSX');
+        if ($this->appleId == 'admin.gle@bimp.fr') {
+            global $gsx_logout_mail_send;
+
+            if (!$gsx_logout_mail_send) {
+                global $user, $langs;
+                mailSyn2('auth GSX bad', 'tommy@bimp.fr, f.martinez@bimp.fr', null, $user->getFullName($langs) . ' id : ' . $this->appleId . ' auth bad' . date('l jS \of F Y h:i:s A'));
+                BimpTools::sendSmsAdmin('Attention Compte admin.gle déconnecté de GSX');
+                $gsx_logout_mail_send = true;
+            }
         }
-            
+
         $this->logged = false;
         $this->saveToken('acti', '');
 
@@ -702,7 +707,7 @@ class GSX_v2 extends GSX_Const
                 $params['shipmentDetails']['trackingNumber'] = (string) $shipmentDetails['trackingNumber'];
             }
         }
-        
+
         if (!empty($parts)) {
             $params['parts'] = $parts;
         }
@@ -942,9 +947,9 @@ class GSX_v2 extends GSX_Const
                 }
 
                 $errors[] = $msg;
-                if (isset($error['code']) && $error['code'] == 'UNAUTHORIZED'){
+                if (isset($error['code']) && $error['code'] == 'UNAUTHORIZED') {
                     $onclick = 'gsxLogOut();';
-                    $errors[] = '<a onclick="'.$onclick.'">Cliquez ici pour vous déconnecté de GSX.</a>';
+                    $errors[] = '<a onclick="' . $onclick . '">Cliquez ici pour vous déconnecté de GSX.</a>';
                 }
             }
         }

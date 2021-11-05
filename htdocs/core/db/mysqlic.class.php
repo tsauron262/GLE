@@ -1030,14 +1030,23 @@ class DoliDBMysqliC extends DoliDB
                 $debug = "";
                 if (function_exists("synGetDebug"))
                     $debug = synGetDebug();
+                
+                $deadLock = false;
+                $classLog = 'sql';
+                if(stripos($this->lasterror, 'Deadlock') !== false){
+                        $deadLock = true;
+                        $classLog = 'deadLock';
+                }
+                elseif(stripos($this->lasterrno, 'DB_ERROR_RECORD_ALREADY_EXISTS') !== false){
+                    $classLog = 'sql_duplicate';
+                }
 
 //				if ($conf->global->SYSLOG_LEVEL < LOG_DEBUG) dol_syslog(get_class($this)."::query SQL Error query: ".$query, LOG_ERR);	// Log of request was not yet done previously
                 dol_syslog(get_class($this)."::query SQL Error message: ".$this->lasterrno." ".$this->lasterror .' serveur : '.$this->database_host.'<br/>'.$query, LOG_ERR);
                 if(class_exists('BimpCore'))
-                    BimpCore::addlog(get_class($this)."::query SQL Error message: ".$this->lasterrno." | ".$this->lasterror .' serveur : '.$this->database_host.'<br/>'.$query, 3,'sql');
-                
-                if(stripos($this->lasterror, 'Deadlock') !== false)
-                        $this->stopAll ();
+                    BimpCore::addlog(get_class($this)."::query SQL Error message: ".$this->lasterrno." | ".$this->lasterror .' serveur : '.$this->database_host.'<br/>'.$query, 3,$classLog);
+                if($deadLock)
+                    $this->stopAll ();
                         
             }
             $this->lastquery=$query;
@@ -1228,6 +1237,10 @@ class DoliDBMysqliC extends DoliDB
      */
     function escape($stringtoencode)
     {
+        if(!$this->connected && ! $this->transaction_opened)
+            $this->connect_server (0);
+            
+            
         if(!$this->connected)
         {
             dol_syslog("Call to escape when server is disconnected", LOG_WARNING);

@@ -20,7 +20,9 @@ class Bimp_Log extends BimpObject
         'divers'     => 'Divers',
         'bds'        => 'Bimp Data Sync',
         'bic'        => 'Interface client',
-        'sav'        => 'SAV'
+        'sav'        => 'SAV',
+        'deadLock'   => 'DeadLock',
+        'sql_duplicate'=>'Doublons champ bdd'
     );
     public static $levels = array(
         self::BIMP_LOG_NOTIF  => array('label' => 'Notification', 'classes' => array('info')),

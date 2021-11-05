@@ -206,9 +206,9 @@ fields_tables:
             - field: note_plus
             - field: note_public
             - field: id_facture
-              display: card
-              show: 
-                  field_value: id_facture
+#              display: card
+#              show: 
+#                  field_value: id_facture
             - field: id_avoir
               display: card
               show: 

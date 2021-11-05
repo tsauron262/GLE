@@ -5,7 +5,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
 class Bimp_Commande extends BimpComm
 {
 
-    public $no_check_reservations = false;
+    public static $no_check_reservations = false;
     public $acomptes_allowed = true;
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public static $dol_module = 'commande';
@@ -2848,7 +2848,7 @@ class Bimp_Commande extends BimpComm
 
     public function checkLogistiqueStatus($log_change = false)
     {
-        if ($this->isLoaded() && (int) $this->getData('fk_statut') >= 0) {
+        if ($this->isLoaded() && (int) $this->getData('fk_statut') >= 0 && !self::$no_check_reservations) {
             $status_forced = $this->getData('status_forced');
 
             if (isset($status_forced['logistique']) && (int) $status_forced['logistique']) {
@@ -3900,7 +3900,7 @@ class Bimp_Commande extends BimpComm
 
     public function checkObject($context = '', $field = '')
     {
-        if ($context === 'fetch') {
+        if ($context === 'fetch' && !self::$no_check_reservations) {
             global $current_bc, $modeCSV;
             if (is_null($current_bc) || !is_a($current_bc, 'BC_List') &&
                     (is_null($modeCSV) || !$modeCSV)) {

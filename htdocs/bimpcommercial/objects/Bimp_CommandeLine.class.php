@@ -5834,7 +5834,7 @@ class Bimp_CommandeLine extends ObjectLine
                         $this->updateField('qty_to_bill', $to_bill_qty, null, true);
                     }
 
-                    if ($qty_billed_not_shipped !== (float) $this->getData('qty_billed_not_shipped')) {
+                    if ((float) $qty_billed_not_shipped !== (float) $this->getData('qty_billed_not_shipped')) {
                         $this->updateField('qty_billed_not_shipped', $qty_billed_not_shipped, null, true);
                     }
 

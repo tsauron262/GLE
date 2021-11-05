@@ -2848,7 +2848,7 @@ class Bimp_Commande extends BimpComm
 
     public function checkLogistiqueStatus($log_change = false)
     {
-        if ($this->isLoaded() && (int) $this->getData('fk_statut') >= 0) {
+        if ($this->isLoaded() && (int) $this->getData('fk_statut') >= 0 && !$this->no_check_reservations) {
             $status_forced = $this->getData('status_forced');
 
             if (isset($status_forced['logistique']) && (int) $status_forced['logistique']) {
@@ -3900,7 +3900,7 @@ class Bimp_Commande extends BimpComm
 
     public function checkObject($context = '', $field = '')
     {
-        if ($context === 'fetch') {
+        if ($context === 'fetch' && !$this->no_check_reservations) {
             global $current_bc, $modeCSV;
             if (is_null($current_bc) || !is_a($current_bc, 'BC_List') &&
                     (is_null($modeCSV) || !$modeCSV)) {

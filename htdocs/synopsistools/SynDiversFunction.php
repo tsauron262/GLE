@@ -717,12 +717,11 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
             
             if (class_exists('BimpCore')) {
                 $ip = BimpCache::getIpFromDns($mailfile->smtps->_smtpsHost);
-                BimpCore::addlog('Echec envoi email', Bimp_Log::BIMP_LOG_ALERTE, 'email', NULL, array(
+                BimpCore::addlog('Echec envoi email '.$mailfile->error, Bimp_Log::BIMP_LOG_ALERTE, 'email', NULL, array(
                     'Ip'    => $ip,
                     'Destinataire' => $to,
                     'Sujet' => $subject,
-                    'Message' => $msg,
-                    'Error' => $mailfile->error
+                    'Message' => $msg
                 ));
                 
                 $lastMailFailedTms = (int) BimpCore::getConf('bimpcore_last_mail_failed_tms', 0);

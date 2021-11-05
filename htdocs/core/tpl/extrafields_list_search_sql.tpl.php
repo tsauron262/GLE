@@ -24,6 +24,10 @@ if (! empty($extrafieldsobjectkey))	// $extrafieldsobject is the $object->table_
 		if (in_array($typ, array('chkbxlst','checkbox'))) $mode_search=4;	                            // Search on a multiselect field with sql type = text
 		if ($crit != '' && (! in_array($typ, array('select','sellist')) || $crit != '0') && (! in_array($typ, array('link')) || $crit != '-1'))
 		{
+                    /*mod drsi*/
+                    if(is_array($crit))
+                        $crit = implode (' ', $crit);
+                    /*fmoddrsi*/
 			$sql .= natural_search('ef.'.$tmpkey, $crit, $mode_search);
 		}
 	}

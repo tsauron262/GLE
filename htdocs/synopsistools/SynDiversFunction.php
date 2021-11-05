@@ -721,7 +721,8 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
                     'Ip'    => $ip,
                     'Destinataire' => $to,
                     'Sujet' => $subject,
-                    'Message' => $msg
+                    'Message' => $msg,
+                    'Error' => $mailfile->error
                 ));
                 
                 $lastMailFailedTms = (int) BimpCore::getConf('bimpcore_last_mail_failed_tms', 0);

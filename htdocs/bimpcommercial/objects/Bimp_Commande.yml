@@ -380,9 +380,9 @@ fields_tables:
                   
     totals: 
         rows: 
-#            - label: Remises
-#              value: 
-#                  callback: displayTotalRemises
+            - label: Remises
+              value: 
+                  callback: displayTotalRemises
             - label: Total HT
               value: 
                   callback: 

@@ -20,11 +20,16 @@ class OrderPDF extends BimpDocumentPDF
     public $user_commercial = null;
     public $user_suivi = null;
     public $entrepot = null;
+    public $signature_bloc = false;
 
     public function __construct($db, $doc_type = 'commande')
     {
         if (!array_key_exists($doc_type, self::$doc_types)) {
             $doc_type = 'commande';
+        }
+        
+        if ($doc_type === 'bl') {
+            $this->signature_bloc = true;
         }
 
         $this->doc_type = $doc_type;
@@ -533,6 +538,7 @@ class BLPDF extends OrderPDF
     public $num_bl = '';
     public $chiffre = 1;
     public $detail = 1;
+    public $signature_bloc = false;
 
     public function __construct($db, $shipment = null)
     {
@@ -1014,7 +1020,7 @@ class BLPDF extends OrderPDF
         return $html;
     }
 
-    public function getAfterTotauxHtml($blocSignature = false)
+    public function getAfterTotauxHtml()
     {
         if ($this->doc_type === 'bl_draft') {
             return '';

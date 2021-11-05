@@ -456,7 +456,7 @@ class Bimp_User extends BimpObject
         return $html;
     }
 
-    function showUserTheme($object, $edit = 0, $foruserprofile = false)
+    public function showUserTheme($object, $edit = 0, $foruserprofile = false)
     {
         global $conf, $langs;
 

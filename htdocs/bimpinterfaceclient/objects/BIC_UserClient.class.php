@@ -723,7 +723,7 @@ class BIC_UserClient extends BimpObject
             $errors = parent::create($warnings, $force_create);
 
             if (!count($errors)) {
-                if ($this->use_email && BimpTools::getPostFieldValue('send_mail', 0)) {
+                if ($this->use_email && (int) BimpTools::getPostFieldValue('send_mail', 1)) {
                     if (stripos(DOL_URL_ROOT, $_SERVER['SERVER_NAME']) === false) {
                         $url = $_SERVER['SERVER_NAME'] . DOL_URL_ROOT . '/bimpinterfaceclient/client.php?email=' . $this->getData('email');
                     } else {

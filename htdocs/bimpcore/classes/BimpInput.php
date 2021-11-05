@@ -42,7 +42,7 @@ class BimpInput
                 break;
 
             case 'text':
-                if (isset($options['hashtags']) && (int) $options['hashtags']) {
+                if (BimpCore::isContextPrivate() && isset($options['hashtags']) && (int) $options['hashtags']) {
                     $extra_class .= ($extra_class ? ' ' : '') . 'allow_hashtags';
                 }
 
@@ -92,7 +92,7 @@ class BimpInput
                     $html .= '/>';
                 }
 
-                if (isset($options['hashtags']) && (int) $options['hashtags']) {
+                if (BimpCore::isContextPrivate() && isset($options['hashtags']) && (int) $options['hashtags']) {
                     $html .= BimpRender::renderInfoIcon('fas_hashtag', 'Vous pouvez utiliser le symbole # pour inclure un lien objet');
                 }
 
@@ -207,7 +207,7 @@ class BimpInput
                 break;
 
             case 'textarea':
-                if (isset($options['hashtags']) && (int) $options['hashtags']) {
+                if (BimpCore::isContextPrivate() && isset($options['hashtags']) && (int) $options['hashtags']) {
                     $extra_class .= ($extra_class ? ' ' : '') . 'allow_hashtags';
                 }
 
@@ -230,7 +230,7 @@ class BimpInput
                     $html .= '<p class="smallInfo">Max ' . $options['maxlength'] . ' caractères</p>';
                 }
 
-                if (isset($options['hashtags']) && (int) $options['hashtags']) {
+                if (BimpCore::isContextPrivate() && isset($options['hashtags']) && (int) $options['hashtags']) {
                     $html .= '<p class="inputHelp">';
                     $html .= 'Vous pouvez utiliser le symbole # pour inclure un lien objet';
                     $html .= '</p>';
@@ -281,7 +281,7 @@ class BimpInput
                 }
                 $doleditor = new DolEditor($field_name, $value, '', 160, 'dolibarr_details', '', false, true, true, ROWS_4, '90%');
 
-                if (isset($options['hashtags']) && (int) $options['hashtags']) {
+                if (BimpCore::isContextPrivate() && isset($options['hashtags']) && (int) $options['hashtags']) {
                     $doleditor->extra_class = 'allow_hashtags';
 
                     $html .= '<p class="inputHelp">';

@@ -162,6 +162,7 @@ class InterfaceClientController extends BimpPublicController
                 $headers = array(
                     'obj'             => 'Elément lié',
                     'doc_type'        => 'Type de document',
+                    'doc_ref'         => 'Référence document',
                     'public_document' => 'Fichier PDF',
                     'public_sign'     => array('label' => '', 'col_style' => 'text-align: right')
                 );
@@ -173,6 +174,7 @@ class InterfaceClientController extends BimpPublicController
                         $rows[] = array(
                             'obj'             => $signature->displayObj(),
                             'doc_type'        => $signature->displayDocType(),
+                            'doc_ref'         => $signature->displayDocRef(),
                             'public_document' => $signature->displayPublicDocument(),
                             'public_sign'     => $signature->dispayPublicSign(),
                         );

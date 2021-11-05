@@ -323,7 +323,7 @@ class Bimp_Commande extends BimpComm
                 return 1;
 
             case 'paiement_comptant':
-                if ((int) $this->getData('fk_statut') != 0 and !$user->admin)
+                if ((int) $this->getData('fk_statut') != 0 and!$user->admin)
                     return 0;
                 return 1;
         }
@@ -553,16 +553,16 @@ class Bimp_Commande extends BimpComm
                     } else {
                         $errors[] = 'Vous n\'avez pas la permission';
                     }
-                    
+
                     global $user;
-                    
+
                     if (in_array((int) $user->login, array('admin', 'f.martinez', 't.sauron'))) {
                         $buttons[] = array(
                             'label'   => 'Forcer Validation (no triggers)',
                             'icon'    => 'fas_check',
                             'onclick' => $this->getJsActionOnclick('validate', array(
                                 'forced_by_dev' => 1
-                            ), array(
+                                    ), array(
                                 'confirm_msg' => 'Veuillez confirmer la validation de cette commande - Mode forcé pour dev uniquement (pas de triggers)'
                             ))
                         );
@@ -1974,7 +1974,7 @@ class Bimp_Commande extends BimpComm
         $html .= '</tr>';
         $html .= '</tbody>';
         $html .= '</table>';
-        $title = BimpRender::renderIcon('fas_euro-sign', 'iconLeft');
+        $title = BimpRender::renderIcon('fas_euro-sign', 'iconLeft') . 'Montants totaux';
 
         return BimpRender::renderPanel($title, $html, '', array(
                     'type'     => 'secondary',
@@ -3096,11 +3096,30 @@ class Bimp_Commande extends BimpComm
         if (!$forced_by_dev) {
             $result = $this->dol_object->valid($user, (int) $this->getData('entrepot'));
         } else {
-            $result = 1;
-            $errors = $this->onValidate($warnings);
+            $client = $this->getChildObject('client');
+
+            if (!BimpObject::objectLoaded($client)) {
+                $errors[] = 'Client invalide';
+            } else {
+                $ref = $this->getRef();
+                if (empty($ref) || preg_match('/^[\(]?PROV/i', $ref)) {
+                    $ref = $this->dol_object->getNextNumRef($client->dol_object);
+
+                    if (!$ref) {
+                        $errors[] = 'Echec new ref';
+                    } else {
+                        $this->updateField('ref', $ref);
+                    }
+                }
+            }
 
             if (!count($errors)) {
-                $this->updateField('fk_statut', 1);
+                $result = 1;
+                $errors = $this->onValidate($warnings);
+
+                if (!count($errors)) {
+                    $this->updateField('fk_statut', 1);
+                }
             }
         }
 
@@ -3805,13 +3824,13 @@ class Bimp_Commande extends BimpComm
         // Validation encours
         if (empty($errors)) {
             if ($this->field_exists('paiement_comptant') and $this->getData('paiement_comptant')) {
-                
+
                 $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
                 $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, $this->id, ValidComm::TYPE_ENCOURS);
                 if ($demande)
                     $demande->delete($warnings, 1);
                 $warnings[] = ucfirst($this->getLabel('the')) . ' ' . $this->getNomUrl(1, true) . " a été validée.";
-                $msg_mail = "Bonjour,<br/><br/>La commande " . $this->getNomUrl(1, true) ;
+                $msg_mail = "Bonjour,<br/><br/>La commande " . $this->getNomUrl(1, true);
                 $msg_mail .= " a été validée financièrement par paiement comptant par ";
                 $msg_mail .= ucfirst($user->firstname) . ' ' . strtoupper($user->lastname);
                 $msg_mail .= "<br/>Merci de vérifier le paiement ultérieurement.";
@@ -3824,7 +3843,7 @@ class Bimp_Commande extends BimpComm
                     if ($demande)
                         $demande->delete($warnings, 1);
                     $warnings[] = ucfirst($this->getLabel('the')) . ' ' . $this->getNomUrl(1, true) . " a été validée (validation financière automatique, voir configuration client)";
-                    $msg_mail = "Bonjour,<br/><br/>La commande " . $this->getNomUrl(1, true) ;
+                    $msg_mail = "Bonjour,<br/><br/>La commande " . $this->getNomUrl(1, true);
                     $msg_mail .= " a été validée financièrement par la configuration du client ";
                     $msg_mail .= "(utilisateur: " . ucfirst($user->firstname) . ' ' . strtoupper($user->lastname) . ")";
                     mailSyn2("Validation financière forcée " . $client_facture->getData('code_client') . ' - ' . $client_facture->getData('nom'), 'a.delauzun@bimp.fr', "gle@bimp.fr", $msg_mail);

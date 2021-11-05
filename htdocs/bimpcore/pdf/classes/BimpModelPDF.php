@@ -176,11 +176,15 @@ Abstract class BimpModelPDF
         }
     }
 
-    public function writeFullBlock($html)
+    public function writeFullBlock($html, &$page = 0, &$yPos = 0)
     {
         $pdf = clone $this->pdf;
 
         $page_num = $this->pdf->getPage();
+
+        $page = $page_num;
+        $yPos = $this->pdf->getY();
+
         $this->writeContent($html);
         $cur_page = (int) $this->pdf->getPage();
 
@@ -188,6 +192,10 @@ Abstract class BimpModelPDF
             unset($this->pdf);
             $this->pdf = $pdf;
             $this->pdf->newPage();
+
+            $page++;
+            $yPos = $this->pdf->getY();
+
             $this->writeContent($html);
         } else {
             unset($pdf);

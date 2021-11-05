@@ -113,8 +113,8 @@ function onSocieteSiretOrSirenChange($input, field, value) {
                     if (typeof (result.data.siret) === 'string' && result.data.siret) {
                         $form.find('[name="siret"]').val(result.data.siret);
                     }
-                    
-                    if(result.data.siret.substr(0,1) == '1' || result.data.siret.substr(0,1) == '2'){
+
+                    if (result.data.siret.substr(0, 1) == '1' || result.data.siret.substr(0, 1) == '2') {
                         $form.find('[name="fk_typent"]').val(5);
                         $form.find('[name="fk_typent"]').change();
                     }
@@ -145,7 +145,7 @@ function onSocieteSiretOrSirenChange($input, field, value) {
 
                     if (typeof (result.data.outstanding_limit) === 'string' && result.data.outstanding_limit) {
                         $form.find('[name="outstanding_limit_credit_safe"]').val(result.data.outstanding_limit);
-                        $form.find('[name="outstanding_limit_credit_safe"]').parent().find('span').html(result.data.outstanding_limit+" €");
+                        $form.find('[name="outstanding_limit_credit_safe"]').parent().find('span').html(result.data.outstanding_limit + " €");
                     }
 
                     if (typeof (result.data.capital) === 'string' && result.data.capital) {
@@ -163,7 +163,7 @@ function onSocieteSiretOrSirenChange($input, field, value) {
                     if (typeof (result.data.lettrecreditsafe) === 'string' && result.data.lettrecreditsafe) {
                         $form.find('[name="lettrecreditsafe"]').val(result.data.lettrecreditsafe);
                     }
-                    
+
                     if (typeof (result.data.alert) === 'string' && result.data.alert) {
                         alert(result.data.alert)
                     }
@@ -229,8 +229,10 @@ function onClientAddFreeRelanceFormSubmit($form, extra_data) {
     return extra_data;
 }
 
-function getBadge(text, size, style){
-    return '<span class="badge badge-pill badge-'+style+'" style="size:'+size+'">'+text+'</span>';
+// Divers: 
+
+function getBadge(text, size, style) {
+    return '<span class="badge badge-pill badge-' + style + '" style="size:' + size + '">' + text + '</span>';
 }
 
 $(document).ready(function () {

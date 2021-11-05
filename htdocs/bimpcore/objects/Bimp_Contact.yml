@@ -9,6 +9,13 @@ icon: far_id-card
 parent_object: Bimp_Societe
 parent_id_property: fk_soc
 
+list_page_url: 
+    controller: clients
+    url_params: 
+        tab: contacts
+header_list_name: default
+header_edit_form: default
+
 name_syntaxe: <firstname> <lastname>
 
 nom_url: 
@@ -225,7 +232,6 @@ forms:
         msgs: 
             - type: warning
               content: Attention, si vous avez des commandes en cours <b>à livrer à ce contact</b>, toute modification de l'adresse affectera la livraison de ces commandes.<br/>Veuillez de préférence créer un nouveau contact si vous ne souhaitez pas modifier l'adresse de livraison des commandes en cours.
-                
             
 fields_tables: 
     identity:
@@ -266,9 +272,12 @@ fields_tables:
         rows: 
             - field: note_public
             - field: note_private
+            
 views: 
     default: 
         rows: 
+            - cols: 
+                - type: object_header
             - cols: 
                 - type: fields_table
                   col_lg: 6

@@ -58,9 +58,6 @@ fields:
                 type: callback
                 method: displayDocType
         
-    doc_name: 
-        label: Fichier document
-        
     type: 
         label: Type signature
         type: int
@@ -77,9 +74,15 @@ fields:
         type: bool
         default_value: 0
         
+    date_open: 
+        label: Date début de demande signature
+        type: date
+        
     date_signed: 
         label: Date signature
         type: datetime
+        input: 
+            display_now: 1
 
     id_client: 
         label: Client
@@ -127,25 +130,24 @@ fields:
     email_signataire:
         label: E-mail signataire
         
+    fonction_signataire: 
+        label: Fonction signataire
+        
     ip_signataire: 
         label: Adresse IP signataire
         
     base_64_signature:
         label: Image signature
     
-    public_url:
-        label: Numéro encodé
+    allow_elec: 
+        label: Signature électronique autorisée
+        type: bool
+        default_value: 1
         
-    public_access_code:
-        label: Code d'accès à distance
-        
-    public_access_date_from:
-        label: Date d'ouverture de l'accès
-        type: datetime
-        
-    public_access_date_to:
-        label: Date de fermeture de l'accès
-        type: datetime
+    allow_dist: 
+        label: Signature électronique à distance autorisée
+        type: bool
+        default_value: 1
         
 forms:
     open_sign_dist:
@@ -193,6 +195,14 @@ forms:
                 nom_signataire: 
                     callback: getDefaultNomSignataire
         rows: 
+            - custom: 1
+              hidden: 1
+              label: Dépôt doc signé
+              input_name: sign_papier
+              input: 
+                  type: hidden
+              value: 1
+            - field: date_signed
             - field: nom_signataire
               required: 1
             - custom: 1
@@ -211,9 +221,15 @@ forms:
                     callback: getDefaultNomSignataire
                 email_signataire: 
                     callback: getDefaultEmailSignataire
+                fonction_signataire: 
+                    callback: getDefaultFonctionSignataire
+                    
         rows: 
             - field: nom_signataire
             - field: email_signataire
+            - field: fonction_signataire
+              show: 
+                  callback: isClientCompany
             - custom: 1
               label: Signature
               input_name: signature
@@ -227,13 +243,78 @@ forms:
             fields: 
                 nom_signataire: 
                     callback: getDefaultNomSignataire
+                fonction_signataire: 
+                    callback: getDefaultFonctionSignataire
         rows: 
             - field: nom_signataire
+            - field: fonction_signataire
+              show: 
+                  callback: isClientCompany
             - custom: 1
               label: Signature
               input_name: signature
               input: 
                   type: signature_pad
+                  
+    signature_params: 
+        title: Ajuster la position de la signature sur le document PDF
+        icon: fas_arrows-alt
+        values: 
+            callback: getSignatureParamsFormValues
+        rows: 
+            - custom: 1
+              label: N° de Page
+              input_name: page
+              input: 
+                  type: qty
+            - custom: 1
+              label: Position en X (mm)
+              input_name: x_pos
+              input: 
+                  type: qty
+            - custom: 1
+              label: Position en Y (mm)
+              input_name: y_pos
+              input: 
+                  type: qty
+            - custom: 1
+              label: Décalage en X du nom (mm)
+              input_name: nom_x_offset
+              input: 
+                  type: qty
+              show: 
+                  callback: isClientCompany
+            - custom: 1
+              label: Décalage en Y du nom (mm)
+              input_name: nom_y_offset
+              input: 
+                  type: qty
+              show: 
+                  callback: isClientCompany
+            - custom: 1
+              label: Décalage en X de la fonction (mm)
+              input_name: fonction_x_offset
+              input: 
+                  type: qty
+              show: 
+                  callback: isClientCompany
+            - custom: 1
+              label: Décalage en Y de la fonction (mm)
+              input_name: fonction_y_offset
+              input: 
+                  type: qty
+              show: 
+                  callback: isClientCompany
+            - custom: 1
+              label: Décalage en X de la date (mm)
+              input_name: date_x_offset
+              input: 
+                  type: qty
+            - custom: 1
+              label: Décalage en Y de la date (mm)
+              input_name: date_y_offset
+              input: 
+                  type: qty
             
 fields_tables: 
     infos: 
@@ -245,13 +326,16 @@ fields_tables:
                   callback: displayObj
             - field: doc_type
               display: name
-            - field: doc_name
+            - label: Référence document
+              value: 
+                  callback: displayDocRef
             - field: id_client
             - field: id_contact
+            - field: date_open
             - field: signed
             
     signature:
-        icon: signature
+        icon: fas_signature
         title: Infos signature
         show: 
             field_value: signed
@@ -263,18 +347,21 @@ fields_tables:
                   field_value: id_user_client_signataire
             - field: nom_signataire
             - field: email_signataire
+            - field: fonction_signataire
+              show: 
+                  callback: isClientCompany
             - field: ip_signataire
-            
-            
+            - label: Image signature
+              show: 
+                  callback: showSignatureImage
+              value: 
+                  callback: renderSignatureImage
+                        
     public_access:
         icon: fas_sign-in-alt
         title: Accès espace client
         rows: 
             - field: allowed_users_client
-#            - field: public_url
-#            - field: public_access_code
-#            - field: public_access_date_from
-#            - field: public_access_date_to
             
 views:
     default: 
@@ -305,6 +392,10 @@ views:
                 - type: custom
                   custom: 
                       callback: renderNotesList
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderRelancesReportsList
               
 lists_cols: 
     obj: 
@@ -315,6 +406,11 @@ lists_cols:
     doc_type: 
         display: name
         
+    doc_ref: 
+        label: Référence document
+        value: 
+            callback: displayDocRef
+        
     public_sign: 
         label: Signer
         value: 
@@ -324,7 +420,7 @@ lists_cols:
         label: Document
         value: 
             callback: displayPublicDocument
-        
+       
 lists: 
     default: 
         configurable: 1
@@ -347,6 +443,7 @@ lists:
         cols: 
             obj: 
             doc_type: 
+            doc_ref: 
             signed: 
             type: 
             date_signed: 
@@ -361,11 +458,24 @@ lists:
             obj: 
                 label: Elément lié
             doc_type: 
+            doc_ref: 
             type:
             date_signed: 
             nom_signataire: 
             public_document: 
             public_sign: 
+                
+cards: 
+    default: 
+        view_btn: 1
+        status: type
+        fields: 
+            - field: date_open
+            - field: signed
+            - field: date_signed
+            - field: nom_signataire
+            
+              
             
             
         

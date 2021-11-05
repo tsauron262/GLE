@@ -4,9 +4,9 @@ CREATE TABLE IF NOT EXISTS `llx_bimpcore_signature` (
   `obj_name` varchar(255) NOT NULL DEFAULT '',
   `id_obj` int(11) NOT NULL DEFAULT 0,
   `doc_type` varchar(255) NOT NULL DEFAULT '',
-  `doc_name` varchar(255) NOT NULL DEFAULT '',
   `type` int(11) NOT NULL DEFAULT 0,
   `signed` tinyint(1) NOT NULL DEFAULT 0,
+  `date_open` datetime DEFAULT NULL,
   `date_signed` datetime DEFAULT NULL,
   `id_client` int(11) NOT NULL DEFAULT 0,
   `id_contact` int(11) NOT NULL DEFAULT 0,
@@ -14,10 +14,9 @@ CREATE TABLE IF NOT EXISTS `llx_bimpcore_signature` (
   `allowed_users_client` TEXT NOT NULL DEFAULT '',
   `nom_signataire` varchar(255) NOT NULL DEFAULT '',
   `email_signataire` varchar(255) NOT NULL DEFAULT '',
+  `fonction_signataire` varchar(255) NOT NULL DEFAULT '',
   `ip_signataire` varchar(255) NOT NULL DEFAULT '',
   `base_64_signature` mediumtext DEFAULT NULL,
-  `public_url` varchar(500) NOT NULL,
-  `public_access_code` varchar(32) NOT NULL,
-  `public_access_date_from` datetime DEFAULT NULL,
-  `public_access_date_to` datetime DEFAULT NULL
+  `allow_elec` tinyint(1) NOT NULL DEFAULT 1,
+  `allow_dist` tinyint(1) NOT NULL DEFAULT 1
 );

@@ -208,7 +208,7 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
     if (typeof ($resultContainer) === 'undefined') {
         $resultContainer = null;
     }
-    
+
     if (typeof (modal_scroll_bottom) === 'undefined') {
         modal_scroll_bottom = false;
     }
@@ -265,18 +265,20 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
                         });
                         if (typeof (on_form_submit) === 'function') {
                             var returned_extra_data = on_form_submit($form, extra_data);
-                            
+
                             if (!returned_extra_data) {
                                 return;
                             }
-                            
+
                             extra_data = returned_extra_data;
                         }
                         setObjectAction($(this), object_data, action, extra_data, null, $('#' + $form.attr('id') + '_result'), function (result) {
-                            if (typeof (result.warnings) !== 'undefined' && result.warnings && result.warnings.length) {
-                                bimpModal.$footer.find('.set_action_button.modal_' + $form.data('modal_idx')).remove();
-                            } else {
-                                bimpModal.removeContent(parseInt($form.data('modal_idx')));
+                            if (typeof (result.allow_reset_form) === 'undefined' || !result.allow_reset_form) {
+                                if (typeof (result.warnings) !== 'undefined' && result.warnings && result.warnings.length) {
+                                    bimpModal.$footer.find('.set_action_button.modal_' + $form.data('modal_idx')).remove();
+                                } else {
+                                    bimpModal.removeContent(parseInt($form.data('modal_idx')));
+                                }
                             }
                             if (typeof (successCallback) === 'function') {
                                 successCallback(result);

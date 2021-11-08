@@ -31,12 +31,14 @@ class BimpDocumentPDF extends BimpModelPDF
     public $maxLogoHeight = 60; // px
     public $totals = array("DEEE" => 0, "RPCP" => 0);
     public $target_label = '';
-    public $after_totaux_label = '';
     public $next_annexe_idx = 1;
     public $max_line_serials = 50;
     public $annexe_listings = array();
     public static $label_prime = "Apport externe";
     public static $label_prime2 = "Apport externe2";
+    public $signature_params = array();
+    public $signature_bloc = true;
+    public $signature_bloc_label = '';
 
     public function __construct($db)
     {
@@ -322,6 +324,7 @@ class BimpDocumentPDF extends BimpModelPDF
         $this->renderFullBlock('renderAfterLines');
         $this->renderFullBlock('renderBottom');
         $this->renderFullBlock('renderAfterBottom');
+        $this->renderSignatureBloc();
         $this->renderFullBlock('renderAnnexes');
         $this->renderAnnexeListings();
 
@@ -627,9 +630,9 @@ class BimpDocumentPDF extends BimpModelPDF
 
                     $this->acompteHt -= $line->total_ht;
                     $this->acompteTtc -= $line->total_ttc;
-                    
+
                     $this->acompteTva[$line->tva_tx] -= $line->total_tva;
-                    
+
                     continue;
                 }
 
@@ -899,7 +902,7 @@ class BimpDocumentPDF extends BimpModelPDF
         // Remise globale
         if (!empty($remises_globales)) {
             foreach ($remises_globales as $id_rg => $rg_amount_ttc) {
-                if($rg_amount_ttc != 0){
+                if ($rg_amount_ttc != 0) {
                     $rg = BimpCache::getBimpObjectInstance('bimpcommercial', 'RemiseGlobale', (int) $id_rg);
                     if (BimpObject::objectLoaded($rg)) {
                         $remise_label = $rg->getData('label');
@@ -928,8 +931,8 @@ class BimpDocumentPDF extends BimpModelPDF
                         $row['total_ttc'] = BimpTools::displayMoneyValue(-$rg_amount_ttc, '', 0, 0, 1);
                     if (isset($remises_globalesHt[$id_rg]))
                         $row['total_ht'] = BimpTools::displayMoneyValue(-$remises_globalesHt[$id_rg], '', 0, 0, 1);
-    //                if (!$this->hideReduc)
-    //                    $row['pu_remise'] = BimpTools::displayMoneyValue(-$rg_amount_ttc, '');
+                    //                if (!$this->hideReduc)
+                    //                    $row['pu_remise'] = BimpTools::displayMoneyValue(-$rg_amount_ttc, '');
 
                     if ($this->hide_pu) {
                         unset($row['pu_ht']);
@@ -1168,9 +1171,9 @@ class BimpDocumentPDF extends BimpModelPDF
                 $i++;
             }
         }
-        foreach($this->acompteTva as $rate => $montant){
+        foreach ($this->acompteTva as $rate => $montant) {
             $this->tva[$rate] += $montant;
-            $this->ht[$rate] += $this->acompteHt;//$montant * 100 / $rate;
+            $this->ht[$rate] += $this->acompteHt; //$montant * 100 / $rate;
         }
     }
 
@@ -1550,7 +1553,7 @@ class BimpDocumentPDF extends BimpModelPDF
         return '';
     }
 
-    public function getAfterTotauxHtml($blocSignature = true)
+    public function getAfterTotauxHtml()
     {
         $html .= '<table style="width: 95%" cellpadding="3">';
 
@@ -1576,11 +1579,33 @@ class BimpDocumentPDF extends BimpModelPDF
             $html .= '</tr>';
         }
 
-        if ($blocSignature) {
+        $html .= '</table>';
+
+        return $html;
+    }
+
+    public function renderAfterBottom()
+    {
+        
+    }
+
+    public function renderSignatureBloc()
+    {
+        // /!\ !!!!! Ne pas modifier ce bloc : réglé précisément pour incrustation signature électronique. 
+
+        if ($this->signature_bloc) {
+            $yPosOffset = 0;
+            
             $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $this->object->socid);
+            $html = '<table style="width: 95%;font-size: 7px;" cellpadding="3">';
             $html .= '<tr>';
-            if ($client->getData('fk_typent') != 8) {
-                $html .= '<td style="text-align:center;"><i><b>' . $this->after_totaux_label . '</b></i></td>';
+            $html .= '<td style="width: 50%"></td>';
+            $html .= '<td style="width: 50%">';
+
+            $html .= '<table cellpadding="3">';
+            $html .= '<tr>';
+            if ($client->isCompany()) {
+                $html .= '<td style="text-align:center;"><i><b>' . $this->signature_bloc_label . '</b></i></td>';
 
                 $html .= '<td style="font-size: 6px">Signature + Cachet avec SIRET :</td>';
                 $html .= '</tr>';
@@ -1601,24 +1626,48 @@ class BimpDocumentPDF extends BimpModelPDF
 
                 $html .= '<tr>';
                 $html .= '<td>Date :</td>';
+
+                $yPosOffset = 7;
+                $this->signature_params = array(
+                    'x_pos'             => 146,
+                    'width'             => 43,
+                    'nom_x_offset'      => -32,
+                    'nom_y_offset'      => 0,
+                    'nom_width'         => 30,
+                    'fonction_x_offset' => -32,
+                    'fonction_y_offset' => 11,
+                    'fonction_width'    => 30,
+                    'date_x_offset'     => -32,
+                    'date_y_offset'     => 16,
+                );
             } else {
-                $html .= '<td><br/></td><td><br/></td>';
-                $html .= '</tr>';
-                $html .= '<tr>';
-                $html .= '<td style="text-align: right">Signature : <br/>Date : </td>';
-                $html .= '<td style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/><br/></td>';
+                $html .= '<td style="text-align: right">Signature :<br/>Date :</td>';
+                $html .= '<td style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/><br/><br/></td>';
+
+                $yPosOffset = 2;
+                $this->signature_params = array(
+                    'x_pos'         => 146,
+                    'width'         => 43,
+                    'date_x_offset' => -16,
+                    'date_y_offset' => 7,
+                );
             }
+
             $html .= '</tr>';
+            $html .= '</table>';
+
+            $html .= '</td>';
+            $html .= '</tr>';
+            $html .= '</table>';
+
+            $page = 0;
+            $yPos = 0;
+
+            $this->writeFullBlock($html, $page, $yPos);
+
+            $this->signature_params['y_pos'] = $yPos + $yPosOffset;
+            $this->signature_params['page'] = $page;
         }
-
-        $html .= '</table>';
-
-        return $html;
-    }
-
-    public function renderAfterBottom()
-    {
-        
     }
 
     public function renderAnnexes()

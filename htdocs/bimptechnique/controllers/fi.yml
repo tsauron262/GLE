@@ -5,7 +5,6 @@ title:
         method: getPageTitle
         
 js: 
-    0: /bimptechnique/views/js/SignaturePad.object.js
     1: /bimptechnique/views/js/signature.js
     
 css: 

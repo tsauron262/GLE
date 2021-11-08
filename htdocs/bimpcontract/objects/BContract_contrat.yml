@@ -1324,16 +1324,25 @@ views:
                           method: renderNotesList
                           params:
                               - 1
-            - cols:
+    inter:
+        show: 
+            callback:
+                method: isActive
+                object: fiche_inter
+                is_static: 1
+        title: Interventions
+        rows:                                                   
+            - cols: 
+                - type: custom
+                  custom: 
+                        callback: 
+                            method: renderFi
                 - type: list
-                  show: 
-                      callback:
-                          method: isActive
-                          object: fiche_inter
-                          is_static: 1
                   list: 
+                      title: Fi du contrat
                       name: contrat
-                      object: fiche_inter
+                      panel: 1
+                      object: fiche_inter 
 
     file:
         title: Fichiers joint

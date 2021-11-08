@@ -181,12 +181,20 @@ class Bimp_Societe extends BimpDolObject
 
     public function isCompany()
     {
-        $id_typeent = (int) $this->getData('fk_typent');
-        if ($id_typeent) {
-            if (!in_array($this->db->getValue('c_typent', 'code', '`id` = ' . $id_typeent), array('TE_PRIVATE', 'TE_UNKNOWN'))) {
-                return 1;
+        if (BimpObject::objectLoaded($this->dol_object)) {
+            if (in_array($this->dol_object->typent_code, array('TE_PRIVATE', 'TE_UNKNOWN'))) {
+                return 0;
             }
-            return 0;
+
+            return 1;
+        } elseif ($this->isLoaded()) {
+            $id_typeent = (int) $this->getData('fk_typent');
+            if ($id_typeent) {
+                if (!in_array($this->db->getValue('c_typent', 'code', '`id` = ' . $id_typeent), array('TE_PRIVATE', 'TE_UNKNOWN'))) {
+                    return 1;
+                }
+                return 0;
+            }
         }
 
         return 1;
@@ -894,6 +902,17 @@ class Bimp_Societe extends BimpDolObject
         }
 
         return null;
+    }
+
+    public function getCommercialEmail()
+    {
+        $comm = $this->getCommercial();
+
+        if (BimpObject::objectLoaded($comm)) {
+            return BimpTools::cleanEmailsStr($comm->getData('email'));
+        }
+
+        return '';
     }
 
     public function getIdCommercials()

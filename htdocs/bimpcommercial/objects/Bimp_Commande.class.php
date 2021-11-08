@@ -1974,7 +1974,7 @@ class Bimp_Commande extends BimpComm
         $html .= '</tr>';
         $html .= '</tbody>';
         $html .= '</table>';
-        $title = BimpRender::renderIcon('fas_euro-sign', 'iconLeft');
+        $title = BimpRender::renderIcon('fas_euro-sign', 'iconLeft') . 'Montants totaux';
 
         return BimpRender::renderPanel($title, $html, '', array(
                     'type'     => 'secondary',

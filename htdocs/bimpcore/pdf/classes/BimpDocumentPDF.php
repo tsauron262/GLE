@@ -1553,7 +1553,7 @@ class BimpDocumentPDF extends BimpModelPDF
         return '';
     }
 
-    public function getAfterTotauxHtml($blocSignature = true)
+    public function getAfterTotauxHtml()
     {
         $html .= '<table style="width: 95%" cellpadding="3">';
 

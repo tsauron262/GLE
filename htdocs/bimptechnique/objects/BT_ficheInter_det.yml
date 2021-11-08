@@ -67,7 +67,6 @@ fields:
             with_secondes: 0
         displays:
             default:
-                label: Durée de l'intervention
                 type: timer
             
     date:
@@ -356,6 +355,7 @@ filters_panels:
                     5: Déplacement sous contrat
                     6: Déplacement vendu
                     7: Intervention en interne
+          facturable:
 lists:
     all:
         title: Listes des interventions
@@ -369,14 +369,14 @@ lists:
                 label: Type d'intervention
                 value:
                     callback: displayTypeInList
-            parent:ref:
-                label: Référence de la FI
+            fk_fichinter:
             parent:fk_soc:
             parent:fk_user_tech:
             parent:datei:
             duree:
                 has_total: 1
                 total_type: timer
+            total_ht:
     in_fiche:
         title: Liste des interventions
         objects_change_reload: BT_ficheInter

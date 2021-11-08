@@ -629,6 +629,7 @@ lists:
                 name: fk_contrat
                 filter: 
                     request: id
+            is_new: unset
                     
     tech:
         extends: default

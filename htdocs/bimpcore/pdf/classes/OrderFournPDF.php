@@ -253,7 +253,7 @@ class OrderFournPDF extends BimpDocumentPDF
         
     }
 
-    public function getAfterTotauxHtml($blocSignature = true)
+    public function getAfterTotauxHtml()
     {
         return '';
     }

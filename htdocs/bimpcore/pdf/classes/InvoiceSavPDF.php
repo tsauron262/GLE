@@ -47,7 +47,7 @@ class InvoiceSavPDF extends InvoicePDF
         $this->header_vars['header_right'] = $rows;
     }
 
-    public function getAfterTotauxHtml()
+    public function getAfterTotauxHtml($blocSignature = true)
     {
         return '';
     }

@@ -657,7 +657,7 @@ class BimpComm extends BimpDolObject
             if ($this->isActionAllowed('useRemise') && $this->canSetAction('useRemise')) {
                 if ($this->object_name === 'Bimp_Commande' || (int) $this->getData('fk_statut') === 0) {
                     $buttons[] = array(
-                        'label'       => 'Ajouter un avoir disponible',
+                        'label'       => 'Déduire un crédit disponible',
                         'icon_before' => 'fas_file-import',
                         'classes'     => array('btn', 'btn-default'),
                         'attr'        => array(

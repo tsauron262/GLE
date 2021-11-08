@@ -393,7 +393,7 @@ class BC_Input extends BimpComponent
                 $options['tab_key_as_enter'] = isset($this->params['tab_key_as_enter']) ? $this->params['tab_key_as_enter'] : 0;
                 $options['maxlength'] = isset($this->params['maxlength']) ? $this->params['maxlength'] : '';
                 $options['values'] = isset($this->params['values']) ? $this->params['values'] : array();
-                $options['hashtags'] = (int) (isset($this->params['hashtags']) && (int) $this->params['hashtags'] ? $this->params['hashtags'] : isset($this->field_params['hashtags']) ? $this->field_params['hashtags'] : 0);
+                $options['hashtags'] = (int) (isset($this->params['hashtags']) && (int) $this->params['hashtags'] ? $this->params['hashtags'] : (isset($this->field_params['hashtags']) ? $this->field_params['hashtags'] : 0));
                 break;
 
             case 'select':

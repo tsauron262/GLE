@@ -297,7 +297,7 @@
                         $sujet = $object->getRef() . " - Reconduction tacite - " . $client->getRef() . ' ' . $client->getName();
                         $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $object->getData('fk_commercial_suivi'));
                         $message = "Bonjour " . $commercial->getName() . "<br />Votre contrat N°" . $object->getNomUrl() . " pour le client "
-                                . $client->getNomUrl() . "(".$client->getName().") est renouvellé tacitement dans " . $diff->days . " jour.s";
+                                . $client->getNomUrl() . "(".$client->getName().") sera renouvelé tacitement dans " . $diff->days . " jour.s";
                         
                         $bimpMail = new BimpMail($sujet, $commercial->getData('email'), null, $message);
                         if($bimpMail->send()) {

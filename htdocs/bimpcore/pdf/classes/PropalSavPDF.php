@@ -108,7 +108,7 @@ class SavRestitutePDF extends PropalSavPDF
 {
 
     public $restitution_sav = 1;
-    public $after_totaux_label = '';
+    public $signature_bloc_label = '';
 
     public function initData()
     {

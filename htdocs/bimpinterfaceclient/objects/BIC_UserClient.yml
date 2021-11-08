@@ -67,6 +67,9 @@ fields:
     email:
         label: E-mail
         required: 1
+        default_value: 
+            callback: getDefaultEmail
+        depends_on: id_contact
         
     password:
         label: Mot de passe 
@@ -103,10 +106,10 @@ forms:
         rows:
             id_client: 
                 field: id_client
-            email: 
-                field: email
             contact: 
                 field: id_contact
+            email: 
+                field: email
             role: 
                 field: role
             status: 
@@ -138,6 +141,26 @@ forms:
             send_pw: unset
         
 fields_tables:
+    infos: 
+        title: Infos
+        icon: fas_info-circle
+        rows: 
+            - field: email
+            - field: role
+              edit: 1
+            - field: status
+              edit: 1
+              
+    client: 
+        title: Client associé
+        icon: fas_user-circle
+        rows: 
+            - field: id_client
+              display: card
+            - field: id_contact
+              display: card
+        
+              
     public:
         panel: 0
         rows: 
@@ -147,6 +170,24 @@ fields_tables:
             - field: status
 
 views:
+    default: 
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: infos
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: client
+            
     public: 
         title: Mon compte utilisateur
         rows: 
@@ -171,8 +212,13 @@ views:
                                 
 lists:
     default:
-        checkboxes: 0
+        checkboxes: 1
         configurable: 1
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les utilisateurs sélectionnés
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
         sort_field: id
         sort_way: desc
         n: 10
@@ -200,6 +246,8 @@ lists:
         icon: fas_users
         extends: client
         configurable: 0
+        checkboxes: 0
+        bulk_actions: unset
         page_btn: 0
         edit_form: public_edit
         add_form_name: public

@@ -1,4 +1,6 @@
 var inputsEvents = [];
+var bimpSignaturePads = [];
+
 function addInputEvent(form_id, input_name, event, callback) {
     for (i in inputsEvents) {
         if (inputsEvents[i].form_id === form_id &&
@@ -51,7 +53,6 @@ function saveObjectFromForm(form_id, $button, successCallback, on_save, on_submi
         on_save = $form.data('on_save');
     }
 
-    console.log(data);
     BimpAjax('saveObject', data, $resultContainer, {
         $form: $form,
         form_id: form_id,
@@ -115,17 +116,35 @@ function prepareFormSubmit($form) {
             var data_type = $(this).data('data_type');
             var field_name = $(this).data('field_name');
             var field_prefix = $(this).data('field_prefix');
+            if (typeof (field_prefix) === 'undefined') {
+                field_prefix = '';
+            }
+            
             if (field_name) {
-                switch (data_type) {
-                    case 'json':
-                        var $input = $(this).find('[name="' + field_prefix + field_name + '"]');
-                        if (!$input.length) {
-                            var values = getJsonInputSubValues($(this), field_name, true);
-                            var val_str = JSON.stringify(values);
-                            val_str = val_str.replace(/"/g, '&quot;');
-                            $(this).prepend('<input type="hidden" name="' + field_prefix + field_name + '" value="' + val_str + '"/>');
+                if ($(this).find('.signaturePadContainer').length) {
+                    var $signatureContainer = $(this).find('.signaturePadContainer');
+                    var $input = $(this).find('input[name="' + field_name + '"]');
+                    var pad_id = $signatureContainer.data('pad_id');
+
+                    if (pad_id && $input.length) {
+                        if (typeof (bimpSignaturePads[pad_id]) !== 'undefined') {
+                            $input.val(bimpSignaturePads[pad_id].toDataURL('image/png'));
+                        } else {
+                            $input.val('');
                         }
-                        break;
+                    }
+                } else {
+                    switch (data_type) {
+                        case 'json':
+                            var $input = $(this).find('[name="' + field_prefix + field_name + '"]');
+                            if (!$input.length) {
+                                var values = getJsonInputSubValues($(this), field_name, true);
+                                var val_str = JSON.stringify(values);
+                                val_str = val_str.replace(/"/g, '&quot;');
+                                $(this).prepend('<input type="hidden" name="' + field_prefix + field_name + '" value="' + val_str + '"/>');
+                            }
+                            break;
+                    }
                 }
             }
         });
@@ -358,8 +377,11 @@ function submitForm(form_id) {
 
 function loadObjectFormFromForm(title, result_input_name, parent_form_id, module, object_name, form_name, id_parent, reload_input, $button, values, id_obj) {
     var $form = $('#' + parent_form_id);
-    if (typeof (id_obj) == 'undefined')
+    
+    if (typeof (id_obj) === 'undefined'){
         id_obj = 0;
+    }
+    
     if (!$form.length) {
         bimp_msg('Une erreur est survenue. Impossible de charger le formulaire (1)', 'danger');
         return;
@@ -472,8 +494,12 @@ function loadObjectFormFromForm(title, result_input_name, parent_form_id, module
                                                         $resultInput.val(saveResult.id_object);
                                                     }
                                                     var fields = getInputsValues(bimpAjax.$parentForm);
+                                                    
                                                     var $inputContainer = bimpAjax.$parentForm.find('.' + bimpAjax.result_input_name + '_inputContainer');
                                                     if ($inputContainer.data('multiple') || $inputContainer.find('.check_list_container').length) {
+                                                        if (typeof(fields[bimpAjax.result_input_name]) === 'undefined' || !fields[bimpAjax.result_input_name]) {
+                                                            fields[bimpAjax.result_input_name] = [];
+                                                        }
                                                         fields[bimpAjax.result_input_name].push(saveResult.id_object);
                                                     } else {
                                                         fields[bimpAjax.result_input_name] = saveResult.id_object;
@@ -921,6 +947,7 @@ function getInputValue($inputContainer) {
     var data_type = $inputContainer.data('data_type');
     var multiple = $inputContainer.data('multiple');
     var check_list = $inputContainer.data('check_list');
+
     if (typeof (check_list) === 'undefined') {
         check_list = $inputContainer.find('.check_list_container').length;
     } else {
@@ -929,7 +956,9 @@ function getInputValue($inputContainer) {
             check_list = 0;
         }
     }
+
     var value = '';
+
     if (multiple || check_list) {
         value = [];
         if (check_list) {
@@ -962,6 +991,24 @@ function getInputValue($inputContainer) {
             }
         }
     } else {
+        if (field_name && $inputContainer.find('.signaturePadContainer').length) {
+            var $signatureContainer = $inputContainer.find('.signaturePadContainer');
+            var $input = $inputContainer.find('input[name="' + field_name + '"]');
+            var pad_id = $signatureContainer.data('pad_id');
+
+            if (pad_id && $input.length) {
+                if (typeof (bimpSignaturePads[pad_id]) !== 'undefined') {
+                    value = bimpSignaturePads[pad_id].toDataURL('image/png');
+                    $input.val(value);
+                } else {
+                    value = '';
+                    $input.val('');
+                    bimp_msg('Erreur: bloc signature non trouvé pour le champ "' + field_name + '"', 'danger');
+                }
+            }
+            return value;
+        }
+
         if ($inputContainer.find('.cke').length) {
             var html_value = $('#cke_' + field_name).find('iframe').contents().find('body').html();
             $inputContainer.find('[name="' + field_name + '"]').val(html_value);
@@ -3212,6 +3259,33 @@ function setInputsEvents($container) {
     $container.find('.allow_hashtags').each(function () {
         BIH.setEvents($(this));
     });
+    $container.find('.signaturePadContainer').each(function () {
+        var pad_id = $(this).data('pad_id');
+
+        if (pad_id) {
+            var $signaturePad = $(this).find('#' + pad_id);
+
+            if ($signaturePad.length) {
+                if ($signaturePad.findParentByClass('inputContainer').width()) {
+                    $signaturePad.attr('width', $signaturePad.findParentByClass('inputContainer').width());
+                } else {
+                    $signaturePad.attr('width', '750px');
+                }
+                $signaturePad.attr('height', '350px');
+
+                var signaturePad = new SignaturePad($signaturePad[0], {
+                    backgroundColor: 'rgba(255, 255, 255, 0)',
+                    penColor: 'rgb(0, 0, 0)'
+                });
+
+                bimpSignaturePads[pad_id] = signaturePad;
+
+                $(this).find('.clearSignaturePadBtn').click(function () {
+                    signaturePad.clear();
+                });
+            }
+        }
+    });
 }
 
 function setInputEvents($form, $input) {
@@ -3936,7 +4010,7 @@ function BimpInputHashtags() {
         bih.lastSearch = '';
         bih.$modal.find('#bihObjectLabel').html('').hide();
         bih.$validateMsg.stop().slideUp(250);
-        bih.$curValueLabel.stop().slideUp(250, function() {
+        bih.$curValueLabel.stop().slideUp(250, function () {
             bih.$curValueLabel.html('');
         });
         bih.$objInput.val('').show().focus();

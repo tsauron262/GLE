@@ -208,8 +208,7 @@ class BimpObject extends BimpCache
 
         $this->config = new BimpConfig(DOL_DOCUMENT_ROOT . '/' . $module . '/objects/', $object_name, $this);
         
-        $this->initBdd(); 
-
+        $this->initBdd();
 
         $this->use_commom_fields = (int) $this->getConf('common_fields', 1, false, 'bool');
         $this->use_positions = (int) $this->getConf('positions', 0, false, 'bool');
@@ -6715,7 +6714,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         $html = '';
 
         if ($this->isLoaded()) {
-            if ($this->field_exists($field)) {
+            if ($this->canSetAction('removeChildObject') && $this->field_exists($field)) {
                 if ($this->getConf('fields/' . $field . '/type', 'string') === 'id_object') {
                     if ((int) $this->getData($field)) {
                         $object = $this->config->getObject('fields/' . $field . '/object');

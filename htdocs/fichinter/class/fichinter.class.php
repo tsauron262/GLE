@@ -1650,4 +1650,3 @@ class FichinterLigne extends CommonObjectLine
 	}
 
 }
-

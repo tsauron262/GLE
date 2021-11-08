@@ -10,6 +10,7 @@ class InvoiceSavPDF extends InvoicePDF
 
     public static $type = 'sav';
     public $sav = null;
+    public $signature_bloc = false;
 
     public function init($object)
     {
@@ -46,7 +47,7 @@ class InvoiceSavPDF extends InvoicePDF
         $this->header_vars['header_right'] = $rows;
     }
 
-    public function getAfterTotauxHtml($blocSignature = false)
+    public function getAfterTotauxHtml()
     {
         return '';
     }

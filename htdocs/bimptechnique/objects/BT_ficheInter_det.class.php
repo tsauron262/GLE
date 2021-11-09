@@ -280,6 +280,8 @@ class BT_ficheInter_det extends BimpDolObject
             case 2:
                 $code = "AC_OTH";
                 break;
+            case self::TYPE_INTERNE:
+                $code = "REU_INT";
         }
         
         if(empty($code) && $fk_soc === $type) {

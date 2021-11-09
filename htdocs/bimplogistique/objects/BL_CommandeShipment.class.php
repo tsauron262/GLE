@@ -534,13 +534,15 @@ class BL_CommandeShipment extends BimpObject
         $id_contact = (int) $this->getData('id_contact');
         if (!$id_contact) {
             $commande = $this->getParentInstance();
-            $contacts = $commande->dol_object->getIdContact('external', 'SHIPPING');
-            if (isset($contacts[0]) && $contacts[0]) {
-                $id_contact = $contacts[0];
-            } else {
-                $contacts = $commande->dol_object->getIdContact('external', 'CUSTOMER');
+            if($commande->isLoaded()){
+                $contacts = $commande->dol_object->getIdContact('external', 'SHIPPING');
                 if (isset($contacts[0]) && $contacts[0]) {
                     $id_contact = $contacts[0];
+                } else {
+                    $contacts = $commande->dol_object->getIdContact('external', 'CUSTOMER');
+                    if (isset($contacts[0]) && $contacts[0]) {
+                        $id_contact = $contacts[0];
+                    }
                 }
             }
         }

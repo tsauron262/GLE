@@ -135,9 +135,26 @@ class Bimp_SocBankAccount extends BimpObject
             $errors[] = "Le RIB n'est pas valide (RUM absent)";
         }
         
+        $this->haveAllParamsForCompta($errors);
+        
         if(!count($errors))
             return (bool) 1;
         return 0;
+    }
+    
+    public function haveAllParamsForCompta(&$errors):void {
+        if($this->isLoaded()) {
+            if(!$this->getData('label'))            $errors[] = "Le RIB doit contenir un label";
+            if(!$this->getData('bank'))             $errors[] = "Le RIB doit contenir un nom de banque";
+            if(!$this->getData('code_banque'))      $errors[] = "Le RIB doit contenir un code banque";
+            if(!$this->getData('code_guichet'))     $errors[] = "Le RIB doit contenir un code guichet";
+            if(!$this->getData('number'))           $errors[] = "Le RIB doit contenir un numéro de compte";
+            if(!$this->getData('bic'))              $errors[] = "Le RIB doit contenir un code BIC/SWIFT";
+            if(!$this->getData('iban_prefix'))      $errors[] = "Le RIB doit contenir un prefix";
+            if(!$this->getData('domiciliation'))    $errors[] = "Le RIB doit contenir une domiciliation";
+        } else {
+            $errors[] = "ID du RIB absent";
+        }
     }
     
     

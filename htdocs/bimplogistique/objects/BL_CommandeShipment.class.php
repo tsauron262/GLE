@@ -534,13 +534,15 @@ class BL_CommandeShipment extends BimpObject
         $id_contact = (int) $this->getData('id_contact');
         if (!$id_contact) {
             $commande = $this->getParentInstance();
-            $contacts = $commande->dol_object->getIdContact('external', 'SHIPPING');
-            if (isset($contacts[0]) && $contacts[0]) {
-                $id_contact = $contacts[0];
-            } else {
-                $contacts = $commande->dol_object->getIdContact('external', 'CUSTOMER');
+            if($commande->isLoaded()){
+                $contacts = $commande->dol_object->getIdContact('external', 'SHIPPING');
                 if (isset($contacts[0]) && $contacts[0]) {
                     $id_contact = $contacts[0];
+                } else {
+                    $contacts = $commande->dol_object->getIdContact('external', 'CUSTOMER');
+                    if (isset($contacts[0]) && $contacts[0]) {
+                        $id_contact = $contacts[0];
+                    }
                 }
             }
         }
@@ -1285,8 +1287,13 @@ class BL_CommandeShipment extends BimpObject
                     $html .= '<thead>';
                     $html .= '<th style="width: 30px;text-align: center">N°</th>';
                     $html .= '<th>Désignation</th>';
-                    $html .= '<th>Qté</th>';
-                    $html .= '<th>Options</th>';
+                    
+                    $cocheDecoche = ' <a style=\'color:blue\' onclick="$(\'.shipment_lines .line_shipment_qty\').each(function(){$(this).val($(this).attr(\'data-max\'))});">(Tout au max)</a>';
+                    $cocheDecoche .= ' <a style=\'color:blue\' onclick="$(\'.shipment_lines .line_shipment_qty\').each(function(){$(this).val($(this).attr(\'data-min\'))});">(Tout au min)</a>';
+                    $html .= '<th>Qté'.$cocheDecoche.'</th>';
+                    $cocheDecoche = ' <a style=\'color:blue\' onclick="$(\'.shipment_lines .check_list_item_input\').attr(\'checked\', \'checked\');">(Tout cocher)</a>';
+                    $cocheDecoche .= ' <a style=\'color:blue\' onclick="$(\'.shipment_lines .check_list_item_input\').removeAttr(\'checked\');">(Tout décocher)</a>';
+                    $html .= '<th>Options'.$cocheDecoche.'</th>';
                     if ($edit) {
                         $html .= '<th>Statut</th>';
                     }
@@ -2481,7 +2488,7 @@ class BL_CommandeShipment extends BimpObject
         $success = 'Expédition validée avec succès';
 
         $date_shipped = (isset($data['date_shipped']) ? $data['date_shipped'] : '');
-        $errors = $this->validateShipment($warnings, $date_shipped);
+        $errors = $this->validateShipment($warnings, $date_shipped, $data['pdf_chiffre'], $data['pdf_detail']);
 
         return array(
             'errors'   => $errors,

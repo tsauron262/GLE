@@ -627,9 +627,9 @@ class BimpDocumentPDF extends BimpModelPDF
 
                     $this->acompteHt -= $line->total_ht;
                     $this->acompteTtc -= $line->total_ttc;
-                    
+
                     $this->acompteTva[$line->tva_tx] -= $line->total_tva;
-                    
+
                     continue;
                 }
 
@@ -721,12 +721,12 @@ class BimpDocumentPDF extends BimpModelPDF
                         (!BimpObject::objectLoaded($bimpLine) && $line->subprice == 0 && !(int) $line->fk_product)) {
                     $row['desc'] = array(
                         'colspan' => 99,
-                        'content' => $desc,
+                        'content' => $this->cleanHtml($desc),
                         'style'   => ' background-color: #F5F5F5;'
                     );
                 } elseif (BimpObject::objectLoaded($bimpLine) && (int) $bimpLine->getData('type') === ObjectLine::LINE_SUB_TOTAL) {
                     $row['desc'] = array(
-                        'content' => ((string) $line->desc ? $line->desc : 'Sous-total'),
+                        'content' => ((string) $line->desc ? $this->cleanHtml($line->desc) : 'Sous-total'),
                         'style'   => ' font-weight: bold; background-color: #DFDFDF;'
                     );
                     $row['total_ht'] = array(
@@ -767,7 +767,7 @@ class BimpDocumentPDF extends BimpModelPDF
                     }
 
                     $row = array(
-                        'desc' => $desc
+                        'desc' => $this->cleanHtml($desc)
                     );
 
                     $pu_ht_with_remise = (float) ($line->subprice - ($line->subprice * ($line_remise / 100)));
@@ -899,7 +899,7 @@ class BimpDocumentPDF extends BimpModelPDF
         // Remise globale
         if (!empty($remises_globales)) {
             foreach ($remises_globales as $id_rg => $rg_amount_ttc) {
-                if($rg_amount_ttc != 0){
+                if ($rg_amount_ttc != 0) {
                     $rg = BimpCache::getBimpObjectInstance('bimpcommercial', 'RemiseGlobale', (int) $id_rg);
                     if (BimpObject::objectLoaded($rg)) {
                         $remise_label = $rg->getData('label');
@@ -928,8 +928,8 @@ class BimpDocumentPDF extends BimpModelPDF
                         $row['total_ttc'] = BimpTools::displayMoneyValue(-$rg_amount_ttc, '', 0, 0, 1);
                     if (isset($remises_globalesHt[$id_rg]))
                         $row['total_ht'] = BimpTools::displayMoneyValue(-$remises_globalesHt[$id_rg], '', 0, 0, 1);
-    //                if (!$this->hideReduc)
-    //                    $row['pu_remise'] = BimpTools::displayMoneyValue(-$rg_amount_ttc, '');
+                    //                if (!$this->hideReduc)
+                    //                    $row['pu_remise'] = BimpTools::displayMoneyValue(-$rg_amount_ttc, '');
 
                     if ($this->hide_pu) {
                         unset($row['pu_ht']);
@@ -1168,9 +1168,9 @@ class BimpDocumentPDF extends BimpModelPDF
                 $i++;
             }
         }
-        foreach($this->acompteTva as $rate => $montant){
+        foreach ($this->acompteTva as $rate => $montant) {
             $this->tva[$rate] += $montant;
-            $this->ht[$rate] += $this->acompteHt;//$montant * 100 / $rate;
+            $this->ht[$rate] += $this->acompteHt; //$montant * 100 / $rate;
         }
     }
 

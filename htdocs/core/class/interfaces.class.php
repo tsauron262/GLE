@@ -201,6 +201,7 @@ class Interfaces
                     $nbko++;
                     if (! empty($objMod->errors)) $this->errors=array_merge($this->errors,$objMod->errors);
                     else if (! empty($objMod->error))  $this->errors[]=$objMod->error;
+                    else  $this->errors[]='Erreur inconnue dans le trigger : '.$modName.' action '.$action;
                     //dol_syslog("Error in trigger ".$action." - Nb of error string returned = ".count($this->errors), LOG_ERR);
                 }
             }

@@ -1,0 +1,481 @@
+table: bimpcore_signature
+controller: signature
+icon: fas_signature
+public_icon: pe_pen
+common_fields: 0
+
+list_page_url: 
+    controller: signatures
+    
+nom_url: 
+    syntaxe: <name>
+    
+header_list_name: default
+header_btn: 
+    callback: getActionsButtons
+    
+labels:
+    name: signature
+    is_female: 1
+    
+objects: 
+    user_client: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpinterfaceclient
+                name: BIC_UserClient
+            id_object: 
+                field_value: id_user_client_signataire
+                
+    users_client: 
+        relation: none
+        instance: 
+            bimp_object: 
+                module: bimpinterfaceclient
+                name: BIC_UserClient
+                
+fields:     
+    obj_module: 
+        label: Module
+        required: 1
+
+    obj_name: 
+        label: Nom objet
+        required: 1
+        
+    id_obj: 
+        label: id_objet
+        type: id
+        required: 1
+
+    doc_type: 
+        label: Type de document
+        displays: 
+            name:
+                label: Nom document
+                type: callback
+                method: displayDocType
+        
+    type: 
+        label: Type signature
+        type: int
+        values: 
+            array: types
+        input: 
+            type: select
+            options: 
+                callback: getTypeInputOptions
+        default_value: 0                
+        
+    signed: 
+        label: Signé
+        type: bool
+        default_value: 0
+        
+    date_open: 
+        label: Date début de demande signature
+        type: date
+        
+    date_signed: 
+        label: Date signature
+        type: datetime
+        input: 
+            display_now: 1
+
+    id_client: 
+        label: Client
+        type: id_object
+        object: client
+        required: 1
+        
+    id_contact: 
+        label: Contact
+        type: id_object
+        object: contact
+        default_value: 0
+        
+    id_user_client_signataire:
+        label: Compte utilisateur signataire
+        type: id_object
+        object: user_client
+        default_value: 0
+        
+    allowed_users_client: 
+        label: Comptes utilisateurs du client autorisés pour cette signature
+        type: items_list
+        items_data_type: id_object
+        items_braces: 1
+        object: users_client
+        input: 
+            type: check_list
+            select_all_buttons: 1
+            search_input: 1
+            items: 
+                callback: getClientUsersArray
+        create_form: default
+        create_form_values: 
+            fields: 
+                id_client: 
+                    field_value: id_client
+                id_contact: 
+                    field_value: id_contact
+                status: 1
+                role: 0
+        
+    nom_signataire: 
+        label: Nom signataire
+        
+    email_signataire:
+        label: E-mail signataire
+        
+    fonction_signataire: 
+        label: Fonction signataire
+        
+    ip_signataire: 
+        label: Adresse IP signataire
+        
+    base_64_signature:
+        label: Image signature
+    
+    allow_elec: 
+        label: Signature électronique autorisée
+        type: bool
+        default_value: 1
+        
+    allow_dist: 
+        label: Signature électronique à distance autorisée
+        type: bool
+        default_value: 1
+        
+forms:
+    open_sign_dist:
+        title: Signature à distance
+        icon: fas_sign-in
+        values: 
+            fields: 
+                allowed_users_client: 
+                    callback: getDefaultAllowedUsersClient
+        rows: 
+            - custom: 1
+              label: Ouvrir automatiquement l'accès public
+              show: 
+                  callback: showAutoOpenPublicAccess
+              input_name: auto_open
+              value: 1
+              input: 
+                  type: toggle
+                  help: 
+                      callback: getAutoOpenPublicAccessInputHelp
+                      
+            - custom: 1
+              label: Adresse e-mail du compte utilisateur à créer
+              input_name: new_user_email
+              input: 
+                  type: text
+              show: 
+                  callback: showOpenPublicAccessNewUserEmailInput
+              value: 
+                  callback: getOpenPublicAccessNewUserDefaultEmail
+              display_if: 
+                  field_name: auto_open
+                  show_values: 1
+                  
+            - field: allowed_users_client
+              display_if: 
+                  field_name: auto_open
+                  hide_values: 1
+            
+    sign_papier: 
+        title: Dépôt document signé
+        icon: fas_file-download
+        values: 
+            fields: 
+                nom_signataire: 
+                    callback: getDefaultNomSignataire
+        rows: 
+            - custom: 1
+              hidden: 1
+              label: Dépôt doc signé
+              input_name: sign_papier
+              input: 
+                  type: hidden
+              value: 1
+            - field: date_signed
+            - field: nom_signataire
+              required: 1
+            - custom: 1
+              label: Fichier
+              input_name: file_signed
+              input: 
+                  type: file_upload
+              required: 1
+            
+    sign_elec: 
+        title: Signature électronique
+        icon: fas_file-signature
+        values: 
+            fields: 
+                nom_signataire: 
+                    callback: getDefaultNomSignataire
+                email_signataire: 
+                    callback: getDefaultEmailSignataire
+                fonction_signataire: 
+                    callback: getDefaultFonctionSignataire
+                    
+        rows: 
+            - field: nom_signataire
+            - field: email_signataire
+            - field: fonction_signataire
+              show: 
+                  callback: isClientCompany
+            - custom: 1
+              label: Signature
+              input_name: signature
+              input: 
+                  type: signature_pad
+            
+    sign_dist: 
+        title: Signature à distance
+        icon: fas_file-signature
+        values: 
+            fields: 
+                nom_signataire: 
+                    callback: getDefaultNomSignataire
+                fonction_signataire: 
+                    callback: getDefaultFonctionSignataire
+        rows: 
+            - field: nom_signataire
+            - field: fonction_signataire
+              show: 
+                  callback: isClientCompany
+            - custom: 1
+              label: Signature
+              input_name: signature
+              input: 
+                  type: signature_pad
+                  
+    signature_params: 
+        title: Ajuster la position de la signature sur le document PDF
+        icon: fas_arrows-alt
+        values: 
+            callback: getSignatureParamsFormValues
+        rows: 
+            - custom: 1
+              label: N° de Page
+              input_name: page
+              input: 
+                  type: qty
+            - custom: 1
+              label: Position en X (mm)
+              input_name: x_pos
+              input: 
+                  type: qty
+            - custom: 1
+              label: Position en Y (mm)
+              input_name: y_pos
+              input: 
+                  type: qty
+            - custom: 1
+              label: Décalage en X du nom (mm)
+              input_name: nom_x_offset
+              input: 
+                  type: qty
+              show: 
+                  callback: isClientCompany
+            - custom: 1
+              label: Décalage en Y du nom (mm)
+              input_name: nom_y_offset
+              input: 
+                  type: qty
+              show: 
+                  callback: isClientCompany
+            - custom: 1
+              label: Décalage en X de la fonction (mm)
+              input_name: fonction_x_offset
+              input: 
+                  type: qty
+              show: 
+                  callback: isClientCompany
+            - custom: 1
+              label: Décalage en Y de la fonction (mm)
+              input_name: fonction_y_offset
+              input: 
+                  type: qty
+              show: 
+                  callback: isClientCompany
+            - custom: 1
+              label: Décalage en X de la date (mm)
+              input_name: date_x_offset
+              input: 
+                  type: qty
+            - custom: 1
+              label: Décalage en Y de la date (mm)
+              input_name: date_y_offset
+              input: 
+                  type: qty
+            
+fields_tables: 
+    infos: 
+        icon: fas_info-circle
+        title: Informations
+        rows:
+            - label: Objet
+              value: 
+                  callback: displayObj
+            - field: doc_type
+              display: name
+            - label: Référence document
+              value: 
+                  callback: displayDocRef
+            - field: id_client
+            - field: id_contact
+            - field: date_open
+            - field: signed
+            
+    signature:
+        icon: fas_signature
+        title: Infos signature
+        show: 
+            field_value: signed
+        rows: 
+            - field: date_signed
+            - field: type
+            - field: id_user_client_signataire
+              show: 
+                  field_value: id_user_client_signataire
+            - field: nom_signataire
+            - field: email_signataire
+            - field: fonction_signataire
+              show: 
+                  callback: isClientCompany
+            - field: ip_signataire
+            - label: Image signature
+              show: 
+                  callback: showSignatureImage
+              value: 
+                  callback: renderSignatureImage
+                        
+    public_access:
+        icon: fas_sign-in-alt
+        title: Accès espace client
+        rows: 
+            - field: allowed_users_client
+            
+views:
+    default: 
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: infos
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: public_access
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: signature
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderNotesList
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderRelancesReportsList
+              
+lists_cols: 
+    obj: 
+        label: Objet
+        value: 
+            callback: displayObj
+            
+    doc_type: 
+        display: name
+        
+    doc_ref: 
+        label: Référence document
+        value: 
+            callback: displayDocRef
+        
+    public_sign: 
+        label: Signer
+        value: 
+            callback: dispayPublicSign
+        
+    public_document: 
+        label: Document
+        value: 
+            callback: displayPublicDocument
+       
+lists: 
+    default: 
+        configurable: 1
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les signatures sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_field: id
+        sort_way: desc
+        n: 10
+        add_form_name: default
+#        edit_btn: 1
+#        edit_form: edit
+        delete_btn: 1
+        page_btn: 1
+        modal_view: default
+        extra_btn: 
+            callback: getListExtraBtn
+        cols: 
+            obj: 
+            doc_type: 
+            doc_ref: 
+            signed: 
+            type: 
+            date_signed: 
+            nom_signataire: 
+            email_signataire:
+            
+    public_client: 
+        title: Liste de vos signatures
+        configurable: 0
+        checkboxes: 0
+        cols: 
+            obj: 
+                label: Elément lié
+            doc_type: 
+            doc_ref: 
+            type:
+            date_signed: 
+            nom_signataire: 
+            public_document: 
+            public_sign: 
+                
+cards: 
+    default: 
+        view_btn: 1
+        status: type
+        fields: 
+            - field: date_open
+            - field: signed
+            - field: date_signed
+            - field: nom_signataire
+            
+              
+            
+            
+        

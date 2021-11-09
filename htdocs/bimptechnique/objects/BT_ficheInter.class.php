@@ -294,7 +294,7 @@ class BT_ficheInter extends BimpDolObject
     }
 
     // Getters Params: 
-    
+
     public function getListExtraBulkActions()
     {
         $actions = array();
@@ -304,7 +304,7 @@ class BT_ficheInter extends BimpDolObject
             'icon'    => 'fas_file-pdf',
             'onclick' => $this->getJsBulkActionOnclick('generateBulkPdf', array(), array('single_action' => true))
         );
-        
+
         return $actions;
     }
     
@@ -387,13 +387,13 @@ class BT_ficheInter extends BimpDolObject
     public function getActionsButtons()
     {
         $buttons = Array();
-        
+
         $buttons[] = array(
             'label'   => 'Planning de la FI',
             'icon'    => 'fas_clock',
             'onclick' => $this->getJsLoadModalView("events")
         );
-        
+
         if (!$this->isOldFi()) {
             if ($this->isActionAllowed('askFacturation') && $this->canSetAction('askFacturation')) {
 //                $buttons[] = array(
@@ -607,10 +607,9 @@ class BT_ficheInter extends BimpDolObject
 
         return null;
     }
-    
-public function getCommercialclientSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
-    {
 
+    public function getCommercialclientSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
+    {
         $alias = 'sc';
         $joins[$alias] = array(
             'alias' => $alias,
@@ -619,7 +618,7 @@ public function getCommercialclientSearchFilters(&$filters, $value, &$joins = ar
         );
         $filters[$alias . '.fk_user'] = $value;
     }
-    
+
     public function displayCommercialClient()
     {
 
@@ -1372,7 +1371,7 @@ public function getCommercialclientSearchFilters(&$filters, $value, &$joins = ar
     }
 
     // Rendus HTML: 
-    
+
     public function renderEventsTable()
     {
         $html = '';
@@ -1385,7 +1384,7 @@ public function getCommercialclientSearchFilters(&$filters, $value, &$joins = ar
             BimpTools::loadDolClass('comm/action', 'actioncomm', 'ActionComm');
 
             $fk_soc = (int) $this->getData('fk_soc');
-          
+
             $list = ActionComm::getActions($this->db->db, $fk_soc, $this->id, static::$dol_module, '', 'a.id', 'ASC');
 
             if (!is_array($list)) {
@@ -1419,38 +1418,38 @@ public function getCommercialclientSearchFilters(&$filters, $value, &$joins = ar
                     $userstatic = new User($this->db->db);
 
                     foreach ($list as $action) {
-                            $html .= '<tr>';
-                            $html .= '<td>' . $action->getNomUrl(1, -1) . '</td>';
-                            $html .= '<td>' . $action->getNomUrl(0, 0) . '</td>';
-                            $html .= '<td>';
-                            if (!empty($conf->global->AGENDA_USE_EVENT_TYPE)) {
-                                $html .= $action->type;
-                            }
-                            $html .= '</td>';
-                            $html .= '<td align="center">';
-                            $html .= dol_print_date($action->datep, 'dayhour');
-                            if ($action->datef) {
-                                $tmpa = dol_getdate($action->datep);
-                                $tmpb = dol_getdate($action->datef);
-                                if ($tmpa['mday'] == $tmpb['mday'] && $tmpa['mon'] == $tmpb['mon'] && $tmpa['year'] == $tmpb['year']) {
-                                    if ($tmpa['hours'] != $tmpb['hours'] || $tmpa['minutes'] != $tmpb['minutes'] && $tmpa['seconds'] != $tmpb['seconds']) {
-                                        $html .= '-' . dol_print_date($action->datef, 'hour');
-                                    }
-                                } else {
-                                    $html .= '-' . dol_print_date($action->datef, 'dayhour');
+                        $html .= '<tr>';
+                        $html .= '<td>' . $action->getNomUrl(1, -1) . '</td>';
+                        $html .= '<td>' . $action->getNomUrl(0, 0) . '</td>';
+                        $html .= '<td>';
+                        if (!empty($conf->global->AGENDA_USE_EVENT_TYPE)) {
+                            $html .= $action->type;
+                        }
+                        $html .= '</td>';
+                        $html .= '<td align="center">';
+                        $html .= dol_print_date($action->datep, 'dayhour');
+                        if ($action->datef) {
+                            $tmpa = dol_getdate($action->datep);
+                            $tmpb = dol_getdate($action->datef);
+                            if ($tmpa['mday'] == $tmpb['mday'] && $tmpa['mon'] == $tmpb['mon'] && $tmpa['year'] == $tmpb['year']) {
+                                if ($tmpa['hours'] != $tmpb['hours'] || $tmpa['minutes'] != $tmpb['minutes'] && $tmpa['seconds'] != $tmpb['seconds']) {
+                                    $html .= '-' . dol_print_date($action->datef, 'hour');
                                 }
+                            } else {
+                                $html .= '-' . dol_print_date($action->datef, 'dayhour');
                             }
-                            $html .= '</td>';
-                            $html .= '<td>';
-                            if (!empty($action->author->id)) {
-                                $userstatic->id = $action->author->id;
-                                $userstatic->firstname = $action->author->firstname;
-                                $userstatic->lastname = $action->author->lastname;
-                                $html .= $userstatic->getNomUrl();
-                            }
-                            $html .= '</td>';
+                        }
+                        $html .= '</td>';
+                        $html .= '<td>';
+                        if (!empty($action->author->id)) {
+                            $userstatic->id = $action->author->id;
+                            $userstatic->firstname = $action->author->firstname;
+                            $userstatic->lastname = $action->author->lastname;
+                            $html .= $userstatic->getNomUrl();
+                        }
+                        $html .= '</td>';
 
-                            $html .= '</tr>';
+                        $html .= '</tr>';
                     }
                 } else {
                     $html .= '<tr>';
@@ -1582,7 +1581,7 @@ public function getCommercialclientSearchFilters(&$filters, $value, &$joins = ar
     }
 
     // Traitements: 
-    
+
     public function createFromContrat($contrat, $data)
     {
         global $user;
@@ -1748,10 +1747,8 @@ public function getCommercialclientSearchFilters(&$filters, $value, &$joins = ar
                     } else {
                         $this->updateField('fk_statut', self::STATUT_ATTENTE_SIGNATURE);
                     }
-                    
-                    // Changement du titre de tous les events
-                    
 
+                    // Changement du titre de tous les events
                     // Création des lignes de facturation: 
                     $services_executed = $this->getServicesExecutedArray();
                     if (count($services_executed)) {
@@ -1994,7 +1991,7 @@ public function getCommercialclientSearchFilters(&$filters, $value, &$joins = ar
                 $msg .= 'Merci de signer votre rapport d\'intervention à l\'adresse suivante: ';
                 $msg .= '<a href="' . DOL_URL_ROOT . '/bimptechnique/public">' . DOL_URL_ROOT . '/bimptechnique/public</a>';
                 $msg .= ' en entrant votre nom ainsi que le mot de passe suivant: <b>' . $new_password . '</b>.<br/><br/>';
-                $msg .= 'Cet accès n\'est valable que 4 Jours calandaire.<br/><br/>';
+                $msg .= 'Cet accès n\'est valable que 4 Jours calandaires.<br/><br/>';
                 $msg .= 'Cordialement';
 
                 $to = BimpTools::cleanEmailsStr($this->getData('email_signature'));
@@ -2064,9 +2061,7 @@ public function getCommercialclientSearchFilters(&$filters, $value, &$joins = ar
         return $password;
     }
 
-    // Actions: 
-    
-
+    // Actions:
 
     public function actionSetStatusAdmin($data, &$success = '')
     {
@@ -2182,7 +2177,7 @@ public function getCommercialclientSearchFilters(&$filters, $value, &$joins = ar
     public function validate()
     {
         $errors = parent::validate();
-        
+
         if (!count($errors)) {
             if ($this->getData('time_from') && $this->getData('time_to') &&
                     $this->getData('time_to') < $this->getData('time_from')) {
@@ -2303,8 +2298,6 @@ public function getCommercialclientSearchFilters(&$filters, $value, &$joins = ar
 
         return $errors;
     }
-    
-    
 
     public function update(&$warnings = array(), $force_update = false)
     {

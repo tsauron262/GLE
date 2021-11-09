@@ -13,6 +13,12 @@ objects:
     serials:
         instance:
             bimp_object: BContract_Serials_Imei
+            
+    inter:
+        instance:
+            bimp_object: 
+                module: bimptechnique
+                name: BT_ficheInter
     
     
     
@@ -97,6 +103,15 @@ sections:
                     panel: 0
                     name: avenant
                     object: contrat
+          - id: inter
+            title: Interventions
+            struct:
+                type: view
+                view:
+                    panel: 1
+                    name: inter
+                    object: contrat
+            
     - type: buttons
       buttons:
           - label: Liste des contrats

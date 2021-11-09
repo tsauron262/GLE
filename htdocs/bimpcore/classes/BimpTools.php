@@ -2681,7 +2681,7 @@ class BimpTools
     {
         $url = DOL_URL_ROOT . '/';
 
-        $params = $config->get($path, null, true, 'array');
+        $params = $config->get($path, null, false, 'array');
 
         if (is_null($params)) {
             return '';

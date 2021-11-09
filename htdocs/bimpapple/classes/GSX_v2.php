@@ -103,7 +103,7 @@ class GSX_v2 extends GSX_Const
         return self::$instance;
     }
 
-    // Gestion du login: 
+    // Gestion du login:
 
     public function setActivationToken($token)
     {
@@ -209,7 +209,7 @@ class GSX_v2 extends GSX_Const
         }
     }
 
-    // Traitements des requêtes CURL: 
+    // Traitements des requêtes CURL:
 
     protected function init($request_name, &$error = '', $url_params = array(), $extra = array())
     {

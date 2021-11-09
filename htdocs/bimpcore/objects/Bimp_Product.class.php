@@ -2531,7 +2531,7 @@ class Bimp_Product extends BimpObject
                 break;
 
             case 'bds_reports':
-                $list = new BC_ListTable(BimpObject::getInstance('bimpdatasync', 'BDS_ReportLine'), 'product', 1, null, 'Notifications des processus', 'far_file-alt');
+                $list = new BC_ListTable(BimpObject::getInstance('bimpdatasync', 'BDS_ReportLine'), 'linked_object', 1, null, 'Notifications des processus', 'far_file-alt');
                 $list->addFieldFilterValue('obj_module', 'bimpcore');
                 $list->addFieldFilterValue('obj_name', 'Bimp_Product');
                 $list->addFieldFilterValue('id_obj', $this->id);

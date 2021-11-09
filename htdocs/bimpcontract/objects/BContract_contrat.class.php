@@ -236,6 +236,18 @@ class BContract_contrat extends BimpDolObject
             $this->updateField('initial_renouvellement', $this->getData('tacite'));
         }
     }
+    
+    public function renderFi(){
+        $html = BimpRender::renderPanel('Stats des Fi ' . $this->getLabel('of_the'), $this->renderThisStatsFi(), '', array(
+                    'icon'     => 'fas_file',
+                    'type'     => 'secondary',
+                    'foldable' => true
+        ));
+//        $objects = $this->getInstance('bimptechnique', 'BT_ficheInter');
+//        $html .= $objects->renderList('contrat');
+            
+        return $html;
+    }
 
     public function renderAvenant()
     {
@@ -340,7 +352,7 @@ class BContract_contrat extends BimpDolObject
         $total_fis = $ficheInter->time_to_qty($ficheInter->timestamp_to_time($total_tms)) * BimpCore::getConf("bimptechnique_coup_horaire_technicien");
         $previsionelle = 0;
         if($this->getJourTotal() > 0 && $this->getJourTotal() > $this->getJourRestant())
-            $previsionelle = $total_fis / ($this->getJourTotal() - $this->getJourRestant()) * $this->getJourRestant();
+            $previsionelle = $total_fis / ($this->getJourTotal() - $this->getJourRestant()) * $this->getJourTotal();
 
         $marge = ($this->getTotalContrat() - $total_fis);
         $marge_previsionelle = ($this->getTotalContrat() - $previsionelle);
@@ -362,7 +374,7 @@ class BContract_contrat extends BimpDolObject
             $html .= "Nombre de FI: " . count($fis) . '<br />';
             $html .= "Nombre d'heures dans le contrat: " . $ficheInter->timestamp_to_time($total_tms) . '<br />';
             $html .= "Nombre d'heures hors du contrat: " . $ficheInter->timestamp_to_time($total_tms_not_contrat) . ' (non pris en compte)<br />';
-            $html .= "Coût technique: " . price($total_fis) . " € (" . BimpCore::getConf("bimptechnique_coup_horaire_technicien") . " €/h)<br />";
+            $html .= "Coût technique: " . price($total_fis) . " € (" . BimpCore::getConf("bimptechnique_coup_horaire_technicien") . " €/h * ".$ficheInter->timestamp_to_time($total_tms).")<br />";
             $html .= "Coût prévisionel: " . price($previsionelle) . " €<br />";
             $html .= "Vendu: " . "<strong class='warning'>" . price($this->getTotalContrat()) . "€</strong><br />";
             $html .= "Marge: " . "<strong class='$class'>" . BimpRender::renderIcon($icone) . " " . price($marge) . "€</strong><br />";

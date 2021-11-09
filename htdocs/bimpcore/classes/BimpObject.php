@@ -6714,7 +6714,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         $html = '';
 
         if ($this->isLoaded()) {
-            if ($this->field_exists($field)) {
+            if ($this->canSetAction('removeChildObject') && $this->field_exists($field)) {
                 if ($this->getConf('fields/' . $field . '/type', 'string') === 'id_object') {
                     if ((int) $this->getData($field)) {
                         $object = $this->config->getObject('fields/' . $field . '/object');

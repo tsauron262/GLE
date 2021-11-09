@@ -12,6 +12,7 @@ class BimpCore
     public static $files = array(
         'js'  => array(
             '/includes/jquery/plugins/jpicker/jpicker-1.1.6.js',
+            '/bimpcore/views/js/SignaturePad.object.js',
             '/bimpcore/views/js/moment.min.js',
             '/bimpcore/views/js/bootstrap.min.js',
             '/bimpcore/views/js/bootstrap-datetimepicker.js',
@@ -441,10 +442,25 @@ class BimpCore
     public static function addlog($msg, $level = 1, $type = 'bimpcore', $object = null, $extra_data = array(), $force = false)
     {
         if (BimpCore::isModeDev() && (int) self::getConf('bimpcore_print_logs', 1)) {
-            $bt = debug_backtrace(null, 300);
-            $infos = BimpTools::getBacktraceArray($bt);
-            unset($infos[0]);
-            die('LOG : ' . $msg . " " . print_r($extra_data, 1) . '<pre>' . print_r($infos, 1));
+            $bt = debug_backtrace(null, 30);
+
+            $html = 'LOG ' . Bimp_Log::$levels[$level]['label'] . '<br/><br/>';
+            $html .= 'Message: ' . $msg . '<br/><br/>';
+
+            if (is_a($object, 'BimpObject') && BimpObject::objectLoaded($object)) {
+                $html .= 'Objet: ' . $object->getLink() . '<br/><br/>';
+            }
+
+            if (!empty($extra_data)) {
+                $html .= 'Données: <pre>';
+                $html .= print_r($extra_data, 1);
+                $html .= '</pre>';
+            }
+
+            $html .= 'Backtrace: <br/>';
+            $html .= BimpRender::renderBacktrace(BimpTools::getBacktraceArray($bt));
+
+            die($html);
         }
 
         $extra_data = BimpTools::merge_array(static::$logs_extra_data, $extra_data);

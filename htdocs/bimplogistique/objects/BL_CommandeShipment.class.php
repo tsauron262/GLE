@@ -2481,7 +2481,7 @@ class BL_CommandeShipment extends BimpObject
         $success = 'Expédition validée avec succès';
 
         $date_shipped = (isset($data['date_shipped']) ? $data['date_shipped'] : '');
-        $errors = $this->validateShipment($warnings, $date_shipped);
+        $errors = $this->validateShipment($warnings, $date_shipped, $data['pdf_chiffre'], $data['pdf_detail']);
 
         return array(
             'errors'   => $errors,

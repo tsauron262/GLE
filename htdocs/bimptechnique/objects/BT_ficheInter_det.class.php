@@ -285,6 +285,9 @@ class BT_ficheInter_det extends BimpDolObject
         if(empty($code) && $fk_soc === $type) {
             $code = "ATELIER";
         }
+        if(empty($code)) {
+            $code = "AC_RDV";
+        }
         
         return (int) $this->db->getValue("c_actioncomm", "id", "code = '$code'");
         
@@ -521,8 +524,10 @@ class BT_ficheInter_det extends BimpDolObject
         
         if(count($actionCommList) > 0) {
             foreach ($actionCommList as $id_actionComm) {
-                $actionCommClass->fetch($id_actionComm);
-                $actionCommClass->delete();
+                if($id_actionComm > 0){
+                    $actionCommClass->fetch($id_actionComm);
+                    $actionCommClass->delete();
+                }
             }
         }
         
@@ -540,21 +545,23 @@ class BT_ficheInter_det extends BimpDolObject
             if($this->getData('arrived')) {
                 $actionCommClass->datep = strtotime($this->getData('arrived'));
                 $actionCommClass->datef = strtotime($this->getData('departure'));
-                $actionCommClass->create($admin);
-                $sql = "UPDATE `".MAIN_DB_PREFIX."fichinterdet` SET `actioncomm` = '[\"$actionCommClass->id\"]' WHERE  rowid = $this->id";
+                if($actionCommClass->create($admin) < 1)
+                    $errors = BimpTools::getErrorsFromDolObject($actionCommClass, $errors);
+                else
+                    BimpTools::merge_array($errors, $this->set('actioncomm', [$actionCommClass->id]));
             } else {
                 $actionCommClass2 = clone $actionCommClass;
                 $actionCommClass->datep = strtotime($this->getData('arriverd_am'));
                 $actionCommClass->datef = strtotime($this->getData('departure_am'));
-                $actionCommClass->create($admin);
+                if($actionCommClass->create($admin) < 1)
+                    $errors = BimpTools::getErrorsFromDolObject($actionCommClass, $errors);
                 $actionCommClass2->datep = strtotime($this->getData('arriverd_pm'));
                 $actionCommClass2->datef = strtotime($this->getData('departure_pm'));
-                $actionCommClass2->create($admin);
-                $sql = "UPDATE `".MAIN_DB_PREFIX."fichinterdet` SET `actioncomm` = '[\"$actionCommClass->id\", \"$actionCommClass2->id\"]' WHERE rowid = $this->id";
+                if($actionCommClass2->create($admin) < 1)
+                    $errors = BimpTools::getErrorsFromDolObject($actionCommClass, $errors);
+                else
+                    BimpTools::merge_array($errors, $this->set('actioncomm', [$actionCommClass->id, $actionCommClass2->id]));
             }
-
-            if(!$this->db->execute($sql))
-                $errors[] = 'Probléme SQL calendar FI';
         }
 
         return $errors;
@@ -574,14 +581,6 @@ class BT_ficheInter_det extends BimpDolObject
 
         parent::onSave($errors, $warnings);
         
-        if(!count($errors) && 
-                $this->getData('type') != self::TYPE_DEPLA && 
-                $this->getData('type') != self::TYPE_DEPLACEMENT_VENDU && 
-                $this->getData('type') != self::TYPE_DEPLACEMENT_CONTRAT &&
-                $this->getData('type') != self::TYPE_LIBRE
-        ) {
-            $errors = $this->adjustCalendar();
-        }
 
     }
 
@@ -844,6 +843,16 @@ class BT_ficheInter_det extends BimpDolObject
 
                 $this->set('forfait', $forfait);
                 $this->set('facturable', $facturable);
+                
+                
+                if(!count($errors) && 
+                        $this->getData('type') != self::TYPE_DEPLA && 
+                        $this->getData('type') != self::TYPE_DEPLACEMENT_VENDU && 
+                        $this->getData('type') != self::TYPE_DEPLACEMENT_CONTRAT &&
+                        $this->getData('type') != self::TYPE_LIBRE
+                ) {
+                    $errors = BimpTools::merge_array($errors, $this->adjustCalendar());
+                }
             }
         }
         return $errors;

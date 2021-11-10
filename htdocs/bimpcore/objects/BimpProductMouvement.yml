@@ -1,6 +1,7 @@
 table: stock_mouvement
 primary: rowid
 icon: fas_exchange-alt
+common_fields: 0
 
 labels: 
     name: Mouvement de stock

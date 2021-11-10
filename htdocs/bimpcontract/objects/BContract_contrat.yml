@@ -346,7 +346,7 @@ fields:
             help: Utiliser ce champ si perte des données de la pièce remplacée
     date_start_provisoire:
         label: Date d'activation provisoir
-    
+
 fields_tables:
     contrat:
         panel: 1
@@ -945,6 +945,8 @@ forms:
         msgs:
             - content: Quelques informations sont nécéssaires pour anticiper la fermeture de ce contrat
               type: warning
+            - content: Cette action est irréversible
+              type: danger
         rows:
             - custom: 1
               input_name: end_date_reel
@@ -953,7 +955,8 @@ forms:
               input:
                   type: date
             - custom: 1
-              label: Cause de cloture anticipée du contrat
+              required: 1
+              label: Cause de clôture anticipée du contrat
               input_name: note_close
               input:
                   type: html

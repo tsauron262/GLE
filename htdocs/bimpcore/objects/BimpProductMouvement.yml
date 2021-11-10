@@ -91,6 +91,7 @@ fields:
     value:
         label: Quantité
         type: int
+        has_total: 1
     
     inventorycode:
         label: Code inventaire

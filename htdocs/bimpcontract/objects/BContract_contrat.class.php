@@ -1045,7 +1045,14 @@ class BContract_contrat extends BimpDolObject
     public function displayRealEndDate($format = "d / m / Y")
     {
         $fin = null;
-        if (!$this->getData('date_end_renouvellement')) {
+        $suup_all = false;
+        
+        if ($this->getData('end_date_reel')) {
+            $suup_all = true;
+            $fin = new DateTime($this->getData('end_date_reel'));
+        }
+        
+        if (!$this->getData('date_end_renouvellement') && !$suup_all) {
             if ($this->getData('end_date_reel')) {
                 $fin = new DateTime($this->getData('end_date_reel'));
             } elseif ($this->getData('end_date_contrat')) {

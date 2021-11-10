@@ -987,7 +987,7 @@ class DoliDBMysqliC extends DoliDB
 
 
                     }
-                        static::stopAll();
+                    static::stopAll();
                 }
             }
         }

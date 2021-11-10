@@ -124,7 +124,8 @@ class BimpController
     {
         ini_set('display_errors', 0); // Par précaution. 
         
-
+//        if(!in_array($level, array(E_NOTICE, E_DEPRECATED)))
+//            die('iiiii'.$level.$msg.$file.$line);
         switch ($level) {
             case E_ERROR:
             case E_CORE_ERROR:

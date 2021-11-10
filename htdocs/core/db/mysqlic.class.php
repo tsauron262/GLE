@@ -987,7 +987,7 @@ class DoliDBMysqliC extends DoliDB
 
 
                     }
-                        $this->stopAll();
+                        static::stopAll();
                 }
             }
         }
@@ -1046,7 +1046,7 @@ class DoliDBMysqliC extends DoliDB
                 if(class_exists('BimpCore'))
                     BimpCore::addlog(get_class($this)."::query SQL Error message: ".$this->lasterrno." | ".$this->lasterror .' serveur : '.$this->database_host.'<br/>'.$query, 3,$classLog);
                 if($deadLock)
-                    $this->stopAll ();
+                    static::stopAll ();
                         
             }
             $this->lastquery=$query;
@@ -1105,21 +1105,6 @@ class DoliDBMysqliC extends DoliDB
         /* fmoddrsi */
 
         return $ret;
-    }
-    
-    function stopAll(){
-        $errors = array('Problème réseau, merci de relancer l\'opération');
-        if (BimpTools::isSubmit('ajax')) {
-            echo json_encode(array(
-                'errors'           => $errors,
-                'request_id'       => BimpTools::getValue('request_id', 0)
-            ));
-        }
-        else{
-            echo 'Oupppps   '.print_r($errors,1);
-        }
-        die();
-        exit;
     }
     
     function getThreadId(){    

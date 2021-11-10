@@ -2280,7 +2280,7 @@ class BimpTools
                 }
 
                 if ($recursive) {
-                    if (is_array($array[$key]) && is_array($value)) {
+                    if (isset($array[$key]) && is_array($array[$key]) && is_array($value)) {
                         $array[$key] = self::overrideArray($array[$key], $value, $skip_null, $recursive);
                         continue;
                     }

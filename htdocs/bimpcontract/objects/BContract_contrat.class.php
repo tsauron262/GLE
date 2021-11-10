@@ -1052,17 +1052,20 @@ class BContract_contrat extends BimpDolObject
             $fin = new DateTime($this->getData('end_date_reel'));
         }
         
-        if (!$this->getData('date_end_renouvellement') && !$suup_all) {
-            if ($this->getData('end_date_reel')) {
-                $fin = new DateTime($this->getData('end_date_reel'));
-            } elseif ($this->getData('end_date_contrat')) {
-                $fin = new DateTime($this->getData('end_date_contrat'));
+        if (!$this->getData('date_end_renouvellement')) {
+            if (!$this->getData('date_end_renouvellement')) {
+                if ($this->getData('end_date_reel')) {
+                    $fin = new DateTime($this->getData('end_date_reel'));
+                } elseif ($this->getData('end_date_contrat')) {
+                    $fin = new DateTime($this->getData('end_date_contrat'));
+                } else {
+                    $fin = $this->getEndDate();
+                }
             } else {
-                $fin = $this->getEndDate();
+                $fin = new DateTime($this->getData('date_end_renouvellement'));
             }
-        } else {
-            $fin = new DateTime($this->getData('date_end_renouvellement'));
         }
+        
 
         if (is_object($fin))
             return $fin->format($format);

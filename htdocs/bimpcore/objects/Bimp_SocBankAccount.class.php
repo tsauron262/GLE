@@ -53,7 +53,7 @@ class Bimp_SocBankAccount extends BimpObject
     // Rights
     
     public function isEditable($force_edit = false, &$errors = array()) {
-        return !$this->getData('exported');
+        return !$this->getData('exported') || !$this->isValid();
     }
     
     public function isDeletable($force_delete = false, &$errors = array()) {
@@ -84,11 +84,11 @@ class Bimp_SocBankAccount extends BimpObject
             $sep = ' ';
         else
             $sep = '';
-        $return = substr(str_replace(" ", "", $this->getData('iban_prefix')),0,40).$sep;
-        $return .= str_replace(" ", "", $this->getData('code_banque')).$sep;
-        $return .= str_replace(" ", "", $this->getData('code_guichet')).$sep;
-        $return .= str_replace(" ", "", $this->getData('number')).$sep;
-        $return .= str_replace(" ", "", $this->getData('cle_rib')).$sep;
+        $return = substr(str_replace(" ", "", $this->getInitData('iban_prefix')),0,40).$sep;
+        $return .= str_replace(" ", "", $this->getInitData('code_banque')).$sep;
+        $return .= str_replace(" ", "", $this->getInitData('code_guichet')).$sep;
+        $return .= str_replace(" ", "", $this->getInitData('number')).$sep;
+        $return .= str_replace(" ", "", $this->getInitData('cle_rib')).$sep;
         
         return $return;
     }
@@ -124,14 +124,14 @@ class Bimp_SocBankAccount extends BimpObject
         if(strlen($iban) < 27 || strlen($iban) > 34){
             $errors[] = "Longueur IBAN invalide";
         }
-        elseif(!static::verif_rib($this->getData('code_banque'), $this->getData('code_guichet'), $this->getData('number'), $this->getData('cle_rib')))
+        elseif(!static::verif_rib($this->getInitData('code_banque'), $this->getInitData('code_guichet'), $this->getInitData('number'), $this->getInitData('cle_rib')))
             $errors[] = "Le RIB sélectionné n'est pas valide, veuillez vérifier qu'il ne comporte pas d'erreurs";
         
         if($this->getDevise() == '')
             $errors[] = 'Devise inconnue';
 
         
-        if($this->getData('rum') == ''){
+        if($this->getInitData('rum') == ''){
             $errors[] = "Le RIB n'est pas valide (RUM absent)";
         }
         
@@ -144,14 +144,14 @@ class Bimp_SocBankAccount extends BimpObject
     
     public function haveAllParamsForCompta(&$errors):void {
         if($this->isLoaded()) {
-            if(!$this->getData('label'))            $errors[] = "Le RIB doit contenir un label";
-            if(!$this->getData('bank'))             $errors[] = "Le RIB doit contenir un nom de banque";
-            if(!$this->getData('code_banque'))      $errors[] = "Le RIB doit contenir un code banque";
-            if(!$this->getData('code_guichet'))     $errors[] = "Le RIB doit contenir un code guichet";
-            if(!$this->getData('number'))           $errors[] = "Le RIB doit contenir un numéro de compte";
-            if(!$this->getData('bic'))              $errors[] = "Le RIB doit contenir un code BIC/SWIFT";
-            if(!$this->getData('iban_prefix'))      $errors[] = "Le RIB doit contenir un prefix";
-            if(!$this->getData('domiciliation'))    $errors[] = "Le RIB doit contenir une domiciliation";
+            if(!$this->getInitData('label'))            $errors[] = "Le RIB doit contenir un label";
+            if(!$this->getInitData('bank'))             $errors[] = "Le RIB doit contenir un nom de banque";
+            if(!$this->getInitData('code_banque'))      $errors[] = "Le RIB doit contenir un code banque";
+            if(!$this->getInitData('code_guichet'))     $errors[] = "Le RIB doit contenir un code guichet";
+            if(!$this->getInitData('number'))           $errors[] = "Le RIB doit contenir un numéro de compte";
+            if(!$this->getInitData('bic'))              $errors[] = "Le RIB doit contenir un code BIC/SWIFT";
+            if(!$this->getInitData('iban_prefix'))      $errors[] = "Le RIB doit contenir un prefix";
+            if(!$this->getInitData('domiciliation'))    $errors[] = "Le RIB doit contenir une domiciliation";
         } else {
             $errors[] = "ID du RIB absent";
         }

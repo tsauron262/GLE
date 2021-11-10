@@ -671,7 +671,7 @@ class BLPDF extends OrderPDF
                 } else {
                     $row['desc'] = array(
                         'colspan' => 99,
-                        'content' => $desc,
+                        'content' => $this->cleanHtml($desc),
                         'style'   => 'font-weight: bold; background-color: #F5F5F5;'
                     );
                 }
@@ -695,7 +695,7 @@ class BLPDF extends OrderPDF
                 }
                 $row = array(
 //                    'code_article' => (!is_null($product) ? $product->ref : ''),
-                    'desc'  => $desc,
+                    'desc'  => $this->cleanHtml($desc),
                     'pu_ht' => pdf_getlineupexcltax($this->object, $i, $this->langs),
                 );
 

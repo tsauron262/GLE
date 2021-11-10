@@ -1066,7 +1066,7 @@ class BimpTools
 
         return $sql;
     }
-    
+
     public static function getSqlSelect($return_fields = null, $default_alias = 'a')
     {
         $sql = 'SELECT ';
@@ -1467,7 +1467,7 @@ class BimpTools
 
         return $filters;
     }
-    
+
     public static function getSqlSelectFullQuery($table, $fields, $filters = array(), $joins = array(), $params = array())
     {
         $params = self::overrideArray(array(
@@ -1480,15 +1480,14 @@ class BimpTools
                     'default_alias'   => 'a',
                     'where_operator'  => 'WHERE'
                         ), $params);
-        
-        
+
         $sql = self::getSqlSelect($fields, $params['default_alias']);
         $sql .= self::getSqlFrom($table, $joins, $params['default_alias']);
-        
+
         if (!empty($filters)) {
             $sql .= self::getSqlWhere($filters, $params['default_alias'], $params['where_operator']);
         }
-        
+
         $sql .= self::getSqlOrderBy($params['order_by'], $params['order_way'], $params['default_alias'], $params['extra_order_by'], $params['extra_order_way']);
         $sql .= self::getSqlLimit($params['n'], $params['p']);
     }
@@ -2153,15 +2152,15 @@ class BimpTools
     {
         $string = str_replace("\n\n", "\n", $string);
         $string = str_replace("\r\r", "\n", $string);
-        $string = str_replace(CHR(13).CHR(13), "\n", $string);
-        $string = str_replace(CHR(10).CHR(10), "\n", $string);
-        $string = str_replace(PHP_EOL.PHP_EOL, "\n", $string);
-        
+        $string = str_replace(CHR(13) . CHR(13), "\n", $string);
+        $string = str_replace(CHR(10) . CHR(10), "\n", $string);
+        $string = str_replace(PHP_EOL . PHP_EOL, "\n", $string);
+
         if ($html) {
             $string = self::replaceBr($string, '<br/>');
             $string = str_replace('<br/><br/>', '<br/>', $string);
         }
-        
+
         return $string;
     }
 
@@ -3149,8 +3148,9 @@ class BimpTools
 
         return $html;
     }
-    
-    public static function sendMailGrouper(){
+
+    public static function sendMailGrouper()
+    {
         $dir = PATH_TMP . "/bimpcore/mailsGrouper/";
         if (!is_dir($dir))
             mkdir($dir);

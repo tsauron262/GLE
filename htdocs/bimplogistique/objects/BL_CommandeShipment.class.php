@@ -1290,6 +1290,7 @@ class BL_CommandeShipment extends BimpObject
                     
                     $cocheDecoche = ' <a style=\'color:blue\' onclick="$(\'.shipment_lines .line_shipment_qty\').each(function(){$(this).val($(this).attr(\'data-max\'))});">(Tout au max)</a>';
                     $cocheDecoche .= ' <a style=\'color:blue\' onclick="$(\'.shipment_lines .line_shipment_qty\').each(function(){$(this).val($(this).attr(\'data-min\'))});">(Tout au min)</a>';
+                    $cocheDecoche .= ' <a style=\'color:blue\' onclick="$(\'.shipment_lines .shipment_line_row\').each(function(){console.log($(this).find(\'.line_shipment_qty\').val($(this).find(\'.qty_ready\').html()));});">(= prête)</a>';
                     $html .= '<th>Qté'.$cocheDecoche.'</th>';
                     $cocheDecoche = ' <a style=\'color:blue\' onclick="$(\'.shipment_lines .check_list_item_input\').attr(\'checked\', \'checked\');">(Tout cocher)</a>';
                     $cocheDecoche .= ' <a style=\'color:blue\' onclick="$(\'.shipment_lines .check_list_item_input\').removeAttr(\'checked\');">(Tout décocher)</a>';
@@ -1297,6 +1298,7 @@ class BL_CommandeShipment extends BimpObject
                     if ($edit) {
                         $html .= '<th>Statut</th>';
                     }
+                    $html .= '<th>Qty Préte</th>';
                     $html .= '</thead>';
                     $html .= '<tbody>';
 
@@ -1488,6 +1490,12 @@ class BL_CommandeShipment extends BimpObject
                             }
                             $html .= '</td>';
                         }
+                        $html .= '<td class="qty_ready">';
+                        if(!$product->isSerialisable())
+                            $html .= $ready_qty;
+                        elseif(is_array($equipments))
+                            $html .= count($equipments);
+                        $html .= '</td>';
 
                         $html .= '</tr>';
                     }

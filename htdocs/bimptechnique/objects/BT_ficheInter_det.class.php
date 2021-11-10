@@ -284,9 +284,6 @@ class BT_ficheInter_det extends BimpDolObject
                 $code = "REU_INT";
         }
         
-        if(empty($code) && $fk_soc === $type) {
-            $code = "ATELIER";
-        }
         if(empty($code)) {
             $code = "AC_RDV";
         }

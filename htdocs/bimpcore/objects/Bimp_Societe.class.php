@@ -879,28 +879,41 @@ class Bimp_Societe extends BimpDolObject
 
         return $use_label;
     }
-
-    public function getCommercial($with_default = true)
-    {
+    
+    public function getCommercials($with_default = true, $first = false){
         $commerciaux = $this->getCommerciauxArray(false, $with_default);
 
+        $users = array();
         foreach ($commerciaux as $id_comm => $comm_label) {
             $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_comm);
             if (BimpObject::objectLoaded($user)) {
-                return $user;
+                if($first)
+                    return array($user);
+                else
+                    $users[] = $user;
             }
         }
+        if(count($users))
+            return $users;
 
         if ($with_default) {
             $default_id_commercial = (int) BimpCore::getConf('default_id_commercial', 0);
             if ($default_id_commercial) {
                 $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $default_id_commercial);
                 if (BimpObject::objectLoaded($user)) {
-                    return $user;
+                    return array($user);
                 }
             }
         }
 
+        return array();
+    }
+
+    public function getCommercial($with_default = true)
+    {
+        $users = $this->getCommercials($with_default, true);
+        if(count($users))
+            return $users[0];
         return null;
     }
 

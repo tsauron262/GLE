@@ -666,6 +666,7 @@ class DoliDBMysqliC extends DoliDB
     function connect_server($query_type=0, $tentative = 0)
     {        
         $timestamp_debut = 0.0;
+        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         
         if(! $this->CONSUL_USE_REDIS_CACHE)
         {
@@ -951,16 +952,6 @@ class DoliDBMysqliC extends DoliDB
         }
 */
         /* moddrsi */
-        $tabRemplacement = array(
-//            "SELECT COUNT(DISTINCT a.rowid) as nb_rows FROM llx_propal a LEFT JOIN llx_element_contact ec ON ec.element_id = a.rowid LEFT JOIN llx_c_type_contact tc ON ec.fk_c_type_contact = tc.rowid" =>
-//                "SELECT COUNT(DISTINCT a.rowid) as nb_rows FROM llx_propal a ",
-//            "SELECT DISTINCT (a.rowid) FROM llx_propal a LEFT JOIN llx_element_contact ec ON ec.element_id = a.rowid LEFT JOIN llx_c_type_contact tc ON ec.fk_c_type_contact = tc.rowid ORDER BY a." =>
-//                "SELECT DISTINCT (a.rowid) FROM llx_propal a ORDER BY a."
-        );
-        foreach ($tabRemplacement as $old => $new) {
-            $query = str_replace($old, $new, $query);
-        }
-
         $this->countReq ++;
         $timestamp_debut = microtime(true);
         if ($debugTime) {
@@ -987,7 +978,7 @@ class DoliDBMysqliC extends DoliDB
 
 
                     }
-                        $this->stopAll();
+                    static::stopAll();
                 }
             }
         }
@@ -1011,44 +1002,20 @@ class DoliDBMysqliC extends DoliDB
             $ret = $this->db->query($query);
         }
 */
-        $ret = $this->db->query($query);
+        
+        try {
+            $ret = $this->db->query($query);
+
+        } catch (Exception $e) {
+            $this->catch($query, $ret, $e);
+            return 0;
+        }
+        if(!$ret)
+            $this->catch ($query, $ret);
         
         if (! preg_match("/^COMMIT/i",$query) && ! preg_match("/^ROLLBACK/i",$query))
         {
             // Si requete utilisateur, on la sauvegarde ainsi que son resultset
-            if (! $ret)
-            {
-                $this->lastqueryerror = $query;
-                $this->lasterror = $this->error();
-                $this->lasterrno = $this->errno();
-                
-//                if($this->transaction_opened > 0)
-//                    $this->rollback();
-//                
-//                BimpCore::addlog('Erreur SQL '.$query.($this->transaction_opened > 0 ? ' ayant provoqué le rollback de la transaction' : ''));
-
-                $debug = "";
-                if (function_exists("synGetDebug"))
-                    $debug = synGetDebug();
-                
-                $deadLock = false;
-                $classLog = 'sql';
-                if(stripos($this->lasterror, 'Deadlock') !== false){
-                        $deadLock = true;
-                        $classLog = 'deadLock';
-                }
-                elseif(stripos($this->lasterrno, 'DB_ERROR_RECORD_ALREADY_EXISTS') !== false){
-                    $classLog = 'sql_duplicate';
-                }
-
-//				if ($conf->global->SYSLOG_LEVEL < LOG_DEBUG) dol_syslog(get_class($this)."::query SQL Error query: ".$query, LOG_ERR);	// Log of request was not yet done previously
-                dol_syslog(get_class($this)."::query SQL Error message: ".$this->lasterrno." ".$this->lasterror .' serveur : '.$this->database_host.'<br/>'.$query, LOG_ERR);
-                if(class_exists('BimpCore'))
-                    BimpCore::addlog(get_class($this)."::query SQL Error message: ".$this->lasterrno." | ".$this->lasterror .' serveur : '.$this->database_host.'<br/>'.$query, 3,$classLog);
-                if($deadLock)
-                    $this->stopAll ();
-                        
-            }
             $this->lastquery=$query;
             $this->_results = $ret;
         }
@@ -1095,7 +1062,7 @@ class DoliDBMysqliC extends DoliDB
                 'open' => false
             ));
 
-            if ($ret <= 0) {
+            if (!$ret) {
                 $content = BimpRender::renderAlerts('Erreur SQL - ' . $this->lasterror());
                 BimpDebug::addDebug('sql', '', $content, array(
                     'foldable' => false
@@ -1107,19 +1074,41 @@ class DoliDBMysqliC extends DoliDB
         return $ret;
     }
     
-    function stopAll(){
-        $errors = array('Problème réseau, merci de relancer l\'opération');
-        if (BimpTools::isSubmit('ajax')) {
-            echo json_encode(array(
-                'errors'           => $errors,
-                'request_id'       => BimpTools::getValue('request_id', 0)
-            ));
+    function catch($query, $ret, $e = null){
+        $deadLock = false;
+        $classLog = 'sql';
+        $this->lastqueryerror = $query;
+        $this->lasterror = $this->error();
+        $this->lasterrno = $this->errno();
+
+        if(stripos($this->lasterror, 'Deadlock') !== false || stripos($this->lasterrno, '1213') !== false){
+                $deadLock = true;
+                $classLog = 'deadLock';
         }
-        else{
-            echo 'Oupppps   '.print_r($errors,1);
+        elseif($e && (stripos($e->getMessage(), 'Deadlock') !== false || stripos($e->getMessage(), '1213') !== false)){
+                $deadLock = true;
+                $classLog = 'deadLock';
         }
-        die();
-        exit;
+        elseif(stripos($this->lasterrno, 'DB_ERROR_RECORD_ALREADY_EXISTS') !== false){
+            $classLog = 'sql_duplicate';
+        }
+        
+        
+        $msg = get_class($this)."::query SQL Error message: ";
+        $msg .= '<br/>Lasterrno : '.$this->lasterrno;
+        $msg .= '<br/>Lasterror : '.$this->lasterror;
+        if($e)
+            $msg .= '<br/>Exception msg : '.$e->getMessage();
+        $msg .= '<br/>Serveur : '.$this->database_host;
+        $msg .= '<br/>Query : '.$query;
+
+        dol_syslog($msg, LOG_ERR);
+        if(class_exists('BimpCore'))
+            BimpCore::addlog($msg, 3,$classLog);
+        else
+            dol_syslog ('Erreur sql BimpCore non loade', LOG_ERR);
+        if($deadLock)
+            static::stopAll ();
     }
     
     function getThreadId(){    

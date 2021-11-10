@@ -123,7 +123,9 @@ class BimpController
     public function handleError($level, $msg, $file, $line)
     {
         ini_set('display_errors', 0); // Par précaution. 
-
+        
+//        if(!in_array($level, array(E_NOTICE, E_DEPRECATED)))
+//            die('iiiii'.$level.$msg.$file.$line);
         switch ($level) {
             case E_ERROR:
             case E_CORE_ERROR:
@@ -173,10 +175,13 @@ class BimpController
                 $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
                 $html .= 'ATTENTION: VEUILLEZ NE PAS REITERER L\'OPERATION AVANT RESOLUTION DU PROBLEME';
                 $html .= '</div>';
+                BimpCore::addlog($msg, Bimp_Log::BIMP_LOG_URGENT, 'php', null, array(
+                    'Fichier' => $file,
+                    'Ligne'   => $line
+                ));
 
                 echo $html;
-
-                return true;
+                break;
 
             case E_RECOVERABLE_ERROR:
             case E_USER_ERROR:
@@ -222,7 +227,21 @@ class BimpController
                 break;
 
             default:
+                if(stripos($msg, 'Deadlock') !== false){
+                    global $db;
+                    $db = new mysqli();
+                    $db::stopAll();
+                }
                 return false;
+        }
+        
+        if(stripos($msg, 'Deadlock') !== false){//ne devrait jamais arrivée.
+            global $db;
+            BimpCore::addlog('Erreur SQL intercepté par handleError php, ne devrait jamais arriver !!!!!!!', Bimp_Log::BIMP_LOG_ERREUR, 'php', null, array(
+                'Fichier' => $file,
+                'Ligne'   => $line
+            ));
+            $db::stopAll();
         }
 
         return true;

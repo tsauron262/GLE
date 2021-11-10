@@ -1491,10 +1491,12 @@ class BL_CommandeShipment extends BimpObject
                             $html .= '</td>';
                         }
                         $html .= '<td class="qty_ready">';
-                        if(!$product->isSerialisable())
-                            $html .= $ready_qty;
-                        elseif(is_array($equipments))
-                            $html .= count($equipments);
+                        if(BimpObject::objectLoaded($product)){
+                            if(!$product->isSerialisable())
+                                $html .= $ready_qty;
+                            elseif(is_array($equipments))
+                                $html .= count($equipments);
+                        }
                         $html .= '</td>';
 
                         $html .= '</tr>';

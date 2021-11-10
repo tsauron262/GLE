@@ -9436,4 +9436,9 @@ var options = {
     {
         return BimpTools::isModuleDoliActif('BIMPSUPPORT');
     }
+
+    public function useEntrepot()
+    {
+        return (int) BimpCore::getConf("USE_ENTREPOT");
+    }
 }

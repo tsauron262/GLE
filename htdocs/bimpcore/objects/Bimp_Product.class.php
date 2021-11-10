@@ -1,6 +1,7 @@
 <?php
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpDolObject.class.php';
 
-class Bimp_Product extends BimpObject
+class Bimp_Product extends BimpDolObject
 {
 
     public $stocks = null;

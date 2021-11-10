@@ -123,6 +123,7 @@ class BimpController
     public function handleError($level, $msg, $file, $line)
     {
         ini_set('display_errors', 0); // Par précaution. 
+        
 
         switch ($level) {
             case E_ERROR:
@@ -175,8 +176,7 @@ class BimpController
                 $html .= '</div>';
 
                 echo $html;
-
-                return true;
+                break;
 
             case E_RECOVERABLE_ERROR:
             case E_USER_ERROR:
@@ -222,7 +222,18 @@ class BimpController
                 break;
 
             default:
+                if(stripos($msg, 'Deadlock') !== false){
+                    global $db;
+                    $db = new mysqli();
+                    $db::stopAll();
+                }
                 return false;
+        }
+        
+        if(stripos($msg, 'Deadlock') !== false){
+            global $db;
+            $db = new mysqli();
+            $db::stopAll();
         }
 
         return true;

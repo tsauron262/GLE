@@ -236,7 +236,6 @@ class BimpController
         
         if(stripos($msg, 'Deadlock') !== false){
             global $db;
-            $db = new mysqli();
             $db::stopAll();
         }
 

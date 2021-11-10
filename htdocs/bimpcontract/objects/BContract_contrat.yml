@@ -949,17 +949,28 @@ forms:
               type: danger
         rows:
             - custom: 1
+              input_name: have_courrier
+              label: Lettre de résiliation déposée dans les fichiers de contrat
+              input:
+                  type: toggle
+            - custom: 1
               input_name: end_date_reel
               required: 1
               label: Date de fin effective du contrat
               input:
                   type: date
+              display_if:
+                  field_name: have_courrier
+                  show_values: 1
             - custom: 1
               required: 1
               label: Cause de clôture anticipée du contrat
               input_name: note_close
               input:
                   type: html
+              display_if:
+                  field_name: have_courrier
+                  show_values: 1
             
     email: 
         rows: 

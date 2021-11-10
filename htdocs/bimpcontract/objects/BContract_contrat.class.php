@@ -435,12 +435,19 @@ class BContract_contrat extends BimpDolObject
     public function actionAnticipateClose($data, &$success)
     {
         global $user;
+        
+        $errors = [];
+        
+        if($data['have_courrier'] == 0) {
+            $errors[] = "Vous ne pouvez pas anticiper la clôture de ce contrat sans lettre de résiliation";
+        }
+        
         if ($this->isLoaded()) {
             $warnings = [];
-            $errors = [];
-            $this->updateField("end_date_reel", $data['end_date_reel']);
-            $this->updateField('anticipate_close_note', $data['note_close']);
+            
             if(!count($errors)) {
+                $this->updateField("end_date_reel", $data['end_date_reel']);
+                $this->updateField('anticipate_close_note', $data['note_close']);
                 $success = "Date de fin défini avec succès";
                 $dateClose = new DateTime($date['end_date_reel']);
                 $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $this->getData('fk_commercial_suivi'));

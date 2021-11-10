@@ -666,6 +666,7 @@ class DoliDBMysqliC extends DoliDB
     function connect_server($query_type=0, $tentative = 0)
     {        
         $timestamp_debut = 0.0;
+        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         
         if(! $this->CONSUL_USE_REDIS_CACHE)
         {
@@ -1011,44 +1012,20 @@ class DoliDBMysqliC extends DoliDB
             $ret = $this->db->query($query);
         }
 */
-        $ret = $this->db->query($query);
+        
+        try {
+            $ret = $this->db->query($query);
+
+        } catch (Exception $e) {
+            $this->catch($query, $ret, $e);
+            return 0;
+        }
+        if(!$ret)
+            $this->catch ($query, $ret);
         
         if (! preg_match("/^COMMIT/i",$query) && ! preg_match("/^ROLLBACK/i",$query))
         {
             // Si requete utilisateur, on la sauvegarde ainsi que son resultset
-            if (! $ret)
-            {
-                $this->lastqueryerror = $query;
-                $this->lasterror = $this->error();
-                $this->lasterrno = $this->errno();
-                
-//                if($this->transaction_opened > 0)
-//                    $this->rollback();
-//                
-//                BimpCore::addlog('Erreur SQL '.$query.($this->transaction_opened > 0 ? ' ayant provoqué le rollback de la transaction' : ''));
-
-                $debug = "";
-                if (function_exists("synGetDebug"))
-                    $debug = synGetDebug();
-                
-                $deadLock = false;
-                $classLog = 'sql';
-                if(stripos($this->lasterror, 'Deadlock') !== false){
-                        $deadLock = true;
-                        $classLog = 'deadLock';
-                }
-                elseif(stripos($this->lasterrno, 'DB_ERROR_RECORD_ALREADY_EXISTS') !== false){
-                    $classLog = 'sql_duplicate';
-                }
-
-//				if ($conf->global->SYSLOG_LEVEL < LOG_DEBUG) dol_syslog(get_class($this)."::query SQL Error query: ".$query, LOG_ERR);	// Log of request was not yet done previously
-                dol_syslog(get_class($this)."::query SQL Error message: ".$this->lasterrno." ".$this->lasterror .' serveur : '.$this->database_host.'<br/>'.$query, LOG_ERR);
-                if(class_exists('BimpCore'))
-                    BimpCore::addlog(get_class($this)."::query SQL Error message: ".$this->lasterrno." | ".$this->lasterror .' serveur : '.$this->database_host.'<br/>'.$query, 3,$classLog);
-                if($deadLock)
-                    static::stopAll ();
-                        
-            }
             $this->lastquery=$query;
             $this->_results = $ret;
         }
@@ -1105,6 +1082,43 @@ class DoliDBMysqliC extends DoliDB
         /* fmoddrsi */
 
         return $ret;
+    }
+    
+    function catch($query, $ret, $e = null){
+        $deadLock = false;
+        $classLog = 'sql';
+        $this->lastqueryerror = $query;
+        $this->lasterror = $this->error();
+        $this->lasterrno = $this->errno();
+
+        if(stripos($this->lasterror, 'Deadlock') !== false || stripos($this->lasterrno, '1213') !== false){
+                $deadLock = true;
+                $classLog = 'deadLock';
+        }
+        if($e && (stripos($e->getMessage(), 'Deadlock') !== false || stripos($e->getMessage(), '1213') !== false)){
+                $deadLock = true;
+                $classLog = 'deadLock';
+        }
+        elseif(stripos($this->lasterrno, 'DB_ERROR_RECORD_ALREADY_EXISTS') !== false){
+            $classLog = 'sql_duplicate';
+        }
+        
+        
+        $msg = get_class($this)."::query SQL Error message: ";
+        $msg .= '<br/>Lasterrno : '.$this->lasterrno;
+        $msg .= '<br/>Lasterror : '.$this->lasterror;
+        if($e)
+            $msg .= '<br/>Exception msg : '.$e->getMessage();
+        $msg .= '<br/>Serveur : '.$this->database_host;
+        $msg .= '<br/>Query : '.$query;
+
+        dol_syslog($msg, LOG_ERR);
+        if(class_exists('BimpCore'))
+            BimpCore::addlog($msg, 3,$classLog);
+        else
+            dol_syslog ('Erreur sql BimpCore non loade', LOG_ERR);
+        if($deadLock)
+            static::stopAll ();
     }
     
     function getThreadId(){    

@@ -436,19 +436,23 @@ class BContract_contrat extends BimpDolObject
     {
         global $user;
         if ($this->isLoaded()) {
-            $success = "Le contrat à été clos avec succès";
-            $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
-            if ($this->dol_object->closeAll($user) >= 1) {
-
-                $this->updateField('statut', self::CONTRAT_STATUS_CLOS);
-                $this->updateField('date_cloture', date('Y-m-d H:i:s'));
-                $this->updateField('end_date_reel', $data['end_date_reel']);
-                $this->updateField('anticipate_close_note', $data['note_close']);
-                $this->updateField('fk_user_cloture', $user->id);
-                if ($echeancier->find(['id_contrat' => $this->id])) {
-                    $echeancier->updateField('statut', 0);
-                }
-                $this->addLog('Cloture anticipée du contrat <br /> <b><i>Motif: </i></b>' . $data['note_close']);
+            $warnings = [];
+            $errors = [];
+            $this->updateField("end_date_reel", $data['end_date_reel']);
+            $this->updateField('anticipate_close_note', $data['note_close']);
+            if(!count($errors)) {
+                $success = "Date de fin défini avec succès";
+                $dateClose = new DateTime($date['end_date_reel']);
+                $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $this->getData('fk_commercial_suivi'));
+                $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
+                $sujet = "Clôture anticipée du contrat " . $this->getRef() . " [".$client->getRef()."] - " . $client->getName();
+                $message = "Bonjour,<br />La date du " . $dateClose->format('d/m/Y') . " a été choisie par " . $user->getNomUrl() . " "
+                        . "comme date de fin anticipée du contrat " . $this->getNomUrl() . " pour le client "
+                        . $client->getNomUrl() . ' - ' . $client->getName() . ' pour la raison suivante:';
+                $message.= "<br /><br />".$data['note_close']."<br /><br />Ce contrat ce clôturera automatiquement à cette date.";
+                $addr_cc = ($commercial->getData('email') == $user->email) ? '' : $user->email;
+                $bimpMail = New BimpMail($sujet, $commercial->getData('email'), null, $message, null, $addr_cc);
+                $bimpMail->send($errors);
             }
         } else {
             $errors[] = "ID du contrat absent";
@@ -819,7 +823,7 @@ class BContract_contrat extends BimpDolObject
         return 0;
     }
 
-    public function closeFromCron()
+    public function closeFromCron($reason = "Contrat clos automatiquement")
     {
         $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
         global $user;
@@ -827,7 +831,7 @@ class BContract_contrat extends BimpDolObject
             $this->updateField('statut', self::CONTRAT_STATUS_CLOS);
             $this->updateField('date_cloture', date('Y-m-d H:i:s'));
             $this->updateField('fk_user_cloture', 1);
-            $this->addLog('Contrat clos automatiquement');
+            $this->addLog($reason);
             if ($echeancier->fetchBy('id_contrat', $this->id)) {
                 $echeancier->updateField('statut', 0);
             }
@@ -1654,13 +1658,16 @@ class BContract_contrat extends BimpDolObject
                 }
             }
             if (($this->getData('statut') == self::CONTRAT_STATUS_ACTIVER) && $user->rights->bimpcontract->to_anticipate) {
-                $buttons[] = array(
-                    'label'   => 'Anticiper la cloture du contrat',
-                    'icon'    => 'fas_clock',
-                    'onclick' => $this->getJsActionOnclick('anticipateClose', array(), array(
-                        'form_name' => 'anticipate'
-                    ))
-                );
+                if(!$this->getData('end_date_reel') && !$this->getData('anticipate_close_note')) {
+                    $buttons[] = array(
+                        'label'   => 'Anticiper la cloture du contrat',
+                        'icon'    => 'fas_clock',
+                        'onclick' => $this->getJsActionOnclick('anticipateClose', array(), array(
+                            'form_name' => 'anticipate'
+                        ))
+                    );
+                }
+                
             }
             if (($user->rights->bimpcontract->to_validate || $user->admin) && $this->getData('statut') != self::CONTRAT_STATUT_ABORT && $this->getData('statut') != self::CONTRAT_STATUS_CLOS && $status != self::CONTRAT_STATUS_REFUSE) {
                 $buttons[] = array(
@@ -3287,10 +3294,10 @@ class BContract_contrat extends BimpDolObject
             $date = new DateTime($this->getData('date_contrat'));
             $extra .= '<br/><span class="important">' . BimpRender::renderIcon('fas_signature', 'iconLeft') . 'Contrat marqué comme signé</span> depuis le ' . $date->format('d/m/Y');
         }
-        if (!is_null($this->getData('end_date_reel')) && !is_null($this->getData('anticipate_close_note'))) {
-            $date = new DateTime($this->getData('end_date_reel'));
-            $extra .= "<br /><span>Cloture anticipée en date du <strong>" . $date->format('d/m/Y') . "</strong></span>";
-        }
+//        if (!is_null($this->getData('end_date_reel')) && !is_null($this->getData('anticipate_close_note'))) {
+//            $date = new DateTime($this->getData('end_date_reel'));
+//            $extra .= "<br /><span>Cloture anticipée en date du <strong>" . $date->format('d/m/Y') . "</strong></span>";
+//        }
 
         if ($this->isFactAuto()) {
             $extra .= "<br /><span class='info' >Facturation automatique activée</strong></span>";
@@ -3648,8 +3655,15 @@ class BContract_contrat extends BimpDolObject
             if ($this->dol_object->element == 'contrat' && BimpTools::getContext() != 'public') {
                 $userCreationContrat = new User($this->db->db);
                 $userCreationContrat->fetch((int) $this->getData('fk_user_author'));
-
                 $html .= '<div class="object_header_infos">';
+                if($this->getData('end_date_reel') && $this->getData('anticipate_close_note')) {
+                    $dateAnticipateClose = new DateTime($this->getData('end_date_reel'));
+                    
+                    $html .= "<strong class='danger' ><h3>Date de clôture anticipée pour ce contrat: <i>".$dateAnticipateClose->format('d/m/Y')."</i>"
+                            . " <span class='rowButton bs-popover' ".BimpRender::renderPopoverData($this->getData('anticipate_close_note'), 'right', true)."> ".BimpRender::renderIcon('fas fa-info')."</span></h3></strong>";
+                    
+                }
+                
                 $create = new DateTime($this->getData('datec'));
                 if ($this->getdata('statut') == self::CONTRAT_STATUS_ACTIVER) {
                     $idAvenantActif = $this->getIdAvenantActif();
@@ -3694,6 +3708,7 @@ class BContract_contrat extends BimpDolObject
                     $html .= BimpRender::renderAlerts("Ce contrat est expiré depuis " . abs($intervale_days) . " jour.s, merci de le clore", 'danger', false);
                 }
                 $html .= '</div>';
+                
 
                 $dt_today = New DateTime();
                 $dt_start = New DateTime($this->getData('date_start'));

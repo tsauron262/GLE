@@ -22,11 +22,6 @@ class BimpDolObject extends BimpObject
         return self::getEmailTemplatesArray(static::$email_type, true);
     }
 
-    public function useEntrepot()
-    {
-        return (int) BimpCore::getConf("USE_ENTREPOT");
-    }
-
     public function getEmailUsersFromArray()
     {
         $cache_key = $this->module . '_' . $this->object_name . ($this->isLoaded() ? '_' . $this->id : '') . '_email_users_array';

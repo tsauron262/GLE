@@ -236,8 +236,13 @@ class BimpObject extends BimpCache
 
     public function __clone()
     {
-        $this->config = clone $this->config;
-        $this->config->instance = $this;
+        if (is_object($this->config)) {
+            $this->config = clone $this->config;
+            $this->config->instance = $this;
+        } else {
+            $this->config = new BimpConfig(DOL_DOCUMENT_ROOT . '/' . $this->module . '/objects/', $this->object_name, $this);
+            mailSyn2('Config inexistant', 'dev@bimp.fr', null, 'Config inexistant dans '.get_class($this));
+        }
     }
 
     public function __destruct()

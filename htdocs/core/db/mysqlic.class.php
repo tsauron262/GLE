@@ -1095,7 +1095,7 @@ class DoliDBMysqliC extends DoliDB
                 $deadLock = true;
                 $classLog = 'deadLock';
         }
-        if($e && (stripos($e->getMessage(), 'Deadlock') !== false || stripos($e->getMessage(), '1213') !== false)){
+        elseif($e && (stripos($e->getMessage(), 'Deadlock') !== false || stripos($e->getMessage(), '1213') !== false)){
                 $deadLock = true;
                 $classLog = 'deadLock';
         }

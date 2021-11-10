@@ -235,8 +235,12 @@ class BimpController
                 return false;
         }
         
-        if(stripos($msg, 'Deadlock') !== false){
+        if(stripos($msg, 'Deadlock') !== false){//ne devrait jamais arrivée.
             global $db;
+            BimpCore::addlog('Erreur SQL intercepté par handleError php, ne devrait jamais arriver !!!!!!!', Bimp_Log::BIMP_LOG_ERREUR, 'php', null, array(
+                'Fichier' => $file,
+                'Ligne'   => $line
+            ));
             $db::stopAll();
         }
 

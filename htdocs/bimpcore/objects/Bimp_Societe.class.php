@@ -911,7 +911,7 @@ class Bimp_Societe extends BimpDolObject
 
     public function getCommercial($with_default = true)
     {
-        $users = $this>$this->getCommercials($with_default, true);
+        $users = $this->getCommercials($with_default, true);
         if(count($users))
             return $users[0];
         return null;

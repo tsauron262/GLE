@@ -50,6 +50,7 @@ class BimpCore
         'romain'  => 'r.PELEGRIN@bimp.fr',
         'peter'   => 'p.tkatchenko@bimp.fr'
     );
+    public static $html_purifier = null;
 
     public static function displayHeaderFiles($echo = true)
     {
@@ -496,8 +497,7 @@ class BimpCore
             if ($check) {
                 // On vérifie qu'on n'a pas déjà un log similaire:
                 $id_current_log = BimpCache::bimpLogExists($type, $level, $msg, $extra_data);
-                
-                
+
                 $mod = '';
                 $obj = '';
                 $id = 0;
@@ -507,9 +507,9 @@ class BimpCore
                     $obj = $object->object_name;
                     $id = (int) $object->id;
                 }
-                
+
                 $bt = debug_backtrace(null, 15);
-                    
+
                 $datas = array(
                     'id_user'    => (BimpObject::objectLoaded($user) ? (int) $user->id : 1),
                     'obj_module' => $mod,
@@ -520,10 +520,10 @@ class BimpCore
 
                 if (!$id_current_log) {
                     $datas = BimpTools::merge_array($datas, array(
-                        'type'       => $type,
-                        'level'      => $level,
-                        'msg'        => $msg,
-                        'extra_data' => $extra_data,
+                                'type'       => $type,
+                                'level'      => $level,
+                                'msg'        => $msg,
+                                'extra_data' => $extra_data,
                     ));
                     $log = BimpObject::createBimpObject('bimpcore', 'Bimp_Log', $datas, true, $errors);
 
@@ -539,14 +539,14 @@ class BimpCore
                     }
                     $log = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Log', $id_current_log);
                     $log->set('last_occurence', date('Y-m-d H:i:d'));
-                    $log->set('nb_occurence', $log->getData('nb_occurence')+1);
+                    $log->set('nb_occurence', $log->getData('nb_occurence') + 1);
                     $warnings = array();
                     $errUpdate = $log->update($warnings, true);
-                    if(count($errUpdate))
+                    if (count($errUpdate))
                         $datas['erreur_maj_log'] = $errUpdate;
                     $datas['GET'] = $_GET;
                     $datas['POST'] = $_POST;
-                    $log->addNote('<pre>'.print_r($datas,1).'</pre>');
+                    $log->addNote('<pre>' . print_r($datas, 1) . '</pre>');
                 }
             }
 
@@ -561,5 +561,39 @@ class BimpCore
     public static function loadPhpExcel()
     {
         require_once DOL_DOCUMENT_ROOT . '/bimpcore/libs/PHPExcel-1.8/Classes/PHPExcel.php';
+    }
+
+    public static function LoadHtmlPurifier()
+    {
+        require_once DOL_DOCUMENT_ROOT . '/bimpcore/libs/htmlpurifier-4.13.0/HTMLPurifier.auto.php';
+    }
+
+    public static function getHtmlPurifier()
+    {
+        if (is_null(self::$html_purifier)) {
+            self::LoadHtmlPurifier();
+
+            $config = HTMLPurifier_Config::createDefault();
+
+            $root = '';
+
+            if (defined('PATH_TMP') && PATH_TMP) {
+                $root = PATH_TMP;
+                $path = '/htmlpurifier/serialiser';
+            } else {
+                $root = DOL_DATA_ROOT;
+                $path = '/bimpcore/htmlpurifier/serialiser';
+            }
+
+            if (!is_dir($root . $path)) {
+                BimpTools::makeDirectories($path, $root);
+            }
+
+            $config->set('Cache.SerializerPath', $root . $path);
+
+            self::$html_purifier = new HTMLPurifier($config);
+        }
+
+        return self::$html_purifier;
     }
 }

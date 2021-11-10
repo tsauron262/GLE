@@ -906,7 +906,7 @@ class Bimp_Societe extends BimpDolObject
             }
         }
 
-        return null;
+        return array();
     }
 
     public function getCommercial($with_default = true)

@@ -174,6 +174,10 @@ class BimpController
                 $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
                 $html .= 'ATTENTION: VEUILLEZ NE PAS REITERER L\'OPERATION AVANT RESOLUTION DU PROBLEME';
                 $html .= '</div>';
+                BimpCore::addlog($msg, Bimp_Log::BIMP_LOG_URGENT, 'php', null, array(
+                    'Fichier' => $file,
+                    'Ligne'   => $line
+                ));
 
                 echo $html;
                 break;

@@ -241,6 +241,8 @@ class BimpObject extends BimpCache
             $this->config->instance = $this;
         } else {
             $this->config = new BimpConfig(DOL_DOCUMENT_ROOT . '/' . $this->module . '/objects/', $this->object_name, $this);
+            $this->addCommonFieldsConfig();
+            $this->addConfigExtraParams();
             mailSyn2('Config inexistant', 'dev@bimp.fr', null, 'Config inexistant dans '.get_class($this));
         }
     }

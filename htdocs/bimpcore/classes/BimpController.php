@@ -239,7 +239,8 @@ class BimpController
             global $db;
             BimpCore::addlog('Erreur SQL intercepté par handleError php, ne devrait jamais arriver !!!!!!!', Bimp_Log::BIMP_LOG_ERREUR, 'php', null, array(
                 'Fichier' => $file,
-                'Ligne'   => $line
+                'Ligne'   => $line,
+                'Msg'   => $msg
             ));
             $db::stopAll();
         }

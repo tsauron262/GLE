@@ -1592,11 +1592,14 @@ class BContract_contrat extends BimpDolObject
             $id_forUpdate[] = $id_line;
         }
         if(count($id_forUpdate) > 0)
-            $errors = $this->db->update('contratdet', Array('statut' => 4), 'rowid IN('.implode (",", $id_forUpdate).')');
+            $errors = $this->db->update('contratdet', Array('statut' => 4, 'renpuvellement' => $data['current_renouvellement']), 'rowid IN('.implode (",", $id_forUpdate).')');
         
         $errors = $this->updateField('date_end_renouvellement', $data['date_end_renouvellement']);
+        $errors = $this->updateField('end_date_contrat', $data['date_end_renouvellement']);
         $errors = $echeancier->updateField('next_facture_date', '0000-00-00 00:00:00');
-        $errors = $this->update();
+        $errors = $this->updateField('current_renouvellement', $data['current_renouvellement']);
+        $errors = $this->updateField('initial_renouvellement', $data['initial_renouvellement']);
+        $errors = $this->updateField('tacite', $data['tacite']);
         return [
             'errors' => $errors,
             'warnings' => $warnings,

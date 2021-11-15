@@ -1572,17 +1572,72 @@ class BContract_contrat extends BimpDolObject
         return Array('errors' => $errors, 'warnings' => $warnings, 'success' => $success);
         
     }
+    
+    public function actionRedefineEcheancier($data, &$success) {
+        $errors = [];
+        $warnings = [];
+        
+        $echeancier = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_echeancier');
+        $echeancier->find(['id_contrat' => $this->id]);
+        $errors = $echeancier->updateField('next_facture_date', '0000-00-00 00:00:00');
+        
+        $idForDelete = [];
+        $id_forUpdate = [];
+        foreach($data['lines'] as $id_line) {
+            $idForDelete[] = $id_line;
+        }
+        if(count($idForDelete) > 0)
+            $errors = $this->db->delete("contratdet", 'rowid = IN('. implode(",", $idForDelete).')');
+        
+        foreach($data['lines_activate'] as $id_line) {
+            $id_forUpdate[] = $id_line;
+        }
+        if(count($id_forUpdate) > 0)
+            $errors = $this->db->update('contratdet', Array('statut' => 4), 'rowid IN('.implode (",", $id_forUpdate).')');
+        
+        $errors = $this->updateField('date_end_renouvellement', $data['date_end_renouvellement']);
+        
+        return [
+            'errors' => $errors,
+            'warnings' => $warnings,
+            'success' => $success
+        ];
+    }
+   
+    
+    public function getLinesForList() {
+        $lines = Array();
+
+        $children = $this->getChildrenList("lines");
+        
+        foreach($children as $id_child) {
+            $child = $this->getChildObject("lines", $id_child);
+            $lines[$id_child] = "Renouvellement: " . $child->getData('renouvellement') . " -> " . $child->displayData('fk_product');
+        }
+        
+        return $lines;
+    }
 
     public function getActionsButtons()
     {
         global $conf, $langs, $user;
-        $buttons = Array();
+        $buttons = Array();        
 
         if ($this->isLoaded() && BimpTools::getContext() != 'public') {
 
             $status = $this->getData('statut');
             $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
-
+            
+            if($user->admin) {
+                $buttons[] = array(
+                        'label'   => 'Annulé renew(ADMIN)',
+                        'icon'    => 'fas_retweet',
+                        'onclick' => $this->getJsActionOnclick('redefineEcheancier', array(), array(
+                            'form_name' => 'redefineEcheancier'
+                        ))
+                    );
+            }
+            
             if (BT_ficheInter::isActive() && $status == self::CONTRAT_STATUS_ACTIVER && $user->rights->bimptechnique->plannified) {
                 if ($user->admin == 1 || $user->id == 375) { // Pour les testes 
                     $buttons[] = array(
@@ -2164,6 +2219,13 @@ class BContract_contrat extends BimpDolObject
             return 1;
 
         switch ($field_name) {
+            case 'current_renouvellement':
+            case 'tacite':
+            case 'initial_renouvellement':
+            case 'date_end_renouvellement':
+                if($user->admin)
+                    return 1;
+                break;
             case 'show_fact_line_in_pdf':
                 if($user->rights->bimpcontract->to_validate && ($this->getData("statut") != self::CONTRAT_STATUS_ACTIVER && $this->getData('statut') != self::CONTRAT_STATUS_ACTIVER_TMP && $this->getData('statut') !=  self::CONTRAT_STATUS_ACTIVER_SUP))
                     return 1;

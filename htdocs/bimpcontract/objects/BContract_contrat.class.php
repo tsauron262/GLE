@@ -1579,7 +1579,7 @@ class BContract_contrat extends BimpDolObject
         
         $echeancier = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_echeancier');
         $echeancier->find(['id_contrat' => $this->id]);
-        $errors = $echeancier->updateField('next_facture_date', '0000-00-00 00:00:00');
+        
         
         $idForDelete = [];
         $id_forUpdate = [];
@@ -1596,7 +1596,8 @@ class BContract_contrat extends BimpDolObject
             $errors = $this->db->update('contratdet', Array('statut' => 4), 'rowid IN('.implode (",", $id_forUpdate).')');
         
         $errors = $this->updateField('date_end_renouvellement', $data['date_end_renouvellement']);
-        
+        $errors = $echeancier->updateField('next_facture_date', '0000-00-00 00:00:00');
+        $errors = $this->update();
         return [
             'errors' => $errors,
             'warnings' => $warnings,

@@ -327,6 +327,8 @@ fields:
     current_renouvellement:
         label: Numéro du renouvellement
         type: int
+        values:
+            array: renouvellement
     syntec_renouvellement:
         label: Syntec lors du dernier renouvellement
         type: float
@@ -336,6 +338,8 @@ fields:
     initial_renouvellement:
         label: Renouvellement initial
         type: int
+        values:
+            array: renouvellement
     next_contrat:
         label: Contrat de renouvellement
         type: id_object
@@ -659,6 +663,28 @@ lists:
             fk_commercial_suivi:
 
 forms:
+    redefineEcheancier:
+        title: Re-define Echeancier ADMIN
+        rows:
+            - field: current_renouvellement
+            - field: tacite
+            - field: initial_renouvellement
+            - field: date_end_renouvellement
+            - custom: 1
+              label: Lignes du contrat à supprimer
+              input_name: lines
+              input: 
+                  type: check_list
+                  items: 
+                      callback: getLinesForList
+            - custom: 1
+              label: Lignes du contrat à activer
+              input_name: lines_activate
+              input: 
+                  type: check_list
+                  items: 
+                      callback: getLinesForList
+
     have_signed:
         title: Vérification signature
         msgs:

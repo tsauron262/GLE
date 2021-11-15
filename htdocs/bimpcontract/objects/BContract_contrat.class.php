@@ -1586,13 +1586,13 @@ class BContract_contrat extends BimpDolObject
             $idForDelete[] = $id_line;
         }
         if(count($idForDelete) > 0)
-            $errors = $this->db->delete("contratdet", 'rowid = IN('. implode(",", $idForDelete).')');
+            $errors = $this->db->delete("contratdet", 'rowid IN ('. implode(",", $idForDelete).')');
         
         foreach($data['lines_activate'] as $id_line) {
             $id_forUpdate[] = $id_line;
         }
         if(count($id_forUpdate) > 0)
-            $errors = $this->db->update('contratdet', Array('statut' => 4, 'renpuvellement' => $data['current_renouvellement']), 'rowid IN('.implode (",", $id_forUpdate).')');
+            $errors = $this->db->update('contratdet', Array('statut' => 4, 'renouvellement' => $data['current_renouvellement']), 'rowid IN('.implode (",", $id_forUpdate).')');
         
         $errors = $this->updateField('date_end_renouvellement', $data['date_end_renouvellement']);
         $errors = $this->updateField('end_date_contrat', $data['date_end_renouvellement']);

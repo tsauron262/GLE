@@ -1,6 +1,7 @@
 table: stock_mouvement
 primary: rowid
 icon: fas_exchange-alt
+common_fields: 0
 
 labels: 
     name: Mouvement de stock
@@ -91,6 +92,7 @@ fields:
     value:
         label: Quantité
         type: int
+        has_total: 1
     
     inventorycode:
         label: Code inventaire

@@ -125,17 +125,6 @@ class BimpSignature extends BimpObject
                 }
                 return 1;
 
-            case 'cancel':
-                if ((int) $this->getData('type') < 0) {
-                    $errors[] = 'Signature déjà annulée';
-                    return 0;
-                }
-                if ((int) $this->getData('signed')) {
-                    $errors[] = 'Signature déjà affectuée';
-                    return 0;
-                }
-                return 1;
-
             case 'setSignatureParams':
                 if (!(int) $this->getData('signed')) {
                     $errors[] = 'Signature non effectuée';
@@ -146,6 +135,36 @@ class BimpSignature extends BimpObject
                     return 0;
                 }
                 return 1;
+
+            case 'cancel':
+                if ((int) $this->getData('type') < 0) {
+                    $errors[] = 'Signature déjà annulée';
+                    return 0;
+                }
+                if ((int) $this->getData('signed')) {
+                    $errors[] = 'Signature déjà affectuée';
+                    return 0;
+                }
+                $obj = $this->getObj();
+                if ($this->isObjectValid($errors, $obj)) {
+                    if (method_exists($obj, 'isSignatureCancellable')) {
+                        $obj->isSignatureCancellable($this->getData('doc_type'), $errors);
+                    }
+                }
+                return 1;
+
+            case 'reopen':
+                if ((int) $this->getData('type') !== -1) {
+                    $errors[] = 'Cette signature n\'est pas au statut annulée';
+                    return 0;
+                }
+                $obj = $this->getObj();
+                if ($this->isObjectValid($errors, $obj)) {
+                    if (method_exists($obj, 'isSignatureReopenable')) {
+                        $obj->isSignatureReopenable($this->getData('doc_type'), $errors);
+                    }
+                }
+                return (count($errors) ? 0 : 1);
         }
         return parent::isActionAllowed($action, $errors);
     }
@@ -231,6 +250,26 @@ class BimpSignature extends BimpObject
                 'icon'    => 'fas_file-signature',
                 'onclick' => $this->getJsActionOnclick('signElec', array(), array(
                     'form_name' => 'sign_elec'
+                ))
+            );
+        }
+
+        if ($this->isActionAllowed('cancel') && $this->canSetAction('cancel')) {
+            $buttons[] = array(
+                'label'   => 'Annuler la Signature',
+                'icon'    => 'fas_times-circle',
+                'onclick' => $this->getJsActionOnclick('cancel', array(), array(
+                    'confirm_msg' => 'Veuillez confirmer l\\\'annulation de cette signature'
+                ))
+            );
+        }
+
+        if ($this->isActionAllowed('reopen') && $this->canSetAction('reopen')) {
+            $buttons[] = array(
+                'label'   => 'Réouvrir la Signature',
+                'icon'    => 'fas_undo',
+                'onclick' => $this->getJsActionOnclick('reopen', array(), array(
+                    'confirm_msg' => 'Veuillez confirmer la réouveture de cette signature'
                 ))
             );
         }
@@ -1069,8 +1108,42 @@ class BimpSignature extends BimpObject
 
         if ($this->isLoaded()) {
             $this->set('type', -1);
-            $this->update($warnings, true);
+            $errors = $this->update($warnings, true);
+
+            if (!count($errors)) {
+                $obj = $this->getObj();
+
+                if ($this->isObjectValid($warnings, $obj)) {
+                    if (method_exists($obj, 'onSignatureCancelled')) {
+                        $warnings = $obj->onSignatureCancelled($this);
+                    }
+                }
+            }
         }
+
+        return $errors;
+    }
+
+    public function reopenSignature(&$warnings = array())
+    {
+        $errors = array();
+
+        if ($this->isLoaded()) {
+            $this->set('type', 0);
+            $this->set('signed', 0);
+            $errors = $this->update($warnings, true);
+
+            if (!count($errors)) {
+                $obj = $this->getObj();
+
+                if ($this->isObjectValid($warnings, $obj)) {
+                    if (method_exists($obj, 'onSignatureReopened')) {
+                        $warnings = $obj->onSignatureReopened($this);
+                    }
+                }
+            }
+        }
+
 
         return $errors;
     }
@@ -1171,7 +1244,7 @@ class BimpSignature extends BimpObject
                     $msg .= '<b>Signature: </b>' . $this->getLink(array(), 'private') . '<br/><br/>';
 
                     $msg .= '<b>Date de la signature: </b>' . date('d / m / Y à H:i:s', strtotime($this->getData('date_signed'))) . '<br/>';
-                    $msg .= '<b>Type signature: </b>' . BimpTools::getArrayValueFromPath(self::$types, $this->getData('type') . '/label', 'inconnue') .'<br/>';
+                    $msg .= '<b>Type signature: </b>' . BimpTools::getArrayValueFromPath(self::$types, $this->getData('type') . '/label', 'inconnue') . '<br/>';
                     $msg .= '<b>Nom Signataire: </b> ' . $this->getData('nom_signataire') . '<br/>';
                     $msg .= '<b>Adresse e-mail signataire: </b>' . $this->getData('email_signataire') . '<br/><br/>';
 
@@ -1263,7 +1336,7 @@ class BimpSignature extends BimpObject
                                     'role'       => ($nAdmin > 0 ? 0 : 1),
                                     'status'     => 1
                                         ), true, $u_err, $warnings);
-                        
+
                         if (count($u_err) || !BimpObject::objectLoaded($bic_user)) {
                             $errors[] = BimpTools::getMsgFromArray($u_err, 'Echec de la création du compte utilisateur client pour l\'adresse email "' . $new_user_email . '"');
                         } else {
@@ -1360,7 +1433,7 @@ class BimpSignature extends BimpObject
                 }
             }
         }
-        
+
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
@@ -1623,6 +1696,34 @@ class BimpSignature extends BimpObject
             'warnings'         => $warnings,
             'success_callback' => $success_callback,
             'allow_reset_form' => true
+        );
+    }
+
+    public function actionCancel($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Annulation de la signature effectuée avec succès';
+
+        $errors = $this->cancelSignature($warnings);
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionReopen($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Réouverture de la signature effectuée avec succès';
+
+        $errors = $this->reopenSignature($warnings);
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
         );
     }
 

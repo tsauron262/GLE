@@ -183,7 +183,7 @@ class BL_CommandeShipment extends BimpObject
                     $errors[] = 'La signature est déjà en place pour cette expédition';
                 }
 
-                if ((int) $this->getData('signed')) {
+                if ((int) $this->getData('signed') === 1) {
                     $errors[] = 'Cette expédition est déjà signée';
                 }
                 break;
@@ -534,7 +534,7 @@ class BL_CommandeShipment extends BimpObject
         $id_contact = (int) $this->getData('id_contact');
         if (!$id_contact) {
             $commande = $this->getParentInstance();
-            if($commande->isLoaded()){
+            if ($commande->isLoaded()) {
                 $contacts = $commande->dol_object->getIdContact('external', 'SHIPPING');
                 if (isset($contacts[0]) && $contacts[0]) {
                     $id_contact = $contacts[0];
@@ -1287,14 +1287,14 @@ class BL_CommandeShipment extends BimpObject
                     $html .= '<thead>';
                     $html .= '<th style="width: 30px;text-align: center">N°</th>';
                     $html .= '<th>Désignation</th>';
-                    
+
                     $cocheDecoche = ' <a style=\'color:blue\' onclick="$(\'.shipment_lines .line_shipment_qty\').each(function(){$(this).val($(this).attr(\'data-max\'))});">(Tout au max)</a>';
                     $cocheDecoche .= ' <a style=\'color:blue\' onclick="$(\'.shipment_lines .line_shipment_qty\').each(function(){$(this).val($(this).attr(\'data-min\'))});">(Tout au min)</a>';
                     $cocheDecoche .= ' <a style=\'color:blue\' onclick="$(\'.shipment_lines .shipment_line_row\').each(function(){console.log($(this).find(\'.line_shipment_qty\').val($(this).find(\'.qty_ready\').html()));});">(= prête)</a>';
-                    $html .= '<th>Qté'.$cocheDecoche.'</th>';
+                    $html .= '<th>Qté' . $cocheDecoche . '</th>';
                     $cocheDecoche = ' <a style=\'color:blue\' onclick="$(\'.shipment_lines .check_list_item_input\').attr(\'checked\', \'checked\');">(Tout cocher)</a>';
                     $cocheDecoche .= ' <a style=\'color:blue\' onclick="$(\'.shipment_lines .check_list_item_input\').removeAttr(\'checked\');">(Tout décocher)</a>';
-                    $html .= '<th>Options'.$cocheDecoche.'</th>';
+                    $html .= '<th>Options' . $cocheDecoche . '</th>';
                     if ($edit) {
                         $html .= '<th>Statut</th>';
                     }
@@ -1491,10 +1491,10 @@ class BL_CommandeShipment extends BimpObject
                             $html .= '</td>';
                         }
                         $html .= '<td class="qty_ready">';
-                        if(BimpObject::objectLoaded($product)){
-                            if(!$product->isSerialisable())
+                        if (BimpObject::objectLoaded($product)) {
+                            if (!$product->isSerialisable())
                                 $html .= $ready_qty;
-                            elseif(is_array($equipments))
+                            elseif (is_array($equipments))
                                 $html .= count($equipments);
                         }
                         $html .= '</td>';
@@ -2079,7 +2079,7 @@ class BL_CommandeShipment extends BimpObject
 
     // Traitements: 
 
-    public function validateShipment(&$warnings = array(), $date_shipped = null, $pdf_chiffre = 1, $pdf_detail = 1)
+    public function validateShipment(&$warnings = array(), $date_shipped = null, $pdf_chiffre = 1, $pdf_detail = 1, $create_signature = 1)
     {
         $errors = array();
 
@@ -2157,6 +2157,12 @@ class BL_CommandeShipment extends BimpObject
             return $errors;
         }
 
+        if ($create_signature) {
+            $this->set('signed', 0);
+        } else {
+            $this->set('signed', 2);
+        }
+
         $update_errors = $this->update($warnings);
         if (count($update_errors)) {
             $errors[] = BimpTools::getMsgFromArray($update_errors, 'Echec de la mise à jour de l\'expédition');
@@ -2168,15 +2174,17 @@ class BL_CommandeShipment extends BimpObject
             $ref = $this->getData('ref');
             $commande->addLog('Expédition n°' . $this->getData('num_livraison') . ($ref ? ' (' . $ref . ')' : '') . ' validée');
 
-            $pdf_errors = $this->generateDocument($pdf_chiffre, $pdf_detail);
-            if (count($pdf_errors)) {
-                $warnings[] = BimpTools::getMsgFromArray($pdf_errors, 'Echec création du fichier PDF');
-            }
+            if ($create_signature) {
+                $pdf_errors = $this->generateDocument($pdf_chiffre, $pdf_detail);
+                if (count($pdf_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($pdf_errors, 'Echec création du fichier PDF');
+                }
 
-            if (!(int) $this->getData('signed')) {
-                $signature_errors = $this->createSignature();
-                if (count($signature_errors)) {
-                    $warnings[] = BimpTools::getMsgFromArray($pdf_errors, 'Echec création de la signature');
+                if (!(int) $this->getData('signed')) {
+                    $signature_errors = $this->createSignature();
+                    if (count($signature_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($pdf_errors, 'Echec création de la signature');
+                    }
                 }
             }
         }
@@ -2498,7 +2506,11 @@ class BL_CommandeShipment extends BimpObject
         $success = 'Expédition validée avec succès';
 
         $date_shipped = (isset($data['date_shipped']) ? $data['date_shipped'] : '');
-        $errors = $this->validateShipment($warnings, $date_shipped, $data['pdf_chiffre'], $data['pdf_detail']);
+        $pdf_chiffre = (int) BimpTools::getArrayValueFromPath($data, 'pdf_chiffre', 1);
+        $pdf_detail = (int) BimpTools::getArrayValueFromPath($data, 'pdf_detail', 1);
+        $create_signature = (int) BimpTools::getArrayValueFromPath($data, 'create_signature', 1);
+
+        $errors = $this->validateShipment($warnings, $date_shipped, $pdf_chiffre, $pdf_detail, $create_signature);
 
         return array(
             'errors'   => $errors,
@@ -3268,6 +3280,51 @@ class BL_CommandeShipment extends BimpObject
 
         if ($this->isLoaded($errors)) {
             $this->set('signed', 1);
+
+            $warnings = array();
+            $errors = $this->update($warnings, true);
+        }
+
+        return $errors;
+    }
+
+    public function onSignatureCancelled($bimpSignature)
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            $this->set('signed', 2);
+
+            $warnings = array();
+            $errors = $this->update($warnings, true);
+        }
+
+        return $errors;
+    }
+
+    public function isSignatureReopenable($doc_type, &$errors = array())
+    {
+        if ($this->isLoaded($errors)) {
+            switch ($doc_type) {
+                case 'bl':
+                    if ((int) $this->getData('status') !== self::BLCS_EXPEDIEE) {
+                        $errors[] = 'Cette expédition est au statut "' . self::$status_list[(int) $this->getData('status')]['label'] . '"';
+                        return 0;
+                    }
+
+                    return 1;
+            }
+        }
+
+        return 0;
+    }
+
+    public function onSignatureReopened($bimpSignature)
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            $this->set('signed', 0);
 
             $warnings = array();
             $errors = $this->update($warnings, true);

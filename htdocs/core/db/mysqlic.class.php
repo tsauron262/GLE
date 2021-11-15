@@ -966,6 +966,10 @@ class DoliDBMysqliC extends DoliDB
             if(!$this->connect_server($qtype))
             {
                 dol_syslog(get_class($this)."::query: Fatal error - cannot connect to database server for request type: ".$qtype, LOG_ERR);
+                if(class_exists('BimpCore')){
+                    $this->discover_svc();
+                    BimpCore::addlog(get_class($this)."::query: Fatal error - cannot connect to database server for request type: ".$qtype, 4, 'sql', null, array('svc_read'=>$this->_svc_read, 'svc_write'=>$this->_svc_write));
+                }
                 return FALSE;
             }
         }
@@ -975,8 +979,6 @@ class DoliDBMysqliC extends DoliDB
                 if($thread_id != $this->thread_id){//gros probléme id transaction changée
                     if(class_exists('BimpCore')){
                         BimpCore::addlog('Gros probléme changement de thread Id', 4, 'sql', null, array('query' => $query, 'oldId' => $this->thread_id, 'newId' => $thread_id));
-
-
                     }
                     static::stopAll();
                 }

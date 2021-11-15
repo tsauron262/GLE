@@ -416,11 +416,6 @@ class BimpComm extends BimpDolObject
         return 1;
     }
 
-    public function useEntrepot()
-    {
-        return (int) BimpCore::getConf("USE_ENTREPOT");
-    }
-
     public function showForceCreateBySoc()
     {
         $client = $this->getChildObject('client');

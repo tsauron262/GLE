@@ -62,6 +62,22 @@ class BimpCache
 
         return self::$cache[$cache_key];
     }
+    
+    public static function getSignature($prenom, $job, $phone){
+        $key = 'sign'.$prenom.$job.$phone;
+        if(!self::cacheServerExists($key)){
+            $url = "https://www.bimp.fr/signatures/v3/supports/sign.php?prenomnom=". urlencode($prenom)."&job=". urlencode($job)."&phone=" . urlencode($phone);
+            $signature = file_get_contents($url, false, stream_context_create(array(
+                'http' => array(
+                    'timeout' => 2   // Timeout in seconds
+            ))));
+            if($signature)
+                self::setCacheServeur ($key, $signature);
+            else
+                return null;
+        }
+        return self::getCacheServeur($key);
+    }
 
     public static function getCacheArray($cache_key, $include_empty = false, $empty_value = 0, $empty_label = '')
     {

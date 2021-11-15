@@ -232,7 +232,7 @@ global $synopsisHook; //Pour vision global de l'objet
 
 if (!defined('NOSESSION')) {
     if(defined('USE_BDD_FOR_SESSION')){
-        global $db;
+        global $db, $conf;
         
         
         require_once DOL_DOCUMENT_ROOT.'/bimpcore/classes/BimpSession.php';
@@ -242,7 +242,7 @@ if (!defined('NOSESSION')) {
             $dbNoTransac = $bdb->db;
         }
         else{
-            $dbNoTransac = $db;
+            $dbNoTransac = getDoliDBInstance($conf->db->type, $conf->db->host, $conf->db->user, $db->database_pass, $conf->db->name, $conf->db->port);
         }
         
         

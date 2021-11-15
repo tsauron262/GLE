@@ -314,7 +314,17 @@ class DoliDBMysqliC extends DoliDB
 
             $collation = empty($conf->db->dolibarr_main_db_collation) ? 'utf8_unicode_ci' : $conf->db->dolibarr_main_db_collation;
             if (preg_match('/latin1/', $collation)) $collation='utf8_unicode_ci';
-            if (! preg_match('/general/', $collation)) $this->db->query("SET collation_connection = ".$collation);
+            if (! preg_match('/general/', $collation)){
+                $query = "SET collation_connection = ".$collation;
+                try {
+                    $sql = $this->db->query($query);
+                } catch (Exception $e) {
+                    $this->catch($query, $sql, $e);
+                    return 0;
+                }
+                if(!$sql)
+                    $this->catch ($query, $sql);
+            }
 	}
     }
     
@@ -1114,7 +1124,15 @@ class DoliDBMysqliC extends DoliDB
     }
     
     function getThreadId(){    
-        $sql = $this->db->query('SELECT CONNECTION_ID() as id;');
+        $query = 'SELECT CONNECTION_ID() as id;';
+        try {
+            $sql = $this->db->query($query);
+        } catch (Exception $e) {
+            $this->catch($query, $sql, $e);
+            return 0;
+        }
+        if(!$sql)
+            $this->catch ($query, $sql);
         if($sql){
             $res = $this->fetch_object($sql);
             return $res->id;

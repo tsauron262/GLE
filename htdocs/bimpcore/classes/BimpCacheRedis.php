@@ -5,7 +5,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpCacheServer.php';
 class BimpCacheRedis extends BimpCacheServer
 {
 
-    protected static $REDIS_LOCALHOST_SOCKET = "/var/run/redis/redis.socks";
+    protected static $REDIS_LOCALHOST_SOCKET = "";
     protected static $redisObj = null;
     protected static $isActif = true;
     protected static $isInit = false;
@@ -14,6 +14,13 @@ class BimpCacheRedis extends BimpCacheServer
     public function initCacheServeur()
     {
         if (class_exists('Redis')) {
+            if(!defined('REDIS_LOCALHOST_SOCKET'))
+            {
+                dol_syslog("Constante REDIS_LOCALHOST_SOCKET non definie", LOG_WARNING);
+                self::$REDIS_LOCALHOST_SOCKET = "/var/run/redis/redis.sock";
+            }
+            else        
+                self::$REDIS_LOCALHOST_SOCKET = REDIS_LOCALHOST_SOCKET;
             if (is_null(self::$redisObj)) {
                 self::$redisObj = new Redis();
 

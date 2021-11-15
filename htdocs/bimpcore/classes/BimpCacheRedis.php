@@ -47,8 +47,14 @@ class BimpCacheRedis extends BimpCacheServer
             return parent::getCacheServeur($key);
         }
 
-        $result = self::$redisObj->get($key);
-
+        try{
+            $result = self::$redisObj->get($key);
+        }
+        catch (Exception $e) {
+            BimpCore::addlog('Redis ingoignable '.$e->getMessage(), Bimp_Log::BIMP_LOG_ALERTE);
+            return null;
+        }
+        
         if ($true_val) {
             if ($result == 'valnull')
                 return null;

@@ -1052,7 +1052,7 @@ class BContract_contrat extends BimpDolObject
             $fin = new DateTime($this->getData('end_date_reel'));
         }
         
-        if (!$this->getData('date_end_renouvellement') && !$suup_all) {
+        if(!$suup_all){
             if (!$this->getData('date_end_renouvellement')) {
                 if ($this->getData('end_date_reel')) {
                     $fin = new DateTime($this->getData('end_date_reel'));
@@ -1065,7 +1065,6 @@ class BContract_contrat extends BimpDolObject
                 $fin = new DateTime($this->getData('date_end_renouvellement'));
             }
         }
-        
 
         if (is_object($fin))
             return $fin->format($format);

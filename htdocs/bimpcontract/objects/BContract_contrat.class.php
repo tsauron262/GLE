@@ -1047,7 +1047,7 @@ class BContract_contrat extends BimpDolObject
         $fin = null;
         $suup_all = false;
         
-        if ($this->getData('end_date_reel')) {
+        if ($this->getData('end_date_reel') && $this->getData('anticipate_close_note')) {
             $suup_all = true;
             $fin = new DateTime($this->getData('end_date_reel'));
         }

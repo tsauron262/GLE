@@ -325,15 +325,18 @@ class BTC_export extends BimpObject {
         if(count($liste)) {
             $instance = $this->getInstance('bimptocegid', 'BTC_export_paiement');
             foreach ($liste as $paiement) {
-                if($instance->export($paiement->rowid, $paiement->fk_paiement, $forced, ['name' => $name, 'dir' => $dir])) {
+                $reglement = $this->db->getRow('c_paiement', 'id = ' . $paiement->fk_paiement);
+                if($reglement->code != "NO_COM") {
+                    if($instance->export($paiement->rowid, $paiement->fk_paiement, $forced, ['name' => $name, 'dir' => $dir])) {
                     $pay = $this->getInstance('bimpcommercial', 'Bimp_Paiement', $paiement->rowid);
                     $this->write_logs("***PAY*** | " . date('d/m/Y H:i:s') . " | " . $user->login . " | " . $paiement->ref . "\n", false);
                     if(is_null($ref)){
                         $pay->updateField('exported', 1);
                     }
-                } else {
-                    // Mettre task
-                    $this->addTaskAlert(['ref' => $instance->getData('ref')]);
+                    } else {
+                        // Mettre task
+                        $this->addTaskAlert(['ref' => $instance->getData('ref')]);
+                    }
                 }
             }
         } else {

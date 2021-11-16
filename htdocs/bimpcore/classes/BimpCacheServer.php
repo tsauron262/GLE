@@ -47,4 +47,12 @@ class BimpCacheServer
     {
         return static::$type;
     }
+    
+    public function delete(){
+        
+    }
+    
+    public function printAll(){
+        
+    }
 }

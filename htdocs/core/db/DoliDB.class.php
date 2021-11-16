@@ -254,6 +254,8 @@ abstract class DoliDB implements Database
                         
                         /* moddrsi */
                         $this->has_rollback = true;
+                        BimpCore::addlog('Tentative de ROLLBACK sur transaction d\'id '.($this->transaction_opened + 1), Bimp_Log::BIMP_LOG_URGENT, 'bimpcore');
+                        
                         /* fmoddrsi */
                         
 			return 1;

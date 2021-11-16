@@ -13,28 +13,32 @@ class BimpCacheRedis extends BimpCacheServer
 
     public function initCacheServeur()
     {
-        if (class_exists('Redis')) {
-            if(!defined('REDIS_LOCALHOST_SOCKET'))
-            {
-                dol_syslog("Constante REDIS_LOCALHOST_SOCKET non definie", LOG_WARNING);
-                self::$REDIS_LOCALHOST_SOCKET = "/var/run/redis/redis.sock";
-            }
-            else        
-                self::$REDIS_LOCALHOST_SOCKET = REDIS_LOCALHOST_SOCKET;
-            if (is_null(self::$redisObj)) {
-                self::$redisObj = new Redis();
-
-                try {
-                    self::$redisObj->connect(self::$REDIS_LOCALHOST_SOCKET);
-                } catch (Exception $e) {
-                    self::$isActif = false;
-                }
-            }
-        } else {
+        if(BimpCore::isModeDev())
             self::$isActif = false;
-        }
+        else{
+            if (class_exists('Redis')) {
+                if(!defined('REDIS_LOCALHOST_SOCKET'))
+                {
+                    dol_syslog("Constante REDIS_LOCALHOST_SOCKET non definie", LOG_WARNING);
+                    self::$REDIS_LOCALHOST_SOCKET = "/var/run/redis/redis.sock";
+                }
+                else        
+                    self::$REDIS_LOCALHOST_SOCKET = REDIS_LOCALHOST_SOCKET;
+                if (is_null(self::$redisObj)) {
+                    self::$redisObj = new Redis();
 
-        self::$isInit = true;
+                    try {
+                        self::$redisObj->connect(self::$REDIS_LOCALHOST_SOCKET);
+                    } catch (Exception $e) {
+                        self::$isActif = false;
+                    }
+                }
+            } else {
+                self::$isActif = false;
+            }
+
+            self::$isInit = true;
+        }
     }
 
     public function getCacheServeur($key, $true_val = true)

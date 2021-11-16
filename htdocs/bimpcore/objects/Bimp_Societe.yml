@@ -824,8 +824,8 @@ views:
             
             - cols:
                 - type: fields_table
-                  show: 
-                      callback: isCompany
+#                  show: 
+#                      callback: isCompany
                   col_lg: 6
                   col_md: 6
                   col_sm: 12

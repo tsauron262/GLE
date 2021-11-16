@@ -436,6 +436,7 @@ class Commande extends CommonOrder
             if($bloqued)
                 BimpTools::bloqueDebloque("numCommande", 0);
             /*fmoddrsi*/
+            BimpCore::addLogs_extra_data(['roolbackCommande' => $this->error]);
             $this->db->rollback();
             return -1;
         }

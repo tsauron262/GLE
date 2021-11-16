@@ -3520,7 +3520,7 @@ class Bimp_Commande extends BimpComm
         $errors = $warnings = array();
         $nbOk = 0;
         if ($this->canSetAction('forceStatus')) {
-            if ($data['status'] == 2) {
+            if ($data['status'] == 2 || ($data['status'] == 3 && $data['type'] == 'logistique_status')) {
                 foreach ($data['id_objects'] as $nb => $idT) {
                     $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $idT);
                     $statutActu = $instance->getData($data['type']);

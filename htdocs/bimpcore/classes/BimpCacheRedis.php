@@ -13,28 +13,32 @@ class BimpCacheRedis extends BimpCacheServer
 
     public function initCacheServeur()
     {
-        if (class_exists('Redis')) {
-            if(!defined('REDIS_LOCALHOST_SOCKET'))
-            {
-                dol_syslog("Constante REDIS_LOCALHOST_SOCKET non definie", LOG_WARNING);
-                self::$REDIS_LOCALHOST_SOCKET = "/var/run/redis/redis.sock";
-            }
-            else        
-                self::$REDIS_LOCALHOST_SOCKET = REDIS_LOCALHOST_SOCKET;
-            if (is_null(self::$redisObj)) {
-                self::$redisObj = new Redis();
-
-                try {
-                    self::$redisObj->connect(self::$REDIS_LOCALHOST_SOCKET);
-                } catch (Exception $e) {
-                    self::$isActif = false;
-                }
-            }
-        } else {
+        if(BimpCore::isModeDev())
             self::$isActif = false;
-        }
+        else{
+            if (class_exists('Redis')) {
+                if(!defined('REDIS_LOCALHOST_SOCKET'))
+                {
+                    dol_syslog("Constante REDIS_LOCALHOST_SOCKET non definie", LOG_WARNING);
+                    self::$REDIS_LOCALHOST_SOCKET = "/var/run/redis/redis.sock";
+                }
+                else        
+                    self::$REDIS_LOCALHOST_SOCKET = REDIS_LOCALHOST_SOCKET;
+                if (is_null(self::$redisObj)) {
+                    self::$redisObj = new Redis();
 
-        self::$isInit = true;
+                    try {
+                        self::$redisObj->connect(self::$REDIS_LOCALHOST_SOCKET);
+                    } catch (Exception $e) {
+                        self::$isActif = false;
+                    }
+                }
+            } else {
+                self::$isActif = false;
+            }
+
+            self::$isInit = true;
+        }
     }
 
     public function getCacheServeur($key, $true_val = true)
@@ -47,8 +51,14 @@ class BimpCacheRedis extends BimpCacheServer
             return parent::getCacheServeur($key);
         }
 
-        $result = self::$redisObj->get($key);
-
+        try{
+            $result = self::$redisObj->get($key);
+        }
+        catch (Exception $e) {
+            BimpCore::addlog('Redis ingoignable '.$e->getMessage(), Bimp_Log::BIMP_LOG_ALERTE);
+            return null;
+        }
+        
         if ($true_val) {
             if ($result == 'valnull')
                 return null;
@@ -85,7 +95,15 @@ class BimpCacheRedis extends BimpCacheServer
         if (is_array($value))
             $value = json_encode($value);
 
-        self::$redisObj->set($key, $value);
+        
+        
+        try{
+            self::$redisObj->set($key, $value);
+        }
+        catch (Exception $e) {
+            BimpCore::addlog('Redis ingoignable '.$e->getMessage(), Bimp_Log::BIMP_LOG_ALERTE);
+            return null;
+        }
 
         return true;
     }
@@ -100,6 +118,13 @@ class BimpCacheRedis extends BimpCacheServer
             return parent::getCacheServeur($key);
         }
         
-        return self::$redisObj->exists($key);
+        try{
+            $ret = self::$redisObj->exists($key);
+        }
+        catch (Exception $e) {
+            BimpCore::addlog('Redis ingoignable '.$e->getMessage(), Bimp_Log::BIMP_LOG_ALERTE);
+            return null;
+        }
+        return $ret;
     }
 }

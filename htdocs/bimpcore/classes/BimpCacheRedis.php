@@ -7,7 +7,7 @@ class BimpCacheRedis extends BimpCacheServer
 
     protected static $REDIS_LOCALHOST_SOCKET = "";
     protected static $redisObj = null;
-    protected static $isActif = false;
+    protected static $isActif = true;
     protected static $isInit = false;
     public static $type = 'server';
 
@@ -40,6 +40,36 @@ class BimpCacheRedis extends BimpCacheServer
             self::$isInit = true;
         }
     }
+    
+     function delete($key)
+    {
+        if (!self::$isInit) {
+            self::initCacheServeur();
+        }
+        if (!self::$isActif) {
+            return parent::delete();
+        }
+        try {
+            self::$redisObj->del($key);
+        } catch (RedisException $e) {
+            return $this->status = false;
+        }
+    }
+    
+    public function printAll(){
+        if (!self::$isInit) {
+            self::initCacheServeur();
+        }
+        if (!self::$isActif) {
+            return parent::printAll();
+        }
+        $_key = self::$redisObj->keys('*');
+        return '<pre>'.print_r($_key,1).'</pre>';
+    }
+    
+    public static function getPrefKey(){
+        return BimpCore::getConf('git_version', 1).'_';
+    }
 
     public function getCacheServeur($key, $true_val = true)
     {
@@ -52,7 +82,7 @@ class BimpCacheRedis extends BimpCacheServer
         }
 
         try{
-            $result = self::$redisObj->get($key);
+            $result = self::$redisObj->get(self::getPrefKey().$key);
         }
         catch (Exception $e) {
             BimpCore::addlog('Redis ingoignable '.$e->getMessage(), Bimp_Log::BIMP_LOG_ALERTE);
@@ -98,7 +128,7 @@ class BimpCacheRedis extends BimpCacheServer
         
         
         try{
-            self::$redisObj->set($key, $value);
+            self::$redisObj->set(self::getPrefKey().$key, $value);
         }
         catch (Exception $e) {
             BimpCore::addlog('Redis ingoignable '.$e->getMessage(), Bimp_Log::BIMP_LOG_ALERTE);
@@ -119,7 +149,7 @@ class BimpCacheRedis extends BimpCacheServer
         }
         
         try{
-            $ret = self::$redisObj->exists($key);
+            $ret = self::$redisObj->exists(self::getPrefKey().$key);
         }
         catch (Exception $e) {
             BimpCore::addlog('Redis ingoignable '.$e->getMessage(), Bimp_Log::BIMP_LOG_ALERTE);

@@ -1,9 +1,9 @@
 <?php
 
-class Bimp_ImportPaiement extends BimpObject
+class Bimp_ImportPrelevement extends BimpObject
 {
 
-    var $id_mode_paiement = 'VIR';
+    var $id_mode_paiement = 'NO_COM';
 
     function create(&$warnings = array(), $force_create = false)
     {
@@ -36,7 +36,6 @@ class Bimp_ImportPaiement extends BimpObject
             $errors[] = 'Fichier introuvable';
 
 
-
         return $errors;
     }
     
@@ -47,13 +46,10 @@ class Bimp_ImportPaiement extends BimpObject
             $errorsLn = array();
             $totP = $child->getData('price');
             if ($child->ok == true) {
-                foreach ($child->getData('factures') as $idFact) {
+                $idFact = $child->getData('facture');
+                if ($idFact > 0) {
                     $fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $idFact);
-                    if ($fact->getData('remain_to_pay') < $totP)
-                        $montant = $fact->getData('remain_to_pay');
-                    else
-                        $montant = $totP;
-                    $totP -= $montant;
+                    $montant = $totP;
                     if ($montant > 0) {
                         if (!class_exists('Paiement')) {
                             require_once DOL_DOCUMENT_ROOT . '/compta/paiement/class/paiement.class.php';
@@ -103,7 +99,7 @@ class Bimp_ImportPaiement extends BimpObject
     {
         $success = 'Paiment(s) crée(s)';
         $wanings = array();
-        $list = $this->getChildrenObjects('lignes', array('traite' => 0, 'type' => 'vir'));
+        $list = $this->getChildrenObjects('lignes', array('traite' => 0));
         $errors = $this->create_paiement_from_list($list);
 
         return array('errors' => $errors, 'warnings' => $wanings);
@@ -112,7 +108,7 @@ class Bimp_ImportPaiement extends BimpObject
     function actionCreate_all_paiement($data, &$success){
         $success = 'Paiment(s) crée(s)';
         $wanings = array();
-        $list = BimpCache::getBimpObjectObjects($this->module, 'Bimp_ImportPaiementLine', array('traite' => 0, 'type' => 'vir'));
+        $list = BimpCache::getBimpObjectObjects($this->module, 'Bimp_ImportPrelevementLine', array('traite' => 0));
         $errors = $this->create_paiement_from_list($list);
 
         return array('errors' => $errors, 'warnings' => $wanings);
@@ -125,28 +121,29 @@ class Bimp_ImportPaiement extends BimpObject
 
     function traiteData($datas, &$errors)
     {
-        $separateurecriture = '04178';
-
+        $separateurecriture = '
+';
+        
         $tabLn = explode($separateurecriture, $datas);
 
         unset($tabLn[0]);
 
         foreach ($tabLn as $ln) {
-            $ln = $separateurecriture . $ln;
-
-            $line = BimpCache::getBimpObjectInstance($this->module, 'Bimp_ImportPaiementLine');
-            $line->set('id_import', $this->id);
-            $line->set('data', $ln);
-            $errors = BimpTools::merge_array($errors, $line->create());
+            if($ln != ''){
+                $line = BimpCache::getBimpObjectInstance($this->module, 'Bimp_ImportPrelevementLine');
+                $line->set('id_import', $this->id);
+                $line->set('data', $ln);
+                $errors = BimpTools::merge_array($errors, $line->create());
+            }
         }
     }
     
     
     public static function toCompteAttente(){
         $return = array();
-        $list = BimpCache::getBimpObjectObjects('bimpfinanc', 'Bimp_ImportPaiementLine', array('traite' => 0, 'type' => 'vir', 'num' => ''));
+        $list = BimpCache::getBimpObjectObjects('bimpfinanc', 'Bimp_ImportPrelevementLine', array('traite' => 0));
         foreach ($list as $payin){
-            $num = BimpTools::getNextRef('Bimp_ImportPaiementLine', 'num', 'PAYNI{AA}{MM}-', 5);
+            $num = BimpTools::getNextRef('Bimp_ImportPrelevementLine', 'num', 'PAYNI{AA}{MM}-', 5);
             $payin->updateField('num', $num);
             $return[] = array('num' => $num, 'amount' => $payin->getData('price'), 'date' => $payin->getData('date'), 'name' => $payin->getData('name'), 'id' => $payin->id);
         }

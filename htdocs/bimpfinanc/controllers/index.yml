@@ -26,6 +26,9 @@ objects:
     import_paiement_line:
         instance:
             bimp_object: Bimp_ImportPaiementLine
+    import_prelevement: 
+        instance:
+            bimp_object: Bimp_ImportPrelevement
             
 sections:
     - type: tabs
@@ -90,4 +93,13 @@ sections:
                                   panel: 1
                                   object: import_paiement_line
                                   name: global
+                                  
+        import_prelevement:
+            label: Import prélévement
+            icon: fas_file-import
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: import_prelevement
                       

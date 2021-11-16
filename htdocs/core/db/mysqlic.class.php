@@ -976,7 +976,7 @@ class DoliDBMysqliC extends DoliDB
             if(!$this->connect_server($qtype))
             {
                 $extra = array('svc_read'=>$this->_svc_read, 'svc_write'=>$this->_svc_write);
-                dol_syslog(get_class($this)."::query: Fatal error - cannot connect to database server for request type: ".$qtype.' '.print_r($extra,1), LOG_ERR);
+                dol_syslog(get_class($this)."::query: Fatal error - cannot connect to database server for request type: ".$qtype.' '.print_r($extra,1).' '.$this->database_user.' '.$this->database_pass.' '.$this->database_name, LOG_ERR);
                 if(class_exists('BimpCore')){
                     $this->discover_svc();
                     BimpCore::addlog(get_class($this)."::query: Fatal error - cannot connect to database server for request type: ".$qtype, 4, 'sql', null, $extra);

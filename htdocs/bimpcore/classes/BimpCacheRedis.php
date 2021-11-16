@@ -91,7 +91,15 @@ class BimpCacheRedis extends BimpCacheServer
         if (is_array($value))
             $value = json_encode($value);
 
-        self::$redisObj->set($key, $value);
+        
+        
+        try{
+            self::$redisObj->set($key, $value);
+        }
+        catch (Exception $e) {
+            BimpCore::addlog('Redis ingoignable '.$e->getMessage(), Bimp_Log::BIMP_LOG_ALERTE);
+            return null;
+        }
 
         return true;
     }

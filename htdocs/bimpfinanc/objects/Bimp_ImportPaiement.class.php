@@ -123,7 +123,7 @@ class Bimp_ImportPaiement extends BimpObject
         return 'origine' . $this->id . '.csv';
     }
 
-    function traiteData($datas, $errors)
+    function traiteData($datas, &$errors)
     {
         $separateurecriture = '04178';
 

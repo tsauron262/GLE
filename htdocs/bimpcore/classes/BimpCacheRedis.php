@@ -7,7 +7,7 @@ class BimpCacheRedis extends BimpCacheServer
 
     protected static $REDIS_LOCALHOST_SOCKET = "";
     protected static $redisObj = null;
-    protected static $isActif = true;
+    protected static $isActif = false;
     protected static $isInit = false;
     public static $type = 'server';
 

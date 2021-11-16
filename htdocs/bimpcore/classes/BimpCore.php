@@ -433,6 +433,11 @@ class BimpCore
     }
 
     // Gestion des logs:
+    
+    public static function addLogs_debug_trace($msg){
+        $bt = debug_backtrace(null, 30);
+        static::addLogs_extra_data([$msg => $bt]);    
+    }
 
     public static function addLogs_extra_data($array)
     {

@@ -203,7 +203,7 @@ class Interfaces
                     else if (! empty($objMod->error))  $this->errors[]=$objMod->error;
                     else  $this->errors[]='Erreur inconnue dans le trigger : '.$modName.' action '.$action;
                     if(class_exists('BimpCore'))
-                        BimpCore::addLogs_debug_trace($this->errors);
+                        BimpCore::addLogs_debug_trace(BimpTools::merge_array(array('Erreur dans le trigger : '.$modName.' action '.$action), $this->errors));
                     //dol_syslog("Error in trigger ".$action." - Nb of error string returned = ".count($this->errors), LOG_ERR);
                 }
             }

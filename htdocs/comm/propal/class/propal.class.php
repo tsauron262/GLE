@@ -1681,6 +1681,7 @@ class Propal extends CommonObject
 		// Protection
 		if ($this->statut == self::STATUS_VALIDATED)
 		{
+			$this->error='Devis déja validée';
 			dol_syslog(get_class($this)."::valid action abandonned: already validated", LOG_WARNING);
 			return 0;
 		}

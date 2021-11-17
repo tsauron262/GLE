@@ -325,36 +325,87 @@ class BContract_contrat extends BimpDolObject
 
         return $html;
     }
-
-    public function renderThisStatsFi($display = true, $in_contrat = true)
-    {
-        $html = "";
-
+    
+    public function getTotalFi($tms) {
+        $ficheInter = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter');        
+        return $ficheInter->time_to_qty($ficheInter->timestamp_to_time($tms)) * BimpCore::getConf("bimptechnique_coup_horaire_technicien");
+        
+    }
+    
+    public function getMargePrevisionnel($total_fis) {
+        return $total_fis / ($this->getJourTotal() - $this->getJourRestant()) * $this->getJourTotal();
+    }
+    
+    public function getTmsArray() {
         $fis = BimpCache::getBimpObjectObjects('bimptechnique', 'BT_ficheInter', array('fk_contrat' => $this->id));
-
-        $ficheInter = $this->getInstance('bimptechnique', 'BT_ficheInter');
-        $total_fis = 0;
-        $total_tms = 0;
-        $total_tms_not_contrat = 0;
-        foreach ($fis as $ficheInter) {
+        $tms_in_contrat = 0;
+        $tms_out_contrat = 0;
+                
+        foreach ($this->getListFi() as $ficheInter) {
             $childrenFiche = $ficheInter->getChildrenList("inters");
             foreach ($childrenFiche as $id_child) {
                 $child = $ficheInter->getChildObject('inters', $id_child);
                 $duration = $child->getData('duree');
                 if ($child->getData('id_line_contrat') || $child->getData('type') == 5 || $ficheInter->getData(('new_fi')) < 1) {
-                    $total_tms += $duration;
+                    $tms_in_contrat += $duration;
                 } else {
-                    $total_tms_not_contrat += $duration;
+                    $tms_out_contrat += $duration;
                 }
             }
         }
+        
+        return (object) Array(
+            'in' => $tms_in_contrat,
+            'out' => $tms_out_contrat
+        );
+        
+    }
+    
+    public function getMargeInter() {
+        if($this->isLoaded()) {
+            $total_contrat = $this->getTotalContrat();
+            $in_out_tms = $this->getTmsArray();
+            $total_fis = $this->getTotalFi($in_out_tms->in);
 
-        $total_fis = $ficheInter->time_to_qty($ficheInter->timestamp_to_time($total_tms)) * BimpCore::getConf("bimptechnique_coup_horaire_technicien");
+            return $total_contrat - $total_fis;
+        }
+        
+        
+        
+        return  null;
+        
+    }
+    
+    public function displayMargeInter() {
+        return BimpTools::displayMoneyValue($this->getMargeInter(), "EUR", true);
+    }
+    
+    
+    
+    public function getListFi() {
+        if($this->isLoaded()) {
+            return BimpCache::getBimpObjectObjects('bimptechnique', 'BT_ficheInter', ['fk_contrat' => $this->id]);
+        }
+        return Array();
+    }
+
+    public function renderThisStatsFi($display = true, $in_contrat = true)
+    {
+        $html = "";
+
+        $fis = $this->getListFi();
+        $in_out_tms = $this->getTmsArray();
+        $ficheInter = $this->getInstance('bimptechnique', 'BT_ficheInter');
+        $total_fis = 0;
+        $total_tms = $in_out_tms->in;
+        $total_tms_not_contrat = $in_out_tms->out;
+        $total_fis = $this->getTotalFi($total_tms);
         $previsionelle = 0;
+        
         if($this->getJourTotal() > 0 && $this->getJourTotal() > $this->getJourRestant())
-            $previsionelle = $total_fis / ($this->getJourTotal() - $this->getJourRestant()) * $this->getJourTotal();
+            $previsionelle = $this->getMargePrevisionnel ($total_fis);
 
-        $marge = ($this->getTotalContrat() - $total_fis);
+        $marge = $this->getMargeInter();
         $marge_previsionelle = ($this->getTotalContrat() - $previsionelle);
 
         $class = 'warning';

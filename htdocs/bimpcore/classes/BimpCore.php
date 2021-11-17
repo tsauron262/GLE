@@ -436,6 +436,8 @@ class BimpCore
     
     public static function addLogs_debug_trace($msg){
         $bt = debug_backtrace(null, 30);
+        if(is_array($msg))
+            $msg = implode(' - ', $msg);
         static::addLogs_extra_data([$msg => $bt]);    
     }
 

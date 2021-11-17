@@ -147,11 +147,11 @@ class BTC_exportRibAndMandat extends BTC_export {
     
     
     private function recurrentORponctuel(string $secteur):string {
-        return ($secteur == "CT" || $secteur == "CTC" || $secteur == "CTE") ? '1PR' : '2PP';        
+        return /*($secteur == "CT" || $secteur == "CTC" || $secteur == "CTE") ? */'1PR'/* : '2PP'*/;        
     }
     
     private function parORpro(Bimp_Societe $client):string {
-        return ($client->getData('type') == 8) ? '1PD' : '2PI';
+        return /*($client->getData('type') == 8) ? */'1PD'/* : '2PI'*/;
     }
     
     // Getters

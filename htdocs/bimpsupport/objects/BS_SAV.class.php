@@ -3842,7 +3842,8 @@ class BS_SAV extends BimpObject
                 $new_status = self::BS_SAV_ATT_CLIENT;
 
                 if ($propal->dol_object->valid($user) < 1) {
-                    $errors[] = "Validation de devis impossible !!!" . BimpTools::getMsgFromArray($propal->dol_object->errors);
+                    BimpTools::getErrorsFromDolObject($propal->dol_object, $errors = null, $langs);
+                    $errors[] = "Validation de devis impossible !!!";
                 }
 
                 if (!count($errors) && !$propal->dol_object->generateDocument(self::$propal_model_pdf, $langs)) {

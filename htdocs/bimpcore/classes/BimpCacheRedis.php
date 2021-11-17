@@ -66,6 +66,23 @@ class BimpCacheRedis extends BimpCacheServer
         $_key = self::$redisObj->keys('*');
         return '<pre>'.print_r($_key,1).'</pre>';
     }
+    public function deleteAll(){
+        if (!self::$isInit) {
+            self::initCacheServeur();
+        }
+        if (!self::$isActif) {
+            return parent::printAll();
+        }
+        $_key = self::$redisObj->keys('*');
+//        print_r($_key);
+        foreach($_key as $key){
+            echo '<br/>jj'.$key;
+            $this->delete($key);
+        }
+        
+        
+//        return '<pre>'.print_r($_key,1).'</pre>';
+    }
     
     public static function getPrefKey(){
         return BimpCore::getConf('git_version', 1).'_';

@@ -520,7 +520,6 @@ filters:
             type: search_user
         data_type: id_object
         type: user
-
     use_syntec:
         label: Utilisation Syntec
         type: check_list
@@ -528,7 +527,6 @@ filters:
           1: OUI
           0: NON
         exclude_btn: 0
-                
     reconduction:
         label: Recondution
         type: check_list
@@ -536,7 +534,7 @@ filters:
             0: Aucune
             1: Sur proposition
             2: Tacite
-            
+        
 filters_panels: 
     default: 
         filters:
@@ -566,8 +564,12 @@ filters_panels:
                         method: isActive
                         object: fiche_inter
                         is_static: 1
-
-lists_cols: 
+                        
+lists_cols:
+    margeInter:
+        label: Marge Inters
+        value:
+            callback: displayMargeInter
     signed:
         label: Contrat signé
         value:

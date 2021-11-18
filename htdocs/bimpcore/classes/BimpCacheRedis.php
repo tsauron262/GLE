@@ -14,7 +14,7 @@ class BimpCacheRedis extends BimpCacheServer
 
     public function initCacheServeur()
     {
-        if(!BimpCore::isModeDev())
+        if(BimpCore::isModeDev())
             self::$isActif = false;
         else{
             if (class_exists('Redis')) {

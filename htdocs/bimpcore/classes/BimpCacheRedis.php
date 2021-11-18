@@ -10,11 +10,11 @@ class BimpCacheRedis extends BimpCacheServer
     protected static $isActif = true;
     protected static $isInit = false;
     public static $type = 'server';
-    public static $TTL = 30;
+    public static $TTL = 60 * 60 * 5;
 
     public function initCacheServeur()
     {
-        if(BimpCore::isModeDev())
+        if(!BimpCore::isModeDev())
             self::$isActif = false;
         else{
             if (class_exists('Redis')) {

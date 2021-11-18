@@ -1816,7 +1816,7 @@ class Bimp_Facture extends BimpComm
     {
         $items = array();
         if ($this->isLoaded()) {
-            $contacts = $this->dol_object->liste_contact(-1, 'external', 0, 'BILLING2');
+            $contacts = $this->dol_object->liste_contact(1, 'external', 0, 'BILLING2');
             $emails = array();
             foreach ($contacts as $item) {
                 if ((string) $item['email'] && (int) $item['id'] && !in_array($item['id'], $items)) {
@@ -1826,7 +1826,7 @@ class Bimp_Facture extends BimpComm
                 }
             }
             if (count($items) == 0) {
-                $contacts = $this->dol_object->liste_contact(-1, 'external', 0, 'BILLING');
+                $contacts = $this->dol_object->liste_contact(1, 'external', 0, 'BILLING');
                 $emails = array();
                 foreach ($contacts as $item) {
                     if ((string) $item['email'] && (int) $item['id'] && !in_array($item['id'], $items)) {
@@ -4397,7 +4397,7 @@ class Bimp_Facture extends BimpComm
             }
         }
 
-        $contacts = $this->dol_object->liste_contact(-1, 'external', 0, 'BILLING');
+        $contacts = $this->dol_object->liste_contact(1, 'external', 0, 'BILLING');
         foreach ($contacts as $contact) {
             if ($contact['socid'] != $this->getData("fk_soc"))
                 $errors[] = 'Validation impossible, contact client adresse de facturation différente du client de la facture';

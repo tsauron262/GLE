@@ -406,6 +406,7 @@ abstract class DoliDB implements Database
         else{
             echo 'Oupppps   '.print_r($errors,1);
         }
+        $this->transaction_opened = 0;
         die();
         exit;
     }

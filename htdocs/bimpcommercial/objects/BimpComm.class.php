@@ -220,7 +220,7 @@ class BimpComm extends BimpDolObject
                 if (!BimpObject::objectLoaded($client)) {
                     $errors[] = 'Client absent';
                 } else {
-                    if ($client->getData('fk_typent') == 0)
+                    if (BimpCore::getConf('fk_typent_REQUIRED') && $client->getData('fk_typent') == 0)
                         $errors[] = 'Type de tier obligatoire';
 
 

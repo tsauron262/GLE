@@ -10,6 +10,7 @@ class BimpCacheRedis extends BimpCacheServer
     protected static $isActif = true;
     protected static $isInit = false;
     public static $type = 'server';
+    public static $TTL = 30;
 
     public function initCacheServeur()
     {
@@ -85,7 +86,8 @@ class BimpCacheRedis extends BimpCacheServer
     }
     
     public static function getPrefKey(){
-        return BimpCore::getConf('git_version', 1).'_';
+        global $conf;
+        return BimpCore::getConf('git_version', 1).'_'.$conf->global->MAIN_INFO_SOCIETE_NOM.'_';
     }
 
     public function getCacheServeur($key, $true_val = true)
@@ -145,7 +147,8 @@ class BimpCacheRedis extends BimpCacheServer
         
         
         try{
-            self::$redisObj->set(self::getPrefKey().$key, $value);
+//            self::$redisObj->set(self::getPrefKey().$key, $value);
+            self::$redisObj->setex(self::getPrefKey().$key, self::$TTL, $value);
         }
         catch (Exception $e) {
             BimpCore::addlog('Redis ingoignable '.$e->getMessage(), Bimp_Log::BIMP_LOG_ALERTE);

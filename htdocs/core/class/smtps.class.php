@@ -748,7 +748,9 @@ class SMTPs
 	 */
 	function getHost()
 	{
-            return BimpCache::getIpFromDns($this->_smtpsHost);
+            if(class_exists('BimpCache'))
+                return BimpCache::getIpFromDns($this->_smtpsHost);
+            return $this->_smtpsHost;
 	}
 
 	/**

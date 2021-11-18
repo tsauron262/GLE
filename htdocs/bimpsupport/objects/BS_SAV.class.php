@@ -4418,9 +4418,9 @@ class BS_SAV extends BimpObject
                                                 $msg = BimpTools::getMsgFromArray($validate_errors, 'Echec de la validation de la facture');
                                                 $errors[] = $msg;
 
-                                                BimpCore::addlog('Erreur validation facture SAV', Bimp_Log::BIMP_LOG_ERREUR, 'sav', $this, array(
-                                                    'Erreurs' => $validate_errors
-                                                ));
+//                                                BimpCore::addlog('Erreur validation facture SAV', Bimp_Log::BIMP_LOG_ERREUR, 'sav', $this, array(
+//                                                    'Erreurs' => $validate_errors
+//                                                ));
                                             } else {
                                                 $bimpFacture->fetch($facture->id);
 

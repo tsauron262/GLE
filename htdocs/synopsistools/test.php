@@ -21,9 +21,23 @@ require("../main.inc.php");
 
 llxHeader();
 
-BimpCore::addlog('Message de test des logs');
+echo BimpCache::$cache_server->printAll();
+if($_REQUEST['deleteAll'] == 'true')
+    echo BimpCache::$cache_server->deleteAll();
 
-die('fin');
+
+
+
+die('uuuu');
+
+
+//            $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
+//                $rows = $equipment->getList($filtre, 1, 1, 'rand', 'asc', 'array', array('id', 'serial'));
+//                
+//                echo '<pre>'; print_r($rows);
+
+ llxFooter();
+die('                    fin'.count($rows));
 
 
 $ldaphost = "ldaps://91.211.164.250:636/";
@@ -326,20 +340,20 @@ $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php'; // Si pas déjà require
 
-$reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation'); // Pas besoin de fetcher
-
-$list = $reservation->getList(array(
-    'id_transfert' => 666, // ID du transfert
-        ), null, null, 'id', 'asc', 'array', array(
-    'id', // Mettre ici la liste des champs à retourner.,
-    'qty',
-    'id_equipment',
-    'id_product',
-    'status'
-        ));
-
-echo "<pre>";
-print_r($list);
+//$reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation'); // Pas besoin de fetcher
+//
+//$list = $reservation->getList(array(
+//    'id_transfert' => 666, // ID du transfert
+//        ), null, null, 'id', 'asc', 'array', array(
+//    'id', // Mettre ici la liste des champs à retourner.,
+//    'qty',
+//    'id_equipment',
+//    'id_product',
+//    'status'
+//        ));
+//
+//echo "<pre>";
+//print_r($list);
 
 
 echo "fin" . print_r($errors, 1);

@@ -655,7 +655,7 @@ class DoliDBMysqliC extends DoliDB
         {
 	    if ($this->transaction_opened > 0) 
                 dol_syslog(get_class($this)."::close Closing a connection with an opened transaction depth=".$this->transaction_opened,LOG_ERR);
-            if(class_exists('BimpCore'))
+            if($this->transaction_opened > 0 && class_exists('BimpCore'))
                 BimpCore::addlog (get_class($this)."::close Closing a connection with an opened transaction depth=".$this->transaction_opened, Bimp_Log::BIMP_LOG_ERREUR);
             $this->connected=false;
             $this->database_host = "";

@@ -815,8 +815,11 @@ class DoliDBMysqliC extends DoliDB
         }
         
         $cur_timestamp = time();
-        if( ($cur_timestamp - $this->_last_discover_time) > ($this->CONSUL_REDIS_CACHE_TTL / 2) )
+        if( ($cur_timestamp - $this->_last_discover_time) > ($this->CONSUL_REDIS_CACHE_TTL / 2) ){
             $this->discover_svc();   // On TTL/2 we rediscover services from Consul (or read cached values from Redis)
+            $count_read = count($this->_svc_read);
+            $count_write = count($this->_svc_write);
+        }
         // Search for a server in array
         switch ($query_type)
         {
@@ -918,7 +921,7 @@ class DoliDBMysqliC extends DoliDB
                 die('impossible de se connecté au serveur');
         }
         
-        dol_syslog('Aucun serveur pour connexion BDD '.$count_read.' '.$count_write.' '.$rnd_index, 3);
+        dol_syslog('Aucun serveur pour connexion BDD '.$count_read.'/'.count($this->_svc_read).' '.$count_write.'/'.count($this->_svc_write).' '.$rnd_index, 3);
         return FALSE;
     }
     

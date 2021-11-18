@@ -2426,7 +2426,7 @@ class Bimp_Facture extends BimpComm
     public function displayPDFButton($display_generate = true, $with_ref = true, $btn_label = '')
     {
         global $user;
-        if ($this->getData('fk_statut') > 0 && !in_array($user->login, array('admin', 't.sauron', 'f.martinez', 'a.delauzun'))) {
+        if ($this->getData('fk_statut') > 0 && !in_array($user->login, array('admin', 't.sauron', 'f.martinez', 'a.delauzun')) && BimpCore::getConf('BLOQUE_GENERATE_FACT_PDF', 0)) {
             $ref = dol_sanitizeFileName($this->getRef());
             if ($this->getFileUrl($ref . '.pdf') != '')
                 $display_generate = false;

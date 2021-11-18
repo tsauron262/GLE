@@ -35,8 +35,14 @@ class BimpTest extends BimpObject{
         $tabTxt[] = $db->db->host_info;
         $db->query("SELECT * FROM llx_facture LIMIT 0,100000");
         $sql = $db->query("SELECT * FROM `llx_bimpcore_conf` WHERE `name` LIKE 'nb_req_%';");
-        while($ln = $db->fetch_object($sql))
-                $tabTxt[] = 'Serveur : '.str_replace('nb_req_', '', $ln->name).' : '.$ln->value.' requetes';
+        $tot = 0;
+        $tabServ = array();
+        while($ln = $db->fetch_object($sql)){
+                $tot += $ln->value;
+                $tabServ[str_replace('nb_req_', '', $ln->name)] = $ln->value;
+        }
+        foreach($tabServ as $idS => $valS)
+                $tabTxt[] = 'Serveur : '.$idS.' : '.$valS.' requetes ('.round($valS / $tot * 100).' %)';
         $timeMySql = $this->microtime_float() - $timeFinFile;
         
         

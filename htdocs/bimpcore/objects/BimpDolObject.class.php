@@ -86,7 +86,7 @@ class BimpDolObject extends BimpObject
 
                 if ($this->isLoaded()) {
                     $c_user = new User($this->db->db);
-                    $contacts = $this->dol_object->liste_contact(-1, 'internal');
+                    $contacts = $this->dol_object->liste_contact(1, 'internal');
                     foreach ($contacts as $item) {
                         $c_user->fetch($item['id']);
                         if (BimpObject::objectLoaded($c_user)) {
@@ -135,7 +135,7 @@ class BimpDolObject extends BimpObject
         );
 
         if ($this->isLoaded()) {
-            $contacts = $this->dol_object->liste_contact(-1, 'external');
+            $contacts = $this->dol_object->liste_contact(1, 'external');
             foreach ($contacts as $item) {
                 if (!isset($emails[(int) $item['id']])) {
                     $emails[(int) $item['id']] = $item['libelle'] . ': ' . $item['firstname'] . ' ' . $item['lastname'] . ' (' . $item['email'] . ')';
@@ -155,7 +155,7 @@ class BimpDolObject extends BimpObject
         }
 
         if ($this->isLoaded()) {
-            $contacts = $this->dol_object->liste_contact(-1, 'internal');
+            $contacts = $this->dol_object->liste_contact(1, 'internal');
             foreach ($contacts as $item) {
                 if (!isset($emails[$item['email']])) {
                     $emails[$item['email']] = $item['libelle'] . ': ' . $item['firstname'] . ' ' . $item['lastname'] . ' (' . $item['email'] . ')';

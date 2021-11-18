@@ -2711,7 +2711,7 @@ class Bimp_Product extends BimpObject
                 continue;
 
             $email_sent = false;
-            $list_contact = $commande->liste_contact(-1, 'internal');
+            $list_contact = $commande->liste_contact(1, 'internal');
 
             // Search responsible
             foreach ($list_contact as $contact) {
@@ -2749,7 +2749,7 @@ class Bimp_Product extends BimpObject
                 continue;
 
             $email_sent = false;
-            $list_contact = $propal->liste_contact(-1, 'internal');
+            $list_contact = $propal->liste_contact(1, 'internal');
 
             // Search responsible
             foreach ($list_contact as $contact) {
@@ -2829,7 +2829,7 @@ class Bimp_Product extends BimpObject
         $commandes_c = $this->getCommandes();
         foreach ($commandes_c as $commande) {
             $email_sent = false;
-            $list_contact = $commande->liste_contact(-1, 'internal');
+            $list_contact = $commande->liste_contact(1, 'internal');
 
             // Search responsible
             foreach ($list_contact as $contact) {
@@ -2864,7 +2864,7 @@ class Bimp_Product extends BimpObject
         $propals = $this->getPropals();
         foreach ($propals as $propal) {
             $email_sent = false;
-            $list_contact = $propal->liste_contact(-1, 'internal');
+            $list_contact = $propal->liste_contact(1, 'internal');
 
             // Search responsible
             foreach ($list_contact as $contact) {

@@ -1786,7 +1786,7 @@ class BimpComm extends BimpDolObject
     {
         $html = '';
         if ($this->isLoaded()) {
-            $list_ext = $this->dol_object->liste_contact(1, 'external', 0, 'BILLING');
+            $list_ext = $this->dol_object->liste_contact(-1, 'external', 0, 'BILLING');
             if (count($list_ext) > 0) {
                 foreach ($list_ext as $contact) {
                     if ($contact['socid'] != $this->getData('fk_soc')) {
@@ -2286,8 +2286,8 @@ class BimpComm extends BimpDolObject
         $list = array();
 
         if ($this->isLoaded() && method_exists($this->dol_object, 'liste_contact')) {
-            $list_int = $this->dol_object->liste_contact(1, 'internal');
-            $list_ext = $this->dol_object->liste_contact(1, 'external');
+            $list_int = $this->dol_object->liste_contact(-1, 'internal');
+            $list_ext = $this->dol_object->liste_contact(-1, 'external');
             $list = BimpTools::merge_array($list_int, $list_ext);
         }
 
@@ -4473,7 +4473,7 @@ class BimpComm extends BimpDolObject
                 case 'Bimp_Facture':
                 case 'Bimp_Commande':
                     // Billing2
-                    $contacts_suivi = $this->dol_object->liste_contact(1, 'external', 0, 'BILLING2');
+                    $contacts_suivi = $this->dol_object->liste_contact(-1, 'external', 0, 'BILLING2');
 
                     if (count($contacts_suivi) == 0) {
                         // Get id of the default contact

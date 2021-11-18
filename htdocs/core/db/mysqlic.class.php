@@ -911,12 +911,14 @@ class DoliDBMysqliC extends DoliDB
     //                unset($this->_svc_read[$ind_srv]);     // Should always be true                        
             }
 
+            dol_syslog('Impossible de se connectée a '.$server, 3);
             if($tentative < 20)
                 return $this->connect_server($query_type, $tentative+1);
             else
                 die('impossible de se connecté au serveur');
         }
         
+        dol_syslog('Aucun serveur pour connexion BDD', 3);
         return FALSE;
     }
     

@@ -111,7 +111,7 @@ class BT_ficheInter extends BimpDolObject
 
         switch ($action) {
             case 'setStatusAdmin':
-                return $this->canDelete();
+                return $user->admin;
 
             case 'createFacture':
                 if ($user->rights->bimptechnique->billing) {
@@ -383,9 +383,113 @@ class BT_ficheInter extends BimpDolObject
             'success_callback' => $success_callback
         );
     }
+    
+    public function actionMessageFacturation($data, &$success) {
+        global $user;
+        $warnings = [];
+        $errors = [];
+        $data = (object) $data;
+        
+        if(!$data->message) $errors[] = "Vous ne pouvez pas envoyer un message vide";
+        
+        if(!count($errors)) {
+            $cc = ($data->copy) ? $user->email : '';
+            $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
+            $message = $data->message . "<br />";
+            $message.= "Fiche d'intervention: " . $this->getNomUrl();
+            $message.= "<br /> Client: " . $client->getNomUrl() . ' ' . $client->getName();
+            
+            $bimpMail = new BimpMail("Demande de facturation FI - [".$this->getRef()."] - " . $client->getRef() . " " . $client->getName(), "facturationclients@bimp.fr", null, $message, null, $cc);
+            $bimpMail->send($errors);
+            
+            if(!count($errors)) {
+                $log = "<br /><i><u>Message</u><br />".$data->message."<br />";
+                $log.= "<u>Liste de difusion:</u><br >facturationclients@bimp.fr";
+                $log .= (!empty($cc)) ? "<br />" . $cc : '';
+                $log .= "</i>";
+                $this->addLog($log);
+            }
+        }
+        
+        return [
+            'success' => $success,
+            'errors' => $errors,
+            'warnings' => $warnings
+        ];
+    }
+    
+    public function actionBilling($data, &$success) {
+        $errors = [];
+        $warnings = [];
+        $data = (object) $data;
+        $intervenant = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $this->getData('fk_user_tech'));
+        $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
+        
+        $new_facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture');
+        $new_facture->set('fk_soc', $this->getData('fk_soc'));
+        $new_facture->set('libelle', 'Facturation intervention N°' . $this->getRef());
+        $new_facture->set('type', 0);
+        $new_facture->set('entrepot', $intervenant->getData('defaultentrepot'));
+        $new_facture->set('fk_cond_reglement', ($client->getData('cond_reglement')) ? $client->getData('cond_reglement') : 2);
+        $new_facture->set('fk_mode_reglement', ($client->getData('mode_reglement')) ? $client->getData('mode_reglement') : 2);
+        $new_facture->set('datef', date('Y-m-d H:i:s'));
+        $new_facture->set('ef_type', 'FI');
+        $new_facture->set('model_pdf', 'bimpfact');
+        $new_facture->set('ref_client', $this->getRef());
+        
+        if($this->getData('ef_type')) {
+            $new_facture->set('ef_type', $this->getData('ef_type'));
+            $errors = $new_facture->create($warnings, true);
+        } else $errors[] = "Impossible de créer une facture sans canal de vente. Merci";
+        
+        if(!count($errors)) {
+            $this->updateField('fk_facture', $new_facture->id);
+            addElementElement("fichinter", "facture", $this->id, $new_facture->id);
+            $new_factureLine = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
+            $errors = BimpTools::merge_array($errors, $new_factureLine->validateArray(
+                    array(
+                        'type' => ObjectLine::LINE_FREE,
+                        'id_obj' => (int) $new_facture->id)
+                    )
+                );
+            $service_de_reference = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', BimpCore::getConf('bimptechnique_id_serv19'));
+            if($service_de_reference->isLoaded()) {
+                $new_factureLine->pu_ht = $service_de_reference->getData('price');
+                $qty = $this->time_to_qty($this->timestamp_to_time($this->getData('duree')));
+                $new_factureLine->qty = $qty;
+                $new_factureLine->id_product = $service_de_reference->id;
+                $new_factureLine->tva_tx = 20;
+                $new_factureLine->pa_ht = $qty * BimpCore::getConf('bimptechnique_coup_horaire_technicien');
+                $errors = BimpTools::merge_array($errors, $new_factureLine->create($warnings, true));
+            }
+            
+            if(!count($errors)) {
+                $callback = "window.open('".DOL_URL_ROOT."/bimpcommercial?fc=facture&id=".$new_facture->id."')";
+                $success = "La facture numéro " . $new_facture->getNomUrl() . " a bien été créée";
+            }
+            
+        }
 
+        return [
+            'success_callback'  => $callback,
+            'success'           => $success,
+            'errors'            => $errors,
+            'warnings'          => $warnings
+        ];
+    }
+    
+    public function canEditField($field_name) {
+        switch($field_name) {
+            case 'ef_type':
+                return 1;
+                break;
+        }
+        return 0;
+    }
+    
     public function getActionsButtons()
     {
+        global $user;
         $buttons = Array();
 
         $buttons[] = array(
@@ -395,6 +499,27 @@ class BT_ficheInter extends BimpDolObject
         );
 
         if (!$this->isOldFi()) {
+            if($this->isLoaded()) {
+                if($this->getData('fk_statut') == self::STATUT_TERMINER || $this->getData('fk_statut') == self::STATUT_VALIDER) {
+                    
+                    if(!$this->getData('fk_facture')) {
+                        $buttons[] = array(
+                            'label'   => 'Message facturation',
+                            'icon'    => 'fas_paper-plane',
+                            'onclick' => $this->getJsActionOnclick('messageFacturation', array(), array('form_name' => "messageFacturation"))
+                        );
+
+                        if($user->rights->bimptechnique->billing) {
+                            $buttons[] = array(
+                                'label'   => 'Facturer la FI',
+                                'icon'    => 'euro',
+                                'onclick' => $this->getJsActionOnclick('billing', array(), array())
+                            );
+                        }
+                    }
+                }
+            }
+            
             if ($this->isActionAllowed('askFacturation') && $this->canSetAction('askFacturation')) {
 //                $buttons[] = array(
 //                    'label'   => 'Demander la facturation',
@@ -1002,9 +1127,9 @@ class BT_ficheInter extends BimpDolObject
 
         return $tickets;
     }
-
+    
     // Affichages: 
-
+    
     public function displayVersion()
     {
         $html = "";
@@ -2209,6 +2334,11 @@ class BT_ficheInter extends BimpDolObject
                         break;
                 }
             }
+            
+            if($this->getInitData('fk_contrat') != BimpTools::getPostFieldValue('fk_contrat')) {
+                
+            }
+
         }
 
         return $errors;

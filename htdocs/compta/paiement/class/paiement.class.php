@@ -203,8 +203,8 @@ class Paiement extends CommonObject
 
                 
                 /* mod drsi*/
-                BimpTools::sleppIfBloqued("numFact");
-                BimpTools::bloqueDebloque("numFact");
+                BimpTools::sleppIfBloqued("numPay");
+                BimpTools::bloqueDebloque("numPay");
                 $bloqued = true;
                 if($this->ref == '')
                     $this->ref = $this->getNextNumRef('');
@@ -406,7 +406,7 @@ class Paiement extends CommonObject
 			$this->db->commit();
                         /*moddrsi*/
                         if($bloqued)
-                            BimpTools::bloqueDebloque("numFact", 0);
+                            BimpTools::bloqueDebloque("numPay", 0);
                         /*fmoddrsi*/
 			return $this->id;
 		}
@@ -415,7 +415,7 @@ class Paiement extends CommonObject
 			$this->db->rollback();
                         /*moddrsi*/
                         if($bloqued)
-                            BimpTools::bloqueDebloque("numFact", 0);
+                            BimpTools::bloqueDebloque("numPay", 0);
                         /*fmoddrsi*/
 			return -1;
 		}

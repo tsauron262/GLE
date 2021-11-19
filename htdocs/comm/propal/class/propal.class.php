@@ -1728,6 +1728,7 @@ class Propal extends CommonObject
                 
 		if (! $resql)
 		{
+			$this->error='Probléme sql';//todo verifier si doublons
 			dol_print_error($this->db);
 			$error++;
 		}

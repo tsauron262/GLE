@@ -17,6 +17,8 @@ class BimpTools
             'no_html' => '$'
         )
     );
+    
+    public static $bloquages = array();
 
     // Gestion GET / POST
 
@@ -3066,8 +3068,10 @@ class BimpTools
                     die('droit sur fichier incorrect : ' . $file);
                 sleep(0.400);
                 $text2 = file_get_contents($file);
-                if ($text == $text2)
+                if ($text == $text2){
+                    static::$bloquages[] = $type;
                     return 1;
+                }
             }
             //conflit
             mailSyn2("Conflit de ref évité", "dev@bimp.fr", null, "Attention : Un conflit de ref de type " . $type . " a été évité");
@@ -3076,8 +3080,17 @@ class BimpTools
                 die('On arrete tout erreur 445834834857');
             self::sleppIfBloqued($type, $nb);
             return static::bloqueDebloque($type, $bloque, $nb);
-        } elseif (is_file($file))
-            return unlink($file);
+        } elseif (is_file($file))//on ne debloque plus ici mais dans debloqueAll
+            return 1;//unlink($file);
+    }
+    
+    public static function deloqueAll(){
+        $i = 0;
+        foreach(static::$bloquages as $type){
+            unlink(static::getFileBloqued($type));
+            $i++;
+        }
+        return $i;
     }
 
     public static function getFileBloqued($type)

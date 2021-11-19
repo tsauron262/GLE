@@ -3079,7 +3079,8 @@ class BimpTools
             else
                 $msg = 'Fichier deja existant';
             //conflit
-            mailSyn2("Conflit de ref évité", "dev@bimp.fr", null, "Attention : Un conflit de ref de type " . $type . " a été évité : ".$msg);
+            global $user;
+            mailSyn2("Conflit de ref évité", "dev@bimp.fr", null, $user->login."  Attention : Un conflit de ref de type " . $type . " a été évité : ".$msg);
             $nb++;
             if ($nb > static::$nbMax)
                 die('On arrete tout erreur 445834834857');

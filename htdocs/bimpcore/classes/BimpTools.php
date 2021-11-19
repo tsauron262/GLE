@@ -3055,7 +3055,7 @@ class BimpTools
 
     // Autres:
 
-    public static $nbMax = 10;
+    public static $nbMax = 20;
 
     public static function bloqueDebloque($type, $bloque = true, $nb = 1)
     {

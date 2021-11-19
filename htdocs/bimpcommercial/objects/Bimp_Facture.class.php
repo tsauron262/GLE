@@ -660,7 +660,7 @@ class Bimp_Facture extends BimpComm
                 return 1;
 
             case 'classifyPaid':
-                if ((int) $this->getData('fk_statut') !== 1) {
+                if ((int) $this->getData('fk_statut') !== 1 && ($this->getData('fk_statut') !== 2 || $this->getData('paye') == 1)) {
                     $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'a pas le statut "Validé' . $this->e() . '"';
                 }
                 if ($this->dol_object->paye) {

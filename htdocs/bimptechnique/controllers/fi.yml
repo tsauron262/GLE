@@ -36,14 +36,14 @@ sections:
                 view: 
                     name: default
                     object: fiche
-          - id: facturation
-            title: Facturation
-            struct: 
-                    type: list
-                    list:
-                        object: fiche
-                        children: facturation
-                        name: in_fiche
+#          - id: facturation
+#            title: Facturation
+#            struct: 
+#                    type: list
+#                    list:
+#                        object: fiche
+#                        children: facturation
+#                        name: in_fiche
           - id: files
             title: Fichiers
             struct: 

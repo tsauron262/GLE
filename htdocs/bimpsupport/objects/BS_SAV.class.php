@@ -2095,74 +2095,78 @@ class BS_SAV extends BimpObject
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($factureA), 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
             } else {
                 $factureA->addline("Acompte", $acompte / 1.2, 1, 20, null, null, null, 0, null, null, null, null, null, 'HT', null, 1, null, null, null, null, null, null, $acompte / 1.2);
-                $factureA->validate($user);
-
-                // Création du paiement: 
-                BimpTools::loadDolClass('compta/paiement', 'paiement');
-                $payement = new Paiement($this->db->db);
-                $payement->amounts = array($factureA->id => $acompte);
-                $payement->datepaye = dol_now();
-                $payement->paiementid = (int) $id_mode_paiement;
-                if ($payement->create($user) <= 0) {
-                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Des erreurs sont survenues lors de la création du paiement de la facture d\'acompte');
-                } else {
-                    if ($this->useCaisseForPayments) {
-                        $id_account = (int) $caisse->getData('id_account');
+                if($factureA->validate($user)){
+                    // Création du paiement: 
+                    BimpTools::loadDolClass('compta/paiement', 'paiement');
+                    $payement = new Paiement($this->db->db);
+                    $payement->amounts = array($factureA->id => $acompte);
+                    $payement->datepaye = dol_now();
+                    $payement->paiementid = (int) $id_mode_paiement;
+                    if ($payement->create($user) <= 0) {
+                        $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Des erreurs sont survenues lors de la création du paiement de la facture d\'acompte');
                     } else {
-                        $id_account = (int) BimpCore::getConf('bimpcaisse_id_default_account');
-                    }
-
-                    // Ajout du paiement au compte bancaire: 
-                    if ($payement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_account, '', '') < 0) {
-                        $account_label = '';
-
                         if ($this->useCaisseForPayments) {
-                            $account = $caisse->getChildObject('account');
+                            $id_account = (int) $caisse->getData('id_account');
+                        } else {
+                            $id_account = (int) BimpCore::getConf('bimpcaisse_id_default_account');
+                        }
 
-                            if (BimpObject::objectLoaded($account)) {
-                                $account_label = '"' . $account->bank . '"';
+                        // Ajout du paiement au compte bancaire: 
+                        if ($payement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_account, '', '') < 0) {
+                            $account_label = '';
+
+                            if ($this->useCaisseForPayments) {
+                                $account = $caisse->getChildObject('account');
+
+                                if (BimpObject::objectLoaded($account)) {
+                                    $account_label = '"' . $account->bank . '"';
+                                }
                             }
+
+                            if (!$account_label) {
+                                $account_label = ' d\'ID ' . $id_account;
+                            }
+                            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Echec de l\'ajout de l\'acompte au compte bancaire ' . $account_label);
                         }
 
-                        if (!$account_label) {
-                            $account_label = ' d\'ID ' . $id_account;
+                        // Enregistrement du paiement caisse: 
+                        if ($this->useCaisseForPayments) {
+                            $errors = BimpTools::merge_array($errors, $caisse->addPaiement($payement, $factureA->id));
                         }
-                        $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Echec de l\'ajout de l\'acompte au compte bancaire ' . $account_label);
+
+                        $factureA->set_paid($user);
                     }
 
-                    // Enregistrement du paiement caisse: 
-                    if ($this->useCaisseForPayments) {
-                        $errors = BimpTools::merge_array($errors, $caisse->addPaiement($payement, $factureA->id));
+                    // Création de la remise client: 
+                    BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+                    $discount = new DiscountAbsolute($this->db->db);
+                    $discount->description = "Acompte";
+                    $discount->fk_soc = $factureA->socid;
+                    $discount->fk_facture_source = $factureA->id;
+                    $discount->amount_ht = $acompte / 1.2;
+                    $discount->amount_ttc = $acompte;
+                    $discount->amount_tva = $acompte - ($acompte / 1.2);
+                    $discount->tva_tx = 20;
+                    if ($discount->create($user) <= 0) {
+                        $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($discount), 'Des erreurs sont survenues lors de la création de la remise sur acompte');
+                    } else {
+                        $this->set('id_discount', $discount->id);
                     }
 
-                    $factureA->set_paid($user);
+                    $this->set('id_facture_acompte', $factureA->id);
+
+                    $w = array();
+                    $this->update($w, true);
+
+                    include_once(DOL_DOCUMENT_ROOT . '/core/modules/facture/modules_facture.php');
+                    if ($factureA->generateDocument(self::$facture_model_pdf, $langs) <= 0) {
+                        $fac_errors = BimpTools::getErrorsFromDolObject($factureA, $error = null, $langs);
+                        $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création du fichier PDF de la facture d\'acompte');
+                    }
                 }
-
-                // Création de la remise client: 
-                BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
-                $discount = new DiscountAbsolute($this->db->db);
-                $discount->description = "Acompte";
-                $discount->fk_soc = $factureA->socid;
-                $discount->fk_facture_source = $factureA->id;
-                $discount->amount_ht = $acompte / 1.2;
-                $discount->amount_ttc = $acompte;
-                $discount->amount_tva = $acompte - ($acompte / 1.2);
-                $discount->tva_tx = 20;
-                if ($discount->create($user) <= 0) {
-                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($discount), 'Des erreurs sont survenues lors de la création de la remise sur acompte');
-                } else {
-                    $this->set('id_discount', $discount->id);
-                }
-
-                $this->set('id_facture_acompte', $factureA->id);
-
-                $w = array();
-                $this->update($w, true);
-
-                include_once(DOL_DOCUMENT_ROOT . '/core/modules/facture/modules_facture.php');
-                if ($factureA->generateDocument(self::$facture_model_pdf, $langs) <= 0) {
+                else{
                     $fac_errors = BimpTools::getErrorsFromDolObject($factureA, $error = null, $langs);
-                    $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création du fichier PDF de la facture d\'acompte');
+                    $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la validation de la facture');
                 }
             }
         }
@@ -3838,7 +3842,8 @@ class BS_SAV extends BimpObject
                 $new_status = self::BS_SAV_ATT_CLIENT;
 
                 if ($propal->dol_object->valid($user) < 1) {
-                    $errors[] = "Validation de devis impossible !!!" . BimpTools::getMsgFromArray($propal->dol_object->errors);
+                    $errors = BimpTools::getErrorsFromDolObject($propal->dol_object, $errors, $langs);
+                    $errors[] = "Validation de devis impossible !!!";
                 }
 
                 if (!count($errors) && !$propal->dol_object->generateDocument(self::$propal_model_pdf, $langs)) {
@@ -4413,9 +4418,9 @@ class BS_SAV extends BimpObject
                                                 $msg = BimpTools::getMsgFromArray($validate_errors, 'Echec de la validation de la facture');
                                                 $errors[] = $msg;
 
-                                                BimpCore::addlog('Erreur validation facture SAV', Bimp_Log::BIMP_LOG_ERREUR, 'sav', $this, array(
-                                                    'Erreurs' => $validate_errors
-                                                ));
+//                                                BimpCore::addlog('Erreur validation facture SAV', Bimp_Log::BIMP_LOG_ERREUR, 'sav', $this, array(
+//                                                    'Erreurs' => $validate_errors
+//                                                ));
                                             } else {
                                                 $bimpFacture->fetch($facture->id);
 

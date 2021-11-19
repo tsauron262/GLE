@@ -3083,4 +3083,10 @@ class BimpController
             'request_id'    => BimpTools::getValue('request_id', 0)
         );
     }
+    
+    public static function bimp_shutdown(){//juste avant de coupé le script
+        $nb = BimpTools::deloqueAll();
+        if($nb > 0)
+            BimpCore::addlog ('Fin de script fichier non debloqué '.$nb, Bimp_Log::BIMP_LOG_ALERTE);
+    }
 }

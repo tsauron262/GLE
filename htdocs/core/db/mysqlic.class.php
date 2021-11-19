@@ -655,6 +655,8 @@ class DoliDBMysqliC extends DoliDB
         {
 	    if ($this->transaction_opened > 0) 
                 dol_syslog(get_class($this)."::close Closing a connection with an opened transaction depth=".$this->transaction_opened,LOG_ERR);
+            if($this->transaction_opened > 0 && class_exists('BimpCore'))
+                BimpCore::addlog (get_class($this)."::close Closing a connection with an opened transaction depth=".$this->transaction_opened, Bimp_Log::BIMP_LOG_ERREUR);
             $this->connected=false;
             $this->database_host = "";
             $this->database_port = 0;
@@ -815,8 +817,11 @@ class DoliDBMysqliC extends DoliDB
         }
         
         $cur_timestamp = time();
-        if( ($cur_timestamp - $this->_last_discover_time) > ($this->CONSUL_REDIS_CACHE_TTL / 2) )
+        if( ($cur_timestamp - $this->_last_discover_time) > ($this->CONSUL_REDIS_CACHE_TTL / 2) ){
             $this->discover_svc();   // On TTL/2 we rediscover services from Consul (or read cached values from Redis)
+            $count_read = count($this->_svc_read);
+            $count_write = count($this->_svc_write);
+        }
         // Search for a server in array
         switch ($query_type)
         {
@@ -911,12 +916,14 @@ class DoliDBMysqliC extends DoliDB
     //                unset($this->_svc_read[$ind_srv]);     // Should always be true                        
             }
 
+            dol_syslog('Impossible de se connectée a '.$server, 3);
             if($tentative < 20)
                 return $this->connect_server($query_type, $tentative+1);
             else
                 die('impossible de se connecté au serveur');
         }
         
+        dol_syslog('Aucun serveur pour connexion BDD '.$count_read.'/'.count($this->_svc_read).' '.$count_write.'/'.count($this->_svc_write).' '.$rnd_index, 3);
         return FALSE;
     }
     
@@ -976,7 +983,11 @@ class DoliDBMysqliC extends DoliDB
             if(!$this->connect_server($qtype))
             {
                 $extra = array('svc_read'=>$this->_svc_read, 'svc_write'=>$this->_svc_write);
+                $this->discover_svc();
+                $extra['new_svc_read'] = $this->_svc_read;
+                $extra['new_svc_write'] = $this->_svc_write;
                 dol_syslog(get_class($this)."::query: Fatal error - cannot connect to database server for request type: ".$qtype.' '.print_r($extra,1).' '.$this->database_user.' '.$this->database_pass.' '.$this->database_name, LOG_ERR);
+
                 if(class_exists('BimpCore')){
                     $this->discover_svc();
                     BimpCore::addlog(get_class($this)."::query: Fatal error - cannot connect to database server for request type: ".$qtype, 4, 'sql', null, $extra);
@@ -991,6 +1002,7 @@ class DoliDBMysqliC extends DoliDB
                     if(class_exists('BimpCore')){
                         BimpCore::addlog('Gros probléme changement de thread Id', 4, 'sql', null, array('query' => $query, 'oldId' => $this->thread_id, 'newId' => $thread_id));
                     }
+                    $this->transaction_opened = 0;
                     static::stopAll();
                 }
             }
@@ -1120,8 +1132,10 @@ class DoliDBMysqliC extends DoliDB
             BimpCore::addlog($msg, 3,$classLog);
         else
             dol_syslog ('Erreur sql BimpCore non loade', LOG_ERR);
-        if($deadLock)
+        if($deadLock){
+            $this->transaction_opened = 0;
             static::stopAll ();
+        }
     }
     
     function getThreadId(){    

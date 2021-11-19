@@ -438,11 +438,13 @@ class BimpCore
         $bt = debug_backtrace(null, 30);
         if(is_array($msg))
             $msg = implode(' - ', $msg);
-        static::addLogs_extra_data([$msg => $bt]);    
+        static::addLogs_extra_data([$msg => BimpTools::getBacktraceArray($bt)]);    
     }
 
     public static function addLogs_extra_data($array)
     {
+        if(!is_array($array))
+            $array = array($array);
         static::$logs_extra_data = BimpTools::merge_array(static::$logs_extra_data, $array);
     }
 

@@ -168,6 +168,9 @@ abstract class DoliDB implements Database
                         
 			$ret=$this->query("COMMIT");
                         
+                        if(class_exists('BimpTools'))
+                            BimpTools::deloqueAll ();
+                        
 			if ($ret)
 			{
 				$this->transaction_opened=0;
@@ -229,6 +232,8 @@ abstract class DoliDB implements Database
 			$this->transaction_opened=0;
                         
                         /* moddrsi */
+                        if(class_exists('BimpTools'))
+                            BimpTools::deloqueAll ();
                         $this->has_rollback = false;
                         
                         if (defined('BIMP_LIB') && BimpDebug::isActive()) {

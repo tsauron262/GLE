@@ -1959,7 +1959,8 @@ class BimpObject extends BimpCache
                 if (!$instance->db->db->commit()) {
                     $result['errors'][] = 'Une erreur inconnue est survenue - opération annulée';
                     BimpCore::addlog('Commit echec - erreur inconnue', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $instance, array(
-                        'Action' => $action
+                        'Action' => $action,
+                        'Result' => $result
                             ), true);
                 }
             }
@@ -4013,7 +4014,8 @@ class BimpObject extends BimpCache
                         $errors[] = 'Echec de l\'enregistrement des données - opération annulée';
 
                         BimpCore::addlog('Commit echec - erreur inconnue', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $this, array(
-                            'Action' => 'Save From Post'
+                            'Action' => 'Save From Post',
+                            'Warnings'> $warnings
                                 ), true);
                     }
                 }

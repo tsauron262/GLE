@@ -10,6 +10,7 @@ class BimpCacheRedis extends BimpCacheServer
     protected static $isActif = true;
     protected static $isInit = false;
     public static $type = 'server';
+    public static $TTL = 60 * 60 * 5;
 
     public function initCacheServeur()
     {
@@ -66,9 +67,27 @@ class BimpCacheRedis extends BimpCacheServer
         $_key = self::$redisObj->keys('*');
         return '<pre>'.print_r($_key,1).'</pre>';
     }
+    public function deleteAll(){
+        if (!self::$isInit) {
+            self::initCacheServeur();
+        }
+        if (!self::$isActif) {
+            return parent::printAll();
+        }
+        $_key = self::$redisObj->keys('*');
+//        print_r($_key);
+        foreach($_key as $key){
+            echo '<br/>jj'.$key;
+            $this->delete($key);
+        }
+        
+        
+//        return '<pre>'.print_r($_key,1).'</pre>';
+    }
     
     public static function getPrefKey(){
-        return BimpCore::getConf('git_version', 1).'_';
+        global $conf;
+        return BimpCore::getConf('git_version', 1).'_'.$conf->global->MAIN_INFO_SOCIETE_NOM.'_';
     }
 
     public function getCacheServeur($key, $true_val = true)
@@ -128,7 +147,8 @@ class BimpCacheRedis extends BimpCacheServer
         
         
         try{
-            self::$redisObj->set(self::getPrefKey().$key, $value);
+//            self::$redisObj->set(self::getPrefKey().$key, $value);
+            self::$redisObj->setex(self::getPrefKey().$key, self::$TTL, $value);
         }
         catch (Exception $e) {
             BimpCore::addlog('Redis ingoignable '.$e->getMessage(), Bimp_Log::BIMP_LOG_ALERTE);

@@ -3123,7 +3123,8 @@ class BimpTools
                 return static::sleppIfBloqued($type, $nb);
             } else {
                 $text = "sleppIfBloqued() : bloquage de plus de " . static::$nbMax . " secondes";
-                static::bloqueDebloque($type, false, $nb);
+//                static::bloqueDebloque($type, false, $nb);
+                unlink(static::getFileBloqued($type));
                 BimpCore::addlog($text, Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
                     'Type' => $type
                 ));

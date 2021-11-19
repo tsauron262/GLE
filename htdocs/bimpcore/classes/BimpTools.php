@@ -3055,9 +3055,13 @@ class BimpTools
 
     // Autres:
 
-    public static $nbMax = 20*4;
+    public static $nbMax = 10*4;
     
     public static function lockNum($type, $nb = 0, $errors = array()){
+        if(in_array($type, static::$bloquages))//On a deja un verrous pour cette clef
+            return true;
+        
+        
         $nb++;
         self::sleppIfBloqued($type, $nb);
         $file = static::getFileBloqued($type);

@@ -232,6 +232,8 @@ abstract class DoliDB implements Database
 			$this->transaction_opened=0;
                         
                         /* moddrsi */
+                        if(class_exists('BimpTools'))
+                            BimpTools::deloqueAll ();
                         $this->has_rollback = false;
                         
                         if (defined('BIMP_LIB') && BimpDebug::isActive()) {

@@ -538,14 +538,14 @@ class BimpDocumentPDF extends BimpModelPDF
                 $desc .= ($desc ? ' - ' : '') . $product->label;
             }
 
-            if ($product->type == 1) {
+//            if ($product->type == 1) {
                 if ($line->date_start) {
                     if (!$line->date_end) {
                         $desc .= '<br/>A partir du ';
                     } else {
                         $desc .= '<br/>Du ';
                     }
-                    $desc .= date('d / m / Y', $line->date_start);
+                    $desc .= date('d/m/Y', $line->date_start);
                 }
                 if ($line->date_end) {
                     if (!$line->date_start) {
@@ -553,9 +553,9 @@ class BimpDocumentPDF extends BimpModelPDF
                     } else {
                         $desc .= ' au ';
                     }
-                    $desc .= date('d / m / Y', $line->date_end);
+                    $desc .= date('d/m/Y', $line->date_end);
                 }
-            }
+//            }
         }
 
         if (!is_null($line->desc) && $line->desc) {

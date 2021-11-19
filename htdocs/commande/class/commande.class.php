@@ -421,19 +421,11 @@ class Commande extends CommonOrder
 
         if (! $error)
         {
-            /*moddrsi*/
-            if($bloqued)
-                BimpTools::bloqueDebloque("numCommande", 0);
-            /*fmoddrsi*/
             $this->db->commit();
             return 1;
         }
         else
 		{
-            /*moddrsi*/
-            if($bloqued)
-                BimpTools::bloqueDebloque("numCommande", 0);
-            /*fmoddrsi*/
             BimpCore::addLogs_extra_data(['roolbackCommande' => $this->error]);
             $this->db->rollback();
             return -1;

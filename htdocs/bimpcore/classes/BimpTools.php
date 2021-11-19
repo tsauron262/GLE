@@ -3055,7 +3055,7 @@ class BimpTools
 
     // Autres:
 
-    public static $nbMax = 20;
+    public static $nbMax = 20*4;
     
     public static function lockNum($type, $nb = 0, $errors = array()){
         $nb++;
@@ -3079,7 +3079,7 @@ class BimpTools
         $text = "Yes" . rand(0, 10000000);
         if (!file_put_contents($file, $text))
             die('droit sur fichier incorrect : ' . $file);
-        sleep(0.400);
+        usleep(400000);
         $text2 = file_get_contents($file);
         if ($text == $text2){
             static::$bloquages[] = $type;
@@ -3158,10 +3158,10 @@ class BimpTools
         $nb++;
         if (static::isBloqued($type)) {
             if ($nb < static::$nbMax) {
-                sleep(1);
+                usleep(250000);
                 return static::sleppIfBloqued($type, $nb);
             } else {
-                $text = "sleppIfBloqued() : bloquage de plus de " . static::$nbMax . " secondes";
+                $text = "sleppIfBloqued() : bloquage de plus de " . static::$nbMax/4 . " secondes";
 //                static::bloqueDebloque($type, false, $nb);
                 unlink(static::getFileBloqued($type));
                 BimpCore::addlog($text, Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(

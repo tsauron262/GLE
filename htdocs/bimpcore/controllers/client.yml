@@ -65,6 +65,10 @@ sections:
                         object: client
           - id: contrat
             title: Creation contrat
+            show: 
+                callback:
+                    method: isActifContratAuto
+                    object: client
             struct: 
                 type: custom
                 custom: 

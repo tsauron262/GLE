@@ -3753,6 +3753,17 @@ class Bimp_Facture extends BimpComm
                     $echeancier->onDeleteFacture($dateDebutFacture);
                 }
             }
+            
+            $tabF = getElementElement('fichinter', 'facture', null, $this->id);
+            if(count($tabF) > 0) {
+                foreach($tabF as $data) {
+                    $ficheInter = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter', $data['s']);
+                    if($ficheInter->getData('fk_facture') == $this->id) {
+                        $ficheInter->set('fk_facture', null);
+                        $ficheInter->update($warnings, true);
+                    }
+                }
+            }
 
             $this->majStatusOtherPiece();
         }

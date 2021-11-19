@@ -168,6 +168,9 @@ abstract class DoliDB implements Database
                         
 			$ret=$this->query("COMMIT");
                         
+                        if(class_exists('BimpTools'))
+                            BimpTools::deloqueAll ();
+                        
 			if ($ret)
 			{
 				$this->transaction_opened=0;

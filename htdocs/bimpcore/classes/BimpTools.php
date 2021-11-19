@@ -3086,8 +3086,9 @@ class BimpTools
     
     public static function deloqueAll(){
         $i = 0;
-        foreach(static::$bloquages as $type){
+        foreach(static::$bloquages as $id => $type){
             unlink(static::getFileBloqued($type));
+            unset(static::$bloquages[$id]);
             $i++;
         }
         return $i;

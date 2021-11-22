@@ -478,12 +478,13 @@ class BT_ficheInter extends BimpDolObject
         ];
     }
     
-    public function canEditField($field_name) {
-        switch($field_name) {
-            case 'ef_type':
-                return 1;
-                break;
-        }
+    public function canEdit() {
+       
+        
+        if($this->getData('fk_statut') == self::STATUT_BROUILLON) {
+            return 1;
+        } 
+        
         return 0;
     }
     

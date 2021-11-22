@@ -3977,12 +3977,18 @@ class BimpObject extends BimpCache
 
             if (!count($errors)) {
                 // Associations: 
-                $warnings = BimpTools::merge_array($warnings, $this->saveAssociationsFromPost());
+                if((int) BimpCore::getConf('bimpcore_use_db_transactions', 0))
+                    $errors = BimpTools::merge_array($errors, $this->saveAssociationsFromPost());
+                else
+                    $warnings = BimpTools::merge_array($warnings, $this->saveAssociationsFromPost());
 
                 // Sous-objets ajoutés: 
                 $sub_result = $this->checkSubObjectsPost($force_edit);
                 if (count($sub_result['errors'])) {
-                    $warnings = BimpTools::merge_array($warnings, $sub_result['errors']);
+                    if((int) BimpCore::getConf('bimpcore_use_db_transactions', 0))
+                        $errors = BimpTools::merge_array($errors, $sub_result['errors']);
+                    else
+                        $warnings = BimpTools::merge_array($warnings, $sub_result['errors']);
                 }
                 if ($sub_result['success_callback']) {
                     $success_callback .= $sub_result['success_callback'];
@@ -3992,7 +3998,10 @@ class BimpObject extends BimpCache
                     // Champs des sous-objets mis à jour: 
                     $sub_result = $this->checkChildrenUpdatesFromPost();
                     if (count($sub_result['errors'])) {
-                        $warnings = BimpTools::merge_array($warnings, $sub_result['errors']);
+                        if((int) BimpCore::getConf('bimpcore_use_db_transactions', 0))
+                            $errors = BimpTools::merge_array($errors, $sub_result['errors']);
+                        else
+                            $warnings = BimpTools::merge_array($warnings, $sub_result['errors']);
                     }
                     if ($sub_result['success_callback']) {
                         $success_callback .= $sub_result['success_callback'];

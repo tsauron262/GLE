@@ -1466,7 +1466,12 @@ class Bimp_CommandeFourn extends BimpComm
                 $success2 = '';
                 $result2 = $this->setObjectAction('approve', 0, array(), $success2);
                 if (count($result2['errors'])) {
-                    $result['warnings'][] = BimpTools::getMsgFromArray($result2['errors'], 'Echec de l\'approbation ' . $this->getLabel('of_the'));
+                    if((int) BimpCore::getConf('bimpcore_use_db_transactions', 0)){
+                        $result['errors'][] = 'Echec de l\'approbation ' . $this->getLabel('of_the');
+                        $result['errors'] = BimpTools::merge_array($result['errors'], $result2['errors']);  
+                    }
+                    else
+                        $result['warnings'][] = BimpTools::getMsgFromArray($result2['errors'], 'Echec de l\'approbation ' . $this->getLabel('of_the'));
                 } else {
                     $success .= '<br/>' . $success2;
                 }

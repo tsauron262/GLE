@@ -534,6 +534,13 @@ filters:
             0: Aucune
             1: Sur proposition
             2: Tacite
+    negatif_positif:
+        label: Marge
+        type: check_list
+        items:
+            0: Négative
+            1: Positive
+            2: Nulle
         
 filters_panels: 
     default: 
@@ -564,6 +571,7 @@ filters_panels:
                         method: isActive
                         object: fiche_inter
                         is_static: 1
+            negatif_positif:
                         
 lists_cols:
     margeInter:

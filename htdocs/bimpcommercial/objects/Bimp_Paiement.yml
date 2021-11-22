@@ -20,12 +20,12 @@ fields:
         type: int
     datec:
         label: Créé le
-        type: date
+        type: datetime
     datep: 
         label: Date
-        type: date
+        type: datetime
         input:
-            type: date
+            type: datetime
             display_now: 1
         dol_prop: date
     amount: 

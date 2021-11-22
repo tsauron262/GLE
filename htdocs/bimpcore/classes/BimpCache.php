@@ -420,20 +420,22 @@ class BimpCache
     {
         $cache_key = 'dol_object_' . $element . '_extrafields_array';
 
-        if (!isset(self::$cache[$cache_key])) {
-            self::$cache[$cache_key] = array();
+        $result = self::getCacheServeur($key);
+        if (!$result) {
 
             $where = '`elementtype` = \'' . $element . '\'';
             $rows = self::getBdb()->getRows('extrafields', $where, null, 'array', array('name', 'label'));
 
+            $result = array();
             if (is_array($rows)) {
                 foreach ($rows as $r) {
-                    self::$cache[$cache_key][$r['name']] = $r['label'];
+                    $result[$r['name']] = $r['label'];
                 }
+                static::setCacheServeur($cache_key, $result);
             }
         }
 
-        return self::$cache[$cache_key];
+        return $result;
     }
 
     public static function getObjectLinkedObjectsArray(BimpObject $object, $include_empty = false)

@@ -169,14 +169,14 @@ class Inventory extends BimpDolObject
         $sql .= ' WHERE inventorycode="inventory-id-' . $this->getData('id') . '"';
 
         $result = $this->db->db->query($sql);
-        if ($result) {
-            $this->db->db->commit();
-            return true;
-        } else {
-            dol_print_error($this->db->db);
-            $this->db->db->rollback();
-            return false;
-        }
+//        if ($result) {
+//            $this->db->db->commit();
+//            return true;
+//        } else {
+//            dol_print_error($this->db->db);
+//            $this->db->db->rollback();
+//            return false;
+//        }
     }
 
     public function getLines($ret_object = false)

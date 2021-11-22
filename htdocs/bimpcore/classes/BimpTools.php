@@ -3086,7 +3086,6 @@ class BimpTools
         usleep(1000000);
         $text2 = file_get_contents($file);
         if ($text == $text2){
-            sleep(10);
             $autreInstanceBloquage = static::isBloqued($type, true);
             if(!$autreInstanceBloquage){
                 static::$bloquages[] = $type;

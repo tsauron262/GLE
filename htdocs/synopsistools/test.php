@@ -27,7 +27,7 @@ if($_REQUEST['deleteAll'] == 'true')
 
 
 
-
+llxFooter();
 die('uuuu');
 
 

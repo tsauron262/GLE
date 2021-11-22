@@ -713,6 +713,25 @@ class BContract_contrat extends BimpDolObject
     public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
+            case 'negatif_positif':
+                if(count($values) > 0) {
+                    
+                    $filters = Array('statut' => 11);
+                    
+                    $list = BimpCache::getBimpObjectObjects("bimpcontract", 'BContract_contrat', $filters);
+                    
+                    $in = [];
+                    
+                    foreach($list as $contrat) {
+                        $marge = $contrat->getMargeInter();
+                        if(in_array('0', $values)) { if($marge < 0) $in[] = $contrat->id;}
+                        if(in_array('1', $values)) { if($marge > 0) $in[] = $contrat->id;}
+                        if(in_array('2', $values)) { if($marge == 0) $in[] = $contrat->id;}
+                    }
+                    
+                    $filters['a.rowid'] = ['in' => $in];
+                }
+                break;
             case 'commercialclient':
                 $alias = 'sc';
                 $joins[$alias] = array(

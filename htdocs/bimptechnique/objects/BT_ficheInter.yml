@@ -465,7 +465,11 @@ forms:
         rows:
             - field: fk_contrat
             - field: commandes
-            - field: tickets            
+            - field: tickets  
+            
+    forBilling:
+        rows: 
+            - field: ef_type
        
 fields_tables:
     infos:

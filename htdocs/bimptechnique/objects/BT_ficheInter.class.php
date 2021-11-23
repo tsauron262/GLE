@@ -131,8 +131,12 @@ class BT_ficheInter extends BimpDolObject
             $errors[] = 'Il s\agit d\'une fiche inter créée via l\'ancien module';
             return 0;
         }
-
-        return 1;
+        
+        if($this->getData('fk_statut') == self::STATUT_BROUILLON) {
+            return 1;
+        } 
+        
+        return 0;
     }
 
     public function isDeletable($force_delete = false, &$errors = [])
@@ -210,6 +214,8 @@ class BT_ficheInter extends BimpDolObject
                 return 1;
             }
         }
+        
+        return 1;
 
         return parent::isFieldEditable($field, $force_edit);
     }
@@ -421,6 +427,9 @@ class BT_ficheInter extends BimpDolObject
     public function actionBilling($data, &$success) {
         $errors = [];
         $warnings = [];
+        
+        if(isset($data['ef_type']))
+            $this->updateField ('ef_type', $data['ef_type']);
         $data = (object) $data;
         $intervenant = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $this->getData('fk_user_tech'));
         $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
@@ -479,13 +488,7 @@ class BT_ficheInter extends BimpDolObject
     }
     
     public function canEdit() {
-       
-        
-        if($this->getData('fk_statut') == self::STATUT_BROUILLON) {
-            return 1;
-        } 
-        
-        return 0;
+       return 1;
     }
     
     public function getActionsButtons()
@@ -514,7 +517,7 @@ class BT_ficheInter extends BimpDolObject
                             $buttons[] = array(
                                 'label'   => 'Facturer la FI',
                                 'icon'    => 'euro',
-                                'onclick' => $this->getJsActionOnclick('billing', array(), array())
+                                'onclick' => $this->getJsActionOnclick('billing', array(), array('form_name' => "forBilling"))
                             );
                         }
                     }

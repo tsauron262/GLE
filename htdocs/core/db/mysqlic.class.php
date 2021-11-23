@@ -1035,10 +1035,12 @@ class DoliDBMysqliC extends DoliDB
 
         } catch (Exception $e) {
             $this->catch($query, $ret, $e);
+            $this->timeDebReq = 0;
             return 0;
         }
         if(!$ret)
             $this->catch ($query, $ret);
+        $this->timeDebReq = 0;
         
         if (! preg_match("/^COMMIT/i",$query) && ! preg_match("/^ROLLBACK/i",$query))
         {

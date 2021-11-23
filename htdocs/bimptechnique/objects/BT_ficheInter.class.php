@@ -166,7 +166,7 @@ class BT_ficheInter extends BimpDolObject
                 return 1;
 
             case 'generatePdf':
-                if($user-admin) {
+                if($user->admin) {
                     return 1;
                 }
                 if ($status !== self::STATUT_BROUILLON) {

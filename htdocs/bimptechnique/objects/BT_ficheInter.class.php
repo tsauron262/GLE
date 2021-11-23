@@ -165,6 +165,9 @@ class BT_ficheInter extends BimpDolObject
                 return 1;
 
             case 'generatePdf':
+                if($user-admin) {
+                    return 1;
+                }
                 if ($status !== self::STATUT_BROUILLON) {
                     $errors[] = BimpTools::ucfirst($this->getLabel('this') . 'n\'est plus au statut "brouilon"');
                     return 0;

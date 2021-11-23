@@ -215,7 +215,7 @@ class BTC_exportRibAndMandat extends BTC_export {
     // display
     public function displayExportedRib() {
         $instance = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_SocBankAccount");
-        $html .= PATH_TMP  ."/" . 'exportCegid' . '/' . "BY_DATE" . '/';
+        
         $html .= $instance->renderList("default", true, "Liste des RIBs exportés en compta", null, ['exported' => 1]);
                 
        $html .= '<span class="btn btn-default" data-trigger="hover" data-placement="top"  data-content="Supprimer la facture" onclick="' . $this->getJsActionOnclick("exportExportedMandat", array(), array("form_name" => "export_one_mandat")) . '")">Exporter les mandats déjà exportés</span>';

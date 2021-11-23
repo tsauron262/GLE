@@ -21,7 +21,7 @@ class BTC_export extends BimpObject {
         "T3" => ["07", "08", "09"],
         "T4" => ["10", "11", "12"]
     ];
-
+    
    
 
     public function getStartTrimestreComptable() {
@@ -723,6 +723,25 @@ class BTC_export extends BimpObject {
         }
         
         return false;
+        
+    }
+    
+    public function display_content_file($path) {
+        return '<h3 class="danger">'.$path.'</h3><pre>' . file_get_contents($path) . '<br /></pre>';
+    }
+    
+    public function actionSearch_piece($data, &$success) {
+        $errors = [];
+        $warnings = []; 
+        return ['success' => $success, 'errors' => $errors, 'warnings' => $warnings];
+    }
+    
+    public function search() {
+        
+        $numero_of_piece = BimpTools::getPostFieldValue('numero_of_piece');
+        
+        
+        return 'bonjour';
         
     }
 }

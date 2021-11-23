@@ -155,6 +155,7 @@ class BT_ficheInter extends BimpDolObject
 
     public function isActionAllowed($action, &$errors = array())
     {
+        global $user;
         $status = (int) $this->getData('fk_statut');
         switch ($action) {
             case 'askFacturation':

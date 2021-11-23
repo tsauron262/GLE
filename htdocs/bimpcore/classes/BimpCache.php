@@ -420,7 +420,7 @@ class BimpCache
     {
         $cache_key = 'dol_object_' . $element . '_extrafields_array';
 
-        $result = self::getCacheServeur($key);
+        $result = self::getCacheServeur($cache_key);
         if (!$result) {
 
             $where = '`elementtype` = \'' . $element . '\'';

@@ -75,8 +75,7 @@ class Bimp_ImportPaiement extends BimpObject
                         $p->facid = (int) $idFact;
 
                         if ($p->create($user) < 0) {
-                            $msg = 'Echec de l\'ajout à la facture du paiement n°' . $n;
-                            $msg .= ' (' . BC_VentePaiement::$codes[$code]['label'] . ': ' . BimpTools::displayMoneyValue($montant, 'EUR') . ')';
+                            $msg = 'Echec de l\'ajout à la facture du paiement de ' . $montant;
                             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($p), $msg);
                         } else {
                             global $conf;

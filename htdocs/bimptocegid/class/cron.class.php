@@ -41,7 +41,7 @@
         protected function send_rapport() {
             
             $sujet = "Rapport export comptable du " . date('d/m/Y');
-            $to = 'at.bernard@bimp.fr';
+            $to = 'dev@bimp.fr';
             $from = null;
             
             // Message type de pièce automatique

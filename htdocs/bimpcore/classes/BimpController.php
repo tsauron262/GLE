@@ -3085,6 +3085,9 @@ class BimpController
     }
     
     public static function bimp_shutdown(){//juste avant de coupé le script
+        global $db;
+        if($db->transaction_opened > 0)
+            BimpCore::addlog ('Fin de script Transaction non fermée');
         $nb = BimpTools::deloqueAll();
         if($nb > 0)
             BimpCore::addlog ('Fin de script fichier non debloqué '.$nb, Bimp_Log::BIMP_LOG_ALERTE);

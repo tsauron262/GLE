@@ -103,6 +103,8 @@ class DoliDBMysqliC extends DoliDB
     public $timeReconnect = 0;
     
     public $thread_id = 0;
+    
+    public $timeDebReq = 0;
 
     /* fmoddrsi */
 
@@ -1027,7 +1029,7 @@ class DoliDBMysqliC extends DoliDB
             $ret = $this->db->query($query);
         }
 */
-        
+        $this->timeDebReq = microtime(true);
         try {
             $ret = $this->db->query($query);
 
@@ -1126,6 +1128,10 @@ class DoliDBMysqliC extends DoliDB
             $msg .= '<br/>Exception msg : '.$e->getMessage();
         $msg .= '<br/>Serveur : '.$this->database_host;
         $msg .= '<br/>Query : '.$query;
+        if($this->timeDebReq > 0)
+            $msg .= '<br/>Time Req : '.(microtime(true) - $this->timeDebReq);
+        if(class_exists('synopsisHook'))
+            $msg .= '<br/>Time Depuis déb : '. synopsisHook::getTime();
 
         dol_syslog($msg, LOG_ERR);
         if(class_exists('BimpCore'))

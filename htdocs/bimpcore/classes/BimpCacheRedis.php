@@ -10,7 +10,7 @@ class BimpCacheRedis extends BimpCacheServer
     protected static $isActif = true;
     protected static $isInit = false;
     public static $type = 'server';
-    public static $TTL = 60 * 60 * 5;
+    public static $TTL = 60 * 60 * 2;
 
     public function initCacheServeur()
     {

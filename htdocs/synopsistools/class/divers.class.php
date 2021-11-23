@@ -23,6 +23,8 @@ class synopsisHook {//FA1506-0369
     function synopsisHook() {
         global $conf, $db, $dbBIMPERP, $tabProductType, $tabTypeLigne, $langs, $user, $tabContactPlus, $tabSelectNatureIntrv, $tabCentre;
 
+        static::initDeb();
+        
         require_once(DOL_DOCUMENT_ROOT . "/synopsisapple/centre.inc.php");
 
         //Pour les logiciel externe.
@@ -31,7 +33,7 @@ class synopsisHook {//FA1506-0369
         if (defined('MAX_TIME_LOG'))
             self::$MAX_TIME_LOG = MAX_TIME_LOG;
         
-        
+
         
 
 
@@ -130,6 +132,13 @@ class synopsisHook {//FA1506-0369
             $conf->global->MAIN_SECURITY_ENABLECAPTCHA = 1;
     }
     
+    public static function initDeb(){
+        if(self::$timeDeb = 0){
+            self::$timeDeb = microtime(true);
+            self::$timeDebRel = microtime(true);
+        }
+    }
+    
 
     public static function reloadPage() {
         ob_start();
@@ -196,8 +205,7 @@ class synopsisHook {//FA1506-0369
 
     static function getHeader() {
         global $db, $langs, $isMobile, $conf, $user;
-        self::$timeDeb = microtime(true);
-        self::$timeDebRel = microtime(true);
+        static::initDeb();
         
         $admin = false;
         if(defined('IP_ADMIN')){

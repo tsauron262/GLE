@@ -133,7 +133,7 @@ class synopsisHook {//FA1506-0369
     }
     
     public static function initDeb(){
-        if(self::$timeDeb = 0){
+        if(self::$timeDeb == 0){
             self::$timeDeb = microtime(true);
             self::$timeDebRel = microtime(true);
         }

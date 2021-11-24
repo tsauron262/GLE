@@ -112,12 +112,13 @@ class BT_ficheInter extends BimpDolObject
         switch ($action) {
             case 'setStatusAdmin':
                 return $user->admin;
-
+            break;
             case 'createFacture':
                 if ($user->rights->bimptechnique->billing) {
                     return 1;
                 }
                 return 0;
+            break;
         }
 
         return parent::canSetAction($action);
@@ -131,7 +132,9 @@ class BT_ficheInter extends BimpDolObject
             $errors[] = 'Il s\agit d\'une fiche inter créée via l\'ancien module';
             return 0;
         }
-        
+        if($force_edit) {
+            return 1;
+        }
         if($this->getData('fk_statut') == self::STATUT_BROUILLON) {
             return 1;
         } 
@@ -166,9 +169,6 @@ class BT_ficheInter extends BimpDolObject
                 return 1;
 
             case 'generatePdf':
-                if($user->admin) {
-                    return 1;
-                }
                 if ($status !== self::STATUT_BROUILLON) {
                     $errors[] = BimpTools::ucfirst($this->getLabel('this') . 'n\'est plus au statut "brouilon"');
                     return 0;
@@ -1678,23 +1678,16 @@ class BT_ficheInter extends BimpDolObject
 
         return $html;
     }
-
+    
     public function renderSignatureTab()
     {
         $html = "";
         global $user;
         if (!$this->isOldFi()) {
-            if ($this->isNotSign()) {
-                if ($this->getData('fk_statut') == SELF::STATUT_ATTENTE_SIGNATURE) {
-                    $html .= $this->displayData('fk_statut');
-                } else {
-                    $info = "<b>" . BimpRender::renderIcon('warning') . "</b> Si vous avez des tickets support et que vous ne les voyez pas dans le formulaire, rechargez la page en cliquant sur le bouton suivant: <a href='" . DOL_URL_ROOT . "/bimptechnique/?fc=fi&id=" . $this->id . "&navtab-maintabs=signature'><button class='btn btn-default'>Rafraîchire la page</button></a>";
-                    $html .= "<h4>$info</h4>";
-
+            if ($this->getData('fk_statut') == self::STATUT_BROUILLON) {
                     $form = new BC_Form($this, null, 'signature');
                     $html .= $form->renderHtml();
-                }
-            } elseif ($this->isSign()) {
+            } else {
                 $html .= '<h3>Nom du signataire client: ' . $this->displayDataTyped($this->getData('signataire')) . '</h3>';
                 $html .= '<h3>Type de signature: ' . $this->displayDataTyped($this->displayData('type_signature', 'default', false)) . '</h3>';
 
@@ -1847,7 +1840,7 @@ class BT_ficheInter extends BimpDolObject
                     $errors = $this->update($warnings, true);
                     $this->no_update_process = false;
                 }
-
+                //print_r($errors); die('dhudfishfds');
                 if (!count($errors)) {
                     // Mise à jour ActionComm
                     $tech = $this->getChildObject('user_tech');
@@ -1868,6 +1861,9 @@ class BT_ficheInter extends BimpDolObject
 
                     if (count($result['errors'])) {
                         $warnings[] = BimpTools::getMsgFromArray($result['errors'], 'Echec création du fichier PDF');
+                        //print_r($warnings); die ('eee');
+                    } else {
+                        //die('ok');
                     }
 
                     // Fermeture auto: 

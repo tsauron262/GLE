@@ -28,22 +28,21 @@
         }
         
       
-        public function exportFacture($ref = "") {
+        public function exportFacture($ref = ""):void {
             global $db;
             $errors = [];
             $list = $this->bdb->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND (datef BETWEEN "'.$this->lastDateExported->format('Y-m-d').'" AND "'.$this->yesterday->format('Y-m-d').'" OR date_valid BETWEEN "'.$this->lastDateExported->format('Y-m-d').'" AND "'.$this->yesterday->format('Y-m-d').'")', 10);
             if(count($list) > 0) {
                 echo "<pre>";
-                $instance= BimpCache::getBimpObjectInstance("bimpcommercial", "Bimp_Facture");
                 foreach($list as $facture) {
-                    $instance->fetch($facture->rowid);
+                    $instance= BimpCache::getBimpObjectInstance("bimpcommercial", "Bimp_Facture", $facture->rowid); 
                     $ecriture .= $this->TRA_facture->constructTra($instance);
                 }
                 
             }
-            //$this->TRA_facture->setRef($ref);
+            
             echo $ecriture;
-            //print_r($list);
+            
         }
         
         public function exportFactureFournisseur($ref):bool {
@@ -102,11 +101,14 @@
         }
         
         private function getMyFile($type):string {
+            
+            $dateTime = new DateTime();
+            $dateTime->sub(new DateInterval("P1D"));
+            
             $entitie        = BimpCore::getConf('BIMPTOCEGID_file_entity');
-            $day_fo_year    = date('z');
-            $day            = date('d');
-            $month          = date('m');
-            $year           = date('Y');
+            $day            = $dateTime->format('d');
+            $month          = $dateTime->format('m');
+            $year           = $dateTime->format('Y');
             $version_tra    = BimpCore::getConf('BIMPTOCEGID_version_tra');
             $extention      = ".tra";
             $files_dir      = PATH_TMP . $this->dir;

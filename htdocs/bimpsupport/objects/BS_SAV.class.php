@@ -3818,7 +3818,10 @@ class BS_SAV extends BimpObject
 
         if (!count($errors)) {
             global $user, $langs;
-
+            
+            $propal->updateField(('datep'), date('Y/m/d'));
+            $propal->updateField('fin_validite', BimpTools::getDateForDolDate($propal->getData('datep')) + ($propal->dol_object->duree_validite * 24 * 3600));
+            
             $propal->lines_locked = 1;
 
             $new_status = null;

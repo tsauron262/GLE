@@ -167,7 +167,7 @@ class BT_ficheInter extends BimpDolObject
                 return 1;
 
             case 'generatePdf':
-                if($user->admin || $user->id = 375) {
+                if($user->admin || $user->id == 375) {
                     return 1;// temporaire
                 }
                 if ($status !== self::STATUT_BROUILLON) {

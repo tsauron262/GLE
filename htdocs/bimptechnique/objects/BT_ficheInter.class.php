@@ -84,7 +84,7 @@ class BT_ficheInter extends BimpDolObject
         0                      => array('label' => 'Non signée', 'icon' => 'fas_times', 'classes' => array('warning')),
         self::TYPE_SIGN_DIST   => array('label' => 'Signature à distance', 'icon' => 'fas_file-download'),
         self::TYPE_SIGN_PAPIER => array('label' => 'Signature papier', 'icon' => 'fas_file-signature'),
-        //self::TYPE_SIGN_ELEC   => array('label' => 'Signature électronique', 'icon' => 'fas_signature')
+        self::TYPE_SIGN_ELEC   => array('label' => 'Signature électronique', 'icon' => 'fas_signature')
     );
 
     // Droits users: 
@@ -132,7 +132,9 @@ class BT_ficheInter extends BimpDolObject
             $errors[] = 'Il s\agit d\'une fiche inter créée via l\'ancien module';
             return 0;
         }
-        
+        if($force_edit) {
+            return 1;
+        }
         if($this->getData('fk_statut') == self::STATUT_BROUILLON) {
             return 1;
         } 
@@ -167,9 +169,6 @@ class BT_ficheInter extends BimpDolObject
                 return 1;
 
             case 'generatePdf':
-                if($user->admin || $user->id == 375) {
-                    return 1;// temporaire
-                }
                 if ($status !== self::STATUT_BROUILLON) {
                     $errors[] = BimpTools::ucfirst($this->getLabel('this') . 'n\'est plus au statut "brouilon"');
                     return 0;
@@ -1841,7 +1840,7 @@ class BT_ficheInter extends BimpDolObject
                     $errors = $this->update($warnings, true);
                     $this->no_update_process = false;
                 }
-
+                //print_r($errors); die('dhudfishfds');
                 if (!count($errors)) {
                     // Mise à jour ActionComm
                     $tech = $this->getChildObject('user_tech');
@@ -1862,6 +1861,9 @@ class BT_ficheInter extends BimpDolObject
 
                     if (count($result['errors'])) {
                         $warnings[] = BimpTools::getMsgFromArray($result['errors'], 'Echec création du fichier PDF');
+                        //print_r($warnings); die ('eee');
+                    } else {
+                        //die('ok');
                     }
 
                     // Fermeture auto: 

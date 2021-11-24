@@ -1679,23 +1679,16 @@ class BT_ficheInter extends BimpDolObject
 
         return $html;
     }
-
+    
     public function renderSignatureTab()
     {
         $html = "";
         global $user;
         if (!$this->isOldFi()) {
-            if ($this->isNotSign()) {
-                if ($this->getData('fk_statut') == SELF::STATUT_ATTENTE_SIGNATURE) {
-                    $html .= $this->displayData('fk_statut');
-                } else {
-                    $info = "<b>" . BimpRender::renderIcon('warning') . "</b> Si vous avez des tickets support et que vous ne les voyez pas dans le formulaire, rechargez la page en cliquant sur le bouton suivant: <a href='" . DOL_URL_ROOT . "/bimptechnique/?fc=fi&id=" . $this->id . "&navtab-maintabs=signature'><button class='btn btn-default'>Rafraîchire la page</button></a>";
-                    $html .= "<h4>$info</h4>";
-
+            if ($this->getData('fk_statut') == self::STATUT_BROUILLON) {
                     $form = new BC_Form($this, null, 'signature');
                     $html .= $form->renderHtml();
-                }
-            } elseif ($this->isSign()) {
+            } else {
                 $html .= '<h3>Nom du signataire client: ' . $this->displayDataTyped($this->getData('signataire')) . '</h3>';
                 $html .= '<h3>Type de signature: ' . $this->displayDataTyped($this->displayData('type_signature', 'default', false)) . '</h3>';
 

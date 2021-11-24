@@ -84,7 +84,7 @@ class BT_ficheInter extends BimpDolObject
         0                      => array('label' => 'Non signée', 'icon' => 'fas_times', 'classes' => array('warning')),
         self::TYPE_SIGN_DIST   => array('label' => 'Signature à distance', 'icon' => 'fas_file-download'),
         self::TYPE_SIGN_PAPIER => array('label' => 'Signature papier', 'icon' => 'fas_file-signature'),
-        self::TYPE_SIGN_ELEC   => array('label' => 'Signature électronique', 'icon' => 'fas_signature')
+        //self::TYPE_SIGN_ELEC   => array('label' => 'Signature électronique', 'icon' => 'fas_signature')
     );
 
     // Droits users: 
@@ -112,12 +112,13 @@ class BT_ficheInter extends BimpDolObject
         switch ($action) {
             case 'setStatusAdmin':
                 return $user->admin;
-
+            break;
             case 'createFacture':
                 if ($user->rights->bimptechnique->billing) {
                     return 1;
                 }
                 return 0;
+            break;
         }
 
         return parent::canSetAction($action);
@@ -166,13 +167,11 @@ class BT_ficheInter extends BimpDolObject
                 return 1;
 
             case 'generatePdf':
-//                if($user->admin) {
-//                    return 1;
-//                }
-//                if ($status !== self::STATUT_BROUILLON) {
-//                    $errors[] = BimpTools::ucfirst($this->getLabel('this') . 'n\'est plus au statut "brouilon"');
-//                    return 0;
-//                }
+
+                if ($status !== self::STATUT_BROUILLON) {
+                    $errors[] = BimpTools::ucfirst($this->getLabel('this') . 'n\'est plus au statut "brouilon"');
+                    return 0;
+                }
                 return 1;
 
             case 'attenteSign_to_signed':

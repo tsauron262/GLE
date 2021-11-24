@@ -235,8 +235,10 @@ fields:
         items_data_type: id_object
         items_braces: 1
         object: commande
-        values: 
-            array: commandesClient
+        input:
+            type: select
+            options: 
+                array: commandesClient
         depends_on: fk_soc
             
     tickets:
@@ -245,8 +247,10 @@ fields:
         items_data_type: id_object
         items_braces: 1
         object: ticket
-        values: 
-            array: ticketsClient
+        input:
+            type: select
+            options: 
+                array: ticketsClient
         depends_on: fk_soc
                 
     datei:

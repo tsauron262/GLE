@@ -14,15 +14,16 @@
         protected $ldlc_ftp_host = 'ftp-edi.groupe-ldlc.com';
         protected $ldlc_ftp_user = 'bimp-erp';
         protected $ldlc_ftp_pass = 'Yu5pTR?(3q99&Aa';
-        protected $ldlc_ftp_path = '/FTP-BIMP-ERP/accounting/'; // Bien penssé a changer pour les test à /FTP-BIMP-ERP/accountingtest/
+        protected $ldlc_ftp_path = '/FTP-BIMP-ERP/accountingtest/'; // Bien penssé a changer pour les test à /FTP-BIMP-ERP/accountingtest/
         protected $local_path    = PATH_TMP . "/" . 'exportCegid' . '/' . 'BY_DATE' . '/';
+        protected $size_vide_tra = 149;
         
         private $auto_tiers         = false;
         private $auto_ventes        = false;
         private $auto_paiements     = false;
         private $auto_achats        = false;
         private $auto_rib_mandats   = false;
-        private $auto_payni         = true;
+        private $auto_payni         = false;
         
         public function automatique() {
             global $db;
@@ -34,6 +35,7 @@
             
             if($this->auto_payni) $this->export_class->exportPayInc();
             $this->FTP();
+            $this->menage();
             $this->send_rapport();
 
         }
@@ -100,6 +102,14 @@
                 $logs .= 'FTP (Process)' . "\n";
                 $logs .= implode("\n", $this->rapport['FTP']);
             }
+            
+            $logs .= "\n\n";
+            
+            // Message pour le ménage
+            if(array_key_exists("MENAGE", $this->rapport)) {
+                $logs .= 'Ménage (Process)' . "\n";
+                $logs .= implode("\n", $this->rapport['MENAGE']);
+            }
 
             $this->output .= $logs;
             
@@ -144,25 +154,44 @@
             if (defined('FTP_SORTANT_MODE_PASSIF')) { ftp_pasv($ftp, true); } else { ftp_pasv($ftp, false); }
             
             $present_sur_ftp_ldlc = ftp_nlist($ftp, $this->ldlc_ftp_path);
-
-            foreach($files as $file_path) {
-                $filename = basename($file_path);
-                if(!in_array($this->ldlc_ftp_path . $filename, $present_sur_ftp_ldlc)) {
-                    if(filesize($file_path) > 149) {
-                        if(ftp_put($ftp, $this->ldlc_ftp_path . $filename, $this->local_path . $filename, FTP_ASCII)) {
-                            $this->rapport['FTP'][] = $filename . " transféré avec succès sur le FTP de LDLC";
-                            unlink($file_path);
+            if(count($files) > 0) {
+                foreach($files as $file_path) {
+                    $filename = basename($file_path);
+                    if(!in_array($this->ldlc_ftp_path . $filename, $present_sur_ftp_ldlc)) {
+                        if(filesize($file_path) > $this->size_vide_tra) {
+                            if(ftp_put($ftp, $this->ldlc_ftp_path . $filename, $this->local_path . $filename, FTP_ASCII)) {
+                                $this->rapport['FTP'][] = $filename . " transféré avec succès sur le FTP de LDLC";
+                                unlink($file_path);
+                            } else {
+                                $this->rapport['FTP'][] = $filename . " non transféré sur le FTP de LDLC";
+                            }
                         } else {
-                            $this->rapport['FTP'][] = $filename . " non transféré sur le FTP de LDLC";
+                            $this->rapport['FTP'][] = $filename . " non transféré sur le FTP de LDLC car il est vide (fichier supprimé automatiquement)";
+                            unlink($file_path);
                         }
                     } else {
-                        $this->rapport['FTP'][] = $filename . " non transféré sur le FTP de LDLC car il est vide (fichier supprimé automatiquement)";
-                        unlink($file_path);
+                        $this->rapport['FTP'][] = $filename . ' déjà présent sur le FTP de LDLC';
                     }
-                } else {
-                    $this->rapport['FTP'][] = $filename . ' déjà présent sur le FTP de LDLC';
+
                 }
-                
+            } else {
+                $this->rapport['FTP'][] = "Aucun fichiers à transférer";
+            }
+        }
+        
+        protected function menage() {
+            
+            $liste_files = scandir($this->local_path);
+            
+            if(count($liste_files) > 0) {
+                foreach($liste_files as $filename) {
+                    if(filesize($this->local_path . $filename) == $this->size_vide_tra) {
+                        unlink($this->local_path . $filename);
+                        $this->rapport['MENAGE'][] = $this->local_path . $filename . " supprimé automatiquement du dossier local car vide";
+                    }
+                }
+            } else {
+                $this->rapport['MENAGE'][] = "Auncun fichiers vide à supprimer";
             }
             
         }

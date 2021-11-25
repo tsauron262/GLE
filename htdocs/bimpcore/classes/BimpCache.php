@@ -416,14 +416,20 @@ class BimpCache
         }
     }
     
-    public static function getDureeMoySav($nbJ = 30){
-        $cache_key = 'sav_moy_duree'.$nbJ;
+    public static function getDureeMoySav($nbJ = 30, $ios = false){
+        $cache_key = 'sav_moy_duree'.$nbJ.$ios;
         
         $result = static::getCacheServeur($cache_key);
         if(!$result){
             $result = array();
             global $db;
-            $sql = $db->query('SELECT AVG(DATEDIFF(date_terminer, date_create )) as moy, code_centre FROM '.MAIN_DB_PREFIX.'bs_sav WHERE DATEDIFF(now(), date_terminer ) <='.$nbJ.' GROUP BY code_centre;');
+            $req = 'SELECT AVG(DATEDIFF(date_terminer, date_create )) as moy, code_centre FROM '.MAIN_DB_PREFIX.'bs_sav WHERE DATEDIFF(now(), date_terminer ) <='.$nbJ.'';
+            if($ios)
+                $req .= ' AND system = 300';
+            else
+                $req .= ' AND system != 300';
+            $req .= ' GROUP BY code_centre;';
+            $sql = $db->query($req);
             while ($ln = $db->fetch_object($sql)){
                 $result[$ln->code_centre] = $ln->moy;
             }

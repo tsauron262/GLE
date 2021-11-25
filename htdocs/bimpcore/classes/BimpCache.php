@@ -437,6 +437,29 @@ class BimpCache
         }
         return $result;
     }
+    
+    public static function getDureeDiago($ios = false){
+        $cache_key = 'sav_duree_diago'.$ios;
+        
+        $result = static::getCacheServeur($cache_key);
+        if(!$result){
+            $result = array();
+            global $db;
+            $req = "SELECT MIN(date_create), code_centre, DATEDIFF(now(), MIN(date_create) ) as time FROM llx_bs_sav a WHERE a.status = '0'";
+            if($ios)
+                $req .= ' AND system = 300';
+            else
+                $req .= ' AND system != 300';
+            $req .= ' GROUP BY code_centre;';
+//            die($req);
+            $sql = $db->query($req);
+            while ($ln = $db->fetch_object($sql)){
+                $result[$ln->code_centre] = $ln->time;
+            }
+            static::setCacheServeur($cache_key, $result, 2*60);
+        }
+        return $result;
+    }
 
     public static function getExtraFieldsArray($element)
     {

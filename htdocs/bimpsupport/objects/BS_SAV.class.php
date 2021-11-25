@@ -3793,8 +3793,9 @@ class BS_SAV extends BimpObject
         $html = '';
         $table = BimpCache::getDureeMoySav($time, $ios);
         
+        
         $i = 0;
-        $result = array();
+        $result = $result2 = array();
         foreach($centres as $centre){
             if(isset($table[$centre['code']])){
                 $i++;
@@ -3805,12 +3806,12 @@ class BS_SAV extends BimpObject
                 else{
                     $result2[] = $tmp;
                 }
-            }
+            } 
         }
-        
         $html = '';
         $html .= '<div style="max-width:700px; float: left; padding:15px">'.BimpRender::renderBimpListTable($result, array('centre' => 'Centre', 'time' => 'Temps moyen en J')).'</div>';
-        $html .= '<div style="max-width:700px; float: left; padding:15px">'.BimpRender::renderBimpListTable($result2, array('centre' => 'Centre', 'time' => 'Temps moyen en  J')).'</div>';
+        if(count($result2))
+            $html .= '<div style="max-width:700px; float: left; padding:15px">'.BimpRender::renderBimpListTable($result2, array('centre' => 'Centre', 'time' => 'Temps moyen en  J')).'</div>';
         
         $html = BimpRender::renderPanel('Temps moyen réparation sur '.$time.' jours '.($ios? '(iOs)' : '(hors iOs)'), $html);
         
@@ -3818,8 +3819,42 @@ class BS_SAV extends BimpObject
         return $html;
     }
     
+    public function displayMaxDiago($ios = true){
+        $time = 31;
+        $centres = BimpCache::getCentres();
+        $html = '';
+        $table = BimpCache::getDureeDiago($ios);
+        
+        
+        $i = 0;
+        $result = $result2 = array();
+        foreach($centres as $centre){
+            if(isset($table[$centre['code']])){
+                $i++;
+                $tmp = array('centre' => $centre['label'], 'time'=>$table[$centre['code']]);
+                if($i < 8){
+                    $result[] = $tmp;
+                }
+                else{
+                    $result2[] = $tmp;
+                }
+            } 
+        }
+        $html = '';
+        $html .= '<div style="max-width:700px; float: left; padding:15px">'.BimpRender::renderBimpListTable($result, array('centre' => 'Centre', 'time' => 'Temps moyen en J')).'</div>';
+        if(count($result2))
+            $html .= '<div style="max-width:700px; float: left; padding:15px">'.BimpRender::renderBimpListTable($result2, array('centre' => 'Centre', 'time' => 'Temps moyen en  J')).'</div>';
+        
+        $html = BimpRender::renderPanel('Temps max diagnostique sur '.$time.' jours '.($ios? '(iOs)' : '(hors iOs)'), $html);
+        
+        
+        return $html;
+    }
+    
     public function displayHeaderListInfo(){
-        $html = '<div style="max-width:46%;float: left; padding:15px"">'.$this->displayMoySav(true).'</div>';
+        $html = '<div style="max-width:46%;float: left; padding:15px"">'.$this->displayMaxDiago(true).'</div>';
+        $html .= '<div style="max-width:46%;float: left; padding:15px"">'.$this->displayMaxDiago(false).'</div>';
+        $html .= '<div style="max-width:46%;float: left; padding:15px"">'.$this->displayMoySav(true).'</div>';
         $html .= '<div style="max-width:46%;float: left; padding:15px"">'.$this->displayMoySav(false).'</div>';
         $html .= '<div style="clear:both;"></div>';
         return $html;

@@ -34,7 +34,7 @@ class BDS_ExportsComptaProcess extends BDSImportProcess {
                 'id_process' => (int) $process->id,
                 'name'       => 'ftp_pwd',
                 'label'      => 'MDP',
-                'value'      => 'Yu5pTR?(3q99&Aa'
+                'value'      => 'Yu5pTR?(3q99Aa'
             ), true, $warnings, $warnings);
 
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(

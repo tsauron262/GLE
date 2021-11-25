@@ -3809,9 +3809,9 @@ class BS_SAV extends BimpObject
             } 
         }
         $html = '';
-        $html .= '<div style="max-width:700px; float: left; padding:15px">'.BimpRender::renderBimpListTable($result, array('centre' => 'Centre', 'time' => 'Temps moyen en J')).'</div>';
+        $html .= '<div style="max-width:700px; float: left; padding:5px">'.BimpRender::renderBimpListTable($result, array('centre' => 'Centre', 'time' => 'Temps moyen en J')).'</div>';
         if(count($result2))
-            $html .= '<div style="max-width:700px; float: left; padding:15px">'.BimpRender::renderBimpListTable($result2, array('centre' => 'Centre', 'time' => 'Temps moyen en  J')).'</div>';
+            $html .= '<div style="max-width:700px; float: left; padding:5px">'.BimpRender::renderBimpListTable($result2, array('centre' => 'Centre', 'time' => 'Temps moyen en  J')).'</div>';
         
         $html = BimpRender::renderPanel('Temps moyen réparation sur '.$time.' jours '.($ios? '(iOs)' : '(hors iOs)'), $html);
         
@@ -3841,9 +3841,9 @@ class BS_SAV extends BimpObject
             } 
         }
         $html = '';
-        $html .= '<div style="max-width:700px; float: left; padding:15px">'.BimpRender::renderBimpListTable($result, array('centre' => 'Centre', 'time' => 'Temps moyen en J')).'</div>';
+        $html .= '<div style="float: left; padding:5px">'.BimpRender::renderBimpListTable($result, array('centre' => 'Centre', 'time' => 'Temps moyen en J')).'</div>';
         if(count($result2))
-            $html .= '<div style="max-width:700px; float: left; padding:15px">'.BimpRender::renderBimpListTable($result2, array('centre' => 'Centre', 'time' => 'Temps moyen en  J')).'</div>';
+            $html .= '<div style="float: left; padding:5px">'.BimpRender::renderBimpListTable($result2, array('centre' => 'Centre', 'time' => 'Temps moyen en  J')).'</div>';
         
         $html = BimpRender::renderPanel('Temps max diagnostic sur '.$time.' jours '.($ios? '(iOs)' : '(hors iOs)'), $html);
         
@@ -3852,10 +3852,10 @@ class BS_SAV extends BimpObject
     }
     
     public function displayHeaderListInfo(){
-        $html = '<div style="max-width:46%;float: left; padding:15px"">'.$this->displayMaxDiago(true).'</div>';
-        $html .= '<div style="max-width:46%;float: left; padding:15px"">'.$this->displayMaxDiago(false).'</div>';
-        $html .= '<div style="max-width:46%;float: left; padding:15px"">'.$this->displayMoySav(true).'</div>';
-        $html .= '<div style="max-width:46%;float: left; padding:15px"">'.$this->displayMoySav(false).'</div>';
+        $html = '<div class="col_xs-12 col-sm-6 col-md-3">'.$this->displayMaxDiago(true).'</div>';
+        $html .= '<div class="col_xs-12 col-sm-6 col-md-3">'.$this->displayMaxDiago(false).'</div>';
+        $html .= '<div class="col_xs-12 col-sm-6 col-md-3">'.$this->displayMoySav(true).'</div>';
+        $html .= '<div class="col_xs-12 col-sm-6 col-md-3">'.$this->displayMoySav(false).'</div>';
         $html .= '<div style="clear:both;"></div>';
         return $html;
     }

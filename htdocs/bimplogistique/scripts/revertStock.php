@@ -11,7 +11,7 @@ echo 'debut';
 
     $sql = 'SELECT COUNT(*) as nb, label, fk_product, value, fk_entrepot ';
     $sql .= 'FROM llx_stock_mouvement ';
-    $sql .= 'WHERE bimp_origin = \'inventory2\' AND datem BETWEEN "2021-09-29" AND "2021-09-30" AND inventorycode = "inventory2-535"';
+    $sql .= 'WHERE bimp_origin = \'inventory2\' AND datem BETWEEN "2021-11-22" AND "2021-11-23" AND inventorycode = "inventory2-577"';
     $sql .= 'GROUP By label, fk_product, value, fk_entrepot ';
     $sql .= 'HAVING nb > 1 ORDER BY nb DESC';
     $rows = BimpObject::getBdb()->executeS($sql, 'array');

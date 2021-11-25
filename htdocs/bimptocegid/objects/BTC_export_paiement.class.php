@@ -237,5 +237,16 @@ class BTC_export_paiement extends BTC_export {
 
         return $write;
     }
+    
+    public function displayExported() {
+        
+        $html = '';
+        
+        $instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Paiement');
+        $html .= $instance->renderList("default", true, "Liste des paiements exportés en compta", null, ['exported' => 1]);
+        
+        return $html;
+        
+    }
 
 }

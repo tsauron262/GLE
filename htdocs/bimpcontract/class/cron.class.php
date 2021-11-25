@@ -275,7 +275,7 @@
             $filters = [
                 'statut' => 11,
                 'tacite' => Array(
-                    'in' => Array(1,2,3,6,12)
+                    'in' => Array(1,3,6,4,5,7)
                 )
             ];
             

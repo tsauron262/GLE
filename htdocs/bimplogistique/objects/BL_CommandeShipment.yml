@@ -241,12 +241,23 @@ forms:
               value: 1
             - field: date_shipped
             - custom: 1
+              label: Signature par le client
+              input_name: create_signature
+              data_type: bool
+              value: 1
+              input: 
+                  type: toggle
+                  help: En choisissant "NON", aucune signature ne sera demandée au client.<br/>Le statut "Signé" sera mis à "Non applicable" pour cette expédition
+            - custom: 1
               label: PDF BL Chiffré
               data_type: bool
               input_name: pdf_chiffre
               input: 
                   type: toggle
               value: 1
+              display_if: 
+                  field_name: create_signature
+                  show_values: 1
             - custom: 1
               label: PDF BL Detail
               data_type: bool
@@ -254,6 +265,9 @@ forms:
               input: 
                   type: toggle
               value: 1
+              display_if: 
+                  field_name: create_signature
+                  show_values: 1
             - custom: 1
               label: Produits / Services inclus
               input_name: lines

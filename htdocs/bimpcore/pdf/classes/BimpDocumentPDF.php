@@ -538,14 +538,14 @@ class BimpDocumentPDF extends BimpModelPDF
                 $desc .= ($desc ? ' - ' : '') . $product->label;
             }
 
-            if ($product->type == 1) {
+//            if ($product->type == 1) {
                 if ($line->date_start) {
                     if (!$line->date_end) {
                         $desc .= '<br/>A partir du ';
                     } else {
                         $desc .= '<br/>Du ';
                     }
-                    $desc .= date('d / m / Y', $line->date_start);
+                    $desc .= date('d/m/Y', $line->date_start);
                 }
                 if ($line->date_end) {
                     if (!$line->date_start) {
@@ -553,9 +553,9 @@ class BimpDocumentPDF extends BimpModelPDF
                     } else {
                         $desc .= ' au ';
                     }
-                    $desc .= date('d / m / Y', $line->date_end);
+                    $desc .= date('d/m/Y', $line->date_end);
                 }
-            }
+//            }
         }
 
         if (!is_null($line->desc) && $line->desc) {
@@ -724,12 +724,12 @@ class BimpDocumentPDF extends BimpModelPDF
                         (!BimpObject::objectLoaded($bimpLine) && $line->subprice == 0 && !(int) $line->fk_product)) {
                     $row['desc'] = array(
                         'colspan' => 99,
-                        'content' => $desc,
+                        'content' => $this->cleanHtml($desc),
                         'style'   => ' background-color: #F5F5F5;'
                     );
                 } elseif (BimpObject::objectLoaded($bimpLine) && (int) $bimpLine->getData('type') === ObjectLine::LINE_SUB_TOTAL) {
                     $row['desc'] = array(
-                        'content' => ((string) $line->desc ? $line->desc : 'Sous-total'),
+                        'content' => ((string) $line->desc ? $this->cleanHtml($line->desc) : 'Sous-total'),
                         'style'   => ' font-weight: bold; background-color: #DFDFDF;'
                     );
                     $row['total_ht'] = array(
@@ -770,7 +770,7 @@ class BimpDocumentPDF extends BimpModelPDF
                     }
 
                     $row = array(
-                        'desc' => $desc
+                        'desc' => $this->cleanHtml($desc)
                     );
 
                     $pu_ht_with_remise = (float) ($line->subprice - ($line->subprice * ($line_remise / 100)));
@@ -1553,7 +1553,7 @@ class BimpDocumentPDF extends BimpModelPDF
         return '';
     }
 
-    public function getAfterTotauxHtml($blocSignature = true)
+    public function getAfterTotauxHtml()
     {
         $html .= '<table style="width: 95%" cellpadding="3">';
 

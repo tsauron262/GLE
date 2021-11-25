@@ -4669,6 +4669,8 @@ if($obj->up == null)
 			{
 				$this->errors=$interface->errors;
 			}
+                        if(class_exists('BimpCore'))
+                            BimpCore::addLogs_extra_data ('Probléme call_trigger '.get_class ());
 		}
 		return $result;
 	}

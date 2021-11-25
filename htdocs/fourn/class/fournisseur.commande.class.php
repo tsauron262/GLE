@@ -462,9 +462,7 @@ class CommandeFournisseur extends CommonOrder
             if (preg_match('/^[\(]?PROV/i', $this->ref) || empty($this->ref)) // empty should not happened, but when it occurs, the test save life
             {
                 /* mod drsi*/
-                BimpTools::sleppIfBloqued("numCommandeFourn");
-                BimpTools::bloqueDebloque("numCommandeFourn");
-                $bloqued = true;
+                BimpTools::lockNum("numCommandeFourn");
                 /*fmoddrsi*/
                 $num = $this->getNextNumRef($soc);
             }
@@ -542,19 +540,11 @@ class CommandeFournisseur extends CommonOrder
             if (! $error)
             {
                 $this->db->commit();
-                /*moddrsi*/
-                if($bloqued)
-                    BimpTools::bloqueDebloque("numCommandeFourn", 0);
-                /*fmoddrsi*/
                 return 1;
             }
             else
             {
                 $this->db->rollback();
-                /*moddrsi*/
-                if($bloqued)
-                    BimpTools::bloqueDebloque("numCommandeFourn", 0);
-                /*fmoddrsi*/
                 return -1;
             }
         }

@@ -13,20 +13,62 @@ objects:
                 name: BTC_exportRibAndMandat
 
 sections:
-    - type: tabs
-      tabs: 
-        default:
-            label: Elements
-            sections:
-                - type: nav_tabs
-                  nav_tabs: 
-                    - id: fiche_contrat
-                      title: RIB / MANDAT
-                      struct: 
-                        type: custom
-                        custom: 
-                            callback: 
-                                method: displayExportedRib
-                                object: TRA_RIB
-                                   
-                      
+    - type: custom
+      custom:
+        callback: displayHeaderInterface
+    - type: nav_tabs
+      nav_tabs:
+        - id: tiers
+          title: TIERS
+          struct:
+            type: rows
+            rows:                                                   
+                - cols:
+                    - type: custom
+                      custom: 
+                        callback: 
+                            method: displayFileExported
+                            params:
+                                - tier
+        - id: payni
+          title: PAIEMENTS
+          struct:
+            type: rows
+            rows:                                                   
+                - cols:
+                    - type: custom
+                      custom: 
+                        callback: 
+                            method: displayFileExported
+                            params:
+                                - pay
+                    - type: custom
+                      custom: 
+                        callback: 
+                            method: displayFileExported
+                            params:
+                                - payni
+                    
+        - id: rib_mandat
+          title: RIB / MANDAT
+          struct:
+            type: rows
+            rows:                                                   
+                - cols:
+                    - type: custom
+                      custom: 
+                        callback: 
+                            method: displayExportedRib
+                            object: TRA_RIB
+                    - type: custom
+                      custom: 
+                        callback: 
+                            method: displayFileExported
+                            params:
+                                - rib
+                    - type: custom
+                      custom: 
+                        callback: 
+                            method: displayFileExported
+                            params:
+                                - mandat

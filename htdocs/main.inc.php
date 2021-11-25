@@ -232,7 +232,7 @@ global $synopsisHook; //Pour vision global de l'objet
 
 if (!defined('NOSESSION')) {
     if(defined('USE_BDD_FOR_SESSION')){
-        global $db;
+        global $db, $conf;
         
         
         require_once DOL_DOCUMENT_ROOT.'/bimpcore/classes/BimpSession.php';
@@ -242,7 +242,7 @@ if (!defined('NOSESSION')) {
             $dbNoTransac = $bdb->db;
         }
         else{
-            $dbNoTransac = $db;
+            $dbNoTransac = getDoliDBInstance($conf->db->type, $conf->db->host, $conf->db->user, $db->database_pass, $conf->db->name, $conf->db->port);
         }
         
         
@@ -1082,7 +1082,7 @@ function top_httphead($contenttype = 'text/html', $forcenocache = 0)
         //	$contentsecuritypolicy = "font-src *; img-src *; style-src * 'unsafe-inline' 'unsafe-eval'; default-src 'self' *.stripe.com 'unsafe-inline' 'unsafe-eval'; script-src 'self' *.stripe.com 'unsafe-inline' 'unsafe-eval'; frame-src 'self' *.stripe.com; connect-src 'self';";
         //}
         //else $contentsecuritypolicy = $conf->global->MAIN_HTTP_CONTENT_SECURITY_POLICY;
-        $contentsecuritypolicy = $conf->global->MAIN_HTTP_CONTENT_SECURITY_POLICY;
+        $contentsecuritypolicy = (isset($conf->global->MAIN_HTTP_CONTENT_SECURITY_POLICY)? $conf->global->MAIN_HTTP_CONTENT_SECURITY_POLICY : '');
 
         if (!is_object($hookmanager))
             $hookmanager = new HookManager($db);
@@ -1494,6 +1494,7 @@ function top_menu($head, $title = '', $target = '', $disablejs = 0, $disablehead
 
         $logouttext = '';
         if (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER)) {
+            $logouthtmltext = '';
             //$logouthtmltext=$appli.'<br>';
             if ($_SESSION["dol_authmode"] != 'forceuser' && $_SESSION["dol_authmode"] != 'http') {
                 $logouthtmltext.=$langs->trans("Logout") . '<br>';

@@ -119,6 +119,14 @@ objects:
             bimp_object:
                 module: bimpcore
                 name: Bimp_ActionComm
+    
+    facture:
+        instance:
+            bimp_object:
+                module: bimpcommercial
+                name: Bimp_Facture
+            id_object:
+                field_value: fk_facture
                 
 fields: 
     # Champs dol object: 
@@ -227,8 +235,10 @@ fields:
         items_data_type: id_object
         items_braces: 1
         object: commande
-        values: 
-            array: commandesClient
+        input:
+            type: select
+            options: 
+                array: commandesClient
         depends_on: fk_soc
             
     tickets:
@@ -237,8 +247,10 @@ fields:
         items_data_type: id_object
         items_braces: 1
         object: ticket
-        values: 
-            array: ticketsClient
+        input:
+            type: select
+            options: 
+                array: ticketsClient
         depends_on: fk_soc
                 
     datei:
@@ -341,7 +353,33 @@ fields:
         label: Status avant modif
         type: int
     
-forms: 
+    fk_facture:
+        label: Facture
+        type: id_object
+        object: facture
+        display:
+            card
+    ef_type:
+        label: Canal de vente
+        type: text
+        values:
+            array: secteurs
+    
+forms:
+    messageFacturation:
+        rows:
+            - custom: 1
+              label: Me mettre en copie
+              input_name: copy
+              value: 1
+              input:
+                type: toggle
+            - custom: 1
+              label: Message
+              input_name: message
+              value: Bonjour, merci de bien vouloir facturer cette fiche d'intervention indépendante d'une commande ou d'un contrat en cours
+              input:
+                  type: textarea
     default: 
         rows: 
             client: 
@@ -431,7 +469,11 @@ forms:
         rows:
             - field: fk_contrat
             - field: commandes
-            - field: tickets            
+            - field: tickets  
+            
+    forBilling:
+        rows: 
+            - field: ef_type
        
 fields_tables:
     infos:
@@ -455,6 +497,9 @@ fields_tables:
             - field: signed
             - field: type_signature
             - field: description
+            - field: fk_facture
+            - field: ef_type
+              edit: 1
                   
     client:
         title: Client
@@ -548,6 +593,7 @@ lists_cols:
         search:
             input: 
                 type: search_user
+    fk_facture:
        
 filters:
     linked:
@@ -629,6 +675,7 @@ lists:
                 name: fk_contrat
                 filter: 
                     request: id
+            is_new: unset
                     
     tech:
         extends: default

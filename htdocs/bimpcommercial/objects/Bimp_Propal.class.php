@@ -1265,6 +1265,11 @@ class Bimp_Propal extends BimpComm
         }
 
         // Date: 
+        if($this->getData('datep') != $this->getInitData('datep')){
+            $this->updateField('fin_validite', BimpTools::getDateForDolDate($this->getData('datep')) + ($this->dol_object->duree_validite * 24 * 3600));
+        }
+        
+        
         if ((string) $this->getData('datep')) {
             $date = BimpTools::getDateForDolDate($this->getData('datep'));
         } else {

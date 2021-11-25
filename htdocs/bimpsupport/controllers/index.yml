@@ -53,6 +53,11 @@ sections:
             label: SAV
             icon: fas_wrench
             sections:
+                - type: custom
+                  custom: 
+                    callback: 
+                        method: displayHeaderListInfo
+                        object: sav
                 - type: list
                   list: 
                       object: sav

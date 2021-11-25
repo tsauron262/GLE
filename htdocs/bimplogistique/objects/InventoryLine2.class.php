@@ -33,6 +33,7 @@ class InventoryLine2 extends BimpObject {
         
         
     public function isProduct($search, &$id_product) {
+        $search = addslashes($search);
         $sql = 'SELECT rowid';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'product';
         $sql .= ' WHERE (';
@@ -55,6 +56,7 @@ class InventoryLine2 extends BimpObject {
     }
 
     public function isEquipment($input, &$id_equipment, &$id_product) {
+        $input = addslashes($input);
         $sql = 'SELECT id, id_product';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_equipment';
         $sql .= ' WHERE serial="' . $input . '" || concat("S", serial)="' . $input . '" || concat("S", "' . $input . '")=serial ORDER BY id_product DESC';

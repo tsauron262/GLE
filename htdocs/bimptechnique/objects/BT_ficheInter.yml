@@ -206,6 +206,7 @@ fields:
     # extraparams
         
     # Champs BimpObject:         
+        
     fk_user_tech: 
         label: Technicien
         type: id_object
@@ -235,8 +236,10 @@ fields:
         items_data_type: id_object
         items_braces: 1
         object: commande
-        values: 
-            array: commandesClient
+        input:
+            type: select
+            options: 
+                array: commandesClient
         depends_on: fk_soc
             
     tickets:
@@ -245,8 +248,10 @@ fields:
         items_data_type: id_object
         items_braces: 1
         object: ticket
-        values: 
-            array: ticketsClient
+        input:
+            type: select
+            options: 
+                array: ticketsClient
         depends_on: fk_soc
                 
     datei:
@@ -355,27 +360,14 @@ fields:
         object: facture
         display:
             card
+            
     ef_type:
         label: Canal de vente
         type: text
         values:
             array: secteurs
     
-forms:
-    messageFacturation:
-        rows:
-            - custom: 1
-              label: Me mettre en copie
-              input_name: copy
-              value: 1
-              input:
-                type: toggle
-            - custom: 1
-              label: Message
-              input_name: message
-              value: Bonjour, merci de bien vouloir facturer cette fiche d'intervention indépendante d'une commande ou d'un contrat en cours
-              input:
-                  type: textarea
+forms:                  
     default: 
         rows: 
             client: 
@@ -470,6 +462,21 @@ forms:
     forBilling:
         rows: 
             - field: ef_type
+            
+    messageFacturation:
+        rows:
+            - custom: 1
+              label: Me mettre en copie
+              input_name: copy
+              value: 1
+              input:
+                type: toggle
+            - custom: 1
+              label: Message
+              input_name: message
+              value: Bonjour, merci de bien vouloir facturer cette fiche d'intervention indépendante d'une commande ou d'un contrat en cours
+              input:
+                  type: textarea
        
 fields_tables:
     infos:

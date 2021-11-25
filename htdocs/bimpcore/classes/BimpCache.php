@@ -155,14 +155,14 @@ class BimpCache
         return null;
     }
 
-    public static function setCacheServeur($key, $value)
+    public static function setCacheServeur($key, $value, $ttl = null)
     {
         if (is_null(self::$cache_server)) {
             self::initCacheServeur();
         }
 
         if (is_a(self::$cache_server, 'BimpCacheServer')) {
-            return self::$cache_server->setCacheServeur($key, $value);
+            return self::$cache_server->setCacheServeur($key, $value, $ttl);
         }
 
         return false;
@@ -414,6 +414,51 @@ class BimpCache
 
             return self::$cache[$cache_key];
         }
+    }
+    
+    public static function getDureeMoySav($nbJ = 30, $ios = false){
+        $cache_key = 'sav_moy_duree'.$nbJ.$ios;
+        
+        $result = static::getCacheServeur($cache_key);
+        if(!$result){
+            $result = array();
+            global $db;
+            $req = 'SELECT AVG(DATEDIFF(date_terminer, date_create )) as moy, code_centre FROM '.MAIN_DB_PREFIX.'bs_sav WHERE DATEDIFF(now(), date_terminer ) <='.$nbJ.'';
+            if($ios)
+                $req .= ' AND system = 300';
+            else
+                $req .= ' AND system != 300';
+            $req .= ' GROUP BY code_centre;';
+            $sql = $db->query($req);
+            while ($ln = $db->fetch_object($sql)){
+                $result[$ln->code_centre] = $ln->moy;
+            }
+            static::setCacheServeur($cache_key, $result, 2*60);
+        }
+        return $result;
+    }
+    
+    public static function getDureeDiago($ios = false){
+        $cache_key = 'sav_duree_diago'.$ios;
+        
+        $result = static::getCacheServeur($cache_key);
+        if(!$result){
+            $result = array();
+            global $db;
+            $req = "SELECT MIN(date_create), code_centre, DATEDIFF(now(), MIN(date_create) ) as time FROM llx_bs_sav a WHERE a.status = '0'";
+            if($ios)
+                $req .= ' AND system = 300';
+            else
+                $req .= ' AND system != 300';
+            $req .= ' GROUP BY code_centre;';
+//            die($req);
+            $sql = $db->query($req);
+            while ($ln = $db->fetch_object($sql)){
+                $result[$ln->code_centre] = $ln->time;
+            }
+            static::setCacheServeur($cache_key, $result, 2*60);
+        }
+        return $result;
     }
 
     public static function getExtraFieldsArray($element)

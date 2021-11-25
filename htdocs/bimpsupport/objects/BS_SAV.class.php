@@ -3786,6 +3786,79 @@ class BS_SAV extends BimpObject
             'warnings' => $warnings
         );
     }
+    
+    public function displayMoySav($ios = true){
+        $time = 31;
+        $centres = BimpCache::getCentres();
+        $html = '';
+        $table = BimpCache::getDureeMoySav($time, $ios);
+        
+        
+        $i = 0;
+        $result = $result2 = array();
+        foreach($centres as $centre){
+            if(isset($table[$centre['code']])){
+                $i++;
+                $tmp = array('centre' => $centre['label'], 'time'=>$table[$centre['code']]);
+                if($i < 8){
+                    $result[] = $tmp;
+                }
+                else{
+                    $result2[] = $tmp;
+                }
+            } 
+        }
+        $html = '';
+        $html .= '<div style="max-width:700px; float: left; padding:5px">'.BimpRender::renderBimpListTable($result, array('centre' => 'Centre', 'time' => 'Temps moyen en J')).'</div>';
+        if(count($result2))
+            $html .= '<div style="max-width:700px; float: left; padding:5px">'.BimpRender::renderBimpListTable($result2, array('centre' => 'Centre', 'time' => 'Temps moyen en  J')).'</div>';
+        
+        $html = BimpRender::renderPanel('Temps moyen réparation sur '.$time.' jours '.($ios? '(iOs)' : '(hors iOs)'), $html);
+        
+        
+        return $html;
+    }
+    
+    public function displayMaxDiago($ios = true){
+        $time = 31;
+        $centres = BimpCache::getCentres();
+        $html = '';
+        $table = BimpCache::getDureeDiago($ios);
+        
+        
+        $i = 0;
+        $result = $result2 = array();
+        foreach($centres as $centre){
+            if(isset($table[$centre['code']])){
+                $i++;
+                $tmp = array('centre' => $centre['label'], 'time'=>$table[$centre['code']]);
+                if($i < 8){
+                    $result[] = $tmp;
+                }
+                else{
+                    $result2[] = $tmp;
+                }
+            } 
+        }
+        $html = '';
+        $html .= '<div style="float: left; padding:5px">'.BimpRender::renderBimpListTable($result, array('centre' => 'Centre', 'time' => 'Temps moyen en J')).'</div>';
+        if(count($result2))
+            $html .= '<div style="float: left; padding:5px">'.BimpRender::renderBimpListTable($result2, array('centre' => 'Centre', 'time' => 'Temps moyen en  J')).'</div>';
+        
+        $html = BimpRender::renderPanel('Temps max diagnostic sur '.$time.' jours '.($ios? '(iOs)' : '(hors iOs)'), $html);
+        
+        
+        return $html;
+    }
+    
+    public function displayHeaderListInfo(){
+        $html = '<div class="col_xs-12 col-sm-6 col-md-3">'.$this->displayMaxDiago(true).'</div>';
+        $html .= '<div class="col_xs-12 col-sm-6 col-md-3">'.$this->displayMaxDiago(false).'</div>';
+        $html .= '<div class="col_xs-12 col-sm-6 col-md-3">'.$this->displayMoySav(true).'</div>';
+        $html .= '<div class="col_xs-12 col-sm-6 col-md-3">'.$this->displayMoySav(false).'</div>';
+        $html .= '<div style="clear:both;"></div>';
+        return $html;
+    }
 
     public function actionValidatePropal($data, &$success)
     {
@@ -3818,7 +3891,10 @@ class BS_SAV extends BimpObject
 
         if (!count($errors)) {
             global $user, $langs;
-
+            
+            $propal->updateField(('datep'), date('Y/m/d'));
+            $propal->updateField('fin_validite', BimpTools::getDateForDolDate($propal->getData('datep')) + ($propal->dol_object->duree_validite * 24 * 3600));
+            
             $propal->lines_locked = 1;
 
             $new_status = null;

@@ -141,7 +141,7 @@ class BL_CommandeShipment extends BimpObject
                 if ((int) $this->getData('id_facture')) {
                     $errors[] = 'Cette expédition a été facturée';
                 }
-                if ((int) $this->getData('signed')) {
+                if ((int) $this->getData('signed') == 1) {
                     $errors[] = 'Cette expédition a été signée par le client';
                 }
                 break;
@@ -2208,6 +2208,7 @@ class BL_CommandeShipment extends BimpObject
                 $pdf->chiffre = $pdf_chiffre;
                 $pdf->detail = $pdf_detail;
                 $pdf->init($commande->dol_object);
+                
                 if (!$pdf->render($dir . $file_name, false)) {
                     $errors[] = BimpTools::getMsgFromArray($pdf->errors, 'Echec génération du document');
                 } else {

@@ -52,7 +52,7 @@ class BimpPDF extends TCPDF
         $this->AddPage();
     }
 
-    public function render($filename, $display = true, $display_only = false, $watermark = '')
+    public function render($filename, $display = true, $display_only = false, $watermark = '', &$errors = array())
     {
         $this->lastPage();
 
@@ -71,11 +71,16 @@ class BimpPDF extends TCPDF
             $output = 'F';
 
             $folder = str_replace($nomPure, "", $filename);
+            
             if (!is_dir($folder))
                 if (!mkdir($folder)) {
                     if (!BimpTools::isSubmit('ajax')) {
                         die("Le dossier " . $folder . " n'existe pas et ne peut être créé");
                     } else {
+                        $errors[] = "Le dossier " . $folder . " n'existe pas et ne peut être créé";
+//                        echo '<pre>';
+//                        print_r($errors);
+//                        exit;
                         return 0;
                     }
                 }

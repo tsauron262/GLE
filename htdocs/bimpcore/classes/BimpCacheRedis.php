@@ -125,7 +125,7 @@ class BimpCacheRedis extends BimpCacheServer
         return $result;
     }
 
-    public function setCacheServeur($key, $value)
+    public function setCacheServeur($key, $value, $ttl = null)
     {
         if (!self::$isInit) {
             self::initCacheServeur();
@@ -145,10 +145,11 @@ class BimpCacheRedis extends BimpCacheServer
             $value = json_encode($value);
 
         
-        
+        if(is_null($ttl))
+            $ttl = self::$TTL;
         try{
 //            self::$redisObj->set(self::getPrefKey().$key, $value);
-            self::$redisObj->setex(self::getPrefKey().$key, self::$TTL, $value);
+            self::$redisObj->setex(self::getPrefKey().$key, $ttl, $value);
         }
         catch (Exception $e) {
             BimpCore::addlog('Redis ingoignable '.$e->getMessage(), Bimp_Log::BIMP_LOG_ALERTE);

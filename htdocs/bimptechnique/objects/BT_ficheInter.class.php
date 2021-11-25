@@ -841,7 +841,7 @@ class BT_ficheInter extends BimpDolObject
 
     public function getCommandesClientArray()
     {
-        $commandes = array();
+        $commandes = array(0=>"");
 
         if ((int) $this->getData('fk_soc')) {
             foreach (BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_Commande', array(
@@ -857,7 +857,7 @@ class BT_ficheInter extends BimpDolObject
 
     public function getTicketsClientArray()
     {
-        $tickets = array();
+        $tickets = array(0=>"");
 
         if ((int) $this->getData('fk_soc')) {
             foreach (BimpCache::getBimpObjectObjects('bimpsupport', 'BS_Ticket', array(

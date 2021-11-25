@@ -179,12 +179,12 @@ class BC_Input extends BimpComponent
         parent::__construct($object, '', $path);
 
         if ($this->data_type === 'items_list') {
-            if (is_null($this->params['type']) || $this->params['type'] === 'items_list') {
+//            if (is_null($this->params['type']) || $this->params['type'] === 'items_list') {
                 $this->params['multiple'] = 1;
                 $this->params['sortable'] = (isset($field_params['items_sortable']) ? (int) $field_params['items_sortable'] : 0);
                 $this->params['add_all_btn'] = (isset($field_params['items_add_all_btn']) ? (int) $field_params['items_add_all_btn'] : 0);
-                $this->params['items_data_type'] = (isset($field_params['items_data_type']) ? (int) $field_params['items_data_type'] : 'string');
-            }
+                $this->params['items_data_type'] = (isset($field_params['items_data_type']) ? $field_params['items_data_type'] : 'string');
+//            }
         }
 
         if (is_null($this->params['type'])) {
@@ -582,10 +582,6 @@ class BC_Input extends BimpComponent
         $input_id = $this->input_id;
         $content = '';
 
-//        if (isset($this->field_params['editable']) && !$this->field_params['editable']) {
-//            $content = '<input type="hidden" name="' . $input_name . '" value="' . $this->new_value . '"/>';
-//            $content .= $this->new_value;
-//        } else {
         $options = $this->getOptions();
         $option = '';
 
@@ -685,7 +681,9 @@ class BC_Input extends BimpComponent
 
             if (is_array($this->value) && !empty($this->value)) {
                 foreach ($this->value as $value) {
-                    if (isset($this->field_params['values'][$value])) {
+                    if (isset($this->field_params['multiple_values_matches'][$value])) {
+                        $values[$value] = $this->field_params['multiple_values_matches'][$value];
+                    } elseif (isset($this->field_params['values'][$value])) {
                         if (is_array($this->field_params['values'][$value])) {
                             if (isset($this->field_params['values'][$value]['label'])) {
                                 $values[$value] = $this->field_params['values'][$value]['label'];
@@ -701,7 +699,6 @@ class BC_Input extends BimpComponent
             }
             $content = BimpInput::renderMultipleValuesInput($this->object, $this->name_prefix . $this->input_name, $content, $values, $label_input_suffixe, $autosave, $required, $sortable, 'none', '', array(), $add_all_btn);
         }
-//        }
 
         $extra_data = $this->extraData;
         $extra_data['data_type'] = $this->data_type;

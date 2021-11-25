@@ -13,7 +13,7 @@
         protected $version_tra   = null;
         protected $ldlc_ftp_host = 'ftp-edi.groupe-ldlc.com';
         protected $ldlc_ftp_user = 'bimp-erp';
-        protected $ldlc_ftp_pass = 'Yu5pTR?(3q99&Aa';
+        protected $ldlc_ftp_pass = 'Yu5pTR?(3q99Aa';
         protected $ldlc_ftp_path = '/FTP-BIMP-ERP/accounting/'; // Bien penssé a changer pour les test à /FTP-BIMP-ERP/accountingtest/
         protected $local_path    = PATH_TMP . "/" . 'exportCegid' . '/' . 'BY_DATE' . '/';
         protected $size_vide_tra = 149;
@@ -99,7 +99,7 @@
             
             // Message FTP
             if(array_key_exists("FTP", $this->rapport)) {
-                $logs .= 'FTP (Process)' . "\n";
+                $logs .= 'FTP (Process) ' . $this->ldlc_ftp_path . "\n";
                 $logs .= implode("\n", $this->rapport['FTP']);
             }
             

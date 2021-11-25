@@ -2183,6 +2183,7 @@ class BL_CommandeShipment extends BimpObject
                 $pdf->chiffre = $pdf_chiffre;
                 $pdf->detail = $pdf_detail;
                 $pdf->init($commande->dol_object);
+                
                 if (!$pdf->render($dir . $file_name, false)) {
                     $errors[] = BimpTools::getMsgFromArray($pdf->errors, 'Echec génération du document');
                 } else {

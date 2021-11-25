@@ -795,7 +795,7 @@ class BimpController
 
                     die(json_encode(array(
                         'errors'     => array('Echec de l\'encodage JSON - ' . $json_err),
-                        'warnings'      => static::getAndResetAjaxWarnings(),
+                        'warnings'   => static::getAndResetAjaxWarnings(),
                         'request_id' => $req_id
                     )));
                 }
@@ -815,7 +815,7 @@ class BimpController
             BimpDebug::addDebug('ajax_result', 'Erreurs', '<pre>' . htmlentities(print_r($errors, 1)) . '</pre>', array('foldable' => false));
             $debug_content = BimpDebug::renderDebug('ajax_' . $req_id);
         }
-        
+
 
         die(json_encode(array(
             'warnings'      => static::getAndResetAjaxWarnings(),
@@ -824,14 +824,16 @@ class BimpController
             'debug_content' => $debug_content
         )));
     }
-    
-    public static function getAndResetAjaxWarnings(){
+
+    public static function getAndResetAjaxWarnings()
+    {
         $warnings = static::$ajax_warnings;
         static::$ajax_warnings = array();
         return $warnings;
     }
-    
-    public static function addAjaxWarnings($msg){
+
+    public static function addAjaxWarnings($msg)
+    {
         static::$ajax_warnings[] = $msg;
     }
 
@@ -2633,7 +2635,7 @@ class BimpController
                 $return['errors'] = $errors;
             }
         }
-        
+
         return $return;
     }
 

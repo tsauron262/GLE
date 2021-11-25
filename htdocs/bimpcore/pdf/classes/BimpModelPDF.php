@@ -108,8 +108,6 @@ Abstract class BimpModelPDF
 
         if (count($this->errors)) {
             return 0;
-//            $this->displayErrors();
-//            exit;
         }
 
         $this->pdf->createHeader($this->header);
@@ -127,7 +125,7 @@ Abstract class BimpModelPDF
 
         $this->renderContent();
 
-        return $this->pdf->render($file_name, $display, $display_only, $this->watermark);
+        return $this->pdf->render($file_name, $display, $display_only, $this->watermark, $this->errors);
     }
 
     protected function renderContent()

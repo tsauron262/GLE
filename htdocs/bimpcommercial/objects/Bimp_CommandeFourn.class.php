@@ -1620,7 +1620,7 @@ class Bimp_CommandeFourn extends BimpComm
 //            ini_set('display_errors', 1);
         $url = "ftp-edi.groupe-ldlc.com";
         $login = "bimp-erp";
-        $mdp = "Yu5pTR?(3q99&Aa";
+        $mdp = "Yu5pTR?(3q99Aa";
         $folder = "/FTP-BIMP-ERP/tracing/";
 
 //            $url = "exportftp.techdata.fr";
@@ -1871,7 +1871,7 @@ class Bimp_CommandeFourn extends BimpComm
 
             $url = "ftp-edi.groupe-ldlc.com";
             $login = "bimp-erp";
-            $mdp = "Yu5pTR?(3q99&Aa";
+            $mdp = "Yu5pTR?(3q99Aa";
 
             if ($conn = ftp_connect($url)) {
                 if (ftp_login($conn, $login, $mdp)) {

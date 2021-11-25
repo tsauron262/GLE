@@ -105,6 +105,7 @@ class DoliDBMysqliC extends DoliDB
     public $thread_id = 0;
     
     public $timeDebReq = 0;
+    public $timeDebReq2 = 0;
 
     /* fmoddrsi */
 
@@ -942,6 +943,7 @@ class DoliDBMysqliC extends DoliDB
      */
     function query($query,$usesavepoint=0,$type='auto')
     {
+        $this->timeDebReq = microtime(true);
 //    	global $conf, $user;
         global $user;
         
@@ -1132,6 +1134,8 @@ class DoliDBMysqliC extends DoliDB
         $msg .= '<br/>Query : '.$query;
         if($this->timeDebReq > 0)
             $msg .= '<br/>Time Req : '.(microtime(true) - $this->timeDebReq);
+        if($this->timeDebReq2 > 0)
+            $msg .= '<br/>Time Req2 : '.(microtime(true) - $this->timeDebReq2);
         if(class_exists('synopsisHook'))
             $msg .= '<br/>Time Depuis déb : '. synopsisHook::getTime();
 

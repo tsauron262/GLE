@@ -3786,6 +3786,45 @@ class BS_SAV extends BimpObject
             'warnings' => $warnings
         );
     }
+    
+    public function displayHeaderListInfo(){
+        $time = 31;
+        $centres = BimpCache::getCentres();
+        $html = '';
+        $table = BimpCache::getDureeMoySav($time);
+        
+        
+//        $html .= '<table class="objectFieldsTable BS_SAV_fieldsTable"><tr>';
+        $i = 0;
+        $result = array();
+        foreach($centres as $centre){
+            if(isset($table[$centre['code']])){
+                $i++;
+                $tmp = array('centre' => $centre['label'], 'time'=>$table[$centre['code']]);
+                if($i < 8){
+                    $result[] = $tmp;
+                }
+                else{
+                    $result2[] = $tmp;
+                }
+                
+//                $html .= '<th>'.$centre['label'].'</th><td>'.$table[$centre['code']].' jours</td>';
+//                if($i > 5){
+//                    $i= 0;
+//                    $html .= '</tr><tr>';
+//                }
+            }
+        }
+//        $html .= '</tr></table>';
+//            $html .= print_r($centre,1);
+        
+        $html = '<div style="max-width:700px; float: left; padding:15px">'.BimpRender::renderBimpListTable($result, array('centre' => 'Centre', 'time' => 'Temps moyen en J')).'</div>';
+        $html .= '<div style="max-width:700px; float: left; padding:15px">'.BimpRender::renderBimpListTable($result2, array('centre' => 'Centre', 'time' => 'Temps moyen en  J')).'</div>';
+        $html = BimpRender::renderPanel('Temp moyen prise en charge sur '.$time.' jours', $html);
+        
+        
+        return $html;
+    }
 
     public function actionValidatePropal($data, &$success)
     {

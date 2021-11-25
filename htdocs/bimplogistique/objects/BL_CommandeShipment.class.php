@@ -141,7 +141,7 @@ class BL_CommandeShipment extends BimpObject
                 if ((int) $this->getData('id_facture')) {
                     $errors[] = 'Cette expédition a été facturée';
                 }
-                if ((int) $this->getData('signed')) {
+                if ((int) $this->getData('signed') == 1) {
                     $errors[] = 'Cette expédition a été signée par le client';
                 }
                 break;

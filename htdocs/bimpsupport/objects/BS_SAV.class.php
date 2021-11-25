@@ -3787,14 +3787,12 @@ class BS_SAV extends BimpObject
         );
     }
     
-    public function displayHeaderListInfo(){
+    public function displayMoySav($ios = true){
         $time = 31;
         $centres = BimpCache::getCentres();
         $html = '';
-        $table = BimpCache::getDureeMoySav($time);
+        $table = BimpCache::getDureeMoySav($time, $ios);
         
-        
-//        $html .= '<table class="objectFieldsTable BS_SAV_fieldsTable"><tr>';
         $i = 0;
         $result = array();
         foreach($centres as $centre){
@@ -3807,22 +3805,23 @@ class BS_SAV extends BimpObject
                 else{
                     $result2[] = $tmp;
                 }
-                
-//                $html .= '<th>'.$centre['label'].'</th><td>'.$table[$centre['code']].' jours</td>';
-//                if($i > 5){
-//                    $i= 0;
-//                    $html .= '</tr><tr>';
-//                }
             }
         }
-//        $html .= '</tr></table>';
-//            $html .= print_r($centre,1);
         
-        $html = '<div style="max-width:700px; float: left; padding:15px">'.BimpRender::renderBimpListTable($result, array('centre' => 'Centre', 'time' => 'Temps moyen en J')).'</div>';
+        $html = '';
+        $html .= '<div style="max-width:700px; float: left; padding:15px">'.BimpRender::renderBimpListTable($result, array('centre' => 'Centre', 'time' => 'Temps moyen en J')).'</div>';
         $html .= '<div style="max-width:700px; float: left; padding:15px">'.BimpRender::renderBimpListTable($result2, array('centre' => 'Centre', 'time' => 'Temps moyen en  J')).'</div>';
-        $html = BimpRender::renderPanel('Temp moyen prise en charge sur '.$time.' jours', $html);
+        
+        $html = BimpRender::renderPanel('Temps moyen réparation sur '.$time.' jours '.($ios? '(iOs)' : '(hors iOs)'), $html);
         
         
+        return $html;
+    }
+    
+    public function displayHeaderListInfo(){
+        $html = '<div style="max-width:46%;float: left; padding:15px"">'.$this->displayMoySav(true).'</div>';
+        $html .= '<div style="max-width:46%;float: left; padding:15px"">'.$this->displayMoySav(false).'</div>';
+        $html .= '<div style="clear:both;"></div>';
         return $html;
     }
 

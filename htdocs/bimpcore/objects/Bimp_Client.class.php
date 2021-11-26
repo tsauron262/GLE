@@ -2473,4 +2473,33 @@ class Bimp_Client extends Bimp_Societe
 
         return $total_unpaid;
     }
+    
+    
+    // En construction
+    public function getTotalUnpayedByRetard($since = '2019-06-30', $day_retard = 5)
+    {
+
+        $factures = $this->getUnpaidFactures($since);
+        $total_unpaid = 0;
+
+        if(!empty($factures)) {
+            
+            $now = new DateTime();
+            
+            foreach ($factures as $fac) {
+
+                $date_tolere = new DateTime($fac->getData('date_lim_reglement'));
+                $date_tolere->add(new DateInterval('P' . $day_retard . 'D'));
+
+                if($date_tolere < $now) {
+//                    echo 'Il y a un retard !';
+                    $fac->checkIsPaid(); // TODO laisser ?
+                    $total_unpaid += (float) $fac->getRemainToPay(true);
+                } 
+
+            }
+        }
+
+        return $total_unpaid;
+    }
 }

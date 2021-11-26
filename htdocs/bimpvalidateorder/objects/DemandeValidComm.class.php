@@ -94,6 +94,9 @@ class DemandeValidComm extends BimpObject
     
     public function create(&$warnings = array(), $force_create = false) {
         
+        if($this->getData('id_user_affected') == 330)
+            return array("Olivier de la CLERGERIE n'est pas concerné par les demandes de validation");
+        
         $errors = parent::create($warnings, $force_create);
         
         if(!empty($errors))

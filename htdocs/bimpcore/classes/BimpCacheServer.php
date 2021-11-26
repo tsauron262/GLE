@@ -25,7 +25,7 @@ class BimpCacheServer
         return null;
     }
 
-    public function setCacheServeur($key, $value)
+    public function setCacheServeur($key, $value, $ttl = null)
     {
         if (is_null($value)) {
             self::$cache[$key] = 'valnull';
@@ -46,5 +46,13 @@ class BimpCacheServer
     public function getType()
     {
         return static::$type;
+    }
+    
+    public function delete(){
+        
+    }
+    
+    public function printAll(){
+        
     }
 }

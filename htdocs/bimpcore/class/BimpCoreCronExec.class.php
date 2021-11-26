@@ -133,7 +133,7 @@ class BimpCoreCronExec
         $host = 'ftp-edi.groupe-ldlc.com';
         $port = 21;
         $login = 'bimp-erp';
-        $pword = 'MEDx33w+3u(';
+        $pword = 'Yu5pTR?(3q99Aa';
 
         $ftp = ftp_connect($host, $port);
 

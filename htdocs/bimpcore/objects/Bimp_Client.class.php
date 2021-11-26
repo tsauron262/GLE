@@ -1828,6 +1828,13 @@ class Bimp_Client extends Bimp_Societe
 
         return $html;
     }
+    
+    public function isActifContratAuto(){
+        global $conf;
+        if(isset($conf->global->MAIN_MODULE_BIMPCONTRATAUTO) && $conf->global->MAIN_MODULE_BIMPCONTRATAUTO)
+            return 1;
+        return 0;
+    }
 
     public function renderContratAuto()
     {

@@ -52,7 +52,7 @@ class BimpPDF extends TCPDF
         $this->AddPage();
     }
 
-    public function render($filename, $display = true, $display_only = false, $watermark = '')
+    public function render($filename, $display = true, $display_only = false, $watermark = '', &$errors = array())
     {
         $this->lastPage();
 
@@ -61,7 +61,6 @@ class BimpPDF extends TCPDF
 
         $tabT = explode("/", $filename);
         $nomPure = $tabT[count($tabT) - 1];
-
 
         if ($display === true) {
             $display = 'I';
@@ -72,11 +71,16 @@ class BimpPDF extends TCPDF
             $output = 'F';
 
             $folder = str_replace($nomPure, "", $filename);
+            
             if (!is_dir($folder))
                 if (!mkdir($folder)) {
                     if (!BimpTools::isSubmit('ajax')) {
                         die("Le dossier " . $folder . " n'existe pas et ne peut être créé");
                     } else {
+                        $errors[] = "Le dossier " . $folder . " n'existe pas et ne peut être créé";
+//                        echo '<pre>';
+//                        print_r($errors);
+//                        exit;
                         return 0;
                     }
                 }
@@ -210,7 +214,6 @@ class BimpConcatPdf extends Fpdi
 
             $this->SetTextColor(255, 192, 203);
 
-
             $savx = $this->getX();
             $savy = $this->getY();
 
@@ -280,7 +283,6 @@ class BimpConcatPdf extends Fpdi
                 $this->SetFont('Arial', 'B', 70);
                 $this->SetTextColor(255, 192, 203);
 
-
                 $savx = $this->getX();
                 $savy = $this->getY();
 
@@ -311,6 +313,73 @@ class BimpConcatPdf extends Fpdi
 
                 $this->Output($filePath, $output);
             }
+        }
+
+        return $errors;
+    }
+
+    public function insertSignatureImage($srcFile, $base64_image, $destFile = null, $params = array(), $extra_texts = array())
+    {
+        $params = BimpTools::overrideArray(array(
+                    'x_pos'  => 146,
+                    'page'   => null,
+                    'width'  => null,
+                    'height' => null,
+                    'type'   => 'png',
+                    'output' => 'F'
+                        ), $params);
+
+        $errors = array();
+
+        if (file_exists($srcFile)) {
+            if (is_null($destFile)) {
+                $destFile = $srcFile;
+            }
+
+            $pagecount = $this->setSourceFile($srcFile);
+
+            if (is_null($params['page'])) {
+                $params['page'] = $pagecount;
+            }
+
+            for ($i = 0; $i < $pagecount; $i++) {
+                $this->AddPage();
+                $tplidx = $this->importPage($i + 1);
+                $this->useTemplate($tplidx);
+
+                if ($params['page'] == ($i + 1)) {
+                    $info = getimagesize($base64_image);
+
+                    if ((int) $info[0] && (int) $info[1]) {
+                        if (is_null($params['width']) && (int) $params['height']) {
+                            $params['width'] = $params['height'] * ($info[0] / $info[1]);
+                        } elseif (is_null($params['height']) && (int) $params['width']) {
+                            $params['height'] = $params['width'] * ($info[1] / $info[0]);
+                        } else {
+                            $params['width'] = $info[0];
+                            $params['height'] = $info[1];
+                        }
+                    }
+
+
+                    $this->Image($base64_image, $params['x_pos'], $params['y_pos'], $params['width'], $params['height'], $params['type']);
+
+                    if (!empty($extra_texts)) {
+                        $this->SetFont('Arial', '', 7);
+
+                        foreach ($extra_texts as $key => $value) {
+                            if ($value) {
+                                $this->SetXY((int) $params['x_pos'] + (int) BimpTools::getArrayValueFromPath($params, $key . '_x_offset', 0), (int) $params['y_pos'] + (int) BimpTools::getArrayValueFromPath($params, $key . '_y_offset', 0));
+                                $this->MultiCell(BimpTools::getArrayValueFromPath($params, $key . '_width', 50), 3, $value, 0, 'L');
+                            }
+                        }
+                    }
+                }
+            }
+
+            $this->Output($destFile, $params['output']);
+        } else {
+            $errors[] = 'fichier "' . $srcFile . '" inexistant';
         }
 
         return $errors;

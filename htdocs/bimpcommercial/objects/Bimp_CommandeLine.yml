@@ -200,6 +200,7 @@ fields:
         default_value: 0
         displays: 
             badge:
+                label: Qté expédiée
                 type: callback
                 method: displayQty
                 params: 
@@ -211,6 +212,7 @@ fields:
         default_value: 0
         displays: 
             badge:
+                label: Qté à expédier
                 type: callback
                 method: displayQty
                 params: 
@@ -789,6 +791,7 @@ lists:
             
     logistique:
         checkboxes: 1
+        filters_panel: default
         title: Logistique produits / services
         icon: fas_truck-loading
         configurable: 1
@@ -796,10 +799,11 @@ lists:
         positions_open: 1
         enable_search: 1
         enable_sort: 1
-        pagination: 0
+        pagination: 
+            callback: hasMoresLine
         sort_field: position
         sort_way: asc
-        n: 0
+        n: 30
         add_btn: 0
         edit_btn: 0
         update_btn: 0

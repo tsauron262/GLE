@@ -12,6 +12,7 @@ class BimpCore
     public static $files = array(
         'js'  => array(
             '/includes/jquery/plugins/jpicker/jpicker-1.1.6.js',
+            '/bimpcore/views/js/SignaturePad.object.js',
             '/bimpcore/views/js/moment.min.js',
             '/bimpcore/views/js/bootstrap.min.js',
             '/bimpcore/views/js/bootstrap-datetimepicker.js',
@@ -49,6 +50,7 @@ class BimpCore
         'romain'  => 'r.PELEGRIN@bimp.fr',
         'peter'   => 'p.tkatchenko@bimp.fr'
     );
+    public static $html_purifier = null;
 
     public static function displayHeaderFiles($echo = true)
     {
@@ -431,44 +433,69 @@ class BimpCore
     }
 
     // Gestion des logs:
+    
+    public static function addLogs_debug_trace($msg){
+        $bt = debug_backtrace(null, 30);
+        if(is_array($msg))
+            $msg = implode(' - ', $msg);
+        static::addLogs_extra_data([$msg => BimpTools::getBacktraceArray($bt)]);    
+    }
 
     public static function addLogs_extra_data($array)
     {
+        if(!is_array($array))
+            $array = array($array);
         static::$logs_extra_data = BimpTools::merge_array(static::$logs_extra_data, $array);
     }
 
     public static function addlog($msg, $level = 1, $type = 'bimpcore', $object = null, $extra_data = array(), $force = false)
     {
-        if (BimpCore::isModeDev() && (int) self::getConf('bimpcore_print_logs', 1)) {
-            $bt = debug_backtrace(null, 300);
-            $infos = BimpTools::getBacktraceArray($bt);
-            unset($infos[0]);
-            die('LOG : ' . $msg . " " . print_r($extra_data, 1).'<pre>'.print_r($infos,1));
-        }
-
-        $extra_data = BimpTools::merge_array(static::$logs_extra_data, $extra_data);
-        if (!$force && $level < Bimp_Log::BIMP_LOG_ERREUR && (int) BimpCore::getConf('bimpcore_mode_eco', 0)) {
-            return array();
-        }
-
-        if (!(int) BimpCore::getConf('bimpcore_use_logs', 0) && !(int) BimpTools::getValue('use_logs', 0)) {
-            return array();
-        }
-
-        $errors = array();
-
         // $bimp_logs_locked: Eviter boucles infinies 
         global $bimp_logs_locked, $user;
 
         if (is_null($bimp_logs_locked)) {
             $bimp_logs_locked = 0;
         }
-
-        if (defined('ID_ERP'))
-            $extra_data['id_erp'] = ID_ERP;
-
         if (!$bimp_logs_locked) {
             $bimp_logs_locked = 1;
+            $extra_data = BimpTools::merge_array(static::$logs_extra_data, $extra_data);
+            if (BimpCore::isModeDev() && (int) self::getConf('bimpcore_print_logs', 1)) {
+                $bt = debug_backtrace(null, 30);
+
+                $html = 'LOG ' . Bimp_Log::$levels[$level]['label'] . '<br/><br/>';
+                $html .= 'Message: ' . $msg . '<br/><br/>';
+
+                if (is_a($object, 'BimpObject') && BimpObject::objectLoaded($object)) {
+                    $html .= 'Objet: ' . $object->getLink() . '<br/><br/>';
+                }
+
+                if (!empty($extra_data)) {
+                    $html .= 'Données: <pre>';
+                    $html .= print_r($extra_data, 1);
+                    $html .= '</pre>';
+                }
+
+                $html .= 'Backtrace: <br/>';
+                $html .= BimpRender::renderBacktrace(BimpTools::getBacktraceArray($bt));
+
+                die($html);
+            }
+
+            if (!$force && $level < Bimp_Log::BIMP_LOG_ERREUR && (int) BimpCore::getConf('bimpcore_mode_eco', 0)) {
+                return array();
+            }
+
+            if (!(int) BimpCore::getConf('bimpcore_use_logs', 0) && !(int) BimpTools::getValue('use_logs', 0)) {
+                return array();
+            }
+
+            $errors = array();
+
+
+
+            if (defined('ID_ERP'))
+                $extra_data['id_erp'] = ID_ERP;
+
 
             $check = true;
             foreach (Bimp_Log::$exclude_msg_prefixes as $prefixe) {
@@ -480,8 +507,7 @@ class BimpCore
             if ($check) {
                 // On vérifie qu'on n'a pas déjà un log similaire:
                 $id_current_log = BimpCache::bimpLogExists($type, $level, $msg, $extra_data);
-                
-                
+
                 $mod = '';
                 $obj = '';
                 $id = 0;
@@ -491,9 +517,9 @@ class BimpCore
                     $obj = $object->object_name;
                     $id = (int) $object->id;
                 }
-                
+
                 $bt = debug_backtrace(null, 15);
-                    
+
                 $datas = array(
                     'id_user'    => (BimpObject::objectLoaded($user) ? (int) $user->id : 1),
                     'obj_module' => $mod,
@@ -504,10 +530,10 @@ class BimpCore
 
                 if (!$id_current_log) {
                     $datas = BimpTools::merge_array($datas, array(
-                        'type'       => $type,
-                        'level'      => $level,
-                        'msg'        => $msg,
-                        'extra_data' => $extra_data,
+                                'type'       => $type,
+                                'level'      => $level,
+                                'msg'        => $msg,
+                                'extra_data' => $extra_data,
                     ));
                     $log = BimpObject::createBimpObject('bimpcore', 'Bimp_Log', $datas, true, $errors);
 
@@ -523,14 +549,14 @@ class BimpCore
                     }
                     $log = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Log', $id_current_log);
                     $log->set('last_occurence', date('Y-m-d H:i:d'));
-                    $log->set('nb_occurence', $log->getData('nb_occurence')+1);
+                    $log->set('nb_occurence', $log->getData('nb_occurence') + 1);
                     $warnings = array();
                     $errUpdate = $log->update($warnings, true);
-                    if(count($errUpdate))
+                    if (count($errUpdate))
                         $datas['erreur_maj_log'] = $errUpdate;
                     $datas['GET'] = $_GET;
                     $datas['POST'] = $_POST;
-                    $log->addNote('<pre>'.print_r($datas,1).'</pre>');
+                    $log->addNote('<pre>' . print_r($datas, 1) . '</pre>');
                 }
             }
 
@@ -545,5 +571,39 @@ class BimpCore
     public static function loadPhpExcel()
     {
         require_once DOL_DOCUMENT_ROOT . '/bimpcore/libs/PHPExcel-1.8/Classes/PHPExcel.php';
+    }
+
+    public static function LoadHtmlPurifier()
+    {
+        require_once DOL_DOCUMENT_ROOT . '/bimpcore/libs/htmlpurifier-4.13.0/HTMLPurifier.auto.php';
+    }
+
+    public static function getHtmlPurifier()
+    {
+        if (is_null(self::$html_purifier)) {
+            self::LoadHtmlPurifier();
+
+            $config = HTMLPurifier_Config::createDefault();
+
+            $root = '';
+
+            if (defined('PATH_TMP') && PATH_TMP) {
+                $root = PATH_TMP;
+                $path = '/htmlpurifier/serialiser';
+            } else {
+                $root = DOL_DATA_ROOT;
+                $path = '/bimpcore/htmlpurifier/serialiser';
+            }
+
+            if (!is_dir($root . $path)) {
+                BimpTools::makeDirectories($path, $root);
+            }
+
+            $config->set('Cache.SerializerPath', $root . $path);
+
+            self::$html_purifier = new HTMLPurifier($config);
+        }
+
+        return self::$html_purifier;
     }
 }

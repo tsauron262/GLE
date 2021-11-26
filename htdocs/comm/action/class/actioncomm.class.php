@@ -675,10 +675,10 @@ class ActionComm extends CommonObject
                 $this->elementtype			= $obj->elementtype;
 
                 $this->fetchResources();
-            }
             $this->db->free($resql);
             $this->oldcopy = clone($this);
             $this->oldcopy->fetch_userassigned();
+            }
         }
         else
         {

@@ -65,6 +65,9 @@ fields:
         dol_prop: duration
         input:
             with_secondes: 0
+        displays:
+            default:
+                type: timer
             
     date:
         label: Date
@@ -324,10 +327,7 @@ lists_cols:
         label: Date
         value:
             callback: displayDateWithDetails
-    duree_inter:
-        label: Durée
-        value:
-            callback: displayDuree
+        has_total: 1
     forfait:
         field: forfait
     type_intervention:
@@ -355,23 +355,28 @@ filters_panels:
                     5: Déplacement sous contrat
                     6: Déplacement vendu
                     7: Intervention en interne
+          facturable:
 lists:
     all:
         title: Listes des interventions
         filters_panel: default
+        total_row: 1
         sort_field: fk_fichinter
+        configurable: 1
         n: 20
         cols:
             type_of:
                 label: Type d'intervention
                 value:
                     callback: displayTypeInList
-            parent:ref:
-                label: Référence de la FI
+            fk_fichinter:
             parent:fk_soc:
             parent:fk_user_tech:
             parent:datei:
-            duree_inter:
+            duree:
+                has_total: 1
+                total_type: timer
+            total_ht:
     in_fiche:
         title: Liste des interventions
         objects_change_reload: BT_ficheInter
@@ -389,7 +394,7 @@ lists:
         cols:
             service:
             show_date:
-            duree_inter:
+            duree:
             forfait:
             type:
             plus_plus:

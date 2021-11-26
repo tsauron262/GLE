@@ -20,7 +20,9 @@ class Bimp_Log extends BimpObject
         'divers'     => 'Divers',
         'bds'        => 'Bimp Data Sync',
         'bic'        => 'Interface client',
-        'sav'        => 'SAV'
+        'sav'        => 'SAV',
+        'deadLock'   => 'DeadLock',
+        'sql_duplicate'=>'Doublons champ bdd'
     );
     public static $levels = array(
         self::BIMP_LOG_NOTIF  => array('label' => 'Notification', 'classes' => array('info')),
@@ -230,8 +232,18 @@ class Bimp_Log extends BimpObject
     {
         $params = array();
         $ajax = false;
-        if (is_array($this->getData('url_params')))
-            foreach ($this->getData('url_params') as $clef => $val) {
+        $paramsBdd = $this->getData('url_params');
+        if(isset($paramsBdd['GET']))
+            $paramsBdd = $paramsBdd['GET'];
+        
+        if(isset($paramsBdd['ajax'])){
+            unset($paramsBdd['ajax']);
+            unset($paramsBdd['action']);
+            unset($paramsBdd['request_id']);
+        }
+        
+        if (is_array($paramsBdd))
+            foreach ($paramsBdd as $clef => $val) {
                 $params[] = $clef . '=' . $val;
                 if ($clef == 'ajax')
                     $ajax = true;

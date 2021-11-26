@@ -660,7 +660,7 @@ class Bimp_Facture extends BimpComm
                 return 1;
 
             case 'classifyPaid':
-                if ((int) $this->getData('fk_statut') !== 1) {
+                if ((int) $this->getData('fk_statut') !== 1 && ($this->getData('fk_statut') !== 2 || $this->getData('paye') == 1)) {
                     $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'a pas le statut "Validé' . $this->e() . '"';
                 }
                 if ($this->dol_object->paye) {
@@ -2426,7 +2426,7 @@ class Bimp_Facture extends BimpComm
     public function displayPDFButton($display_generate = true, $with_ref = true, $btn_label = '')
     {
         global $user;
-        if ($this->getData('fk_statut') > 0 && !in_array($user->login, array('admin', 't.sauron', 'f.martinez', 'a.delauzun'))) {
+        if ($this->getData('fk_statut') > 0 && !in_array($user->login, array('admin', 't.sauron', 'f.martinez', 'a.delauzun')) && BimpCore::getConf('BLOQUE_GENERATE_FACT_PDF', 0)) {
             $ref = dol_sanitizeFileName($this->getRef());
             if ($this->getFileUrl($ref . '.pdf') != '')
                 $display_generate = false;
@@ -3753,6 +3753,17 @@ class Bimp_Facture extends BimpComm
                     $echeancier->onDeleteFacture($dateDebutFacture);
                 }
             }
+            
+            $tabF = getElementElement('fichinter', 'facture', null, $this->id);
+            if(count($tabF) > 0) {
+                foreach($tabF as $data) {
+                    $ficheInter = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter', $data['s']);
+                    if($ficheInter->getData('fk_facture') == $this->id) {
+                        $ficheInter->set('fk_facture', null);
+                        $ficheInter->update($warnings, true);
+                    }
+                }
+            }
 
             $this->majStatusOtherPiece();
         }
@@ -4440,8 +4451,8 @@ class Bimp_Facture extends BimpComm
                     $warnings[] = "Attention la date a été modifiée à la date du jour.";
                     $errors = $this->updateField('datef', $today);
                     $this->dol_object->date = strtotime($this->getData('datef'));
-                    $this->updateField('date_lim_reglement', BimpTools::getDateFromDolDate($this->dol_object->calculate_date_lim_reglement((int) $this->getData('fk_cond_reglement'))));
                 }
+                $this->updateField('date_lim_reglement', BimpTools::getDateFromDolDate($this->dol_object->calculate_date_lim_reglement((int) $this->getData('fk_cond_reglement'))));
 
 
 

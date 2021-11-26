@@ -220,7 +220,7 @@ class BimpComm extends BimpDolObject
                 if (!BimpObject::objectLoaded($client)) {
                     $errors[] = 'Client absent';
                 } else {
-                    if ($client->getData('fk_typent') == 0)
+                    if (BimpCore::getConf('fk_typent_REQUIRED', 0) && $client->getData('fk_typent') == 0)
                         $errors[] = 'Type de tier obligatoire';
 
 
@@ -414,11 +414,6 @@ class BimpComm extends BimpDolObject
         }
 
         return 1;
-    }
-
-    public function useEntrepot()
-    {
-        return (int) BimpCore::getConf("USE_ENTREPOT");
     }
 
     public function showForceCreateBySoc()
@@ -657,7 +652,7 @@ class BimpComm extends BimpDolObject
             if ($this->isActionAllowed('useRemise') && $this->canSetAction('useRemise')) {
                 if ($this->object_name === 'Bimp_Commande' || (int) $this->getData('fk_statut') === 0) {
                     $buttons[] = array(
-                        'label'       => 'Ajouter un avoir disponible',
+                        'label'       => 'Déduire un crédit disponible',
                         'icon_before' => 'fas_file-import',
                         'classes'     => array('btn', 'btn-default'),
                         'attr'        => array(
@@ -1562,7 +1557,7 @@ class BimpComm extends BimpDolObject
                         $label = '';
 
                         if ($this->object_name !== 'Bimp_Facture' || (int) $this->getData('fk_statut') === 0) {
-                            $label = 'Ajouter un avoir disponible';
+                            $label = 'Déduire un crédit disponible';
                         } elseif ($this->object_name === 'Bimp_Facture' && in_array((int) $this->getData('fk_statut'), array(1, 2))) {
                             $label = 'Appliquer un avoir ou un trop perçu disponible';
                         }

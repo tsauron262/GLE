@@ -23,4 +23,12 @@ class Bimp_Client_Suivi_Recouvrement extends BimpObject
 
         return (int) $user->admin;
     }
+    public function canEdit()
+    {
+        global $user;
+
+        if($this->isLoaded())
+            return (int) ($user->admin || $this->getData('user_create') == $user->id);
+        return 1;
+    }
 }

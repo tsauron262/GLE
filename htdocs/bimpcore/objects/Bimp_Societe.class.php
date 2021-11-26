@@ -181,12 +181,20 @@ class Bimp_Societe extends BimpDolObject
 
     public function isCompany()
     {
-        $id_typeent = (int) $this->getData('fk_typent');
-        if ($id_typeent) {
-            if (!in_array($this->db->getValue('c_typent', 'code', '`id` = ' . $id_typeent), array('TE_PRIVATE', 'TE_UNKNOWN'))) {
-                return 1;
+        if (BimpObject::objectLoaded($this->dol_object)) {
+            if (in_array($this->dol_object->typent_code, array('TE_PRIVATE', 'TE_UNKNOWN'))) {
+                return 0;
             }
-            return 0;
+
+            return 1;
+        } elseif ($this->isLoaded()) {
+            $id_typeent = (int) $this->getData('fk_typent');
+            if ($id_typeent) {
+                if (!in_array($this->db->getValue('c_typent', 'code', '`id` = ' . $id_typeent), array('TE_PRIVATE', 'TE_UNKNOWN'))) {
+                    return 1;
+                }
+                return 0;
+            }
         }
 
         return 1;
@@ -871,29 +879,53 @@ class Bimp_Societe extends BimpDolObject
 
         return $use_label;
     }
-
-    public function getCommercial($with_default = true)
-    {
+    
+    public function getCommercials($with_default = true, $first = false){
         $commerciaux = $this->getCommerciauxArray(false, $with_default);
 
+        $users = array();
         foreach ($commerciaux as $id_comm => $comm_label) {
             $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_comm);
             if (BimpObject::objectLoaded($user)) {
-                return $user;
+                if($first)
+                    return array($user);
+                else
+                    $users[] = $user;
             }
         }
+        if(count($users))
+            return $users;
 
         if ($with_default) {
             $default_id_commercial = (int) BimpCore::getConf('default_id_commercial', 0);
             if ($default_id_commercial) {
                 $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $default_id_commercial);
                 if (BimpObject::objectLoaded($user)) {
-                    return $user;
+                    return array($user);
                 }
             }
         }
 
+        return array();
+    }
+
+    public function getCommercial($with_default = true)
+    {
+        $users = $this->getCommercials($with_default, true);
+        if(count($users))
+            return $users[0];
         return null;
+    }
+
+    public function getCommercialEmail()
+    {
+        $comm = $this->getCommercial();
+
+        if (BimpObject::objectLoaded($comm)) {
+            return BimpTools::cleanEmailsStr($comm->getData('email'));
+        }
+
+        return '';
     }
 
     public function getIdCommercials()
@@ -1960,7 +1992,7 @@ class Bimp_Societe extends BimpDolObject
                 if (!is_object($result)) {
                     $warnings[] = 'Le service CreditSafe semble indisponible. Le n° ' . $field . ' ne peut pas être vérifié pour le moment';
                 } elseif (stripos($result->header->reportinformation->reporttype, "Error") !== false) {
-                    $errors[] = 'Erreur lors de la vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' (Code: ' . $result->body->errors->errordetail->code . ')';
+                    $warnings[] = 'Erreur lors de la vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' (Code: ' . $result->body->errors->errordetail->code . ')';
                 } else {
                     $note = $alert = "";
                     $limit = 0;

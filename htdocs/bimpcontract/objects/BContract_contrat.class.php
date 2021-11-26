@@ -236,6 +236,18 @@ class BContract_contrat extends BimpDolObject
             $this->updateField('initial_renouvellement', $this->getData('tacite'));
         }
     }
+    
+    public function renderFi(){
+        $html = BimpRender::renderPanel('Stats des Fi ' . $this->getLabel('of_the'), $this->renderThisStatsFi(), '', array(
+                    'icon'     => 'fas_file',
+                    'type'     => 'secondary',
+                    'foldable' => true
+        ));
+//        $objects = $this->getInstance('bimptechnique', 'BT_ficheInter');
+//        $html .= $objects->renderList('contrat');
+            
+        return $html;
+    }
 
     public function renderAvenant()
     {
@@ -313,36 +325,87 @@ class BContract_contrat extends BimpDolObject
 
         return $html;
     }
-
-    public function renderThisStatsFi($display = true, $in_contrat = true)
-    {
-        $html = "";
-
+    
+    public function getTotalFi($tms) {
+        $ficheInter = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter');        
+        return $ficheInter->time_to_qty($ficheInter->timestamp_to_time($tms)) * BimpCore::getConf("bimptechnique_coup_horaire_technicien");
+        
+    }
+    
+    public function getMargePrevisionnel($total_fis) {
+        return $total_fis / ($this->getJourTotal() - $this->getJourRestant()) * $this->getJourTotal();
+    }
+    
+    public function getTmsArray() {
         $fis = BimpCache::getBimpObjectObjects('bimptechnique', 'BT_ficheInter', array('fk_contrat' => $this->id));
-
-        $ficheInter = $this->getInstance('bimptechnique', 'BT_ficheInter');
-        $total_fis = 0;
-        $total_tms = 0;
-        $total_tms_not_contrat = 0;
-        foreach ($fis as $ficheInter) {
+        $tms_in_contrat = 0;
+        $tms_out_contrat = 0;
+                
+        foreach ($this->getListFi() as $ficheInter) {
             $childrenFiche = $ficheInter->getChildrenList("inters");
             foreach ($childrenFiche as $id_child) {
                 $child = $ficheInter->getChildObject('inters', $id_child);
                 $duration = $child->getData('duree');
                 if ($child->getData('id_line_contrat') || $child->getData('type') == 5 || $ficheInter->getData(('new_fi')) < 1) {
-                    $total_tms += $duration;
+                    $tms_in_contrat += $duration;
                 } else {
-                    $total_tms_not_contrat += $duration;
+                    $tms_out_contrat += $duration;
                 }
             }
         }
+        
+        return (object) Array(
+            'in' => $tms_in_contrat,
+            'out' => $tms_out_contrat
+        );
+        
+    }
+    
+    public function getMargeInter() {
+        if($this->isLoaded()) {
+            $total_contrat = $this->getTotalContrat();
+            $in_out_tms = $this->getTmsArray();
+            $total_fis = $this->getTotalFi($in_out_tms->in);
 
-        $total_fis = $ficheInter->time_to_qty($ficheInter->timestamp_to_time($total_tms)) * BimpCore::getConf("bimptechnique_coup_horaire_technicien");
+            return $total_contrat - $total_fis;
+        }
+        
+        
+        
+        return  null;
+        
+    }
+    
+    public function displayMargeInter() {
+        return BimpTools::displayMoneyValue($this->getMargeInter(), "EUR", true);
+    }
+    
+    
+    
+    public function getListFi() {
+        if($this->isLoaded()) {
+            return BimpCache::getBimpObjectObjects('bimptechnique', 'BT_ficheInter', ['fk_contrat' => $this->id]);
+        }
+        return Array();
+    }
+
+    public function renderThisStatsFi($display = true, $in_contrat = true)
+    {
+        $html = "";
+
+        $fis = $this->getListFi();
+        $in_out_tms = $this->getTmsArray();
+        $ficheInter = $this->getInstance('bimptechnique', 'BT_ficheInter');
+        $total_fis = 0;
+        $total_tms = $in_out_tms->in;
+        $total_tms_not_contrat = $in_out_tms->out;
+        $total_fis = $this->getTotalFi($total_tms);
         $previsionelle = 0;
+        
         if($this->getJourTotal() > 0 && $this->getJourTotal() > $this->getJourRestant())
-            $previsionelle = $total_fis / ($this->getJourTotal() - $this->getJourRestant()) * $this->getJourRestant();
+            $previsionelle = $this->getMargePrevisionnel ($total_fis);
 
-        $marge = ($this->getTotalContrat() - $total_fis);
+        $marge = $this->getMargeInter();
         $marge_previsionelle = ($this->getTotalContrat() - $previsionelle);
 
         $class = 'warning';
@@ -362,7 +425,7 @@ class BContract_contrat extends BimpDolObject
             $html .= "Nombre de FI: " . count($fis) . '<br />';
             $html .= "Nombre d'heures dans le contrat: " . $ficheInter->timestamp_to_time($total_tms) . '<br />';
             $html .= "Nombre d'heures hors du contrat: " . $ficheInter->timestamp_to_time($total_tms_not_contrat) . ' (non pris en compte)<br />';
-            $html .= "Coût technique: " . price($total_fis) . " € (" . BimpCore::getConf("bimptechnique_coup_horaire_technicien") . " €/h)<br />";
+            $html .= "Coût technique: " . price($total_fis) . " € (" . BimpCore::getConf("bimptechnique_coup_horaire_technicien") . " €/h * ".$ficheInter->timestamp_to_time($total_tms).")<br />";
             $html .= "Coût prévisionel: " . price($previsionelle) . " €<br />";
             $html .= "Vendu: " . "<strong class='warning'>" . price($this->getTotalContrat()) . "€</strong><br />";
             $html .= "Marge: " . "<strong class='$class'>" . BimpRender::renderIcon($icone) . " " . price($marge) . "€</strong><br />";
@@ -423,20 +486,31 @@ class BContract_contrat extends BimpDolObject
     public function actionAnticipateClose($data, &$success)
     {
         global $user;
+        
+        $errors = [];
+        
+        if($data['have_courrier'] == 0) {
+            $errors[] = "Vous ne pouvez pas anticiper la clôture de ce contrat sans lettre de résiliation";
+        }
+        
         if ($this->isLoaded()) {
-            $success = "Le contrat à été clos avec succès";
-            $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
-            if ($this->dol_object->closeAll($user) >= 1) {
-
-                $this->updateField('statut', self::CONTRAT_STATUS_CLOS);
-                $this->updateField('date_cloture', date('Y-m-d H:i:s'));
-                $this->updateField('end_date_reel', $data['end_date_reel']);
+            $warnings = [];
+            
+            if(!count($errors)) {
+                $this->updateField("end_date_reel", $data['end_date_reel']);
                 $this->updateField('anticipate_close_note', $data['note_close']);
-                $this->updateField('fk_user_cloture', $user->id);
-                if ($echeancier->find(['id_contrat' => $this->id])) {
-                    $echeancier->updateField('statut', 0);
-                }
-                $this->addLog('Cloture anticipée du contrat <br /> <b><i>Motif: </i></b>' . $data['note_close']);
+                $success = "Date de fin défini avec succès";
+                $dateClose = new DateTime($date['end_date_reel']);
+                $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $this->getData('fk_commercial_suivi'));
+                $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
+                $sujet = "Clôture anticipée du contrat " . $this->getRef() . " [".$client->getRef()."] - " . $client->getName();
+                $message = "Bonjour,<br />La date du " . $dateClose->format('d/m/Y') . " a été choisie par " . $user->getNomUrl() . " "
+                        . "comme date de fin anticipée du contrat " . $this->getNomUrl() . " pour le client "
+                        . $client->getNomUrl() . ' - ' . $client->getName() . ' pour la raison suivante:';
+                $message.= "<br /><br />".$data['note_close']."<br /><br />Ce contrat ce clôturera automatiquement à cette date.";
+                $addr_cc = ($commercial->getData('email') == $user->email) ? '' : $user->email;
+                $bimpMail = New BimpMail($sujet, $commercial->getData('email'), null, $message, null, $addr_cc);
+                $bimpMail->send($errors);
             }
         } else {
             $errors[] = "ID du contrat absent";
@@ -575,7 +649,7 @@ class BContract_contrat extends BimpDolObject
             $instance->set('id_contrat', $this->id);
             $instance->set('next_facture_date', $date->format('Y-m-d H:i:s'));
             $instance->set('next_facture_amount', $this->reste_a_payer());
-            $instance->set('validate', 0);
+            $instance->set('validate', 1);
             $instance->set('client', $this->getData('fk_soc'));
             $instance->set('commercial', $this->getData('fk_commercial_suivi'));
             $instance->set('statut', 1);
@@ -639,6 +713,25 @@ class BContract_contrat extends BimpDolObject
     public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
+            case 'negatif_positif':
+                if(count($values) > 0) {
+                    
+                    $filters = Array('statut' => 11);
+                    
+                    $list = BimpCache::getBimpObjectObjects("bimpcontract", 'BContract_contrat', $filters);
+                    
+                    $in = [];
+                    
+                    foreach($list as $contrat) {
+                        $marge = $contrat->getMargeInter();
+                        if(in_array('0', $values)) { if($marge < 0) $in[] = $contrat->id;}
+                        if(in_array('1', $values)) { if($marge > 0) $in[] = $contrat->id;}
+                        if(in_array('2', $values)) { if($marge == 0) $in[] = $contrat->id;}
+                    }
+                    
+                    $filters['a.rowid'] = ['in' => $in];
+                }
+                break;
             case 'commercialclient':
                 $alias = 'sc';
                 $joins[$alias] = array(
@@ -807,7 +900,7 @@ class BContract_contrat extends BimpDolObject
         return 0;
     }
 
-    public function closeFromCron()
+    public function closeFromCron($reason = "Contrat clos automatiquement")
     {
         $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
         global $user;
@@ -815,7 +908,7 @@ class BContract_contrat extends BimpDolObject
             $this->updateField('statut', self::CONTRAT_STATUS_CLOS);
             $this->updateField('date_cloture', date('Y-m-d H:i:s'));
             $this->updateField('fk_user_cloture', 1);
-            $this->addLog('Contrat clos automatiquement');
+            $this->addLog($reason);
             if ($echeancier->fetchBy('id_contrat', $this->id)) {
                 $echeancier->updateField('statut', 0);
             }
@@ -1022,16 +1115,25 @@ class BContract_contrat extends BimpDolObject
     public function displayRealEndDate($format = "d / m / Y")
     {
         $fin = null;
-        if (!$this->getData('date_end_renouvellement')) {
-            if ($this->getData('end_date_reel')) {
-                $fin = new DateTime($this->getData('end_date_reel'));
-            } elseif ($this->getData('end_date_contrat')) {
-                $fin = new DateTime($this->getData('end_date_contrat'));
+        $suup_all = false;
+        
+        if ($this->getData('end_date_reel') && $this->getData('anticipate_close_note')) {
+            $suup_all = true;
+            $fin = new DateTime($this->getData('end_date_reel'));
+        }
+        
+        if(!$suup_all){
+            if (!$this->getData('date_end_renouvellement')) {
+                if ($this->getData('end_date_reel')) {
+                    $fin = new DateTime($this->getData('end_date_reel'));
+                } elseif ($this->getData('end_date_contrat')) {
+                    $fin = new DateTime($this->getData('end_date_contrat'));
+                } else {
+                    $fin = $this->getEndDate();
+                }
             } else {
-                $fin = $this->getEndDate();
+                $fin = new DateTime($this->getData('date_end_renouvellement'));
             }
-        } else {
-            $fin = new DateTime($this->getData('date_end_renouvellement'));
         }
 
         if (is_object($fin))
@@ -1539,17 +1641,76 @@ class BContract_contrat extends BimpDolObject
         return Array('errors' => $errors, 'warnings' => $warnings, 'success' => $success);
         
     }
+    
+    public function actionRedefineEcheancier($data, &$success) {
+        $errors = [];
+        $warnings = [];
+        
+        $echeancier = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_echeancier');
+        $echeancier->find(['id_contrat' => $this->id]);
+        
+        
+        $idForDelete = [];
+        $id_forUpdate = [];
+        foreach($data['lines'] as $id_line) {
+            $idForDelete[] = $id_line;
+        }
+        if(count($idForDelete) > 0)
+            $errors = $this->db->delete("contratdet", 'rowid IN ('. implode(",", $idForDelete).')');
+        
+        foreach($data['lines_activate'] as $id_line) {
+            $id_forUpdate[] = $id_line;
+        }
+        if(count($id_forUpdate) > 0)
+            $errors = $this->db->update('contratdet', Array('statut' => 4, 'renouvellement' => $data['current_renouvellement']), 'rowid IN('.implode (",", $id_forUpdate).')');
+        
+        $errors = $this->updateField('date_end_renouvellement', $data['date_end_renouvellement']);
+        $errors = $this->updateField('end_date_contrat', $data['date_end_renouvellement']);
+        $errors = $echeancier->updateField('next_facture_date', '0000-00-00 00:00:00');
+        $errors = $this->updateField('current_renouvellement', $data['current_renouvellement']);
+        $errors = $this->updateField('initial_renouvellement', $data['initial_renouvellement']);
+        $errors = $this->updateField('tacite', $data['tacite']);
+        return [
+            'errors' => $errors,
+            'warnings' => $warnings,
+            'success' => $success
+        ];
+    }
+   
+    
+    public function getLinesForList() {
+        $lines = Array();
+
+        $children = $this->getChildrenList("lines");
+        
+        foreach($children as $id_child) {
+            $child = $this->getChildObject("lines", $id_child);
+            $lines[$id_child] = "Renouvellement: " . $child->getData('renouvellement') . " -> " . $child->displayData('fk_product');
+        }
+        
+        return $lines;
+    }
 
     public function getActionsButtons()
     {
         global $conf, $langs, $user;
-        $buttons = Array();
+        $buttons = Array();        
 
         if ($this->isLoaded() && BimpTools::getContext() != 'public') {
 
             $status = $this->getData('statut');
             $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
-
+            
+            if($user->admin) {
+                $buttons[] = array(
+                        'label'   => 'Annulé renew(ADMIN)',
+                        'icon'    => 'fas_retweet',
+                        'onclick' => $this->getJsActionOnclick('redefineEcheancier', array(), array(
+                            'form_name' => 'redefineEcheancier'
+                        ))
+                    );
+            }
+            
             if (BT_ficheInter::isActive() && $status == self::CONTRAT_STATUS_ACTIVER && $user->rights->bimptechnique->plannified) {
                 if ($user->admin == 1 || $user->id == 375) { // Pour les testes 
                     $buttons[] = array(
@@ -1642,13 +1803,16 @@ class BContract_contrat extends BimpDolObject
                 }
             }
             if (($this->getData('statut') == self::CONTRAT_STATUS_ACTIVER) && $user->rights->bimpcontract->to_anticipate) {
-                $buttons[] = array(
-                    'label'   => 'Anticiper la cloture du contrat',
-                    'icon'    => 'fas_clock',
-                    'onclick' => $this->getJsActionOnclick('anticipateClose', array(), array(
-                        'form_name' => 'anticipate'
-                    ))
-                );
+                if(!$this->getData('end_date_reel') && !$this->getData('anticipate_close_note')) {
+                    $buttons[] = array(
+                        'label'   => 'Anticiper la cloture du contrat',
+                        'icon'    => 'fas_clock',
+                        'onclick' => $this->getJsActionOnclick('anticipateClose', array(), array(
+                            'form_name' => 'anticipate'
+                        ))
+                    );
+                }
+                
             }
             if (($user->rights->bimpcontract->to_validate || $user->admin) && $this->getData('statut') != self::CONTRAT_STATUT_ABORT && $this->getData('statut') != self::CONTRAT_STATUS_CLOS && $status != self::CONTRAT_STATUS_REFUSE) {
                 $buttons[] = array(
@@ -2128,6 +2292,13 @@ class BContract_contrat extends BimpDolObject
             return 1;
 
         switch ($field_name) {
+            case 'current_renouvellement':
+            case 'tacite':
+            case 'initial_renouvellement':
+            case 'date_end_renouvellement':
+                if($user->admin)
+                    return 1;
+                break;
             case 'show_fact_line_in_pdf':
                 if($user->rights->bimpcontract->to_validate && ($this->getData("statut") != self::CONTRAT_STATUS_ACTIVER && $this->getData('statut') != self::CONTRAT_STATUS_ACTIVER_TMP && $this->getData('statut') !=  self::CONTRAT_STATUS_ACTIVER_SUP))
                     return 1;
@@ -3275,10 +3446,10 @@ class BContract_contrat extends BimpDolObject
             $date = new DateTime($this->getData('date_contrat'));
             $extra .= '<br/><span class="important">' . BimpRender::renderIcon('fas_signature', 'iconLeft') . 'Contrat marqué comme signé</span> depuis le ' . $date->format('d/m/Y');
         }
-        if (!is_null($this->getData('end_date_reel')) && !is_null($this->getData('anticipate_close_note'))) {
-            $date = new DateTime($this->getData('end_date_reel'));
-            $extra .= "<br /><span>Cloture anticipée en date du <strong>" . $date->format('d/m/Y') . "</strong></span>";
-        }
+//        if (!is_null($this->getData('end_date_reel')) && !is_null($this->getData('anticipate_close_note'))) {
+//            $date = new DateTime($this->getData('end_date_reel'));
+//            $extra .= "<br /><span>Cloture anticipée en date du <strong>" . $date->format('d/m/Y') . "</strong></span>";
+//        }
 
         if ($this->isFactAuto()) {
             $extra .= "<br /><span class='info' >Facturation automatique activée</strong></span>";
@@ -3636,8 +3807,15 @@ class BContract_contrat extends BimpDolObject
             if ($this->dol_object->element == 'contrat' && BimpTools::getContext() != 'public') {
                 $userCreationContrat = new User($this->db->db);
                 $userCreationContrat->fetch((int) $this->getData('fk_user_author'));
-
                 $html .= '<div class="object_header_infos">';
+                if($this->getData('end_date_reel') && $this->getData('anticipate_close_note')) {
+                    $dateAnticipateClose = new DateTime($this->getData('end_date_reel'));
+                    
+                    $html .= "<strong class='danger' ><h3>Date de clôture anticipée pour ce contrat: <i>".$dateAnticipateClose->format('d/m/Y')."</i>"
+                            . " <span class='rowButton bs-popover' ".BimpRender::renderPopoverData($this->getData('anticipate_close_note'), 'right', true)."> ".BimpRender::renderIcon('fas fa-info')."</span></h3></strong>";
+                    
+                }
+                
                 $create = new DateTime($this->getData('datec'));
                 if ($this->getdata('statut') == self::CONTRAT_STATUS_ACTIVER) {
                     $idAvenantActif = $this->getIdAvenantActif();
@@ -3682,6 +3860,7 @@ class BContract_contrat extends BimpDolObject
                     $html .= BimpRender::renderAlerts("Ce contrat est expiré depuis " . abs($intervale_days) . " jour.s, merci de le clore", 'danger', false);
                 }
                 $html .= '</div>';
+                
 
                 $dt_today = New DateTime();
                 $dt_start = New DateTime($this->getData('date_start'));

@@ -208,8 +208,7 @@ class BimpObject extends BimpCache
 
         $this->config = new BimpConfig(DOL_DOCUMENT_ROOT . '/' . $module . '/objects/', $object_name, $this);
         
-        $this->initBdd(); 
-
+        $this->initBdd();
 
         $this->use_commom_fields = (int) $this->getConf('common_fields', 1, false, 'bool');
         $this->use_positions = (int) $this->getConf('positions', 0, false, 'bool');
@@ -237,8 +236,15 @@ class BimpObject extends BimpCache
 
     public function __clone()
     {
-        $this->config = clone $this->config;
-        $this->config->instance = $this;
+        if (is_object($this->config)) {
+            $this->config = clone $this->config;
+            $this->config->instance = $this;
+        } else {
+            $this->config = new BimpConfig(DOL_DOCUMENT_ROOT . '/' . $this->module . '/objects/', $this->object_name, $this);
+            $this->addCommonFieldsConfig();
+            $this->addConfigExtraParams();
+            mailSyn2('Config inexistant', 'dev@bimp.fr', null, 'Config inexistant dans '.get_class($this));
+        }
     }
 
     public function __destruct()
@@ -1953,12 +1959,13 @@ class BimpObject extends BimpCache
                 if (!$instance->db->db->commit()) {
                     $result['errors'][] = 'Une erreur inconnue est survenue - opération annulée';
                     BimpCore::addlog('Commit echec - erreur inconnue', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $instance, array(
-                        'Action' => $action
+                        'Action' => $action,
+                        'Result' => $result
                             ), true);
                 }
             }
         }
-
+        
         return $result;
     }
 
@@ -3970,12 +3977,18 @@ class BimpObject extends BimpCache
 
             if (!count($errors)) {
                 // Associations: 
-                $warnings = BimpTools::merge_array($warnings, $this->saveAssociationsFromPost());
+                if((int) BimpCore::getConf('bimpcore_use_db_transactions', 0))
+                    $errors = BimpTools::merge_array($errors, $this->saveAssociationsFromPost());
+                else
+                    $warnings = BimpTools::merge_array($warnings, $this->saveAssociationsFromPost());
 
                 // Sous-objets ajoutés: 
                 $sub_result = $this->checkSubObjectsPost($force_edit);
                 if (count($sub_result['errors'])) {
-                    $warnings = BimpTools::merge_array($warnings, $sub_result['errors']);
+                    if((int) BimpCore::getConf('bimpcore_use_db_transactions', 0))
+                        $errors = BimpTools::merge_array($errors, $sub_result['errors']);
+                    else
+                        $warnings = BimpTools::merge_array($warnings, $sub_result['errors']);
                 }
                 if ($sub_result['success_callback']) {
                     $success_callback .= $sub_result['success_callback'];
@@ -3985,7 +3998,10 @@ class BimpObject extends BimpCache
                     // Champs des sous-objets mis à jour: 
                     $sub_result = $this->checkChildrenUpdatesFromPost();
                     if (count($sub_result['errors'])) {
-                        $warnings = BimpTools::merge_array($warnings, $sub_result['errors']);
+                        if((int) BimpCore::getConf('bimpcore_use_db_transactions', 0))
+                            $errors = BimpTools::merge_array($errors, $sub_result['errors']);
+                        else
+                            $warnings = BimpTools::merge_array($warnings, $sub_result['errors']);
                     }
                     if ($sub_result['success_callback']) {
                         $success_callback .= $sub_result['success_callback'];
@@ -4007,7 +4023,8 @@ class BimpObject extends BimpCache
                         $errors[] = 'Echec de l\'enregistrement des données - opération annulée';
 
                         BimpCore::addlog('Commit echec - erreur inconnue', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $this, array(
-                            'Action' => 'Save From Post'
+                            'Action' => 'Save From Post',
+                            'Warnings'> $warnings
                                 ), true);
                     }
                 }
@@ -6715,7 +6732,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         $html = '';
 
         if ($this->isLoaded()) {
-            if ($this->field_exists($field)) {
+            if ($this->canSetAction('removeChildObject') && $this->field_exists($field)) {
                 if ($this->getConf('fields/' . $field . '/type', 'string') === 'id_object') {
                     if ((int) $this->getData($field)) {
                         $object = $this->config->getObject('fields/' . $field . '/object');
@@ -9436,5 +9453,10 @@ var options = {
     public static function useApple()
     {
         return BimpTools::isModuleDoliActif('BIMPSUPPORT');
+    }
+
+    public function useEntrepot()
+    {
+        return (int) BimpCore::getConf("USE_ENTREPOT");
     }
 }

@@ -1,7 +1,5 @@
 <?php
 
-ini_set('memory_limit', '6000M');
-
 class BL_CommandeShipment extends BimpObject
 {
 
@@ -21,6 +19,53 @@ class BL_CommandeShipment extends BimpObject
         1 => array('label' => 'OUI', 'classes' => array('success')),
         2 => array('label' => 'Non applicable', 'classes' => array('info')),
     );
+    public static $default_signature_params = array(
+        'x_pos'             => 146,
+        'width'             => 43,
+        'date_x_offset'     => -16,
+        'date_y_offset'     => 7,
+        'nom_x_offset'      => -32,
+        'nom_y_offset'      => 0,
+        'nom_width'         => 30,
+        'fonction_x_offset' => -32,
+        'fonction_y_offset' => 11,
+        'fonction_width'    => 30
+    );
+
+    // Droits users: 
+
+    public function canClientView()
+    {
+        global $userClient;
+
+        if (BimpObject::objectLoaded($userClient)) {
+            if (!$this->isLoaded()) {
+                return 1;
+            }
+
+            $commande = $this->getParentInstance();
+
+            if (BimpObject::objectLoaded($commande)) {
+                if ((int) $commande->getData('fk_soc') === (int) $userClient->getData('id_client')) {
+                    return 1;
+                } else {
+                    die('comm: ' . $commande->getData('fk_soc') . ' - uc: ' . $userClient->getData('id_client'));
+                }
+            }
+        }
+
+        return 0;
+    }
+
+    public function canSetAction($action)
+    {
+        switch ($action) {
+            case 'editFacture':
+                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
+                return $facture->can('create');
+        }
+        return (int) parent::canSetAction($action);
+    }
 
     // Gestion des droits et autorisations: 
 
@@ -43,8 +88,22 @@ class BL_CommandeShipment extends BimpObject
         switch ($field) {
             case 'id_user_resp':
                 if (!$force_edit && $status === self::BLCS_EXPEDIEE) {
+                    $errors[] = 'Expédiée';
                     return 0;
                 }
+
+            case 'signed':
+                if ($force_edit) {
+                    return 1;
+                }
+                if ($status !== self::BLCS_EXPEDIEE) {
+                    $errors[] = 'Non Expédiée';
+                    return 0;
+                }
+                if ((int) $this->getData('id_signature')) {
+                    return 0;
+                }
+                return 1;
         }
 
         return (int) parent::isFieldEditable($field, $force_edit);
@@ -54,7 +113,7 @@ class BL_CommandeShipment extends BimpObject
     {
         $commande = $this->getParentInstance();
 
-        if (in_array($action, array('validateShipment', 'cancelShipment', 'createFacture', 'editFacture', 'generateVignettes'))) {
+        if (in_array($action, array('validateShipment', 'cancelShipment', 'createFacture', 'editFacture', 'generateVignettes', 'createSignature'))) {
             if (!$this->isLoaded()) {
                 $errors[] = 'ID de l\'expédition absent';
             } elseif (!BimpObject::objectLoaded($commande)) {
@@ -81,6 +140,9 @@ class BL_CommandeShipment extends BimpObject
                 }
                 if ((int) $this->getData('id_facture')) {
                     $errors[] = 'Cette expédition a été facturée';
+                }
+                if ((int) $this->getData('signed') == 1) {
+                    $errors[] = 'Cette expédition a été signée par le client';
                 }
                 break;
 
@@ -111,6 +173,20 @@ class BL_CommandeShipment extends BimpObject
                     $errors[] = 'Cette exépédition a été annulée';
                 }
                 break;
+
+            case 'createSignature':
+                if ($status !== self::BLCS_EXPEDIEE) {
+                    $errors[] = 'Cette exépédition n\'est pas au statut expédiée';
+                }
+
+                if ((int) $this->getData('id_signature')) {
+                    $errors[] = 'La signature est déjà en place pour cette expédition';
+                }
+
+                if ((int) $this->getData('signed') === 1) {
+                    $errors[] = 'Cette expédition est déjà signée';
+                }
+                break;
         }
 
         if (count($errors)) {
@@ -132,18 +208,37 @@ class BL_CommandeShipment extends BimpObject
         return 0;
     }
 
-    public function canSetAction($action)
+    public function showOverwritePdfFileInput()
     {
-
-        switch ($action) {
-            case 'editFacture':
-                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
-                return $facture->can('create');
+        if ((int) $this->getData('status') === self::BLCS_EXPEDIEE) {
+            return 1;
         }
-        return (int) parent::canSetAction($action);
+
+        return 0;
     }
 
     // Getters params: 
+
+    public function getActionsButtons()
+    {
+        $buttons = $this->getExtraBtn();
+
+        $signature = $this->getChildObject('signature');
+        if (BimpObject::objectLoaded($signature) && !(int) $signature->getData('signed')) {
+            $buttons = BimpTools::merge_array($buttons, $signature->getSignButtons());
+        }
+
+        if ($this->isActionAllowed('viewPdfExpe') && $this->canSetAction('viewPdfExpe')) {
+            $buttons[] = array(
+                'label'   => 'Régénérer le PDF',
+                'icon'    => 'fas_undo',
+                'onclick' => $this->getJsActionOnclick('viewPdfExpe', array(), array(
+                    'form_name' => 'pdf'
+                ))
+            );
+        }
+        return $buttons;
+    }
 
     public function getExtraBtn()
     {
@@ -152,6 +247,16 @@ class BL_CommandeShipment extends BimpObject
         if ($this->isLoaded()) {
 
             $commande = $this->getParentInstance();
+
+            if ($this->isActionAllowed('createSignature') && $this->canSetAction('createSignature')) {
+                $buttons[] = array(
+                    'label'   => 'Créer signature',
+                    'icon'    => 'fas_signature',
+                    'onclick' => $this->getJsActionOnclick('createSignature', array(), array(
+                        'form_name' => 'create_signature'
+                    ))
+                );
+            }
 
             if ((int) $this->getData('status') !== self::BLCS_ANNULEE) {
                 $buttons[] = array(
@@ -429,13 +534,15 @@ class BL_CommandeShipment extends BimpObject
         $id_contact = (int) $this->getData('id_contact');
         if (!$id_contact) {
             $commande = $this->getParentInstance();
-            $contacts = $commande->dol_object->getIdContact('external', 'SHIPPING');
-            if (isset($contacts[0]) && $contacts[0]) {
-                $id_contact = $contacts[0];
-            } else {
-                $contacts = $commande->dol_object->getIdContact('external', 'CUSTOMER');
+            if ($commande->isLoaded()) {
+                $contacts = $commande->dol_object->getIdContact('external', 'SHIPPING');
                 if (isset($contacts[0]) && $contacts[0]) {
                     $id_contact = $contacts[0];
+                } else {
+                    $contacts = $commande->dol_object->getIdContact('external', 'CUSTOMER');
+                    if (isset($contacts[0]) && $contacts[0]) {
+                        $id_contact = $contacts[0];
+                    }
                 }
             }
         }
@@ -681,40 +788,42 @@ class BL_CommandeShipment extends BimpObject
         return 0;
     }
 
+    public function getPdfFileName(&$errors = array(), $signed = false)
+    {
+        $file_name = '';
+
+        $commande = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($commande)) {
+            $file_name = $commande->getRef();
+            $file_name .= '_bl_' . $this->getData('num_livraison') . ($signed ? '_signe' : '') . '.pdf';
+        } else {
+            $errors[] = 'Commande associée absente';
+        }
+
+        return $file_name;
+    }
+
     // Affichages: 
 
     public function displayContact()
     {
-        $id_contact = (int) $this->getData('id_contact');
+        $id_contact = (int) $this->getcontact();
 
         if ($id_contact) {
-            return $this->displayData('id_contact', 'nom_url');
+            $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
+
+            if (BimpObject::objectLoaded($contact)) {
+                return $contact->getLink();
+            }
         }
 
         $commande = $this->getChildObject('commande_client');
         if (BimpObject::objectLoaded($commande)) {
-            $commande = $commande->dol_object;
-            $contacts = $commande->getIdContact('external', 'SHIPPING');
-            if (isset($contacts[0]) && $contacts[0]) {
-                BimpTools::loadDolClass('contact');
-                $contact = new Contact($this->db->db);
-                if ($contact->fetch($contacts[0]) > 0) {
-                    return $contact->getNomUrl(1) . BimpRender::renderObjectIcons($contact, true);
-                }
-            }
+            $client = $commande->getChildObject('client');
 
-            $contacts = $commande->getIdContact('external', 'CUSTOMER');
-            if (isset($contacts[0]) && $contacts[0]) {
-                BimpTools::loadDolClass('contact');
-                $contact = new Contact($this->db->db);
-                if ($contact->fetch($contacts[0]) > 0) {
-                    return $contact->getNomUrl(1) . BimpRender::renderObjectIcons($contact, true);
-                }
-            }
-
-            $commande->fetch_thirdparty();
-            if (is_object($commande->thirdparty)) {
-                return $commande->thirdparty->getNomUrl(1) . BimpRender::renderObjectIcons($commande->thirdparty, true);
+            if (BimpObject::objectLoaded($client)) {
+                return $client->getLink();
             }
 
             return 'Adresse de livraison de la commande';
@@ -728,24 +837,32 @@ class BL_CommandeShipment extends BimpObject
         $html = '';
 
         if ($this->isLoaded()) {
-//            if ((int) $this->getData('status') > 0) {
-//                $url = DOL_URL_ROOT . '/bimplogistique/bl.php?id_shipment=' . $this->id;
-//                $onclick = 'window.open(\'' . $url . '\')';
-//                $html .= '<button type="button" class="btn btn-default" onclick="' . htmlentities($onclick) . '">';
-//                $html .= '<i class="' . BimpRender::renderIconClass('fas_file-pdf') . ' iconLeft"></i>';
-//                if ((int) $this->getData('status') === self::BLCS_BROUILLON) {
-//                    $html .= 'Bon de préparation';
-//                } else {
-//                    $html .= 'Bon de livraison';
-//                }
-//                $html .= '</button>';
-//            }
-            if ((int) $this->getData('status') > 0) {
+
+            $status = (int) $this->getData('status');
+            $no_bl_pdf = true;
+
+            if ($status > 1) {
+                $file_name = $this->getPdfFileName();
+                $file = $this->getFilesDir() . $file_name;
+
+                if (file_exists($file)) {
+                    $url = $this->getFileUrl($file_name);
+
+                    if ($url) {
+                        $no_bl_pdf = false;
+                        $html .= '<button type="button" class="btn btn-default" onclick="window.open(\'' . $url . '\')">';
+                        $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . 'Bon de livraison';
+                        $html .= '</button>';
+                    }
+                }
+            }
+
+            if ($no_bl_pdf && $status > 0) {
                 $onclick = $this->getJsActionOnclick('viewPdfExpe', array(), array(
                     'form_name' => 'pdf'
                 ));
                 $html .= '<button type="button" class="btn btn-default" onclick="' . htmlentities($onclick) . '">';
-                $html .= '<i class="' . BimpRender::renderIconClass('fas_file-pdf') . ' iconLeft"></i>';
+                $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft');
                 if ((int) $this->getData('status') === self::BLCS_BROUILLON) {
                     $html .= 'Bon de préparation';
                 } else {
@@ -818,6 +935,58 @@ class BL_CommandeShipment extends BimpObject
         }
 
         return '';
+    }
+
+    public function displaySignature()
+    {
+        $html = '';
+
+        if ((int) $this->getData('id_signature') === -1) {
+            if ($this->isActionAllowed('createSignature') && $this->canSetAction('createSignature')) {
+                $onclick = $this->getJsActionOnclick('createSignature', array(), array(
+                    'confirm_msg' => 'Veuillez confirmer'
+                ));
+
+                $html .= '<span class="warning">Non applicable</span>';
+                $html .= '&nbsp;&nbsp;';
+                $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Créer signature';
+                $html .= '</span>';
+            }
+        }
+
+        if ((int) $this->getData('id_signature') > 0) {
+            $signature = $this->getChildObject('signature');
+
+            if (BimpObject::objectLoaded($signature)) {
+                $html .= $signature->getLink();
+            }
+        }
+
+        return $html;
+    }
+
+    public function displaySignatureActions()
+    {
+        $html = '';
+
+        if ((int) $this->getData('id_signature')) {
+            $signature = $this->getChildObject('signature');
+
+            if (BimpObject::objectLoaded($signature)) {
+                $buttons = $signature->getSignButtons();
+
+                if (!empty($buttons)) {
+                    $html .= '<div>';
+                    foreach ($buttons as $btn) {
+                        $html .= BimpRender::renderRowButton($btn['label'], $btn['icon'], $btn['onclick']);
+                    }
+                    $html .= '</div>';
+                }
+            }
+        }
+
+        return $html;
     }
 
     // Rendus: 
@@ -1118,11 +1287,18 @@ class BL_CommandeShipment extends BimpObject
                     $html .= '<thead>';
                     $html .= '<th style="width: 30px;text-align: center">N°</th>';
                     $html .= '<th>Désignation</th>';
-                    $html .= '<th>Qté</th>';
-                    $html .= '<th>Options</th>';
+
+                    $cocheDecoche = ' <a style=\'color:blue\' onclick="$(\'.shipment_lines .line_shipment_qty\').each(function(){$(this).val($(this).attr(\'data-max\'))});">(Tout au max)</a>';
+                    $cocheDecoche .= ' <a style=\'color:blue\' onclick="$(\'.shipment_lines .line_shipment_qty\').each(function(){$(this).val($(this).attr(\'data-min\'))});">(Tout au min)</a>';
+                    $cocheDecoche .= ' <a style=\'color:blue\' onclick="$(\'.shipment_lines .shipment_line_row\').each(function(){console.log($(this).find(\'.line_shipment_qty\').val($(this).find(\'.qty_ready\').html()));});">(= prête)</a>';
+                    $html .= '<th>Qté' . $cocheDecoche . '</th>';
+                    $cocheDecoche = ' <a style=\'color:blue\' onclick="$(\'.shipment_lines .check_list_item_input\').attr(\'checked\', \'checked\');">(Tout cocher)</a>';
+                    $cocheDecoche .= ' <a style=\'color:blue\' onclick="$(\'.shipment_lines .check_list_item_input\').removeAttr(\'checked\');">(Tout décocher)</a>';
+                    $html .= '<th>Options' . $cocheDecoche . '</th>';
                     if ($edit) {
                         $html .= '<th>Statut</th>';
                     }
+                    $html .= '<th>Qty Préte</th>';
                     $html .= '</thead>';
                     $html .= '<tbody>';
 
@@ -1314,6 +1490,14 @@ class BL_CommandeShipment extends BimpObject
                             }
                             $html .= '</td>';
                         }
+                        $html .= '<td class="qty_ready">';
+                        if (BimpObject::objectLoaded($product)) {
+                            if (!$product->isSerialisable())
+                                $html .= $ready_qty;
+                            elseif (is_array($equipments))
+                                $html .= count($equipments);
+                        }
+                        $html .= '</td>';
 
                         $html .= '</tr>';
                     }
@@ -1415,7 +1599,6 @@ class BL_CommandeShipment extends BimpObject
 
         $has_lines = false;
         $body_html = '';
-
 
         foreach ($lines as $line) {
             if (!isset($qties[(int) $line->id]) || !(float) $qties[(int) $line->id]) {
@@ -1869,9 +2052,34 @@ class BL_CommandeShipment extends BimpObject
         return '<input type="hidden" value="0" name="id_facture"/>Nouvelle facture';
     }
 
+    public function renderOverwritePdfFileInput()
+    {
+        $html = '';
+
+        if ((int) $this->getData('status') === self::BLCS_EXPEDIEE) {
+            $signature = $this->getChildObject('signature');
+
+            if (BimpObject::objectLoaded($signature)) {
+                if ((int) $signature->getData('signed')) {
+                    $html .= '<span class="danger">NON (BL signé)</span>';
+                    $html .= '<input type="hidden" value="0" name="overwrite_pdf_file"/>';
+                } else {
+                    $html .= BimpInput::renderInput('toggle', 'overwrite_pdf_file', 1);
+                }
+
+                return $html;
+            }
+        }
+
+        $html .= '<span class="warning">Non applicable</span>';
+        $html .= '<input type="hidden" value="1" name="overwrite_pdf_file"/>';
+
+        return $html;
+    }
+
     // Traitements: 
 
-    public function validateShipment(&$warnings = array(), $date_shipped = null)
+    public function validateShipment(&$warnings = array(), $date_shipped = null, $pdf_chiffre = 1, $pdf_detail = 1, $create_signature = 1)
     {
         $errors = array();
 
@@ -1949,6 +2157,12 @@ class BL_CommandeShipment extends BimpObject
             return $errors;
         }
 
+        if ($create_signature) {
+            $this->set('signed', 0);
+        } else {
+            $this->set('signed', 2);
+        }
+
         $update_errors = $this->update($warnings);
         if (count($update_errors)) {
             $errors[] = BimpTools::getMsgFromArray($update_errors, 'Echec de la mise à jour de l\'expédition');
@@ -1959,6 +2173,60 @@ class BL_CommandeShipment extends BimpObject
         if (!count($errors)) {
             $ref = $this->getData('ref');
             $commande->addLog('Expédition n°' . $this->getData('num_livraison') . ($ref ? ' (' . $ref . ')' : '') . ' validée');
+
+            if ($create_signature) {
+                $pdf_errors = $this->generateDocument($pdf_chiffre, $pdf_detail);
+                if (count($pdf_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($pdf_errors, 'Echec création du fichier PDF');
+                }
+
+                if (!(int) $this->getData('signed')) {
+                    $signature_errors = $this->createSignature();
+                    if (count($signature_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($pdf_errors, 'Echec création de la signature');
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function generateDocument($pdf_chiffre = 1, $pdf_detail = 1)
+    {
+        $errors = array();
+
+        $commande = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($commande)) {
+            $file_name = $this->getPdfFileName($errors);
+            $dir = $this->getFilesDir();
+
+            if ($file_name) {
+                require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/OrderPDF.php';
+                $pdf = new BLPDF($this->db->db, $this);
+                $pdf->chiffre = $pdf_chiffre;
+                $pdf->detail = $pdf_detail;
+                $pdf->init($commande->dol_object);
+                
+                if (!$pdf->render($dir . $file_name, false)) {
+                    $errors[] = BimpTools::getMsgFromArray($pdf->errors, 'Echec génération du document');
+                } else {
+                    if (isset($pdf->signature_params) && is_array($pdf->signature_params) && !empty($pdf->signature_params)) {
+                        $signature_params = $pdf->signature_params;
+
+                        foreach (self::$default_signature_params as $key => $value) {
+                            if (isset($signature_params[$key]) && $signature_params[$key] == $value) {
+                                unset($signature_params[$key]);
+                            }
+                        }
+
+                        $this->updateField('signature_params', $signature_params);
+                    }
+                }
+            }
+        } else {
+            $errors[] = 'Commande associée absente ou invalide';
         }
 
         return $errors;
@@ -2002,6 +2270,7 @@ class BL_CommandeShipment extends BimpObject
 
         $this->set('status', self::BLCS_ANNULEE);
         $this->set('date_shipped', '');
+        $this->set('signed', 0);
 
         $update_errors = $this->update($warnings, true);
         if (count($update_errors)) {
@@ -2011,6 +2280,17 @@ class BL_CommandeShipment extends BimpObject
         $this->onLinesChange();
 
         if (!count($errors)) {
+
+            $signature = $this->getChildObject('signature');
+
+            if (BimpObject::objectLoaded($signature)) {
+                $signature->cancelSignature();
+
+                if ((int) $signature->getData('signed')) {
+                    $this->updateField('id_signature', 0);
+                }
+            }
+
             $ref = $this->getData('ref');
             $commande->addLog('Expédition n°' . $this->getData('num_livraison') . ($ref ? ' (' . $ref . ')' : '') . ' annulée');
         }
@@ -2043,6 +2323,80 @@ class BL_CommandeShipment extends BimpObject
             }
         } else {
             $errors[] = 'ID de l\'expédition absent';
+        }
+
+        return $errors;
+    }
+
+    public function createSignature(&$warnings = array(), $pdf_chiffre = 1, $pdf_detail = 1)
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            $comm = $this->getParentInstance();
+
+            if (!BimpObject::objectLoaded($comm)) {
+                $errors[] = 'Commande liée absente';
+            } else {
+                $id_client = (int) $comm->getData('fk_soc');
+            }
+
+            $id_contact = (int) $this->getcontact();
+
+            if ($id_contact) {
+                $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
+
+                if (BimpObject::objectLoaded($contact)) {
+                    $id_client = (int) $contact->getData('fk_soc');
+                } else {
+                    $id_contact = 0;
+                }
+            }
+
+            // On conserve la même signature si elle elle exite, n'a pas été signée et si ses données sont toujours exactes: 
+            // (possible si expé annulée précédemment)
+            if ((int) $this->getData('id_signature')) {
+                $signature = $this->getChildObject('signature');
+                if (BimpObject::objectLoaded($signature)) {
+                    if (!$signature->getData('signed') && (int) $signature->getData('id_client') == $id_client &&
+                            (int) $signature->getData('id_contact') == $id_contact &&
+                            $signature->getData('doc_type') == 'bl') {
+                        $errors = $signature->updateField('type', 0);
+
+                        if (!count($errors)) {
+                            return array();
+                        }
+                    } elseif ($signature->getData('type') >= 0) {
+                        $signature->cancelSignature();
+                        $this->updateField('id_signature', 0);
+                    }
+                }
+            }
+
+            if (!count($errors)) {
+                $signature = BimpObject::createBimpObject('bimpcore', 'BimpSignature', array(
+                            'obj_module' => 'bimplogistique',
+                            'obj_name'   => 'BL_CommandeShipment',
+                            'id_obj'     => $this->id,
+                            'doc_type'   => 'bl',
+                            'id_client'  => $id_client,
+                            'id_contact' => $id_contact
+                                ), true, $errors);
+
+                if (!count($errors) && BimpObject::objectLoaded($signature)) {
+                    $errors = $this->updateField('id_signature', (int) $signature->id);
+                    $this->updateField('signed', 0);
+
+                    $file_path = $this->getSignatureDocFileDir('bl') . $this->getSignatureDocFileName('bl');
+
+                    if (!file_exists($file_path)) {
+                        $pdf_errors = $this->generateDocument($pdf_chiffre, $pdf_detail);
+                        if (count($pdf_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($pdf_errors, 'Echec création du fichier PDF');
+                        }
+                    }
+                }
+            }
         }
 
         return $errors;
@@ -2153,7 +2507,11 @@ class BL_CommandeShipment extends BimpObject
         $success = 'Expédition validée avec succès';
 
         $date_shipped = (isset($data['date_shipped']) ? $data['date_shipped'] : '');
-        $errors = $this->validateShipment($warnings, $date_shipped);
+        $pdf_chiffre = (int) BimpTools::getArrayValueFromPath($data, 'pdf_chiffre', 1);
+        $pdf_detail = (int) BimpTools::getArrayValueFromPath($data, 'pdf_detail', 1);
+        $create_signature = (int) BimpTools::getArrayValueFromPath($data, 'create_signature', 1);
+
+        $errors = $this->validateShipment($warnings, $date_shipped, $pdf_chiffre, $pdf_detail, $create_signature);
 
         return array(
             'errors'   => $errors,
@@ -2523,12 +2881,79 @@ class BL_CommandeShipment extends BimpObject
 
     public function actionViewPdfExpe($data, &$success)
     {
-        $url = DOL_URL_ROOT . '/bimplogistique/bl.php?id_shipment=' . $this->id . '&chiffre=' . $data['chiffre'] . '&detail=' . $data['detail'];
+        $errors = array();
+        $url = '';
+
+        $chiffre = (int) BimpTools::getArrayValueFromPath($data, 'chiffre', 1);
+        $detail = (int) BimpTools::getArrayValueFromPath($data, 'detail', 1);
+        $overwrite = (int) BimpTools::getArrayValueFromPath($data, 'overwrite_pdf_file', 1);
+
+        $status = (int) $this->getData('status');
+
+        if (!$overwrite && !$this->getData('signed') && $status === self::BLCS_EXPEDIEE) {
+            $filePath = $this->getSignatureDocFileDir('bl') . $this->getSignatureDocFileName('bl');
+
+            if (!file_exists($filePath)) {
+                echo 'ici';
+                $overwrite = 1;
+            }
+        }
+
+        if ($overwrite && $status === self::BLCS_EXPEDIEE) {
+            $signature = $this->getChildObject('signature');
+
+            if (BimpObject::objectLoaded($signature)) {
+                if (!(int) $signature->getData('signed')) {
+                    $errors = $this->generateDocument($chiffre, $detail);
+
+                    if (!count($errors)) {
+                        $url = $this->getSignatureDocFileUrl('bl');
+                    }
+                } else {
+                    $filePath = $this->getSignatureDocFileDir('bl') . $this->getSignatureDocFileName('bl');
+
+                    if ($filePath && file_exists($filePath)) {
+                        $url = $this->getSignatureDocFileUrl('bl');
+                    }
+                }
+            }
+        }
+
+        if (!$url) {
+            $url = DOL_URL_ROOT . '/bimplogistique/bl.php?id_shipment=' . $this->id . '&chiffre=' . $chiffre . '&detail=' . $detail . '&display_only=' . ($overwrite ? 0 : 1);
+        }
 
         return array(
-            'errors'           => array(),
+            'errors'           => $errors,
             'warnings'         => array(),
             'success_callback' => 'window.open(\'' . $url . '\')'
+        );
+    }
+
+    public function actionCreateSignature($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Signature créée avec succès';
+        $url = '';
+
+        $pdf_chiffre = BimpTools::getArrayValueFromPath($data, 'pdf_chiffre', 1);
+        $pdf_detail = BimpTools::getArrayValueFromPath($data, 'pdf_detail', 1);
+
+        $errors = $this->createSignature($warnings, $pdf_chiffre, $pdf_detail);
+
+        if (!count($errors)) {
+            $signature = $this->getChildObject('signature');
+
+            if (BimpObject::objectLoaded($signature)) {
+                $url = $signature->getUrl();
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => ($url ? 'window.open(\'' . $url . '\');' : '')
         );
     }
 
@@ -2703,7 +3128,7 @@ class BL_CommandeShipment extends BimpObject
             $list = $asso->getAssociatesList();
 
             if ($this->getData('id_facture') > 0 && !in_array($this->getData('id_facture'), $list)) {
-                return array('La facture '.$this->getData('id_facture').' ne fait pas partie des factures de la commande ' . $comm->getRef());
+                return array('La facture ' . $this->getData('id_facture') . ' ne fait pas partie des factures de la commande ' . $comm->getRef());
             }
         }
 
@@ -2737,6 +3162,32 @@ class BL_CommandeShipment extends BimpObject
                     }
                 }
             }
+
+            // Maj de la signature si nécessaire: 
+            if ((int) $this->getData('status') !== self::BLCS_ANNULEE && (int) $this->getData('id_signature')) {
+                $signature = $this->getChildObject('signature');
+
+                if (BimpObject::objectLoaded($signature)) {
+                    if (!(int) $signature->getData('signed')) {
+                        $id_contact = $this->getcontact();
+
+                        if ($id_contact != (int) $signature->getData('id_contact')) {
+                            $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
+                            if (BimpObject::objectLoaded($contact)) {
+                                $id_client = (int) $contact->getData('fk_soc');
+
+                                if ((int) $signature->getData('id_contact') != $id_contact ||
+                                        (int) $signature->getData('id_client') != $id_client) {
+                                    $signature->set('id_contact', $id_contact);
+                                    $signature->set('id_client', $id_client);
+                                    $sw = array();
+                                    $signature->update($sw, true);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         return $errors;
@@ -2753,6 +3204,131 @@ class BL_CommandeShipment extends BimpObject
         if (!count($errors) && BimpObject::objectLoaded($commande)) {
             $ref = $this->getData('ref');
             $commande->addLog('Expédition n°' . $this->getData('num_livraison') . ($ref ? ' (' . $ref . ')' : '') . ' supprimée');
+        }
+
+        return $errors;
+    }
+
+    // Gestion Signature: 
+
+    public function getSignatureDocFileDir($doc_type)
+    {
+        return $this->getFilesDir();
+    }
+
+    public function getSignatureDocFileName($doc_type, $signed = false)
+    {
+        switch ($doc_type) {
+            case 'bl':
+                $errors = array();
+                return $this->getPdfFileName($errors, $signed);
+        }
+
+        return '';
+    }
+
+    public function getSignatureDocFileUrl($doc_type, $forced_context = '', $signed = false)
+    {
+        if (!$this->isLoaded()) {
+            return '';
+        }
+        $context = BimpCore::getContext();
+
+        if ($forced_context) {
+            $context = $forced_context;
+        }
+
+        $fileName = $this->getSignatureDocFileName($doc_type, $signed);
+
+        if ($fileName) {
+            switch ($doc_type) {
+                case 'bl':
+                    if ($context === 'public') {
+                        return DOL_URL_ROOT . '/bimpinterfaceclient/client.php?fc=doc&doc=bl' . ($signed ? '_signed' : '') . '&docid=' . $this->id . '&docref=' . $this->getData('num_livraison');
+                    } else {
+                        return $this->getFileUrl($fileName);
+                    }
+                    break;
+            }
+        }
+
+        return '';
+    }
+
+    public function getSignatureDocRef($doc_type)
+    {
+        switch ($doc_type) {
+            case 'bl':
+                $comm = $this->getParentInstance();
+
+                if (BimpObject::objectLoaded($comm)) {
+                    return 'LIV-' . $comm->getRef() . '-' . $this->getData('num_livraison');
+                }
+                break;
+        }
+
+        return $this->getRef();
+    }
+
+    public function getSignatureParams($doc_type)
+    {
+        return BimpTools::overrideArray(self::$default_signature_params, (array) $this->getData('signature_params'));
+    }
+
+    public function onSigned($bimpSignature, $data)
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            $this->set('signed', 1);
+
+            $warnings = array();
+            $errors = $this->update($warnings, true);
+        }
+
+        return $errors;
+    }
+
+    public function onSignatureCancelled($bimpSignature)
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            $this->set('signed', 2);
+
+            $warnings = array();
+            $errors = $this->update($warnings, true);
+        }
+
+        return $errors;
+    }
+
+    public function isSignatureReopenable($doc_type, &$errors = array())
+    {
+        if ($this->isLoaded($errors)) {
+            switch ($doc_type) {
+                case 'bl':
+                    if ((int) $this->getData('status') !== self::BLCS_EXPEDIEE) {
+                        $errors[] = 'Cette expédition est au statut "' . self::$status_list[(int) $this->getData('status')]['label'] . '"';
+                        return 0;
+                    }
+
+                    return 1;
+            }
+        }
+
+        return 0;
+    }
+
+    public function onSignatureReopened($bimpSignature)
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            $this->set('signed', 0);
+
+            $warnings = array();
+            $errors = $this->update($warnings, true);
         }
 
         return $errors;

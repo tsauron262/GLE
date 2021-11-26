@@ -43,10 +43,26 @@ class Bimp_ImportPaiement extends BimpObject
     function create_paiement_from_list($list){
         global $user;
         $errors = array();
+        if (!class_exists('Paiement')) {
+            require_once DOL_DOCUMENT_ROOT . '/compta/paiement/class/paiement.class.php';
+        }
         foreach ($list as $child) {
             $errorsLn = array();
             $totP = $child->getData('price');
+            
             if ($child->ok == true) {
+                $p = new Paiement($this->db->db);
+
+                if ((string) $child->getData('date')) {
+                    $p->datepaye = strtotime($child->getData('date'));
+                } else {
+                    $p->datepaye = dol_now();
+                }
+
+                $p->ref = $child->getData('num');
+
+                $p->amounts = array();
+                
                 foreach ($child->getData('factures') as $idFact) {
                     $fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $idFact);
                     if ($fact->getData('remain_to_pay') < $totP)
@@ -55,42 +71,33 @@ class Bimp_ImportPaiement extends BimpObject
                         $montant = $totP;
                     $totP -= $montant;
                     if ($montant > 0) {
-                        if (!class_exists('Paiement')) {
-                            require_once DOL_DOCUMENT_ROOT . '/compta/paiement/class/paiement.class.php';
-                        }
-                        $p = new Paiement($this->db->db);
-
-                        if ((string) $child->getData('date')) {
-                            $p->datepaye = strtotime($child->getData('date'));
-                        } else {
-                            $p->datepaye = dol_now();
-                        }
-
-                        $p->ref = $child->getData('num');
-                        
-                        $p->amounts = array(
-                            $idFact => $montant
-                        );
-                        $p->paiementid = (int) dol_getIdFromCode($this->db->db, $this->id_mode_paiement, 'c_paiement');
-                        $p->facid = (int) $idFact;
-
-                        if ($p->create($user) < 0) {
-                            $msg = 'Echec de l\'ajout à la facture du paiement n°' . $n;
-                            $msg .= ' (' . BC_VentePaiement::$codes[$code]['label'] . ': ' . BimpTools::displayMoneyValue($montant, 'EUR') . ')';
-                            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($p), $msg);
-                        } else {
-                            global $conf;
-                            if (!empty($conf->banque->enabled)) {
-                                if ($p->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $this->getData('banque'), '', '') < 0) {
-                                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($p), 'Echec de l\'ajout du paiement n°' . $p->id . ' au compte bancaire ' . $this->getData('banque'));
-                                }
-                            }
-                        }
+                        $p->amounts[$idFact] = $montant;
                     } else {
                         $errorsLn[] = 'Impossible de créer le paiment : ' . $montant;
                     }
-                    $fact->checkIsPaid();
                 }
+                $p->paiementid = (int) dol_getIdFromCode($this->db->db, $this->id_mode_paiement, 'c_paiement');
+//                        $p->facid = (int) $idFact;
+
+                if ($p->create($user) < 0) {
+                    $msg = 'Echec de l\'ajout à la facture du paiement de ' . $montant;
+                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($p), $msg);
+                } else {
+                    global $conf;
+                    if (!empty($conf->banque->enabled)) {
+                        if ($p->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $this->getData('banque'), '', '') < 0) {
+                            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($p), 'Echec de l\'ajout du paiement n°' . $p->id . ' au compte bancaire ' . $this->getData('banque'));
+                        }
+                        foreach ($child->getData('factures') as $idFact) {
+                            $fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $idFact);
+                            $fact->checkIsPaid();
+                        }
+                        
+                    }
+                }
+                
+                
+                
                 if (!count($errorsLn))
                     $child->updateField('traite', 1);
                 $errors = BimpTools::merge_array($errors, $errorsLn);
@@ -123,7 +130,7 @@ class Bimp_ImportPaiement extends BimpObject
         return 'origine' . $this->id . '.csv';
     }
 
-    function traiteData($datas, $errors)
+    function traiteData($datas, &$errors)
     {
         $separateurecriture = '04178';
 

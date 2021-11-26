@@ -1135,6 +1135,12 @@ abstract class CommonObject
 	 */
 	function getIdContact($source,$code,$status=0)
 	{
+            if(class_exists('BimpCache')){
+                $clef = 'getIdContact'.$this->id.$source.$code.$status;
+                if(isset(BimpCache::$cache[$clef]))
+                    return BimpCache::$cache[$clef];
+            }
+            
 		global $conf;
 
 		$result=array();
@@ -1179,6 +1185,9 @@ abstract class CommonObject
 			$this->error=$this->db->error();
 			return null;
 		}
+                
+                if(class_exists('BimpCache'))
+                    BimpCache::$cache[$clef] = $result;
 
 		return $result;
 	}
@@ -4660,6 +4669,8 @@ if($obj->up == null)
 			{
 				$this->errors=$interface->errors;
 			}
+                        if(class_exists('BimpCore'))
+                            BimpCore::addLogs_extra_data ('Probléme call_trigger '.get_class ());
 		}
 		return $result;
 	}

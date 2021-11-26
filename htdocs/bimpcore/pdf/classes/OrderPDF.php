@@ -20,11 +20,16 @@ class OrderPDF extends BimpDocumentPDF
     public $user_commercial = null;
     public $user_suivi = null;
     public $entrepot = null;
+    public $signature_bloc = false;
 
     public function __construct($db, $doc_type = 'commande')
     {
         if (!array_key_exists($doc_type, self::$doc_types)) {
             $doc_type = 'commande';
+        }
+        
+        if ($doc_type === 'bl') {
+            $this->signature_bloc = true;
         }
 
         $this->doc_type = $doc_type;
@@ -531,6 +536,9 @@ class BLPDF extends OrderPDF
     public $total_ht = 0;
     public $total_ttc = 0;
     public $num_bl = '';
+    public $chiffre = 1;
+    public $detail = 1;
+    public $signature_bloc = false;
 
     public function __construct($db, $shipment = null)
     {
@@ -593,7 +601,7 @@ class BLPDF extends OrderPDF
         $table->cols_def['qte']['style'] = 'text-align: center;';
         $table->cols_def['qte']['head_style'] = 'text-align: center;';
 
-        if (!isset($_GET['chiffre']) || $_GET['chiffre'] == 1)
+        if ($this->chiffre)
             $table->setCols(array('code_article', 'desc', 'pu_ht', 'tva', 'total_ht', 'qte', 'dl', 'ral'));
         else {
             $table->setCols(array('code_article', 'desc', 'qte', 'dl', 'ral'));
@@ -663,7 +671,7 @@ class BLPDF extends OrderPDF
                 } else {
                     $row['desc'] = array(
                         'colspan' => 99,
-                        'content' => $desc,
+                        'content' => $this->cleanHtml($desc),
                         'style'   => 'font-weight: bold; background-color: #F5F5F5;'
                     );
                 }
@@ -687,7 +695,7 @@ class BLPDF extends OrderPDF
                 }
                 $row = array(
 //                    'code_article' => (!is_null($product) ? $product->ref : ''),
-                    'desc'  => $desc,
+                    'desc'  => $this->cleanHtml($desc),
                     'pu_ht' => pdf_getlineupexcltax($this->object, $i, $this->langs),
                 );
 
@@ -781,8 +789,9 @@ class BLPDF extends OrderPDF
                 }
             }
 
-            if (!isset($_GET['detail']) || $_GET['detail'] == 1 || $row['qte'] != 0)
+            if ($this->detail || $row['qte'] != 0) {
                 $table->rows[] = $row;
+            }
 
             unset($product);
             $product = null;
@@ -1011,7 +1020,7 @@ class BLPDF extends OrderPDF
         return $html;
     }
 
-    public function getAfterTotauxHtml($blocSignature = false)
+    public function getAfterTotauxHtml()
     {
         if ($this->doc_type === 'bl_draft') {
             return '';

@@ -31,6 +31,7 @@ Abstract class BimpModelPDF
     public $typeObject = '';
     public $primary = '000000';
     public $watermark = '';
+    public static $html_purifier = null;
 
     public function __construct($db, $orientation = 'P', $format = 'A4')
     {
@@ -107,8 +108,6 @@ Abstract class BimpModelPDF
 
         if (count($this->errors)) {
             return 0;
-//            $this->displayErrors();
-//            exit;
         }
 
         $this->pdf->createHeader($this->header);
@@ -126,7 +125,7 @@ Abstract class BimpModelPDF
 
         $this->renderContent();
 
-        return $this->pdf->render($file_name, $display, $display_only, $this->watermark);
+        return $this->pdf->render($file_name, $display, $display_only, $this->watermark, $this->errors);
     }
 
     protected function renderContent()
@@ -176,11 +175,15 @@ Abstract class BimpModelPDF
         }
     }
 
-    public function writeFullBlock($html)
+    public function writeFullBlock($html, &$page = 0, &$yPos = 0)
     {
         $pdf = clone $this->pdf;
 
         $page_num = $this->pdf->getPage();
+
+        $page = $page_num;
+        $yPos = $this->pdf->getY();
+
         $this->writeContent($html);
         $cur_page = (int) $this->pdf->getPage();
 
@@ -188,6 +191,10 @@ Abstract class BimpModelPDF
             unset($this->pdf);
             $this->pdf = $pdf;
             $this->pdf->newPage();
+
+            $page++;
+            $yPos = $this->pdf->getY();
+
             $this->writeContent($html);
         } else {
             unset($pdf);
@@ -481,6 +488,56 @@ Abstract class BimpModelPDF
             $html = str_replace('font-size:' . $i . 'px', 'font-size:' . ($i - 3) . 'px', $html);
         }
 
+        return $html;
+    }
+
+    public static function getHtmlPurifier()
+    {
+        if (is_null(self::$html_purifier)) {
+            BimpCore::LoadHtmlPurifier();
+
+            $config = HTMLPurifier_Config::createDefault();
+            $allowed_tags = 'a,b,blockquote,br,dd,del,div,dl,dt,em,font,h1,h2,h3,h4,h5,h6,hr,i,img,li,ol,p,pre,small,span,strong,sub,sup,table,td,th,thead,tr,tt,u,ul';
+            $config->set('HTML.AllowedElements', $allowed_tags);
+            
+            $root = '';
+
+            if (defined('PATH_TMP') && PATH_TMP) {
+                $root = PATH_TMP;
+                $path = '/htmlpurifier/serialiser';
+            } else {
+                $root = DOL_DATA_ROOT;
+                $path = '/bimpcore/htmlpurifier/serialiser';
+            }
+
+            if (!is_dir($root . $path)) {
+                BimpTools::makeDirectories($path, $root);
+            }
+
+            $config->set('Cache.SerializerPath', $root . $path);
+
+            self::$html_purifier = new HTMLPurifier($config);
+        }
+
+        return self::$html_purifier;
+    }
+
+    public static function cleanHtml($html)
+    {
+        if ((int) BimpCore::getConf('bimpcore_pdf_use_html_purifier', 0)) {
+//            echo 'AVANT: <br/>'; 
+//            echo htmlentities($html);
+            
+            $purifier = self::getHtmlPurifier();            
+            $html = $purifier->purify($html);
+            
+//            echo '<br/><br/>APRES: <br/>';
+//            echo htmlentities($html);
+//            exit;
+        } else {
+            // Envisager d'autres méthodes... 
+        }
+        
         return $html;
     }
 }

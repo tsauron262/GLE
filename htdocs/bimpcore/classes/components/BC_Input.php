@@ -56,8 +56,8 @@ class BC_Input extends BimpComponent
             'values'           => array('data_type' => 'array', 'default' => array()),
             'hashtags'         => array('data_type' => 'bool', 'default' => 0)
         ),
-        'html' => array(
-            'hashtags'         => array('data_type' => 'bool', 'default' => 0)
+        'html'                        => array(
+            'hashtags' => array('data_type' => 'bool', 'default' => 0)
         ),
         'select'                      => array(
             'options'      => array('data_type' => 'array', 'compile' => true, 'default' => array()),
@@ -146,6 +146,9 @@ class BC_Input extends BimpComponent
             'obj_input_name' => array('default' => ''),
             'obj_module'     => array('default' => ''),
             'obj_name'       => array('default' => '')
+        ),
+        'signature_pad'               => array(
+            'expand' => array('data_type' => 'bool', 'default' => 0)
         )
     );
 
@@ -176,10 +179,12 @@ class BC_Input extends BimpComponent
         parent::__construct($object, '', $path);
 
         if ($this->data_type === 'items_list') {
-            $this->params['multiple'] = 1;
-            $this->params['sortable'] = (isset($field_params['items_sortable']) ? (int) $field_params['items_sortable'] : 0);
-            $this->params['add_all_btn'] = (isset($field_params['items_add_all_btn']) ? (int) $field_params['items_add_all_btn'] : 0);
-            $this->params['items_data_type'] = (isset($field_params['items_data_type']) ? (int) $field_params['items_data_type'] : 'string');
+//            if (is_null($this->params['type']) || $this->params['type'] === 'items_list') {
+                $this->params['multiple'] = 1;
+                $this->params['sortable'] = (isset($field_params['items_sortable']) ? (int) $field_params['items_sortable'] : 0);
+                $this->params['add_all_btn'] = (isset($field_params['items_add_all_btn']) ? (int) $field_params['items_add_all_btn'] : 0);
+                $this->params['items_data_type'] = (isset($field_params['items_data_type']) ? $field_params['items_data_type'] : 'string');
+//            }
         }
 
         if (is_null($this->params['type'])) {
@@ -193,6 +198,7 @@ class BC_Input extends BimpComponent
                 }
                 switch ($data_type) {
                     case 'int':
+                    case 'id':
                     case 'float':
                     case 'string':
                     case 'percent':
@@ -280,7 +286,7 @@ class BC_Input extends BimpComponent
                 }
                 break;
         }
-        
+
         $current_bc = $prev_bc;
     }
 
@@ -309,11 +315,11 @@ class BC_Input extends BimpComponent
         $options = array();
 
         switch ($this->params['type']) {
-            case 'text':                
+            case 'text':
                 $options['values'] = isset($this->params['values']) ? $this->params['values'] : array();
                 $options['allow_custom'] = (int) (isset($this->params['allow_custom']) ? $this->params['allow_custom'] : 1);
                 $options['hashtags'] = ((isset($this->params['hashtags']) && (int) $this->params['hashtags']) ? (int) $this->params['hashtags'] : (isset($this->field_params['hashtags']) ? (int) $this->field_params['hashtags'] : 0));
-                
+
             case 'qty':
                 $options['data'] = array();
                 $options['step'] = isset($this->params['step']) ? $this->params['step'] : 1;
@@ -329,6 +335,7 @@ class BC_Input extends BimpComponent
                     case 'float':
                     case 'qty':
                     case 'int':
+                    case 'id':
                         switch ($this->data_type) {
                             case 'percent':
                                 $min = '0';
@@ -378,7 +385,7 @@ class BC_Input extends BimpComponent
                 $options['with_secondes'] = isset($this->params['with_secondes']) ? $this->params['with_secondes'] : 1;
                 break;
 
-            case 'html':                 
+            case 'html':
             case 'textarea':
                 $options['rows'] = isset($this->params['rows']) ? $this->params['rows'] : 3;
                 $options['auto_expand'] = isset($this->params['auto_expand']) ? $this->params['auto_expand'] : 0;
@@ -386,7 +393,7 @@ class BC_Input extends BimpComponent
                 $options['tab_key_as_enter'] = isset($this->params['tab_key_as_enter']) ? $this->params['tab_key_as_enter'] : 0;
                 $options['maxlength'] = isset($this->params['maxlength']) ? $this->params['maxlength'] : '';
                 $options['values'] = isset($this->params['values']) ? $this->params['values'] : array();
-                $options['hashtags'] = (int) (isset($this->params['hashtags']) && (int) $this->params['hashtags'] ? $this->params['hashtags'] : isset($this->field_params['hashtags']) ? $this->field_params['hashtags'] : 0);
+                $options['hashtags'] = (int) (isset($this->params['hashtags']) && (int) $this->params['hashtags'] ? $this->params['hashtags'] : (isset($this->field_params['hashtags']) ? $this->field_params['hashtags'] : 0));
                 break;
 
             case 'select':
@@ -522,6 +529,10 @@ class BC_Input extends BimpComponent
                 $options['obj_module'] = isset($this->params['obj_module']) ? $this->params['obj_module'] : '';
                 $options['obj_name'] = isset($this->params['obj_input_name']) ? $this->params['obj_name'] : '';
                 break;
+
+            case 'signature_pad':
+                $options['expand'] = isset($this->params['expand']) ? (int) $this->params['expand'] : 0;
+                break;
         }
 
         return $options;
@@ -571,10 +582,6 @@ class BC_Input extends BimpComponent
         $input_id = $this->input_id;
         $content = '';
 
-//        if (isset($this->field_params['editable']) && !$this->field_params['editable']) {
-//            $content = '<input type="hidden" name="' . $input_name . '" value="' . $this->new_value . '"/>';
-//            $content .= $this->new_value;
-//        } else {
         $options = $this->getOptions();
         $option = '';
 
@@ -674,7 +681,9 @@ class BC_Input extends BimpComponent
 
             if (is_array($this->value) && !empty($this->value)) {
                 foreach ($this->value as $value) {
-                    if (isset($this->field_params['values'][$value])) {
+                    if (isset($this->field_params['multiple_values_matches'][$value])) {
+                        $values[$value] = $this->field_params['multiple_values_matches'][$value];
+                    } elseif (isset($this->field_params['values'][$value])) {
                         if (is_array($this->field_params['values'][$value])) {
                             if (isset($this->field_params['values'][$value]['label'])) {
                                 $values[$value] = $this->field_params['values'][$value]['label'];
@@ -690,7 +699,6 @@ class BC_Input extends BimpComponent
             }
             $content = BimpInput::renderMultipleValuesInput($this->object, $this->name_prefix . $this->input_name, $content, $values, $label_input_suffixe, $autosave, $required, $sortable, 'none', '', array(), $add_all_btn);
         }
-//        }
 
         $extra_data = $this->extraData;
         $extra_data['data_type'] = $this->data_type;

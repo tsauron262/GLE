@@ -555,38 +555,60 @@ abstract class BDSProcess
 
     protected function ftpConnect($host, $login, $pword, $port = 21, $passive = true, &$errors = null)
     {
-        if($port == 22)
-            $ftp = ftp_ssl_connect($host, $port);
-        else
+        $ssl = ($port == 22);
+        if($ssl){
+            $connection = ssh2_connect($host, $port);
+            if (!ssh2_auth_password($connection, $login, $pword)) {
+                $msg = 'Echec de la connexion FTP - Identifiant ou mot de passe incorrect.';
+                $msg .= 'Veuillez vérifier les paramètres de connexion';
+                $this->Error($msg);
+                if (!is_null($errors)) {
+                    $errors[] = $msg;
+                }
+                return false;
+            }
+
+            if(!$ftp = ssh2_sftp($connection)){
+                $msg = 'Echec de la connexion SFTP  avec le serveur "' . $host . '"';
+                $this->Error($msg);
+                if (!is_null($errors)) {
+                    $errors[] = $msg;
+                }
+                return false;
+            }
+                    
+        }
+        else{
             $ftp = ftp_connect($host, $port);
 
-        if ($ftp === false) {
-            $msg = 'Echec de la connexion FTP avec le serveur "' . $host . '"';
-            $this->Error($msg);
-            if (!is_null($errors)) {
-                $errors[] = $msg;
+            if ($ftp === false) {
+                $msg = 'Echec de la connexion '.($ssl? 'S':'').'FTP avec le serveur "' . $host . '"';
+                $this->Error($msg);
+                if (!is_null($errors)) {
+                    $errors[] = $msg;
+                }
+                return false;
             }
-            return false;
-        }
 
-        if (!ftp_login($ftp, $login, $pword)) {
-            $msg = 'Echec de la connexion FTP - Identifiant ou mot de passe incorrect.';
-            $msg .= 'Veuillez vérifier les paramètres de connexion';
-            $this->Error($msg);
-            if (!is_null($errors)) {
-                $errors[] = $msg;
+            if (!ftp_login($ftp, $login, $pword)) {
+                $msg = 'Echec de la connexion FTP - Identifiant ou mot de passe incorrect.';
+                $msg .= 'Veuillez vérifier les paramètres de connexion';
+                $this->Error($msg);
+                if (!is_null($errors)) {
+                    $errors[] = $msg;
+                }
+                return false;
             }
-            return false;
-        }
 
-        if (defined('FTP_SORTANT_MODE_PASSIF')) {
-            $passive =  FTP_SORTANT_MODE_PASSIF;
-        }
+            if (defined('FTP_SORTANT_MODE_PASSIF')) {
+                $passive =  FTP_SORTANT_MODE_PASSIF;
+            }
 
-        if ($passive) {
-            ftp_pasv($ftp, true);
-        } else {
-            ftp_pasv($ftp, false);
+            if ($passive) {
+                ftp_pasv($ftp, true);
+            } else {
+                ftp_pasv($ftp, false);
+            }
         }
         return $ftp;
     }

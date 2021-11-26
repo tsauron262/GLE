@@ -116,7 +116,9 @@ class BimpMailCore
 
     public function send(&$errors = array(), &$warnings = array())
     {
-        global $dolibarr_main_url_root;
+        if (BimpCore::isModeDev()) {
+            sleep(1);
+        }
 
         if (!$this->to) {
             $errors[] = 'Destinataire absent';
@@ -150,8 +152,10 @@ class BimpMailCore
         $html .= $this->msg;
         $html .= $this->getFooter();
 
+//        global $dolibarr_main_url_root;
 //        $html = str_replace(DOL_URL_ROOT . "/", $dolibarr_main_url_root . "/", $html);
 //        $html = str_replace(array($dolibarr_main_url_root, $_SERVER['SERVER_NAME'] . DOL_URL_ROOT), DOL_URL_ROOT, $html);
+        
         $html = str_replace("\n", "<br/>", $html);
 
 //        echo '<br/><br/>HTML:  <br/><br/>';
@@ -168,7 +172,7 @@ class BimpMailCore
         $result = $cmail->sendfile();
 
         if (!$result) {
-            $ip = BimpCache::getIpFromDns($mailfile->smtps->_smtpsHost);
+            $ip = BimpCache::getIpFromDns($cmail->smtps->_smtpsHost);
             BimpCore::addlog('Echec envoi email '.$cmail->error, Bimp_Log::BIMP_LOG_ALERTE, 'email', NULL, array(
                 'IP'           => $ip,
                 'Destinataire' => $to,

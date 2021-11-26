@@ -137,7 +137,7 @@ class BimpDolObject extends BimpObject
         if ($this->isLoaded()) {
             $contacts = $this->dol_object->liste_contact(-1, 'external');
             foreach ($contacts as $item) {
-                if (!isset($emails[(int) $item['id']])) {
+                if (!isset($emails[(int) $item['id']]) && $item['statuscontact'] == 1) {
                     $emails[(int) $item['id']] = $item['libelle'] . ': ' . $item['firstname'] . ' ' . $item['lastname'] . ' (' . $item['email'] . ')';
                 }
             }

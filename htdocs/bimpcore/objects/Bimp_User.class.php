@@ -1318,13 +1318,11 @@ class Bimp_User extends BimpObject
             // Il s'agit d'un utilisateur
             if(0 < $u) {
                 
-                echo 'c est un user<br/>';
                 if(self::isUserAvaible($u, $errors, $from, $to))
                     $users_out[] = $u;
                 
             // Supérieur hiérarchique
             } elseif($u == 'parent') {
-                echo 'c est un parent<br/>';
                 $id_parent = $user->getData('fk_user');
 
                 if(self::isUserAvaible($id_parent, $errors, $from, $to))
@@ -1332,7 +1330,6 @@ class Bimp_User extends BimpObject
                 
             // Code d'un groupe d'utilisateur
             } else {
-                echo 'c est un groupe<br/>';
                 $ids_user = self::getUsersInGroup($u);
                 
                 foreach ($ids_user as $id) {
@@ -1427,16 +1424,12 @@ class Bimp_User extends BimpObject
             
             // Pendant la soirée on vérifie les dispo le lendemain matin (10h)
             else {
-                $day = (int) $datetime->format('h') + 1;
+                $day = (int) $datetime->format('h') + 1; // TODO fin de mois ?
                 $from = $datetime->format('Y-m-' . $day . ' 10:00:00');
             }
         }
 //        $from = "2019-07-30 14:00:00";
         
-//        if(is_null($to)) {
-//            $datetime = new DateTime();
-//            $to = $datetime->format('Y-m-d 18:00:00');
-//        }
         
         if(!is_null($from) and ! is_null($to)) {
             $datetime_from = new DateTime($from);
@@ -1452,14 +1445,13 @@ class Bimp_User extends BimpObject
             return 0;
                 
         $sql = 'SELECT *';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'actioncomm AS a';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'c_actioncomm AS ca ON a.fk_action = ca.id';
-        $sql .= ' WHERE a.fk_user_action = ' . $id_user;
-        $sql .= ' AND ca.code IN ("CONGES", "RTT_DEM")';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'actioncomm';
+        $sql .= ' WHERE fk_user_action = ' . $id_user;
+        $sql .= ' AND code IN ("CONGES", "RTT_DEM")';
         $sql .= ' AND (';
         
-        $sql .= ' a.datep < "' . $from . '" AND ';
-        $sql .= ' a.datep2 > "' . $from . '"';
+        $sql .= ' datep < "' . $from . '" AND ';
+        $sql .= ' datep2 > "' . $from . '"';
         
         $sql .= ')';
         
@@ -1485,42 +1477,19 @@ class Bimp_User extends BimpObject
 //            $sql .= '))';
 //        }
         
-//        $rows = self::getBdb()->executeS('SELECT rowid FROM llx_product '
-//                . 'WHERE datec BETWEEN "2012-01-01 00:00:00" AND "2021-01-01 00:00:00"', 'array');
-        
-        
-        
-        
-//        $bdd = self::getBdb();
-//        $rows = $bdd->getRows('actioncomm', 'DATE("' . $from . '") < a.datep2');
-        
-        
-//        $result = $bdd->db->query($sql);
-//
-//        if ($result) {
-//            while ($row = $bdd->db->fetch_object($result)) {
-//                echo '<br/>sasszasa';
-//                print_r($row);
-//            }
-//        }
         
 
         $rows = self::getBdb()->executeS($sql, 'object');
         
-//        echo self::getBdb()->err();
-//        die();
-        
-                foreach ($rows as $r) {
-//                    if($id_user == 568)
-//                        die('pouf');
-                    return 0;
-//                    print_r($r);
-//                    echo "<br>dzdzdzazdza";
-//                    die('SELECT rowid FROM llx_product '
-//                . 'WHERE datec BETWEEN "2012-01-01 00:00:00" AND "2021-12-31 23:00:00"');
-                }
+//        if($id_user == 568)
+//            die('<pre>' . $sql . print_r($rows, 1) . ' FIN ');
 
-                return 1;
+        
+        foreach ($rows as $r) {
+            return 0;
+        }
+
+        return 1;
   
 //        if (is_null($rows))
 //            return 1;

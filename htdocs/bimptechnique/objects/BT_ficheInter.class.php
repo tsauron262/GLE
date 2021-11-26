@@ -112,7 +112,7 @@ class BT_ficheInter extends BimpDolObject
 
         switch ($action) {
             case 'setStatusAdmin':
-                return $user->admin;
+                return ($user->admin || $user->id == 375);
                 break;
             case 'createFacture':
                 if ($user->rights->bimptechnique->billing) {

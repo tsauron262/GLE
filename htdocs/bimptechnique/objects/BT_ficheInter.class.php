@@ -378,7 +378,7 @@ class BT_ficheInter extends BimpDolObject
 //                );
             }
 
-            if ($this->isActionAllowed('generatePdf') && $this->canSetAction('generatePdf')) {
+            if (($this->isActionAllowed('generatePdf') && $this->canSetAction('generatePdf')) || $user->admin) {
                 $buttons[] = array(
                     'label'   => 'Générer le PDF',
                     'icon'    => 'fas_file-pdf',

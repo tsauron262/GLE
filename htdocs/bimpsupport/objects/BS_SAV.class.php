@@ -3845,7 +3845,7 @@ class BS_SAV extends BimpObject
         if(count($result2))
             $html .= '<div style="float: left; padding:5px">'.BimpRender::renderBimpListTable($result2, array('centre' => 'Centre', 'time' => 'Temps moyen en  J')).'</div>';
         
-        $html = BimpRender::renderPanel('Temps max diagnostic sur '.$time.' jours '.($ios? '(iOs)' : '(hors iOs)'), $html);
+        $html = BimpRender::renderPanel('Temps max diagnostic '.($ios? '(iOs)' : '(hors iOs)'), $html);
         
         
         return $html;

@@ -483,6 +483,7 @@ fields_tables:
         title: Informations
         icon: info
         rows:
+            - field: fk_user_tech
             - label: Version Fi
               value:
                   callback: displayVersion

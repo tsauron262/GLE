@@ -2560,7 +2560,13 @@ class BimpCache
     public static function getSystemsArray()
     {
         return array(
+            ''    => "",
             300  => "iOs",
+            34   => "Mac Os",
+            35   => "WatchOs",
+            37   => "Windows",
+            39   => "Produit non concerné par un système",
+            1200 => "MAC OS 12 (Monterey)",
             1120 => "MAC OS 11.2 (Big Sur)",
             1015 => "MAC OS 10.15 (Catalina)",
             1014 => "MAC OS 10.14 (Mojave)",

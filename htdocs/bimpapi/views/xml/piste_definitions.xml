@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <request name="">
+        <label>Dépot facture</label>
+        <fields>
+            <fields name="idUtilisateurCourant" type="int"
+        </fields>
+    </request>
+    <def name="idUtilisateurCourant" type="int">
+        <label>ID utilisateur</label>
+    </def>
+    <def name="modeDepot" type="select">
+        <label>Mode de dépôt</label>
+        <values>
+            <val val="SAISIE_API">Saisie</val>
+            <val val="DEPOT_PDF_API">Dépôt PDF</val>
+            <val val="DEPOT_PDF_SIGNE_API">Dépôt PDF Signé</val>
+        </values>
+    </def>
+    <def name="numeroFactureSaisi" type="int">
+        <label>N° Facture</label>
+    </def>
+    <def name="dateFacture" type="datetime">
+        <label>Date Facture</label>
+    </def>
+    
+    <!--destinataire Facture-->
+    <def name="idUtilisateurCourant" type="int">
+        <label>ID utilisateur</label>
+    </def>
+    
+    <def name="idUtilisateurCourant" type="int">
+        <label>ID utilisateur</label>
+    </def>
+    
+    <def name="idUtilisateurCourant" type="int">
+        <label>ID utilisateur</label>
+    </def>
+    
+    <def name="idUtilisateurCourant" type="int">
+        <label>ID utilisateur</label>
+    </def>
+    
+    <def name="idUtilisateurCourant" type="int">
+        <label>ID utilisateur</label>
+    </def>
+    
+    <def name="idUtilisateurCourant" type="int">
+        <label>ID utilisateur</label>
+    </def>
+    <def name="idUtilisateurCourant" type="int">
+        <label>ID utilisateur</label>
+    </def>
+    
+    <def name="idUtilisateurCourant" type="int">
+        <label>ID utilisateur</label>
+    </def>
+    
+    <def name="idUtilisateurCourant" type="int">
+        <label>ID utilisateur</label>
+    </def>
+    
+    <def name="idUtilisateurCourant" type="int">
+        <label>ID utilisateur</label>
+    </def>
+    
+    <def name="idUtilisateurCourant" type="int">
+        <label>ID utilisateur</label>
+    </def>
+    
+    <def name="idUtilisateurCourant" type="int">
+        <label>ID utilisateur</label>
+    </def>
+    
+    <def name="idUtilisateurCourant" type="int">
+        <label>ID utilisateur</label>
+    </def>
+    
+    <def name="idUtilisateurCourant" type="int">
+        <label>ID utilisateur</label>
+    </def>
+    <def name="idUtilisateurCourant" type="int">
+        <label>ID utilisateur</label>
+    </def>
+    <def name="idUtilisateurCourant" type="int">
+        <label>ID utilisateur</label>
+    </def>
+    
+    <def name="idUtilisateurCourant" type="int">
+        <label>ID utilisateur</label>
+    </def>
+
+
+
+    
+    
+    
+</root>

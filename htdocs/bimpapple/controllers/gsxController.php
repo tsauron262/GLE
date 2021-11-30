@@ -3488,7 +3488,7 @@ class gsxController extends BimpController
                             'onclick' => 'gsx_findRepairsToImport($(this), ' . $sav->id . ')'
             )));
 
-            $html .= BimpRender::renderFreeForm(array(
+            $html .= BimpForm::renderFreeForm(array(
                         array(
                             'label' => 'Identifiant',
                             'input' => BimpInput::renderInput('text', 'identifier', $serial)
@@ -3529,7 +3529,7 @@ class gsxController extends BimpController
                             'onclick' => $onclick
             )));
 
-            $html .= BimpRender::renderFreeForm(array(
+            $html .= BimpForm::renderFreeForm(array(
                         array(
                             'label' => 'Type de réparation',
                             'input' => BimpInput::renderInput('select', 'repairType', null, array(
@@ -3576,7 +3576,7 @@ class gsxController extends BimpController
                                 'onclick' => $onclick
                 )));
 
-                $html .= BimpRender::renderFreeForm(array(
+                $html .= BimpForm::renderFreeForm(array(
                             array(
                                 'label' => 'Type de réparation',
                                 'input' => BimpInput::renderInput('select', 'eligibilityRepairType', null, array(
@@ -3638,7 +3638,7 @@ class gsxController extends BimpController
                             'onclick' => 'loadRepairForm($(this), ' . $sav->id . ', \'' . $this->serial . '\')'
             )));
 
-            $html .= BimpRender::renderFreeForm(array(
+            $html .= BimpForm::renderFreeForm(array(
                         array(
                             'label' => 'Type d\'opération',
                             'input' => BimpInput::renderInput('select', 'repairType', null, array(

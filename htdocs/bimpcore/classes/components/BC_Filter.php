@@ -15,6 +15,7 @@ class BC_Filter extends BimpComponent
     public $is_default = false;
     public $data = array();
     public $cur_value_type = '';
+    public $is_items_list = false;
     protected $child_instance = null;
     protected $child_filters_panels = array();
     public static $type_params_def = array(
@@ -68,7 +69,7 @@ class BC_Filter extends BimpComponent
         }
 
         parent::__construct($filter_object, $name, 'filters');
-        
+
         if (count($this->errors)) {
             return;
         }
@@ -81,7 +82,15 @@ class BC_Filter extends BimpComponent
             // Surcharge des paramètres selon le champ: 
             if (is_null($this->params['label'])) {
                 $this->params['label'] = $this->bc_field->getParam('label', $this->filter_name);
-                $this->params['data_type'] = $this->bc_field->getParam('type', 'string');
+            }
+
+            $this->params['data_type'] = $this->bc_field->getParam('type', 'string');
+
+            if ($this->params['data_type'] === 'items_list') {
+                $this->is_items_list = true;
+                $this->params['exclude_btn'] = 0;
+                $this->params['data_type'] = $this->bc_field->getParam('items_data_type', 'string');
+                $this->bc_field->params['type'] = $this->params['data_type'];
             }
         }
 
@@ -96,11 +105,11 @@ class BC_Filter extends BimpComponent
 //                    $this->params = BimpTools::overrideArray($this->params, $override_params, true, true);
 //                }
 //            }
-            
+
             if ($this->base_object->config->isDefined('filters/' . $this->name)) {
                 $errors = array();
                 $override_params = self::fetchParamsStatic($this->base_object->config, 'filters/' . $this->name, $this->params_def, $errors, true, true);
-                
+
                 if (!empty($override_params)) {
                     $this->params = BimpTools::overrideArray($this->params, $override_params, true, true);
                 }
@@ -425,6 +434,11 @@ class BC_Filter extends BimpComponent
             $errors[] = 'Objet propriétaire du champ invalide';
         }
 
+        // Vérif pour les items_list: 
+        if ($this->is_items_list && !(int) $this->bc_field->getParam('items_braces', 0)) {
+            $errors[] = 'Le champ "' . $this->bc_field->getParam('label', $this->name) . '" ne peut pas être filtré car il s\'agit d\'une liste de valeurs non formatée pour les filtres';
+        }
+
         if (!count($errors)) {
             $filter_key = $field_object->getFieldSqlKey($field_name, $field_alias, null, $filters, $joins, $errors);
 
@@ -441,7 +455,7 @@ class BC_Filter extends BimpComponent
                     foreach ($values as $value) {
                         if (is_array($value)) {
                             if (isset($value['ids_list'])) {
-                                // Liste d'IDs objet: 
+                                // Liste d'IDs objet:
                                 $sep = BimpTools::getArrayValueFromPath($value, 'ids_list/separator', '');
                                 $list = BimpTools::getArrayValueFromPath($value, 'ids_list/list', '');
 
@@ -456,10 +470,20 @@ class BC_Filter extends BimpComponent
                                             $ids[] = $id;
                                         }
                                     }
+
                                     if (!empty($ids)) {
-                                        $or_field[] = array(
-                                            'in' => $ids
-                                        );
+                                        if ($this->is_items_list) {
+                                            foreach ($ids as $id) {
+                                                $or_field[] = array(
+                                                    'part_type' => 'middle',
+                                                    'part'      => '[' . $id . ']'
+                                                );
+                                            }
+                                        } else {
+                                            $or_field[] = array(
+                                                'in' => $ids
+                                            );
+                                        }
                                     }
                                 }
                             } elseif (isset($value['id_filters'])) {
@@ -485,9 +509,18 @@ class BC_Filter extends BimpComponent
                                                 }
                                             }
 
-                                            $or_field[] = array(
-                                                'in' => $ids
-                                            );
+                                            if ($this->is_items_list) {
+                                                foreach ($ids as $id) {
+                                                    $or_field[] = array(
+                                                        'part_type' => 'middle',
+                                                        'part'      => '[' . $id . ']'
+                                                    );
+                                                }
+                                            } else {
+                                                $or_field[] = array(
+                                                    'in' => $ids
+                                                );
+                                            }
                                         }
                                     }
                                 }
@@ -495,7 +528,14 @@ class BC_Filter extends BimpComponent
                         } else {
                             // Valeur standard: 
                             if (BimpTools::checkValueByType($this->bc_field->params['type'], $value)) {
-                                $or_field[] = $value;
+                                if ($this->is_items_list) {
+                                    $or_field[] = array(
+                                        'part_type' => 'middle',
+                                        'part'      => '[' . $value . ']'
+                                    );
+                                } else {
+                                    $or_field[] = $value;
+                                }
                             } else {
                                 $errors[] = 'Valeur invalide: "' . $value . '" (doit être de type: "' . BimpTools::getDataTypeLabel($this->bc_field->params['type']) . '"';
                             }
@@ -1131,6 +1171,7 @@ class BC_Filter extends BimpComponent
 
             // Type recherche d'objet: 
             $html .= '<div class="bimp_filter_type_container bimp_filter_type_">';
+
             $bc_input = new BC_Input($this->object, $this->params['data_type'], $input_name, $input_path, null, $field_params);
             $bc_input->addInputExtraClass('bimp_filter_input');
             $html .= $bc_input->renderHtml();

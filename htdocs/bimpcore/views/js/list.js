@@ -282,6 +282,8 @@ function reloadObjectList(list_id, callback, full_reload, id_config) {
         full_reload: full_reload,
         $resultContainer: $resultContainer,
         display_success: false,
+        display_errors_in_popup_only: true,
+        display_warnings_in_popup_only: true,
         error_msg: error_msg,
         success: function (result, bimpAjax) {
             bimpAjax.$list.find('.headerTools').find('.loadingIcon').css('opacity', 0);
@@ -810,7 +812,7 @@ function setSelectedObjectsAction($button, list_id, action, extra_data, form_nam
         return;
     }
 
-    if (typeof (confirm_msg) === 'string') {
+    if (typeof (confirm_msg) === 'string' && confirm_msg) {
         if (!confirm(confirm_msg.replace(/&quote;/g, '"'))) {
             return;
         }

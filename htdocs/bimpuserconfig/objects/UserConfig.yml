@@ -172,7 +172,7 @@ lists:
             
     globale: 
         extends: base
-        title: Configurations des liste
+        title: Configurations des listes
         filters_panel: default
         filters_panel_open: 1
         bulk_actions: 

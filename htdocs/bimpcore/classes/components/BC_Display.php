@@ -957,11 +957,12 @@ class BC_Display extends BimpComponent
                 case 'datetime':
                     if ($this->value && $this->value !== '0000-00-00 00:00:00') {
                         $format = $this->getParam('format', 'd / m / Y H:i:s');
+                        
                         $date = new DateTime($this->value);
                         if ($this->no_html) {
                             $html .= $date->format($format);
                         } else {
-                            $html .= BimpTools::printDate($date, 'span', 'datetime', $this->params['format'], ($this->params['show_hour'] ? $this->params['format'] : 'd / m / Y'));
+                            $html .= BimpTools::printDate($date, 'span', 'datetime', $format, ($this->params['show_hour'] ? $format : 'd / m / Y'));
                         }
                     }
                     break;

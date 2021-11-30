@@ -22,11 +22,13 @@ objects:
     droitGroupUser:
         instance: 
             bimp_object: Bimp_UserGroup_Rights
-#    lists_configs: 
-#        instance: 
-#            bimp_object: 
-#                module: bimpcore
-#                name: ListConfig
+            
+    lists_configs: 
+        instance: 
+            bimp_object: 
+                module: bimpuserconfig
+                name: ListTableConfig
+                
     lists_filters: 
         instance: 
             bimp_object: 

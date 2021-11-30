@@ -918,7 +918,7 @@ class BimpDolObject extends BimpObject
         );
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function copyContactsFromOrigin($origin, &$errors = array())
     {

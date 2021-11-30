@@ -1928,7 +1928,7 @@ class BimpController
         $footer .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter';
         $footer .= '</span>';
         $footer .= '</div>';
-        $html .= BimpRender::renderSingleLineForm(array(
+        $html .= BimpForm::renderSingleLineForm(array(
                     array(
                         'label'      => 'Mot-clé',
                         'content'    => BimpInput::renderInput('text', 'bih_new_ht_code', ''),
@@ -2046,6 +2046,7 @@ class BimpController
             $colspan = $list->colspan;
 
             if (count($list->errors)) {
+                $errors = $list->errors;
                 BimpCore::addlog('Erreur génération liste', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', $object, array(
                     'Nom liste' => $list_name,
                     'Erreurs'   => $errors

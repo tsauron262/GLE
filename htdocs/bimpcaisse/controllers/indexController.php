@@ -367,7 +367,7 @@ class indexController extends BimpController
                 $buttons[] = $button;
 
                 $html .= '<div id="closeCaisseForm">';
-                $html .= BimpRender::renderFreeForm($rows, $buttons, 'Fermeture de caisse');
+                $html .= BimpForm::renderFreeForm($rows, $buttons, 'Fermeture de caisse');
                 $html .= '</div>';
             }
         }

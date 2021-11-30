@@ -82,11 +82,11 @@ class BC_Field extends BimpComponent
             'uppercase'       => array('data_type' => 'bool', 'default' => 0),
             'lowercase'       => array('data_type' => 'bool', 'default' => 0),
         ),
-        'text' => array(
-            'hashtags'        => array('data_type' => 'bool', 'default' => 0)
+        'text'           => array(
+            'hashtags' => array('data_type' => 'bool', 'default' => 0)
         ),
-        'html' => array(
-            'hashtags'        => array('data_type' => 'bool', 'default' => 0)
+        'html'           => array(
+            'hashtags' => array('data_type' => 'bool', 'default' => 0)
         ),
         'object_filters' => array(
             'obj_module' => array('default' => ''),
@@ -97,6 +97,7 @@ class BC_Field extends BimpComponent
         'string', 'text', 'password', 'html', 'id', 'id_object', 'id_parent', 'time', 'date', 'datetime', 'color'
     );
     public static $has_total_types = array('qty', 'money', 'timer');
+    public static $not_searchable_types = array('object_filters');
 
     public function __construct(BimpObject $object, $name, $edit = false, $path = 'fields', $force_edit = false)
     {
@@ -161,6 +162,8 @@ class BC_Field extends BimpComponent
         $current_bc = $prev_bc;
     }
 
+    // Getters booléens: 
+    
     public function isEditable()
     {
         if (!$this->isObjectValid()) {
@@ -173,6 +176,31 @@ class BC_Field extends BimpComponent
     public function isUsed()
     {
         return (!(int) $this->params['unused']);
+    }
+
+    public function isSearchable()
+    {
+        if (!$this->params['searchable']) {
+            return 0;
+        }
+
+        $type = $this->getParam('type', 'string');
+
+        if (in_array($type, self::$not_searchable_types)) {
+            return 0;
+        }
+
+        if ($type === 'items_list') {
+            if (!(int) $this->getParam('items_braces', 0)) {
+                return 0;
+            }
+
+            if (in_array($this->getParam('items_data_type'), self::$not_searchable_types)) {
+                return 0;
+            }
+        }
+
+        return 1;
     }
 
     // Rendus HTML principaux: 
@@ -243,17 +271,17 @@ class BC_Field extends BimpComponent
         }
 
         if ($this->params['type'] === 'items_list' && is_array($this->value)) {
-            if (!isset($this->params['values']) || empty($this->params['values'])) {
-                $field_params = $this->params;
-                $field_params['type'] = $this->getParam('items_data_type', 'string');
-                $bc_display = new BC_Display($this->object, $this->display_name, $this->config_path . '/display', $this->name, $field_params);
-                $bc_display->no_html = $this->no_html;
-                $bc_display->setDisplayOptions($this->display_options);
+            $this->params['multiple_values_matches'] = array();
 
-                foreach ($this->value as $value) {
-                    $bc_display->value = $value;
-                    $this->params['values'][$value] = $bc_display->renderHtml();
-                }
+            $field_params = $this->params;
+            $field_params['type'] = $this->getParam('items_data_type', 'string');
+            $bc_display = new BC_Display($this->object, $this->display_name, $this->config_path . '/display', $this->name, $field_params);
+            $bc_display->no_html = $this->no_html;
+            $bc_display->setDisplayOptions($this->display_options);
+
+            foreach ($this->value as $value) {
+                $bc_display->value = $value;
+                $this->params['multiple_values_matches'][$value] = $bc_display->renderHtml();
             }
         }
 
@@ -829,7 +857,7 @@ class BC_Field extends BimpComponent
             return '';
         }
 
-        if (!$this->params['searchable']) {
+        if (!$this->isSearchable()) {
             return '';
         }
 

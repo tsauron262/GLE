@@ -252,12 +252,18 @@ fields:
     total_achat_reval_ok: 
         label: Total achat (reval OK)
         type: money
-        default_value: 0
-        
+        default_value: 0        
     litige: 
         label: Litige
         dol_extra_field: 1
         type: bool
+    chorus_status: 
+        label: Statut export chorus
+        dol_extra_field: 1
+        type: int
+        default_value: 0
+        values: 
+            array: chorus_status
 #    rib_client:
 #        label: Rib Client
 #        dol_extra_field: 1
@@ -654,6 +660,20 @@ forms:
                   type: select
                   options: 
                       array: draftFacturesForRefacture
+                      
+    export_to_chorus: 
+        rows: 
+            - custom: 1
+              label: Structure
+              input_name: id_structure
+              content: 
+                  callback: renderClientSelectChorusStructuresInput
+            - custom: 1
+              label: Service
+              input_name: id_service
+              content: 
+                  callback: renderClientSelectChorusServicesInput
+              depends_on: id_structure
                   
 fields_tables: 
     infos: 

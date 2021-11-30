@@ -8,4 +8,5 @@ if (!defined('BDS_LIB')) {
     include_once $dir . 'BDSProcess.php';
     include_once $dir . 'BDSImportProcess.php';
     include_once $dir . 'BDSExportProcess.php';
+    include_once $dir . 'BDSApiProcess.php';
 }

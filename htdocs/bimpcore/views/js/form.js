@@ -1054,7 +1054,14 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
     if ($value_input.length) {
         value = $value_input.val();
     }
-    if ($label_input.length) {
+
+    if ($value_input.length && $value_input.parent().hasClass('search_object_input_container')) {
+        var $search_result = $value_input.parent().find('.search_object_result');
+
+        if ($search_result.length) {
+            label = $search_result.text();
+        }
+    } else if ($label_input.length) {
         if ($label_input.tagName() === 'select') {
             label = $label_input.find('[value="' + value + '"]').html();
         } else {
@@ -3936,7 +3943,7 @@ function BimpInputHashtags() {
         bih.lastSearch = '';
         bih.$modal.find('#bihObjectLabel').html('').hide();
         bih.$validateMsg.stop().slideUp(250);
-        bih.$curValueLabel.stop().slideUp(250, function() {
+        bih.$curValueLabel.stop().slideUp(250, function () {
             bih.$curValueLabel.html('');
         });
         bih.$objInput.val('').show().focus();

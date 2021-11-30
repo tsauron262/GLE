@@ -20,7 +20,8 @@ class BimpDebug
         'php'         => 'Erreurs PHP',
         'params'      => 'Paramètres requête',
         'ajax_result' => 'Réponse ajax',
-        'gsx'         => 'GSX'
+        'gsx'         => 'GSX',
+        'api'         => 'API'
     );
     public static $times = array();
     public static $sql_count = array();
@@ -402,9 +403,9 @@ class BimpDebug
         }
 
         if ($is_fetched) {
-            self::$cache_infos['objects'][$module][$object_name]['f'] ++;
+            self::$cache_infos['objects'][$module][$object_name]['f']++;
         } else {
-            self::$cache_infos['objects'][$module][$object_name]['s'] ++;
+            self::$cache_infos['objects'][$module][$object_name]['s']++;
         }
 
         if ($obj_type === 'bimp_object') {
@@ -418,9 +419,9 @@ class BimpDebug
     {
         if (isset(self::$cache_infos['counts'][$type])) {
             if ($is_new) {
-                self::$cache_infos['counts'][$type]['n'] ++;
+                self::$cache_infos['counts'][$type]['n']++;
             } else {
-                self::$cache_infos['counts'][$type]['s'] ++;
+                self::$cache_infos['counts'][$type]['s']++;
             }
         }
     }
@@ -645,7 +646,7 @@ class BimpDebug
             self::$cache_infos['server'][$key] = 0;
         }
 
-        self::$cache_infos['server'][$key] ++;
+        self::$cache_infos['server'][$key]++;
     }
 
     // Collections infos: 

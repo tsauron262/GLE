@@ -25,6 +25,7 @@ if (!defined('BIMP_LIB')) {
 //    require_once $dir . 'BimpConfig_v1.php';
     require_once $dir . 'BimpConfig_v2.php';
     require_once $dir . 'BimpDebug.php';
+    require_once $dir . 'BimpForm.php';
     require_once $dir . 'BimpInput.php';
     require_once $dir . 'BimpRender.php';
     require_once $dir . 'BimpConfigDefinitions.php';

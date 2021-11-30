@@ -46,6 +46,11 @@ class Bimp_Facture extends BimpComm
         4 => array('label' => 'Trop remboursé', 'classes' => array('important'), 'icon' => 'fas_exclamation-triangle'),
         5 => array('label' => 'Irrécouvrable', 'classes' => array('danger'), 'icon' => 'fas_times-circle')
     );
+    public static $chorus_status = array(
+        -1 => array('label' => 'Non applicable', 'icon' => 'fas_times', 'classes' => 'info'),
+        0  => array('label' => 'Non exporté', 'icon' => 'fas_times', 'classes' => array('danger')),
+        1  => array('label' => 'Exporté', 'icon' => 'fas_success', 'classes' => array('success'))
+    );
 
     // Gestion des droits: 
 
@@ -167,6 +172,9 @@ class Bimp_Facture extends BimpComm
                     return 1;
                 }
                 return 1;
+
+            case 'exportToChorus':
+                return (int) $user->admin;
         }
 
         return parent::canSetAction($action);
@@ -290,7 +298,7 @@ class Bimp_Facture extends BimpComm
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (in_array($action, array('validate', 'modify', 'reopen', 'cancel', 'sendMail', 'addAcompte', 'useRemise', 'removeFromUserCommission', 'removeFromEntrepotCommission', 'addToCommission', 'convertToReduc', 'checkPa', 'createAcompteRemiseRbt', 'generatePDFDuplicata', 'setIrrevouvrable', 'checkPaiements', 'classifyPaid', 'setCommandeLinesNotBilled', 'linesToFacture'))) {
+        if (in_array($action, array('validate', 'modify', 'reopen', 'cancel', 'sendMail', 'addAcompte', 'useRemise', 'removeFromUserCommission', 'removeFromEntrepotCommission', 'addToCommission', 'convertToReduc', 'checkPa', 'createAcompteRemiseRbt', 'generatePDFDuplicata', 'setIrrevouvrable', 'checkPaiements', 'classifyPaid', 'setCommandeLinesNotBilled', 'linesToFacture', 'exportToChorus'))) {
             if (!$this->isLoaded()) {
                 $errors[] = 'ID de la facture absent';
                 return 0;
@@ -729,6 +737,30 @@ class Bimp_Facture extends BimpComm
                     return 0;
                 }
                 return 1;
+
+            case 'exportToChorus':
+                require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+
+                if (!BimpAPI::isApiActive('piste')) {
+                    $errors[] = 'L\'API "Piste" n\'est pas active';
+                } else {
+                    if ($status < 1) {
+                        $errors[] = 'Le statut actuel ' . $this->getLabel('of_this') . ' ne permet pas cette opération';
+                    } elseif (!$this->field_exists('chorus_status')) {
+                        $errors[] = 'Le champ "Statut chorus" n\'est pas paramétré pour les factures';
+                    } elseif ((int) $this->getData('chorus_status') > 0) {
+                        $errors[] = 'Cette facture a déjà été déposée sur chorus';
+                    } else {
+                        $client = $this->getChildObject('client');
+                        if (!BimpObject::objectLoaded($client)) {
+                            $errors[] = 'Client absent';
+                        } elseif (!in_array($client->dol_object->typent_code, array('TE_ADMIN'))) {
+                            $errors[] = 'Ce client n\'est pas une administration';
+                        }
+                    }
+                }
+
+                return (count($errors) ? 0 : 1);
         }
 
         return (int) parent::isActionAllowed($action, $errors);
@@ -896,6 +928,19 @@ class Bimp_Facture extends BimpComm
                 'onclick'  => '',
                 'disabled' => 1,
                 'popover'  => $error_msg
+            );
+        }
+
+        // Déposer sur Chorus: 
+
+        $errors = array();
+        if ($this->isActionAllowed('exportToChorus', $errors) && $this->canSetAction('exportToChorus')) {
+            $buttons[] = array(
+                'label'   => 'Exporter vers Chorus',
+                'icon'    => 'fas_file-export',
+                'onclick' => $this->getJsActionOnclick('exportToChorus', array(), array(
+                    'form_name' => 'export_to_chorus'
+                ))
             );
         }
 
@@ -1484,7 +1529,7 @@ class Bimp_Facture extends BimpComm
             'paiementnotsaved' => array(
                 'label' => 'Le paiement a été effectué mais non enregistré'
             ),
-            'cfr' => array(
+            'cfr'              => array(
                 'label' => 'Le reste à payer (' . BimpTools::displayMoneyValue($remainToPay) . ') a été encaissé directement via CFR'
             ),
             'inf_one_euro'     => array(
@@ -3476,6 +3521,111 @@ class Bimp_Facture extends BimpComm
         return $html;
     }
 
+    public function renderClientSelectChorusStructuresInput()
+    {
+        $errors = array();
+        $html = '';
+
+        if ($this->isActionAllowed('exportToChorus', $errors)) {
+            $client = $this->getChildObject('client');
+            $siret = '';
+
+            if (!BimpObject::objectLoaded($client)) {
+                $errors[] = 'Client absent';
+            } elseif (!in_array($client->dol_object->typent_code, array('TE_ADMIN'))) {
+                $errors[] = 'Ce client n\'est pas une administration';
+            } else {
+                $siret = $client->getData('siret');
+
+                if (!$siret) {
+                    $errors[] = 'N° SIRET du client absent';
+                }
+            }
+
+            if (!count($errors)) {
+                $html .= '<b>Structure(s) Chorus du client ' . $client->getRef() . ' - ' . $client->getName() . ':</b><br/>';
+                $api = BimpAPI::getApiInstance('piste');
+
+                if (is_a($api, 'BimpAPI') && $api->isOk($errors)) {
+                    $response = $api->rechercheClientStructures($siret, array(), $errors);
+
+                    if (!count($errors)) {
+                        $structures = array();
+
+                        $id_structure = 0;
+                        foreach ($response['listeStructures'] as $structure) {
+                            $structures[$structure['idStructureCPP']] = $structure['idStructureCPP'] . ' - ' . $structure['designationStructure'];
+
+                            if (!$id_structure) {
+                                $id_structure = $structure['idStructureCPP'];
+                                $this->id_struture_client_chorus = $id_structure;
+                            }
+                        }
+
+                        $html .= BimpInput::renderInput('select', 'id_structure', $id_structure, array('options' => $structures));
+                    }
+                }
+            }
+        }
+
+        if (count($errors)) {
+            $html .= BimpRender::renderAlerts($errors);
+        }
+
+        return $html;
+    }
+
+    public function renderClientSelectChorusServicesInput()
+    {
+        $errors = array();
+        $html = '';
+
+        if ($this->isActionAllowed('exportToChorus', $errors)) {
+            $id_structure = '';
+
+            if (isset($this->id_struture_client_chorus) && $this->id_struture_client_chorus) {
+                $id_structure = $this->id_struture_client_chorus;
+            } else {
+                $id_structure = BimpTools::getPostFieldValue('id_structure', '');
+            }
+
+            if (!$id_structure) {
+                $errors[] = 'Identifiant Chorus de la Structure du client absent';
+            }
+
+            if (!count($errors)) {
+                $html .= '<b>Liste des services Chorus rattachés à la struction ' . $id_structure . ':</b><br/>';
+                $api = BimpAPI::getApiInstance('piste');
+
+                if (is_a($api, 'BimpAPI') && $api->isOk($errors)) {
+                    $response = $api->rechercheClientServices($id_structure, array(), $errors);
+
+                    if (!count($errors)) {
+                        $services = array();
+
+                        $id_service = 0;
+                        foreach ($response['listeServices'] as $service) {
+                            $services[$service['idService']] = $service['idService'] . ' - ' . $service['libelleService'] . ' (' . ($service['estActif'] ? 'ACTIF' : 'INACTIF') . ')';
+
+                            if (!$id_service) {
+                                $id_service = $service['idService'];
+                                $this->id_service_client_chorus = $id_service;
+                            }
+                        }
+
+                        $html .= BimpInput::renderInput('select', 'id_service', $id_service, array('options' => $services));
+                    }
+                }
+            }
+        }
+
+        if (count($errors)) {
+            $html .= BimpRender::renderAlerts($errors);
+        }
+
+        return $html;
+    }
+
     // Traitements:
 
     public function beforeValidate()
@@ -5187,6 +5337,35 @@ class Bimp_Facture extends BimpComm
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
+        );
+    }
+
+    public function actionExportToChorus($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $success_callback = '';
+
+        $id_structure = BimpTools::getArrayValueFromPath($data, 'id_structure', '');
+        $id_service = BimpTools::getArrayValueFromPath($data, 'id_service', '');
+
+        if (!$id_structure) {
+            $errors[] = 'Identifiant de la structure client absent';
+        }
+
+        if (!$id_service) {
+            $errors[] = 'Identifiant du service client absent';
+        }
+        
+        if (!count($errors)) {
+            $success_callback = 'setTimeout(function() {BimpApi.loadRequestModalForm(null, \'Export de la facture vers Chorus\', \'piste\', \'soumettreFacture\');}, 500);';
+        }
+        
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
         );
     }
 

@@ -1106,7 +1106,7 @@ class BimpTools
             foreach ($filters as $field => $filter) {
                 $sql_filter = self::getSqlFilter($field, $filter, $default_alias);
 
-                if ($sql_filter) {
+                if ($sql_filter !== '') {
                     if (!$first_loop) {
                         $sql .= ' AND ';
                     } else {
@@ -1777,7 +1777,7 @@ class BimpTools
 
     // Gestion des dates: 
 
-    public function printDate($date, $balise = "span", $class = '', $format = 'd/m/Y H:i:s', $format_mini = 'd / m / Y')
+    public function printDate($date, $balise = "span", $class = '', $format = 'd / m / Y H:i:s', $format_mini = 'd / m / Y')
     {
         if ($date == '')
             return '';
@@ -1790,15 +1790,21 @@ class BimpTools
             $date = $date->getTimestamp();
         }
 
-        if (is_array($class))
+        if (is_array($class)) {
             $class = explode(" ", $class);
+        }
 
         $html = '<' . $balise;
-        if ($format != $format_mini)
+
+        if ($format != $format_mini) {
             $html .= ' title="' . date($format, $date) . '"';
-        if ($class != '')
+        }
+
+        if ($class != '') {
             $html .= ' class="' . $class . '"';
+        }
         $html .= '>' . date($format_mini, $date) . '</' . $balise . '>';
+
         return $html;
     }
 
@@ -2611,6 +2617,19 @@ class BimpTools
         }
     }
 
+    public static function makeUrlParamsFromArray($url_params)
+    {
+        $str = '';
+
+        if (is_array($url_params)) {
+            foreach ($url_params as $key => $value) {
+                $str .= ($str ? '&' : '') . $key . '=' . urlencode($value);
+            }
+        }
+
+        return $str;
+    }
+
     public static function makeUrlFromConfig(BimpConfig $config, $path, $default_module, $default_controller)
     {
         $url = DOL_URL_ROOT . '/';
@@ -2633,14 +2652,15 @@ class BimpTools
 
         if ($url && isset($params['url_params'])) {
             $url_params = $config->getCompiledParams($path . '/url_params');
-            foreach ($url_params as $name => $value) {
-                if ((string) $name && (string) $value) {
+
+            if (is_array($url_params) && !empty($url_params)) {
+                $params_str = self::makeUrlParamsFromArray($url_params);
+
+                if ($params_str) {
                     if (!preg_match('/\?/', $url)) {
                         $url .= '?';
-                    } else {
-                        $url .= '&';
                     }
-                    $url .= $name . '=' . $value;
+                    $url .= $params_str;
                 }
             }
         }
@@ -2704,7 +2724,7 @@ class BimpTools
         if (is_null($json) || $json === '') {
             return array();
         }
-        
+
         if (is_array($json)) {
             return $json;
         }
@@ -2992,7 +3012,7 @@ class BimpTools
     {
         $file = static::getFileBloqued($type);
         if ($bloque) {
-            if(!is_file($file)){
+            if (!is_file($file)) {
                 $random = rand(0, 10000000);
                 $text = "Yes" . $random;
                 if (!file_put_contents($file, $text))
@@ -3114,18 +3134,19 @@ class BimpTools
             return 1;
         return 0;
     }
-    
-    public static function sendSmsAdmin($text, $tels = array('0628335081', '06 86 69 18 14')){    
+
+    public static function sendSmsAdmin($text, $tels = array('0628335081', '06 86 69 18 14'))
+    {
         $errors = array();
         require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
-        foreach ($tels as $tel){
+        foreach ($tels as $tel) {
             $tel = traiteNumMobile($tel);
             $smsfile = new CSMSFile($tel, 'BIMP ADMIN', $text);
             if (!$smsfile->sendfile()) {
                 $errors[] = 'Echec de l\'envoi du sms';
             }
         }
-        
+
         return $errors;
     }
 }

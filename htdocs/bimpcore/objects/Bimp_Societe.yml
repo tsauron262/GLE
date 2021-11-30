@@ -1102,6 +1102,7 @@ forms:
 filters: 
     accounting_account:
         label: Compte comptable filliale
+        
     accounting_account_fournisseur:
         label: Compte comptable filliale
                 

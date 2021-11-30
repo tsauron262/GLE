@@ -81,7 +81,7 @@ class savController extends gsxController
             '<button id="loadGSXButton" type="button" class="btn btn-primary btn-large" onclick="loadGSXView($(this), ' . $sav->id . ')"><i class="fa fa-download iconLeft"></i>Charger les données GSX</button>'
         );
 
-        $html .= BimpRender::renderFreeForm($rows, $buttons, 'Chargement des données Apple GSX', 'download');
+        $html .= BimpForm::renderFreeForm($rows, $buttons, 'Chargement des données Apple GSX', 'download');
         $html .= '</div>';
 
         $html .= '<div id="gsxContainer">';

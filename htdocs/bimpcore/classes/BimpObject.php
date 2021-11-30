@@ -1337,15 +1337,24 @@ class BimpObject extends BimpCache
             } else {
                 $value = $this->getConf('fields/' . $field . '/default_value', null, false, 'any');
             }
-        } elseif (is_array($id_object)) {
-            if (!is_array($value)) {
-                $value = array();
-                $def_val = $this->getConf('fields/' . $field . '/default_value', null, false, 'any');
-                foreach ($id_object as $id) {
-                    if (!isset($value[$id]) || is_null($value[$id])) {
-                        $value[$id] = $def_val;
-                    }
+        } elseif (is_array($id_object) && !is_array($value)) {
+            $value = array();
+            $def_val = $this->getConf('fields/' . $field . '/default_value', null, false, 'any');
+            foreach ($id_object as $id) {
+                if (!isset($value[$id]) || is_null($value[$id])) {
+                    $value[$id] = $def_val;
                 }
+            }
+        } else {
+            // Checks value:
+            if (is_array($id_object)) {
+                foreach ($value as $id_object => $val) {
+                    $value[$id_object] = $this->getValueFromDb($field, $val);
+                    $this->checkFieldValueType($field, $value[$id_object]);
+                }
+            } else {
+                $value = $this->getValueFromDb($field, $value);
+                $this->checkFieldValueType($field, $value);
             }
         }
 
@@ -1421,6 +1430,11 @@ class BimpObject extends BimpCache
             }
         }
 
+        return $value;
+    }
+
+    public function getValueFromDb($field_name, $value)
+    {
         return $value;
     }
 
@@ -1961,7 +1975,7 @@ class BimpObject extends BimpCache
                         'Action' => $action
                             ), true);
                 } else {
-                    if(!$instance->db->db->commit()){
+                    if (!$instance->db->db->commit()) {
                         $result['errors'][] = 'Une erreur inconnue est survenue - opération annulée';
                         BimpCore::addlog('Commit echec - erreur inconnue', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $instance, array(
                             'Action' => $action
@@ -2199,7 +2213,25 @@ class BimpObject extends BimpCache
                             case 'field_input':
                             case 'values':
                             default:
-                                $filters[$filter_key] = $value;
+                                if ($bc_field->getParam('type', 'string') === 'items_list') {
+                                    if ((int) $bc_field->getParam('items_braces', 0)) {
+                                        $filters[$filter_key] = array(
+                                            'part_type' => 'middle',
+                                            'part'      => '[' . $value . ']'
+                                        );
+                                    } else {
+                                        $filters['custom_' . $filter_key] = array(
+                                            'custom' => '0' // On plante la recherche pour éviter des résultats incohérents
+                                        );
+
+                                        BimpCore::addlog('Tentative de recherche sur une champ de type items_list sans crochets', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
+                                            'Champ' => $bc_field->name,
+                                            'Note'  => 'Mettre "searchable: 0" dans les params du champ'
+                                                ), true);
+                                    }
+                                } else {
+                                    $filters[$filter_key] = $value;
+                                }
                                 break;
                         }
                     }
@@ -3277,10 +3309,13 @@ class BimpObject extends BimpCache
         $sql .= BimpTools::getSqlSelect($fields);
         $sql .= BimpTools::getSqlFrom($table, $joins);
         $sql .= BimpTools::getSqlWhere($filters);
-        if ($order_by == 'rand')
+
+        if ($order_by == 'rand') {
             $sql .= ' ORDER BY rand() ';
-        else
+        } else {
             $sql .= BimpTools::getSqlOrderBy($order_by, $order_way, 'a', $extra_order_by, $extra_order_way);
+        }
+
         $sql .= BimpTools::getSqlLimit($n, $p);
 
         $rows = $this->db->executeS($sql, $return);
@@ -4652,6 +4687,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 if ($field === $primary) {
                     $this->id = (int) $value;
                 } elseif ($this->field_exists($field)) {
+                    $value = $this->getValueFromDb($field, $value);
                     $this->checkFieldValueType($field, $value);
                     $this->data[$field] = $value;
                 }
@@ -4660,6 +4696,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             $extra_fields = $this->fetchExtraFields();
 
             foreach ($extra_fields as $field_name => $value) {
+                $value = $this->getValueFromDb($field, $value);
                 $this->checkFieldValueType($field_name, $value);
                 $this->data[$field_name] = $value;
             }
@@ -6680,8 +6717,8 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             }
 
             $search = new BC_Search($this, $search_name, $search_value);
-            if(!count($search->searchItems()) && stripos($search_value, 'prov') !== false)
-                $search = new BC_Search($this, $search_name, str_ireplace ('prov', '', $search_value));
+            if (!count($search->searchItems()) && stripos($search_value, 'prov') !== false)
+                $search = new BC_Search($this, $search_name, str_ireplace('prov', '', $search_value));
             $html = $list_button;
             $html .= $search->renderHtml();
             $html .= $list_button;
@@ -9194,7 +9231,7 @@ var options = {
     public static function replaceHastags($text, $no_html = false)
     {
         if (is_string($text)) {
-            if (preg_match_all('/\{\{(.+):([0-9]+)\}\}/U', $text, $matches, PREG_SET_ORDER)) {                
+            if (preg_match_all('/\{\{(.+):([0-9]+)\}\}/U', $text, $matches, PREG_SET_ORDER)) {
                 foreach ($matches as $match) {
                     $obj_kw = (string) $match[1];
                     $id = (int) $match[2];

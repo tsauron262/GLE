@@ -265,7 +265,7 @@ class BimpCache
             $sql = BimpTools::getSqlSelect('a.' . $primary);
             $sql .= BimpTools::getSqlFrom($table, $joins);
             $sql .= BimpTools::getSqlWhere($filters);
-
+            
             $rows = self::getBdb()->executeS($sql, 'array');
 
             if (!is_null($rows) && count($rows)) {
@@ -2448,10 +2448,10 @@ class BimpCache
 
         return self::$cache['secteurs_array'];
     }
-
-    // Comme getSecteursArray avec l'option "Tous" en plus
-    public function getSecteurAllArray()
+    
+    public static function getSecteurAllArray()
     {
+        // Comme getSecteursArray avec l'option "Tous" en plus
         if (!BimpCore::getConf("USE_SECTEUR")) {
             return array();
         }
@@ -2470,8 +2470,6 @@ class BimpCache
                 }
             }
         }
-
-
 
         return self::$cache['secteurs_all_array'];
     }

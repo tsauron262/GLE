@@ -1,0 +1,38 @@
+
+bootstrap: 1
+title: Admin APIs
+
+js: 
+    - /bimpapi/views/js/bimp_api.js
+    
+objects:
+    api: 
+        instance: 
+            bimp_object: API_Api
+    user_account: 
+        instance: 
+            bimp_object: API_UserAccount
+    
+                
+sections:
+    - type: tabs
+      tabs: 
+        default: 
+            label: APIs
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: api
+                      name: default
+                      
+        users:
+            label: Comtpes Utilisateurs APIs
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: user_account
+                      name: default
+           
+                            

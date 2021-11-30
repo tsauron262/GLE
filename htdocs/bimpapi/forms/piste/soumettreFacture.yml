@@ -1,0 +1,145 @@
+
+title: Dépot facture
+
+fields: 
+    idUtilisateurCourant: 
+        label: ID utilisateur
+        type: int
+        
+    modeDepot: 
+        label: Mode de dépôt
+        values: 
+            SAISIE_API: Saisie
+            DEPOT_PDF_API: Dépôt PDF
+            DEPOT_PDF_SIGNE_API: Dépôt PDF signé
+            
+    numeroFactureSaisi: 
+        label: N° Facture
+        type: int
+        
+    dateFacture: 
+        label: Date Facture
+        type: datetime
+        
+    destinataire: 
+        label: Destinataire
+        type: fields_group
+        fields: 
+            codeDestinataire: 
+                label: Code destinataire
+                
+            codeServiceExecutant: 
+                label: Code service exécutant
+        
+    fournisseur: 
+        label: Fournisseur
+        type: fields_group
+        fields: 
+            idFournisseur: 
+                label: ID
+                type: int
+                
+            idServiceFournisseur: 
+                label: ID Service
+                type: int
+                
+            codeCoordonneesBancairesFournisseur: 
+                label: Code RIB
+                type: int
+                
+    cadreDeFacturation: 
+        label: Cadre de facturation
+        type: fields_group
+        fields: 
+            codeCadreFacturation: 
+                label: Code
+                values: 
+                    A1_FACTURE_FOURNISSEUR: A1 - Facture fournisseur
+                    A2_FACTURE_FOURNISSEUR_DEJA_PAYEE: A2 - Facture fournisseur déjà payée
+                    A9_FACTURE_SOUSTRAITANT: A9 - Facture sous-traitant
+                    A12_FACTURE_COTRAITANT: A12 - Facture Co-traitant
+                    
+            codeStructureValideur: 
+                label: Code structure valideur
+                
+            codeServiceValideur: 
+                label: Code service valideur
+                
+    references: 
+        label: Données facture
+        type: fields_group
+        fields: 
+            deviseFacture: 
+                label: Devise
+                
+            typeFacture: 
+                label: Type
+                values: 
+                    FACTURE: Facture
+                    AVOIR: Avoir
+                    
+            typeTva: 
+                label: Type TVA
+                values: 
+                    TVA_SUR_DEBIT: TVA sur débit
+                    TVA_SUR_ENCAISSEMENT: TVA sur encaissement
+                    EXONERATION: Exonération
+                    SANS_TVA: Sans TVA
+                    
+            motifExonerationTva: 
+                label: Motif exonération TVA
+                display_if: 
+                    field_name: typeTva
+                    show_values: EXONERATION
+                    
+            numeroMarche: 
+                label: N° Marché
+                
+            numeroBonCommande: 
+                label: N° Bon de commande
+                
+            numeroFactureOrigine: 
+                label: N° facture d'origine
+                
+            modePaiement: 
+                label: Mode de paiement
+                values: 
+                    CHEQUE: Chèque
+                    VIREMENT: Virement
+                    PRELEVEMENT: Prélèvement
+                    ESPECE: Espèce
+                    REPORT: Report
+                    AUTRE: Autre
+                    
+    montantTotal: 
+        label: Totaux
+        type: fields_group
+        fields: 
+            montantHtTotal: 
+                label: Total HT
+                type: money
+                
+            montantTVA: 
+                label: Total TVA
+                type: money
+                
+            montantTtcTotal: 
+                label: Total TTC
+                type: money
+                
+            montantRemiseGlobaleTTC:
+                label: Total Remises globales TTC
+                type: money
+                
+            motifRemiseGlobaleTTC: 
+                label: Motif remises globales
+                
+            montantAPayer: 
+                label: A Payer
+                type: money
+                
+    commentaire: 
+        label: Commentaires
+                
+    
+        

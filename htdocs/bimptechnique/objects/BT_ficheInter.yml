@@ -483,6 +483,7 @@ fields_tables:
         title: Informations
         icon: info
         rows:
+            - field: fk_user_tech
             - label: Version Fi
               value:
                   callback: displayVersion
@@ -611,6 +612,12 @@ filters:
         type: check_list
         items:
           0: OUI
+    commercialclient:
+        label: Commercial client
+        input:
+            type: search_user
+        data_type: id_object
+        type: user
 
 filters_panels: 
     default: 
@@ -627,15 +634,7 @@ filters_panels:
           datec:
           datei:
           commandes:
-              
-filters:
-    commercialclient:
-        label: Commercial client
-        input:
-            type: search_user
-        data_type: id_object
-        type: user
-        
+
 lists: 
     default:
         checkboxes: 1

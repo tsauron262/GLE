@@ -365,6 +365,15 @@ class Bimp_Commande extends BimpComm
                 $client_facture->canBuy($errors);
             }
 
+            $id_ldlc_pro_lease = (int) BimpCore::getConf('ldlc_pro_lease_id_societe', 0);
+            if ($id_ldlc_pro_lease) {
+                if ($this->dol_object->mode_reglement_code == 'FINLDL') {
+                    if ($this->getData('id_client_facture') != $id_ldlc_pro_lease) {
+                        $errors[] = 'Cette commande est en financement LDLC Pro Lease.<br/>Vous devez enregistrer LDLC Pro Lease en tant que "Client facturation" ou modifier le Mode de Règlement';
+                    }
+                }
+            }
+
             if (!count($errors) && !defined('NOT_VERIF')) {
                 if ($this->getData('ef_type') !== 'M' && !(int) BimpCore::getConf('NOT_FORCE_CONTACT')) {
                     // Vérif du contact facturation: 
@@ -3900,13 +3909,24 @@ class Bimp_Commande extends BimpComm
 
     public function checkObject($context = '', $field = '')
     {
-        if ($context === 'fetch' && !self::$no_check_reservations) {
-            global $current_bc, $modeCSV;
-            if (is_null($current_bc) || !is_a($current_bc, 'BC_List') &&
-                    (is_null($modeCSV) || !$modeCSV)) {
-                $this->checkLogistiqueStatus(false);
-                $this->checkShipmentStatus(false);
-                $this->checkInvoiceStatus(false);
+        if ($context === 'fetch') {
+            if (!self::$no_check_reservations) {
+                global $current_bc, $modeCSV;
+                if (is_null($current_bc) || !is_a($current_bc, 'BC_List') &&
+                        (is_null($modeCSV) || !$modeCSV)) {
+                    $this->checkLogistiqueStatus(false);
+                    $this->checkShipmentStatus(false);
+                    $this->checkInvoiceStatus(false);
+                }
+            }
+
+            $id_ldlc_pro_lease = (int) BimpCore::getConf('ldlc_pro_lease_id_societe', 0);
+            if ($id_ldlc_pro_lease) {
+                if ($this->dol_object->mode_reglement_code == 'FINLDL') {
+                    if ($this->getData('id_client_facture') != $id_ldlc_pro_lease) {
+                        $this->msgs['errors'][] = 'Cette commande est en financement LDLC Pro Lease.<br/>Vous devez enregistrer LDLC Pro Lease en tant que "Client facturation" ou modifier le Mode de Règlement';
+                    }
+                }
             }
         }
     }

@@ -323,9 +323,9 @@ class Bimp_Commande extends BimpComm
                 return 1;
 
             case 'paiement_comptant':
-                if ((int) $this->getData('fk_statut') != 0 and!$user->admin)
+//                if ((int) $this->getData('fk_statut') != 0 and !$user->admin)
                     return 0;
-                return 1;
+//                return 1;
         }
 
         return parent::isFieldEditable($field, $force_edit);
@@ -4002,11 +4002,26 @@ class Bimp_Commande extends BimpComm
 
         return $errors;
     }
+    
+    
+    private function setPaiementComptant() {
+        
+        $cond_paiement_comptant = array('LIVRAISON', 'TIERFAC', 'TIERAV', 'RECEPCOM', 'HALFFAC', 'HALFAV', 'RECEP');
+                $code = self::getBdb()->getValue('c_payment_term', 'code', '`active` > 0 and rowid = ' . $this->getData('fk_cond_reglement'));
+
+        if(in_array($code, $cond_paiement_comptant))
+            return $this->set('paiement_comptant', 1);
+        else
+            return $this->set('paiement_comptant', 0);        
+    }
 
     public function update(&$warnings = array(), $force_update = false)
     {
         $init_entrepot = (int) $this->getInitData('entrepot');
 
+        if(empty($errors))
+            $this->setPaiementComptant();
+        
         $errors = parent::update($warnings, $force_update);
 
         if (!count($errors)) {
@@ -4016,7 +4031,7 @@ class Bimp_Commande extends BimpComm
                 $this->db->db->query($sql);
             }
         }
-
+        
         return $errors;
     }
 

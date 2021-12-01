@@ -112,7 +112,7 @@ class BT_ficheInter extends BimpDolObject
 
         switch ($action) {
             case 'setStatusAdmin':
-                return $user->admin;
+                return ($user->admin || $user->id == 375);
                 break;
             case 'createFacture':
                 if ($user->rights->bimptechnique->billing) {
@@ -170,6 +170,8 @@ class BT_ficheInter extends BimpDolObject
                 return 1;
 
             case 'generatePdf':
+                if($user->admin)
+                    return 1;
                 if ($status !== self::STATUT_BROUILLON) {
                     $errors[] = BimpTools::ucfirst($this->getLabel('this') . 'n\'est plus au statut "brouilon"');
                     return 0;
@@ -378,7 +380,7 @@ class BT_ficheInter extends BimpDolObject
 //                );
             }
 
-            if ($this->isActionAllowed('generatePdf') && $this->canSetAction('generatePdf')) {
+            if (($this->isActionAllowed('generatePdf') && $this->canSetAction('generatePdf')) || $user->admin) {
                 $buttons[] = array(
                     'label'   => 'Générer le PDF',
                     'icon'    => 'fas_file-pdf',

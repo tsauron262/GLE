@@ -121,7 +121,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 
                 $this->avenant = BimpObject::getInstance('bimpcontract', 'BContract_avenant', $contrat->pdf_avenant);
                 
-                $this->avenant->ref = $contrat->ref."-AV".$this->avenant->getData('number_in_contrat');
+                $this->avenant->ref = $this->avenant->getRefAv();
                 $file1 = $dir . "/" . $this->avenant->ref . "_Ex_OLYS.pdf";
                 $file = $dir . "/".$this->avenant->ref."_Ex_Client.pdf";
             }
@@ -354,218 +354,246 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 $pdf1->SetFont('', 'B', 9);
                 $pdf1->Ln();
                 $pdf1->Cell($W, 4, "IL EST AINSI CONVENU CE QUI SUIT", 0, null, 'L', true);
-                foreach($lignes_avenant as $id => $infos) {
-                    $new_qty = 0;
-                    
-                    $have_modif = false;
-                    $line = $this->avenant->getChildObject('avenantdet', $id);
-                    $current_ligne++;
-                    $need = 50; // En tete + Marge du bas + nombre de ligne contenu dans le service
-                    
-                    $currentY = (int) $pdf->getY();
-                    $currentY = (int) $pdf1->getY();
-                    $hauteur = (int) $this->page_hauteur;
-                    $reste = $hauteur - $currentY;
+                $date = ($this->avenant->getData('type') == 0) ? new DateTime($this->avenant->getData('date_effect')) : new DateTime($this->avenant->getData('date_end'));
+                if($this->avenant->getData('type') == 0) {
+                    foreach($lignes_avenant as $id => $infos) {
+                        $new_qty = 0;
 
-                    if ($reste < $need) {
-                        //$this->_pagefoot($pdf, $outputlangs);
-                        $pdf->AddPage();
-                        $pdf1->AddPage();
-                        $this->addLogo($pdf, 12);
-                        $this->addLogo($pdf1, 12);
-                        $pdf->SetXY($this->marge_gauche, $this->marge_haute - 6);
-                        $pdf1->SetXY($this->marge_gauche, $this->marge_haute - 6);
-                        $pdf->Line(15, 32, 195, 32);
-                        $pdf1->Line(15, 32, 195, 32);
-                    }
-                    
-                    $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
-                    $pdf->Ln();
-                    $pdf1->Ln();
-                    $contrat_line = null;
-                    if($line->getData('id_line_contrat')) {
-                        $contrat_line = BimpObject::getInstance('bimpcontract', 'BContract_contratLine', $line->getData('id_line_contrat'));
-                        $p = BimpObject::getInstance('bimpcore', 'Bimp_Product', $contrat_line->getData('fk_product'));
-                    } else {
-                        $p = BimpObject::getInstance('bimpcore', 'Bimp_Product', $line->getData('id_serv'));
-                    }
-                    
-                    $old_qty = 0;
-                    if(is_object($contrat_line)) {
-                        $old_qty = $contrat_line->getData('qty');
-                    }
+                        $have_modif = false;
+                        $line = $this->avenant->getChildObject('avenantdet', $id);
+                        $current_ligne++;
+                        $need = 50; // En tete + Marge du bas + nombre de ligne contenu dans le service
 
-                    if(1){//$line->getData('id_line_contrat')) {
+                        $currentY = (int) $pdf->getY();
+                        $currentY = (int) $pdf1->getY();
+                        $hauteur = (int) $this->page_hauteur;
+                        $reste = $hauteur - $currentY;
 
-                        if($line->getData('id_line_contrat')) {
-                            if(!$print_article_modif){
-                                $pdf->setY($pdf->getY() + 2);
-                                $pdf->SetFont('', '', 8);
-                                $pdf->Cell($W, 4, "Article ".$current_article."", "L", null, 'L', true);
-                                $pdf->ln();
-                                $pdf->Cell($W, 4, "Les parties conviennent de modifier: ", 0, null, 'L', true);
-                                $pdf->setY($pdf->getY() + 5);
-                                $pdf1->setY($pdf1->getY() + 2);
-                                $pdf1->SetFont('', '', 8);
-                                $pdf1->Cell($W, 4, "Article ".$current_article."", "L", null, 'L', true);
-                                $pdf1->ln();
-                                $pdf1->Cell($W, 4, "Les parties conviennent de modifier: ", 0, null, 'L', true);
-                                $pdf1->setY($pdf1->getY() + 5);
-                                $print_article_modif = true;
-                                $current_article++;
-                            }
+                        if ($reste < $need) {
+                            //$this->_pagefoot($pdf, $outputlangs);
+                            $pdf->AddPage();
+                            $pdf1->AddPage();
+                            $this->addLogo($pdf, 12);
+                            $this->addLogo($pdf1, 12);
+                            $pdf->SetXY($this->marge_gauche, $this->marge_haute - 6);
+                            $pdf1->SetXY($this->marge_gauche, $this->marge_haute - 6);
+                            $pdf->Line(15, 32, 195, 32);
+                            $pdf1->Line(15, 32, 195, 32);
                         }
-                        else{
-                            if(!$print_article_new) {
-                                $pdf->setY($pdf->getY() + 2);
-                                $pdf->SetFont('', '', 10);
-                                $pdf->Cell($W, 4, "Article ".$current_article." (Ajout de service)", "L", null, 'L', true);
-                                $pdf->setY($pdf->getY() + 5);
 
-                                $pdf1->setY($pdf1->getY() + 2);
-                                $pdf1->SetFont('', '', 10);
-                                $pdf1->Cell($W, 4, "Article ".$current_article." (Ajout de service)", "L", null, 'L', true);
-                                $pdf1->setY($pdf1->getY() + 5);
-                                $print_article_new = true;
-                                $current_article++;
-                            }
-                        }
-                        
-                        $pdf->SetFont('', '', 9); $pdf1->SetFont('', '', 9);
-                        $pdf->Cell($W * 2, 4, "- Service: " . $p->getData('ref') . " - cout sur le contrat :" . price($line->getCoup(false)) . "€ HT", 0, null, 'L', false);
-                        $pdf1->Cell($W * 2, 4, "- Service: " . $p->getData('ref') . " - cout sur le contrat :" . price($line->getCoup(false)) . "€ HT", 0, null, 'L', false);
+                        $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
                         $pdf->Ln();
                         $pdf1->Ln();
-    //                    $pdf1->Cell($W * 2, 4, "- Service: " . $p->getData('ref'), 0, null, 'L', false);
-    //                    $pdf1->Ln();
-                        
-                        $serv19_dep = ["SERV19-DP1", "SERV19-DP2", "SERV19-DP3"];
-                        $isDP = (in_array($p->getRef(), $serv19_dep)) ? true : false;
-                        
-                        if(!is_object($contrat_line) || $line->getData('description') != $contrat_line->getData('description')) {
-                            $have_modif = true;
-                            $pdf->Cell($W, 4, "- Nouvelle description du service", 0, null, 'L', false);
-                            $pdf->Ln();$pdf->SetX(24);
-                            $pdf1->Cell($W, 4, "- Nouvelle description du service", 0, null, 'L', false);
-                            $pdf1->Ln();$pdf1->SetX(24);
-                            $chaine_description = $line->getData('description');
-                            if($chaine_description == '')
-                                $chaine_description = $p->getData('description');
-                            //$chaine_description = strip_tags($chaine_description,"<b><u><i><a><img><p><strong><em><font><tr><blockquote>");
-                            $chaine_description = str_replace(":&nbsp;", ' ', $chaine_description);  
-                            $chaine_description = str_replace("<li>", '', $chaine_description);
-                            $chaine_description = str_replace("</li>", "\n", $chaine_description);
-                            $chaine_description = str_replace("<br>", "\n", $chaine_description);
-                            $chaine_description = str_replace("<br/>", "\n", $chaine_description);
-                            $chaine_description = str_replace("<br />", "\n", $chaine_description);
-                            $chaine_description = str_replace("<ul>", '', $chaine_description);
-                            $chaine_description = str_replace("</ul>", '', $chaine_description);
-                            $chaine_description = str_replace("<p>", '', $chaine_description);
-                            $chaine_description = str_replace("</p>", '', $chaine_description);
-                            $chaine_description = str_replace("<em>", '', $chaine_description);
-                            $chaine_description = str_replace("</em>", '', $chaine_description);
-                            $pdf->MultiCell($W * 10, 4, $chaine_description, 0, null, 'L', false);
-                            $pdf->Ln();$pdf->SetX(20);
-                            $pdf1->MultiCell($W * 10, 4, $chaine_description, 0, null, 'L', false);
-                            $pdf1->Ln();$pdf1->SetX(20);
+                        $contrat_line = null;
+                        if($line->getData('id_line_contrat')) {
+                            $contrat_line = BimpObject::getInstance('bimpcontract', 'BContract_contratLine', $line->getData('id_line_contrat'));
+                            $p = BimpObject::getInstance('bimpcore', 'Bimp_Product', $contrat_line->getData('fk_product'));
+                        } else {
+                            $p = BimpObject::getInstance('bimpcore', 'Bimp_Product', $line->getData('id_serv'));
                         }
 
-                        $old_serials = BimpTools::json_decode_array($line->getData('serials_out'));
+                        $old_qty = 0;
+                        if(is_object($contrat_line)) {
+                            $old_qty = $contrat_line->getData('qty');
+                        }
 
-                        if(is_object($contrat_line))
-                            $serials_in_contratLine = BimpTools::json_decode_array($contrat_line->getData('serials'));
-                        else
-                            $serials_in_contratLine = array();
-                        $pdf->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
-                        $pdf->SetX(20);
-                        $pdf1->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
-                        $pdf1->SetX(20);
-                        $diff_add = array_diff(BimpTools::json_decode_array($line->getData('serials_in')), $serials_in_contratLine);
-                        $new_qty += count(BimpTools::json_decode_array($line->getData('serials_in')));
-                        if(count($diff_add) > 0) {
-                            $have_modif = true;
-                            //$new_qty += count($diff_add);
-                            if(count($diff_add) > 1) {
-                                if($isDP) {
-                                    $pdf->Cell($W*5, 4, "- Description des jours de délégation ajoutés", 0, null, 'L', false);
-                                    $pdf1->Cell($W*5, 4, "- Description des jours de délégation ajoutés", 0, null, 'L', false);
-                                } else {
-                                    $pdf->Cell($W*5, 4, "- Numéros de séries ajoutés à ce contrat pour ce service", 0, null, 'L', false);
-                                    $pdf1->Cell($W*5, 4, "- Numéros de séries ajoutés à ce contrat pour ce service", 0, null, 'L', false);
-                                }
-                                
-                            } else {
-                                if($isDP) {
-                                    $pdf->Cell($W*5, 4, "- Description des jours de délégation", 0, null, 'L', false);
-                                    $pdf1->Cell($W*5, 4, "- Description des jours de délégation", 0, null, 'L', false);
-                                } else {
-                                    $pdf->Cell($W*5, 4, "- Numéro de série ajouté à ce contrat pour ce service", 0, null, 'L', false);
-                                    $pdf1->Cell($W*5, 4, "- Numéro de série ajouté à ce contrat pour ce service", 0, null, 'L', false);
+                        if(1){//$line->getData('id_line_contrat')) {
+
+                            if($line->getData('id_line_contrat')) {
+                                if(!$print_article_modif){
+                                    $pdf->setY($pdf->getY() + 2);
+                                    $pdf->SetFont('', '', 8);
+                                    $pdf->Cell($W, 4, "Article ".$current_article."", "L", null, 'L', true);
+                                    $pdf->ln();
+                                    $pdf->Cell($W, 4, "Les parties conviennent de modifier: ", 0, null, 'L', true);
+                                    $pdf->setY($pdf->getY() + 5);
+                                    $pdf1->setY($pdf1->getY() + 2);
+                                    $pdf1->SetFont('', '', 8);
+                                    $pdf1->Cell($W, 4, "Article ".$current_article."", "L", null, 'L', true);
+                                    $pdf1->ln();
+                                    $pdf1->Cell($W, 4, "Les parties conviennent de modifier: ", 0, null, 'L', true);
+                                    $pdf1->setY($pdf1->getY() + 5);
+                                    $print_article_modif = true;
+                                    $current_article++;
                                 }
                             }
-                            $pdf->Ln();$pdf->SetX(24);
-                            $pdf1->Ln();$pdf1->SetX(24);
-                            $pdf->MultiCell($W * 10, 4, implode(',', $diff_add) , 0, null, 'L', false);
-                            $pdf1->MultiCell($W * 10, 4, implode(',', $diff_add) , 0, null, 'L', false);
-                            $pdf->Ln();$pdf1->Ln();
-                        }
+                            else{
+                                if(!$print_article_new) {
+                                    $pdf->setY($pdf->getY() + 2);
+                                    $pdf->SetFont('', '', 10);
+                                    $pdf->Cell($W, 4, "Article ".$current_article." (Ajout de service)", "L", null, 'L', true);
+                                    $pdf->setY($pdf->getY() + 5);
 
-                        if(count($old_serials)) {
-                            $have_modif = true;
+                                    $pdf1->setY($pdf1->getY() + 2);
+                                    $pdf1->SetFont('', '', 10);
+                                    $pdf1->Cell($W, 4, "Article ".$current_article." (Ajout de service)", "L", null, 'L', true);
+                                    $pdf1->setY($pdf1->getY() + 5);
+                                    $print_article_new = true;
+                                    $current_article++;
+                                }
+                            }
+
+                            $pdf->SetFont('', '', 9); $pdf1->SetFont('', '', 9);
+                            $pdf->Cell($W * 2, 4, "- Service: " . $p->getData('ref') . " - cout sur le contrat :" . price($line->getCoup(false)) . "€ HT", 0, null, 'L', false);
+                            $pdf1->Cell($W * 2, 4, "- Service: " . $p->getData('ref') . " - cout sur le contrat :" . price($line->getCoup(false)) . "€ HT", 0, null, 'L', false);
+                            $pdf->Ln();
+                            $pdf1->Ln();
+        //                    $pdf1->Cell($W * 2, 4, "- Service: " . $p->getData('ref'), 0, null, 'L', false);
+        //                    $pdf1->Ln();
+
+                            $serv19_dep = ["SERV19-DP1", "SERV19-DP2", "SERV19-DP3"];
+                            $isDP = (in_array($p->getRef(), $serv19_dep)) ? true : false;
+
+                            if(!is_object($contrat_line) || $line->getData('description') != $contrat_line->getData('description')) {
+                                $have_modif = true;
+                                $pdf->Cell($W, 4, "- Nouvelle description du service", 0, null, 'L', false);
+                                $pdf->Ln();$pdf->SetX(24);
+                                $pdf1->Cell($W, 4, "- Nouvelle description du service", 0, null, 'L', false);
+                                $pdf1->Ln();$pdf1->SetX(24);
+                                $chaine_description = $line->getData('description');
+                                if($chaine_description == '')
+                                    $chaine_description = $p->getData('description');
+                                //$chaine_description = strip_tags($chaine_description,"<b><u><i><a><img><p><strong><em><font><tr><blockquote>");
+                                $chaine_description = str_replace(":&nbsp;", ' ', $chaine_description);  
+                                $chaine_description = str_replace("<li>", '', $chaine_description);
+                                $chaine_description = str_replace("</li>", "\n", $chaine_description);
+                                $chaine_description = str_replace("<br>", "\n", $chaine_description);
+                                $chaine_description = str_replace("<br/>", "\n", $chaine_description);
+                                $chaine_description = str_replace("<br />", "\n", $chaine_description);
+                                $chaine_description = str_replace("<ul>", '', $chaine_description);
+                                $chaine_description = str_replace("</ul>", '', $chaine_description);
+                                $chaine_description = str_replace("<p>", '', $chaine_description);
+                                $chaine_description = str_replace("</p>", '', $chaine_description);
+                                $chaine_description = str_replace("<em>", '', $chaine_description);
+                                $chaine_description = str_replace("</em>", '', $chaine_description);
+                                $pdf->MultiCell($W * 10, 4, $chaine_description, 0, null, 'L', false);
+                                $pdf->Ln();$pdf->SetX(20);
+                                $pdf1->MultiCell($W * 10, 4, $chaine_description, 0, null, 'L', false);
+                                $pdf1->Ln();$pdf1->SetX(20);
+                            }
+
+                            $old_serials = BimpTools::json_decode_array($line->getData('serials_out'));
+
+                            if(is_object($contrat_line))
+                                $serials_in_contratLine = BimpTools::json_decode_array($contrat_line->getData('serials'));
+                            else
+                                $serials_in_contratLine = array();
                             $pdf->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
                             $pdf->SetX(20);
                             $pdf1->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
                             $pdf1->SetX(20);
-                            //$new_qty -= count($old_serials);
-                            if(count($old_serials) > 1) { // Plusriel
-                                $pdf->Cell($W*5, 4, "- Numéros de série supprimés de ce contrat pour ce service", 0, null, 'L', false);
-                                $pdf1->Cell($W*5, 4, "- Numéros de série supprimés de ce contrat pour ce service", 0, null, 'L', false);
-                            } else { // Singulier
-                                $pdf->Cell($W*5, 4, "- Numéro de série supprimé de ce contrat pour ce service", 0, null, 'L', false);
-                                $pdf1->Cell($W*5, 4, "- Numéro de série supprimé de ce contrat pour ce service", 0, null, 'L', false);
-                            }                        
-                            $pdf->Ln();$pdf->SetX(24);
-                            $pdf->MultiCell($W * 10, 4, implode(',', json_decode($line->getData('serials_out'))) , 0, null, 'L', false);
-                            $pdf1->Ln();$pdf1->SetX(24);
-                            $pdf1->MultiCell($W * 10, 4, implode(',', json_decode($line->getData('serials_out'))) , 0, null, 'L', false);
-                            $pdf->Ln(); $pdf1->Ln();
-                        }
+                            $diff_add = array_diff(BimpTools::json_decode_array($line->getData('serials_in')), $serials_in_contratLine);
+                            $new_qty += count(BimpTools::json_decode_array($line->getData('serials_in')));
+                            if(count($diff_add) > 0) {
+                                $have_modif = true;
+                                //$new_qty += count($diff_add);
+                                if(count($diff_add) > 1) {
+                                    if($isDP) {
+                                        $pdf->Cell($W*5, 4, "- Description des jours de délégation ajoutés", 0, null, 'L', false);
+                                        $pdf1->Cell($W*5, 4, "- Description des jours de délégation ajoutés", 0, null, 'L', false);
+                                    } else {
+                                        $pdf->Cell($W*5, 4, "- Numéros de séries ajoutés à ce contrat pour ce service", 0, null, 'L', false);
+                                        $pdf1->Cell($W*5, 4, "- Numéros de séries ajoutés à ce contrat pour ce service", 0, null, 'L', false);
+                                    }
 
-                        if(!$have_modif) {
-                            $pdf->SetX(20); $pdf1->SetX(20);
-                            $pdf->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
-                            $pdf->MultiCell($W * 10, 4, "Aucun changement sur ce service" , 0, null, 'L', false);
-                            $pdf1->MultiCell($W * 10, 4, "Aucun changement sur ce service" , 0, null, 'L', false);
-                        } else {
-                            if(!$isDP) {
+                                } else {
+                                    if($isDP) {
+                                        $pdf->Cell($W*5, 4, "- Description des jours de délégation", 0, null, 'L', false);
+                                        $pdf1->Cell($W*5, 4, "- Description des jours de délégation", 0, null, 'L', false);
+                                    } else {
+                                        $pdf->Cell($W*5, 4, "- Numéro de série ajouté à ce contrat pour ce service", 0, null, 'L', false);
+                                        $pdf1->Cell($W*5, 4, "- Numéro de série ajouté à ce contrat pour ce service", 0, null, 'L', false);
+                                    }
+                                }
+                                $pdf->Ln();$pdf->SetX(24);
+                                $pdf1->Ln();$pdf1->SetX(24);
+                                $pdf->MultiCell($W * 10, 4, implode(',', $diff_add) , 0, null, 'L', false);
+                                $pdf1->MultiCell($W * 10, 4, implode(',', $diff_add) , 0, null, 'L', false);
+                                $pdf->Ln();$pdf1->Ln();
+                            }
+
+                            if(count($old_serials)) {
+                                $have_modif = true;
+                                $pdf->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
+                                $pdf->SetX(20);
+                                $pdf1->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
+                                $pdf1->SetX(20);
+                                //$new_qty -= count($old_serials);
+                                if(count($old_serials) > 1) { // Plusriel
+                                    $pdf->Cell($W*5, 4, "- Numéros de série supprimés de ce contrat pour ce service", 0, null, 'L', false);
+                                    $pdf1->Cell($W*5, 4, "- Numéros de série supprimés de ce contrat pour ce service", 0, null, 'L', false);
+                                } else { // Singulier
+                                    $pdf->Cell($W*5, 4, "- Numéro de série supprimé de ce contrat pour ce service", 0, null, 'L', false);
+                                    $pdf1->Cell($W*5, 4, "- Numéro de série supprimé de ce contrat pour ce service", 0, null, 'L', false);
+                                }                        
+                                $pdf->Ln();$pdf->SetX(24);
+                                $pdf->MultiCell($W * 10, 4, implode(',', json_decode($line->getData('serials_out'))) , 0, null, 'L', false);
+                                $pdf1->Ln();$pdf1->SetX(24);
+                                $pdf1->MultiCell($W * 10, 4, implode(',', json_decode($line->getData('serials_out'))) , 0, null, 'L', false);
+                                $pdf->Ln(); $pdf1->Ln();
+                            }
+
+                            if(!$have_modif) {
                                 $pdf->SetX(20); $pdf1->SetX(20);
                                 $pdf->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
-                                $pdf->MultiCell($W * 10, 4, "Nombre de numéro de série couvert par ce service: " . $new_qty , 0, null, 'L', false);
-                                $pdf1->MultiCell($W * 10, 4, "Nombre de numéros de série couvert par ce service: " . $new_qty , 0, null, 'L', false);
+                                $pdf->MultiCell($W * 10, 4, "Aucun changement sur ce service" , 0, null, 'L', false);
+                                $pdf1->MultiCell($W * 10, 4, "Aucun changement sur ce service" , 0, null, 'L', false);
+                            } else {
+                                if(!$isDP) {
+                                    $pdf->SetX(20); $pdf1->SetX(20);
+                                    $pdf->SetFont('', '', 8); $pdf1->SetFont('', '', 8);
+                                    $pdf->MultiCell($W * 10, 4, "Nombre de numéro de série couvert par ce service: " . $new_qty , 0, null, 'L', false);
+                                    $pdf1->MultiCell($W * 10, 4, "Nombre de numéros de série couvert par ce service: " . $new_qty , 0, null, 'L', false);
+                                }
+
+
                             }
-                            
-                            
-                        }
+
+                        } 
+    //                    else {
+    //                        if(!$print_article_new) {
+    //                            $pdf->setY($pdf->getY() + 2);
+    //                            $pdf->SetFont('', '', 10);
+    //                            $pdf->Cell($W, 4, "Article ".$current_article." (Ajout de service)", "L", null, 'L', true);
+    //                            $pdf->setY($pdf->getY() + 5);
+    //                            
+    //                            $pdf1->setY($pdf1->getY() + 2);
+    //                            $pdf1->SetFont('', '', 10);
+    //                            $pdf1->Cell($W, 4, "Article ".$current_article." (Ajout de service)", "L", null, 'L', true);
+    //                            $pdf1->setY($pdf1->getY() + 5);
+    //                            $print_article_new = true;
+    //                            $current_article++;
+    //                        }
+    //                    }
+
+                        $pdf->Ln(); $pdf1->Ln();
+                    }
+                } else {
+                    $date_fin_av = new DateTime($this->avenant->getData('want_end_date'));
+                    $pdf->setY($pdf->getY() + 5);
+                    $pdf->SetFont('', '', 8);
+                    $pdf->Cell($W, 4, "Article 1", "L", null, 'C', true);
+                    $pdf->ln();
+                    $pdf->SetFont('', '', 8);
+                    $pdf1->setY($pdf1->getY() + 5);
+                    $pdf1->SetFont('', '', 8);
+                    $pdf1->Cell($W, 4, "Article 1" . 1, "L", null, 'C', true);
+                    $pdf1->ln();
+                    $pdf1->SetFont('', '', 8);
+                    $current_article = 2;
                     
-                    } 
-//                    else {
-//                        if(!$print_article_new) {
-//                            $pdf->setY($pdf->getY() + 2);
-//                            $pdf->SetFont('', '', 10);
-//                            $pdf->Cell($W, 4, "Article ".$current_article." (Ajout de service)", "L", null, 'L', true);
-//                            $pdf->setY($pdf->getY() + 5);
-//                            
-//                            $pdf1->setY($pdf1->getY() + 2);
-//                            $pdf1->SetFont('', '', 10);
-//                            $pdf1->Cell($W, 4, "Article ".$current_article." (Ajout de service)", "L", null, 'L', true);
-//                            $pdf1->setY($pdf1->getY() + 5);
-//                            $print_article_new = true;
-//                            $current_article++;
-//                        }
-//                    }
-                    
-                    $pdf->Ln(); $pdf1->Ln();
-                }
+                    $pdf->Cell($W, 4, "Les parties conviennent de modifier: ", 0, null, 'L', true);
+                    $pdf->setY($pdf->getY() + 5);
+                    $pdf1->setY($pdf1->getY() + 2);
+                    $pdf1->SetFont('', '', 8);
+                    $pdf1->Cell($W, 4, "Article ".$current_article."", "L", null, 'L', true);
+                    $pdf1->Cell($W, 4, "Les parties conviennent de modifier: ", 0, null, 'L', true);
+                    $pdf->SetFont('', '', 8);
+                    $pdf->Cell($W*5, 4, "La date de fin de contrat initialement prévue au " . $date->format('d/m/Y') . ' sera repportée au ' . $date_fin_av->format('d/m/Y') , 0, null, 'L', false);
+                    $pdf1->SetFont('', '', 8);
+                    $pdf1->Cell($W*5, 4, "La date de fin de contrat initialement prévue au " . $date->format('d/m/Y') . ' sera repportée au ' . $date_fin_av->format('d/m/Y'), 0, null, 'L', false);
+                } 
+                
                 $pdf->setY($pdf->getY() + 5);
                 $pdf->SetFont('', '', 8);
                 $pdf->Cell($W, 4, "Article " . $current_article, "L", null, 'C', true);
@@ -576,7 +604,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 $pdf1->Cell($W, 4, "Article " . $current_article, "L", null, 'C', true);
                 $pdf1->ln();
                 $pdf1->SetFont('', '', 8);
-                $date = new DateTime($this->avenant->getData('date_effect'));
+                
                 
                 $pdf->Cell($W*5, 4, "Le présent avenant entrera en vigueur à compter du " . $date->format('d/m/Y'), 0, null, 'L', false);
                 $pdf1->Cell($W*5, 4, "Le présent avenant entrera en vigueur à compter du " . $date->format('d/m/Y'), 0, null, 'L', false);

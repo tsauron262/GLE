@@ -88,56 +88,56 @@ class newExportController extends BimpController {
                 break;
         }
        
-        $headers = array(
-            'path'   => 'Chemin du fichier',
-            'size' => array('label' => 'Taille', 'align' => 'center', 'searchable' => 0),
-            'date'  => array('label' => 'Date', 'align' => 'center', 'searchable' => 0),
-            'action' => array('label' => '', 'align' => 'right', 'searchable' => 0),
-        );
-        
-        $html .= BimpRender::renderBimpListTable($rows, $headers, array(
-                    'searchable' => true,
-                    'sortable'   => true,
-                    'checkboxes' => false
-        ));
-        
-//        $html .= '<table class="bimp_list_table">';
-//            $html .= '<thead>';
-//            $html .= '<tr>';
-//            $html .= '<th>Fichier</th>';
-//            $html .= '<th>Type</th>';
-//            $html .= '<th>Taille</th>';
-//            $html .= '<th>Date</th>';
-//            $html .= '<th></th>';
-//            $html .= '</tr>';
-//            $html .= '</thead>';
-//
-//            $html .= '<tbody>';
-//            
-//            $glob = glob($this->path_imported . $patern . '*' . date('Y') . '*');
-//            if (count($glob)) {
-//                foreach ($glob as $filePath) {
-//                    $time = new DateTime();
-//                    $time->setTimestamp(fileatime($filePath));
-//                    $htmlP .= '<tr>';
-//                    $htmlP .= '<td><strong>' . $filePath . '</strong></td>';
-//                    $htmlP .= '<td>'. filetype($filePath).'</td>';
-//                    $htmlP .= '<td>'. filesize($filePath).'</td>';
-//                    $htmlP .= '<td>'. $time->format('d/m/Y') .'</td>';
-//                    $htmlP .= '<td class="buttons"> ' . '<span class="rowButton bs-popover" '.BimpRender::renderPopoverData('Voir le contenu du fichier').' onclick="'. $this->export->getJsLoadModalCustomContent('display_content_file', "Contenu du fichier", ['path' => $filePath]) .'" ><i class="far fa5-eye" ></i></span>' . ' </td>';
-//                    $htmlP .= '</tr>';
-//                }
-//            }
-//            if ($htmlP == '') {
-//                $htmlP .= '<tr>';
-//                $htmlP .= '<td colspan="5">' . BimpRender::renderAlerts($no_linked, 'info') . '</td>';
-//                $htmlP .= '</tr>';
-//            }
-//
-//            $html .= $htmlP;
-//            $html .= '</tbody>';
-//            $html .= '</table>';
-//
+//        $headers = array(
+//            'path'   => 'Chemin du fichier',
+//            'size' => array('label' => 'Taille', 'align' => 'center', 'searchable' => 0),
+//            'date'  => array('label' => 'Date', 'align' => 'center', 'searchable' => 0),
+//            'action' => array('label' => '', 'align' => 'right', 'searchable' => 0),
+//        );
+//        
+//        $html .= BimpRender::renderBimpListTable($rows, $headers, array(
+//                    'searchable' => true,
+//                    'sortable'   => true,
+//                    'checkboxes' => false
+//        ));
+//        
+        $html .= '<table class="bimp_list_table">';
+            $html .= '<thead>';
+            $html .= '<tr>';
+            $html .= '<th>Fichier</th>';
+            $html .= '<th>Type</th>';
+            $html .= '<th>Taille</th>';
+            $html .= '<th>Date</th>';
+            $html .= '<th></th>';
+            $html .= '</tr>';
+            $html .= '</thead>';
+
+            $html .= '<tbody>';
+            
+            $glob = glob($this->path_imported . $patern . '*' . date('Y') . '*');
+            if (count($glob)) {
+                foreach ($glob as $filePath) {
+                    $time = new DateTime();
+                    $time->setTimestamp(fileatime($filePath));
+                    $htmlP .= '<tr>';
+                    $htmlP .= '<td><strong>' . $filePath . '</strong></td>';
+                    $htmlP .= '<td>'. filetype($filePath).'</td>';
+                    $htmlP .= '<td>'. filesize($filePath).'</td>';
+                    $htmlP .= '<td>'. $time->format('d/m/Y') .'</td>';
+                    $htmlP .= '<td class="buttons"> ' . '<span class="rowButton bs-popover" '.BimpRender::renderPopoverData('Voir le contenu du fichier').' onclick="'. $this->export->getJsLoadModalCustomContent('display_content_file', "Contenu du fichier", ['path' => $filePath]) .'" ><i class="far fa5-eye" ></i></span>' . ' </td>';
+                    $htmlP .= '</tr>';
+                }
+            }
+            if ($htmlP == '') {
+                $htmlP .= '<tr>';
+                $htmlP .= '<td colspan="5">' . BimpRender::renderAlerts($no_linked, 'info') . '</td>';
+                $htmlP .= '</tr>';
+            }
+
+            $html .= $htmlP;
+            $html .= '</tbody>';
+            $html .= '</table>';
+
 //            $html = BimpRender::renderPanel($title, $html, '', array(
 //                'foldable' => true,
 //                'type'     => 'secondary-forced',

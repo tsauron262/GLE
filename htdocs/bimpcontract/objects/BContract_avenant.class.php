@@ -19,6 +19,16 @@ class BContract_avenant extends BContract_contrat {
         4 => ['label' => 'Abandonné', 'icon' => 'times', 'classes' => ['danger']]
     ];
     
+    public function getTypeAvenantArray() {
+        $parent = $this->getParentInstance();
+        
+        $array = Array(0 => ['label' => 'Avenant de service', 'icon' => 'sign', 'classes' => ['']]);
+        
+        if(!$parent->getData('tacite')) $array[1] = ['label' => 'Avenant de prolongation', 'icon' => 'retweet', 'classes' => ['']];
+        
+        return $array;
+    }
+    
     public function getProductPrice() {
         $id_service = BimpTools::getPostFieldValue('id_serv');
         $product = $this->getInstance('bimpcore', 'Bimp_Product', $id_service);
@@ -74,23 +84,59 @@ class BContract_avenant extends BContract_contrat {
         
         return $allSerials;
     }
-
-    public function create(&$warnings = array(), $force_create = false) {
+    
+    public function update(&$warnings = array(), $force_update = false) {
         
+        $errors = [];
+        
+        if(BimpTools::getPostFieldValue("years")) {
+            
+            $nombre_months = BimpTools::getPostFieldValue('years') * 12;
+            $end = new DateTime($this->getData('date_end'));
+            $end->add(new DateInterval('P' . $nombre_months . 'M'));
+            $end->sub(new DateInterval('P1D'));
+            
+            $errors = $this->updateField('want_end_date', $end->format('Y-m-d'));
+            BimpTools::merge_array($errors, $this->updateField('added_month', $nombre_months));
+            
+        }
+        
+        return $errors;
+        
+    }
+
+    public function validatePost() {
+         $errors = parent::validatePost();
+         $parent = $this->getParentInstance();
+         
+         if($this->getData('statut') != 0) $errors[] = 'Cet avenant n\'est plus au statut brouillon';
+         
+         $conserne_date_end_avp = false;
+         
+         if(BimpTools::getPostFieldValue('type') && BimpTools::getPostFieldValue('type') == 1) $conserne_date_end_avp = true;
+         if(BimpTools::getPostFieldValue('years')) $conserne_date_end_avp = true;
+         
+         
+         if($conserne_date_end_avp) {            
+            if(BimpTools::getPostFieldValue('years') == 0) $errors[] = 'Vous ne pouvez pas choisir 0 année de prolongation';
+        }
+         
+         return $errors;
+    }
+    
+    public function create(&$warnings = array(), $force_create = false) {
+                
         $parent = $this->getParentInstance();
         $errors = [];
-                
         if(!count($errors)) {
             $errors = parent::create($warnings, $force_create);
-            if(!count($errors)) {
+            if(!count($errors) && $this->getData('type') == 0) {
 //                $success = "Avenant créer avec succès";
-                $sql = $this->db->db->query('SELECT * FROM `llx_bcontract_avenantdet`, llx_contratdet cd WHERE id_line_contrat = cd.rowid AND cd.fk_contrat = '.$_REQUEST['id']);
                 
-                $number = $this->db->db->num_rows($sql);//count($this->getList(['id_contrat' => $_REQUEST['id']]));
                 
                 $det = $this->getInstance('bimpcontract', 'BContract_avenantdet');
                 $laLigne = $this->getInstance('bimpcontract', 'BContract_contratLine');
-                if(is_array($parent->dol_object->lines))
+                if(is_array($parent->dol_object->lines) && BimpTools::getPostFieldValue('type') == 0)
                     foreach($parent->dol_object->lines as $line) {
                         $laLigne->fetch($line->id);
                         if($laLigne->getData('renouvellement') == $parent->getData('current_renouvellement')) {
@@ -110,13 +156,36 @@ class BContract_avenant extends BContract_contrat {
                             $det->create();
                         }
                     }
-                $this->updateField('number_in_contrat', $number);
-                
+
                 $this->updateField('date_end', $parent->displayRealEndDate("Y-m-d"));
-            }
+            } elseif(!count($errors) && $this->getData('type') == 1) {
+                
+                $months = BimpTools::getPostFieldValue('years') * 12;
+                $errors = $this->updateField('added_month', $months);
+                
+                $date_de_fin = new DateTime($parent->displayRealEndDate("Y-m-d"));
+                $date_de_fin->add(new DateInterval('P' . $months . 'M'));
+                $date_de_fin->sub(new DateInterval('P1D'));
+                
+                BimpTools::merge_array($errors, $this->updateField('want_end_date', $date_de_fin->format('Y-m-d')));
+                BimpTools::merge_array($errors, $this->updateField('date_effect', $parent->displayRealEndDate("Y-m-d")));
+                BimpTools::merge_array($errors, $this->updateField('date_end', $parent->displayRealEndDate("Y-m-d")));
+
+            }            
+            
+            $sql = $this->db->db->query('SELECT * FROM `llx_bcontract_avenant` WHERE id_contrat = '.$_REQUEST['id']);
+            $number = $this->db->db->num_rows($sql);
+            $this->updateField('number_in_contrat', $number);
         }
         
         return $errors;
+    }
+    
+    public function getNbYears() {
+        if($this->isLoaded()) {
+            return $this->getData('added_month') / 12;
+        }
+        return 1;
     }
     
     public function actionValidate() {
@@ -126,9 +195,11 @@ class BContract_avenant extends BContract_contrat {
         $success = "";
         $canValidate = (count($this->getChildrenList('avenantdet', ['in_contrat' => 1]))) ? true : false;        
         
-        if(!$canValidate)
-            $errors[] = "L'avenant ne peut pas être validé sans aucune ligne pour le contrat";
-        
+        if($this->getData('type') == 0) {
+            if(!$canValidate)
+                $errors[] = "L'avenant ne peut pas être validé sans aucune ligne pour le contrat";
+        }
+
         $parent = $this->getParentInstance();
         if($parent->getData('statut') != 11)
             $errors[] = "Vous ne pouvez pas valider l'avenant car  le contrat n'est pas actif";
@@ -270,10 +341,36 @@ class BContract_avenant extends BContract_contrat {
             'success' => ""
         ];
     }
+
+    public function actionSignedProlongation($data, &$success) {
+        
+        $errors = [];
+        $warnings = [];
+        
+        $parent = $this->getParentInstance();
+
+        if(!count($errors)) {
+            $errors = $parent->updateField('end_date_contrat', $this->getData('want_end_date'));
+            $errors = BimpTools::merge_array($errors, $parent->updateField('date_end_renouvellement', $this->getData('want_end_date')));
+            $errors = BimpTools::merge_array($errors, $parent->updateField('duree_mois', ($parent->getData('duree_mois') + $this->getData('added_month'))));
+            $errors = BimpTools::merge_array($errors, $this->updateField('statut', 2));
+            
+            if(!count($errors)) {
+                $success = "Avenant signé et pris en compte avec succès";
+                $ref = $this->getRefAv();
+                $msg = "L'avenant N°" . $ref . " à été signé le " . $data['date_signed'];
+                mailSyn2("AVENANT CONTRAT", 'contrat@bimp.fr', null, $msg);
+            }
+        }
+
+        return ['errors' => $errors, 'warnings' => $warnings, 'success' => $success];
+        
+    }
     
     public function getRefAv() {
         $parent = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getdata('id_contrat'));
-        return $parent->getData('ref') . '-AV' . $this->getData('number_in_contrat');
+        $sufix = ($this->getData('type') == 1) ? 'AVP' : 'AV'; 
+        return $parent->getData('ref') . '-' . $sufix . $this->getData('number_in_contrat');;
     }
     
     public function getContrat() {
@@ -318,105 +415,54 @@ class BContract_avenant extends BContract_contrat {
                 'onclick' => $this->getJsActionOnclick('validate', array(), array(
                 ))
             );
-            $buttons[] = array(
-                'label'   => 'Ajouter une ligne à l\'avenant',
-                'icon'    => 'fas_list',
-                'onclick' => $this->getJsActionOnclick('addLine', array(), array(
-                    'form_name' => 'addLine'
-                ))
-            );
         }
+        
         if($this->getData('statut') == 1) {
+            
+            $action = ($this->getData('type') == 1) ? 'signedProlongation' : 'signed';
+            
             $buttons[] = array(
                 'label'   => 'Signer',
                 'icon'    => 'fas_signature',
-                'onclick' => $this->getJsActionOnclick('signed', array(), array(
+                'onclick' => $this->getJsActionOnclick($action, array(), array(
                     'form_name' => "signed"
                 ))
             );
         }
-        if($this->getData('statut') == 1) {
-            $buttons[] = array(
-                'label'   => 'Abandonner',
-                'icon'    => 'fas_stop-circle',
-                'onclick' => $this->getJsActionOnclick('abort', array(), array(
-                    
-                ))
-            );
-            $buttons[] = array(
-                'label'   => 'Clore',
-                'icon'    => 'fas_times',
-                'onclick' => $this->getJsActionOnclick('close', array(), array(
-                    
-                ))
-            );
+        
+        if($this->getData('type') == 0) {
+            if($this->getData('statut') == 0) {
+                $buttons[] = array(
+                    'label'   => 'Ajouter une ligne à l\'avenant',
+                    'icon'    => 'fas_list',
+                    'onclick' => $this->getJsActionOnclick('addLine', array(), array(
+                        'form_name' => 'addLine'
+                    ))
+                );
+            }
+            
+            if($this->getData('statut') == 1) {
+                $buttons[] = array(
+                    'label'   => 'Abandonner',
+                    'icon'    => 'fas_stop-circle',
+                    'onclick' => $this->getJsActionOnclick('abort', array(), array(
+
+                    ))
+                );
+                $buttons[] = array(
+                    'label'   => 'Clore',
+                    'icon'    => 'fas_times',
+                    'onclick' => $this->getJsActionOnclick('close', array(), array(
+
+                    ))
+                );
+            }
         }
-        
-//        $lastAvenantId = $this->db->getMax('bcontract_avenant', 'id', 'id_contrat = ' . $this->getData('id_contrat'));
-        
-//        if($this->getData('statut') == 2  && $this->id == $lastAvenantId) {
-//            $buttons[] = array(
-//                'label'   => 'Supprimer  l\'avenant',
-//                'icon'    => 'fas_trash',
-//                'onclick' => $this->getJsActionOnclick('goBackAvenant', array(), array(
-//                     "form_name" => 'delete_avenant'
-//                ))
-//            );
-//        }
-        
+
         return $buttons;
     }
     
-//    public function actionGoBackAvenant($data, &$success) {
-//        
-//        $errors = [];
-//        $warnings = [];
-//        $parent = $this->getParentInstance();
-//        
-//        $lines = $parent->getChildrenList("lines");
-//        if(count($children) > 0) {
-//           foreach($children as $id_child) {
-//               $line = $parent->getChildObject('lines', $id_child);
-//           }
-//        }
-//        
-//        $children = $this->getChildrenList("avenantdet");
-//        if(count($children) > 0) {
-//            foreach($children as $id_child) {
-//                $child = $this->getChildObject("avenantdet", $id_child);
-//                $back_description = $child->getData('save_line_description');
-//                $back_serials = json_decode($child->getData('save_line_serials'));
-//                
-//            }
-//        }
-//
-//        return [
-//            'errors' => $errors,
-//            'warnings'  => $warnings,
-//            'success' => $success
-//        ];
-//        
-//    }
-//    
-//    public function displayModifSuppAvenant() {
-//        
-//        $txt = "";
-//        $children = $this->getChildrenList("avenantdet");
-//        $parent = $this->getParentInstance();
-//        
-//        if(count($children) > 0) {
-//            foreach($children as $id_child)  {
-//                $child = $this->getChildObject('avenantdet', $id_child);
-//                if($child->getData('id_line_contrat')) {
-//                    $line = $parent->getChildObject('lines', $child->getData('id_line_contrat'));
-//                } else {
-//                    
-//                }
-//            }
-//        }
-//        
-//        return $txt;
-//    }
+
     
     public function actionAbort($data = [], &$success) {
         $errors = [];
@@ -459,7 +505,10 @@ class BContract_avenant extends BContract_contrat {
         $html .= $prorata . ' Jour.s';
         $html .= "<strong>";
         if($display)
-            return $html;
+            if($this->getData('type') == 0)
+                return $html;
+            else
+                return 'N/A';
         else
             return $prorata;
     }
@@ -534,5 +583,26 @@ class BContract_avenant extends BContract_contrat {
         return 1;
     }
     
+    public function displayDet() {
+        
+        $html = '';
+        
+        if($this->getData('type') == 0) {
+            $html .= $this->renderChildrenList('avenantdet');
+        } else {
+            
+            $end = new DateTime($this->getData('date_end'));
+            $fin = new DateTime($this->getData('want_end_date'));
+            
+            $html .= '<h3 class="danger" ><u>Avenant de prolongation</u></h3>';
+            $html .= BimpRender::renderIcon('calendar danger') . ' Du <strong>'.$end->format('d/m/Y').'</strong> au <strong>'.$fin->format('d/m/Y').'</strong>';
+            $html .= '<br /><br />';
+            $html .= $this->renderForm('avenantProlongationEdit', true);
+        }
+        
+        
+        return $html;
+        
+    }
     
 }

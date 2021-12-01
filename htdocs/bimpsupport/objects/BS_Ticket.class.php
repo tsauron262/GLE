@@ -380,15 +380,16 @@ class BS_Ticket extends BimpObject
 
     public function getSerialEquipment($in_the_client = false)
     {
-        if ($this->getData('serial') != '') {
+        $serial = addslashes($this->getData('serial'));
+        if ($serial != '') {
             $equipment = BimpObject::getBimpObjectInstance('bimpequipment', 'Equipment');
             if ($equipment->find(array(
                         'or_serial' => array(
                             'or' => array(
-                                'serial' => $this->getData('serial'),
-                                'imei'   => $this->getData('serial'),
-                                'imei2'  => $this->getData('serial'),
-                                'meid'   => $this->getData('serial')
+                                'serial' => $serial,
+                                'imei'   => $serial,
+                                'imei2'  => $serial,
+                                'meid'   => $serial
                             )
                         )
                             ), true)) {

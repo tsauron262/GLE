@@ -709,6 +709,7 @@ filters:
         input: 
             type: search_user
             include_empty: 1
+            include_current: 1
             empty_label: Aucun
                     
     id_product:

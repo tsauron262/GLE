@@ -524,7 +524,8 @@ class BT_ficheInter extends BimpDolObject
                     if (in_array("0", $values)) {
                         $sql = "SELECT rowid FROM llx_fichinter WHERE fk_contrat = 0 AND ";
                         $sql .= "(commandes = '[]' OR commandes = '' OR commandes IS NULL) AND ";
-                        $sql .= "(tickets = '[]' OR tickets = '' OR tickets IS NULL)";
+                        $sql .= "(tickets = '[]' OR tickets = '' OR tickets IS NULL) AND ";
+                        $sql .= "(fk_facture = '[]' OR fk_facture = '' OR fk_facture IS NULL)";
                     }
                 }
                 if ($sql != "") {

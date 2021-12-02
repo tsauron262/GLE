@@ -25,7 +25,7 @@ class indexController extends BimpController
         );
         $tabs[] = array(
             'id'      => 'byMy',
-            'title'   => 'Mes tâches créer',
+            'title'   => 'Mes tâches crées',
             'content' => $list2->renderHtml()
         );
 

@@ -39,10 +39,10 @@ objects:
 #            bimp_object: 
 #                module: bimpreservation
 #                name: BR_OrderLine
-        list: 
-            title: Produits
-            filters: 
-                type: 1
+#        list: 
+#            title: Produits
+#            filters: 
+#                type: 1
     
 #    services: 
 #        relation: hasMany

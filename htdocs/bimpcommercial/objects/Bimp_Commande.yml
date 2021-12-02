@@ -51,10 +51,10 @@ objects:
 #            bimp_object: 
 #                module: bimpreservation
 #                name: BR_OrderLine
-        list: 
-            title: Services
-            filters: 
-                type: 2
+#        list: 
+#            title: Services
+#            filters: 
+#                type: 2
                 
     shipment: 
         relation: none

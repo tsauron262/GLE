@@ -24,38 +24,6 @@ objects:
         instance: 
             bimp_object: Bimp_CommandeLine
             
-#    order_lines: 
-#        relation: hasMany
-#        delete: 1
-#        instance: 
-#            bimp_object: 
-#                module: bimpreservation
-#                name: BR_OrderLine
-#                
-#    products: 
-#        relation: hasMany
-#        delete: 0
-#        instance: 
-#            bimp_object: 
-#                module: bimpreservation
-#                name: BR_OrderLine
-#        list: 
-#            title: Produits
-#            filters: 
-#                type: 1
-    
-#    services: 
-#        relation: hasMany
-#        delete: 0
-#        instance: 
-#            bimp_object: 
-#                module: bimpreservation
-#                name: BR_OrderLine
-#        list: 
-#            title: Services
-#            filters: 
-#                type: 2
-                
     shipment: 
         relation: none
         delete: 0
@@ -63,14 +31,6 @@ objects:
             bimp_object: 
                 module: bimplogistique
                 name: BL_CommandeShipment
-                
-#    old_shipments: 
-#        relation: hasMany
-#        delete: 1
-#        instance: 
-#            bimp_object: 
-#                module: bimpreservation
-#                name: BR_CommandeShipment
                 
     shipments: 
         relation: hasMany

@@ -14,7 +14,13 @@ class BIMP_Task extends BimpObject
         'vols@bimp-groupe.net' => "VOLS", 
         'sms-apple@bimp-groupe.net' => "Code APPLE", 
         'suivicontrat@bimp-groupe.net' => "Suivi contrat", 
-        'other' => 'AUTRE');
+        'other' => 'Autre');
+    
+    public static $types_manuel = array(
+        'dev' => 'Dévlopement'
+    );
+    
+    
     public static $srcNotAttribute = array('sms-apple@bimp-groupe.net');
     public static $nbNonLu = 0;
     public static $nbAlert = 0;
@@ -62,6 +68,7 @@ class BIMP_Task extends BimpObject
         $return = parent::create($warnings, $force_create);
         
         $this->updateField('date_update', $this->getData('date_create'));
+        $this->updateField('auto', ($this->getData('dst') != '') ? 1 : 0);
         
         return $return;
     }
@@ -114,19 +121,33 @@ class BIMP_Task extends BimpObject
     }
     
     public function displayType(){
-        return self::$valSrc[$this->getType()];
+        if($this->getData('auto'))
+            return self::$valSrc[$this->getType()];
+        else
+            return $this->displayData('type_manuel');
     }
     
 
     public function getTypeTacheSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
     {
         global $user;
-        if($value != 'other')
-            $filters['dst'] = $value;
+        
+        if(isset(static::$valSrc[$value])){
+            $filters['auto'] = 1;
+            if($value != 'other')
+                $filters['dst'] = $value;
+            else{
+                $tabsDroit =  self::getTableSqlDroitPasDroit($user);
+    //            print_r($tabsDroit);die;
+                $filters['dst'] = array("not_in"=> $tabsDroit[2]);
+            }
+        }
+        elseif(isset(static::$types_manuel[$value])){
+            $filters['auto'] = 0;
+            $filters['type_manuel'] = $value;
+        }
         else{
-            $tabsDroit =  self::getTableSqlDroitPasDroit($user);
-//            print_r($tabsDroit);die;
-            $filters['dst'] = array("not_in"=> $tabsDroit[2]);
+            BimpCore::addlog('Type de tache inconnue '.$value);
         }
         
         return self::$valStatus;
@@ -192,6 +213,10 @@ class BIMP_Task extends BimpObject
     {
         return $this->getRight("write");
     }
+    
+    public function canEditAll(){
+        return 1; //todo
+    }
 
     public function canDelete()
     {
@@ -208,6 +233,10 @@ class BIMP_Task extends BimpObject
         if ($field_name == "id_user_owner")
             return $this->canAttribute();
         return parent::canEditField($field_name);
+    }
+    
+    public function getTypeArray(){
+        return BimpTools::merge_array(static::$valSrc, static::$types_manuel);
     }
     
     public static function getTableSqlDroitPasDroit($user){

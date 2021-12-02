@@ -1438,6 +1438,76 @@ class BS_SAV extends BimpObject
         return BimpRender::renderAlerts('Equipement non trouvé (ID ' . $id_equipment . ')', 'warning');
     }
 
+    public function displayMoySav($ios = true)
+    {
+        $time = 31;
+        $centres = BimpCache::getCentres();
+        $html = '';
+        $table = BimpCache::getDureeMoySav($time, $ios);
+
+        $i = 0;
+        $result = $result2 = array();
+        foreach ($centres as $centre) {
+            if (isset($table[$centre['code']])) {
+                $i++;
+                $tmp = array('centre' => $centre['label'], 'time' => $table[$centre['code']]);
+                if ($i < 8) {
+                    $result[] = $tmp;
+                } else {
+                    $result2[] = $tmp;
+                }
+            }
+        }
+        $html = '';
+        $html .= '<div style="max-width:700px; float: left; padding:5px">' . BimpRender::renderBimpListTable($result, array('centre' => 'Centre', 'time' => 'Temps moyen en J')) . '</div>';
+        if (count($result2))
+            $html .= '<div style="max-width:700px; float: left; padding:5px">' . BimpRender::renderBimpListTable($result2, array('centre' => 'Centre', 'time' => 'Temps moyen en  J')) . '</div>';
+
+        $html = BimpRender::renderPanel('Temps moyen réparation sur ' . $time . ' jours ' . ($ios ? '(iOs)' : '(hors iOs)'), $html);
+
+        return $html;
+    }
+
+    public function displayMaxDiago($ios = true)
+    {
+        $time = 31;
+        $centres = BimpCache::getCentres();
+        $html = '';
+        $table = BimpCache::getDureeDiago($ios);
+
+        $i = 0;
+        $result = $result2 = array();
+        foreach ($centres as $centre) {
+            if (isset($table[$centre['code']])) {
+                $i++;
+                $tmp = array('centre' => $centre['label'], 'time' => $table[$centre['code']]);
+                if ($i < 8) {
+                    $result[] = $tmp;
+                } else {
+                    $result2[] = $tmp;
+                }
+            }
+        }
+        $html = '';
+        $html .= '<div style="float: left; padding:5px">' . BimpRender::renderBimpListTable($result, array('centre' => 'Centre', 'time' => 'Temps moyen en J')) . '</div>';
+        if (count($result2))
+            $html .= '<div style="float: left; padding:5px">' . BimpRender::renderBimpListTable($result2, array('centre' => 'Centre', 'time' => 'Temps moyen en  J')) . '</div>';
+
+        $html = BimpRender::renderPanel('Temps max diagnostic ' . ($ios ? '(iOs)' : '(hors iOs)'), $html);
+
+        return $html;
+    }
+
+    public function displayHeaderListInfo()
+    {
+        $html = '<div class="col_xs-12 col-sm-6 col-md-3">' . $this->displayMaxDiago(true) . '</div>';
+        $html .= '<div class="col_xs-12 col-sm-6 col-md-3">' . $this->displayMaxDiago(false) . '</div>';
+        $html .= '<div class="col_xs-12 col-sm-6 col-md-3">' . $this->displayMoySav(true) . '</div>';
+        $html .= '<div class="col_xs-12 col-sm-6 col-md-3">' . $this->displayMoySav(false) . '</div>';
+        $html .= '<div style="clear:both;"></div>';
+        return $html;
+    }
+
     // Rendus HTML: 
 
     public function renderHeaderExtraLeft()
@@ -2095,7 +2165,7 @@ class BS_SAV extends BimpObject
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($factureA), 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
             } else {
                 $factureA->addline("Acompte", $acompte / 1.2, 1, 20, null, null, null, 0, null, null, null, null, null, 'HT', null, 1, null, null, null, null, null, null, $acompte / 1.2);
-                if($factureA->validate($user)){
+                if ($factureA->validate($user)) {
                     // Création du paiement: 
                     BimpTools::loadDolClass('compta/paiement', 'paiement');
                     $payement = new Paiement($this->db->db);
@@ -2163,8 +2233,7 @@ class BS_SAV extends BimpObject
                         $fac_errors = BimpTools::getErrorsFromDolObject($factureA, $error = null, $langs);
                         $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création du fichier PDF de la facture d\'acompte');
                     }
-                }
-                else{
+                } else {
                     $fac_errors = BimpTools::getErrorsFromDolObject($factureA, $error = null, $langs);
                     $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la validation de la facture');
                 }
@@ -3786,79 +3855,6 @@ class BS_SAV extends BimpObject
             'warnings' => $warnings
         );
     }
-    
-    public function displayMoySav($ios = true){
-        $time = 31;
-        $centres = BimpCache::getCentres();
-        $html = '';
-        $table = BimpCache::getDureeMoySav($time, $ios);
-        
-        
-        $i = 0;
-        $result = $result2 = array();
-        foreach($centres as $centre){
-            if(isset($table[$centre['code']])){
-                $i++;
-                $tmp = array('centre' => $centre['label'], 'time'=>$table[$centre['code']]);
-                if($i < 8){
-                    $result[] = $tmp;
-                }
-                else{
-                    $result2[] = $tmp;
-                }
-            } 
-        }
-        $html = '';
-        $html .= '<div style="max-width:700px; float: left; padding:5px">'.BimpRender::renderBimpListTable($result, array('centre' => 'Centre', 'time' => 'Temps moyen en J')).'</div>';
-        if(count($result2))
-            $html .= '<div style="max-width:700px; float: left; padding:5px">'.BimpRender::renderBimpListTable($result2, array('centre' => 'Centre', 'time' => 'Temps moyen en  J')).'</div>';
-        
-        $html = BimpRender::renderPanel('Temps moyen réparation sur '.$time.' jours '.($ios? '(iOs)' : '(hors iOs)'), $html);
-        
-        
-        return $html;
-    }
-    
-    public function displayMaxDiago($ios = true){
-        $time = 31;
-        $centres = BimpCache::getCentres();
-        $html = '';
-        $table = BimpCache::getDureeDiago($ios);
-        
-        
-        $i = 0;
-        $result = $result2 = array();
-        foreach($centres as $centre){
-            if(isset($table[$centre['code']])){
-                $i++;
-                $tmp = array('centre' => $centre['label'], 'time'=>$table[$centre['code']]);
-                if($i < 8){
-                    $result[] = $tmp;
-                }
-                else{
-                    $result2[] = $tmp;
-                }
-            } 
-        }
-        $html = '';
-        $html .= '<div style="float: left; padding:5px">'.BimpRender::renderBimpListTable($result, array('centre' => 'Centre', 'time' => 'Temps moyen en J')).'</div>';
-        if(count($result2))
-            $html .= '<div style="float: left; padding:5px">'.BimpRender::renderBimpListTable($result2, array('centre' => 'Centre', 'time' => 'Temps moyen en  J')).'</div>';
-        
-        $html = BimpRender::renderPanel('Temps max diagnostic sur '.$time.' jours '.($ios? '(iOs)' : '(hors iOs)'), $html);
-        
-        
-        return $html;
-    }
-    
-    public function displayHeaderListInfo(){
-        $html = '<div class="col_xs-12 col-sm-6 col-md-3">'.$this->displayMaxDiago(true).'</div>';
-        $html .= '<div class="col_xs-12 col-sm-6 col-md-3">'.$this->displayMaxDiago(false).'</div>';
-        $html .= '<div class="col_xs-12 col-sm-6 col-md-3">'.$this->displayMoySav(true).'</div>';
-        $html .= '<div class="col_xs-12 col-sm-6 col-md-3">'.$this->displayMoySav(false).'</div>';
-        $html .= '<div style="clear:both;"></div>';
-        return $html;
-    }
 
     public function actionValidatePropal($data, &$success)
     {
@@ -3891,10 +3887,10 @@ class BS_SAV extends BimpObject
 
         if (!count($errors)) {
             global $user, $langs;
-            
+
             $propal->updateField(('datep'), date('Y/m/d'));
             $propal->updateField('fin_validite', BimpTools::getDateForDolDate($propal->getData('datep')) + ($propal->dol_object->duree_validite * 24 * 3600));
-            
+
             $propal->lines_locked = 1;
 
             $new_status = null;
@@ -4609,7 +4605,7 @@ class BS_SAV extends BimpObject
             }
 
             // Opération hors transactions: 
-            
+
             if (!count($errors)) {
                 // Fermeture des réparations GSX: 
                 $repair = BimpObject::getInstance('bimpapple', 'GSX_Repair');
@@ -4640,7 +4636,7 @@ class BS_SAV extends BimpObject
                     }
                 }
             }
-            
+
             if ($use_db_transactions) {
                 $this->db->db->begin();
             }
@@ -5257,7 +5253,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $fac_errors = $this->createAccompte((float) $this->getData('acompte'), false);
                 if (count($fac_errors)) {
                     $fac_errors = BimpTools::merge_array(array('Des erreurs sont survenues lors de la création de la facture d\'acompte'), $fac_errors);
-                    if((int) BimpCore::getConf('bimpcore_use_db_transactions', 0))
+                    if ((int) BimpCore::getConf('bimpcore_use_db_transactions', 0))
                         $errors = BimpTools::merge_array($errors, $fac_errors);
                     else
                         $warnings = BimpTools::merge_array($warnings, $fac_errors);
@@ -5270,7 +5266,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $prop_errors = $this->createPropal();
                     if (count($prop_errors)) {
                         $prop_errors = BimpTools::merge_array(array('Des erreurs sont survenues lors de la création de la proposition commerciale'), $prop_errors);
-                        if((int) BimpCore::getConf('bimpcore_use_db_transactions', 0))
+                        if ((int) BimpCore::getConf('bimpcore_use_db_transactions', 0))
                             $errors = BimpTools::merge_array($errors, $prop_errors);
                         else
                             $warnings = BimpTools::merge_array($warnings, $prop_errors);

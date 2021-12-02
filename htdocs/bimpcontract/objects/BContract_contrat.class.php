@@ -531,10 +531,12 @@ class BContract_contrat extends BimpDolObject
         $dateEffecte = new DateTime($this->getData('date_start'));
         $date_now = new DateTime();
 
-        $tms_effect = strtotime($dateEffecte->format('Y-m-d'));
-        $tms_now = strtotime($date_now->format('Y-m-d'));
         
-        if(($tms_effect > $tms_now) && !BimpCore::getConf("bimpcontract_activate_contrat_before")) {
+        $diff = $date_now->diff($dateEffecte);
+        
+        //$errors[] = $diff->days;
+        
+        if(($diff->days > 10)) {
             $errors[] = "Ce contrat ne peut pas être activé car sa date d'effet est trop éloignée. Le groupe contrat recevra une demande d'activation 10 jours avant cette date";
         }
 

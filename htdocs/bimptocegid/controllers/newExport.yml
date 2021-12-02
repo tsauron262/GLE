@@ -11,6 +11,11 @@ objects:
             bimp_object:
                 module: bimptocegid
                 name: BTC_exportRibAndMandat
+    TRA_TIERS:
+        instance:
+            bimp_object:
+                module: bimptocegid
+                name: BTC_export_societe
 
 sections:
     - type: custom
@@ -25,11 +30,17 @@ sections:
             rows:                                                   
                 - cols:
                     - type: custom
+                      custom:
+                          callback: 
+                              method: displayBtn
+                              object: TRA_TIERS
+                    - type: custom
                       custom: 
                         callback: 
                             method: displayFileExported
                             params:
                                 - tier
+                    
         - id: payni
           title: PAIEMENTS
           struct:

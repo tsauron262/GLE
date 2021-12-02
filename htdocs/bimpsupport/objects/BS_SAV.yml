@@ -373,6 +373,7 @@ fields:
         values: 
             array: systems
         user_edit: 1
+        required: 1
     login_admin: 
         label: Login admin
         user_edit: 1

@@ -559,7 +559,21 @@ class BimpInput
                 if (!isset($options['empty_label'])) {
                     $options['empty_label'] = '';
                 }
+
                 $options['options'] = BimpCache::getUsersArray($options['include_empty'], $options['empty_label']);
+
+                if (isset($options['include_current']) && (int) $options['include_current']) {
+                    $new_options = array(
+                        'current' => 'Utilisateur connecté'
+                    );
+
+                    foreach ($options['options'] as $id => $label) {
+                        $new_options[$id] = $label;
+                    }
+
+                    $options['options'] = $new_options;
+                }
+
                 return self::renderInput('select', $field_name, $value, $options, $form, $option, $input_id);
 
             case 'search_group':

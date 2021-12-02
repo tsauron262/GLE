@@ -170,6 +170,8 @@ class BT_ficheInter extends BimpDolObject
                 return 1;
 
             case 'generatePdf':
+                if($user->admin)
+                    return 1;
                 if ($status !== self::STATUT_BROUILLON) {
                     $errors[] = BimpTools::ucfirst($this->getLabel('this') . 'n\'est plus au statut "brouilon"');
                     return 0;
@@ -378,7 +380,7 @@ class BT_ficheInter extends BimpDolObject
 //                );
             }
 
-            if ($this->isActionAllowed('generatePdf') && $this->canSetAction('generatePdf')) {
+            if (($this->isActionAllowed('generatePdf') && $this->canSetAction('generatePdf')) || $user->admin) {
                 $buttons[] = array(
                     'label'   => 'Générer le PDF',
                     'icon'    => 'fas_file-pdf',
@@ -522,7 +524,8 @@ class BT_ficheInter extends BimpDolObject
                     if (in_array("0", $values)) {
                         $sql = "SELECT rowid FROM llx_fichinter WHERE fk_contrat = 0 AND ";
                         $sql .= "(commandes = '[]' OR commandes = '' OR commandes IS NULL) AND ";
-                        $sql .= "(tickets = '[]' OR tickets = '' OR tickets IS NULL)";
+                        $sql .= "(tickets = '[]' OR tickets = '' OR tickets IS NULL) AND ";
+                        $sql .= "(fk_facture = '[]' OR fk_facture = '' OR fk_facture IS NULL)";
                     }
                 }
                 if ($sql != "") {

@@ -1,0 +1,21 @@
+labels:
+    name: Tiers
+
+forms:
+    exported:
+        rows:
+            - custom: 1
+              label: Liste des tiers
+              input_name: tiers
+              input:
+                  type: textarea
+                  rows: 15
+                  help: Code auxilière séparés par un saut de ligne
+            - custom: 1
+              label: Want
+              input_name: want
+              input:
+                  type: select
+                  options:
+                      c: Code client
+                      f: Code fournisseur

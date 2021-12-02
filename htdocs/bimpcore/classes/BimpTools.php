@@ -3083,7 +3083,7 @@ class BimpTools
         $text = "Yes" . rand(0, 10000000);
         if (!file_put_contents($file, $text))
             die('droit sur fichier incorrect : ' . $file);
-        usleep(2000000);
+        usleep(3000000);
         $text2 = file_get_contents($file);
         if ($text == $text2){
             $autreInstanceBloquage = static::isBloqued($type, true);

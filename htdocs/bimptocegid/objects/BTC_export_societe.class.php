@@ -1,5 +1,5 @@
 <?php
-
+require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/BTC_export.class.php';
 class BTC_export_societe extends BTC_export {
     
     const EXPORTED = 1;
@@ -173,4 +173,30 @@ class BTC_export_societe extends BTC_export {
         
     }
     
+    public function displayBtn() {
+        return '<div class="header_buttons"><button class="btn btn-default" type="button" onclick="'.$this->getJsActionOnclick("exported_export", array(), array("form_name" => "exported")).'"><i class="fas fa5-download iconLeft"></i>Exporter un tiers déjà exporté</button>';
+    }
+    
+    public function actionExported_export($data, &$success) {
+        $errors = [];
+        $warnings = [];
+        
+        $tiers = explode("\n", $data['tiers']);
+        
+        foreach($tiers as $code) {
+            $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe');
+            
+            $find_by = ($data['want'] == "c") ? "code_compta" : "code_compta_fournisseur";
+            
+            $client->find(Array($find_by => $code), 1);
+            if($client->isLoaded()) {
+                $this->export($client, $data['want'], date('Y_m_d'));
+            } else {
+                $errors[] = $code . " existe pas";
+            }
+        }
+        
+        
+        return ['errors' => $errors, 'warnings' => $warnings, 'success' => $success];
+    }
 }

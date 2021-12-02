@@ -310,7 +310,9 @@ lists:
         icon: fas_user-circle
         list_filters:
             - name: client
-              filter: 1
+              filter: 
+                  operator: '>'
+                  value: 0
         add_btn_label: Nouveau client
         header_buttons: 
             callback: getDefaultListExtraHeaderButtons

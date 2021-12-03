@@ -54,6 +54,11 @@ class modBimpTechnique extends DolibarrModules {
         $this->rights[$r][1] = 'Facturer une FI';
         $this->rights[$r][3] = 0;
         $this->rights[$r][4] = 'billing';
+        $r++;
+        $this->rights[$r][0] = $this->numero + $r;
+        $this->rights[$r][1] = 'Rattacher un objet à une FI après validation (Commande, contrat, facture)';
+        $this->rights[$r][3] = 0;
+        $this->rights[$r][4] = 'reattach_an_object';
         $r = 1;
         
 

@@ -1856,7 +1856,7 @@ class BT_ficheInter extends BimpDolObject
                     }
 
                     $commercial = $this->getCommercialClient();
-                    $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', 460);
+                    //$commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', 460);
                     if (BimpObject::objectLoaded($commercial)) {
                         $email_comm = BimpTools::cleanEmailsStr($commercial->getData('email'));
                     }

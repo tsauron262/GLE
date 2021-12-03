@@ -320,14 +320,14 @@ class BimpNote extends BimpObject
                 $msg['is_viewed'] = (int) $c['lu'];
 
                 // Obj
-                $msg['obj']['nom_url'] = $c['obj']->getNomUrl();
+                $msg['obj']['nom_url'] = $c['obj']->getLink(array('external_link'=>0, 'modal_view'=>0));
                 if (method_exists($c['obj'], "getChildObject")) {
                     $soc = $c['obj']->getChildObject("societe");
                     if (!$soc or!$soc->isLoaded())
                         $soc = $c['obj']->getChildObject("client");
 
                     if ($soc && $soc->isLoaded())
-                        $msg['obj']['client_nom_url'] = $soc->getNomUrl(1);
+                        $msg['obj']['client_nom_url'] = $soc->getLink(array('external_link'=>0, 'modal_view'=>0));
                 }
 
                 // Author

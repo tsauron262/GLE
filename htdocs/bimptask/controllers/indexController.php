@@ -14,6 +14,7 @@ class indexController extends BimpController
         $obj = BimpObject::getInstance('bimptask', 'BIMP_Task');
         $list = $obj->getListFiltre("my");
         $list2 = $obj->getListFiltre("byMy");
+        $list3 = $obj->getListFiltre();
         
         
         
@@ -25,8 +26,13 @@ class indexController extends BimpController
         );
         $tabs[] = array(
             'id'      => 'byMy',
-            'title'   => 'Mes tâches créer',
+            'title'   => 'Mes tâches crées',
             'content' => $list2->renderHtml()
+        );
+        $tabs[] = array(
+            'id'      => 'all',
+            'title'   => 'Toutes',
+            'content' => $list3->renderHtml()
         );
 
         return BimpRender::renderNavTabs($tabs);

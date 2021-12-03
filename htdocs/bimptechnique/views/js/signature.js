@@ -7,13 +7,17 @@ function onSignatureFormSubmit($form) {
     if ($typeInput.length && $input.length) {
         var type_sign = parseInt($typeInput.val());
         if (type_sign === 3) {
-            if (typeof (signaturePads[$form.attr('id')]) !== 'undefined') {
-                $input.val(signaturePads[$form.attr('id')].toDataURL('image/png'));
-                return 1;
+            var _data = signaturePads[$form.attr('id')]._data;
+            if(_data.length > 0) {
+                if (typeof (signaturePads[$form.attr('id')]) !== 'undefined') {
+                    $input.val(signaturePads[$form.attr('id')].toDataURL('image/png'));
+                    return 1;
+                } else {
+                    bimp_msg('Erreur: bloc signature non trouvé', 'danger');
+                }
             } else {
-                bimp_msg('Erreur: bloc signature non trouvé', 'danger');
+                bimp_msg("Signature client manquante", "danger");
             }
-
             return 0;
         } else {
             $input.val('');

@@ -129,6 +129,9 @@ forms:
             - field: txt
             - field: comment
             - field: id_user_owner
+#            - object: files
+#              form: upload
+#              multiple: 1
             
     newMail:
         rows:

@@ -177,6 +177,8 @@ class BIMP_Task extends BimpObject
     public function getRight($right)
     {
         global $user;
+        if(!$this->isLoaded())
+            return 1;
         if ($this->getData("id_user_owner") == $user->id)
             return 1;
         if ($this->getData("user_create") == $user->id && $right == 'read')

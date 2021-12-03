@@ -367,7 +367,17 @@ fields:
         values:
             array: secteurs
     
-forms:                  
+forms:
+    reattach_an_object:
+        title: Rattacher un objet à la FI
+        rows:
+            - custom: 1
+              label: Type d'objet
+              input_name: type_of_object
+              input:
+                  type: select
+                  options:
+                      array: typeOfReattachmentObject
     default: 
         rows: 
             client: 

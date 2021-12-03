@@ -608,14 +608,17 @@ filters:
            1: Commande(s)
            2: Ticket(s) support
     no_linked:
-        label: FI(s) non liée(s) (Forcer l'affichage)
+        label: FI(s) non liée(s)
         type: check_list
         items:
           0: OUI
     commercialclient:
         label: Commercial client
-        input:
+        input: 
             type: search_user
+            include_empty: 1
+            include_current: 1
+            empty_label: Aucun
         data_type: id_object
         type: user
 

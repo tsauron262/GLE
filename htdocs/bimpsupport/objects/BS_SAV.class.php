@@ -4981,6 +4981,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         
         global $user;
         $this->addNote('Sav pris en charge par ' . $user->getFullName($langs), 4);
+        $this->updateField('date_pc', date('Y-m-d H:i:s'));
 
         // Mise à jour des champs: 
         if (!count($errors)) {

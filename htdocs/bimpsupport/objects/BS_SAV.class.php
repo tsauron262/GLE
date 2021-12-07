@@ -4979,7 +4979,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         // Mise à jour du statut: 
         $errors = $this->updateField('status', self::BS_SAV_NEW);
         
-        global $user;
+        global $user, $langs;
         $this->addNote('Sav pris en charge par ' . $user->getFullName($langs), 4);
         $this->updateField('date_pc', date('Y-m-d H:i:s'));
 

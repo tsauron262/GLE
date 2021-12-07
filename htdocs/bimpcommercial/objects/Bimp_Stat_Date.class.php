@@ -99,7 +99,11 @@ class Bimp_Stat_Date extends BimpObject
         $data["data11"] = 'Facture HT a 1an';
         $data["axeX"] = '';
         $data["axeY"] = 'K €';
-        $data["title"] = 'Facture Commande et Devis par Jour';
+        $data["title"] = 'Facture Commande et Devis par ';
+        if($this->mode == 'day')
+            $data["title"] .= 'Jour';
+        elseif($this->mode == 'month')
+            $data["title"] .= 'Mois';
         
         return $data;
     }

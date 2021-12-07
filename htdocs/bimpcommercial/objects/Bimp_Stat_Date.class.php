@@ -9,6 +9,7 @@ class Bimp_Stat_Date extends BimpObject
     public $datasFacture = array();
     public $signatureFilter = "";
     public $filterCusom = array();
+    public $mode = 'month';
     
     public $asGraph = true;
     public $filterCusomExclud = array();
@@ -125,14 +126,21 @@ class Bimp_Stat_Date extends BimpObject
             $memoireFilter = $filters;
             unset($memoireFilter['a.date']);
         }
-        
+//        print_r($filters);die('tttt');
         if(strtotime($filters["a.date"]["or_field"][0]['max']) > ( time() - 86400))
-            $filters["a.date"]["or_field"][0]['max'] = date('Y-m-d', ( time() - 86400) );;
+            $filters["a.date"]["or_field"][0]['max'] = date('Y-m-d', ( time() - 86400) );
+       if(isset($filters['a.fk_soc'])){
+            if(!is_array($filters['a.fk_soc']))
+                $filters['a.fk_soc'] = array($filters['a.fk_soc']);
+            $this->filterCusom['a.fk_soc'] = $filters['a.fk_soc'];
+            unset($filters['a.fk_soc']);
+       }
         
         
         $this->signatureFilter = json_encode($this->filterCusom);
         $this->signatureFilter .= json_encode($this->filterCusomExclud);
         $this->signatureFilter .= json_encode($memoireFilter);
+        $this->signatureFilter .= json_encode($this->mode);
        $filters["a.filter"] = $this->signatureFilter;
 //       print_r($filters);die;
     }
@@ -155,8 +163,7 @@ class Bimp_Stat_Date extends BimpObject
             $dateFinJ = $date + 3600*24;
             
             $dateStr = gmdate("Y-m-d", $date);
-            
-            if(!isset($this->datas[$dateStr.$this->signatureFilter])){
+            if(!isset($this->datas[$dateStr.$this->signatureFilter]) && ($this->mode != 'month' || (int) gmdate("d", $date) == 1)){
                 $nbProp = (isset($this->datasPropal[$dateStr.$this->signatureFilter]))? $this->datasPropal[$dateStr.$this->signatureFilter]->nb : 0;
                 $totProp = (isset($this->datasPropal[$dateStr.$this->signatureFilter]))? $this->datasPropal[$dateStr.$this->signatureFilter]->tot : 0;
                 
@@ -181,6 +188,15 @@ class Bimp_Stat_Date extends BimpObject
     public function cacheTables(){
         $this->datas = array();
         
+        if($this->mode == 'month'){
+            $selectDate = 'CONCAT(DATE_FORMAT(date_valid, "%Y-%m"),"-01") ';
+            $groupBy = 'DATE_FORMAT(date_valid, "%m%Y")';
+        }
+        else{
+            $selectDate = 'DATE(`date_valid`)';
+            $groupBy = 'DATE(`date_valid`)';
+        }
+        
         $and = $andFact = "";
         $extrafield = $contact = false;
         foreach(array("IN" => $this->filterCusom, "NOT IN" => $this->filterCusomExclud) as $typeF => $filters){
@@ -193,14 +209,16 @@ class Bimp_Stat_Date extends BimpObject
                         $filter = str_replace("ec_", "ec.", $filter);
                         $contact = true;
                 }
-                else {
+                elseif(stripos($filter, 'a.') === false) {
                     $filter = "a.".$filter;
                 }
                 if(stripos($filter, "facture_") !== false){
                     $andFact .= " AND ".str_replace("facture_", "", $filter). " ".$typeF." ('".implode("','", $values)."')";
                 }
-                else
+                else{
+//                    echo '<br/>'.$filter.' : '.print_r($values,1);
                     $and .= " AND ".$filter. " ".$typeF." ('".implode("','", $values)."')";
+                }
             }
         }
         $sql = $this->db->db->query("SELECT * FROM `llx_bimp_stat_date` WHERE filter = '".$this->signatureFilter."' GROUP BY date ASC");
@@ -208,34 +226,34 @@ class Bimp_Stat_Date extends BimpObject
             $this->datas[$ln->date.$this->signatureFilter] = $ln;
         }
         
-        $req = "SELECT DATE(`date_valid`) as date, count(*) as nb, SUM(total_ht) as tot FROM `llx_propal` a";
+        $req = "SELECT ".$selectDate." as date, count(*) as nb, SUM(total_ht) as tot FROM `llx_propal` a";
         if($extrafield)
             $req .= " LEFT JOIN llx_propal_extrafields f ON  a.rowid = f.fk_object ";
         if($contact)
             $req .= " LEFT JOIN `llx_element_contact` ec ON ec.element_id = a.rowid LEFT JOIN `llx_c_type_contact` c ON `code` LIKE 'SALESREPFOLL' AND `fk_c_type_contact` = c.rowid AND c.element = 'propal' ";
-        $req .= " WHERE 1 ".$and." group by DATE(`date_valid`)";
+        $req .= " WHERE 1 ".$and." group by ".$groupBy;
         $sql = $this->db->db->query($req);
         while($ln = $this->db->db->fetch_object($sql)){
             $this->datasPropal[$ln->date.$this->signatureFilter] = $ln;
         }
         
-        $req = "SELECT DATE(`date_valid`) as date, count(*) as nb, SUM(total_ht) as tot FROM `llx_commande` a";
+        $req = "SELECT ".$selectDate." as date, count(*) as nb, SUM(total_ht) as tot FROM `llx_commande` a";
         if($extrafield)
             $req .= " LEFT JOIN llx_commande_extrafields f ON a.rowid = f.fk_object ";
         if($contact)
             $req .= " LEFT JOIN `llx_element_contact` ec ON ec.element_id = a.rowid LEFT JOIN `llx_c_type_contact` c ON `code` LIKE 'SALESREPFOLL' AND `fk_c_type_contact` = c.rowid AND c.element = 'commande' ";
-        $req .= " WHERE 1 ".$and." group by DATE(`date_valid`)";
+        $req .= " WHERE 1 ".$and." group by ".$groupBy;
         $sql = $this->db->db->query($req);
         while($ln = $this->db->db->fetch_object($sql)){
             $this->datasCommande[$ln->date.$this->signatureFilter] = $ln;
         }
         
-        $req = "SELECT DATE(`date_valid`) as date, count(*) as nb, SUM(total) as tot FROM `llx_facture` a";
+        $req = "SELECT ".$selectDate." as date, count(*) as nb, SUM(total) as tot FROM `llx_facture` a";
         if($extrafield)
             $req .= " LEFT JOIN llx_facture_extrafields f ON a.rowid = f.fk_object ";
         if($contact)
             $req .= " LEFT JOIN `llx_element_contact` ec ON ec.element_id = a.rowid LEFT JOIN `llx_c_type_contact` c ON `code` LIKE 'SALESREPFOLL' AND `fk_c_type_contact` = c.rowid AND c.element = 'facture' ";
-        $req .= " WHERE 1 ".$and.$andFact." group by DATE(`date_valid`)";
+        $req .= " WHERE 1 ".$and.$andFact." group by ".$groupBy;
         $sql = $this->db->db->query($req);
         while($ln = $this->db->db->fetch_object($sql)){
             $this->datasFacture[$ln->date.$this->signatureFilter] = $ln;

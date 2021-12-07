@@ -5332,6 +5332,9 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         if (!count($errors)) {
             $this->checkObject('create');
         }
+        
+        if($this->getData('status') == 0)
+            $this->updateField('date_pc', $this->getData('date_create'));
 
         return $errors;
     }

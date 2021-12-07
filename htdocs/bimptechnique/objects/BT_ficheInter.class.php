@@ -2334,7 +2334,19 @@ class BT_ficheInter extends BimpDolObject
             $service_de_reference = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', BimpCore::getConf('bimptechnique_id_serv19'));
             if ($service_de_reference->isLoaded()) {
                 $new_factureLine->pu_ht = $service_de_reference->getData('price');
-                $qty = $this->time_to_qty($this->timestamp_to_time($this->getData('duree')));
+                
+                
+                $qty = 0;
+                
+                $children = $this->getChildrenList('inters');
+                if(count($children)) {
+                    foreach($children as $id_child) {
+                        $child = $this->getChildObject('inters', $id_child);
+                        if($child->getData('type') == 3 || $child->getData('type') == 4)
+                            $qty += $this->time_to_qty($this->timestamp_to_time($child->getData('duree')));
+                    }
+                }
+                
                 $new_factureLine->qty = $qty;
                 $new_factureLine->id_product = $service_de_reference->id;
                 $new_factureLine->tva_tx = 20;

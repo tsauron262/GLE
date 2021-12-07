@@ -24,7 +24,7 @@ class BContract_avenant extends BContract_contrat {
         
         $array = Array(0 => ['label' => 'Avenant de service', 'icon' => 'sign', 'classes' => ['']]);
         
-        if(!$parent->getData('tacite')) $array[1] = ['label' => 'Avenant de prolongation', 'icon' => 'retweet', 'classes' => ['']];
+        if($parent->getData('tacite') == 0 || $this->getData('tacite') == 12) $array[1] = ['label' => 'Avenant de prolongation', 'icon' => 'retweet', 'classes' => ['']];
         
         return $array;
     }

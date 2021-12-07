@@ -106,7 +106,8 @@ class Bimp_Stat_Date extends BimpObject
     
     public function getGraphDataPoint($numero_data = 1){
         $tabDate = explode("-", $this->getData('date'));
-        $tabDate[1]--;
+        if($this->mode == 'day')
+            $tabDate[1]--;
         $x = "new Date(".implode(", ", $tabDate).")";
         if($numero_data == 1)
             $y = $this->getData('facture_total');

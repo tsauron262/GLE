@@ -1226,7 +1226,7 @@ class Bimp_Client extends Bimp_Societe
 
             case 'stat_date':
                 $obj = BimpObject::getInstance('bimpcommercial', 'Bimp_Stat_Date');
-                $list = new BC_ListTable($obj, 'default', 1, null, 'State par date "' . $client_label . '"', 'fas_history');
+                $list = new BC_ListTable($obj, 'client', 1, null, 'State par date "' . $client_label . '"', 'fas_history');
                 $list->addFieldFilterValue('fk_soc', (int) $this->id);
                 break;
 

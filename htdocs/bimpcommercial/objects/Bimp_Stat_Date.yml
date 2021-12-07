@@ -38,10 +38,10 @@ filters:
         label: Commecial
         data_type: id_object
         type: user
-        input: 
-            type: search_user
-            include_empty: 1
-            empty_label: Aucun
+#        input: 
+#            type: search_user
+#            include_empty: 1
+#            empty_label: Aucun
     ef_type: 
         label: Secteur (Canal de Vente)
         type: value
@@ -56,6 +56,16 @@ filters:
             type: select
             options: 
                 array: factTypes
+    fk_soc: 
+        label: Client
+#        data_type: id_object
+        type: value
+        input: 
+            type: search_societe
+#            include_empty: 1
+#            empty_label: Aucun
+                
+                
             
 filters_panels: 
     default: 
@@ -67,7 +77,8 @@ filters_panels:
             commande_qty: 
             commande_total:
             facture_qty: 
-            facture_total:    
+            facture_total: 
+            fk_soc:
     
 lists: 
     default: 
@@ -78,8 +89,8 @@ lists:
         sort_field: date
         sort_way: desc
         filters_panel: default
-        header_buttons:
-            callback: getListHeaderButtons
+#        header_buttons:
+#            callback: getListHeaderButtons
         cols: 
             date: 
             devis_qty: 

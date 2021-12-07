@@ -1024,6 +1024,14 @@ class Bimp_Client extends Bimp_Societe
             'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_suivi_recouvrement_list_tab .nav_tab_ajax_result\')', array('suivi_recouvrement'), array('button' => ''))
         );
 
+        // stats par date: 
+        $tabs[] = array(
+            'id'            => 'client_stat_date_list_tab',
+            'title'         => BimpRender::renderIcon('fas_history', 'iconLeft') . 'Stat par date',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_stat_date_list_tab .nav_tab_ajax_result\')', array('stat_date'), array('button' => ''))
+        );
+
         return BimpRender::renderNavTabs($tabs, 'commercial_view');
     }
 
@@ -1214,6 +1222,12 @@ class Bimp_Client extends Bimp_Societe
             case 'suivi_recouvrement':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcore', 'Bimp_Client_Suivi_Recouvrement'), 'default', 1, null, 'Suivi Recouvrement "' . $client_label . '"', 'fas_history');
                 $list->addFieldFilterValue('id_societe', (int) $this->id);
+                break;
+
+            case 'stat_date':
+                $obj = BimpObject::getInstance('bimpcommercial', 'Bimp_Stat_Date');
+                $list = new BC_ListTable($obj, 'client', 1, null, 'State par date "' . $client_label . '"', 'fas_history');
+                $list->addFieldFilterValue('fk_soc', (int) $this->id);
                 break;
 
             case 'relances':

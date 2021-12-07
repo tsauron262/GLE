@@ -503,12 +503,11 @@ class BC_List extends BC_Panel
                 $this->errors[] = BimpTools::getMsgFromArray($filters_errors, 'Erreurs sur les filtres');
             }
 
-            if (method_exists($this->object, 'traiteFilters'))
-                $this->object->traiteFilters($panelFilters);
-
             foreach ($panelFilters as $name => $filter) {
                 $this->mergeFilter($name, $filter);
             }
+            if (method_exists($this->object, 'traiteFilters'))
+                $this->object->traiteFilters($this->filters);
         }
         
         // Filtres selon objets associés:

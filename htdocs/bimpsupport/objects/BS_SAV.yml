@@ -281,6 +281,9 @@ fields:
     date_close: 
         label: Date / Heure Fin
         type: datetime
+    date_pc: 
+        label: Date de prise en charge
+        type: datetime
     prestataire_number: 
         label: N° de dossier prestataire
         user_edit: 1

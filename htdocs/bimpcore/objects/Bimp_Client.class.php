@@ -2494,4 +2494,36 @@ class Bimp_Client extends Bimp_Societe
 
         return $total_unpaid;
     }
+    
+    
+    public function getTotalUnpayedTolerance($since = '2019-06-30', $euros_tolere = 2000, $day_tolere = 5)
+    {
+
+        $factures = $this->getUnpaidFactures($since);
+        $total_unpaid = 0;
+        $has_retard = 0;
+
+        if(!empty($factures)) {
+            
+            $now = new DateTime();
+            
+            foreach ($factures as $fac) {
+
+                $date_tolere = new DateTime($fac->getData('date_lim_reglement'));
+                $date_tolere->add(new DateInterval('P' . $day_tolere . 'D'));
+                
+                if($has_retard or $date_tolere < $now)
+                    $has_retard = 1;
+
+                $fac->checkIsPaid();
+                $total_unpaid += (float) $fac->getRemainToPay(true);
+                
+            }
+        }
+        
+        if($has_retard or $euros_tolere < $total_unpaid)
+            return $total_unpaid;
+                
+        return 0;
+    }
 }

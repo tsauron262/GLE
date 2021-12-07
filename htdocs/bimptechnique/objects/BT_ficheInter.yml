@@ -358,8 +358,6 @@ fields:
         label: Facture
         type: id_object
         object: facture
-        display:
-            card
             
     ef_type:
         label: Canal de vente
@@ -367,7 +365,17 @@ fields:
         values:
             array: secteurs
     
-forms:                  
+forms:
+    reattach_an_object:
+        title: Rattacher un objet à la FI
+        rows:
+            - custom: 1
+              label: Type d'objet
+              input_name: type_of_object
+              input:
+                  type: select
+                  options:
+                      array: typeOfReattachmentObject
     default: 
         rows: 
             client: 
@@ -501,7 +509,6 @@ fields_tables:
             - field: signed
             - field: type_signature
             - field: description
-            - field: fk_facture
             - field: ef_type
               edit: 1
                   
@@ -510,6 +517,8 @@ fields_tables:
         icon: building
         rows:
             - field: fk_soc
+              display: card
+            - field: fk_facture
               display: card
             - field: note_private
             - field: logs

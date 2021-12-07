@@ -1125,7 +1125,7 @@ class BimpCache
             }
 
             if (is_a($dolObject, 'BimpObject')) {
-                return self::getBimpObjectPopoverCardHtml($dolObject, $card_name);
+                return self::getBimpObjectCardHtml($dolObject, $card_name);
             }
         }
 
@@ -1518,7 +1518,7 @@ class BimpCache
                     $instance = new User($db);
                     if ($instance->fetch($r->fk_user) > 0) {
                         if ($instance->statut == 1) {
-                            self::$cache[$cache_key][$comm->fk_user] = $instance;
+                            self::$cache[$cache_key][$r->fk_user] = $instance;
                         }
                     }
                 }

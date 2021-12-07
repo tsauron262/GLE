@@ -129,6 +129,14 @@ forms:
             - field: txt
             - field: comment
             - field: id_user_owner
+            - object: files
+              form_name: upload
+              form_label: Ajouter
+              form_values: 
+                  fields: 
+                      id_parent: 1
+                  
+              multiple: 1
             
     newMail:
         rows:
@@ -169,7 +177,7 @@ lists:
             - label: supprimer les tâches sélectionnées
               icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this))
-        sort_field: src
+        sort_field: id
         sort_way: desc
         n: 10
         add_form_name: add

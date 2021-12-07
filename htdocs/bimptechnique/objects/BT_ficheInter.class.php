@@ -120,6 +120,11 @@ class BT_ficheInter extends BimpDolObject
                 }
                 return 0;
                 break;
+            case 'reattach_an_object':
+                if($user->rights->bimptechnique->reattach_an_object)
+                    return 1;
+                return 0;
+                break;
         }
 
         return parent::canSetAction($action);
@@ -352,14 +357,14 @@ class BT_ficheInter extends BimpDolObject
             if ($this->isLoaded()) {
                 if ($this->getData('fk_statut') == self::STATUT_TERMINER || $this->getData('fk_statut') == self::STATUT_VALIDER) {
 
-                    if (!$this->getData('fk_facture')) {
+                    if (!$this->getData('fk_facture') && $this->isFacturable()) {
                         $buttons[] = array(
                             'label'   => 'Message facturation',
                             'icon'    => 'fas_paper-plane',
                             'onclick' => $this->getJsActionOnclick('messageFacturation', array(), array('form_name' => "messageFacturation"))
                         );
 
-                        if ($user->rights->bimptechnique->billing) {
+                        if ($user->rights->bimptechnique->billing && $this->isFacturable()) {
                             $buttons[] = array(
                                 'label'   => 'Facturer la FI',
                                 'icon'    => 'euro',
@@ -367,6 +372,15 @@ class BT_ficheInter extends BimpDolObject
                             );
                         }
                     }
+                    
+                    if($this->canSetAction("reattach_an_object")) {
+                        $buttons[] = array(
+                            'label'   => 'Rattacher un objet à la FI',
+                            'icon'    => 'link',
+                            'onclick' => $this->getJsActionOnclick('reattach_an_object', array(), array('form_name' => "reattach_an_object"))
+                        );
+                    }
+                    
                 }
             }
 
@@ -740,6 +754,17 @@ class BT_ficheInter extends BimpDolObject
             }
         }
         return self::getCacheArray($cache_key, $include_empty);
+    }
+    
+    public function getTypeOfReattachmentObjectArray(){
+        $reattachment = Array(
+            0   => 'Auncun type d\'objet',
+            1   => 'Facture',
+            2   => 'Contrat',
+            3   => 'Commande'
+        );
+        
+        return $reattachment;
     }
 
     public function getContratsClientArray()
@@ -1831,6 +1856,7 @@ class BT_ficheInter extends BimpDolObject
                     }
 
                     $commercial = $this->getCommercialClient();
+                    //$commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', 460);
                     if (BimpObject::objectLoaded($commercial)) {
                         $email_comm = BimpTools::cleanEmailsStr($commercial->getData('email'));
                     }
@@ -1844,7 +1870,26 @@ class BT_ficheInter extends BimpDolObject
                             $email_cli = BimpTools::cleanEmailsStr($email_cli);
                         }
                     }
-
+                    
+                    // Envois au commercial quand FI non liée
+                    
+                    if(!count(json_decode($this->getData('commandes'))) && !$this->getData('fk_contrat')) {
+                        //die($email_comm . ' fhjifods');
+                        $task = BimpCache::getBimpObjectInstance("bimptask", "BIMP_Task");
+                        $data = array(
+                            "src"  => "noreply@bimp.fr",
+                            "dst"  => $email_comm,
+                            "subj" => "Fiche d’intervention non liée",
+                            "prio" => 20,
+                            "txt"  => "Bonjour,Cette fiche d’intervention a été validée, mais n’est liée à aucune commande et à aucun contrat. Merci de faire les vérifications nécessaires et de corriger si cela est une erreur. " . $this->getNomUrl(),
+                            "id_user_owner"  => $commercial->id,
+                        );
+                        $errors = BimpTools::merge_array($errors, $task->validateArray($data));
+                        $errors = BimpTools::merge_array($errors, $task->create());
+                        //die(print_r($errors, 1) . 'dyhuidhudis');
+                    }
+                    
+                    
                     // Envoi au client: 
                     if (!$auto_terminer && $type_signature !== self::TYPE_SIGN_DIST) {
                         if (!is_file($pdf_file)) {
@@ -2246,6 +2291,26 @@ class BT_ficheInter extends BimpDolObject
             'warnings' => $warnings
         ];
     }
+    
+    public function isFacturable():bool {
+        
+        $children = $this->getChildrenList('inters');
+        
+        if(count($children) > 0) {
+            
+            foreach($children as $id_child) {
+                
+                $child = $this->getChildObject('inters', $id_child);
+                
+                if($child->getData('type') == 3 || $child->getData('type') == 4)
+                    return 1;
+                
+            }
+            
+        }
+        
+        return 0;
+    }
 
     public function actionBilling($data, &$success)
     {
@@ -2289,7 +2354,19 @@ class BT_ficheInter extends BimpDolObject
             $service_de_reference = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', BimpCore::getConf('bimptechnique_id_serv19'));
             if ($service_de_reference->isLoaded()) {
                 $new_factureLine->pu_ht = $service_de_reference->getData('price');
-                $qty = $this->time_to_qty($this->timestamp_to_time($this->getData('duree')));
+                
+                
+                $qty = 0;
+                
+                $children = $this->getChildrenList('inters');
+                if(count($children) > 0) {
+                    foreach($children as $id_child) {
+                        $child = $this->getChildObject('inters', $id_child);
+                        if($child->getData('type') == 3 || $child->getData('type') == 4)
+                            $qty += $this->time_to_qty($this->timestamp_to_time($child->getData('duree')));
+                    }
+                }
+                
                 $new_factureLine->qty = $qty;
                 $new_factureLine->id_product = $service_de_reference->id;
                 $new_factureLine->tva_tx = 20;

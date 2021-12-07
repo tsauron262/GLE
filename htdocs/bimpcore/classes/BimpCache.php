@@ -425,8 +425,8 @@ class BimpCache
         if (!$result) {
             $result = array();
             global $db;
-            $req = 'SELECT AVG(DATEDIFF(date_terminer, date_create )) as moy, code_centre FROM ' . MAIN_DB_PREFIX . 'bs_sav WHERE DATEDIFF(now(), date_terminer ) <=' . $nbJ . '';
-            if ($ios)
+            $req = 'SELECT AVG(DATEDIFF(date_terminer, date_pc )) as moy, code_centre FROM '.MAIN_DB_PREFIX.'bs_sav WHERE DATEDIFF(now(), date_pc ) <='.$nbJ.'';
+            if($ios)
                 $req .= ' AND system = 300';
             else
                 $req .= ' AND system != 300';
@@ -448,8 +448,8 @@ class BimpCache
         if (!$result) {
             $result = array();
             global $db;
-            $req = "SELECT MIN(date_create), code_centre, DATEDIFF(now(), MIN(date_create) ) as time FROM llx_bs_sav a WHERE a.status = '0'";
-            if ($ios)
+            $req = "SELECT MIN(date_pc), code_centre, DATEDIFF(now(), MIN(date_pc) ) as time FROM llx_bs_sav a WHERE a.status = '0'";
+            if($ios)
                 $req .= ' AND system = 300';
             else
                 $req .= ' AND system != 300';

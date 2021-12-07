@@ -1856,7 +1856,7 @@ class BT_ficheInter extends BimpDolObject
                     }
 
                     $commercial = $this->getCommercialClient();
-                    $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', 460);
+                    //$commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', 460);
                     if (BimpObject::objectLoaded($commercial)) {
                         $email_comm = BimpTools::cleanEmailsStr($commercial->getData('email'));
                     }
@@ -1881,7 +1881,7 @@ class BT_ficheInter extends BimpDolObject
                             "dst"  => $email_comm,
                             "subj" => "Fiche d’intervention non liée",
                             "prio" => 20,
-                            "txt"  => "Bonjour,Cette fiche d’intervention a été validée, mais n’est liée à aucune commande et à aucun contrat. Merci de faire les vérifications nécessaires et de corriger si cela est une erreur. ",
+                            "txt"  => "Bonjour,Cette fiche d’intervention a été validée, mais n’est liée à aucune commande et à aucun contrat. Merci de faire les vérifications nécessaires et de corriger si cela est une erreur. " . $this->getNomUrl(),
                             "id_user_owner"  => $commercial->id,
                         );
                         $errors = BimpTools::merge_array($errors, $task->validateArray($data));

@@ -451,7 +451,7 @@ class BimpCollection
                                 $child_module = $object->getConf('objects/' . $child_name . '/instance/bimp_object/module', '');
                                 $child_object_name = $object->getConf('objects/' . $child_name . '/instance/bimp_object/name', '');
 
-                                if ($child_module && $child_name) {
+                                if ($child_module) {
                                     $children[$field_name] = array(
                                         'module'      => $child_module,
                                         'object_name' => $child_object_name,

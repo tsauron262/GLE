@@ -2534,6 +2534,7 @@ class BimpCache
     }
 
     // Comme getSecteursArray avec l'option "Tous" en plus
+    
     public function getSecteurAllArray()
     {
         if (!BimpCore::getConf("USE_SECTEUR")) {

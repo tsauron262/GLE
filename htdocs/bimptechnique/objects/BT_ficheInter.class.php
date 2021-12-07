@@ -357,14 +357,14 @@ class BT_ficheInter extends BimpDolObject
             if ($this->isLoaded()) {
                 if ($this->getData('fk_statut') == self::STATUT_TERMINER || $this->getData('fk_statut') == self::STATUT_VALIDER) {
 
-                    if (!$this->getData('fk_facture')) {
+                    if (!$this->getData('fk_facture') && $this->isFacturable()) {
                         $buttons[] = array(
                             'label'   => 'Message facturation',
                             'icon'    => 'fas_paper-plane',
                             'onclick' => $this->getJsActionOnclick('messageFacturation', array(), array('form_name' => "messageFacturation"))
                         );
 
-                        if ($user->rights->bimptechnique->billing) {
+                        if ($user->rights->bimptechnique->billing && $this->isFacturable()) {
                             $buttons[] = array(
                                 'label'   => 'Facturer la FI',
                                 'icon'    => 'euro',
@@ -2290,6 +2290,26 @@ class BT_ficheInter extends BimpDolObject
             'errors'   => $errors,
             'warnings' => $warnings
         ];
+    }
+    
+    public function isFacturable():bool {
+        
+        $children = $this->getChildrenList('inters');
+        
+        if(count($children) > 0) {
+            
+            foreach($children as $id_child) {
+                
+                $child = $this->getChildObject('inters', $id_child);
+                
+                if($child->getData('type') == 3 || $child->getData('type') == 4)
+                    return 1;
+                
+            }
+            
+        }
+        
+        return 0;
     }
 
     public function actionBilling($data, &$success)

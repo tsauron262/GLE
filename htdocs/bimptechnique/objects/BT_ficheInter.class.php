@@ -2339,7 +2339,7 @@ class BT_ficheInter extends BimpDolObject
                 $qty = 0;
                 
                 $children = $this->getChildrenList('inters');
-                if(count($children)) {
+                if(count($children) > 0) {
                     foreach($children as $id_child) {
                         $child = $this->getChildObject('inters', $id_child);
                         if($child->getData('type') == 3 || $child->getData('type') == 4)

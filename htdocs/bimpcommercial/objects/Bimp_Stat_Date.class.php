@@ -108,6 +108,14 @@ class Bimp_Stat_Date extends BimpObject
         $tabDate = explode("-", $this->getData('date'));
         if($this->mode == 'day')
             $tabDate[1]--;
+        elseif($this->mode == 'month'){
+            if($tabDate[1] == 1){
+                $tabDate[1] = 12;
+                $tabDate[0]--;
+            }
+            else
+                $tabDate[1]--;
+        }
         $x = "new Date(".implode(", ", $tabDate).")";
         if($numero_data == 1)
             $y = $this->getData('facture_total');

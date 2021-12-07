@@ -100,3 +100,6 @@ lists:
             facture_qty: 
             facture_total:
                 
+    client: 
+        extends: default
+                

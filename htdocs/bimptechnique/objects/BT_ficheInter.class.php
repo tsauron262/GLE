@@ -357,14 +357,14 @@ class BT_ficheInter extends BimpDolObject
             if ($this->isLoaded()) {
                 if ($this->getData('fk_statut') == self::STATUT_TERMINER || $this->getData('fk_statut') == self::STATUT_VALIDER) {
 
-                    if (!$this->getData('fk_facture')) {
+                    if (!$this->getData('fk_facture') && $this->isFacturable()) {
                         $buttons[] = array(
                             'label'   => 'Message facturation',
                             'icon'    => 'fas_paper-plane',
                             'onclick' => $this->getJsActionOnclick('messageFacturation', array(), array('form_name' => "messageFacturation"))
                         );
 
-                        if ($user->rights->bimptechnique->billing) {
+                        if ($user->rights->bimptechnique->billing && $this->isFacturable()) {
                             $buttons[] = array(
                                 'label'   => 'Facturer la FI',
                                 'icon'    => 'euro',
@@ -2291,6 +2291,26 @@ class BT_ficheInter extends BimpDolObject
             'warnings' => $warnings
         ];
     }
+    
+    public function isFacturable():bool {
+        
+        $children = $this->getChildrenList('inters');
+        
+        if(count($children) > 0) {
+            
+            foreach($children as $id_child) {
+                
+                $child = $this->getChildObject('inters', $id_child);
+                
+                if($child->getData('type') == 3 || $child->getData('type') == 4)
+                    return 1;
+                
+            }
+            
+        }
+        
+        return 0;
+    }
 
     public function actionBilling($data, &$success)
     {
@@ -2334,7 +2354,19 @@ class BT_ficheInter extends BimpDolObject
             $service_de_reference = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', BimpCore::getConf('bimptechnique_id_serv19'));
             if ($service_de_reference->isLoaded()) {
                 $new_factureLine->pu_ht = $service_de_reference->getData('price');
-                $qty = $this->time_to_qty($this->timestamp_to_time($this->getData('duree')));
+                
+                
+                $qty = 0;
+                
+                $children = $this->getChildrenList('inters');
+                if(count($children) > 0) {
+                    foreach($children as $id_child) {
+                        $child = $this->getChildObject('inters', $id_child);
+                        if($child->getData('type') == 3 || $child->getData('type') == 4)
+                            $qty += $this->time_to_qty($this->timestamp_to_time($child->getData('duree')));
+                    }
+                }
+                
                 $new_factureLine->qty = $qty;
                 $new_factureLine->id_product = $service_de_reference->id;
                 $new_factureLine->tva_tx = 20;

@@ -358,8 +358,6 @@ fields:
         label: Facture
         type: id_object
         object: facture
-        display:
-            card
             
     ef_type:
         label: Canal de vente
@@ -511,7 +509,6 @@ fields_tables:
             - field: signed
             - field: type_signature
             - field: description
-            - field: fk_facture
             - field: ef_type
               edit: 1
                   
@@ -520,6 +517,8 @@ fields_tables:
         icon: building
         rows:
             - field: fk_soc
+              display: card
+            - field: fk_facture
               display: card
             - field: note_private
             - field: logs

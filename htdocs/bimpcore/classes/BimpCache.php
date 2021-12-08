@@ -47,36 +47,37 @@ class BimpCache
 
         return self::$bdb_noTransac;
     }
-    
-    public static function getIpFromDns($host){
+
+    public static function getIpFromDns($host)
+    {
         if (filter_var($host, FILTER_VALIDATE_IP))
             return $host;
-        
-        $cache_key = 'ipFromDns'.$host;
+
+        $cache_key = 'ipFromDns' . $host;
         if (!isset(self::$cache[$cache_key])) {
             $dnsData = dns_get_record($host);
-            $i = rand(0, count($dnsData)-1);
+            $i = rand(0, count($dnsData) - 1);
             $ip = $dnsData[$i]['ip'];
             self::$cache[$cache_key] = $ip;
         }
 
         return self::$cache[$cache_key];
     }
-    
-    public static function getSignature($prenom, $job, $phone){
-        $key = 'sign'.$prenom.$job.$phone;
+
+    public static function getSignature($prenom, $job, $phone)
+    {
+        $key = 'sign' . $prenom . $job . $phone;
         $cache = self::getCacheServeur($key);
-        if(!$cache){
-            $url = "https://www.bimp.fr/signatures/v3/supports/sign.php?prenomnom=". urlencode($prenom)."&job=". urlencode($job)."&phone=" . urlencode($phone);
+        if (!$cache) {
+            $url = "https://www.bimp.fr/signatures/v3/supports/sign.php?prenomnom=" . urlencode($prenom) . "&job=" . urlencode($job) . "&phone=" . urlencode($phone);
             $signature = file_get_contents($url, false, stream_context_create(array(
                 'http' => array(
                     'timeout' => 2   // Timeout in seconds
             ))));
-            if($signature){
-                self::setCacheServeur ($key, $signature);
+            if ($signature) {
+                self::setCacheServeur($key, $signature);
                 return $signature;
-            }
-            else
+            } else
                 return null;
         }
         return $cache;
@@ -415,37 +416,39 @@ class BimpCache
             return self::$cache[$cache_key];
         }
     }
-    
-    public static function getDureeMoySav($nbJ = 30, $ios = false){
-        $cache_key = 'sav_moy_duree'.$nbJ.$ios;
-        
+
+    public static function getDureeMoySav($nbJ = 30, $ios = false)
+    {
+        $cache_key = 'sav_moy_duree' . $nbJ . $ios;
+
         $result = static::getCacheServeur($cache_key);
-        if(!$result){
+        if (!$result) {
             $result = array();
             global $db;
-            $req = 'SELECT AVG(DATEDIFF(date_terminer, date_create )) as moy, code_centre FROM '.MAIN_DB_PREFIX.'bs_sav WHERE DATEDIFF(now(), date_terminer ) <='.$nbJ.'';
+            $req = 'SELECT AVG(DATEDIFF(date_terminer, date_pc )) as moy, code_centre FROM '.MAIN_DB_PREFIX.'bs_sav WHERE DATEDIFF(now(), date_pc ) <='.$nbJ.'';
             if($ios)
                 $req .= ' AND system = 300';
             else
                 $req .= ' AND system != 300';
             $req .= ' GROUP BY code_centre;';
             $sql = $db->query($req);
-            while ($ln = $db->fetch_object($sql)){
+            while ($ln = $db->fetch_object($sql)) {
                 $result[$ln->code_centre] = $ln->moy;
             }
-            static::setCacheServeur($cache_key, $result, 2*60);
+            static::setCacheServeur($cache_key, $result, 2 * 60);
         }
         return $result;
     }
-    
-    public static function getDureeDiago($ios = false){
-        $cache_key = 'sav_duree_diago'.$ios;
-        
+
+    public static function getDureeDiago($ios = false)
+    {
+        $cache_key = 'sav_duree_diago' . $ios;
+
         $result = static::getCacheServeur($cache_key);
-        if(!$result){
+        if (!$result) {
             $result = array();
             global $db;
-            $req = "SELECT MIN(date_create), code_centre, DATEDIFF(now(), MIN(date_create) ) as time FROM llx_bs_sav a WHERE a.status = '0'";
+            $req = "SELECT MIN(date_pc), code_centre, DATEDIFF(now(), MIN(date_pc) ) as time FROM llx_bs_sav a WHERE a.status = '0'";
             if($ios)
                 $req .= ' AND system = 300';
             else
@@ -453,10 +456,10 @@ class BimpCache
             $req .= ' GROUP BY code_centre;';
 //            die($req);
             $sql = $db->query($req);
-            while ($ln = $db->fetch_object($sql)){
+            while ($ln = $db->fetch_object($sql)) {
                 $result[$ln->code_centre] = $ln->time;
             }
-            static::setCacheServeur($cache_key, $result, 2*60);
+            static::setCacheServeur($cache_key, $result, 2 * 60);
         }
         return $result;
     }
@@ -753,7 +756,7 @@ class BimpCache
                 // Fields: 
                 self::$cache[$cache_key] = array();
 
-                if (isset($object->params['fields'])) {
+                if (isset($object->params['fields']) && !empty($object->params['fields'])) {
                     foreach ($object->params['fields'] as $field_name) {
                         if (!$object->isFieldActivated($field_name)) {
                             continue;
@@ -780,7 +783,7 @@ class BimpCache
                                     continue;
                                 }
 
-                                $obj_field_label = $object->getConf('fields/' . $field_name . '/label', '');
+                                $obj_field_label = $object->getConf('fields/' . $filter_name . '/label', '');
                                 if ($obj_field_label && $label !== $obj_field_label) {
                                     $label .= ' (Champ "' . $obj_field_label . '")';
                                 }
@@ -824,7 +827,7 @@ class BimpCache
                     }
                 }
 
-                foreach ($instance->getList(array(), null, null, 'id', 'desc', 'array', array($primary, $name_prop)) as $item) {
+                foreach ($instance->getList(array(), null, null, 'id', 'desc', 'array', $fields) as $item) {
                     $label = '';
 
                     if (!empty($name_props)) {
@@ -1122,7 +1125,7 @@ class BimpCache
             }
 
             if (is_a($dolObject, 'BimpObject')) {
-                return self::getBimpObjectPopoverCardHtml($dolObject, $card_name);
+                return self::getBimpObjectCardHtml($dolObject, $card_name);
             }
         }
 
@@ -1515,7 +1518,7 @@ class BimpCache
                     $instance = new User($db);
                     if ($instance->fetch($r->fk_user) > 0) {
                         if ($instance->statut == 1) {
-                            self::$cache[$cache_key][$comm->fk_user] = $instance;
+                            self::$cache[$cache_key][$r->fk_user] = $instance;
                         }
                     }
                 }
@@ -2531,6 +2534,7 @@ class BimpCache
     }
 
     // Comme getSecteursArray avec l'option "Tous" en plus
+    
     public function getSecteurAllArray()
     {
         if (!BimpCore::getConf("USE_SECTEUR")) {
@@ -2560,7 +2564,7 @@ class BimpCache
     public static function getSystemsArray()
     {
         return array(
-            ''    => "",
+            ''   => "",
             300  => "iOs",
             34   => "Mac Os",
             35   => "WatchOs",

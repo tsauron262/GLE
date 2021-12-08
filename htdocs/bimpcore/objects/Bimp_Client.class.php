@@ -149,6 +149,14 @@ class Bimp_Client extends Bimp_Societe
         return (count($errors) ? 0 : 1);
     }
 
+    public function isActifContratAuto()
+    {
+        global $conf;
+        if (isset($conf->global->MAIN_MODULE_BIMPCONTRATAUTO) && $conf->global->MAIN_MODULE_BIMPCONTRATAUTO)
+            return 1;
+        return 0;
+    }
+
     // Getters params:
 
     public function getRefProperty()
@@ -1024,6 +1032,14 @@ class Bimp_Client extends Bimp_Societe
             'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_suivi_recouvrement_list_tab .nav_tab_ajax_result\')', array('suivi_recouvrement'), array('button' => ''))
         );
 
+        // stats par date: 
+        $tabs[] = array(
+            'id'            => 'client_stat_date_list_tab',
+            'title'         => BimpRender::renderIcon('fas_chart-bar', 'iconLeft') . 'Stat par date',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_stat_date_list_tab .nav_tab_ajax_result\')', array('stat_date'), array('button' => ''))
+        );
+
         return BimpRender::renderNavTabs($tabs, 'commercial_view');
     }
 
@@ -1214,6 +1230,12 @@ class Bimp_Client extends Bimp_Societe
             case 'suivi_recouvrement':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcore', 'Bimp_Client_Suivi_Recouvrement'), 'default', 1, null, 'Suivi Recouvrement "' . $client_label . '"', 'fas_history');
                 $list->addFieldFilterValue('id_societe', (int) $this->id);
+                break;
+
+            case 'stat_date':
+                $obj = BimpObject::getInstance('bimpcommercial', 'Bimp_Stat_Date');
+                $list = new BC_ListTable($obj, 'client', 1, null, 'State par date "' . $client_label . '"', 'fas_history');
+                $list->addFieldFilterValue('fk_soc', (int) $this->id);
                 break;
 
             case 'relances':
@@ -1827,13 +1849,6 @@ class Bimp_Client extends Bimp_Societe
         }
 
         return $html;
-    }
-    
-    public function isActifContratAuto(){
-        global $conf;
-        if(isset($conf->global->MAIN_MODULE_BIMPCONTRATAUTO) && $conf->global->MAIN_MODULE_BIMPCONTRATAUTO)
-            return 1;
-        return 0;
     }
 
     public function renderContratAuto()
@@ -2480,8 +2495,7 @@ class Bimp_Client extends Bimp_Societe
 
         return $total_unpaid;
     }
-    
-    
+
     public function getTotalUnpayedTolerance($since = '2019-06-30', $euros_tolere = 2000, $day_tolere = 5)
     {
 
@@ -2489,27 +2503,26 @@ class Bimp_Client extends Bimp_Societe
         $total_unpaid = 0;
         $has_retard = 0;
 
-        if(!empty($factures)) {
-            
+        if (!empty($factures)) {
+
             $now = new DateTime();
-            
+
             foreach ($factures as $fac) {
 
                 $date_tolere = new DateTime($fac->getData('date_lim_reglement'));
                 $date_tolere->add(new DateInterval('P' . $day_tolere . 'D'));
-                
-                if($has_retard or $date_tolere < $now)
+
+                if ($has_retard or $date_tolere < $now)
                     $has_retard = 1;
 
                 $fac->checkIsPaid();
                 $total_unpaid += (float) $fac->getRemainToPay(true);
-                
             }
         }
-        
-        if($has_retard or $euros_tolere < $total_unpaid)
+
+        if ($has_retard or $euros_tolere < $total_unpaid)
             return $total_unpaid;
-                
+
         return 0;
     }
 }

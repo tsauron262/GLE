@@ -176,7 +176,7 @@ class Bimp_Stat_Date extends BimpObject
         $i= 0;
         $this->cacheTables();
         while($date < $dateFin){
-            if($i > 1000)
+            if($i > 10000)
                 die('trop de boucles');
             $i++;
             $dateFinJ = $date + 3600*24;

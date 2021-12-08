@@ -245,7 +245,7 @@ class Bimp_Propal extends BimpComm
         if(!isset(BimpCache::$cache[$clef])){
             BimpCache::$cache[$clef] = 1;
             if (!$this->isServiceAutorisedInContrat()) {
-                BimpCache::$cache[$clef] = 0;
+//                BimpCache::$cache[$clef] = 0;
             }
 
             if (count(getElementElement("contrat", "propal", null, $this->id)) > 0) {

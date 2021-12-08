@@ -100,8 +100,16 @@ lists:
             facture_qty: 
             facture_total:
                 
-    client: 
+    clientMonth: 
         extends: default
+        list_filters:
+            type: 
+                name: mode
+                filter: month
     clientYear:
-        extends: client
+        extends: default
+        list_filters:
+            type: 
+                name: mode
+                filter: year
                 

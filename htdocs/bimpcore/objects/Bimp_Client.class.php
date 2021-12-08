@@ -1235,7 +1235,13 @@ class Bimp_Client extends Bimp_Societe
             case 'stat_date':
                 $obj = BimpObject::getInstance('bimpcommercial', 'Bimp_Stat_Date');
                 $list = new BC_ListTable($obj, 'client', 1, null, 'State par date "' . $client_label . '"', 'fas_history');
+                $list->addIdentifierSuffix('month');
                 $list->addFieldFilterValue('fk_soc', (int) $this->id);
+                $list->addFieldFilterValue('mode', 'month');
+                $list2 = new BC_ListTable($obj, 'clientYear', 1, null, 'State par date "' . $client_label . '"', 'fas_history');
+                $list2->addIdentifierSuffix('year');
+                $list2->addFieldFilterValue('fk_soc', (int) $this->id);
+                $list2->addFieldFilterValue('mode', 'year');
                 break;
 
             case 'relances':
@@ -1276,6 +1282,9 @@ class Bimp_Client extends Bimp_Societe
         } else {
             $html .= BimpRender::renderAlerts('Type de liste non spécifié');
         }
+        
+        if (is_a($list2, 'BC_ListTable'))
+            $html .= $list2->renderHtml();
 
         return $html;
     }

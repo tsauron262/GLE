@@ -9,7 +9,6 @@ class Bimp_Stat_Date extends BimpObject
     public $datasFacture = array();
     public $signatureFilter = "";
     public $filterCusom = array();
-    public static $mode = 'day';
     
     public $asGraph = true;
     public $filterCusomExclud = array();
@@ -96,15 +95,16 @@ class Bimp_Stat_Date extends BimpObject
         $data["data1"] = 'Facture HT';
         $data["data2"] = 'Commande HT';
         $data["data3"] = 'Devis HT';
-        $data["data11"] = 'Facture HT a 1an';
+        if(static::$modeDateGraph != 'year')
+            $data["data11"] = 'Facture HT a 1an';
         $data["axeX"] = '';
         $data["axeY"] = 'K €';
         $data["title"] = 'Facture Commande et Devis par ';
-        if(static::$mode == 'day')
+        if(static::$modeDateGraph == 'day')
             $data["title"] .= 'Jour';
-        elseif(static::$mode == 'month')
+        elseif(static::$modeDateGraph == 'month')
             $data["title"] .= 'Mois';
-        elseif(static::$mode == 'year')
+        elseif(static::$modeDateGraph == 'year')
             $data["title"] .= 'Ans';
         
         return $data;
@@ -112,9 +112,9 @@ class Bimp_Stat_Date extends BimpObject
     
     public function getGraphDataPoint($numero_data = 1){
         $tabDate = explode("-", $this->getData('date'));
-        if(static::$mode == 'day')
+        if(static::$modeDateGraph == 'day')
             $tabDate[1]--;
-        elseif(static::$mode == 'month'){
+        elseif(static::$modeDateGraph == 'month'){
             if($tabDate[1] == 1){
                 $tabDate[1] = 12;
                 $tabDate[0]--;
@@ -122,7 +122,10 @@ class Bimp_Stat_Date extends BimpObject
             else
                 $tabDate[1]--;
         }
-        $x = "new Date(".implode(", ", $tabDate).")";
+        if(static::$modeDateGraph == 'year')
+            $x = "new Date(".$tabDate[0].", 0)";
+        else
+            $x = "new Date(".implode(", ", $tabDate).")";
         if($numero_data == 1)
             $y = $this->getData('facture_total');
         elseif($numero_data == 2)
@@ -151,7 +154,7 @@ class Bimp_Stat_Date extends BimpObject
             unset($filters['a.fk_soc']);
        }
        if(isset($filters['a.mode'])){
-            static::$mode = $filters['a.mode'];
+            static::$modeDateGraph = $filters['a.mode'];
             unset($filters['a.mode']);
        }
         
@@ -159,7 +162,7 @@ class Bimp_Stat_Date extends BimpObject
         $this->signatureFilter = json_encode($this->filterCusom);
         $this->signatureFilter .= json_encode($this->filterCusomExclud);
         $this->signatureFilter .= json_encode($memoireFilter);
-        $this->signatureFilter .= json_encode(static::$mode);
+        $this->signatureFilter .= json_encode(static::$modeDateGraph);
        $filters["a.filter"] = $this->signatureFilter;
 //       print_r($filters);die;
     }
@@ -182,7 +185,7 @@ class Bimp_Stat_Date extends BimpObject
             $dateFinJ = $date + 3600*24;
             
             $dateStr = gmdate("Y-m-d", $date);
-            if(!isset($this->datas[$dateStr.$this->signatureFilter]) && (static::$mode != 'month' || (int) gmdate("d", $date) == 1) && (static::$mode != 'year' || ((int) gmdate("d", $date) == 1 && (int) gmdate("m", $date) == 1))){
+            if(!isset($this->datas[$dateStr.$this->signatureFilter]) && (static::$modeDateGraph != 'month' || (int) gmdate("d", $date) == 1) && (static::$modeDateGraph != 'year' || ((int) gmdate("d", $date) == 1 && (int) gmdate("m", $date) == 1))){
                 $nbProp = (isset($this->datasPropal[$dateStr.$this->signatureFilter]))? $this->datasPropal[$dateStr.$this->signatureFilter]->nb : 0;
                 $totProp = (isset($this->datasPropal[$dateStr.$this->signatureFilter]))? $this->datasPropal[$dateStr.$this->signatureFilter]->tot : 0;
                 
@@ -207,11 +210,11 @@ class Bimp_Stat_Date extends BimpObject
     public function cacheTables(){
         $this->datas = array();
         
-        if(static::$mode == 'month'){
+        if(static::$modeDateGraph == 'month'){
             $selectDate = 'CONCAT(DATE_FORMAT(date_valid, "%Y-%m"),"-01") ';
             $groupBy = 'DATE_FORMAT(date_valid, "%m%Y")';
         }
-        elseif(static::$mode == 'year'){
+        elseif(static::$modeDateGraph == 'year'){
             $selectDate = 'CONCAT(DATE_FORMAT(date_valid, "%Y"),"-01-01")';
             $groupBy = 'DATE_FORMAT(date_valid, "%Y")';
         }

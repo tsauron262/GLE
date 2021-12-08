@@ -8656,6 +8656,8 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         $_POST = $list_data;
 
         $list = new BC_ListTable($this, $list_name);
+        
+        $list->initForGraph();
 
         $data = $this->getInfoGraph();
         if (method_exists($this, 'getGraphDataPoint')) {

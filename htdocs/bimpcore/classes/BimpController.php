@@ -150,7 +150,7 @@ class BimpController
                     $txt .= $file . ' - Ligne ' . $line . "\n\n";
                     $txt .= $msg;
 
-                    if (isset($_POST) && !empty($_POST)) {
+                    if (!empty($_POST)) {
                         $txt .= "\n\n";
                         $txt .= 'POST: ' . "\n";
                         $txt .= '<pre>' . print_r($_POST, 1) . '</pre>';
@@ -191,7 +191,7 @@ class BimpController
                 ));
 
                 if (BimpDebug::isActive()) {
-                    $content .= '<strong>' . $file . ' - Ligne ' . $line . '</strong>';
+                    $content = '<strong>' . $file . ' - Ligne ' . $line . '</strong>';
                     $content .= BimpRender::renderAlerts($msg, 'danger');
                     BimpDebug::addDebug('php', 'Erreur', $content, array('open' => true));
                 }
@@ -208,7 +208,7 @@ class BimpController
                     ));
                 }
                 if (BimpDebug::isActive()) {
-                    $content .= '<strong>' . $file . ' - Ligne ' . $line . '</strong>';
+                    $content = '<strong>' . $file . ' - Ligne ' . $line . '</strong>';
                     $content .= BimpRender::renderAlerts($msg, 'warning');
                     BimpDebug::addDebug('php', 'Alerte', $content, array('open' => true));
                 }
@@ -220,7 +220,7 @@ class BimpController
             case E_DEPRECATED:
             case E_USER_DEPRECATED:
 //                if (BimpDebug::isActive()) {
-//                    $content .= '<strong>' . $file . ' - Ligne ' . $line . '</strong>';
+//                    $content = '<strong>' . $file . ' - Ligne ' . $line . '</strong>';
 //                    $content .= BimpRender::renderAlerts($msg, 'info');
 //                    BimpDebug::addDebug('php', 'Info', $content, array('open' => true));
 //                }
@@ -928,6 +928,8 @@ class BimpController
     {
         $errors = array();
         $url = '';
+        
+        $result = array('warnings'=>array(), 'success'=>'', 'success_callback'=>'');
 
         $id_object = BimpTools::getValue('id_object');
         $object_name = BimpTools::getValue('object_name', '');
@@ -2026,6 +2028,8 @@ class BimpController
         $pagination_html = '';
         $filters_panel_html = '';
         $active_filters_html = '';
+        $before_html = '';
+        $after_html = '';
         $thead_html = '';
         $colspan = 0;
         $id_config = 0;

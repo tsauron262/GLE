@@ -3992,7 +3992,7 @@ class ObjectLine extends BimpObject
                                     )
                         ));
                     } else {
-                        $min = 'none';
+                        $min = $max = 'none';
                         $decimals = $this->getQtyDecimals();
 
                         if ($this->isLoaded()) {
@@ -4013,11 +4013,17 @@ class ObjectLine extends BimpObject
                                 }
                             }
                         }
+                        $parent = $this->getParentInstance();
+                        if(is_a($parent, 'Bimp_Facture') && $parent->getData('type') == 2){
+                            $max = -$min;
+                            $min = 'none';
+                        }
 
                         $html = BimpInput::renderInput('qty', $prefixe . 'qty', (int) $value, array(
                                     'data' => array(
                                         'data_type' => 'number',
                                         'min'       => $min,
+                                        'max'       => $max,
                                         'unsigned'  => 0,
                                         'decimals'  => $decimals
                                     )

@@ -12,6 +12,7 @@ class BimpObject extends BimpCache
 //    public $asGraph = false; => remplacé par param yml "has_graph" 
     public $ref = "";
     public static $status_list = array();
+    public static $modeDateGraph = 'day';
     public static $common_fields = array(
         'id',
         'date_create',
@@ -8660,6 +8661,12 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         $list->initForGraph();
 
         $data = $this->getInfoGraph();
+        if(static::$modeDateGraph == 'day')
+            $xValueFormatString = 'DD MMM, YYYY';
+        elseif(static::$modeDateGraph == 'month')
+            $xValueFormatString = 'MMM, YYYY';
+        else
+            $xValueFormatString = 'YYYY';
         if (method_exists($this, 'getGraphDataPoint')) {
             $success_callback = '
 var options = {
@@ -8670,7 +8677,7 @@ var options = {
 	},
 	axisX:{
 		title: "' . $data['axeX'] . '",
-		valueFormatString: "DD MMM"
+		valueFormatString: "'.$xValueFormatString.'"
 	},
 	axisY: {
 		title: "' . $data['axeY'] . '",
@@ -8693,7 +8700,7 @@ var options = {
 		showInLegend: true,
 		name: "' . $data['data1'] . '",
 		markerType: "square",
-		xValueFormatString: "DD MMM, YYYY",
+		xValueFormatString: "'.$xValueFormatString.'",
 		yValueFormatString: "#,##0 €",
 		dataPoints: [';
 
@@ -8706,7 +8713,7 @@ var options = {
                         showInLegend: true,
                         name: "' . $data['data2'] . '",
                         markerType: "square",
-                        xValueFormatString: "DD MMM, YYYY",
+                        xValueFormatString: "'.$xValueFormatString.'",
                         color: "#F08080",
                         yValueFormatString: "#,##0 €",
                         visible: 0,
@@ -8722,7 +8729,7 @@ var options = {
                         showInLegend: true,
                         name: "' . $data['data3'] . '",
                         markerType: "square",
-                        xValueFormatString: "DD MMM, YYYY",
+                        xValueFormatString: "'.$xValueFormatString.'",
                         color: "#CC2080",
                         visible: 0,
                         yValueFormatString: "#,##0 €",
@@ -8739,7 +8746,7 @@ var options = {
                         name: "' . $data['data11'] . '",
                         lineDashType: "dash",
                         markerType: "square",
-                        xValueFormatString: "DD MMM, YYYY",
+                        xValueFormatString: "'.$xValueFormatString.'",
                         yValueFormatString: "#,##0 €",
                         dataPoints: [';
 

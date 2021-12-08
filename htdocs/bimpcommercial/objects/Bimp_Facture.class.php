@@ -5832,7 +5832,7 @@ class Bimp_Facture extends BimpComm
         $year = (isset($boxObj->confUser['year']) ? $boxObj->confUser['year'] : $boxObj->config['year']['val_default']);
         $boxObj->boxlabel .= ' ' . $year;
 
-        $ln = BimpCache::getBdb()->executeS("SELECT SUM(total_ttc) as tot, SUM(IF(paye = 0, `remain_to_pay`, 0)) as totIP, COUNT(*) as nb, SUM(IF(paye = 0 ,1,0)) as nbIP, SUM(IF(remain_to_pay != total_ttc && paye = 0 ,1,0)) as nbPart, SUM(IF(paye = 0 && `date_lim_reglement` < now() ,1,0)) as nbRetard, SUM(IF(paye = 0 && `date_lim_reglement` < now() ,remain_to_pay,0)) as totRetard FROM `llx_facture` WHERE YEAR( datef ) = '" . $year . "'");
+        $ln = BimpCache::getBdb()->executeS("SELECT SUM(total_ttc) as tot, SUM(IF(paye = 0, `remain_to_pay`, 0)) as totIP, COUNT(*) as nb, SUM(IF(paye = 0 ,1,0)) as nbIP, SUM(IF(remain_to_pay != total_ttc && paye = 0 ,1,0)) as nbPart, SUM(IF(paye = 0 && `date_lim_reglement` < now() ,1,0)) as nbRetard, SUM(IF(paye = 0 && `date_lim_reglement` < now() ,remain_to_pay,0)) as totRetard FROM `llx_facture` WHERE fk_statut != 3 AND YEAR( datef ) = '" . $year . "'");
         $ln = $ln[0];
 
         $data = array(

@@ -89,6 +89,24 @@ class Bimp_Stat_Date extends BimpObject
        return parent::getListCount($filters, $joins);
     }
     
+//    public function displayData($field, $display_name = 'default', $display_input_value = true, $no_html = false) {
+//        if($field == 'date'){
+//            return $this->displayDate();
+//        }
+//        
+//        return parent::displayData($field, $display_name, $display_input_value, $no_html);
+//    }
+    
+    public function displayDate(){
+        $date = new DateTime($this->getData('date'));
+        if(static::$modeDateGraph == 'month')
+            return $date->format('M Y');
+        elseif(static::$modeDateGraph == 'year')
+            return $date->format('Y');
+        
+        return parent::displayData ('date');
+    }
+    
     
     public function getInfoGraph(){
         $data = parent::getInfoGraph();

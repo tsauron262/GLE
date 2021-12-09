@@ -54,6 +54,8 @@ class Bimp_Product extends BimpObject
     private static $ventes = array();
     private static $lienShowRoomEntrepot = array();
     public $fieldsWithAddNoteOnUpdate = array('serialisable');
+    
+    public $error = '';
 
     public function __construct($module, $object_name)
     {
@@ -1308,6 +1310,7 @@ class Bimp_Product extends BimpObject
         return $prices;
     }
 
+    /* moitier static moitier non inutilisé
     public static function getFournisseursArray($id_product, $include_empty = true)
     {
         $fournisseurs = array();
@@ -1327,7 +1330,7 @@ class Bimp_Product extends BimpObject
         }
 
         return $fournisseurs;
-    }
+    }*/
 
     public function getProductFournisseursPricesArray()
     {
@@ -1681,6 +1684,7 @@ class Bimp_Product extends BimpObject
                                 $rec_updated[] = $rec;
                             }
 
+                            $w = array();
                             $line->set('receptions', $receptions);
                             $line_errors = $line->update($w, true);
 
@@ -1975,7 +1979,7 @@ class Bimp_Product extends BimpObject
         if (!$this->isLoaded())
             return $html;
 
-        $body .= '<table id="history_table" class="noborder objectlistTable">';
+        $body = '<table id="history_table" class="noborder objectlistTable">';
         // Thead
         $body .= '<thead>';
         $body .= '<th>Objets référents</th>';

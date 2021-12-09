@@ -359,6 +359,7 @@ class BimpPDF_Table
     public function getFullHtml()
     {
         $html = '';
+        $head = '';
 
         // Vérification de l'affichage des colonnes: 
         $cols = array();

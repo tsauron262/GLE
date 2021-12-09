@@ -3100,8 +3100,10 @@ class BimpTools
                     return static::lockNum($type, $nb, $errors);
                 }
             }
-            else 
+            else{
+                static::$bloquages[] = $type;
                 return 1;
+            }
                     
         }
         else{

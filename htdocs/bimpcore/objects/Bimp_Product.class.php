@@ -411,7 +411,7 @@ class Bimp_Product extends BimpObject
             $dateMax = date('Y-m-d') . ' 23:59:59';
         }
 
-        return (int) isset(static::$ventes[$dateMin . '-' . $dateMax]);
+        return (int) isset(self::$ventes[$dateMin . '-' . $dateMax]);
     }
 
     public function isVendable(&$errors, $urgent = false, $mail = true)
@@ -815,6 +815,7 @@ class Bimp_Product extends BimpObject
         if ($dateMax)
             $query .= " AND date_valid <= '" . $dateMax . "'";
         $sql = $db->query($query . " GROUP BY fk_product");
+        $tabT = array();
         while ($ln = $db->fetch_object($sql)) {
             $tabT[] = $ln->rowid;
         }
@@ -936,7 +937,7 @@ class Bimp_Product extends BimpObject
 
         $result = $this->db->db->query($sql);
         if ($result and $this->db->db->num_rows($result) > 0) {
-            while ($result and $obj = $this->db->db->fetch_object($result)) {
+            while ($obj = $this->db->db->fetch_object($result)) {
                 $commande = new Commande($this->db->db);
                 $commande->fetch($obj->id);
                 $commandes[] = $commande;
@@ -958,7 +959,7 @@ class Bimp_Product extends BimpObject
 
             $result = $this->db->db->query($sql);
             if ($result and $this->db->db->num_rows($result) > 0) {
-                while ($result and $obj = $this->db->db->fetch_object($result)) {
+                while ($obj = $this->db->db->fetch_object($result)) {
                     $propal = new Propal($this->db->db);
                     $propal->fetch($obj->id);
                     $propals[] = $propal;
@@ -996,7 +997,7 @@ class Bimp_Product extends BimpObject
             if ($edit == 1) {
                 $form = new Form($this->db->db);
                 $cate_arbo = $form->select_all_categories(Categorie::TYPE_PRODUCT, '', 'parent', 64, 0, 1);
-                return $form->multiselectarray('categories', $cate_arbo, GETPOST('categories', 'array'), '', 0, '', 0, '100%');
+                return $form->multiselectarray('categories', $cate_arbo, GETPOST('categories', 'array'), 0, 0, '', 0, '100%');
             } else {
                 $form = new Form($this->db->db);
                 return $form->showCategories($this->getData('id'), 'product', 1);
@@ -1167,6 +1168,7 @@ class Bimp_Product extends BimpObject
 
     public function getStockDate($date = null, $id_entrepot = null, $id_product = null, $include_shipment_diff = false)
     {
+        $stock = 0;
         if (is_null($date))
             return 'N/C';
 
@@ -1176,7 +1178,6 @@ class Bimp_Product extends BimpObject
         }
 
         if ((int) $id_product) {
-            $stock = 0;
             if (!isset(self::$stockDate[$date])) {
                 self::initStockDate($date, $include_shipment_diff);
             }
@@ -1897,7 +1898,7 @@ class Bimp_Product extends BimpObject
             $html .= '</tr>';
         }
 
-        $html1 = $html2 = "";
+        $html1 = $html2 = $html3 = $html4 = "";
         foreach ($this->stocks as $id_ent => $stocks) {
             if (!is_null($id_entrepot) && ((int) $id_entrepot === (int) $id_ent)) {
                 continue;
@@ -2893,7 +2894,7 @@ class Bimp_Product extends BimpObject
                 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
                 $userT = new User($this->db->db);
                 $userT->fetch((int) 62);
-                $errors = BimpTools::merge_array($errors, $this->sendEmailPropalRefuse($commande, $userT->email));
+                $errors = BimpTools::merge_array($errors, $this->sendEmailPropalRefuse($propal, $userT->email));
                 $email_sent = true;
                 continue;
             }

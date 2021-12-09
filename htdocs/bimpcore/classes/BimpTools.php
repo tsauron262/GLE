@@ -3086,19 +3086,22 @@ class BimpTools
         usleep(3000000);
         $text2 = file_get_contents($file);
         if ($text == $text2){
-            $autreInstanceBloquage = static::isBloqued($type, true);
-            if(!$autreInstanceBloquage){
-                static::$bloquages[] = $type;
+            if(defined('ID_ERP')){
+                $autreInstanceBloquage = static::isBloqued($type, true);
+                if(!$autreInstanceBloquage){
+                    static::$bloquages[] = $type;
+                    return 1;
+                }
+                else{
+                    unlink($file); 
+                    $errors[] = 'Fichier lock d\'une autre instance : '.$autreInstanceBloquage;
+                    BimpCore::addlog('Probléme lockNum '.$type, Bimp_Log::BIMP_LOG_URGENT, null, null, array('Errors'=>$errors));
+                    return static::lockNum($type, $nb, $errors);
+                }
+            }
+            else 
                 return 1;
-            }
-            else{
-                unlink($file); 
-                $errors[] = 'Fichier lock d\'une autre instance : '.$autreInstanceBloquage;
-                BimpCore::addlog('Probléme lockNum '.$type, Bimp_Log::BIMP_LOG_URGENT, null, null, array('Errors'=>$errors));
-                return static::lockNum($type, $nb, $errors);
-            }
-            
-            
+                    
         }
         else{
             $errors[] = 'Fichier diférent de celui attendue';

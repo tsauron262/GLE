@@ -181,9 +181,9 @@ class InvoicePDF extends BimpDocumentPDF
                 $docName = $this->langs->transnoentities('Invoice');
         }
 
-        if ($this->sitationinvoice) {
-            $docName = $this->langs->transnoentities('InvoiceSituation');
-        }
+//        if ($this->sitationinvoice) {
+//            $docName = $this->langs->transnoentities('InvoiceSituation');
+//        }
 
         // Réf facture: 
         $docRef = $this->langs->transnoentities("Ref") . " : " . $this->langs->convToOutputCharset($this->facture->ref);
@@ -208,7 +208,7 @@ class InvoicePDF extends BimpDocumentPDF
             $soc = null;
         }
 
-        $html .= '<div>';
+        $html = '<div>';
 
         // Ref. client:
         if ($this->facture->ref_client) {
@@ -399,7 +399,7 @@ class InvoicePDF extends BimpDocumentPDF
             if (empty($this->object->mode_reglement_code) && empty($conf->global->FACTURE_CHQ_NUMBER) && empty($conf->global->FACTURE_RIB_NUMBER)) {
                 $error = $this->langs->transnoentities("ErrorNoPaiementModeConfigured");
             } elseif (($this->object->mode_reglement_code == 'CHQ' && empty($conf->global->FACTURE_CHQ_NUMBER) && empty($this->object->fk_account) && empty($this->object->fk_bank)) || ($this->object->mode_reglement_code == 'VIR' && empty($conf->global->FACTURE_RIB_NUMBER) && empty($this->object->fk_account) && empty($this->object->fk_bank))) {
-                $error = $this->langs->transnoentities("ErrorPaymentModeDefinedToWithoutSetup", $object->mode_reglement_code);
+                $error = $this->langs->transnoentities("ErrorPaymentModeDefinedToWithoutSetup", $this->object->mode_reglement_code);
             }
 
             if ($error) {

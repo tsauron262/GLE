@@ -27,8 +27,6 @@ class BimpDocumentPDF extends BimpModelPDF
     public $periodicity = 0;
     public $nbPeriods = 0;
     public $proforma = 0;
-    public $maxLogoWidth = 120; // px
-    public $maxLogoHeight = 60; // px
     public $totals = array("DEEE" => 0, "RPCP" => 0);
     public $target_label = '';
     public $next_annexe_idx = 1;

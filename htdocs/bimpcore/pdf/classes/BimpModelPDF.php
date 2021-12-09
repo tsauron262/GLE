@@ -321,6 +321,7 @@ Abstract class BimpModelPDF
             $bickey = "SWIFT";
         }
 
+        $html = '';
         $usedetailedbban = $account->useDetailedBBAN();
 
         if (!$only_number) {

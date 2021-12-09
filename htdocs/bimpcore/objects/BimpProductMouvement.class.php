@@ -47,6 +47,7 @@ class BimpProductMouvement extends BimpObject
     {
         switch ($field_name) {
             case 'origin_type':
+                $filter = '';
                 $in = '';
                 $has_emtpy = false;
                 $has_inc = false;
@@ -72,7 +73,7 @@ class BimpProductMouvement extends BimpObject
                         $filter = 'a.origintype NOT IN (' . $in . ') AND a.bimp_origin NOT IN (' . $in . ')';
                     }
                     if ($has_emtpy) {
-                        $filter .= ($filter ? ' AND ' : '') . 'NOT ((a.origintype = \'\' OR a.origintype IS NULL) AND (a.bimp_origin = \'\' OR a.bimp_origin IS NULL))';
+                        $filter .= ($filter != '' ? ' AND ' : '') . 'NOT ((a.origintype = \'\' OR a.origintype IS NULL) AND (a.bimp_origin = \'\' OR a.bimp_origin IS NULL))';
                     }
                     if ($has_inc) {
                         $origintypes = self::$originetypes;
@@ -80,14 +81,14 @@ class BimpProductMouvement extends BimpObject
                         unset($origintypes['inc']);
                         $origintypes = BimpTools::implodeArrayKeys($origintypes, ',', true);
 
-                        $filter .= ($filter ? ' AND ' : '') . 'NOT ((a.origintype != \'\' AND a.origintype IS NOT NULL AND a.origintype NOT IN(' . $origintypes . ')) OR (a.bimp_origin != \'\' AND a.bimp_origin IS NOT NULL AND a.bimp_origin NOT IN (' . $origintypes . ')))';
+                        $filter .= ($filter != '' ? ' AND ' : '') . 'NOT ((a.origintype != \'\' AND a.origintype IS NOT NULL AND a.origintype NOT IN(' . $origintypes . ')) OR (a.bimp_origin != \'\' AND a.bimp_origin IS NOT NULL AND a.bimp_origin NOT IN (' . $origintypes . ')))';
                     }
                 } else {
                     if ($in) {
                         $filter = 'a.origintype IN (' . $in . ') OR a.bimp_origin IN (' . $in . ')';
                     }
                     if ($has_emtpy) {
-                        $filter .= ($filter ? ' OR ' : '') . '((a.origintype = \'\' OR a.origintype IS NULL) AND (a.bimp_origin = \'\' OR a.bimp_origin IS NULL))';
+                        $filter .= ($filter != '' ? ' OR ' : '') . '((a.origintype = \'\' OR a.origintype IS NULL) AND (a.bimp_origin = \'\' OR a.bimp_origin IS NULL))';
                     }
                     if ($has_inc) {
                         $origintypes = self::$originetypes;
@@ -95,7 +96,7 @@ class BimpProductMouvement extends BimpObject
                         unset($origintypes['inc']);
                         $origintypes = BimpTools::implodeArrayKeys($origintypes, ',', true);
 
-                        $filter .= ($filter ? ' AND ' : '') . '((a.origintype != \'\' AND a.origintype IS NOT NULL AND a.origintype NOT IN(' . $origintypes . ')) OR (a.bimp_origin != \'\' AND a.bimp_origin IS NOT NULL AND a.bimp_origin NOT IN (' . $origintypes . ')))';
+                        $filter .= ($filter != '' ? ' AND ' : '') . '((a.origintype != \'\' AND a.origintype IS NOT NULL AND a.origintype NOT IN(' . $origintypes . ')) OR (a.bimp_origin != \'\' AND a.bimp_origin IS NOT NULL AND a.bimp_origin NOT IN (' . $origintypes . ')))';
                     }
                 }
 

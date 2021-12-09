@@ -1018,9 +1018,9 @@ class BimpSignature extends BimpObject
                 $msg .= 'Cordialement';
             }
 
-//            if (count($up_errors)) {
-//                $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement du mot de passe');
-//            } else {
+            if (count($errors)) {
+                $errors[] = BimpTools::getMsgFromArray($errors, 'Echec de l\'enregistrement du mot de passe');
+            } else {
                 $to = BimpTools::cleanEmailsStr($this->getData('email_signature'));
                 $tech = $this->getChildObject('user_tech');
 
@@ -1053,7 +1053,7 @@ class BimpSignature extends BimpObject
                 if (count($mail_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail au client pour la signature à distance');
                 }
-//            }
+            }
         } else {
             $errors[] = 'Adresse e-mail du client absente ou invalide';
         }
@@ -1231,7 +1231,7 @@ class BimpSignature extends BimpObject
                 $client = $this->getChildObject('client');
                 if (BimpObject::objectLoaded($client)) {
                     $obj_label = $this->displayDocType() . ' ' . $this->displayDocRef();
-                    $subject = 'Signature effectuée - ' . $obj_label . ' - Client: ' . (BimpObject::objectLoaded($client) ? $client->getRef() . ' ' . $client->getName() : 'inconnu');
+                    $subject = 'Signature effectuée - ' . $obj_label . ' - Client: ' . $client->getRef() . ' ' . $client->getName();
 
                     $msg = 'Bonjour,<br/><br/>';
                     $msg .= 'La signature du document "' . $obj_label . '" a été effectuée.<br/><br/>';
@@ -1462,7 +1462,7 @@ class BimpSignature extends BimpObject
                 $errors[] = 'Fichier du document signé absent';
             } else {
                 $file_name = $this->getDocumentFileName(true);
-                $file_path = $this->getDocumentFilePath(true, 'private');
+                $file_path = $this->getDocumentFilePath(true/*, 'private'*/);
                 $dir = $this->getDocumentFileDir();
 
                 if (!$dir || !$file_path || !$file_name) {
@@ -1677,6 +1677,7 @@ class BimpSignature extends BimpObject
         $errors = array();
         $warnings = array();
         $success = 'Document signé régénéré avec succès';
+        $success_callback = '';
 
         $errors = $this->writeSignatureOnDoc($data);
 

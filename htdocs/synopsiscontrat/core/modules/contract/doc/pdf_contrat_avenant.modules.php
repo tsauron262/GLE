@@ -577,17 +577,18 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                     $pdf->SetFont('', '', 8);
                     $pdf1->setY($pdf1->getY() + 5);
                     $pdf1->SetFont('', '', 8);
-                    $pdf1->Cell($W, 4, "Article 1" . 1, "L", null, 'C', true);
+                    $pdf1->Cell($W, 4, "Article 1", "L", null, 'C', true);
                     $pdf1->ln();
                     $pdf1->SetFont('', '', 8);
                     $current_article = 2;
                     
                     $pdf->Cell($W, 4, "Les parties conviennent de modifier: ", 0, null, 'L', true);
                     $pdf->setY($pdf->getY() + 5);
-                    $pdf1->setY($pdf1->getY() + 2);
-                    $pdf1->SetFont('', '', 8);
-                    $pdf1->Cell($W, 4, "Article ".$current_article."", "L", null, 'L', true);
+//                    $pdf1->setY($pdf1->getY() + 2);
+//                    $pdf1->SetFont('', '', 8);
+//                    $pdf1->Cell($W, 4, "Article ".$current_article."", "L", null, 'L', true);
                     $pdf1->Cell($W, 4, "Les parties conviennent de modifier: ", 0, null, 'L', true);
+                    $pdf1->setY($pdf1->getY() + 5);
                     $pdf->SetFont('', '', 8);
                     $pdf->Cell($W*5, 4, "La date de fin de contrat initialement prévue au " . $date->format('d/m/Y') . ' sera repportée au ' . $date_fin_av->format('d/m/Y') , 0, null, 'L', false);
                     $pdf1->SetFont('', '', 8);

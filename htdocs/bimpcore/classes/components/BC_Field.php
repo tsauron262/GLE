@@ -271,6 +271,7 @@ class BC_Field extends BimpComponent
             $history_html = BimpRender::renderObjectFieldHistoryPopoverButton($this->object, $this->name_prefix . $this->name, 15, $history_user);
         }
 
+        $html = '';
         if ($history_html) {
             $html .= '<div style="padding-left: 32px;">';
             $html .= '<div style="float: left; margin-left: -28px; margin-top: 4px">';
@@ -856,7 +857,7 @@ class BC_Field extends BimpComponent
             }
             $content = BimpInput::renderSearchListInputFromConfig($this->object, $input_path, $input_name, $this->value, $this->params['search']['option']);
         } elseif ($search_data['search_type'] === 'values_range') {
-            $content .= '<div>';
+            $content = '<div>';
             $input_options = $search_data['input_options'];
             $input_options['addon_left'] = 'Min';
             $content .= BimpInput::renderInput($search_data['input_type'], $input_name . '_min', null, $input_options);

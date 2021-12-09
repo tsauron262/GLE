@@ -83,6 +83,7 @@ class BimpObject extends BimpCache
     public $noFetchOnTrigger = false;
     public $fieldsWithAddNoteOnUpdate = array();
     public $isDeleting = false;
+    public $thirdparty = null;
 
     // Gestion instance:
 
@@ -1520,7 +1521,7 @@ class BimpObject extends BimpCache
                 if (property_exists($obj, 'id'))
                     $id = $obj->id;
                 else
-                    $value = "ERR pas de champ ID" . $nom;
+                    $value = "ERR pas de champ ID" . get_class($obj);
                 if ($id > 0) {
                     $value = array();
                     if (method_exists($obj, "getNomUrl"))
@@ -6768,7 +6769,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 if (is_a($instance, 'BimpObject')) {
                     $msg = BimpTools::ucfirst($instance->getLabel('the')) . ' d\'ID ' . $id_object . ' semble avoir été supprimé' . ($instance->isLabelFemale() ? 'e' : '');
                 } elseif (is_object($instance)) {
-                    $msg .= 'L\'objet de type "' . get_class($instance) . '" d\'ID ' . $id_object . ' semble avoir été supprimé';
+                    $msg = 'L\'objet de type "' . get_class($instance) . '" d\'ID ' . $id_object . ' semble avoir été supprimé';
                 } else {
                     $msg = 'Cet objet semble avoir été supprimé (ID: ' . $id_object . ')';
                 }
@@ -6908,7 +6909,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
     public function renderData()
     {
-        $html .= $this->printData(1);
+        $html = $this->printData(1);
 
         return $html;
     }
@@ -9226,7 +9227,7 @@ var options = {
                         BimpTools::loadDolClass($module, $file, $class_name);
 
                         if (class_exists($class_name)) {
-                            $instance = new $class_name($db);
+                            $instance = new $class_name($this->db->db);
                         }
 
                         // todo

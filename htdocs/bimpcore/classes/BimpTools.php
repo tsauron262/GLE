@@ -1830,7 +1830,7 @@ class BimpTools
 
     // Gestion des dates: 
 
-    public function printDate($date, $balise = "span", $class = '', $format = 'd/m/Y H:i:s', $format_mini = 'd / m / Y')
+    public static function printDate($date, $balise = "span", $class = '', $format = 'd/m/Y H:i:s', $format_mini = 'd / m / Y')
     {
         if ($date == '')
             return '';

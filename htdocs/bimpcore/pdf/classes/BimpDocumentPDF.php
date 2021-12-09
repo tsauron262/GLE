@@ -39,6 +39,7 @@ class BimpDocumentPDF extends BimpModelPDF
     public $signature_params = array();
     public $signature_bloc = true;
     public $signature_bloc_label = '';
+    public $hidePrice = false;
 
     public function __construct($db)
     {
@@ -1046,7 +1047,7 @@ class BimpDocumentPDF extends BimpModelPDF
     public function getBottomRightHtml()
     {
 
-        $html .= $this->getTotauxRowsHtml();
+        $html = $this->getTotauxRowsHtml();
         $html .= $this->getPaymentsHtml();
         $html .= $this->getAfterTotauxHtml();
 

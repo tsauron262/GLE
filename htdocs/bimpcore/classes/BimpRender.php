@@ -129,7 +129,7 @@ class BimpRender
         return $html;
     }
 
-    public static function renderButtonFromConfig(BimpConfig $config, $path, $extra_params, $tag = 'span')
+    public static function renderButtonFromConfig(BimpConfig $config, $path, $extra_params = array(), $tag = 'span')
     {
         $label = $config->get($path . '/label', '');
         $icon_before = $config->get($path . '/icon_before', '');

@@ -802,7 +802,7 @@ class Bimp_User extends BimpObject
 
         $tmparray = array('index.php' => 'Dashboard');
 
-        $html .= '<table class="noborder" width="100%">';
+        $html = '<table class="noborder" width="100%">';
         $html .= '<tr class="liste_titre"><td width="50%">' . $langs->trans("Parameter") . '</td><td width="50%">' . $langs->trans("DefaultValue") . '</td></tr>';
 
         // Language

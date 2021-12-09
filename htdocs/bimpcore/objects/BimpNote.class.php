@@ -176,7 +176,8 @@ class BimpNote extends BimpObject
         if (is_null($id_user)) {
             global $user;
         } elseif ((int) $id_user) {
-            $user = new User($this->db->db);
+            global $db;
+            $user = new User($db);
             $user->fetch((int) $id_user);
         }
 

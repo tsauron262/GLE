@@ -32,6 +32,8 @@ Abstract class BimpModelPDF
     public $primary = '000000';
     public $watermark = '';
     public static $html_purifier = null;
+    public $maxLogoWidth = 120; // px
+    public $maxLogoHeight = 60; // px
 
     public function __construct($db, $orientation = 'P', $format = 'A4')
     {

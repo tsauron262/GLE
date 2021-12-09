@@ -40,6 +40,7 @@ class BimpDocumentPDF extends BimpModelPDF
     public $signature_bloc = true;
     public $signature_bloc_label = '';
     public $hidePrice = false;
+    public $contactFinal = null;
 
     public function __construct($db)
     {

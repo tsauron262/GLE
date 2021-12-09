@@ -1899,7 +1899,7 @@ class Bimp_Societe extends BimpDolObject
         if ($code != '') {
             $errors = BimpTools::merge_array($errors, $this->checkSiren('siret', $code, $data));
         } else {
-            $code = (string) $client->getData('siren');
+            $code = (string) $this->getData('siren');
             if($code != '')
                 $errors = BimpTools::merge_array($errors, $this->checkSiren('siren', $code, $data));
         }

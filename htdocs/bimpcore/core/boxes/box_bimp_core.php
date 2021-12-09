@@ -218,8 +218,8 @@ class box_bimp_core extends ModeleBoxes
             if(isset($temp[2]))
                 $nocolor = 0;
 
-        $filenamenb = $dir."/".$clef."-".$year.".png";
-        $fileurlnb = DOL_URL_ROOT.'/viewimage.php?modulepart=productstats&amp;file='.$clef.'-'.$year.'.png';
+        $filenamenb = $dir."/".$clef."-"/*.$year*/.".png";
+        $fileurlnb = DOL_URL_ROOT.'/viewimage.php?modulepart=productstats&amp;file='.$clef.'-'/*.$year*/.'.png';
 
         $px1 = new DolGraph();
         $mesg = $px1->isGraphKo();

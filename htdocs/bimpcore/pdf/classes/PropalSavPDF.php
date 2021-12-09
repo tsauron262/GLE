@@ -82,7 +82,7 @@ class PropalSavPDF extends PropalPDF
 
     public function renderAfterBottom()
     {
-        $html .= '<table cellpadding="20px"><tr><td>';
+        $html = '<table cellpadding="20px"><tr><td>';
 //        $html .= '<p style="font-size: 7px; color: #002E50">';
         $html .= '<div style="text-indent: 15px; font-size: 7px; color: #002E50">';
         $html .= 'Si le service est requis conformément à une obligation de réparation d’un tiers, ces informations seront ';

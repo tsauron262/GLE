@@ -1512,7 +1512,7 @@ class Bimp_Societe extends BimpDolObject
     {
         // On passe à la fonction la variable contenant le numéro à vérifier
         // et la longueur qu'il doit impérativement avoir
-
+        $tableauChiffresNumero = array();
         if ((strlen($numero) == $longueur) && preg_match("#[0-9]{" . $longueur . "}#i", $numero)) {
             // si la longueur est bonne et que l'on n'a que des chiffres
 
@@ -1994,6 +1994,10 @@ class Bimp_Societe extends BimpDolObject
                 } elseif (stripos($result->header->reportinformation->reporttype, "Error") !== false) {
                     $warnings[] = 'Erreur lors de la vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' (Code: ' . $result->body->errors->errordetail->code . ')';
                 } else {
+                    $ville = '';
+                    $codeP = '';
+                    $tel = '';
+                    $nom = '';
                     $note = $alert = "";
                     $limit = 0;
 
@@ -2033,7 +2037,7 @@ class Bimp_Societe extends BimpDolObject
                         if (is_array($branches)) {
                             foreach ($branches as $branche) {
                                 if (($siret && $branche->companynumber == $siret) || (!$siret && stripos($branche->type, "Siège") !== false)) {
-                                    die('gggggg');
+//                                    die('gggggg');
                                     $adress = $branche->full_address->address;
                                     //$nom = $branche->full_address->name;
                                     $codeP = $branche->postcode;
@@ -2054,13 +2058,13 @@ class Bimp_Societe extends BimpDolObject
                         //                            $limit = 10000000;
                     }
                     if (isset($result->body->company->ratings2013->commentaries->comment)) {
-                        if (is_string($result->body->company->ratings2013->commentaries->comment))
-                            $note .= "
-    " . $result->body->company->ratings2013->commentaries->comment;
-                        else
+                        if(is_array($result->body->company->ratings2013->commentaries->comment))
                             foreach ($result->body->company->ratings2013->commentaries->comment as $comment)
                                 $note .= "
     " . $comment;
+                        else
+                            $note .= "
+    " . $result->body->company->ratings2013->commentaries->comment;
                     }
 
                     $data = array(

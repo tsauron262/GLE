@@ -7,6 +7,7 @@ class BimpObjectPDF extends BimpModelPDF
 
     public $object = null;
     public static $type = 'bimp_object';
+    public $sections = array();
 
     public function __construct(BimpObject $object, $orientation = 'L', $format = 'A4')
     {
@@ -22,7 +23,7 @@ class BimpObjectPDF extends BimpModelPDF
 
     protected function initHeader()
     {
-        if (!is_null($this->object) && is_a($object, 'BimpObject') && $object->isLoaded) {
+        if (!is_null($this->object) && is_a($this->object, 'BimpObject') && $this->object->isLoaded) {
             $object_name = BimpTools::ucfirst($this->object->getLabel()) . ' "' . $this->object->getInstanceName() . '"';
             $this->header_vars['header_right'] = $this->renderTemplate(self::$tpl_dir . '/' . static::$type . '/header_right.html', array(
                 'object_name' => $object_name

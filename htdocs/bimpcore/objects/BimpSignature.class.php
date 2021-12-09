@@ -1018,11 +1018,10 @@ class BimpSignature extends BimpObject
                 $msg .= 'Cordialement';
             }
 
-            if (count($up_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement du mot de passe');
-            } else {
+//            if (count($up_errors)) {
+//                $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement du mot de passe');
+//            } else {
                 $to = BimpTools::cleanEmailsStr($this->getData('email_signature'));
-                $commercial = $this->getCommercialClient();
                 $tech = $this->getChildObject('user_tech');
 
                 $email_tech = '';
@@ -1032,9 +1031,7 @@ class BimpSignature extends BimpObject
                     $email_tech = $tech->getData('email');
                 }
 
-                if (BimpObject::objectLoaded($commercial)) {
-                    $email_comm = $commercial->getData('email');
-                }
+                $email_comm = $this->getCommercialEmail();
 
                 $reply_to = ($email_comm ? $email_comm : $email_tech);
                 $cc = ''; //($email_comm ? $email_tech . ', ' : '') . 't.sauron@bimp.fr, f.martinez@bimp.fr';
@@ -1056,7 +1053,7 @@ class BimpSignature extends BimpObject
                 if (count($mail_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail au client pour la signature à distance');
                 }
-            }
+//            }
         } else {
             $errors[] = 'Adresse e-mail du client absente ou invalide';
         }

@@ -1555,7 +1555,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function getAfterTotauxHtml()
     {
-        $html .= '<table style="width: 95%" cellpadding="3">';
+        $html = '<table style="width: 95%" cellpadding="3">';
 
         global $mysoc, $langs;
         // If France, show VAT mention if not applicable

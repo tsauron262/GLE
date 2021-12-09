@@ -829,6 +829,7 @@ class Bimp_Client extends Bimp_Societe
     {
         $html = '';
         $tot = 0;
+        $values = null;
         if ($this->isLoaded()) {
             $values = $this->getEncours(false);
             $tot += $values;
@@ -1167,6 +1168,7 @@ class Bimp_Client extends Bimp_Societe
         $html = '';
 
         $list = null;
+        $list2 = null;
         $client_label = $this->getRef() . ' - ' . $this->getName();
 
         switch ($list_type) {
@@ -1401,7 +1403,7 @@ class Bimp_Client extends Bimp_Societe
                                     $facs_rows_html .= '<td>';
                                     if ($relance) {
                                         $nSelectables++;
-                                        $facs_rows_html .= '<input type="checkbox" class="facture_check ' . $checkbox_class . '" value="' . $id_fac . '" name="factures[]"' . ($relance ? ' checked="1"' : '');
+                                        $facs_rows_html .= '<input type="checkbox" class="facture_check ' . $checkbox_class . '" value="' . $id_fac . '" name="factures[]" checked="1"';
                                         $facs_rows_html .= ' data-id_client="' . $id_client . '"';
                                         $facs_rows_html .= '/>';
                                     }
@@ -1931,7 +1933,7 @@ class Bimp_Client extends Bimp_Societe
             $date_prevue = date('Y-m-d');
         }
 
-        if (empty($clients) && $mode = 'cron') {
+        if (empty($clients) && $mode == 'cron') {
             // Si liste de factures clients non fournie et si mode cron, on récup la liste complète des factures à relancer. 
             $clients = $this->getFacturesToRelanceByClients(true);
         }

@@ -722,6 +722,8 @@ class Bimp_User extends BimpObject
     public function showUserTheme($object, $edit = 0, $foruserprofile = false)
     {
         global $conf, $langs;
+        
+        $html = '';
 
         $dirthemes = array('/theme');
         if (!empty($conf->modules_parts['theme'])) {  // Using this feature slow down application
@@ -794,7 +796,7 @@ class Bimp_User extends BimpObject
         global $conf, $langs, $db;
         BimpTools::loadDolClass("user");
         $object = new User($db);
-        $object->fetch(GETPOST('id'), "", "", 1);
+        $object->fetch((int) GETPOST('id'), "", "", 1);
         $object->getrights();
 
         // Load translation files required by page
@@ -958,9 +960,9 @@ class Bimp_User extends BimpObject
 
         if (is_a($list, 'BC_ListTable')) {
             $html .= $list->renderHtml();
-        } elseif ($list_type && !$html) {
+        } elseif ($list_type) {
             $html .= BimpRender::renderAlerts('La liste de type "' . $list_type . '" n\'existe pas');
-        } elseif (!$html) {
+        } else {
             $html .= BimpRender::renderAlerts('Type de liste non spécifié');
         }
 
@@ -1405,7 +1407,7 @@ class Bimp_User extends BimpObject
     /**
      * Renvoie un ou plusieurs utilisateurs en fonction de leurs disponibilité
      * 
-     * @param int/array $users_in un id d'utilisateur ou un tableau d'id/nom de
+     * @param int|array $users_in un id d'utilisateur ou un tableau d'id/nom de
      *  groupe trier de l'utilisateur le plus recherché vers le moins recherché, exemple:
      * array(330, 'parent', 'XX_Développement')
      * recherche en priorité l'utilisateur d'id 330, si il n'est pas disponible
@@ -1418,7 +1420,7 @@ class Bimp_User extends BimpObject
      * @param bool $fetch indique si on fetch le(s) utilisateur(s) renvoyé(s)
      * @param string $from date à partir de laquelle on cherche la disponibilité
      * @param string $to   date jusqu'à laquelle on cherche la disponibilité
-     * @return int/array
+     * @return int|array
      */
     public static function getUsersAvaible($users_in, &$errors = array(), &$warnings = array(),
             $max_user = 1, $return_array = false, $fetch = false, $from = null, $to = null) {
@@ -1504,8 +1506,6 @@ class Bimp_User extends BimpObject
             else
                 return BimpCache::getBimpObjectInstance ('bimpcore', 'Bimp_User', (int) $id_user_out);
         }
-        
-        return array();
     }
 
     // En construction !!

@@ -591,7 +591,9 @@ views:
                           params:
                               - 1
                               
-lists_cols: 
+lists_cols:
+    ref:
+        object_link: 1
     duree:
         has_total: 1
         total_type: timer

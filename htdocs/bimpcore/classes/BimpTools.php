@@ -2,6 +2,7 @@
 
 class BimpTools
 {
+    public $output = '';
 
     public static $currencies = array(
         'EUR' => array(

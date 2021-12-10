@@ -2232,6 +2232,11 @@ class BT_ficheInter extends BimpDolObject
 
                     $dir = $obj->getFilesDir();
                     $filename = $obj->getRef() . '.pdf';
+                    
+                    
+                    if (!file_exists($dir . $filename)) {
+                        $obj->actionGeneratePdf(array());
+                    }
 
                     if (!file_exists($dir . $filename)) {
                         $warnings[] = ucfirst($this->getLabel()) . ' ' . $obj->getLink() . ': fichier PDF absent (' . $dir . $filename . ')';

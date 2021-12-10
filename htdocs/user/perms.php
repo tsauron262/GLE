@@ -257,7 +257,8 @@ $parameters=array('permsgroupbyentity'=>$permsgroupbyentity);
 $reshook=$hookmanager->executeHooks('insertExtraHeader',$parameters,$object,$action);    // Note that $action and $object may have been modified by some hooks
 if ($reshook < 0) setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
 
-
+if($user->admin)
+    echo '<a target="_blank" href="'.DOL_URL_ROOT.'/bimpcore/?fc=admin&tab=droit&id_user='.$object->id.'">Nouvelle verssion</a>';
 print "\n";
 print '<table width="100%" class="noborder">';
 print '<tr class="liste_titre">';

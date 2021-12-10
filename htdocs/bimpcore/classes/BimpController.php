@@ -1647,7 +1647,7 @@ class BimpController
                 $form = new BC_Form($object, $id_parent, $form_name, 1, !$full_panel);
                 $modal_format = $form->params['modal_format'];
                 if ($force_edit) {
-                    $form->force_edit = true;
+                    $form->setParam('force_edit', $force_edit);
                 }
                 if (!is_null($form_id)) {
                     $form->identifier = $form_id;
@@ -2800,61 +2800,68 @@ class BimpController
 
     protected function ajaxProcessLoadUserListFiltersList()
     {
-        $errors = array();
-        $html = '';
-        $list_id = '';
-
-        $module = BimpTools::getValue('module', $this->module);
-        $object_name = BimpTools::getValue('object_name');
-        $panel_name = BimpTools::getValue('panel_name', 'default');
-        $id_user = (int) BimpTools::getValue('id_user', 0);
-
-        if (is_null($object_name) || !$object_name) {
-            $errors[] = 'Type d\'objet absent';
-        } else {
-            $object = BimpObject::getInstance($module, $object_name);
-
-            if (!is_a($object, $object_name)) {
-                $errors[] = 'L\'objet "' . $object_name . '" n\'existe pas dans le module "' . $module . '"';
-            }
-        }
-
-        if (!$id_user) {
-            $errors[] = 'ID de l\'utilisateur absent';
-        }
-
-        if (!count($errors)) {
-            $instance = BimpObject::getInstance('bimpcore', 'ListFilters');
-            $instance->validateArray(array(
-                'obj_module' => $module,
-                'obj_name'   => $object_name,
-                'panel_name' => $panel_name
-            ));
-
-            $list = new BC_ListTable($instance);
-
-            $list->addFieldFilterValue('obj_module', $module);
-            $list->addFieldFilterValue('obj_name', $object_name);
-            $list->addFieldFilterValue('panel_name', $panel_name);
-
-            $list->params['add_form_values']['fields']['owner_type'] = 2;
-            $list->params['add_form_values']['fields']['id_owner'] = $id_user;
-
-            $list->params['list_filters'][] = array(
-                'name'   => 'owner',
-                'filter' => array(
-                    'custom' => ListFilters::getOwnerFilterCustomSql($id_user)
-                )
-            );
-
-            $html = $list->renderHtml();
-            $list_id = $list->identifier;
-        }
+        // Obsolète. 
+        
+        $errors = array(
+            'Erreur: cette fonction est désactivée'
+        );
+        
+        BimpCore::addlog('Appel à méthode obsolète: BimpController::ajaxProcessLoadUserListFiltersList()', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore');
+        
+//        $html = '';
+//        $list_id = '';
+//
+//        $module = BimpTools::getValue('module', $this->module);
+//        $object_name = BimpTools::getValue('object_name');
+//        $panel_name = BimpTools::getValue('panel_name', 'default');
+//        $id_user = (int) BimpTools::getValue('id_user', 0);
+//
+//        if (is_null($object_name) || !$object_name) {
+//            $errors[] = 'Type d\'objet absent';
+//        } else {
+//            $object = BimpObject::getInstance($module, $object_name);
+//
+//            if (!is_a($object, $object_name)) {
+//                $errors[] = 'L\'objet "' . $object_name . '" n\'existe pas dans le module "' . $module . '"';
+//            }
+//        }
+//
+//        if (!$id_user) {
+//            $errors[] = 'ID de l\'utilisateur absent';
+//        }
+//
+//        if (!count($errors)) {
+//            $instance = BimpObject::getInstance('bimpcore', 'ListFilters');
+//            $instance->validateArray(array(
+//                'obj_module' => $module,
+//                'obj_name'   => $object_name,
+//                'panel_name' => $panel_name
+//            ));
+//
+//            $list = new BC_ListTable($instance);
+//
+//            $list->addFieldFilterValue('obj_module', $module);
+//            $list->addFieldFilterValue('obj_name', $object_name);
+//            $list->addFieldFilterValue('panel_name', $panel_name);
+//
+//            $list->params['add_form_values']['fields']['owner_type'] = 2;
+//            $list->params['add_form_values']['fields']['id_owner'] = $id_user;
+//
+//            $list->params['list_filters'][] = array(
+//                'name'   => 'owner',
+//                'filter' => array(
+//                    'custom' => ListFilters::getOwnerFilterCustomSql($id_user)
+//                )
+//            );
+//
+//            $html = $list->renderHtml();
+//            $list_id = $list->identifier;
+//        }
 
         return array(
             'errors'     => $errors,
-            'html'       => $html,
-            'list_id'    => $list_id,
+//            'html'       => $html,
+//            'list_id'    => $list_id,
             'request_id' => BimpTools::getValue('request_id', 0)
         );
     }

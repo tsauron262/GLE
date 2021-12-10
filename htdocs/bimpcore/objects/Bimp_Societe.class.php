@@ -748,14 +748,14 @@ class Bimp_Societe extends BimpDolObject
                     $and_where = ' AND cdet.fk_commande NOT IN (' . implode(',', $allowed['commandes']) . ')';
                 }
 
-                $sql .= ' AND (SELECT COUNT(cdet.rowid) FROM ' . MAIN_DB_PREFIX . 'commandedet cdet WHERE cdet.fk_remise_except = r.rowid' . $and_where . ') = 0';
+                $sql .= ' AND (SELECT COUNT(cdet.rowid) FROM ' . MAIN_DB_PREFIX . 'commandedet cdet,  ' . MAIN_DB_PREFIX . 'commande comm WHERE comm.rowid = cdet.fk_commande AND comm.fk_statut != 3 AND cdet.fk_remise_except = r.rowid' . $and_where . ') = 0';
 
                 $and_where = '';
                 if (isset($allowed['propales']) && !empty($allowed['propales'])) {
                     $and_where = ' AND pdet.fk_propal NOT IN (' . implode(',', $allowed['propales']) . ')';
                 }
 
-                $sql .= ' AND (SELECT COUNT(pdet.rowid) FROM ' . MAIN_DB_PREFIX . 'propaldet pdet WHERE pdet.fk_remise_except = r.rowid' . $and_where . ') = 0';
+                $sql .= ' AND (SELECT COUNT(pdet.rowid) FROM ' . MAIN_DB_PREFIX . 'propaldet pdet,  ' . MAIN_DB_PREFIX . 'propal prop WHERE prop.rowid = pdet.fk_propal AND prop.fk_statut != 4 AND pdet.fk_remise_except = r.rowid' . $and_where . ') = 0';
             }
 
             $result = $this->db->executeS($sql, 'array');

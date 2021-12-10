@@ -1646,7 +1646,7 @@ class BimpCache
         );
         global $user;
         if (BimpObject::objectLoaded($user)) {
-            $cache_key = 'user_' . $user->id . '_centres_array'.$all;
+            $cache_key = 'user_' . $user->id . '_centres_array'.$valDef;
             if (!isset(self::$cache[$cache_key])) {
                 $result = array();
                 $userCentres = explode(' ', $user->array_options['options_apple_centre']);

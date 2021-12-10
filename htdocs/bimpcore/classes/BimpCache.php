@@ -1638,7 +1638,7 @@ class BimpCache
         return self::getCacheArray($cache_key, $include_empty, 0, $empty_label);
     }
 
-    public static function getUserCentresArray($all = false)
+    public static function getUserCentresArray($valDef = '')
     {
 
         $centres = array(
@@ -1650,6 +1650,7 @@ class BimpCache
             if (!isset(self::$cache[$cache_key])) {
                 $result = array();
                 $userCentres = explode(' ', $user->array_options['options_apple_centre']);
+                $userCentres = array('V');
                 $centres = self::getCentres();
 
                 if (count($userCentres)) {
@@ -1662,9 +1663,9 @@ class BimpCache
                     }
                 }
                 
-                if($all){
+                if($valDef != ''){
                     foreach ($centres as $code => $data) {
-                        if (!isset($result[$code])) {
+                        if (!isset($result[$code]) && $valDef == $code) {
                             $result[$code] = $data['label'];
                             
                         }

@@ -748,14 +748,16 @@ class Bimp_Societe extends BimpDolObject
                     $and_where = ' AND cdet.fk_commande NOT IN (' . implode(',', $allowed['commandes']) . ')';
                 }
 
-                $sql .= ' AND (SELECT COUNT(cdet.rowid) FROM ' . MAIN_DB_PREFIX . 'commandedet cdet,  ' . MAIN_DB_PREFIX . 'commande comm WHERE comm.rowid = cdet.fk_commande AND comm.fk_statut != 3 AND cdet.fk_remise_except = r.rowid' . $and_where . ') = 0';
+                $sql .= ' AND (SELECT COUNT(cdet.rowid) FROM ' . MAIN_DB_PREFIX . 'commandedet cdet,  ' . MAIN_DB_PREFIX . 'commande comm ';
+                $sql .= 'WHERE comm.rowid = cdet.fk_commande AND comm.fk_statut NOT IN (-1,3) AND cdet.fk_remise_except = r.rowid' . $and_where . ') = 0';
 
                 $and_where = '';
                 if (isset($allowed['propales']) && !empty($allowed['propales'])) {
                     $and_where = ' AND pdet.fk_propal NOT IN (' . implode(',', $allowed['propales']) . ')';
                 }
 
-                $sql .= ' AND (SELECT COUNT(pdet.rowid) FROM ' . MAIN_DB_PREFIX . 'propaldet pdet,  ' . MAIN_DB_PREFIX . 'propal prop WHERE prop.rowid = pdet.fk_propal AND prop.fk_statut != 4 AND pdet.fk_remise_except = r.rowid' . $and_where . ') = 0';
+                $sql .= ' AND (SELECT COUNT(pdet.rowid) FROM ' . MAIN_DB_PREFIX . 'propaldet pdet,  ' . MAIN_DB_PREFIX . 'propal prop ';
+                $sql .= 'WHERE prop.rowid = pdet.fk_propal AND prop.fk_statut NOT IN (3,4) AND pdet.fk_remise_except = r.rowid' . $and_where . ') = 0';
             }
 
             $result = $this->db->executeS($sql, 'array');
@@ -842,7 +844,7 @@ class Bimp_Societe extends BimpDolObject
                             foreach ($rows as $r) {
                                 if (!isset($allowed['commandes']) || !in_array((int) $r['fk_commande'], $allowed['commandes'])) {
                                     $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $r['fk_commande']);
-                                    if (BimpObject::objectLoaded($commande)) {
+                                    if (BimpObject::objectLoaded($commande) && !in_array($commande->getData('fk_statut'), array(-1, 3))) {
                                         $use_label = 'Ajouté à la commande ' . ($with_nom_url ? $commande->getNomUrl(1, 1, 1, 'full') : '"' . $commande->getRef() . '"');
                                         break;
                                     } else {
@@ -861,7 +863,8 @@ class Bimp_Societe extends BimpDolObject
                                     $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', (int) $r['fk_propal']);
                                     if (BimpObject::objectLoaded($propal)) {
                                         if (!in_array($propal->getData('fk_statut'), array(4, 3))) {
-                                            if (!(int) $bdb->getValue('element_element', 'rowid', '`fk_source` = ' . $r['fk_propal'] . ' AND `sourcetype` = \'propal\'  AND `targettype` = \'commande\'') && !(int) $bdb->getValue('element_element', 'rowid', '`fk_source` = ' . $r['fk_propal'] . ' AND `sourcetype` = \'propal\'  AND `targettype` = \'contrat\'')) {
+                                            if (!(int) $bdb->getValue('element_element', 'rowid', '`fk_source` = ' . $r['fk_propal'] . ' AND `sourcetype` = \'propal\'  AND `targettype` = \'commande\'') && 
+                                                    !(int) $bdb->getValue('element_element', 'rowid', '`fk_source` = ' . $r['fk_propal'] . ' AND `sourcetype` = \'propal\'  AND `targettype` = \'contrat\'')) {
                                                 $use_label = 'Ajouté à la propale ' . ($with_nom_url ? $propal->getNomUrl(1, 1, 1, 'full') : '"' . $propal->getRef() . '"');
                                                 break;
                                             }

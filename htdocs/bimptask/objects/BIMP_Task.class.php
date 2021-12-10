@@ -17,7 +17,8 @@ class BIMP_Task extends BimpObject
         'other' => 'Autre');
     
     public static $types_manuel = array(
-        'dev' => 'Développement'
+        'dev'        => 'Développement',
+        'adminVente' => 'Administration des Ventes'
     );
     
     

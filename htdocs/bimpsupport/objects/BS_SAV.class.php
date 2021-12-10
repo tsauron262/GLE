@@ -155,7 +155,11 @@ class BS_SAV extends BimpObject
     }
     
     public function getListCentre($field){
-        return static::getUserCentresArray($this->getData($field));
+        if($this->isLoaded())
+            $value = $this->getData($field);
+        else
+            $value = '';
+        return static::getUserCentresArray($value);
     }
 
     public function canClientEdit()

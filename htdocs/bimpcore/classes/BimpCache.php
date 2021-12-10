@@ -1650,7 +1650,6 @@ class BimpCache
             if (!isset(self::$cache[$cache_key])) {
                 $result = array();
                 $userCentres = explode(' ', $user->array_options['options_apple_centre']);
-                $userCentres = array('V');
                 $centres = self::getCentres();
 
                 if (count($userCentres)) {

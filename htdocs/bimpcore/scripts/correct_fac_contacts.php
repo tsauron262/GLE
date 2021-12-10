@@ -25,7 +25,7 @@ if (!$user->admin) {
     echo BimpRender::renderAlerts('Seuls les admin peuvent exécuter ce script');
 }
 
-if (!(int) BimPTools::getValue('exec', 0)) {
+if (!(int) BimpTools::getValue('exec', 0)) {
     echo 'Corrige les contacts absents dans les avoirs SAV à partir des factures sources <br/>';
 
     $path = pathinfo(__FILE__);

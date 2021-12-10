@@ -390,8 +390,8 @@ class BimpCache
         if (!$result) {
             $result = array();
             global $db;
-            $req = 'SELECT AVG(DATEDIFF(date_terminer, date_create )) as moy, code_centre FROM ' . MAIN_DB_PREFIX . 'bs_sav WHERE DATEDIFF(now(), date_terminer ) <=' . $nbJ . '';
-            if ($ios)
+            $req = 'SELECT AVG(DATEDIFF(date_terminer, date_pc )) as moy, code_centre FROM '.MAIN_DB_PREFIX.'bs_sav WHERE DATEDIFF(now(), date_pc ) <='.$nbJ.'';
+            if($ios)
                 $req .= ' AND system = 300';
             else
                 $req .= ' AND system != 300';
@@ -413,8 +413,8 @@ class BimpCache
         if (!$result) {
             $result = array();
             global $db;
-            $req = "SELECT MIN(date_create), code_centre, DATEDIFF(now(), MIN(date_create) ) as time FROM llx_bs_sav a WHERE a.status = '0'";
-            if ($ios)
+            $req = "SELECT MIN(date_pc), code_centre, DATEDIFF(now(), MIN(date_pc) ) as time FROM llx_bs_sav a WHERE a.status = '0'";
+            if($ios)
                 $req .= ' AND system = 300';
             else
                 $req .= ' AND system != 300';
@@ -721,7 +721,7 @@ class BimpCache
                 // Fields: 
                 self::$cache[$cache_key] = array();
 
-                if (isset($object->params['fields'])) {
+                if (isset($object->params['fields']) && !empty($object->params['fields'])) {
                     foreach ($object->params['fields'] as $field_name) {
                         if (!$object->isFieldActivated($field_name)) {
                             continue;
@@ -748,7 +748,7 @@ class BimpCache
                                     continue;
                                 }
 
-                                $obj_field_label = $object->getConf('fields/' . $field_name . '/label', '');
+                                $obj_field_label = $object->getConf('fields/' . $filter_name . '/label', '');
                                 if ($obj_field_label && $label !== $obj_field_label) {
                                     $label .= ' (Champ "' . $obj_field_label . '")';
                                 }
@@ -792,7 +792,7 @@ class BimpCache
                     }
                 }
 
-                foreach ($instance->getList(array(), null, null, 'id', 'desc', 'array', array($primary, $name_prop)) as $item) {
+                foreach ($instance->getList(array(), null, null, 'id', 'desc', 'array', $fields) as $item) {
                     $label = '';
 
                     if (!empty($name_props)) {
@@ -1090,7 +1090,7 @@ class BimpCache
             }
 
             if (is_a($dolObject, 'BimpObject')) {
-                return self::getBimpObjectPopoverCardHtml($dolObject, $card_name);
+                return self::getBimpObjectCardHtml($dolObject, $card_name);
             }
         }
 
@@ -1483,7 +1483,7 @@ class BimpCache
                     $instance = new User($db);
                     if ($instance->fetch($r->fk_user) > 0) {
                         if ($instance->statut == 1) {
-                            self::$cache[$cache_key][$comm->fk_user] = $instance;
+                            self::$cache[$cache_key][$r->fk_user] = $instance;
                         }
                     }
                 }
@@ -1603,38 +1603,49 @@ class BimpCache
         return self::getCacheArray($cache_key, $include_empty, 0, $empty_label);
     }
 
-    public static function getUserCentresArray()
+    public static function getUserCentresArray($valDef = '')
     {
 
         $centres = array(
             '' => ''
         );
-
         global $user;
         if (BimpObject::objectLoaded($user)) {
-            $cache_key = 'user_' . $user->id . '_centres_array';
-            if (!isset(self::$cache[$cache_key])) {
+            $cache_key = 'user_' . $user->id . '_centres_array'.$valDef;
+
+            $result = self::getCacheServeur($cache_key);
+            if (!$result) {
+                $result = array();
                 $userCentres = explode(' ', $user->array_options['options_apple_centre']);
                 $centres = self::getCentres();
 
-                if (count($userCentres)) {
+                if (count($userCentres) > 1 || $userCentres[0] != '') {
                     foreach ($userCentres as $code) {
                         if (preg_match('/^ ?([A-Z]+) ?$/', $code, $matches)) {
                             if (isset($centres[$matches[1]])) {
-                                self::$cache[$cache_key][$matches[1]] = $centres[$matches[1]]['label'];
+                                $result[$matches[1]] = $centres[$matches[1]]['label'];
                             }
                         }
                     }
                 }
-
-                if (count($centres) <= 1) {
+                else {
                     foreach ($centres as $code => $centre) {
-                        self::$cache[$cache_key][$code] = $centre['label'];
+                        $result[$code] = $centre['label'];
                     }
                 }
+                
+                if($valDef != ''){
+                    foreach ($centres as $code => $data) {
+                        if (!isset($result[$code]) && $valDef == $code) {
+                            $result[$code] = $data['label'];
+                            
+                        }
+                    }
+                }
+                self::setCacheServeur($cache_key, $result);
             }
 
-            return self::$cache[$cache_key];
+            return $result;
         }
 
         return array();
@@ -2497,6 +2508,7 @@ class BimpCache
 
         return self::$cache['secteurs_array'];
     }
+    
     public static function getIpFromDns($host)
     {
         if (filter_var($host, FILTER_VALIDATE_IP))
@@ -2515,7 +2527,7 @@ class BimpCache
 
     public static function getSignature($prenom, $job, $phone)
     {
-        $key = 'sign_' . $prenom . '_' . $job . '_' . $phone;
+        $key = 'sign' . $prenom . $job . $phone;
         $cache = self::getCacheServeur($key);
         if (!$cache) {
             $url = "https://www.bimp.fr/signatures/v3/supports/sign.php?prenomnom=" . urlencode($prenom) . "&job=" . urlencode($job) . "&phone=" . urlencode($phone);
@@ -2534,6 +2546,7 @@ class BimpCache
     
 
     // Comme getSecteursArray avec l'option "Tous" en plus
+    
     public function getSecteurAllArray()
     {
         if (!BimpCore::getConf("USE_SECTEUR")) {

@@ -354,7 +354,7 @@ class DolibarrModules           // Can not be abstract, because we need to insta
 	public $hidden = false;
 
 
-
+        public $tabs = array();
 
 
 	/**

@@ -200,7 +200,7 @@ class BimpFile extends BimpObject
                 return 1;
             return 0;
         }
-        if ($default_value = 'default_value')
+        if ($default_value == 'default_value')
             return 2;
         return 1;
     }
@@ -400,6 +400,7 @@ class BimpFile extends BimpObject
         } elseif (!BimpObject::objectLoaded($object)) {
             $errors[] = 'ID ' . $object->getLabel('of_the') . ' absent';
         }
+        $dst_file = '';
 
         $src_file = $this->getFilePath();
 
@@ -613,7 +614,7 @@ class BimpFile extends BimpObject
 
         if (!count($errors)) {
             $current_name = (string) $this->getInitData('file_name');
-            if (!is_null($current_name)) {
+            if ($current_name != '') {
                 $new_name = (string) $this->getData('file_name');
                 if ($new_name) {
                     if ($new_name !== $current_name) {

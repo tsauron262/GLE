@@ -230,6 +230,7 @@ class Bimp_Log extends BimpObject
 
     public function displayLink()
     {
+        $html = '';
         $params = array();
         $ajax = false;
         $paramsBdd = $this->getData('url_params');
@@ -646,7 +647,7 @@ class Bimp_Log extends BimpObject
 
         $params['GET'] = $_GET;
         $params['POST'] = $_POST;
-        foreach (explode('&', $_REQUEST) as $param) {
+        foreach (implode('&', $_REQUEST) as $param) {
             if (preg_match('/^(.+)=(.+)$/', $param, $matches)) {
                 $params[$matches[1]] = $matches[2];
             }

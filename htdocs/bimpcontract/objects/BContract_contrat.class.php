@@ -534,9 +534,9 @@ class BContract_contrat extends BimpDolObject
         
         $diff = $date_now->diff($dateEffecte);
         
-        //$errors[] = $diff->days;
+        //$errors[] = print_r($diff,1);
         
-        if(($diff->days > 10)) {
+        if(($diff->days > 10) && !$diff->invert) {
             $errors[] = "Ce contrat ne peut pas être activé car sa date d'effet est trop éloignée. Le groupe contrat recevra une demande d'activation 10 jours avant cette date";
         }
 
@@ -805,37 +805,46 @@ class BContract_contrat extends BimpDolObject
 //                break;
             case 'reconduction':
                 $in = [];
-                $sql = "SELECT c.rowid FROM llx_contrat as c, llx_contrat_extrafields as e WHERE c.rowid = e.fk_object ";
-
-                if (count($values) == 1) {
-                    if (in_array('0', $values)) {// Aucune reconduction 
-                        $sql .= " AND (e.tacite = " . self::CONTRAT_RENOUVELLEMENT_NON . " OR e.tacite IS NULL)";
+                $included = [];
+                $sql = "SELECT c.rowid FROM llx_contrat as c, llx_contrat_extrafields as e WHERE e.fk_object = c.rowid ";                
+                
+                if(count($values) > 0) {
+                    
+                    if(in_array('0', $values)) {
+                        // Pas de reconduction
+                        $included[] = 0;
                     }
-                    if (in_array('1', $values)) {// Sur proposition 
-                        $sql .= " AND (e.tacite = " . self::CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION . ")";
+                    if(in_array('1', $values)) {
+                        $included[] = self::CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION;
                     }
-                    if (in_array('2', $values)) { // Tacite
-                        $in_renouvellement = Array();
+                    if(in_array('2', $values)) {
                         foreach (self::$renouvellement as $code => $text) {
                             if ($code != self::CONTRAT_RENOUVELLEMENT_NON && $code != self::CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION)
-                                $in_renouvellement[] = $code;
+                                $included[] = $code;
                         }
-                        $sql .= " AND (e.tacite IN (" . implode(',', $in_renouvellement) . "))";
                     }
+                    
+                    $sql .= ' AND e.tacite IN('.implode(',', $included).')';
+                    
                     $res = $this->db->executeS($sql, 'array');
                     foreach ($res as $nb => $i) {
                         $in[] = $i['rowid'];
                     }
                     $filters['a.rowid'] = ['in' => $in];
+                    
                 }
+                
                 break;
         }
+        
+        
+        
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
     }
 
     public function getCommercialclientSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
     {
-
+        
         $alias = 'sc';
         $joins[$alias] = array(
             'alias' => $alias,
@@ -844,51 +853,6 @@ class BContract_contrat extends BimpDolObject
         );
         $filters[$alias . '.fk_user'] = $value;
     }
-
-    public function getRenouvellementSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
-    {
-        $alias = 'c_e';
-        $field = $alias . '.tacite';
-        $joins[$alias] = array(
-            'alias' => $alias,
-            'table' => 'contrat_extrafields',
-            'on'    => $alias . '.fk_object = a.rowid'
-        );
-        switch ($value) {
-            case 0:
-                $filters[$field] = self::CONTRAT_RENOUVELLEMENT_NON;
-                break;
-            case 1:
-                $filters[$field] = self::CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION;
-                break;
-            case 2:
-                $in = [];
-                $in[] = self::CONTRAT_RENOUVELLEMENT_1_FOIS;
-                $in[] = self::CONTRAT_RENOUVELLEMENT_2_FOIS;
-                $in[] = self::CONTRAT_RENOUVELLEMENT_3_FOIS;
-                $in[] = self::CONTRAT_RENOUVELLEMENT_4_FOIS;
-                $in[] = self::CONTRAT_RENOUVELLEMENT_5_FOIS;
-                $in[] = self::CONTRAT_RENOUVELLEMENT_6_FOIS;
-                $filters[$field] = ['in' => $in];
-                break;
-        }
-    }
-
-//        public function getCustomFilterValueLabel($field_name, $value) {
-//            switch ($field_name) {
-//            case 'commercialclient':
-//                if ((int) $value) {
-//                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $value);
-//                    if (BimpObject::ObjectLoaded($user)) {
-//                        return $user->dol_object->getFullName();
-//                    }
-//                } else {
-//                    return 'Aucun';
-//                }
-//                break;
-//            
-//            }
-//        }
 
     public function isClosDansCombienDeTemps()
     {

@@ -156,17 +156,16 @@ class OrderPDF extends BimpDocumentPDF
         // Titre commande:
         $docName = self::$doc_types[$this->doc_type];
 
-        if ($this->sitationinvoice) {
-            $docName = self::$doc_types[$this->doc_type];
-        }
+//        if ($this->sitationinvoice) {
+//            $docName = self::$doc_types[$this->doc_type];
+//        }
 
         // Réf commande: 
         switch ($this->doc_type) {
             case 'commande':
+                $docRef = $this->langs->transnoentities("Ref") . " : " . $this->langs->convToOutputCharset($this->commande->ref);
                 if ($this->commande->statut == Commande::STATUS_DRAFT) {
                     $docRef = '<span style="color: #800000"> ' . $docRef . ' - ' . $this->langs->transnoentities("NotValidated") . '</span>';
-                } else {
-                    $docRef = $this->langs->transnoentities("Ref") . " : " . $this->langs->convToOutputCharset($this->commande->ref);
                 }
                 break;
 
@@ -459,7 +458,7 @@ class OrderPDF extends BimpDocumentPDF
             if (empty($this->object->mode_reglement_code) && empty($conf->global->FACTURE_CHQ_NUMBER) && empty($conf->global->FACTURE_RIB_NUMBER)) {
                 $error = $this->langs->transnoentities("ErrorNoPaiementModeConfigured");
             } elseif (($this->object->mode_reglement_code == 'CHQ' && empty($conf->global->FACTURE_CHQ_NUMBER) && empty($this->object->fk_account) && empty($this->object->fk_bank)) || ($this->object->mode_reglement_code == 'VIR' && empty($conf->global->FACTURE_RIB_NUMBER) && empty($this->object->fk_account) && empty($this->object->fk_bank))) {
-                $error = $this->langs->transnoentities("ErrorPaymentModeDefinedToWithoutSetup", $object->mode_reglement_code);
+                $error = $this->langs->transnoentities("ErrorPaymentModeDefinedToWithoutSetup", $this->object->mode_reglement_code);
             }
 
             if ($error) {
@@ -636,7 +635,7 @@ class BLPDF extends OrderPDF
 
                 $this->acompteHt -= $line->total_ht;
                 $this->acompteTtc -= $line->total_ttc;
-                $this->acompteTva20 -= $line->total_tva;
+//                $this->acompteTva20 -= $line->total_tva;
                 continue;
             }
 

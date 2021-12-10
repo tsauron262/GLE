@@ -338,28 +338,29 @@ class Bimp_Propal extends BimpComm
         if (!isset(BimpCache::$cache[$clef])) {
             if (!BimpCore::getConf('bimpcontract_use_autorised_service'))
                 BimpCache::$cache[$clef] = 1;
+            else{
+                $children = $this->getChildrenList('lines');
+                $id_services = [];
 
-            $children = $this->getChildrenList('lines');
-            $id_services = [];
-
-            foreach ($children as $id_child) {
-                $child = $this->getChildObject("lines", $id_child);
-                $dol_line = $child->getChildObject('dol_line');
-                if ($dol_line->getData('fk_product') > 0) {
-                    $service = $this->getInstance('bimpcore', 'Bimp_Product', $dol_line->getData('fk_product'));
-                    if (!$service->isInContrat() && $dol_line->getData('total_ht') != 0) {
-                        $id_services[] = $service->getData('ref');
+                foreach ($children as $id_child) {
+                    $child = $this->getChildObject("lines", $id_child);
+                    $dol_line = $child->getChildObject('dol_line');
+                    if ($dol_line->getData('fk_product') > 0) {
+                        $service = $this->getInstance('bimpcore', 'Bimp_Product', $dol_line->getData('fk_product'));
+                        if (!$service->isInContrat() && $dol_line->getData('total_ht') != 0) {
+                            $id_services[] = $service->getData('ref');
+                        }
                     }
                 }
-            }
 
-            if (count($id_services) > 0 && !$return_array) {
-                BimpCache::$cache[$clef] = 0;
-            } else {
-                if ($return_array) {
-                    BimpCache::$cache[$clef] = $id_services;
+                if (count($id_services) > 0 && !$return_array) {
+                    BimpCache::$cache[$clef] = 0;
                 } else {
-                    BimpCache::$cache[$clef] = 1;
+                    if ($return_array) {
+                        BimpCache::$cache[$clef] = $id_services;
+                    } else {
+                        BimpCache::$cache[$clef] = 1;
+                    }
                 }
             }
         }

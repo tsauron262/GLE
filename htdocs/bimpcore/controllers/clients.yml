@@ -48,6 +48,11 @@ objects:
             bimp_object: 
                 module: bimpcore
                 name: Bimp_SocBankAccount
+    stats:
+        instance:
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_Stat_Date
         
                 
 sections: 
@@ -112,3 +117,14 @@ sections:
                   - type: list
                     list:
                         object: ribs
+          stats:
+              label: Stats par date
+              sections:
+                  - type: list
+                    list:
+                        object: stats
+                        name: clientMonth
+                  - type: list
+                    list:
+                        object: stats
+                        name: clientYear

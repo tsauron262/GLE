@@ -1468,7 +1468,7 @@ class Bimp_Facture extends BimpComm
             'paiementnotsaved' => array(
                 'label' => 'Le paiement a été effectué mais non enregistré'
             ),
-            'cfr' => array(
+            'cfr'              => array(
                 'label' => 'Le reste à payer (' . BimpTools::displayMoneyValue($remainToPay) . ') a été encaissé directement via CFR'
             ),
             'inf_one_euro'     => array(
@@ -3119,6 +3119,17 @@ class Bimp_Facture extends BimpComm
             $html .= '<strong>Client: </strong>';
             $html .= $client->getLink();
             $html .= '</div>';
+
+            if (!(int) $this->getData('paye')) {
+                $discounts = (float) $client->getAvailableDiscountsAmounts();
+
+                if ($discounts) {
+                    $html .= '<div style="margin-top: 10px">';
+                    $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Ce client dispose de ' . BimpTools::displayMoneyValue($discounts) . ' d\'avoirs disponibles';
+                    $html .= BimpRender::renderAlerts($msg, 'warning');
+                    $html .= '</div>';
+                }
+            }
         }
 
         return $html;
@@ -3737,12 +3748,12 @@ class Bimp_Facture extends BimpComm
                     $echeancier->onDeleteFacture($dateDebutFacture);
                 }
             }
-            
+
             $tabF = getElementElement('fichinter', 'facture', null, $this->id);
-            if(count($tabF) > 0) {
-                foreach($tabF as $data) {
+            if (count($tabF) > 0) {
+                foreach ($tabF as $data) {
                     $ficheInter = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter', $data['s']);
-                    if($ficheInter->getData('fk_facture') == $this->id) {
+                    if ($ficheInter->getData('fk_facture') == $this->id) {
                         $ficheInter->set('fk_facture', null);
                         $ficheInter->update($warnings, true);
                     }
@@ -4437,8 +4448,6 @@ class Bimp_Facture extends BimpComm
                     $this->dol_object->date = strtotime($this->getData('datef'));
                 }
                 $this->updateField('date_lim_reglement', BimpTools::getDateFromDolDate($this->dol_object->calculate_date_lim_reglement((int) $this->getData('fk_cond_reglement'))));
-
-
 
                 $result = $this->dol_object->validate($user, '', $id_entrepot);
                 $fac_warnings = BimpTools::getDolEventsMsgs(array('warnings'));
@@ -5807,7 +5816,7 @@ class Bimp_Facture extends BimpComm
         $year = (isset($boxObj->confUser['year']) ? $boxObj->confUser['year'] : $boxObj->config['year']['val_default']);
         $boxObj->boxlabel .= ' ' . $year;
 
-        $ln = BimpCache::getBdb()->executeS("SELECT SUM(total_ttc) as tot, SUM(IF(paye = 0, `remain_to_pay`, 0)) as totIP, COUNT(*) as nb, SUM(IF(paye = 0 ,1,0)) as nbIP, SUM(IF(remain_to_pay != total_ttc && paye = 0 ,1,0)) as nbPart, SUM(IF(paye = 0 && `date_lim_reglement` < now() ,1,0)) as nbRetard, SUM(IF(paye = 0 && `date_lim_reglement` < now() ,remain_to_pay,0)) as totRetard FROM `llx_facture` WHERE YEAR( datef ) = '" . $year . "'");
+        $ln = BimpCache::getBdb()->executeS("SELECT SUM(total_ttc) as tot, SUM(IF(paye = 0, `remain_to_pay`, 0)) as totIP, COUNT(*) as nb, SUM(IF(paye = 0 ,1,0)) as nbIP, SUM(IF(remain_to_pay != total_ttc && paye = 0 ,1,0)) as nbPart, SUM(IF(paye = 0 && `date_lim_reglement` < now() ,1,0)) as nbRetard, SUM(IF(paye = 0 && `date_lim_reglement` < now() ,remain_to_pay,0)) as totRetard FROM `llx_facture` WHERE fk_statut != 3 AND YEAR( datef ) = '" . $year . "'");
         $ln = $ln[0];
 
         $data = array(

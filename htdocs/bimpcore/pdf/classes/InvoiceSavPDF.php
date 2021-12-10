@@ -31,7 +31,7 @@ class InvoiceSavPDF extends InvoicePDF
     protected function initHeader()
     {
         parent::initHeader();
-
+        $rows = '';
         if (!is_null($this->sav)) {
             $rows .= '<span style="color: #' . BimpCore::getParam('pdf/primary', '000000') . '">' . $this->sav->getData('ref') . '</span><br/>';
             $equipment = $this->sav->getchildObject('equipment');
@@ -92,7 +92,7 @@ class InvoiceSavPDF extends InvoicePDF
 
     public function renderSavConditions()
     {
-        $html .= '<table cellpadding="20px"><tr><td>';
+        $html = '<table cellpadding="20px"><tr><td>';
 //        $html .= '<p style="font-size: 7px; color: #002E50">';
         $html .= '<div style="text-indent: 15px; font-size: 7px; color: #002E50">';
         $html .= 'Si le service est requis conformément à une obligation de réparation d’un tiers, ces informations seront ';

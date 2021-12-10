@@ -30,7 +30,7 @@ $bdb = new BimpDb($db);
 $where = '';
 $rows = $bdb->getRows('table', $where, null, 'array', null, 'rowid', 'desc');
 
-if (!(int) BimPTools::getValue('exec', 0)) {
+if (!(int) BimpTools::getValue('exec', 0)) {
     echo 'Desc <br/>';
 
     if (is_array($rows) && count($rows)) {

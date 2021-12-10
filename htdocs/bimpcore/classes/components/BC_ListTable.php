@@ -557,7 +557,7 @@ class BC_ListTable extends BC_List
                         $title .= BimpTools::ucfirst($child_label) . ' > ';
                         $field_object = $child;
                     } else {
-                        $errors[] = 'L\'objet lié "' . $child_name . '" n\'existe pas pour les ' . $filter_obj->getLabel('name_plur');
+                        $errors[] = 'L\'objet lié "' . $child_name . '" n\'existe pas pour les ' . $field_object->getLabel('name_plur');
                         $title = '';
                         break;
                     }

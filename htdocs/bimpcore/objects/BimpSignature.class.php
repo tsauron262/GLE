@@ -871,7 +871,7 @@ class BimpSignature extends BimpObject
 
             if ($this->isObjectValid()) {
                 if ($this->can('view')) {
-                    if (method_exists($obj, 'getSignatureDocFileUrl')) {
+                    if (method_exists($obj, 'getSignatureDocFileUrl') && method_exists($obj, 'getSignatureDocFileName')) {
                         if (method_exists($obj, 'getSignatureDocFileDir')) {
                             $dir = $obj->getSignatureDocFileDir($this->getData('doc_type'));
                         } elseif (method_exists($obj, 'getFilesDir')) {
@@ -1510,7 +1510,7 @@ class BimpSignature extends BimpObject
                 $client = $this->getChildObject('client');
                 if (BimpObject::objectLoaded($client)) {
                     $obj_label = $this->displayDocType() . ' ' . $this->displayDocRef();
-                    $subject = 'Signature effectuée - ' . $obj_label . ' - Client: ' . (BimpObject::objectLoaded($client) ? $client->getRef() . ' ' . $client->getName() : 'inconnu');
+                    $subject = 'Signature effectuée - ' . $obj_label . ' - Client: ' . $client->getRef() . ' ' . $client->getName();
 
                     $msg = 'Bonjour,<br/><br/>';
                     $msg .= 'La signature du document "' . $obj_label . '" a été effectuée.<br/><br/>';
@@ -1582,7 +1582,7 @@ class BimpSignature extends BimpObject
                 $errors[] = 'Fichier du document signé absent';
             } else {
                 $file_name = $this->getDocumentFileName(true);
-                $file_path = $this->getDocumentFilePath(true, 'private');
+                $file_path = $this->getDocumentFilePath(true/*, 'private'*/);
                 $dir = $this->getDocumentFileDir();
 
                 if (!$dir || !$file_path || !$file_name) {
@@ -1797,6 +1797,7 @@ class BimpSignature extends BimpObject
         $errors = array();
         $warnings = array();
         $success = 'Document signé régénéré avec succès';
+        $success_callback = '';
 
         $errors = $this->writeSignatureOnDoc($data);
 

@@ -175,6 +175,14 @@ class BS_SAV extends BimpObject
     {
         return $this->canView();
     }
+    
+    public function getListCentre($field){
+        if($this->isLoaded())
+            $value = $this->getData($field);
+        else
+            $value = '';
+        return static::getUserCentresArray($value);
+    }
 
     public function canClientEdit()
     {
@@ -1645,6 +1653,9 @@ class BS_SAV extends BimpObject
     public function renderHeaderExtraLeft()
     {
         $html = '';
+        
+        if($this->getData('date_pc'))
+            $html .= '<div class="object_header_infos">Prise en charge le <strong>'.$this->displayData('date_pc').'</strong></div><br/>';
 
         if ($this->getData('replaced_ref')) {
             $html .= '<div style="margin-bottom: 8px">';
@@ -2392,7 +2403,7 @@ class BS_SAV extends BimpObject
             $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
             $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
             if (!$id_caisse) {
-                $errors[] = 'Utilisateur connecté à aucune caisse. Enregistrement de l\'acompte abandonné';
+                $errors[] = 'Utilisateur non connecté à aucune caisse. Enregistrement de l\'acompte abandonné';
             } else {
                 $caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
                 if (!$caisse->isLoaded()) {
@@ -5186,7 +5197,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         if ($this->getData("id_facture_acompte") < 1 && (float) $this->getData('acompte') > 0) {
             $fac_errors = $this->createAccompte((float) $this->getData('acompte'), false);
             if (count($fac_errors)) {
-                $warnings[] = BimpTools::getMsgFromArray($fac_errors, 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
+                $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
             } else
                 $success = "Acompte créer avec succés.";
         }
@@ -5324,6 +5335,10 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
         // Mise à jour du statut: 
         $errors = $this->updateField('status', self::BS_SAV_NEW);
+        
+        global $user, $langs;
+        $this->addNote('Sav pris en charge par ' . $user->getFullName($langs), 4);
+        $this->updateField('date_pc', date('Y-m-d H:i:s'));
 
         // Mise à jour des champs: 
         if (!count($errors)) {
@@ -5780,6 +5795,9 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         if (!count($errors)) {
             $this->checkObject('create');
         }
+        
+        if($this->getData('status') == 0)
+            $this->updateField('date_pc', $this->getData('date_create'));
 
         return $errors;
     }

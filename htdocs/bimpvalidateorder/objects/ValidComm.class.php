@@ -450,10 +450,10 @@ class ValidComm extends BimpObject
         if(isset($this->client_rtp))
             $rtp = $this->client_rtp;
         else
-            $rtp = $client->getTotalUnpayed();
+            $rtp = $client->getTotalUnpayedTolerance();
         if($rtp < 0)
             $rtp = 0;
-                
+        
         return array($secteur, $class, $percent, $val, $rtp);
     }
     
@@ -822,7 +822,7 @@ class ValidComm extends BimpObject
 //        if(isset($this->client_rtp))
 //            $rtp = $this->client_rtp;
 //        else
-//            $rtp = $client->getTotalUnpayed();
+//            $rtp = $client->getTotalUnpayedTolerance();
 //
 //        if($rtp != 0)
 //            return $errors;

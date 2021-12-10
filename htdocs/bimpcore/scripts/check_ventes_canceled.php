@@ -29,7 +29,7 @@ $bdb = new BimpDb($db);
 $where = 'status = 0 AND date_create > \'2020-05-10\'';
 $rows = $bdb->getRows('bc_vente', $where, null, 'array', null, 'id', 'desc');
 
-if (!(int) BimPTools::getValue('exec', 0)) {
+if (!(int) BimpTools::getValue('exec', 0)) {
     echo 'Vérifie l\'existance de ventes abondonnées avec création de facture<br/>';
 
     if (is_array($rows) && count($rows)) {

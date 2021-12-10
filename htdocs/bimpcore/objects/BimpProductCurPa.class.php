@@ -133,7 +133,6 @@ class BimpProductCurPa extends BimpObject
                         } else {
                             return '<span class="danger">ID de la commande fournisseur absent</span>';
                         }
-                        break;
 
                     case 'facture_fourn':
                         $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', (int) $this->getData('id_origin'));
@@ -144,7 +143,6 @@ class BimpProductCurPa extends BimpObject
                         } else {
                             return '<span class="danger">ID de la facture fournisseur absent</span>';
                         }
-                        break;
 
                     case 'fourn_price':
                         $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', (int) $this->getData('id_origin'));
@@ -155,7 +153,6 @@ class BimpProductCurPa extends BimpObject
                         } else {
                             return '<span class="danger">ID du prix d\'achat fournisseur absent</span>';
                         }
-                        break;
 
                     case 'pmp':
                         return self::$origin_types['pmp'];

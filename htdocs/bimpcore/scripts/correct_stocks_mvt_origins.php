@@ -49,7 +49,7 @@ $where .= ' OR (`inventorycode` LIKE \'PACKAGE%_PLACE%\' AND bimp_origin = \'\')
 
 $rows = $bdb->getRows('stock_mouvement', $where, null, 'array', null, 'rowid', 'desc');
 
-if (!(int) BimPTools::getValue('exec', 0)) {
+if (!(int) BimpTools::getValue('exec', 0)) {
     echo 'Corrige l\'origine des mouvements de stock<br/><br/>';
 
     if (is_array($rows) && count($rows)) {

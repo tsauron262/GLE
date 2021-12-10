@@ -19,10 +19,6 @@ if (!$id_sav) {
     $errors[] = 'ID du sav absent';
 } else {
     $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id_sav);
-    /* tocomment */
-//    $sav = new BS_SAV();
-//    die('Fichier "' . basename(__FILE__) . '", ligne ' . __LINE__ . ': instanciation directe à commenter');
-
     if (!BimpObject::objectLoaded($sav)) {
         $errors[] = 'Le SAV d\'ID ' . $id_sav . ' n\'existe pas';
     } else {

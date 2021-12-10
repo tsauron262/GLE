@@ -3058,6 +3058,10 @@ class BimpTools
     public static $nbMax = 15*4;
     
     public static function lockNum($type, $nb = 0, $errors = array()){
+        if (BimpCore::isModeDev()) { // Flo: ça plante sur ma version de dev... 
+            return;
+        }
+        
         if(in_array($type, static::$bloquages))//On a deja un verrous pour cette clef
             return true;
         

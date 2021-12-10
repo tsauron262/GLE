@@ -2,6 +2,32 @@
 
 class BimpSignature extends BimpObject
 {
+    /*
+     * *** Mémo ajout signature pour un objet: ***
+     * 
+     * /!\ ATTENTION: le doc_type doit être unique : voir les doc_types utilisés dans bimpinterfaceclient > docController::display()
+     * 
+     * - Ajouter les champs "id_signature" et "signature_params" dans l'objet (+ définitions de l'objet BimpSignature) 
+     * - Ajouter le tableau static $default_signature_params
+     * - Ajouter une procédure pour créer la signature (action/fonction etc.)
+     * - Ajouter les méthodes: 
+     *      - getSignatureDocFileDir($doc_type): dossier fichier signé ou à signer
+     *      - getSignatureDocFileName($doc_type, $signed = false): nom fichier signé ou à signer
+     *      - getSignatureDocFileUrl($doc_type, $forced_context = '', $signed = false): URL fichier
+     *      - getSignatureDocRef($doc_type): Reférence document
+     *      - getSignatureParams($doc_type): Paramètres position signature sur PDF
+     *      - onSigned($bimpSignature, $data): Traitement post signature effectuée
+     *      - onSignatureCancelled($bimpSignature): Traitement post signature annulée
+     *      - isSignatureReopenable($doc_type, &$errors = array()): la signature peut-elle être réouverte (suite annulation) 
+     *      - onSignatureReopened($bimpSignature): Traitement post réouverture signature
+     * 
+     * - Gérer l'enregistrement des paramètres de position de la signature sur le PDF au moment de sa génération (Si besoin) / ou régler par défaut pour les PDF fixes
+     * - Intégrer selon le context: marqueur signé (champ booléen ou statut) / indicateur signature dans l'en-tête / etc. 
+     * - Gérer Annulation signature si besoin
+     * - Gérer Duplication / Révision / Etc. 
+     * - Gérer la visualisation du docuement sur l'interface publique (bimpinterfaceclient > docController) 
+     * - Gérer le droit canClientView() pour la visualisation du document sur l'espace public. 
+     */
 
     const TYPE_DIST = 1;
     const TYPE_PAPIER = 2;
@@ -148,10 +174,12 @@ class BimpSignature extends BimpObject
                 $obj = $this->getObj();
                 if ($this->isObjectValid($errors, $obj)) {
                     if (method_exists($obj, 'isSignatureCancellable')) {
-                        $obj->isSignatureCancellable($this->getData('doc_type'), $errors);
+                        if (!$obj->isSignatureCancellable($this->getData('doc_type'), $errors)) {
+                            return 0;
+                        }
                     }
                 }
-                return 1;
+                return (count($errors) ? 0 : 1);
 
             case 'reopen':
                 if ((int) $this->getData('type') !== -1) {
@@ -161,7 +189,9 @@ class BimpSignature extends BimpObject
                 $obj = $this->getObj();
                 if ($this->isObjectValid($errors, $obj)) {
                     if (method_exists($obj, 'isSignatureReopenable')) {
-                        $obj->isSignatureReopenable($this->getData('doc_type'), $errors);
+                        if (!$obj->isSignatureReopenable($this->getData('doc_type'), $errors)) {
+                            return 0;
+                        }
                     }
                 }
                 return (count($errors) ? 0 : 1);
@@ -238,7 +268,7 @@ class BimpSignature extends BimpObject
 
         if ($this->isActionAllowed('signPapier') && $this->canSetAction('signPapier')) {
             $buttons[] = array(
-                'label'   => 'Dépôser document signé',
+                'label'   => 'Déposer document signé',
                 'icon'    => 'fas_file-download',
                 'onclick' => $this->getJsLoadModalForm('sign_papier', 'Dépôt document signé')
             );
@@ -459,6 +489,17 @@ class BimpSignature extends BimpObject
         }
 
         return '';
+    }
+
+    public static function getDefaultSignDistEmailContent()
+    {
+        $message = 'Bonjour, <br/><br/>';
+        $message .= 'La signature du document "{NOM_DOCUMENT}" pour {NOM_PIECE} {REF_PIECE}  est en attente.<br/><br/>';
+        $message .= 'Vous pouvez effectuer la signature électronique de ce document directement depuis votre {LIEN_ESPACE_CLIENT} ou nous retourner le document ci-joint signé.<br/><br/>';
+        $message .= 'Cordialement, <br/><br/>';
+        $message .= 'L\'équipe BIMP';
+        
+        return $message;
     }
 
     // Getters données: 
@@ -789,6 +830,12 @@ class BimpSignature extends BimpObject
         return '';
     }
 
+    public function displayDocTitle()
+    {
+        $ref = $this->displayDocRef();
+        return $this->displayDocType() . ($ref ? ' - <b>' . $ref . '</b>' : '');
+    }
+
     public function dispayPublicSign()
     {
         if ($this->isLoaded()) {
@@ -824,51 +871,77 @@ class BimpSignature extends BimpObject
 
             if ($this->isObjectValid()) {
                 if ($this->can('view')) {
-                    if (method_exists($obj, 'getSignatureDocFileDir') && method_exists($obj, 'getSignatureDocFileUrl')) {
-                        $dir = $obj->getSignatureDocFileDir($this->getData('doc_type'));
-                        $file_name = $obj->getSignatureDocFileName($this->getData('doc_type'), (int) $this->getData('signed'));
-                        $file = $dir . $file_name;
+                    if (method_exists($obj, 'getSignatureDocFileUrl')) {
+                        if (method_exists($obj, 'getSignatureDocFileDir')) {
+                            $dir = $obj->getSignatureDocFileDir($this->getData('doc_type'));
+                        } elseif (method_exists($obj, 'getFilesDir')) {
+                            $dir = $obj->getFilesDir();
+                        }
 
-                        if ($file && file_exists($file)) {
-                            $url = $obj->getSignatureDocFileUrl($this->getData('doc_type'), 'public', (int) $this->getData('signed'));
+                        if ($dir) {
+                            $file_name = $obj->getSignatureDocFileName($this->getData('doc_type'), (int) $this->getData('signed'));
+                            $file = $dir . $file_name;
 
-                            if ($url) {
-                                $check = false;
-                                if (BimpCore::isContextPublic()) {
-                                    global $userClient;
+                            if ($file && file_exists($file)) {
+                                $url = $obj->getSignatureDocFileUrl($this->getData('doc_type'), 'public', (int) $this->getData('signed'));
 
-                                    if (BimpObject::objectLoaded($userClient)) {
-                                        $allowed = $this->getData('allowed_users_client');
-                                        if ($userClient->isAdmin() || (is_array($allowed) && in_array($userClient->id, $allowed))) {
-                                            $check = true;
+                                if ($url) {
+                                    $check = false;
+                                    if (BimpCore::isContextPublic()) {
+                                        global $userClient;
+
+                                        if (BimpObject::objectLoaded($userClient)) {
+                                            $allowed = $this->getData('allowed_users_client');
+                                            if ($userClient->isAdmin() || (is_array($allowed) && in_array($userClient->id, $allowed))) {
+                                                $check = true;
+                                            }
                                         }
+                                    } else {
+                                        $check = true;
                                     }
-                                } else {
-                                    $check = true;
-                                }
 
-                                if ($check) {
-                                    $html = '<span class="btn btn-default" onclick="window.open(\'' . $url . '\')">';
-                                    $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . 'Document PDF';
-                                    $html .= '</span>';
-                                } else {
-                                    $html = '<span class="btn btn-default disabled bs-popover" onclick=""';
-                                    $html .= BimpRender::renderPopoverData('Vous n\'avez pas la permission de voir ce document');
-                                    $html .= '>';
-                                    $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . 'Document PDF';
-                                    $html .= '</span>';
+                                    if ($check) {
+                                        $html = '<span class="btn btn-default" onclick="window.open(\'' . $url . '\')">';
+                                        $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . 'Document PDF';
+                                        $html .= '</span>';
+                                    } else {
+                                        $html = '<span class="btn btn-default disabled bs-popover" onclick=""';
+                                        $html .= BimpRender::renderPopoverData('Vous n\'avez pas la permission de voir ce document');
+                                        $html .= '>';
+                                        $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . 'Document PDF';
+                                        $html .= '</span>';
+                                    }
+                                    return $html;
                                 }
-                                return $html;
                             }
                         }
                     }
                 }
             }
 
-            return '<span class="warning">Non disponible</span>';
+            return '<span class="warning">Non disponible</span> - ';
         }
 
         return '';
+    }
+
+    public function displayActionsButtons()
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+            $buttons = $this->getSignButtons();
+
+            if (!empty($buttons)) {
+                $html .= '<div>';
+                foreach ($buttons as $btn) {
+                    $html .= BimpRender::renderRowButton($btn['label'], $btn['icon'], $btn['onclick']);
+                }
+                $html .= '</div>';
+            }
+        }
+
+        return $html;
     }
 
     // Rendus HTML: 
@@ -980,7 +1053,204 @@ class BimpSignature extends BimpObject
         return '';
     }
 
+    public function renderSignButtonsGroup($label = 'Actions signature')
+    {
+        $buttons = $this->getSignButtons();
+
+        if (!empty($buttons)) {
+            return BimpRender::renderButtonsGroup($buttons, array(
+                        'max'            => 1,
+                        'dropdown_icon'  => 'fas_signature',
+                        'dropdown_label' => $label
+            ));
+        }
+
+        return '';
+    }
+
     // Traitements:
+
+    public function openSignDistAccess($email_content = '', $auto_open = true, $new_users = array(), $new_user_email = '', &$warnings = array(), &$success = '')
+    {
+        $errors = array();
+        $cur_users = $this->getData('allowed_users_client');
+
+        if (empty($new_users)) {
+            $new_users = $this->getDefaultAllowedUsersClient();
+        }
+
+        if ($auto_open) {
+            $client = $this->getChildObject('client');
+            if (BimpObject::objectLoaded($client)) {
+                $contact = $this->getChildObject('contact');
+
+                if (!$new_user_email) {
+                    if (empty($new_users)) {
+                        $new_user_email = $this->getDefaultEmailSignataire();
+                    }
+
+                    if (!$new_user_email) {
+                        $email = '';
+                        if (BimpObject::objectLoaded($contact)) {
+                            $email = $contact->getData('email');
+                        }
+
+                        if (!$email) {
+                            $email = $client->getData('email');
+                        }
+
+                        if ($email) {
+                            $def_users = $this->getDefaultAllowedUsersClientArray();
+
+                            $user_exists = false;
+                            foreach ($def_users as $id_user => $user_label) {
+                                if (strpos($user_label, $email) !== false) {
+                                    $user_exists = true;
+                                }
+                            }
+
+                            if (!$user_exists) {
+                                $new_user_email = $email;
+                            }
+                        }
+                    }
+                }
+
+                if (!count($errors) && $new_user_email) {
+                    // Check de l\'existance du compte user (il peut être désactivé)
+                    $bic_user = BimpCache::findBimpObjectInstance('bimpinterfaceclient', 'BIC_UserClient', array(
+                                'id_client' => (int) $client->id,
+                                'email'     => $new_user_email
+                    ));
+
+                    if (BimpObject::objectLoaded($bic_user)) {
+                        if (!(int) $bic_user->getData('status')) {
+                            $err = $bic_user->updateField('status', 1);
+                            if (count($err)) {
+                                $errors[] = BimpTools::getMsgFromArray($err, 'Echec de la réactivation du compte utilisateur "' . $new_user_email . '"');
+                            } else {
+                                $success .= 'Réactivation du compte utilisateur "' . $new_user_email . '" effectuée avec succès';
+                                $new_users[] = $bic_user->id;
+                            }
+                        }
+                    } else {
+                        // Création du compte user: 
+                        $where = 'id_client = ' . (int) $this->getData('id_client') . ' AND status = 1 AND role = 1';
+                        $nAdmin = $this->db->getCount('bic_user', $where);
+                        $u_err = array();
+                        $bic_user = BimpObject::createBimpObject('bimpinterfaceclient', 'BIC_UserClient', array(
+                                    'id_client'  => (int) $client->id,
+                                    'id_contact' => (BimpObject::objectLoaded($contact) && $contact->getData('email') == $new_user_email ? $contact->id : 0),
+                                    'email'      => $new_user_email,
+                                    'role'       => ($nAdmin > 0 ? 0 : 1),
+                                    'status'     => 1
+                                        ), true, $u_err, $warnings);
+
+                        if (count($u_err) || !BimpObject::objectLoaded($bic_user)) {
+                            $errors[] = BimpTools::getMsgFromArray($u_err, 'Echec de la création du compte utilisateur client pour l\'adresse email "' . $new_user_email . '"');
+                        } else {
+                            $success .= 'Création du compte utilisateur effectuée avec succès';
+                            $new_users[] = $bic_user->id;
+                        }
+                    }
+                }
+            } else {
+                $errors[] = 'Impossible de créer le compte utilisateur client - Client lié absent ou invalide';
+            }
+        }
+
+        if (!count($errors)) {
+            $errors = $this->updateField('allowed_users_client', $new_users);
+
+            if (!count($errors)) {
+                if (empty($new_users)) {
+                    $warnings[] = 'Aucun compte utilisateur client sélectionné - Le client n\'aura aucun accès à la signature à distance';
+                    $this->updateField('date_open', null);
+                } else {
+                    $obj = $this->getObj();
+
+                    if ($this->isObjectValid($errors, $obj)) {
+                        $success .= ($success ? '<br/>' : '') . 'Liste des utilisteurs client enregistrée avec succès';
+
+                        $nOk = 0;
+                        if (empty($cur_users)) {
+                            $up_err = $this->updateField('date_open', date('Y-m-d'));
+
+                            if (count($up_err)) {
+                                $warnings[] = BimpTools::getMsgFromArray($up_err, 'Echec màj date d\'ouverture');
+                            }
+                        }
+
+                        // Envoi e-mails notification: 
+                        $emails = '';
+
+                        foreach ($new_users as $id_user) {
+                            if (!in_array($id_user, $cur_users)) {
+                                $bic_user = BimpCache::getBimpObjectInstance('bimpinterfaceclient', 'BIC_UserClient', $id_user);
+
+                                if (!BimpObject::objectLoaded($bic_user)) {
+                                    $warnings[] = 'Le compte utilisateur client #' . $id_user . ' n\'existe pas';
+                                } else {
+                                    $user_email = BimpTools::cleanEmailsStr($bic_user->getData('email'));
+
+                                    if ($user_email) {
+                                        $emails .= ($emails ? ',' : '') . $user_email;
+                                        $nOk++;
+                                    }
+                                }
+                            }
+                        }
+
+                        if ($emails) {
+                            $comm_email = BimpTools::cleanEmailsStr($this->getCommercialEmail());
+                            $doc_label = $this->displayDocType() . ' ' . $this->displayDocRef();
+                            $subject = 'BIMP - Signature en attente - Document: ' . $doc_label;
+
+                            if (!$email_content) {
+                                $email_content = $this->getDefaultSignDistEmailContent();
+                            }
+                            
+                            $url = DOL_URL_ROOT . '/bimpinterfaceclient/client.php';
+                            
+                            $email_content = str_replace(array(
+                                '{NOM_DOCUMENT}',
+                                '{NOM_PIECE}',
+                                '{REF_PIECE}',
+                                '{LIEN_ESPACE_CLIENT}'
+                            ), array(
+                                $doc_label,
+                                $obj->getLabel('the'),
+                                $obj->getRef(),
+                                '<a href="' . $url . '">espace client BIMP</a>'
+                            ), $email_content);
+
+                            $bimpMail = new BimpMail($subject, BimpTools::cleanEmailsStr($email), '', $email_content, $comm_email);
+
+                            $filePath = $this->getDocumentFilePath();
+                            $fileName = $this->getDocumentFileName();
+
+                            if (file_exists($filePath)) {
+                                $bimpMail->addFile(array($filePath, 'application/pdf', $fileName));
+                            }
+
+                            $mail_errors = array();
+                            $bimpMail->send($mail_errors);
+
+                            if (count($mail_errors)) {
+                                $warnings[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail de notification (Adresse(s): ' . $email . ')');
+                            } else {
+                                $success .= '<br/>E-mail de notification envoyé avec succès pour ' . $nOk . ' utilisateur(s)';
+                            }
+                        }
+                    } else {
+                        $errors[] = 'L\'objet lié est invalide';
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
 
     public function sendClientEmailForFarSign($email)
     {
@@ -1086,12 +1356,18 @@ class BimpSignature extends BimpObject
 
             require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpPDF.php';
 
-            $texts = array(
-                'date' => date('d/m/Y', strtotime($this->getData('date_signed')))
-            );
+            $texts = array();
 
-            if ($this->isClientCompany()) {
+            if ((int) BimpTools::getArrayValueFromPath($params, 'display_date', 1)) {
+                $texts['date'] = date('d/m/Y', strtotime($this->getData('date_signed')));
+            }
+
+            $is_company = (int) $this->isClientCompany();
+            if ((int) BimpTools::getArrayValueFromPath($params, 'display_nom', $is_company)) {
                 $texts['nom'] = $this->getData('nom_signataire');
+            }
+
+            if ((int) BimpTools::getArrayValueFromPath($params, 'display_fonction', $is_company)) {
                 $texts['fonction'] = $this->getData('fonction_signataire');
             }
 
@@ -1262,177 +1538,18 @@ class BimpSignature extends BimpObject
         $warnings = array();
         $success = '';
 
-        $new_users = array();
-        $cur_users = $this->getData('allowed_users_client');
         $auto_open = (int) BimpTools::getArrayValueFromPath($data, 'auto_open', 0);
+        $new_users = BimpTools::getArrayValueFromPath($data, 'allowed_users_client', array());
+        $new_user_email = BimpTools::getArrayValueFromPath($data, 'new_user_email', '');
+        $email_content = BimpTools::getArrayValueFromPath($data, 'email_content', '');
 
-        if ($auto_open) {
-            $client = $this->getChildObject('client');
-            if (BimpObject::objectLoaded($client)) {
-                $contact = $this->getChildObject('contact');
-                $new_users = $this->getDefaultAllowedUsersClient();
-
-                $new_user_email = '';
-                if (empty($new_users)) {
-                    $new_user_email = BimpTools::getArrayValueFromPath($data, 'new_user_email', '');
-
-                    if (!$new_user_email) {
-                        $errors[] = 'Veuillez saisir une adresse e-mail pour la création du compte utilisateur client';
-                    } elseif (!BimpValidate::isEmail($new_user_email)) {
-                        $errors[] = 'L\'adresse e-mail pour la création du compte utilisateur client est invalide';
-                    }
-                } else {
-                    $email = '';
-                    if (BimpObject::objectLoaded($contact)) {
-                        $email = $contact->getData('email');
-                    }
-
-                    if (!$email) {
-                        $email = $client->getData('email');
-                    }
-
-                    if ($email) {
-                        $def_users = $this->getDefaultAllowedUsersClientArray();
-
-                        $user_exists = false;
-                        foreach ($def_users as $id_user => $user_label) {
-                            if (strpos($user_label, $email) !== false) {
-                                $user_exists = true;
-                            }
-                        }
-
-                        if (!$user_exists) {
-                            $new_user_email = $email;
-                        }
-                    }
-                }
-
-                if (!count($errors) && $new_user_email) {
-                    // Check de l\'existance du compte user (il peut être désactivé)
-                    $bic_user = BimpCache::findBimpObjectInstance('bimpinterfaceclient', 'BIC_UserClient', array(
-                                'id_client' => (int) $client->id,
-                                'email'     => $new_user_email
-                    ));
-
-                    if (BimpObject::objectLoaded($bic_user)) {
-                        if (!(int) $bic_user->getData('status')) {
-                            $err = $bic_user->updateField('status', 1);
-                            if (count($err)) {
-                                $errors[] = BimpTools::getMsgFromArray($err, 'Echec de la réactivation du compte utilisateur "' . $new_user_email . '"');
-                            } else {
-                                $success .= 'Réactivation du compte utilisateur "' . $new_user_email . '" effectuée avec succès';
-                                $new_users[] = $bic_user->id;
-                            }
-                        }
-                    } else {
-                        // Création du compte user: 
-                        $where = 'id_client = ' . (int) $this->getData('id_client') . ' AND status = 1 AND role = 1';
-                        $nAdmin = $this->db->getCount('bic_user', $where);
-                        $u_err = array();
-                        $bic_user = BimpObject::createBimpObject('bimpinterfaceclient', 'BIC_UserClient', array(
-                                    'id_client'  => (int) $client->id,
-                                    'id_contact' => (BimpObject::objectLoaded($contact) && $contact->getData('email') == $new_user_email ? $contact->id : 0),
-                                    'email'      => $new_user_email,
-                                    'role'       => ($nAdmin > 0 ? 0 : 1),
-                                    'status'     => 1
-                                        ), true, $u_err, $warnings);
-
-                        if (count($u_err) || !BimpObject::objectLoaded($bic_user)) {
-                            $errors[] = BimpTools::getMsgFromArray($u_err, 'Echec de la création du compte utilisateur client pour l\'adresse email "' . $new_user_email . '"');
-                        } else {
-                            $success .= 'Création du compte utilisateur effectuée avec succès';
-                            $new_users[] = $bic_user->id;
-                        }
-                    }
-                }
-            } else {
-                $errors[] = 'Impossible de créer le compte utilisateur client - Client lié absent ou invalide';
-            }
-        } else {
-            $new_users = BimpTools::getArrayValueFromPath($data, 'allowed_users_client', array());
+        if (!$new_user_email) {
+            $errors[] = 'Veuillez saisir une adresse e-mail pour la création du compte utilisateur client';
+        } elseif (!BimpValidate::isEmail($new_user_email)) {
+            $errors[] = 'L\'adresse e-mail pour la création du compte utilisateur client est invalide';
         }
 
-        if (!count($errors)) {
-            $errors = $this->updateField('allowed_users_client', $new_users);
-
-            if (!count($errors)) {
-                if (empty($new_users)) {
-                    $warnings[] = 'Aucun compte utilisateur client sélectionné - Le client n\'aura aucun accès à la signature à distance';
-                    $this->updateField('date_open', null);
-                } else {
-                    $obj = $this->getObj();
-
-                    if ($this->isObjectValid($errors, $obj)) {
-                        $success .= ($success ? '<br/>' : '') . 'Liste des utilisteurs client enregistrée avec succès';
-
-                        $nOk = 0;
-                        if (empty($cur_users)) {
-                            $up_err = $this->updateField('date_open', date('Y-m-d'));
-
-                            if (count($up_err)) {
-                                $warnings[] = BimpTools::getMsgFromArray($up_err, 'Echec màj date d\'ouverture');
-                            }
-                        }
-
-                        // Envoi e-mails notification: 
-                        $emails = '';
-
-                        foreach ($new_users as $id_user) {
-                            if (!in_array($id_user, $cur_users)) {
-                                $bic_user = BimpCache::getBimpObjectInstance('bimpinterfaceclient', 'BIC_UserClient', $id_user);
-
-                                if (!BimpObject::objectLoaded($bic_user)) {
-                                    $warnings[] = 'Le compte utilisateur client #' . $id_user . ' n\'existe pas';
-                                } else {
-                                    $user_email = BimpTools::cleanEmailsStr($bic_user->getData('email'));
-
-                                    if ($user_email) {
-                                        $emails .= ($emails ? ',' : '') . $user_email;
-                                        $nOk++;
-                                    }
-                                }
-                            }
-                        }
-
-                        if ($emails) {
-                            $comm_email = BimpTools::cleanEmailsStr($this->getCommercialEmail());
-                            $doc_label = $this->displayDocType() . ' ' . $this->displayDocRef();
-                            $subject = 'BIMP - Signature en attente - Document: ' . $doc_label;
-
-                            $message = 'Bonjour, <br/><br/>';
-                            $message .= 'La signature du document "' . $doc_label . '" pour ' . $obj->getLabel('the') . ' ' . $obj->getRef();
-                            $message .= ' est en attente.<br/><br/>';
-
-                            $url = DOL_URL_ROOT . '/bimpinterfaceclient/client.php';
-
-                            $message .= 'Vous pouvez effectuer la signature électronique de ce document directement depuis votre <a href="' . $url . '">espace client BIMP</a><br/><br/>';
-                            $message .= 'Cordialement, <br/><br/>';
-                            $message .= 'L\'équipe BIMP';
-
-                            $bimpMail = new BimpMail($subject, BimpTools::cleanEmailsStr($email), '', $message, $comm_email);
-
-                            $filePath = $this->getDocumentFilePath();
-                            $fileName = $this->getDocumentFileName();
-
-                            if (file_exists($filePath)) {
-                                $bimpMail->addFile(array($filePath, 'application/pdf', $fileName));
-                            }
-
-                            $mail_errors = array();
-                            $bimpMail->send($mail_errors);
-
-                            if (count($mail_errors)) {
-                                $warnings[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail de notification (Adresse(s): ' . $email . ')');
-                            } else {
-                                $success .= '<br/>E-mail de notification envoyé avec succès pour ' . $nOk . ' utilisateur(s)';
-                            }
-                        }
-                    } else {
-                        $errors[] = 'L\'objet lié est invalide';
-                    }
-                }
-            }
-        }
+        $errors = $this->openSignDistAccess($email_content, $auto_open, $new_users, $new_user_email, $warnings);
 
         return array(
             'errors'   => $errors,

@@ -47,8 +47,8 @@ class PropalSavPDF extends PropalPDF
                 }
                 $rows .= '<span style="font-size: 9px;">' . $equipment->getData('serial') . '</span>';
                 $imei = $equipment->getData('imei');
-                if($imei != '' && $imei != "n/a")
-                    $rows .= "<br/>".'<span style="font-size: 9px;">' .$imei . '</span>';
+                if ($imei != '' && $imei != "n/a")
+                    $rows .= "<br/>" . '<span style="font-size: 9px;">' . $imei . '</span>';
             }
 
             $infoCentre = $this->sav->getCentreData();
@@ -115,7 +115,7 @@ class SavRestitutePDF extends PropalSavPDF
         parent::initData();
 
         $this->pdf->addCgvPages = false;
-        
+
         if (BimpObject::objectLoaded($this->object) && BimpObject::objectLoaded($this->sav)) {
             Propal::STATUS_BILLED;
             $line = new PropaleLigne($this->db);
@@ -124,19 +124,20 @@ class SavRestitutePDF extends PropalSavPDF
         }
     }
 
-    public function getBottomRightHtml(){
-        $html = '<br/>';
-        $html .= '<table style="width: 95%" cellpadding="3">';
+    public function renderSignatureBloc()
+    {
+        // /!\ !!!!! Ne pas modifier ce bloc : réglé précisément pour incrustation signature électronique. 
 
-        /* if (!is_null($this->contact) && isset($this->contact->id) && $this->contact->id) {
-          $html .= '<tr>';
-          $html .= '<td style="text-align: center;">' . $this->contact->lastname . ' ' . $this->contact->firstname;
-          $html .= (isset($this->contact->poste) && $this->contact->poste ? ' - ' . $this->contact->poste : '') . '</td>';
-          $html .= '</tr>';
-          } */
+        $html = '<br/>';
+
+        $html .= '<table style="width: 95%;font-size: 7px;" cellpadding="3">';
+        $html .= '<tr>';
+        $html .= '<td style="width: 50%"></td>';
+        $html .= '<td style="width: 50%">';
+
+        $html .= '<table cellpadding="3">';
 
         $html .= '<tr>';
-//        $html .= '<td style="text-align: center;">Cachet, Date, Signature et mention <b>"Bon pour Commande"</b></td>';
         $html .= '<td style="text-align:center;"><i><b>Je reconnais avoir récupéré ce jour mon matériel :</b></i></td>';
 
         $html .= '<td></td>';
@@ -156,10 +157,36 @@ class SavRestitutePDF extends PropalSavPDF
         $html .= '</tr>';
 
         $html .= '</table>';
+
+        $html .= '</td>';
+        $html .= '</tr>';
+        $html .= '</table>';
+
+        $page = 0;
+        $yPos = 0;
+
+        $this->writeFullBlock($html, $page, $yPos);
+
+        $this->signature_params = array(
+            'page'          => $page,
+            'y_pos'         => $yPos + 10,
+            'x_pos'         => 146,
+            'width'         => 40,
+            'nom_x_offset'  => -32,
+            'nom_y_offset'  => 2,
+            'date_x_offset' => -32,
+            'date_y_offset' => 12,
+        );
+
+        if (BimpObject::objectLoaded($this->sav)) {
+            $this->sav->updateField('signature_resti_params', $this->signature_params);
+        }
+
         return $html;
     }
-    
-    public function getBottomLeftHtml(){
+
+    public function getBottomLeftHtml()
+    {
         
     }
 }

@@ -115,6 +115,26 @@ objects:
             id_object: 
                 field_value: id_user_client
                 
+    signature_pc: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object:
+                module: bimpcore
+                name: BimpSignature
+            id_object: 
+                field_value: id_signature_pc
+                
+    signature_resti: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object:
+                module: bimpcore
+                name: BimpSignature
+            id_object: 
+                field_value: id_signature_resti
+                
 associations: 
     propales:
         object: propal
@@ -412,6 +432,20 @@ fields:
         type: int
         values: 
             array: bon_restit_raison
+    id_signature_pc: 
+        label: Signature prise en charge
+        type: id_object
+        object: signature_pc
+    signature_pc_params: 
+        label: Paramètres signature PC
+        type: json
+    id_signature_resti: 
+        label: Signature restitution
+        type: id_object
+        object: signature_resti
+    signature_resti_params: 
+        label: Paramètres signature restitution
+        type: json
         
 forms: 
     default:
@@ -773,7 +807,12 @@ forms:
                   type: select
                   options: 
                       array: rdv_cancel_reasons
-              
+                      
+    signature: 
+        rows: 
+            - field: id_contact
+              label: Contact signataire
+        
 fields_tables: 
     infos: 
         title: Informations
@@ -920,11 +959,29 @@ fields_tables:
             - field: extra_infos
               label: Informations supplémentaires
               
+    signatures: 
+        title: Signatures
+        icon: fas_signature
+        rows: 
+            - field: id_signature_pc
+              display: card
+              show: 
+                  field_value: id_signature_pc
+            - field: 'propal:id_signature'
+              label: Signature Devis
+              display: card
+              show: 
+                  callback: showPropalSignature
+            - field: id_signature_resti
+              display: card
+              show: 
+                  field_value: id_signature_resti
+              
 views: 
     default: 
         title: 
             callback: getRef
-        objects_change_reload: BS_SavProduct,BS_ApplePart,Bimp_Paiement
+        objects_change_reload: BS_SavProduct,BS_ApplePart,Bimp_Paiement,BimpSignature
         rows:
             - cols: 
                   - type: object_header
@@ -935,6 +992,12 @@ views:
                     fields_table: 
                         name: infos
                   
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table:
+                        name: signatures
+                        
                   - type: fields_table
                     col_lg: 6
                     col_md: 6
@@ -969,9 +1032,9 @@ views:
             callback: getRef
         delete_btn: 1
         edit_form: edit
-        objects_change_reload: BS_SavProduct,BS_ApplePart,Bimp_Paiement
+        objects_change_reload: BS_SavProduct,BS_ApplePart,Bimp_Paiement,BimpSignature
         rows:
-            - cols: 
+            - cols:                       
                 - type: fields_table
                   col_lg: 6
                   col_md: 6
@@ -982,8 +1045,14 @@ views:
                   col_lg: 6
                   col_md: 6
                   fields_table:
+                      name: signatures
+                      
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table:
                       name: client
-                  
+                      
                 - type: fields_table
                   col_lg: 6
                   col_md: 6
@@ -1174,6 +1243,14 @@ searches:
               alias: r
               on: a.id = r.id_sav
                       
+signatures: 
+    sav_pc: 
+        label: Bon de prise en charge SAV
+    sav_resti: 
+        label: Bon de restitution SAV
+    sav_facture: 
+        label: Facture SAV
+        
 pages: 
     default: 
         nav_tabs: 

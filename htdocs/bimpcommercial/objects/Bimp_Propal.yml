@@ -53,7 +53,33 @@ objects:
             id_object:
                 field_value: id_client_facture
                 
+    signature: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpSignature
+            id_object: 
+                field_value: id_signature
+                
+    id_signature: 
+        label: Signature
+        type: id_object
+        object: signature
+        displays: 
+            default: 
+                label: Lien signature
+                type: callback
+                method: displaySignature
+                
+    signature_params: 
+        label: Paramètres incrustation signature
+        type: json
+                
 fields:
+    libelle: 
+        required: 1
     datec:
         label: Créée le
         type: datetime
@@ -144,6 +170,13 @@ fields:
         object: user_close
         input: 
             type: hidden
+    id_signature: 
+        label: Signature
+        type: id_object
+        object: signature              
+    signature_params: 
+        label: Paramètres incrustation signature
+        type: json
                 
 forms: 
     default: 
@@ -214,14 +247,14 @@ forms:
             
     close: 
         rows: 
-            - custom: 1
-              label: Nouveau statut
-              data_type: int
-              input_name: new_status
-              input: 
-                  type: select
-                  options: 
-                      array: closeStatus
+#            - custom: 1
+#              label: Nouveau statut
+#              data_type: int
+#              input_name: new_status
+#              input: 
+#                  type: select
+#                  options: 
+#                      array: closeStatus
             - custom: 1
               label: Note
               data_type: text
@@ -427,7 +460,73 @@ forms:
                           - note_private
               show:
                   callback: isServiceAutorisedInContrat
-            
+                  
+    create_signature: 
+        title: Création de la signature
+        rows: 
+            - custom: 1
+              label: Contact signataire
+              data_type: id_object
+              input_name: id_contact_signature
+              input: 
+                  type: select
+                  options: 
+                      callback: 
+                          method: getSocieteContactsArray
+                          params: 
+                              - field_value: fk_soc
+              value: 
+                  callback: getDefaultSignatureContact
+            - custom: 1
+              label: Contenu e-mail client pour la signature à distance
+              input_name: email_content
+              input: 
+                  type: html
+                  help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE} et {LIEN_ESPACE_CLIENT}.<br/>Le devis sera automatiquement joint à l'email"
+              value: 
+                  callback: getDefaultSignDistEmailContent
+              display_if: 
+                  field_name: create_signature
+                  show_values: 1
+                  
+    validate: 
+        title: Validation
+        rows: 
+            - custom: 1 
+              label: Créer la fiche signature
+              data_type: bool
+              input_name: create_signature
+              value: 1
+              input: 
+                  type: toggle
+            - custom: 1
+              label: Contact signataire
+              data_type: id_object
+              input_name: id_contact_signature
+              input: 
+                  type: select
+                  options: 
+                      callback: 
+                          method: getSocieteContactsArray
+                          params: 
+                              - field_value: fk_soc
+              value: 
+                  callback: getDefaultSignatureContact
+              display_if: 
+                  field_name: create_signature
+                  show_values: 1
+            - custom: 1
+              label: Contenu e-mail client pour la signature à distance
+              input_name: email_content
+              input: 
+                  type: html
+                  help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE} et {LIEN_ESPACE_CLIENT}.<br/>Le devis sera automatiquement joint à l'email"
+              value: 
+                  callback: getDefaultSignDistEmailContent
+              display_if: 
+                  field_name: create_signature
+                  show_values: 1
+                  
 fields_tables: 
     infos: 
         rows: 
@@ -509,13 +608,33 @@ fields_tables:
             - field: prime
             - field: prime2
             
+    signature: 
+        title: Signature
+        icon: fas_signature
+        show: 
+            field_value: id_signature
+        rows: 
+            - field: id_signature
+              display: card
+        
 views: 
     default: 
-        objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile,RemiseGlobale
+        objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile,RemiseGlobale,BimpSignature
+        rows: 
+            0: 
+                cols: 
+                    1: 
+                        rows: 
+                            2: 
+                                cols: 
+                                    0: 
+                                        type: fields_table
+                                        fields_table: 
+                                            name: signature
     content_infos: 
-        objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile,RemiseGlobale
+        objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile,RemiseGlobale,BimpSignature
     full: 
-        objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile,RemiseGlobale
+        objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile,RemiseGlobale,BimpSignature
      
 lists_cols: 
     fin_validite: 
@@ -533,6 +652,7 @@ filters_panels:
                 
 lists: 
     default: 
+        configurable: 1
         title: Propositions commerciales
         icon: fas_file-invoice
         bulk_actions:
@@ -600,3 +720,7 @@ searches:
             - a.ref
             - s.nom
         label_syntaxe: '<a.ref> (Client: <s.nom>)'
+
+signatures: 
+    devis: 
+        label: Devis

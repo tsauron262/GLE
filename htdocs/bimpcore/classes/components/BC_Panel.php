@@ -93,6 +93,12 @@ class BC_Panel extends BimpComponent
             return '';
         }
 
+        $inner_content .= $this->renderHtmlContent();
+        
+        if ((int) !$this->params['show']) { // show a pu être modifé par renderHtmlContent()
+            return '';
+        }
+        
         global $current_bc;
         if (!is_object($current_bc)) {
             $current_bc = null;
@@ -167,7 +173,7 @@ class BC_Panel extends BimpComponent
             $content .= '</div>';
 
             $content .= '<div class="container-fluid object_component_content object_' . static::$type . '_content">';
-            $content .= $this->renderHtmlContent();
+            $content .= $inner_content;
             $content .= '</div>';
 
             $content .= '<div class="ajaxResultContainer" id="' . $this->identifier . '_result" style="display: none"></div>';

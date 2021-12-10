@@ -89,8 +89,7 @@ sections:
                 notes: 
                     object: sav
                     visibility: 4
-                    
-                    
+            
     - type: buttons
       buttons:
           - label: Liste des SAV

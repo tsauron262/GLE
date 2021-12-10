@@ -126,11 +126,15 @@
 
 @media (max-width: $screen-sm) {
     .fieldRow,
-    formRow {
+    .formRow {
         display: block;
 
         .inputLabel {
             text-align: left;
+        }
+
+        input, select, textarea {
+            width: 100% !important;
         }
     }
 }

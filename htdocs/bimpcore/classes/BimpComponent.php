@@ -278,7 +278,7 @@ abstract class BimpComponent
         return $param;
     }
 
-    protected static function validateParam($name, $value, $definitions, &$errors = array())
+    protected static function validateParam($name, &$value, $definitions, &$errors = array())
     {
         if (is_null($definitions) || !is_array($definitions) || !array_key_exists($name, $definitions)) {
             $errors[] = 'Paramètre de configuration invalide: "' . $name . '" (définitions absentes)';
@@ -299,7 +299,7 @@ abstract class BimpComponent
             $value = '';
         }
 
-        if (MOD_DEV) {
+        if (BimpCore::isModeDev()) {
             $type = (isset($defs['data_type']) ? $defs['data_type'] : 'string');
             if (!BimpTools::checkValueByType($type, $value)) {
                 $errors[] = 'Paramètre de configuration invalide: "' . $name . '" (doit être de type "' . $type . '")';

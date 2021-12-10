@@ -75,6 +75,8 @@ class BC_FieldsTable extends BC_Panel
         $html .= '<table class="objectFieldsTable ' . $this->object->object_name . '_fieldsTable">';
         $html .= '<tbody>';
 
+        $has_content = false;
+        
         foreach ($this->params['rows'] as $row) {
             $row_params = $this->fetchParams($this->config_path . '/rows/' . $row, $this->row_params);
 
@@ -85,41 +87,56 @@ class BC_FieldsTable extends BC_Panel
             $label = $row_params['label'];
             $content = '';
             if ($row_params['field']) {
-                if (!$this->object->isFieldActivated($row_params['field'])) {
-                    continue;
-                }
-                if ($this->object->isDolObject()) {
-                    if (!$this->object->dol_field_exists($row_params['field'])) {
+                $field_errors = array();
+                $field_name = $row_params['field'];
+                $field_object = BC_Field::getFieldObject($this->object, $field_name, $field_errors);
+
+                if (count($field_errors)) {
+                    $content .= BimpRender::renderAlerts($field_errors);
+                } else {
+                    if (!$field_object->isFieldActivated($field_name)) {
                         continue;
                     }
+
+                    if ($field_object->isDolObject()) {
+                        if (!$field_object->dol_field_exists($field_name)) {
+                            continue;
+                        }
+                    }
+
+                    $edit = 0;
+
+                    if ($field_name == $row_params['field'] && (int) $row_params['edit']) {
+                        $edit = 1;
+                    }
+
+                    $field = new BC_Field($field_object, $field_name, (int) $row_params['edit']);
+                    $field->display_name = $row_params['display'];
+
+                    if (!$field->params['show']) {
+                        continue;
+                    }
+
+                    if (!$field->checkDisplayIf()) {
+                        continue;
+                    }
+
+                    if (isset($this->new_values[$field_name])) {
+                        $field->new_value = $this->new_values[$field_name];
+                    }
+
+                    if (!$label) {
+                        $label = $field->params['label'];
+                    }
+
+                    $content = $field->renderHtml();
+
+                    if ($field->edit && $field->isEditable()) {
+                        $content .= $field->displayCreateObjectButton(true, true);
+                    }
+
+                    unset($field);
                 }
-
-                $field = new BC_Field($this->object, $row_params['field'], (int) $row_params['edit']);
-                $field->display_name = $row_params['display'];
-
-                if (!$field->params['show']) {
-                    continue;
-                }
-
-                if (!$field->checkDisplayIf()) {
-                    continue;
-                }
-
-                if (isset($this->new_values[$row_params['field']])) {
-                    $field->new_value = $this->new_values[$row_params['field']];
-                }
-
-                if (!$label) {
-                    $label = $field->params['label'];
-                }
-
-                $content = $field->renderHtml();
-
-                if ($field->edit && $field->isEditable()) {
-                    $content .= $field->displayCreateObjectButton(true, true);
-                }
-
-                unset($field);
             } elseif ($row_params['association']) {
                 $asso = new BimpAssociation($this->object, $row_params['association']);
                 if (count($asso->errors)) {
@@ -173,16 +190,24 @@ class BC_FieldsTable extends BC_Panel
                 $label = BimpTools::ucfirst($row);
             }
 
+            $has_content = true;
+            
             $html .= '<tr>';
             $html .= '<th>' . $label . '</th>';
             $html .= '<td>' . $content . '</td>';
             $html .= '</tr>';
         }
-
+        
         $html .= '</tbody>';
         $html .= '</table>';
 
+        if (!$has_content) {
+            $this->params['show'] = 0;
+            return '';
+        }
+        
         $current_bc = $prev_bc;
+        
         return $html;
     }
 

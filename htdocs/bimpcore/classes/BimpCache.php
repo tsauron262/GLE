@@ -1,4 +1,4 @@
-<?php
+ <?php
 
 require_once(DOL_DOCUMENT_ROOT . "/bimpcore/classes/BimpCacheRedis.php");
 
@@ -46,40 +46,6 @@ class BimpCache
         }
 
         return self::$bdb_noTransac;
-    }
-    
-    public static function getIpFromDns($host){
-        if (filter_var($host, FILTER_VALIDATE_IP))
-            return $host;
-        
-        $cache_key = 'ipFromDns'.$host;
-        if (!isset(self::$cache[$cache_key])) {
-            $dnsData = dns_get_record($host);
-            $i = rand(0, count($dnsData)-1);
-            $ip = $dnsData[$i]['ip'];
-            self::$cache[$cache_key] = $ip;
-        }
-
-        return self::$cache[$cache_key];
-    }
-    
-    public static function getSignature($prenom, $job, $phone){
-        $key = 'sign'.$prenom.$job.$phone;
-        $cache = self::getCacheServeur($key);
-        if(!$cache){
-            $url = "https://www.bimp.fr/signatures/v3/supports/sign.php?prenomnom=". urlencode($prenom)."&job=". urlencode($job)."&phone=" . urlencode($phone);
-            $signature = file_get_contents($url, false, stream_context_create(array(
-                'http' => array(
-                    'timeout' => 2   // Timeout in seconds
-            ))));
-            if($signature){
-                self::setCacheServeur ($key, $signature);
-                return $signature;
-            }
-            else
-                return null;
-        }
-        return $cache;
     }
 
     public static function getCacheArray($cache_key, $include_empty = false, $empty_value = 0, $empty_label = '')
@@ -415,48 +381,50 @@ class BimpCache
             return self::$cache[$cache_key];
         }
     }
-    
-    public static function getDureeMoySav($nbJ = 30, $ios = false){
-        $cache_key = 'sav_moy_duree'.$nbJ.$ios;
-        
+
+    public static function getDureeMoySav($nbJ = 30, $ios = false)
+    {
+        $cache_key = 'sav_moy_duree' . $nbJ . $ios;
+
         $result = static::getCacheServeur($cache_key);
-        if(!$result){
+        if (!$result) {
             $result = array();
             global $db;
-            $req = 'SELECT AVG(DATEDIFF(date_terminer, date_create )) as moy, code_centre FROM '.MAIN_DB_PREFIX.'bs_sav WHERE DATEDIFF(now(), date_terminer ) <='.$nbJ.'';
-            if($ios)
+            $req = 'SELECT AVG(DATEDIFF(date_terminer, date_create )) as moy, code_centre FROM ' . MAIN_DB_PREFIX . 'bs_sav WHERE DATEDIFF(now(), date_terminer ) <=' . $nbJ . '';
+            if ($ios)
                 $req .= ' AND system = 300';
             else
                 $req .= ' AND system != 300';
             $req .= ' GROUP BY code_centre;';
             $sql = $db->query($req);
-            while ($ln = $db->fetch_object($sql)){
+            while ($ln = $db->fetch_object($sql)) {
                 $result[$ln->code_centre] = $ln->moy;
             }
-            static::setCacheServeur($cache_key, $result, 2*60);
+            static::setCacheServeur($cache_key, $result, 2 * 60);
         }
         return $result;
     }
-    
-    public static function getDureeDiago($ios = false){
-        $cache_key = 'sav_duree_diago'.$ios;
-        
+
+    public static function getDureeDiago($ios = false)
+    {
+        $cache_key = 'sav_duree_diago' . $ios;
+
         $result = static::getCacheServeur($cache_key);
-        if(!$result){
+        if (!$result) {
             $result = array();
             global $db;
             $req = "SELECT MIN(date_create), code_centre, DATEDIFF(now(), MIN(date_create) ) as time FROM llx_bs_sav a WHERE a.status = '0'";
-            if($ios)
+            if ($ios)
                 $req .= ' AND system = 300';
             else
                 $req .= ' AND system != 300';
             $req .= ' GROUP BY code_centre;';
 //            die($req);
             $sql = $db->query($req);
-            while ($ln = $db->fetch_object($sql)){
+            while ($ln = $db->fetch_object($sql)) {
                 $result[$ln->code_centre] = $ln->time;
             }
-            static::setCacheServeur($cache_key, $result, 2*60);
+            static::setCacheServeur($cache_key, $result, 2 * 60);
         }
         return $result;
     }
@@ -2529,6 +2497,41 @@ class BimpCache
 
         return self::$cache['secteurs_array'];
     }
+    public static function getIpFromDns($host)
+    {
+        if (filter_var($host, FILTER_VALIDATE_IP))
+            return $host;
+
+        $cache_key = 'ipFromDns' . $host;
+        if (!isset(self::$cache[$cache_key])) {
+            $dnsData = dns_get_record($host);
+            $i = rand(0, count($dnsData) - 1);
+            $ip = $dnsData[$i]['ip'];
+            self::$cache[$cache_key] = $ip;
+        }
+
+        return self::$cache[$cache_key];
+    }
+
+    public static function getSignature($prenom, $job, $phone)
+    {
+        $key = 'sign_' . $prenom . '_' . $job . '_' . $phone;
+        $cache = self::getCacheServeur($key);
+        if (!$cache) {
+            $url = "https://www.bimp.fr/signatures/v3/supports/sign.php?prenomnom=" . urlencode($prenom) . "&job=" . urlencode($job) . "&phone=" . urlencode($phone);
+            $signature = file_get_contents($url, false, stream_context_create(array(
+                'http' => array(
+                    'timeout' => 2   // Timeout in seconds
+            ))));
+            if ($signature) {
+                self::setCacheServeur($key, $signature);
+                return $signature;
+            } else
+                return null;
+        }
+        return $cache;
+    }
+    
 
     // Comme getSecteursArray avec l'option "Tous" en plus
     public function getSecteurAllArray()
@@ -2560,7 +2563,7 @@ class BimpCache
     public static function getSystemsArray()
     {
         return array(
-            ''    => "",
+            ''   => "",
             300  => "iOs",
             34   => "Mac Os",
             35   => "WatchOs",

@@ -1647,18 +1647,25 @@ class BimpCache
         global $user;
         if (BimpObject::objectLoaded($user)) {
             $cache_key = 'user_' . $user->id . '_centres_array'.$valDef;
-            if (!isset(self::$cache[$cache_key])) {
+
+            $result = self::getCacheServeur($cache_key);
+            if (!$result) {
                 $result = array();
                 $userCentres = explode(' ', $user->array_options['options_apple_centre']);
                 $centres = self::getCentres();
 
-                if (count($userCentres)) {
+                if (count($userCentres) > 1 || $userCentres[0] != '') {
                     foreach ($userCentres as $code) {
                         if (preg_match('/^ ?([A-Z]+) ?$/', $code, $matches)) {
                             if (isset($centres[$matches[1]])) {
                                 $result[$matches[1]] = $centres[$matches[1]]['label'];
                             }
                         }
+                    }
+                }
+                else {
+                    foreach ($centres as $code => $centre) {
+                        $result[$code] = $centre['label'];
                     }
                 }
                 
@@ -1670,17 +1677,10 @@ class BimpCache
                         }
                     }
                 }
-
-                if (count($centres) <= 1) {
-                    foreach ($centres as $code => $centre) {
-                        $result[$code] = $centre['label'];
-                    }
-                }
-//                print_r($result);echo $all.'<br/><br/>';
-                self::$cache[$cache_key] = $result;
+                self::setCacheServeur($cache_key, $result);
             }
 
-            return self::$cache[$cache_key];
+            return $result;
         }
 
         return array();

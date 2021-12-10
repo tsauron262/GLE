@@ -1644,7 +1644,6 @@ class BimpCache
         $centres = array(
             '' => ''
         );
-
         global $user;
         if (BimpObject::objectLoaded($user)) {
             $cache_key = 'user_' . $user->id . '_centres_array'.$all;
@@ -1664,11 +1663,10 @@ class BimpCache
                 }
                 
                 if($all){
-                    foreach ($userCentres as $code) {
-                        if (preg_match('/^ ?([A-Z]+) ?$/', $code, $matches) && !isset($result[$matches[1]])) {
-                            if (isset($centres[$matches[1]])) {
-                                $result[$matches[1]] = $centres[$matches[1]]['label'];
-                            }
+                    foreach ($centres as $code => $data) {
+                        if (!isset($result[$code])) {
+                            $result[$code] = $data['label'];
+                            
                         }
                     }
                 }
@@ -1678,6 +1676,7 @@ class BimpCache
                         $result[$code] = $centre['label'];
                     }
                 }
+//                print_r($result);echo $all.'<br/><br/>';
                 self::$cache[$cache_key] = $result;
             }
 

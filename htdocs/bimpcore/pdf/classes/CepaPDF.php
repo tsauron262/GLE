@@ -27,7 +27,8 @@ class CepaPDF extends BimpDocumentPDF
         $this->typeObject = 'societe';
 
         $this->propal = new Propal($db);
-        $this->pdf2 = new BimpPDF($orientation, $format);
+//        $this->pdf2 = new BimpPDF($orientation, $format);
+        $this->pdf2 = pdf_getInstance($format);
     }
 
     protected function initData()

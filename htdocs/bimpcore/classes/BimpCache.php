@@ -1638,7 +1638,7 @@ class BimpCache
         return self::getCacheArray($cache_key, $include_empty, 0, $empty_label);
     }
 
-    public static function getUserCentresArray()
+    public static function getUserCentresArray($all = false)
     {
 
         $centres = array(
@@ -1647,8 +1647,9 @@ class BimpCache
 
         global $user;
         if (BimpObject::objectLoaded($user)) {
-            $cache_key = 'user_' . $user->id . '_centres_array';
+            $cache_key = 'user_' . $user->id . '_centres_array'.$all;
             if (!isset(self::$cache[$cache_key])) {
+                $result = array();
                 $userCentres = explode(' ', $user->array_options['options_apple_centre']);
                 $centres = self::getCentres();
 
@@ -1656,7 +1657,17 @@ class BimpCache
                     foreach ($userCentres as $code) {
                         if (preg_match('/^ ?([A-Z]+) ?$/', $code, $matches)) {
                             if (isset($centres[$matches[1]])) {
-                                self::$cache[$cache_key][$matches[1]] = $centres[$matches[1]]['label'];
+                                $result[$matches[1]] = $centres[$matches[1]]['label'];
+                            }
+                        }
+                    }
+                }
+                
+                if($all){
+                    foreach ($userCentres as $code) {
+                        if (preg_match('/^ ?([A-Z]+) ?$/', $code, $matches) && !isset($result[$matches[1]])) {
+                            if (isset($centres[$matches[1]])) {
+                                $result[$matches[1]] = $centres[$matches[1]]['label'];
                             }
                         }
                     }
@@ -1664,9 +1675,10 @@ class BimpCache
 
                 if (count($centres) <= 1) {
                     foreach ($centres as $code => $centre) {
-                        self::$cache[$cache_key][$code] = $centre['label'];
+                        $result[$code] = $centre['label'];
                     }
                 }
+                self::$cache[$cache_key] = $result;
             }
 
             return self::$cache[$cache_key];

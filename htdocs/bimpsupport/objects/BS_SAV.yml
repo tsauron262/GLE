@@ -147,7 +147,10 @@ fields:
             array: centres
         input: 
             options: 
-                array: userCentres
+                callback: 
+                    method: getUserCentresArray
+                    params:
+                        - true
         required: 1
         default_value: 
             callback: getDefaultCodeCentre

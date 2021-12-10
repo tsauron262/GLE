@@ -148,9 +148,9 @@ fields:
         input: 
             options: 
                 callback: 
-                    method: getUserCentresArray
+                    method: getListCentre
                     params:
-                        - true
+                        - code_centre
         required: 1
         default_value: 
             callback: getDefaultCodeCentre
@@ -161,7 +161,10 @@ fields:
         input: 
             help: Laisser vide si identique au centre de prise en charge
             options: 
-                array: userCentres
+                callback: 
+                    method: getListCentre
+                    params:
+                        - code_centre_repa
         default_value: 
             callback: getDefaultCodeCentreRepa
         depends_on: code_centre

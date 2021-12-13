@@ -123,7 +123,6 @@ class BimpController
     public function handleError($level, $msg, $file, $line)
     {
         ini_set('display_errors', 0); // Par précaution. 
-        
 //        if(!in_array($level, array(E_NOTICE, E_DEPRECATED)))
 //            die('iiiii'.$level.$msg.$file.$line);
         switch ($level) {
@@ -227,20 +226,20 @@ class BimpController
                 break;
 
             default:
-                if(stripos($msg, 'Deadlock') !== false){
+                if (stripos($msg, 'Deadlock') !== false) {
                     global $db;
                     $db = new mysqli();
                     $db::stopAll();
                 }
                 return false;
         }
-        
-        if(stripos($msg, 'Deadlock') !== false){//ne devrait jamais arrivée.
+
+        if (stripos($msg, 'Deadlock') !== false) {//ne devrait jamais arrivée.
             global $db;
             BimpCore::addlog('Erreur SQL intercepté par handleError php, ne devrait jamais arriver !!!!!!!', Bimp_Log::BIMP_LOG_ERREUR, 'php', null, array(
                 'Fichier' => $file,
                 'Ligne'   => $line,
-                'Msg'   => $msg
+                'Msg'     => $msg
             ));
             $db::stopAll();
         }
@@ -760,13 +759,18 @@ class BimpController
                     $result['request_id'] = $req_id;
                 }
 
+                if (!isset($result['warnings'])) {
+                    $result['warnings'] = array();
+                }
+
+                $result['warnings'] = BimpTools::merge_array($result['warnings'], static::getAndResetAjaxWarnings());
+
                 if (BimpDebug::isActive()) {
                     BimpDebug::addDebug('ajax_result', '', '<pre>' . htmlentities(print_r($result, 1)) . '</pre>', array('foldable' => false));
                     BimpDebug::addDebugTime('Fin affichage page');
                     $result['debug_content'] = BimpDebug::renderDebug('ajax_' . $req_id);
                 }
 
-                $result['warnings'] = static::getAndResetAjaxWarnings();
                 $json = json_encode($result);
 
                 if ($json === false) {
@@ -928,8 +932,8 @@ class BimpController
     {
         $errors = array();
         $url = '';
-        
-        $result = array('warnings'=>array(), 'success'=>'', 'success_callback'=>'');
+
+        $result = array('warnings' => array(), 'success' => '', 'success_callback' => '');
 
         $id_object = BimpTools::getValue('id_object');
         $object_name = BimpTools::getValue('object_name', '');
@@ -2801,13 +2805,13 @@ class BimpController
     protected function ajaxProcessLoadUserListFiltersList()
     {
         // Obsolète. 
-        
+
         $errors = array(
             'Erreur: cette fonction est désactivée'
         );
-        
+
         BimpCore::addlog('Appel à méthode obsolète: BimpController::ajaxProcessLoadUserListFiltersList()', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore');
-        
+
 //        $html = '';
 //        $list_id = '';
 //
@@ -3096,13 +3100,14 @@ class BimpController
             'request_id'    => BimpTools::getValue('request_id', 0)
         );
     }
-    
-    public static function bimp_shutdown(){//juste avant de coupé le script
+
+    public static function bimp_shutdown()
+    {//juste avant de coupé le script
         global $db;
-        if($db->transaction_opened > 0)
-            BimpCore::addlog ('Fin de script Transaction non fermée');
+        if ($db->transaction_opened > 0)
+            BimpCore::addlog('Fin de script Transaction non fermée');
         $nb = BimpTools::deloqueAll();
-        if($nb > 0)
-            BimpCore::addlog ('Fin de script fichier non debloqué '.$nb, Bimp_Log::BIMP_LOG_ALERTE);
+        if ($nb > 0)
+            BimpCore::addlog('Fin de script fichier non debloqué ' . $nb, Bimp_Log::BIMP_LOG_ALERTE);
     }
 }

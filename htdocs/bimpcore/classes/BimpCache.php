@@ -1268,10 +1268,13 @@ class BimpCache
             if (!isset(self::$cache[$cache_key])) {
 //                self::$cache[$cache_key] = array(0 => ""); => Ne pas déco: on ne doit pas inclure de valeurs vides dans le cache, utiliser $include_empty.
                 $where = '`fk_soc` = ' . (int) $id_societe;
-                $rows = self::getBdb()->getRows('socpeople', $where, null, 'array', array('rowid', 'firstname', 'lastname'));
+                $rows = self::getBdb()->getRows('socpeople', $where, null, 'array', array('rowid', 'firstname', 'lastname', 'statut'));
                 if (!is_null($rows)) {
                     foreach ($rows as $r) {
-                        self::$cache[$cache_key][(int) $r['rowid']] = BimpTools::ucfirst($r['firstname']) . ' ' . strtoupper($r['lastname']);
+                        $label = BimpTools::ucfirst($r['firstname']) . ' ' . strtoupper($r['lastname']);
+                        if($r['statut'] == 0)
+                            $label = '<span style="text-decoration:line-through;">[desactivé] '.$label.' [désactivé]</span>';
+                        self::$cache[$cache_key][(int) $r['rowid']] = $label;
                     }
                 }
             }

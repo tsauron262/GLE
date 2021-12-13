@@ -202,9 +202,12 @@ class GSX_Reservation
 //            curl_setopt($ch, CURLOPT_SSLCERTPASSWD, $certInfo['pass']);
 
 
+            require_once DOL_DOCUMENT_ROOT.'/bimpapple/classes/GSX_Const.php';
+            $certInfo = GSX_Const::getCertifInfo($soldTo);
+            
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-            curl_setopt($ch, CURLOPT_SSLCERT, $certif_file_path);
-            curl_setopt($ch, CURLOPT_SSLCERTPASSWD, '');
+            curl_setopt($ch, CURLOPT_SSLKEY, $certInfo['pathKey']);
+            curl_setopt($ch, CURLOPT_SSLCERT, $certInfo['path']);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
             curl_setopt($ch, CURLOPT_TIMEOUT, 30);

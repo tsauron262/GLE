@@ -11,7 +11,7 @@ class BimpCommandeForDol extends Bimp_Commande{
     
     public function remindEndLine($days = 60) {
         $user_line = $this->getLinesToRemind($days);
-        $this->sendRappel($user_line);
+        $this->sendRappel($user_line, $days);
         return true;
     }
     
@@ -74,7 +74,7 @@ class BimpCommandeForDol extends Bimp_Commande{
         
     }
     
-    public function sendRappel($user_line) {
+    public function sendRappel($user_line, $days) {
         
         $errors = array();
         $warnings = array();
@@ -140,6 +140,7 @@ class BimpCommandeForDol extends Bimp_Commande{
                     $date_end = new DateTime($data['date_end']);
                     
                     $days  = $date_end->diff($now)->format('%a');
+                    $days -= $days;
                         
                     $m .=  '- Quantité: ' . $l->getFullQty() . ', libellé: ' . $product_label . ' ' ;
                     $m .= $date_start->format('d/m/Y') . ' - ' . $date_end->format('d/m/Y');

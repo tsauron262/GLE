@@ -1594,4 +1594,65 @@ class Bimp_User extends BimpObject
   
     }
     
+    
+    
+    public function boxCreateUser($boxObj, $context)
+    {
+        global $user;
+        $boxObj->boxlabel = 'Création client par commercial';
+        
+        if ($context == 'init')
+            return 1;
+        
+        $boxObj->config['nbJ'] = array('type' => 'int', 'val_default' => 31, 'title' => 'Nb Jours');
+        $boxObj->config['my'] = array('type' => 'radio', 'val_default' => 1, 'title' => 'Personne à afficher', 'values'=>array(0=>'Tous le monde', 1=> 'N-1'));
+        $nbJ = ((isset($boxObj->confUser['nbJ']) && $boxObj->confUser['nbJ'] > 0) ? $boxObj->confUser['nbJ'] : $boxObj->config['nbJ']['val_default']);
+        $my = (isset($boxObj->confUser['my']) ? $boxObj->confUser['my'] : $boxObj->config['my']['val_default']);
+        
+        $boxObj->boxlabel .= ' sur '.$nbJ.' jours';
+
+        $sql = "SELECT count(*) as nb, sc.fk_user, u.lastname, u.firstname FROM llx_societe s
+LEFT JOIN llx_societe_commerciaux sc ON sc.fk_soc = s.rowid
+LEFT JOIN llx_user u ON u.rowid = sc.fk_user 
+WHERE client > 0 AND  DATEDIFF(now(), s.datec ) <= ".$nbJ." ";
+        if($my)
+            $sql .= "AND u.fk_user = 62 ";$user->id.' ';
+        $sql .= "GROUP BY sc.fk_user ORDER BY nb DESC";
+        
+        $lns = BimpCache::getBdb()->executeS($sql);
+//        $field = new BC_Field($this, 'ef_type');
+        $data = $data2 = array();
+        $i = 0;
+        foreach ($lns as $ln) {
+//            $field->value = $ln->secteur;
+//            $ln->secteur = $field->getNoHtmlValue(array());
+            $data[] = array($ln->lastname.' '.$ln->firstname, $ln->nb);
+            $data2[] = array('user'=>$ln->lastname.' '.$ln->firstname, 'nb'=>$ln->nb);
+        }
+
+        $boxObj->addCamenbere('', $data);
+        
+        $boxObj->addList(array('user' => 'Utilisateur', 'nb' => 'Nombre de créations'), $data2);
+
+//        $unit = '€';
+//        foreach ($data2 as $temp) {
+//            if ($temp[1] > 100000000) {
+//                $unit = 'M€';
+//                brek;
+//            } elseif ($temp[1] > 100000) {
+//                $unit = 'K€';
+//            }
+//        }
+//        foreach ($data2 as $i => $temp) {
+//            if ($unit == 'M€')
+//                $data2[$i][1] = $data2[$i][1] / 1000000;
+//            if ($unit == 'K€')
+//                $data2[$i][1] = $data2[$i][1] / 1000;
+//
+//            $data2[$i][1] = round($data2[$i][1]);
+//        }
+//
+//        $boxObj->addCamenbere('En ' . $unit . ' HT', $data2);
+        return 1;
+    }
 }

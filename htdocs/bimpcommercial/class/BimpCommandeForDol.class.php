@@ -146,7 +146,7 @@ class BimpCommandeForDol extends Bimp_Commande{
                     $m .= $date_start->format('d/m/Y') . ' - ' . $date_end->format('d/m/Y');
                     
                     if($days < 0)
-                        $m .= ' <strong>expire dans ' . $days . ' jours</strong><br/>';
+                        $m .= ' <strong>expire dans ' . -$days . ' jours</strong><br/>';
                     else
                         $m .= ' <strong style="color: #b50000">expiré depuis ' . $days . ' jours</strong><br/>';
                 }

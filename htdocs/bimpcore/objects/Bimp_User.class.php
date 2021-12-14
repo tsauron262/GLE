@@ -1528,49 +1528,39 @@ class Bimp_User extends BimpObject
     }
     
     
-    public static function isUserAvaible($id_user, &$errors = array(), $from = null, $to = null) {
-
-        if(!is_null($to) and is_null($from)) {
-            $to = null;
-        }
+    public static function isUserAvaible($id_user, &$errors = array(), $from = null) {
 
         if(is_null($id_user) or $id_user < 0) {
             $errors[] = "ID de l'utilisateur absent ou mal renseigné";
             return -1;
         }
         
-        if(is_null($from)) {
-            $datetime = new DateTime();
-            $hour = (int) $datetime->format('h');
-            
-            // Si on est avant midi, on vérifie les dispo à 10h
-            if($hour < 12)
-                $from = $datetime->format('Y-m-d 10:00:00');
-            
-            // Si on est après-midi mais pas le soir, on vérifie les dispo à 15h
-            elseif ($hour < 18)
-                $from = $datetime->format('Y-m-d 15:00:00');
-            
-            // Pendant la soirée on vérifie les dispo le lendemain matin (10h)
-            else {
-                $day = (int) $datetime->format('h') + 1; // TODO fin de mois ?
-                $from = $datetime->format('Y-m-' . $day . ' 10:00:00');
-            }
-        }
-        
-        
-        if(!is_null($from) and ! is_null($to)) {
-            $datetime_from = new DateTime($from);
-            $datetime_to = new DateTime($to);
-            if($to < $from){
-                $errors[] = "Date de fin antérieure à date de début";
-                return -2;
-            }
-        }
-
+        // L'utilisateur est actif ?
         $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
         if(!$user->getData('statut'))
             return 0;
+        
+        
+        // L'utilisateur est disponible ?
+        if(is_null($from)) {
+            $init_from = new DateTime();
+            $hour = (int) $init_from->format('h');
+            
+            // Si on est avant midi, on vérifie les dispo à 10h
+            if($hour < 12)
+                $from = $init_from->format('Y-m-d 10:00:00');
+            
+            // Si on est après-midi mais pas le soir, on vérifie les dispo à 15h
+            elseif ($hour < 18)
+                $from = $init_from->format('Y-m-d 15:00:00');
+            
+            // Pendant la soirée on vérifie les dispo le lendemain matin (10h)
+            else {
+                // TODO Fin de semaine/jour férié ?
+                $init_from->add(new DateInterval('P1D'));
+                $from = $init_from->format('Y-m-d 10:00:00');
+            }
+        }
                 
         $sql = 'SELECT *';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'actioncomm';

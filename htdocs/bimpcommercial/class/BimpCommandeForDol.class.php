@@ -157,7 +157,6 @@ class BimpCommandeForDol extends Bimp_Commande{
             
             $subject = $l_user . " ligne" . (($l_user > 1) ? 's' : '') . " de commande arrivant à expiration";
             
-            $m='';
             $this->output .= $m;
             
 //            mailSyn2($subject, $u_a->getData('email'), '', $m);

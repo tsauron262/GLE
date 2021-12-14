@@ -1624,4 +1624,49 @@ WHERE client > 0 AND  DATEDIFF(now(), s.datec ) <= ".$nbJ." ";
         $boxObj->addList(array('user' => 'Utilisateur', 'nb' => 'Nombre de créations'), $data2);
         return 1;
     }
+    
+    public function boxServiceUser($boxObj, $context)
+    {
+        global $user;
+        $boxObj->boxlabel = 'Répartition service par commercial';
+        
+        if ($context == 'init')
+            return 1;
+        
+        $boxObj->config['nbJ'] = array('type' => 'int', 'val_default' => 31, 'title' => 'Nb Jours');
+        $boxObj->config['my'] = array('type' => 'radio', 'val_default' => 1, 'title' => 'Personne à afficher', 'values'=>array(0=>'Tous le monde', 1=> 'N-1'));
+        $nbJ = ((isset($boxObj->confUser['nbJ']) && $boxObj->confUser['nbJ'] > 0) ? $boxObj->confUser['nbJ'] : $boxObj->config['nbJ']['val_default']);
+        $my = (isset($boxObj->confUser['my']) ? $boxObj->confUser['my'] : $boxObj->config['my']['val_default']);
+        
+        $boxObj->boxlabel .= ' sur '.$nbJ.' jours';
+
+        
+        $sql = "SELECT u.lastname, u.firstname, SUM(total_ht) as total, COUNT(DISTINCT a.rowid) as nbTot, SUM(IF(fk_product_type=1, total_ht, 0)) as totalServ, SUM(IF(fk_product_type=1, 1, 0)) as nbServ, SUM(a.qty) as qtyTot, SUM(IF(fk_product_type=1, a.qty, 0)) as qtyServ
+FROM llx_facturedet a
+LEFT JOIN llx_facture f ON f.rowid = a.fk_facture
+LEFT JOIN llx_element_contact elemcont ON elemcont.element_id = a.fk_facture
+LEFT JOIN llx_c_type_contact typecont ON elemcont.fk_c_type_contact = typecont.rowid
+LEFT JOIN llx_user u ON u.rowid = elemcont.fk_socpeople 
+LEFT JOIN llx_product product ON product.rowid = a.fk_product
+WHERE typecont.element = 'facture' AND typecont.source = 'internal' AND typecont.code = 'SALESREPFOLL' AND f.type IN ('0','1','2','4','5') ";
+        $sql .= "AND  DATEDIFF(now(), f.datef ) <= ".$nbJ." ";
+        
+        
+        if($my)
+            $sql .= "AND u.fk_user = ".$user->id.' ';
+        $sql .= "GROUP BY elemcont.fk_socpeople ORDER BY lastname ASC";
+        
+        
+        $lns = BimpCache::getBdb()->executeS($sql);
+        
+        $data = array();
+        $i = 0;
+        foreach ($lns as $ln) {
+            $data[] = array('user'=>$ln->lastname.' '.$ln->firstname, 'total'=>price($ln->total), 'totalServ'=>price($ln->totalServ), 'pourc'=>price($ln->totalServ/$ln->total*100).' %', 'qty'=>round($ln->qtyTot), 'qtyServ'=>round($ln->qtyServ));
+        }
+
+        
+        $boxObj->addList(array('user' => 'Utilisateur', 'total' => 'CA', 'totalServ' => 'CA Service', 'pourc' => 'Pourcentage service', 'qty' => 'Qty', 'qtyServ' => 'Qty Service'), $data);
+        return 1;
+    }
 }

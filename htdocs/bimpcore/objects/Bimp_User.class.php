@@ -1605,9 +1605,12 @@ class Bimp_User extends BimpObject
         $sql = "SELECT count(*) as nb, sc.fk_user, u.lastname, u.firstname FROM llx_societe s
 LEFT JOIN llx_societe_commerciaux sc ON sc.fk_soc = s.rowid
 LEFT JOIN llx_user u ON u.rowid = sc.fk_user 
+LEFT JOIN llx_user u2 ON u2.rowid = u.fk_user 
 WHERE client > 0 AND  DATEDIFF(now(), s.datec ) <= ".$nbJ." ";
+        
+        $userId = 62;//$user->id;
         if($my)
-            $sql .= "AND u.fk_user = ".$user->id.' ';
+            $sql .= "AND (u.fk_user = ".$userId." || u2.fk_user = ".$userId." || u.rowid = ".$userId.") ";
         $sql .= "GROUP BY sc.fk_user ORDER BY nb DESC";
         
         $lns = BimpCache::getBdb()->executeS($sql);

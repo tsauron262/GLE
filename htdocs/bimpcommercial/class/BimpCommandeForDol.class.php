@@ -11,7 +11,7 @@ class BimpCommandeForDol extends Bimp_Commande{
     
     public function remindEndLine($days = 60) {
         $user_line = $this->getLinesToRemind($days);
-        $this->sendRappel($user_line);
+        $this->sendRappel($user_line, $days);
         return true;
     }
     
@@ -24,8 +24,8 @@ class BimpCommandeForDol extends Bimp_Commande{
     public function getLinesToRemind($days) {
         
         $user_line = array();
-        $date = new DateTime();
-        $date->add(new DateInterval('P' . $days . 'D'));
+        $date_limit_expire = new DateTime();
+        $date_limit_expire->add(new DateInterval('P' . $days . 'D'));
         
         $sql .= BimpTools::getSqlSelect('a.rowid as id_dol_line, a.date_end as date_end,'
                 . 'b.id as id_bimp_line, c.rowid as id_c, c.fk_user_author as user_create');
@@ -40,9 +40,9 @@ class BimpCommandeForDol extends Bimp_Commande{
                     'alias' => 'c',
                     'on'    => 'a.fk_commande = c.rowid')
                 ));    
-        $sql .= ' WHERE a.date_end != "" AND a.date_end < "' . $date->format('Y-m-d H:i:s') . '"';
+        $sql .= ' WHERE a.date_end != "" AND a.date_end < "' . $date_limit_expire->format('Y-m-d H:i:s') . '"';
         $sql .= BimpTools::getSqlOrderBy("a.date_end", 'ASC');
-//        $sql .= BimpTools::getSqlLimit(125, 1); // TODO enlever ?
+//        $sql .= BimpTools::getSqlLimit(10, 0); // TODO enlever ?
         $rows = $this->db->executeS($sql);
         
         if (!is_null($rows)) {
@@ -74,7 +74,7 @@ class BimpCommandeForDol extends Bimp_Commande{
         
     }
     
-    public function sendRappel($user_line) {
+    public function sendRappel($user_line, $day_tolerance) {
         
         $errors = array();
         $warnings = array();
@@ -140,14 +140,15 @@ class BimpCommandeForDol extends Bimp_Commande{
                     $date_end = new DateTime($data['date_end']);
                     
                     $days  = $date_end->diff($now)->format('%a');
+                    $days -= $day_tolerance;
                         
                     $m .=  '- Quantité: ' . $l->getFullQty() . ', libellé: ' . $product_label . ' ' ;
                     $m .= $date_start->format('d/m/Y') . ' - ' . $date_end->format('d/m/Y');
                     
                     if($days < 0)
-                        $m .= ' <strong>expire dans ' . $days . ' jours</strong><br/>';
+                        $m .= ' <strong>expire dans ' . -$days . ' jours</strong><br/>';
                     else
-                        $m .= ' <strong style="color: #D20000">expiré depuis ' . $days . ' jours</strong><br/>';
+                        $m .= ' <strong style="color: #b50000">expiré depuis ' . $days . ' jours</strong><br/>';
                 }
                 
                 $m .= '<br/>';
@@ -156,9 +157,9 @@ class BimpCommandeForDol extends Bimp_Commande{
             
             $subject = $l_user . " ligne" . (($l_user > 1) ? 's' : '') . " de commande arrivant à expiration";
             
-            $this->output .= $m;
+            $this->output .= 'Sujet:' . $subject . '<br/>' . $m;
             
-//            mailSyn2($subject, $u_a->getData('email'), '', $m);
+            mailSyn2($subject, $u_a->getData('email'), '', $m);
             $tot_l += $l_user;
         }
         

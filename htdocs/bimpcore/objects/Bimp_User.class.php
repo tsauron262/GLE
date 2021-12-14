@@ -1607,7 +1607,7 @@ LEFT JOIN llx_societe_commerciaux sc ON sc.fk_soc = s.rowid
 LEFT JOIN llx_user u ON u.rowid = sc.fk_user 
 WHERE client > 0 AND  DATEDIFF(now(), s.datec ) <= ".$nbJ." ";
         if($my)
-            $sql .= "AND u.fk_user = 62 ";$user->id.' ';
+            $sql .= "AND u.fk_user = ".$user->id.' ';
         $sql .= "GROUP BY sc.fk_user ORDER BY nb DESC";
         
         $lns = BimpCache::getBdb()->executeS($sql);

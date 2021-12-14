@@ -1652,7 +1652,7 @@ LEFT JOIN llx_product product ON product.rowid = a.fk_product
 WHERE typecont.element = 'facture' AND typecont.source = 'internal' AND typecont.code = 'SALESREPFOLL' AND f.type IN ('0','1','2','4','5') ";
         $sql .= "AND  DATEDIFF(now(), f.datef ) <= ".$nbJ." ";
         
-        $userId = 62;//$user->id;
+        $userId = $user->id;
         if($my)
             $sql .= "AND (u.fk_user = ".$userId." || u2.fk_user = ".$userId." || u.rowid = ".$userId.") ";
         $sql .= "GROUP BY elemcont.fk_socpeople ORDER BY lastname ASC";

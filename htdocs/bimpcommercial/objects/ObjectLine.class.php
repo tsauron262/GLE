@@ -4014,7 +4014,7 @@ class ObjectLine extends BimpObject
                             }
                         }
                         $parent = $this->getParentInstance();
-                        if(is_a($parent, 'Bimp_Facture') && $parent->getData('type') == 2){
+                        if(is_a($parent, 'Bimp_Facture') && $parent->getData('type') == 2 && $min != 'none'){
                             $max = -$min;
                             $min = 'none';
                         }

@@ -1608,7 +1608,7 @@ LEFT JOIN llx_user u ON u.rowid = sc.fk_user
 LEFT JOIN llx_user u2 ON u2.rowid = u.fk_user 
 WHERE client > 0 AND  DATEDIFF(now(), s.datec ) <= ".$nbJ." ";
         
-        $userId = 62;//$user->id;
+        $userId = $user->id;
         if($my)
             $sql .= "AND (u.fk_user = ".$userId." || u2.fk_user = ".$userId." || u.rowid = ".$userId.") ";
         $sql .= "GROUP BY sc.fk_user ORDER BY nb DESC";

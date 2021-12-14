@@ -1634,7 +1634,7 @@ WHERE client > 0 AND  DATEDIFF(now(), s.datec ) <= ".$nbJ." ";
             return 1;
         
         $boxObj->config['nbJ'] = array('type' => 'int', 'val_default' => 31, 'title' => 'Nb Jours');
-        $boxObj->config['my'] = array('type' => 'radio', 'val_default' => 1, 'title' => 'Personne à afficher', 'values'=>array(0=>'Tous le monde', 1=> 'N-1'));
+        $boxObj->config['my'] = array('type' => 'radio', 'val_default' => 1, 'title' => 'Personne à afficher', 'values'=>array(0=>'Tous le monde', 1=> 'N-1 + N-2'));
         $nbJ = ((isset($boxObj->confUser['nbJ']) && $boxObj->confUser['nbJ'] > 0) ? $boxObj->confUser['nbJ'] : $boxObj->config['nbJ']['val_default']);
         $my = (isset($boxObj->confUser['my']) ? $boxObj->confUser['my'] : $boxObj->config['my']['val_default']);
         
@@ -1647,13 +1647,14 @@ LEFT JOIN llx_facture f ON f.rowid = a.fk_facture
 LEFT JOIN llx_element_contact elemcont ON elemcont.element_id = a.fk_facture
 LEFT JOIN llx_c_type_contact typecont ON elemcont.fk_c_type_contact = typecont.rowid
 LEFT JOIN llx_user u ON u.rowid = elemcont.fk_socpeople 
+LEFT JOIN llx_user u2 ON u2.rowid = u.fk_user 
 LEFT JOIN llx_product product ON product.rowid = a.fk_product
 WHERE typecont.element = 'facture' AND typecont.source = 'internal' AND typecont.code = 'SALESREPFOLL' AND f.type IN ('0','1','2','4','5') ";
         $sql .= "AND  DATEDIFF(now(), f.datef ) <= ".$nbJ." ";
         
-        
+        $userId = 62;//$user->id;
         if($my)
-            $sql .= "AND u.fk_user = ".$user->id.' ';
+            $sql .= "AND (u.fk_user = ".$userId." || u2.fk_user = ".$userId." || u.rowid = ".$userId.") ";
         $sql .= "GROUP BY elemcont.fk_socpeople ORDER BY lastname ASC";
         
         

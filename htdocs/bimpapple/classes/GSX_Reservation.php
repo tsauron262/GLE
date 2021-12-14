@@ -78,10 +78,16 @@ class GSX_Reservation
 //            $this->DebugData($headers, 'CURL REQUEST HEADER');
 //            $this->DebugData($params, 'CURL REQUEST PARAMS');
 
+            require_once DOL_DOCUMENT_ROOT.'/bimpapple/classes/GSX_Const.php';
+            $certInfo = GSX_Const::getCertifInfo($soldTo);
+            
+            curl_setopt($ch, CURLOPT_SSLKEY, $certInfo['pathKey']);
+            curl_setopt($ch, CURLOPT_SSLCERT, $certInfo['path']);
+            
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
-            curl_setopt($ch, CURLOPT_SSLCERT, $certif_file_path);
-            curl_setopt($ch, CURLOPT_SSLCERTPASSWD, '');
+//            curl_setopt($ch, CURLOPT_SSLCERT, $certif_file_path);
+//            curl_setopt($ch, CURLOPT_SSLCERTPASSWD, '');
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
             curl_setopt($ch, CURLOPT_TIMEOUT, 30);
@@ -136,10 +142,15 @@ class GSX_Reservation
             );
 
 //            $this->DebugData($headers, 'CURL REQUEST HEADER');
+            require_once DOL_DOCUMENT_ROOT.'/bimpapple/classes/GSX_Const.php';
+            $certInfo = GSX_Const::getCertifInfo($soldTo);
+            
+            curl_setopt($ch, CURLOPT_SSLKEY, $certInfo['pathKey']);
+            curl_setopt($ch, CURLOPT_SSLCERT, $certInfo['path']);
 
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-            curl_setopt($ch, CURLOPT_SSLCERT, $certif_file_path);
-            curl_setopt($ch, CURLOPT_SSLCERTPASSWD, '');
+//            curl_setopt($ch, CURLOPT_SSLCERT, $certif_file_path);
+//            curl_setopt($ch, CURLOPT_SSLCERTPASSWD, '');
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
             curl_setopt($ch, CURLOPT_TIMEOUT, 30);
@@ -273,11 +284,15 @@ class GSX_Reservation
             if (!isset($params['createdBy'])) {
                 $params['createdBy'] = self::$default_tech_id;
             }
+            require_once DOL_DOCUMENT_ROOT.'/bimpapple/classes/GSX_Const.php';
+            $certInfo = GSX_Const::getCertifInfo($soldTo);
+            curl_setopt($ch, CURLOPT_SSLKEY, $certInfo['pathKey']);
+            curl_setopt($ch, CURLOPT_SSLCERT, $certInfo['path']);
 
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
-            curl_setopt($ch, CURLOPT_SSLCERT, $certif_file_path);
-            curl_setopt($ch, CURLOPT_SSLCERTPASSWD, '');
+//            curl_setopt($ch, CURLOPT_SSLCERT, $certif_file_path);
+//            curl_setopt($ch, CURLOPT_SSLCERTPASSWD, '');
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
             curl_setopt($ch, CURLOPT_TIMEOUT, 30);
@@ -341,12 +356,18 @@ class GSX_Reservation
             $params['reservationId'] = $reservationId;
             $params['currentStatus'] = 'CANCELLED';
             $params['shipToCode'] = BimpTools::addZeros($shipTo, 10);
+            
+            require_once DOL_DOCUMENT_ROOT.'/bimpapple/classes/GSX_Const.php';
+            $certInfo = GSX_Const::getCertifInfo($soldTo);
+            
+            curl_setopt($ch, CURLOPT_SSLKEY, $certInfo['pathKey']);
+            curl_setopt($ch, CURLOPT_SSLCERT, $certInfo['path']);
 
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
-            curl_setopt($ch, CURLOPT_SSLCERT, $certif_file_path);
-            curl_setopt($ch, CURLOPT_SSLCERTPASSWD, '');
+//            curl_setopt($ch, CURLOPT_SSLCERT, $certif_file_path);
+//            curl_setopt($ch, CURLOPT_SSLCERTPASSWD, '');
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
             curl_setopt($ch, CURLOPT_TIMEOUT, 30);

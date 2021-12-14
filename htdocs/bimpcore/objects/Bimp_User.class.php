@@ -1611,12 +1611,10 @@ WHERE client > 0 AND  DATEDIFF(now(), s.datec ) <= ".$nbJ." ";
         $sql .= "GROUP BY sc.fk_user ORDER BY nb DESC";
         
         $lns = BimpCache::getBdb()->executeS($sql);
-//        $field = new BC_Field($this, 'ef_type');
+        
         $data = $data2 = array();
         $i = 0;
         foreach ($lns as $ln) {
-//            $field->value = $ln->secteur;
-//            $ln->secteur = $field->getNoHtmlValue(array());
             $data[] = array($ln->lastname.' '.$ln->firstname, $ln->nb);
             $data2[] = array('user'=>$ln->lastname.' '.$ln->firstname, 'nb'=>$ln->nb);
         }
@@ -1624,26 +1622,6 @@ WHERE client > 0 AND  DATEDIFF(now(), s.datec ) <= ".$nbJ." ";
         $boxObj->addCamenbere('', $data);
         
         $boxObj->addList(array('user' => 'Utilisateur', 'nb' => 'Nombre de créations'), $data2);
-
-//        $unit = '€';
-//        foreach ($data2 as $temp) {
-//            if ($temp[1] > 100000000) {
-//                $unit = 'M€';
-//                brek;
-//            } elseif ($temp[1] > 100000) {
-//                $unit = 'K€';
-//            }
-//        }
-//        foreach ($data2 as $i => $temp) {
-//            if ($unit == 'M€')
-//                $data2[$i][1] = $data2[$i][1] / 1000000;
-//            if ($unit == 'K€')
-//                $data2[$i][1] = $data2[$i][1] / 1000;
-//
-//            $data2[$i][1] = round($data2[$i][1]);
-//        }
-//
-//        $boxObj->addCamenbere('En ' . $unit . ' HT', $data2);
         return 1;
     }
 }

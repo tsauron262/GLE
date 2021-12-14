@@ -1456,6 +1456,9 @@ class Bimp_User extends BimpObject
                 // Supérieur hiérarchique
             } elseif ($u == 'parent') {
                 $id_parent = $user->getData('fk_user');
+                
+                if($id_parent == 1414)
+                    continue;
 
                 if (self::isUserAvaible($id_parent, $errors, $from, $to))
                     $users_out[] = $id_parent;

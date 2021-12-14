@@ -837,9 +837,10 @@ class BC_Filter extends BimpComponent
                 $filters_panel = new BC_FiltersPanel($child_instance);
 
                 if (!$filters_panel->isOk() || !$filters_panel->isObjectValid()) {
+                    $errors = $filters_panel->errors;
                     unset($filters_panel);
                     $filters_panel = array(
-                        'errors' => (!empty($filters_panel->errors) ? $filters_panel->errors : array('Filtres invalides'))
+                        'errors' => (!empty($errors) ? $errors : array('Filtres invalides'))
                     );
                 } else {
                     $errors = $filters_panel->loadSavedValues($id_filters);

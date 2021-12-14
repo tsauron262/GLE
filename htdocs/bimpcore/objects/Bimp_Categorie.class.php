@@ -23,8 +23,8 @@ class Bimp_Categorie extends BimpObject
 
         if (is_array($rows)) {
             foreach ($rows as $r) {
+                $label = '';
                 if (!in_array($level, $skiped_levels)) {
-                    $label = '';
                     if ($with_full_path && $path) {
                         $label .= $path . ' >> ';
                     }

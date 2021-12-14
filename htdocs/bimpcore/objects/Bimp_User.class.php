@@ -723,6 +723,8 @@ class Bimp_User extends BimpObject
     {
         global $conf, $langs;
 
+        $html = '';
+
         $dirthemes = array('/theme');
         if (!empty($conf->modules_parts['theme'])) {  // Using this feature slow down application
             foreach ($conf->modules_parts['theme'] as $reldir) {
@@ -794,7 +796,7 @@ class Bimp_User extends BimpObject
         global $conf, $langs, $db;
         BimpTools::loadDolClass("user");
         $object = new User($db);
-        $object->fetch(GETPOST('id'), "", "", 1);
+        $object->fetch((int) GETPOST('id'), "", "", 1);
         $object->getrights();
 
         // Load translation files required by page
@@ -802,7 +804,7 @@ class Bimp_User extends BimpObject
 
         $tmparray = array('index.php' => 'Dashboard');
 
-        $html .= '<table class="noborder" width="100%">';
+        $html = '<table class="noborder" width="100%">';
         $html .= '<tr class="liste_titre"><td width="50%">' . $langs->trans("Parameter") . '</td><td width="50%">' . $langs->trans("DefaultValue") . '</td></tr>';
 
         // Language
@@ -958,9 +960,9 @@ class Bimp_User extends BimpObject
 
         if (is_a($list, 'BC_ListTable')) {
             $html .= $list->renderHtml();
-        } elseif ($list_type && !$html) {
+        } elseif ($list_type) {
             $html .= BimpRender::renderAlerts('La liste de type "' . $list_type . '" n\'existe pas');
-        } elseif (!$html) {
+        } else {
             $html .= BimpRender::renderAlerts('Type de liste non spécifié');
         }
 
@@ -1401,11 +1403,11 @@ class Bimp_User extends BimpObject
 
         return $html;
     }
-    
+
     /**
      * Renvoie un ou plusieurs utilisateurs en fonction de leurs disponibilité
      * 
-     * @param int/array $users_in un id d'utilisateur ou un tableau d'id/nom de
+     * @param int|array $users_in un id d'utilisateur ou un tableau d'id/nom de
      *  groupe trier de l'utilisateur le plus recherché vers le moins recherché, exemple:
      * array(330, 'parent', 'XX_Développement')
      * recherche en priorité l'utilisateur d'id 330, si il n'est pas disponible
@@ -1418,40 +1420,41 @@ class Bimp_User extends BimpObject
      * @param bool $fetch indique si on fetch le(s) utilisateur(s) renvoyé(s)
      * @param string $from date à partir de laquelle on cherche la disponibilité
      * @param string $to   date jusqu'à laquelle on cherche la disponibilité
-     * @return int/array
+     * @return int|array
      */
     public static function getUsersAvaible($users_in, &$errors = array(), &$warnings = array(),
-            $max_user = 1, $return_array = false, $fetch = false, $from = null, $to = null) {
-        
-        if(1 < $max_user and !$return_array)
+            $max_user = 1, $return_array = false, $fetch = false, $from = null, $to = null)
+    {
+
+        if (1 < $max_user and!$return_array)
             $errors[] = "Impossible de renvoyer plusieurs utilisateurs sans utiliser les tableaux !";
-        
-        if(1 == $max_user and $return_array)
+
+        if (1 == $max_user and $return_array)
             $warnings[] = "Il est recommandé d'utilisé un retour unique plutôt qu'un tableau";
 
         if (count($errors))
             return -1;
-        
-        if(!is_array($users_in))
+
+        if (!is_array($users_in))
             $users_in = array($users_in);
-                
-        
+
+
         $users_out = array();
         $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $users_in[0]);
-        
+
         $nb_add = 0;
-        foreach($users_in as $u) {
-            
+        foreach ($users_in as $u) {
+
             $cnt_tab = count($users_out);
-            
+
             // Il s'agit d'un utilisateur
-            if(0 < $u) {
-                
-                if(self::isUserAvaible($u, $errors, $from, $to))
+            if (0 < $u) {
+
+                if (self::isUserAvaible($u, $errors, $from, $to))
                     $users_out[] = $u;
-                
-            // Supérieur hiérarchique
-            } elseif($u == 'parent') {
+
+                // Supérieur hiérarchique
+            } elseif ($u == 'parent') {
                 $id_parent = $user->getData('fk_user');
 
                 if (self::isUserAvaible($id_parent, $errors, $from, $to))
@@ -1465,47 +1468,44 @@ class Bimp_User extends BimpObject
                     if (self::isUserAvaible($id, $errors, $from, $to))
                         $users_out[] = $id;
                 }
-                
             }
-            
-            if($cnt_tab < count($users_out))
+
+            if ($cnt_tab < count($users_out))
                 $nb_add++;
-            
-            if($nb_add >= $max_user)
+
+            if ($nb_add >= $max_user)
                 break;
         }
-        
-        if(empty($users_out)) {
+
+        if (empty($users_out)) {
             $id_default = array_shift($users_in);
             $users_out[] = $id_default;
             $warnings[] = "Personne n'est disponible, l'utilisateur par défaut a été selectionné automatiquement (id: " . $id_default . ')';
         }
-        
+
         // Renvoie plusieurs utilisateurs
-        if($return_array) {
-            
-            if(!$fetch)
+        if ($return_array) {
+
+            if (!$fetch)
                 return $users_out;
-                
+
             else {
                 $user_fetch = array();
-                foreach($users_out as $u)
-                    $user_fetch[] = BimpCache::getBimpObjectInstance ('bimpcore', 'Bimp_User', (int) $u);
-                
+                foreach ($users_out as $u)
+                    $user_fetch[] = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $u);
+
                 return $user_fetch;
             }
-        
-        // Renvoie un seul utilisateur
+
+            // Renvoie un seul utilisateur
         } else {
             $id_user_out = array_pop($users_out);
-            
-            if(!$fetch)
+
+            if (!$fetch)
                 return $id_user_out;
             else
-                return BimpCache::getBimpObjectInstance ('bimpcore', 'Bimp_User', (int) $id_user_out);
+                return BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user_out);
         }
-        
-        return array();
     }
 
     // En construction !!
@@ -1530,14 +1530,14 @@ class Bimp_User extends BimpObject
     
     public static function isUserAvaible($id_user, &$errors = array(), $from = null) {
 
-        if(is_null($id_user) or $id_user < 0) {
+        if (is_null($id_user) or $id_user < 0) {
             $errors[] = "ID de l'utilisateur absent ou mal renseigné";
             return -1;
         }
         
         // L'utilisateur est actif ?
         $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
-        if(!$user->getData('statut'))
+        if (!$user->getData('statut'))
             return 0;
         
         
@@ -1567,21 +1567,18 @@ class Bimp_User extends BimpObject
         $sql .= ' WHERE fk_user_action = ' . $id_user;
         $sql .= ' AND code IN ("CONGES", "RTT_DEM")';
         $sql .= ' AND (';
-        
+
         $sql .= ' datep < "' . $from . '" AND ';
         $sql .= ' datep2 > "' . $from . '"';
-        
+
         $sql .= ')';
 
         $rows = self::getBdb()->executeS($sql, 'object');
 
-        
         foreach ($rows as $r) {
             return 0;
         }
 
         return 1;
-  
     }
-    
 }

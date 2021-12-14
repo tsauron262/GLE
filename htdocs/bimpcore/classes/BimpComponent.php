@@ -105,7 +105,7 @@ abstract class BimpComponent
 
     public function setParam($name, $value)
     {
-        if (self::validateParam($name, $value, $this->params_def, $errors)) {
+        if (self::validateParam($name, $value, $this->params_def)) {
             $this->params[$name] = $value;
         }
     }

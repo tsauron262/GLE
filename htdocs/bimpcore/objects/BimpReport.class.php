@@ -33,7 +33,7 @@ class BimpReport extends BimpObject
             }
         }
 
-        return '<span class="badge badge-' . ($class ? $class : 'default') . '">' . $value . '</span>';
+        return '<span class="badge badge-' . $class . '">' . $value . '</span>';
     }
 
     // Rendus HTML: 

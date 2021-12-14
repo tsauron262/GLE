@@ -8,6 +8,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/InvoicePDF.php';
 class InvoiceRgePDF extends InvoicePDF
 {
     public static $label_prime = "Prime CEE";
+    public $contactChantier = null;
     protected function initHeader()
     {
         parent::initHeader();

@@ -129,7 +129,7 @@ class BimpRender
         return $html;
     }
 
-    public static function renderButtonFromConfig(BimpConfig $config, $path, $extra_params, $tag = 'span')
+    public static function renderButtonFromConfig(BimpConfig $config, $path, $extra_params = array(), $tag = 'span')
     {
         $label = $config->get($path . '/label', '');
         $icon_before = $config->get($path . '/icon_before', '');
@@ -896,7 +896,7 @@ class BimpRender
             )
         );
 
-        $html .= '<div class="compteur_caisse">';
+        $html = '<div class="compteur_caisse">';
         $html .= '<p class="small">';
         $html .= 'Appuyez sur "Entrée" pour passer au champ suivant';
         $html .= '</p>';
@@ -1062,7 +1062,7 @@ class BimpRender
             $params['color'] = (string) BimpCore::getParam('colors/' . $params['class'], BimpCore::getParam('colors/default', '000000'));
         }
 
-        $html .= '<div class="bimp_info_card" style="border-color: #' . $params['color'] . '">';
+        $html = '<div class="bimp_info_card" style="border-color: #' . $params['color'] . '">';
 
         if ($params['icon']) {
             $html .= '<div class="bimp_info_card_icon" style="color: #' . $params['color'] . '">';
@@ -1384,9 +1384,9 @@ class BimpRender
 
     public static function renderSingleLineForm($inputs, $params = array())
     {
-        $html .= '<div class="singleLineForm' . (isset($params['main_class']) ? ' ' . $params['main_class'] : '') . '"';
+        $html = '<div class="singleLineForm' . (isset($params['main_class']) ? ' ' . $params['main_class'] : '') . '"';
         if (isset($params['data'])) {
-            $html .= BimpRender::renderTagData($data);
+            $html .= BimpRender::renderTagData($params['data']);
         }
         $html .= '>';
 

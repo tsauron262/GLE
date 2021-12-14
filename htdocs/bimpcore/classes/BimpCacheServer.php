@@ -48,7 +48,7 @@ class BimpCacheServer
         return static::$type;
     }
     
-    public function delete(){
+    public function delete($key){
         
     }
     

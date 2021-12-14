@@ -147,7 +147,7 @@ class box_bimp_core extends ModeleBoxes
             
             
             if(count($this->erreurs)){
-                $this->info_box_contents[0][0] = array('tr'=>'class="oddeven nohover"', 'td' => 'align="center" class="nohover"','textnoformat'=>$this->presenteBox(BimpRender::renderAlerts($this->erreurs)));
+                $this->info_box_contents[0][0] = array('tr'=>'class="oddeven nohover"', 'td' => 'align="center" class="nohover"','textnoformat'=>$this->presenteBox(BimpRender::renderAlerts($this->erreurs), ''));
                 return 0;
             }
             $this->info_box_contents[0][0] = array('tr'=>'class="oddeven nohover"', 'td' => 'align="center" class="nohover"','textnoformat'=>$this->presenteBox($stringgraph, $stringtext));
@@ -178,6 +178,8 @@ class box_bimp_core extends ModeleBoxes
                         });
                 });
         </script>';
+        
+        $refreshaction='refresh_'.$this->boxcode;
         $stringtoshow.='<div class="center hideobject" id="idfilter'.$this->boxcode.'">';	// hideobject is to start hidden
         $stringtoshow.='<form class="flat formboxfilter" method="POST" action="'.$_SERVER["PHP_SELF"].'">';
         $stringtoshow.='<input type="hidden" name="action" value="'.$refreshaction.'">';
@@ -218,8 +220,8 @@ class box_bimp_core extends ModeleBoxes
             if(isset($temp[2]))
                 $nocolor = 0;
 
-        $filenamenb = $dir."/".$clef."-".$year.".png";
-        $fileurlnb = DOL_URL_ROOT.'/viewimage.php?modulepart=productstats&amp;file='.$clef.'-'.$year.'.png';
+        $filenamenb = DOL_DATA_ROOT."/product/".$clef."-"/*.$year*/.".png";//ne semble servire a rien
+        $fileurlnb = DOL_URL_ROOT.'/viewimage.php?modulepart=product&amp;file='.$clef.'-'/*.$year*/.'.png';//ne semble servire a rien
 
         $px1 = new DolGraph();
         $mesg = $px1->isGraphKo();

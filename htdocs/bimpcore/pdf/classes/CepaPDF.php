@@ -14,10 +14,11 @@ class CepaPDF extends BimpDocumentPDF
     public $rib = null;
     public $mode = "normal";
     public $signature_bloc_label = 'Bon pour commande';
+    public $pdf2 = null;
 
-    public function __construct($db)
+    public function __construct($db, $orientation = 'P', $format = 'A4')
     {
-        parent::__construct($db);
+        parent::__construct($db, $orientation = 'P', $format = 'A4');
 
         $this->langs->load("bills");
         $this->langs->load("propal");
@@ -26,6 +27,8 @@ class CepaPDF extends BimpDocumentPDF
         $this->typeObject = 'societe';
 
         $this->propal = new Propal($db);
+//        $this->pdf2 = new BimpPDF($orientation, $format);
+        $this->pdf2 = pdf_getInstance($format);
     }
 
     protected function initData()
@@ -33,8 +36,6 @@ class CepaPDF extends BimpDocumentPDF
         require_once DOL_DOCUMENT_ROOT . '/includes/tcpdi/tcpdi.php';
         require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/src/fpdf2.php';
         require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/src/autoload.php';
-        //$this->pdf2 = new BimpConcatPdf();
-        $this->pdf2 = pdf_getInstance($this->format);
         $this->pdf2->addPage();
         $this->pdf2->SetFont('Times');
         $pagecountTpl = $this->pdf2->setSourceFile(DOL_DOCUMENT_ROOT . '/bimpcore/pdf/templates/SEPA.pdf');

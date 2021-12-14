@@ -48,41 +48,6 @@ class BimpCache
         return self::$bdb_noTransac;
     }
 
-    public static function getIpFromDns($host)
-    {
-        if (filter_var($host, FILTER_VALIDATE_IP))
-            return $host;
-
-        $cache_key = 'ipFromDns' . $host;
-        if (!isset(self::$cache[$cache_key])) {
-            $dnsData = dns_get_record($host);
-            $i = rand(0, count($dnsData) - 1);
-            $ip = $dnsData[$i]['ip'];
-            self::$cache[$cache_key] = $ip;
-        }
-
-        return self::$cache[$cache_key];
-    }
-
-    public static function getSignature($prenom, $job, $phone)
-    {
-        $key = 'sign' . $prenom . $job . $phone;
-        $cache = self::getCacheServeur($key);
-        if (!$cache) {
-            $url = "https://www.bimp.fr/signatures/v3/supports/sign.php?prenomnom=" . urlencode($prenom) . "&job=" . urlencode($job) . "&phone=" . urlencode($phone);
-            $signature = file_get_contents($url, false, stream_context_create(array(
-                'http' => array(
-                    'timeout' => 2   // Timeout in seconds
-            ))));
-            if ($signature) {
-                self::setCacheServeur($key, $signature);
-                return $signature;
-            } else
-                return null;
-        }
-        return $cache;
-    }
-
     public static function getCacheArray($cache_key, $include_empty = false, $empty_value = 0, $empty_label = '')
     {
         if ($include_empty) {
@@ -1303,10 +1268,13 @@ class BimpCache
             if (!isset(self::$cache[$cache_key])) {
 //                self::$cache[$cache_key] = array(0 => ""); => Ne pas déco: on ne doit pas inclure de valeurs vides dans le cache, utiliser $include_empty.
                 $where = '`fk_soc` = ' . (int) $id_societe;
-                $rows = self::getBdb()->getRows('socpeople', $where, null, 'array', array('rowid', 'firstname', 'lastname'));
+                $rows = self::getBdb()->getRows('socpeople', $where, null, 'array', array('rowid', 'firstname', 'lastname', 'statut'));
                 if (!is_null($rows)) {
                     foreach ($rows as $r) {
-                        self::$cache[$cache_key][(int) $r['rowid']] = BimpTools::ucfirst($r['firstname']) . ' ' . strtoupper($r['lastname']);
+                        $label = BimpTools::ucfirst($r['firstname']) . ' ' . strtoupper($r['lastname']);
+                        if($r['statut'] == 0)
+                            $label = '<span style="text-decoration:line-through;">[desactivé] '.$label.' [désactivé]</span>';
+                        self::$cache[$cache_key][(int) $r['rowid']] = $label;
                     }
                 }
             }
@@ -1638,38 +1606,49 @@ class BimpCache
         return self::getCacheArray($cache_key, $include_empty, 0, $empty_label);
     }
 
-    public static function getUserCentresArray()
+    public static function getUserCentresArray($valDef = '')
     {
 
         $centres = array(
             '' => ''
         );
-
         global $user;
         if (BimpObject::objectLoaded($user)) {
-            $cache_key = 'user_' . $user->id . '_centres_array';
-            if (!isset(self::$cache[$cache_key])) {
+            $cache_key = 'user_' . $user->id . '_centres_array'.$valDef;
+
+            $result = self::getCacheServeur($cache_key);
+            if (!$result) {
+                $result = array();
                 $userCentres = explode(' ', $user->array_options['options_apple_centre']);
                 $centres = self::getCentres();
 
-                if (count($userCentres)) {
+                if (count($userCentres) > 1 || $userCentres[0] != '') {
                     foreach ($userCentres as $code) {
                         if (preg_match('/^ ?([A-Z]+) ?$/', $code, $matches)) {
                             if (isset($centres[$matches[1]])) {
-                                self::$cache[$cache_key][$matches[1]] = $centres[$matches[1]]['label'];
+                                $result[$matches[1]] = $centres[$matches[1]]['label'];
                             }
                         }
                     }
                 }
-
-                if (count($centres) <= 1) {
+                else {
                     foreach ($centres as $code => $centre) {
-                        self::$cache[$cache_key][$code] = $centre['label'];
+                        $result[$code] = $centre['label'];
                     }
                 }
+                
+                if($valDef != ''){
+                    foreach ($centres as $code => $data) {
+                        if (!isset($result[$code]) && $valDef == $code) {
+                            $result[$code] = $data['label'];
+                            
+                        }
+                    }
+                }
+                self::setCacheServeur($cache_key, $result);
             }
 
-            return self::$cache[$cache_key];
+            return $result;
         }
 
         return array();
@@ -2531,6 +2510,41 @@ class BimpCache
         }
 
         return self::$cache['secteurs_array'];
+    }
+    
+    public static function getIpFromDns($host)
+    {
+        if (filter_var($host, FILTER_VALIDATE_IP))
+            return $host;
+
+        $cache_key = 'ipFromDns' . $host;
+        if (!isset(self::$cache[$cache_key])) {
+            $dnsData = dns_get_record($host);
+            $i = rand(0, count($dnsData) - 1);
+            $ip = $dnsData[$i]['ip'];
+            self::$cache[$cache_key] = $ip;
+        }
+
+        return self::$cache[$cache_key];
+    }
+
+    public static function getSignature($prenom, $job, $phone)
+    {
+        $key = 'sign' . $prenom . $job . $phone;
+        $cache = self::getCacheServeur($key);
+        if (!$cache) {
+            $url = "https://www.bimp.fr/signatures/v3/supports/sign.php?prenomnom=" . urlencode($prenom) . "&job=" . urlencode($job) . "&phone=" . urlencode($phone);
+            $signature = file_get_contents($url, false, stream_context_create(array(
+                'http' => array(
+                    'timeout' => 2   // Timeout in seconds
+            ))));
+            if ($signature) {
+                self::setCacheServeur($key, $signature);
+                return $signature;
+            } else
+                return null;
+        }
+        return $cache;
     }
 
     // Comme getSecteursArray avec l'option "Tous" en plus

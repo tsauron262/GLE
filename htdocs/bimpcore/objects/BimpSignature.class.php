@@ -824,7 +824,7 @@ class BimpSignature extends BimpObject
 
             if ($this->isObjectValid()) {
                 if ($this->can('view')) {
-                    if (method_exists($obj, 'getSignatureDocFileDir') && method_exists($obj, 'getSignatureDocFileUrl')) {
+                    if (method_exists($obj, 'getSignatureDocFileDir') && method_exists($obj, 'getSignatureDocFileName') && method_exists($obj, 'getSignatureDocFileUrl')) {
                         $dir = $obj->getSignatureDocFileDir($this->getData('doc_type'));
                         $file_name = $obj->getSignatureDocFileName($this->getData('doc_type'), (int) $this->getData('signed'));
                         $file = $dir . $file_name;
@@ -981,88 +981,6 @@ class BimpSignature extends BimpObject
     }
 
     // Traitements:
-
-    public function sendClientEmailForFarSign($email)
-    {
-        $errors = array();
-
-        if ($email && BimpValidate::isEmail($email)) {
-            $obj = $this->getObj();
-
-            if ($this->isObjectValid($errors, $obj)) {
-                $new_password = '';
-
-                for ($i = 0; $i < 100; $i++) {
-                    $new_password = $this->generateRandomPassword(5);
-                    if (!(int) $this->db->getCount('bimpcore_signature', 'public_access_code = "' . $new_password . '"', 'rowid')) {
-                        break;
-                    }
-                }
-
-                $dt = new DateTime();
-                $date_from = $dt->format('Y-m-d H:i:s');
-                $dt->add(new DateInterval("P4D"));
-                $date_to = $dt->format('Y-m-d H:i:s');
-            }
-
-            if (!is_a($obj, 'BimpObject')) {
-                $errors[] = 'Objet lié invalide';
-            } else {
-                $subject = BimpTools::ucfirst($obj->getLabel()) . ' - ' . $obj->getRef();
-
-                $msg = 'Bonjour,<br/><br/>';
-                $msg .= 'Merci de signer votre ' . $obj->getLabel() . ' à l\'adresse suivante: ';
-                $msg .= '<a href="' . DOL_URL_ROOT . '/bimptechnique/public">' . DOL_URL_ROOT . '/bimptechnique/public</a>';
-                $msg .= ' en entrant votre nom ainsi que le mot de passe suivant: <b>' . $new_password . '</b>.<br/><br/>';
-                $msg .= 'Cet accès n\'est valable que 4 Jours calandaires.<br/><br/>';
-                $msg .= 'Cordialement';
-            }
-
-            if (count($up_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement du mot de passe');
-            } else {
-                $to = BimpTools::cleanEmailsStr($this->getData('email_signature'));
-                $commercial = $this->getCommercialClient();
-                $tech = $this->getChildObject('user_tech');
-
-                $email_tech = '';
-                $email_comm = '';
-
-                if (BimpObject::objectLoaded($tech)) {
-                    $email_tech = $tech->getData('email');
-                }
-
-                if (BimpObject::objectLoaded($commercial)) {
-                    $email_comm = $commercial->getData('email');
-                }
-
-                $reply_to = ($email_comm ? $email_comm : $email_tech);
-                $cc = ''; //($email_comm ? $email_tech . ', ' : '') . 't.sauron@bimp.fr, f.martinez@bimp.fr';
-
-                $bimpMail = new BimpMail($subject, $to, '', $msg, $reply_to, $cc);
-
-                global $conf;
-
-                $file = $conf->ficheinter->dir_output . '/' . $this->dol_object->ref . '/' . $this->dol_object->ref . '.pdf';
-                if (file_exists($file)) {
-                    $bimpMail->addFile(array($file, 'application/pdf', $this->dol_object->ref . '.pdf'));
-                }
-
-                $mail_errors = array();
-                $bimpMail->send($mail_errors);
-
-                sleep(3);
-
-                if (count($mail_errors)) {
-                    $errors[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail au client pour la signature à distance');
-                }
-            }
-        } else {
-            $errors[] = 'Adresse e-mail du client absente ou invalide';
-        }
-
-        return $errors;
-    }
 
     public function writeSignatureOnDoc($params_overrides = array())
     {
@@ -1234,7 +1152,7 @@ class BimpSignature extends BimpObject
                 $client = $this->getChildObject('client');
                 if (BimpObject::objectLoaded($client)) {
                     $obj_label = $this->displayDocType() . ' ' . $this->displayDocRef();
-                    $subject = 'Signature effectuée - ' . $obj_label . ' - Client: ' . (BimpObject::objectLoaded($client) ? $client->getRef() . ' ' . $client->getName() : 'inconnu');
+                    $subject = 'Signature effectuée - ' . $obj_label . ' - Client: ' . $client->getRef() . ' ' . $client->getName();
 
                     $msg = 'Bonjour,<br/><br/>';
                     $msg .= 'La signature du document "' . $obj_label . '" a été effectuée.<br/><br/>';
@@ -1375,7 +1293,7 @@ class BimpSignature extends BimpObject
                         }
 
                         // Envoi e-mails notification: 
-                        $emails = '';
+                        $to_emails = '';
 
                         foreach ($new_users as $id_user) {
                             if (!in_array($id_user, $cur_users)) {
@@ -1387,14 +1305,14 @@ class BimpSignature extends BimpObject
                                     $user_email = BimpTools::cleanEmailsStr($bic_user->getData('email'));
 
                                     if ($user_email) {
-                                        $emails .= ($emails ? ',' : '') . $user_email;
+                                        $to_emails .= ($to_emails ? ',' : '') . $user_email;
                                         $nOk++;
                                     }
                                 }
                             }
                         }
 
-                        if ($emails) {
+                        if ($to_emails) {
                             $comm_email = BimpTools::cleanEmailsStr($this->getCommercialEmail());
                             $doc_label = $this->displayDocType() . ' ' . $this->displayDocRef();
                             $subject = 'BIMP - Signature en attente - Document: ' . $doc_label;
@@ -1409,7 +1327,7 @@ class BimpSignature extends BimpObject
                             $message .= 'Cordialement, <br/><br/>';
                             $message .= 'L\'équipe BIMP';
 
-                            $bimpMail = new BimpMail($subject, BimpTools::cleanEmailsStr($email), '', $message, $comm_email);
+                            $bimpMail = new BimpMail($subject, BimpTools::cleanEmailsStr($to_emails), '', $message, $comm_email);
 
                             $filePath = $this->getDocumentFilePath();
                             $fileName = $this->getDocumentFileName();
@@ -1422,7 +1340,7 @@ class BimpSignature extends BimpObject
                             $bimpMail->send($mail_errors);
 
                             if (count($mail_errors)) {
-                                $warnings[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail de notification (Adresse(s): ' . $email . ')');
+                                $warnings[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail de notification (Adresse(s): ' . $to_emails . ')');
                             } else {
                                 $success .= '<br/>E-mail de notification envoyé avec succès pour ' . $nOk . ' utilisateur(s)';
                             }
@@ -1465,7 +1383,7 @@ class BimpSignature extends BimpObject
                 $errors[] = 'Fichier du document signé absent';
             } else {
                 $file_name = $this->getDocumentFileName(true);
-                $file_path = $this->getDocumentFilePath(true, 'private');
+                $file_path = $this->getDocumentFilePath(true/*, 'private'*/);
                 $dir = $this->getDocumentFileDir();
 
                 if (!$dir || !$file_path || !$file_name) {
@@ -1680,6 +1598,7 @@ class BimpSignature extends BimpObject
         $errors = array();
         $warnings = array();
         $success = 'Document signé régénéré avec succès';
+        $success_callback = '';
 
         $errors = $this->writeSignatureOnDoc($data);
 

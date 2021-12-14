@@ -313,6 +313,8 @@ function validateProducts($file, $ref_key, BimpDb $bdb)
 
 function importFournPrices($file, $id_fourn, $maj_comm_fourn = false)
 {
+    $warnings = array();
+    
     if ($maj_comm_fourn) {
         $_POST['update_comm_fourn'] = 1;
     }
@@ -453,6 +455,9 @@ class importCatalogueFourn
     public $sep = ";";
     public $updateSql = true;
     public $modeProdFourn = "insert";
+    public $idProdFournToPrice = array();
+    public $idFourn = 0;
+    public $keys = array();
     
     function majStock($ref, $qty){
         global $db;

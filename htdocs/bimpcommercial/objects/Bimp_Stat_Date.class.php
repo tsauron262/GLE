@@ -9,7 +9,6 @@ class Bimp_Stat_Date extends BimpObject
     public $datasFacture = array();
     public $signatureFilter = "";
     public $filterCusom = array();
-    public $mode = 'month';
     
     public $asGraph = true;
     public $filterCusomExclud = array();
@@ -90,29 +89,50 @@ class Bimp_Stat_Date extends BimpObject
        return parent::getListCount($filters, $joins);
     }
     
+//    public function displayData($field, $display_name = 'default', $display_input_value = true, $no_html = false) {
+//        if($field == 'date'){
+//            return $this->displayDate();
+//        }
+//        
+//        return parent::displayData($field, $display_name, $display_input_value, $no_html);
+//    }
+    
+    public function displayDate(){
+        $date = new DateTime($this->getData('date'));
+        if(static::$modeDateGraph == 'month')
+            return $date->format('M Y');
+        elseif(static::$modeDateGraph == 'year')
+            return $date->format('Y');
+        
+        return parent::displayData ('date');
+    }
+    
     
     public function getInfoGraph(){
         $data = parent::getInfoGraph();
         $data["data1"] = 'Facture HT';
         $data["data2"] = 'Commande HT';
         $data["data3"] = 'Devis HT';
-        $data["data11"] = 'Facture HT a 1an';
+        if(static::$modeDateGraph != 'year')
+            $data["data11"] = 'Facture HT a 1an';
         $data["axeX"] = '';
         $data["axeY"] = 'K €';
         $data["title"] = 'Facture Commande et Devis par ';
-        if($this->mode == 'day')
+        if(static::$modeDateGraph == 'day')
             $data["title"] .= 'Jour';
-        elseif($this->mode == 'month')
+        elseif(static::$modeDateGraph == 'month')
             $data["title"] .= 'Mois';
+        elseif(static::$modeDateGraph == 'year')
+            $data["title"] .= 'Ans';
         
         return $data;
     }
     
     public function getGraphDataPoint($numero_data = 1){
         $tabDate = explode("-", $this->getData('date'));
-        if($this->mode == 'day')
+        if(static::$modeDateGraph == 'day')
             $tabDate[1]--;
-        elseif($this->mode == 'month'){
+        elseif(static::$modeDateGraph == 'month'){
             if($tabDate[1] == 1){
                 $tabDate[1] = 12;
                 $tabDate[0]--;
@@ -120,7 +140,10 @@ class Bimp_Stat_Date extends BimpObject
             else
                 $tabDate[1]--;
         }
-        $x = "new Date(".implode(", ", $tabDate).")";
+        if(static::$modeDateGraph == 'year')
+            $x = "new Date(".$tabDate[0].", 0)";
+        else
+            $x = "new Date(".implode(", ", $tabDate).")";
         if($numero_data == 1)
             $y = $this->getData('facture_total');
         elseif($numero_data == 2)
@@ -148,12 +171,16 @@ class Bimp_Stat_Date extends BimpObject
             $this->filterCusom['a.fk_soc'] = $filters['a.fk_soc'];
             unset($filters['a.fk_soc']);
        }
+       if(isset($filters['a.mode'])){
+            static::$modeDateGraph = $filters['a.mode'];
+            unset($filters['a.mode']);
+       }
         
         
         $this->signatureFilter = json_encode($this->filterCusom);
         $this->signatureFilter .= json_encode($this->filterCusomExclud);
         $this->signatureFilter .= json_encode($memoireFilter);
-        $this->signatureFilter .= json_encode($this->mode);
+        $this->signatureFilter .= json_encode(static::$modeDateGraph);
        $filters["a.filter"] = $this->signatureFilter;
 //       print_r($filters);die;
     }
@@ -170,13 +197,13 @@ class Bimp_Stat_Date extends BimpObject
         $i= 0;
         $this->cacheTables();
         while($date < $dateFin){
-            if($i > 1000)
+            if($i > 10000)
                 die('trop de boucles');
             $i++;
             $dateFinJ = $date + 3600*24;
             
             $dateStr = gmdate("Y-m-d", $date);
-            if(!isset($this->datas[$dateStr.$this->signatureFilter]) && ($this->mode != 'month' || (int) gmdate("d", $date) == 1)){
+            if(!isset($this->datas[$dateStr.$this->signatureFilter]) && (static::$modeDateGraph != 'month' || (int) gmdate("d", $date) == 1) && (static::$modeDateGraph != 'year' || ((int) gmdate("d", $date) == 1 && (int) gmdate("m", $date) == 1))){
                 $nbProp = (isset($this->datasPropal[$dateStr.$this->signatureFilter]))? $this->datasPropal[$dateStr.$this->signatureFilter]->nb : 0;
                 $totProp = (isset($this->datasPropal[$dateStr.$this->signatureFilter]))? $this->datasPropal[$dateStr.$this->signatureFilter]->tot : 0;
                 
@@ -201,9 +228,13 @@ class Bimp_Stat_Date extends BimpObject
     public function cacheTables(){
         $this->datas = array();
         
-        if($this->mode == 'month'){
+        if(static::$modeDateGraph == 'month'){
             $selectDate = 'CONCAT(DATE_FORMAT(date_valid, "%Y-%m"),"-01") ';
             $groupBy = 'DATE_FORMAT(date_valid, "%m%Y")';
+        }
+        elseif(static::$modeDateGraph == 'year'){
+            $selectDate = 'CONCAT(DATE_FORMAT(date_valid, "%Y"),"-01-01")';
+            $groupBy = 'DATE_FORMAT(date_valid, "%Y")';
         }
         else{
             $selectDate = 'DATE(`date_valid`)';

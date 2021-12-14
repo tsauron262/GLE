@@ -82,7 +82,7 @@ class BimpCorrectif extends BimpObject
                     }
 
                     if (count($create_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($up_errors, 'Erreurs lors de l\'ajout de la ligne de correction pour le champ "' . $field . '" de l\'objet "' . $filters['obj_name'] . '"');
+                        $errors[] = 'Erreurs lors de l\'ajout de la ligne de correction pour le champ "' . $field . '" de l\'objet "' . $filters['obj_name'] . '"';
                     }
                 }
             }

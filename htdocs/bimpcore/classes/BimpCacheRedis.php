@@ -48,12 +48,14 @@ class BimpCacheRedis extends BimpCacheServer
             self::initCacheServeur();
         }
         if (!self::$isActif) {
-            return parent::delete();
+            return parent::delete($key);
         }
         try {
             self::$redisObj->del($key);
         } catch (RedisException $e) {
-            return $this->status = false;
+            static::$isActif = false;
+            BimpCore::addlog('Probléme delete cache');
+            return 0;
         }
     }
     

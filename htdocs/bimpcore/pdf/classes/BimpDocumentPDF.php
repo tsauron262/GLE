@@ -27,8 +27,6 @@ class BimpDocumentPDF extends BimpModelPDF
     public $periodicity = 0;
     public $nbPeriods = 0;
     public $proforma = 0;
-    public $maxLogoWidth = 120; // px
-    public $maxLogoHeight = 60; // px
     public $totals = array("DEEE" => 0, "RPCP" => 0);
     public $target_label = '';
     public $next_annexe_idx = 1;
@@ -39,6 +37,8 @@ class BimpDocumentPDF extends BimpModelPDF
     public $signature_params = array();
     public $signature_bloc = true;
     public $signature_bloc_label = '';
+    public $hidePrice = false;
+    public $contactFinal = null;
 
     public function __construct($db)
     {
@@ -1046,7 +1046,7 @@ class BimpDocumentPDF extends BimpModelPDF
     public function getBottomRightHtml()
     {
 
-        $html .= $this->getTotauxRowsHtml();
+        $html = $this->getTotauxRowsHtml();
         $html .= $this->getPaymentsHtml();
         $html .= $this->getAfterTotauxHtml();
 
@@ -1555,7 +1555,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function getAfterTotauxHtml()
     {
-        $html .= '<table style="width: 95%" cellpadding="3">';
+        $html = '<table style="width: 95%" cellpadding="3">';
 
         global $mysoc, $langs;
         // If France, show VAT mention if not applicable

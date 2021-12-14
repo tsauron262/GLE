@@ -829,6 +829,7 @@ class Bimp_Client extends Bimp_Societe
     {
         $html = '';
         $tot = 0;
+        $values = null;
         if ($this->isLoaded()) {
             $values = $this->getEncours(false);
             $tot += $values;
@@ -1167,6 +1168,7 @@ class Bimp_Client extends Bimp_Societe
         $html = '';
 
         $list = null;
+        $list2 = null;
         $client_label = $this->getRef() . ' - ' . $this->getName();
 
         switch ($list_type) {
@@ -1234,8 +1236,12 @@ class Bimp_Client extends Bimp_Societe
 
             case 'stat_date':
                 $obj = BimpObject::getInstance('bimpcommercial', 'Bimp_Stat_Date');
-                $list = new BC_ListTable($obj, 'client', 1, null, 'State par date "' . $client_label . '"', 'fas_history');
+                $list = new BC_ListTable($obj, 'clientMonth', 1, null, 'State par date "' . $client_label . '"', 'fas_history');
+                $list->addIdentifierSuffix('month');
                 $list->addFieldFilterValue('fk_soc', (int) $this->id);
+                $list2 = new BC_ListTable($obj, 'clientYear', 1, null, 'State par date "' . $client_label . '"', 'fas_history');
+                $list2->addIdentifierSuffix('year');
+                $list2->addFieldFilterValue('fk_soc', (int) $this->id);
                 break;
 
             case 'relances':
@@ -1276,6 +1282,9 @@ class Bimp_Client extends Bimp_Societe
         } else {
             $html .= BimpRender::renderAlerts('Type de liste non spécifié');
         }
+        
+        if (is_a($list2, 'BC_ListTable'))
+            $html .= $list2->renderHtml();
 
         return $html;
     }
@@ -1394,7 +1403,7 @@ class Bimp_Client extends Bimp_Societe
                                     $facs_rows_html .= '<td>';
                                     if ($relance) {
                                         $nSelectables++;
-                                        $facs_rows_html .= '<input type="checkbox" class="facture_check ' . $checkbox_class . '" value="' . $id_fac . '" name="factures[]"' . ($relance ? ' checked="1"' : '');
+                                        $facs_rows_html .= '<input type="checkbox" class="facture_check ' . $checkbox_class . '" value="' . $id_fac . '" name="factures[]" checked="1"';
                                         $facs_rows_html .= ' data-id_client="' . $id_client . '"';
                                         $facs_rows_html .= '/>';
                                     }
@@ -1924,7 +1933,7 @@ class Bimp_Client extends Bimp_Societe
             $date_prevue = date('Y-m-d');
         }
 
-        if (empty($clients) && $mode = 'cron') {
+        if (empty($clients) && $mode == 'cron') {
             // Si liste de factures clients non fournie et si mode cron, on récup la liste complète des factures à relancer. 
             $clients = $this->getFacturesToRelanceByClients(true);
         }

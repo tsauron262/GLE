@@ -695,8 +695,12 @@ class savFormController extends BimpPublicController
 
         // Système: 
         $html .= '<div class="col-xs-12 col-md-4 col-lg-3">';
-        $html .= '<label>Système</label><br/>';
-        $html .= BimpInput::renderInput('select', 'eq_system', 2, array('options' => BimpCache::getSystemsArray()));
+        $html .= '<label>Système</label><sup>*</sup><br/>';
+        $html .= BimpInput::renderInput('select', 'eq_system', 2, array(
+                    'options'     => BimpCache::getSystemsArray(),
+                    'extra_class' => 'required'
+                        )
+        );
         $html .= '</div>';
 
         $html .= '</div>';

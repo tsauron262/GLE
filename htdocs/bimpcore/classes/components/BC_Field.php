@@ -294,7 +294,7 @@ class BC_Field extends BimpComponent
         }
 
         $history_html = '';
-        if ($this->params['history'] && BimpObject::objectLoaded($this->object)) {
+        if ($this->params['history'] && BimpObject::objectLoaded($this->object) && BimpCore::isContextPrivate()) {
             $history_user = (int) $this->object->getConf('fields/' . $this->name . '/history_user', 0, false, 'bool');
             $history_html = BimpRender::renderObjectFieldHistoryPopoverButton($this->object, $this->name_prefix . $this->name, 15, $history_user);
         }
@@ -338,7 +338,7 @@ class BC_Field extends BimpComponent
         }
 
         $history_html = '';
-        if ($this->params['history']) {
+        if ($this->params['history'] && BimpCore::isContextPrivate()) {
             $history_user = (int) $this->object->getConf('fields/' . $this->name . '/history_user', 0, false, 'bool');
             $history_html = BimpRender::renderObjectFieldHistoryPopoverButton($this->object, $this->name, 15, $history_user);
         }

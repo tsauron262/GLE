@@ -23,7 +23,7 @@
         <link rel="stylesheet" href="<?= DOL_URL_ROOT ?>/bimptechnique/views/css/signature.css">
         <script type='text/javascript' src="<?= DOL_URL_ROOT ?>/bimptechnique/public/js/public_jquery.js"></script>
         <script type='text/javascript' src="<?= DOL_URL_ROOT ?>/bimptechnique/public/js/informations.js"></script>
-        <script type='text/javascript' src="<?= DOL_URL_ROOT ?>/bimptechnique/views/js/SignaturePad.object.js"></script>
+        <script type='text/javascript' src="<?= DOL_URL_ROOT ?>/bimpcore/views/js/SignaturePad.object.js"></script>
     </head>
     <body>
         <div class="bimp_ldlc_page">

@@ -146,6 +146,9 @@ class BC_Input extends BimpComponent
             'obj_input_name' => array('default' => ''),
             'obj_module'     => array('default' => ''),
             'obj_name'       => array('default' => '')
+        ),
+        'signature_pad'               => array(
+            'expand' => array('data_type' => 'bool', 'default' => 0)
         )
     );
 
@@ -176,10 +179,12 @@ class BC_Input extends BimpComponent
         parent::__construct($object, '', $path);
 
         if ($this->data_type === 'items_list') {
-            $this->params['multiple'] = 1;
-            $this->params['sortable'] = (isset($field_params['items_sortable']) ? (int) $field_params['items_sortable'] : 0);
-            $this->params['add_all_btn'] = (isset($field_params['items_add_all_btn']) ? (int) $field_params['items_add_all_btn'] : 0);
-            $this->params['items_data_type'] = (isset($field_params['items_data_type']) ? $field_params['items_data_type'] : 'string');
+//            if (is_null($this->params['type']) || $this->params['type'] === 'items_list') {
+                $this->params['multiple'] = 1;
+                $this->params['sortable'] = (isset($field_params['items_sortable']) ? (int) $field_params['items_sortable'] : 0);
+                $this->params['add_all_btn'] = (isset($field_params['items_add_all_btn']) ? (int) $field_params['items_add_all_btn'] : 0);
+                $this->params['items_data_type'] = (isset($field_params['items_data_type']) ? $field_params['items_data_type'] : 'string');
+//            }
         }
 
         if (is_null($this->params['type'])) {
@@ -193,6 +198,7 @@ class BC_Input extends BimpComponent
                 }
                 switch ($data_type) {
                     case 'int':
+                    case 'id':
                     case 'float':
                     case 'string':
                     case 'percent':
@@ -329,6 +335,7 @@ class BC_Input extends BimpComponent
                     case 'float':
                     case 'qty':
                     case 'int':
+                    case 'id':
                         switch ($this->data_type) {
                             case 'percent':
                                 $min = '0';
@@ -386,7 +393,7 @@ class BC_Input extends BimpComponent
                 $options['tab_key_as_enter'] = isset($this->params['tab_key_as_enter']) ? $this->params['tab_key_as_enter'] : 0;
                 $options['maxlength'] = isset($this->params['maxlength']) ? $this->params['maxlength'] : '';
                 $options['values'] = isset($this->params['values']) ? $this->params['values'] : array();
-                $options['hashtags'] = (int) (isset($this->params['hashtags']) && (int) $this->params['hashtags'] ? $this->params['hashtags'] : isset($this->field_params['hashtags']) ? $this->field_params['hashtags'] : 0);
+                $options['hashtags'] = (int) (isset($this->params['hashtags']) && (int) $this->params['hashtags'] ? $this->params['hashtags'] : (isset($this->field_params['hashtags']) ? $this->field_params['hashtags'] : 0));
                 break;
 
             case 'select':
@@ -521,6 +528,10 @@ class BC_Input extends BimpComponent
                 $options['obj_input_name'] = isset($this->params['obj_input_name']) ? $this->params['obj_input_name'] : '';
                 $options['obj_module'] = isset($this->params['obj_module']) ? $this->params['obj_module'] : '';
                 $options['obj_name'] = isset($this->params['obj_input_name']) ? $this->params['obj_name'] : '';
+                break;
+
+            case 'signature_pad':
+                $options['expand'] = isset($this->params['expand']) ? (int) $this->params['expand'] : 0;
                 break;
         }
 

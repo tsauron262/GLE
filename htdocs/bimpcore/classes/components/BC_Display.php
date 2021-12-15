@@ -325,7 +325,10 @@ class BC_Display extends BimpComponent
 
                 if (!empty($displays)) {
                     foreach ($displays as $display_name => $display_params) {
-                        $types[$display_name] = $object->getConf('fields/' . $field_name . '/displays/' . $display_name . '/label', $display_name, true);
+                        $label = $display_name;
+                        if(isset($display_params['type']) && isset(static::$types[$display_params['type']]))
+                            $label = static::$types[$display_params['type']];
+                        $types[$display_name] = $object->getConf('fields/' . $field_name . '/displays/' . $display_name . '/label', $label, ($label == $display_name));
                     }
                 }
             }

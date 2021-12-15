@@ -321,7 +321,6 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
 
                     if (bimpAjax.append_html) {
                         if ($.isOk(bimpAjax.$resultContainer) && typeof (result.html) === 'string') {
-
                             var trigger_function = function (bimpAjax) {
                                 $('body').trigger($.Event('contentLoaded', {
                                     $container: bimpAjax.$resultContainer

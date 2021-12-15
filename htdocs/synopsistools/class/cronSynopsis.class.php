@@ -3,6 +3,8 @@
 require_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/divers.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/synopsistools/SynDiversFunction.php");
 
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+
 class CronSynopsis {
 
     var $nbErreur = 0;

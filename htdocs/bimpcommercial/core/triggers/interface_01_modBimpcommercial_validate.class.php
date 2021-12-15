@@ -46,11 +46,13 @@ class Interfacevalidate extends BimpCommTriggers
             }
 
             if (count($errors)) {
+                $this->errors = $errors;
                 // Attention toute la remontée des erreurs est basée là-dessus (pour les BimpComm): 
                 setEventMessages(BimpTools::getMsgFromArray($errors), null, 'errors');
                 return -1;
             }
         } elseif (count($errors)) {
+            $this->errors = $errors;
             setEventMessages(BimpTools::getMsgFromArray($errors), null, 'errors');
             return -1;
         }

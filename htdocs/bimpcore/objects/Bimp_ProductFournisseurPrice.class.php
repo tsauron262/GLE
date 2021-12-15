@@ -11,6 +11,16 @@ class Bimp_ProductFournisseurPrice extends BimpObject
 
         parent::__construct($module, $object_name);
     }
+    
+    public function isCreatable($force_create = false, &$errors = array()): int {
+        $parent = $this->getParentInstance();
+        return $parent->isEditable();
+    }
+    
+    public function isEditable($force_edit = false, &$errors = array()): int {
+        $parent = $this->getParentInstance();
+        return $parent->isEditable();
+    }
 
     public function getRefProperty()
     {

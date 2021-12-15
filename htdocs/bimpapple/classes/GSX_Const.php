@@ -99,6 +99,10 @@ class GSX_Const
         579256 => array(
             'test' => array('privatekey.nopass.pem', ''),
             'prod' => array('proditrb.pem', '')
+        ),
+        1442050 => array(
+            'test' => array('AppleCare-Partner-0001442050.Test.apple.com.key', ''),
+            'prod' => array('AppleCare-Partner-0001442050.Prod.apple.com.key', '')
         )
     );
     public static $test_ids = array(
@@ -114,7 +118,7 @@ class GSX_Const
     );
     public static $default_ids = array(
         'apple_id'    => 'admin.gle@bimp.fr',
-        'apple_pword' => 'BIMP@gle69#',
+        'apple_pword' => '@LdLc.com#69760',
         'sold_to'     => '897316',
         'ship_to'     => '897316'
     );

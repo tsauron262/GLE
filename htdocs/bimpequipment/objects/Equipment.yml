@@ -746,6 +746,7 @@ searches:
     default:
         has_serial: 1
         fields_search: 
+            - a.id
             - a.product_label
             - a.serial
             - CONCAT('S', a.serial)

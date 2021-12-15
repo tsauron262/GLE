@@ -1,0 +1,24 @@
+labels:
+    name: Export Rib and mandat
+
+forms:
+    export_one_mandat:
+        title: Exporter un mandat
+        msgs:
+            - type: warning
+              content: Les mandats exportés par ce formulaire ne serons pas marqués comme exporté en compta
+        rows:
+            - custom: 1
+              label: Tous les mandats
+              value: 0
+              input_name: all
+              input:
+                  type: toggle
+            - custom: 1
+              label: Numéro RUM
+              input_name: rum
+              input:
+                  type: text
+              display_if:
+                  field_name: all
+                  show_values: 0

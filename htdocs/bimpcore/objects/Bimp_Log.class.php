@@ -9,19 +9,21 @@ class Bimp_Log extends BimpObject
     const BIMP_LOG_URGENT = 4;
 
     public static $types = array(
-        'php'        => 'PHP',
-        'bimpcore'   => 'BimpCore',
-        'yml'        => 'Config YML',
-        'sql'        => 'Erreurs SQL',
-        'logistique' => 'Logistique',
-        'bimpcomm'   => 'Commercial',
-        'stocks'     => 'Stocks',
-        'email'      => 'E-mails',
-        'divers'     => 'Divers',
-        'bds'        => 'Bimp Data Sync',
-        'bic'        => 'Interface client',
-        'sav'        => 'SAV',
-        'api'        => 'API'
+        'php'           => 'PHP',
+        'bimpcore'      => 'BimpCore',
+        'yml'           => 'Config YML',
+        'sql'           => 'Erreurs SQL',
+        'logistique'    => 'Logistique',
+        'bimpcomm'      => 'Commercial',
+        'stocks'        => 'Stocks',
+        'email'         => 'E-mails',
+        'divers'        => 'Divers',
+        'bds'           => 'Bimp Data Sync',
+        'bic'           => 'Interface client',
+        'sav'           => 'SAV',
+        'deadLock'      => 'DeadLock',
+        'sql_duplicate' => 'Doublons champ bdd',
+        'api'           => 'API'
     );
     public static $levels = array(
         self::BIMP_LOG_NOTIF  => array('label' => 'Notification', 'classes' => array('info')),
@@ -231,8 +233,18 @@ class Bimp_Log extends BimpObject
     {
         $params = array();
         $ajax = false;
-        if (is_array($this->getData('url_params')))
-            foreach ($this->getData('url_params') as $clef => $val) {
+        $paramsBdd = $this->getData('url_params');
+        if (isset($paramsBdd['GET']))
+            $paramsBdd = $paramsBdd['GET'];
+
+        if (isset($paramsBdd['ajax'])) {
+            unset($paramsBdd['ajax']);
+            unset($paramsBdd['action']);
+            unset($paramsBdd['request_id']);
+        }
+
+        if (is_array($paramsBdd))
+            foreach ($paramsBdd as $clef => $val) {
                 $params[] = $clef . '=' . $val;
                 if ($clef == 'ajax')
                     $ajax = true;
@@ -633,6 +645,8 @@ class Bimp_Log extends BimpObject
 
         $params = array();
 
+        $params['GET'] = $_GET;
+        $params['POST'] = $_POST;
         foreach (explode('&', $_REQUEST) as $param) {
             if (preg_match('/^(.+)=(.+)$/', $param, $matches)) {
                 $params[$matches[1]] = $matches[2];

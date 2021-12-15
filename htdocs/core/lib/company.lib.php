@@ -427,6 +427,12 @@ function societe_admin_prepare_head()
 function getCountry($searchkey, $withcode='', $dbtouse=0, $outputlangs='', $entconv=1, $searchlabel='')
 {
     global $db,$langs;
+    
+    if(class_exists('BimpCache')){
+        $clef = 'getCountry'.$searchkey.$withcode. $entconv.$searchlabel;
+        if(isset(BimpCache::$cache[$clef]))
+            return BimpCache::$cache[$clef];
+    }
 
     $result='';
 
@@ -468,6 +474,13 @@ function getCountry($searchkey, $withcode='', $dbtouse=0, $outputlangs='', $entc
             $result='NotDefined';
         }
         $dbtouse->free($resql);
+        
+        
+        if(class_exists('BimpCache')){
+            BimpCache::$cache[$clef] = $result;
+        }
+    
+    
         return $result;
     }
     else dol_print_error($dbtouse,'');

@@ -16,6 +16,7 @@ class BimpController
     private $nbBouclePush = 2;
 //    private $maxBouclePush = 40;
     private $maxBouclePush = 1;
+    static public $ajax_warnings = array();
 
     public static function getInstance($module, $controller = null)
     {
@@ -122,7 +123,9 @@ class BimpController
     public function handleError($level, $msg, $file, $line)
     {
         ini_set('display_errors', 0); // Par précaution. 
-
+        
+//        if(!in_array($level, array(E_NOTICE, E_DEPRECATED)))
+//            die('iiiii'.$level.$msg.$file.$line);
         switch ($level) {
             case E_ERROR:
             case E_CORE_ERROR:
@@ -172,10 +175,13 @@ class BimpController
                 $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
                 $html .= 'ATTENTION: VEUILLEZ NE PAS REITERER L\'OPERATION AVANT RESOLUTION DU PROBLEME';
                 $html .= '</div>';
+                BimpCore::addlog($msg, Bimp_Log::BIMP_LOG_URGENT, 'php', null, array(
+                    'Fichier' => $file,
+                    'Ligne'   => $line
+                ));
 
                 echo $html;
-
-                return true;
+                break;
 
             case E_RECOVERABLE_ERROR:
             case E_USER_ERROR:
@@ -221,7 +227,22 @@ class BimpController
                 break;
 
             default:
+                if(stripos($msg, 'Deadlock') !== false){
+                    global $db;
+                    $db = new mysqli();
+                    $db::stopAll();
+                }
                 return false;
+        }
+        
+        if(stripos($msg, 'Deadlock') !== false){//ne devrait jamais arrivée.
+            global $db;
+            BimpCore::addlog('Erreur SQL intercepté par handleError php, ne devrait jamais arriver !!!!!!!', Bimp_Log::BIMP_LOG_ERREUR, 'php', null, array(
+                'Fichier' => $file,
+                'Ligne'   => $line,
+                'Msg'   => $msg
+            ));
+            $db::stopAll();
         }
 
         return true;
@@ -745,6 +766,7 @@ class BimpController
                     $result['debug_content'] = BimpDebug::renderDebug('ajax_' . $req_id);
                 }
 
+                $result['warnings'] = static::getAndResetAjaxWarnings();
                 $json = json_encode($result);
 
                 if ($json === false) {
@@ -754,7 +776,7 @@ class BimpController
                     if ($json_err_code == JSON_ERROR_UTF8) {
                         // On tente un encodage utf-8. 
                         $result = BimpTools::utf8_encode($result);
-
+                        $result['warnings'] = static::getAndResetAjaxWarnings();
                         $json = json_encode($result);
 
                         if ($json !== false) {
@@ -773,6 +795,7 @@ class BimpController
 
                     die(json_encode(array(
                         'errors'     => array('Echec de l\'encodage JSON - ' . $json_err),
+                        'warnings'   => static::getAndResetAjaxWarnings(),
                         'request_id' => $req_id
                     )));
                 }
@@ -793,11 +816,25 @@ class BimpController
             $debug_content = BimpDebug::renderDebug('ajax_' . $req_id);
         }
 
+
         die(json_encode(array(
+            'warnings'      => static::getAndResetAjaxWarnings(),
             'errors'        => $errors,
             'request_id'    => $req_id,
             'debug_content' => $debug_content
         )));
+    }
+
+    public static function getAndResetAjaxWarnings()
+    {
+        $warnings = static::$ajax_warnings;
+        static::$ajax_warnings = array();
+        return $warnings;
+    }
+
+    public static function addAjaxWarnings($msg)
+    {
+        static::$ajax_warnings[] = $msg;
     }
 
     // Controller:
@@ -1600,7 +1637,7 @@ class BimpController
             }
             if ($id_object) {
                 if (!$object->fetch($id_object)) {
-                    $errors[] = ucfirst($object->getLabel('')) . ' d\'ID ' . $id_object . ' non trouvé';
+                    $errors[] = ucfirst($object->getLabel('')) . ' d\'ID ' . $id_object . ' non trouvé (form)';
                 }
             }
 
@@ -3048,5 +3085,14 @@ class BimpController
             'notifications' => $notifs_for_user,
             'request_id'    => BimpTools::getValue('request_id', 0)
         );
+    }
+    
+    public static function bimp_shutdown(){//juste avant de coupé le script
+        global $db;
+        if($db->transaction_opened > 0)
+            BimpCore::addlog ('Fin de script Transaction non fermée');
+        $nb = BimpTools::deloqueAll();
+        if($nb > 0)
+            BimpCore::addlog ('Fin de script fichier non debloqué '.$nb, Bimp_Log::BIMP_LOG_ALERTE);
     }
 }

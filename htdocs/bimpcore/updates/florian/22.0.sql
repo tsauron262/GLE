@@ -1,1 +1,1 @@
-ALTER TABLE `llx_Bimp_ImportPaiementLine` ADD `date` DATE NULL DEFAULT NULL; 
+ALTER TABLE `llx_Bimp_ImportPaiementLine` ADD `date` DATE NULL DEFAULT NULL;

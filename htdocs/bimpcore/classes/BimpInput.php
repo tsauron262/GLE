@@ -42,7 +42,7 @@ class BimpInput
                 break;
 
             case 'text':
-                if (isset($options['hashtags']) && (int) $options['hashtags']) {
+                if (BimpCore::isContextPrivate() && isset($options['hashtags']) && (int) $options['hashtags']) {
                     $extra_class .= ($extra_class ? ' ' : '') . 'allow_hashtags';
                 }
 
@@ -92,7 +92,7 @@ class BimpInput
                     $html .= '/>';
                 }
 
-                if (isset($options['hashtags']) && (int) $options['hashtags']) {
+                if (BimpCore::isContextPrivate() && isset($options['hashtags']) && (int) $options['hashtags']) {
                     $html .= BimpRender::renderInfoIcon('fas_hashtag', 'Vous pouvez utiliser le symbole # pour inclure un lien objet');
                 }
 
@@ -207,7 +207,7 @@ class BimpInput
                 break;
 
             case 'textarea':
-                if (isset($options['hashtags']) && (int) $options['hashtags']) {
+                if (BimpCore::isContextPrivate() && isset($options['hashtags']) && (int) $options['hashtags']) {
                     $extra_class .= ($extra_class ? ' ' : '') . 'allow_hashtags';
                 }
 
@@ -230,7 +230,7 @@ class BimpInput
                     $html .= '<p class="smallInfo">Max ' . $options['maxlength'] . ' caractères</p>';
                 }
 
-                if (isset($options['hashtags']) && (int) $options['hashtags']) {
+                if (BimpCore::isContextPrivate() && isset($options['hashtags']) && (int) $options['hashtags']) {
                     $html .= '<p class="inputHelp">';
                     $html .= 'Vous pouvez utiliser le symbole # pour inclure un lien objet';
                     $html .= '</p>';
@@ -281,7 +281,7 @@ class BimpInput
                 }
                 $doleditor = new DolEditor($field_name, $value, '', 160, 'dolibarr_details', '', false, true, true, ROWS_4, '90%');
 
-                if (isset($options['hashtags']) && (int) $options['hashtags']) {
+                if (BimpCore::isContextPrivate() && isset($options['hashtags']) && (int) $options['hashtags']) {
                     $doleditor->extra_class = 'allow_hashtags';
 
                     $html .= '<p class="inputHelp">';
@@ -858,6 +858,29 @@ class BimpInput
                 $html .= '</div>';
                 break;
 
+            case 'signature_pad':
+                $displayStyle = '';
+                $prefix = rand(111111, 999999);
+
+                if ((int) BimpTools::getArrayValueFromPath($options, 'expand', 0)) {
+                    $displayStyle .= ' display: none;';
+                }
+
+                $id = $prefix . '_signature-pad';
+
+                $html .= '<div class="signaturePadContainer" data-pad_id="' . $id . '">';
+                $html .= '<div class="signature_wrapper">';
+                $html .= '<canvas id="' . $id . '" class="signature-pad ' . $extra_class . '" style="border: solid 1px;' . $displayStyle . '" width=400 height=200></canvas>';
+                $html .= '</div>';
+
+                $html .= '<div class="buttonsContainer align-center">';
+                $html .= '<sapn class="clearSignaturePadBtn btn btn-danger btn-large" >' . BimpRender::renderIcon("fas_undo") . ' Refaire la signature</span>';
+                $html .= '</div>';
+
+                $html .= '<input type="hidden" name="' . $field_name . '" value=""/>';
+                $html .= '</div>';
+                break;
+
             default:
                 $html .= '<p class="alert alert-danger">Erreur technique: type d\'input invalide pour le champ "' . $field_name . '"</p>';
                 break;
@@ -867,6 +890,8 @@ class BimpInput
 
     public static function renderDatePickerInput($input_name, $value = '', $options = array(), $input_id = null, $type = "datetime")
     {
+        $html = '';
+        
         if (is_null($input_id)) {
             $input_id = $input_name;
         }
@@ -874,11 +899,12 @@ class BimpInput
         $input_id .= '_' . rand(111111, 999999);
         if (is_null($value)) {
             $value = '';
-        } elseif (preg_match('/^([0-9]{4})\-([0-9][0-9])\-([0-9][0-9]).*$/', $value, $matches)) {
-            if (!(int) $matches[1] || !(int) $matches[2] || !(int) $matches[3]) {
-                $value = '';
-            }
         }
+//        elseif (preg_match('/^([0-9]{4})\-([0-9][0-9])\-([0-9][0-9]).*$/', $value, $matches)) {
+//            if (!(int) $matches[1] || !(int) $matches[2] || !(int) $matches[3]) {
+//                $value = '';
+//            }
+//        }
 
         $extra_class = isset($options['extra_class']) ? $options['extra_class'] : '';
 
@@ -926,7 +952,7 @@ class BimpInput
 
                 $php_format = 'Y-m-d H:i:s';
                 if ($value) {
-                    if (preg_match('/^(\d{4})\-(\d{2})\-(\d{2}) (\d{2}):(\d{2}):(\d{2})?$/', $value)) {
+                    if (preg_match('/^(\d{4})\-(\d{2})\-(\d{2})( (\d{2}):(\d{2}):(\d{2})?)?$/', $value)) {
                         $dt_value = new DateTime($value);
                     }
                 }
@@ -937,8 +963,6 @@ class BimpInput
             $value = date($php_format);
             $dt_value = new DateTime($value);
         }
-
-        $html = '';
 
         $html .= '<input type="hidden" class="datepicker_value' . ($extra_class ? ' ' . $extra_class : '') . '" id="' . $input_id . '" name="' . $input_name . '" value="';
         if (!is_null($dt_value)) {

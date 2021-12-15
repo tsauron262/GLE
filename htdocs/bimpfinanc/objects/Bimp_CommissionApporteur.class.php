@@ -40,15 +40,18 @@ class Bimp_CommissionApporteur extends BimpObject
                 'commission_apporteur' => array('<' => '0'),
                 'f.fk_facture'         => array('IN' => "SELECT rowid FROM llx_facture WHERE rowid IN (SELECT DISTINCT(`element_id`) FROM `llx_element_contact` WHERE `fk_c_type_contact` = (SELECT rowid FROM `llx_c_type_contact`  WHERE `code` = 'APPORTEUR' and `source` = 'external' AND `element` = 'facture') AND `fk_socpeople` IN (SELECT `rowid` FROM `llx_socpeople` WHERE `fk_soc` = " . $parent->getData('id_fourn') . ")) and fk_statut IN (1, 2)")
             );
-            $idProd = $filtreObj->getProductIds();
-            if ($idProd != 'all')
-                $filters['f.fk_product'] = array('IN' => $idProd);
-
-
-            $list = $factureLine->getList($filters, null, null, null, null, 'array', null, array('f' => array(
+            $joins = array('f' => array(
                     'table' => 'facturedet',
                     'alias' => 'f',
-                    'on'    => 'a.id_line = f.rowid')));
+                    'on'    => 'a.id_line = f.rowid'));
+            
+            
+            $filterObj = new BC_FiltersPanel($factureLine);
+            $filterObj->setFilters($filtreObj->getData('filter'));
+            $errors = BimpTools::merge_array($errors, $filterObj->getSqlFilters($filters, $joins));
+
+
+            $list = $factureLine->getList($filters, null, null, null, null, 'array', null, $joins);
 
             foreach ($list as $line) {
                 if (!$this->db->execute('UPDATE llx_bimp_facture_line SET commission_apporteur = "' . $this->id . '-' . $filtreObj->id . '" WHERE id_line = ' . $line['id_line']))

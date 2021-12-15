@@ -55,7 +55,7 @@ lists:
         cols: 
             id_report: unset
             
-    product: 
+    linked_object: 
         extends: default
         configurable: 0
         cols: 

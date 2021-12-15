@@ -2,69 +2,53 @@
 title: Dépot facture
 
 fields: 
-    idUtilisateurCourant: 
-        label: ID utilisateur
-        type: int
+#    idUtilisateurCourant: 
+#        label: ID utilisateur
+#        type: int
+        
+    numeroFactureSaisi: 
+        label: N° Facture
+        
+    dateFacture: 
+        label: Date Facture
+        type: date
         
     modeDepot: 
         label: Mode de dépôt
+        edit: 0
         values: 
             SAISIE_API: Saisie
             DEPOT_PDF_API: Dépôt PDF
             DEPOT_PDF_SIGNE_API: Dépôt PDF signé
-            
-    numeroFactureSaisi: 
-        label: N° Facture
-        type: int
-        
-    dateFacture: 
-        label: Date Facture
-        type: datetime
-        
-    destinataire: 
-        label: Destinataire
-        type: fields_group
-        fields: 
-            codeDestinataire: 
-                label: Code destinataire
-                
-            codeServiceExecutant: 
-                label: Code service exécutant
+        default_value: SAISIE_API
         
     fournisseur: 
         label: Fournisseur
         type: fields_group
         fields: 
             idFournisseur: 
-                label: ID
+                label: Identifiant
                 type: int
+                edit: 0
                 
-            idServiceFournisseur: 
-                label: ID Service
-                type: int
-                
-            codeCoordonneesBancairesFournisseur: 
-                label: Code RIB
-                type: int
-                
-    cadreDeFacturation: 
-        label: Cadre de facturation
+#            idServiceFournisseur: 
+#                label: ID Service
+#                type: int
+#                
+#            codeCoordonneesBancairesFournisseur: 
+#                label: Code RIB
+#                type: int
+
+    destinataire: 
+        label: Destinataire
         type: fields_group
         fields: 
-            codeCadreFacturation: 
-                label: Code
-                values: 
-                    A1_FACTURE_FOURNISSEUR: A1 - Facture fournisseur
-                    A2_FACTURE_FOURNISSEUR_DEJA_PAYEE: A2 - Facture fournisseur déjà payée
-                    A9_FACTURE_SOUSTRAITANT: A9 - Facture sous-traitant
-                    A12_FACTURE_COTRAITANT: A12 - Facture Co-traitant
-                    
-            codeStructureValideur: 
-                label: Code structure valideur
+            codeDestinataire: 
+                label: N° Siret
                 
-            codeServiceValideur: 
-                label: Code service valideur
-                
+            codeServiceExecutant: 
+                label: Code service exécutant
+        
     references: 
         label: Données facture
         type: fields_group
@@ -96,10 +80,10 @@ fields:
                 label: N° Marché
                 
             numeroBonCommande: 
-                label: N° Bon de commande
+                label: N° d'engagement
                 
             numeroFactureOrigine: 
-                label: N° facture d'origine
+                label: N° Facture d'origine
                 
             modePaiement: 
                 label: Mode de paiement
@@ -140,6 +124,35 @@ fields:
                 
     commentaire: 
         label: Commentaires
-                
-    
         
+    cadreDeFacturation: 
+        label: Cadre de facturation
+        type: fields_group
+        fields: 
+            codeCadreFacturation: 
+                label: Code
+                values: 
+                    A1_FACTURE_FOURNISSEUR: A1 - Facture fournisseur
+                    A2_FACTURE_FOURNISSEUR_DEJA_PAYEE: A2 - Facture fournisseur déjà payée
+                    A9_FACTURE_SOUSTRAITANT: A9 - Facture sous-traitant
+                    A12_FACTURE_COTRAITANT: A12 - Facture Co-traitant
+                    
+#            codeStructureValideur: 
+#                label: Code structure valideur
+#                
+#            codeServiceValideur: 
+#                label: Code service valideur
+
+    pieceJointePrincipale: 
+        label: Fichier PDF
+        type: fields_group
+        multiple: 1
+        fields: 
+            pieceJointePrincipaleId: 
+                label: Identifiant Chorus fichier PDF
+                type: int
+                edit: 0
+                
+            pieceJointePrincipaleDesignation: 
+                label: Nom Fichier
+                edit: 0

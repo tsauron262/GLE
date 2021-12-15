@@ -1,0 +1,2 @@
+INSERT INTO `llx_bimpcore_conf` (`name`, `value`) VALUES ('particulier_id_default_cond_reglement', '1');
+INSERT INTO `llx_bimpcore_conf` (`name`, `value`) VALUES ('particulier_id_default_mode_reglement', '6');

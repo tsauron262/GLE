@@ -799,6 +799,10 @@ lists:
                 label: Forcer expédié les commandes sélectionnées
                 icon: far_check-square
                 onclick: setSelectedObjectsAction($(this), 'list_id', 'forceStatusMultiple', {'status':'2','type':'shipment_status'}, '', 'Forcer expédié ', true)
+            force_logi:
+                label: Forcer logistique complète les commandes sélectionnées
+                icon: far_check-square
+                onclick: setSelectedObjectsAction($(this), 'list_id', 'forceStatusMultiple', {'status':'3','type':'logistique_status'}, '', 'Forcer logistique complète ', true)
             cancel: 
                 label: Annuler
                 icon: fas_times

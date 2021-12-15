@@ -11,7 +11,7 @@ fields:
     id_societe: 
         label: Client
         type: id_object
-        object: societe
+        object: client
         input: 
             type: search_societe
         required: 1
@@ -57,8 +57,8 @@ lists:
         delete_btn: 1
         add_btn: 1
         add_form_name: default
-        extra_btn: 
-            callback: getListExtraButtons
+#        extra_btn: 
+#            callback: getListExtraButtons
         cols: 
             id_societe: 
             date_create:

@@ -254,7 +254,7 @@ abstract class BimpAPI
             if ($request_name === 'testRequest') {
                 $result = $this->testRequest($errors, $warnings);
             } else {
-                $params['allow_reconnect'] = false;
+                $params['allow_reconnect'] = 0;
                 $result = $this->execCurl($request_name, $params, $errors, $response_headers);
             }
         }
@@ -300,9 +300,14 @@ abstract class BimpAPI
         return array();
     }
 
-    public function requestFormResultOverride($request_name, &$result, $params = array(), &$warnings = array())
+    public function requestFormFieldsOverride($request_name, &$result, $params = array(), &$warnings = array())
     {
         return array();
+    }
+
+    public function onRequestFormSuccess($request_name, $result, &$warnings = array())
+    {
+        
     }
 
     // Traitements des requêtes CURL:
@@ -329,7 +334,7 @@ abstract class BimpAPI
                         'post_mode'       => BimpTools::getArrayValueFromPath(static::$requests, $request_name . '/post_mode', static::$default_post_mode),
                         'header_out'      => BimpTools::getArrayValueFromPath(static::$requests, $request_name . '/header_out', true),
                         'allow_reconnect' => true
-                            ), $params);
+                            ), $params, false, true);
 
             $url = BimpTools::getArrayValueFromPath(static::$urls_bases, $params['url_base_type'] . '/' . $this->options['mode'], '');
 

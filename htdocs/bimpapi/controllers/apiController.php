@@ -61,7 +61,15 @@ class apiController extends BimpController
 
         if (!count($errors)) {
             if ($this->setApi($api_name, $errors)) {
-                return $this->{$method}($request_name, $params, $options);
+                if ((int) BimpTools::getArrayValueFromPath($options, 'need_connection', 1)) {
+                    if (!$this->api->isLogged()) {
+                        $this->api->connect($errors);
+                    }
+                }
+
+                if (!count($errors)) {
+                    return $this->{$method}($request_name, $params, $options);
+                }
             }
         }
 
@@ -82,7 +90,6 @@ class apiController extends BimpController
         $errors = array();
         $title = '';
         $html = '';
-        $button = null;
 
         $values = $this->api->getRequestFormValues($request_name, $params, $errors);
 
@@ -93,35 +100,39 @@ class apiController extends BimpController
                 $errors[] = BimpTools::getMsgFromArray($apiRequest->errors, 'Echec génération du formulaire');
             } else {
                 $html = $apiRequest->generateRequestFormHtml($values, $params);
-                $title = $apiRequest->requestLabel;
             }
         }
 
         return array(
             'errors' => $errors,
             'title'  => $title,
-            'html'   => $html,
-            'button' => $button
+            'html'   => $html
         );
     }
 
-    protected function apiProcessRequestForm($request_name, $params, $options = array())
+    protected function apiProcessRequestForm($request_name, $params = array(), $options = array())
     {
         $errors = array();
         $warnings = array();
 
         $apiRequests = new BimpApiRequest($this->api, $request_name);
-        $result = $apiRequests->processRequestForm();
+        $fields = $apiRequests->processRequestForm();
 
-        $errors = $this->api->requestFormResultOverride($request_name, $result, $params, $warnings);
+        if (!count($apiRequests->errors)) {
+            $errors = $this->api->requestFormFieldsOverride($request_name, $fields, $params, $warnings);
 
-        if (!count($errors)) {
-            if (is_array($result) && !empty($result)) {
-                $params['fields'] = BimpTools::overrideArray($params['fields'], $result, false, true);
-                return $this->api->setRequest($request_name, $params);
-            } else {
-                $errors[] = BimpTools::getMsgFromArray($apiRequests->errors, 'Erreurs lors du traitement des données');
+            if (!count($errors)) {
+                $params['fields'] = $fields;
+                $return = $this->api->setRequest($request_name, $params);
+
+                if (!count($return['errors'])) {
+                    $this->api->onRequestFormSuccess($request_name, $return['result'], $return['warnings']);
+                }
+
+                return $return;
             }
+        } else {
+            $errors[] = BimpTools::getMsgFromArray($apiRequests->errors, 'Erreurs lors du traitement des données');
         }
 
         return array(
@@ -140,6 +151,22 @@ class apiController extends BimpController
         $method = BimpTools::getValue('api_method', 'apiRequest');
         $params = BimpTools::getValue('api_params', array());
         $options = BimpTools::getValue('api_options', array());
+
+        if (is_string($params)) {
+            $params = json_decode($params, 1);
+
+            if (!is_array($params)) {
+                $params = array();
+            }
+        }
+
+        if (is_string($options)) {
+            $options = json_decode($options, 1);
+
+            if (!is_array($options)) {
+                $options = array();
+            }
+        }
 
         $result = $this->apiRequest($api_name, $request_name, $method, $params, $options);
 

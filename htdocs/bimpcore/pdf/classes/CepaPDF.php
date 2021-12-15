@@ -13,7 +13,7 @@ class CepaPDF extends BimpDocumentPDF
     public $propal = null;
     public $rib = null;
     public $mode = "normal";
-    public $after_totaux_label = 'Bon pour commande';
+    public $signature_bloc_label = 'Bon pour commande';
 
     public function __construct($db)
     {

@@ -6,6 +6,9 @@ parent_module: bimpcommercial
 parent_object: Bimp_Commande
 parent_id_property: id_commande_client
 
+header_btn: 
+    callback: getActionsButtons
+    
 labels: 
     name: expédition
     is_female: 1
@@ -27,7 +30,36 @@ objects:
         extends: facture
         instance: 
             id_object: 
-                field_value: id_avoir
+                field_value: id_avoir            
+                
+    signature: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpSignature
+            id_object: 
+                field_value: id_signature
+                
+    files:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpFile
+        list: 
+            filters:
+                parent_module: bimplogistique
+                parent_object_name: BL_CommandeShipment
+                deleted: 0
+        add_form: 
+            name: upload
+            values:
+                fields: 
+                    parent_module: bimplogistique
+                    parent_object_name: BL_CommandeShipment
                 
 fields: 
     id_commande_client: 
@@ -152,6 +184,20 @@ fields:
                 name: id
                 object: 
                     global: user
+                    
+    id_signature: 
+        label: Signature
+        type: id_object
+        object: signature
+        displays: 
+            default: 
+                label: Lien signature
+                type: callback
+                method: displaySignature
+                
+    signature_params: 
+        label: Paramètres incrustation signature
+        type: json
         
 forms: 
     default: 
@@ -194,6 +240,34 @@ forms:
                   type: hidden
               value: 1
             - field: date_shipped
+            - custom: 1
+              label: Signature par le client
+              input_name: create_signature
+              data_type: bool
+              value: 1
+              input: 
+                  type: toggle
+                  help: En choisissant "NON", aucune signature ne sera demandée au client.<br/>Le statut "Signé" sera mis à "Non applicable" pour cette expédition
+            - custom: 1
+              label: PDF BL Chiffré
+              data_type: bool
+              input_name: pdf_chiffre
+              input: 
+                  type: toggle
+              value: 1
+              display_if: 
+                  field_name: create_signature
+                  show_values: 1
+            - custom: 1
+              label: PDF BL Detail
+              data_type: bool
+              input_name: pdf_detail
+              input: 
+                  type: toggle
+              value: 1
+              display_if: 
+                  field_name: create_signature
+                  show_values: 1
             - custom: 1
               label: Produits / Services inclus
               input_name: lines
@@ -439,6 +513,14 @@ forms:
     pdf: 
         rows: 
             - custom: 1
+              label: Ecraser le PDF enregistré
+              input_name: overwrite_pdf_file
+              data_type: bool
+              show: 
+                  callback: showOverwritePdfFileInput
+              content: 
+                  callback: renderOverwritePdfFileInput
+            - custom: 1
               label: Chiffré
               data_type: bool
               input_name: chiffre
@@ -452,11 +534,30 @@ forms:
               input: 
                   type: toggle
               value: 1
+              
+    create_signature: 
+        rows: 
+            - custom: 1
+              label: 'PDF BL: Chiffré'
+              data_type: bool
+              input_name: pdf_chiffre
+              input: 
+                  type: toggle
+              value: 1
+            - custom: 1
+              label: 'PDF BL: Detail'
+              data_type: bool
+              input_name: pdf_detail
+              input: 
+                  type: toggle
+              value: 1
                   
 fields_tables: 
     data: 
-        panel_header: 0
+        title: Infos
+        icon: fas_info-circle
         rows: 
+            - field: id_commande_client
             - field: num_livraison
             - field: status
             - field: id_entrepot
@@ -480,18 +581,40 @@ fields_tables:
             - field: total_ht
             - field: total_ttc
             
+    signature: 
+        title: Signature
+        icon: fas_signature
+        show: 
+            field_value: id_signature
+        rows: 
+            - field: id_signature
+              display: card
+            
 views: 
     default: 
+        objects_change_reload: BimpSignature
         rows: 
             - cols: 
                 - type: object_header
             - cols: 
                 - type: fields_table
-                  col_lg: 8
-                  col_md: 7
+                  col_lg: 6
+                  col_md: 6
                   col_sm: 12
                   fields_table: 
                       name: data
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: signature
+            - cols: 
+                - type: list
+                  list: 
+                      title: Fichier joints
+                      name: default
+                      children: files   
                       
     lines: 
         title: Produits / services inclus dans l'expédition
@@ -590,7 +713,12 @@ lists_cols:
         label: Fac. Cmd
         display: icon
         min_width: 45
-        
+    signature_buttons: 
+        label: Actions signature
+        value: 
+            callback: displaySignatureActions
+        min_width: 90
+    
 lists: 
     default: 
         configurable: 1
@@ -606,7 +734,7 @@ lists:
         update_btn: 1
         edit_form: edit
         modal_view: default
-        objects_change_reload: BR_Reservation
+        objects_change_reload: BR_Reservation,BimpSignature
         extra_btn: 
             callback: getExtraBtn
         cols:
@@ -622,6 +750,8 @@ lists:
             signed: 
             pdf:
             user_create:
+            id_signature: 
+            signature_buttons:
         
     client: 
         extends: default
@@ -643,7 +773,7 @@ lists:
         add_form_name: default
         edit_form: default
         modal_view: default
-        objects_change_reload: BR_Reservation,Bimp_CommandeLine,Bimp_Commande
+        objects_change_reload: BR_Reservation,Bimp_CommandeLine,Bimp_Commande,BimpSignature
         extra_btn: 
             callback: getExtraBtn
         cols:
@@ -654,9 +784,11 @@ lists:
             contact: 
             date_shipped: 
             total_ht: 
-            signed: 
             id_facture: 
             pdf:
+            signed:
+            id_signature:            
+            signature_buttons:
                     
 cards: 
     default: 
@@ -688,3 +820,7 @@ searches:
                 table: societe
                 on: c.fk_soc = s.rowid
                 alias: s
+
+signatures: 
+    bl: 
+        label: Bon de livraison

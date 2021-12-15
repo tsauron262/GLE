@@ -11,7 +11,7 @@ class PropalPDF extends BimpDocumentPDF
     public static $type = 'propal';
     public $propal = null;
     public $mode = "normal";
-    public $after_totaux_label = 'Bon pour commande';
+    public $signature_bloc_label = 'Bon pour commande';
 
     public function __construct($db)
     {

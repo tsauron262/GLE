@@ -21,6 +21,13 @@ class FiltersConfig extends BCUserConfig
     {
         return $this->getJsLoadFiltersConfig();
     }
+    
+    public function getListTitle()
+    {
+        global $user, $langs;
+
+        return (BimpObject::objectLoaded($user) ? $user->getFullName($langs) . ': l' : 'L') . 'iste des configurations de filtres enregistrés';
+    }
 
     public function getJsLoadFiltersConfig()
     {

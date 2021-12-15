@@ -8,7 +8,9 @@ llxHeader();
 
 $lien = '.bimp.fr/mymu/synopsistools/git_pull.php?no_menu=1&nolog=ujgjhkhkfghgkvgkfdkshfiohf5453FF454FFDzelef';
 
-$array = array("erp1", "erp2", "erp3");
+$array = array("erp1", "erp2", "erp3", "erp4");
+
+BimpCore::setConf('git_version', BimpCore::getConf('git_version', 1)+1);
 
 foreach($array as $erp){
     echo '<h1>Serveur '.$erp.'</h1>';

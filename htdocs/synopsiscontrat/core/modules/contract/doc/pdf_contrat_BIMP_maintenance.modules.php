@@ -205,8 +205,31 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         $pdf->setColor('fill', 235, 235, 235);
         $pdf->setFont('', 'B', 6);
         $liste_mode_reglement = BimpObject::getModeReglementsArray();
-       
-        $pdf->Cell($W * 4, 6, "Mode de règlement : " . $liste_mode_reglement[$contrat->array_options['options_moderegl']], 1, null, 'L', true);
+        $pdf->Cell($W * 4, 6, "Mode de règlement : " . $liste_mode_reglement[$contrat->array_options['options_moderegl']], 1, 1, 'L', true);
+        
+        if($contrat->array_options['options_periodicity'] != 0 && $contrat->array_options['options_periodicity'] != 1200) {
+            $pdf->setColor('fill', 255, 255, 255);
+            $pdf->Cell($W * 5, 7, "", 1, null, 'L', true);
+            $pdf->Cell($W, 7, "", 1, null, 'C', true);
+            $pdf->Cell($W * 2, 7, "", 1, null, 'C', true);
+            $pdf->Cell($W, 7, "", 1, null, 'C', true);
+            $pdf->setColor('fill', 235, 235, 235);
+            $pdf->setFont('', 'B', 6);
+
+            switch($contrat->array_options['options_periodicity']) {
+                case 1: $display_par = "mois"; break;
+                case 2: $display_par = "bimestre"; break;
+                case 3: $display_par = "trimestre"; break;
+                case 6: $display_par = "semestre"; break;
+                case 12: $display_par = "année"; break;
+            }
+
+            $total_periode = 0;
+            $nombre_periode = $contrat->array_options['options_duree_mois'] / $contrat->array_options['options_periodicity'];
+            $pdf->Cell($W * 4, 6, "Coût par " . $display_par . ": " . price($total->HT  / $nombre_periode) . "€ HT", 1, null, 'L', true);
+        }
+        
+        
         
         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 7, "", 0, 'C');
     }

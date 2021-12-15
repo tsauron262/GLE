@@ -7,7 +7,8 @@ class BDS_Process extends BimpObject
         'import' => array('label' => 'Import', 'icon' => 'fas_sign-in-alt'),
         'export' => array('label' => 'Export', 'icon' => 'fas_sign-out-alt'),
         'sync'   => array('label' => 'Synchronisation', 'icon' => 'fas_sync'),
-        'ws'     => array('label' => 'Web service', 'icon' => 'fas_globe')
+        'ws'     => array('label' => 'Web service', 'icon' => 'fas_globe'),
+        'other'  => array('label' => 'Autre', 'icon' => 'fas_cogs'),
     );
 
     // Droits users: 

@@ -181,7 +181,7 @@ class Bimp_Vente extends BimpObject
 
         $total_ca = 0;
         foreach ($products_list as $p) {
-            if(stripos($p['ref'], 'SAVAPPLE') === false && stripos($p['ref'], 'SAV-DIAG')===false && stripos($p['ref'], 'Opération')===false && stripos($p['ref'], 'MYL92NF/A-')===false){
+            if (stripos($p['ref'], 'SAVAPPLE') === false && stripos($p['ref'], 'SAV-DIAG') === false && stripos($p['ref'], 'Opération') === false && stripos($p['ref'], 'MYL92NF/A-') === false) {
                 $entrepots_data = $product->getAppleCsvData($dateFrom, $dateTo, $entrepots, $p['rowid']);
 
                 if ((int) $p['no_fixe_prices']) {
@@ -282,7 +282,7 @@ Preferred Field
 (10)";"Errors"' . "\n";
 
             foreach ($products_list as $p) {
-                if(stripos($p['ref'], 'SAVAPPLE') === false && stripos($p['ref'], 'SAV-DIAG')===false && stripos($p['ref'], 'Opération')===false && stripos($p['ref'], 'MYL92NF/A-')===false){
+                if (stripos($p['ref'], 'SAVAPPLE') === false && stripos($p['ref'], 'SAV-DIAG') === false && stripos($p['ref'], 'Opération') === false && stripos($p['ref'], 'MYL92NF/A-') === false) {
                     foreach ($shiptos_data as $shipTo => $shipToData) {
                         if (isset($shipToData['products'][(int) $p['rowid']])) {
                             $prod = $shipToData['products'][(int) $p['rowid']];
@@ -421,7 +421,7 @@ Preferred Field
             $countries = BimpCache::getCountriesCodesArray();
 
             foreach ($products_list as $p) {
-                if(stripos($p['ref'], 'SAVAPPLE') === false && stripos($p['ref'], 'SAV-DIAG')===false && stripos($p['ref'], 'Opération')===false && stripos($p['ref'], 'MYL92NF/A-')===false){
+                if (stripos($p['ref'], 'SAVAPPLE') === false && stripos($p['ref'], 'SAV-DIAG') === false && stripos($p['ref'], 'Opération') === false && stripos($p['ref'], 'MYL92NF/A-') === false) {
                     foreach ($shiptos_data as $shipTo => $shipToData) {
                         if (isset($shipToData['products'][(int) $p['rowid']])) {
                             $prod = $shipToData['products'][(int) $p['rowid']];
@@ -442,8 +442,8 @@ Preferred Field
 
                                     if ($secteur == 'E' || in_array((int) $fac_data['fk_soc'], array(527782, 8786))) {
                                         $customer_code = '1R';
-    //                                } elseif ($secteur == 'BP') {
-    //                                    $customer_code = 'BB';
+                                        //                                } elseif ($secteur == 'BP') {
+                                        //                                    $customer_code = 'BB';
                                     } else {
                                         $id_soc_type = isset($soc_data['fk_typent']) ? (int) $soc_data['fk_typent'] : 0;
                                         if (!$id_soc_type) {

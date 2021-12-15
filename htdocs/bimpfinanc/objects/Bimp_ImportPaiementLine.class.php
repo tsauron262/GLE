@@ -248,6 +248,7 @@ class Bimp_ImportPaiementLine extends BimpObject
     {
         global $modeCSV;
         $return = array();
+        $factIds = array();
         if (!$this->ok && $this->getData('price') > 0) {
             $sql = $this->db->db->query('SELECT SUM(remain_to_pay) as remain_to_pay_tot, fk_soc FROM `llx_facture` WHERE fk_statut = 1 AND paye = 0 GROUP BY fk_soc HAVING remain_to_pay_tot = ' . $this->getData('price'));
             while ($ln = $this->db->db->fetch_object($sql)) {
@@ -255,6 +256,7 @@ class Bimp_ImportPaiementLine extends BimpObject
                 $facts = array();
                 $list = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', array('paye' => 0, 'fk_soc' => $ln->fk_soc));
                 foreach ($list as $fact) {
+                    $factIds[] = $fact->id;
                     if ($modeCSV)
                         $facts[] = $fact->getRef();
                     else
@@ -269,17 +271,19 @@ class Bimp_ImportPaiementLine extends BimpObject
             
             $sql = $this->db->db->query('SELECT remain_to_pay, rowid, fk_soc FROM `llx_facture` WHERE fk_statut = 1 AND paye = 0 AND remain_to_pay = ' . $this->getData('price'));
             while ($ln = $this->db->db->fetch_object($sql)) {
-                $cli = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $ln->fk_soc);
-                $fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $ln->rowid);
-                $facts = array();
-                if ($modeCSV)
-                    $facts[] = $fact->getRef();
-                else
-                    $facts[] = $fact->getLink() . $this->getButtonAdd($fact->id);
-                if ($modeCSV)
-                    $return[] = $cli->getData('nom') . ' (' . implode(' - ', $facts) . ')';
-                else
-                    $return[] = $cli->getLink() . ' (' . implode(' - ', $facts) . ')';
+                if(!in_array($ln->rowid, $factIds)){
+                    $cli = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $ln->fk_soc);
+                    $fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $ln->rowid);
+                    $facts = array();
+                    if ($modeCSV)
+                        $facts[] = $fact->getRef();
+                    else
+                        $facts[] = $fact->getLink() . $this->getButtonAdd($fact->id);
+                    if ($modeCSV)
+                        $return[] = $cli->getData('nom') . ' (' . implode(' - ', $facts) . ')';
+                    else
+                        $return[] = $cli->getLink() . ' (' . implode(' - ', $facts) . ')';
+                }
             }
             
             

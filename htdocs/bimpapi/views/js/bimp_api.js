@@ -129,11 +129,12 @@ function BimpApi() {
             display_success: false,
             display_processing: true,
             processing_msg: 'Chargement du formulaire',
+            append_html: true,
             success: function (result, bimpAjax) {
                 if (typeof (result.html) !== 'undefined' && result.html) {
                     var $content = bimpModal.$contents.find('#modal_content_' + bimpAjax.modal_idx);
                     if ($.isOk($content)) {
-                        var $form = $content.find('.request_form');
+                        var $form = $content.find('.bimp_api_request_form');
                         if ($form.length) {
                             onFormLoaded($form);
                             $form.data('modal_idx', bimpAjax.modal_idx);
@@ -142,7 +143,7 @@ function BimpApi() {
                                 var onclick = result.button.onclick;
                             } else {
                                 var label = 'Envoyer<i class="fa fa-arrow-circle-right iconRight"></i>';
-                                var onclick = 'BimpApi.processRequestForm($(this))';
+                                var onclick = 'BimpApi.processRequestModalForm($(this))';
                             }
                             bimpModal.addButton(label, onclick, 'primary', 'save_object_button', bimpAjax.modal_idx);
                         }
@@ -157,9 +158,50 @@ function BimpApi() {
 
         BimpApiAjax(api_name, 'apiLoadRequestForm', request_name, api_params, $container, request_options, ajax_params);
     };
-    
-    this.processRequestForm = function($button) {
-        
+
+    this.processRequestModalForm = function ($button) {
+        if ($.isOk($button)) {
+            if ($button.hasClass('disabled')) {
+                return;
+            }
+
+            var modal_idx = parseInt($button.data('modal_idx'));
+
+            if (modal_idx && !isNaN(modal_idx)) {
+                var $container = bimpModal.getContent(modal_idx);
+
+                if ($.isOk($container)) {
+                    var $form = $container.find('form.bimp_api_request_form');
+                    if ($form.length) {
+                        var data = new FormData($form.get(0));
+                        var api_name = $form.data('api_name');
+                        var request_name = $form.data('api_requestName');
+
+                        BimpApiAjax(api_name, 'apiProcessRequestForm', request_name, data, $form.find('.ajaxResultContainer'), {}, {
+                            modal_idx: modal_idx,
+                            $button: $button,
+                            display_processing: true,
+                            processing_padding: 20,
+                            append_html: true,
+                            processData: false,
+                            contentType: false,
+                            modal_scroll_bottom: true,
+                            success: function (result, bimpAjax) {
+                                bimpModal.$footer.find('.extra_button.modal_' + bimpAjax.modal_idx).remove();
+                                if (typeof (result.new_buttons) === 'Array') {
+                                    for (var i in result.new_buttons) {
+                                        bimpModal.addButton(result.new_buttons[i].label, result.new_buttons[i].onclick, 'primary', 'save_object_button', bimpAjax.modal_idx);
+                                    }
+                                }
+                            }
+                        });
+                        return;
+                    }
+                }
+            }
+        }
+
+        bimp_msg('Une erreur est survenue. Envoi du formulaire impossible', 'danger');
     };
 }
 

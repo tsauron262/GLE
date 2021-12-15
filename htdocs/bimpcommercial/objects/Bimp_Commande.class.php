@@ -5,7 +5,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
 class Bimp_Commande extends BimpComm
 {
 
-    public $no_check_reservations = false;
+    public static $no_check_reservations = false;
     public $acomptes_allowed = true;
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public static $dol_module = 'commande';
@@ -1974,7 +1974,7 @@ class Bimp_Commande extends BimpComm
         $html .= '</tr>';
         $html .= '</tbody>';
         $html .= '</table>';
-        $title = BimpRender::renderIcon('fas_euro-sign', 'iconLeft');
+        $title = BimpRender::renderIcon('fas_euro-sign', 'iconLeft') . 'Montants totaux';
 
         return BimpRender::renderPanel($title, $html, '', array(
                     'type'     => 'secondary',
@@ -2848,7 +2848,7 @@ class Bimp_Commande extends BimpComm
 
     public function checkLogistiqueStatus($log_change = false)
     {
-        if ($this->isLoaded() && (int) $this->getData('fk_statut') >= 0) {
+        if ($this->isLoaded() && (int) $this->getData('fk_statut') >= 0 && !self::$no_check_reservations) {
             $status_forced = $this->getData('status_forced');
 
             if (isset($status_forced['logistique']) && (int) $status_forced['logistique']) {
@@ -2934,14 +2934,14 @@ class Bimp_Commande extends BimpComm
                 $isFullyShipped = 1;
                 $hasOnlyPeriodicity = 1;
                 foreach ($lines as $line) {
-                    $shipped_qty = (float) $line->getShippedQty(null, true);
+                    $shipped_qty = round((float) $line->getShippedQty(null, true), 6);
                     if ($shipped_qty) {
                         $hasShipment = 1;
                     } else {
                         $hasOnlyPeriodicity = 0;
                     }
 
-                    if (abs($shipped_qty) < abs((float) $line->getShipmentsQty())) {
+                    if (abs($shipped_qty) < abs(round((float) $line->getShipmentsQty(), 6))) {
                         $isFullyShipped = 0;
 
                         if ($hasOnlyPeriodicity && !(int) $line->getData('exp_periodicity')) {
@@ -2998,14 +2998,15 @@ class Bimp_Commande extends BimpComm
                     $hasOnlyPeriodicity = 1;
 
                     foreach ($lines as $line) {
-                        $billed_qty = (float) $line->getBilledQty(null, false);
+                        $billed_qty = abs(round((float) $line->getBilledQty(null, false), 6));
+                        $full_qty = abs(round((float) $line->getFullQty(), 6));
                         if ($billed_qty) {
                             $hasInvoice = 1;
                         } else {
                             $hasOnlyPeriodicity = 0;
                         }
 
-                        if (abs($billed_qty) < abs((float) $line->getFullQty())) {
+                        if ($billed_qty < $full_qty) {
                             $isFullyAddedToInvoice = 0;
 
                             if ($hasOnlyPeriodicity && !(int) $line->getData('fac_periodicity')) {
@@ -3014,7 +3015,7 @@ class Bimp_Commande extends BimpComm
                         }
 
                         if ($isFullyInvoiced) {
-                            if (abs((float) $line->getBilledQty(null, true)) < abs((float) $line->getFullQty())) {
+                            if (abs(round((float) $line->getBilledQty(null, true), 6)) < $full_qty) {
                                 $isFullyInvoiced = 0;
                             }
                         }
@@ -3519,7 +3520,7 @@ class Bimp_Commande extends BimpComm
         $errors = $warnings = array();
         $nbOk = 0;
         if ($this->canSetAction('forceStatus')) {
-            if ($data['status'] == 2) {
+            if ($data['status'] == 2 || ($data['status'] == 3 && $data['type'] == 'logistique_status')) {
                 foreach ($data['id_objects'] as $nb => $idT) {
                     $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $idT);
                     $statutActu = $instance->getData($data['type']);
@@ -3899,7 +3900,7 @@ class Bimp_Commande extends BimpComm
 
     public function checkObject($context = '', $field = '')
     {
-        if ($context === 'fetch') {
+        if ($context === 'fetch' && !self::$no_check_reservations) {
             global $current_bc, $modeCSV;
             if (is_null($current_bc) || !is_a($current_bc, 'BC_List') &&
                     (is_null($modeCSV) || !$modeCSV)) {

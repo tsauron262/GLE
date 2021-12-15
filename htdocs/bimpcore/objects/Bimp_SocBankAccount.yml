@@ -58,6 +58,12 @@ fields:
         label: Banque
 #        required: 1
         
+    iban_prefix: 
+        label: IBAN Prefix
+        dol_prop: iban
+        input: 
+            help: ex FR76
+        
     code_banque: 
         label: Code banque
         
@@ -69,10 +75,6 @@ fields:
         
     cle_rib: 
         label: Clé RIB
-        
-    iban_prefix: 
-        label: IBAN
-        dol_prop: iban
         
     bic: 
         label: BIC/SWIFT
@@ -137,14 +139,23 @@ views:
                  
 lists_cols: 
     rib: 
-        label: RIB
+        label: IBAN
         value: 
             callback: displayRib
+    iban:
+        label: Iban
+        value:
+            callback: getIban
+    devise:
+        label: Devise
+        value:
+            callback: getdevise
                     
 lists: 
     default: 
         n: 10
         sort_field: rowid
+        filters_panel: default
         sort_way: desc
         add_btn: 1
         delete_btn: 1
@@ -158,8 +169,8 @@ lists:
             rum:
             bank: 
             rib: 
-            iban_prefix:
             bic: 
+            devise:
             
     soc: 
         extends: default
@@ -198,6 +209,15 @@ forms:
                 field: label
             
             
+filters_panel: 
+    default: 
+        filters: 
+            exported:
+            fk_soc: 
+            label: 
+            rum:
+            bank: 
+            bic: 
             
         
     

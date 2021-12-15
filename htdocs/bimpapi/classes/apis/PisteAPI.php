@@ -27,11 +27,22 @@ class PisteAPI extends BimpAPI
             'label' => 'Recherche stucture',
             'url'   => '/cpro/structures/v1/rechercher'
         ),
+        'consulterStructure' => array(
+            'label' => 'Consulter une structure',
+            'url'   => '/cpro/structures/v1/consulter'
+        ),
         'rechercheService'   => array(
             'label' => 'Recherche service',
             'url'   => '/cpro/structures/v1/rechercher/services'
         ),
-        'soumettreFacture' => array()
+        'deposerPdfFacture'  => array(
+            'label' => 'Dépôt PDF facture',
+            'url'   => '/cpro/factures/v1/deposer/pdf'
+        ),
+        'soumettreFacture'   => array(
+            'label' => 'Envoi données facture',
+            'url'   => '/cpro/factures/v1/soumettre'
+        )
     );
     public static $tokens_types = array(
         'access' => 'Token d\'accès'
@@ -41,185 +52,84 @@ class PisteAPI extends BimpAPI
 
     public function rechercheClientStructures($siret, $params = array(), &$errors = array(), &$warnings = array())
     {
-//        $params = BimpTools::overrideArray(array(
-//                    'fields' => array(
-//                        'structure' => array(
-//                            'identifiantStructure'     => $siret,
-//                            'typeIdentifiantStructure' => 'SIRET',
-//                            'statutStructure'          => 'ACTIF'
-//                        )
-//                    )
-//                        ), $params, false, true);
-//
-//        $response = $this->execCurl('rechercheStructure', $params, $errors);
-//
-//        if (empty($errors) && (!isset($response['codeRetour']) || $response['codeRetour'] !== 200 || !isset($response['listeStructures']) || empty($response['listeStructures']))) {
-//            $errors[] = 'Erreur inconnue';
-//        }
-//
-//        return $response;
+        $siret = '12345678200051';
+        $params = BimpTools::overrideArray(array(
+                    'fields' => array(
+                        'structure' => array(
+                            'identifiantStructure'     => $siret,
+                            'typeIdentifiantStructure' => 'SIRET',
+                            'statutStructure'          => 'ACTIF'
+                        )
+                    )
+                        ), $params, false, true);
 
-        return array(
-            'listeStructures' => array(
-                array(
-                    'idStructureCPP'       => '001',
-                    'designationStructure' => 'Struct 1'
-                ),
-                array(
-                    'idStructureCPP'       => '002',
-                    'designationStructure' => 'Struct 2'
-                )
-            )
-        );
+        $response = $this->execCurl('rechercheStructure', $params, $errors);
+
+        if (empty($errors) && (!isset($response['listeStructures']) || empty($response['listeStructures']))) {
+            $errors[] = 'Aucune structure trouvée pour ce numéro SIRET';
+        }
+
+        return $response;
+    }
+
+    public function consulterStructure($id_structure, $params = array(), &$errors = array(), &$warnings = array())
+    {
+        $params = BimpTools::overrideArray(array(
+                    'fields' => array(
+                        'idStructureCPP' => (int) $id_structure
+                    )
+                        ), $params, false, true);
+
+        $response = $this->execCurl('consulterStructure', $params, $errors);
+
+        return $response;
     }
 
     public function rechercheClientServices($id_structure, $params = array(), &$errors = array(), &$warnings = array())
     {
-//        $params = BimpTools::overrideArray(array(
-//                    'fields' => array(
-//                        'idStructure' => $id_structure
-//                    )
-//                        ), $params, false, true);
-//
-//        $response = $this->execCurl('rechercheService', $params, $errors);
-//
-//        if (empty($errors) && (!isset($response['codeRetour']) || $response['codeRetour'] !== 200 || !isset($response['listeServices']) || empty($response['listeServices']))) {
-//            $errors[] = 'Erreur inconnue';
-//        }
-//
-//        return $response;
+        $params = BimpTools::overrideArray(array(
+                    'fields' => array(
+                        'idStructure' => (int) $id_structure
+                    )
+                        ), $params, false, true);
 
-        if ($id_structure === '001') {
-            return array(
-                'listeServices' => array(
-                    array(
-                        'idService'      => 11,
-                        'libelleService' => 'Service 1-1',
-                        'estActif'       => true,
-                    ),
-                    array(
-                        'idService'      => 12,
-                        'libelleService' => 'Service 1-2',
-                        'estActif'       => false,
-                    )
-                )
-            );
-        } else {
-            return array(
-                'listeServices' => array(
-                    array(
-                        'idService'      => 21,
-                        'libelleService' => 'Service 2-1',
-                        'estActif'       => true,
-                    ),
-                    array(
-                        'idService'      => 22,
-                        'libelleService' => 'Service 2-2',
-                        'estActif'       => false,
-                    )
-                )
-            );
+        $response = $this->execCurl('rechercheService', $params, $errors);
+
+        if (empty($errors) && (!isset($response['listeServices']) || empty($response['listeServices']))) {
+            $errors[] = 'Aucun service trouvé';
         }
+
+        return $response;
     }
 
-    public function soumettreFacture($id_facture, &$errors = array(), &$warnings = array())
+    public function deposerPdfFacture($id_facture, $params = array(), &$errors = array(), &$warnings = array())
     {
-        $facture = null;
-        $client = null;
-        $siret = '';
-        $structure_data = array();
-        $service_data = array();
-
-        // Fetchs instances et vérifs: 
         if (!$id_facture) {
             $errors[] = 'ID de la facture absent';
         } else {
             $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
 
-            if (BimpObject::objectLoaded($facture)) {
-                if (!in_array((int) $facture->getData('fk_statut'), array(Facture::STATUS_VALIDATED, Facture::STATUS_CLOSED))) {
-                    $errors[] = 'Le statut actuel de la facture ne permet pas cette opération';
-                } elseif (!$facture->field_exists('chorus_status')) {
-                    $errors[] = 'Le champ "Statut chorus" n\'est pas paramétré pour les factures';
-                } elseif ((int) $facture->getData('chorus_status') > 0) {
-                    $errors[] = 'Cette facture a déjà été déposée sur chorus';
-                } else {
-                    $client = $facture->getChildObject('client');
-
-                    if (!BimpObject::objectLoaded($client)) {
-                        $errors[] = 'Client absent';
-                    } elseif (!in_array($client->dol_object->typent_code, array('TE_ADMIN'))) {
-                        $errors[] = 'Ce client n\'est pas une administration';
-                    } else {
-                        $siret = $client->getData('siret');
-
-                        if (!$siret) {
-                            $errors[] = 'N° SIRET du client absent';
-                        }
-                    }
-                }
-            }
-        }
-
-        if (!count($errors)) {
-            $fields = array();
-            $id_structure = 0;
-
-            // Recherche ID structure du client:
-            $request_errors = array();
-            $response = $this->rechercheStructureBySiret($siret, $request_errors);
-
-            if (empty($request_errors) && (!isset($response['codeRetour']) || $response['codeRetour'] !== 200 || !isset($response['listeStructures']) || empty($response['listeStructures']))) {
-                $request_errors[] = 'Erreur inconnue';
-            } elseif (count($response['listeStructures']) > 1) {
-                $request_errors[] = 'Plusieurs structures trouvées pour le n° SIRET "' . $siret . '"';
+            if (!BimpObject::objectLoaded($facture)) {
+                $errors[] = 'La facture #' . $id_facture . ' n\'existe plus';
             } else {
-                $id_structure = (int) $response['listeStructures'][0]['idStructureCPP'];
+                $file_name = dol_sanitizeFileName($facture->getRef()) . '.pdf';
+                $dir = $facture->getFilesDir();
 
-                if (!$id_structure) {
-                    $request_errors[] = 'Identifiant de la structure du client absent de la réponse';
+                if (!file_exists($dir . '/' . $file_name)) {
+                    $errors[] = 'Le fichier "' . $file_name . '" n\'existe pas';
+                } else {
+                    $params['fields'] = array(
+                        'fichierFacture' => base64_encode(file_get_contents($dir . '/' . $file_name)),
+                        'nomFichier'     => $file_name,
+                        'formatDepot'    => 'PDF_NON_SIGNE'
+                    );
+
+                    return $this->execCurl('deposerPdfFacture', $params, $errors);
                 }
             }
-
-            if (!empty($request_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($request_errors, 'Echec de la récupération de l\'identifiant de la structure du client depuis Chorus');
-                return null;
-            }
-
-            $fields = array(
-                'modeDepot'                  => 'SAISIE_API',
-                'numeroFactureSaisi'         => 1,
-                'dateFacture'                => $facture->getData('datef'),
-                'destinataire'               => array(
-                    'codeDestinataire'     => '',
-                    'codeServiceExecutant' => ''
-                ),
-                'fournisseur'                => array(
-                    'idFournisseur'                       => '',
-                    'idServiceFournisseur'                => '',
-                    'codeCoordonneesBancairesFournisseur' => ''
-                ),
-                'cadreDeFacturation'         => array(
-                    'codeCadreFacturation'  => '',
-                    'codeStructureValideur' => '',
-                    'codeServiceValideur'   => ''
-                ),
-                'SoumettreFactureReferences' => array(
-                    'deviseFacture'        => 'EURO',
-                    'typeFacture'          => ($facture->getData('type') === Facture::TYPE_CREDIT_NOTE ? 'AVOIR' : 'FACTURE'),
-                    'typeTva'              => 'TVA_SUR_DEBIT',
-                    'motifExonerationTva'  => '',
-                    'numeroMarche'         => '',
-                    'numeroBonCommande'    => '',
-                    'numeroFactureOrigine' => '',
-                    'modePaiement'         => ''
-                ),
-                'montantTotal'               => array(
-                    'montantHtTotal' => $facture->dol_object->total_ht,
-                    'montantTVA'     => $facture->dol_object->total_tva
-                )
-            );
         }
+
+        return null;
     }
 
     // Overrides: 
@@ -316,7 +226,7 @@ class PisteAPI extends BimpAPI
                 $errors[] = 'API non trouvée';
                 break;
 
-            case '415':
+            case '405':
                 $errors[] = 'Format de la requête non supoorté';
                 break;
 
@@ -325,7 +235,7 @@ class PisteAPI extends BimpAPI
                 break;
         }
 
-        if (isset($response_body['codeRetour']) && (int) $response_body['codeRetour'] !== 200 && isset($response_body['libelle'])) {
+        if (isset($response_body['codeRetour']) && (int) $response_body['codeRetour'] !== 0 && isset($response_body['libelle'])) {
             $errors[] = $response_body['libelle'];
         }
 
@@ -343,6 +253,161 @@ class PisteAPI extends BimpAPI
                         )
                     )
                         ), $errors);
+    }
+
+    public function getRequestFormValues($request_name, $params, &$errors = array())
+    {
+        $fields = array();
+
+        switch ($request_name) {
+            case 'soumettreFacture':
+                $id_facture = BimpTools::getArrayValueFromPath($params, 'id_facture', 0);
+
+                if (!$id_facture) {
+                    $errors[] = 'ID de la facture à exporter absent';
+                } else {
+                    $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+
+                    if (!BimpObject::objectLoaded($facture)) {
+                        $errors[] = 'La facture #' . $id_facture . ' n\'existe plus';
+                    } elseif ($facture->isActionAllowed('confirmChorusExport', $errors)) {
+                        $client = $facture->getChildObject('client');
+                        
+                        if (!BimpObject::objectLoaded($client)) {
+                            $errors[] = 'Client absent';
+                        }
+                        
+                        $id_fournisseur = 0;
+
+                        if ($this->options['mode'] === 'test') {
+                            $id_fournisseur = BimpTools::getArrayValueFromPath($this->params, 'test_id_fournisseur', '');
+                        } else {
+                            $id_fournisseur = BimpTools::getArrayValueFromPath($this->params, 'prod_id_fournisseur', '');
+                        }
+
+                        if (!$id_fournisseur) {
+                            $errors[] = 'Identifiant fournisseur absent';
+                        }
+
+                        $chorus_data = $facture->getData('chorus_data');
+
+                        $id_pdf = (int) BimpTools::getArrayValueFromPath($chorus_data, 'id_pdf', 0);
+                        $num_facture = BimpTools::getArrayValueFromPath($chorus_data, 'num_facture', '');
+
+                        if (!$id_pdf) {
+                            $errors[] = 'ID Chorus du PDF absent';
+                        }
+
+                        if (!$num_facture) {
+                            $errors[] = 'N° Chorus de la facture absent';
+                        }
+
+                        $mode_paiement = '';
+                        switch ($facture->dol_object->mode_reglement_code) {
+                            case 'CHQ':
+                                $mode_paiement = 'CHEQUE';
+                                break;
+
+                            case 'VIR':
+                                $mode_paiement = 'VIREMENT';
+                                break;
+
+                            case 'LIQ':
+                                $mode_paiement = 'ESPECE';
+                                break;
+
+                            case 'PRE':
+                            case 'PRELEV':
+                                $mode_paiement = 'PRELEVEMENT';
+                                break;
+
+                            default:
+                                $mode_paiement = 'AUTRE';
+                                break;
+                        }
+
+                        if (!count($errors)) {
+                            $code_service = BimpTools::getArrayValueFromPath($params, 'code_service', '');
+
+                            if ($code_service == 'not_required') {
+                                $code_service = '';
+                            }
+                            
+                            $fields = array(
+                                'numeroFactureSaisi'    => $num_facture,
+                                'dateFacture'           => $facture->getData('datef'),
+                                'modeDepot'             => 'DEPOT_PDF_API',
+                                'fournisseur'           => array(
+                                    'idFournisseur' => $id_fournisseur
+                                ),
+                                'destinataire'          => array(
+                                    'codeDestinataire'     => $client->getData('siret'),
+                                    'codeServiceExecutant' => $code_service
+                                ),
+                                'references'            => array(
+                                    'deviseFacture' => 'EUR',
+                                    'typeFacture'   => ((int) $facture->getData('type') === Facture::TYPE_CREDIT_NOTE ? 'AVOIR' : 'FACTURE'),
+                                    'modePaiement'  => $mode_paiement
+                                ),
+                                'montantTotal'          => array(
+                                    'montantHtTotal'  => $facture->dol_object->total_ht,
+                                    'montantTVA'      => $facture->dol_object->total_tva,
+                                    'montantTtcTotal' => $facture->dol_object->total_ttc,
+                                    'montantAPayer'   => $facture->getRemainToPay()
+                                ),
+                                'cadreDeFacturation'    => array(
+                                    'codeCadreFacturation' => ((int) $facture->getData('paye') ? 'A1_FACTURE_FOURNISSEUR' : 'A2_FACTURE_FOURNISSEUR_DEJA_PAYEE')
+                                ),
+                                'pieceJointePrincipale' => array(
+                                    array(
+                                        'pieceJointePrincipaleDesignation' => dol_sanitizeFileName($facture->getRef()) . '.pdf',
+                                        'pieceJointePrincipaleId'          => (int) $id_pdf
+                                    )
+                                )
+                            );
+                        }
+                    }
+                }
+                break;
+        }
+
+        return $fields;
+    }
+
+    public function onRequestFormSuccess($request_name, $result, &$warnings = array())
+    {
+        switch ($request_name) {
+            case 'soumettreFacture':
+                $errors = array();
+                $id_facture = (int) BimpTools::getValue('id_facture', 0);
+
+                if (!$id_facture) {
+                    $errors[] = 'ID de la facture absent';
+                } else {
+                    $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+
+                    if (!BimpObject::objectLoaded($facture)) {
+                        $errors[] = 'La facture #' . $id_facture . ' n\'existe plus';
+                    } else {
+                        if (isset($result['empreinteCertificatDepot'])) {
+                            $chorus_data = $facture->getData('chorus_data');
+                            $chorus_data['certif'] = $result['empreinteCertificatDepot'];
+                            $facture->set('chorus_data', $chorus_data);
+                        }
+                        $facture->set('chorus_status', 2);
+
+                        $up_warnings = array();
+                        $errors = $facture->update($up_warnings, true);
+
+                        if (count($errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($errors, 'Echec de la mise à jour de la facture');
+                        }
+
+                        $facture->addLog('Export Chorus terminé');
+                    }
+                }
+                break;
+        }
     }
 
     // Install: 
@@ -384,6 +449,18 @@ class PisteAPI extends BimpAPI
                             'id_api' => $api->id,
                             'name'   => 'test_api_secret',
                             'title'  => 'Secret API en mode test'
+                                ), true, $warnings, $warnings);
+
+                $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+                            'id_api' => $api->id,
+                            'name'   => 'test_id_fournisseur',
+                            'title'  => 'Identifiant fournisseur en mode test'
+                                ), true, $warnings, $warnings);
+
+                $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+                            'id_api' => $api->id,
+                            'name'   => 'prod_id_fournisseur',
+                            'title'  => 'Identifiant fournisseur en mode production'
                                 ), true, $warnings, $warnings);
             }
         }

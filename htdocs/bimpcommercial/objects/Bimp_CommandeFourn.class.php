@@ -328,19 +328,34 @@ class Bimp_CommandeFourn extends BimpComm
                         $town = str_replace($tabZipTown[0] . " ", "", $dataAdd[3]);
                         if (count($dataAdd) == 5)
                             $result['country'] = $dataAdd[4];
-                    } /*elseif ((count($dataAdd) >= 3 && count(explode(" ", $dataAdd[2])) > 1)) {
+                    }
+                    elseif (count($dataAdd) >= 3 && count(explode(" ", $dataAdd[2])) > 1) {
+//                        $result['adress2'] = $dataAdd[2];
+                        $tabZipTown = explode(" ", $dataAdd[2]);
+                        $town = str_replace($tabZipTown[0] . " ", "", $dataAdd[2]);
+                        $result['contact'] = $dataAdd[0];
+                        $result['adress'] = $dataAdd[1];
+                        if (count($dataAdd) == 5)
+                            $result['country'] = $dataAdd[4];
+                    }
+                    /*elseif ((count($dataAdd) >= 3 && count(explode(" ", $dataAdd[2])) > 1)) {
                         $tabZipTown = explode(" ", $dataAdd[2]);
                         $town = str_replace($tabZipTown[0] . " ", "", $dataAdd[2]);
                         if (count($dataAdd) == 4)
                             $result['country'] = $dataAdd[3];
                     } */else
                         $warnings[] = "Impossible de parser l'adresse personalisée";
-                    if (count($tabZipTown) > 1) {
-                        $result['zip'] = $tabZipTown[0];
-                        $result['town'] = $town;
+                    if(!is_array($tabZipTown)){
+                        $warnings[] = 'Consitution de l\'adresse incorrect';
                     }
-                    if (strlen($result['zip']) != 5)
-                        $warnings[] = "Code postal : " . $result['zip'] . ' incorrect';
+                    else{
+                        if (count($tabZipTown) > 1) {
+                            $result['zip'] = $tabZipTown[0];
+                            $result['town'] = $town;
+                        }
+                        if (strlen($result['zip']) != 5)
+                            $warnings[] = "Code postal : " . $result['zip'] . ' incorrect';
+                    }
                 } else {
                     $warnings[] = 'Adresse non renseignée';
                 }
@@ -1451,7 +1466,12 @@ class Bimp_CommandeFourn extends BimpComm
                 $success2 = '';
                 $result2 = $this->setObjectAction('approve', 0, array(), $success2);
                 if (count($result2['errors'])) {
-                    $result['warnings'][] = BimpTools::getMsgFromArray($result2['errors'], 'Echec de l\'approbation ' . $this->getLabel('of_the'));
+                    if((int) BimpCore::getConf('bimpcore_use_db_transactions', 0)){
+                        $result['errors'][] = 'Echec de l\'approbation ' . $this->getLabel('of_the');
+                        $result['errors'] = BimpTools::merge_array($result['errors'], $result2['errors']);  
+                    }
+                    else
+                        $result['warnings'][] = BimpTools::getMsgFromArray($result2['errors'], 'Echec de l\'approbation ' . $this->getLabel('of_the'));
                 } else {
                     $success .= '<br/>' . $success2;
                 }
@@ -1600,7 +1620,7 @@ class Bimp_CommandeFourn extends BimpComm
 //            ini_set('display_errors', 1);
         $url = "ftp-edi.groupe-ldlc.com";
         $login = "bimp-erp";
-        $mdp = "MEDx33w+3u(";
+        $mdp = "Yu5pTR?(3q99Aa";
         $folder = "/FTP-BIMP-ERP/tracing/";
 
 //            $url = "exportftp.techdata.fr";
@@ -1849,13 +1869,9 @@ class Bimp_CommandeFourn extends BimpComm
         if (!count($errors)) {
             $arrayToXml->writeNodes($tab);
 
-//            $remote_file = DOL_DATA_ROOT.'/importldlc/exportCommande/'.$this->getData('ref').'.xml';
-//            $remote_file = "ftp://bimp-erp:MEDx33w+3u(@ftp-edi.groupe-ldlc.com/FTP-BIMP-ERP/orders/".$this->getData('ref').'.xml';
-
-
             $url = "ftp-edi.groupe-ldlc.com";
             $login = "bimp-erp";
-            $mdp = "MEDx33w+3u(";
+            $mdp = "Yu5pTR?(3q99Aa";
 
             if ($conn = ftp_connect($url)) {
                 if (ftp_login($conn, $login, $mdp)) {

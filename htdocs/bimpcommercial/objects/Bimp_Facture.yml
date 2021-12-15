@@ -264,6 +264,10 @@ fields:
         default_value: 0
         values: 
             array: chorus_status
+    chorus_data:
+        label: Données Chorus
+        dol_extra_field: 1
+        type: json
 #    rib_client:
 #        label: Rib Client
 #        dol_extra_field: 1
@@ -285,6 +289,7 @@ fields:
     ref: unset
     fk_availability: unset
     fk_input_reason: unset
+    total_ht: unset
        
 forms: 
     default: 
@@ -669,8 +674,8 @@ forms:
               content: 
                   callback: renderClientSelectChorusStructuresInput
             - custom: 1
-              label: Service
-              input_name: id_service
+              label: Code Service
+              input_name: code_service
               content: 
                   callback: renderClientSelectChorusServicesInput
               depends_on: id_structure
@@ -845,6 +850,7 @@ filters_panels:
             datef: 
                 
 lists_cols:
+    total_ht: unset
     facnumber: 
         object_link: 1
     ref: unset

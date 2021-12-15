@@ -5,7 +5,6 @@ title:
         method: getPageTitle
         
 js: 
-    0: /bimptechnique/views/js/SignaturePad.object.js
     1: /bimptechnique/views/js/signature.js
     
 css: 
@@ -37,14 +36,14 @@ sections:
                 view: 
                     name: default
                     object: fiche
-          - id: facturation
-            title: Facturation
-            struct: 
-                    type: list
-                    list:
-                        object: fiche
-                        children: facturation
-                        name: in_fiche
+#          - id: facturation
+#            title: Facturation
+#            struct: 
+#                    type: list
+#                    list:
+#                        object: fiche
+#                        children: facturation
+#                        name: in_fiche
           - id: files
             title: Fichiers
             struct: 

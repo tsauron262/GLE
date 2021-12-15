@@ -150,6 +150,13 @@ lists:
         delete_btn: 1
         extra_btn: 
             callback: getListExtraButtons
+        cols: 
+            name:
+            id_user_create: 
+            owner_nom_url: 
+            utilisation: 
+            shared_users:
+            shared_groups:
                     
     default: 
         extends: base
@@ -162,13 +169,6 @@ lists:
         add_btn_label: Nouvelle configuration
         n: 0
         pagination: 0
-        cols: 
-            name:
-            id_user_create: 
-            owner_nom_url: 
-            utilisation: 
-            shared_users:
-            shared_groups:
             
     globale: 
         extends: base
@@ -184,7 +184,6 @@ lists:
         enable_search: 1
         n: 10
         sort_way: desc
-        cols: 
                 
     user: 
         extends: base
@@ -195,4 +194,3 @@ lists:
         enable_sort: 1
         sort_way: desc
         n: 10
-        cols:

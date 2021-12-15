@@ -646,7 +646,7 @@ class pdf_fi
                     $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "", 0, 'L');
                     $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "SIGNATURE CLIENT", 0, 'L');
                     $img_base64_encoded = $fiche->getData('base_64_signature');
-                    $img = '<img src="@' . preg_replace('#^data:image/[^;]+;base64,#', '', $img_base64_encoded) . '" width="300px" >';
+                    $img = '<img src="@' . preg_replace('#^data:image/[^;]+;base64,#', '', $img_base64_encoded) . '" width="300px">';
                     $pdf->writeHTML($img, true, false, true, false, '');
                 } elseif ($fiche->getData('fk_statut') != 0) {
                     if ($pdf->GetY() > 250) {

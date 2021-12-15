@@ -351,7 +351,8 @@ class BimpNote extends BimpObject
                 } elseif ($msg['is_grp'])
                     $msg['dest']['nom'] = $note->displayDestinataire(false, true);
             }
-            $messages['content'][] = $msg;
+            if(count($msg))
+                $messages['content'][] = $msg;
         }
 
         if (!empty($messages['content']))

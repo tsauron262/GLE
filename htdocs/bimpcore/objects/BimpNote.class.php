@@ -440,7 +440,7 @@ class BimpNote extends BimpObject
 
         global $user;
 
-        if ($this->getData('viewed') == 0) {
+        if ($this->getData('viewed') == 0 && $this->i_am_dest()) {
             $this->updateField('viewed', 1);
         }
 

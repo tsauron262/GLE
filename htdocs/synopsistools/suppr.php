@@ -33,46 +33,38 @@ require_once('../main.inc.php');
 
 llxHeader();
 
-//if (isset($_REQUEST['connect']))
-//    echo "<script>$(window).on('load', function() {initSynchServ(idActionMax);});</script>";
+//categorie sans prod
+$tables = array('ps_category', 'ps_category_group', 'ps_category_lang', 'ps_category_shop');
 
-//echo '
-//<script>
-//    jQuery("document").ready(function(){
-//        var iframe = document.createElement("iframe");
-//        iframe.src = "https://erp.bimp.fr/bimp8/bimpsupport/public/page.php"+window.location.search;
-//        /* style peut être modifiée */
-//        iframe.style["width"] = "80%";
-//        iframe.style["height"] = "80%";
-//        iframe.style["min-width"] = "900px";
-//        iframe.style["min-height"] = "500px";
-//        iframe.style.marginLeft = "10%";
-//        /* fin style */
-//        jQuery(".div_iframe").each(function(){
-//            this.appendChild(iframe);
-//        });
-//    });
-//</script>
-//<div class="div_iframe"></div>
-//';
+$tables = array('ps_feature', 'ps_feature_lang', 'ps_feature_shop', 'ps_feature_value', 'ps_feature_value_lang');
 
+$tables = array('ps_product', 'ps_product_lang', 'ps_product_shop', 'ps_product_supplier', 'ps_product_attachment', 'ps_category_product', 'ps_feature_product');
 
-echo ' 
-<script>
-    jQuery("document").ready(function(){
-        var iframe = document.createElement("iframe");
-        iframe.src = "https://erp.bimp.fr/bimp8/bimpinterfaceclient/client.php"+window.location.search;
-        /* style peut être modifiée */
-        iframe.style["width"] = "100%";
-        iframe.style["min-height"] = "1200px";
-        /* fin style */
-        jQuery(".div_iframe").each(function(){
-            this.appendChild(iframe);
-        });
-    });
-</script>
-<div class="div_iframe"></iframe></div>
-';
+$tables = array('ps_image', 'ps_image_lang', 'ps_image_shop', 'ps_image_type');
+
+foreach ($tables as $table){
+    $oldTable = str_replace("ps_", "pre2902_", $table);
+    $newTable = str_replace("ps_", "pre2902_SAUV_", $table);
+    echo '<br/><br/>ALTER TABLE '.$oldTable.' RENAME TO '.$newTable.';';
+    
+    
+    $oldTable = $table;
+    $newTable = str_replace("ps_", "pre2902_", $table);
+    echo '<br/><br/>ALTER TABLE '.$oldTable.' RENAME TO '.$newTable.';';
+}
+
+//revert
+//echo '<br/><br/>revert';
+//foreach ($tables as $table){
+//    $oldTable = str_replace("ps_", "pre2902_", $table);
+//    $newTable = $table;
+//    echo '<br/><br/>ALTER TABLE '.$oldTable.' RENAME TO '.$newTable.';';
+//    
+//    
+//    $oldTable = str_replace("ps_", "pre2902_SAUV_", $table);;
+//    $newTable = str_replace("ps_", "pre2902_", $table);
+//    echo '<br/><br/>ALTER TABLE '.$oldTable.' RENAME TO '.$newTable.';';
+//}
 
 
 llxFooter();

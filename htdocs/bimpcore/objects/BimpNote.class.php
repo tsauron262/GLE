@@ -351,7 +351,8 @@ class BimpNote extends BimpObject
                 } elseif ($msg['is_grp'])
                     $msg['dest']['nom'] = $note->displayDestinataire(false, true);
             }
-            $messages['content'][] = $msg;
+            if(count($msg))
+                $messages['content'][] = $msg;
         }
 
         if (!empty($messages['content']))
@@ -439,7 +440,7 @@ class BimpNote extends BimpObject
 
         global $user;
 
-        if ($this->getData('viewed') == 0) {
+        if ($this->getData('viewed') == 0 && $this->i_am_dest()) {
             $this->updateField('viewed', 1);
         }
 

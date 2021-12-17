@@ -1928,7 +1928,7 @@ class Bimp_Societe extends BimpDolObject
             return array('Siren de la Poste, trop de résultats');
 
         $errors = array();
-
+        
         $siret = '';
         $siren = '';
 
@@ -2090,6 +2090,11 @@ class Bimp_Societe extends BimpDolObject
 //                    BimpCore::addlog('Echec connexion SOAP pour Credit SAFE', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', $this);
 //                }
             }
+        }
+        
+        if($this->field_exists('date_check_credit_safe')) {
+            $this->updateField('date_check_credit_safe', date('Y-m-d H:i:s'));
+            return $errors;
         }
 
         return $errors;

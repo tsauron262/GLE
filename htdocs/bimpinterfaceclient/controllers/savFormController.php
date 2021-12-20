@@ -695,8 +695,11 @@ class savFormController extends BimpPublicController
 
         // Système: 
         $html .= '<div class="col-xs-12 col-md-4 col-lg-3">';
-        $html .= '<label>Système</label><br/>';
-        $html .= BimpInput::renderInput('select', 'eq_system', 2, array('options' => BimpCache::getSystemsArray()));
+        $html .= '<label>Système</label><sup>*</sup><br/>';
+        $html .= BimpInput::renderInput('select', 'eq_system', null,array(
+                    'options'     => BimpCache::getSystemsArray(),
+                    'extra_class' => 'required'
+        ));
         $html .= '</div>';
 
         $html .= '</div>';
@@ -1314,7 +1317,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
             'eq_serial'           => array('label' => 'N° de série', 'required' => 1),
             'eq_symptomes'        => array('label' => 'Description du problème', 'required' => 1),
             'eq_etat'             => array('label' => 'Etat du matériel', 'required' => 0),
-            'eq_system'           => array('label' => 'Système', 'required' => 0),
+            'eq_system'           => array('label' => 'Système', 'required' => 1),
             'sav_centre'          => array('label' => 'Lieu', 'required' => 1),
             'sav_day'             => array('label' => 'Jour', 'required' => 0),
             'sav_slot'            => array('label' => 'Horaire', 'required' => 0),

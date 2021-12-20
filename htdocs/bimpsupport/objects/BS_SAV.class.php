@@ -1651,12 +1651,17 @@ class BS_SAV extends BimpObject
                 }
             }
         }
+        
+        $sup = '';
+        if(isset($_GET['code_centre']) && count(explode('-', $_GET['code_centre'])) == 1 && isset($table[$_GET['code_centre']]))
+            $sup .= '<br/>('.$centres[$_GET['code_centre']]['label'].' '.$table[$_GET['code_centre']].' jours)';
+        
         $html = '';
         $html .= '<div style="max-width:700px; float: left; padding:5px">' . BimpRender::renderBimpListTable($result, array('centre' => 'Centre', 'time' => 'Temps moyen en J')) . '</div>';
         if (count($result2))
             $html .= '<div style="max-width:700px; float: left; padding:5px">' . BimpRender::renderBimpListTable($result2, array('centre' => 'Centre', 'time' => 'Temps moyen en  J')) . '</div>';
 
-        $html = BimpRender::renderPanel('Temps moyen réparation sur ' . $time . ' jours ' . ($ios ? '(iOs)' : '(hors iOs)'), $html);
+        $html = BimpRender::renderPanel('Temps moyen réparation sur ' . $time . ' jours ' . ($ios ? '(iOs)' : '(hors iOs)').$sup, $html, '', array('open' => 0));
 
         return $html;
     }
@@ -1686,7 +1691,12 @@ class BS_SAV extends BimpObject
         if (count($result2))
             $html .= '<div style="float: left; padding:5px">' . BimpRender::renderBimpListTable($result2, array('centre' => 'Centre', 'time' => 'Temps moyen en  J')) . '</div>';
 
-        $html = BimpRender::renderPanel('Temps max diagnostic ' . ($ios ? '(iOs)' : '(hors iOs)'), $html);
+        
+        $sup = '';
+        if(isset($_GET['code_centre']) && count(explode('-', $_GET['code_centre'])) == 1 && isset($table[$_GET['code_centre']]))
+            $sup .= '<br/>('.$centres[$_GET['code_centre']]['label'].' '.$table[$_GET['code_centre']].' jours)';
+        
+        $html = BimpRender::renderPanel('Temps max diagnostic ' . ($ios ? '(iOs)' : '(hors iOs)').$sup, $html, '',  array('open' => 0));
 
         return $html;
     }

@@ -5444,7 +5444,7 @@ class Bimp_Facture extends BimpComm
                         // copie des lignes: 
                         $lines_errors = $this->createLinesFromOrigin($avoir_to_refacture, $params);
                         if (count($lines_errors)) {
-                            $warnings[] = BimpTools::getMsgFromArray($lines_errors);
+                            $errors[] = BimpTools::getMsgFromArray($lines_errors);
                         }
 
                         // Copie des contacts: 

@@ -722,7 +722,7 @@ class Bimp_User extends BimpObject
     public function showUserTheme($object, $edit = 0, $foruserprofile = false)
     {
         global $conf, $langs;
-        
+
         $html = '';
 
         $dirthemes = array('/theme');
@@ -1403,7 +1403,7 @@ class Bimp_User extends BimpObject
 
         return $html;
     }
-    
+
     /**
      * Renvoie un ou plusieurs utilisateurs en fonction de leurs disponibilité
      * 
@@ -1423,38 +1423,42 @@ class Bimp_User extends BimpObject
      * @return int|array
      */
     public static function getUsersAvaible($users_in, &$errors = array(), &$warnings = array(),
-            $max_user = 1, $return_array = false, $fetch = false, $from = null, $to = null) {
-        
-        if(1 < $max_user and !$return_array)
+            $max_user = 1, $return_array = false, $fetch = false, $from = null, $to = null)
+    {
+
+        if (1 < $max_user and!$return_array)
             $errors[] = "Impossible de renvoyer plusieurs utilisateurs sans utiliser les tableaux !";
-        
-        if(1 == $max_user and $return_array)
+
+        if (1 == $max_user and $return_array)
             $warnings[] = "Il est recommandé d'utilisé un retour unique plutôt qu'un tableau";
 
         if (count($errors))
             return -1;
-        
-        if(!is_array($users_in))
+
+        if (!is_array($users_in))
             $users_in = array($users_in);
-                
-        
+
+
         $users_out = array();
         $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $users_in[0]);
-        
+
         $nb_add = 0;
-        foreach($users_in as $u) {
-            
+        foreach ($users_in as $u) {
+
             $cnt_tab = count($users_out);
-            
+
             // Il s'agit d'un utilisateur
-            if(0 < $u) {
-                
-                if(self::isUserAvaible($u, $errors, $from, $to))
+            if (0 < $u) {
+
+                if (self::isUserAvaible($u, $errors, $from, $to))
                     $users_out[] = $u;
-                
-            // Supérieur hiérarchique
-            } elseif($u == 'parent') {
+
+                // Supérieur hiérarchique
+            } elseif ($u == 'parent') {
                 $id_parent = $user->getData('fk_user');
+                
+                if($id_parent == 1414)
+                    continue;
 
                 if (self::isUserAvaible($id_parent, $errors, $from, $to))
                     $users_out[] = $id_parent;
@@ -1467,44 +1471,43 @@ class Bimp_User extends BimpObject
                     if (self::isUserAvaible($id, $errors, $from, $to))
                         $users_out[] = $id;
                 }
-                
             }
-            
-            if($cnt_tab < count($users_out))
+
+            if ($cnt_tab < count($users_out))
                 $nb_add++;
-            
-            if($nb_add >= $max_user)
+
+            if ($nb_add >= $max_user)
                 break;
         }
-        
-        if(empty($users_out)) {
+
+        if (empty($users_out)) {
             $id_default = array_shift($users_in);
             $users_out[] = $id_default;
             $warnings[] = "Personne n'est disponible, l'utilisateur par défaut a été selectionné automatiquement (id: " . $id_default . ')';
         }
-        
+
         // Renvoie plusieurs utilisateurs
-        if($return_array) {
-            
-            if(!$fetch)
+        if ($return_array) {
+
+            if (!$fetch)
                 return $users_out;
-                
+
             else {
                 $user_fetch = array();
-                foreach($users_out as $u)
-                    $user_fetch[] = BimpCache::getBimpObjectInstance ('bimpcore', 'Bimp_User', (int) $u);
-                
+                foreach ($users_out as $u)
+                    $user_fetch[] = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $u);
+
                 return $user_fetch;
             }
-        
-        // Renvoie un seul utilisateur
+
+            // Renvoie un seul utilisateur
         } else {
             $id_user_out = array_pop($users_out);
-            
-            if(!$fetch)
+
+            if (!$fetch)
                 return $id_user_out;
             else
-                return BimpCache::getBimpObjectInstance ('bimpcore', 'Bimp_User', (int) $id_user_out);
+                return BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user_out);
         }
     }
 
@@ -1528,70 +1531,146 @@ class Bimp_User extends BimpObject
     }
     
     
-    public static function isUserAvaible($id_user, &$errors = array(), $from = null, $to = null) {
+    public static function isUserAvaible($id_user, &$errors = array(), $from = null) {
 
-        if(!is_null($to) and is_null($from)) {
-            $to = null;
-        }
-
-        if(is_null($id_user) or $id_user < 0) {
+        if (is_null($id_user) or $id_user < 0) {
             $errors[] = "ID de l'utilisateur absent ou mal renseigné";
             return -1;
         }
         
+        // L'utilisateur est actif ?
+        $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
+        if (!$user->getData('statut'))
+            return 0;
+        
+        
+        // L'utilisateur est disponible ?
         if(is_null($from)) {
-            $datetime = new DateTime();
-            $hour = (int) $datetime->format('h');
+            $init_from = new DateTime();
+            $hour = (int) $init_from->format('h');
             
             // Si on est avant midi, on vérifie les dispo à 10h
             if($hour < 12)
-                $from = $datetime->format('Y-m-d 10:00:00');
+                $from = $init_from->format('Y-m-d 10:00:00');
             
             // Si on est après-midi mais pas le soir, on vérifie les dispo à 15h
             elseif ($hour < 18)
-                $from = $datetime->format('Y-m-d 15:00:00');
+                $from = $init_from->format('Y-m-d 15:00:00');
             
             // Pendant la soirée on vérifie les dispo le lendemain matin (10h)
             else {
-                $day = (int) $datetime->format('h') + 1; // TODO fin de mois ?
-                $from = $datetime->format('Y-m-' . $day . ' 10:00:00');
+                // TODO Fin de semaine/jour férié ?
+                $init_from->add(new DateInterval('P1D'));
+                $from = $init_from->format('Y-m-d 10:00:00');
             }
         }
-        
-        
-        if(!is_null($from) and ! is_null($to)) {
-            $datetime_from = new DateTime($from);
-            $datetime_to = new DateTime($to);
-            if($to < $from){
-                $errors[] = "Date de fin antérieure à date de début";
-                return -2;
-            }
-        }
-
-        $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
-        if(!$user->getData('statut'))
-            return 0;
                 
         $sql = 'SELECT *';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'actioncomm';
         $sql .= ' WHERE fk_user_action = ' . $id_user;
         $sql .= ' AND code IN ("CONGES", "RTT_DEM")';
         $sql .= ' AND (';
-        
+
         $sql .= ' datep < "' . $from . '" AND ';
         $sql .= ' datep2 > "' . $from . '"';
-        
+
         $sql .= ')';
 
         $rows = self::getBdb()->executeS($sql, 'object');
 
-        
         foreach ($rows as $r) {
             return 0;
         }
 
         return 1;
-  
     }
     
+    
+    
+    public function boxCreateUser($boxObj, $context)
+    {
+        global $user;
+        $boxObj->boxlabel = 'Création client par commercial';
+        
+        if ($context == 'init')
+            return 1;
+        
+        $boxObj->config['nbJ'] = array('type' => 'int', 'val_default' => 31, 'title' => 'Nb Jours');
+        $boxObj->config['my'] = array('type' => 'radio', 'val_default' => 1, 'title' => 'Personne à afficher', 'values'=>array(0=>'Tous le monde', 1=> 'N-1'));
+        $nbJ = ((isset($boxObj->confUser['nbJ']) && $boxObj->confUser['nbJ'] > 0) ? $boxObj->confUser['nbJ'] : $boxObj->config['nbJ']['val_default']);
+        $my = (isset($boxObj->confUser['my']) ? $boxObj->confUser['my'] : $boxObj->config['my']['val_default']);
+        
+        $boxObj->boxlabel .= ' sur '.$nbJ.' jours';
+
+        $sql = "SELECT count(*) as nb, sc.fk_user, u.lastname, u.firstname FROM llx_societe s
+LEFT JOIN llx_societe_commerciaux sc ON sc.fk_soc = s.rowid
+LEFT JOIN llx_user u ON u.rowid = sc.fk_user 
+LEFT JOIN llx_user u2 ON u2.rowid = u.fk_user 
+WHERE client > 0 AND  DATEDIFF(now(), s.datec ) <= ".$nbJ." ";
+        
+        $userId = $user->id;
+        if($my)
+            $sql .= "AND (u.fk_user = ".$userId." || u2.fk_user = ".$userId." || u.rowid = ".$userId.") ";
+        $sql .= "GROUP BY sc.fk_user ORDER BY nb DESC";
+        
+        $lns = BimpCache::getBdb()->executeS($sql);
+        
+        $data = $data2 = array();
+        $i = 0;
+        foreach ($lns as $ln) {
+            $data[] = array($ln->lastname.' '.$ln->firstname, $ln->nb);
+            $data2[] = array('user'=>$ln->lastname.' '.$ln->firstname, 'nb'=>$ln->nb);
+        }
+
+        $boxObj->addCamenbere('', $data);
+        
+        $boxObj->addList(array('user' => 'Utilisateur', 'nb' => 'Nombre de créations'), $data2);
+        return 1;
+    }
+    
+    public function boxServiceUser($boxObj, $context)
+    {
+        global $user;
+        $boxObj->boxlabel = 'Répartition service par commercial';
+        
+        if ($context == 'init')
+            return 1;
+        
+        $boxObj->config['nbJ'] = array('type' => 'int', 'val_default' => 31, 'title' => 'Nb Jours');
+        $boxObj->config['my'] = array('type' => 'radio', 'val_default' => 1, 'title' => 'Personne à afficher', 'values'=>array(0=>'Tous le monde', 1=> 'N-1 + N-2'));
+        $nbJ = ((isset($boxObj->confUser['nbJ']) && $boxObj->confUser['nbJ'] > 0) ? $boxObj->confUser['nbJ'] : $boxObj->config['nbJ']['val_default']);
+        $my = (isset($boxObj->confUser['my']) ? $boxObj->confUser['my'] : $boxObj->config['my']['val_default']);
+        
+        $boxObj->boxlabel .= ' sur '.$nbJ.' jours';
+
+        
+        $sql = "SELECT u.lastname, u.firstname, SUM(total_ht) as total, COUNT(DISTINCT a.rowid) as nbTot, SUM(IF(fk_product_type=1, total_ht, 0)) as totalServ, SUM(IF(fk_product_type=1, 1, 0)) as nbServ, SUM(a.qty) as qtyTot, SUM(IF(fk_product_type=1, a.qty, 0)) as qtyServ
+FROM llx_facturedet a
+LEFT JOIN llx_facture f ON f.rowid = a.fk_facture
+LEFT JOIN llx_element_contact elemcont ON elemcont.element_id = a.fk_facture
+LEFT JOIN llx_c_type_contact typecont ON elemcont.fk_c_type_contact = typecont.rowid
+LEFT JOIN llx_user u ON u.rowid = elemcont.fk_socpeople 
+LEFT JOIN llx_user u2 ON u2.rowid = u.fk_user 
+LEFT JOIN llx_product product ON product.rowid = a.fk_product
+WHERE typecont.element = 'facture' AND typecont.source = 'internal' AND typecont.code = 'SALESREPFOLL' AND f.type IN ('0','1','2','4','5') ";
+        $sql .= "AND  DATEDIFF(now(), f.datef ) <= ".$nbJ." ";
+        
+        $userId = $user->id;
+        if($my)
+            $sql .= "AND (u.fk_user = ".$userId." || u2.fk_user = ".$userId." || u.rowid = ".$userId.") ";
+        $sql .= "GROUP BY elemcont.fk_socpeople ORDER BY lastname ASC";
+        
+        
+        $lns = BimpCache::getBdb()->executeS($sql);
+        
+        $data = array();
+        $i = 0;
+        foreach ($lns as $ln) {
+            $data[] = array('user'=>$ln->lastname.' '.$ln->firstname, 'total'=>price($ln->total), 'totalServ'=>price($ln->totalServ), 'pourc'=>price($ln->totalServ/$ln->total*100).' %', 'qty'=>round($ln->qtyTot), 'qtyServ'=>round($ln->qtyServ));
+        }
+
+        
+        $boxObj->addList(array('user' => 'Utilisateur', 'total' => 'CA', 'totalServ' => 'CA Service', 'pourc' => 'Pourcentage service', 'qty' => 'Qty', 'qtyServ' => 'Qty Service'), $data);
+        return 1;
+    }
 }

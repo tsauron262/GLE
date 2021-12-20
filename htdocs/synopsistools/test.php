@@ -21,13 +21,42 @@ require("../main.inc.php");
 
 llxHeader();
 
-echo BimpCache::$cache_server->printAll();
-if($_REQUEST['deleteAll'] == 'true')
-    echo BimpCache::$cache_server->deleteAll();
+//echo BimpCache::$cache_server->printAll();
+//if($_REQUEST['deleteAll'] == 'true')
+//    echo BimpCache::$cache_server->deleteAll();
 
+$h = BimpObject::getBimpObjectInstance('bimpcore', 'BimpHistory');
+$h->getHistory(null, 'eee');
 
+die('hhh');
 
-llxFooter();
+BimpTools::lockNum('ggggh');
+
+global $db;
+$db->begin();
+//$db->query('INSERT into table_test (id, value) VALUES (3,3);');
+$db->query('UPDATE table_testttff set value = 4 WHERE id=1;');
+//$db->query('LOCK TABLES table_test WRITE;');
+//$db->query('UNLOCK TABLES;');
+//die('ggggg');
+
+$db2 = BimpCache::getBdb(false)->db;
+$sql = $db2->query('SELECt * FROM table_test WHERE id = 1');
+while ($ln = $db2->fetch_object($sql)){
+    echo '<pre>'.print_r($ln,1).'</pre>';
+}
+
+echo '<br/><br/><h1>db2</h1>';
+
+$db2 = BimpCache::getBdb(true)->db;
+$sql = $db2->query('SELECT * FROM table_test WHERE id = 1');
+while ($ln = $db2->fetch_object($sql)){
+    echo '<pre>'.print_r($ln,1).'</pre>';
+}
+echo 'fin';
+
+//$db->commit();
+//llxFooter();
 die('uuuu');
 
 

@@ -17,7 +17,7 @@
  * BIMP-ERP-1.2
  */
 //define('NOREQUIREMENU');
-//require_once('../main.inc.php');
+require_once('../main.inc.php');
 
 
 
@@ -35,11 +35,28 @@
 
 //if (isset($_REQUEST['connect']))
 //    echo "<script>$(window).on('load', function() {initSynchServ(idActionMax);});</script>";
-
-echo '<h1>Iframe OK</h1><br/><br/>Paramètre url : <br/>';
-echo '<pre>';
-print_r($_GET);
-echo '</pre>';
+llxHeader();
+echo 'ff
+<script>
+    jQuery("document").ready(function(){
+        var iframe = document.createElement("iframe");
+        var params = window.location.search;
+        if(params == "")
+            params = "?fc=savForm";
+        else
+            params += "&fc=savForm";
+        iframe.src = "https://erp.bimp.fr/bimp8/bimpinterfaceclient/client.php"+params;
+        /* style peut être modifiée */
+        iframe.style["width"] = "100%";
+        iframe.style["min-height"] = "1200px";
+        iframe.style["margin-top"] = "43px";
+        /* fin style */
+        jQuery(".div_iframe").each(function(){
+            this.appendChild(iframe);
+        });
+    });
+</script>
+<div class="div_iframe"></iframe></div>';
 
 //llxFooter();
 ?>

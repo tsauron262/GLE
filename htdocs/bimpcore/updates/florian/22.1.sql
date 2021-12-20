@@ -18,7 +18,5 @@ CREATE TABLE IF NOT EXISTS `llx_bimpcore_signature` (
   `ip_signataire` varchar(255) NOT NULL DEFAULT '',
   `base_64_signature` mediumtext DEFAULT NULL,
   `allow_elec` tinyint(1) NOT NULL DEFAULT 1,
-  `allow_dist` tinyint(1) NOT NULL DEFAULT 1,
-  `need_sms_code` tinyint(1) NOT NULL DEFAULT 0,
-  `code_sms_infos` TEXT NOT NULL DEFAULT ''
+  `allow_dist` tinyint(1) NOT NULL DEFAULT 1
 );

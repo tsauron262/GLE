@@ -444,6 +444,11 @@ fields:
         label: Limite recommandée par Crédit SAFE
         type: money
         edit: 0
+        
+    date_check_credit_safe:
+        label: Date de verification Crédit SAFE
+        type: datetime
+        dol_extra_field: 1
             
     outstanding_limit_atradius: 
         label: Limite de crédit Atradius
@@ -735,6 +740,7 @@ fields_tables:
               value:
                   callback: getCreditSafeLettre
             - field: notecreditsafe
+            - field: date_check_credit_safe
             - field: mode_reglement
               edit: 1
             - field: cond_reglement

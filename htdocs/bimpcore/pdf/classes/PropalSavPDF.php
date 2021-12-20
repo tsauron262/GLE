@@ -143,13 +143,13 @@ class SavRestitutePDF extends PropalSavPDF
         $html .= '<td></td>';
         $html .= '</tr>';
         $html .= '<tr>';
-        $html .= '<td>Nom :</td>';
+        $html .= '<td>Nom et prénom:</td>';
 
         $html .= '<td rowspan="4" style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/><br/></td>';
         $html .= '</tr>';
 
         $html .= '<tr>';
-        $html .= '<td>Prénom :</td>';
+        $html .= '<td></td>';
         $html .= '</tr>';
 
         $html .= '<tr>';
@@ -170,11 +170,11 @@ class SavRestitutePDF extends PropalSavPDF
         $this->signature_params = array(
             'page'          => $page,
             'y_pos'         => $yPos + 10,
-            'x_pos'         => 146,
+            'x_pos'         => 148,
             'width'         => 40,
-            'nom_x_offset'  => -32,
-            'nom_y_offset'  => 2,
-            'date_x_offset' => -32,
+            'nom_x_offset'  => -47,
+            'nom_y_offset'  => 5,
+            'date_x_offset' => -38,
             'date_y_offset' => 12,
         );
 

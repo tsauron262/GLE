@@ -1,4 +1,4 @@
- <?php
+<?php
 
 require_once(DOL_DOCUMENT_ROOT . "/bimpcore/classes/BimpCacheRedis.php");
 
@@ -390,8 +390,8 @@ class BimpCache
         if (!$result) {
             $result = array();
             global $db;
-            $req = 'SELECT AVG(DATEDIFF(date_terminer, date_pc )) as moy, code_centre FROM '.MAIN_DB_PREFIX.'bs_sav WHERE DATEDIFF(now(), date_pc ) <='.$nbJ.'';
-            if($ios)
+            $req = 'SELECT AVG(DATEDIFF(date_terminer, date_pc )) as moy, code_centre FROM ' . MAIN_DB_PREFIX . 'bs_sav WHERE DATEDIFF(now(), date_pc ) <=' . $nbJ . '';
+            if ($ios)
                 $req .= ' AND system = 300';
             else
                 $req .= ' AND system != 300';
@@ -414,7 +414,7 @@ class BimpCache
             $result = array();
             global $db;
             $req = "SELECT MIN(date_pc), code_centre, DATEDIFF(now(), MIN(date_pc) ) as time FROM llx_bs_sav a WHERE a.status = '0'";
-            if($ios)
+            if ($ios)
                 $req .= ' AND system = 300';
             else
                 $req .= ' AND system != 300';
@@ -1259,15 +1259,25 @@ class BimpCache
 
     // Sociétés: 
 
-    public static function getSocieteContactsArray($id_societe, $include_empty = true, $empty_label = '')
+    public static function getSocieteContactsArray($id_societe, $include_empty = true, $empty_label = '', $active_only = false)
     {
         $cache_key = '';
 
         if ((int) $id_societe) {
             $cache_key = 'societe_' . $id_societe . '_contacts_array';
+
+            if ($active_only) {
+                $cache_key .= '_active_only';
+            }
+
             if (!isset(self::$cache[$cache_key])) {
 //                self::$cache[$cache_key] = array(0 => ""); => Ne pas déco: on ne doit pas inclure de valeurs vides dans le cache, utiliser $include_empty.
                 $where = '`fk_soc` = ' . (int) $id_societe;
+
+                if ($active_only) {
+                    $where .= ' AND statut = 1';
+                }
+                
                 $rows = self::getBdb()->getRows('socpeople', $where, null, 'array', array('rowid', 'firstname', 'lastname'));
                 if (!is_null($rows)) {
                     foreach ($rows as $r) {
@@ -1603,19 +1613,20 @@ class BimpCache
         return self::getCacheArray($cache_key, $include_empty, 0, $empty_label);
     }
 
-    public static function getUserCentresArray($valDef = '')
+    public static function getUserCentresArray($valDef = '', $include_empty = false)
     {
-
-        $centres = array(
-            '' => ''
-        );
         global $user;
         if (BimpObject::objectLoaded($user)) {
-            $cache_key = 'user_' . $user->id . '_centres_array'.$valDef;
+            $cache_key = 'user_' . $user->id . '_centres_array_' . $valDef;
 
             $result = self::getCacheServeur($cache_key);
             if (!$result) {
                 $result = array();
+
+                if ($include_empty) {
+                    $result[''] = '';
+                }
+
                 $userCentres = explode(' ', $user->array_options['options_apple_centre']);
                 $centres = self::getCentres();
 
@@ -1627,18 +1638,16 @@ class BimpCache
                             }
                         }
                     }
-                }
-                else {
+                } else {
                     foreach ($centres as $code => $centre) {
                         $result[$code] = $centre['label'];
                     }
                 }
-                
-                if($valDef != ''){
+
+                if ($valDef != '') {
                     foreach ($centres as $code => $data) {
                         if (!isset($result[$code]) && $valDef == $code) {
                             $result[$code] = $data['label'];
-                            
                         }
                     }
                 }
@@ -1648,6 +1657,9 @@ class BimpCache
             return $result;
         }
 
+        if ($include_empty) {
+            return array('' => '');
+        }
         return array();
     }
 
@@ -2508,7 +2520,7 @@ class BimpCache
 
         return self::$cache['secteurs_array'];
     }
-    
+
     public static function getIpFromDns($host)
     {
         if (filter_var($host, FILTER_VALIDATE_IP))
@@ -2543,10 +2555,9 @@ class BimpCache
         }
         return $cache;
     }
-    
 
     // Comme getSecteursArray avec l'option "Tous" en plus
-    
+
     public function getSecteurAllArray()
     {
         if (!BimpCore::getConf("USE_SECTEUR")) {

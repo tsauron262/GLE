@@ -171,6 +171,7 @@ fields:
                     method: getListCentre
                     params:
                         - code_centre
+                        - 1
         required: 1
         default_value: 
             callback: getDefaultCodeCentre
@@ -185,6 +186,7 @@ fields:
                     method: getListCentre
                     params:
                         - code_centre_repa
+                        - 1
         default_value: 
             callback: getDefaultCodeCentreRepa
         depends_on: code_centre
@@ -703,6 +705,25 @@ forms:
               content: 
                   callback: displayFactureAmountToPay
               input_name: inut
+            - custom: 1
+              label: Créer la fiche signature
+              input_name: create_signature
+              input: 
+                  type: toggle
+              value: 
+                  callback: needSignaturePropal
+            - custom: 1
+              label: Contenu e-mail pour la signature à distance du devis
+              input_name: email_content
+              input: 
+                  type: html
+                  help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE} et {LIEN_ESPACE_CLIENT}.<br/>Le devis sera automatiquement joint à l'email"
+              value: 
+                  callback: getDefaultSignDistEmailContent
+              display_if: 
+                  field_name: create_signature
+                  show_values: 1
+            
             
     resolution: 
         rows: 

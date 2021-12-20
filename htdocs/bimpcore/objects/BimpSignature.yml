@@ -5,12 +5,15 @@ public_icon: pe_pen
 common_fields: 0
 
 list_page_url: 
-    controller: signatures
+    controller: admin
+    url_params: 
+        tab: signatures
     
 nom_url: 
     syntaxe: <name>
     card: default
     
+header_edit_form: edit
 header_list_name: default
 header_btn: 
     callback: getActionsButtons
@@ -76,7 +79,7 @@ fields:
         default_value: 0
         
     date_open: 
-        label: Date début de demande signature
+        label: Date ouverture accès public
         type: date
         
     date_signed: 
@@ -96,6 +99,10 @@ fields:
         type: id_object
         object: contact
         default_value: 0
+        input: 
+            type: select
+            options: 
+                array: contacts
         
     id_user_client_signataire:
         label: Compte utilisateur signataire
@@ -146,11 +153,30 @@ fields:
         default_value: 1
         
     allow_dist: 
-        label: Signature électronique à distance autorisée
+        label: Signature à distance autorisée
         type: bool
         default_value: 1
         
+    need_sms_code: 
+        label: Certification signature à distance par code SMS
+        type: bool
+        default_value: 0
+        display_if: 
+            field_name: allow_dist
+            show_values: 1
+        
+    code_sms_infos: 
+        label: Données code SMS
+        type: json
+        
 forms:
+    edit: 
+        rows: 
+            - field: id_contact
+            - field: allow_elec
+            - field: allow_dist
+            - field: need_sms_code
+            
     open_sign_dist:
         title: Signature à distance
         icon: fas_sign-in
@@ -276,6 +302,14 @@ forms:
               input_name: doc_title
               content: 
                   callback: displayDocTitle
+            - custom: 1
+              label: Code SMS
+              input_name: code_sms
+              content: 
+                  callback: renderSignDistCodeSmsInput
+              show: 
+                  field_value: need_sms_code
+              required: 1
             - field: nom_signataire
             - field: fonction_signataire
               show: 
@@ -342,6 +376,23 @@ forms:
               input_name: date_y_offset
               input: 
                   type: qty
+                  
+    sms_code: 
+        title: Envoi du code SMS
+        rows: 
+            - custom: 1
+              label: N° mobile sur lequel envoyer le code SMS
+              input_name: num_tel_selected
+              content: 
+                  callback: renderNumTelForSmsCodeInput
+            - custom: 1
+              label: Autre n° de téléphone mobile
+              input_name: other_num
+              input: 
+                  type: text
+              display_if: 
+                  field_name: num_tel_selected
+                  show_values: other
             
 fields_tables: 
     infos: 
@@ -358,7 +409,7 @@ fields_tables:
                   callback: displayDocRef
             - field: id_client
             - field: id_contact
-            - field: date_open
+            - field: allow_elec
             - field: signed
             
     signature:
@@ -386,9 +437,16 @@ fields_tables:
                         
     public_access:
         icon: fas_sign-in-alt
-        title: Accès espace client
+        title: Signature à distance
         rows: 
+            - field: allow_dist
+            - field: date_open
+              show: 
+                  field_value: allow_dist
+            - field: need_sms_code
             - field: allowed_users_client
+              show: 
+                  field_value: allow_dist
             
 views:
     default: 

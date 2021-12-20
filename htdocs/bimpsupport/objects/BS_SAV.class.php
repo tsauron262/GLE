@@ -175,14 +175,6 @@ class BS_SAV extends BimpObject
     {
         return $this->canView();
     }
-    
-    public function getListCentre($field){
-        if($this->isLoaded())
-            $value = $this->getData($field);
-        else
-            $value = '';
-        return static::getUserCentresArray($value);
-    }
 
     public function canClientEdit()
     {
@@ -322,6 +314,15 @@ class BS_SAV extends BimpObject
                     $errors[] = 'Le devis n\'a pas le statut "validé"';
                     return 0;
                 }
+
+                if ($action === 'propalAccepted' && (int) $propal->getData('id_signature')) {
+                    $signature = $propal->getChildObject('signature');
+                    if (BimpObject::objectLoaded($signature) && (int) $signature->getData('type') >= 0) {
+                        $errors[] = 'Utiliser la signature du devis';
+                        return 0;
+                    }
+                }
+
                 if (in_array($status, array(self::BS_SAV_DEVIS_ACCEPTE, self::BS_SAV_DEVIS_REFUSE, self::BS_SAV_FERME))) {
                     $errors[] = $status_error;
                     return 0;
@@ -544,6 +545,19 @@ class BS_SAV extends BimpObject
 
         if (BimpObject::objectLoaded($propal)) {
             return (int) $propal->getData('id_signature');
+        }
+
+        return 0;
+    }
+
+    public function needSignaturePropal()
+    {
+        $propal = $this->getChildObject('propal');
+
+        if (BimpObject::objectLoaded($propal)) {
+            if ((float) $propal->dol_object->total_ttc != 0) {
+                return 1;
+            }
         }
 
         return 0;
@@ -825,6 +839,16 @@ class BS_SAV extends BimpObject
                         'icon'    => 'check',
                         'onclick' => $this->getJsActionOnclick('propalAccepted')
                     );
+
+                    if (BimpObject::objectLoaded($propal) && $this->isActionAllowed('createSignature')) {
+                        $buttons[] = array(
+                            'label'   => 'Créer signature devis',
+                            'icon'    => 'fas_signature',
+                            'onclick' => $propal->getJsActionOnclick('createSignature', array(), array(
+                                'form_name' => 'create_signature'
+                            ))
+                        );
+                    }
                 }
 
                 if ($this->isActionAllowed('propalRefused')) {
@@ -1436,6 +1460,35 @@ class BS_SAV extends BimpObject
         return '';
     }
 
+    public function getListCentre($field, $include_empty = false)
+    {
+        if ($this->isLoaded())
+            $value = $this->getData($field);
+        else
+            $value = '';
+
+        return static::getUserCentresArray($value, $include_empty);
+    }
+
+    public function getDefaultSignDistEmailContent()
+    {
+        BimpObject::loadClass('bimpcore', 'BimpSignature');
+        return BimpSignature::getDefaultSignDistEmailContent();
+    }
+
+    public function getPublicLink()
+    {
+        if ((int) $this->getData('id_user_client')) {
+            $url = $this->getPublicUrl();
+
+            if ($url) {
+                return $url;
+            }
+        }
+//        return DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?serial=" . $this->getChildObject("equipment")->getData("serial") . "&id_sav=" . $this->id . "&user_name=" . substr($this->getChildObject("client")->dol_object->name, 0, 3);
+        return "https://www.bimp.fr/nos-services/?serial=" . urlencode($this->getChildObject("equipment")->getData("serial")) . "&id_sav=" . $this->id . "&user_name=" . urlencode(str_replace(" ", "", substr($this->getChildObject("client")->dol_object->name, 0, 3))) . "#suivi-sav";
+    }
+
     // Affichage:
 
     public function displayFactureAmountToPay()
@@ -1640,12 +1693,19 @@ class BS_SAV extends BimpObject
 
     public function displayHeaderListInfo()
     {
-        $html = '<div class="col_xs-12 col-sm-6 col-md-3">' . $this->displayMaxDiago(true) . '</div>';
-        $html .= '<div class="col_xs-12 col-sm-6 col-md-3">' . $this->displayMaxDiago(false) . '</div>';
-        $html .= '<div class="col_xs-12 col-sm-6 col-md-3">' . $this->displayMoySav(true) . '</div>';
-        $html .= '<div class="col_xs-12 col-sm-6 col-md-3">' . $this->displayMoySav(false) . '</div>';
+        $html = '<div class="row">';
+        $html .= '<div class="col_xs-6 col-sm-6 col-md-3">' . $this->displayMaxDiago(true) . '</div>';
+        $html .= '<div class="col_xs-6 col-sm-6 col-md-3">' . $this->displayMaxDiago(false) . '</div>';
+        $html .= '<div class="col_xs-6 col-sm-6 col-md-3">' . $this->displayMoySav(true) . '</div>';
+        $html .= '<div class="col_xs-6 col-sm-6 col-md-3">' . $this->displayMoySav(false) . '</div>';
         $html .= '<div style="clear:both;"></div>';
+        $html .= '</div>';
         return $html;
+    }
+
+    public function displayPublicLink()
+    {
+        return "<a target='_blank' href='" . $this->getPublicLink() . "'><i class='fas fa5-external-link-alt'></i></a>";
     }
 
     // Rendus HTML: 
@@ -1653,9 +1713,9 @@ class BS_SAV extends BimpObject
     public function renderHeaderExtraLeft()
     {
         $html = '';
-        
-        if($this->getData('date_pc'))
-            $html .= '<div class="object_header_infos">Prise en charge le <strong>'.$this->displayData('date_pc').'</strong></div><br/>';
+
+        if ($this->getData('date_pc'))
+            $html .= '<div class="object_header_infos">Prise en charge le <strong>' . $this->displayData('date_pc') . '</strong></div><br/>';
 
         if ($this->getData('replaced_ref')) {
             $html .= '<div style="margin-bottom: 8px">';
@@ -1736,7 +1796,7 @@ class BS_SAV extends BimpObject
             $signature_propal = $propal->getChildObject('signature');
 
             if (BimpObject::objectLoaded($signature_propal)) {
-                if (!$signature_propal->getData('signed')) {
+                if (!$signature_propal->getData('signed') && (int) $signature_propal->getData('type') >= 0) {
                     $html .= '<div style="margin-top: 10px">';
                     $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
                     $msg .= '<a href="' . $signature_propal->getUrl() . '" target="_blank">Signature du devis en attente' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
@@ -1751,34 +1811,17 @@ class BS_SAV extends BimpObject
                     $html .= BimpRender::renderAlerts($msg, 'warning');
                     $html .= '</div>';
                 }
-            } elseif ($propal->isActionAllowed('createSignature') && (int) $this->getData('status') === self::BS_SAV_DEVIS_ACCEPTE) {
-                $html .= '<div style="margin-top: 10px">';
-                $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
-                $msg .= 'Signature du devis non créée.<br/>';
-
-                if ($propal->canSetAction('createSignature')) {
-                    $msg .= '<div style="margin-top: 8px; text-align: right">';
-                    $msg .= '<span class="btn btn-default btn-small" onclick="' . $propal->getJsActionOnclick('createSignature', array(), array(
-                                'form_name' => 'create_signature'
-                            )) . '">';
-                    $msg .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Créer la signature';
-                    $msg .= '</span>';
-                    $msg .= '</div>';
-                }
-                $html .= BimpRender::renderAlerts($msg, 'danger');
-                $html .= '</div>';
             }
         }
 
         // Messages signature Bon restit / facture:
         $signature_resti = $this->getChildObject('signature_resti');
-        $id_facture = (int) $this->getData('id_facture');
 
         if (BimpObject::objectLoaded($signature_resti)) {
             if (!$signature_resti->getData('signed')) {
                 $html .= '<div style="margin-top: 10px">';
                 $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
-                $msg .= '<a href="' . $signature_resti->getUrl() . '" target="_blank">Signature ' . ($id_facture ? 'de la facture' : 'du bon de restitution') . ' en attente' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
+                $msg .= '<a href="' . $signature_resti->getUrl() . '" target="_blank">Signature du bon de restitution en attente' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
 
                 $btn_html = $signature_resti->renderSignButtonsGroup();
                 if ($btn_html) {
@@ -1793,7 +1836,7 @@ class BS_SAV extends BimpObject
         } elseif ($this->isActionAllowed('createSignatureRestitution')) {
             $html .= '<div style="margin-top: 10px">';
             $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
-            $msg .= 'Signature ' . ($id_facture ? 'de la facture' : 'du bon de restitution') . ' non créée.<br/>';
+            $msg .= 'Signature du bon de restitution non créée.<br/>';
 
             if ($this->canSetAction('createSignatureRestitution')) {
                 $msg .= '<div style="margin-top: 8px; text-align: right">';
@@ -1824,11 +1867,11 @@ class BS_SAV extends BimpObject
                     $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . 'Bon de restitution';
                     $html .= '</span>';
                 }
-            } elseif ((int) $this->getData('id_facture')) {
-                $url = DOL_URL_ROOT . '/bimpsupport/bon_restitution.php?id_sav= ' . $this->id;
-                $html .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\')">';
-                $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . 'Bon de restitution';
-                $html .= '</span>';
+//            } elseif ((int) $this->getData('id_facture')) {
+//                $url = DOL_URL_ROOT . '/bimpsupport/bon_restitution.php?id_sav= ' . $this->id;
+//                $html .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\')">';
+//                $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . 'Bon de restitution';
+//                $html .= '</span>';
             } else {
                 $onclick = $this->getJsActionOnclick('generateRestiPdf');
                 $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
@@ -2627,6 +2670,12 @@ class BS_SAV extends BimpObject
                 }
 
                 if ($new_id_propal && !count($errors)) {
+                    $signature = $propal->getChildObject('signature');
+
+                    if (BimpObject::objectLoaded($signature)) {
+                        $signature->cancelSignature();
+                    }
+
                     //Anulation du montant de la propal
                     $totHt = (float) $propal->dol_object->total_ht;
                     if ($totHt == 0)
@@ -3172,22 +3221,26 @@ class BS_SAV extends BimpObject
         return '';
     }
 
-    public function displayPublicLink()
+    public function onPropalSigned($bimpSignature)
     {
-        return "<a target='_blank' href='" . $this->getPublicLink() . "'><i class='fas fa5-external-link-alt'></i></a>";
-    }
+        $errors = array();
 
-    public function getPublicLink()
-    {
-        if ((int) $this->getData('id_user_client')) {
-            $url = $this->getPublicUrl();
+        if ($this->isLoaded($errors)) {
+            if (!in_array((int) $this->getData('status'), array(self::BS_SAV_DEVIS_ACCEPTE, self::BS_SAV_DEVIS_REFUSE, self::BS_SAV_REP_EN_COURS, self::BS_SAV_FERME))) {
+                $errors = $this->setNewStatus(self::BS_SAV_DEVIS_ACCEPTE);
+            }
 
-            if ($url) {
-                return $url;
+            if (!count($errors)) {
+                global $user;
+
+                $this->addNote('Devis signé le "' . date('d / m / Y H:i')) . ' par ' . $bimpSignature->getData('nom_signataire');
+                $propal = $this->getChildObject('propal');
+                $propal->dol_object->cloture($user, 2, "Auto via SAV");
+                $this->createReservations();
             }
         }
-//        return DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?serial=" . $this->getChildObject("equipment")->getData("serial") . "&id_sav=" . $this->id . "&user_name=" . substr($this->getChildObject("client")->dol_object->name, 0, 3);
-        return "https://www.bimp.fr/nos-services/?serial=" . urlencode($this->getChildObject("equipment")->getData("serial")) . "&id_sav=" . $this->id . "&user_name=" . urlencode(str_replace(" ", "", substr($this->getChildObject("client")->dol_object->name, 0, 3))) . "#suivi-sav";
+
+        return $errors;
     }
 
     public function sendMsg($msg_type = '')
@@ -4102,7 +4155,8 @@ class BS_SAV extends BimpObject
                         'id_obj'     => $this->id,
                         'doc_type'   => $doc_type,
                         'id_client'  => (int) $this->getData('id_client'),
-                        'id_contact' => (int) $id_contact
+                        'id_contact' => (int) $id_contact,
+                        'allow_dist' => 0
                             ), true, $errors, $warnings);
 
             if (BimpObject::objectLoaded($signature)) {
@@ -4202,6 +4256,8 @@ class BS_SAV extends BimpObject
         $errors = array();
         $warnings = array();
 
+        $create_signature = BimpTools::getArrayValueFromPath($data, 'create_signature', $this->needSignaturePropal());
+
         if (isset($data['diagnostic'])) {
             $this->updateField('diagnostic', $data['diagnostic']);
         }
@@ -4254,13 +4310,19 @@ class BS_SAV extends BimpObject
                 $new_status = self::BS_SAV_ATT_CLIENT;
 
                 if ($propal->dol_object->valid($user) < 1) {
-                    $errors = BimpTools::getErrorsFromDolObject($propal->dol_object, $errors, $langs);
-                    $errors[] = "Validation de devis impossible !!!";
+                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($propal->dol_object, array(), $langs), 'Echec de la validation du devis');
                 }
 
                 if (!count($errors) && !$propal->dol_object->generateDocument(self::$propal_model_pdf, $langs)) {
                     $errors[] = "Impossible de générer le PDF validation impossible";
                     $propal->dol_object->reopen($user, 0);
+                } elseif ($create_signature) {
+                    $email_content = BimpTools::getArrayValueFromPath($data, 'email_content', $this->getDefaultSignDistEmailContent());
+                    $signature_errors = $propal->createSignature(true, (int) $this->getData('id_contact'), $email_content);
+
+                    if (count($signature_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($signature_errors, 'Echec de la création de la fiche signature');
+                    }
                 }
             }
             $propal->lines_locked = 0;
@@ -4307,23 +4369,7 @@ class BS_SAV extends BimpObject
 
             $this->addNote('Devis accepté le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
             $propal = $this->getChildObject('propal');
-//            $propal->dol_object->cloture($user, 2, "Auto via SAV");
-
-            $signature_errors = $propal->createSignature(false);
-
-            if (count($signature_errors)) {
-                $warnings[] = BimpTools::getMsgFromArray($signature_errors, 'Echec création de la signature du devis');
-            }
-
-            $signature = $propal->getChildObject('signature');
-
-            if (BimpObject::objectLoaded($signature)) {
-                $url = $signature->getUrl();
-
-                if ($url) {
-                    $success_callback .= 'window.open(\'' . $url . '\');';
-                }
-            }
+            $propal->dol_object->cloture($user, 2, "Auto via SAV");
 
             $this->createReservations();
         }
@@ -4349,6 +4395,14 @@ class BS_SAV extends BimpObject
             $this->removeReservations();
             if (BimpTools::getValue('send_msg', 0))
                 $warnings = BimpTools::merge_array($warnings, $this->sendMsg('commercialRefuse'));
+
+            if ((int) $propal->getData('id_signature')) {
+                $signature = $propal->getChildObject('signature');
+
+                if (BimpObject::objectLoaded($signature)) {
+                    $signature->cancelSignature();
+                }
+            }
         }
         return array(
             'errors'   => $errors,
@@ -4737,7 +4791,7 @@ class BS_SAV extends BimpObject
                         }
 
                         if (!round($total_ttc_wo_discounts, 2) && !$has_amounts_lines) {
-                            $url = DOL_URL_ROOT . '/bimpsupport/bon_restitution.php?id_sav=' . $this->id;
+//                            $url = DOL_URL_ROOT . '/bimpsupport/bon_restitution.php?id_sav=' . $this->id;
                         } else {
                             if ((int) $this->getData('id_facture')) {
                                 $warnings[] = 'Une facture a déjà été créée pour ce SAV';
@@ -4949,6 +5003,26 @@ class BS_SAV extends BimpObject
             }
 
             $errors = $this->setNewStatus(self::BS_SAV_FERME);
+
+            // Génération bon de restitution:
+            $pdf_errors = $this->generateRestitutionPdf();
+
+            if (count($pdf_errors)) {
+                $warnings[] = BimpTools::getMsgFromArray($pdf_errors, 'Echec création du Bon de restitution');
+            } else {
+                // Création signature: 
+                $signature_errors = $this->createSignature('sav_resti');
+
+                if (count($signature_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($pdf_errors, 'Echec création de la signature du Bon de restitution');
+                } else {
+                    $id_signature = (int) $this->getData('id_signature_resti');
+
+                    if ($id_signature) {
+                        $success_callback .= 'bimp_msg(\'ID de la signature du bon de restitution: ' . $id_signature . '\');';
+                    }
+                }
+            }
         }
 
         $use_db_transactions = (int) BimpCore::getConf('bimpcore_use_db_transactions', 0);
@@ -5335,7 +5409,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
         // Mise à jour du statut: 
         $errors = $this->updateField('status', self::BS_SAV_NEW);
-        
+
         global $user, $langs;
         $this->addNote('Sav pris en charge par ' . $user->getFullName($langs), 4);
         $this->updateField('date_pc', date('Y-m-d H:i:s'));
@@ -5795,8 +5869,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         if (!count($errors)) {
             $this->checkObject('create');
         }
-        
-        if($this->getData('status') == 0)
+
+        if ($this->getData('status') == 0)
             $this->updateField('date_pc', $this->getData('date_create'));
 
         return $errors;
@@ -6089,23 +6163,25 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
     public function getSignatureDocFileDir($doc_type)
     {
-        if ($doc_type === 'sav_resti' && (int) $this->getData('id_facture')) {
-            $doc_type = 'sav_facture';
-        }
+        return $this->getFilesDir();
 
-        switch ($doc_type) {
-            case 'sav_pc':
-            case 'sav_resti':
-                return $this->getFilesDir();
-
-            case 'sav_facture':
-                $facture = $this->getChildObject('facture');
-                if (BimpObject::objectLoaded($facture)) {
-                    return $facture->getFilesDir();
-                }
-        }
-
-        return '';
+//        if ($doc_type === 'sav_resti' && (int) $this->getData('id_facture')) {
+//            $doc_type = 'sav_facture';
+//        }
+//
+//        switch ($doc_type) {
+//            case 'sav_pc':
+//            case 'sav_resti':
+//                return $this->getFilesDir();
+//
+//            case 'sav_facture':
+//                $facture = $this->getChildObject('facture');
+//                if (BimpObject::objectLoaded($facture)) {
+//                    return $facture->getFilesDir();
+//                }
+//        }
+//
+//        return '';
     }
 
     public function getSignatureFieldName($doc_type)
@@ -6115,7 +6191,6 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 return 'id_signature_pc';
 
             case 'sav_resti':
-            case 'sav_facture':
                 return 'id_signature_resti';
         }
 
@@ -6124,9 +6199,9 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
     public function getSignatureDocFileName($doc_type, $signed = false)
     {
-        if ($doc_type === 'sav_resti' && (int) $this->getData('id_facture')) {
-            $doc_type = 'sav_facture';
-        }
+//        if ($doc_type === 'sav_resti' && (int) $this->getData('id_facture')) {
+//            $doc_type = 'sav_facture';
+//        }
 
         switch ($doc_type) {
             case 'sav_pc':
@@ -6135,11 +6210,11 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             case 'sav_resti':
                 return 'Restitution_' . dol_sanitizeFileName($this->getRef()) . ($signed ? '_signe' : '') . '.pdf';
 
-            case 'sav_facture':
-                $facture = $this->getChildObject('facture');
-                if (BimpObject::objectLoaded($facture)) {
-                    return dol_sanitizeFileName($facture->getRef()) . ($signed ? '_signe' : '') . '.pdf';
-                }
+//            case 'sav_facture':
+//                $facture = $this->getChildObject('facture');
+//                if (BimpObject::objectLoaded($facture)) {
+//                    return dol_sanitizeFileName($facture->getRef()) . ($signed ? '_signe' : '') . '.pdf';
+//                }
         }
 
         return '';
@@ -6151,9 +6226,9 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             return '';
         }
 
-        if ($doc_type === 'sav_resti' && (int) $this->getData('id_facture')) {
-            $doc_type = 'sav_facture';
-        }
+//        if ($doc_type === 'sav_resti' && (int) $this->getData('id_facture')) {
+//            $doc_type = 'sav_facture';
+//        }
 
         $context = BimpCore::getContext();
 
@@ -6165,28 +6240,28 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             return DOL_URL_ROOT . '/bimpinterfaceclient/client.php?fc=doc&doc=' . $doc_type . ($signed ? '_signed' : '') . '&docid=' . $this->id . '&docref=' . $this->getRef();
         }
 
-        if ($doc_type === 'sav_facture') {
-            $facture = $this->getChildObject('facture');
+//        if ($doc_type === 'sav_facture') {
+//            $facture = $this->getChildObject('facture');
+//
+//            if (BimpObject::objectLoaded($facture)) {
+//                return $this->getFileUrl(dol_sanitizeFileName($facture->getRef() . '.pdf'));
+//            }
+//        } else {
+        $file_name = $this->getSignatureDocFileName($doc_type, $signed);
 
-            if (BimpObject::objectLoaded($facture)) {
-                return $this->getFileUrl(dol_sanitizeFileName($facture->getRef() . '.pdf'));
-            }
-        } else {
-            $file_name = $this->getSignatureDocFileName($doc_type, $signed);
-
-            if ($file_name) {
-                return $this->getFileUrl($file_name);
-            }
+        if ($file_name) {
+            return $this->getFileUrl($file_name);
         }
+//        }
 
         return '';
     }
 
     public function getSignatureDocRef($doc_type)
     {
-        if ($doc_type === 'sav_resti' && (int) $this->getData('id_facture')) {
-            $doc_type = 'sav_facture';
-        }
+//        if ($doc_type === 'sav_resti' && (int) $this->getData('id_facture')) {
+//            $doc_type = 'sav_facture';
+//        }
 
         switch ($doc_type) {
             case 'sav_pc':
@@ -6195,12 +6270,12 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             case 'sav_resti':
                 return 'BR-' . $this->getRef();
 
-            case 'sav_facture':
-                $facture = $this->getChildObject('facture');
-                if (BimpObject::objectLoaded($facture)) {
-                    return $facture->getRef();
-                }
-                break;
+//            case 'sav_facture':
+//                $facture = $this->getChildObject('facture');
+//                if (BimpObject::objectLoaded($facture)) {
+//                    return $facture->getRef();
+//                }
+//                break;
         }
 
         return '';
@@ -6213,7 +6288,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 return self::$default_signature_pc_params;
 
             case 'sav_resti':
-            case 'sav_facture':
+//            case 'sav_facture':
                 return BimpTools::overrideArray(self::$default_signature_resti_params, (array) $this->getData('signature_resti_params'));
         }
 

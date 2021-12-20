@@ -67,6 +67,7 @@ class BimpSignature extends BimpObject
     {
         switch ($action) {
             case 'signDist':
+            case 'sendSmsCode':
                 global $userClient;
 
                 if (!BimpObject::objectLoaded($userClient)) {
@@ -119,6 +120,19 @@ class BimpSignature extends BimpObject
 
     // Getters booléens: 
 
+    public function isFieldEditable($field, $force_edit = false)
+    {
+        if (in_array($field, array('id_contact', 'allow_elec', 'allow_dist', 'need_sms_code'))) {
+            if ((int) $this->getData('signed')) {
+                return 0;
+            }
+
+            return 1;
+        }
+
+        return parent::isFieldEditable($field, $force_edit);
+    }
+
     public function isDeletable($force_delete = false, &$errors = [])
     {
         if (!$force_delete && (int) $this->getData('signed')) {
@@ -141,6 +155,7 @@ class BimpSignature extends BimpObject
             case 'signPapier':
             case 'signDist':
             case 'signElec':
+            case 'sendSmsCode':
                 if ((int) $this->getData('signed')) {
                     $errors[] = 'Signature déjà effectuée';
                     return 0;
@@ -148,6 +163,22 @@ class BimpSignature extends BimpObject
                 if ((int) $this->getData('type') < 0) {
                     $errors[] = 'Signature annulée';
                     return 0;
+                }
+
+                switch ($action) {
+                    case 'signDistAccess':
+                    case 'signDist':
+                    case 'sendSmsCode':
+                        if (!(int) $this->getData('allow_dist')) {
+                            $errors[] = 'Signature à distance non autorisée pour cette signature';
+                            return 0;
+                        }
+
+                    case 'signElec':
+                        if (!(int) $this->getData('allow_elec')) {
+                            $errors[] = 'Signature éléctronique non autorisée pour cette signature';
+                            return 0;
+                        }
                 }
                 return 1;
 
@@ -258,7 +289,7 @@ class BimpSignature extends BimpObject
 
         if ($this->isActionAllowed('signDistAccess') && $this->canSetAction('signDistAccess')) {
             $buttons[] = array(
-                'label'   => 'Accès signature à distance',
+                'label'   => (empty($this->getData('allowed_users_client')) ? 'Ouvrir accès' : 'Accès') . ' signature à distance',
                 'icon'    => 'fas_sign-in-alt',
                 'onclick' => $this->getJsActionOnclick('signDistAccess', array(), array(
                     'form_name' => 'open_sign_dist'
@@ -498,7 +529,7 @@ class BimpSignature extends BimpObject
         $message .= 'Vous pouvez effectuer la signature électronique de ce document directement depuis votre {LIEN_ESPACE_CLIENT} ou nous retourner le document ci-joint signé.<br/><br/>';
         $message .= 'Cordialement, <br/><br/>';
         $message .= 'L\'équipe BIMP';
-        
+
         return $message;
     }
 
@@ -675,6 +706,21 @@ class BimpSignature extends BimpObject
         return $types;
     }
 
+    public function getcontactsArray($include_empty = true, $active_only = true)
+    {
+        if ((int) $this->getData('id_client')) {
+            return self::getSocieteContactsArray((int) $this->getData('id_client'), $include_empty);
+        }
+
+        if ($include_empty) {
+            return array(
+                0 => ''
+            );
+        }
+
+        return array();
+    }
+
     public function getClientUsersArray($include_empty = false)
     {
         $id_client = (int) $this->getData('id_client');
@@ -842,9 +888,16 @@ class BimpSignature extends BimpObject
             if ($this->isActionAllowed('signDist')) {
                 $html = '';
                 if ($this->canSetAction('signDist')) {
-                    $onclick = $this->getJsActionOnclick('signDist', array(), array(
-                        'form_name' => 'sign_dist'
-                    ));
+                    $infos = $this->getData('code_sms_infos');
+                    if ((int) $this->getData('need_sms_code') && !BimpTools::getArrayValueFromPath($infos, 'code', '')) {
+                        $onclick = $this->getJsActionOnclick('sendSmsCode', array(), array(
+                            'form_name' => 'sms_code'
+                        ));
+                    } else {
+                        $onclick = $this->getJsActionOnclick('signDist', array(), array(
+                            'form_name' => 'sign_dist'
+                        ));
+                    }
 
                     $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
                     $html .= BimpRender::renderIcon('fas_pen', 'iconLeft') . 'Signer';
@@ -1068,11 +1121,120 @@ class BimpSignature extends BimpObject
         return '';
     }
 
+    public function renderNumTelForSmsCodeInput()
+    {
+        $html = '';
+
+        $msg = 'Nous allons vous envoyer un code par SMS pour certifier la signature.<br/>';
+        $msg .= 'Veuillez sélectionner le numéro de téléphone mobile sur lequel envoyer ce code';
+
+        $html .= BimpRender::renderAlerts($msg, 'info');
+
+        $nums = array();
+
+        global $userClient;
+
+        if (BimpObject::objectLoaded($userClient)) {
+            $contact = $userClient->getChildObject('contact');
+
+            if (BimpObject::objectLoaded($contact)) {
+                foreach (array('phone_mobile', 'phone_perso', 'phone') as $field) {
+                    if ($contact->field_exists($field)) {
+                        $num = $contact->getData($field);
+
+                        if ($num) {
+                            $num = str_replace(array(' ', '-', '/', '_', '.'), array('', '', '', '', ''), $num);
+
+                            if (!array_key_exists($num, $nums) && preg_match('/^(\+33|0)(6|7)[0-9]{6}([0-9]{2})$/', $num, $matches)) {
+                                $nums[$num] = $matches[1] . $matches[2] . ' ** ** ** ' . $matches[3];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        $client = $this->getChildObject('client');
+
+        if (BimpObject::objectLoaded($client)) {
+            $num = $client->getData('phone');
+
+            if ($num) {
+                $num = str_replace(array(' ', '-', '/', '_', '.'), array('', '', '', '', ''), $num);
+
+                if (!array_key_exists($num, $nums) && preg_match('/^(\+33|0)(6|7)[0-9]{6}([0-9]{2})$/', $num, $matches)) {
+                    $nums[$num] = $matches[1] . [$matches[2]] . ' ** ** ** ' . $matches[3];
+                }
+            }
+        }
+
+        $nums['other'] = 'Autre';
+
+        $html .= BimpInput::renderInput('select', 'num_tel_selected', '', array(
+                    'options' => $nums
+        ));
+
+        return $html;
+    }
+
+    public function renderSignDistCodeSmsInput()
+    {
+        $html = '';
+
+        if (!$this->getData('need_sms_code')) {
+            $html .= '<span class="success">Non applicable</span>';
+            $html .= '<input type="hidden" value="xxxx" name="code_sms"/>';
+            return $html;
+        }
+
+        $infos = $this->getData('code_sms_infos');
+
+        $dt_ok = false;
+        $dt_send = BimpTools::getArrayValueFromPath($infos, 'dt_send', '');
+
+        if ($dt_send) {
+            $dt = new DateTime($dt_send);
+            $dt->add(new DateInterval('PT1H'));
+
+            if ($dt->format('Y-m-d H:i:s') > date('Y-m-d H:i:s')) {
+                $dt_ok = true;
+            }
+        }
+
+        $html .= '<div style="text-align: center">';
+        if (!$dt_ok) {
+            $html .= BimpRender::renderAlerts('Le code SMS qui vous a été envoyé a expiré', 'warning');
+        } else {
+            $html .= '<h4>';
+            $html .= 'Code SMS reçu: ';
+            $html .= '</h4>';
+
+            $html .= '<input type="text" name="code_sms" value="" style="width: 80px; font-size: 16px; line-height: 18px; padding: 8px 5px"/><br/>';
+        }
+
+        $onclick = 'bimpModal.clearAllContents();setTimeout(function() {';
+        $onclick .= $this->getJsActionOnclick('sendSmsCode', array(), array(
+            'form_name' => 'sms_code'
+        ));
+        $onclick .= '}, 500);';
+
+        $html .= '<span style="color: #807F7F" class="btn btn-light-default" onclick="' . $onclick . '">' . ($dt_ok ? 'Code non reçu' : 'Envoyer un nouveau code') . '</span>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
     // Traitements:
 
     public function openSignDistAccess($email_content = '', $auto_open = true, $new_users = array(), $new_user_email = '', &$warnings = array(), &$success = '')
     {
         $errors = array();
+
+        if (!(int) $this->getData('allow_dist')) {
+            $errors[] = 'La signature à distance n\'est pas autorisé pour cette signature';
+            return $errors;
+        }
+
         $cur_users = $this->getData('allowed_users_client');
 
         if (empty($new_users)) {
@@ -1209,20 +1371,20 @@ class BimpSignature extends BimpObject
                             if (!$email_content) {
                                 $email_content = $this->getDefaultSignDistEmailContent();
                             }
-                            
+
                             $url = DOL_URL_ROOT . '/bimpinterfaceclient/client.php';
-                            
+
                             $email_content = str_replace(array(
                                 '{NOM_DOCUMENT}',
                                 '{NOM_PIECE}',
                                 '{REF_PIECE}',
                                 '{LIEN_ESPACE_CLIENT}'
-                            ), array(
+                                    ), array(
                                 $doc_label,
                                 $obj->getLabel('the'),
                                 $obj->getRef(),
                                 '<a href="' . $url . '">espace client BIMP</a>'
-                            ), $email_content);
+                                    ), $email_content);
 
                             $bimpMail = new BimpMail($subject, BimpTools::cleanEmailsStr($email), '', $email_content, $comm_email);
 
@@ -1247,88 +1409,6 @@ class BimpSignature extends BimpObject
                     }
                 }
             }
-        }
-
-        return $errors;
-    }
-
-    public function sendClientEmailForFarSign($email)
-    {
-        $errors = array();
-
-        if ($email && BimpValidate::isEmail($email)) {
-            $obj = $this->getObj();
-
-            if ($this->isObjectValid($errors, $obj)) {
-                $new_password = '';
-
-                for ($i = 0; $i < 100; $i++) {
-                    $new_password = $this->generateRandomPassword(5);
-                    if (!(int) $this->db->getCount('bimpcore_signature', 'public_access_code = "' . $new_password . '"', 'rowid')) {
-                        break;
-                    }
-                }
-
-                $dt = new DateTime();
-                $date_from = $dt->format('Y-m-d H:i:s');
-                $dt->add(new DateInterval("P4D"));
-                $date_to = $dt->format('Y-m-d H:i:s');
-            }
-
-            if (!is_a($obj, 'BimpObject')) {
-                $errors[] = 'Objet lié invalide';
-            } else {
-                $subject = BimpTools::ucfirst($obj->getLabel()) . ' - ' . $obj->getRef();
-
-                $msg = 'Bonjour,<br/><br/>';
-                $msg .= 'Merci de signer votre ' . $obj->getLabel() . ' à l\'adresse suivante: ';
-                $msg .= '<a href="' . DOL_URL_ROOT . '/bimptechnique/public">' . DOL_URL_ROOT . '/bimptechnique/public</a>';
-                $msg .= ' en entrant votre nom ainsi que le mot de passe suivant: <b>' . $new_password . '</b>.<br/><br/>';
-                $msg .= 'Cet accès n\'est valable que 4 Jours calandaires.<br/><br/>';
-                $msg .= 'Cordialement';
-            }
-
-            if (count($up_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement du mot de passe');
-            } else {
-                $to = BimpTools::cleanEmailsStr($this->getData('email_signature'));
-                $commercial = $this->getCommercialClient();
-                $tech = $this->getChildObject('user_tech');
-
-                $email_tech = '';
-                $email_comm = '';
-
-                if (BimpObject::objectLoaded($tech)) {
-                    $email_tech = $tech->getData('email');
-                }
-
-                if (BimpObject::objectLoaded($commercial)) {
-                    $email_comm = $commercial->getData('email');
-                }
-
-                $reply_to = ($email_comm ? $email_comm : $email_tech);
-                $cc = ''; //($email_comm ? $email_tech . ', ' : '') . 't.sauron@bimp.fr, f.martinez@bimp.fr';
-
-                $bimpMail = new BimpMail($subject, $to, '', $msg, $reply_to, $cc);
-
-                global $conf;
-
-                $file = $conf->ficheinter->dir_output . '/' . $this->dol_object->ref . '/' . $this->dol_object->ref . '.pdf';
-                if (file_exists($file)) {
-                    $bimpMail->addFile(array($file, 'application/pdf', $this->dol_object->ref . '.pdf'));
-                }
-
-                $mail_errors = array();
-                $bimpMail->send($mail_errors);
-
-                sleep(3);
-
-                if (count($mail_errors)) {
-                    $errors[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail au client pour la signature à distance');
-                }
-            }
-        } else {
-            $errors[] = 'Adresse e-mail du client absente ou invalide';
         }
 
         return $errors;
@@ -1582,7 +1662,7 @@ class BimpSignature extends BimpObject
                 $errors[] = 'Fichier du document signé absent';
             } else {
                 $file_name = $this->getDocumentFileName(true);
-                $file_path = $this->getDocumentFilePath(true/*, 'private'*/);
+                $file_path = $this->getDocumentFilePath(true/* , 'private' */);
                 $dir = $this->getDocumentFileDir();
 
                 if (!$dir || !$file_path || !$file_name) {
@@ -1748,6 +1828,21 @@ class BimpSignature extends BimpObject
                     $errors[] = 'Signature électronique absente';
                 }
 
+                $code_sms_infos = array();
+
+                if ((int) $this->getData('need_sms_code')) {
+                    $code_sms_infos = $this->getData('code_sms_infos');
+                    $code = BimpTools::getArrayValueFromPath($data, 'code_sms', '');
+
+                    if (!$code) {
+                        $errors[] = 'Veuillez saisir votre reçu par SMS';
+                    } elseif ($code != $code_sms_infos['code']) {
+                        $errors[] = 'Code SMS invalide';
+                    } else {
+                        $code_sms_infos['dt_confirmed'] = date('Y-m-d H:i:s');
+                    }
+                }
+
                 if (!count($errors)) {
                     require_once DOL_DOCUMENT_ROOT . '/synopsistools/class/divers.class.php';
                     $this->set('signed', 1);
@@ -1759,6 +1854,7 @@ class BimpSignature extends BimpObject
                     $this->set('base_64_signature', $signature);
                     $this->set('type', self::TYPE_DIST);
                     $this->set('ip_signataire', synopsisHook::getUserIp());
+                    $this->set('code_sms_infos', $code_sms_infos);
 
                     $errors = $this->update($warnings, true);
 
@@ -1842,6 +1938,69 @@ class BimpSignature extends BimpObject
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
+        );
+    }
+
+    public function actionSendSmsCode($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Code envoyé avec succès';
+        $success_callback = '';
+
+        $num = BimpTools::getArrayValueFromPath($data, 'num_tel_selected', '');
+
+        if ($num == 'other') {
+            $num = BimpTools::getArrayValueFromPath($data, 'other_num', '');
+        }
+
+        if (!$num) {
+            $errors[] = 'Veuillez sélectionner ou saisir une numéro de téléphone mobile';
+        } else {
+            $num = str_replace(array(' ', '-', '/', '_', '.'), array('', '', '', '', ''), $num);
+
+            if (preg_match('/^(\+33|0)((6|7)([0-9]{8}))$/', $num, $matches)) {
+                $num = '+33' . $matches[2];
+                $success .= ' (' . $num . ')';
+            } else {
+                $errors[] = 'Le numéro de téléphone sélectionné ou saisi ne semble par être un numéro de téléphone mobile valide';
+            }
+        }
+
+        if (!count($errors)) {
+            $code = BimpTools::randomPassword(4);
+            require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
+
+            $text = 'Votre code pour la signature à distance du document "' . strip_tags($this->displayDocTitle()) . '": ' . $code;
+
+            $smsfile = new CSMSFile($num, 'BIMP', $text);
+            if (!$smsfile->sendfile()) {
+                $errors[] = 'Echec de l\'envoi du sms.';
+            } else {
+                $infos = array(
+                    'code'         => $code,
+                    'num_tel'      => $num,
+                    'dt_send'      => date('Y-m-d H:i:s'),
+                    'dt_confirmed' => ''
+                );
+
+                $this->updateField('code_sms_infos', $infos);
+
+                $w = array();
+                $this->update($w, true);
+
+                $success_callback = 'setTimeout(function() {';
+                $success_callback .= $this->getJsActionOnclick('signDist', array(), array(
+                    'form_name' => 'sign_dist'
+                ));
+                $success_callback .= '}, 500);';
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
         );
     }
 

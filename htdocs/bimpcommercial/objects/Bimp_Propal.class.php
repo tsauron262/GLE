@@ -190,8 +190,8 @@ class Bimp_Propal extends BimpComm
                         $errors[] = ucfirst($this->getLabel('this')) . ' est liée au SAV ' . $sav->getNomUrl(0, 1, 1, 'default') . '. Veuillez utiliser le bouton réviser depuis la fiche SAV';
                     }
                 }
-                if ($status !== Propal::STATUS_VALIDATED) {
-                    $errors[] = ucfirst($this->getLabel('the')) . ' n\'a pas le statut validée';
+                if (!in_array($status, array(Propal::STATUS_VALIDATED, Propal::STATUS_NOTSIGNED))) {
+                    $errors[] = ucfirst($this->getLabel('the')) . ' n\'a pas le statut validé' . $this->e() . ' ou refusé' . $this->e();
                 }
 
                 $where = '`fk_source` = ' . $this->id . ' AND `sourcetype` = \'propal\'';
@@ -338,7 +338,7 @@ class Bimp_Propal extends BimpComm
         if (!isset(BimpCache::$cache[$clef])) {
             if (!BimpCore::getConf('bimpcontract_use_autorised_service'))
                 BimpCache::$cache[$clef] = 1;
-            else{
+            else {
                 $children = $this->getChildrenList('lines');
                 $id_services = [];
 
@@ -576,6 +576,22 @@ class Bimp_Propal extends BimpComm
                             );
                         }
 
+                        // Refuser
+                        if ($this->isActionAllowed('close')) {
+                            if ($this->canSetAction('close')) {
+                                $clientFact = $this->getClientFacture();
+                                $buttons[] = array(
+                                    'label'   => 'Devis Refusé',
+                                    'icon'    => 'times',
+                                    'onclick' => $this->getJsActionOnclick('close', array(
+                                        'new_status' => 3
+                                            ), array(
+                                        'form_name' => 'close'
+                                    ))
+                                );
+                            }
+                        }
+
                         if ($no_signature) {
                             // Accepter (sans signature)
                             if ($this->isNewStatusAllowed(2)) {
@@ -586,22 +602,6 @@ class Bimp_Propal extends BimpComm
                                         'confirm_msg' => 'Veuillez confirmer'
                                     ))
                                 );
-                            }
-
-                            // Refuser
-                            if ($this->isActionAllowed('close')) {
-                                if ($this->canSetAction('close')) {
-                                    $clientFact = $this->getClientFacture();
-                                    $buttons[] = array(
-                                        'label'   => 'Devis Refusé',
-                                        'icon'    => 'times',
-                                        'onclick' => $this->getJsActionOnclick('close', array(
-                                            'new_status' => 3
-                                                ), array(
-                                            'form_name' => 'close'
-                                        ))
-                                    );
-                                }
                             }
 
                             // Modifier
@@ -1123,7 +1123,7 @@ class Bimp_Propal extends BimpComm
                 $result['warnings'] = BimpTools::merge_array($result['warnings'], $this->createSignature(true, $id_contact, $email_content));
             }
         }
-        
+
         return $result;
     }
 
@@ -1140,6 +1140,18 @@ class Bimp_Propal extends BimpComm
             $note = isset($data['note']) ? $data['note'] : '';
             if ($this->dol_object->cloture($user, (int) $data['new_status'], $note) <= 0) {
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la cloture de la proposition commerciale');
+            } else {
+                if ((int) $this->getData('id_signature')) {
+                    $signature = $this->getChildObject('signature');
+
+                    if (BimpObject::objectLoaded($signature)) {
+                        $signature_errors = $signature->cancelSignature();
+
+                        if (count($signature_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($signature_errors, 'Echec de l\'annulation de la signature');
+                        }
+                    }
+                }
             }
         }
 
@@ -1558,7 +1570,13 @@ class Bimp_Propal extends BimpComm
         $errors = array();
 
         if ($this->isLoaded($errors)) {
-            $this->updateField('fk_statut', Propal::STATUS_SIGNED);
+            $sav = $this->getSav();
+
+            if (BimpObject::objectLoaded($sav)) {
+                $sav->onPropalSigned($bimpSignature);
+            } else {
+                $this->updateField('fk_statut', Propal::STATUS_SIGNED);
+            }
         }
 
         return $errors;

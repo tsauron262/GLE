@@ -122,8 +122,8 @@ class securLogSms {
     function asSecureCokie() {
         if (isset($_COOKIE[$this->nomCookie])) {//cokkie secur en place
             $crypt = $_COOKIE[$this->nomCookie];
-            $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "bimp_secure_log WHERE id_user = " . $this->user->id . " AND crypt = '" . $crypt . "' AND IP = '" . $this->ip . "'");
-//            echo "<pre>"; print_r($_COOKIE);die($crypt);
+            $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "bimp_secure_log WHERE id_user = " . $this->user->id . " AND crypt = '" . $crypt . "' AND IP = '" . $this->ip . "' AND DATEDIFF(now(), tms ) <= 31");
+//            echo "<pre>"; print_r($_COOKIE);die("SELECT * FROM " . MAIN_DB_PREFIX . "bimp_secure_log WHERE id_user = " . $this->user->id . " AND crypt = '" . $crypt . "' AND IP = '" . $this->ip . "'");
             if ($this->db->num_rows($sql) > 0) {
                 $this->setSecure(1, $crypt);
                 return 1;

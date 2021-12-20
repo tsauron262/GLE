@@ -7,7 +7,10 @@ ini_set('display_errors', 1);
 $tabBox = array(
     array('module'=>'bimpcommercial', 'object'=>'Bimp_Facture', 'methode'=>'dataGraphPayeAn'),
     array('module'=>'bimpcommercial', 'object'=>'Bimp_Facture', 'methode'=>'dataGraphSecteur'),
-    array('module'=>'bimpcore', 'object'=>'Bimp_User', 'methode'=>'boxCreateUser')
+    array('module'=>'bimpcore', 'object'=>'Bimp_User', 'methode'=>'boxCreateUser'),
+    array('module'=>'bimpcore', 'object'=>'Bimp_User', 'methode'=>'boxServiceUser'),
+    
+    
     
 );
 

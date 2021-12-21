@@ -255,8 +255,13 @@ fields:
     paiement_comptant:
         label: Paiement comptant
         type: bool
-        default_value: 0 
-
+        default_value: 0
+        
+    rappel_service_expire:
+        label: Rappel service expire
+        type: bool
+        default_value: 1
+        
 fields_tables: 
     infos: 
         rows: 
@@ -291,6 +296,10 @@ fields_tables:
               edit: 1
             - field: revalorisation
               edit: 1
+            - field: rappel_service_expire
+              edit:
+                  callback: isCommercialOrSup
+                  
                   
     payment:
         rows:

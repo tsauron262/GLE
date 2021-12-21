@@ -5729,7 +5729,18 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $errors[] = BimpTools::getMsgFromArray($client_errors, $msg);
                 }
             }
-
+            
+            foreach($this->getData('sacs') as $sacId){
+                $sac = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_Sac', $sacId);
+                $list = $sac->getSav();
+                if(count($list)){
+                    foreach($list as $sav){
+                        if($sav->id != $this->id)
+                        $errors[] = 'Le sac '.$sac->getLink().' est déja utilisé dans le '.$sav->getLink();
+                    }
+                }
+                
+            }
             if (!$this->getData('code_centre_repa')) {
                 $this->set('code_centre_repa', $this->getData('code_centre'));
             }

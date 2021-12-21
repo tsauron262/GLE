@@ -106,7 +106,7 @@ class Bimp_Propal extends BimpComm
                     return 1;
                 }
 
-                if ($conf->contrat->enabled && in_array($this->getData('fk_statut', array(1, 2)))) {
+                if ($conf->contrat->enabled && in_array($this->getData('fk_statut'), array(1, 2))) {
                     return 1;
                 }
 

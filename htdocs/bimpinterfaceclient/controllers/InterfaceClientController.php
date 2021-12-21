@@ -20,18 +20,19 @@ class InterfaceClientController extends BimpPublicController
 
         global $userClient;
         if (BimpObject::objectLoaded($userClient)) {
+            $base_url = BimpObject::getPublicBaseUrl();
             $this->sideTabs = array(
-                'home'     => array('url' => DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=home', 'label' => 'Accueil', 'icon' => 'pe_home'),
-                'infos'    => array('url' => DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=infos', 'label' => 'Mes informations', 'icon' => 'pe_id'),
-                'contrats' => array('url' => DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=contrats', 'label' => 'Mes contrats', 'icon' => 'pe_news-paper'),
-                'contrats' => array('url' => DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=signatures', 'label' => 'Mes signatures', 'icon' => 'pe_pen'),
-                'factures' => array('url' => DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=factures', 'label' => 'Mes factures', 'icon' => 'pe_file'),
-                'tickets'  => array('url' => DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=tickets', 'label' => 'Support téléphonique', 'icon' => 'pe_headphones'),
-                'sav'      => array('url' => DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=sav', 'label' => 'SAV - Réparations', 'icon' => 'pe_tools')
+                'home'     => array('url' => $base_url . '?tab=home', 'label' => 'Accueil', 'icon' => 'pe_home'),
+                'infos'    => array('url' => $base_url . '?tab=infos', 'label' => 'Mes informations', 'icon' => 'pe_id'),
+                'contrats' => array('url' => $base_url . '?tab=contrats', 'label' => 'Mes contrats', 'icon' => 'pe_news-paper'),
+                'contrats' => array('url' => $base_url . '?tab=signatures', 'label' => 'Mes signatures', 'icon' => 'pe_pen'),
+                'factures' => array('url' => $base_url . '?tab=factures', 'label' => 'Mes factures', 'icon' => 'pe_file'),
+                'tickets'  => array('url' => $base_url . '?tab=tickets', 'label' => 'Support téléphonique', 'icon' => 'pe_headphones'),
+                'sav'      => array('url' => $base_url . '?tab=sav', 'label' => 'SAV - Réparations', 'icon' => 'pe_tools')
             );
 
             if ($userClient->isAdmin()) {
-                $this->sideTabs['users'] = array('url' => DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=users', 'label' => 'Utilisateurs', 'icon' => 'pe_users');
+                $this->sideTabs['users'] = array('url' => $base_url . '?tab=users', 'label' => 'Utilisateurs', 'icon' => 'pe_users');
             } else {
                 unset($this->sideTabs['factures']);
             }
@@ -314,7 +315,7 @@ class InterfaceClientController extends BimpPublicController
             }
 
             $html .= '<div class="buttonsContainer align-right" style="margin: 15px 0">';
-            $html .= '<span class="btn btn-default" onclick="window.location = \'' . DOL_URL_ROOT . '/bimpinterfaceclient/client.php?fc=savForm\'">';
+            $html .= '<span class="btn btn-default" onclick="window.location = \'' . BimpObject::getPublicBaseUrl() . '?fc=savForm\'">';
             $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouvelle demande de réparation';
             $html .= '</span>';
             $html .= '</div>';
@@ -335,7 +336,7 @@ class InterfaceClientController extends BimpPublicController
                 foreach ($savs as $sav) {
                     $button = '';
                     if ($sav->can('edit') && $sav->getData('resgsx') && $sav->getData('status') == -1) {
-                        $url = DOL_URL_ROOT . '/bimpinterfaceclient/client.php?fc=savForm&cancel_rdv=1&sav=' . $sav->id . '&r=' . $sav->getRef() . '&res=' . $sav->getData('resgsx');
+                        $url = BimpObject::getPublicBaseUrl() . '?fc=savForm&cancel_rdv=1&sav=' . $sav->id . '&r=' . $sav->getRef() . '&res=' . $sav->getData('resgsx');
                         $button .= '<a class="btn btn-default" href="' . $url . '">';
                         $button .= BimpRender::renderIcon('fas_times', 'iconLeft') . 'Annuler';
                         $button .= '</a>';
@@ -671,7 +672,7 @@ class InterfaceClientController extends BimpPublicController
                     $html .= BimpRender::renderAlerts('Vous n\'avez pas la permission d\'accéder à ce contenu');
                 } else {
                     $html .= '<div class="buttonsContainer align-right" style="margin: 15px 0">';
-                    $html .= '<span class="btn btn-default" onclick="window.location = \'' . DOL_URL_ROOT . '/bimpinterfaceclient/client.php?fc=savForm\'">';
+                    $html .= '<span class="btn btn-default" onclick="window.location = \'' . BimpObject::getPublicBaseUrl() . '?fc=savForm\'">';
                     $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouvelle demande de réparation';
                     $html .= '</span>';
                     $html .= '</div>';

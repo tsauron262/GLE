@@ -296,7 +296,7 @@ class BIC_UserClient extends BimpObject
             $buttons[] = array(
                 'label'   => 'Changer mon mot de passe',
                 'icon'    => 'fas_pen',
-                'onclick' => 'window.location = \'' . DOL_URL_ROOT . '/bimpinterfaceclient/client.php?display_public_form=1&public_form=changePw\''
+                'onclick' => 'window.location = \'' . BimpObject::getPublicBaseUrl() . '?display_public_form=1&public_form=changePw\''
             );
         }
 
@@ -724,11 +724,7 @@ class BIC_UserClient extends BimpObject
 
             if (!count($errors)) {
                 if ($this->use_email && (int) BimpTools::getPostFieldValue('send_mail', 1)) {
-                    if (stripos(DOL_URL_ROOT, $_SERVER['SERVER_NAME']) === false) {
-                        $url = $_SERVER['SERVER_NAME'] . DOL_URL_ROOT . '/bimpinterfaceclient/client.php?email=' . $this->getData('email');
-                    } else {
-                        $url = DOL_URL_ROOT . '/bimpinterfaceclient/client.php?email=' . $this->getData('email');
-                    }
+                    $url = BimpObject::getPublicBaseUrl(false) . '?email=' . $this->getData('email');
 
                     $sujet = "Mot de passe BIMP ERP Interface Client";
 

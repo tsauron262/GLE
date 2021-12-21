@@ -197,9 +197,10 @@ class BimpObject extends BimpCache
 
         return 0;
     }
-    
-    public function initBdd($mode = -1){
-        if($mode < 0)
+
+    public function initBdd($mode = -1)
+    {
+        if ($mode < 0)
             $mode = (int) $this->getConf('no_transaction_db', 0, false, 'bool');
         $this->db = self::getBdb($mode);
     }
@@ -210,7 +211,7 @@ class BimpObject extends BimpCache
         $this->object_name = $object_name;
 
         $this->config = new BimpConfig(DOL_DOCUMENT_ROOT . '/' . $module . '/objects/', $object_name, $this);
-        
+
         $this->initBdd();
 
         $this->use_commom_fields = (int) $this->getConf('common_fields', 1, false, 'bool');
@@ -246,7 +247,7 @@ class BimpObject extends BimpCache
             $this->config = new BimpConfig(DOL_DOCUMENT_ROOT . '/' . $this->module . '/objects/', $this->object_name, $this);
             $this->addCommonFieldsConfig();
             $this->addConfigExtraParams();
-            mailSyn2('Config inexistant', 'dev@bimp.fr', null, 'Config inexistant dans '.get_class($this));
+            mailSyn2('Config inexistant', 'dev@bimp.fr', null, 'Config inexistant dans ' . get_class($this));
         }
     }
 
@@ -1935,7 +1936,7 @@ class BimpObject extends BimpCache
                     if (!isset($result['errors'])) {
                         BimpCore::addlog('Retour d\'action invalide', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $instance, array(
                             'Action' => $action,
-                            'Note'   => 'Toutes les actions BimpObject doivent retourner un résultat sous la forme array(\'errors\' => $errors, \'warnings\' => $warnings, ... autre valeurs facultatives ...). Retournée : '.print_r($result,1)
+                            'Note'   => 'Toutes les actions BimpObject doivent retourner un résultat sous la forme array(\'errors\' => $errors, \'warnings\' => $warnings, ... autre valeurs facultatives ...). Retournée : ' . print_r($result, 1)
                         ));
                     }
                 } else {
@@ -1968,7 +1969,7 @@ class BimpObject extends BimpCache
                 }
             }
         }
-        
+
         return $result;
     }
 
@@ -3980,7 +3981,7 @@ class BimpObject extends BimpCache
 
             if (!count($errors)) {
                 // Associations: 
-                if((int) BimpCore::getConf('bimpcore_use_db_transactions', 0))
+                if ((int) BimpCore::getConf('bimpcore_use_db_transactions', 0))
                     $errors = BimpTools::merge_array($errors, $this->saveAssociationsFromPost());
                 else
                     $warnings = BimpTools::merge_array($warnings, $this->saveAssociationsFromPost());
@@ -3988,7 +3989,7 @@ class BimpObject extends BimpCache
                 // Sous-objets ajoutés: 
                 $sub_result = $this->checkSubObjectsPost($force_edit);
                 if (count($sub_result['errors'])) {
-                    if((int) BimpCore::getConf('bimpcore_use_db_transactions', 0))
+                    if ((int) BimpCore::getConf('bimpcore_use_db_transactions', 0))
                         $errors = BimpTools::merge_array($errors, $sub_result['errors']);
                     else
                         $warnings = BimpTools::merge_array($warnings, $sub_result['errors']);
@@ -4001,7 +4002,7 @@ class BimpObject extends BimpCache
                     // Champs des sous-objets mis à jour: 
                     $sub_result = $this->checkChildrenUpdatesFromPost();
                     if (count($sub_result['errors'])) {
-                        if((int) BimpCore::getConf('bimpcore_use_db_transactions', 0))
+                        if ((int) BimpCore::getConf('bimpcore_use_db_transactions', 0))
                             $errors = BimpTools::merge_array($errors, $sub_result['errors']);
                         else
                             $warnings = BimpTools::merge_array($warnings, $sub_result['errors']);
@@ -4027,7 +4028,7 @@ class BimpObject extends BimpCache
 
                         BimpCore::addlog('Commit echec - erreur inconnue', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $this, array(
                             'Action' => 'Save From Post',
-                            'Warnings'> $warnings
+                            'Warnings' > $warnings
                                 ), true);
                     }
                 }
@@ -7979,7 +7980,33 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         return DOL_URL_ROOT . '/' . $this->module . '/index.php?fc=' . $controller . '&id=' . $this->id;
     }
 
-    public function getPublicUrl()
+    public static function getPublicBaseUrl($internal = true)
+    {
+        if ($internal) {
+            return DOL_URL_ROOT . '/bimpinterfaceclient/client.php';
+        }
+
+        return BimpCore::getConf('interface_client_base_url', '');
+    }
+
+    public function getPublicUrl($internal = true)
+    {
+        if ($this->isLoaded()) {
+            $params = $this->getPublicUrlParams();
+
+            if ($params) {
+                $base = self::getPublicBaseUrl($internal);
+
+                if ($base) {
+                    return $base . '?' . $params;
+                }
+            }
+        }
+
+        return '';
+    }
+
+    public function getPublicUrlParams()
     {
         return '';
     }
@@ -8192,7 +8219,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         }
 
         $url = false;
-        if($this->config->isDefined('list_page_url'))
+        if ($this->config->isDefined('list_page_url'))
             $url = BimpTools::makeUrlFromConfig($this->config, 'list_page_url', $this->module, $this->getController());
 
         if (!$url && $this->isDolObject()) {
@@ -8202,7 +8229,24 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         return $url;
     }
 
-    public function getPublicListPageUrl()
+    public function getPublicListPageUrl($internal = true)
+    {
+        if ($this->isLoaded()) {
+            $params = $this->getPublicListPageUrlParams();
+
+            if ($params) {
+                $base = self::getPublicBaseUrl($internal);
+
+                if ($base) {
+                    return $base . '?' . $params;
+                }
+            }
+        }
+
+        return '';
+    }
+
+    public function getPublicListPageUrlParams()
     {
         return '';
     }
@@ -8658,13 +8702,13 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         $_POST = $list_data;
 
         $list = new BC_ListTable($this, $list_name);
-        
+
         $list->initForGraph();
 
         $data = $this->getInfoGraph();
-        if(static::$modeDateGraph == 'day')
+        if (static::$modeDateGraph == 'day')
             $xValueFormatString = 'DD MMM, YYYY';
-        elseif(static::$modeDateGraph == 'month')
+        elseif (static::$modeDateGraph == 'month')
             $xValueFormatString = 'MMM, YYYY';
         else
             $xValueFormatString = 'YYYY';
@@ -8678,7 +8722,7 @@ var options = {
 	},
 	axisX:{
 		title: "' . $data['axeX'] . '",
-		valueFormatString: "'.$xValueFormatString.'"
+		valueFormatString: "' . $xValueFormatString . '"
 	},
 	axisY: {
 		title: "' . $data['axeY'] . '",
@@ -8701,7 +8745,7 @@ var options = {
 		showInLegend: true,
 		name: "' . $data['data1'] . '",
 		markerType: "square",
-		xValueFormatString: "'.$xValueFormatString.'",
+		xValueFormatString: "' . $xValueFormatString . '",
 		yValueFormatString: "#,##0 €",
 		dataPoints: [';
 
@@ -8714,7 +8758,7 @@ var options = {
                         showInLegend: true,
                         name: "' . $data['data2'] . '",
                         markerType: "square",
-                        xValueFormatString: "'.$xValueFormatString.'",
+                        xValueFormatString: "' . $xValueFormatString . '",
                         color: "#F08080",
                         yValueFormatString: "#,##0 €",
                         visible: 0,
@@ -8730,7 +8774,7 @@ var options = {
                         showInLegend: true,
                         name: "' . $data['data3'] . '",
                         markerType: "square",
-                        xValueFormatString: "'.$xValueFormatString.'",
+                        xValueFormatString: "' . $xValueFormatString . '",
                         color: "#CC2080",
                         visible: 0,
                         yValueFormatString: "#,##0 €",
@@ -8747,7 +8791,7 @@ var options = {
                         name: "' . $data['data11'] . '",
                         lineDashType: "dash",
                         markerType: "square",
-                        xValueFormatString: "'.$xValueFormatString.'",
+                        xValueFormatString: "' . $xValueFormatString . '",
                         yValueFormatString: "#,##0 €",
                         dataPoints: [';
 

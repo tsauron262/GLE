@@ -769,7 +769,7 @@ class BS_SAV extends BimpObject
 
             if ($this->canClientEdit() && $this->getData('resgsx') && $this->getData('status') == -1) {
 
-                $url = DOL_URL_ROOT . '/bimpinterfaceclient/client.php?fc=savForm&cancel_rdv=1&sav=' . $this->id . '&r=' . $this->getRef() . '&res=' . $this->getData('resgsx');
+                $url = self::getPublicBaseUrl() .'?fc=savForm&cancel_rdv=1&sav=' . $this->id . '&r=' . $this->getRef() . '&res=' . $this->getData('resgsx');
                 $buttons[] = array(
                     'label'   => 'Annuler le RDV',
                     'icon'    => 'fas_times',
@@ -840,16 +840,16 @@ class BS_SAV extends BimpObject
                         'onclick' => $this->getJsActionOnclick('propalAccepted')
                     );
                 }
-                
+
                 if (BimpObject::objectLoaded($propal) && $propal->isActionAllowed('createSignature')) {
-                        $buttons[] = array(
-                            'label'   => 'Créer signature devis',
-                            'icon'    => 'fas_signature',
-                            'onclick' => $propal->getJsActionOnclick('createSignature', array(), array(
-                                'form_name' => 'create_signature'
-                            ))
-                        );
-                    }
+                    $buttons[] = array(
+                        'label'   => 'Créer signature devis',
+                        'icon'    => 'fas_signature',
+                        'onclick' => $propal->getJsActionOnclick('createSignature', array(), array(
+                            'form_name' => 'create_signature'
+                        ))
+                    );
+                }
 
                 if ($this->isActionAllowed('propalRefused')) {
                     $buttons[] = array(
@@ -1203,27 +1203,14 @@ class BS_SAV extends BimpObject
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
     }
 
-    public function getPublicUrl()
+    public function getPublicUrlParams($internal = true)
     {
-        if ($this->isLoaded()) {
-            $base_url = BimpCore::getConf('interface_client_base_url', '');
-            if ($base_url) {
-                return $base_url . '?tab=sav&content=card&id_sav=' . $this->id;
-                exit;
-            }
-        }
-
-        return '';
+        return 'tab=sav&content=card&id_sav=' . $this->id;
     }
 
-    public function getPublicListPageUrl()
+    public function getPublicListPageUrlParams()
     {
-        $base_url = BimpCore::getConf('interface_client_base_url', '');
-        if ($base_url) {
-            return $base_url . '?tab=sav';
-        }
-
-        return '';
+        return 'tab=sav';
     }
 
     public function getFilesDir()
@@ -1486,7 +1473,7 @@ class BS_SAV extends BimpObject
     public function getPublicLink()
     {
         if ((int) $this->getData('id_user_client')) {
-            $url = $this->getPublicUrl();
+            $url = $this->getPublicUrl(false);
 
             if ($url) {
                 return $url;
@@ -5747,17 +5734,16 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $errors[] = BimpTools::getMsgFromArray($client_errors, $msg);
                 }
             }
-            
-            foreach($this->getData('sacs') as $sacId){
+
+            foreach ($this->getData('sacs') as $sacId) {
                 $sac = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_Sac', $sacId);
                 $list = $sac->getSav();
-                if(count($list)){
-                    foreach($list as $sav){
-                        if($sav->id != $this->id)
-                        $errors[] = 'Le sac '.$sac->getLink().' est déja utilisé dans le '.$sav->getLink();
+                if (count($list)) {
+                    foreach ($list as $sav) {
+                        if ($sav->id != $this->id)
+                            $errors[] = 'Le sac ' . $sac->getLink() . ' est déja utilisé dans le ' . $sav->getLink();
                     }
                 }
-                
             }
             if (!$this->getData('code_centre_repa')) {
                 $this->set('code_centre_repa', $this->getData('code_centre'));
@@ -6280,7 +6266,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         }
 
         if ($context === 'public') {
-            return DOL_URL_ROOT . '/bimpinterfaceclient/client.php?fc=doc&doc=' . $doc_type . ($signed ? '_signed' : '') . '&docid=' . $this->id . '&docref=' . $this->getRef();
+            return self::getPublicBaseUrl() . '?fc=doc&doc=' . $doc_type . ($signed ? '_signed' : '') . '&docid=' . $this->id . '&docref=' . $this->getRef();
         }
 
 //        if ($doc_type === 'sav_facture') {

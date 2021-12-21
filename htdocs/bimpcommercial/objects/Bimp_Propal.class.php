@@ -1544,7 +1544,7 @@ class Bimp_Propal extends BimpComm
             switch ($doc_type) {
                 case 'devis':
                     if ($context === 'public') {
-                        return DOL_URL_ROOT . '/bimpinterfaceclient/client.php?fc=doc&doc=devis' . ($signed ? '_signed' : '') . '&docid=' . $this->id . '&docref=' . $this->getRef();
+                        return self::getPublicBaseUrl() .'?fc=doc&doc=devis' . ($signed ? '_signed' : '') . '&docid=' . $this->id . '&docref=' . $this->getRef();
                     } else {
                         return $this->getFileUrl($fileName);
                     }

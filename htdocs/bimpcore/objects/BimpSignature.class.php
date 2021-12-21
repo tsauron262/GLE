@@ -1383,7 +1383,7 @@ class BimpSignature extends BimpObject
                                 $email_content = $this->getDefaultSignDistEmailContent();
                             }
 
-                            $url = DOL_URL_ROOT . '/bimpinterfaceclient/client.php';
+                            $url = self::getPublicBaseUrl(false);
 
                             $email_content = str_replace(array(
                                 '{NOM_DOCUMENT}',
@@ -1561,7 +1561,7 @@ class BimpSignature extends BimpObject
                 $commercial_email = $this->getCommercialEmail();
                 $date_open = $this->getData('date_open');
                 $doc_label = $this->displayDocType() . ' ' . $this->displayDocRef();
-                $url = DOL_URL_ROOT . '/bimpinterfaceclient/client.php';
+                $url = self::getPublicBaseUrl(false);
 
                 $subject = 'Client ' . $client->getRef() . ' - ' . $doc_label . ' - Signature en attente';
 

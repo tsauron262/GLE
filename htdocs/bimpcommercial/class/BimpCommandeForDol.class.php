@@ -40,7 +40,7 @@ class BimpCommandeForDol extends Bimp_Commande{
                     'alias' => 'c',
                     'on'    => 'a.fk_commande = c.rowid')
                 ));    
-        $sql .= ' WHERE a.date_end != "" AND a.date_end < "' . $date_limit_expire->format('Y-m-d H:i:s') . '"';
+        $sql .= ' WHERE a.date_end != "" AND a.date_end < "' . $date_limit_expire->format('Y-m-d H:i:s') . '" AND c.rappel_service_expire = 1';
         $sql .= BimpTools::getSqlOrderBy("a.date_end", 'ASC');
         $rows = $this->db->executeS($sql);
         

@@ -135,6 +135,12 @@ objects:
             id_object: 
                 field_value: id_signature_resti
                 
+    sac: 
+        relation: hasMany
+        delete: 0
+        instance: 
+            bimp_object: BS_Sac
+            
 associations: 
     propales:
         object: propal
@@ -458,6 +464,13 @@ fields:
         label: Paramètres signature restitution
         type: json
         
+    sacs: 
+        label: Sac d'emballage
+        type: items_list
+        items_braces: 1
+        items_data_type: id_object
+        object: sac
+        
 forms: 
     default:
         rows: 
@@ -511,6 +524,7 @@ forms:
               value: 1
             - field: id_ticket
               hidden: 1
+            - field: sacs
               
     prise_en_charge: 
         rows: 
@@ -572,6 +586,7 @@ forms:
             - field: system
             - field: login_admin
             - field: pword_admin
+            - field: sacs
             
     public_edit: 
         rows: 
@@ -903,6 +918,11 @@ fields_tables:
               display: card
               show: 
                   field_value: id_facture
+    sac:
+        title: Emballage
+        icon: fas_shopping-bag
+        rows: 
+            - field: sacs
               
     client: 
         title: Client
@@ -1043,6 +1063,11 @@ views:
                     col_md: 6
                     fields_table:
                         name: facturation
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table:
+                        name: sac
             - cols: 
                   - type: fields_table
                     col_lg: 6
@@ -1092,6 +1117,12 @@ views:
                   col_md: 6
                   fields_table:
                       name: facturation
+                      
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table:
+                        name: sac
             - cols: 
                 - type: custom
                   col_lg: 6

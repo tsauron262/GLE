@@ -4103,4 +4103,27 @@ class Bimp_Commande extends BimpComm
         $this->resprints = "OK " . $ok . ' mails BAD ' . $err . ' mails dont ' . $mailDef . ' mail par default';
         return "OK " . $ok . ' mails BAD ' . $err . ' mails dont ' . $mailDef . ' mail par default';
     }
+    
+    public function isCommercialOrSup() {
+        
+        global $user;
+        
+        if($this->isLoaded()) {
+            $id_commercial = $this->getCommercialId();
+
+            if((int) $id_commercial == 0)
+                $id_commercial = $this->dol_object->user_author_id;
+        }
+        
+        // Check si il est admin ou le commercial de cette commande
+        if($user->admin or (int) $id_commercial == (int) $user->id)
+            return 1;
+        
+        $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_commercial);
+        // Check si il est le n+1 du commercial en charge de cette commande
+        if((int) $commercial->getData('fk_user') == (int) $user->id)
+            return 1;
+        
+        return 0;
+    }
 }

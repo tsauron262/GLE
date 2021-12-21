@@ -56,6 +56,54 @@ class docController extends BimpPublicController
                         $file_name = 'bimplogistique/BL_CommandeShipment/' . $shipment->id . '/' . $file_name;
                     }
                     break;
+
+                case 'devis':
+                case 'devis_signed':
+                    $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id);
+                    $propal_ref = $propal->getRef();
+
+                    if (!BimpObject::objectLoaded($propal)) {
+                        $this->errors[] = 'Identifiant du document invalide';
+                    } elseif ($propal_ref != $ref) {
+                        $this->errors[] = 'Référence du document invalide';
+                    } elseif (!$propal->can('view')) {
+                        $this->errors[] = 'Vous n\'avez pas la permission de voir ce document';
+                    }
+
+                    $dir = $propal->getFilesDir();
+                    $file_name = dol_sanitizeFileName($propal_ref) . ($doc == 'devis_signed' ? '_signe' : '') . '.pdf';
+
+                    if (!file_exists($dir . $file_name)) {
+                        $this->errors[] = 'Ce document n\'existe pas (' . $dir . $file_name . ')';
+                    } else {
+                        $module_part = 'propal';
+                        $file_name = dol_sanitizeFileName($propal_ref) . '/' . $file_name;
+                    }
+                    break;
+
+                case 'sav_pc':
+                case 'sav_pc_signed':
+                    $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id);
+                    $sav_ref = $sav->getRef();
+
+                    if (!BimpObject::objectLoaded($sav)) {
+                        $this->errors[] = 'Identifiant du document invalide';
+                    } elseif ($sav_ref != $ref) {
+                        $this->errors[] = 'Référence du document invalide';
+                    } elseif (!$sav->can('view')) {
+                        $this->errors[] = 'Vous n\'avez pas la permission de voir ce document';
+                    }
+
+                    $dir = $sav->getFilesDir();
+                    $file_name = $sav->getSignatureDocFileName('sav_pc', ($doc == 'sav_pc_signed' ? true : false));
+
+                    if (!file_exists($dir . $file_name)) {
+                        $this->errors[] = 'Ce document n\'existe pas (' . $dir . $file_name . ')';
+                    } else {
+                        $module_part = 'bimpcore';
+                        $file_name = 'sav/' . $sav->id . '/' . $file_name;
+                    }
+                    break;
             }
 
             if (!count($this->errors)) {
@@ -81,17 +129,17 @@ class docController extends BimpPublicController
     {
         // Code repris depuis document.php (Epuré: les contrôles de sécurité ont déjà été fait)
         global $userClient, $conf;
-        
+
         if (!BimpObject::objectLoaded($userClient)) {
             $this->errors[] = 'Aucun utilisateur connecté';
             return false;
         }
-        
-        if (empty($modulepart)){
+
+        if (empty($modulepart)) {
             $this->errors[] = 'Nom du module absent';
             return false;
         }
-        
+
         require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
         $encoding = '';
 
@@ -117,7 +165,6 @@ class docController extends BimpPublicController
 
         $check_access = dol_check_secure_access_document($modulepart, $original_file, 0);
         $fullpath_original_file = $check_access['original_file'];               // $fullpath_original_file is now a full path name
-
         // On interdit les remontees de repertoire ainsi que les pipe dans les noms de fichiers.
         if (preg_match('/\.\./', $fullpath_original_file) || preg_match('/[<>|]/', $fullpath_original_file)) {
             $this->errors[] = 'Le nom du fichier contient des caractères interdits';
@@ -131,13 +178,12 @@ class docController extends BimpPublicController
                 $fullpath_original_file = $inTmpPath;
             }
         }
-        
+
         $filename = basename($fullpath_original_file);
 
         // Output file on browser
         dol_syslog("document.php download $fullpath_original_file filename=$filename content-type=$type");
         $fullpath_original_file_osencoded = dol_osencode($fullpath_original_file); // New file name encoded in OS encoding charset
-        
         // This test if file exists should be useless. We keep it to find bug more easily
         if (!file_exists($fullpath_original_file_osencoded)) {
             $this->errors[] = 'Le fichier n\'existe pas';
@@ -147,18 +193,18 @@ class docController extends BimpPublicController
         // Permissions are ok and file found, so we return it
         top_httphead($type);
         header('Content-Description: File Transfer');
-        
+
         if ($encoding)
             header('Content-Encoding: ' . $encoding);
-        
+
         // Add MIME Content-Disposition from RFC 2183 (inline=automatically displayed, attachment=need user action to open)
         if ($attachment)
             header('Content-Disposition: attachment; filename="' . $filename . '"');
         else
             header('Content-Disposition: inline; filename="' . $filename . '"');
-        
+
         header('Content-Length: ' . dol_filesize($fullpath_original_file));
-        
+
         // Ajout directives pour resoudre bug IE
         header('Cache-Control: Public, must-revalidate');
         header('Pragma: public');
@@ -168,7 +214,7 @@ class docController extends BimpPublicController
         global $db;
         if (is_object($db))
             $db->close();
-        
+
         return true;
     }
 }

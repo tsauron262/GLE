@@ -115,6 +115,26 @@ objects:
             id_object: 
                 field_value: id_user_client
                 
+    signature_pc: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object:
+                module: bimpcore
+                name: BimpSignature
+            id_object: 
+                field_value: id_signature_pc
+                
+    signature_resti: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object:
+                module: bimpcore
+                name: BimpSignature
+            id_object: 
+                field_value: id_signature_resti
+                
 associations: 
     propales:
         object: propal
@@ -151,6 +171,7 @@ fields:
                     method: getListCentre
                     params:
                         - code_centre
+                        - 1
         required: 1
         default_value: 
             callback: getDefaultCodeCentre
@@ -165,6 +186,7 @@ fields:
                     method: getListCentre
                     params:
                         - code_centre_repa
+                        - 1
         default_value: 
             callback: getDefaultCodeCentreRepa
         depends_on: code_centre
@@ -421,6 +443,20 @@ fields:
         type: int
         values: 
             array: bon_restit_raison
+    id_signature_pc: 
+        label: Signature prise en charge
+        type: id_object
+        object: signature_pc
+    signature_pc_params: 
+        label: Paramètres signature PC
+        type: json
+    id_signature_resti: 
+        label: Signature restitution
+        type: id_object
+        object: signature_resti
+    signature_resti_params: 
+        label: Paramètres signature restitution
+        type: json
         
 forms: 
     default:
@@ -669,6 +705,25 @@ forms:
               content: 
                   callback: displayFactureAmountToPay
               input_name: inut
+            - custom: 1
+              label: Créer la fiche signature
+              input_name: create_signature
+              input: 
+                  type: toggle
+              value: 
+                  callback: needSignaturePropal
+            - custom: 1
+              label: Contenu e-mail pour la signature à distance du devis
+              input_name: email_content
+              input: 
+                  type: html
+                  help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE} et {LIEN_ESPACE_CLIENT}.<br/>Le devis sera automatiquement joint à l'email"
+              value: 
+                  callback: getDefaultSignDistEmailContent
+              display_if: 
+                  field_name: create_signature
+                  show_values: 1
+            
             
     resolution: 
         rows: 
@@ -782,7 +837,12 @@ forms:
                   type: select
                   options: 
                       array: rdv_cancel_reasons
-              
+                      
+    signature: 
+        rows: 
+            - field: id_contact
+              label: Contact signataire
+        
 fields_tables: 
     infos: 
         title: Informations
@@ -929,11 +989,29 @@ fields_tables:
             - field: extra_infos
               label: Informations supplémentaires
               
+    signatures: 
+        title: Signatures
+        icon: fas_signature
+        rows: 
+            - field: id_signature_pc
+              display: card
+              show: 
+                  field_value: id_signature_pc
+            - field: 'propal:id_signature'
+              label: Signature Devis
+              display: card
+              show: 
+                  callback: showPropalSignature
+            - field: id_signature_resti
+              display: card
+              show: 
+                  field_value: id_signature_resti
+              
 views: 
     default: 
         title: 
             callback: getRef
-        objects_change_reload: BS_SavProduct,BS_ApplePart,Bimp_Paiement
+        objects_change_reload: BS_SavProduct,BS_ApplePart,Bimp_Paiement,BimpSignature
         rows:
             - cols: 
                   - type: object_header
@@ -944,6 +1022,12 @@ views:
                     fields_table: 
                         name: infos
                   
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table:
+                        name: signatures
+                        
                   - type: fields_table
                     col_lg: 6
                     col_md: 6
@@ -978,9 +1062,9 @@ views:
             callback: getRef
         delete_btn: 1
         edit_form: edit
-        objects_change_reload: BS_SavProduct,BS_ApplePart,Bimp_Paiement
+        objects_change_reload: BS_SavProduct,BS_ApplePart,Bimp_Paiement,BimpSignature
         rows:
-            - cols: 
+            - cols:                       
                 - type: fields_table
                   col_lg: 6
                   col_md: 6
@@ -991,8 +1075,14 @@ views:
                   col_lg: 6
                   col_md: 6
                   fields_table:
+                      name: signatures
+                      
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table:
                       name: client
-                  
+                      
                 - type: fields_table
                   col_lg: 6
                   col_md: 6
@@ -1183,6 +1273,14 @@ searches:
               alias: r
               on: a.id = r.id_sav
                       
+signatures: 
+    sav_pc: 
+        label: Bon de prise en charge SAV
+    sav_resti: 
+        label: Bon de restitution SAV
+    sav_facture: 
+        label: Facture SAV
+        
 pages: 
     default: 
         nav_tabs: 

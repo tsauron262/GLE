@@ -592,6 +592,38 @@ class BC_Field extends BimpComponent
                 return 120;
         }
     }
+    
+    public static function getFieldObject($base_object, &$field_name, &$errors = array())
+    {
+        $field_object = null;
+        $children = explode(':', $field_name);
+        $field_name = array_pop($children);
+
+        if (is_a($base_object, 'BimpObject')) {
+            if ((string) $field_name) {
+                $field_object = $base_object;
+
+                if (count($children)) {
+                    foreach ($children as $child_name) {
+                        $child = $field_object->getChildObject($child_name);
+
+                        if (is_a($child, 'BimpObject')) {
+                            $field_object = $child;
+                        } else {
+                            $errors[] = 'Instance enfant "' . $child_name . '" invalide pour l\'objet "' . $field_object->object_name . '"';
+                            break;
+                        }
+                    }
+                }
+            } else {
+                $errors[] = 'Nom du champ absent';
+            }
+        } else {
+            $errors[] = 'Object associé invalide';
+        }
+
+        return $field_object;
+    }
 
     // Display_if / Depends_on: 
 

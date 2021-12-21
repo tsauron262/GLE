@@ -147,11 +147,7 @@ class InterfaceClientController extends BimpPublicController
             $signatures = BimpCache::getBimpObjectObjects('bimpcore', 'BimpSignature', array(
                         'id_client' => (int) $userClient->getData('id_client'),
                         'signed'    => 0,
-                        'type'      => 0,
-//                        'allowed_users_client' => array(
-//                            'part'      => '[' . $userClient->id . ']',
-//                            'part_type' => 'middle'
-//                        )
+                        'type'      => 0
                             ), 'id', 'desc');
 
             if (!empty($signatures)) {

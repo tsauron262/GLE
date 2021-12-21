@@ -168,7 +168,7 @@ class Bimp_Propal extends BimpComm
 
             case 'close':
                 if ($status !== Propal::STATUS_VALIDATED) {
-                    $errors[] = 'Le statut actuel ' . $this->getLabel('of_this') . ' ne permet pas cette opération';
+                    $errors[] = 'Le statut actuel ' . $this->getLabel('of_this') . ' ne permetffff pas cette opération';
                     return 0;
                 }
 
@@ -647,7 +647,7 @@ class Bimp_Propal extends BimpComm
                                     'note_private'       => addslashes(htmlentities($this->getData('note_private'))),
                                     'origin'             => 'propal',
                                     'origin_id'          => (int) $this->id,
-                                    'close_propal'       => 1
+                                    'close_propal'       => 0
                                 )
                             );
 

@@ -1632,13 +1632,13 @@ class BimpCache
                 if ($include_empty) {
                     $result[''] = '';
                 }
-
+                
                 $userCentres = explode(' ', str_replace(',', ' ', $user->array_options['options_apple_centre']));
                 $centres = self::getCentres();
-
                 if (count($userCentres) > 1 || $userCentres[0] != '') {
                     foreach ($userCentres as $code) {
-                        if (preg_match('/^ ?([A-Z]+) ?$/', $code, $matches)) {
+//                        echo 'mm'.$code;
+                        if (preg_match('/^ ?([A-Z1-9]+) ?$/', $code, $matches)) {
                             if (isset($centres[$matches[1]])) {
                                 $result[$matches[1]] = $centres[$matches[1]]['label'];
                             }

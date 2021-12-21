@@ -315,13 +315,13 @@ class BS_SAV extends BimpObject
                     return 0;
                 }
 
-                if ($action === 'propalAccepted' && (int) $propal->getData('id_signature')) {
-                    $signature = $propal->getChildObject('signature');
-                    if (BimpObject::objectLoaded($signature) && (int) $signature->getData('type') >= 0) {
-                        $errors[] = 'Utiliser la signature du devis';
-                        return 0;
-                    }
-                }
+//                if ($action === 'propalAccepted' && (int) $propal->getData('id_signature')) {
+//                    $signature = $propal->getChildObject('signature');
+//                    if (BimpObject::objectLoaded($signature) && (int) $signature->getData('type') >= 0) {
+//                        $errors[] = 'Utiliser la signature du devis';
+//                        return 0;
+//                    }
+//                }
 
                 if (in_array($status, array(self::BS_SAV_DEVIS_ACCEPTE, self::BS_SAV_DEVIS_REFUSE, self::BS_SAV_FERME))) {
                     $errors[] = $status_error;
@@ -1472,8 +1472,15 @@ class BS_SAV extends BimpObject
 
     public function getDefaultSignDistEmailContent()
     {
-        BimpObject::loadClass('bimpcore', 'BimpSignature');
-        return BimpSignature::getDefaultSignDistEmailContent();
+        $message = 'Bonjour, <br/><br/>';
+
+        $message = "Vous trouvez ci-joint le devis pour la réparation de votre '" . $this->getNomMachine() . ".<br/><br/>";
+        $message .= 'Vous pouvez effectuer la signature électronique de ce document directement depuis votre {LIEN_ESPACE_CLIENT} ou nous retourner le document ci-joint signé.<br/><br/>';
+        $message .= "Si vous voulez des informations complémentaires, contactez le centre de service par téléphone au " . $tel . " (Appel non surtaxé).<br/><br/>";
+        $message .= 'Cordialement, <br/><br/>';
+        $message .= 'L\'équipe BIMP';
+
+        return $message;
     }
 
     public function getPublicLink()
@@ -1804,7 +1811,7 @@ class BS_SAV extends BimpObject
 
         // Messages signature propale: 
         $propal = $this->getChildObject('propal');
-        if (BimpObject::objectLoaded($propal) && !$propal->isSigned()) {
+        if (BimpObject::objectLoaded($propal)) {
             $signature_propal = $propal->getChildObject('signature');
 
             if (BimpObject::objectLoaded($signature_propal)) {
@@ -3257,7 +3264,7 @@ class BS_SAV extends BimpObject
         return $errors;
     }
 
-    public function sendMsg($msg_type = '')
+    public function sendMsg($msg_type = '', $sms_only = false)
     {
         global $langs;
 
@@ -3515,65 +3522,68 @@ class BS_SAV extends BimpObject
                 break;
         }
 
-        if ($mail_msg) {
-            $toMail = '';
+        if (!$sms_only) {
+            if ($mail_msg) {
+                $toMail = '';
 
-            if ($msg_type === 'Facture' && (int) $client->getData('contact_default')) {
-                $fac_contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', (int) $client->getData('contact_default'));
+                if ($msg_type === 'Facture' && (int) $client->getData('contact_default')) {
+                    $fac_contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', (int) $client->getData('contact_default'));
 
-                if (BimpObject::objectLoaded($fac_contact)) {
-                    $toMail = $fac_contact->getData('email');
+                    if (BimpObject::objectLoaded($fac_contact)) {
+                        $toMail = $fac_contact->getData('email');
+                    }
                 }
-            }
 
-            if (!$toMail && (int) $this->getData('id_user_client')) {
-                $userClient = $this->getChildObject('user_client');
+                if (!$toMail && (int) $this->getData('id_user_client')) {
+                    $userClient = $this->getChildObject('user_client');
 
-                if (BimpObject::objectLoaded($userClient)) {
-                    $toMail = $userClient->getData('email');
+                    if (BimpObject::objectLoaded($userClient)) {
+                        $toMail = $userClient->getData('email');
+                    }
                 }
-            }
 
-            if (!$toMail && BimpObject::objectLoaded($contact)) {
-                if (isset($contact->dol_object->email) && $contact->dol_object->email) {
-                    $toMail = $contact->dol_object->email;
+                if (!$toMail && BimpObject::objectLoaded($contact)) {
+                    if (isset($contact->dol_object->email) && $contact->dol_object->email) {
+                        $toMail = $contact->dol_object->email;
+                    }
                 }
-            }
 
-            if (!$toMail) {
-                $toMail = $client->dol_object->email;
-            }
+                if (!$toMail) {
+                    $toMail = $client->dol_object->email;
+                }
 
-            if (!$toMail) {
-                $errors[] = $error_msg . ' (E-mail du client absent)';
-            }
+                if (!$toMail) {
+                    $errors[] = $error_msg . ' (E-mail du client absent)';
+                }
 
-            if ($tech) {
-                $mail_msg .= "\n" . "Technicien en charge de la réparation : " . $tech;
-            }
+                if ($tech) {
+                    $mail_msg .= "\n" . "Technicien en charge de la réparation : " . $tech;
+                }
 
-            $mail_msg .= "\n" . $textSuivie . "\n\n Cordialement.\n\nL'équipe BIMP\n\n" . $signature;
+                $mail_msg .= "\n" . $textSuivie . "\n\n Cordialement.\n\nL'équipe BIMP\n\n" . $signature;
 
-            $toMail = BimpTools::cleanEmailsStr($toMail);
+                $toMail = BimpTools::cleanEmailsStr($toMail);
 
-            if (BimpValidate::isEmail($toMail)) {
+                if (BimpValidate::isEmail($toMail)) {
 //                if (!mailSyn2($subject, $toMail, $fromMail, $mail_msg, $tabFile, $tabFile2, $tabFile3)) {
 //                    $errors[] = 'Echec envoi du mail';
 //                }
-                $bimpMail = new BimpMail($subject, $toMail, $fromMail, $mail_msg);
-                $bimpMail->addFiles($files);
-                $mail_errors = array();
-                $bimpMail->send($mail_errors);
+                    $bimpMail = new BimpMail($subject, $toMail, $fromMail, $mail_msg);
+                    $bimpMail->addFiles($files);
+                    $mail_errors = array();
+                    $bimpMail->send($mail_errors);
 
-                if (count($mail_errors)) {
-                    $errors[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail');
+                    if (count($mail_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($mail_errors, 'Echec de l\'envoi de l\'e-mail');
+                    }
+                } else {
+                    $errors[] = "Pas d'email correct " . $toMail;
                 }
-            } else {
-                $errors[] = "Pas d'email correct " . $toMail;
+            } elseif (!count($errors)) {
+                $errors[] = 'pas de message';
             }
-        } elseif (!count($errors)) {
-            $errors[] = 'pas de message';
         }
+
 
         if ($contact_pref === 3 && $sms) {
             require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
@@ -4272,6 +4282,14 @@ class BS_SAV extends BimpObject
 
         $create_signature = BimpTools::getArrayValueFromPath($data, 'create_signature', $this->needSignaturePropal());
 
+        if ($create_signature) {
+            $id_contact = (int) BimpTools::getArrayValueFromPath($data, 'id_contact', $this->getData('id_contact'));
+
+            if (!$id_contact) {
+                $errors[] = 'Veuillez sélectionner le contact signataire';
+            }
+        }
+
         if (isset($data['diagnostic'])) {
             $this->updateField('diagnostic', $data['diagnostic']);
         }
@@ -4353,7 +4371,7 @@ class BS_SAV extends BimpObject
                 $propal->hydrateFromDolObject();
 
                 if (isset($data['send_msg']) && (int) $data['send_msg']) {
-                    $warnings = BimpTools::merge_array($warnings, $this->sendMsg('Devis'));
+                    $warnings = BimpTools::merge_array($warnings, $this->sendMsg('Devis'), $create_signature);
                 }
             }
         }

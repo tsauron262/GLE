@@ -1935,7 +1935,7 @@ class BimpObject extends BimpCache
                     if (!isset($result['errors'])) {
                         BimpCore::addlog('Retour d\'action invalide', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $instance, array(
                             'Action' => $action,
-                            'Note'   => 'Toutes les actions BimpObject doivent retourner un résultat sous la forme array(\'errors\' => $errors, \'warnings\' => $warnings, ... autre valeurs facultatives ...)'
+                            'Note'   => 'Toutes les actions BimpObject doivent retourner un résultat sous la forme array(\'errors\' => $errors, \'warnings\' => $warnings, ... autre valeurs facultatives ...). Retournée : '.print_r($result,1)
                         ));
                     }
                 } else {

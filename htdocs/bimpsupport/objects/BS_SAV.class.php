@@ -4371,7 +4371,7 @@ class BS_SAV extends BimpObject
                 $propal->hydrateFromDolObject();
 
                 if (isset($data['send_msg']) && (int) $data['send_msg']) {
-                    $warnings = BimpTools::merge_array($warnings, $this->sendMsg('Devis'), $create_signature);
+                    $warnings = BimpTools::merge_array($warnings, $this->sendMsg('Devis', $create_signature));
                 }
             }
         }

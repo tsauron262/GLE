@@ -1651,17 +1651,17 @@ class BS_SAV extends BimpObject
                 }
             }
         }
-        
+
         $sup = '';
-        if(isset($_GET['code_centre']) && count(explode('-', $_GET['code_centre'])) == 1 && isset($table[$_GET['code_centre']]))
-            $sup .= '<br/>('.$centres[$_GET['code_centre']]['label'].' '.$table[$_GET['code_centre']].' jours)';
-        
+        if (isset($_GET['code_centre']) && count(explode('-', $_GET['code_centre'])) == 1 && isset($table[$_GET['code_centre']]))
+            $sup .= '<br/>(' . $centres[$_GET['code_centre']]['label'] . ' ' . $table[$_GET['code_centre']] . ' jours)';
+
         $html = '';
         $html .= '<div style="max-width:700px; float: left; padding:5px">' . BimpRender::renderBimpListTable($result, array('centre' => 'Centre', 'time' => 'Temps moyen en J')) . '</div>';
         if (count($result2))
             $html .= '<div style="max-width:700px; float: left; padding:5px">' . BimpRender::renderBimpListTable($result2, array('centre' => 'Centre', 'time' => 'Temps moyen en  J')) . '</div>';
 
-        $html = BimpRender::renderPanel('Temps moyen réparation sur ' . $time . ' jours ' . ($ios ? '(iOs)' : '(hors iOs)').$sup, $html, '', array('open' => 0));
+        $html = BimpRender::renderPanel('Temps moyen réparation sur ' . $time . ' jours ' . ($ios ? '(iOs)' : '(hors iOs)') . $sup, $html, '', array('open' => 0));
 
         return $html;
     }
@@ -1691,12 +1691,12 @@ class BS_SAV extends BimpObject
         if (count($result2))
             $html .= '<div style="float: left; padding:5px">' . BimpRender::renderBimpListTable($result2, array('centre' => 'Centre', 'time' => 'Temps moyen en  J')) . '</div>';
 
-        
+
         $sup = '';
-        if(isset($_GET['code_centre']) && count(explode('-', $_GET['code_centre'])) == 1 && isset($table[$_GET['code_centre']]))
-            $sup .= '<br/>('.$centres[$_GET['code_centre']]['label'].' '.$table[$_GET['code_centre']].' jours)';
-        
-        $html = BimpRender::renderPanel('Temps max diagnostic ' . ($ios ? '(iOs)' : '(hors iOs)').$sup, $html, '',  array('open' => 0));
+        if (isset($_GET['code_centre']) && count(explode('-', $_GET['code_centre'])) == 1 && isset($table[$_GET['code_centre']]))
+            $sup .= '<br/>(' . $centres[$_GET['code_centre']]['label'] . ' ' . $table[$_GET['code_centre']] . ' jours)';
+
+        $html = BimpRender::renderPanel('Temps max diagnostic ' . ($ios ? '(iOs)' : '(hors iOs)') . $sup, $html, '', array('open' => 0));
 
         return $html;
     }
@@ -1764,40 +1764,42 @@ class BS_SAV extends BimpObject
         }
 
         // Messages signature prise en charge: 
-        $signature_pc = $this->getChildObject('signature_pc');
+        if ((int) $this->getData('id_signature_pc') >= 0) {
+            $signature_pc = $this->getChildObject('signature_pc');
 
-        if (BimpObject::objectLoaded($signature_pc)) {
-            if (!$signature_pc->getData('signed')) {
+            if (BimpObject::objectLoaded($signature_pc)) {
+                if (!$signature_pc->getData('signed')) {
+                    $html .= '<div style="margin-top: 10px">';
+                    $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+                    $msg .= '<a href="' . $signature_pc->getUrl() . '" target="_blank">Signature du bon de prise en charge en attente' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
+
+                    $btn_html = $signature_pc->renderSignButtonsGroup();
+                    if ($btn_html) {
+                        $msg .= '<div style="margin-top: 8px; text-align: right">';
+                        $msg .= $btn_html;
+                        $msg .= '</div>';
+                    }
+
+                    $html .= BimpRender::renderAlerts($msg, 'warning');
+                    $html .= '</div>';
+                }
+            } elseif ($this->isActionAllowed('createSignaturePC')) {
                 $html .= '<div style="margin-top: 10px">';
                 $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
-                $msg .= '<a href="' . $signature_pc->getUrl() . '" target="_blank">Signature du bon de prise en charge en attente' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
+                $msg .= 'Signature du bon de prise en charge non créée.<br/>';
 
-                $btn_html = $signature_pc->renderSignButtonsGroup();
-                if ($btn_html) {
+                if ($this->canSetAction('createSignaturePC')) {
                     $msg .= '<div style="margin-top: 8px; text-align: right">';
-                    $msg .= $btn_html;
+                    $msg .= '<span class="btn btn-default btn-small" onclick="' . $this->getJsActionOnclick('createSignaturePC', array(), array(
+                                'form_name' => 'signature'
+                            )) . '">';
+                    $msg .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Crééer';
+                    $msg .= '</span>';
                     $msg .= '</div>';
                 }
-
-                $html .= BimpRender::renderAlerts($msg, 'warning');
+                $html .= BimpRender::renderAlerts($msg, 'danger');
                 $html .= '</div>';
             }
-        } elseif ($this->isActionAllowed('createSignaturePC')) {
-            $html .= '<div style="margin-top: 10px">';
-            $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
-            $msg .= 'Signature du bon de prise en charge non créée.<br/>';
-
-            if ($this->canSetAction('createSignaturePC')) {
-                $msg .= '<div style="margin-top: 8px; text-align: right">';
-                $msg .= '<span class="btn btn-default btn-small" onclick="' . $this->getJsActionOnclick('createSignaturePC', array(), array(
-                            'form_name' => 'signature'
-                        )) . '">';
-                $msg .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Crééer';
-                $msg .= '</span>';
-                $msg .= '</div>';
-            }
-            $html .= BimpRender::renderAlerts($msg, 'danger');
-            $html .= '</div>';
         }
 
         // Messages signature propale: 
@@ -1825,40 +1827,42 @@ class BS_SAV extends BimpObject
         }
 
         // Messages signature Bon restit / facture:
-        $signature_resti = $this->getChildObject('signature_resti');
+        if ((int) $this->getData('id_signature_resti') >= 0) {
+            $signature_resti = $this->getChildObject('signature_resti');
 
-        if (BimpObject::objectLoaded($signature_resti)) {
-            if (!$signature_resti->getData('signed')) {
+            if (BimpObject::objectLoaded($signature_resti)) {
+                if (!$signature_resti->getData('signed')) {
+                    $html .= '<div style="margin-top: 10px">';
+                    $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+                    $msg .= '<a href="' . $signature_resti->getUrl() . '" target="_blank">Signature du bon de restitution en attente' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
+
+                    $btn_html = $signature_resti->renderSignButtonsGroup();
+                    if ($btn_html) {
+                        $msg .= '<div style="margin-top: 8px; text-align: right">';
+                        $msg .= $btn_html;
+                        $msg .= '</div>';
+                    }
+
+                    $html .= BimpRender::renderAlerts($msg, 'warning');
+                    $html .= '</div>';
+                }
+            } elseif ($this->isActionAllowed('createSignatureRestitution')) {
                 $html .= '<div style="margin-top: 10px">';
                 $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
-                $msg .= '<a href="' . $signature_resti->getUrl() . '" target="_blank">Signature du bon de restitution en attente' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
+                $msg .= 'Signature du bon de restitution non créée.<br/>';
 
-                $btn_html = $signature_resti->renderSignButtonsGroup();
-                if ($btn_html) {
+                if ($this->canSetAction('createSignatureRestitution')) {
                     $msg .= '<div style="margin-top: 8px; text-align: right">';
-                    $msg .= $btn_html;
+                    $msg .= '<span class="btn btn-default btn-small" onclick="' . $this->getJsActionOnclick('createSignatureRestitution', array(), array(
+                                'form_name' => 'signature'
+                            )) . '">';
+                    $msg .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Crééer';
+                    $msg .= '</span>';
                     $msg .= '</div>';
                 }
-
-                $html .= BimpRender::renderAlerts($msg, 'warning');
+                $html .= BimpRender::renderAlerts($msg, 'danger');
                 $html .= '</div>';
             }
-        } elseif ($this->isActionAllowed('createSignatureRestitution')) {
-            $html .= '<div style="margin-top: 10px">';
-            $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
-            $msg .= 'Signature du bon de restitution non créée.<br/>';
-
-            if ($this->canSetAction('createSignatureRestitution')) {
-                $msg .= '<div style="margin-top: 8px; text-align: right">';
-                $msg .= '<span class="btn btn-default btn-small" onclick="' . $this->getJsActionOnclick('createSignatureRestitution', array(), array(
-                            'form_name' => 'signature'
-                        )) . '">';
-                $msg .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Crééer';
-                $msg .= '</span>';
-                $msg .= '</div>';
-            }
-            $html .= BimpRender::renderAlerts($msg, 'danger');
-            $html .= '</div>';
         }
 
         return $html;

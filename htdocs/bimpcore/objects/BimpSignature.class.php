@@ -32,13 +32,15 @@ class BimpSignature extends BimpObject
     const TYPE_DIST = 1;
     const TYPE_PAPIER = 2;
     const TYPE_ELEC = 3;
+    const TYPE_PAPIER_NO_SCAN = 4;
 
     public static $types = array(
-        -1                => array('label' => 'Annulée', 'icon' => 'fas_times', 'classes' => array('danger')),
-        0                 => array('label' => 'En attente de signature', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
-        self::TYPE_DIST   => array('label' => 'Signature à distance', 'icon' => 'fas_sign-in-alt'),
-        self::TYPE_PAPIER => array('label' => 'Signature papier', 'icon' => 'fas_file-download'),
-        self::TYPE_ELEC   => array('label' => 'Signature électronique', 'icon' => 'fas_file-signature')
+        -1                        => array('label' => 'Annulée', 'icon' => 'fas_times', 'classes' => array('danger')),
+        0                         => array('label' => 'En attente de signature', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
+        self::TYPE_DIST           => array('label' => 'Signature à distance', 'icon' => 'fas_sign-in-alt'),
+        self::TYPE_PAPIER         => array('label' => 'Signature papier', 'icon' => 'fas_file-download'),
+        self::TYPE_ELEC           => array('label' => 'Signature électronique', 'icon' => 'fas_file-signature'),
+        self::TYPE_PAPIER_NO_SCAN => array('label' => 'Signature papier sans document scanné', 'icon' => 'fas_file-contract')
     );
     public static $empty_base_64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyYAAAFeCAYAAABw2Qu3AAAEXElEQVR4nO3BAQEAAACCIP+vbkhAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMC7ATotAAEPLajTAAAAAElFTkSuQmCC';
 
@@ -144,15 +146,14 @@ class BimpSignature extends BimpObject
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (in_array($action, array('setSigned', 'allowed_users_client', 'signPapier', 'signDist', 'cancel'))) {
-            if (!$this->isLoaded($errors)) {
-                return 0;
-            }
+        if (!$this->isLoaded($errors)) {
+            return 0;
         }
 
         switch ($action) {
             case 'signDistAccess':
             case 'signPapier':
+            case 'signPapierNoScan':
             case 'signDist':
             case 'signElec':
             case 'sendSmsCode':
@@ -311,6 +312,16 @@ class BimpSignature extends BimpObject
                 'icon'    => 'fas_file-signature',
                 'onclick' => $this->getJsActionOnclick('signElec', array(), array(
                     'form_name' => 'sign_elec'
+                ))
+            );
+        }
+        
+        if ($this->isActionAllowed('signPapierNoScan') && $this->canSetAction('signPapierNoScan')) {
+            $buttons[] = array(
+                'label'   => 'Signature papier sans scan',
+                'icon'    => 'fas_file-contract',
+                'onclick' => $this->getJsActionOnclick('signPapierNoScan', array(), array(
+                    'form_name' => 'sign_no_scan'
                 ))
             );
         }
@@ -1707,6 +1718,48 @@ class BimpSignature extends BimpObject
         } else {
             $errors[] = 'Objet lié absent ou invalide';
         }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionSignPapierNoScan($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Signature sans scan enregistrée avec succès';
+        
+        $obj = $this->getObj();
+
+        if ($this->isObjectValid($errors, $obj)) {
+            $nom = BimpTools::getArrayValueFromPath($data, 'nom_signataire', '');
+
+            if (!$nom) {
+                $errors[] = 'Veuillez saisir le nom du signataire';
+            }
+
+            $date = BimpTools::getArrayValueFromPath($data, 'date_signed', date('Y-m-d H:i:s'));
+
+            if (!count($errors)) {
+                $this->set('type', self::TYPE_PAPIER_NO_SCAN);
+                $this->set('signed', 1);
+                $this->set('date_signed', $date);
+                $this->set('nom_signataire', $nom);
+
+                $errors = $this->update($warnings, true);
+
+                if (!count($errors)) {
+                    if (method_exists($obj, 'onSigned')) {
+                        $warnings = array_merge($warnings, $obj->onSigned($this, $data));
+                    }
+                }
+            }
+        } else {
+            $errors[] = 'Objet lié absent ou invalide';
+        }
+
 
         return array(
             'errors'   => $errors,

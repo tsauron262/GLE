@@ -839,8 +839,9 @@ class BS_SAV extends BimpObject
                         'icon'    => 'check',
                         'onclick' => $this->getJsActionOnclick('propalAccepted')
                     );
-
-                    if (BimpObject::objectLoaded($propal) && $this->isActionAllowed('createSignature')) {
+                }
+                
+                if (BimpObject::objectLoaded($propal) && $propal->isActionAllowed('createSignature')) {
                         $buttons[] = array(
                             'label'   => 'Créer signature devis',
                             'icon'    => 'fas_signature',
@@ -849,7 +850,6 @@ class BS_SAV extends BimpObject
                             ))
                         );
                     }
-                }
 
                 if ($this->isActionAllowed('propalRefused')) {
                     $buttons[] = array(

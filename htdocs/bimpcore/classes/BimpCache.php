@@ -1633,7 +1633,7 @@ class BimpCache
                     $result[''] = '';
                 }
 
-                $userCentres = explode(' ', $user->array_options['options_apple_centre']);
+                $userCentres = explode(' ', str_replace(',', ' ', $user->array_options['options_apple_centre']));
                 $centres = self::getCentres();
 
                 if (count($userCentres) > 1 || $userCentres[0] != '') {

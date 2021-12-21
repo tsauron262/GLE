@@ -712,6 +712,11 @@ forms:
                   type: toggle
               value: 
                   callback: needSignaturePropal
+            - field: id_contact
+              label: Contact signataire
+              display_if: 
+                  field_name: create_signature
+                  show_values: 1
             - custom: 1
               label: Contenu e-mail pour la signature à distance du devis
               input_name: email_content
@@ -723,7 +728,6 @@ forms:
               display_if: 
                   field_name: create_signature
                   show_values: 1
-            
             
     resolution: 
         rows: 

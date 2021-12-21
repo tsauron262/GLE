@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS `llx_bimpcore_signature` (
   `doc_type` varchar(255) NOT NULL DEFAULT '',
   `type` int(11) NOT NULL DEFAULT 0,
   `signed` tinyint(1) NOT NULL DEFAULT 0,
-  `date_open` datetime DEFAULT NULL,
+  `date_open` date DEFAULT NULL,
   `date_signed` datetime DEFAULT NULL,
   `id_client` int(11) NOT NULL DEFAULT 0,
   `id_contact` int(11) NOT NULL DEFAULT 0,

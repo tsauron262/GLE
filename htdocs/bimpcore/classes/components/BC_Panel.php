@@ -94,9 +94,9 @@ class BC_Panel extends BimpComponent
         }
 
         
-        if ((int) !$this->params['show']) { // show a pu être modifé par renderHtmlContent()
-            return '';
-        }
+//        if ((int) !$this->params['show']) { // show a pu être modifé par renderHtmlContent()
+//            return '';
+//        }
         
         global $current_bc;
         if (!is_object($current_bc)) {

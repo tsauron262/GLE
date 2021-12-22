@@ -1717,7 +1717,7 @@ class BContract_contrat extends BimpDolObject
                     ))
                 );
             }
-            if (($this->getData('tacite') == 12 || $this->getData('tacite') == 0) && !$this->getData('next_contrat') && $status == self::CONTRAT_STATUS_ACTIVER) {
+            if (/*($this->getData('tacite') == 12 || $this->getData('tacite') == 0) &&*/ !$this->getData('next_contrat') && $status == self::CONTRAT_STATUS_ACTIVER) {
                 $buttons[] = array(
                     'label'   => 'Renouvellement manuel',
                     'icon'    => 'fas_retweet',

@@ -2384,7 +2384,7 @@ class BL_CommandeShipment extends BimpObject
                                 ), true, $errors);
 
                 if (!count($errors) && BimpObject::objectLoaded($signature)) {
-                    $signature->openSignDistAccess('', true);
+//                    $signature->openSignDistAccess('', true);
                     
                     $errors = $this->updateField('id_signature', (int) $signature->id);
                     $this->updateField('signed', 0);

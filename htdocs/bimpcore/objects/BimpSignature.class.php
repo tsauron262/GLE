@@ -1712,7 +1712,7 @@ class BimpSignature extends BimpObject
                         $warnings = array_merge($warnings, $obj->onSigned($this, $data));
                     }
 
-                    $this->sendOnSignedCommercialEmail();
+//                    $this->sendOnSignedCommercialEmail();
                 }
             }
         } else {
@@ -1832,7 +1832,7 @@ class BimpSignature extends BimpObject
                         $warnings = array_merge($warnings, $obj->onSigned($this, $data));
                     }
 
-                    $this->sendOnSignedCommercialEmail();
+//                    $this->sendOnSignedCommercialEmail();
                 }
             }
         }

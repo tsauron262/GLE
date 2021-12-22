@@ -245,7 +245,7 @@ class BS_Note extends BimpObject
                 $msg .= '<b>Message : </b><br/>' . $this->getData('content');
 
                 if (BimpObject::objectLoaded($ticket)) {
-                    $url = $ticket->getPublicUrl();
+                    $url = $ticket->getPublicUrl(false);
                 }
                 if ($url) {
                     $msg .= '<br/>------------------<br/><a href="' . $url . '">Cliquez ici</a> pour accéder au détail de votre ticket support depuis votre espace client BIMP';

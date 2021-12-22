@@ -3246,7 +3246,7 @@ class BL_CommandeShipment extends BimpObject
             switch ($doc_type) {
                 case 'bl':
                     if ($context === 'public') {
-                        return DOL_URL_ROOT . '/bimpinterfaceclient/client.php?fc=doc&doc=bl' . ($signed ? '_signed' : '') . '&docid=' . $this->id . '&docref=' . $this->getData('num_livraison');
+                        return BimpObject::getPublicBaseUrl() . '?fc=doc&doc=bl' . ($signed ? '_signed' : '') . '&docid=' . $this->id . '&docref=' . $this->getData('num_livraison');
                     } else {
                         return $this->getFileUrl($fileName);
                     }

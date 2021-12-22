@@ -320,6 +320,23 @@ forms:
               input: 
                   type: signature_pad
                   
+    sign_no_scan: 
+        title: Marquer signé sans scan du document
+        icon: fas_file-contract
+        values: 
+            fields: 
+                nom_signataire: 
+                    callback: getDefaultNomSignataire
+        rows: 
+            - custom: 1
+              label: Document
+              input_name: doc_title
+              content: 
+                  callback: displayDocTitle
+            - field: date_signed
+            - field: nom_signataire
+              required: 1
+                  
     signature_params: 
         title: Ajuster la position de la signature sur le document PDF
         icon: fas_arrows-alt

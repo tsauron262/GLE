@@ -138,7 +138,7 @@ class savFormController extends BimpPublicController
 
                 $html .= '<p class="inputHelp">';
                 $html .= 'Si vous disposez déjà d\'un accès à l\'espace client BIMP, veuillez vous ';
-                $html .= '<a href="' . DOL_URL_ROOT . '/bimpinterfaceclient/client.php?back=savForm">authentifier</a>';
+                $html .= '<a href="' . BimpObject::getPublicBaseUrl() . '?back=savForm">authentifier</a>';
                 $html .= ' pour simplifier la prise de rendez-vous.';
                 $html .= '</p>';
             }
@@ -174,7 +174,7 @@ class savFormController extends BimpPublicController
 
             if (BimpObject::objectLoaded($userClient)) {
                 $html .= '<div style="margin-top: 15px; text-align: center">';
-                $html .= '<p><a href="' . DOL_URL_ROOT . '/bimpinterfaceclient/client.php">Retour à l\'espace client</a></p>';
+                $html .= '<p><a href="' . BimpObject::getPublicBaseUrl() . '">Retour à l\'espace client</a></p>';
                 $html .= '</div>';
             }
         }
@@ -214,7 +214,7 @@ class savFormController extends BimpPublicController
                 $html .= 'Un compte utilisateur existe déjà pour l\'adresse e-mail "' . $email . '".<br/>';
                 $html .= '</h3>';
                 $html .= '<h4 style="text-align: center; font-weight: bold" class="info">';
-                $html .= 'Veuillez vous <a href="' . DOL_URL_ROOT . '/bimpinterfaceclient/client.php?back=savForm';
+                $html .= 'Veuillez vous <a href="' . BimpObject::getPublicBaseUrl() . '?back=savForm';
 
                 if (!is_null($reservation)) {
                     $html .= '&resgsx=' . $reservation['reservationId'] . '&centre_id=' . $reservation['shipToCode'];
@@ -281,7 +281,7 @@ class savFormController extends BimpPublicController
                         $html .= 'Nous vous avons ouvert un accès à votre espace client personnalisé BIMP.<br/>';
                         $html .= 'Un e-mail contenant votre mot de passe vous a été envoyé.<br/>';
                         $html .= 'Veuillez consulter votre messagerie, puis ';
-                        $html .= '<a href="' . DOL_URL_ROOT . '/bimpinterfaceclient/client.php?back=savForm';
+                        $html .= '<a href="' . BimpObject::getPublicBaseUrl() . '?back=savForm';
 
                         if (!is_null($reservation)) {
                             $html .= '&resgsx=' . $reservation['reservationId'] . '&centre_id=' . $reservation['shipToCode'];
@@ -696,7 +696,7 @@ class savFormController extends BimpPublicController
         // Système: 
         $html .= '<div class="col-xs-12 col-md-4 col-lg-3">';
         $html .= '<label>Système</label><sup>*</sup><br/>';
-        $html .= BimpInput::renderInput('select', 'eq_system', null,array(
+        $html .= BimpInput::renderInput('select', 'eq_system', null, array(
                     'options'     => BimpCache::getSystemsArray(),
                     'extra_class' => 'required'
         ));
@@ -915,7 +915,7 @@ class savFormController extends BimpPublicController
         }
 
         $html .= '<p style="text-align: center">';
-        $html .= '<a href="' . DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=sav">Retour à votre espace client</a>';
+        $html .= '<a href="' . BimpObject::getPublicBaseUrl() . '?tab=sav">Retour à votre espace client</a>';
         $html .= '</p>';
 
         $html .= '</div>';
@@ -2116,7 +2116,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
 
                     if (BimpObject::objectLoaded($userClient)) {
                         $success_html .= '<p style="text-align: center">';
-                        $success_html .= '<a href="' . DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=sav">Retour à votre espace client</a>';
+                        $success_html .= '<a href="' . BimpObject::getPublicBaseUrl() . '?tab=sav">Retour à votre espace client</a>';
                         $success_html .= '</p>';
                     }
                 }
@@ -2186,7 +2186,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
 
                     if (!count($errors)) {
                         $success_html = '<h2 class="success">Votre rendez-vous SAV a été annulé avec succès</h2>';
-                        $success_html .= '<p><a href="' . DOL_URL_ROOT . '/bimpinterfaceclient/client.php">Retour à votre espace client</a></p>';
+                        $success_html .= '<p><a href="' . BimpObject::getPublicBaseUrl() . '">Retour à votre espace client</a></p>';
 
                         // Maj SAV: 
                         $sav->updateField('status', -2);

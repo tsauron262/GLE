@@ -5489,6 +5489,9 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             if (isset($data['symptomes'])) {
                 $this->set('symptomes', $data['symptomes']);
             }
+            if (isset($data['sacs'])) {
+                $this->set('sacs', $data['sacs']);
+            }
 
             $up_errors = $this->update($warnings, true);
 

@@ -355,7 +355,7 @@ class BimpSignature extends BimpObject
 
         if ($this->isActionAllowed('setSignatureParams') && $this->canSetAction('setSignatureParams')) {
             $buttons[] = array(
-                'label'   => 'Ajouster la Signature sur le document',
+                'label'   => 'Ajuster la Signature sur le document',
                 'icon'    => 'fas_arrows-alt',
                 'onclick' => $this->getJsActionOnclick('setSignatureParams', array(), array(
                     'form_name' => 'signature_params'

@@ -286,7 +286,7 @@ fields:
             options:
                 array: expertise
         default_value: 0
-        required: 1
+#        required: 1
         
     
 forms: 

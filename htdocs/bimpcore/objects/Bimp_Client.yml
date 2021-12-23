@@ -67,7 +67,6 @@ fields_tables:
         panel: 1
         rows: 
             - field: outstanding_limit_atradius
-            - field: status
               edit: 1
             - label: Fichier Altradius
               input_name: send_emails

@@ -52,10 +52,29 @@ class BimpFile extends BimpObject
         return $this->canClientCreate();
     }
 
+    public function canEditField($field_name)
+    {
+        if ($this->isLoaded() && $field_name == 'is_deletable') {
+            global $user;
+
+            if ($user->admin) {
+                return 1;
+            }
+
+            return 0;
+        }
+
+        return parent::canEditField($field_name);
+    }
+
     // Getters booléens: 
 
     public function isDeletable($force_delete = false, &$errors = array())
     {
+        if (!$force_delete && !(int) $this->getData('is_deletable')) {
+            return 0;
+        }
+        
         return (int) (!(int) $this->getData('deleted'));
     }
 

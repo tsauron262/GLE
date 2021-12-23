@@ -819,16 +819,15 @@ class ValidComm extends BimpObject
             return $errors;
 
         // Avec retard de paiement
-//        if(isset($this->client_rtp))
-//            $rtp = $this->client_rtp;
-//        else
-//            $rtp = $client->getTotalUnpayedTolerance();
-//
-//        if($rtp != 0)
-//            return $errors;
+        if(isset($this->client_rtp))
+            $rtp = $this->client_rtp;
+        else
+            $rtp = $client->getTotalUnpayedTolerance();
+
+        if($rtp != 0)
+            return $errors;
         
         // Les 3 conditions sont satifaites, update limite
-//        $old_limit = $client->getdata('outstanding_limit');
         
         if($client->field_exists('date_check_credit_safe')) {
 
@@ -837,12 +836,11 @@ class ValidComm extends BimpObject
         }
 
         // data Crédit Safe
-//        if($client->isSirenRequired()) {
+        if($client->isSirenRequired()) {
             $client->useNoTransactionsDb();
             $errors = BimpTools::merge_array($errors, $client->majEncourscreditSafe(true));
             $client->useTransactionsDb();
-            
-//        }
+        }
 
         return $errors;
     }

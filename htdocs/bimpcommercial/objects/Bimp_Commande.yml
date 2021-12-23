@@ -278,6 +278,8 @@ fields_tables:
               display: nom_url
               edit: 1
             - field: ef_type
+            - field: expertise
+              edit: 1
             - field: fk_input_reason
               edit: 
                   callback: isEditable
@@ -413,6 +415,7 @@ forms:
         rows: 
             - field: replaced_ref
             - field: libelle
+            - field: expertise
             - field: entrepot
             - field: ef_type
             - field: fk_soc

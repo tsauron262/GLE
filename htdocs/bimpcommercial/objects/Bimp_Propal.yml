@@ -201,6 +201,7 @@ forms:
             - field: entrepot
             - field: ef_type
             - field: libelle
+            - field: expertise
             - field: fk_input_reason
               show: 
                   callback: isEditable
@@ -534,6 +535,8 @@ fields_tables:
               show: 
                   field_value: replaced_ref
             - field: libelle
+              edit: 1
+            - field: expertise
               edit: 1
             - field: fk_statut
             - field: entrepot

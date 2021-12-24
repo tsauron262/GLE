@@ -25,13 +25,13 @@ class Bimp_Client extends Bimp_Societe
 
     public function canClientEdit()
     {
-        global $userClient;
+//        global $userClient;
 
-        if (BimpObject::objectLoaded($userClient)) {
-            if ($userClient->isAdmin() && $this->id == (int) $userClient->getData('id_client')) {
-                return 1;
-            }
-        }
+//        if (BimpObject::objectLoaded($userClient)) {
+//            if ($userClient->isAdmin() && $this->id == (int) $userClient->getData('id_client')) {
+//                return 1;
+//            }
+//        }
 
         return 0;
     }

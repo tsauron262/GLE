@@ -45,7 +45,7 @@ class BimpComm extends BimpDolObject
         0 => "",
         10 => "Arts graphiques",
         20 => "Constructions",
-        30 => "Education",
+        30 => "Education et Administrations",
         40 => "Infrastructure",
         50 => "Marketing",
         60 => "Mobilité",

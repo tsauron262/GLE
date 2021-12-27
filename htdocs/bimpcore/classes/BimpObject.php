@@ -6763,25 +6763,29 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             if ($this->getConf('fields/' . $field . '/type', 'string') === 'id_object') {
                 $id_object = (int) $this->getData($field);
 
-                if (is_null($instance)) {
-                    $instance = $this->config->getObject('fields/' . $field . '/object');
-                }
+                if ($id_object > 0) {
+                    if (is_null($instance)) {
+                        $instance = $this->config->getObject('fields/' . $field . '/object');
+                    }
 
-                if (is_a($instance, 'BimpObject')) {
-                    $msg = BimpTools::ucfirst($instance->getLabel('the')) . ' d\'ID ' . $id_object . ' semble avoir été supprimé' . ($instance->isLabelFemale() ? 'e' : '');
-                } elseif (is_object($instance)) {
-                    $msg = 'L\'objet de type "' . get_class($instance) . '" d\'ID ' . $id_object . ' semble avoir été supprimé';
-                } else {
-                    $msg = 'Cet objet semble avoir été supprimé (ID: ' . $id_object . ')';
-                }
+                    if (is_a($instance, 'BimpObject')) {
+                        $msg = BimpTools::ucfirst($instance->getLabel('the')) . ' d\'ID ' . $id_object . ' semble avoir été supprimé' . ($instance->isLabelFemale() ? 'e' : '');
+                    } elseif (is_object($instance)) {
+                        $msg = 'L\'objet de type "' . get_class($instance) . '" d\'ID ' . $id_object . ' semble avoir été supprimé';
+                    } else {
+                        $msg = 'Cet objet semble avoir été supprimé (ID: ' . $id_object . ')';
+                    }
 
-                if ($remove_button) {
-                    $msg .= ' ' . $this->renderRemoveChildObjectButton($field, $reload_page);
-                }
+                    if ($remove_button) {
+                        $msg .= ' ' . $this->renderRemoveChildObjectButton($field, $reload_page);
+                    }
 
-                return BimpRender::renderAlerts($msg);
+                    return BimpRender::renderAlerts($msg);
+                }
             }
         }
+        
+        return '';
     }
 
     public function renderSearchInput($input_name, $value = null, $options = array())

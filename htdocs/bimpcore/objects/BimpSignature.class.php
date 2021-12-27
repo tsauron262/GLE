@@ -315,7 +315,7 @@ class BimpSignature extends BimpObject
                 ))
             );
         }
-        
+
         if ($this->isActionAllowed('signPapierNoScan') && $this->canSetAction('signPapierNoScan')) {
             $buttons[] = array(
                 'label'   => 'Signature papier sans scan',
@@ -679,7 +679,7 @@ class BimpSignature extends BimpObject
         $errors = array();
         if ($this->isObjectValid($errors, $obj)) {
             if (method_exists($obj, 'getSignatureCommercialEmail')) {
-                return $obj->getSignatureCommercialEmail($this->getData('doc_type'), false);
+                return $obj->getSignatureCommercialEmail($this->getData('doc_type'));
             }
         }
 
@@ -1730,7 +1730,7 @@ class BimpSignature extends BimpObject
         $errors = array();
         $warnings = array();
         $success = 'Signature sans scan enregistrée avec succès';
-        
+
         $obj = $this->getObj();
 
         if ($this->isObjectValid($errors, $obj)) {
@@ -1925,7 +1925,15 @@ class BimpSignature extends BimpObject
                         }
 
                         if (method_exists($obj, 'onSigned')) {
-                            $warnings = array_merge($warnings, $obj->onSigned($this, $data));
+                            $onsign_errors = $obj->onSigned($this, $data);
+
+                            if (count($onsign_errors)) {
+                                BimpCore::addlog('Erreurs suite à signature à distance', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
+                                    'Erreurs' => $onsign_errors
+                                ));
+
+                                $warnings = BimpTools::merge_array($warnings, $onsign_errors);
+                            }
                         }
 
                         $this->sendOnSignedCommercialEmail();

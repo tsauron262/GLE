@@ -2564,7 +2564,6 @@ class Bimp_Client extends Bimp_Societe
     public function displayAltradiusFile(){
         $html = '';
         $file = $this->getAltradiusFileName();
-//        die('rr'.$file);
         if(!is_null($file) && $file){
             $html .= '<a target="__blanck" href="'.DOL_URL_ROOT.'/document.php?modulepart=societe&file='.$this->id.'/'.$file.'">Fichier</a>';
         }
@@ -2572,6 +2571,16 @@ class Bimp_Client extends Bimp_Societe
 //            return BimpInput::renderInput('file_upload', 'altradius_file');
             
             $buttons = array();
+            
+            
+            // Demande encours altriadus
+            $note = BimpObject::getInstance("bimpcore", "BimpNote");
+            $buttons[] = array(
+                'label'   => 'Message Altradius',
+                'icon'    => 'far_paper-plane',
+                'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => 680, "content" => "Bonjour, merci de bien vouloir demander un encours à Altradius."), array('form_name' => 'rep'))
+            );
+            
             $buttons[] = array(
                 'label'   => 'Ajouter fichier',
                 'icon'    => 'fas_comment-dollar',

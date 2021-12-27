@@ -679,14 +679,14 @@ class BimpSignature extends BimpObject
         $errors = array();
         if ($this->isObjectValid($errors, $obj)) {
             if (method_exists($obj, 'getSignatureCommercialEmail')) {
-                return $obj->getSignatureCommercialEmail($this->getData('doc_type'));
+                return $obj->getSignatureCommercialEmail($this->getData('doc_type'), false);
             }
         }
 
         $client = $this->getChildObject('client');
 
         if (BimpObject::objectLoaded($client)) {
-            return $client->getCommercialEmail();
+            return $client->getCommercialEmail(false);
         }
 
         return '';

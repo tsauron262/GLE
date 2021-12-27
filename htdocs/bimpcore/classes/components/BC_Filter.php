@@ -1925,6 +1925,11 @@ class BC_Filter extends BimpComponent
     public static function getConvertedValues($filter_type, $values)
     {
         foreach ($values as $idx => $value) {
+            if($value == ''){
+                unset($values[$idx]);
+            }
+            
+            
             switch ($filter_type) {
                 case 'value_part':
                     $part = (is_string($value) ? $value : (isset($value['value']) ? $value['value'] : ''));

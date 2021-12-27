@@ -3,7 +3,7 @@
 class BimpTimer extends BimpObject
 {
 
-    public function setObject(Bimpobject $object, $object_time_field, $start = false, $id_user = null)
+    public function setObject(BimpObject $object, $object_time_field, $start = false, $id_user = null)
     {
         $warnings = array();
         $this->reset();

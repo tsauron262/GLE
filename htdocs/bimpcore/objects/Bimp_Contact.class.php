@@ -258,7 +258,8 @@ class Bimp_Contact extends BimpObject
     {
         $civility = (string) $this->getData('civility');
         $fistname = (string) $this->getData('firstname');
-
+        $errors = array();
+        
         if ($civility !== 'SERVIC' && !$fistname) {
             $errors[] = 'Le prénom est obligatoire pour les contacts de type autre que "Service"';
         }

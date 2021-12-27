@@ -185,6 +185,8 @@ if(stripos($search_boxvalue, "ct") === 0 && isset($arrayresult["searchintocontra
         $arrayresult=array_merge(array($arrayresult['searchintocontract']), $arrayresult);
 if(stripos($search_boxvalue, "fi") === 0 && isset($arrayresult["searchintointervention"]))
         $arrayresult=array_merge(array($arrayresult['searchintointervention']), $arrayresult);
+if(stripos($search_boxvalue, "sac") === 0 && isset($arrayresult["searchintosac"]))
+        $arrayresult=array_merge(array($arrayresult['searchintosac']), $arrayresult);
 /*fmod drsi*/
 
 

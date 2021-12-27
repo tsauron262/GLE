@@ -106,7 +106,7 @@ class Bimp_SocBankAccount extends BimpObject
         // multiplication de chaque groupe par les coef du tableau 
         for ($i=0, $s=0; $i<3; $i++) { 
         $code = substr($rib, 7 * $i, 7) ; 
-        $s += (0 + $code) * $coef[$i] ; } 
+        $s += (0 + (int) $code) * $coef[$i] ; } 
 
        // Soustraction du modulo 97 de $s à  97 pour obtenir la clé RIB
         $cle_rib = 97 - ($s % 97) ; 
@@ -139,7 +139,7 @@ class Bimp_SocBankAccount extends BimpObject
         
         if(!count($errors))
             return (bool) 1;
-        return 0;
+        return false;
     }
     
     public function haveAllParamsForCompta(&$errors):void {
@@ -244,7 +244,7 @@ class Bimp_SocBankAccount extends BimpObject
             $check
             );
             /*On effectue la vérification finale*/
-            return fmod($check,97) === '1';
+            return fmod((float) $check,97) === '1';
     }
 
     // overrides: 
@@ -288,6 +288,7 @@ class Bimp_SocBankAccount extends BimpObject
     
     public function update(&$warnings = array(), $force_update = false)
     {
+        $errors = array();
         $this->set('rum', $this->getNumSepa());
         $def = (int) $this->getData('default_rib');
         

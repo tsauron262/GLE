@@ -314,7 +314,12 @@ class BC_List extends BC_Panel
                     if (is_null($label)) {
                         $label = 'Associer ' . BimpObject::getInstanceLabel($associate, 'to') . ' ' . $id_associate;
                     }
-                    $this->bulk_actions[] = array(
+
+                    if (!is_array($this->params['extra_bulk_actions'])) {
+                        $this->params['extra_bulk_actions'] = array();
+                    }
+                    
+                    $this->params['extra_bulk_actions'][] = array(
                         'label'   => $label,
                         'onclick' => 'toggleSelectedItemsAssociation(\'' . $this->identifier . '\', \'add\', \'' . $association . '\', ' . $id_associate . ')',
                         'icon'    => 'link'
@@ -337,7 +342,12 @@ class BC_List extends BC_Panel
                     $this->params['add_form'] = null;
                     $this->params['title'] = BimpTools::ucfirst($this->object->getLabel('name_plur')) . ' associés ';
                     $this->params['title'] .= BimpObject::getInstanceLabel($associate, 'to') . ' "' . BimpObject::getInstanceNom($associate) . '"';
-                    $this->bulk_actions[] = array(
+
+                    if (!is_array($this->params['extra_bulk_actions'])) {
+                        $this->params['extra_bulk_actions'] = array();
+                    }
+
+                    $this->params['extra_bulk_actions'][] = array(
                         'label'   => $label,
                         'onclick' => 'toggleSelectedItemsAssociation(\'' . $this->identifier . '\', \'delete\', \'' . $association . '\', ' . $id_associate . ')',
                         'icon'    => 'unlink'
@@ -450,9 +460,6 @@ class BC_List extends BC_Panel
 
     public function getPointsForGraph($numero_data = 1)
     {
-        $this->params['n'] = 1000;
-        $this->fetchItems();
-
         foreach ($this->items as $item) {
             $obj = BimpCache::getBimpObjectInstance($this->object->module, $this->object->object_name, $item['id']);
             $return .= $obj->getGraphDataPoint($numero_data);
@@ -460,10 +467,16 @@ class BC_List extends BC_Panel
         return $return;
     }
 
+    public function initForGraph()
+    {
+        $this->params['n'] = 1000;
+        $this->fetchItems();
+    }
+
     protected function fetchItems()
-    {        
+    {
         $this->filters = $this->getSearchFilters($this->params['joins']);
-        
+
         if (method_exists($this->object, "beforeListFetchItems")) {
             $this->object->beforeListFetchItems($this);
         }
@@ -487,7 +500,7 @@ class BC_List extends BC_Panel
 
         // Jointures: 
         $joins = $this->params['joins'];
-        
+
         // Filtres: 
         if (count($this->params['list_filters'])) {
             foreach ($this->params['list_filters'] as $list_filter) {
@@ -503,14 +516,13 @@ class BC_List extends BC_Panel
                 $this->errors[] = BimpTools::getMsgFromArray($filters_errors, 'Erreurs sur les filtres');
             }
 
-            if (method_exists($this->object, 'traiteFilters'))
-                $this->object->traiteFilters($panelFilters);
-
             foreach ($panelFilters as $name => $filter) {
                 $this->mergeFilter($name, $filter);
             }
+            if (method_exists($this->object, 'traiteFilters'))
+                $this->object->traiteFilters($this->filters);
         }
-        
+
         // Filtres selon objets associés:
         if (count($this->params['association_filters'])) {
             foreach ($this->params['association_filters'] as $asso_filter) {
@@ -594,11 +606,11 @@ class BC_List extends BC_Panel
         $this->final_order_way = $extra_order_way;
 
         BimpCore::addLogs_extra_data(array('filtre' => $filters, 'joins' => $joins));
-        
+
         $this->items = $this->object->getList($filters, $this->params['n'], $this->params['p'], $order_by, $this->params['sort_way'], 'array', array(
             'DISTINCT (a.' . $primary . ')'
                 ), $joins, $extra_order_by, $extra_order_way);
-        
+
         if (method_exists($this->object, 'listItemsOverride')) {
             $this->object->listItemsOverride($this->name, $this->items);
         }
@@ -635,7 +647,7 @@ class BC_List extends BC_Panel
     }
 
     public function getOrderBySqlKey($sort_field = '', $sort_option = '', &$filters = array(), &$joins = array())
-    {        
+    {
         // Attention: fonction surchargée par BC_ListTable
         if ($sort_field == 'position') {
             return 'a.position';
@@ -668,7 +680,6 @@ class BC_List extends BC_Panel
         }
 
         return 'a.' . $this->object->getPrimary();
-        
     }
 
     // rendus HTML:

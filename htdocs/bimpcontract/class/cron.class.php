@@ -296,8 +296,12 @@
                         $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $object->getData('fk_soc'));
                         $sujet = $object->getRef() . " - Reconduction tacite - " . $client->getRef() . ' ' . $client->getName();
                         $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $object->getData('fk_commercial_suivi'));
-                        $message = "Bonjour " . $commercial->getName() . "<br />Votre contrat N°" . $object->getNomUrl() . " pour le client "
+                        if($diff->days > 0)
+                            $message = "Bonjour " . $commercial->getName() . "<br />Votre contrat N°" . $object->getNomUrl() . " pour le client "
                                 . $client->getNomUrl() . "(".$client->getName().") sera renouvelé tacitement dans " . $diff->days . " jour.s";
+                        else
+                            $message = "Bonjour, " . $commercial->getName() . '<br />Votre contrat N°' . $object->getNomUrl() . ' pour le client'
+                                . $client->getNomUrl() . '('.$client->getName().') a atteint sa date d\'échéance mais il est en tacite reconduction. Il sera donc renouvelé demain';
                         
                         $bimpMail = new BimpMail($sujet, $commercial->getData('email'), null, $message);
                         if($bimpMail->send()) {

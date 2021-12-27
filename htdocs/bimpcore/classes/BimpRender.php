@@ -129,7 +129,7 @@ class BimpRender
         return $html;
     }
 
-    public static function renderButtonFromConfig(BimpConfig $config, $path, $extra_params, $tag = 'span')
+    public static function renderButtonFromConfig(BimpConfig $config, $path, $extra_params = array(), $tag = 'span')
     {
         $label = $config->get($path . '/label', '');
         $icon_before = $config->get($path . '/icon_before', '');
@@ -609,10 +609,10 @@ class BimpRender
         return $html;
     }
 
-    public static function renderAjaxModal($modal_id, $ajaxName = 'bimpModal')
+    public static function renderAjaxModal($modal_id, $ajaxName = 'bimpModal', $full_width = false)
     {
         $html = '';
-        $html .= '<div class="modal ajax-modal fade" tabindex="-1" role="dialog" id="' . $modal_id . '">';
+        $html .= '<div class="modal ajax-modal fade' . ($full_width ? ' full-window-modal' : '') . '" tabindex="-1" role="dialog" id="' . $modal_id . '">';
         $html .= '<div class="modal-dialog modal-lg" role="document">';
         $html .= '<div class="modal-content">';
 
@@ -845,7 +845,7 @@ class BimpRender
             )
         );
 
-        $html .= '<div class="compteur_caisse">';
+        $html = '<div class="compteur_caisse">';
         $html .= '<p class="small">';
         $html .= 'Appuyez sur "Entrée" pour passer au champ suivant';
         $html .= '</p>';
@@ -1011,7 +1011,7 @@ class BimpRender
             $params['color'] = (string) BimpCore::getParam('colors/' . $params['class'], BimpCore::getParam('colors/default', '000000'));
         }
 
-        $html .= '<div class="bimp_info_card" style="border-color: #' . $params['color'] . '">';
+        $html = '<div class="bimp_info_card" style="border-color: #' . $params['color'] . '">';
 
         if ($params['icon']) {
             $html .= '<div class="bimp_info_card_icon" style="color: #' . $params['color'] . '">';

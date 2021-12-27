@@ -4,6 +4,7 @@
 class ActionsBimpcore
 {
     var $bimp_fixe_tabs = null;
+    var $resprints = '';
 
 
 

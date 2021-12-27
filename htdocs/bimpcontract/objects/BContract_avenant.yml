@@ -73,6 +73,17 @@ fields:
     date_create:
         label: Créé le
         type: datetime
+    type:
+        label: Type de l'avenant
+        type: int
+        values:
+            array: typeAvenant
+    want_end_date:
+        label: Date de fin souhaitée
+        type: date
+    added_month:
+        label: Nombre de mois ajoutés au contrat
+        type: int
 
 lists:
     default:
@@ -124,12 +135,33 @@ forms:
                 type: custom
                 content: EN ATTENTE
                     #callback: displayModifSuppAvenant
+    avenantProlongationEdit:
+        title: Edition du nombre d'année de prolongation
+        rows:
+            - custom: 1
+              label: Nombre d'année de de prolongation
+              input_name: years
+              value: 
+                  callback: getNbYears
+              input:
+                  type: qty
     add:
         title: Création d'un avenant
         rows:
-            date_effect:
-                field: date_effect
-                required: 1
+            - field: type
+            - field: date_effect
+              display_if:
+                  field_name: type
+                  show_values: 0
+            - custom: 1
+              label: Nombre d'année de de prolongation
+              input_name: years
+              value: 1
+              input:
+                  type: qty
+              display_if:
+                  field_name: type
+                  show_values: 1
     signed:
         title: Signer l'avenant
         rows:
@@ -191,7 +223,7 @@ views:
                   col_md: 12
                   rows:                        
                       - cols: 
-                          - type: list
+                          - type: custom
                             col_lg: 12
-                            list: 
-                                children: avenantdet
+                            custom: 
+                                callback: displayDet

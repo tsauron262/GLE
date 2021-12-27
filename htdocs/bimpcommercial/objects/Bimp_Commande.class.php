@@ -323,9 +323,9 @@ class Bimp_Commande extends BimpComm
                 return 1;
 
             case 'paiement_comptant':
-                if ((int) $this->getData('fk_statut') != 0 and!$user->admin)
+//                if ((int) $this->getData('fk_statut') != 0 and !$user->admin)
                     return 0;
-                return 1;
+//                return 1;
         }
 
         return parent::isFieldEditable($field, $force_edit);
@@ -363,6 +363,15 @@ class Bimp_Commande extends BimpComm
                 $errors[] = 'Client facturation absent';
             } elseif ($this->getData('ef_type') != 'M') {
                 $client_facture->canBuy($errors);
+            }
+
+            $id_ldlc_pro_lease = (int) BimpCore::getConf('ldlc_pro_lease_id_societe', 0);
+            if ($id_ldlc_pro_lease) {
+                if ($this->dol_object->mode_reglement_code == 'FINLDL') {
+                    if ($this->getData('id_client_facture') != $id_ldlc_pro_lease) {
+                        $errors[] = 'Cette commande est en financement LDLC Pro Lease.<br/>Vous devez enregistrer LDLC Pro Lease en tant que "Client facturation" ou modifier le Mode de Règlement';
+                    }
+                }
             }
 
             if (!count($errors) && !defined('NOT_VERIF')) {
@@ -556,7 +565,7 @@ class Bimp_Commande extends BimpComm
 
                     global $user;
 
-                    if (in_array((int) $user->login, array('admin', 'f.martinez', 't.sauron'))) {
+                    if (in_array($user->login, array('admin', 'f.martinez', 't.sauron'))) {
                         $buttons[] = array(
                             'label'   => 'Forcer Validation (no triggers)',
                             'icon'    => 'fas_check',
@@ -3900,13 +3909,24 @@ class Bimp_Commande extends BimpComm
 
     public function checkObject($context = '', $field = '')
     {
-        if ($context === 'fetch' && !self::$no_check_reservations) {
-            global $current_bc, $modeCSV;
-            if (is_null($current_bc) || !is_a($current_bc, 'BC_List') &&
-                    (is_null($modeCSV) || !$modeCSV)) {
-                $this->checkLogistiqueStatus(false);
-                $this->checkShipmentStatus(false);
-                $this->checkInvoiceStatus(false);
+        if ($context === 'fetch') {
+            if (!self::$no_check_reservations) {
+                global $current_bc, $modeCSV;
+                if (is_null($current_bc) || !is_a($current_bc, 'BC_List') &&
+                        (is_null($modeCSV) || !$modeCSV)) {
+                    $this->checkLogistiqueStatus(false);
+                    $this->checkShipmentStatus(false);
+                    $this->checkInvoiceStatus(false);
+                }
+            }
+
+            $id_ldlc_pro_lease = (int) BimpCore::getConf('ldlc_pro_lease_id_societe', 0);
+            if ($id_ldlc_pro_lease) {
+                if ($this->dol_object->mode_reglement_code == 'FINLDL') {
+                    if ($this->getData('id_client_facture') != $id_ldlc_pro_lease) {
+                        $this->msgs['errors'][] = 'Cette commande est en financement LDLC Pro Lease.<br/>Vous devez enregistrer LDLC Pro Lease en tant que "Client facturation" ou modifier le Mode de Règlement';
+                    }
+                }
             }
         }
     }
@@ -4002,11 +4022,26 @@ class Bimp_Commande extends BimpComm
 
         return $errors;
     }
+    
+    
+    private function setPaiementComptant() {
+        
+        $cond_paiement_comptant = array('LIVRAISON', 'TIERFAC', 'TIERAV', 'RECEPCOM', 'HALFFAC', 'HALFAV', 'RECEP');
+                $code = self::getBdb()->getValue('c_payment_term', 'code', '`active` > 0 and rowid = ' . $this->getData('fk_cond_reglement'));
+
+        if(in_array($code, $cond_paiement_comptant))
+            return $this->set('paiement_comptant', 1);
+        else
+            return $this->set('paiement_comptant', 0);        
+    }
 
     public function update(&$warnings = array(), $force_update = false)
     {
         $init_entrepot = (int) $this->getInitData('entrepot');
 
+        if(empty($errors))
+            $this->setPaiementComptant();
+        
         $errors = parent::update($warnings, $force_update);
 
         if (!count($errors)) {
@@ -4016,7 +4051,7 @@ class Bimp_Commande extends BimpComm
                 $this->db->db->query($sql);
             }
         }
-
+        
         return $errors;
     }
 
@@ -4067,5 +4102,28 @@ class Bimp_Commande extends BimpComm
         }
         $this->resprints = "OK " . $ok . ' mails BAD ' . $err . ' mails dont ' . $mailDef . ' mail par default';
         return "OK " . $ok . ' mails BAD ' . $err . ' mails dont ' . $mailDef . ' mail par default';
+    }
+    
+    public function isCommercialOrSup() {
+        
+        global $user;
+        
+        if($this->isLoaded()) {
+            $id_commercial = $this->getCommercialId();
+
+            if((int) $id_commercial == 0)
+                $id_commercial = $this->dol_object->user_author_id;
+        }
+        
+        // Check si il est admin ou le commercial de cette commande
+        if($user->admin or (int) $id_commercial == (int) $user->id)
+            return 1;
+        
+        $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_commercial);
+        // Check si il est le n+1 du commercial en charge de cette commande
+        if((int) $commercial->getData('fk_user') == (int) $user->id)
+            return 1;
+        
+        return 0;
     }
 }

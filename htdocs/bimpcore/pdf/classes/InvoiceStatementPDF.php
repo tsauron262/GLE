@@ -179,7 +179,7 @@ class InvoiceStatementPDF extends BimpDocumentPDF
 
     public function getBottomRightHtml()
     {
-        $html .= $this->getTotauxRowsHtml();
+        $html = $this->getTotauxRowsHtml();
 
         return $html;
     }

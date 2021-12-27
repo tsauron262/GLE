@@ -2,6 +2,7 @@
 
 class BimpTools
 {
+    public $output = '';
 
     public static $currencies = array(
         'EUR' => array(
@@ -2389,7 +2390,7 @@ class BimpTools
         return 'http://placehold.it/' . $size . '/' . $color . '/fff&amp;text=' . $text;
     }
 
-    public function getBadge($text, $size = 35, $style = 'info', $popover = '')
+    public static function getBadge($text, $size = 35, $style = 'info', $popover = '')
     {
         return '<span class="badge badge-pill badge-' . $style . (($popover != '') ? ' bs-popover' : '') . '" ' . (($popover != '') ? BimpRender::renderPopoverData($popover) : '') . ' style="size:' . $size . '">' . $text . '</span>';
     }
@@ -3078,6 +3079,10 @@ class BimpTools
     public static $nbMax = 15*4;
     
     public static function lockNum($type, $nb = 0, $errors = array()){
+        if (BimpCore::isModeDev()) { // Flo: ça plante sur ma version de dev... 
+            return;
+        }
+        
         if(in_array($type, static::$bloquages))//On a deja un verrous pour cette clef
             return true;
         
@@ -3103,22 +3108,27 @@ class BimpTools
         $text = "Yes" . rand(0, 10000000);
         if (!file_put_contents($file, $text))
             die('droit sur fichier incorrect : ' . $file);
-        usleep(2000000);
+        usleep(3000000);
         $text2 = file_get_contents($file);
         if ($text == $text2){
-            $autreInstanceBloquage = static::isBloqued($type, true);
-            if(!$autreInstanceBloquage){
+            if(defined('ID_ERP')){
+                $autreInstanceBloquage = static::isBloqued($type, true);
+                if(!$autreInstanceBloquage){
+                    static::$bloquages[] = $type;
+                    return 1;
+                }
+                else{
+                    unlink($file); 
+                    $errors[] = 'Fichier lock d\'une autre instance : '.$autreInstanceBloquage;
+                    BimpCore::addlog('Probléme lockNum '.$type, Bimp_Log::BIMP_LOG_URGENT, null, null, array('Errors'=>$errors));
+                    return static::lockNum($type, $nb, $errors);
+                }
+            }
+            else{
                 static::$bloquages[] = $type;
                 return 1;
             }
-            else{
-                unlink($file); 
-                $errors[] = 'Fichier lock d\'une autre instance : '.$autreInstanceBloquage;
-                BimpCore::addlog('Probléme lockNum '.$type, Bimp_Log::BIMP_LOG_URGENT, null, null, array('Errors'=>$errors));
-                return static::lockNum($type, $nb, $errors);
-            }
-            
-            
+                    
         }
         else{
             $errors[] = 'Fichier diférent de celui attendue';

@@ -2384,6 +2384,8 @@ class BL_CommandeShipment extends BimpObject
                                 ), true, $errors);
 
                 if (!count($errors) && BimpObject::objectLoaded($signature)) {
+//                    $signature->openSignDistAccess('', true);
+                    
                     $errors = $this->updateField('id_signature', (int) $signature->id);
                     $this->updateField('signed', 0);
 
@@ -3048,9 +3050,9 @@ class BL_CommandeShipment extends BimpObject
             $qty = $line->getExpQtyFromNbPeriods($qty);
 
             $available_qty = (float) $line->getShipmentsQty() - (float) $line->getShippedQty();
-            if (abs($qty) > abs($available_qty)) {
+            if (round(abs($qty),2) > round(abs($available_qty),2)) {
                 if ($qty >= 0) {
-                    $errors[] = 'Ligne n°' . $line->getData('position') . ': il ne reste que ' . $available_qty . ' unité(s) à expédier.<br/>Veuillez retirer ' . ($qty - $available_qty) . ' unité(s)';
+                    $errors[] = 'Ligne n°' . $line->getData('position') . ': il ne reste que ' . $available_qty . ' unité(s) à expédier.<br/>Veuillez retirer ' . round($qty - $available_qty,2) . ' unité(s)';
                 } else {
                     $errors[] = 'Ligne n°' . $line->getData('position') . ': il ne reste que ' . $available_qty . ' unité(s) retournée(s) à réceptionner.<br/>Veuillez retirer ' . abs($qty - $available_qty) . ' unité(s)';
                 }
@@ -3244,7 +3246,7 @@ class BL_CommandeShipment extends BimpObject
             switch ($doc_type) {
                 case 'bl':
                     if ($context === 'public') {
-                        return DOL_URL_ROOT . '/bimpinterfaceclient/client.php?fc=doc&doc=bl' . ($signed ? '_signed' : '') . '&docid=' . $this->id . '&docref=' . $this->getData('num_livraison');
+                        return BimpObject::getPublicBaseUrl() . '?fc=doc&doc=bl' . ($signed ? '_signed' : '') . '&docid=' . $this->id . '&docref=' . $this->getData('num_livraison');
                     } else {
                         return $this->getFileUrl($fileName);
                     }

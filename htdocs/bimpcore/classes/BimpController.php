@@ -123,7 +123,6 @@ class BimpController
     public function handleError($level, $msg, $file, $line)
     {
         ini_set('display_errors', 0); // Par précaution. 
-        
 //        if(!in_array($level, array(E_NOTICE, E_DEPRECATED)))
 //            die('iiiii'.$level.$msg.$file.$line);
         switch ($level) {
@@ -150,7 +149,7 @@ class BimpController
                     $txt .= $file . ' - Ligne ' . $line . "\n\n";
                     $txt .= $msg;
 
-                    if (isset($_POST) && !empty($_POST)) {
+                    if (!empty($_POST)) {
                         $txt .= "\n\n";
                         $txt .= 'POST: ' . "\n";
                         $txt .= '<pre>' . print_r($_POST, 1) . '</pre>';
@@ -191,7 +190,7 @@ class BimpController
                 ));
 
                 if (BimpDebug::isActive()) {
-                    $content .= '<strong>' . $file . ' - Ligne ' . $line . '</strong>';
+                    $content = '<strong>' . $file . ' - Ligne ' . $line . '</strong>';
                     $content .= BimpRender::renderAlerts($msg, 'danger');
                     BimpDebug::addDebug('php', 'Erreur', $content, array('open' => true));
                 }
@@ -208,7 +207,7 @@ class BimpController
                     ));
                 }
                 if (BimpDebug::isActive()) {
-                    $content .= '<strong>' . $file . ' - Ligne ' . $line . '</strong>';
+                    $content = '<strong>' . $file . ' - Ligne ' . $line . '</strong>';
                     $content .= BimpRender::renderAlerts($msg, 'warning');
                     BimpDebug::addDebug('php', 'Alerte', $content, array('open' => true));
                 }
@@ -220,27 +219,27 @@ class BimpController
             case E_DEPRECATED:
             case E_USER_DEPRECATED:
 //                if (BimpDebug::isActive()) {
-//                    $content .= '<strong>' . $file . ' - Ligne ' . $line . '</strong>';
+//                    $content = '<strong>' . $file . ' - Ligne ' . $line . '</strong>';
 //                    $content .= BimpRender::renderAlerts($msg, 'info');
 //                    BimpDebug::addDebug('php', 'Info', $content, array('open' => true));
 //                }
                 break;
 
             default:
-                if(stripos($msg, 'Deadlock') !== false){
+                if (stripos($msg, 'Deadlock') !== false) {
                     global $db;
                     $db = new mysqli();
                     $db::stopAll();
                 }
                 return false;
         }
-        
-        if(stripos($msg, 'Deadlock') !== false){//ne devrait jamais arrivée.
+
+        if (stripos($msg, 'Deadlock') !== false) {//ne devrait jamais arrivée.
             global $db;
             BimpCore::addlog('Erreur SQL intercepté par handleError php, ne devrait jamais arriver !!!!!!!', Bimp_Log::BIMP_LOG_ERREUR, 'php', null, array(
                 'Fichier' => $file,
                 'Ligne'   => $line,
-                'Msg'   => $msg
+                'Msg'     => $msg
             ));
             $db::stopAll();
         }
@@ -760,13 +759,18 @@ class BimpController
                     $result['request_id'] = $req_id;
                 }
 
+                if (!isset($result['warnings'])) {
+                    $result['warnings'] = array();
+                }
+
+                $result['warnings'] = BimpTools::merge_array($result['warnings'], static::getAndResetAjaxWarnings());
+
                 if (BimpDebug::isActive()) {
                     BimpDebug::addDebug('ajax_result', '', '<pre>' . htmlentities(print_r($result, 1)) . '</pre>', array('foldable' => false));
                     BimpDebug::addDebugTime('Fin affichage page');
                     $result['debug_content'] = BimpDebug::renderDebug('ajax_' . $req_id);
                 }
 
-                $result['warnings'] = static::getAndResetAjaxWarnings();
                 $json = json_encode($result);
 
                 if ($json === false) {
@@ -928,6 +932,8 @@ class BimpController
     {
         $errors = array();
         $url = '';
+
+        $result = array('warnings' => array(), 'success' => '', 'success_callback' => '');
 
         $id_object = BimpTools::getValue('id_object');
         $object_name = BimpTools::getValue('object_name', '');
@@ -1645,7 +1651,7 @@ class BimpController
                 $form = new BC_Form($object, $id_parent, $form_name, 1, !$full_panel);
                 $modal_format = $form->params['modal_format'];
                 if ($force_edit) {
-                    $form->force_edit = true;
+                    $form->setParam('force_edit', $force_edit);
                 }
                 if (!is_null($form_id)) {
                     $form->identifier = $form_id;
@@ -2026,6 +2032,8 @@ class BimpController
         $pagination_html = '';
         $filters_panel_html = '';
         $active_filters_html = '';
+        $before_html = '';
+        $after_html = '';
         $thead_html = '';
         $colspan = 0;
         $id_config = 0;
@@ -2797,61 +2805,68 @@ class BimpController
 
     protected function ajaxProcessLoadUserListFiltersList()
     {
-        $errors = array();
-        $html = '';
-        $list_id = '';
+        // Obsolète. 
 
-        $module = BimpTools::getValue('module', $this->module);
-        $object_name = BimpTools::getValue('object_name');
-        $panel_name = BimpTools::getValue('panel_name', 'default');
-        $id_user = (int) BimpTools::getValue('id_user', 0);
+        $errors = array(
+            'Erreur: cette fonction est désactivée'
+        );
 
-        if (is_null($object_name) || !$object_name) {
-            $errors[] = 'Type d\'objet absent';
-        } else {
-            $object = BimpObject::getInstance($module, $object_name);
+        BimpCore::addlog('Appel à méthode obsolète: BimpController::ajaxProcessLoadUserListFiltersList()', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore');
 
-            if (!is_a($object, $object_name)) {
-                $errors[] = 'L\'objet "' . $object_name . '" n\'existe pas dans le module "' . $module . '"';
-            }
-        }
-
-        if (!$id_user) {
-            $errors[] = 'ID de l\'utilisateur absent';
-        }
-
-        if (!count($errors)) {
-            $instance = BimpObject::getInstance('bimpcore', 'ListFilters');
-            $instance->validateArray(array(
-                'obj_module' => $module,
-                'obj_name'   => $object_name,
-                'panel_name' => $panel_name
-            ));
-
-            $list = new BC_ListTable($instance);
-
-            $list->addFieldFilterValue('obj_module', $module);
-            $list->addFieldFilterValue('obj_name', $object_name);
-            $list->addFieldFilterValue('panel_name', $panel_name);
-
-            $list->params['add_form_values']['fields']['owner_type'] = 2;
-            $list->params['add_form_values']['fields']['id_owner'] = $id_user;
-
-            $list->params['list_filters'][] = array(
-                'name'   => 'owner',
-                'filter' => array(
-                    'custom' => ListFilters::getOwnerFilterCustomSql($id_user)
-                )
-            );
-
-            $html = $list->renderHtml();
-            $list_id = $list->identifier;
-        }
+//        $html = '';
+//        $list_id = '';
+//
+//        $module = BimpTools::getValue('module', $this->module);
+//        $object_name = BimpTools::getValue('object_name');
+//        $panel_name = BimpTools::getValue('panel_name', 'default');
+//        $id_user = (int) BimpTools::getValue('id_user', 0);
+//
+//        if (is_null($object_name) || !$object_name) {
+//            $errors[] = 'Type d\'objet absent';
+//        } else {
+//            $object = BimpObject::getInstance($module, $object_name);
+//
+//            if (!is_a($object, $object_name)) {
+//                $errors[] = 'L\'objet "' . $object_name . '" n\'existe pas dans le module "' . $module . '"';
+//            }
+//        }
+//
+//        if (!$id_user) {
+//            $errors[] = 'ID de l\'utilisateur absent';
+//        }
+//
+//        if (!count($errors)) {
+//            $instance = BimpObject::getInstance('bimpcore', 'ListFilters');
+//            $instance->validateArray(array(
+//                'obj_module' => $module,
+//                'obj_name'   => $object_name,
+//                'panel_name' => $panel_name
+//            ));
+//
+//            $list = new BC_ListTable($instance);
+//
+//            $list->addFieldFilterValue('obj_module', $module);
+//            $list->addFieldFilterValue('obj_name', $object_name);
+//            $list->addFieldFilterValue('panel_name', $panel_name);
+//
+//            $list->params['add_form_values']['fields']['owner_type'] = 2;
+//            $list->params['add_form_values']['fields']['id_owner'] = $id_user;
+//
+//            $list->params['list_filters'][] = array(
+//                'name'   => 'owner',
+//                'filter' => array(
+//                    'custom' => ListFilters::getOwnerFilterCustomSql($id_user)
+//                )
+//            );
+//
+//            $html = $list->renderHtml();
+//            $list_id = $list->identifier;
+//        }
 
         return array(
             'errors'     => $errors,
-            'html'       => $html,
-            'list_id'    => $list_id,
+//            'html'       => $html,
+//            'list_id'    => $list_id,
             'request_id' => BimpTools::getValue('request_id', 0)
         );
     }
@@ -3086,13 +3101,14 @@ class BimpController
             'request_id'    => BimpTools::getValue('request_id', 0)
         );
     }
-    
-    public static function bimp_shutdown(){//juste avant de coupé le script
+
+    public static function bimp_shutdown()
+    {//juste avant de coupé le script
         global $db;
-        if($db->transaction_opened > 0)
-            BimpCore::addlog ('Fin de script Transaction non fermée');
+        if ($db->transaction_opened > 0)
+            BimpCore::addlog('Fin de script Transaction non fermée');
         $nb = BimpTools::deloqueAll();
-        if($nb > 0)
-            BimpCore::addlog ('Fin de script fichier non debloqué '.$nb, Bimp_Log::BIMP_LOG_ALERTE);
+        if ($nb > 0)
+            BimpCore::addlog('Fin de script fichier non debloqué ' . $nb, Bimp_Log::BIMP_LOG_ALERTE);
     }
 }

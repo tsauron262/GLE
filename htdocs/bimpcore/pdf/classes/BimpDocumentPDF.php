@@ -27,8 +27,6 @@ class BimpDocumentPDF extends BimpModelPDF
     public $periodicity = 0;
     public $nbPeriods = 0;
     public $proforma = 0;
-    public $maxLogoWidth = 120; // px
-    public $maxLogoHeight = 60; // px
     public $totals = array("DEEE" => 0, "RPCP" => 0);
     public $target_label = '';
     public $next_annexe_idx = 1;
@@ -39,6 +37,8 @@ class BimpDocumentPDF extends BimpModelPDF
     public $signature_params = array();
     public $signature_bloc = true;
     public $signature_bloc_label = '';
+    public $hidePrice = false;
+    public $contactFinal = null;
 
     public function __construct($db)
     {
@@ -539,22 +539,22 @@ class BimpDocumentPDF extends BimpModelPDF
             }
 
 //            if ($product->type == 1) {
-                if ($line->date_start) {
-                    if (!$line->date_end) {
-                        $desc .= '<br/>A partir du ';
-                    } else {
-                        $desc .= '<br/>Du ';
-                    }
-                    $desc .= date('d/m/Y', $line->date_start);
+            if ($line->date_start) {
+                if (!$line->date_end) {
+                    $desc .= '<br/>A partir du ';
+                } else {
+                    $desc .= '<br/>Du ';
                 }
-                if ($line->date_end) {
-                    if (!$line->date_start) {
-                        $desc .= '<br/>Jusqu\'au ';
-                    } else {
-                        $desc .= ' au ';
-                    }
-                    $desc .= date('d/m/Y', $line->date_end);
+                $desc .= date('d/m/Y', $line->date_start);
+            }
+            if ($line->date_end) {
+                if (!$line->date_start) {
+                    $desc .= '<br/>Jusqu\'au ';
+                } else {
+                    $desc .= ' au ';
                 }
+                $desc .= date('d/m/Y', $line->date_end);
+            }
 //            }
         }
 
@@ -1046,7 +1046,7 @@ class BimpDocumentPDF extends BimpModelPDF
     public function getBottomRightHtml()
     {
 
-        $html .= $this->getTotauxRowsHtml();
+        $html = $this->getTotauxRowsHtml();
         $html .= $this->getPaymentsHtml();
         $html .= $this->getAfterTotauxHtml();
 
@@ -1555,7 +1555,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function getAfterTotauxHtml()
     {
-        $html .= '<table style="width: 95%" cellpadding="3">';
+        $html = '<table style="width: 95%" cellpadding="3">';
 
         global $mysoc, $langs;
         // If France, show VAT mention if not applicable
@@ -1595,7 +1595,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
         if ($this->signature_bloc) {
             $yPosOffset = 0;
-            
+
             $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $this->object->socid);
             $html = '<table style="width: 95%;font-size: 7px;" cellpadding="3">';
             $html .= '<tr>';
@@ -1667,6 +1667,12 @@ class BimpDocumentPDF extends BimpModelPDF
 
             $this->signature_params['y_pos'] = $yPos + $yPosOffset;
             $this->signature_params['page'] = $page;
+
+            if (is_a($this->bimpCommObject, 'BimpObject')) {
+                if ($this->bimpCommObject->field_exists('signature_params')) {
+                    $this->bimpCommObject->updateField('signature_params', $this->signature_params);
+                }
+            }
         }
     }
 

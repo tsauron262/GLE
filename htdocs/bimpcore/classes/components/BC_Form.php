@@ -390,14 +390,14 @@ class BC_Form extends BC_Panel
         }
         $html .= '>';
 
-        $html .= '<div class="inputLabel col-xs-12 col-sm-4 col-md-' . (int) $label_cols . '">';
+        $html .= '<div class="inputLabel col-xs-12 col-sm-12 col-md-' . (int) $label_cols . '">';
         $html .= $label;
         if ($required) {
             $html .= '&nbsp;*';
         }
         $html .= '</div>';
 
-        $html .= '<div class="formRowInput field col-xs-12 col-sm-6 col-md-' . (12 - (int) $label_cols) . '">';
+        $html .= '<div class="formRowInput field col-xs-12 col-sm-12 col-md-' . (12 - (int) $label_cols) . '">';
 
         if ($field->edit && $field->isEditable()) {
             if ($field->params['type'] === 'id_object' ||
@@ -466,7 +466,7 @@ class BC_Form extends BC_Panel
         }
         $html .= '>';
 
-        $html .= '<div class="inputLabel col-xs-12 col-sm-4 col-md-' . (int) $label_cols . '">';
+        $html .= '<div class="inputLabel col-xs-12 col-sm-12 col-md-' . (int) $label_cols . '">';
         if ($params['label']) {
             $html .= $params['label'];
         } elseif ($this->object->config->isDefined('associations/' . $params['association'] . '/label')) {
@@ -481,7 +481,7 @@ class BC_Form extends BC_Panel
         }
         $html .= '</div>';
 
-        $html .= '<div class="formRowInput field col-xs-12 col-sm-6 col-md-' . (12 - (int) $label_cols) . '">';
+        $html .= '<div class="formRowInput field col-xs-12 col-sm-12 col-md-' . (12 - (int) $label_cols) . '">';
 
         if (count($asso->errors)) {
             $html .= BimpRender::renderAlerts($asso->errors);
@@ -549,14 +549,14 @@ class BC_Form extends BC_Panel
         }
         $html .= '>';
 
-        $html .= '<div class="inputLabel col-xs-12 col-sm-4 col-md-' . (int) $label_cols . '">';
+        $html .= '<div class="inputLabel col-xs-12 col-sm-12 col-md-' . (int) $label_cols . '">';
         $html .= $params['label'];
         if ((int) $params['required']) {
             $html .= '&nbsp;*';
         }
         $html .= '</div>';
 
-        $html .= '<div class="formRowInput field col-xs-12 col-sm-6 col-md-' . (12 - (int) $label_cols) . '">';
+        $html .= '<div class="formRowInput field col-xs-12 col-sm-12 col-md-' . (12 - (int) $label_cols) . '">';
 
         $html .= $this->renderCustomInput($row, $params);
 

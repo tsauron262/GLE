@@ -204,7 +204,7 @@ class BS_Inter extends BimpObject
         if (!count($errors)) {
             $ticket = $this->getParentInstance();
             if ($ticket->getData('id_user_client') > 0) {
-                $url = $ticket->getPublicUrl();
+                $url = $ticket->getPublicUrl(false);
                 $userClient = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClient', $ticket->getData('id_user_client'));
                 $to = $userClient->getData('email');
                 $cc = implode(',', $userClient->get_dest('admin'));

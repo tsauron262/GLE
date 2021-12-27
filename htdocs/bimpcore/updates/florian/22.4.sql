@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimpcore_file` ADD `is_deletable` tinyint(1) NOT NULL DEFAULT 1;

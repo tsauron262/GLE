@@ -32,6 +32,9 @@ Abstract class BimpModelPDF
     public $primary = '000000';
     public $watermark = '';
     public static $html_purifier = null;
+    public $maxLogoWidth = 120; // px
+    public $maxLogoHeight = 60; // px
+    public $object_conf = null;
 
     public function __construct($db, $orientation = 'P', $format = 'A4')
     {
@@ -321,6 +324,7 @@ Abstract class BimpModelPDF
             $bickey = "SWIFT";
         }
 
+        $html = '';
         $usedetailedbban = $account->useDetailedBBAN();
 
         if (!$only_number) {

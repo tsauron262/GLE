@@ -44,6 +44,7 @@ class box_bimp_core extends ModeleBoxes
         var $erreurs = array();
         var $camenberes = array();
         var $indicateurs = array();
+        var $lists = array();
         
         var $classObj = null;
         var $methode = '';
@@ -107,23 +108,31 @@ class box_bimp_core extends ModeleBoxes
                 $result = call_user_func(array($this->classObj, $this->methode),$this, 'load');
                 if(!$result)
                     $this->erreurs[] = 'Probléme load box';
-                
-                if($result && count($this->camenberes)){
-                    $htmlGraph = array();
-                    $WIDTH=(count(result['graphs']) >= 2 || ! empty($conf->dol_optimize_smallscreen))?'160':'320';
-                    $HEIGHT='192';
-                    $i = 0;
-                    
-                    foreach($this->camenberes as $dataGraph){
-                        $i++;
-                        $htmlGraph[] = $this->getCamemberre($clef.$i, $dataGraph, $WIDTH, $HEIGHT);
+                else{
+                    if(count($this->camenberes)){
+                        $htmlGraph = array();
+                        $WIDTH=(count(result['graphs']) >= 2 || ! empty($conf->dol_optimize_smallscreen))?'160':'320';
+                        $HEIGHT='192';
+                        $i = 0;
+
+                        foreach($this->camenberes as $dataGraph){
+                            $i++;
+                            $htmlGraph[] = $this->getCamemberre($clef.$i, $dataGraph, $WIDTH, $HEIGHT);
+                        }
+
+                        $stringgraph.=implode('</div><div class="fichehalfright">', $htmlGraph);
+
+
+                        foreach($this->indicateurs as $indicateur){
+                            $stringtext .= $this->getIndicateur($indicateur);
+                        }
                     }
                     
-                    $stringgraph.=implode('</div><div class="fichehalfright">', $htmlGraph);
-                    
-                    
-                    foreach($this->indicateurs as $indicateur){
-                        $stringtext .= $this->getIndicateur($indicateur);
+                    if(count($this->lists)){
+                        foreach($this->lists as $list){
+//                            echo '<pre>';   print_r($list['data']);
+                            $stringtext .= BimpRender::renderBimpListTable($list['data'], $list['legend']);
+                        }
                     }
                 }
 
@@ -147,7 +156,7 @@ class box_bimp_core extends ModeleBoxes
             
             
             if(count($this->erreurs)){
-                $this->info_box_contents[0][0] = array('tr'=>'class="oddeven nohover"', 'td' => 'align="center" class="nohover"','textnoformat'=>$this->presenteBox(BimpRender::renderAlerts($this->erreurs)));
+                $this->info_box_contents[0][0] = array('tr'=>'class="oddeven nohover"', 'td' => 'align="center" class="nohover"','textnoformat'=>$this->presenteBox(BimpRender::renderAlerts($this->erreurs), ''));
                 return 0;
             }
             $this->info_box_contents[0][0] = array('tr'=>'class="oddeven nohover"', 'td' => 'align="center" class="nohover"','textnoformat'=>$this->presenteBox($stringgraph, $stringtext));
@@ -178,6 +187,8 @@ class box_bimp_core extends ModeleBoxes
                         });
                 });
         </script>';
+        
+        $refreshaction='refresh_'.$this->boxcode;
         $stringtoshow.='<div class="center hideobject" id="idfilter'.$this->boxcode.'">';	// hideobject is to start hidden
         $stringtoshow.='<form class="flat formboxfilter" method="POST" action="'.$_SERVER["PHP_SELF"].'">';
         $stringtoshow.='<input type="hidden" name="action" value="'.$refreshaction.'">';
@@ -185,13 +196,39 @@ class box_bimp_core extends ModeleBoxes
 
         foreach($this->config as $name => $confData){
             $value = '';
+            $text = '';
+            $stringtoshowTmp = '';
+            if(isset($confData['title']))
+                $text = $confData['title'];
             if(isset($this->confUser[$name]))
                 $value = $this->confUser[$name];
             elseif(isset($confData['val_default']))
                 $value = $confData['val_default'];
             if($confData['type'] == 'year'){
-                $stringtoshow.=$langs->trans("Year").' <input class="flat" size="4" type="text" name="'.'boxConf'.$this->boxcode.$name.'" value="'.$value.'">';
+                if($text == '')
+                    $text = $langs->trans("Year");
+                $stringtoshowTmp.= '<input class="flat" size="4" type="text" name="'.'boxConf'.$this->boxcode.$name.'" value="'.$value.'">';
             }
+            elseif($confData['type'] == 'int'){
+                $stringtoshowTmp.= '<input class="flat" size="4" type="text" name="'.'boxConf'.$this->boxcode.$name.'" value="'.$value.'">';
+            }
+            elseif($confData['type'] == 'bool'){
+                $stringtoshowTmp.= '<input class="flat" size="4" type="checkbox" name="'.'boxConf'.$this->boxcode.$name.'"';
+                if($value)
+                    $stringtoshowTmp.= ' checked="checked"';
+                $stringtoshowTmp.= '>';
+            }
+            elseif($confData['type'] == 'radio'){
+                $stringtoshowTmp .= ' :';
+                foreach($confData['values'] as $val => $label){
+                    $stringtoshowTmp .= '<input type="radio" id="dewey" name="'.'boxConf'.$this->boxcode.$name.'" value="'.$val.'"';
+                    if($value == $val)
+                        $stringtoshowTmp.= ' checked="checked"';
+                    $stringtoshowTmp.= '> '.$label.' ';
+                }
+            }
+                    
+            $stringtoshow .= $text.' '.$stringtoshowTmp.'<br/>';
         }
         $stringtoshow.='<input type="image" class="reposition inline-block valigntextbottom" alt="'.$langs->trans("Refresh").'" src="'.img_picto('','refresh.png','','',1).'">';
         $stringtoshow.='</form>';
@@ -218,8 +255,8 @@ class box_bimp_core extends ModeleBoxes
             if(isset($temp[2]))
                 $nocolor = 0;
 
-        $filenamenb = $dir."/".$clef."-".$year.".png";
-        $fileurlnb = DOL_URL_ROOT.'/viewimage.php?modulepart=productstats&amp;file='.$clef.'-'.$year.'.png';
+        $filenamenb = DOL_DATA_ROOT."/product/".$clef."-"/*.$year*/.".png";//ne semble servire a rien
+        $fileurlnb = DOL_URL_ROOT.'/viewimage.php?modulepart=product&amp;file='.$clef.'-'/*.$year*/.'.png';//ne semble servire a rien
 
         $px1 = new DolGraph();
         $mesg = $px1->isGraphKo();
@@ -267,6 +304,10 @@ class box_bimp_core extends ModeleBoxes
     
     function addCamenbere($titre, $data){
         $this->camenberes[] = array('titre'=>$titre, 'data'=>$data);
+    }
+    
+    function addList($legend, $data){
+        $this->lists[] = array('legend'=>$legend, 'data'=>$data);
     }
     
     function addIndicateur($text, $value, $url = null, $title = null, $alert = null, $urlAlert = null, $titleAlert = null, $img = null){

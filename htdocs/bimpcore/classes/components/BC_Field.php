@@ -299,6 +299,7 @@ class BC_Field extends BimpComponent
             $history_html = BimpRender::renderObjectFieldHistoryPopoverButton($this->object, $this->name_prefix . $this->name, 15, $history_user);
         }
 
+        $html = '';
         if ($history_html) {
             $html .= '<div style="padding-left: 32px;">';
             $html .= '<div style="float: left; margin-left: -28px; margin-top: 4px">';
@@ -619,6 +620,38 @@ class BC_Field extends BimpComponent
                 return 120;
         }
     }
+    
+    public static function getFieldObject($base_object, &$field_name, &$errors = array())
+    {
+        $field_object = null;
+        $children = explode(':', $field_name);
+        $field_name = array_pop($children);
+
+        if (is_a($base_object, 'BimpObject')) {
+            if ((string) $field_name) {
+                $field_object = $base_object;
+
+                if (count($children)) {
+                    foreach ($children as $child_name) {
+                        $child = $field_object->getChildObject($child_name);
+
+                        if (is_a($child, 'BimpObject')) {
+                            $field_object = $child;
+                        } else {
+                            $errors[] = 'Instance enfant "' . $child_name . '" invalide pour l\'objet "' . $field_object->object_name . '"';
+                            break;
+                        }
+                    }
+                }
+            } else {
+                $errors[] = 'Nom du champ absent';
+            }
+        } else {
+            $errors[] = 'Object associé invalide';
+        }
+
+        return $field_object;
+    }
 
     // Display_if / Depends_on: 
 
@@ -884,7 +917,7 @@ class BC_Field extends BimpComponent
             }
             $content = BimpInput::renderSearchListInputFromConfig($this->object, $input_path, $input_name, $this->value, $this->params['search']['option']);
         } elseif ($search_data['search_type'] === 'values_range') {
-            $content .= '<div>';
+            $content = '<div>';
             $input_options = $search_data['input_options'];
             $input_options['addon_left'] = 'Min';
             $content .= BimpInput::renderInput($search_data['input_type'], $input_name . '_min', null, $input_options);

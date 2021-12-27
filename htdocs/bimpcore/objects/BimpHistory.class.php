@@ -9,15 +9,11 @@ class BimpHistory extends BimpObject
         $errors = array();
         $baseErrorMsg = 'Echec de la mise à jour de l\'historique pour le champ "' . $field . '"';
 
-        if (is_null($object) || !$object || !is_a($object, 'BimpObject')) {
-            $errors[] = $baseErrorMsg . ' - Objet invalide';
-        } else {
-            $baseErrorMsg .= ' ' . $object->getLabel('of_the');
-            if (is_null($object->id) || !$object->id) {
-                $errors[] = ' - aucun ID';
-            } elseif (!$field || !$object->config->isDefined('fields/' . $field)) {
-                $errors[] = ' - champ invalide';
-            }
+        $baseErrorMsg .= ' ' . $object->getLabel('of_the');
+        if (is_null($object->id) || !$object->id) {
+            $errors[] = ' - aucun ID';
+        } elseif (!$field || !$object->config->isDefined('fields/' . $field)) {
+            $errors[] = ' - champ invalide';
         }
 
         $baseErrorMsg .= ' ' . $object->id;
@@ -53,7 +49,7 @@ class BimpHistory extends BimpObject
     public function deleteByObject(BimpObject $object, $id_object)
     {
         $errors = array();
-        if (!is_null($object) && is_a($object, 'BimpObject') && !is_null($id_object) && $id_object) {
+        if (!is_null($id_object) && $id_object) {
             $where = '`module` = \'' . $object->module . '\'';
             $where .= ' AND `object` = \'' . $object->object_name . '\'';
             $where .= ' AND `id_object` = ' . (int) $id_object;
@@ -68,7 +64,7 @@ class BimpHistory extends BimpObject
 
     public function getHistory(BimpObject $object, $field)
     {
-        if (is_null($object) || !isset($object->id) || !$object->id) {
+        if (!isset($object->id) || !$object->id) {
             return array();
         }
 

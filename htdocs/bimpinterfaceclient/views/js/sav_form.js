@@ -362,10 +362,18 @@ function SavPublicForm() {
                 if ($input.length) {
                     if ($input.hasClass('required')) {
                         if ($input.val() === '') {
-                            $input.addClass('value_missing');
+                            if ($input.tagName() === 'select') {
+                                $input.parent().children('span.select2').addClass('value_missing');
+                            } else {
+                                $input.addClass('value_missing');
+                            }
                             check = false;
                         } else {
-                            $input.removeClass('value_missing');
+                            if ($input.tagName() === 'select') {
+                                $input.parent().children('span.select2').removeClass('value_missing');
+                            } else {
+                                $input.removeClass('value_missing');
+                            }
                         }
                     }
                 }
@@ -454,13 +462,13 @@ function SavPublicForm() {
         if (sav_form_submit_locked) {
             return;
         }
-        
+
         if ($button.hasClass('disabled')) {
             return;
         }
-        
+
         sav_form_submit_locked = true;
-        
+
         $button.addClass('disabled');
 
         if (typeof (force_validate) === 'undefined') {
@@ -526,7 +534,7 @@ function SavPublicForm() {
             }
 
             $('#debug').html('').hide();
-            
+
             BimpAjax('savFormSubmit', data, $('#sav_form_submit_result'), {
                 $btn: $button,
                 display_success: false,

@@ -56,22 +56,6 @@ class Bimp_Facture extends BimpComm
 
     // Gestion des droits: 
 
-    public function canClientView()
-    {
-        global $userClient;
-
-        if (BimpObject::objectLoaded($userClient)) {
-            if ($userClient->isLogged()) {
-                if ($this->isLoaded() && (int) $this->getData('fk_soc') !== (int) $userClient->getData('id_client')) {
-                    return 0;
-                }
-                return 1;
-            }
-        }
-
-        return 0;
-    }
-
     public function canCreate()
     {
         global $user;
@@ -3241,6 +3225,17 @@ class Bimp_Facture extends BimpComm
             $html .= '<strong>Client: </strong>';
             $html .= $client->getLink();
             $html .= '</div>';
+
+            if (!(int) $this->getData('paye')) {
+                $discounts = (float) $client->getAvailableDiscountsAmounts();
+
+                if ($discounts) {
+                    $html .= '<div style="margin-top: 10px">';
+                    $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Ce client dispose de ' . BimpTools::displayMoneyValue($discounts) . ' de crédits disponibles';
+                    $html .= BimpRender::renderAlerts($msg, 'warning');
+                    $html .= '</div>';
+                }
+            }
         }
 
         return $html;
@@ -5786,7 +5781,7 @@ class Bimp_Facture extends BimpComm
                         // copie des lignes: 
                         $lines_errors = $this->createLinesFromOrigin($avoir_to_refacture, $params);
                         if (count($lines_errors)) {
-                            $warnings[] = BimpTools::getMsgFromArray($lines_errors);
+                            $errors[] = BimpTools::getMsgFromArray($lines_errors);
                         }
 
                         // Copie des contacts: 
@@ -6158,7 +6153,7 @@ class Bimp_Facture extends BimpComm
         $year = (isset($boxObj->confUser['year']) ? $boxObj->confUser['year'] : $boxObj->config['year']['val_default']);
         $boxObj->boxlabel .= ' ' . $year;
 
-        $ln = BimpCache::getBdb()->executeS("SELECT SUM(total_ttc) as tot, SUM(IF(paye = 0, `remain_to_pay`, 0)) as totIP, COUNT(*) as nb, SUM(IF(paye = 0 ,1,0)) as nbIP, SUM(IF(remain_to_pay != total_ttc && paye = 0 ,1,0)) as nbPart, SUM(IF(paye = 0 && `date_lim_reglement` < now() ,1,0)) as nbRetard, SUM(IF(paye = 0 && `date_lim_reglement` < now() ,remain_to_pay,0)) as totRetard FROM `llx_facture` WHERE YEAR( datef ) = '" . $year . "'");
+        $ln = BimpCache::getBdb()->executeS("SELECT SUM(total_ttc) as tot, SUM(IF(paye = 0, `remain_to_pay`, 0)) as totIP, COUNT(*) as nb, SUM(IF(paye = 0 ,1,0)) as nbIP, SUM(IF(remain_to_pay != total_ttc && paye = 0 ,1,0)) as nbPart, SUM(IF(paye = 0 && `date_lim_reglement` < now() ,1,0)) as nbRetard, SUM(IF(paye = 0 && `date_lim_reglement` < now() ,remain_to_pay,0)) as totRetard FROM `llx_facture` WHERE fk_statut != 3 AND YEAR( datef ) = '" . $year . "'");
         $ln = $ln[0];
 
         $data = array(

@@ -37,7 +37,7 @@ if (!file_exists($filepath)) {
 
 $refs = file($filepath, FILE_SKIP_EMPTY_LINES | FILE_IGNORE_NEW_LINES);
 
-if (!(int) BimPTools::getValue('exec', 0)) {
+if (!(int) BimpTools::getValue('exec', 0)) {
     if (is_array($refs) && count($refs)) {
         echo count($refs) . ' élément(s) à traiter <br/><br/>';
 

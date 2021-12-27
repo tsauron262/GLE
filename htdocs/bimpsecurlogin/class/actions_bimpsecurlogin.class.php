@@ -49,7 +49,7 @@ class securLogSms {
         if(class_exists("BimpCore") && BimpCore::getConf('mode_securlogin', "")!= "")
             $this->debug = BimpCore::getConf('mode_securlogin');
         
-        $this->debug = 0;
+//        $this->debug = 0;
     }
 
     public function testSecur() {
@@ -122,8 +122,8 @@ class securLogSms {
     function asSecureCokie() {
         if (isset($_COOKIE[$this->nomCookie])) {//cokkie secur en place
             $crypt = $_COOKIE[$this->nomCookie];
-            $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "bimp_secure_log WHERE id_user = " . $this->user->id . " AND crypt = '" . $crypt . "' AND IP = '" . $this->ip . "'");
-//            echo "<pre>"; print_r($_COOKIE);die($crypt);
+            $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "bimp_secure_log WHERE id_user = " . $this->user->id . " AND crypt = '" . $crypt . "' AND IP = '" . $this->ip . "' AND DATEDIFF(now(), tms ) <= 31");
+//            echo "<pre>"; print_r($_COOKIE);die("SELECT * FROM " . MAIN_DB_PREFIX . "bimp_secure_log WHERE id_user = " . $this->user->id . " AND crypt = '" . $crypt . "' AND IP = '" . $this->ip . "'");
             if ($this->db->num_rows($sql) > 0) {
                 $this->setSecure(1, $crypt);
                 return 1;
@@ -339,7 +339,7 @@ class securLogSms {
 
     public function createWhiteList() {
 //        $sql = $this->db->query("SELECT count(DISTINCT(fk_user)) as nb, `ip` FROM `".MAIN_DB_PREFIX."events` WHERE `type` = 'USER_LOGIN' GROUP BY `ip` ORDER BY `nb` DESC");
-        $sql = $this->db->query("SELECT COUNT(DISTINCT(id_user)) as nb, IP as ip FROM `".MAIN_DB_PREFIX."bimp_secure_log` WHERE 1 GROUP BY IP ORDER BY `nb` DESC");
+        $sql = $this->db->query("SELECT COUNT(DISTINCT(id_user)) as nb, IP as ip FROM `".MAIN_DB_PREFIX."bimp_secure_log` WHERE DATEDIFF(now(), tms ) <= 31 GROUP BY IP ORDER BY `nb` DESC");
         $tabIp = array("78.195.193.207//flo");
         while ($ln = $this->db->fetch_object($sql))
             if ($ln->nb > 1)

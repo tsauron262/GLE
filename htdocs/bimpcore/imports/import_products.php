@@ -226,7 +226,7 @@ function validateProducts($file, $ref_key, BimpDb $bdb)
 function importFournPrices($file, $id_fourn)
 {
     $rows = file($file, FILE_IGNORE_NEW_LINES);
-
+    $warnings = array();
     $keys = array(
         'id_fourn'    => 0,
         'ref_fourn'   => 1,

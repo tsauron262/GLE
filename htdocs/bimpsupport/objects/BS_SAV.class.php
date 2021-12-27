@@ -4270,10 +4270,16 @@ class BS_SAV extends BimpObject
         $create_signature = BimpTools::getArrayValueFromPath($data, 'create_signature', $this->needSignaturePropal());
 
         if ($create_signature) {
-            $id_contact = (int) BimpTools::getArrayValueFromPath($data, 'id_contact', $this->getData('id_contact'));
+            $client = $this->getChildObject('client');
 
-            if (!$id_contact) {
-                $errors[] = 'Veuillez sélectionner le contact signataire';
+            if (!BimpObject::objectLoaded($client)) {
+                $errors[] = 'Client absent';
+            } else {
+                $id_contact = (int) BimpTools::getArrayValueFromPath($data, 'id_contact', $this->getData('id_contact'));
+
+                if (!$id_contact && $client->isCompany()) {
+                    $errors[] = 'Veuillez sélectionner le contact signataire';
+                }
             }
         }
 
@@ -5426,92 +5432,92 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         $success = 'Prise en charge effectuée';
         $success_callback = '';
 
-        // Mise à jour du statut: 
-        $errors = $this->updateField('status', self::BS_SAV_NEW);
-
         global $user, $langs;
-        $this->addNote('Sav pris en charge par ' . $user->getFullName($langs), 4);
-        $this->updateField('date_pc', date('Y-m-d H:i:s'));
 
-        // Mise à jour des champs: 
-        if (!count($errors)) {
-            if (isset($data['code_centre_repa'])) {
-                $this->set('code_centre_repa', $data['code_centre_repa']);
-            }
-            if (isset($data['id_client'])) {
-                $this->set('id_client', (int) $data['id_client']);
-            }
-            if (isset($data['id_contact'])) {
-                $this->set('id_contact', (int) $data['id_contact']);
-            }
-            if (isset($data['id_equipment'])) {
-                $this->set('id_equipment', (int) $data['id_equipment']);
-            }
-            if (isset($data['code_centre_repa'])) {
-                $this->set('code_centre_repa', $data['code_centre_repa']);
-            }
-            if (isset($data['code_centre_repa'])) {
-                $this->set('code_centre_repa', $data['code_centre_repa']);
-            }
-            if (isset($data['prioritaire'])) {
-                $this->set('code_centre_repa', (int) $data['prioritaire']);
-            }
-            if (isset($data['system'])) {
-                $this->set('system', $data['system']);
-            }
-            if (isset($data['login_admin'])) {
-                $this->set('login_admin', $data['login_admin']);
-            }
-            if (isset($data['pword_admin'])) {
-                $this->set('pword_admin', $data['pword_admin']);
-            }
-            if (isset($data['contact_pref'])) {
-                $this->set('contact_pref', $data['contact_pref']);
-            }
-            if (isset($data['accessoires'])) {
-                $this->set('accessoires', $data['accessoires']);
-            }
-            if (isset($data['etat_materiel'])) {
-                $this->set('etat_materiel', $data['etat_materiel']);
-            }
-            if (isset($data['etat_materiel_desc'])) {
-                $this->set('etat_materiel_desc', $data['etat_materiel_desc']);
-            }
-            if (isset($data['save_option'])) {
-                $this->set('save_option', (int) $data['save_option']);
-            }
-            if (isset($data['sav_pro'])) {
-                $this->set('sav_pro', (int) $data['sav_pro']);
-            }
-            if (isset($data['prestataire_number'])) {
-                $this->set('prestataire_number', $data['prestataire_number']);
-            }
-            if (isset($data['symptomes'])) {
-                $this->set('symptomes', $data['symptomes']);
-            }
-            if (isset($data['sacs'])) {
-                $this->set('sacs', $data['sacs']);
-            }
+        // Mise à jour SAV: 
+        $this->set('status', self::BS_SAV_NEW);
+        $this->set('date_pc', date('Y-m-d H:i:s'));
 
-            $up_errors = $this->update($warnings, true);
+        if (isset($data['code_centre_repa'])) {
+            $this->set('code_centre_repa', $data['code_centre_repa']);
+        }
+        if (isset($data['id_client'])) {
+            $this->set('id_client', (int) $data['id_client']);
+        }
+        if (isset($data['id_contact'])) {
+            $this->set('id_contact', (int) $data['id_contact']);
+        }
+        if (isset($data['id_equipment'])) {
+            $this->set('id_equipment', (int) $data['id_equipment']);
+        }
+        if (isset($data['code_centre_repa'])) {
+            $this->set('code_centre_repa', $data['code_centre_repa']);
+        }
+        if (isset($data['code_centre_repa'])) {
+            $this->set('code_centre_repa', $data['code_centre_repa']);
+        }
+        if (isset($data['prioritaire'])) {
+            $this->set('code_centre_repa', (int) $data['prioritaire']);
+        }
+        if (isset($data['system'])) {
+            $this->set('system', $data['system']);
+        }
+        if (isset($data['login_admin'])) {
+            $this->set('login_admin', $data['login_admin']);
+        }
+        if (isset($data['pword_admin'])) {
+            $this->set('pword_admin', $data['pword_admin']);
+        }
+        if (isset($data['contact_pref'])) {
+            $this->set('contact_pref', $data['contact_pref']);
+        }
+        if (isset($data['accessoires'])) {
+            $this->set('accessoires', $data['accessoires']);
+        }
+        if (isset($data['etat_materiel'])) {
+            $this->set('etat_materiel', $data['etat_materiel']);
+        }
+        if (isset($data['etat_materiel_desc'])) {
+            $this->set('etat_materiel_desc', $data['etat_materiel_desc']);
+        }
+        if (isset($data['save_option'])) {
+            $this->set('save_option', (int) $data['save_option']);
+        }
+        if (isset($data['sav_pro'])) {
+            $this->set('sav_pro', (int) $data['sav_pro']);
+        }
+        if (isset($data['prestataire_number'])) {
+            $this->set('prestataire_number', $data['prestataire_number']);
+        }
+        if (isset($data['symptomes'])) {
+            $this->set('symptomes', $data['symptomes']);
+        }
+        if (isset($data['sacs'])) {
+            $this->set('sacs', $data['sacs']);
+        }
 
-            if (!count($up_errors)) {
-                // Création de la facture d'acompte: 
-                if ((float) $data['acompte'] > 0) {
-                    if ((int) $this->getData('id_facture_acompte')) {
-                        $warnings[] = 'Attention: l\'acompte n\'a pas pu être créé car une facture d\'acompte existe déjà pour ce SAV. Veuillez utiliser le bouton "Ajouter un acompte"';
+        $up_errors = $this->update($warnings, true);
+
+        if (!count($up_errors)) {
+            // Création de la facture d'acompte: 
+            if ((float) $data['acompte'] > 0) {
+                if ((int) $this->getData('id_facture_acompte')) {
+                    $warnings[] = 'Attention: l\'acompte n\'a pas pu être créé car une facture d\'acompte existe déjà pour ce SAV. Veuillez utiliser le bouton "Ajouter un acompte"';
+                } else {
+                    $fac_errors = $this->createAccompte((float) $data['acompte'], false, (int) BimpTools::getArrayValueFromPath($data, 'mode_paiement_acompte', 6));
+                    if (count($fac_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($fac_errors, 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
                     } else {
-                        $fac_errors = $this->createAccompte((float) $data['acompte'], false, (int) BimpTools::getArrayValueFromPath($data, 'mode_paiement_acompte', 6));
-                        if (count($fac_errors)) {
-                            $warnings[] = BimpTools::getMsgFromArray($fac_errors, 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
-                        } else {
-                            $this->updateField('acompte', (float) $data['acompte']);
-                        }
+                        $this->updateField('acompte', (float) $data['acompte']);
                     }
                 }
-            } else {
-                $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour des champs depuis le formulaire');
             }
+        } else {
+            $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour du SAV');
+        }
+
+        if (!count($errors)) {
+            $this->addNote('Sav pris en charge par ' . $user->getFullName($langs), 4);
 
             // Création de la popale: 
             if ($this->getData("id_propal") < 1 && $this->getData("sav_pro") < 1) {
@@ -5735,6 +5741,12 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $url = $client->getUrl();
                     $msg = 'Le client sélectionné n\'est pas valide. Veuillez <a href="' . $url . '" target="_blank">Corriger</a>';
                     $errors[] = BimpTools::getMsgFromArray($client_errors, $msg);
+                } elseif ((int) $this->getData('status') >= 0 && $client->isCompany()) {
+                    $id_contact = (int) $this->getData('id_contact');
+
+                    if (!$id_contact) {
+                        $errors[] = 'Client pro: sélection d\'un contact client obligatoire';
+                    }
                 }
             }
 

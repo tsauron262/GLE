@@ -769,7 +769,7 @@ class BS_SAV extends BimpObject
 
             if ($this->canClientEdit() && $this->getData('resgsx') && $this->getData('status') == -1) {
 
-                $url = self::getPublicBaseUrl() .'?fc=savForm&cancel_rdv=1&sav=' . $this->id . '&r=' . $this->getRef() . '&res=' . $this->getData('resgsx');
+                $url = self::getPublicBaseUrl() . '?fc=savForm&cancel_rdv=1&sav=' . $this->id . '&r=' . $this->getRef() . '&res=' . $this->getData('resgsx');
                 $buttons[] = array(
                     'label'   => 'Annuler le RDV',
                     'icon'    => 'fas_times',
@@ -1787,7 +1787,7 @@ class BS_SAV extends BimpObject
                     $msg .= '<span class="btn btn-default btn-small" onclick="' . $this->getJsActionOnclick('createSignaturePC', array(), array(
                                 'form_name' => 'signature'
                             )) . '">';
-                    $msg .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Crééer';
+                    $msg .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Créer';
                     $msg .= '</span>';
                     $msg .= '</div>';
                 }
@@ -1850,7 +1850,7 @@ class BS_SAV extends BimpObject
                     $msg .= '<span class="btn btn-default btn-small" onclick="' . $this->getJsActionOnclick('createSignatureRestitution', array(), array(
                                 'form_name' => 'signature'
                             )) . '">';
-                    $msg .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Crééer';
+                    $msg .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Créer';
                     $msg .= '</span>';
                     $msg .= '</div>';
                 }
@@ -3235,13 +3235,13 @@ class BS_SAV extends BimpObject
 
         if ($this->isLoaded($errors)) {
             if (!in_array((int) $this->getData('status'), array(self::BS_SAV_DEVIS_ACCEPTE, self::BS_SAV_DEVIS_REFUSE, self::BS_SAV_REP_EN_COURS, self::BS_SAV_FERME))) {
-                $errors = $this->setNewStatus(self::BS_SAV_DEVIS_ACCEPTE);
+                $errors = $this->updateField('status', self::BS_SAV_DEVIS_ACCEPTE);
             }
 
             if (!count($errors)) {
                 global $user;
 
-                $this->addNote('Devis signé le "' . date('d / m / Y H:i')) . ' par ' . $bimpSignature->getData('nom_signataire');
+                $this->addNote('Devis signé le "' . date('d / m / Y H:i') . ' par ' . $bimpSignature->getData('nom_signataire'));
                 $propal = $this->getChildObject('propal');
                 $propal->dol_object->cloture($user, 2, "Auto via SAV");
                 $this->createReservations();
@@ -6325,6 +6325,17 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         }
 
         return array();
+    }
+
+    public function getSignatureCommercialEmail($doc_type)
+    {
+        $centre = $this->getCentreData();
+
+        if (isset($centre['mail'])) {
+            return $centre['mail'];
+        }
+
+        return '';
     }
 
     public function isSignatureCancellable()

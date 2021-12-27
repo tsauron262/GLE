@@ -1566,6 +1566,22 @@ class Bimp_Propal extends BimpComm
         return BimpTools::overrideArray(self::$default_signature_params, (array) $this->getData('signature_params'));
     }
 
+    public function getSignatureCommercialEmail($doc_type)
+    {
+        $sav = $this->getSav();
+        if (BimpObject::objectLoaded($sav)) {
+            return $sav->getSignatureCommercialEmail($doc_type);
+        }
+        
+        $client = $this->getChildObject('client');
+
+        if (BimpObject::objectLoaded($client)) {
+            return $client->getCommercialEmail(false);
+        }
+        
+        return '';
+    }
+    
     public function onSigned($bimpSignature, $data)
     {
         $errors = array();
@@ -1574,11 +1590,11 @@ class Bimp_Propal extends BimpComm
             $sav = $this->getSav();
 
             if (BimpObject::objectLoaded($sav)) {
-                $sav->onPropalSigned($bimpSignature);
+                $errors = $sav->onPropalSigned($bimpSignature);
             } else {
                 $this->updateField('fk_statut', Propal::STATUS_SIGNED);
             }
-        }
+        }        
 
         return $errors;
     }

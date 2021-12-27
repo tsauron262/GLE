@@ -1787,7 +1787,7 @@ class BS_SAV extends BimpObject
                     $msg .= '<span class="btn btn-default btn-small" onclick="' . $this->getJsActionOnclick('createSignaturePC', array(), array(
                                 'form_name' => 'signature'
                             )) . '">';
-                    $msg .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Crééer';
+                    $msg .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Créer';
                     $msg .= '</span>';
                     $msg .= '</div>';
                 }
@@ -1850,7 +1850,7 @@ class BS_SAV extends BimpObject
                     $msg .= '<span class="btn btn-default btn-small" onclick="' . $this->getJsActionOnclick('createSignatureRestitution', array(), array(
                                 'form_name' => 'signature'
                             )) . '">';
-                    $msg .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Crééer';
+                    $msg .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Créer';
                     $msg .= '</span>';
                     $msg .= '</div>';
                 }

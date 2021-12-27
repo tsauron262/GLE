@@ -15,6 +15,7 @@ header_btn:
 labels:
     name: API
     name_plur: APIs
+    is_female: 1
 
 nom_url: 
     syntaxe: <title>
@@ -35,8 +36,16 @@ objects:
             bimp_object: 
                 module: bimpapi
                 name: API_UserAccount
-            id_object: 
-                field_value: id_default_user_account
+                
+    default_user_account_test:
+        extends: default_user_account
+        id_object: 
+            field_value: id_default_user_account_test
+            
+    default_user_account_prod:
+        extends: default_user_account
+        id_object: 
+            field_value: id_default_user_account_prod
                 
     processes: 
         relation: none
@@ -60,11 +69,24 @@ fields:
         
     title: 
         label: Intitulé
-        
-    id_default_user_account: 
-        label: Compte utilisateur par défaut
+    
+    id_default_user_account_test: 
+        label: Compte utilisateur par défaut (Test)
         type: id_object
-        object: default_user_account
+        object: default_user_account_test
+        default_value: 0
+        input: 
+            type: select
+            options: 
+                callback: 
+                    method: getUsersAccountsArray
+                    params: 
+                        - 1
+                        
+    id_default_user_account_prod: 
+        label: Compte utilisateur par défaut (Prod)
+        type: id_object
+        object: default_user_account_prod
         default_value: 0
         input: 
             type: select
@@ -134,7 +156,8 @@ forms:
             - field: title
             - field: mode
             - field: active
-            - field: id_default_user_account
+            - field: id_default_user_account_test
+            - field: id_default_user_account_prod
             - field: processes
             - field: connect_timeout
             - field: exec_timeout
@@ -149,7 +172,8 @@ fields_tables:
         rows: 
             - field: name
             - field: title
-            - field: id_default_user_account
+            - field: id_default_user_account_test
+            - field: id_default_user_account_prod
             - field: processes
             
     options: 

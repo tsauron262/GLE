@@ -34,18 +34,15 @@ class API_Api extends BimpObject
     {
         $buttons = array();
 
-        if ((int) $this->getData('id_default_user_account')) {
-            $userAccount = $this->getChildObject('default_user_account');
-
-            if (BimpObject::objectLoaded($userAccount)) {
-                if ($userAccount->isActionAllowed('connect') && $userAccount->canSetAction('connect')) {
-                    $label = ($userAccount->isLogged() ? 'Réinitialiser la connexion du' : 'Connecter le') . ' compte par défaut';
-                    $buttons[] = array(
-                        'label'   => $label,
-                        'icon'    => 'fas_power-off',
-                        'onclick' => $userAccount->getJsActionOnclick('connect')
-                    );
-                }
+        $userAccount = $this->getDefaultUserAccount();
+        if (BimpObject::objectLoaded($userAccount)) {
+            if ($userAccount->isActionAllowed('connect') && $userAccount->canSetAction('connect')) {
+                $label = ($userAccount->isLogged() ? 'Réinitialiser la connexion du' : 'Connecter le') . ' compte par défaut';
+                $buttons[] = array(
+                    'label'   => $label,
+                    'icon'    => 'fas_power-off',
+                    'onclick' => $userAccount->getJsActionOnclick('connect')
+                );
             }
         }
 
@@ -95,19 +92,17 @@ class API_Api extends BimpObject
     {
         $apis = array();
 
-        $apis_classes = BimpAPI::getApisArray();
+        $apis_classes = BimpAPI::getApisClassesArray();
         $installed_apis = self::getApisArray(false, false);
-
-        foreach ($apis_classes as $api_name => $api_label) {
+        
+        foreach ($apis_classes as $api_name => $api_class_name) {
             if (array_key_exists($api_name, $installed_apis)) {
                 continue;
             }
 
-            $api = BimpApi::getApiInstance($api_name);
-
-            if (is_a($api, 'BimpAPI')) {
-                if (method_exists($api, 'install')) {
-                    $apis[$api_name] = $api_label;
+            if (class_exists($api_class_name)) {
+                if (method_exists($api_class_name, 'install')) {
+                    $apis[$api_name] = $api_class_name;
                 }
             }
         }
@@ -128,7 +123,7 @@ class API_Api extends BimpObject
 
             $rows = self::getBdb()->getRows('bimpapi_api', ($active_only ? 'active = 1' : '1'), null, 'array', array(
                 $key,
-                'libelle'
+                'title'
             ));
 
             if (is_array($rows)) {
@@ -204,13 +199,43 @@ class API_Api extends BimpObject
         return null;
     }
 
+    public function getDefaultUserAccountId($mode = null)
+    {
+        if (is_null($mode)) {
+            $mode = $this->getData('mode');
+        }
+
+        switch ($mode) {
+            case 'test':
+                return (int) $this->getData('id_default_user_account_test');
+
+            case 'prod':
+                return (int) $this->getData('id_default_user_account_prod');
+        }
+
+        return 0;
+    }
+
+    public function getDefaultUserAccount($mode = null)
+    {
+        $id_user_account = (int) $this->getDefaultUserAccountId($mode);
+
+        if ($id_user_account) {
+            return BimpCache::getBimpObjectInstance('bimpapi', 'API_UserAccount', $id_user_account);
+        }
+
+        return null;
+    }
+
     // Affichages: 
 
     public function displayDefaultUserAccountLogged()
     {
         $html = '';
-        if ($this->getData('id_default_user_account')) {
-            $userAccount = $this->getChildObject('default_user_account');
+
+        $id_default_user_account = (int) $this->getDefaultUserAccountId();
+        if ($id_default_user_account) {
+            $userAccount = $this->getDefaultUserAccount();
 
             if (BimpObject::objectLoaded($userAccount)) {
                 if ($userAccount->isLogged()) {
@@ -219,10 +244,10 @@ class API_Api extends BimpObject
                     $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Déconnecté</span>';
                 }
             } else {
-                $html .= '<span class="important">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Le compte #' . $this->getData('id_default_user_account') . ' n\'existe plus</span>';
+                $html .= '<span class="important">' . BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Le compte #' . $id_default_user_account . ' n\'existe plus</span>';
             }
         } else {
-            $html .= '<span class="warning">' . BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft') . 'Pas de compte par défaut</span>';
+            $html .= '<span class="warning">' . BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft') . 'Pas de compte par défaut dans le mode actuel</span>';
         }
 
         return $html;

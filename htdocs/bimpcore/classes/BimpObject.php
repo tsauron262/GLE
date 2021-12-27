@@ -7633,7 +7633,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             }
 
             $vowel_first = false;
-            if (preg_match('/^[aàâäeéèêëiîïoôöuùûüyŷÿ](.*)$/', $object_name)) {
+            if (preg_match('/^[aàâäeéèêëiîïoôöuùûüyŷÿ](.*)$/', strtolower($object_name))) {
                 $vowel_first = true;
             }
         } else {
@@ -7749,7 +7749,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             $object_name = $labels['name'];
 
             $vowel_first = false;
-            if (preg_match('/^[aàâäeéèêëiîïoôöuùûüyŷÿ](.*)$/', $object_name)) {
+            if (preg_match('/^[aàâäeéèêëiîïoôöuùûüyŷÿ](.*)$/', strtolower($object_name))) {
                 $vowel_first = true;
             }
 

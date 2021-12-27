@@ -159,7 +159,7 @@ abstract class BimpAPI
             }
 
             if (!BimpObject::objectLoaded($this->userAccount)) {
-                $id_default_user_account = (int) $this->apiObject->getData('id_default_user_account');
+                $id_default_user_account = (int) $this->apiObject->getDefaultUserAccountId($this->options['mode']);
 
                 if ($id_default_user_account) {
                     $userAccount = BimpCache::getBimpObjectInstance('bimpapi', 'API_UserAccount', $id_default_user_account);
@@ -621,6 +621,38 @@ abstract class BimpAPI
     {
         BimpObject::loadClass('bimpapi', 'API_Api');
         return API_Api::getApisArray($include_empty, $active_only, 'name');
+    }
+
+    public static function getApisClassesArray()
+    {
+        $apis = array();
+
+        $dir = DOL_DOCUMENT_ROOT . '/bimpapi/classes/apis';
+
+        if (is_dir($dir)) {
+            $files = scandir($dir);
+
+            foreach ($files as $f) {
+                if (in_array($f, array('.', '..'))) {
+                    continue;
+                }
+
+                if (preg_match('/^(.+)API\.php$/', $f, $matches)) {
+                    $api_name = strtolower($matches[1]);
+                    $class_name = $matches[1] . 'API';
+
+                    if (!class_exists($class_name)) {
+                        require_once $dir . '/' . $f;
+                    }
+
+                    if (class_exists($class_name)) {
+                        $apis[$api_name] = $class_name;
+                    }
+                }
+            }
+        }
+
+        return $apis;
     }
 
     public static function isApiActive($api_name, &$api = null)

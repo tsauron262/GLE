@@ -59,44 +59,50 @@ class GSX_Const
 //            'filesUpload'            => 'attachment/upload-access',
 //            'articleLookup'          => 'content/article/lookup',
 
-            'authenticate'           => 'api/authenticate/token',
+            'authenticate'             => 'api/authenticate/token',
             // Réparations: 
-            'productDetails'         => 'gsx/api/repair/product/details',
-            'componentIssue'         => 'gsx/api/repair/product/componentissue',
-            'repairSummary'          => 'gsx/api/repair/summary',
-            'repairDetails'          => 'gsx/api/repair/details',
-            'repairEligibility'      => 'gsx/api/repair/eligibility',
-            'repairCreate'           => 'gsx/api/repair/create',
-            'repairUpdate'           => 'gsx/api/repair/update',
-            'repairQuestions'        => 'gsx/api/repair/questions',
+            'productDetails'           => 'gsx/api/repair/product/details',
+            'componentIssue'           => 'gsx/api/repair/product/componentissue',
+            'repairSummary'            => 'gsx/api/repair/summary',
+            'repairDetails'            => 'gsx/api/repair/details',
+            'repairEligibility'        => 'gsx/api/repair/eligibility',
+            'repairCreate'             => 'gsx/api/repair/create',
+            'repairUpdate'             => 'gsx/api/repair/update',
+            'repairQuestions'          => 'gsx/api/repair/questions',
             // Diagnostiques: 
-            'diagnosticSuites'       => 'gsx/api/diagnostics/suites',
-            'diagnosticTest'         => 'gsx/api/diagnostics/initiate-test',
-            'diagnosticStatus'       => 'gsx/api/diagnostics/status',
-            'diagnosticsLookup'      => 'gsx/api/diagnostics/lookup',
+            'diagnosticSuites'         => 'gsx/api/diagnostics/suites',
+            'diagnosticTest'           => 'gsx/api/diagnostics/initiate-test',
+            'diagnosticStatus'         => 'gsx/api/diagnostics/status',
+            'diagnosticsLookup'        => 'gsx/api/diagnostics/lookup',
             // Retours: 
-            'returnsManage'          => 'gsx/api/returns/manage',
-            'returnsLookup'          => 'gsx/api/returns/lookup',
-            'returnsConfirmshipment' => 'gsx/api/returns/confirmshipment',
+            'returnsManage'            => 'gsx/api/returns/manage',
+            'returnsLookup'            => 'gsx/api/returns/lookup',
+            'returnsConfirmshipment'   => 'gsx/api/returns/confirmshipment',
+            // Réservations: 
+            'fetchReservationsSummary' => 'gsx/api/reservation/summary',
+            'fetchReservation'         => 'gsx/api/reservation/details',
+            'fetchAvailableSlots'      => 'gsx/api/reservation/fetch-available-slots',
+            'createReservation'        => 'gsx/api/reservation/create',
+            'updateReservation'        => 'gsx/api/reservation/update',
             // Autre: 
-            'partsSummary'           => 'gsx/api/parts/summary',
-            'filesUpload'            => 'gsx/api/attachment/upload-access',
-            'articleLookup'          => 'gsx/api/content/article/lookup',
-            'getFile'                => 'gsx/api/document-download',
+            'partsSummary'             => 'gsx/api/parts/summary',
+            'filesUpload'              => 'gsx/api/attachment/upload-access',
+            'articleLookup'            => 'gsx/api/content/article/lookup',
+            'getFile'                  => 'gsx/api/document-download',
         )
     );
     public static $getRequests = array(
-        'repairDetails', 'diagnosticSuites'
+        'repairDetails', 'diagnosticSuites', 'fetchReservation', 'fetchAvailableSlots'
     );
     public static $fileContentRequests = array(
         'getFile'
     );
     public static $certifs = array(
-        897316 => array(
+        897316  => array(
             'test' => array('testCertif.pem', '', 'test.key'),
             'prod' => array('AppleCare-Partner-0000897316.Prod.apple.com.chain.pem', '', 'prod.key')
         ),
-        579256 => array(
+        579256  => array(
             'test' => array('privatekey.nopass.pem', ''),
             'prod' => array('proditrb.pem', '')
         ),
@@ -122,6 +128,7 @@ class GSX_Const
         'sold_to'     => '897316',
         'ship_to'     => '897316'
     );
+//    public static $default_reservations_tech_id = 'G1DFE7494B';
     public static $importIdentifierTypes = array(
         'serial'   => 'Numéro de série',
         'repairId' => 'ID réparation'

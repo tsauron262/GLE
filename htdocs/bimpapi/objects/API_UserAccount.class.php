@@ -61,7 +61,7 @@ class API_UserAccount extends BimpObject
             $api = $this->getParentInstance();
 
             if (BimpObject::objectLoaded($api)) {
-                if ((int) $api->getData('id_default_user_account') === $this->id) {
+                if ((int) $api->getDefaultUserAccountId() === $this->id) {
                     return 1;
                 }
             }

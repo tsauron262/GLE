@@ -921,9 +921,9 @@ class Bimp_Societe extends BimpDolObject
         return null;
     }
 
-    public function getCommercialEmail()
+    public function getCommercialEmail($with_default = true)
     {
-        $comm = $this->getCommercial();
+        $comm = $this->getCommercial($with_default);
 
         if (BimpObject::objectLoaded($comm)) {
             return BimpTools::cleanEmailsStr($comm->getData('email'));

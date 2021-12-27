@@ -568,7 +568,7 @@ class Bimp_Propal extends BimpComm
                             $no_signature = true;
                             // Créer Signature: 
                             $buttons[] = array(
-                                'label'   => 'Créer signature',
+                                'label'   => 'Créer la fiche signature',
                                 'icon'    => 'fas_signature',
                                 'onclick' => $this->getJsActionOnclick('createSignature', array(), array(
                                     'form_name' => 'create_signature'
@@ -1283,12 +1283,13 @@ class Bimp_Propal extends BimpComm
         $errors = array();
         $warnings = array();
         $success = 'Signature créée avec succès';
-        $url = '';
+        $url = '';        
 
         $id_contact = (int) BimpTools::getArrayValueFromPath($data, 'id_contact_signature', 0);
         $email_content = BimpTools::getArrayValueFromPath($data, 'email_content', $this->getDefaultSignDistEmailContent());
+        $open_public_access = (int) BimpTools::getArrayValueFromPath($data, 'open_public_access', 1);
 
-        $errors = $this->createSignature(true, $id_contact, $email_content, $warnings);
+        $errors = $this->createSignature($open_public_access, $id_contact, $email_content, $warnings);
 
         if (!count($errors)) {
             $signature = $this->getChildObject('signature');

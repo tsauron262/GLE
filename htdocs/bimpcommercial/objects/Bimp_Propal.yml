@@ -479,6 +479,13 @@ forms:
               value: 
                   callback: getDefaultSignatureContact
             - custom: 1
+              label: Ouvrir l'accès à la signature électronique à distance
+              input_name: open_public_access
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 1
+            - custom: 1
               label: Contenu e-mail client pour la signature à distance
               input_name: email_content
               input: 
@@ -487,7 +494,7 @@ forms:
               value: 
                   callback: getDefaultSignDistEmailContent
               display_if: 
-                  field_name: create_signature
+                  field_name: open_public_access
                   show_values: 1
                   
     validate: 

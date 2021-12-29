@@ -49,22 +49,6 @@ class Bimp_Facture extends BimpComm
 
     // Gestion des droits: 
 
-    public function canClientView()
-    {
-        global $userClient;
-
-        if (BimpObject::objectLoaded($userClient)) {
-            if ($userClient->isLogged()) {
-                if ($this->isLoaded() && (int) $this->getData('fk_soc') !== (int) $userClient->getData('id_client')) {
-                    return 0;
-                }
-                return 1;
-            }
-        }
-
-        return 0;
-    }
-
     public function canCreate()
     {
         global $user;
@@ -3141,7 +3125,7 @@ class Bimp_Facture extends BimpComm
 
                 if ($discounts) {
                     $html .= '<div style="margin-top: 10px">';
-                    $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Ce client dispose de ' . BimpTools::displayMoneyValue($discounts) . ' d\'avoirs disponibles';
+                    $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Ce client dispose de ' . BimpTools::displayMoneyValue($discounts) . ' de crédits disponibles';
                     $html .= BimpRender::renderAlerts($msg, 'warning');
                     $html .= '</div>';
                 }

@@ -25,13 +25,13 @@ class Bimp_Client extends Bimp_Societe
 
     public function canClientEdit()
     {
-        global $userClient;
+//        global $userClient;
 
-        if (BimpObject::objectLoaded($userClient)) {
-            if ($userClient->isAdmin() && $this->id == (int) $userClient->getData('id_client')) {
-                return 1;
-            }
-        }
+//        if (BimpObject::objectLoaded($userClient)) {
+//            if ($userClient->isAdmin() && $this->id == (int) $userClient->getData('id_client')) {
+//                return 1;
+//            }
+//        }
 
         return 0;
     }
@@ -951,6 +951,14 @@ class Bimp_Client extends Bimp_Societe
             'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_events_list_tab .nav_tab_ajax_result\')', array('events'), array('button' => ''))
         );
 
+        // Altradius: 
+        $tabs[] = array(
+            'id'            => 'client_altradius_list_tab',
+            'title'         => BimpRender::renderIcon('fas_dollar-sign', 'iconLeft') . 'Altradius',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderNavtabView', '$(\'#client_altradius_list_tab .nav_tab_ajax_result\')', array('altradius'), array('button' => ''))
+        );
+
         $html = BimpRender::renderNavTabs($tabs, 'card_view');
         $html .= $this->renderNotesList();
 
@@ -1153,6 +1161,10 @@ class Bimp_Client extends Bimp_Societe
                 ));
                 $html .= $list->renderHtml();
                 break;
+            
+            case 'altradius': 
+                $view = new BC_View($this, 'altradius');
+                $html .= $view->renderHtml();
         }
 
         return $html;
@@ -2533,5 +2545,81 @@ class Bimp_Client extends Bimp_Societe
             return $total_unpaid;
 
         return 0;
+    }
+    
+    
+    
+    public function getAltradiusFileName($force = false, $show_ext = true){
+        $name = 'altradius';
+        $ext = '.pdf';
+        if($force || file_exists($this->getFilesDir().$name.$ext)){
+            if($show_ext)
+                return $name.$ext;
+            else
+                return $name;
+        }
+        return 0;
+    }
+    
+    public function displayAltradiusFile(){
+        $html = '';
+        $file = $this->getAltradiusFileName();
+        if(!is_null($file) && $file){
+            $html .= '<a target="__blanck" href="'.DOL_URL_ROOT.'/document.php?modulepart=societe&file='.$this->id.'/'.$file.'">Fichier</a>';
+        }
+        else{
+//            return BimpInput::renderInput('file_upload', 'altradius_file');
+            
+            $buttons = array();
+            
+            
+            // Demande encours altriadus
+            $note = BimpObject::getInstance("bimpcore", "BimpNote");
+            $buttons[] = array(
+                'label'   => 'Message Altradius',
+                'icon'    => 'far_paper-plane',
+                'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => 680, "content" => "Bonjour, merci de bien vouloir demander un encours à Altradius."), array('form_name' => 'rep'))
+            );
+            
+            $buttons[] = array(
+                'label'   => 'Ajouter fichier',
+                'icon'    => 'fas_comment-dollar',
+                'onclick' => $this->getJsLoadModalForm('altradius_file')
+
+            );
+            foreach ($buttons as $button) {
+                $html .= BimpRender::renderButton($button);
+            }
+        }
+        return $html;
+    }
+    
+    public function update(&$warnings = array(), $force_update = false) {
+        $name = 'file';
+        $success = 'Fichier uploadé';
+        $errors = array();
+        
+        if (file_exists($_FILES[$name]["tmp_name"])) {
+            if(stripos($_FILES[$name]['name'], '.pdf') > 0){
+                $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile');
+                $values = array();
+                $values['parent_module'] = 'bimpcore';
+                $values['parent_object_name'] = 'Bimp_Societe';
+                $values['id_parent'] = $this->id;
+                $values['file_name'] = $this->getAltradiusFileName(true, false);
+                $values['is_deletable'] = 0;
+
+                $file->validateArray($values);
+
+                $errors = $file->create();
+            }
+            else
+                $errors[] = 'Uniquement des fichier PDF';
+        }
+        if(count($errors))
+            return $errors;
+        
+        
+        return parent::update($warnings, $force_update);
     }
 }

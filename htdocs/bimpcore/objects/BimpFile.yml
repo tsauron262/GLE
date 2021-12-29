@@ -91,6 +91,12 @@ fields:
                 method: currentContext
                 params:
                     - default_value
+                    
+    is_deletable: 
+        label: Suppression autorisée
+        type: bool
+        default_value: 1
+                
 
 forms:
     upload: 
@@ -140,6 +146,9 @@ forms:
         rows:
             - field: file_name
             - field: description
+            - field: is_deletable
+              edit: 
+                  callback: isContextPrivate
             - field: visibility
               edit:
                   callback: currentContext

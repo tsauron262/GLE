@@ -14,29 +14,29 @@ class BimpPublicController extends BimpController
     {
         switch (BimpTools::getValue('back', '')) {
             case 'savForm':
-                $this->back_url = DOL_URL_ROOT . '/bimpinterfaceclient/client.php?fc=savForm';
-                
+                $this->back_url = BimpObject::getPublicBaseUrl() . '?fc=savForm';
+
                 if (BimpTools::isSubmit('resgsx')) {
                     $res_id = BimpTools::getValue('resgsx', '');
                     if ($res_id) {
                         $this->back_url .= '&resgsx=' . $res_id;
                     }
                 }
-                
+
                 if (BimpTools::isSubmit('resgsx')) {
                     $res_id = BimpTools::getValue('resgsx', '');
                     if ($res_id) {
                         $this->back_url .= '&resgsx=' . $res_id;
                     }
                 }
-                
+
                 if (BimpTools::isSubmit('centre_id')) {
                     $shipTo = BimpTools::getValue('centre_id', '');
                     if ($shipTo) {
                         $this->back_url .= '&centre_id=' . $shipTo;
                     }
                 }
-                
+
                 $this->back_label = 'Retour au formulaire RDV SAV';
                 break;
         }
@@ -135,7 +135,7 @@ class BimpPublicController extends BimpController
 
     public function getLogoutUrl()
     {
-        return DOL_URL_ROOT . '/bimpinterfaceclient/client.php?bic_logout=1';
+        return BimpObject::getPublicBaseUrl() . '?bic_logout=1';
     }
 
     // Affichage standards: 
@@ -278,7 +278,7 @@ class BimpPublicController extends BimpController
         $this->displayPublicForm('reinitPw', array(
             'main_title' => 'Réinitialisation de votre mot de passe',
             'sub_title'  => 'Le nouveau mot de passe sera envoyé à l\'adresse e-mail indiquée',
-            'back_url'   => DOL_URL_ROOT . '/bimpinterfaceclient/client.php',
+            'back_url'   => BimpObject::getPublicBaseUrl(),
             'back_label' => 'Retour'
                 ), $errors);
     }
@@ -289,7 +289,7 @@ class BimpPublicController extends BimpController
             'sub_title'      => ($required ? 'Le changement de votre mot de passe est requis' : 'Modifier votre mot de passe'),
             'submit_label'   => 'Changer mon mot de passe',
             'submit_enabled' => false,
-            'back_url'       => DOL_URL_ROOT . '/bimpinterfaceclient/client.php?' . ($required ? 'bic_logout=1' : 'tab=infos'),
+            'back_url'       => BimpObject::getPublicBaseUrl() . '?' . ($required ? 'bic_logout=1' : 'tab=infos'),
             'back_label'     => ($required ? 'Déconnexion' : 'Retour')
                 ), $errors);
     }
@@ -433,7 +433,7 @@ class BimpPublicController extends BimpController
         } else {
             $userClient = BimpCache::findBimpObjectInstance('bimpinterfaceclient', 'BIC_UserClient', array(
                         'email' => $email
-            ), true);
+                            ), true);
 
             if (!BimpObject::objectLoaded($userClient)) {
                 $errors[] = 'Il n\'y a aucun compte client enregistré pour cette adresse e-mail';
@@ -447,7 +447,7 @@ class BimpPublicController extends BimpController
                 if (!count($errors)) {
                     $this->displayPublicForm('reinitPw', array(
                         'success_msg' => 'Votre mot de passe a été réinitialisé avec succès.<br/>Veuillez consulter votre boîte mail pour l\'obtenir',
-                        'back_url'    => DOL_URL_ROOT . '/bimpinterfaceclient/client.php'
+                        'back_url'    => BimpObject::getPublicBaseUrl()
                     ));
                 }
             }
@@ -497,7 +497,7 @@ class BimpPublicController extends BimpController
                 if (!count($errors)) {
                     $this->displayPublicForm('changePw', array(
                         'success_msg' => 'La mise à jour de votre mot de passe a été effectuée avec succès',
-                        'back_url'    => DOL_URL_ROOT . '/bimpinterfaceclient/client.php',
+                        'back_url'    => BimpObject::getPublicBaseUrl(),
                         'back_label'  => 'Accédez à votre espace client'
                     ));
                 }

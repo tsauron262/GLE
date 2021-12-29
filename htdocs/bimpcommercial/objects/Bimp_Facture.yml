@@ -409,6 +409,8 @@ forms:
                     callback: isEditable
             libelle: 
                 field: libelle
+            expertise:
+                field: expertise
             datef: 
                 field: datef
                 show: 
@@ -666,6 +668,8 @@ fields_tables:
               value: 
                   callback: displayType
             - field: libelle
+              edit: 1
+            - field: expertise
               edit: 1
             - field: fk_statut
             - field: paye

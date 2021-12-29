@@ -1285,9 +1285,9 @@ class Bimp_CommandeFournLine extends FournObjectLine
         if ($qty > 0) {
             $remain_qty = (float) $this->getReceptionAvailableQty($id_reception);
 
-            if ($qty > $remain_qty) {
+            if (round($qty,2) > round($remain_qty,2)) {
                 $msg = 'Il ne reste que ' . $remain_qty . ' unité(s) à réceptionner pour cette ligne de commande fournisseur.<br/>';
-                $msg .= 'Veuillez retirer ' . ($qty - $remain_qty) . ' unité(s)';
+                $msg .= 'Veuillez retirer ' . round($qty - $remain_qty,2) . ' unité(s)';
                 $errors[] = $msg;
             }
         }

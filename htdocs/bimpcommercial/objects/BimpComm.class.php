@@ -41,6 +41,20 @@ class BimpComm extends BimpDolObject
         102 => ['label' => 'Comptabilisation suspendue', 'classes' => ['important'], 'icon' => 'refresh'],
         204 => ['label' => 'Non comptabilisable', 'classes' => ['warning'], 'icon' => 'times'],
     ];
+    public static $expertise = [
+        0 => "",
+        10 => "Arts graphiques",
+        20 => "Constructions",
+        30 => "Education et Administrations",
+        40 => "Infrastructure",
+        50 => "Marketing",
+        60 => "Mobilité",
+        70 => "Partner",
+        80 => "Santé",
+        90 => "SAV",
+        100 => "Autre"
+    ];
+    
     public static $zones_vente = array(
         self::BC_ZONE_FR      => 'France',
         self::BC_ZONE_UE      => 'Union Européenne',
@@ -98,6 +112,22 @@ class BimpComm extends BimpDolObject
         }
 
         return 1;
+    }
+
+    public function canClientView()
+    {
+        global $userClient;
+
+        if (BimpObject::objectLoaded($userClient)) {
+            if ($userClient->isLogged()) {
+                if ($this->isLoaded() && (int) $this->getData('fk_soc') !== (int) $userClient->getData('id_client')) {
+                    return 0;
+                }
+                return 1;
+            }
+        }
+
+        return 0;
     }
 
     // Getters booléens: 
@@ -529,15 +559,6 @@ class BimpComm extends BimpDolObject
     {
         $buttons = array();
 
-        // Edition historique: 
-        if ($this->canEditField('logs')) {
-            $buttons[] = array(
-                'label'   => 'Editer logs',
-                'icon'    => 'fas_history',
-                'onclick' => $this->getJsLoadModalForm('logs', 'Editer les logs')
-            );
-        }
-
         // Ajout acompte: 
         if ($this->isActionAllowed('addAcompte') && $this->canSetAction('addAcompte')) {
             $id_mode_paiement = 0;
@@ -600,6 +621,15 @@ class BimpComm extends BimpDolObject
                         ), array(
                     'form_name' => 'releverFacturation'
                 ))
+            );
+        }
+
+        // Edition historique: 
+        if ($this->canEditField('logs')) {
+            $buttons[] = array(
+                'label'   => 'Editer logs',
+                'icon'    => 'fas_history',
+                'onclick' => $this->getJsLoadModalForm('logs', 'Editer les logs')
             );
         }
 
@@ -2482,7 +2512,7 @@ class BimpComm extends BimpDolObject
                 $totalHt += $dol_lines[$id_dol_line]->total_ht;
             }
 
-            if($this->field_exists('total_ht'))
+            if ($this->field_exists('total_ht'))
                 $tot = $this->getData('total_ht');
             else
                 $tot = $this->getData('total');
@@ -3746,9 +3776,9 @@ class BimpComm extends BimpDolObject
             $i = 0;
             $position = (int) $this->db->getMax($line_instance->getTable(), 'position', 'id_obj = ' . (int) $this->id);
             $position += 1;
-            
+
             $this->startLineTransaction();
-            
+
             foreach ($rows as $r) {
                 $i++;
                 $data = explode(';', $r);
@@ -3790,7 +3820,7 @@ class BimpComm extends BimpDolObject
                     $warnings[] = 'Ligne n° ' . $i . ' : référence produit absente';
                 }
             }
-            
+
             $this->stopLineTransaction();
         } else {
             $errors[] = 'Fichier CSV absent';

@@ -54,40 +54,40 @@ class InvoiceSavPDF extends InvoicePDF
 
     public function renderSignature()
     {
-        if ($this->object->type === 3) {
-            return;
-        }
-
-        $html = '';
-        $html .= '<table style="width: 95%" cellpadding="3">';
-
-        $html .= '<tr>';
-        $html .= '<td>Matériel récupéré le:</td>';
-        $html .= '</tr>';
-
-        $html .= '<tr>';
-        $html .= '<td>Signature :</td>';
-        $html .= '</tr>';
-
-        $html .= '<tr>';
-        $html .= '<td style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/><br/></td>';
-        $html .= '</tr>';
-
-        $html .= '</table>';
-
-        $table = new BimpPDF_Table($this->pdf, false);
-        $table->cellpadding = 0;
-        $table->remove_empty_cols = false;
-        $table->addCol('left', '', 95);
-        $table->addCol('right', '', 95);
-
-        $table->rows[] = array(
-            'left'  => '',
-            'right' => $html
-        );
-
-        $this->writeContent('<br/><br/>');
-        $table->write();
+//        if ($this->object->type === 3) {
+//            return;
+//        }
+//
+//        $html = '';
+//        $html .= '<table style="width: 95%" cellpadding="3">';
+//
+//        $html .= '<tr>';
+//        $html .= '<td>Matériel récupéré le:</td>';
+//        $html .= '</tr>';
+//
+//        $html .= '<tr>';
+//        $html .= '<td>Signature :</td>';
+//        $html .= '</tr>';
+//
+//        $html .= '<tr>';
+//        $html .= '<td style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/><br/></td>';
+//        $html .= '</tr>';
+//
+//        $html .= '</table>';
+//
+//        $table = new BimpPDF_Table($this->pdf, false);
+//        $table->cellpadding = 0;
+//        $table->remove_empty_cols = false;
+//        $table->addCol('left', '', 95);
+//        $table->addCol('right', '', 95);
+//
+//        $table->rows[] = array(
+//            'left'  => '',
+//            'right' => $html
+//        );
+//
+//        $this->writeContent('<br/><br/>');
+//        $table->write();
     }
 
     public function renderSavConditions()

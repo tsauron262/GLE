@@ -813,29 +813,33 @@ class ValidComm extends BimpObject
             $errors[] = "Client insolvable";
             return $errors;
         }
-        
+                
         // Créer après le 1er mai 2021
         if('2021-05-1' < $client->getData('datec'))
             return $errors;
 
         // Avec retard de paiement
-//        if(isset($this->client_rtp))
-//            $rtp = $this->client_rtp;
-//        else
-//            $rtp = $client->getTotalUnpayedTolerance();
-//
-//        if($rtp != 0)
-//            return $errors;
+        if(isset($this->client_rtp))
+            $rtp = $this->client_rtp;
+        else
+            $rtp = $client->getTotalUnpayedTolerance();
+
+        if($rtp != 0)
+            return $errors;
         
         // Les 3 conditions sont satifaites, update limite
-//        $old_limit = $client->getdata('outstanding_limit');
         
+        if($client->field_exists('date_check_credit_safe')) {
+
+            if(strtotime('-30 days') < strtotime($client->getData('date_check_credit_safe')))
+                return $errors;
+        }
+
         // data Crédit Safe
         if($client->isSirenRequired()) {
             $client->useNoTransactionsDb();
             $errors = BimpTools::merge_array($errors, $client->majEncourscreditSafe(true));
             $client->useTransactionsDb();
-            
         }
 
         return $errors;

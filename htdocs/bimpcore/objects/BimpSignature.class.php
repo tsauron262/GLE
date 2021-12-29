@@ -105,6 +105,11 @@ class BimpSignature extends BimpObject
 
             return 0;
         }
+        
+        if (in_array($field_name, array('allow_elec', 'allow_dist', 'allow_no_scan'))) {
+            global $user;
+            return (int) $user->admin;
+        }
 
         return parent::canEditField($field_name);
     }
@@ -167,6 +172,13 @@ class BimpSignature extends BimpObject
                 }
 
                 switch ($action) {
+                    case 'signPapierNoScan':
+                        if (!(int) $this->getData('allow_no_scan')) {
+                            $errors[] = 'Scan du document signé obligatoire pour cette signature';
+                            return 0;
+                        }
+                        break;
+                        
                     case 'signDistAccess':
                     case 'signDist':
                     case 'sendSmsCode':
@@ -174,12 +186,14 @@ class BimpSignature extends BimpObject
                             $errors[] = 'Signature à distance non autorisée pour cette signature';
                             return 0;
                         }
+                        break;
 
                     case 'signElec':
                         if (!(int) $this->getData('allow_elec')) {
                             $errors[] = 'Signature éléctronique non autorisée pour cette signature';
                             return 0;
                         }
+                        break;
                 }
                 return 1;
 

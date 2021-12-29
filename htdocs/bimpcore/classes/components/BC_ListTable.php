@@ -1155,7 +1155,7 @@ class BC_ListTable extends BC_List
         $html .= $this->renderListParamsInputs();
 
         if (!is_null($this->params['filters_panel'])) {
-            $html .= '<div class="row">';
+            $html .= '<div class="row" style="margin-top: 0">';
             $html .= '<div class="listFiltersPanelContainer col-xs-12 col-sm-12 col-md-3 col-lg-2"' . (!(int) $this->params['filters_panel_open'] ? ' style="display: none"' : '') . '>';
             $html .= $this->renderFiltersPanel();
             $html .= '</div>';
@@ -2099,7 +2099,6 @@ class BC_ListTable extends BC_List
     {
         $html = '';
 
-        $is_public = BimpCore::isContextPublic();
         $this->setConfPath();
 
         if (!$this->isOk() || !count($this->cols)) {
@@ -2290,7 +2289,6 @@ class BC_ListTable extends BC_List
 
                     $i = 1;
                     foreach ($rowButtons as $btn_params) {
-//                    echo $i . '(' . count($rowButtons) . '): ' . $btn_params['label'] . ': ' . strlen($btn_params['label']) . '<br/>';
                         $position = ($i === count($rowButtons) || ($i === (count($rowButtons) - 1) && strlen($btn_params['label']) > 18) || strlen($btn_params['label']) > 28 ? 'left' : 'top');
                         $html .= $this->renderRowButton($btn_params, $position);
                         $i++;

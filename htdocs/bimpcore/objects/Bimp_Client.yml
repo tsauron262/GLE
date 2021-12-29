@@ -63,17 +63,28 @@ fields_tables:
             - field: idprof4
               label: RCS
               
-    altradius:
+    atradius:
         panel: 1
         rows: 
+            - field: notecreditsafe
+            - custom: 1 
+              label: Lettre Crédit Safe  
+              value:
+                  callback: getCreditSafeLettre
+            - field: outstanding_limit_credit_safe
+              edit: 1
+            - field: outstanding_limit_icba
+              edit: 1
             - field: outstanding_limit_atradius
               edit: 1
-            - label: Fichier Altradius
+            - field: outstanding_limit
+              edit: 1
+            - label: PDF Rapport Assurance crédit
               input_name: send_emails
               input: 
                   type: file_upload
               value:
-                callback: displayAltradiusFile
+                callback: displayAtradiusFile
 
 views: 
     client:
@@ -105,15 +116,15 @@ views:
                       name: public
                       children: contacts
                       
-    altradius:
-        title: Altradius
+    atradius:
+        title: Assurance crédit
         rows: 
             - cols: 
                 - type: fields_table
                   col_lg: 6
                   col_md: 6
                   fields_table: 
-                      name: altradius 
+                      name: atradius 
                       
 forms:
     light: 
@@ -306,15 +317,15 @@ forms:
             - field: phone
             - field: fax
             - field: skype
-    altradius_file:
+    atradius_file:
         rows:
             - custom: 1
-              label: Fichier Altradius
+              label: PDF Rapport Assurance crédit
               input_name: file
               input: 
                   type: file_upload
 #              value:
-#                callback: displayAltradiusFile
+#                callback: displayAtradiusFile
         
 filters: 
     nb_notes_suivi: 

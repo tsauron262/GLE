@@ -1,0 +1,59 @@
+
+table: bimpapi_api_param
+common_fields: 0
+
+parent_object: API_Api
+parent_id_property: id_api
+
+labels:
+    name: Paramètre API
+    name_plur: Paramètres API
+    
+fields: 
+    id_api: 
+        label: API
+        type: id_parent
+        required: 1
+        
+    name: 
+        label: Nom système
+        required: 1
+        
+    title: 
+        label: Intitulé
+        required: 1
+        
+    value: 
+        label: Valeur
+        
+#    crypted: 
+#        label: Crypté
+#        type: bool
+#        default_value: 0
+        
+lists: 
+    default: 
+        title: Paramètres
+        icon: fas_cog
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les paramètres sélectionnés
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        enable_search: 1
+        pagination: 0
+        sort_field: id
+        sort_way: asc
+        n: 0
+        add_object_row: 1
+        delete_btn: 1
+        cols: 
+            name: 
+                edit: 1
+            title: 
+                edit: 1
+            value: 
+                edit: 1
+#            crypted:
+#                edit: 1
+    

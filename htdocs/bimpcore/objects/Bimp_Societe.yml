@@ -455,6 +455,13 @@ fields:
         type: money
         history: 1
         default_value: -1
+     
+    outstanding_limit_icba:
+        label: Limite de crédit ICBA 
+        type: money
+        history: 1
+        default_value: -1
+    
         
     fk_account: 
         label: Compte bancaire
@@ -735,7 +742,7 @@ fields_tables:
               show: 
                   callback: isClient
             - field: outstanding_limit_credit_safe
-              edit: 0
+              edit: 1
             - label: Lettre Credit SAFE
               value:
                   callback: getCreditSafeLettre
@@ -1125,6 +1132,7 @@ forms:
 filters: 
     accounting_account:
         label: Compte comptable filliale
+        
     accounting_account_fournisseur:
         label: Compte comptable filliale
                 

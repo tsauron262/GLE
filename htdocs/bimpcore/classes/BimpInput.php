@@ -904,6 +904,8 @@ class BimpInput
 
     public static function renderDatePickerInput($input_name, $value = '', $options = array(), $input_id = null, $type = "datetime")
     {
+        $html = '';
+        
         if (is_null($input_id)) {
             $input_id = $input_name;
         }
@@ -911,11 +913,12 @@ class BimpInput
         $input_id .= '_' . rand(111111, 999999);
         if (is_null($value)) {
             $value = '';
-        } elseif (preg_match('/^([0-9]{4})\-([0-9][0-9])\-([0-9][0-9]).*$/', $value, $matches)) {
-            if (!(int) $matches[1] || !(int) $matches[2] || !(int) $matches[3]) {
-                $value = '';
-            }
         }
+//        elseif (preg_match('/^([0-9]{4})\-([0-9][0-9])\-([0-9][0-9]).*$/', $value, $matches)) {
+//            if (!(int) $matches[1] || !(int) $matches[2] || !(int) $matches[3]) {
+//                $value = '';
+//            }
+//        }
 
         $extra_class = isset($options['extra_class']) ? $options['extra_class'] : '';
 
@@ -963,7 +966,7 @@ class BimpInput
 
                 $php_format = 'Y-m-d H:i:s';
                 if ($value) {
-                    if (preg_match('/^(\d{4})\-(\d{2})\-(\d{2}) (\d{2}):(\d{2}):(\d{2})?$/', $value)) {
+                    if (preg_match('/^(\d{4})\-(\d{2})\-(\d{2})( (\d{2}):(\d{2}):(\d{2})?)?$/', $value)) {
                         $dt_value = new DateTime($value);
                     }
                 }
@@ -974,8 +977,6 @@ class BimpInput
             $value = date($php_format);
             $dt_value = new DateTime($value);
         }
-
-        $html = '';
 
         $html .= '<input type="hidden" class="datepicker_value' . ($extra_class ? ' ' . $extra_class : '') . '" id="' . $input_id . '" name="' . $input_name . '" value="';
         if (!is_null($dt_value)) {

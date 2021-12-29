@@ -97,6 +97,7 @@ class BC_Field extends BimpComponent
         'string', 'text', 'password', 'html', 'id', 'id_object', 'id_parent', 'time', 'date', 'datetime', 'color'
     );
     public static $has_total_types = array('qty', 'money', 'timer');
+    public static $not_searchable_types = array('object_filters');
 
     public function __construct(BimpObject $object, $name, $edit = false, $path = 'fields', $force_edit = false)
     {
@@ -161,6 +162,8 @@ class BC_Field extends BimpComponent
         $current_bc = $prev_bc;
     }
 
+    // Getters booléens: 
+    
     public function isEditable()
     {
         if (!$this->isObjectValid()) {
@@ -173,6 +176,31 @@ class BC_Field extends BimpComponent
     public function isUsed()
     {
         return (!(int) $this->params['unused']);
+    }
+
+    public function isSearchable()
+    {
+        if (!$this->params['searchable']) {
+            return 0;
+        }
+
+        $type = $this->getParam('type', 'string');
+
+        if (in_array($type, self::$not_searchable_types)) {
+            return 0;
+        }
+
+        if ($type === 'items_list') {
+            if (!(int) $this->getParam('items_braces', 0)) {
+                return 0;
+            }
+
+            if (in_array($this->getParam('items_data_type'), self::$not_searchable_types)) {
+                return 0;
+            }
+        }
+
+        return 1;
     }
 
     // Rendus HTML principaux: 
@@ -862,7 +890,7 @@ class BC_Field extends BimpComponent
             return '';
         }
 
-        if (!$this->params['searchable']) {
+        if (!$this->isSearchable()) {
             return '';
         }
 

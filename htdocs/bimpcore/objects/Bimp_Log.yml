@@ -288,3 +288,10 @@ lists:
             send_to: 
             processed:
             nb_occurence:
+
+    object: 
+        extends: default
+        before_list_callback: unset
+        cols: 
+            obj: unset
+        

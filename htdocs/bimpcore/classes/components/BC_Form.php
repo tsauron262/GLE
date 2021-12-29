@@ -126,7 +126,7 @@ class BC_Form extends BC_Panel
         if (!$this->params['icon']) {
             $this->params['icon'] = 'fas_edit';
         }
-
+        
         if (isset($this->params['values']) && !is_null($this->params['values'])) {
             if (isset($this->params['values']['fields'])) {
                 foreach ($this->params['values']['fields'] as $field_name => $value) {
@@ -762,10 +762,12 @@ class BC_Form extends BC_Panel
         $html = '';
 
         if (($params['data_type'] === 'id_object' || (($params['data_type'] === 'items_list') && isset($params['items_data_type']) && $params['items_data_type'] === 'id_object')) && $params['object']) {
-            if ($params['create_form'])
+            if ($params['create_form']) {
                 $html .= self::renderLoadFormObjectButton($this->object, $this->identifier, $params['object'], $this->fields_prefix . $params['input_name'], $params['create_form'], $params['create_form_values'], $params['create_form_label']);
-            if ($params['edit_form'])
+            }
+            if ($params['edit_form']) {
                 $html .= self::renderLoadFormObjectButton($this->object, $this->identifier, $params['object'], $this->fields_prefix . $params['input_name'], $params['edit_form'], $params['edit_form_values'], $params['edit_form_label'], true, null, '', -1);
+            }
         }
 
         if ($this->object->config->isDefined($row_path . '/input')) {

@@ -1260,7 +1260,7 @@ class BimpSignature extends BimpObject
 
         $cur_users = $this->getData('allowed_users_client');
 
-        if (empty($new_users)) {
+        if (empty($new_users) && $auto_open) {
             $new_users = $this->getDefaultAllowedUsersClient();
         }
 

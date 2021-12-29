@@ -140,8 +140,8 @@ class PisteAPI extends BimpAPI
             $client_id = BimpTools::getArrayValueFromPath($this->params, 'test_oauth_client_id', '');
             $client_secret = BimpTools::getArrayValueFromPath($this->params, 'test_oauth_client_secret', '');
         } else {
-            $client_id = BimpTools::getArrayValueFromPath($this->params, '', '');
-            $client_secret = BimpTools::getArrayValueFromPath($this->params, '', '');
+            $client_id = BimpTools::getArrayValueFromPath($this->params, 'prod_oauth_client_id', '');
+            $client_secret = BimpTools::getArrayValueFromPath($this->params, 'prod_oauth_client_secret', '');
         }
 
         if (!$client_id) {
@@ -272,11 +272,11 @@ class PisteAPI extends BimpAPI
                         $errors[] = 'La facture #' . $id_facture . ' n\'existe plus';
                     } elseif ($facture->isActionAllowed('confirmChorusExport', $errors)) {
                         $client = $facture->getChildObject('client');
-                        
+
                         if (!BimpObject::objectLoaded($client)) {
                             $errors[] = 'Client absent';
                         }
-                        
+
                         $id_fournisseur = 0;
 
                         if ($this->options['mode'] === 'test') {
@@ -332,7 +332,7 @@ class PisteAPI extends BimpAPI
                             if ($code_service == 'not_required') {
                                 $code_service = '';
                             }
-                            
+
                             $fields = array(
                                 'numeroFactureSaisi'    => $num_facture,
                                 'dateFacture'           => $facture->getData('datef'),
@@ -429,6 +429,36 @@ class PisteAPI extends BimpAPI
             if (BimpObject::objectLoaded($api)) {
                 $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
                             'id_api' => $api->id,
+                            'name'   => 'prod_oauth_client_id',
+                            'title'  => 'ID Client OAuth en mode production'
+                                ), true, $warnings, $warnings);
+
+                $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+                            'id_api' => $api->id,
+                            'name'   => 'prod_oauth_client_secret',
+                            'title'  => 'Secret client OAuth en mode production'
+                                ), true, $warnings, $warnings);
+
+                $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+                            'id_api' => $api->id,
+                            'name'   => 'prod_api_key',
+                            'title'  => 'Clé API en mode production'
+                                ), true, $warnings, $warnings);
+
+                $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+                            'id_api' => $api->id,
+                            'name'   => 'prod_api_secret',
+                            'title'  => 'Secret API en mode production'
+                                ), true, $warnings, $warnings);
+
+                $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+                            'id_api' => $api->id,
+                            'name'   => 'prod_id_fournisseur',
+                            'title'  => 'Identifiant fournisseur en mode production'
+                                ), true, $warnings, $warnings);
+
+                $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+                            'id_api' => $api->id,
                             'name'   => 'test_oauth_client_id',
                             'title'  => 'ID Client OAuth en mode test'
                                 ), true, $warnings, $warnings);
@@ -455,12 +485,6 @@ class PisteAPI extends BimpAPI
                             'id_api' => $api->id,
                             'name'   => 'test_id_fournisseur',
                             'title'  => 'Identifiant fournisseur en mode test'
-                                ), true, $warnings, $warnings);
-
-                $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
-                            'id_api' => $api->id,
-                            'name'   => 'prod_id_fournisseur',
-                            'title'  => 'Identifiant fournisseur en mode production'
                                 ), true, $warnings, $warnings);
             }
         }

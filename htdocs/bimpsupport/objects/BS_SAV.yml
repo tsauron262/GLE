@@ -250,6 +250,8 @@ fields:
         object: contact
         values: 
             array: client_contacts
+        input: 
+            help: Obligatoire si client pro
         depends_on: id_client
         display_if:
             field_name: id_client

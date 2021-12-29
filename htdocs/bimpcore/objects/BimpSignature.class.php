@@ -480,6 +480,12 @@ class BimpSignature extends BimpObject
             return $contact->getName();
         }
 
+        $client = $this->getChildObject('client');
+        
+        if (BimpObject::objectLoaded($client)) {
+            return $client->getName();
+        }
+        
         return '';
     }
 
@@ -503,6 +509,12 @@ class BimpSignature extends BimpObject
 
         if (BimpObject::objectLoaded($contact)) {
             return $contact->getData('email');
+        }
+        
+        $client = $this->getChildObject('client');
+        
+        if (BimpObject::objectLoaded($client)) {
+            return $client->getData('email');
         }
 
         return '';
@@ -1248,7 +1260,7 @@ class BimpSignature extends BimpObject
 
         $cur_users = $this->getData('allowed_users_client');
 
-        if (empty($new_users)) {
+        if (empty($new_users) && $auto_open) {
             $new_users = $this->getDefaultAllowedUsersClient();
         }
 

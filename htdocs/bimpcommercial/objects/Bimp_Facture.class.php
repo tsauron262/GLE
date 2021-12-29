@@ -3125,7 +3125,7 @@ class Bimp_Facture extends BimpComm
 
                 if ($discounts) {
                     $html .= '<div style="margin-top: 10px">';
-                    $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Ce client dispose de ' . BimpTools::displayMoneyValue($discounts) . ' d\'avoirs disponibles';
+                    $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Ce client dispose de ' . BimpTools::displayMoneyValue($discounts) . ' de crédits disponibles';
                     $html .= BimpRender::renderAlerts($msg, 'warning');
                     $html .= '</div>';
                 }

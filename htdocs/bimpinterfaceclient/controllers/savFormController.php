@@ -1160,7 +1160,14 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
             $timeZone = 'Europe/Paris';
 
             if (isset($centres[$code_centre])) {
-                $result = GSX_Reservation::fetchAvailableSlots(897316, $centres[$code_centre]['shipTo'], $code_product, $errors);
+                $request_errors = array();
+                $result = GSX_Reservation::fetchAvailableSlots(897316, $centres[$code_centre]['shipTo'], $code_product, $request_errors);
+
+                if (count($request_errors)) {
+                    BimpCore::addlog('Echec requête GSX "fetch available slots" depuis le formulaire sav public', Bimp_Log::BIMP_LOG_ERREUR, 'gsx', null, array(
+                        'Erreurs' => $request_errors
+                    ));
+                }
 
                 if (isset($result['response']['slots'])) {
                     $slots = $result['response']['slots'];
@@ -2191,17 +2198,6 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                         // Maj SAV: 
                         $sav->updateField('status', -2);
                         $sav->addNote('Annulé par le client le ' . date('d / m / Y à H:i'), 4);
-
-                        // Màj action comm: 
-//                        if ($reservation_id) {
-//                            $id_ac = (int) BimpCache::getBdb()->getValue('actioncomm_extrafields', 'fk_object', 'resgsx = \'' . $reservation_id . '\'');
-//                            
-//                            if ($id_ac) {
-////                                /Users/flo/Documents/NetBeansProjects/BIMP_ERP/FLODEV_1/BIMP_ERP_FLODEV_1/htdocs/comm/action/class/actioncomm.class.php
-//                                global $db;
-//                                $ac = new ActionComm($db);
-//                            }
-//                        }
                     }
                 }
             }

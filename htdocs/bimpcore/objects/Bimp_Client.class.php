@@ -954,7 +954,7 @@ class Bimp_Client extends Bimp_Societe
         // Atradius: 
         $tabs[] = array(
             'id'            => 'client_atradius_list_tab',
-            'title'         => BimpRender::renderIcon('fas_dollar-sign', 'iconLeft') . 'Atradius',
+            'title'         => BimpRender::renderIcon('fas_dollar-sign', 'iconLeft') . 'Assurance crédit',
             'ajax'          => 1,
             'ajax_callback' => $this->getJsLoadCustomContent('renderNavtabView', '$(\'#client_atradius_list_tab .nav_tab_ajax_result\')', array('atradius'), array('button' => ''))
         );
@@ -2575,20 +2575,22 @@ class Bimp_Client extends Bimp_Societe
             
             // Demande encours altriadus
             $note = BimpObject::getInstance("bimpcore", "BimpNote");
-            $buttons[] = array(
-                'label'   => 'Message Atradius',
-                'icon'    => 'far_paper-plane',
-                'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => 680, "content" => "Bonjour, merci de bien vouloir demander un encours à Atradius."), array('form_name' => 'rep'))
-            );
             
             $buttons[] = array(
-                'label'   => 'Ajouter fichier',
+                'label'   => 'Ajouter PDF du Rapport Assurance crédit',
                 'icon'    => 'fas_comment-dollar',
                 'onclick' => $this->getJsLoadModalForm('atradius_file')
 
             );
+            
+            global $user, $langs;
+            $buttons[] = array(
+                'label'   => 'Demander encours',
+                'icon'    => 'far_paper-plane',
+                'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => 680, "content" => "Bonjour, ".$user->getFullName($langs)." sollicite pour le client N°CLIENT - NOM CLIENT un encours de XX XXX  €"), array('form_name' => 'rep'))
+            );
             foreach ($buttons as $button) {
-                $html .= BimpRender::renderButton($button);
+                $html .= BimpRender::renderButton($button).'<br/>';
             }
         }
         return $html;

@@ -66,9 +66,20 @@ fields_tables:
     atradius:
         panel: 1
         rows: 
+            - field: notecreditsafe
+            - custom: 1 
+              label: Lettre Crédit Safe  
+              value:
+                  callback: getCreditSafeLettre
+            - field: outstanding_limit_credit_safe
+              edit: 1
+            - field: outstanding_limit_icba
+              edit: 1
             - field: outstanding_limit_atradius
               edit: 1
-            - label: Fichier Atradius
+            - field: outstanding_limit
+              edit: 1
+            - label: PDF Rapport Assurance crédit
               input_name: send_emails
               input: 
                   type: file_upload
@@ -106,7 +117,7 @@ views:
                       children: contacts
                       
     atradius:
-        title: Atradius
+        title: Assurance crédit
         rows: 
             - cols: 
                 - type: fields_table
@@ -309,7 +320,7 @@ forms:
     atradius_file:
         rows:
             - custom: 1
-              label: Fichier Atradius
+              label: PDF Rapport Assurance crédit
               input_name: file
               input: 
                   type: file_upload

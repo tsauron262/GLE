@@ -2715,6 +2715,14 @@ class Bimp_Societe extends BimpDolObject
         $init_solv = (int) $this->getInitData('solvabilite_status');
         $init_status = (int) $this->getInitData('status');
         $init_outstanding_limit = $this->getInitData('outstanding_limit');
+        
+        $limit = -1;
+        if($this->getData('outstanding_limit_atradius') > 0)
+            $limit = $this->getData('outstanding_limit_atradius');
+        elseif($this->getData('outstanding_limit_icba') > 0)
+            $limit = $this->getData('outstanding_limit_icba');
+        if($limit > 0 && $limit != $this->getInitData('outstanding_limit'))
+            $this->updateField('outstanding_limit', $limit);
 
         if ($this->getInitData('fk_typent') != $this->getData('fk_typent') && !$this->canEditField('status')) {
 //            if (stripos($this->getData('code_compta'), 'P') === 0 && $this->getData('fk_typent') != 8)

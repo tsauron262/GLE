@@ -4,7 +4,7 @@ class GSX_Const
 {
 
     // Toutes les données en dur pour GSX V2 sont à mettre ici: 
-    public static $mode = 'prod'; // test ou prod
+    public static $mode = 'test'; // test ou prod
     public static $debug_mode = false;
     public static $log_errors = true;
     public static $log_requests = false;
@@ -92,11 +92,11 @@ class GSX_Const
         'getFile'
     );
     public static $certifs = array(
-        897316 => array(
+        897316  => array(
             'test' => array('testCertif.pem', '', 'test.key'),
             'prod' => array('AppleCare-Partner-0000897316.Prod.apple.com.chain.pem', '', 'prod.key')
         ),
-        579256 => array(
+        579256  => array(
             'test' => array('privatekey.nopass.pem', ''),
             'prod' => array('proditrb.pem', '')
         ),
@@ -151,7 +151,8 @@ class GSX_Const
         ''    => '',
         'NTF' => 'No Trouble Found',
         'SRC' => 'Screening',
-        'LUA' => 'Loaner Unavailable'
+        'LUA' => 'Loaner Unavailable',
+        'CUA' => 'Customer Unavailable'
     );
     public static $repair_classifications = array(
         'SINGLE'                    => 'Simple - le client demande une seule réparation',
@@ -167,12 +168,14 @@ class GSX_Const
 //        'REVIEW_RESULT'         => 'Notes indicating results for review hold'
     );
     public static $consumer_law = array(
-        ''        => '',
-        'RFD'     => 'Refund',
-        'RPL'     => 'Replace',
-        'SVC'     => 'Service',
-        'OPT_IN'  => 'Customer has opted in for Consumer Law coverage',
-        'OPT_OUT' => 'Customer has opted out of Consumer Law coverage'
+        ''                  => '',
+        'RFD'               => 'Refund',
+        'RPL'               => 'Replace',
+        'SVC'               => 'Service',
+        'OPT_IN'            => 'Customer has opted in for Consumer Law coverage',
+        'OPT_OUT'           => 'Customer has opted out of Consumer Law coverage',
+        'OPT_IN_FOR_REVIEW' => 'Opt in for Review',
+        'OPT_OUT_OF_REVIEW' => 'Opt out of Review'
     );
     public static $reproducibilities = array(
         'A' => 'Non Applicable',

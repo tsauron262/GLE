@@ -2282,7 +2282,7 @@ class Bimp_Societe extends BimpDolObject
 
         if ($this->isLoaded()) {
             $status = (int) $this->getData('solvabilite_status');
-            BimpObject::createBimpObject('bimpcore', 'Bimp_Client_Suivi_Recouvrement', array('id_societe' => $this->id, 'mode' => 4, 'sens' => 2, 'content' => 'Changement ' . ($mode == 'auto' ? 'auto' : 'manuel') . ' statut solvabilitée : ' . self::$solvabilites[$status]['label']));
+            BimpObject::createBimpObject('bimpcore', 'Bimp_Client_Suivi_Recouvrement', array('id_societe' => $this->id, 'mode' => 4, 'sens' => 2, 'content' => 'Changement ' . ($mode == 'auto' ? 'auto' : 'manuel') . ' statut solvabilité : ' . self::$solvabilites[$status]['label']));
 
             $emails = BimpCore::getConf('emails_notify_solvabilite_client_change_' . $mode, '');
 

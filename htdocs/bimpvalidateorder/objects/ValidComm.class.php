@@ -836,11 +836,11 @@ class ValidComm extends BimpObject
         }
 
         // data Crédit Safe
-        if($client->isSirenRequired()) {
-            $client->useNoTransactionsDb();
-            $errors = BimpTools::merge_array($errors, $client->majEncourscreditSafe(true));
-            $client->useTransactionsDb();
-        }
+//        if($client->isSirenRequired()) {
+//            $client->useNoTransactionsDb();
+//            $errors = BimpTools::merge_array($errors, $client->majEncourscreditSafe(true));
+//            $client->useTransactionsDb();
+//        }
 
         return $errors;
     }

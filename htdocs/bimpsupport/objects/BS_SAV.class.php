@@ -5926,7 +5926,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
         $centre = $this->getCentreData();
 
-        if ($this->getData("id_facture_acompte") > 0 && (int) $this->getData('id_contact') !== (int) $this->getInitData('id_contact')) {
+        if ($this->getData("id_facture_acompte") > 0 && (int) $this->getData('id_client') !== (int) $this->getInitData('id_client')) {
             $errors[] = 'Facture d\'acompte, impossible de changer de client';
             return $errors;
         }

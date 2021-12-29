@@ -2282,7 +2282,7 @@ class Bimp_Societe extends BimpDolObject
 
         if ($this->isLoaded()) {
             $status = (int) $this->getData('solvabilite_status');
-            BimpObject::createBimpObject('bimpcore', 'Bimp_Client_Suivi_Recouvrement', array('id_societe' => $this->id, 'mode' => 4, 'sens' => 2, 'content' => 'Changement ' . ($mode == 'auto' ? 'auto' : 'manuel') . ' statut solvabilitée : ' . self::$solvabilites[$status]['label']));
+            BimpObject::createBimpObject('bimpcore', 'Bimp_Client_Suivi_Recouvrement', array('id_societe' => $this->id, 'mode' => 4, 'sens' => 2, 'content' => 'Changement ' . ($mode == 'auto' ? 'auto' : 'manuel') . ' statut solvabilité : ' . self::$solvabilites[$status]['label']));
 
             $emails = BimpCore::getConf('emails_notify_solvabilite_client_change_' . $mode, '');
 
@@ -2715,6 +2715,14 @@ class Bimp_Societe extends BimpDolObject
         $init_solv = (int) $this->getInitData('solvabilite_status');
         $init_status = (int) $this->getInitData('status');
         $init_outstanding_limit = $this->getInitData('outstanding_limit');
+        
+        $limit = -1;
+        if($this->getData('outstanding_limit_atradius') > 0)
+            $limit = $this->getData('outstanding_limit_atradius');
+        elseif($this->getData('outstanding_limit_icba') > 0)
+            $limit = $this->getData('outstanding_limit_icba');
+        if($limit > 0 && $limit != $this->getInitData('outstanding_limit'))
+            $this->updateField('outstanding_limit', $limit);
 
         if ($this->getInitData('fk_typent') != $this->getData('fk_typent') && !$this->canEditField('status')) {
 //            if (stripos($this->getData('code_compta'), 'P') === 0 && $this->getData('fk_typent') != 8)

@@ -951,12 +951,12 @@ class Bimp_Client extends Bimp_Societe
             'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_events_list_tab .nav_tab_ajax_result\')', array('events'), array('button' => ''))
         );
 
-        // Altradius: 
+        // Atradius: 
         $tabs[] = array(
-            'id'            => 'client_altradius_list_tab',
-            'title'         => BimpRender::renderIcon('fas_dollar-sign', 'iconLeft') . 'Altradius',
+            'id'            => 'client_atradius_list_tab',
+            'title'         => BimpRender::renderIcon('fas_dollar-sign', 'iconLeft') . 'Atradius',
             'ajax'          => 1,
-            'ajax_callback' => $this->getJsLoadCustomContent('renderNavtabView', '$(\'#client_altradius_list_tab .nav_tab_ajax_result\')', array('altradius'), array('button' => ''))
+            'ajax_callback' => $this->getJsLoadCustomContent('renderNavtabView', '$(\'#client_atradius_list_tab .nav_tab_ajax_result\')', array('atradius'), array('button' => ''))
         );
 
         $html = BimpRender::renderNavTabs($tabs, 'card_view');
@@ -1162,8 +1162,8 @@ class Bimp_Client extends Bimp_Societe
                 $html .= $list->renderHtml();
                 break;
             
-            case 'altradius': 
-                $view = new BC_View($this, 'altradius');
+            case 'atradius': 
+                $view = new BC_View($this, 'atradius');
                 $html .= $view->renderHtml();
         }
 
@@ -2549,8 +2549,8 @@ class Bimp_Client extends Bimp_Societe
     
     
     
-    public function getAltradiusFileName($force = false, $show_ext = true){
-        $name = 'altradius';
+    public function getAtradiusFileName($force = false, $show_ext = true){
+        $name = 'atradius';
         $ext = '.pdf';
         if($force || file_exists($this->getFilesDir().$name.$ext)){
             if($show_ext)
@@ -2561,14 +2561,14 @@ class Bimp_Client extends Bimp_Societe
         return 0;
     }
     
-    public function displayAltradiusFile(){
+    public function displayAtradiusFile(){
         $html = '';
-        $file = $this->getAltradiusFileName();
+        $file = $this->getAtradiusFileName();
         if(!is_null($file) && $file){
             $html .= '<a target="__blanck" href="'.DOL_URL_ROOT.'/document.php?modulepart=societe&file='.$this->id.'/'.$file.'">Fichier</a>';
         }
         else{
-//            return BimpInput::renderInput('file_upload', 'altradius_file');
+//            return BimpInput::renderInput('file_upload', 'atradius_file');
             
             $buttons = array();
             
@@ -2576,15 +2576,15 @@ class Bimp_Client extends Bimp_Societe
             // Demande encours altriadus
             $note = BimpObject::getInstance("bimpcore", "BimpNote");
             $buttons[] = array(
-                'label'   => 'Message Altradius',
+                'label'   => 'Message Atradius',
                 'icon'    => 'far_paper-plane',
-                'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => 680, "content" => "Bonjour, merci de bien vouloir demander un encours à Altradius."), array('form_name' => 'rep'))
+                'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => 680, "content" => "Bonjour, merci de bien vouloir demander un encours à Atradius."), array('form_name' => 'rep'))
             );
             
             $buttons[] = array(
                 'label'   => 'Ajouter fichier',
                 'icon'    => 'fas_comment-dollar',
-                'onclick' => $this->getJsLoadModalForm('altradius_file')
+                'onclick' => $this->getJsLoadModalForm('atradius_file')
 
             );
             foreach ($buttons as $button) {
@@ -2606,7 +2606,7 @@ class Bimp_Client extends Bimp_Societe
                 $values['parent_module'] = 'bimpcore';
                 $values['parent_object_name'] = 'Bimp_Societe';
                 $values['id_parent'] = $this->id;
-                $values['file_name'] = $this->getAltradiusFileName(true, false);
+                $values['file_name'] = $this->getAtradiusFileName(true, false);
                 $values['is_deletable'] = 0;
 
                 $file->validateArray($values);

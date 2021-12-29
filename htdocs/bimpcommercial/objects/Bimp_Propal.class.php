@@ -466,7 +466,7 @@ class Bimp_Propal extends BimpComm
 
     public function getDefaultSignatureContact()
     {
-        foreach (array('CUSTOMER', 'SHIPPING', 'BILLING2', 'BILLING') as $type_contact) {
+        foreach (array('CUSTOMER'/* , 'SHIPPING', 'BILLING2', 'BILLING' */) as $type_contact) {
             $contacts = $this->dol_object->getIdContact('external', $type_contact);
             if (isset($contacts[0]) && $contacts[0]) {
                 return (int) $contacts[0];
@@ -480,6 +480,30 @@ class Bimp_Propal extends BimpComm
     {
         BimpObject::loadClass('bimpcore', 'BimpSignature');
         return BimpSignature::getDefaultSignDistEmailContent();
+    }
+
+    public function getSignatureContactCreateFormValues()
+    {
+        $client = $this->getChildObject('client');
+
+        if (BimpObject::objectLoaded($client)) {
+            $fields = array(
+                'email' => $client->getData('email')
+            );
+
+            if (!$client->isCompany()) {
+                $fields['address'] = $client->getData('address');
+                $fields['zip'] = $client->getData('zip');
+                $fields['town'] = $client->getData('town');
+                $fields['fk_pays'] = $client->getData('fk_pays');
+                $fields['fk_departement'] = $client->getData('fk_departement');
+            }
+
+            return array(
+                'fields' => $fields
+            );
+        }
+        return array();
     }
 
     // Getters - overrides BimpComm
@@ -596,7 +620,7 @@ class Bimp_Propal extends BimpComm
                             // Accepter (sans signature)
                             if ($this->isNewStatusAllowed(2)) {
                                 $buttons[] = array(
-                                    'label'   => 'Devis accepté (sans signature)',
+                                    'label'   => 'Devis accepté',
                                     'icon'    => 'fas_check',
                                     'onclick' => $this->getJsNewStatusOnclick(2, array(), array(
                                         'confirm_msg' => 'Veuillez confirmer'
@@ -1114,14 +1138,23 @@ class Bimp_Propal extends BimpComm
 
     public function actionValidate($data, &$success)
     {
+        $id_contact = (int) BimpTools::getArrayValueFromPath($data, 'id_contact_signature', 0);
+        $open_public_access = (int) BimpTools::getArrayValueFromPath($data, 'open_public_access', 0);
+
+        if ($open_public_access) {
+            if (!$id_contact) {
+                return array(
+                    'errors'   => array('Contact signataire obligatoire pour ouvrir l\'accès à la signature à distance'),
+                    'warnings' => array()
+                );
+            }
+        }
+
         $result = parent::actionValidate($data, $success);
 
         if (!count($result['errors'])) {
-            if ((int) BimpTools::getArrayValueFromPath($data, 'create_signature', 0)) {
-                $id_contact = (int) BimpTools::getArrayValueFromPath($data, 'id_contact_signature', 0);
-                $email_content = BimpTools::getArrayValueFromPath($data, 'email_content', $this->getDefaultSignDistEmailContent());
-                $result['warnings'] = BimpTools::merge_array($result['warnings'], $this->createSignature(true, $id_contact, $email_content));
-            }
+            $email_content = BimpTools::getArrayValueFromPath($data, 'email_content', $this->getDefaultSignDistEmailContent());
+            $result['warnings'] = BimpTools::merge_array($result['warnings'], $this->createSignature($open_public_access, $id_contact, $email_content));
         }
 
         return $result;
@@ -1283,19 +1316,25 @@ class Bimp_Propal extends BimpComm
         $errors = array();
         $warnings = array();
         $success = 'Signature créée avec succès';
-        $url = '';        
+        $url = '';
 
+        $open_public_access = (int) BimpTools::getArrayValueFromPath($data, 'open_public_access', 1);
         $id_contact = (int) BimpTools::getArrayValueFromPath($data, 'id_contact_signature', 0);
         $email_content = BimpTools::getArrayValueFromPath($data, 'email_content', $this->getDefaultSignDistEmailContent());
-        $open_public_access = (int) BimpTools::getArrayValueFromPath($data, 'open_public_access', 1);
 
-        $errors = $this->createSignature($open_public_access, $id_contact, $email_content, $warnings);
+        if ($open_public_access && !$id_contact) {
+            $errors[] = 'Contact signataire obligatoire pour ouvrir l\'accès à la signature à distance';
+        }
 
         if (!count($errors)) {
-            $signature = $this->getChildObject('signature');
+            $errors = $this->createSignature($open_public_access, $id_contact, $email_content, $warnings);
 
-            if (BimpObject::objectLoaded($signature)) {
-                $url = $signature->getUrl();
+            if (!count($errors)) {
+                $signature = $this->getChildObject('signature');
+
+                if (BimpObject::objectLoaded($signature)) {
+                    $url = $signature->getUrl();
+                }
             }
         }
 
@@ -1545,7 +1584,7 @@ class Bimp_Propal extends BimpComm
             switch ($doc_type) {
                 case 'devis':
                     if ($context === 'public') {
-                        return self::getPublicBaseUrl() .'?fc=doc&doc=devis' . ($signed ? '_signed' : '') . '&docid=' . $this->id . '&docref=' . $this->getRef();
+                        return self::getPublicBaseUrl() . '?fc=doc&doc=devis' . ($signed ? '_signed' : '') . '&docid=' . $this->id . '&docref=' . $this->getRef();
                     } else {
                         return $this->getFileUrl($fileName);
                     }
@@ -1572,16 +1611,16 @@ class Bimp_Propal extends BimpComm
         if (BimpObject::objectLoaded($sav)) {
             return $sav->getSignatureCommercialEmail($doc_type);
         }
-        
+
         $client = $this->getChildObject('client');
 
         if (BimpObject::objectLoaded($client)) {
             return $client->getCommercialEmail(false);
         }
-        
+
         return '';
     }
-    
+
     public function onSigned($bimpSignature, $data)
     {
         $errors = array();
@@ -1594,7 +1633,7 @@ class Bimp_Propal extends BimpComm
             } else {
                 $this->updateField('fk_statut', Propal::STATUS_SIGNED);
             }
-        }        
+        }
 
         return $errors;
     }

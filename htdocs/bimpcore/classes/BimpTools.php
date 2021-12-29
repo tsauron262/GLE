@@ -1135,7 +1135,7 @@ class BimpTools
             foreach ($filters as $field => $filter) {
                 $sql_filter = self::getSqlFilter($field, $filter, $default_alias);
 
-                if ($sql_filter) {
+                if ($sql_filter !== '') {
                     if (!$first_loop) {
                         $sql .= ' AND ';
                     } else {
@@ -1830,7 +1830,7 @@ class BimpTools
 
     // Gestion des dates: 
 
-    public static function printDate($date, $balise = "span", $class = '', $format = 'd/m/Y H:i:s', $format_mini = 'd / m / Y')
+    public function printDate($date, $balise = "span", $class = '', $format = 'd / m / Y H:i:s', $format_mini = 'd / m / Y')
     {
         if ($date == '')
             return '';
@@ -1843,15 +1843,21 @@ class BimpTools
             $date = $date->getTimestamp();
         }
 
-        if (is_array($class))
+        if (is_array($class)) {
             $class = explode(" ", $class);
+        }
 
         $html = '<' . $balise;
-        if ($format != $format_mini)
+
+        if ($format != $format_mini) {
             $html .= ' title="' . date($format, $date) . '"';
-        if ($class != '')
+        }
+
+        if ($class != '') {
             $html .= ' class="' . $class . '"';
+        }
         $html .= '>' . date($format_mini, $date) . '</' . $balise . '>';
+
         return $html;
     }
 
@@ -2680,6 +2686,19 @@ class BimpTools
         }
     }
 
+    public static function makeUrlParamsFromArray($url_params)
+    {
+        $str = '';
+
+        if (is_array($url_params)) {
+            foreach ($url_params as $key => $value) {
+                $str .= ($str ? '&' : '') . $key . '=' . urlencode($value);
+            }
+        }
+
+        return $str;
+    }
+
     public static function makeUrlFromConfig(BimpConfig $config, $path, $default_module, $default_controller)
     {
         $url = DOL_URL_ROOT . '/';
@@ -2702,14 +2721,15 @@ class BimpTools
 
         if ($url && isset($params['url_params'])) {
             $url_params = $config->getCompiledParams($path . '/url_params');
-            foreach ($url_params as $name => $value) {
-                if ((string) $name && (string) $value) {
+
+            if (is_array($url_params) && !empty($url_params)) {
+                $params_str = self::makeUrlParamsFromArray($url_params);
+
+                if ($params_str) {
                     if (!preg_match('/\?/', $url)) {
                         $url .= '?';
-                    } else {
-                        $url .= '&';
                     }
-                    $url .= $name . '=' . $value;
+                    $url .= $params_str;
                 }
             }
         }

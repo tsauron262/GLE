@@ -146,7 +146,12 @@ class BDS_ProcessOperation extends BimpObject
                 }
                 $input .= '</div>';
 
-                $op_html .= BimpRender::renderFormRow($label, $input);
+                $op_html .= BimpForm::renderFormRow(array(
+                            'label'       => $label,
+                            'content'     => $input,
+                            'class'       => 'operationOptionRow',
+                            'input_class' => 'operationOptionInput'
+                ));
             }
         }
 
@@ -155,7 +160,12 @@ class BDS_ProcessOperation extends BimpObject
             $field_name = 'operation_' . $this->id . '_debug_active';
             $input = BimpInput::renderInput('toggle', $field_name, 1);
             $input = BimpInput::renderInputContainer($field_name, 1, $input);
-            $op_html .= BimpRender::renderFormRow($label, $input);
+            $op_html .= BimpForm::renderFormRow(array(
+                        'label'       => $label,
+                        'content'     => $input,
+                        'class'       => 'operationOptionRow',
+                        'input_class' => 'operationOptionInput'
+            ));
         }
 
         $op_html .= '</form>';
@@ -182,7 +192,6 @@ class BDS_ProcessOperation extends BimpObject
             $html .= $op_footer;
         }
         $html .= '</div>';
-
 
         return $html;
     }

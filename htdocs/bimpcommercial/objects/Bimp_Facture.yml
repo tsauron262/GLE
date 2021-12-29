@@ -66,7 +66,7 @@ objects:
                 
     facture_source:
         extends: facture
-                
+        
 fields: 
     facnumber: 
         label: Référence
@@ -252,12 +252,22 @@ fields:
     total_achat_reval_ok: 
         label: Total achat (reval OK)
         type: money
-        default_value: 0
-        
+        default_value: 0        
     litige: 
         label: Litige
         dol_extra_field: 1
         type: bool
+    chorus_status: 
+        label: Statut export chorus
+        dol_extra_field: 1
+        type: int
+        default_value: 0
+        values: 
+            array: chorus_status
+    chorus_data:
+        label: Données Chorus
+        dol_extra_field: 1
+        type: json
 #    rib_client:
 #        label: Rib Client
 #        dol_extra_field: 1
@@ -657,6 +667,20 @@ forms:
                   type: select
                   options: 
                       array: draftFacturesForRefacture
+                      
+    export_to_chorus: 
+        rows: 
+            - custom: 1
+              label: Structure
+              input_name: id_structure
+              content: 
+                  callback: renderClientSelectChorusStructuresInput
+            - custom: 1
+              label: Code Service
+              input_name: code_service
+              content: 
+                  callback: renderClientSelectChorusServicesInput
+              depends_on: id_structure
                   
 fields_tables: 
     infos: 

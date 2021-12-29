@@ -694,6 +694,7 @@ class BC_Input extends BimpComponent
                             $values[$value] = $this->field_params['values'][$value];
                         }
                     }
+
                     if (!isset($values[$value])) {
                         $values[$value] = $value;
                     }

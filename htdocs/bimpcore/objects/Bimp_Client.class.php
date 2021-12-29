@@ -788,6 +788,86 @@ class Bimp_Client extends Bimp_Societe
         return 0;
     }
 
+    // Données piste: 
+
+    public function getChorusStructuresList(&$errors = array())
+    {
+        if ($this->isLoaded($errors)) {
+            $siret = $this->getData('siret');
+
+            if ($siret) {
+                $cache_key = 'client_' . $this->id . '_chorus_structures';
+
+                if (!isset(self::$cache[$cache_key])) {
+                    BimpCore::loadBimpApiLib();
+
+                    $api = BimpAPI::getApiInstance('piste');
+
+                    if (is_a($api, 'BimpAPI') && $api->isOk($errors)) {
+                        $response = $api->rechercheClientStructures($this->getData('siret'), array(), $errors);
+
+                        if (is_array($response) && !count($errors)) {
+                            self::$cache[$cache_key] = $response;
+                            return $response;
+                        }
+                    }
+                }
+            } else {
+                $errors[] = 'N° SIRET absent';
+            }
+        }
+
+        return null;
+    }
+
+    public function getChorusStructureData($id_structure, &$errors = array())
+    {
+        if ($this->isLoaded($errors)) {
+            $cache_key = 'client_' . $this->id . '_chorus_structure_' . $id_structure . '_data';
+
+            if (!isset(self::$cache[$cache_key])) {
+                BimpCore::loadBimpApiLib();
+
+                $api = BimpAPI::getApiInstance('piste');
+
+                if (is_a($api, 'BimpAPI') && $api->isOk($errors)) {
+                    $response = $api->consulterStructure($id_structure, array(), $errors);
+
+                    if (is_array($response) && !count($errors)) {
+                        self::$cache[$cache_key] = $response;
+                        return $response;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public function getChorusStructureServices($id_structure, &$errors = array())
+    {
+        if ($this->isLoaded($errors)) {
+            $cache_key = 'client_' . $this->id . '_chorus_structure_' . $id_structure . '_services';
+
+            if (!isset(self::$cache[$cache_key])) {
+                BimpCore::loadBimpApiLib();
+
+                $api = BimpAPI::getApiInstance('piste');
+
+                if (is_a($api, 'BimpAPI') && $api->isOk($errors)) {
+                    $response = $api->rechercheClientServices($id_structure, array(), $errors);
+
+                    if (is_array($response) && !count($errors)) {
+                        self::$cache[$cache_key] = $response;
+                        return $response;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
     // Getters Array:
 
     public function getRelancesDisplayModesArray()

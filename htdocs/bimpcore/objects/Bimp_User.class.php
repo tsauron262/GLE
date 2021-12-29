@@ -922,6 +922,7 @@ class Bimp_User extends BimpObject
 
 //              return "Groupes aux quel appartient l'utilisateur";
             // Onglet "Liste des configurations de listes": 
+            
             case 'lists_configs':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpuserconfig', 'ListTableConfig'), 'default', 1, null, 'Liste des configurations de listes de "' . $user_label . '"', 'fas_cog');
                 $list->addFieldFilterValue('owner_type', ListTableConfig::OWNER_TYPE_USER);

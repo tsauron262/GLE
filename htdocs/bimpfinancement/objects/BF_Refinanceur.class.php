@@ -275,7 +275,7 @@ class BF_Refinanceur extends BimpObject
 
             $ranges .= '<div style="text-align: center">';
             $ranges .= '<div id="newCoefsPeriodRangeForm" style="display: none; margin: auto; width: 600px;">';
-            $ranges .= BimpRender::renderFreeForm(array(
+            $ranges .= BimpForm::renderFreeForm(array(
                         array(
                             'label' => 'Durée',
                             'input' => BimpInput::renderInput('text', 'new_period_range', '', array(
@@ -294,7 +294,7 @@ class BF_Refinanceur extends BimpObject
                             ), 'Nouvelle tranche de durée', 'fas_plus-circle');
             $ranges .= '</div>';
             $ranges .= '<div id="newCoefsAmountRangeForm" style="display: none; margin: auto; width: 600px;">';
-            $ranges .= BimpRender::renderFreeForm(array(
+            $ranges .= BimpForm::renderFreeForm(array(
                         array(
                             'label' => 'Montant',
                             'input' => BimpInput::renderInput('text', 'new_amount_range', '', array(

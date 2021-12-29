@@ -190,7 +190,7 @@ function setObjectNewStatus($button, object_data, new_status, extra_data, $resul
     });
 }
 
-function setObjectAction($button, object_data, action, extra_data, form_name, $resultContainer, successCallback, confirm_msg, on_form_submit, no_triggers, modal_format, modal_scroll_bottom) {
+function setObjectAction($button, object_data, action, extra_data, form_name, $resultContainer, successCallback, confirm_msg, on_form_submit, no_triggers, modal_format, modal_scroll_bottom, modal_title) {
     if (typeof (confirm_msg) === 'string') {
         if (!confirm(confirm_msg.replace(/&quote;/g, '"'))) {
             return;
@@ -220,14 +220,19 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
 
         object_data.form_name = form_name;
         var title = '';
-        if ($.isOk($button)) {
-            if ($button.hasClass('rowButton')) {
-                title = $button.data('content');
-            } else {
-                title = $button.text();
-            }
+
+        if (typeof (modal_title) !== 'undefined' && modal_title) {
+            title = modal_title;
         } else {
-            title = 'Action';
+            if ($.isOk($button)) {
+                if ($button.hasClass('rowButton')) {
+                    title = $button.data('content');
+                } else {
+                    title = $button.text();
+                }
+            } else {
+                title = 'Action "' + action + '"';
+            }
         }
 
         object_data.param_values = {

@@ -23,6 +23,7 @@ class Bimp_Log extends BimpObject
         'sav'           => 'SAV',
         'deadLock'      => 'DeadLock',
         'sql_duplicate' => 'Doublons champ bdd',
+        'api'           => 'API',
         'gsx'           => 'GSX'
     );
     public static $levels = array(

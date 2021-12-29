@@ -99,13 +99,12 @@ class Bimp_Societe extends BimpDolObject
         global $user;
         switch ($field_name) {
             case 'outstanding_limit_atradius':
-                if ($user->admin) {
+            case 'outstanding_limit_icba':
+            case 'outstanding_limit':
+                if ($user->admin || $user->rights->bimpcommercial->admin_recouvrement) {
                     return 1;
                 }
                 return 0;
-
-            case 'outstanding_limit':
-                return ($user->rights->bimpcommercial->admin_financier ? 1 : 0);
 
             case 'outstanding_limit_credit_safe':
                 return 0;

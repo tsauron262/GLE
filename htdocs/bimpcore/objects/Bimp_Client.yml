@@ -63,17 +63,17 @@ fields_tables:
             - field: idprof4
               label: RCS
               
-    altradius:
+    atradius:
         panel: 1
         rows: 
             - field: outstanding_limit_atradius
               edit: 1
-            - label: Fichier Altradius
+            - label: Fichier Atradius
               input_name: send_emails
               input: 
                   type: file_upload
               value:
-                callback: displayAltradiusFile
+                callback: displayAtradiusFile
 
 views: 
     client:
@@ -105,15 +105,15 @@ views:
                       name: public
                       children: contacts
                       
-    altradius:
-        title: Altradius
+    atradius:
+        title: Atradius
         rows: 
             - cols: 
                 - type: fields_table
                   col_lg: 6
                   col_md: 6
                   fields_table: 
-                      name: altradius 
+                      name: atradius 
                       
 forms:
     light: 
@@ -306,15 +306,15 @@ forms:
             - field: phone
             - field: fax
             - field: skype
-    altradius_file:
+    atradius_file:
         rows:
             - custom: 1
-              label: Fichier Altradius
+              label: Fichier Atradius
               input_name: file
               input: 
                   type: file_upload
 #              value:
-#                callback: displayAltradiusFile
+#                callback: displayAtradiusFile
         
 filters: 
     nb_notes_suivi: 

@@ -55,6 +55,7 @@ class PisteAPI extends BimpAPI
         if ($this->options['mode'] == 'test') {
             $siret = '12345678200051';
         }
+        
         $params = BimpTools::overrideArray(array(
                     'fields' => array(
                         'structure' => array(

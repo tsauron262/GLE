@@ -762,11 +762,11 @@ class Bimp_Facture extends BimpComm
                 }
 
                 $chorus_data = $this->getData('chorus_data');
-                if (!(int) BimpTools::getArrayValueFromPath($chorus_data, 'id_pdf', 0)) {
+                if (!BimpTools::getArrayValueFromPath($chorus_data, 'id_pdf', '')) {
                     $errors[] = 'Identifiant chorus du fichier PDF absent';
                 }
 
-                if (!(int) BimpTools::getArrayValueFromPath($chorus_data, 'num_facture', 0)) {
+                if (!BimpTools::getArrayValueFromPath($chorus_data, 'num_facture', '')) {
                     $errors[] = 'N° facture sur Chorus absent';
                 }
 

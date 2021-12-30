@@ -3166,11 +3166,16 @@ class Bimp_Facture extends BimpComm
     {
         $html = '';
 
-        if ((int) $this->getData('fk_statut') > 0) {
+        $status = (int) $this->getData('fk_statut');
+        if ($status > 0) {
             $html .= '<span style="display: inline-block; margin-left: 12px"' . $this->displayData('paiement_status') . '</span>';
 
-            if ($this->field_exists('chorus_status') && (int) $this->getData('chorus_status') >= 0) {
-                $html .= '<br/>Export Chorus: ' . $this->displayData('chorus_status', 'default', false);
+            if (in_array($status, array(1, 2)) && $this->field_exists('chorus_status') && (int) $this->getData('chorus_status') >= 0) {
+                $client = $this->getChildObject('client');
+
+                if (BimpObject::objectLoaded($client) && $client->dol_object->typent_code == 'TE_ADMIN') {
+                    $html .= '<br/>Export Chorus: ' . $this->displayData('chorus_status', 'default', false);
+                }
             }
         }
 

@@ -783,6 +783,8 @@ forms:
               display_if: 
                   field_name: bon_resti_raison
                   show_values: 99
+              show:
+                  callback: isGratuit
               
     equipment: 
         rows: 

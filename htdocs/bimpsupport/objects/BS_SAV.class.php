@@ -239,6 +239,9 @@ class BS_SAV extends BimpObject
                 if ($lineS->getData('linked_object_name') == 'sav_garantie') {
                     $montant -= $lineS->getTotalHT(true);
                 }
+                if ($lineS->getData('linked_object_name') == 'discount') {
+                    $montant -= $lineS->getTotalHT(true);
+                }
             }
         }
         if ($montant < 1 && $montant > -1)

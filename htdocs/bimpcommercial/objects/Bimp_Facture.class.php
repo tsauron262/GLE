@@ -2721,6 +2721,8 @@ class Bimp_Facture extends BimpComm
 
     public function renderContentExtraLeft()
     {
+        $html = '';
+        
         // Partie "Paiements": 
         if ($this->isLoaded()) {
             $html .= '<table class="bimp_fields_table">';

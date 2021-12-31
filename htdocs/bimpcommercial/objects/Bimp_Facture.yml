@@ -261,7 +261,7 @@ fields:
         label: Statut export chorus
         dol_extra_field: 1
         type: int
-        default_value: 0
+        default_value: -1
         values: 
             array: chorus_status
     chorus_data:
@@ -729,11 +729,10 @@ fields_tables:
               edit: 1
             - field: litige
               edit: 1
-#                  1
-#                  callback: canSetAsLitige
-#                        method: canSetAsLitige
-#                        params: 
-#                             - "factureLitige"
+            - field: chorus_status
+            - label: Infos export Chorus
+              value: 
+                  callback: displayChorusData
                   
     client: 
         rows: 

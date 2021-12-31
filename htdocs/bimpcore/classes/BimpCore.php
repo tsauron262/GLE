@@ -461,7 +461,7 @@ class BimpCore
         if (!$bimp_logs_locked) {
             $bimp_logs_locked = 1;
             $extra_data = BimpTools::merge_array(static::$logs_extra_data, $extra_data);
-            if (BimpCore::isModeDev() && (int) self::getConf('bimpcore_print_logs', 1)) {
+            if (BimpCore::isModeDev() && (int) self::getConf('bimpcore_print_logs', 1) && !defined('NO_BIMPLOG_PRINTS')) {
                 $bt = debug_backtrace(null, 30);
 
                 $html = 'LOG ' . Bimp_Log::$levels[$level]['label'] . '<br/><br/>';

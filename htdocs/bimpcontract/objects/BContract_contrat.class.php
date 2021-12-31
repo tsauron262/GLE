@@ -501,6 +501,7 @@ class BContract_contrat extends BimpDolObject
             if (!count($errors)) {
                 $this->updateField("end_date_reel", $data['end_date_reel']);
                 $this->updateField('anticipate_close_note', $data['note_close']);
+                $this->updateField('relance_renouvellement', 0);
                 $success = "Date de fin défini avec succès";
                 $dateClose = new DateTime($date['end_date_reel']);
                 $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $this->getData('fk_commercial_suivi'));

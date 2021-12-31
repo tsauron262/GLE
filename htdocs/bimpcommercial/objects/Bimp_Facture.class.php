@@ -781,7 +781,7 @@ class Bimp_Facture extends BimpComm
                 } elseif (!in_array($this->getData('chorus_status'), array(0, 1, 3))) {
                     $errors[] = 'Le statut actuel de l\'export Chorus ne permet pas cette opération';
                 }
-                
+
                 return (count($errors) ? 0 : 1);
         }
 
@@ -2722,7 +2722,7 @@ class Bimp_Facture extends BimpComm
     public function renderContentExtraLeft()
     {
         $html = '';
-        
+
         // Partie "Paiements": 
         if ($this->isLoaded()) {
             $html .= '<table class="bimp_fields_table">';
@@ -3943,7 +3943,9 @@ class Bimp_Facture extends BimpComm
             $client = $this->getChildObject('client');
 
             if (BimpObject::objectLoaded($client)) {
-                
+                if ($client->dol_object->typent_code == 'TE_ADMIN') {
+                    $this->updateField('chorus_status', 0);
+                }
             }
         }
 

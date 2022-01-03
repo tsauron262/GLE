@@ -139,7 +139,7 @@ forms:
         title: Edition du nombre d'année de prolongation
         rows:
             - custom: 1
-              label: Nombre d'année de de prolongation
+              label: Nombre d'année de prolongation
               input_name: years
               value: 
                   callback: getNbYears

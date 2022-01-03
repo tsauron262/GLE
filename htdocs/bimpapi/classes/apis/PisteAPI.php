@@ -337,7 +337,7 @@ class PisteAPI extends BimpAPI
                             }
 
                             $fields = array(
-                                'numeroFactureSaisi'    => $num_facture,
+                                'numeroFactureSaisi'    => $facture->getRef(),
                                 'dateFacture'           => $facture->getData('datef'),
                                 'modeDepot'             => 'DEPOT_PDF_API',
                                 'fournisseur'           => array(
@@ -356,10 +356,10 @@ class PisteAPI extends BimpAPI
                                     'montantHtTotal'  => $facture->dol_object->total_ht,
                                     'montantTVA'      => $facture->dol_object->total_tva,
                                     'montantTtcTotal' => $facture->dol_object->total_ttc,
-                                    'montantAPayer'   => $facture->getRemainToPay()
+                                    'montantAPayer'   => $facture->getRemainToPay(false, false)
                                 ),
                                 'cadreDeFacturation'    => array(
-                                    'codeCadreFacturation' => ((int) $facture->getData('paye') ? 'A1_FACTURE_FOURNISSEUR' : 'A2_FACTURE_FOURNISSEUR_DEJA_PAYEE')
+                                    'codeCadreFacturation' => ((int) $facture->getData('paye') ? 'A2_FACTURE_FOURNISSEUR_DEJA_PAYEE' : 'A1_FACTURE_FOURNISSEUR')
                                 ),
                                 'pieceJointePrincipale' => array(
                                     array(

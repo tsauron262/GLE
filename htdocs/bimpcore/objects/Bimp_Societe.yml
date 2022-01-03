@@ -461,6 +461,10 @@ fields:
         type: money
         history: 1
         default_value: -1
+        
+    date_atradius:
+        label: Date de dépôt du Rapport Atradius
+        type: datetime
     
         
     fk_account: 

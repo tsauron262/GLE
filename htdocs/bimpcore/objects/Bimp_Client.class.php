@@ -2694,6 +2694,8 @@ class Bimp_Client extends Bimp_Societe
                 $file->validateArray($values);
 
                 $errors = $file->create();
+                 if(!count($errors))
+                    $this->updateField('date_atradius', dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S'));
             }
             else
                 $errors[] = 'Uniquement des fichier PDF';

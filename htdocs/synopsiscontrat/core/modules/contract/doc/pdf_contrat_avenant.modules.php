@@ -606,9 +606,9 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 $pdf1->ln();
                 $pdf1->SetFont('', '', 8);
                 
-                
-                $pdf->Cell($W*5, 4, "Le présent avenant entrera en vigueur à compter du " . $date->format('d/m/Y'), 0, null, 'L', false);
-                $pdf1->Cell($W*5, 4, "Le présent avenant entrera en vigueur à compter du " . $date->format('d/m/Y'), 0, null, 'L', false);
+                $date_effect = new DateTime($this->avenant->getData('date_effect'));
+                $pdf->Cell($W*5, 4, "Le présent avenant entrera en vigueur à compter du " . $date_effect->format('d/m/Y'), 0, null, 'L', false);
+                $pdf1->Cell($W*5, 4, "Le présent avenant entrera en vigueur à compter du " . $date_effect->format('d/m/Y'), 0, null, 'L', false);
                 $current_article++;
                 $pdf->setY($pdf->getY() + 5);
                 $pdf->SetFont('', '', 8);

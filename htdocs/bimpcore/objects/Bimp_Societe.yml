@@ -730,23 +730,20 @@ fields_tables:
                   callback: displayOutstanding
               show: 
                   callback: isClient
-            - field: outstanding_limit_atradius
-              edit: 1
-              show: 
-                  callback: 
-                      method: canViewField
-                      params: 
-                          - outstanding_limit_atradius
-            - field: outstanding_limit
-              edit: 1
-              show: 
-                  callback: isClient
-            - field: outstanding_limit_credit_safe
-              edit: 1
-            - label: Lettre Credit SAFE
+                  
+            - field: notecreditsafe
+            - custom: 1 
+              label: Lettre Crédit Safe  
               value:
                   callback: getCreditSafeLettre
-            - field: notecreditsafe
+            - field: outstanding_limit_credit_safe
+              edit: 1
+            - field: outstanding_limit_icba
+              edit: 1
+            - field: outstanding_limit_atradius
+              edit: 1
+            - field: outstanding_limit
+              edit: 1
             - field: date_check_credit_safe
             - field: mode_reglement
               edit: 1

@@ -163,7 +163,7 @@ class Bimp_Facture extends BimpComm
             case 'exportToChorus':
             case 'confirmChorusExport':
             case 'forceChorusExported':
-                return ($user->admin || $user->login == 'c.belot');
+                return ($user->admin || $user->bimpcommercial->chorus_exports);
         }
 
         return parent::canSetAction($action);

@@ -86,6 +86,7 @@ fields_tables:
               value:
                 callback: displayAtradiusFile
             - field: date_atradius
+              edit: 1
 
 views: 
     client:

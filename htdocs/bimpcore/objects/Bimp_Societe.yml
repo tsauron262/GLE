@@ -445,6 +445,12 @@ fields:
         type: money
         edit: 0
         
+    outstanding_limit_credit_check:    
+        label: Limite Crédit Chek
+        type: money
+        history: 1
+        default_value: -1
+        
     date_check_credit_safe:
         label: Date de verification Crédit SAFE
         type: datetime
@@ -744,6 +750,8 @@ fields_tables:
             - field: outstanding_limit_credit_safe
               edit: 1
             - field: outstanding_limit_icba
+              edit: 1
+            - field: outstanding_limit_credit_check
               edit: 1
             - field: outstanding_limit_atradius
               edit: 1

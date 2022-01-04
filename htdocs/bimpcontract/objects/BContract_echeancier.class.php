@@ -539,7 +539,7 @@ class BContract_echeancier extends BimpObject {
         
         $html = '';
         if(!$this->canEdit()) {
-            $html = BimpRender::renderAlerts("Ce contrat est clos, aucune facture ne peut être emises", 'info', false);
+            $html = BimpRender::renderAlerts("Ce contrat est clos, aucune facture ne peut être emise", 'info', false);
         }
 
         $instance_facture = $this->getInstance('bimpcommercial', 'Bimp_Facture');

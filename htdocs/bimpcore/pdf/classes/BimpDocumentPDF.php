@@ -39,6 +39,7 @@ class BimpDocumentPDF extends BimpModelPDF
     public $signature_bloc_label = '';
     public $hidePrice = false;
     public $contactFinal = null;
+    public $file_logo = '';
 
     public function __construct($db)
     {
@@ -146,24 +147,25 @@ class BimpDocumentPDF extends BimpModelPDF
         global $conf;
 
         $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
-
-        if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('R', 'C', 'ME', 'CO'))) {
-            $testFile = str_replace(array(".jpg", ".png"), "_PRO.png", $logo_file);
-            if (is_file($testFile))
-                $logo_file = $testFile;
+        if($this->file_logo != '' && is_file($conf->mycompany->dir_output . '/logos/' . $this->file_logo))
+                $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->file_logo;
+        else{
+            if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('R', 'C', 'ME', 'CO'))) {
+                $testFile = str_replace(array(".jpg", ".png"), "_PRO.png", $logo_file);
+                if (is_file($testFile))
+                    $logo_file = $testFile;
+            }
+            if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('S'))) {
+                $testFile = str_replace(array(".jpg", "_RESEAUNANCE.png"), "_SAV.png", $logo_file);
+                if (is_file($testFile))
+                    $logo_file = $testFile;
+            }
+            if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('E'))) {
+                $testFile = str_replace(array(".jpg", ".png"), "_EDUC.png", $logo_file);
+                if (is_file($testFile))
+                    $logo_file = $testFile;
+            }
         }
-        if (
-                isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('S'))) {
-            $testFile = str_replace(array(".jpg", ".png"), "_SAV.png", $logo_file);
-            if (is_file($testFile))
-                $logo_file = $testFile;
-        }
-        if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('E'))) {
-            $testFile = str_replace(array(".jpg", ".png"), "_EDUC.png", $logo_file);
-            if (is_file($testFile))
-                $logo_file = $testFile;
-        }
-
         $logo_width = 0;
         if (!file_exists($logo_file)) {
             $logo_file = '';

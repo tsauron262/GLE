@@ -445,7 +445,7 @@ class pdf_fi
                     $pdf->Cell($W, 8, "Durée", 1, null, 'C', true);
                     $pdf->Cell($W, 8, "Référence", 1, null, 'C', true);
 
-                    if ($child->getData('type') == 4 || $child->getData('type') == 3) {
+                    if ($child->getData('type') == 3) {
                         $pdf->Cell($W, 8, "Total HT en €", 1, null, 'C', true);
                     } else {
                         $pdf->Cell($W, 8, "Service", 1, null, 'C', true);
@@ -491,7 +491,7 @@ class pdf_fi
                     $pdf->Cell($W, 6, "$type", 1, 0, 'C', 1);
                     if ($child->getData('type') == 2) {
                         $pdf->Cell($W, 6, "Pas de durée", 1, 0, 'C', 1);
-                    } elseif ($child->getData('type') == 3) {
+                    } elseif ($child->getData('type') == 3 || $child->getData('type') == 4) {
                         $pdf->Cell($W, 6, "Forfait", 1, 0, 'C', 1);
                     } else {
                         $pdf->Cell($W, 6, $child->displayDuree(), 1, 0, 'C', 1);
@@ -560,8 +560,13 @@ class pdf_fi
                             $pareteze = "";
                             $price = "Sous contrat";
                         }
-
-                        $pdf->Cell($W, 6, $price . " $pareteze", 1, 0, 'C', 1);
+                        
+                        if($child->getData('type') != 4) {
+                            $pdf->Cell($W, 6, $price . " $pareteze", 1, 0, 'C', 1);
+                        } else {
+                            $pdf->Cell($W, 6, 'Supplément', 1, 0, 'C', 1);
+                        }
+ 
                     }
 
                     $excludeDescriptionService = Array(4, 5, 1, 2, 3);

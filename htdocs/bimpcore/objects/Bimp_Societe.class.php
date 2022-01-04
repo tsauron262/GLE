@@ -101,6 +101,7 @@ class Bimp_Societe extends BimpDolObject
             case 'outstanding_limit_atradius':
             case 'outstanding_limit_icba':
             case 'outstanding_limit':
+            case 'date_atradius':
                 if ($user->admin || $user->rights->bimpcommercial->admin_recouvrement) {
                     return 1;
                 }

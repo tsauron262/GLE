@@ -1621,6 +1621,17 @@ class Bimp_Propal extends BimpComm
         return '';
     }
 
+    public function getOnSignedEmailExtraInfos($doc_type)
+    {
+        $sav = $this->getSav();
+
+        if (BimpObject::objectLoaded($sav)) {
+            return $sav->getOnSignedEmailExtraInfos('devis_sav');
+        }
+
+        return '';
+    }
+
     public function onSigned($bimpSignature, $data)
     {
         $errors = array();

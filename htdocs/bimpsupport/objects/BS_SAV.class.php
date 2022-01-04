@@ -6353,6 +6353,25 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         return '';
     }
 
+    public function getOnSignedEmailExtraInfos($doc_type)
+    {
+        if ($this->isLoaded() && $doc_type == 'devis_sav') {
+            $html = '<b>SAV: </b> ' . $this->getLink(array(), 'private') . '<br/>';
+
+            $tech = $this->getChildObject('user_tech');
+
+            if (BimpObject::objectLoaded($tech)) {
+                $html .= '<br/><b>Technicien: </b>' . $tech->getLink(array(), 'private');
+            }
+            
+            $html .= '<br/><br/>';
+
+            return $html;
+        }
+
+        return '';
+    }
+
     public function isSignatureCancellable()
     {
         return 0;

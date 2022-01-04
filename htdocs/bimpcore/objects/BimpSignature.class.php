@@ -1641,6 +1641,10 @@ class BimpSignature extends BimpObject
                     $msg .= '<b>Nom Signataire: </b> ' . $this->getData('nom_signataire') . '<br/>';
                     $msg .= '<b>Adresse e-mail signataire: </b>' . $this->getData('email_signataire') . '<br/><br/>';
 
+                    if (method_exists($obj, 'getOnSignedEmailExtraInfos')) {
+                        $msg .= $obj->getOnSignedEmailExtraInfos($this->getData('doc_type'));
+                    }
+                    
                     mailSyn2($subject, $comm_email, '', $msg);
                 }
             }

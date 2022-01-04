@@ -75,6 +75,8 @@ fields_tables:
               edit: 1
             - field: outstanding_limit_icba
               edit: 1
+            - field: outstanding_limit_credit_check
+              edit: 1
             - field: outstanding_limit_atradius
               edit: 1
             - field: outstanding_limit

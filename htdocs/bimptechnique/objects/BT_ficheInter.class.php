@@ -759,8 +759,8 @@ class BT_ficheInter extends BimpDolObject
     public function getTypeOfReattachmentObjectArray(){
         $reattachment = Array(0 => 'Auncun type d\'objet');
         if(!$this->getData('fk_facture')) $reattachment[1] = 'Facture';
-//        $reattachment[2] = 'Contrat';
-//        $reattachment[3] = 'Commande';
+        if(!$this->getData('fk_contrat')) $reattachment[2] = 'Contrat';
+        if(!count(json_decode($this->getData('commandes')))) $reattachment[3] = 'Commande';
         
         return $reattachment;
     }
@@ -801,15 +801,6 @@ class BT_ficheInter extends BimpDolObject
             }
             
         }
-        
-//        foreach($contrat_n_n_mois_1 as $object) {
-//                        
-//            if(!in_array($object['statut'], $exclude_statut)) {
-//                $label = ($object['statut'] == 2) ? '<span class=\'danger\'>'.$object['ref'].'</span>' : $object['ref'];
-//                $return[$object['rowid']] = $label;
-//            }
-//            
-//        }
                
         return $return;
         
@@ -844,6 +835,7 @@ class BT_ficheInter extends BimpDolObject
     public function actionReattach_an_object($data, &$success) {
         $warnings = [];
         $errors = [];
+        $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
         switch($data['type_of_object']) {
             case 0;
                 $errors[] = "Vous ne pouvez pas rattacher aucun objet";
@@ -852,6 +844,7 @@ class BT_ficheInter extends BimpDolObject
                 $instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $data['fk_facture']);
                 if($this->getData('fk_soc') == $instance->getData('fk_soc')) {
                     $this->set('fk_facture', $data['fk_facture']);
+                    addElementElement('fichinter', 'facture', $this->id, $data['fk_facture']);
                 } else {
                     $errors[] = "La facture sélectionnée n'est pas à ce client";
                 }
@@ -878,12 +871,39 @@ class BT_ficheInter extends BimpDolObject
                             $errors = BimpTools::merge_array($errors, $child->updateField('id_line_contrat', $children_contrat[0]));
                         }
                     }
-                    
-//                    if(!count($errors)) {
-//                        addElementElement('fichinter', 'contrat', $this->id, $data['id_contrat']);
-                        
-//                    }
                 }
+                break;
+            case 3:
+                
+                if(!$data['id_commande']) {$errors[] = "Merci de renseigner une commande client";}
+                if(in_array($data['id_commande'], $this->getData('commandes'))) $errors[] = "La commande est déjà liée à cette FI";
+                
+                
+                if(!count($errors)){
+                    $instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $data['id_commande']);
+                    if($instance->getData('fk_soc') == $this->getData('fk_soc')) {
+                        $errors = $this->updateField('commandes', BimpTools::merge_array($this->getData('commandes'), [$instance->id]));
+                        if(!count($errors)) {
+                            addElementElement('fichinter', 'commande', $this->id, $instance->id);
+                            if(count($data['lines_for_commande'])) {
+                                foreach($data['lines_for_commande'] as $id_line_fiche) {
+                                    $child = $this->getChildObject('inters', $id_line_fiche);
+                                    if($child->getData('type') == 3)
+                                        $errors = BimpTools::merge_array($errors, $child->updateField('type', 6));
+                                    else
+                                        $errors = BimpTools::merge_array($errors, $child->updateField('type', 0));
+                                    
+                                    $errors = BimpTools::merge_array($errors, $child->updateField('id_line_commande', $instance->dol_object->lines[0]->id));
+                                    
+                                }
+                            }
+                        }
+                    } else {
+                        $errors[] = 'Cette commande n\'appartient pas à ' . $client->getName();
+                    }
+                }
+                
+                
                 break;
         }
         

@@ -5,6 +5,7 @@ class Session {
     private $table = "llx_bimp_php_session";
     private static $sessionBase = array();
     private $sessionId = '';
+    private $db = null;
     // Initialisation de la session lors de l'appel de la classe
     public function __construct($db){
 //         Ouverture de la connexion à la BDD et association de cette connexion à la variable $_Connexion_BDD

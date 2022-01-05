@@ -32,7 +32,7 @@ class adminController extends BimpController
 
     public function renderTestTab()
     {
-        $html .= "<div id='retourTestSpeed'></div>";
+        $html = "<div id='retourTestSpeed'></div>";
         $html .= "<br/><br/>Google : <span id='retourGoogle'></span> s";
         $html .= "<br/><br/>Php : <span id='retourPhp'></span> s";
         $html .= "<br/><br/>Mysql : <span id='retourMysql'></span> s";

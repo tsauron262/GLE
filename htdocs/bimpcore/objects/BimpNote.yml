@@ -96,7 +96,7 @@ fields:
             field_name: type_dest
             show_values: 1
     fk_group_dest:
-        label: Destinataire group
+        label: Destinataire groupe
         type: id_object
         object: user_group
         input: 

@@ -33,7 +33,7 @@ var partDataType = {
 };
 
 // GSX V2:
-function gsxLogOut(){
+function gsxLogOut() {
     new BimpAjax("gsxLogOut", {}, null, {url: dol_url_root + '/bimpapple/index.php'});
 }
 
@@ -150,7 +150,7 @@ function gsx_loadRequestModalForm($button, title, requestName, data, params) {
                 return;
             }
             data.coverageOption = $repairForm.find('[name="coverageOption"]').val();
-            data.consumerLaw = $repairForm.find('[name="consumerLaw"]').val();            
+            data.consumerLaw = $repairForm.find('[name="consumerLaw"]').val();
         }
     }
 
@@ -738,7 +738,7 @@ function gsx_addAppleShipmentPart($button, id_shipment) {
         bimp_msg('Erreur - données du composant absentes', 'danger', null, true);
         return;
     }
-    
+
     action_data.parts.push(part_data);
 
     gsx_UpsShipmentAction($button, 'addParts', id_shipment, action_data, '', {

@@ -34,6 +34,7 @@ class ActionsBimpsupport
         global $langs;
         $hookmanager->resArray['searchintosav'] = array('position' => 33, 'img' => "object_chrono@synopsischrono", 'text' => img_object("Chrono", "chrono@synopsischrono") . $langs->trans("SAV"), 'url' => DOL_URL_ROOT . '/bimpsupport/?search=1&object=sav&sall=' . GETPOST('q'), 'label' => 'SAV');
         $hookmanager->resArray['searchintosn'] = array('position' => 32, 'img' => "object_chrono@synopsischrono", 'text' => img_object("Chrono", "chrono@synopsischrono") . $langs->trans("S/N"), 'url' => DOL_URL_ROOT . '/bimpequipment/?search=1&object=equipment&sall=' . GETPOST('q'), 'label' => "S/N");
+        $hookmanager->resArray['searchintosac'] = array('position' => 34, 'img' => "object_chrono@synopsischrono", 'text' => img_object("Chrono", "chrono@synopsischrono") . $langs->trans("SAC"), 'url' => DOL_URL_ROOT . '/bimpsupport/?search=1&object=sac&sall=' . GETPOST('q'), 'label' => "SAC");
         return 0;
     }
 

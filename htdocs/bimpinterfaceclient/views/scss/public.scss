@@ -270,6 +270,11 @@
             box-shadow: 0 0 5px 0 rgba(60, 60, 60, 0.2);
             margin: 0 0 7px;
             width: 100%;
+
+            &.value_missing {
+                box-shadow: 0 0 5px 0 #FF0000;
+                border: none;
+            }
         }
 
         .select2-selection {

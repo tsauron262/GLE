@@ -902,18 +902,27 @@ class BT_ficheInter extends BimpDolObject
         $contrats = Array(
             0 => 'Aucun contrat'
         );
+        
+        $filtres = array(
+            'statut' => 11
+        );
 
         if ((int) $this->getData('fk_soc')) {
-            foreach (BimpCache::getBimpObjectObjects('bimpcontract', 'BContract_contrat', array(
-                'fk_soc' => (int) $this->getData('fk_soc'),
-                'statut' => 11
-                    ), 'rowid', 'desc') as $contrat) {
-                $label = $contrat->getData('label');
-                $contrats[(int) $contrat->id] = $contrat->getRef() . '&nbsp;&nbsp;' . ($label ? ' - ' . $label : '');
-            }
+            $filtres['fk_soc'] = (int) $this->getData('fk_soc');
+        }
+        foreach (BimpCache::getBimpObjectObjects('bimpcontract', 'BContract_contrat', $filtres, 'rowid', 'desc') as $contrat) {
+            $label = $contrat->getData('label');
+            $contrats[(int) $contrat->id] = $contrat->getRef() . '&nbsp;&nbsp;' . ($label ? ' - ' . $label : '');
         }
 
         return $contrats;
+    }
+    
+    public function getLinkedInput(){
+        if ((int) $this->getData('fk_soc')) {
+            return 'select';
+        }
+        return null;
     }
 
     public function getTypeActionCommArray()
@@ -2356,6 +2365,11 @@ class BT_ficheInter extends BimpDolObject
 
                     $dir = $obj->getFilesDir();
                     $filename = $obj->getRef() . '.pdf';
+                    
+                    
+                    if (!file_exists($dir . $filename)) {
+                        $obj->actionGeneratePdf(array());
+                    }
 
                     if (!file_exists($dir . $filename)) {
                         $warnings[] = ucfirst($this->getLabel()) . ' ' . $obj->getLink() . ': fichier PDF absent (' . $dir . $filename . ')';

@@ -228,7 +228,7 @@ function correctAcomptesFacs(BimpDb $bdb, $type = '', $sav_only = false)
     $select_in_lines .= '(SELECT COUNT(fl.rowid) FROM llx_facturedet fl LEFT JOIN llx_facture f ON f.rowid = fl.fk_facture WHERE fl.fk_remise_except = r4.rowid AND f.fk_statut > 0 AND f.datef >= \'2019-07-01\') > 0';
     $select_in_lines .= ')';
 
-    $select_avoir .= 'SELECT COUNT(avoir.rowid) FROM llx_facture avoir WHERE avoir.facnumber = CONCAT(\'' . $ref_prefixe . '\', fa.rowid)';
+    $select_avoir = 'SELECT COUNT(avoir.rowid) FROM llx_facture avoir WHERE avoir.facnumber = CONCAT(\'' . $ref_prefixe . '\', fa.rowid)';
 
     $sql = 'SELECT fa.rowid as id_acompte, fa.facnumber as ref_acompte, fa.datef as date_acompte, soc.code_client, soc.code_compta, fa.total as total_ht, fa.total_ttc';
     $sql .= ' FROM llx_facture fa, llx_societe soc';

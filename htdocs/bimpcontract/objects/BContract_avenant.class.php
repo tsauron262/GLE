@@ -165,10 +165,13 @@ class BContract_avenant extends BContract_contrat {
                 
                 $date_de_fin = new DateTime($parent->displayRealEndDate("Y-m-d"));
                 $date_de_fin->add(new DateInterval('P' . $months . 'M'));
-                $date_de_fin->sub(new DateInterval('P1D'));
+                //$date_de_fin->sub(new DateInterval('P1D'));
+                
+                $date_effect = new DateTime($parent->displayRealEndDate("Y-m-d"));
+                $date_effect->add(new DateInterval("P1D"));
                 
                 BimpTools::merge_array($errors, $this->updateField('want_end_date', $date_de_fin->format('Y-m-d')));
-                BimpTools::merge_array($errors, $this->updateField('date_effect', $parent->displayRealEndDate("Y-m-d")));
+                BimpTools::merge_array($errors, $this->updateField('date_effect', $date_effect->format("Y-m-d")));
                 BimpTools::merge_array($errors, $this->updateField('date_end', $parent->displayRealEndDate("Y-m-d")));
 
             }            
@@ -236,7 +239,16 @@ class BContract_avenant extends BContract_contrat {
         $parent->dol_object->pdf_avenant = $this->id;
         $parent->dol_object->generateDocument('contrat_avenant', $langs);
         
-        return array('errors' => array());
+        $file = $parent->getRef().'/'.$this->getRefAv().'_Ex_OLYS.pdf';
+        $url = DOL_URL_ROOT.'/document.php?modulepart=contract&file='.$file;
+        
+        $success_callback = 'window.open(\'' . $url . '\');';
+
+        return array(
+            'errors'           => array(),
+            'warnings'         => array(),
+            'success_callback' => $success_callback
+        );
     }
     
     public function actionSigned($data, &$success) {

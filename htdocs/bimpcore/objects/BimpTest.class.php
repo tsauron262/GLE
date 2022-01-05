@@ -27,7 +27,7 @@ class BimpTest extends BimpObject{
         $timePhp = $timeFinPhp - $timeFinGoogle;
         
         file_put_contents(PATH_TMP.'/testFile.txt', $str);//=<> 360Mo
-        file_get_contents(PATH_TMP.'/testFile.txt');
+        $inut = file_get_contents(PATH_TMP.'/testFile.txt');
         $timeFinFile = $this->microtime_float();
         $timeFile = $timeFinFile - $timeFinPhp;
         

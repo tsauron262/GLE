@@ -179,7 +179,7 @@ class BC_Input extends BimpComponent
 
         parent::__construct($object, '', $path);
 
-        if ($this->data_type === 'items_list') {
+        if ($this->data_type === 'items_list' && $this->params['type'] !== 'check_list') {
 //            if (is_null($this->params['type']) || $this->params['type'] === 'items_list') {
             $this->params['multiple'] = 1;
             $this->params['sortable'] = (isset($field_params['items_sortable']) ? (int) $field_params['items_sortable'] : 0);
@@ -694,6 +694,7 @@ class BC_Input extends BimpComponent
                             $values[$value] = $this->field_params['values'][$value];
                         }
                     }
+
                     if (!isset($values[$value])) {
                         $values[$value] = $value;
                     }

@@ -437,33 +437,28 @@ class BS_Ticket extends BimpObject
         if ($this->isLoaded()) {
             if ($this->can('view')) {
                 $url = $this->getPublicUrl();
-                $buttons[] = array(
-                    'label'   => 'Voir le détail',
-                    'icon'    => 'fas_eye',
-                    'onclick' => 'window.location = \'' . $url . '\''
-                );
+
+                if ($url) {
+                    $buttons[] = array(
+                        'label'   => 'Voir le détail',
+                        'icon'    => 'fas_eye',
+                        'onclick' => 'window.location = \'' . $url . '\''
+                    );
+                }
             }
         }
 
         return $buttons;
     }
 
-    public function getPublicUrl()
+    public function getPublicUrlParams()
     {
-        if ($this->isLoaded()) {
-            $base_url = BimpCore::getConf('interface_client_base_url', '');
-
-            if ($base_url) {
-                return $base_url . '?tab=tickets&content=card&id_ticket=' . $this->id;
-            }
-        }
-
-        return '';
+        return 'tab=tickets&content=card&id_ticket=' . $this->id;
     }
 
-    public function getPublicListPageUrl()
+    public function getPublicListPageUrlParams()
     {
-        return DOL_URL_ROOT . '/bimpinterfaceclient/client.php?tab=tickets';
+        return 'tab=tickets';
     }
 
     public function getRefProperty()
@@ -822,7 +817,7 @@ class BS_Ticket extends BimpObject
                         $msg = 'Bonjour,<br/><br/>';
                         $msg .= 'Nous vous confirmons que votre ticket support n° ' . $this->getData('ticket_number') . ' a été pris en compte par nos équipes.<br/>';
                         $msg .= '<b>Responsable de votre demande : </b>' . $user->firstname . ' ' . $user->lastname . '<br/><br/>';
-                        $url = $this->getPublicUrl();
+                        $url = $this->getPublicUrl(false);
 
                         if ($url) {
                             $msg .= '<a href="' . $url . '">Cliquez ici</a> pour accéder au détail de ce ticket depuis notre site www.bimp.fr';
@@ -1079,7 +1074,7 @@ class BS_Ticket extends BimpObject
                         $subject = 'BIMP - Mise à jour de votre ticket support n°' . $this->getData('ticket_number');
                         $msg = 'Bonjour,<br/><br/>';
                         $msg .= 'Votre ticket support n°<b>' . $this->getData('ticket_number') . '</b> est passé au statut "' . self::$status_list[(int) $this->getData('status')]['label'] . '".<br/><br/>';
-                        $public_url = $this->getPublicUrl();
+                        $public_url = $this->getPublicUrl(false);
                         if ($public_url) {
                             $msg .= '<a href="' . $public_url . '">Cliquez ici</a> pour accéder au détail de votre ticket support sur notre site www.bimp.fr';
                         }

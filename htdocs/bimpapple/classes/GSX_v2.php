@@ -61,7 +61,9 @@ class GSX_v2 extends GSX_Const
                 $oldShipTo = array('1111748', '1000566', '462140', '1139941', '1000565', '1000483', '494685', '466183', '484926', '1040727', '1046076', '1046075', '1187559', '1187562', '1187561', '1187560', '1199659');
                 if(in_array($this->shipTo, $oldShipTo)){
                     $this->soldTo = BimpTools::addZeros('897316', self::$numbersNumChars);
-                }else
+                }elseif (isset($user->array_options['options_apple_service']) && (string) $user->array_options['options_apple_service']) {
+                    $this->soldTo = BimpTools::addZeros($user->array_options['options_apple_service'], self::$numbersNumChars);
+                } else 
                     $this->soldTo = BimpTools::addZeros(self::$default_ids['sold_to'], self::$numbersNumChars);
 //                die('fffff'.$this->soldTo.'l'.$this->shipTo);
                 break;
@@ -799,6 +801,100 @@ class GSX_v2 extends GSX_Const
                         )
                     )), $response_headers, array('url_params' => array('documentType' => 'returnsPackingList'))
         );
+    }
+
+    // Requêtes - Réservations: 
+
+    public function fetchReservationsSummary($shipTo, $from, $to, $productCode = '')
+    {
+        if (self::$mode === 'test') {
+            $shipTo = BimpTools::addZeros('897316', 10);
+        } else {
+            $shipTo = BimpTools::addZeros($shipTo, 10);
+        }
+
+        $params = array(
+            'shipToCode'    => $shipTo,
+            'toDate'        => $to,
+            'fromDate'      => $from,
+            'currentStatus' => 'RESERVED'
+        );
+
+        if ($productCode) {
+            $params['product'] = array(
+                'productCode' => $productCode
+            );
+        }
+
+        return $this->exec('fetchReservationsSummary', array(
+                    "shipToCode"    => $shipTo,
+                    "fromDate"      => $from,
+                    "toDate"        => $to,
+                    "productCode"   => $productCode,
+                    "currentStatus" => "RESERVED"
+        ));
+    }
+
+    public function fetchReservation($shipTo, $reservation_id)
+    {
+        if (self::$mode === 'test') {
+            $this->shipTo = BimpTools::addZeros('897316', 10);
+        } else {
+            $this->shipTo = BimpTools::addZeros($shipTo, 10);
+        }
+
+        return $this->exec('fetchReservation', array(
+                    'reservationId' => $reservation_id
+        ));
+    }
+
+    public function fetchAvailableSlots($shipTo, $product_code)
+    {
+        if (self::$mode === 'test') {
+            $this->shipTo = BimpTools::addZeros('897316', 10);
+        } else {
+            $this->shipTo = BimpTools::addZeros($shipTo, 10);
+        }
+
+        return $this->exec('fetchAvailableSlots', array(
+                    'productCode' => $product_code
+        ));
+    }
+
+    public function createReservation($shipTo, $params)
+    {
+        if (self::$mode === 'test') {
+            $shipTo = BimpTools::addZeros('897316', 10);
+        } else {
+            $shipTo = BimpTools::addZeros($shipTo, 10);
+        }
+
+        $params['shipToCode'] = BimpTools::addZeros($shipTo, 10);
+
+        if (!isset($params['emailLanguageCode'])) {
+            $params['emailLanguageCode'] = 'fr_fr';
+        }
+
+        return $this->exec('createReservation', $params);
+    }
+
+    public function cancelReservation($shipTo, $reservationId)
+    {
+        if (self::$mode === 'test') {
+            $shipTo = BimpTools::addZeros('897316', 10);
+        } else {
+            $shipTo = BimpTools::addZeros($shipTo, 10);
+        }
+
+        $params = BimpTools::overrideArray(array(
+                    'cancelReason' => 'CUSTOMER_CANCELLED'
+                        ), $params);
+
+        $params['reservationId'] = $reservationId;
+        $params['modifiedStatus'] = 'CANCELLED';
+        $params['shipToCode'] = BimpTools::addZeros($shipTo, 10);
+        
+        return $this->exec('updateReservation', $params);
     }
 
     // Requêtes - Divers:

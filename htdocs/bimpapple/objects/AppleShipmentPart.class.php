@@ -352,7 +352,7 @@ class AppleShipmentPart extends BimpObject
                     $after_html .= '</span>';
 
                     $html .= '<div style="margin-bottom: 10px;">';
-                    $html .= BimpRender::renderSingleLineForm($inputs, array(
+                    $html .= BimpForm::renderSingleLineForm($inputs, array(
                                 'title'      => 'Ajout rapide',
                                 'icon'       => 'fas_plus-circle',
                                 'after_html' => $after_html

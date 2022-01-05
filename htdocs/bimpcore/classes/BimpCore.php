@@ -32,7 +32,8 @@ class BimpCore
             '/bimpcore/views/js/page.js',
             '/bimpcore/views/js/table2csv.js',
             '/bimpuserconfig/views/js/buc.js',
-            '/bimpcore/views/js/bimpcore.js'
+            '/bimpcore/views/js/bimpcore.js',
+            '/bimpapi/views/js/bimp_api.js'
         ),
         'css' => array(
             '/includes/jquery/plugins/jpicker/css/jPicker-1.1.6.css',
@@ -433,17 +434,18 @@ class BimpCore
     }
 
     // Gestion des logs:
-    
-    public static function addLogs_debug_trace($msg){
+
+    public static function addLogs_debug_trace($msg)
+    {
         $bt = debug_backtrace(null, 30);
-        if(is_array($msg))
+        if (is_array($msg))
             $msg = implode(' - ', $msg);
-        static::addLogs_extra_data([$msg => BimpTools::getBacktraceArray($bt)]);    
+        static::addLogs_extra_data([$msg => BimpTools::getBacktraceArray($bt)]);
     }
 
     public static function addLogs_extra_data($array)
     {
-        if(!is_array($array))
+        if (!is_array($array))
             $array = array($array);
         static::$logs_extra_data = BimpTools::merge_array(static::$logs_extra_data, $array);
     }
@@ -459,7 +461,7 @@ class BimpCore
         if (!$bimp_logs_locked) {
             $bimp_logs_locked = 1;
             $extra_data = BimpTools::merge_array(static::$logs_extra_data, $extra_data);
-            if (BimpCore::isModeDev() && (int) self::getConf('bimpcore_print_logs', 1)) {
+            if (BimpCore::isModeDev() && (int) self::getConf('bimpcore_print_logs', 1) && !defined('NO_BIMPLOG_PRINTS')) {
                 $bt = debug_backtrace(null, 30);
 
                 $html = 'LOG ' . Bimp_Log::$levels[$level]['label'] . '<br/><br/>';
@@ -490,8 +492,6 @@ class BimpCore
             }
 
             $errors = array();
-
-
 
             if (defined('ID_ERP'))
                 $extra_data['id_erp'] = ID_ERP;
@@ -566,7 +566,7 @@ class BimpCore
         return $errors;
     }
 
-    // Chargements librairies: 
+    // Chargements librairies:
 
     public static function loadPhpExcel()
     {
@@ -605,5 +605,10 @@ class BimpCore
         }
 
         return self::$html_purifier;
+    }
+
+    public static function loadBimpApiLib()
+    {
+        require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
     }
 }

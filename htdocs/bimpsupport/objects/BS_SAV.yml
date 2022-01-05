@@ -115,6 +115,32 @@ objects:
             id_object: 
                 field_value: id_user_client
                 
+    signature_pc: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object:
+                module: bimpcore
+                name: BimpSignature
+            id_object: 
+                field_value: id_signature_pc
+                
+    signature_resti: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object:
+                module: bimpcore
+                name: BimpSignature
+            id_object: 
+                field_value: id_signature_resti
+                
+    sac: 
+        relation: hasMany
+        delete: 0
+        instance: 
+            bimp_object: BS_Sac
+            
 associations: 
     propales:
         object: propal
@@ -147,7 +173,11 @@ fields:
             array: centres
         input: 
             options: 
-                array: userCentres
+                callback: 
+                    method: getListCentre
+                    params:
+                        - code_centre
+                        - 1
         required: 1
         default_value: 
             callback: getDefaultCodeCentre
@@ -158,7 +188,11 @@ fields:
         input: 
             help: Laisser vide si identique au centre de prise en charge
             options: 
-                array: userCentres
+                callback: 
+                    method: getListCentre
+                    params:
+                        - code_centre_repa
+                        - 1
         default_value: 
             callback: getDefaultCodeCentreRepa
         depends_on: code_centre
@@ -216,6 +250,8 @@ fields:
         object: contact
         values: 
             array: client_contacts
+        input: 
+            help: Obligatoire si client pro
         depends_on: id_client
         display_if:
             field_name: id_client
@@ -415,6 +451,27 @@ fields:
         type: int
         values: 
             array: bon_restit_raison
+    id_signature_pc: 
+        label: Signature prise en charge
+        type: id_object
+        object: signature_pc
+    signature_pc_params: 
+        label: Paramètres signature PC
+        type: json
+    id_signature_resti: 
+        label: Signature restitution
+        type: id_object
+        object: signature_resti
+    signature_resti_params: 
+        label: Paramètres signature restitution
+        type: json
+        
+    sacs: 
+        label: Sac d'emballage
+        type: items_list
+        items_braces: 1
+        items_data_type: id_object
+        object: sac
         
 forms: 
     default:
@@ -469,6 +526,7 @@ forms:
               value: 1
             - field: id_ticket
               hidden: 1
+            - field: sacs
               
     prise_en_charge: 
         rows: 
@@ -513,6 +571,7 @@ forms:
             - field: save_option
             - field: sav_pro
             - field: prestataire_number
+            - field: sacs
               
     edit: 
         rows: 
@@ -530,6 +589,7 @@ forms:
             - field: system
             - field: login_admin
             - field: pword_admin
+            - field: sacs
             
     public_edit: 
         rows: 
@@ -663,6 +723,29 @@ forms:
               content: 
                   callback: displayFactureAmountToPay
               input_name: inut
+            - custom: 1
+              label: Créer la fiche signature
+              input_name: create_signature
+              input: 
+                  type: toggle
+              value: 
+                  callback: needSignaturePropal
+            - field: id_contact
+              label: Contact signataire
+              display_if: 
+                  field_name: create_signature
+                  show_values: 1
+            - custom: 1
+              label: Contenu e-mail pour la signature à distance du devis
+              input_name: email_content
+              input: 
+                  type: html
+                  help: "Vous pouvez utiliser les mot-clés: {NOM_DOCUMENT}, {NOM_PIECE} (le remplacement inclus l'article le / la / l'), {REF_PIECE} et {LIEN_ESPACE_CLIENT}.<br/>Le devis sera automatiquement joint à l'email"
+              value: 
+                  callback: getDefaultSignDistEmailContent
+              display_if: 
+                  field_name: create_signature
+                  show_values: 1
             
     resolution: 
         rows: 
@@ -700,6 +783,8 @@ forms:
               display_if: 
                   field_name: bon_resti_raison
                   show_values: 99
+              show:
+                  callback: isGratuit
               
     equipment: 
         rows: 
@@ -776,7 +861,12 @@ forms:
                   type: select
                   options: 
                       array: rdv_cancel_reasons
-              
+                      
+    signature: 
+        rows: 
+            - field: id_contact
+              label: Contact signataire
+        
 fields_tables: 
     infos: 
         title: Informations
@@ -833,6 +923,11 @@ fields_tables:
               display: card
               show: 
                   field_value: id_facture
+    sac:
+        title: Emballage
+        icon: fas_shopping-bag
+        rows: 
+            - field: sacs
               
     client: 
         title: Client
@@ -923,11 +1018,29 @@ fields_tables:
             - field: extra_infos
               label: Informations supplémentaires
               
+    signatures: 
+        title: Signatures
+        icon: fas_signature
+        rows: 
+            - field: id_signature_pc
+              display: card
+              show: 
+                  field_value: id_signature_pc
+            - field: 'propal:id_signature'
+              label: Signature Devis
+              display: card
+              show: 
+                  callback: showPropalSignature
+            - field: id_signature_resti
+              display: card
+              show: 
+                  field_value: id_signature_resti
+              
 views: 
     default: 
         title: 
             callback: getRef
-        objects_change_reload: BS_SavProduct,BS_ApplePart,Bimp_Paiement
+        objects_change_reload: BS_SavProduct,BS_ApplePart,Bimp_Paiement,BimpSignature
         rows:
             - cols: 
                   - type: object_header
@@ -942,6 +1055,12 @@ views:
                     col_lg: 6
                     col_md: 6
                     fields_table:
+                        name: signatures
+                        
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table:
                         name: client
                         
                   - type: fields_table
@@ -949,6 +1068,11 @@ views:
                     col_md: 6
                     fields_table:
                         name: facturation
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table:
+                        name: sac
             - cols: 
                   - type: fields_table
                     col_lg: 6
@@ -972,9 +1096,9 @@ views:
             callback: getRef
         delete_btn: 1
         edit_form: edit
-        objects_change_reload: BS_SavProduct,BS_ApplePart,Bimp_Paiement
+        objects_change_reload: BS_SavProduct,BS_ApplePart,Bimp_Paiement,BimpSignature
         rows:
-            - cols: 
+            - cols:                       
                 - type: fields_table
                   col_lg: 6
                   col_md: 6
@@ -985,13 +1109,25 @@ views:
                   col_lg: 6
                   col_md: 6
                   fields_table:
+                      name: signatures
+                      
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table:
                       name: client
-                  
+                      
                 - type: fields_table
                   col_lg: 6
                   col_md: 6
                   fields_table:
                       name: facturation
+                      
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table:
+                        name: sac
             - cols: 
                 - type: custom
                   col_lg: 6
@@ -1177,6 +1313,14 @@ searches:
               alias: r
               on: a.id = r.id_sav
                       
+signatures: 
+    sav_pc: 
+        label: Bon de prise en charge SAV
+    sav_resti: 
+        label: Bon de restitution SAV
+    sav_facture: 
+        label: Facture SAV
+        
 pages: 
     default: 
         nav_tabs: 

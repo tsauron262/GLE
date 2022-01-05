@@ -39,7 +39,7 @@ class BC_FiltersPanel extends BC_Panel
         $this->data['list_type'] = $this->list_type;
         $this->data['list_name'] = $this->list_name;
 
-        $this->values = $this->params['default_values'];
+//        $this->values = $this->params['default_values'];
 
         if (BimpTools::isSubmit('id_current_list_filters')) {
             $this->id_list_filters = (int) BimpTools::getValue('id_current_list_filters', 0);
@@ -53,7 +53,7 @@ class BC_FiltersPanel extends BC_Panel
 
     public function fetchFilters()
     {
-        $this->bc_Filters = array();
+        $this->bc_filters = array();
         $filters = array();
 
         if (BimpObject::objectLoaded($this->userConfig)) {
@@ -362,7 +362,7 @@ class BC_FiltersPanel extends BC_Panel
                     )
         ));
 
-        $html .= '<div class="panelFooterButtons" style="text-align: right">';
+        $html = '<div class="panelFooterButtons" style="text-align: right">';
         $html .= BimpRender::renderDropDownButton('Action', $items, array(
                     'type' => 'default',
                     'icon' => 'fas_cogs'

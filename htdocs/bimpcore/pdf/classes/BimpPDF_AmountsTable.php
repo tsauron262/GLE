@@ -15,8 +15,7 @@ class BimpPDF_AmountsTable extends BimpPDF_Table
         'reduc'     => array('label' => 'Remise', 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;'),
         'total_ht'  => array('label' => 'Total HT', 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;'),
         'tva'       => array('label' => 'TVA', 'width_mm' => 12, 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;'),
-        'total_ttc' => array('label' => 'Total TTC', 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;'),
-        'pu_remise' => array('label' => 'P.U remisé', 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;')
+        'total_ttc' => array('label' => 'Total TTC', 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;')
     );
 
     public function __construct($pdf)

@@ -28,7 +28,7 @@ class Bimp_ImportPrelevementLine extends BimpObject
         $date = '';
         $facture = 0;
         if(isset($datas[7]))
-            $price = str_replace(" ", "", $datas[7]);
+            $price = str_replace(array(" ", " "), "", $datas[7]);
         else{
             $errors[] = 'Prix invalide';
         }

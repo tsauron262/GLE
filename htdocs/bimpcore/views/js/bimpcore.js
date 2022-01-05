@@ -63,7 +63,7 @@ function onSocieteSiretOrSirenChange($input, field, value) {
         $form.find('[name="town"]').addClass('disabled');
         $form.find('[name="phone"]').addClass('disabled');
         $form.find('[name="tva_intra"]').addClass('disabled');
-//        $form.find('[name="outstanding_limit_credit_safe"]').addClass('disabled');
+        $form.find('[name="outstanding_limit_credit_safe"]').addClass('disabled');
         $form.find('[name="capital"]').addClass('disabled');
         $form.find('[name="ape"]').addClass('disabled');
         $form.find('[name="notecreditsafe"]').addClass('disabled');
@@ -94,6 +94,7 @@ function onSocieteSiretOrSirenChange($input, field, value) {
                 $form.find('[name="phone"]').removeClass('disabled');
                 $form.find('[name="tva_intra"]').removeClass('disabled');
 //                $form.find('[name="outstanding_limit"]').removeClass('disabled');
+                $form.find('[name="outstanding_limit_credit_safe"]').removeClass('disabled');
                 $form.find('[name="capital"]').removeClass('disabled');
                 $form.find('[name="ape"]').removeClass('disabled');
                 $form.find('[name="notecreditsafe"]').removeClass('disabled');
@@ -420,6 +421,7 @@ var BimpUserRightsTable = new BimpUserRightsTable();
 function getBadge(text, size, style) {
     return '<span class="badge badge-pill badge-' + style + '" style="size:' + size + '">' + text + '</span>';
 }
+
 
 $(document).ready(function () {
     $('body').on('formLoaded', function (e) {

@@ -277,6 +277,17 @@ fields:
             options:
                 callback: getRibArray
         default_value: 0
+        
+    expertise:
+        label: Expertise Bimp
+        dol_extra_field: 1
+        input:
+            type: select
+            options:
+                array: expertise
+        default_value: 0
+#        required: 1
+        
     
 forms: 
     contact:

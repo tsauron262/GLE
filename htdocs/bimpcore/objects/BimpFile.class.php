@@ -52,10 +52,29 @@ class BimpFile extends BimpObject
         return $this->canClientCreate();
     }
 
+    public function canEditField($field_name)
+    {
+        if ($this->isLoaded() && $field_name == 'is_deletable') {
+            global $user;
+
+            if ($user->admin) {
+                return 1;
+            }
+
+            return 0;
+        }
+
+        return parent::canEditField($field_name);
+    }
+
     // Getters booléens: 
 
     public function isDeletable($force_delete = false, &$errors = array())
     {
+        if (!$force_delete && !(int) $this->getData('is_deletable')) {
+            return 0;
+        }
+        
         return (int) (!(int) $this->getData('deleted'));
     }
 
@@ -200,7 +219,7 @@ class BimpFile extends BimpObject
                 return 1;
             return 0;
         }
-        if ($default_value = 'default_value')
+        if ($default_value == 'default_value')
             return 2;
         return 1;
     }
@@ -400,6 +419,7 @@ class BimpFile extends BimpObject
         } elseif (!BimpObject::objectLoaded($object)) {
             $errors[] = 'ID ' . $object->getLabel('of_the') . ' absent';
         }
+        $dst_file = '';
 
         $src_file = $this->getFilePath();
 
@@ -613,7 +633,7 @@ class BimpFile extends BimpObject
 
         if (!count($errors)) {
             $current_name = (string) $this->getInitData('file_name');
-            if (!is_null($current_name)) {
+            if ($current_name != '') {
                 $new_name = (string) $this->getData('file_name');
                 if ($new_name) {
                     if ($new_name !== $current_name) {

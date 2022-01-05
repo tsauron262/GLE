@@ -97,6 +97,7 @@ class BC_Field extends BimpComponent
         'string', 'text', 'password', 'html', 'id', 'id_object', 'id_parent', 'time', 'date', 'datetime', 'color'
     );
     public static $has_total_types = array('qty', 'money', 'timer');
+    public static $not_searchable_types = array('object_filters');
 
     public function __construct(BimpObject $object, $name, $edit = false, $path = 'fields', $force_edit = false)
     {
@@ -161,6 +162,8 @@ class BC_Field extends BimpComponent
         $current_bc = $prev_bc;
     }
 
+    // Getters booléens: 
+    
     public function isEditable()
     {
         if (!$this->isObjectValid()) {
@@ -173,6 +176,31 @@ class BC_Field extends BimpComponent
     public function isUsed()
     {
         return (!(int) $this->params['unused']);
+    }
+
+    public function isSearchable()
+    {
+        if (!$this->params['searchable']) {
+            return 0;
+        }
+
+        $type = $this->getParam('type', 'string');
+
+        if (in_array($type, self::$not_searchable_types)) {
+            return 0;
+        }
+
+        if ($type === 'items_list') {
+            if (!(int) $this->getParam('items_braces', 0)) {
+                return 0;
+            }
+
+            if (in_array($this->getParam('items_data_type'), self::$not_searchable_types)) {
+                return 0;
+            }
+        }
+
+        return 1;
     }
 
     // Rendus HTML principaux: 
@@ -271,6 +299,7 @@ class BC_Field extends BimpComponent
             $history_html = BimpRender::renderObjectFieldHistoryPopoverButton($this->object, $this->name_prefix . $this->name, 15, $history_user);
         }
 
+        $html = '';
         if ($history_html) {
             $html .= '<div style="padding-left: 32px;">';
             $html .= '<div style="float: left; margin-left: -28px; margin-top: 4px">';
@@ -591,6 +620,38 @@ class BC_Field extends BimpComponent
                 return 120;
         }
     }
+    
+    public static function getFieldObject($base_object, &$field_name, &$errors = array())
+    {
+        $field_object = null;
+        $children = explode(':', $field_name);
+        $field_name = array_pop($children);
+
+        if (is_a($base_object, 'BimpObject')) {
+            if ((string) $field_name) {
+                $field_object = $base_object;
+
+                if (count($children)) {
+                    foreach ($children as $child_name) {
+                        $child = $field_object->getChildObject($child_name);
+
+                        if (is_a($child, 'BimpObject')) {
+                            $field_object = $child;
+                        } else {
+                            $errors[] = 'Instance enfant "' . $child_name . '" invalide pour l\'objet "' . $field_object->object_name . '"';
+                            break;
+                        }
+                    }
+                }
+            } else {
+                $errors[] = 'Nom du champ absent';
+            }
+        } else {
+            $errors[] = 'Object associé invalide';
+        }
+
+        return $field_object;
+    }
 
     // Display_if / Depends_on: 
 
@@ -829,7 +890,7 @@ class BC_Field extends BimpComponent
             return '';
         }
 
-        if (!$this->params['searchable']) {
+        if (!$this->isSearchable()) {
             return '';
         }
 
@@ -856,7 +917,7 @@ class BC_Field extends BimpComponent
             }
             $content = BimpInput::renderSearchListInputFromConfig($this->object, $input_path, $input_name, $this->value, $this->params['search']['option']);
         } elseif ($search_data['search_type'] === 'values_range') {
-            $content .= '<div>';
+            $content = '<div>';
             $input_options = $search_data['input_options'];
             $input_options['addon_left'] = 'Min';
             $content .= BimpInput::renderInput($search_data['input_type'], $input_name . '_min', null, $input_options);

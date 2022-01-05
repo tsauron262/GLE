@@ -158,7 +158,8 @@ fields:
         type: id_object
         object: contrat
         input:
-            type: select
+            type: 
+                callback: getLinkedInput
             options:
                 array: contratsClient
         depends_on: fk_soc
@@ -237,7 +238,8 @@ fields:
         items_braces: 1
         object: commande
         input:
-            type: select
+            type: 
+                callback: getLinkedInput
             options: 
                 array: commandesClient
         depends_on: fk_soc

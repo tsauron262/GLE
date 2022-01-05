@@ -2,6 +2,7 @@
 
 class BimpTools
 {
+    public $output = '';
 
     public static $currencies = array(
         'EUR' => array(
@@ -1134,7 +1135,7 @@ class BimpTools
             foreach ($filters as $field => $filter) {
                 $sql_filter = self::getSqlFilter($field, $filter, $default_alias);
 
-                if ($sql_filter) {
+                if ($sql_filter !== '') {
                     if (!$first_loop) {
                         $sql .= ' AND ';
                     } else {
@@ -1829,7 +1830,7 @@ class BimpTools
 
     // Gestion des dates: 
 
-    public function printDate($date, $balise = "span", $class = '', $format = 'd/m/Y H:i:s', $format_mini = 'd / m / Y')
+    public function printDate($date, $balise = "span", $class = '', $format = 'd / m / Y H:i:s', $format_mini = 'd / m / Y')
     {
         if ($date == '')
             return '';
@@ -1842,15 +1843,21 @@ class BimpTools
             $date = $date->getTimestamp();
         }
 
-        if (is_array($class))
+        if (is_array($class)) {
             $class = explode(" ", $class);
+        }
 
         $html = '<' . $balise;
-        if ($format != $format_mini)
+
+        if ($format != $format_mini) {
             $html .= ' title="' . date($format, $date) . '"';
-        if ($class != '')
+        }
+
+        if ($class != '') {
             $html .= ' class="' . $class . '"';
+        }
         $html .= '>' . date($format_mini, $date) . '</' . $balise . '>';
+
         return $html;
     }
 
@@ -2383,7 +2390,7 @@ class BimpTools
         return 'http://placehold.it/' . $size . '/' . $color . '/fff&amp;text=' . $text;
     }
 
-    public function getBadge($text, $size = 35, $style = 'info', $popover = '')
+    public static function getBadge($text, $size = 35, $style = 'info', $popover = '')
     {
         return '<span class="badge badge-pill badge-' . $style . (($popover != '') ? ' bs-popover' : '') . '" ' . (($popover != '') ? BimpRender::renderPopoverData($popover) : '') . ' style="size:' . $size . '">' . $text . '</span>';
     }
@@ -2679,6 +2686,19 @@ class BimpTools
         }
     }
 
+    public static function makeUrlParamsFromArray($url_params)
+    {
+        $str = '';
+
+        if (is_array($url_params)) {
+            foreach ($url_params as $key => $value) {
+                $str .= ($str ? '&' : '') . $key . '=' . urlencode($value);
+            }
+        }
+
+        return $str;
+    }
+
     public static function makeUrlFromConfig(BimpConfig $config, $path, $default_module, $default_controller)
     {
         $url = DOL_URL_ROOT . '/';
@@ -2701,14 +2721,15 @@ class BimpTools
 
         if ($url && isset($params['url_params'])) {
             $url_params = $config->getCompiledParams($path . '/url_params');
-            foreach ($url_params as $name => $value) {
-                if ((string) $name && (string) $value) {
+
+            if (is_array($url_params) && !empty($url_params)) {
+                $params_str = self::makeUrlParamsFromArray($url_params);
+
+                if ($params_str) {
                     if (!preg_match('/\?/', $url)) {
                         $url .= '?';
-                    } else {
-                        $url .= '&';
                     }
-                    $url .= $name . '=' . $value;
+                    $url .= $params_str;
                 }
             }
         }
@@ -3058,6 +3079,10 @@ class BimpTools
     public static $nbMax = 15*4;
     
     public static function lockNum($type, $nb = 0, $errors = array()){
+        if (BimpCore::isModeDev()) { // Flo: ça plante sur ma version de dev... 
+            return;
+        }
+        
         if(in_array($type, static::$bloquages))//On a deja un verrous pour cette clef
             return true;
         
@@ -3086,19 +3111,24 @@ class BimpTools
         usleep(3000000);
         $text2 = file_get_contents($file);
         if ($text == $text2){
-            $autreInstanceBloquage = static::isBloqued($type, true);
-            if(!$autreInstanceBloquage){
+            if(defined('ID_ERP')){
+                $autreInstanceBloquage = static::isBloqued($type, true);
+                if(!$autreInstanceBloquage){
+                    static::$bloquages[] = $type;
+                    return 1;
+                }
+                else{
+                    unlink($file); 
+                    $errors[] = 'Fichier lock d\'une autre instance : '.$autreInstanceBloquage;
+                    BimpCore::addlog('Probléme lockNum '.$type, Bimp_Log::BIMP_LOG_URGENT, null, null, array('Errors'=>$errors));
+                    return static::lockNum($type, $nb, $errors);
+                }
+            }
+            else{
                 static::$bloquages[] = $type;
                 return 1;
             }
-            else{
-                unlink($file); 
-                $errors[] = 'Fichier lock d\'une autre instance : '.$autreInstanceBloquage;
-                BimpCore::addlog('Probléme lockNum '.$type, Bimp_Log::BIMP_LOG_URGENT, null, null, array('Errors'=>$errors));
-                return static::lockNum($type, $nb, $errors);
-            }
-            
-            
+                    
         }
         else{
             $errors[] = 'Fichier diférent de celui attendue';

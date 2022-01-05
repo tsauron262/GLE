@@ -27,7 +27,7 @@ class BimpRevision
 
     static function convertRef($oldRef, $table)
     {
-        global $conf;
+        global $conf, $db;
         $oldRef = self::getRefMax($oldRef, $table);
         if ($oldRef) {
             $oldRef[1] = str_replace(self::$old_separateur, self::$separateur, $oldRef[1]);
@@ -72,6 +72,9 @@ class BimpRevisionPropal extends BimpRevision
 {
 
     private static $oldRefCli = "";
+    public $propalSui = null;
+    public $propalPre = null;
+    public $propal = null;
 
     public function __construct($propal)
     {

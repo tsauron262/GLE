@@ -444,12 +444,34 @@ fields:
         label: Limite recommandée par Crédit SAFE
         type: money
         edit: 0
+        
+    outstanding_limit_credit_check:    
+        label: Limite Crédit Chek
+        type: money
+        history: 1
+        default_value: -1
+        
+    date_check_credit_safe:
+        label: Date de verification Crédit SAFE
+        type: datetime
+        dol_extra_field: 1
             
     outstanding_limit_atradius: 
         label: Limite de crédit Atradius
         type: money
         history: 1
         default_value: -1
+     
+    outstanding_limit_icba:
+        label: Limite de crédit ICBA 
+        type: money
+        history: 1
+        default_value: -1
+        
+    date_atradius:
+        label: Date de dépôt du Rapport
+        type: datetime
+    
         
     fk_account: 
         label: Compte bancaire
@@ -718,23 +740,23 @@ fields_tables:
                   callback: displayOutstanding
               show: 
                   callback: isClient
-            - field: outstanding_limit_atradius
-              edit: 1
-              show: 
-                  callback: 
-                      method: canViewField
-                      params: 
-                          - outstanding_limit_atradius
-            - field: outstanding_limit
-              edit: 1
-              show: 
-                  callback: isClient
-            - field: outstanding_limit_credit_safe
-              edit: 0
-            - label: Lettre Credit SAFE
+                  
+            - field: notecreditsafe
+            - custom: 1 
+              label: Lettre Crédit Safe  
               value:
                   callback: getCreditSafeLettre
-            - field: notecreditsafe
+            - field: date_check_credit_safe
+            - field: outstanding_limit_credit_safe
+              edit: 1
+            - field: outstanding_limit_icba
+              edit: 1
+            - field: outstanding_limit_credit_check
+              edit: 1
+            - field: outstanding_limit_atradius
+              edit: 1
+            - field: outstanding_limit
+              edit: 1
             - field: mode_reglement
               edit: 1
             - field: cond_reglement
@@ -1119,6 +1141,7 @@ forms:
 filters: 
     accounting_account:
         label: Compte comptable filliale
+        
     accounting_account_fournisseur:
         label: Compte comptable filliale
                 

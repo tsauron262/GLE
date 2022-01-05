@@ -397,7 +397,7 @@ class BimpStruct
         $config->setCurrentPath($path);
 
         $rows = $config->getFromCurrentPath('', array(), true, 'array');
-
+        
         foreach ($rows as $idx_row => $row) {
             $config->setCurrentPath($path);
             $html .= '<div class="row">';

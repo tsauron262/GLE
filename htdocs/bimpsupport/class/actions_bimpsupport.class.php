@@ -141,7 +141,7 @@ class ActionsBimpsupport
             $tabResult = array();
 
             if (!$mode_eco) {
-                $result2 = $db->query("SELECT COUNT(id) as nb, code_centre as CentreVal, status as EtatVal FROM `" . MAIN_DB_PREFIX . "bs_sav` WHERE 1 " . (count($centreUser) > 0 ? "AND code_centre IN ('" . implode($centreUser, "','") . "')" : "") . " GROUP BY code_centre, status");
+                $result2 = $db->query("SELECT COUNT(id) as nb, code_centre as CentreVal, status as EtatVal FROM `" . MAIN_DB_PREFIX . "bs_sav` WHERE status >= -1 " . (count($centreUser) > 0 ? "AND code_centre IN ('" . implode($centreUser, "','") . "')" : "") . " GROUP BY code_centre, status");
                 while ($ligne2 = $db->fetch_object($result2)) {
                     $tabResult[$ligne2->CentreVal][$ligne2->EtatVal] = $ligne2->nb;
                     if (!isset($tabResult['Tous'][$ligne2->EtatVal]))
@@ -160,22 +160,24 @@ class ActionsBimpsupport
                     ' . img_object("SAV", "drap0@synopsistools") . ' ' . $ligne3['label'] . '</a></span><br/>';
 
                 foreach ($tabStatutSav as $idStat => $tabStat) {
-                    if ($mode_eco) {
-                        $nb = '';
-                    } else {
-                        $nb = (isset($tabResult[$centre]) && isset($tabResult[$centre][$idStat]) ? $tabResult[$centre][$idStat] : 0);
-                        if ($nb == "")
-                            $nb = "0";
-                    }
+                    if($idStat >= -1){
+                        if ($mode_eco) {
+                            $nb = '';
+                        } else {
+                            $nb = (isset($tabResult[$centre]) && isset($tabResult[$centre][$idStat]) ? $tabResult[$centre][$idStat] : 0);
+                            if ($nb == "")
+                                $nb = "0";
+                        }
 
-                    $return .= '<span href="#" title="" class="vsmenu" style="font-size: 10px; margin-left:12px">';
-                    if ($mode_eco) {
-                        $nbStr = '';
-                    } else {
-                        $nbStr = "<span style='width: 33px; display: inline-block; text-align:right'>" . $nb . "</span> : ";
+                        $return .= '<span href="#" title="" class="vsmenu" style="font-size: 10px; margin-left:12px">';
+                        if ($mode_eco) {
+                            $nbStr = '';
+                        } else {
+                            $nbStr = "<span style='width: 33px; display: inline-block; text-align:right'>" . $nb . "</span> : ";
+                        }
+                        $return .= "<a href='" . $href . "&status=" . urlencode($idStat) . $hrefFin . "'>" . $nbStr . $tabStat['label'] . "</a>";
+                        $return .= "</span><br/>";
                     }
-                    $return .= "<a href='" . $href . "&status=" . urlencode($idStat) . $hrefFin . "'>" . $nbStr . $tabStat['label'] . "</a>";
-                    $return .= "</span><br/>";
                 }
                 $return .= '</div>';
             }

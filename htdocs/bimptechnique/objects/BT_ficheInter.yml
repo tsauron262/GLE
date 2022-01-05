@@ -406,6 +406,25 @@ forms:
               display_if:
                   field_name: type_of_object
                   show_values: 2
+            - custom: 1
+              label: Commande
+              input_name: id_commande
+              input:
+                  type: search_object
+                  object: commande
+              display_if:
+                  field_name: type_of_object
+                  show_values: 3
+            - custom: 1
+              label: Lignes à mettre en commande
+              input_name: lines_for_commande
+              input:
+                  type: check_list
+                  items: 
+                      array: linesFacturable
+              display_if:
+                  field_name: type_of_object
+                  show_values: 3
     default: 
         rows: 
             client: 

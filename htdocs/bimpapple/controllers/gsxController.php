@@ -187,6 +187,7 @@ class gsxController extends BimpController
                     if ((int) $sav->getData('id_propal')) {
                         GSX_Const::$sav_files = BimpCache::getObjectFilesArray('bimpcommercial', 'Bimp_Propal', (int) $sav->getData('id_propal'), false, true);
                     }
+                    GSX_Const::$sav_files = BimpTools::merge_array(GSX_Const::$sav_files, BimpCache::getObjectFilesArray('bimpsupport', 'BS_SAV', (int) $sav->id, false, true));
 
                     $customer_note = '';
                     $tech_note = '';

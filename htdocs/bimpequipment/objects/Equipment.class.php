@@ -1605,7 +1605,7 @@ class Equipment extends BimpObject
                             $identifiers['date_purchase'] = $dt->format('Y-m-d H:i:s');
                         }
 
-                        if ($this->field_exists('code_config') && preg_match('/^.+(.{4})$/', $identifiers['serial'], $matches)) {
+                        if (preg_match('/^.+(.{4})$/', $identifiers['serial'], $matches)) {
                             $product = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
                                         'code_config' => $matches[1],
                                         'ref'         => array(

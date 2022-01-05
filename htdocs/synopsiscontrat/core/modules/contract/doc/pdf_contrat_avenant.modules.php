@@ -590,9 +590,9 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                     $pdf1->Cell($W, 4, "Les parties conviennent de modifier: ", 0, null, 'L', true);
                     $pdf1->setY($pdf1->getY() + 5);
                     $pdf->SetFont('', '', 8);
-                    $pdf->Cell($W*5, 4, "La date de fin de contrat initialement prévue au " . $date->format('d/m/Y') . ' sera repportée au ' . $date_fin_av->format('d/m/Y') , 0, null, 'L', false);
+                    $pdf->Cell($W*5, 4, "La date de fin de contrat initialement prévue au " . $date->format('d/m/Y') . ' sera reportée au ' . $date_fin_av->format('d/m/Y') , 0, null, 'L', false);
                     $pdf1->SetFont('', '', 8);
-                    $pdf1->Cell($W*5, 4, "La date de fin de contrat initialement prévue au " . $date->format('d/m/Y') . ' sera repportée au ' . $date_fin_av->format('d/m/Y'), 0, null, 'L', false);
+                    $pdf1->Cell($W*5, 4, "La date de fin de contrat initialement prévue au " . $date->format('d/m/Y') . ' sera reportée au ' . $date_fin_av->format('d/m/Y'), 0, null, 'L', false);
                 } 
                 
                 $pdf->setY($pdf->getY() + 5);

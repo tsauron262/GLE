@@ -757,14 +757,144 @@ class BT_ficheInter extends BimpDolObject
     }
     
     public function getTypeOfReattachmentObjectArray(){
-        $reattachment = Array(
-            0   => 'Auncun type d\'objet',
-            1   => 'Facture',
-            2   => 'Contrat',
-            3   => 'Commande'
-        );
+        $reattachment = Array(0 => 'Auncun type d\'objet');
+        if(!$this->getData('fk_facture')) $reattachment[1] = 'Facture';
+//        $reattachment[2] = 'Contrat';
+//        $reattachment[3] = 'Commande';
         
         return $reattachment;
+    }
+    
+    public function getContratNNmoins1Array() {
+        
+        $instance = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat');
+        
+        $contrat_n_n_mois_1 = Array();
+        
+        $date_butoire_n = new DateTime();
+        $date_butoire_n_1 = new DateTime();
+        $date_butoire_n_1->sub(new DateInterval("P1Y"));
+        
+        $filters['fk_soc'] = Array('operator' => '=', 'value' => $this->getData('fk_soc'));
+        
+        $filters['date_start'] = array(
+                'operator' => '>=',
+                'value'    => $date_butoire_n_1->format('Y-m-d')
+            );
+        
+        $contrat_n_n_mois_1 = $instance->getList($filters);
+        
+        $filters['date_start'] = array(
+                'operator' => '>=',
+                'value'    => $date_butoire_n->format('Y-m-d')
+            );
+        
+        $contrat_n_n_mois_1 = BimpTools::merge_array($contrat_n_n_mois_1, $instance->getList($filters));
+        //die(print_r($contrat_n_n_mois_1));
+        $return = Array();
+        
+        $exclude_statut = Array(0, 4, 10);
+        
+        foreach($contrat_n_n_mois_1 as $object) {
+            if(!in_array($object['statut'], $exclude_statut)) {
+                $return[$object[0]] = ($object['statut'] == 2) ? '<span class=\'danger\'>'.$object['ref'].'</span>' : $object['ref'];
+            }
+            
+        }
+        
+//        foreach($contrat_n_n_mois_1 as $object) {
+//                        
+//            if(!in_array($object['statut'], $exclude_statut)) {
+//                $label = ($object['statut'] == 2) ? '<span class=\'danger\'>'.$object['ref'].'</span>' : $object['ref'];
+//                $return[$object['rowid']] = $label;
+//            }
+//            
+//        }
+               
+        return $return;
+        
+    }
+    
+    public function getLinesFacturableArray() {
+        
+        $array = Array();
+        
+        
+        $children = $this->getChildrenList('inters');
+        
+        if(count($children) > 0) {
+            
+            foreach($children as $id_child) {
+                $child = $this->getChildObject('inters', $id_child);
+                if($child->getData('type') == 3 || $child->getData('type') == 4) {
+                    
+                    $points = (strlen($child->getData('description')) > 50) ? '...' : '';
+                    
+                    $array[$child->id] = '<span class=\'bs-popover\' '.BimpRender::renderPopoverData($child->getData('description'), 'right', true).' >' . substr($child->getData('description'), 0, 50) . $points . ' <b class=\'danger\' >'. BT_ficheInter_det::$types[$child->getData('type')]['label'].' ('.$child->displayDuree().'h)</b></span>';
+                    
+                }
+            }
+            
+        }
+        
+        return $array;
+        
+    }
+    
+    public function actionReattach_an_object($data, &$success) {
+        $warnings = [];
+        $errors = [];
+        switch($data['type_of_object']) {
+            case 0;
+                $errors[] = "Vous ne pouvez pas rattacher aucun objet";
+                break;
+            case 1:
+                $instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $data['fk_facture']);
+                if($this->getData('fk_soc') == $instance->getData('fk_soc')) {
+                    $this->set('fk_facture', $data['fk_facture']);
+                } else {
+                    $errors[] = "La facture sélectionnée n'est pas à ce client";
+                }
+                $errors = BimpTools::merge_array($errors, $this->update($warnings, true));
+                break;
+            case 2:
+                $instance = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $data['id_contrat']);
+                if($data['lines_for_contrat'] == 0) {
+                    $errors[] = 'Vous devez rattacher le contrat à au moin une intervention';
+                }
+                if(!count($errors)) {
+
+                    BimpTools::merge_array($errors, $this->updateField('fk_contrat', $data['id_contrat']));
+                   
+                    if(!count($errors)) {
+                        addElementElement('fichinter', 'contrat', $this->id, $data['id_contrat']);
+                        foreach($data['lines_for_contrat'] as $id_line_fiche) {
+                            $child = $this->getChildObject('inters', $id_line_fiche);
+                            if($child->getData('type') == 3)
+                                $errors = BimpTools::merge_array($errors, $child->updateField('type', 5));
+                            else
+                                $errors = BimpTools::merge_array($errors, $child->updateField('type', 0));
+                            $children_contrat = $instance->getChildrenList('lines');
+                            $errors = BimpTools::merge_array($errors, $child->updateField('id_line_contrat', $children_contrat[0]));
+                        }
+                    }
+                    
+//                    if(!count($errors)) {
+//                        addElementElement('fichinter', 'contrat', $this->id, $data['id_contrat']);
+                        
+//                    }
+                }
+                break;
+        }
+        
+        
+        
+        return [
+            'errors'    => $errors,
+            'warnings'  => $warnings,
+            'success'   => $success
+        ];
+            
     }
 
     public function getContratsClientArray()
@@ -1204,15 +1334,18 @@ class BT_ficheInter extends BimpDolObject
         $html = "";
 
         if ($this->hasContratLinked()) {
-            $contrat = $this->getChildObject('contrat');
-            $card = new BC_Card($contrat);
-            $html .= '<div style="max-width: 650px">';
-            $html .= $card->renderHtml();
-            $html .= '</div>';
+            $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $this->getData('fk_contrat'));
+            if($contrat->isLoaded()) {
+                $card = new BC_Card($contrat);
+                $html .= '<div style="max-width: 650px">';
+                $html .= $card->renderHtml();
+                $html .= '</div>';
+            } else {
+                $html .= BimpRender::renderAlerts("Erreur lors du chargement du contrat: #" . $this->getData('fk_contrat'), 'danger', false);
+            }
         } else {
             $html .= BimpRender::renderAlerts("Il n'y a pas de contrat lié sur cette fiche d'intervention", "info", false);
         }
-
         return $html;
     }
 

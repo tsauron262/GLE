@@ -1700,7 +1700,14 @@ class BT_ficheInter extends BimpDolObject
     public function renderHeaderStatusExtra()
     {
         $html = '';
-
+        
+        if($this->getData('fk_facture') > 0) {
+            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $this->getData('fk_facture'));
+            if($facture->isLoaded()) {
+                $html .= '<div><strong>Facturée avec'.$facture->getNomUrl().'</strong></div>';
+            }
+        }
+        
         $html .= '<div>Signée :' . $this->displayData('signed', 'default', false) . '</div>';
         $html .= '<div>Intervention urgente :' . $this->displayData('urgent', 'default', false) . '</div>';
 

@@ -1009,7 +1009,7 @@ class BimpSignature extends BimpObject
                 }
             }
 
-            return '<span class="warning">Non disponible</span> - ';
+            return '<span class="warning">Non disponible</span>';
         }
 
         return '';

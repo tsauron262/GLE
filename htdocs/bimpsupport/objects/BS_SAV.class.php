@@ -6356,7 +6356,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
     public function getOnSignedEmailExtraInfos($doc_type)
     {
         if ($this->isLoaded() && $doc_type == 'devis_sav') {
-            $html = '<b>SAV: </b> ' . $this->getLink(array(), 'private') . '<br/>';
+            $html = '<b>SAV: </b> ' . $this->getLink(array(), 'private');
 
             $tech = $this->getChildObject('user_tech');
 

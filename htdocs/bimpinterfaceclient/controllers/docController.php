@@ -83,6 +83,8 @@ class docController extends BimpPublicController
 
                 case 'sav_pc':
                 case 'sav_pc_signed':
+                case 'sav_resti':
+                case 'sav_resti_signed':
                     $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id);
                     $sav_ref = $sav->getRef();
 
@@ -95,7 +97,12 @@ class docController extends BimpPublicController
                     }
 
                     $dir = $sav->getFilesDir();
-                    $file_name = $sav->getSignatureDocFileName('sav_pc', ($doc == 'sav_pc_signed' ? true : false));
+
+                    if (in_array($doc, array('sav_pc', 'sav_pc_signed'))) {
+                        $file_name = $sav->getSignatureDocFileName('sav_pc', ($doc == 'sav_pc_signed' ? true : false));
+                    } else {
+                        $file_name = $sav->getSignatureDocFileName('sav_resti', ($doc == 'sav_resti_signed' ? true : false));
+                    }
 
                     if (!file_exists($dir . $file_name)) {
                         $this->errors[] = 'Ce document n\'existe pas (' . $dir . $file_name . ')';

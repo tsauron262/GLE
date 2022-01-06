@@ -42,19 +42,26 @@ class Bimp_Societe extends BimpDolObject
         0  => array('E', 'danger', 'Entreprise en situation de défaillance et ayant un très fort risque de radiation')
     );
     public static $regions = array(
-        'HDF'                     => array(62, 59, 80, 60, 2),
-        'IDF'                     => array(95, 78, 91, 77, 93, 75, 92, 94),
-        'Bourgogne Franche-Comte' => array(25, 39, 71, 58, 21, 89, 70),
-        'Centre'                  => array(37, 36, 18, 41, 28, 45),
-        'Auvergne'                => array(3, 15, 43, 63, 42),
-        'Rhône'                   => array(1, 69),
-        'Alpes'                   => array(73, 74, 38),
-        'Drôme Ardèche'           => array(7, 26),
-        'Provence-Azur'           => array(4, 5, 6, 13, 83, 84, '2A', '2B'),
-        'Occitanie'               => array(65, 32, 31, 9, 82, 46, 81, 11, 66, 34, 12, 48, 30),
-        'Normandie'               => array(50, 14, 61, 27, 76),
-        'Bretagne'                => array(56, 22, 29, 35),
-        'Nouvelle Aquitaine'      => array(79, 17, 86, 87, 16, 23, 19, 24, 47, 33, 40, 64)
+        //    OLD: 
+//        'HDF'                     => array(62, 59, 80, 60, 2),
+//        'IDF'                     => array(95, 78, 91, 77, 93, 75, 92, 94),
+//        'Bourgogne Franche-Comte' => array(25, 39, 71, 58, 21, 89, 70),
+//        'Centre'                  => array(37, 36, 18, 41, 28, 45),
+//        'Auvergne'                => array(3, 15, 43, 63, 42),
+//        'Rhône'                   => array(1, 69),
+//        'Alpes'                   => array(73, 74, 38),
+//        'Drôme Ardèche'           => array(7, 26),
+//        'Provence-Azur'           => array(4, 5, 6, 13, 83, 84, '2A', '2B'),
+//        'Occitanie'               => array(65, 32, 31, 9, 82, 46, 81, 11, 66, 34, 12, 48, 30),
+//        'Normandie'               => array(50, 14, 61, 27, 76),
+//        'Bretagne'                => array(56, 22, 29, 35),
+//        'Nouvelle Aquitaine'      => array(79, 17, 86, 87, 16, 23, 19, 24, 47, 33, 40, 64)
+        
+        // NEW: 
+        'Alpes-Drôme' => array(73, 74, 38, 7, 26),
+        'Rhône-Auvergne' => array(3, 15, 43, 63, 42, 1, 69),
+        'PACA-Occitanie' => array(79, 17, 86, 87, 16, 23, 19, 24, 47, 33, 40, 64, 65 ,32 ,31 ,9, 82, 46, 81, 11, 66, 34, 12, 48, 30, 4, 5, 6, 13, 83, 84, '2A', '2B'),
+        'Bourgogne-Centre' => array(62, 59, 80, 60, 2, 95, 78, 91, 77, 93, 75, 92, 94, 25, 39, 71, 58, 21, 89, 70, 37, 36, 18, 41, 28, 45, 50, 14, 61, 27, 76, 56, 22, 29, 35)
     );
 
 //    public $fieldsWithAddNoteOnUpdate = array('solvabilite_status');

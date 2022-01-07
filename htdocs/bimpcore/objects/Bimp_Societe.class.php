@@ -42,19 +42,25 @@ class Bimp_Societe extends BimpDolObject
         0  => array('E', 'danger', 'Entreprise en situation de défaillance et ayant un très fort risque de radiation')
     );
     public static $regions = array(
-        'HDF'                     => array(62, 59, 80, 60, 2),
-        'IDF'                     => array(95, 78, 91, 77, 93, 75, 92, 94),
-        'Bourgogne Franche-Comte' => array(25, 39, 71, 58, 21, 89, 70),
-        'Centre'                  => array(37, 36, 18, 41, 28, 45),
-        'Auvergne'                => array(3, 15, 43, 63, 42),
-        'Rhône'                   => array(1, 69),
-        'Alpes'                   => array(73, 74, 38),
-        'Drôme Ardèche'           => array(7, 26),
-        'Provence-Azur'           => array(4, 5, 6, 13, 83, 84, '2A', '2B'),
-        'Occitanie'               => array(65, 32, 31, 9, 82, 46, 81, 11, 66, 34, 12, 48, 30),
-        'Normandie'               => array(50, 14, 61, 27, 76),
-        'Bretagne'                => array(56, 22, 29, 35),
-        'Nouvelle Aquitaine'      => array(79, 17, 86, 87, 16, 23, 19, 24, 47, 33, 40, 64)
+        //    OLD: 
+//        'HDF'                     => array(62, 59, 80, 60, 2),
+//        'IDF'                     => array(95, 78, 91, 77, 93, 75, 92, 94),
+//        'Bourgogne Franche-Comte' => array(25, 39, 71, 58, 21, 89, 70),
+//        'Centre'                  => array(37, 36, 18, 41, 28, 45),
+//        'Auvergne'                => array(3, 15, 43, 63, 42),
+//        'Rhône'                   => array(1, 69),
+//        'Alpes'                   => array(73, 74, 38),
+//        'Drôme Ardèche'           => array(7, 26),
+//        'Provence-Azur'           => array(4, 5, 6, 13, 83, 84, '2A', '2B'),
+//        'Occitanie'               => array(65, 32, 31, 9, 82, 46, 81, 11, 66, 34, 12, 48, 30),
+//        'Normandie'               => array(50, 14, 61, 27, 76),
+//        'Bretagne'                => array(56, 22, 29, 35),
+//        'Nouvelle Aquitaine'      => array(79, 17, 86, 87, 16, 23, 19, 24, 47, 33, 40, 64)
+        // NEW: 
+        'Alpes-Drôme'      => array(73, 74, 38, 7, 26),
+        'Rhône-Auvergne'   => array(3, 15, 43, 63, 42, 1, 69),
+        'PACA-Occitanie'   => array(79, 17, 86, 87, 16, 23, 19, 24, 47, 33, 40, 64, 65, 32, 31, 9, 82, 46, 81, 11, 66, 34, 12, 48, 30, 4, 5, 6, 13, 83, 84, '2A', '2B'),
+        'Bourgogne-Centre' => array(62, 59, 80, 60, 2, 95, 78, 91, 77, 93, 75, 92, 94, 25, 39, 71, 58, 21, 89, 70, 37, 36, 18, 41, 28, 45, 50, 14, 61, 27, 76, 56, 22, 29, 35)
     );
 
 //    public $fieldsWithAddNoteOnUpdate = array('solvabilite_status');
@@ -99,13 +105,14 @@ class Bimp_Societe extends BimpDolObject
         global $user;
         switch ($field_name) {
             case 'outstanding_limit_atradius':
-                if ($user->admin) {
+            case 'outstanding_limit_icba':
+            case 'outstanding_limit':
+            case 'outstanding_limit_credit_check':
+            case 'date_atradius':
+                if ($user->admin || $user->rights->bimpcommercial->admin_recouvrement) {
                     return 1;
                 }
                 return 0;
-
-            case 'outstanding_limit':
-                return ($user->rights->bimpcommercial->admin_financier ? 1 : 0);
 
             case 'outstanding_limit_credit_safe':
                 return 0;
@@ -331,6 +338,25 @@ class Bimp_Societe extends BimpDolObject
 
         if (in_array((int) $this->getData('solvabilite_status'), array(Bimp_Societe::SOLV_SOLVABLE, Bimp_Societe::SOLV_A_SURVEILLER, Bimp_Societe::SOLV_A_SURVEILLER_FORCE))) {
             return 1;
+        }
+
+        return 0;
+    }
+
+    public function isAdministration()
+    {
+        if (isset($this->dol_object->typent_code) && $this->dol_object->typent_code) {
+            return (int) in_array($this->dol_object->typent_code, array('TE_ADMIN', 'TE_OTHER_ADM'));
+        }
+
+        $id_type = (int) $this->getData('fk_typent');
+
+        if ($id_type) {
+            $code = $this->db->getValue('c_typent', 'code', 'id = ' . $id_type);
+
+            if ($code) {
+                return (int) in_array($code, array('TE_ADMIN', 'TE_OTHER_ADM'));
+            }
         }
 
         return 0;
@@ -2717,10 +2743,12 @@ class Bimp_Societe extends BimpDolObject
         $init_outstanding_limit = $this->getInitData('outstanding_limit');
 
         $limit = -1;
-        if ($this->getData('outstanding_limit_atradius') > 0)
+        if ($this->getData('outstanding_limit_atradius') > -1)
             $limit = $this->getData('outstanding_limit_atradius');
         elseif ($this->getData('outstanding_limit_icba') > 0)
             $limit = $this->getData('outstanding_limit_icba');
+        elseif ($this->getData('outstanding_limit_credit_check') > 0)
+            $limit = $this->getData('outstanding_limit_credit_check');
         if ($limit > 0 && $limit != $this->getInitData('outstanding_limit'))
             $this->updateField('outstanding_limit', $limit);
 

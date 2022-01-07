@@ -10,7 +10,6 @@ $lien = '.bimp.fr/mymu/synopsistools/git_pull.php?no_menu=1&nolog=ujgjhkhkfghgkv
 
 $array = array("erp1", "erp2", "erp3", "erp4", "erp5");
 
-BimpCore::setConf('git_version', BimpCore::getConf('git_version', 1)+1);
 
 foreach($array as $erp){
     echo '<h1>Serveur '.$erp.'</h1>';
@@ -18,4 +17,8 @@ foreach($array as $erp){
     echo '<iframe style="width: 100%; height: 400px;" src="https://'.$erp.$lien.'"></iframe>';
 }
 
+
+sleep(3);
+
+BimpCore::setConf('git_version', BimpCore::getConf('git_version', 1)+1);
 

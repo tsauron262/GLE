@@ -187,6 +187,7 @@ class gsxController extends BimpController
                     if ((int) $sav->getData('id_propal')) {
                         GSX_Const::$sav_files = BimpCache::getObjectFilesArray('bimpcommercial', 'Bimp_Propal', (int) $sav->getData('id_propal'), false, true);
                     }
+                    GSX_Const::$sav_files = BimpTools::merge_array(GSX_Const::$sav_files, BimpCache::getObjectFilesArray('bimpsupport', 'BS_SAV', (int) $sav->id, false, true));
 
                     $customer_note = '';
                     $tech_note = '';
@@ -467,7 +468,7 @@ class gsxController extends BimpController
             if (BimpObject::objectLoaded($sav)) {
                 $propal = $sav->getChildObject('propal');
                 if (BimpObject::objectLoaded($propal)) {
-                    $sav_files_dir = $propal->getFilesDir();
+                    $sav_files_dir = $sav->getFilesDir();
                 }
             }
 
@@ -1863,7 +1864,7 @@ class gsxController extends BimpController
         return $responses;
     }
 
-    // Diagnostics: 
+    // Diagnostics:
 
     protected function gsxDiagnosticSuites($params)
     {

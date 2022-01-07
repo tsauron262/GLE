@@ -843,10 +843,11 @@ class GSX_v2 extends GSX_Const
         $dt_to = new DateTime($to);
 
         $params = array(
-            'shipToCode'    => $shipTo,
-            'toDate'        => $dt_to->format(DateTime::ATOM),
-            'fromDate'      => $dt_from->format(DateTime::ATOM),
-            'currentStatus' => 'RESERVED'
+            'shipToCode'      => $shipTo,
+            'toDate'          => $dt_to->format(DateTime::ATOM),
+            'fromDate'        => $dt_from->format(DateTime::ATOM),
+            'currentStatus'   => 'RESERVED',
+            'reservationType' => 'CIN'
         );
 
         if ($productCode) {

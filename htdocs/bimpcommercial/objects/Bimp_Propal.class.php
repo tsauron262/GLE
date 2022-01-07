@@ -723,17 +723,17 @@ class Bimp_Propal extends BimpComm
                                 'onclick' => $onclick
                             );
                         }
+                    }
 
-                        // Créer un contrat
-                        if ($this->isActionAllowed('createContrat') && $this->canSetAction('createContrat')) {
-                            $buttons[] = array(
-                                'label'   => 'Créer un contrat',
-                                'icon'    => 'fas_file-signature',
-                                'onclick' => $this->getJsActionOnclick('createContrat', array(), array(
-                                    'form_name' => "contrat")
-                                )
-                            );
-                        }
+                    // Créer un contrat
+                    if ($this->isActionAllowed('createContrat') && $this->canSetAction('createContrat')) {
+                        $buttons[] = array(
+                            'label'   => 'Créer un contrat',
+                            'icon'    => 'fas_file-signature',
+                            'onclick' => $this->getJsActionOnclick('createContrat', array(), array(
+                                'form_name' => "contrat"
+                            ))
+                        );
                     }
 
                     // Réviser: 
@@ -1266,6 +1266,7 @@ class Bimp_Propal extends BimpComm
 
     public function actionCreateContrat($data, &$success = '')
     {
+        $warnings =[];
         $errors = [];
         $instance = $this->getInstance('bimpcontract', 'BContract_contrat');
         $autre_erreurs = true;
@@ -1293,8 +1294,17 @@ class Bimp_Propal extends BimpComm
                 if ($this->getData('fk_statut') < 2)
                     $this->updateField('fk_statut', 2);
                 $callback = 'window.location.href = "' . DOL_URL_ROOT . '/bimpcontract/index.php?fc=contrat&id=' . $id_new_contrat . '"';
-            } else {
 
+                $signature = $this->getChildObject('signature');
+
+                if (BimpObject::objectLoaded($signature)) {
+                    $cancel_errors = $signature->cancelSignature();
+
+                    if (count($cancel_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($cancel_errors, 'Echec de l\'annulation de la signature');
+                    }
+                }
+            } else {
                 if ($client->getData('solvabilite_status') > 1) {
                     $errors[] = "Le contrat ne peut pas être créé car le client est bloqué";
                 } else {
@@ -1306,7 +1316,7 @@ class Bimp_Propal extends BimpComm
 
         return [
             'success_callback' => $callback,
-            'warnings'         => array(),
+            'warnings'         => $warnings,
             'errors'           => $errors
         ];
     }
@@ -1616,6 +1626,17 @@ class Bimp_Propal extends BimpComm
 
         if (BimpObject::objectLoaded($client)) {
             return $client->getCommercialEmail(false);
+        }
+
+        return '';
+    }
+
+    public function getOnSignedEmailExtraInfos($doc_type)
+    {
+        $sav = $this->getSav();
+
+        if (BimpObject::objectLoaded($sav)) {
+            return $sav->getOnSignedEmailExtraInfos('devis_sav');
         }
 
         return '';

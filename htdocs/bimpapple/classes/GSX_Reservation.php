@@ -68,6 +68,7 @@ class GSX_Reservation
             }
             
             $gsx_v2->setSoldTo($soldTo);
+            $gsx_v2->resetErrors();
 
             $reservations = $gsx_v2->fetchReservationsSummary($shipTo, $from, $to, $productCode);
             $errors = BimpTools::merge_array($errors, $gsx_v2->getErrors());
@@ -165,6 +166,7 @@ class GSX_Reservation
 
             $gsx_v2->soldTo = BimpTools::addZeros($soldTo, GSX_v2::$numbersNumChars);
             $gsx_v2->shipTo = BimpTools::addZeros($shipTo, GSX_v2::$numbersNumChars);
+            $gsx_v2->resetErrors();
 
             $reservation = $gsx_v2->fetchReservation($shipTo, $reservation_id);
             $errors = BimpTools::merge_array($errors, $gsx_v2->getErrors());
@@ -250,6 +252,7 @@ class GSX_Reservation
 
             $gsx_v2->soldTo = BimpTools::addZeros($soldTo, GSX_v2::$numbersNumChars);
             $gsx_v2->shipTo = BimpTools::addZeros($shipTo, GSX_v2::$numbersNumChars);
+            $gsx_v2->resetErrors();
 
             $slots = $gsx_v2->fetchAvailableSlots($shipTo, $product_code);
             $errors = BimpTools::merge_array($errors, $gsx_v2->getErrors());
@@ -339,6 +342,7 @@ class GSX_Reservation
 
             $gsx_v2->soldTo = BimpTools::addZeros($soldTo, GSX_v2::$numbersNumChars);
             $gsx_v2->shipTo = BimpTools::addZeros($shipTo, GSX_v2::$numbersNumChars);
+            $gsx_v2->resetErrors();
 
             $reservations = $gsx_v2->createReservation($shipTo, $params);
             $errors = BimpTools::merge_array($errors, $gsx_v2->getErrors());
@@ -432,6 +436,7 @@ class GSX_Reservation
 
             $gsx_v2->soldTo = BimpTools::addZeros($soldTo, GSX_v2::$numbersNumChars);
             $gsx_v2->shipTo = BimpTools::addZeros($shipTo, GSX_v2::$numbersNumChars);
+            $gsx_v2->resetErrors();
 
             $result = $gsx_v2->cancelReservation($shipTo, $reservationId);
             $errors = BimpTools::merge_array($errors, $gsx_v2->getErrors());

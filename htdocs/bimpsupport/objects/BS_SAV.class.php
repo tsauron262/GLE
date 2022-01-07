@@ -239,6 +239,9 @@ class BS_SAV extends BimpObject
                 if ($lineS->getData('linked_object_name') == 'sav_garantie') {
                     $montant -= $lineS->getTotalHT(true);
                 }
+                if ($lineS->getData('linked_object_name') == 'discount') {
+                    $montant -= $lineS->getTotalHT(true);
+                }
             }
         }
         if ($montant < 1 && $montant > -1)
@@ -6357,6 +6360,25 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
         if (isset($centre['mail'])) {
             return $centre['mail'];
+        }
+
+        return '';
+    }
+
+    public function getOnSignedEmailExtraInfos($doc_type)
+    {
+        if ($this->isLoaded() && $doc_type == 'devis_sav') {
+            $html = '<b>SAV: </b> ' . $this->getLink(array(), 'private');
+
+            $tech = $this->getChildObject('user_tech');
+
+            if (BimpObject::objectLoaded($tech)) {
+                $html .= '<br/><b>Technicien: </b>' . $tech->getLink(array(), 'private');
+            }
+            
+            $html .= '<br/><br/>';
+
+            return $html;
         }
 
         return '';

@@ -121,8 +121,9 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
                     }
 
                     $data['result_html'] .= BimpRender::renderFoldableContainer('Code produit "' . $product_code . '"', $pc_html);
-                    break 2;
+//                    break 2;
                 }
+                break;
             }
         }
     }
@@ -1047,17 +1048,39 @@ L’équipe BIMP";
             $ac->userownerid = $usersAssigned[0]['id'];
             $ac->note = '';
 
+            if (BimpObject::objectLoaded($client)) {
+                $ac->socid = $client->id;
+            } else {
+                if (isset($data['customer']) && !empty($data['customer'])) {
+                    $ac->note .= 'Infos client: ';
+                    $client_fname = BimpTools::getArrayValueFromPath($data, 'customer/firstname', '');
+                    $client_lname = BimpTools::getArrayValueFromPath($data, 'customer/lastname', '');
+                    $client_email = BimpTools::getArrayValueFromPath($data, 'customer/emailId', '');
+                    $client_phone = BimpTools::getArrayValueFromPath($data, 'customer/phone/primaryPhone', '');
+
+                    if ($client_fname || $client_lname) {
+                        $ac->note .= "\n" . $client_fname . ($client_fname ? ' ' : '') . $client_lname;
+                    }
+
+                    if ($client_email) {
+                        $ac->note .= "\n" . $client_email;
+                    }
+
+                    if ($client_phone) {
+                        $ac->note .= "\n" . $client_phone;
+                    }
+
+                    $ac->note .= "\n";
+                }
+            }
+
             if (isset($data['notes']) && count($data['notes'])) {
-                $ac->note .= ($ac->note ? "\n" : '') . 'Notes client: ' . "\n";
+                $ac->note .= ($ac->note ? "\n" : '') . 'Notes client: ';
                 foreach ($data['notes'] as $note) {
                     if (isset($note['note']) && (string) $note['note']) {
                         $ac->note .= ($ac->note ? "\n" : '') . $note['note'];
                     }
                 }
-            }
-
-            if (BimpObject::objectLoaded($client)) {
-                $ac->socid = $client->id;
             }
 
             $ac->array_options['options_resgsx'] = $resId;
@@ -1205,14 +1228,19 @@ L’équipe BIMP";
 
                 $to = BimpTools::cleanEmailsStr($email_client);
                 $this->debug_content .= 'Envoi e-mail client à ' . $to . ': ';
-                if (mailSyn2("Votre rendez-vous SAV BIMP", $to, $from, str_replace("\n", "<br/>", $messageClient))) {
+
+                $bimpMail = new BimpMail("Votre rendez-vous SAV BIMP", $to, $from, str_replace("\n", "<br/>", $messageClient));
+                $mail_errors = array();
+
+                if ($bimpMail->send($mail_errors)) {
                     $this->Success('Envoi e-mail client OK (Destinataire(s): ' . $to . ')', $to, null, $resId);
                     $this->debug_content .= '<span class="success">OK</span>';
                 } else {
                     $this->debug_content .= '<span class="danger">ECHEC</span>';
-                    $this->Error('Echec envoi e-mail au client suite ajout RDV SAV (Destinataire(s): ' . $to . ')', null, $resId);
+                    $this->Error(BimpTools::getMsgFromArray($mail_errors, 'Echec envoi e-mail au client suite ajout RDV SAV (Destinataire(s): ' . $to . ')'), null, $resId);
                     BimpCore::addlog('Echec envoi e-mail au client suite ajout RDV SAV', Bimp_Log::BIMP_LOG_URGENT, 'bds', null, array(
-                        'Destinataire' => $to
+                        'Destinataire' => $to,
+                        'Erreurs'      => $mail_errors
                     ));
                 }
 

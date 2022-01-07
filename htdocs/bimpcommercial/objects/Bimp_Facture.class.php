@@ -50,8 +50,9 @@ class Bimp_Facture extends BimpComm
         -1 => array('label' => 'Non applicable', 'icon' => 'fas_times', 'classes' => 'info'),
         0  => array('label' => 'En attente d\'export', 'icon' => 'fas_hourglass-half', 'classes' => array('warning')),
         1  => array('label' => 'PDF en attente de validation', 'icon' => 'fas_hourglass-half', 'classes' => array('warning')),
-        2  => array('label' => 'Export terminé', 'icon' => 'fas_success', 'classes' => array('success')),
+        2  => array('label' => 'Export terminé', 'icon' => 'fas_check', 'classes' => array('success')),
         3  => array('label' => 'Echec export', 'icon' => 'fas_exclamation-circle', 'classes' => array('danger')),
+        4  => array('label' => 'Exporté via L\'interface Chorus Pro', 'icon' => 'fas_check', 'classes' => array('success'))
     );
 
     // Gestion des droits: 
@@ -162,7 +163,7 @@ class Bimp_Facture extends BimpComm
             case 'exportToChorus':
             case 'confirmChorusExport':
             case 'forceChorusExported':
-                return (int) $user->admin;
+                return ($user->admin || !empty($user->rights->bimpcommercial->chorus_exports));
         }
 
         return parent::canSetAction($action);
@@ -742,7 +743,7 @@ class Bimp_Facture extends BimpComm
                         $client = $this->getChildObject('client');
                         if (!BimpObject::objectLoaded($client)) {
                             $errors[] = 'Client absent';
-                        } elseif (!in_array($client->dol_object->typent_code, array('TE_ADMIN'))) {
+                        } elseif (!$client->isAdministration()) {
                             $errors[] = 'Ce client n\'est pas une administration';
                         }
                     }
@@ -762,7 +763,7 @@ class Bimp_Facture extends BimpComm
                 }
 
                 $chorus_data = $this->getData('chorus_data');
-                if (!(int) BimpTools::getArrayValueFromPath($chorus_data, 'id_pdf', 0)) {
+                if (!BimpTools::getArrayValueFromPath($chorus_data, 'id_pdf', '')) {
                     $errors[] = 'Identifiant chorus du fichier PDF absent';
                 }
 
@@ -777,11 +778,10 @@ class Bimp_Facture extends BimpComm
 
                 if (!BimpAPI::isApiActive('piste')) {
                     $errors[] = 'L\'API "Piste" n\'est pas active';
-                } else {
-                    if ($this->getData('chorus_status') != 3) {
-                        $errors[] = 'L\'export vers Chorus n\'est pas en échec pour ' . $this->getLabel('this');
-                    }
+                } elseif (!in_array($this->getData('chorus_status'), array(0, 1, 3))) {
+                    $errors[] = 'Le statut actuel de l\'export Chorus ne permet pas cette opération';
                 }
+
                 return (count($errors) ? 0 : 1);
         }
 
@@ -2700,13 +2700,30 @@ class Bimp_Facture extends BimpComm
         
     }
 
+    public function displayChorusData()
+    {
+        $html = '';
+
+        $data = $this->getData('chorus_data');
+
+        if (isset($data['id_pdf']) && $data['id_pdf']) {
+            $html .= '<b>ID PDF: </b>' . $data['id_pdf'];
+        }
+
+        if (isset($data['certif']) && $data['certif']) {
+            $html .= ($html ? '<br/>' : '') . '<b>Certificat d\'export: </b>' . $data['certif'];
+        }
+
+        return $html;
+    }
+
     //Rendus HTML: 
 
     public function renderContentExtraLeft()
     {
-        // Partie "Paiements": 
         $html = '';
 
+        // Partie "Paiements": 
         if ($this->isLoaded()) {
             $html .= '<table class="bimp_fields_table">';
             $html .= '<tbody>';
@@ -3166,11 +3183,16 @@ class Bimp_Facture extends BimpComm
     {
         $html = '';
 
-        if ((int) $this->getData('fk_statut') > 0) {
+        $status = (int) $this->getData('fk_statut');
+        if ($status > 0) {
             $html .= '<span style="display: inline-block; margin-left: 12px"' . $this->displayData('paiement_status') . '</span>';
 
-            if ($this->field_exists('chorus_status') && (int) $this->getData('chorus_status') >= 0) {
-                $html .= '<br/>Export Chorus: ' . $this->displayData('chorus_status', 'default', false);
+            if (in_array($status, array(1, 2)) && $this->field_exists('chorus_status') && (int) $this->getData('chorus_status') >= 0) {
+                $client = $this->getChildObject('client');
+
+                if (BimpObject::objectLoaded($client) && $client->isAdministration()) {
+                    $html .= '<br/>Export Chorus: ' . $this->displayData('chorus_status', 'default', false);
+                }
             }
         }
 
@@ -3590,7 +3612,7 @@ class Bimp_Facture extends BimpComm
 
             if (!BimpObject::objectLoaded($client)) {
                 $errors[] = 'Client absent';
-            } elseif (!in_array($client->dol_object->typent_code, array('TE_ADMIN'))) {
+            } elseif (!$client->isAdministration()) {
                 $errors[] = 'Ce client n\'est pas une administration';
             } else {
                 $siret = $client->getData('siret');
@@ -3917,6 +3939,14 @@ class Bimp_Facture extends BimpComm
             $this->checkRemisesGlobales();
             $this->checkMargin(true);
             $this->checkTotalAchat(true);
+
+            $client = $this->getChildObject('client');
+
+            if (BimpObject::objectLoaded($client)) {
+                if ($client->isAdministration()) {
+                    $this->updateField('chorus_status', 0);
+                }
+            }
         }
 
         return array();
@@ -5521,10 +5551,18 @@ class Bimp_Facture extends BimpComm
         $warnings = array();
         $success = BimpTools::ucfirst($this->getLabel()) . ' marqué' . $this->e() . ' exporté' . $this->e() . ' vers Chorus';
 
-        $errors = $this->updateField('chorus_status', 2);
+        $cur_status = (int) $this->getData('chorus_status');
+
+        if (in_array($cur_status, array(1, 3))) {
+            $log = 'Export Chorus terminé manuellement';
+        } else {
+            $log = 'Export chorus marqué comme effectué manuellement sur l\'interface Chorus Pro';
+        }
+
+        $errors = $this->updateField('chorus_status', 4);
 
         if (!count($errors)) {
-            $this->addLog('Export Chorus terminé manuellement');
+            $this->addLog($log);
         }
 
         return array(

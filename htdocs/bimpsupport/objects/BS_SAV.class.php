@@ -5590,7 +5590,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         $res_id = $this->getData('resgsx');
         $date_rdv = $this->getData('date_rdv');
 
-        if ($res_id && $date_rdv /* && $date_rdv > date('Y-m-d H:i:s') */) {
+        if ($res_id && $date_rdv) {
 
             // Annulation GSX: 
             require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_Reservation.php';
@@ -5603,14 +5603,26 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                             'cancelReason' => BimpTools::getArrayValueFromPath($data, 'cancel_reason', 'CUSTOMER_CANCELLED')
                 ));
 
-                if (isset($result['faults']) && !empty($result['faults'])) {
-                    $request_errors = array();
-                    foreach ($result['faults'] as $fault) {
-                        $gsx_errors[] = $fault['message'] . ' (code: ' . $fault['code'] . ')';
+                if ((int) BimpCore::getConf('use_gsx_v2_for_reservations', 0)) {
+                    if (isset($result['errors']) && !empty($result['errors'])) {
+                        $request_errors = array();
+                        foreach ($result['errors'] as $error) {
+                            $gsx_errors[] = $error['message'] . ' (code: ' . $error['code'] . ')';
+                        }
+                        $gsx_errors[] = BimpTools::getMsgFromArray($request_errors, 'Echec de l\'annulation de la réservation');
+                    } elseif (is_null($result) && !count($gsx_errors)) {
+                        $gsx_errors[] = 'Echec de l\'annulation de la réservation pour une raison inconnue';
                     }
-                    $gsx_errors[] = BimpTools::getMsgFromArray($request_errors, 'Echec de l\'annulation de la réservation');
-                } elseif (is_null($result) && !count($gsx_errors)) {
-                    $gsx_errors[] = 'Echec de l\'annulation de la réservation pour une raison inconnue';
+                } else {
+                    if (isset($result['faults']) && !empty($result['faults'])) {
+                        $request_errors = array();
+                        foreach ($result['faults'] as $fault) {
+                            $gsx_errors[] = $fault['message'] . ' (code: ' . $fault['code'] . ')';
+                        }
+                        $gsx_errors[] = BimpTools::getMsgFromArray($request_errors, 'Echec de l\'annulation de la réservation');
+                    } elseif (is_null($result) && !count($gsx_errors)) {
+                        $gsx_errors[] = 'Echec de l\'annulation de la réservation pour une raison inconnue';
+                    }
                 }
 
                 if (count($gsx_errors)) {

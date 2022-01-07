@@ -51,8 +51,7 @@ class PisteAPI extends BimpAPI
     // Requêtes: 
 
     public function rechercheClientStructures($siret, $params = array(), &$errors = array(), &$warnings = array())
-    {
-        $siret = '12345678200051';
+    {        
         $params = BimpTools::overrideArray(array(
                     'fields' => array(
                         'structure' => array(

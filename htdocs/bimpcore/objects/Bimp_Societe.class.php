@@ -863,7 +863,7 @@ class Bimp_Societe extends BimpDolObject
                                     $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', (int) $r['fk_propal']);
                                     if (BimpObject::objectLoaded($propal)) {
                                         if (!in_array($propal->getData('fk_statut'), array(4, 3))) {
-                                            if (!(int) $bdb->getValue('element_element', 'rowid', '`fk_source` = ' . $r['fk_propal'] . ' AND `sourcetype` = \'propal\'  AND `targettype` = \'commande\'') && 
+                                            if (!(int) $bdb->getValue('element_element', 'rowid', '`fk_source` = ' . $r['fk_propal'] . ' AND `sourcetype` = \'propal\'  AND `targettype` = \'commande\'') &&
                                                     !(int) $bdb->getValue('element_element', 'rowid', '`fk_source` = ' . $r['fk_propal'] . ' AND `sourcetype` = \'propal\'  AND `targettype` = \'contrat\'')) {
                                                 $use_label = 'Ajouté à la propale ' . ($with_nom_url ? $propal->getNomUrl(1, 1, 1, 'full') : '"' . $propal->getRef() . '"');
                                                 break;
@@ -1929,12 +1929,12 @@ class Bimp_Societe extends BimpDolObject
         if (BimpCore::isModeDev()) {
             return array();
         }
-        
+
         if ($value == "356000000")
             return array('Siren de la Poste, trop de résultats');
 
         $errors = array();
-        
+
         $siret = '';
         $siren = '';
 
@@ -2067,7 +2067,7 @@ class Bimp_Societe extends BimpDolObject
                         //                            $limit = 10000000;
                     }
                     if (isset($result->body->company->ratings2013->commentaries->comment)) {
-                        if(is_array($result->body->company->ratings2013->commentaries->comment))
+                        if (is_array($result->body->company->ratings2013->commentaries->comment))
                             foreach ($result->body->company->ratings2013->commentaries->comment as $comment)
                                 $note .= "
     " . $comment;
@@ -2097,8 +2097,8 @@ class Bimp_Societe extends BimpDolObject
 //                }
             }
         }
-        
-        if($this->field_exists('date_check_credit_safe')) {
+
+        if ($this->field_exists('date_check_credit_safe')) {
             $this->updateField('date_check_credit_safe', date('Y-m-d H:i:s'));
             return $errors;
         }
@@ -2715,13 +2715,13 @@ class Bimp_Societe extends BimpDolObject
         $init_solv = (int) $this->getInitData('solvabilite_status');
         $init_status = (int) $this->getInitData('status');
         $init_outstanding_limit = $this->getInitData('outstanding_limit');
-        
+
         $limit = -1;
-        if($this->getData('outstanding_limit_atradius') > 0)
+        if ($this->getData('outstanding_limit_atradius') > 0)
             $limit = $this->getData('outstanding_limit_atradius');
-        elseif($this->getData('outstanding_limit_icba') > 0)
+        elseif ($this->getData('outstanding_limit_icba') > 0)
             $limit = $this->getData('outstanding_limit_icba');
-        if($limit > 0 && $limit != $this->getInitData('outstanding_limit'))
+        if ($limit > 0 && $limit != $this->getInitData('outstanding_limit'))
             $this->updateField('outstanding_limit', $limit);
 
         if ($this->getInitData('fk_typent') != $this->getData('fk_typent') && !$this->canEditField('status')) {

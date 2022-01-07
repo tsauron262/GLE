@@ -54,19 +54,37 @@ class savFormController extends BimpPublicController
                 $fetch_errors = array();
                 $result = GSX_Reservation::fetchReservation(897316, $shipto, $res_id, $fetch_errors);
 
-                if (isset($result['faults'])) {
-                    foreach ($result['faults'] as $fault) {
-                        $fetch_errors[] = $fault['message'] . ' (Code: ' . $fault['code'] . ')';
-                    }
-                } elseif (!isset($result['response'])) {
-                    $fetch_errors[] = 'Aucune réponse reçue';
-                } else {
-                    $reservation = $result['response'];
+                if ((int) BimpCore::getConf('use_gsx_v2_for_reservations', 0)) {
+                    if (isset($result['errors'])) {
+                        foreach ($result['errors'] as $error) {
+                            $fetch_errors[] = $error['message'] . ' (Code: ' . $error['code'] . ')';
+                        }
+                    } elseif (!is_array($result) || empty($result)) {
+                        $fetch_errors[] = 'Aucune réponse reçue';
+                    } else {
+                        $reservation = $result;
 
-                    if (BimpObject::objectLoaded($userClient) && $userClient->getData('email') != $reservation['customer']['emailId']) {
-                        // On déco l\'utilisateur client si l'adresse e-mail ne correspond pas
-                        $userClient = null;
-                        $_SESSION['userClient'] = 'none';
+                        if (BimpObject::objectLoaded($userClient) && $userClient->getData('email') != $reservation['customer']['emailId']) {
+                            // On déco l\'utilisateur client si l'adresse e-mail ne correspond pas
+                            $userClient = null;
+                            $_SESSION['userClient'] = 'none';
+                        }
+                    }
+                } else {
+                    if (isset($result['faults'])) {
+                        foreach ($result['faults'] as $fault) {
+                            $fetch_errors[] = $fault['message'] . ' (Code: ' . $fault['code'] . ')';
+                        }
+                    } elseif (!isset($result['response'])) {
+                        $fetch_errors[] = 'Aucune réponse reçue';
+                    } else {
+                        $reservation = $result['response'];
+
+                        if (BimpObject::objectLoaded($userClient) && $userClient->getData('email') != $reservation['customer']['emailId']) {
+                            // On déco l\'utilisateur client si l'adresse e-mail ne correspond pas
+                            $userClient = null;
+                            $_SESSION['userClient'] = 'none';
+                        }
                     }
                 }
 
@@ -159,6 +177,13 @@ class savFormController extends BimpPublicController
                 $errors = array();
                 $warnings = array();
 
+                if (!isset($reservation['reservationId'])) {
+                    $reservation['reservationId'] = $res_id;
+                }
+                if (!isset($reservation['shipToCode'])) {
+                    $reservation['shipToCode'] = $shipto;
+                }
+
                 $html .= $this->renderCustomerInfosForm($reservation['customer']['emailId'], $errors, $warnings, $code_centre, $reservation);
                 $html .= $this->renderEquipmentForm($reservation);
                 $html .= $this->renderRdvForm(!is_null($centre) ? $code_centre : '', $reservation);
@@ -216,7 +241,7 @@ class savFormController extends BimpPublicController
                 $html .= '<h4 style="text-align: center; font-weight: bold" class="info">';
                 $html .= 'Veuillez vous <a href="' . BimpObject::getPublicBaseUrl() . '?back=savForm';
 
-                if (!is_null($reservation)) {
+                if (isset($reservation['reservationId']) && isset($reservation['shipToCode'])) {
                     $html .= '&resgsx=' . $reservation['reservationId'] . '&centre_id=' . $reservation['shipToCode'];
                 }
 
@@ -410,42 +435,87 @@ class savFormController extends BimpPublicController
         }
 
         if (!is_null($reservation)) {
-            if (isset($reservation['customer']['firstName']) && $reservation['customer']['firstName']) {
-                $firstname = $reservation['customer']['firstName'];
-            }
-            if (isset($reservation['customer']['lastName']) && $reservation['customer']['lastName']) {
-                $lastname = $reservation['customer']['lastName'];
-            }
-            if (isset($reservation['customer']['phoneNumber']) && $reservation['customer']['phoneNumber']) {
-                $tel_perso = $reservation['customer']['phoneNumber'];
-            }
-
-            if (isset($reservation['customer']['address']) && !empty($reservation['customer']['address'])) {
-                $address = '';
-                $zip = '';
-                $town = '';
-                $fk_country = 1;
-
-                if (isset($reservation['customer']['address']['addressLine1']) && $reservation['customer']['address']['addressLine1']) {
-                    $address = $reservation['customer']['address']['addressLine1'];
+            if ((int) BimpCore::getConf('use_gsx_v2_for_reservations', 0)) {
+                if (isset($reservation['customer']['firstName']) && $reservation['customer']['firstName']) {
+                    $firstname = $reservation['customer']['firstName'];
                 }
-                if (isset($reservation['customer']['address']['addressLine2']) && $reservation['customer']['address']['addressLine2']) {
-                    $address .= ($address ? "\n" : '') . $reservation['customer']['address']['addressLine2'];
+                if (isset($reservation['customer']['lastName']) && $reservation['customer']['lastName']) {
+                    $lastname = $reservation['customer']['lastName'];
                 }
-                if (isset($reservation['customer']['address']['postalCode']) && $reservation['customer']['address']['postalCode']) {
-                    $zip = $reservation['customer']['address']['postalCode'];
+                if (isset($reservation['customer']['phone']['primaryPhone']) && $reservation['customer']['phone']['primaryPhone']) {
+                    $tel_perso = $reservation['customer']['phone']['primaryPhone'];
                 }
-                if (isset($reservation['customer']['address']['city']) && $reservation['customer']['address']['city']) {
-                    $town = $reservation['customer']['address']['city'];
-                }
-                if (isset($reservation['customer']['address']['country']) && $reservation['customer']['address']['country']) {
-                    $country_name = ucfirst(strtolower($reservation['customer']['address']['country']));
 
-                    if ($country_name !== 'France') {
-                        $fk_country = (int) BimpCache::getBdb()->getValue('c_country', 'rowid', 'label = \'' . $country_name . '\'');
+                if (isset($reservation['customer']['address']) && !empty($reservation['customer']['address'])) {
+                    $address = '';
+                    $zip = '';
+                    $town = '';
+                    $fk_country = 1;
 
-                        if (!$fk_country) {
-                            $fk_country = 1;
+                    if (isset($reservation['customer']['address']['line1']) && $reservation['customer']['address']['line1']) {
+                        $address = $reservation['customer']['address']['line1'];
+                    }
+                    if (isset($reservation['customer']['address']['line2']) && $reservation['customer']['address']['line2']) {
+                        $address .= ($address ? "\n" : '') . $reservation['customer']['address']['line2'];
+                    }
+                    if (isset($reservation['customer']['address']['line3']) && $reservation['customer']['address']['line3']) {
+                        $address .= ($address ? "\n" : '') . $reservation['customer']['address']['line3'];
+                    }
+                    if (isset($reservation['customer']['address']['line4']) && $reservation['customer']['address']['line4']) {
+                        $address .= ($address ? "\n" : '') . $reservation['customer']['address']['line4'];
+                    }
+                    if (isset($reservation['customer']['address']['postalCode']) && $reservation['customer']['address']['postalCode']) {
+                        $zip = $reservation['customer']['address']['postalCode'];
+                    }
+                    if (isset($reservation['customer']['address']['city']) && $reservation['customer']['address']['city']) {
+                        $town = $reservation['customer']['address']['city'];
+                    }
+                    if (isset($reservation['customer']['address']['countryCode']) && $reservation['customer']['address']['countryCode']) {
+                        $country_code = strtoupper($reservation['customer']['address']['countryCode']);
+
+                        if ($country_code !== 'FRA') {
+                            $fk_country = (int) BimpCache::getBdb()->getValue('c_country', 'rowid', 'code_iso = \'' . $country_code . '\'');
+                        }
+                    }
+                }
+            } else {
+                if (isset($reservation['customer']['firstName']) && $reservation['customer']['firstName']) {
+                    $firstname = $reservation['customer']['firstName'];
+                }
+                if (isset($reservation['customer']['lastName']) && $reservation['customer']['lastName']) {
+                    $lastname = $reservation['customer']['lastName'];
+                }
+                if (isset($reservation['customer']['phoneNumber']) && $reservation['customer']['phoneNumber']) {
+                    $tel_perso = $reservation['customer']['phoneNumber'];
+                }
+
+                if (isset($reservation['customer']['address']) && !empty($reservation['customer']['address'])) {
+                    $address = '';
+                    $zip = '';
+                    $town = '';
+                    $fk_country = 1;
+
+                    if (isset($reservation['customer']['address']['addressLine1']) && $reservation['customer']['address']['addressLine1']) {
+                        $address = $reservation['customer']['address']['addressLine1'];
+                    }
+                    if (isset($reservation['customer']['address']['addressLine2']) && $reservation['customer']['address']['addressLine2']) {
+                        $address .= ($address ? "\n" : '') . $reservation['customer']['address']['addressLine2'];
+                    }
+                    if (isset($reservation['customer']['address']['postalCode']) && $reservation['customer']['address']['postalCode']) {
+                        $zip = $reservation['customer']['address']['postalCode'];
+                    }
+                    if (isset($reservation['customer']['address']['city']) && $reservation['customer']['address']['city']) {
+                        $town = $reservation['customer']['address']['city'];
+                    }
+                    if (isset($reservation['customer']['address']['country']) && $reservation['customer']['address']['country']) {
+                        $country_name = ucfirst(strtolower($reservation['customer']['address']['country']));
+
+                        if ($country_name !== 'France') {
+                            $fk_country = (int) BimpCache::getBdb()->getValue('c_country', 'rowid', 'label = \'' . $country_name . '\'');
+
+                            if (!$fk_country) {
+                                $fk_country = 1;
+                            }
                         }
                     }
                 }
@@ -926,7 +996,7 @@ class savFormController extends BimpPublicController
         return $html;
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function sendRDVEmailToClient($email, $reservationId, $dt_begin, $sav, $centre, $serial, $reservation_exists = false)
     {
@@ -1153,11 +1223,12 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
             $html .= $centres[$code_centre]['zip'] . ' ' . $centres[$code_centre]['town'];
             $html .= '</div>';
 
-            $slots = array();
-
             require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_Reservation.php';
 
+            $slots = array();
             $timeZone = 'Europe/Paris';
+            $use_gsx_v2 = (int) BimpCore::getConf('use_gsx_v2_for_reservations', 0);
+            $correlationId = '';
 
             if (isset($centres[$code_centre])) {
                 $request_errors = array();
@@ -1169,12 +1240,26 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                     ));
                 }
 
-                if (isset($result['response']['slots'])) {
-                    $slots = $result['response']['slots'];
-                }
+                if ($use_gsx_v2) {
+                    if (isset($result['slots'])) {
+                        $slots = $result['slots'];
+                    }
 
-                if (isset($result['response']['storeTimeZone'])) {
-                    $timeZone = $result['response']['storeTimeZone'];
+                    if (isset($result['storeTimeZone'])) {
+                        $timeZone = $result['storeTimeZone'];
+                    }
+
+                    if (isset($result['correlationId'])) {
+                        $correlationId = $result['correlationId'];
+                    }
+                } else {
+                    if (isset($result['response']['slots'])) {
+                        $slots = $result['response']['slots'];
+                    }
+
+                    if (isset($result['response']['storeTimeZone'])) {
+                        $timeZone = $result['response']['storeTimeZone'];
+                    }
                 }
             }
 
@@ -1202,7 +1287,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
 
                     $days_slots[$day][] = array(
                         'label' => 'De ' . date('H:i', strtotime($slot['start'])) . ' à ' . date('H:i', strtotime($slot['end'])),
-                        'value' => $slot['start']
+                        'value' => $slot['start'] . ($correlationId ? '___' . $correlationId : '')
                     );
                 }
 
@@ -1297,6 +1382,8 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
         $isImei = false;
         $isCompany = false;
 
+        $use_gsx_v2 = (int) BimpCore::getConf('use_gsx_v2_for_reservations', 0);
+
         BimpObject::loadClass('bimpequipment', 'Equipment');
         BimpObject::loadClass('bimpsupport', 'BS_SAV');
         BimpObject::loadClass('bimpcore', 'Bimp_User');
@@ -1330,6 +1417,9 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
             'sav_slot'            => array('label' => 'Horaire', 'required' => 0),
             'reservation_id'      => array('label' => 'ID réservatiion', 'required' => 0),
         );
+
+        $reservationDate = '';
+        $correlationId = '';
 
         if (BimpObject::objectLoaded($userClient)) {
             $inputs['client_email']['required'] = 0;
@@ -1365,6 +1455,15 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
 
             if (!isset($data['sav_slot']) || !$data['sav_slot']) {
                 $errors[] = 'Veuillez sélectionner un créneau horaire';
+            } else {
+                if ($use_gsx_v2) {
+                    if (preg_match('/^(.+)___(.+)$/', $data['sav_slot'], $matches)) {
+                        $reservationDate = $matches[1];
+                        $correlationId = $matches[2];
+                    }
+                } else {
+                    $reservationDate = $data['sav_slot'];
+                }
             }
         }
 
@@ -1478,7 +1577,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                         $countries = BimpCache::getCountriesArray();
 
                         $params = array(
-                            'reservationDate' => $data['sav_slot'],
+                            'reservationDate' => $reservationDate,
                             'product'         => array(
                                 'productCode'   => $data['eq_type'],
                                 'issueReported' => substr($data['eq_symptomes'], 0, 250),
@@ -1489,42 +1588,90 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                                 'emailId'     => (BimpObject::objectLoaded($userClient) ? $userClient->getData('email') : $data['client_email']),
                                 'phoneNumber' => ($data['client_phone_mobile'] ? $data['client_phone_mobile'] : ($data['client_phone_pro'] ? $data['client_phone_pro'] : $data['client_phone_perso'])),
                                 'address'     => array(
-                                    'addressLine1' => substr($data['client_address'], 0, 60),
-                                    'postalCode'   => $data['client_zip'],
-                                    'city'         => substr($data['town'], 0, 40),
-                                    'country'      => (isset($countries[$data['client_pays']]) ? $countries[$data['client_pays']] : 'France')
+                                    'postalCode' => $data['client_zip'],
+                                    'city'       => substr($data['town'], 0, 40)
                                 )
                             )
                         );
 
-                        if (!$isImei) {
-                            $params['product']['serialNumber'] = $data['eq_serial'];
+                        if ($use_gsx_v2) {
+                            $params['customer']['phone']['primaryPhone'] = ($data['client_phone_mobile'] ? $data['client_phone_mobile'] : ($data['client_phone_pro'] ? $data['client_phone_pro'] : $data['client_phone_perso']));
+                            $params['customer']['address']['countryCode'] = 'FRA';
+
+                            $i = 0;
+                            foreach (explode("\n", $data['client_address']) as $line) {
+                                $i++;
+                                $params['customer']['address']['line' . $i] = substr($line, 0, ($i == 1 ? 60 : 40));
+
+                                if ($i >= 4) {
+                                    break;
+                                }
+                            }
+
+                            $params['device']['id'] = $data['eq_serial'];
+                            $params['reservationType'] = '';
+                            $params['correlationId'] = $correlationId;
+                        } else {
+                            $params['customer']['phoneNumber'] = ($data['client_phone_mobile'] ? $data['client_phone_mobile'] : ($data['client_phone_pro'] ? $data['client_phone_pro'] : $data['client_phone_perso']));
+                            $params['customer']['address']['addressLine1'] = substr($data['client_address'], 0, 60);
+                            $params['customer']['address']['country'] = (isset($countries[$data['client_pays']]) ? $countries[$data['client_pays']] : 'France');
+
+                            if (!$isImei) {
+                                $params['product']['serialNumber'] = $data['eq_serial'];
+                            }
                         }
 
                         $result = GSX_Reservation::createReservation(897316, $centre['shipTo'], $params, $req_errors, $debug);
                     }
 
                     if (!empty($result)) {
-                        if (isset($result['response']['reservationId'])) {
-                            $reservationId = $result['response']['reservationId'];
-                        } else {
-                            $forceValidate = true;
+                        if ($use_gsx_v2) {
+                            if (isset($result['reservationId'])) {
+                                $reservationId = $result['reservationId'];
+                            } else {
+                                $forceValidate = true;
 
-                            if (isset($result['faults'])) {
-                                foreach ($result['faults'] as $fault) {
-                                    if ($fault['code'] === 'SYS.RSV.005') {
-                                        $slotNotAvailable = true;
-                                        $forceValidateReason = 'Créneau horaire sélectionné par le client indisponible';
-                                        break;
-                                    } else {
-                                        $req_errors[] = $fault['message'] . ' (' . $fault['code'] . ')';
+                                if (isset($result['errors'])) {
+                                    foreach ($result['errors'] as $error) {
+                                        if ($error['code'] === 'SYS.RSV.005') {
+                                            $slotNotAvailable = true;
+                                            $forceValidateReason = 'Créneau horaire sélectionné par le client indisponible';
+                                            break;
+                                        } else {
+                                            $req_errors[] = $error['message'] . ' (' . $error['code'] . ')';
+                                        }
+                                    }
+
+                                    if (!$forceValidateReason) {
+                                        $forceValidateReason = 'Echec requête réservation sur GSX';
+                                        if (count($req_errors)) {
+                                            $forceValidateReason .= '<br/>' . BimpTools::getMsgFromArray($req_errors, 'Erreurs');
+                                        }
                                     }
                                 }
+                            }
+                        } else {
+                            if (isset($result['response']['reservationId'])) {
+                                $reservationId = $result['response']['reservationId'];
+                            } else {
+                                $forceValidate = true;
 
-                                if (!$forceValidateReason) {
-                                    $forceValidateReason = 'Echec requête réservation sur GSX';
-                                    if (count($req_errors)) {
-                                        $forceValidateReason .= '<br/>' . BimpTools::getMsgFromArray($req_errors, 'Erreurs');
+                                if (isset($result['faults'])) {
+                                    foreach ($result['faults'] as $fault) {
+                                        if ($fault['code'] === 'SYS.RSV.005') {
+                                            $slotNotAvailable = true;
+                                            $forceValidateReason = 'Créneau horaire sélectionné par le client indisponible';
+                                            break;
+                                        } else {
+                                            $req_errors[] = $fault['message'] . ' (' . $fault['code'] . ')';
+                                        }
+                                    }
+
+                                    if (!$forceValidateReason) {
+                                        $forceValidateReason = 'Echec requête réservation sur GSX';
+                                        if (count($req_errors)) {
+                                            $forceValidateReason .= '<br/>' . BimpTools::getMsgFromArray($req_errors, 'Erreurs');
+                                        }
                                     }
                                 }
                             }
@@ -1554,9 +1701,9 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                     $dateBegin = null;
                     $dateEnd = null;
 
-                    if (isset($data['sav_slot']) && (string) $data['sav_slot']) {
-                        $dateBegin = new DateTime(date('Y-m-d H:i:s', strtotime($data['sav_slot'])));
-                        $dateEnd = new DateTime(date('Y-m-d H:i:s', strtotime($data['sav_slot'])));
+                    if ((string) $reservationDate) {
+                        $dateBegin = new DateTime(date('Y-m-d H:i:s', strtotime($reservationDate)));
+                        $dateEnd = new DateTime(date('Y-m-d H:i:s', strtotime($reservationDate)));
                         $dateEnd->add(new DateInterval('PT20M'));
                     }
 
@@ -2179,14 +2326,26 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
 
                             $result = GSX_Reservation::cancelReservation(897316, $centre['ship_to'], $reservation_id, $errors);
 
-                            if (isset($result['faults']) && !empty($result['faults'])) {
-                                $request_errors = array();
-                                foreach ($result['faults'] as $fault) {
-                                    $request_errors[] = $fault['message'] . ' (code: ' . $fault['code'] . ')';
+                            if ((int) BimpCore::getConf('use_gsx_v2_for_reservations', 0)) {
+                                if (isset($result['errors']) && !empty($result['errors'])) {
+                                    $request_errors = array();
+                                    foreach ($result['errors'] as $error) {
+                                        $request_errors[] = $error['message'] . ' (code: ' . $error['code'] . ')';
+                                    }
+                                    $errors[] = BimpTools::getMsgFromArray($request_errors, 'Echec de l\'annulation de la réservation');
+                                } elseif (is_null($result) && !count($errors)) {
+                                    $errors[] = 'Echec de l\'annulation de la réservation pour une raison inconnue';
                                 }
-                                $errors[] = BimpTools::getMsgFromArray($request_errors, 'Echec de l\'annulation de la réservation');
-                            } elseif (is_null($result) && !count($errors)) {
-                                $errors[] = 'Echec de l\'annulation de la réservation pour une raison inconnue';
+                            } else {
+                                if (isset($result['faults']) && !empty($result['faults'])) {
+                                    $request_errors = array();
+                                    foreach ($result['faults'] as $fault) {
+                                        $request_errors[] = $fault['message'] . ' (code: ' . $fault['code'] . ')';
+                                    }
+                                    $errors[] = BimpTools::getMsgFromArray($request_errors, 'Echec de l\'annulation de la réservation');
+                                } elseif (is_null($result) && !count($errors)) {
+                                    $errors[] = 'Echec de l\'annulation de la réservation pour une raison inconnue';
+                                }
                             }
                         }
                     }

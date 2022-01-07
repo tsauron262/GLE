@@ -2663,17 +2663,28 @@ class Bimp_Client extends Bimp_Societe
 
             );
             
+            $list = BimpCache::getBimpObjectObjects('bimpcore', 'BimpNote', array('content' => array(
+                                'operator' => 'like',
+                                'value'    => '%licite pour ce client un encours%'
+                            ), "obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id));
+            
             global $user, $langs;
-            $buttons[] = array(
-                'label'   => 'Demander encours',
-                'icon'    => 'far_paper-plane',
-                'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => 680, "content" => "Bonjour, ".$user->getFullName($langs)." sollicite pour ce client un encours de XX XXX  €\\n\\nNB : si ce client est une Administration publique (son Siren commence par 1 ou par 2) ou si vous pensez qu\'il fait partie des Autres Administrations et Institution demandez 50 000 € d\'encours\\nCette information sera vérifiée par l\'équipe en charge de l\'attribution des encours"), array('form_name' => 'rep'))
-            );
-//            $buttons[] = array(
-//                'label'   => 'Refus d\'encours',
-//                'icon'    => 'far_paper-plane',
-//                'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => 680, "content" => "Bonjour\\n\\nVotre demande d\'encours pour le client NOM - CLGLEXXXXX a été refusée\\n\\nNous pouvons toutefois solliciter Atradius pour une révision de cette décision \\n\\nPour cela nous devons fournir un maximum d\'éléments prouvant la bonne santé financière de cette entreprise (dernier bilan, compte de résultats, etc)\\n\\nMerci de bien vouloir les demander à votre client puis les transmettre à GDS-OLYS-atradiusolys@ldlc.com \\n\\nDans l\'attente de cette révision, toutes les commandes en cours devront être réglées au comptant"), array('form_name' => 'rep'))
-//            );
+            if(count($list) == 0){
+                $buttons[] = array(
+                    'label'   => 'Demander encours',
+                    'icon'    => 'far_paper-plane',
+                    'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => 680, "content" => "Bonjour, ".$user->getFullName($langs)." sollicite pour ce client un encours de XX XXX  €\\n\\nNB : si ce client est une Administration publique (son Siren commence par 1 ou par 2) ou si vous pensez qu\'il fait partie des Autres Administrations et Institution demandez 50 000 € d\'encours\\nCette information sera vérifiée par l\'équipe en charge de l\'attribution des encours"), array('form_name' => 'rep'))
+                );
+            }
+            else{
+//                print_r($list);die;
+                $noteT = current($list);
+                $buttons[] = array(
+                    'label'   => 'Refus d\'encours',
+                    'icon'    => 'far_paper-plane',
+                    'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_USER, "fk_user_dest" => $noteT->getData('user_create'), "content" => "Bonjour\\n\\nVotre demande d\'encours pour le client ".$this->getName()." a été refusée\\n\\nNous pouvons toutefois solliciter Atradius pour une révision de cette décision \\n\\nPour cela nous devons fournir un maximum d\'éléments prouvant la bonne santé financière de cette entreprise (dernier bilan, compte de résultats, etc)\\n\\nMerci de bien vouloir les demander à votre client puis les transmettre à GDS-OLYS-atradiusolys@ldlc.com \\n\\nDans l\'attente de cette révision, toutes les commandes en cours devront être réglées au comptant"), array('form_name' => 'rep'))
+                );
+            }
             foreach ($buttons as $button) {
                 $html .= BimpRender::renderButton($button).'<br/>';
             }

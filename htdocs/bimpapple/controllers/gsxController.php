@@ -468,7 +468,7 @@ class gsxController extends BimpController
             if (BimpObject::objectLoaded($sav)) {
                 $propal = $sav->getChildObject('propal');
                 if (BimpObject::objectLoaded($propal)) {
-                    $sav_files_dir = $propal->getFilesDir();
+                    $sav_files_dir = $sav->getFilesDir();
                 }
             }
 

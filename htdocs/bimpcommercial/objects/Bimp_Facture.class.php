@@ -743,7 +743,7 @@ class Bimp_Facture extends BimpComm
                         $client = $this->getChildObject('client');
                         if (!BimpObject::objectLoaded($client)) {
                             $errors[] = 'Client absent';
-                        } elseif (!in_array($client->dol_object->typent_code, array('TE_ADMIN'))) {
+                        } elseif (!$client->isAdministration()) {
                             $errors[] = 'Ce client n\'est pas une administration';
                         }
                     }
@@ -3190,7 +3190,7 @@ class Bimp_Facture extends BimpComm
             if (in_array($status, array(1, 2)) && $this->field_exists('chorus_status') && (int) $this->getData('chorus_status') >= 0) {
                 $client = $this->getChildObject('client');
 
-                if (BimpObject::objectLoaded($client) && $client->dol_object->typent_code == 'TE_ADMIN') {
+                if (BimpObject::objectLoaded($client) && $client->isAdministration()) {
                     $html .= '<br/>Export Chorus: ' . $this->displayData('chorus_status', 'default', false);
                 }
             }
@@ -3612,7 +3612,7 @@ class Bimp_Facture extends BimpComm
 
             if (!BimpObject::objectLoaded($client)) {
                 $errors[] = 'Client absent';
-            } elseif (!in_array($client->dol_object->typent_code, array('TE_ADMIN'))) {
+            } elseif (!$client->isAdministration()) {
                 $errors[] = 'Ce client n\'est pas une administration';
             } else {
                 $siret = $client->getData('siret');
@@ -3943,7 +3943,7 @@ class Bimp_Facture extends BimpComm
             $client = $this->getChildObject('client');
 
             if (BimpObject::objectLoaded($client)) {
-                if ($client->dol_object->typent_code == 'TE_ADMIN') {
+                if ($client->isAdministration()) {
                     $this->updateField('chorus_status', 0);
                 }
             }

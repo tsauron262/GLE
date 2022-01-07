@@ -2039,23 +2039,20 @@ class BT_ficheInter extends BimpDolObject
                             $email_cli = BimpTools::cleanEmailsStr($email_cli);
                         }
                     }
-                    
-                    // Envois au commercial quand FI non liée
-                    
+                
                     if(!count(json_decode($this->getData('commandes'))) && !$this->getData('fk_contrat')) {
-                        //die($email_comm . ' fhjifods');
-                        $task = BimpCache::getBimpObjectInstance("bimptask", "BIMP_Task");
-                        $data = array(
-                            "src"  => "noreply@bimp.fr",
-                            "subj" => "Fiche d’intervention non liée",
-                            "prio" => 20,
-                            "txt"  => "Bonjour,Cette fiche d’intervention a été validée, mais n’est liée à aucune commande et à aucun contrat. Merci de faire les vérifications nécessaires et de corriger si cela est une erreur. " . $this->getNomUrl(),
-                        );
-                        $errors = BimpTools::merge_array($errors, $task->validateArray($data));
-                        $errors = BimpTools::merge_array($errors, $task->create());
-                        //die(print_r($errors, 1) . 'dyhuidhudis');
+                        if(!in_array($this->getData('fk_soc'), explode(',', BimpCore::getConf('bimptechnique_id_societe_auto_terminer')))) {
+                            $task = BimpCache::getBimpObjectInstance("bimptask", "BIMP_Task");
+                            $data = array(
+                                "src"  => "noreply@bimp.fr",
+                                "subj" => "Fiche d’intervention non liée",
+                                "prio" => 20,
+                                "txt"  => "Bonjour,Cette fiche d’intervention a été validée, mais n’est liée à aucune commande et à aucun contrat. Merci de faire les vérifications nécessaires et de corriger si cela est une erreur. " . $this->getNomUrl(),
+                            );
+                            $errors = BimpTools::merge_array($errors, $task->validateArray($data));
+                            $errors = BimpTools::merge_array($errors, $task->create());
+                        }
                     }
-                    
                     
                     // Envoi au client: 
                     if (!$auto_terminer && $type_signature !== self::TYPE_SIGN_DIST) {

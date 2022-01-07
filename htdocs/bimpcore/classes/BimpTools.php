@@ -3109,7 +3109,7 @@ class BimpTools
         $text = "Yes" . rand(0, 10000000).$user->getFullName($langs);
         if (!file_put_contents($file, $text))
             die('droit sur fichier incorrect : ' . $file);
-        usleep(3000000);
+        usleep(1000000);
         $text2 = file_get_contents($file);
         if ($text == $text2){
             if(defined('ID_ERP')){

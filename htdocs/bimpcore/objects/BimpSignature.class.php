@@ -1268,7 +1268,7 @@ class BimpSignature extends BimpObject
         $errors = array();
 
         if (!(int) $this->getData('allow_dist')) {
-            $errors[] = 'La signature à distance n\'est pas autorisé pour cette signature';
+            $errors[] = 'La signature à distance n\'est pas autorisée pour cette signature';
             return $errors;
         }
 

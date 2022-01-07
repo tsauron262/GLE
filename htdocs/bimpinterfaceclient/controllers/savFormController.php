@@ -7,6 +7,9 @@ class savFormController extends BimpPublicController
 
     public function renderHtml()
     {
+        if (!(int) BimpCore::getConf('sav_public_reservations', 0)) {
+            return BimpRender::renderAlerts('Les demandes de réparations en ligne ne sont actuellement pas disponibles');
+        }
 
         if ((int) BimpTools::getValue('cancel_rdv', 0)) {
             return $this->renderCancelRdvForm();

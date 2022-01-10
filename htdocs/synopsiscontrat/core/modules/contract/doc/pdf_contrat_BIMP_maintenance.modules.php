@@ -290,16 +290,16 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
             $pdf->setFont('','', 8);
             $chaine_description = $contrat->note_public;
             
-            $chaine_description = str_replace(":&nbsp;", ' ', $chaine_description);  
-            $chaine_description = str_replace("<li>", '', $chaine_description);
-            $chaine_description = str_replace("</li>", "\n", $chaine_description);
-            $chaine_description = str_replace("<br>", "\n", $chaine_description);
-            $chaine_description = str_replace("<br/>", "\n", $chaine_description);
-            $chaine_description = str_replace("<br />", "\n", $chaine_description);
-            $chaine_description = str_replace("<ul>", '', $chaine_description);
-            $chaine_description = str_replace("</ul>", '', $chaine_description);
-            $chaine_description = str_replace("<p>", '', $chaine_description);
-            $chaine_description = str_replace("</p>", '', $chaine_description);
+//            $chaine_description = str_replace(":&nbsp;", ' ', $chaine_description);  
+//            $chaine_description = str_replace("<li>", '', $chaine_description);
+//            $chaine_description = str_replace("</li>", "\n", $chaine_description);
+//            $chaine_description = str_replace("<br>", "\n", $chaine_description);
+//            $chaine_description = str_replace("<br/>", "\n", $chaine_description);
+//            $chaine_description = str_replace("<br />", "\n", $chaine_description);
+//            $chaine_description = str_replace("<ul>", '', $chaine_description);
+//            $chaine_description = str_replace("</ul>", '', $chaine_description);
+//            $chaine_description = str_replace("<p>", '', $chaine_description);
+//            $chaine_description = str_replace("</p>", '', $chaine_description);
             $pdf->writeHTML($chaine_description);
             $pdf->setDrawColor(240, 240, 240);
             $pdf->Line(15, $pdf->getY() + 3, 195, $pdf->getY() + 3);

@@ -300,7 +300,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
             $chaine_description = str_replace("</ul>", '', $chaine_description);
             $chaine_description = str_replace("<p>", '', $chaine_description);
             $chaine_description = str_replace("</p>", '', $chaine_description);
-            $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, $chaine_description, 0, 'L');
+            $pdf->writeHTML($chaine_description);
             $pdf->setDrawColor(240, 240, 240);
             $pdf->Line(15, $pdf->getY() + 3, 195, $pdf->getY() + 3);
             $pdf->setY($pdf->getY() + 4);
@@ -441,18 +441,18 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
             
             $chaine_description = $line->description;
             //$chaine_description = strip_tags($chaine_description,"<b><u><i><a><img><p><strong><em><font><tr><blockquote>");
-            $chaine_description = str_replace(":&nbsp;", ' ', $chaine_description);  
-            $chaine_description = str_replace("<li>", '', $chaine_description);
-            $chaine_description = str_replace("</li>", "\n", $chaine_description);
-            $chaine_description = str_replace("<br>", "\n", $chaine_description);
-            $chaine_description = str_replace("<br/>", "\n", $chaine_description);
-            $chaine_description = str_replace("<br />", "\n", $chaine_description);
-            $chaine_description = str_replace("<ul>", '', $chaine_description);
-            $chaine_description = str_replace("</ul>", '', $chaine_description);
-            $chaine_description = str_replace("<p>", '', $chaine_description);
-            $chaine_description = str_replace("</p>", '', $chaine_description);
+//            $chaine_description = str_replace(":&nbsp;", ' ', $chaine_description);  
+//            $chaine_description = str_replace("<li>", '', $chaine_description);
+//            $chaine_description = str_replace("</li>", "\n", $chaine_description);
+//            $chaine_description = str_replace("<br>", "\n", $chaine_description);
+//            $chaine_description = str_replace("<br/>", "\n", $chaine_description);
+//            $chaine_description = str_replace("<br />", "\n", $chaine_description);
+//            $chaine_description = str_replace("<ul>", '', $chaine_description);
+//            $chaine_description = str_replace("</ul>", '', $chaine_description);
+//            $chaine_description = str_replace("<p>", '', $chaine_description);
+//            $chaine_description = str_replace("</p>", '', $chaine_description);
             
-            $pdf->MultiCell($this->page_largeur - $this->marge_droite - $this->marge_gauche - 25, 7, $chaine_description, 0, 'L'); 
+            $pdf->writeHTML('<br/>'.$chaine_description, false, false, true, false, ''); 
             
             $first_passage = false;
             

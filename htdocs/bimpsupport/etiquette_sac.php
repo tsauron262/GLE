@@ -8,7 +8,7 @@ class EtiquetteSac1 extends BimpEtiquettePDF {
 
 
     public function __construct($db) {
-        parent::__construct($db);
+        parent::__construct($db, $orientation = 'L', $format = array(75, 36));
 
         $this->typeObject = "sac";
         $this->prefName = "Etiquette_Sac_";
@@ -34,10 +34,10 @@ class EtiquetteSac1 extends BimpEtiquettePDF {
             if($i > 1)
                 $this->pdf->newPage();
             $this->pdf->SetFont('times', 'B', 15);
-            $this->pdf->setXY(6,1);
-            $this->pdf->Cell(77,5,dol_trunc($object->getData('ref'),18),1,0,'C');
+            $this->pdf->setXY(12,1);
+            $this->pdf->Cell(59,5,dol_trunc($object->getData('ref'),18),1,0,'C');
 
-            $this->pdf->setXY(6,8);
+            $this->pdf->setXY(11,8);
             $this->pdf->SetFont('times', '', 10);
 
 //            $label = $object->label;
@@ -59,13 +59,13 @@ class EtiquetteSac1 extends BimpEtiquettePDF {
 
     //        $this->writeContent($html);
             if (file_exists(static::$tpl_dir . '/' . static::$type . '/logomininoir.jpg'))
-                $this->pdf->Image( static::$tpl_dir . '/' . static::$type . '/logomininoir.jpg', 6,25,15,10);
+                $this->pdf->Image( static::$tpl_dir . '/' . static::$type . '/logomininoir.jpg', 16,25,15,10);
 
 
             $codeBar = ($object->barcode != "")? $object->barcode : $object->ref;
             $maxLn = 35;
             $longeur = (strlen($codeBar) < $maxLn)? strlen($codeBar) : $maxLn;
-            $this->pdf->write1DBarcode($codeBar, 'C128', 12-($longeur), 13, 7+($longeur*2), 5, '', array('text'=> true));
+            $this->pdf->write1DBarcode($codeBar, 'C128', 22-($longeur), 13, 7+($longeur*2), 5, '', array('text'=> true));
 
             
             require_once(DOL_DOCUMENT_ROOT . "/synopsisphpqrcode/qrlib.php");
@@ -76,7 +76,7 @@ class EtiquetteSac1 extends BimpEtiquettePDF {
             QRcode::png($object->ref
                 , $file
                 , "L", 4, 2);
-            $this->pdf->Image($file, 53, 9, 0, 24);
+            $this->pdf->Image($file, 45, 9, 0, 24);
             
             
 

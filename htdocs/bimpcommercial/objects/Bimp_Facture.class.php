@@ -737,8 +737,8 @@ class Bimp_Facture extends BimpComm
                         $errors[] = 'Le statut actuel ' . $this->getLabel('of_this') . ' ne permet pas cette opération';
                     } elseif (!$this->field_exists('chorus_status')) {
                         $errors[] = 'Le champ "Statut chorus" n\'est pas paramétré pour les factures';
-                    } elseif ((int) $this->getData('chorus_status') != 0) {
-                        $errors[] = ucfirst($this->getLabel('this')) . ' n\'est pas en attente d\'export vers Chorus';
+                    } elseif (!in_array ((int) $this->getData('chorus_status'), array(-1, 0))) {
+                        $errors[] = ucfirst($this->getLabel('this')) . ' n\'est pas en attente d\'export vers Chorus'.(int)$this->getData('chorus_status');
                     } else {
                         $client = $this->getChildObject('client');
                         if (!BimpObject::objectLoaded($client)) {

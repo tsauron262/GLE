@@ -2689,7 +2689,7 @@ class Bimp_Client extends Bimp_Societe
                 $buttons[] = array(
                     'label'   => 'Demander révision encours',
                     'icon'    => 'far_paper-plane',
-                    'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => 680, "content" => "Bonjour, ".$user->getFullName($langs)." sollicite pour ce client une révision d\'encours de XX XXX  €"), array('form_name' => 'rep'))
+                    'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => 680, "content" => "Bonjour, ".$user->getFullName($langs)." sollicite pour ce client une révision d\'encours à XX XXX  €"), array('form_name' => 'rep'))
                 );
                 
                 

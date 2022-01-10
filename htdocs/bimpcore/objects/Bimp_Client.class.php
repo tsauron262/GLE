@@ -2673,7 +2673,7 @@ class Bimp_Client extends Bimp_Societe
                 $buttons[] = array(
                     'label'   => 'Demander encours',
                     'icon'    => 'far_paper-plane',
-                    'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => 680, "content" => "Bonjour, ".$user->getFullName($langs)." sollicite pour ce client un encours de XX XXX  €\\n\\nNB : si ce client est une Administration publique (son Siren commence par 1 ou par 2) ou si vous pensez qu\'il fait partie des Autres Administrations et Institution demandez 50 000 € d\'encours\\nCette information sera vérifiée par l\'équipe en charge de l\'attribution des encours"), array('form_name' => 'rep'))
+                    'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => 680, "content" => "Bonjour, ".$user->getFullName($langs)." sollicite pour ce client un encours à XX XXX  €\\n\\nNB : si ce client est une Administration publique (son Siren commence par 1 ou par 2) ou si vous pensez qu\'il fait partie des Autres Administrations et Institution demandez 50 000 € d\'encours\\nCette information sera vérifiée par l\'équipe en charge de l\'attribution des encours"), array('form_name' => 'rep'))
                 );
             }
             else{

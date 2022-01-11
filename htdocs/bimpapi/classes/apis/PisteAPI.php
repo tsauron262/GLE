@@ -92,7 +92,10 @@ class PisteAPI extends BimpAPI
     {
         $params = BimpTools::overrideArray(array(
                     'fields' => array(
-                        'idStructure' => (int) $id_structure
+                        'idStructure' => (int) $id_structure,
+                        'parametresRechercherServicesStructure' => array(
+                            'nbResultatsParPage' => 100
+                        )
                     )
                         ), $params, false, true);
 

@@ -2823,9 +2823,9 @@ class Bimp_Societe extends BimpDolObject
         $limit = -1;
         if ($this->getData('outstanding_limit_atradius') > -1)
             $limit = $this->getData('outstanding_limit_atradius');
-        elseif ($this->getData('outstanding_limit_icba') > 0)
+        if($this->getData('outstanding_limit_icba') > $limit)
             $limit = $this->getData('outstanding_limit_icba');
-        elseif ($this->getData('outstanding_limit_credit_check') > 0)
+        if($this->getData('outstanding_limit_credit_check') > $limit)
             $limit = $this->getData('outstanding_limit_credit_check');
         if ($limit > 0 && $limit != $this->getInitData('outstanding_limit'))
             $this->updateField('outstanding_limit', $limit);

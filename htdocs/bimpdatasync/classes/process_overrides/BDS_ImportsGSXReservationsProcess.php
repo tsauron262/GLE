@@ -117,7 +117,7 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
                         }
 
                         $pc_html .= '<br/>';
-                        break;
+//                        break;
                     }
 
                     $data['result_html'] .= BimpRender::renderFoldableContainer('Code produit "' . $product_code . '"', $pc_html);
@@ -1134,33 +1134,33 @@ L’équipe BIMP";
                 }
             }
 
-            $emails = '';
-
-            foreach ($users as $u) {
-                if (isset($u['email']) && !empty($u['email'])) {
-                    $emails .= ($emails ? ',' : '') . $u['email'];
-                }
-            }
-
-            $emails = BimpTools::cleanEmailsStr($emails);
-
-            if ($emails) {
-//                $this->debug_content .= 'Envoi e-mail à "' . $emails . '": ';
-//                if (mailSyn2($subject, $emails, '', $message)) {
-//                    $this->debug_content .= '<span class="success">OK</span>';
-//                } else {
-//                    $this->debug_content .= '<span class="danger">ECHEC</span>';
-//                    $this->Error('Echec envoi e-mail aux utilisateurs suite ajout RDV SAV (Destinataire(s): ' . $emails . ')', $sav, $data['reservationId']);
-//                    BimpCore::addlog('Echec envoi e-mail aux utilisateurs suite ajout RDV SAV', Bimp_Log::BIMP_LOG_URGENT, 'bds', $sav, array(
-//                        'Destinataires' => $emails
-//                    ));
+//            $emails = '';
+//
+//            foreach ($users as $u) {
+//                if (isset($u['email']) && !empty($u['email'])) {
+//                    $emails .= ($emails ? ',' : '') . $u['email'];
 //                }
-
-                $this->debug_content .= '<br/>';
-            } else {
-                $this->Alert('Aucun e-mail utilisateur pour notification RDV SAV', $sav, $resId);
-                BimpCore::addlog('Aucun e-mail utilisateur pour notification RDV SAV', Bimp_Log::BIMP_LOG_URGENT, 'bds', $sav);
-            }
+//            }
+//
+//            $emails = BimpTools::cleanEmailsStr($emails);
+//
+//            if ($emails) {
+////                $this->debug_content .= 'Envoi e-mail à "' . $emails . '": ';
+////                if (mailSyn2($subject, $emails, '', $message)) {
+////                    $this->debug_content .= '<span class="success">OK</span>';
+////                } else {
+////                    $this->debug_content .= '<span class="danger">ECHEC</span>';
+////                    $this->Error('Echec envoi e-mail aux utilisateurs suite ajout RDV SAV (Destinataire(s): ' . $emails . ')', $sav, $data['reservationId']);
+////                    BimpCore::addlog('Echec envoi e-mail aux utilisateurs suite ajout RDV SAV', Bimp_Log::BIMP_LOG_URGENT, 'bds', $sav, array(
+////                        'Destinataires' => $emails
+////                    ));
+////                }
+//
+//                $this->debug_content .= '<br/>';
+//            } else {
+//                $this->Alert('Aucun e-mail utilisateur pour notification RDV SAV', $sav, $resId);
+//                BimpCore::addlog('Aucun e-mail utilisateur pour notification RDV SAV', Bimp_Log::BIMP_LOG_URGENT, 'bds', $sav);
+//            }
 
             // Envoi e-mail client: 
             $email_client = '';

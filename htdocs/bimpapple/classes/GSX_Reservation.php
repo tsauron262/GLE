@@ -60,17 +60,30 @@ class GSX_Reservation
     {
         // GSX V2: 
         if (self::useGsxV2()) {
+            if (!(int) $soldTo || !(int) $shipTo) {
+                return array();
+            }
+
             $gsx_v2 = self::getGsxV2();
 
             if (!$gsx_v2->logged) {
                 $errors[] = 'Non connecté à GSX';
                 return array();
             }
-            
+
             $gsx_v2->setSoldTo($soldTo);
             $gsx_v2->resetErrors();
 
             $reservations = $gsx_v2->fetchReservationsSummary($shipTo, $from, $to, $productCode);
+
+            $curl_errors = $gsx_v2->errors['curl'];
+
+            foreach ($curl_errors as $error) {
+                if (isset($error['code']) && $error['code'] == 'RESERVATIONS_NOT_FOUND') {
+                    return array();
+                }
+            }
+
             $errors = BimpTools::merge_array($errors, $gsx_v2->getErrors());
 
             return $reservations;

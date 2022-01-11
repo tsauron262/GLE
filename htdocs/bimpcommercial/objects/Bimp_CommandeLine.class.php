@@ -849,12 +849,14 @@ class Bimp_CommandeLine extends ObjectLine
                 if (!is_null($id_facture) && ((int) $id_facture !== (int) $id_f)) {
                     continue;
                 }
+                
                 if ($invoices_validated_only && (int) $id_f !== -1) {
                     $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_f);
                     if (!BimpObject::objectLoaded($facture) || (int) $facture->getData('fk_statut') === Facture::STATUS_DRAFT) {
                         continue;
                     }
                 }
+                
                 if (isset($facture_data['qty'])) {
                     $qty += (float) $facture_data['qty'];
                 }

@@ -523,6 +523,7 @@ fields:
         label: Marché potentiel
         type: items_list
         items_data_type: int
+        items_braces: 1
         values: 
             callback: 
                method: getListExtrafield

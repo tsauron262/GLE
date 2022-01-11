@@ -88,7 +88,7 @@ class BC_Filter extends BimpComponent
 
             if ($this->params['data_type'] === 'items_list') {
                 $this->is_items_list = true;
-                $this->params['exclude_btn'] = 0;
+//                $this->params['exclude_btn'] = 0;
                 $this->params['data_type'] = $this->bc_field->getParam('items_data_type', 'string');
                 $this->bc_field->params['type'] = $this->params['data_type'];
             }
@@ -598,10 +598,18 @@ class BC_Filter extends BimpComponent
                             }
                         } else {
                             if (BimpTools::checkValueByType($this->bc_field->params['type'], $value)) {
-                                $and_field[] = array(
-                                    'operator' => '!=',
-                                    'value'    => $value
-                                );
+                                if ($this->is_items_list) {
+                                    $and_field[] = array(
+                                        'part_type' => 'middle',
+                                        'part'      => '[' . $value . ']',
+                                        'not'       => 1
+                                    );
+                                } else {
+                                    $and_field[] = array(
+                                        'operator' => '!=',
+                                        'value'    => $value
+                                    );
+                                }
                             } else {
                                 $errors[] = 'Valeur invalide: "' . $value . '" (doit être de type: "' . BimpTools::getDataTypeLabel($this->bc_field->params['type']) . '"';
                             }
@@ -1966,11 +1974,11 @@ class BC_Filter extends BimpComponent
     public static function getConvertedValues($filter_type, $values)
     {
         foreach ($values as $idx => $value) {
-            if($value == ''){
+            if ($value == '') {
                 unset($values[$idx]);
             }
-            
-            
+
+
             switch ($filter_type) {
                 case 'value_part':
                     $part = (is_string($value) ? $value : (isset($value['value']) ? $value['value'] : ''));

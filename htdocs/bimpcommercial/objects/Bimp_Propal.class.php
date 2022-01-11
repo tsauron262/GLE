@@ -190,7 +190,7 @@ class Bimp_Propal extends BimpComm
                         $errors[] = ucfirst($this->getLabel('this')) . ' est liée au SAV ' . $sav->getNomUrl(0, 1, 1, 'default') . '. Veuillez utiliser le bouton réviser depuis la fiche SAV';
                     }
                 }
-                if (!in_array($status, array(Propal::STATUS_VALIDATED, Propal::STATUS_NOTSIGNED))) {
+                if (!in_array($status, array(Propal::STATUS_VALIDATED, Propal::STATUS_SIGNED, Propal::STATUS_NOTSIGNED))) {
                     $errors[] = ucfirst($this->getLabel('the')) . ' n\'a pas le statut validé' . $this->e() . ' ou refusé' . $this->e();
                 }
 

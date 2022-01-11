@@ -26,7 +26,6 @@ class Bimp_Client extends Bimp_Societe
     public function canClientEdit()
     {
 //        global $userClient;
-
 //        if (BimpObject::objectLoaded($userClient)) {
 //            if ($userClient->isAdmin() && $this->id == (int) $userClient->getData('id_client')) {
 //                return 1;
@@ -788,6 +787,63 @@ class Bimp_Client extends Bimp_Societe
         return 0;
     }
 
+    public function getTotalUnpayed($since = '2019-06-30')
+    {
+
+        $factures = $this->getUnpaidFactures($since);
+        $total_unpaid = 0;
+
+        foreach ($factures as $fac) {
+            $fac->checkIsPaid(); // TODO laisser ?
+            $total_unpaid += (float) $fac->getRemainToPay(true);
+        }
+
+        return $total_unpaid;
+    }
+
+    public function getTotalUnpayedTolerance($since = '2019-06-30', $euros_tolere = 2000, $day_tolere = 5)
+    {
+
+        $factures = $this->getUnpaidFactures($since);
+        $total_unpaid = 0;
+        $has_retard = 0;
+
+        if (!empty($factures)) {
+
+            $now = new DateTime();
+
+            foreach ($factures as $fac) {
+
+                $date_tolere = new DateTime($fac->getData('date_lim_reglement'));
+                $date_tolere->add(new DateInterval('P' . $day_tolere . 'D'));
+
+                if ($has_retard or $date_tolere < $now)
+                    $has_retard = 1;
+
+                $fac->checkIsPaid();
+                $total_unpaid += (float) $fac->getRemainToPay(true);
+            }
+        }
+
+        if ($has_retard or $euros_tolere < $total_unpaid)
+            return $total_unpaid;
+
+        return 0;
+    }
+
+    public function getAtradiusFileName($force = false, $show_ext = true)
+    {
+        $name = 'atradius';
+        $ext = '.pdf';
+        if ($force || file_exists($this->getFilesDir() . $name . $ext)) {
+            if ($show_ext)
+                return $name . $ext;
+            else
+                return $name;
+        }
+        return 0;
+    }
+
     // Données piste: 
 
     public function getChorusStructuresList(&$errors = array())
@@ -939,9 +995,20 @@ class Bimp_Client extends Bimp_Societe
                 }
             }
 
-            if ($tot != $values)
+            if ($tot != $values) {
                 $html .= '<br/><br/>Encours TOTAL sur l\'entreprise (Siren): ' . BimpTools::displayMoneyValue($tot);
+            }
         }
+
+        $html .= '<div style="margin-top: 10px;">';
+        $html .= '<b>Encours sur les commandes non facturées: </b><span id="client_' . $this->id . '_encours_non_facture"></span>';
+        $onclick = $this->getJsLoadCustomContent('displayEncoursNonFacture', '$(\'#client_' . $this->id . '_encours_non_facture' . '\')');
+
+        $html .= '&nbsp;&nbsp;<span class="btn btn-default" onclick="' . $onclick . '">';
+        $html .= BimpRender::renderIcon('fas_calculator', 'iconLeft') . 'Calculer';
+        $html .= '</span>';
+
+        $html .= '</div>';
 
         return $html;
     }
@@ -955,6 +1022,60 @@ class Bimp_Client extends Bimp_Societe
         }
 
         return '';
+    }
+
+    public function displayAtradiusFile()
+    {
+        $html = '';
+        $file = $this->getAtradiusFileName();
+        if (!is_null($file) && $file) {
+            $html .= '<a target="__blanck" href="' . DOL_URL_ROOT . '/document.php?modulepart=societe&file=' . $this->id . '/' . $file . '">Fichier</a>';
+        } else {
+//            return BimpInput::renderInput('file_upload', 'atradius_file');
+
+            $buttons = array();
+
+            // Demande encours altriadus
+            $note = BimpObject::getInstance("bimpcore", "BimpNote");
+
+            $buttons[] = array(
+                'label'   => 'Ajouter PDF du Rapport Assurance crédit',
+                'icon'    => 'fas_comment-dollar',
+                'onclick' => $this->getJsLoadModalForm('atradius_file')
+            );
+
+            $list = BimpCache::getBimpObjectObjects('bimpcore', 'BimpNote', array('content'    => array(
+                            'operator' => 'like',
+                            'value'    => '%licite pour ce client un encours%'
+                        ), "obj_type"   => "bimp_object", "obj_module" => $this->module, "obj_name"   => $this->object_name, "id_obj"     => $this->id));
+
+            global $user, $langs;
+            if (count($list) == 0) {
+                $buttons[] = array(
+                    'label'   => 'Demander encours',
+                    'icon'    => 'far_paper-plane',
+                    'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => 680, "content" => "Bonjour, " . $user->getFullName($langs) . " sollicite pour ce client un encours à XX XXX  €\\n\\nNB : si ce client est une Administration publique (son Siren commence par 1 ou par 2) ou si vous pensez qu\'il fait partie des Autres Administrations et Institution demandez 50 000 € d\'encours\\nCette information sera vérifiée par l\'équipe en charge de l\'attribution des encours"), array('form_name' => 'rep'))
+                );
+            } else {
+//                print_r($list);die;
+                $noteT = current($list);
+                $buttons[] = array(
+                    'label'   => 'Refus d\'encours',
+                    'icon'    => 'far_paper-plane',
+                    'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_USER, "fk_user_dest" => $noteT->getData('user_create'), "content" => "Bonjour\\n\\nVotre demande d\'encours pour le client " . $this->getName() . " a été refusée\\n\\nNous pouvons toutefois solliciter Atradius pour une révision de cette décision \\n\\nPour cela nous devons fournir un maximum d\'éléments prouvant la bonne santé financière de cette entreprise (dernier bilan, compte de résultats, etc)\\n\\nMerci de bien vouloir les demander à votre client puis les transmettre à GDS-OLYS-atradiusolys@ldlc.com \\n\\nDans l\'attente de cette révision, toutes les commandes en cours devront être réglées au comptant"), array('form_name' => 'rep'))
+                );
+
+                $buttons[] = array(
+                    'label'   => 'Demander révision encours',
+                    'icon'    => 'far_paper-plane',
+                    'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => 680, "content" => "Bonjour, " . $user->getFullName($langs) . " sollicite pour ce client une révision d\'encours à XX XXX  €"), array('form_name' => 'rep'))
+                );
+            }
+            foreach ($buttons as $button) {
+                $html .= BimpRender::renderButton($button) . '<br/>';
+            }
+        }
+        return $html;
     }
 
     // Rendus HTML:
@@ -1241,8 +1362,8 @@ class Bimp_Client extends Bimp_Societe
                 ));
                 $html .= $list->renderHtml();
                 break;
-            
-            case 'atradius': 
+
+            case 'atradius':
                 $view = new BC_View($this, 'atradius');
                 $html .= $view->renderHtml();
         }
@@ -1374,7 +1495,7 @@ class Bimp_Client extends Bimp_Societe
         } else {
             $html .= BimpRender::renderAlerts('Type de liste non spécifié');
         }
-        
+
         if (is_a($list2, 'BC_ListTable'))
             $html .= $list2->renderHtml();
 
@@ -2583,106 +2704,14 @@ class Bimp_Client extends Bimp_Societe
         parent::onSave($errors, $warnings);
     }
 
-    public function getTotalUnpayed($since = '2019-06-30')
+    public function update(&$warnings = array(), $force_update = false)
     {
-
-        $factures = $this->getUnpaidFactures($since);
-        $total_unpaid = 0;
-
-        foreach ($factures as $fac) {
-            $fac->checkIsPaid(); // TODO laisser ?
-            $total_unpaid += (float) $fac->getRemainToPay(true);
-        }
-
-        return $total_unpaid;
-    }
-
-    public function getTotalUnpayedTolerance($since = '2019-06-30', $euros_tolere = 2000, $day_tolere = 5)
-    {
-
-        $factures = $this->getUnpaidFactures($since);
-        $total_unpaid = 0;
-        $has_retard = 0;
-
-        if (!empty($factures)) {
-
-            $now = new DateTime();
-
-            foreach ($factures as $fac) {
-
-                $date_tolere = new DateTime($fac->getData('date_lim_reglement'));
-                $date_tolere->add(new DateInterval('P' . $day_tolere . 'D'));
-
-                if ($has_retard or $date_tolere < $now)
-                    $has_retard = 1;
-
-                $fac->checkIsPaid();
-                $total_unpaid += (float) $fac->getRemainToPay(true);
-            }
-        }
-
-        if ($has_retard or $euros_tolere < $total_unpaid)
-            return $total_unpaid;
-
-        return 0;
-    }
-    
-    
-    
-    public function getAtradiusFileName($force = false, $show_ext = true){
-        $name = 'atradius';
-        $ext = '.pdf';
-        if($force || file_exists($this->getFilesDir().$name.$ext)){
-            if($show_ext)
-                return $name.$ext;
-            else
-                return $name;
-        }
-        return 0;
-    }
-    
-    public function displayAtradiusFile(){
-        $html = '';
-        $file = $this->getAtradiusFileName();
-        if(!is_null($file) && $file){
-            $html .= '<a target="__blanck" href="'.DOL_URL_ROOT.'/document.php?modulepart=societe&file='.$this->id.'/'.$file.'">Fichier</a>';
-        }
-        else{
-//            return BimpInput::renderInput('file_upload', 'atradius_file');
-            
-            $buttons = array();
-            
-            
-            // Demande encours altriadus
-            $note = BimpObject::getInstance("bimpcore", "BimpNote");
-            
-            $buttons[] = array(
-                'label'   => 'Ajouter PDF du Rapport Assurance crédit',
-                'icon'    => 'fas_comment-dollar',
-                'onclick' => $this->getJsLoadModalForm('atradius_file')
-
-            );
-            
-            global $user, $langs;
-            $buttons[] = array(
-                'label'   => 'Demander encours',
-                'icon'    => 'far_paper-plane',
-                'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => 680, "content" => "Bonjour, ".$user->getFullName($langs)." sollicite pour ce client un encours de XX XXX  €"), array('form_name' => 'rep'))
-            );
-            foreach ($buttons as $button) {
-                $html .= BimpRender::renderButton($button).'<br/>';
-            }
-        }
-        return $html;
-    }
-    
-    public function update(&$warnings = array(), $force_update = false) {
         $name = 'file';
         $success = 'Fichier uploadé';
         $errors = array();
-        
+
         if (file_exists($_FILES[$name]["tmp_name"])) {
-            if(stripos($_FILES[$name]['name'], '.pdf') > 0){
+            if (stripos($_FILES[$name]['name'], '.pdf') > 0) {
                 $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile');
                 $values = array();
                 $values['parent_module'] = 'bimpcore';
@@ -2694,16 +2723,15 @@ class Bimp_Client extends Bimp_Societe
                 $file->validateArray($values);
 
                 $errors = $file->create();
-                 if(!count($errors))
+                if (!count($errors))
                     $this->set('date_atradius', dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S'));
-            }
-            else
+            } else
                 $errors[] = 'Uniquement des fichier PDF';
         }
-        if(count($errors))
+
+        if (count($errors))
             return $errors;
-        
-        
+
         return parent::update($warnings, $force_update);
     }
 }

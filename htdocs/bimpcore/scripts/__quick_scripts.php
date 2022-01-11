@@ -51,7 +51,8 @@ if (!$action) {
         'correct_sav_dates_rdv'                     => 'Corriger dates RDV SAV',
         'correct_tickets_serials'                   => 'Récupérer serials tickets depuis sujet',
         'convert_fi'                                => 'Convertir FI',
-        'check_margin_commande'                     => 'Marge commande'
+        'check_margin_commande'                     => 'Marge commande',
+        'convert_sql_field_for_items_braces'        => 'Convertir champ "Items_list" avec utilisation des crochets'
     );
 
     $path = pathinfo(__FILE__);
@@ -76,14 +77,13 @@ switch ($action) {
             $db->query("UPDATE llx_facture_fourn_extrafields SET type = '" . $ln->newType . "' WHERE type is NULL AND fk_object =" . $ln->rowid);
         }
         break;
-        
-        
+
     case 'check_margin_commande':
         global $db;
         $sql = $db->query('SELECT c.rowid, c.marge, SUM(cd.total_ht - (cd.buy_price_ht * cd.qty)) as margeCalc FROM llx_commande c LEFT JOIN llx_commandedet cd ON cd.`fk_commande` = c.`rowid` WHERE 1 GROUP BY c.rowid HAVING SUM(cd.total_ht - (cd.buy_price_ht * cd.qty)) - c.marge > 1 || SUM(cd.total_ht - (cd.buy_price_ht * cd.qty)) - c.marge < -1');
-        
+
         while ($ln = $db->fetch_object($sql)) {
-            $db->query("UPDATE llx_commandedet SET test = 1 WHERE fk_commande = ". $ln->rowid);
+            $db->query("UPDATE llx_commandedet SET test = 1 WHERE fk_commande = " . $ln->rowid);
         }
 
     case 'check_limit_client':
@@ -284,6 +284,40 @@ switch ($action) {
     case 'convert_fi':
         BimpObject::loadClass('bimptechnique', 'BT_ficheInter');
         BT_ficheInter::convertAllNewFi();
+        break;
+
+    case 'convert_sql_field_for_items_braces':
+        $table = 'societe_extrafields';
+        $primary = 'rowid';
+        $field = 'marche';
+        $delimiter = ',';
+
+        $where = $field . ' IS NOT NULL AND ' . $field . ' != \'\'';
+        $bdb = new BimpDb($db);
+        $rows = $bdb->getRows($table, $where, null, 'array', array($primary, $field));
+
+        echo 'NB Lignes: ' . count($rows).'<br/>';
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                if (strpos($r[$field], $delimiter) !== false) {
+                    continue;
+                }
+                $values = explode($delimiter, $r[$field]);
+
+                $new_val = '';
+
+                foreach ($values as $val) {
+                    $new_val .= '[' . $val . ']';
+                }
+
+                if ($new_val != $r[$field]) {
+                    $bdb->update($table, array(
+                        $field => $new_val
+                            ), $primary . ' = ' . $r[$primary]);
+                }
+            }
+        }
+
         break;
 
     default:

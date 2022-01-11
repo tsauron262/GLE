@@ -4309,8 +4309,13 @@ class BimpComm extends BimpDolObject
 
         $id_objs = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
 
-        if (count($id_objs) > 50)
-            return array('Trop de PDF action impossible');
+        if (count($id_objs) > 70){
+            $errors[] = 'Trop de PDF action impossible';
+            return array(
+                'errors'           => $errors,
+                'warnings'         => $warnings
+            );
+    }
 
         if (!is_array($id_objs) || empty($id_objs)) {
             $errors[] = 'Aucune ' . $this->getLabel() . ' sélectionnée';

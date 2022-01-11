@@ -3079,6 +3079,7 @@ class BimpTools
     public static $nbMax = 15*4;
     
     public static function lockNum($type, $nb = 0, $errors = array()){
+        global $user, $langs;
         if (BimpCore::isModeDev()) { // Flo: ça plante sur ma version de dev... 
             return;
         }
@@ -3105,10 +3106,10 @@ class BimpTools
         }
         
         
-        $text = "Yes" . rand(0, 10000000);
+        $text = "Yes" . rand(0, 10000000).$user->getFullName($langs);
         if (!file_put_contents($file, $text))
             die('droit sur fichier incorrect : ' . $file);
-        usleep(3000000);
+        usleep(1000000);
         $text2 = file_get_contents($file);
         if ($text == $text2){
             if(defined('ID_ERP')){

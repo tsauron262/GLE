@@ -94,7 +94,7 @@ class PisteAPI extends BimpAPI
                     'fields' => array(
                         'idStructure' => (int) $id_structure,
                         'parametresRechercherServicesStructure' => array(
-                            'nbResultatsParPage' => 100
+                            'nbResultatsParPage' => 3000
                         )
                     )
                         ), $params, false, true);

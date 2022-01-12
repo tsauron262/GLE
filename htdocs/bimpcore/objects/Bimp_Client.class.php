@@ -789,12 +789,11 @@ class Bimp_Client extends Bimp_Societe
 
     public function getTotalUnpayed($since = '2019-06-30')
     {
-
         $factures = $this->getUnpaidFactures($since);
         $total_unpaid = 0;
 
         foreach ($factures as $fac) {
-            $fac->checkIsPaid(); // TODO laisser ?
+//            $fac->checkIsPaid(); // TODO laisser? => non nécessaire: getRemainToPay() effectue le calcul en direct. 
             $total_unpaid += (float) $fac->getRemainToPay(true);
         }
 
@@ -803,7 +802,6 @@ class Bimp_Client extends Bimp_Societe
 
     public function getTotalUnpayedTolerance($since = '2019-06-30', $euros_tolere = 2000, $day_tolere = 5)
     {
-
         $factures = $this->getUnpaidFactures($since);
         $total_unpaid = 0;
         $has_retard = 0;
@@ -820,7 +818,7 @@ class Bimp_Client extends Bimp_Societe
                 if ($has_retard or $date_tolere < $now)
                     $has_retard = 1;
 
-                $fac->checkIsPaid();
+//                $fac->checkIsPaid(); // => non nécessaire: getRemainToPay() effectue le calcul en direct. 
                 $total_unpaid += (float) $fac->getRemainToPay(true);
             }
         }

@@ -418,7 +418,7 @@ class ValidComm extends BimpObject
     }
 
 
-    public function getObjectParams($object, &$errors = array()) {
+    public function getObjectParams($object, &$errors = array(), $withRtp = false) {
         
         // Secteur
         $secteur = $object->getData('ef_type');
@@ -429,7 +429,6 @@ class ValidComm extends BimpObject
         // remise %
         $infos_remises = $object->getRemisesInfos();
         $percent = (float) $infos_remises['remise_total_percent'];
-
         // Valeur €
         if((int) $object->getData('total_ht') > 0)
             $val = (float) $object->getData('total_ht');
@@ -447,10 +446,12 @@ class ValidComm extends BimpObject
             return;
         }
         
-        if(isset($this->client_rtp))
-            $rtp = $this->client_rtp;
-        else
-            $rtp = $client->getTotalUnpayedTolerance();
+        if($withRtp){
+            if(isset($this->client_rtp))
+                $rtp = $this->client_rtp;
+            else
+                $rtp = $client->getTotalUnpayedTolerance();
+        }
         if($rtp < 0)
             $rtp = 0;
         

@@ -2129,6 +2129,8 @@ class BS_SAV extends BimpObject
         $html .= '<strong>AppleId</strong>: ' . $gsx->appleId . '<br/>';
         if ($gsx->appleId === GSX_v2::$default_ids['apple_id']) {
             $html .= '<strong>Mot de passe</strong>: ' . GSX_v2::$default_ids['apple_pword'];
+            $html .= '<br/>Utiliser le numéro terminant par <strong>37</strong>';
+            
             $html .= '<script>'
                     . 'var idMaxMesg = 0;'
                     . 'function checkCode(){'

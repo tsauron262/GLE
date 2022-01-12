@@ -140,7 +140,7 @@ class GSX_Const
 //        'NEEDS_EXTRA_UNDERSTANDING' => 'Needs extra understanding - Customer requests repairs for a large number of devices that may not belong to them'
 //    );
     public static $repair_classifications = array(
-        'DIRECT' => 'Soumission directe,',
+        'DIRECT' => 'Soumission directe',
         'NEEDS_EXTRA_UNDERSTANDING' => 'Nécessite une compréhension supplémentaire',
         'INDIRECT' => 'Soumission indirecte'
     );

@@ -770,7 +770,7 @@ class Bimp_Facture extends BimpComm
                 if (!BimpTools::getArrayValueFromPath($chorus_data, 'num_facture', '')) {
                     $errors[] = 'N° facture sur Chorus absent';
                 }
-
+                
                 return (count($errors) ? 0 : 1);
 
             case 'forceChorusExported':

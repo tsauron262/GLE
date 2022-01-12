@@ -356,8 +356,7 @@ class GSX_Repair extends BimpObject
                 if (!$result) {
                     if (!$gsx->logged) {
                         $errors[] = $gsx->displayNoLogged();
-                    }
-                    else{
+                    } else {
                         $errors = BimpTools::merge_array($errors, $gsx->getErrors());
                     }
                 } else {
@@ -562,8 +561,6 @@ class GSX_Repair extends BimpObject
 
             $update = false;
 
-
-
             if (is_array($this->repairLookUp) && !isset($this->repairLookUp['repairConfirmationNumber'])) {
                 $this->repairLookUp = $this->repairLookUp[0];
             }
@@ -587,7 +584,6 @@ class GSX_Repair extends BimpObject
             if (isset($this->repairLookUp['repairStatus']) && ($this->repairLookUp['repairStatus'] != '')) {
                 $repairComplete = 0;
                 $ready_for_pick_up = 0;
-
 
                 if ($this->repairLookUp['repairStatus'] == "Prêt pour enlèvement") {
                     $ready_for_pick_up = 1;
@@ -1337,7 +1333,6 @@ class GSX_Repair extends BimpObject
             $html .= '<table class="bimp_list_table">';
             $html .= '<tbody class="headers_col">';
 
-
             foreach (array(
         'referenceNumber'                  => 'Référence',
         'repairClassificationDescription'  => 'Classification de la réparation',
@@ -1351,9 +1346,9 @@ class GSX_Repair extends BimpObject
         'coverageOptionDescription'        => 'Description option de couverture',
         'coverageStatusCode'               => 'Code statut couverture',
         'coverageStatusDescription'        => 'Statut couverture',
+        'acPlusCoverage'                   => 'Code couverture AppeCare+',
+        'acPlusCoverageDescription'        => 'Description couverture AppleCare+',
         'acPlusIncidentConsumed'           => 'AppleCare+ consommé',
-        'shipment/deviceShipped'           => 'Matériel expédié',
-        'shipment/trackingNumber'          => 'N° de suivi de l\'expédition',
         'invoiceAvailable'                 => 'Facture disponible',
         'csCode'                           => 'Code satisfaction client',
         'consumerLawDescription'           => 'Loi consommation',
@@ -1366,6 +1361,36 @@ class GSX_Repair extends BimpObject
                     $html .= '<th>' . $label . '</th>';
                     $html .= '<td>' . $value . '</td>';
                     $html .= '</tr>';
+                }
+            }
+
+            $shipments = BimpTools::getArrayValueFromPath($this->repairLookUp, 'shipments', array());
+
+            if (is_array($shipments) && !empty($shipments)) {
+                $i = 1;
+                foreach ($shipments as $shipment) {
+                    $html .= '<tr>';
+                    $html .= '<th colspan="2">Expédition ' . $i . ' </th>';
+                    $html .= '</tr>';
+
+                    foreach (array(
+                'deviceShipped'  => 'Expédié',
+                'shippedDate'    => 'Date d\'envoi',
+                'receivedDate'   => 'Date de réception',
+                'carrierName'    => 'Transporteur',
+                'trackingNumber' => 'N° de suivi'
+                    ) as $path => $label) {
+                        $value = BimpTools::getArrayValueFromPath($shipment, $path, '', $errors, false, '', array(
+                                    'value2String' => true
+                        ));
+                        if ($value) {
+                            $html .= '<tr>';
+                            $html .= '<th>' . $label . '</th>';
+                            $html .= '<td>' . $value . '</td>';
+                            $html .= '</tr>';
+                        }
+                    }
+                    $i++;
                 }
             }
 
@@ -1433,7 +1458,6 @@ class GSX_Repair extends BimpObject
                                 'type'     => 'default'
                     ));
                     $part_html .= '</div>';
-
 
                     $part_html .= '<div class="col-xs-12 col-sm-6 sol-md-6 col-lg-6">';
                     // Infos commande:
@@ -1618,7 +1642,7 @@ class GSX_Repair extends BimpObject
                                                 'return_order_number' => $part['returnOrderNumber'],
                                                 'sequence_number'     => $part['sequenceNumber'],
                                                 'return_type'         => $return_type,
-                                                'ship_to'             => (string) ' '.BimpTools::getArrayValueFromPath($this->repairLookUp, 'account/shipTo', '')
+                                                'ship_to'             => (string) ' ' . BimpTools::getArrayValueFromPath($this->repairLookUp, 'account/shipTo', '')
                                             ));
                                         }
 
@@ -2139,7 +2163,7 @@ class GSX_Repair extends BimpObject
                             } else {
                                 BimpObject::loadClass('bimpsupport', 'BS_ApplePart');
                                 $part_type = BS_ApplePart::getCategProdApple(isset($part['number']) ? $part['number'] : '', isset($part['desc']) ? $part['desc'] : '');
-                                
+
                                 $equipment = $sav->getChildObject('equipment');
                                 $pu_ht = (float) BS_ApplePart::convertPrixStatic($part_type, (float) $part['new_price'], $part['number'], $equipment);
 
@@ -2162,7 +2186,6 @@ class GSX_Repair extends BimpObject
                                             'remisable'       => 0
                                         ));
 
-
                                         $propalLine->pa_ht = $part['new_price'];
                                         $propalLine->pu_ht = $pu_ht;
                                         $propalLine->tva_tx = 20;
@@ -2182,7 +2205,6 @@ class GSX_Repair extends BimpObject
                                         'out_of_warranty' => ($part['new_price'] > 0) ? 1 : 0,
                                         'remisable'       => 0
                                     ));
-
 
                                     $line->desc = $desc;
                                     $line->qty = 1;

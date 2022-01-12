@@ -15,15 +15,11 @@ class GSX_Const
     );
     public static $urls = array(
         'login'            => array(
-//            'test' => 'https://dgfdgsx2-uat.apple.com/gsx/api/login', // OLD
             'test' => 'https://login-partner-connect-uat.apple.com',
-//            'prod' => 'https://gsx2.apple.com/gsx/api/login', // OLD
             'prod' => 'https://login-partner-connect.apple.com',
         ),
         'base'             => array(
-//            'test' => 'https://partner-connect-uat.apple.com/gsx/api/', // OLD
             'test' => 'https://api-partner-connect-uat.apple.com/',
-//            'prod' => 'https://partner-connect.apple.com/gsx/api/' // OLD
             'prod' => 'https://api-partner-connect.apple.com/',
         ),
         'base_file_upload' => array(
@@ -35,30 +31,6 @@ class GSX_Const
             'prod' => ''
         ),
         'req'              => array(
-//            'authenticate'           => 'authenticate/token',
-            // Réparations: 
-//            'productDetails'         => 'repair/product/details',
-//            'componentIssue'         => 'repair/product/componentissue',
-//            'repairSummary'          => 'repair/summary',
-//            'repairDetails'          => 'repair/details',
-//            'repairEligibility'      => 'repair/eligibility',
-//            'repairCreate'           => 'repair/create',
-//            'repairUpdate'           => 'repair/update',
-//            'repairQuestions'        => 'repair/questions',
-//            // Diagnostiques: 
-//            'diagnosticSuites'       => 'diagnostics/suites',
-//            'diagnosticTest'         => 'diagnostics/initiate-test',
-//            'diagnosticStatus'       => 'diagnostics/status',
-//            'diagnosticsLookup'      => 'diagnostics/lookup',
-//            // Retours: 
-//            'returnsManage'          => 'returns/manage',
-//            'returnsLookup'          => 'returns/lookup',
-//            'returnsConfirmshipment' => 'returns/confirmshipment',
-//            // Autre: 
-//            'partsSummary'           => 'parts/summary',
-//            'filesUpload'            => 'attachment/upload-access',
-//            'articleLookup'          => 'content/article/lookup',
-
             'authenticate'             => 'api/authenticate/token',
             // Réparations: 
             'productDetails'           => 'gsx/api/repair/product/details',
@@ -89,6 +61,7 @@ class GSX_Const
             'filesUpload'              => 'gsx/api/attachment/upload-access',
             'articleLookup'            => 'gsx/api/content/article/lookup',
             'getFile'                  => 'gsx/api/document-download',
+            'attributeLookup'          => 'gsx/api/attribute/lookup'
         )
     );
     public static $getRequests = array(
@@ -119,8 +92,8 @@ class GSX_Const
 //        'apple_id'    => 'olys_tech_aprvlreqrd@bimp.fr', // New sans droits
 //        'tech_id' => 'ZUGLPGA45B',
         'apple_pword' => 'Apple@214',
-        'sold_to'     => '897316',
-        'ship_to'     => '897316'
+        'sold_to'     => '1442050',
+        'ship_to'     => '1442050'
     );
     public static $default_ids = array(
         'apple_id'    => 'admin.gle@bimp.fr',
@@ -158,7 +131,8 @@ class GSX_Const
         ''    => '',
         'NTF' => 'No Trouble Found',
         'SRC' => 'Screening',
-        'LUA' => 'Loaner Unavailable'
+        'LUA' => 'Loaner Unavailable',
+        'CUA' => 'Customer Unavailable'
     );
     public static $repair_classifications = array(
         'SINGLE'                    => 'Simple - le client demande une seule réparation',
@@ -174,12 +148,14 @@ class GSX_Const
 //        'REVIEW_RESULT'         => 'Notes indicating results for review hold'
     );
     public static $consumer_law = array(
-        ''        => '',
-        'RFD'     => 'Refund',
-        'RPL'     => 'Replace',
-        'SVC'     => 'Service',
-        'OPT_IN'  => 'Customer has opted in for Consumer Law coverage',
-        'OPT_OUT' => 'Customer has opted out of Consumer Law coverage'
+        ''                  => '',
+        'RFD'               => 'Refund',
+        'RPL'               => 'Replace',
+        'SVC'               => 'Service',
+        'OPT_IN'            => 'Customer has opted in for Consumer Law coverage',
+        'OPT_OUT'           => 'Customer has opted out of Consumer Law coverage',
+        'OPT_IN_FOR_REVIEW' => 'Opt in for Review',
+        'OPT_OUT_OF_REVIEW' => 'Opt out of Review'
     );
     public static $reproducibilities = array(
         'A' => 'Non Applicable',
@@ -235,7 +211,7 @@ class GSX_Const
 
     // Méthodes statiques: 
 
-    public static function getCertifInfo($soldTo)
+    public static function getCertifInfo($soldTo, &$errors = array())
     {
         $soldTo = intval($soldTo);
 
@@ -254,12 +230,23 @@ class GSX_Const
             }
         }
 
+        $folder = DOL_DOCUMENT_ROOT . '/bimpapple/certif/api2/';
+
         if (empty($certif)) {
-            if (self::$log_errors) {
-                dol_syslog('Aucun certificat trouvé pour le soldTo "' . $soldTo . '"', LOG_ERR);
+            $errors[] = 'Aucun certificat trouvé pour le soldTo "' . $soldTo . '"';
+            BimpCore::addlog('Aucun certificat trouvé pour le soldTo "' . $soldTo . '"', Bimp_Log::BIMP_LOG_URGENT, 'gsx');
+        } else {
+            if (!file_exists($folder . $pathKey)) {
+                $errors[] = 'Fichier "Path Key" absent';
+                BimpCore::addlog('Fichier "' . $folder . $pathKey . '" absent', Bimp_Log::BIMP_LOG_URGENT, 'gsx');
+            }
+
+            if (!file_exists($folder . $certif)) {
+                $errors[] = 'Fichier du certificat absent';
+                BimpCore::addlog('Fichier "' . $folder . $certif . '" absent', Bimp_Log::BIMP_LOG_URGENT, 'gsx');
             }
         }
-        $folder = DOL_DOCUMENT_ROOT . '/bimpapple/certif/api2/';
+
         return array("pass" => $pass, "pathKey" => $folder . $pathKey, 'path' => $folder . $certif);
     }
 

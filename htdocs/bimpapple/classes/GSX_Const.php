@@ -134,10 +134,15 @@ class GSX_Const
         'LUA' => 'Loaner Unavailable',
         'CUA' => 'Customer Unavailable'
     );
+//    public static $repair_classifications = array(
+//        'SINGLE'                    => 'Simple - le client demande une seule réparation',
+//        'BULK'                      => 'Multiple - le client demande plusieurs réparations',
+//        'NEEDS_EXTRA_UNDERSTANDING' => 'Needs extra understanding - Customer requests repairs for a large number of devices that may not belong to them'
+//    );
     public static $repair_classifications = array(
-        'SINGLE'                    => 'Simple - le client demande une seule réparation',
-        'BULK'                      => 'Multiple - le client demande plusieurs réparations',
-        'NEEDS_EXTRA_UNDERSTANDING' => 'Needs extra understanding - Customer requests repairs for a large number of devices that may not belong to them'
+        'DIRECT' => 'Soumission directe,',
+        'NEEDS_EXTRA_UNDERSTANDING' => 'Nécessite une compréhension supplémentaire',
+        'INDIRECT' => 'Soumission indirecte'
     );
     public static $repair_note_types = array(
         'TECHNICIAN'            => 'Notes du technicien',

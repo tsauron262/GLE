@@ -541,7 +541,7 @@ class savFormController extends BimpPublicController
             $html .= '<div class="col-xs-12 editContactNotif" style="' . (BimpObject::objectLoaded($contact) ? '' : 'display: none') . '">';
             $html .= '<p class="warning bold" style="padding-left: 15px; margin: 10px 0; border-left: 3px solid #E69900">';
             $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Attention: si vous modifiez les informations de contact si dessous, celles-ci seront mises à jour dans notre système pour le contact sélectionné.<br/>';
-            $html .= 'Ceci pourrait éventuellement affecter l\'adresse de livraison pour des commandes en cours à livrer à ce contact.<br/>';
+            $html .= 'Ceci pourrait affecter l\'adresse de livraison des commandes en cours à livrer à ce contact.<br/>';
             $html .= 'Si vous souhaitez modifier l\'adresse ci-dessous tout en conservant l\'adresse de livraison du contact, veuillez de préférence sélectionner "Nouveau contact".';
             $html .= '</p>';
             $html .= '</div>';
@@ -1114,7 +1114,7 @@ Votre satisfaction est notre objectif, nous mettrons tout en œuvre pour vous sa
         $msg .= 'Lors du dépôt de votre matériel dans notre centre SAV, un acompte de 49 euros vous sera demandé si votre matériel est hors garantie ou si la garantie ne peut être applicable.
 Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit IOS.
 
- Cet acompte sera déduit de la réparation en cas d’accord sur le devis ou considéré comme frais de diagnostic en cas de refus.\n\n';
+ Cet acompte sera déduit de la réparation en cas d’accord sur le devis ou considéré comme frais de diagnostic en cas de refus.' . "\n\n";
 
         if ($cancel_url) {
             $msg .= 'Vous pouvez annuler cette demande de prise en charge depuis votre <a href="' . $base_url . '">espace personnel</a>';
@@ -1612,7 +1612,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                             }
 
                             $params['device']['id'] = $data['eq_serial'];
-                            $params['reservationType'] = '';
+                            $params['reservationType'] = 'CIN';
                             $params['correlationId'] = $correlationId;
                         } else {
                             $params['customer']['phoneNumber'] = ($data['client_phone_mobile'] ? $data['client_phone_mobile'] : ($data['client_phone_pro'] ? $data['client_phone_pro'] : $data['client_phone_perso']));

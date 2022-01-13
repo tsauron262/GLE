@@ -268,6 +268,15 @@ class GSX_Reservation
             $gsx_v2->resetErrors();
 
             $slots = $gsx_v2->fetchAvailableSlots($shipTo, $product_code);
+            
+            $curl_errors = $gsx_v2->errors['curl'];
+
+            foreach ($curl_errors as $error) {
+                if (isset($error['code']) && $error['code'] == 'NO_SLOTS_AVAILABLE') {
+                    return array();
+                }
+            }
+            
             $errors = BimpTools::merge_array($errors, $gsx_v2->getErrors());
 
             return $slots;

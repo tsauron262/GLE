@@ -541,7 +541,7 @@ class savFormController extends BimpPublicController
             $html .= '<div class="col-xs-12 editContactNotif" style="' . (BimpObject::objectLoaded($contact) ? '' : 'display: none') . '">';
             $html .= '<p class="warning bold" style="padding-left: 15px; margin: 10px 0; border-left: 3px solid #E69900">';
             $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Attention: si vous modifiez les informations de contact si dessous, celles-ci seront mises à jour dans notre système pour le contact sélectionné.<br/>';
-            $html .= 'Ceci pourrait éventuellement affecter l\'adresse de livraison pour des commandes en cours à livrer à ce contact.<br/>';
+            $html .= 'Ceci pourrait affecter l\'adresse de livraison des commandes en cours à livrer à ce contact.<br/>';
             $html .= 'Si vous souhaitez modifier l\'adresse ci-dessous tout en conservant l\'adresse de livraison du contact, veuillez de préférence sélectionner "Nouveau contact".';
             $html .= '</p>';
             $html .= '</div>';

@@ -73,7 +73,7 @@ class Bimp_ImportPaiement extends BimpObject
                     if ($montant > 0) {
                         $p->amounts[$idFact] = $montant;
                     } else {
-                        $errorsLn[] = 'Impossible de créer le paiment facture '.$fact->getLink().' : ' . $montant;
+                        $errorsLn[] = 'Impossible de créer le paiment facture '.$fact->getLink().' : ' . $montant.' reste a payer '.$fact->getData('remain_to_pay');
                     }
                 }
                 $p->paiementid = (int) dol_getIdFromCode($this->db->db, $this->id_mode_paiement, 'c_paiement');

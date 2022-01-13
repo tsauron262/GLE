@@ -70,60 +70,61 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
             foreach ($dates as $date) {
                 $data['result_html'] .= '<h2>Du ' . date('d / m / Y', strtotime($date['from'])) . ' au ' . date('d / m / Y', strtotime($date['to'])) . '</h2>';
 
-                foreach (self::$products_codes as $product_code) {
-                    $pc_html = '';
+                foreach ($apple_ids as $ids) {
+                    $html = '';
 
-                    foreach ($apple_ids as $ids) {
-                        $pc_html .= '<h3>SoldTo: ' . $ids['soldTo'] . ' - ShipTo: ' . $ids['shipTo'] . '</h3><br/>';
-
-                        if (!$this->use_gsx_v2) {
-                            if (!array_key_exists($ids['soldTo'], self::$certifs)) {
-                                $pc_html .= BimpRender::renderAlerts('Aucun certificat pour ce soldTo');
-                                continue;
-                            }
-
-                            $certif = '';
-                            $pword = '';
-
-                            if (isset(self::$certifs[$ids['soldTo']][1][0])) {
-                                $certif = self::$certifs[$ids['soldTo']][1][0];
-                            }
-
-                            if (isset(self::$certifs[$ids['soldTo']][1][1])) {
-                                $pword = self::$certifs[$ids['soldTo']][1][1];
-                            }
+                    if (!$this->use_gsx_v2) {
+                        if (!array_key_exists($ids['soldTo'], self::$certifs)) {
+                            $html .= BimpRender::renderAlerts('Aucun certificat pour ce soldTo');
+                            continue;
                         }
 
-                        $fetch_errors = array();
-                        $reservations = GSX_Reservation::fetchReservationsSummay($ids['soldTo'], $ids['shipTo'], $product_code, $date['from'], $date['to'], $fetch_errors, $this->debug_content);
+                        $certif = '';
+                        $pword = '';
 
-                        if (count($fetch_errors)) {
-                            $pc_html .= BimpRender::renderAlerts(BimpTools::getMsgFromArray($fetch_errors, 'Echec récupération des réservations'));
-
-                            if ($this->use_gsx_v2) {
-                                $gsx = GSX_Reservation::getGsxV2();
-
-                                if (!$gsx->logged) {
-                                    $data['result_html'] .= BimpRender::renderFoldableContainer('Code produit "' . $product_code . '"', $pc_html);
-                                    break 3;
-                                }
-                            }
-                        } elseif (count($reservations)) {
-                            $pc_html .= '<pre>';
-                            $pc_html .= print_r($reservations, 1);
-                            $pc_html .= '</pre>';
-                        } else {
-                            $pc_html .= BimpRender::renderAlerts('Aucune réservation', 'warning');
+                        if (isset(self::$certifs[$ids['soldTo']][1][0])) {
+                            $certif = self::$certifs[$ids['soldTo']][1][0];
                         }
 
-                        $pc_html .= '<br/>';
-//                        break;
+                        if (isset(self::$certifs[$ids['soldTo']][1][1])) {
+                            $pword = self::$certifs[$ids['soldTo']][1][1];
+                        }
                     }
 
-                    $data['result_html'] .= BimpRender::renderFoldableContainer('Code produit "' . $product_code . '"', $pc_html);
-//                    break 2;
+                    $fetch_errors = array();
+                    $reservations = GSX_Reservation::fetchReservationsSummay($ids['soldTo'], $ids['shipTo'], '', $date['from'], $date['to'], $fetch_errors, $this->debug_content);
+                    $open = false;
+                    $class = 'success';
+
+                    if (count($fetch_errors)) {
+                        $html .= BimpRender::renderAlerts(BimpTools::getMsgFromArray($fetch_errors, 'Echec récupération des réservations'));
+
+                        if ($this->use_gsx_v2) {
+                            $gsx = GSX_Reservation::getGsxV2();
+
+                            if (!$gsx->logged) {
+                                $data['result_html'] .= $html;
+                                break 2;
+                            }
+                        }
+                        $open = true;
+                        $class = 'danger';
+                    } elseif (count($reservations)) {
+                        $html .= '<pre>';
+                        $html .= print_r($reservations, 1);
+                        $html .= '</pre>';
+                    } else {
+                        $html .= BimpRender::renderAlerts('Aucune réservation', 'warning');
+                        $class = 'warning';
+                    }
+
+                    $html .= '<br/>';
+
+                    $title = '<span class="' . $class . '">SoldTo ' . $ids['soldTo'] . ' - ShipTo ' . $ids['shipTo'] . '</span>';
+                    $data['result_html'] .= BimpRender::renderFoldableContainer($title, $html, array(
+                                'open' => $open
+                    ));
                 }
-                break;
             }
         }
     }
@@ -168,11 +169,18 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
             $data['steps'] = array();
 
             foreach ($dates as $date) {
-                foreach (self::$products_codes as $code) {
-                    $data['steps']['process_' . $code . '_from_' . $date['from'] . '_to_' . $date['to']] = array(
-                        'label'    => 'Récupération et traitement des réservations - ' . $code . ' du ' . date('d / m / Y', strtotime($date['from'])) . ' au ' . date('d / m / Y', strtotime($date['to'])),
+                if ($this->use_gsx_v2) {
+                    $data['steps']['process_from_' . $date['from'] . '_to_' . $date['to']] = array(
+                        'label'    => 'Récupération et traitement des réservations du ' . date('d / m / Y', strtotime($date['from'])) . ' au ' . date('d / m / Y', strtotime($date['to'])),
                         'on_error' => 'continue'
                     );
+                } else {
+                    foreach (self::$products_codes as $code) {
+                        $data['steps']['process_' . $code . '_from_' . $date['from'] . '_to_' . $date['to']] = array(
+                            'label'    => 'Récupération et traitement des réservations - ' . $code . ' du ' . date('d / m / Y', strtotime($date['from'])) . ' au ' . date('d / m / Y', strtotime($date['to'])),
+                            'on_error' => 'continue'
+                        );
+                    }
                 }
             }
         }
@@ -203,18 +211,40 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
     {
         $result = array();
 
-        if (preg_match('/^process_(.+)_from_(.+)_to_(.+)$/', $step_name, $matches)) {
-            $code = $matches[1];
-            $from = $matches[2];
-            $to = $matches[3];
+        if ($this->use_gsx_v2) {
+            if (preg_match('/^process_from_(.+)_to_(.+)$/', $step_name, $matches)) {
+                $from = $matches[1];
+                $to = $matches[2];
+                $apple_ids = $this->getAppleIdentifiers($errors);
 
-            if (in_array($code, self::$products_codes)) {
-                $this->processProductCodeReservations($from, $to, $code, $errors);
+                if (empty($apple_ids)) {
+                    $errors[] = 'Aucun couple shipTo / soldTo trouvé';
+                }
+
+                if ($from > $to) {
+                    $errors[] = 'Dates invalides';
+                }
+
+                if (!count($errors)) {
+                    $this->processReservations_v2($apple_ids, $from, $to);
+                }
             } else {
-                $errors[] = 'Code invalide: ' . $code;
+                $errors[] = 'Etape invalide: "' . $step_name . '"';
             }
         } else {
-            $errors[] = 'Etape invalide: "' . $step_name . '"';
+            if (preg_match('/^process_(.+)_from_(.+)_to_(.+)$/', $step_name, $matches)) {
+                $code = $matches[1];
+                $from = $matches[2];
+                $to = $matches[3];
+
+                if (in_array($code, self::$products_codes)) {
+                    $this->processProductCodeReservations($from, $to, $code, $errors);
+                } else {
+                    $errors[] = 'Code invalide: ' . $code;
+                }
+            } else {
+                $errors[] = 'Etape invalide: "' . $step_name . '"';
+            }
         }
 
         return $result;
@@ -239,11 +269,7 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
         }
 
         if (!count($errors)) {
-            if ($this->use_gsx_v2) {
-                $this->processProductCodeReservations_v2($apple_ids, $from, $to, $product_code);
-            } else {
-                $this->processProductCodeReservations_v1($apple_ids, $from, $to, $product_code);
-            }
+            $this->processProductCodeReservations_v1($apple_ids, $from, $to, $product_code);
         }
     }
 
@@ -332,7 +358,7 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
         }
     }
 
-    public function processProductCodeReservations_v2($apple_ids, $from, $to, $product_code)
+    public function processReservations_v2($apple_ids, $from, $to)
     {
         foreach ($apple_ids as $ids) {
             $one_res_done = false;
@@ -1161,7 +1187,6 @@ L’équipe BIMP";
 //                $this->Alert('Aucun e-mail utilisateur pour notification RDV SAV', $sav, $resId);
 //                BimpCore::addlog('Aucun e-mail utilisateur pour notification RDV SAV', Bimp_Log::BIMP_LOG_URGENT, 'bds', $sav);
 //            }
-
             // Envoi e-mail client: 
             $email_client = '';
 

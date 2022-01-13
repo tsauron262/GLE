@@ -1566,15 +1566,15 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                 } elseif (!(int) BimpTools::getValue('force_validate', 0)) {
                     $req_errors = array();
 
-//                    if (BimpCore::isModeDev()) {
-//                        // POUR TESTS
-//                        $result = array(
-//                            'response' => array(
-//                                'reservationId' => '123456789'
-//                            )
-//                        );
-//                    } else {
-                    // Création de la réservation: 
+                    if (BimpCore::isModeDev()) {
+                        // POUR TESTS
+                        $result = array(
+                            'response' => array(
+                                'reservationId' => '123456789'
+                            )
+                        );
+                    } else {
+                        // Création de la réservation: 
                         require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_Reservation.php';
 
                         $countries = BimpCache::getCountriesArray();
@@ -1625,11 +1625,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                         }
 
                         $result = GSX_Reservation::createReservation(897316, $centre['shipTo'], $params, $req_errors, $debug);
-                        
-//                        echo '<pre>';
-//                        print_r($result);
-//                        exit;
-//                    }
+                    }
 
                     if (!empty($result)) {
                         if ($use_gsx_v2) {

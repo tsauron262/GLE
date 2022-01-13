@@ -1114,7 +1114,7 @@ Votre satisfaction est notre objectif, nous mettrons tout en œuvre pour vous sa
         $msg .= 'Lors du dépôt de votre matériel dans notre centre SAV, un acompte de 49 euros vous sera demandé si votre matériel est hors garantie ou si la garantie ne peut être applicable.
 Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit IOS.
 
- Cet acompte sera déduit de la réparation en cas d’accord sur le devis ou considéré comme frais de diagnostic en cas de refus.\n\n';
+ Cet acompte sera déduit de la réparation en cas d’accord sur le devis ou considéré comme frais de diagnostic en cas de refus.' . "\n\n";
 
         if ($cancel_url) {
             $msg .= 'Vous pouvez annuler cette demande de prise en charge depuis votre <a href="' . $base_url . '">espace personnel</a>';
@@ -1566,15 +1566,15 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                 } elseif (!(int) BimpTools::getValue('force_validate', 0)) {
                     $req_errors = array();
 
-                    if (BimpCore::isModeDev()) {
-                        // POUR TESTS
-                        $result = array(
-                            'response' => array(
-                                'reservationId' => '123456789'
-                            )
-                        );
-                    } else {
-                        // Création de la réservation: 
+//                    if (BimpCore::isModeDev()) {
+//                        // POUR TESTS
+//                        $result = array(
+//                            'response' => array(
+//                                'reservationId' => '123456789'
+//                            )
+//                        );
+//                    } else {
+                    // Création de la réservation: 
                         require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_Reservation.php';
 
                         $countries = BimpCache::getCountriesArray();
@@ -1612,7 +1612,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                             }
 
                             $params['device']['id'] = $data['eq_serial'];
-                            $params['reservationType'] = '';
+                            $params['reservationType'] = 'CIN';
                             $params['correlationId'] = $correlationId;
                         } else {
                             $params['customer']['phoneNumber'] = ($data['client_phone_mobile'] ? $data['client_phone_mobile'] : ($data['client_phone_pro'] ? $data['client_phone_pro'] : $data['client_phone_perso']));
@@ -1625,7 +1625,11 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                         }
 
                         $result = GSX_Reservation::createReservation(897316, $centre['shipTo'], $params, $req_errors, $debug);
-                    }
+                        
+//                        echo '<pre>';
+//                        print_r($result);
+//                        exit;
+//                    }
 
                     if (!empty($result)) {
                         if ($use_gsx_v2) {

@@ -122,10 +122,15 @@ class BContract_contratLine extends BContract_contrat {
     protected function updateDolObject(&$errors = array(), &$warnings = Array()) {
         global $user;
         $data = $this->getDataArray();
-        //print_r($data); die();
+        
         $contrat = $this->getParentInstance();
         $contrat->dol_object->pa_ht = $this->getData('buy_price_ht');
         if($contrat->dol_object->updateline($this->id, $data['description'], $data['subprice'], $data['qty'], $data['remise_percent'], $contrat->getData('date_start'), $contrat->getEndDate()->format('Y-m-d'), $data['tva_tx'], 0.0, 0.0, '', '', "HT", 0, null, $this->getData('buy_price_ht')) > 0) {
+            
+            if($data['buy_price_ht'] != $this->getInitData('buy_price_ht')) {
+                $contrat->addLog('Modification du prix d\'achat de la ligne #' . $this->id . ' de ' . $this->getInitData('buy_price_ht') . '€HT à ' . $data['buy_price_ht'] . ' €HT');
+            }
+            
             $success = "Modifier avec succès";
         } else {
             $errors = 'Erreur';
@@ -154,9 +159,18 @@ class BContract_contratLine extends BContract_contrat {
     public function canDelete() {
         return $this->canCreate();
     }
-
-    public function canEdit() {
-        return $this->canCreate();
+    
+    public function canEditField($field_name) {
+        
+        global $user;
+        
+        switch($field_name) {
+            case 'buy_price_ht':
+                return $user->admin;
+                break;
+        }
+        
+        return 0;
     }
 
     public function displaySerialsList($textarea = false) {

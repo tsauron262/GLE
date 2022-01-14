@@ -1431,13 +1431,14 @@ class BContract_contrat extends BimpDolObject
             $this->updateField('next_contrat', $new_contrat->id);
             $children = $this->getChildrenList("lines", Array("renouvellement" => 0));
             foreach ($children as $id_child) {
-
+                
                 $child = $this->getChildObject("lines", $id_child);
-
+                
                 $neew_price = $child->getData('subprice');
                 if ($this->getData('syntec') > 0 && BimpTools::getValue('use_syntec')) {
                     $neew_price = $child->getData('subprice') * (BimpCore::getConf('current_indice_syntec') / $this->getData('syntec'));
                 }
+                $new_contrat->dol_object->pa_ht = $child->getData('buy_price_ht'); // BUG DéBILE DOLIBARR
                 $createLine = $new_contrat->dol_object->addLine(
                         $child->getData('description'), $neew_price, $child->getData('qty'), $child->getData('tva_tx'), 0, 0, $child->getData('fk_product'), $child->getData('remise_percent'), $for_date_end->add(new DateInterval("P1D"))->format('Y-m-d'), $for_date_end->add(new DateInterval('P' . $this->getData('duree_mois') . "M"))->format('Y-m-d'), 'HT', 0.0, 0, null, $child->getData('buy_price_ht'), Array('fk_contrat' => $new_contrat->id)
                 );

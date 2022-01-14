@@ -1071,6 +1071,78 @@ class Bimp_Societe extends BimpDolObject
         return BimpCore::getConf('societe_id_default_cond_reglement', 0);
     }
 
+    public function getEncoursNonFacture()
+    {
+        if (!$this->isLoaded()) {
+            return 0;
+        }
+
+        $encours = 0;
+
+        $sql = BimpTools::getSqlSelect(array('a.qty_modif', 'a.factures', 'det.qty', 'det.subprice', 'det.tva_tx', 'det.remise_percent'));
+        $sql .= BimpTools::getSqlFrom('bimp_commande_line', array(
+                    'c'   => array(
+                        'table' => 'commande',
+                        'alias' => 'c',
+                        'on'    => 'c.rowid = a.id_obj'
+                    ),
+                    'det' => array(
+                        'table' => 'commandedet',
+                        'alias' => 'det',
+                        'on'    => 'det.rowid = a.id_line'
+                    )
+        ));
+        $sql .= BimpTools::getSqlWhere(array(
+                    'c.fk_statut'      => 1,
+                    'c.fk_soc'         => (int) $this->id,
+                    'c.invoice_status' => array(
+                        'operator' => '!=',
+                        'value'    => 2
+                    )
+        ));
+        
+        $rows = $this->db->executeS($sql, 'array');
+        
+        if (is_array($rows)) {
+            $facs_status = array();
+
+            foreach ($rows as $r) {
+                $full_qty = $r['qty'] + $r['qty_modif'];
+
+                $qty_billed = 0;
+
+                if (!in_array((string) $r['factures'], array('', '[]'))) {
+                    $factures = json_decode($r['factures'], 1);
+
+                    if (is_array($factures)) {
+                        foreach ($factures as $id_facture => $data) {
+                            if (!isset($facs_status[$id_facture])) {
+                                $facs_status[$id_facture] = (int) $this->db->getValue('facture', 'fk_statut', 'rowid = ' . $id_facture);
+                            }
+
+                            if (in_array($facs_status[$id_facture], array(1, 2))) {
+                                $qty_billed += (float) $data['qty'];
+                            }
+                        }
+                    }
+                }
+
+                if ($full_qty - $qty_billed) {
+                    $pu_ttc = $r['subprice'];
+
+                    if ($r['remise_percent']) {
+                        $pu_ttc -= ($pu_ttc * ($r['remise_percent'] / 100));
+                    }
+
+                    $pu_ttc *= (1 + ($r['tva_tx'] / 100));
+                    $encours += (($full_qty - $qty_billed) * $pu_ttc);
+                }
+            }
+        }
+
+        return $encours;
+    }
+
     public static function getRegionCsvValue($needed_fields = array())
     {
         if (isset($needed_fields['fk_pays']) && (int) $needed_fields['fk_pays'] !== 1) {
@@ -1453,6 +1525,12 @@ class Bimp_Societe extends BimpDolObject
         }
 
         return 'nc';
+    }
+
+    public function displayEncoursNonFacture()
+    {
+        $encours = $this->getEncoursNonFacture();
+        return BimpTools::displayMoneyValue($encours);
     }
 
     // Rendus HTML: 

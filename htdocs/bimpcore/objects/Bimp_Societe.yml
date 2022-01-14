@@ -439,6 +439,8 @@ fields:
             conf: societe_default_outstanding_limit
         history: 1
         history_user: 1
+        input: 
+            help: Remplissage automatique selon données des 3 champs précédents. <br/>Faire saisie manuelle si encours accordé hors assurance
             
     outstanding_limit_credit_safe: 
         label: Limite recommandée par Crédit SAFE
@@ -450,6 +452,8 @@ fields:
         type: money
         history: 1
         default_value: -1
+        input:
+            help: -1 = aucun demande<br/>Saisir O si encours refusé
         
     date_check_credit_safe:
         label: Date de verification Crédit SAFE
@@ -461,12 +465,16 @@ fields:
         type: money
         history: 1
         default_value: -1
+        input:
+            help: -1 = aucun demande<br/>Saisir O si encours refusé
      
     outstanding_limit_icba:
         label: Limite de crédit ICBA 
         type: money
         history: 1
         default_value: -1
+        input:
+            help: -1 = aucun demande<br/>Saisir O si encours refusé
         
     date_atradius:
         label: Date de dépôt du Rapport
@@ -523,6 +531,7 @@ fields:
         label: Marché potentiel
         type: items_list
         items_data_type: int
+        items_braces: 1
         values: 
             callback: 
                method: getListExtrafield

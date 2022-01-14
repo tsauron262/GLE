@@ -1864,7 +1864,7 @@ class gsxController extends BimpController
         return $responses;
     }
 
-    // Diagnostics: 
+    // Diagnostics:
 
     protected function gsxDiagnosticSuites($params)
     {

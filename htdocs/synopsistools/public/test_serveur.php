@@ -17,6 +17,7 @@ if(!count($error)){
     foreach($files as $file){
         if(!file_get_contents($file)){
             $error[] = 'Pas de lecture '.$file;
+            file_put_contents($file, 'ok');
         }
         $file = str_replace('.txt', '_eciture.txt', $file);
         if(!file_put_contents($file, 'ok'))
@@ -27,6 +28,7 @@ if(!count($error)){
     foreach($files as $file){
         if(!file_get_contents($file)){
             $error[] = 'Pas de lecture '.$file;
+            file_put_contents($file, 'ok');
         }
 //        $file = str_replace('.txt', '_eciture.txt', $file);
         if(!file_put_contents($file, 'ok'))

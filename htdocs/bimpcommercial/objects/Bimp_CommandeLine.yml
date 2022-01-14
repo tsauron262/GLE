@@ -177,10 +177,10 @@ fields:
                 params: 
                     - achat
                     - 1
-        
-    # Tous les champs qty_xxx suivants sont uniquement à titre indicatifs 
-    # et servent pour la liste "general" (Ne pas utiliser en PHP)   
-    # Attention: les quantités sont en valeur absolues (toujours positifs, même pour les retours, sauf qty_total) . 
+                    
+    # Tous les champs qty_xxx suivants sont uniquement à titre indicatifs.
+    # et servent pour la liste "general" (Ne pas utiliser en PHP).
+    # Attention: les quantités sont en valeur absolues (toujours positifs, même pour les retours, sauf qty_total).
         
     qty_total: 
         label: Qté Totale

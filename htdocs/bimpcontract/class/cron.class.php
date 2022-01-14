@@ -143,7 +143,7 @@
             foreach($list as $index => $c) {
                 $contrats->fetch($c['rowid']);
                 if($contrats->isLoaded() && in_array($contrats->getData('tacite'), $this->arrayTacite)) {
-                    if((strtotime($contrats->displayRealEndDate('Y-m-d')) <= strtotime($date)) && !$contrat->getData('anticipate_close_note')) {
+                    if((strtotime($contrats->displayRealEndDate('Y-m-d')) <= strtotime($date)) && !$contrats->getData('anticipate_close_note')) {
                         if($contrats->tacite(true)) {
                             $this->output .= "Contrat N°" . $contrats->getRef() . ' [Renouvellement TACITE]';
 

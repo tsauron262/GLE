@@ -57,23 +57,23 @@ class GSX_v2 extends GSX_Const
                 } else {
                     $this->shipTo = BimpTools::addZeros(self::$default_ids['ship_to'], self::$numbersNumChars);
                 }
-                
+
                 $oldShipTo = array('1111748', '1000566', '462140', '1139941', '1000565', '1000483', '494685', '466183', '484926', '1040727', '1046076', '1046075', '1187559', '1187562', '1187561', '1187560', '1199659');
-                if(in_array($this->shipTo, $oldShipTo)){
+                if (in_array($this->shipTo, $oldShipTo)) {
                     $this->soldTo = BimpTools::addZeros('897316', self::$numbersNumChars);
-                }elseif (isset($user->array_options['options_apple_service']) && (string) $user->array_options['options_apple_service']) {
+                } elseif (isset($user->array_options['options_apple_service']) && (string) $user->array_options['options_apple_service']) {
                     $this->soldTo = BimpTools::addZeros($user->array_options['options_apple_service'], self::$numbersNumChars);
-                } else 
+                } else {
                     $this->soldTo = BimpTools::addZeros(self::$default_ids['sold_to'], self::$numbersNumChars);
-//                die('fffff'.$this->soldTo.'l'.$this->shipTo);
+                }
                 break;
         }
 
-        $certInfo = self::getCertifInfo($this->soldTo);
+        $errors = $this->setSoldTo($this->soldTo);
 
-        $this->certPath = $certInfo['path'];
-        $this->certPathKey = $certInfo['pathKey'];
-        $this->certPword = $certInfo['pass'];
+        if (count($errors)) {
+            $this->errors[] = BimpTools::getMsgFromArray($errors);
+        }
 
         if (isset($user->array_options['options_gsx_acti_token']) && (string) $user->array_options['options_gsx_acti_token']) {
             $this->acti_token = $user->array_options['options_gsx_acti_token'];
@@ -108,6 +108,28 @@ class GSX_v2 extends GSX_Const
         }
 
         return self::$instance;
+    }
+
+    public function setSoldTo($soldTo)
+    {
+        $errors = array();
+
+        $this->soldTo = BimpTools::addZeros($soldTo, self::$numbersNumChars);
+
+        $certInfo = self::getCertifInfo($this->soldTo, $errors);
+
+        if (!count($errors)) {
+            $this->certPath = $certInfo['path'];
+            $this->certPathKey = $certInfo['pathKey'];
+            $this->certPword = $certInfo['pass'];
+        }
+
+        return $errors;
+    }
+
+    public function setShipTo($shipTo)
+    {
+        $this->shipTo = BimpTools::addZeros($shipTo, self::$numbersNumChars);
     }
 
     // Gestion du login:
@@ -289,7 +311,7 @@ class GSX_v2 extends GSX_Const
 
         if ($request_name !== 'authenticate') {
             $headers[] = 'X-Apple-Auth-Token: ' . $this->auth_token;
-            $headers[] = 'X-Apple-Service-Version: v2';
+            $headers[] = 'X-Apple-Service-Version: v3';
         }
 
         if (isset($extra['headers']) && is_array($extra['headers'])) {
@@ -299,10 +321,11 @@ class GSX_v2 extends GSX_Const
         }
 
         curl_setopt($this->ch, CURLOPT_HTTPHEADER, $headers);
+
         curl_setopt($this->ch, CURLOPT_SSLCERT, $this->certPath);
         curl_setopt($this->ch, CURLOPT_SSLKEY, $this->certPathKey);
-
         curl_setopt($this->ch, CURLOPT_SSLCERTPASSWD, $this->certPword);
+
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->ch, CURLINFO_HEADER_OUT, true);
         curl_setopt($this->ch, CURLOPT_CONNECTTIMEOUT, 10);
@@ -377,6 +400,7 @@ class GSX_v2 extends GSX_Const
             return false;
         }
 
+//        die($data);
         $header_size = curl_getinfo($this->ch, CURLINFO_HEADER_SIZE);
         $headers = substr($data, 0, $header_size);
         $data = substr($data, $header_size);
@@ -403,6 +427,8 @@ class GSX_v2 extends GSX_Const
             if (is_array($data)) {
                 $infos .= "<h4>Body RESPONSE:</h4><br/>" . str_replace("\n", "<br/>", '<pre>' . print_r($data, 1)) . '</pre>';
                 $infos .= '<b>JSON: </b></h4><br/><pre>' . json_encode($data) . '</pre><br/><br/>';
+            } elseif (is_string($data)) {
+                $infos .= '<b>Réponse: </b>' . $data . '<br/><br/>';
             }
 
             if (self::$log_requests) {
@@ -808,16 +834,20 @@ class GSX_v2 extends GSX_Const
     public function fetchReservationsSummary($shipTo, $from, $to, $productCode = '')
     {
         if (self::$mode === 'test') {
-            $shipTo = BimpTools::addZeros('897316', 10);
+            $shipTo = BimpTools::addZeros('897316', self::$numbersNumChars);
         } else {
-            $shipTo = BimpTools::addZeros($shipTo, 10);
+            $shipTo = BimpTools::addZeros($shipTo, self::$numbersNumChars);
         }
 
+        $dt_from = new DateTime($from);
+        $dt_to = new DateTime($to);
+
         $params = array(
-            'shipToCode'    => $shipTo,
-            'toDate'        => $to,
-            'fromDate'      => $from,
-            'currentStatus' => 'RESERVED'
+            'shipToCode'      => $shipTo,
+            'toDate'          => $dt_to->format(DateTime::ATOM),
+            'fromDate'        => $dt_from->format(DateTime::ATOM),
+            'currentStatus'   => 'RESERVED',
+            'reservationType' => 'CIN'
         );
 
         if ($productCode) {
@@ -826,13 +856,7 @@ class GSX_v2 extends GSX_Const
             );
         }
 
-        return $this->exec('fetchReservationsSummary', array(
-                    "shipToCode"    => $shipTo,
-                    "fromDate"      => $from,
-                    "toDate"        => $to,
-                    "productCode"   => $productCode,
-                    "currentStatus" => "RESERVED"
-        ));
+        return $this->exec('fetchReservationsSummary', $params);
     }
 
     public function fetchReservation($shipTo, $reservation_id)
@@ -893,7 +917,7 @@ class GSX_v2 extends GSX_Const
         $params['reservationId'] = $reservationId;
         $params['modifiedStatus'] = 'CANCELLED';
         $params['shipToCode'] = BimpTools::addZeros($shipTo, 10);
-        
+
         return $this->exec('updateReservation', $params);
     }
 
@@ -968,6 +992,17 @@ class GSX_v2 extends GSX_Const
         }
 
         return $result;
+    }
+
+    public function attributeLookup($type)
+    {
+        return $this->exec('attributeLookup', array(
+                    'attributes' => array(
+                        array(
+                            'type' => $type
+                        )
+                    )
+        ));
     }
 
     // Gestion des erreurs:

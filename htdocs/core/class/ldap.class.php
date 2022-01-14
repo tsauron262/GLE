@@ -213,6 +213,14 @@ class Ldap
 						}
 						else
 						{
+                                                    $msg = 'pass err '.$this->searchUser.' '.$this->searchPassword;
+                                                    if(class_exists('synopsisHook'))
+                                                        $msg .= '<br/>'. synopsisHook::getUserIp();
+                                                    
+                                                    $msg .= '<br/>'. $_SERVER['HTTP_USER_AGENT'];
+                                                    $msg .= '<br/>'.get_browser(null, true);
+                                                    
+                                                    mailSyn2('Err pass', 'tommy@bimp.fr', null, $msg);
 							$this->error=ldap_errno($this->connection).' '.ldap_error($this->connection);
 						}
 					}

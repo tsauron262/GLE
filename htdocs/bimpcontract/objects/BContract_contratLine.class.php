@@ -128,7 +128,7 @@ class BContract_contratLine extends BContract_contrat {
         if($contrat->dol_object->updateline($this->id, $data['description'], $data['subprice'], $data['qty'], $data['remise_percent'], $contrat->getData('date_start'), $contrat->getEndDate()->format('Y-m-d'), $data['tva_tx'], 0.0, 0.0, '', '', "HT", 0, null, $this->getData('buy_price_ht')) > 0) {
             
             if($data['buy_price_ht'] != $this->getInitData('buy_price_ht')) {
-                $contrat->addLog('Modification du prix d\'achat de la ligne #' . $this->id . ' de ' . $this->getInitData('buy_price_ht') . '€HT à ' . $data['buyu_price_ht'] . ' €HT');
+                $contrat->addLog('Modification du prix d\'achat de la ligne #' . $this->id . ' de ' . $this->getInitData('buy_price_ht') . '€HT à ' . $data['buy_price_ht'] . ' €HT');
             }
             
             $success = "Modifier avec succès";

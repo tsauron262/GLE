@@ -418,7 +418,7 @@ class ValidComm extends BimpObject
     }
 
 
-    public function getObjectParams($object, &$errors = array(), $withRtp = false) {
+    public function getObjectParams($object, &$errors = array(), $withRtp = true) {
         
         // Secteur
         $secteur = $object->getData('ef_type');

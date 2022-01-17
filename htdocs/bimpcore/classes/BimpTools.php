@@ -2,8 +2,8 @@
 
 class BimpTools
 {
-    public $output = '';
 
+    public $output = '';
     public static $currencies = array(
         'EUR' => array(
             'label'   => 'euro',
@@ -18,7 +18,6 @@ class BimpTools
             'no_html' => '$'
         )
     );
-    
     public static $bloquages = array();
 
     // Gestion GET / POST
@@ -2346,7 +2345,7 @@ class BimpTools
         return $str;
     }
 
-    public static function merge_array($array1, $array2 = null)
+    public static function merge_array($array1, $array2 = null, $keep_keys = false)
     {
         if (!is_array($array1)) {
             if (!is_null($array1)) {
@@ -2362,6 +2361,14 @@ class BimpTools
                     'Type array2' => gettype($array1)
                 ));
             }
+            return $array1;
+        }
+
+        if ($keep_keys) {
+            foreach ($array2 as $key => $value) {
+                $array1[$key] = $value;
+            }
+
             return $array1;
         }
 
@@ -3076,72 +3083,68 @@ class BimpTools
 
     // Autres:
 
-    public static $nbMax = 15*4;
-    
-    public static function lockNum($type, $nb = 0, $errors = array()){
+    public static $nbMax = 15 * 4;
+
+    public static function lockNum($type, $nb = 0, $errors = array())
+    {
         global $user, $langs;
         if (BimpCore::isModeDev()) { // Flo: ça plante sur ma version de dev... 
             return;
         }
-        
-        if(in_array($type, static::$bloquages))//On a deja un verrous pour cette clef
+
+        if (in_array($type, static::$bloquages))//On a deja un verrous pour cette clef
             return true;
-        
-        
+
+
         $nb++;
         self::sleppIfBloqued($type, $nb);
         $file = static::getFileBloqued($type);
-        
-        if ($nb > static::$nbMax){
+
+        if ($nb > static::$nbMax) {
             $errors[] = 'Dépassement du nombre de tentative lockNum';
-            BimpCore::addlog('Probléme lockNum '.$type, Bimp_Log::BIMP_LOG_URGENT, null, null, array('Errors'=>$errors));
-            die(print_r($errors,1));
+            BimpCore::addlog('Probléme lockNum ' . $type, Bimp_Log::BIMP_LOG_URGENT, null, null, array('Errors' => $errors));
+            die(print_r($errors, 1));
         }
-        
-        
-        if(is_file($file)){
+
+
+        if (is_file($file)) {
             $errors[] = 'Fichier existant aprés sleepIfBlocked';
-            BimpCore::addlog('Probléme lockNum '.$type, Bimp_Log::BIMP_LOG_URGENT, null, null, array('Errors'=>$errors));
+            BimpCore::addlog('Probléme lockNum ' . $type, Bimp_Log::BIMP_LOG_URGENT, null, null, array('Errors' => $errors));
             return static::lockNum($type, $nb, $errors);
         }
-        
-        
-        $text = "Yes" . rand(0, 10000000).$user->getFullName($langs);
+
+
+        $text = "Yes" . rand(0, 10000000) . $user->getFullName($langs);
         if (!file_put_contents($file, $text))
             die('droit sur fichier incorrect : ' . $file);
         usleep(1000000);
         $text2 = file_get_contents($file);
-        if ($text == $text2){
-            if(defined('ID_ERP')){
+        if ($text == $text2) {
+            if (defined('ID_ERP')) {
                 $autreInstanceBloquage = static::isBloqued($type, true);
-                if(!$autreInstanceBloquage){
+                if (!$autreInstanceBloquage) {
                     static::$bloquages[] = $type;
                     return 1;
-                }
-                else{
-                    unlink($file); 
-                    $errors[] = 'Fichier lock d\'une autre instance : '.$autreInstanceBloquage;
-                    BimpCore::addlog('Probléme lockNum '.$type, Bimp_Log::BIMP_LOG_URGENT, null, null, array('Errors'=>$errors));
+                } else {
+                    unlink($file);
+                    $errors[] = 'Fichier lock d\'une autre instance : ' . $autreInstanceBloquage;
+                    BimpCore::addlog('Probléme lockNum ' . $type, Bimp_Log::BIMP_LOG_URGENT, null, null, array('Errors' => $errors));
                     return static::lockNum($type, $nb, $errors);
                 }
-            }
-            else{
+            } else {
                 static::$bloquages[] = $type;
                 return 1;
             }
-                    
-        }
-        else{
+        } else {
             $errors[] = 'Fichier diférent de celui attendue';
-            BimpCore::addlog('Probléme lockNum '.$type, Bimp_Log::BIMP_LOG_URGENT, null, null, array('Errors'=>$errors));
+            BimpCore::addlog('Probléme lockNum ' . $type, Bimp_Log::BIMP_LOG_URGENT, null, null, array('Errors' => $errors));
             return static::lockNum($type, $nb, $errors);
-        }    
+        }
     }
-    
+
 //    public static function unlockNum($type){
 //        
 //    }
-
 //    public static function bloqueDebloque($type, $bloque = true, $nb = 1)
 //    {
 //        $file = static::getFileBloqued($type);
@@ -3174,12 +3177,13 @@ class BimpTools
 //        } elseif (is_file($file))//on ne debloque plus ici mais dans debloqueAll
 //            return 1;//unlink($file);
 //    }
-    
-    public static function deloqueAll(){
+
+    public static function deloqueAll()
+    {
         $i = 0;
-        foreach(static::$bloquages as $id => $type){
-            if(!unlink(static::getFileBloqued($type)))
-                BimpCore::addlog ('Suppression fichier de lock impossible '.static::getFileBloqued($type), Bimp_Log::BIMP_LOG_URGENT);
+        foreach (static::$bloquages as $id => $type) {
+            if (!unlink(static::getFileBloqued($type)))
+                BimpCore::addlog('Suppression fichier de lock impossible ' . static::getFileBloqued($type), Bimp_Log::BIMP_LOG_URGENT);
             unset(static::$bloquages[$id]);
             $i++;
         }
@@ -3188,7 +3192,7 @@ class BimpTools
 
     public static function getFileBloqued($type)
     {
-        return static::getDirBloqued() . $type . (defined('ID_ERP')? '_'.ID_ERP : '') . ".txt";
+        return static::getDirBloqued() . $type . (defined('ID_ERP') ? '_' . ID_ERP : '') . ".txt";
     }
 
     public static function getDirBloqued()
@@ -3203,9 +3207,9 @@ class BimpTools
     {
         $dir = static::getDirBloqued();
         $files = scandir($dir);
-        foreach($files as $file){
-            if(stripos($file, $type) === 0 && (!$notThis || stripos($file, '_'.ID_ERP) === false))
-                    return $file;
+        foreach ($files as $file) {
+            if (stripos($file, $type) === 0 && (!$notThis || stripos($file, '_' . ID_ERP) === false))
+                return $file;
         }
         return false;
     }
@@ -3219,7 +3223,7 @@ class BimpTools
                 usleep(250000);
                 return static::sleppIfBloqued($type, $nb);
             } else {
-                $text = "sleppIfBloqued() : bloquage de plus de " . static::$nbMax/4 . " secondes";
+                $text = "sleppIfBloqued() : bloquage de plus de " . static::$nbMax / 4 . " secondes";
 //                static::bloqueDebloque($type, false, $nb);
 //                unlink(static::getFileBloqued($type));
                 BimpCore::addlog($text, Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(

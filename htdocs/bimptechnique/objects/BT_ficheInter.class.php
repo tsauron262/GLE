@@ -377,7 +377,7 @@ class BT_ficheInter extends BimpDolObject
                         $buttons[] = array(
                             'label'   => 'Rattacher un objet à la FI',
                             'icon'    => 'link',
-                            'onclick' => $this->getJsActionOnclick('reattach_an_object', array(), array('form_name' => "reattach_an_object"))
+                            'onclick' => $this->getJsActionOnclick('reattach_an_object', array(), array('form_name' => "reattach_an_object", 'on_form_submit' => 'on_rattachement_form_submit'))
                         );
                     }
                     
@@ -806,36 +806,67 @@ class BT_ficheInter extends BimpDolObject
         
     }
     
-    public function getLinesFacturableArray() {
+    public function displayLinesForCommande() {
         
-        $array = Array();
+        $html = '';
         
+        $lines = $this->getLinesFacturable();
         
-        $children = $this->getChildrenList('inters');
+        $id_commande = BimpTools::getPostFieldValue('id_commande');
         
-        if(count($children) > 0) {
-            
-            foreach($children as $id_child) {
-                $child = $this->getChildObject('inters', $id_child);
-                if($child->getData('type') == 3 || $child->getData('type') == 4) {
+        if(count($lines) && $id_commande > 0) {
+            foreach($lines as $id) {
+                $child = $this->getChildObject('inters', $id);
+                $points = (strlen($child->getData('description')) > 50) ? '...' : '';
+                $html .= '- <b class=\'danger bs-popover\' '.BimpRender::renderPopoverData($child->getData('description'), 'right', true).' >'. BT_ficheInter_det::$types[$child->getData('type')]['label'].' ('.$child->displayDuree().'h)</b> : ';
+                $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id_commande);
+                $html .= '<select class=\'extra_select\' name=\'BT_ficheInter_line_for_commande_'.$child->id.'\' child_id=\''.$child->id.'\'>';
+                $html .= '<option value=\'0\'>Ne pas affecter de ligne</option>';
+                foreach($commande->dol_object->lines as $line) {
+                    $html .= '<option value=\''.$line->id.'\'>';
+                    $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
                     
-                    $points = (strlen($child->getData('description')) > 50) ? '...' : '';
-                    
-                    $array[$child->id] = '<span class=\'bs-popover\' '.BimpRender::renderPopoverData($child->getData('description'), 'right', true).' >' . substr($child->getData('description'), 0, 50) . $points . ' <b class=\'danger\' >'. BT_ficheInter_det::$types[$child->getData('type')]['label'].' ('.$child->displayDuree().'h)</b></span>';
-                    
+                    $child_commande = $commande->getChildrenList('lines', Array('id_line' => $line->id))[0];
+                    $child_commande_object = $commande->getChildObject('lines', $child_commande);
+                    $html .= '<span> ' . $product->getRef() . "\n" . $line->description . '<br />';
+                    if($child_commande_object->getData('force_qty_1'))
+                        $html .= '<br /><strong class=\'danger\'>Au forfait</strong>';
+                    $html .= '</span>';
+                    $html .= '</option>';
                 }
+                $html .= '</select><br />';
             }
             
+        } else {
+            $html .= BimpRender::renderAlerts('Il n\'y à aucune ligne non vendu', 'info', false);
         }
         
-        return $array;
+        return $html;
         
     }
+    
+    public function getLinesFacturable() {
+        $array = [];
+        $children = $this->getChildrenList('inters');
+        foreach($children as $id_child) {
+            $child = $this->getChildObject('inters', $id_child);
+            if($child->getData('type') == 3 || $child->getData('type') == 4) {
+
+                $points = (strlen($child->getData('description')) > 50) ? '...' : '';
+
+                $array[$child->id] = $child->id;
+
+            }
+        }
+        return $array;
+    }
+   
     
     public function actionReattach_an_object($data, &$success) {
         $warnings = [];
         $errors = [];
         $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
+
         switch($data['type_of_object']) {
             case 0;
                 $errors[] = "Vous ne pouvez pas rattacher aucun objet";
@@ -885,15 +916,17 @@ class BT_ficheInter extends BimpDolObject
                         $errors = $this->updateField('commandes', BimpTools::merge_array($this->getData('commandes'), [$instance->id]));
                         if(!count($errors)) {
                             addElementElement('fichinter', 'commande', $this->id, $instance->id);
-                            if(count($data['lines_for_commande'])) {
-                                foreach($data['lines_for_commande'] as $id_line_fiche) {
+                            if(count($data['idLineFI_idLineCommande'])) {
+                                foreach($data['idLineFI_idLineCommande'] as $id_line_fiche => $id_commande_line) {
                                     $child = $this->getChildObject('inters', $id_line_fiche);
                                     if($child->getData('type') == 3)
                                         $errors = BimpTools::merge_array($errors, $child->updateField('type', 6));
                                     else
                                         $errors = BimpTools::merge_array($errors, $child->updateField('type', 0));
                                     
-                                    $errors = BimpTools::merge_array($errors, $child->updateField('id_line_commande', $instance->dol_object->lines[0]->id));
+                                    $child->set('id_dol_line_commande', $id_commande_line);
+                                    
+                                    $errors = BimpTools::merge_array($errors, $child->update($warnings, true));
                                     
                                 }
                             }
@@ -2039,14 +2072,14 @@ class BT_ficheInter extends BimpDolObject
                             $email_cli = BimpTools::cleanEmailsStr($email_cli);
                         }
                     }
-                
-                    if(!count(json_decode($this->getData('commandes'))) && !$this->getData('fk_contrat')) {
+                    if(!count($this->getData('commandes')) && !$this->getData('fk_contrat')) {
                         if(!in_array($this->getData('fk_soc'), explode(',', BimpCore::getConf('bimptechnique_id_societe_auto_terminer')))) {
                             $task = BimpCache::getBimpObjectInstance("bimptask", "BIMP_Task");
                             $data = array(
                                 "src"  => "noreply@bimp.fr",
                                 "subj" => "Fiche d’intervention non liée",
                                 "prio" => 20,
+                                'test_ferme' => 'fichinter:rowid='.$this->id.' && (commandes != "" OR fk_contrat > 0 OR fk_facture > 0)',
                                 "txt"  => "Bonjour,Cette fiche d’intervention a été validée, mais n’est liée à aucune commande et à aucun contrat. Merci de faire les vérifications nécessaires et de corriger si cela est une erreur. " . $this->getNomUrl(),
                             );
                             $errors = BimpTools::merge_array($errors, $task->validateArray($data));

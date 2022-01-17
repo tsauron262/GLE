@@ -416,7 +416,7 @@ class pdf_fi
                     if ($child->getData('arrived')) {
                         $arrived = new DateTime($child->getData('arrived'));
                         $departure = new DateTime($child->getData('departure'));
-                        if ($child->getData('type') == 2) {
+                        if ($child->getData('type') == 2 || $child->getData('forfait') == 1) {
                             $add = "";
                         } else {
                             $add = "de " . $arrived->format('H:i') . ' à ' . $departure->format('H:i');
@@ -426,7 +426,7 @@ class pdf_fi
                         $departure_am = new DateTime($child->getData('departure_am'));
                         $arrived_pm = new DateTime($child->getData('arriverd_pm'));
                         $departure_pm = new DateTime($child->getData('departure_pm'));
-                        if ($child->getData('type') == 2) {
+                        if ($child->getData('type') == 2 || $child->getData('forfait') == 1) {
                             $add = "";
                         } else {
                             $add = "de " . $arrived_am->format('H:i') . ' à ' . $departure_am->format('H:i') . " et de ";
@@ -445,10 +445,13 @@ class pdf_fi
                     $pdf->Cell($W, 8, "Durée", 1, null, 'C', true);
                     $pdf->Cell($W, 8, "Référence", 1, null, 'C', true);
 
-                    if ($child->getData('type') == 3) {
+                    if ($child->getData('type') == 3 || $child->getData('type') == 4) {
                         $pdf->Cell($W, 8, "Total HT en €", 1, null, 'C', true);
                     } else {
-                        $pdf->Cell($W, 8, "Service", 1, null, 'C', true);
+                        if($child->getData('forfait') == 1 || $child->getData('type') == 0)
+                            $pdf->Cell($W, 8, "", 1, null, 'C', true);
+                        else
+                            $pdf->Cell($W, 8, "Service", 1, null, 'C', true);
                     }
 
                     $pdf->Ln();
@@ -491,16 +494,21 @@ class pdf_fi
                     $pdf->Cell($W, 6, "$type", 1, 0, 'C', 1);
                     if ($child->getData('type') == 2) {
                         $pdf->Cell($W, 6, "Pas de durée", 1, 0, 'C', 1);
-                    } elseif ($child->getData('type') == 3 || $child->getData('type') == 4) {
+                    } elseif ($child->getData('type') == 3) {
                         $pdf->Cell($W, 6, "Forfait", 1, 0, 'C', 1);
                     } else {
-                        $pdf->Cell($W, 6, $child->displayDuree(), 1, 0, 'C', 1);
+                        if($child->getData('forfait') == 1) {
+                            $pdf->Cell($W, 6, "Forfait", 1, 0, 'C', 1);
+                        } else {
+                            $pdf->Cell($W, 6, $child->displayDuree(), 1, 0, 'C', 1);
+                        }
+                        
                     }
-
+                    $ref_service = '';
                     $have_pdf_ref = false;
                     if ($child->getData('id_line_commande')) {
                         $ref_commande = '';
-                        $ref_service = '';
+                        
                         $have_pdf_ref = true;
                         $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $child->getData('id_line_commande'));
                         if (BimpObject::objectLoaded($line)) {
@@ -511,7 +519,7 @@ class pdf_fi
                                 $service = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $line->id_product);
                             }
                         }
-
+                        $ref_service = $service->getRef();
                         $pdf->Cell($W, 6, $ref_commande, 1, 0, 'C', 1);
                         $pdf->Cell($W, 6, (BimpObject::objectLoaded($service) ? $service->getRef() : ''), 1, 0, 'C', 1);
                     }
@@ -524,6 +532,7 @@ class pdf_fi
                         $ref_service = '';
                         if ((int) $obj->getData('fk_product')) {
                             $service = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $obj->getData('fk_product'));
+                            $ref_service = $service->getRef();
                         }
                         $pdf->Cell($W, 6, (BimpObject::objectLoaded($service) ? $service->getRef() : 'inconnu'), 1, 0, 'C', 1);
                     }
@@ -560,13 +569,13 @@ class pdf_fi
                             $pareteze = "";
                             $price = "Sous contrat";
                         }
-                        
-                        if($child->getData('type') != 4) {
+                        if($child->getData('forfait') == 1 || $child->getData('type') == 0)
+                            $pdf->Cell($W, 6, "", 1, 0, 'C', 1);
+                        else {
                             $pdf->Cell($W, 6, $price . " $pareteze", 1, 0, 'C', 1);
-                        } else {
-                            $pdf->Cell($W, 6, 'Supplément', 1, 0, 'C', 1);
                         }
- 
+                            
+
                     }
 
                     $excludeDescriptionService = Array(4, 5, 1, 2, 3);

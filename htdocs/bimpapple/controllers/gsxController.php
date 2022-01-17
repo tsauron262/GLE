@@ -65,9 +65,6 @@ class gsxController extends BimpController
 
     public function gsxRequest($method_name, $params)
     {
-//        echo '<pre>';
-//        print_r($_POST);
-//        exit;
         // GSX V2 seulement
         // Doit être le point d'entrée de toutes les reqêtes GSX
 
@@ -503,7 +500,7 @@ class gsxController extends BimpController
                     $errors[] = 'Aucun fichier sélectionné pour l\'ajout de fichier #' . $i;
                 }
             }
-            
+
             if (!empty($files)) {
                 $file_upload_module = '';
                 switch ($requestName) {

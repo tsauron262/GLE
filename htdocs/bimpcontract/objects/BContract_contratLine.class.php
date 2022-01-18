@@ -163,11 +163,11 @@ class BContract_contratLine extends BContract_contrat {
     public function canEditField($field_name) {
         
         global $user;
+        $rights = $user->rights->bimpcontract;
         
         switch($field_name) {
-            case 'buy_price_ht':
-                return $user->admin;
-                break;
+            case 'buy_price_ht': return ($rights->can_change_pa) ? 1 : 0; break;
+            case 'description': return ($rights->can_change_desc) ? 1 : 0; break;
         }
         
         return 0;

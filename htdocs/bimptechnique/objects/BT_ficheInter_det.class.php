@@ -876,7 +876,9 @@ class BT_ficheInter_det extends BimpDolObject
                 $facturable = 0;
 
                 $type = (int) $this->getData('type');
-                if($this->getData('type') != $this->getInitData('type')) {
+                if(($this->getData('id_line_commande') != $this->getInitData('id_line_commande')) || 
+                        ($this->getData('id_dol_line_commande') != $this->getInitData('id_dol_line_commande')) || 
+                        ($this->getData('id_line_contrat') != $this->getInitData('id_line_contrat'))) {
                     switch ($type) {
                         case 0:
                             if((int) $this->getData('id_line_contrat')) {

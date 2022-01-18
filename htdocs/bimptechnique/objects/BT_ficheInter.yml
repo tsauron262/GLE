@@ -411,7 +411,7 @@ forms:
               input:
                   type: check_list
                   items: 
-                      array: linesFacturable
+                      array: linesFacturableContrat
               display_if:
                   field_name: type_of_object
                   show_values: 2

@@ -605,7 +605,7 @@ function validateForm($form) {
             var field_name = $(this).data('field_name');
             if (field_name) {
                 var $input = $(this).find('[name="' + field_name + '"]');
-                
+
                 // Patch: (problème avec l'éditeur html => le textarea n'est pas alimenté depuis l'éditeur) 
                 if ($(this).find('.cke').length) {
                     var html_value = $('#cke_' + field_name).find('iframe').contents().find('body').html();
@@ -633,6 +633,18 @@ function validateForm($form) {
                                 check = false;
                             }
                         }
+                    }
+
+                    var $checksMentions = $signatureContainer.find('.signature_mention_check');
+
+                    if ($checksMentions.length) {
+                        $checksMentions.each(function () {
+                            if (!$(this).prop('checked')) {
+                                var check_mention = $(this).parent().find('label').text();
+                                bimp_msg('Veuillez cocher la case "' + check_mention + '"', 'danger', null, true);
+                                check = false;
+                            }
+                        });
                     }
                 } else if (parseInt($(this).data('required'))) {
                     if (parseInt($(this).data('multiple'))) {

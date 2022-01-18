@@ -149,7 +149,8 @@ class BC_Input extends BimpComponent
             'obj_name'       => array('default' => '')
         ),
         'signature_pad'               => array(
-            'expand' => array('data_type' => 'bool', 'default' => 0)
+            'expand'         => array('data_type' => 'bool', 'default' => 0),
+            'check_mentions' => array('data_type' => 'array', 'compile' => true, 'default' => array())
         )
     );
 
@@ -534,6 +535,7 @@ class BC_Input extends BimpComponent
 
             case 'signature_pad':
                 $options['expand'] = isset($this->params['expand']) ? (int) $this->params['expand'] : 0;
+                $options['check_mentions'] = isset($this->params['check_mentions']) ? $this->params['check_mentions'] : array();
                 break;
         }
 

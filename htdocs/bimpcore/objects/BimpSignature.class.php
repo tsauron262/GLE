@@ -105,7 +105,7 @@ class BimpSignature extends BimpObject
 
             return 0;
         }
-        
+
         if (in_array($field_name, array('allow_elec', 'allow_dist', 'allow_no_scan'))) {
             global $user;
             return (int) $user->admin;
@@ -178,7 +178,7 @@ class BimpSignature extends BimpObject
                             return 0;
                         }
                         break;
-                        
+
                     case 'signDistAccess':
                     case 'signDist':
                     case 'sendSmsCode':
@@ -495,11 +495,11 @@ class BimpSignature extends BimpObject
         }
 
         $client = $this->getChildObject('client');
-        
+
         if (BimpObject::objectLoaded($client)) {
             return $client->getName();
         }
-        
+
         return '';
     }
 
@@ -524,9 +524,9 @@ class BimpSignature extends BimpObject
         if (BimpObject::objectLoaded($contact)) {
             return $contact->getData('email');
         }
-        
+
         $client = $this->getChildObject('client');
-        
+
         if (BimpObject::objectLoaded($client)) {
             return $client->getData('email');
         }
@@ -732,6 +732,21 @@ class BimpSignature extends BimpObject
         return 0;
     }
 
+    public function getCheckMentions()
+    {
+        $obj = $this->getObj();
+
+        $errors = array();
+
+        if ($this->isObjectValid($errors, $obj)) {
+            if (method_exists($obj, 'getSignatureCheckMentions')) {
+                return $obj->getSignatureCheckMentions($this->getData('doc_type'));
+            }
+        }
+
+        return array();
+    }
+
     // Getters Array: 
 
     public function getTypeInputOptions()
@@ -919,6 +934,26 @@ class BimpSignature extends BimpObject
         return $this->displayDocType() . ($ref ? ' - <b>' . $ref . '</b>' : '');
     }
 
+    public function displayDocInfos()
+    {
+        $html = '<h4>' . $this->displayDocTitle() . '</h4>';
+
+        $obj = $this->getObj();
+
+        $errors = array();
+        if ($this->isObjectValid($errors, $obj)) {
+            if (method_exists($obj, 'displayDocExtraInfos')) {
+                $extra_infos = $obj->displayDocExtraInfos($this->getData('doc_type'));
+
+                if ($extra_infos) {
+                    $html .= '<br/>' . $extra_infos;
+                }
+            }
+        }
+
+        return $html;
+    }
+
     public function dispayPublicSign()
     {
         if ($this->isLoaded()) {
@@ -954,7 +989,7 @@ class BimpSignature extends BimpObject
         return '';
     }
 
-    public function displayPublicDocument()
+    public function displayPublicDocument($label = 'Document PDF')
     {
         if ($this->isLoaded() && (int) $this->getData('type') >= 0) {
             $obj = $this->getObj();
@@ -992,13 +1027,13 @@ class BimpSignature extends BimpObject
 
                                     if ($check) {
                                         $html = '<span class="btn btn-default" onclick="window.open(\'' . $url . '\')">';
-                                        $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . 'Document PDF';
+                                        $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . $label;
                                         $html .= '</span>';
                                     } else {
                                         $html = '<span class="btn btn-default disabled bs-popover" onclick=""';
                                         $html .= BimpRender::renderPopoverData('Vous n\'avez pas la permission de voir ce document');
                                         $html .= '>';
-                                        $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . 'Document PDF';
+                                        $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . $label;
                                         $html .= '</span>';
                                     }
                                     return $html;
@@ -1644,7 +1679,7 @@ class BimpSignature extends BimpObject
                     if (method_exists($obj, 'getOnSignedEmailExtraInfos')) {
                         $msg .= $obj->getOnSignedEmailExtraInfos($this->getData('doc_type'));
                     }
-                    
+
                     mailSyn2($subject, $comm_email, '', $msg);
                 }
             }

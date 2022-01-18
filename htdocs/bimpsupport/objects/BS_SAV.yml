@@ -732,6 +732,8 @@ forms:
                   callback: needSignaturePropal
             - field: id_contact
               label: Contact signataire
+              value: 
+                  callback: getIdContactSignataire
               display_if: 
                   field_name: create_signature
                   show_values: 1

@@ -114,7 +114,7 @@ fields:
         type: int
         values:
             array: modes_facturation
-            
+        
     total_ht:
         label: PU HT
         type: int

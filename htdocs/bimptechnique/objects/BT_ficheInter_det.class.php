@@ -441,6 +441,32 @@ class BT_ficheInter_det extends BimpDolObject
         
         return $html;
     }
+    
+    public function displayDescriptifPrestationDemande() {
+        $description = '';
+        $orderLine = null;
+        
+        if($this->getData('id_line_contrat') > 0) {
+            $obj = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine', $this->getData('id_line_contrat'));
+            $description = $obj->getData('description');
+        } elseif($this->getData('id_line_commande') > 0 || $this->getData('id_dol_line_commande') > 0) {
+            BimpTools::loadDolClass('commande', 'commande', 'OrderLine');
+            if($this->getData('id_line_commande') > 0){
+                $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $this->getData('id_line_commande'));
+                $orderLine = new OrderLine($this->db->db);
+                $orderLine->fetch($obj->getData('id_line'));
+            }   
+            elseif($this->getData('id_dol_line_commande') > 0) {
+                $orderLine = new OrderLine($this->db->db);
+                $orderLine->fetch($this->getData('id_dol_line_commande'));
+            }
+            
+            $description = $orderLine->desc;
+            
+        }
+        
+        return $description;
+    }
 
     public function displayClient()
     {

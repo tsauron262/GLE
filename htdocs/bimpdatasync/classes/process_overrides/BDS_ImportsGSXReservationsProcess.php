@@ -131,15 +131,6 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
 
     public function initProcessReservations(&$data, &$errors = array())
     {
-        if ($this->use_gsx_v2) {
-            $gsx = GSX_Reservation::getGsxV2();
-
-            if (!$gsx->logged) {
-                $this->Error('Non connecté à GSX');
-                return;
-            }
-        }
-
         $dates = array();
         if (isset($this->options['date_from']) && $this->options['date_from'] && isset($this->options['date_to']) && $this->options['date_to']) {
             $dates[] = array(
@@ -181,7 +172,7 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
                 if ($this->use_gsx_v2) {
                     $data['steps']['process_from_' . $date['from'] . '_to_' . $date['to']] = array(
                         'label'    => 'Récupération et traitement des réservations du ' . date('d / m / Y', strtotime($date['from'])) . ' au ' . date('d / m / Y', strtotime($date['to'])),
-                        'on_error' => 'continue'
+                        'on_error' => 'stop'
                     );
                 } else {
                     foreach (self::$products_codes as $code) {

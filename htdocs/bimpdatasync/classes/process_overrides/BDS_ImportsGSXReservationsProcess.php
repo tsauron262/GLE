@@ -172,7 +172,7 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
                 if ($this->use_gsx_v2) {
                     $data['steps']['process_from_' . $date['from'] . '_to_' . $date['to']] = array(
                         'label'    => 'Récupération et traitement des réservations du ' . date('d / m / Y', strtotime($date['from'])) . ' au ' . date('d / m / Y', strtotime($date['to'])),
-                        'on_error' => 'stop'
+                        'on_error' => 'continue'
                     );
                 } else {
                     foreach (self::$products_codes as $code) {

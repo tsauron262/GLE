@@ -1235,21 +1235,7 @@ Votre satisfaction est notre objectif, nous mettrons tout en œuvre pour vous sa
 Bien cordialement
 L’équipe BIMP";
 
-                $from = '';
-                $centre = 'savbimp@bimp.fr';
-
-                if (BimpObject::objectLoaded($sav)) {
-                    $centre = $sav->getData('code_centre');
-                }
-
-                if ($centre) {
-                    global $tabCentre;
-                    $centreData = isset($tabCentre[$centre]) ? $tabCentre[$centre] : array();
-
-                    if (isset($centreData[1]) && $centreData[1]) {
-                        $from = "SAV BIMP<" . $centreData[1] . ">";
-                    }
-                }
+                $from = 'savbimp@bimp.fr';
 
                 $to = BimpTools::cleanEmailsStr($email_client);
                 $this->debug_content .= 'Envoi e-mail client à ' . $to . ': ';

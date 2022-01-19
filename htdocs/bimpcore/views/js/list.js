@@ -1471,13 +1471,13 @@ function onListLoaded($list) {
                 var $filtersPanel = $list.find('.listFiltersPanelContainer');
                 if ($filtersPanel.length) {
                     if ($(this).hasClass('action-open')) {
-                        $table.findParentByClass('objectlistTableContainer').removeClass('col-md-12').removeClass('col-lg-12').addClass('col-md-9').addClass('col-lg-10');
+                        $table.findParentByClass('objectlistTableContainer').removeClass('col-sm-12').removeClass('col-md-12').removeClass('col-lg-12').addClass('col-sm-8').addClass('col-md-9').addClass('col-lg-10');
                         $filtersPanel.stop().fadeIn(150);
                         $(this).removeClass('action-open').addClass('action-close');
                         checkListWidth($list);
                     } else {
                         $filtersPanel.stop().fadeOut(150, function () {
-                            $table.findParentByClass('objectlistTableContainer').removeClass('col-md-9').removeClass('col-lg-10').addClass('col-md-12').addClass('col-lg-12');
+                            $table.findParentByClass('objectlistTableContainer').removeClass('col-sm-8').removeClass('col-md-9').removeClass('col-lg-10').addClass('col-sm-12').addClass('col-md-12').addClass('col-lg-12');
                             checkListWidth($list);
                         });
                         $(this).removeClass('action-close').addClass('action-open');

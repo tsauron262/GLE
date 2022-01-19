@@ -883,6 +883,24 @@ class BimpInput
                 $id = $prefix . '_signature-pad';
 
                 $html .= '<div class="signaturePadContainer" data-pad_id="' . $id . '">';
+
+                if (isset($options['check_mentions']) && !empty($options['check_mentions'])) {
+                    $html .= '<div class="" style="margin-bottom: 15px">';
+                    foreach ($options['check_mentions'] as $check_option_value => $check_option_label) {
+                        $item_name = $field_name . '_check_mentions';
+                        $id_item = $item_name . '_' . $check_option_value . '_' . rand(111111, 999999);
+                        
+                        $html .= '<div class="check_list_item">';
+                        $html .= '<input type="checkbox" name="' . $item_name . '[]" value="' . $check_option_value . '" id="' . $id_item . '"';
+                        $html .= ' class="' . $item_name . '_check check_list_item_input signature_mention_check"/>';
+                        $html .= '<label for="' . $id_item . '">';
+                        $html .= $check_option_label;
+                        $html .= '</label>';
+                        $html .= '</div>';
+                    }
+                    $html .= '</div>';
+                }
+
                 $html .= '<div class="signature_wrapper">';
                 $html .= '<canvas id="' . $id . '" class="signature-pad ' . $extra_class . '" style="border: solid 1px;' . $displayStyle . '" width=400 height=200></canvas>';
                 $html .= '</div>';
@@ -905,7 +923,7 @@ class BimpInput
     public static function renderDatePickerInput($input_name, $value = '', $options = array(), $input_id = null, $type = "datetime")
     {
         $html = '';
-        
+
         if (is_null($input_id)) {
             $input_id = $input_name;
         }

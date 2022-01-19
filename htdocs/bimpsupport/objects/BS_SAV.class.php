@@ -579,17 +579,17 @@ class BS_SAV extends BimpObject
 //                $js .= 'window.open("' . $url . '");';
 //            }
 //
-//            $id_facture_account = (int) $this->getData('id_facture_acompte');
-//            if ($id_facture_account) {
-//                $facture = $this->getChildObject('facture_acompte');
-//                if (BimpObject::objectLoaded($facture)) {
-//                    $ref = $facture->getData('facnumber');
-//                    if (file_exists(DOL_DATA_ROOT . '/facture/' . $ref . '/' . $ref . '.pdf')) {
-//                        $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . htmlentities('/' . $ref . '/' . $ref . '.pdf');
-//                        $js .= 'window.open("' . $url . '");';
-//                    }
-//                }
-//            }
+            $id_facture_account = (int) $this->getData('id_facture_acompte');
+            if ($id_facture_account) {
+                $facture = $this->getChildObject('facture_acompte');
+                if (BimpObject::objectLoaded($facture)) {
+                    $ref = $facture->getData('facnumber');
+                    if (file_exists(DOL_DATA_ROOT . '/facture/' . $ref . '/' . $ref . '.pdf')) {
+                        $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . htmlentities('/' . $ref . '/' . $ref . '.pdf');
+                        $js .= 'window.open("' . $url . '");';
+                    }
+                }
+            }
 
             if ((int) $this->getData('id_signature_pc')) {
                 $signature = $this->getChildObject('signature_pc');

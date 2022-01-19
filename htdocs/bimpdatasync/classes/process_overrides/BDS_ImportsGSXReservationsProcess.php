@@ -130,6 +130,15 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
 
     public function initProcessReservations(&$data, &$errors = array())
     {
+        if ($this->use_gsx_v2) {
+            $gsx = GSX_Reservation::getGsxV2();
+
+            if (!$gsx->logged) {
+                $this->Error('Non connecté à GSX');
+                return;
+            }
+        }
+
         $dates = array();
         if (isset($this->options['date_from']) && $this->options['date_from'] && isset($this->options['date_to']) && $this->options['date_to']) {
             $dates[] = array(
@@ -1161,7 +1170,6 @@ L’équipe BIMP";
 //                $this->Alert('Aucun e-mail utilisateur pour notification RDV SAV', $sav, $resId);
 //                BimpCore::addlog('Aucun e-mail utilisateur pour notification RDV SAV', Bimp_Log::BIMP_LOG_URGENT, 'bds', $sav);
 //            }
-
             // Envoi e-mail client: 
             $email_client = '';
 

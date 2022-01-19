@@ -278,10 +278,10 @@ forms:
                     
         rows: 
             - custom: 1
-              label: Document
-              input_name: doc_title
+              label: Récapitulatif
+              input_name: doc_infos
               content: 
-                  callback: displayDocTitle
+                  callback: displayDocInfos
             - field: nom_signataire
             - field: email_signataire
             - field: fonction_signataire
@@ -292,6 +292,8 @@ forms:
               input_name: signature
               input: 
                   type: signature_pad
+                  check_mentions: 
+                      callback: getCheckMentions
             
     sign_dist: 
         title: Signature à distance

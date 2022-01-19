@@ -845,6 +845,20 @@ class BT_ficheInter extends BimpDolObject
         
     }
     
+    public function getLinesFacturableContratArray() {
+        $return = Array();
+        if(count($this->getLinesFacturable())) {
+            foreach($this->getLinesFacturable() as $id) {
+                $child = $this->getChildObject('inters', $id);
+                if($child->getData('type') == 3 || $child->getData('type') == 4) {
+                    $return[$id] = '- <b class=\'danger bs-popover\' '.BimpRender::renderPopoverData($child->getData('description'), 'right', true).' >'. BT_ficheInter_det::$types[$child->getData('type')]['label'].' ('.$child->displayDuree().'h)</b>';
+                }
+                
+            }
+        }
+        return $return;
+    }
+    
     public function getLinesFacturable() {
         $array = [];
         $children = $this->getChildrenList('inters');
@@ -895,11 +909,12 @@ class BT_ficheInter extends BimpDolObject
                         foreach($data['lines_for_contrat'] as $id_line_fiche) {
                             $child = $this->getChildObject('inters', $id_line_fiche);
                             if($child->getData('type') == 3)
-                                $errors = BimpTools::merge_array($errors, $child->updateField('type', 5));
+                                $errors = BimpTools::merge_array($errors, $child->set('type', 5));
                             else
-                                $errors = BimpTools::merge_array($errors, $child->updateField('type', 0));
+                                $errors = BimpTools::merge_array($errors, $child->set('type', 0));
                             $children_contrat = $instance->getChildrenList('lines');
-                            $errors = BimpTools::merge_array($errors, $child->updateField('id_line_contrat', $children_contrat[0]));
+                            $errors = BimpTools::merge_array($errors, $child->set('id_line_contrat', $children_contrat[0]));
+                            $errors = BimpTools::merge_array($errors, $child->update($warnings, true));
                         }
                     }
                 }

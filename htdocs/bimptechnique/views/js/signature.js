@@ -1,5 +1,20 @@
 var signaturePads = [];
 
+
+function on_rattachement_form_submit($form, extra_data) {
+    extra_data['idLineFI_idLineCommande'] = {};
+    if(extra_data['id_commande'] > 0) {
+            $('.extra_select').each(function(){
+            var id_line_commande_selected = $(this).children('option:selected').val();
+            if(id_line_commande_selected > 0) {
+                extra_data['idLineFI_idLineCommande'][$(this).attr('child_id')] = $(this).children('option:selected').val();
+            }
+        });
+    }
+    console.log(extra_data);
+    return extra_data;
+}
+
 function onSignatureFormSubmit($form) {
     var $typeInput = $form.find('[name="type_signature"]');
     var $input = $form.find('[name="base_64_signature"]');

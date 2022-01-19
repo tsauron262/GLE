@@ -114,7 +114,7 @@ fields:
         type: int
         values:
             array: modes_facturation
-            
+        
     total_ht:
         label: PU HT
         type: int
@@ -319,6 +319,8 @@ forms:
                         
             desc: 
                 field: description
+            forfait:
+                field: forfait
             
 lists_cols: 
     service:
@@ -404,7 +406,7 @@ lists:
                 label: Prestation demandée (Descriptif de la commande)
                 value:
                     callback: displayDescriptifPrestationDemande
-            
+            forfait:
 fields_tables:
     default:
         title: Infos de l'intervention

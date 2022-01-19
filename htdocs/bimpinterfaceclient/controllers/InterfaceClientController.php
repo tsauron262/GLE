@@ -713,6 +713,33 @@ class InterfaceClientController extends BimpPublicController
                             $view = new BC_View($sav, 'public_client');
                             $html .= $view->renderHtml();
 
+                            $sql = BimpTools::getSqlSelect(array('id'));
+                            $sql .= BimpTools::getSqlFrom('bimpcore_signature');
+                            $sql .= ' WHERE ';
+                            $sql .= '(obj_module = \'bimpsupport\' AND obj_name = \'BS_SAV\' AND id_obj = ' . $sav->id . ')';
+                            $sql .= ' OR ';
+                            $sql .= '(obj_module = \'bimpcommercial\' AND obj_name = \'Bimp_Propal\' AND id_obj = ' . $sav->getData('id_propal') . ')';
+
+                            $rows = BimpCache::getBdb()->executeS($sql, 'array');
+
+                            if (is_array($rows) && !empty($rows)) {
+                                $ids = array();
+
+                                foreach ($rows as $r) {
+                                    $ids[] = (int) $r['id'];
+                                }
+
+                                $signature = BimpObject::getInstance('bimpcore', 'BimpSignature');
+                                $list = new BC_ListTable($signature, 'public_client', 1, null, 'Signatures', 'fas_signature');
+                                $list->addFieldFilterValue('id', $ids);
+                                $html .= '<div style="margin-top: 30px">';
+                                $html .= $list->renderHtml();
+                                $html .= '</div>';
+                            } else {
+                                $html .= $sql .' <br/><br/>';
+                                $html .= BimpCache::getBdb()->err();
+                            }
+
                             $note = BimpObject::getInstance('bimpcore', 'BimpNote');
                             $list = new BC_ListTable($note, 'public');
                             $list->addFieldFilterValue('obj_type', 'bimp_object');

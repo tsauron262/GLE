@@ -66,20 +66,38 @@ class BT_ficheInter_det extends BimpDolObject
 
         return 1;
     }
+    
+    public function canEditField($field_name) {
+        
+        global $user;
+        switch($field_name) {
+            case 'forfait':
+                return (int) $user->rights->bimptechnique->modif_apres_validation;
+        break;
+    
+        }
+        
+        return 1;
+    }
 
     public function isFieldEditable($field, $force_edit = false)
     {
+        global $user;
         $fi = $this->getParentInstance();
 
         if (BimpObject::objectLoaded($fi)) {
             if ((int) $fi->getData('fk_statut') === 0) {
                 return 1;
             }
+            
+            if((int)$user->rights->bimptechnique->modif_apres_validation && (int) $fi->getData('fk_statut') != 0) {
+                return 1;
+            }
 
             if (in_array($field, array('pourcentage_commercial'))) {
                 return 1;
             }
-
+            
             return 0;
         }
 
@@ -110,7 +128,9 @@ class BT_ficheInter_det extends BimpDolObject
 
         return 0;
     }
-
+    
+    
+    
     public function isAmPm()
     {
         if (!$this->isLoaded() || (string) $this->getData('arrived') || (string) $this->getData('departure')) {
@@ -135,7 +155,9 @@ class BT_ficheInter_det extends BimpDolObject
 //                ))
 //            );
 //        }
-
+        
+        //if($this->getData(''))
+        
         return $buttons;
     }
 
@@ -364,10 +386,14 @@ class BT_ficheInter_det extends BimpDolObject
                     }
                 }
             }
-        } elseif ($this->getData('id_line_commande') > 0) {
-            $line = $this->getChildObject('commande_line');
-
+        } elseif ($this->getData('id_line_commande') > 0 || $this->getData('id_dol_line_commande') > 0) {
+            $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine');
+            if($this->getData('id_dol_line_commande') > 0)
+                $line->find(Array('id_line' => $this->getData('id_dol_line_commande')), 1);
+            elseif($this->getData('id_line_commande') > 0)
+                $line->fetch($this->getData('id_line_commande'));
             if (BimpObject::objectLoaded($line)) {
+                
                 $fk_product = $line->id_product;
 
                 if ($with_details_commande_line) {
@@ -426,8 +452,38 @@ class BT_ficheInter_det extends BimpDolObject
                 }
             }
         }
-
+        
+        if($this->getData('forfait') == 1) {
+            $html .= '<br /><span class=\'danger\'>Au forfait</span>';
+        }
+        
         return $html;
+    }
+    
+    public function displayDescriptifPrestationDemande() {
+        $description = '';
+        $orderLine = null;
+        
+        if($this->getData('id_line_contrat') > 0) {
+            $obj = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine', $this->getData('id_line_contrat'));
+            $description = $obj->getData('description');
+        } elseif($this->getData('id_line_commande') > 0 || $this->getData('id_dol_line_commande') > 0) {
+            BimpTools::loadDolClass('commande', 'commande', 'OrderLine');
+            if($this->getData('id_line_commande') > 0){
+                $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $this->getData('id_line_commande'));
+                $orderLine = new OrderLine($this->db->db);
+                $orderLine->fetch($obj->getData('id_line'));
+            }   
+            elseif($this->getData('id_dol_line_commande') > 0) {
+                $orderLine = new OrderLine($this->db->db);
+                $orderLine->fetch($this->getData('id_dol_line_commande'));
+            }
+            
+            $description = $orderLine->desc;
+            
+        }
+        
+        return $description;
     }
 
     public function displayClient()
@@ -483,7 +539,7 @@ class BT_ficheInter_det extends BimpDolObject
 //                $html .= " <small>" . BimpRender::renderIcon('info-circle') . "</small>";
             }
         }
-
+        
         return $html;
     }
 
@@ -570,7 +626,7 @@ class BT_ficheInter_det extends BimpDolObject
     public function onSave(&$errors = [], &$warnings = [])
     {
         $parent = $this->getParentInstance();
-
+        
         if (BimpObject::objectLoaded($parent)) {
             $tt = $this->db->getSum('fichinterdet', 'duree', 'fk_fichinter = ' . $this->getData('fk_fichinter'));
             $parent->set('duree', $tt);
@@ -580,7 +636,6 @@ class BT_ficheInter_det extends BimpDolObject
 
         parent::onSave($errors, $warnings);
         
-
     }
 
     // Actions: 
@@ -784,7 +839,7 @@ class BT_ficheInter_det extends BimpDolObject
 
         return $errors;
     }
-
+    
     public function validate()
     {
         $errors = parent::validate();
@@ -804,7 +859,7 @@ class BT_ficheInter_det extends BimpDolObject
                     if (!$fk_contrat && empty($commandes) && empty($tickets)) {
                         $errors[] = 'Il n\'est pas possible d\'ajouter une intervention vendue sans objet lié à la fiche inter';
                     }
-                    if (!(int) $this->getData('id_line_commande') && !(int) $this->getData('id_line_contrat')) {
+                    if (!(int) $this->getData('id_line_commande') && !(int) $this->getData('id_line_contrat') && !(int) $this->getData('id_dol_line_commande')) {
                         $errors[] = 'Vous ne pouvez pas faire une intervention vendue sans code service, si ceci est une erreur merci d\'envoyer un e-mail à: support-fi@bimp.fr';
                     }
                 } elseif ($type == 5) {
@@ -821,28 +876,49 @@ class BT_ficheInter_det extends BimpDolObject
                 $facturable = 0;
 
                 $type = (int) $this->getData('type');
-
-                switch ($type) {
-                    case 0:
-                    case 1:
-                    case 6:
-                    case 5:
-                        $facturable = 1;
-                        if ($type == 5 || (int) $this->getData('id_line_contrat')) {
-                            $forfait = 1;
-                        } else {
-                            $forfait = 2;
-                        }
-                        break;
-                    case 3:
-                    case 4:
-                        $forfait = 2;
-                        break;
-                }
-
-                $this->set('forfait', $forfait);
-                $this->set('facturable', $facturable);
-                
+                if(($this->getData('id_line_commande') != $this->getInitData('id_line_commande')) || 
+                        ($this->getData('id_dol_line_commande') != $this->getInitData('id_dol_line_commande')) || 
+                        ($this->getData('id_line_contrat') != $this->getInitData('id_line_contrat'))) {
+                    switch ($type) {
+                        case 0:
+                            if((int) $this->getData('id_line_contrat')) {
+                                $forfait = self::MODE_FACT_FORFAIT;
+                            } else {
+                                $line = BimpObject::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine');
+                                if($this->getData('id_line_commande') > 0) {
+                                    $line->fetch((int) $this->getData('id_line_commande'));
+                                }  
+                                elseif($this->getData('id_dol_line_commande') > 0) {
+                                    $line->find(Array('id_line' => $this->getData('id_dol_line_commande')), 1);
+                                }
+                                $forfait = ($line->getData('force_qty_1')) ? self::MODE_FACT_FORFAIT : self::MODE_FACT_TEMPS_P;
+                            }
+                            break;
+                        case 1:
+                        case 2:
+                            $forfait = self::MODE_FACT_AUCUN__;
+                            break;
+                        case 6:
+                             $forfait = self::MODE_FACT_FORFAIT;
+                            break;
+                        case 5:
+                            $facturable = 1;
+                            if ($type == 5 || (int) $this->getData('id_line_contrat')) {
+                                $forfait = self::MODE_FACT_FORFAIT;
+                            } else {
+                                $forfait = self::MODE_FACT_TEMPS_P;
+                            }
+                            break;
+                        case 3:
+                            $forfait = self::MODE_FACT_FORFAIT;
+                            break;
+                        case 4:
+                            $forfait = self::MODE_FACT_TEMPS_P;
+                            break;
+                    }
+                    $this->set('forfait', $forfait);
+                    $this->set('facturable', $facturable);
+                }                
                 
                 if(!count($errors) && 
                         $this->getData('type') != self::TYPE_DEPLA && 

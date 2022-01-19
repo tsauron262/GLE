@@ -375,6 +375,15 @@ forms:
         title: Rattacher un objet à la FI
         rows:
             - custom: 1
+              label: id fichinter
+              input_name: id_fi
+              type: hidden
+              input:
+                  type: hidden
+              value:
+                  request: id
+              hidden: 1
+            - custom: 1
               label: Type d'objet
               input_name: type_of_object
               input:
@@ -402,7 +411,7 @@ forms:
               input:
                   type: check_list
                   items: 
-                      array: linesFacturable
+                      array: linesFacturableContrat
               display_if:
                   field_name: type_of_object
                   show_values: 2
@@ -418,10 +427,11 @@ forms:
             - custom: 1
               label: Lignes à mettre en commande
               input_name: lines_for_commande
+              depends_on: id_commande
               input:
-                  type: check_list
-                  items: 
-                      array: linesFacturable
+                  type: custom
+                  content: 
+                      callback: displayLinesForCommande
               display_if:
                   field_name: type_of_object
                   show_values: 3

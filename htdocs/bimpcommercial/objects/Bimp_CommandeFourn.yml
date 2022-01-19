@@ -211,6 +211,13 @@ fields:
         display_if: 
             field_name: delivery_type
             show_values: 2
+    methode_liv:
+        label: Methode de livraison
+        type: int
+        values: 
+            array: delivery_mode
+        default_value: 0
+        dol_extra_field: 1
     edi_status:
         label: Statut chez le fournisseur
         type: int
@@ -247,6 +254,7 @@ forms:
             - field: ref_supplier
             - field: delivery_type
             - field: custom_delivery
+            - field: methode_liv
             - field: date_livraison
             - field: fk_cond_reglement
             - field: fk_mode_reglement
@@ -301,6 +309,7 @@ forms:
             - field: ref_supplier
             - field: delivery_type
             - field: custom_delivery
+            - field: methode_liv
             - field: date_livraison
             - field: fk_cond_reglement
             - field: fk_mode_reglement
@@ -524,6 +533,8 @@ fields_tables:
             - field: delivery_type
               edit: 1
             - field: custom_delivery
+              edit: 1
+            - field: methode_liv
               edit: 1
             - field: fk_input_method
               show: 

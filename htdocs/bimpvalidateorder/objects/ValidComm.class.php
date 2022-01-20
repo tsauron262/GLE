@@ -634,14 +634,6 @@ class ValidComm extends BimpObject
         }
         
         
-//        if($type == self::TYPE_ENCOURS) {
-//            echo '<pre>';
-//            echo $sql . '<br/>';
-//            echo BimpCache::getBdb()->db->lastquery;
-//            echo '<br/>nb de valideur trouvé: ' . sizeof($rows); 
-//            die('<br/>trouvé');
-//        }
-//        
         if($can_valid_avaible != 0)
             return $can_valid_avaible;
         

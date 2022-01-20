@@ -306,7 +306,7 @@ class DemandeValidComm extends BimpObject
             $bimp_object = self::getObject($d->getData('type_de_piece'), $d->getData('id_piece'));
             
             if($bimp_object->isLoaded()) {
-                list($secteur, , $percent, $montant_piece) = $valid_comm->getObjectParams($bimp_object);
+                list($secteur, , $percent_pv, $percent_marge, $montant_piece) = $valid_comm->getObjectParams($bimp_object);
                 
                 $soc = $bimp_object->getChildObject('client');
 

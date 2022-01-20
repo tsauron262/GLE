@@ -60,7 +60,7 @@ class BC_Input extends BimpComponent
         ),
         'html'                        => array(
             'hashtags' => array('data_type' => 'bool', 'default' => 0),
-            'scanner'  => array('data_type' => 'bool', 'default' => 0)
+//            'scanner'  => array('data_type' => 'bool', 'default' => 0) // A implémenter
         ),
         'select'                      => array(
             'options'      => array('data_type' => 'array', 'compile' => true, 'default' => array()),
@@ -400,7 +400,7 @@ class BC_Input extends BimpComponent
                 $options['maxlength'] = isset($this->params['maxlength']) ? $this->params['maxlength'] : '';
                 $options['values'] = isset($this->params['values']) ? $this->params['values'] : array();
                 $options['hashtags'] = (int) (isset($this->params['hashtags']) && (int) $this->params['hashtags'] ? $this->params['hashtags'] : (isset($this->field_params['hashtags']) ? $this->field_params['hashtags'] : 0));
-                $options['scanner'] = ((isset($this->params['scanner'])) ? (int) $this->params['scanner'] : 0);
+//                $options['scanner'] = ((isset($this->params['scanner'])) ? (int) $this->params['scanner'] : 0);
                 break;
 
             case 'select':

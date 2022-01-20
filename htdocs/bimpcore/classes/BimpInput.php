@@ -242,10 +242,17 @@ class BimpInput
                     $html .= '<p class="smallInfo">Max ' . $options['maxlength'] . ' caractères</p>';
                 }
 
-                if (BimpCore::isContextPrivate() && isset($options['hashtags']) && (int) $options['hashtags']) {
-                    $html .= '<p class="inputHelp">';
-                    $html .= 'Vous pouvez utiliser le symbole # pour inclure un lien objet';
-                    $html .= '</p>';
+                if (BimpCore::isContextPrivate()) {
+                    if (isset($options['scanner']) && (int) $options['scanner']) {
+                        $onclick = 'var $input = $(this).parent().find(\'textarea[name=' . $field_name . ']\');';
+                        $onclick .= 'BIS.openModal($input);';
+                        $html .= BimpRender::renderRowButton('Scanner code-barres / Qr-Code', 'fas_camera', $onclick);
+                    }
+                    if (isset($options['hashtags']) && (int) $options['hashtags']) {
+                        $html .= '<p class="inputHelp" style="display: inline-block">';
+                        $html .= 'Vous pouvez utiliser le symbole # pour inclure un lien objet';
+                        $html .= '</p>';
+                    }
                 }
 
                 $html .= '<textarea id="' . $input_id . '" rows="' . $options['rows'] . '" name="' . $field_name . '"';
@@ -296,7 +303,13 @@ class BimpInput
                 if (BimpCore::isContextPrivate() && isset($options['hashtags']) && (int) $options['hashtags']) {
                     $doleditor->extra_class = 'allow_hashtags';
 
-                    $html .= '<p class="inputHelp">';
+//                    if (isset($options['scanner']) && (int) $options['scanner']) {
+//                        $onclick = 'var $input = $(this).parent().find(\'textarea[name=' . $field_name . ']\');';
+//                        $onclick .= 'BIS.openModal($input);';
+//                        $html .= BimpRender::renderRowButton('Scanner code-barres / Qr-Code', 'fas_camera', $onclick);
+//                    }
+
+                    $html .= '<p class="inputHelp" style="display: inline-block">';
                     $html .= 'Vous pouvez utiliser le symbole # pour inclure un lien objet';
                     $html .= '</p>';
                 }

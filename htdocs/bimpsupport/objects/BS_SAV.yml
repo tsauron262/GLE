@@ -377,6 +377,7 @@ fields:
         label: Symptômes
         type: text
         input:
+            hashtags: 1
             auto_expand: 1
             rows: 4
             values: 
@@ -437,7 +438,6 @@ fields:
         label: Référence remplacée
         input: 
             help: Utiliser ce champ si perte des données de la pièce remplacée
-#            scanner: 1
     resgsx: 
         label: ID réservation GSX
     date_rdv: 
@@ -466,8 +466,7 @@ fields:
     signature_resti_params: 
         label: Paramètres signature restitution
         type: json
-        
-    sacs: 
+    sacs:
         label: Sac d'emballage
         type: items_list
         items_braces: 1

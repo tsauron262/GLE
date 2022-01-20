@@ -4394,7 +4394,6 @@ function BimpInputHashtags() {
 function BimpInputScanner() {
     var bis = this;
     this.$curInput = $();
-    this.curInputCursorPos = 0;
     this.init = false;
     this.modalOpen = false;
     this.$modal = $();
@@ -4405,16 +4404,10 @@ function BimpInputScanner() {
             return;
         }
 
-        bis.reset();
         bis.modalOpen = true;
         bis.$curInput = $input;
         bis.insertModal();
         bis.$modal.modal('show');
-    };
-
-    this.reset = function () {
-        bis.$curInput = $();
-        bis.curInputCursorPos = 0;
     };
 
     this.insertModal = function () {
@@ -4428,15 +4421,22 @@ function BimpInputScanner() {
 
         var html = '';
         html += '<div class="modal ajax-modal" tabindex="-1" role="dialog" id="bis_scanner_modal">';
-        html += '<div class="modal-dialog modal-md" role="document">';
+        html += '<div class="modal-dialog modal-sm" role="document">';
         html += '<div class="modal-content">';
 
         html += '<div class="modal-header">';
-        html += '<h4 class="modal-titles_container"><i class="fas fa5-link iconLeft"></i>Scan Code-barres ou QrCode</h4>';
+        html += '<h4 class="modal-titles_container"><i class="fas fa5-camera iconLeft"></i>Scan Code-barres ou QrCode</h4>';
         html += '</div>';
 
-        html += '<div id="bis_scanner_modal_body" class="modal-body">';
-        html += '<div style="width: 500px" id="bis_scanner"></div>';
+        html += '<div id="bis_scanner_modal_body" class="modal-body" style="text-align: center">';
+        html += '<div style="width: 500px; margin: auto" id="bis_scanner"></div>';
+
+        html += '<div style="margin-top: 30px">';
+        html += '<span class="btn btn-danger btn-large" onclick="BIS.$modal.modal(\'hide\');">';
+        html += '<i class="fas fa5-times iconLeft"></i>Annuler';
+        html += '</span>';
+        html += '</div>';
+
         html += '</div>';
 
         html += '</div>';
@@ -4450,41 +4450,43 @@ function BimpInputScanner() {
         bis.$modal.on('shown.bs.modal', function (e) {
             if (!bis.init) {
                 bis.scanner = new Html5QrcodeScanner("bis_scanner", {fps: 10, qrbox: 250});
-                bis.scanner.render(bis.onScanSuccess);
+                bis.init = true;
             }
+            bis.scanner.render(bis.onScanSuccess);
         });
 
         bis.$modal.on('hidden.bs.modal', function (e) {
-            if (bis.modalOpen) {
-                bis.modalOpen = false;
-                bis.cancel();
-            }
-
-            if (bis.$curInput.length) {
-                var inputTag = bis.$curInput.tagName();
-
-                if (inputTag === 'input' || inputTag === 'textarea') {
-                    bis.$curInput.focus();
-                    if (!bis.curInputCursorPos) {
-                        bis.curInputCursorPos = bis.$curInput.val().length;
-                    }
-
-                    if (bis.curInputCursorPos) {
-                        setInputCursorPos(bis.$curInput, bis.curInputCursorPos);
-                    }
-                }
-            }
-
-            bis.reset();
+            bis.modalOpen = false;
+            bis.scanner.clear();
+            bis.$curInput = $();
         });
     };
 
-    this.onScanSuccess = function () {
+    this.onScanSuccess = function (decodedText, decodedResult) {
+        if (bis.$curInput.length) {
+            var inputTag = bis.$curInput.tagName();
 
-    };
-    
-    this.cancel = function () {
+            var val = '';
+            if (inputTag === 'input' || inputTag === 'textarea') {
+                val = bis.$curInput.val();
+            } else {
+                val = bis.$curInput.html();
+            }
 
+            if (val) {
+                val += ' ';
+            }
+
+            val += decodedText;
+
+            if (inputTag === 'input' || inputTag === 'textarea') {
+                bis.$curInput.val(val);
+            } else {
+                bis.$curInput.html(val);
+            }
+        }
+
+        bis.$modal.modal('hide');
     };
 }
 

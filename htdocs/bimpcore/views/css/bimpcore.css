@@ -16088,7 +16088,7 @@ i.iconRight {
     .formRow input,
     .formRow select,
     .formRow textarea {
-      width: 100% !important; } }
+      width: 95% !important; } }
 /*.formRow {
     padding: 5px;
     width: 100%;

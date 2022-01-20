@@ -14,10 +14,16 @@ foreach($array as $erp){
     echo 'https://'.$erp.$lien;
     echo '<iframe style="width: 100%; height: 400px;" src="https://'.$erp.$lien.'"></iframe>';
 }
-ob_end_flush();
 
 
-sleep(3);
 
-BimpCore::setConf('git_version', BimpCore::getConf('git_version', 1)+1);
+//pour tenter de load les iframes avant d'augmenter le git_version... mais marche pas/
+//ob_end_flush();
+//
+//
+//sleep(3);
+
+$version = BimpCore::getConf('git_version', 1)+1;
+echo 'version '.$version;
+BimpCore::setConf('git_version', $version);
 

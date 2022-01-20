@@ -59,6 +59,11 @@ class modBimpTechnique extends DolibarrModules {
         $this->rights[$r][1] = 'Rattacher un objet à une FI après validation (Commande, contrat, facture)';
         $this->rights[$r][3] = 0;
         $this->rights[$r][4] = 'reattach_an_object';
+        $r++;
+        $this->rights[$r][0] = $this->numero + $r;
+        $this->rights[$r][1] = 'Modifier les lignes après validation';
+        $this->rights[$r][3] = 0;
+        $this->rights[$r][4] = 'modif_apres_validation';
         $r = 1;
         
 

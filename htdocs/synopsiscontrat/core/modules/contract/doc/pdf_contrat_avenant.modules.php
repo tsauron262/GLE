@@ -126,7 +126,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 $file = $dir . "/".$this->avenant->ref."_Ex_Client.pdf";
             }
             $this->contrat = $contrat;
-
+            $bContract = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $contrat->id);
             if (!file_exists($dir)) {
                 if (dol_mkdir($dir) < 0) {
                     $this->error = $langs->trans("ErrorCanNotCreateDir", $dir);
@@ -181,7 +181,11 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 $pdf->SetXY($this->marge_gauche, $this->marge_haute - 17);
                 $pdf->SetFont('', 'B', 14);
                 $pdf->setXY(58,10);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, 'Avenant N°' . $this->avenant->ref, 0, 'L');
+                
+                if($this->avenant->getData('type') == 1)
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, 'Avenant de prolongation N°' . $this->avenant->ref, 0, 'L');
+                else
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, 'Avenant N°' . $this->avenant->ref, 0, 'L');
                 $pdf->setX(58);
                 $pdf->SetFont('', 'B', 10);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, 'au Contrat d’assistance et de maintenance informatique N°' . $contrat->ref, 0, 'L');
@@ -191,7 +195,10 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 $pdf1->SetXY($this->marge_gauche, $this->marge_haute - 17);
                 $pdf1->SetFont('', 'B', 14);
                 $pdf1->setXY(58,10);
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, 'Avenant N°' . $this->avenant->ref, 0, 'L');
+                if($this->avenant->getData('type') == 1)
+                    $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, 'Avenant de prolongation N°' . $this->avenant->ref, 0, 'L');
+                else
+                    $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, 'Avenant N°' . $this->avenant->ref, 0, 'L');
                 $pdf1->setX(58);
                 $pdf1->SetFont('', 'B', 10);
                 $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, 'au Contrat d’assistance et de maintenance informatique N°' . $contrat->ref, 0, 'L');
@@ -616,12 +623,16 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 $pdf->ln();
                 $pdf->SetFont('', '', 8);
                 $pdf->Cell($W*5, 4, "Les autres dispositions du Contrat qui n’ont pas été modifiées par le présent avenant demeurent inchangées.", 0, null, 'L', false);
+                $pdf->ln();
+                $pdf->Cell($W*5, 4, "Ce contrat et ses avenants portent à ce jour sur un montant de " . $bContract->getCurrentTotal() . ' € HT', 0, null, 'L', false);
                 $pdf1->setY($pdf1->getY() + 5);
                 $pdf1->SetFont('', '', 8);
                 $pdf1->Cell($W, 4, "Article " . $current_article, "L", null, 'C', true);
                 $pdf1->ln();
                 $pdf1->SetFont('', '', 8);
                 $pdf1->Cell($W*5, 4, "Les autres dispositions du Contrat qui n’ont pas été modifiées par le présent avenant demeurent inchangées.", 0, null, 'L', false);
+                $pdf1->ln();
+                $pdf1->Cell($W*5, 4, "Ce contrat et ses avenants portent à ce jour sur un montant de " . $bContract->getCurrentTotal() . ' € HT', 0, null, 'L', false);
                 $current_article++;
                 
                 

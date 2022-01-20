@@ -605,7 +605,7 @@ function validateForm($form) {
             var field_name = $(this).data('field_name');
             if (field_name) {
                 var $input = $(this).find('[name="' + field_name + '"]');
-                
+
                 // Patch: (problème avec l'éditeur html => le textarea n'est pas alimenté depuis l'éditeur) 
                 if ($(this).find('.cke').length) {
                     var html_value = $('#cke_' + field_name).find('iframe').contents().find('body').html();
@@ -633,6 +633,18 @@ function validateForm($form) {
                                 check = false;
                             }
                         }
+                    }
+
+                    var $checksMentions = $signatureContainer.find('.signature_mention_check');
+
+                    if ($checksMentions.length) {
+                        $checksMentions.each(function () {
+                            if (!$(this).prop('checked')) {
+                                var check_mention = $(this).parent().find('label').text();
+                                bimp_msg('Veuillez cocher la case "' + check_mention + '"', 'danger', null, true);
+                                check = false;
+                            }
+                        });
                     }
                 } else if (parseInt($(this).data('required'))) {
                     if (parseInt($(this).data('multiple'))) {
@@ -4379,7 +4391,107 @@ function BimpInputHashtags() {
     };
 }
 
+function BimpInputScanner() {
+    var bis = this;
+    this.$curInput = $();
+    this.init = false;
+    this.modalOpen = false;
+    this.$modal = $();
+    this.scanner = null;
+
+    this.openModal = function ($input) {
+        if (bis.modalOpen) {
+            return;
+        }
+
+        bis.modalOpen = true;
+        bis.$curInput = $input;
+        bis.insertModal();
+        bis.$modal.modal('show');
+    };
+
+    this.insertModal = function () {
+        if (bis.$modal.length) {
+            return;
+        }
+
+        if (typeof (Html5QrcodeScanner) === 'undefined') {
+            $('body').append('<script type="text/javascript" src="' + dol_url_root + '/bimpcore/views/js/html5-qrcode.min.js"></script>');
+        }
+
+        var html = '';
+        html += '<div class="modal ajax-modal" tabindex="-1" role="dialog" id="bis_scanner_modal">';
+        html += '<div class="modal-dialog modal-sm" role="document">';
+        html += '<div class="modal-content">';
+
+        html += '<div class="modal-header">';
+        html += '<h4 class="modal-titles_container"><i class="fas fa5-camera iconLeft"></i>Scan Code-barres ou QrCode</h4>';
+        html += '</div>';
+
+        html += '<div id="bis_scanner_modal_body" class="modal-body" style="text-align: center">';
+        html += '<div style="width: 500px; margin: auto" id="bis_scanner"></div>';
+
+        html += '<div style="margin-top: 30px">';
+        html += '<span class="btn btn-danger btn-large" onclick="BIS.$modal.modal(\'hide\');">';
+        html += '<i class="fas fa5-times iconLeft"></i>Annuler';
+        html += '</span>';
+        html += '</div>';
+
+        html += '</div>';
+
+        html += '</div>';
+        html += '</div>';
+        html += '</div>';
+
+        $('body').append(html);
+
+        bis.$modal = $('#bis_scanner_modal');
+
+        bis.$modal.on('shown.bs.modal', function (e) {
+            if (!bis.init) {
+                bis.scanner = new Html5QrcodeScanner("bis_scanner", {fps: 10, qrbox: 250});
+                bis.init = true;
+            }
+            bis.scanner.render(bis.onScanSuccess);
+        });
+
+        bis.$modal.on('hidden.bs.modal', function (e) {
+            bis.modalOpen = false;
+            bis.scanner.clear();
+            bis.$curInput = $();
+        });
+    };
+
+    this.onScanSuccess = function (decodedText, decodedResult) {
+        if (bis.$curInput.length) {
+            var inputTag = bis.$curInput.tagName();
+
+            var val = '';
+            if (inputTag === 'input' || inputTag === 'textarea') {
+                val = bis.$curInput.val();
+            } else {
+                val = bis.$curInput.html();
+            }
+
+            if (val) {
+                val += ' ';
+            }
+
+            val += decodedText;
+
+            if (inputTag === 'input' || inputTag === 'textarea') {
+                bis.$curInput.val(val);
+            } else {
+                bis.$curInput.html(val);
+            }
+        }
+
+        bis.$modal.modal('hide');
+    };
+}
+
 var BIH = new BimpInputHashtags();
+var BIS = new BimpInputScanner();
 
 $(document).ready(function () {
     $('.object_form').each(function () {

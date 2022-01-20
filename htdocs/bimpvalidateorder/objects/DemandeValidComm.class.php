@@ -306,7 +306,7 @@ class DemandeValidComm extends BimpObject
             $bimp_object = self::getObject($d->getData('type_de_piece'), $d->getData('id_piece'));
             
             if($bimp_object->isLoaded()) {
-                list($secteur, , $percent_pv, $percent_marge, $montant_piece) = $valid_comm->getObjectParams($bimp_object, $errors, false);
+                list($secteur, , $percent_pv, , $montant_piece) = $valid_comm->getObjectParams($bimp_object, $errors, false);
                 
                 $soc = $bimp_object->getChildObject('client');
 
@@ -323,7 +323,7 @@ class DemandeValidComm extends BimpObject
                 if((int) $d->getData('type') == (int) self::TYPE_ENCOURS)
                     $new_demande['montant'] = $montant_piece;
                 else
-                    $new_demande['remise'] = $percent;
+                    $new_demande['remise'] = $percent_pv;
                 
             } else
                 $new_demande = array();

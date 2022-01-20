@@ -291,10 +291,9 @@ class Bimp_ImportPaiementLine extends BimpObject
         return implode('<br/>', $return);
     }
 
-    function getFactClient()
+    function getFactClient($max = 10)
     {
         global $modeCSV;
-        $max = 10;
         $return = array();
         if (!$this->ok && $this->getData('price') > 0 && $this->getData('name') != '') {
             $cli = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe');

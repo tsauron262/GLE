@@ -42,7 +42,7 @@ class Cron
             $tech->fetch($id_tech);
             foreach ($information as $id_fi => $i) {
                 $fi->fetch($id_fi);
-                $this->output .= $fi->getLink() . " retard de " . $i['days'] . " jours " . $tech->getData('email') . "<br />";
+                $this->output .= $fi->getData('ref') . " retard de " . $i['days'] . " jours " . $tech->getData('email') . "<br />";
                 $mail .= $fi->getLink() . " retard de " . $i['days'] . " jours<br />";
             }
             $mail .= "<br />Si la régularisation a été faite entre temps, merci de ne pas tenir compte de cet email.<br />Cordialement.";

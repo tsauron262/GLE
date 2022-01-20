@@ -539,7 +539,7 @@ class BContract_echeancier extends BimpObject {
         
         $html = '';
         if(!$this->canEdit()) {
-            $html = BimpRender::renderAlerts("Ce contrat est clos, aucune facture ne peut être emises", 'info', false);
+            $html = BimpRender::renderAlerts("Ce contrat est clos, aucune facture ne peut être emise", 'info', false);
         }
 
         $instance_facture = $this->getInstance('bimpcommercial', 'Bimp_Facture');
@@ -752,7 +752,7 @@ class BContract_echeancier extends BimpObject {
 //                    $html .= '<div class="btn-group"><button type="button" class="btn btn-default" aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsLoadModalForm('create_perso', "Créer une facture personnalisée ou une facturation de plusieurs périodes") . '"><i class="fa fa-plus-square-o iconLeft"></i>Créer une facture personalisée ou une facturation de plusieurs périodes</button></div>';
 //                }
             }
-            if($user->rights->facture->creer && $reste_periodeEntier == 0 && $parent->getTotalContrat() - $parent->getTotalDejaPayer() > 0)
+            if(($user->rights->facture->creer && $reste_periodeEntier == 0 && $parent->getTotalContrat() - $parent->getTotalDejaPayer() > 0) && $parent->getData('statut') == 11)
                 $html .= '<div class="btn-group"><button type="button" class="btn btn-danger bs-popover" '.BimpRender::renderPopoverData('Facturation supplémentaire').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick("createFacture", array('labelLn'=> 'Facturation supplémentaire', 'label'=> 'Complément à', 'total_ht' => $parent->getTotalContrat() - $parent->getTotalDejaPayer(), 'pa' => ($parent->getTotalPa() - $parent->getTotalDejaPayer(false, 'pa'))), array("success_callback" => $callback)) . '"><i class="fa fa-times"></i> Facturation supplémentaire</button></div>';
             $html .= '</div>';
         }

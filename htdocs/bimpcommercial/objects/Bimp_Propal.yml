@@ -466,6 +466,13 @@ forms:
         title: Création de la signature
         rows: 
             - custom: 1
+              label: Ouvrir l'accès à la signature électronique à distance
+              input_name: open_public_access
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 0
+            - custom: 1
               label: Contact signataire
               data_type: id_object
               input_name: id_contact_signature
@@ -476,8 +483,12 @@ forms:
                           method: getSocieteContactsArray
                           params: 
                               - field_value: fk_soc
+                  help: 'Contact signataire obligatoire.<br/><b>Si aucun contact enregistré pour ce client, veuillez en créer un.</b>'
               value: 
                   callback: getDefaultSignatureContact
+              display_if: 
+                  field_name: open_public_access
+                  show_values: 1
             - custom: 1
               label: Contenu e-mail client pour la signature à distance
               input_name: email_content
@@ -487,25 +498,30 @@ forms:
               value: 
                   callback: getDefaultSignDistEmailContent
               display_if: 
-                  field_name: create_signature
+                  field_name: open_public_access
                   show_values: 1
                   
     validate: 
         title: Validation
         rows: 
             - custom: 1 
-              label: Créer la fiche signature
+              label: Ouvrir l'accès à la signature distance
               data_type: bool
-              input_name: create_signature
-              value: 1
+              input_name: open_public_access
+              value: 0
               input: 
                   type: toggle
             - custom: 1
               label: Contact signataire
               data_type: id_object
               input_name: id_contact_signature
+              object: contact
+              create_form: default
+              create_form_values: 
+                  callback: getSignatureContactCreateFormValues
               input: 
                   type: select
+                  help: 'Contact signataire obligatoire.<br/><b>Si aucun contact enregistré pour ce client, veuillez en créer un.</b>'
                   options: 
                       callback: 
                           method: getSocieteContactsArray
@@ -514,7 +530,7 @@ forms:
               value: 
                   callback: getDefaultSignatureContact
               display_if: 
-                  field_name: create_signature
+                  field_name: open_public_access
                   show_values: 1
             - custom: 1
               label: Contenu e-mail client pour la signature à distance
@@ -525,7 +541,7 @@ forms:
               value: 
                   callback: getDefaultSignDistEmailContent
               display_if: 
-                  field_name: create_signature
+                  field_name: open_public_access
                   show_values: 1
                   
 fields_tables: 
@@ -667,6 +683,10 @@ lists:
                     request: id_entrepot
                 fk_soc:
                     request: id_client
+        extra_bulk_actions: 
+            callback: getListExtraBulkActions
+        list_actions: 
+            callback: getFilteredListActions
         cols: 
             ref: 
             libelle: 

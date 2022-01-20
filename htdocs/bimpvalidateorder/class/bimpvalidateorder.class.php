@@ -144,7 +144,8 @@ class BimpValidateOrder
                 $test = "commande:rowid=" . $order->id . " && fk_statut>0";
                 $tasks = $task->getList(array('test_ferme' => $test));
                 if (count($tasks) == 0) {
-                    $tab = array("src" => $user->email, "dst" => "validationcommande@bimp-groupe.net", "subj" => "Validation commande " . $order->ref, "txt" => "Merci de valider la commande " . $order->getProvLink(), "test_ferme" => $test);
+                    $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $order->socid);
+                    $tab = array("src" => $user->email, "dst" => "validationcommande@bimp-groupe.net", "subj" => "Validation commande " . $order->ref, "txt" => "Merci de valider la commande " . $order->getProvLink(). " du client ".$soc->getLink(), "test_ferme" => $test);
                     $this->errors = BimpTools::merge_array($this->errors, $task->validateArray($tab));
                     $this->errors = BimpTools::merge_array($this->errors, $task->create());
                 }

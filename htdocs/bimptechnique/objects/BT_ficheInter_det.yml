@@ -91,7 +91,9 @@ fields:
         type: bool
         input:
             type: toggle
-            
+    id_dol_line_commande:
+        label: Ligne de la commande
+        type: int
     id_line_commande:
         label: Ligne de la commande
         type: id_object
@@ -112,7 +114,7 @@ fields:
         type: int
         values:
             array: modes_facturation
-            
+        
     total_ht:
         label: PU HT
         type: int
@@ -317,6 +319,8 @@ forms:
                         
             desc: 
                 field: description
+            forfait:
+                field: forfait
             
 lists_cols: 
     service:
@@ -395,10 +399,14 @@ lists:
             service:
             show_date:
             duree:
-            forfait:
+#            forfait:
             type:
             plus_plus:
-            
+            description_in_commande:
+                label: Prestation demandée (Descriptif de la commande)
+                value:
+                    callback: displayDescriptifPrestationDemande
+            forfait:
 fields_tables:
     default:
         title: Infos de l'intervention
@@ -412,6 +420,7 @@ fields_tables:
             - label: Durée de l'intervention
               value:
                   callback: displayDuree
+            - field: forfait
                   
     client:
         title: Infos client

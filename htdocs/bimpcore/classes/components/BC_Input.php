@@ -23,7 +23,8 @@ class BC_Input extends BimpComponent
         'text'                        => array(
             'values'       => array('data_type' => 'array', 'compile' => true, 'default' => array()),
             'allow_custom' => array('data_type' => 'bool', 'default' => 1),
-            'hashtags'     => array('data_type' => 'bool', 'default' => 0)
+            'hashtags'     => array('data_type' => 'bool', 'default' => 0),
+            'scanner'      => array('data_type' => 'bool', 'default' => 0)
         ),
         'qty'                         => array(
             'step'      => array('data_type' => 'float', 'default' => 1),
@@ -54,10 +55,12 @@ class BC_Input extends BimpComponent
             'tab_key_as_enter' => array('data_type' => 'bool', 'default' => 0),
             'maxlength'        => array('data_type' => 'int'),
             'values'           => array('data_type' => 'array', 'default' => array()),
-            'hashtags'         => array('data_type' => 'bool', 'default' => 0)
+            'hashtags'         => array('data_type' => 'bool', 'default' => 0),
+            'scanner'          => array('data_type' => 'bool', 'default' => 0)
         ),
         'html'                        => array(
-            'hashtags' => array('data_type' => 'bool', 'default' => 0)
+            'hashtags' => array('data_type' => 'bool', 'default' => 0),
+//            'scanner'  => array('data_type' => 'bool', 'default' => 0) // A implémenter
         ),
         'select'                      => array(
             'options'      => array('data_type' => 'array', 'compile' => true, 'default' => array()),
@@ -149,7 +152,8 @@ class BC_Input extends BimpComponent
             'obj_name'       => array('default' => '')
         ),
         'signature_pad'               => array(
-            'expand' => array('data_type' => 'bool', 'default' => 0)
+            'expand'         => array('data_type' => 'bool', 'default' => 0),
+            'check_mentions' => array('data_type' => 'array', 'compile' => true, 'default' => array())
         )
     );
 
@@ -320,6 +324,7 @@ class BC_Input extends BimpComponent
                 $options['values'] = isset($this->params['values']) ? $this->params['values'] : array();
                 $options['allow_custom'] = (int) (isset($this->params['allow_custom']) ? $this->params['allow_custom'] : 1);
                 $options['hashtags'] = ((isset($this->params['hashtags']) && (int) $this->params['hashtags']) ? (int) $this->params['hashtags'] : (isset($this->field_params['hashtags']) ? (int) $this->field_params['hashtags'] : 0));
+                $options['scanner'] = ((isset($this->params['scanner'])) ? (int) $this->params['scanner'] : 0);
 
             case 'qty':
                 $options['data'] = array();
@@ -395,6 +400,7 @@ class BC_Input extends BimpComponent
                 $options['maxlength'] = isset($this->params['maxlength']) ? $this->params['maxlength'] : '';
                 $options['values'] = isset($this->params['values']) ? $this->params['values'] : array();
                 $options['hashtags'] = (int) (isset($this->params['hashtags']) && (int) $this->params['hashtags'] ? $this->params['hashtags'] : (isset($this->field_params['hashtags']) ? $this->field_params['hashtags'] : 0));
+//                $options['scanner'] = ((isset($this->params['scanner'])) ? (int) $this->params['scanner'] : 0);
                 break;
 
             case 'select':
@@ -534,6 +540,7 @@ class BC_Input extends BimpComponent
 
             case 'signature_pad':
                 $options['expand'] = isset($this->params['expand']) ? (int) $this->params['expand'] : 0;
+                $options['check_mentions'] = isset($this->params['check_mentions']) ? $this->params['check_mentions'] : array();
                 break;
         }
 
@@ -694,6 +701,7 @@ class BC_Input extends BimpComponent
                             $values[$value] = $this->field_params['values'][$value];
                         }
                     }
+
                     if (!isset($values[$value])) {
                         $values[$value] = $value;
                     }

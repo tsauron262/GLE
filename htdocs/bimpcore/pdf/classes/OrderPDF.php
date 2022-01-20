@@ -630,12 +630,15 @@ class BLPDF extends OrderPDF
 //                $acompteHt = $line->subprice * (float) $line->qty;
 //                $acompteTtc = BimpTools::calculatePriceTaxIn($acompteHt, (float) $line->tva_tx);
 
+
+                $ht = $line->subprice * $qties[$line->id]['qty'];
+                $ttc = $ht * (100 + $line->tva_tx) / 100;
+                
+                
                 $total_ht_without_remises += $line->total_ht;
                 $total_ttc_without_remises += $line->total_ttc;
-
-                $this->acompteHt -= $line->total_ht;
-                $this->acompteTtc -= $line->total_ttc;
-//                $this->acompteTva20 -= $line->total_tva;
+                $this->acompteHt -= $ht;
+                $this->acompteTtc -= $ttc;
                 continue;
             }
 
@@ -957,6 +960,19 @@ class BLPDF extends OrderPDF
                 $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("TotalTTC") . '</td>';
                 $html .= '<td style="background-color: #DCDCDC; text-align: right;">' . price($this->total_ttc, 0, $this->langs) . '</td>';
                 $html .= '</tr>';
+                
+                
+                if ($this->acompteHt > 0) {
+                    $html .= '<tr>';
+                    $html .= '<td style="background-color: #F0F0F0;">' . $this->langs->transnoentities("Acompte") . '</td>';
+                    $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . BimpTools::displayMoneyValue($this->acompteTtc, '', 0, 0, 1) . '</td>';
+                    $html .= '</tr>';
+                    $resteapayer = $this->total_ttc - $this->acompteTtc;
+                    $html .= '<tr>';
+                    $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("RemainderToPay") . '</td>';
+                    $html .= '<td style="text-align: right; background-color: #DCDCDC;">' . BimpTools::displayMoneyValue($resteapayer, '', 0, 0, 1) . '</td>';
+                    $html .= '</tr>';
+                }
             }
         }
 

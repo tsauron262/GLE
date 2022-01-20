@@ -1351,15 +1351,24 @@ class BimpObject extends BimpCache
             } else {
                 $value = $this->getConf('fields/' . $field . '/default_value', null, false, 'any');
             }
-        } elseif (is_array($id_object)) {
-            if (!is_array($value)) {
-                $value = array();
-                $def_val = $this->getConf('fields/' . $field . '/default_value', null, false, 'any');
-                foreach ($id_object as $id) {
-                    if (!isset($value[$id]) || is_null($value[$id])) {
-                        $value[$id] = $def_val;
-                    }
+        } elseif (is_array($id_object) && !is_array($value)) {
+            $value = array();
+            $def_val = $this->getConf('fields/' . $field . '/default_value', null, false, 'any');
+            foreach ($id_object as $id) {
+                if (!isset($value[$id]) || is_null($value[$id])) {
+                    $value[$id] = $def_val;
                 }
+            }
+        } else {
+            // Checks value:
+            if (is_array($id_object)) {
+                foreach ($value as $id_object => $val) {
+                    $value[$id_object] = $this->getValueFromDb($field, $val);
+                    $this->checkFieldValueType($field, $value[$id_object]);
+                }
+            } else {
+                $value = $this->getValueFromDb($field, $value);
+                $this->checkFieldValueType($field, $value);
             }
         }
 
@@ -1416,6 +1425,10 @@ class BimpObject extends BimpCache
                     break;
 
                 case 'items_list':
+                    if (isset($value[0]) && $value[0] === '') {
+                        unset($value[0]);
+                    }
+
                     if ((int) $this->getConf('fields/' . $field_name . '/items_braces', 0)) {
                         if (!is_array($value)) {
                             $value = array($value);
@@ -1435,6 +1448,11 @@ class BimpObject extends BimpCache
             }
         }
 
+        return $value;
+    }
+
+    public function getValueFromDb($field_name, $value)
+    {
         return $value;
     }
 
@@ -1676,11 +1694,11 @@ class BimpObject extends BimpCache
                 case 'datetime':
                     $value = BimpTools::getDateForDolDate($value);
                     break;
+
                 case 'items_list':
-                    if (isset($value[0]) && $value[0] == '')
-                        unset($value[0]);
-                    if (is_array($value))
-                        $value = implode(",", $value);
+                case 'json':
+                case 'object_filters':
+                    $value = $this->getDbValue($field, $value);
                     break;
             }
         }
@@ -2198,7 +2216,25 @@ class BimpObject extends BimpCache
                             case 'field_input':
                             case 'values':
                             default:
-                                $filters[$filter_key] = $value;
+                                if ($bc_field->getParam('type', 'string') === 'items_list') {
+                                    if ((int) $bc_field->getParam('items_braces', 0)) {
+                                        $filters[$filter_key] = array(
+                                            'part_type' => 'middle',
+                                            'part'      => '[' . $value . ']'
+                                        );
+                                    } else {
+                                        $filters['custom_' . $filter_key] = array(
+                                            'custom' => '0' // On plante la recherche pour éviter des résultats incohérents
+                                        );
+
+                                        BimpCore::addlog('Tentative de recherche sur une champ de type items_list sans crochets', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
+                                            'Champ' => $bc_field->name,
+                                            'Note'  => 'Mettre "searchable: 0" dans les params du champ'
+                                                ), true);
+                                    }
+                                } else {
+                                    $filters[$filter_key] = $value;
+                                }
                                 break;
                         }
                     }
@@ -3276,10 +3312,13 @@ class BimpObject extends BimpCache
         $sql .= BimpTools::getSqlSelect($fields);
         $sql .= BimpTools::getSqlFrom($table, $joins);
         $sql .= BimpTools::getSqlWhere($filters);
-        if ($order_by == 'rand')
+
+        if ($order_by == 'rand') {
             $sql .= ' ORDER BY rand() ';
-        else
+        } else {
             $sql .= BimpTools::getSqlOrderBy($order_by, $order_way, 'a', $extra_order_by, $extra_order_way);
+        }
+
         $sql .= BimpTools::getSqlLimit($n, $p);
 
         $rows = $this->db->executeS($sql, $return);
@@ -4690,6 +4729,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 if ($field === $primary) {
                     $this->id = (int) $value;
                 } elseif ($this->field_exists($field)) {
+                    $value = $this->getValueFromDb($field, $value);
                     $this->checkFieldValueType($field, $value);
                     $this->data[$field] = $value;
                 }
@@ -4698,6 +4738,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             $extra_fields = $this->fetchExtraFields();
 
             foreach ($extra_fields as $field_name => $value) {
+                $value = $this->getValueFromDb($field, $value);
                 $this->checkFieldValueType($field_name, $value);
                 $this->data[$field_name] = $value;
             }
@@ -6763,25 +6804,29 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             if ($this->getConf('fields/' . $field . '/type', 'string') === 'id_object') {
                 $id_object = (int) $this->getData($field);
 
-                if (is_null($instance)) {
-                    $instance = $this->config->getObject('fields/' . $field . '/object');
-                }
+                if ($id_object > 0) {
+                    if (is_null($instance)) {
+                        $instance = $this->config->getObject('fields/' . $field . '/object');
+                    }
 
-                if (is_a($instance, 'BimpObject')) {
-                    $msg = BimpTools::ucfirst($instance->getLabel('the')) . ' d\'ID ' . $id_object . ' semble avoir été supprimé' . ($instance->isLabelFemale() ? 'e' : '');
-                } elseif (is_object($instance)) {
-                    $msg = 'L\'objet de type "' . get_class($instance) . '" d\'ID ' . $id_object . ' semble avoir été supprimé';
-                } else {
-                    $msg = 'Cet objet semble avoir été supprimé (ID: ' . $id_object . ')';
-                }
+                    if (is_a($instance, 'BimpObject')) {
+                        $msg = BimpTools::ucfirst($instance->getLabel('the')) . ' d\'ID ' . $id_object . ' semble avoir été supprimé' . ($instance->isLabelFemale() ? 'e' : '');
+                    } elseif (is_object($instance)) {
+                        $msg = 'L\'objet de type "' . get_class($instance) . '" d\'ID ' . $id_object . ' semble avoir été supprimé';
+                    } else {
+                        $msg = 'Cet objet semble avoir été supprimé (ID: ' . $id_object . ')';
+                    }
 
-                if ($remove_button) {
-                    $msg .= ' ' . $this->renderRemoveChildObjectButton($field, $reload_page);
-                }
+                    if ($remove_button) {
+                        $msg .= ' ' . $this->renderRemoveChildObjectButton($field, $reload_page);
+                    }
 
-                return BimpRender::renderAlerts($msg);
+                    return BimpRender::renderAlerts($msg);
+                }
             }
         }
+        
+        return '';
     }
 
     public function renderSearchInput($input_name, $value = null, $options = array())
@@ -7462,6 +7507,18 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         } else {
             $js .= '\'medium\'';
         }
+        $js .= ', ';
+        if (isset($params['modal_scroll_bottom'])) {
+            $js .= ($params['modal_scroll_bottom'] ? 'true' : 'false');
+        } else {
+            $js .= 'true';
+        }
+        $js .= ', ';
+        if (isset($params['modal_title'])) {
+            $js .= '\'' . $params['modal_title'] . '\'';
+        } else {
+            $js .= '\'\'';
+        }
         $js .= ');';
 
         return $js;
@@ -7583,7 +7640,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             }
 
             $vowel_first = false;
-            if (preg_match('/^[aàâäeéèêëiîïoôöuùûüyŷÿ](.*)$/', $object_name)) {
+            if (preg_match('/^[aàâäeéèêëiîïoôöuùûüyŷÿ](.*)$/', strtolower($object_name))) {
                 $vowel_first = true;
             }
         } else {
@@ -7699,7 +7756,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             $object_name = $labels['name'];
 
             $vowel_first = false;
-            if (preg_match('/^[aàâäeéèêëiîïoôöuùûüyŷÿ](.*)$/', $object_name)) {
+            if (preg_match('/^[aàâäeéèêëiîïoôöuùûüyŷÿ](.*)$/', strtolower($object_name))) {
                 $vowel_first = true;
             }
 

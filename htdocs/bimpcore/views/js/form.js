@@ -111,6 +111,8 @@ function saveObjectFromForm(form_id, $button, successCallback, on_save, on_submi
 }
 
 function prepareFormSubmit($form) {
+    var check = true;
+
     if ($.isOk($form)) {
         $form.find('.inputContainer').each(function () {
             var data_type = $(this).data('data_type');
@@ -119,7 +121,7 @@ function prepareFormSubmit($form) {
             if (typeof (field_prefix) === 'undefined') {
                 field_prefix = '';
             }
-            
+
             if (field_name) {
                 if ($(this).find('.signaturePadContainer').length) {
                     var $signatureContainer = $(this).find('.signaturePadContainer');
@@ -149,6 +151,8 @@ function prepareFormSubmit($form) {
             }
         });
     }
+
+    return check;
 }
 
 function loadModalForm($button, data, title, successCallback, on_save, modal_format, on_save_success_callback) {
@@ -377,11 +381,11 @@ function submitForm(form_id) {
 
 function loadObjectFormFromForm(title, result_input_name, parent_form_id, module, object_name, form_name, id_parent, reload_input, $button, values, id_obj) {
     var $form = $('#' + parent_form_id);
-    
-    if (typeof (id_obj) === 'undefined'){
+
+    if (typeof (id_obj) === 'undefined') {
         id_obj = 0;
     }
-    
+
     if (!$form.length) {
         bimp_msg('Une erreur est survenue. Impossible de charger le formulaire (1)', 'danger');
         return;
@@ -494,10 +498,10 @@ function loadObjectFormFromForm(title, result_input_name, parent_form_id, module
                                                         $resultInput.val(saveResult.id_object);
                                                     }
                                                     var fields = getInputsValues(bimpAjax.$parentForm);
-                                                    
+
                                                     var $inputContainer = bimpAjax.$parentForm.find('.' + bimpAjax.result_input_name + '_inputContainer');
                                                     if ($inputContainer.data('multiple') || $inputContainer.find('.check_list_container').length) {
-                                                        if (typeof(fields[bimpAjax.result_input_name]) === 'undefined' || !fields[bimpAjax.result_input_name]) {
+                                                        if (typeof (fields[bimpAjax.result_input_name]) === 'undefined' || !fields[bimpAjax.result_input_name]) {
                                                             fields[bimpAjax.result_input_name] = [];
                                                         }
                                                         fields[bimpAjax.result_input_name].push(saveResult.id_object);
@@ -592,14 +596,17 @@ function saveAssociations(operation, associations, $resultContainer, successCall
 // Gestion des formulaires objets:
 
 function validateForm($form) {
-
     var data_missing = false;
+    var check = true;
+
     $form.find('.inputContainer').each(function () {
         var $template = $(this).findParentByClass('subObjectFormTemplate');
         if (!$.isOk($template)) {
             var field_name = $(this).data('field_name');
             if (field_name) {
-// Patch: (problème avec l'éditeur html => le textarea n'est pas alimenté depuis l'éditeur) 
+                var $input = $(this).find('[name="' + field_name + '"]');
+
+                // Patch: (problème avec l'éditeur html => le textarea n'est pas alimenté depuis l'éditeur) 
                 if ($(this).find('.cke').length) {
                     var html_value = $('#cke_' + field_name).find('iframe').contents().find('body').html();
                     if (html_value === '<br>') {
@@ -608,16 +615,47 @@ function validateForm($form) {
                     $(this).find('[name="' + field_name + '"]').val(html_value);
                 }
 
-                if (parseInt($(this).data('required'))) {
+                if ($(this).find('.signaturePadContainer').length) {
+                    var $signatureContainer = $(this).find('.signaturePadContainer');
+                    var pad_id = $signatureContainer.data('pad_id');
+
+                    if (pad_id && $input.length) {
+                        if (typeof (bimpSignaturePads[pad_id]) !== 'undefined') {
+                            var _data = bimpSignaturePads[pad_id]._data;
+                            var size = 0;
+                            _data.forEach(element => size += element.length);
+
+                            if (!size) {
+                                bimp_msg('Signature absente', 'danger', null, true);
+                                check = false;
+                            } else if (size < 25) {
+                                bimp_msg('Signature trop petite', 'danger', null, true);
+                                check = false;
+                            }
+                        }
+                    }
+
+                    var $checksMentions = $signatureContainer.find('.signature_mention_check');
+
+                    if ($checksMentions.length) {
+                        $checksMentions.each(function () {
+                            if (!$(this).prop('checked')) {
+                                var check_mention = $(this).parent().find('label').text();
+                                bimp_msg('Veuillez cocher la case "' + check_mention + '"', 'danger', null, true);
+                                check = false;
+                            }
+                        });
+                    }
+                } else if (parseInt($(this).data('required'))) {
                     if (parseInt($(this).data('multiple'))) {
                         if ($(this).find('.check_list_container').length) {
-                            var check = false;
+                            var list_check = false;
                             $(this).find('.check_list_container').find('.check_list_item').each(function () {
                                 if ($(this).find('[name="' + field_name + '[]"]').prop('checked')) {
-                                    check = true;
+                                    list_check = true;
                                 }
                             });
-                            if (!check) {
+                            if (!list_check) {
                                 $(this).addClass('value_required');
                                 data_missing = true;
                             } else {
@@ -625,7 +663,6 @@ function validateForm($form) {
                             }
                         }
                     } else {
-                        var $input = $(this).find('[name="' + field_name + '"]');
                         if ($input.length) {
                             var data_type = $(this).data('data_type');
                             if (data_type && ((data_type === 'id_object') || (data_type === 'id'))) {
@@ -650,6 +687,7 @@ function validateForm($form) {
             }
         }
     });
+
     $form.find('.inputMultipleValuesContainer').each(function () {
         var $template = $(this).findParentByClass('subObjectFormTemplate');
         if (!$.isOk($template)) {
@@ -663,7 +701,7 @@ function validateForm($form) {
             }
         }
     });
-    var check = true;
+
     if (data_missing) {
         check = false;
         bimp_msg('Certains champs obligatoires ne sont pas renseignés', 'danger', null, true);
@@ -1101,7 +1139,14 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
     if ($value_input.length) {
         value = $value_input.val();
     }
-    if ($label_input.length) {
+
+    if ($value_input.length && $value_input.parent().hasClass('search_object_input_container')) {
+        var $search_result = $value_input.parent().find('.search_object_result');
+
+        if ($search_result.length) {
+            label = $search_result.text();
+        }
+    } else if ($label_input.length) {
         if ($label_input.tagName() === 'select') {
             label = $label_input.find('[value="' + value + '"]').html();
         } else {
@@ -4346,7 +4391,107 @@ function BimpInputHashtags() {
     };
 }
 
+function BimpInputScanner() {
+    var bis = this;
+    this.$curInput = $();
+    this.init = false;
+    this.modalOpen = false;
+    this.$modal = $();
+    this.scanner = null;
+
+    this.openModal = function ($input) {
+        if (bis.modalOpen) {
+            return;
+        }
+
+        bis.modalOpen = true;
+        bis.$curInput = $input;
+        bis.insertModal();
+        bis.$modal.modal('show');
+    };
+
+    this.insertModal = function () {
+        if (bis.$modal.length) {
+            return;
+        }
+
+        if (typeof (Html5QrcodeScanner) === 'undefined') {
+            $('body').append('<script type="text/javascript" src="' + dol_url_root + '/bimpcore/views/js/html5-qrcode.min.js"></script>');
+        }
+
+        var html = '';
+        html += '<div class="modal ajax-modal" tabindex="-1" role="dialog" id="bis_scanner_modal">';
+        html += '<div class="modal-dialog modal-sm" role="document">';
+        html += '<div class="modal-content">';
+
+        html += '<div class="modal-header">';
+        html += '<h4 class="modal-titles_container"><i class="fas fa5-camera iconLeft"></i>Scan Code-barres ou QrCode</h4>';
+        html += '</div>';
+
+        html += '<div id="bis_scanner_modal_body" class="modal-body" style="text-align: center">';
+        html += '<div style="width: 500px; margin: auto" id="bis_scanner"></div>';
+
+        html += '<div style="margin-top: 30px">';
+        html += '<span class="btn btn-danger btn-large" onclick="BIS.$modal.modal(\'hide\');">';
+        html += '<i class="fas fa5-times iconLeft"></i>Annuler';
+        html += '</span>';
+        html += '</div>';
+
+        html += '</div>';
+
+        html += '</div>';
+        html += '</div>';
+        html += '</div>';
+
+        $('body').append(html);
+
+        bis.$modal = $('#bis_scanner_modal');
+
+        bis.$modal.on('shown.bs.modal', function (e) {
+            if (!bis.init) {
+                bis.scanner = new Html5QrcodeScanner("bis_scanner", {fps: 10, qrbox: 250});
+                bis.init = true;
+            }
+            bis.scanner.render(bis.onScanSuccess);
+        });
+
+        bis.$modal.on('hidden.bs.modal', function (e) {
+            bis.modalOpen = false;
+            bis.scanner.clear();
+            bis.$curInput = $();
+        });
+    };
+
+    this.onScanSuccess = function (decodedText, decodedResult) {
+        if (bis.$curInput.length) {
+            var inputTag = bis.$curInput.tagName();
+
+            var val = '';
+            if (inputTag === 'input' || inputTag === 'textarea') {
+                val = bis.$curInput.val();
+            } else {
+                val = bis.$curInput.html();
+            }
+
+            if (val) {
+                val += ' ';
+            }
+
+            val += decodedText;
+
+            if (inputTag === 'input' || inputTag === 'textarea') {
+                bis.$curInput.val(val);
+            } else {
+                bis.$curInput.html(val);
+            }
+        }
+
+        bis.$modal.modal('hide');
+    };
+}
+
 var BIH = new BimpInputHashtags();
+var BIS = new BimpInputScanner();
 
 $(document).ready(function () {
     $('.object_form').each(function () {

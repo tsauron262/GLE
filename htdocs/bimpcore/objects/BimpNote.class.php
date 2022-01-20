@@ -36,16 +36,40 @@ class BimpNote extends BimpObject
         self::BN_DEST_USER  => 'Utilisateur',
         self::BN_DEST_GROUP => 'Group'
     );
+    
+    public function traiteContent(){
+        $note = $this->getData('content');
+        $note = trim($note);
+        $tab = array(CHR(13).CHR(10) => "[saut]", CHR(13).CHR(10).' ' => "[saut]", CHR(10) => "[saut]" );
+        $tab2 = array("[saut][saut][saut][saut][saut][saut]" => CHR(13).CHR(10).CHR(13).CHR(10), "[saut][saut][saut][saut][saut]" => CHR(13).CHR(10).CHR(13).CHR(10), "[saut][saut][saut][saut]" => CHR(13).CHR(10).CHR(13).CHR(10), "[saut][saut][saut]" => CHR(13).CHR(10).CHR(13).CHR(10), "[saut]" => CHR(13).CHR(10));
+        $note = strtr($note,$tab);
+        $note = strtr($note,$tab2);
+        $note = strtr($note,$tab);
+        $note = strtr($note,$tab2);
+        $note = strtr($note,$tab);
+        $note = strtr($note,$tab2);
+//        die('<textarea>'.$note.'</textarea>');
+        $this->set('content', $note);
+    }
 
     public function create(&$warnings = array(), $force_create = false)
     {
+        $this->traiteContent();
         $return = parent::create($warnings, $force_create);
+        
+        
 
         if (!count($return)) {
             $obj = $this->getParentInstance();
             if (is_object($obj) && $obj->isLoaded() && method_exists($obj, 'afterCreateNote'))
                 $obj->afterCreateNote($this);
         }
+        return $return;
+    }
+    
+    public function update(&$warnings = array(), $force_update = false) {
+        $this->traiteContent();
+        $return = parent::update($warnings, $force_update);
         return $return;
     }
 

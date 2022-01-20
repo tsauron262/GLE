@@ -501,6 +501,7 @@ class BContract_contrat extends BimpDolObject
             if (!count($errors)) {
                 $this->updateField("end_date_reel", $data['end_date_reel']);
                 $this->updateField('anticipate_close_note', $data['note_close']);
+                $this->updateField('relance_renouvellement', 0);
                 $success = "Date de fin défini avec succès";
                 $dateClose = new DateTime($date['end_date_reel']);
                 $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $this->getData('fk_commercial_suivi'));
@@ -1430,13 +1431,14 @@ class BContract_contrat extends BimpDolObject
             $this->updateField('next_contrat', $new_contrat->id);
             $children = $this->getChildrenList("lines", Array("renouvellement" => 0));
             foreach ($children as $id_child) {
-
+                
                 $child = $this->getChildObject("lines", $id_child);
-
+                
                 $neew_price = $child->getData('subprice');
                 if ($this->getData('syntec') > 0 && BimpTools::getValue('use_syntec')) {
                     $neew_price = $child->getData('subprice') * (BimpCore::getConf('current_indice_syntec') / $this->getData('syntec'));
                 }
+                $new_contrat->dol_object->pa_ht = $child->getData('buy_price_ht'); // BUG DéBILE DOLIBARR
                 $createLine = $new_contrat->dol_object->addLine(
                         $child->getData('description'), $neew_price, $child->getData('qty'), $child->getData('tva_tx'), 0, 0, $child->getData('fk_product'), $child->getData('remise_percent'), $for_date_end->add(new DateInterval("P1D"))->format('Y-m-d'), $for_date_end->add(new DateInterval('P' . $this->getData('duree_mois') . "M"))->format('Y-m-d'), 'HT', 0.0, 0, null, $child->getData('buy_price_ht'), Array('fk_contrat' => $new_contrat->id)
                 );
@@ -3680,7 +3682,7 @@ class BContract_contrat extends BimpDolObject
         if (!count($errors)) {
             foreach ($propal->dol_object->lines as $line) {
                 $produit = $this->getInstance('bimpcore', 'Bimp_Product', $line->fk_product);
-                if ($produit->getData('fk_product_type') == 1 || !BimpCore::getConf('bimpcontract_just_code_service')) {
+                if ($produit->getData('fk_product_type') == 1 || !BimpCore::getConf('bimpcontract_just_code_service') || $line->pa_ht == 0) {
                     $description = ($line->desc) ? $line->desc : $line->libelle;
                     $end_date = new DateTime($data['valid_start']);
                     $end_date->add(new DateInterval("P" . $duree_mois . "M"));

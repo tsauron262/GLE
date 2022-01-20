@@ -1,0 +1,1 @@
+ALTER TABLE `llx_societe` ADD `outstanding_limit_credit_check` DECIMAL(24,8) DEFAULT -1 NOT NULL;

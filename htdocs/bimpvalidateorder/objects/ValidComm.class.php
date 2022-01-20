@@ -130,7 +130,7 @@ class ValidComm extends BimpObject
         else
             $client = $bimp_object->getChildObject('client');
         
-        $errors = BimpTools::merge_array($errors, $this->updateCreditSafe($bimp_object));
+//        $errors = BimpTools::merge_array($errors, $this->updateCreditSafe($bimp_object));
         
         
 //        return 1;
@@ -428,7 +428,7 @@ class ValidComm extends BimpObject
     }
 
 
-    public function getObjectParams($object, &$errors = array()) {
+    public function getObjectParams($object, &$errors = array(), $withRtp = true) {
         
         // Secteur
         $secteur = $object->getData('ef_type');
@@ -465,10 +465,12 @@ class ValidComm extends BimpObject
             return;
         }
         
-        if(isset($this->client_rtp))
-            $rtp = $this->client_rtp;
-        else
-            $rtp = $client->getTotalUnpayedTolerance();
+        if($withRtp){
+            if(isset($this->client_rtp))
+                $rtp = $this->client_rtp;
+            else
+                $rtp = $client->getTotalUnpayedTolerance();
+        }
         if($rtp < 0)
             $rtp = 0;
         
@@ -857,11 +859,11 @@ class ValidComm extends BimpObject
         }
 
         // data Crédit Safe
-        if($client->isSirenRequired()) {
-            $client->useNoTransactionsDb();
-            $errors = BimpTools::merge_array($errors, $client->majEncourscreditSafe(true));
-            $client->useTransactionsDb();
-        }
+//        if($client->isSirenRequired()) {
+//            $client->useNoTransactionsDb();
+//            $errors = BimpTools::merge_array($errors, $client->majEncourscreditSafe(true));
+//            $client->useTransactionsDb();
+//        }
 
         return $errors;
     }

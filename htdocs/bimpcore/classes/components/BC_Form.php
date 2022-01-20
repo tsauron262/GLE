@@ -126,7 +126,7 @@ class BC_Form extends BC_Panel
         if (!$this->params['icon']) {
             $this->params['icon'] = 'fas_edit';
         }
-
+        
         if (isset($this->params['values']) && !is_null($this->params['values'])) {
             if (isset($this->params['values']['fields'])) {
                 foreach ($this->params['values']['fields'] as $field_name => $value) {
@@ -390,14 +390,14 @@ class BC_Form extends BC_Panel
         }
         $html .= '>';
 
-        $html .= '<div class="inputLabel col-xs-12 col-sm-12 col-md-' . (int) $label_cols . '">';
+        $html .= '<div class="inputLabel col-xs-12 col-sm-' . (int) $label_cols . '">';
         $html .= $label;
         if ($required) {
             $html .= '&nbsp;*';
         }
         $html .= '</div>';
 
-        $html .= '<div class="formRowInput field col-xs-12 col-sm-12 col-md-' . (12 - (int) $label_cols) . '">';
+        $html .= '<div class="formRowInput field col-xs-12 col-sm-' . (12 - (int) $label_cols) . '">';
 
         if ($field->edit && $field->isEditable()) {
             if ($field->params['type'] === 'id_object' ||
@@ -466,7 +466,7 @@ class BC_Form extends BC_Panel
         }
         $html .= '>';
 
-        $html .= '<div class="inputLabel col-xs-12 col-sm-12 col-md-' . (int) $label_cols . '">';
+        $html .= '<div class="inputLabel col-xs-12 col-sm-' . (int) $label_cols . '">';
         if ($params['label']) {
             $html .= $params['label'];
         } elseif ($this->object->config->isDefined('associations/' . $params['association'] . '/label')) {
@@ -481,7 +481,7 @@ class BC_Form extends BC_Panel
         }
         $html .= '</div>';
 
-        $html .= '<div class="formRowInput field col-xs-12 col-sm-12 col-md-' . (12 - (int) $label_cols) . '">';
+        $html .= '<div class="formRowInput field col-xs-12 col-sm-' . (12 - (int) $label_cols) . '">';
 
         if (count($asso->errors)) {
             $html .= BimpRender::renderAlerts($asso->errors);
@@ -549,14 +549,14 @@ class BC_Form extends BC_Panel
         }
         $html .= '>';
 
-        $html .= '<div class="inputLabel col-xs-12 col-sm-12 col-md-' . (int) $label_cols . '">';
+        $html .= '<div class="inputLabel col-xs-12 col-sm-' . (int) $label_cols . '">';
         $html .= $params['label'];
         if ((int) $params['required']) {
             $html .= '&nbsp;*';
         }
         $html .= '</div>';
 
-        $html .= '<div class="formRowInput field col-xs-12 col-sm-12 col-md-' . (12 - (int) $label_cols) . '">';
+        $html .= '<div class="formRowInput field col-xs-12 col-sm-' . (12 - (int) $label_cols) . '">';
 
         $html .= $this->renderCustomInput($row, $params);
 
@@ -762,10 +762,12 @@ class BC_Form extends BC_Panel
         $html = '';
 
         if (($params['data_type'] === 'id_object' || (($params['data_type'] === 'items_list') && isset($params['items_data_type']) && $params['items_data_type'] === 'id_object')) && $params['object']) {
-            if ($params['create_form'])
+            if ($params['create_form']) {
                 $html .= self::renderLoadFormObjectButton($this->object, $this->identifier, $params['object'], $this->fields_prefix . $params['input_name'], $params['create_form'], $params['create_form_values'], $params['create_form_label']);
-            if ($params['edit_form'])
+            }
+            if ($params['edit_form']) {
                 $html .= self::renderLoadFormObjectButton($this->object, $this->identifier, $params['object'], $this->fields_prefix . $params['input_name'], $params['edit_form'], $params['edit_form_values'], $params['edit_form_label'], true, null, '', -1);
+            }
         }
 
         if ($this->object->config->isDefined($row_path . '/input')) {

@@ -100,7 +100,7 @@ class InterfaceClientController extends BimpPublicController
 
         $html .= '<div class="navbar-header">';
         $html .= '<a class="navbar-brand" href="#">';
-        $html .= '<img src="' . DOL_URL_ROOT . '/viewimage.php?cache=1&modulepart=mycompany&file=' . $mysoc->logo . '" style="width: 43%"/>';
+        $html .= '<img src="' . DOL_URL_ROOT . '/viewimage.php?cache=1&modulepart=mycompany&file=' . $mysoc->logo . '" style="width: auto; height: 50px"/>';
         $html .= '</a>';
         $html .= '</div>';
 
@@ -146,9 +146,10 @@ class InterfaceClientController extends BimpPublicController
         } else {
             // Signatures en attentes:
             $signatures = BimpCache::getBimpObjectObjects('bimpcore', 'BimpSignature', array(
-                        'id_client' => (int) $userClient->getData('id_client'),
-                        'signed'    => 0,
-                        'type'      => 0
+                        'id_client'  => (int) $userClient->getData('id_client'),
+                        'signed'     => 0,
+                        'type'       => 0,
+                        'allow_dist' => 1
                             ), 'id', 'desc');
 
             if (!empty($signatures)) {
@@ -314,11 +315,13 @@ class InterfaceClientController extends BimpPublicController
                 $html .= BimpRender::renderAlerts('Vous n\'avez aucune réparation en cours', 'info');
             }
 
-            $html .= '<div class="buttonsContainer align-right" style="margin: 15px 0">';
-            $html .= '<span class="btn btn-default" onclick="window.location = \'' . BimpObject::getPublicBaseUrl() . '?fc=savForm\'">';
-            $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouvelle demande de réparation';
-            $html .= '</span>';
-            $html .= '</div>';
+            if ((int) BimpCore::getConf('sav_public_reservations', 0)) {
+                $html .= '<div class="buttonsContainer align-right" style="margin: 15px 0">';
+                $html .= '<span class="btn btn-default" onclick="window.location = \'' . BimpObject::getPublicBaseUrl() . '?fc=savForm\'">';
+                $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouvelle demande de réparation';
+                $html .= '</span>';
+                $html .= '</div>';
+            }
 
             if (!empty($savs)) {
                 $headers = array(
@@ -671,11 +674,13 @@ class InterfaceClientController extends BimpPublicController
                 if (!BimpObject::objectLoaded($userClient) || !$sav->can('view')) {
                     $html .= BimpRender::renderAlerts('Vous n\'avez pas la permission d\'accéder à ce contenu');
                 } else {
-                    $html .= '<div class="buttonsContainer align-right" style="margin: 15px 0">';
-                    $html .= '<span class="btn btn-default" onclick="window.location = \'' . BimpObject::getPublicBaseUrl() . '?fc=savForm\'">';
-                    $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouvelle demande de réparation';
-                    $html .= '</span>';
-                    $html .= '</div>';
+                    if ((int) BimpCore::getConf('sav_public_reservations', 0)) {
+                        $html .= '<div class="buttonsContainer align-right" style="margin: 15px 0">';
+                        $html .= '<span class="btn btn-default" onclick="window.location = \'' . BimpObject::getPublicBaseUrl() . '?fc=savForm\'">';
+                        $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouvelle demande de réparation';
+                        $html .= '</span>';
+                        $html .= '</div>';
+                    }
 
                     $list = new BC_ListTable($sav, 'public_client', 1, null, 'Liste des réparations');
                     $list->addFieldFilterValue('id_client', (int) $userClient->getData('id_client'));
@@ -707,6 +712,33 @@ class InterfaceClientController extends BimpPublicController
                         } else {
                             $view = new BC_View($sav, 'public_client');
                             $html .= $view->renderHtml();
+
+                            $sql = BimpTools::getSqlSelect(array('id'));
+                            $sql .= BimpTools::getSqlFrom('bimpcore_signature');
+                            $sql .= ' WHERE ';
+                            $sql .= '(obj_module = \'bimpsupport\' AND obj_name = \'BS_SAV\' AND id_obj = ' . $sav->id . ')';
+                            $sql .= ' OR ';
+                            $sql .= '(obj_module = \'bimpcommercial\' AND obj_name = \'Bimp_Propal\' AND id_obj = ' . $sav->getData('id_propal') . ')';
+
+                            $rows = BimpCache::getBdb()->executeS($sql, 'array');
+
+                            if (is_array($rows) && !empty($rows)) {
+                                $ids = array();
+
+                                foreach ($rows as $r) {
+                                    $ids[] = (int) $r['id'];
+                                }
+
+                                $signature = BimpObject::getInstance('bimpcore', 'BimpSignature');
+                                $list = new BC_ListTable($signature, 'public_client', 1, null, 'Signatures', 'fas_signature');
+                                $list->addFieldFilterValue('id', $ids);
+                                $html .= '<div style="margin-top: 30px">';
+                                $html .= $list->renderHtml();
+                                $html .= '</div>';
+                            } else {
+                                $html .= $sql .' <br/><br/>';
+                                $html .= BimpCache::getBdb()->err();
+                            }
 
                             $note = BimpObject::getInstance('bimpcore', 'BimpNote');
                             $list = new BC_ListTable($note, 'public');

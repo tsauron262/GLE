@@ -442,10 +442,12 @@ input:focus {
 
 /* line 228, ../scss/lbd/_sidebar-and-main-panel.scss */
 .bic_main-panel {
-  position: relative;
+  position: fixed;
+  left: 280px;
   z-index: 2;
   float: right;
-  width: calc(100% - 280px); }
+  width: calc(100% - 280px);
+  overflow: scroll;}
   /* line 234, ../scss/lbd/_sidebar-and-main-panel.scss */
   .bic_main-panel > .content {
     padding: 30px 15px;
@@ -1396,4 +1398,26 @@ input:focus {
     overflow-x: scroll;
     overflow-y: hidden;
     -ms-overflow-style: -ms-autohiding-scrollbar;
-    -webkit-overflow-scrolling: touch; } }
+    -webkit-overflow-scrolling: touch; }
+  
+  .bic_sidebar .nav p{
+      font-size: 9px;
+      margin: 0;
+  }
+  .bic_sidebar .nav i {
+    font-size: 18px;
+    margin-right: 5px;
+  }
+  
+  .bic_sidebar .sidebar-wrapper, .bic_sidebar {
+      width: 180px;
+  }
+  .nav > li > a{
+      padding: 10px 5px;
+  }
+  
+    .bic_main-panel {
+      left: 180px;
+      width: calc(100% - 180px);
+    }
+}

@@ -157,6 +157,11 @@ fields:
         type: bool
         default_value: 1
         
+    allow_no_scan: 
+        label: Signature papier sans scan autorisée
+        type: bool
+        default_value: 0
+        
     need_sms_code: 
         label: Certification signature à distance par code SMS
         type: bool
@@ -175,6 +180,7 @@ forms:
             - field: id_contact
             - field: allow_elec
             - field: allow_dist
+            - field: allow_no_scan
             - field: need_sms_code
             
     open_sign_dist:
@@ -272,10 +278,10 @@ forms:
                     
         rows: 
             - custom: 1
-              label: Document
-              input_name: doc_title
+              label: Récapitulatif
+              input_name: doc_infos
               content: 
-                  callback: displayDocTitle
+                  callback: displayDocInfos
             - field: nom_signataire
             - field: email_signataire
             - field: fonction_signataire
@@ -286,6 +292,8 @@ forms:
               input_name: signature
               input: 
                   type: signature_pad
+                  check_mentions: 
+                      callback: getCheckMentions
             
     sign_dist: 
         title: Signature à distance
@@ -427,6 +435,7 @@ fields_tables:
             - field: id_client
             - field: id_contact
             - field: allow_elec
+            - field: allow_no_scan
             - field: signed
             
     signature:

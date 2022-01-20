@@ -6535,9 +6535,10 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             $html .= '<div style="text-align: center; margin-bottom: 10px">';
             $html .= '<h3 style="margin-top: 0">Conditions générales de prise en charge</h3>';
 
-            //            if ($prioritaire) {
-            $html .= '<span class="danger">Prise en charge urgente</span>';
-//            }
+            if ($prioritaire) {
+                $html .= '<span class="danger">Prise en charge urgente</span>';
+            }
+
             $html .= '</div>';
 
             $html .= $cgv;

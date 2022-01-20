@@ -4391,7 +4391,105 @@ function BimpInputHashtags() {
     };
 }
 
+function BimpInputScanner() {
+    var bis = this;
+    this.$curInput = $();
+    this.curInputCursorPos = 0;
+    this.init = false;
+    this.modalOpen = false;
+    this.$modal = $();
+    this.scanner = null;
+
+    this.openModal = function ($input) {
+        if (bis.modalOpen) {
+            return;
+        }
+
+        bis.reset();
+        bis.modalOpen = true;
+        bis.$curInput = $input;
+        bis.insertModal();
+        bis.$modal.modal('show');
+    };
+
+    this.reset = function () {
+        bis.$curInput = $();
+        bis.curInputCursorPos = 0;
+    };
+
+    this.insertModal = function () {
+        if (bis.$modal.length) {
+            return;
+        }
+
+        if (typeof (Html5QrcodeScanner) === 'undefined') {
+            $('body').append('<script type="text/javascript" src="' + dol_url_root + '/bimpcore/views/js/html5-qrcode.min.js"></script>');
+        }
+
+        var html = '';
+        html += '<div class="modal ajax-modal" tabindex="-1" role="dialog" id="bis_scanner_modal">';
+        html += '<div class="modal-dialog modal-md" role="document">';
+        html += '<div class="modal-content">';
+
+        html += '<div class="modal-header">';
+        html += '<h4 class="modal-titles_container"><i class="fas fa5-link iconLeft"></i>Scan Code-barres ou QrCode</h4>';
+        html += '</div>';
+
+        html += '<div id="bis_scanner_modal_body" class="modal-body">';
+        html += '<div style="width: 500px" id="bis_scanner"></div>';
+        html += '</div>';
+
+        html += '</div>';
+        html += '</div>';
+        html += '</div>';
+
+        $('body').append(html);
+
+        bis.$modal = $('#bis_scanner_modal');
+
+        bis.$modal.on('shown.bs.modal', function (e) {
+            if (!bis.init) {
+                bis.scanner = new Html5QrcodeScanner("bis_scanner", {fps: 10, qrbox: 250});
+                bis.scanner.render(bis.onScanSuccess);
+            }
+        });
+
+        bis.$modal.on('hidden.bs.modal', function (e) {
+            if (bis.modalOpen) {
+                bis.modalOpen = false;
+                bis.cancel();
+            }
+
+            if (bis.$curInput.length) {
+                var inputTag = bis.$curInput.tagName();
+
+                if (inputTag === 'input' || inputTag === 'textarea') {
+                    bis.$curInput.focus();
+                    if (!bis.curInputCursorPos) {
+                        bis.curInputCursorPos = bis.$curInput.val().length;
+                    }
+
+                    if (bis.curInputCursorPos) {
+                        setInputCursorPos(bis.$curInput, bis.curInputCursorPos);
+                    }
+                }
+            }
+
+            bis.reset();
+        });
+    };
+
+    this.onScanSuccess = function () {
+
+    };
+    
+    this.cancel = function () {
+
+    };
+}
+
 var BIH = new BimpInputHashtags();
+var BIS = new BimpInputScanner();
 
 $(document).ready(function () {
     $('.object_form').each(function () {

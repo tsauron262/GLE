@@ -437,6 +437,7 @@ fields:
         label: Référence remplacée
         input: 
             help: Utiliser ce champ si perte des données de la pièce remplacée
+#            scanner: 1
     resgsx: 
         label: ID réservation GSX
     date_rdv: 

@@ -92,8 +92,20 @@ class BimpInput
                     $html .= '/>';
                 }
 
-                if (BimpCore::isContextPrivate() && isset($options['hashtags']) && (int) $options['hashtags']) {
-                    $html .= BimpRender::renderInfoIcon('fas_hashtag', 'Vous pouvez utiliser le symbole # pour inclure un lien objet');
+                if (BimpCore::isContextPrivate()) {
+                    if (isset($options['hashtags']) && (int) $options['hashtags']) {
+                        $html .= BimpRender::renderInfoIcon('fas_hashtag', 'Vous pouvez utiliser le symbole # pour inclure un lien objet');
+                    }
+
+                    if (isset($options['scanner']) && (int) $options['scanner']) {
+                        $onclick = 'var $parent = $(this).parent();';
+                        $onclick .= 'if ($parent.hasClass(\'input-group\')) {';
+                        $onclick .= '$parent = $parent.parent().parent();';
+                        $onclick .= '}';
+                        $onclick .= 'var $input = $parent.find(\'input[name=' . $field_name . ']\');';
+                        $onclick .= 'BIS.openModal($input);';
+                        $html .= BimpRender::renderRowButton('Scanner code-barres / Qr-Code', 'fas_camera', $onclick);
+                    }
                 }
 
                 if (isset($options['min_label']) && $options['min_label']) {
@@ -889,7 +901,7 @@ class BimpInput
                     foreach ($options['check_mentions'] as $check_option_value => $check_option_label) {
                         $item_name = $field_name . '_check_mentions';
                         $id_item = $item_name . '_' . $check_option_value . '_' . rand(111111, 999999);
-                        
+
                         $html .= '<div class="check_list_item">';
                         $html .= '<input type="checkbox" name="' . $item_name . '[]" value="' . $check_option_value . '" id="' . $id_item . '"';
                         $html .= ' class="' . $item_name . '_check check_list_item_input signature_mention_check"/>';

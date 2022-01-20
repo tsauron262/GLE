@@ -14,6 +14,8 @@ foreach($array as $erp){
     echo 'https://'.$erp.$lien;
     echo '<iframe style="width: 100%; height: 400px;" src="https://'.$erp.$lien.'"></iframe>';
 }
+ob_end_flush();
+
 
 sleep(3);
 

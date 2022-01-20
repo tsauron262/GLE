@@ -348,6 +348,38 @@ class DemandeValidComm extends BimpObject
         return $demandes;
     }
     
+    public function getListExtraBulkActions()
+    {
+        $actions = array();
+
+        if ($this->canSetAction('sendEmail')) {
+            $actions[] = array(
+                'label'   => 'Valider',
+                'icon'    => 'fas_check',
+                'onclick' => $this->getJsBulkActionOnclick('validatePiece', array(), array())
+            );
+        }
+
+
+        return $actions;
+    }
+    
+    public function actionValidatePiece($data, &$sucess){
+        $errors = $warnings = array();
+        
+        $obj = $this->getThisObject();
+        
+        $name = $obj->getLabel().' '.$obj->getLink();
+        $sucess = ucfirst($name).' validée';
+        if(!$obj->validate())
+            $errors[] = 'Validation '.$name.' impossible';
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings
+        );
+    }
+    
     public function getRef($withGenerique = true) {
         $obj = $this->getObject($this->getData('type_de_piece'), $this->getData('id_piece'));
         if(is_object($obj) && $obj->isLoaded())

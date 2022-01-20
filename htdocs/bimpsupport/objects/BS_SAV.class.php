@@ -1772,6 +1772,8 @@ class BS_SAV extends BimpObject
             $html .= '<span class="warning" style="font-size: 15px">Annule et remplace ' . $this->getLabel('the') . ' "' . $this->getData('replaced_ref') . '" (données perdues)</span>';
             $html .= '</div>';
         }
+        
+        $html .= $this->displayData('sacs');
 
         $soc = $this->getChildObject("client");
         if (BimpObject::objectLoaded($soc)) {
@@ -1904,6 +1906,7 @@ class BS_SAV extends BimpObject
                 $html .= '</div>';
             }
         }
+        
 
         return $html;
     }

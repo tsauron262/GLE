@@ -278,11 +278,12 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
 
             $pdf->SetXY('28.5', '160.3');
             
-            $text = $sav->displayData('save_option', 'default', false, true);
-            if($save == 1)
-                $text = "Le client donne son accord pour que toutes ses données soient effacées. Son produit lui sera restitué en configuration usine, aucune de ses données personnelles ne sera présentes.";
-            elseif($save == 2)
-                $text = "Le client autorise BIMP à essayer de sauvegarder ses données personnelles. Si cela s’avère impossible aucune intervention ne sera réalisée sur le produit sans accord préalable du client. Le délai d’intervention pourra en être augmenté.";
+            if (isset(BS_SAV::$save_options_desc[$save])) {
+                $text = BS_SAV::$save_options_desc[$save];
+            } else {
+                $text = $sav->displayData('save_option', 'default', false, true);
+            }
+            
             $pdf->MultiCell(175, 6, $text, 0, 'L');
 
             $cgv = "";

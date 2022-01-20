@@ -170,7 +170,7 @@ class Bimp_ImportPaiementLine extends BimpObject
         }
 
 
-        if (($this->getData('price') - $this->total_reste_a_paye) < 0.10 && ($this->getData('price') - $this->total_reste_a_paye) > -0.10)
+        if (($this->getData('price') - $this->total_reste_a_paye) < 0.10 /*&& ($this->getData('price') - $this->total_reste_a_paye) > -0.10*/)
             $this->ok = true;
         if ($this->getData('traite'))
             $this->ok = true;

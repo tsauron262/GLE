@@ -370,9 +370,15 @@ class DemandeValidComm extends BimpObject
         $obj = $this->getThisObject();
         
         $name = $obj->getLabel().' '.$obj->getLink();
-        $sucess = ucfirst($name).' validée';
-        if(!$obj->validate())
+        $errorsVal = $obj->actionValidate(array(), $sucessPiece);
+        $sucess .= '<br/>'.$sucessPiece;
+        if(count($errorsVal['errors'])){
             $errors[] = 'Validation '.$name.' impossible';
+            $errors = BimpTools::merge_array($errors, $errorsVal['errors']);
+        }
+        if(count($errorsVal['warnings'])){
+            $warnings = BimpTools::merge_array($warnings, $errorsVal['warnings']);
+        }
 
         return array(
             'errors'           => $errors,

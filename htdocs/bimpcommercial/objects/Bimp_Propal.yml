@@ -683,6 +683,10 @@ lists:
                     request: id_entrepot
                 fk_soc:
                     request: id_client
+        extra_bulk_actions: 
+            callback: getListExtraBulkActions
+        list_actions: 
+            callback: getFilteredListActions
         cols: 
             ref: 
             libelle: 

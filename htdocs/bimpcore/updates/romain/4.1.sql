@@ -1,0 +1,1 @@
+ALTER TABLE `llx_validate_comm` ADD `sur_marge` INT NOT NULL DEFAULT '0' AFTER `only_child`;

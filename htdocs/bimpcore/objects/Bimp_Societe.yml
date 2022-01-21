@@ -771,22 +771,22 @@ fields_tables:
                   
     encours: 
         title: Encours
-        icon: fas_hand-holding-usd
-        show: 
-            callback: isClient
-        rows: 
-            - label: Encours actuels
-              value: 
-                  callback: displayOutstanding
-            
-    encours_infos: 
-        title: Infos encours
         icon: fas_search-dollar
         show: 
             callback: isClient
         rows: 
             - field: outstanding_limit
               edit: 1
+            - label: Encours actuels
+              value: 
+                  callback: displayOutstanding
+            
+    encours_infos: 
+        title: Infos Crédits
+        icon: fas_hand-holding-usd
+        show: 
+            callback: isClient
+        rows: 
             - field: notecreditsafe
             - custom: 1 
               label: Lettre Crédit Safe  

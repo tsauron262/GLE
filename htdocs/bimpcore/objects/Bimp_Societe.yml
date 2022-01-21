@@ -743,34 +743,11 @@ fields_tables:
               value: 
                   callback: displayDiscountAvailables
               show: 
-                  callback: isClient
-            - label: Encours actuel
-              value: 
-                  callback: displayOutstanding
-              show: 
-                  callback: isClient
-                  
-            - field: notecreditsafe
-            - custom: 1 
-              label: Lettre Crédit Safe  
-              value:
-                  callback: getCreditSafeLettre
-            - field: date_check_credit_safe
-            - field: outstanding_limit_credit_safe
-              edit: 1
-            - field: outstanding_limit_icba
-              edit: 1
-            - field: outstanding_limit_credit_check
-              edit: 1
-            - field: outstanding_limit_atradius
-              edit: 1
-            - field: outstanding_limit
-              edit: 1
+                  callback: isClient            
             - field: mode_reglement
               edit: 1
             - field: cond_reglement
               edit: 1
-#            - field: fk_account
             - field: relances_actives
               show: 
                   callback: isClient
@@ -791,6 +768,39 @@ fields_tables:
             - field: validation_impaye
               edit:
                   callback: iAmAdmin
+                  
+    encours: 
+        title: Encours
+        icon: fas_hand-holding-usd
+        show: 
+            callback: isClient
+        rows: 
+            - label: Encours actuels
+              value: 
+                  callback: displayOutstanding
+            
+    encours_infos: 
+        title: Infos encours
+        icon: fas_search-dollar
+        show: 
+            callback: isClient
+        rows: 
+            - field: outstanding_limit
+              edit: 1
+            - field: notecreditsafe
+            - custom: 1 
+              label: Lettre Crédit Safe  
+              value:
+                  callback: getCreditSafeLettre
+            - field: date_check_credit_safe
+            - field: outstanding_limit_credit_safe
+              edit: 1
+            - field: outstanding_limit_icba
+              edit: 1
+            - field: outstanding_limit_credit_check
+              edit: 1
+            - field: outstanding_limit_atradius
+              edit: 1
  
     contact: 
         title: Informations de contact
@@ -853,10 +863,23 @@ views:
                   fields_table: 
                       name: infos_comm
             
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: encours
+                      
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: encours_infos
+                      
             - cols:
                 - type: fields_table
-#                  show: 
-#                      callback: isCompany
                   col_lg: 6
                   col_md: 6
                   col_sm: 12

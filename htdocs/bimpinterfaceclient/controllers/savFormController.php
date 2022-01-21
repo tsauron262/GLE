@@ -1459,11 +1459,9 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
             if (!isset($data['sav_slot']) || !$data['sav_slot']) {
                 $errors[] = 'Veuillez sélectionner un créneau horaire';
             } else {
-                if ($use_gsx_v2) {
-                    if (preg_match('/^(.+)___(.+)$/', $data['sav_slot'], $matches)) {
-                        $reservationDate = $matches[1];
-                        $correlationId = $matches[2];
-                    }
+                if ($use_gsx_v2 && preg_match('/^(.+)___(.+)$/', $data['sav_slot'], $matches)) {
+                    $reservationDate = $matches[1];
+                    $correlationId = $matches[2];
                 } else {
                     $reservationDate = $data['sav_slot'];
                 }

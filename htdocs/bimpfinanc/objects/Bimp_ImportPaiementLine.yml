@@ -208,4 +208,7 @@ fields_tables:
                 callback: getFactPossible
             - label: Facture(s) par client
               value: 
-                callback: getFactClient
+                callback: 
+                    method: getFactClient
+                    params:
+                        - 1000

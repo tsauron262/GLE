@@ -162,6 +162,9 @@ lists:
         page_btn: 1
         update_btn: 1
         # enlever delete btn
+        checkboxes: 1
+        extra_bulk_actions: 
+            callback: getListExtraBulkActions
         delete_btn: 1 
         modal_view: default
         extra_btn: 

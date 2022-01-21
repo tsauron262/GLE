@@ -1773,6 +1773,8 @@ class BS_SAV extends BimpObject
             $html .= '</div>';
         }
 
+        $html .= $this->displayData('sacs');
+
         $soc = $this->getChildObject("client");
         if (BimpObject::objectLoaded($soc)) {
             $html .= '<div>';
@@ -1904,6 +1906,7 @@ class BS_SAV extends BimpObject
                 $html .= '</div>';
             }
         }
+
 
         return $html;
     }
@@ -5115,10 +5118,14 @@ class BS_SAV extends BimpObject
                 if (count($signature_errors)) {
                     $warnings[] = BimpTools::getMsgFromArray($pdf_errors, 'Echec création de la signature du Bon de restitution');
                 } else {
-                    $id_signature = (int) $this->getData('id_signature_resti');
+                    $signature = $this->getChildObject('signature_resti');
 
-                    if ($id_signature) {
-                        $success_callback .= 'bimp_msg(\'ID de la signature du bon de restitution: ' . $id_signature . '\');';
+                    if (BimpObject::objectLoaded($signature) && $signature->isActionAllowed('signElec')) {
+                        $success_callback .= 'setTimeout(function() {' . $signature->getJsActionOnclick('signElec', array(), array(
+                                    'form_name'   => 'sign_elec',
+                                    'no_button'   => true,
+                                    'modal_title' => 'Signature électronique du bon de restitution "BR-' . $this->getRef() . '"'
+                                )) . '}, 500);';
                     }
                 }
             }

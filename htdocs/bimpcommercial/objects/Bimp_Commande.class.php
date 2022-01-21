@@ -127,7 +127,7 @@ class Bimp_Commande extends BimpComm
 
                 // Encours
                 if (is_a($demande, 'DemandeValidComm')) {
-                    list($secteur, $class,, $val_euros) = $vc->getObjectParams($this, $errors);
+                    list($secteur, $class,,, $val_euros) = $vc->getObjectParams($this, $errors);
                     return $vc->userCanValidate((int) $user->id, $secteur, ValidComm::TYPE_ENCOURS, $class, $val_euros, $this)
                             or $vc->userCanValidate((int) $user->id, $secteur, ValidComm::TYPE_IMPAYE, $class, $val_euros, $this);
                 }

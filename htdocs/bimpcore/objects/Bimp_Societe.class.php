@@ -1071,13 +1071,50 @@ class Bimp_Societe extends BimpDolObject
         return BimpCore::getConf('societe_id_default_cond_reglement', 0);
     }
 
-    public function getEncoursNonFacture()
+    public function getEncours($withOtherSiret = true)
+    {
+        if ($withOtherSiret && $this->getData('siren') . 'x' != 'x' && strlen($this->getData('siren')) == 9) {
+            $tot = 0;
+            $lists = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array('siren' => $this->getData('siren')));
+            foreach ($lists as $idO => $obj) {
+                $tot += $obj->getEncours(false);
+            }
+            return $tot;
+        } else {
+            $values = $this->dol_object->getOutstandingBills();
+
+            if (isset($values['opened'])) {
+                return $values['opened'];
+            }
+        }
+        return 0;
+    }
+
+    public function getEncoursNonFacture($withOtherSiret = true)
     {
         if (!$this->isLoaded()) {
             return 0;
         }
 
         $encours = 0;
+
+        $ids = array($this->id);
+
+        if ($withOtherSiret) {
+            $siren = $this->getData('siren');
+
+            if ($siren . 'x' != 'x' && strlen($siren) == 9) {
+                $result = $this->db->getRows('societe', 'siren = \'' . $siren . '\' AND rowid != ' . $this->id, null, 'array', array('rowid'));
+
+                if (is_array($result)) {
+                    foreach ($result as $r) {
+                        if (!in_array((int) $r['rowid'], $ids)) {
+                            $ids[] = (int) $r['rowid'];
+                        }
+                    }
+                }
+            }
+        }
 
         $sql = BimpTools::getSqlSelect(array('a.qty_modif', 'a.factures', 'det.qty', 'det.subprice', 'det.tva_tx', 'det.remise_percent'));
         $sql .= BimpTools::getSqlFrom('bimp_commande_line', array(
@@ -1094,15 +1131,15 @@ class Bimp_Societe extends BimpDolObject
         ));
         $sql .= BimpTools::getSqlWhere(array(
                     'c.fk_statut'      => 1,
-                    'c.fk_soc'         => (int) $this->id,
+                    'c.fk_soc'         => $ids,
                     'c.invoice_status' => array(
                         'operator' => '!=',
                         'value'    => 2
                     )
         ));
-        
+
         $rows = $this->db->executeS($sql, 'array');
-        
+
         if (is_array($rows)) {
             $facs_status = array();
 
@@ -1136,6 +1173,83 @@ class Bimp_Societe extends BimpDolObject
 
                     $pu_ttc *= (1 + ($r['tva_tx'] / 100));
                     $encours += (($full_qty - $qty_billed) * $pu_ttc);
+                }
+            }
+        }
+
+        return $encours;
+    }
+
+    public function getAllEncoursForSiret($with_commandes_non_facturees = false)
+    {
+        $encours = array(
+            'factures'  => array(
+                'socs'  => array(
+                    $this->id => 0
+                ),
+                'total' => 0
+            ),
+            'commandes' => array(
+                'socs'  => array(
+                    $this->id => 0
+                ),
+                'total' => 0
+            ),
+            'total'     => 0
+        );
+
+        if ($this->isLoaded()) {
+            $value = $this->getEncours(false);
+
+            if ($value) {
+                $encours['factures']['socs'][$this->id] += $value;
+                $encours['factures']['total'] += $value;
+                $encours['total'] += $value;
+            }
+
+            if ($with_commandes_non_facturees) {
+                $value = $this->getEncoursNonFacture(false);
+
+                if ($value) {
+                    $encours['commandes']['socs'][$this->id] += $value;
+                    $encours['commandes']['total'] += $value;
+                    $encours['total'] += $value;
+                }
+            }
+
+            $siren = $this->getData('siren');
+
+            if ($siren . 'x' != 'x' && strlen($siren) == 9) {
+                foreach (BimpCache::getBimpObjectObjects($this->module, $this->object_name, array(
+                    'siren' => $siren,
+                    'rowid' => array(
+                        'operator' => '!=',
+                        'value'    => $this->id
+                    )
+                )) as $id_soc => $soc) {
+                    if (BimpObject::objectLoaded($soc)) {
+                        if (!isset($encours['factures']['socs'][$id_soc])) {
+                            $encours['factures']['socs'][$id_soc] = 0;
+                        }
+
+                        $value = $soc->getEncours(false);
+
+                        if ($value) {
+                            $encours['factures']['socs'][$id_soc] += $value;
+                            $encours['factures']['total'] += $value;
+                            $encours['total'] += $value;
+                        }
+
+                        if ($with_commandes_non_facturees) {
+                            $value = $soc->getEncoursNonFacture(false);
+
+                            if ($value) {
+                                $encours['commandes']['socs'][$id_soc] += $value;
+                                $encours['commandes']['total'] += $value;
+                                $encours['total'] += $value;
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -1529,8 +1643,44 @@ class Bimp_Societe extends BimpDolObject
 
     public function displayEncoursNonFacture()
     {
-        $encours = $this->getEncoursNonFacture();
-        return BimpTools::displayMoneyValue($encours);
+        if (!$this->isLoaded()) {
+            return '';
+        }
+
+        $encours = $this->getAllEncoursForSiret(true);
+
+        $html .= BimpTools::displayMoneyValue($encours['commandes']['socs'][$this->id]);
+
+        if (count($encours['commandes']['socs']) > 1) {
+            $html .= '<br/>';
+            foreach ($encours['commandes']['socs'] as $id_soc => $soc_encours) {
+                if ($id_soc == (int) $this->id) {
+                    continue;
+                }
+
+                $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_soc);
+                $html .= '<br/>Client ';
+
+                if (BimpObject::objectLoaded($soc)) {
+                    $html .= $soc->getLink();
+                } else {
+                    $html .= '#' . $id_soc;
+                }
+
+                $html .= ' : ';
+
+                $html .= BimpTools::displayMoneyValue($soc_encours);
+            }
+
+            $html .= '<br/><br/>';
+            $html .= '<b>Total encours sur commandes non facturées pour l\'entreprise (Siren): </b>' . BimpTools::displayMoneyValue($encours['commandes']['total']);
+        }
+
+        if ($encours['commandes']['total'] && $encours['factures']['total']) {
+            $html .= '<br/><b>Total encours</b> : ' . BimpTools::displayMoneyValue($encours['total']);
+        }
+
+        return $html;
     }
 
     // Rendus HTML: 
@@ -2823,9 +2973,9 @@ class Bimp_Societe extends BimpDolObject
         $limit = -1;
         if ($this->getData('outstanding_limit_atradius') > -1)
             $limit = $this->getData('outstanding_limit_atradius');
-        if($this->getData('outstanding_limit_icba') > $limit)
+        if ($this->getData('outstanding_limit_icba') > $limit)
             $limit = $this->getData('outstanding_limit_icba');
-        if($this->getData('outstanding_limit_credit_check') > $limit)
+        if ($this->getData('outstanding_limit_credit_check') > $limit)
             $limit = $this->getData('outstanding_limit_credit_check');
         if ($limit > 0 && $limit != $this->getInitData('outstanding_limit'))
             $this->updateField('outstanding_limit', $limit);

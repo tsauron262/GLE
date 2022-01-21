@@ -2233,6 +2233,7 @@ class User extends CommonObject
 		$label.= '<br><b>' . $langs->trans("EMail").':</b> '.$this->email;
 		if (! empty($this->admin))
 			$label.= '<br><b>' . $langs->trans("Administrator").'</b>: '.yn($this->admin);
+                $companylink = '';
 		if (! empty($this->socid) )	// Add thirdparty for external users
 		{
 			$thirdpartystatic = new Societe($db);

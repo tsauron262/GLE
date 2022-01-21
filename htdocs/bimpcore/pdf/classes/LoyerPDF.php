@@ -28,13 +28,13 @@ class LoyerPDF extends PropalPDF
                     $product = null;
                 }
             }
-            
+
             $desc = $this->getLineDesc($line, $product);
 
             if ($line->total_ht == 0) {
                 $row['desc'] = array(
                     'colspan' => 99,
-                    'content' => $desc,
+                    'content' => $this->cleanHtml($desc),
                     'style'   => 'font-weight: bold; background-color: #F5F5F5;'
                 );
             } else {
@@ -44,7 +44,7 @@ class LoyerPDF extends PropalPDF
                 }
 
                 $row = array(
-                    'desc'  => $desc,
+                    'desc'  => $this->cleanHtml($desc),
                     'loyer' => BimpTools::displayMoneyValue($loyer, 'EUR'),
                     'mois'  => pdf_getlineqty($this->object, $i, $this->langs) . ' mois'
                 );

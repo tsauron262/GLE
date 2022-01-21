@@ -41,10 +41,10 @@
             $this->relanceActivationProvisoire();
             $this->relance_brouillon();
             $this->echeance_contrat();
+            $this->relance_echeance_tacite();
             $this->relance_demande();
             $this->tacite();
             $this->facturation_auto();
-            //$this->relance_echeance_tacite();
             return "OK";
         }
         
@@ -143,7 +143,7 @@
             foreach($list as $index => $c) {
                 $contrats->fetch($c['rowid']);
                 if($contrats->isLoaded() && in_array($contrats->getData('tacite'), $this->arrayTacite)) {
-                    if(strtotime($contrats->displayRealEndDate('Y-m-d')) <= strtotime($date)) {
+                    if((strtotime($contrats->displayRealEndDate('Y-m-d')) <= strtotime($date)) && !$contrats->getData('anticipate_close_note')) {
                         if($contrats->tacite(true)) {
                             $this->output .= "Contrat N°" . $contrats->getRef() . ' [Renouvellement TACITE]';
 
@@ -272,15 +272,53 @@
             
             // 28 jours => 21 Jours => 14 Jours => 7 Jours => Jours de renouvellement
             
-            $filters = Array(['statut' => 11]);
-            $list = BimpCache::getBimpObjectInstance("bimpcontract", "BContract_contrat");
+            $filters = [
+                'statut' => 11,
+                'tacite' => Array(
+                    'in' => Array(1,3,6,4,5,7)
+                )
+            ];
             
-//            foreach($list as $object) {
-//                
-//            }
+            $nombres_jours_relance = Array(28,21,14,7,0);
             
-            $this->output = count($list);
-
+            $list = BimpCache::getBimpObjectObjects("bimpcontract", "BContract_contrat", $filters);
+            $this->output .= "=> RELANCE RECONDUCTION TACITE =><br />";
+            $toDay = new DateTime();
+            $this->output .= "Aujourd'hui: " . $toDay->format('d/m/Y') . "<br />";
+            foreach($list as $object) {
+                $message = "";
+                $dateContrat = new DateTime($object->displayRealEndDate("Y-m-d"));
+                $diff = $toDay->diff($dateContrat);
+                if($diff->invert == 0) {
+                    $output = $object->getRef() . " => expire dans " . $diff->days . " jour.s (".$dateContrat->format('d/m/Y').") => ";
+                    
+                    if(in_array($diff->days, $nombres_jours_relance)) {
+                        $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $object->getData('fk_soc'));
+                        $sujet = $object->getRef() . " - Reconduction tacite - " . $client->getRef() . ' ' . $client->getName();
+                        $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $object->getData('fk_commercial_suivi'));
+                        if($diff->days > 0)
+                            $message = "Bonjour " . $commercial->getName() . "<br />Votre contrat N°" . $object->getNomUrl() . " pour le client "
+                                . $client->getNomUrl() . "(".$client->getName().") sera renouvelé tacitement dans " . $diff->days . " jour.s";
+                        else
+                            $message = "Bonjour, " . $commercial->getName() . '<br />Votre contrat N°' . $object->getNomUrl() . ' pour le client'
+                                . $client->getNomUrl() . '('.$client->getName().') a atteint sa date d\'échéance mais il est en tacite reconduction. Il sera donc renouvelé demain';
+                        
+                        $bimpMail = new BimpMail($sujet, $commercial->getData('email'), null, $message);
+                        if($bimpMail->send()) {
+                            $output .= "<i class='fa fa-check success' ></i> " . $commercial->getData('email');
+                        } else {
+                            $output .= "<i class='fa fa-retweet warnings' ></i> " . $commercial->getData('email');
+                        }
+                        
+                        
+                    } else {
+                        $output .= "<i class='fa fa-times danger' ></i>";
+                    }
+                    
+                    $this->output .= $output . "<br />";
+                }
+            }
+            $this->output .= "<= RELANCE RECONDUCTION TACITE <=<br />";
         }
         
         public function echeance_contrat() {

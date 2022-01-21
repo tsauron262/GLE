@@ -472,6 +472,7 @@ class RelancePaiementPDF extends BimpModelPDF
 
     public function renderDataTable()
     {
+        $before_html = '';
         $rows = BimpTools::getArrayValueFromPath($this->data, 'rows', array());
         $total_debit = BimpTools::getArrayValueFromPath($this->data, 'total_debit', 0);
         $total_credit = BimpTools::getArrayValueFromPath($this->data, 'total_credit', 0);

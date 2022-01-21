@@ -1,0 +1,1 @@
+ALTER TABLE `llx_propal` ADD `id_signature` INT NOT NULL DEFAULT '0';

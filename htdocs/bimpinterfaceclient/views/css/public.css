@@ -214,7 +214,7 @@
     background-color: #F9F9FA;
     padding: 20px;
     margin: 15px 0;
-    box-shadow: 0 5px 15px -5px rgba(60, 60, 60, 0.2); }
+    box-shadow: 0 5px 12px -5px #737373; }
   /* line 252, ../scss/public.scss */
   .bic_container .bimp_public_form input, .bic_container .bimp_public_form select, .bic_container .bimp_public_form textarea {
     background-color: #FFF;
@@ -235,16 +235,20 @@
     box-shadow: 0 0 5px 0 rgba(60, 60, 60, 0.2);
     margin: 0 0 7px;
     width: 100%; }
-  /* line 275, ../scss/public.scss */
+    /* line 274, ../scss/public.scss */
+    .bic_container .bimp_public_form .select2.value_missing {
+      box-shadow: 0 0 5px 0 #FF0000;
+      border: none; }
+  /* line 280, ../scss/public.scss */
   .bic_container .bimp_public_form .select2-selection {
     font-size: 14px;
     border-bottom: 1px solid #FBD75C;
     padding: 2px 0;
     height: 33px; }
-  /* line 282, ../scss/public.scss */
+  /* line 287, ../scss/public.scss */
   .bic_container .bimp_public_form textarea:focus, .bic_container .bimp_public_form input:focus {
     outline: 0; }
-  /* line 286, ../scss/public.scss */
+  /* line 291, ../scss/public.scss */
   .bic_container .bimp_public_form .form_section_title {
     color: #303233;
     text-transform: uppercase;
@@ -252,14 +256,14 @@
     font-size: 12px;
     letter-spacing: 2px;
     margin-bottom: 15px; }
-  /* line 295, ../scss/public.scss */
+  /* line 300, ../scss/public.scss */
   .bic_container .bimp_public_form label {
     color: #82888C;
     text-transform: uppercase;
     font-size: 11px;
     font-weight: bold;
     margin-bottom: 2px; }
-  /* line 303, ../scss/public.scss */
+  /* line 308, ../scss/public.scss */
   .bic_container .bimp_public_form a {
     -webkit-transition: all 0.3s ease;
     -moz-transition: all 0.3s ease;
@@ -267,27 +271,27 @@
     transition: all 0.3s ease;
     font-weight: bold;
     color: #0077CC; }
-    /* line 308, ../scss/public.scss */
+    /* line 313, ../scss/public.scss */
     .bic_container .bimp_public_form a:hover {
       color: #EF7D00; }
-  /* line 313, ../scss/public.scss */
+  /* line 318, ../scss/public.scss */
   .bic_container .bimp_public_form .inputHelp {
     color: #484B4D; }
-  /* line 317, ../scss/public.scss */
+  /* line 322, ../scss/public.scss */
   .bic_container .bimp_public_form .inputHelp a {
     color: #0077CC; }
-    /* line 320, ../scss/public.scss */
+    /* line 325, ../scss/public.scss */
     .bic_container .bimp_public_form .inputHelp a:hover {
       color: #EF7D00; }
 
 /* START TOOLTIP STYLES */
-/* line 328, ../scss/public.scss */
+/* line 333, ../scss/public.scss */
 [tool] {
   position: relative;
   /* opinion 1 */ }
 
 /* Applies to all tooltips */
-/* line 333, ../scss/public.scss */
+/* line 338, ../scss/public.scss */
 [tool]::before,
 [tool]::after {
   text-transform: none;
@@ -301,7 +305,7 @@
   display: none;
   opacity: 0; }
 
-/* line 344, ../scss/public.scss */
+/* line 349, ../scss/public.scss */
 [tool]::before {
   content: '';
   border: 5px solid transparent;
@@ -309,7 +313,7 @@
   z-index: 1001;
   /* absurdity 1 */ }
 
-/* line 349, ../scss/public.scss */
+/* line 354, ../scss/public.scss */
 [tool]::after {
   content: attr(tool);
   /* magic! */
@@ -334,31 +338,31 @@
   /* absurdity 2 */ }
 
 /* Make the tooltips respond to hover */
-/* line 374, ../scss/public.scss */
+/* line 379, ../scss/public.scss */
 [tool]:hover::before,
 [tool]:hover::after {
   display: block; }
 
 /* don't show empty tooltips */
-/* line 380, ../scss/public.scss */
+/* line 385, ../scss/public.scss */
 [tool='']::before,
 [tool='']::after {
   display: none !important; }
 
 /* FLOW: UP */
-/* line 386, ../scss/public.scss */
+/* line 391, ../scss/public.scss */
 [tool]:not([flow])::before,
 [tool][flow^="up"]::before {
   bottom: 100%;
   border-bottom-width: 0;
   border-top-color: #333; }
 
-/* line 392, ../scss/public.scss */
+/* line 397, ../scss/public.scss */
 [tool]:not([flow])::after,
 [tool][flow^="up"]::after {
   bottom: calc(100% + 5px); }
 
-/* line 396, ../scss/public.scss */
+/* line 401, ../scss/public.scss */
 [tool]:not([flow])::before,
 [tool]:not([flow])::after,
 [tool][flow^="up"]::before,
@@ -367,24 +371,24 @@
   transform: translate(-50%, -0.5em); }
 
 /* FLOW: DOWN */
-/* line 405, ../scss/public.scss */
+/* line 410, ../scss/public.scss */
 [tool][flow^="down"]::before {
   top: 100%;
   border-top-width: 0;
   border-bottom-color: #333; }
 
-/* line 410, ../scss/public.scss */
+/* line 415, ../scss/public.scss */
 [tool][flow^="down"]::after {
   top: calc(100% + 5px); }
 
-/* line 413, ../scss/public.scss */
+/* line 418, ../scss/public.scss */
 [tool][flow^="down"]::before,
 [tool][flow^="down"]::after {
   left: 50%;
   transform: translate(-50%, 0.5em); }
 
 /* FLOW: LEFT */
-/* line 420, ../scss/public.scss */
+/* line 425, ../scss/public.scss */
 [tool][flow^="left"]::before {
   top: 50%;
   border-right-width: 0;
@@ -392,14 +396,14 @@
   left: calc(0em - 5px);
   transform: translate(-0.5em, -50%); }
 
-/* line 427, ../scss/public.scss */
+/* line 432, ../scss/public.scss */
 [tool][flow^="left"]::after {
   top: 50%;
   right: calc(100% + 5px);
   transform: translate(-0.5em, -50%); }
 
 /* FLOW: RIGHT */
-/* line 434, ../scss/public.scss */
+/* line 439, ../scss/public.scss */
 [tool][flow^="right"]::before {
   top: 50%;
   border-left-width: 0;
@@ -407,7 +411,7 @@
   right: calc(0em - 5px);
   transform: translate(0.5em, -50%); }
 
-/* line 441, ../scss/public.scss */
+/* line 446, ../scss/public.scss */
 [tool][flow^="right"]::after {
   top: 50%;
   left: calc(100% + 5px);
@@ -423,7 +427,7 @@
     opacity: .9;
     transform: translate(0, -50%); } }
 /* FX All The Things */
-/* line 464, ../scss/public.scss */
+/* line 469, ../scss/public.scss */
 [tool]:not([flow]):hover::before,
 [tool]:not([flow]):hover::after,
 [tool][flow^="up"]:hover::before,
@@ -432,7 +436,7 @@
 [tool][flow^="down"]:hover::after {
   animation: tooltips-vert 300ms ease-out forwards; }
 
-/* line 473, ../scss/public.scss */
+/* line 478, ../scss/public.scss */
 [tool][flow^="left"]:hover::before,
 [tool][flow^="left"]:hover::after,
 [tool][flow^="right"]:hover::before,

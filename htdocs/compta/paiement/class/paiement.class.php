@@ -203,11 +203,10 @@ class Paiement extends CommonObject
 
                 
                 /* mod drsi*/
-                BimpTools::sleppIfBloqued("numFact");
-                BimpTools::bloqueDebloque("numFact");
-                $bloqued = true;
-                if($this->ref == '')
+                if($this->ref == ''){
+                    BimpTools::lockNum("numPay");
                     $this->ref = $this->getNextNumRef('');
+                }
                 /*fmoddrsi*/
 
 		if ($way == 'dolibarr')
@@ -404,19 +403,11 @@ class Paiement extends CommonObject
 		    $this->total=$total;    // deprecated
 		    $this->multicurrency_amount=$mtotal;
 			$this->db->commit();
-                        /*moddrsi*/
-                        if($bloqued)
-                            BimpTools::bloqueDebloque("numFact", 0);
-                        /*fmoddrsi*/
 			return $this->id;
 		}
 		else
 		{
 			$this->db->rollback();
-                        /*moddrsi*/
-                        if($bloqued)
-                            BimpTools::bloqueDebloque("numFact", 0);
-                        /*fmoddrsi*/
 			return -1;
 		}
 	}

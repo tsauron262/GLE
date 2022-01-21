@@ -41,6 +41,20 @@ class BimpComm extends BimpDolObject
         102 => ['label' => 'Comptabilisation suspendue', 'classes' => ['important'], 'icon' => 'refresh'],
         204 => ['label' => 'Non comptabilisable', 'classes' => ['warning'], 'icon' => 'times'],
     ];
+    public static $expertise = [
+        0 => "",
+        10 => "Arts graphiques",
+        20 => "Constructions",
+        30 => "Education et Administrations",
+        40 => "Infrastructure",
+        50 => "Marketing",
+        60 => "Mobilité",
+        70 => "Partner",
+        80 => "Santé",
+        90 => "SAV",
+        100 => "Autre"
+    ];
+    
     public static $zones_vente = array(
         self::BC_ZONE_FR      => 'France',
         self::BC_ZONE_UE      => 'Union Européenne',
@@ -98,6 +112,22 @@ class BimpComm extends BimpDolObject
         }
 
         return 1;
+    }
+
+    public function canClientView()
+    {
+        global $userClient;
+
+        if (BimpObject::objectLoaded($userClient)) {
+            if ($userClient->isLogged()) {
+                if ($this->isLoaded() && (int) $this->getData('fk_soc') !== (int) $userClient->getData('id_client')) {
+                    return 0;
+                }
+                return 1;
+            }
+        }
+
+        return 0;
     }
 
     // Getters booléens: 
@@ -220,7 +250,7 @@ class BimpComm extends BimpDolObject
                 if (!BimpObject::objectLoaded($client)) {
                     $errors[] = 'Client absent';
                 } else {
-                    if ($client->getData('fk_typent') == 0)
+                    if (BimpCore::getConf('fk_typent_REQUIRED', 0) && $client->getData('fk_typent') == 0)
                         $errors[] = 'Type de tier obligatoire';
 
 
@@ -416,11 +446,6 @@ class BimpComm extends BimpDolObject
         return 1;
     }
 
-    public function useEntrepot()
-    {
-        return (int) BimpCore::getConf("USE_ENTREPOT");
-    }
-
     public function showForceCreateBySoc()
     {
         $client = $this->getChildObject('client');
@@ -534,15 +559,6 @@ class BimpComm extends BimpDolObject
     {
         $buttons = array();
 
-        // Edition historique: 
-        if ($this->canEditField('logs')) {
-            $buttons[] = array(
-                'label'   => 'Editer logs',
-                'icon'    => 'fas_history',
-                'onclick' => $this->getJsLoadModalForm('logs', 'Editer les logs')
-            );
-        }
-
         // Ajout acompte: 
         if ($this->isActionAllowed('addAcompte') && $this->canSetAction('addAcompte')) {
             $id_mode_paiement = 0;
@@ -608,6 +624,15 @@ class BimpComm extends BimpDolObject
             );
         }
 
+        // Edition historique: 
+        if ($this->canEditField('logs')) {
+            $buttons[] = array(
+                'label'   => 'Editer logs',
+                'icon'    => 'fas_history',
+                'onclick' => $this->getJsLoadModalForm('logs', 'Editer les logs')
+            );
+        }
+
         return $buttons;
     }
 
@@ -657,7 +682,7 @@ class BimpComm extends BimpDolObject
             if ($this->isActionAllowed('useRemise') && $this->canSetAction('useRemise')) {
                 if ($this->object_name === 'Bimp_Commande' || (int) $this->getData('fk_statut') === 0) {
                     $buttons[] = array(
-                        'label'       => 'Ajouter un avoir disponible',
+                        'label'       => 'Déduire un crédit disponible',
                         'icon_before' => 'fas_file-import',
                         'classes'     => array('btn', 'btn-default'),
                         'attr'        => array(
@@ -1562,7 +1587,7 @@ class BimpComm extends BimpDolObject
                         $label = '';
 
                         if ($this->object_name !== 'Bimp_Facture' || (int) $this->getData('fk_statut') === 0) {
-                            $label = 'Ajouter un avoir disponible';
+                            $label = 'Déduire un crédit disponible';
                         } elseif ($this->object_name === 'Bimp_Facture' && in_array((int) $this->getData('fk_statut'), array(1, 2))) {
                             $label = 'Appliquer un avoir ou un trop perçu disponible';
                         }
@@ -2487,7 +2512,7 @@ class BimpComm extends BimpDolObject
                 $totalHt += $dol_lines[$id_dol_line]->total_ht;
             }
 
-            if($this->field_exists('total_ht'))
+            if ($this->field_exists('total_ht'))
                 $tot = $this->getData('total_ht');
             else
                 $tot = $this->getData('total');
@@ -3751,9 +3776,9 @@ class BimpComm extends BimpDolObject
             $i = 0;
             $position = (int) $this->db->getMax($line_instance->getTable(), 'position', 'id_obj = ' . (int) $this->id);
             $position += 1;
-            
+
             $this->startLineTransaction();
-            
+
             foreach ($rows as $r) {
                 $i++;
                 $data = explode(';', $r);
@@ -3795,7 +3820,7 @@ class BimpComm extends BimpDolObject
                     $warnings[] = 'Ligne n° ' . $i . ' : référence produit absente';
                 }
             }
-            
+
             $this->stopLineTransaction();
         } else {
             $errors[] = 'Fichier CSV absent';
@@ -4284,8 +4309,13 @@ class BimpComm extends BimpDolObject
 
         $id_objs = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
 
-        if (count($id_objs) > 50)
-            return array('Trop de PDF action impossible');
+        if (count($id_objs) > 70){
+            $errors[] = 'Trop de PDF action impossible';
+            return array(
+                'errors'           => $errors,
+                'warnings'         => $warnings
+            );
+    }
 
         if (!is_array($id_objs) || empty($id_objs)) {
             $errors[] = 'Aucune ' . $this->getLabel() . ' sélectionnée';

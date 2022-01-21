@@ -327,6 +327,8 @@ fields:
     current_renouvellement:
         label: Numéro du renouvellement
         type: int
+        values:
+            array: renouvellement
     syntec_renouvellement:
         label: Syntec lors du dernier renouvellement
         type: float
@@ -336,6 +338,8 @@ fields:
     initial_renouvellement:
         label: Renouvellement initial
         type: int
+        values:
+            array: renouvellement
     next_contrat:
         label: Contrat de renouvellement
         type: id_object
@@ -346,7 +350,7 @@ fields:
             help: Utiliser ce champ si perte des données de la pièce remplacée
     date_start_provisoire:
         label: Date d'activation provisoir
-    
+
 fields_tables:
     contrat:
         panel: 1
@@ -516,7 +520,6 @@ filters:
             type: search_user
         data_type: id_object
         type: user
-
     use_syntec:
         label: Utilisation Syntec
         type: check_list
@@ -524,7 +527,6 @@ filters:
           1: OUI
           0: NON
         exclude_btn: 0
-                
     reconduction:
         label: Recondution
         type: check_list
@@ -532,7 +534,14 @@ filters:
             0: Aucune
             1: Sur proposition
             2: Tacite
-            
+    negatif_positif:
+        label: Marge
+        type: check_list
+        items:
+            0: Négative
+            1: Positive
+            2: Nulle
+        
 filters_panels: 
     default: 
         filters:
@@ -562,8 +571,13 @@ filters_panels:
                         method: isActive
                         object: fiche_inter
                         is_static: 1
-
-lists_cols: 
+            negatif_positif:
+                        
+lists_cols:
+    margeInter:
+        label: Marge Inters
+        value:
+            callback: displayMargeInter
     signed:
         label: Contrat signé
         value:
@@ -659,6 +673,28 @@ lists:
             fk_commercial_suivi:
 
 forms:
+    redefineEcheancier:
+        title: Re-define Echeancier ADMIN
+        rows:
+            - field: current_renouvellement
+            - field: tacite
+            - field: initial_renouvellement
+            - field: date_end_renouvellement
+            - custom: 1
+              label: Lignes du contrat à supprimer
+              input_name: lines
+              input: 
+                  type: check_list
+                  items: 
+                      callback: getLinesForList
+            - custom: 1
+              label: Lignes du contrat à activer
+              input_name: lines_activate
+              input: 
+                  type: check_list
+                  items: 
+                      callback: getLinesForList
+
     have_signed:
         title: Vérification signature
         msgs:
@@ -945,18 +981,32 @@ forms:
         msgs:
             - content: Quelques informations sont nécéssaires pour anticiper la fermeture de ce contrat
               type: warning
+            - content: Cette action est irréversible
+              type: danger
         rows:
+            - custom: 1
+              input_name: have_courrier
+              label: Lettre de résiliation déposée dans les fichiers de contrat
+              input:
+                  type: toggle
             - custom: 1
               input_name: end_date_reel
               required: 1
               label: Date de fin effective du contrat
               input:
                   type: date
+              display_if:
+                  field_name: have_courrier
+                  show_values: 1
             - custom: 1
-              label: Cause de cloture anticipée du contrat
+              required: 1
+              label: Cause de clôture anticipée du contrat
               input_name: note_close
               input:
                   type: html
+              display_if:
+                  field_name: have_courrier
+                  show_values: 1
             
     email: 
         rows: 
@@ -1324,16 +1374,25 @@ views:
                           method: renderNotesList
                           params:
                               - 1
-            - cols:
+    inter:
+        show: 
+            callback:
+                method: isActive
+                object: fiche_inter
+                is_static: 1
+        title: Interventions
+        rows:                                                   
+            - cols: 
+                - type: custom
+                  custom: 
+                        callback: 
+                            method: renderFi
                 - type: list
-                  show: 
-                      callback:
-                          method: isActive
-                          object: fiche_inter
-                          is_static: 1
                   list: 
+                      title: Fi du contrat
                       name: contrat
-                      object: fiche_inter
+                      panel: 1
+                      object: fiche_inter 
 
     file:
         title: Fichiers joint

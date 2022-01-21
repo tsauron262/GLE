@@ -31,7 +31,10 @@ objects:
         instance: 
             bimp_object: 
                 module: bimpapple
-                name: AppleShipment            
+                name: AppleShipment 
+    sac: 
+        instance: 
+            bimp_object: BS_Sac         
             
 sections:
     - type: tabs
@@ -53,6 +56,11 @@ sections:
             label: SAV
             icon: fas_wrench
             sections:
+                - type: custom
+                  custom: 
+                    callback: 
+                        method: displayHeaderListInfo
+                        object: sav
                 - type: list
                   list: 
                       object: sav
@@ -70,4 +78,11 @@ sections:
                 - type: list
                   list: 
                       object: shipments
+        sac: 
+            label: Sacs
+            icon: fas_shopping-bag
+            sections:
+                - type: list
+                  list: 
+                      object: sac
                 

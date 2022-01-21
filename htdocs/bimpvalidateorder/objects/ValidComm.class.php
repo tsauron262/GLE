@@ -74,11 +74,21 @@ class ValidComm extends BimpObject
         
         return $errors;
     }
+    
+    private function checkSurMarge() {
+        
+        $errors = array();
+        
+        if($this->getData('sur_marge') == 1 and $this->getData('type') != self::TYPE_COMMERCIAL)
+            $errors[] = "Les validations sur la marge ne peuvent être effectuées que sur le type \"commercial\".";
+            
+        return $errors;
+    }
 
-
-    public function create(&$warnings = array(), $force_create = false) {
+        public function create(&$warnings = array(), $force_create = false) {
         
         $errors = $this->checkMinMax();
+        $errors = $this->checkSurMarge();
         
         if(empty($errors))
             $errors =  parent::create($warnings, $force_create);
@@ -90,6 +100,7 @@ class ValidComm extends BimpObject
     public function update(&$warnings = array(), $force_update = false) {
         
         $errors = $this->checkMinMax();
+        $errors = $this->checkSurMarge();
         
         if(empty($errors))
             $errors =  parent::update($warnings, $force_update);
@@ -119,7 +130,7 @@ class ValidComm extends BimpObject
         else
             $client = $bimp_object->getChildObject('client');
         
-        $errors = BimpTools::merge_array($errors, $this->updateCreditSafe($bimp_object));
+//        $errors = BimpTools::merge_array($errors, $this->updateCreditSafe($bimp_object));
         
         
 //        return 1;
@@ -134,14 +145,15 @@ class ValidComm extends BimpObject
         $errors = BimpTools::merge_array($errors, $bimp_object->checkContacts());
         $bimp_object->dol_object->db = $this->db->db;
         
-        list($secteur, $class, $percent, $val_euros, $rtp) = $this->getObjectParams($bimp_object, $errors);
+        list($secteur, $class, $percent_pv, $percent_marge, $val_euros, $rtp) = $this->getObjectParams($bimp_object, $errors);
         
         if(!empty($errors))
             return 0;
-                
+
+        
         // Validation commerciale
-        if($percent != 0)
-            $valid_comm = (int) $this->tryValidateByType($user, self::TYPE_COMMERCIAL, $secteur, $class, $percent, $bimp_object, $errors);
+        if($percent_pv != 0 or $percent_marge != 0)
+            $valid_comm = (int) $this->tryValidateByType($user, self::TYPE_COMMERCIAL, $secteur, $class, $percent_pv, $bimp_object, $errors, array('sur_marge' => $percent_marge));
         elseif(is_a($this->demandeExists($class, (int) $bimp_object->id, self::TYPE_COMMERCIAL), 'DemandeValidComm'))
             $this->updateDemande($user->id, $class, $bimp_object->id, self::TYPE_COMMERCIAL,
                     DemandeValidComm::STATUS_VALIDATED, DemandeValidComm::NO_VAL_COMM);
@@ -214,7 +226,7 @@ class ValidComm extends BimpObject
     }
     
     
-    private function tryValidateByType($user, $type, $secteur, $class, $val, $bimp_object, &$errors) {
+    private function tryValidateByType($user, $type, $secteur, $class, $val, $bimp_object, &$errors, $options = array()) {
 //return 1; TODO
 
         global $conf;
@@ -228,18 +240,12 @@ class ValidComm extends BimpObject
             if((int) $demande->getData('status') == (int) DemandeValidComm::STATUS_VALIDATED)
                 return 1;
             else {
-//                $this->valideur[$type] = $demande->getData('id_user_affected');
                 $user_aff = BimpCache::getBimpObjectInstance("bimpcore", 'Bimp_User', $demande->getData('id_user_affected'));
                 $this->valideur[$type] = ucfirst($user_aff->getData('firstname')) . ' ' . ucfirst($user_aff->getData('lastname'));
             }
-
-//            // Je suis le valideur enlever pour ne pas court-circuiter la traçabilité
-//            elseif ((int) $demande->getData('id_user_affected') == (int) $user->id) {
-//                $this->updateDemande ((int) $user->id, $class, (int) $bimp_object->id, $type, (int) DemandeValidComm::STATUS_VALIDATED);
-//                return 1;
                 
             // Je peux valider 
-            if($this->userCanValidate((int) $user->id, $secteur, $type, $class, $val, $bimp_object, $val_comm_validation)) {
+            if($this->userCanValidate((int) $user->id, $secteur, $type, $class, $val, $bimp_object, $val_comm_validation, $options)) {
                 $this->updateDemande ((int) $user->id, $class, (int) $bimp_object->id, $type, (int) DemandeValidComm::STATUS_VALIDATED, $val_comm_validation);
                 return 1;
             }
@@ -252,11 +258,11 @@ class ValidComm extends BimpObject
                 return 1;
             }
             
-            elseif($this->userCanValidate((int) $user->id, $secteur, $type, $class, $val, $bimp_object))
+            elseif($this->userCanValidate((int) $user->id, $secteur, $type, $class, $val, $bimp_object, $val_comm_validation, $options))
                 return 1;
             
             else {
-                $this->createDemande($user, $bimp_object, $type, $class, $val, $secteur, $errors);
+                $this->createDemande($user, $bimp_object, $type, $class, $val, $secteur, $errors, $options);
                 return 0;
             }
         }
@@ -265,7 +271,7 @@ class ValidComm extends BimpObject
     }
 
     
-    public function userCanValidate($id_user, $secteur, $type, $object, $val, $bimp_object, &$valid_comm = 0) {
+    public function userCanValidate($id_user, $secteur, $type, $object, $val, $bimp_object, &$valid_comm = 0, $options = array()) {
         
         if($type == self::TYPE_ENCOURS) {
             $depassement_actuel = $this->getEncours($bimp_object);
@@ -285,7 +291,9 @@ class ValidComm extends BimpObject
         $user_groups = array($id_user, self::USER_ALL);
         if($this->isSupHierarchique($id_user))
             $user_groups[] = self::USER_SUP;
-
+        
+        $v = (isset($val_max)) ? $val_max : $val;
+        
         $filters = array(
             'user'    => array(
                 'in' => $user_groups
@@ -296,19 +304,21 @@ class ValidComm extends BimpObject
             'type'    => $type,
             'type_de_piece' => array(
                 'in' => array($object, self::OBJ_ALL)
-            ),
-            'val_max' => array(
-                'operator' => '>=',
-                'value'    => (isset($val_max)) ? $val_max : $val
-            ),
-//            'val_min' => array(
-//                'operator' => '<=',
-//                'value'    => (isset($val_max)) ? $val_max : $val
-//            )
-        );
+            )
+        ); 
+
+        $filter_pv = '(sur_marge = 0 AND val_max >= ' . $v . ')';
+        
+        if(!isset($options['sur_marge'])) {
+            $filters['sur_marge'] = array('custom' => $filter_pv);
+        } else {
+            $filters['sur_marge'] = array('custom' => '(' . $filter_pv . ' OR (' . 
+                      'sur_marge = 1 AND val_max >= ' . $options['sur_marge'] . '))');
+        }
         
         $valid_comms = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'ValidComm', $filters);
-
+        
+                
         foreach($valid_comms as $vc) {
             $valid_comm = $vc->id;
             return 1;
@@ -334,7 +344,7 @@ class ValidComm extends BimpObject
     
     private function getErrorEncours($user, $bimp_object) {
         $id_user = (int) $user->id;
-        list($secteur, $class, $percent, $montant_piece, $rtp) = $this->getObjectParams($bimp_object, $errors);
+        list($secteur, $class, $percent_pv, $percent_marge, $montant_piece, $rtp) = $this->getObjectParams($bimp_object, $errors);
         $error = '';
         
         if(!empty($errors))
@@ -418,7 +428,7 @@ class ValidComm extends BimpObject
     }
 
 
-    public function getObjectParams($object, &$errors = array()) {
+    public function getObjectParams($object, &$errors = array(), $withRtp = true) {
         
         // Secteur
         $secteur = $object->getData('ef_type');
@@ -426,15 +436,26 @@ class ValidComm extends BimpObject
         // Piece
         $class = self::getObjectClass($object);
         
-        // remise %
-        $infos_remises = $object->getRemisesInfos();
-        $percent = (float) $infos_remises['remise_total_percent'];
-
         // Valeur €
         if((int) $object->getData('total_ht') > 0)
             $val = (float) $object->getData('total_ht');
         else
             $val = (float) $object->getData('total');
+                
+        $infos_remises = $object->getRemisesInfos();
+
+        // Percent prix de vente %
+        $percent_pv = (float) $infos_remises['remise_total_percent'];
+        
+        // Percent de marge
+        $margin_infos = $object->getMarginInfosArray();
+        $marge_ini = $infos_remises['remise_total_amount_ht'] + $margin_infos['total_margin'];
+        if($infos_remises['remise_total_amount_ht'] == 0)
+            $percent_marge = 0;
+        else
+            $percent_marge = 100 * $infos_remises['remise_total_amount_ht'] / $marge_ini;
+
+        
         
         // Impayé
         if(method_exists($object, 'getClientFacture'))
@@ -447,14 +468,16 @@ class ValidComm extends BimpObject
             return;
         }
         
-        if(isset($this->client_rtp))
-            $rtp = $this->client_rtp;
-        else
-            $rtp = $client->getTotalUnpayed();
+        if($withRtp){
+            if(isset($this->client_rtp))
+                $rtp = $this->client_rtp;
+            else
+                $rtp = $client->getTotalUnpayedTolerance();
+        }
         if($rtp < 0)
             $rtp = 0;
-                
-        return array($secteur, $class, $percent, $val, $rtp);
+        
+        return array($secteur, $class, $percent_pv, $percent_marge, $val, $rtp);
     }
     
     public static function getObjectClass($object) {
@@ -471,7 +494,7 @@ class ValidComm extends BimpObject
         return -2;
     }
     
-    public function createDemande($user_ask, $bimp_object, $type, $object, $val, $secteur, &$errors) {
+    public function createDemande($user_ask, $bimp_object, $type, $object, $val, $secteur, &$errors, $options = array()) {
         
         $d = $this->demandeExists($object, (int) $bimp_object->id, $type);
         
@@ -479,7 +502,7 @@ class ValidComm extends BimpObject
         if($d)
             return 2;
         
-        $id_user_affected = $this->findValidator($type, $val, $secteur, $object, $user_ask, $bimp_object, $val_comm_demande);
+        $id_user_affected = $this->findValidator($type, $val, $secteur, $object, $user_ask, $bimp_object, $val_comm_demande, $options);
         
         // Personne ne peut valider
         if(!$id_user_affected) {
@@ -549,7 +572,7 @@ class ValidComm extends BimpObject
     /**
      * Trouve le premier valideur disponible
      */
-    private function findValidator($type, $val, $secteur, $object, $user_ask, $bimp_object, &$val_comm_demande = 0) {
+    private function findValidator($type, $val, $secteur, $object, $user_ask, $bimp_object, &$val_comm_demande = 0, $options = array()) {
                 
         if($type == self::TYPE_ENCOURS)
             $val += $this->getEncours ($bimp_object);
@@ -565,31 +588,33 @@ class ValidComm extends BimpObject
             'type_de_piece'  => array(
                 'in' => array($object, self::OBJ_ALL)
             ),
-            'val_max' => array(
-                'operator' => '>',
-                'value'    => $val
-            ),
-            'val_min' => array(
-                'operator' => '<=',
-                'value'    => $val
-            ),
         );
         
-        $sql = BimpTools::getSqlSelect(array('id', 'user', 'val_max'));
+        $filter_pv = '(sur_marge = 0 AND val_min <= ' . $val . ' AND ' . $val . ' <= val_max)';
+         
+        if(!isset($options['sur_marge'])) {
+            $filters['sur_marge'] = array('custom' => $filter_pv);
+        } else {
+            $filters['sur_marge'] = array('custom' => '(' . $filter_pv . ' OR (' . 
+                      'sur_marge = 1 AND val_min <= ' . $options['sur_marge'] . ' AND ' . $options['sur_marge'] . ' <= val_max))');
+        }
+        
+        $sql  = BimpTools::getSqlSelect(array('id', 'user', 'val_max'));
         $sql .= BimpTools::getSqlFrom($this->getTable());
         $sql .= BimpTools::getSqlWhere($filters);
         $sql .= ' AND (only_child=' . self::USER_ASK_ALL;
         if($user_ask->fk_user > 0)
             $sql .= ' OR (only_child=' . self::USER_ASK_CHILD . ' AND user=' . $user_ask->fk_user . ')';
         $sql .= ')';
-        $sql .= BimpTools::getSqlOrderBy('date_create', 'DESC');
+        $sql .= ' ORDER BY sur_marge DESC, val_min ASC, val_max ASC';
+//        $sql .= BimpTools::getSqlOrderBy('date_create', 'DESC');
+//        echo($sql);
         $rows = self::getBdb()->executeS($sql, 'array');
-
+        
         
         if (is_array($rows)) {
             foreach ($rows as $r) {
-        
-                if($r['user'] == self::USER_SUP) {
+                if((int) $r['user'] == $user_ask->fk_user) {
                     if($this->userIsAvaible($user_ask->fk_user)) {
                         $can_valid_avaible = $user_ask->fk_user;
                         $val_comm_demande = $r['id'];
@@ -612,6 +637,7 @@ class ValidComm extends BimpObject
                     
             }
         }
+        
         
         if($can_valid_avaible != 0)
             return $can_valid_avaible;
@@ -674,40 +700,40 @@ class ValidComm extends BimpObject
             if(0 < (int) $item['id_object'] and $item['type'] == 'propal') {
                 $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', (int) $item['id_object']);
 
-                list($secteur, $class, $percent, $val_euros, $rtp) = $this->getObjectParams($propal, $errors);
+                list($secteur, $class, $percent_pv, $percent_marge, $val_euros, $rtp) = $this->getObjectParams($propal, $errors);
                 
                 if(count($errors))
                     return 0;
 
                 /*if((int) $current_type == self::TYPE_ENCOURS and $current_val <= $val_euros and in_array((int) $propal->getData('fk_statut'), array(1, 2, 4)))
                     return 1;
-                else*/if((int) $current_type == self::TYPE_COMMERCIAL and $current_val <= $percent and in_array((int) $propal->getData('fk_statut'), array(1, 2, 4)))
+                else*/if((int) $current_type == self::TYPE_COMMERCIAL and $current_val <= $percent_pv and in_array((int) $propal->getData('fk_statut'), array(1, 2, 4)))
                     return 1;
                 
             } elseif(0 < (int) $item['id_object'] and $item['type'] == 'facture') {
                 $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $item['id_object']);
 
-                list($secteur, $class, $percent, $val_euros, $rtp) = $this->getObjectParams($facture, $errors);
+                list($secteur, $class, $percent_pv, $percent_marge, $val_euros, $rtp) = $this->getObjectParams($facture, $errors);
                 
                 if(count($errors))
                     return 0;
                 
                 if((int) $current_type == self::TYPE_ENCOURS  and $current_val <= $val_euros and in_array((int) $facture->getData('fk_statut'), array(1, 2)))
                     return 1;
-                elseif((int) $current_type == self::TYPE_COMMERCIAL and $current_val <= $percent and in_array((int) $facture->getData('fk_statut'), array(1, 2)))
+                elseif((int) $current_type == self::TYPE_COMMERCIAL and $current_val <= $percent_pv and in_array((int) $facture->getData('fk_statut'), array(1, 2)))
                     return 1;
                 
             } elseif(0 < (int) $item['id_object'] and $item['type'] == 'commande') {
                 $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $item['id_object']);
 
-                list($secteur, $class, $percent, $val_euros, $rtp) = $this->getObjectParams($commande, $errors);
-                
+                list($secteur, $class, $percent_pv, $percent_marge, $val_euros, $rtp) = $this->getObjectParams($commande, $errors);
+
                 if(count($errors))
                     return 0;
                 
                 if((int) $current_type == self::TYPE_ENCOURS  and $current_val <= $val_euros and in_array((int) $commande->getData('fk_statut'), array(1, 3)))
                     return 1;
-                elseif((int) $current_type == self::TYPE_COMMERCIAL and $current_val <= $percent and in_array((int) $commande->getData('fk_statut'), array(1, 3)))
+                elseif((int) $current_type == self::TYPE_COMMERCIAL and $current_val <= $percent_pv and in_array((int) $commande->getData('fk_statut'), array(1, 3)))
                     return 1;                
             } 
                 
@@ -813,30 +839,34 @@ class ValidComm extends BimpObject
             $errors[] = "Client insolvable";
             return $errors;
         }
-        
+                
         // Créer après le 1er mai 2021
         if('2021-05-1' < $client->getData('datec'))
             return $errors;
 
         // Avec retard de paiement
-//        if(isset($this->client_rtp))
-//            $rtp = $this->client_rtp;
-//        else
-//            $rtp = $client->getTotalUnpayed();
-//
-//        if($rtp != 0)
-//            return $errors;
+        if(isset($this->client_rtp))
+            $rtp = $this->client_rtp;
+        else
+            $rtp = $client->getTotalUnpayedTolerance();
+
+        if($rtp != 0)
+            return $errors;
         
         // Les 3 conditions sont satifaites, update limite
-//        $old_limit = $client->getdata('outstanding_limit');
         
-        // data Crédit Safe
-        if($client->isSirenRequired()) {
-            $client->useNoTransactionsDb();
-            $errors = BimpTools::merge_array($errors, $client->majEncourscreditSafe(true));
-            $client->useTransactionsDb();
-            
+        if($client->field_exists('date_check_credit_safe')) {
+
+            if(strtotime('-30 days') < strtotime($client->getData('date_check_credit_safe')))
+                return $errors;
         }
+
+        // data Crédit Safe
+//        if($client->isSirenRequired()) {
+//            $client->useNoTransactionsDb();
+//            $errors = BimpTools::merge_array($errors, $client->majEncourscreditSafe(true));
+//            $client->useTransactionsDb();
+//        }
 
         return $errors;
     }

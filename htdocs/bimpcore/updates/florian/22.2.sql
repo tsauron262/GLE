@@ -1,0 +1,1 @@
+ALTER TABLE `llx_entrepot` ADD `close_msg` TEXT DEFAULT '' NOT NULL;

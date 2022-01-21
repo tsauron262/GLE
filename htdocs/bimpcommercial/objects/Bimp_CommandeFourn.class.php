@@ -74,6 +74,10 @@ class Bimp_CommandeFourn extends BimpComm
         self::DELIV_CUSTOM   => 'Personnalisée',
         self::DELIV_DIRECT   => 'Contact livraison directe'
     );
+    public static $delivery_mode = array(
+        0 => 'Normal',
+        1 => 'Interne région Lyonnaise'
+    );
     protected static $types_entrepot = array();
 
     // Gestion des autorisations objet:
@@ -1466,7 +1470,12 @@ class Bimp_CommandeFourn extends BimpComm
                 $success2 = '';
                 $result2 = $this->setObjectAction('approve', 0, array(), $success2);
                 if (count($result2['errors'])) {
-                    $result['warnings'][] = BimpTools::getMsgFromArray($result2['errors'], 'Echec de l\'approbation ' . $this->getLabel('of_the'));
+                    if((int) BimpCore::getConf('bimpcore_use_db_transactions', 0)){
+                        $result['errors'][] = 'Echec de l\'approbation ' . $this->getLabel('of_the');
+                        $result['errors'] = BimpTools::merge_array($result['errors'], $result2['errors']);  
+                    }
+                    else
+                        $result['warnings'][] = BimpTools::getMsgFromArray($result2['errors'], 'Echec de l\'approbation ' . $this->getLabel('of_the'));
                 } else {
                     $success .= '<br/>' . $success2;
                 }
@@ -1615,7 +1624,7 @@ class Bimp_CommandeFourn extends BimpComm
 //            ini_set('display_errors', 1);
         $url = "ftp-edi.groupe-ldlc.com";
         $login = "bimp-erp";
-        $mdp = "MEDx33w+3u(";
+        $mdp = "Yu5pTR?(3q99Aa";
         $folder = "/FTP-BIMP-ERP/tracing/";
 
 //            $url = "exportftp.techdata.fr";
@@ -1830,6 +1839,8 @@ class Bimp_CommandeFourn extends BimpComm
 
             $portHt = $portTtc = 0;
             $shipping_mode = "";
+            if($this->getData('methode_liv') == 1)
+                $shipping_mode = 'PNS1';
 //            if (in_array($this->getData('delivery_type'), array(Bimp_CommandeFourn::DELIV_ENTREPOT, Bimp_CommandeFourn::DELIV_SIEGE)))
 //                $shipping_mode = "PNS6";
             $tab = array(
@@ -1864,13 +1875,9 @@ class Bimp_CommandeFourn extends BimpComm
         if (!count($errors)) {
             $arrayToXml->writeNodes($tab);
 
-//            $remote_file = DOL_DATA_ROOT.'/importldlc/exportCommande/'.$this->getData('ref').'.xml';
-//            $remote_file = "ftp://bimp-erp:MEDx33w+3u(@ftp-edi.groupe-ldlc.com/FTP-BIMP-ERP/orders/".$this->getData('ref').'.xml';
-
-
             $url = "ftp-edi.groupe-ldlc.com";
             $login = "bimp-erp";
-            $mdp = "MEDx33w+3u(";
+            $mdp = "Yu5pTR?(3q99Aa";
 
             if ($conn = ftp_connect($url)) {
                 if (ftp_login($conn, $login, $mdp)) {

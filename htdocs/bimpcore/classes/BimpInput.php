@@ -42,7 +42,7 @@ class BimpInput
                 break;
 
             case 'text':
-                if (isset($options['hashtags']) && (int) $options['hashtags']) {
+                if (BimpCore::isContextPrivate() && isset($options['hashtags']) && (int) $options['hashtags']) {
                     $extra_class .= ($extra_class ? ' ' : '') . 'allow_hashtags';
                 }
 
@@ -92,8 +92,20 @@ class BimpInput
                     $html .= '/>';
                 }
 
-                if (isset($options['hashtags']) && (int) $options['hashtags']) {
-                    $html .= BimpRender::renderInfoIcon('fas_hashtag', 'Vous pouvez utiliser le symbole # pour inclure un lien objet');
+                if (BimpCore::isContextPrivate()) {
+                    if (isset($options['hashtags']) && (int) $options['hashtags']) {
+                        $html .= BimpRender::renderInfoIcon('fas_hashtag', 'Vous pouvez utiliser le symbole # pour inclure un lien objet');
+                    }
+
+                    if (isset($options['scanner']) && (int) $options['scanner']) {
+                        $onclick = 'var $parent = $(this).parent();';
+                        $onclick .= 'if ($parent.hasClass(\'input-group\')) {';
+                        $onclick .= '$parent = $parent.parent().parent();';
+                        $onclick .= '}';
+                        $onclick .= 'var $input = $parent.find(\'input[name=' . $field_name . ']\');';
+                        $onclick .= 'BIS.openModal($input);';
+                        $html .= BimpRender::renderRowButton('Scanner code-barres / Qr-Code', 'fas_camera', $onclick);
+                    }
                 }
 
                 if (isset($options['min_label']) && $options['min_label']) {
@@ -207,7 +219,7 @@ class BimpInput
                 break;
 
             case 'textarea':
-                if (isset($options['hashtags']) && (int) $options['hashtags']) {
+                if (BimpCore::isContextPrivate() && isset($options['hashtags']) && (int) $options['hashtags']) {
                     $extra_class .= ($extra_class ? ' ' : '') . 'allow_hashtags';
                 }
 
@@ -230,10 +242,17 @@ class BimpInput
                     $html .= '<p class="smallInfo">Max ' . $options['maxlength'] . ' caractères</p>';
                 }
 
-                if (isset($options['hashtags']) && (int) $options['hashtags']) {
-                    $html .= '<p class="inputHelp">';
-                    $html .= 'Vous pouvez utiliser le symbole # pour inclure un lien objet';
-                    $html .= '</p>';
+                if (BimpCore::isContextPrivate()) {
+                    if (isset($options['scanner']) && (int) $options['scanner']) {
+                        $onclick = 'var $input = $(this).parent().find(\'textarea[name=' . $field_name . ']\');';
+                        $onclick .= 'BIS.openModal($input);';
+                        $html .= BimpRender::renderRowButton('Scanner code-barres / Qr-Code', 'fas_camera', $onclick);
+                    }
+                    if (isset($options['hashtags']) && (int) $options['hashtags']) {
+                        $html .= '<p class="inputHelp" style="display: inline-block">';
+                        $html .= 'Vous pouvez utiliser le symbole # pour inclure un lien objet';
+                        $html .= '</p>';
+                    }
                 }
 
                 $html .= '<textarea id="' . $input_id . '" rows="' . $options['rows'] . '" name="' . $field_name . '"';
@@ -281,10 +300,16 @@ class BimpInput
                 }
                 $doleditor = new DolEditor($field_name, $value, '', 160, 'dolibarr_details', '', false, true, true, ROWS_4, '90%');
 
-                if (isset($options['hashtags']) && (int) $options['hashtags']) {
+                if (BimpCore::isContextPrivate() && isset($options['hashtags']) && (int) $options['hashtags']) {
                     $doleditor->extra_class = 'allow_hashtags';
 
-                    $html .= '<p class="inputHelp">';
+//                    if (isset($options['scanner']) && (int) $options['scanner']) {
+//                        $onclick = 'var $input = $(this).parent().find(\'textarea[name=' . $field_name . ']\');';
+//                        $onclick .= 'BIS.openModal($input);';
+//                        $html .= BimpRender::renderRowButton('Scanner code-barres / Qr-Code', 'fas_camera', $onclick);
+//                    }
+
+                    $html .= '<p class="inputHelp" style="display: inline-block">';
                     $html .= 'Vous pouvez utiliser le symbole # pour inclure un lien objet';
                     $html .= '</p>';
                 }
@@ -559,7 +584,21 @@ class BimpInput
                 if (!isset($options['empty_label'])) {
                     $options['empty_label'] = '';
                 }
+
                 $options['options'] = BimpCache::getUsersArray($options['include_empty'], $options['empty_label']);
+
+                if (isset($options['include_current']) && (int) $options['include_current']) {
+                    $new_options = array(
+                        'current' => 'Utilisateur connecté'
+                    );
+
+                    foreach ($options['options'] as $id => $label) {
+                        $new_options[$id] = $label;
+                    }
+
+                    $options['options'] = $new_options;
+                }
+
                 return self::renderInput('select', $field_name, $value, $options, $form, $option, $input_id);
 
             case 'search_group':
@@ -858,6 +897,47 @@ class BimpInput
                 $html .= '</div>';
                 break;
 
+            case 'signature_pad':
+                $displayStyle = '';
+                $prefix = rand(111111, 999999);
+
+                if ((int) BimpTools::getArrayValueFromPath($options, 'expand', 0)) {
+                    $displayStyle .= ' display: none;';
+                }
+
+                $id = $prefix . '_signature-pad';
+
+                $html .= '<div class="signaturePadContainer" data-pad_id="' . $id . '">';
+
+                if (isset($options['check_mentions']) && !empty($options['check_mentions'])) {
+                    $html .= '<div class="" style="margin-bottom: 15px">';
+                    foreach ($options['check_mentions'] as $check_option_value => $check_option_label) {
+                        $item_name = $field_name . '_check_mentions';
+                        $id_item = $item_name . '_' . $check_option_value . '_' . rand(111111, 999999);
+
+                        $html .= '<div class="check_list_item">';
+                        $html .= '<input type="checkbox" name="' . $item_name . '[]" value="' . $check_option_value . '" id="' . $id_item . '"';
+                        $html .= ' class="' . $item_name . '_check check_list_item_input signature_mention_check"/>';
+                        $html .= '<label for="' . $id_item . '">';
+                        $html .= $check_option_label;
+                        $html .= '</label>';
+                        $html .= '</div>';
+                    }
+                    $html .= '</div>';
+                }
+
+                $html .= '<div class="signature_wrapper">';
+                $html .= '<canvas id="' . $id . '" class="signature-pad ' . $extra_class . '" style="border: solid 1px;' . $displayStyle . '" width=400 height=200></canvas>';
+                $html .= '</div>';
+
+                $html .= '<div class="buttonsContainer align-center">';
+                $html .= '<sapn class="clearSignaturePadBtn btn btn-danger btn-large" >' . BimpRender::renderIcon("fas_undo") . ' Refaire la signature</span>';
+                $html .= '</div>';
+
+                $html .= '<input type="hidden" name="' . $field_name . '" value=""/>';
+                $html .= '</div>';
+                break;
+
             default:
                 $html .= '<p class="alert alert-danger">Erreur technique: type d\'input invalide pour le champ "' . $field_name . '"</p>';
                 break;
@@ -867,6 +947,8 @@ class BimpInput
 
     public static function renderDatePickerInput($input_name, $value = '', $options = array(), $input_id = null, $type = "datetime")
     {
+        $html = '';
+
         if (is_null($input_id)) {
             $input_id = $input_name;
         }
@@ -874,11 +956,12 @@ class BimpInput
         $input_id .= '_' . rand(111111, 999999);
         if (is_null($value)) {
             $value = '';
-        } elseif (preg_match('/^([0-9]{4})\-([0-9][0-9])\-([0-9][0-9]).*$/', $value, $matches)) {
-            if (!(int) $matches[1] || !(int) $matches[2] || !(int) $matches[3]) {
-                $value = '';
-            }
         }
+//        elseif (preg_match('/^([0-9]{4})\-([0-9][0-9])\-([0-9][0-9]).*$/', $value, $matches)) {
+//            if (!(int) $matches[1] || !(int) $matches[2] || !(int) $matches[3]) {
+//                $value = '';
+//            }
+//        }
 
         $extra_class = isset($options['extra_class']) ? $options['extra_class'] : '';
 
@@ -926,7 +1009,7 @@ class BimpInput
 
                 $php_format = 'Y-m-d H:i:s';
                 if ($value) {
-                    if (preg_match('/^(\d{4})\-(\d{2})\-(\d{2}) (\d{2}):(\d{2}):(\d{2})?$/', $value)) {
+                    if (preg_match('/^(\d{4})\-(\d{2})\-(\d{2})( (\d{2}):(\d{2}):(\d{2})?)?$/', $value)) {
                         $dt_value = new DateTime($value);
                     }
                 }
@@ -937,8 +1020,6 @@ class BimpInput
             $value = date($php_format);
             $dt_value = new DateTime($value);
         }
-
-        $html = '';
 
         $html .= '<input type="hidden" class="datepicker_value' . ($extra_class ? ' ' . $extra_class : '') . '" id="' . $input_id . '" name="' . $input_name . '" value="';
         if (!is_null($dt_value)) {

@@ -4,6 +4,7 @@ class BimpObject extends BimpCache
 {
 
     public $db = null;
+    public $cache_id = 0;
     public $module = '';
     public $object_name = '';
     public $config = null;
@@ -11,6 +12,7 @@ class BimpObject extends BimpCache
 //    public $asGraph = false; => remplacé par param yml "has_graph" 
     public $ref = "";
     public static $status_list = array();
+    public static $modeDateGraph = 'day';
     public static $common_fields = array(
         'id',
         'date_create',
@@ -81,6 +83,7 @@ class BimpObject extends BimpCache
     public $noFetchOnTrigger = false;
     public $fieldsWithAddNoteOnUpdate = array();
     public $isDeleting = false;
+    public $thirdparty = null;
 
     // Gestion instance:
 
@@ -194,9 +197,10 @@ class BimpObject extends BimpCache
 
         return 0;
     }
-    
-    public function initBdd($mode = -1){
-        if($mode < 0)
+
+    public function initBdd($mode = -1)
+    {
+        if ($mode < 0)
             $mode = (int) $this->getConf('no_transaction_db', 0, false, 'bool');
         $this->db = self::getBdb($mode);
     }
@@ -207,9 +211,8 @@ class BimpObject extends BimpCache
         $this->object_name = $object_name;
 
         $this->config = new BimpConfig(DOL_DOCUMENT_ROOT . '/' . $module . '/objects/', $object_name, $this);
-        
-        $this->initBdd(); 
 
+        $this->initBdd();
 
         $this->use_commom_fields = (int) $this->getConf('common_fields', 1, false, 'bool');
         $this->use_positions = (int) $this->getConf('positions', 0, false, 'bool');
@@ -237,8 +240,15 @@ class BimpObject extends BimpCache
 
     public function __clone()
     {
-        $this->config = clone $this->config;
-        $this->config->instance = $this;
+        if (is_object($this->config)) {
+            $this->config = clone $this->config;
+            $this->config->instance = $this;
+        } else {
+            $this->config = new BimpConfig(DOL_DOCUMENT_ROOT . '/' . $this->module . '/objects/', $this->object_name, $this);
+            $this->addCommonFieldsConfig();
+            $this->addConfigExtraParams();
+            mailSyn2('Config inexistant', 'dev@bimp.fr', null, 'Config inexistant dans ' . get_class($this));
+        }
     }
 
     public function __destruct()
@@ -1341,15 +1351,24 @@ class BimpObject extends BimpCache
             } else {
                 $value = $this->getConf('fields/' . $field . '/default_value', null, false, 'any');
             }
-        } elseif (is_array($id_object)) {
-            if (!is_array($value)) {
-                $value = array();
-                $def_val = $this->getConf('fields/' . $field . '/default_value', null, false, 'any');
-                foreach ($id_object as $id) {
-                    if (!isset($value[$id]) || is_null($value[$id])) {
-                        $value[$id] = $def_val;
-                    }
+        } elseif (is_array($id_object) && !is_array($value)) {
+            $value = array();
+            $def_val = $this->getConf('fields/' . $field . '/default_value', null, false, 'any');
+            foreach ($id_object as $id) {
+                if (!isset($value[$id]) || is_null($value[$id])) {
+                    $value[$id] = $def_val;
                 }
+            }
+        } else {
+            // Checks value:
+            if (is_array($id_object)) {
+                foreach ($value as $id_object => $val) {
+                    $value[$id_object] = $this->getValueFromDb($field, $val);
+                    $this->checkFieldValueType($field, $value[$id_object]);
+                }
+            } else {
+                $value = $this->getValueFromDb($field, $value);
+                $this->checkFieldValueType($field, $value);
             }
         }
 
@@ -1406,6 +1425,10 @@ class BimpObject extends BimpCache
                     break;
 
                 case 'items_list':
+                    if (isset($value[0]) && $value[0] === '') {
+                        unset($value[0]);
+                    }
+
                     if ((int) $this->getConf('fields/' . $field_name . '/items_braces', 0)) {
                         if (!is_array($value)) {
                             $value = array($value);
@@ -1425,6 +1448,11 @@ class BimpObject extends BimpCache
             }
         }
 
+        return $value;
+    }
+
+    public function getValueFromDb($field_name, $value)
+    {
         return $value;
     }
 
@@ -1512,7 +1540,7 @@ class BimpObject extends BimpCache
                 if (property_exists($obj, 'id'))
                     $id = $obj->id;
                 else
-                    $value = "ERR pas de champ ID" . $nom;
+                    $value = "ERR pas de champ ID" . get_class($obj);
                 if ($id > 0) {
                     $value = array();
                     if (method_exists($obj, "getNomUrl"))
@@ -1666,11 +1694,11 @@ class BimpObject extends BimpCache
                 case 'datetime':
                     $value = BimpTools::getDateForDolDate($value);
                     break;
+
                 case 'items_list':
-                    if (isset($value[0]) && $value[0] == '')
-                        unset($value[0]);
-                    if (is_array($value))
-                        $value = implode(",", $value);
+                case 'json':
+                case 'object_filters':
+                    $value = $this->getDbValue($field, $value);
                     break;
             }
         }
@@ -1926,7 +1954,7 @@ class BimpObject extends BimpCache
                     if (!isset($result['errors'])) {
                         BimpCore::addlog('Retour d\'action invalide', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $instance, array(
                             'Action' => $action,
-                            'Note'   => 'Toutes les actions BimpObject doivent retourner un résultat sous la forme array(\'errors\' => $errors, \'warnings\' => $warnings, ... autre valeurs facultatives ...)'
+                            'Note'   => 'Toutes les actions BimpObject doivent retourner un résultat sous la forme array(\'errors\' => $errors, \'warnings\' => $warnings, ... autre valeurs facultatives ...). Retournée : ' . print_r($result, 1)
                         ));
                     }
                 } else {
@@ -1953,12 +1981,13 @@ class BimpObject extends BimpCache
                 if (!$instance->db->db->commit()) {
                     $result['errors'][] = 'Une erreur inconnue est survenue - opération annulée';
                     BimpCore::addlog('Commit echec - erreur inconnue', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $instance, array(
-                        'Action' => $action
+                        'Action' => $action,
+                        'Result' => $result
                             ), true);
                 }
             }
         }
-        
+
         return $result;
     }
 
@@ -2187,7 +2216,25 @@ class BimpObject extends BimpCache
                             case 'field_input':
                             case 'values':
                             default:
-                                $filters[$filter_key] = $value;
+                                if ($bc_field->getParam('type', 'string') === 'items_list') {
+                                    if ((int) $bc_field->getParam('items_braces', 0)) {
+                                        $filters[$filter_key] = array(
+                                            'part_type' => 'middle',
+                                            'part'      => '[' . $value . ']'
+                                        );
+                                    } else {
+                                        $filters['custom_' . $filter_key] = array(
+                                            'custom' => '0' // On plante la recherche pour éviter des résultats incohérents
+                                        );
+
+                                        BimpCore::addlog('Tentative de recherche sur une champ de type items_list sans crochets', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
+                                            'Champ' => $bc_field->name,
+                                            'Note'  => 'Mettre "searchable: 0" dans les params du champ'
+                                                ), true);
+                                    }
+                                } else {
+                                    $filters[$filter_key] = $value;
+                                }
                                 break;
                         }
                     }
@@ -3265,10 +3312,13 @@ class BimpObject extends BimpCache
         $sql .= BimpTools::getSqlSelect($fields);
         $sql .= BimpTools::getSqlFrom($table, $joins);
         $sql .= BimpTools::getSqlWhere($filters);
-        if ($order_by == 'rand')
+
+        if ($order_by == 'rand') {
             $sql .= ' ORDER BY rand() ';
-        else
+        } else {
             $sql .= BimpTools::getSqlOrderBy($order_by, $order_way, 'a', $extra_order_by, $extra_order_way);
+        }
+
         $sql .= BimpTools::getSqlLimit($n, $p);
 
         $rows = $this->db->executeS($sql, $return);
@@ -3970,12 +4020,18 @@ class BimpObject extends BimpCache
 
             if (!count($errors)) {
                 // Associations: 
-                $warnings = BimpTools::merge_array($warnings, $this->saveAssociationsFromPost());
+                if ((int) BimpCore::getConf('bimpcore_use_db_transactions', 0))
+                    $errors = BimpTools::merge_array($errors, $this->saveAssociationsFromPost());
+                else
+                    $warnings = BimpTools::merge_array($warnings, $this->saveAssociationsFromPost());
 
                 // Sous-objets ajoutés: 
                 $sub_result = $this->checkSubObjectsPost($force_edit);
                 if (count($sub_result['errors'])) {
-                    $warnings = BimpTools::merge_array($warnings, $sub_result['errors']);
+                    if ((int) BimpCore::getConf('bimpcore_use_db_transactions', 0))
+                        $errors = BimpTools::merge_array($errors, $sub_result['errors']);
+                    else
+                        $warnings = BimpTools::merge_array($warnings, $sub_result['errors']);
                 }
                 if ($sub_result['success_callback']) {
                     $success_callback .= $sub_result['success_callback'];
@@ -3985,7 +4041,10 @@ class BimpObject extends BimpCache
                     // Champs des sous-objets mis à jour: 
                     $sub_result = $this->checkChildrenUpdatesFromPost();
                     if (count($sub_result['errors'])) {
-                        $warnings = BimpTools::merge_array($warnings, $sub_result['errors']);
+                        if ((int) BimpCore::getConf('bimpcore_use_db_transactions', 0))
+                            $errors = BimpTools::merge_array($errors, $sub_result['errors']);
+                        else
+                            $warnings = BimpTools::merge_array($warnings, $sub_result['errors']);
                     }
                     if ($sub_result['success_callback']) {
                         $success_callback .= $sub_result['success_callback'];
@@ -4007,7 +4066,8 @@ class BimpObject extends BimpCache
                         $errors[] = 'Echec de l\'enregistrement des données - opération annulée';
 
                         BimpCore::addlog('Commit echec - erreur inconnue', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $this, array(
-                            'Action' => 'Save From Post'
+                            'Action' => 'Save From Post',
+                            'Warnings' > $warnings
                                 ), true);
                     }
                 }
@@ -4669,6 +4729,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 if ($field === $primary) {
                     $this->id = (int) $value;
                 } elseif ($this->field_exists($field)) {
+                    $value = $this->getValueFromDb($field, $value);
                     $this->checkFieldValueType($field, $value);
                     $this->data[$field] = $value;
                 }
@@ -4677,6 +4738,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             $extra_fields = $this->fetchExtraFields();
 
             foreach ($extra_fields as $field_name => $value) {
+                $value = $this->getValueFromDb($field, $value);
                 $this->checkFieldValueType($field_name, $value);
                 $this->data[$field_name] = $value;
             }
@@ -6715,7 +6777,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         $html = '';
 
         if ($this->isLoaded()) {
-            if ($this->field_exists($field)) {
+            if ($this->canSetAction('removeChildObject') && $this->field_exists($field)) {
                 if ($this->getConf('fields/' . $field . '/type', 'string') === 'id_object') {
                     if ((int) $this->getData($field)) {
                         $object = $this->config->getObject('fields/' . $field . '/object');
@@ -6742,25 +6804,29 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             if ($this->getConf('fields/' . $field . '/type', 'string') === 'id_object') {
                 $id_object = (int) $this->getData($field);
 
-                if (is_null($instance)) {
-                    $instance = $this->config->getObject('fields/' . $field . '/object');
-                }
+                if ($id_object > 0) {
+                    if (is_null($instance)) {
+                        $instance = $this->config->getObject('fields/' . $field . '/object');
+                    }
 
-                if (is_a($instance, 'BimpObject')) {
-                    $msg = BimpTools::ucfirst($instance->getLabel('the')) . ' d\'ID ' . $id_object . ' semble avoir été supprimé' . ($instance->isLabelFemale() ? 'e' : '');
-                } elseif (is_object($instance)) {
-                    $msg .= 'L\'objet de type "' . get_class($instance) . '" d\'ID ' . $id_object . ' semble avoir été supprimé';
-                } else {
-                    $msg = 'Cet objet semble avoir été supprimé (ID: ' . $id_object . ')';
-                }
+                    if (is_a($instance, 'BimpObject')) {
+                        $msg = BimpTools::ucfirst($instance->getLabel('the')) . ' d\'ID ' . $id_object . ' semble avoir été supprimé' . ($instance->isLabelFemale() ? 'e' : '');
+                    } elseif (is_object($instance)) {
+                        $msg = 'L\'objet de type "' . get_class($instance) . '" d\'ID ' . $id_object . ' semble avoir été supprimé';
+                    } else {
+                        $msg = 'Cet objet semble avoir été supprimé (ID: ' . $id_object . ')';
+                    }
 
-                if ($remove_button) {
-                    $msg .= ' ' . $this->renderRemoveChildObjectButton($field, $reload_page);
-                }
+                    if ($remove_button) {
+                        $msg .= ' ' . $this->renderRemoveChildObjectButton($field, $reload_page);
+                    }
 
-                return BimpRender::renderAlerts($msg);
+                    return BimpRender::renderAlerts($msg);
+                }
             }
         }
+        
+        return '';
     }
 
     public function renderSearchInput($input_name, $value = null, $options = array())
@@ -6889,7 +6955,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
     public function renderData()
     {
-        $html .= $this->printData(1);
+        $html = $this->printData(1);
 
         return $html;
     }
@@ -7441,6 +7507,18 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         } else {
             $js .= '\'medium\'';
         }
+        $js .= ', ';
+        if (isset($params['modal_scroll_bottom'])) {
+            $js .= ($params['modal_scroll_bottom'] ? 'true' : 'false');
+        } else {
+            $js .= 'true';
+        }
+        $js .= ', ';
+        if (isset($params['modal_title'])) {
+            $js .= '\'' . $params['modal_title'] . '\'';
+        } else {
+            $js .= '\'\'';
+        }
         $js .= ');';
 
         return $js;
@@ -7562,7 +7640,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             }
 
             $vowel_first = false;
-            if (preg_match('/^[aàâäeéèêëiîïoôöuùûüyŷÿ](.*)$/', $object_name)) {
+            if (preg_match('/^[aàâäeéèêëiîïoôöuùûüyŷÿ](.*)$/', strtolower($object_name))) {
                 $vowel_first = true;
             }
         } else {
@@ -7678,7 +7756,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             $object_name = $labels['name'];
 
             $vowel_first = false;
-            if (preg_match('/^[aàâäeéèêëiîïoôöuùûüyŷÿ](.*)$/', $object_name)) {
+            if (preg_match('/^[aàâäeéèêëiîïoôöuùûüyŷÿ](.*)$/', strtolower($object_name))) {
                 $vowel_first = true;
             }
 
@@ -7959,7 +8037,33 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         return DOL_URL_ROOT . '/' . $this->module . '/index.php?fc=' . $controller . '&id=' . $this->id;
     }
 
-    public function getPublicUrl()
+    public static function getPublicBaseUrl($internal = true)
+    {
+        if ($internal) {
+            return DOL_URL_ROOT . '/bimpinterfaceclient/client.php';
+        }
+
+        return BimpCore::getConf('interface_client_base_url', '');
+    }
+
+    public function getPublicUrl($internal = true)
+    {
+        if ($this->isLoaded()) {
+            $params = $this->getPublicUrlParams();
+
+            if ($params) {
+                $base = self::getPublicBaseUrl($internal);
+
+                if ($base) {
+                    return $base . '?' . $params;
+                }
+            }
+        }
+
+        return '';
+    }
+
+    public function getPublicUrlParams()
     {
         return '';
     }
@@ -8172,7 +8276,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         }
 
         $url = false;
-        if($this->config->isDefined('list_page_url'))
+        if ($this->config->isDefined('list_page_url'))
             $url = BimpTools::makeUrlFromConfig($this->config, 'list_page_url', $this->module, $this->getController());
 
         if (!$url && $this->isDolObject()) {
@@ -8182,7 +8286,24 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         return $url;
     }
 
-    public function getPublicListPageUrl()
+    public function getPublicListPageUrl($internal = true)
+    {
+        if ($this->isLoaded()) {
+            $params = $this->getPublicListPageUrlParams();
+
+            if ($params) {
+                $base = self::getPublicBaseUrl($internal);
+
+                if ($base) {
+                    return $base . '?' . $params;
+                }
+            }
+        }
+
+        return '';
+    }
+
+    public function getPublicListPageUrlParams()
     {
         return '';
     }
@@ -8639,7 +8760,15 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
         $list = new BC_ListTable($this, $list_name);
 
+        $list->initForGraph();
+
         $data = $this->getInfoGraph();
+        if (static::$modeDateGraph == 'day')
+            $xValueFormatString = 'DD MMM, YYYY';
+        elseif (static::$modeDateGraph == 'month')
+            $xValueFormatString = 'MMM, YYYY';
+        else
+            $xValueFormatString = 'YYYY';
         if (method_exists($this, 'getGraphDataPoint')) {
             $success_callback = '
 var options = {
@@ -8650,7 +8779,7 @@ var options = {
 	},
 	axisX:{
 		title: "' . $data['axeX'] . '",
-		valueFormatString: "DD MMM"
+		valueFormatString: "' . $xValueFormatString . '"
 	},
 	axisY: {
 		title: "' . $data['axeY'] . '",
@@ -8673,7 +8802,7 @@ var options = {
 		showInLegend: true,
 		name: "' . $data['data1'] . '",
 		markerType: "square",
-		xValueFormatString: "DD MMM, YYYY",
+		xValueFormatString: "' . $xValueFormatString . '",
 		yValueFormatString: "#,##0 €",
 		dataPoints: [';
 
@@ -8686,7 +8815,7 @@ var options = {
                         showInLegend: true,
                         name: "' . $data['data2'] . '",
                         markerType: "square",
-                        xValueFormatString: "DD MMM, YYYY",
+                        xValueFormatString: "' . $xValueFormatString . '",
                         color: "#F08080",
                         yValueFormatString: "#,##0 €",
                         visible: 0,
@@ -8702,7 +8831,7 @@ var options = {
                         showInLegend: true,
                         name: "' . $data['data3'] . '",
                         markerType: "square",
-                        xValueFormatString: "DD MMM, YYYY",
+                        xValueFormatString: "' . $xValueFormatString . '",
                         color: "#CC2080",
                         visible: 0,
                         yValueFormatString: "#,##0 €",
@@ -8719,7 +8848,7 @@ var options = {
                         name: "' . $data['data11'] . '",
                         lineDashType: "dash",
                         markerType: "square",
-                        xValueFormatString: "DD MMM, YYYY",
+                        xValueFormatString: "' . $xValueFormatString . '",
                         yValueFormatString: "#,##0 €",
                         dataPoints: [';
 
@@ -9199,7 +9328,7 @@ var options = {
                         BimpTools::loadDolClass($module, $file, $class_name);
 
                         if (class_exists($class_name)) {
-                            $instance = new $class_name($db);
+                            $instance = new $class_name($this->db->db);
                         }
 
                         // todo
@@ -9436,5 +9565,10 @@ var options = {
     public static function useApple()
     {
         return BimpTools::isModuleDoliActif('BIMPSUPPORT');
+    }
+
+    public function useEntrepot()
+    {
+        return (int) BimpCore::getConf("USE_ENTREPOT");
     }
 }

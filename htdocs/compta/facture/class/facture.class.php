@@ -2269,9 +2269,7 @@ class Facture extends CommonInvoice
                         
                         
                         /* mod drsi*/
-                        BimpTools::sleppIfBloqued("numFact");
-                        BimpTools::bloqueDebloque("numFact");
-                        $bloqued = true;
+                        BimpTools::lockNum("numFact");
                         /*fmoddrsi*/
 			$num = $this->getNextNumRef($this->thirdparty);
 		}
@@ -2427,19 +2425,11 @@ class Facture extends CommonInvoice
 		if (! $error)
 		{
 			$this->db->commit();
-                        /*moddrsi*/
-                        if($bloqued)
-                            BimpTools::bloqueDebloque("numFact", 0);
-                        /*fmoddrsi*/
 			return 1;
 		}
 		else
 		{
 			$this->db->rollback();
-                        /*moddrsi*/
-                        if($bloqued)
-                            BimpTools::bloqueDebloque("numFact", 0);
-                        /*fmoddrsi*/
 			return -1;
 		}
 	}
@@ -4557,7 +4547,7 @@ class FactureLigne extends CommonInvoiceLine
 		$sql.= " ".price2num($this->remise_percent).",";
 		$sql.= " ".price2num($this->subprice).",";
 		$sql.= ' '.(! empty($this->fk_remise_except)?$this->fk_remise_except:"null").',';
-		$sql.= " ".(! empty($this->date_start)?"'".$this->db->idate($this->db->jdate($this->date_start))."'":"null").",";
+		$sql.= " ".(! empty($this->date_start)?"'".$this->db->idate($this->date_start)."'":"null").",";
 		$sql.= " ".(! empty($this->date_end)?"'".$this->db->idate($this->date_end)."'":"null").",";
 		$sql.= ' '.$this->fk_code_ventilation.',';
 		$sql.= ' '.$this->rang.',';

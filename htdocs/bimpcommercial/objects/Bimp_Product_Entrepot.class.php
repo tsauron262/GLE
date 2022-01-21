@@ -15,7 +15,7 @@ class Bimp_Product_Entrepot extends BimpObject
         BimpCore::setMemoryLimit(1024);
         
 //        $this->dateBilan = date('2019-10-01 00:00:01');
-        $this->dateBilan = date('2021-10-01 00:00:01');
+        $this->dateBilan = date('2022-01-01 00:00:01');
 //        $this->dateBilan = date('2019-06-30 00:00:01');
         if (is_null(static::$product_instance)) {
             static::$product_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');
@@ -41,7 +41,7 @@ class Bimp_Product_Entrepot extends BimpObject
             static::$modeStockDate = true;
         if (array_key_exists('stockShowRoom', $list->cols))
             static::$modeStockShowRoom = true;
-        if (array_key_exists('ventes_qty', $list->cols) || in_array('ventes_ht', $list->cols) || in_array('derPv', $list->cols))
+        if (array_key_exists('ventes_qty', $list->cols) || array_key_exists('ventes_ht', $list->cols) || array_key_exists('derPv', $list->cols))
             static::$modeVentes = true;
 
         $prod = BimpObject::getInstance("bimpcore", "Bimp_Product");

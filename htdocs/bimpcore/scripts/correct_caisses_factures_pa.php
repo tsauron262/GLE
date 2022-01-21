@@ -55,7 +55,7 @@ $where .= 'AND fl.qty < 0 AND fl.buy_price_ht = 0 AND bfl.pa_editable = 1 AND fl
 
 $rows = $bdb->getRows('facturedet fl', $where, null, 'array', array('fl.*', 'f.datec', 'bfl.id as id_bimp_line'), 'fl.rowid', 'desc', $joins);
 
-if (!(int) BimPTools::getValue('exec', 0)) {
+if (!(int) BimpTools::getValue('exec', 0)) {
     echo 'Corrige les PA à 0 des factures pour les retours en caisse.<br/>';
 
     if (is_array($rows) && count($rows)) {

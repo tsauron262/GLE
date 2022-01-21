@@ -168,6 +168,9 @@ abstract class DoliDB implements Database
                         
 			$ret=$this->query("COMMIT");
                         
+                        if(class_exists('BimpTools'))
+                            BimpTools::deloqueAll ();
+                        
 			if ($ret)
 			{
 				$this->transaction_opened=0;
@@ -229,6 +232,8 @@ abstract class DoliDB implements Database
 			$this->transaction_opened=0;
                         
                         /* moddrsi */
+                        if(class_exists('BimpTools'))
+                            BimpTools::deloqueAll ();
                         $this->has_rollback = false;
                         
                         if (defined('BIMP_LIB') && BimpDebug::isActive()) {
@@ -254,6 +259,7 @@ abstract class DoliDB implements Database
                         
                         /* moddrsi */
                         $this->has_rollback = true;
+                        BimpCore::addLogs_debug_trace('Tentative de ROLLBACK sur transaction d\'id '.($this->transaction_opened + 1));
                         /* fmoddrsi */
                         
 			return 1;
@@ -392,5 +398,21 @@ abstract class DoliDB implements Database
 	{
 		return $this->lastqueryerror;
 	}
+        
+    
+    static function stopAll(){
+        $errors = array('Problème réseau, merci de relancer l\'opération');
+        if (BimpTools::isSubmit('ajax')) {
+            echo json_encode(array(
+                'errors'           => $errors,
+                'request_id'       => BimpTools::getValue('request_id', 0)
+            ));
+        }
+        else{
+            echo 'Oupppps   '.print_r($errors,1);
+        }
+        die();
+        exit;
+    }
 }
 

@@ -94,6 +94,9 @@ class DemandeValidComm extends BimpObject
     
     public function create(&$warnings = array(), $force_create = false) {
         
+        if($this->getData('id_user_affected') == 1414)
+            return array("Olivier de la CLERGERIE n'est pas concerné par les demandes de validation");
+        
         $errors = parent::create($warnings, $force_create);
         
         if(!empty($errors))
@@ -303,7 +306,7 @@ class DemandeValidComm extends BimpObject
             $bimp_object = self::getObject($d->getData('type_de_piece'), $d->getData('id_piece'));
             
             if($bimp_object->isLoaded()) {
-                list($secteur, , $percent, $montant_piece) = $valid_comm->getObjectParams($bimp_object);
+                list($secteur, , $percent_pv, , $montant_piece) = $valid_comm->getObjectParams($bimp_object, $errors, false);
                 
                 $soc = $bimp_object->getChildObject('client');
 
@@ -320,7 +323,7 @@ class DemandeValidComm extends BimpObject
                 if((int) $d->getData('type') == (int) self::TYPE_ENCOURS)
                     $new_demande['montant'] = $montant_piece;
                 else
-                    $new_demande['remise'] = $percent;
+                    $new_demande['remise'] = $percent_pv;
                 
             } else
                 $new_demande = array();
@@ -343,6 +346,44 @@ class DemandeValidComm extends BimpObject
         $demandes['nb_demande'] = (int) sizeof($demande_en_cours);
         
         return $demandes;
+    }
+    
+    public function getListExtraBulkActions()
+    {
+        $actions = array();
+
+        if ($this->canSetAction('sendEmail')) {
+            $actions[] = array(
+                'label'   => 'Valider',
+                'icon'    => 'fas_check',
+                'onclick' => $this->getJsBulkActionOnclick('validatePiece', array(), array())
+            );
+        }
+
+
+        return $actions;
+    }
+    
+    public function actionValidatePiece($data, &$sucess){
+        $errors = $warnings = array();
+        
+        $obj = $this->getThisObject();
+        
+        $name = $obj->getLabel().' '.$obj->getLink();
+        $errorsVal = $obj->actionValidate(array(), $sucessPiece);
+        $sucess .= '<br/>'.$sucessPiece;
+        if(count($errorsVal['errors'])){
+            $errors[] = 'Validation '.$name.' impossible';
+            $errors = BimpTools::merge_array($errors, $errorsVal['errors']);
+        }
+        if(count($errorsVal['warnings'])){
+            $warnings = BimpTools::merge_array($warnings, $errorsVal['warnings']);
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings
+        );
     }
     
     public function getRef($withGenerique = true) {

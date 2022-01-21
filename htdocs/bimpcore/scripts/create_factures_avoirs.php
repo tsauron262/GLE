@@ -59,7 +59,7 @@ if (!file_exists($file)) {
 
 $refs = array();
 
-if (!(int) BimPTools::getValue('exec', 0)) {
+if (!(int) BimpTools::getValue('exec', 0)) {
     echo 'Création avoirs/factures<br/>';
 
     if (count($refs_for_facs) || count($refs_for_avs)) {

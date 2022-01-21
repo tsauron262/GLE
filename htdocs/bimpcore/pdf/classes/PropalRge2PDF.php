@@ -9,6 +9,7 @@ class PropalRge2PDF extends PropalPDF
 {
     public static $label_prime = "Prime CEE";
     public static $label_prime2 = "MaPrimeRénov'";
+    public $contactChantier = null;
     protected function initHeader()
     {
         parent::initHeader();

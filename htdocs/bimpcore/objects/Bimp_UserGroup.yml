@@ -2,6 +2,7 @@ table: usergroup
 primary: rowid
 common_fields: 0
 icon: fas_users
+controller: userGroup
 
 dol_object: 
     instance: 
@@ -12,6 +13,32 @@ dol_object:
             
 labels: 
     name: Groupe d'utilisateur
+    
+objects:
+    user:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_User
+    user_group_rights:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_UserGroup_Rights
+    files:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpFile
+        list: 
+            filters:
+                parent_module: bimpcore
+                parent_object_name: Bimp_UserGroup
+                deleted: 0
+
+        
     
 nom_url: 
     syntaxe: <nom>
@@ -62,6 +89,7 @@ lists:
         sort_field: rowid
         sort_way: desc
         n: 10
+        page_btn: 1
         cols: 
             nom:
             mail: 
@@ -85,3 +113,41 @@ searches:
         fields_return: 
             - a.nom
         label_syntaxe: '<a.nom>'
+
+fields_tables:
+    informations:
+        title: informations
+        rows:
+            - field: nom
+            - field: mail
+            - field: alias
+            - field: secteur
+            - field: note
+     
+views:
+    fiche: 
+        panel: 0
+        rows:
+            - cols:
+                - type: rows
+                  col_lg: 12
+                  col_md: 12
+                  rows:
+                    - cols:
+                        - type: fields_table
+                          col_lg: 6
+                          fields_table:
+                            name: informations
+                        - type: list
+                          col_lg: 6
+                          list: 
+                              title: Utilisateurs du groupe
+                              name: bygroup
+                              object: user
+                    - cols:
+                        - type: list
+                          col_lg: 12
+                          list: 
+                              title: Permissions du groupe
+                              name: bygrouprights
+                              object: user_group_rights   

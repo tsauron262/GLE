@@ -22,10 +22,10 @@ $tabHook[] = array(
     'url' => WEBHOOK_SERVER.WEBHOOK_PATH_GIT_PULL,
     'secret' => WEBHOOK_SECRET_GIT_PULL
 );
-$tabHook[] = array(
-    'url' => WEBHOOK_SERVER.WEBHOOK_PATH_REDIS_RESTART,//"http://10.192.20.5:9000/hooks/bimp8";
-    'secret' => WEBHOOK_SECRET_REDIS_RESTART
-);
+//$tabHook[] = array(
+//    'url' => WEBHOOK_SERVER.WEBHOOK_PATH_REDIS_RESTART,//"http://10.192.20.5:9000/hooks/bimp8";
+//    'secret' => WEBHOOK_SECRET_REDIS_RESTART
+//);
 
 foreach($tabHook as $hook){
     echo '<textarea style="whidth=\'200px\'; height=\'auto\'">';

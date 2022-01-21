@@ -46,24 +46,16 @@ class Bimp_Facture extends BimpComm
         4 => array('label' => 'Trop remboursé', 'classes' => array('important'), 'icon' => 'fas_exclamation-triangle'),
         5 => array('label' => 'Irrécouvrable', 'classes' => array('danger'), 'icon' => 'fas_times-circle')
     );
+    public static $chorus_status = array(
+        -1 => array('label' => 'Non applicable', 'icon' => 'fas_times', 'classes' => 'info'),
+        0  => array('label' => 'En attente d\'export', 'icon' => 'fas_hourglass-half', 'classes' => array('warning')),
+        1  => array('label' => 'PDF en attente de validation', 'icon' => 'fas_hourglass-half', 'classes' => array('warning')),
+        2  => array('label' => 'Export terminé', 'icon' => 'fas_check', 'classes' => array('success')),
+        3  => array('label' => 'Echec export', 'icon' => 'fas_exclamation-circle', 'classes' => array('danger')),
+        4  => array('label' => 'Exporté via L\'interface Chorus Pro', 'icon' => 'fas_check', 'classes' => array('success'))
+    );
 
     // Gestion des droits: 
-
-    public function canClientView()
-    {
-        global $userClient;
-
-        if (BimpObject::objectLoaded($userClient)) {
-            if ($userClient->isLogged()) {
-                if ($this->isLoaded() && (int) $this->getData('fk_soc') !== (int) $userClient->getData('id_client')) {
-                    return 0;
-                }
-                return 1;
-            }
-        }
-
-        return 0;
-    }
 
     public function canCreate()
     {
@@ -167,6 +159,11 @@ class Bimp_Facture extends BimpComm
                     return 1;
                 }
                 return 1;
+
+            case 'exportToChorus':
+            case 'confirmChorusExport':
+            case 'forceChorusExported':
+                return ($user->admin || !empty($user->rights->bimpcommercial->chorus_exports));
         }
 
         return parent::canSetAction($action);
@@ -290,7 +287,7 @@ class Bimp_Facture extends BimpComm
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (in_array($action, array('validate', 'modify', 'reopen', 'cancel', 'sendMail', 'addAcompte', 'useRemise', 'removeFromUserCommission', 'removeFromEntrepotCommission', 'addToCommission', 'convertToReduc', 'checkPa', 'createAcompteRemiseRbt', 'generatePDFDuplicata', 'setIrrevouvrable', 'checkPaiements', 'classifyPaid', 'setCommandeLinesNotBilled', 'linesToFacture'))) {
+        if (in_array($action, array('validate', 'modify', 'reopen', 'cancel', 'sendMail', 'addAcompte', 'useRemise', 'removeFromUserCommission', 'removeFromEntrepotCommission', 'addToCommission', 'convertToReduc', 'checkPa', 'createAcompteRemiseRbt', 'generatePDFDuplicata', 'setIrrevouvrable', 'checkPaiements', 'classifyPaid', 'setCommandeLinesNotBilled', 'linesToFacture', 'exportToChorus', 'confirmChorusExport', 'forceChorusExported'))) {
             if (!$this->isLoaded()) {
                 $errors[] = 'ID de la facture absent';
                 return 0;
@@ -660,7 +657,7 @@ class Bimp_Facture extends BimpComm
                 return 1;
 
             case 'classifyPaid':
-                if ((int) $this->getData('fk_statut') !== 1) {
+                if ((int) $this->getData('fk_statut') !== 1 && ($this->getData('fk_statut') !== 2 || $this->getData('paye') == 1)) {
                     $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'a pas le statut "Validé' . $this->e() . '"';
                 }
                 if ($this->dol_object->paye) {
@@ -729,6 +726,63 @@ class Bimp_Facture extends BimpComm
                     return 0;
                 }
                 return 1;
+
+            case 'exportToChorus':
+                require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+
+                if (!BimpAPI::isApiActive('piste')) {
+                    $errors[] = 'L\'API "Piste" n\'est pas active';
+                } else {
+                    if (!in_array($status, array(1, 2))) {
+                        $errors[] = 'Le statut actuel ' . $this->getLabel('of_this') . ' ne permet pas cette opération';
+                    } elseif (!$this->field_exists('chorus_status')) {
+                        $errors[] = 'Le champ "Statut chorus" n\'est pas paramétré pour les factures';
+                    } elseif (!in_array ((int) $this->getData('chorus_status'), array(-1, 0))) {
+                        $errors[] = ucfirst($this->getLabel('this')) . ' n\'est pas en attente d\'export vers Chorus'.(int)$this->getData('chorus_status');
+                    } else {
+                        $client = $this->getChildObject('client');
+                        if (!BimpObject::objectLoaded($client)) {
+                            $errors[] = 'Client absent';
+                        } elseif (!$client->isAdministration()) {
+                            $errors[] = 'Ce client n\'est pas une administration';
+                        }
+                    }
+                }
+
+                return (count($errors) ? 0 : 1);
+
+            case 'confirmChorusExport':
+                require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+
+                if (!BimpAPI::isApiActive('piste')) {
+                    $errors[] = 'L\'API "Piste" n\'est pas active';
+                } else {
+                    if ($this->getData('chorus_status') != 1) {
+                        $errors[] = 'L\'export vers Chorus n\'est pas en attente de confirmation pour ' . $this->getLabel('this');
+                    }
+                }
+
+                $chorus_data = $this->getData('chorus_data');
+                if (!BimpTools::getArrayValueFromPath($chorus_data, 'id_pdf', '')) {
+                    $errors[] = 'Identifiant chorus du fichier PDF absent';
+                }
+
+                if (!BimpTools::getArrayValueFromPath($chorus_data, 'num_facture', '')) {
+                    $errors[] = 'N° facture sur Chorus absent';
+                }
+                
+                return (count($errors) ? 0 : 1);
+
+            case 'forceChorusExported':
+                require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+
+                if (!BimpAPI::isApiActive('piste')) {
+                    $errors[] = 'L\'API "Piste" n\'est pas active';
+                } elseif (!in_array($this->getData('chorus_status'), array(0, 1, 3))) {
+                    $errors[] = 'Le statut actuel de l\'export Chorus ne permet pas cette opération';
+                }
+
+                return (count($errors) ? 0 : 1);
         }
 
         return (int) parent::isActionAllowed($action, $errors);
@@ -861,11 +915,9 @@ class Bimp_Facture extends BimpComm
         $ref = $this->getRef();
         $type = (int) $this->getData('type');
         $paye = (int) $this->dol_object->paye;
-        $remainToPay = $this->getRemainToPay();
         $total_paid = (float) $this->getTotalPaid();
         $id_replacing_invoice = $this->dol_object->getIdReplacingInvoice();
 
-        $soc = $this->getChildObject('client');
         $discount = new DiscountAbsolute($this->db->db);
         $discount->fetch(0, $this->id);
 
@@ -896,6 +948,39 @@ class Bimp_Facture extends BimpComm
                 'onclick'  => '',
                 'disabled' => 1,
                 'popover'  => $error_msg
+            );
+        }
+
+        // Export Chorus:
+        if ($this->isActionAllowed('exportToChorus') && $this->canSetAction('exportToChorus')) {
+            $buttons[] = array(
+                'label'   => 'Exporter vers Chorus',
+                'icon'    => 'fas_file-export',
+                'onclick' => $this->getJsActionOnclick('exportToChorus', array(), array(
+                    'confirm_msg' => 'Veuillez confirmer l\\\'envoi du fichier PDF vers Chorus'
+                ))
+            );
+        }
+
+        // Confirmation Chorus:
+        if ($this->isActionAllowed('confirmChorusExport') && $this->canSetAction('confirmChorusExport')) {
+            $buttons[] = array(
+                'label'   => 'Valider export Chorus',
+                'icon'    => 'fas_file-export',
+                'onclick' => $this->getJsActionOnclick('confirmChorusExport', array(), array(
+                    'form_name' => 'export_to_chorus'
+                ))
+            );
+        }
+
+        // Marquer exporté vers Chorus: 
+        if ($this->isActionAllowed('forceChorusExported') && $this->canSetAction('forceChorusExported')) {
+            $buttons[] = array(
+                'label'   => 'Marquer exporté vers Chorus',
+                'icon'    => 'fas_file-export',
+                'onclick' => $this->getJsActionOnclick('forceChorusExported', array(), array(
+                    'confirm_msg' => 'Veuillez confirmer que la facture a bien été déposée manuellement sur Chorus'
+                ))
             );
         }
 
@@ -1188,8 +1273,7 @@ class Bimp_Facture extends BimpComm
             }
         }
 
-//         Ajout à une commission: 
-
+        // Ajout à une commission:
         if ($this->isActionAllowed('addToCommission') && $this->canSetAction('addToCommission')) {
             $buttons[] = array(
                 'label'   => 'Ajouter à une commission',
@@ -1484,7 +1568,7 @@ class Bimp_Facture extends BimpComm
             'paiementnotsaved' => array(
                 'label' => 'Le paiement a été effectué mais non enregistré'
             ),
-            'cfr' => array(
+            'cfr'              => array(
                 'label' => 'Le reste à payer (' . BimpTools::displayMoneyValue($remainToPay) . ') a été encaissé directement via CFR'
             ),
             'inf_one_euro'     => array(
@@ -2426,7 +2510,7 @@ class Bimp_Facture extends BimpComm
     public function displayPDFButton($display_generate = true, $with_ref = true, $btn_label = '')
     {
         global $user;
-        if ($this->getData('fk_statut') > 0 && !in_array($user->login, array('admin', 't.sauron', 'f.martinez', 'a.delauzun'))) {
+        if ($this->getData('fk_statut') > 0 && !in_array($user->login, array('admin', 't.sauron', 'f.martinez', 'a.delauzun')) && BimpCore::getConf('BLOQUE_GENERATE_FACT_PDF', 0)) {
             $ref = dol_sanitizeFileName($this->getRef());
             if ($this->getFileUrl($ref . '.pdf') != '')
                 $display_generate = false;
@@ -2616,13 +2700,30 @@ class Bimp_Facture extends BimpComm
         
     }
 
+    public function displayChorusData()
+    {
+        $html = '';
+
+        $data = $this->getData('chorus_data');
+
+        if (isset($data['id_pdf']) && $data['id_pdf']) {
+            $html .= '<b>ID PDF: </b>' . $data['id_pdf'];
+        }
+
+        if (isset($data['certif']) && $data['certif']) {
+            $html .= ($html ? '<br/>' : '') . '<b>Certificat d\'export: </b>' . $data['certif'];
+        }
+
+        return $html;
+    }
+
     //Rendus HTML: 
 
     public function renderContentExtraLeft()
     {
-        // Partie "Paiements": 
         $html = '';
 
+        // Partie "Paiements": 
         if ($this->isLoaded()) {
             $html .= '<table class="bimp_fields_table">';
             $html .= '<tbody>';
@@ -3080,11 +3181,22 @@ class Bimp_Facture extends BimpComm
 
     public function renderHeaderStatusExtra()
     {
-        $html = parent::renderHeaderStatusExtra();
+        $html = '';
 
-        if ((int) $this->getData('fk_statut') > 0) {
+        $status = (int) $this->getData('fk_statut');
+        if ($status > 0) {
             $html .= '<span style="display: inline-block; margin-left: 12px"' . $this->displayData('paiement_status') . '</span>';
+
+            if (in_array($status, array(1, 2)) && $this->field_exists('chorus_status') && (int) $this->getData('chorus_status') >= 0) {
+                $client = $this->getChildObject('client');
+
+                if (BimpObject::objectLoaded($client) && $client->isAdministration()) {
+                    $html .= '<br/>Export Chorus: ' . $this->displayData('chorus_status', 'default', false);
+                }
+            }
         }
+
+        $html .= parent::renderHeaderStatusExtra();
 
         return $html;
     }
@@ -3135,6 +3247,17 @@ class Bimp_Facture extends BimpComm
             $html .= '<strong>Client: </strong>';
             $html .= $client->getLink();
             $html .= '</div>';
+
+            if (!(int) $this->getData('paye')) {
+                $discounts = (float) $client->getAvailableDiscountsAmounts();
+
+                if ($discounts) {
+                    $html .= '<div style="margin-top: 10px">';
+                    $msg = BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Ce client dispose de ' . BimpTools::displayMoneyValue($discounts) . ' de crédits disponibles';
+                    $html .= BimpRender::renderAlerts($msg, 'warning');
+                    $html .= '</div>';
+                }
+            }
         }
 
         return $html;
@@ -3478,6 +3601,123 @@ class Bimp_Facture extends BimpComm
         return $html;
     }
 
+    public function renderClientSelectChorusStructuresInput()
+    {
+        $errors = array();
+        $html = '';
+
+        if ($this->isActionAllowed('confirmChorusExport', $errors)) {
+            $client = $this->getChildObject('client');
+            $siret = '';
+
+            if (!BimpObject::objectLoaded($client)) {
+                $errors[] = 'Client absent';
+            } elseif (!$client->isAdministration()) {
+                $errors[] = 'Ce client n\'est pas une administration';
+            } else {
+                $siret = $client->getData('siret');
+
+                if (!$siret) {
+                    $errors[] = 'N° SIRET du client absent';
+                }
+            }
+
+            if (!count($errors)) {
+                $html .= '<b>Structure(s) Chorus du client ' . $client->getRef() . ' - ' . $client->getName() . ':</b><br/>';
+                $response = $client->getChorusStructuresList($errors);
+
+                if (!count($errors) && isset($response['listeStructures'])) {
+                    $structures = array();
+
+                    $id_structure = 0;
+                    foreach ($response['listeStructures'] as $structure) {
+                        $structures[$structure['idStructureCPP']] = $structure['idStructureCPP'] . ' - ' . $structure['designationStructure'];
+
+                        if (!$id_structure) {
+                            $id_structure = $structure['idStructureCPP'];
+                            $this->id_struture_client_chorus = $id_structure;
+                        }
+                    }
+
+                    $html .= BimpInput::renderInput('select', 'id_structure', $id_structure, array('options' => $structures));
+                }
+            }
+        }
+
+        if (count($errors)) {
+            $html .= BimpRender::renderAlerts($errors);
+        }
+
+        return $html;
+    }
+
+    public function renderClientSelectChorusServicesInput()
+    {
+        $errors = array();
+        $html = '';
+
+        if ($this->isActionAllowed('confirmChorusExport', $errors)) {
+            $id_structure = '';
+
+            if (isset($this->id_struture_client_chorus) && $this->id_struture_client_chorus) {
+                $id_structure = $this->id_struture_client_chorus;
+            } else {
+                $id_structure = BimpTools::getPostFieldValue('id_structure', '');
+            }
+
+            if (!$id_structure) {
+                $errors[] = 'Identifiant Chorus de la Structure du client absent';
+            }
+
+            $client = $this->getChildObject('client');
+
+            if (!BimpObject::objectLoaded($client)) {
+                $errors[] = 'Client absent';
+            }
+
+            if (!count($errors)) {
+                $structure = $client->getChorusStructureData($id_structure, $errors);
+
+                if (!count($errors)) {
+                    if (isset($structure['parametres']['codeServiceDoitEtreRenseigne'])) {
+                        if ((int) $structure['parametres']['codeServiceDoitEtreRenseigne']) {
+                            $html .= '<b>Liste des services Chorus rattachés à la structure ' . $id_structure . ':</b><br/>';
+
+                            $response = $client->getChorusStructureServices($id_structure, $errors);
+
+                            if (!count($errors)) {
+                                $services = array();
+
+                                $code_service = '';
+                                foreach ($response['listeServices'] as $service) {
+                                    $services[$service['codeService']] = $service['idService'] . ' ' . $service['codeService'] . ' - ' . $service['libelleService'] . ' (' . ($service['estActif'] ? 'ACTIF' : 'INACTIF') . ')';
+
+                                    if (!$code_service) {
+                                        $code_service = $service['codeService'];
+                                        $this->code_service_client_chorus = $code_service;
+                                    }
+                                }
+
+                                $html .= BimpInput::renderInput('select', 'code_service', $code_service, array('options' => $services));
+                            } else {
+                                $html .= '<input type="hidden" value="" name="code_service"/>';
+                            }
+                        } else {
+                            $html .= '<span class="warning">Non requis</span>';
+                            $html .= '<input type="hidden" value="not_required" name="code_service"/>';
+                        }
+                    }
+                }
+            }
+        }
+
+        if (count($errors)) {
+            $html .= BimpRender::renderAlerts($errors);
+        }
+
+        return $html;
+    }
+
     // Traitements:
 
     public function beforeValidate()
@@ -3699,6 +3939,14 @@ class Bimp_Facture extends BimpComm
             $this->checkRemisesGlobales();
             $this->checkMargin(true);
             $this->checkTotalAchat(true);
+
+            $client = $this->getChildObject('client');
+
+            if (BimpObject::objectLoaded($client)) {
+                if ($client->isAdministration()) {
+                    $this->updateField('chorus_status', 0);
+                }
+            }
         }
 
         return array();
@@ -3751,6 +3999,17 @@ class Bimp_Facture extends BimpComm
                 if ($echeancier->find(['id_contrat' => $data['s']])) {
                     $dateDebutFacture = $this->dol_object->lines[0]->date_start;
                     $echeancier->onDeleteFacture($dateDebutFacture);
+                }
+            }
+
+            $tabF = getElementElement('fichinter', 'facture', null, $this->id);
+            if (count($tabF) > 0) {
+                foreach ($tabF as $data) {
+                    $ficheInter = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter', $data['s']);
+                    if ($ficheInter->getData('fk_facture') == $this->id) {
+                        $ficheInter->set('fk_facture', null);
+                        $ficheInter->update($warnings, true);
+                    }
                 }
             }
 
@@ -4440,10 +4699,8 @@ class Bimp_Facture extends BimpComm
                     $warnings[] = "Attention la date a été modifiée à la date du jour.";
                     $errors = $this->updateField('datef', $today);
                     $this->dol_object->date = strtotime($this->getData('datef'));
-                    $this->updateField('date_lim_reglement', BimpTools::getDateFromDolDate($this->dol_object->calculate_date_lim_reglement((int) $this->getData('fk_cond_reglement'))));
                 }
-
-
+                $this->updateField('date_lim_reglement', BimpTools::getDateFromDolDate($this->dol_object->calculate_date_lim_reglement((int) $this->getData('fk_cond_reglement'))));
 
                 $result = $this->dol_object->validate($user, '', $id_entrepot);
                 $fac_warnings = BimpTools::getDolEventsMsgs(array('warnings'));
@@ -5192,6 +5449,128 @@ class Bimp_Facture extends BimpComm
         );
     }
 
+    public function actionExportToChorus($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $success_callback = '';
+
+        require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+
+        $api = BimpAPI::getApiInstance('piste');
+
+        if (is_a($api, 'PisteAPI')) {
+            $response = $api->deposerPdfFacture($this->id, array(), $errors, $warnings);
+
+            $id_pdf = (int) BimpTools::getArrayValueFromPath($response, 'pieceJointeId', 0);
+            $num_facture = BimpTools::getArrayValueFromPath($response, 'numeroFacture', '');
+
+            if (!$id_pdf) {
+                $errors[] = 'ID Du PDF sur Chorus absent';
+            }
+
+            if (!$num_facture) {
+                $errors[] = 'N° Chorus de la facture absent';
+            }
+
+            if (!count($errors)) {
+                $success = 'Fichier PDF ' . $this->getLabel('of_the') . ' déposé avec succès';
+
+                if ($this->canSetAction('confirmChorusExport')) {
+                    $success = 'Fichier déposé sur Chorus avec succès';
+                    $success_callback = 'setTimeout(function() {' . $this->getJsActionOnclick('confirmChorusExport', array(), array(
+                                'form_name'   => 'export_to_chorus',
+                                'modal_title' => 'Validation du fichier PDF sur Chorus'
+                            )) . '}, 500);';
+                }
+
+                $chorus_data = $this->getData('chorus_data');
+
+                $chorus_data['id_pdf'] = $id_pdf;
+                $chorus_data['num_facture'] = $num_facture;
+
+                $this->set('chorus_status', 1);
+                $this->set('chorus_data', $chorus_data);
+
+                $up_errors = $this->update($warnings, true);
+
+                if (count($up_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour des données de la facture');
+
+                    BimpCore::addlog('Echec enregistrement Données Chorus', Bimp_Log::BIMP_LOG_URGENT, 'commercial', $this, array(
+                        'Données Chorus' => $chorus_data,
+                        'Erreurs'        => $errors
+                            ), true);
+                }
+
+                $this->addLog('Envoi PDF sur Chorus (ID PDF: ' . $id_pdf . ' - N° fac: ' . $num_facture . ')');
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
+
+    public function actionConfirmChorusExport($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $success_callback = '';
+
+        $id_structure = BimpTools::getArrayValueFromPath($data, 'id_structure', '');
+        $code_service = BimpTools::getArrayValueFromPath($data, 'code_service', '');
+
+        if (!$id_structure) {
+            $errors[] = 'Identifiant de la structure client absent';
+        }
+
+        if (!$code_service) {
+            $errors[] = 'Code service du client absent';
+        }
+
+        if (!count($errors)) {
+            $params = '{id_facture: ' . $this->id . ', id_struture: \'' . $id_structure . '\', code_service: \'' . $code_service . '\'});}';
+            $success_callback = 'setTimeout(function() {BimpApi.loadRequestModalForm(null, \'Validation du fichier PDF sur Chorus\', \'piste\', \'soumettreFacture\', {}, ' . $params . ', 500);';
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
+
+    public function actionForceChorusExported($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = BimpTools::ucfirst($this->getLabel()) . ' marqué' . $this->e() . ' exporté' . $this->e() . ' vers Chorus';
+
+        $cur_status = (int) $this->getData('chorus_status');
+
+        if (in_array($cur_status, array(1, 3))) {
+            $log = 'Export Chorus terminé manuellement';
+        } else {
+            $log = 'Export chorus marqué comme effectué manuellement sur l\'interface Chorus Pro';
+        }
+
+        $errors = $this->updateField('chorus_status', 4);
+
+        if (!count($errors)) {
+            $this->addLog($log);
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
     // Overrides BimpObject:
 
     public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)
@@ -5440,7 +5819,7 @@ class Bimp_Facture extends BimpComm
                         // copie des lignes: 
                         $lines_errors = $this->createLinesFromOrigin($avoir_to_refacture, $params);
                         if (count($lines_errors)) {
-                            $warnings[] = BimpTools::getMsgFromArray($lines_errors);
+                            $errors[] = BimpTools::getMsgFromArray($lines_errors);
                         }
 
                         // Copie des contacts: 
@@ -5812,7 +6191,7 @@ class Bimp_Facture extends BimpComm
         $year = (isset($boxObj->confUser['year']) ? $boxObj->confUser['year'] : $boxObj->config['year']['val_default']);
         $boxObj->boxlabel .= ' ' . $year;
 
-        $ln = BimpCache::getBdb()->executeS("SELECT SUM(total_ttc) as tot, SUM(IF(paye = 0, `remain_to_pay`, 0)) as totIP, COUNT(*) as nb, SUM(IF(paye = 0 ,1,0)) as nbIP, SUM(IF(remain_to_pay != total_ttc && paye = 0 ,1,0)) as nbPart, SUM(IF(paye = 0 && `date_lim_reglement` < now() ,1,0)) as nbRetard, SUM(IF(paye = 0 && `date_lim_reglement` < now() ,remain_to_pay,0)) as totRetard FROM `llx_facture` WHERE YEAR( datef ) = '" . $year . "'");
+        $ln = BimpCache::getBdb()->executeS("SELECT SUM(total_ttc) as tot, SUM(IF(paye = 0, `remain_to_pay`, 0)) as totIP, COUNT(*) as nb, SUM(IF(paye = 0 ,1,0)) as nbIP, SUM(IF(remain_to_pay != total_ttc && paye = 0 ,1,0)) as nbPart, SUM(IF(paye = 0 && `date_lim_reglement` < now() ,1,0)) as nbRetard, SUM(IF(paye = 0 && `date_lim_reglement` < now() ,remain_to_pay,0)) as totRetard FROM `llx_facture` WHERE fk_statut != 3 AND YEAR( datef ) = '" . $year . "'");
         $ln = $ln[0];
 
         $data = array(

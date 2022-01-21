@@ -170,7 +170,7 @@ class Bimp_ImportPaiementLine extends BimpObject
         }
 
 
-        if (($this->getData('price') - $this->total_reste_a_paye) < 0.10 && ($this->getData('price') - $this->total_reste_a_paye) > -0.10)
+        if (($this->getData('price') - $this->total_reste_a_paye) < 0.10 /*&& ($this->getData('price') - $this->total_reste_a_paye) > -0.10*/)
             $this->ok = true;
         if ($this->getData('traite'))
             $this->ok = true;
@@ -291,10 +291,9 @@ class Bimp_ImportPaiementLine extends BimpObject
         return implode('<br/>', $return);
     }
 
-    function getFactClient()
+    function getFactClient($max = 10)
     {
         global $modeCSV;
-        $max = 10;
         $return = array();
         if (!$this->ok && $this->getData('price') > 0 && $this->getData('name') != '') {
             $cli = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe');

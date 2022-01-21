@@ -42,19 +42,25 @@ class Bimp_Societe extends BimpDolObject
         0  => array('E', 'danger', 'Entreprise en situation de défaillance et ayant un très fort risque de radiation')
     );
     public static $regions = array(
-        'HDF'                     => array(62, 59, 80, 60, 2),
-        'IDF'                     => array(95, 78, 91, 77, 93, 75, 92, 94),
-        'Bourgogne Franche-Comte' => array(25, 39, 71, 58, 21, 89, 70),
-        'Centre'                  => array(37, 36, 18, 41, 28, 45),
-        'Auvergne'                => array(3, 15, 43, 63, 42),
-        'Rhône'                   => array(1, 69),
-        'Alpes'                   => array(73, 74, 38),
-        'Drôme Ardèche'           => array(7, 26),
-        'Provence-Azur'           => array(4, 5, 6, 13, 83, 84, '2A', '2B'),
-        'Occitanie'               => array(65, 32, 31, 9, 82, 46, 81, 11, 66, 34, 12, 48, 30),
-        'Normandie'               => array(50, 14, 61, 27, 76),
-        'Bretagne'                => array(56, 22, 29, 35),
-        'Nouvelle Aquitaine'      => array(79, 17, 86, 87, 16, 23, 19, 24, 47, 33, 40, 64)
+        //    OLD: 
+//        'HDF'                     => array(62, 59, 80, 60, 2),
+//        'IDF'                     => array(95, 78, 91, 77, 93, 75, 92, 94),
+//        'Bourgogne Franche-Comte' => array(25, 39, 71, 58, 21, 89, 70),
+//        'Centre'                  => array(37, 36, 18, 41, 28, 45),
+//        'Auvergne'                => array(3, 15, 43, 63, 42),
+//        'Rhône'                   => array(1, 69),
+//        'Alpes'                   => array(73, 74, 38),
+//        'Drôme Ardèche'           => array(7, 26),
+//        'Provence-Azur'           => array(4, 5, 6, 13, 83, 84, '2A', '2B'),
+//        'Occitanie'               => array(65, 32, 31, 9, 82, 46, 81, 11, 66, 34, 12, 48, 30),
+//        'Normandie'               => array(50, 14, 61, 27, 76),
+//        'Bretagne'                => array(56, 22, 29, 35),
+//        'Nouvelle Aquitaine'      => array(79, 17, 86, 87, 16, 23, 19, 24, 47, 33, 40, 64)
+        // NEW: 
+        'Alpes-Drôme'      => array(73, 74, 38, 7, 26),
+        'Rhône-Auvergne'   => array(3, 15, 43, 63, 42, 1, 69),
+        'PACA-Occitanie'   => array(79, 17, 86, 87, 16, 23, 19, 24, 47, 33, 40, 64, 65, 32, 31, 9, 82, 46, 81, 11, 66, 34, 12, 48, 30, 4, 5, 6, 13, 83, 84, '2A', '2B'),
+        'Bourgogne-Centre' => array(62, 59, 80, 60, 2, 95, 78, 91, 77, 93, 75, 92, 94, 25, 39, 71, 58, 21, 89, 70, 37, 36, 18, 41, 28, 45, 50, 14, 61, 27, 76, 56, 22, 29, 35)
     );
 
 //    public $fieldsWithAddNoteOnUpdate = array('solvabilite_status');
@@ -99,13 +105,14 @@ class Bimp_Societe extends BimpDolObject
         global $user;
         switch ($field_name) {
             case 'outstanding_limit_atradius':
-                if ($user->admin) {
+            case 'outstanding_limit_icba':
+            case 'outstanding_limit':
+            case 'outstanding_limit_credit_check':
+            case 'date_atradius':
+                if ($user->admin || $user->rights->bimpcommercial->admin_recouvrement) {
                     return 1;
                 }
                 return 0;
-
-            case 'outstanding_limit':
-                return ($user->rights->bimpcommercial->admin_financier ? 1 : 0);
 
             case 'outstanding_limit_credit_safe':
                 return 0;
@@ -181,12 +188,20 @@ class Bimp_Societe extends BimpDolObject
 
     public function isCompany()
     {
-        $id_typeent = (int) $this->getData('fk_typent');
-        if ($id_typeent) {
-            if (!in_array($this->db->getValue('c_typent', 'code', '`id` = ' . $id_typeent), array('TE_PRIVATE', 'TE_UNKNOWN'))) {
-                return 1;
+        if (BimpObject::objectLoaded($this->dol_object)) {
+            if (in_array($this->dol_object->typent_code, array('TE_PRIVATE', 'TE_UNKNOWN'))) {
+                return 0;
             }
-            return 0;
+
+            return 1;
+        } elseif ($this->isLoaded()) {
+            $id_typeent = (int) $this->getData('fk_typent');
+            if ($id_typeent) {
+                if (!in_array($this->db->getValue('c_typent', 'code', '`id` = ' . $id_typeent), array('TE_PRIVATE', 'TE_UNKNOWN'))) {
+                    return 1;
+                }
+                return 0;
+            }
         }
 
         return 1;
@@ -323,6 +338,25 @@ class Bimp_Societe extends BimpDolObject
 
         if (in_array((int) $this->getData('solvabilite_status'), array(Bimp_Societe::SOLV_SOLVABLE, Bimp_Societe::SOLV_A_SURVEILLER, Bimp_Societe::SOLV_A_SURVEILLER_FORCE))) {
             return 1;
+        }
+
+        return 0;
+    }
+
+    public function isAdministration()
+    {
+        if (isset($this->dol_object->typent_code) && $this->dol_object->typent_code) {
+            return (int) in_array($this->dol_object->typent_code, array('TE_ADMIN', 'TE_OTHER_ADM'));
+        }
+
+        $id_type = (int) $this->getData('fk_typent');
+
+        if ($id_type) {
+            $code = $this->db->getValue('c_typent', 'code', 'id = ' . $id_type);
+
+            if ($code) {
+                return (int) in_array($code, array('TE_ADMIN', 'TE_OTHER_ADM'));
+            }
         }
 
         return 0;
@@ -740,14 +774,16 @@ class Bimp_Societe extends BimpDolObject
                     $and_where = ' AND cdet.fk_commande NOT IN (' . implode(',', $allowed['commandes']) . ')';
                 }
 
-                $sql .= ' AND (SELECT COUNT(cdet.rowid) FROM ' . MAIN_DB_PREFIX . 'commandedet cdet WHERE cdet.fk_remise_except = r.rowid' . $and_where . ') = 0';
+                $sql .= ' AND (SELECT COUNT(cdet.rowid) FROM ' . MAIN_DB_PREFIX . 'commandedet cdet,  ' . MAIN_DB_PREFIX . 'commande comm ';
+                $sql .= 'WHERE comm.rowid = cdet.fk_commande AND comm.fk_statut NOT IN (-1,3) AND cdet.fk_remise_except = r.rowid' . $and_where . ') = 0';
 
                 $and_where = '';
                 if (isset($allowed['propales']) && !empty($allowed['propales'])) {
                     $and_where = ' AND pdet.fk_propal NOT IN (' . implode(',', $allowed['propales']) . ')';
                 }
 
-                $sql .= ' AND (SELECT COUNT(pdet.rowid) FROM ' . MAIN_DB_PREFIX . 'propaldet pdet WHERE pdet.fk_remise_except = r.rowid' . $and_where . ') = 0';
+                $sql .= ' AND (SELECT COUNT(pdet.rowid) FROM ' . MAIN_DB_PREFIX . 'propaldet pdet,  ' . MAIN_DB_PREFIX . 'propal prop ';
+                $sql .= 'WHERE prop.rowid = pdet.fk_propal AND prop.fk_statut NOT IN (3,4) AND pdet.fk_remise_except = r.rowid' . $and_where . ') = 0';
             }
 
             $result = $this->db->executeS($sql, 'array');
@@ -834,7 +870,7 @@ class Bimp_Societe extends BimpDolObject
                             foreach ($rows as $r) {
                                 if (!isset($allowed['commandes']) || !in_array((int) $r['fk_commande'], $allowed['commandes'])) {
                                     $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $r['fk_commande']);
-                                    if (BimpObject::objectLoaded($commande)) {
+                                    if (BimpObject::objectLoaded($commande) && !in_array($commande->getData('fk_statut'), array(-1, 3))) {
                                         $use_label = 'Ajouté à la commande ' . ($with_nom_url ? $commande->getNomUrl(1, 1, 1, 'full') : '"' . $commande->getRef() . '"');
                                         break;
                                     } else {
@@ -853,7 +889,8 @@ class Bimp_Societe extends BimpDolObject
                                     $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', (int) $r['fk_propal']);
                                     if (BimpObject::objectLoaded($propal)) {
                                         if (!in_array($propal->getData('fk_statut'), array(4, 3))) {
-                                            if (!(int) $bdb->getValue('element_element', 'rowid', '`fk_source` = ' . $r['fk_propal'] . ' AND `sourcetype` = \'propal\'  AND `targettype` = \'commande\'') && !(int) $bdb->getValue('element_element', 'rowid', '`fk_source` = ' . $r['fk_propal'] . ' AND `sourcetype` = \'propal\'  AND `targettype` = \'contrat\'')) {
+                                            if (!(int) $bdb->getValue('element_element', 'rowid', '`fk_source` = ' . $r['fk_propal'] . ' AND `sourcetype` = \'propal\'  AND `targettype` = \'commande\'') &&
+                                                    !(int) $bdb->getValue('element_element', 'rowid', '`fk_source` = ' . $r['fk_propal'] . ' AND `sourcetype` = \'propal\'  AND `targettype` = \'contrat\'')) {
                                                 $use_label = 'Ajouté à la propale ' . ($with_nom_url ? $propal->getNomUrl(1, 1, 1, 'full') : '"' . $propal->getRef() . '"');
                                                 break;
                                             }
@@ -872,28 +909,53 @@ class Bimp_Societe extends BimpDolObject
         return $use_label;
     }
 
-    public function getCommercial($with_default = true)
+    public function getCommercials($with_default = true, $first = false)
     {
         $commerciaux = $this->getCommerciauxArray(false, $with_default);
 
+        $users = array();
         foreach ($commerciaux as $id_comm => $comm_label) {
             $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_comm);
             if (BimpObject::objectLoaded($user)) {
-                return $user;
+                if ($first)
+                    return array($user);
+                else
+                    $users[] = $user;
             }
         }
+        if (count($users))
+            return $users;
 
         if ($with_default) {
             $default_id_commercial = (int) BimpCore::getConf('default_id_commercial', 0);
             if ($default_id_commercial) {
                 $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $default_id_commercial);
                 if (BimpObject::objectLoaded($user)) {
-                    return $user;
+                    return array($user);
                 }
             }
         }
 
+        return array();
+    }
+
+    public function getCommercial($with_default = true)
+    {
+        $users = $this->getCommercials($with_default, true);
+        if (count($users))
+            return $users[0];
         return null;
+    }
+
+    public function getCommercialEmail($with_default = true)
+    {
+        $comm = $this->getCommercial($with_default);
+
+        if (BimpObject::objectLoaded($comm)) {
+            return BimpTools::cleanEmailsStr($comm->getData('email'));
+        }
+
+        return '';
     }
 
     public function getIdCommercials()
@@ -974,9 +1036,9 @@ class Bimp_Societe extends BimpDolObject
         if ((int) $this->getData('fk_typent')) {
             $code = $this->db->getValue('c_typent', 'code', 'id = ' . (int) $this->getData('fk_typent'));
         }
-        if(BimpTools::getPostFieldValue('is_company') == '0')
+        if (BimpTools::getPostFieldValue('is_company') == '0')
             $code = 'TE_PRIVATE';
-        if($code != ''){
+        if ($code != '') {
             if ($code == 'TE_ADMIN') {
                 return BimpCore::getConf('societe_id_default_mode_reglement_admin', BimpCore::getConf('societe_id_default_mode_reglement', 0));
             }
@@ -994,9 +1056,9 @@ class Bimp_Societe extends BimpDolObject
         if ((int) $this->getData('fk_typent')) {
             $code = $this->db->getValue('c_typent', 'code', 'id = ' . (int) $this->getData('fk_typent'));
         }
-        if(BimpTools::getPostFieldValue('is_company') == '0')
+        if (BimpTools::getPostFieldValue('is_company') == '0')
             $code = 'TE_PRIVATE';
-        if($code != ''){
+        if ($code != '') {
             if ($code === 'TE_ADMIN') {
                 return BimpCore::getConf('societe_id_default_cond_reglement_admin', BimpCore::getConf('societe_id_default_cond_reglement', 0));
             }
@@ -1007,6 +1069,192 @@ class Bimp_Societe extends BimpDolObject
 //            die($code.'pppppp');
 
         return BimpCore::getConf('societe_id_default_cond_reglement', 0);
+    }
+
+    public function getEncours($withOtherSiret = true)
+    {
+        if ($withOtherSiret && $this->getData('siren') . 'x' != 'x' && strlen($this->getData('siren')) == 9) {
+            $tot = 0;
+            $lists = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array('siren' => $this->getData('siren')));
+            foreach ($lists as $idO => $obj) {
+                $tot += $obj->getEncours(false);
+            }
+            return $tot;
+        } else {
+            $values = $this->dol_object->getOutstandingBills();
+
+            if (isset($values['opened'])) {
+                return $values['opened'];
+            }
+        }
+        return 0;
+    }
+
+    public function getEncoursNonFacture($withOtherSiret = true)
+    {
+        if (!$this->isLoaded()) {
+            return 0;
+        }
+
+        $encours = 0;
+
+        $ids = array($this->id);
+
+        if ($withOtherSiret) {
+            $siren = $this->getData('siren');
+
+            if ($siren . 'x' != 'x' && strlen($siren) == 9) {
+                $result = $this->db->getRows('societe', 'siren = \'' . $siren . '\' AND rowid != ' . $this->id, null, 'array', array('rowid'));
+
+                if (is_array($result)) {
+                    foreach ($result as $r) {
+                        if (!in_array((int) $r['rowid'], $ids)) {
+                            $ids[] = (int) $r['rowid'];
+                        }
+                    }
+                }
+            }
+        }
+
+        $sql = BimpTools::getSqlSelect(array('a.qty_modif', 'a.factures', 'det.qty', 'det.subprice', 'det.tva_tx', 'det.remise_percent'));
+        $sql .= BimpTools::getSqlFrom('bimp_commande_line', array(
+                    'c'   => array(
+                        'table' => 'commande',
+                        'alias' => 'c',
+                        'on'    => 'c.rowid = a.id_obj'
+                    ),
+                    'det' => array(
+                        'table' => 'commandedet',
+                        'alias' => 'det',
+                        'on'    => 'det.rowid = a.id_line'
+                    )
+        ));
+        $sql .= BimpTools::getSqlWhere(array(
+                    'c.fk_statut'      => 1,
+                    'c.fk_soc'         => $ids,
+                    'c.invoice_status' => array(
+                        'operator' => '!=',
+                        'value'    => 2
+                    )
+        ));
+
+        $rows = $this->db->executeS($sql, 'array');
+
+        if (is_array($rows)) {
+            $facs_status = array();
+
+            foreach ($rows as $r) {
+                $full_qty = $r['qty'] + $r['qty_modif'];
+
+                $qty_billed = 0;
+
+                if (!in_array((string) $r['factures'], array('', '[]'))) {
+                    $factures = json_decode($r['factures'], 1);
+
+                    if (is_array($factures)) {
+                        foreach ($factures as $id_facture => $data) {
+                            if (!isset($facs_status[$id_facture])) {
+                                $facs_status[$id_facture] = (int) $this->db->getValue('facture', 'fk_statut', 'rowid = ' . $id_facture);
+                            }
+
+                            if (in_array($facs_status[$id_facture], array(1, 2))) {
+                                $qty_billed += (float) $data['qty'];
+                            }
+                        }
+                    }
+                }
+
+                if ($full_qty - $qty_billed) {
+                    $pu_ttc = $r['subprice'];
+
+                    if ($r['remise_percent']) {
+                        $pu_ttc -= ($pu_ttc * ($r['remise_percent'] / 100));
+                    }
+
+                    $pu_ttc *= (1 + ($r['tva_tx'] / 100));
+                    $encours += (($full_qty - $qty_billed) * $pu_ttc);
+                }
+            }
+        }
+
+        return $encours;
+    }
+
+    public function getAllEncoursForSiret($with_commandes_non_facturees = false)
+    {
+        $encours = array(
+            'factures'  => array(
+                'socs'  => array(
+                    $this->id => 0
+                ),
+                'total' => 0
+            ),
+            'commandes' => array(
+                'socs'  => array(
+                    $this->id => 0
+                ),
+                'total' => 0
+            ),
+            'total'     => 0
+        );
+
+        if ($this->isLoaded()) {
+            $value = $this->getEncours(false);
+
+            if ($value) {
+                $encours['factures']['socs'][$this->id] += $value;
+                $encours['factures']['total'] += $value;
+                $encours['total'] += $value;
+            }
+
+            if ($with_commandes_non_facturees) {
+                $value = $this->getEncoursNonFacture(false);
+
+                if ($value) {
+                    $encours['commandes']['socs'][$this->id] += $value;
+                    $encours['commandes']['total'] += $value;
+                    $encours['total'] += $value;
+                }
+            }
+
+            $siren = $this->getData('siren');
+
+            if ($siren . 'x' != 'x' && strlen($siren) == 9) {
+                foreach (BimpCache::getBimpObjectObjects($this->module, $this->object_name, array(
+                    'siren' => $siren,
+                    'rowid' => array(
+                        'operator' => '!=',
+                        'value'    => $this->id
+                    )
+                )) as $id_soc => $soc) {
+                    if (BimpObject::objectLoaded($soc)) {
+                        if (!isset($encours['factures']['socs'][$id_soc])) {
+                            $encours['factures']['socs'][$id_soc] = 0;
+                        }
+
+                        $value = $soc->getEncours(false);
+
+                        if ($value) {
+                            $encours['factures']['socs'][$id_soc] += $value;
+                            $encours['factures']['total'] += $value;
+                            $encours['total'] += $value;
+                        }
+
+                        if ($with_commandes_non_facturees) {
+                            $value = $soc->getEncoursNonFacture(false);
+
+                            if ($value) {
+                                $encours['commandes']['socs'][$id_soc] += $value;
+                                $encours['commandes']['total'] += $value;
+                                $encours['total'] += $value;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $encours;
     }
 
     public static function getRegionCsvValue($needed_fields = array())
@@ -1393,6 +1641,48 @@ class Bimp_Societe extends BimpDolObject
         return 'nc';
     }
 
+    public function displayEncoursNonFacture()
+    {
+        if (!$this->isLoaded()) {
+            return '';
+        }
+
+        $encours = $this->getAllEncoursForSiret(true);
+
+        $html .= BimpTools::displayMoneyValue($encours['commandes']['socs'][$this->id]);
+
+        if (count($encours['commandes']['socs']) > 1) {
+            $html .= '<br/>';
+            foreach ($encours['commandes']['socs'] as $id_soc => $soc_encours) {
+                if ($id_soc == (int) $this->id) {
+                    continue;
+                }
+
+                $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_soc);
+                $html .= '<br/>Client ';
+
+                if (BimpObject::objectLoaded($soc)) {
+                    $html .= $soc->getLink();
+                } else {
+                    $html .= '#' . $id_soc;
+                }
+
+                $html .= ' : ';
+
+                $html .= BimpTools::displayMoneyValue($soc_encours);
+            }
+
+            $html .= '<br/><br/>';
+            $html .= '<b>Total encours sur commandes non facturées pour l\'entreprise (Siren): </b>' . BimpTools::displayMoneyValue($encours['commandes']['total']);
+        }
+
+        if ($encours['commandes']['total'] && $encours['factures']['total']) {
+            $html .= '<br/><b>Total encours</b> : ' . BimpTools::displayMoneyValue($encours['total']);
+        }
+
+        return $html;
+    }
+
     // Rendus HTML: 
 
     public function renderHeaderExtraLeft()
@@ -1480,7 +1770,7 @@ class Bimp_Societe extends BimpDolObject
     {
         // On passe à la fonction la variable contenant le numéro à vérifier
         // et la longueur qu'il doit impérativement avoir
-
+        $tableauChiffresNumero = array();
         if ((strlen($numero) == $longueur) && preg_match("#[0-9]{" . $longueur . "}#i", $numero)) {
             // si la longueur est bonne et que l'on n'a que des chiffres
 
@@ -1859,22 +2149,23 @@ class Bimp_Societe extends BimpDolObject
 
         return $errors;
     }
-    
-    public function majEncourscreditSafe($majOutstandingLimit = false, $maxOutstandingLimit = 100000){
+
+    public function majEncourscreditSafe($majOutstandingLimit = false, $maxOutstandingLimit = 100000)
+    {
         $data = $errors = $w = array();
-        
+
         $code = (string) $this->getData('siret');
         if ($code != '') {
             $errors = BimpTools::merge_array($errors, $this->checkSiren('siret', $code, $data));
         } else {
-            $code = (string) $client->getData('siren');
-            if($code != '')
+            $code = (string) $this->getData('siren');
+            if ($code != '')
                 $errors = BimpTools::merge_array($errors, $this->checkSiren('siren', $code, $data));
         }
         $this->set('lettrecreditsafe', $data['lettrecreditsafe']);
         $this->set('notecreditsafe', $data['notecreditsafe']);
-        if($majOutstandingLimit){
-            if($data['outstanding_limit'] > $maxOutstandingLimit)
+        if ($majOutstandingLimit) {
+            if ($data['outstanding_limit'] > $maxOutstandingLimit)
                 $data['outstanding_limit'] = $maxOutstandingLimit;
             $this->set('outstanding_limit', $data['outstanding_limit']);
         }
@@ -1889,6 +2180,10 @@ class Bimp_Societe extends BimpDolObject
 
     public function checkSiren($field, $value, &$data = array(), &$warnings = array())
     {
+        if (BimpCore::isModeDev()) {
+            return array();
+        }
+
         if ($value == "356000000")
             return array('Siren de la Poste, trop de résultats');
 
@@ -1960,8 +2255,12 @@ class Bimp_Societe extends BimpDolObject
                 if (!is_object($result)) {
                     $warnings[] = 'Le service CreditSafe semble indisponible. Le n° ' . $field . ' ne peut pas être vérifié pour le moment';
                 } elseif (stripos($result->header->reportinformation->reporttype, "Error") !== false) {
-                    $errors[] = 'Erreur lors de la vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' (Code: ' . $result->body->errors->errordetail->code . ')';
+                    $warnings[] = 'Erreur lors de la vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' (Code: ' . $result->body->errors->errordetail->code . ')';
                 } else {
+                    $ville = '';
+                    $codeP = '';
+                    $tel = '';
+                    $nom = '';
                     $note = $alert = "";
                     $limit = 0;
 
@@ -2001,7 +2300,7 @@ class Bimp_Societe extends BimpDolObject
                         if (is_array($branches)) {
                             foreach ($branches as $branche) {
                                 if (($siret && $branche->companynumber == $siret) || (!$siret && stripos($branche->type, "Siège") !== false)) {
-                                    die('gggggg');
+//                                    die('gggggg');
                                     $adress = $branche->full_address->address;
                                     //$nom = $branche->full_address->name;
                                     $codeP = $branche->postcode;
@@ -2022,13 +2321,13 @@ class Bimp_Societe extends BimpDolObject
                         //                            $limit = 10000000;
                     }
                     if (isset($result->body->company->ratings2013->commentaries->comment)) {
-                        if (is_string($result->body->company->ratings2013->commentaries->comment))
-                            $note .= "
-    " . $result->body->company->ratings2013->commentaries->comment;
-                        else
+                        if (is_array($result->body->company->ratings2013->commentaries->comment))
                             foreach ($result->body->company->ratings2013->commentaries->comment as $comment)
                                 $note .= "
     " . $comment;
+                        else
+                            $note .= "
+    " . $result->body->company->ratings2013->commentaries->comment;
                     }
 
                     $data = array(
@@ -2051,6 +2350,11 @@ class Bimp_Societe extends BimpDolObject
 //                    BimpCore::addlog('Echec connexion SOAP pour Credit SAFE', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', $this);
 //                }
             }
+        }
+
+        if ($this->field_exists('date_check_credit_safe')) {
+            $this->updateField('date_check_credit_safe', date('Y-m-d H:i:s'));
+            return $errors;
         }
 
         return $errors;
@@ -2232,7 +2536,7 @@ class Bimp_Societe extends BimpDolObject
 
         if ($this->isLoaded()) {
             $status = (int) $this->getData('solvabilite_status');
-            BimpObject::createBimpObject('bimpcore', 'Bimp_Client_Suivi_Recouvrement', array('id_societe' => $this->id, 'mode' => 4, 'sens' => 2, 'content' => 'Changement ' . ($mode == 'auto' ? 'auto' : 'manuel') . ' statut solvabilitée : ' . self::$solvabilites[$status]['label']));
+            BimpObject::createBimpObject('bimpcore', 'Bimp_Client_Suivi_Recouvrement', array('id_societe' => $this->id, 'mode' => 4, 'sens' => 2, 'content' => 'Changement ' . ($mode == 'auto' ? 'auto' : 'manuel') . ' statut solvabilité : ' . self::$solvabilites[$status]['label']));
 
             $emails = BimpCore::getConf('emails_notify_solvabilite_client_change_' . $mode, '');
 
@@ -2645,16 +2949,15 @@ class Bimp_Societe extends BimpDolObject
                 $note = BimpTools::cleanStringMultipleNewLines($note);
                 $this->set('note_public', $note);
             }
-            
+
             $have_already_code_comptable = (BimpTools::getValue('has_already_code_comptable_client') == 1) ? true : false;
-            if($have_already_code_comptable && empty(BimpTools::getValue('code_compta'))) {
+            if ($have_already_code_comptable && empty(BimpTools::getValue('code_compta'))) {
                 $errors[] = "Vous devez rensseigner un code comptable client";
             }
 
-            if(!count($errors) && $have_already_code_comptable) {
+            if (!count($errors) && $have_already_code_comptable) {
                 $this->set('exported', 1);
             }
-
         }
         return $errors;
     }
@@ -2667,13 +2970,23 @@ class Bimp_Societe extends BimpDolObject
         $init_status = (int) $this->getInitData('status');
         $init_outstanding_limit = $this->getInitData('outstanding_limit');
 
+        $limit = -1;
+        if ($this->getData('outstanding_limit_atradius') > -1)
+            $limit = $this->getData('outstanding_limit_atradius');
+        if ($this->getData('outstanding_limit_icba') > $limit)
+            $limit = $this->getData('outstanding_limit_icba');
+        if ($this->getData('outstanding_limit_credit_check') > $limit)
+            $limit = $this->getData('outstanding_limit_credit_check');
+        if ($limit > 0 && $limit != $this->getInitData('outstanding_limit'))
+            $this->updateField('outstanding_limit', $limit);
+
         if ($this->getInitData('fk_typent') != $this->getData('fk_typent') && !$this->canEditField('status')) {
 //            if (stripos($this->getData('code_compta'), 'P') === 0 && $this->getData('fk_typent') != 8)
 //                return array("Code compta particulier, le type de tiers ne peut être différent.");
             if (stripos($this->getData('code_compta'), 'E') === 0 && $this->getData('fk_typent') == 8)
                 return array("Code compta entreprise, le type de tiers ne peut être différent.");
         }
-        
+
         if ($init_solv != $this->getData('solvabilite_status') && (int) $this->getData('solvabilite_status') === self::SOLV_A_SURVEILLER_FORCE) {
             global $user;
             if (!$user->admin && $user->id != 1499) {

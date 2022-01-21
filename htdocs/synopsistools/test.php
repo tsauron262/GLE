@@ -21,9 +21,52 @@ require("../main.inc.php");
 
 llxHeader();
 
-BimpCore::addlog('Message de test des logs');
+//echo BimpCache::$cache_server->printAll();
+//if($_REQUEST['deleteAll'] == 'true')
+//    echo BimpCache::$cache_server->deleteAll();
 
-die('fin');
+$h = BimpObject::getBimpObjectInstance('bimpcore', 'BimpHistory');
+$h->getHistory(null, 'eee');
+
+die('hhh');
+
+BimpTools::lockNum('ggggh');
+
+global $db;
+$db->begin();
+//$db->query('INSERT into table_test (id, value) VALUES (3,3);');
+$db->query('UPDATE table_testttff set value = 4 WHERE id=1;');
+//$db->query('LOCK TABLES table_test WRITE;');
+//$db->query('UNLOCK TABLES;');
+//die('ggggg');
+
+$db2 = BimpCache::getBdb(false)->db;
+$sql = $db2->query('SELECt * FROM table_test WHERE id = 1');
+while ($ln = $db2->fetch_object($sql)){
+    echo '<pre>'.print_r($ln,1).'</pre>';
+}
+
+echo '<br/><br/><h1>db2</h1>';
+
+$db2 = BimpCache::getBdb(true)->db;
+$sql = $db2->query('SELECT * FROM table_test WHERE id = 1');
+while ($ln = $db2->fetch_object($sql)){
+    echo '<pre>'.print_r($ln,1).'</pre>';
+}
+echo 'fin';
+
+//$db->commit();
+//llxFooter();
+die('uuuu');
+
+
+//            $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
+//                $rows = $equipment->getList($filtre, 1, 1, 'rand', 'asc', 'array', array('id', 'serial'));
+//                
+//                echo '<pre>'; print_r($rows);
+
+ llxFooter();
+die('                    fin'.count($rows));
 
 
 $ldaphost = "ldaps://91.211.164.250:636/";
@@ -326,20 +369,20 @@ $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php'; // Si pas déjà require
 
-$reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation'); // Pas besoin de fetcher
-
-$list = $reservation->getList(array(
-    'id_transfert' => 666, // ID du transfert
-        ), null, null, 'id', 'asc', 'array', array(
-    'id', // Mettre ici la liste des champs à retourner.,
-    'qty',
-    'id_equipment',
-    'id_product',
-    'status'
-        ));
-
-echo "<pre>";
-print_r($list);
+//$reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation'); // Pas besoin de fetcher
+//
+//$list = $reservation->getList(array(
+//    'id_transfert' => 666, // ID du transfert
+//        ), null, null, 'id', 'asc', 'array', array(
+//    'id', // Mettre ici la liste des champs à retourner.,
+//    'qty',
+//    'id_equipment',
+//    'id_product',
+//    'status'
+//        ));
+//
+//echo "<pre>";
+//print_r($list);
 
 
 echo "fin" . print_r($errors, 1);

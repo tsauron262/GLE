@@ -21,7 +21,7 @@ class BTC_export extends BimpObject {
         "T3" => ["07", "08", "09"],
         "T4" => ["10", "11", "12"]
     ];
-
+    
    
 
     public function getStartTrimestreComptable() {
@@ -319,21 +319,27 @@ class BTC_export extends BimpObject {
      */
     
     private function export_paiement($ref = null, $since = false, $name = '', $dir = '') {
-        global $user;
+        global $user, $db;
+        $bdb = new BimpDb($db);
         $liste = $this->get_paiements_for_export($ref, $since);
         $forced = (is_null($ref)) ? false : true;
         if(count($liste)) {
             $instance = $this->getInstance('bimptocegid', 'BTC_export_paiement');
             foreach ($liste as $paiement) {
-                if($instance->export($paiement->rowid, $paiement->fk_paiement, $forced, ['name' => $name, 'dir' => $dir])) {
-                    $pay = $this->getInstance('bimpcommercial', 'Bimp_Paiement', $paiement->rowid);
+                $pay = $this->getInstance('bimpcommercial', 'Bimp_Paiement', $paiement->rowid);
+                $reglement = $bdb->getRow('c_paiement', 'id = ' . $paiement->fk_paiement);
+                if($reglement->code != "NO_COM") {
+                    if($instance->export($paiement->rowid, $paiement->fk_paiement, $forced, ['name' => $name, 'dir' => $dir])) {
                     $this->write_logs("***PAY*** | " . date('d/m/Y H:i:s') . " | " . $user->login . " | " . $paiement->ref . "\n", false);
                     if(is_null($ref)){
                         $pay->updateField('exported', 1);
                     }
+                    } else {
+                        // Mettre task
+                        $this->addTaskAlert(['ref' => $instance->getData('ref')]);
+                    }
                 } else {
-                    // Mettre task
-                    $this->addTaskAlert(['ref' => $instance->getData('ref')]);
+                    $pay->updateField("exported", 204);
                 }
             }
         } else {
@@ -717,6 +723,25 @@ class BTC_export extends BimpObject {
         }
         
         return false;
+        
+    }
+    
+    public function display_content_file($path) {
+        return '<h3 class="danger">'.$path.'</h3><pre>' . file_get_contents($path) . '<br /></pre>';
+    }
+    
+    public function actionSearch_piece($data, &$success) {
+        $errors = [];
+        $warnings = []; 
+        return ['success' => $success, 'errors' => $errors, 'warnings' => $warnings];
+    }
+    
+    public function search() {
+        
+        $numero_of_piece = BimpTools::getPostFieldValue('numero_of_piece');
+        
+        
+        return 'bonjour';
         
     }
 }

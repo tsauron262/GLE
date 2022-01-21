@@ -137,7 +137,7 @@ class BimpDolObject extends BimpObject
         if ($this->isLoaded()) {
             $contacts = $this->dol_object->liste_contact(-1, 'external');
             foreach ($contacts as $item) {
-                if (!isset($emails[(int) $item['id']])) {
+                if (!isset($emails[(int) $item['id']]) && $item['statuscontact'] == 1) {
                     $emails[(int) $item['id']] = $item['libelle'] . ': ' . $item['firstname'] . ' ' . $item['lastname'] . ' (' . $item['email'] . ')';
                 }
             }
@@ -219,7 +219,7 @@ class BimpDolObject extends BimpObject
 
                     if (dol_textishtml($content) && !dol_textishtml($formMail->substit['__SIGNATURE__'])) {
                         $formMail->substit['__SIGNATURE__'] = dol_nl2br($formMail->substit['__SIGNATURE__']);
-                    } else if (!dol_textishtml($content) && dol_textishtml($this->substit['__SIGNATURE__'])) {
+                    } else if (!dol_textishtml($content) && dol_textishtml($formMail->substit['__SIGNATURE__'])) {
                         $content = dol_nl2br($content);
                     }
 
@@ -888,7 +888,7 @@ class BimpDolObject extends BimpObject
             }
 
             if (!count($errors)) {
-                $mail_object .= $data['mail_object'];
+                $mail_object = $data['mail_object'];
 
                 $id_model = (int) BimpTools::getPostFieldValue('id_model', 0);
 
@@ -921,7 +921,7 @@ class BimpDolObject extends BimpObject
         );
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function copyContactsFromOrigin($origin, &$errors = array())
     {

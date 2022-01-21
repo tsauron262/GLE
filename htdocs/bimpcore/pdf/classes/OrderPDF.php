@@ -20,11 +20,16 @@ class OrderPDF extends BimpDocumentPDF
     public $user_commercial = null;
     public $user_suivi = null;
     public $entrepot = null;
+    public $signature_bloc = false;
 
     public function __construct($db, $doc_type = 'commande')
     {
         if (!array_key_exists($doc_type, self::$doc_types)) {
             $doc_type = 'commande';
+        }
+        
+        if ($doc_type === 'bl') {
+            $this->signature_bloc = true;
         }
 
         $this->doc_type = $doc_type;
@@ -151,17 +156,16 @@ class OrderPDF extends BimpDocumentPDF
         // Titre commande:
         $docName = self::$doc_types[$this->doc_type];
 
-        if ($this->sitationinvoice) {
-            $docName = self::$doc_types[$this->doc_type];
-        }
+//        if ($this->sitationinvoice) {
+//            $docName = self::$doc_types[$this->doc_type];
+//        }
 
         // Réf commande: 
         switch ($this->doc_type) {
             case 'commande':
+                $docRef = $this->langs->transnoentities("Ref") . " : " . $this->langs->convToOutputCharset($this->commande->ref);
                 if ($this->commande->statut == Commande::STATUS_DRAFT) {
                     $docRef = '<span style="color: #800000"> ' . $docRef . ' - ' . $this->langs->transnoentities("NotValidated") . '</span>';
-                } else {
-                    $docRef = $this->langs->transnoentities("Ref") . " : " . $this->langs->convToOutputCharset($this->commande->ref);
                 }
                 break;
 
@@ -454,7 +458,7 @@ class OrderPDF extends BimpDocumentPDF
             if (empty($this->object->mode_reglement_code) && empty($conf->global->FACTURE_CHQ_NUMBER) && empty($conf->global->FACTURE_RIB_NUMBER)) {
                 $error = $this->langs->transnoentities("ErrorNoPaiementModeConfigured");
             } elseif (($this->object->mode_reglement_code == 'CHQ' && empty($conf->global->FACTURE_CHQ_NUMBER) && empty($this->object->fk_account) && empty($this->object->fk_bank)) || ($this->object->mode_reglement_code == 'VIR' && empty($conf->global->FACTURE_RIB_NUMBER) && empty($this->object->fk_account) && empty($this->object->fk_bank))) {
-                $error = $this->langs->transnoentities("ErrorPaymentModeDefinedToWithoutSetup", $object->mode_reglement_code);
+                $error = $this->langs->transnoentities("ErrorPaymentModeDefinedToWithoutSetup", $this->object->mode_reglement_code);
             }
 
             if ($error) {
@@ -531,6 +535,9 @@ class BLPDF extends OrderPDF
     public $total_ht = 0;
     public $total_ttc = 0;
     public $num_bl = '';
+    public $chiffre = 1;
+    public $detail = 1;
+    public $signature_bloc = false;
 
     public function __construct($db, $shipment = null)
     {
@@ -593,7 +600,7 @@ class BLPDF extends OrderPDF
         $table->cols_def['qte']['style'] = 'text-align: center;';
         $table->cols_def['qte']['head_style'] = 'text-align: center;';
 
-        if (!isset($_GET['chiffre']) || $_GET['chiffre'] == 1)
+        if ($this->chiffre)
             $table->setCols(array('code_article', 'desc', 'pu_ht', 'tva', 'total_ht', 'qte', 'dl', 'ral'));
         else {
             $table->setCols(array('code_article', 'desc', 'qte', 'dl', 'ral'));
@@ -623,12 +630,15 @@ class BLPDF extends OrderPDF
 //                $acompteHt = $line->subprice * (float) $line->qty;
 //                $acompteTtc = BimpTools::calculatePriceTaxIn($acompteHt, (float) $line->tva_tx);
 
+
+                $ht = $line->subprice * $qties[$line->id]['qty'];
+                $ttc = $ht * (100 + $line->tva_tx) / 100;
+                
+                
                 $total_ht_without_remises += $line->total_ht;
                 $total_ttc_without_remises += $line->total_ttc;
-
-                $this->acompteHt -= $line->total_ht;
-                $this->acompteTtc -= $line->total_ttc;
-                $this->acompteTva20 -= $line->total_tva;
+                $this->acompteHt -= $ht;
+                $this->acompteTtc -= $ttc;
                 continue;
             }
 
@@ -663,7 +673,7 @@ class BLPDF extends OrderPDF
                 } else {
                     $row['desc'] = array(
                         'colspan' => 99,
-                        'content' => $desc,
+                        'content' => $this->cleanHtml($desc),
                         'style'   => 'font-weight: bold; background-color: #F5F5F5;'
                     );
                 }
@@ -687,7 +697,7 @@ class BLPDF extends OrderPDF
                 }
                 $row = array(
 //                    'code_article' => (!is_null($product) ? $product->ref : ''),
-                    'desc'  => $desc,
+                    'desc'  => $this->cleanHtml($desc),
                     'pu_ht' => pdf_getlineupexcltax($this->object, $i, $this->langs),
                 );
 
@@ -781,8 +791,9 @@ class BLPDF extends OrderPDF
                 }
             }
 
-            if (!isset($_GET['detail']) || $_GET['detail'] == 1 || $row['qte'] != 0)
+            if ($this->detail || $row['qte'] != 0) {
                 $table->rows[] = $row;
+            }
 
             unset($product);
             $product = null;
@@ -949,6 +960,19 @@ class BLPDF extends OrderPDF
                 $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("TotalTTC") . '</td>';
                 $html .= '<td style="background-color: #DCDCDC; text-align: right;">' . price($this->total_ttc, 0, $this->langs) . '</td>';
                 $html .= '</tr>';
+                
+                
+                if ($this->acompteHt > 0) {
+                    $html .= '<tr>';
+                    $html .= '<td style="background-color: #F0F0F0;">' . $this->langs->transnoentities("Acompte") . '</td>';
+                    $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . BimpTools::displayMoneyValue($this->acompteTtc, '', 0, 0, 1) . '</td>';
+                    $html .= '</tr>';
+                    $resteapayer = $this->total_ttc - $this->acompteTtc;
+                    $html .= '<tr>';
+                    $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("RemainderToPay") . '</td>';
+                    $html .= '<td style="text-align: right; background-color: #DCDCDC;">' . BimpTools::displayMoneyValue($resteapayer, '', 0, 0, 1) . '</td>';
+                    $html .= '</tr>';
+                }
             }
         }
 
@@ -1011,7 +1035,7 @@ class BLPDF extends OrderPDF
         return $html;
     }
 
-    public function getAfterTotauxHtml($blocSignature = false)
+    public function getAfterTotauxHtml()
     {
         if ($this->doc_type === 'bl_draft') {
             return '';

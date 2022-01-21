@@ -36,16 +36,40 @@ class BimpNote extends BimpObject
         self::BN_DEST_USER  => 'Utilisateur',
         self::BN_DEST_GROUP => 'Group'
     );
+    
+    public function traiteContent(){
+        $note = $this->getData('content');
+        $note = trim($note);
+        $tab = array(CHR(13).CHR(10) => "[saut]", CHR(13).CHR(10).' ' => "[saut]", CHR(10) => "[saut]" );
+        $tab2 = array("[saut][saut][saut][saut][saut][saut]" => CHR(13).CHR(10).CHR(13).CHR(10), "[saut][saut][saut][saut][saut]" => CHR(13).CHR(10).CHR(13).CHR(10), "[saut][saut][saut][saut]" => CHR(13).CHR(10).CHR(13).CHR(10), "[saut][saut][saut]" => CHR(13).CHR(10).CHR(13).CHR(10), "[saut]" => CHR(13).CHR(10));
+        $note = strtr($note,$tab);
+        $note = strtr($note,$tab2);
+        $note = strtr($note,$tab);
+        $note = strtr($note,$tab2);
+        $note = strtr($note,$tab);
+        $note = strtr($note,$tab2);
+//        die('<textarea>'.$note.'</textarea>');
+        $this->set('content', $note);
+    }
 
     public function create(&$warnings = array(), $force_create = false)
     {
+        $this->traiteContent();
         $return = parent::create($warnings, $force_create);
+        
+        
 
         if (!count($return)) {
             $obj = $this->getParentInstance();
             if (is_object($obj) && $obj->isLoaded() && method_exists($obj, 'afterCreateNote'))
                 $obj->afterCreateNote($this);
         }
+        return $return;
+    }
+    
+    public function update(&$warnings = array(), $force_update = false) {
+        $this->traiteContent();
+        $return = parent::update($warnings, $force_update);
         return $return;
     }
 
@@ -99,7 +123,7 @@ class BimpNote extends BimpObject
         $parent = $this->getParentInstance();
 
         if (BimpObject::objectLoaded($parent) && is_a($parent, 'BimpObject')) {
-            return (int) $parent->areNotesEditable($force_edit);
+            return (int) $parent->areNotesEditable();
         }
 
         return 1;
@@ -173,10 +197,11 @@ class BimpNote extends BimpObject
     {
         $filters = array();
 
-        if (is_null($id_user)) {
+        if (is_null($id_user) || (int) $id_user < 1) {
             global $user;
-        } elseif ((int) $id_user) {
-            $user = new User($this->db->db);
+        } else {
+            global $db;
+            $user = new User($db);
             $user->fetch((int) $id_user);
         }
 
@@ -255,15 +280,15 @@ class BimpNote extends BimpObject
     public function getInitiale($str)
     {
         $str = str_replace(array("_", "-"), " ", $str);
-        $return = $str;
-        $tabT = explode(" ", $str);
-        if (count($tabT) > 0) {
-            $return = "";
+        $return = "";
+        if (strlen($str) > 0) {
+            $tabT = explode(" ", $str);
             foreach ($tabT as $part) {
                 $return .= substr($part, 0, 1);
             }
+            $return = strtoupper(substr($return, 0, 2));
         }
-        return strtoupper(substr($return, 0, 2));
+        return $return;
     }
 
     public function getJsRepondre()
@@ -279,7 +304,8 @@ class BimpNote extends BimpObject
         $conversations = $this->getMyNewConversations($id_max, true, 30);
 
         foreach ($conversations as $c) {
-
+            $note = null;
+            $msg = array();
             if (!$c['lu'])
                 $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $c['idNoteRef']);
             else {
@@ -297,8 +323,6 @@ class BimpNote extends BimpObject
             }
 
             if ($note) {
-                $msg = array();
-
                 // Note
                 //            $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $c['idNoteRef']);
                 $msg['content'] = $note->getData('content');
@@ -320,14 +344,14 @@ class BimpNote extends BimpObject
                 $msg['is_viewed'] = (int) $c['lu'];
 
                 // Obj
-                $msg['obj']['nom_url'] = $c['obj']->getNomUrl();
+                $msg['obj']['nom_url'] = $c['obj']->getLink(array('external_link'=>0, 'modal_view'=>0));
                 if (method_exists($c['obj'], "getChildObject")) {
                     $soc = $c['obj']->getChildObject("societe");
                     if (!$soc or!$soc->isLoaded())
                         $soc = $c['obj']->getChildObject("client");
 
                     if ($soc && $soc->isLoaded())
-                        $msg['obj']['client_nom_url'] = $soc->getNomUrl(1);
+                        $msg['obj']['client_nom_url'] = $soc->getLink(array('external_link'=>0, 'modal_view'=>0));
                 }
 
                 // Author
@@ -351,7 +375,8 @@ class BimpNote extends BimpObject
                 } elseif ($msg['is_grp'])
                     $msg['dest']['nom'] = $note->displayDestinataire(false, true);
             }
-            $messages['content'][] = $msg;
+            if(count($msg))
+                $messages['content'][] = $msg;
         }
 
         if (!empty($messages['content']))
@@ -439,7 +464,7 @@ class BimpNote extends BimpObject
 
         global $user;
 
-        if ($this->getData('viewed') == 0) {
+        if ($this->getData('viewed') == 0 && $this->i_am_dest()) {
             $this->updateField('viewed', 1);
         }
 

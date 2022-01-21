@@ -14,7 +14,14 @@ class BIMP_Task extends BimpObject
         'vols@bimp-groupe.net' => "VOLS", 
         'sms-apple@bimp-groupe.net' => "Code APPLE", 
         'suivicontrat@bimp-groupe.net' => "Suivi contrat", 
-        'other' => 'AUTRE');
+        'other' => 'Autre');
+    
+    public static $types_manuel = array(
+        'dev'        => 'Développement',
+        'adminVente' => 'Administration des Ventes'
+    );
+    
+    
     public static $srcNotAttribute = array('sms-apple@bimp-groupe.net');
     public static $nbNonLu = 0;
     public static $nbAlert = 0;
@@ -62,6 +69,7 @@ class BIMP_Task extends BimpObject
         $return = parent::create($warnings, $force_create);
         
         $this->updateField('date_update', $this->getData('date_create'));
+        $this->updateField('auto', ($this->getData('dst') != '') ? 1 : 0);
         
         return $return;
     }
@@ -106,27 +114,46 @@ class BIMP_Task extends BimpObject
     }
     
     public function getType(){
-        $d = $this->getData("dst");
         $type = 'other';
-        if(isset(self::$valSrc[$d]))
-            $type = $d;
+        if($this->getData('auto')){
+            $d = $this->getData("dst");
+            if(isset(self::$valSrc[$d]))
+                $type = $d;
+        }
+        else{
+            $type = $this->getData('type_manuel');
+        }
         return $type;
     }
     
     public function displayType(){
-        return self::$valSrc[$this->getType()];
+        if($this->getData('auto'))
+            return self::$valSrc[$this->getType()];
+        else
+            return $this->displayData('type_manuel');
     }
     
 
     public function getTypeTacheSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
     {
         global $user;
-        if($value != 'other')
-            $filters['dst'] = $value;
+        
+        if(isset(static::$valSrc[$value])){
+            $filters['auto'] = 1;
+            if($value != 'other')
+                $filters['dst'] = $value;
+            else{
+                $tabsDroit =  self::getTableSqlDroitPasDroit($user);
+    //            print_r($tabsDroit);die;
+                $filters['dst'] = array("not_in"=> $tabsDroit[2]);
+            }
+        }
+        elseif(isset(static::$types_manuel[$value])){
+            $filters['auto'] = 0;
+            $filters['type_manuel'] = $value;
+        }
         else{
-            $tabsDroit =  self::getTableSqlDroitPasDroit($user);
-//            print_r($tabsDroit);die;
-            $filters['dst'] = array("not_in"=> $tabsDroit[2]);
+            BimpCore::addlog('Type de tache inconnue '.$value);
         }
         
         return self::$valStatus;
@@ -151,19 +178,25 @@ class BIMP_Task extends BimpObject
     public function getRight($right)
     {
         global $user;
+        if(!$this->isLoaded())
+            return 1;
         if ($this->getData("id_user_owner") == $user->id)
             return 1;
+        if ($this->getData("user_create") == $user->id && $right == 'read')
+            return 1;
         $classRight = $this->getType();
-        
         return $user->rights->bimptask->$classRight->$right;
     }
 
     public function getListFiltre($type = "normal")
     {
         global $user;
-        $list = new BC_ListTable($this, 'default', 1, null, ($type == "my" ? 'Mes tâches assignées' : 'Toutes les tâches'));
+        $list = new BC_ListTable($this, 'default', 1, null, ($type == "my" ? 'Mes tâches assignées' : ($type == "byMy" ? 'Mes tâches créer' : 'Toutes les tâches')));
+        $list->addIdentifierSuffix($type);
         $tabFiltre = self::getFiltreDstRight($user);
-        if (count($tabFiltre[1]) > 0)
+        if($type == 'byMy')
+            $list->addFieldFilterValue('user_create', (int) $user->id);
+        elseif (count($tabFiltre[1]) > 0)
             $list->addFieldFilterValue('fgdg_dst', array(
                 ($type == "my" ? 'and_fields' : 'or') => array(
                     'dst'           => array(
@@ -192,9 +225,14 @@ class BIMP_Task extends BimpObject
     {
         return $this->getRight("write");
     }
+    
+    public function canEditAll(){
+        return 1; //todo
+    }
 
     public function canDelete()
     {
+//        static::majRight();
         return $this->getRight("delete");
     }
 
@@ -208,6 +246,10 @@ class BIMP_Task extends BimpObject
         if ($field_name == "id_user_owner")
             return $this->canAttribute();
         return parent::canEditField($field_name);
+    }
+    
+    public static function getTypeArray(){
+        return BimpTools::merge_array(static::$valSrc, static::$types_manuel);
     }
     
     public static function getTableSqlDroitPasDroit($user){
@@ -501,5 +543,56 @@ class BIMP_Task extends BimpObject
         }
 
         return $tasks;
+    }
+    
+    
+    
+    public static function majRight(){
+        global $db;
+        $sql = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."rights_def WHERE module = 'bimptask'");
+        while ($ln = $db->fetch_object($sql)){
+            $tabRights[] = $ln->perms.$ln->subperms;
+        }
+        foreach(static::getTypeArray() as $type => $label){
+            if($type != 'other'){
+                foreach(array('read' => 'Lire', 'write' => 'Modifié', 'delete' => 'Supprimé', 'attribute' => 'Attribué') as $subperms => $subLabel){
+                    if(!in_array($type.$subperms, $tabRights)){
+                        echo '<br/>'.$subLabel.' '.$label;
+                        $db->query("INSERT INTO ".MAIN_DB_PREFIX."rights_def (`libelle`, `module`, `entity`, `perms`, `subperms`, `type`, `bydefault`) VALUES ('".$subLabel.' '.$label."', 'bimptask', 1, '".$type."', '".$subperms."', 'w', 0);");
+                    }
+                }
+            }
+        }
+        
+        
+        
+//        $right = 
+//        
+//        
+//        
+//                    $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+//            $this->rights[$r][1] = 'Read '.$nom; // Permission label
+//            $this->rights[$r][3] = 0;      // Permission by default for new user (0/1)
+//            $this->rights[$r][4] = $typeTask;    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//            $this->rights[$r][5] = 'read';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//            $r++;
+//            $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+//            $this->rights[$r][1] = 'Write '.$nom; // Permission label
+//            $this->rights[$r][3] = 0;      // Permission by default for new user (0/1)
+//            $this->rights[$r][4] = $typeTask;    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//            $this->rights[$r][5] = 'write';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//            $r++;
+//            $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+//            $this->rights[$r][1] = 'Supprimer '.$nom; // Permission label
+//            $this->rights[$r][3] = 0;      // Permission by default for new user (0/1)
+//            $this->rights[$r][4] = $typeTask;    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//            $this->rights[$r][5] = 'delete';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//            $r++;
+//            $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+//            $this->rights[$r][1] = 'Attribué '.$nom; // Permission label
+//            $this->rights[$r][3] = 0;      // Permission by default for new user (0/1)
+//            $this->rights[$r][4] = $typeTask;    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//            $this->rights[$r][5] = 'attribute';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+//            $r++;
     }
 }

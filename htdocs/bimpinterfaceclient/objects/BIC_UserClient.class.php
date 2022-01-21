@@ -296,7 +296,7 @@ class BIC_UserClient extends BimpObject
             $buttons[] = array(
                 'label'   => 'Changer mon mot de passe',
                 'icon'    => 'fas_pen',
-                'onclick' => 'window.location = \'' . DOL_URL_ROOT . '/bimpinterfaceclient/client.php?display_public_form=1&public_form=changePw\''
+                'onclick' => 'window.location = \'' . BimpObject::getPublicBaseUrl() . '?display_public_form=1&public_form=changePw\''
             );
         }
 
@@ -420,6 +420,63 @@ class BIC_UserClient extends BimpObject
             }
 
             return self::$cache[$cache_key];
+        }
+
+        return array();
+    }
+
+    public function getDefaultEmail()
+    {
+        if ((int) $this->getData('id_contact')) {
+            $email = (string) $this->db->getValue('socpeople', 'email', 'rowid = ' . (int) $this->getData('id_contact'));
+
+            if ($email) {
+                return $email;
+            }
+        }
+
+        if ($this->data['email']) {
+            return $this->data['email'];
+        }
+
+        return '';
+    }
+
+    // Getters Statics: 
+
+    public static function getClientUsersArray($id_client, $include_empty = false)
+    {
+        if ((int) $id_client) {
+            $cache_key = 'bic_users_client_' . $id_client;
+
+            if (!isset(self::$cache[$cache_key])) {
+                $userClient = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClient');
+
+                $rows = $userClient->getList(array(
+                    'status'    => 1,
+                    'id_client' => $id_client
+                        ), null, null, 'id', 'asc', 'array', array('a.id', 'a.email', 'a.role', 'c.firstname', 'c.lastname'), array(
+                    'c' => array(
+                        'table' => 'socpeople',
+                        'on'    => 'c.rowid = a.id_contact',
+                        'alias' => 'c'
+                    )
+                ));
+
+                if (is_array($rows)) {
+                    foreach ($rows as $r) {
+                        $contact = '';
+
+                        if ($r['firstname'] || $r['lastname']) {
+                            $contact .= ' (Contact: ' . $r['firstname'] . ($r['lastname'] ? ($r['firstname'] ? ' ' : '') . $r['lastname'] : '') . ')';
+                        }
+
+                        self::$cache[$cache_key][(int) $r['id']] = $r['email'] . $contact . ((int) $r['role'] === self::USER_CLIENT_ROLE_ADMIN ? ' - Admin' : '');
+                    }
+                }
+            }
+
+            return self::getCacheArray($cache_key, $include_empty);
         }
 
         return array();
@@ -650,10 +707,9 @@ class BIC_UserClient extends BimpObject
             $errors[] = 'Adresse e-mail absente';
         } elseif (!BimpValidate::isEmail($email)) {
             $errors[] = 'Adresse e-mail invalide';
-        } 
-//        elseif ((int) $this->db->getValue($this->getTable(), 'id', 'LOWER(email) = \'' . strtolower($email) . '\'')) {
-//            $errors[] = 'Un compte utilisateur existe déjà pour cette adresse e-mail';
-//        }
+        } elseif ((int) $this->db->getValue($this->getTable(), 'id', 'LOWER(email) = \'' . strtolower($email) . '\'')) {
+            $errors[] = 'Un compte utilisateur existe déjà pour cette adresse e-mail';
+        }
 
         if (!count($errors)) {
             if (!(int) $this->getData('role')) {
@@ -667,11 +723,9 @@ class BIC_UserClient extends BimpObject
             $errors = parent::create($warnings, $force_create);
 
             if (!count($errors)) {
-                if ($this->use_email && BimpTools::getPostFieldValue('send_mail', 0)) {
-                    if (stripos(DOL_URL_ROOT, $_SERVER['SERVER_NAME']) === false)
-                        $url = $_SERVER['SERVER_NAME'] . DOL_URL_ROOT . '/bimpinterfaceclient/client.php';
-                    else
-                        $url = DOL_URL_ROOT . '/bimpinterfaceclient/client.php?email=' . $this->getData('email');
+                if ($this->use_email && (int) BimpTools::getPostFieldValue('send_mail', 1)) {
+                    $url = BimpObject::getPublicBaseUrl(false) . '?email=' . $this->getData('email');
+
                     $sujet = "Mot de passe BIMP ERP Interface Client";
 
                     $message = "Bonjour, <br /><br />";
@@ -692,13 +746,13 @@ class BIC_UserClient extends BimpObject
                         $message .= "Chez BIMP, nous faisons aussi le pari de la complémentarité des compétences dans nos équipes !<br />";
                         $message .= "Vous avez la possibilité de contacter directement l’assistance technique au numéro figurant sur votre contrat (bien laisser un message) ou par mail à hotline@bimp.fr <br />";
                         $message .= "Le service est joignable du lundi au vendredi  (de 9 h à 12 h et de 14 h à 18 h, le vendredi à 17 h.<br /><br />";
-                        $message .= "Voici votre accès à votre espace client <br /><br />";
+                        $message .= "<b>Voici votre accès à votre espace client</b><br /><br />";
                     }
 
-                    $message .= '<a href="' . $url . '">Espace client BIMP ERP</a><br />';
-                    $message .= 'Identifiant : ' . $email . '<br />';
+                    $message .= '<a href="' . $url . '">Votre Espace client BIMP ERP</a><br/><br/>';
+                    $message .= '<b>Identifiant :</b> ' . $email . '<br />';
                     if ($mdp_clear) {
-                        $message .= 'Mot de passe (Généré automatiquement) : ' . $mdp_clear;
+                        $message .= '<b>Mot de passe (Généré automatiquement) :</b> ' . $mdp_clear;
                     }
                     $message .= '<br /><br /><br />';
                     $url_notice = "https://r.emailing.bimp-groupe.fr/mk/cl/f/fjaJDCZiyHn3ixmdjVfLHPUSzRBzlYjsfpssdw_dklmhgN7Rlm7ztqBEXLbIKJtMnEQgq_c8PnFXMmE7kB1jjsugCTsEJ7RQFNYG0t5Ks3vd_8ZYmKBoRLUFdzaJ0xHmKqyZtY7pQaJAMxOhD1AEEmrWT3yc660gskTYZLe8VetnKI-LyDzSgxOPfNV9sML4h-Y_0mMwr1V8ltNqeEzbtdlUajs02Fnek4SHgHsktedp4Qn40gRovH788YIpeD1SdAb7Oav0KBONH487Exm1-FiwSDTsmzbKE3DrrrHG0mgmuisHe4F04sEhyWZZIyfXSfasmhwq1TEd33NhdA5aizTj9oXJnYW-JM3Ph5e1oavhKYsMEu2bAJBggH0e1w";

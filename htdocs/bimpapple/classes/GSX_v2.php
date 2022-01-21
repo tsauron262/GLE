@@ -58,15 +58,22 @@ class GSX_v2 extends GSX_Const
                     $this->shipTo = BimpTools::addZeros(self::$default_ids['ship_to'], self::$numbersNumChars);
                 }
 
-                $this->soldTo = BimpTools::addZeros(self::$default_ids['sold_to'], self::$numbersNumChars);
+                $oldShipTo = array('1111748', '1000566', '462140', '1139941', '1000565', '1000483', '494685', '466183', '484926', '1040727', '1046076', '1046075', '1187559', '1187562', '1187561', '1187560', '1199659');
+                if (in_array($this->shipTo, $oldShipTo)) {
+                    $this->soldTo = BimpTools::addZeros('897316', self::$numbersNumChars);
+                } elseif (isset($user->array_options['options_apple_service']) && (string) $user->array_options['options_apple_service']) {
+                    $this->soldTo = BimpTools::addZeros($user->array_options['options_apple_service'], self::$numbersNumChars);
+                } else {
+                    $this->soldTo = BimpTools::addZeros(self::$default_ids['sold_to'], self::$numbersNumChars);
+                }
                 break;
         }
 
-        $certInfo = self::getCertifInfo($this->soldTo);
+        $errors = $this->setSoldTo($this->soldTo);
 
-        $this->certPath = $certInfo['path'];
-        $this->certPathKey = $certInfo['pathKey'];
-        $this->certPword = $certInfo['pass'];
+        if (count($errors)) {
+            $this->errors[] = BimpTools::getMsgFromArray($errors);
+        }
 
         if (isset($user->array_options['options_gsx_acti_token']) && (string) $user->array_options['options_gsx_acti_token']) {
             $this->acti_token = $user->array_options['options_gsx_acti_token'];
@@ -103,7 +110,29 @@ class GSX_v2 extends GSX_Const
         return self::$instance;
     }
 
-    // Gestion du login: 
+    public function setSoldTo($soldTo)
+    {
+        $errors = array();
+
+        $this->soldTo = BimpTools::addZeros($soldTo, self::$numbersNumChars);
+
+        $certInfo = self::getCertifInfo($this->soldTo, $errors);
+
+        if (!count($errors)) {
+            $this->certPath = $certInfo['path'];
+            $this->certPathKey = $certInfo['pathKey'];
+            $this->certPword = $certInfo['pass'];
+        }
+
+        return $errors;
+    }
+
+    public function setShipTo($shipTo)
+    {
+        $this->shipTo = BimpTools::addZeros($shipTo, self::$numbersNumChars);
+    }
+
+    // Gestion du login:
 
     public function setActivationToken($token)
     {
@@ -152,12 +181,17 @@ class GSX_v2 extends GSX_Const
         $this->displayDebug('échec');
         $this->initError('Echec authentification (token ' . $this->acti_token . ')');
 
-        if($this->appleId == 'admin.gle@bimp.fr'){
-            global $user, $langs;
-            mailSyn2('auth GSX bad', 'tommy@bimp.fr, f.martinez@bimp.fr', null, $user->getFullName($langs).' id : '.$this->appleId.' auth bad'. date('l jS \of F Y h:i:s A'));
-            BimpTools::sendSmsAdmin('Attention Compte admin.gle déconnecté de GSX');
+        if ($this->appleId == 'admin.gle@bimp.fr') {
+            global $gsx_logout_mail_send;
+
+            if (!$gsx_logout_mail_send) {
+                global $user, $langs;
+                mailSyn2('auth GSX bad', 'tommy@bimp.fr, f.martinez@bimp.fr', null, $user->getFullName($langs) . ' id : ' . $this->appleId . ' auth bad' . date('l jS \of F Y h:i:s A'));
+                BimpTools::sendSmsAdmin('Attention Compte admin.gle déconnecté de GSX');
+                $gsx_logout_mail_send = true;
+            }
         }
-            
+
         $this->logged = false;
         $this->saveToken('acti', '');
 
@@ -204,7 +238,7 @@ class GSX_v2 extends GSX_Const
         }
     }
 
-    // Traitements des requêtes CURL: 
+    // Traitements des requêtes CURL:
 
     protected function init($request_name, &$error = '', $url_params = array(), $extra = array())
     {
@@ -277,7 +311,7 @@ class GSX_v2 extends GSX_Const
 
         if ($request_name !== 'authenticate') {
             $headers[] = 'X-Apple-Auth-Token: ' . $this->auth_token;
-            $headers[] = 'X-Apple-Service-Version: v2';
+            $headers[] = 'X-Apple-Service-Version: v3';
         }
 
         if (isset($extra['headers']) && is_array($extra['headers'])) {
@@ -287,10 +321,11 @@ class GSX_v2 extends GSX_Const
         }
 
         curl_setopt($this->ch, CURLOPT_HTTPHEADER, $headers);
+
         curl_setopt($this->ch, CURLOPT_SSLCERT, $this->certPath);
         curl_setopt($this->ch, CURLOPT_SSLKEY, $this->certPathKey);
-
         curl_setopt($this->ch, CURLOPT_SSLCERTPASSWD, $this->certPword);
+
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->ch, CURLINFO_HEADER_OUT, true);
         curl_setopt($this->ch, CURLOPT_CONNECTTIMEOUT, 10);
@@ -365,6 +400,7 @@ class GSX_v2 extends GSX_Const
             return false;
         }
 
+//        die($data);
         $header_size = curl_getinfo($this->ch, CURLINFO_HEADER_SIZE);
         $headers = substr($data, 0, $header_size);
         $data = substr($data, $header_size);
@@ -391,6 +427,8 @@ class GSX_v2 extends GSX_Const
             if (is_array($data)) {
                 $infos .= "<h4>Body RESPONSE:</h4><br/>" . str_replace("\n", "<br/>", '<pre>' . print_r($data, 1)) . '</pre>';
                 $infos .= '<b>JSON: </b></h4><br/><pre>' . json_encode($data) . '</pre><br/><br/>';
+            } elseif (is_string($data)) {
+                $infos .= '<b>Réponse: </b>' . $data . '<br/><br/>';
             }
 
             if (self::$log_requests) {
@@ -702,7 +740,7 @@ class GSX_v2 extends GSX_Const
                 $params['shipmentDetails']['trackingNumber'] = (string) $shipmentDetails['trackingNumber'];
             }
         }
-        
+
         if (!empty($parts)) {
             $params['parts'] = $parts;
         }
@@ -791,6 +829,98 @@ class GSX_v2 extends GSX_Const
         );
     }
 
+    // Requêtes - Réservations: 
+
+    public function fetchReservationsSummary($shipTo, $from, $to, $productCode = '')
+    {
+        if (self::$mode === 'test') {
+            $shipTo = BimpTools::addZeros('897316', self::$numbersNumChars);
+        } else {
+            $shipTo = BimpTools::addZeros($shipTo, self::$numbersNumChars);
+        }
+
+        $dt_from = new DateTime($from);
+        $dt_to = new DateTime($to);
+
+        $params = array(
+            'shipToCode'      => $shipTo,
+            'toDate'          => $dt_to->format(DateTime::ATOM),
+            'fromDate'        => $dt_from->format(DateTime::ATOM),
+            'currentStatus'   => 'RESERVED',
+            'reservationType' => 'CIN'
+        );
+
+        if ($productCode) {
+            $params['product'] = array(
+                'productCode' => $productCode
+            );
+        }
+
+        return $this->exec('fetchReservationsSummary', $params);
+    }
+
+    public function fetchReservation($shipTo, $reservation_id)
+    {
+        if (self::$mode === 'test') {
+            $this->shipTo = BimpTools::addZeros('897316', 10);
+        } else {
+            $this->shipTo = BimpTools::addZeros($shipTo, 10);
+        }
+
+        return $this->exec('fetchReservation', array(
+                    'reservationId' => $reservation_id
+        ));
+    }
+
+    public function fetchAvailableSlots($shipTo, $product_code)
+    {
+        if (self::$mode === 'test') {
+            $this->shipTo = BimpTools::addZeros('897316', 10);
+        } else {
+            $this->shipTo = BimpTools::addZeros($shipTo, 10);
+        }
+
+        return $this->exec('fetchAvailableSlots', array(
+                    'productCode' => $product_code
+        ));
+    }
+
+    public function createReservation($shipTo, $params)
+    {
+        if (self::$mode === 'test') {
+            $shipTo = BimpTools::addZeros('897316', 10);
+        } else {
+            $shipTo = BimpTools::addZeros($shipTo, 10);
+        }
+
+        $params['shipToCode'] = BimpTools::addZeros($shipTo, 10);
+
+        if (!isset($params['emailLanguageCode'])) {
+            $params['emailLanguageCode'] = 'fr_fr';
+        }
+
+        return $this->exec('createReservation', $params);
+    }
+
+    public function cancelReservation($shipTo, $reservationId)
+    {
+        if (self::$mode === 'test') {
+            $shipTo = BimpTools::addZeros('897316', 10);
+        } else {
+            $shipTo = BimpTools::addZeros($shipTo, 10);
+        }
+
+        $params = BimpTools::overrideArray(array(
+                    'cancelReason' => 'CUSTOMER_CANCELLED'
+                        ), $params);
+
+        $params['reservationId'] = $reservationId;
+        $params['modifiedStatus'] = 'CANCELLED';
+        $params['shipToCode'] = BimpTools::addZeros($shipTo, 10);
+
+        return $this->exec('updateReservation', $params);
+    }
+
     // Requêtes - Divers:
 
     public function filesUpload($serial, $files, $module = '')
@@ -862,6 +992,17 @@ class GSX_v2 extends GSX_Const
         }
 
         return $result;
+    }
+
+    public function attributeLookup($type)
+    {
+        return $this->exec('attributeLookup', array(
+                    'attributes' => array(
+                        array(
+                            'type' => $type
+                        )
+                    )
+        ));
     }
 
     // Gestion des erreurs:
@@ -942,9 +1083,9 @@ class GSX_v2 extends GSX_Const
                 }
 
                 $errors[] = $msg;
-                if (isset($error['code']) && $error['code'] == 'UNAUTHORIZED'){
+                if (isset($error['code']) && $error['code'] == 'UNAUTHORIZED') {
                     $onclick = 'gsxLogOut();';
-                    $errors[] = '<a onclick="'.$onclick.'">Cliquez ici pour vous déconnecté de GSX.</a>';
+                    $errors[] = '<a onclick="' . $onclick . '">Cliquez ici pour vous déconnecté de GSX.</a>';
                 }
             }
         }

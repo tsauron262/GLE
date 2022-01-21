@@ -12,8 +12,6 @@ define("NOLOGIN", 1);
 $errors = array();
 
 require_once '../bimpcore/main.php';
-
-
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
 //dol_syslog(print_r($_REQUEST,1),3);

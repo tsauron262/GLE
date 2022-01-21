@@ -106,6 +106,18 @@ class modBimpContract extends DolibarrModules {
         $this->rights[$r][3] = 0;
         $this->rights[$r][4] = 'to_reopen'; 
         $this->menu = array();   // List of menus to add
+        $r++;
+        $this->rights[$r][0] = $this->numero + $r;
+        $this->rights[$r][1] = 'Changer le PA';
+        $this->rights[$r][3] = 0;
+        $this->rights[$r][4] = 'can_change_pa'; 
+        $this->menu = array();   // List of menus to add
+        $r++;
+        $this->rights[$r][0] = $this->numero + $r;
+        $this->rights[$r][1] = 'Changer la description';
+        $this->rights[$r][3] = 0;
+        $this->rights[$r][4] = 'can_change_desc'; 
+        $this->menu = array();   // List of menus to add
         $r = 1;
 
     }

@@ -1025,27 +1025,29 @@ class BimpRelanceClientsLine extends BimpObject
                     $subject .= ' - Client: ' . $client->getRef() . ' ' . $client->getName();
 
                     $from = 'recouvrementolys@bimp.fr';
-                    $replyTo = '';
-                    $cc = '';
+                    $replyTo = array();
+                    $cc = array();
 
-                    $commercial = $client->getCommercial(false);
+                    $commercials = $client->getCommercials(false);
 
-                    if (BimpObject::objectLoaded($commercial)) {
-                        $replyTo = $commercial->getData('email');
+                    foreach($commercials as $commercial){
+                        if (BimpObject::objectLoaded($commercial)) {
+                            $replyTo[] = $commercial->getData('email');
 
-                        if (!BimpObject::objectLoaded($relance) || in_array($relance->getData('mode'), array('global', 'indiv')) || $relance_idx > 1) {
-                            $cc = $replyTo;
                         }
                     }
+                    if (!BimpObject::objectLoaded($relance) || in_array($relance->getData('mode'), array('global', 'indiv')) || $relance_idx > 1) {
+                        $cc = $replyTo;
+                    }
 
-                    if (!$replyTo) {
-                        $replyTo = $from;
+                    if (!count($replyTo)) {
+                        $replyTo[] = $from;
                     }
 
                     $filePath = $this->getPdfFilepath();
                     $fileName = $this->getPdfFileName();
 
-                    if (!mailSyn2($subject, $email, $from, $mail_body, array($filePath), array('application/pdf'), array($fileName), $cc, '', 0, 1, '', '', $replyTo)) {
+                    if (!mailSyn2($subject, $email, $from, $mail_body, array($filePath), array('application/pdf'), array($fileName), implode(',', $cc), '', 0, 1, '', '', implode(',', $replyTo))) {
                         // Mail KO
                         $errors[] = 'Echec de l\'envoi de la relance par e-mail';
                     } else {

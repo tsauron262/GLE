@@ -25,13 +25,12 @@ class Bimp_Client extends Bimp_Societe
 
     public function canClientEdit()
     {
-        global $userClient;
-
-        if (BimpObject::objectLoaded($userClient)) {
-            if ($userClient->isAdmin() && $this->id == (int) $userClient->getData('id_client')) {
-                return 1;
-            }
-        }
+//        global $userClient;
+//        if (BimpObject::objectLoaded($userClient)) {
+//            if ($userClient->isAdmin() && $this->id == (int) $userClient->getData('id_client')) {
+//                return 1;
+//            }
+//        }
 
         return 0;
     }
@@ -147,6 +146,14 @@ class Bimp_Client extends Bimp_Societe
         }
 
         return (count($errors) ? 0 : 1);
+    }
+
+    public function isActifContratAuto()
+    {
+        global $conf;
+        if (isset($conf->global->MAIN_MODULE_BIMPCONTRATAUTO) && $conf->global->MAIN_MODULE_BIMPCONTRATAUTO)
+            return 1;
+        return 0;
     }
 
     // Getters params:
@@ -719,23 +726,6 @@ class Bimp_Client extends Bimp_Societe
         return 'relancables';
     }
 
-    public function getEncours($withAutherSiret = true)
-    {
-        if ($withAutherSiret && $this->getData('siren') . 'x' != 'x' && strlen($this->getData('siren')) == 9) {
-            $tot = 0;
-            $lists = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array('siren' => $this->getData('siren')));
-            foreach ($lists as $idO => $obj) {
-                $tot += $obj->getEncours(false);
-            }
-            return $tot;
-        } else {
-            $values = $this->dol_object->getOutstandingBills();
-            if (isset($values['opened']))
-                return $values['opened'];
-        }
-        return 0;
-    }
-
     public function getUnpaidFactures($date_from = '')
     {
         if ($this->isLoaded()) {
@@ -780,6 +770,141 @@ class Bimp_Client extends Bimp_Societe
         return 0;
     }
 
+    public function getTotalUnpayed($since = '2019-06-30')
+    {
+        $factures = $this->getUnpaidFactures($since);
+        $total_unpaid = 0;
+
+        foreach ($factures as $fac) {
+//            $fac->checkIsPaid(); // TODO laisser? => non nécessaire: getRemainToPay() effectue le calcul en direct. 
+            $total_unpaid += (float) $fac->getRemainToPay(true);
+        }
+
+        return $total_unpaid;
+    }
+
+    public function getTotalUnpayedTolerance($since = '2019-06-30', $euros_tolere = 2000, $day_tolere = 5)
+    {
+        $factures = $this->getUnpaidFactures($since);
+        $total_unpaid = 0;
+        $has_retard = 0;
+
+        if (!empty($factures)) {
+
+            $now = new DateTime();
+
+            foreach ($factures as $fac) {
+
+                $date_tolere = new DateTime($fac->getData('date_lim_reglement'));
+                $date_tolere->add(new DateInterval('P' . $day_tolere . 'D'));
+
+                if ($has_retard or $date_tolere < $now)
+                    $has_retard = 1;
+
+//                $fac->checkIsPaid(); // => non nécessaire: getRemainToPay() effectue le calcul en direct. 
+                $total_unpaid += (float) $fac->getRemainToPay(true);
+            }
+        }
+
+        if ($has_retard or $euros_tolere < $total_unpaid)
+            return $total_unpaid;
+
+        return 0;
+    }
+
+    public function getAtradiusFileName($force = false, $show_ext = true)
+    {
+        $name = 'atradius';
+        $ext = '.pdf';
+        if ($force || file_exists($this->getFilesDir() . $name . $ext)) {
+            if ($show_ext)
+                return $name . $ext;
+            else
+                return $name;
+        }
+        return 0;
+    }
+
+    // Données piste: 
+
+    public function getChorusStructuresList(&$errors = array())
+    {
+        if ($this->isLoaded($errors)) {
+            $siret = $this->getData('siret');
+
+            if ($siret) {
+                $cache_key = 'client_' . $this->id . '_chorus_structures';
+
+                if (!isset(self::$cache[$cache_key])) {
+                    BimpCore::loadBimpApiLib();
+
+                    $api = BimpAPI::getApiInstance('piste');
+
+                    if (is_a($api, 'BimpAPI') && $api->isOk($errors)) {
+                        $response = $api->rechercheClientStructures($this->getData('siret'), array(), $errors);
+
+                        if (is_array($response) && !count($errors)) {
+                            self::$cache[$cache_key] = $response;
+                            return $response;
+                        }
+                    }
+                }
+            } else {
+                $errors[] = 'N° SIRET absent';
+            }
+        }
+
+        return null;
+    }
+
+    public function getChorusStructureData($id_structure, &$errors = array())
+    {
+        if ($this->isLoaded($errors)) {
+            $cache_key = 'client_' . $this->id . '_chorus_structure_' . $id_structure . '_data';
+
+            if (!isset(self::$cache[$cache_key])) {
+                BimpCore::loadBimpApiLib();
+
+                $api = BimpAPI::getApiInstance('piste');
+
+                if (is_a($api, 'BimpAPI') && $api->isOk($errors)) {
+                    $response = $api->consulterStructure($id_structure, array(), $errors);
+
+                    if (is_array($response) && !count($errors)) {
+                        self::$cache[$cache_key] = $response;
+                        return $response;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public function getChorusStructureServices($id_structure, &$errors = array())
+    {
+        if ($this->isLoaded($errors)) {
+            $cache_key = 'client_' . $this->id . '_chorus_structure_' . $id_structure . '_services';
+
+            if (!isset(self::$cache[$cache_key])) {
+                BimpCore::loadBimpApiLib();
+
+                $api = BimpAPI::getApiInstance('piste');
+
+                if (is_a($api, 'BimpAPI') && $api->isOk($errors)) {
+                    $response = $api->rechercheClientServices($id_structure, array(), $errors);
+
+                    if (is_array($response) && !count($errors)) {
+                        self::$cache[$cache_key] = $response;
+                        return $response;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
     // Getters Array:
 
     public function getRelancesDisplayModesArray()
@@ -820,38 +945,61 @@ class Bimp_Client extends Bimp_Societe
     public function displayOutstanding()
     {
         $html = '';
-        $tot = 0;
-        if ($this->isLoaded()) {
-            $values = $this->getEncours(false);
-            $tot += $values;
 
-            if ($values > 0) {
-                $html .= BimpTools::displayMoneyValue($values);
+        if ($this->isLoaded()) {
+            $encours = $this->getAllEncoursForSiret(false);
+            if ($encours['total'] > 0) {
+                $html .= '<b>Encours sur factures restant dues: </b>';
+                $html .= BimpTools::displayMoneyValue($encours['factures']['socs'][$this->id]);
+
+                if (count($encours['factures']['socs']) > 1) {
+                    $html .= '<br/>';
+
+                    foreach ($encours['factures']['socs'] as $id_soc => $soc_encours) {
+                        if ($id_soc == $this->id) {
+                            continue;
+                        }
+                        
+                        $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_soc);
+
+                        $html .= '<br/>Client ';
+
+                        if (BimpObject::objectLoaded($soc)) {
+                            $html .= $soc->getLink();
+                        } else {
+                            $html .= '#' . $id_soc;
+                        }
+
+                        $html .= ' : ' . BimpTools::displayMoneyValue($soc_encours);
+                    }
+
+                    $html .= '<br/><br/>';
+                    $html .= '<b>Total encours sur factures restant dues pour l\'entreprise (Siren): </b>' . BimpTools::displayMoneyValue($encours['factures']['total']);
+                }
             } else {
                 $html .= '<span class="warning">Aucun encours trouvé sur cet établissement (Siret)</span>';
             }
 
+            // Calcul encours sur commandes non facturées: 
+            $html .= '<div style="margin: 10px 0; padding: 10px; border: 1px solid #737373">';
+            $html .= '<b>Encours sur les commandes non facturées: </b>';
+            $html .= '<div id="client_' . $this->id . '_encours_non_facture"></div>';
+            $onclick = $this->getJsLoadCustomContent('displayEncoursNonFacture', '$(\'#client_' . $this->id . '_encours_non_facture' . '\')');
+
+            $html .= '<div style="margin-top: 10px; text-align: center">';
+            $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+            $html .= BimpRender::renderIcon('fas_calculator', 'iconLeft') . 'Calculer';
+            $html .= '</span>';
+            $html .= '</div>';
+            $html .= '</div>';
+
+            // Bouton aperçu: 
             $html .= '<div class="buttonsContainer align-right">';
             $url = DOL_URL_ROOT . '/compta/recap-compta.php?socid=' . $this->id;
             $html .= '<a href="' . $url . '" target="_blank" class="btn btn-default">';
             $html .= 'Aperçu client' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
             $html .= '</a>';
             $html .= '</div>';
-        }
-
-        if ($this->getData('siren') . 'x' != 'x' && strlen($this->getData('siren')) == 9) {
-            $lists = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array('siren' => $this->getData('siren')));
-            //        print_r($lists);
-            foreach ($lists as $idO => $obj) {
-                if ($idO != $this->id) {
-                    $enCli = $obj->getEncours(false);
-                    $tot += $enCli;
-                    $html .= '<br/>Client ' . $obj->getLink() . ' : ' . BimpTools::displayMoneyValue($enCli);
-                }
-            }
-
-            if ($tot != $values)
-                $html .= '<br/><br/>Encours TOTAL sur l\'entreprise (Siren): ' . BimpTools::displayMoneyValue($tot);
         }
 
         return $html;
@@ -866,6 +1014,60 @@ class Bimp_Client extends Bimp_Societe
         }
 
         return '';
+    }
+
+    public function displayAtradiusFile()
+    {
+        $html = '';
+        $file = $this->getAtradiusFileName();
+        if (!is_null($file) && $file) {
+            $html .= '<a target="__blanck" href="' . DOL_URL_ROOT . '/document.php?modulepart=societe&file=' . $this->id . '/' . $file . '">Fichier</a>';
+        } else {
+//            return BimpInput::renderInput('file_upload', 'atradius_file');
+
+            $buttons = array();
+
+            // Demande encours altriadus
+            $note = BimpObject::getInstance("bimpcore", "BimpNote");
+
+            $buttons[] = array(
+                'label'   => 'Ajouter PDF du Rapport Assurance crédit',
+                'icon'    => 'fas_comment-dollar',
+                'onclick' => $this->getJsLoadModalForm('atradius_file')
+            );
+
+            $list = BimpCache::getBimpObjectObjects('bimpcore', 'BimpNote', array('content'    => array(
+                            'operator' => 'like',
+                            'value'    => '%licite pour ce client un encours%'
+                        ), "obj_type"   => "bimp_object", "obj_module" => $this->module, "obj_name"   => $this->object_name, "id_obj"     => $this->id));
+
+            global $user, $langs;
+            if (count($list) == 0) {
+                $buttons[] = array(
+                    'label'   => 'Demander encours',
+                    'icon'    => 'far_paper-plane',
+                    'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => 680, "content" => "Bonjour, " . $user->getFullName($langs) . " sollicite pour ce client un encours à XX XXX  €\\n\\nNB : si ce client est une Administration publique (son Siren commence par 1 ou par 2) ou si vous pensez qu\'il fait partie des Autres Administrations et Institution demandez 50 000 € d\'encours\\nCette information sera vérifiée par l\'équipe en charge de l\'attribution des encours"), array('form_name' => 'rep'))
+                );
+            } else {
+//                print_r($list);die;
+                $noteT = current($list);
+                $buttons[] = array(
+                    'label'   => 'Refus d\'encours',
+                    'icon'    => 'far_paper-plane',
+                    'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_USER, "fk_user_dest" => $noteT->getData('user_create'), "content" => "Bonjour\\n\\nVotre demande d\'encours pour le client " . $this->getName() . " a été refusée\\n\\nNous pouvons toutefois solliciter Atradius pour une révision de cette décision \\n\\nPour cela nous devons fournir un maximum d\'éléments prouvant la bonne santé financière de cette entreprise (dernier bilan, compte de résultats, etc)\\n\\nMerci de bien vouloir les demander à votre client puis les transmettre à atradius-olys@bimp.fr \\n\\nDans l\'attente de cette révision, toutes les commandes en cours devront être réglées au comptant"), array('form_name' => 'rep'))
+                );
+
+                $buttons[] = array(
+                    'label'   => 'Demander révision encours',
+                    'icon'    => 'far_paper-plane',
+                    'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => 680, "content" => "Bonjour, " . $user->getFullName($langs) . " sollicite pour ce client une révision d\'encours à XX XXX  €"), array('form_name' => 'rep'))
+                );
+            }
+            foreach ($buttons as $button) {
+                $html .= BimpRender::renderButton($button) . '<br/>';
+            }
+        }
+        return $html;
     }
 
     // Rendus HTML:
@@ -940,6 +1142,14 @@ class Bimp_Client extends Bimp_Societe
             'title'         => BimpRender::renderIcon('fas_calendar-check', 'iconLeft') . 'Evénements',
             'ajax'          => 1,
             'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_events_list_tab .nav_tab_ajax_result\')', array('events'), array('button' => ''))
+        );
+
+        // Atradius: 
+        $tabs[] = array(
+            'id'            => 'client_atradius_list_tab',
+            'title'         => BimpRender::renderIcon('fas_dollar-sign', 'iconLeft') . 'Assurance crédit',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderNavtabView', '$(\'#client_atradius_list_tab .nav_tab_ajax_result\')', array('atradius'), array('button' => ''))
         );
 
         $html = BimpRender::renderNavTabs($tabs, 'card_view');
@@ -1022,6 +1232,14 @@ class Bimp_Client extends Bimp_Societe
             'title'         => BimpRender::renderIcon('fas_history', 'iconLeft') . 'Suivi Recouvrement',
             'ajax'          => 1,
             'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_suivi_recouvrement_list_tab .nav_tab_ajax_result\')', array('suivi_recouvrement'), array('button' => ''))
+        );
+
+        // stats par date: 
+        $tabs[] = array(
+            'id'            => 'client_stat_date_list_tab',
+            'title'         => BimpRender::renderIcon('fas_chart-bar', 'iconLeft') . 'Stat par date',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectList', '$(\'#client_stat_date_list_tab .nav_tab_ajax_result\')', array('stat_date'), array('button' => ''))
         );
 
         return BimpRender::renderNavTabs($tabs, 'commercial_view');
@@ -1136,6 +1354,10 @@ class Bimp_Client extends Bimp_Societe
                 ));
                 $html .= $list->renderHtml();
                 break;
+
+            case 'atradius':
+                $view = new BC_View($this, 'atradius');
+                $html .= $view->renderHtml();
         }
 
         return $html;
@@ -1151,6 +1373,7 @@ class Bimp_Client extends Bimp_Societe
         $html = '';
 
         $list = null;
+        $list2 = null;
         $client_label = $this->getRef() . ' - ' . $this->getName();
 
         switch ($list_type) {
@@ -1216,6 +1439,16 @@ class Bimp_Client extends Bimp_Societe
                 $list->addFieldFilterValue('id_societe', (int) $this->id);
                 break;
 
+            case 'stat_date':
+                $obj = BimpObject::getInstance('bimpcommercial', 'Bimp_Stat_Date');
+                $list = new BC_ListTable($obj, 'clientMonth', 1, null, 'State par date "' . $client_label . '"', 'fas_history');
+                $list->addIdentifierSuffix('month');
+                $list->addFieldFilterValue('fk_soc', (int) $this->id);
+                $list2 = new BC_ListTable($obj, 'clientYear', 1, null, 'State par date "' . $client_label . '"', 'fas_history');
+                $list2->addIdentifierSuffix('year');
+                $list2->addFieldFilterValue('fk_soc', (int) $this->id);
+                break;
+
             case 'relances':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'BimpRelanceClientsLine'), 'client', 1, null, 'Relances de paiement du client "' . $client_label . '"', 'fas_comment-dollar');
                 $list->addFieldFilterValue('id_client', (int) $this->id);
@@ -1254,6 +1487,9 @@ class Bimp_Client extends Bimp_Societe
         } else {
             $html .= BimpRender::renderAlerts('Type de liste non spécifié');
         }
+
+        if (is_a($list2, 'BC_ListTable'))
+            $html .= $list2->renderHtml();
 
         return $html;
     }
@@ -1372,7 +1608,7 @@ class Bimp_Client extends Bimp_Societe
                                     $facs_rows_html .= '<td>';
                                     if ($relance) {
                                         $nSelectables++;
-                                        $facs_rows_html .= '<input type="checkbox" class="facture_check ' . $checkbox_class . '" value="' . $id_fac . '" name="factures[]"' . ($relance ? ' checked="1"' : '');
+                                        $facs_rows_html .= '<input type="checkbox" class="facture_check ' . $checkbox_class . '" value="' . $id_fac . '" name="factures[]" checked="1"';
                                         $facs_rows_html .= ' data-id_client="' . $id_client . '"';
                                         $facs_rows_html .= '/>';
                                     }
@@ -1902,7 +2138,7 @@ class Bimp_Client extends Bimp_Societe
             $date_prevue = date('Y-m-d');
         }
 
-        if (empty($clients) && $mode = 'cron') {
+        if (empty($clients) && $mode == 'cron') {
             // Si liste de factures clients non fournie et si mode cron, on récup la liste complète des factures à relancer. 
             $clients = $this->getFacturesToRelanceByClients(true);
         }
@@ -2460,17 +2696,34 @@ class Bimp_Client extends Bimp_Societe
         parent::onSave($errors, $warnings);
     }
 
-    public function getTotalUnpayed($since = '2019-06-30')
+    public function update(&$warnings = array(), $force_update = false)
     {
+        $name = 'file';
+        $success = 'Fichier uploadé';
+        $errors = array();
 
-        $factures = $this->getUnpaidFactures($since);
-        $total_unpaid = 0;
+        if (file_exists($_FILES[$name]["tmp_name"])) {
+            if (stripos($_FILES[$name]['name'], '.pdf') > 0) {
+                $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile');
+                $values = array();
+                $values['parent_module'] = 'bimpcore';
+                $values['parent_object_name'] = 'Bimp_Societe';
+                $values['id_parent'] = $this->id;
+                $values['file_name'] = $this->getAtradiusFileName(true, false);
+                $values['is_deletable'] = 0;
 
-        foreach ($factures as $fac) {
-            $fac->checkIsPaid(); // TODO laisser ?
-            $total_unpaid += (float) $fac->getRemainToPay(true);
+                $file->validateArray($values);
+
+                $errors = $file->create();
+                if (!count($errors))
+                    $this->set('date_atradius', dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S'));
+            } else
+                $errors[] = 'Uniquement des fichier PDF';
         }
 
-        return $total_unpaid;
+        if (count($errors))
+            return $errors;
+
+        return parent::update($warnings, $force_update);
     }
 }

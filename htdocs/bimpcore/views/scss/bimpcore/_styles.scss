@@ -395,7 +395,7 @@ i.iconRight {
 }
 
 .btn-large {
-    @media (min-width: $screen-sm-max) {
+    /*@media (min-width: $screen-xs-max) {*/
         font-size: 14px;
         padding: 12px 20px;
 
@@ -410,7 +410,7 @@ i.iconRight {
                 margin-left: 12px;
             }
         }
-    }
+    /*}*/
 }
 
 .btn-small {

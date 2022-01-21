@@ -1,0 +1,26 @@
+labels:
+    name: Export
+    
+forms:
+    search_piece:
+        title: Chercher une pièce comptable
+        rows:
+            - custom: 1
+              label: Numéro de la pièce
+              input_name: numero_of_piece
+              required: 1
+              input:
+                  type: text
+            - custom: 1
+              label: Résultat
+              input_name: resultat
+              edit: 0
+              depends_on: numero_of_piece
+              value:
+                  callback: search
+              input:
+                  help: Selectionner le champs pour afficher le résultat
+                  sizable: 0
+                  rows: 25 
+                  type: textarea
+              

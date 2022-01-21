@@ -188,6 +188,8 @@ class gsxController extends BimpController
                         GSX_Const::$sav_files = BimpCache::getObjectFilesArray('bimpcommercial', 'Bimp_Propal', (int) $sav->getData('id_propal'), false, true);
                     }
 
+                    GSX_Const::$sav_files = BimpTools::merge_array(GSX_Const::$sav_files, BimpCache::getObjectFilesArray('bimpsupport', 'BS_SAV', (int) $sav->id, false, true), true);
+
                     $customer_note = '';
                     $tech_note = '';
 
@@ -463,27 +465,15 @@ class gsxController extends BimpController
         $idx = BimpTools::getValue('attachments_nextIdx', 0);
         if ($idx) {
             $files = array();
-            $sav_files_dir = '';
-            if (BimpObject::objectLoaded($sav)) {
-                $propal = $sav->getChildObject('propal');
-                if (BimpObject::objectLoaded($propal)) {
-                    $sav_files_dir = $propal->getFilesDir();
-                }
-            }
 
             for ($i = 1; $i < $idx; $i++) {
                 if (isset($_POST['attachments_fileOrigin_' . $i]) && $_POST['attachments_fileOrigin_' . $i] === 'sav') {
-                    // Fichier de la propale du SAV: 
-                    if (!$sav_files_dir) {
-                        return array('Impossible de déterminer le dossier pour les fichiers du SAV (SAV ou devis invalide)');
-                    }
-
                     $id_file = (int) BimpTools::getValue('attachments_savFile_' . $i, 0);
                     if ($id_file) {
                         $fileObj = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', $id_file);
                         if (BimpObject::objectLoaded($fileObj)) {
                             $file_name = $fileObj->getData('file_name') . '.' . $fileObj->getData('file_ext');
-                            $file_path = $sav_files_dir . $file_name;
+                            $file_path = $fileObj->getFilePath();
                             if (!file_exists($file_path)) {
                                 $errors[] = 'Le fichier "' . $file_name . '" n\'existe pas';
                                 continue;
@@ -572,7 +562,7 @@ class gsxController extends BimpController
                         }
                     }
                 }
-                
+
 
                 if (isset($result['parts']) && !empty($result['parts'])) {
                     foreach ($result['parts'] as $key => $part) {
@@ -597,7 +587,7 @@ class gsxController extends BimpController
                         }
                     }
                 }
-                
+
                 // Traitement des questions: 
                 if (!isset($params['repairType']) && isset($result['repairType'])) {
                     $params['repairType'] = $result['repairType'];
@@ -1863,7 +1853,7 @@ class gsxController extends BimpController
         return $responses;
     }
 
-    // Diagnostics: 
+    // Diagnostics:
 
     protected function gsxDiagnosticSuites($params)
     {
@@ -3488,7 +3478,7 @@ class gsxController extends BimpController
                             'onclick' => 'gsx_findRepairsToImport($(this), ' . $sav->id . ')'
             )));
 
-            $html .= BimpRender::renderFreeForm(array(
+            $html .= BimpForm::renderFreeForm(array(
                         array(
                             'label' => 'Identifiant',
                             'input' => BimpInput::renderInput('text', 'identifier', $serial)
@@ -3529,7 +3519,7 @@ class gsxController extends BimpController
                             'onclick' => $onclick
             )));
 
-            $html .= BimpRender::renderFreeForm(array(
+            $html .= BimpForm::renderFreeForm(array(
                         array(
                             'label' => 'Type de réparation',
                             'input' => BimpInput::renderInput('select', 'repairType', null, array(
@@ -3576,7 +3566,7 @@ class gsxController extends BimpController
                                 'onclick' => $onclick
                 )));
 
-                $html .= BimpRender::renderFreeForm(array(
+                $html .= BimpForm::renderFreeForm(array(
                             array(
                                 'label' => 'Type de réparation',
                                 'input' => BimpInput::renderInput('select', 'eligibilityRepairType', null, array(
@@ -3638,7 +3628,7 @@ class gsxController extends BimpController
                             'onclick' => 'loadRepairForm($(this), ' . $sav->id . ', \'' . $this->serial . '\')'
             )));
 
-            $html .= BimpRender::renderFreeForm(array(
+            $html .= BimpForm::renderFreeForm(array(
                         array(
                             'label' => 'Type d\'opération',
                             'input' => BimpInput::renderInput('select', 'repairType', null, array(

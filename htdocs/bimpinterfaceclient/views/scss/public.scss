@@ -246,7 +246,7 @@
             background-color: #F9F9FA;
             padding: 20px;
             margin: 15px 0;
-            box-shadow: 0 5px 15px -5px rgba(60, 60, 60, 0.2);
+            box-shadow: 0 5px 12px -5px #737373;
         }
 
         input, select, textarea {
@@ -270,6 +270,11 @@
             box-shadow: 0 0 5px 0 rgba(60, 60, 60, 0.2);
             margin: 0 0 7px;
             width: 100%;
+
+            &.value_missing {
+                box-shadow: 0 0 5px 0 #FF0000;
+                border: none;
+            }
         }
 
         .select2-selection {

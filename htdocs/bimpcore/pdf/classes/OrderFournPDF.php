@@ -9,6 +9,7 @@ class OrderFournPDF extends BimpDocumentPDF
 
     public static $type = 'order_supplier';
     public $commande = null;
+    public $signature_bloc = false;
 
     public function __construct($db)
     {
@@ -252,7 +253,7 @@ class OrderFournPDF extends BimpDocumentPDF
         
     }
 
-    public function getAfterTotauxHtml($blocSignature = true)
+    public function getAfterTotauxHtml()
     {
         return '';
     }

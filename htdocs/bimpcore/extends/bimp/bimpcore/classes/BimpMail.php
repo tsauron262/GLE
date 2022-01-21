@@ -57,7 +57,7 @@ class BimpMail extends BimpMailCore
 
     function getFooter()
     {
-        $html .= '</div>';
+        $html = '</div>';
         $html .= '</div>';
         $html .= '</div>';
 

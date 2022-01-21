@@ -325,7 +325,10 @@ class BC_Display extends BimpComponent
 
                 if (!empty($displays)) {
                     foreach ($displays as $display_name => $display_params) {
-                        $types[$display_name] = $object->getConf('fields/' . $field_name . '/displays/' . $display_name . '/label', $display_name, true);
+                        $label = $display_name;
+                        if(isset($display_params['type']) && isset(static::$types[$display_params['type']]))
+                            $label = static::$types[$display_params['type']];
+                        $types[$display_name] = $object->getConf('fields/' . $field_name . '/displays/' . $display_name . '/label', $label, ($label == $display_name));
                     }
                 }
             }
@@ -957,11 +960,12 @@ class BC_Display extends BimpComponent
                 case 'datetime':
                     if ($this->value && $this->value !== '0000-00-00 00:00:00') {
                         $format = $this->getParam('format', 'd / m / Y H:i:s');
+                        
                         $date = new DateTime($this->value);
                         if ($this->no_html) {
                             $html .= $date->format($format);
                         } else {
-                            $html .= BimpTools::printDate($date, 'span', 'datetime', $this->params['format'], ($this->params['show_hour'] ? $this->params['format'] : 'd / m / Y'));
+                            $html .= BimpTools::printDate($date, 'span', 'datetime', $format, ($this->params['show_hour'] ? $format : 'd / m / Y'));
                         }
                     }
                     break;

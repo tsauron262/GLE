@@ -12,6 +12,7 @@ class InvoicePDF extends BimpDocumentPDF
     public $shipments = array();
     public $deliveries = array();
     public $nb_deliveries = 0;
+    public $signature_bloc = false;
 
     public function __construct($db)
     {
@@ -27,6 +28,10 @@ class InvoicePDF extends BimpDocumentPDF
     {
         if (isset($this->object) && is_a($this->object, 'Facture')) {
             if (isset($this->object->id) && $this->object->id) {
+                if ($this->object->mode_reglement_code == 'FIN_YC') {
+                    $this->signature_bloc = true;
+                }
+                        
                 $this->bimpCommObject = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture', (int) $this->object->id);
                 $this->facture = $this->object;
                 $this->facture->fetch_thirdparty();
@@ -176,9 +181,9 @@ class InvoicePDF extends BimpDocumentPDF
                 $docName = $this->langs->transnoentities('Invoice');
         }
 
-        if ($this->sitationinvoice) {
-            $docName = $this->langs->transnoentities('InvoiceSituation');
-        }
+//        if ($this->sitationinvoice) {
+//            $docName = $this->langs->transnoentities('InvoiceSituation');
+//        }
 
         // Réf facture: 
         $docRef = $this->langs->transnoentities("Ref") . " : " . $this->langs->convToOutputCharset($this->facture->ref);
@@ -203,7 +208,7 @@ class InvoicePDF extends BimpDocumentPDF
             $soc = null;
         }
 
-        $html .= '<div>';
+        $html = '<div>';
 
         // Ref. client:
         if ($this->facture->ref_client) {
@@ -367,11 +372,6 @@ class InvoicePDF extends BimpDocumentPDF
 
         return $html;
     }
-    
-    public function getAfterTotauxHtml($blocSignature = false)
-    {
-        return parent::getAfterTotauxHtml($this->object->mode_reglement_code == 'FIN_YC');
-    }
 
     public function getPaymentInfosHtml()
     {
@@ -399,7 +399,7 @@ class InvoicePDF extends BimpDocumentPDF
             if (empty($this->object->mode_reglement_code) && empty($conf->global->FACTURE_CHQ_NUMBER) && empty($conf->global->FACTURE_RIB_NUMBER)) {
                 $error = $this->langs->transnoentities("ErrorNoPaiementModeConfigured");
             } elseif (($this->object->mode_reglement_code == 'CHQ' && empty($conf->global->FACTURE_CHQ_NUMBER) && empty($this->object->fk_account) && empty($this->object->fk_bank)) || ($this->object->mode_reglement_code == 'VIR' && empty($conf->global->FACTURE_RIB_NUMBER) && empty($this->object->fk_account) && empty($this->object->fk_bank))) {
-                $error = $this->langs->transnoentities("ErrorPaymentModeDefinedToWithoutSetup", $object->mode_reglement_code);
+                $error = $this->langs->transnoentities("ErrorPaymentModeDefinedToWithoutSetup", $this->object->mode_reglement_code);
             }
 
             if ($error) {

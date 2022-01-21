@@ -95,7 +95,6 @@ fields:
     libelle: 
         label: Libellé
         dol_extra_field: 1
-        hashtags: 1
 #        required: 1
     ef_type: 
         label: Secteur (Canal de Vente)
@@ -278,6 +277,17 @@ fields:
             options:
                 callback: getRibArray
         default_value: 0
+        
+    expertise:
+        label: Expertise Bimp
+        dol_extra_field: 1
+        input:
+            type: select
+            options:
+                array: expertise
+        default_value: 0
+#        required: 1
+        
     
 forms: 
     contact:
@@ -710,6 +720,7 @@ filters:
         input: 
             type: search_user
             include_empty: 1
+            include_current: 1
             empty_label: Aucun
                     
     id_product:

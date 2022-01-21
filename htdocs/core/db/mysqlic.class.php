@@ -103,6 +103,9 @@ class DoliDBMysqliC extends DoliDB
     public $timeReconnect = 0;
     
     public $thread_id = 0;
+    
+    public $timeDebReq = 0;
+    public $timeDebReq2 = 0;
 
     /* fmoddrsi */
 
@@ -314,7 +317,17 @@ class DoliDBMysqliC extends DoliDB
 
             $collation = empty($conf->db->dolibarr_main_db_collation) ? 'utf8_unicode_ci' : $conf->db->dolibarr_main_db_collation;
             if (preg_match('/latin1/', $collation)) $collation='utf8_unicode_ci';
-            if (! preg_match('/general/', $collation)) $this->db->query("SET collation_connection = ".$collation);
+            if (! preg_match('/general/', $collation)){
+                $query = "SET collation_connection = ".$collation;
+                try {
+                    $sql = $this->db->query($query);
+                } catch (Exception $e) {
+                    $this->catch($query, $sql, $e);
+                    return 0;
+                }
+                if(!$sql)
+                    $this->catch ($query, $sql);
+            }
 	}
     }
     
@@ -645,6 +658,8 @@ class DoliDBMysqliC extends DoliDB
         {
 	    if ($this->transaction_opened > 0) 
                 dol_syslog(get_class($this)."::close Closing a connection with an opened transaction depth=".$this->transaction_opened,LOG_ERR);
+            if($this->transaction_opened > 0 && class_exists('BimpCore'))
+                BimpCore::addlog (get_class($this)."::close Closing a connection with an opened transaction depth=".$this->transaction_opened, Bimp_Log::BIMP_LOG_ERREUR);
             $this->connected=false;
             $this->database_host = "";
             $this->database_port = 0;
@@ -666,6 +681,7 @@ class DoliDBMysqliC extends DoliDB
     function connect_server($query_type=0, $tentative = 0)
     {        
         $timestamp_debut = 0.0;
+        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         
         if(! $this->CONSUL_USE_REDIS_CACHE)
         {
@@ -804,8 +820,11 @@ class DoliDBMysqliC extends DoliDB
         }
         
         $cur_timestamp = time();
-        if( ($cur_timestamp - $this->_last_discover_time) > ($this->CONSUL_REDIS_CACHE_TTL / 2) )
+        if( ($cur_timestamp - $this->_last_discover_time) > ($this->CONSUL_REDIS_CACHE_TTL / 2) ){
             $this->discover_svc();   // On TTL/2 we rediscover services from Consul (or read cached values from Redis)
+            $count_read = count($this->_svc_read);
+            $count_write = count($this->_svc_write);
+        }
         // Search for a server in array
         switch ($query_type)
         {
@@ -900,12 +919,14 @@ class DoliDBMysqliC extends DoliDB
     //                unset($this->_svc_read[$ind_srv]);     // Should always be true                        
             }
 
+            dol_syslog('Impossible de se connectée a '.$server, 3);
             if($tentative < 20)
                 return $this->connect_server($query_type, $tentative+1);
             else
                 die('impossible de se connecté au serveur');
         }
         
+        dol_syslog('Aucun serveur pour connexion BDD '.$count_read.'/'.count($this->_svc_read).' '.$count_write.'/'.count($this->_svc_write).' '.$rnd_index, 3);
         return FALSE;
     }
     
@@ -922,6 +943,7 @@ class DoliDBMysqliC extends DoliDB
      */
     function query($query,$usesavepoint=0,$type='auto')
     {
+        $this->timeDebReq = microtime(true);
 //    	global $conf, $user;
         global $user;
         
@@ -951,16 +973,6 @@ class DoliDBMysqliC extends DoliDB
         }
 */
         /* moddrsi */
-        $tabRemplacement = array(
-//            "SELECT COUNT(DISTINCT a.rowid) as nb_rows FROM llx_propal a LEFT JOIN llx_element_contact ec ON ec.element_id = a.rowid LEFT JOIN llx_c_type_contact tc ON ec.fk_c_type_contact = tc.rowid" =>
-//                "SELECT COUNT(DISTINCT a.rowid) as nb_rows FROM llx_propal a ",
-//            "SELECT DISTINCT (a.rowid) FROM llx_propal a LEFT JOIN llx_element_contact ec ON ec.element_id = a.rowid LEFT JOIN llx_c_type_contact tc ON ec.fk_c_type_contact = tc.rowid ORDER BY a." =>
-//                "SELECT DISTINCT (a.rowid) FROM llx_propal a ORDER BY a."
-        );
-        foreach ($tabRemplacement as $old => $new) {
-            $query = str_replace($old, $new, $query);
-        }
-
         $this->countReq ++;
         $timestamp_debut = microtime(true);
         if ($debugTime) {
@@ -974,7 +986,16 @@ class DoliDBMysqliC extends DoliDB
         if($this->transaction_opened == 0){//On est pas dans une transaction.
             if(!$this->connect_server($qtype))
             {
-                dol_syslog(get_class($this)."::query: Fatal error - cannot connect to database server for request type: ".$qtype, LOG_ERR);
+                $extra = array('svc_read'=>$this->_svc_read, 'svc_write'=>$this->_svc_write);
+                $this->discover_svc();
+                $extra['new_svc_read'] = $this->_svc_read;
+                $extra['new_svc_write'] = $this->_svc_write;
+                dol_syslog(get_class($this)."::query: Fatal error - cannot connect to database server for request type: ".$qtype.' '.print_r($extra,1).' '.$this->database_user.' '.$this->database_pass.' '.$this->database_name, LOG_ERR);
+
+                if(class_exists('BimpCore')){
+                    $this->discover_svc();
+                    BimpCore::addlog(get_class($this)."::query: Fatal error - cannot connect to database server for request type: ".$qtype, 4, 'sql', null, $extra);
+                }
                 return FALSE;
             }
         }
@@ -984,10 +1005,9 @@ class DoliDBMysqliC extends DoliDB
                 if($thread_id != $this->thread_id){//gros probléme id transaction changée
                     if(class_exists('BimpCore')){
                         BimpCore::addlog('Gros probléme changement de thread Id', 4, 'sql', null, array('query' => $query, 'oldId' => $this->thread_id, 'newId' => $thread_id));
-
-
                     }
-                        $this->stopAll();
+                    $this->transaction_opened = 0;
+                    static::stopAll();
                 }
             }
         }
@@ -1011,35 +1031,22 @@ class DoliDBMysqliC extends DoliDB
             $ret = $this->db->query($query);
         }
 */
-        $ret = $this->db->query($query);
+        $this->timeDebReq = microtime(true);
+        try {
+            $ret = $this->db->query($query);
+
+        } catch (Exception $e) {
+            $this->catch($query, $ret, $e);
+            $this->timeDebReq = 0;
+            return 0;
+        }
+        if(!$ret)
+            $this->catch ($query, $ret);
+        $this->timeDebReq = 0;
         
         if (! preg_match("/^COMMIT/i",$query) && ! preg_match("/^ROLLBACK/i",$query))
         {
             // Si requete utilisateur, on la sauvegarde ainsi que son resultset
-            if (! $ret)
-            {
-                $this->lastqueryerror = $query;
-                $this->lasterror = $this->error();
-                $this->lasterrno = $this->errno();
-                
-//                if($this->transaction_opened > 0)
-//                    $this->rollback();
-//                
-//                BimpCore::addlog('Erreur SQL '.$query.($this->transaction_opened > 0 ? ' ayant provoqué le rollback de la transaction' : ''));
-
-                $debug = "";
-                if (function_exists("synGetDebug"))
-                    $debug = synGetDebug();
-
-//				if ($conf->global->SYSLOG_LEVEL < LOG_DEBUG) dol_syslog(get_class($this)."::query SQL Error query: ".$query, LOG_ERR);	// Log of request was not yet done previously
-                dol_syslog(get_class($this)."::query SQL Error message: ".$this->lasterrno." ".$this->lasterror .' serveur : '.$this->database_host.'<br/>'.$query, LOG_ERR);
-                if(class_exists('BimpCore'))
-                    BimpCore::addlog(get_class($this)."::query SQL Error message: ".$this->lasterrno." | ".$this->lasterror .' serveur : '.$this->database_host.'<br/>'.$query, 3,'sql');
-                
-                if(stripos($this->lasterror, 'Deadlock') !== false)
-                        $this->stopAll ();
-                        
-            }
             $this->lastquery=$query;
             $this->_results = $ret;
         }
@@ -1086,7 +1093,7 @@ class DoliDBMysqliC extends DoliDB
                 'open' => false
             ));
 
-            if ($ret <= 0) {
+            if (!$ret) {
                 $content = BimpRender::renderAlerts('Erreur SQL - ' . $this->lasterror());
                 BimpDebug::addDebug('sql', '', $content, array(
                     'foldable' => false
@@ -1098,23 +1105,61 @@ class DoliDBMysqliC extends DoliDB
         return $ret;
     }
     
-    function stopAll(){
-        $errors = array('Problème réseau, merci de relancer l\'opération');
-        if (BimpTools::isSubmit('ajax')) {
-            echo json_encode(array(
-                'errors'           => $errors,
-                'request_id'       => BimpTools::getValue('request_id', 0)
-            ));
+    function catch($query, $ret, $e = null){
+        $deadLock = false;
+        $classLog = 'sql';
+        $this->lastqueryerror = $query;
+        $this->lasterror = $this->error();
+        $this->lasterrno = $this->errno();
+
+        if(stripos($this->lasterror, 'Deadlock') !== false || stripos($this->lasterrno, '1213') !== false){
+                $deadLock = true;
+                $classLog = 'deadLock';
         }
-        else{
-            echo 'Oupppps   '.print_r($errors,1);
+        elseif($e && (stripos($e->getMessage(), 'Deadlock') !== false || stripos($e->getMessage(), '1213') !== false)){
+                $deadLock = true;
+                $classLog = 'deadLock';
         }
-        die();
-        exit;
+        elseif(stripos($this->lasterrno, 'DB_ERROR_RECORD_ALREADY_EXISTS') !== false){
+            $classLog = 'sql_duplicate';
+        }
+        
+        
+        $msg = get_class($this)."::query SQL Error message: ";
+        $msg .= '<br/>Lasterrno : '.$this->lasterrno;
+        $msg .= '<br/>Lasterror : '.$this->lasterror;
+        if($e)
+            $msg .= '<br/>Exception msg : '.$e->getMessage();
+        $msg .= '<br/>Serveur : '.$this->database_host;
+        $msg .= '<br/>Query : '.$query;
+        if($this->timeDebReq > 0)
+            $msg .= '<br/>Time Req : '.(microtime(true) - $this->timeDebReq);
+        if($this->timeDebReq2 > 0)
+            $msg .= '<br/>Time Req2 : '.(microtime(true) - $this->timeDebReq2);
+        if(class_exists('synopsisHook'))
+            $msg .= '<br/>Time Depuis déb : '. synopsisHook::getTime();
+
+        dol_syslog($msg, LOG_ERR);
+        if(class_exists('BimpCore'))
+            BimpCore::addlog($msg, 3,$classLog);
+        else
+            dol_syslog ('Erreur sql BimpCore non loade', LOG_ERR);
+        if($deadLock){
+            $this->transaction_opened = 0;
+            static::stopAll ();
+        }
     }
     
     function getThreadId(){    
-        $sql = $this->db->query('SELECT CONNECTION_ID() as id;');
+        $query = 'SELECT CONNECTION_ID() as id;';
+        try {
+            $sql = $this->db->query($query);
+        } catch (Exception $e) {
+            $this->catch($query, $sql, $e);
+            return 0;
+        }
+        if(!$sql)
+            $this->catch ($query, $sql);
         if($sql){
             $res = $this->fetch_object($sql);
             return $res->id;
@@ -1228,6 +1273,10 @@ class DoliDBMysqliC extends DoliDB
      */
     function escape($stringtoencode)
     {
+        if(!$this->connected && ! $this->transaction_opened)
+            $this->connect_server (0);
+            
+            
         if(!$this->connected)
         {
             dol_syslog("Call to escape when server is disconnected", LOG_WARNING);

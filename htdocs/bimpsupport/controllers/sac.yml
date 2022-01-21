@@ -1,0 +1,18 @@
+bootstrap: 1
+
+title: SAC
+
+    
+objects:
+    sac: 
+        instance: 
+            bimp_object: BS_Sac
+            id_object:
+                request: id
+        
+sections: 
+    - type: view
+      view: 
+          panel: 0
+          name: default
+          object: sac

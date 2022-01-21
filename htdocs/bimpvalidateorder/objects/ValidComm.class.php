@@ -450,7 +450,10 @@ class ValidComm extends BimpObject
         // Percent de marge
         $margin_infos = $object->getMarginInfosArray();
         $marge_ini = $infos_remises['remise_total_amount_ht'] + $margin_infos['total_margin'];
-        $percent_marge = 100 * $infos_remises['remise_total_amount_ht'] / $marge_ini;
+        if($infos_remises['remise_total_amount_ht'] == 0)
+            $percent_marge = 0;
+        else
+            $percent_marge = 100 * $infos_remises['remise_total_amount_ht'] / $marge_ini;
 
         
         

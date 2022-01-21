@@ -449,7 +449,7 @@ class ValidComm extends BimpObject
         
         // Percent de marge
         $margin_infos = $object->getMarginInfosArray();
-        $marge_ini = $infos_remises['remise_total_amount_ht'] + $margin_infos['total_margin'];
+        $marge_ini = $infos_remises['remise_total_amount_ht'] + $margin_infos['margin_on_products'];
         if($infos_remises['remise_total_amount_ht'] == 0)
             $percent_marge = 0;
         else

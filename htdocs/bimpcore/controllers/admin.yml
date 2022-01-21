@@ -2,9 +2,13 @@ bootstrap: 1
 title: BimpCore Admin
 
 objects:
-    users: 
+    users:
         instance: 
             bimp_object: Bimp_User
+    
+    user_group:
+        instance:
+            bimp_object: Bimp_UserGroup
             
     entrepots: 
         instance: 
@@ -64,6 +68,15 @@ sections:
                   list: 
                       panel: 1
                       object: users
+        
+        user_group:
+            label: Groupe utilisateurs
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: user_group                     
+
         entrepots: 
             label: Entrepôts
             sections: 

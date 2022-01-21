@@ -3781,7 +3781,7 @@ function setFiltersInputAddFilterFormEvents($container) {
     });
 }
 
-// Gestion des Hashtags: 
+// Outils: 
 
 function BimpInputHashtags() {
     var bih = this;
@@ -4429,7 +4429,7 @@ function BimpInputScanner() {
         html += '</div>';
 
         html += '<div id="bis_scanner_modal_body" class="modal-body" style="text-align: center">';
-        html += '<div style="width: 500px; margin: auto" id="bis_scanner"></div>';
+        html += '<div style="width: 250px; margin: auto" id="bis_scanner"></div>';
 
         html += '<div style="margin-top: 30px">';
         html += '<span class="btn btn-danger btn-large" onclick="BIS.$modal.modal(\'hide\');">';

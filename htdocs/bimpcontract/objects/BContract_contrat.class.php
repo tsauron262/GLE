@@ -13,7 +13,7 @@ class BContract_contrat extends BimpDolObject
     public static $email_type = 'contract';
     public $email_group = "";
     public $email_facturation = "";
-
+    public static $element_name = "contract";
     // Les status
     CONST CONTRAT_STATUT_ABORT = -1;
     CONST CONTRAT_STATUS_BROUILLON = 0;
@@ -1178,6 +1178,28 @@ class BContract_contrat extends BimpDolObject
             $echeancier->updateField('statut', 0);
         }
     }
+    
+    public function getModelStatementPdf() {
+        return 'contratStatement';
+    }
+    
+    public function actionReleveIntervention($data, &$success) {
+        
+        global $langs;
+        
+        $errors = Array();
+        $warnings = Array();
+        
+        if ($this->dol_object->generateDocument($this->getModelStatementPdf(), $outputlangs) <= 0) {
+            $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'des erreurs sont survenues lors de la génération du document PDF');
+        } else {
+            $callback = "window.open('" . DOL_URL_ROOT . "/document.php?modulepart=contract&file=".$this->getRef()."/Releve_intervention.pdf&entity=1', '_blank');";
+            $success = 'PDF généré avec succès';
+        }
+        
+        return Array('errors' => $errors, 'warnings' => $warnings, 'success_callback' => $callback);
+        
+    }
 
     public function actionAbort($data = [], &$success)
     {
@@ -1667,6 +1689,10 @@ class BContract_contrat extends BimpDolObject
 
         return $lines;
     }
+    
+    public function getTotalContratAll() {
+        
+    }
 
     public function getActionsButtons()
     {
@@ -1698,6 +1724,14 @@ class BContract_contrat extends BimpDolObject
                         ))
                     );
                 }
+            }
+            
+            if(BT_ficheInter::isActive()) {
+//                $buttons[] = array(
+//                    'label'   => 'Relevé d\'interventions',
+//                    'icon'    => 'fas_ambulance',
+//                    'onclick' => $this->getJsActionOnclick('releveIntervention', array(), array())
+//                );
             }
 
             if ($status == self::CONTRAT_STATUS_VALIDE || $status == self::CONTRAT_STATUT_WAIT_ACTIVER) {
@@ -3234,6 +3268,32 @@ class BContract_contrat extends BimpDolObject
         }
 
         return $montant;
+    }
+    
+    public function getAddAmountAvenantProlongation() {
+        
+        $now = new DateTime();
+        
+        $total = 0;
+        
+        $filters = [
+            'statut'        => 2, 
+            'type'          => 1,
+            'want_end_date' => [
+                'operator'  => '>=',
+                'value'     => $now->format('Y-m-d')
+            ]
+        ];
+        
+        $children = $this->getChildrenList('avenant', $filters);
+        
+        foreach($children as $id_child) {
+            
+            $total += $this->getCurrentTotal();
+            
+        }
+        
+        return $total;
     }
 
     public function getTotalBeforeRenouvellement()

@@ -470,7 +470,7 @@ class BT_ficheInter_det extends BimpDolObject
         } elseif($this->getData('id_line_commande') > 0 || $this->getData('id_dol_line_commande') > 0) {
             BimpTools::loadDolClass('commande', 'commande', 'OrderLine');
             if($this->getData('id_line_commande') > 0){
-                $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $this->getData('id_line_commande'));
+                $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $this->getData('id_line_commande'));
                 $orderLine = new OrderLine($this->db->db);
                 $orderLine->fetch($obj->getData('id_line'));
             }   

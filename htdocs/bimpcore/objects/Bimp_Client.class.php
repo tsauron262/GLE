@@ -726,23 +726,6 @@ class Bimp_Client extends Bimp_Societe
         return 'relancables';
     }
 
-    public function getEncours($withAutherSiret = true)
-    {
-        if ($withAutherSiret && $this->getData('siren') . 'x' != 'x' && strlen($this->getData('siren')) == 9) {
-            $tot = 0;
-            $lists = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array('siren' => $this->getData('siren')));
-            foreach ($lists as $idO => $obj) {
-                $tot += $obj->getEncours(false);
-            }
-            return $tot;
-        } else {
-            $values = $this->dol_object->getOutstandingBills();
-            if (isset($values['opened']))
-                return $values['opened'];
-        }
-        return 0;
-    }
-
     public function getUnpaidFactures($date_from = '')
     {
         if ($this->isLoaded()) {
@@ -962,18 +945,55 @@ class Bimp_Client extends Bimp_Societe
     public function displayOutstanding()
     {
         $html = '';
-        $tot = 0;
-        $values = null;
-        if ($this->isLoaded()) {
-            $values = $this->getEncours(false);
-            $tot += $values;
 
-            if ($values > 0) {
-                $html .= BimpTools::displayMoneyValue($values);
+        if ($this->isLoaded()) {
+            $encours = $this->getAllEncoursForSiret(false);
+            if ($encours['total'] > 0) {
+                $html .= '<b>Encours sur factures restant dues: </b>';
+                $html .= BimpTools::displayMoneyValue($encours['factures']['socs'][$this->id]);
+
+                if (count($encours['factures']['socs']) > 1) {
+                    $html .= '<br/>';
+
+                    foreach ($encours['factures']['socs'] as $id_soc => $soc_encours) {
+                        if ($id_soc == $this->id) {
+                            continue;
+                        }
+                        
+                        $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_soc);
+
+                        $html .= '<br/>Client ';
+
+                        if (BimpObject::objectLoaded($soc)) {
+                            $html .= $soc->getLink();
+                        } else {
+                            $html .= '#' . $id_soc;
+                        }
+
+                        $html .= ' : ' . BimpTools::displayMoneyValue($soc_encours);
+                    }
+
+                    $html .= '<br/><br/>';
+                    $html .= '<b>Total encours sur factures restant dues pour l\'entreprise (Siren): </b>' . BimpTools::displayMoneyValue($encours['factures']['total']);
+                }
             } else {
                 $html .= '<span class="warning">Aucun encours trouvé sur cet établissement (Siret)</span>';
             }
 
+            // Calcul encours sur commandes non facturées: 
+            $html .= '<div style="margin: 10px 0; padding: 10px; border: 1px solid #737373">';
+            $html .= '<b>Encours sur les commandes non facturées: </b>';
+            $html .= '<div id="client_' . $this->id . '_encours_non_facture"></div>';
+            $onclick = $this->getJsLoadCustomContent('displayEncoursNonFacture', '$(\'#client_' . $this->id . '_encours_non_facture' . '\')');
+
+            $html .= '<div style="margin-top: 10px; text-align: center">';
+            $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+            $html .= BimpRender::renderIcon('fas_calculator', 'iconLeft') . 'Calculer';
+            $html .= '</span>';
+            $html .= '</div>';
+            $html .= '</div>';
+
+            // Bouton aperçu: 
             $html .= '<div class="buttonsContainer align-right">';
             $url = DOL_URL_ROOT . '/compta/recap-compta.php?socid=' . $this->id;
             $html .= '<a href="' . $url . '" target="_blank" class="btn btn-default">';
@@ -981,32 +1001,6 @@ class Bimp_Client extends Bimp_Societe
             $html .= '</a>';
             $html .= '</div>';
         }
-
-        if ($this->getData('siren') . 'x' != 'x' && strlen($this->getData('siren')) == 9) {
-            $lists = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array('siren' => $this->getData('siren')));
-            //        print_r($lists);
-            foreach ($lists as $idO => $obj) {
-                if ($idO != $this->id) {
-                    $enCli = $obj->getEncours(false);
-                    $tot += $enCli;
-                    $html .= '<br/>Client ' . $obj->getLink() . ' : ' . BimpTools::displayMoneyValue($enCli);
-                }
-            }
-
-            if ($tot != $values) {
-                $html .= '<br/><br/>Encours TOTAL sur l\'entreprise (Siren): ' . BimpTools::displayMoneyValue($tot);
-            }
-        }
-
-        $html .= '<div style="margin-top: 10px;">';
-        $html .= '<b>Encours sur les commandes non facturées: </b><span id="client_' . $this->id . '_encours_non_facture"></span>';
-        $onclick = $this->getJsLoadCustomContent('displayEncoursNonFacture', '$(\'#client_' . $this->id . '_encours_non_facture' . '\')');
-
-        $html .= '&nbsp;&nbsp;<span class="btn btn-default" onclick="' . $onclick . '">';
-        $html .= BimpRender::renderIcon('fas_calculator', 'iconLeft') . 'Calculer';
-        $html .= '</span>';
-
-        $html .= '</div>';
 
         return $html;
     }

@@ -377,6 +377,7 @@ fields:
         label: Symptômes
         type: text
         input:
+            hashtags: 1
             auto_expand: 1
             rows: 4
             values: 
@@ -465,8 +466,7 @@ fields:
     signature_resti_params: 
         label: Paramètres signature restitution
         type: json
-        
-    sacs: 
+    sacs:
         label: Sac d'emballage
         type: items_list
         items_braces: 1

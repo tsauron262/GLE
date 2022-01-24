@@ -360,7 +360,7 @@ class BContract_avenant extends BContract_contrat {
         $warnings = [];
         
         $parent = $this->getParentInstance();
-
+        
         if(!count($errors)) {
             $errors = $parent->updateField('end_date_contrat', $this->getData('want_end_date'));
             $errors = BimpTools::merge_array($errors, $parent->updateField('date_end_renouvellement', $this->getData('want_end_date')));

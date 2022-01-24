@@ -18,7 +18,7 @@ foreach($array as $erp){
 }
 
 
-sleep(3);
+echo '<iframe style="width: 100%; height: 400px;" src="'.DOL_URL_ROOT.'/synopsistools/git_maj_version.php'.'"></iframe>';
 
-BimpCore::setConf('git_version', BimpCore::getConf('git_version', 1)+1);
+llxFooter();
 

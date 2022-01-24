@@ -2,6 +2,7 @@
 
 require_once('../main.inc.php');
 
+require_once DOL_DATA_ROOT . '/bimpcore/Bimp_Lib.php';
 
 
 sleep(5);

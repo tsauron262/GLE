@@ -679,21 +679,21 @@ class BContract_echeancier extends BimpObject {
                 $getEndDate = new DateTime($parent->displayRealEndDate("Y-m-d"));
                 if($getEndDate < $dateTime_end_mkTime)
                     $dateTime_end_mkTime = $getEndDate;
-
+                $amount = $parent->getAddAmountAvenantProlongation() / ($data->reste_periode / $morceauPeriode);
                 $firstPassage = false;
                 if($parent->getData('periodicity') != 1200 && $data->reste_periode > 1) {
-                    $amount = $data->reste_a_payer / ($data->reste_periode / $morceauPeriode);
+                    $amount += $data->reste_a_payer / ($data->reste_periode / $morceauPeriode);
                     $tva = $amount * 0.2;
                     $nb_periode = ceil($parent->getData('duree_mois') / $parent->getData('periodicity'));
                     $pa = ($parent->getTotalPa()- $parent->getTotalDejaPayer(false, 'pa')) /  ($data->reste_periode * $morceauPeriode); 
                 } else {
-                    $amount = $data->reste_a_payer;
+                    $amount += $data->reste_a_payer;
                     $tva = $amount * 0.2;
                     $nb_periode = 1;
                     $pa = ($parent->getTotalPa()- $parent->getTotalDejaPayer(false, 'pa')); 
                 }
                 
-                $amount += $parent->getAddAmountAvenantProlongation() / ($data->reste_periode / $morceauPeriode);
+                
                 
                 if(!$display) {
                     $none_display = [

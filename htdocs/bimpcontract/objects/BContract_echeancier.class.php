@@ -656,8 +656,9 @@ class BContract_echeancier extends BimpObject {
             $firstDinamycLine = true;
             
             $reste_periodeEntier = ceil($data->reste_periode);
-            
+                        
             for ($i = 1; $i <= $reste_periodeEntier; $i++) {
+                
                 $morceauPeriode = (($data->reste_periode - ($i-1)) >= 1)? 1 : (($data->reste_periode - ($i-1)));
                 if (!$firstPassage) {
                     $startedDate->add(new DateInterval("P" . $data->periodicity . "M"));
@@ -692,6 +693,7 @@ class BContract_echeancier extends BimpObject {
                     $pa = ($parent->getTotalPa()- $parent->getTotalDejaPayer(false, 'pa')); 
                 }
                 
+                $amount += $parent->getAddAmountAvenantProlongation() / ($data->reste_periode / $morceauPeriode);
                 
                 if(!$display) {
                     $none_display = [

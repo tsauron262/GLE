@@ -28,7 +28,14 @@ foreach($files1 as $fichier)
                 while($ln = $db->fetch_object($sql)){
                     $db->query("UPDATE llx_societe SET date_atradius = '2021-01-01' WHERE rowid = ".$ln->rowid);
     //                die(DOL_DATA_ROOT.'/societe/'.$ln->rowid.'/'.$fichier);
-                    copy($dir.$fichier, DOL_DATA_ROOT.'/societe/'.$ln->rowid.'/atradius.pdf');
+                    $new_dir = DOL_DATA_ROOT.'/societe/'.$ln->rowid.'/';
+                    if(!is_dir($new_dir))
+                        mkdir($new_dir);
+                    
+                    if(!is_file($new_dir.'/atradius.pdf'))
+                        if(!copy($dir.$fichier, $new_dir.'atradius.pdf'))
+                                die('Impossible '.$new_dir.'atradius.pdf');
+                   
                     
                     $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $ln->rowid);
                     $soc->getChildrenObjects('files');

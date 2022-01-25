@@ -1018,17 +1018,23 @@ class Bimp_Client extends Bimp_Societe
 
     public function displayAtradiusFile()
     {
+        global $user, $langs;
         $html = '';
         $file = $this->getAtradiusFileName();
+        $buttons = array();
+        $note = BimpObject::getInstance("bimpcore", "BimpNote");
         if (!is_null($file) && $file) {
-            $html .= '<a target="__blanck" href="' . DOL_URL_ROOT . '/document.php?modulepart=societe&file=' . $this->id . '/' . $file . '">Fichier</a>';
+            $html .= '<a target="__blanck" href="' . DOL_URL_ROOT . '/document.php?modulepart=societe&file=' . $this->id . '/' . $file . '">Fichier</a><br/>';
+                $buttons[] = array(
+                    'label'   => 'Demander révision encours',
+                    'icon'    => 'far_paper-plane',
+                    'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => 680, "content" => "Bonjour, " . $user->getFullName($langs) . " sollicite pour ce client une révision d\'encours à XX XXX  €"), array('form_name' => 'rep'))
+                );
         } else {
 //            return BimpInput::renderInput('file_upload', 'atradius_file');
 
-            $buttons = array();
 
             // Demande encours altriadus
-            $note = BimpObject::getInstance("bimpcore", "BimpNote");
 
             $buttons[] = array(
                 'label'   => 'Ajouter PDF du Rapport Assurance crédit',
@@ -1041,7 +1047,6 @@ class Bimp_Client extends Bimp_Societe
                             'value'    => '%licite pour ce client un encours%'
                         ), "obj_type"   => "bimp_object", "obj_module" => $this->module, "obj_name"   => $this->object_name, "id_obj"     => $this->id));
 
-            global $user, $langs;
             if (count($list) == 0) {
                 $buttons[] = array(
                     'label'   => 'Demander encours',
@@ -1057,15 +1062,10 @@ class Bimp_Client extends Bimp_Societe
                     'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_USER, "fk_user_dest" => $noteT->getData('user_create'), "content" => "Bonjour\\n\\nVotre demande d\'encours pour le client " . addslashes($this->getName()) . " a été refusée\\n\\nNous pouvons toutefois solliciter Atradius pour une révision de cette décision \\n\\nPour cela nous devons fournir un maximum d\'éléments prouvant la bonne santé financière de cette entreprise (dernier bilan, compte de résultats, etc)\\n\\nMerci de bien vouloir les demander à votre client puis les transmettre à atradius-olys@bimp.fr \\n\\nDans l\'attente de cette révision, toutes les commandes en cours devront être réglées au comptant"), array('form_name' => 'rep'))
                 );
 
-                $buttons[] = array(
-                    'label'   => 'Demander révision encours',
-                    'icon'    => 'far_paper-plane',
-                    'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => 680, "content" => "Bonjour, " . $user->getFullName($langs) . " sollicite pour ce client une révision d\'encours à XX XXX  €"), array('form_name' => 'rep'))
-                );
             }
-            foreach ($buttons as $button) {
-                $html .= BimpRender::renderButton($button) . '<br/>';
-            }
+        }
+        foreach ($buttons as $button) {
+            $html .= BimpRender::renderButton($button) . '<br/>';
         }
         return $html;
     }

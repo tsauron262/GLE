@@ -136,7 +136,7 @@ class Bimp_Commande extends BimpComm
     }
 
     // Getters booléens:
-
+    
     public function isActionAllowed($action, &$errors = array())
     {
         global $conf;
@@ -311,6 +311,10 @@ class Bimp_Commande extends BimpComm
 
     public function isFieldEditable($field, $force_edit = false)
     {
+        if (!(int) parent::isFieldEditable($field, $force_edit)) {
+            return 0;
+        }
+
         global $user;
         switch ($field) {
             case 'entrepot':
@@ -324,11 +328,11 @@ class Bimp_Commande extends BimpComm
 
             case 'paiement_comptant':
 //                if ((int) $this->getData('fk_statut') != 0 and !$user->admin)
-                    return 0;
+                return 0;
 //                return 1;
         }
 
-        return parent::isFieldEditable($field, $force_edit);
+        return 1;
     }
 
     public function canEditField($field_name)
@@ -4022,26 +4026,26 @@ class Bimp_Commande extends BimpComm
 
         return $errors;
     }
-    
-    
-    private function setPaiementComptant() {
-        
-        $cond_paiement_comptant = array('LIVRAISON', 'TIERFAC', 'TIERAV', 'RECEPCOM', 'HALFFAC', 'HALFAV', 'RECEP');
-                $code = self::getBdb()->getValue('c_payment_term', 'code', '`active` > 0 and rowid = ' . $this->getData('fk_cond_reglement'));
 
-        if(in_array($code, $cond_paiement_comptant))
+    private function setPaiementComptant()
+    {
+
+        $cond_paiement_comptant = array('LIVRAISON', 'TIERFAC', 'TIERAV', 'RECEPCOM', 'HALFFAC', 'HALFAV', 'RECEP');
+        $code = self::getBdb()->getValue('c_payment_term', 'code', '`active` > 0 and rowid = ' . $this->getData('fk_cond_reglement'));
+
+        if (in_array($code, $cond_paiement_comptant))
             return $this->set('paiement_comptant', 1);
         else
-            return $this->set('paiement_comptant', 0);        
+            return $this->set('paiement_comptant', 0);
     }
 
     public function update(&$warnings = array(), $force_update = false)
     {
         $init_entrepot = (int) $this->getInitData('entrepot');
 
-        if(empty($errors))
+        if (empty($errors))
             $this->setPaiementComptant();
-        
+
         $errors = parent::update($warnings, $force_update);
 
         if (!count($errors)) {
@@ -4051,7 +4055,7 @@ class Bimp_Commande extends BimpComm
                 $this->db->db->query($sql);
             }
         }
-        
+
         return $errors;
     }
 
@@ -4103,27 +4107,28 @@ class Bimp_Commande extends BimpComm
         $this->resprints = "OK " . $ok . ' mails BAD ' . $err . ' mails dont ' . $mailDef . ' mail par default';
         return "OK " . $ok . ' mails BAD ' . $err . ' mails dont ' . $mailDef . ' mail par default';
     }
-    
-    public function isCommercialOrSup() {
-        
+
+    public function isCommercialOrSup()
+    {
+
         global $user;
-        
-        if($this->isLoaded()) {
+
+        if ($this->isLoaded()) {
             $id_commercial = $this->getCommercialId();
 
-            if((int) $id_commercial == 0)
+            if ((int) $id_commercial == 0)
                 $id_commercial = $this->dol_object->user_author_id;
         }
-        
+
         // Check si il est admin ou le commercial de cette commande
-        if($user->admin or (int) $id_commercial == (int) $user->id)
+        if ($user->admin or (int) $id_commercial == (int) $user->id)
             return 1;
-        
+
         $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_commercial);
         // Check si il est le n+1 du commercial en charge de cette commande
-        if((int) $commercial->getData('fk_user') == (int) $user->id)
+        if ((int) $commercial->getData('fk_user') == (int) $user->id)
             return 1;
-        
+
         return 0;
     }
 }

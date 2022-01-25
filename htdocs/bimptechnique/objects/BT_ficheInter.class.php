@@ -1527,6 +1527,11 @@ class BT_ficheInter extends BimpDolObject
                         }
 
                         $html .= "<strong> - (" . price($line->getTotalHT(true)) . "€ HT / " . price($line->getTotalTTC()) . "€ TTC)</strong>";
+                        
+                        if($line->getData('force_qty_1') == 1) {
+                            $html .= " <strong class='danger'>Au forfait</strong>";
+                        }
+                        
                         if ($line->desc) {
                             $html .= "<br /><strong style='margin-left:10px'>" . $line->desc . "</strong><br />";
                         } elseif (BimpObject::objectLoaded($service) && $service->getData('description')) {

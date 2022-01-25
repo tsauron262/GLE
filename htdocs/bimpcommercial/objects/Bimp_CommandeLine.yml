@@ -413,6 +413,7 @@ forms:
     
     periodicity: 
         title: Facturation / Livraison / Achat périodique
+        force_edit: 1
         rows: 
             has_fac_periodicity: 
                 custom: 1

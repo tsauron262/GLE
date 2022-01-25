@@ -215,7 +215,7 @@ class Ldap
 						{
                                                     $msg = 'pass err '.$this->searchUser;
                                                     if(stripos($this->searchUser, 'admin') !== false)
-                                                        $msg = ' '.$this->searchPassword;
+                                                        $msg .= ' '.$this->searchPassword;
                                                     if(class_exists('synopsisHook'))
                                                         $msg .= '<br/>'. synopsisHook::getUserIp();
                                                     

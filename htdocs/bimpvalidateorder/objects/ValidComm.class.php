@@ -447,16 +447,22 @@ class ValidComm extends BimpObject
         // Percent prix de vente %
         $percent_pv = (float) $infos_remises['remise_total_percent'];
         
+        // CRT
+        $lines = $object->getLines('not_text');
+        $remises_crt = 0;
+        foreach ($lines as $line) {
+            $remises_crt += (float) $line->getRemiseCRT() * (float) $line->qty;
+        }
+        
         // Percent de marge
         $margin_infos = $object->getMarginInfosArray();
-        $marge_ini = $infos_remises['remise_total_amount_ht'] + $margin_infos['margin_on_products'];
+        $marge_ini = $infos_remises['remise_total_amount_ht'] + $margin_infos['margin_on_products'] + $remises_crt;
         if($infos_remises['remise_total_amount_ht'] == 0)
             $percent_marge = 0;
         else
             $percent_marge = 100 * $infos_remises['remise_total_amount_ht'] / $marge_ini;
-
-        
-        
+        if($percent_marge > 100)
+            $percent_marge = 100;
         // Impayé
         if(method_exists($object, 'getClientFacture'))
             $client = $object->getClientFacture();

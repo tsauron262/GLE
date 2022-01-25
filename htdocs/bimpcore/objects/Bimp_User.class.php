@@ -530,7 +530,7 @@ class Bimp_User extends BimpObject
         );
         $tabs[] = array(
             'id'            => 'user_materielNS_tab',
-            'title'         => BimpRender::renderIcon('fas_tv', 'iconLeft') . 'Materiel non sérialisée',
+            'title'         => BimpRender::renderIcon('fas_tv', 'iconLeft') . 'Materiel non sérialisé',
             'ajax'          => 1,
             'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#user_materielNS_tab .nav_tab_ajax_result\')', array('materielNS'), array('button' => ''))
         );

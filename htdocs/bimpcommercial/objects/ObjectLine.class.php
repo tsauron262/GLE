@@ -148,7 +148,11 @@ class ObjectLine extends BimpObject
             return 0;
         }
 
-        return (int) ((int) $parent->isEditable() && (int) $parent->areLinesEditable());
+        if ($this->isLineText()) {
+            return 1;
+        }
+
+        return (int) ((int) $parent->isEditable());
     }
 
     public function isParentDraft()
@@ -211,7 +215,12 @@ class ObjectLine extends BimpObject
         } else {
             if (!in_array($field, array('remise_crt', 'remise_crt_percent', 'force_qty_1', 'hide_product_label', 'date_from', 'date_to', 'desc', 'ref_supplier', 'hide_in_pdf'))) {
                 if (!$force_edit) {
-                    if (!$this->isParentDraft() || !(int) $this->getData('editable')) {
+                    $parent = $this->getParentInstance();
+                    if (!BimpObject::objectLoaded($parent)) {
+                        return 0;
+                    }
+
+                    if (!(int) $this->getData('editable') || !$parent->areLinesEditable()) {
                         return 0;
                     }
                 }

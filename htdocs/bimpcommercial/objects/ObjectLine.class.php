@@ -137,7 +137,9 @@ class ObjectLine extends BimpObject
 
     public function isEditable($force_edit = false, &$errors = array())
     {
-        if (!$force_edit && (int) $this->id_remise_except) {
+        if ($force_edit) {
+            return 1;
+        } elseif ((int) $this->id_remise_except) {
             return 0;
         }
 
@@ -193,7 +195,7 @@ class ObjectLine extends BimpObject
 
     public function isFieldEditable($field, $force_edit = false)
     {
-        if (!(int) $this->isEditable()) {
+        if (!(int) $this->isEditable($force_edit)) {
             return 0;
         }
 
@@ -467,11 +469,10 @@ class ObjectLine extends BimpObject
                 if ((int) $product->getData('fk_product_type') == 1)
                     return 1;
             }
-        }
-        else{
+        } else {
             $line = $this->getChildObject('line');
             $type = $line->product_type ? $line->product_type : $line->fk_product_type;
-            if($type == 1)
+            if ($type == 1)
                 return 1;
         }
         return 0;
@@ -1392,9 +1393,9 @@ class ObjectLine extends BimpObject
     public function getRemiseTotalInfos($recalculate = false, $force_qty_mode = -1)
     {
 //        $force_qty_mode : -1 aucun forçage / 0 : forcer qtés initiales / 1 : forcer qtés finales (qty + qty_modif). 
-        
+
         $qty_modif_exists = $this->field_exists('qty_modif');
-        
+
         if (($qty_modif_exists && $force_qty_mode >= 0) || $recalculate || is_null($this->remises_total_infos)) {
             $this->remises_total_infos = array(
                 'line_percent'              => 0,
@@ -1419,7 +1420,7 @@ class ObjectLine extends BimpObject
             }
 
             $full_qty = 0;
-            
+
             if ($force_qty_mode >= 0) {
                 $full_qty = $force_qty_mode;
             } elseif ((float) $this->qty == 0 && $qty_modif_exists) {
@@ -4014,7 +4015,7 @@ class ObjectLine extends BimpObject
                             }
                         }
                         $parent = $this->getParentInstance();
-                        if(is_a($parent, 'Bimp_Facture') && $parent->getData('type') == 2 && $min != 'none'){
+                        if (is_a($parent, 'Bimp_Facture') && $parent->getData('type') == 2 && $min != 'none') {
                             $max = -$min;
                             $min = 'none';
                         }
@@ -4605,7 +4606,6 @@ class ObjectLine extends BimpObject
             }
             $this->setLinesPositions();
         }
-
     }
 
     public function setPosition($position)

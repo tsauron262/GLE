@@ -195,7 +195,7 @@ class ObjectLine extends BimpObject
 
     public function isFieldEditable($field, $force_edit = false)
     {
-        if (!(int) $this->isEditable()) {
+        if (!(int) $this->isEditable($force_edit)) {
             return 0;
         }
 

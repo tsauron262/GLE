@@ -167,8 +167,10 @@ class DemandeValidComm extends BimpObject
             else
                 $client = $bimp_object->getChildObject('client');
             
-            if (BimpObject::objectLoaded($client))
+            if (BimpObject::objectLoaded($client)){
                 $subject_mail .= ' - ' . $client->getData('code_client') . ' - ' . $client->getData('nom');
+                $message_mail .= ' du client '.$client->getLink();
+            }
             else
                 $subject_mail .= ', client inconnu';
         }

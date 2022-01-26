@@ -417,10 +417,14 @@ fields:
     login_admin: 
         label: Login admin
         user_edit: 1
+        input:
+            no_autocorrect: 1
     pword_admin: 
         label: Mot de passe admin
         required: 1
         user_edit: 1
+        input:
+            no_autocorrect: 1
     acompte: 
         label: Acompte
         type: money

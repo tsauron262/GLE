@@ -24,7 +24,8 @@ class BC_Input extends BimpComponent
             'values'       => array('data_type' => 'array', 'compile' => true, 'default' => array()),
             'allow_custom' => array('data_type' => 'bool', 'default' => 1),
             'hashtags'     => array('data_type' => 'bool', 'default' => 0),
-            'scanner'      => array('data_type' => 'bool', 'default' => 0)
+            'scanner'      => array('data_type' => 'bool', 'default' => 0),
+            'no_autocorrect'=> array('data_type' => 'bool', 'default' => 0)
         ),
         'qty'                         => array(
             'step'      => array('data_type' => 'float', 'default' => 1),
@@ -325,6 +326,7 @@ class BC_Input extends BimpComponent
                 $options['allow_custom'] = (int) (isset($this->params['allow_custom']) ? $this->params['allow_custom'] : 1);
                 $options['hashtags'] = ((isset($this->params['hashtags']) && (int) $this->params['hashtags']) ? (int) $this->params['hashtags'] : (isset($this->field_params['hashtags']) ? (int) $this->field_params['hashtags'] : 0));
                 $options['scanner'] = ((isset($this->params['scanner'])) ? (int) $this->params['scanner'] : 0);
+                $options['no_autocorrect'] = ((isset($this->params['no_autocorrect'])) ? (int) $this->params['no_autocorrect'] : 0);
 
             case 'qty':
                 $options['data'] = array();

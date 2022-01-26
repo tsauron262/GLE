@@ -741,7 +741,7 @@ class BimpInput
 
                     $nb_selected = 0;
 
-                    $html = '<div class="check_list_container"';
+                    $html = '<div class="check_list_container' . ($extra_class ? ' ' . $extra_class : '') . '"';
                     $html .= ' data-max="' . $options['max'] . '"';
                     $html .= ' data-max_input_name="' . (isset($options['max_input_name']) ? $options['max_input_name'] : '') . '"';
                     $html .= ' data-max_input_abs="' . (isset($options['max_input_abs']) ? $options['max_input_abs'] : 0) . '"';

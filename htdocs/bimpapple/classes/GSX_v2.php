@@ -921,6 +921,48 @@ class GSX_v2 extends GSX_Const
         return $this->exec('updateReservation', $params);
     }
 
+    // Stocks consignés: 
+
+    public function consignmentOrdersLookup($type, $status = 'OPEN', $from = '', $to = '')
+    {
+        $params = array(
+            'orderStatusGroupCode' => $status,
+            'typeCode'             => $type
+        );
+
+        if ($from && $to) {
+            $params['createdFromDate'] = $from;
+            $params['createdToDate'] = $to;
+        }
+
+        return $this->exec('consignmentOrderLookup', $params);
+    }
+
+    public function consignmentDeliveryLookup($deliveryNumber, $status = 'OPEN', $from = '', $to = '')
+    {
+        $params = array(
+            'deliveryNumber'          => $deliveryNumber,
+            'deliveryStatusGroupCode' => $status
+        );
+
+        if ($from && $to) {
+            $params['createdFromDate'] = $from;
+            $params['createdToDate'] = $to;
+        }
+
+        return $this->exec('consignmentDeliveryLookup', $params);
+    }
+
+    public function consignmentDeliveryAcknowledge($deliveryNumber, $parts)
+    {
+        return $this->exec('consignmentDeliveryAcknowledge', array(
+                    'deliveryNumber' => $deliveryNumber,
+                    'parts'          => $parts
+        ));
+    }
+    
+    
+
     // Requêtes - Divers:
 
     public function filesUpload($serial, $files, $module = '')

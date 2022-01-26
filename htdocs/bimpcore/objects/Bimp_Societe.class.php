@@ -745,7 +745,16 @@ class Bimp_Societe extends BimpDolObject
             return $this->db->getValue('c_country', 'code', '`rowid` = ' . (int) $fk_pays);
         }
     }
+    
+    public function getTotalPaiementsInconnus()
+    {
+        if ($this->isLoaded() && $this->isClient()) {
+            return (float) $this->db->getSum('Bimp_PaiementInc', 'total', 'fk_soc = ' . (int) $this->id);
+        }
 
+        return 0;
+    }
+    
     public function getAvailableDiscountsAmounts($is_fourn = false, $allowed = array())
     {
         if ($this->isLoaded()) {
@@ -1073,21 +1082,25 @@ class Bimp_Societe extends BimpDolObject
 
     public function getEncours($withOtherSiret = true)
     {
+        $encours = 0;
+
         if ($withOtherSiret && $this->getData('siren') . 'x' != 'x' && strlen($this->getData('siren')) == 9) {
-            $tot = 0;
             $lists = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array('siren' => $this->getData('siren')));
             foreach ($lists as $idO => $obj) {
-                $tot += $obj->getEncours(false);
+                $encours += $obj->getEncours(false);
             }
-            return $tot;
         } else {
             $values = $this->dol_object->getOutstandingBills();
 
             if (isset($values['opened'])) {
-                return $values['opened'];
+                $encours = $values['opened'];
             }
+            
+            $encours -= (float) $this->getTotalPaiementsInconnus();
+            $encours -= (float) $this->getAvailableDiscountsAmounts();
         }
-        return 0;
+
+        return $encours;
     }
 
     public function getEncoursNonFacture($withOtherSiret = true)

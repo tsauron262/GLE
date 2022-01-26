@@ -501,6 +501,20 @@ class BT_ficheInter_det extends BimpDolObject
 
         return '';
     }
+    
+    public function isAuForfait() {
+        if($this->getData('id_line_contrat')) return 1;
+        if($this->getData('id_line_commande') || $this->getData('id_dol_line_commande')) {
+            $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine');
+            if($this->getData('id_line_commande')){
+                $line->fetch($this->getData('id_line_commande'));
+            } else {
+                $line->find(['id_line' => $this->getData('id_dol_line_commande')], 1);
+            }
+            return $line->getData('force_qty_1');
+        }
+        return 0;
+    }
 
     public function displayDuree()
     {

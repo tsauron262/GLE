@@ -54,7 +54,6 @@ class Bimp_Product extends BimpObject
     private static $ventes = array();
     private static $lienShowRoomEntrepot = array();
     public $fieldsWithAddNoteOnUpdate = array('serialisable');
-    
     public $error = '';
 
     public function __construct($module, $object_name)
@@ -195,9 +194,9 @@ class Bimp_Product extends BimpObject
     public function isEditable($force_edit = false, &$errors = array())
     {
         global $user;
-        if($this->getData('lock_admin') && !$user->admin)
+        if ($this->getData('lock_admin') && !$user->admin)
             return 0;
-        
+
         if ($force_edit || $user->admin or $user->rights->produit->creer)
             return 1;
         return 0;
@@ -236,7 +235,7 @@ class Bimp_Product extends BimpObject
                 return 1;
 
             case 'validate':
-                if(!$this->isEditable())
+                if (!$this->isEditable())
                     return 0;
                 if (!$this->isLoaded($errors)) {
                     return 0;
@@ -251,14 +250,14 @@ class Bimp_Product extends BimpObject
                 }
                 return 1;
             case 'merge':
-                if(!$this->isEditable())
+                if (!$this->isEditable())
                     return 0;
                 if (!$this->isLoaded($errors)) {
                     return 0;
                 }
                 return 1;
             case 'refuse':
-                if(!$this->isEditable())
+                if (!$this->isEditable())
                     return 0;
                 if (!$this->isLoaded($errors)) {
                     return 0;
@@ -272,7 +271,7 @@ class Bimp_Product extends BimpObject
                 return 1;
 
             case 'updatePrice':
-                if(!$this->isEditable())
+                if (!$this->isEditable())
                     return 0;
                 if (!$this->isLoaded($errors)) {
                     return 0;
@@ -452,8 +451,9 @@ class Bimp_Product extends BimpObject
     {
         return (in_array($this->getData('type2'), static::$sousTypeDep));
     }
-    
-    public function isInContrat() {
+
+    public function isInContrat()
+    {
         return (in_array($this->getData('type2'), static::$sousTypeContrat));
     }
 
@@ -1310,28 +1310,27 @@ class Bimp_Product extends BimpObject
 
         return $prices;
     }
-
     /* moitier static moitier non inutilisé
-    public static function getFournisseursArray($id_product, $include_empty = true)
-    {
-        $fournisseurs = array();
+      public static function getFournisseursArray($id_product, $include_empty = true)
+      {
+      $fournisseurs = array();
 
-        $product = $this->getChildObject('product');
+      $product = $this->getChildObject('product');
 
-        if (!is_null($product) && $product->isLoaded()) {
-            $list = $product->dol_object->list_suppliers();
-            foreach ($list as $id_fourn) {
-                if (!array_key_exists($id_fourn, $fournisseurs)) {
-                    $result = $this->db->getRow('societe', '`rowid` = ' . (int) $id_fourn, array('nom', 'code_fournisseur'));
-                    if (!is_null($result)) {
-                        $fournisseurs[(int) $id_fourn] = $result->code_fournisseur . ' - ' . $result->nom;
-                    }
-                }
-            }
-        }
+      if (!is_null($product) && $product->isLoaded()) {
+      $list = $product->dol_object->list_suppliers();
+      foreach ($list as $id_fourn) {
+      if (!array_key_exists($id_fourn, $fournisseurs)) {
+      $result = $this->db->getRow('societe', '`rowid` = ' . (int) $id_fourn, array('nom', 'code_fournisseur'));
+      if (!is_null($result)) {
+      $fournisseurs[(int) $id_fourn] = $result->code_fournisseur . ' - ' . $result->nom;
+      }
+      }
+      }
+      }
 
-        return $fournisseurs;
-    }*/
+      return $fournisseurs;
+      } */
 
     public function getProductFournisseursPricesArray()
     {
@@ -2046,7 +2045,7 @@ class Bimp_Product extends BimpObject
 
     public function renderValidationDuration()
     {
-        if($this->getData('date_ask_valid') && $this->getData('date_valid')){
+        if ($this->getData('date_ask_valid') && $this->getData('date_valid')) {
             $date_ask_valid = new DateTime($this->getData('date_ask_valid'));
             $date_valid = new DateTime($this->getData('date_valid'));
 

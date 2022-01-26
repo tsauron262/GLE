@@ -1023,13 +1023,8 @@ class Bimp_Client extends Bimp_Societe
         $file = $this->getAtradiusFileName();
         $buttons = array();
         $note = BimpObject::getInstance("bimpcore", "BimpNote");
-        $html .= '<a target="__blanck" href="' . DOL_URL_ROOT . '/document.php?modulepart=societe&file=' . $this->id . '/' . $file . '">Fichier</a><br/>';
-            $buttons[] = array(
-                'label'   => 'Demander révision encours',
-                'icon'    => 'far_paper-plane',
-                'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => 680, "content" => "Bonjour, " . $user->getFullName($langs) . " sollicite pour ce client une révision d\'encours à XX XXX  €"), array('form_name' => 'rep'))
-            );
         if (!is_null($file) && $file) {
+            $html .= '<a target="__blanck" href="' . DOL_URL_ROOT . '/document.php?modulepart=societe&file=' . $this->id . '/' . $file . '">Fichier</a><br/>';
         } else {
 //            return BimpInput::renderInput('file_upload', 'atradius_file');
 
@@ -1064,6 +1059,11 @@ class Bimp_Client extends Bimp_Societe
 
             }
         }
+        $buttons[] = array(
+            'label'   => 'Demander révision encours',
+            'icon'    => 'far_paper-plane',
+            'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => 680, "content" => "Bonjour, " . $user->getFullName($langs) . " sollicite pour ce client une révision d\'encours à XX XXX  €"), array('form_name' => 'rep'))
+        );
         foreach ($buttons as $button) {
             $html .= BimpRender::renderButton($button) . '<br/>';
         }

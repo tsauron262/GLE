@@ -1,0 +1,126 @@
+table: bimp_apple_consigned_stock
+primary: id
+icon: fas_box-open
+controller: consigned_stock
+common_fields: 0
+    
+nom_url: 
+    syntaxe: <part_number>
+    
+list_page_url: 
+    module: bimpsupport
+    controller: index
+    url_params: 
+        tab: consigned_stock
+
+header_btn: 
+    callback: getActionsButtons
+    
+header_list_name: default
+header_edit_form: default
+header_delete_btn: 0
+
+labels: 
+    name: stock consigné
+    name_plur: stocks consignés
+    
+fields: 
+    part_number: 
+        label: Part number
+        required: 1
+        
+    qty: 
+        label: Quantité
+        type: qty
+        decimals: 0
+        default_value: 0
+        
+    code_centre: 
+        label: Centre
+        values: 
+            array: centres
+            
+    serials: 
+        label: Numéros de série
+        type: items_list
+        items_braces: 1
+        
+forms: 
+    receive: 
+        rows: 
+            - custom: 1
+              label: Centre
+              input_name: code_centre
+              input: 
+                  type: select
+                  options: 
+                      callback: 
+                          method: getCentresArray
+                          params: 
+                              - 1
+            - custom: 1
+              label: N° de livraison
+              input_name: deliveryNumber
+              content: 
+                  callback: renderReceptionDeliveryNumberSelect
+              display_if: 
+                  field_name: code_centre
+                  hide_values: ''
+              depends_on: code_centre
+              value: ''
+            - custom: 1
+              label: Unités reçues
+              input_name: part_qties
+              content: 
+                  callback: renderDeliveryPartsQtyInputs
+              display_if: 
+                  field_name: deliveryNumber
+                  hide_values: ''
+              depends_on: code_centre,deliveryNumber
+              
+    send: 
+        rows: 
+            - custom: 1
+              label: Centre
+              input_name: code_centre
+              input: 
+                  type: select
+                  options: 
+                      callback: 
+                          method: getCentresArray
+                          params: 
+                              - 1
+            - custom: 1
+              label: N° de commande
+              input_name: orderId
+              content: 
+                  callback: renderShipmentOrderIdSelect
+              display_if: 
+                  field_name: code_centre
+                  hide_values: ''
+              depends_on: code_centre
+              value: ''
+#            - custom: 1
+#              label: Unités reçues
+#              input_name: part_qties
+#              content: 
+#                  callback: renderDeliveryPartsQtyInputs
+#              display_if: 
+#                  field_name: deliveryNumber
+#                  hide_values: ''
+#              depends_on: code_centre,deliveryNumber
+              
+lists: 
+    default: 
+        title: Stocks consignés
+        configurable: 1
+        sort_field: id
+        sort_way: desc
+        n: 10
+        header_buttons: 
+            callback: getListHeaderButtons
+        cols:
+            code_centre: 
+            part_number: 
+            qty: 
+            serials: 

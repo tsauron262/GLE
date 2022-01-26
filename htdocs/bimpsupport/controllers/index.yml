@@ -4,6 +4,7 @@ js:
     - /bimpcore/views/js/BimpTimer.js
     - /bimpsupport/views/js/ticket.js
     - /bimpapple/views/js/gsx.js
+    - /bimpapple/views/js/consigned_stocks.js
     - /bimpsupport/views/js/sav.js
     - /bimpequipment/views/js/equipment.js
     - /bimpcommercial/views/js/paiement.js
@@ -35,6 +36,12 @@ objects:
     sac: 
         instance: 
             bimp_object: BS_Sac         
+            
+    stocks: 
+        instance: 
+            bimp_object: 
+                module: bimpapple
+                name: ConsignedStock
             
 sections:
     - type: tabs
@@ -85,4 +92,11 @@ sections:
                 - type: list
                   list: 
                       object: sac
+        stocks: 
+            label: Stocks consignés
+            icon: fas_boxes
+            sections: 
+                - type: list
+                  list: 
+                      object: stocks
                 

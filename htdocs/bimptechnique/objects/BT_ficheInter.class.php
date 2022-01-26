@@ -1381,7 +1381,7 @@ class BT_ficheInter extends BimpDolObject
 
             return 0;
         } else {
-            return BimpRender::renderAlerts("Calcule de la rentabilitée sur les anciennes FI en attente", "danger", false);
+            return BimpRender::renderAlerts("Calcul de la rentabilité sur les anciennes FI en attente", "danger", false);
         }
     }
 
@@ -1551,7 +1551,7 @@ class BT_ficheInter extends BimpDolObject
             $html .= '</tbody>';
             $html .= '</table>';
         } else {
-            $html .= BimpRender::renderAlerts("Il n'y à pas de commandes liées sur cette fiche d'intervention", "info", false);
+            $html .= BimpRender::renderAlerts("Il n'y a pas de commandes liées sur cette fiche d'intervention", "info", false);
         }
 
 

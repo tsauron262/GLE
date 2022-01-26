@@ -1489,12 +1489,23 @@ class BT_ficheInter extends BimpDolObject
                     $html .= '<tr>';
                     $html .= '<th style="text-align: left">Commande #' . $commande->id . ' - ' . $commande->getRef() . '</th>';
                     $html .= '</tr>';
+                    
+                    
+                    
                 }
 
                 $html .= '<tr>';
                 $html .= '<td style="padding: 20px">';
 
                 if (BimpObject::objectLoaded($commande)) {
+                    
+                    if($commande->getData('note_public')){
+                        $html .= '<h3>Note publique : </h3>'.$commande->getData('note_public').'';
+                    }
+                    if($commande->getData('note_private')){
+                        $html .= '<h3>Note privée : </h3>'.$commande->getData('note_private').'';
+                    }
+                    
                     $card = new BC_Card($commande);
                     $card->setParam('title', '');
 
@@ -1505,6 +1516,7 @@ class BT_ficheInter extends BimpDolObject
                     $html .= '<u><strong>';
                     $html .= 'Contenu de la commande';
                     $html .= '</strong></u><br />';
+                    
 
                     foreach ($commande->getLines('not_text') as $line) {
                         $service = $line->getProduct();

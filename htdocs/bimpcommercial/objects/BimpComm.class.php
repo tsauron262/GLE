@@ -42,19 +42,18 @@ class BimpComm extends BimpDolObject
         204 => ['label' => 'Non comptabilisable', 'classes' => ['warning'], 'icon' => 'times'],
     ];
     public static $expertise = [
-        0 => "",
-        10 => "Arts graphiques",
-        20 => "Constructions",
-        30 => "Education et Administrations",
-        40 => "Infrastructure",
-        50 => "Marketing",
-        60 => "Mobilité",
-        70 => "Partner",
-        80 => "Santé",
-        90 => "SAV",
+        0   => "",
+        10  => "Arts graphiques",
+        20  => "Constructions",
+        30  => "Education et Administrations",
+        40  => "Infrastructure",
+        50  => "Marketing",
+        60  => "Mobilité",
+        70  => "Partner",
+        80  => "Santé",
+        90  => "SAV",
         100 => "Autre"
     ];
-    
     public static $zones_vente = array(
         self::BC_ZONE_FR      => 'France',
         self::BC_ZONE_UE      => 'Union Européenne',
@@ -142,29 +141,34 @@ class BimpComm extends BimpDolObject
 
     public function isEditable($force_edit = false, &$errors = Array())
     {
+        return parent::isEditable($force_edit, $errors);
+    }
+
+    public function hasDemandsValidations($exclude_user_affected = true)
+    {
         global $user;
 
-        if (!$force_edit && !$user->admin) {
-            $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
-            $type_de_piece = ValidComm::getObjectClass($this);
+        $valid_comm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+        $type_de_piece = ValidComm::getObjectClass($this);
 
-            $demands = $valid_comm->demandeExists($type_de_piece, $this->id, null, 0, true);
+        $demands = $valid_comm->demandeExists($type_de_piece, $this->id, null, 0, true);
 
-            if ($demands) {
+        if ($demands) {
+            if ($exclude_user_affected) {
                 foreach ($demands as $d) {
-                    if ((int) $d->getData('id_user_affected') == (int) $user->id)
-                        return 1;
+                    if ((int) $d->getData('id_user_affected') == (int) $user->id) {
+                        return 0;
+                    }
                 }
+            }
 
-                // Soumis à des validations et possède des demandes de validation en brouillon
-                if ($type_de_piece != -2 and $demands) {
-                    $errors[] = 'Une demande de validation est en attente';
-                    return 0;
-                }
+            // Soumis à des validations et possède des demandes de validation en brouillon
+            if ($type_de_piece != -2 and $demands) {
+                return 1;
             }
         }
 
-        return parent::isEditable();
+        return 0;
     }
 
     public function isFieldActivated($field_name)
@@ -181,6 +185,14 @@ class BimpComm extends BimpDolObject
 
     public function isFieldEditable($field, $force_edit = false)
     {
+        global $user;
+
+        if (!$force_edit && !$user->admin && !in_array($field, array('note_public', 'note_private'))) {
+            if ($this->hasDemandsValidations(true)) {
+                return 0;
+            }
+        }
+
         switch ($field) {
             case 'replaced_ref':
                 return 1;
@@ -396,8 +408,15 @@ class BimpComm extends BimpDolObject
             }
         }
 
-        if (!$this->isEditable())
+        if (!$this->isEditable()) {
             return 0;
+        }
+
+        global $user;
+
+        if (!$user->admin && $this->hasDemandsValidations()) {
+            return 0;
+        }
 
         return 1;
     }
@@ -4309,13 +4328,13 @@ class BimpComm extends BimpDolObject
 
         $id_objs = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
 
-        if (count($id_objs) > 70){
+        if (count($id_objs) > 70) {
             $errors[] = 'Trop de PDF action impossible';
             return array(
-                'errors'           => $errors,
-                'warnings'         => $warnings
+                'errors'   => $errors,
+                'warnings' => $warnings
             );
-    }
+        }
 
         if (!is_array($id_objs) || empty($id_objs)) {
             $errors[] = 'Aucune ' . $this->getLabel() . ' sélectionnée';

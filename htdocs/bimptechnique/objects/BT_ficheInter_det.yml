@@ -319,6 +319,10 @@ forms:
                         
             desc: 
                 field: description
+
+    edit:
+        extends: default
+        rows:
             forfait:
                 field: forfait
             
@@ -391,7 +395,7 @@ lists:
         add_form_name: default
         delete_btn: 1
         edit_btn: 1
-        edit_form: default
+        edit_form: edit
         modal_view: default
         extra_btn:
             callback: getListExtraButtons

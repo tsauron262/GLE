@@ -1381,7 +1381,7 @@ class BT_ficheInter extends BimpDolObject
 
             return 0;
         } else {
-            return BimpRender::renderAlerts("Calcule de la rentabilitée sur les anciennes FI en attente", "danger", false);
+            return BimpRender::renderAlerts("Calcul de la rentabilité sur les anciennes FI en attente", "danger", false);
         }
     }
 
@@ -1489,12 +1489,23 @@ class BT_ficheInter extends BimpDolObject
                     $html .= '<tr>';
                     $html .= '<th style="text-align: left">Commande #' . $commande->id . ' - ' . $commande->getRef() . '</th>';
                     $html .= '</tr>';
+                    
+                    
+                    
                 }
 
                 $html .= '<tr>';
                 $html .= '<td style="padding: 20px">';
 
                 if (BimpObject::objectLoaded($commande)) {
+                    
+                    if($commande->getData('note_public')){
+                        $html .= '<h3>Note publique : </h3>'.$commande->getData('note_public').'';
+                    }
+                    if($commande->getData('note_private')){
+                        $html .= '<h3>Note privée : </h3>'.$commande->getData('note_private').'';
+                    }
+                    
                     $card = new BC_Card($commande);
                     $card->setParam('title', '');
 
@@ -1505,6 +1516,7 @@ class BT_ficheInter extends BimpDolObject
                     $html .= '<u><strong>';
                     $html .= 'Contenu de la commande';
                     $html .= '</strong></u><br />';
+                    
 
                     foreach ($commande->getLines('not_text') as $line) {
                         $service = $line->getProduct();
@@ -1515,6 +1527,11 @@ class BT_ficheInter extends BimpDolObject
                         }
 
                         $html .= "<strong> - (" . price($line->getTotalHT(true)) . "€ HT / " . price($line->getTotalTTC()) . "€ TTC)</strong>";
+                        
+                        if($line->getData('force_qty_1') == 1) {
+                            $html .= " <strong class='danger'>Au forfait</strong>";
+                        }
+                        
                         if ($line->desc) {
                             $html .= "<br /><strong style='margin-left:10px'>" . $line->desc . "</strong><br />";
                         } elseif (BimpObject::objectLoaded($service) && $service->getData('description')) {
@@ -1534,7 +1551,7 @@ class BT_ficheInter extends BimpDolObject
             $html .= '</tbody>';
             $html .= '</table>';
         } else {
-            $html .= BimpRender::renderAlerts("Il n'y à pas de commandes liées sur cette fiche d'intervention", "info", false);
+            $html .= BimpRender::renderAlerts("Il n'y a pas de commandes liées sur cette fiche d'intervention", "info", false);
         }
 
 

@@ -34,6 +34,9 @@ class BimpInput
         if (isset($options['data'])) {
             $data = BimpRender::renderTagData($options['data']);
         }
+        if(isset($options['no_autocorrect']) && $options['no_autocorrect'])
+            $data .= ' autocorrect="off" autocapitalize="none"';
+        
 
         switch ($type) {
             case 'hidden':

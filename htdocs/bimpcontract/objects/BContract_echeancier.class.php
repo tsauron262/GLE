@@ -656,8 +656,9 @@ class BContract_echeancier extends BimpObject {
             $firstDinamycLine = true;
             
             $reste_periodeEntier = ceil($data->reste_periode);
-            
+                        
             for ($i = 1; $i <= $reste_periodeEntier; $i++) {
+                
                 $morceauPeriode = (($data->reste_periode - ($i-1)) >= 1)? 1 : (($data->reste_periode - ($i-1)));
                 if (!$firstPassage) {
                     $startedDate->add(new DateInterval("P" . $data->periodicity . "M"));
@@ -678,19 +679,20 @@ class BContract_echeancier extends BimpObject {
                 $getEndDate = new DateTime($parent->displayRealEndDate("Y-m-d"));
                 if($getEndDate < $dateTime_end_mkTime)
                     $dateTime_end_mkTime = $getEndDate;
-
+                $amount = $parent->getAddAmountAvenantProlongation() / ($data->reste_periode / $morceauPeriode);
                 $firstPassage = false;
                 if($parent->getData('periodicity') != 1200 && $data->reste_periode > 1) {
-                    $amount = $data->reste_a_payer / ($data->reste_periode / $morceauPeriode);
+                    $amount += $data->reste_a_payer / ($data->reste_periode / $morceauPeriode);
                     $tva = $amount * 0.2;
                     $nb_periode = ceil($parent->getData('duree_mois') / $parent->getData('periodicity'));
                     $pa = ($parent->getTotalPa()- $parent->getTotalDejaPayer(false, 'pa')) /  ($data->reste_periode * $morceauPeriode); 
                 } else {
-                    $amount = $data->reste_a_payer;
+                    $amount += $data->reste_a_payer;
                     $tva = $amount * 0.2;
                     $nb_periode = 1;
                     $pa = ($parent->getTotalPa()- $parent->getTotalDejaPayer(false, 'pa')); 
                 }
+                
                 
                 
                 if(!$display) {
@@ -752,8 +754,8 @@ class BContract_echeancier extends BimpObject {
 //                    $html .= '<div class="btn-group"><button type="button" class="btn btn-default" aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsLoadModalForm('create_perso', "Créer une facture personnalisée ou une facturation de plusieurs périodes") . '"><i class="fa fa-plus-square-o iconLeft"></i>Créer une facture personalisée ou une facturation de plusieurs périodes</button></div>';
 //                }
             }
-            if(($user->rights->facture->creer && $reste_periodeEntier == 0 && $parent->getTotalContrat() - $parent->getTotalDejaPayer() > 0) && $parent->getData('statut') == 11)
-                $html .= '<div class="btn-group"><button type="button" class="btn btn-danger bs-popover" '.BimpRender::renderPopoverData('Facturation supplémentaire').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick("createFacture", array('labelLn'=> 'Facturation supplémentaire', 'label'=> 'Complément à', 'total_ht' => $parent->getTotalContrat() - $parent->getTotalDejaPayer(), 'pa' => ($parent->getTotalPa() - $parent->getTotalDejaPayer(false, 'pa'))), array("success_callback" => $callback)) . '"><i class="fa fa-times"></i> Facturation supplémentaire</button></div>';
+            if(($user->rights->facture->creer && $reste_periodeEntier == 0 && round($parent->getCurrentTotal(), 2) - round($parent->getTotalDejaPayer(), 2) > 0) && $parent->getData('statut') == 11)
+                $html .= '<div class="btn-group"><button type="button" class="btn btn-default bs-popover" '.BimpRender::renderPopoverData('Facturation supplémentaire').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick("createFacture", array('labelLn'=> 'Facturation supplémentaire', 'label'=> 'Complément à', 'total_ht' => $parent->getTotalContrat() - $parent->getTotalDejaPayer(), 'pa' => ($parent->getTotalPa() - $parent->getTotalDejaPayer(false, 'pa'))), array("success_callback" => $callback)) . '"><i class="fa fa-plus"></i> Facturation supplémentaire</button></div>';
             $html .= '</div>';
         }
 

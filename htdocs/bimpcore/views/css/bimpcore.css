@@ -12980,64 +12980,65 @@ button.close {
 @media (max-width: 999px) {
   /* line 139, ../scss/bootstrap/_modals.scss */
   .modal-dialog {
-    position: fixed;
     width: 100%;
     height: 100%;
-    margin: 0;
+    margin: 52px 0 60px 0 !important;
     max-width: 100%;
     left: 0;
-    top: 0;
-    bottom: 0;
+    right: 0;
     display: block; }
-    /* line 150, ../scss/bootstrap/_modals.scss */
+    /* line 148, ../scss/bootstrap/_modals.scss */
+    .modal-dialog .modal-body {
+      max-height: 100% !important; }
+    /* line 151, ../scss/bootstrap/_modals.scss */
     .modal-dialog .modal-content {
       width: 100%;
       height: 100%;
       border: none;
       border-radius: 0; } }
 @media (min-width: 1000px) {
-  /* line 161, ../scss/bootstrap/_modals.scss */
+  /* line 162, ../scss/bootstrap/_modals.scss */
   .modal-dialog {
     width: 90%;
     margin: 30px auto; }
 
-  /* line 165, ../scss/bootstrap/_modals.scss */
+  /* line 166, ../scss/bootstrap/_modals.scss */
   .modal-content {
     -webkit-box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); } }
 @media (min-width: 1280px) {
-  /* line 171, ../scss/bootstrap/_modals.scss */
+  /* line 172, ../scss/bootstrap/_modals.scss */
   .modal-dialog {
     width: 70%; }
 
-  /* line 172, ../scss/bootstrap/_modals.scss */
+  /* line 173, ../scss/bootstrap/_modals.scss */
   .modal-lg {
     width: 90%; }
 
-  /* line 173, ../scss/bootstrap/_modals.scss */
+  /* line 174, ../scss/bootstrap/_modals.scss */
   .modal-md {
     width: 70%; }
 
-  /* line 174, ../scss/bootstrap/_modals.scss */
+  /* line 175, ../scss/bootstrap/_modals.scss */
   .modal-sm {
     width: 50%; } }
 @media (min-width: 1680px) {
-  /* line 178, ../scss/bootstrap/_modals.scss */
+  /* line 179, ../scss/bootstrap/_modals.scss */
   .modal-dialog {
     width: 60%; }
 
-  /* line 179, ../scss/bootstrap/_modals.scss */
+  /* line 180, ../scss/bootstrap/_modals.scss */
   .modal-lg {
     width: 80%; }
 
-  /* line 180, ../scss/bootstrap/_modals.scss */
+  /* line 181, ../scss/bootstrap/_modals.scss */
   .modal-md {
     width: 60%; }
 
-  /* line 181, ../scss/bootstrap/_modals.scss */
+  /* line 182, ../scss/bootstrap/_modals.scss */
   .modal-sm {
     width: 40%; } }
-/* line 185, ../scss/bootstrap/_modals.scss */
+/* line 186, ../scss/bootstrap/_modals.scss */
 .full-window-modal .modal-dialog {
   position: fixed;
   width: 100%;
@@ -13048,16 +13049,16 @@ button.close {
   top: 0;
   bottom: 0;
   display: block; }
-  /* line 195, ../scss/bootstrap/_modals.scss */
+  /* line 196, ../scss/bootstrap/_modals.scss */
   .full-window-modal .modal-dialog .modal-content {
     height: 100vh;
     border: none;
     border-radius: 0; }
-    /* line 200, ../scss/bootstrap/_modals.scss */
+    /* line 201, ../scss/bootstrap/_modals.scss */
     .full-window-modal .modal-dialog .modal-content .modal-body {
       height: calc(100vh - 50px);
       overflow-x: auto; }
-    /* line 204, ../scss/bootstrap/_modals.scss */
+    /* line 205, ../scss/bootstrap/_modals.scss */
     .full-window-modal .modal-dialog .modal-content .modal-footer {
       background-color: #393a3d;
       padding: 15px 24px;

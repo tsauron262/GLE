@@ -509,7 +509,33 @@ class Bimp_User extends BimpObject
             'title'   => BimpRender::renderIcon('fas_briefcase', 'iconLeft') . 'Commercial',
             'content' => $this->renderCommercialView()
         );
+
+        $tabs[] = array(
+            'id'      => 'materiel',
+            'title'   => BimpRender::renderIcon('fas_tv', 'iconLeft') . 'Materiel',
+            'content' => $this->renderMaterielView()
+        );
         return BimpRender::renderNavTabs($tabs);
+    }
+    
+    public function renderMaterielView()
+    {
+        $tabs = array();
+
+        $tabs[] = array(
+            'id'            => 'user_materiel_tab',
+            'title'         => BimpRender::renderIcon('fas_tv', 'iconLeft') . 'Materiel',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#user_materiel_tab .nav_tab_ajax_result\')', array('materiel'), array('button' => ''))
+        );
+        $tabs[] = array(
+            'id'            => 'user_materielNS_tab',
+            'title'         => BimpRender::renderIcon('fas_tv', 'iconLeft') . 'Materiel non sérialisé',
+            'ajax'          => 1,
+            'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#user_materielNS_tab .nav_tab_ajax_result\')', array('materielNS'), array('button' => ''))
+        );
+
+        return BimpRender::renderNavTabs($tabs, 'conges_tabs');
     }
 
     public function renderParamsView()
@@ -956,6 +982,42 @@ class Bimp_User extends BimpObject
                 $list->addFieldFilterValue('commercial_custom', array(
                     'custom' => $sql
                 ));
+                break;
+
+            // Onglet "Materiel": 
+            case 'materiel':
+                $list = new BC_ListTable(BimpObject::getInstance('bimpequipment', 'Equipment'), 'default', 1, null, 'Materiel serialisé de "' . $user_label . '"', 'fas_tv');
+
+                $list->addJoin('be_equipment_place', 'a___places.id_equipment = a.id', 'a___places');
+                
+                $list->addFieldFilterValue('a___places.position', 1);
+                $list->addFieldFilterValue('a___places.id_user', $this->id);
+                break;
+                $list = new BC_ListTable(BimpObject::getInstance('bimpequipment', 'BE_PackageProduct'), 'default', 1, null, 'Materiel serialisé de "' . $user_label . '"', 'fas_tv');
+
+//                $list->addJoin('be_equipment_place', 'a___places.id_equipment = a.id', 'a___places');
+//                
+//                $list->addFieldFilterValue('a___places.position', 1);
+//                $list->addFieldFilterValue('a___places.id_user', $this->id);
+                break;
+            case 'materielNS':
+                $list = new BC_ListTable(BimpObject::getInstance('bimpequipment', 'BE_PackageProduct'), 'user', 1, null, 'Materiel non serialisé de "' . $user_label . '"', 'fas_tv');
+
+                
+//                SELECT COUNT(DISTINCT a.id) as nb_rows
+//FROM llx_be_package_product a
+//LEFT JOIN llx_be_package a___parent ON a___parent.id = a.id_package
+//LEFT JOIN llx_be_package_place a___parent___places ON a___parent___places.id_package = a___parent.id
+//WHERE (a___parent___places.position <= '1') AND a.id_package = '4429'
+                
+                
+                $list->addJoin('be_package', 'a___parent.id = a.id_package', 'a___parent');
+                $list->addJoin('be_package_place', 'a___parent___places.id_package = a___parent.id', 'a___parent___places');
+//                
+                $list->addFieldFilterValue('a___parent___places.position', 1);
+                $list->addFieldFilterValue('a___parent___places.id_user', $this->id);
+                $list->addFieldFilterValue('a___parent___places.type', 3);
+                
                 break;
         }
 

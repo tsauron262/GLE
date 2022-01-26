@@ -25,10 +25,22 @@ sections:
           - id: liste_fiche
             title: Fiches d'interventions
             struct: 
-                type: list
-                list: 
-                    name: default
-                    object: fi
+                type: rows
+                rows:                                                   
+                    - cols: 
+                        - type: list
+                          list: 
+                              title: Fiches d'interventions (nouvelle version)
+                              name: default
+                              panel: 1
+                              object: fi
+                        - type: list
+                          list: 
+                              title: Fiches d'interventions (Historique)
+                              name: historique
+                              panel: 1
+                              object: fi
+                
           - id: stats
             title: Liste des lignes des FIs
             struct:

@@ -21,7 +21,9 @@ require("../main.inc.php");
 
 llxHeader();
 
-//echo BimpCache::$cache_server->printAll();
+echo BimpCache::$cache_server->printAll('product');
+
+die('fin');
 //if($_REQUEST['deleteAll'] == 'true')
 //    echo BimpCache::$cache_server->deleteAll();
 

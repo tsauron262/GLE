@@ -248,6 +248,8 @@ fields:
     email: 
         label: E-mail
         user_edit: 1
+        input:
+            no_autocorrect: 1
         
     skype: 
         label: Skype
@@ -570,6 +572,8 @@ fields:
         dol_extra_field: 1
         type: text
         user_edit: 1
+        input:
+            no_autocorrect: 1
         
     contact_default: 
         label: Contact par défaut pour e-mail facturation

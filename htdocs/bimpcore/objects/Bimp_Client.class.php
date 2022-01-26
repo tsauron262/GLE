@@ -674,15 +674,6 @@ class Bimp_Client extends Bimp_Societe
         return $clients;
     }
 
-    public function getTotalPaiementsInconnus()
-    {
-        if ($this->isLoaded()) {
-            return (float) $this->db->getSum('Bimp_PaiementInc', 'total', 'fk_soc = ' . (int) $this->id);
-        }
-
-        return 0;
-    }
-
     public function getConvertibleToDiscountAmount()
     {
         $amount = 0;

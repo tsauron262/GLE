@@ -14,4 +14,23 @@ class Bimp_PropalLine extends ObjectLine
     {
         return 1;
     }
+    
+    
+    public function isDeletable($force_delete = false, &$errors = array()): int {
+        if($this->getData('linked_object_name') == 'discount')
+            return 1;
+        return parent::isDeletable($force_delete, $errors);
+    }
+    
+    public function delete(&$warnings = array(), $force_delete = false) {
+        if($this->getData('linked_object_name') == 'discount'){
+            $parent = $this->getParentInstance();
+            $parent->dol_object->statut = 0;
+            $return = parent::delete($warnings, $force_delete);
+            $parent->dol_object->statut = $parent->getInitData('statut');
+        }
+        else
+            $return = parent::delete($warnings, $force_delete);
+        return $return;
+    }
 }

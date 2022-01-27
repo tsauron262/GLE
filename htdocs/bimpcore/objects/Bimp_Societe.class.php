@@ -745,7 +745,7 @@ class Bimp_Societe extends BimpDolObject
             return $this->db->getValue('c_country', 'code', '`rowid` = ' . (int) $fk_pays);
         }
     }
-    
+
     public function getTotalPaiementsInconnus()
     {
         if ($this->isLoaded() && $this->isClient()) {
@@ -754,7 +754,7 @@ class Bimp_Societe extends BimpDolObject
 
         return 0;
     }
-    
+
     public function getAvailableDiscountsAmounts($is_fourn = false, $allowed = array())
     {
         if ($this->isLoaded()) {
@@ -1095,7 +1095,7 @@ class Bimp_Societe extends BimpDolObject
             if (isset($values['opened'])) {
                 $encours = $values['opened'];
             }
-            
+
             $encours -= (float) $this->getTotalPaiementsInconnus();
             $encours -= (float) $this->getAvailableDiscountsAmounts();
         }
@@ -1835,7 +1835,13 @@ class Bimp_Societe extends BimpDolObject
         $errors = array();
 
         if ($this->isLoaded($errors)) {
-            if (is_uploaded_file($_FILES['logo']['tmp_name'])) {
+            if ((int) BimpTools::getValue('no_logo', 0)) {
+                if ($this->db->update($this->getTable(), array(
+                            'logo' => ''
+                                ), 'rowid = ' . (int) $this->id) <= 0) {
+                    $errors[] = 'Echec de la suppression du logo - ' . $this->db->err();
+                }
+            } elseif (is_uploaded_file($_FILES['logo']['tmp_name'])) {
                 global $maxwidthsmall, $maxheightsmall, $maxwidthmini, $maxheightmini, $quality;
 
                 require_once DOL_DOCUMENT_ROOT . '/core/lib/images.lib.php';

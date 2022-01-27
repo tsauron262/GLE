@@ -1119,12 +1119,23 @@ forms:
     logo: 
         title: Changer le logo
         rows: 
+            no_logo: 
+                custom: 1
+                label: Aucun logo
+                input_name: no_logo
+                input: 
+                    type: toggle
+                value: 0
             logo: 
                 custom: 1
                 input_name: logo
                 label: Fichier
                 input: 
                     type: file_upload
+                display_if: 
+                    field_name: no_logo
+                    show_values: 0
+                
                     
     add_commercial: 
         title: Ajouter un commercial

@@ -1188,7 +1188,7 @@ class BContract_contrat extends BimpDolObject
     public function actionReleveIntervention($data, &$success) {
         
         global $langs, $conf;
-        die($conf->contract->dir_output . ' JJJJ');
+        //die($conf->contract->dir_output . ' JJJJ');
         $errors = Array();
         $warnings = Array();
         if ($this->dol_object->generateDocument($this->getModelStatementPdf(), $outputlangs) <= 0) {
@@ -1727,12 +1727,12 @@ class BContract_contrat extends BimpDolObject
                 }
             }
             
-            if(BT_ficheInter::isActive()) {
-//                $buttons[] = array(
-//                    'label'   => 'Relevé d\'interventions',
-//                    'icon'    => 'fas_ambulance',
-//                    'onclick' => $this->getJsActionOnclick('releveIntervention', array(), array())
-//                );
+            if(BT_ficheInter::isActive() && $user->id == 460) {
+                $buttons[] = array(
+                    'label'   => 'Relevé d\'interventions',
+                    'icon'    => 'fas_ambulance',
+                    'onclick' => $this->getJsActionOnclick('releveIntervention', array(), array())
+                );
             }
 
             if ($status == self::CONTRAT_STATUS_VALIDE || $status == self::CONTRAT_STATUT_WAIT_ACTIVER) {
@@ -1898,7 +1898,7 @@ class BContract_contrat extends BimpDolObject
                 )));
             }
 
-            if ($status == self::CONTRAT_STATUS_BROUILLON) {
+            if ($status == self::CONTRAT_STATUS_BROUILLON || $user->id == 460) {
                 $buttons[] = array(
                     'label'   => 'Générer le PDF du contrat',
                     'icon'    => 'fas_file-pdf',

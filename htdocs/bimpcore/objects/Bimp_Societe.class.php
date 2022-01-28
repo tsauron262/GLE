@@ -1735,6 +1735,7 @@ class Bimp_Societe extends BimpDolObject
                     }
                 }
             }
+            $contrat = null;
 
             if ($this->dol_object->date_creation) {
                 $dt = new DateTime(BimpTools::getDateFromDolDate($this->dol_object->date_creation));

@@ -602,14 +602,16 @@ class pdf_fi
                             }
                         }
 
-                        if ($child->getData('description') != "<br>" && $child->getData('description') != "") {
+                        
+                    }
+                    
+                    if ($child->getData('description') != "<br>" && $child->getData('description') != "") {
                             $pdf->SetFont(''/* 'Arial' */, 'B', 9);
                             $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Notes de " . $tech->getName(), 0, 'L');
                             $pdf->SetFont(''/* 'Arial' */, '', 9);
                             $pdf->setX(16);
                             $pdf->writeHTML($child->getData('description'));
                         }
-                    }
                     $pdf->Ln();
                 }
                 $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche);

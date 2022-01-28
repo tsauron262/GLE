@@ -180,6 +180,8 @@ forms:
                 custom: 1
                 label: Service
                 input_name: service
+                value:
+                    callback: getIdLineInput
                 input:
                     type: select
                     options:

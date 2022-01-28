@@ -1716,6 +1716,25 @@ class Bimp_Societe extends BimpDolObject
                 }
                 $html .= '</div>';
             }
+            
+            $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat');
+            $liste = $contrat->getList(['statut' => 11, 'fk_soc' => $this->id]);
+                
+            if(count($liste)) {
+                $s = (count($liste) > 1) ? 's' : '';
+                $html .= 'Contrat'.$s.' actif'.$s.': ';
+                $fl = true;
+                foreach($liste as $infos) {
+                    $contrat->fetch($infos['rowid']);
+                    $card = new BC_Card($contrat);
+                    if($fl) {
+                        $html .= '<span class=\'bs-popover\' '.BimpRender::renderPopoverData($card->renderHtml(), 'top', true).' >' . $contrat->getNomUrl() . ' </span>';
+                        $fl = false;
+                    } else {
+                        $html .= ', ' . '<span class=\'bs-popover\' '.BimpRender::renderPopoverData($card->renderHtml(), 'top', true).' >' . $contrat->getNomUrl() . ' </span>';
+                    }
+                }
+            }
 
             if ($this->dol_object->date_creation) {
                 $dt = new DateTime(BimpTools::getDateFromDolDate($this->dol_object->date_creation));
@@ -1731,7 +1750,7 @@ class Bimp_Societe extends BimpDolObject
                         $html .= ' par ' . $user->getLink();
                     }
                 }
-
+                
                 $html .= '</div>';
             }
 
@@ -1747,7 +1766,7 @@ class Bimp_Societe extends BimpDolObject
                         $html .= ' par ' . $user->getLink();
                     }
                 }
-
+                
                 $html .= '</div>';
             }
         }

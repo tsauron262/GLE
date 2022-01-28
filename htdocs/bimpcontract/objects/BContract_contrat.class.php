@@ -141,6 +141,8 @@ class BContract_contrat extends BimpDolObject
             //'propal' => 'Proposition commercial'
     ];
     public static $dol_module = 'contract';
+    
+    public $filtresPDFstatement = Array('ids' => Array(), 'type' => 'contrat');
 
     function __construct($module, $object_name)
     {
@@ -1185,15 +1187,14 @@ class BContract_contrat extends BimpDolObject
     
     public function actionReleveIntervention($data, &$success) {
         
-        global $langs;
-        
+        global $langs, $conf;
+        //die($conf->contract->dir_output . ' JJJJ');
         $errors = Array();
         $warnings = Array();
-        
         if ($this->dol_object->generateDocument($this->getModelStatementPdf(), $outputlangs) <= 0) {
             $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'des erreurs sont survenues lors de la génération du document PDF');
         } else {
-            $callback = "window.open('" . DOL_URL_ROOT . "/document.php?modulepart=contract&file=".$this->getRef()."/Releve_intervention.pdf&entity=1', '_blank');";
+            $callback = "window.open('" . DOL_URL_ROOT . "/document.php?modulepart=contract&file=".$this->getRef()."/Releve_interventions.pdf&entity=1', '_blank');";
             $success = 'PDF généré avec succès';
         }
         
@@ -1726,12 +1727,12 @@ class BContract_contrat extends BimpDolObject
                 }
             }
             
-            if(BT_ficheInter::isActive()) {
-//                $buttons[] = array(
-//                    'label'   => 'Relevé d\'interventions',
-//                    'icon'    => 'fas_ambulance',
-//                    'onclick' => $this->getJsActionOnclick('releveIntervention', array(), array())
-//                );
+            if(BT_ficheInter::isActive() && $user->id == 460) {
+                $buttons[] = array(
+                    'label'   => 'Relevé d\'interventions',
+                    'icon'    => 'fas_ambulance',
+                    'onclick' => $this->getJsActionOnclick('releveIntervention', array(), array())
+                );
             }
 
             if ($status == self::CONTRAT_STATUS_VALIDE || $status == self::CONTRAT_STATUT_WAIT_ACTIVER) {
@@ -1753,7 +1754,7 @@ class BContract_contrat extends BimpDolObject
                     );
                 }
             }
-            if ($user->admin && $this->getData('tacite') != 12 && $this->getData('tacite') != 0) {
+            if (($user->admin || $user->rights->bimpcontract->to_validate) && $this->getData('tacite') != 12 && $this->getData('tacite') != 0) {
                 $buttons[] = array(
                     "label"   => 'Annuler la reconduction tacite',
                     'icon'    => "fas_hand-paper",
@@ -1897,7 +1898,7 @@ class BContract_contrat extends BimpDolObject
                 )));
             }
 
-            if ($status == self::CONTRAT_STATUS_BROUILLON) {
+            if ($status == self::CONTRAT_STATUS_BROUILLON || $user->id == 460) {
                 $buttons[] = array(
                     'label'   => 'Générer le PDF du contrat',
                     'icon'    => 'fas_file-pdf',

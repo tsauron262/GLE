@@ -48,12 +48,12 @@ class BT_ficheInter_det extends BimpDolObject
         self::TYPE_PLUS                => [
             'classes' => [
                 'info'
-            ], 'label'   => "Intervention non vendu", 'icon'    => 'plus'
+            ], 'label'   => "Intervention non prévue", 'icon'    => 'plus'
         ],
         self::TYPE_DEPLA               => [
             'classes' => [
                 'important'
-            ], 'label'   => "Déplacement non vendu", 'icon'    => 'car'
+            ], 'label'   => "Déplacement non prévu", 'icon'    => 'car'
         ],
         self::TYPE_DEPLACEMENT_CONTRAT => [
             'classes' => [

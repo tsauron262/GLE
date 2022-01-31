@@ -2,6 +2,11 @@
 
 class Bimp_UserGroup extends BimpObject
 {
+    
+    function __construct($module, $object_name) {
+       $this->redirectMode = 1;
+       return parent::__construct($module, $object_name);
+    }
 
     // Droits user: 
 

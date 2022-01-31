@@ -583,7 +583,7 @@ class pdf_fi
                     $pdf->setColor('fill', 255, 255, 255);
                     $pdf->setDrawColor(255, 255, 255);
                     $pdf->SetFont(''/* 'Arial' */, 'B', 9);
-                    if (BimpObject::objectLoaded($service)) {
+                    if (BimpObject::objectLoaded($service) && $child->getData('forfait') == 0) {
                         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Description du service " . $service->getRef(), 0, 'L');
                     } else {
                         if (!in_array($child->getData('type'), $excludeDescriptionService)) {
@@ -591,21 +591,27 @@ class pdf_fi
                         }
                     }
                     $pdf->SetFont(''/* 'Arial' */, '', 9);
-                    if (BimpObject::objectLoaded($service)) {
-                        $pdf->MultiCell(($this->page_largeur - $this->marge_droite - $this->marge_gauche), 4, strip_tags($service->getData('description')), 0, 'L');
+                    if($child->getData('forfait') == 1) {
+                        $pdf->MultiCell(($this->page_largeur - $this->marge_droite - $this->marge_gauche), 4,'Prestation au forfait', 0, 'L');
                     } else {
-                        if (!in_array($child->getData('type'), $excludeDescriptionService)) {
-                            $pdf->MultiCell(($this->page_largeur - $this->marge_droite - $this->marge_gauche), 4, $type, 0, 'L');
+                        if (BimpObject::objectLoaded($service)) {
+                            $pdf->MultiCell(($this->page_largeur - $this->marge_droite - $this->marge_gauche), 4, strip_tags($service->getData('description')), 0, 'L');
+                        } else {
+                            if (!in_array($child->getData('type'), $excludeDescriptionService)) {
+                                $pdf->MultiCell(($this->page_largeur - $this->marge_droite - $this->marge_gauche), 4, $type, 0, 'L');
+                            }
                         }
-                    }
 
-                    if ($child->getData('description') != "<br>" && $child->getData('description') != "") {
-                        $pdf->SetFont(''/* 'Arial' */, 'B', 9);
-                        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Notes de " . $tech->getName(), 0, 'L');
-                        $pdf->SetFont(''/* 'Arial' */, '', 9);
-                        $pdf->setX(16);
-                        $pdf->writeHTML($child->getData('description'));
+                        
                     }
+                    
+                    if ($child->getData('description') != "<br>" && $child->getData('description') != "") {
+                            $pdf->SetFont(''/* 'Arial' */, 'B', 9);
+                            $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Notes de " . $tech->getName(), 0, 'L');
+                            $pdf->SetFont(''/* 'Arial' */, '', 9);
+                            $pdf->setX(16);
+                            $pdf->writeHTML($child->getData('description'));
+                        }
                     $pdf->Ln();
                 }
                 $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche);

@@ -363,16 +363,20 @@ class BT_ficheInter_det extends BimpDolObject
         }
         
     }
-
-    public function display_service_ref($with_details_commande_line = true)
-    {
-        $html = '';
-
+    
+    public function getIdLineInput(){
+        $idLine = $this->getData('id_line_commande');
+        if($idLine > 0)
+            return 'commande_'.$idLine;
+        $idLine = $this->getData('id_line_contrat');
+        if($idLine > 0)
+            return 'contrat_'.$idLine;
+        return 0;
+        }
+    
+    public function getIdService() {
         $fk_product = 0;
-        $element = '';
-        $valeur = '';
-
-        if ($this->getData('id_line_contrat') > 0) {
+         if ($this->getData('id_line_contrat') > 0) {
             $contrat_line = $this->getChildObject('contrat_line');
             if (BimpObject::objectLoaded($contrat_line)) {
                 $fk_product = (int) $contrat_line->getData('fk_product');
@@ -406,6 +410,18 @@ class BT_ficheInter_det extends BimpDolObject
                 }
             }
         }
+        return $fk_product;
+    }
+
+    public function display_service_ref($with_details_commande_line = true)
+    {
+        $html = '';
+
+        $fk_product = 0;
+        $element = '';
+        $valeur = '';
+
+        $fk_product = $this->getIdService();
 
         if ($fk_product > 0) {
             if ($this->getData('type') == 6) {

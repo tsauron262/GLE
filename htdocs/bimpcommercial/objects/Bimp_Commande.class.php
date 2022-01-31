@@ -5,7 +5,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
 class Bimp_Commande extends BimpComm
 {
 
-    public static $no_check_reservations = false;
+    public $no_check_reservations = false;
     public $acomptes_allowed = true;
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public static $dol_module = 'commande';
@@ -127,7 +127,7 @@ class Bimp_Commande extends BimpComm
 
                 // Encours
                 if (is_a($demande, 'DemandeValidComm')) {
-                    list($secteur, $class,,, $val_euros) = $vc->getObjectParams($this, $errors);
+                    list($secteur, $class,, $val_euros) = $vc->getObjectParams($this, $errors);
                     return $vc->userCanValidate((int) $user->id, $secteur, ValidComm::TYPE_ENCOURS, $class, $val_euros, $this)
                             or $vc->userCanValidate((int) $user->id, $secteur, ValidComm::TYPE_IMPAYE, $class, $val_euros, $this);
                 }
@@ -369,15 +369,6 @@ class Bimp_Commande extends BimpComm
                 $client_facture->canBuy($errors);
             }
 
-            $id_ldlc_pro_lease = (int) BimpCore::getConf('ldlc_pro_lease_id_societe', 0);
-            if ($id_ldlc_pro_lease) {
-                if ($this->dol_object->mode_reglement_code == 'FINLDL') {
-                    if ($this->getData('id_client_facture') != $id_ldlc_pro_lease) {
-                        $errors[] = 'Cette commande est en financement LDLC Pro Lease.<br/>Vous devez enregistrer LDLC Pro Lease en tant que "Client facturation" ou modifier le Mode de Règlement';
-                    }
-                }
-            }
-
             if (!count($errors) && !defined('NOT_VERIF')) {
                 if ($this->getData('ef_type') !== 'M' && !(int) BimpCore::getConf('NOT_FORCE_CONTACT')) {
                     // Vérif du contact facturation: 
@@ -569,7 +560,7 @@ class Bimp_Commande extends BimpComm
 
                     global $user;
 
-                    if (in_array($user->login, array('admin', 'f.martinez', 't.sauron'))) {
+                    if (in_array((int) $user->login, array('admin', 'f.martinez', 't.sauron'))) {
                         $buttons[] = array(
                             'label'   => 'Forcer Validation (no triggers)',
                             'icon'    => 'fas_check',
@@ -1987,7 +1978,7 @@ class Bimp_Commande extends BimpComm
         $html .= '</tr>';
         $html .= '</tbody>';
         $html .= '</table>';
-        $title = BimpRender::renderIcon('fas_euro-sign', 'iconLeft') . 'Montants totaux';
+        $title = BimpRender::renderIcon('fas_euro-sign', 'iconLeft');
 
         return BimpRender::renderPanel($title, $html, '', array(
                     'type'     => 'secondary',
@@ -2861,7 +2852,7 @@ class Bimp_Commande extends BimpComm
 
     public function checkLogistiqueStatus($log_change = false)
     {
-        if ($this->isLoaded() && (int) $this->getData('fk_statut') >= 0 && !self::$no_check_reservations) {
+        if ($this->isLoaded() && (int) $this->getData('fk_statut') >= 0) {
             $status_forced = $this->getData('status_forced');
 
             if (isset($status_forced['logistique']) && (int) $status_forced['logistique']) {
@@ -3533,7 +3524,7 @@ class Bimp_Commande extends BimpComm
         $errors = $warnings = array();
         $nbOk = 0;
         if ($this->canSetAction('forceStatus')) {
-            if ($data['status'] == 2 || ($data['status'] == 3 && $data['type'] == 'logistique_status')) {
+            if ($data['status'] == 2) {
                 foreach ($data['id_objects'] as $nb => $idT) {
                     $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $idT);
                     $statutActu = $instance->getData($data['type']);
@@ -3914,23 +3905,12 @@ class Bimp_Commande extends BimpComm
     public function checkObject($context = '', $field = '')
     {
         if ($context === 'fetch') {
-            if (!self::$no_check_reservations) {
-                global $current_bc, $modeCSV;
-                if (is_null($current_bc) || !is_a($current_bc, 'BC_List') &&
-                        (is_null($modeCSV) || !$modeCSV)) {
-                    $this->checkLogistiqueStatus(false);
-                    $this->checkShipmentStatus(false);
-                    $this->checkInvoiceStatus(false);
-                }
-            }
-
-            $id_ldlc_pro_lease = (int) BimpCore::getConf('ldlc_pro_lease_id_societe', 0);
-            if ($id_ldlc_pro_lease) {
-                if ($this->dol_object->mode_reglement_code == 'FINLDL') {
-                    if ($this->getData('id_client_facture') != $id_ldlc_pro_lease) {
-                        $this->msgs['errors'][] = 'Cette commande est en financement LDLC Pro Lease.<br/>Vous devez enregistrer LDLC Pro Lease en tant que "Client facturation" ou modifier le Mode de Règlement';
-                    }
-                }
+            global $current_bc, $modeCSV;
+            if (is_null($current_bc) || !is_a($current_bc, 'BC_List') &&
+                    (is_null($modeCSV) || !$modeCSV)) {
+                $this->checkLogistiqueStatus(false);
+                $this->checkShipmentStatus(false);
+                $this->checkInvoiceStatus(false);
             }
         }
     }

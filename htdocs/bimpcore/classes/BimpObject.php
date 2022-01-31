@@ -3713,7 +3713,7 @@ class BimpObject extends BimpCache
         $force_edit = (int) BimpTools::getPostFieldValue('force_edit', 0);
 
         $fields = $this->getConf('fields', array(), true, 'array');
-
+        
         foreach ($fields as $field => $params) {
             if (!$this->isFieldActivated($field)) {
                 continue;

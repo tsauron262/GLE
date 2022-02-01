@@ -2,22 +2,20 @@ bootstrap: 1
 title: BimpCore Admin
 
 objects:
-    users: 
+    users:
         instance: 
             bimp_object: Bimp_User
+    
+    user_group:
+        instance:
+            bimp_object: Bimp_UserGroup
             
     entrepots: 
         instance: 
             bimp_object: Bimp_Entrepot
-            
     hashtags: 
         instance: 
             bimp_object: BimpHashtag
-            
-    signature: 
-        instance: 
-            bimp_object: BimpSignature
-            
     correctifs: 
         instance: 
             bimp_object: BimpCorrectif
@@ -70,6 +68,15 @@ sections:
                   list: 
                       panel: 1
                       object: users
+        
+        user_group:
+            label: Groupe utilisateurs
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: user_group                     
+
         entrepots: 
             label: Entrepôts
             sections: 
@@ -85,14 +92,6 @@ sections:
                   list: 
                       panel: 1
                       object: hashtags
-                      name: default
-        signatures: 
-            label: Signatures
-            sections: 
-                - type: list
-                  list: 
-                      panel: 1
-                      object: signature
                       name: default
         correctifs: 
             label: Correctifs

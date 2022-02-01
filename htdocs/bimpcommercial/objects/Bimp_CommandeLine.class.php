@@ -4464,7 +4464,7 @@ class Bimp_CommandeLine extends ObjectLine
             if (!BimpObject::objectLoaded($commande)) {
                 $errors[] = 'ID de la commande absent';
             } else {
-                if ($commande::$no_check_reservations) {
+                if (isset($commande::$no_check_reservations) && $commande::$no_check_reservations) {
                     return array();
                 }
 
@@ -7208,6 +7208,11 @@ class Bimp_CommandeLine extends ObjectLine
 
         $init_remise_crt = (int) $this->getInitData('remise_crt');
 
+        // Forçage si on est dans le cas d'une ligne ajouté en logistique: 
+        if ((int) $this->qty === 0 && (int) $this->getData('qty_modif')) {
+            $force_update = true;
+        }
+        
         $errors = parent::update($warnings, $force_update);
 
         if (!is_null($prev_commande_status)) {

@@ -838,7 +838,7 @@ class BT_ficheInter extends BimpDolObject
             }
             
         } else {
-            $html .= BimpRender::renderAlerts('Il n\'y à aucune ligne non vendu', 'info', false);
+            $html .= BimpRender::renderAlerts('Il n\'y à aucune ligne non prévue', 'info', false);
         }
         
         return $html;
@@ -1240,6 +1240,11 @@ class BT_ficheInter extends BimpDolObject
     }
 
     // Affichages: 
+    
+    public function displayTech() {
+        $tech = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $this->getData('fk_user_tech'));
+        return $tech->getName();
+    }
 
     public function displayVersion()
     {

@@ -1569,7 +1569,7 @@ class BimpObject extends BimpCache
             $ref = $this->getRef();
 
             if ($ref) {
-                $title .= ' ' . $ref;
+                $title = $ref . ' ' . $title;
             } else {
                 $title .= ' #' . $this->id;
             }

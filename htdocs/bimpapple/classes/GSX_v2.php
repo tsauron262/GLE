@@ -661,7 +661,7 @@ class GSX_v2 extends GSX_Const
         }
 
         $shipto = BimpTools::addZeros($shipto, 10);
-
+        $this->setShipTo($shipto);
         return $this->exec('returnsLookup', array(
                     'returnStatusType' => 'PENDING',
                     'shipTo'           => $shipto
@@ -760,7 +760,7 @@ class GSX_v2 extends GSX_Const
         }
 
         $shipTo = BimpTools::addZeros($shipTo, 10);
-
+        $this->setShipTo($shipto);
         return $this->exec('returnsLookup', array(
                     'returnStatusType' => 'RETURN_REPORT',
                     'shipTo'           => $shipTo,

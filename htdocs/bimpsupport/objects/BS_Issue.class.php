@@ -113,7 +113,7 @@ class BS_Issue extends BimpObject
                     if (BimpCache::cacheExists($cache_key)) {
                         $this->issueCodes = BimpCache::getCacheArray($cache_key);
                     } else {
-                        $gsx = GSX_v2::getInstance();
+                        $gsx = GSX_v2::getInstance(true, $sav->getShipTo());
 
                         // En principe, ici, le fait de ne pas être loggué à gsx devrait arriver très rarement
                         // (Le login est checké au chargement du formulaire. 

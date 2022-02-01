@@ -547,7 +547,8 @@ class gsxController extends BimpController
                         $centres = BimpCache::getCentres();
 
                         if (isset($centres[$result['code_centre']])) {
-                            $this->gsx_v2->shipTo = BimpTools::addZeros($centres[$result['code_centre']]['shipTo'], GSX_v2::$numbersNumChars);
+                            $this->gsx_v2->setShipTo($centres[$result['code_centre']]['shipTo']);
+                            
                         }
                     }
                     unset($result['code_centre']);

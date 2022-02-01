@@ -555,14 +555,17 @@ class BimpNote extends BimpObject
         return $errors;
     }
 
-    public static function getMyNewConversations($id_max, $notViewedInFirst = true, $limit = 10)
+    public static function getMyNewConversations($id_max = 0, $notViewedInFirst = true, $limit = 10, $idUser = null)
     {
-        global $user;
-        $listIdGr = self::getUserUserGroupsList($user->id);
+        if(is_null($idUser)){
+            global $user;
+            $idUser = $user->id;
+        }
+        $listIdGr = self::getUserUserGroupsList($idUser);
         $reqDeb = "SELECT `obj_type`,`obj_module`,`obj_name`,`id_obj`, MIN(viewed) as mviewed, MAX(date_create) as mdate_create, MAX(id) as idNoteRef"
                 . " FROM `" . MAIN_DB_PREFIX . "bimpcore_note` "
                 . "WHERE auto = 0 AND id>" . $id_max . ' AND ';
-        $where = "(type_dest = 1 AND fk_user_dest = " . $user->id . ") "
+        $where = "(type_dest = 1 AND fk_user_dest = " . $idUser . ") "
                 . "         OR (type_dest = 2 AND fk_group_dest IN ('" . implode("','", $listIdGr) . "'))"
                 . "         ";
 
@@ -576,7 +579,7 @@ class BimpNote extends BimpObject
         $tabNoDoublons = array();
         $tabReq = array(
             $reqDeb . "(" . $where . ") AND viewed = 0 " . $reqFin,
-            $reqDeb . "(" . $where . " OR (type_author = 1 AND user_create = " . $user->id . ")) " . $reqFin);
+            $reqDeb . "(" . $where . " OR (type_author = 1 AND user_create = " . $idUser . ")) " . $reqFin);
 
 //        echo '<pre>';
 //        print_r($tabReq);

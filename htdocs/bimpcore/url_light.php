@@ -1,12 +1,8 @@
 <?php
 
-if($_GET['a'] == 'df'){
+if ($_GET['a'] == 'df') {
     require '../bimpcommercial/duplicata.php';
-}
-else{
+} else {
     echo 'hello world';
 }
-
-
-
 ?>

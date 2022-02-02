@@ -14,7 +14,7 @@ class BimpPublicController extends BimpController
     {
         switch (BimpTools::getValue('back', '')) {
             case 'savForm':
-                $this->back_url = BimpObject::getPublicBaseUrl() . '?fc=savForm';
+                $this->back_url = BimpObject::getPublicBaseUrl() . 'fc=savForm';
 
                 if (BimpTools::isSubmit('resgsx')) {
                     $res_id = BimpTools::getValue('resgsx', '');
@@ -135,7 +135,7 @@ class BimpPublicController extends BimpController
 
     public function getLogoutUrl()
     {
-        return BimpObject::getPublicBaseUrl() . '?bic_logout=1';
+        return BimpObject::getPublicBaseUrl() . 'bic_logout=1';
     }
 
     // Affichage standards: 
@@ -289,7 +289,7 @@ class BimpPublicController extends BimpController
             'sub_title'      => ($required ? 'Le changement de votre mot de passe est requis' : 'Modifier votre mot de passe'),
             'submit_label'   => 'Changer mon mot de passe',
             'submit_enabled' => false,
-            'back_url'       => BimpObject::getPublicBaseUrl() . '?' . ($required ? 'bic_logout=1' : 'tab=infos'),
+            'back_url'       => BimpObject::getPublicBaseUrl() . ($required ? 'bic_logout=1' : 'tab=infos'),
             'back_label'     => ($required ? 'Déconnexion' : 'Retour')
                 ), $errors);
     }

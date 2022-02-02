@@ -29,6 +29,13 @@ objects:
                 module: bimpcore
                 name: Bimp_Contact
     
+    contrat:
+        relation: hasMany
+        instance:
+            bimp_object:
+                module: bimpcontract
+                name: BContract_contrat
+    
     files:
         relation: hasMany
         delete: 1
@@ -918,7 +925,64 @@ views:
                       panel: 0
                       
 forms: 
-            
+    releverInter:
+        title: Créer un relevé d'interventions
+        msgs:
+            - type: info
+              content: Si aucun filtre n'est choisi, par défaut le relever d'intervention era fait pour le client.
+        rows:
+            - custom: 1
+              label: Filtrer par contrat
+              input_name: by_contrat
+              input:
+                  type: toggle
+            - custom: 1
+              label: Contrat
+              input_name: id_contrat
+              input:
+                  type: search_object
+                  object: contrat
+              display_if:
+                  field_name: by_contrat
+                  show_values: 1
+            - custom: 1
+              label: Borner par date
+              input_name: by_date
+              input:
+                  type: toggle
+            - custom: 1
+              required: 1
+              label: Date de début du relevé
+              input:
+                  display_now: 1
+                  type: date
+              display_if:
+                  field_name: by_date
+                  show_values: 1
+              input_name: start
+            - custom: 1
+              required: 1
+              label: Date de fin du relevé
+              input:
+                  display_now: 1
+                  type: date
+              display_if:
+                  field_name: by_date
+                  show_values: 1
+              input_name: stop
+            - custom: 1
+              label: Filtrer par le technicien ?
+              input_name: by_tech
+              input:
+                  type: toggle
+            - custom: 1
+              label: Technicien
+              input_name: id_tech
+              input:
+                  type: search_user
+              display_if:
+                  field_name: by_tech
+                  show_values: 1
     light: 
         title: Ajout d'une société
         rows: 

@@ -53,8 +53,8 @@ class GSX_Repair extends BimpObject
             } else {
                 $repairShipTo = (string) $this->getData('ship_to');
                 if ($repairShipTo) {
-                    $repairShipTo = BimpTools::addZeros($repairShipTo, GSX_v2::$numbersNumChars);
-                    $this->gsx_v2->shipTo = $repairShipTo;
+//                    $repairShipTo = BimpTools::addZeros($repairShipTo, GSX_v2::$numbersNumChars);
+                    $this->gsx_v2->setShipTo($repairShipTo);
                 }
             }
             $this->gsx_v2->resetErrors();
@@ -430,7 +430,7 @@ class GSX_Repair extends BimpObject
                             $shipTo = BimpTools::addZeros($shipTo, GSX_v2::$numbersNumChars);
                             if ($shipTo != $this->getData('ship_to')) {
                                 $this->updateField('ship_to', $shipTo);
-                                $this->gsx_v2->shipTo = $shipTo;
+                                $this->gsx_v2->setShipTo($shipTo);
                             }
                         }
 
@@ -2395,7 +2395,7 @@ class GSX_Repair extends BimpObject
             if (!$shipTo) {
                 $this->lookup();
             } elseif (is_a($this->gsx_v2, 'GSX_v2')) {
-                $this->gsx_v2->shipTo = BimpTools::addZeros($shipTo, GSX_v2::$numbersNumChars);
+                $this->gsx_v2->setShipTo($shipTo);
             }
             return true;
         }

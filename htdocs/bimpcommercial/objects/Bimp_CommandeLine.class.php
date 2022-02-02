@@ -4464,7 +4464,7 @@ class Bimp_CommandeLine extends ObjectLine
             if (!BimpObject::objectLoaded($commande)) {
                 $errors[] = 'ID de la commande absent';
             } else {
-                if ($commande::$no_check_reservations) {
+                if (isset($commande::$no_check_reservations) && $commande::$no_check_reservations) {
                     return array();
                 }
 

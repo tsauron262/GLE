@@ -34,8 +34,9 @@ class GSX_v2 extends GSX_Const
             case 'test':
                 $this->appleId = self::$test_ids['apple_id'];
                 $this->applePword = self::$test_ids['apple_pword'];
-                $this->shipTo = BimpTools::addZeros(self::$test_ids['ship_to'], self::$numbersNumChars);
-                $this->soldTo = BimpTools::addZeros(self::$test_ids['sold_to'], self::$numbersNumChars);
+//                $this->shipTo = BimpTools::addZeros(self::$test_ids['ship_to'], self::$numbersNumChars);
+//                $this->soldTo = BimpTools::addZeros(self::$test_ids['sold_to'], self::$numbersNumChars);
+                $this->setShipTo(self::$test_ids['ship_to']);
                 break;
 
             case 'prod':
@@ -51,20 +52,14 @@ class GSX_v2 extends GSX_Const
                 }
 
                 if ($shipTo) {
-                    $this->shipTo = BimpTools::addZeros($shipTo, self::$numbersNumChars);
+//                    $this->shipTo = BimpTools::addZeros($shipTo, self::$numbersNumChars);
+                    $this->setShipTo($shipTo);
                 } elseif (isset($user->array_options['options_apple_shipto']) && (string) $user->array_options['options_apple_shipto']) {
-                    $this->shipTo = BimpTools::addZeros($user->array_options['options_apple_shipto'], self::$numbersNumChars);
+//                    $this->shipTo = BimpTools::addZeros($user->array_options['options_apple_shipto'], self::$numbersNumChars);
+                    $this->setShipTo($user->array_options['options_apple_shipto']);
                 } else {
-                    $this->shipTo = BimpTools::addZeros(self::$default_ids['ship_to'], self::$numbersNumChars);
-                }
-
-                $oldShipTo = array('1111748', '1000566', '462140', '1139941', '1000565', '1000483', '494685', '466183', '484926', '1040727', '1046076', '1046075', '1187559', '1187562', '1187561', '1187560', '1199659');
-                if (in_array($this->shipTo, $oldShipTo)) {
-                    $this->soldTo = BimpTools::addZeros('897316', self::$numbersNumChars);
-                } elseif (isset($user->array_options['options_apple_service']) && (string) $user->array_options['options_apple_service']) {
-                    $this->soldTo = BimpTools::addZeros($user->array_options['options_apple_service'], self::$numbersNumChars);
-                } else {
-                    $this->soldTo = BimpTools::addZeros(self::$default_ids['sold_to'], self::$numbersNumChars);
+//                    $this->shipTo = BimpTools::addZeros(self::$default_ids['ship_to'], self::$numbersNumChars);
+                    $this->setShipTo(self::$default_ids['ship_to']);
                 }
                 break;
         }
@@ -130,6 +125,12 @@ class GSX_v2 extends GSX_Const
     public function setShipTo($shipTo)
     {
         $this->shipTo = BimpTools::addZeros($shipTo, self::$numbersNumChars);
+        $oldShipTo = array('1111748', '1000566', '462140', '1139941', '1000565', '1000483', '494685', '466183', '484926', '1040727', '1046076', '1046075', '1187559', '1187562', '1187561', '1187560', '1199659', '897316');
+        if (in_array($this->shipTo, $oldShipTo)) {
+            $this->soldTo = BimpTools::addZeros('897316', self::$numbersNumChars);
+        }else {
+            $this->soldTo = BimpTools::addZeros('1442050', self::$numbersNumChars);
+        }
     }
 
     // Gestion du login:
@@ -331,7 +332,7 @@ class GSX_v2 extends GSX_Const
         curl_setopt($this->ch, CURLOPT_CONNECTTIMEOUT, 10);
         curl_setopt($this->ch, CURLOPT_TIMEOUT, 30);
         curl_setopt($this->ch, CURLOPT_HEADER, true);
-
+//    die($this->certPath);
         return 1;
     }
 
@@ -660,7 +661,7 @@ class GSX_v2 extends GSX_Const
         }
 
         $shipto = BimpTools::addZeros($shipto, 10);
-
+        $this->setShipTo($shipto);
         return $this->exec('returnsLookup', array(
                     'returnStatusType' => 'PENDING',
                     'shipTo'           => $shipto
@@ -759,7 +760,7 @@ class GSX_v2 extends GSX_Const
         }
 
         $shipTo = BimpTools::addZeros($shipTo, 10);
-
+        $this->setShipTo($shipto);
         return $this->exec('returnsLookup', array(
                     'returnStatusType' => 'RETURN_REPORT',
                     'shipTo'           => $shipTo,
@@ -862,9 +863,11 @@ class GSX_v2 extends GSX_Const
     public function fetchReservation($shipTo, $reservation_id)
     {
         if (self::$mode === 'test') {
-            $this->shipTo = BimpTools::addZeros('897316', 10);
+//            $this->shipTo = BimpTools::addZeros('897316', 10);
+            $this->setShipTo('897316');
         } else {
-            $this->shipTo = BimpTools::addZeros($shipTo, 10);
+//            $this->shipTo = BimpTools::addZeros($shipTo, 10);
+            $this->setShipTo($shipTo);
         }
 
         return $this->exec('fetchReservation', array(
@@ -875,9 +878,11 @@ class GSX_v2 extends GSX_Const
     public function fetchAvailableSlots($shipTo, $product_code)
     {
         if (self::$mode === 'test') {
-            $this->shipTo = BimpTools::addZeros('897316', 10);
+//            $this->shipTo = BimpTools::addZeros('897316', 10);
+            $this->setShipTo('897316');
         } else {
-            $this->shipTo = BimpTools::addZeros($shipTo, 10);
+//            $this->shipTo = BimpTools::addZeros($shipTo, 10);
+            $this->setShipTo($shipTo);
         }
 
         return $this->exec('fetchAvailableSlots', array(

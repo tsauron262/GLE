@@ -411,6 +411,8 @@ forms:
                 value: 
                     callback: getModeReglementBySociete
                 depends_on: fk_soc,is_clone_form
+            expertise:
+                field: expertise
     
     releverFacturation:
         rows:

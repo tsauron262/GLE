@@ -177,6 +177,8 @@ fields:
     signature_params: 
         label: Paramètres incrustation signature
         type: json
+    expertise:
+        required: 1
                 
 forms: 
     default: 

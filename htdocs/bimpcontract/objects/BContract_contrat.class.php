@@ -142,8 +142,7 @@ class BContract_contrat extends BimpDolObject
     ];
     public static $dol_module = 'contract';
     
-    public $filtresPDFstatement = Array('ids' => Array(), 'type' => 'contrat');
-
+    
     function __construct($module, $object_name)
     {
         global $user, $db;
@@ -151,7 +150,7 @@ class BContract_contrat extends BimpDolObject
         $this->email_group = BimpCore::getConf('bimpcontract_email_groupe');
         $this->email_facturation = BimpCore::getConf('bimpcontract_email_facturation');
         return parent::__construct($module, $object_name);
-    }
+    }   
 
     public function canShowAdmin()
     {
@@ -1180,28 +1179,6 @@ class BContract_contrat extends BimpDolObject
             $echeancier->updateField('statut', 0);
         }
     }
-    
-    public function getModelStatementPdf() {
-        return 'contratStatement';
-    }
-    
-    public function actionReleveIntervention($data, &$success) {
-        
-        global $langs, $conf;
-        //die($conf->contract->dir_output . ' JJJJ');
-        $errors = Array();
-        $warnings = Array();
-        if ($this->dol_object->generateDocument($this->getModelStatementPdf(), $outputlangs) <= 0) {
-            $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'des erreurs sont survenues lors de la génération du document PDF');
-        } else {
-            $callback = "window.open('" . DOL_URL_ROOT . "/document.php?modulepart=contract&file=".$this->getRef()."/Releve_interventions.pdf&entity=1', '_blank');";
-            $success = 'PDF généré avec succès';
-        }
-        
-        return Array('errors' => $errors, 'warnings' => $warnings, 'success_callback' => $callback);
-        
-    }
-
     public function actionAbort($data = [], &$success)
     {
 
@@ -1727,13 +1704,7 @@ class BContract_contrat extends BimpDolObject
                 }
             }
             
-            if(BT_ficheInter::isActive() && $user->id == 460) {
-                $buttons[] = array(
-                    'label'   => 'Relevé d\'interventions',
-                    'icon'    => 'fas_ambulance',
-                    'onclick' => $this->getJsActionOnclick('releveIntervention', array(), array())
-                );
-            }
+            
 
             if ($status == self::CONTRAT_STATUS_VALIDE || $status == self::CONTRAT_STATUT_WAIT_ACTIVER) {
                 $buttons[] = array(

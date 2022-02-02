@@ -301,7 +301,7 @@ class BimpPublicController extends BimpController
         $html = '';
 
         $html .= '<label for="bic_login_email">Email</label><br/>';
-        $html .= '<input id="bic_login_email" type="email" name="bic_login_email" placeholder="Email" value="' . (BimpTools::getValue('email', '')) . '">';
+        $html .= '<input id="bic_login_email" type="text" name="bic_login_email" placeholder="Email" value="' . (BimpTools::getValue('email', '')) . '">';
         $html .= '<br/><br/>';
         $html .= '<label for="bic_login_pw">Mot de passe</label><br/>';
         $html .= '<input id="bic_login_pw" type="password" name="bic_login_pw" placeholder="Mot de passe"><br/>';
@@ -315,7 +315,7 @@ class BimpPublicController extends BimpController
         $html = '';
 
         $html .= '<label for="email">Email</label><br/>';
-        $html .= '<input id="email" type="email" name="bic_reinit_pw_email" placeholder="Email" value="' . BimpTools::getValue('email', '') . '">';
+        $html .= '<input id="email" type="text" name="bic_reinit_pw_email" placeholder="Email" value="' . BimpTools::getValue('email', '') . '">';
 
         return $html;
     }

@@ -123,6 +123,20 @@ class InterfaceClientController extends BimpPublicController
     {
         $html = '';
 
+        global $userClient;
+
+        if (BimpObject::objectLoaded($userClient)) {
+            $client = $userClient->getParentInstance();
+
+            if ($client->can('view')) {
+                $html .= '<div style="margin-bottom: 30px; border-bottom: 1px solid #999999; vertical-align: middle">';
+                $html .= '<h5 style="margin: 0"><span style="font-size: 22px; vertical-align: middle;">';
+                $html .= BimpRender::renderIcon('pe_user', 'iconLeft') . '</span>';
+                $html .= $client->getRef() . ' - ' . $client->getName() . '</h5>';
+                $html .= '</div>';
+            }
+        }
+
         if ($this->tabActive) {
             $method = 'renderTab' . ucfirst($this->tabActive);
             if (method_exists($this, $method)) {
@@ -736,7 +750,7 @@ class InterfaceClientController extends BimpPublicController
                                 $html .= $list->renderHtml();
                                 $html .= '</div>';
                             } else {
-                                $html .= $sql .' <br/><br/>';
+                                $html .= $sql . ' <br/><br/>';
                                 $html .= BimpCache::getBdb()->err();
                             }
 

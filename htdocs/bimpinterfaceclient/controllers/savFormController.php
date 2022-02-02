@@ -1525,7 +1525,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                         'zip'            => $data['client_zip'],
                         'town'           => $data['client_town'],
                         'fk_pays'        => $data['client_pays'],
-                        'phone'          => ($isCompany && $data['client_phone_pro'] ? $data['client_phone_pro'] : $data['client_phone_mobile'] ? $data['client_phone_mobile'] : $data['client_phone_perso'] ? $data['client_phone_perso'] : $data['client_phone_pro']),
+                        'phone'          => ($isCompany && $data['client_phone_pro'] ? $data['client_phone_pro'] : ($data['client_phone_mobile'] ? $data['client_phone_mobile'] : ($data['client_phone_perso'] ? $data['client_phone_perso'] : $data['client_phone_pro']))),
                         'email'          => (BimpObject::objectLoaded($userClient) ? $userClient->getData('email') : $data['client_email']),
                         'fk_typent'      => ($isCompany ? (int) $data['client_type'] : 8),
                         'marche'         => array(18),

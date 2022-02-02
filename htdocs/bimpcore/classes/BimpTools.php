@@ -2138,6 +2138,10 @@ class BimpTools
             $emails_str = '';
 
             foreach (explode(',', $emails) as $email) {
+                if (preg_match('/^(.+)\[.+\]$/', $email, $matches)) {
+                    $email = $matches[1];
+                }
+
                 if ($name) {
                     $emails_str .= ($emails_str ? ', ' : '') . $name . ' <' . $email . '>';
                 } else {

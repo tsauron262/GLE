@@ -1962,13 +1962,13 @@ class BS_SAV extends BimpObject
                 }
             }
 
-            if (BimpObject::objectLoaded($propal)) {
-                $signature = $propal->getChildObject('signature');
-
-                if (BimpObject::objectLoaded($signature)) {
-                    $html .= $signature->displayPublicDocument('Devis');
-                }
-            }
+//            if (BimpObject::objectLoaded($propal)) {
+//                $signature = $propal->getChildObject('signature');
+//
+//                if (BimpObject::objectLoaded($signature)) {
+//                    $html .= $signature->displayPublicDocument('Devis');
+//                }
+//            }
 
             if ((int) $this->getData('id_signature_resti')) {
                 $signature = $this->getChildObject('signature_resti');
@@ -1978,31 +1978,28 @@ class BS_SAV extends BimpObject
                 }
             }
 
-            if (BimpCore::isModeDev()) {
+            $url_base = BimpCore::getConf('public_base_url', '');
+            if ($url_base) {
+                $url_base .= 'a=df&';
+            } elseif (BimpCore::isModeDev()) {
                 $url_base = DOL_URL_ROOT . '/bimpcommercial/duplicata.php?';
-            } else {
-                $url_base = 'https://erp.bimp.fr/pdf_fact.php?';
             }
 
-            $status = (int) $this->getData('status');
-            if (in_array($status, array(1, 2, 3, 4, 6, 7, 9))) {
+            if ($url_base) {
+                $status = (int) $this->getData('status');
+                if (in_array($status, array(1, 2, 3, 4, 6, 7, 9))) {
+                    if (BimpObject::objectLoaded($propal)) {
+                        $ref = $propal->getRef();
+                        $fileName = dol_sanitizeFileName($ref) . '.pdf';
+                        $fileDir = $propal->getFilesDir();
 
-
-                if (BimpObject::objectLoaded($propal)) {
-                    $ref = $propal->getRef();
-                    $fileName = dol_sanitizeFileName($ref) . '.pdf';
-                    $fileDir = $propal->getFilesDir();
-
-                    if (file_exists($fileDir . $fileName)) {
-                        $url = $url_base . 'r=' . urlencode($ref) . '&i=' . $propal->id . '&t=propale';
-                        $html .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\');">';
-                        $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . 'Devis';
-                        $html .= '</span>';
-                    } else {
-                        $html .= 'NO FILE';
+                        if (file_exists($fileDir . $fileName)) {
+                            $url = $url_base . 'r=' . urlencode($ref) . '&i=' . $propal->id . '&t=propale';
+                            $html .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\');">';
+                            $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . 'Devis';
+                            $html .= '</span>';
+                        }
                     }
-                } else {
-                    $html .= 'NO PROP';
                 }
             }
 

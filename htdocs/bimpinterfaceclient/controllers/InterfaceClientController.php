@@ -749,9 +749,6 @@ class InterfaceClientController extends BimpPublicController
                                 $html .= '<div style="margin-top: 30px">';
                                 $html .= $list->renderHtml();
                                 $html .= '</div>';
-                            } else {
-                                $html .= $sql . ' <br/><br/>';
-                                $html .= BimpCache::getBdb()->err();
                             }
 
                             $note = BimpObject::getInstance('bimpcore', 'BimpNote');

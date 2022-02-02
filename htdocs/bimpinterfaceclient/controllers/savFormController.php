@@ -159,7 +159,7 @@ class savFormController extends BimpPublicController
 
                 $html .= '<p class="inputHelp">';
                 $html .= 'Si vous disposez déjà d\'un accès à l\'espace client BIMP, veuillez vous ';
-                $html .= '<a href="' . BimpObject::getPublicBaseUrl() . '?back=savForm">authentifier</a>';
+                $html .= '<a href="' . BimpObject::getPublicBaseUrl() . 'back=savForm">authentifier</a>';
                 $html .= ' pour simplifier la prise de rendez-vous.';
                 $html .= '</p>';
             }
@@ -309,7 +309,7 @@ class savFormController extends BimpPublicController
                         $html .= 'Nous vous avons ouvert un accès à votre espace client personnalisé BIMP.<br/>';
                         $html .= 'Un e-mail contenant votre mot de passe vous a été envoyé.<br/>';
                         $html .= 'Veuillez consulter votre messagerie, puis ';
-                        $html .= '<a href="' . BimpObject::getPublicBaseUrl() . '?back=savForm';
+                        $html .= '<a href="' . BimpObject::getPublicBaseUrl() . 'back=savForm';
 
                         if (!is_null($reservation)) {
                             $html .= '&resgsx=' . $reservation['reservationId'] . '&centre_id=' . $reservation['shipToCode'];
@@ -988,7 +988,7 @@ class savFormController extends BimpPublicController
         }
 
         $html .= '<p style="text-align: center">';
-        $html .= '<a href="' . BimpObject::getPublicBaseUrl() . '?tab=sav">Retour à votre espace client</a>';
+        $html .= '<a href="' . BimpObject::getPublicBaseUrl() . 'tab=sav">Retour à votre espace client</a>';
         $html .= '</p>';
 
         $html .= '</div>';
@@ -2271,7 +2271,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
 
                     if (BimpObject::objectLoaded($userClient)) {
                         $success_html .= '<p style="text-align: center">';
-                        $success_html .= '<a href="' . BimpObject::getPublicBaseUrl() . '?tab=sav">Retour à votre espace client</a>';
+                        $success_html .= '<a href="' . BimpObject::getPublicBaseUrl() . 'tab=sav">Retour à votre espace client</a>';
                         $success_html .= '</p>';
                     }
                 }

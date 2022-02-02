@@ -2001,23 +2001,23 @@ class BS_SAV extends BimpObject
                         }
                     }
                 }
-            }
 
-            foreach (array(
-        'facture_acompte' => 'Facture d\'acompte',
-        'facture'         => 'Facture',
-        'facture_avoir'   => 'Avoir'
-            ) as $fac_type => $fac_label) {
-                $fac = $this->getChildObject($fac_type);
+                foreach (array(
+            'facture_acompte' => 'Facture d\'acompte',
+            'facture'         => 'Facture',
+            'facture_avoir'   => 'Avoir'
+                ) as $fac_type => $fac_label) {
+                    $fac = $this->getChildObject($fac_type);
 
-                if (BimpObject::objectLoaded($fac)) {
-                    $ref = dol_sanitizeFileName($fac->getRef());
+                    if (BimpObject::objectLoaded($fac)) {
+                        $ref = dol_sanitizeFileName($fac->getRef());
 
-                    if (file_exists($fac->getFilesDir() . $ref . '.pdf')) {
-                        $url = $url_base . 'r=' . urlencode($ref) . '&i=' . $fac->id . '&t=facture';
-                        $html .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\');">';
-                        $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . $fac_label;
-                        $html .= '</span>';
+                        if (file_exists($fac->getFilesDir() . $ref . '.pdf')) {
+                            $url = $url_base . 'r=' . urlencode($ref) . '&i=' . $fac->id . '&t=facture';
+                            $html .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\');">';
+                            $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . $fac_label;
+                            $html .= '</span>';
+                        }
                     }
                 }
             }

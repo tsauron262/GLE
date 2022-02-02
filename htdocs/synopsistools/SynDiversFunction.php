@@ -714,6 +714,10 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
             $_SESSION['error']["Mail envoyé"] = 0;
                 
         if (!$return) {            
+            if (!defined('BIMP_LIB')) {
+                require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+            }
+            
             if (class_exists('BimpCore')) {
                 $ip = BimpCache::getIpFromDns($mailfile->smtps->_smtpsHost);
                 BimpCore::addlog('Echec envoi email '.$mailfile->error, Bimp_Log::BIMP_LOG_ALERTE, 'email', NULL, array(

@@ -452,15 +452,18 @@ class Bimp_Societe extends BimpDolObject
             }
 
             if ($this->isLoaded()) {
-                $buttons[] = array(
-                    'label'   => 'Relevé interventions',
-                    'icon'    => 'fas_clipboard-list',
-                    'onclick' => $this->getJsActionOnclick('releveIntervention', array(
-                        'id_client' => $this->id
-                    ), array(
-                        'form_name' => 'releverInter'
-                    ))
-                );
+                if($user->admin) {
+                    $buttons[] = array(
+                        'label'   => 'Relevé interventions',
+                        'icon'    => 'fas_clipboard-list',
+                        'onclick' => $this->getJsActionOnclick('releveIntervention', array(
+                            'id_client' => $this->id
+                        ), array(
+                            'form_name' => 'releverInter'
+                        ))
+                    );
+                }
+                
                 $buttons[] = array(
                     'label'   => 'Demander ' . ((int) $this->getData('status') ? ' dés' : '') . 'activation du compte',
                     'icon'    => 'fas_paper-plane',

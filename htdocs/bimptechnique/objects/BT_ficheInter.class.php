@@ -516,7 +516,7 @@ class BT_ficheInter extends BimpDolObject
                     }
                     if (in_array("2", $values)) { // Tickets
                         if ($have_commande || $have_contrat) {
-                            $sql .= "AND ";
+                            $sql .= " AND ";
                         }
                         $sql .= "tickets <> '[]' AND tickets <> '' AND tickets IS NOT NULL";
                     }

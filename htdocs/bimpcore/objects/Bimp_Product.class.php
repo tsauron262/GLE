@@ -4052,7 +4052,7 @@ class Bimp_Product extends BimpObject
                 self::$ventes[$cache_key][$ln->fk_product][$ln->entrepot]['factures'][$ln->fk_facture][$ln->id_line] = array(
                     'position' => $ln->rang,
                     'qty'      => $ln->qty,
-                    'subprice' => $ln->subprice
+                    'subprice' => $ln->total_ht / $ln->qty
                 );
             }
 

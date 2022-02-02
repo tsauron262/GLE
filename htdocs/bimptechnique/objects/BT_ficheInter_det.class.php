@@ -259,10 +259,21 @@ class BT_ficheInter_det extends BimpDolObject
                             $product  = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Product", $line->id_product);
                             if (BimpObject::objectLoaded($product)) {
                                 if (!$product->isDep() && $product->isTypeService()) {
+                                    $bimp_line_commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $line->id);
+                                    $addAuForfait = ($bimp_line_commande->getData('force_qty_1')) ? '<br /><span class="danger">Au forfait</span>' : '';
                                     if (array_key_exists($product->getRef(), $tp)) {
-                                        $services['commande_' . $line->id] = $tp[$product->getRef()] . ' (' . price($line->getTotalHT(true)) . ' € HT) - <b>' . $commande->getRef() . '</b> <br />' . $line->desc;
+                                        if($bimp_line_commande->getData('force_qty_1')){
+                                            $services['commande_' . $line->id] = "AU FORFAIT " . ' (' . price($line->getTotalHT(true)) . ' € HT) - <b>' . $commande->getRef() . '</b> <br />' . $line->desc;
+                                        } else {
+                                            $services['commande_' . $line->id] = $tp[$product->getRef()] . ' (' . price($line->getTotalHT(true)) . ' € HT) - <b>' . $commande->getRef() . '</b> <br />' . $line->desc;
+                                        }
                                     } elseif ($product->getData('price') != 0) {
-                                        $services['commande_' . $line->id] = $product->getRef() . ' (' . price($line->getTotalHT(true)) . ' € HT) - <b>' . $commande->getRef() . '</b> <br />' . $line->desc;
+                                        if($bimp_line_commande->getData('force_qty_1')) {
+                                            $services['commande_' . $line->id] = $product->getRef() . ' (AU FORFAIT - ' . price($line->getTotalHT(true)) . ' € HT) - <b>' . $commande->getRef() . '</b> <br />' . $line->desc . $addAuForfait;
+                                        } else {
+                                            $services['commande_' . $line->id] = $product->getRef() . ' (' . price($line->getTotalHT(true)) . ' € HT) - <b>' . $commande->getRef() . '</b> <br />' . $line->desc;
+                                        }
+                                        
                                     }
                                 }
                             }

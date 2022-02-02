@@ -977,7 +977,7 @@ class BimpRelanceClientsLine extends BimpObject
                         $duplicata_notif = '<br/><div style="dont-size: 12px; font-weight: bold; color: #EF7D00;">';
                         $duplicata_notif .= 'Cliquez sur le n° de facture pour télécharger un duplicata</div><br/>';
 
-                        $url_base = BimpCore::getConf('duplicata_factures_base_url', '');
+                        $url_base = BimpCore::getConf('public_base_url', '');
                         if ($url_base) {
                             $url_base .= 'a=df&';
 

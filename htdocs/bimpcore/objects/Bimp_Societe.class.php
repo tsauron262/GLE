@@ -391,6 +391,7 @@ class Bimp_Societe extends BimpDolObject
 
     public function getActionsButtons()
     {
+        global $user;
         $buttons = array();
 
         if ($this->isLoaded()) {

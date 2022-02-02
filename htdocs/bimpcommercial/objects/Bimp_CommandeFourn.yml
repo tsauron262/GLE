@@ -239,6 +239,7 @@ fields:
     fk_availability: unset
     fk_input_reason: unset
     replaced_ref: unset
+    expertise: unset
         
     
 forms: 

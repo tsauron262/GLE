@@ -37,6 +37,43 @@ class BimpNote extends BimpObject
         self::BN_DEST_GROUP => 'Group'
     );
     
+    public static function cronNonLu(){
+        $listUser = BimpObject::getBimpObjectList('bimpcore', 'Bimp_User', array('statut'=>1));
+        
+        global $db, $langs;
+        $userT = new User($db);
+//        $listUser = array(242);
+        foreach($listUser as $idUser){
+            $html = '';
+            $notes = BimpNote::getMyNewConversations(0, true, 20, $idUser);
+
+            $data = array();
+            foreach($notes as $note)
+                if($note['lu'] == 0){
+                    $noteObj = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $note['idNoteRef']);
+                    $objParent = $noteObj->getParentInstance();
+                    if($objParent && $objParent->isLoaded())
+                        $data[] = 'Message de '.$noteObj->displayData('user_create', 'nom'). ' concernant ' .$objParent->getLink(). ': <br/><i>'.$noteObj->getData('content').'</i>';
+                    else
+                        echo('objet non loadé'.$noteObj->printData());
+            }
+            if(count($data) > 0){
+                $userT->fetch($idUser);
+                $html = '';
+                $htmlTitre = '<h2>User : '.$userT->getFullName($langs).'</h3><br/>';
+                $html .= 'Bonjour vous avez '.count($data).' message(s) non lu : <br/><br/>';
+                $html .= 'Pour désactiver cette relance, vous pouvez : <br/>- soit répondre au message de la pièce émettrice (dans les notes de pied de page) <br/>- soit cliquer sur la petite enveloppe "Message" en haut à droite de la page ERP.<br/><br/>';
+                
+                $html .= implode('<br/><br/>', $data);
+                mailSyn2('Message dans l\'erp', $userT->email, null, $html);
+                
+                echo $htmlTitre.$html;
+            }
+        }
+
+        return '';
+    }
+    
     public function traiteContent(){
         $note = $this->getData('content');
         $note = trim($note);
@@ -565,9 +602,10 @@ class BimpNote extends BimpObject
         $reqDeb = "SELECT `obj_type`,`obj_module`,`obj_name`,`id_obj`, MIN(viewed) as mviewed, MAX(date_create) as mdate_create, MAX(id) as idNoteRef"
                 . " FROM `" . MAIN_DB_PREFIX . "bimpcore_note` "
                 . "WHERE auto = 0 AND id>" . $id_max . ' AND ';
-        $where = "(type_dest = 1 AND fk_user_dest = " . $idUser . ") "
-                . "         OR (type_dest = 2 AND fk_group_dest IN ('" . implode("','", $listIdGr) . "'))"
-                . "         ";
+        $where = "(type_dest = 1 AND fk_user_dest = " . $idUser . ") ";
+        if(count($listIdGr) > 0)
+        $where .=  "         OR (type_dest = 2 AND fk_group_dest IN ('" . implode("','", $listIdGr) . "'))";
+        $where .=   "         ";
 
         $reqFin = " GROUP BY `obj_type`,`obj_module`,`obj_name`,`id_obj`";
 //        if($notViewedInFirst)

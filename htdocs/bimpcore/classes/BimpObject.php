@@ -8039,6 +8039,12 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     public static function getPublicBaseUrl($internal = true)
     {
         if ($internal) {
+            $url = BimpCore::getConf('public_base_url', '');
+
+            if ($url) {
+                return $url;
+            }
+            
             return DOL_URL_ROOT . '/bimpinterfaceclient/client.php';
         }
 
@@ -8054,7 +8060,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 $base = self::getPublicBaseUrl($internal);
 
                 if ($base) {
-                    return $base . '?' . $params;
+                    return $base . $params;
                 }
             }
         }
@@ -8294,7 +8300,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 $base = self::getPublicBaseUrl($internal);
 
                 if ($base) {
-                    return $base . '?' . $params;
+                    return $base . $params;
                 }
             }
         }

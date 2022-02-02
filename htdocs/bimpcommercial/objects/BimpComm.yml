@@ -286,6 +286,7 @@ fields:
             options:
                 array: expertise
         default_value: 0
+        type: id
 #        required: 1
         
     
@@ -411,6 +412,8 @@ forms:
                 value: 
                     callback: getModeReglementBySociete
                 depends_on: fk_soc,is_clone_form
+            expertise:
+                field: expertise
     
     releverFacturation:
         rows:

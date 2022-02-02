@@ -2,6 +2,11 @@
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpDolObject.class.php';
 
+global $langs;
+$langs->load('bills');
+$langs->load('errors');
+$cacheInstance = array();
+
 class BT_ficheInter extends BimpDolObject
 {
 
@@ -511,7 +516,7 @@ class BT_ficheInter extends BimpDolObject
                     }
                     if (in_array("2", $values)) { // Tickets
                         if ($have_commande || $have_contrat) {
-                            $sql .= "AND ";
+                            $sql .= " AND ";
                         }
                         $sql .= "tickets <> '[]' AND tickets <> '' AND tickets IS NOT NULL";
                     }
@@ -2339,7 +2344,7 @@ class BT_ficheInter extends BimpDolObject
         }
         return $password;
     }
-
+    
     // Actions:
 
     public function actionSetStatusAdmin($data, &$success = '')
@@ -2550,7 +2555,7 @@ class BT_ficheInter extends BimpDolObject
         
         return 0;
     }
-
+    
     public function actionBilling($data, &$success)
     {
         $errors = [];

@@ -172,4 +172,12 @@ class BimpCoreCronExec
 
         return 'OK';
     }
+    
+    public function mailMessageNote(){
+        BimpObject::loadClass('bimpcore', 'BimpNote');
+
+        echo BimpNote::cronNonLu();
+        
+        return 'OK';
+    }
 }

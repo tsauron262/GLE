@@ -371,6 +371,7 @@ fields:
             array: secteurs
     
 forms:
+    
     reattach_an_object:
         title: Rattacher un objet à la FI
         rows:

@@ -466,6 +466,7 @@ Preferred Field
                                     $dt_fac = new DateTime($fac_data['datef']);
 
                                     foreach ($fac_lines as $id_line => $line_data) {
+//                                        print_r($line_data);die;
                                         $file_str .= '"' . implode('";"', array(
                                                     $shipTo, // A
                                                     substr($prod_ref, 0, 30), // B
@@ -474,7 +475,7 @@ Preferred Field
                                                     ($line_data['qty'] >= 0 ? $line_data['qty'] : 0), // E
                                                     ($line_data['qty'] < 0 ? abs($line_data['qty']) : 0), // F
                                                     '',
-                                                    '',
+                                                    $line_data['subprice'],
                                                     $id_fac, // I
                                                     $line_data['position'], // J
                                                     $dt_fac->format('Ymd'),

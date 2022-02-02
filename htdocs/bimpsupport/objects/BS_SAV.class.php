@@ -784,7 +784,7 @@ class BS_SAV extends BimpObject
 
             if ($this->canClientEdit() && $this->getData('resgsx') && $this->getData('status') == -1) {
 
-                $url = self::getPublicBaseUrl() . '?fc=savForm&cancel_rdv=1&sav=' . $this->id . '&r=' . $this->getRef() . '&res=' . $this->getData('resgsx');
+                $url = self::getPublicBaseUrl() . 'fc=savForm&cancel_rdv=1&sav=' . $this->id . '&r=' . $this->getRef() . '&res=' . $this->getData('resgsx');
                 $buttons[] = array(
                     'label'   => 'Annuler le RDV',
                     'icon'    => 'fas_times',
@@ -6374,7 +6374,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         }
 
         if ($context === 'public') {
-            return self::getPublicBaseUrl() . '?fc=doc&doc=' . $doc_type . ($signed ? '_signed' : '') . '&docid=' . $this->id . '&docref=' . $this->getRef();
+            return self::getPublicBaseUrl() . 'fc=doc&doc=' . $doc_type . ($signed ? '_signed' : '') . '&docid=' . $this->id . '&docref=' . $this->getRef();
         }
 
 //        if ($doc_type === 'sav_facture') {

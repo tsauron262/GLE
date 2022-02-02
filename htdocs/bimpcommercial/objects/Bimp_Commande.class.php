@@ -136,7 +136,7 @@ class Bimp_Commande extends BimpComm
     }
 
     // Getters booléens:
-    
+
     public function isActionAllowed($action, &$errors = array())
     {
         global $conf;
@@ -558,9 +558,7 @@ class Bimp_Commande extends BimpComm
                         $errors[] = 'Vous n\'avez pas la permission';
                     }
 
-                    global $user;
-
-                    if (in_array((int) $user->login, array('admin', 'f.martinez', 't.sauron'))) {
+                    if (in_array($user->login, array('admin', 'f.martinez', 't.sauron'))) {
                         $buttons[] = array(
                             'label'   => 'Forcer Validation (no triggers)',
                             'icon'    => 'fas_check',

@@ -391,6 +391,7 @@ class Bimp_Societe extends BimpDolObject
 
     public function getActionsButtons()
     {
+        global $user;
         $buttons = array();
 
         if ($this->isLoaded()) {
@@ -452,6 +453,18 @@ class Bimp_Societe extends BimpDolObject
             }
 
             if ($this->isLoaded()) {
+                if($user->admin) {
+                    $buttons[] = array(
+                        'label'   => 'Relevé interventions',
+                        'icon'    => 'fas_clipboard-list',
+                        'onclick' => $this->getJsActionOnclick('releveIntervention', array(
+                            'id_client' => $this->id
+                        ), array(
+                            'form_name' => 'releverInter'
+                        ))
+                    );
+                }
+                
                 $buttons[] = array(
                     'label'   => 'Demander ' . ((int) $this->getData('status') ? ' dés' : '') . 'activation du compte',
                     'icon'    => 'fas_paper-plane',
@@ -2820,6 +2833,48 @@ class Bimp_Societe extends BimpDolObject
             'errors'   => $errors,
             'warnings' => $warnings
         );
+    }
+    
+    public function actionReleveIntervention($data, &$success) {
+        
+        global $langs, $conf;
+        
+        $errors = Array();
+        $warnings = Array();
+        $success_callback = '';
+        
+        if($data['stop'] < $data['start'])
+            $errors[] = 'La date de fin ne peut pas être plus petite que la date de début';
+
+        if(!count($errors)) {
+            
+            if($data['by_date']) {
+                $this->dol_object->date_start_relever = $data['start'];
+                $this->dol_object->date_stop_relever = $data['stop'];
+            }
+
+            if($data['by_tech']) if($data['id_tech'] > 0) $this->dol_object->id_tech = $data['id_tech']; else $errors[] = 'L\'id du tech est obligatoire';
+            if($data['by_client']) if($data['id_client'] > 0) $this->dol_object->id_client = $data['id_client']; else $errors[] = 'L\'id du client en obligatoire';
+            if($data['by_contrat']) if($data['id_contrat'] > 0) {
+                $this->dol_object->id_contrat = $data['id_contrat'];
+                $cacheContrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $data['id_contrat']);
+                if($this->id != $cacheContrat->getData('fk_soc'))
+                    $errors[] = 'Ce contrat n\'appartient pas à ' . $this->getName();
+            } else {
+                $errors[] = 'L\'id du contrat est obligatoire';
+            }
+            
+            
+            if(!count($errors)) {
+                if ($this->dol_object->generateDocument('interStatement', $langs) <= 0) {
+                    $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'des erreurs sont survenues lors de la génération du document PDF');
+                } else {
+                    $callback = "window.open('" . DOL_URL_ROOT . "/document.php?modulepart=company&file=".$this->id."/Releve_interventions.pdf&entity=1', '_blank');";
+                    $success = 'PDF généré avec succès';
+                }
+            }
+        }
+        return Array('errors' => $errors, 'warnings' => $warnings, 'success_callback' => $callback);
     }
 
     public function actionReleveFacturation($data, &$success)

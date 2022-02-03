@@ -701,6 +701,9 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
 //    }
     $msg = str_replace("\n", "<br/>", $msg);
     if (isset($to) && $to != '') {
+        if (preg_match('/^(.+)\[.+\]$/', $to, $matches)) { // Pour les adresses e-mail des comptes utilisateurs client (par précaution)
+            $to = $matches[1];
+        }
 //        mail($to, $sujet, $msg, $headers);
         require_once DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php';
         $mailfile = new CMailFile($subject, $to, $from, $msg, $filename_list, $mimetype_list, $mimefilename_list, $addr_cc, $addr_bcc, $deliveryreceipt, $msgishtml, $errors_to, $css, '', '', 'standard', $replyTo);
@@ -710,7 +713,7 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
         else
             $_SESSION['error']["Mail envoyé"] = 0;
                 
-        if (!$return) {
+        if (!$return) {            
             if (!defined('BIMP_LIB')) {
                 require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
             }

@@ -59,12 +59,12 @@ class BimpMailCore
         }
 
         if (defined('MOD_DEV_SYN_MAIL')) {
-            $msg = "OrigineTo = " . htmlentities($to) . "\n\n" . $msg;
+            $msg = "OrigineTo = " . htmlentities(BimpTools::cleanEmailsStr($to)) . "\n\n" . $msg;
             if ($addr_cc) {
-                $msg = "OrigineCc = " . htmlentities($addr_cc) . "\n\n" . $msg;
+                $msg = "OrigineCc = " . htmlentities(BimpTools::cleanEmailsStr($addr_cc)) . "\n\n" . $msg;
             }
             if ($addr_bcc) {
-                $msg = "OrigineBcc = " . htmlentities($addr_bcc) . "\n\n" . $msg;
+                $msg = "OrigineBcc = " . htmlentities(BimpTools::cleanEmailsStr($addr_bcc)) . "\n\n" . $msg;
             }
             $addr_cc = '';
             $addr_bcc = '';
@@ -151,16 +151,8 @@ class BimpMailCore
         $html = $this->getHeader();
         $html .= $this->msg;
         $html .= $this->getFooter();
-
-//        global $dolibarr_main_url_root;
-//        $html = str_replace(DOL_URL_ROOT . "/", $dolibarr_main_url_root . "/", $html);
-//        $html = str_replace(array($dolibarr_main_url_root, $_SERVER['SERVER_NAME'] . DOL_URL_ROOT), DOL_URL_ROOT, $html);
         
         $html = str_replace("\n", "<br/>", $html);
-
-//        echo '<br/><br/>HTML:  <br/><br/>';
-//        echo $html;
-//        echo '<br/>----------- <br/>';
 
         $to = BimpTools::cleanEmailsStr($this->to);
         $from = BimpTools::cleanEmailsStr($this->from);

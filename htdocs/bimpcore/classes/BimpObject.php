@@ -3537,8 +3537,7 @@ class BimpObject extends BimpCache
 
     public function displayFieldName($field)
     {
-        $bc_field = new BC_Field($this, $field);
-        return $bc_field->params['label'];
+        return $this->getConf('fields/' . $field . '/label', $field);
     }
 
     public function displayInitData($field, $display_name = 'default', $display_input_value = true, $no_html = false)

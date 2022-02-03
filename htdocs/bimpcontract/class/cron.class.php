@@ -129,7 +129,7 @@
                 $contrat->fetch($infos['rowid']);
                 if((int) $contrat->getJourRestantReel() < 0) {
                     $contrat->closeFromCron();
-                    $this->output .= $contrat->getRef() . " : " . (int) $contrat->getJourRestantReel() . ' => FERMé';
+                    $this->output .= $contrat->getRef() . " : " . (int) $contrat->getJourRestantReel() . ' => FERMé<br/>';
                 }
             }
             $this->output .= "STOP auto close<br />";

@@ -177,8 +177,6 @@ fields:
     signature_params: 
         label: Paramètres incrustation signature
         type: json
-    expertise:
-        required: 1
                 
 forms: 
     default: 
@@ -204,6 +202,7 @@ forms:
             - field: ef_type
             - field: libelle
             - field: expertise
+              required: 1
             - field: fk_input_reason
               show: 
                   callback: isEditable

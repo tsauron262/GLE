@@ -1757,7 +1757,7 @@ class BContract_contrat extends BimpDolObject
                 );
             }
 
-            if (($this->getData('statut') == self::CONTRAT_STATUS_ACTIVER || $this->getDaat('statut') == self::CONTRAT_STATUS_CLOS) && !$this->getContratChild()) {
+            if (($this->getData('statut') == self::CONTRAT_STATUS_ACTIVER || $this->getData('statut') == self::CONTRAT_STATUS_CLOS) && !$this->getContratChild()) {
                 if ($this->getData('tacite') == 12 || $this->getData('tacite') == 0) {
                     $button_label = "Renouveler par clonage du devis";
                     $button_icone = "fas_file-invoice";

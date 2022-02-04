@@ -213,12 +213,14 @@ class BContract_avenant extends BContract_contrat {
             if(!count($errors)) {
                 
                 $parent = $this->getParentInstance();
-
+                $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $parent->getData('fk_soc'));
                 $this->actionGeneratePdf([], $success);
                 
-                $success = "Avenant validé avec succès";
-                $message = "Bonjour,<br />Une avenant est en attente de signature client sur le contrat " . $parent->dol_object->getNomUrl();
-                mailSyn2("[CONTRAT] - Avenant", "contrat@bimp.fr", null, $message);
+                $success = "Avenant validé avec succès";                
+                $objet      = 'Avenant n°' . 'AV' . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getData('ref') . ' Client ' . $client->getData('code_client') . ' ' . $client->getName();
+                $message    = 'L\'avenant n°AV' . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getData('ref') . ' est en attente de signature';
+                
+                mailSyn2($objet, "contrat@bimp.fr", null, $message);
             }
                 
         }
@@ -256,6 +258,7 @@ class BContract_avenant extends BContract_contrat {
         $warnings = [];
         $success = "";
         $parent = $this->getParentInstance();
+        $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $parent->getData('fk_soc'));
         $errors = $this->updateField('date_signed', $data['date_signed']);
         if(!count($errors)) {
             $errors = $this->updateField('signed', 1);

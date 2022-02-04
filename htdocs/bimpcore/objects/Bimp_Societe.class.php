@@ -2396,7 +2396,7 @@ class Bimp_Societe extends BimpDolObject
                         "zip"               => "" . $codeP,
                         "town"              => "" . $ville,
                         "outstanding_limit" => "" . intval($limit),
-                        "capital"           => "" . trim(str_replace(" Euros", "", $summary->sharecapital)));
+                        "capital"           => "" . trim(str_replace(array(" Euros", '-'), "", $summary->sharecapital)));
                 }
 //                } elseif (!BimpCore::isModeDev()) {
 //                    BimpCore::addlog('Echec connexion SOAP pour Credit SAFE', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', $this);

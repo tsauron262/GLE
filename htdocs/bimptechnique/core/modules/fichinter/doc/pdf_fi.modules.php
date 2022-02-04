@@ -595,7 +595,7 @@ class pdf_fi
                         $pdf->MultiCell(($this->page_largeur - $this->marge_droite - $this->marge_gauche), 4,'Prestation au forfait', 0, 'L');
                     } else {
                         if (BimpObject::objectLoaded($service)) {
-                            $pdf->MultiCell(($this->page_largeur - $this->marge_droite - $this->marge_gauche), 4, strip_tags($service->getData('description')), 0, 'L');
+                            $pdf->writeHTML($service->getData('description'));
                         } else {
                             if (!in_array($child->getData('type'), $excludeDescriptionService)) {
                                 $pdf->MultiCell(($this->page_largeur - $this->marge_droite - $this->marge_gauche), 4, $type, 0, 'L');

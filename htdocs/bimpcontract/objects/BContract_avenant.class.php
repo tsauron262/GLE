@@ -216,9 +216,12 @@ class BContract_avenant extends BContract_contrat {
                 $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $parent->getData('fk_soc'));
                 $this->actionGeneratePdf([], $success);
                 
-                $success = "Avenant validé avec succès";                
-                $objet      = 'Avenant n°' . 'AV' . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getData('ref') . ' Client ' . $client->getData('code_client') . ' ' . $client->getName();
-                $message    = 'L\'avenant n°AV' . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getData('ref') . ' est en attente de signature';
+                $success = "Avenant validé avec succès";
+                
+                $prefix = ($this->getData('type') == 1) ? 'AVP' : 'AV';
+                
+                $objet      = 'Avenant n°' . $prefix . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getData('ref') . ' Client ' . $client->getData('code_client') . ' ' . $client->getName();
+                $message    = 'L\'avenant n°' . $prefix . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getData('ref') . ' est en attente de signature';
                 
                 mailSyn2($objet, "contrat@bimp.fr", null, $message);
             }

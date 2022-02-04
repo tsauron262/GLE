@@ -221,7 +221,7 @@ class BContract_avenant extends BContract_contrat {
                 $prefix = ($this->getData('type') == 1) ? 'AVP' : 'AV';
                 
                 $objet      = 'Avenant n°' . $prefix . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getData('ref') . ' Client ' . $client->getData('code_client') . ' ' . $client->getName();
-                $message    = 'L\'avenant n°' . $prefix . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getData('ref') . ' est en attente de signature';
+                $message    = 'L\'avenant n°' . $prefix . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getNomUrl() . ' est en attente de signature';
                 
                 mailSyn2($objet, "contrat@bimp.fr", null, $message);
             }
@@ -352,7 +352,7 @@ class BContract_avenant extends BContract_contrat {
             $dateS = new DateTime($data['date_signed']);
             
             $objet      = 'Signature avenant n°' . 'AV' . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getData('ref') . ' client ' . $client->getData('code_client') . ' ' . $client->getName();
-            $message    = 'L\'avenant n°AV' . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getData('ref') . ' à été signé le ' . $dateS->format('d/m/Y');
+            $message    = 'L\'avenant n°AV' . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getNomUrl() . ' à été signé le ' . $dateS->format('d/m/Y');
             
             mailSyn2($objet, 'contrat@bimp.fr', null, $message);
         }
@@ -385,7 +385,7 @@ class BContract_avenant extends BContract_contrat {
 
                 $dateS = new DateTime($data['date_signed']);
                 $objet      = 'Signature avenant n°' . 'AVP' . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getData('ref') . ' client ' . $client->getData('code_client') . ' ' . $client->getName();
-                $message    = 'L\'avenant n°AVP' . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getData('ref') . ' à été signé le ' . $dateS->format('d/m/Y');
+                $message    = 'L\'avenant n°AVP' . $this->getData('number_in_contrat') . ' sur le contrat ' . $parent->getNomUrl() . ' à été signé le ' . $dateS->format('d/m/Y');
 
                 
                 mailSyn2($objet, 'contrat@bimp.fr', null, $message);

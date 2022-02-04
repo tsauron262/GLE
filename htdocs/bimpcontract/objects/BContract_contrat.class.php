@@ -1734,9 +1734,9 @@ class BContract_contrat extends BimpDolObject
                     ))
                 );
             }
-            if (/*($this->getData('tacite') == 12 || $this->getData('tacite') == 0) &&*/ !$this->getData('next_contrat') && $status == self::CONTRAT_STATUS_ACTIVER) {
+            if (/*($this->getData('tacite') == 12 || $this->getData('tacite') == 0) &&*/ !$this->getData('next_contrat') && ($status == self::CONTRAT_STATUS_ACTIVER || $status == self::CONTRAT_STATUS_CLOS)) {
                 $buttons[] = array(
-                    'label'   => 'Renouvellement manuel',
+                    'label'   => 'Renouveler par clonage du contrat (SN et sites inclus)',
                     'icon'    => 'fas_retweet',
                     'onclick' => $this->getJsActionOnclick('manuel', array(), array(
                         'form_name' => 'use_syntec'
@@ -1757,9 +1757,9 @@ class BContract_contrat extends BimpDolObject
                 );
             }
 
-            if ($this->getData('statut') == self::CONTRAT_STATUS_ACTIVER && !$this->getContratChild()) {
+            if (($this->getData('statut') == self::CONTRAT_STATUS_ACTIVER || $this->getData('statut') == self::CONTRAT_STATUS_CLOS) && !$this->getContratChild()) {
                 if ($this->getData('tacite') == 12 || $this->getData('tacite') == 0) {
-                    $button_label = "Renouvellement du contrat par proposition";
+                    $button_label = "Renouveler par clonage du devis";
                     $button_icone = "fas_file-invoice";
                     $button_form = array();
                     $button_action = "createProposition";

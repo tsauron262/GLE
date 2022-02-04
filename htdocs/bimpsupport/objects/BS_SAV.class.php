@@ -784,7 +784,7 @@ class BS_SAV extends BimpObject
 
             if ($this->canClientEdit() && $this->getData('resgsx') && $this->getData('status') == -1) {
 
-                $url = self::getPublicBaseUrl() . '?fc=savForm&cancel_rdv=1&sav=' . $this->id . '&r=' . $this->getRef() . '&res=' . $this->getData('resgsx');
+                $url = self::getPublicBaseUrl() . 'fc=savForm&cancel_rdv=1&sav=' . $this->id . '&r=' . $this->getRef() . '&res=' . $this->getData('resgsx');
                 $buttons[] = array(
                     'label'   => 'Annuler le RDV',
                     'icon'    => 'fas_times',
@@ -1962,13 +1962,13 @@ class BS_SAV extends BimpObject
                 }
             }
 
-            if (BimpObject::objectLoaded($propal)) {
-                $signature = $propal->getChildObject('signature');
-
-                if (BimpObject::objectLoaded($signature)) {
-                    $html .= $signature->displayPublicDocument('Devis');
-                }
-            }
+//            if (BimpObject::objectLoaded($propal)) {
+//                $signature = $propal->getChildObject('signature');
+//
+//                if (BimpObject::objectLoaded($signature)) {
+//                    $html .= $signature->displayPublicDocument('Devis');
+//                }
+//            }
 
             if ((int) $this->getData('id_signature_resti')) {
                 $signature = $this->getChildObject('signature_resti');
@@ -1978,49 +1978,46 @@ class BS_SAV extends BimpObject
                 }
             }
 
-            if (BimpCore::isModeDev()) {
+            $url_base = BimpCore::getConf('public_base_url', '');
+            if ($url_base) {
+                $url_base .= 'a=df&';
+            } elseif (BimpCore::isModeDev()) {
                 $url_base = DOL_URL_ROOT . '/bimpcommercial/duplicata.php?';
-            } else {
-                $url_base = 'https://erp.bimp.fr/pdf_fact.php?';
             }
 
-            $status = (int) $this->getData('status');
-            if (in_array($status, array(1, 2, 3, 4, 6, 7, 9))) {
+            if ($url_base) {
+                $status = (int) $this->getData('status');
+                if (in_array($status, array(1, 2, 3, 4, 6, 7, 9))) {
+                    if (BimpObject::objectLoaded($propal)) {
+                        $ref = $propal->getRef();
+                        $fileName = dol_sanitizeFileName($ref) . '.pdf';
+                        $fileDir = $propal->getFilesDir();
 
-
-                if (BimpObject::objectLoaded($propal)) {
-                    $ref = $propal->getRef();
-                    $fileName = dol_sanitizeFileName($ref) . '.pdf';
-                    $fileDir = $propal->getFilesDir();
-
-                    if (file_exists($fileDir . $fileName)) {
-                        $url = $url_base . 'r=' . urlencode($ref) . '&i=' . $propal->id . '&t=propale';
-                        $html .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\');">';
-                        $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . 'Devis';
-                        $html .= '</span>';
-                    } else {
-                        $html .= 'NO FILE';
+                        if (file_exists($fileDir . $fileName)) {
+                            $url = $url_base . 'r=' . urlencode($ref) . '&i=' . $propal->id . '&t=propale';
+                            $html .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\');">';
+                            $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . 'Devis';
+                            $html .= '</span>';
+                        }
                     }
-                } else {
-                    $html .= 'NO PROP';
                 }
-            }
 
-            foreach (array(
-        'facture_acompte' => 'Facture d\'acompte',
-        'facture'         => 'Facture',
-        'facture_avoir'   => 'Avoir'
-            ) as $fac_type => $fac_label) {
-                $fac = $this->getChildObject($fac_type);
+                foreach (array(
+            'facture_acompte' => 'Facture d\'acompte',
+            'facture'         => 'Facture',
+            'facture_avoir'   => 'Avoir'
+                ) as $fac_type => $fac_label) {
+                    $fac = $this->getChildObject($fac_type);
 
-                if (BimpObject::objectLoaded($fac)) {
-                    $ref = dol_sanitizeFileName($fac->getRef());
+                    if (BimpObject::objectLoaded($fac)) {
+                        $ref = dol_sanitizeFileName($fac->getRef());
 
-                    if (file_exists($fac->getFilesDir() . $ref . '.pdf')) {
-                        $url = $url_base . 'r=' . urlencode($ref) . '&i=' . $fac->id . '&t=facture';
-                        $html .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\');">';
-                        $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . $fac_label;
-                        $html .= '</span>';
+                        if (file_exists($fac->getFilesDir() . $ref . '.pdf')) {
+                            $url = $url_base . 'r=' . urlencode($ref) . '&i=' . $fac->id . '&t=facture';
+                            $html .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\');">';
+                            $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . $fac_label;
+                            $html .= '</span>';
+                        }
                     }
                 }
             }
@@ -6374,7 +6371,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         }
 
         if ($context === 'public') {
-            return self::getPublicBaseUrl() . '?fc=doc&doc=' . $doc_type . ($signed ? '_signed' : '') . '&docid=' . $this->id . '&docref=' . $this->getRef();
+            return self::getPublicBaseUrl() . 'fc=doc&doc=' . $doc_type . ($signed ? '_signed' : '') . '&docid=' . $this->id . '&docref=' . $this->getRef();
         }
 
 //        if ($doc_type === 'sav_facture') {

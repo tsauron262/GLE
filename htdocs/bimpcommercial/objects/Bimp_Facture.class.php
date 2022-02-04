@@ -737,8 +737,8 @@ class Bimp_Facture extends BimpComm
                         $errors[] = 'Le statut actuel ' . $this->getLabel('of_this') . ' ne permet pas cette opération';
                     } elseif (!$this->field_exists('chorus_status')) {
                         $errors[] = 'Le champ "Statut chorus" n\'est pas paramétré pour les factures';
-                    } elseif (!in_array ((int) $this->getData('chorus_status'), array(-1, 0))) {
-                        $errors[] = ucfirst($this->getLabel('this')) . ' n\'est pas en attente d\'export vers Chorus'.(int)$this->getData('chorus_status');
+                    } elseif (!in_array((int) $this->getData('chorus_status'), array(-1, 0))) {
+                        $errors[] = ucfirst($this->getLabel('this')) . ' n\'est pas en attente d\'export vers Chorus' . (int) $this->getData('chorus_status');
                     } else {
                         $client = $this->getChildObject('client');
                         if (!BimpObject::objectLoaded($client)) {
@@ -770,7 +770,7 @@ class Bimp_Facture extends BimpComm
                 if (!BimpTools::getArrayValueFromPath($chorus_data, 'num_facture', '')) {
                     $errors[] = 'N° facture sur Chorus absent';
                 }
-                
+
                 return (count($errors) ? 0 : 1);
 
             case 'forceChorusExported':
@@ -2536,10 +2536,13 @@ class Bimp_Facture extends BimpComm
         if ($this->isLoaded()) {
             $ref = dol_sanitizeFileName($this->getRef());
             if ($this->getFileUrl($ref . '.pdf') != '') {
-                $url = 'https://erp.bimp.fr/pdf_fact.php?r=' . urlencode($this->getRef()) . '&i=' . $this->id;
-                $html .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\')">';
-                $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . 'Duplicata';
-                $html .= '</span>';
+                $url = BimpCore::getConf('public_base_url', '');
+                if ($url) {
+                    $url .= 'a=df&r=' . urlencode($this->getRef()) . '&i=' . $this->id;
+                    $html .= '<span class="btn btn-default" onclick="window.open(\'' . $url . '\')">';
+                    $html .= BimpRender::renderIcon('fas_file-pdf', 'iconLeft') . 'Duplicata';
+                    $html .= '</span>';
+                }
             }
         }
 

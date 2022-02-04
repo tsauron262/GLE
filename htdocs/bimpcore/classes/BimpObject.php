@@ -3537,8 +3537,7 @@ class BimpObject extends BimpCache
 
     public function displayFieldName($field)
     {
-        $bc_field = new BC_Field($this, $field);
-        return $bc_field->params['label'];
+        return $this->getConf('fields/' . $field . '/label', $field);
     }
 
     public function displayInitData($field, $display_name = 'default', $display_input_value = true, $no_html = false)
@@ -3713,7 +3712,7 @@ class BimpObject extends BimpCache
         $force_edit = (int) BimpTools::getPostFieldValue('force_edit', 0);
 
         $fields = $this->getConf('fields', array(), true, 'array');
-        
+
         foreach ($fields as $field => $params) {
             if (!$this->isFieldActivated($field)) {
                 continue;
@@ -6825,7 +6824,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 }
             }
         }
-        
+
         return '';
     }
 
@@ -8040,6 +8039,12 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     public static function getPublicBaseUrl($internal = true)
     {
         if ($internal) {
+            $url = BimpCore::getConf('public_base_url', '');
+
+            if ($url) {
+                return $url;
+            }
+            
             return DOL_URL_ROOT . '/bimpinterfaceclient/client.php';
         }
 
@@ -8055,7 +8060,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 $base = self::getPublicBaseUrl($internal);
 
                 if ($base) {
-                    return $base . '?' . $params;
+                    return $base . $params;
                 }
             }
         }
@@ -8295,7 +8300,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 $base = self::getPublicBaseUrl($internal);
 
                 if ($base) {
-                    return $base . '?' . $params;
+                    return $base . $params;
                 }
             }
         }

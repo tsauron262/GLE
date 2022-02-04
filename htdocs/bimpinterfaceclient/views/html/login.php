@@ -1,6 +1,6 @@
 <label for="email">Email</label>
 <br />
-<input id="email" type="email" name="bic_login_email" placeholder="Email" value="<?php (isset($_REQUEST['email']) ? $_REQUEST['email'] : '') ?>">
+<input id="email" type="text" name="bic_login_email" placeholder="Email" value="<?php (isset($_REQUEST['email']) ? $_REQUEST['email'] : '') ?>">
 <br /><br />
 <label for="password">Mot de passe</label>
 <br />

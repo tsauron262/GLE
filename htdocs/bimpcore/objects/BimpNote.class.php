@@ -42,6 +42,7 @@ class BimpNote extends BimpObject
         
         global $db, $langs;
         $userT = new User($db);
+//        $listUser = array(242);
         foreach($listUser as $idUser){
             $html = '';
             $notes = BimpNote::getMyNewConversations(0, true, 20, $idUser);
@@ -52,7 +53,7 @@ class BimpNote extends BimpObject
                     $noteObj = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $note['idNoteRef']);
                     $objParent = $noteObj->getParentInstance();
                     if($objParent && $objParent->isLoaded())
-                        $data[] = 'Message de '.$noteObj->displayData('user_create'). ' concernant ' .$objParent->getLink(). ': '.$noteObj->getData('content');
+                        $data[] = 'Message de '.$noteObj->displayData('user_create', 'nom'). ' concernant ' .$objParent->getLink(). ': <br/><i>'.$noteObj->getData('content').'</i>';
                     else
                         echo('objet non loadé'.$noteObj->printData());
             }
@@ -60,8 +61,10 @@ class BimpNote extends BimpObject
                 $userT->fetch($idUser);
                 $html = '';
                 $htmlTitre = '<h2>User : '.$userT->getFullName($langs).'</h3><br/>';
-                $html .= 'Bonjour vous avez '.count($data).' messages non lu : <br/>'.implode('<br/><br/>', $data);
-                $html .= '<br/><br/>Pour désactiver cette relance, vous pouvez soit répondre aux messages, soit cliquer sur la petite enveloppe à côté des messages en haut à droite de l’ERP.';
+                $html .= 'Bonjour vous avez '.count($data).' message(s) non lu : <br/><br/>';
+                $html .= 'Pour désactiver cette relance, vous pouvez : <br/>- soit répondre au message de la pièce émettrice (dans les notes de pied de page) <br/>- soit cliquer sur la petite enveloppe "Message" en haut à droite de la page ERP.<br/><br/>';
+                
+                $html .= implode('<br/><br/>', $data);
                 mailSyn2('Message dans l\'erp', $userT->email, null, $html);
                 
                 echo $htmlTitre.$html;

@@ -251,6 +251,9 @@ fields:
         values: 
             array: client_contacts
         input: 
+            type: custom 
+            content: 
+                callback: renderContactsSelect
             help: Obligatoire si client pro
         depends_on: id_client
         display_if:

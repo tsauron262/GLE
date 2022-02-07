@@ -1529,6 +1529,29 @@ class BS_SAV extends BimpObject
         return 0;
     }
 
+    public function getPreselectedIdContact()
+    {
+        $id_client = (int) BimpTools::getPostFieldValue('id_client', (int) $this->getData('id_client'));
+
+        if ($id_client) {
+            $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client);
+
+            if (BimpObject::objectLoaded($client)) {
+                $contacts = $client->getContactsArray(false);
+
+                if (count($contacts) === 1) {
+                    foreach ($contacts as $id_contact => $contat_label) {
+                        if ((int) $id_contact) {
+                            return (int) $id_contact;
+                        }
+                    }
+                }
+            }
+        }
+
+        return 0;
+    }
+
     // Affichage:
 
     public function displayFactureAmountToPay()
@@ -2355,6 +2378,13 @@ class BS_SAV extends BimpObject
         $html .= '<input type="hidden" value="0" name="' . $input_name . '"/>';
 
         return $html;
+    }
+
+    public function renderContactsSelect()
+    {
+        return BimpInput::renderInput('select', 'id_contact', (int) $this->getPreselectedIdContact(), array(
+                    'options' => $this->getClient_contactsArray()
+        ));
     }
 
     // Traitements:

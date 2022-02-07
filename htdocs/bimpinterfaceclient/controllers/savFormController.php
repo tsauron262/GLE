@@ -1108,6 +1108,10 @@ Conditions particulières aux iPhones
 
 La plupart de nos centres peuvent effectuer une réparation de votre écran d’iPhone sous 24h00. Pour savoir si votre centre SAV est éligible à ce type de réparation consultez notre site internet.
 
+
+Si votre produit à plus de cinq ans, il est possible que celui-ci soit classé « obsolète » par Apple et que nous ne puissions pas réparer une panne matériel. 
+Nous pourrons toutefois vous proposer, si cela est nécessaire et possible, une  récupération, transfert ou sauvegarde de vos données.
+
 Nous proposons des services de sauvegarde des données, de protection de votre téléphone… venez nous rencontrer pour découvrir tous les services que nous pouvons vous proposer.
 Votre satisfaction est notre objectif, nous mettrons tout en œuvre pour vous satisfaire et réduire les délais d’immobilisation de votre produit Apple.\n\n";
 

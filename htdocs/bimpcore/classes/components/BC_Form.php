@@ -30,6 +30,7 @@ class BC_Form extends BC_Panel
         'required'           => array('data_type' => 'bool', 'default' => null),
         'edit'               => array('data_type' => 'bool', 'default' => 1),
         'display_if'         => array('data_type' => 'array', 'compile' => 1, 'default' => null),
+        'value'              => array('data_type' => 'any', 'default' => null),
     );
     public static $association_params = array(
         'display_if' => array('data_type' => 'array'),
@@ -40,7 +41,6 @@ class BC_Form extends BC_Panel
         'display_if'      => array('data_type' => 'array'),
         'depends_on'      => array(),
         'data_type'       => array('default' => 'string'),
-        'value'           => array('data_type' => 'any', 'default' => ''),
         'no_container'    => array('data_type' => 'bool', 'default' => 0),
         'multiple'        => array('data_type' => 'bool', 'default' => 0),
         'keep_new_value'  => array('data_type' => 'bool', 'default' => null),
@@ -126,7 +126,7 @@ class BC_Form extends BC_Panel
         if (!$this->params['icon']) {
             $this->params['icon'] = 'fas_edit';
         }
-        
+
         if (isset($this->params['values']) && !is_null($this->params['values'])) {
             if (isset($this->params['values']['fields'])) {
                 foreach ($this->params['values']['fields'] as $field_name => $value) {
@@ -358,6 +358,16 @@ class BC_Form extends BC_Panel
             }
         }
 
+        if (isset($params['value']) && is_array($params['value'])) {
+            if ($params['data_type'] === 'json') {
+                $params['value'] = json_encode($params['value']);
+            } else {
+                $params['value'] = implode(',', $params['value']);
+            }
+
+            $field->value = $params['value'];
+        }
+
         global $current_bc;
         if (!is_object($current_bc)) {
             $current_bc = null;
@@ -531,7 +541,7 @@ class BC_Form extends BC_Panel
         $html = '';
 
         $params = BimpTools::merge_array($params, parent::fetchParams($this->config_path . '/rows/' . $row, self::$custom_row_params));
-        if (is_array($params['value'])) {
+        if (isset($params['value']) && is_array($params['value'])) {
             if ($params['data_type'] === 'json') {
                 $params['value'] = json_encode($params['value']);
             } else {
@@ -754,7 +764,6 @@ class BC_Form extends BC_Panel
             $params = BimpTools::merge_array($params, $this->fetchParams($row_path, self::$custom_row_params));
         }
 
-//        if ((is_null($params['value']) || $params['value'] === '') && isset($this->params['values']['fields'][$params['input_name']])) {
         if (isset($this->params['values']['fields'][$params['input_name']])) {
             $params['value'] = $this->params['values']['fields'][$params['input_name']];
         }

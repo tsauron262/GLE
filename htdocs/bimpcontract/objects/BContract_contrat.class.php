@@ -567,7 +567,7 @@ class BContract_contrat extends BimpDolObject
 
                 $this->updateField('statut', self::CONTRAT_STATUS_ACTIVER);
 
-                $success = "Le contrat " . $this->getData('ref') . ' à été activé avec succès';
+                $success = "Le contrat " . $this->getData('ref') . ' a été activé avec succès';
                 $this->addLog('Contrat activé');
                 if ($this->getEndDate() != '') {
                     $this->updateField('end_date_contrat', $this->getEndDate()->format('Y-m-d'));
@@ -966,7 +966,7 @@ class BContract_contrat extends BimpDolObject
                     return "La piece " . self::$true_objects_for_link[BimpTools::getValue('type_piece')] . ' que vous avez choisi est déjà liée à ce contrat';
                 } else {
                     addElementElement(BimpTools::getValue('type_piece'), 'contrat', $id, $this->id);
-                    $success = "La " . self::$true_objects_for_link[BimpTools::getValue('type_piece')] . " à été liée au contrat avec succès";
+                    $success = "La " . self::$true_objects_for_link[BimpTools::getValue('type_piece')] . " a été liée au contrat avec succès";
                 }
             }
             return ['success' => $success, 'warnings' => $warnings, 'errors' => $errors];
@@ -1251,10 +1251,10 @@ class BContract_contrat extends BimpDolObject
             if (!count($errors)) {
                 if ($data['to'] == 1) {
                     // Le contrat passe en facturation auto ON
-                    $success = 'La facturation automatique à été activée';
+                    $success = 'La facturation automatique a été activée';
                 } else {
                     // Le contrat passe en facturation auto OFF
-                    $success = 'La facturation automatique à été désactivée';
+                    $success = 'La facturation automatique a été désactivée';
                 }
                 $this->addLog($success);
             }
@@ -1613,7 +1613,7 @@ class BContract_contrat extends BimpDolObject
         $this->set("relance_renouvellement", 0);
         $this->set('initial_renouvellement', 0);
         if ($this->update($warnings)) {
-            $success = "La reconduction tacite à été annulée";
+            $success = "La reconduction tacite a été annulée";
         }
 
         return Array('errors' => $errors, 'warnings' => $warnings, 'success' => $success);
@@ -2550,7 +2550,7 @@ class BContract_contrat extends BimpDolObject
 
             $this->mail($commercial->getData('email'), self::MAIL_VALIDATION);
 
-            $success = 'Le contrat ' . $ref . " à été validé avec succès";
+            $success = 'Le contrat ' . $ref . " a été validé avec succès";
             if (!BimpTools::getValue('use_syntec')) {
                 $this->updateField('syntec', null);
             }
@@ -2611,7 +2611,7 @@ class BContract_contrat extends BimpDolObject
                         $msg .= "Contrat : " . $contrat->dol_object->getNomUrl() . "<br/>Commercial : " . $comm->getNomUrl() . "<br />";
                         $msg .= "Facture : " . $f->dol_object->getNomUrl();
                         mailSyn2("Facturation Contrat [" . $contrat->getRef() . "]", $this->email_facturation, 'dev@bimp.fr', $msg);
-                        $success = "Le contrat " . $contrat->getRef() . " à été facturé avec succès";
+                        $success = "Le contrat " . $contrat->getRef() . " a été facturé avec succès";
                     }
                 } else {
                     $warnings[] = "Le contrat " . $contrat->getRef() . " ne peut être facturé car la période de facturation n'est ps encore arrivée";
@@ -3495,7 +3495,7 @@ class BContract_contrat extends BimpDolObject
             $next_contrat->updateField('date_contrat', NULL);
             $next_contrat->updateField('ref_ext', $this->getData('ref'));
             $next_contrat->updateField('ref', $next_ref);
-            $success = "L'avenant N°" . $next_ref . " à été créé avec succes";
+            $success = "L'avenant N°" . $next_ref . " a été créé avec succes";
         }
     }
 

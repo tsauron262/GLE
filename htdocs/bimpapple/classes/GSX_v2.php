@@ -127,9 +127,9 @@ class GSX_v2 extends GSX_Const
         $this->shipTo = BimpTools::addZeros($shipTo, self::$numbersNumChars);
         $oldShipTo = array('1111748', '1000566', '462140', '1139941', '1000565', '1000483', '494685', '466183', '484926', '1040727', '1046076', '1046075', '1187559', '1187562', '1187561', '1187560', '1199659', '897316');
         if (in_array($this->shipTo, $oldShipTo)) {
-            $this->soldTo = BimpTools::addZeros('897316', self::$numbersNumChars);
+            $this->setSoldTo('897316');
         }else {
-            $this->soldTo = BimpTools::addZeros('1442050', self::$numbersNumChars);
+            $this->setSoldTo('1442050');
         }
     }
 

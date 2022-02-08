@@ -564,10 +564,15 @@ fields:
         
     duree:
         label: Durée
-        type: int
+        type: timer
+        input: 
+            type: timer
+        displays: 
+            default: 
+                type: timer
 #        default_value: 00:00:00
-        input:
-            help: En secondes (1h = 3600s - 7h = 25200s)
+#        input:
+#            help: En secondes (1h = 3600s - 7h = 25200s)
         dol_extra_field: 1
         
 forms: 

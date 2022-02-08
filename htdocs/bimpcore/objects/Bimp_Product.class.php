@@ -4081,6 +4081,26 @@ class Bimp_Product extends BimpObject
             }
         }
     }
+    
+    public function getFilteredListActions()
+    {
+        $actions = array();
+
+        if ($this->canSetAction('bulkEditField')) {
+            $actions[] = array(
+                'label'      => 'Editer durée',
+                'icon'       => 'fas_pen',
+                'action'     => 'bulkEditField',
+                'form_name'  => 'bulk_edit_field',
+                'extra_data' => array(
+                    'field_name'   => 'duree',
+                    'update_mode'  => 'update_field',
+                    'force_update' => 1
+                )
+            );
+        }
+        return $actions;
+    }
 
     public static function correctAllProductCurPa($echo = false, $echo_errors_only = true)
     {

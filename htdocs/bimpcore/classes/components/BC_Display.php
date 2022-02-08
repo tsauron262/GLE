@@ -64,7 +64,8 @@ class BC_Display extends BimpComponent
         'json'       => array('value', 'json'),
         'date'       => array('value', 'date'),
         'time'       => array('value', 'time'),
-        'datetime'   => array('value', 'datetime')
+        'datetime'   => array('value', 'datetime'),
+        'timer'      => array('value', 'timer')
     );
     public static $syntaxe_allowed_data_types = array('string', 'text', 'html', 'password', 'int', 'float', 'bool', 'qty', 'money', 'percent', 'color', 'date', 'time', 'datetime');
     public static $type_params_def = array(
@@ -286,6 +287,7 @@ class BC_Display extends BimpComponent
                             case 'percent':
                             case 'items_list':
                             case 'object_filters':
+                            case 'timer':
                                 $type = $bc_field->params['type'];
                                 break;
                         }

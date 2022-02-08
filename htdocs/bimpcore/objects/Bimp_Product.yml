@@ -575,6 +575,13 @@ fields:
 #            help: En secondes (1h = 3600s - 7h = 25200s)
         dol_extra_field: 1
         
+        
+    renta_service:
+        label: Rentabilitée €/h
+        type: money
+        extra: 1
+        has_total: 0
+        
 forms: 
     # Utiliser plutôt "default" que "card" pour le formulaire principal 
     # Important car tout objet doit avoir un formulaire par défaut s'il est éditable.

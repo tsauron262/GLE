@@ -165,6 +165,29 @@ class Bimp_Product extends BimpObject
 
         return parent::canSetAction($action);
     }
+    
+           
+    public function getExtraFieldFilterKey($field, &$joins, $main_alias = '', &$filters = array())
+    {
+        if($field == 'renta_service'){
+            $join_alias = ($main_alias ? $main_alias . '__' : '') . 'ef';
+            $joins[$join_alias] = array(
+                'alias' => $join_alias,
+                'table' => 'product_extrafields',
+                'on'    => ($main_alias ? $main_alias : 'a') . '.rowid = '.$join_alias . '.fk_object'
+            );
+            return 'if('.$join_alias.'.duree > 0, '.$main_alias.'.price / '.$join_alias.'.duree * 3600, 0)';
+        }
+
+        return '';
+    }
+    
+    public function fetchExtraFields()
+    {
+        $extra = array();
+        $extra['renta_service'] = $this->getData('duree') > 0 ? $this->getData('price') / $this->getData('duree') * 3600 : 0;
+        return $extra;
+    }
 
     public function canValidate()
     {

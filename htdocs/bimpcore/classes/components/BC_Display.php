@@ -287,6 +287,7 @@ class BC_Display extends BimpComponent
                             case 'percent':
                             case 'items_list':
                             case 'object_filters':
+                            case 'timer':
                                 $type = $bc_field->params['type'];
                                 break;
                         }

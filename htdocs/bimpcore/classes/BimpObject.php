@@ -5408,7 +5408,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         // Fetcher tous les extrafields
         // retourner les valeurs dans un tableau ($field_name => $value) 
         // Ne pas assigner les valeurs directement dans $this->data. D'autres vérifs sont faites ultérieurement de manière générique.
-
+        
         return array();
     }
 

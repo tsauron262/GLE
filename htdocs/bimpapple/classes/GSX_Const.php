@@ -87,11 +87,10 @@ class GSX_Const
             'test' => array('AppleCare-Partner-0001442050.Test.apple.com.chain.pem', '', 'AppleCare-Partner-0001442050.Test.apple.com.key'),
             'prod' => array('AppleCare-Partner-0001442050.Prod.apple.com.chain.pem', '', 'AppleCare-Partner-0001442050.Prod.apple.com.key')
         ),
-        
-        897316  => array(
+        897316 => array(
             'test' => array('AppleCare-Partner-0001442050.Test.apple.com.chain.pem', '', 'AppleCare-Partner-0001442050.Test.apple.com.key'),
             'prod' => array('AppleCare-Partner-0001442050.Prod.apple.com.chain.pem', '', 'AppleCare-Partner-0001442050.Prod.apple.com.key')
-       )
+        )
     );
     public static $test_ids = array(
 //        'apple_id'    => 'olys_tech_aprvlreqrd@olys.com', // OLD

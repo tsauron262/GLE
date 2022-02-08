@@ -4478,6 +4478,7 @@ class ObjectLine extends BimpObject
                 'on'    => $join_alias . '.rowid = ' . ($main_alias ? $main_alias : 'a') . '.id_line'
             );
             $join_alias2 = ($join_alias ? $join_alias . '___' : '') . 'product';
+            /*Pas necessaire de faire la jointure sur cette table mais gardé l'alias pour compatibilit avec le reste*/
 //            $joins[$join_alias2] = array(
 //                'alias' => $join_alias2,
 //                'table' => 'product',

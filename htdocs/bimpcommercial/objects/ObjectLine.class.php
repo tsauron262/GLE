@@ -4478,16 +4478,16 @@ class ObjectLine extends BimpObject
                 'on'    => $join_alias . '.rowid = ' . ($main_alias ? $main_alias : 'a') . '.id_line'
             );
             $join_alias2 = ($join_alias ? $join_alias . '___' : '') . 'product';
-            $joins[$join_alias2] = array(
-                'alias' => $join_alias2,
-                'table' => 'product',
-                'on'    => $join_alias2 . '.rowid = ' . ($join_alias ? $join_alias : 'a') . '.fk_product'
-            );
+//            $joins[$join_alias2] = array(
+//                'alias' => $join_alias2,
+//                'table' => 'product',
+//                'on'    => $join_alias2 . '.rowid = ' . ($join_alias ? $join_alias : 'a') . '.fk_product'
+//            );
             $join_alias3 = ($join_alias2 ? $join_alias2 . '___' : '') . 'product';
             $joins[$join_alias3] = array(
                 'alias' => $join_alias3,
                 'table' => 'product_extrafields',
-                'on'    => $join_alias3 . '.fk_object = ' . ($join_alias2 ? $join_alias2 : 'a') . '.rowid'
+                'on'    => $join_alias3 . '.fk_object = ' . ($join_alias ? $join_alias : 'a') . '.fk_product'
             );
 
 //        die('('.$join_alias.'.duree * '.$main_alias.'.qty) as duree_tot');
@@ -4495,6 +4495,22 @@ class ObjectLine extends BimpObject
         }
 
         return '';
+    }
+    
+    public function fetchExtraFields()
+    {
+        $extra = array();
+        $sql = 'SELECT (a___dol_line___product___product.duree * a___dol_line.qty) as tot
+                    FROM '.MAIN_DB_PREFIX.'facturedet a___dol_line
+                    LEFT JOIN '.MAIN_DB_PREFIX.'product_extrafields a___dol_line___product___product ON a___dol_line___product___product.fk_object = a___dol_line.fk_product
+                    WHERE a___dol_line.rowid = '.$this->getData('id_line');
+
+            $result = $this->db->executeS($sql, 'array');
+
+            if (!is_null($result)) {
+                $extra['duree_tot'] = $result[0]['tot'];
+            }
+        return $extra;
     }
 
     public function renderQuickAddForm($bc_list)

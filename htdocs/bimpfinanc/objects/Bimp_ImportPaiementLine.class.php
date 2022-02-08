@@ -389,7 +389,7 @@ class Bimp_ImportPaiementLine extends BimpObject
             if ($this->getData('type') == 'vir') {
                 $manque = $this->getData('price') - $this->total_reste_a_paye;
                 if ($this->getData('traite') == 0) {
-                    return BimpRender::renderAlerts(price($this->getData('price')) . ' € - ' . price($this->total_reste_a_paye) . ' € = ' . price($manque) . ' €', ($this->ok ? 'success' : 'danger'));
+                    return BimpRender::renderAlerts(price($this->getData('price')) . ' - ' . price($this->total_reste_a_paye) . ' = ' . price($manque) . ' €', ($this->ok ? 'success' : 'danger'));
                 } else
                     return BimpRender::renderAlerts(price($this->getData('price')) . ' €', ($manque == 0 ? 'success' : 'danger'));
             }

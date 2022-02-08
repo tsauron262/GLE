@@ -923,7 +923,7 @@ class BT_ficheInter_det extends BimpDolObject
                     switch ($type) {
                         case 0:
                             if((int) $this->getData('id_line_contrat')) {
-                                $forfait = self::MODE_FACT_FORFAIT;
+                                $forfait = self::MODE_FACT_TEMPS_P;
                             } else {
                                 $line = BimpObject::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine');
                                 if($this->getData('id_line_commande') > 0) {

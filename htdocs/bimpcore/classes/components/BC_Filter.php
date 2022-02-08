@@ -2033,6 +2033,7 @@ class BC_Filter extends BimpComponent
             case 'qty':
             case 'percent':
             case 'money':
+            case 'timer':
                 return 'range';
 
             case 'date':

@@ -4483,7 +4483,7 @@ class ObjectLine extends BimpObject
 //                'table' => 'product',
 //                'on'    => $join_alias2 . '.rowid = ' . ($join_alias ? $join_alias : 'a') . '.fk_product'
 //            );
-            $join_alias3 = ($join_alias2 ? $join_alias2 . '___' : '') . 'product';
+            $join_alias3 = ($join_alias2 ? $join_alias2 . '__' : '') . 'ef';
             $joins[$join_alias3] = array(
                 'alias' => $join_alias3,
                 'table' => 'product_extrafields',

@@ -676,7 +676,7 @@ class BC_ListTable extends BC_List
                 $field_object = $this->object;
                 $errors = array();
 
-                if (!empty($children)) {
+                if (!empty($children) && !empty($search_filter)) {
                     $errors = $this->object->getRecursiveChildrenJoins($children, $filters, $joins, 'a', $field_alias, $field_object);
                 }
 
@@ -691,7 +691,6 @@ class BC_ListTable extends BC_List
                     $fields[$field_alias]['fields'][$field_name] = $search_filter;
                 }
             }
-
             if (!empty($fields)) {
                 foreach ($fields as $parent_alias => $fields_data) {
                     if (is_a($fields_data['object'], 'BimpObject')) {

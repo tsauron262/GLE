@@ -4506,11 +4506,11 @@ class ObjectLine extends BimpObject
                     LEFT JOIN '.MAIN_DB_PREFIX.'product_extrafields a___dol_line___product___product ON a___dol_line___product___product.fk_object = a___dol_line.fk_product
                     WHERE a___dol_line.rowid = '.$this->getData('id_line');
 
-            $result = $this->db->executeS($sql, 'array');
+        $result = $this->db->executeS($sql, 'array');
 
-            if (!is_null($result)) {
-                $extra['duree_tot'] = $result[0]['tot'];
-            }
+        if (!is_null($result)) {
+            $extra['duree_tot'] = $result[0]['tot'];
+        }
         return $extra;
     }
 

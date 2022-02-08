@@ -154,6 +154,7 @@ lists_cols:
         label: Montant
         value: 
             callback: getPrice
+        min_width: 200px
         
 views: 
     default: 

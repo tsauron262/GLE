@@ -351,7 +351,7 @@ class BE_Place extends BimpObject
             }
         }
 
-        return '';
+        return $this->displayData('origin');
     }
 
     // Overrides:

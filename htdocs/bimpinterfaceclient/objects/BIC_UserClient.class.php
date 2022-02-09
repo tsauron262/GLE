@@ -749,7 +749,7 @@ class BIC_UserClient extends BimpObject
                         $message .= "<b>Voici votre accès à votre espace client</b><br /><br />";
                     }
 
-                    $message .= '<a href="' . $url . '">Votre Espace client BIMP ERP</a><br/><br/>';
+                    $message .= '<a href="' . $url . '">Votre Espace client</a><br/><br/>';
                     $message .= '<b>Identifiant :</b> ' . $email . '<br />';
                     if ($mdp_clear) {
                         $message .= '<b>Mot de passe (Généré automatiquement) :</b> ' . $mdp_clear;

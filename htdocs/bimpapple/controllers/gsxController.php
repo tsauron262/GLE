@@ -362,12 +362,14 @@ class gsxController extends BimpController
                                         $pricingOption = '';
                                     }
 
-                                    if ($is_tier_parts) {
+                                    $partsWithNonIssue = array('011-00212', '011-00214', '011-00213');
+                                    if ($is_tier_parts || in_array($part->getData('part_number'), $partsWithNonIssue)) {
                                         $values['parts'][] = array(
                                             'part_label'     => $part->getData('label'),
                                             'number'         => $part->getData('part_number'),
                                             'pricingOption'  => $pricingOption,
-                                            'componentIssue' => 'hidden'
+                                            'componentIssue' => 'hidden',
+                                            'fromConsignedStock' => 'non'
                                         );
                                     } else {
                                         $part_used = (string) $part->getData('new_part_number');

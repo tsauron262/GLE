@@ -1380,43 +1380,36 @@ class BS_SAV extends BimpObject
              
     public function getExtraFieldFilterKey($field, &$joins, $main_alias = '', &$filters = array())
     {
-        if($field == 'j_date_create'){
-            return 'if('.$main_alias.'.date_create, DayOfWeek('.$main_alias.'.date_create)-1, 10)';
-        }
-        if($field == 'j_date_pc'){
-            return 'if('.$main_alias.'.date_pc, DayOfWeek('.$main_alias.'.date_pc)-1, 10)';
-        }
-        if($field == 'h_date_create'){
-            return 'if('.$main_alias.'.date_create, DATE_FORMAT('.$main_alias.'.date_create, "%H"), 10)';
-        }
-        if($field == 'h_date_pc'){
-            return 'if('.$main_alias.'.date_pc, DATE_FORMAT('.$main_alias.'.date_pc, "%H"), 10)';
+        $fields = array('date_create', 'date_pc', 'date_close');
+        
+        $fieldPrinc = str_replace('j_', '', $field);
+        if(in_array($fieldPrinc, $fields)){
+            return 'if('.$main_alias.'.'.$fieldPrinc.', DayOfWeek('.$main_alias.'.'.$fieldPrinc.')-1, 10)';
         }
         
+        
+        $fieldPrinc = str_replace('h_', '', $field);
+        if(in_array($fieldPrinc, $fields)){
+            return 'if('.$main_alias.'.'.$fieldPrinc.', DATE_FORMAT('.$main_alias.'.'.$fieldPrinc.', "%H"), 10)';
+        }
 
         return '';
     }
     
     public function fetchExtraFields()
     {
+        $fields = array('date_create', 'date_pc', 'date_close');
         $extra = array();
-        if($this->getData('date_create')){
-            $extra['j_date_create'] = date('w',strtotime($this->getData('date_create')));
-            $extra['h_date_create'] = date('H',strtotime($this->getData('date_create')));
-        }
-        else{
-            $extra['j_date_create'] = 10;
-            $extra['h_date_create'] = 0;
-        }
         
-        
-        if($this->getData('date_pc')){
-            $extra['j_date_pc'] = date('w',strtotime($this->getData('date_pc')));
-            $extra['h_date_pc'] = date('H',strtotime($this->getData('date_pc')));
-        }
-        else{
-            $extra['j_date_pc'] = 10;
-            $extra['h_date_pc'] = 0;
+        foreach($fields as $field){
+            if($this->getData($field)){
+                $extra['j_'.$field] = date('w',strtotime($this->getData($field)));
+                $extra['h_'.$field] = date('H',strtotime($this->getData($field)));
+            }
+            else{
+                $extra['j_'.$field] = 10;
+                $extra['h_'.$field] = 0;
+            }
         }
         return $extra;
     }
@@ -4762,6 +4755,8 @@ class BS_SAV extends BimpObject
                     $warnings = $this->sendMsg($msg_type);
                 }
             }
+            if(!count($errors))
+                $errors = $this->updateField('date_close', dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S'));
         }
 
         return array(

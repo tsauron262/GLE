@@ -3733,6 +3733,7 @@ class Bimp_Commande extends BimpComm
 
                     $success = 'Mail envoyé à l\'adresse ' . $data['user_ask_email'] . ' pour un total de ';
                     $success .= BimpTools::displayMoneyValue($total_rtp) . ' impayé.';
+                    $this->addNote($success.'<br/>'.$msg);
 
                     mailSyn2($subject, $data['user_ask_email'], null, $msg);
                 } else

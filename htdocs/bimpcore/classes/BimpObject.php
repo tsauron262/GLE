@@ -5371,7 +5371,6 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         // Enregistrer tous les extrafields (create) 
         // A ce stade l'ID est déjà assigné à l'objet
         // retourner un tableau d'erreurs. 
-
 //        if (count($this->getExtraFields())) {
 //            return array('Fonction d\'enregistrement des champs supplémentaires non implémentée');
 //        }
@@ -5383,7 +5382,6 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         // Mettre à jour tous les extrafields
         // retourner un tableau d'erreurs. 
-
 //        if (count($this->getExtraFields())) {
 //            return array('Fonction d\'enregistrement des champs supplémentaires non implémentée');
 //        }
@@ -5395,7 +5393,6 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         // enregistrer la valeur $value pour le champ extra: $field_name et l'ID $id_object (Ne pas tenir compte de $this->id). 
         // Retourner un tableau d'erreurs.
-
 //        if ($this->isExtraField($field_name)) {
 //            return array('Fonction d\'enregistrement des champs supplémentaires non implémentée');
 //        }
@@ -5408,7 +5405,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         // Fetcher tous les extrafields
         // retourner les valeurs dans un tableau ($field_name => $value) 
         // Ne pas assigner les valeurs directement dans $this->data. D'autres vérifs sont faites ultérieurement de manière générique.
-        
+
         return array();
     }
 
@@ -8044,11 +8041,11 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             if ($url) {
                 return $url;
             }
-            
+
             return DOL_URL_ROOT . '/bimpinterfaceclient/client.php';
         }
 
-        return BimpCore::getConf('interface_client_base_url', '');
+        return BimpCore::getConf('interface_client_base_url', '') . '?';
     }
 
     public function getPublicUrl($internal = true)

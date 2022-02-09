@@ -63,9 +63,11 @@ class Bimp_ImportPaiement extends BimpObject
 
                 $p->amounts = array();
                 
+                $i = 0;
                 foreach ($child->getData('factures') as $idFact) {
+                    $i++;
                     $fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $idFact);
-                    if ($fact->getData('remain_to_pay') < $totP)
+                    if (($fact->getData('remain_to_pay')+0.10) < $totP && $i < count($child->getData('factures')))//Pas le total et pas la derniére
                         $montant = $fact->getData('remain_to_pay');
                     else
                         $montant = $totP;

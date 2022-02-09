@@ -251,6 +251,9 @@ fields:
         values: 
             array: client_contacts
         input: 
+            type: custom 
+            content: 
+                callback: renderContactsSelect
             help: Obligatoire si client pro
         depends_on: id_client
         display_if:
@@ -476,6 +479,26 @@ fields:
         items_braces: 1
         items_data_type: id_object
         object: sac
+    j_date_create:
+        label: Jour de la création
+        extra: 1
+        type: int
+        values:
+            array: j_semaine
+    j_date_pc:
+        label: Jour de la prise en charge
+        extra: 1
+        type: int
+        values:
+            array: j_semaine
+    h_date_create:
+        label: Heure de la création
+        extra: 1
+        type: int
+    h_date_pc:
+        label: Heur de la prise en charge
+        extra: 1
+        type: int
         
 forms: 
     default:

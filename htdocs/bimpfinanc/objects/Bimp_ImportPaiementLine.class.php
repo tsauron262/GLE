@@ -163,14 +163,18 @@ class Bimp_ImportPaiementLine extends BimpObject
             }
         }
 
+        $totalFact = 0;
         foreach ($this->getData('factures') as $idF) {
             $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $idF);
 
             $this->total_reste_a_paye += $obj->getData('remain_to_pay');
+            $totalFact += $obj->getData('total_ttc');
         }
 
 
         if (($this->getData('price') - $this->total_reste_a_paye) < 0.10 /*&& ($this->getData('price') - $this->total_reste_a_paye) > -0.10*/)
+            $this->ok = true;
+        if($totalFact - $this->getData('price') < 0.10 && $totalFact - $this->getData('price') > -0.10)
             $this->ok = true;
         if ($this->getData('traite'))
             $this->ok = true;
@@ -389,7 +393,7 @@ class Bimp_ImportPaiementLine extends BimpObject
             if ($this->getData('type') == 'vir') {
                 $manque = $this->getData('price') - $this->total_reste_a_paye;
                 if ($this->getData('traite') == 0) {
-                    return BimpRender::renderAlerts(price($this->getData('price')) . ' € - ' . price($this->total_reste_a_paye) . ' € = ' . price($manque) . ' €', ($this->ok ? 'success' : 'danger'));
+                    return BimpRender::renderAlerts(price($this->getData('price')) . ' - ' . price($this->total_reste_a_paye) . ' = ' . price($manque) . ' €', ($this->ok ? 'success' : 'danger'));
                 } else
                     return BimpRender::renderAlerts(price($this->getData('price')) . ' €', ($manque == 0 ? 'success' : 'danger'));
             }

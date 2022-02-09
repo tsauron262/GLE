@@ -1376,6 +1376,50 @@ class BS_SAV extends BimpObject
 
         return '';
     }
+    
+             
+    public function getExtraFieldFilterKey($field, &$joins, $main_alias = '', &$filters = array())
+    {
+        if($field == 'j_date_create'){
+            return 'if('.$main_alias.'.date_create, DayOfWeek('.$main_alias.'.date_create)-1, 10)';
+        }
+        if($field == 'j_date_pc'){
+            return 'if('.$main_alias.'.date_pc, DayOfWeek('.$main_alias.'.date_pc)-1, 10)';
+        }
+        if($field == 'h_date_create'){
+            return 'if('.$main_alias.'.date_create, DATE_FORMAT('.$main_alias.'.date_create, "%H"), 10)';
+        }
+        if($field == 'h_date_pc'){
+            return 'if('.$main_alias.'.date_pc, DATE_FORMAT('.$main_alias.'.date_pc, "%H"), 10)';
+        }
+        
+
+        return '';
+    }
+    
+    public function fetchExtraFields()
+    {
+        $extra = array();
+        if($this->getData('date_create')){
+            $extra['j_date_create'] = date('w',strtotime($this->getData('date_create')));
+            $extra['h_date_create'] = date('H',strtotime($this->getData('date_create')));
+        }
+        else{
+            $extra['j_date_create'] = 10;
+            $extra['h_date_create'] = 0;
+        }
+        
+        
+        if($this->getData('date_pc')){
+            $extra['j_date_pc'] = date('w',strtotime($this->getData('date_pc')));
+            $extra['h_date_pc'] = date('H',strtotime($this->getData('date_pc')));
+        }
+        else{
+            $extra['j_date_pc'] = 10;
+            $extra['h_date_pc'] = 0;
+        }
+        return $extra;
+    }
 
     public function getCentreData($centre_repa = false)
     {
@@ -1522,6 +1566,29 @@ class BS_SAV extends BimpObject
             if (count($contacts) == 1) {
                 foreach ($contacts as $id => $label) {
                     return $id;
+                }
+            }
+        }
+
+        return 0;
+    }
+
+    public function getPreselectedIdContact()
+    {
+        $id_client = (int) BimpTools::getPostFieldValue('id_client', (int) $this->getData('id_client'));
+
+        if ($id_client) {
+            $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client);
+
+            if (BimpObject::objectLoaded($client)) {
+                $contacts = $client->getContactsArray(false);
+
+                if (count($contacts) === 1) {
+                    foreach ($contacts as $id_contact => $contat_label) {
+                        if ((int) $id_contact) {
+                            return (int) $id_contact;
+                        }
+                    }
                 }
             }
         }
@@ -2355,6 +2422,13 @@ class BS_SAV extends BimpObject
         $html .= '<input type="hidden" value="0" name="' . $input_name . '"/>';
 
         return $html;
+    }
+
+    public function renderContactsSelect()
+    {
+        return BimpInput::renderInput('select', 'id_contact', (int) $this->getPreselectedIdContact(), array(
+                    'options' => $this->getClient_contactsArray()
+        ));
     }
 
     // Traitements:
@@ -5657,6 +5731,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             'success_callback' => $success_callback
         );
     }
+    
+    
 
     public function actionCancelRdv($data, &$success)
     {

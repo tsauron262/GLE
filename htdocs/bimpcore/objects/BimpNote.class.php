@@ -46,7 +46,7 @@ class BimpNote extends BimpObject
 //        $listUser = array(242);
         foreach($listUser as $idUser){
             $html = '';
-            $notes = BimpNote::getMyNewConversations(0, true, 20, $idUser);
+            $notes = BimpNote::getMyNewConversations(0, true, 50, $idUser);
 
             $data = array();
             foreach($notes as $note)

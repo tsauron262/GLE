@@ -13,12 +13,19 @@ objects:
     entrepots: 
         instance: 
             bimp_object: Bimp_Entrepot
+            
     hashtags: 
         instance: 
             bimp_object: BimpHashtag
+            
+    signature: 
+        instance: 
+            bimp_object: BimpSignature
+
     correctifs: 
         instance: 
             bimp_object: BimpCorrectif
+            
     droitUser:
         instance: 
             bimp_object: Bimp_User_Rights
@@ -26,6 +33,7 @@ objects:
     droitGroupUser:
         instance: 
             bimp_object: Bimp_UserGroup_Rights
+            
     lists_configs: 
         instance: 
             bimp_object: 
@@ -93,6 +101,16 @@ sections:
                       panel: 1
                       object: hashtags
                       name: default
+                      
+        signatures: 
+            label: Signatures
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: signature
+                      name: default
+                      
         correctifs: 
             label: Correctifs
             sections: 

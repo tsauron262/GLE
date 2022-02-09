@@ -113,6 +113,8 @@ lists:
         extra_btn: 
             callback: getListExtraButtons
         update_btn: 1
+        sort_field: id
+        sort_way: asc
         cols:
             type:
             factures:
@@ -154,6 +156,7 @@ lists_cols:
         label: Montant
         value: 
             callback: getPrice
+        min_width: 220px
         
 views: 
     default: 

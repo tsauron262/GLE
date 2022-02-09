@@ -4461,6 +4461,58 @@ class ObjectLine extends BimpObject
         }
         return $html;
     }
+    
+        
+    public function getExtraFieldFilterKey($field, &$joins, $main_alias = '', &$filters = array())
+    {
+        // Retourner la clé de filtre SQl sous la forme alias_table.nom_champ_db 
+        // Implémenter la jointure dans $joins en utilisant l'alias comme clé du tableau (pour éviter que la même jointure soit ajouté plusieurs fois à $joins). 
+        // Si $main_alias est défini, l'utiliser comme préfixe de alias_table. Ex: $main_alias .'_'.$alias_table (Bien utiliser l'underscore).  
+        // ET: utiliser $main_alias à la place de "a" dans la clause ON. 
+//        Ex: 
+        if($field == 'duree_tot'){
+            $join_alias = ($main_alias ? $main_alias . '___' : '') . 'dol_line';
+            $joins[$join_alias] = array(
+                'alias' => $join_alias,
+                'table' => 'facturedet',
+                'on'    => $join_alias . '.rowid = ' . ($main_alias ? $main_alias : 'a') . '.id_line'
+            );
+            $join_alias2 = ($join_alias ? $join_alias . '___' : '') . 'product';
+            /*Pas necessaire de faire la jointure sur cette table mais gardé l'alias pour compatibilit avec le reste*/
+//            $joins[$join_alias2] = array(
+//                'alias' => $join_alias2,
+//                'table' => 'product',
+//                'on'    => $join_alias2 . '.rowid = ' . ($join_alias ? $join_alias : 'a') . '.fk_product'
+//            );
+            $join_alias3 = ($join_alias2 ? $join_alias2 . '__' : '') . 'ef';
+            $joins[$join_alias3] = array(
+                'alias' => $join_alias3,
+                'table' => 'product_extrafields',
+                'on'    => $join_alias3 . '.fk_object = ' . ($join_alias ? $join_alias : 'a') . '.fk_product'
+            );
+
+//        die('('.$join_alias.'.duree * '.$main_alias.'.qty) as duree_tot');
+            return '('.$join_alias3.'.duree * '.$join_alias.'.qty)';
+        }
+
+        return '';
+    }
+    
+    public function fetchExtraFields()
+    {
+        $extra = array();
+        $sql = 'SELECT (a___dol_line___product___product.duree * a___dol_line.qty) as tot
+                    FROM '.MAIN_DB_PREFIX.'facturedet a___dol_line
+                    LEFT JOIN '.MAIN_DB_PREFIX.'product_extrafields a___dol_line___product___product ON a___dol_line___product___product.fk_object = a___dol_line.fk_product
+                    WHERE a___dol_line.rowid = '.$this->getData('id_line');
+
+        $result = $this->db->executeS($sql, 'array');
+
+        if (!is_null($result)) {
+            $extra['duree_tot'] = $result[0]['tot'];
+        }
+        return $extra;
+    }
 
     public function renderQuickAddForm($bc_list)
     {

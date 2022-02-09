@@ -435,7 +435,7 @@ fields:
         dol_extra_field: 1
         
     duration:
-        label: Durée
+        label: Durée (obsoléte)
         type: string
         
     fk_user_valid:
@@ -549,18 +549,38 @@ fields:
         values:
             array: type_compta
             
-    duree: 
-        label: Durée limitée (en mois)
-        type: int
-        min: 0
-        default_value: 0
-        input: 
-            type: text
-            help: Uniquement pour les prestations réalisées au fil du temps
+#    duree: 
+#        label: Durée limitée (en mois)
+#        type: int
+#        min: 0
+#        default_value: 0
+#        input: 
+#            type: text
+#            help: Uniquement pour les prestations réalisées au fil du temps
             
     lock_admin:
         label: Blocage Admin
         type: bool
+        
+    duree:
+        label: Durée
+        type: timer
+        input: 
+            type: timer
+        displays: 
+            default: 
+                type: timer
+#        default_value: 00:00:00
+#        input:
+#            help: En secondes (1h = 3600s - 7h = 25200s)
+        dol_extra_field: 1
+        
+        
+    renta_service:
+        label: Rentabilitée €/h
+        type: money
+        extra: 1
+        has_total: 0
         
 forms: 
     # Utiliser plutôt "default" que "card" pour le formulaire principal 
@@ -595,6 +615,7 @@ forms:
             - field: seuil_stock_alerte
             - field: desiredstock
             - field: 2hotline
+            - field: duree
             # Measure
 #            - field: weight
 #            - field: weight_units
@@ -836,6 +857,7 @@ fields_tables:
         title: Mesures
         icon: fas_ruler
         rows:
+            - field: duree
             - field: weight
             - field: weight_units
             - field: length
@@ -1113,6 +1135,8 @@ lists:
             - label: étiquettes magasin
               icon: fas_sticky-note
               onclick: setSelectedObjectsAction($(this), 'list_id', 'printEtiquettes', {'type':'magasin'}, '', 'Générer les étiquettes ?', true)
+        list_actions: 
+            callback: getFilteredListActions            
         filters_panel: default
         sort_field: id
         sort_way: desc

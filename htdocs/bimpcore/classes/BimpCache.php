@@ -25,6 +25,8 @@ class BimpCache
     protected static $memoryMax = null;
     public static $objects_keys = array();
     public static $objects_keys_removed = array();
+    
+    public $j_semaine = array(0 => 'Dimanche', 1 => "Lundi", 2 => "Mardi", 3 => "Mercredi", 4 => "Jeudi", 5 => "Vendredi", 6 => "Samedi", 10 => "N/C");
 
     public static function getBdb($no_transactions = false)
     {

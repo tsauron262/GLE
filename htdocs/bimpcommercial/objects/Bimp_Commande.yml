@@ -450,7 +450,7 @@ forms:
               hidden: 1
               input: 
                   type: hidden
-              depends_on: fk_cond_reglement
+              depends_on: fk_cond_reglement,fk_mode_reglement
               value: 
                   callback: isPaiementComptant                  
             - field: date_commande

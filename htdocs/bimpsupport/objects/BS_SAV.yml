@@ -491,6 +491,14 @@ fields:
         type: int
         values:
             array: j_semaine
+    h_date_create:
+        label: Heure de la création
+        extra: 1
+        type: int
+    h_date_pc:
+        label: Heur de la prise en charge
+        extra: 1
+        type: int
         
 forms: 
     default:

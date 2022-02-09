@@ -496,7 +496,7 @@ fields:
         extra: 1
         type: int
     h_date_pc:
-        label: Heur de la prise en charge
+        label: Heure de la prise en charge
         extra: 1
         type: int
         

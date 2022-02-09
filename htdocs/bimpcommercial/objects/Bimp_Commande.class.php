@@ -326,9 +326,9 @@ class Bimp_Commande extends BimpComm
                 }
                 return 1;
 
-            case 'paiement_comptant':
+//            case 'paiement_comptant':
 //                if ((int) $this->getData('fk_statut') != 0 and !$user->admin)
-                return 0;
+//                return 0;
 //                return 1;
         }
 
@@ -3782,7 +3782,7 @@ class Bimp_Commande extends BimpComm
                 }
             }
         }
-
+        
         return $errors;
     }
 
@@ -4005,28 +4005,24 @@ class Bimp_Commande extends BimpComm
 
         return $errors;
     }
-
-    private function setPaiementComptant()
-    {
-
+    
+    public function isPaiementComptant() {
         $cond_paiement_comptant = array('LIVRAISON', 'TIERFAC', 'TIERAV', 'RECEPCOM', 'HALFFAC', 'HALFAV', 'RECEP');
         $code = self::getBdb()->getValue('c_payment_term', 'code', '`active` > 0 and rowid = ' . $this->getData('fk_cond_reglement'));
+        return (int) in_array($code, $cond_paiement_comptant);
+    }
 
-        if (in_array($code, $cond_paiement_comptant))
-            return $this->set('paiement_comptant', 1);
-        else
-            return $this->set('paiement_comptant', 0);
+    public function setPaiementComptant()
+    {
+        return $this->set('paiement_comptant', $this->isPaiementComptant());
     }
 
     public function update(&$warnings = array(), $force_update = false)
     {
         $init_entrepot = (int) $this->getInitData('entrepot');
-
-        if (empty($errors))
-            $this->setPaiementComptant();
-
+        $this->setPaiementComptant();
         $errors = parent::update($warnings, $force_update);
-
+        
         if (!count($errors)) {
             if ($init_entrepot !== (int) $this->getData('entrepot')) {
                 $sql = 'UPDATE `' . MAIN_DB_PREFIX . 'br_reservation` SET `id_entrepot` = ' . (int) $this->getData('entrepot');

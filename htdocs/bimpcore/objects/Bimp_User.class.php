@@ -246,7 +246,7 @@ class Bimp_User extends BimpObject
 
         $shipTo = (int) $shipTo;
 
-        $cache_key = 'users_gsx_data_fro_shipto_' . $shipTo;
+        $cache_key = 'users_gsx_data_for_shipto_' . $shipTo;
 
         if (!isset(BimpCache::$cache[$cache_key])) {
             BimpCache::$cache[$cache_key] = array();

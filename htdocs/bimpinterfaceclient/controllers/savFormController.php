@@ -55,7 +55,7 @@ class savFormController extends BimpPublicController
                 require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_Reservation.php';
 
                 $fetch_errors = array();
-                $result = GSX_Reservation::fetchReservation(897316, $shipto, $res_id, $fetch_errors);
+                $result = GSX_Reservation::fetchReservation(1442050, $shipto, $res_id, $fetch_errors);
 
                 if ((int) BimpCore::getConf('use_gsx_v2_for_reservations', 0)) {
                     if (isset($result['errors'])) {
@@ -92,7 +92,10 @@ class savFormController extends BimpPublicController
                 }
 
                 if (count($fetch_errors)) {
-                    $errors[] = 'Les données de votre réservation n\'ont pas pu être récupérées depuis le site d\'Apple';
+                    $msg = 'Les données de votre réservation ne peuvent pas être récupérées depuis le site d\'Apple pour le moment.<br/>';
+                    $msg .= 'Pas d\'inquiètude, vous aurez toujours la possiblité de compléter vos informations lors de votre rendez-vous';
+
+                    $errors[] = $msg;
 
                     BimpCore::addlog('Complément infos RDV SAV - Echec fetch Reservation', Bimp_Log::BIMP_LOG_ERREUR, 'sav', null, array(
                         'ID Réservation' => $res_id,
@@ -1239,7 +1242,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
 
             if (isset($centres[$code_centre])) {
                 $request_errors = array();
-                $result = GSX_Reservation::fetchAvailableSlots(897316, $centres[$code_centre]['shipTo'], $code_product, $request_errors);
+                $result = GSX_Reservation::fetchAvailableSlots(1442050, $centres[$code_centre]['shipTo'], $code_product, $request_errors);
 
                 if (count($request_errors)) {
                     BimpCore::addlog('Echec requête GSX "fetch available slots" depuis le formulaire sav public', Bimp_Log::BIMP_LOG_ERREUR, 'gsx', null, array(
@@ -1626,7 +1629,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                             }
                         }
 
-                        $result = GSX_Reservation::createReservation(897316, $centre['shipTo'], $params, $req_errors, $debug);
+                        $result = GSX_Reservation::createReservation(1442050, $centre['shipTo'], $params, $req_errors, $debug);
                     }
 
                     if (!empty($result)) {
@@ -2329,7 +2332,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                             // Annulation de la requête: 
                             require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_Reservation.php';
 
-                            $result = GSX_Reservation::cancelReservation(897316, $centre['ship_to'], $reservation_id, $errors);
+                            $result = GSX_Reservation::cancelReservation(1442050, $centre['ship_to'], $reservation_id, $errors);
 
                             if ((int) BimpCore::getConf('use_gsx_v2_for_reservations', 0)) {
                                 if (isset($result['errors']) && !empty($result['errors'])) {

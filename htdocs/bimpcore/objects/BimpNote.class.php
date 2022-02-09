@@ -19,6 +19,7 @@ class BimpNote extends BimpObject
     // ID GR:
     const BN_GROUPID_LOGISTIQUE = 108;
     const BN_GROUPID_FACT = 408;
+    const BN_GROUPID_ATRADIUS = 680;
 
     public static $visibilities = array(
         self::BIMP_NOTE_AUTHOR  => array('label' => 'Auteur seulement', 'classes' => array('danger')),

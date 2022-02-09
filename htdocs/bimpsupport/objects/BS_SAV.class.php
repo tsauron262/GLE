@@ -1403,8 +1403,9 @@ class BS_SAV extends BimpObject
         
         foreach($fields as $field){
             if($this->getData($field)){
-                $extra['j_'.$field] = date('w',strtotime($this->getData($field)));
-                $extra['h_'.$field] = date('H',strtotime($this->getData($field)));
+                $date = strtotime($this->getData($field));
+                $extra['j_'.$field] = date('w',$date);
+                $extra['h_'.$field] = date('H',$date);
             }
             else{
                 $extra['j_'.$field] = 10;

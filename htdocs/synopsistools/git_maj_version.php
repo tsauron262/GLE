@@ -5,7 +5,7 @@ require_once('../main.inc.php');
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
 
-sleep(5);
+sleep(10);
 
 $version = BimpCore::getConf('git_version', 1)+1;
 echo 'version '.$version;

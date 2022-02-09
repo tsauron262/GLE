@@ -1381,16 +1381,16 @@ class BS_SAV extends BimpObject
     public function getExtraFieldFilterKey($field, &$joins, $main_alias = '', &$filters = array())
     {
         if($field == 'j_date_create'){
-            return 'if(date_create, DayOfWeek('.$main_alias.'.date_create)-1, 10)';
+            return 'if('.$main_alias.'.date_create, DayOfWeek('.$main_alias.'.date_create)-1, 10)';
         }
         if($field == 'j_date_pc'){
-            return 'if(date_pc, DayOfWeek('.$main_alias.'.date_pc)-1, 10)';
+            return 'if('.$main_alias.'.date_pc, DayOfWeek('.$main_alias.'.date_pc)-1, 10)';
         }
         if($field == 'h_date_create'){
-            return 'if(date_create, DATE_FORMAT('.$main_alias.'.date_create, "%H"), 10)';
+            return 'if('.$main_alias.'.date_create, DATE_FORMAT('.$main_alias.'.date_create, "%H"), 10)';
         }
         if($field == 'h_date_pc'){
-            return 'if(date_pc, DATE_FORMAT('.$main_alias.'.date_pc, "%H"), 10)';
+            return 'if('.$main_alias.'.date_pc, DATE_FORMAT('.$main_alias.'.date_pc, "%H"), 10)';
         }
         
 

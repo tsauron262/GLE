@@ -1376,6 +1376,34 @@ class BS_SAV extends BimpObject
 
         return '';
     }
+    
+             
+    public function getExtraFieldFilterKey($field, &$joins, $main_alias = '', &$filters = array())
+    {
+        if($field == 'j_date_create'){
+            return '(DayOfWeek('.$main_alias.'.date_create)-1)';
+        }
+        if($field == 'j_date_pc'){
+            return 'if(date_pc, DayOfWeek('.$main_alias.'.date_pc)-1, 10)';
+        }
+
+        return '';
+    }
+    
+    public function fetchExtraFields()
+    {
+        $extra = array();
+        if($this->getData('date_create'))
+            $extra['j_date_create'] = date('w',strtotime($this->getData('date_create')));
+        else
+            $extra['j_date_create'] = 10;
+        
+        if($this->getData('date_pc'))
+            $extra['j_date_pc'] = date('w',strtotime($this->getData('date_pc')));
+        else
+            $extra['j_date_pc'] = 10;
+        return $extra;
+    }
 
     public function getCentreData($centre_repa = false)
     {
@@ -5687,6 +5715,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             'success_callback' => $success_callback
         );
     }
+    
+    
 
     public function actionCancelRdv($data, &$success)
     {

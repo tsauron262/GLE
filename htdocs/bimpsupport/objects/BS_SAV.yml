@@ -479,6 +479,18 @@ fields:
         items_braces: 1
         items_data_type: id_object
         object: sac
+    j_date_create:
+        label: Jour de la création
+        extra: 1
+        type: int
+        values:
+            array: j_semaine
+    j_date_pc:
+        label: Jour de la prise en charge
+        extra: 1
+        type: int
+        values:
+            array: j_semaine
         
 forms: 
     default:

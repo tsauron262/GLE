@@ -1458,7 +1458,7 @@ class BimpSignature extends BimpObject
                                 '<a href="' . $url . '">espace client BIMP</a>'
                                     ), $email_content);
 
-                            $bimpMail = new BimpMail($subject, BimpTools::cleanEmailsStr($email), '', $email_content, $comm_email);
+                            $bimpMail = new BimpMail($subject, BimpTools::cleanEmailsStr($emails), '', $email_content, $comm_email);
 
                             $filePath = $this->getDocumentFilePath();
                             $fileName = $this->getDocumentFileName();

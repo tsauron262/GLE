@@ -832,6 +832,28 @@ class GSX_v2 extends GSX_Const
         );
     }
 
+    public function getDocRepa($shipTo, $g)
+    {
+        if (self::$mode == 'test') {
+            $shipTo = self::$test_ids['ship_to'];
+        }
+
+        $shipTo = BimpTools::addZeros($shipTo, 10);
+
+        $this->setShipTo($shipTo);
+        $response_headers = array();
+
+        return $this->exec('getFile', array(
+            "identifiers" => array(
+                array('repairId' => $g)
+              )   
+            ), $response_headers, array('url_params' => array('documentType' => 'depotShipper'))
+        );
+    }
+    
+    
+    
+
     // Requêtes - Réservations: 
 
     public function fetchReservationsSummary($shipTo, $from, $to, $productCode = '')

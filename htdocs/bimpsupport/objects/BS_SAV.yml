@@ -479,6 +479,36 @@ fields:
         items_braces: 1
         items_data_type: id_object
         object: sac
+    j_date_create:
+        label: Jour de la création
+        extra: 1
+        type: int
+        values:
+            array: j_semaine
+    h_date_create:
+        label: Heure de la création
+        extra: 1
+        type: int
+    j_date_pc:
+        label: Jour de la prise en charge
+        extra: 1
+        type: int
+        values:
+            array: j_semaine
+    h_date_pc:
+        label: Heure de la prise en charge
+        extra: 1
+        type: int
+    j_date_close:
+        label: Jour de la restitution
+        extra: 1
+        type: int
+        values:
+            array: j_semaine
+    h_date_close:
+        label: Heure de la restitution
+        extra: 1
+        type: int
         
 forms: 
     default:

@@ -92,7 +92,10 @@ class savFormController extends BimpPublicController
                 }
 
                 if (count($fetch_errors)) {
-                    $errors[] = 'Les données de votre réservation n\'ont pas pu être récupérées depuis le site d\'Apple';
+                    $msg = 'Les données de votre réservation ne peuvent pas être récupérées depuis le site d\'Apple pour le moment.<br/>';
+                    $msg .= 'Pas d\'inquiètude, vous aurez toujours la possiblité de compléter vos informations lors de votre rendez-vous';
+
+                    $errors[] = $msg;
 
                     BimpCore::addlog('Complément infos RDV SAV - Echec fetch Reservation', Bimp_Log::BIMP_LOG_ERREUR, 'sav', null, array(
                         'ID Réservation' => $res_id,

@@ -1376,6 +1376,44 @@ class BS_SAV extends BimpObject
 
         return '';
     }
+    
+             
+    public function getExtraFieldFilterKey($field, &$joins, $main_alias = '', &$filters = array())
+    {
+        $fields = array('date_create', 'date_pc', 'date_close');
+        
+        $fieldPrinc = str_replace('j_', '', $field);
+        if(in_array($fieldPrinc, $fields)){
+            return 'if('.$main_alias.'.'.$fieldPrinc.', DayOfWeek('.$main_alias.'.'.$fieldPrinc.')-1, 10)';
+        }
+        
+        
+        $fieldPrinc = str_replace('h_', '', $field);
+        if(in_array($fieldPrinc, $fields)){
+            return 'if('.$main_alias.'.'.$fieldPrinc.', DATE_FORMAT('.$main_alias.'.'.$fieldPrinc.', "%H"), 10)';
+        }
+
+        return '';
+    }
+    
+    public function fetchExtraFields()
+    {
+        $fields = array('date_create', 'date_pc', 'date_close');
+        $extra = array();
+        
+        foreach($fields as $field){
+            if($this->getData($field)){
+                $date = strtotime($this->getData($field));
+                $extra['j_'.$field] = date('w',$date);
+                $extra['h_'.$field] = date('H',$date);
+            }
+            else{
+                $extra['j_'.$field] = 10;
+                $extra['h_'.$field] = 0;
+            }
+        }
+        return $extra;
+    }
 
     public function getCentreData($centre_repa = false)
     {
@@ -4718,6 +4756,8 @@ class BS_SAV extends BimpObject
                     $warnings = $this->sendMsg($msg_type);
                 }
             }
+            if(!count($errors))
+                $errors = $this->updateField('date_close', dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S'));
         }
 
         return array(
@@ -5687,6 +5727,8 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             'success_callback' => $success_callback
         );
     }
+    
+    
 
     public function actionCancelRdv($data, &$success)
     {

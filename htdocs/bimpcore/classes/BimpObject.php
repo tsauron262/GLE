@@ -5421,9 +5421,9 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         // Supprimer les extrafields
         // Retourner un tableau d'erreurs
 
-        if (count($this->getExtraFields())) {
-            return array('Fonction de suppression des champs supplémentaires non implémentée');
-        }
+//        if (count($this->getExtraFields())) {
+//            return array('Fonction de suppression des champs supplémentaires non implémentée');
+//        }
 
         return array();
     }
@@ -5950,7 +5950,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
     // Gestion des notes:
 
-    public function addNote($content, $visibility = null, $viewed = 0, $auto = 1, $email = '', $type_author = 1)
+    public function addNote($content, $visibility = null, $viewed = 0, $auto = 1, $email = '', $type_author = 1, $type_dest = 0, $fk_group_dest = 0)
     {
         if (!$this->isLoaded()) {
             return array('ID ' . $this->getLabel('of_the') . ' absent');
@@ -5963,16 +5963,18 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         }
 
         $errors = $note->validateArray(array(
-            'obj_type'    => 'bimp_object',
-            'obj_module'  => $this->module,
-            'obj_name'    => $this->object_name,
-            'id_obj'      => (int) $this->id,
-            'visibility'  => (int) $visibility,
-            'content'     => $content,
-            'viewed'      => $viewed,
-            'auto'        => $auto,
-            "email"       => $email,
-            "type_author" => $type_author
+            'obj_type'      => 'bimp_object',
+            'obj_module'    => $this->module,
+            'obj_name'      => $this->object_name,
+            'id_obj'        => (int) $this->id,
+            'visibility'    => (int) $visibility,
+            'content'       => $content,
+            'viewed'        => $viewed,
+            'auto'          => $auto,
+            "email"         => $email,
+            "type_author"   => $type_author,
+            'type_dest'     => $type_dest,
+            'fk_group_dest' => $fk_group_dest
         ));
 
         if (!count($errors)) {
@@ -8052,7 +8054,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             return DOL_URL_ROOT . '/bimpinterfaceclient/client.php';
         }
 
-        return BimpCore::getConf('interface_client_base_url', '');
+        return BimpCore::getConf('interface_client_base_url', '') . '?';
     }
 
     public function getPublicUrl($internal = true)

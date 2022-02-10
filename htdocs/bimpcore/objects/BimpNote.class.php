@@ -19,6 +19,7 @@ class BimpNote extends BimpObject
     // ID GR:
     const BN_GROUPID_LOGISTIQUE = 108;
     const BN_GROUPID_FACT = 408;
+    const BN_GROUPID_ATRADIUS = 680;
 
     public static $visibilities = array(
         self::BIMP_NOTE_AUTHOR  => array('label' => 'Auteur seulement', 'classes' => array('danger')),
@@ -45,24 +46,22 @@ class BimpNote extends BimpObject
 //        $listUser = array(242);
         foreach($listUser as $idUser){
             $html = '';
-            $notes = BimpNote::getMyNewConversations(0, true, 50, $idUser);
-
+            $notes = BimpNote::getMyNewConversations(0, true, 500, $idUser, true, false);
+            $maxForMail = 20;
             $data = array();
             foreach($notes as $note)
-                if($note['lu'] == 0){
+                if($note['lu'] == 0 && count($data) < $maxForMail){
                     $noteObj = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $note['idNoteRef']);
-                    $objParent = $noteObj->getParentInstance();
-                    if($objParent && $objParent->isLoaded())
-                        $data[] = 'Message de '.$noteObj->displayData('user_create', 'nom'). ' concernant ' .$objParent->getLink(). ': <br/><i>'.$noteObj->getData('content').'</i>';
-                    else
-                        echo('objet non loadé'.$noteObj->printData());
+                    $data[] = 'Message de '.$noteObj->displayData('user_create', 'nom'). ' concernant ' .$noteObj->getParentLink(). ': <br/><i>'.$noteObj->getData('content').'</i>';
             }
             if(count($data) > 0){
                 $userT->fetch($idUser);
                 $html = '';
                 $htmlTitre = '<h2>User : '.$userT->getFullName($langs).'</h3><br/>';
-                $html .= 'Bonjour vous avez '.count($data).' message(s) non lu : <br/><br/>';
-                $html .= 'Pour désactiver cette relance, vous pouvez : <br/>- soit répondre au message de la pièce émettrice (dans les notes de pied de page) <br/>- soit cliquer sur la petite enveloppe "Message" en haut à droite de la page ERP.<br/><br/>';
+                $html .= 'Bonjour vous avez '.count($notes).' message(s) non lu : <br/>';
+                if(count($data) >= $maxForMail)
+                    $html .= 'Voici les '.count($data).' dérniéres<br/>';
+                $html .= '<br/>Pour désactiver cette relance, vous pouvez : <br/>- soit répondre au message de la pièce émettrice (dans les notes de pied de page) <br/>- soit cliquer sur la petite enveloppe "Message" en haut à droite de la page ERP.<br/><br/>';
                 
                 $html .= implode('<br/><br/>', $data);
                 mailSyn2('Message dans l\'erp', $userT->email, null, $html);
@@ -226,6 +225,25 @@ class BimpNote extends BimpObject
         }
 
         return $this->parent;
+    }
+    
+    public function getParentLink(){
+        $html = '';
+        if (is_null($this->parent)) {
+            $object_type = (string) $this->getData('obj_type');
+            $module = (string) $this->getData('obj_module');
+            $object_name = (string) $this->getData('obj_name');
+            $id_object = (int) $this->getData('id_obj');
+
+            if ($object_type && $module && $object_name && $id_object) {
+                if ($object_type === 'bimp_object') {
+                    $coll = new BimpCollection($module, $object_name);
+                    $html = BimpCache::getBimpObjectLink($module, $object_name, $id_object);
+                }
+            }
+        }
+
+        return $html;
     }
 
     // Getters: 
@@ -592,7 +610,7 @@ class BimpNote extends BimpObject
         return $errors;
     }
 
-    public static function getMyNewConversations($id_max = 0, $notViewedInFirst = true, $limit = 10, $idUser = null)
+    public static function getMyNewConversations($id_max = 0, $notViewedInFirst = true, $limit = 10, $idUser = null, $onlyNotViewed = false, $withObject = true)
     {
         if(is_null($idUser)){
             global $user;
@@ -615,9 +633,10 @@ class BimpNote extends BimpObject
         $reqFin .= " LIMIT 0," . $limit;
         $tabFils = array();
         $tabNoDoublons = array();
-        $tabReq = array(
-            $reqDeb . "(" . $where . ") AND viewed = 0 " . $reqFin,
-            $reqDeb . "(" . $where . " OR (type_author = 1 AND user_create = " . $idUser . ")) " . $reqFin);
+        $tabReq = array();
+        $tabReq[0] = $reqDeb . "(" . $where . ") AND viewed = 0 " . $reqFin;
+        if(!$onlyNotViewed)
+            $tabReq[1] = $reqDeb . "(" . $where . " OR (type_author = 1 AND user_create = " . $idUser . ")) " . $reqFin;
 
 //        echo '<pre>';
 //        print_r($tabReq);
@@ -629,9 +648,13 @@ class BimpNote extends BimpObject
                     $hash = $ln->obj_module . $ln->obj_name . $ln->id_obj;
                     if (!isset($tabNoDoublons[$hash])) {
                         $tabNoDoublons[$hash] = true;
-                        if ($ln->obj_type == "bimp_object") {
-                            $tabFils[] = array("lu" => $rang, "obj" => BimpObject::getInstance($ln->obj_module, $ln->obj_name, $ln->id_obj), "idNoteRef" => $ln->idNoteRef);
+                        $data = array("lu" => $rang, "idNoteRef" => $ln->idNoteRef);
+                        if ($withObject && $ln->obj_type == "bimp_object") {
+                            $data['obj'] = BimpCache::getBimpObjectInstance($ln->obj_module, $ln->obj_name, $ln->id_obj);
+                            $tabFils[] = $data;
                         }
+                        elseif(!$withObject)
+                            $tabFils[] = $data;
                     }
                 }
             }

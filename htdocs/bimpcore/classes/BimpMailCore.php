@@ -30,6 +30,16 @@ class BimpMailCore
         $subject = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $subject);
         $msg = str_replace(array($dolibarr_main_url_root, $_SERVER['SERVER_NAME'] . DOL_URL_ROOT), DOL_URL_ROOT, $msg);
         $msg = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $msg);
+        
+        if(BimpTools::cleanEmailsStr($to) == ''){
+            BimpCore::addlog('Echec envoi email sans destinatiare ', Bimp_Log::BIMP_LOG_ALERTE, 'email', NULL, array(
+                'Destinataire' => $to,
+                'From'         => $from,
+                'Reply_to'     => $reply_to,
+                'Sujet'        => $subject,
+                'Message'      => $msg
+            ));
+        }
 
         if ($from == '') {
             $from = 'Application BIMP-ERP ' . $conf->global->MAIN_INFO_SOCIETE_NOM . ' <';

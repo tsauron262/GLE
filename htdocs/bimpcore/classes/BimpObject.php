@@ -5417,9 +5417,9 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         // Supprimer les extrafields
         // Retourner un tableau d'erreurs
 
-        if (count($this->getExtraFields())) {
-            return array('Fonction de suppression des champs supplémentaires non implémentée');
-        }
+//        if (count($this->getExtraFields())) {
+//            return array('Fonction de suppression des champs supplémentaires non implémentée');
+//        }
 
         return array();
     }

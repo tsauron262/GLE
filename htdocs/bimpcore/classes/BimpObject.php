@@ -4828,10 +4828,17 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
         if ($result <= 0) {
             $msg = 'Echec de la suppression ' . $this->getLabel('of_the');
-            $sqlError = $this->db->db->lasterror;
+
+            $sqlError = $this->db->err();
             if ($sqlError) {
                 $msg .= ' - Erreur SQL: ' . $sqlError;
             }
+
+            if ($this->isDolObject()) {
+                $msg .= ' - Code: ' . $result;
+            }
+
+
             $errors[] = $msg;
         } elseif (!count($errors)) {
             $id = $this->id;
@@ -5358,7 +5365,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 $errors[] = $err_sql;
             }
 
-            return 0;
+            return $result;
         }
 
         return 1;

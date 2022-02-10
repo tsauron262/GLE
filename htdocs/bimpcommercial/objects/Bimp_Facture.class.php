@@ -232,6 +232,14 @@ class Bimp_Facture extends BimpComm
             return 0;
         }
 
+        if ($force_delete) {
+            global $rgpd_delete;
+
+            if ($rgpd_delete) {
+                return 1;
+            }
+        }
+
         // Suppression autorisée seulement pour les brouillons:
         if ((int) $this->getData('fk_statut') > 0) {
             $errors[] = 'Facture validée';

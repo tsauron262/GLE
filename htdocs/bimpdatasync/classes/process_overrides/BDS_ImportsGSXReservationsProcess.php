@@ -833,8 +833,8 @@ L’équipe BIMP";
             foreach ($centres as $code_centre => $centre_data) {
                 $shipTo = BimpTools::getArrayValueFromPath($centre_data, 'shipTo', '');
 
-                if ($shipTo && !in_array($shipTo, $this->apple_ids)) {
-                    $this->apple_ids[] = $shipTo;
+                if ($shipTo && !in_array((int) $shipTo, GSX_v2::$oldShipTos) && !in_array((int) $shipTo, $this->apple_ids)) {
+                    $this->apple_ids[] = (int) $shipTo;
                 }
             }
         }

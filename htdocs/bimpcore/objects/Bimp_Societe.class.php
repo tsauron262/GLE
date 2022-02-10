@@ -980,12 +980,27 @@ class Bimp_Societe extends BimpDolObject
         return null;
     }
 
-    public function getCommercialEmail($with_default = true)
+    public function getCommercialEmail($with_default = true, $only_first = true)
     {
-        $comm = $this->getCommercial($with_default);
+        if ($only_first) {
+            $comm = $this->getCommercial($with_default);
 
-        if (BimpObject::objectLoaded($comm)) {
-            return BimpTools::cleanEmailsStr($comm->getData('email'));
+            if (BimpObject::objectLoaded($comm)) {
+                return BimpTools::cleanEmailsStr($comm->getData('email'));
+            }
+        } else {
+            $users = $this->getCommercials($with_default, $only_first);
+
+            if (!empty($users)) {
+                $email = '';
+                foreach ($users as $user) {
+                    if ((int) $user->getData('statut')) {
+                        $email .= ($email ? ',' : '') . BimpTools::cleanEmailsStr($user->getData('email'));
+                    }
+                }
+
+                return $email;
+            }
         }
 
         return '';

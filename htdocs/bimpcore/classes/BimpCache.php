@@ -170,7 +170,7 @@ class BimpCache
     }
     
     public static function getBimpObjectLink($module, $object_name, $id_object){
-        $coll = new BimpCollection($module, $object_name);
+        $coll = BimpCollection::getInstance($module, $object_name);
         return $coll->getLink($id_object);
     }
 

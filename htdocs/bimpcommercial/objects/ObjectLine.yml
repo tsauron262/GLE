@@ -189,9 +189,10 @@ fields:
         depends_on: pu_ht,qty,type
 
     duree_tot:
-        label: Durée Total
+        label: Durée Totale
         type: timer
         extra: 1
+        default_value: 0
         input: 
             type: timer
         displays: 

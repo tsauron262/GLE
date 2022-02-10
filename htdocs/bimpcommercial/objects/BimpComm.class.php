@@ -136,6 +136,14 @@ class BimpComm extends BimpDolObject
         if ((int) $this->getData('fk_statut') === 0) {
             return 1;
         }
+
+        if ($force_delete) {
+            global $rgpd_delete;
+
+            if ($rgpd_delete) {
+                return 1;
+            }
+        }
         return 0;
     }
 

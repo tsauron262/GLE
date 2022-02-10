@@ -38,7 +38,8 @@ class Interfacevalidate extends BimpCommTriggers
 
                 case 'DELETE':
                     if (method_exists($bimpObject, 'isDeletable')) {
-                        if (!$bimpObject->isDeletable()) {
+                        global $rgpd_delete;
+                        if (!$bimpObject->isDeletable($rgpd_delete ? true : false)) {
                             $errors[] = BimpTools::ucfirst($bimpObject->getLabel('this')) . ' ne peut pas être supprimé' . $bimpObject->e();
                         }
                     }

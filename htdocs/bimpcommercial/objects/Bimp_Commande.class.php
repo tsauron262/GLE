@@ -469,10 +469,18 @@ class Bimp_Commande extends BimpComm
 
     public function isDeletable($force_delete = false, &$errors = array())
     {
+        if ($force_delete) {
+            global $rgpd_delete;
+
+            if ($rgpd_delete) {
+                return 1;
+            }
+        }
+
         if ((int) $this->getData('fk_statut') > 0) {
             return 0;
-//            return (int) $this->isUnvalidatable();
         }
+        
         return (int) parent::isDeletable($force_delete);
     }
 

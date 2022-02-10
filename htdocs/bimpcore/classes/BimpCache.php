@@ -168,6 +168,11 @@ class BimpCache
     {
         return self::cacheExists('bimp_object_' . $module . '_' . $object_name . '_' . $id_object);
     }
+    
+    public static function getBimpObjectLink($module, $object_name, $id_object){
+        $coll = new BimpCollection($module, $object_name);
+        return $coll->getLink($id_object);
+    }
 
     public static function getBimpObjectInstance($module, $object_name, $id_object = null, $parent = null)
     {

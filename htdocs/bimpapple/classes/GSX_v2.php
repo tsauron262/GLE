@@ -510,7 +510,7 @@ class GSX_v2 extends GSX_Const
         ));
     }
 
-    public function partsSummaryBySerialAndIssue($serial, BS_Issue $issue = null)
+    public function partsSummaryBySerialAndIssue($serial, BS_Issue $issue = null, $desc = '')
     {
         $params = array(
             'devices' => array(
@@ -519,6 +519,8 @@ class GSX_v2 extends GSX_Const
                 )
             )
         );
+        if($desc != '')
+            $params['partDescriptions'] = array($desc);
 
         if (BimpObject::objectLoaded($issue) && (string) $issue->getData('category_code')) {
             $params['componentIssues'] = array(

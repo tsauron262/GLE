@@ -34,11 +34,7 @@ class BimpClientForDol extends Bimp_Client{
             )
         );
         
-        
         $clients = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_Client', $filters);
-        $remove = BimpCache::getBimpObjectList('bimpcore', 'Bimp_Client', $filters); //todo
-        $this->addError(BimpCache::getBdb()->db->lastquery);
-        
         
         return $clients;
     }

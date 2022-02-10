@@ -52,11 +52,7 @@ class BimpNote extends BimpObject
             foreach($notes as $note)
                 if($note['lu'] == 0 && count($data) < $maxForMail){
                     $noteObj = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $note['idNoteRef']);
-                    $objParent = $noteObj->getParentInstance();
-                    if($objParent && $objParent->isLoaded())
-                        $data[] = 'Message de '.$noteObj->displayData('user_create', 'nom'). ' concernant ' .$objParent->getLink(). ': <br/><i>'.$noteObj->getData('content').'</i>';
-                    else
-                        echo('objet non loadé'.$noteObj->printData());
+                    $data[] = 'Message de '.$noteObj->displayData('user_create', 'nom'). ' concernant ' .$noteObj->getParentLink(). ': <br/><i>'.$noteObj->getData('content').'</i>';
             }
             if(count($data) > 0){
                 $userT->fetch($idUser);
@@ -68,7 +64,7 @@ class BimpNote extends BimpObject
                 $html .= '<br/>Pour désactiver cette relance, vous pouvez : <br/>- soit répondre au message de la pièce émettrice (dans les notes de pied de page) <br/>- soit cliquer sur la petite enveloppe "Message" en haut à droite de la page ERP.<br/><br/>';
                 
                 $html .= implode('<br/><br/>', $data);
-//                mailSyn2('Message dans l\'erp', $userT->email, null, $html);
+                mailSyn2('Message dans l\'erp', $userT->email, null, $html);
                 
                 echo $htmlTitre.$html;
             }
@@ -229,6 +225,25 @@ class BimpNote extends BimpObject
         }
 
         return $this->parent;
+    }
+    
+    public function getParentLink(){
+        $html = '';
+        if (is_null($this->parent)) {
+            $object_type = (string) $this->getData('obj_type');
+            $module = (string) $this->getData('obj_module');
+            $object_name = (string) $this->getData('obj_name');
+            $id_object = (int) $this->getData('id_obj');
+
+            if ($object_type && $module && $object_name && $id_object) {
+                if ($object_type === 'bimp_object') {
+                    $coll = new BimpCollection($module, $object_name);
+                    $html = BimpCache::getBimpObjectLink($module, $object_name, $id_object);
+                }
+            }
+        }
+
+        return $html;
     }
 
     // Getters: 

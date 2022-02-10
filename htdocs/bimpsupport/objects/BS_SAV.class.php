@@ -2263,10 +2263,16 @@ class BS_SAV extends BimpObject
 
             $html .= '<script>'
                     . 'var idMaxMesg = 0;'
+                    . 'var boucle = true;'
                     . 'function checkCode(){'
-                    . ' setObjectAction(null, {"module":"bimpsupport", "object_name":"BS_SAV"}, "getCodeApple", {"idMax":idMaxMesg});'
+                    . ' if(boucle){'
+                    . '     setObjectAction(null, {"module":"bimpsupport", "object_name":"BS_SAV"}, "getCodeApple", {"idMax":idMaxMesg});'
+                    . ' }'
                     . '}'
                     . 'checkCode();'
+                    . 'bimpModal.$modal.on("hidden.bs.modal", function (e) {'
+                    . ' boucle = false;'
+                    . '});'
                     . '</script>';
         }
 

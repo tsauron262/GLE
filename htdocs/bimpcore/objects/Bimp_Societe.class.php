@@ -9,7 +9,7 @@ class Bimp_Societe extends BimpDolObject
     const SOLV_A_SURVEILLER = 1;
     const SOLV_MIS_EN_DEMEURE = 2;
     const SOLV_DOUTEUX = 3;
-    const SOLV_INSOLVABLE = 4; 
+    const SOLV_INSOLVABLE = 4;
     const SOLV_DOUTEUX_FORCE = 5;
     const SOLV_A_SURVEILLER_FORCE = 6;
 
@@ -189,7 +189,7 @@ class Bimp_Societe extends BimpDolObject
         if (!$this->isLoaded()) {
             return 1;
         }
-        
+
         global $user;
 
         return (int) ($user->admin || $user->login == 'jc.cannet');
@@ -3119,6 +3119,7 @@ class Bimp_Societe extends BimpDolObject
         $init_solv = (int) $this->getInitData('solvabilite_status');
         $init_status = (int) $this->getInitData('status');
         $init_outstanding_limit = $this->getInitData('outstanding_limit');
+        $init_relance_actives = (int) $this->getInitData('relances_actives');
 
         $limit = -1;
         if ($this->getData('outstanding_limit_atradius') > -1)
@@ -3160,6 +3161,12 @@ class Bimp_Societe extends BimpDolObject
             }
             if ($init_outstanding_limit != $this->getData('outstanding_limit'))
                 $this->onNewOutstanding_limit($init_outstanding_limit);
+
+            if ($init_relance_actives && !(int) $this->getData('relances_actives')) {
+                $this->updateField('date_relances_deactivated', date('Y-m-d'));
+            } elseif (!$init_relance_actives = (int) $this->getData('relances_actives')) {
+                $this->updateField('date_relances_deactivated', null);
+            }
         }
 
         $fc = BimpTools::getValue('fc');

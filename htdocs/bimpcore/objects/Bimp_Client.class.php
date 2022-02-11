@@ -2435,6 +2435,7 @@ class Bimp_Client extends Bimp_Societe
 
                     if (!count($errors)) {
                         $this->updateField('relances_infos', '', null, true, true);
+                        $this->updateField('date_relances_deactivated', null);
                     }
                 }
 
@@ -2446,6 +2447,7 @@ class Bimp_Client extends Bimp_Societe
                     $errors = $this->updateField('relances_actives', 0, null, true, true);
                     if (!count($errors)) {
                         $this->updateField('relances_infos', $infos, null, true, true);
+                        $this->updateField('date_relances_deactivated', date('Y-m-d'));
                     }
                 }
 

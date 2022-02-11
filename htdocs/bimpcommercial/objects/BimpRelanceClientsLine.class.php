@@ -1287,12 +1287,12 @@ class BimpRelanceClientsLine extends BimpObject
                         $html .= '</tr>';
                     }
 
-//                    if (count($fac_rows) > 1) {
+                    if (count($fac_rows) > 1) {
                         $html .= '<tr>';
                         $html .= '<td colspan="6" style="padding: 8px; text-align: right; font-weight: bold">Total</td>';
                         $html .= '<td style="padding: 8px; font-weight: bold">' . BimpTools::displayMoneyValue($total_ttc, '', false, false, true) . '</td>';
                         $html .= '</tr>';
-//                    }
+                    }
                 } else {
                     $html .= '<tr>';
                     $html .= '<td colspan="7" style="padding: 8px">';

@@ -724,9 +724,9 @@ class gsxController extends BimpController
                 if (empty($errors) && is_array($result)) {
                     $parts = array();
                     foreach ($result as $part) {
-                        if ($is_tier_part && $part['type'] !== 'CNTC') {
+                        if ($is_tier_part && $part['type'] !== 'CNTC' && $part['type'] !== 'BOX') {
                             continue;
-                        } elseif (!$is_tier_part && $part['type'] === 'CNTC') {
+                        } elseif (!$is_tier_part && $part['type'] === 'CNTC' && $part['type'] === 'BOX') {
                             continue;
                         }
 

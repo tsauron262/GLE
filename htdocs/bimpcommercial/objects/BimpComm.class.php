@@ -1821,6 +1821,10 @@ class BimpComm extends BimpDolObject
     {
         return $this->getIdContact($type = 'internal', $code = 'SALESREPFOLL');
     }
+    
+    public function addNoteToCommercial($note){
+        return $this->addNote($note, null, 0, 0, '', 1, 1, 0, $this->getIdCommercial());
+    }
 
     public function displayCommercial()
     {
@@ -3040,7 +3044,7 @@ class BimpComm extends BimpDolObject
         return count($errors) ? 0 : 1;
     }
 
-    public function createAcompte($amount, $id_mode_paiement, $id_bank_account = 0, $paye = 1, $date_paiement = null, $use_caisse = false, $num_paiement = '', $nom_emetteur = '', $banque_emetteur = '', &$warnings = array(), $id_rib = 0)
+    public function createAcompte($amount, $id_mode_paiement, $id_bank_account = 0, $paye = 1, $date_paiement = null, $use_caisse = false, $num_paiement = '', $nom_emetteur = '', $banque_emetteur = '', &$warnings = array(), $id_rib = 0, $refPaiement = '', &$idFacture = 0)
     {
         global $user, $langs;
         $errors = array();
@@ -3142,12 +3146,14 @@ class BimpComm extends BimpDolObject
                 $factureA->addline("Acompte", $ht, 1, $tva, null, null, null, 0, null, null, null, null, null, 'HT', null, 1, null, null, null, null, null, null, $ht);
                 $user->rights->facture->creer = 1;
                 $factureA->validate($user);
+                $idFacture = $factureA->id;
 
                 // Création du paiement:
                 if ($paye) {
                     BimpTools::loadDolClass('compta/paiement', 'paiement');
                     $payement = new Paiement($this->db->db);
                     $payement->amounts = array($factureA->id => $amount);
+                    $payement->ref = $refPaiement;
                     $payement->datepaye = ($date_paiement ? BimpTools::getDateForDolDate($date_paiement) : dol_now());
                     $id_mode_paiement = $this->db->getValue('c_paiement', 'id', '`code` = \'' . $id_mode_paiement . '\'');
                     $payement->paiementid = (int) $id_mode_paiement;

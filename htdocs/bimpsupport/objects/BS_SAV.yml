@@ -228,9 +228,11 @@ fields:
         object: user_tech
         input: 
             type: search_user
+            include_empty: 1
         search:
             input: 
                 type: search_user
+                include_empty: 1
     id_client:
         label: Client
         type: id_object

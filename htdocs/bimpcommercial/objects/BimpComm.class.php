@@ -1821,6 +1821,10 @@ class BimpComm extends BimpDolObject
     {
         return $this->getIdContact($type = 'internal', $code = 'SALESREPFOLL');
     }
+    
+    public function addNoteToCommercial($note){
+        return $this->addNote($note, null, 0, 0, '', 1, 1, 0, $this->getIdCommercial());
+    }
 
     public function displayCommercial()
     {

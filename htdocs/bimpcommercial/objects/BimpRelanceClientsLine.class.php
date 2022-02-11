@@ -1251,7 +1251,10 @@ class BimpRelanceClientsLine extends BimpObject
                 $fac_rows = $this->db->getRows('facture', $where, null, 'array', array('rowid', 'facnumber', 'total_ttc', 'date_lim_reglement'), 'datef', 'asc');
 
                 if (is_array($fac_rows)) {
+                    $total_ttc = 0;
+
                     foreach ($fac_rows as $r) {
+                        $total_ttc += (float) $r['total_ttc'];
                         $html .= '<tr>';
                         $html .= '<td style="padding: 8px">' . $r['facnumber'] . '</td>';
                         $html .= '<td style="padding: 8px">' . date('d / m / Y', strtotime($r['date_lim_reglement'])) . '</td>';
@@ -1283,6 +1286,13 @@ class BimpRelanceClientsLine extends BimpObject
 
                         $html .= '</tr>';
                     }
+
+//                    if (count($fac_rows) > 1) {
+                        $html .= '<tr>';
+                        $html .= '<td colspan="6" style="padding: 8px; text-align: right; font-weight: bold">Total</td>';
+                        $html .= '<td style="padding: 8px; font-weight: bold">' . BimpTools::displayMoneyValue($total_ttc, '', false, false, true) . '</td>';
+                        $html .= '</tr>';
+//                    }
                 } else {
                     $html .= '<tr>';
                     $html .= '<td colspan="7" style="padding: 8px">';
@@ -1297,7 +1307,7 @@ class BimpRelanceClientsLine extends BimpObject
                 $html .= '<br/><br/>Si cette situation n\'est pas régularisée sous 15 jours, ce compte passera au statut "contentieux", ';
                 $html .= 'puis cette action sera suivie d\'une déclaration de sinistre auprès d\'Atradius.<br/><br/>';
 
-                $html .= 'Ceci générera les conséquences suivantes : <br/><br/>';
+                $html .= 'Ceci générera les conséquences suivantes : <br/>';
 
                 $html .= '<ul>';
                 $html .= '<li>Ce compte restera bloqué jusqu\'à recouvrement complet, ce qui prendra plusieurs semaines, voire plusieurs mois</li>';
@@ -1305,7 +1315,7 @@ class BimpRelanceClientsLine extends BimpObject
                 $html .= '<li>Ce client fera l\'objet d\'une mauvaise cotation dans les bases de données financières, ';
                 $html .= 'notamment chez Crédit Safe, qui est l\'organisme de référence. Cela lui posera des problèmes ';
                 $html .= 'd\'encours auprès de tous ses fournisseurs</li>';
-                $html .= '</ul><br/><br/>';
+                $html .= '</ul><br/>';
 
                 $html .= 'Nous vous recommandons donc vivement de prendre contact avec votre client afin de traiter au plus vite ';
                 $html .= 'cet incident de paiement';

@@ -221,9 +221,13 @@ class Bimp_ImportPaiementLine extends BimpObject
         elseif($data['object_type'] == 1){
             if($data['id_propal'] > 0){
                 $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $data['id_propal']);
-//                    $propal = new Bimp_Propal();
+
                 if(!$obj->isLoaded())
                     $errors[] = 'Propal introuvable';
+                $linkedObj = getElementElement('propal', 'commande', $obj->id);
+                if(count($linkedObj)){
+                    $errors[] = 'Une commande existe : '.BimpCache::getBimpObjectLink('bimpcommercial', 'Bimp_Commande', $linkedObj[0]['d']);
+                }
             }
             else
                 $errors[] = 'Pas de propal séléctionné';
@@ -241,10 +245,12 @@ class Bimp_ImportPaiementLine extends BimpObject
             
         }
         if(!count($errors)){
+            $client = $obj->getChildObject('client');
             if($obj->getData('total_ttc') < $this->getData('price'))
                 $errors[] = 'Montant plus grand que le total de la piéce';
             if(!count($errors))
                 $errors = $obj->createAcompte($this->getData('price'), $parent->id_mode_paiement, $this->getData('banque'), 1, strtotime($this->getData('date')), false, '', '', '', $warnings, 0, $this->getData('num'), $idFacture);
+            $obj->addNoteToCommercial('Bonjour.<br/>Le client '.$client->getLink().' a effectué un virement de '.$this->getData('price').' €.');
         }
         
         if(!count($errors) && $idFacture > 0){
@@ -255,6 +261,7 @@ class Bimp_ImportPaiementLine extends BimpObject
             
             $errors = BimpTools::merge_array($errors, $this->update());
         }
+//        $errors[] = 'fin';
         return array('errors' => $errors, 'warnings' => $warnings, 'success_callback' => '');
     }
 

@@ -93,6 +93,50 @@ forms:
               display_if: 
                   field_name: raison
                   show_values: 99
+    acompte:
+        rows:
+            - custom: 1
+              label: Type d'objet
+              input_name: object_type
+              data_type: text
+              input: 
+                  type: select
+              values:
+#                  0: Client
+                  1: Devis
+                  2: Commande
+            - custom: 1
+              label: Client
+              input_name: id_client
+              input:
+                  type: search_object
+                  object: client
+                  card: default
+              display_if: 
+                field_name: object_type
+                show_values: 0
+            - custom: 1
+              label: Devis
+              input_name: id_propal
+              input:
+                  type: search_object
+                  object: propal
+                  card: default
+              display_if: 
+                field_name: object_type
+                show_values: 1
+                
+            - custom: 1
+              label: Commande
+              input_name: id_commande
+              input:
+                  type: search_object
+                  object: commande
+                  card: default
+              display_if: 
+                field_name: object_type
+                show_values: 2
+            
     
 filters_panels: 
     default: 

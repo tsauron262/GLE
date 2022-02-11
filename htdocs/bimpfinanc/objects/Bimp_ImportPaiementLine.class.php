@@ -119,6 +119,11 @@ class Bimp_ImportPaiementLine extends BimpObject
                 'icon'    => 'fas_check',
                 'onclick' => $this->getJsActionOnclick('traiteManuel', array(), array('form_name' => 'lettrage_man'))
             );
+            $buttons[] = array(
+                'label'   => 'Créer acompte',
+                'icon'    => 'fas_euro-sign',
+                'onclick' => $this->getJsActionOnclick('createAcompte', array(), array('form_name' => 'acompte'))
+            );
         }
         return $buttons;
     }
@@ -194,6 +199,63 @@ class Bimp_ImportPaiementLine extends BimpObject
         $errors = $warnings = array();
         $this->addFact($data['id']);
         return array('errors' => $errors, 'warnings' => $warnings);
+    }
+    
+    function actionCreateAcompte($data, &$success)
+    {
+        $errors = $warnings = array();
+        $success = 'Acompte créer';
+        $idFacture = 0;
+        
+        $parent = $this->getParentInstance();
+        
+        if($data['object_type'] == 0){//pas encore géré
+            if($data['id_client'] > 0){
+                $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $data['id_client']);
+                if(!$client->isLoaded())
+                    $errors[] = 'Client introuvable';
+            }
+            else
+                $errors[] = 'Pas de client séléctionné';
+        }
+        elseif($data['object_type'] == 1){
+            if($data['id_propal'] > 0){
+                $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $data['id_propal']);
+//                    $propal = new Bimp_Propal();
+                if(!$obj->isLoaded())
+                    $errors[] = 'Propal introuvable';
+            }
+            else
+                $errors[] = 'Pas de propal séléctionné';
+            
+        }
+        elseif($data['object_type'] == 2){
+            if($data['id_commande'] > 0){
+                $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $data['id_commande']);
+//                    $propal = new Bimp_Propal();
+                if(!$obj->isLoaded())
+                    $errors[] = 'Commande introuvable';
+            }
+            else
+                $errors[] = 'Pas de commande séléctionné';
+            
+        }
+        if(!count($errors)){
+            if($obj->getData('total_ttc') < $this->getData('price'))
+                $errors[] = 'Montant plus grand que le total de la piéce';
+            if(!count($errors))
+                $errors = $obj->createAcompte($this->getData('price'), $parent->id_mode_paiement, $this->getData('banque'), 1, strtotime($this->getData('date')), false, '', '', '', $warnings, 0, $this->getData('num'), $idFacture);
+        }
+        
+        if(!count($errors) && $idFacture > 0){
+            global $user;
+            $errors = BimpTools::merge_array($errors, $this->set('factures', array($idFacture)));
+            $errors = BimpTools::merge_array($errors, $this->set('traite', 1));
+            $errors = BimpTools::merge_array($errors, $this->set('id_user_traite', $user->id));
+            
+            $errors = BimpTools::merge_array($errors, $this->update());
+        }
+        return array('errors' => $errors, 'warnings' => $warnings, 'success_callback' => '');
     }
 
     function actionTraiteManuel($data)

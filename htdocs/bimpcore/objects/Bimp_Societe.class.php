@@ -9,7 +9,7 @@ class Bimp_Societe extends BimpDolObject
     const SOLV_A_SURVEILLER = 1;
     const SOLV_MIS_EN_DEMEURE = 2;
     const SOLV_DOUTEUX = 3;
-    const SOLV_INSOLVABLE = 4;
+    const SOLV_INSOLVABLE = 4; 
     const SOLV_DOUTEUX_FORCE = 5;
     const SOLV_A_SURVEILLER_FORCE = 6;
 

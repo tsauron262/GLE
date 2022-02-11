@@ -439,7 +439,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
             $start_char = 0;
             
             
-            $chaine_description = $line->description;
+            $chaine_description = '  '.$line->description;
             //$chaine_description = strip_tags($chaine_description,"<b><u><i><a><img><p><strong><em><font><tr><blockquote>");
 //            $chaine_description = str_replace(":&nbsp;", ' ', $chaine_description);  
 //            $chaine_description = str_replace("<li>", '', $chaine_description);
@@ -451,8 +451,9 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
 //            $chaine_description = str_replace("</ul>", '', $chaine_description);
 //            $chaine_description = str_replace("<p>", '', $chaine_description);
 //            $chaine_description = str_replace("</p>", '', $chaine_description);
-            
-            $pdf->writeHTML('<br/>'.$chaine_description, false, false, true, false, ''); 
+            $pdf->SetMargins(36, 10,10);
+            $pdf->writeHTML($chaine_description, false, false, true, false, ''); 
+            $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);
             
             $first_passage = false;
             
@@ -660,7 +661,8 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf->Cell($W, 4, $mysoc->zip . ' ' . $mysoc->town, "R", null, 'C', true);
                 $pdf->Cell($W, 4, $client->zip . ' ' . $client->town, "L", null, 'C', true);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
-                $pdf->Cell($W, 4, 'Tel: ' . $mysoc->phone, "R", null, 'C', true);
+//                $pdf->Cell($W, 4, 'Tel: ' . $mysoc->phone, "R", null, 'C', true);
+                $pdf->Cell($W, 4, '', "R", null, 'C', true);
                 $pdf->Cell($W, 4, "Tel contact: " . $phone_contact, "L", null, 'C', true);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
                 $pdf->Cell($W, 4, "Email: " . $mysoc->email, "R", null, 'C', true);
@@ -682,7 +684,8 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf1->Cell($W, 4, $mysoc->zip . ' ' . $mysoc->town, "R", null, 'C', true);
                 $pdf1->Cell($W, 4, $client->zip . ' ' . $client->town, "L", null, 'C', true);
                 $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
-                $pdf1->Cell($W, 4, 'Tel: ' . $mysoc->phone, "R", null, 'C', true);
+//                $pdf1->Cell($W, 4, 'Tel: ' . $mysoc->phone, "R", null, 'C', true);
+                $pdf1->Cell($W, 4, '', "R", null, 'C', true);
                 $pdf1->Cell($W, 4, "Tel contact: " . $phone_contact, "L", null, 'C', true);
                 $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
                 $pdf1->Cell($W, 4, "Email : " . $mysoc->email, "R", null, 'C', true);
@@ -1035,7 +1038,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         $pdf->setY(285);
         $pdf->SetFont('', '', 8);
         $pdf->SetTextColor(150, 150, 150);
-        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, $mysoc->name . " - SAS au capital de " . $mysoc->capital . ' - ' . $mysoc->address . ' - ' . $mysoc->zip . ' ' . $mysoc->town . ' - Tél ' . $mysoc->phone . ' - SIRET: ' . $conf->global->MAIN_INFO_SIRET  , 0, 'C');
+        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, $mysoc->name . " - SAS au capital de " . $mysoc->capital . ' - ' . $mysoc->address . ' - ' . $mysoc->zip . ' ' . $mysoc->town . ' - SIRET: ' . $conf->global->MAIN_INFO_SIRET  , 0, 'C');
         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, 'APE : '.$conf->global->MAIN_INFO_APE.' - RCS/RM : '.$conf->global->MAIN_INFO_RCS.' - Num. TVA : FR 34 320387483'  , 0, 'C');
     }
 

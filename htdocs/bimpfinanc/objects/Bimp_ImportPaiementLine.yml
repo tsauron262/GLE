@@ -122,6 +122,7 @@ forms:
                   type: search_object
                   object: propal
                   card: default
+                  search_name: light
               display_if: 
                 field_name: object_type
                 show_values: 1
@@ -133,6 +134,7 @@ forms:
                   type: search_object
                   object: commande
                   card: default
+                  search_name: light
               display_if: 
                 field_name: object_type
                 show_values: 2

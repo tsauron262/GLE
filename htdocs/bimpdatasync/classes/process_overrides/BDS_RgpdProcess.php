@@ -7,22 +7,32 @@ class BDS_RgpdProcess extends BDSProcess
 
     public static $objects = array(
         'propales'  => array(
-            'module'      => 'bimpcommercial',
-            'object_name' => 'Bimp_Propal',
-            'date_field'  => 'datep',
-            'total_field' => 'total'
+            'module'            => 'bimpcommercial',
+            'object_name'       => 'Bimp_Propal',
+            'date_field'        => 'datep',
+            'date_create_field' => 'datec',
+            'total_field'       => 'total',
+            'delete_drafts'     => 1,
+            'status_field'      => 'fk_statut',
+            'draft_value'       => 0,
         ),
         'commandes' => array(
-            'module'      => 'bimpcommercial',
-            'object_name' => 'Bimp_Commande',
-            'date_field'  => 'date_commande',
-            'total_field' => 'total_ttc'
+            'module'            => 'bimpcommercial',
+            'object_name'       => 'Bimp_Commande',
+            'date_field'        => 'date_commande',
+            'total_field'       => 'total_ttc',
+            'date_create_field' => 'datec',
+            'delete_drafts'     => 1,
+            'status_field'      => 'fk_statut',
+            'draft_value'       => 0,
         ),
         'factures'  => array(
-            'module'      => 'bimpcommercial',
-            'object_name' => 'Bimp_Facture',
-            'date_field'  => 'datef',
-            'total_field' => 'total_ttc'
+            'module'            => 'bimpcommercial',
+            'object_name'       => 'Bimp_Facture',
+            'date_field'        => 'datef',
+            'date_create_field' => 'datec',
+            'total_field'       => 'total_ttc',
+            'delete_drafts'     => 0,
         )
     );
 
@@ -37,6 +47,9 @@ class BDS_RgpdProcess extends BDSProcess
 
         $dt_6_years = new DateTime();
         $dt_6_years->sub(new DateInterval('P6Y'));
+
+        $dt_3_years = new DateTime();
+        $dt_3_years->sub(new DateInterval('P3Y'));
 
         foreach (self::$objects as $type => $params) {
             $instance = BimpObject::getInstance($params['module'], $params['object_name']);
@@ -74,6 +87,16 @@ class BDS_RgpdProcess extends BDSProcess
             ));
 
             $html .= BimpTools::ucfirst($instance->getLabel()) . ' > 6 ans et < 120€: <b>' . count($rows) . '</b><br/><br/>';
+
+            if ((int) $params['delete_drafts']) {
+                $rows = BimpCache::getBimpObjectList($params['module'], $params['object_name'], array(
+                            $params['date_field']   => array(
+                                'operator' => '<',
+                                'value'    => $dt_3_years->format('Y-m-d')
+                            ),
+                            $params['status_field'] => $params['draft_value']
+                ));
+            }
         }
 
         $data['result_html'] = $html;
@@ -81,6 +104,9 @@ class BDS_RgpdProcess extends BDSProcess
 
     public function initDailyCheck(&$data, &$errors = array())
     {
+        $errors[] = 'Désactivé pour l\'instant';
+        return;
+        
         $data['steps'] = array();
 
         // Recherche des objets à supprimer: 

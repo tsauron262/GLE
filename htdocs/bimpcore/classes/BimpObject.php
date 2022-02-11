@@ -5950,7 +5950,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
     // Gestion des notes:
 
-    public function addNote($content, $visibility = null, $viewed = 0, $auto = 1, $email = '', $type_author = 1, $type_dest = 0, $fk_group_dest = 0)
+    public function addNote($content, $visibility = null, $viewed = 0, $auto = 1, $email = '', $type_author = 1, $type_dest = 0, $fk_group_dest = 0, $fk_user_dest = 0)
     {
         if (!$this->isLoaded()) {
             return array('ID ' . $this->getLabel('of_the') . ' absent');
@@ -5974,7 +5974,8 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             "email"         => $email,
             "type_author"   => $type_author,
             'type_dest'     => $type_dest,
-            'fk_group_dest' => $fk_group_dest
+            'fk_group_dest' => $fk_group_dest,
+            'fk_user_dest'  => $fk_user_dest
         ));
 
         if (!count($errors)) {

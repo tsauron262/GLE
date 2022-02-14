@@ -1095,6 +1095,7 @@ class BC_Field extends BimpComponent
                 case 'percent':
                 case 'float':
                 case 'qty':
+                case 'timer':
                     $default_value = 'number';
                     $options = array(
                         'number' => 'Valeur numérique',
@@ -1266,6 +1267,7 @@ class BC_Field extends BimpComponent
                     case 'percent':
                     case 'float':
                     case 'qty':
+                    case 'timer':
                         if ($option === 'string') {
                             switch ($this->params['type']) {
                                 case 'money':

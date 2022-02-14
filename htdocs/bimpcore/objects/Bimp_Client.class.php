@@ -2748,7 +2748,7 @@ class Bimp_Client extends Bimp_Societe
                         $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $r['rowid']);
 
                         if (BimpObject::objectLoaded($client) && $client->getData('is_subsidiary') == 0) {
-                            $is_comm_default = false;
+//                            $is_comm_default = false;
 //                            $email = $client->getCommercialEmail(false, false);
 //
 //                            if (!$email) {
@@ -2766,10 +2766,10 @@ class Bimp_Client extends Bimp_Societe
 
                                 $html .= '<b>Il convient de vérifier ce compte et en réactiver les relances dès que possible</b>';
 
-                                if ($is_comm_default) {
-                                    $html .= '<br/><br/>Note: vous avez reçu ce message car vous êtes commercial par défaut.<br/>';
-                                    $html .= 'Pour ne plus recevoir de type de notification pour ce client, il est nécessaire de lui attribuer un commercial attitré';
-                                }
+//                                if ($is_comm_default) {
+//                                    $html .= '<br/><br/>Note: vous avez reçu ce message car vous êtes commercial par défaut.<br/>';
+//                                    $html .= 'Pour ne plus recevoir de type de notification pour ce client, il est nécessaire de lui attribuer un commercial attitré';
+//                                }
 
                                 mailSyn2($subject, $email . ',f.martinez@bimp.fr', '', $html);
                             }

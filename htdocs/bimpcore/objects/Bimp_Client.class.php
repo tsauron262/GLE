@@ -2747,7 +2747,7 @@ class Bimp_Client extends Bimp_Societe
                         // Envoi mail
                         $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $r['rowid']);
 
-                        if (BimpObject::objectLoaded($client)) {
+                        if (BimpObject::objectLoaded($client) && $client->getData('is_subsidiary') == 0) {
                             $is_comm_default = false;
 //                            $email = $client->getCommercialEmail(false, false);
 //

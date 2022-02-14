@@ -396,10 +396,10 @@ class BS_ApplePart extends BimpObject
     {
         $sav = $this->getParentInstance();
         $equipment = $sav->getChildObject('equipment');
-        return self::convertPrixStatic($type, $prix, $ref, $equipment, $this->getData('price_type'));
+        return self::convertPrixStatic($type, $prix, $ref, $equipment->isIphone(), $this->getData('price_type'));
     }
 
-    public static function convertPrixStatic($type, $prix, $ref, $equipment, $price_type = 'STOCK')
+    public static function convertPrixStatic($type, $prix, $ref, $isIphone, $price_type = 'STOCK')
     {
         if($prix == 0)
             return 0;
@@ -437,7 +437,7 @@ class BS_ApplePart extends BimpObject
                 $constPrix = $prix * 0.17 + 24.17;
             elseif ($prix > 200)
                 $constPrix = $prix * 0.2 + 24.17;
-        } elseif ($equipment->isIphone()) {
+        } elseif ($isIphone) {
 //            $constPrix = 45;
             if ($prix > 400)
                 $constPrix = $prix * 0.1;

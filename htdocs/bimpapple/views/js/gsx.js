@@ -349,6 +349,32 @@ function gsx_loadAddPartsForm($button, id_issue) {
     });
 }
 
+function gsx_loadAddPartsTestForm($button, serial,  isIphone) {
+    if ($.isOk($button) && $button.hasClass('disabled')) {
+        return;
+    }
+
+    bimpModal.newContent('Ajout de composant Apple', '', false, '', null, 'large');
+    var modal_idx = bimpModal.idx;
+    var $container = bimpModal.$contents.find('#modal_content_' + modal_idx);
+
+    GsxAjax('gsx_loadAddPartsTestForm', {
+        'isIphone': isIphone,
+        'serial': serial
+    }, $container, {
+        $button: $button,
+        modal_idx: modal_idx,
+        display_success: false,
+        append_html: true,
+        display_processing: true,
+        processing_padding: 20,
+        processing_msg: 'Chargement en cours',
+        success: function (result, bimpAjax) {
+            setCommonEvents(bimpAjax.$resultContainer);
+        }
+    });
+}
+
 function gsx_saveAppleParts($button, id_issue, modal_idx) {
     if ($button.hasClass('disabled')) {
         return;

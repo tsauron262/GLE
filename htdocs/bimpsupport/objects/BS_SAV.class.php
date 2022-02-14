@@ -3964,6 +3964,10 @@ class BS_SAV extends BimpObject
 
         return $errors;
     }
+    
+    public function  renderAlertDiago(){
+        return '<div class="error">Tous les tests post réparation empêchant le passage en prêt pour enlèvement ont été effectués ?</div>';
+    }
 
     public function convertSav(Equipment $equipment = null)
     {

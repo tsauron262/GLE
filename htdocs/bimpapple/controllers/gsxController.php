@@ -715,7 +715,10 @@ class gsxController extends BimpController
 
         if (!count($errors)) {
             if ($this->gsx_v2->logged) {
-                $is_tier_part = (!(string) $issue->getData('category_code'));
+                if(!BimpObject::objectLoaded($issue))
+                    $is_tier_part = -1;
+                else
+                    $is_tier_part = (!(string) $issue->getData('category_code'));
 
                 $result = $this->gsx_v2->partsSummaryBySerialAndIssue($serial, $issue);
                 $result = BimpTools::merge_array($result, $this->gsx_v2->partsSummaryBySerialAndIssue($serial, $issue, 'Recovery Kit'));
@@ -724,9 +727,9 @@ class gsxController extends BimpController
                 if (empty($errors) && is_array($result)) {
                     $parts = array();
                     foreach ($result as $part) {
-                        if ($is_tier_part && $part['type'] !== 'CNTC' && $part['type'] !== 'BOX') {
+                        if ($is_tier_part == 1 && $part['type'] !== 'CNTC' && $part['type'] !== 'BOX') {
                             continue;
-                        } elseif (!$is_tier_part && $part['type'] === 'CNTC' && $part['type'] === 'BOX') {
+                        } elseif ($is_tier_part == 0 && $part['type'] === 'CNTC' && $part['type'] === 'BOX') {
                             continue;
                         }
 
@@ -869,6 +872,26 @@ class gsxController extends BimpController
             }
         }
 
+        return array(
+            'errors'  => $errors,
+            'html'    => $html,
+            'form_id' => $form_id
+        );
+    }
+    
+    public function gsx_loadAddPartsTestForm($params){
+        $serial = $params['serial'];
+        $isIphone = $params['isIphone'];
+        $this->setSerial($serial);
+        $result = $this->gsxGetParts(array(
+            'serial'   => $serial
+        ));
+
+        if (!is_null($result['parts'])) {
+            $html = $this->renderPartsList($result['parts'], $sav->id, '_issue_' . $id_issue, $isIphone);
+        } else {
+            $errors = $result['errors'];
+        }
         return array(
             'errors'  => $errors,
             'html'    => $html,
@@ -1202,8 +1225,14 @@ class gsxController extends BimpController
         }
 
         if (!count($errors)) {
-            $html = $this->renderSavGsxView($sav, $serial, $errors, $warnings);
+            $isIphone = 0;
+            $html = $this->renderSavGsxView($sav, $serial, $errors, $warnings, $isIphone);
         }
+        $product_label = $datas['configDescription'];
+        
+        $onclick = 'gsx_loadAddPartsTestForm($(this), \'' . $serial . '\', ' . (int) $isIphone . ')';
+
+        $html .= '<button onclick="'.$onclick.'">Prix des Composants</button>';
 
         return array(
             'errors'   => $errors,
@@ -2579,7 +2608,7 @@ class gsxController extends BimpController
 
     // Rendus HTML V2:
 
-    public function renderSavGsxView($sav, $serial, &$errors = array(), &$warnings = array())
+    public function renderSavGsxView($sav, $serial, &$errors = array(), &$warnings = array(), &$isIphone = false)
     {
         $html = '';
 
@@ -2689,6 +2718,11 @@ class gsxController extends BimpController
                         $warrantyContent .= '<tr><th>' . $label . '</th><td>' . $value . '</td></tr>';
                     }
                 }
+                $product_label = $data['productDescription'];
+                if (stripos($product_label, "Iphone") !== false || stripos($product_label, "IPAD") !== false || stripos($product_label, "IPOD") !== false || stripos($product_label, "WATCH") !== false || stripos($product_label, "XXXX") !== false || stripos($product_label, "***") !== false)
+                    $isIphone = true;
+                else
+                    $isIphone = false;
                 $warrantyContent .= '</tbody>';
                 $warrantyContent .= '</table>';
 
@@ -3666,7 +3700,7 @@ class gsxController extends BimpController
         return $html;
     }
 
-    public function renderPartsList($parts, $id_sav = null, $sufixe = '')
+    public function renderPartsList($parts, $id_sav = null, $sufixe = '', $isIphone = false)
     {
         $add_btn = false;
         if (!is_null($id_sav) && !$this->use_gsx_v2) {
@@ -3757,6 +3791,7 @@ class gsxController extends BimpController
                 $headers .= '<th style = "min-width: 80px">Prix commande</th>';
                 $headers .= '<th style = "min-width: 80px">Prix stock</th>';
                 $headers .= '<th>Prix spéciaux</th>';
+                $headers .= '<th>Prix vente</th>';
 
                 if (!$this->use_gsx_v2) {
                     $headers .= '<th style = "width: 30px; text-align: center"></th>';
@@ -3859,6 +3894,18 @@ class gsxController extends BimpController
 //                            }
 //                            $content .= '</td>';
                         }
+//                        
+                        $vente_price = 'N/C';
+                        $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id_sav);
+                        if (BimpObject::objectLoaded($sav)) {
+                            $equipment = $sav->getChildObject('equipment');
+                            $isIphone = $equipment->isIphone();
+                        }
+                        BimpObject::getInstance('bimpsupport', 'BS_ApplePart');
+                        $type = BS_ApplePart::getCategProdApple($num, $name);
+                        $vente_price = price(BS_ApplePart::convertPrixStatic($type, ($exchange_price > 0 ? $exchange_price : $stock_price), $num, $isIphone, 'EXCHANGE')).' €';
+                        
+                        
                         $content .= '<td>' . $name . '</td>';
                         $content .= '<td>' . $num . '</td>';
                         $content .= '<td>' . $partNewNumber . '</td>';
@@ -3878,19 +3925,20 @@ class gsxController extends BimpController
                             $content .= addslashes($option['price'] . ' (' . $code . ')');
                         }
                         $content .= '</td>';
-                        $content .= '<td>';
-
-                        if ($add_btn) {
-                            $content .= BimpRender::renderButton(array(
-                                        'label'       => 'Ajouter au panier',
-                                        'icon_before' => 'shopping-basket',
-                                        'classes'     => array('btn', 'btn-default'),
-                                        'attr'        => array(
-                                            'onclick' => 'addPartToCart($(this), ' . $id_sav . ')'
-                                        )
-                            ));
-                        }
-                        $content .= '</td>';
+//                        $content .= '<td>';
+//
+//                        if ($add_btn) {
+//                            $content .= BimpRender::renderButton(array(
+//                                        'label'       => 'Ajouter au panier',
+//                                        'icon_before' => 'shopping-basket',
+//                                        'classes'     => array('btn', 'btn-default'),
+//                                        'attr'        => array(
+//                                            'onclick' => 'addPartToCart($(this), ' . $id_sav . ')'
+//                                        )
+//                            ));
+//                        }
+//                        $content .= '</td>';
+                        $content .= '<td>' . $vente_price . '</td>';
                         $content .= '</tr>';
                         $i++;
                         $odd = !$odd;

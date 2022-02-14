@@ -805,31 +805,36 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf1->Cell($W * 1.5, 8, (is_null($extra->options_tacite)) ? "Non" : $bimp_contract::$renouvellement[$extra->options_tacite], 1, null, 'L', true);
                 
                 
-                $pdf1->SetFont('', '', 1);
+//                $pdf->SetFont('', '', 1);
+//                $pdf1->SetFont('', '', 1);
+                
+                
                 $pdf->SetXY($this->marge_gauche, $pdf->getY()+9);
-//                $pdf->MultiCell(70, 15, "La procédure de déclenchement d'incident auprès de notre support technique peut être réalisée par :
-//- e-mail ou courriel : hotline@bimp.fr
-//- téléphone (numéro non surtaxé) : 04 72 60 39 15
-//- sur le portail client dédié : https://www.bimp.fr/espace-client");
-                
-                
                 $pdf->setTextColor(236, 147, 0);
                 $pdf->MultiCell(180, 15, "La procédure de déclenchement d'incident auprès de notre support technique peut être réalisée par :
-e-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72 60 39 15 ou sur le portail client dédié : https://www.bimp.fr/espace-client", 0, 'C');
+E-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72 60 39 15 ou sur le portail client dédié : https://www.bimp.fr/espace-client", 0, 'C');
 //                $pdf->writeHTML("<span style='color:red'>La procédure de déclenchement d'incident auprès de notre support technique peut être réalisée par :</span><br/>e-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72 60 39 15 ou sur le portail client dédié : https://www.bimp.fr/espace-client");
-                $pdf->SetXY($this->marge_gauche, $pdf->getY()-18);
+                $pdf->SetXY($this->marge_gauche, $pdf->getY()-8);
                 $pdf->setTextColor(0,0, 0);
                 
+                $pdf1->SetXY($this->marge_gauche, $pdf1->getY()+9);
+                $pdf1->setTextColor(236, 147, 0);
+                $pdf1->MultiCell(180, 15, "La procédure de déclenchement d'incident auprès de notre support technique peut être réalisée par :
+E-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72 60 39 15 ou sur le portail client dédié : https://www.bimp.fr/espace-client", 0, 'C');
+//                $pdf->writeHTML("<span style='color:red'>La procédure de déclenchement d'incident auprès de notre support technique peut être réalisée par :</span><br/>e-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72 60 39 15 ou sur le portail client dédié : https://www.bimp.fr/espace-client");
+                $pdf1->SetXY($this->marge_gauche, $pdf1->getY()-8);
+                $pdf1->setTextColor(0,0, 0);
+                
                 $pdf->SetFont('', 'BU', 13);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, '', 0, 'C');
+//                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, '', 0, 'C');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, 'Tarification', 0, 'C');
                 $pdf->SetFont('', '', 9);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
+//                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
                 $pdf1->SetFont('', 'BU', 13);
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, '', 0, 'C');
+//                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, '', 0, 'C');
                 $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, 'Tarification', 0, 'C');
                 $pdf1->SetFont('', '', 9);
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
+//                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
                 
                 
 

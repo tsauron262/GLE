@@ -2749,15 +2749,16 @@ class Bimp_Client extends Bimp_Societe
 
                         if (BimpObject::objectLoaded($client)) {
                             $is_comm_default = false;
-                            $email = $client->getCommercialEmail(false, false);
-
-                            if (!$email) {
-                                $email = $client->getCommercialEmail(true, true);
-                                $is_comm_default = true;
-                            }
+//                            $email = $client->getCommercialEmail(false, false);
+//
+//                            if (!$email) {
+//                                $email = $client->getCommercialEmail(true, true);
+//                                $is_comm_default = true;
+//                            }
+                            $email = 'recouvrementolys@bimp.fr';
 
                             if ($email) {
-                                $subject = 'Client ' . $client->getRef() . ' - Vérifier relances à réactiver';
+                                $subject = 'Client ' . $client->getRef() . ' ' .$client->getName() . ' - Vérifier relances à réactiver';
 
                                 $html = 'Bonjour,<br/><br/>';
                                 $html .= 'Les relances du client ' . $client->getLink();

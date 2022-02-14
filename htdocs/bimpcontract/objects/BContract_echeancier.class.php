@@ -305,7 +305,6 @@ class BContract_echeancier extends BimpObject {
                 }
                 $montant = ($reste_a_payer / $reste_periode) * $nb;
             }
-            die($montant . " jj");   
 
             if ($montant > $parent->reste_a_payer()) {
                 return "Vous ne pouvez pas indiquer un montant (".$montant.") suppérieur au reste à payer ".$parent->reste_a_payer();

@@ -718,7 +718,7 @@ class gsxController extends BimpController
                 if(!BimpObject::objectLoaded($issue))
                     $is_tier_part = -1;
                 else
-                    $is_tier_part = (!(string) $issue->getData('category_code'));
+                    $is_tier_part = (!(string) $issue->getData('category_code'))? 1 : 0;
 
                 $result = $this->gsx_v2->partsSummaryBySerialAndIssue($serial, $issue);
                 $result = BimpTools::merge_array($result, $this->gsx_v2->partsSummaryBySerialAndIssue($serial, $issue, 'Recovery Kit'));
@@ -729,7 +729,7 @@ class gsxController extends BimpController
                     foreach ($result as $part) {
                         if ($is_tier_part == 1 && $part['type'] !== 'CNTC' && $part['type'] !== 'BOX') {
                             continue;
-                        } elseif ($is_tier_part == 0 && $part['type'] === 'CNTC' && $part['type'] === 'BOX') {
+                        } elseif ($is_tier_part == 0 && ($part['type'] === 'CNTC' || $part['type'] === 'BOX')) {
                             continue;
                         }
 

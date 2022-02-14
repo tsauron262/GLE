@@ -337,6 +337,7 @@ fields:
         label: Type du tiers
         type: int
         user_edit: 1
+        history: 1
         values: 
             array:
                 callback: 

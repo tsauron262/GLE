@@ -1193,7 +1193,7 @@ forms:
         title: Créer un relevé d'interventions
         msgs:
             - type: info
-              content: Si aucun filtre n'est choisi, par défaut le relever d'intervention era fait pour le client.
+              content: Si aucun filtre n'est choisi, le relevé d'interventions par défaut sera celui destiné au client
         rows:
             - custom: 1
               label: Filtrer par contrat

@@ -1861,7 +1861,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                                 }
                             }
 
-                            if (BimpObject::objectLoaded($userClient) && $userClient->getData('id_client') !== (int) $client->id) {
+                            if (BimpObject::objectLoaded($userClient) && (int) $userClient->getData('id_client') !== (int) $client->id) {
                                 $old_id_client = (int) $userClient->getData('id_client');
                                 $debug .= '<br/><br/><b>Mise à jour du client pour le userClient: </b>';
 

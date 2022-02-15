@@ -563,7 +563,7 @@ fields:
         type: bool
         
     duree_i:
-        label: Durée
+        label: Durée inter
         type: timer
         input: 
             type: timer

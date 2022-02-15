@@ -34,8 +34,10 @@ class InterStatementPDF extends BimpDocumentPDF
     }
 
     protected function initData() {
+        $this->thirdparty = $this->object;
         parent::initData();
         $this->date_document = new DateTime();
+        
         
         if($this->object->date_start_relever || $this->object->date_stop_relever) {
             $this->date_start = new DateTime($this->object->date_start_relever);
@@ -114,10 +116,10 @@ class InterStatementPDF extends BimpDocumentPDF
         );
         
     }
-
+    
     public function getFileName()
     {
-        return 'Releve_interventions';
+        return 'Releve_interventions.pdf';
     }
 
     public function renderTop()
@@ -138,7 +140,7 @@ class InterStatementPDF extends BimpDocumentPDF
             
             $table = new BimpPDF_Table($this->pdf);
             
-            $table->addCol('ref', 'N° fiche intervention', 15, 'text-align: left;', '', 'text-align: left;');
+            $table->addCol('ref', 'N° fiche intervention', 20, 'text-align: left;', '', 'text-align: left;');
             $table->addCol('contrat', 'Contrat', 20, 'text-align: left;', '', 'text-align: left;');
             $table->addCol('tech', 'Intervenant', 28, 'text-align: left;', '', 'text-align: left;');
             $table->addCol('date', 'Date d\'intervention', 20, 'text-align: center;', '', 'text-align: center;');
@@ -175,7 +177,7 @@ class InterStatementPDF extends BimpDocumentPDF
                 $this->writeContent('<br /><h3>Interventions à venir / en cours</h3>');
                 $table2 = new BimpPDF_Table($this->pdf);
             
-                $table2->addCol('ref', 'N° fiche intervention', 15, 'text-align: left;', '', 'text-align: left;');
+                $table2->addCol('ref', 'N° fiche intervention', 20, 'text-align: left;', '', 'text-align: left;');
                 $table2->addCol('contrat', 'Contrat', 20, 'text-align: left;', '', 'text-align: left;');
                 $table2->addCol('tech', 'Intervenant', 28, 'text-align: left;', '', 'text-align: left;');
                 $table2->addCol('date', 'Date d\'intervention', 20, 'text-align: center;', '', 'text-align: center;');

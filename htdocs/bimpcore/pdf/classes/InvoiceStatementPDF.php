@@ -56,9 +56,12 @@ class InvoiceStatementPDF extends BimpDocumentPDF
 
         global $conf;
 
-        $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
+        $logo_file = $conf->mycompany->dir_output . '/logos/' . str_replace('.png', '_PRO.png', $this->fromCompany->logo);
 
         $logo_width = 0;
+        if (!file_exists($logo_file)) {
+            $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
+        }        
         if (!file_exists($logo_file)) {
             $logo_file = '';
         } else {

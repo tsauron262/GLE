@@ -1232,7 +1232,7 @@ class gsxController extends BimpController
         
         $onclick = 'gsx_loadAddPartsTestForm($(this), \'' . $serial . '\', ' . (int) $isIphone . ')';
 
-        $html .= '<button onclick="'.$onclick.'" class="btn btn-default">Prix des Composants</button>';
+        $html .= '<button onclick="'.$onclick.'" class="btn btn-default">'.BimpRender::renderIcon('euro').' Prix des Composants</button>';
 
         return array(
             'errors'   => $errors,

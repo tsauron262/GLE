@@ -101,7 +101,7 @@ class InvoiceStatementPDF extends BimpDocumentPDF
 
     public function getFileName()
     {
-        return 'Releve_facturation'; //_' . $this->date_debut->format('d_m_Y') .'_a_'. $this->date_fin->format('d_m_Y');
+        return 'Releve_facturation.pdf'; //_' . $this->date_debut->format('d_m_Y') .'_a_'. $this->date_fin->format('d_m_Y');
     }
 
     public function renderTop()
@@ -127,8 +127,17 @@ class InvoiceStatementPDF extends BimpDocumentPDF
             $table->addCol('remain', 'Reste à payer', 23, 'text-align: center;', '', 'text-align: center;');
 
             foreach ($this->factures as $facture) {
+//                if(stripos($facture->getData('facnumber'), 'ACC') !== false){
+//                echo $facture->printData();die;}
+                if($facture->getData('type') == 3){
+                    $this->total_acc += round((float) $facture->getData('total_ttc'), 2);
+                }
+                else{
+                    $this->total_ttc += round((float) $facture->getData('total_ttc'), 2);
+                }
+                
+                
                 $rap = $facture->getRemainToPay();
-                $this->total_ttc += round((float) $facture->getData('total_ttc'), 2);
                 $this->total_rap += $rap;
 
                 $row = array(
@@ -195,6 +204,15 @@ class InvoiceStatementPDF extends BimpDocumentPDF
 
         $html .= '<table style="width: 100%" cellpadding="5">';
 
+        if($this->total_acc > 0){
+            $html .= '<tr>';
+            $html .= '<td style="background-color: #F0F0F0;">Total acompte</td>';
+            $html .= '<td style="text-align: right;background-color: #F0F0F0;">';
+            $html .= BimpTools::displayMoneyValue($this->total_acc, '', 0, 0, 1, 2);
+            $html .= '</td>';
+            $html .= '</tr>';
+        }
+        
         $html .= '<tr>';
         $html .= '<td style="background-color: #F0F0F0;">Total factures TTC</td>';
         $html .= '<td style="text-align: right;background-color: #F0F0F0;">';

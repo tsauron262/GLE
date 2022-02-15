@@ -105,6 +105,8 @@ class InterStatementPDF extends BimpDocumentPDF
                 }
             }
         }
+        
+        $docRef .= "<br/>Commercial : ".$this->client->displayCommercials(true, false);
 
         $this->pdf->topMargin = 44;
 

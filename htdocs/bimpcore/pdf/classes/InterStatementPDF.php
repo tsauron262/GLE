@@ -39,7 +39,7 @@ class InterStatementPDF extends BimpDocumentPDF
         parent::initData();
         $this->date_document = new DateTime();
         
-        $this->string_filters .= '<br/>';
+        $this->string_filters .= '<br/> Code client : '.$this->object->code_client.'<br/> Code compta : '.$this->object->code_compta;
         if($this->object->date_start_relever || $this->object->date_stop_relever) {
             $this->date_start = new DateTime($this->object->date_start_relever);
             $this->date_stop = new DateTime($this->object->date_stop_relever);

@@ -25,6 +25,7 @@ class InterStatementPDF extends BimpDocumentPDF
     
     public function __construct($db)
     {
+        static::$use_cgv = false;
         parent::__construct($db);
         $this->bimpDb = new BimpDb($db);
 
@@ -38,7 +39,7 @@ class InterStatementPDF extends BimpDocumentPDF
         parent::initData();
         $this->date_document = new DateTime();
         
-        
+        $this->string_filters .= '<br/>';
         if($this->object->date_start_relever || $this->object->date_stop_relever) {
             $this->date_start = new DateTime($this->object->date_start_relever);
             $this->date_stop = new DateTime($this->object->date_stop_relever);
@@ -53,7 +54,7 @@ class InterStatementPDF extends BimpDocumentPDF
         }
         
         $this->client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->object->id);
-        $this->string_filters .= 'Client: ' . $this->client->getName() . '<br />';
+//        $this->string_filters .= '<br/> Client: ' . $this->client->getName() . '<br />';
         $this->filters['fk_soc'] = $this->client->id;
         
         
@@ -72,8 +73,12 @@ class InterStatementPDF extends BimpDocumentPDF
         $docRef = $this->string_filters . '<br />';
 
         global $conf;
+        $logo_file = $conf->mycompany->dir_output . '/logos/' . str_replace('.png', '_PRO.png', $this->fromCompany->logo);
 
-        $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
+        $logo_width = 0;
+        if (!file_exists($logo_file)) {
+            $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
+        }   
 
         $logo_width = 0;
         if (!file_exists($logo_file)) {

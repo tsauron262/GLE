@@ -748,7 +748,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf->SetFont('', 'B', 7);
                 $pdf->Cell($W * 2, 8, "Annule et remplace :", 1, null, 'L', true);
                 $pdf->SetFont('', '', 6);
-                $pdf->Cell($W * 1.5, 8, $bimp_contract->getData('replaced_ref'), 1, null, 'L', true);
+                $pdf->Cell($W * 1.5, 8, $bimp_contract->getData('ref_ext'), 1, null, 'L', true);
                 $pdf->SetFont('', 'B', 7);
                 $pdf->Cell($W * 1.5, 8, "Durée :", 1, null, 'L', true);
                 $pdf->SetFont('', '', 7);
@@ -762,7 +762,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf1->SetFont('', 'B', 7);
                 $pdf1->Cell($W * 2, 8, "Annule et remplace :", 1, null, 'L', true);
                 $pdf1->SetFont('', '', 7);
-                $pdf1->Cell($W * 1.5, 8, $bimp_contract->getData('replaced_ref'), 1, null, 'L', true);
+                $pdf1->Cell($W * 1.5, 8, $bimp_contract->getData('ref_ext'), 1, null, 'L', true);
                 $pdf1->SetFont('', 'B', 7);
                 $pdf1->Cell($W * 1.5, 8, "Durée :", 1, null, 'L', true);
                 $pdf1->SetFont('', '', 7);

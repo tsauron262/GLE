@@ -229,10 +229,6 @@ fields:
             type: search_country
         values:
             callback: getCountriesArray
-#        displays: 
-#            default: 
-#                type: callback
-#                method: displayCountry
                 
     fk_departement: 
         dol_prop: state_id
@@ -341,6 +337,7 @@ fields:
         label: Type du tiers
         type: int
         user_edit: 1
+        history: 1
         values: 
             array:
                 callback: 
@@ -488,7 +485,6 @@ fields:
     date_atradius:
         label: Date de dépôt du Rapport
         type: datetime
-    
         
     fk_account: 
         label: Compte bancaire
@@ -635,6 +631,10 @@ fields:
             auto_expand: 1
             maxlength: 300
             
+    date_relances_deactivated: 
+        label: Date de désactivation des relances
+        type: date
+        
     id_user_status_demand: 
         label: Utilisateur demande changement statut
         type: id
@@ -653,7 +653,7 @@ fields:
         dol_extra_field: 1
         
     date_last_active:
-        label: Date derniére activitée
+        label: Date derniére activité
         type: date
             
 #    *** Champs non gérés: ***

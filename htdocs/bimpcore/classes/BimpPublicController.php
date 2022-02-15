@@ -305,7 +305,7 @@ class BimpPublicController extends BimpController
         $html .= '<br/><br/>';
         $html .= '<label for="bic_login_pw">Mot de passe</label><br/>';
         $html .= '<input id="bic_login_pw" type="password" name="bic_login_pw" placeholder="Mot de passe"><br/>';
-        $html .= '<p style="text-align: center"><a href="javascript: var email = document.getElementById(\'bic_login_email\').value; window.location = \'./client.php?display_public_form=1&public_form=reinitPw\' + (email ? \'&email=\' + email : \'\');">Mot de passe oublié</a></p>';
+        $html .= '<p style="text-align: center"><a href="javascript: var email = document.getElementById(\'bic_login_email\').value; window.location = \''.BimpObject::getPublicBaseUrl().'display_public_form=1&public_form=reinitPw\' + (email ? \'&email=\' + email : \'\');">Mot de passe oublié</a></p>';
 
         return $html;
     }

@@ -3806,9 +3806,9 @@ class BContract_contrat extends BimpDolObject
         $html = '';
 
         if ($this->isLoaded()) {
-            if ($this->getData('replaced_ref')) {
+            if ($this->getData('ref_ext')) {
                 $html .= '<div style="margin-bottom: 8px">';
-                $html .= '<span class="warning" style="font-size: 15px">Annule et remplace ' . $this->getLabel('the') . ' "' . $this->getData('replaced_ref') . '" (données perdues)</span>';
+                $html .= '<span class="warning" style="font-size: 15px">Annule et remplace ' . $this->getLabel('the') . ' "' . $this->getData('ref_ext') . '"</span>';
                 $html .= '</div>';
             }
 

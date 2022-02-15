@@ -949,7 +949,7 @@ class Bimp_Client extends Bimp_Societe
                         if ($id_soc == $this->id) {
                             continue;
                         }
-                        
+
                         $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_soc);
 
                         $html .= '<br/>Client ';
@@ -1017,8 +1017,6 @@ class Bimp_Client extends Bimp_Societe
             $html .= '<a target="__blanck" href="' . DOL_URL_ROOT . '/document.php?modulepart=societe&file=' . $this->id . '/' . $file . '">Fichier</a><br/>';
         } else {
 //            return BimpInput::renderInput('file_upload', 'atradius_file');
-
-
             // Demande encours altriadus
 
             $buttons[] = array(
@@ -1046,7 +1044,6 @@ class Bimp_Client extends Bimp_Societe
                     'icon'    => 'far_paper-plane',
                     'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_USER, "fk_user_dest" => $noteT->getData('user_create'), "content" => "Bonjour\\n\\nVotre demande d\'encours pour le client " . addslashes($this->getName()) . " a été refusée\\n\\nNous pouvons toutefois solliciter Atradius pour une révision de cette décision \\n\\nPour cela nous devons fournir un maximum d\'éléments prouvant la bonne santé financière de cette entreprise (dernier bilan, compte de résultats, etc)\\n\\nMerci de bien vouloir les demander à votre client puis les transmettre à GDS-OLYS-atradiusolys@ldlc.com \\n\\nDans l\'attente de cette éventuelle révision, les commandes ne peuvent être traitées que sur application de l\'une des solutions suivantes :\\nsoit le client nous règle au comptant, c\'est à dire à la commande ou avant livraison ou à réception de facture (ce dernier choix implique un règlement immédiat à date de facture)\\nsoit il accepte qu\'on le prélève à 30 jours date de factures (dans ce cas-là il nous faut un Mandat SEPA accepté et un RIB)\\nNB : la solution du prélèvement concernerait toutes ses factures, et si nous rencontrons le moindre incident de paiement, par exemple un prélèvement rejeté, nous reviendrons obligatoirement à la solution du paiement au comptant"), array('form_name' => 'rep'))
                 );
-
             }
         }
         $buttons[] = array(
@@ -2437,6 +2434,7 @@ class Bimp_Client extends Bimp_Societe
 
                     if (!count($errors)) {
                         $this->updateField('relances_infos', '', null, true, true);
+                        $this->updateField('date_relances_deactivated', null);
                     }
                 }
 
@@ -2448,6 +2446,7 @@ class Bimp_Client extends Bimp_Societe
                     $errors = $this->updateField('relances_actives', 0, null, true, true);
                     if (!count($errors)) {
                         $this->updateField('relances_infos', $infos, null, true, true);
+                        $this->updateField('date_relances_deactivated', date('Y-m-d'));
                     }
                 }
 
@@ -2715,5 +2714,77 @@ class Bimp_Client extends Bimp_Societe
             return $errors;
 
         return parent::update($warnings, $force_update);
+    }
+
+    // Méthodes statiques: 
+
+    public static function checkRelancesDeactivatedToNotify()
+    {
+        global $db;
+        $bdb = new BimpDb($db);
+
+        $dt = new DateTime();
+        $dt->sub(new DateInterval('P14D'));
+        $date_begin = $dt->format('Y-m-d');
+
+        $where = 'status = 1 AND relances_actives = 0 AND date_relances_deactivated <= \'' . $date_begin . '\'';
+        $rows = $bdb->getRows('societe', $where, null, 'array', array('rowid', 'date_relances_deactivated'));
+
+        if (is_array($rows)) {
+            $interval = new DateInterval('P7D');
+            foreach ($rows as $r) {
+                if (!$r['date_relances_deactivated']) {
+                    continue;
+                }
+
+                $dt = new DateTime($date_begin);
+                $date = $dt->format('Y-m-d');
+                $i = 0; // Précaution boucle infinie
+
+                while ($date >= $r['date_relances_deactivated']) {
+                    if ($r['date_relances_deactivated'] == $date) {
+                        // Envoi mail
+                        $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $r['rowid']);
+
+                        if (BimpObject::objectLoaded($client) && $client->getData('is_subsidiary') == 0) {
+//                            $is_comm_default = false;
+//                            $email = $client->getCommercialEmail(false, false);
+//
+//                            if (!$email) {
+//                                $email = $client->getCommercialEmail(true, true);
+//                                $is_comm_default = true;
+//                            }
+                            $email = 'recouvrementolys@bimp.fr';
+
+                            if ($email) {
+                                $subject = 'Client ' . $client->getRef() . ' ' .$client->getName() . ' - Vérifier relances à réactiver';
+
+                                $html = 'Bonjour,<br/><br/>';
+                                $html .= 'Les relances du client ' . $client->getLink();
+                                $html .= ' ont été désactivées le ' . $dt->format('d / m / Y') . '<br/><br/>';
+
+                                $html .= '<b>Il convient de vérifier ce compte et en réactiver les relances dès que possible</b>';
+
+//                                if ($is_comm_default) {
+//                                    $html .= '<br/><br/>Note: vous avez reçu ce message car vous êtes commercial par défaut.<br/>';
+//                                    $html .= 'Pour ne plus recevoir de type de notification pour ce client, il est nécessaire de lui attribuer un commercial attitré';
+//                                }
+
+                                mailSyn2($subject, $email . ',f.martinez@bimp.fr', '', $html);
+                            }
+                        }
+                        break;
+                    }
+
+                    $dt->sub($interval);
+                    $date = $dt->format('Y-m-d');
+
+                    $i++;
+                    if ($i > 200) {
+                        break;
+                    }
+                }
+            }
+        }
     }
 }

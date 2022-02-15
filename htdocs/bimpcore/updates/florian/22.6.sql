@@ -1,0 +1,1 @@
+ALTER TABLE `llx_societe` ADD `date_relances_deactivated` DATE DEFAULT NULL;

@@ -310,7 +310,7 @@ class BimpFile extends BimpObject
 
     public function checkObjectFiles($module, $object_name, $id_object)
     {
-        if ($this->isLoaded()) {
+        if ($this->isLoaded() || is_array($module) || is_array($object_name) || is_array($id_object)) {
             return;
         }
 

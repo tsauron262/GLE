@@ -790,6 +790,10 @@ forms:
             
     resolution: 
         rows: 
+            - custom: 1
+              input_name: inut2
+              content:
+                   callback: renderAlertDiago
             - field: resolution
             - custom: 1
               label: Dispo sous

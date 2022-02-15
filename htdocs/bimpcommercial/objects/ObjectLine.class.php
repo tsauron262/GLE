@@ -4492,7 +4492,7 @@ class ObjectLine extends BimpObject
             );
 
 //        die('('.$join_alias.'.duree * '.$main_alias.'.qty) as duree_tot');
-            return '('.$join_alias3.'.duree * '.$join_alias.'.qty)';
+            return '('.$join_alias3.'.duree_i * '.$join_alias.'.qty)';
         }
 
         return '';
@@ -4501,7 +4501,7 @@ class ObjectLine extends BimpObject
     public function fetchExtraFields()
     {
         $extra = array();
-        $sql = 'SELECT (a___dol_line___product___product.duree * a___dol_line.qty) as tot
+        $sql = 'SELECT (a___dol_line___product___product.duree_i * a___dol_line.qty) as tot
                     FROM '.MAIN_DB_PREFIX.'facturedet a___dol_line
                     LEFT JOIN '.MAIN_DB_PREFIX.'product_extrafields a___dol_line___product___product ON a___dol_line___product___product.fk_object = a___dol_line.fk_product
                     WHERE a___dol_line.rowid = '.$this->getData('id_line');

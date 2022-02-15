@@ -1235,7 +1235,7 @@ forms:
                   show_values: 1
               input_name: stop
             - custom: 1
-              label: Filtrer par le technicien ?
+              label: Filtrer par technicien
               input_name: by_tech
               input:
                   type: toggle

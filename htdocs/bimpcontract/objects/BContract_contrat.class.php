@@ -907,22 +907,27 @@ class BContract_contrat extends BimpDolObject
                 
                 if($echeancier->find(Array('id_contrat' => $beforeContrat->id))) {
                     
-                    if($beforeContrat->dol_object->closeAll($user) >= 1) {
+                    $dateFinNow = new DateTime();
+                    $dateFinBefore = $this->displayRealEndDate('Y-m-d');
+                    
+                    if($dateFinBefore > $dateFinNow) {
+                        if($beforeContrat->dol_object->closeAll($user) >= 1) {
                         
-                        $beforeContrat->updateField('statut', self::CONTRAT_STATUS_CLOS);
-                        $beforeContrat->updateField('date_cloture', date('Y-m-d H:i:s'));
-                        $beforeContrat->updateField('fk_user_cloture', $user->id);
-                        $echeancier->updateField('statut', 0);
-                        $echeancier->updateField('validate', 0);
-                        
-                        $beforeContrat->addLog('Clos car contrat de renouvellement ' . $this->getRef());
-                        
-                        if(!$fromCron)
-                            $this->addLog($beforeContrat->getRef() . ' clos suite à l\'activation de ce contrat');
-                        else
-                            $this->addLog($beforeContrat->getRef() . ' clos automatiquement car ce contrat en est le renouvellement');
-                        
-                        return 1;
+                            $beforeContrat->updateField('statut', self::CONTRAT_STATUS_CLOS);
+                            $beforeContrat->updateField('date_cloture', date('Y-m-d H:i:s'));
+                            $beforeContrat->updateField('fk_user_cloture', $user->id);
+                            $echeancier->updateField('statut', 0);
+                            $echeancier->updateField('validate', 0);
+
+                            $beforeContrat->addLog('Clos car contrat de renouvellement ' . $this->getRef());
+
+                            if(!$fromCron)
+                                $this->addLog($beforeContrat->getRef() . ' clos suite à l\'activation de ce contrat');
+                            else
+                                $this->addLog($beforeContrat->getRef() . ' clos automatiquement car ce contrat en est le renouvellement');
+
+                            return 1;
+                        }
                     }
                 }
             }

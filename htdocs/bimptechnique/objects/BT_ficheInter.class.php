@@ -2895,9 +2895,9 @@ class BT_ficheInter extends BimpDolObject
             // Changement de date et d'horaire
             $dateTime_debut = new DateTime($this->getData('datei') . ' ' . $this->getData('time_from'));
             $dateTime_fin   = new DateTime($this->getData('datei') . ' ' . $this->getData('time_to'));
-            
+            $changement_horaire = false;
             if(($init_date != $this->getData('datei')) || ($init_time_from != $this->getData('time_from') || $init_time_to != $this->getData('time_to'))) {
-                
+                $changement_horaire = true;
                 $table = 'actioncomm';
                 $where = 'code = \'AC_RDV\' AND fk_element = ' . $this->id . ' AND fk_soc = ' . $this->getData('fk_soc') . ' AND elementtype = \'fichinter\'';
 
@@ -2913,7 +2913,7 @@ class BT_ficheInter extends BimpDolObject
                 } 
             }
             
-            if(!$changement_de_tech) {
+            if(!$changement_de_tech && $changement_horaire) {
                 $sujet = 'FI ' . $this->getRef() . ' - Modification horaire';
                 $message = 'Bonjour,<br />La fiche d\'intervention N°' . $this->getNomUrl() . ' à été modifiée au niveau des horaires.<br />';
                 $message.= 'Nouveaux horaires: ' . '<strong class=\'danger\'>Du '.$dateTime_debut->format('d/m/Y H:i').' au '.$dateTime_fin->format('d/m/Y H:i').'</strong>';

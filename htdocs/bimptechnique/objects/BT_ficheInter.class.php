@@ -2893,9 +2893,11 @@ class BT_ficheInter extends BimpDolObject
             }
             
             // Changement de date et d'horaire
+            $dateTime_debut = new DateTime($this->getData('datei') . ' ' . $this->getData('time_from'));
+            $dateTime_fin   = new DateTime($this->getData('datei') . ' ' . $this->getData('time_to'));
+            
             if(($init_date != $this->getData('datei')) || ($init_time_from != $this->getData('time_from') || $init_time_to != $this->getData('time_to'))) {
-                $dateTime_debut = new DateTime($this->getData('datei') . ' ' . $this->getData('time_from'));
-                $dateTime_fin   = new DateTime($this->getData('datei') . ' ' . $this->getData('time_to'));
+                
                 $table = 'actioncomm';
                 $where = 'code = \'AC_RDV\' AND fk_element = ' . $this->id . ' AND fk_soc = ' . $this->getData('fk_soc') . ' AND elementtype = \'fichinter\'';
 

@@ -140,10 +140,10 @@ class InterStatementPDF extends BimpDocumentPDF
         $inters_valid = $intervention->getList(BimpTools::merge_array($this->filters, Array('fk_statut' => array('operator' => '>', 'value' => 0))));
                 
         if (!count($inters_valid)) {
-            $this->writeContent('<p style="font-weight: bold; font-size: 12px">Aucune interventions éffectuées</p>');
+            $this->writeContent('<p style="font-weight: bold; font-size: 12px">Aucune intervention effectuées</p>');
         } else {
             
-            $this->writeContent('<h3>Interventions éffectuées</h3>');
+            $this->writeContent('<h3>Interventions effectuées</h3>');
             
             $table = new BimpPDF_Table($this->pdf);
             
@@ -179,7 +179,7 @@ class InterStatementPDF extends BimpDocumentPDF
         $inters_valid_nok = $intervention->getList(BimpTools::merge_array($this->filters, Array('fk_statut' => array('operator' => '=', 'value' => 0))));
             
             if(!count($inters_valid_nok)) {
-                $this->writeContent('<br /><p style="font-weight: bold; font-size: 12px">Aucune interventions à venir / en cours</p>');
+                $this->writeContent('<br /><p style="font-weight: bold; font-size: 12px">Aucune intervention à venir / en cours</p>');
             } else {
                 $this->writeContent('<br /><h3>Interventions à venir / en cours</h3>');
                 $table2 = new BimpPDF_Table($this->pdf);

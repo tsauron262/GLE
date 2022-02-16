@@ -2877,7 +2877,7 @@ class BT_ficheInter extends BimpDolObject
                 
                 $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
                 $ancienTech = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $init_id_tech);
-                $currentTech = BimpCache::getBimpObjectInstance('bimpcore', 'BimpUser', $this->getData('fk_user_tech'));
+                $currentTech = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $this->getData('fk_user_tech'));
                 //Envois des mails
                 $sujet = 'FI ' . $this->getRef() . ' - Changement de technicien';
                 $message = 'Bonjour,<br />' . 'La fiche d\'intervention N°' . $this->getRef() . ' vous a été attribuée<br /></br ><b><u>Détails</u></b><br />';

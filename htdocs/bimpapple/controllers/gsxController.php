@@ -3792,7 +3792,8 @@ class gsxController extends BimpController
                 $headers .= '<th style = "min-width: 80px">Prix commande</th>';
                 $headers .= '<th style = "min-width: 80px">Prix stock</th>';
                 $headers .= '<th>Prix spéciaux</th>';
-                $headers .= '<th>Prix vente</th>';
+                $headers .= '<th>Prix vente HT</th>';
+                $headers .= '<th>Prix vente TTC</th>';
 
                 if (!$this->use_gsx_v2) {
                     $headers .= '<th style = "width: 30px; text-align: center"></th>';
@@ -3940,6 +3941,7 @@ class gsxController extends BimpController
 //                        }
 //                        $content .= '</td>';
                         $content .= '<td>' . $vente_price . '</td>';
+                        $content .= '<td>' . $vente_price*1.2 . '</td>';
                         $content .= '</tr>';
                         $i++;
                         $odd = !$odd;

@@ -2847,47 +2847,40 @@ class BT_ficheInter extends BimpDolObject
                     $this->set('fk_contrat', $init_fk_contrat);
                 }
             }
-
+            
             // Changement de tech: 
             if ($init_id_tech !== (int) $this->getData('fk_user_tech')) {
+                
+                $table = 'actioncomm';
+                $where = 'code <> \'AC_FICHINTER_VALIDATE\' AND fk_element = ' . $this->id . ' AND fk_soc = ' . $this->getData('fk_soc') . ' AND elementtype = \'fichinter\'';
+                
+                $allEvents = $this->db->getRows($table, $where);
                 BimpTools::loadDolClass('comm/action/', 'actioncomm', 'ActionComm');
-                $ac = new ActionComm($this->db->db);
-                $id_ac = (int) $this->db->getValue("actioncomm", "id", "code <> 'AC_FICHINTER_VALIDATE' AND fk_element = " . $this->id . " AND fk_soc = " . $this->getData('fk_soc') . " AND elementtype = 'fichinter'");
-                if ($id_ac) {
-                    $ac->fetch($id_ac);
-                    $ac->userownerid = (int) $this->getData('fk_user_tech');
-                    $ac->otherassigned = Array();
-                    if ($ac->update($user) <= 0) {
-                        $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($ac), 'Echec du changement d\'utilisateur dans l\'événement agenda');
-                    }
-                }
-
-                if ($init_id_tech && $init_id_tech != $user->id) {
-                    $prev_tech = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $init_id_tech);
-                    if (BimpObject::objectLoaded($prev_tech)) {
-                        $subject = 'FI ' . $this->getRef() . ' assignée à un autre technicien';
-                        $msg = "Bonjour,<br />La fiche d'intervention " . $this->getLink() . " a été attribuée à un autre utilisateur par " . $user->getNomUrl() . '<br/><br/>';
-                        $to = BimpTools::cleanEmailsStr($prev_tech->getData('email'));
-
-                        if ($to) {
-                            mailSyn2($subject, $to, '', $msg);
+                $actionComm = new ActionComm($this->db->db);
+                
+                if(count($allEvents) > 0) {
+                    foreach($allEvents as $event) {
+                        $actionComm->fetch($event->id);
+                        $actionComm->userownerid = (int) $this->getData('fk_user_tech');
+                        $actionComm->userassigned = Array();
+                        $actionComm->otherassigned = Array();
+                        if($actionComm->update($user) <= 0) {
+                            $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($ac), 'Echec du changement d\'utilisateur dans l\'événement agenda');
                         }
                     }
                 }
+                
+                $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
+                $ancienTech = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $init_id_tech);
+                $currentTech = BimpCache::getBimpObjectInstance('bimpcore', 'BimpUser', $this->getData('fk_user_tech'));
+                //Envois des mails
+                $sujet = 'FI ' . $this->getRef() . ' - Changement de technicien';
+                $message = 'Bonjour,<br />' . 'La fiche d\'intervention N°' . $this->getRef() . ' vous a été attribuée<br /></br ><b><u>Détails</u></b><br />';
+                $message.= 'Référence: ' . $this->getNomUrl() . ' <br />' . 'Client: ' . $client->getNomUrl() . ' ' . $client->getName() .'<br />Ancien technicien: ' . $ancienTech->getName();
+                $message.= '<br />Pour plus de détails rendez-vous sur la fiche d\'intervention';
+                                
+                mailSyn2($sujet, BimpTools::cleanEmailsStr($currentTech->getData('email')), null, $message);
 
-                $new_id_tech = (int) $this->getData('fk_user_tech');
-                if ($new_id_tech && $new_id_tech != $user->id) {
-                    $tech = $this->getChildObject('');
-                    if (BimpObject::objectLoaded($tech)) {
-                        $subject = '[FI] ' . $this->getRef() . ' à traiter';
-                        $msg = "Bonjour,<br />La fiche d'intervention " . $this->getLink() . " vous a été attribuée par " . $user->getNomUrl() . '<br/><br/>';
-                        $to = BimpTools::cleanEmailsStr($tech->getData('email'));
-
-                        if ($to) {
-                            mailSyn2($subject, $to, '', $msg);
-                        }
-                    }
-                }
             }
         }
 

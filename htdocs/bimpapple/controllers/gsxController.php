@@ -3940,7 +3940,7 @@ class gsxController extends BimpController
 //                            ));
 //                        }
 //                        $content .= '</td>';
-                        $content .= '<td>' . prince($vente_price) . ' €</td>';
+                        $content .= '<td>' . price($vente_price) . ' €</td>';
                         $content .= '<td>' . price($vente_price*1.2) . ' €</td>';
                         $content .= '</tr>';
                         $i++;

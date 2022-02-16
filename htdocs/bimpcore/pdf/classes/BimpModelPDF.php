@@ -352,13 +352,13 @@ Abstract class BimpModelPDF
                             $content = $account->code_banque;
                             break;
                         case 'DeskCode':
-                            $content = $account->code_banque;
+                            $content = $account->code_guichet;
                             break;
                         case 'BankAccountNumber':
-                            $content = $account->code_banque;
+                            $content = $account->number;
                             break;
                         case 'BankAccountNumberKey':
-                            $content = $account->code_banque;
+                            $content = $account->cle_rib;
                             break;
                     }
 

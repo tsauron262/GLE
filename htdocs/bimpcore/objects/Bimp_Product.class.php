@@ -176,7 +176,7 @@ class Bimp_Product extends BimpObject
                 'table' => 'product_extrafields',
                 'on'    => ($main_alias ? $main_alias : 'a') . '.rowid = '.$join_alias . '.fk_object'
             );
-            return 'if('.$join_alias.'.duree > 0, '.$main_alias.'.price / '.$join_alias.'.duree * 3600, 0)';
+            return 'if('.$join_alias.'.duree_i > 0, '.$main_alias.'.price / '.$join_alias.'.duree_i * 3600, 0)';
         }
 
         return '';
@@ -185,7 +185,7 @@ class Bimp_Product extends BimpObject
     public function fetchExtraFields()
     {
         $extra = array();
-        $extra['renta_service'] = $this->getData('duree') > 0 ? $this->getData('price') / $this->getData('duree') * 3600 : 0;
+        $extra['renta_service'] = $this->getData('duree_i') > 0 ? $this->getData('price') / $this->getData('duree_i') * 3600 : 0;
         return $extra;
     }
 

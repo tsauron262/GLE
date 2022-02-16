@@ -25,6 +25,7 @@ class InterStatementPDF extends BimpDocumentPDF
     
     public function __construct($db)
     {
+        static::$use_cgv = false;
         parent::__construct($db);
         $this->bimpDb = new BimpDb($db);
 
@@ -34,9 +35,11 @@ class InterStatementPDF extends BimpDocumentPDF
     }
 
     protected function initData() {
+        $this->thirdparty = $this->object;
         parent::initData();
         $this->date_document = new DateTime();
         
+        $this->string_filters .= '<br/> Code client : '.$this->object->code_client.'<br/> Code compta : '.$this->object->code_compta;
         if($this->object->date_start_relever || $this->object->date_stop_relever) {
             $this->date_start = new DateTime($this->object->date_start_relever);
             $this->date_stop = new DateTime($this->object->date_stop_relever);
@@ -51,7 +54,7 @@ class InterStatementPDF extends BimpDocumentPDF
         }
         
         $this->client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->object->id);
-        $this->string_filters .= 'Client: ' . $this->client->getName() . '<br />';
+//        $this->string_filters .= '<br/> Client: ' . $this->client->getName() . '<br />';
         $this->filters['fk_soc'] = $this->client->id;
         
         
@@ -70,8 +73,12 @@ class InterStatementPDF extends BimpDocumentPDF
         $docRef = $this->string_filters . '<br />';
 
         global $conf;
+        $logo_file = $conf->mycompany->dir_output . '/logos/' . str_replace('.png', '_PRO.png', $this->fromCompany->logo);
 
-        $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
+        $logo_width = 0;
+        if (!file_exists($logo_file)) {
+            $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
+        }   
 
         $logo_width = 0;
         if (!file_exists($logo_file)) {
@@ -98,6 +105,8 @@ class InterStatementPDF extends BimpDocumentPDF
                 }
             }
         }
+        
+        $docRef .= "<br/>Commercial : ".$this->client->displayCommercials(true, false);
 
         $this->pdf->topMargin = 44;
 
@@ -114,10 +123,10 @@ class InterStatementPDF extends BimpDocumentPDF
         );
         
     }
-
+    
     public function getFileName()
     {
-        return 'Releve_interventions';
+        return 'Releve_interventions.pdf';
     }
 
     public function renderTop()
@@ -131,14 +140,14 @@ class InterStatementPDF extends BimpDocumentPDF
         $inters_valid = $intervention->getList(BimpTools::merge_array($this->filters, Array('fk_statut' => array('operator' => '>', 'value' => 0))));
                 
         if (!count($inters_valid)) {
-            $this->writeContent('<p style="font-weight: bold; font-size: 12px">Aucune interventions éffectuées</p>');
+            $this->writeContent('<p style="font-weight: bold; font-size: 12px">Aucune intervention effectuées</p>');
         } else {
             
-            $this->writeContent('<h3>Interventions éffectuées</h3>');
+            $this->writeContent('<h3>Interventions effectuées</h3>');
             
             $table = new BimpPDF_Table($this->pdf);
             
-            $table->addCol('ref', 'N° fiche intervention', 15, 'text-align: left;', '', 'text-align: left;');
+            $table->addCol('ref', 'N° fiche intervention', 20, 'text-align: left;', '', 'text-align: left;');
             $table->addCol('contrat', 'Contrat', 20, 'text-align: left;', '', 'text-align: left;');
             $table->addCol('tech', 'Intervenant', 28, 'text-align: left;', '', 'text-align: left;');
             $table->addCol('date', 'Date d\'intervention', 20, 'text-align: center;', '', 'text-align: center;');
@@ -170,12 +179,12 @@ class InterStatementPDF extends BimpDocumentPDF
         $inters_valid_nok = $intervention->getList(BimpTools::merge_array($this->filters, Array('fk_statut' => array('operator' => '=', 'value' => 0))));
             
             if(!count($inters_valid_nok)) {
-                $this->writeContent('<br /><p style="font-weight: bold; font-size: 12px">Aucune interventions à venir / en cours</p>');
+                $this->writeContent('<br /><p style="font-weight: bold; font-size: 12px">Aucune intervention à venir / en cours</p>');
             } else {
                 $this->writeContent('<br /><h3>Interventions à venir / en cours</h3>');
                 $table2 = new BimpPDF_Table($this->pdf);
             
-                $table2->addCol('ref', 'N° fiche intervention', 15, 'text-align: left;', '', 'text-align: left;');
+                $table2->addCol('ref', 'N° fiche intervention', 20, 'text-align: left;', '', 'text-align: left;');
                 $table2->addCol('contrat', 'Contrat', 20, 'text-align: left;', '', 'text-align: left;');
                 $table2->addCol('tech', 'Intervenant', 28, 'text-align: left;', '', 'text-align: left;');
                 $table2->addCol('date', 'Date d\'intervention', 20, 'text-align: center;', '', 'text-align: center;');

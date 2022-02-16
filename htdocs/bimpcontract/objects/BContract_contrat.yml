@@ -1367,13 +1367,13 @@ views:
                   custom: 
                     callback:
                         method: renderFilesTable
-            - cols:
-                - type: custom
-                  custom: 
-                      callback: 
-                          method: renderNotesList
-                          params:
-                              - 1
+#            - cols:
+#                - type: custom
+#                  custom: 
+#                      callback: 
+#                          method: renderNotesList
+#                          params:
+#                              - 1
     inter:
         show: 
             callback:

@@ -821,7 +821,7 @@ class Bimp_Client extends Bimp_Societe
     public function getChorusStructuresList(&$errors = array())
     {
         if ($this->isLoaded($errors)) {
-            $siret = $this->getData('siret');
+            $siret = $this->getSiret();
 
             if ($siret) {
                 $cache_key = 'client_' . $this->id . '_chorus_structures';
@@ -832,7 +832,7 @@ class Bimp_Client extends Bimp_Societe
                     $api = BimpAPI::getApiInstance('piste');
 
                     if (is_a($api, 'BimpAPI') && $api->isOk($errors)) {
-                        $response = $api->rechercheClientStructures($this->getData('siret'), array(), $errors);
+                        $response = $api->rechercheClientStructures($siret, array(), $errors);
 
                         if (is_array($response) && !count($errors)) {
                             self::$cache[$cache_key] = $response;

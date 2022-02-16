@@ -84,6 +84,7 @@ class BimpObject extends BimpCache
     public $fieldsWithAddNoteOnUpdate = array();
     public $isDeleting = false;
     public $thirdparty = null;
+    public $force_update = false;
 
     // Gestion instance:
 
@@ -3867,7 +3868,7 @@ class BimpObject extends BimpCache
             }
         }
 
-        if ($missing && $required) {
+        if ($missing && $required && !$this->force_update) {
             $errors[] = 'Valeur obligatoire manquante : "' . BimpTools::ucfirst($this->getLabel()) . ': ' . $label . ' (' . $field . ')"';
             return $errors;
         }
@@ -4371,6 +4372,8 @@ class BimpObject extends BimpCache
     public function update(&$warnings = array(), $force_update = false)
     {
         $this->noFetchOnTrigger = true;
+        
+        $this->force_update = $force_update;
 
         BimpLog::actionStart('bimpobject_update', 'Mise à jour', $this);
 

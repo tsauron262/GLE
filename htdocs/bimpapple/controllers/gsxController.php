@@ -3792,7 +3792,8 @@ class gsxController extends BimpController
                 $headers .= '<th style = "min-width: 80px">Prix commande</th>';
                 $headers .= '<th style = "min-width: 80px">Prix stock</th>';
                 $headers .= '<th>Prix spéciaux</th>';
-                $headers .= '<th>Prix vente</th>';
+                $headers .= '<th>Prix vente HT</th>';
+                $headers .= '<th>Prix vente TTC</th>';
 
                 if (!$this->use_gsx_v2) {
                     $headers .= '<th style = "width: 30px; text-align: center"></th>';
@@ -3904,7 +3905,7 @@ class gsxController extends BimpController
                         }
                         BimpObject::getInstance('bimpsupport', 'BS_ApplePart');
                         $type = BS_ApplePart::getCategProdApple($num, $name);
-                        $vente_price = price(BS_ApplePart::convertPrixStatic($type, ($exchange_price > 0 ? $exchange_price : $stock_price), $num, $isIphone, 'EXCHANGE')).' €';
+                        $vente_price = BS_ApplePart::convertPrixStatic($type, ($exchange_price > 0 ? $exchange_price : $stock_price), $num, $isIphone, 'EXCHANGE');
                         
                         
                         $content .= '<td>' . $name . '</td>';
@@ -3939,7 +3940,8 @@ class gsxController extends BimpController
 //                            ));
 //                        }
 //                        $content .= '</td>';
-                        $content .= '<td>' . $vente_price . '</td>';
+                        $content .= '<td>' . price($vente_price) . ' €</td>';
+                        $content .= '<td>' . price($vente_price*1.2) . ' €</td>';
                         $content .= '</tr>';
                         $i++;
                         $odd = !$odd;

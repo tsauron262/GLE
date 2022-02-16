@@ -2459,6 +2459,10 @@ class Bimp_Societe extends BimpDolObject
 
         return $errors;
     }
+    
+    public function getSiret(){
+        return substr($this->getData('siret'), 0, 14);
+    }
 
     public function getCreditSafeLettre($noHtml = false)
     {

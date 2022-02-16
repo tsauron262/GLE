@@ -2848,6 +2848,11 @@ class BT_ficheInter extends BimpDolObject
                 }
             }
             
+            // Changement de date
+            $init_date = $this->getInitData('datei');
+            
+            //die($init_date);
+            
             // Changement de tech: 
             if ($init_id_tech !== (int) $this->getData('fk_user_tech')) {
                 
@@ -2879,7 +2884,7 @@ class BT_ficheInter extends BimpDolObject
                 $message.= 'Référence: ' . $this->getNomUrl() . ' <br />' . 'Client: ' . $client->getNomUrl() . ' ' . $client->getName() .'<br />Ancien technicien: ' . $ancienTech->getName();
                 $message.= '<br />Pour plus de détails rendez-vous sur la fiche d\'intervention';
                                 
-                mailSyn2($sujet, BimpTools::cleanEmailsStr($currentTech->getData('email')), null, $message);
+                mailSyn2($sujet, $currentTech->getData('email'), null, $message);
 
             }
         }

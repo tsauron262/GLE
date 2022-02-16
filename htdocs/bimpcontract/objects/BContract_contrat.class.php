@@ -550,21 +550,9 @@ class BContract_contrat extends BimpDolObject
             $signed_doc = ($data['have_contrat_signed']) ? true : false;
             if ($signed_doc) {
                 $contratChhild = $this->getContratChild();
-                if ($contratChhild) {
-                    $source = $this->getInstance('bimpcontract', 'BContract_contrat', $contratChhild->id);
-                    $echeancier = $this->getInstance('bimpcontract', 'BContract_echeancier');
-                    if ($source->dol_object->closeAll($user) >= 1) {
-                        $source->updateField('statut', self::CONTRAT_STATUS_CLOS);
-                        $source->updateField('date_cloture', date('Y-m-d H:i:s'));
-                        $source->updateField('fk_user_cloture', $user->id);
-                        $this->addLog('Contrat objet du renouvellement CLOS');
-                        $source->addLog('Contrat CLOS suite à l\'activation du contrat N°' . $this->getData('ref'));
-                        if ($echeancier->find(['id_contrat' => $source->id])) {
-                            $echeancier->updateField('statut', 0);
-                        }
-                    }
-                }
-
+                
+                $this->closeContratChildWhenActivateRenewManual();
+                    
                 $this->updateField('statut', self::CONTRAT_STATUS_ACTIVER);
 
                 $success = "Le contrat " . $this->getData('ref') . ' a été activé avec succès';
@@ -890,6 +878,62 @@ class BContract_contrat extends BimpDolObject
                 $echeancier->updateField('statut', 0);
             }
         }
+    }
+    
+    public function actionTestContrat($data, &$success) {
+        $errors = [];
+        $warnings = [];
+        
+        $this->closeContratChildWhenActivateRenewManual(true);
+        
+        return Array('errors' => $errors, 'warnings' => $warnings, 'success' => $success);
+    }
+    
+    public function closeContratChildWhenActivateRenewManual($fromCron = false) {
+        
+        global $user;
+        
+        $beforeContrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat');
+        
+        if($beforeContrat->find(Array('next_contrat' => $this->id))) {
+            
+            if($beforeContrat->isLoaded()) {
+                
+                if(!in_array($this->getData('statut'), Array(self::CONTRAT_STATUS_ACTIVER,self::CONTRAT_STATUS_ACTIVER_SUP,self::CONTRAT_STATUS_ACTIVER_TMP)) && $fromCron) {
+                    return 0;
+                }
+                
+                $echeancier = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_echeancier');
+                
+                if($echeancier->find(Array('id_contrat' => $beforeContrat->id))) {
+                    
+                    $dateFinNow = new DateTime();
+                    $dateFinBefore = $this->displayRealEndDate('Y-m-d');
+                    
+                    if($dateFinBefore > $dateFinNow) {
+                        if($beforeContrat->dol_object->closeAll($user) >= 1) {
+                        
+                            $beforeContrat->updateField('statut', self::CONTRAT_STATUS_CLOS);
+                            $beforeContrat->updateField('date_cloture', date('Y-m-d H:i:s'));
+                            $beforeContrat->updateField('fk_user_cloture', $user->id);
+                            $echeancier->updateField('statut', 0);
+                            $echeancier->updateField('validate', 0);
+
+                            $beforeContrat->addLog('Clos car contrat de renouvellement ' . $this->getRef());
+
+                            if(!$fromCron)
+                                $this->addLog($beforeContrat->getRef() . ' clos suite à l\'activation de ce contrat');
+                            else
+                                $this->addLog($beforeContrat->getRef() . ' clos automatiquement car ce contrat en est le renouvellement');
+
+                            return 1;
+                        }
+                    }
+                }
+            }
+        }
+
+        return 0; 
     }
 
     public function actionClose($data, &$success)
@@ -1676,7 +1720,16 @@ class BContract_contrat extends BimpDolObject
     {
         global $conf, $langs, $user;
         $buttons = Array();
-
+        
+        if($user->id == 460) {
+            $buttons[] = array(
+                'label'   => 'TEST EN COURS',
+                'icon'    => 'fas_retweet',
+                'onclick' => $this->getJsActionOnclick('testContrat', array(), array(
+                ))
+            );
+        }
+        
         if ($this->isLoaded() && BimpTools::getContext() != 'public') {
 
             $status = $this->getData('statut');

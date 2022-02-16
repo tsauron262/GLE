@@ -3905,7 +3905,7 @@ class gsxController extends BimpController
                         }
                         BimpObject::getInstance('bimpsupport', 'BS_ApplePart');
                         $type = BS_ApplePart::getCategProdApple($num, $name);
-                        $vente_price = price(BS_ApplePart::convertPrixStatic($type, ($exchange_price > 0 ? $exchange_price : $stock_price), $num, $isIphone, 'EXCHANGE')).' €';
+                        $vente_price = BS_ApplePart::convertPrixStatic($type, ($exchange_price > 0 ? $exchange_price : $stock_price), $num, $isIphone, 'EXCHANGE');
                         
                         
                         $content .= '<td>' . $name . '</td>';
@@ -3940,8 +3940,8 @@ class gsxController extends BimpController
 //                            ));
 //                        }
 //                        $content .= '</td>';
-                        $content .= '<td>' . $vente_price . '</td>';
-                        $content .= '<td>' . $vente_price*1.2 . '</td>';
+                        $content .= '<td>' . prince($vente_price) . ' €</td>';
+                        $content .= '<td>' . price($vente_price*1.2) . ' €</td>';
                         $content .= '</tr>';
                         $i++;
                         $odd = !$odd;

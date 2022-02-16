@@ -2795,7 +2795,10 @@ class BT_ficheInter extends BimpDolObject
         $init_commandes = $this->getInitData('commandes');
         $init_tickets = $this->getInitData('tickets');
         $init_id_tech = (int) $this->getInitData('fk_user_tech');
-
+        $init_date = $this->getInitData('datei');
+        $init_time_from = $this->getInitData('time_from');
+        $init_time_to = $this->getInitData('time_to');
+        
         $errors = parent::update($warnings, $force_update);
 
         if (!$this->no_update_process && !count($errors)) {
@@ -2847,21 +2850,19 @@ class BT_ficheInter extends BimpDolObject
                     $this->set('fk_contrat', $init_fk_contrat);
                 }
             }
-            
-            // Changement de date
-            $init_date = $this->getInitData('datei');
-            
+
             //die($init_date);
-            
+            $changement_de_tech = false;
+            BimpTools::loadDolClass('comm/action/', 'actioncomm', 'ActionComm');
+            $actionComm = new ActionComm($this->db->db);
             // Changement de tech: 
             if ($init_id_tech !== (int) $this->getData('fk_user_tech')) {
-                
+                $changement_de_tech = true;
                 $table = 'actioncomm';
                 $where = 'code <> \'AC_FICHINTER_VALIDATE\' AND fk_element = ' . $this->id . ' AND fk_soc = ' . $this->getData('fk_soc') . ' AND elementtype = \'fichinter\'';
                 
                 $allEvents = $this->db->getRows($table, $where);
-                BimpTools::loadDolClass('comm/action/', 'actioncomm', 'ActionComm');
-                $actionComm = new ActionComm($this->db->db);
+                
                 
                 if(count($allEvents) > 0) {
                     foreach($allEvents as $event) {
@@ -2882,11 +2883,44 @@ class BT_ficheInter extends BimpDolObject
                 $sujet = 'FI ' . $this->getRef() . ' - Changement de technicien';
                 $message = 'Bonjour,<br />' . 'La fiche d\'intervention N°' . $this->getRef() . ' vous a été attribuée<br /></br ><b><u>Détails</u></b><br />';
                 $message.= 'Référence: ' . $this->getNomUrl() . ' <br />' . 'Client: ' . $client->getNomUrl() . ' ' . $client->getName() .'<br />Ancien technicien: ' . $ancienTech->getName();
+                $message.= '<br />Changement par: ' . $user->getNomUrl();
                 $message.= '<br />Pour plus de détails rendez-vous sur la fiche d\'intervention';
-                                
+                
+                $this->addLog('Changement de technicien: ' . $ancienTech->getName() . ' => ' . $currentTech->getName());
+                
                 mailSyn2($sujet, $currentTech->getData('email'), null, $message);
 
             }
+            
+            // Changement de date et d'horaire
+            if(($init_date != $this->getData('datei')) || ($init_time_from != $this->getData('time_from') || $init_time_to != $this->getData('time_to'))) {
+                $dateTime_debut = new DateTime($this->getData('datei') . ' ' . $this->getData('time_from'));
+                $dateTime_fin   = new DateTime($this->getData('datei') . ' ' . $this->getData('time_to'));
+                $table = 'actioncomm';
+                $where = 'code = \'AC_RDV\' AND fk_element = ' . $this->id . ' AND fk_soc = ' . $this->getData('fk_soc') . ' AND elementtype = \'fichinter\'';
+
+                $id_event = $this->db->getValue($table, 'id', $where);
+
+                if($id_event > 0) {
+                    $actionComm->fetch($id_event);
+                    $actionComm->datep = $dateTime_debut->getTimestamp();
+                    $actionComm->datef = $dateTime_fin->getTimestamp();
+                    if($actionComm->update($user) <= 0) {
+                        $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($ac), 'Echec du changement d\'utilisateur dans l\'événement agenda');
+                    }
+                } 
+            }
+            
+            if(!$changement_de_tech) {
+                $sujet = 'FI ' . $this->getRef() . ' - Modification horaire';
+                $message = 'Bonjour,<br />La fiche d\'intervention N°' . $this->getNomUrl() . ' à été modifiée au niveau des horaires.<br />';
+                $message.= 'Nouveaux horaires: ' . '<strong class=\'danger\'>Du '.$dateTime_debut->format('d/m/Y H:i').' au '.$dateTime_fin->format('d/m/Y H:i').'</strong>';
+                $tech = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $this->getData('fk_user_tech'));
+                
+                mailSyn2($sujet, $tech->getData('email'), null, $message);
+                
+            }
+            
         }
 
         return $errors;

@@ -684,6 +684,8 @@ class Bimp_Log extends BimpObject
                         }
                         $message .= "\n";
                     }
+                    
+                    $message .= "\n\n"."Extra Data : ".$this->displayExtraData();
 
                     mailSyn2("LOG URGENT", "dev@bimp.fr", null, $message);
                 }

@@ -34,7 +34,7 @@ class GSX_Repair extends BimpObject
     public static $repairTypes = array(
         'carry_in', 'repair_or_replace'
     );
-    public static $readyForPickupCodes = array('RFPU');
+    public static $readyForPickupCodes = array('RFPU','USHP');
     public static $cancelCodes = array('GX02', 'GX08', 'SCNC', 'CCAR', 'CCCR', 'CCNR');
     public static $closeCodes = array('SACM', 'SCOM', 'CFPH', 'CRCN', 'CRCP', 'CUNR', 'CRDE', 'SPCM');
 

@@ -884,7 +884,7 @@ class BContract_contrat extends BimpDolObject
         $errors = [];
         $warnings = [];
         
-       // $this->closeContratChildWhenActivateRenewManual();
+        $this->closeContratChildWhenActivateRenewManual(true);
         
         return Array('errors' => $errors, 'warnings' => $warnings, 'success' => $success);
     }

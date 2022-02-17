@@ -424,7 +424,7 @@ class PisteAPI extends BimpAPI
 
         $bdb = BimpCache::getBdb();
 
-        if ((int) $bdb->getValue('api_bimp_api', 'id', 'name = \'piste\'')) {
+        if ((int) $bdb->getValue('bimpapi_api', 'id', 'name = \'piste\'')) {
             $errors[] = 'Cette API a déjà été installée';
         } else {
             $api = BimpObject::createBimpObject('bimpapi', 'API_Api', array(

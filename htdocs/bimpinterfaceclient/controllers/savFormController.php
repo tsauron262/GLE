@@ -1630,6 +1630,14 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                         }
 
                         $result = GSX_Reservation::createReservation(1442050, $centre['shipTo'], $params, $req_errors, $debug);
+                        
+                        if(isset($result['errors']) && $result['errors'][0]){
+                            if($result['errors'][0]['code'] == 'DEVICE_INFORMATION_INVALID'){
+                                unset($params['device']);
+                                $result = GSX_Reservation::createReservation(1442050, $centre['shipTo'], $params, $req_errors, $debug);
+                            }
+                        }
+                        
                     }
 
                     if (!empty($result)) {

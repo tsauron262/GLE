@@ -135,6 +135,10 @@ class BimpObject extends BimpCache
         return $instance;
     }
     
+    public function getPdfNamePrincipal(){
+        BimpCore::addlog('"getPdfNamePrincipal" n\'est pas redéfinit dans '.$this->object_name);
+        return 'n_c.pdf';
+    }
     
 
     public function actionGenerateBulkPdf($data, &$success)
@@ -168,7 +172,7 @@ class BimpObject extends BimpCache
                 }
 
                 $dir = $obj->getFilesDir();
-                $filename = $obj->getRef() . '.pdf';
+                $filename = $obj->getPdfNamePrincipal();
 
                 if (!file_exists($dir . $filename)) {
                     $warnings[] = ucfirst($this->getLabel()) . ' ' . $obj->getLink() . ': fichier PDF absent (' . $dir . $filename . ')';
@@ -227,7 +231,7 @@ class BimpObject extends BimpCache
                     }
 
                     $dir = $obj->getFilesDir();
-                    $filename = $obj->getRef() . '.pdf';
+                    $filename = $obj->getPdfNamePrincipal();
 
                     if (!file_exists($dir . $filename)) {
                         $warnings[] = ucfirst($this->getLabel()) . ' ' . $obj->getLink() . ': fichier PDF absent (' . $dir . $filename . ')';

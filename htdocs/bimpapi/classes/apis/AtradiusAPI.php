@@ -29,22 +29,6 @@ class AtradiusAPI extends BimpAPI
         'buyerDetails2' => array(
             'label' => 'Details client',
             'url'   => '/credit-insurance/organisation-management/v1/buyers/'
-        ),
-        'consulterStructure' => array(
-            'label' => 'Consulter une structure',
-            'url'   => '/cpro/structures/v1/consulter'
-        ),
-        'rechercheService'   => array(
-            'label' => 'Recherche service',
-            'url'   => '/cpro/structures/v1/rechercher/services'
-        ),
-        'deposerPdfFacture'  => array(
-            'label' => 'Dépôt PDF facture',
-            'url'   => '/cpro/factures/v1/deposer/pdf'
-        ),
-        'soumettreFacture'   => array(
-            'label' => 'Envoi données facture',
-            'url'   => '/cpro/factures/v1/soumettre'
         )
     );
     public static $tokens_types = array(
@@ -71,8 +55,6 @@ class AtradiusAPI extends BimpAPI
 
     public function connect(&$errors = array(), &$warnings = array())
     {
-
-       
         if (!count($errors)) {
             $result = $this->execCurl('authenticate', array(
                 'fields' => array('inut'=>'inut')), $errors);
@@ -210,17 +192,6 @@ class AtradiusAPI extends BimpAPI
                             'title'  => 'Clé API en mode production'
                                 ), true, $warnings, $warnings);
 
-                $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
-                            'id_api' => $api->id,
-                            'name'   => 'prod_api_secret',
-                            'title'  => 'Secret API en mode production'
-                                ), true, $warnings, $warnings);
-
-                $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
-                            'id_api' => $api->id,
-                            'name'   => 'prod_id_fournisseur',
-                            'title'  => 'Identifiant fournisseur en mode production'
-                                ), true, $warnings, $warnings);
 
                 $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
                             'id_api' => $api->id,
@@ -240,17 +211,6 @@ class AtradiusAPI extends BimpAPI
                             'title'  => 'Clé API en mode test'
                                 ), true, $warnings, $warnings);
 
-                $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
-                            'id_api' => $api->id,
-                            'name'   => 'test_api_secret',
-                            'title'  => 'Secret API en mode test'
-                                ), true, $warnings, $warnings);
-
-                $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
-                            'id_api' => $api->id,
-                            'name'   => 'test_id_fournisseur',
-                            'title'  => 'Identifiant fournisseur en mode test'
-                                ), true, $warnings, $warnings);
             }
         }
 

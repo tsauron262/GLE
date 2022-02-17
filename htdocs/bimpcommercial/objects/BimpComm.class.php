@@ -756,6 +756,10 @@ class BimpComm extends BimpDolObject
 
         return $fields;
     }
+    
+    public function getPdfNamePrincipal(){
+        return $this->getRef() . '.pdf';
+    }
 
     // Getters filtres: 
 

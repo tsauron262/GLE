@@ -254,7 +254,7 @@ class PisteAPI extends BimpAPI
                     'allow_reconnect' => 0,
                     'fields'          => array(
                         'structure' => array(
-                            'identifiantStructure'     => '425551',
+                            'identifiantStructure'     => '18008901303720',
                             'typeIdentifiantStructure' => 'SIRET'
                         )
                     )
@@ -424,7 +424,7 @@ class PisteAPI extends BimpAPI
 
         $bdb = BimpCache::getBdb();
 
-        if ((int) $bdb->getValue('api_bimp_api', 'id', 'name = \'piste\'')) {
+        if ((int) $bdb->getValue('bimpapi_api', 'id', 'name = \'piste\'')) {
             $errors[] = 'Cette API a déjà été installée';
         } else {
             $api = BimpObject::createBimpObject('bimpapi', 'API_Api', array(

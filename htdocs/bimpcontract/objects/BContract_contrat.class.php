@@ -2721,7 +2721,7 @@ class BContract_contrat extends BimpDolObject
 
     public function getBulkActions()
     {
-        return array(
+        $actions = array(
 //            [
 //                'label' => 'Fusionner les contrats sélectionnés',
 //                'icon' => 'fas_sign-in-alt',
@@ -2735,6 +2735,23 @@ class BContract_contrat extends BimpDolObject
                 'btn_class' => 'setSelectedObjectsAction'
             ]
         );
+        if (1 || $this->canSetAction('sendEmail')) {
+            $actions[] = array(
+                'label'   => 'Fichiers PDF',
+                'icon'    => 'fas_file-pdf',
+                'onclick' => $this->getJsBulkActionOnclick('generateBulkPdf', array(), array('single_action' => true))
+            );
+            $actions[] = array(
+                'label'   => 'Fichiers Zip des PDF',
+                'icon'    => 'fas_file-pdf',
+                'onclick' => $this->getJsBulkActionOnclick('generateZipPdf', array(), array('single_action' => true))
+            );
+        }
+        return $actions;
+    }
+    
+    public function getPdfNamePrincipal(){
+        return 'Contrat_'.$this->getRef().'_Ex_OLYS.pdf';
     }
 
     public function actionAddContact($data, &$success)

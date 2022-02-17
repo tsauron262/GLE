@@ -254,7 +254,7 @@ class PisteAPI extends BimpAPI
                     'allow_reconnect' => 0,
                     'fields'          => array(
                         'structure' => array(
-                            'identifiantStructure'     => '425551',
+                            'identifiantStructure'     => '18008901303720',
                             'typeIdentifiantStructure' => 'SIRET'
                         )
                     )

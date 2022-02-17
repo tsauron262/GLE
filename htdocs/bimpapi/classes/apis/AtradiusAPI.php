@@ -29,6 +29,10 @@ class AtradiusAPI extends BimpAPI
         'buyerDetails2' => array(
             'label' => 'Details client',
             'url'   => '/credit-insurance/organisation-management/v1/buyers/'
+        ),
+        'findBuyers'    => array(
+            'label' => 'Recherche client',
+            'url'   => '/credit-insurance/organisation-management/v1/buyers'
         )
     );
     public static $tokens_types = array(
@@ -36,18 +40,57 @@ class AtradiusAPI extends BimpAPI
     );
 
     // Requêtes: 
+    public function findBuyer($filter, &$errors = array()){
+        $data = $this->execCurl('findBuyers', array(
+                    'url_params'          => $filter
+                        ), $errors);
+        
+        $result = array();
+        if(isset($data['data']) && isset($data['data'][0]) && isset($data['data'][0]) && isset($data['data'][0]['buyerId'])){
+            $buyerId = $data['data'][0]['buyerId'];
+            $result = $this->execCurl('buyerDetails2', array(
+                        'url_end'          => $buyerId
+                            ), $errors);
+        }
+        return $result;
+    }
+    
+    public function findBuyerBySiret($siret, &$errors = array()){
+        $result = $this->findBuyer(array(
+            'country' => 'FRA',
+            'uid'     => $siret,
+            'uidType' => 'NRN'
+        ));
+        return $result;
+    }
     
     public function testRequest(&$errors = array(), &$warnings = array())
     {
-//        return $this->execCurl('buyerDetails', array(
+//        $result = $this->findBuyerBySiret('512642950', $errors);
+        
+//        $result =  $this->execCurl('buyerDetails', array(
 //                    'url_params'          => array(
-//                        'customerId' => '512642950'
+//                        'customerId' => '9865574'
 //                    )
 //                        ), $errors);
         
-        return $this->execCurl('buyerDetails2', array(
-                    'url_end'          => '12345678'
+        $result =  $this->execCurl('buyerDetails2', array(
+                    'url_end'          => '9865574'
                         ), $errors);
+        
+
+        if (is_array($result) && isset($result['data']) && !empty($result['data'])) {
+            $html = BimpRender::renderRecursiveArrayContent($result['data'], array(
+                        'title'    => 'Infos Atradius',
+                        'foldable' => 1,
+                        'open'     => 1
+            ));
+            echo BimpRender::renderPanel(BimpRender::renderIcon('fas_bars', 'iconLeft') . 'Données', $html, '', array(
+                        'type' => 'secondary',
+                        'panel_class' => 'panel_info_altriadus'
+            ));
+        }
+        echo '<script>setCommonEvents($(".panel_info_altriadus"));</script>';
     }
 
 

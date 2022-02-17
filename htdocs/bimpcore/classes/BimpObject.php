@@ -4003,7 +4003,7 @@ class BimpObject extends BimpCache
             }
         }
 
-        if ($missing && $required && !$this->force_update) {
+        if ($missing && $required && !$this->force_update && $this->field_exists($field)) {
             $errors[] = 'Valeur obligatoire manquante : "' . BimpTools::ucfirst($this->getLabel()) . ': ' . $label . ' (' . $field . ')"';
             return $errors;
         }

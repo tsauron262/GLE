@@ -66,7 +66,7 @@ class AtradiusAPI extends BimpAPI
     
     public function testRequest(&$errors = array(), &$warnings = array())
     {
-//        $result = $this->findBuyerBySiret('512642950', $errors);
+        $result = $this->findBuyerBySiret('512642950', $errors);
         
 //        $result =  $this->execCurl('buyerDetails', array(
 //                    'url_params'          => array(
@@ -74,9 +74,9 @@ class AtradiusAPI extends BimpAPI
 //                    )
 //                        ), $errors);
         
-        $result =  $this->execCurl('buyerDetails2', array(
-                    'url_end'          => '9865574'
-                        ), $errors);
+//        $result =  $this->execCurl('buyerDetails2', array(
+//                    'url_end'          => '9865574'
+//                        ), $errors);
         
 
         if (is_array($result) && isset($result['data']) && !empty($result['data'])) {

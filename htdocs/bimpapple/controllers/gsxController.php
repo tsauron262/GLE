@@ -721,7 +721,8 @@ class gsxController extends BimpController
                     $is_tier_part = (!(string) $issue->getData('category_code'))? 1 : 0;
 
                 $result = $this->gsx_v2->partsSummaryBySerialAndIssue($serial, $issue);
-                $result = BimpTools::merge_array($result, $this->gsx_v2->partsSummaryBySerialAndIssue($serial, $issue, 'Recovery Kit'));
+                if($is_tier_part == -1 || $is_tier_part == 1)
+                    $result = BimpTools::merge_array($result, $this->gsx_v2->partsSummaryBySerialAndIssue($serial, $issue, 'Recovery Kit'));
                 $errors = $this->gsx_v2->getErrors();
 
                 if (empty($errors) && is_array($result)) {
@@ -1232,7 +1233,7 @@ class gsxController extends BimpController
         
         $onclick = 'gsx_loadAddPartsTestForm($(this), \'' . $serial . '\', ' . (int) $isIphone . ')';
 
-        $html .= '<button onclick="'.$onclick.'" class="btn btn-default">Prix des Composants</button>';
+        $html .= '<button onclick="'.$onclick.'" class="btn btn-default">'.BimpRender::renderIcon('euro').' Prix des Composants</button>';
 
         return array(
             'errors'   => $errors,
@@ -3791,7 +3792,8 @@ class gsxController extends BimpController
                 $headers .= '<th style = "min-width: 80px">Prix commande</th>';
                 $headers .= '<th style = "min-width: 80px">Prix stock</th>';
                 $headers .= '<th>Prix spéciaux</th>';
-                $headers .= '<th>Prix vente</th>';
+                $headers .= '<th>Prix vente HT</th>';
+                $headers .= '<th>Prix vente TTC</th>';
 
                 if (!$this->use_gsx_v2) {
                     $headers .= '<th style = "width: 30px; text-align: center"></th>';
@@ -3903,7 +3905,7 @@ class gsxController extends BimpController
                         }
                         BimpObject::getInstance('bimpsupport', 'BS_ApplePart');
                         $type = BS_ApplePart::getCategProdApple($num, $name);
-                        $vente_price = price(BS_ApplePart::convertPrixStatic($type, ($exchange_price > 0 ? $exchange_price : $stock_price), $num, $isIphone, 'EXCHANGE')).' €';
+                        $vente_price = BS_ApplePart::convertPrixStatic($type, ($exchange_price > 0 ? $exchange_price : $stock_price), $num, $isIphone, 'EXCHANGE');
                         
                         
                         $content .= '<td>' . $name . '</td>';
@@ -3938,7 +3940,8 @@ class gsxController extends BimpController
 //                            ));
 //                        }
 //                        $content .= '</td>';
-                        $content .= '<td>' . $vente_price . '</td>';
+                        $content .= '<td>' . price($vente_price) . ' €</td>';
+                        $content .= '<td>' . price($vente_price*1.2) . ' €</td>';
                         $content .= '</tr>';
                         $i++;
                         $odd = !$odd;

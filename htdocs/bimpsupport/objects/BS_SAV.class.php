@@ -2643,7 +2643,7 @@ class BS_SAV extends BimpObject
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($factureA), 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
             } else {
                 $factureA->addline("Acompte", $acompte / 1.2, 1, 20, null, null, null, 0, null, null, null, null, null, 'HT', null, 1, null, null, null, null, null, null, $acompte / 1.2);
-                if ($factureA->validate($user)) {
+                if ($factureA->validate($user) > 0) {
                     // Création du paiement: 
                     BimpTools::loadDolClass('compta/paiement', 'paiement');
                     $payement = new Paiement($this->db->db);
@@ -2717,7 +2717,7 @@ class BS_SAV extends BimpObject
                 }
             }
         }
-
+        
         return $errors;
     }
 
@@ -6011,7 +6011,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 }
             }
 
-            if (BimpCore::isContextPrivate()) {
+            if (!count($errors) && BimpCore::isContextPrivate()) {
                 // Création de la popale: 
                 if ($this->getData("id_propal") < 1 && $this->getData("sav_pro") < 1) {
                     $prop_errors = $this->createPropal();

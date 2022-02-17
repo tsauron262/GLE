@@ -56,9 +56,12 @@ class InvoiceStatementPDF extends BimpDocumentPDF
 
         global $conf;
 
-        $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
+        $logo_file = $conf->mycompany->dir_output . '/logos/' . str_replace('.png', '_PRO.png', $this->fromCompany->logo);
 
         $logo_width = 0;
+        if (!file_exists($logo_file)) {
+            $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
+        }        
         if (!file_exists($logo_file)) {
             $logo_file = '';
         } else {
@@ -94,7 +97,7 @@ class InvoiceStatementPDF extends BimpDocumentPDF
             'header_right'  => $header_right,
             'primary_color' => $this->primary,
             'doc_name'      => 'Relevé facturation',
-            'doc_ref'       => $docRef,
+            'doc_ref'       => $docRef.'<br/><br/> Code client : '.$this->object->code_client.'<br/> Code compta : '.$this->object->code_compta,
             'ref_extra'     => ''
         );
     }
@@ -206,7 +209,7 @@ class InvoiceStatementPDF extends BimpDocumentPDF
 
         if($this->total_acc > 0){
             $html .= '<tr>';
-            $html .= '<td style="background-color: #F0F0F0;">Total acompte</td>';
+            $html .= '<td style="background-color: #F0F0F0;">Total acomptes</td>';
             $html .= '<td style="text-align: right;background-color: #F0F0F0;">';
             $html .= BimpTools::displayMoneyValue($this->total_acc, '', 0, 0, 1, 2);
             $html .= '</td>';

@@ -347,7 +347,7 @@ class PisteAPI extends BimpAPI
                                     'idFournisseur' => $id_fournisseur
                                 ),
                                 'destinataire'          => array(
-                                    'codeDestinataire'     => $client->getData('siret'),
+                                    'codeDestinataire'     => $client->getSiret(),
                                     'codeServiceExecutant' => $code_service
                                 ),
                                 'references'            => array(

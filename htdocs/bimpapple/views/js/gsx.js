@@ -371,6 +371,7 @@ function gsx_loadAddPartsTestForm($button, serial,  isIphone) {
         processing_msg: 'Chargement en cours',
         success: function (result, bimpAjax) {
             setCommonEvents(bimpAjax.$resultContainer);
+            PM['parts' + '_issue_'] = new PartsManager('_issue_');
         }
     });
 }
@@ -898,7 +899,7 @@ function PartsManager(sufixe) {
         var $result = this.$container.find('.partsSearchResult');
         var search = this.$container.find('.searchPartInput').val();
         if (!search) {
-            bimp_msg('Veuillez entrer un code produit', 'danger', null, true);
+            bimp_msg('Veuillez entrer un code produit'+ search, 'danger', null, true);
             return;
         }
         if (!/[a-zA-Z0-9\-\_ ]+$/.test(search)) {

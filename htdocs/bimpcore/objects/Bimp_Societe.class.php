@@ -1645,7 +1645,7 @@ class Bimp_Societe extends BimpDolObject
         return $html;
     }
 
-    public function displayCommercials()
+    public function displayCommercials($first = false, $link = true)
     {
         global $modeCSV;
 
@@ -1656,11 +1656,13 @@ class Bimp_Societe extends BimpDolObject
             foreach ($ids as $id) {
                 $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id);
                 if (BimpObject::objectLoaded($user)) {
-                    if ($modeCSV)
+                    if ($modeCSV || !$link)
                         $return[] = $user->getName();
                     else
                         $return[] = $user->getLink();
                 }
+                if($first)
+                    break;
             }
         }
 
@@ -2456,6 +2458,10 @@ class Bimp_Societe extends BimpDolObject
         }
 
         return $errors;
+    }
+    
+    public function getSiret(){
+        return substr($this->getData('siret'), 0, 14);
     }
 
     public function getCreditSafeLettre($noHtml = false)

@@ -38,7 +38,7 @@ require_once __DIR__ . '/../Bimp_Lib.php';
 //print_r($errors);
 //echo BimpTools::sendMailGrouper();
 
-$limitRowid = 7265; // PROD: 7065
+$limitRowid = 7065; // PROD: 7065
 
 $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat');
 $table = 'contrat';

@@ -601,7 +601,7 @@ forms:
             - custom: 1
               label: Mode de paiement
               input_name: id_mode_paiement
-              required: 1
+              required: 0
               input: 
                   type: select_payment
                   value_type: code

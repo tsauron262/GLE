@@ -329,6 +329,7 @@ abstract class BimpAPI
                         'headers'         => array(),
                         'fields'          => array(),
                         'curl_options'    => array(),
+                        'url_end'         => '',
                         'url_base_type'   => BimpTools::getArrayValueFromPath(static::$requests, $request_name . '/url_base_type', 'default'),
                         'type'            => BimpTools::getArrayValueFromPath(static::$requests, $request_name . '/type', static::$default_requests_type),
                         'post_mode'       => BimpTools::getArrayValueFromPath(static::$requests, $request_name . '/post_mode', static::$default_post_mode),
@@ -349,6 +350,9 @@ abstract class BimpAPI
                     $url .= static::$requests[$request_name];
                 }
 
+                if (!empty($params['url_end'])) {
+                    $url .= $params['url_end'];
+                }
                 if (is_array($params['url_params']) && !empty($params['url_params'])) {
                     $url .= '?' . BimpTools::makeUrlParamsFromArray($params['url_params']);
                 }

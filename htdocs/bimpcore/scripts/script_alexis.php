@@ -38,7 +38,7 @@ require_once __DIR__ . '/../Bimp_Lib.php';
 //print_r($errors);
 //echo BimpTools::sendMailGrouper();
 
-$limitRowid = 7250; // PROD: 7065
+$limitRowid = 7265; // PROD: 7065
 
 $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat');
 $table = 'contrat';
@@ -47,13 +47,16 @@ $bimpDb = new BimpDb($db);
 
 //$allContrat = $bimpDb->getRows($table, $where, 10);
 
-$sql = 'SELECT rowid FROM llx_contrat WHERE rowid >= ' . $limitRowid . ' AND tmp_correct = 0  LIMIT 10';
+$sql = 'SELECT rowid FROM llx_contrat WHERE rowid >= ' . $limitRowid . ' AND tmp_correct = 0  LIMIT 50';
 $allContrat = $bimpDb->executeS($sql);
 
 echo '<pre>';
+
+$random_color_line = Array(rand(100, 200), rand(100, 200), rand(100, 200));
+
 foreach($allContrat as $c) {
     $contrat->fetch($c->rowid);
-    echo 'Date d\'effet: ' . $contrat->getData('date_start') . ' - Date de fin: '.$contrat->displayRealEndDate('Y-m-d').' <br />';
+    echo 'Date d\'effet: ' . $contrat->getData('date_start') . ' - Date de fin: '.$contrat->displayRealEndDate('Y-m-d').' ' . $contrat->getNomUrl() . '<br />';
     
     $children = $contrat->getChildrenList('lines');
     $parcour_renouvellement = 0;
@@ -65,29 +68,41 @@ foreach($allContrat as $c) {
     
     $cache_date_start = $dateStart->format('Y-m-d');
     $cache_date_end   = $dateEnd->format('Y-m-d');
+    $cache_color = $random_color_line;
     
-    foreach($children as $id_child) {
+    if(count($children) > 0) {
+        foreach($children as $id_child) {
         
-        $child = $contrat->getChildObject('lines', $id_child);
-        if($child->getData('renouvellement') == $parcour_renouvellement + 1) {
-            $new_date_start = new DateTime($cache_date_end);
-            $new_date_start->add(new DateInterval('P1D'));
-            $cache_date_start = $new_date_start->format('Y-m-d');
-            $new_date_end = new DateTime($cache_date_start);
-            $new_date_end->add(new DateInterval('P' . $contrat->getData('duree_mois') . 'M'));
-            $new_date_end->sub(new DateInterval('P1D'));
-            $cache_date_end = $new_date_end->format('Y-m-d');
-            $parcour_renouvellement++;
+            $child = $contrat->getChildObject('lines', $id_child);
+            if($child->getData('renouvellement') == $parcour_renouvellement + 1) {
+                $cache_color = Array(rand(1, 100), rand(1, 100), rand(1, 100));
+
+                $new_date_start = new DateTime($cache_date_end);
+                $new_date_start->add(new DateInterval('P1D'));
+                $cache_date_start = $new_date_start->format('Y-m-d');
+                $new_date_end = new DateTime($cache_date_start);
+                $new_date_end->add(new DateInterval('P' . $contrat->getData('duree_mois') . 'M'));
+                $new_date_end->sub(new DateInterval('P1D'));
+                $cache_date_end = $new_date_end->format('Y-m-d');
+                $parcour_renouvellement++;
+            }
+            
+            echo '<i style=\'margin-left:20px; color:rgb('.implode(',',$cache_color).')\'>'.$child->id.'('.$parcour_renouvellement.') Ouverture:' . $cache_date_start . ' Fermeture:'.$cache_date_end.'</i><br />';
+
         }
-        echo '<i style=\'margin-left:20px\'>'.$child->id.'('.$parcour_renouvellement.') Ouverture:' . $cache_date_start . ' Fermeture:'.$cache_date_end.'</i><br />';
         
+        if($cache_date_end === $contrat->displayRealEndDate('Y-m-d')) {
+            echo '<b style=\'color:green;margin-left:20px\'>Ok pour changement</b><br />';
+        } else {
+            echo '<b style=\'color:darkred;margin-left:20px\'>Pas Ok pour changement</b><br />';
+        }
+        
+    } else {
+        echo '<b style=\'margin-left:20px;color:purple\'>Pas de lignes dans ce contrat</b>';
     }
     
-    if($cache_date_end === $contrat->displayRealEndDate('Y-m-d')) {
-        echo '<b style=\'color:green;margin-left:20px\'>Ok pour changement</b><br />';
-    } else {
-        echo '<b style=\'color:darkred;margin-left:20px\'>Pas Ok pour changement</b><br />';
-    }
+    
+    
     
     echo '<br />';
 }

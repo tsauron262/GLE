@@ -19,9 +19,10 @@ class BimpClientForDol extends Bimp_Client{
     
     private function getClientsFinValidite($days) {
         
+        $days += 365; // Valable 1 an
         $date_limit_expire = new DateTime();
-        $date_limit_expire->add(new DateInterval('P' . $days . 'D'));
-        
+        $date_limit_expire->modify('-' . $days . ' day');
+                
         $filters = array(
             'date_atradius' => array(
                 'and' => array(
@@ -48,11 +49,19 @@ class BimpClientForDol extends Bimp_Client{
                 $this->addError("Erreur lors du chargement de la classe BimpNote");
         
             foreach ($clients as $c) {
+                
+                $date_validite_atra = new DateTime($c->getData('date_atradius'));
+                $date_validite_atra->add(new DateInterval('P1Y'));
+                $msg = "L'encours ICBA pour le client" . $c->getData('code_client') . ' ' . $c->getData('nom');
+                $msg .= " n'est valable que jusqu'au " . $date_validite_atra->format("d/m/Y");
+                $msg .= "<br/>Il convient de le renouveler avant cette date";
+                
+
                 $this->addError(implode('', $c->addNote("Ce compte client ne seras bientôt plus validé par Atradius",
                         BimpNote::BIMP_NOTE_MEMBERS, 0, 1, '',BimpNote::BN_AUTHOR_USER,
                         BimpNote::BN_DEST_GROUP, BimpNote::BN_GROUPID_ATRADIUS)));
                  
-                $this->output .= '<br/>Rappel envoyé pour ' .  $c->getNomUrl() . " (date de fin: " . $c->getData('date_atradius') . ')';
+                $this->output .= $msg . '<br/>';
                 $nb_rappels++;
                 }
         }

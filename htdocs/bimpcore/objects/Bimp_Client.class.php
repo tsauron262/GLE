@@ -792,7 +792,6 @@ class Bimp_Client extends Bimp_Societe
                 if ($has_retard or $date_tolere < $now)
                     $has_retard = 1;
 
-//                $fac->checkIsPaid(); // => non nécessaire: getRemainToPay() effectue le calcul en direct. 
                 $total_unpaid += (float) $fac->getRemainToPay(true);
             }
         }

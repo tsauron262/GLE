@@ -17,7 +17,7 @@ if(isset($_GET['tok'])){
     print_r(BS_SAV::setGsxActiToken($_GET['tok'], $_GET['log']));
     die('fin');
 }
-else{
+elseif(isset($_GET['id'])){
     $oldIdMax = $_GET['id'];
     $newIdMax = 0;
 
@@ -25,3 +25,5 @@ else{
 
     die($code.'|'.$newIdMax);
 }
+print_r($_GET);
+die ('pas de requete');

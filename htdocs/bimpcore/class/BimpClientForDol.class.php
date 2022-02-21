@@ -57,7 +57,7 @@ class BimpClientForDol extends Bimp_Client{
                 $msg .= "<br/>Il convient de le renouveler avant cette date";
                 
 
-                $this->addError(implode('', $c->addNote("Ce compte client ne seras bientôt plus validé par Atradius",
+                $this->addError(implode('', $c->addNote($msg,
                         BimpNote::BIMP_NOTE_MEMBERS, 0, 1, '',BimpNote::BN_AUTHOR_USER,
                         BimpNote::BN_DEST_GROUP, BimpNote::BN_GROUPID_ATRADIUS)));
                  

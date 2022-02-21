@@ -1,0 +1,1 @@
+ALTER TABLE llx_contrat ADD tmp_correct INT(1) NOT NULL DEFAULT '0';

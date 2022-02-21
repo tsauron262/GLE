@@ -185,7 +185,7 @@ class GSX_v2 extends GSX_Const
         $this->displayDebug('échec');
         $this->initError('Echec authentification (token ' . $this->acti_token . ')');
 
-        if ($this->appleId == 'admin.gle@bimp.fr') {
+        if ($this->appleId == self::$default_ids['apple_id']) {
             global $gsx_logout_mail_send;
 
             if (!$gsx_logout_mail_send) {

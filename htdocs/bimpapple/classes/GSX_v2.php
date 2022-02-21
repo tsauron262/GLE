@@ -135,13 +135,16 @@ class GSX_v2 extends GSX_Const
 
     // Gestion du login:
 
-    public function setActivationToken($token)
+    public function setActivationToken($token, $login = '')
     {
         if (!(string) $token) {
             return array(
                 'Token absent'
             );
         }
+        if($login != '')
+            $this->appleId = $login;
+        
         $this->acti_token = $token;
 
         if ($this->reauthenticate()) {

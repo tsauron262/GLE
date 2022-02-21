@@ -52,7 +52,7 @@ class BimpClientForDol extends Bimp_Client{
                 
                 $date_validite_atra = new DateTime($c->getData('date_atradius'));
                 $date_validite_atra->add(new DateInterval('P1Y'));
-                $msg = "L'encours ICBA pour le client" . $c->getData('code_client') . ' ' . $c->getData('nom');
+                $msg = "L'encours ICBA pour le client " . $c->getData('code_client') . ' ' . $c->getData('nom');
                 $msg .= " n'est valable que jusqu'au " . $date_validite_atra->format("d/m/Y");
                 $msg .= "<br/>Il convient de le renouveler avant cette date";
                 

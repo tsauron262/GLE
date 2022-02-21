@@ -87,14 +87,31 @@ foreach($allContrat as $c) {
                 $parcour_renouvellement++;
             }
             
-            echo '<i style=\'margin-left:20px; color:rgb('.implode(',',$cache_color).')\'>'.$child->id.'('.$parcour_renouvellement.') Ouverture:' . $cache_date_start . ' Fermeture:'.$cache_date_end.'</i><br />';
+            $oldOpen = new DateTime($child->getData('date_ouverture_prevue'));
+            
+            if($child->getData('date_fin_validite')) {
+                $oldClose = new DateTime($child->getData('date_fin_validite'));
+                $oldCloseDisplay = $oldClose->format('Y-m-d');
+            } else {
+                $oldCloseDisplay = 'Il n\'y à pas de date de fin';
+            }
+            
+            $changementLineDisplay = '';
+            
+            if($oldOpen->format('Y-m-d') == $cache_date_start && $oldCloseDisplay == $cache_date_end) {
+                $changementLineDisplay = '<b style=\'color:green\'>Pas de changement à opérer</b>';
+            } else {
+                $changementLineDisplay = '<b style=\'color:darkred\'>Des changements sont à opérer</b>';
+            }
+            
+            echo '<i style=\'margin-left:20px; color:rgb('.implode(',',$cache_color).')\'>'.$child->id.'('.$parcour_renouvellement.') Ouverture:' . $cache_date_start . ' Fermeture:'.$cache_date_end.'</i> - <b>(OLD OPEN: '.$oldOpen->format('Y-m-d').' OLD CLOSE: '.$oldCloseDisplay.')</b> '.$changementLineDisplay.'<br />';
 
         }
         
         if($cache_date_end === $contrat->displayRealEndDate('Y-m-d')) {
-            echo '<b style=\'color:green;margin-left:20px\'>Ok pour changement</b><br />';
+            echo '<b style=\'color:green;margin-left:20px\'>Les dates calculées correspondent aux dates du contrat</b><br />';
         } else {
-            echo '<b style=\'color:darkred;margin-left:20px\'>Pas Ok pour changement</b><br />';
+            echo '<b style=\'color:darkred;margin-left:20px\'>Les dates calculées ne correspondent pas aux dates du contrat</b><br />';
         }
         
     } else {

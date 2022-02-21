@@ -7,7 +7,10 @@ class Cron
 {
 
     public $output = "";
-
+    
+    public $idTechForVanina = [157,632];
+    public $sendEmailDefault = 'v.gilbert@bimp.fr';
+    
     public function start()
     {
         $this->relanceTechBrouillonJplus1etPlus();
@@ -47,8 +50,16 @@ class Cron
             }
             $mail .= "<br />Si la régularisation a été faite entre temps, merci de ne pas tenir compte de cet email.<br />Cordialement.";
             
-//            echo '<br/><br/>'.$tech->getData('email').'<br/>'.$mail;
-            mailSyn2("Fiches d'intervention en brouillon", BimpTools::cleanEmailsStr($tech->getData('email')), null, $mail);
+            $emailSendTo = BimpTools::cleanEmailsStr($tech->getData('email'));
+            $sujet = 'Fiches d\'intervention en brouillon';
+            
+            if(in_array($id_tech, $this->idTechForVanina)) {
+                $sujet = 'Fiche d\'intervention en brouillon de ' . $tech->getName();
+                $emailSendTo = $this->sendEmailDefault;
+                $email .= '<br /><br />Ceci est un mail de redirection de ' . $tech->getData('email') . ' vers ' . $this->sendEmailDefault;
+            }
+            
+            mailSyn2($sujet, $emailSendTo, null, $mail);
         }
     }
 }

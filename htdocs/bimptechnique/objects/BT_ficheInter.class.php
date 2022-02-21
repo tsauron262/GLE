@@ -2118,6 +2118,7 @@ class BT_ficheInter extends BimpDolObject
                         if(!in_array($this->getData('fk_soc'), explode(',', BimpCore::getConf('bimptechnique_id_societe_auto_terminer')))) {
                             $task = BimpCache::getBimpObjectInstance("bimptask", "BIMP_Task");
                             $data = array(
+                                "dst"  => "dispatch@bimp.fr",
                                 "src"  => "noreply@bimp.fr",
                                 "subj" => "Fiche d’intervention non liée",
                                 "prio" => 20,

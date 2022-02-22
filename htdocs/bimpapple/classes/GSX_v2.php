@@ -135,13 +135,16 @@ class GSX_v2 extends GSX_Const
 
     // Gestion du login:
 
-    public function setActivationToken($token)
+    public function setActivationToken($token, $login = '')
     {
         if (!(string) $token) {
             return array(
                 'Token absent'
             );
         }
+        if($login != '')
+            $this->appleId = $login;
+        
         $this->acti_token = $token;
 
         if ($this->reauthenticate()) {
@@ -182,7 +185,7 @@ class GSX_v2 extends GSX_Const
         $this->displayDebug('échec');
         $this->initError('Echec authentification (token ' . $this->acti_token . ')');
 
-        if ($this->appleId == 'admin.gle@bimp.fr') {
+        if ($this->appleId == self::$default_ids['apple_id']) {
             global $gsx_logout_mail_send;
 
             if (!$gsx_logout_mail_send) {

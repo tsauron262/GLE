@@ -1,5 +1,6 @@
 <?php
 
+
 //$chaine = file_get_contents("/data/synchro/test.txt");
 //
 //        $chaine = str_replace("\x0D\x0A\x20", '', $chaine);
@@ -21,7 +22,62 @@ require("../main.inc.php");
 
 llxHeader();
 
-echo BimpCache::$cache_server->printAll('product');
+$url = "https://login-partner-connect.apple.com/api/login";
+
+//echo BimpCache::$cache_server->printAll('product');
+$ch = curl_init();  
+  
+// Récupérer le contenu de la page
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
+  
+//Saisir l'URL et la transmettre à la variable.
+curl_setopt($ch, CURLOPT_URL, $url); 
+
+echo '<pre>';
+$return = curl_exec($ch);
+print_r($return);
+
+$return2 = curl_getinfo($ch);
+print_r($return2);
+
+if(isset($return2['redirect_url'])){
+    $url = $return2['redirect_url'];
+    $curl = curl_init($url);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
+
+    $page = curl_exec($curl);
+    if(curl_errno($curl)):
+            echo 'Erro: ' . curl_error($curl);
+            exit;
+    endif;
+
+    $DOM = new DOMDocument;
+    libxml_use_internal_errors(true);
+
+    if(!$DOM->loadHTML($page)):
+            $erros = null;
+            foreach (libxml_get_errors() as $error):
+                    $errors.= $error->message."\r\n"; 
+            endforeach;
+
+            libxml_clear_errors();
+            print "LibXML Erros: \r\n$erros";
+            return;
+    endif;
+    
+
+    $Xpath = new DOMXPath($DOM);
+
+    $content = $Xpath->query('//*[@class="content"]')->item(0);
+    echo utf8_decode($content->textContent).'fin';
+    
+echo $DOM->saveHTML();
+    $return2 = curl_getinfo($curl);
+    print_r($DOM);
+    curl_close($curl);
+}
+
+print_r();
 
 die('fin');
 //if($_REQUEST['deleteAll'] == 'true')

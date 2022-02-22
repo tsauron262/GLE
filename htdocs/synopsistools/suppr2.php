@@ -38,14 +38,10 @@ require_once('../main.inc.php');
 llxHeader();
 echo 'ff
 <script>
+    
     jQuery("document").ready(function(){
         var iframe = document.createElement("iframe");
-        var params = window.location.search;
-        if(params == "")
-            params = "?fc=savForm";
-        else
-            params += "&fc=savForm";
-        iframe.src = "https://erp.bimp.fr/bimp8/bimpinterfaceclient/client.php"+params;
+        iframe.src = "https://erp.bimp.fr/b/"+window.location.search.replace("?", "");
         /* style peut être modifiée */
         iframe.style["width"] = "100%";
         iframe.style["min-height"] = "1200px";

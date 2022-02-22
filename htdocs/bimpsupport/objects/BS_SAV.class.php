@@ -5408,33 +5408,55 @@ class BS_SAV extends BimpObject
             'warnings' => $warnings
         );
     }
+    
+    public static function getCodeApple($idMax = 0, &$newIdMax = 0){
+        $code = '';
+        $db = BimpCache::getBdb();
+        $result = $db->executeS("SELECT *
+FROM " . MAIN_DB_PREFIX . "bimpcore_note a
+WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 'BIMP_Task' AND a.id_obj = '25350' ORDER by id DESC");
+        if (isset($result[0])) {
+            $ln = $result[0];
+            $newIdMax = $ln->id;
+            if ($idMax != 0 && $newIdMax > $idMax) {
+                $code = $ln->content;
+                $tabCode = explode('votre identifiant Apple est :', $code);
+                if (isset($tabCode[1]))
+                    $code = $tabCode[1];
+                else{
+                    $tabCode = explode('Your Apple ID Code is: ', $code);
+                    if (isset($tabCode[1]))
+                        $code = $tabCode[1];
+                    
+                }
+                $tabCode = explode('. Ne le', $code);
+                if (isset($tabCode[1]))
+                    $code = $tabCode[0];
+                else{
+                    $tabCode = explode('. Don', $code);
+                    if (isset($tabCode[1]))
+                        $code = $tabCode[0];
+                }
+                $code = str_replace(" ", "", $code);
+            }
+        }
+        return $code;
+    }
 
     public function actionGetCodeApple($data, &$success)
     {
         $idMax = $data['idMax'];
         $success = 'Code pas encore reçu';
-
-        $result = $this->db->executeS("SELECT *
-FROM " . MAIN_DB_PREFIX . "bimpcore_note a
-WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 'BIMP_Task' AND a.id_obj = '25350' ORDER by id DESC");
-        if (isset($result[0])) {
-            $ln = $result[0];
-            $success_callback = "setTimeout(function(){checkCode();}, 2000);";
-            if ($idMax == 0) {
+        
+        $newIdMax = 0;
+        $code = static::getCodeApple($idMax, $newIdMax);
+        
+        $success_callback = "setTimeout(function(){checkCode();}, 2000);";
+        if($code != ''){
+            if ($idMax == 0)
                 $success_callback .= 'idMaxMesg = ' . $ln->id . ';';
-            } elseif ($idMax == $ln->id) {
-                //On fait rien pas recu
-            } else {
-                $code = $ln->content;
-                $tabCode = explode('votre identifiant Apple est :', $code);
-                if (isset($tabCode[1]))
-                    $code = $tabCode[1];
-                $tabCode = explode('. Ne le', $code);
-                if (isset($tabCode[1]))
-                    $code = $tabCode[0];
-                $code = str_replace(" ", "", $code);
+            elseif($idMax < $newIdMax)
                 $success_callback = "text = '" . urlencode($code) . "'; alert(text); const notification = new Notification('Code Apple', { body: text });";
-            }
         }
 
         return array(
@@ -5558,6 +5580,15 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             'warnings' => $warnings
         );
     }
+    
+    public static function setGsxActiToken($token, $login = ''){
+        require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
+
+        $gsx = new GSX_v2();
+
+        $errors = $gsx->setActivationToken($token, $login);
+        return $errors;
+    }
 
     public function actionSetGsxActiToken($data, &$success)
     {
@@ -5570,11 +5601,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         if (!$token) {
             $errors[] = 'Token absent';
         } else {
-            require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
-
-            $gsx = new GSX_v2();
-
-            $errors = $gsx->setActivationToken($token);
+            $errors = static::setGsxActiToken($token);
         }
 
         return array(

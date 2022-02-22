@@ -39,14 +39,14 @@ class BContract_contrat extends BimpDolObject
     CONST CONTRAT_DELAIS_8_HEURES = 8;
     CONST CONTRAT_DELAIS_16_HEURES = 16;
     // Les renouvellements
-    CONST CONTRAT_RENOUVELLEMENT_NON = 0;
-    CONST CONTRAT_RENOUVELLEMENT_1_FOIS = 1;
-    CONST CONTRAT_RENOUVELLEMENT_2_FOIS = 3;
-    CONST CONTRAT_RENOUVELLEMENT_3_FOIS = 6;
-    CONST CONTRAT_RENOUVELLEMENT_4_FOIS = 4;
-    CONST CONTRAT_RENOUVELLEMENT_5_FOIS = 5;
-    CONST CONTRAT_RENOUVELLEMENT_6_FOIS = 7;
-    CONST CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION = 12;
+    CONST CONTRAT_RENOUVELLEMENT_NON = 0; // 100
+    CONST CONTRAT_RENOUVELLEMENT_1_FOIS = 1; // 101
+    CONST CONTRAT_RENOUVELLEMENT_2_FOIS = 3; // 102
+    CONST CONTRAT_RENOUVELLEMENT_3_FOIS = 6; // 103
+    CONST CONTRAT_RENOUVELLEMENT_4_FOIS = 4; // 104
+    CONST CONTRAT_RENOUVELLEMENT_5_FOIS = 5; // 105
+    CONST CONTRAT_RENOUVELLEMENT_6_FOIS = 7; // 106
+    CONST CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION = 12; // 112
     // Contrat dénoncé
     CONST CONTRAT_DENOUNCE_NON = 0;
     CONST CONTRAT_DENOUNCE_OUI_DANS_LES_TEMPS = 1;
@@ -108,7 +108,7 @@ class BContract_contrat extends BimpDolObject
         self::CONTRAT_RENOUVELLEMENT_NON             => 'Non',
     );
     public static $renouvellement_create = Array(
-        0                                            => "Choix du renouvellement",
+        self::CONTRAT_RENOUVELLEMENT_NON             => "Choix du renouvellement",
         self::CONTRAT_RENOUVELLEMENT_1_FOIS          => 'Tacite 1 fois',
         self::CONTRAT_RENOUVELLEMENT_2_FOIS          => 'Tacite 2 fois',
         self::CONTRAT_RENOUVELLEMENT_3_FOIS          => 'Tacite 3 fois',
@@ -118,7 +118,7 @@ class BContract_contrat extends BimpDolObject
         self::CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION => 'Sur proposition'
     );
     public static $renouvellement_edit = Array(
-        0                                            => 'Aucun',
+        self::CONTRAT_RENOUVELLEMENT_NON             => 'Aucun',
         self::CONTRAT_RENOUVELLEMENT_1_FOIS          => 'Tacite 1 fois',
         self::CONTRAT_RENOUVELLEMENT_2_FOIS          => 'Tacite 2 fois',
         self::CONTRAT_RENOUVELLEMENT_3_FOIS          => 'Tacite 3 fois',

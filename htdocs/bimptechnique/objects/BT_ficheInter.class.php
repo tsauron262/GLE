@@ -2127,7 +2127,14 @@ class BT_ficheInter extends BimpDolObject
                             );
                             $errors = BimpTools::merge_array($errors, $task->validateArray($data));
                             $errors = BimpTools::merge_array($errors, $task->create());
+                            if(!count($errors)) {
+                                mailSyn2($data['subj'], $data['dst'], null, $data['txt']);
+                            }
+                            
                         }
+                        
+                        
+                        
                     }
                     
                     // Envoi au client: 

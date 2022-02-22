@@ -328,7 +328,7 @@ class ValidComm extends BimpObject
     }
     
     private function getEncours($bimp_object){
-
+                
         if(method_exists($bimp_object, 'getClientFacture'))
             $client = $bimp_object->getClientFacture();
         else
@@ -336,9 +336,9 @@ class ValidComm extends BimpObject
         $max = $client->getData('outstanding_limit');
         
         $actuel = $client->getEncours();
-
-        return $actuel - $max;
+        $actuel += $client->getEncoursNonFacture();
         
+        return $actuel - $max;
     }
     
     

@@ -70,7 +70,8 @@ $tabPrefixe = array("" => "Général", "_deprecated" => "Deprecated",
     "_sauv" => "Sauv", "_admin" => "Log Admin", "_extract" => "Export", "_devissav" => "Devis SAV",
     "_charge_sql" => "Charge SQL",
     "_duplicate" => "Duplicate/Forbiden",
-    "_redis" => "Redis"
+    "_redis" => "Redis",
+    "_correcte_dates_lines_contrats" => "Correction des dates des lignes des contrats"
     );
 
 

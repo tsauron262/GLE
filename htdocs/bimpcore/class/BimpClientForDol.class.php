@@ -52,12 +52,12 @@ class BimpClientForDol extends Bimp_Client{
                 
                 $date_validite_atra = new DateTime($c->getData('date_atradius'));
                 $date_validite_atra->add(new DateInterval('P1Y'));
-                $msg = "L'encours ICBA pour le client" . $c->getData('code_client') . ' ' . $c->getData('nom');
+                $msg = "L'encours ICBA pour le client " . $c->getData('code_client') . ' ' . $c->getData('nom');
                 $msg .= " n'est valable que jusqu'au " . $date_validite_atra->format("d/m/Y");
                 $msg .= "<br/>Il convient de le renouveler avant cette date";
                 
 
-                $this->addError(implode('', $c->addNote("Ce compte client ne seras bientôt plus validé par Atradius",
+                $this->addError(implode('', $c->addNote($msg,
                         BimpNote::BIMP_NOTE_MEMBERS, 0, 1, '',BimpNote::BN_AUTHOR_USER,
                         BimpNote::BN_DEST_GROUP, BimpNote::BN_GROUPID_ATRADIUS)));
                  

@@ -795,6 +795,17 @@ Bien cordialement
 L’équipe BIMP";
 
                 $from = 'savbimp@bimp.fr';
+                
+                $centre = '';
+                foreach ($users as $u) {
+                    if (!empty($u['centre'])) {
+                        $centre = $u['centre'];
+                        break;
+                    }
+                }
+                $centres = BimpCache::getCentres();
+                if(isset($centres[$centre]) && isset($centres[$centre]['mail']))
+                    $from = $centres[$centre]['mail'];
 
                 $to = BimpTools::cleanEmailsStr($email_client);
                 $this->debug_content .= 'Envoi e-mail client à ' . $to . ': ';
@@ -803,7 +814,7 @@ L’équipe BIMP";
                 $mail_errors = array();
 
                 if ($bimpMail->send($mail_errors)) {
-                    $this->Success('Envoi e-mail client OK (Destinataire(s): ' . $to . ')', $to, null, $resId);
+                    $this->Success('Envoi e-mail client OK (Destinataire(s): ' . $to . ', From : '.$from.')', $to, null, $resId);
                     $this->debug_content .= '<span class="success">OK</span>';
                 } else {
                     $this->debug_content .= '<span class="danger">ECHEC</span>';

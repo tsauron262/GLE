@@ -94,6 +94,7 @@ class GSX_v2 extends GSX_Const
     {
         if ($this->ch) {
             curl_close($this->ch);
+            $this->ch = false;
         }
     }
 
@@ -186,7 +187,13 @@ class GSX_v2 extends GSX_Const
         $this->initError('Echec authentification (token ' . $this->acti_token . ')');
 
         if ($this->appleId == self::$default_ids['apple_id']) {
-            global $gsx_logout_mail_send;
+            global $gsx_logout_mail_send, $phantomAuthTest;
+            if(!$phantomAuthTest){
+                $phantomAuthTest = true;
+                static::phantomAuth(self::$default_ids['apple_id'], self::$default_ids['apple_pword']);
+                $this->logged = true;
+                return 1;
+            }
 
             if (!$gsx_logout_mail_send) {
                 global $user, $langs;
@@ -200,6 +207,29 @@ class GSX_v2 extends GSX_Const
         $this->saveToken('acti', '');
 
         return 0;
+    }
+    
+    public static function phantomAuth($login, $mdp){
+        $connection = ssh2_connect('10.192.20.152', 22);
+        if(!ssh2_auth_pubkey_file($connection,'phantomjs', '/usr/local/data2/bimp8/keys/phantomjs.pub', '/usr/local/data2/bimp8/keys/phantomjs'))
+            echo 'pas dauh';
+
+//        $stream = ssh2_exec($connection, '/usr/local/bin/phantomjs /home/phantomjs/loadspeed.js https://www.kp.ru -i');
+        
+        $commande = '/usr/local/bin/phantomjs --web-security=no /home/phantomjs/apple.js '.$login.' '.$mdp;
+//        $commande = '/usr/local/bin/phantomjs --web-security=no /home/phantomjs/apple.js tommy@drsi.fr 7v06KZyRX8sm';
+//        die('ssh -i /usr/local/data2/bimp8/keys/phantomjs phantomjs@10.192.20.152 '.$commande);
+        $stream = ssh2_exec($connection, $commande);
+        
+        
+        $retour = '';
+        $stderr_stream = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);
+        stream_set_blocking($stream, true);
+        while($line = fgets($stream)) {
+                flush();
+                $retour .= $line."<br />";
+        }
+        return $retour;
     }
 
     public function reauthenticate()

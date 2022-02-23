@@ -191,7 +191,9 @@ class GSX_v2 extends GSX_Const
             if(!$phantomAuthTest){
                 $phantomAuthTest = true;
                 static::phantomAuth(self::$default_ids['apple_id'], self::$default_ids['apple_pword']);
-                $this->logged = true;
+                global $user;
+                $user->fetch_optionals();
+                $this->__construct($this->shipTo);
                 return 1;
             }
 

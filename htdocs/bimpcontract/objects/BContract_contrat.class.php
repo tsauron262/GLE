@@ -3848,6 +3848,23 @@ class BContract_contrat extends BimpDolObject
         //print_r($interval);
         return $interval->days;
     }
+    
+    public function facturationIsDemainCron($heure_cron = 23) {
+        $echeancier = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_echeancier');
+        if($echeancier->find(['id_contrat' => $this->id], true)) {
+            $today = new DateTime(date('Y-m-d ' . $heure_cron . ':00:00'));
+            $nextFacturation = new DateTime($echeancier->getData('next_facture_date'));
+            
+            $diff = $today->diff($nextFacturation);
+            
+            if($diff->y == 0 && $diff->m == 0 && $diff->d == 0 && $diff->h == 1) {
+                return 1;
+            }
+
+        }
+        
+        return 0;
+    }
 
     public function getJourRestantReel()
     {

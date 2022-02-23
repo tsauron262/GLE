@@ -206,6 +206,9 @@ class GSX_Repair extends BimpObject
     public function getActionsButtons()
     {
         $buttons = array();
+        
+        if(!count($this->repairLookUp))
+            $this->lookup ();
 
         if ($this->isLoaded() && $this->use_gsx_v2) {
             if (!(int) $this->findInGsx && !(int) $this->getData('canceled')) {

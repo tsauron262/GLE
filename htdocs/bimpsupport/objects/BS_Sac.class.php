@@ -8,9 +8,8 @@ class BS_Sac extends BimpObject
     {
         $errors = array();
         if(isset($_REQUEST['nb_create'])){
-            
             for($i=0; $i<$_REQUEST['nb_create']; $i++){
-                $this->set('ref', BimpTools::getNextRef('bs_sac', 'ref', 'SAC', 5));
+                $this->set('ref', BimpTools::getNextRef('bs_sac', 'ref', 'SAC'.$_REQUEST['code_centre'], 5));
                 $errors = BimpTools::merge_array($errors, parent::create());
                 $this->tmp_ids[] = $this->id;
             }
@@ -18,6 +17,47 @@ class BS_Sac extends BimpObject
         }
         
         return $errors;
+    }
+    
+    public function getDefaultCodeCentre()
+    {
+        if (BimpTools::isSubmit('code_centre')) {
+            return BimpTools::getValue('code_centre');
+        } else {
+            global $user;
+            $userCentres = explode(' ', $user->array_options['options_apple_centre']);
+            foreach ($userCentres as $code) {
+                if (preg_match('/^ ?([A-Z]+) ?$/', $code, $matches)) {
+                    return $matches[1];
+                }
+            }
+
+            $id_entrepot = (int) $this->getData('id_entrepot');
+            if (!$id_entrepot) {
+                $id_entrepot = BimpTools::getValue('id_entrepot', 0);
+            }
+            if ($id_entrepot) {
+                global $tabCentre;
+                foreach ($tabCentre as $code_centre => $centre) {
+                    if ((int) $centre[8] === $id_entrepot) {
+                        return $code_centre;
+                    }
+                }
+            }
+        }
+
+        return '';
+    }
+    
+
+    public function getListCentre($field, $include_empty = false)
+    {
+        if ($this->isLoaded())
+            $value = $this->getData($field);
+        else
+            $value = '';
+
+        return static::getUserCentresArray($value, $include_empty);
     }
     
     public function getCreateJsCallback()

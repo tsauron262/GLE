@@ -475,7 +475,7 @@ class GSX_v2 extends GSX_Const
             }
             $data = false;
         }
-
+//print_r($infos);
         return $data;
     }
 
@@ -522,7 +522,9 @@ class GSX_v2 extends GSX_Const
                 )
             )
         );
-        if($desc != '')
+        if(is_array($desc))
+            $params['partDescriptions'] = $desc;
+        elseif($desc != '')
             $params['partDescriptions'] = array($desc);
 
         if (BimpObject::objectLoaded($issue) && (string) $issue->getData('category_code')) {

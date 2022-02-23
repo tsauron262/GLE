@@ -722,7 +722,7 @@ class gsxController extends BimpController
 
                 $result = $this->gsx_v2->partsSummaryBySerialAndIssue($serial, $issue);
                 if($is_tier_part == -1 || $is_tier_part == 1)
-                    $result = BimpTools::merge_array($result, $this->gsx_v2->partsSummaryBySerialAndIssue($serial, $issue, 'Recovery Kit'));
+                    $result = BimpTools::merge_array($result, $this->gsx_v2->partsSummaryBySerialAndIssue($serial, $issue, array('Recovery Kit', 'box')));
                 $errors = $this->gsx_v2->getErrors();
 
                 if (empty($errors) && is_array($result)) {

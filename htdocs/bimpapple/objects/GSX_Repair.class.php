@@ -1778,7 +1778,8 @@ class GSX_Repair extends BimpObject
 
                     $maj_required = false;
                     $codeReturnAttendKBB = array('KBB', 'ABU', 'NRET');
-                    if (isset($part['returnStatusCode']) && in_array($part['returnStatusCode'], $codeReturnAttendKBB) &&
+                    
+                    if ((!isset($part['returnStatusCode']) || in_array($part['returnStatusCode'], $codeReturnAttendKBB)) &&
                             (!isset($part['kgbDeviceDetail']) || empty($part['kgbDeviceDetail']))) {
                         $maj_required = true;
                     }

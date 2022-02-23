@@ -209,6 +209,8 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
 
     public function processReservations($soldTo, $shipTos, $from, $to)
     {
+        global $user, $langs;
+        $this->Info('Process reservations. User : '.$user->getFullName($langs));
         foreach ($shipTos as $shipTo) {
             $one_res_done = false;
             $this->debug_content .= '<h3>SoldTo: ' . $soldTo . ' - ShipTo: ' . $shipTo . '</h3><br/>';

@@ -63,7 +63,7 @@
                             $commercial_suivi = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $contrat->getData('fk_commercial_suivi'));
                             $commercial_signa = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $contrat->getData('fk_commercial_signature'));
                             $sujet = 'Rappel facturation contrat ' . $contrat->getRef() . ' - ' . $client->getData('code_client') . ' ' . $client->getName();
-                            $message = 'Bonjour,<br />Pour rappel, le contrat numéro ' . $contrat->getNomUrl() . ' doit être facturé demain ('.$demain->format('d/m/Y').').<br />'
+                            $message = 'Bonjour,<br />Pour rappel, le contrat numéro ' . $contrat->getNomUrl() . ' doit être facturé le '.$demain->format('d/m/Y').'.<br />'
                                     . '<u>Informations</u><br />'
                                     . 'Référence du contrat: ' . $contrat->getNomUrl() . '<br />Client: ' . $client->getNomUrl() . ' ' . $client->getName() . '<br />'
                                     . 'Commercial suivi de contrat: ' . $commercial_suivi->getName() . '<br />Commercial signataire du contrat: ' . $commercial_signa->getName(); 

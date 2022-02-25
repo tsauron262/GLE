@@ -796,7 +796,7 @@ class ObjectLine extends BimpObject
                 $joins[$line_alias] = array(
                     'alias' => $line_alias,
                     'table' => static::$dol_line_table,
-                    'on'    => $line_alias . '.rowid = a.id_line'
+                    'on'    => $line_alias . '.rowid = '.$this->alias.'.id_line'
                 );
                 $joins[$alias] = array(
                     'alias' => $alias,
@@ -826,7 +826,7 @@ class ObjectLine extends BimpObject
                 $joins[$line_alias] = array(
                     'alias' => $line_alias,
                     'table' => static::$dol_line_table,
-                    'on'    => $line_alias . '.rowid = a.id_line'
+                    'on'    => $line_alias . '.rowid = '.$this->alias.'.id_line'
                 );
                 $joins[$alias] = array(
                     'alias' => $alias,
@@ -850,7 +850,7 @@ class ObjectLine extends BimpObject
                 $joins[$line_alias] = array(
                     'alias' => $line_alias,
                     'table' => static::$dol_line_table,
-                    'on'    => $line_alias . '.rowid = a.id_line'
+                    'on'    => $line_alias . '.rowid = '.$this->alias.'.id_line'
                 );
                 $joins[$alias] = array(
                     'alias' => $alias,
@@ -869,7 +869,7 @@ class ObjectLine extends BimpObject
                     $joins[$line_alias] = array(
                         'alias' => $line_alias,
                         'table' => static::$dol_line_table,
-                        'on'    => $line_alias . '.rowid = a.id_line'
+                        'on'    => $line_alias . '.rowid = '.$this->alias.'.id_line'
                     );
 
                     if ((int) $values[0]) {

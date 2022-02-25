@@ -206,6 +206,9 @@ class GSX_Repair extends BimpObject
     public function getActionsButtons()
     {
         $buttons = array();
+        
+        if(!count($this->repairLookUp))
+            $this->lookup ();
 
         if ($this->isLoaded() && $this->use_gsx_v2) {
             if (!(int) $this->findInGsx && !(int) $this->getData('canceled')) {
@@ -1778,7 +1781,8 @@ class GSX_Repair extends BimpObject
 
                     $maj_required = false;
                     $codeReturnAttendKBB = array('KBB', 'ABU', 'NRET');
-                    if (isset($part['returnStatusCode']) && in_array($part['returnStatusCode'], $codeReturnAttendKBB) &&
+                    
+                    if ((!isset($part['returnStatusCode']) || in_array($part['returnStatusCode'], $codeReturnAttendKBB)) &&
                             (!isset($part['kgbDeviceDetail']) || empty($part['kgbDeviceDetail']))) {
                         $maj_required = true;
                     }

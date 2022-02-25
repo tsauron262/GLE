@@ -22,6 +22,33 @@ require("../main.inc.php");
 
 llxHeader();
 
+
+require_once DOL_DOCUMENT_ROOT.'/bimpapple/classes/GSX_v2.php';
+echo GSX_v2::phantomAuth();
+//$ret = $out = '';
+//
+//$connection = ssh2_connect('10.192.20.152', 22);
+////ssh2_auth_password($connection, 'phantomjs', 'password');
+//if(!ssh2_auth_pubkey_file($connection,'phantomjs', '/usr/local/data2/bimp8/keys/phantomjs.pub', '/usr/local/data2/bimp8/keys/phantomjs'))
+//        echo 'pas dauh';
+//
+//$stream = ssh2_exec($connection, '/usr/local/bin/phantomjs /home/phantomjs/loadspeed.js https://www.kp.ru -i');
+//$stderr_stream = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);
+// stream_set_blocking($stream, true);
+//                while($line = fgets($stream)) {
+//                        flush();
+//                        echo $line."<br />";
+//                }
+
+
+
+//echo exec('ssh -i /usr/local/data2/bimp8/keys/phantomjs phantomjs@10.192.20.152 /usr/local/bin/phantomjs /home/phantomjs/loadspeed.js https://www.kp.ru', $ret, $out);
+//
+//print_r($ret);
+//print_r($out);
+
+
+die('fin');
 $url = "https://login-partner-connect.apple.com/api/login";
 
 //echo BimpCache::$cache_server->printAll('product');

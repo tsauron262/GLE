@@ -209,6 +209,8 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
 
     public function processReservations($soldTo, $shipTos, $from, $to)
     {
+        global $user, $langs;
+        $this->Info('Process reservations. User : '.$user->getFullName($langs));
         foreach ($shipTos as $shipTo) {
             $one_res_done = false;
             $this->debug_content .= '<h3>SoldTo: ' . $soldTo . ' - ShipTo: ' . $shipTo . '</h3><br/>';
@@ -795,6 +797,17 @@ Bien cordialement
 L’équipe BIMP";
 
                 $from = 'savbimp@bimp.fr';
+                
+                $centre = '';
+                foreach ($users as $u) {
+                    if (!empty($u['centre'])) {
+                        $centre = $u['centre'];
+                        break;
+                    }
+                }
+                $centres = BimpCache::getCentres();
+                if(isset($centres[$centre]) && isset($centres[$centre]['mail']))
+                    $from = $centres[$centre]['mail'];
 
                 $to = BimpTools::cleanEmailsStr($email_client);
                 $this->debug_content .= 'Envoi e-mail client à ' . $to . ': ';
@@ -803,7 +816,7 @@ L’équipe BIMP";
                 $mail_errors = array();
 
                 if ($bimpMail->send($mail_errors)) {
-                    $this->Success('Envoi e-mail client OK (Destinataire(s): ' . $to . ')', $to, null, $resId);
+                    $this->Success('Envoi e-mail client OK (Destinataire(s): ' . $to . ', From : '.$from.')', $to, null, $resId);
                     $this->debug_content .= '<span class="success">OK</span>';
                 } else {
                     $this->debug_content .= '<span class="danger">ECHEC</span>';
@@ -833,7 +846,7 @@ L’équipe BIMP";
             foreach ($centres as $code_centre => $centre_data) {
                 $shipTo = BimpTools::getArrayValueFromPath($centre_data, 'shipTo', '');
 
-                if ($shipTo && !in_array((int) $shipTo, GSX_v2::$oldShipTos) && !in_array((int) $shipTo, $this->apple_ids)) {
+                if ($shipTo && !in_array((int) $shipTo, GSX_v2::$oldShipTos) && !in_array((int) $shipTo, $this->apple_ids) && $centre_data['active'] == 1) {
                     $this->apple_ids[] = (int) $shipTo;
                 }
             }

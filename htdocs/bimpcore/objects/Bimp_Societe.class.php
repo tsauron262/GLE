@@ -606,7 +606,7 @@ class Bimp_Societe extends BimpDolObject
                 $joins['soc_commercial'] = array(
                     'alias' => 'soc_commercial',
                     'table' => 'societe_commerciaux',
-                    'on'    => 'a.rowid = soc_commercial.fk_soc'
+                    'on'    => $this->alias.'.rowid = soc_commercial.fk_soc'
                 );
 
                 $sql = '';

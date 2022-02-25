@@ -221,9 +221,8 @@ class GSX_v2 extends GSX_Const
 //            $key2 = '/usr/local/data2/bimp8/keys/phantomjs';
             
 
-            $commande = '/usr/local/bin/phantomjs /home/phantomjs/loadspeed.js https://google.com';
-
-//            $commande = '/usr/local/bin/phantomjs --web-security=no /home/phantomjs/apple.js '.$login.' '.$mdp;
+//            $commande = '/usr/local/bin/phantomjs /home/phantomjs/loadspeed.js https://google.com';
+            $commande = '/usr/local/bin/phantomjs --web-security=no /home/phantomjs/apple.js '.$login.' '.$mdp;
             
             if(!ssh2_auth_pubkey_file($connection,'phantomjs', $key1, $key2))
                     die('Pas dauth<br/>ssh -i '.$key2.' phantomjs@10.192.20.152 '.$commande);

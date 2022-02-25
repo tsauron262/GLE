@@ -173,6 +173,7 @@ views:
 lists: 
     default: 
         title: Matériels prêtés
+        filters_panel: default
         icon: mobile
         checkboxes: 1
         list_filters: 
@@ -240,3 +241,16 @@ lists:
             returned: 
                 edit: 1
     
+filters_panels: 
+    default: 
+        filters:
+            ref: 
+            date_begin: 
+            date_end: 
+            caution: 
+            id_entrepot: 
+            ref: 
+            id_client: 
+            id_sav: 
+            returned: 
+            caution: 

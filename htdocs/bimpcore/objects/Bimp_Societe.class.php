@@ -564,7 +564,7 @@ class Bimp_Societe extends BimpDolObject
                 if ((int) $value) {
                     $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $value);
                     if (BimpObject::ObjectLoaded($user)) {
-                        return $user->dol_object->getFullName();
+                        return $user->dol_object->getFullName(1);
                     }
                 } else {
                     return 'Aucun';

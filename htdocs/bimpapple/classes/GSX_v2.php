@@ -214,14 +214,21 @@ class GSX_v2 extends GSX_Const
     public static function phantomAuth($login, $mdp){
         if(function_exists('ssh2_connect')){
             $connection = ssh2_connect('10.192.20.152', 22);
-            if(!ssh2_auth_pubkey_file($connection,'phantomjs', '/usr/local/data2/bimp8/keys/phantomjs.pub', '/usr/local/data2/bimp8/keys/phantomjs'))
-                echo 'pas dauh';
+            $key1 = DOL_DOCUMENT_ROOT.'bimpapple/phantom/cert/phantomjs.pub';
+            $key2 = DOL_DOCUMENT_ROOT.'bimpapple/phantom/cert/phantomjs';
+            
+//            $key1 = '/usr/local/data2/bimp8/keys/phantomjs.pub';
+//            $key2 = '/usr/local/data2/bimp8/keys/phantomjs';
+            
 
-    //        $stream = ssh2_exec($connection, '/usr/local/bin/phantomjs /home/phantomjs/loadspeed.js https://www.kp.ru -i');
+            $commande = '/usr/local/bin/phantomjs /home/phantomjs/loadspeed.js https://google.com';
 
-            $commande = '/usr/local/bin/phantomjs --web-security=no /home/phantomjs/apple.js '.$login.' '.$mdp;
-    //        $commande = '/usr/local/bin/phantomjs --web-security=no /home/phantomjs/apple.js tommy@drsi.fr 7v06KZyRX8sm';
-    //        die('ssh -i /usr/local/data2/bimp8/keys/phantomjs phantomjs@10.192.20.152 '.$commande);
+//            $commande = '/usr/local/bin/phantomjs --web-security=no /home/phantomjs/apple.js '.$login.' '.$mdp;
+            
+            if(!ssh2_auth_pubkey_file($connection,'phantomjs', $key1, $key2))
+                    die('Pas dauth<br/>ssh -i '.$key2.' phantomjs@10.192.20.152 '.$commande);
+            
+//            die('<br/>ssh -i '.$key2.' phantomjs@10.192.20.152 '.$commande);
             $stream = ssh2_exec($connection, $commande);
 
 

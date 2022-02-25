@@ -2666,8 +2666,25 @@ class BimpObject extends BimpCache
                     break;
 
                 case 'hasMany':
+                    $ok = false;
                     if (!$this->isChild($child)) {
-                        $errors[] = 'Objet "' . $this->getLabel() . '": relation de parenté invalide pour l\'objet "' . $child_name . '"';
+                        $path = 'objects/'.$child_name.'/list/filters';
+                        $this->config->isDefined($path);
+                        $data = $this->config->getParams($path);
+                        
+                        foreach($data as $joinInChild => $data2){
+                            if(isset($data2['field_value'])){
+                                $alias = ($main_alias ? $main_alias . '___' : '') . $child_name;
+                                $ok = true;
+                                $joins[$alias] = array(
+                                    'table' => $child->getTable(),
+                                    'alias' => $alias,
+                                    'on'    => $alias . '.' . $joinInChild . ' = ' . $main_alias . '.' . $data2['field_value']
+                                );
+                            }
+                        }
+                        if(!$ok)
+                            $errors[] = 'Objet "' . $this->getLabel() . '": relation de parenté invalide pour l\'objet "' . $child_name . '"';
                     } else {
                         $child_id_parent_property = $child->getParentIdProperty();
                         $alias = ($main_alias ? $main_alias . '___' : '') . $child_name;

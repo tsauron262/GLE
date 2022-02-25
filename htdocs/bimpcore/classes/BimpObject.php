@@ -9,6 +9,7 @@ class BimpObject extends BimpCache
     public $object_name = '';
     public $config = null;
     public $id = null;
+    public $alias = 'a';
 //    public $asGraph = false; => remplacé par param yml "has_graph" 
     public $ref = "";
     public static $status_list = array();

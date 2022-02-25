@@ -820,7 +820,7 @@ class BimpComm extends BimpDolObject
                         $joins[$alias] = array(
                             'alias' => $alias,
                             'table' => $line::$dol_line_table,
-                            'on'    => $alias . '.' . $line::$dol_line_parent_field . ' = a.' . $this->getPrimary()
+                            'on'    => $alias . '.' . $line::$dol_line_parent_field . ' = '.$this->alias.'.' . $this->getPrimary()
                         );
                         $key = 'in';
                         if ($excluded) {
@@ -831,7 +831,7 @@ class BimpComm extends BimpDolObject
                         );
                     } else {
                         $alias .= '_not';
-                        $filters['a.' . $this->getPrimary()] = array(
+                        $filters[$this->alias.'.' . $this->getPrimary()] = array(
                             'not_in' => '(SELECT ' . $alias . '.' . $line::$dol_line_parent_field . ' FROM ' . MAIN_DB_PREFIX . $line::$dol_line_table . ' ' . $alias . ' WHERE ' . $alias . '.fk_product' . ' IN (' . implode(',', $values) . '))'
                         );
                     }
@@ -856,7 +856,7 @@ class BimpComm extends BimpDolObject
                 }
                 $joins['elemcont'] = array(
                     'table' => 'element_contact',
-                    'on'    => 'elemcont.element_id = a.rowid',
+                    'on'    => 'elemcont.element_id = '.$this->alias.'.rowid',
                     'alias' => 'elemcont'
                 );
                 $joins['typecont'] = array(
@@ -879,7 +879,7 @@ class BimpComm extends BimpDolObject
                         $sql .= ' WHERE tc2.element = \'' . static::$dol_module . '\'';
                         $sql .= ' AND tc2.source = \'internal\'';
                         $sql .= ' AND tc2.code = \'SALESREPFOLL\'';
-                        $sql .= ' AND ec2.element_id = a.rowid) = 0';
+                        $sql .= ' AND ec2.element_id = '.$this->alias.'.rowid) = 0';
                     }
                 }
 
@@ -890,7 +890,7 @@ class BimpComm extends BimpDolObject
                     $sql .= ' WHERE tc2.element = \'' . static::$dol_module . '\'';
                     $sql .= ' AND tc2.source = \'internal\'';
                     $sql .= ' AND tc2.code = \'SALESREPFOLL\'';
-                    $sql .= ' AND ec2.element_id = a.rowid) ' . ($excluded ? '>' : '=') . ' 0';
+                    $sql .= ' AND ec2.element_id = '.$this->alias.'.rowid) ' . ($excluded ? '>' : '=') . ' 0';
                 }
 
                 if ($sql) {
@@ -911,7 +911,7 @@ class BimpComm extends BimpDolObject
                     $joins[$line_alias] = array(
                         'alias' => $line_alias,
                         'table' => $line::$dol_line_table,
-                        'on'    => $line_alias . '.' . $line::$dol_line_parent_field . ' = a.' . $this->getPrimary()
+                        'on'    => $line_alias . '.' . $line::$dol_line_parent_field . ' = '.$this->alias.'.' . $this->getPrimary()
                     );
                     $joins[$alias] = array(
                         'alias' => $alias,
@@ -924,7 +924,7 @@ class BimpComm extends BimpDolObject
                     );
                 } else {
                     $alias .= '_not';
-                    $filters['a.' . $this->getPrimary()] = array(
+                    $filters[$this->alias.'.' . $this->getPrimary()] = array(
                         'not_in' => '(SELECT ' . $line_alias . '.' . $line::$dol_line_parent_field . ' FROM ' . MAIN_DB_PREFIX . $line::$dol_line_table . ' ' . $line_alias . ', ' . MAIN_DB_PREFIX . 'product_extrafields ' . $alias . ' WHERE ' . $alias . '.fk_object = ' . $line_alias . '.fk_product AND ' . $alias . '.' . $field_name . ' IN (' . implode(',', $values) . '))'
                     );
                 }
@@ -1451,7 +1451,7 @@ class BimpComm extends BimpDolObject
             $joins['det'] = array(
                 'table' => $line::$dol_line_table,
                 'alias' => 'det',
-                'on'    => 'a.rowid = det.' . $line::$dol_line_parent_field
+                'on'    => $this->alias.'.rowid = det.' . $line::$dol_line_parent_field
             );
 
             $sql = 'SELECT SUM(det.qty * det.buy_price_ht) as total';

@@ -4458,6 +4458,7 @@ class Bimp_Facture extends BimpComm
                     }
 
                     if (count($errors)) {
+                        print_r($errors);
                         BimpCore::addlog('Echec facture classée payée', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcomm', $this, array(
                             'Erreurs' => $errors
                         ));
@@ -4966,9 +4967,9 @@ class Bimp_Facture extends BimpComm
         $close_code = (isset($data['close_code']) ? $data['close_code'] : '');
         $close_note = (isset($data['close_note']) ? $data['close_note'] : '');
 
-        if ($remainToPay) {
+        if ($remainToPay > 0) {
             if (!$close_code) {
-                $errors[] = 'Veuillez sélectionner la raison pour classer ' . $this->getLabel('this') . ' payé' . $this->e();
+                $errors[] = 'Veuillez sélectionner la raison pour classer ' . $this->getLabel('this') . ' payé' . $this->e().'. Diférence : '.$remainToPay;
             }
         }
 

@@ -213,6 +213,7 @@ class GSX_v2 extends GSX_Const
     
     public static function phantomAuth($login, $mdp){
         if(function_exists('ssh2_connect')){
+            BimpCore::addlog('Tentative de connexion Apple en auto.');
             $connection = ssh2_connect('10.192.20.152', 22);
             $key1 = DOL_DOCUMENT_ROOT.'bimpapple/phantom/cert/phantomjs.pub';
             $key2 = DOL_DOCUMENT_ROOT.'bimpapple/phantom/cert/phantomjs';

@@ -2740,6 +2740,8 @@ class BimpTools
                     if (!preg_match('/\?/', $url)) {
                         $url .= '?';
                     }
+                    else
+                        $url .= '&';
                     $url .= $params_str;
                 }
             }

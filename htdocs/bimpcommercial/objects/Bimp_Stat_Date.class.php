@@ -185,12 +185,14 @@ class Bimp_Stat_Date extends BimpObject
 //       print_r($filters);die;
     }
     
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         if($excluded)
             $this->filterCusomExclud[$field_name] = $values;
         else
             $this->filterCusom[$field_name] = $values;
+        
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
     
     public function majTable($date, $dateFin){

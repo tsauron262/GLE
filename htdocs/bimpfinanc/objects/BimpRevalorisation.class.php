@@ -10,11 +10,11 @@ class BimpRevalorisation extends BimpObject
         2  => array('label' => 'Refusée', 'icon' => 'fas_times', 'classes' => array('danger')),
     );
     public static $types = array(
-        'crt'           => 'Remise CRT',
-        'correction_pa' => 'Correction du prix d\'achat',
-        'achat_sup'     => 'Achat complémentaire',
-        'commission_app'     => 'Commission Apporteur',
-        'oth'           => 'Autre'
+        'crt'            => 'Remise CRT',
+        'correction_pa'  => 'Correction du prix d\'achat',
+        'achat_sup'      => 'Achat complémentaire',
+        'commission_app' => 'Commission Apporteur',
+        'oth'            => 'Autre'
     );
 
     // Gestion des droits user: 
@@ -294,7 +294,6 @@ class BimpRevalorisation extends BimpObject
         if ($id_facture) {
             $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
 
-
             if (BimpObject::objectLoaded($facture)) {
                 $lines = $facture->getLines('not_text');
                 foreach ($lines as $line) {
@@ -331,40 +330,41 @@ class BimpRevalorisation extends BimpObject
         return 0;
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'id_product':
-                $alias = 'f';
-                $alias2 = 'f_det';
                 if (!$excluded) {
-                    $joins[$alias] = array(
-                        'alias' => $alias,
+                    $fac_alias = $main_alias . '___facture';
+                    $joins[$fac_alias] = array(
+                        'alias' => $fac_alias,
                         'table' => 'facture',
-                        'on'    => $alias . '.rowid' . ' = a.id_facture'
+                        'on'    => $fac_alias . '.rowid' . ' = ' . $main_alias . '.id_facture'
                     );
-                    $joins[$alias2] = array(
-                        'alias' => $alias2,
+
+                    $line_alias = $main_alias . '___facturedet';
+                    $joins[$line_alias] = array(
+                        'alias' => $line_alias,
                         'table' => 'facturedet',
-                        'on'    => $alias2 . '.fk_facture' . ' = ' . $alias . '.rowid'
+                        'on'    => $line_alias . '.fk_facture' . ' = ' . $fac_alias . '.rowid'
                     );
                     $key = 'in';
                     if ($excluded) {
                         $key = 'not_in';
                     }
-                    $filters[$alias2 . '.fk_product'] = array(
+                    $filters[$line_alias . '.fk_product'] = array(
                         $key => $values
                     );
                 } else {
-                    $alias .= '_not';
-                    $filters['a.' . $this->getPrimary()] = array(
-                        'not_in' => '(SELECT ' . $alias . '.' . $line::$dol_line_parent_field . ' FROM ' . MAIN_DB_PREFIX . $line::$dol_line_table . ' ' . $alias . ' WHERE ' . $alias . '.fk_product' . ' IN (' . implode(',', $values) . '))'
+                    $line_alias = $main_alias . '___facturedet_not';
+                    $filters[$main_alias . '.' . $this->getPrimary()] = array(
+                        'not_in' => '(SELECT ' . $line_alias . '.' . $line::$dol_line_parent_field . ' FROM ' . MAIN_DB_PREFIX . $line::$dol_line_table . ' ' . $line_alias . ' WHERE ' . $line_alias . '.fk_product' . ' IN (' . implode(',', $values) . '))'
                     );
                 }
                 break;
         }
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
 
     public function getCustomFilterValueLabel($field_name, $value)
@@ -763,22 +763,22 @@ class BimpRevalorisation extends BimpObject
     }
 
     // Overrides: 
-     
+
     public function onSave(&$errors = array(), &$warnings = array())
     {
         parent::onSave($errors, $warnings);
 
         $facture = $this->getChildObject('facture');
-        
+
         if (BimpObject::objectLoaded($facture)) {
             $facture->onChildSave($this);
-        } 
+        }
     }
 
     public function create(&$warnings = array(), $force_create = false)
     {
         $errors = array();
-        
+
         $isGlobal = BimpTools::getValue('global', 0);
         if ($isGlobal) {
             if ($this->getData('type') == 'crt') {
@@ -817,13 +817,13 @@ class BimpRevalorisation extends BimpObject
 
         return $errors;
     }
-    
+
     public function delete(&$warnings = array(), $force_delete = false)
     {
         $facture = $this->getChildObject('facture');
-        
+
         $errors = parent::delete($warnings, $force_delete);
-        
+
         if (!count($errors) && BimpObject::objectLoaded($facture)) {
             $facture->onChildDelete($this);
         }

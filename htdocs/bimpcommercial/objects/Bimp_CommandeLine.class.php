@@ -547,7 +547,7 @@ class Bimp_CommandeLine extends ObjectLine
         return $buttons;
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'reservations_status':
@@ -566,11 +566,11 @@ class Bimp_CommandeLine extends ObjectLine
 
                     if (!empty($res_filters)) {
                         if ($excluded) {
-                            $filters['and_reservations_status'] = array(
+                            $filters[$main_alias . '___and_reservations_status'] = array(
                                 'and_fields' => $res_filters
                             );
                         } else {
-                            $filters['or_reservations_status'] = array(
+                            $filters[$main_alias . '___or_reservations_status'] = array(
                                 'or' => $res_filters
                             );
                         }
@@ -579,7 +579,7 @@ class Bimp_CommandeLine extends ObjectLine
                 break;
         }
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
 
     // Getters valeurs:

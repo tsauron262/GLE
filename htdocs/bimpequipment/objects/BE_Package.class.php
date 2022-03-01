@@ -320,22 +320,25 @@ class BE_Package extends BimpObject
         }
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'place_date_end':
                 // Bouton "Exclure" désactivé pour ce filtre: ne pas tenir compte de $excluded
-                $joins['place'] = array(
+                $place_alias = $main_alias . '___place';
+                $joins[$place_alias] = array(
                     'table' => 'be_package_place',
-                    'on'    => 'place.id_package = a.id',
-                    'alias' => 'place'
+                    'on'    => $place_alias . '.id_package = ' . $main_alias . '.id',
+                    'alias' => $place_alias
                 );
-                $joins['next_place'] = array(
+
+                $next_place_alias = $main_alias . '___next_place';
+                $joins[$next_place_alias] = array(
                     'table' => 'be_package_place',
-                    'on'    => 'next_place.id_package = a.id',
-                    'alias' => 'next_place'
+                    'on'    => $next_place_alias . '.id_package = ' . $main_alias . '.id',
+                    'alias' => $next_place_alias
                 );
-                $filters['next_place_position'] = array('custom' => 'next_place.position = (place.position - 1)');
+                $filters[$main_alias . '___next_place_position'] = array('custom' => $next_place_alias . '.position = (' . $place_alias . '.position - 1)');
 
                 $or_field = array();
                 foreach ($values as $value) {
@@ -343,14 +346,14 @@ class BE_Package extends BimpObject
                 }
 
                 if (!empty($or_field)) {
-                    $filters['next_place.date'] = array(
+                    $filters[$next_place_alias . '.date'] = array(
                         'or_field' => $or_field
                     );
                 }
                 break;
         }
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
 
     // Affichages:
@@ -485,17 +488,17 @@ class BE_Package extends BimpObject
         $product = $equipment->getChildObject('bimp_product');
         if (!BimpObject::objectLoaded($equipment)) {
             $errors[] = 'L\'équipement d\'ID ' . $id_equipment . ' n\'existe pas';
-        } elseif (BimpObject::objectLoaded($product) && !$product->getData('serialisable')){
-            $errors[] = 'Le produit n\'est pas serialisable déplacement impossible (package) '.$equipment->getData('serial');
+        } elseif (BimpObject::objectLoaded($product) && !$product->getData('serialisable')) {
+            $errors[] = 'Le produit n\'est pas serialisable déplacement impossible (package) ' . $equipment->getData('serial');
         } else {
             $package = null;
             if ((int) $equipment->getData('id_package')) {
                 $package = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $equipment->getData('id_package'));
             }
-            if (BimpObject::objectLoaded($package) and ! $force) {
+            if (BimpObject::objectLoaded($package) and!$force) {
                 $errors[] = 'L\'équipement ' . $equipment->getNomUrl(0, 1, 1, 'default') . ' est déjà attribué au package ' . $package->getNomUrl(0, 1, 1, 'default');
             } else {
-                if (!$equipment->isAvailable(0, $errors) and ! $force) {
+                if (!$equipment->isAvailable(0, $errors) and!$force) {
                     return $errors;
                 }
 
@@ -514,7 +517,7 @@ class BE_Package extends BimpObject
     {
 
         $errors = array();
-        
+
         if (!$this->isLoaded($errors)) {
             return $errors;
         }
@@ -545,7 +548,7 @@ class BE_Package extends BimpObject
                     'id_package' => (int) $this->id,
                     'id_product' => (int) $id_product
         ));
-        
+
         if (!BimpObject::objectLoaded($pp)) {
             $pp = BimpObject::getInstance('bimpequipment', 'BE_PackageProduct');
             $errors = $pp->validateArray(array(
@@ -553,7 +556,7 @@ class BE_Package extends BimpObject
                 'id_product' => (int) $id_product,
                 'qty'        => $qty
             ));
-            
+
             if (!count($errors)) {
                 $errors = $pp->create($warnings, true);
             }
@@ -576,7 +579,7 @@ class BE_Package extends BimpObject
         if ((int) $pp->getData('qty') == 0) {
             $pp->delete();
         }
-        
+
         $errors = BimpTools::merge_array($errors, $warnings);
 
         return $errors;
@@ -685,7 +688,7 @@ class BE_Package extends BimpObject
         if (!$this->isLoaded($errors)) {
             return $errors;
         }
-        
+
         $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $id_product);
 
         if (!BimpObject::objectLoaded($product)) {
@@ -706,7 +709,7 @@ class BE_Package extends BimpObject
         if (BimpObject::objectLoaded($place)) {
             if ((int) $place->getData('type') === BE_Place::BE_PLACE_ENTREPOT) {
 
-                
+
                 $id_entrepot_dest = (int) $place->getData('id_entrepot');
                 if (!$id_entrepot_dest) {
                     $errors[] = 'ID de l\'entrepôt absent pour l\'emplacement actuel du package';
@@ -722,12 +725,12 @@ class BE_Package extends BimpObject
         if ($mvt_infos) {
             $label .= ' - ' . $mvt_infos;
         }
-        
+
         if (!$origin || !$id_origin) {
             $origin = 'package';
             $id_origin = (int) $this->id;
         }
-                
+
 //        // Mouvement de package à package
 //        if(
 //           ($id_entrepot_src  < 1 or is_null($id_entrepot_src))
@@ -748,7 +751,7 @@ class BE_Package extends BimpObject
 //                'bimp_origin' => $origin,
 //                'bimp_id_origin' => $id_origin));
 //        }
-        
+
         if ((int) $id_entrepot_src === (int) $id_entrepot_dest) {
             return array();
         }
@@ -822,7 +825,7 @@ class BE_Package extends BimpObject
                 }
             }
         }
-        
+
 //        // Mouvement de package à package
 //        if(($id_entrepot_src  < 1 or is_null($id_entrepot_src))
 //       and ($id_entrepot_dest < 1 or is_null($id_entrepot_dest))) {
@@ -859,7 +862,7 @@ class BE_Package extends BimpObject
                 $errors[] = BimpTools::getMsgFromArray($stock_errors);
             }
         }
-        
+
         return $errors;
     }
 
@@ -929,8 +932,8 @@ class BE_Package extends BimpObject
         if ($id_package_dest < 1) {
             $errors[] = 'Le package de destination n\'est pas défini';
         }
-        
-        if((int) $id_package_src == (int) $id_package_dest) {
+
+        if ((int) $id_package_src == (int) $id_package_dest) {
             $errors[] = 'Le package source est le même que celui de destination';
         }
 
@@ -957,7 +960,6 @@ class BE_Package extends BimpObject
 
                 $errors = BimpTools::merge_array($errors, $package_src->addProduct($id_product, -$qty, -1, $warnings, $code_mvt, $stock_label, $origin, $id_origin));
                 $errors = BimpTools::merge_array($errors, $package_dest->addProduct($id_product, $qty, -1, $warnings, $code_mvt, $stock_label, $origin, $id_origin));
-
             }
 
             // Vérification des équipements
@@ -966,7 +968,7 @@ class BE_Package extends BimpObject
                 $errors = BimpTools::merge_array($errors, $equipment->moveToPackage($id_package_dest, $code_mvt, $stock_label, 1, null, $origin, $id_origin));
             }
         }
-        
+
         return $errors;
     }
 
@@ -1004,13 +1006,13 @@ class BE_Package extends BimpObject
         if (!BimpObject::objectLoaded($package_dest)) {
             $errors[] = 'Le package de destination d\'ID ' . $package_product_src->getData('id_package') . ' n\'existe pas';
         }
-        
+
         if (!count($errors)) {
             $id_product = $package_product_src->getData('id_product');
-            
+
             // Ajout dans $package_dest
             $warnings = array();
-            $errors = BimpTools::merge_array($errors, $package_dest->addProduct($id_product, $qty, $id_entrepot,  $warnings, $code_mvt, $mvt_label, $origin, $id_origin));
+            $errors = BimpTools::merge_array($errors, $package_dest->addProduct($id_product, $qty, $id_entrepot, $warnings, $code_mvt, $mvt_label, $origin, $id_origin));
 
             if (!count($errors)) {
                 // Retrait dans $package_product_src
@@ -1018,7 +1020,7 @@ class BE_Package extends BimpObject
                 $errors = BimpTools::merge_array($errors, $package_src->saveProductQty($id_package_product_src, $new_qty, 0, $warnings, 'Destination: package ' . $package_dest->getRef() . ' (Nouvel emplacement: ' . $package_dest->displayCurrentPlace(true) . ')'));
             }
         }
-        
+
         return $errors;
     }
 
@@ -1684,7 +1686,7 @@ class BE_Package extends BimpObject
 
                     foreach ($rows as $r) {
                         $val = (float) $r['pa'] * (float) $r['qty'];
-                        $str .= '"' . $p->getRef() . '";' . '"' . $r['ref'] . '";"' . $r['label'] . '";;"' . $r['qty'] . '";"' . $place_name . '";"' . number_format($val,2, ",", "") . '"' . "\n";
+                        $str .= '"' . $p->getRef() . '";' . '"' . $r['ref'] . '";"' . $r['label'] . '";;"' . $r['qty'] . '";"' . $place_name . '";"' . number_format($val, 2, ",", "") . '"' . "\n";
                     }
 
                     // equipements: 
@@ -1701,7 +1703,7 @@ class BE_Package extends BimpObject
                             $val = (float) $r['p_pa'];
                         }
 
-                        $str .= '"' . $p->getRef() . '";' . '"' . $r['ref'] . '";"' . $r['label'] . '";"' . $r['serial'] . '";"1";"' . $place_name . '";"' . number_format($val,2,",", "") . '"' . "\n";
+                        $str .= '"' . $p->getRef() . '";' . '"' . $r['ref'] . '";"' . $r['label'] . '";"' . $r['serial'] . '";"1";"' . $place_name . '";"' . number_format($val, 2, ",", "") . '"' . "\n";
                     }
                 } else {
                     $warnings[] = 'Le package #' . $id . ' n\'existe pas';

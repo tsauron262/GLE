@@ -39,7 +39,7 @@ class Bimp_SocRemiseExcept extends BimpObject
         return parent::getCustomFilterValueLabel($field_name, $value);
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'facture_dest':
@@ -50,25 +50,25 @@ class Bimp_SocRemiseExcept extends BimpObject
                     if ($excluded) {
                         $key = 'not_in';
                     }
-                    $or_filters['a.fk_facture'] = array(
+                    $or_filters[$main_alias . '.fk_facture'] = array(
                         $key => $values
                     );
 
-                    $select_lines = 'SELECT DISTINCT fac_line.rowid';
-                    $select_lines .= ' FROM ' . MAIN_DB_PREFIX . 'facturedet fac_line';
-                    $select_lines .= ' WHERE fac_line.fk_facture ' . ($excluded ? 'NOT ' : '') . 'IN (' . implode(',', $values) . ')';
-                    $select_lines .= ' AND fac_line.fk_remise_except = a.rowid';
+                    $select_lines = 'SELECT DISTINCT fl.rowid';
+                    $select_lines .= ' FROM ' . MAIN_DB_PREFIX . 'facturedet fl';
+                    $select_lines .= ' WHERE fl.fk_facture ' . ($excluded ? 'NOT ' : '') . 'IN (' . implode(',', $values) . ')';
+                    $select_lines .= ' AND fl.fk_remise_except = ' . $main_alias . '.rowid';
 
-                    $or_filters['custom_fac_dest_lines'] = array(
-                        'custom' => 'a.fk_facture_line IN (' . $select_lines . ')'
+                    $or_filters[$main_alias . '___custom_fac_dest_lines'] = array(
+                        'custom' => $main_alias . '.fk_facture_line IN (' . $select_lines . ')'
                     );
 
                     if (!$excluded) {
-                        $filters['or_facture_dest'] = array(
+                        $filters[$main_alias . '___or_facture_dest'] = array(
                             'or' => $or_filters
                         );
                     } else {
-                        $filters['and_facture_dest'] = array(
+                        $filters[$main_alias . '___and_facture_dest'] = array(
                             'and_fields' => $or_filters
                         );
                     }
@@ -76,7 +76,7 @@ class Bimp_SocRemiseExcept extends BimpObject
                 break;
         }
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
 
     // Getters données: 

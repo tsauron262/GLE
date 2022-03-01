@@ -22,7 +22,7 @@ class Bimp_ProductAchats extends Bimp_Product
         return parent::getCustomFilterValueLabel($field_name, $value);
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'id_fourn_achats':
@@ -34,13 +34,13 @@ class Bimp_ProductAchats extends Bimp_Product
                 $sql = 'SELECT COUNT(fl.rowid) FROM ' . MAIN_DB_PREFIX . 'facture_fourn_det fl, ' . MAIN_DB_PREFIX . 'facture_fourn ff';
                 $sql .= ' WHERE fl.fk_product = a.rowid AND ff.rowid = fl.fk_facture_fourn AND ff.fk_soc ' . ($excluded ? 'NOT ' : '') . 'IN (' . implode(',', $values) . ') AND ff.fk_statut';
 
-                $filters['custom_fourns_achats'] = array(
+                $filters[$main_alias . '___custom_fourns_achats'] = array(
                     'custom' => '(' . $sql . ') > 0'
                 );
                 break;
         }
 
-        return parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+        return parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
 
     public function getAchatsData()
@@ -102,7 +102,7 @@ class Bimp_ProductAchats extends Bimp_Product
 //                        }
 //                    }
 //                } else {
-                    $value = $data['total_ht'];
+                $value = $data['total_ht'];
 //                }
                 return BimpTools::displayMoneyValue($value, 'EUR', false, true);
 
@@ -115,7 +115,7 @@ class Bimp_ProductAchats extends Bimp_Product
 //                        }
 //                    }
 //                } else {
-                    $value = $data['total_ttc'];
+                $value = $data['total_ttc'];
 //                }
                 return BimpTools::displayMoneyValue($value, 'EUR', false, true);
 
@@ -128,7 +128,7 @@ class Bimp_ProductAchats extends Bimp_Product
 //                        }
 //                    }
 //                } else {
-                    $value = $data['qty'];
+                $value = $data['qty'];
 //                }
                 return $value;
 
@@ -137,13 +137,13 @@ class Bimp_ProductAchats extends Bimp_Product
 
                 $html .= '<table class="bimp_list_table">';
                 $html .= '<tbody>';
-                
+
                 foreach ($data['fourns'] as $id_fourn => $fourn_data) {
                     $html .= '<tr>';
                     if (!empty(static::$inc_fourns_filters) && !in_array($id_fourn, static::$inc_fourns_filters)) {
                         continue;
                     }
-                    
+
                     if (!empty(static::$excl_fourns_filters) && in_array($id_fourn, static::$excl_fourns_filters)) {
                         continue;
                     }
@@ -166,7 +166,7 @@ class Bimp_ProductAchats extends Bimp_Product
                     $html .= '</td>';
                     $html .= '</tr>';
                 }
-                
+
                 $html .= '</tbody>';
                 $html .= '</table>';
 

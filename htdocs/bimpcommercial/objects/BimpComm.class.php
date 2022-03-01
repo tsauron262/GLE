@@ -756,8 +756,9 @@ class BimpComm extends BimpDolObject
 
         return $fields;
     }
-    
-    public function getPdfNamePrincipal(){
+
+    public function getPdfNamePrincipal()
+    {
         return $this->getRef() . '.pdf';
     }
 
@@ -809,18 +810,20 @@ class BimpComm extends BimpDolObject
         return parent::getCustomFilterValueLabel($field_name, $value);
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'id_product':
                 if (!empty($values)) {
                     $line = $this->getLineInstance();
-                    $alias = $line::$parent_comm_type . '_det';
+
+                    $alias = $main_alias . '___' . $line::$parent_comm_type . '_det';
+
                     if (!$excluded) {
                         $joins[$alias] = array(
                             'alias' => $alias,
                             'table' => $line::$dol_line_table,
-                            'on'    => $alias . '.' . $line::$dol_line_parent_field . ' = '.$this->alias.'.' . $this->getPrimary()
+                            'on'    => $alias . '.' . $line::$dol_line_parent_field . ' = ' . $main_alias . '.' . $this->getPrimary()
                         );
                         $key = 'in';
                         if ($excluded) {
@@ -831,7 +834,7 @@ class BimpComm extends BimpDolObject
                         );
                     } else {
                         $alias .= '_not';
-                        $filters[$this->alias.'.' . $this->getPrimary()] = array(
+                        $filters[$main_alias . '.' . $this->getPrimary()] = array(
                             'not_in' => '(SELECT ' . $alias . '.' . $line::$dol_line_parent_field . ' FROM ' . MAIN_DB_PREFIX . $line::$dol_line_table . ' ' . $alias . ' WHERE ' . $alias . '.fk_product' . ' IN (' . implode(',', $values) . '))'
                         );
                     }
@@ -854,23 +857,27 @@ class BimpComm extends BimpDolObject
                         $empty = true;
                     }
                 }
-                $joins['elemcont'] = array(
+
+                $elem_alias = $main_alias . '___elemcont';
+                $joins[$elem_alias] = array(
                     'table' => 'element_contact',
-                    'on'    => 'elemcont.element_id = '.$this->alias.'.rowid',
-                    'alias' => 'elemcont'
+                    'on'    => $elem_alias . '.element_id = ' . $main_alias . '.rowid',
+                    'alias' => $elem_alias
                 );
-                $joins['typecont'] = array(
+
+                $type_alias = $main_alias . '___typecont';
+                $joins[$type_alias] = array(
                     'table' => 'c_type_contact',
-                    'on'    => 'elemcont.fk_c_type_contact = typecont.rowid',
-                    'alias' => 'typecont'
+                    'on'    => $elem_alias . '.fk_c_type_contact = ' . $type_alias . '.rowid',
+                    'alias' => $type_alias
                 );
 
                 $sql = '';
 
                 if (!empty($ids)) {
                     $sql .= '(';
-                    $sql .= 'typecont.element = \'' . static::$dol_module . '\' AND typecont.source = \'internal\'';
-                    $sql .= ' AND typecont.code = \'SALESREPFOLL\' AND elemcont.fk_socpeople ' . ($excluded ? 'NOT ' : '') . 'IN (' . implode(',', $ids) . ')';
+                    $sql .= $type_alias . '.element = \'' . static::$dol_module . '\' AND ' . $type_alias . '.source = \'internal\'';
+                    $sql .= ' AND ' . $type_alias . '.code = \'SALESREPFOLL\' AND ' . $elem_alias . '.fk_socpeople ' . ($excluded ? 'NOT ' : '') . 'IN (' . implode(',', $ids) . ')';
                     $sql .= ')';
 
                     if (!$empty && $excluded) {
@@ -879,7 +886,7 @@ class BimpComm extends BimpDolObject
                         $sql .= ' WHERE tc2.element = \'' . static::$dol_module . '\'';
                         $sql .= ' AND tc2.source = \'internal\'';
                         $sql .= ' AND tc2.code = \'SALESREPFOLL\'';
-                        $sql .= ' AND ec2.element_id = '.$this->alias.'.rowid) = 0';
+                        $sql .= ' AND ec2.element_id = ' . $main_alias . '.rowid) = 0';
                     }
                 }
 
@@ -890,11 +897,11 @@ class BimpComm extends BimpDolObject
                     $sql .= ' WHERE tc2.element = \'' . static::$dol_module . '\'';
                     $sql .= ' AND tc2.source = \'internal\'';
                     $sql .= ' AND tc2.code = \'SALESREPFOLL\'';
-                    $sql .= ' AND ec2.element_id = '.$this->alias.'.rowid) ' . ($excluded ? '>' : '=') . ' 0';
+                    $sql .= ' AND ec2.element_id = ' . $main_alias . '.rowid) ' . ($excluded ? '>' : '=') . ' 0';
                 }
 
                 if ($sql) {
-                    $filters['commercial_custom'] = array(
+                    $filters[$main_alias . '___commercial_custom'] = array(
                         'custom' => '(' . $sql . ')'
                     );
                 }
@@ -904,34 +911,41 @@ class BimpComm extends BimpDolObject
             case 'nature':
             case 'famille':
             case 'gamme':
-                $alias = 'product_ef';
+                $prod_ef_alias = $main_alias . '___product_ef';
                 $line = $this->getLineInstance();
-                $line_alias = $line::$parent_comm_type . '_det';
+                $line_alias = $main_alias . '___' . $line::$parent_comm_type . '_det';
                 if (!$excluded) {
                     $joins[$line_alias] = array(
                         'alias' => $line_alias,
                         'table' => $line::$dol_line_table,
-                        'on'    => $line_alias . '.' . $line::$dol_line_parent_field . ' = '.$this->alias.'.' . $this->getPrimary()
+                        'on'    => $line_alias . '.' . $line::$dol_line_parent_field . ' = ' . $main_alias . '.' . $this->getPrimary()
                     );
-                    $joins[$alias] = array(
-                        'alias' => $alias,
+                    $joins[$prod_ef_alias] = array(
+                        'alias' => $prod_ef_alias,
                         'table' => 'product_extrafields',
-                        'on'    => $alias . '.fk_object = ' . $line_alias . '.fk_product'
+                        'on'    => $prod_ef_alias . '.fk_object = ' . $line_alias . '.fk_product'
                     );
 
-                    $filters[$alias . '.' . $field_name] = array(
+                    $filters[$prod_ef_alias . '.' . $field_name] = array(
                         ($excluded ? 'not_' : '') . 'in' => $values
                     );
                 } else {
-                    $alias .= '_not';
-                    $filters[$this->alias.'.' . $this->getPrimary()] = array(
-                        'not_in' => '(SELECT ' . $line_alias . '.' . $line::$dol_line_parent_field . ' FROM ' . MAIN_DB_PREFIX . $line::$dol_line_table . ' ' . $line_alias . ', ' . MAIN_DB_PREFIX . 'product_extrafields ' . $alias . ' WHERE ' . $alias . '.fk_object = ' . $line_alias . '.fk_product AND ' . $alias . '.' . $field_name . ' IN (' . implode(',', $values) . '))'
+                    $prod_ef_alias .= '_not';
+
+                    $select_sql = 'SELECT ' . $line_alias . '.' . $line::$dol_line_parent_field;
+                    $select_sql .= ' FROM ' . MAIN_DB_PREFIX . $line::$dol_line_table . ' ' . $line_alias . ', ';
+                    $select_sql .= MAIN_DB_PREFIX . 'product_extrafields ' . $prod_ef_alias;
+                    $select_sql .= ' WHERE ' . $prod_ef_alias . '.fk_object = ' . $line_alias . '.fk_product';
+                    $select_sql .= ' AND ' . $prod_ef_alias . '.' . $field_name . ' IN (' . implode(',', $values) . ')';
+
+                    $filters[$main_alias . '.' . $this->getPrimary()] = array(
+                        'not_in' => '(' . $select_sql . ')'
                     );
                 }
                 break;
         }
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
 
     // Getters données: 
@@ -1438,7 +1452,7 @@ class BimpComm extends BimpDolObject
         return 0;
     }
 
-    public function getTotal_paListTotal($filters = array(), $joins = array())
+    public function getTotal_paListTotal($filters = array(), $joins = array(), $main_alias = 'a')
     {
         $return = array(
             'data_type' => 'money',
@@ -1448,14 +1462,15 @@ class BimpComm extends BimpDolObject
         $line = $this->getLineInstance();
 
         if (is_a($line, 'ObjectLine')) {
-            $joins['det'] = array(
+            $line_alias = $main_alias . '___det';
+            $joins[$line_alias] = array(
                 'table' => $line::$dol_line_table,
                 'alias' => 'det',
-                'on'    => $this->alias.'.rowid = det.' . $line::$dol_line_parent_field
+                'on'    => $main_alias . '.rowid = ' . $line_alias . '.' . $line::$dol_line_parent_field
             );
 
-            $sql = 'SELECT SUM(det.qty * det.buy_price_ht) as total';
-            $sql .= BimpTools::getSqlFrom($this->getTable(), $joins, 'a');
+            $sql = 'SELECT SUM(' . $line_alias . '.qty * ' . $line_alias . '.buy_price_ht) as total';
+            $sql .= BimpTools::getSqlFrom($this->getTable(), $joins, $main_alias);
             $sql .= BimpTools::getSqlWhere($filters);
 
             $result = $this->db->executeS($sql, 'array');
@@ -1825,8 +1840,9 @@ class BimpComm extends BimpDolObject
     {
         return $this->getIdContact($type = 'internal', $code = 'SALESREPFOLL');
     }
-    
-    public function addNoteToCommercial($note){
+
+    public function addNoteToCommercial($note)
+    {
         return $this->addNote($note, null, 0, 0, '', 1, 1, 0, $this->getIdCommercial());
     }
 

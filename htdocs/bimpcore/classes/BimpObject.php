@@ -135,12 +135,12 @@ class BimpObject extends BimpCache
 
         return $instance;
     }
-    
-    public function getPdfNamePrincipal(){
-        BimpCore::addlog('"getPdfNamePrincipal" n\'est pas redéfinit dans '.$this->object_name);
+
+    public function getPdfNamePrincipal()
+    {
+        BimpCore::addlog('"getPdfNamePrincipal" n\'est pas redéfinit dans ' . $this->object_name);
         return 'n_c.pdf';
     }
-    
 
     public function actionGenerateBulkPdf($data, &$success)
     {
@@ -2668,12 +2668,12 @@ class BimpObject extends BimpCache
                 case 'hasMany':
                     $ok = false;
                     if (!$this->isChild($child)) {
-                        $path = 'objects/'.$child_name.'/list/filters';
+                        $path = 'objects/' . $child_name . '/list/filters';
                         $this->config->isDefined($path);
                         $data = $this->config->getParams($path);
-                        
-                        foreach($data as $joinInChild => $data2){
-                            if(isset($data2['field_value'])){
+
+                        foreach ($data as $joinInChild => $data2) {
+                            if (isset($data2['field_value'])) {
                                 $alias = ($main_alias ? $main_alias . '___' : '') . $child_name;
                                 $ok = true;
                                 $joins[$alias] = array(
@@ -2683,7 +2683,7 @@ class BimpObject extends BimpCache
                                 );
                             }
                         }
-                        if(!$ok)
+                        if (!$ok)
                             $errors[] = 'Objet "' . $this->getLabel() . '": relation de parenté invalide pour l\'objet "' . $child_name . '"';
                     } else {
                         $child_id_parent_property = $child->getParentIdProperty();
@@ -3143,7 +3143,7 @@ class BimpObject extends BimpCache
         return $value;
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         
     }
@@ -4525,7 +4525,7 @@ class BimpObject extends BimpCache
     public function update(&$warnings = array(), $force_update = false)
     {
         $this->noFetchOnTrigger = true;
-        
+
         $this->force_update = $force_update;
 
         BimpLog::actionStart('bimpobject_update', 'Mise à jour', $this);
@@ -5576,7 +5576,6 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         // Supprimer les extrafields
         // Retourner un tableau d'erreurs
-
 //        if (count($this->getExtraFields())) {
 //            return array('Fonction de suppression des champs supplémentaires non implémentée');
 //        }

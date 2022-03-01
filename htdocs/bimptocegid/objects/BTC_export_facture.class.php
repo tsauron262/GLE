@@ -416,7 +416,7 @@ class BTC_export_facture extends BTC_export
             }  else {
                 $subject = "EXPORT COMPTA - RIB MANQUANT";
                 $msg = "La facture " . $facture->getNomUrl() . " a été exportée avec comme mode de règlement mandat de prélèvement SEPA mais n'a pas de RIB";
-                $mail = new BimpMail($subject, "dev@bimp.fr", null, $msg);
+                $mail = new BimpMail(null, $subject, "dev@bimp.fr", null, $msg);
                 $mail->send();
             }
         }

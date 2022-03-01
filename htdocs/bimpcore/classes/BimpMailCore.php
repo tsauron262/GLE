@@ -32,19 +32,21 @@ class BimpMailCore
         else{
             BimpCore::addlog ('Pas d\'objet parent pour BimpMail');
             
-            $paramtres = array('parent', 'subject', 'to', 'from', 'msg', 'reply_to', 'addr_cc', 'addr_bcc', 'deliveryreceipt', 'errors_to');
-            $oldParams = null;
-            foreach ($paramtres as $newParams){
-                if($oldParams){
-                    eval('$'.$newParams.'tmp=$'.$oldParams.';');
+            if(!is_null($parent)){
+                $paramtres = array('parent', 'subject', 'to', 'from', 'msg', 'reply_to', 'addr_cc', 'addr_bcc', 'deliveryreceipt', 'errors_to');
+                $oldParams = null;
+                foreach ($paramtres as $newParams){
+                    if($oldParams){
+                        eval('$'.$newParams.'tmp=$'.$oldParams.';');
+                    }
+
+
+                    $oldParams = $newParams;
                 }
-                
-                
-                $oldParams = $newParams;
-            }
-            foreach ($paramtres as $newParams){
-                    eval('$'.$newParams.'=$'.$newParams.'tmp;');
-                
+                foreach ($paramtres as $newParams){
+                        eval('$'.$newParams.'=$'.$newParams.'tmp;');
+
+                }
             }
         }
 

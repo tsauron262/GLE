@@ -331,7 +331,7 @@
                             $message = "Bonjour, " . $commercial->getName() . '<br />Votre contrat N°' . $object->getNomUrl() . ' pour le client'
                                 . $client->getNomUrl() . '('.$client->getName().') a atteint sa date d\'échéance mais il est en tacite reconduction. Il sera donc renouvelé demain';
                         
-                        $bimpMail = new BimpMail($sujet, $commercial->getData('email'), null, $message);
+                        $bimpMail = new BimpMail($object, $sujet, $commercial->getData('email'), null, $message);
                         if($bimpMail->send()) {
                             $output .= "<i class='fa fa-check success' ></i> " . $commercial->getData('email');
                         } else {
@@ -375,7 +375,7 @@
                         if($c->getData('relance_renouvellement') && in_array($c->getData('tacite'), $not_tacite)){
                             //$this->sendMailCommercial('ECHEANCE - Contrat ' . $c->getData('ref') . "[".$client->getData('code_client')."]", $c->getData('fk_commercial_suivi'), $message, $c);
                             $sujet = "Echéance contrat - " . $c->getRef() . " - " . $client->getData('code_client');
-                            $bimp_mail = new BimpMail($sujet, $email_comm, '', $message, '', '');
+                            $bimp_mail = new BimpMail($c, $sujet, $email_comm, '', $message, '', '');
                             $bimp_mail->send();
                             $this->output .= "Mail envoyé à <b>$email_comm</b> pour le contrat <b>".$c->getRef()."</b><br />" ;
                         }
@@ -395,7 +395,7 @@
                                 if($c->getData('relance_renouvellement') && in_array($c->getData('tacite'), $not_tacite)){
                                     $message = "Contrat " . $c->getNomUrl(). "<br />Client ".$client->dol_object->getNomUrl()." <br /> dont vous êtes le commercial arrive à expiration dans <b>$diff->d jour.s</b>";
                                     $sujet = "Echéance contrat - " . $c->getRef() . " - " . $client->getData('code_client');
-                                    $bimp_mail = new BimpMail($sujet, $email_comm, '', $message, '', '');
+                                    $bimp_mail = new BimpMail($c, $sujet, $email_comm, '', $message, '', '');
                                     $bimp_mail->send();
                                     $this->output .= "Mail envoyé à <b>$email_comm</b> pour le contrat <b>".$c->getRef()."</b><br />" ;
                                     //$this->sendMailCommercial('ECHEANCE - Contrat ' . $c->getData('ref') . "[".$client->getData('code_client')."]", $c->getData('fk_commercial_suivi'), $message, $c);

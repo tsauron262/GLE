@@ -17,8 +17,9 @@ class BimpMailLog extends BimpObject
             $str .= ' Dest : '.$email;
         
         $this->updateField('old_trace', $str);
-        if(in_array($info, static::$statutError))
-            $this->addNote ($str, null, 0, 0, '', null, 1, null, 242);
+        if(in_array($info, static::$statutError)){
+            $this->addNote ($str, null, 0, 0, '', null, 1, null, $this->getData('user_create'));
+        }
         else
             $this->addNote($str);
     }

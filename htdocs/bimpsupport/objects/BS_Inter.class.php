@@ -223,7 +223,7 @@ class BS_Inter extends BimpObject
                     '</a>';
                 }
 
-                $bimpMail = new BimpMail($subject, $to, '', $msg, '', $cc);
+                $bimpMail = new BimpMail($this, $subject, $to, '', $msg, '', $cc);
                 $mail_errors = array();
                 $bimpMail->send($mail_errors);
 

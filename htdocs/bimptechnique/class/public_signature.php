@@ -23,7 +23,7 @@ if ($fi->find(['public_signature_url' => $_POST['key']], 1)) {
     $client = BimpObject::getInstance('bimpcore', "Bimp_Societe", $fi->getData('fk_soc'));
     if (BimpObject::objectLoaded($commercial)) {
         $email_comm = BimpTools::cleanEmailsStr($commercial->getData('email'));
-        $bmCommercial = new BimpMail(
+        $bmCommercial = new BimpMail($fi,
                 $ref . " signée à distance par le client",
                 $email_comm, 
                 '',
@@ -55,7 +55,7 @@ if ($fi->find(['public_signature_url' => $_POST['key']], 1)) {
     
     $email_comm . ($email_comm ? ', ' : '') . $email_tech . ($email_tech ? ', ' : '') . 't.sauron@bimp.fr, f.martinez@bimp.fr';
 
-    $bm = new BimpMail($subject, $email_cli, '', $message, $reply_to, $cc);
+    $bm = new BimpMail($fi, $subject, $email_cli, '', $message, $reply_to, $cc);
 
     if (file_exists($file)) {
         $bm->addFile(array($file, 'application/pdf', $ref . '.pdf'));

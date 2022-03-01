@@ -513,7 +513,7 @@ class BContract_contrat extends BimpDolObject
                         . $client->getNomUrl() . ' - ' . $client->getName() . ' pour la raison suivante:';
                 $message .= "<br /><br />" . $data['note_close'] . "<br /><br />Ce contrat ce clôturera automatiquement à cette date.";
                 $addr_cc = ($commercial->getData('email') == $user->email) ? '' : $user->email;
-                $bimpMail = New BimpMail($sujet, $commercial->getData('email'), null, $message, null, $addr_cc);
+                $bimpMail = New BimpMail($this, $sujet, $commercial->getData('email'), null, $message, null, $addr_cc);
                 $bimpMail->send($errors);
             }
         } else {

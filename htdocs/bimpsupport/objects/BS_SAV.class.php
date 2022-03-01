@@ -3703,7 +3703,7 @@ class BS_SAV extends BimpObject
 //                if (!mailSyn2($subject, $toMail, $fromMail, $mail_msg, $tabFile, $tabFile2, $tabFile3)) {
 //                    $errors[] = 'Echec envoi du mail';
 //                }
-                    $bimpMail = new BimpMail($subject, $toMail, $fromMail, $mail_msg);
+                    $bimpMail = new BimpMail($this, $subject, $toMail, $fromMail, $mail_msg);
                     $bimpMail->addFiles($files);
                     $mail_errors = array();
                     $bimpMail->send($mail_errors);
@@ -6321,7 +6321,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
 //                            mailSyn2($subject, $to, '', $msg);
                             $from = (isset($centres[$r['code_centre']]['mail']) ? $centres[$r['code_centre']]['mail'] : '');
-                            $bimpMail = new BimpMail($subject, $to, $from, $msg);
+                            $bimpMail = new BimpMail($this, $subject, $to, $from, $msg);
                             $bimpMail->send();
 
 //                            BimpCore::addlog('Annulation auto SAV réservé', Bimp_Log::BIMP_LOG_NOTIF, 'bic', null, array(
@@ -6391,7 +6391,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
                     $from = (isset($centres[$r['code_centre']]['mail']) ? $centres[$r['code_centre']]['mail'] : '');
 
-                    $bimpMail = new BimpMail($subject, $to, $from, $msg);
+                    $bimpMail = new BimpMail($this, $subject, $to, $from, $msg);
                     $bimpMail->send();
 
 //                    BimpCore::addlog('Annulation auto SAV réservé', Bimp_Log::BIMP_LOG_NOTIF, 'bic', null, array(
@@ -6707,7 +6707,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     if ($to) {
                         $to = BimpTools::cleanEmailsStr($to);
 
-                        $bimpMail = new BimpMail($subject, $to, $from, $message);
+                        $bimpMail = new BimpMail($this, $subject, $to, $from, $message);
                         $bimpMail->addFile(array($filePath, 'application/pdf', $fileName));
                         $bimpMail->send($errors);
                     } else {

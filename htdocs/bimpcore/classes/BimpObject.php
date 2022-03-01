@@ -6371,6 +6371,20 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             $html .= '>';
             $html .= BimpRender::renderIcon('fas_comments');
             $html .= '</span>';
+            
+            //Suivi mail
+            $random = random_int("3", "999999999999");
+            $htmlId = 'suivi_mail_'.$random;
+            $onclick = $this->getJsLoadModalCustomContent('renderSuiviMail', 'Suivi des mails');
+            $html .= '<span id="'.$htmlId.'" class="btn btn-default bs-popover"';
+            $html .= ' onclick="' . $onclick . '"';
+            $html .= BimpRender::renderPopoverData('Suivi des mails');
+            $html .= '>';
+            $html .= BimpRender::renderIcon('fas_inbox');
+            $html .= '</span>';
+            if($_GET['open'] == 'suivi_mail')
+                $html .= '<script>$(document).ready(function(){  $("#'.$htmlId.'").click();});</script>';
+            
 
             $html .= '</div>';
             $html .= '</div>';
@@ -7408,6 +7422,27 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
         return '';
     }
+    
+    public function renderSuiviMail()
+    {
+        $instance = BimpObject::getInstance('bimpcore', 'BimpMailLog');
+        $list = new BC_ListTable($instance, 'default');
+//        $list->addIdentifierSuffix($suffixe);
+        $list->addFieldFilterValue('obj_type', 'bimp_object');
+        $list->addFieldFilterValue('obj_module', $this->module);
+        $list->addFieldFilterValue('obj_name', $this->object_name);
+        $list->addFieldFilterValue('id_obj', $this->id);
+        $list->addObjectChangeReload($this->object_name);
+
+        if ($filter_by_user) {
+            $filters = BimpNote::getFiltersByUser();
+            foreach ($filters as $field => $filter) {
+                $list->addFieldFilterValue($field, $filter);
+            }
+        }
+
+        return $list->renderHtml();
+    }
 
     // Générations javascript: 
 
@@ -8380,6 +8415,9 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         } else {
             $url = $this->getUrl('private');
         }
+        
+        if(isset($params['after_link']))
+            $url .= $params['after_link'];
 
         if ($url) {
             $html .= '<a href="' . $url . '"';

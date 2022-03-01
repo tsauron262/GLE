@@ -1,6 +1,6 @@
 bootstrap: 1
 table: user_param
-primary: unset
+primary: rowid
             
 labels:
     name: Paramètres interface

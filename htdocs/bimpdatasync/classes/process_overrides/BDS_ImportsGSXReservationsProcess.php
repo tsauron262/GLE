@@ -812,7 +812,7 @@ L’équipe BIMP";
                 $to = BimpTools::cleanEmailsStr($email_client);
                 $this->debug_content .= 'Envoi e-mail client à ' . $to . ': ';
 
-                $bimpMail = new BimpMail("Votre rendez-vous SAV BIMP", $to, $from, str_replace("\n", "<br/>", $messageClient));
+                $bimpMail = new BimpMail($client, "Votre rendez-vous SAV BIMP", $to, $from, str_replace("\n", "<br/>", $messageClient));
                 $mail_errors = array();
 
                 if ($bimpMail->send($mail_errors)) {

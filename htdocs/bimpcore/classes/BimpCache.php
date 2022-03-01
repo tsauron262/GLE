@@ -272,7 +272,8 @@ class BimpCache
             $sql = BimpTools::getSqlSelect('a.' . $primary);
             $sql .= BimpTools::getSqlFrom($table, $joins);
             $sql .= BimpTools::getSqlWhere($filters);
-            
+            $sql .= BimpTools::getSqlOrderBy('a.' . $primary, 'DESC');
+
             $rows = self::getBdb()->executeS($sql, 'array');
 
             if (!is_null($rows) && count($rows)) {

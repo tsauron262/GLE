@@ -2170,7 +2170,7 @@ class BT_ficheInter extends BimpDolObject
                             $reply_to = $email_comm ? $email_comm : $email_tech;
                             $cc = ''; //$email_comm . ($email_comm ? ', ' : '') . $email_tech . ($email_tech ? ', ' : '') . t.sauron@bimp.fr, f.martinez@bimp.fr';
 
-                            $bimpMail = new BimpMail($subject, $email_cli, '', $message, $reply_to, $cc);
+                            $bimpMail = new BimpMail($this, $subject, $email_cli, '', $message, $reply_to, $cc);
                             $bimpMail->addFile(array($pdf_file, 'application/pdf', $ref . '.pdf'));
                             $bimpMail->send($mail_cli_errors);
 
@@ -2303,7 +2303,7 @@ class BT_ficheInter extends BimpDolObject
                 $reply_to = ($email_comm ? $email_comm : $email_tech);
                 $cc = ''; //($email_comm ? $email_tech . ', ' : '') . 't.sauron@bimp.fr, f.martinez@bimp.fr';
 
-                $bimpMail = new BimpMail($subject, $to, '', $msg, $reply_to, $cc);
+                $bimpMail = new BimpMail($this, $subject, $to, '', $msg, $reply_to, $cc);
 
                 global $conf;
 
@@ -2523,7 +2523,7 @@ class BT_ficheInter extends BimpDolObject
             $message .= "Fiche d'intervention: " . $this->getNomUrl();
             $message .= "<br /> Client: " . $client->getNomUrl() . ' ' . $client->getName();
 
-            $bimpMail = new BimpMail("Demande de facturation FI - [" . $this->getRef() . "] - " . $client->getRef() . " " . $client->getName(), "facturationclients@bimp.fr", null, $message, null, $cc);
+            $bimpMail = new BimpMail($this, "Demande de facturation FI - [" . $this->getRef() . "] - " . $client->getRef() . " " . $client->getName(), "facturationclients@bimp.fr", null, $message, null, $cc);
             $bimpMail->send($errors);
 
             if (!count($errors)) {

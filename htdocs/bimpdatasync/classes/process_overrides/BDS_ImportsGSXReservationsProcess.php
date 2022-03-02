@@ -766,7 +766,7 @@ Merci d’avoir pris rendez-vous dans notre Centre de Services Agrée Apple, nou
                     $url = BimpCore::getConf('interface_client_base_url', '');
 
                     if ($url) {
-                        $url .= '?fc=savForm&resgsx=' . $resId . '&centre_id=' . $shipTo;
+                        $url .= '?fc=savForm&resgsx=' . $resId . '&ac='.$ac->id.'&centre_id=' . $shipTo;
                         $messageClient .= "<b>Afin de faciliter votre prise en charge, merci de compléter vos informations sur notre site bimp.fr";
                         $messageClient .= ' en cliquant <a href="' . $url . '">sur ce lien</a></b>' . "\n\n";
                         $messageClient .= "Nous souhaitons également attirer votre attention sur les points suivants :\n";

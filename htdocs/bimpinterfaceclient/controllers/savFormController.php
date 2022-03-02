@@ -169,11 +169,11 @@ class savFormController extends BimpPublicController
                 $html .= '</span>';
                 $html .= '</div>';
 
-                $html .= '<p class="inputHelp">';
-                $html .= 'Si vous disposez déjà d\'un accès à l\'espace client BIMP, veuillez vous ';
-                $html .= '<a href="' . BimpObject::getPublicBaseUrl() . 'back=savForm">authentifier</a>';
-                $html .= ' pour simplifier la prise de rendez-vous.';
-                $html .= '</p>';
+//                $html .= '<p class="inputHelp">';
+//                $html .= 'Si vous disposez déjà d\'un accès à l\'espace client BIMP, veuillez vous ';
+//                $html .= '<a href="' . BimpObject::getPublicBaseUrl() . 'back=savForm">authentifier</a>';
+//                $html .= ' pour simplifier la prise de rendez-vous.';
+//                $html .= '</p>';
             }
 
             if (!is_null($centre) && $code_centre) {

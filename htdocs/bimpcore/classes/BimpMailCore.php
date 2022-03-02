@@ -30,8 +30,8 @@ class BimpMailCore
         $subject = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $subject);
         $msg = str_replace(array($dolibarr_main_url_root, $_SERVER['SERVER_NAME'] . DOL_URL_ROOT), DOL_URL_ROOT, $msg);
         $msg = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $msg);
-        
-        if(BimpTools::cleanEmailsStr($to) == ''){
+
+        if (BimpTools::cleanEmailsStr($to) == '') {
             BimpCore::addlog('Echec envoi email sans destinatiare ', Bimp_Log::BIMP_LOG_ALERTE, 'email', NULL, array(
                 'Destinataire' => $to,
                 'From'         => $from,
@@ -161,7 +161,7 @@ class BimpMailCore
         $html = $this->getHeader();
         $html .= $this->msg;
         $html .= $this->getFooter();
-        
+
         $html = str_replace("\n", "<br/>", $html);
 
         $to = BimpTools::cleanEmailsStr($this->to);
@@ -175,7 +175,7 @@ class BimpMailCore
 
         if (!$result) {
             $ip = BimpCache::getIpFromDns($cmail->smtps->_smtpsHost);
-            BimpCore::addlog('Echec envoi email '.$cmail->error, Bimp_Log::BIMP_LOG_ALERTE, 'email', NULL, array(
+            BimpCore::addlog('Echec envoi email ' . $cmail->error, Bimp_Log::BIMP_LOG_ALERTE, 'email', NULL, array(
                 'IP'           => $ip,
                 'Destinataire' => $to,
                 'Sujet'        => $this->subject,

@@ -13,7 +13,7 @@ class BimpMailLog extends BimpObject
     
     function changeStatut($info, $email){
         $str = $this->trad($info);
-        if($email != $this->getData('mail_to'))
+        if(strtolower($email) != strtolower($this->getData('mail_to')))
             $str .= ' Dest : '.$email;
         
         $this->updateField('old_trace', $str);

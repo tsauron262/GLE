@@ -709,16 +709,15 @@ class BC_Filter extends BimpComponent
         $field_alias = 'a';
         $field_object = $this->base_object;
         $errors = $field_object->getRecursiveChildrenJoins($children, $filters, $joins, 'a', $field_alias, $field_object);
-        $this->object->alias = $field_alias;
                     
         $values = self::getConvertedValues($this->params['type'], $this->values);
         if (!empty($values)) {
-            $this->object->getCustomFilterSqlFilters($this->filter_name, $values, $filters, $joins, $errors, false);
+            $this->object->getCustomFilterSqlFilters($this->filter_name, $values, $filters, $joins, $field_alias, $errors, false);
         }
 
         $excluded_values = self::getConvertedValues($this->params['type'], $this->excluded_values);
         if (!empty($excluded_values)) {
-            $this->object->getCustomFilterSqlFilters($this->filter_name, $excluded_values, $filters, $joins, $errors, true);
+            $this->object->getCustomFilterSqlFilters($this->filter_name, $excluded_values, $filters, $joins, $field_alias, $errors, true);
         }
 
         return $errors;

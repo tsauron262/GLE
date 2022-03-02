@@ -1175,7 +1175,7 @@ class BS_SAV extends BimpObject
         );
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'date_facturation':
@@ -1189,24 +1189,26 @@ class BS_SAV extends BimpObject
                 }
 
                 if (!empty($values_filters)) {
-                    $joins['facture'] = array(
-                        'alias' => 'facture',
+                    $fac_alias = $main_alias . '___facture';
+                    $joins[$fac_alias] = array(
+                        'alias' => $fac_alias,
                         'table' => 'facture',
-                        'on'    => 'facture.rowid = a.id_facture'
+                        'on'    => $fac_alias . '.rowid = ' . $main_alias . '.id_facture'
                     );
 
-                    $joins['facture_avoir'] = array(
-                        'alias' => 'facture_avoir',
+                    $avoir_alias = $main_alias . '___facture_avoir';
+                    $joins[$avoir_alias] = array(
+                        'alias' => $avoir_alias,
                         'table' => 'facture',
-                        'on'    => 'facture_avoir.rowid = a.id_facture_avoir'
+                        'on'    => $avoir_alias . '.rowid = ' . $main_alias . '.id_facture_avoir'
                     );
 
-                    $filters['date_facturation' . ($excluded ? '_excluded' : '')] = array(
+                    $filters[$main_alias . 'date_facturation' . ($excluded ? '_excluded' : '')] = array(
                         ($excluded ? 'and_fields' : 'or') => array(
-                            'facture.datef'       => array(
+                            $fac_alias . '.datef'   => array(
                                 ($excluded ? 'and' : 'or_field') => $values_filters
                             ),
-                            'facture_avoir.datef' => array(
+                            $avoir_alias . '.datef' => array(
                                 ($excluded ? 'and' : 'or_field') => $values_filters
                             )
                         )
@@ -1215,7 +1217,7 @@ class BS_SAV extends BimpObject
                 break;
         }
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
 
     public function getPublicUrlParams($internal = true)
@@ -1376,40 +1378,38 @@ class BS_SAV extends BimpObject
 
         return '';
     }
-    
-             
+
     public function getExtraFieldFilterKey($field, &$joins, $main_alias = '', &$filters = array())
     {
         $fields = array('date_create', 'date_pc', 'date_close');
-        
+
         $fieldPrinc = str_replace('j_', '', $field);
-        if(in_array($fieldPrinc, $fields)){
-            return 'if('.$main_alias.'.'.$fieldPrinc.', DayOfWeek('.$main_alias.'.'.$fieldPrinc.')-1, 10)';
+        if (in_array($fieldPrinc, $fields)) {
+            return 'if(' . $main_alias . '.' . $fieldPrinc . ', DayOfWeek(' . $main_alias . '.' . $fieldPrinc . ')-1, 10)';
         }
-        
-        
+
+
         $fieldPrinc = str_replace('h_', '', $field);
-        if(in_array($fieldPrinc, $fields)){
-            return 'if('.$main_alias.'.'.$fieldPrinc.', DATE_FORMAT('.$main_alias.'.'.$fieldPrinc.', "%H"), 10)';
+        if (in_array($fieldPrinc, $fields)) {
+            return 'if(' . $main_alias . '.' . $fieldPrinc . ', DATE_FORMAT(' . $main_alias . '.' . $fieldPrinc . ', "%H"), 10)';
         }
 
         return '';
     }
-    
+
     public function fetchExtraFields()
     {
         $fields = array('date_create', 'date_pc', 'date_close');
         $extra = array();
-        
-        foreach($fields as $field){
-            if($this->getData($field)){
+
+        foreach ($fields as $field) {
+            if ($this->getData($field)) {
                 $date = strtotime($this->getData($field));
-                $extra['j_'.$field] = date('w',$date);
-                $extra['h_'.$field] = date('H',$date);
-            }
-            else{
-                $extra['j_'.$field] = 10;
-                $extra['h_'.$field] = 0;
+                $extra['j_' . $field] = date('w', $date);
+                $extra['h_' . $field] = date('H', $date);
+            } else {
+                $extra['j_' . $field] = 10;
+                $extra['h_' . $field] = 0;
             }
         }
         return $extra;
@@ -2717,7 +2717,7 @@ class BS_SAV extends BimpObject
                 }
             }
         }
-        
+
         return $errors;
     }
 
@@ -3964,8 +3964,9 @@ class BS_SAV extends BimpObject
 
         return $errors;
     }
-    
-    public function  renderAlertDiago(){
+
+    public function renderAlertDiago()
+    {
         return '<div class="error">Tous les tests post réparation empêchant le passage en prêt pour enlèvement ont été effectués ?</div>';
     }
 
@@ -4766,7 +4767,7 @@ class BS_SAV extends BimpObject
                     $warnings = $this->sendMsg($msg_type);
                 }
             }
-            if(!count($errors))
+            if (!count($errors))
                 $errors = $this->updateField('date_close', dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S'));
         }
 
@@ -5408,8 +5409,9 @@ class BS_SAV extends BimpObject
             'warnings' => $warnings
         );
     }
-    
-    public static function getCodeApple($idMax = 0, &$newIdMax = 0){
+
+    public static function getCodeApple($idMax = 0, &$newIdMax = 0)
+    {
         $code = '';
         $db = BimpCache::getBdb();
         $result = $db->executeS("SELECT *
@@ -5423,16 +5425,15 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 $tabCode = explode('votre identifiant Apple est :', $code);
                 if (isset($tabCode[1]))
                     $code = $tabCode[1];
-                else{
+                else {
                     $tabCode = explode('Your Apple ID Code is: ', $code);
                     if (isset($tabCode[1]))
                         $code = $tabCode[1];
-                    
                 }
                 $tabCode = explode('. Ne le', $code);
                 if (isset($tabCode[1]))
                     $code = $tabCode[0];
-                else{
+                else {
                     $tabCode = explode('. Don', $code);
                     if (isset($tabCode[1]))
                         $code = $tabCode[0];
@@ -5447,15 +5448,15 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
     {
         $idMax = $data['idMax'];
         $success = 'Code pas encore reçu';
-        
+
         $newIdMax = 0;
         $code = static::getCodeApple($idMax, $newIdMax);
-        
+
         $success_callback = "setTimeout(function(){checkCode();}, 2000);";
-        if($code != ''){
+        if ($code != '') {
             if ($idMax == 0)
                 $success_callback .= 'idMaxMesg = ' . $ln->id . ';';
-            elseif($idMax < $newIdMax)
+            elseif ($idMax < $newIdMax)
                 $success_callback = "text = '" . urlencode($code) . "'; alert(text); const notification = new Notification('Code Apple', { body: text });";
         }
 
@@ -5580,8 +5581,9 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             'warnings' => $warnings
         );
     }
-    
-    public static function setGsxActiToken($token, $login = ''){
+
+    public static function setGsxActiToken($token, $login = '')
+    {
         require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
 
         $gsx = new GSX_v2();
@@ -5764,8 +5766,6 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             'success_callback' => $success_callback
         );
     }
-    
-    
 
     public function actionCancelRdv($data, &$success)
     {

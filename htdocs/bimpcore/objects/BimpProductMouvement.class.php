@@ -43,7 +43,7 @@ class BimpProductMouvement extends BimpObject
 
     // Getters params 
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'origin_type':
@@ -70,10 +70,10 @@ class BimpProductMouvement extends BimpObject
 
                 if ($excluded) {
                     if ($in) {
-                        $filter = 'a.origintype NOT IN (' . $in . ') AND a.bimp_origin NOT IN (' . $in . ')';
+                        $filter = $main_alias . '.origintype NOT IN (' . $in . ') AND ' . $main_alias . '.bimp_origin NOT IN (' . $in . ')';
                     }
                     if ($has_emtpy) {
-                        $filter .= ($filter != '' ? ' AND ' : '') . 'NOT ((a.origintype = \'\' OR a.origintype IS NULL) AND (a.bimp_origin = \'\' OR a.bimp_origin IS NULL))';
+                        $filter .= ($filter != '' ? ' AND ' : '') . 'NOT ((' . $main_alias . '.origintype = \'\' OR ' . $main_alias . '.origintype IS NULL) AND (' . $main_alias . '.bimp_origin = \'\' OR ' . $main_alias . '.bimp_origin IS NULL))';
                     }
                     if ($has_inc) {
                         $origintypes = self::$originetypes;
@@ -81,14 +81,14 @@ class BimpProductMouvement extends BimpObject
                         unset($origintypes['inc']);
                         $origintypes = BimpTools::implodeArrayKeys($origintypes, ',', true);
 
-                        $filter .= ($filter != '' ? ' AND ' : '') . 'NOT ((a.origintype != \'\' AND a.origintype IS NOT NULL AND a.origintype NOT IN(' . $origintypes . ')) OR (a.bimp_origin != \'\' AND a.bimp_origin IS NOT NULL AND a.bimp_origin NOT IN (' . $origintypes . ')))';
+                        $filter .= ($filter != '' ? ' AND ' : '') . 'NOT ((' . $main_alias . '.origintype != \'\' AND ' . $main_alias . '.origintype IS NOT NULL AND ' . $main_alias . '.origintype NOT IN(' . $origintypes . ')) OR (' . $main_alias . '.bimp_origin != \'\' AND ' . $main_alias . '.bimp_origin IS NOT NULL AND ' . $main_alias . '.bimp_origin NOT IN (' . $origintypes . ')))';
                     }
                 } else {
                     if ($in) {
-                        $filter = 'a.origintype IN (' . $in . ') OR a.bimp_origin IN (' . $in . ')';
+                        $filter = $main_alias . '.origintype IN (' . $in . ') OR ' . $main_alias . '.bimp_origin IN (' . $in . ')';
                     }
                     if ($has_emtpy) {
-                        $filter .= ($filter != '' ? ' OR ' : '') . '((a.origintype = \'\' OR a.origintype IS NULL) AND (a.bimp_origin = \'\' OR a.bimp_origin IS NULL))';
+                        $filter .= ($filter != '' ? ' OR ' : '') . '((' . $main_alias . '.origintype = \'\' OR ' . $main_alias . '.origintype IS NULL) AND (' . $main_alias . '.bimp_origin = \'\' OR ' . $main_alias . '.bimp_origin IS NULL))';
                     }
                     if ($has_inc) {
                         $origintypes = self::$originetypes;
@@ -96,12 +96,12 @@ class BimpProductMouvement extends BimpObject
                         unset($origintypes['inc']);
                         $origintypes = BimpTools::implodeArrayKeys($origintypes, ',', true);
 
-                        $filter .= ($filter != '' ? ' AND ' : '') . '((a.origintype != \'\' AND a.origintype IS NOT NULL AND a.origintype NOT IN(' . $origintypes . ')) OR (a.bimp_origin != \'\' AND a.bimp_origin IS NOT NULL AND a.bimp_origin NOT IN (' . $origintypes . ')))';
+                        $filter .= ($filter != '' ? ' AND ' : '') . '((' . $main_alias . '.origintype != \'\' AND ' . $main_alias . '.origintype IS NOT NULL AND ' . $main_alias . '.origintype NOT IN(' . $origintypes . ')) OR (' . $main_alias . '.bimp_origin != \'\' AND ' . $main_alias . '.bimp_origin IS NOT NULL AND ' . $main_alias . '.bimp_origin NOT IN (' . $origintypes . ')))';
                     }
                 }
 
                 if ($filter) {
-                    $filters['origin_type'] = array(
+                    $filters[$main_alias . 'origin_type'] = array(
                         'custom' => '(' . $filter . ')'
                     );
                 }
@@ -116,98 +116,105 @@ class BimpProductMouvement extends BimpObject
 
                     // Factures: 
                     if (in_array('facture', self::$current_origin_types_filters)) {
-                        $joins['origin_facture'] = array(
+                        $of_alias = $main_alias . '___origin_facture';
+                        $joins[$of_alias] = array(
                             'table' => 'facture',
-                            'alias' => 'origin_facture',
-                            'on'    => '((a.origintype = \'facture\' and a.fk_origin = origin_facture.rowid) OR (a.bimp_origin = \'facture\' and a.bimp_id_origin = origin_facture.rowid))'
+                            'alias' => $of_alias,
+                            'on'    => '((' . $main_alias . '.origintype = \'facture\' and ' . $main_alias . '.fk_origin = ' . $of_alias . '.rowid) OR (' . $main_alias . '.bimp_origin = \'facture\' and ' . $main_alias . '.bimp_id_origin = ' . $of_alias . '.rowid))'
                         );
 
-                        $or_origins['origin_facture.facnumber'] = array(
+                        $or_origins[$of_alias . '.facnumber'] = array(
                             'or_field' => $or_field
                         );
                     }
 
                     // Commandes: 
                     if (in_array('commande', self::$current_origin_types_filters)) {
-                        $joins['origin_commande'] = array(
+                        $oc_alias = $main_alias . '___origin_commande';
+                        $joins[$oc_alias] = array(
                             'table' => 'commande',
-                            'alias' => 'origin_commande',
-                            'on'    => '((a.origintype = \'commande\' and a.fk_origin = origin_commande.rowid) OR (a.bimp_origin = \'commande\' and a.bimp_id_origin = origin_commande.rowid))'
+                            'alias' => $oc_alias,
+                            'on'    => '((' . $main_alias . '.origintype = \'commande\' and ' . $main_alias . '.fk_origin = ' . $oc_alias . '.rowid) OR (' . $main_alias . '.bimp_origin = \'commande\' and ' . $main_alias . '.bimp_id_origin = ' . $oc_alias . '.rowid))'
                         );
 
-                        $or_origins['origin_commande.ref'] = array(
+                        $or_origins[$oc_alias . '.ref'] = array(
                             'or_field' => $or_field
                         );
                     }
 
                     // Commandes fourn: 
                     if (in_array('order_supplier', self::$current_origin_types_filters)) {
-                        $joins['origin_commande_fourn'] = array(
+                        $ocf_alias = $main_alias . '___origin_commande_fourn';
+                        $joins[$ocf_alias] = array(
                             'table' => 'commande_fournisseur',
-                            'alias' => 'origin_commande_fourn',
-                            'on'    => '((a.origintype = \'order_supplier\' and a.fk_origin = origin_commande_fourn.rowid) OR (a.bimp_origin = \'order_supplier\' and a.bimp_id_origin = origin_commande_fourn.rowid))'
+                            'alias' => $ocf_alias,
+                            'on'    => '((' . $main_alias . '.origintype = \'order_supplier\' and ' . $main_alias . '.fk_origin = ' . $ocf_alias . '.rowid) OR (' . $main_alias . '.bimp_origin = \'order_supplier\' and ' . $main_alias . '.bimp_id_origin = ' . $ocf_alias . '.rowid))'
                         );
 
-                        $or_origins['origin_commande_fourn.ref'] = array(
+                        $or_origins[$ocf_alias . '.ref'] = array(
                             'or_field' => $or_field
                         );
                     }
 
                     // Sociétés: 
                     if (in_array('societe', self::$current_origin_types_filters)) {
-                        $joins['origin_societe'] = array(
+                        $soc_alias = $main_alias . '___origin_societe';
+                        $joins[$soc_alias] = array(
                             'table' => 'societe',
-                            'alias' => 'origin_societe',
-                            'on'    => '((a.origintype = \'societe\' and a.fk_origin = origin_societe.rowid) OR (a.bimp_origin = \'societe\' and a.bimp_id_origin = origin_societe.rowid))'
+                            'alias' => $soc_alias,
+                            'on'    => '((' . $main_alias . '.origintype = \'societe\' and ' . $main_alias . '.fk_origin = ' . $soc_alias . '.rowid) OR (' . $main_alias . '.bimp_origin = \'societe\' and ' . $main_alias . '.bimp_id_origin = ' . $soc_alias . '.rowid))'
                         );
 
-                        $or_origins['origin_societe.code_client'] = array(
+                        $or_origins[$soc_alias . '.code_client'] = array(
                             'or_field' => $or_field
                         );
-                        $or_origins['origin_societe.code_fournisseur'] = array(
+                        $or_origins[$soc_alias . '.code_fournisseur'] = array(
                             'or_field' => $or_field
                         );
-                        $or_origins['origin_societe.nom'] = array(
+                        $or_origins[$soc_alias . '.nom'] = array(
                             'or_field' => $or_field
                         );
                     }
 
                     // User: 
                     if (in_array('user', self::$current_origin_types_filters)) {
-                        $joins['origin_user'] = array(
+                        $user_alias = $main_alias . '___origin_user';
+                        $joins[$user_alias] = array(
                             'table' => 'user',
-                            'alias' => 'origin_user',
-                            'on'    => '((a.origintype = \'user\' and a.fk_origin = origin_user.rowid) OR (a.bimp_origin = \'user\' and a.bimp_id_origin = origin_user.rowid))'
+                            'alias' => $user_alias,
+                            'on'    => '((' . $main_alias . '.origintype = \'user\' and ' . $main_alias . '.fk_origin = ' . $user_alias . '.rowid) OR (' . $main_alias . '.bimp_origin = \'user\' and ' . $main_alias . '.bimp_id_origin = ' . $user_alias . '.rowid))'
                         );
-                        $or_origins['origin_user.lastname'] = array(
+                        $or_origins[$user_alias . '.lastname'] = array(
                             'or_field' => $or_field
                         );
-                        $or_origins['origin_user.firstname'] = array(
+                        $or_origins[$user_alias . '.firstname'] = array(
                             'or_field' => $or_field
                         );
-                        $or_origins['origin_user.login'] = array(
+                        $or_origins[$user_alias . '.login'] = array(
                             'or_field' => $or_field
                         );
                     }
 
                     // Ventes en caisse: 
                     if (in_array('vente_caisse', self::$current_origin_types_filters)) {
-                        $joins['origin_vente'] = array(
+                        $ov_alias = $main_alias . '___origin_vente';
+                        $joins[$ov_alias] = array(
                             'table' => 'bc_vente',
-                            'alias' => 'origin_vente',
-                            'on'    => '(a.bimp_origin = \'vente_caisse\' and a.bimp_id_origin = origin_vente.id)'
+                            'alias' => $ov_alias,
+                            'on'    => '(' . $main_alias . '.bimp_origin = \'vente_caisse\' and ' . $main_alias . '.bimp_id_origin = ' . $ov_alias . '.id)'
                         );
-                        $or_origins['origin_vente.id'] = array(
+                        $or_origins[$ov_alias . '.id'] = array(
                             'in' => $values
                         );
                     }
 
                     // SAV: 
                     if (in_array('sav', self::$current_origin_types_filters)) {
-                        $joins['origin_sav'] = array(
+                        $sav_alias = $main_alias . '___origin_sav';
+                        $joins[$sav_alias] = array(
                             'table' => 'bs_sav',
-                            'alias' => 'origin_sav',
-                            'on'    => '(a.bimp_origin = \'sav\' and a.bimp_id_origin = origin_sav.id)'
+                            'alias' => $sav_alias,
+                            'on'    => '(' . $main_alias . '.bimp_origin = \'sav\' and ' . $main_alias . '.bimp_id_origin = ' . $sav_alias . '.id)'
                         );
                         $or_origins['origin_sav.ref'] = array(
                             'or_field' => $or_field
@@ -216,63 +223,68 @@ class BimpProductMouvement extends BimpObject
 
                     // Transferts: 
                     if (in_array('transfert', self::$current_origin_types_filters)) {
-                        $joins['origin_transfert'] = array(
+                        $ot_alias = $main_alias . '___origin_transfert';
+                        $joins[$ot_alias] = array(
                             'table' => 'be_transfer',
-                            'alias' => 'origin_transfert',
-                            'on'    => '(a.bimp_origin = \'transfert\' and a.bimp_id_origin = origin_transfert.rowid)'
+                            'alias' => $ot_alias,
+                            'on'    => '(' . $main_alias . '.bimp_origin = \'transfert\' and ' . $main_alias . '.bimp_id_origin = ' . $ot_alias . '.rowid)'
                         );
-                        $or_origins['origin_transfert.rowid'] = array(
+                        $or_origins[$ot_alias . '.rowid'] = array(
                             'in' => $values
                         );
                     }
 
                     // Packages: 
                     if (in_array('package', self::$current_origin_types_filters)) {
-                        $joins['origin_package'] = array(
+                        $op_alias = $main_alias . '___origin_package';
+                        $joins[$op_alias] = array(
                             'table' => 'be_package',
-                            'alias' => 'origin_package',
-                            'on'    => '(a.bimp_origin = \'package\' and a.bimp_id_origin = origin_package.id)'
+                            'alias' => $op_alias,
+                            'on'    => '(' . $main_alias . '.bimp_origin = \'package\' and ' . $main_alias . '.bimp_id_origin = ' . $op_alias . '.id)'
                         );
-                        $or_origins['origin_package.ref'] = array(
+                        $or_origins[$op_alias . '.ref'] = array(
                             'or_field' => $or_field
                         );
-                        $or_origins['origin_package.label'] = array(
+                        $or_origins[$op_alias . '.label'] = array(
                             'or_field' => $or_field
                         );
                     }
 
                     // Inventaires (1): 
                     if (in_array('inventory', self::$current_origin_types_filters)) {
-                        $joins['origin_inventory'] = array(
+                        $ov_alias = $main_alias . '___origin_inventory';
+                        $joins[$ov_alias] = array(
                             'table' => 'be_inventory',
-                            'alias' => 'origin_inventory',
-                            'on'    => '(a.bimp_origin = \'inventory\' and a.bimp_id_origin = origin_inventory.rowid)'
+                            'alias' => $ov_alias,
+                            'on'    => '(' . $main_alias . '.bimp_origin = \'inventory\' and ' . $main_alias . '.bimp_id_origin = ' . $ov_alias . '.rowid)'
                         );
-                        $or_origins['origin_inventory.rowid'] = array(
+                        $or_origins[$ov_alias . '.rowid'] = array(
                             'in' => $values
                         );
                     }
 
                     // Inventaires (2): 
                     if (in_array('inventory2', self::$current_origin_types_filters)) {
-                        $joins['origin_inventory2'] = array(
+                        $ov2_alias = $main_alias . '___origin_inventory2';
+                        $joins[$ov2_alias] = array(
                             'table' => 'bl_inventory_2',
-                            'alias' => 'origin_inventory2',
-                            'on'    => '(a.bimp_origin = \'inventory2\' and a.bimp_id_origin = origin_inventory2.id)'
+                            'alias' => $ov2_alias,
+                            'on'    => '(' . $main_alias . '.bimp_origin = \'inventory2\' and ' . $main_alias . '.bimp_id_origin = ' . $ov2_alias . '.id)'
                         );
-                        $or_origins['origin_inventory.rowid'] = array(
+                        $or_origins[$ov2_alias . '.rowid'] = array(
                             'in' => $values
                         );
                     }
 
                     // Prêts: 
                     if (in_array('pret', self::$current_origin_types_filters)) {
-                        $joins['origin_pret'] = array(
+                        $op_alias = $main_alias . '___origin_pret';
+                        $joins[$op_alias] = array(
                             'table' => 'bs_pret',
-                            'alias' => 'origin_pret',
-                            'on'    => '(a.bimp_origin = \'pret\' and a.bimp_id_origin = origin_pret.id)'
+                            'alias' => $op_alias,
+                            'on'    => '(' . $main_alias . '.bimp_origin = \'pret\' and ' . $main_alias . '.bimp_id_origin = ' . $op_alias . '.id)'
                         );
-                        $or_origins['origin_pret.ref'] = array(
+                        $or_origins[$op_alias . '.ref'] = array(
                             'or_field' => $or_field
                         );
                     }
@@ -286,7 +298,7 @@ class BimpProductMouvement extends BimpObject
                 }
         }
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
 
     // Getters:
@@ -351,7 +363,7 @@ class BimpProductMouvement extends BimpObject
                 break;
 
             case 'user':
-                if (stripos($this->getData('label'), "Emplacement") !== false){
+                if (stripos($this->getData('label'), "Emplacement") !== false) {
                     $label = 'Immo';
                 }
                 $objet = 'Bimp_User';
@@ -524,7 +536,7 @@ class BimpProductMouvement extends BimpObject
     public function revertMouvement(&$warnings = array())
     {
 
-        echo '<br/>mv '.$this->id.'<br/>';
+        echo '<br/>mv ' . $this->id . '<br/>';
         $errors = array();
 
         BimpObject::loadClass('bimpequipment', 'BE_Package');
@@ -539,46 +551,38 @@ class BimpProductMouvement extends BimpObject
             $errors = BimpTools::merge_array($errors, BE_Package::moveElements($m[1], $id_package_src, array($this->getData('fk_product') => $this->getData('value'))
                                     , array(), $this->getData('inventorycode'), 'Revert', $this->getData('bimp_origin'), $this->getData('bimp_id_origin')));
 
-
-
             // enlève
         } elseif (preg_match("/^Ajout au package #(\d+)/", $this->getData('label'), $m)) {
-            if($this->getData('value') < 0){//il est dans un package hors stock
+            if ($this->getData('value') < 0) {//il est dans un package hors stock
                 $package = BimpObject::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $m[1]);
-                $errors = BimpTools::merge_array($errors, $package->addProduct($this->getData('fk_product'), $this->getData('value'), $this->getData('fk_entrepot'), $warnings, $this->getData('inventorycode'), 'Revert '.$this->id.' | ' . $this->getData('label'), $this->getData('bimp_origin'), $this->getData('bimp_id_origin')));
-            }
-            else{
+                $errors = BimpTools::merge_array($errors, $package->addProduct($this->getData('fk_product'), $this->getData('value'), $this->getData('fk_entrepot'), $warnings, $this->getData('inventorycode'), 'Revert ' . $this->id . ' | ' . $this->getData('label'), $this->getData('bimp_origin'), $this->getData('bimp_id_origin')));
+            } else {
                 $package = BimpObject::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $m[1]);
-                $errors = BimpTools::merge_array($errors, $package->addProduct($this->getData('fk_product'), -$this->getData('value'), -1, $warnings, $this->getData('inventorycode'), 'Revert '.$this->id.' | ' . $this->getData('label'), $this->getData('bimp_origin'), $this->getData('bimp_id_origin')));
-                
+                $errors = BimpTools::merge_array($errors, $package->addProduct($this->getData('fk_product'), -$this->getData('value'), -1, $warnings, $this->getData('inventorycode'), 'Revert ' . $this->id . ' | ' . $this->getData('label'), $this->getData('bimp_origin'), $this->getData('bimp_id_origin')));
             }
-            
-            echo 'Retrait de ' . $m[1] .' '. $this->getData('fk_product') . '<br/>';
-        }  elseif(preg_match("/^Retrait du package #(\d+)/", $this->getData('label'), $m)) {
-            if($this->getData('value') < 0){//package en stock
-                echo 'Ajout de '.$this->getData('value').' dans pkg ' . $m[1] .' '. $this->getData('fk_product') . '<br/>';
-                $package = BimpObject::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $m[1]);
-                $errors = BimpTools::merge_array($errors, $package->addProduct($this->getData('fk_product'), -$this->getData('value'), -1, $warnings, $this->getData('inventorycode'), 'Revert '.$this->id.' | ' . $this->getData('label'), $this->getData('bimp_origin'), $this->getData('bimp_id_origin')));
-            }
-            else{//package hors stock
-                echo 'Ajout de '.$this->getData('value').' dans pkg ' . $m[1] .' '. $this->getData('fk_product') . '<br/>';
-                $package = BimpObject::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $m[1]);
-                $errors = BimpTools::merge_array($errors, $package->addProduct($this->getData('fk_product'), $this->getData('value'), $this->getData('fk_entrepot'), $warnings, $this->getData('inventorycode'), 'Revert '.$this->id.' | ' . $this->getData('label'), $this->getData('bimp_origin'), $this->getData('bimp_id_origin')));
-            }
-          //            print_r($m);
 
-          //            $package = BimpObject::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $m[1]);
-          //            $package->addProduct($this->getData('fk_product'), $this->getData('value'), 0, $warnings,
-          //                    $this->getData('inventorycode'), 'Revert ' . $this->getData('label'), $this->getData('bimp_origin'), $this->getData('bimp_id_origin'));
-         
+            echo 'Retrait de ' . $m[1] . ' ' . $this->getData('fk_product') . '<br/>';
+        } elseif (preg_match("/^Retrait du package #(\d+)/", $this->getData('label'), $m)) {
+            if ($this->getData('value') < 0) {//package en stock
+                echo 'Ajout de ' . $this->getData('value') . ' dans pkg ' . $m[1] . ' ' . $this->getData('fk_product') . '<br/>';
+                $package = BimpObject::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $m[1]);
+                $errors = BimpTools::merge_array($errors, $package->addProduct($this->getData('fk_product'), -$this->getData('value'), -1, $warnings, $this->getData('inventorycode'), 'Revert ' . $this->id . ' | ' . $this->getData('label'), $this->getData('bimp_origin'), $this->getData('bimp_id_origin')));
+            } else {//package hors stock
+                echo 'Ajout de ' . $this->getData('value') . ' dans pkg ' . $m[1] . ' ' . $this->getData('fk_product') . '<br/>';
+                $package = BimpObject::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $m[1]);
+                $errors = BimpTools::merge_array($errors, $package->addProduct($this->getData('fk_product'), $this->getData('value'), $this->getData('fk_entrepot'), $warnings, $this->getData('inventorycode'), 'Revert ' . $this->id . ' | ' . $this->getData('label'), $this->getData('bimp_origin'), $this->getData('bimp_id_origin')));
+            }
+            //            print_r($m);
+            //            $package = BimpObject::getBimpObjectInstance('bimpequipment', 'BE_Package', (int) $m[1]);
+            //            $package->addProduct($this->getData('fk_product'), $this->getData('value'), 0, $warnings,
+            //                    $this->getData('inventorycode'), 'Revert ' . $this->getData('label'), $this->getData('bimp_origin'), $this->getData('bimp_id_origin'));
 //        } elseif((int) $this->getData('fk_entrepot') > 0) {
 //            
 //            echo ' ATTENTION ' . $this->getData('label') . '<br/>';
 //            
-        } 
-        else {
+        } else {
 
-            echo ' ATTENTION mv id '.$this->id.' | ' . $this->getData('label') . ' n\'est pas géré !<br/>';
+            echo ' ATTENTION mv id ' . $this->id . ' | ' . $this->getData('label') . ' n\'est pas géré !<br/>';
 
 //            die('"Type inconnue');
         }

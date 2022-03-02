@@ -66,17 +66,17 @@ class BT_ficheInter_det extends BimpDolObject
 
         return 1;
     }
-    
-    public function canEditField($field_name) {
-        
+
+    public function canEditField($field_name)
+    {
+
         global $user;
-        switch($field_name) {
+        switch ($field_name) {
             case 'forfait':
                 return (int) $user->rights->bimptechnique->modif_apres_validation;
-        break;
-    
+                break;
         }
-        
+
         return 1;
     }
 
@@ -89,15 +89,15 @@ class BT_ficheInter_det extends BimpDolObject
             if ((int) $fi->getData('fk_statut') === 0) {
                 return 1;
             }
-            
-            if((int)$user->rights->bimptechnique->modif_apres_validation && (int) $fi->getData('fk_statut') != 0) {
+
+            if ((int) $user->rights->bimptechnique->modif_apres_validation && (int) $fi->getData('fk_statut') != 0) {
                 return 1;
             }
 
             if (in_array($field, array('pourcentage_commercial'))) {
                 return 1;
             }
-            
+
             return 0;
         }
 
@@ -128,9 +128,7 @@ class BT_ficheInter_det extends BimpDolObject
 
         return 0;
     }
-    
-    
-    
+
     public function isAmPm()
     {
         if (!$this->isLoaded() || (string) $this->getData('arrived') || (string) $this->getData('departure')) {
@@ -155,9 +153,8 @@ class BT_ficheInter_det extends BimpDolObject
 //                ))
 //            );
 //        }
-        
         //if($this->getData(''))
-        
+
         return $buttons;
     }
 
@@ -256,24 +253,23 @@ class BT_ficheInter_det extends BimpDolObject
                     foreach ($lines as $line) {
                         if ((int) $line->id_product) {
                             //$product = $line->getProduct(); // Supprimé sinon les  produits à 0 ne sortent pas (On en a quand même besoin)
-                            $product  = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Product", $line->id_product);
+                            $product = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Product", $line->id_product);
                             if (BimpObject::objectLoaded($product)) {
                                 if (!$product->isDep() && $product->isTypeService()) {
                                     $bimp_line_commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $line->id);
                                     $addAuForfait = ($bimp_line_commande->getData('force_qty_1')) ? '<br /><span class="danger">Au forfait</span>' : '';
                                     if (array_key_exists($product->getRef(), $tp)) {
-                                        if($bimp_line_commande->getData('force_qty_1')){
+                                        if ($bimp_line_commande->getData('force_qty_1')) {
                                             $services['commande_' . $line->id] = "AU FORFAIT " . ' (' . price($line->getTotalHT(true)) . ' € HT) - <b>' . $commande->getRef() . '</b> <br />' . $line->desc;
                                         } else {
                                             $services['commande_' . $line->id] = $tp[$product->getRef()] . ' (' . price($line->getTotalHT(true)) . ' € HT) - <b>' . $commande->getRef() . '</b> <br />' . $line->desc;
                                         }
                                     } elseif ($product->getData('price') != 0) {
-                                        if($bimp_line_commande->getData('force_qty_1')) {
+                                        if ($bimp_line_commande->getData('force_qty_1')) {
                                             $services['commande_' . $line->id] = $product->getRef() . ' (AU FORFAIT - ' . price($line->getTotalHT(true)) . ' € HT) - <b>' . $commande->getRef() . '</b> <br />' . $line->desc . $addAuForfait;
                                         } else {
                                             $services['commande_' . $line->id] = $product->getRef() . ' (' . price($line->getTotalHT(true)) . ' € HT) - <b>' . $commande->getRef() . '</b> <br />' . $line->desc;
                                         }
-                                        
                                     }
                                 }
                             }
@@ -296,14 +292,15 @@ class BT_ficheInter_det extends BimpDolObject
 
         return $services;
     }
-    
-    private function getTypePlanningCode():int {
-        
+
+    private function getTypePlanningCode(): int
+    {
+
         $code = "";
         $parent = $this->getParentInstance();
         $fk_soc = (int) $parent->getData('fk_soc');
         $type = (int) $this->getData('type');
-        
+
         switch ($this->getData('type')) {
             case 0:
             case 4:
@@ -316,13 +313,12 @@ class BT_ficheInter_det extends BimpDolObject
             case self::TYPE_INTERNE:
                 $code = "REU_INT";
         }
-        
-        if(empty($code)) {
+
+        if (empty($code)) {
             $code = "AC_RDV";
         }
-        
+
         return (int) $this->db->getValue("c_actioncomm", "id", "code = '$code'");
-        
     }
 
     // Getters données: 
@@ -360,34 +356,36 @@ class BT_ficheInter_det extends BimpDolObject
         $t = new DateTime($this->getData($field));
         return($t->format('H:i' . ($with_secondes ? ':s' : '')));
     }
-    
-    public function displayTypeInList() {
-        $type  = $this->getData('type');
-        if(array_key_exists($type,self::$types)) {
+
+    public function displayTypeInList()
+    {
+        $type = $this->getData('type');
+        if (array_key_exists($type, self::$types)) {
             return $this->displayData("type");
         }
         $parent = $this->getParentInstance();
         $fk_soc = $parent->getData('fk_soc');
         $soc = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Societe", $fk_soc);
-        if($type == $fk_soc) {
-            return "<b>Intervention interne (".$soc->getName().")</b>";
+        if ($type == $fk_soc) {
+            return "<b>Intervention interne (" . $soc->getName() . ")</b>";
         }
-        
     }
-    
-    public function getIdLineInput(){
+
+    public function getIdLineInput()
+    {
         $idLine = $this->getData('id_line_commande');
-        if($idLine > 0)
-            return 'commande_'.$idLine;
+        if ($idLine > 0)
+            return 'commande_' . $idLine;
         $idLine = $this->getData('id_line_contrat');
-        if($idLine > 0)
-            return 'contrat_'.$idLine;
+        if ($idLine > 0)
+            return 'contrat_' . $idLine;
         return 0;
-        }
-    
-    public function getIdService() {
+    }
+
+    public function getIdService()
+    {
         $fk_product = 0;
-         if ($this->getData('id_line_contrat') > 0) {
+        if ($this->getData('id_line_contrat') > 0) {
             $contrat_line = $this->getChildObject('contrat_line');
             if (BimpObject::objectLoaded($contrat_line)) {
                 $fk_product = (int) $contrat_line->getData('fk_product');
@@ -403,12 +401,12 @@ class BT_ficheInter_det extends BimpDolObject
             }
         } elseif ($this->getData('id_line_commande') > 0 || $this->getData('id_dol_line_commande') > 0) {
             $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine');
-            if($this->getData('id_dol_line_commande') > 0)
+            if ($this->getData('id_dol_line_commande') > 0)
                 $line->find(Array('id_line' => $this->getData('id_dol_line_commande')), 1);
-            elseif($this->getData('id_line_commande') > 0)
+            elseif ($this->getData('id_line_commande') > 0)
                 $line->fetch($this->getData('id_line_commande'));
             if (BimpObject::objectLoaded($line)) {
-                
+
                 $fk_product = $line->id_product;
 
                 if ($with_details_commande_line) {
@@ -479,37 +477,36 @@ class BT_ficheInter_det extends BimpDolObject
                 }
             }
         }
-        
-        if($this->getData('forfait') == 1) {
+
+        if ($this->getData('forfait') == 1) {
             $html .= '<br /><span class=\'danger\'>Au forfait</span>';
         }
-        
+
         return $html;
     }
-    
-    public function displayDescriptifPrestationDemande() {
+
+    public function displayDescriptifPrestationDemande()
+    {
         $description = '';
         $orderLine = null;
-        
-        if($this->getData('id_line_contrat') > 0) {
+
+        if ($this->getData('id_line_contrat') > 0) {
             $obj = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contratLine', $this->getData('id_line_contrat'));
             $description = $obj->getData('description');
-        } elseif($this->getData('id_line_commande') > 0 || $this->getData('id_dol_line_commande') > 0) {
+        } elseif ($this->getData('id_line_commande') > 0 || $this->getData('id_dol_line_commande') > 0) {
             BimpTools::loadDolClass('commande', 'commande', 'OrderLine');
-            if($this->getData('id_line_commande') > 0){
+            if ($this->getData('id_line_commande') > 0) {
                 $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $this->getData('id_line_commande'));
                 $orderLine = new OrderLine($this->db->db);
                 $orderLine->fetch($obj->getData('id_line'));
-            }   
-            elseif($this->getData('id_dol_line_commande') > 0) {
+            } elseif ($this->getData('id_dol_line_commande') > 0) {
                 $orderLine = new OrderLine($this->db->db);
                 $orderLine->fetch($this->getData('id_dol_line_commande'));
             }
-            
+
             $description = $orderLine->desc;
-            
         }
-        
+
         return $description;
     }
 
@@ -528,12 +525,14 @@ class BT_ficheInter_det extends BimpDolObject
 
         return '';
     }
-    
-    public function isAuForfait() {
-        if($this->getData('id_line_contrat')) return 1;
-        if($this->getData('id_line_commande') || $this->getData('id_dol_line_commande')) {
+
+    public function isAuForfait()
+    {
+        if ($this->getData('id_line_contrat'))
+            return 1;
+        if ($this->getData('id_line_commande') || $this->getData('id_dol_line_commande')) {
             $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine');
-            if($this->getData('id_line_commande')){
+            if ($this->getData('id_line_commande')) {
                 $line->fetch($this->getData('id_line_commande'));
             } else {
                 $line->find(['id_line' => $this->getData('id_dol_line_commande')], 1);
@@ -580,7 +579,7 @@ class BT_ficheInter_det extends BimpDolObject
 //                $html .= " <small>" . BimpRender::renderIcon('info-circle') . "</small>";
             }
         }
-        
+
         return $html;
     }
 
@@ -608,7 +607,8 @@ class BT_ficheInter_det extends BimpDolObject
 
     // Traitements: 
 
-    private function adjustCalendar($delete = false) {
+    private function adjustCalendar($delete = false)
+    {
         $errors = array();
         $parent = $this->getParentInstance();
         BimpTools::loadDolClass("comm/action", "actioncomm");
@@ -617,17 +617,17 @@ class BT_ficheInter_det extends BimpDolObject
         $admin->fetch(1);
         $actionCommList = ($this->getData('actioncomm') != "") ? json_decode($this->getData('actioncomm')) : [];
         $actionCommClass = new ActionComm($this->db->db);
-        
-        if(count($actionCommList) > 0) {
+
+        if (count($actionCommList) > 0) {
             foreach ($actionCommList as $id_actionComm) {
-                if($id_actionComm > 0){
+                if ($id_actionComm > 0) {
                     $actionCommClass->fetch($id_actionComm);
                     $actionCommClass->delete();
                 }
             }
         }
-        
-        if(!$delete) {
+
+        if (!$delete) {
             $actionCommClass->label = $parent->getRef() . " - " . BT_ficheInter_det::$types[$this->getData('type')]['label'];
             $actionCommClass->note = addslashes($this->getData('description'));
             $actionCommClass->punctual = 1;
@@ -638,10 +638,10 @@ class BT_ficheInter_det extends BimpDolObject
             $actionCommClass->socid = $parent->getData('fk_soc');
             $actionCommClass->fk_element = $parent->id;
 
-            if($this->getData('arrived')) {
+            if ($this->getData('arrived')) {
                 $actionCommClass->datep = strtotime($this->getData('arrived'));
                 $actionCommClass->datef = strtotime($this->getData('departure'));
-                if($actionCommClass->create($admin) < 1)
+                if ($actionCommClass->create($admin) < 1)
                     $errors = BimpTools::getErrorsFromDolObject($actionCommClass, $errors);
                 else
                     BimpTools::merge_array($errors, $this->set('actioncomm', [$actionCommClass->id]));
@@ -649,11 +649,11 @@ class BT_ficheInter_det extends BimpDolObject
                 $actionCommClass2 = clone $actionCommClass;
                 $actionCommClass->datep = strtotime($this->getData('arriverd_am'));
                 $actionCommClass->datef = strtotime($this->getData('departure_am'));
-                if($actionCommClass->create($admin) < 1)
+                if ($actionCommClass->create($admin) < 1)
                     $errors = BimpTools::getErrorsFromDolObject($actionCommClass, $errors);
                 $actionCommClass2->datep = strtotime($this->getData('arriverd_pm'));
                 $actionCommClass2->datef = strtotime($this->getData('departure_pm'));
-                if($actionCommClass2->create($admin) < 1)
+                if ($actionCommClass2->create($admin) < 1)
                     $errors = BimpTools::getErrorsFromDolObject($actionCommClass, $errors);
                 else
                     BimpTools::merge_array($errors, $this->set('actioncomm', [$actionCommClass->id, $actionCommClass2->id]));
@@ -661,13 +661,12 @@ class BT_ficheInter_det extends BimpDolObject
         }
 
         return $errors;
-        
     }
-    
+
     public function onSave(&$errors = [], &$warnings = [])
     {
         $parent = $this->getParentInstance();
-        
+
         if (BimpObject::objectLoaded($parent)) {
             $tt = $this->db->getSum('fichinterdet', 'duree', 'fk_fichinter = ' . $this->getData('fk_fichinter'));
             $parent->set('duree', $tt);
@@ -676,7 +675,6 @@ class BT_ficheInter_det extends BimpDolObject
         }
 
         parent::onSave($errors, $warnings);
-        
     }
 
     // Actions: 
@@ -736,8 +734,9 @@ class BT_ficheInter_det extends BimpDolObject
     }
 
     // Overrides: 
-    
-    public function delete(&$warnings = array(), $force_delete = false) {
+
+    public function delete(&$warnings = array(), $force_delete = false)
+    {
         $this->adjustCalendar(true);
         return parent::delete($warnings, $force_delete);
     }
@@ -880,7 +879,7 @@ class BT_ficheInter_det extends BimpDolObject
 
         return $errors;
     }
-    
+
     public function validate()
     {
         $errors = parent::validate();
@@ -917,19 +916,18 @@ class BT_ficheInter_det extends BimpDolObject
                 $facturable = 0;
 
                 $type = (int) $this->getData('type');
-                if(($this->getData('id_line_commande') != $this->getInitData('id_line_commande')) || 
-                        ($this->getData('id_dol_line_commande') != $this->getInitData('id_dol_line_commande')) || 
+                if (($this->getData('id_line_commande') != $this->getInitData('id_line_commande')) ||
+                        ($this->getData('id_dol_line_commande') != $this->getInitData('id_dol_line_commande')) ||
                         ($this->getData('id_line_contrat') != $this->getInitData('id_line_contrat'))) {
                     switch ($type) {
                         case 0:
-                            if((int) $this->getData('id_line_contrat')) {
+                            if ((int) $this->getData('id_line_contrat')) {
                                 $forfait = self::MODE_FACT_TEMPS_P;
                             } else {
                                 $line = BimpObject::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine');
-                                if($this->getData('id_line_commande') > 0) {
+                                if ($this->getData('id_line_commande') > 0) {
                                     $line->fetch((int) $this->getData('id_line_commande'));
-                                }  
-                                elseif($this->getData('id_dol_line_commande') > 0) {
+                                } elseif ($this->getData('id_dol_line_commande') > 0) {
                                     $line->find(Array('id_line' => $this->getData('id_dol_line_commande')), 1);
                                 }
                                 $forfait = ($line->getData('force_qty_1')) ? self::MODE_FACT_FORFAIT : self::MODE_FACT_TEMPS_P;
@@ -940,7 +938,7 @@ class BT_ficheInter_det extends BimpDolObject
                             $forfait = self::MODE_FACT_AUCUN__;
                             break;
                         case 6:
-                             $forfait = self::MODE_FACT_FORFAIT;
+                            $forfait = self::MODE_FACT_FORFAIT;
                             break;
                         case 5:
                             $facturable = 1;
@@ -959,11 +957,11 @@ class BT_ficheInter_det extends BimpDolObject
                     }
                     $this->set('forfait', $forfait);
                     $this->set('facturable', $facturable);
-                }                
-                
-                if(!count($errors) && 
-                        $this->getData('type') != self::TYPE_DEPLA && 
-                        $this->getData('type') != self::TYPE_DEPLACEMENT_VENDU && 
+                }
+
+                if (!count($errors) &&
+                        $this->getData('type') != self::TYPE_DEPLA &&
+                        $this->getData('type') != self::TYPE_DEPLACEMENT_VENDU &&
                         $this->getData('type') != self::TYPE_DEPLACEMENT_CONTRAT &&
                         $this->getData('type') != self::TYPE_LIBRE
                 ) {
@@ -975,7 +973,7 @@ class BT_ficheInter_det extends BimpDolObject
     }
 
     // Outils:
-    
+
     public function time_to_qty($time)
     {
         $timeArr = explode(':', $time);
@@ -988,42 +986,42 @@ class BT_ficheInter_det extends BimpDolObject
         }
         return $decTime;
     }
-    
+
     // Filters
-    
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false){
-        switch($field_name) {
+
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
+    {
+        switch ($field_name) {
             case 'type_of':
                 $in = [];
                 $sql = "SELECT rowid FROM llx_fichinterdet";
-                if(count($values) > 0) {
+                if (count($values) > 0) {
                     $sql .= " WHERE ";
                     $for_or = Array();
-                    foreach($values as $value) {
-                        if($value != 7){
+                    foreach ($values as $value) {
+                        if ($value != 7) {
                             $for_or[] = $value;
-                        }
-                        else {
+                        } else {
                             $intern_societe = explode(',', BimpCore::getConf("bimptechnique_id_societe_auto_terminer"));
-                            foreach($intern_societe as $id) {
+                            foreach ($intern_societe as $id) {
                                 $for_or[] = $id;
                             }
                         }
                     }
                 }
                 $first_loop = true;
-                foreach($for_or as $type_of) {
+                foreach ($for_or as $type_of) {
                     $sql .= ($first_loop) ? "type = $type_of" : " OR type = $type_of";
                     $first_loop = false;
                 }
-                
+
                 if ($sql != "") {
                     $res = $this->db->executeS($sql, 'array');
                     foreach ($res as $nb => $i) {
                         $in[] = $i['rowid'];
                     }
                 }
-                $filters['a.rowid'] = ['in' => $in];
+                $filters[$main_alias . '.rowid'] = ['in' => $in];
                 break;
         }
     }

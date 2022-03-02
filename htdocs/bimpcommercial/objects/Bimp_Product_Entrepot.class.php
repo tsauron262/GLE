@@ -13,7 +13,7 @@ class Bimp_Product_Entrepot extends BimpObject
     public function __construct($module, $object_name)
     {
         BimpCore::setMemoryLimit(1024);
-        
+
 //        $this->dateBilan = date('2019-10-01 00:00:01');
         $this->dateBilan = date('2022-03-01 00:00:01');
 //        $this->dateBilan = date('2019-06-30 00:00:01');
@@ -23,17 +23,17 @@ class Bimp_Product_Entrepot extends BimpObject
 
         parent::__construct($module, $object_name);
     }
-    
-    public function getDateForStock(){
-        if(isset($_REQUEST['extra_data']) && isset($_REQUEST['extra_data']['date_for_stock']))
+
+    public function getDateForStock()
+    {
+        if (isset($_REQUEST['extra_data']) && isset($_REQUEST['extra_data']['date_for_stock']))
             return date($_REQUEST['extra_data']['date_for_stock']);
-        
-    
-        if(isset($_GET['date_for_stock']))
+
+
+        if (isset($_GET['date_for_stock']))
             return date($_GET['date_for_stock']);
         return $this->dateBilan;
     }
-    
 
     public function beforeListFetchItems(BC_List $list)
     {
@@ -61,14 +61,15 @@ class Bimp_Product_Entrepot extends BimpObject
     }
 
     // Getters: 
-    
-    public function getRefFourn($idFourn = null){
-        if($this->isLoaded()){
+
+    public function getRefFourn($idFourn = null)
+    {
+        if ($this->isLoaded()) {
             $refFourn = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice');
-            $filter = array('fk_product'=>$this->getData('fk_product'));
-            if($idFourn)
+            $filter = array('fk_product' => $this->getData('fk_product'));
+            if ($idFourn)
                 $filter['fk_soc'] = $idFourn;
-            if($refFourn->find($filter)){
+            if ($refFourn->find($filter)) {
                 return $refFourn->getData('ref_fourn');
             }
         }
@@ -95,17 +96,17 @@ class Bimp_Product_Entrepot extends BimpObject
         return 56;
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'categ1':
             case 'categ2':
             case 'categ3':
-                $alias = 'cat_prod' . $field_name;
+                $alias = $main_alias . '___cat_prod_' . $field_name;
                 $joins[$alias] = array(
                     'alias' => $alias,
                     'table' => 'categorie_product',
-                    'on'    => $alias . '.fk_product = a.fk_product'
+                    'on'    => $alias . '.fk_product = ' . $main_alias . '.fk_product'
                 );
                 $filters[$alias . '.fk_categorie'] = array(
                     ($excluded ? 'not_' : '') . 'in' => $values
@@ -114,18 +115,18 @@ class Bimp_Product_Entrepot extends BimpObject
 
             case 'stockDateDifZero':
                 if (count($this->exludeIdDifZero)) {
-                    $filters['a.rowid'] = array(
+                    $filters[$main_alias . '.rowid'] = array(
                         'not_in' => implode(",", $this->exludeIdDifZero)
                     );
                 }
                 return;
-                
+
             case 'date_for_stock ':
-                die('oooooo');
+                die('oooooo'); // todo? 
                 return;
         }
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
 
     public function getLastTruePaHt()
@@ -383,7 +384,7 @@ class Bimp_Product_Entrepot extends BimpObject
                 )
             );
         }
-        
+
         $this->config->addParams('lists_cols', $cols);
     }
 

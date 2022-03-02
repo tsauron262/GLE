@@ -234,14 +234,14 @@ class ListConfig extends BCUserConfig
         parent::getCustomFilterValueLabel($field_name, $value);
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'id_user':
-                $filters['and_user'] = array(
+                $filters[$main_alias . '___and_user'] = array(
                     'and_fields' => array(
-                        'owner_type' => self::TYPE_USER,
-                        'id_owner'   => array(
+                        $main_alias . '.owner_type' => self::TYPE_USER,
+                        $main_alias . '.id_owner'   => array(
                             ($excluded ? 'not_' : '') . 'in' => $values
                         )
                     )
@@ -249,21 +249,21 @@ class ListConfig extends BCUserConfig
                 break;
 
             case 'id_user_with_groups':
-                $filters['user_group'] = array(
+                $filters[$main_alias . '___user_group'] = array(
                     ($excluded ? 'and_fields' : 'or') => array(
                         'and_user'  => array(
                             'and_fields' => array(
-                                'owner_type' => self::TYPE_USER,
-                                'id_owner'   => array(
+                                $main_alias . '.owner_type' => self::TYPE_USER,
+                                $main_alias . '.id_owner'   => array(
                                     ($excluded ? 'not_' : '') . 'in' => $values
                                 )
                             )
                         ),
                         'and_group' => array(
                             'and_fields' => array(
-                                'owner_type'   => self::TYPE_GROUP,
-                                'owner_custom' => array(
-                                    'custom' => 'id_owner ' . ($excluded ? 'NOT ' : '') . 'IN (SELECT ugu.fk_usergroup FROM ' . MAIN_DB_PREFIX . 'usergroup_user ugu WHERE ugu.fk_user IN (' . implode(',', $values) . '))'
+                                $main_alias . '.owner_type' => self::TYPE_GROUP,
+                                'owner_custom'              => array(
+                                    'custom' => $main_alias . '.id_owner ' . ($excluded ? 'NOT ' : '') . 'IN (SELECT ugu.fk_usergroup FROM ' . MAIN_DB_PREFIX . 'usergroup_user ugu WHERE ugu.fk_user IN (' . implode(',', $values) . '))'
                                 )
                             )
                         )
@@ -272,17 +272,17 @@ class ListConfig extends BCUserConfig
                 break;
 
             case 'id_group':
-                $filters['and_group'] = array(
+                $filters[$main_alias . '___and_group'] = array(
                     'and_fields' => array(
-                        'owner_type' => self::TYPE_GROUP,
-                        'id_owner'   => array(
+                        $main_alias . '.owner_type' => self::TYPE_GROUP,
+                        $main_alias . '.id_owner'   => array(
                             ($excluded ? 'not_' : '') . 'in' => $values
                         )
                     )
                 );
                 break;
         }
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
 
     public function getObject_labelSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
@@ -379,7 +379,6 @@ class ListConfig extends BCUserConfig
         $html = '';
 
         $list_cols = array();
-
 
         $list_name = $this->getData('list_name');
         $cols_options = $this->getData('cols_options');

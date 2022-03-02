@@ -480,7 +480,7 @@ class Bimp_Client extends Bimp_Societe
         return $buttons;
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'nb_notes_suivi':
@@ -491,7 +491,7 @@ class Bimp_Client extends Bimp_Societe
                     }
 
                     if (!empty($or_field)) {
-                        $sql = '(SELECT COUNT(suivi.id) FROM ' . MAIN_DB_PREFIX . 'bimpclient_suivi_recouv suivi WHERE suivi.id_societe = a.rowid)';
+                        $sql = '(SELECT COUNT(suivi.id) FROM ' . MAIN_DB_PREFIX . 'bimpclient_suivi_recouv suivi WHERE suivi.id_societe = ' . $main_alias . '.rowid)';
 
                         $filters[$sql] = array(
                             'or_field' => $or_field
@@ -501,7 +501,7 @@ class Bimp_Client extends Bimp_Societe
                 break;
         }
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
 
     // Getters données:

@@ -68,7 +68,7 @@ class Bimp_ActionComm extends BimpObject
         return parent::getCustomFilterValueLabel($field_name, $value);
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'propal':
@@ -86,8 +86,8 @@ class Bimp_ActionComm extends BimpObject
                         $element_type = 'facture';
                         break;
                 }
-                $filters['a.elementtype'] = $element_type;
-                $filters['a.fk_element'] = array(
+                $filters[$main_alias . '.elementtype'] = $element_type;
+                $filters[$main_alias . '.fk_element'] = array(
                     ($excluded ? 'not_' : '') . 'in' => $values
                 );
                 break;

@@ -33,10 +33,18 @@ class savFormController extends BimpPublicController
 
         $res_id = BimpTools::getValue('resgsx', '');
         $shipto = BimpTools::getValue('centre_id', '');
+        $acId = BimpTools::getValue('ac', '');
         $reservation = null;
         $errors = array();
+        
+        if($acId > 0){//a virer au plus vite
+            $db = BimpCache::getBdb()->db;
+            $db->query('SELECT * FROM '.MAIN_DB_PREFIX.'actioncomm_extrafields WHERE rowid = "'.$acId.'" AND resgsx = "'.$res_id.'";');
+            if($db->num_rows($sql) < 1)
+                $errors[] = 'Données non concordantes';
+        }
 
-        if ($res_id) {
+        if ($res_id && !count($errors)) {
             if (!$shipto) {
                 $errors[] = 'Identifiant du centre BIMP absent';
             } else {

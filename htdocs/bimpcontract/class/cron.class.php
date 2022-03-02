@@ -363,6 +363,8 @@
                 $client = BimpObject::getInstance('bimpcore', 'Bimp_Societe', $c->getData('fk_soc'));
                 
                 $commercial_suivi = $c->getData('fk_commercial_suivi');
+                BimpObject::loadClass('bimpcore', 'Bimp_User');
+                $commercial_suivi = Bimp_User::getUsersAvaible(array($commercial_suivi, 'parent'));
                 $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User',$commercial_suivi);
                 $email_comm = BimpTools::cleanEmailsStr($commercial->getData('email'));
                 if($c->getData('periodicity')) {

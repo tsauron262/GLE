@@ -209,6 +209,8 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
 
     public function processReservations($soldTo, $shipTos, $from, $to)
     {
+        global $user, $langs;
+        $this->Info('Process reservations. User : '.$user->getFullName($langs));
         foreach ($shipTos as $shipTo) {
             $one_res_done = false;
             $this->debug_content .= '<h3>SoldTo: ' . $soldTo . ' - ShipTo: ' . $shipTo . '</h3><br/>';
@@ -764,7 +766,7 @@ Merci d’avoir pris rendez-vous dans notre Centre de Services Agrée Apple, nou
                     $url = BimpCore::getConf('interface_client_base_url', '');
 
                     if ($url) {
-                        $url .= '?fc=savForm&resgsx=' . $resId . '&centre_id=' . $shipTo;
+                        $url .= '?fc=savForm&resgsx=' . $resId . '&ac='.$ac->id.'&centre_id=' . $shipTo;
                         $messageClient .= "<b>Afin de faciliter votre prise en charge, merci de compléter vos informations sur notre site bimp.fr";
                         $messageClient .= ' en cliquant <a href="' . $url . '">sur ce lien</a></b>' . "\n\n";
                         $messageClient .= "Nous souhaitons également attirer votre attention sur les points suivants :\n";
@@ -795,15 +797,26 @@ Bien cordialement
 L’équipe BIMP";
 
                 $from = 'savbimp@bimp.fr';
+                
+                $centre = '';
+                foreach ($users as $u) {
+                    if (!empty($u['centre'])) {
+                        $centre = $u['centre'];
+                        break;
+                    }
+                }
+                $centres = BimpCache::getCentres();
+                if(isset($centres[$centre]) && isset($centres[$centre]['mail']))
+                    $from = $centres[$centre]['mail'];
 
                 $to = BimpTools::cleanEmailsStr($email_client);
                 $this->debug_content .= 'Envoi e-mail client à ' . $to . ': ';
 
-                $bimpMail = new BimpMail("Votre rendez-vous SAV BIMP", $to, $from, str_replace("\n", "<br/>", $messageClient));
+                $bimpMail = new BimpMail($client, "Votre rendez-vous SAV BIMP", $to, $from, str_replace("\n", "<br/>", $messageClient));
                 $mail_errors = array();
 
                 if ($bimpMail->send($mail_errors)) {
-                    $this->Success('Envoi e-mail client OK (Destinataire(s): ' . $to . ')', $to, null, $resId);
+                    $this->Success('Envoi e-mail client OK (Destinataire(s): ' . $to . ', From : '.$from.')', $to, null, $resId);
                     $this->debug_content .= '<span class="success">OK</span>';
                 } else {
                     $this->debug_content .= '<span class="danger">ECHEC</span>';
@@ -833,8 +846,8 @@ L’équipe BIMP";
             foreach ($centres as $code_centre => $centre_data) {
                 $shipTo = BimpTools::getArrayValueFromPath($centre_data, 'shipTo', '');
 
-                if ($shipTo && !in_array($shipTo, $this->apple_ids)) {
-                    $this->apple_ids[] = $shipTo;
+                if ($shipTo && !in_array((int) $shipTo, GSX_v2::$oldShipTos) && !in_array((int) $shipTo, $this->apple_ids) && $centre_data['active'] == 1) {
+                    $this->apple_ids[] = (int) $shipTo;
                 }
             }
         }

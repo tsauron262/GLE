@@ -251,7 +251,7 @@ class BS_Note extends BimpObject
                     $msg .= '<br/>------------------<br/><a href="' . $url . '">Cliquez ici</a> pour accéder au détail de votre ticket support depuis votre espace client BIMP';
                 }
 
-                $bimpMail = new BimpMail($subject, $to, '', $msg, '', $cc);
+                $bimpMail = new BimpMail($ticket, $subject, $to, '', $msg, '', $cc);
                 $bimpMail->send();
             }
         }

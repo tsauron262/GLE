@@ -136,6 +136,14 @@ class BimpComm extends BimpDolObject
         if ((int) $this->getData('fk_statut') === 0) {
             return 1;
         }
+
+        if ($force_delete) {
+            global $rgpd_delete;
+
+            if ($rgpd_delete) {
+                return 1;
+            }
+        }
         return 0;
     }
 
@@ -749,6 +757,11 @@ class BimpComm extends BimpDolObject
         return $fields;
     }
 
+    public function getPdfNamePrincipal()
+    {
+        return $this->getRef() . '.pdf';
+    }
+
     // Getters filtres: 
 
     public function getCommercialSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
@@ -797,18 +810,20 @@ class BimpComm extends BimpDolObject
         return parent::getCustomFilterValueLabel($field_name, $value);
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'id_product':
                 if (!empty($values)) {
                     $line = $this->getLineInstance();
-                    $alias = $line::$parent_comm_type . '_det';
+
+                    $alias = $main_alias . '___' . $line::$parent_comm_type . '_det';
+
                     if (!$excluded) {
                         $joins[$alias] = array(
                             'alias' => $alias,
                             'table' => $line::$dol_line_table,
-                            'on'    => $alias . '.' . $line::$dol_line_parent_field . ' = a.' . $this->getPrimary()
+                            'on'    => $alias . '.' . $line::$dol_line_parent_field . ' = ' . $main_alias . '.' . $this->getPrimary()
                         );
                         $key = 'in';
                         if ($excluded) {
@@ -819,7 +834,7 @@ class BimpComm extends BimpDolObject
                         );
                     } else {
                         $alias .= '_not';
-                        $filters['a.' . $this->getPrimary()] = array(
+                        $filters[$main_alias . '.' . $this->getPrimary()] = array(
                             'not_in' => '(SELECT ' . $alias . '.' . $line::$dol_line_parent_field . ' FROM ' . MAIN_DB_PREFIX . $line::$dol_line_table . ' ' . $alias . ' WHERE ' . $alias . '.fk_product' . ' IN (' . implode(',', $values) . '))'
                         );
                     }
@@ -842,23 +857,27 @@ class BimpComm extends BimpDolObject
                         $empty = true;
                     }
                 }
-                $joins['elemcont'] = array(
+
+                $elem_alias = $main_alias . '___elemcont';
+                $joins[$elem_alias] = array(
                     'table' => 'element_contact',
-                    'on'    => 'elemcont.element_id = a.rowid',
-                    'alias' => 'elemcont'
+                    'on'    => $elem_alias . '.element_id = ' . $main_alias . '.rowid',
+                    'alias' => $elem_alias
                 );
-                $joins['typecont'] = array(
+
+                $type_alias = $main_alias . '___typecont';
+                $joins[$type_alias] = array(
                     'table' => 'c_type_contact',
-                    'on'    => 'elemcont.fk_c_type_contact = typecont.rowid',
-                    'alias' => 'typecont'
+                    'on'    => $elem_alias . '.fk_c_type_contact = ' . $type_alias . '.rowid',
+                    'alias' => $type_alias
                 );
 
                 $sql = '';
 
                 if (!empty($ids)) {
                     $sql .= '(';
-                    $sql .= 'typecont.element = \'' . static::$dol_module . '\' AND typecont.source = \'internal\'';
-                    $sql .= ' AND typecont.code = \'SALESREPFOLL\' AND elemcont.fk_socpeople ' . ($excluded ? 'NOT ' : '') . 'IN (' . implode(',', $ids) . ')';
+                    $sql .= $type_alias . '.element = \'' . static::$dol_module . '\' AND ' . $type_alias . '.source = \'internal\'';
+                    $sql .= ' AND ' . $type_alias . '.code = \'SALESREPFOLL\' AND ' . $elem_alias . '.fk_socpeople ' . ($excluded ? 'NOT ' : '') . 'IN (' . implode(',', $ids) . ')';
                     $sql .= ')';
 
                     if (!$empty && $excluded) {
@@ -867,7 +886,7 @@ class BimpComm extends BimpDolObject
                         $sql .= ' WHERE tc2.element = \'' . static::$dol_module . '\'';
                         $sql .= ' AND tc2.source = \'internal\'';
                         $sql .= ' AND tc2.code = \'SALESREPFOLL\'';
-                        $sql .= ' AND ec2.element_id = a.rowid) = 0';
+                        $sql .= ' AND ec2.element_id = ' . $main_alias . '.rowid) = 0';
                     }
                 }
 
@@ -878,11 +897,11 @@ class BimpComm extends BimpDolObject
                     $sql .= ' WHERE tc2.element = \'' . static::$dol_module . '\'';
                     $sql .= ' AND tc2.source = \'internal\'';
                     $sql .= ' AND tc2.code = \'SALESREPFOLL\'';
-                    $sql .= ' AND ec2.element_id = a.rowid) ' . ($excluded ? '>' : '=') . ' 0';
+                    $sql .= ' AND ec2.element_id = ' . $main_alias . '.rowid) ' . ($excluded ? '>' : '=') . ' 0';
                 }
 
                 if ($sql) {
-                    $filters['commercial_custom'] = array(
+                    $filters[$main_alias . '___commercial_custom'] = array(
                         'custom' => '(' . $sql . ')'
                     );
                 }
@@ -892,34 +911,41 @@ class BimpComm extends BimpDolObject
             case 'nature':
             case 'famille':
             case 'gamme':
-                $alias = 'product_ef';
+                $prod_ef_alias = $main_alias . '___product_ef';
                 $line = $this->getLineInstance();
-                $line_alias = $line::$parent_comm_type . '_det';
+                $line_alias = $main_alias . '___' . $line::$parent_comm_type . '_det';
                 if (!$excluded) {
                     $joins[$line_alias] = array(
                         'alias' => $line_alias,
                         'table' => $line::$dol_line_table,
-                        'on'    => $line_alias . '.' . $line::$dol_line_parent_field . ' = a.' . $this->getPrimary()
+                        'on'    => $line_alias . '.' . $line::$dol_line_parent_field . ' = ' . $main_alias . '.' . $this->getPrimary()
                     );
-                    $joins[$alias] = array(
-                        'alias' => $alias,
+                    $joins[$prod_ef_alias] = array(
+                        'alias' => $prod_ef_alias,
                         'table' => 'product_extrafields',
-                        'on'    => $alias . '.fk_object = ' . $line_alias . '.fk_product'
+                        'on'    => $prod_ef_alias . '.fk_object = ' . $line_alias . '.fk_product'
                     );
 
-                    $filters[$alias . '.' . $field_name] = array(
+                    $filters[$prod_ef_alias . '.' . $field_name] = array(
                         ($excluded ? 'not_' : '') . 'in' => $values
                     );
                 } else {
-                    $alias .= '_not';
-                    $filters['a.' . $this->getPrimary()] = array(
-                        'not_in' => '(SELECT ' . $line_alias . '.' . $line::$dol_line_parent_field . ' FROM ' . MAIN_DB_PREFIX . $line::$dol_line_table . ' ' . $line_alias . ', ' . MAIN_DB_PREFIX . 'product_extrafields ' . $alias . ' WHERE ' . $alias . '.fk_object = ' . $line_alias . '.fk_product AND ' . $alias . '.' . $field_name . ' IN (' . implode(',', $values) . '))'
+                    $prod_ef_alias .= '_not';
+
+                    $select_sql = 'SELECT ' . $line_alias . '.' . $line::$dol_line_parent_field;
+                    $select_sql .= ' FROM ' . MAIN_DB_PREFIX . $line::$dol_line_table . ' ' . $line_alias . ', ';
+                    $select_sql .= MAIN_DB_PREFIX . 'product_extrafields ' . $prod_ef_alias;
+                    $select_sql .= ' WHERE ' . $prod_ef_alias . '.fk_object = ' . $line_alias . '.fk_product';
+                    $select_sql .= ' AND ' . $prod_ef_alias . '.' . $field_name . ' IN (' . implode(',', $values) . ')';
+
+                    $filters[$main_alias . '.' . $this->getPrimary()] = array(
+                        'not_in' => '(' . $select_sql . ')'
                     );
                 }
                 break;
         }
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
 
     // Getters données: 
@@ -1426,7 +1452,7 @@ class BimpComm extends BimpDolObject
         return 0;
     }
 
-    public function getTotal_paListTotal($filters = array(), $joins = array())
+    public function getTotal_paListTotal($filters = array(), $joins = array(), $main_alias = 'a')
     {
         $return = array(
             'data_type' => 'money',
@@ -1436,14 +1462,15 @@ class BimpComm extends BimpDolObject
         $line = $this->getLineInstance();
 
         if (is_a($line, 'ObjectLine')) {
-            $joins['det'] = array(
+            $line_alias = $main_alias . '___det';
+            $joins[$line_alias] = array(
                 'table' => $line::$dol_line_table,
                 'alias' => 'det',
-                'on'    => 'a.rowid = det.' . $line::$dol_line_parent_field
+                'on'    => $main_alias . '.rowid = ' . $line_alias . '.' . $line::$dol_line_parent_field
             );
 
-            $sql = 'SELECT SUM(det.qty * det.buy_price_ht) as total';
-            $sql .= BimpTools::getSqlFrom($this->getTable(), $joins, 'a');
+            $sql = 'SELECT SUM(' . $line_alias . '.qty * ' . $line_alias . '.buy_price_ht) as total';
+            $sql .= BimpTools::getSqlFrom($this->getTable(), $joins, $main_alias);
             $sql .= BimpTools::getSqlWhere($filters);
 
             $result = $this->db->executeS($sql, 'array');
@@ -1812,6 +1839,11 @@ class BimpComm extends BimpDolObject
     public function getIdCommercial()
     {
         return $this->getIdContact($type = 'internal', $code = 'SALESREPFOLL');
+    }
+
+    public function addNoteToCommercial($note)
+    {
+        return $this->addNote($note, null, 0, 0, '', 1, 1, 0, $this->getIdCommercial());
     }
 
     public function displayCommercial()
@@ -2535,7 +2567,7 @@ class BimpComm extends BimpDolObject
                 $tot = $this->getData('total_ht');
             else
                 $tot = $this->getData('total');
-            if (round((float) $tot, 3) != round($totalHt, 3)) {
+            if (round((float) $tot, 2) != round($totalHt, 2)) {
                 $this->erreurFatal++;
                 $errors[] = 'Ecart entre le total des lignes et le total ' . $this->getLabel('of_the') . '. Total lignes : ' . round($totalHt, 3) . ', total ' . $this->getLabel() . ': ' . round($tot, 3);
             }
@@ -3032,7 +3064,7 @@ class BimpComm extends BimpDolObject
         return count($errors) ? 0 : 1;
     }
 
-    public function createAcompte($amount, $id_mode_paiement, $id_bank_account = 0, $paye = 1, $date_paiement = null, $use_caisse = false, $num_paiement = '', $nom_emetteur = '', $banque_emetteur = '', &$warnings = array(), $id_rib = 0)
+    public function createAcompte($amount, $id_mode_paiement, $id_bank_account = 0, $paye = 1, $date_paiement = null, $use_caisse = false, $num_paiement = '', $nom_emetteur = '', $banque_emetteur = '', &$warnings = array(), $id_rib = 0, $refPaiement = '', &$idFacture = 0)
     {
         global $user, $langs;
         $errors = array();
@@ -3134,12 +3166,14 @@ class BimpComm extends BimpDolObject
                 $factureA->addline("Acompte", $ht, 1, $tva, null, null, null, 0, null, null, null, null, null, 'HT', null, 1, null, null, null, null, null, null, $ht);
                 $user->rights->facture->creer = 1;
                 $factureA->validate($user);
+                $idFacture = $factureA->id;
 
                 // Création du paiement:
                 if ($paye) {
                     BimpTools::loadDolClass('compta/paiement', 'paiement');
                     $payement = new Paiement($this->db->db);
                     $payement->amounts = array($factureA->id => $amount);
+                    $payement->ref = $refPaiement;
                     $payement->datepaye = ($date_paiement ? BimpTools::getDateForDolDate($date_paiement) : dol_now());
                     $id_mode_paiement = $this->db->getValue('c_paiement', 'id', '`code` = \'' . $id_mode_paiement . '\'');
                     $payement->paiementid = (int) $id_mode_paiement;
@@ -4317,135 +4351,6 @@ class BimpComm extends BimpDolObject
             'errors'           => $errors,
             'warnings'         => array()
         ];
-    }
-
-    public function actionGenerateBulkPdf($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Fichier généré avec succès';
-        $success_callback = '';
-
-        $id_objs = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
-
-        if (count($id_objs) > 70) {
-            $errors[] = 'Trop de PDF action impossible';
-            return array(
-                'errors'   => $errors,
-                'warnings' => $warnings
-            );
-        }
-
-        if (!is_array($id_objs) || empty($id_objs)) {
-            $errors[] = 'Aucune ' . $this->getLabel() . ' sélectionnée';
-        } else {
-            $files = array();
-
-            foreach ($id_objs as $id_obj) {
-                $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_obj);
-
-                if (!BimpObject::objectLoaded($obj)) {
-                    $warnings[] = ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_obj . ' n\'existe pas';
-                    continue;
-                }
-
-                $dir = $obj->getFilesDir();
-                $filename = $obj->getRef() . '.pdf';
-
-                if (!file_exists($dir . $filename)) {
-                    $warnings[] = ucfirst($this->getLabel()) . ' ' . $obj->getLink() . ': fichier PDF absent (' . $dir . $filename . ')';
-                    continue;
-                }
-
-                $files[] = $dir . $filename;
-            }
-
-            if (!empty($files)) {
-                global $user;
-                require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpPDF.php';
-                $fileName = 'bulk_' . $this->dol_object->element . '_' . $user->id . '.pdf';
-                $dir = PATH_TMP . '/bimpcore/';
-
-                $pdf = new BimpConcatPdf();
-                $pdf->concatFiles($dir . $fileName, $files, 'F');
-
-                $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($fileName);
-                $success_callback = 'window.open(\'' . $url . '\');';
-            } else {
-                $errors[] = 'Aucun PDF trouvé';
-            }
-        }
-
-        return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
-            'success_callback' => $success_callback
-        );
-    }
-
-    public function actionGenerateZipPdf($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Fichier généré avec succès';
-        $success_callback = '';
-
-        $id_objs = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
-
-        if (count($id_objs) > 50) {
-            $errors[] = 'Trop de PDF action impossible';
-        } else {
-            if (!is_array($id_objs) || empty($id_objs)) {
-                $errors[] = 'Aucune ' . $this->getLabel() . ' sélectionnée';
-            } else {
-                $files = array();
-
-                foreach ($id_objs as $id_obj) {
-                    $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_obj);
-
-                    if (!BimpObject::objectLoaded($obj)) {
-                        $warnings[] = ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_obj . ' n\'existe pas';
-                        continue;
-                    }
-
-                    $dir = $obj->getFilesDir();
-                    $filename = $obj->getRef() . '.pdf';
-
-                    if (!file_exists($dir . $filename)) {
-                        $warnings[] = ucfirst($this->getLabel()) . ' ' . $obj->getLink() . ': fichier PDF absent (' . $dir . $filename . ')';
-                        continue;
-                    }
-
-                    $files[] = array($dir . $filename, $filename);
-                }
-
-                if (!empty($files)) {
-                    global $user;
-                    $dir = PATH_TMP . '/bimpcore/';
-                    $fileName = 'zip_' . $this->dol_object->element . '_' . $user->id . '.zip';
-                    if (file_exists($dir . $fileName))
-                        unlink($dir . $fileName);
-                    $zip = new ZipArchive();
-                    if ($zip->open($dir . $fileName, ZipArchive::CREATE) === true) {
-                        foreach ($files as $tabFile) {
-                            $zip->addFile($tabFile[0], $tabFile[1]);
-                        }
-                    }
-                    $zip->close();
-
-                    $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($fileName);
-                    $success_callback = 'window.open(\'' . $url . '\');';
-                } else {
-                    $errors[] = 'Aucun PDF trouvé';
-                }
-            }
-        }
-
-        return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
-            'success_callback' => $success_callback
-        );
     }
 
     // Overrides BimpObject:

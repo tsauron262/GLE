@@ -823,7 +823,7 @@ class BS_Ticket extends BimpObject
                             $msg .= '<a href="' . $url . '">Cliquez ici</a> pour accéder au détail de ce ticket depuis notre site www.bimp.fr';
                         }
 
-                        $bimpMail = new BimpMail($subject, $to, '', $msg, '', $cc);
+                        $bimpMail = new BimpMail($this, $subject, $to, '', $msg, '', $cc);
                         $mail_errors = array();
                         $bimpMail->send($mail_errors);
                         if (count($mail_errors)) {
@@ -1079,7 +1079,7 @@ class BS_Ticket extends BimpObject
                             $msg .= '<a href="' . $public_url . '">Cliquez ici</a> pour accéder au détail de votre ticket support sur notre site www.bimp.fr';
                         }
 
-                        $bimpMail = new BimpMail($subject, $to, '', $msg);
+                        $bimpMail = new BimpMail($this, $subject, $to, '', $msg);
                         $mail_errors = array();
                         $bimpMail->send($mail_errors);
 

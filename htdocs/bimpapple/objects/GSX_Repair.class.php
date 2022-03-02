@@ -34,7 +34,7 @@ class GSX_Repair extends BimpObject
     public static $repairTypes = array(
         'carry_in', 'repair_or_replace'
     );
-    public static $readyForPickupCodes = array('RFPU');
+    public static $readyForPickupCodes = array('RFPU','USHP');
     public static $cancelCodes = array('GX02', 'GX08', 'SCNC', 'CCAR', 'CCCR', 'CCNR');
     public static $closeCodes = array('SACM', 'SCOM', 'CFPH', 'CRCN', 'CRCP', 'CUNR', 'CRDE', 'SPCM');
 
@@ -206,6 +206,9 @@ class GSX_Repair extends BimpObject
     public function getActionsButtons()
     {
         $buttons = array();
+        
+        if(!count($this->repairLookUp))
+            $this->lookup ();
 
         if ($this->isLoaded() && $this->use_gsx_v2) {
             if (!(int) $this->findInGsx && !(int) $this->getData('canceled')) {
@@ -255,10 +258,60 @@ class GSX_Repair extends BimpObject
 //                    'onclick' => $onclick
 //                );
 //            }
+            
+
+            // doc repa: 
+            $onclick = '';
+            $filePath = $this->getDocRepaFilePath();
+            if (file_exists($filePath)) {
+                $fileUrl = $this->getDocRepaFileUrl();
+                if ($fileUrl) {
+                    $onclick = 'window.open(\'' . $fileUrl . '\')';
+                }
+            }
+
+            if (!$onclick) {
+                $onclick = $this->getJsActionOnclick('fetchDocRepa');
+            }
+
+            if ($onclick) {
+                $buttons[] = array(
+                    'label'   => 'Doc Répa',
+                    'icon'    => 'fas_file-pdf',
+                    'onclick' => $onclick
+                );
+            }
+            
+            
         }
 
         return $buttons;
     }
+    
+       public function getDocRepaFilePath()
+    {
+        if ($this->isLoaded()) {
+            $dir = $this->getFilesDir();
+            if ($dir) {
+                if (!preg_match('/^.+\/$/', $dir)) {
+                    $dir .= '/';
+                }
+            }
+            return $dir . 'Doc_repa_' . $this->id . '.pdf';
+        }
+
+        return '';
+    }
+
+    public function getDocRepaFileUrl()
+    {
+        if ($this->isLoaded()) {
+            return $this->getFileUrl('Doc_repa_' . $this->id . '.pdf');
+        }
+
+        return '';
+    }
+
 
     public function updatePartNumber($part_number, $kgb_number, $kbb_number, $sequence_number = 0, &$warnings = array())
     {
@@ -380,6 +433,53 @@ class GSX_Repair extends BimpObject
             }
         } else {
             $errors[] = 'ID du SAV absent';
+        }
+
+        return $errors;
+    }
+    
+    public function fetchDocRepa()
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+
+            if (!(string) $this->getData('repair_number')) {
+                $errors[] = 'N° de repa absent';
+            } else {
+                $gsx = GSX_v2::getInstance();
+
+                $result = false;
+
+                if ($gsx->logged) {
+                    $result = $gsx->getDocRepa($this->getData('ship_to'),$this->getData('repair_number'));
+                }
+
+                if (!$result) {
+                    if (!$gsx->logged) {
+                        $errors[] = $gsx->displayNoLogged();
+                    } else {
+                        $errors = $gsx->getErrors();
+                        if (!count($errors)) {
+                            $errors[] = 'Aucun fichier reçu';
+                        }
+                    }
+                } else {
+                    $dir = $this->getFilesDir();
+
+                    if (!file_exists($dir) || !is_dir($dir)) {
+                        $dir_error = BimpTools::makeDirectories($dir);
+                        if ($dir_error) {
+                            $errors[] = 'Echec de la création du dossier - ' . $dir_error;
+                        }
+                    }
+                    if (!count($errors)) {
+                        if (!file_put_contents($this->getDocRepaFilePath(), $result)) {
+                            $errors[] = 'Echec de la création du fichier';
+                        }
+                    }
+                }
+            }
         }
 
         return $errors;
@@ -1681,7 +1781,8 @@ class GSX_Repair extends BimpObject
 
                     $maj_required = false;
                     $codeReturnAttendKBB = array('KBB', 'ABU', 'NRET');
-                    if (isset($part['returnStatusCode']) && in_array($part['returnStatusCode'], $codeReturnAttendKBB) &&
+                    
+                    if ((!isset($part['returnStatusCode']) || in_array($part['returnStatusCode'], $codeReturnAttendKBB)) &&
                             (!isset($part['kgbDeviceDetail']) || empty($part['kgbDeviceDetail']))) {
                         $maj_required = true;
                     }
@@ -2165,7 +2266,7 @@ class GSX_Repair extends BimpObject
                                 $part_type = BS_ApplePart::getCategProdApple(isset($part['number']) ? $part['number'] : '', isset($part['desc']) ? $part['desc'] : '');
 
                                 $equipment = $sav->getChildObject('equipment');
-                                $pu_ht = (float) BS_ApplePart::convertPrixStatic($part_type, (float) $part['new_price'], $part['number'], $equipment);
+                                $pu_ht = (float) BS_ApplePart::convertPrixStatic($part_type, (float) $part['new_price'], $part['number'], $equipment->isIphone());
 
                                 $desc = (isset($part['number']) && $part['number'] ? $part['number'] : '');
                                 if (isset($part['desc']) && $part['desc']) {
@@ -2306,6 +2407,45 @@ class GSX_Repair extends BimpObject
 
         return $this->close(true, $checkRepair);
     }
+        
+    public function actionFetchDocRepa($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $cb = '';
+
+        $filePath = $this->getDocRepaFilePath();
+
+        if (!file_exists($filePath)) {
+            $errors = $this->fetchDocRepa();
+
+            if (!count($errors)) {
+                if (!file_exists($filePath)) {
+                    $errors[] = 'Fichier non trouvé';
+                } else {
+                    $cb .= 'triggerObjectChange(\'bimpcore\', \'BimpFile\', 0);';
+                }
+            }
+        }
+
+        if (!count($errors)) {
+            $file_url = $this->getDocRepaFileUrl();
+            if ($file_url) {
+                $cb .= 'window.open(\'' . $file_url . '\');';
+            } else {
+                $errors[] = 'Fichier non trouvé';
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $cb
+        );
+    }
+    
+    
 
     public function actionCancelRepair($data, &$success)
     {

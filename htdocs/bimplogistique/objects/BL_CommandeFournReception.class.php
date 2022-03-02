@@ -280,7 +280,7 @@ class BL_CommandeFournReception extends BimpObject
         return $buttons;
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'billed':
@@ -290,19 +290,20 @@ class BL_CommandeFournReception extends BimpObject
                         break;
                     }
                     if (in_array(0, $values)) {
-                        $joins['parent2'] = array(
-                            'alias' => 'parent2',
+                        $alias = $main_alias . '___commande_fourn';
+                        $joins[$alias] = array(
+                            'alias' => $alias,
                             'table' => 'commande_fournisseur',
-                            'on'    => 'parent2.rowid = a.id_commande_fourn'
+                            'on'    => $alias . '.rowid = ' . $main_alias . '.id_commande_fourn'
                         );
-                        $filters['a.id_facture'] = 0;
-                        $filters['parent2.invoice_status'] = array(
+                        $filters[$main_alias . '.id_facture'] = 0;
+                        $filters[$alias . '.invoice_status'] = array(
                             'operator' => '<',
                             'value'    => 2
                         );
                     }
                     if (in_array(1, $values)) {
-                        $filters['a.id_facture'] = array(
+                        $filters[$main_alias . '.id_facture'] = array(
                             'operator' => '>',
                             'value'    => 0
                         );
@@ -311,7 +312,7 @@ class BL_CommandeFournReception extends BimpObject
                 break;
         }
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
 
     // Rendus HTML: 
@@ -471,8 +472,8 @@ class BL_CommandeFournReception extends BimpObject
         $html = '';
         $html .= '<td style="width: 220px" class="serial" data-serial="' . $serial . '">';
         $html .= $serial;
-        
-        if($product && $product->getData('barcode') == $serial){
+
+        if ($product && $product->getData('barcode') == $serial) {
             $html .= '<br/>';
             $html .= '<span class="danger">';
             $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Le numéro de série ne peut être identique au code-bar du produit';
@@ -480,7 +481,6 @@ class BL_CommandeFournReception extends BimpObject
         }
 
         $isImei = (!preg_match("/[a-zA-Z]/", $serial)) ? true : false;
-
 
         if (!$isImei && $code_config && !preg_match('/^.+' . preg_quote($code_config) . '$/', $serial)) {
             $html .= '<br/>';
@@ -1105,7 +1105,6 @@ class BL_CommandeFournReception extends BimpObject
             }
             $html .= '</td>';
 
-
             $html .= '</tr>';
         }
 
@@ -1331,7 +1330,7 @@ class BL_CommandeFournReception extends BimpObject
 
                 if (BimpObject::objectLoaded($line_prod) && $line_prod->isTypeProduct()) {
                     $reception_data = $line->getReceptionData((int) $this->id);
-                    
+
                     if (isset($reception_data['assign_to_commande_client']) && (int) $reception_data['assign_to_commande_client']) {
                         if (isset($reception_data['qty']) && (float) $reception_data['qty'] > 0 && $line->getData('linked_object_name') === 'commande_line') {
                             $errors[] = 'Cette réception ne peut pas être validée avec déplacement vers stock boutique car il y a au moins une ligne associée à une commande client';
@@ -1653,7 +1652,6 @@ class BL_CommandeFournReception extends BimpObject
 
                     $isSerialisable = $line->isProductSerialisable();
                     $isReturn = ($line->getFullQty() < 0);
-
 
                     if ($isSerialisable) {
                         if (isset($line_data['items'])) {

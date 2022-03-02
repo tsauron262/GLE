@@ -33,13 +33,22 @@ class savFormController extends BimpPublicController
 
         $res_id = BimpTools::getValue('resgsx', '');
         $shipto = BimpTools::getValue('centre_id', '');
+        $acId = BimpTools::getValue('ac', '');
         $reservation = null;
         $errors = array();
+        
 
         if ($res_id) {
+            if($acId > 0 || BimpTools::getValue('previewDate', '') != ''){//a virer au plus vite
+                $db = BimpCache::getBdb()->db;
+                $db->query('SELECT * FROM '.MAIN_DB_PREFIX.'actioncomm_extrafields WHERE rowid = "'.$acId.'" AND resgsx = "'.$res_id.'";');
+                if($db->num_rows($sql) < 1)
+                    $errors[] = 'Données non concordantes';
+            }
+            
             if (!$shipto) {
                 $errors[] = 'Identifiant du centre BIMP absent';
-            } else {
+            } elseif(!count($errors)) {
                 $shipto = BimpTools::addZeros($shipto, 10);
                 $centres = BimpCache::getCentres();
                 $centre = null;
@@ -1135,7 +1144,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
 
 //        $email = BimpTools::cleanEmailsStr($email);
 //        return mailSyn2('RDV SAV BIMP - Confirmation', $email, '', $msg, $tabFile, $tabFile2, $tabFile3);
-        $bimpMail = new BimpMail('BIMP - Confirmation de votre RDV SAV', $email, '', $msg, (isset($centre['mail']) ? $centre['mail'] : ''));
+        $bimpMail = new BimpMail($sav, 'BIMP - Confirmation de votre RDV SAV', $email, '', $msg, (isset($centre['mail']) ? $centre['mail'] : ''));
         $bimpMail->addFiles($files);
         return $bimpMail->send();
     }
@@ -1630,6 +1639,14 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                         }
 
                         $result = GSX_Reservation::createReservation(1442050, $centre['shipTo'], $params, $req_errors, $debug);
+                        
+                        if(is_array($req_errors) && isset($req_errors[0])){
+                            if(stripos($req_errors[0],'DEVICE_INFORMATION_INVALID') !== false){
+                                unset($params['device']);
+                                unset($req_errors[0]);
+                                $result = GSX_Reservation::createReservation(1442050, $centre['shipTo'], $params, $req_errors, $debug);
+                            }
+                        }
                     }
 
                     if (!empty($result)) {
@@ -1861,7 +1878,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                                 }
                             }
 
-                            if (BimpObject::objectLoaded($userClient) && $userClient->getData('id_client') !== (int) $client->id) {
+                            if (BimpObject::objectLoaded($userClient) && (int) $userClient->getData('id_client') !== (int) $client->id) {
                                 $old_id_client = (int) $userClient->getData('id_client');
                                 $debug .= '<br/><br/><b>Mise à jour du client pour le userClient: </b>';
 

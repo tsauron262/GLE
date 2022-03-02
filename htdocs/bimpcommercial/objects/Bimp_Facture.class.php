@@ -232,6 +232,14 @@ class Bimp_Facture extends BimpComm
             return 0;
         }
 
+        if ($force_delete) {
+            global $rgpd_delete;
+
+            if ($rgpd_delete) {
+                return 1;
+            }
+        }
+
         // Suppression autorisée seulement pour les brouillons:
         if ((int) $this->getData('fk_statut') > 0) {
             $errors[] = 'Facture validée';
@@ -1441,7 +1449,7 @@ class Bimp_Facture extends BimpComm
         return $buttons;
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'revals_brouillons':
@@ -1461,9 +1469,9 @@ class Bimp_Facture extends BimpComm
                 }
 
                 if (!empty($revals_filters)) {
-                    $sql = '(SELECT SUM(reval.amount * reval.qty) FROM ' . MAIN_DB_PREFIX . 'bimp_revalorisation reval';
-                    $sql .= ' WHERE reval.id_facture = a.rowid';
-                    $sql .= ' AND reval.status IN (' . $status . '))';
+                    $sql = '(SELECT SUM(' . $main_alias . '___reval.amount * ' . $main_alias . '___reval.qty) FROM ' . MAIN_DB_PREFIX . 'bimp_revalorisation ' . $main_alias . '___reval';
+                    $sql .= ' WHERE ' . $main_alias . '___reval.id_facture = ' . $main_alias . '.rowid';
+                    $sql .= ' AND ' . $main_alias . '___reval.status IN (' . $status . '))';
 
                     if ($excluded) {
                         $filters[$sql] = array(
@@ -1478,19 +1486,20 @@ class Bimp_Facture extends BimpComm
                 break;
 
             case 'tech_sav':
-                $joins['sav'] = array(
+                $alias = $main_alias . '___sav';
+                $joins[$alias] = array(
                     'table' => 'bs_sav',
-                    'alias' => 'sav',
-                    'on'    => '(a.rowid = sav.id_facture OR a.rowid = sav.id_facture_acompte OR a.rowid = sav.id_facture_avoir)'
+                    'alias' => $alias,
+                    'on'    => '(' . $main_alias . '.rowid = ' . $alias . '.id_facture OR ' . $main_alias . '.rowid = ' . $alias . '.id_facture_acompte OR ' . $main_alias . '.rowid = ' . $alias . '.id_facture_avoir)'
                 );
 
-                $filters['sav.id_user_tech'] = array(
+                $filters[$alias . '.id_user_tech'] = array(
                     ($excluded ? 'not_' : '') . 'in' => $values
                 );
                 break;
         }
 
-        return parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+        return parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
 
     // Getters Array: 
@@ -4450,6 +4459,7 @@ class Bimp_Facture extends BimpComm
                     }
 
                     if (count($errors)) {
+                        print_r($errors);
                         BimpCore::addlog('Echec facture classée payée', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcomm', $this, array(
                             'Erreurs' => $errors
                         ));
@@ -4958,9 +4968,9 @@ class Bimp_Facture extends BimpComm
         $close_code = (isset($data['close_code']) ? $data['close_code'] : '');
         $close_note = (isset($data['close_note']) ? $data['close_note'] : '');
 
-        if ($remainToPay) {
+        if ($remainToPay > 0) {
             if (!$close_code) {
-                $errors[] = 'Veuillez sélectionner la raison pour classer ' . $this->getLabel('this') . ' payé' . $this->e();
+                $errors[] = 'Veuillez sélectionner la raison pour classer ' . $this->getLabel('this') . ' payé' . $this->e().'. Diférence : '.$remainToPay;
             }
         }
 

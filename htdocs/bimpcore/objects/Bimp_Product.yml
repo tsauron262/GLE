@@ -549,21 +549,21 @@ fields:
         values:
             array: type_compta
             
-#    duree: 
-#        label: Durée limitée (en mois)
-#        type: int
-#        min: 0
-#        default_value: 0
-#        input: 
-#            type: text
-#            help: Uniquement pour les prestations réalisées au fil du temps
+    duree: 
+        label: Durée limitée (en mois)
+        type: int
+        min: 0
+        default_value: 0
+        input: 
+            type: text
+            help: Uniquement pour les prestations réalisées au fil du temps
             
     lock_admin:
         label: Blocage Admin
         type: bool
         
-    duree:
-        label: Durée
+    duree_i:
+        label: Durée inter
         type: timer
         input: 
             type: timer
@@ -616,6 +616,7 @@ forms:
             - field: desiredstock
             - field: 2hotline
             - field: duree
+            - field: duree_i
             # Measure
 #            - field: weight
 #            - field: weight_units
@@ -831,6 +832,8 @@ fields_tables:
               edit: 1
             - field: duree
               edit: 1
+            - field: duree_i
+              edit: 1
             - custom: 1
               label: Durée validation
               value:
@@ -857,7 +860,7 @@ fields_tables:
         title: Mesures
         icon: fas_ruler
         rows:
-            - field: duree
+            - field: duree_i
             - field: weight
             - field: weight_units
             - field: length

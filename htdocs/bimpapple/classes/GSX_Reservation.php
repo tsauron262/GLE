@@ -1,5 +1,7 @@
 <?php
 
+require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
+
 class GSX_Reservation
 {
 
@@ -16,10 +18,6 @@ class GSX_Reservation
     public static function getGsxV2()
     {
         if (is_null(self::$gsx_v2)) {
-            if (!class_exists('GSX_v2')) {
-                require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
-            }
-
             self::$gsx_v2 = new GSX_v2();
         }
 

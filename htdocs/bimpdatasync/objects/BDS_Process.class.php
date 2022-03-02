@@ -96,7 +96,9 @@ class BDS_Process extends BimpObject
                     $className = $matches[1];
 
                     if (!in_array($className, $currents)) {
-                        require_once $dir . '/' . $f;
+                        if (!class_exists($className)) {
+                            require_once $dir . '/' . $f;
+                        }
 
                         if (class_exists($className) && method_exists($className, 'install')) {
                             $processes[$className] = $className;

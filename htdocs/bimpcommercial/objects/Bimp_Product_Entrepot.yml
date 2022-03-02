@@ -166,7 +166,7 @@ filters_panels:
         filters: 
             fk_entrepot: 
             fk_product: 
-            product:product: 
+#            product:product: 
             reel: 
             product:categorie:
             product:collection:

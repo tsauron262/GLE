@@ -744,6 +744,11 @@ searches:
             - a.ref
             - s.nom
         label_syntaxe: '<a.ref> (Client: <s.nom>)'
+    light:
+        fields_search: 
+            - a.ref
+        fields_return: 
+            - a.ref
 
 signatures: 
     devis: 

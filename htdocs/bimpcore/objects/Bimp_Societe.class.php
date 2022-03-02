@@ -189,7 +189,7 @@ class Bimp_Societe extends BimpDolObject
         if (!$this->isLoaded()) {
             return 1;
         }
-        
+
         global $user;
 
         return (int) ($user->admin || $user->login == 'jc.cannet');
@@ -564,7 +564,7 @@ class Bimp_Societe extends BimpDolObject
                 if ((int) $value) {
                     $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $value);
                     if (BimpObject::ObjectLoaded($user)) {
-                        return $user->dol_object->getFullName();
+                        return $user->dol_object->getFullName(1);
                     }
                 } else {
                     return 'Aucun';
@@ -575,17 +575,20 @@ class Bimp_Societe extends BimpDolObject
         return parent::getCustomFilterValueLabel($field_name, $value);
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'marche':
                 $tabSql = array();
-                foreach ($values as $value)
+                foreach ($values as $value) {
                     $tabSql[] = '(ef.marche LIKE "' . $value . '" || ef.marche LIKE "%,' . $value . '" || ef.marche LIKE "%,' . $value . ',%" || ef.marche LIKE "' . $value . ',%")';
-                $filters['marche'] = array(
+                }
+
+                $filters[$main_alias . '___custom_marche'] = array(
                     'custom' => '(' . implode(" || ", $tabSql) . ')'
                 );
                 break;
+
             case 'commerciaux':
                 $ids = array();
                 $empty = false;
@@ -603,15 +606,16 @@ class Bimp_Societe extends BimpDolObject
                     }
                 }
 
-                $joins['soc_commercial'] = array(
+                $sc_alias = $main_alias . '___soc_commercial';
+                $joins[$sc_alias] = array(
                     'alias' => 'soc_commercial',
-                    'table' => 'societe_commerciaux',
-                    'on'    => 'a.rowid = soc_commercial.fk_soc'
+                    'table' => $sc_alias,
+                    'on'    => $main_alias . '.rowid = ' . $sc_alias . '.fk_soc'
                 );
 
                 $sql = '';
 
-                $nbCommerciaux = 'SELECT COUNT(sc.rowid) FROM ' . MAIN_DB_PREFIX . 'societe_commerciaux sc WHERE sc.fk_soc = a.rowid';
+                $nbCommerciaux = 'SELECT COUNT(sc.rowid) FROM ' . MAIN_DB_PREFIX . 'societe_commerciaux sc WHERE sc.fk_soc = ' . $main_alias . '.rowid';
 
                 if (!empty($ids)) {
                     if (!$excluded) {
@@ -619,10 +623,6 @@ class Bimp_Societe extends BimpDolObject
                     } else {
                         $sql = '(' . $nbCommerciaux . ' AND sc.fk_user IN (' . implode(',', $ids) . ')) = 0';
                     }
-
-//                    if (!$empty && $excluded) {
-//                        $sql .= ' OR (' . $nbCommerciaux . ') = 0';
-//                    }
                 }
 
                 if ($empty) {
@@ -631,14 +631,14 @@ class Bimp_Societe extends BimpDolObject
                 }
 
                 if ($sql) {
-                    $filters['commerciaux_custom'] = array(
+                    $filters[$main_alias . '___commerciaux_custom'] = array(
                         'custom' => '(' . $sql . ')'
                     );
                 }
                 break;
         }
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
 
     public function getInputExtra($field)
@@ -980,12 +980,27 @@ class Bimp_Societe extends BimpDolObject
         return null;
     }
 
-    public function getCommercialEmail($with_default = true)
+    public function getCommercialEmail($with_default = true, $only_first = true)
     {
-        $comm = $this->getCommercial($with_default);
+        if ($only_first) {
+            $comm = $this->getCommercial($with_default);
 
-        if (BimpObject::objectLoaded($comm)) {
-            return BimpTools::cleanEmailsStr($comm->getData('email'));
+            if (BimpObject::objectLoaded($comm)) {
+                return BimpTools::cleanEmailsStr($comm->getData('email'));
+            }
+        } else {
+            $users = $this->getCommercials($with_default, $only_first);
+
+            if (!empty($users)) {
+                $email = '';
+                foreach ($users as $user) {
+                    if ((int) $user->getData('statut')) {
+                        $email .= ($email ? ',' : '') . BimpTools::cleanEmailsStr($user->getData('email'));
+                    }
+                }
+
+                return $email;
+            }
         }
 
         return '';
@@ -1630,7 +1645,7 @@ class Bimp_Societe extends BimpDolObject
         return $html;
     }
 
-    public function displayCommercials()
+    public function displayCommercials($first = false, $link = true)
     {
         global $modeCSV;
 
@@ -1641,11 +1656,13 @@ class Bimp_Societe extends BimpDolObject
             foreach ($ids as $id) {
                 $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id);
                 if (BimpObject::objectLoaded($user)) {
-                    if ($modeCSV)
+                    if ($modeCSV || !$link)
                         $return[] = $user->getName();
                     else
                         $return[] = $user->getLink();
                 }
+                if ($first)
+                    break;
             }
         }
 
@@ -2443,6 +2460,11 @@ class Bimp_Societe extends BimpDolObject
         return $errors;
     }
 
+    public function getSiret()
+    {
+        return substr($this->getData('siret'), 0, 14);
+    }
+
     public function getCreditSafeLettre($noHtml = false)
     {
         global $modeCSV;
@@ -3104,6 +3126,7 @@ class Bimp_Societe extends BimpDolObject
         $init_solv = (int) $this->getInitData('solvabilite_status');
         $init_status = (int) $this->getInitData('status');
         $init_outstanding_limit = $this->getInitData('outstanding_limit');
+        $init_relance_actives = (int) $this->getInitData('relances_actives');
 
         $limit = -1;
         if ($this->getData('outstanding_limit_atradius') > -1)
@@ -3145,6 +3168,12 @@ class Bimp_Societe extends BimpDolObject
             }
             if ($init_outstanding_limit != $this->getData('outstanding_limit'))
                 $this->onNewOutstanding_limit($init_outstanding_limit);
+
+            if ($init_relance_actives && !(int) $this->getData('relances_actives')) {
+                $this->updateField('date_relances_deactivated', date('Y-m-d'));
+            } elseif (!$init_relance_actives = (int) $this->getData('relances_actives')) {
+                $this->updateField('date_relances_deactivated', null);
+            }
         }
 
         $fc = BimpTools::getValue('fc');

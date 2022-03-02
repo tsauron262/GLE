@@ -9,6 +9,7 @@ class BimpObject extends BimpCache
     public $object_name = '';
     public $config = null;
     public $id = null;
+    public $alias = 'a';
 //    public $asGraph = false; => remplacé par param yml "has_graph" 
     public $ref = "";
     public static $status_list = array();
@@ -84,6 +85,7 @@ class BimpObject extends BimpCache
     public $fieldsWithAddNoteOnUpdate = array();
     public $isDeleting = false;
     public $thirdparty = null;
+    public $force_update = false;
 
     // Gestion instance:
 
@@ -132,6 +134,141 @@ class BimpObject extends BimpCache
         }
 
         return $instance;
+    }
+
+    public function getPdfNamePrincipal()
+    {
+        BimpCore::addlog('"getPdfNamePrincipal" n\'est pas redéfinit dans ' . $this->object_name);
+        return 'n_c.pdf';
+    }
+
+    public function actionGenerateBulkPdf($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Fichier généré avec succès';
+        $success_callback = '';
+
+        $id_objs = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+
+        if (count($id_objs) > 70) {
+            $errors[] = 'Trop de PDF action impossible';
+            return array(
+                'errors'   => $errors,
+                'warnings' => $warnings
+            );
+        }
+
+        if (!is_array($id_objs) || empty($id_objs)) {
+            $errors[] = 'Aucune ' . $this->getLabel() . ' sélectionnée';
+        } else {
+            $files = array();
+
+            foreach ($id_objs as $id_obj) {
+                $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_obj);
+
+                if (!BimpObject::objectLoaded($obj)) {
+                    $warnings[] = ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_obj . ' n\'existe pas';
+                    continue;
+                }
+
+                $dir = $obj->getFilesDir();
+                $filename = $obj->getPdfNamePrincipal();
+
+                if (!file_exists($dir . $filename)) {
+                    $warnings[] = ucfirst($this->getLabel()) . ' ' . $obj->getLink() . ': fichier PDF absent (' . $dir . $filename . ')';
+                    continue;
+                }
+
+                $files[] = $dir . $filename;
+            }
+
+            if (!empty($files)) {
+                global $user;
+                require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpPDF.php';
+                $fileName = 'bulk_' . $this->dol_object->element . '_' . $user->id . '.pdf';
+                $dir = PATH_TMP . '/bimpcore/';
+
+                $pdf = new BimpConcatPdf();
+                $pdf->concatFiles($dir . $fileName, $files, 'F');
+
+                $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($fileName);
+                $success_callback = 'window.open(\'' . $url . '\');';
+            } else {
+                $errors[] = 'Aucun PDF trouvé';
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
+
+    public function actionGenerateZipPdf($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Fichier généré avec succès';
+        $success_callback = '';
+
+        $id_objs = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+
+        if (count($id_objs) > 50) {
+            $errors[] = 'Trop de PDF action impossible';
+        } else {
+            if (!is_array($id_objs) || empty($id_objs)) {
+                $errors[] = 'Aucune ' . $this->getLabel() . ' sélectionnée';
+            } else {
+                $files = array();
+
+                foreach ($id_objs as $id_obj) {
+                    $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_obj);
+
+                    if (!BimpObject::objectLoaded($obj)) {
+                        $warnings[] = ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_obj . ' n\'existe pas';
+                        continue;
+                    }
+
+                    $dir = $obj->getFilesDir();
+                    $filename = $obj->getPdfNamePrincipal();
+
+                    if (!file_exists($dir . $filename)) {
+                        $warnings[] = ucfirst($this->getLabel()) . ' ' . $obj->getLink() . ': fichier PDF absent (' . $dir . $filename . ')';
+                        continue;
+                    }
+
+                    $files[] = array($dir . $filename, $filename);
+                }
+
+                if (!empty($files)) {
+                    global $user;
+                    $dir = PATH_TMP . '/bimpcore/';
+                    $fileName = 'zip_' . $this->dol_object->element . '_' . $user->id . '.zip';
+                    if (file_exists($dir . $fileName))
+                        unlink($dir . $fileName);
+                    $zip = new ZipArchive();
+                    if ($zip->open($dir . $fileName, ZipArchive::CREATE) === true) {
+                        foreach ($files as $tabFile) {
+                            $zip->addFile($tabFile[0], $tabFile[1]);
+                        }
+                    }
+                    $zip->close();
+
+                    $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($fileName);
+                    $success_callback = 'window.open(\'' . $url . '\');';
+                } else {
+                    $errors[] = 'Aucun PDF trouvé';
+                }
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
     }
 
     public static function getDolInstance($dol_object_params, $id_object = null)
@@ -2529,8 +2666,25 @@ class BimpObject extends BimpCache
                     break;
 
                 case 'hasMany':
+                    $ok = false;
                     if (!$this->isChild($child)) {
-                        $errors[] = 'Objet "' . $this->getLabel() . '": relation de parenté invalide pour l\'objet "' . $child_name . '"';
+                        $path = 'objects/' . $child_name . '/list/filters';
+                        $this->config->isDefined($path);
+                        $data = $this->config->getParams($path);
+
+                        foreach ($data as $joinInChild => $data2) {
+                            if (isset($data2['field_value'])) {
+                                $alias = ($main_alias ? $main_alias . '___' : '') . $child_name;
+                                $ok = true;
+                                $joins[$alias] = array(
+                                    'table' => $child->getTable(),
+                                    'alias' => $alias,
+                                    'on'    => $alias . '.' . $joinInChild . ' = ' . $main_alias . '.' . $data2['field_value']
+                                );
+                            }
+                        }
+                        if (!$ok)
+                            $errors[] = 'Objet "' . $this->getLabel() . '": relation de parenté invalide pour l\'objet "' . $child_name . '"';
                     } else {
                         $child_id_parent_property = $child->getParentIdProperty();
                         $alias = ($main_alias ? $main_alias . '___' : '') . $child_name;
@@ -2989,7 +3143,7 @@ class BimpObject extends BimpCache
         return $value;
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         
     }
@@ -3867,7 +4021,7 @@ class BimpObject extends BimpCache
             }
         }
 
-        if ($missing && $required) {
+        if ($missing && $required && !$this->force_update && $this->field_exists($field)) {
             $errors[] = 'Valeur obligatoire manquante : "' . BimpTools::ucfirst($this->getLabel()) . ': ' . $label . ' (' . $field . ')"';
             return $errors;
         }
@@ -4372,6 +4526,8 @@ class BimpObject extends BimpCache
     {
         $this->noFetchOnTrigger = true;
 
+        $this->force_update = $force_update;
+
         BimpLog::actionStart('bimpobject_update', 'Mise à jour', $this);
 
         $errors = array();
@@ -4828,10 +4984,17 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
         if ($result <= 0) {
             $msg = 'Echec de la suppression ' . $this->getLabel('of_the');
-            $sqlError = $this->db->db->lasterror;
+
+            $sqlError = $this->db->err();
             if ($sqlError) {
                 $msg .= ' - Erreur SQL: ' . $sqlError;
             }
+
+            if ($this->isDolObject()) {
+                $msg .= ' - Code: ' . $result;
+            }
+
+
             $errors[] = $msg;
         } elseif (!count($errors)) {
             $id = $this->id;
@@ -5358,7 +5521,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 $errors[] = $err_sql;
             }
 
-            return 0;
+            return $result;
         }
 
         return 1;
@@ -5413,10 +5576,9 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         // Supprimer les extrafields
         // Retourner un tableau d'erreurs
-
-        if (count($this->getExtraFields())) {
-            return array('Fonction de suppression des champs supplémentaires non implémentée');
-        }
+//        if (count($this->getExtraFields())) {
+//            return array('Fonction de suppression des champs supplémentaires non implémentée');
+//        }
 
         return array();
     }
@@ -5943,7 +6105,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
     // Gestion des notes:
 
-    public function addNote($content, $visibility = null, $viewed = 0, $auto = 1, $email = '', $type_author = 1)
+    public function addNote($content, $visibility = null, $viewed = 0, $auto = 1, $email = '', $type_author = 1, $type_dest = 0, $fk_group_dest = 0, $fk_user_dest = 0)
     {
         if (!$this->isLoaded()) {
             return array('ID ' . $this->getLabel('of_the') . ' absent');
@@ -5956,16 +6118,19 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         }
 
         $errors = $note->validateArray(array(
-            'obj_type'    => 'bimp_object',
-            'obj_module'  => $this->module,
-            'obj_name'    => $this->object_name,
-            'id_obj'      => (int) $this->id,
-            'visibility'  => (int) $visibility,
-            'content'     => $content,
-            'viewed'      => $viewed,
-            'auto'        => $auto,
-            "email"       => $email,
-            "type_author" => $type_author
+            'obj_type'      => 'bimp_object',
+            'obj_module'    => $this->module,
+            'obj_name'      => $this->object_name,
+            'id_obj'        => (int) $this->id,
+            'visibility'    => (int) $visibility,
+            'content'       => $content,
+            'viewed'        => $viewed,
+            'auto'          => $auto,
+            "email"         => $email,
+            "type_author"   => $type_author,
+            'type_dest'     => $type_dest,
+            'fk_group_dest' => $fk_group_dest,
+            'fk_user_dest'  => $fk_user_dest
         ));
 
         if (!count($errors)) {
@@ -6206,6 +6371,20 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             $html .= '>';
             $html .= BimpRender::renderIcon('fas_comments');
             $html .= '</span>';
+            
+            //Suivi mail
+            $random = random_int("3", "999999999999");
+            $htmlId = 'suivi_mail_'.$random;
+            $onclick = $this->getJsLoadModalCustomContent('renderSuiviMail', 'Suivi des mails');
+            $html .= '<span id="'.$htmlId.'" class="btn btn-default bs-popover"';
+            $html .= ' onclick="' . $onclick . '"';
+            $html .= BimpRender::renderPopoverData('Suivi des mails');
+            $html .= '>';
+            $html .= BimpRender::renderIcon('fas_inbox');
+            $html .= '</span>';
+            if($_GET['open'] == 'suivi_mail')
+                $html .= '<script>$(document).ready(function(){  $("#'.$htmlId.'").click();});</script>';
+            
 
             $html .= '</div>';
             $html .= '</div>';
@@ -7243,6 +7422,27 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
         return '';
     }
+    
+    public function renderSuiviMail()
+    {
+        $instance = BimpObject::getInstance('bimpcore', 'BimpMailLog');
+        $list = new BC_ListTable($instance, 'default');
+//        $list->addIdentifierSuffix($suffixe);
+        $list->addFieldFilterValue('obj_type', 'bimp_object');
+        $list->addFieldFilterValue('obj_module', $this->module);
+        $list->addFieldFilterValue('obj_name', $this->object_name);
+        $list->addFieldFilterValue('id_obj', $this->id);
+        $list->addObjectChangeReload($this->object_name);
+
+        if ($filter_by_user) {
+            $filters = BimpNote::getFiltersByUser();
+            foreach ($filters as $field => $filter) {
+                $list->addFieldFilterValue($field, $filter);
+            }
+        }
+
+        return $list->renderHtml();
+    }
 
     // Générations javascript: 
 
@@ -8215,6 +8415,9 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         } else {
             $url = $this->getUrl('private');
         }
+        
+        if(isset($params['after_link']))
+            $url .= $params['after_link'];
 
         if ($url) {
             $html .= '<a href="' . $url . '"';

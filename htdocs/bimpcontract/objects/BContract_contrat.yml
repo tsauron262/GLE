@@ -548,7 +548,7 @@ filters_panels:
             ref:
                 show: 1
             statut:
-            commercial:
+            fk_commercial_suivi:
             client:
             commercialclient:
             entrepot:
@@ -1367,13 +1367,13 @@ views:
                   custom: 
                     callback:
                         method: renderFilesTable
-            - cols:
-                - type: custom
-                  custom: 
-                      callback: 
-                          method: renderNotesList
-                          params:
-                              - 1
+#            - cols:
+#                - type: custom
+#                  custom: 
+#                      callback: 
+#                          method: renderNotesList
+#                          params:
+#                              - 1
     inter:
         show: 
             callback:

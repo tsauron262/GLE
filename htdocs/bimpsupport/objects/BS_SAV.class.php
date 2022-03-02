@@ -1175,7 +1175,7 @@ class BS_SAV extends BimpObject
         );
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'date_facturation':
@@ -1189,24 +1189,26 @@ class BS_SAV extends BimpObject
                 }
 
                 if (!empty($values_filters)) {
-                    $joins['facture'] = array(
-                        'alias' => 'facture',
+                    $fac_alias = $main_alias . '___facture';
+                    $joins[$fac_alias] = array(
+                        'alias' => $fac_alias,
                         'table' => 'facture',
-                        'on'    => 'facture.rowid = a.id_facture'
+                        'on'    => $fac_alias . '.rowid = ' . $main_alias . '.id_facture'
                     );
 
-                    $joins['facture_avoir'] = array(
-                        'alias' => 'facture_avoir',
+                    $avoir_alias = $main_alias . '___facture_avoir';
+                    $joins[$avoir_alias] = array(
+                        'alias' => $avoir_alias,
                         'table' => 'facture',
-                        'on'    => 'facture_avoir.rowid = a.id_facture_avoir'
+                        'on'    => $avoir_alias . '.rowid = ' . $main_alias . '.id_facture_avoir'
                     );
 
-                    $filters['date_facturation' . ($excluded ? '_excluded' : '')] = array(
+                    $filters[$main_alias . 'date_facturation' . ($excluded ? '_excluded' : '')] = array(
                         ($excluded ? 'and_fields' : 'or') => array(
-                            'facture.datef'       => array(
+                            $fac_alias . '.datef'   => array(
                                 ($excluded ? 'and' : 'or_field') => $values_filters
                             ),
-                            'facture_avoir.datef' => array(
+                            $avoir_alias . '.datef' => array(
                                 ($excluded ? 'and' : 'or_field') => $values_filters
                             )
                         )
@@ -1215,7 +1217,7 @@ class BS_SAV extends BimpObject
                 break;
         }
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
 
     public function getPublicUrlParams($internal = true)
@@ -1376,39 +1378,38 @@ class BS_SAV extends BimpObject
 
         return '';
     }
-    
-             
+
     public function getExtraFieldFilterKey($field, &$joins, $main_alias = '', &$filters = array())
     {
         $fields = array('date_create', 'date_pc', 'date_close');
-        
+
         $fieldPrinc = str_replace('j_', '', $field);
-        if(in_array($fieldPrinc, $fields)){
-            return 'if('.$main_alias.'.'.$fieldPrinc.', DayOfWeek('.$main_alias.'.'.$fieldPrinc.')-1, 10)';
+        if (in_array($fieldPrinc, $fields)) {
+            return 'if(' . $main_alias . '.' . $fieldPrinc . ', DayOfWeek(' . $main_alias . '.' . $fieldPrinc . ')-1, 10)';
         }
-        
-        
+
+
         $fieldPrinc = str_replace('h_', '', $field);
-        if(in_array($fieldPrinc, $fields)){
-            return 'if('.$main_alias.'.'.$fieldPrinc.', DATE_FORMAT('.$main_alias.'.'.$fieldPrinc.', "%H"), 10)';
+        if (in_array($fieldPrinc, $fields)) {
+            return 'if(' . $main_alias . '.' . $fieldPrinc . ', DATE_FORMAT(' . $main_alias . '.' . $fieldPrinc . ', "%H"), 10)';
         }
 
         return '';
     }
-    
+
     public function fetchExtraFields()
     {
         $fields = array('date_create', 'date_pc', 'date_close');
         $extra = array();
-        
-        foreach($fields as $field){
-            if($this->getData($field)){
-                $extra['j_'.$field] = date('w',strtotime($this->getData($field)));
-                $extra['h_'.$field] = date('H',strtotime($this->getData($field)));
-            }
-            else{
-                $extra['j_'.$field] = 10;
-                $extra['h_'.$field] = 0;
+
+        foreach ($fields as $field) {
+            if ($this->getData($field)) {
+                $date = strtotime($this->getData($field));
+                $extra['j_' . $field] = date('w', $date);
+                $extra['h_' . $field] = date('H', $date);
+            } else {
+                $extra['j_' . $field] = 10;
+                $extra['h_' . $field] = 0;
             }
         }
         return $extra;
@@ -2262,10 +2263,16 @@ class BS_SAV extends BimpObject
 
             $html .= '<script>'
                     . 'var idMaxMesg = 0;'
+                    . 'var boucle = true;'
                     . 'function checkCode(){'
-                    . ' setObjectAction(null, {"module":"bimpsupport", "object_name":"BS_SAV"}, "getCodeApple", {"idMax":idMaxMesg});'
+                    . ' if(boucle){'
+                    . '     setObjectAction(null, {"module":"bimpsupport", "object_name":"BS_SAV"}, "getCodeApple", {"idMax":idMaxMesg});'
+                    . ' }'
                     . '}'
                     . 'checkCode();'
+                    . 'bimpModal.$modal.on("hidden.bs.modal", function (e) {'
+                    . ' boucle = false;'
+                    . '});'
                     . '</script>';
         }
 
@@ -2636,7 +2643,7 @@ class BS_SAV extends BimpObject
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($factureA), 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
             } else {
                 $factureA->addline("Acompte", $acompte / 1.2, 1, 20, null, null, null, 0, null, null, null, null, null, 'HT', null, 1, null, null, null, null, null, null, $acompte / 1.2);
-                if ($factureA->validate($user)) {
+                if ($factureA->validate($user) > 0) {
                     // Création du paiement: 
                     BimpTools::loadDolClass('compta/paiement', 'paiement');
                     $payement = new Paiement($this->db->db);
@@ -3696,7 +3703,7 @@ class BS_SAV extends BimpObject
 //                if (!mailSyn2($subject, $toMail, $fromMail, $mail_msg, $tabFile, $tabFile2, $tabFile3)) {
 //                    $errors[] = 'Echec envoi du mail';
 //                }
-                    $bimpMail = new BimpMail($subject, $toMail, $fromMail, $mail_msg);
+                    $bimpMail = new BimpMail($this, $subject, $toMail, $fromMail, $mail_msg);
                     $bimpMail->addFiles($files);
                     $mail_errors = array();
                     $bimpMail->send($mail_errors);
@@ -3956,6 +3963,11 @@ class BS_SAV extends BimpObject
         }
 
         return $errors;
+    }
+
+    public function renderAlertDiago()
+    {
+        return '<div class="error">Tous les tests post réparation empêchant le passage en prêt pour enlèvement ont été effectués ?</div>';
     }
 
     public function convertSav(Equipment $equipment = null)
@@ -4755,7 +4767,7 @@ class BS_SAV extends BimpObject
                     $warnings = $this->sendMsg($msg_type);
                 }
             }
-            if(!count($errors))
+            if (!count($errors))
                 $errors = $this->updateField('date_close', dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S'));
         }
 
@@ -5398,32 +5410,54 @@ class BS_SAV extends BimpObject
         );
     }
 
+    public static function getCodeApple($idMax = 0, &$newIdMax = 0)
+    {
+        $code = '';
+        $db = BimpCache::getBdb();
+        $result = $db->executeS("SELECT *
+FROM " . MAIN_DB_PREFIX . "bimpcore_note a
+WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 'BIMP_Task' AND a.id_obj = '25350' ORDER by id DESC");
+        if (isset($result[0])) {
+            $ln = $result[0];
+            $newIdMax = $ln->id;
+            if ($idMax != 0 && $newIdMax > $idMax) {
+                $code = $ln->content;
+                $tabCode = explode('votre identifiant Apple est :', $code);
+                if (isset($tabCode[1]))
+                    $code = $tabCode[1];
+                else {
+                    $tabCode = explode('Your Apple ID Code is: ', $code);
+                    if (isset($tabCode[1]))
+                        $code = $tabCode[1];
+                }
+                $tabCode = explode('. Ne le', $code);
+                if (isset($tabCode[1]))
+                    $code = $tabCode[0];
+                else {
+                    $tabCode = explode('. Don', $code);
+                    if (isset($tabCode[1]))
+                        $code = $tabCode[0];
+                }
+                $code = str_replace(" ", "", $code);
+            }
+        }
+        return $code;
+    }
+
     public function actionGetCodeApple($data, &$success)
     {
         $idMax = $data['idMax'];
         $success = 'Code pas encore reçu';
 
-        $result = $this->db->executeS("SELECT *
-FROM " . MAIN_DB_PREFIX . "bimpcore_note a
-WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 'BIMP_Task' AND a.id_obj = '25350' ORDER by id DESC");
-        if (isset($result[0])) {
-            $ln = $result[0];
-            $success_callback = "setTimeout(function(){checkCode();}, 2000);";
-            if ($idMax == 0) {
+        $newIdMax = 0;
+        $code = static::getCodeApple($idMax, $newIdMax);
+
+        $success_callback = "setTimeout(function(){checkCode();}, 2000);";
+        if ($code != '') {
+            if ($idMax == 0)
                 $success_callback .= 'idMaxMesg = ' . $ln->id . ';';
-            } elseif ($idMax == $ln->id) {
-                //On fait rien pas recu
-            } else {
-                $code = $ln->content;
-                $tabCode = explode('votre identifiant Apple est :', $code);
-                if (isset($tabCode[1]))
-                    $code = $tabCode[1];
-                $tabCode = explode('. Ne le', $code);
-                if (isset($tabCode[1]))
-                    $code = $tabCode[0];
-                $code = str_replace(" ", "", $code);
+            elseif ($idMax < $newIdMax)
                 $success_callback = "text = '" . urlencode($code) . "'; alert(text); const notification = new Notification('Code Apple', { body: text });";
-            }
         }
 
         return array(
@@ -5548,6 +5582,16 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         );
     }
 
+    public static function setGsxActiToken($token, $login = '')
+    {
+        require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
+
+        $gsx = new GSX_v2();
+
+        $errors = $gsx->setActivationToken($token, $login);
+        return $errors;
+    }
+
     public function actionSetGsxActiToken($data, &$success)
     {
         $errors = array();
@@ -5559,11 +5603,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         if (!$token) {
             $errors[] = 'Token absent';
         } else {
-            require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
-
-            $gsx = new GSX_v2();
-
-            $errors = $gsx->setActivationToken($token);
+            $errors = static::setGsxActiToken($token);
         }
 
         return array(
@@ -5726,8 +5766,6 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             'success_callback' => $success_callback
         );
     }
-    
-    
 
     public function actionCancelRdv($data, &$success)
     {
@@ -6000,7 +6038,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 }
             }
 
-            if (BimpCore::isContextPrivate()) {
+            if (!count($errors) && BimpCore::isContextPrivate()) {
                 // Création de la popale: 
                 if ($this->getData("id_propal") < 1 && $this->getData("sav_pro") < 1) {
                     $prop_errors = $this->createPropal();
@@ -6283,7 +6321,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
 //                            mailSyn2($subject, $to, '', $msg);
                             $from = (isset($centres[$r['code_centre']]['mail']) ? $centres[$r['code_centre']]['mail'] : '');
-                            $bimpMail = new BimpMail($subject, $to, $from, $msg);
+                            $bimpMail = new BimpMail($this, $subject, $to, $from, $msg);
                             $bimpMail->send();
 
 //                            BimpCore::addlog('Annulation auto SAV réservé', Bimp_Log::BIMP_LOG_NOTIF, 'bic', null, array(
@@ -6353,7 +6391,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
                     $from = (isset($centres[$r['code_centre']]['mail']) ? $centres[$r['code_centre']]['mail'] : '');
 
-                    $bimpMail = new BimpMail($subject, $to, $from, $msg);
+                    $bimpMail = new BimpMail($this, $subject, $to, $from, $msg);
                     $bimpMail->send();
 
 //                    BimpCore::addlog('Annulation auto SAV réservé', Bimp_Log::BIMP_LOG_NOTIF, 'bic', null, array(
@@ -6669,7 +6707,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     if ($to) {
                         $to = BimpTools::cleanEmailsStr($to);
 
-                        $bimpMail = new BimpMail($subject, $to, $from, $message);
+                        $bimpMail = new BimpMail($this, $subject, $to, $from, $message);
                         $bimpMail->addFile(array($filePath, 'application/pdf', $fileName));
                         $bimpMail->send($errors);
                     } else {

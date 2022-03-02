@@ -89,6 +89,11 @@ class BimpCoreCronExec
 
         BimpObject::loadClass('bimpsupport', 'BS_SAV');
         BS_SAV::checkSavToCancel();
+        
+        // Vérifs des notifs relances client désactivées. 
+        
+        BimpObject::loadClass('bimpcore', 'Bimp_Client');
+        Bimp_Client::checkRelancesDeactivatedToNotify();
 
         return 'OK';
     }

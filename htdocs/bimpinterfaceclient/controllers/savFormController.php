@@ -37,7 +37,7 @@ class savFormController extends BimpPublicController
         $reservation = null;
         $errors = array();
         
-        if($acId > 0){//a virer au plus vite
+        if($acId > 0 || BimpTools::getValue('previewDate', '') != ''){//a virer au plus vite
             $db = BimpCache::getBdb()->db;
             $db->query('SELECT * FROM '.MAIN_DB_PREFIX.'actioncomm_extrafields WHERE rowid = "'.$acId.'" AND resgsx = "'.$res_id.'";');
             if($db->num_rows($sql) < 1)

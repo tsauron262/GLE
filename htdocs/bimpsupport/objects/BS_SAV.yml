@@ -929,6 +929,7 @@ fields_tables:
               display: card
               show: 
                   field_value: id_facture
+                  
     sac:
         title: Emballage
         icon: fas_shopping-bag

@@ -34,9 +34,9 @@ class BimpInput
         if (isset($options['data'])) {
             $data = BimpRender::renderTagData($options['data']);
         }
-        if(isset($options['no_autocorrect']) && $options['no_autocorrect'])
+        if (isset($options['no_autocorrect']) && $options['no_autocorrect'])
             $data .= ' autocorrect="off" autocapitalize="none"';
-        
+
 
         switch ($type) {
             case 'hidden':
@@ -143,6 +143,10 @@ class BimpInput
                 break;
 
             case 'qty':
+                if (!isset($options['data']['data_type'])) {
+                    $data .= ' data-data_type="number"';
+                }
+
                 $data .= ' data-step="' . (isset($options['step']) ? $options['step'] : 1) . '"';
 
                 if ((isset($options['addon_left']) && $options['addon_left']) ||
@@ -1498,6 +1502,9 @@ class BimpInput
         }
 
         $html .= '<div class="inputMultipleValues">';
+//        $html .= '<pre>';
+//        $html .= print_r($values, 1);
+//        $html .= '</pre>';
         $html .= '<table>';
         $html .= '<thead></thead>';
         $html .= '<tbody class="multipleValuesList">';

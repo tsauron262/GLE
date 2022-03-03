@@ -938,6 +938,17 @@ class GSX_v2 extends GSX_Const
         return $this->exec('consignmentOrderLookup', $params);
     }
 
+    public function consignmentOrderLookup($orderId, $type = 'DECREASE', $status = 'OPEN')
+    {
+        $params = array(
+            'orderId'              => $orderId,
+            'orderStatusGroupCode' => $status,
+            'typeCode'             => $type
+        );
+
+        return $this->exec('consignmentOrderLookup', $params);
+    }
+
     public function consignmentDeliveryLookup($deliveryNumber, $status = 'OPEN', $from = '', $to = '')
     {
         $params = array(
@@ -959,6 +970,28 @@ class GSX_v2 extends GSX_Const
                     'deliveryNumber' => $deliveryNumber,
                     'parts'          => $parts
         ));
+    }
+
+    public function consignmentOrderSubmit($orderId, $parts)
+    {
+        $params = array(
+            'orderId' => $orderId,
+            'parts'   => $parts
+        );
+
+        return $this->exec('consignmentOrderSubmit', $params);
+    }
+
+    public function consignmentOrderShipment($orderId, $carrier_code, $tracking_number, $parts)
+    {
+        $params = array(
+            'orderId'        => $orderId,
+            'carrierCode'    => $carrier_code,
+            'trackingNumber' => $tracking_number,
+            'parts'          => $parts
+        );
+
+        return $this->exec('consignmentOrderShipment', $params);
     }
 
     // Requêtes - Divers:
@@ -1157,6 +1190,7 @@ class GSX_v2 extends GSX_Const
         if (!$msg) {
             $msg = 'Non connecté à GSX. Veuillez vous connecter et réitérer l\'opération';
         }
+
         $msg .= '<script type="text/javascript">';
         $msg .= 'gsx_open_login_modal($(\'\')' . ($callback ? ', ' . $callback : '') . ');';
         $msg .= '</script>';

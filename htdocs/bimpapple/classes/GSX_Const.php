@@ -60,6 +60,8 @@ class GSX_Const
             'consignmentOrderLookup'         => 'gsx/api/consignment/order/lookup',
             'consignmentDeliveryLookup'      => 'gsx/api/consignment/delivery/lookup',
             'consignmentDeliveryAcknowledge' => 'gsx/api/consignment/delivery/acknowledge',
+            'consignmentOrderSubmit'         => 'gsx/api/consignment/order/submit',
+            'consignmentOrderShipment'       => 'gsx/api/consignment/order/shipment',
             // Autre: 
             'partsSummary'                   => 'gsx/api/parts/summary',
             'filesUpload'                    => 'gsx/api/attachment/upload-access',

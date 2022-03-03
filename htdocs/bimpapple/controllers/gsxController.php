@@ -100,7 +100,7 @@ class gsxController extends BimpController
         );
     }
 
-    // Gestion des requêtes via formulaire: 
+    // Gestion des requêtes via formulaire:
 
     protected function gsxLoadRequestForm($params)
     {
@@ -787,6 +787,7 @@ class gsxController extends BimpController
                 }
             }
         }
+        
         if (!$serial) {
             $errors[] = 'Numéro de série de l\'équipement absent';
         } else {
@@ -831,7 +832,7 @@ class gsxController extends BimpController
         $id_sav = (isset($params['id_sav']) ? (int) $params['id_sav'] : 0);
 
         if (!$id_sav) {
-            $errors[] = 'ID du SAV absent 55';
+            $errors[] = 'ID du SAV absent';
         } else {
             $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id_sav);
 

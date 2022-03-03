@@ -2366,7 +2366,9 @@ class BimpObject extends BimpCache
             // Traitement des cas particuliers des listes de valeurs: 
             if ($type === 'items_list') {
                 if (is_string($value)) {
-                    if ($this->getConf('fields/' . $field . '/items_braces', 0)) {
+                    if ($value === '') {
+                        $value = array();
+                    } elseif ($this->getConf('fields/' . $field . '/items_braces', 0)) {
                         $value = str_replace('][', ',', $value);
                         $value = str_replace('[', '', $value);
                         $value = str_replace(']', '', $value);
@@ -6825,7 +6827,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 }
             }
         }
-        
+
         return '';
     }
 
@@ -9008,11 +9010,15 @@ var options = {
 
     // Gestion statique des objets:
 
-    public static function createBimpObject($module, $object_name, $data, $force_create = false, &$errors = array(), &$warnings = array())
+    public static function createBimpObject($module, $object_name, $data, $force_create = false, &$errors = array(), &$warnings = array(), $no_transactions_db = false)
     {
         $instance = static::getInstance($module, $object_name);
 
         if (is_a($instance, 'BimpObject')) {
+            if ($no_transactions_db) {
+                $instance->useNoTransactionsDb();
+            }
+            
             $create_warnings = array();
             $create_errors = $instance->validateArray($data);
 

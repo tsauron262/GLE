@@ -150,8 +150,13 @@ class BimpDocumentPDF extends BimpModelPDF
         if($this->file_logo != '' && is_file($conf->mycompany->dir_output . '/logos/' . $this->file_logo))
                 $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->file_logo;
         else{
-            if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('R', 'C', 'ME', 'CO', 'BP'))) {
+            if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('BP'))) {
                 $testFile = str_replace(array(".jpg", ".png"), "_PRO.png", $logo_file);
+                if (is_file($testFile))
+                    $logo_file = $testFile;
+            }
+            if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('BP'))) {
+                $testFile = str_replace(array(".jpg", ".png"), "_BP.png", $logo_file);
                 if (is_file($testFile))
                     $logo_file = $testFile;
             }

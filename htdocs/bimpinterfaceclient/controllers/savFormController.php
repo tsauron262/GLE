@@ -41,7 +41,7 @@ class savFormController extends BimpPublicController
         if ($res_id) {
             if($acId > 0 || BimpTools::getValue('previewDate', '') != ''){//a virer au plus vite
                 $db = BimpCache::getBdb()->db;
-                $db->query('SELECT * FROM '.MAIN_DB_PREFIX.'actioncomm_extrafields WHERE rowid = "'.$acId.'" AND resgsx = "'.$res_id.'";');
+                $db->query('SELECT * FROM '.MAIN_DB_PREFIX.'actioncomm_extrafields WHERE fk_object = "'.$acId.'" AND resgsx = "'.$res_id.'";');
                 if($db->num_rows($sql) < 1)
                     $errors[] = 'Données non concordantes';
             }
@@ -169,11 +169,11 @@ class savFormController extends BimpPublicController
                 $html .= '</span>';
                 $html .= '</div>';
 
-                $html .= '<p class="inputHelp">';
-                $html .= 'Si vous disposez déjà d\'un accès à l\'espace client BIMP, veuillez vous ';
-                $html .= '<a href="' . BimpObject::getPublicBaseUrl() . 'back=savForm">authentifier</a>';
-                $html .= ' pour simplifier la prise de rendez-vous.';
-                $html .= '</p>';
+//                $html .= '<p class="inputHelp">';
+//                $html .= 'Si vous disposez déjà d\'un accès à l\'espace client BIMP, veuillez vous ';
+//                $html .= '<a href="' . BimpObject::getPublicBaseUrl() . 'back=savForm">authentifier</a>';
+//                $html .= ' pour simplifier la prise de rendez-vous.';
+//                $html .= '</p>';
             }
 
             if (!is_null($centre) && $code_centre) {

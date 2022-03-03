@@ -172,7 +172,7 @@ class BimpPublicController extends BimpController
         $params = BimpTools::overrideArray(array(
                     'page_title'     => 'BIMP - Espace client',
                     'main_title'     => 'Espace client',
-                    'sub_title'      => '',
+                    'sub_title'      => 'Votre identifiant et mot de passe sont différents de votre compte client LDLC.',
                     'submit_label'   => 'Valider',
                     'submit_enabled' => true,
                     'js_files'       => array(),

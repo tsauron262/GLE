@@ -8,8 +8,9 @@ class BimpMailLog extends BimpObject
         'proxy_open' => 'Chargé par proxy',
         'soft_bounce' => 'Soft Bounce',
         'hard_bounce' => 'Hard Bounce',
+        'blocked'     => 'Bloqué'
     );
-    static $statutError = array('soft_bounce', 'hard_bounce');
+    static $statutError = array('soft_bounce', 'hard_bounce', 'blocked');
     
     function changeStatut($info, $email){
         $str = $this->trad($info);

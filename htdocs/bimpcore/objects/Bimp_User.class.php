@@ -560,13 +560,13 @@ class Bimp_User extends BimpObject
         if ($user->admin || $user->id === $this->id) {
             $tabs = array();
             
-            $tabs[] = array(
-                'id'            => 'interface_tab',
-                'title'         => 'Interface',
-                'ajax'          => 1,
-                //'ajax_callback' => $params->renderList('default', true, 'Liste des paramètres', null, array('fk_user' => $user->id))
-                'ajax_callback' => $this->getJsLoadCustomContent('renderInterfaceView', '$(\'#interface_tab .nav_tab_ajax_result\')', array(''), array('button' => ''))
-            );
+//            $tabs[] = array(
+//                'id'            => 'interface_tab',
+//                'title'         => 'Interface',
+//                'ajax'          => 1,
+//                //'ajax_callback' => $params->renderList('default', true, 'Liste des paramètres', null, array('fk_user' => $user->id))
+//                'ajax_callback' => $this->getJsLoadCustomContent('renderInterfaceView', '$(\'#interface_tab .nav_tab_ajax_result\')', array(''), array('button' => ''))
+//            );
 
             
             $tabs[] = array(

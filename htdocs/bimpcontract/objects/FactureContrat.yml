@@ -67,6 +67,7 @@ filters_panels:
             fk_contrat:
             fk_facture:
             fk_product:
+            datef:
       
 lists_cols: 
     montant:
@@ -111,4 +112,5 @@ lists:
             fk_facture:
             fk_product:
             montant:
+            datef:
     

@@ -3307,15 +3307,20 @@ class BContract_contrat extends BimpDolObject
 
     public function getCurrentTotal()
     {
+        return $this->getTotal($this->getData('current_renouvellement'));
+    }
+    
+    public function getTotal($renouvellement){
         $montant = 0;
         foreach ($this->dol_object->lines as $line) {
             $child = $this->getChildObject("lines", $line->id);
-            if ($child->getData('renouvellement') == $this->getData('current_renouvellement')) {
+            if ($child->getData('renouvellement') == $renouvellement) {
                 $montant += $line->total_ht;
             }
         }
 
         return $montant;
+        
     }
 
     public function getAddAmountAvenantProlongation()

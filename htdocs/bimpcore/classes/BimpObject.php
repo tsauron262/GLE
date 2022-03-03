@@ -2764,7 +2764,7 @@ class BimpObject extends BimpCache
         $errors = array();
         $new_filters = array();
         $new_joins = array();
-        $child_alias = '';
+        $child_alias = $main_alias;
         $child_name = array_shift($children);
 
         if ($child_name) {

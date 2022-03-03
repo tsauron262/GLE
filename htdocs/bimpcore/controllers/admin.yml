@@ -39,6 +39,7 @@ objects:
             bimp_object: 
                 module: bimpuserconfig
                 name: ListTableConfig
+                
     lists_filters: 
         instance: 
             bimp_object: 

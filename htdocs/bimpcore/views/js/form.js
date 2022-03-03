@@ -2632,7 +2632,24 @@ function setFormEvents($form) {
     $form.find('form').first().submit(function (e) {
         e.preventDefault();
         e.stopPropagation();
-        submitForm($form.attr('id'));
+
+        var hold = $form.data('hold_auto_submit');
+
+        if (typeof (hold) === 'undefined') {
+            hold = 0;
+        }
+
+        if (!parsetInt(hold)) {
+            submitForm($form.attr('id'));
+        } else {
+            $form.data('hold_auto_submit', 0)
+        }
+    });
+
+    $form.keydown(function (e) {
+        if (e.key === 'Enter') {
+            e.stopPropagation();
+        }
     });
 }
 
@@ -3020,6 +3037,32 @@ function setInputsEvents($container) {
                 }
             });
             $(this).data('ziptown_event_init', 1);
+        }
+    });
+    $container.find('.addValueInputContainer').each(function () {
+        if (!parseInt($(this).data('add_value_input_events_init'))) {
+            $(this).data('add_value_input_events_init', 1);
+            var $input = $(this).children('input[type="text"]');
+            var $btn = $(this).children('.addValueBtn');
+
+            if ($input.length && $btn.length) {
+                $input.keydown(function (e) {
+                    if (e.key === 'Enter') {
+                        var $form = $(this).findParentByClass('object_form');
+                        if ($.isOk($form)) {
+                            $form.data('hold_auto_submit', 1);
+                        }
+                    }
+                });
+
+                $input.keyup(function (e) {
+                    if (e.key === 'Alt' || e.key === 'Enter') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        $btn.click();
+                    }
+                })
+            }
         }
     });
     $container.find('.inputMultipleValuesContainer').each(function () {

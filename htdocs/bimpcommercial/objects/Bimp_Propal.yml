@@ -55,27 +55,13 @@ objects:
                 
     signature: 
         relation: hasOne
-        delete: 0
+        delete: 1
         instance: 
             bimp_object: 
                 module: bimpcore
                 name: BimpSignature
             id_object: 
                 field_value: id_signature
-                
-    id_signature: 
-        label: Signature
-        type: id_object
-        object: signature
-        displays: 
-            default: 
-                label: Lien signature
-                type: callback
-                method: displaySignature
-                
-    signature_params: 
-        label: Paramètres incrustation signature
-        type: json
                 
 fields:
     libelle: 

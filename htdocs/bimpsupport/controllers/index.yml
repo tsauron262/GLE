@@ -42,6 +42,18 @@ objects:
             bimp_object: 
                 module: bimpapple
                 name: ConsignedStock
+                
+    cs_shipment: 
+        instance: 
+            bimp_object: 
+                module: bimpapple
+                name: ConsignedStockShipment
+                
+    cs_mvt: 
+        instance: 
+            bimp_object: 
+                module: bimpapple
+                name: ConsignedStockMvt
             
 sections:
     - type: tabs
@@ -92,11 +104,29 @@ sections:
                 - type: list
                   list: 
                       object: sac
-        stocks: 
+                      
+        consigned_stocks: 
             label: Stocks consignés
             icon: fas_boxes
             sections: 
-                - type: list
-                  list: 
-                      object: stocks
+                - type: nav_tabs
+                  nav_tabs: 
+                    - id: cs_stocks
+                      title: Stocks
+                      struct: 
+                          type: list
+                          list: 
+                              object: stocks
+                    - id: cs_shipments
+                      title: Renvois
+                      struct: 
+                          type: list
+                          list: 
+                              object: cs_shipment
+                    - id: cs_mvts
+                      title: Mouvements de stock
+                      struct: 
+                          type: list
+                          list: 
+                              object: cs_mvt
                 

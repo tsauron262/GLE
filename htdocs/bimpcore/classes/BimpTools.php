@@ -2739,9 +2739,9 @@ class BimpTools
                 if ($params_str) {
                     if (!preg_match('/\?/', $url)) {
                         $url .= '?';
-                    }
-                    else
+                    } else {
                         $url .= '&';
+                    }
                     $url .= $params_str;
                 }
             }
@@ -2803,7 +2803,7 @@ class BimpTools
 
     public static function json_decode_array($json, &$errors = array())
     {
-        if (is_null($json) || $json === '') {
+        if (is_null($json) || in_array($json, array('', '[]', '{}'))) {
             return array();
         }
 

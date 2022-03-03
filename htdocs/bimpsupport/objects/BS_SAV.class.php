@@ -3429,8 +3429,8 @@ class BS_SAV extends BimpObject
         if (is_null($centre)) {
             return array($error_msg . ' - Centre absent');
         }
-
-        $signature = BimpCache::getSignature('SAV LDLC', "Centre de Services Agréé Apple", $centre['tel']);
+        $signature = '';
+//        $signature = BimpCache::getSignature('SAV LDLC', "Centre de Services Agréé Apple", $centre['tel']);
 //        $signature = file_get_contents("https://www.bimp.fr/signatures/v3/supports/sign.php?prenomnom=BIMP%20SAV&job=Centre%20de%20Services%20Agr%C3%A9%C3%A9%20Apple&phone=" . urlencode($centre['tel']), false, stream_context_create(array(
 //            'http' => array(
 //                'timeout' => 2   // Timeout in seconds

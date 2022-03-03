@@ -2742,8 +2742,6 @@ class BimpTools
                     } else {
                         $url .= '&';
                     }
-                    else
-                        $url .= '&';
                     $url .= $params_str;
                 }
             }

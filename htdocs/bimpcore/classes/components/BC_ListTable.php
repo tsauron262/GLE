@@ -676,7 +676,7 @@ class BC_ListTable extends BC_List
                 $field_object = $this->object;
                 $errors = array();
 
-                if (!empty($children)) {
+                if (!empty($children) && !empty($search_filter)) {
                     $errors = $this->object->getRecursiveChildrenJoins($children, $filters, $joins, 'a', $field_alias, $field_object);
                 }
 
@@ -691,7 +691,6 @@ class BC_ListTable extends BC_List
                     $fields[$field_alias]['fields'][$field_name] = $search_filter;
                 }
             }
-
             if (!empty($fields)) {
                 foreach ($fields as $parent_alias => $fields_data) {
                     if (is_a($fields_data['object'], 'BimpObject')) {
@@ -931,32 +930,33 @@ class BC_ListTable extends BC_List
         $errors = array();
 
         foreach ($this->totals as $col_name => $params) {
-            $method_name = 'get' . ucfirst($col_name) . 'ListTotal';
+            $col_name = str_replace(':', '___', $col_name);
+            $children = explode('___', $col_name);
+            $field_name = array_pop($children);
+            $field_alias = 'a';
+            $field_object = $this->object;
+            $col_errors = array();
 
-            if (method_exists($this->object, $method_name)) {
-                $this->totals[$col_name]['value'] = $this->object->{$method_name}($filters, $joins);
-                continue;
+            if (!empty($children)) {
+                $col_errors = $this->object->getRecursiveChildrenJoins($children, $filters, $joins, 'a', $field_alias, $field_object);
             }
 
-            $col_name = str_replace(':', '___', $col_name);
-
-            if (method_exists($this->object, 'get' . ucfirst($col_name) . 'SqlKey')) {
-                $sqlKey = $this->object->{'get' . ucfirst($col_name) . 'SqlKey'}($joins);
-                if ($sqlKey) {
-                    $fields[$sqlKey] = $col_name;
-                }
-            } else {
-                $children = explode('___', $col_name);
-                $field_name = array_pop($children);
-                $field_alias = 'a';
-                $field_object = $this->object;
-                $col_errors = array();
-
-                if (!empty($children)) {
-                    $col_errors = $this->object->getRecursiveChildrenJoins($children, $filters, $joins, 'a', $field_alias, $field_object);
-                }
-
-                if (empty($col_errors) && $field_name && is_a($field_object, 'BimpObject')) {
+            if (empty($col_errors) && $field_name && is_a($field_object, 'BimpObject')) {
+                $method_name = 'get' . ucfirst($field_name) . 'ListTotal';
+                if (method_exists($field_object, $method_name)) {
+                    $this->totals[$col_name]['value'] = $field_object->{$method_name}($filters, $joins, $field_alias);
+                } elseif (method_exists($field_object, 'get' . ucfirst($field_name) . 'SqlKey')) {
+                    BimpCore::addlog('Appel à getxxxSqlKey pour total - intégrer field_alias', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $field_object, array(
+                        'Champ' => $field_name
+                    ));
+                    $ok = array(); // ajouter object_name_field_name au fur et à mesure des corrections. 
+                    if (in_array($field_object->object_name . '_' . $field_name, $ok)) { // Pour éviter erreur fatale liée au nombre de paramètres. 
+                        $sqlKey = $this->object->{'get' . ucfirst($field_name) . 'SqlKey'}($joins, $field_alias);
+                        if ($sqlKey) {
+                            $fields[$sqlKey] = $col_name;
+                        }
+                    }
+                } else {
                     $sqlKey = $field_object->getFieldSqlKey($field_name, $field_alias, null, $filters, $joins, $col_errors);
                     if ($sqlKey) {
                         $fields[$sqlKey] = $col_name;
@@ -1378,7 +1378,7 @@ class BC_ListTable extends BC_List
                 $tools_html .= '></span>';
                 $tools_width += 44;
             }
-        if ($this->params['checkboxes'] && (count($this->params['bulk_actions']) || count($this->params['extra_bulk_actions']))) {
+            if ($this->params['checkboxes'] && (count($this->params['bulk_actions']) || count($this->params['extra_bulk_actions']))) {
                 $tools_html .= '<span class="headerButton displayPopupButton openBulkActionsPopupButton"';
                 $tools_html .= ' data-popup_id="' . $this->identifier . '_bulkActionsPopup"></span>';
                 $tools_html .= $this->renderBulkActionsPopup();
@@ -2710,15 +2710,15 @@ class BC_ListTable extends BC_List
                                     $method = 'get' . ucfirst($bc_field['field']) . 'csvValue';
                                     if (class_exists($bc_field['class']) && method_exists($bc_field['class'], $method)) {
                                         $needed = array();
-                                        
-                                        if (!empty($bc_field['needed_fields'])) {                                            
+
+                                        if (!empty($bc_field['needed_fields'])) {
                                             foreach ($bc_field['needed_fields'] as $needed_field) {
                                                 if (isset($r[$col_name . '_needed_field_' . $needed_field])) {
                                                     $needed[$needed_field] = $r[$col_name . '_needed_field_' . $needed_field];
                                                 }
                                             }
                                         }
-                                        
+
                                         $value = forward_static_call_array(array(
                                             $bc_field['class'], $method
                                                 ), array($needed));

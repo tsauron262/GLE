@@ -547,7 +547,7 @@ class Bimp_CommandeLine extends ObjectLine
         return $buttons;
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'reservations_status':
@@ -566,11 +566,11 @@ class Bimp_CommandeLine extends ObjectLine
 
                     if (!empty($res_filters)) {
                         if ($excluded) {
-                            $filters['and_reservations_status'] = array(
+                            $filters[$main_alias . '___and_reservations_status'] = array(
                                 'and_fields' => $res_filters
                             );
                         } else {
-                            $filters['or_reservations_status'] = array(
+                            $filters[$main_alias . '___or_reservations_status'] = array(
                                 'or' => $res_filters
                             );
                         }
@@ -579,7 +579,7 @@ class Bimp_CommandeLine extends ObjectLine
                 break;
         }
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
 
     // Getters valeurs:
@@ -4464,7 +4464,7 @@ class Bimp_CommandeLine extends ObjectLine
             if (!BimpObject::objectLoaded($commande)) {
                 $errors[] = 'ID de la commande absent';
             } else {
-                if ($commande::$no_check_reservations) {
+                if (isset($commande::$no_check_reservations) && $commande::$no_check_reservations) {
                     return array();
                 }
 
@@ -7208,6 +7208,11 @@ class Bimp_CommandeLine extends ObjectLine
 
         $init_remise_crt = (int) $this->getInitData('remise_crt');
 
+        // Forçage si on est dans le cas d'une ligne ajouté en logistique: 
+        if ((int) $this->qty === 0 && (int) $this->getData('qty_modif')) {
+            $force_update = true;
+        }
+        
         $errors = parent::update($warnings, $force_update);
 
         if (!is_null($prev_commande_status)) {

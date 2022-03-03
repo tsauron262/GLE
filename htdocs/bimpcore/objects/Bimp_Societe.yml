@@ -29,6 +29,13 @@ objects:
                 module: bimpcore
                 name: Bimp_Contact
     
+    contrat:
+        relation: hasMany
+        instance:
+            bimp_object:
+                module: bimpcontract
+                name: BContract_contrat
+    
     files:
         relation: hasMany
         delete: 1
@@ -222,10 +229,6 @@ fields:
             type: search_country
         values:
             callback: getCountriesArray
-#        displays: 
-#            default: 
-#                type: callback
-#                method: displayCountry
                 
     fk_departement: 
         dol_prop: state_id
@@ -334,6 +337,7 @@ fields:
         label: Type du tiers
         type: int
         user_edit: 1
+        history: 1
         values: 
             array:
                 callback: 
@@ -481,7 +485,6 @@ fields:
     date_atradius:
         label: Date de dépôt du Rapport
         type: datetime
-    
         
     fk_account: 
         label: Compte bancaire
@@ -628,6 +631,10 @@ fields:
             auto_expand: 1
             maxlength: 300
             
+    date_relances_deactivated: 
+        label: Date de désactivation des relances
+        type: date
+        
     id_user_status_demand: 
         label: Utilisateur demande changement statut
         type: id
@@ -646,7 +653,7 @@ fields:
         dol_extra_field: 1
         
     date_last_active:
-        label: Date derniére activitée
+        label: Date derniére activité
         type: date
             
 #    *** Champs non gérés: ***
@@ -917,8 +924,7 @@ views:
                       name: default
                       panel: 0
                       
-forms: 
-            
+forms:                   
     light: 
         title: Ajout d'une société
         rows: 
@@ -936,11 +942,9 @@ forms:
                 custom: 1
                 label: Entreprise
                 input_name: is_company
-                data_type: int
-                value: 
-                    callback: isCompany
-                input: 
-                    type: toggle
+                data_type: bool
+                content: 
+                    callback: renderIsCompanyInput
             has_already_code_comptable_client:
                 custom: 1
                 label: A déjà un code comptable client
@@ -1135,7 +1139,6 @@ forms:
                 display_if: 
                     field_name: no_logo
                     show_values: 0
-                
                     
     add_commercial: 
         title: Ajouter un commercial
@@ -1185,6 +1188,65 @@ forms:
               data_type: date
               input:
                   type: date
+                  
+    releverInter:
+        title: Créer un relevé d'interventions
+        msgs:
+            - type: info
+              content: Si aucun filtre n'est choisi, le relevé d'interventions par défaut sera celui destiné au client
+        rows:
+            - custom: 1
+              label: Filtrer par contrat
+              input_name: by_contrat
+              input:
+                  type: toggle
+            - custom: 1
+              label: Contrat
+              input_name: id_contrat
+              input:
+                  type: search_object
+                  object: contrat
+              display_if:
+                  field_name: by_contrat
+                  show_values: 1
+            - custom: 1
+              label: Borner par date
+              input_name: by_date
+              input:
+                  type: toggle
+            - custom: 1
+              required: 1
+              label: Date de début du relevé
+              input:
+                  display_now: 1
+                  type: date
+              display_if:
+                  field_name: by_date
+                  show_values: 1
+              input_name: start
+            - custom: 1
+              required: 1
+              label: Date de fin du relevé
+              input:
+                  display_now: 1
+                  type: date
+              display_if:
+                  field_name: by_date
+                  show_values: 1
+              input_name: stop
+            - custom: 1
+              label: Filtrer par technicien
+              input_name: by_tech
+              input:
+                  type: toggle
+            - custom: 1
+              label: Technicien
+              input_name: id_tech
+              input:
+                  type: search_user
+              display_if:
+                  field_name: by_tech
+                  show_values: 1
              
 filters: 
     accounting_account:

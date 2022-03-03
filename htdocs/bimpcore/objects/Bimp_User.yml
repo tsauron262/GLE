@@ -27,6 +27,17 @@ labels:
     name: utilisateur
     
 objects: 
+    user_group:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_UserGroup
+    perms_group:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_User_Rights
+                
     resp_user:
         relation: hasOne
         delete: 0
@@ -209,7 +220,7 @@ fields:
         dol_extra_field: 1
         values: 
             array: secteurs
-        
+      
 forms:
     light: 
         rows:
@@ -414,8 +425,33 @@ filters_panel:
             firstname: 
             lastname: 
             login: 
+                
         
 lists:
+    bygroup:
+        extends: default
+        filters_panel: unset
+        add_form_name: unset
+        header_buttons: unset
+        edit_btn: unset
+        edit_form: unset
+        delete_btn: unset
+        list_filters: 
+            callback:
+                method: getFilterByGroup
+                
+    bygroupperms:
+        extends: default
+        filters_panel: unset
+        add_form_name: unset
+        header_buttons: unset
+        edit_btn: unset
+        edit_form: unset
+        delete_btn: unset
+        list_filters: 
+            callback:
+                method: getGroupsRights
+                
     default: 
         checkboxes: 1
         configurable: 1
@@ -443,8 +479,8 @@ lists:
             login: 
             job:
             email: 
-            office_phone: 
-                  
+            office_phone:
+                   
 views_lists: 
     default: 
         title: Utilisateurs

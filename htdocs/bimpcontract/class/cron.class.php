@@ -45,7 +45,35 @@
             $this->relance_demande();
             $this->tacite();
             $this->facturation_auto();
+            $this->notifDemainFacturation();
             return "OK";
+        }
+        
+        public function notifDemainFacturation() {
+            $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat');
+            $list = $contrat->getList(['statut' => self::CONTRAT_ACTIF]);
+            $contratsFactureDemain = Array();
+            $demain = new DateTime(); $demain->add(new DateInterval('P1D'));
+            if(count($list) > 0) {
+                foreach($list as $infos) {
+                    $contrat->fetch($infos['rowid']);
+                    if($contrat->isLoaded()) {
+                        if($contrat->facturationIsDemainCron()) {
+                            $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $contrat->getData('fk_soc'));
+                            $commercial_suivi = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $contrat->getData('fk_commercial_suivi'));
+                            $commercial_signa = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $contrat->getData('fk_commercial_signature'));
+                            $sujet = 'Rappel facturation contrat ' . $contrat->getRef() . ' - ' . $client->getData('code_client') . ' ' . $client->getName();
+                            $message = 'Bonjour,<br />Pour rappel, le contrat numéro ' . $contrat->getNomUrl() . ' doit être facturé le '.$demain->format('d/m/Y').'.<br />'
+                                    . '<u>Informations</u><br />'
+                                    . 'Référence du contrat: ' . $contrat->getNomUrl() . '<br />Client: ' . $client->getNomUrl() . ' ' . $client->getName() . '<br />'
+                                    . 'Commercial suivi de contrat: ' . $commercial_suivi->getName() . '<br />Commercial signataire du contrat: ' . $commercial_signa->getName(); 
+
+                            mailSyn2($sujet, 'facturationclients@bimp.fr', null, $message);
+                            $this->output .= $contrat->getRef() . ' => FAIT: RELANCE FACTURATION DEMAIN';
+                        } 
+                    }
+                }
+            }
         }
         
         public function mailJourActivation() {
@@ -127,9 +155,9 @@
             $liste = $contrat->getList(Array('statut' => self::CONTRAT_ACTIF));
             foreach($liste as $index => $infos) {
                 $contrat->fetch($infos['rowid']);
-                if((int) $contrat->getJourRestantReel() < 0) {
+                if((int) $contrat->getJourRestantReel() <= 0 && ($contrat->getData('tacite') == 0 || $contrat->getData('tacite') == 12)) {
                     $contrat->closeFromCron();
-                    $this->output .= $contrat->getRef() . " : " . (int) $contrat->getJourRestantReel() . ' => FERMé';
+                    $this->output .= $contrat->getRef() . " : " . (int) $contrat->getJourRestantReel() . ' => FERMé<br/>';
                 }
             }
             $this->output .= "STOP auto close<br />";
@@ -303,7 +331,7 @@
                             $message = "Bonjour, " . $commercial->getName() . '<br />Votre contrat N°' . $object->getNomUrl() . ' pour le client'
                                 . $client->getNomUrl() . '('.$client->getName().') a atteint sa date d\'échéance mais il est en tacite reconduction. Il sera donc renouvelé demain';
                         
-                        $bimpMail = new BimpMail($sujet, $commercial->getData('email'), null, $message);
+                        $bimpMail = new BimpMail($object, $sujet, $commercial->getData('email'), null, $message);
                         if($bimpMail->send()) {
                             $output .= "<i class='fa fa-check success' ></i> " . $commercial->getData('email');
                         } else {
@@ -335,6 +363,8 @@
                 $client = BimpObject::getInstance('bimpcore', 'Bimp_Societe', $c->getData('fk_soc'));
                 
                 $commercial_suivi = $c->getData('fk_commercial_suivi');
+                BimpObject::loadClass('bimpcore', 'Bimp_User');
+                $commercial_suivi = Bimp_User::getUsersAvaible(array($commercial_suivi, 'parent'));
                 $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User',$commercial_suivi);
                 $email_comm = BimpTools::cleanEmailsStr($commercial->getData('email'));
                 if($c->getData('periodicity')) {
@@ -347,7 +377,7 @@
                         if($c->getData('relance_renouvellement') && in_array($c->getData('tacite'), $not_tacite)){
                             //$this->sendMailCommercial('ECHEANCE - Contrat ' . $c->getData('ref') . "[".$client->getData('code_client')."]", $c->getData('fk_commercial_suivi'), $message, $c);
                             $sujet = "Echéance contrat - " . $c->getRef() . " - " . $client->getData('code_client');
-                            $bimp_mail = new BimpMail($sujet, $email_comm, '', $message, '', '');
+                            $bimp_mail = new BimpMail($c, $sujet, $email_comm, '', $message, '', '');
                             $bimp_mail->send();
                             $this->output .= "Mail envoyé à <b>$email_comm</b> pour le contrat <b>".$c->getRef()."</b><br />" ;
                         }
@@ -367,7 +397,7 @@
                                 if($c->getData('relance_renouvellement') && in_array($c->getData('tacite'), $not_tacite)){
                                     $message = "Contrat " . $c->getNomUrl(). "<br />Client ".$client->dol_object->getNomUrl()." <br /> dont vous êtes le commercial arrive à expiration dans <b>$diff->d jour.s</b>";
                                     $sujet = "Echéance contrat - " . $c->getRef() . " - " . $client->getData('code_client');
-                                    $bimp_mail = new BimpMail($sujet, $email_comm, '', $message, '', '');
+                                    $bimp_mail = new BimpMail($c, $sujet, $email_comm, '', $message, '', '');
                                     $bimp_mail->send();
                                     $this->output .= "Mail envoyé à <b>$email_comm</b> pour le contrat <b>".$c->getRef()."</b><br />" ;
                                     //$this->sendMailCommercial('ECHEANCE - Contrat ' . $c->getData('ref') . "[".$client->getData('code_client')."]", $c->getData('fk_commercial_suivi'), $message, $c);

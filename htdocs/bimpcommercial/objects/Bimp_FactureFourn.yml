@@ -153,6 +153,7 @@ fields:
     total: unset
     tx_marge: unset
     tx_marque: unset
+    expertise: unset
     fk_mode_reglement: 
         values: 
             callback:

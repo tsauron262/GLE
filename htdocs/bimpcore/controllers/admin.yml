@@ -2,9 +2,13 @@ bootstrap: 1
 title: BimpCore Admin
 
 objects:
-    users: 
+    users:
         instance: 
             bimp_object: Bimp_User
+    
+    user_group:
+        instance:
+            bimp_object: Bimp_UserGroup
             
     entrepots: 
         instance: 
@@ -17,10 +21,11 @@ objects:
     signature: 
         instance: 
             bimp_object: BimpSignature
-            
+
     correctifs: 
         instance: 
             bimp_object: BimpCorrectif
+            
     droitUser:
         instance: 
             bimp_object: Bimp_User_Rights
@@ -60,6 +65,11 @@ objects:
             bimp_object: 
                 module: bimpcore
                 name: BimpAlert
+    mail_log: 
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpMailLog
     
                 
 sections:
@@ -72,6 +82,15 @@ sections:
                   list: 
                       panel: 1
                       object: users
+        
+        user_group:
+            label: Groupe utilisateurs
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: user_group                     
+
         entrepots: 
             label: Entrepôts
             sections: 
@@ -88,6 +107,7 @@ sections:
                       panel: 1
                       object: hashtags
                       name: default
+                      
         signatures: 
             label: Signatures
             sections: 
@@ -96,6 +116,7 @@ sections:
                       panel: 1
                       object: signature
                       name: default
+                      
         correctifs: 
             label: Correctifs
             sections: 
@@ -186,6 +207,14 @@ sections:
                   list: 
                       panel: 1
                       object: alert
+                      
+        mail_log:
+            label: Log Mail
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: mail_log
                       
 #        test: 
 #            label: Tests views list

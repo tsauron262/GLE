@@ -30,9 +30,18 @@ sections:
                       object: demande_valid_comm
 
         my_validations:
-            label: Mes validations en attente
+            label: Mes validations en attente (valideur)
             sections:
                 - type: custom
                   custom: 
                       callback: 
                           method: renderMyValidations
+        my_validations2:
+            label: Mes validations en attente (demandeur)
+            sections:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderMyValidations
+                          params:
+                              - 0

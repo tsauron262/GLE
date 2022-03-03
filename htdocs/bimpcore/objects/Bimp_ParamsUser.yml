@@ -1,0 +1,80 @@
+bootstrap: 1
+table: user_param
+primary: rowid
+            
+labels:
+    name: Paramètres interface
+    
+objects:
+    fk_user:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_User
+            id_object:
+                field_value: fk_user
+                
+fields:
+    fk_user:
+        label: Utilisateur
+        type: id_object
+        object: fk_user
+        
+    param:
+        label: Paramètre
+        type: text
+                  
+                
+lists:
+    default:
+        cols:
+            fk_user:
+            param:
+            
+forms:
+    theme_edit:
+        rows:
+            - custom: 1
+              label: Thèmes
+              type: text
+              input_name: theme_edit
+              value:
+                  callback:
+                      method: getCurrentAttr
+                      params:
+                          - MAIN_THEME
+              input: 
+                  type: select
+                  options: 
+                      callback: getThemeNames  
+                  required: 1
+            - custom: 1
+              label: Langues
+              type: text
+              input_name: languages_edit
+              value:
+                  callback:
+                      method: getCurrentAttr
+                      params:
+                          - MAIN_LANG_DEFAULT
+              input:
+                  type: select
+                  options:
+                      callback: getLanguages  
+                  required: 1
+            - custom: 1
+              label: Page cible
+              type: text
+              input_name: target_page_edit
+              value:
+                  callback:
+                      method: getCurrentAttr
+                      params:
+                          - MAIN_LANDING_PAGE
+              input:
+                  type: select
+                  options:
+                      callback: getTargetPage  
+                  required: 1
+
+

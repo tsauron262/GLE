@@ -83,5 +83,6 @@ class ListFilters extends BCUserConfig
                     ), 'id_default_filters = ' . $id
             );
         }
+        return $errors;
     }
 }

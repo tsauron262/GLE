@@ -296,7 +296,7 @@ class BIC_UserClient extends BimpObject
             $buttons[] = array(
                 'label'   => 'Changer mon mot de passe',
                 'icon'    => 'fas_pen',
-                'onclick' => 'window.location = \'' . BimpObject::getPublicBaseUrl() . '?display_public_form=1&public_form=changePw\''
+                'onclick' => 'window.location = \'' . BimpObject::getPublicBaseUrl() . 'display_public_form=1&public_form=changePw\''
             );
         }
 
@@ -587,7 +587,7 @@ class BIC_UserClient extends BimpObject
 
         $subject = 'Espace client BIMP - Changement de votre mot de passe';
 
-        $bimpMail = new BimpMail($subject, $this->getData('email'), '', $msg);
+        $bimpMail = new BimpMail($this, $subject, $this->getData('email'), '', $msg);
 
         if ($bimpMail->send($errors)) {
             $this->updateField('renew_required', 0);
@@ -617,7 +617,7 @@ class BIC_UserClient extends BimpObject
 //            $warnings[] = 'Echec de l\'envoi du mot de passe par e-mail';
 //        }
 
-        $bimpMail = new BimpMail($subject, $this->getData('email'), '', $msg);
+        $bimpMail = new BimpMail($this, $subject, $this->getData('email'), '', $msg);
         $bimpMail->send($errors, $warnings);
         return $errors;
     }
@@ -666,7 +666,7 @@ class BIC_UserClient extends BimpObject
 //                $warnings[] = 'Echec de l\'envoi du mot de passe par e-mail';
 //            }
 
-            $bimpMail = new BimpMail($subject, $this->getData('email'), '', $msg);
+            $bimpMail = new BimpMail($this, $subject, $this->getData('email'), '', $msg);
             $bimpMail->send($errors, $warnings);
         }
 
@@ -724,7 +724,7 @@ class BIC_UserClient extends BimpObject
 
             if (!count($errors)) {
                 if ($this->use_email && (int) BimpTools::getPostFieldValue('send_mail', 1)) {
-                    $url = BimpObject::getPublicBaseUrl(false) . '?email=' . $this->getData('email');
+                    $url = BimpObject::getPublicBaseUrl(false) . 'email=' . $this->getData('email');
 
                     $sujet = "Mot de passe BIMP ERP Interface Client";
 
@@ -749,7 +749,7 @@ class BIC_UserClient extends BimpObject
                         $message .= "<b>Voici votre accès à votre espace client</b><br /><br />";
                     }
 
-                    $message .= '<a href="' . $url . '">Votre Espace client BIMP ERP</a><br/><br/>';
+                    $message .= '<a href="' . $url . '">Votre Espace client</a><br/><br/>';
                     $message .= '<b>Identifiant :</b> ' . $email . '<br />';
                     if ($mdp_clear) {
                         $message .= '<b>Mot de passe (Généré automatiquement) :</b> ' . $mdp_clear;
@@ -759,7 +759,7 @@ class BIC_UserClient extends BimpObject
                     $message .= "<a href='" . $url_notice . "'>Notice d'utilisation</a>";
 
 //                    mailSyn2($sujet, BimpTools::cleanEmailsStr($email), '', $message);
-                    $bimpMail = new BimpMail($sujet, $this->getData('email'), '', $message);
+                    $bimpMail = new BimpMail($this, $sujet, $this->getData('email'), '', $message);
                     $mail_errors = array();
                     $bimpMail->send($mail_errors);
 

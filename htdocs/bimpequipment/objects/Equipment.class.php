@@ -572,7 +572,7 @@ class Equipment extends BimpObject
         }
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'in_package':
@@ -582,10 +582,10 @@ class Equipment extends BimpObject
                     break;
                 }
                 if (in_array(0, $values)) {
-                    $filters['a.id_package'] = 0;
+                    $filters[$main_alias . '.id_package'] = 0;
                 }
                 if (in_array(1, $values)) {
-                    $filters['a.id_package'] = array(
+                    $filters[$main_alias . '.id_package'] = array(
                         'operator' => '>',
                         'value'    => 0
                     );
@@ -594,17 +594,20 @@ class Equipment extends BimpObject
 
             case 'place_date_end':
                 // Bouton Exclure désactivé
-                $joins['places'] = array(
+                $places_alias = $main_alias . '___places';
+                $joins[$places_alias] = array(
                     'table' => 'be_equipment_place',
-                    'on'    => 'places.id_equipment = a.id',
-                    'alias' => 'places'
+                    'on'    => $places_alias . '.id_equipment = ' . $main_alias . '.id',
+                    'alias' => $places_alias
                 );
-                $joins['next_place'] = array(
+
+                $np_alias = $main_alias . '___next_place';
+                $joins[$np_alias] = array(
                     'table' => 'be_equipment_place',
-                    'on'    => 'next_place.id_equipment = a.id',
-                    'alias' => 'next_place'
+                    'on'    => $np_alias . '.id_equipment = ' . $main_alias . '.id',
+                    'alias' => $np_alias
                 );
-                $filters['next_place_position'] = array('custom' => 'next_place.position = (places.position - 1)');
+                $filters[$main_alias . '___next_place_position'] = array('custom' => $np_alias . '.position = (' . $places_alias . '.position - 1)');
 
                 $or_field = array();
                 foreach ($values as $value) {
@@ -612,14 +615,14 @@ class Equipment extends BimpObject
                 }
 
                 if (!empty($or_field)) {
-                    $filters['next_place.date'] = array(
+                    $filters[$np_alias . '.date'] = array(
                         'or_field' => $or_field
                     );
                 }
                 break;
         }
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
 
     // Getters array: 
@@ -979,19 +982,22 @@ class Equipment extends BimpObject
 
     public function displayFactFourn()
     {
-        $result = $this->db->executeS("SELECT b.id_obj FROM " . MAIN_DB_PREFIX . "object_line_equipment a, `" . MAIN_DB_PREFIX . "bimp_facture_fourn_line` b WHERE a.object_type = 'facture_fournisseur' AND a.id_equipment = " . $this->id . " AND b.id = a.id_object_line", 'array');
+        if ($this->isLoaded()) {
+            $result = $this->db->executeS("SELECT b.id_obj FROM " . MAIN_DB_PREFIX . "object_line_equipment a, `" . MAIN_DB_PREFIX . "bimp_facture_fourn_line` b WHERE a.object_type = 'facture_fournisseur' AND a.id_equipment = " . $this->id . " AND b.id = a.id_object_line", 'array');
 
-        if (is_array($result) && !empty($result)) {
-            foreach ($result as $idF) {
-                $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', $idF['id_obj']);
-                global $modeCSV;
-                if ($modeCSV) {
-                    return $obj->getName();
-                } else {
-                    return $obj->getLink();
+            if (is_array($result) && !empty($result)) {
+                foreach ($result as $idF) {
+                    $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', $idF['id_obj']);
+                    global $modeCSV;
+                    if ($modeCSV) {
+                        return $obj->getName();
+                    } else {
+                        return $obj->getLink();
+                    }
                 }
             }
         }
+        return '';
     }
 
     public function displayAvailability($id_entrepot = 0, $allowed = array())
@@ -1161,8 +1167,9 @@ class Equipment extends BimpObject
 
         return $html;
     }
-    
-    public function isIphone(){
+
+    public function isIphone()
+    {
         $product_label = $this->displayProduct('nom', true);
         if (stripos($product_label, "Iphone") !== false || stripos($product_label, "IPAD") !== false || stripos($product_label, "IPOD") !== false || stripos($product_label, "WATCH") !== false || stripos($product_label, "XXXX") !== false || stripos($product_label, "***") !== false)
             return true;

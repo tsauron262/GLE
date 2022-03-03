@@ -14,7 +14,7 @@ class BimpPublicController extends BimpController
     {
         switch (BimpTools::getValue('back', '')) {
             case 'savForm':
-                $this->back_url = BimpObject::getPublicBaseUrl() . '?fc=savForm';
+                $this->back_url = BimpObject::getPublicBaseUrl() . 'fc=savForm';
 
                 if (BimpTools::isSubmit('resgsx')) {
                     $res_id = BimpTools::getValue('resgsx', '');
@@ -135,7 +135,7 @@ class BimpPublicController extends BimpController
 
     public function getLogoutUrl()
     {
-        return BimpObject::getPublicBaseUrl() . '?bic_logout=1';
+        return BimpObject::getPublicBaseUrl() . 'bic_logout=1';
     }
 
     // Affichage standards: 
@@ -172,7 +172,7 @@ class BimpPublicController extends BimpController
         $params = BimpTools::overrideArray(array(
                     'page_title'     => 'BIMP - Espace client',
                     'main_title'     => 'Espace client',
-                    'sub_title'      => '',
+                    'sub_title'      => 'Votre identifiant et mot de passe sont différents de votre compte client LDLC.',
                     'submit_label'   => 'Valider',
                     'submit_enabled' => true,
                     'js_files'       => array(),
@@ -289,7 +289,7 @@ class BimpPublicController extends BimpController
             'sub_title'      => ($required ? 'Le changement de votre mot de passe est requis' : 'Modifier votre mot de passe'),
             'submit_label'   => 'Changer mon mot de passe',
             'submit_enabled' => false,
-            'back_url'       => BimpObject::getPublicBaseUrl() . '?' . ($required ? 'bic_logout=1' : 'tab=infos'),
+            'back_url'       => BimpObject::getPublicBaseUrl() . ($required ? 'bic_logout=1' : 'tab=infos'),
             'back_label'     => ($required ? 'Déconnexion' : 'Retour')
                 ), $errors);
     }
@@ -301,11 +301,11 @@ class BimpPublicController extends BimpController
         $html = '';
 
         $html .= '<label for="bic_login_email">Email</label><br/>';
-        $html .= '<input id="bic_login_email" type="email" name="bic_login_email" placeholder="Email" value="' . (BimpTools::getValue('email', '')) . '">';
+        $html .= '<input id="bic_login_email" type="text" name="bic_login_email" placeholder="Email" value="' . (BimpTools::getValue('email', '')) . '">';
         $html .= '<br/><br/>';
         $html .= '<label for="bic_login_pw">Mot de passe</label><br/>';
         $html .= '<input id="bic_login_pw" type="password" name="bic_login_pw" placeholder="Mot de passe"><br/>';
-        $html .= '<p style="text-align: center"><a href="javascript: var email = document.getElementById(\'bic_login_email\').value; window.location = \'./client.php?display_public_form=1&public_form=reinitPw\' + (email ? \'&email=\' + email : \'\');">Mot de passe oublié</a></p>';
+        $html .= '<p style="text-align: center"><a href="javascript: var email = document.getElementById(\'bic_login_email\').value; window.location = \''.BimpObject::getPublicBaseUrl().'display_public_form=1&public_form=reinitPw\' + (email ? \'&email=\' + email : \'\');">Mot de passe oublié</a></p>';
 
         return $html;
     }
@@ -315,7 +315,7 @@ class BimpPublicController extends BimpController
         $html = '';
 
         $html .= '<label for="email">Email</label><br/>';
-        $html .= '<input id="email" type="email" name="bic_reinit_pw_email" placeholder="Email" value="' . BimpTools::getValue('email', '') . '">';
+        $html .= '<input id="email" type="text" name="bic_reinit_pw_email" placeholder="Email" value="' . BimpTools::getValue('email', '') . '">';
 
         return $html;
     }

@@ -16,7 +16,7 @@ objects:
                 
 fields: 
     fk_usergroup: 
-        label: Group
+        label: Groupe
         type: id_object
         object: usergroup
     fk_id: 
@@ -42,15 +42,25 @@ lists:
         sort_field: rowid
         sort_way: desc
         cols: 
-            fk_usergroup:
+            module:
+                label: Module
+                value:
+                    callback: getModuleForRight
             fk_id:
+            fk_usergroup:
+            libelle:
+                label: Libellé
+                value:
+                    callback: getLibelleForRight
+    bygrouprights:
+        extends: default
+        title: Permissions du groupe
+        cols:
+            fk_usergroup:
+        list_filters: 
+            callback:
+                method: getFilterPermsByGroup            
     right:
         extends: default
         cols:
             fk_id: unset
-            
-                
-        
-    
-    
-    

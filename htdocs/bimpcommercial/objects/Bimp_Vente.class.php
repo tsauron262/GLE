@@ -25,25 +25,25 @@ class Bimp_Vente extends BimpObject
 
     // Getters:
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'categ1':
             case 'categ2':
             case 'categ3':
-                $alias = 'cat_prod';
+                $alias = $main_alias . '___cat_prod';
                 $joins[$alias] = array(
                     'alias' => $alias,
                     'table' => 'categorie_product',
-                    'on'    => $alias . '.fk_product = a.fk_product'
+                    'on'    => $alias . '.fk_product = ' . $main_alias . '.fk_product'
                 );
-                $filters['cat_prod.fk_categorie'] = array(
+                $filters[$alias . '.fk_categorie'] = array(
                     ($excluded ? 'not_' : '') . 'in' => $values
                 );
                 break;
         }
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
 
     public function getListHeaderButtons()
@@ -466,6 +466,7 @@ Preferred Field
                                     $dt_fac = new DateTime($fac_data['datef']);
 
                                     foreach ($fac_lines as $id_line => $line_data) {
+//                                        print_r($line_data);die;
                                         $file_str .= '"' . implode('";"', array(
                                                     $shipTo, // A
                                                     substr($prod_ref, 0, 30), // B
@@ -474,7 +475,7 @@ Preferred Field
                                                     ($line_data['qty'] >= 0 ? $line_data['qty'] : 0), // E
                                                     ($line_data['qty'] < 0 ? abs($line_data['qty']) : 0), // F
                                                     '',
-                                                    '',
+                                                    $line_data['subprice'],
                                                     $id_fac, // I
                                                     $line_data['position'], // J
                                                     $dt_fac->format('Ymd'),

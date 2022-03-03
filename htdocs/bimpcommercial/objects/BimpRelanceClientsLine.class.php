@@ -976,27 +976,19 @@ class BimpRelanceClientsLine extends BimpObject
                     if (!empty($facs_done)) {
                         $duplicata_notif = '<br/><div style="dont-size: 12px; font-weight: bold; color: #EF7D00;">';
                         $duplicata_notif .= 'Cliquez sur le n° de facture pour télécharger un duplicata</div><br/>';
-//                        $mail_body .= '<div style="font-size: 12px; font-weight: bold;">';
-                        $url_base = 'https://erp2.bimp.fr/pdf_fact.php?';
-//                        $mail_body .= '<br/><br/><br/>';
-//
-//                        if (count($facs_done) > 1) {
-//                            $mail_body .= 'Vous pouvez utiliser les liens suivants pour télécharger les duplicata des factures concernées: ';
-//                        } else {
-//                            $mail_body .= 'Vous pouvez utiliser le lien suivant pour télécharger le duplicata de la facture concernée: ';
-//                        }
-//                        
-//                        $mail_body .= '<br/>';
-//
-                        foreach ($facs_done as $id_facture) {
-                            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
-                            if (BimpObject::objectLoaded($facture)) {
-                                $fac_url = $url_base . 'r=' . urlencode($facture->getRef()) . '&i=' . $id_facture;
-//                                $mail_body .= '<br/><a href="' . $fac_url . '">' . $facture->getRef() . '</a>';
-                                $mail_body = str_replace($facture->getRef(), '<a href="' . $fac_url . '">' . $facture->getRef() . '</a>', $mail_body);
+
+                        $url_base = BimpCore::getConf('public_base_url', '');
+                        if ($url_base) {
+                            $url_base .= 'a=df&';
+
+                            foreach ($facs_done as $id_facture) {
+                                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
+                                if (BimpObject::objectLoaded($facture)) {
+                                    $fac_url = $url_base . 'r=' . urlencode($facture->getRef()) . '&i=' . $id_facture;
+                                    $mail_body = str_replace($facture->getRef(), '<a href="' . $fac_url . '">' . $facture->getRef() . '</a>', $mail_body);
+                                }
                             }
                         }
-//                        $mail_body .= '</div>';
                     }
                     $mail_body = str_replace('{FACTURES_DUPLICATA_NOTIF}', $duplicata_notif, $mail_body);
 
@@ -1030,10 +1022,9 @@ class BimpRelanceClientsLine extends BimpObject
 
                     $commercials = $client->getCommercials(false);
 
-                    foreach($commercials as $commercial){
+                    foreach ($commercials as $commercial) {
                         if (BimpObject::objectLoaded($commercial)) {
                             $replyTo[] = $commercial->getData('email');
-
                         }
                     }
                     if (!BimpObject::objectLoaded($relance) || in_array($relance->getData('mode'), array('global', 'indiv')) || $relance_idx > 1) {
@@ -1086,6 +1077,7 @@ class BimpRelanceClientsLine extends BimpObject
         if ($this->isLoaded($errors)) {
             $factures = $this->getData('factures');
             $init_date_send = $this->getData('date_send');
+            $relance_idx = (int) $this->getData('relance_idx');
 
             if ($new_status >= 10) {
                 global $user;
@@ -1105,7 +1097,6 @@ class BimpRelanceClientsLine extends BimpObject
                 }
 
                 if ($new_status < 20) {
-                    $relance_idx = (int) $this->getData('relance_idx');
                     $now = date('Y-m-d');
                     foreach ($factures as $id_facture) {
                         $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
@@ -1126,8 +1117,6 @@ class BimpRelanceClientsLine extends BimpObject
 
             if (!count($err)) {
                 if (($new_status < 10 || $new_status >= 20) && $current_status >= 10 && $current_status < 20) {
-                    $relance_idx = (int) $this->getData('relance_idx');
-
                     foreach ($factures as $id_facture) {
                         $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
                         if (BimpObject::objectLoaded($facture)) {
@@ -1148,6 +1137,15 @@ class BimpRelanceClientsLine extends BimpObject
 
                             $facture->updateField('nb_relance', ($relance_idx - 1), null, true);
                         }
+                    }
+                }
+
+                // Envoi du mail de notification de mise en demeure au commercial: 
+                if ($relance_idx == 4 && $new_status >= 10 && $new_status < 20 && ($current_status < 10 || $current_status >= 20)) {
+                    $mail_errors = $this->sendCommercialEmailOnMiseEnDemeure();
+
+                    if (count($mail_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($mail_errors, 'Echec envoi notification de mise en demeure au commercial');
                     }
                 }
             }
@@ -1211,6 +1209,122 @@ class BimpRelanceClientsLine extends BimpObject
                         }
                     }
                 }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function sendCommercialEmailOnMiseEnDemeure()
+    {
+        $errors = array();
+
+        $client = $this->getChildObject('client');
+
+        if (BimpObject::objectLoaded($client)) {
+            $email = $client->getCommercialEmail(false, false);
+
+            if ($email) {
+                $subject = 'Client ' . $client->getRef() . ' - ' . $client->getName() . ' mis en demeure';
+
+                $html = 'Bonjour,<br/><br/>';
+                $html .= 'Nous venons d\'envoyer une Mise en Demeure au client ' . $client->getLink() . '<br/>';
+                $html .= 'Son compte est désormais bloqué.<br/><br/>';
+                $html .= 'Voici l\'état actuel des créances y compris les factures non échues : <br/><br/>';
+
+                $html .= '<table>';
+                $html .= '<thead>';
+                $html .= '<tr>';
+                $html .= '<th style="padding: 8px">Ref. Facture</th>';
+                $html .= '<th style="padding: 8px">Date échéance</th>';
+                $html .= '<th style="padding: 8px">1ère relance</th>';
+                $html .= '<th style="padding: 8px">2ème relance</th>';
+                $html .= '<th style="padding: 8px">3ème relance</th>';
+                $html .= '<th style="padding: 8px">MED</th>';
+                $html .= '<th style="padding: 8px">Total</th>';
+                $html .= '</tr>';
+                $html .= '</thead>';
+
+                $html .= '<tbody>';
+
+                $where = 'fk_soc = ' . $client->id . ' AND type IN (0,1,2,3) AND fk_statut = 1 AND paye = 0';
+                $fac_rows = $this->db->getRows('facture', $where, null, 'array', array('rowid', 'facnumber', 'total_ttc', 'date_lim_reglement'), 'datef', 'asc');
+
+                if (is_array($fac_rows)) {
+                    $total_ttc = 0;
+
+                    foreach ($fac_rows as $r) {
+                        $total_ttc += (float) $r['total_ttc'];
+                        $html .= '<tr>';
+                        $html .= '<td style="padding: 8px">' . $r['facnumber'] . '</td>';
+                        $html .= '<td style="padding: 8px">' . date('d / m / Y', strtotime($r['date_lim_reglement'])) . '</td>';
+
+                        $relances = array();
+
+                        $where = 'factures LIKE \'%[' . (int) $r['rowid'] . ']%\' AND (status >= 10 AND status < 20 OR id = ' . (int) $this->id . ')';
+                        $relances_rows = $this->db->getRows('bimp_relance_clients_line', $where, null, 'array', array('id', 'relance_idx', 'date_send'), 'relance_idx', 'asc');
+
+                        if (is_array($relances_rows)) {
+                            foreach ($relances_rows as $rr) {
+                                $relances[(int) $rr['relance_idx']] = $rr;
+                            }
+                        }
+
+                        for ($i = 1; $i < 5; $i++) {
+                            $html .= '<td style="padding: 8px">';
+                            if (isset($relances[$i]['id']) && (int) $relances[$i]['id'] == $this->id) {
+                                $html .= date('d / m / Y');
+                            } elseif (isset($relances[$i]['date_send']) && $relances[$i]['date_send']) {
+                                $html .= date('d / m / Y', strtotime($relances[$i]['date_send']));
+                            } else {
+                                $html .= 'aucune';
+                            }
+                            $html .= '</td>';
+                        }
+
+                        $html .= '<td style="padding: 8px">' . BimpTools::displayMoneyValue((float) $r['total_ttc'], '', false, false, true) . '</td>';
+
+                        $html .= '</tr>';
+                    }
+
+                    if (count($fac_rows) > 1) {
+                        $html .= '<tr>';
+                        $html .= '<td colspan="6" style="padding: 8px; text-align: right; font-weight: bold">Total</td>';
+                        $html .= '<td style="padding: 8px; font-weight: bold">' . BimpTools::displayMoneyValue($total_ttc, '', false, false, true) . '</td>';
+                        $html .= '</tr>';
+                    }
+                } else {
+                    $html .= '<tr>';
+                    $html .= '<td colspan="7" style="padding: 8px">';
+                    $html .= 'Erreur: aucun facture trouvée';
+                    $html .= '</td>';
+                    $html .= '</tr>';
+                }
+
+                $html .= '</tbody>';
+                $html .= '</table>';
+
+                $html .= '<br/><br/>Si cette situation n\'est pas régularisée sous 15 jours, ce compte passera au statut "contentieux", ';
+                $html .= 'puis cette action sera suivie d\'une déclaration de sinistre auprès d\'Atradius.<br/><br/>';
+
+                $html .= 'Ceci générera les conséquences suivantes : <br/>';
+
+                $html .= '<ul>';
+                $html .= '<li>Ce compte restera bloqué jusqu\'à recouvrement complet, ce qui prendra plusieurs semaines, voire plusieurs mois</li>';
+                $html .= '<li>A l\'avenir plus aucun encours ne lui sera accordé et cette décision sera irrémédiable</li>';
+                $html .= '<li>Ce client fera l\'objet d\'une mauvaise cotation dans les bases de données financières, ';
+                $html .= 'notamment chez Crédit Safe, qui est l\'organisme de référence. Cela lui posera des problèmes ';
+                $html .= 'd\'encours auprès de tous ses fournisseurs</li>';
+                $html .= '</ul><br/>';
+
+                $html .= 'Nous vous recommandons donc vivement de prendre contact avec votre client afin de traiter au plus vite ';
+                $html .= 'cet incident de paiement';
+
+                if (!mailSyn2($subject, $email, '', $html)) {
+                    $errors[] = 'Echec de l\'envoi du mail (e-mail: ' . $email . ')';
+                }
+            } else {
+                $errors[] = 'Aucun commercial enregistré pour ce client';
             }
         }
 

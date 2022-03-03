@@ -181,7 +181,7 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
                                 $mailTech = $user->email;
                         }
 
-                        if ($this->repair->repairLookUp['repairStatus'] == "RFPU") {
+                        if (in_array($this->repair->repairLookUp['repairStatus'], GSX_Repair::$readyForPickupCodes)) {
                             $erreurSOAP = $this->repair->close(1, 0);
                             if (isset($erreurSOAP['errors']))
                                 $erreurSOAP = $erreurSOAP['errors'];
@@ -267,7 +267,26 @@ AND DATEDIFF(now(), s.date_update) < 60 ";
                         $this->repair->readyForPickUp = 1;
                         $this->repair->update();
                         $this->nbOk++;
-                    } else {
+                    } elseif($this->repair->repairLookUp['repairStatus'] == "USHP") {
+                        $erreurSOAP = $this->repair->close(1, 0);
+                        if (isset($erreurSOAP['errors']))
+                            $erreurSOAP = $erreurSOAP['errors'];
+
+                        if (count($erreurSOAP) == 0) {
+                            echo "Semble avoir été fermé en auto<br/>";
+                            $this->nbOk++;
+                        } else {
+                            $this->nbErr++;
+                            $messErreur = $this->displayError("N'arrive pas a être fermé", $ligne, $this->repair, $erreurSOAP);
+                            echo $messErreur;
+//                                $mailTech .= ",tommy@bimp.fr";
+                            if (isset($_GET['envoieMail'])) {
+                                mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
+                                $this->nbMail++;
+                            }
+                        }
+                    }
+                    else{
                         $erreurSOAP = $this->repair->updateStatus('RFPU');
                         if (count($erreurSOAP) == 0) {
                             echo "Semble avoir été passer dans GSX a RFPU<br/>";

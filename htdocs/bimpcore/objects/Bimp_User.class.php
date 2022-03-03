@@ -12,6 +12,20 @@ class Bimp_User extends BimpObject
         'man'   => 'Homme',
         'woman' => 'Femme'
     );
+    
+    
+    public function getFilterByGroup() {
+        $id_group = $_REQUEST['id'];         
+        $filters = array();
+        $filters[] = [
+            'name' => 'rowid',
+            'filter' => array(
+                'in' => (array) $this->db->getValues('usergroup_user', 'fk_user', 'fk_usergroup = ' . $id_group)
+            )
+        ];
+        
+        return $filters;
+    }
 
     // Gestion des droits: 
 
@@ -232,7 +246,7 @@ class Bimp_User extends BimpObject
 
         $shipTo = (int) $shipTo;
 
-        $cache_key = 'users_gsx_data_fro_shipto_' . $shipTo;
+        $cache_key = 'users_gsx_data_for_shipto_' . $shipTo;
 
         if (!isset(BimpCache::$cache[$cache_key])) {
             BimpCache::$cache[$cache_key] = array();
@@ -488,11 +502,6 @@ class Bimp_User extends BimpObject
                 'ajax_callback' => $this->getJsLoadCustomContent('renderLinkedObjectsList', '$(\'#groups .nav_tab_ajax_result\')', array('user_groups'), array('button' => ''))
             );
 
-//            $tabs[] = array(
-//                'id'      => 'groups',
-//                'title'   => BimpRender::renderIcon('fas_users', 'iconLeft') . 'Groupes',
-//                'content' => $this->renderUserGroups()
-//            );
         }
 
         if ($isAdmin || $isItself || $this->canViewUserCommissions()) {
@@ -545,17 +554,21 @@ class Bimp_User extends BimpObject
         }
 
         global $user;
+        
+        $params = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ParamsUser');
 
         if ($user->admin || $user->id === $this->id) {
             $tabs = array();
+            
+//            $tabs[] = array(
+//                'id'            => 'interface_tab',
+//                'title'         => 'Interface',
+//                'ajax'          => 1,
+//                //'ajax_callback' => $params->renderList('default', true, 'Liste des paramètres', null, array('fk_user' => $user->id))
+//                'ajax_callback' => $this->getJsLoadCustomContent('renderInterfaceView', '$(\'#interface_tab .nav_tab_ajax_result\')', array(''), array('button' => ''))
+//            );
 
-            $tabs[] = array(
-                'id'            => 'interface_tab',
-                'title'         => 'Interface',
-                'ajax'          => 1,
-                'ajax_callback' => $this->getJsLoadCustomContent('renderInterfaceView', '$(\'#interface_tab .nav_tab_ajax_result\')', array(), array('button' => ''))
-            );
-
+            
             $tabs[] = array(
                 'id'            => 'lists_configs_tab',
                 'title'         => 'Configuration des listes',
@@ -744,7 +757,31 @@ class Bimp_User extends BimpObject
                     'type'     => 'secondary'
         ));
     }
-
+    
+        // récupération des paramètres lié à l'utilisateur en bdd 
+    public function getParamValue($defaultParam) 
+    {
+        die($defaultParam);
+        $entity = 1;
+        $params = $this->db->getRows('user_param', 'fk_user = ' . (int) $user->id . ' AND entity = ' . $entity, null, 'array', array('param'));
+        
+        foreach ($params as $param) {
+            foreach ($param as $key => $value) {
+                $p = $value[0];
+                if (empty($p)) {
+                   return $defaultParam;
+                } else {
+                    if($defaultParam === $p) {
+                        return $p;
+                    } else {
+                        return $defaultParam;
+                    }
+                }
+            }  
+        }
+       
+    }
+    
     public function showUserTheme($object, $edit = 0, $foruserprofile = false)
     {
         global $conf, $langs;
@@ -752,11 +789,13 @@ class Bimp_User extends BimpObject
         $html = '';
 
         $dirthemes = array('/theme');
+        
         if (!empty($conf->modules_parts['theme'])) {  // Using this feature slow down application
             foreach ($conf->modules_parts['theme'] as $reldir) {
                 $dirthemes = array_merge($dirthemes, (array) ($reldir . 'theme'));
             }
         }
+        
         $dirthemes = array_unique($dirthemes);
 
         $selected_theme = '';
@@ -766,6 +805,58 @@ class Bimp_User extends BimpObject
             $selected_theme = $conf->global->MAIN_THEME;
         else
             $selected_theme = ((is_object($object) && !empty($object->conf->MAIN_THEME)) ? $object->conf->MAIN_THEME : '');
+        
+	$hoverdisabled='';
+	if (empty($foruserprofile)) 
+            $hoverdisabled = (isset($conf->global->THEME_ELDY_USE_HOVER) && $conf->global->THEME_ELDY_USE_HOVER == '0');
+	else 
+            $hoverdisabled=(is_object($fuser)?(empty($fuser->conf->THEME_ELDY_USE_HOVER) || $fuser->conf->THEME_ELDY_USE_HOVER == '0'):'');
+
+	$colspan=2;
+	if ($foruserprofile) $colspan=4;
+
+	$thumbsbyrow = 6;
+	$html .= '<table class="noborder" width="100%">';
+
+	// Title
+	if ($foruserprofile)
+	{
+            $html .= '<tr class="liste_titre"><th class="titlefield">'.$langs->trans("Parameter").'</th><th>'.$langs->trans("DefaultValue").'</th>';
+            $html .= '<th colspan="2">&nbsp;</th>';
+            $html .= '</tr>';
+
+            $html .= '<tr>';
+            $html .= '<td>'.$langs->trans("DefaultSkin").'</td>';
+            $html .= '<td>'.$conf->global->MAIN_THEME.'</td>';
+            $html .= '<td align="left" class="nowrap" width="20%"><input id="check_MAIN_THEME" name="check_MAIN_THEME"'.($edit?'':' disabled').' type="checkbox" '.($selected_theme?" checked":"").'> '.$langs->trans("UsePersonalValue").'</td>';
+            $html .= '<td>&nbsp;</td>';
+            $html .= '</tr>';
+	}
+	else
+	{
+            $html .= '<tr class="liste_titre"><th class="titlefield">'.$langs->trans("DefaultSkin").'</th>';
+            $html .= '<th align="right">';
+            $url='https://www.dolistore.com/lang-en/4-skins';
+            if (preg_match('/fr/i',$langs->defaultlang)) $url='https://www.dolistore.com/fr/4-themes';
+            //if (preg_match('/es/i',$langs->defaultlang)) $url='http://www.dolistore.com/lang-es/4-themes';
+            $html .= '<a href="'.$url.'" target="_blank">';
+            $html .= $langs->trans('DownloadMoreSkins');
+            $html .= '</a>';
+            $html .= '</th></tr>';
+
+            $html .= '<tr>';
+            $html .= '<td>'.$langs->trans("ThemeDir").'</td>';
+            $html .= '<td>';
+            foreach($dirthemes as $dirtheme)
+            {
+                    echo '"'.$dirtheme.'" ';
+            }
+            $html .= '</td>';
+            $html .= '</tr>';
+	}
+
+	$html .= '<tr><td colspan="'.$colspan.'">';
+	$html .= '<table class="nobordernopadding" width="100%"><tr><td><div align="center">';   
 
         $i = 0;
         foreach ($dirthemes as $dir) {
@@ -789,8 +880,9 @@ class Bimp_User extends BimpObject
 
                             if (!file_exists($file))
                                 $url = DOL_URL_ROOT . '/public/theme/common/nophoto.png';
-
-                            $html .= '<a href="' . $_SERVER["PHP_SELF"] . ($edit ? '?action=edit&theme=' : '?theme=') . $subdir . (GETPOST('optioncss', 'alpha', 1) ? '&optioncss=' . GETPOST('optioncss', 'alpha', 1) : '') . ($object ? '&id=' . $object->id : '') . '" style="font-weight: normal;" alt="' . $langs->trans("Preview") . '">';
+                            
+                            $html .= '<a href="'.DOL_URL_ROOT.'/bimpcore/?fc=user&id='.$this->id.'&theme='.$subdir.'&navtab-maintabs=params&navtab-params_tabs=interface_tab">';
+                            //$html .= '<a href="' .  ["PHP_SELF"] . ($edit ? '?action=edit&theme=' : '?theme=') . $subdir . (GETPOST('optioncss', 'alpha', 1) ? '&optioncss=' . GETPOST('optioncss', 'alpha', 1) : '') . ($object ? '&id=' . $object->id : '') . '" style="font-weight: normal;" alt="' . $langs->trans("Preview") . '">';
 
                             if ($subdir == $conf->global->MAIN_THEME)
                                 $title = $langs->trans("ThemeCurrentlyActive");
@@ -806,56 +898,191 @@ class Bimp_User extends BimpObject
                                 $html .= '<input ' . ($edit ? '' : 'disabled') . ' type="radio" class="themethumbs" style="border: 0px;" name="main_theme" value="' . $subdir . '"> ' . $subdir;
                             }
                             $html .= '</div>';
-
+                            
                             $i++;
                         }
                     }
                 }
             }
         }
+        
+        
+        $html .=  '</div></td></tr></table>';
+	$html .=  '</td></tr>';
 
         return $html;
     }
 
     public function renderInterfaceView()
     {
-        global $conf, $langs, $db;
+        global $conf, $langs, $db, $user, $bc;
         BimpTools::loadDolClass("user");
-        $object = new User($db);
-        $object->fetch((int) GETPOST('id'), "", "", 1);
-        $object->getrights();
-
-        // Load translation files required by page
+        
+                 
+        $hookmanager = new HookManager($db);
+        
         $langs->loadLangs(array('companies', 'products', 'admin', 'users', 'languages', 'projects', 'members'));
+        
+        $canreaduser = ($user->admin || $user->rights->user->user->lire);
+        
+        $id = $this->id;
+        $action = GETPOST('action','alpha');
+        $contextpage = GETPOST('contextpage','aZ') ? GETPOST('contextpage','aZ') : 'userihm';
 
-        $tmparray = array('index.php' => 'Dashboard');
-
-        $html = '<table class="noborder" width="100%">';
-        $html .= '<tr class="liste_titre"><td width="50%">' . $langs->trans("Parameter") . '</td><td width="50%">' . $langs->trans("DefaultValue") . '</td></tr>';
-
-        // Language
-        $html .= '<tr class="oddeven"><td>' . $langs->trans("Language") . '</td>';
-        $html .= '<td>';
-        $s = picto_from_langcode($conf->global->MAIN_LANG_DEFAULT);
-        $html .= ($s ? $s . ' ' : '');
-        $html .= (isset($conf->global->MAIN_LANG_DEFAULT) && $conf->global->MAIN_LANG_DEFAULT == 'auto' ? $langs->trans("AutoDetectLang") : $langs->trans("Language_" . $conf->global->MAIN_LANG_DEFAULT));
-        $html .= '</td>';
+        if ($id) {
+            $caneditfield = ((($user->id == $id) && $user->rights->user->self->creer) || (($user->id != $id) && $user->rights->user->user->creer));
+        }
+          
+        // Security check
+        $socid = 0;
+        if ($user->societe_id > 0) $socid = $user->societe_id;
+        $feature2 = (($socid && $user->rights->user->self->creer)?'':'user');
+        if ($user->id == $id)
+        {
+            $feature2='';
+            $canreaduser=1;
+        }
+        $result = restrictedArea($user, 'user', $id, 'user&user', $feature2);
+        if ($user->id <> $id && ! $canreaduser) accessforbidden();
+        
+        $dirtop = "../core/menus/standard";
+        $dirleft = "../core/menus/standard";
+        
+        $object = new User($db);
+        $object->fetch($this->id, "", "", 1);
+        $object->getrights();
+        
+        $form = new Form($db);
+        $formadmin = new FormAdmin($db);
+ 
+        $hookmanager->initHooks(array('usercard','userihm','globalcard'));
+        
+        $buttons = array();
+        
+        $parameters = array('id'=>$socid);
+        $reshook = $hookmanager->executeHooks('doActions', $parameters, $object, $action);    // Note that $action and $object may have been modified by some hooks
+        if ($reshook < 0) setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+        
+        $valLang = $this->db->getValue('user_param', 'value', 'fk_user = ' .  (int) $user->id . ' AND param = "MAIN_LANG_DEFAULT"');        
+        
+        // List of possible landing pages
+        $tmparray = array('index.php'=>'Dashboard');
+        if (! empty($conf->societe->enabled)) $tmparray['societe/index.php?mainmenu=companies&leftmenu=']='ThirdPartiesArea';
+        if (! empty($conf->projet->enabled)) $tmparray['projet/index.php?mainmenu=project&leftmenu=']='ProjectsArea';
+        if (! empty($conf->holiday->enabled) || ! empty($conf->expensereport->enabled)) $tmparray['hrm/index.php?mainmenu=hrm&leftmenu=']='HRMArea';   // TODO Complete list with first level of menus
+        if (! empty($conf->product->enabled) || ! empty($conf->service->enabled)) $tmparray['bimpcore/?fc=products&mainmenu=products']='ProductsAndServicesArea';
+        if (! empty($conf->propal->enabled) || ! empty($conf->commande->enabled) || ! empty($conf->ficheinter->enabled) || ! empty($conf->contrat->enabled)) $tmparray['bimpcommercial/index.php?fc=tabCommercial']='CommercialArea';
+        if (! empty($conf->compta->enabled) || ! empty($conf->accounting->enabled)) $tmparray['compta/index.php?mainmenu=compta&leftmenu=']='AccountancyTreasuryArea';
+        if (! empty($conf->adherent->enabled)) $tmparray['adherents/index.php?mainmenu=members&leftmenu=']='MembersArea';
+        if (! empty($conf->agenda->enabled)) $tmparray['comm/action/index.php?mainmenu=agenda&leftmenu=']='Agenda';
+        
+           
+        $html .= '<table class="bimp_list_table">';
+        $html .= '<thead>';
+        $html .= '<tr>';
+        $html .= '<th>'.$langs->trans("Parameter").'</th>';
+        $html .= '<th>'.$langs->trans("DefaultValue").'</th>';
+        $html .= '<th>'.$langs->trans("PersonalValue").'</th>';
+        $html .= '<th></th>';
+        $html .= '<th> Valeur modifiée </th>';
+        $html .= '<th></th>';
         $html .= '</tr>';
+        $html .= '</thead>';
 
-        $html .= '<tr class="oddeven"><td>' . $langs->trans("MaxSizeList") . '</td>';
-        $html .= '<td>' . (!empty($conf->global->MAIN_SIZE_LISTE_LIMIT) ? $conf->global->MAIN_SIZE_LISTE_LIMIT : '&nbsp;') . '</td></tr>';
+        $html .= '<tbody>';
+        $htmlP .= '<tr>';
+        $htmlP .= '<td>' . $langs->trans("LandingPage") . '</td>';
+        $htmlP .= '<td>' . (empty($conf->global->MAIN_LANDING_PAGE) ? '' : $conf->global->MAIN_LANDING_PAGE) . '</td>';
+        $htmlP .= '<td><input '.$bc[$var].' name="check_MAIN_LANDING_PAGE" disabled id="check_MAIN_LANDING_PAGE" type="checkbox" '.(! empty($object->conf->MAIN_LANDING_PAGE)?" checked":"");
+        $htmlP .= empty($dolibarr_main_demo)?'':' disabled="disabled"';
+        $htmlP .= '> '.$langs->trans("UsePersonalValue").'</td>';
+        $htmlP .= '<td>';
+        $htmlP .= '<td>';
+        if (empty($tmparray[$object->conf->MAIN_LANDING_PAGE])) {
+            $htmlP .= $langs->trans($tmparray[$object->conf->MAIN_LANDING_PAGE] ? 'Pas de modif apportée' : $object->conf->MAIN_LANDING_PAGE);
+        }
+        else $htmlP .= $tmparray[$object->conf->MAIN_LANDING_PAGE];
+        $html .= '</td>';
+        $html .= '</td>';
+        $htmlP .= '</tr>';
 
-        // Taille max des listes
-        $html .= '<tr class="oddeven"><td>' . $langs->trans("MaxSizeList") . '</td>';
-        $html .= '<td>' . $conf->global->MAIN_SIZE_LISTE_LIMIT . '</td></tr>';
-        $html .= '</table><br>';
+        $htmlP .= '<tr>';
+        $htmlP .= '<td>'. $langs->trans("Language") .'</td>';
+        $htmlP .= '<td>';
+        $s=picto_from_langcode((empty($valLang)) ? $conf->global->MAIN_LANG_DEFAULT : $valLang);
+        $htmlP .= ($s?$s.' ':'');
+        $htmlP .= ((isset($valLang) && $valLang == 'auto' || isset($conf->global->MAIN_LANG_DEFAULT) && $conf->global->MAIN_LANG_DEFAULT == 'auto' 
+            ? $langs->trans("AutoDetectLang") 
+            : (empty($valLang)) 
+            ? $langs->trans("Language_".$conf->global->MAIN_LANG_DEFAULT) 
+            : $langs->trans("Language_".$valLang)));
+        $htmlP .= '</td>'; 
+        $htmlP .= '<td>';    
+        $htmlP .= '<input '.$bc[$var].' type="checkbox" disabled '.(! empty($valLang)?" checked":"").'> '.$langs->trans("UsePersonalValue").'';
+        $htmlP .= '</td>';
+        $htmlP .= '<td>';
+        $htmlP .= '<td>'. $langs->trans("Language_".$valLang) .'</td>';
+        $htmlP .= '</td>';
+        $htmlP .= '</tr>';
 
-        //Thème
-        $html .= $this->showUserTheme($object, 0, true);
+        $modThemeVal = $this->db->getValue('user_param', 'value', 'param = "MAIN_THEME" AND fk_user = ' . $this->id);
 
-        return $html;
+        $htmlP .= '<tr>';
+        $htmlP .= '<td>'.$langs->trans("DefaultSkin").'</td>';
+        $htmlP .= '<td>'.$conf->global->MAIN_THEME.'</td>';
+        $htmlP .= '<td>';
+        $htmlP .= '<input id="check_MAIN_THEME" name="check_MAIN_THEME"'.($edit?'':' disabled').' type="checkbox" '.($selected_theme?" checked":"").'> '.$langs->trans("UsePersonalValue");
+        $htmlP .= '</td>';
+        $htmlP .= '<td>';
+        $htmlP .= '<td>'.$modThemeVal.'</td>';
+        $htmlP .= '</td>';
+        $htmlP .= '</tr>';
+
+        if ($htmlP == '') {
+            $htmlP .= '<tr>';
+            $htmlP .= '<td colspan="5">' . BimpRender::renderAlerts($no_linked, 'info') . '</td>';
+            $htmlP .= '</tr>';
+        }
+
+        $html .= $htmlP;
+        $html .= '</tbody>';
+        $html .= '</table>';
+
+        $interface_instance = BimpObject::getInstance('bimpcore', 'Bimp_ParamsUser');
+
+        $params = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ParamsUser');
+            
+//            $saveButton = array(
+//                'label' => 'Enregistrer le Thème',
+//                'onclick' => $this->getJsActionOnclick('test')
+//            );
+
+        $buttons[] = array(
+            'classes'     => array('btn', 'btn-default'),
+            'label'       => "Modifier l'interface",
+            'icon_before' => 'fas_plus-circle',
+            'attr'        => array(
+                'onclick' => $params->getJsActionOnclick('editTheme', array(), array(
+                    'form_name' => 'theme_edit'
+                ))
+                //getJsLoadModalForm('theme_edit', "Modification de l interface", array(), '')
+            )
+        );            
+
+        $list = $params->renderList('default', true, 'Liste des paramètres', null, array('fk_user' => $user->id));
+
+        return BimpRender::renderPanel('Paramètres interface', $html, '', 
+            array(
+                'foldable' => false,
+                'type'     => 'secondary',
+                'icon'     => 'fas_image',
+                'header_buttons' => $buttons
+            )
+        );
+            
     }
-
+    
+    
     public function renderCommercialView()
     {
         $tabs = array();
@@ -870,64 +1097,9 @@ class Bimp_User extends BimpObject
         return BimpRender::renderNavTabs($tabs, 'conges_tabs');
     }
 
-    public function renderUserGroups()
-    {
-        $html = '';
-
-//        global $db;
-//        
-//        //$id_group = $this->getIdGroup();
-//
-//        $form = new Form($db);
-//        $exclude = array();
-//
-//        $html = '';
-//
-//        $rows = BimpCache::getUserUserGroupsArray($this->id, 0, 0);
-//
-//        $html .= '<form action="' . $_SERVER['PHP_SELF'] . '?id=' . $this->id . '" method="POST">' . "\n";
-//        $html .= '<input type="hidden" name="token" value="' . $_SESSION['newtoken'] . '" />';
-//        $html .= '<input type="hidden" name="action" value="addgroup" />';
-//
-//        $html .= '<table class="noborder" width="100%">'
-//                . '<tbody>'
-//                . '<tr class="liste_titre"><th class="liste_titre">Groupes</th>'
-//                . '<th class="liste_titre" align="right">';
-//
-//        $html .= $form->select_dolgroups('', 'usergroup', 1, $exclude, 0, '', '', $this->entity, 0, 0, '', 0, '', 'maxwidth300');
-//
-//        //$html .= BimpInput::renderInput('search_group', 'id_group', $id_group);
-//
-//        $keys = array_keys($rows);
-//        $i = -1;
-//        foreach ($rows as $row) {
-//            $i++;
-//            $html .= '<tr class="oddeven">'
-//                    . '<td>'
-//                    . '<img src="' . DOL_URL_ROOT . '/theme/BimpTheme/img/object_group.png" alt="" title="Afficher groupe" class="inline-block">'
-//                    . '<a href="' . DOL_URL_ROOT . '/user/group/card.php?id=' . $keys[$i] . '"> ' . $row . ' </a>'
-//                    . '</td>'
-//                    . '<td align="right">'
-//                    . '<a href="' . DOL_URL_ROOT . '/user/card.php?id=' . $this->id . '&amp;action=removegroup&amp;group=' . $keys[$i] . '">'
-//                    . '<span class="fa fa-chain-broken marginleftonly valignmiddle" style=" color: #555;" alt="Supprimer du groupe" title="Supprimer du groupe">'
-//                    . '</span>'
-//                    . '</a>'
-//                    . '</td>'
-//                    . '</tr>';
-//        }
-//
-//        $html .= '</th>'
-//                . '</tr>'
-//                . '</tbody>'
-//                . '</table>'
-//                . '</form>';
-
-        return $html;
-    }
-
     public function renderLinkedObjectsList($list_type)
     {
-        global $db;
+        global $db, $conf, $langs;
 
         $html = '';
 

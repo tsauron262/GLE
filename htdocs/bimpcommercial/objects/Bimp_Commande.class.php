@@ -127,7 +127,7 @@ class Bimp_Commande extends BimpComm
 
                 // Encours
                 if (is_a($demande, 'DemandeValidComm')) {
-                    list($secteur, $class,,, $val_euros) = $vc->getObjectParams($this, $errors);
+                    list($secteur, $class,, $val_euros) = $vc->getObjectParams($this, $errors);
                     return $vc->userCanValidate((int) $user->id, $secteur, ValidComm::TYPE_ENCOURS, $class, $val_euros, $this)
                             or $vc->userCanValidate((int) $user->id, $secteur, ValidComm::TYPE_IMPAYE, $class, $val_euros, $this);
                 }
@@ -136,7 +136,7 @@ class Bimp_Commande extends BimpComm
     }
 
     // Getters booléens:
-    
+
     public function isActionAllowed($action, &$errors = array())
     {
         global $conf;
@@ -326,9 +326,9 @@ class Bimp_Commande extends BimpComm
                 }
                 return 1;
 
-            case 'paiement_comptant':
+//            case 'paiement_comptant':
 //                if ((int) $this->getData('fk_statut') != 0 and !$user->admin)
-                return 0;
+//                return 0;
 //                return 1;
         }
 
@@ -367,15 +367,6 @@ class Bimp_Commande extends BimpComm
                 $errors[] = 'Client facturation absent';
             } elseif ($this->getData('ef_type') != 'M') {
                 $client_facture->canBuy($errors);
-            }
-
-            $id_ldlc_pro_lease = (int) BimpCore::getConf('ldlc_pro_lease_id_societe', 0);
-            if ($id_ldlc_pro_lease) {
-                if ($this->dol_object->mode_reglement_code == 'FINLDL') {
-                    if ($this->getData('id_client_facture') != $id_ldlc_pro_lease) {
-                        $errors[] = 'Cette commande est en financement LDLC Pro Lease.<br/>Vous devez enregistrer LDLC Pro Lease en tant que "Client facturation" ou modifier le Mode de Règlement';
-                    }
-                }
             }
 
             if (!count($errors) && !defined('NOT_VERIF')) {
@@ -478,10 +469,18 @@ class Bimp_Commande extends BimpComm
 
     public function isDeletable($force_delete = false, &$errors = array())
     {
+        if ($force_delete) {
+            global $rgpd_delete;
+
+            if ($rgpd_delete) {
+                return 1;
+            }
+        }
+
         if ((int) $this->getData('fk_statut') > 0) {
             return 0;
-//            return (int) $this->isUnvalidatable();
         }
+        
         return (int) parent::isDeletable($force_delete);
     }
 
@@ -566,8 +565,6 @@ class Bimp_Commande extends BimpComm
                     } else {
                         $errors[] = 'Vous n\'avez pas la permission';
                     }
-
-                    global $user;
 
                     if (in_array($user->login, array('admin', 'f.martinez', 't.sauron'))) {
                         $buttons[] = array(
@@ -1987,7 +1984,7 @@ class Bimp_Commande extends BimpComm
         $html .= '</tr>';
         $html .= '</tbody>';
         $html .= '</table>';
-        $title = BimpRender::renderIcon('fas_euro-sign', 'iconLeft') . 'Montants totaux';
+        $title = BimpRender::renderIcon('fas_euro-sign', 'iconLeft');
 
         return BimpRender::renderPanel($title, $html, '', array(
                     'type'     => 'secondary',
@@ -2861,7 +2858,7 @@ class Bimp_Commande extends BimpComm
 
     public function checkLogistiqueStatus($log_change = false)
     {
-        if ($this->isLoaded() && (int) $this->getData('fk_statut') >= 0 && !self::$no_check_reservations) {
+        if ($this->isLoaded() && (int) $this->getData('fk_statut') >= 0) {
             $status_forced = $this->getData('status_forced');
 
             if (isset($status_forced['logistique']) && (int) $status_forced['logistique']) {
@@ -3533,7 +3530,7 @@ class Bimp_Commande extends BimpComm
         $errors = $warnings = array();
         $nbOk = 0;
         if ($this->canSetAction('forceStatus')) {
-            if ($data['status'] == 2 || ($data['status'] == 3 && $data['type'] == 'logistique_status')) {
+            if ($data['status'] == 2) {
                 foreach ($data['id_objects'] as $nb => $idT) {
                     $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $idT);
                     $statutActu = $instance->getData($data['type']);
@@ -3744,6 +3741,7 @@ class Bimp_Commande extends BimpComm
 
                     $success = 'Mail envoyé à l\'adresse ' . $data['user_ask_email'] . ' pour un total de ';
                     $success .= BimpTools::displayMoneyValue($total_rtp) . ' impayé.';
+                    $this->addNote($success.'<br/>'.$msg);
 
                     mailSyn2($subject, $data['user_ask_email'], null, $msg);
                 } else
@@ -3792,7 +3790,7 @@ class Bimp_Commande extends BimpComm
                 }
             }
         }
-
+        
         return $errors;
     }
 
@@ -3914,23 +3912,12 @@ class Bimp_Commande extends BimpComm
     public function checkObject($context = '', $field = '')
     {
         if ($context === 'fetch') {
-            if (!self::$no_check_reservations) {
-                global $current_bc, $modeCSV;
-                if (is_null($current_bc) || !is_a($current_bc, 'BC_List') &&
-                        (is_null($modeCSV) || !$modeCSV)) {
-                    $this->checkLogistiqueStatus(false);
-                    $this->checkShipmentStatus(false);
-                    $this->checkInvoiceStatus(false);
-                }
-            }
-
-            $id_ldlc_pro_lease = (int) BimpCore::getConf('ldlc_pro_lease_id_societe', 0);
-            if ($id_ldlc_pro_lease) {
-                if ($this->dol_object->mode_reglement_code == 'FINLDL') {
-                    if ($this->getData('id_client_facture') != $id_ldlc_pro_lease) {
-                        $this->msgs['errors'][] = 'Cette commande est en financement LDLC Pro Lease.<br/>Vous devez enregistrer LDLC Pro Lease en tant que "Client facturation" ou modifier le Mode de Règlement';
-                    }
-                }
+            global $current_bc, $modeCSV;
+            if (is_null($current_bc) || !is_a($current_bc, 'BC_List') &&
+                    (is_null($modeCSV) || !$modeCSV)) {
+                $this->checkLogistiqueStatus(false);
+                $this->checkShipmentStatus(false);
+                $this->checkInvoiceStatus(false);
             }
         }
     }
@@ -4026,28 +4013,32 @@ class Bimp_Commande extends BimpComm
 
         return $errors;
     }
-
-    private function setPaiementComptant()
-    {
-
+    
+    public function isPaiementComptant() {
         $cond_paiement_comptant = array('LIVRAISON', 'TIERFAC', 'TIERAV', 'RECEPCOM', 'HALFFAC', 'HALFAV', 'RECEP');
-        $code = self::getBdb()->getValue('c_payment_term', 'code', '`active` > 0 and rowid = ' . $this->getData('fk_cond_reglement'));
+        $code_cond_paiement = self::getBdb()->getValue('c_payment_term', 'code', '`active` > 0 and rowid = ' . $this->getData('fk_cond_reglement'));
+        if((int) in_array($code_cond_paiement, $cond_paiement_comptant) == 1)
+            return 1;
+        
+        // Prélèvement SEPA
+        $code_mode_paiement = self::getBdb()->getValue('c_paiement', 'code', '`active` > 0 and id = ' . $this->getData('fk_mode_reglement'));
+        if($code_cond_paiement == '30D' and $code_mode_paiement == 'PRE')
+            return 1;
+        
+        return 0;
+    }
 
-        if (in_array($code, $cond_paiement_comptant))
-            return $this->set('paiement_comptant', 1);
-        else
-            return $this->set('paiement_comptant', 0);
+    public function setPaiementComptant()
+    {
+        return $this->set('paiement_comptant', $this->isPaiementComptant());
     }
 
     public function update(&$warnings = array(), $force_update = false)
     {
         $init_entrepot = (int) $this->getInitData('entrepot');
-
-        if (empty($errors))
-            $this->setPaiementComptant();
-
+        $this->setPaiementComptant();
         $errors = parent::update($warnings, $force_update);
-
+        
         if (!count($errors)) {
             if ($init_entrepot !== (int) $this->getData('entrepot')) {
                 $sql = 'UPDATE `' . MAIN_DB_PREFIX . 'br_reservation` SET `id_entrepot` = ' . (int) $this->getData('entrepot');

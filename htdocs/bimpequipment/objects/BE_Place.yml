@@ -150,7 +150,7 @@ lists_cols:
         label: Emplacement
         value: 
             callback: displayPlace
-    origin: 
+    origin_html: 
         label: Origine
         value: 
             callback: displayOrigin
@@ -173,4 +173,4 @@ lists:
             name: 
             date: 
             infos: 
-            origin:
+            origin_html:

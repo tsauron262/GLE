@@ -77,15 +77,19 @@ class GSX_Const
         'getFile'
     );
     public static $certifs = array(
-        897316  => array(
-            'test' => array('testCertif.pem', '', 'test.key'),
-            'prod' => array('AppleCare-Partner-0000897316.Prod.apple.com.chain.pem', '', 'AppleCare-Partner-0000897316.Prod.apple.com.key')
-        ),
-        579256  => array(
-            'test' => array('privatekey.nopass.pem', ''),
-            'prod' => array('proditrb.pem', '')
-        ),
+//        897316  => array(
+//            'test' => array('testCertif.pem', '', 'test.key'),
+//            'prod' => array('AppleCare-Partner-0000897316.Prod.apple.com.chain.pem', '', 'AppleCare-Partner-0000897316.Prod.apple.com.key')
+//        ),
+//        579256  => array(
+//            'test' => array('privatekey.nopass.pem', ''),
+//            'prod' => array('proditrb.pem', '')
+//        ),
         1442050 => array(
+            'test' => array('AppleCare-Partner-0001442050.Test.apple.com.chain.pem', '', 'AppleCare-Partner-0001442050.Test.apple.com.key'),
+            'prod' => array('AppleCare-Partner-0001442050.Prod.apple.com.chain.pem', '', 'AppleCare-Partner-0001442050.Prod.apple.com.key')
+        ),
+        897316 => array(
             'test' => array('AppleCare-Partner-0001442050.Test.apple.com.chain.pem', '', 'AppleCare-Partner-0001442050.Test.apple.com.key'),
             'prod' => array('AppleCare-Partner-0001442050.Prod.apple.com.chain.pem', '', 'AppleCare-Partner-0001442050.Prod.apple.com.key')
         )
@@ -103,9 +107,10 @@ class GSX_Const
     );
     public static $default_ids = array(
         'apple_id'    => 'admin.gle@bimp.fr',
+//        'apple_id'    => 't.sauron@ldlc.com',
         'apple_pword' => '@LdLc.com#69760',
-        'sold_to'     => '897316',
-        'ship_to'     => '897316'
+        'sold_to'     => '1442050',
+        'ship_to'     => '1442050'
     );
 //    public static $default_reservations_tech_id = 'G1DFE7494B';
     public static $importIdentifierTypes = array(

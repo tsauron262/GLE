@@ -188,6 +188,7 @@ forms:
             - field: ef_type
             - field: libelle
             - field: expertise
+              required: 1
             - field: fk_input_reason
               show: 
                   callback: isEditable
@@ -729,6 +730,11 @@ searches:
             - a.ref
             - s.nom
         label_syntaxe: '<a.ref> (Client: <s.nom>)'
+    light:
+        fields_search: 
+            - a.ref
+        fields_return: 
+            - a.ref
 
 signatures: 
     devis: 

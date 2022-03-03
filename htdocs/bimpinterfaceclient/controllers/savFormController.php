@@ -33,13 +33,22 @@ class savFormController extends BimpPublicController
 
         $res_id = BimpTools::getValue('resgsx', '');
         $shipto = BimpTools::getValue('centre_id', '');
+        $acId = BimpTools::getValue('ac', '');
         $reservation = null;
         $errors = array();
+        
 
         if ($res_id) {
+            if($acId > 0 || BimpTools::getValue('previewDate', '') != ''){//a virer au plus vite
+                $db = BimpCache::getBdb()->db;
+                $db->query('SELECT * FROM '.MAIN_DB_PREFIX.'actioncomm_extrafields WHERE fk_object = "'.$acId.'" AND resgsx = "'.$res_id.'";');
+                if($db->num_rows($sql) < 1)
+                    $errors[] = 'Données non concordantes';
+            }
+            
             if (!$shipto) {
                 $errors[] = 'Identifiant du centre BIMP absent';
-            } else {
+            } elseif(!count($errors)) {
                 $shipto = BimpTools::addZeros($shipto, 10);
                 $centres = BimpCache::getCentres();
                 $centre = null;
@@ -55,7 +64,7 @@ class savFormController extends BimpPublicController
                 require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_Reservation.php';
 
                 $fetch_errors = array();
-                $result = GSX_Reservation::fetchReservation(897316, $shipto, $res_id, $fetch_errors);
+                $result = GSX_Reservation::fetchReservation(1442050, $shipto, $res_id, $fetch_errors);
 
                 if ((int) BimpCore::getConf('use_gsx_v2_for_reservations', 0)) {
                     if (isset($result['errors'])) {
@@ -92,7 +101,10 @@ class savFormController extends BimpPublicController
                 }
 
                 if (count($fetch_errors)) {
-                    $errors[] = 'Les données de votre réservation n\'ont pas pu être récupérées depuis le site d\'Apple';
+                    $msg = 'Les données de votre réservation ne peuvent pas être récupérées depuis le site d\'Apple pour le moment.<br/>';
+                    $msg .= 'Pas d\'inquiètude, vous aurez toujours la possiblité de compléter vos informations lors de votre rendez-vous';
+
+                    $errors[] = $msg;
 
                     BimpCore::addlog('Complément infos RDV SAV - Echec fetch Reservation', Bimp_Log::BIMP_LOG_ERREUR, 'sav', null, array(
                         'ID Réservation' => $res_id,
@@ -157,11 +169,11 @@ class savFormController extends BimpPublicController
                 $html .= '</span>';
                 $html .= '</div>';
 
-                $html .= '<p class="inputHelp">';
-                $html .= 'Si vous disposez déjà d\'un accès à l\'espace client BIMP, veuillez vous ';
-                $html .= '<a href="' . BimpObject::getPublicBaseUrl() . '?back=savForm">authentifier</a>';
-                $html .= ' pour simplifier la prise de rendez-vous.';
-                $html .= '</p>';
+//                $html .= '<p class="inputHelp">';
+//                $html .= 'Si vous disposez déjà d\'un accès à l\'espace client BIMP, veuillez vous ';
+//                $html .= '<a href="' . BimpObject::getPublicBaseUrl() . 'back=savForm">authentifier</a>';
+//                $html .= ' pour simplifier la prise de rendez-vous.';
+//                $html .= '</p>';
             }
 
             if (!is_null($centre) && $code_centre) {
@@ -309,7 +321,7 @@ class savFormController extends BimpPublicController
                         $html .= 'Nous vous avons ouvert un accès à votre espace client personnalisé BIMP.<br/>';
                         $html .= 'Un e-mail contenant votre mot de passe vous a été envoyé.<br/>';
                         $html .= 'Veuillez consulter votre messagerie, puis ';
-                        $html .= '<a href="' . BimpObject::getPublicBaseUrl() . '?back=savForm';
+                        $html .= '<a href="' . BimpObject::getPublicBaseUrl() . 'back=savForm';
 
                         if (!is_null($reservation)) {
                             $html .= '&resgsx=' . $reservation['reservationId'] . '&centre_id=' . $reservation['shipToCode'];
@@ -988,7 +1000,7 @@ class savFormController extends BimpPublicController
         }
 
         $html .= '<p style="text-align: center">';
-        $html .= '<a href="' . BimpObject::getPublicBaseUrl() . '?tab=sav">Retour à votre espace client</a>';
+        $html .= '<a href="' . BimpObject::getPublicBaseUrl() . 'tab=sav">Retour à votre espace client</a>';
         $html .= '</p>';
 
         $html .= '</div>';
@@ -1108,6 +1120,10 @@ Conditions particulières aux iPhones
 
 La plupart de nos centres peuvent effectuer une réparation de votre écran d’iPhone sous 24h00. Pour savoir si votre centre SAV est éligible à ce type de réparation consultez notre site internet.
 
+
+Si votre produit à plus de cinq ans, il est possible que celui-ci soit classé « obsolète » par Apple et que nous ne puissions pas réparer une panne matériel. 
+Nous pourrons toutefois vous proposer, si cela est nécessaire et possible, une  récupération, transfert ou sauvegarde de vos données.
+
 Nous proposons des services de sauvegarde des données, de protection de votre téléphone… venez nous rencontrer pour découvrir tous les services que nous pouvons vous proposer.
 Votre satisfaction est notre objectif, nous mettrons tout en œuvre pour vous satisfaire et réduire les délais d’immobilisation de votre produit Apple.\n\n";
 
@@ -1128,7 +1144,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
 
 //        $email = BimpTools::cleanEmailsStr($email);
 //        return mailSyn2('RDV SAV BIMP - Confirmation', $email, '', $msg, $tabFile, $tabFile2, $tabFile3);
-        $bimpMail = new BimpMail('BIMP - Confirmation de votre RDV SAV', $email, '', $msg, (isset($centre['mail']) ? $centre['mail'] : ''));
+        $bimpMail = new BimpMail($sav, 'BIMP - Confirmation de votre RDV SAV', $email, '', $msg, (isset($centre['mail']) ? $centre['mail'] : ''));
         $bimpMail->addFiles($files);
         return $bimpMail->send();
     }
@@ -1235,7 +1251,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
 
             if (isset($centres[$code_centre])) {
                 $request_errors = array();
-                $result = GSX_Reservation::fetchAvailableSlots(897316, $centres[$code_centre]['shipTo'], $code_product, $request_errors);
+                $result = GSX_Reservation::fetchAvailableSlots(1442050, $centres[$code_centre]['shipTo'], $code_product, $request_errors);
 
                 if (count($request_errors)) {
                     BimpCore::addlog('Echec requête GSX "fetch available slots" depuis le formulaire sav public', Bimp_Log::BIMP_LOG_ERREUR, 'gsx', null, array(
@@ -1525,7 +1541,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                         'zip'            => $data['client_zip'],
                         'town'           => $data['client_town'],
                         'fk_pays'        => $data['client_pays'],
-                        'phone'          => ($isCompany && $data['client_phone_pro'] ? $data['client_phone_pro'] : $data['client_phone_mobile'] ? $data['client_phone_mobile'] : $data['client_phone_perso'] ? $data['client_phone_perso'] : $data['client_phone_pro']),
+                        'phone'          => ($isCompany && $data['client_phone_pro'] ? $data['client_phone_pro'] : ($data['client_phone_mobile'] ? $data['client_phone_mobile'] : ($data['client_phone_perso'] ? $data['client_phone_perso'] : $data['client_phone_pro']))),
                         'email'          => (BimpObject::objectLoaded($userClient) ? $userClient->getData('email') : $data['client_email']),
                         'fk_typent'      => ($isCompany ? (int) $data['client_type'] : 8),
                         'marche'         => array(18),
@@ -1622,7 +1638,15 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                             }
                         }
 
-                        $result = GSX_Reservation::createReservation(897316, $centre['shipTo'], $params, $req_errors, $debug);
+                        $result = GSX_Reservation::createReservation(1442050, $centre['shipTo'], $params, $req_errors, $debug);
+                        
+                        if(is_array($req_errors) && isset($req_errors[0])){
+                            if(stripos($req_errors[0],'DEVICE_INFORMATION_INVALID') !== false){
+                                unset($params['device']);
+                                unset($req_errors[0]);
+                                $result = GSX_Reservation::createReservation(1442050, $centre['shipTo'], $params, $req_errors, $debug);
+                            }
+                        }
                     }
 
                     if (!empty($result)) {
@@ -1854,7 +1878,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                                 }
                             }
 
-                            if (BimpObject::objectLoaded($userClient) && $userClient->getData('id_client') !== (int) $client->id) {
+                            if (BimpObject::objectLoaded($userClient) && (int) $userClient->getData('id_client') !== (int) $client->id) {
                                 $old_id_client = (int) $userClient->getData('id_client');
                                 $debug .= '<br/><br/><b>Mise à jour du client pour le userClient: </b>';
 
@@ -2271,7 +2295,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
 
                     if (BimpObject::objectLoaded($userClient)) {
                         $success_html .= '<p style="text-align: center">';
-                        $success_html .= '<a href="' . BimpObject::getPublicBaseUrl() . '?tab=sav">Retour à votre espace client</a>';
+                        $success_html .= '<a href="' . BimpObject::getPublicBaseUrl() . 'tab=sav">Retour à votre espace client</a>';
                         $success_html .= '</p>';
                     }
                 }
@@ -2325,7 +2349,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                             // Annulation de la requête: 
                             require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_Reservation.php';
 
-                            $result = GSX_Reservation::cancelReservation(897316, $centre['ship_to'], $reservation_id, $errors);
+                            $result = GSX_Reservation::cancelReservation(1442050, $centre['ship_to'], $reservation_id, $errors);
 
                             if ((int) BimpCore::getConf('use_gsx_v2_for_reservations', 0)) {
                                 if (isset($result['errors']) && !empty($result['errors'])) {

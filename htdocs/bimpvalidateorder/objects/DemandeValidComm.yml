@@ -188,5 +188,13 @@ lists:
             id_user_valid: unset
             date_valid: unset
             date_create:
+    my_demand2:
+        extends: default
+        cols: 
+            status: unset
+            id_user_ask: unset
+            id_user_valid: unset
+            date_valid: unset
+            date_create:
             
             

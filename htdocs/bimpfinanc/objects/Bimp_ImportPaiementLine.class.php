@@ -119,6 +119,11 @@ class Bimp_ImportPaiementLine extends BimpObject
                 'icon'    => 'fas_check',
                 'onclick' => $this->getJsActionOnclick('traiteManuel', array(), array('form_name' => 'lettrage_man'))
             );
+            $buttons[] = array(
+                'label'   => 'Créer acompte',
+                'icon'    => 'fas_euro-sign',
+                'onclick' => $this->getJsActionOnclick('createAcompte', array(), array('form_name' => 'acompte'))
+            );
         }
         return $buttons;
     }
@@ -163,14 +168,18 @@ class Bimp_ImportPaiementLine extends BimpObject
             }
         }
 
+        $totalFact = 0;
         foreach ($this->getData('factures') as $idF) {
             $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $idF);
 
             $this->total_reste_a_paye += $obj->getData('remain_to_pay');
+            $totalFact += $obj->getData('total_ttc');
         }
 
 
         if (($this->getData('price') - $this->total_reste_a_paye) < 0.10 /*&& ($this->getData('price') - $this->total_reste_a_paye) > -0.10*/)
+            $this->ok = true;
+        if($totalFact - $this->getData('price') < 0.10 && $totalFact - $this->getData('price') > -0.10)
             $this->ok = true;
         if ($this->getData('traite'))
             $this->ok = true;
@@ -190,6 +199,70 @@ class Bimp_ImportPaiementLine extends BimpObject
         $errors = $warnings = array();
         $this->addFact($data['id']);
         return array('errors' => $errors, 'warnings' => $warnings);
+    }
+    
+    function actionCreateAcompte($data, &$success)
+    {
+        $errors = $warnings = array();
+        $success = 'Acompte créer';
+        $idFacture = 0;
+        
+        $parent = $this->getParentInstance();
+        
+        if($data['object_type'] == 0){//pas encore géré
+            if($data['id_client'] > 0){
+                $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $data['id_client']);
+                if(!$client->isLoaded())
+                    $errors[] = 'Client introuvable';
+            }
+            else
+                $errors[] = 'Pas de client séléctionné';
+        }
+        elseif($data['object_type'] == 1){
+            if($data['id_propal'] > 0){
+                $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $data['id_propal']);
+
+                if(!$obj->isLoaded())
+                    $errors[] = 'Propal introuvable';
+                $linkedObj = getElementElement('propal', 'commande', $obj->id);
+                if(count($linkedObj)){
+                    $errors[] = 'Une commande existe : '.BimpCache::getBimpObjectLink('bimpcommercial', 'Bimp_Commande', $linkedObj[0]['d']);
+                }
+            }
+            else
+                $errors[] = 'Pas de propal séléctionné';
+            
+        }
+        elseif($data['object_type'] == 2){
+            if($data['id_commande'] > 0){
+                $obj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $data['id_commande']);
+//                    $propal = new Bimp_Propal();
+                if(!$obj->isLoaded())
+                    $errors[] = 'Commande introuvable';
+            }
+            else
+                $errors[] = 'Pas de commande séléctionné';
+            
+        }
+        if(!count($errors)){
+            $client = $obj->getChildObject('client');
+            if($obj->getData('total_ttc')+0.1 < $this->getData('price'))
+                $errors[] = 'Montant plus grand que le total de la piéce';
+            if(!count($errors))
+                $errors = $obj->createAcompte($this->getData('price'), $parent->id_mode_paiement, $this->getData('banque'), 1, $this->getData('date'), false, '', '', '', $warnings, 0, $this->getData('num'), $idFacture);
+            $obj->addNoteToCommercial('Bonjour.<br/>Le client '.$client->getLink().' a effectué un virement de '.$this->getData('price').' €.');
+        }
+        
+        if(!count($errors) && $idFacture > 0){
+            global $user;
+            $errors = BimpTools::merge_array($errors, $this->set('factures', array($idFacture)));
+            $errors = BimpTools::merge_array($errors, $this->set('traite', 1));
+            $errors = BimpTools::merge_array($errors, $this->set('id_user_traite', $user->id));
+            
+            $errors = BimpTools::merge_array($errors, $this->update());
+        }
+//        $errors[] = 'fin';
+        return array('errors' => $errors, 'warnings' => $warnings, 'success_callback' => '');
     }
 
     function actionTraiteManuel($data)
@@ -389,7 +462,7 @@ class Bimp_ImportPaiementLine extends BimpObject
             if ($this->getData('type') == 'vir') {
                 $manque = $this->getData('price') - $this->total_reste_a_paye;
                 if ($this->getData('traite') == 0) {
-                    return BimpRender::renderAlerts(price($this->getData('price')) . ' € - ' . price($this->total_reste_a_paye) . ' € = ' . price($manque) . ' €', ($this->ok ? 'success' : 'danger'));
+                    return BimpRender::renderAlerts(price($this->getData('price')) . ' - ' . price($this->total_reste_a_paye) . ' = ' . price($manque) . ' €', ($this->ok ? 'success' : 'danger'));
                 } else
                     return BimpRender::renderAlerts(price($this->getData('price')) . ' €', ($manque == 0 ? 'success' : 'danger'));
             }

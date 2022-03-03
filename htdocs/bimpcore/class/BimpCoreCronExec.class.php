@@ -89,6 +89,11 @@ class BimpCoreCronExec
 
         BimpObject::loadClass('bimpsupport', 'BS_SAV');
         BS_SAV::checkSavToCancel();
+        
+        // Vérifs des notifs relances client désactivées. 
+        
+        BimpObject::loadClass('bimpcore', 'Bimp_Client');
+        Bimp_Client::checkRelancesDeactivatedToNotify();
 
         return 'OK';
     }
@@ -170,6 +175,14 @@ class BimpCoreCronExec
             return 'Echec envoi ftp (cf log)';
         }
 
+        return 'OK';
+    }
+    
+    public function mailMessageNote(){
+        BimpObject::loadClass('bimpcore', 'BimpNote');
+
+        echo BimpNote::cronNonLu();
+        
         return 'OK';
     }
 }

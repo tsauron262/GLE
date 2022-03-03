@@ -208,7 +208,7 @@ class BT_ficheInter extends BimpDolObject
 
     // Gettters params: 
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'linked':
@@ -270,7 +270,7 @@ class BT_ficheInter extends BimpDolObject
                 break;
         }
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
 
     public function getDirOutput()
@@ -1579,7 +1579,7 @@ class BT_ficheInter extends BimpDolObject
                                 . $current
                                 . '</div>'
                                 . '<div class="bimp_info_card_content">'
-                                . '<div class="bimp_info_card_title" style="color: #EF7D00"><h4>Intervention non vendu #' . $index . '</h4></div>'
+                                . '<div class="bimp_info_card_title" style="color: #EF7D00"><h4>Intervention non prévue #' . $index . '</h4></div>'
                                 . '<div class="bimp_info_card_value">Date: ' . $date->format('d M Y') . '</div>'
                                 . '<div class="bimp_info_card_value"><br /></div>'
                                 . '<div class="bimp_info_card_value">Tarif horaire: ' . price($informations['tarif']) . '€ HT</div>'
@@ -1607,7 +1607,7 @@ class BT_ficheInter extends BimpDolObject
                                 . $current
                                 . '</div>'
                                 . '<div class="bimp_info_card_content">'
-                                . '<div class="bimp_info_card_title" style="color: #EF7D00"><h4>Déplacement non vendu #' . $index . '</h4></div>'
+                                . '<div class="bimp_info_card_title" style="color: #EF7D00"><h4>Déplacement non prévu #' . $index . '</h4></div>'
                                 . '<div class="bimp_info_card_value">Date: ' . $date->format('d M Y') . '</div>'
                                 . '<div class="bimp_info_card_value"><br /></div>'
                                 . '<div class="bimp_info_card_value">Tarif horaire: ' . price($informations['tarif']) . '€ HT</div>'
@@ -1896,7 +1896,7 @@ class BT_ficheInter extends BimpDolObject
             $this->update();
 
             $commercial = $this->getCommercialClient();
-            $bimpMail = new BimpMail("BIMP - Rapport d'intervention - " . $this->getRef(),
+            $bimpMail = new BimpMail($this, "BIMP - Rapport d'intervention - " . $this->getRef(),
                                      $mail_signataire, '', "Bonjour, merci de signer votre rapport d'intervention à l'adresse suivante: "
                     . "<a href='" . DOL_URL_ROOT . "/bimptechnique/public'>" . DOL_URL_ROOT . "/bimptechnique/public</a> en entrant votre nom ainsi que le mot de passe suivant: <b>$new_password</b><br />Cet accès n'est valable que 4 Jours calandaire."
                     . "<br /><br />Cordialement", $commercial->getData('email'));

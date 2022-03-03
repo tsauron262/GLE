@@ -385,16 +385,16 @@ class BL_CommandeShipment extends BimpObject
         return parent::getCustomFilterValueLabel($field_name, $value);
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'id_product':
-                $alias = "cd";
+                $alias = $main_alias . '___commande_line';
                 $table = "commande" . 'det';
                 $joins[$alias] = array(
                     'alias' => $alias,
                     'table' => $table,
-                    'on'    => $alias . '.fk_commande = a.id_commande_client'
+                    'on'    => $alias . '.fk_commande = ' . $main_alias . '.id_commande_client'
                 );
                 $filters[$alias . '.fk_product'] = array(
                     ($excluded ? 'not_' : '') . 'in' => $values
@@ -402,20 +402,24 @@ class BL_CommandeShipment extends BimpObject
                 return;
 
             case 'id_commercial':
-                $joins['elemcont'] = array(
+                $elem_alias = $main_alias . '___elemcont';
+                $joins[$elem_alias] = array(
                     'table' => 'element_contact',
-                    'on'    => 'elemcont.element_id = a.id_commande_client',
-                    'alias' => 'elemcont'
+                    'on'    => $elem_alias . '.element_id = ' . $main_alias . '.id_commande_client',
+                    'alias' => $elem_alias
                 );
-                $joins['typecont'] = array(
+
+                $type_alias = $main_alias . '___typecont';
+                $joins[$type_alias] = array(
                     'table' => 'c_type_contact',
-                    'on'    => 'elemcont.fk_c_type_contact = typecont.rowid',
-                    'alias' => 'typecont'
+                    'on'    => $elem_alias . '.fk_c_type_contact = ' . $type_alias . '.rowid',
+                    'alias' => $type_alias
                 );
-                $filters['typecont.element'] = "commande";
-                $filters['typecont.source'] = 'internal';
-                $filters['typecont.code'] = 'SALESREPFOLL';
-                $filters['elemcont.fk_socpeople'] = array(
+
+                $filters[$type_alias . '.element'] = "commande";
+                $filters[$type_alias . '.source'] = 'internal';
+                $filters[$type_alias . '.code'] = 'SALESREPFOLL';
+                $filters[$elem_alias . '.fk_socpeople'] = array(
                     ($excluded ? 'not_' : '') . 'in' => $values
                 );
                 return;
@@ -427,19 +431,20 @@ class BL_CommandeShipment extends BimpObject
                         break;
                     }
                     if (in_array(0, $values)) {
-                        $joins['parent2'] = array(
-                            'alias' => 'parent2',
+                        $comm_alias = $main_alias . '___commande';
+                        $joins[$comm_alias] = array(
+                            'alias' => $comm_alias,
                             'table' => 'commande',
-                            'on'    => 'parent2.rowid = a.id_commande_client'
+                            'on'    => $comm_alias . '.rowid = ' . $main_alias . '.id_commande_client'
                         );
-                        $filters['a.id_facture'] = 0;
-                        $filters['parent2.invoice_status'] = array(
+                        $filters[$main_alias . '.id_facture'] = 0;
+                        $filters[$comm_alias . '.invoice_status'] = array(
                             'operator' => '<',
                             'value'    => 2
                         );
                     }
                     if (in_array(1, $values)) {
-                        $filters['a.id_facture'] = array(
+                        $filters[$main_alias . '.id_facture'] = array(
                             'operator' => '>',
                             'value'    => 0
                         );
@@ -448,7 +453,7 @@ class BL_CommandeShipment extends BimpObject
                 return;
         }
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
 
     // Getters: 
@@ -2208,7 +2213,7 @@ class BL_CommandeShipment extends BimpObject
                 $pdf->chiffre = $pdf_chiffre;
                 $pdf->detail = $pdf_detail;
                 $pdf->init($commande->dol_object);
-                
+
                 if (!$pdf->render($dir . $file_name, false)) {
                     $errors[] = BimpTools::getMsgFromArray($pdf->errors, 'Echec génération du document');
                 } else {
@@ -2385,7 +2390,7 @@ class BL_CommandeShipment extends BimpObject
 
                 if (!count($errors) && BimpObject::objectLoaded($signature)) {
 //                    $signature->openSignDistAccess('', true);
-                    
+
                     $errors = $this->updateField('id_signature', (int) $signature->id);
                     $this->updateField('signed', 0);
 
@@ -3050,9 +3055,9 @@ class BL_CommandeShipment extends BimpObject
             $qty = $line->getExpQtyFromNbPeriods($qty);
 
             $available_qty = (float) $line->getShipmentsQty() - (float) $line->getShippedQty();
-            if (round(abs($qty),2) > round(abs($available_qty),2)) {
+            if (round(abs($qty), 2) > round(abs($available_qty), 2)) {
                 if ($qty >= 0) {
-                    $errors[] = 'Ligne n°' . $line->getData('position') . ': il ne reste que ' . $available_qty . ' unité(s) à expédier.<br/>Veuillez retirer ' . round($qty - $available_qty,2) . ' unité(s)';
+                    $errors[] = 'Ligne n°' . $line->getData('position') . ': il ne reste que ' . $available_qty . ' unité(s) à expédier.<br/>Veuillez retirer ' . round($qty - $available_qty, 2) . ' unité(s)';
                 } else {
                     $errors[] = 'Ligne n°' . $line->getData('position') . ': il ne reste que ' . $available_qty . ' unité(s) retournée(s) à réceptionner.<br/>Veuillez retirer ' . abs($qty - $available_qty) . ' unité(s)';
                 }
@@ -3246,7 +3251,7 @@ class BL_CommandeShipment extends BimpObject
             switch ($doc_type) {
                 case 'bl':
                     if ($context === 'public') {
-                        return BimpObject::getPublicBaseUrl() . '?fc=doc&doc=bl' . ($signed ? '_signed' : '') . '&docid=' . $this->id . '&docref=' . $this->getData('num_livraison');
+                        return BimpObject::getPublicBaseUrl() . 'fc=doc&doc=bl' . ($signed ? '_signed' : '') . '&docid=' . $this->id . '&docref=' . $this->getData('num_livraison');
                     } else {
                         return $this->getFileUrl($fileName);
                     }

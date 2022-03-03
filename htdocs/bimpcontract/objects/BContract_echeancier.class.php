@@ -305,7 +305,6 @@ class BContract_echeancier extends BimpObject {
                 }
                 $montant = ($reste_a_payer / $reste_periode) * $nb;
             }
-            die($montant . " jj");   
 
             if ($montant > $parent->reste_a_payer()) {
                 return "Vous ne pouvez pas indiquer un montant (".$montant.") suppérieur au reste à payer ".$parent->reste_a_payer();
@@ -748,7 +747,9 @@ class BContract_echeancier extends BimpObject {
                 
 //                        $html .= '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Facturer la période" onclick="' . $this->getJsActionOnclick("createFacture", array('total_ht' => $parent->getTotalContrat() - $parent->getTotalDejaPayer(), 'pa' => ($parent->getTotalPa() - $parent->getTotalDejaPayer(false, 'pa'))), array("success_callback" => $callback)) . '")"><i class="fa fa-plus" >Facturation suplémentaire</i></span>';
 //                if($this->canEdit()) {
-//                    $html .= '<div class="btn-group"><button type="button" class="btn btn-default" aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsLoadModalForm('create_perso', "Créer une facture personnalisée ou une facturation de plusieurs périodes") . '"><i class="fa fa-plus-square-o iconLeft"></i>Créer une facture personalisée ou une facturation de plusieurs périodes</button></div>';
+                  if($user->admin) {
+                    $html .= '<div class="btn-group"><button type="button" class="btn btn-default" aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsLoadModalForm('create_perso', "Créer une facture personnalisée ou une facturation de plusieurs périodes") . '"><i class="fa fa-plus-square-o iconLeft"></i>Créer une facture personalisée ou une facturation de plusieurs périodes</button></div>';
+                  }
 //                }
 //                if($this->canEdit()) {
 //                    $html .= '<div class="btn-group"><button type="button" class="btn btn-default" aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsLoadModalForm('create_perso', "Créer une facture personnalisée ou une facturation de plusieurs périodes") . '"><i class="fa fa-plus-square-o iconLeft"></i>Créer une facture personalisée ou une facturation de plusieurs périodes</button></div>';

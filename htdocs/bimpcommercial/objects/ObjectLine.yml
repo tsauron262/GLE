@@ -188,6 +188,17 @@ fields:
         default_value: 0
         depends_on: pu_ht,qty,type
 
+    duree_tot:
+        label: Durée Totale
+        type: timer
+        extra: 1
+        default_value: 0
+        input: 
+            type: timer
+        displays: 
+            default: 
+                type: timer
+
 forms: 
     default: 
         values: 

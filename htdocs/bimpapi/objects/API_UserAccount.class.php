@@ -461,7 +461,7 @@ class API_UserAccount extends BimpObject
             $where_base = 'id_api = ' . (int) $this->getData('id_api') . ' AND users LIKE ';
 
             foreach ($users as $id_user) {
-                if (!in_array($id_user, $init_users)) {
+                if (!is_array($init_users) || !in_array($id_user, $init_users)) {
                     $id = (int) $this->db->getValue($this->getTable(), 'id', $where_base . '\'%[' . $id_user . ']%\'');
                     if ($id) {
                         $msg = 'L\'utilisteur ';

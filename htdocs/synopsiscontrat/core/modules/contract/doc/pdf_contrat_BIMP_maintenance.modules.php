@@ -52,6 +52,9 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
     public function addLogo(&$pdf, $size, $pdf1 = null) {
         global $conf;
         $logo = $conf->mycompany->dir_output . '/logos/' . $this->emetteur->logo;
+        $testFile = str_replace(array(".jpg", ".png"), "_PRO.png", $logo);
+        if (is_file($testFile))
+            $logo = $testFile;
         if(is_file($logo)) {
              if(is_object($pdf1)){
                 $pdf1->Image($logo, 0, 10, 0, $size, '', '', '', false, 250, 'L');
@@ -439,7 +442,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
             $start_char = 0;
             
             
-            $chaine_description = $line->description;
+            $chaine_description = '  '.$line->description;
             //$chaine_description = strip_tags($chaine_description,"<b><u><i><a><img><p><strong><em><font><tr><blockquote>");
 //            $chaine_description = str_replace(":&nbsp;", ' ', $chaine_description);  
 //            $chaine_description = str_replace("<li>", '', $chaine_description);
@@ -451,8 +454,9 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
 //            $chaine_description = str_replace("</ul>", '', $chaine_description);
 //            $chaine_description = str_replace("<p>", '', $chaine_description);
 //            $chaine_description = str_replace("</p>", '', $chaine_description);
-            
-            $pdf->writeHTML('<br/>'.$chaine_description, false, false, true, false, ''); 
+            $pdf->SetMargins(36, 10,10);
+            $pdf->writeHTML($chaine_description, false, false, true, false, ''); 
+            $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);
             
             $first_passage = false;
             
@@ -660,7 +664,8 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf->Cell($W, 4, $mysoc->zip . ' ' . $mysoc->town, "R", null, 'C', true);
                 $pdf->Cell($W, 4, $client->zip . ' ' . $client->town, "L", null, 'C', true);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
-                $pdf->Cell($W, 4, 'Tel: ' . $mysoc->phone, "R", null, 'C', true);
+//                $pdf->Cell($W, 4, 'Tel: ' . $mysoc->phone, "R", null, 'C', true);
+                $pdf->Cell($W, 4, '', "R", null, 'C', true);
                 $pdf->Cell($W, 4, "Tel contact: " . $phone_contact, "L", null, 'C', true);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
                 $pdf->Cell($W, 4, "Email: " . $mysoc->email, "R", null, 'C', true);
@@ -682,7 +687,8 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf1->Cell($W, 4, $mysoc->zip . ' ' . $mysoc->town, "R", null, 'C', true);
                 $pdf1->Cell($W, 4, $client->zip . ' ' . $client->town, "L", null, 'C', true);
                 $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
-                $pdf1->Cell($W, 4, 'Tel: ' . $mysoc->phone, "R", null, 'C', true);
+//                $pdf1->Cell($W, 4, 'Tel: ' . $mysoc->phone, "R", null, 'C', true);
+                $pdf1->Cell($W, 4, '', "R", null, 'C', true);
                 $pdf1->Cell($W, 4, "Tel contact: " . $phone_contact, "L", null, 'C', true);
                 $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
                 $pdf1->Cell($W, 4, "Email : " . $mysoc->email, "R", null, 'C', true);
@@ -745,7 +751,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf->SetFont('', 'B', 7);
                 $pdf->Cell($W * 2, 8, "Annule et remplace :", 1, null, 'L', true);
                 $pdf->SetFont('', '', 6);
-                $pdf->Cell($W * 1.5, 8, $bimp_contract->getData('replaced_ref'), 1, null, 'L', true);
+                $pdf->Cell($W * 1.5, 8, $bimp_contract->getData('ref_ext'), 1, null, 'L', true);
                 $pdf->SetFont('', 'B', 7);
                 $pdf->Cell($W * 1.5, 8, "Durée :", 1, null, 'L', true);
                 $pdf->SetFont('', '', 7);
@@ -759,7 +765,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf1->SetFont('', 'B', 7);
                 $pdf1->Cell($W * 2, 8, "Annule et remplace :", 1, null, 'L', true);
                 $pdf1->SetFont('', '', 7);
-                $pdf1->Cell($W * 1.5, 8, $bimp_contract->getData('replaced_ref'), 1, null, 'L', true);
+                $pdf1->Cell($W * 1.5, 8, $bimp_contract->getData('ref_ext'), 1, null, 'L', true);
                 $pdf1->SetFont('', 'B', 7);
                 $pdf1->Cell($W * 1.5, 8, "Durée :", 1, null, 'L', true);
                 $pdf1->SetFont('', '', 7);
@@ -801,16 +807,39 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf1->SetFont('', '', 7);
                 $pdf1->Cell($W * 1.5, 8, (is_null($extra->options_tacite)) ? "Non" : $bimp_contract::$renouvellement[$extra->options_tacite], 1, null, 'L', true);
                 
+                
+//                $pdf->SetFont('', '', 1);
+//                $pdf1->SetFont('', '', 1);
+                
+                
+                $pdf->SetXY($this->marge_gauche, $pdf->getY()+9);
+                $pdf->setTextColor(236, 147, 0);
+                $pdf->MultiCell(180, 15, "La procédure de déclenchement d'incident auprès de notre support technique peut être réalisée par :
+E-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72 60 39 15 ou sur le portail client dédié : https://www.bimp.fr/espace-client", 0, 'C');
+//                $pdf->writeHTML("<span style='color:red'>La procédure de déclenchement d'incident auprès de notre support technique peut être réalisée par :</span><br/>e-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72 60 39 15 ou sur le portail client dédié : https://www.bimp.fr/espace-client");
+                $pdf->SetXY($this->marge_gauche, $pdf->getY()-8);
+                $pdf->setTextColor(0,0, 0);
+                
+                $pdf1->SetXY($this->marge_gauche, $pdf1->getY()+9);
+                $pdf1->setTextColor(236, 147, 0);
+                $pdf1->MultiCell(180, 15, "La procédure de déclenchement d'incident auprès de notre support technique peut être réalisée par :
+E-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72 60 39 15 ou sur le portail client dédié : https://www.bimp.fr/espace-client", 0, 'C');
+//                $pdf->writeHTML("<span style='color:red'>La procédure de déclenchement d'incident auprès de notre support technique peut être réalisée par :</span><br/>e-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72 60 39 15 ou sur le portail client dédié : https://www.bimp.fr/espace-client");
+                $pdf1->SetXY($this->marge_gauche, $pdf1->getY()-8);
+                $pdf1->setTextColor(0,0, 0);
+                
                 $pdf->SetFont('', 'BU', 13);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, '', 0, 'C');
+//                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, '', 0, 'C');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, 'Tarification', 0, 'C');
                 $pdf->SetFont('', '', 9);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
+//                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
                 $pdf1->SetFont('', 'BU', 13);
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, '', 0, 'C');
+//                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, '', 0, 'C');
                 $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, 'Tarification', 0, 'C');
                 $pdf1->SetFont('', '', 9);
-                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
+//                $pdf1->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
+                
+                
 
                 $pdf->SetDrawColor(255, 255, 255);
                 $pdf->setColor('fill', 255, 255, 255);
@@ -1035,7 +1064,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         $pdf->setY(285);
         $pdf->SetFont('', '', 8);
         $pdf->SetTextColor(150, 150, 150);
-        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, $mysoc->name . " - SAS au capital de " . $mysoc->capital . ' - ' . $mysoc->address . ' - ' . $mysoc->zip . ' ' . $mysoc->town . ' - Tél ' . $mysoc->phone . ' - SIRET: ' . $conf->global->MAIN_INFO_SIRET  , 0, 'C');
+        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, $mysoc->name . " - SAS au capital de " . $mysoc->capital . ' - ' . $mysoc->address . ' - ' . $mysoc->zip . ' ' . $mysoc->town . ' - SIRET: ' . $conf->global->MAIN_INFO_SIRET  , 0, 'C');
         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, 'APE : '.$conf->global->MAIN_INFO_APE.' - RCS/RM : '.$conf->global->MAIN_INFO_RCS.' - Num. TVA : FR 34 320387483'  , 0, 'C');
     }
 

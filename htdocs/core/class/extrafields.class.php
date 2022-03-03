@@ -789,12 +789,12 @@ class ExtraFields
 //		dol_syslog("fetch_name_optionals_label elementtype=".$elementtype);
 
                 /*moddrsi*/
-                if ($elementtype && defined('BIMP_LIB')) {
+                if ($elementtype && defined('BIMP_LIB') && BimpCore::getConf('use_cache_for_extrafields', 0)) {
                     $cache_key = 'dol_object_' . $elementtype . '_extrafields';
                     
                     $result = BimpCache::getCacheServeur($cache_key);
                     
-                    if (is_array($result)) {                    
+                    if (is_array($result) && count($result) > 0) {                    
                         $labels = array();
                         
                         foreach ($result as $name => $fields) {
@@ -900,7 +900,8 @@ class ExtraFields
                                     }
                                 }
                                 
-                                BimpCache::setCacheServeur($cache_key, $rows);
+                                if(BimpCore::getConf('use_cache_for_extrafields', 0))
+                                    BimpCache::setCacheServeur($cache_key, $rows);
                             }
                         }
                         /*fmoddrsi*/

@@ -111,6 +111,13 @@ sections:
                     panel: 1
                     name: inter
                     object: contrat
+    - type: custom
+      custom: 
+          callback: 
+              method: renderNotesList
+              object: contrat
+              params:
+                  - 1
             
     - type: buttons
       buttons:

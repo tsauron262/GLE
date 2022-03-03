@@ -435,7 +435,7 @@ fields:
         dol_extra_field: 1
         
     duration:
-        label: Durée
+        label: Durée (obsoléte)
         type: string
         
     fk_user_valid:
@@ -562,6 +562,26 @@ fields:
         label: Blocage Admin
         type: bool
         
+    duree_i:
+        label: Durée inter
+        type: timer
+        input: 
+            type: timer
+        displays: 
+            default: 
+                type: timer
+#        default_value: 00:00:00
+#        input:
+#            help: En secondes (1h = 3600s - 7h = 25200s)
+        dol_extra_field: 1
+        
+        
+    renta_service:
+        label: Rentabilitée €/h
+        type: money
+        extra: 1
+        has_total: 0
+        
 forms: 
     # Utiliser plutôt "default" que "card" pour le formulaire principal 
     # Important car tout objet doit avoir un formulaire par défaut s'il est éditable.
@@ -595,6 +615,8 @@ forms:
             - field: seuil_stock_alerte
             - field: desiredstock
             - field: 2hotline
+            - field: duree
+            - field: duree_i
             # Measure
 #            - field: weight
 #            - field: weight_units
@@ -810,6 +832,8 @@ fields_tables:
               edit: 1
             - field: duree
               edit: 1
+            - field: duree_i
+              edit: 1
             - custom: 1
               label: Durée validation
               value:
@@ -836,6 +860,7 @@ fields_tables:
         title: Mesures
         icon: fas_ruler
         rows:
+            - field: duree_i
             - field: weight
             - field: weight_units
             - field: length
@@ -1113,6 +1138,8 @@ lists:
             - label: étiquettes magasin
               icon: fas_sticky-note
               onclick: setSelectedObjectsAction($(this), 'list_id', 'printEtiquettes', {'type':'magasin'}, '', 'Générer les étiquettes ?', true)
+        list_actions: 
+            callback: getFilteredListActions            
         filters_panel: default
         sort_field: id
         sort_way: desc

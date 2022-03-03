@@ -314,7 +314,6 @@ fields_tables:
             - field: date_prevue_facturation
               edit: 1
             - field: paiement_comptant
-              edit: 1
                   
     client: 
         rows: 
@@ -445,7 +444,15 @@ forms:
             - field: fk_cond_reglement
             - field: fk_mode_reglement
             - field: rib_client
-            - field: paiement_comptant
+            - custom: 1
+              label: Paiement Comptant
+              input_name: paiement_comptant
+              hidden: 1
+              input: 
+                  type: hidden
+              depends_on: fk_cond_reglement,fk_mode_reglement
+              value: 
+                  callback: isPaiementComptant                  
             - field: date_commande
             - field: date_livraison
             - field: fk_availability
@@ -840,6 +847,11 @@ searches:
             - a.ref
             - s.nom
         label_syntaxe: '<a.ref> (Client: <s.nom>)'
+    light:
+        fields_search:
+            - a.ref
+        fields_return: 
+            - a.ref
 
 views_lists: 
     default:

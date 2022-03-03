@@ -203,6 +203,7 @@ fields:
         label: Relances paiements autorisées
         type: bool
         default_value: 1
+        history: 1
     nb_relance:
         label: Nombre de relances
         type: int

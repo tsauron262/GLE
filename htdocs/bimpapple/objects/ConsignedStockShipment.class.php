@@ -206,7 +206,7 @@ class ConsignedStockShipment extends BimpObject
                 $result = $gsx->consignmentOrderLookup($orderId);
 
                 if (!$gsx->logged) {
-                    $html .= BimpRender::renderAlerts('Non connecté à GSX. Veillez vous connectez puis cliquer sur "Actualiser"');
+                    $html .= BimpRender::renderAlerts('Non connecté à GSX. Veillez vous connecter puis cliquer sur "Actualiser"');
                     $html .= '<div class="buttonsContainer">';
                     $html .= '<span class="btn btn-default" onclick="gsx_open_login_modal($(this));">';
                     $html .= 'Se connecter' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');

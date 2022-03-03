@@ -6373,20 +6373,20 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             $html .= '>';
             $html .= BimpRender::renderIcon('fas_comments');
             $html .= '</span>';
-            
+
             //Suivi mail
             $random = random_int("3", "999999999999");
-            $htmlId = 'suivi_mail_'.$random;
+            $htmlId = 'suivi_mail_' . $random;
             $onclick = $this->getJsLoadModalCustomContent('renderSuiviMail', 'Suivi des mails');
-            $html .= '<span id="'.$htmlId.'" class="btn btn-default bs-popover"';
+            $html .= '<span id="' . $htmlId . '" class="btn btn-default bs-popover"';
             $html .= ' onclick="' . $onclick . '"';
             $html .= BimpRender::renderPopoverData('Suivi des mails');
             $html .= '>';
             $html .= BimpRender::renderIcon('fas_inbox');
             $html .= '</span>';
-            if($_GET['open'] == 'suivi_mail')
-                $html .= '<script>$(document).ready(function(){  $("#'.$htmlId.'").click();});</script>';
-            
+            if ($_GET['open'] == 'suivi_mail')
+                $html .= '<script>$(document).ready(function(){  $("#' . $htmlId . '").click();});</script>';
+
 
             $html .= '</div>';
             $html .= '</div>';
@@ -7424,7 +7424,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
         return '';
     }
-    
+
     public function renderSuiviMail()
     {
         $instance = BimpObject::getInstance('bimpcore', 'BimpMailLog');
@@ -8417,8 +8417,8 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         } else {
             $url = $this->getUrl('private');
         }
-        
-        if(isset($params['after_link']))
+
+        if (isset($params['after_link']))
             $url .= $params['after_link'];
 
         if ($url) {
@@ -9223,7 +9223,7 @@ var options = {
             if ($no_transactions_db) {
                 $instance->useNoTransactionsDb();
             }
-            
+
             $create_warnings = array();
             $create_errors = $instance->validateArray($data);
 

@@ -80,6 +80,7 @@ fields_tables:
             - field: tracking_number
             - field: date_submitted
             - field: date_shipped
+            - field: shipment_number
             
 views: 
     default: 

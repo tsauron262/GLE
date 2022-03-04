@@ -218,9 +218,9 @@ if ($id_sav) {
         <meta charset="UTF-8" />
         <meta name="viewport" content="initial-scale=1.0, width=device-width, target-densitydpi=device-dpi">
         <title>SAV, Support &amp; Hotline / Bimp Informatique</title>
-        <link rel="stylesheet" href="./bimpcore/views/css/bimpcore.css">
-        <link rel="stylesheet" href="./theme/common/fontawesome/css/font-awesome.min.css?version=6.0.4">
-        <link rel="stylesheet" href="./bimpsupport/public/css/styles.css">
+        <link rel="stylesheet" href="<?php echo DOL_URL_ROOT; ?>/bimpcore/views/css/bimpcore.css">
+        <link rel="stylesheet" href="<?php echo DOL_URL_ROOT; ?>/theme/common/fontawesome/css/font-awesome.min.css?version=6.0.4">
+        <link rel="stylesheet" href="<?php echo DOL_URL_ROOT; ?>/bimpsupport/public/css/styles.css">
          <style>
             .error:before {
                 position:initial;

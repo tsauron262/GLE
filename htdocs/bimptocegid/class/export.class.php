@@ -54,7 +54,7 @@
             }
         }
         
-        public function exportFactureFournisseur($ref):bool {
+        public function exportFactureFournisseur($ref = ''):void {
             
         }
         
@@ -62,8 +62,8 @@
             global $db;
             $errors = [];
             $file = PATH_TMP . $this->dir . $this->getMyFile("paiements");
-            //$list = $this->bdb->getRows('paiement', 'exported = 0 AND datec BETWEEN "'.$this->lastDateExported->format('Y-m-d').' 00:00:00" AND "'.$this->yesterday->format('Y-m-d').' 23:59:59"');
-            $list = $this->bdb->getRows('paiement', 'rowid = 181956');
+            $list = $this->bdb->getRows('paiement', 'exported = 0 AND datec BETWEEN "'.$this->lastDateExported->format('Y-m-d').' 00:00:00" AND "'.$this->yesterday->format('Y-m-d').' 23:59:59"');
+            //$list = $this->bdb->getRows('paiement', 'rowid = 181956');
             foreach($list as $pay) {
                 $reglement = $this->bdb->getRow('c_paiement', 'id = ' . $pay->fk_paiement);
                 if($reglement->code != 'NO_COM') {

@@ -23,7 +23,7 @@
         function __construct($db) {
             $hier = new DateTime();
             $this->yesterday = $hier->sub(new DateInterval("P1D"));
-            $this->yesterday = new DateTime('2020-09-16');
+            //$this->yesterday = new DateTime('2020-09-16');
             $this->lastDateExported = new DateTime(BimpCore::getConf("BIMPTOCEGID_last_export_date"));
             $this->bdb = new BimpDb($db);
             $this->TRA_facture = new TRA_facture($this->bdb, PATH_TMP . $this->dir . $this->getMyFile("tiers"));

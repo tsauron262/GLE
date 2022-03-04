@@ -170,7 +170,7 @@
             $file = fopen($this->file, 'a+');
             fwrite($file, $ecriture . "\n");
             fclose($file);
-            //$this->tier->updateField('exported', 1);
+            $this->tier->updateField('exported', 1);
         }
 
     }

@@ -159,32 +159,35 @@ class Bimp_FactureLine extends ObjectLine
         return $buttons;
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'type_soc':
-                if (!isset($joins['facture'])) {
-                    $joins['facture'] = array(
-                        'alias' => 'facture',
+                $fac_alias = $main_alias . '___facture';
+                if (!isset($joins[$fac_alias])) {
+                    $joins[$fac_alias] = array(
+                        'alias' => $fac_alias,
                         'table' => 'facture',
-                        'on'    => 'facture.rowid = a.id_obj'
-                    );
-                }
-                if (!isset($joins['soc'])) {
-                    $joins['soc'] = array(
-                        'alias' => 'soc',
-                        'table' => 'societe',
-                        'on'    => 'soc.rowid = facture.fk_soc'
+                        'on'    => $fac_alias . '.rowid = ' . $main_alias . '.id_obj'
                     );
                 }
 
-                $filters['soc.fk_typent'] = array(
+                $soc_alias = $main_alias . '___client';
+                if (!isset($joins[$soc_alias])) {
+                    $joins[$soc_alias] = array(
+                        'alias' => $soc_alias,
+                        'table' => 'societe',
+                        'on'    => $soc_alias . '.rowid = ' . $fac_alias . '.fk_soc'
+                    );
+                }
+
+                $filters[$soc_alias . '.fk_typent'] = array(
                     ($excluded ? 'not_' : '') . 'in' => $values
                 );
                 break;
         }
 
-        return parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+        return parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
 
     // Getters Array: 

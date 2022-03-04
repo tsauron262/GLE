@@ -204,6 +204,8 @@ class GSX_v2 extends GSX_Const
                 $gsx_logout_mail_send = true;
             }
         }
+        else
+            BimpCore::addlog ('deconnexion GSX de '.$this->appleId.' sans reconnexion possible');
 
         $this->logged = false;
         $this->saveToken('acti', '');
@@ -213,15 +215,22 @@ class GSX_v2 extends GSX_Const
     
     public static function phantomAuth($login, $mdp){
         if(function_exists('ssh2_connect')){
+            BimpCore::addlog('Tentative de connexion Apple en auto.');
             $connection = ssh2_connect('10.192.20.152', 22);
-            if(!ssh2_auth_pubkey_file($connection,'phantomjs', '/usr/local/data2/bimp8/keys/phantomjs.pub', '/usr/local/data2/bimp8/keys/phantomjs'))
-                echo 'pas dauh';
+            $key1 = DOL_DOCUMENT_ROOT.'bimpapple/phantom/cert/phantomjs.pub';
+            $key2 = DOL_DOCUMENT_ROOT.'bimpapple/phantom/cert/phantomjs';
+            
+//            $key1 = '/usr/local/data2/bimp8/keys/phantomjs.pub';
+//            $key2 = '/usr/local/data2/bimp8/keys/phantomjs';
+            
 
-    //        $stream = ssh2_exec($connection, '/usr/local/bin/phantomjs /home/phantomjs/loadspeed.js https://www.kp.ru -i');
-
+//            $commande = '/usr/local/bin/phantomjs /home/phantomjs/loadspeed.js https://google.com';
             $commande = '/usr/local/bin/phantomjs --web-security=no /home/phantomjs/apple.js '.$login.' '.$mdp;
-    //        $commande = '/usr/local/bin/phantomjs --web-security=no /home/phantomjs/apple.js tommy@drsi.fr 7v06KZyRX8sm';
-    //        die('ssh -i /usr/local/data2/bimp8/keys/phantomjs phantomjs@10.192.20.152 '.$commande);
+            
+            if(!ssh2_auth_pubkey_file($connection,'phantomjs', $key1, $key2))
+                    die('Pas dauth<br/>ssh -i '.$key2.' phantomjs@10.192.20.152 '.$commande);
+            
+//            die('<br/>ssh -i '.$key2.' phantomjs@10.192.20.152 '.$commande);
             $stream = ssh2_exec($connection, $commande);
 
 
@@ -1008,6 +1017,17 @@ class GSX_v2 extends GSX_Const
         return $this->exec('consignmentOrderLookup', $params);
     }
 
+    public function consignmentOrderLookup($orderId, $type = 'DECREASE', $status = 'OPEN')
+    {
+        $params = array(
+            'orderId'              => $orderId,
+            'orderStatusGroupCode' => $status,
+            'typeCode'             => $type
+        );
+
+        return $this->exec('consignmentOrderLookup', $params);
+    }
+
     public function consignmentDeliveryLookup($deliveryNumber, $status = 'OPEN', $from = '', $to = '')
     {
         $params = array(
@@ -1029,6 +1049,28 @@ class GSX_v2 extends GSX_Const
                     'deliveryNumber' => $deliveryNumber,
                     'parts'          => $parts
         ));
+    }
+
+    public function consignmentOrderSubmit($orderId, $parts)
+    {
+        $params = array(
+            'orderId' => $orderId,
+            'parts'   => $parts
+        );
+
+        return $this->exec('consignmentOrderSubmit', $params);
+    }
+
+    public function consignmentOrderShipment($orderId, $carrier_code, $tracking_number, $parts)
+    {
+        $params = array(
+            'orderId'        => $orderId,
+            'carrierCode'    => $carrier_code,
+            'trackingNumber' => $tracking_number,
+            'parts'          => $parts
+        );
+
+        return $this->exec('consignmentOrderShipment', $params);
     }
 
     // Requêtes - Divers:
@@ -1227,6 +1269,7 @@ class GSX_v2 extends GSX_Const
         if (!$msg) {
             $msg = 'Non connecté à GSX. Veuillez vous connecter et réitérer l\'opération';
         }
+
         $msg .= '<script type="text/javascript">';
         $msg .= 'gsx_open_login_modal($(\'\')' . ($callback ? ', ' . $callback : '') . ');';
         $msg .= '</script>';

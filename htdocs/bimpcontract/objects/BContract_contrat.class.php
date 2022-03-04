@@ -14,6 +14,7 @@ class BContract_contrat extends BimpDolObject
     public $email_group = "";
     public $email_facturation = "";
     public static $element_name = "contract";
+
     // Les status
     CONST CONTRAT_STATUT_ABORT = -1;
     CONST CONTRAT_STATUS_BROUILLON = 0;
@@ -141,8 +142,7 @@ class BContract_contrat extends BimpDolObject
             //'propal' => 'Proposition commercial'
     ];
     public static $dol_module = 'contract';
-    
-    
+
     function __construct($module, $object_name)
     {
         global $user, $db;
@@ -150,7 +150,7 @@ class BContract_contrat extends BimpDolObject
         $this->email_group = BimpCore::getConf('bimpcontract_email_groupe');
         $this->email_facturation = BimpCore::getConf('bimpcontract_email_facturation');
         return parent::__construct($module, $object_name);
-    }   
+    }
 
     public function canShowAdmin()
     {
@@ -513,7 +513,7 @@ class BContract_contrat extends BimpDolObject
                         . $client->getNomUrl() . ' - ' . $client->getName() . ' pour la raison suivante:';
                 $message .= "<br /><br />" . $data['note_close'] . "<br /><br />Ce contrat ce clôturera automatiquement à cette date.";
                 $addr_cc = ($commercial->getData('email') == $user->email) ? '' : $user->email;
-                $bimpMail = New BimpMail($sujet, $commercial->getData('email'), null, $message, null, $addr_cc);
+                $bimpMail = New BimpMail($this, $sujet, $commercial->getData('email'), null, $message, null, $addr_cc);
                 $bimpMail->send($errors);
             }
         } else {
@@ -550,9 +550,9 @@ class BContract_contrat extends BimpDolObject
             $signed_doc = ($data['have_contrat_signed']) ? true : false;
             if ($signed_doc) {
                 $contratChhild = $this->getContratChild();
-                
+
                 $this->closeContratChildWhenActivateRenewManual();
-                    
+
                 $this->updateField('statut', self::CONTRAT_STATUS_ACTIVER);
 
                 $success = "Le contrat " . $this->getData('ref') . ' a été activé avec succès';
@@ -703,7 +703,7 @@ class BContract_contrat extends BimpDolObject
         }
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'negatif_positif':
@@ -731,30 +731,33 @@ class BContract_contrat extends BimpDolObject
                         }
                     }
 
-                    $filters['a.rowid'] = ['in' => $in];
+                    $filters[$main_alias . '.rowid'] = ['in' => $in];
                 }
                 break;
+
             case 'commercialclient':
-                $alias = 'sc';
+                $alias = $main_alias . '___sc';
                 $joins[$alias] = array(
                     'alias' => $alias,
                     'table' => 'societe_commerciaux',
-                    'on'    => $alias . '.fk_soc = a.fk_soc'
+                    'on'    => $alias . '.fk_soc = ' . $main_alias . '.fk_soc'
                 );
                 $filters[$alias . '.fk_user'] = array(
                     ($excluded ? 'not_' : '') . 'in' => $values
                 );
+                break;
+
             case 'use_syntec':
                 if (count($values) == 1) {
-                    $alias = 'ce';
+                    $alias = $main_alias . '___ce';
                     $joins[$alias] = array(
                         'alias' => $alias,
                         'table' => 'contrat_extrafields',
-                        'on'    => $alias . '.fk_object = a.rowid'
+                        'on'    => $alias . '.fk_object = ' . $main_alias . '.rowid'
                     );
                     if (in_array('0', $values)) {
                         $sql = '(' . $alias . '.syntec = 0 OR ' . $alias . '.syntec IS NULL)';
-                        $filters[$alias . '.syntec'] = array(
+                        $filters[$alias . '___custom_syntec'] = array(
                             'custom' => $sql
                         );
                     }
@@ -765,9 +768,9 @@ class BContract_contrat extends BimpDolObject
                     }
                 }
                 break;
+
             case 'have_fi':
                 if (count($values) == 1) {
-
                     $sql = "SELECT DISTINCT c.rowid FROM llx_contrat as c, llx_fichinter as f WHERE c.rowid = f.fk_contrat";
                     $res = $this->db->executeS($sql, 'array');
                     $in = [];
@@ -775,12 +778,12 @@ class BContract_contrat extends BimpDolObject
                         $in[] = $i['rowid'];
                     }
                     if (in_array('1', $values)) {
-                        $filters['a.rowid'] = [
+                        $filters[$main_alias . '.rowid'] = [
                             'in' => $in
                         ];
                     }
                     if (in_array('0', $values)) {
-                        $filters['a.rowid'] = [
+                        $filters[$main_alias . '.rowid'] = [
                             'not_in' => $in
                         ];
                     }
@@ -830,25 +833,23 @@ class BContract_contrat extends BimpDolObject
                     foreach ($res as $nb => $i) {
                         $in[] = $i['rowid'];
                     }
-                    $filters['a.rowid'] = ['in' => $in];
+                    $filters[$main_alias . '.rowid'] = ['in' => $in];
                 }
-
                 break;
         }
 
 
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
 
     public function getCommercialclientSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
     {
-
         $alias = 'sc';
         $joins[$alias] = array(
             'alias' => $alias,
             'table' => 'societe_commerciaux',
-            'on'    => $alias . '.fk_soc = a.fk_soc'
+            'on'    => $alias . '.fk_soc = ' . $main_alias . '.fk_soc'
         );
         $filters[$alias . '.fk_user'] = $value;
     }
@@ -879,40 +880,42 @@ class BContract_contrat extends BimpDolObject
             }
         }
     }
-    
-    public function actionTestContrat($data, &$success) {
+
+    public function actionTestContrat($data, &$success)
+    {
         $errors = [];
         $warnings = [];
-        
+
         $this->closeContratChildWhenActivateRenewManual(true);
-        
+
         return Array('errors' => $errors, 'warnings' => $warnings, 'success' => $success);
     }
-    
-    public function closeContratChildWhenActivateRenewManual($fromCron = false) {
-        
+
+    public function closeContratChildWhenActivateRenewManual($fromCron = false)
+    {
+
         global $user;
-        
+
         $beforeContrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat');
-        
-        if($beforeContrat->find(Array('next_contrat' => $this->id))) {
-            
-            if($beforeContrat->isLoaded()) {
-                
-                if(!in_array($this->getData('statut'), Array(self::CONTRAT_STATUS_ACTIVER,self::CONTRAT_STATUS_ACTIVER_SUP,self::CONTRAT_STATUS_ACTIVER_TMP)) && $fromCron) {
+
+        if ($beforeContrat->find(Array('next_contrat' => $this->id))) {
+
+            if ($beforeContrat->isLoaded()) {
+
+                if (!in_array($this->getData('statut'), Array(self::CONTRAT_STATUS_ACTIVER, self::CONTRAT_STATUS_ACTIVER_SUP, self::CONTRAT_STATUS_ACTIVER_TMP)) && $fromCron) {
                     return 0;
                 }
-                
+
                 $echeancier = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_echeancier');
-                
-                if($echeancier->find(Array('id_contrat' => $beforeContrat->id))) {
-                    
+
+                if ($echeancier->find(Array('id_contrat' => $beforeContrat->id))) {
+
                     $dateFinNow = new DateTime();
                     $dateFinBefore = $this->displayRealEndDate('Y-m-d');
-                    
-                    if($dateFinBefore > $dateFinNow) {
-                        if($beforeContrat->dol_object->closeAll($user) >= 1) {
-                        
+
+                    if ($dateFinBefore > $dateFinNow) {
+                        if ($beforeContrat->dol_object->closeAll($user) >= 1) {
+
                             $beforeContrat->updateField('statut', self::CONTRAT_STATUS_CLOS);
                             $beforeContrat->updateField('date_cloture', date('Y-m-d H:i:s'));
                             $beforeContrat->updateField('fk_user_cloture', $user->id);
@@ -921,7 +924,7 @@ class BContract_contrat extends BimpDolObject
 
                             $beforeContrat->addLog('Clos car contrat de renouvellement ' . $this->getRef());
 
-                            if(!$fromCron)
+                            if (!$fromCron)
                                 $this->addLog($beforeContrat->getRef() . ' clos suite à l\'activation de ce contrat');
                             else
                                 $this->addLog($beforeContrat->getRef() . ' clos automatiquement car ce contrat en est le renouvellement');
@@ -933,7 +936,7 @@ class BContract_contrat extends BimpDolObject
             }
         }
 
-        return 0; 
+        return 0;
     }
 
     public function actionClose($data, &$success)
@@ -1223,6 +1226,7 @@ class BContract_contrat extends BimpDolObject
             $echeancier->updateField('statut', 0);
         }
     }
+
     public function actionAbort($data = [], &$success)
     {
 
@@ -1475,9 +1479,9 @@ class BContract_contrat extends BimpDolObject
             $this->updateField('next_contrat', $new_contrat->id);
             $children = $this->getChildrenList("lines", Array("renouvellement" => 0));
             foreach ($children as $id_child) {
-                
+
                 $child = $this->getChildObject("lines", $id_child);
-                
+
                 $neew_price = $child->getData('subprice');
                 if ($this->getData('syntec') > 0 && BimpTools::getValue('use_syntec')) {
                     $neew_price = $child->getData('subprice') * (BimpCore::getConf('current_indice_syntec') / $this->getData('syntec'));
@@ -1711,8 +1715,9 @@ class BContract_contrat extends BimpDolObject
 
         return $lines;
     }
-    
-    public function getTotalContratAll() {
+
+    public function getTotalContratAll()
+    {
         
     }
 
@@ -1720,8 +1725,8 @@ class BContract_contrat extends BimpDolObject
     {
         global $conf, $langs, $user;
         $buttons = Array();
-        
-        if($user->id == 460) {
+
+        if ($user->id == 460) {
             $buttons[] = array(
                 'label'   => 'TEST EN COURS',
                 'icon'    => 'fas_retweet',
@@ -1729,7 +1734,7 @@ class BContract_contrat extends BimpDolObject
                 ))
             );
         }
-        
+
         if ($this->isLoaded() && BimpTools::getContext() != 'public') {
 
             $status = $this->getData('statut');
@@ -1756,8 +1761,8 @@ class BContract_contrat extends BimpDolObject
                     );
                 }
             }
-            
-            
+
+
 
             if ($status == self::CONTRAT_STATUS_VALIDE || $status == self::CONTRAT_STATUT_WAIT_ACTIVER) {
                 $buttons[] = array(
@@ -1787,7 +1792,7 @@ class BContract_contrat extends BimpDolObject
                     ))
                 );
             }
-            if (/*($this->getData('tacite') == 12 || $this->getData('tacite') == 0) &&*/ !$this->getData('next_contrat') && ($status == self::CONTRAT_STATUS_ACTIVER || $status == self::CONTRAT_STATUS_CLOS)) {
+            if (/* ($this->getData('tacite') == 12 || $this->getData('tacite') == 0) && */!$this->getData('next_contrat') && ($status == self::CONTRAT_STATUS_ACTIVER || $status == self::CONTRAT_STATUS_CLOS)) {
                 $buttons[] = array(
                     'label'   => 'Renouveler par clonage du contrat (SN et sites inclus)',
                     'icon'    => 'fas_retweet',
@@ -2297,7 +2302,7 @@ class BContract_contrat extends BimpDolObject
 
         $card .= '<div>';
         if ($this->canClientViewDetail())
-            $card .= '<a tool="Voir le contrat" flow="down" class="button" href="' . self::getPublicBaseUrl() .'tab=contrats&content=card&id_contrat=' . $this->id . '"><i class="fas fa-eye"></i></a>';
+            $card .= '<a tool="Voir le contrat" flow="down" class="button" href="' . self::getPublicBaseUrl() . 'tab=contrats&content=card&id_contrat=' . $this->id . '"><i class="fas fa-eye"></i></a>';
         if ($this->isValide()) {
             $card .= '<span tool="Nouveau ticket support" flow="down" class="button" onclick="' . $this->getNewTicketSupportOnClick() . '"><i class="fas fa-plus"></i></span>';
         }
@@ -2749,9 +2754,10 @@ class BContract_contrat extends BimpDolObject
         }
         return $actions;
     }
-    
-    public function getPdfNamePrincipal(){
-        return 'Contrat_'.$this->getRef().'_Ex_OLYS.pdf';
+
+    public function getPdfNamePrincipal()
+    {
+        return 'Contrat_' . $this->getRef() . '_Ex_OLYS.pdf';
     }
 
     public function actionAddContact($data, &$success)
@@ -3301,40 +3307,45 @@ class BContract_contrat extends BimpDolObject
 
     public function getCurrentTotal()
     {
+        return $this->getTotal($this->getData('current_renouvellement'));
+    }
+    
+    public function getTotal($renouvellement){
         $montant = 0;
         foreach ($this->dol_object->lines as $line) {
             $child = $this->getChildObject("lines", $line->id);
-            if ($child->getData('renouvellement') == $this->getData('current_renouvellement')) {
+            if ($child->getData('renouvellement') == $renouvellement) {
                 $montant += $line->total_ht;
             }
         }
 
         return $montant;
+        
     }
-    
-    public function getAddAmountAvenantProlongation() {
-        
+
+    public function getAddAmountAvenantProlongation()
+    {
+
         $now = new DateTime();
-        
+
         $total = 0;
-        
+
         $filters = [
-            'statut'        => 2, 
+            'statut'        => 2,
             'type'          => 1,
             'want_end_date' => [
-                'operator'  => '>=',
-                'value'     => $now->format('Y-m-d')
+                'operator' => '>=',
+                'value'    => $now->format('Y-m-d')
             ]
         ];
-        
+
         $children = $this->getChildrenList('avenant', $filters);
-        
-        foreach($children as $id_child) {
-            
+
+        foreach ($children as $id_child) {
+
             $total += $this->getCurrentTotal();
-            
         }
-        
+
         return $total;
     }
 
@@ -3848,21 +3859,21 @@ class BContract_contrat extends BimpDolObject
         //print_r($interval);
         return $interval->days;
     }
-    
-    public function facturationIsDemainCron($heure_cron = 23) {
+
+    public function facturationIsDemainCron($heure_cron = 23)
+    {
         $echeancier = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_echeancier');
-        if($echeancier->find(['id_contrat' => $this->id], true)) {
+        if ($echeancier->find(['id_contrat' => $this->id], true)) {
             $today = new DateTime(date('Y-m-d ' . $heure_cron . ':00:00'));
             $nextFacturation = new DateTime($echeancier->getData('next_facture_date'));
-            
+
             $diff = $today->diff($nextFacturation);
-            
-            if($diff->y == 0 && $diff->m == 0 && $diff->d == 0 && $diff->h == 1) {
+
+            if ($diff->y == 0 && $diff->m == 0 && $diff->d == 0 && $diff->h == 1) {
                 return 1;
             }
-
         }
-        
+
         return 0;
     }
 

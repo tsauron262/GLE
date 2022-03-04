@@ -9,6 +9,7 @@ class BimpObject extends BimpCache
     public $object_name = '';
     public $config = null;
     public $id = null;
+    public $alias = 'a';
 //    public $asGraph = false; => remplacé par param yml "has_graph" 
     public $ref = "";
     public static $status_list = array();
@@ -134,12 +135,12 @@ class BimpObject extends BimpCache
 
         return $instance;
     }
-    
-    public function getPdfNamePrincipal(){
-        BimpCore::addlog('"getPdfNamePrincipal" n\'est pas redéfinit dans '.$this->object_name);
+
+    public function getPdfNamePrincipal()
+    {
+        BimpCore::addlog('"getPdfNamePrincipal" n\'est pas redéfinit dans ' . $this->object_name);
         return 'n_c.pdf';
     }
-    
 
     public function actionGenerateBulkPdf($data, &$success)
     {
@@ -2502,7 +2503,9 @@ class BimpObject extends BimpCache
             // Traitement des cas particuliers des listes de valeurs: 
             if ($type === 'items_list') {
                 if (is_string($value)) {
-                    if ($this->getConf('fields/' . $field . '/items_braces', 0)) {
+                    if ($value === '') {
+                        $value = array();
+                    } elseif ($this->getConf('fields/' . $field . '/items_braces', 0)) {
                         $value = str_replace('][', ',', $value);
                         $value = str_replace('[', '', $value);
                         $value = str_replace(']', '', $value);
@@ -2665,8 +2668,25 @@ class BimpObject extends BimpCache
                     break;
 
                 case 'hasMany':
+                    $ok = false;
                     if (!$this->isChild($child)) {
-                        $errors[] = 'Objet "' . $this->getLabel() . '": relation de parenté invalide pour l\'objet "' . $child_name . '"';
+                        $path = 'objects/' . $child_name . '/list/filters';
+                        $this->config->isDefined($path);
+                        $data = $this->config->getParams($path);
+
+                        foreach ($data as $joinInChild => $data2) {
+                            if (isset($data2['field_value'])) {
+                                $alias = ($main_alias ? $main_alias . '___' : '') . $child_name;
+                                $ok = true;
+                                $joins[$alias] = array(
+                                    'table' => $child->getTable(),
+                                    'alias' => $alias,
+                                    'on'    => $alias . '.' . $joinInChild . ' = ' . $main_alias . '.' . $data2['field_value']
+                                );
+                            }
+                        }
+                        if (!$ok)
+                            $errors[] = 'Objet "' . $this->getLabel() . '": relation de parenté invalide pour l\'objet "' . $child_name . '"';
                     } else {
                         $child_id_parent_property = $child->getParentIdProperty();
                         $alias = ($main_alias ? $main_alias . '___' : '') . $child_name;
@@ -3125,7 +3145,7 @@ class BimpObject extends BimpCache
         return $value;
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         
     }
@@ -4507,7 +4527,7 @@ class BimpObject extends BimpCache
     public function update(&$warnings = array(), $force_update = false)
     {
         $this->noFetchOnTrigger = true;
-        
+
         $this->force_update = $force_update;
 
         BimpLog::actionStart('bimpobject_update', 'Mise à jour', $this);
@@ -5558,7 +5578,6 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         // Supprimer les extrafields
         // Retourner un tableau d'erreurs
-
 //        if (count($this->getExtraFields())) {
 //            return array('Fonction de suppression des champs supplémentaires non implémentée');
 //        }
@@ -6354,6 +6373,20 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             $html .= '>';
             $html .= BimpRender::renderIcon('fas_comments');
             $html .= '</span>';
+            
+            //Suivi mail
+            $random = random_int("3", "999999999999");
+            $htmlId = 'suivi_mail_'.$random;
+            $onclick = $this->getJsLoadModalCustomContent('renderSuiviMail', 'Suivi des mails');
+            $html .= '<span id="'.$htmlId.'" class="btn btn-default bs-popover"';
+            $html .= ' onclick="' . $onclick . '"';
+            $html .= BimpRender::renderPopoverData('Suivi des mails');
+            $html .= '>';
+            $html .= BimpRender::renderIcon('fas_inbox');
+            $html .= '</span>';
+            if($_GET['open'] == 'suivi_mail')
+                $html .= '<script>$(document).ready(function(){  $("#'.$htmlId.'").click();});</script>';
+            
 
             $html .= '</div>';
             $html .= '</div>';
@@ -7391,6 +7424,27 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
         return '';
     }
+    
+    public function renderSuiviMail()
+    {
+        $instance = BimpObject::getInstance('bimpcore', 'BimpMailLog');
+        $list = new BC_ListTable($instance, 'default');
+//        $list->addIdentifierSuffix($suffixe);
+        $list->addFieldFilterValue('obj_type', 'bimp_object');
+        $list->addFieldFilterValue('obj_module', $this->module);
+        $list->addFieldFilterValue('obj_name', $this->object_name);
+        $list->addFieldFilterValue('id_obj', $this->id);
+        $list->addObjectChangeReload($this->object_name);
+
+        if ($filter_by_user) {
+            $filters = BimpNote::getFiltersByUser();
+            foreach ($filters as $field => $filter) {
+                $list->addFieldFilterValue($field, $filter);
+            }
+        }
+
+        return $list->renderHtml();
+    }
 
     // Générations javascript: 
 
@@ -8363,6 +8417,9 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         } else {
             $url = $this->getUrl('private');
         }
+        
+        if(isset($params['after_link']))
+            $url .= $params['after_link'];
 
         if ($url) {
             $html .= '<a href="' . $url . '"';
@@ -9158,11 +9215,15 @@ var options = {
 
     // Gestion statique des objets:
 
-    public static function createBimpObject($module, $object_name, $data, $force_create = false, &$errors = array(), &$warnings = array())
+    public static function createBimpObject($module, $object_name, $data, $force_create = false, &$errors = array(), &$warnings = array(), $no_transactions_db = false)
     {
         $instance = static::getInstance($module, $object_name);
 
         if (is_a($instance, 'BimpObject')) {
+            if ($no_transactions_db) {
+                $instance->useNoTransactionsDb();
+            }
+            
             $create_warnings = array();
             $create_errors = $instance->validateArray($data);
 

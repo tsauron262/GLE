@@ -1,7 +1,6 @@
 <?php
 
-class BC_Filter extends BimpComponent
-{
+class BC_Filter extends BimpComponent {
 
     public $component_name = 'Filtre';
     public static $type = 'filter';
@@ -36,12 +35,11 @@ class BC_Filter extends BimpComponent
     public static $date_range_options = array(
         'max_today' => '<= Aujourd\'hui',
         'min_today' => '>= Aujourd\'hui',
-        'max_yd'    => '< Aujourd\'hui',
-        'min_yd'    => '> Aujourd\'hui'
+        'max_yd' => '< Aujourd\'hui',
+        'min_yd' => '> Aujourd\'hui'
     );
 
-    public function __construct(BimpObject $object, $name, $path, $params = array(), $values = array(), $excluded_values = array())
-    {
+    public function __construct(BimpObject $object, $name, $path, $params = array(), $values = array(), $excluded_values = array()) {
         $this->params_def['type'] = array();
         $this->params_def['label'] = array();
         $this->params_def['data_type'] = array('default' => 'string');
@@ -132,7 +130,24 @@ class BC_Filter extends BimpComponent
 
         $items = null;
 
-        $input_type = $this->object->getConf('fields/' . $this->bc_field->name . '/input/type', '');
+
+        if (!is_null($this->bc_field)) {
+            $field_params = $this->bc_field->params;
+
+            if ($this->object->config->isDefined('fields/' . $this->bc_field->name . '/search/input/type')) {
+                $input_path = 'fields/' . $this->bc_field->name . '/search/input/type';
+            } elseif ($this->object->config->isDefined('fields/' . $this->bc_field->name . '/filter/input/type')) {
+                $input_path = 'fields/' . $this->bc_field->name . '/filter/input/type';
+            } else {
+                $input_path = 'fields/' . $this->bc_field->name . '/input/type';
+            }
+        } elseif ($this->object->config->isDefined('filters/' . $this->filter_name . '/input/type')) {
+            $input_path = 'filters/' . $this->filter_name . '/input/type';
+        }
+        $input_type = $this->object->getConf($input_path, '');
+
+
+
         if ($input_type === 'search_user') {
             $this->params['type'] = 'user';
         } elseif ($this->bc_field->params['type'] == 'id_object') {
@@ -211,8 +226,7 @@ class BC_Filter extends BimpComponent
 
     // Getters: 
 
-    public function getFilterValueLabel($value)
-    {
+    public function getFilterValueLabel($value) {
         if (!$this->isOk()) {
             return '';
         }
@@ -360,8 +374,7 @@ class BC_Filter extends BimpComponent
         return $label;
     }
 
-    public function getSqlFilters(&$filters = array(), &$joins = array())
-    {
+    public function getSqlFilters(&$filters = array(), &$joins = array()) {
         if (!$this->isOk()) {
             return array();
         }
@@ -388,8 +401,8 @@ class BC_Filter extends BimpComponent
         if (!empty($errors)) {
             BimpCore::addlog('Erreur filtres de liste', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', $this->object, array(
                 'Nom du filtre' => $this->name,
-                'Erreurs'       => $errors,
-                'Paramètres'    => $this->params
+                'Erreurs' => $errors,
+                'Paramètres' => $this->params
             ));
         }
 
@@ -397,8 +410,7 @@ class BC_Filter extends BimpComponent
         return $errors;
     }
 
-    protected function getFieldSqlFilters(&$filters = array(), &$joins = array())
-    {
+    protected function getFieldSqlFilters(&$filters = array(), &$joins = array()) {
         if (in_array($this->filter_name, $this->object->params['fields']) && !$this->object->isFieldActivated($this->filter_name)) {
             return array();
         }
@@ -476,7 +488,7 @@ class BC_Filter extends BimpComponent
                                             foreach ($ids as $id) {
                                                 $or_field[] = array(
                                                     'part_type' => 'middle',
-                                                    'part'      => '[' . $id . ']'
+                                                    'part' => '[' . $id . ']'
                                                 );
                                             }
                                         } else {
@@ -513,7 +525,7 @@ class BC_Filter extends BimpComponent
                                                 foreach ($ids as $id) {
                                                     $or_field[] = array(
                                                         'part_type' => 'middle',
-                                                        'part'      => '[' . $id . ']'
+                                                        'part' => '[' . $id . ']'
                                                     );
                                                 }
                                             } else {
@@ -531,7 +543,7 @@ class BC_Filter extends BimpComponent
                                 if ($this->is_items_list) {
                                     $or_field[] = array(
                                         'part_type' => 'middle',
-                                        'part'      => '[' . $value . ']'
+                                        'part' => '[' . $value . ']'
                                     );
                                 } else {
                                     $or_field[] = $value;
@@ -601,13 +613,13 @@ class BC_Filter extends BimpComponent
                                 if ($this->is_items_list) {
                                     $and_field[] = array(
                                         'part_type' => 'middle',
-                                        'part'      => '[' . $value . ']',
-                                        'not'       => 1
+                                        'part' => '[' . $value . ']',
+                                        'not' => 1
                                     );
                                 } else {
                                     $and_field[] = array(
                                         'operator' => '!=',
-                                        'value'    => $value
+                                        'value' => $value
                                     );
                                 }
                             } else {
@@ -683,25 +695,43 @@ class BC_Filter extends BimpComponent
         return $errors;
     }
 
-    protected function getCustomFilterSqlFilters(&$filters = array(), &$joins = array())
-    {
+    protected function getCustomFilterSqlFilters(&$filters = array(), &$joins = array()) {
         $errors = array();
+
+
+
+        /* Pour jointure vers objet parent + alias dans objet */
+        $children = explode(':', $this->name);
+        $filter_name = array_pop($children);
+        $field_alias = 'a';
+        $field_object = $this->base_object;
+
+
+
+        if (!empty($children)) {
+            $errors = $field_object->getRecursiveChildrenJoins($children, $filters, $joins, 'a', $field_alias, $field_object);
+        }
+
+
 
         $values = self::getConvertedValues($this->params['type'], $this->values);
         if (!empty($values)) {
-            $this->object->getCustomFilterSqlFilters($this->filter_name, $values, $filters, $joins, $errors, false);
+            $field_object->getCustomFilterSqlFilters($filter_name, $values, $filters, $joins, $field_alias, $errors, false);
         }
+
+
 
         $excluded_values = self::getConvertedValues($this->params['type'], $this->excluded_values);
         if (!empty($excluded_values)) {
-            $this->object->getCustomFilterSqlFilters($this->filter_name, $excluded_values, $filters, $joins, $errors, true);
+            $field_object->getCustomFilterSqlFilters($filter_name, $excluded_values, $filters, $joins, $field_alias, $errors, true);
         }
+
+
 
         return $errors;
     }
 
-    public function getChildInstance()
-    {
+    public function getChildInstance() {
         if (is_null($this->child_instance)) {
             $child_instance = null;
             if (!is_null($this->bc_field)) {
@@ -735,8 +765,7 @@ class BC_Filter extends BimpComponent
         return $this->child_instance;
     }
 
-    public function getObjectIdsListLabel($ids_list)
-    {
+    public function getObjectIdsListLabel($ids_list) {
         $label = '';
 
         $sep = BimpTools::getArrayValueFromPath($ids_list, 'separator', '');
@@ -836,8 +865,7 @@ class BC_Filter extends BimpComponent
         return $label;
     }
 
-    public function getObjectChildIdFiltersLabel($id_filters)
-    {
+    public function getObjectChildIdFiltersLabel($id_filters) {
         $label = '';
 
         $filters_panel = $this->getChildFiltersPanel($id_filters);
@@ -876,8 +904,7 @@ class BC_Filter extends BimpComponent
         return $label;
     }
 
-    public function getChildFiltersPanel($id_filters)
-    {
+    public function getChildFiltersPanel($id_filters) {
         if (!isset($this->child_filters_panels[$id_filters])) {
             $child_instance = $this->getChildInstance();
 
@@ -914,8 +941,7 @@ class BC_Filter extends BimpComponent
 
     // Rendus HTML:
 
-    public function renderHtml($context = 'filters_panel')
-    {
+    public function renderHtml($context = 'filters_panel') {
         if (!$this->isOk() || !$this->isObjectValid()) {
             return '';
         }
@@ -1009,8 +1035,7 @@ class BC_Filter extends BimpComponent
         return $html;
     }
 
-    public function renderFilterValue($value, $excluded = false)
-    {
+    public function renderFilterValue($value, $excluded = false) {
         if (!$this->params['show']) {
             return '';
         }
@@ -1051,8 +1076,7 @@ class BC_Filter extends BimpComponent
         return $html;
     }
 
-    public function renderAddInput($context = 'filters_panel')
-    {
+    public function renderAddInput($context = 'filters_panel') {
         if (!$this->params['show']) {
             return '';
         }
@@ -1120,11 +1144,11 @@ class BC_Filter extends BimpComponent
 
             case 'range':
                 $input_options = array(
-                    'data'        => array(
+                    'data' => array(
                         'data_type' => 'number',
-                        'decimals'  => 8,
-                        'min'       => 'none',
-                        'max'       => 'none'
+                        'decimals' => 8,
+                        'min' => 'none',
+                        'max' => 'none'
                     ),
                     'extra_class' => 'bimp_filter_input'
                 );
@@ -1140,7 +1164,7 @@ class BC_Filter extends BimpComponent
                     $this->params['items'] = array();
                 }
                 $html .= BimpInput::renderInput('check_list', $input_name, $this->values, array(
-                            'items'              => $this->params['items'],
+                            'items' => $this->params['items'],
                             'select_all_buttons' => 1
                 ));
                 break;
@@ -1150,8 +1174,7 @@ class BC_Filter extends BimpComponent
         return $html;
     }
 
-    public function renderValueInput($input_name, $add_btn_html, $input_path, $field_params, $context = 'filters_panel')
-    {
+    public function renderValueInput($input_name, $add_btn_html, $input_path, $field_params, $context = 'filters_panel') {
         BimpObject::loadClass('bimpuserconfig', 'ListFilters');
 
         $html = '';
@@ -1162,8 +1185,8 @@ class BC_Filter extends BimpComponent
 
             // Select du type: 
             $type_options = array(
-                ''        => ($this->params['type'] === 'user' ? 'Sélection' : 'Recherche') . ' ' . $child_instance->getLabel('of_a'),
-                'ids'     => 'Liste d\'IDs',
+                '' => ($this->params['type'] === 'user' ? 'Sélection' : 'Recherche') . ' ' . $child_instance->getLabel('of_a'),
+                'ids' => 'Liste d\'IDs',
                 'filters' => 'Filtres enregistrés'
             );
 
@@ -1236,8 +1259,8 @@ class BC_Filter extends BimpComponent
             } else {
                 $html .= BimpInput::renderInput('select', $input_name . '_child_filters', 0, array(
                             'extra_class' => 'bimp_filter_input bimp_filter_child_id_filters',
-                            'options'     => $userChildFilters,
-                            'data'        => array(
+                            'options' => $userChildFilters,
+                            'data' => array(
                                 'default_value' => 0
                             )
                 ));
@@ -1281,16 +1304,15 @@ class BC_Filter extends BimpComponent
         return $html;
     }
 
-    public function renderValuePartInput($input_name, $add_btn_html)
-    {
+    public function renderValuePartInput($input_name, $add_btn_html) {
         $html = '';
 
         $html .= BimpInput::renderInput('select', $input_name . '_part_type', $this->params['part_type'], array(
                     'options' => array(
-                        'middle'    => 'Contient',
-                        'full'      => 'Est égal à',
+                        'middle' => 'Contient',
+                        'full' => 'Est égal à',
                         'beginning' => 'Commence par',
-                        'end'       => 'Fini par'
+                        'end' => 'Fini par'
                     ),
         ));
 
@@ -1302,8 +1324,7 @@ class BC_Filter extends BimpComponent
         return $html;
     }
 
-    public function renderDateRangeInput($input_type, $input_name, $add_btn_html, $context = 'filters_panel')
-    {
+    public function renderDateRangeInput($input_type, $input_name, $add_btn_html, $context = 'filters_panel') {
         $html = '';
 
         if ($input_type === 'date_range') {
@@ -1313,8 +1334,8 @@ class BC_Filter extends BimpComponent
             $html .= BimpInput::renderInput('select', $input_name . '_filter_type', ($this->cur_value_type ? $this->cur_value_type : 'min_max'), array(
                         'options' => array(
                             'min_max' => 'Min / Max',
-                            'period'  => 'Période relative',
-                            'option'  => 'Date relative à ajourd\'hui'
+                            'period' => 'Période relative',
+                            'option' => 'Date relative à ajourd\'hui'
                         )
             ));
             $html .= '</div>';
@@ -1325,23 +1346,23 @@ class BC_Filter extends BimpComponent
             $html .= '<b>Période passée:</b> <br/>';
             $html .= BimpInput::renderInput('qty', $input_name . '_period_qty', 0, array(
                         'extra_class' => 'bimp_filter_input bimp_filter_date_range_period_qty',
-                        'data'        => array(
-                            'data_type'     => 'number',
-                            'min'           => 0,
-                            'max'           => 'none',
-                            'unsigned'      => 1,
-                            'decimals'      => 0,
+                        'data' => array(
+                            'data_type' => 'number',
+                            'min' => 0,
+                            'max' => 'none',
+                            'unsigned' => 1,
+                            'decimals' => 0,
                             'default_value' => 0
                         )
             ));
             $html .= BimpInput::renderInput('select', $input_name . '_period_unit', 'n', array(
                         'extra_class' => 'bimp_filter_input bimp_filter_date_range_period_unit ',
-                        'options'     => array(
+                        'options' => array(
                             'n' => 'Année(s)',
                             'm' => 'Mois',
                             'j' => 'Jour(s)',
                         ),
-                        'data'        => array(
+                        'data' => array(
                             'default_value' => 'n'
                         )
             ));
@@ -1350,23 +1371,23 @@ class BC_Filter extends BimpComponent
             $html .= '<b>Décalage (-):</b> <br/>';
             $html .= BimpInput::renderInput('qty', $input_name . '_period_offset_qty', 0, array(
                         'extra_class' => 'bimp_filter_input bimp_filter_date_range_offset_qty',
-                        'data'        => array(
-                            'data_type'     => 'number',
-                            'min'           => 'none',
-                            'max'           => 'none',
-                            'unsigned'      => 0,
-                            'decimals'      => 0,
+                        'data' => array(
+                            'data_type' => 'number',
+                            'min' => 'none',
+                            'max' => 'none',
+                            'unsigned' => 0,
+                            'decimals' => 0,
                             'default_value' => 0
                         )
             ));
             $html .= BimpInput::renderInput('select', $input_name . '_period_offset_unit', 'n', array(
                         'extra_class' => 'bimp_filter_input bimp_filter_date_range_offset_unit ',
-                        'options'     => array(
+                        'options' => array(
                             'n' => 'Année(s)',
                             'm' => 'Mois',
                             'j' => 'Jour(s)',
                         ),
-                        'data'        => array(
+                        'data' => array(
                             'default_value' => 'n'
                         )
             ));
@@ -1375,11 +1396,11 @@ class BC_Filter extends BimpComponent
             $html .= '<b>Mode:</b>';
             $html .= BimpInput::renderInput('select', $input_name . '_period_mode', 'abs', array(
                         'extra_class' => 'bimp_filter_input bimp_filter_date_range_period_mode ',
-                        'options'     => array(
+                        'options' => array(
                             'abs' => 'Absolu',
                             'rel' => 'Relatif'
                         ),
-                        'data'        => array(
+                        'data' => array(
                             'default_value' => 'abs'
                         )
             ));
@@ -1387,8 +1408,8 @@ class BC_Filter extends BimpComponent
             $html .= '<div class="date_range_limits_container" style="margin-top: 5px">';
             $html .= '<b>Limites:</b><br/>';
             $html .= BimpInput::renderInput($input_type, $input_name . '_period_limit', '', array(
-                        'from_label'  => 'Min',
-                        'to_label'    => 'Max',
+                        'from_label' => 'Min',
+                        'to_label' => 'Max',
                         'extra_class' => 'bimp_filter_input'
             ));
             $html .= '</div>';
@@ -1411,12 +1432,12 @@ class BC_Filter extends BimpComponent
             $html .= '<div class="bimp_filter_type_container bimp_filter_type_option bimp_filter_date_range_option">';
             $html .= BimpInput::renderInput('select', $input_name . 'date_range_option', '', array(
                         'extra_class' => 'bimp_filter_input bimp_filter_date_range_option',
-                        'options'     => array(
-                            ''          => '',
+                        'options' => array(
+                            '' => '',
                             'max_today' => '<= Aujourd\'hui',
                             'min_today' => '>= Aujourd\'hui',
-                            'max_yd'    => '< Aujourd\'hui',
-                            'min_yd'    => '> Aujourd\'hui'
+                            'max_yd' => '< Aujourd\'hui',
+                            'min_yd' => '> Aujourd\'hui'
                         )
             ));
             $html .= '<div style="text-align: right; margin-top: 2px">';
@@ -1452,8 +1473,7 @@ class BC_Filter extends BimpComponent
 
     // Getters statics: 
 
-    public static function getFilterObject($base_object, $full_name, &$filter_name = '', &$errors = array())
-    {
+    public static function getFilterObject($base_object, $full_name, &$filter_name = '', &$errors = array()) {
         $filter_object = null;
         $children = explode(':', $full_name);
         $filter_name = array_pop($children);
@@ -1484,8 +1504,7 @@ class BC_Filter extends BimpComponent
         return $filter_object;
     }
 
-    public static function getFilterDefaultLabel($base_object, $full_name)
-    {
+    public static function getFilterDefaultLabel($base_object, $full_name) {
         $full_name = str_replace('___', ':', $full_name);
 
         $label = '';
@@ -1522,8 +1541,7 @@ class BC_Filter extends BimpComponent
         return $label;
     }
 
-    public static function getFilterTitle($base_object, $full_name, &$errors = array(), $with_base_object = true)
-    {
+    public static function getFilterTitle($base_object, $full_name, &$errors = array(), $with_base_object = true) {
         $full_name = str_replace('___', ':', $full_name);
 
         $title = '';
@@ -1579,8 +1597,7 @@ class BC_Filter extends BimpComponent
         return $title;
     }
 
-    public static function getRangeSqlFilter($value, &$errors = array(), $is_dates = false, $excluded = false)
-    {
+    public static function getRangeSqlFilter($value, &$errors = array(), $is_dates = false, $excluded = false) {
         $filter = array();
 
         if (is_array($value)) {
@@ -1599,24 +1616,24 @@ class BC_Filter extends BimpComponent
                     if ($excluded) {
                         $filter = array(
                             'operator' => '<=',
-                            'value'    => $value['min']
+                            'value' => $value['min']
                         );
                     } else {
                         $filter = array(
                             'operator' => '>=',
-                            'value'    => $value['min']
+                            'value' => $value['min']
                         );
                     }
                 } elseif ($value['max'] !== '' && $value['min'] === '') {
                     if ($excluded) {
                         $filter = array(
                             'operator' => '>=',
-                            'value'    => $value['max']
+                            'value' => $value['max']
                         );
                     } else {
                         $filter = array(
                             'operator' => '<=',
-                            'value'    => $value['max']
+                            'value' => $value['max']
                         );
                     }
                 } else {
@@ -1638,8 +1655,7 @@ class BC_Filter extends BimpComponent
         return $filter;
     }
 
-    public static function getValuePartSqlFilter($value, $part_type, $excluded = false)
-    {
+    public static function getValuePartSqlFilter($value, $part_type, $excluded = false) {
         if (is_array($value) && isset($value['value'])) {
             $value = $value['value'];
             $part_type = (isset($value['part_type']) ? $value['part_type'] : $part_type);
@@ -1672,7 +1688,7 @@ class BC_Filter extends BimpComponent
         } else {
             $filter = array(
                 'part_type' => $part_type,
-                'part'      => $value
+                'part' => $value
             );
 
             if ($excluded) {
@@ -1683,8 +1699,7 @@ class BC_Filter extends BimpComponent
         return $filter;
     }
 
-    public static function getValuePartLabel($value, $part_type)
-    {
+    public static function getValuePartLabel($value, $part_type) {
         $label = '';
 
         if (in_array($part_type, array('middle', 'end'))) {
@@ -1709,8 +1724,7 @@ class BC_Filter extends BimpComponent
         return $label;
     }
 
-    public static function getDateRangePeriodLabel($value)
-    {
+    public static function getDateRangePeriodLabel($value) {
         $label = '';
         if (isset($value['qty']) && (int) $value['qty'] && isset($value['unit']) && (string) $value['unit']) {
             if (isset($value['mode']) && $value['mode'] === 'rel') {
@@ -1796,8 +1810,7 @@ class BC_Filter extends BimpComponent
         return $label;
     }
 
-    public static function convertDateRangePeriodValue($value)
-    {
+    public static function convertDateRangePeriodValue($value) {
         $from = '';
         $to = '';
 
@@ -1934,8 +1947,7 @@ class BC_Filter extends BimpComponent
         );
     }
 
-    public static function getDateRangeOptionLabel($option)
-    {
+    public static function getDateRangeOptionLabel($option) {
         if (isset(self::$date_range_options[$option])) {
             return self::$date_range_options[$option] . '<br/>';
         }
@@ -1943,8 +1955,7 @@ class BC_Filter extends BimpComponent
         return '<span class="danger">Valeur invalide</span>';
     }
 
-    public static function convertDateRangeOptionValue($option)
-    {
+    public static function convertDateRangeOptionValue($option) {
         $value = array(
             'min' => '',
             'max' => ''
@@ -1971,8 +1982,7 @@ class BC_Filter extends BimpComponent
         return $value;
     }
 
-    public static function getConvertedValues($filter_type, $values)
-    {
+    public static function getConvertedValues($filter_type, $values) {
         foreach ($values as $idx => $value) {
             if ($value == '') {
                 unset($values[$idx]);
@@ -1984,7 +1994,7 @@ class BC_Filter extends BimpComponent
                     $part = (is_string($value) ? $value : (isset($value['value']) ? $value['value'] : ''));
                     $part_type = (isset($value['part_type']) ? $value['part_type'] : "middle"); //$this->params['part_type']);
                     $values[$idx] = array(
-                        'value'     => $part,
+                        'value' => $part,
                         'part_type' => $part_type
                     );
                     break;
@@ -2013,8 +2023,7 @@ class BC_Filter extends BimpComponent
         return $values;
     }
 
-    public static function getDefaultTypeFromDataType($data_type)
-    {
+    public static function getDefaultTypeFromDataType($data_type) {
         switch ($data_type) {
             case 'color':
             case 'bool':
@@ -2045,8 +2054,7 @@ class BC_Filter extends BimpComponent
         return '';
     }
 
-    public static function getValueType($filter_type, $value)
-    {
+    public static function getValueType($filter_type, $value) {
         switch ($filter_type) {
             case 'value':
             case 'user':
@@ -2078,4 +2086,5 @@ class BC_Filter extends BimpComponent
 
         return '';
     }
+
 }

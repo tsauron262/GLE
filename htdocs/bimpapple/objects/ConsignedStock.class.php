@@ -3,19 +3,75 @@
 class ConsignedStock extends BimpObject
 {
 
-    // Droits user: 
+    // Droits user:
+
+    public function canCreate()
+    {
+        global $user;
+
+        return (int) $user->admin;
+    }
+
+    public function canEdit()
+    {
+        return $this->canCreate();
+    }
+
+    public function canDelete()
+    {
+        global $user;
+
+        return (int) $user->admin;
+    }
+
+    public function canEditField($field_name)
+    {
+        if (!$this->isLoaded()) {
+            return 1;
+        }
+
+        global $user;
+
+        if ($user->admin) {
+            return 1;
+        }
+
+        if (in_array($field_name, array('serials', 'qty'))) {
+            return 1;
+        }
+
+        return 0;
+    }
 
     public function canSetAction($action)
     {
         switch ($action) {
-            case 'send':
-                return 0;
+            case 'correct':
+                return 1;
+
+            case 'createShipment':
+                return 1;
 
             case 'receive':
                 return 1;
         }
 
         return parent::canSetAction($action);
+    }
+
+    // Getters booléens: 
+
+    public function isActionAllowed($action, &$errors = array())
+    {
+        switch ($action) {
+            case 'correct':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
+                return 1;
+        }
+
+        return parent::isActionAllowed($action, $errors);
     }
 
     // Getters données: 
@@ -38,16 +94,6 @@ class ConsignedStock extends BimpObject
     {
         $buttons = array();
 
-//        if ($this->canSetAction('send')) {
-//            $buttons[] = array(
-//                'label'   => 'Envoi stock consigné',
-//                'icon'    => 'fas_sign-out-alt',
-//                'onclick' => $this->getJsActionOnclick('send', array(), array(
-//                    'form_name' => 'send'
-//                ))
-//            );
-//        }
-
         if ($this->canSetAction('receive')) {
             $buttons[] = array(
                 'label'   => 'Réception stock consigné',
@@ -60,6 +106,33 @@ class ConsignedStock extends BimpObject
         }
 
         return $buttons;
+    }
+
+    public function getListExtraButtons()
+    {
+        $buttons = array();
+
+        if ($this->isActionAllowed('correct') && $this->canSetAction('correct')) {
+            $buttons[] = array(
+                'label'   => 'Corriger le stock',
+                'icon'    => 'fas_pen',
+                'onclick' => $this->getJsActionOnclick('correct', array(), array(
+                    'form_name' => 'correct' . ((int) $this->getData('serialized') ? '_serialized' : '')
+                ))
+            );
+        }
+
+        return $buttons;
+    }
+
+    // Getters statics: 
+
+    public static function getStockInstance($code_centre, $part_number)
+    {
+        return BimpCache::findBimpObjectInstance('bimpapple', 'ConsignedStock', array(
+                    'code_centre' => $code_centre,
+                    'part_number' => $part_number
+                        ), true);
     }
 
     // Rendus HTML: 
@@ -330,36 +403,31 @@ class ConsignedStock extends BimpObject
                             if (empty($result)) {
                                 return BimpRender::renderAlerts('Aucun stock consigné à renvoyer à Apple pour ce n° ShipTo', 'warning');
                             } else {
-                                $html .= '<pre>';
-                                $html .= print_r($result, 1);
-                                $html .= '</pre>';
-                                return $html;
-
-//                                $deliveries = array();
-//                                foreach ($result as $order) {
-//                                    if (isset($order['deliveries'])) {
-//                                        foreach ($order['deliveries'] as $delivery) {
-//                                            $total = 0;
-//                                            $qty = 0;
-//                                            $dt = new DateTime($delivery['deliveredDate']);
-//
-//                                            if (isset($delivery['parts'])) {
-//                                                foreach ($delivery['parts'] as $part) {
-//                                                    $total += (int) $part['quantityDelivered'];
-//                                                    $qty += ((int) $part['quantityDelivered'] - (int) $part['quantityAcknowledged']);
-//                                                }
-//                                            }
-//
-//                                            $deliveries[$delivery['number']] = 'N° ' . $delivery['number'] . ' - ' . $dt->format('d / m / Y') . ' - ' . $qty . ' unité(s) à réceptionner sur ' . $total;
-//                                        }
-//                                    }
-//                                }
-//
-//                                $html .= BimpInput::renderInput('select', 'deliveryNumber', '', array(
-//                                            'options' => $deliveries
-//                                ));
-//
+//                                $html .= '<pre>';
+//                                $html .= print_r($result, 1);
+//                                $html .= '</pre>';
 //                                return $html;
+
+                                $orders = array();
+                                foreach ($result as $order) {
+                                    if (isset($order['parts'])) {
+                                        $total = 0;
+                                        $qty = 0;
+
+                                        foreach ($order['parts'] as $part) {
+                                            $total += (int) $part['partQuantity'];
+                                            $qty += ((int) $part['partQuantity'] - (int) $part['quantitySubmitted']);
+                                        }
+
+                                        $orders[$order['orderId']] = 'N° ' . $order['orderId'] . ' - ' . $qty . ' unité(s) à renvoyer sur ' . $total;
+                                    }
+                                }
+
+                                $html .= BimpInput::renderInput('select', 'orderId', '', array(
+                                            'options' => $orders
+                                ));
+
+                                return $html;
                             }
                         }
                     }
@@ -375,9 +443,189 @@ class ConsignedStock extends BimpObject
         return $html;
     }
 
+    // Traitements:
+
+    public function correctStock($qty_modif, $serial = '', $code_mvt = '', $desc = '', &$warnings = array(), $log_error = false, $no_db_transactions = false)
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            $serials = $this->getData('serials');
+            $qty = (int) $this->getData('qty');
+
+            if ((int) $this->getData('serialized')) {
+                if (!$serial) {
+                    $errors[] = 'Composant sérialisé - n° de série obligatoire';
+                } else {
+                    if ($qty_modif < 0) {
+                        if (!in_array($serial, $serials)) {
+                            $errors[] = 'Le n° de série "' . $serial . '" n\'est pas en stock';
+                        } else {
+                            foreach ($serials as $idx => $s) {
+                                if ($s == $serial) {
+                                    unset($serials[$idx]);
+                                    break;
+                                }
+                            }
+                            $qty_modif = -1;
+                        }
+                    } else if ($qty_modif > 0) {
+                        if (in_array($serial, $serials)) {
+                            $errors[] = 'Le n° de série "' . $serial . '" est déjà en stock';
+                        } else {
+                            $serials[] = $serial;
+                            $qty_modif = 1;
+                        }
+                    }
+
+                    $qty = count($serials);
+                }
+            } else {
+                $serials = array();
+                $qty += $qty_modif;
+            }
+
+            if (!count($errors)) {
+                $prev_db = $this->db;
+                if ($no_db_transactions) {
+                    $this->useNoTransactionsDb();
+                }
+
+                $this->set('serials', $serials);
+                $this->set('qty', $qty);
+                $errors = $this->update($warnings, true);
+
+                if (!count($errors)) {
+                    global $user;
+
+                    $mvt_errors = array();
+                    $mvt_warnings = array();
+                    BimpObject::createBimpObject('bimpapple', 'ConsignedStockMvt', array(
+                        'id_stock'    => (int) $this->id,
+                        'id_user'     => (int) $user->id,
+                        'date'        => date('Y-m-d H:i:s'),
+                        'qty'         => $qty_modif,
+                        'serial'      => $serial,
+                        'code_mvt'    => $code_mvt,
+                        'description' => $desc
+                            ), true, $mvt_errors, $mvt_warnings, $no_db_transactions);
+
+                    if (count($mvt_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($mvt_errors, $this->getData('part_number'));
+                    }
+                } elseif ($log_error) {
+                    BimpCore::addlog('Echec mise à jour stock consigné Apple - A corriger', Bimp_Log::BIMP_LOG_ERREUR, 'stocks', $this, array(
+                        'Modificateur qté' => $qty_modif,
+                        'Serial'           => $serial,
+                        'Code mvt'         => $code_mvt,
+                        'Description mvt'  => $desc
+                            ), true);
+                }
+
+                $this->db = $prev_db;
+            }
+        }
+
+        return $errors;
+    }
+
     // Actions: 
 
-    public function actionReceive($data, &$success)
+    public function actionCorrect($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $sc = 'triggerObjectChange(\'bimpapple\', \'ConsignedStockMvt\');';
+
+        $code_mvt = 'MANUAL';
+        $desc = BimpTools::getArrayValueFromPath($data, 'infos', '');
+
+        if ((int) $this->getData('serialized')) {
+            $nAdded = 0;
+            $nRemoved = 0;
+
+            $serials = $this->getData('serials');
+            $new_serials = BimpTools::getArrayValueFromPath($data, 'serials', array());
+
+            foreach ($serials as $serial) {
+                if (!in_array($serial, $new_serials)) {
+                    $stock_errors = $this->correctStock(-1, $serial, $code_mvt, $desc, $warnings);
+
+                    if (count($stock_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($stock_errors, 'Echec retrait du n° de série "' . $serial . '"');
+                    } else {
+                        $nRemoved++;
+                    }
+                }
+            }
+
+            foreach ($new_serials as $serial) {
+                if (!in_array($serial, $serials)) {
+                    $stock_errors = $this->correctStock(1, $serial, $code_mvt, $desc, $warnings);
+
+                    if (count($stock_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($stock_errors, 'Echec ajout du n° de série "' . $serial . '"');
+                    } else {
+                        $nAdded++;
+                    }
+                }
+            }
+
+            if (!$nAdded && !$nRemoved) {
+                $warnings[] = 'Aucun changement n\'a été éffectué';
+            } else {
+                if ($nAdded) {
+                    $success .= ($success ? '<br/>' : '') . $nAdded . ' n° de série ajouté(s) avec succès';
+                }
+                if ($nRemoved) {
+                    $success .= ($success ? '<br/>' : '') . $nRemoved . ' n° de série retiré(s) avec succès';
+                }
+            }
+        } else {
+            $mode = BimpTools::getArrayValueFromPath($data, 'mode', '');
+
+            if (!$mode) {
+                $errors[] = 'Mode de saisie des quantités absent';
+            } else {
+                $qty_modif = 0;
+
+                switch ($mode) {
+                    case 'total':
+                        $new_qty = (int) BimpTools::getArrayValueFromPath($data, 'qty', $this->getData('qty'));
+                        $qty = (int) $this->getData('qty');
+                        $qty_modif = $new_qty - $qty;
+                        break;
+
+                    case 'add':
+                        $qty_modif = (int) BimpTools::getArrayValueFromPath($data, 'qty_to_add', 0);
+                        break;
+
+                    case 'remove':
+                        $qty_modif = (int) BimpTools::getArrayValueFromPath($data, 'qty_to_remove', 0) * -1;
+                        break;
+                }
+
+                if (!$qty_modif) {
+                    $errors[] = 'Nouvelle quantité identique à la quantité actuelle';
+                } else {
+                    $errors = $this->correctStock($qty_modif, '', $code_mvt, $desc, $warnings);
+
+                    if (!count($errors)) {
+                        $success = 'Correction du stock effectuée avec succès.<br/>Nouvelle quantité <b>' . $this->getData('qty') . '</b>';
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $sc
+        );
+    }
+
+    public function actionReceive($data, &$success = '')
     {
         $errors = array();
         $warnings = array();
@@ -475,6 +723,7 @@ class ConsignedStock extends BimpObject
                                                 'Part Number'  => $part['number'],
                                                 'Identifiants' => $part['device']['identifiers']
                                                     ), true);
+                                            $nFails++;
                                             continue;
                                         }
                                     } elseif (isset($part['quantity'])) {
@@ -486,73 +735,50 @@ class ConsignedStock extends BimpObject
                                     }
 
                                     // Recherche entrée existante: 
-                                    $cs = BimpCache::findBimpObjectInstance('bimpapple', 'ConsignedStock', array(
-                                                'part_number' => $part['number'],
-                                                'code_centre' => $code_centre
-                                                    ), true, false);
+                                    $stock = self::getStockInstance($code_centre, $part['number']);
 
-                                    if (BimpObject::objectLoaded($cs)) {
-                                        // Mise à jour: 
-                                        $new_qty = (int) $cs->getData('qty');
-
-                                        if ($serial) {
-                                            $serials = $cs->getData('serials');
-
-                                            if (!in_array($serial, $serials)) {
-                                                $serials[] = $serial;
-                                                $cs->set('serials', $serials);
-                                                $new_qty += 1;
-                                            } else {
-                                                $warnings[] = 'N° de série "' . $serial . '" déjà ajouté pour le composant "' . $part['number'] . '"';
-                                                continue;
-                                            }
-                                        } else {
-                                            $new_qty += (int) $part['quantity'];
-                                        }
-
-                                        $cs->set('qty', $new_qty);
-
-                                        $up_warnings = array();
-                                        $up_errors = $cs->update($up_warnings, true);
-
-                                        if (count($up_errors)) {
-                                            $warnings[] = BimpTools::getMsgFromArray($up_errors, $part['number'] . ' - Echec mise à jour des quantités');
-
-                                            BimpCore::addlog('Echec mise à jour stock consigné Apple - A corriger manuellement impérativement', Bimp_Log::BIMP_LOG_ERREUR, 'stocks', $cs, array(
-                                                'Part Number'        => $part['number'],
-                                                'Code Centre'        => $code_centre,
-                                                'Nouvelle Quantités' => $new_qty,
-                                                'Serial'             => $serial
-                                                    ), true);
-                                            $nFails++;
-                                        } else {
-                                            $nOk++;
-                                        }
-                                    } else {
+                                    if (!BimpObject::objectLoaded($stock)) {
                                         // Création: 
                                         $cs_data = array(
                                             'part_number' => $part['number'],
-                                            'code_centre' => $code_centre
+                                            'code_centre' => $code_centre,
+                                            'serialized'  => ($serial ? 1 : 0)
                                         );
 
-                                        if ($serial) {
-                                            $cs_data['serials'] = array($serial);
-                                            $cs_data['qty'] = 1;
-                                        } elseif (isset($part['quantity'])) {
-                                            $cs_data['qty'] = (int) $part['quantity'];
-                                        } else {
-                                            continue;
-                                        }
-
                                         $create_errors = array();
-                                        $cs = BimpObject::createBimpObject('bimpapple', 'ConsignedStock', $cs_data, true, $create_errors);
+                                        $create_warnings = array();
+                                        $stock = BimpObject::createBimpObject('bimpapple', 'ConsignedStock', $cs_data, true, $create_errors, $create_warnings, true);
 
                                         if (count($create_errors)) {
-                                            $warnings[] = BimpTools::getMsgFromArray($create_errors, $part['number'] . ' - Echec ajout du stock');
+                                            $warnings[] = BimpTools::getMsgFromArray($create_errors, $part['number']);
 
                                             BimpCore::addlog('Echec création stock consigné Apple - A ajouter manuellement impérativement', Bimp_Log::BIMP_LOG_ERREUR, 'stocks', null, array(
-                                                'Données' => $cs_data
+                                                'Données'            => $cs_data,
+                                                'Quantité réception' => (int) BimpTools::getArrayValueFromPath($part, 'quantity', 0),
+                                                'Serial'             => $serial
                                                     ), true);
+                                            $nFails++;
+                                        }
+                                    }
+
+                                    if (BimpObject::objectLoaded($stock)) {
+                                        // mise à jour stock: 
+                                        $qty_modif = (int) BimpTools::getArrayValueFromPath($part, 'quantity', 0);
+                                        if ($serial) {
+                                            $qty_modif = 1;
+                                        }
+
+                                        $mvt_warnings = array();
+                                        $desc = 'Réception n° ' . $deliveryNumber;
+                                        $mvt_errors = $stock->correctStock($qty_modif, $serial, 'DELIVERY_' . $deliveryNumber, $desc, $mvt_warnings, true, true);
+
+                                        if (count($mvt_errors)) {
+                                            if ($serial) {
+                                                $warnings[] = BimpTools::getMsgFromArray($mvt_errors, $part['number'] . ' - Echec ajout du n° de série "' . $serial . '"');
+                                            } else {
+                                                $warnings[] = BimpTools::getMsgFromArray($mvt_errors, $part['number'] . ' - Echec mise à jour du stock');
+                                            }
+
                                             $nFails++;
                                         } else {
                                             $nOk++;
@@ -581,5 +807,76 @@ class ConsignedStock extends BimpObject
             'errors'   => $errors,
             'warnings' => $warnings
         );
+    }
+
+    public function actionCreateShipment($data, &$success = '')
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Renvoi de stock consigné ajouté avec succès';
+        $success_callback = '';
+
+        $code_centre = BimpTools::getArrayValueFromPath($data, 'code_centre', '');
+        $order_id = BimpTools::getArrayValueFromPath($data, 'orderId', '');
+
+        if (!$code_centre) {
+            $errors[] = 'Veuillez sélectionner un centre';
+        }
+
+        if (!$order_id) {
+            $errors[] = 'Veuillez sélectionner un n° de commande';
+        }
+
+        if (!count($errors)) {
+            $shipment = BimpCache::findBimpObjectInstance('bimpapple', 'ConsignedStockShipment', array(
+                        'code_centre' => $code_centre,
+                        'order_id'    => $order_id,
+                        'status'      => 0
+                            ), true);
+
+            if (BimpObject::objectLoaded($shipment)) {
+                $errors[] = 'Un renvoi au statut brouillon existe déjà pour ce numéro de commande: ' . $shipment->getLink();
+            } else {
+                $shipment = BimpObject::createBimpObject('bimpapple', 'ConsignedStockShipment', array(
+                            'code_centre' => $code_centre,
+                            'order_id'    => $order_id
+                                ), true, $errors, $warnings);
+
+                if (BimpObject::objectLoaded($shipment)) {
+                    $url = $shipment->getUrl();
+
+                    if ($url) {
+                        $success_callback .= 'window.open(\'' . $url . '\');';
+                    }
+                }
+            }
+        }
+
+        $success_callback .= 'triggerObjectChange(\'bimpapple\', \'ConsignedStockShipment\');';
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
+
+    // Overrides: 
+
+    public function validate()
+    {
+        $errors = array();
+
+        if ((int) $this->getData('serialized')) {
+            $this->set('qty', count($this->getData('serials')));
+        } else {
+            $this->set('serials', array());
+        }
+
+        if (!count($errors)) {
+            $errors = parent::validate();
+        }
+
+        return $errors;
     }
 }

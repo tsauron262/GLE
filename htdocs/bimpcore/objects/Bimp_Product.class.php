@@ -165,23 +165,22 @@ class Bimp_Product extends BimpObject
 
         return parent::canSetAction($action);
     }
-    
-           
+
     public function getExtraFieldFilterKey($field, &$joins, $main_alias = '', &$filters = array())
     {
-        if($field == 'renta_service'){
+        if ($field == 'renta_service') {
             $join_alias = ($main_alias ? $main_alias . '__' : '') . 'ef';
             $joins[$join_alias] = array(
                 'alias' => $join_alias,
                 'table' => 'product_extrafields',
-                'on'    => ($main_alias ? $main_alias : 'a') . '.rowid = '.$join_alias . '.fk_object'
+                'on'    => ($main_alias ? $main_alias : 'a') . '.rowid = ' . $join_alias . '.fk_object'
             );
-            return 'if('.$join_alias.'.duree_i > 0, '.$main_alias.'.price / '.$join_alias.'.duree_i * 3600, 0)';
+            return 'if(' . $join_alias . '.duree_i > 0, ' . $main_alias . '.price / ' . $join_alias . '.duree_i * 3600, 0)';
         }
 
         return '';
     }
-    
+
     public function fetchExtraFields()
     {
         $extra = array();
@@ -674,25 +673,25 @@ class Bimp_Product extends BimpObject
         return $buttons;
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'categ1':
             case 'categ2':
             case 'categ3':
-                $alias = 'cat_prod';
+                $alias = $main_alias . '___cat_prod';
                 $joins[$alias] = array(
                     'alias' => $alias,
                     'table' => 'categorie_product',
-                    'on'    => $alias . '.fk_product = a.rowid'
+                    'on'    => $alias . '.fk_product = ' . $main_alias . '.rowid'
                 );
-                $filters['cat_prod.fk_categorie'] = array(
+                $filters[$alias . '.fk_categorie'] = array(
                     ($excluded ? 'not_' : '') . 'in' => $values
                 );
                 break;
         }
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
 
     public function getActionsButtons()
@@ -4104,7 +4103,7 @@ class Bimp_Product extends BimpObject
             }
         }
     }
-    
+
     public function getFilteredListActions()
     {
         $actions = array();

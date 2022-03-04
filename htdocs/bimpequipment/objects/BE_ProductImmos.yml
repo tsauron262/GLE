@@ -104,10 +104,10 @@ lists:
         extra_btn: 
             callback: getListExtraBtn
         joins: 
-            ef: 
-                alias: ef
+            a___ef: 
+                alias: a___ef
                 table: product_extrafields
-                on: a.rowid = ef.fk_object
+                on: a.rowid = a___ef.fk_object
         cols: 
             ref: 
             label:

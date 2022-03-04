@@ -214,44 +214,48 @@ class Bimp_Paiement extends BimpObject
         $filters['facture.fk_soc'] = $value;
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'id_facture':
-                if (!isset($joins['pf'])) {
-                    $joins['pf'] = array(
-                        'alias' => 'pf',
+                $pf_alias = $main_alias . '___pf';
+                if (!isset($joins[$pf_alias])) {
+                    $joins[$pf_alias] = array(
+                        'alias' => $pf_alias,
                         'table' => 'paiement_facture',
-                        'on'    => 'pf.fk_paiement = a.rowid'
+                        'on'    => $pf_alias . '.fk_paiement = ' . $main_alias . '.rowid'
                     );
                 }
-                $filters['pf.fk_facture'] = array(
+                $filters[$pf_alias . '.fk_facture'] = array(
                     ($excluded ? 'not_' : '') . 'in' => $values
                 );
                 break;
 
             case 'id_client';
-                if (!isset($joins['pf'])) {
-                    $joins['pf'] = array(
-                        'alias' => 'pf',
+                $pf_alias = $main_alias . '___pf';
+                if (!isset($joins[$pf_alias])) {
+                    $joins[$pf_alias] = array(
+                        'alias' => $pf_alias,
                         'table' => 'paiement_facture',
-                        'on'    => 'pf.fk_paiement = a.rowid'
+                        'on'    => $pf_alias . '.fk_paiement = ' . $main_alias . '.rowid'
                     );
                 }
-                if (!isset($joins['facture'])) {
-                    $joins['facture'] = array(
-                        'alias' => 'facture',
+
+                $fac_alias = $pf_alias . '___facture';
+                if (!isset($joins[$fac_alias])) {
+                    $joins[$fac_alias] = array(
+                        'alias' => $fac_alias,
                         'table' => 'facture',
-                        'on'    => 'facture.rowid = pf.fk_facture'
+                        'on'    => $fac_alias . '.rowid = ' . $pf_alias . '.fk_facture'
                     );
                 }
-                $filters['facture.fk_soc'] = array(
+                $filters[$fac_alias . '.fk_soc'] = array(
                     ($excluded ? 'not_' : '') . 'in' => $values
                 );
                 break;
         }
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
 
     public function getCustomFilterValueLabel($field_name, $value)
@@ -865,7 +869,6 @@ class Bimp_Paiement extends BimpObject
                         $paiement_exported = (int) $this->db->getValue('paiement_facture', 'exported', $where);
                         $mail = 'Référence du paiement: ' . $this->getRef() . "\n\n";
 
-
                         if ($diff) {
                             if ($this->db->update('paiement_facture', array(
                                         'amount' => $diff
@@ -989,8 +992,7 @@ class Bimp_Paiement extends BimpObject
         $id_caisse = 0;
         $account = null;
         $use_caisse = false;
-        
-        
+
         $date_debut_ex = BimpCore::getConf('date_debut_exercice');
         if ($date_debut_ex) {
             if ($this->getData('datep') < $date_debut_ex)
@@ -1096,7 +1098,6 @@ class Bimp_Paiement extends BimpObject
             $total_to_return = 0;
             $to_return_amounts = array();
             $facs_to_convert = array();
-
 
             // Calcul du total payé par facture. 
             while (BimpTools::isSubmit('amount_' . $i)) {
@@ -1229,7 +1230,7 @@ class Bimp_Paiement extends BimpObject
                             }
                         }
                         $i++;
-                        
+
                         BimpCore::setMaxExecutionTime(1200);
                     }
                 }

@@ -33,13 +33,22 @@ class savFormController extends BimpPublicController
 
         $res_id = BimpTools::getValue('resgsx', '');
         $shipto = BimpTools::getValue('centre_id', '');
+        $acId = BimpTools::getValue('ac', '');
         $reservation = null;
         $errors = array();
+        
 
         if ($res_id) {
+            if($acId > 0 || BimpTools::getValue('previewDate', '') != ''){//a virer au plus vite
+                $db = BimpCache::getBdb()->db;
+                $db->query('SELECT * FROM '.MAIN_DB_PREFIX.'actioncomm_extrafields WHERE fk_object = "'.$acId.'" AND resgsx = "'.$res_id.'";');
+                if($db->num_rows($sql) < 1)
+                    $errors[] = 'Données non concordantes';
+            }
+            
             if (!$shipto) {
                 $errors[] = 'Identifiant du centre BIMP absent';
-            } else {
+            } elseif(!count($errors)) {
                 $shipto = BimpTools::addZeros($shipto, 10);
                 $centres = BimpCache::getCentres();
                 $centre = null;
@@ -160,11 +169,11 @@ class savFormController extends BimpPublicController
                 $html .= '</span>';
                 $html .= '</div>';
 
-                $html .= '<p class="inputHelp">';
-                $html .= 'Si vous disposez déjà d\'un accès à l\'espace client BIMP, veuillez vous ';
-                $html .= '<a href="' . BimpObject::getPublicBaseUrl() . 'back=savForm">authentifier</a>';
-                $html .= ' pour simplifier la prise de rendez-vous.';
-                $html .= '</p>';
+//                $html .= '<p class="inputHelp">';
+//                $html .= 'Si vous disposez déjà d\'un accès à l\'espace client BIMP, veuillez vous ';
+//                $html .= '<a href="' . BimpObject::getPublicBaseUrl() . 'back=savForm">authentifier</a>';
+//                $html .= ' pour simplifier la prise de rendez-vous.';
+//                $html .= '</p>';
             }
 
             if (!is_null($centre) && $code_centre) {
@@ -1135,7 +1144,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
 
 //        $email = BimpTools::cleanEmailsStr($email);
 //        return mailSyn2('RDV SAV BIMP - Confirmation', $email, '', $msg, $tabFile, $tabFile2, $tabFile3);
-        $bimpMail = new BimpMail('BIMP - Confirmation de votre RDV SAV', $email, '', $msg, (isset($centre['mail']) ? $centre['mail'] : ''));
+        $bimpMail = new BimpMail($sav, 'BIMP - Confirmation de votre RDV SAV', $email, '', $msg, (isset($centre['mail']) ? $centre['mail'] : ''));
         $bimpMail->addFiles($files);
         return $bimpMail->send();
     }

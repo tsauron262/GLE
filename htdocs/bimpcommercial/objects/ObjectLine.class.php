@@ -711,20 +711,20 @@ class ObjectLine extends BimpObject
         );
     }
 
-    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, &$errors = array(), $excluded = false)
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
             case 'categ1':
             case 'categ2':
             case 'categ3':
-                $line_alias = 'dol_line';
+                $line_alias = $main_alias . '___dol_line';
                 $joins[$line_alias] = array(
                     'alias' => $line_alias,
                     'table' => static::$dol_line_table,
-                    'on'    => $line_alias . '.rowid = a.id_line'
+                    'on'    => $line_alias . '.rowid = ' . $main_alias . '.id_line'
                 );
 
-                $alias = 'cat_prod' . $field_name;
+                $alias = $main_alias . '___cat_prod_' . $field_name;
                 $joins[$alias] = array(
                     'alias' => $alias,
                     'table' => 'categorie_product',
@@ -746,22 +746,26 @@ class ObjectLine extends BimpObject
                         $empty = true;
                     }
                 }
-                $joins['elemcont'] = array(
+
+                $elem_alias = $main_alias . '___elemcont';
+                $joins[$elem_alias] = array(
                     'table' => 'element_contact',
-                    'on'    => 'elemcont.element_id = a.id_obj',
-                    'alias' => 'elemcont'
+                    'on'    => $elem_alias . '.element_id = ' . $main_alias . '.id_obj',
+                    'alias' => $elem_alias
                 );
-                $joins['typecont'] = array(
+
+                $type_alias = $main_alias . '___typecont';
+                $joins[$type_alias] = array(
                     'table' => 'c_type_contact',
-                    'on'    => 'elemcont.fk_c_type_contact = typecont.rowid',
-                    'alias' => 'typecont'
+                    'on'    => $elem_alias . '.fk_c_type_contact = ' . $type_alias . '.rowid',
+                    'alias' => $type_alias
                 );
 
                 $sql = '';
 
                 if (!empty($ids)) {
-                    $sql = '(typecont.element = \'' . static::$parent_comm_type . '\' AND typecont.source = \'internal\'';
-                    $sql .= ' AND typecont.code = \'SALESREPFOLL\' AND elemcont.fk_socpeople ' . ($excluded ? 'NOT ' : '') . 'IN (' . implode(',', $ids) . '))';
+                    $sql = '(' . $type_alias . '.element = \'' . static::$parent_comm_type . '\' AND ' . $type_alias . '.source = \'internal\'';
+                    $sql .= ' AND ' . $type_alias . '.code = \'SALESREPFOLL\' AND ' . $elem_alias . '.fk_socpeople ' . ($excluded ? 'NOT ' : '') . 'IN (' . implode(',', $ids) . '))';
 
                     if (!$empty && $excluded) {
                         $sql .= ' OR (SELECT COUNT(ec2.fk_socpeople) FROM ' . MAIN_DB_PREFIX . 'element_contact ec2';
@@ -769,7 +773,7 @@ class ObjectLine extends BimpObject
                         $sql .= ' WHERE tc2.element = \'' . static::$parent_comm_type . '\'';
                         $sql .= ' AND tc2.source = \'internal\'';
                         $sql .= ' AND tc2.code = \'SALESREPFOLL\'';
-                        $sql .= ' AND ec2.element_id = a.id_obj) = 0';
+                        $sql .= ' AND ec2.element_id = ' . $main_alias . '.id_obj) = 0';
                     }
                 }
 
@@ -780,28 +784,29 @@ class ObjectLine extends BimpObject
                     $sql .= ' WHERE tc2.element = \'' . static::$parent_comm_type . '\'';
                     $sql .= ' AND tc2.source = \'internal\'';
                     $sql .= ' AND tc2.code = \'SALESREPFOLL\'';
-                    $sql .= ' AND ec2.element_id = a.id_obj) ' . ($excluded ? '>' : '=') . ' 0';
+                    $sql .= ' AND ec2.element_id = ' . $main_alias . '.id_obj) ' . ($excluded ? '>' : '=') . ' 0';
                 }
 
                 if ($sql) {
-                    $filters['commercial_custom'] = array(
+                    $filters[$main_alias . '___commercial_custom'] = array(
                         'custom' => $sql
                     );
                 }
                 break;
 
             case 'ref-prod':
-                $alias = 'product';
-                $line_alias = 'dol_line';
+                $line_alias = $main_alias . '___dol_line';
                 $joins[$line_alias] = array(
                     'alias' => $line_alias,
                     'table' => static::$dol_line_table,
-                    'on'    => $line_alias . '.rowid = a.id_line'
+                    'on'    => $line_alias . '.rowid = ' . $main_alias . '.id_line'
                 );
-                $joins[$alias] = array(
-                    'alias' => $alias,
+
+                $prod_alias = $main_alias . '___product';
+                $joins[$prod_alias] = array(
+                    'alias' => $prod_alias,
                     'table' => 'product',
-                    'on'    => $alias . '.rowid = ' . $line_alias . '.fk_product'
+                    'on'    => $prod_alias . '.rowid = ' . $line_alias . '.fk_product'
                 );
 
                 $ref_filters = array();
@@ -814,27 +819,28 @@ class ObjectLine extends BimpObject
                 }
 
                 if (!empty($ref_filters)) {
-                    $filters[$alias . '.ref'] = array(
+                    $filters[$prod_alias . '.ref'] = array(
                         ($excluded ? 'and' : 'or_field') => $ref_filters
                     );
                 }
                 break;
 
             case 'fk_product_type':
-                $alias = 'product';
                 $line_alias = 'dol_line';
                 $joins[$line_alias] = array(
                     'alias' => $line_alias,
                     'table' => static::$dol_line_table,
-                    'on'    => $line_alias . '.rowid = a.id_line'
-                );
-                $joins[$alias] = array(
-                    'alias' => $alias,
-                    'table' => 'product',
-                    'on'    => $alias . '.rowid = ' . $line_alias . '.fk_product'
+                    'on'    => $line_alias . '.rowid = ' . $main_alias . '.id_line'
                 );
 
-                $filters[$alias . '.fk_product_type'] = array(
+                $prod_alias = $main_alias . '___product';
+                $joins[$prod_alias] = array(
+                    'alias' => $prod_alias,
+                    'table' => 'product',
+                    'on'    => $prod_alias . '.rowid = ' . $line_alias . '.fk_product'
+                );
+
+                $filters[$prod_alias . '.fk_product_type'] = array(
                     ($excluded ? 'not_' : '') . 'in' => $values
                 );
 
@@ -845,31 +851,32 @@ class ObjectLine extends BimpObject
             case 'nature':
             case 'famille':
             case 'gamme':
-                $alias = 'product_ef';
                 $line_alias = 'dol_line';
                 $joins[$line_alias] = array(
                     'alias' => $line_alias,
                     'table' => static::$dol_line_table,
-                    'on'    => $line_alias . '.rowid = a.id_line'
-                );
-                $joins[$alias] = array(
-                    'alias' => $alias,
-                    'table' => 'product_extrafields',
-                    'on'    => $alias . '.fk_object = ' . $line_alias . '.fk_product'
+                    'on'    => $line_alias . '.rowid = ' . $main_alias . '.id_line'
                 );
 
-                $filters[$alias . '.' . $field_name] = array(
+                $prod_ef_alias = $main_alias . '___product_ef';
+                $joins[$prod_ef_alias] = array(
+                    'alias' => $prod_ef_alias,
+                    'table' => 'product_extrafields',
+                    'on'    => $prod_ef_alias . '.fk_object = ' . $line_alias . '.fk_product'
+                );
+
+                $filters[$prod_ef_alias . '.' . $field_name] = array(
                     ($excluded ? 'not_' : '') . 'in' => $values
                 );
                 break;
 
             case 'acomptes':
                 if (count($values) === 1) {
-                    $line_alias = 'dol_line';
+                    $line_alias = $main_alias . '___dol_line';
                     $joins[$line_alias] = array(
                         'alias' => $line_alias,
                         'table' => static::$dol_line_table,
-                        'on'    => $line_alias . '.rowid = a.id_line'
+                        'on'    => $line_alias . '.rowid = ' . $main_alias . '.id_line'
                     );
 
                     if ((int) $values[0]) {
@@ -889,7 +896,7 @@ class ObjectLine extends BimpObject
                 break;
         }
 
-        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $errors, $excluded);
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
 
     public function getCustomFilterValueLabel($field_name, $value)
@@ -4461,8 +4468,7 @@ class ObjectLine extends BimpObject
         }
         return $html;
     }
-    
-        
+
     public function getExtraFieldFilterKey($field, &$joins, $main_alias = '', &$filters = array())
     {
         // Retourner la clé de filtre SQl sous la forme alias_table.nom_champ_db 
@@ -4470,7 +4476,7 @@ class ObjectLine extends BimpObject
         // Si $main_alias est défini, l'utiliser comme préfixe de alias_table. Ex: $main_alias .'_'.$alias_table (Bien utiliser l'underscore).  
         // ET: utiliser $main_alias à la place de "a" dans la clause ON. 
 //        Ex: 
-        if($field == 'duree_tot'){
+        if ($field == 'duree_tot') {
             $join_alias = ($main_alias ? $main_alias . '___' : '') . 'dol_line';
             $joins[$join_alias] = array(
                 'alias' => $join_alias,
@@ -4478,7 +4484,7 @@ class ObjectLine extends BimpObject
                 'on'    => $join_alias . '.rowid = ' . ($main_alias ? $main_alias : 'a') . '.id_line'
             );
             $join_alias2 = ($join_alias ? $join_alias . '___' : '') . 'product';
-            /*Pas necessaire de faire la jointure sur cette table mais gardé l'alias pour compatibilit avec le reste*/
+            /* Pas necessaire de faire la jointure sur cette table mais gardé l'alias pour compatibilit avec le reste */
 //            $joins[$join_alias2] = array(
 //                'alias' => $join_alias2,
 //                'table' => 'product',
@@ -4492,19 +4498,19 @@ class ObjectLine extends BimpObject
             );
 
 //        die('('.$join_alias.'.duree * '.$main_alias.'.qty) as duree_tot');
-            return '('.$join_alias3.'.duree_i * '.$join_alias.'.qty)';
+            return '(' . $join_alias3 . '.duree_i * ' . $join_alias . '.qty)';
         }
 
         return '';
     }
-    
+
     public function fetchExtraFields()
     {
         $extra = array();
         $sql = 'SELECT (a___dol_line___product___product.duree_i * a___dol_line.qty) as tot
-                    FROM '.MAIN_DB_PREFIX.'facturedet a___dol_line
-                    LEFT JOIN '.MAIN_DB_PREFIX.'product_extrafields a___dol_line___product___product ON a___dol_line___product___product.fk_object = a___dol_line.fk_product
-                    WHERE a___dol_line.rowid = '.$this->getData('id_line');
+                    FROM ' . MAIN_DB_PREFIX . 'facturedet a___dol_line
+                    LEFT JOIN ' . MAIN_DB_PREFIX . 'product_extrafields a___dol_line___product___product ON a___dol_line___product___product.fk_object = a___dol_line.fk_product
+                    WHERE a___dol_line.rowid = ' . $this->getData('id_line');
 
         $result = $this->db->executeS($sql, 'array');
 

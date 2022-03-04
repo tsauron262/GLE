@@ -10,6 +10,14 @@ icon: fas_euro-sign
 
 labels: 
     name: paiement
+    
+    
+objects: 
+    user_creat: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: fk_user_creat
 
 fields: 
 #    Champs en base
@@ -21,6 +29,12 @@ fields:
     datec:
         label: Créé le
         type: datetime
+    fk_user_creat:
+        label: Créé par
+        type: id_object
+        object: user_creat
+        input: 
+            type: search_user
     datep: 
         label: Date
         type: datetime

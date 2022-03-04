@@ -159,7 +159,7 @@ abstract class DoliDB implements Database
                             if (!defined('BIMP_LIB')) {
                                 require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
                             }
-                            BimpCore::addlog('Tentative de COMMIT SQL à la suite d\'un ROLLBACK', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore');
+                            BimpCore::addlog('Tentative de COMMIT SQL à la suite d\'un ROLLBACK', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore');
                             $this->rollback();
                             return 0;
                         }
@@ -179,7 +179,7 @@ abstract class DoliDB implements Database
 			}
 			else
 			{
-                            BimpCore::addlog('COMMIT ERREUR', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
+                            BimpCore::addlog('COMMIT ERREUR', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', null, array(
                                 'Dernière Erreur SQL' => $this->lasterror(),
                                 'lasterror'           => $this->error(),
                                 'lasterrno'           => $this->errno()
@@ -202,7 +202,7 @@ abstract class DoliDB implements Database
 			return 1;
 		}
                 else{
-                        BimpCore::addlog('Tentative de COMMIT transaction deja fermé', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore');
+                        BimpCore::addlog('Tentative de COMMIT transaction deja fermé', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore');
                         return 0;
                 }
 	}

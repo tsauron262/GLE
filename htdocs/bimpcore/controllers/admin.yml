@@ -39,6 +39,7 @@ objects:
             bimp_object: 
                 module: bimpuserconfig
                 name: ListTableConfig
+                
     lists_filters: 
         instance: 
             bimp_object: 
@@ -64,6 +65,11 @@ objects:
             bimp_object: 
                 module: bimpcore
                 name: BimpAlert
+    mail_log: 
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpMailLog
     
                 
 sections:
@@ -201,6 +207,14 @@ sections:
                   list: 
                       panel: 1
                       object: alert
+                      
+        mail_log:
+            label: Log Mail
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: mail_log
                       
 #        test: 
 #            label: Tests views list

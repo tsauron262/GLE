@@ -106,7 +106,7 @@ function gsx_open_login_modal($button, success_callback) {
     bimp_msg('Veuillez vous authentifier sur la plateforme GSX', 'warning', null, true);
 //    window.open(gsx_login_url, 'Authentification GSX', "menubar=no, status=no, width=800, height=600");
 
-    setObjectAction($(''), {
+    setObjectAction($button, {
         module: 'bimpsupport',
         object_name: 'BS_SAV'
     }, 'setGsxActiToken', {}, 'gsx_token', null, function () {

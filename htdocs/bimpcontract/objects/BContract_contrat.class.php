@@ -666,6 +666,34 @@ class BContract_contrat extends BimpDolObject
     {
         return [0 => "Aucun", 1 => "Proposition", 2 => "Tacite"];
     }
+    
+    public function getRenouvellementNumberFromDate($date){
+        $datef = new DateTime();
+        $datef->setTimestamp(strtotime($date));
+
+        $debut = new DateTime();
+        $fin = new DateTime();
+        $Timestamp_debut = strtotime($this->getData('date_start'));
+//            echo $datef->format('d / m / Y').'<br/>';
+        $renouvellement = 0;
+        if ($Timestamp_debut > 0 && $this->getData('duree_mois') > 0){ 
+            $debut->setTimestamp($Timestamp_debut);
+            $fin->setTimestamp($Timestamp_debut);
+            for($i=0; $i <5; $i++){
+                $fin = $fin->add(new DateInterval("P" . $this->getData('duree_mois') . "M"));
+                $fin = $fin->sub(new DateInterval("P1D"));
+//                    echo($debut->format('d / m / Y').' '.$fin->format('d / m / Y').' '.$i.'av<br/>');
+                if($datef > $debut && $datef < $fin){
+                    $renouvellement = $i;
+                    break;
+                }
+                $debut = $debut->add(new DateInterval("P" . $this->getData('duree_mois') . "M"));
+//                    $fin = $fin->add(new DateInterval("P1D"));
+            }
+
+        }
+        return $renouvellement;
+    }
 
     public function displayRenouvellement()
     {

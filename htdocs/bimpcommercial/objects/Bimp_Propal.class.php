@@ -533,7 +533,7 @@ class Bimp_Propal extends BimpComm
             3 => self::$status_list[3]['label']
         );
     }
-    
+
     public function getFilteredListActions()
     {
         $actions = array();
@@ -560,7 +560,7 @@ class Bimp_Propal extends BimpComm
 
         return $actions;
     }
-    
+
     public function getListExtraBulkActions()
     {
         $actions = array();
@@ -595,6 +595,7 @@ class Bimp_Propal extends BimpComm
             );
 
             $status = $this->getData('fk_statut');
+            $use_signature = (int) BimpCore::getConf('bimp_propal_use_signatures', 0);
 
             if (!is_null($status)) {
                 $status = (int) $status;
@@ -603,12 +604,17 @@ class Bimp_Propal extends BimpComm
                     $errors = array();
                     if ($this->isActionAllowed('validate', $errors)) {
                         if ($this->canSetAction('validate')) {
+                            $params = array();
+                            if ($use_signature) {
+                                $params['form_name'] = 'validate';
+                            } else {
+                                $params['confirm_msg'] = 'Veuillez confirmer la validation ' . $this->getLabel('of_this');
+                            }
+                            
                             $buttons[] = array(
                                 'label'   => 'Valider',
                                 'icon'    => 'check',
-                                'onclick' => $this->getJsActionOnclick('validate', array(), array(
-                                    'form_name' => 'validate'
-                                ))
+                                'onclick' => $this->getJsActionOnclick('validate', array(), $params)
                             );
                         } else {
                             $errors[] = 'Vous n\'avez pas la permission de valider cette proposition commerciale';
@@ -628,24 +634,26 @@ class Bimp_Propal extends BimpComm
                     $signed = in_array($status, array(2, 4));
 
                     if (!$signed) {
-                        // Boutons signature: 
-                        $signature = $this->getChildObject('signature');
-                        if (BimpObject::objectLoaded($signature)) {
-                            if (!(int) $signature->getData('signed')) {
-                                $buttons = BimpTools::merge_array($buttons, $signature->getSignButtons());
-                            } else {
-                                $signed = true;
+                        if ($use_signature) {
+                            // Boutons signature: 
+                            $signature = $this->getChildObject('signature');
+                            if (BimpObject::objectLoaded($signature)) {
+                                if (!(int) $signature->getData('signed')) {
+                                    $buttons = BimpTools::merge_array($buttons, $signature->getSignButtons());
+                                } else {
+                                    $signed = true;
+                                }
+                            } elseif ($this->isActionAllowed('createSignature') && $this->canSetAction('createSignature')) {
+                                $no_signature = true;
+                                // Créer Signature: 
+                                $buttons[] = array(
+                                    'label'   => 'Créer la fiche signature',
+                                    'icon'    => 'fas_signature',
+                                    'onclick' => $this->getJsActionOnclick('createSignature', array(), array(
+                                        'form_name' => 'create_signature'
+                                    ))
+                                );
                             }
-                        } elseif ($this->isActionAllowed('createSignature') && $this->canSetAction('createSignature')) {
-                            $no_signature = true;
-                            // Créer Signature: 
-                            $buttons[] = array(
-                                'label'   => 'Créer la fiche signature',
-                                'icon'    => 'fas_signature',
-                                'onclick' => $this->getJsActionOnclick('createSignature', array(), array(
-                                    'form_name' => 'create_signature'
-                                ))
-                            );
                         }
 
                         // Refuser
@@ -664,7 +672,7 @@ class Bimp_Propal extends BimpComm
                             }
                         }
 
-                        if ($no_signature) {
+                        if ($no_signature || !$use_signature) {
                             // Accepter (sans signature)
                             if ($this->isNewStatusAllowed(2)) {
                                 $buttons[] = array(
@@ -689,7 +697,7 @@ class Bimp_Propal extends BimpComm
                         }
                     }
 
-                    if ($signed || $no_signature) {
+                    if ($signed || $no_signature || !$use_signature) {
                         // Créer commande: 
                         $errors = array();
                         if ($this->isActionAllowed('createOrder', $errors) && $this->canSetAction('createOrder')) {
@@ -1186,23 +1194,29 @@ class Bimp_Propal extends BimpComm
 
     public function actionValidate($data, &$success)
     {
-        $id_contact = (int) BimpTools::getArrayValueFromPath($data, 'id_contact_signature', 0);
-        $open_public_access = (int) BimpTools::getArrayValueFromPath($data, 'open_public_access', 0);
+        $use_signature = (int) BimpCore::getConf('bimp_propal_use_signatures', 0);
 
-        if ($open_public_access) {
-            if (!$id_contact) {
-                return array(
-                    'errors'   => array('Contact signataire obligatoire pour ouvrir l\'accès à la signature à distance'),
-                    'warnings' => array()
-                );
+        if ($use_signature) {
+            $id_contact = (int) BimpTools::getArrayValueFromPath($data, 'id_contact_signature', 0);
+            $open_public_access = (int) BimpTools::getArrayValueFromPath($data, 'open_public_access', 0);
+
+            if ($open_public_access) {
+                if (!$id_contact) {
+                    return array(
+                        'errors'   => array('Contact signataire obligatoire pour ouvrir l\'accès à la signature à distance'),
+                        'warnings' => array()
+                    );
+                }
             }
         }
 
         $result = parent::actionValidate($data, $success);
 
         if (!count($result['errors'])) {
-            $email_content = BimpTools::getArrayValueFromPath($data, 'email_content', $this->getDefaultSignDistEmailContent());
-            $result['warnings'] = BimpTools::merge_array($result['warnings'], $this->createSignature($open_public_access, $id_contact, $email_content));
+            if ($use_signature) {
+                $email_content = BimpTools::getArrayValueFromPath($data, 'email_content', $this->getDefaultSignDistEmailContent());
+                $result['warnings'] = BimpTools::merge_array($result['warnings'], $this->createSignature($open_public_access, $id_contact, $email_content));
+            }
         }
 
         return $result;
@@ -1314,7 +1328,7 @@ class Bimp_Propal extends BimpComm
 
     public function actionCreateContrat($data, &$success = '')
     {
-        $warnings =[];
+        $warnings = [];
         $errors = [];
         $instance = $this->getInstance('bimpcontract', 'BContract_contrat');
         $autre_erreurs = true;

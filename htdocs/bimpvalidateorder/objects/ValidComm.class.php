@@ -226,11 +226,9 @@ class ValidComm extends BimpObject
     }
     
     
-    private function tryValidateByType($user, $type, $secteur, $class, $val, $bimp_object, &$errors, $options = array()) {
-//return 1; TODO
-
+    private function tryValidateByType($user, $type, $secteur, $class, $val, $bimp_object, &$errors, $options = array()) {        
         global $conf;
-        if (!isset($conf->global->MAIN_MODULE_BIMPVALIDATEORDER))
+        if (!isset($conf->global->MAIN_MODULE_BIMPVALIDATEORDER)) // Utiliser bimpcore_conf pour les vars de conf des modules BIMP !! 
             return 1;
         
         $demande = $this->demandeExists($class, (int) $bimp_object->id, $type);

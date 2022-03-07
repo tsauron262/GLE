@@ -1525,25 +1525,25 @@ class BS_SAV extends BimpObject
 
     public function getPublicLink()
     {
-        return BimpCore::getConf('interface_client_base_url', '');
-//        $id_user_client = (int) $this->getData('id_user_client');
-//        if (!$id_user_client) {
-//            $id_client = (int) $this->getData('id_client');
-//
-//            if ($id_client) {
-//                $id_user_client = (int) $this->db->getValue('bic_user', 'id', 'id_client = ' . $id_client);
-//            }
-//        }
-//
-//        if ($id_user_client) {
-//            $url = $this->getPublicUrl(false);
-//
-//            if ($url) {
-//                return $url;
-//            }
-//        }
-//
-////        return DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?serial=" . $this->getChildObject("equipment")->getData("serial") . "&id_sav=" . $this->id . "&user_name=" . substr($this->getChildObject("client")->dol_object->name, 0, 3);
+//        return BimpCore::getConf('interface_client_base_url', '');
+        $id_user_client = (int) $this->getData('id_user_client');
+        if (!$id_user_client) {
+            $id_client = (int) $this->getData('id_client');
+
+            if ($id_client) {
+                $id_user_client = (int) $this->db->getValue('bic_user', 'id', 'id_client = ' . $id_client);
+            }
+        }
+
+        if ($id_user_client) {
+            $url = $this->getPublicUrl(false);
+
+            if ($url) {
+                return $url;
+            }
+        }
+        return BimpCore::getConf('interface_client_base_url', '')."?a=ss&serial=" . urlencode($this->getChildObject("equipment")->getData("serial")) . "&id_sav=" . $this->id . "&user_name=" . urlencode(str_replace(" ", "", substr($this->getChildObject("client")->dol_object->name, 0, 3))) . "#suivi-sav";
+//        return DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?serial=" . $this->getChildObject("equipment")->getData("serial") . "&id_sav=" . $this->id . "&user_name=" . substr($this->getChildObject("client")->dol_object->name, 0, 3);
 //        return "https://www.bimp.fr/nos-services/?serial=" . urlencode($this->getChildObject("equipment")->getData("serial")) . "&id_sav=" . $this->id . "&user_name=" . urlencode(str_replace(" ", "", substr($this->getChildObject("client")->dol_object->name, 0, 3))) . "#suivi-sav";
     }
 

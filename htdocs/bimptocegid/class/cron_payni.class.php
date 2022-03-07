@@ -4,7 +4,7 @@
     require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';    
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/export.class.php';
     
-    class Cron {
+    class Cron_payni {
         
         protected $export_class  = null;
         protected $rapport       = [];
@@ -18,17 +18,8 @@
         protected $local_path    = PATH_TMP . "/" . 'exportCegid' . '/' . 'BY_DATE' . '/';
         protected $size_vide_tra = 149;
         
-        private $auto_tiers         = false;
-        private $auto_ventes        = false;
-        private $auto_paiements     = false;
-        private $auto_achats        = false;
-        private $auto_rib_mandats   = false;
-        private $auto_payni         = false;
-        
-        private $export_ventes        = true;
-        private $export_paiements     = true;
-        private $export_achats        = false;
-        private $export_payni         = false;
+        private $auto_payni             = true;
+        private $export_payni           = true;
         
         public function automatique() {
             global $db;
@@ -37,11 +28,8 @@
             $this->export_class = new export($db);
             $this->export_class->create_daily_files();
             $this->files_for_ftp = $this->getFilesArrayForTranfert();
-                        
+            
             if($this->export_payni)     $this->export_class->exportPayInc();
-            if($this->export_ventes)    $this->export_class->exportFacture();
-            if($this->export_paiements) $this->export_class->exportPaiement();
-            if($this->export_achats)    $this->export_class->exportFactureFournisseur();
             
             $this->FTP();
             $this->menage();
@@ -51,7 +39,7 @@
 
         protected function send_rapport() {
             
-            $sujet = "Rapport export comptable du " . date('d/m/Y');
+            $sujet = "Rapport export PAYNI du " . date('d/m/Y');
             $to = 'dev@bimp.fr';
             $from = null;
             
@@ -84,11 +72,13 @@
             
             $logs .= "\n";
             
+            $savePAYNIArray = Array();
             // message pour les payni
             if(array_key_exists("PAYNI", $this->export_class->good)) {
                 $logs .= "PAYNI (Succès)\n";
                 foreach($this->export_class->good['PAYNI'] as $name => $log) {
                     $logs .= ''.$name.': ' . $log . "\n";
+                    $savePAYNIArray[] = $name;
                 }
             }
             if(array_key_exists("PAYNI", $this->export_class->fails)) {
@@ -103,66 +93,6 @@
                     $logs .= ''.$name.': ' . $log . "\n";
                 }
             }
-            
-            $logs .= "\n";
-            
-            $saveArrayFacture = Array();
-            // message pour les ventes
-            if(array_key_exists("VENTES", $this->export_class->good)) {
-                $logs .= "VENTES (Succès)\n";
-                
-                foreach($this->export_class->good['VENTES'] as $name => $log) {
-                    $logs .= ''.$name.': ' . $log . "\n";
-                    $saveArrayFacture[] = $name;
-                }
-            }
-            if(array_key_exists("VENTES", $this->export_class->fails)) {
-                $logs .= "\nVENTES (Erreurs)\n";
-                foreach($this->export_class->fails['VENTES'] as $name => $log) {
-                    $logs .= ''.$name.': ' . $log . "\n";
-                }
-            }
-            if(array_key_exists("VENTES", $this->export_class->warn)) {
-                $logs .= "\nVENTES (Informations)\n";
-                foreach($this->export_class->warn['VENTES'] as $name => $log) {
-                    $logs .= ''.$name.': ' . $log . "\n";
-                }
-            }
-            
-            $logs .= "\n";
-            
-            $saveArrayPaiement = Array();
-            // message pour les paiements
-            if(array_key_exists("PAY", $this->export_class->good)) {
-                $logs .= "PAY (Succès)\n";
-                
-                foreach($this->export_class->good['PAY'] as $name => $log) {
-                    $logs .= ''.$name.': ' . $log . "\n";
-                    $saveArrayPaiement[] = $name;
-                }
-            }
-            if(array_key_exists("PAY", $this->export_class->fails)) {
-                $logs .= "\nPAY (Erreurs)\n";
-                foreach($this->export_class->fails['PAY'] as $name => $log) {
-                    $logs .= ''.$name.': ' . $log . "\n";
-                }
-            }
-            if(array_key_exists("PAY", $this->export_class->warn)) {
-                $logs .= "\nPAY (Informations)\n";
-                foreach($this->export_class->warn['PAY'] as $name => $log) {
-                    $logs .= ''.$name.': ' . $log . "\n";
-                }
-            }
-            
-            $saveTiersArray = Array();
-            // Message pour les tiers
-            if(count($this->export_class->tiers) > 0) {
-                $logs .= "\nTIERS (Création)\n";
-                foreach($this->export_class->tiers as $aux => $log) {
-                    $logs .= '' . $aux . ': ' . $log . "\n";
-                    $saveTiersArray[] = $aux;
-                }
-            } 
             
             $logs .= "\n\n";
             
@@ -180,39 +110,24 @@
                 $logs .= implode("\n", $this->rapport['MENAGE']);
             }
             
-           // BimpCore::setConf('BIMPTOCEGID_last_export_date', date('Y-m-d'));
-
-            $logs .= "\n\nListe des factures en cas d'erreurs: \n" . implode(',' , $saveArrayFacture) . "\n";
-            $logs .= "Liste des paiement en cas d'erreurs: \n" . implode(',' , $saveArrayPaiement) . "\n";
-            $logs .= "Liste des tiers en cas d'erreurs: \n" . implode(',' , $saveTiersArray) . "\n";
+            $logs .= "\n\nListe des paiement non identifiés en cas d'erreurs: \n" . implode(',' , $savePAYNIArray) . "\n";
             
             $this->output .= $logs;
             
-            $log_file = fopen(PATH_TMP . '/' . 'exportCegid' . '/' . 'rapports' . '/' . date('d_m_Y') . '.log', 'w');
+            $log_file = fopen(PATH_TMP . '/' . 'exportCegid' . '/' . 'rapports/payni' . '_' . date('d_m_Y') . '.log', 'w');
             fwrite($log_file, $logs);
             fclose($log_file);
-            
-            
-            
-            mailSyn2($sujet, $to, $from, "Bonjour, vous trouverez en pièce jointe le rapport des exports comptable de ce matin.", [PATH_TMP . '/' . 'exportCegid' . '/' . 'rapports' . '/' . date('d_m_Y') . '.log']);
+
+            mailSyn2($sujet, $to, $from, "Bonjour, vous trouverez en pièce jointe le rapport des exports PAYNI de ce matin.", [PATH_TMP . '/' . 'exportCegid' . '/' . 'rapports/payni' . '_' . date('d_m_Y') . '.log']);
             
         }
         
         protected function getFilesArrayForTranfert():array {
             $files = [];
-                        
-            if($this->auto_tiers)       $files[] = "0_" . $this->entitie . '_(TIERS)_' . '*' . '_' . $this->version_tra . '.tra';
-            if($this->auto_ventes)      $files[] = "1_" . $this->entitie . '_(VENTES)_' . '*' . '_' . $this->version_tra . '.tra';
-            if($this->auto_paiements)   $files[] = "2_" . $this->entitie . '_(PAIEMENTS)_' . '*' . '_' . $this->version_tra . '.tra';
-            if($this->auto_achats)      $files[] = "3_" . $this->entitie . '_(ACHATS)_' . '*' . '_' . $this->version_tra . '.tra';
-            if($this->auto_rib_mandats) {
-                $files[] = "4_" . $this->entitie . '_(RIBS)_' . '*' . '_' . $this->version_tra . '.tra';
-                $files[] = "5_" . $this->entitie . '_(MANDATS)_' . '*' . '_' . $this->version_tra . '.tra';
-            }
+
             if($this->auto_payni)       $files[] = "6_" . $this->entitie . '_(PAYNI)_' . '*' . '_' . $this->version_tra . '.tra';
             
-            $this->rapport['FILES_FTP'] = 'Liste des fichiers transférés automatiquement sur le FTP de LDLC' . "\n"
-                    . implode("\n", $files) . "\n";
+            $this->rapport['FILES_FTP'] = 'Liste des fichiers transférés automatiquement sur le FTP de LDLC' . "\n" . implode("\n", $files) . "\n";
             
             return $files;
         }

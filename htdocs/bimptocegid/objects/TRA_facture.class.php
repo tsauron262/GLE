@@ -135,9 +135,9 @@
                     if($this->sens_facture == "C") { //c'est un avoir
                         $sens = ($line->multicurrency_total_ht > 0) ? "D" : "C";
                     }
-                    
+                    $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
                     if($line->multicurrency_total_ht != 0) {
-                        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
+                        
                         $current_montant = round($line->multicurrency_total_ht, 2);
                         if($use_d3e) {
                             $current_montant = round($line->multicurrency_total_ht, 2) - ($product->getData('deee') * $line->qty);

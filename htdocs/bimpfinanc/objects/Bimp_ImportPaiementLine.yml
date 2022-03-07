@@ -66,6 +66,9 @@ fields:
     num:
         label: Numéro
         type: text
+    exported:
+        label: Exporté en compta
+        type: bool
         
     
 forms:

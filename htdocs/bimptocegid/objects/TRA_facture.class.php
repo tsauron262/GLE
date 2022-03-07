@@ -135,9 +135,9 @@
                     if($this->sens_facture == "C") { //c'est un avoir
                         $sens = ($line->multicurrency_total_ht > 0) ? "D" : "C";
                     }
-                    
+                    $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
                     if($line->multicurrency_total_ht != 0) {
-                        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
+                        
                         $current_montant = round($line->multicurrency_total_ht, 2);
                         if($use_d3e) {
                             $current_montant = round($line->multicurrency_total_ht, 2) - ($product->getData('deee') * $line->qty);
@@ -180,7 +180,10 @@
                 }
                 
                 if($facture->getData('zone_vente') == 1 || $facture->getData('zone_vente') == 2) {
-                    $this->compte_general = $product->getCodeComptableVenteTva($facture->getData('zone_vente'));
+                    if($product->isLoaded())
+                        $this->compte_general = $product->getCodeComptableVenteTva($facture->getData('zone_vente'));
+                    else
+                        $this->compte_general = '44571000';
                     $structure['COMPTE_GENERAL']        = sizing($this->compte_general , 17);
                     $structure['SENS']                  = sizing($this->getSens($total_tva),1);
                     $structure['CONTRE_PARTIE']         = sizing($this->compte_general_client,17);

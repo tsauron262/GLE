@@ -21,7 +21,7 @@
         public $good = Array();
         public $warn = Array();
         public $tiers = Array();
-        private $moment;
+        public $moment;
         
         function __construct($db) {
             $hier = new DateTime();
@@ -45,17 +45,19 @@
         public function exportFacture($ref = ""):void {
             global $db;
             $errors = [];
-            switch($this->moment) {
-                case 'AM':
-                    $list = $this->bdb->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND (datef BETWEEN "'.$this->lastDateExported->format('Y-m-d').'" AND "'.$this->yesterday->format('Y-m-d').'" OR date_valid BETWEEN "'.$this->lastDateExported->format('Y-m-d').'" AND "'.$this->yesterday->format('Y-m-d').'")');
-                    break;
-                case 'PM':
-                    $toDay = new DateTime();
-                    $list = $this->bdb->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND (datef BETWEEN "'.$toDay->format('Y-m-d').'" AND "'.$toDay->format('Y-m-d').'" OR date_valid BETWEEN "'.$toDay->format('Y-m-d').'" AND "'.$toDay->format('Y-m-d').'")');
-                    break;
-                default:
-                    $list = [];
-            }
+//            switch($this->moment) {
+//                case 'AM':
+//                    $list = $this->bdb->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND (datef BETWEEN "'.$this->lastDateExported->format('Y-m-d').'" AND "'.$this->yesterday->format('Y-m-d').'" OR date_valid BETWEEN "'.$this->lastDateExported->format('Y-m-d').'" AND "'.$this->yesterday->format('Y-m-d').'")');
+//                    break;
+//                case 'PM':
+//                    $toDay = new DateTime();
+//                    $list = $this->bdb->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND (datef BETWEEN "'.$toDay->format('Y-m-d').'" AND "'.$toDay->format('Y-m-d').'" OR date_valid BETWEEN "'.$toDay->format('Y-m-d').'" AND "'.$toDay->format('Y-m-d').'")');
+//                    break;
+//                default:
+//                    $list = [];
+//            }
+            
+            $list = $this->bdb->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND (datef BETWEEN "'.$this->lastDateExported->format('Y-m-d').'" AND "'.$this->yesterday->format('Y-m-d').'" OR date_valid BETWEEN "'.$this->lastDateExported->format('Y-m-d').'" AND "'.$this->yesterday->format('Y-m-d').'")');
             
             $file = PATH_TMP . $this->dir . $this->getMyFile("ventes");
             if(count($list) > 0) {
@@ -79,20 +81,28 @@
             
         }
         
-        public function exportImportPaiement(Bimp_ImportPaiementLine $line, $compte) {
+        public function exportImportPaiement() {
 
-            $file = PATH_TMP . $this->dir . 'IP' . $line->getParentId() . '-' . $line->id . '.tra';
+            $instance = BimpCache::getBimpObjectInstance('bimpfinanc', 'Bimp_ImportPaiementLine');
             
-            $ecriture = $this->TRA_importPaiement->constructTRA($line, $compte);
-            
-            if(!file_exists($file)) $this->createFile ($file);
-            
-            if($this->write_tra($ecriture, $file)) {
-                return 1;
+            $list = $instance->getList(['exported' => 0, 'infos' => Array('in' => Array('C2BO', 'YOUNITED', 'ONEY'))]);
+            if(count($list) > 0) {
+                foreach($list as $import) {
+                    $instance->fetch($import['id']);
+                    $file = PATH_TMP . $this->dir . 'IP' . $instance->getParentId() . '-' . $instance->id . '.tra';
+                    if(!file_exists($file)) $this->createFile ($file);
+
+                    if($this->write_tra($this->TRA_importPaiement->constructTRA($instance), $file)) {
+                        $this->good['IP']['IP' . $instance->getParentId() . '-' . $instance->id] = 'Ok dans le fichier ' . $file;
+                        $instance->updateField('exported', 1);
+                    } else {
+                        $this->fails['IP']['IP' . $instance->getParentId() . '-' . $instance->id] = "Erreur lors de l'écriture dans le fichier";
+                    }
+                }
             } else {
-                return 0;
+                $this->warn['IP']['IP' . $instance->getParentId() . '-' . $instance->id] = 'Pas d\'import de paiement à exporter en compta';
             }
-            
+
         }
         
         public function exportPaiement($ref = ''):void  {

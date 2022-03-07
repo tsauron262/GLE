@@ -21,7 +21,7 @@
         public $good = Array();
         public $warn = Array();
         public $tiers = Array();
-        private $moment;
+        public $moment;
         
         function __construct($db) {
             $hier = new DateTime();
@@ -79,20 +79,28 @@
             
         }
         
-        public function exportImportPaiement(Bimp_ImportPaiementLine $line, $compte) {
+        public function exportImportPaiement() {
 
-            $file = PATH_TMP . $this->dir . 'IP' . $line->getParentId() . '-' . $line->id . '.tra';
+            $instance = BimpCache::getBimpObjectInstance('bimpfinanc', 'Bimp_ImportPaiementLine');
             
-            $ecriture = $this->TRA_importPaiement->constructTRA($line, $compte);
-            
-            if(!file_exists($file)) $this->createFile ($file);
-            
-            if($this->write_tra($ecriture, $file)) {
-                return 1;
+            $list = $instance->getList(['exported' => 0, 'infos' => Array('in' => Array('C2BO', 'YOUNITED', 'ONEY'))]);
+            if(count($list) > 0) {
+                foreach($list as $import) {
+                    $instance->fetch($import['id']);
+                    $file = PATH_TMP . $this->dir . 'IP' . $instance->getParentId() . '-' . $instance->id . '.tra';
+                    if(!file_exists($file)) $this->createFile ($file);
+
+                    if($this->write_tra($this->TRA_importPaiement->constructTRA($instance), $file)) {
+                        $this->good['IP']['IP' . $instance->getParentId() . '-' . $instance->id] = 'Ok dans le fichier ' . $file;
+                        $instance->updateField('exported', 1);
+                    } else {
+                        $this->fails['IP']['IP' . $instance->getParentId() . '-' . $instance->id] = "Erreur lors de l'écriture dans le fichier";
+                    }
+                }
             } else {
-                return 0;
+                $this->warn['IP']['IP' . $instance->getParentId() . '-' . $instance->id] = 'Pas d\'import de paiement à exporter en compta';
             }
-            
+
         }
         
         public function exportPaiement($ref = ''):void  {

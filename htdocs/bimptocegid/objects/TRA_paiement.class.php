@@ -26,7 +26,7 @@
         public function constructTra($transaction, Bimp_Paiement $parent_paiement, $pay) {
             
             $facture        = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $transaction->fk_facture);
-            $client         = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', ($this->isVenteTicket($parent_paiement->id) ? $this->caisse->getData('id_client') : $facture->getData('fk_soc')));
+            $client         = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', ($this->isVenteTicket($parent_paiement->id) ? $this->vente->getData('id_client') : $facture->getData('fk_soc')));
             $datec          = new DateTime($parent_paiement->getData('datec'));
             $datep          = new DateTime($parent_paiement->getData('datep'));
             $entrepot       = $this->db->getRow('entrepot', 'rowid = ' . ($this->isVenteTicket($parent_paiement->id) ? $caisse->getData('id_entrepot') : $facture->getData('entrepot')));
@@ -162,12 +162,12 @@
 
             if ($bc_paiement->find(['id_paiement' => $id])) {
                 if ($bc_paiement->getData('id_vente') > 0) {
-                    $this->caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Vente', $bc_paiement->getData('id_vente'));
-                    if ($vente->getData('id_client') == 0) {
+                    $this->vente = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Vente', $bc_paiement->getData('id_vente'));
+                    if ($this->vente->getData('id_client') == 0) {
                         return 1;
                     }
                 } else {
-                    $this->caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $bc_paiement->getData('id_caisse'));
+//                    $this->caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $bc_paiement->getData('id_caisse'));
                 }
             }
 

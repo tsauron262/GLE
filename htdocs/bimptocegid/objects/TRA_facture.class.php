@@ -180,7 +180,10 @@
                 }
                 
                 if($facture->getData('zone_vente') == 1 || $facture->getData('zone_vente') == 2) {
-                    $this->compte_general = $product->getCodeComptableVenteTva($facture->getData('zone_vente'));
+                    if($product->isLoaded())
+                        $this->compte_general = $product->getCodeComptableVenteTva($facture->getData('zone_vente'));
+                    else
+                        $this->compte_general = '44571000';
                     $structure['COMPTE_GENERAL']        = sizing($this->compte_general , 17);
                     $structure['SENS']                  = sizing($this->getSens($total_tva),1);
                     $structure['CONTRE_PARTIE']         = sizing($this->compte_general_client,17);

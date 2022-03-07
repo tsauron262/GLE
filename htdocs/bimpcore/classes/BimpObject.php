@@ -3593,19 +3593,15 @@ class BimpObject extends BimpCache
             return array();
         }
 
-        // Vérification des filtres: 
+        // Vérification des filtres:
         $filters = $this->checkSqlFilters($filters, $joins, 'a');
 
-        $sql = 'SELECT ';
-        $fl = true;
-        foreach ($fields as $sqlKey => $field_alias) {
-            if (!$fl) {
-                $sql .= ', ';
-            } else {
-                $fl = false;
-            }
+        $primary = $this->getPrimary();
 
-            $sql .= 'SUM(' . $sqlKey . ') as ' . $field_alias;
+        $sql = 'SELECT COUNT(DISTINCT a.' . $primary . ') as __nb_rows_expected__, COUNT(a.' . $primary . ') as __nb_rows_real__';
+
+        foreach ($fields as $sqlKey => $field_alias) {
+            $sql .= ', SUM(' . $sqlKey . ') as ' . $field_alias;
         }
 
         $sql .= BimpTools::getSqlFrom($table, $joins);
@@ -3627,8 +3623,78 @@ class BimpObject extends BimpCache
         } else {
             if (BimpDebug::isActive()) {
                 $content = BimpRender::renderSql($sql);
+                $content .= '<br/><br/>';
+                $content .= 'Nb lignes attendu: ' . $rows[0]['__nb_rows_expected__'];
+                $content .= '<br/>Nb lignes réel: ' . $rows[0]['__nb_rows_real__'];
                 $title = 'SQL Liste Total - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
                 BimpDebug::addDebug('list_sql', $title, $content);
+            }
+
+            if ((int) $rows[0]['__nb_rows_expected__'] != (int) $rows[0]['__nb_rows_real__']) {
+                // Nouvelle requête pour obtenir les bons totaux:
+                $new_joins = array();
+                $sql = 'SELECT COUNT(DISTINCT a.' . $primary . ') as __nb_rows_expected__, COUNT(a.' . $primary . ') as __nb_rows_real__';
+                foreach ($fields as $sqlKey => $field_alias) {
+                    if (preg_match('/^(.+)\.(.+)$/', $sqlKey, $matches)) {
+                        $table_alias = $matches[1];
+                        if ($table_alias != 'a' && !isset($new_joins[$table_alias])) {
+                            if (isset($joins[$table_alias])) {
+                                $new_joins[$table_alias] = $joins[$table_alias];
+                            } else {
+                                $check = false;
+                                foreach ($joins as $join) {
+                                    if (isset($join['alias']) && $join['alias'] == $table_alias) {
+                                        $new_joins[$table_alias] = $join;
+                                        $check = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!$check) {
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                    $sql .= ', SUM(' . $sqlKey . ') as ' . $field_alias;
+                }
+
+                $sql .= BimpTools::getSqlFrom($this->getTable(), $new_joins);
+                $sql .= ' WHERE a.' . $primary . ' IN (';
+                $sql .= 'SELECT DISTINCT a.' . $primary;
+                $sql .= BimpTools::getSqlFrom($this->getTable(), $joins);
+                $sql .= BimpTools::getSqlWhere($filters);
+                $sql .= ')';
+
+                $rows = $this->db->executeS($sql, 'array');
+                if (is_null($rows)) {
+                    $rows = array();
+
+                    if (BimpDebug::isActive()) {
+                        $content = BimpRender::renderSql($sql);
+                        $content .= BimpRender::renderDebugInfo($this->db->err(), 'ERREUR SQL', 'fas_exclamation-circle');
+                        $title = 'SQL Liste Total [REQUETE 2] - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
+                        BimpDebug::addDebug('list_sql', $title, $content);
+                    }
+                } else {
+                    if (BimpDebug::isActive()) {
+                        $content = BimpRender::renderSql($sql);
+                        $content .= '<br/><br/>';
+                        $content .= 'Nb lignes attendu: ' . $rows[0]['__nb_rows_expected__'];
+                        $content .= '<br/>Nb lignes réel: ' . $rows[0]['__nb_rows_real__'];
+                        $title = 'SQL Liste Total [REQUETE 2] - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
+                        BimpDebug::addDebug('list_sql', $title, $content);
+                    }
+
+                    if ((int) $rows[0]['__nb_rows_expected__'] != (int) $rows[0]['__nb_rows_real__']) {
+                        BimpCore::addlog('Total liste - écart entre le nombre de ligne attendu et réel [REQUETE 2]- A corriger', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
+                            'Nb lignes attendu' => $rows[0]['__nb_rows_expected__'],
+                            'Nb Lignes réelles' => $rows[0]['__nb_rows_real__'],
+                            'Requête'           => BimpRender::renderSql($sql),
+                        ));
+                        $rows = array(); // Pour ne pas afficher des totaux faux   
+                    }
+                }
             }
         }
 

@@ -114,11 +114,10 @@ class BC_Paiement extends BimpObject
 
         return '';
     }
-
-    public function displayClient($display_name = 'nom_url')
-    {
+    
+    public function getClient(){
         if (!$this->isLoaded()) {
-            return '';
+            return null;
         }
 
         $facture = null;
@@ -146,14 +145,22 @@ class BC_Paiement extends BimpObject
         if (BimpObject::objectLoaded($facture)) {
             $client = $facture->getChildObject('client');
             if (BimpObject::objectLoaded($client)) {
-                if ($display_name === 'nom_url') {
-                    return $client->getLink();
-                } else {
-                    return BimpTools::ucfirst($client->getRef() . ' - ' . $client->getName());
-                }
+                return $client;
             }
         }
+        return null;
+    }
 
+    public function displayClient($display_name = 'nom_url')
+    {
+        $client = $this->getClient();
+        if($client && $client->isLoaded()){
+            if ($display_name === 'nom_url') {
+                return $client->getLink();
+            } else {
+                return BimpTools::ucfirst($client->getRef() . ' - ' . $client->getName());
+            }
+        }
         return '';
     }
 }

@@ -6441,7 +6441,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             $html .= '</span>';
 
             //Suivi mail
-            $random = random_int("3", "999999999999");
+            $random = rand(11111111, 99999999);
             $htmlId = 'suivi_mail_' . $random;
             $onclick = $this->getJsLoadModalCustomContent('renderSuiviMail', 'Suivi des mails');
             $html .= '<span id="' . $htmlId . '" class="btn btn-default bs-popover"';

@@ -8244,7 +8244,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 return $url;
             }
 
-            return DOL_URL_ROOT . '/bimpinterfaceclient/client.php';
+            return DOL_URL_ROOT . '/bimpinterfaceclient/client.php?';
         }
 
         return BimpCore::getConf('interface_client_base_url', '') . '?';

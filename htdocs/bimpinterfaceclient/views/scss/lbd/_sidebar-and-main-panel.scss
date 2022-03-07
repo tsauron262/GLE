@@ -20,7 +20,7 @@
         width: 280px;
         z-index: 4;
         padding-bottom: 100px;
-        background-color: #EF7D00;
+        background-color: $secondary-color;
     }
 
     .sidebar-background{
@@ -28,7 +28,7 @@
         z-index: 1;
         height: 100%;
         width: 100%;
-        background: #EF7D00;
+        background: $secondary-color;
         display: block;
         top: 0;
         left: 0;

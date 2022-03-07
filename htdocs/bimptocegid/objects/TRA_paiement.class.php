@@ -162,7 +162,7 @@
 
             if ($bc_paiement->find(['id_paiement' => $id])) {
                 if ($bc_paiement->getData('id_vente') > 0) {
-                    $this->caisse = $this->getInstance('bimpcaisse', 'BC_Vente', $bc_paiement->getData('id_vente'));
+                    $this->caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Vente', $bc_paiement->getData('id_vente'));
                     if ($vente->getData('id_client') == 0) {
                         return 1;
                     }

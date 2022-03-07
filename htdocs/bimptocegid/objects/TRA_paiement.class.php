@@ -12,7 +12,6 @@
         
         protected $db;
         protected $compte_general;
-        protected $compte_general_client;
         public $rapport = [];
         private $caisse;
         private $TRA_tiers;

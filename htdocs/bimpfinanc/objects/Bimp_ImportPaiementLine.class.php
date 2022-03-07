@@ -10,9 +10,11 @@ class Bimp_ImportPaiementLine extends BimpObject
     var $raisonManu = array(
         1 => 'C2BO',
         2 => 'Fournisseur',
+        3 => 'ONEY',
+        4 => 'YOUNITED',
         99 => 'Autre'
     );
-
+    
     function create(&$warnings = array(), $force_create = false)
     {
         $errors = parent::create($warnings, $force_create);

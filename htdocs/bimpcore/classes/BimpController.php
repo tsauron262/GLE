@@ -315,7 +315,7 @@ class BimpController
     public function displayHeaderFiles($echo = true)
     {
         $html = '';
-        $id_object = BimpTools::getValue('id');
+        $id_object = BimpTools::getValue('id'); 
 
         $prefixe = DOL_URL_ROOT;
         if ($prefixe == "/")
@@ -340,8 +340,10 @@ class BimpController
         $html .= '<script type="text/javascript">';
         $html .= '$(document).ready(function() {$(\'body\').trigger($.Event(\'bimp_ready\'));});';
         $html .= '</script>';
+        
         if ($echo)
             echo $html;
+        
         return $html;
     }
 

@@ -114,11 +114,11 @@
             
             $this->output .= $logs;
             
-            $log_file = fopen(PATH_TMP . '/' . 'exportCegid' . '/' . 'rapports_payni' . '/' . date('d_m_Y') . '.log', 'w');
+            $log_file = fopen(PATH_TMP . '/' . 'exportCegid' . '/' . 'rapports/payni' . '_' . date('d_m_Y') . '.log', 'w');
             fwrite($log_file, $logs);
             fclose($log_file);
 
-            mailSyn2($sujet, $to, $from, "Bonjour, vous trouverez en pièce jointe le rapport des exports PAYNI de ce matin.", [PATH_TMP . '/' . 'exportCegid' . '/' . 'rapports_payni' . '/' . date('d_m_Y') . '.log']);
+            mailSyn2($sujet, $to, $from, "Bonjour, vous trouverez en pièce jointe le rapport des exports PAYNI de ce matin.", [PATH_TMP . '/' . 'exportCegid' . '/' . 'rapports/payni' . '_' . date('d_m_Y') . '.log']);
             
         }
         

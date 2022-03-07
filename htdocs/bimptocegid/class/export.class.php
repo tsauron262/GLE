@@ -65,6 +65,7 @@
                     $instance= BimpCache::getBimpObjectInstance("bimpcommercial", "Bimp_Facture", $facture->rowid); 
                     $ecriture .= $this->TRA_facture->constructTra($instance);
                     if($this->write_tra($ecriture, $file)) {
+                        $instance->updateField('exported', 1);
                         $this->good['VENTES'][$instance->getRef()]= "Ok dans le fichier TRA " . $file;
                     } else {
                         $this->fails['VENTES'][$instance->getRef()] = "Nom écrit dans le TRA " . $file;

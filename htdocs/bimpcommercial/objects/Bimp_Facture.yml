@@ -269,6 +269,10 @@ fields:
         label: Données Chorus
         dol_extra_field: 1
         type: json
+    date_cfr:
+        label: Date de dépot CFR
+        dol_extra_field: 1
+        type: datetime
 #    rib_client:
 #        label: Rib Client
 #        dol_extra_field: 1
@@ -777,6 +781,8 @@ fields_tables:
             - label: Avoir potentiel
               value: 
                   callback: displayPotentielRemise
+            - field: date_cfr
+              edit: 1
                 
     pdf: 
         rows: 

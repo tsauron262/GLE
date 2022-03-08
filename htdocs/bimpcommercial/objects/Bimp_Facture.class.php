@@ -202,6 +202,11 @@ class Bimp_Facture extends BimpComm
                     return 0;
                 }
                 break;
+                
+            case 'date_cfr':
+                if($user->admin || $user->rights->admin_financier)
+                    return 1;
+                return 0;
 
             case 'fk_mode_reglement':
                 if ($this->getData('fk_statut') > 0) {

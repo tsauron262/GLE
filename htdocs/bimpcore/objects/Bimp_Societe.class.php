@@ -105,11 +105,12 @@ class Bimp_Societe extends BimpDolObject
         global $user;
         switch ($field_name) {
             case 'outstanding_limit_atradius':
+            case 'outstanding_limit_atradius':
             case 'outstanding_limit_icba':
             case 'outstanding_limit':
             case 'outstanding_limit_credit_check':
             case 'date_atradius':
-                if ($user->admin || $user->rights->bimpcommercial->admin_recouvrement) {
+                if ($user->admin || $user->rights->bimpcommercial->admin_recouvrement || $user->rights->bimpcommercial->admin_compta) {
                     return 1;
                 }
                 return 0;
@@ -146,21 +147,6 @@ class Bimp_Societe extends BimpDolObject
         }
 
         return parent::canEditField($field_name);
-    }
-
-    public function canViewField($field_name)
-    {
-        global $user;
-
-        switch ($field_name) {
-            case 'outstanding_limit_atradius':
-                if ($user->admin) {
-                    return 1;
-                }
-
-                return 0;
-        }
-        return parent::canViewField($field_name);
     }
 
     public function canSetAction($action)

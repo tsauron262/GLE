@@ -299,7 +299,7 @@ class Bimp_Propal extends BimpComm
                     return 0;
                 }
 
-                if ((int) $this->getData('id_signature')) {
+                if ((int) $this->getData('id_signature') && (int) BimpCore::getConf('bimp_propal_use_signatures', 0)) {
                     $errors[] = 'Utiliser la fiche signature';
                     return 0;
                 }

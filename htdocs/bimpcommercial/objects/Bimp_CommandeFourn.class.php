@@ -1777,7 +1777,7 @@ class Bimp_CommandeFourn extends BimpComm
 
 
         if (!count($errors)) {
-            require_once DOL_DOCUMENT_ROOT . '/bimpdatasync_old/classes/BDS_ArrayToXml.php';
+            require_once DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDS_ArrayToXml.php';
             $arrayToXml = new BDS_ArrayToXml();
 
             $products = array();

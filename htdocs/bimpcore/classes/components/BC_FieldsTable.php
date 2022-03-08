@@ -89,7 +89,6 @@ class BC_FieldsTable extends BC_Panel
             if ($row_params['field']) {
                 $field_errors = array();
                 $field_name = $row_params['field'];
-                $field_name = $row_params['field'];
                 $field_object = BC_Field::getFieldObject($this->object, $field_name, $field_errors);
 
                 if (count($field_errors)) {

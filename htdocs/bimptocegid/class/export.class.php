@@ -29,10 +29,7 @@
             $this->moment = ((int)$hier->format('H') < 12) ? 'AM' : 'PM'; 
             
             $this->yesterday = $hier->sub(new DateInterval("P1D"));
-            
-            
-            
-            //$this->yesterday = new DateTime('2020-09-16');
+
             $this->lastDateExported = new DateTime(BimpCore::getConf("BIMPTOCEGID_last_export_date"));
             $this->bdb = new BimpDb($db);
             $this->TRA_facture = new TRA_facture($this->bdb, PATH_TMP . $this->dir . $this->getMyFile("tiers"));
@@ -45,20 +42,18 @@
         public function exportFacture($ref = ""):void {
             global $db;
             $errors = [];
-//            switch($this->moment) {
-//                case 'AM':
-//                    $list = $this->bdb->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND (datef BETWEEN "'.$this->lastDateExported->format('Y-m-d').'" AND "'.$this->yesterday->format('Y-m-d').'" OR date_valid BETWEEN "'.$this->lastDateExported->format('Y-m-d').'" AND "'.$this->yesterday->format('Y-m-d').'")');
-//                    break;
-//                case 'PM':
-//                    $toDay = new DateTime();
-//                    $list = $this->bdb->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND (datef BETWEEN "'.$toDay->format('Y-m-d').'" AND "'.$toDay->format('Y-m-d').'" OR date_valid BETWEEN "'.$toDay->format('Y-m-d').'" AND "'.$toDay->format('Y-m-d').'")');
-//                    break;
-//                default:
-//                    $list = [];
-//            }
-            
-            $list = $this->bdb->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND (datef BETWEEN "'.$this->lastDateExported->format('Y-m-d').'" AND "'.$this->yesterday->format('Y-m-d').'" OR date_valid BETWEEN "'.$this->lastDateExported->format('Y-m-d').'" AND "'.$this->yesterday->format('Y-m-d').'")');
-            
+            switch($this->moment) {
+                case 'AM':
+                    $list = $this->bdb->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND (datef BETWEEN "'.$this->lastDateExported->format('Y-m-d').'" AND "'.$this->yesterday->format('Y-m-d').'" OR date_valid BETWEEN "'.$this->lastDateExported->format('Y-m-d').'" AND "'.$this->yesterday->format('Y-m-d').'")');
+                    break;
+                case 'PM':
+                    $toDay = new DateTime();
+                    $list = $this->bdb->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND (datef BETWEEN "'.$toDay->format('Y-m-d').'" AND "'.$toDay->format('Y-m-d').'" OR date_valid BETWEEN "'.$toDay->format('Y-m-d').'" AND "'.$toDay->format('Y-m-d').'")');
+                    break;
+                default:
+                    $list = [];
+            }
+                        
             $file = PATH_TMP . $this->dir . $this->getMyFile("ventes");
             if(count($list) > 0) {
                 foreach($list as $facture) {
@@ -120,7 +115,6 @@
                     break;
             }
 
-            //$list = $this->bdb->getRows('paiement', 'rowid = 181956');
             foreach($list as $pay) {
                 $reglement = $this->bdb->getRow('c_paiement', 'id = ' . $pay->fk_paiement);
                 if($reglement->code != 'NO_COM') {

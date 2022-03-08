@@ -165,7 +165,7 @@
                     }
                 }
                 
-                if($use_d3e && $total_deee > 0) {
+                if($use_d3e && $total_deee != 0) {
                     $this->compte_general = $product->getCodeComptableVenteDeee($facture->getData('zone_vente'));
                     $structure['COMPTE_GENERAL']        = sizing(sizing(interco_code($this->compte_general, $this->compte_general_client), 8, false, true) , 17);
                     $structure['SENS']                  = sizing($this->getSens($total_deee),1);
@@ -175,7 +175,7 @@
                     $structure['CONTRE_PARTIE']         = sizing($this->compte_general_client,17);
                     $structure['REF_LIBRE']             = sizing("DEEE",35);
                     $ecriture .= implode('', $structure);
-                    if($total_tva > 0) $ecriture .= "\n";
+                    if(abs($total_tva) > 0) $ecriture .= "\n";
                     
                 }
                 

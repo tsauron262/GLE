@@ -76,7 +76,7 @@ class BC_FieldsTable extends BC_Panel
         $html .= '<tbody>';
 
         $has_content = false;
-        
+
         foreach ($this->params['rows'] as $row) {
             $row_params = $this->fetchParams($this->config_path . '/rows/' . $row, $this->row_params);
 
@@ -88,6 +88,7 @@ class BC_FieldsTable extends BC_Panel
             $content = '';
             if ($row_params['field']) {
                 $field_errors = array();
+                $field_name = $row_params['field'];
                 $field_name = $row_params['field'];
                 $field_object = BC_Field::getFieldObject($this->object, $field_name, $field_errors);
 
@@ -104,13 +105,14 @@ class BC_FieldsTable extends BC_Panel
                         }
                     }
 
+                    $isBaseObjectField = ($field_name == $row_params['field']);
                     $edit = 0;
 
-                    if ($field_name == $row_params['field'] && (int) $row_params['edit']) {
+                    if ($isBaseObjectField && (int) $row_params['edit']) {
                         $edit = 1;
                     }
 
-                    $field = new BC_Field($field_object, $field_name, (int) $row_params['edit']);
+                    $field = new BC_Field($field_object, $field_name, $edit);
                     $field->display_name = $row_params['display'];
 
                     if (!$field->params['show']) {
@@ -121,7 +123,7 @@ class BC_FieldsTable extends BC_Panel
                         continue;
                     }
 
-                    if (isset($this->new_values[$field_name])) {
+                    if (isset($this->new_values[$row_params['field']])) {
                         $field->new_value = $this->new_values[$field_name];
                     }
 
@@ -131,7 +133,7 @@ class BC_FieldsTable extends BC_Panel
 
                     $content = $field->renderHtml();
 
-                    if ($field->edit && $field->isEditable()) {
+                    if ($edit && $field->isEditable()) {
                         $content .= $field->displayCreateObjectButton(true, true);
                     }
 
@@ -191,13 +193,13 @@ class BC_FieldsTable extends BC_Panel
             }
 
             $has_content = true;
-            
+
             $html .= '<tr>';
             $html .= '<th>' . $label . '</th>';
             $html .= '<td>' . $content . '</td>';
             $html .= '</tr>';
         }
-        
+
         $html .= '</tbody>';
         $html .= '</table>';
 
@@ -205,9 +207,9 @@ class BC_FieldsTable extends BC_Panel
             $this->params['show'] = 0;
             return '';
         }
-        
+
         $current_bc = $prev_bc;
-        
+
         return $html;
     }
 

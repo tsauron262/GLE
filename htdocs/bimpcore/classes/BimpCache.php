@@ -25,7 +25,6 @@ class BimpCache
     protected static $memoryMax = null;
     public static $objects_keys = array();
     public static $objects_keys_removed = array();
-    
     public $j_semaine = array(0 => 'Dimanche', 1 => "Lundi", 2 => "Mardi", 3 => "Mercredi", 4 => "Jeudi", 5 => "Vendredi", 6 => "Samedi", 10 => "N/C");
 
     public static function getBdb($no_transactions = false)
@@ -168,8 +167,9 @@ class BimpCache
     {
         return self::cacheExists('bimp_object_' . $module . '_' . $object_name . '_' . $id_object);
     }
-    
-    public static function getBimpObjectLink($module, $object_name, $id_object){
+
+    public static function getBimpObjectLink($module, $object_name, $id_object)
+    {
         $coll = BimpCollection::getInstance($module, $object_name);
         return $coll->getLink($id_object);
     }
@@ -1640,7 +1640,7 @@ class BimpCache
                 if ($include_empty) {
                     $result[''] = '';
                 }
-                
+
                 $userCentres = explode(' ', str_replace(',', ' ', $user->array_options['options_apple_centre']));
                 $centres = self::getCentres();
                 if (count($userCentres) > 1 || $userCentres[0] != '') {
@@ -1774,6 +1774,172 @@ class BimpCache
         }
 
         return self::$cache[$cache_key];
+    }
+
+    // Définitions des droits: 
+
+    public static function getRightsDefData()
+    {
+        $cache_key = 'rights_definitions_data';
+
+        if (!isset(self::$cache[$cache_key])) {
+            $rows = self::getBdb()->getRows('rights_def', '1', null, 'array');
+
+            if (is_array($rows)) {
+                self::$cache[$cache_key] = array();
+                foreach ($rows as $r) {
+                    self::$cache[$cache_key][$r['id']] = array(
+                        'libelle'  => $r['libelle'],
+                        'module'   => $r['module'],
+                        'perms'    => $r['perms'],
+                        'subperms' => $r['subperms'],
+                        'type'     => $r['type']
+                    );
+                }
+            }
+        }
+
+        return self::$cache[$cache_key];
+    }
+
+    public static function getRightsDefDataByModules()
+    {
+        $cache_key = 'rights_definitions_data_by_modules';
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            foreach (self::getRightsDefData() as $id_right => $data) {
+                if (!isset(self::$cache[$cache_key][$data['module']])) {
+                    self::$cache[$cache_key][$data['module']] = array();
+                }
+
+                self::$cache[$cache_key][$data['module']][$id_right] = $data;
+            }
+        }
+
+        return self::$cache[$cache_key];
+    }
+
+    public static function getRightsDefArray()
+    {
+        $cache_key = 'rights_definitions_array';
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            foreach (self::getRightsDefData() as $id_right => $data) {
+                $label = $data['libelle'];
+                $label .= ' (' . $data['module'] . ($data['perms'] ? '->' . $data['perms'] : '') . ($data['subperms'] ? '->' . $data['subperms'] : '') . ')';
+                self::$cache[$cache_key][$id_right] = $label;
+            }
+        }
+
+        return self::$cache[$cache_key];
+    }
+
+    public static function getRightsDefArrayFormModule($module, $include_empty = true)
+    {
+        if (!$module) {
+            if ($include_empty) {
+                return array(
+                    '' => ''
+                );
+            }
+            return array();
+        }
+
+        $cache_key = 'rights_definitions_array_for_module_' . $module;
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            $rights = self::getRightsDefDataByModules();
+
+            if (isset($rights[$module])) {
+                foreach ($rights[$module] as $id_right => $right_data) {
+                    $label = $right_data['libelle'];
+
+                    if (isset($right_data['perms']) && $right_data['perms']) {
+                        $label .= ' (' . $right_data['perms'];
+
+                        if (isset($right_data['subperms']) && $right_data['subperms']) {
+                            $label .= '->' . $right_data['subperms'];
+                        }
+
+                        $label .= ')';
+                    }
+                    self::$cache[$cache_key][$id_right] = $label;
+                }
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty);
+    }
+
+    public static function getRightsDefModulesArray($include_empty = true)
+    {
+        $cache_key = 'rights_definitions_modules_array';
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            foreach (self::getRightsDefData() as $data) {
+                if (isset(self::$cache[$cache_key][$data['module']])) {
+                    continue;
+                }
+                self::$cache[$cache_key][$data['module']] = $data['module'];
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty, '', '');
+    }
+
+    public static function getRightDefLibelle($id_right, $with_default = true)
+    {
+        $rights = self::getRightsDefData();
+
+        if (isset($rights[$id_right]['libelle'])) {
+            return $rights[$id_right]['libelle'];
+        }
+
+        if ($with_default) {
+            return 'Droit #' . $id_right;
+        }
+
+        return '';
+    }
+
+    public static function getRightDefCode($id_right)
+    {
+        $rights = self::getRightsDefData();
+
+        $code = '';
+
+        if (isset($rights[$id_right]['module']) && $rights[$id_right]['module']) {
+            $code .= $rights[$id_right]['module'];
+        }
+
+        if (isset($rights[$id_right]['perms']) && $rights[$id_right]['perms']) {
+            $code .= ($code ? '->' : '') . $rights[$id_right]['perms'];
+        }
+
+        if (isset($rights[$id_right]['subperms']) && $rights[$id_right]['subperms']) {
+            $code .= ($code ? '->' : '') . $rights[$id_right]['subperms'];
+        }
+
+        return $code;
+    }
+
+    public static function getRightDefModule($id_right)
+    {
+        $rights = self::getRightsDefData();
+
+        if (isset($rights[$id_right]['module'])) {
+            return $rights[$id_right]['module'];
+        }
+
+        return '';
     }
 
     // MySoc: 
@@ -2512,27 +2678,24 @@ class BimpCache
         return self::getCacheArray($cache_key, $include_empty);
     }
 
-    public static function getSecteursArray()
+    public static function getSecteursArray($include_empty = true)
     {
-        if (!BimpCore::getConf("USE_SECTEUR")) {
+        if (!BimpCore::getConf("USE_SECTEUR", 0)) {
             return array();
         }
 
-        if (!isset(self::$cache['secteurs_array'])) {
-            self::$cache['secteurs_array'] = array(
-                '' => ''
-            );
-
+        $cache_key = 'secteurs_array';
+        if (!isset(self::$cache[$cache_key])) {
             $rows = self::getBdb()->getRows('bimp_c_secteur');
 
             if (is_array($rows)) {
                 foreach ($rows as $r) {
-                    self::$cache['secteurs_array'][$r->clef] = $r->valeur;
+                    self::$cache[$cache_key][$r->clef] = $r->valeur;
                 }
             }
         }
 
-        return self::$cache['secteurs_array'];
+        return self::getCacheArray($cache_key, $include_empty, '', '');
     }
 
     public static function getIpFromDns($host)

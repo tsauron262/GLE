@@ -1469,6 +1469,15 @@ class BimpTools
 
         return $filters;
     }
+    
+    public static function mergeSqlFilters($filters, $new_filters)
+    {
+        foreach ($new_filters as $filter_name => $new_filter) {
+            $filters = self::mergeSqlFilter($filters, $filter_name, $new_filter);
+        }
+        
+        return $filters;
+    }
 
     public static function getSqlSelectFullQuery($table, $fields, $filters = array(), $joins = array(), $params = array())
     {

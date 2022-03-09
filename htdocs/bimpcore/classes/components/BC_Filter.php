@@ -132,7 +132,6 @@ class BC_Filter extends BimpComponent
 
         $items = null;
 
-        
         if (!is_null($this->bc_field)) {
             $field_params = $this->bc_field->params;
 
@@ -147,9 +146,7 @@ class BC_Filter extends BimpComponent
             $input_path = 'filters/' . $this->filter_name . '/input/type';
         }
         $input_type = $this->object->getConf($input_path, '');
-        
-        
-        
+
         if ($input_type === 'search_user') {
             $this->params['type'] = 'user';
         } elseif ($this->bc_field->params['type'] == 'id_object') {
@@ -709,15 +706,19 @@ class BC_Filter extends BimpComponent
         $field_alias = 'a';
         $field_object = $this->base_object;
         $errors = $field_object->getRecursiveChildrenJoins($children, $filters, $joins, 'a', $field_alias, $field_object);
-                    
+
         $values = self::getConvertedValues($this->params['type'], $this->values);
         if (!empty($values)) {
-            $this->object->getCustomFilterSqlFilters($this->filter_name, $values, $filters, $joins, $field_alias, $errors, false);
+            $new_filters = array();
+            $this->object->getCustomFilterSqlFilters($this->filter_name, $values, $new_filters, $joins, $field_alias, $errors, false);
+            $filters = BimpTools::mergeSqlFilters($filters, $new_filters);
         }
 
         $excluded_values = self::getConvertedValues($this->params['type'], $this->excluded_values);
         if (!empty($excluded_values)) {
-            $this->object->getCustomFilterSqlFilters($this->filter_name, $excluded_values, $filters, $joins, $field_alias, $errors, true);
+            $new_filters = array();
+            $this->object->getCustomFilterSqlFilters($this->filter_name, $excluded_values, $new_filters, $joins, $field_alias, $errors, true);
+            $filters = BimpTools::mergeSqlFilters($filters, $new_filters);
         }
 
         return $errors;

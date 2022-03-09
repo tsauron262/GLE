@@ -22,7 +22,7 @@ function reloadObjectView(view_id) {
                     if (field_name) {
                         var $input = $inputContainer.find('[name="' + field_name + '"]');
                         if ($input.length) {
-                            new_values[field_name] = $input.val();
+                            new_values[field_name] = getInputValue($inputContainer);
                         }
                     }
                 }

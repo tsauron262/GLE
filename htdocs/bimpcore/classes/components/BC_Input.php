@@ -21,11 +21,11 @@ class BC_Input extends BimpComponent
     protected $input_extra_data = array();
     public static $type_params_def = array(
         'text'                        => array(
-            'values'       => array('data_type' => 'array', 'compile' => true, 'default' => array()),
-            'allow_custom' => array('data_type' => 'bool', 'default' => 1),
-            'hashtags'     => array('data_type' => 'bool', 'default' => 0),
-            'scanner'      => array('data_type' => 'bool', 'default' => 0),
-            'no_autocorrect'=> array('data_type' => 'bool', 'default' => 0)
+            'values'         => array('data_type' => 'array', 'compile' => true, 'default' => array()),
+            'allow_custom'   => array('data_type' => 'bool', 'default' => 1),
+            'hashtags'       => array('data_type' => 'bool', 'default' => 0),
+            'scanner'        => array('data_type' => 'bool', 'default' => 0),
+            'no_autocorrect' => array('data_type' => 'bool', 'default' => 0)
         ),
         'qty'                         => array(
             'step'      => array('data_type' => 'float', 'default' => 1),

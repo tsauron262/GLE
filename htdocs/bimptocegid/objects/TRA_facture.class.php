@@ -157,8 +157,8 @@
                         $structure['REF_LIBRE']             = sizing(($product->isLoaded()) ? $product->getRef() : 'Ligne ' . $line->id,35);
                         $ecriture .= implode('', $structure) . "\n";
                         
-                        if($current_montant > $montant_le_plus_grand) {
-                            $montant_le_plus_grand = $current_montant;
+                        if(abs($current_montant) > $montant_le_plus_grand) {
+                            $montant_le_plus_grand = abs($current_montant);
                             $compte_le_plus_grand = $this->compte_general;
                         }
                         

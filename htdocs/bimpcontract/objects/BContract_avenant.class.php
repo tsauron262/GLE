@@ -89,6 +89,10 @@ class BContract_avenant extends BContract_contrat {
         
         $errors = [];
         
+        if(BimpTools::getPostFieldValue("label") && BimpTools::getPostFieldValue("label") != $this->getInitData('label')) {
+            $this->updateField('label', BimpTools::getPostFieldValue("label"));
+        }
+        
         if(BimpTools::getPostFieldValue("years")) {
             
             $nombre_months = BimpTools::getPostFieldValue('years') * 12;
@@ -363,6 +367,10 @@ class BContract_avenant extends BContract_contrat {
             'warnings' => $warnings,
             'success' => ""
         ];
+    }
+    
+    public function displayLabel() {
+        return ($this->getData('label')) ? $this->getData('label') : 'N/C';
     }
 
     public function actionSignedProlongation($data, &$success) {

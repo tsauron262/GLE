@@ -1452,19 +1452,43 @@ class BimpTools
         return $sql;
     }
 
-    public static function mergeSqlFilter($filters, $field, $new_filter)
+    public static function mergeSqlFilter($filters, $sqlKey, $new_filter, $type = 'and')
     {
-        if (isset($filters[$field])) {
-            if (isset($filters[$field]['and'])) {
-                $filters[$field]['and'][] = $new_filter;
-            } else {
-                $current_filter = $filters[$field];
-                $filters[$field] = array('and' => array());
-                $filters[$field]['and'][] = $current_filter;
-                $filters[$field]['and'][] = $new_filter;
+        if (isset($filters[$sqlKey])) {
+            switch (strtolower($type)) {
+                case 'or':
+                    if (isset($filters[$sqlKey]['or_field'])) {
+                        $filters[$sqlKey]['or_field'][] = $new_filter;
+                    } else {
+                        $current_filter = $filters[$sqlKey];
+                        $filters[$sqlKey] = array('or_field' => array());
+                        $filters[$sqlKey]['or_field'][] = $current_filter;
+                        $filters[$sqlKey]['or_field'][] = $new_filter;
+                    }
+                    break;
+
+                case 'and':
+                    if (isset($filters[$sqlKey]['and'])) {
+                        $filters[$sqlKey]['and'][] = $new_filter;
+                    } else {
+                        $current_filter = $filters[$sqlKey];
+                        $filters[$sqlKey] = array('and' => array());
+                        $filters[$sqlKey]['and'][] = $current_filter;
+                        $filters[$sqlKey]['and'][] = $new_filter;
+                    }
+                default:
             }
         } else {
-            $filters[$field] = $new_filter;
+            $filters[$sqlKey] = $new_filter;
+        }
+
+        return $filters;
+    }
+
+    public static function mergeSqlFilters($filters, $new_filters, $type = 'and')
+    {
+        foreach ($new_filters as $filter_name => $new_filter) {
+            $filters = self::mergeSqlFilter($filters, $filter_name, $new_filter, $type);
         }
 
         return $filters;

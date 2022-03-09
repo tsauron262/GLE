@@ -375,7 +375,7 @@ class BimpStruct
 
         if (!is_null($parent_component)) {
             if (is_a($parent_component, 'BC_View')) {
-                if (count($parent_component->new_values)) {
+                if (is_array($parent_component->new_values) && !empty($parent_component->new_values)) {
                     $table->setNewValues($parent_component->new_values);
                 }
             }

@@ -72,7 +72,7 @@ class Bimp_ImportPaiement extends BimpObject
                     else
                         $montant = $totP;
                     $totP -= $montant;
-                    if ($montant > 0) {
+                    if ($montant != 0) {
                         $p->amounts[$idFact] = $montant;
                     } else {
                         $errorsLn[] = 'Impossible de créer le paiment facture '.$fact->getLink().' : ' . $montant.' reste a payer '.$fact->getData('remain_to_pay');

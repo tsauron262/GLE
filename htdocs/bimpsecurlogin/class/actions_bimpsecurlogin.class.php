@@ -143,6 +143,8 @@ class securLogSms {
         if ($this->asSecureCokie())
             return 1;
 
+        if(stripos($tis->ip, '10.20.') !== false)//interne
+                return 1;
 
         if ($this->isIpWhite($this->ip))
             return 1;

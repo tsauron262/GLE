@@ -592,23 +592,13 @@ class Bimp_Societe extends BimpDolObject
                     }
                 }
 
-                $sc_alias = $main_alias . '___soc_commercial';
-                $joins[$sc_alias] = array(
-                    'alias' => 'soc_commercial',
-                    'table' => $sc_alias,
-                    'on'    => $main_alias . '.rowid = ' . $sc_alias . '.fk_soc'
-                );
-
                 $sql = '';
 
                 $nbCommerciaux = 'SELECT COUNT(sc.rowid) FROM ' . MAIN_DB_PREFIX . 'societe_commerciaux sc WHERE sc.fk_soc = ' . $main_alias . '.rowid';
 
                 if (!empty($ids)) {
-                    if (!$excluded) {
-                        $sql = 'soc_commercial.fk_user IN (' . implode(',', $ids) . ')';
-                    } else {
-                        $sql = '(' . $nbCommerciaux . ' AND sc.fk_user IN (' . implode(',', $ids) . ')) = 0';
-                    }
+                    $sql .= '(' . $nbCommerciaux . ' AND sc.fk_user IN (' . implode(',', $ids) . ')) ';
+                    $sql .= ($excluded ? '=' : '>') . ' 0';
                 }
 
                 if ($empty) {

@@ -592,8 +592,8 @@ var bimp_storage = new BimpStorage();
 
 $(document).ready(function () {
     $('a#notiDropdown').hide();
-//    bimp_notification.updateStorage();
-//    bimp_notification.onWindowLoaded();
+    bimp_notification.updateStorage();
+    bimp_notification.onWindowLoaded();
 });
 
 

@@ -150,6 +150,10 @@ class BC_FiltersPanel extends BC_Panel
                 $filters = BimpTools::mergeSqlFilters($filters, $new_filters);
             }
         }
+        
+//        echo 'FINAL<pre>';
+//        print_r($filters);
+//        exit;
 
         $current_bc = $prev_bc;
         return $errors;

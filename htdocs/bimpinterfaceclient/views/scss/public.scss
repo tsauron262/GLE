@@ -101,10 +101,9 @@
         font-size: 15px;
     }
     .card_interface .button {
-
         text-decoration: none;
-        background: #EF7D00;
-        color: #f9f9f9;
+        background: #4195C8;
+        color: #fff;
         padding: 12px;
         border: none;
         width:50px;
@@ -116,15 +115,17 @@
         display: inline-block;
         cursor: pointer;
 
-    }
-    .card_interface .button span {
-        font-size: 20px;
-        line-height: 1;
-        vertical-align: top;
-    }
-    .card_interface .button:hover {
-        background: transparent;
-        color: #EF7D00;
+        span {
+            font-size: 20px;
+            line-height: 1;
+            vertical-align: top;
+        }
+
+        &:hover {
+            background: transparent;
+            color: #4195C8;
+        }
+
     }
 
     // Tooltips: 
@@ -308,10 +309,10 @@
         a {
             @include transition(all 0.3s ease);
             font-weight: bold;
-            color: #0077CC;
+            color: #4195C8;
 
             &:hover {
-                color: #EF7D00;
+                color: #003C66;
             }
         }
 
@@ -320,10 +321,10 @@
         }
 
         .inputHelp a {
-            color: #0077CC;
+            color: #4195C8;
 
             &:hover {
-                color: #EF7D00;
+                color: #003C66;
             }
         }
     }

@@ -1,5 +1,0 @@
-﻿# Dolibarr Language file - fr_FR - bimpdatasync
-CHARSET=UTF-8
-bimpdatasync=Bimp Data Sync
-Synchronization=Synchronisation
-ModDescription= Synchronisation entre Dolibarr et Prestashop

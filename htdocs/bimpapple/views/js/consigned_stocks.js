@@ -63,4 +63,68 @@ function ConsignedStocks() {
     };
 }
 
+function ConsignedStocksShipment() {
+    this.saveParts = function ($button, id_cs_shipment) {
+        var $form = $button.findParentByClass('parts_form');
+
+        if ($.isOk($form)) {
+            var parts = [];
+
+            $form.find('input.part_qty_input').each(function () {
+                var $row = $(this).findParentByTag('tr');
+
+                if ($.isOk($row)) {
+                    var part_number = $row.data('part_number');
+
+                    if (part_number) {
+                        var qty = parseInt($(this).val());
+
+                        if (isNaN(qty)) {
+                            qty = 0;
+                        }
+
+                        parts.push({
+                            'number': part_number,
+                            'qty': qty
+                        });
+                    }
+                }
+            });
+
+            $form.find('.part_serials_check_list').each(function () {
+
+                var $row = $(this).findParentByTag('tr');
+
+                if ($.isOk($row)) {
+                    var part_number = $row.data('part_number');
+
+                    if (part_number) {
+                        var serials = [];
+
+                        $(this).find('.check_list_item_input').each(function () {
+                            if ($(this).prop('checked')) {
+                                serials.push($(this).val());
+                            }
+                        });
+
+                        parts.push({
+                            'number': part_number,
+                            'serials': serials
+                        });
+                    }
+                }
+            });
+
+            setObjectAction($button, {
+                module: 'bimpapple',
+                object_name: 'ConsignedStockShipment',
+                id_object: id_cs_shipment
+            }, 'saveParts', {
+                parts: parts
+            }, null, $form.find('.ajaxResultContainer'));
+        }
+    };
+}
+
 var ConsignedStocks = new ConsignedStocks();
+var ConsignedStocksShipment = new ConsignedStocksShipment();

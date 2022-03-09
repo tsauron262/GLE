@@ -2503,7 +2503,9 @@ class BimpObject extends BimpCache
             // Traitement des cas particuliers des listes de valeurs: 
             if ($type === 'items_list') {
                 if (is_string($value)) {
-                    if ($this->getConf('fields/' . $field . '/items_braces', 0)) {
+                    if ($value === '') {
+                        $value = array();
+                    } elseif ($this->getConf('fields/' . $field . '/items_braces', 0)) {
                         $value = str_replace('][', ',', $value);
                         $value = str_replace('[', '', $value);
                         $value = str_replace(']', '', $value);
@@ -3591,19 +3593,15 @@ class BimpObject extends BimpCache
             return array();
         }
 
-        // Vérification des filtres: 
+        // Vérification des filtres:
         $filters = $this->checkSqlFilters($filters, $joins, 'a');
 
-        $sql = 'SELECT ';
-        $fl = true;
-        foreach ($fields as $sqlKey => $field_alias) {
-            if (!$fl) {
-                $sql .= ', ';
-            } else {
-                $fl = false;
-            }
+        $primary = $this->getPrimary();
 
-            $sql .= 'SUM(' . $sqlKey . ') as ' . $field_alias;
+        $sql = 'SELECT COUNT(DISTINCT a.' . $primary . ') as __nb_rows_expected__, COUNT(a.' . $primary . ') as __nb_rows_real__';
+
+        foreach ($fields as $sqlKey => $field_alias) {
+            $sql .= ', SUM(' . $sqlKey . ') as ' . $field_alias;
         }
 
         $sql .= BimpTools::getSqlFrom($table, $joins);
@@ -3625,8 +3623,78 @@ class BimpObject extends BimpCache
         } else {
             if (BimpDebug::isActive()) {
                 $content = BimpRender::renderSql($sql);
+                $content .= '<br/><br/>';
+                $content .= 'Nb lignes attendu: ' . $rows[0]['__nb_rows_expected__'];
+                $content .= '<br/>Nb lignes réel: ' . $rows[0]['__nb_rows_real__'];
                 $title = 'SQL Liste Total - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
                 BimpDebug::addDebug('list_sql', $title, $content);
+            }
+
+            if ((int) $rows[0]['__nb_rows_expected__'] != (int) $rows[0]['__nb_rows_real__']) {
+                // Nouvelle requête pour obtenir les bons totaux:
+                $new_joins = array();
+                $sql = 'SELECT COUNT(DISTINCT a.' . $primary . ') as __nb_rows_expected__, COUNT(a.' . $primary . ') as __nb_rows_real__';
+                foreach ($fields as $sqlKey => $field_alias) {
+                    if (preg_match('/^(.+)\.(.+)$/', $sqlKey, $matches)) {
+                        $table_alias = $matches[1];
+                        if ($table_alias != 'a' && !isset($new_joins[$table_alias])) {
+                            if (isset($joins[$table_alias])) {
+                                $new_joins[$table_alias] = $joins[$table_alias];
+                            } else {
+                                $check = false;
+                                foreach ($joins as $join) {
+                                    if (isset($join['alias']) && $join['alias'] == $table_alias) {
+                                        $new_joins[$table_alias] = $join;
+                                        $check = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!$check) {
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                    $sql .= ', SUM(' . $sqlKey . ') as ' . $field_alias;
+                }
+
+                $sql .= BimpTools::getSqlFrom($this->getTable(), $new_joins);
+                $sql .= ' WHERE a.' . $primary . ' IN (';
+                $sql .= 'SELECT DISTINCT a.' . $primary;
+                $sql .= BimpTools::getSqlFrom($this->getTable(), $joins);
+                $sql .= BimpTools::getSqlWhere($filters);
+                $sql .= ')';
+
+                $rows = $this->db->executeS($sql, 'array');
+                if (is_null($rows)) {
+                    $rows = array();
+
+                    if (BimpDebug::isActive()) {
+                        $content = BimpRender::renderSql($sql);
+                        $content .= BimpRender::renderDebugInfo($this->db->err(), 'ERREUR SQL', 'fas_exclamation-circle');
+                        $title = 'SQL Liste Total [REQUETE 2] - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
+                        BimpDebug::addDebug('list_sql', $title, $content);
+                    }
+                } else {
+                    if (BimpDebug::isActive()) {
+                        $content = BimpRender::renderSql($sql);
+                        $content .= '<br/><br/>';
+                        $content .= 'Nb lignes attendu: ' . $rows[0]['__nb_rows_expected__'];
+                        $content .= '<br/>Nb lignes réel: ' . $rows[0]['__nb_rows_real__'];
+                        $title = 'SQL Liste Total [REQUETE 2] - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"';
+                        BimpDebug::addDebug('list_sql', $title, $content);
+                    }
+
+                    if ((int) $rows[0]['__nb_rows_expected__'] != (int) $rows[0]['__nb_rows_real__']) {
+                        BimpCore::addlog('Total liste - écart entre le nombre de ligne attendu et réel [REQUETE 2]- A corriger', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $this, array(
+                            'Nb lignes attendu' => $rows[0]['__nb_rows_expected__'],
+                            'Nb Lignes réelles' => $rows[0]['__nb_rows_real__'],
+                            'Requête'           => BimpRender::renderSql($sql),
+                        ));
+                        $rows = array(); // Pour ne pas afficher des totaux faux   
+                    }
+                }
             }
         }
 
@@ -6371,20 +6439,20 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             $html .= '>';
             $html .= BimpRender::renderIcon('fas_comments');
             $html .= '</span>';
-            
+
             //Suivi mail
-            $random = random_int("3", "999999999999");
-            $htmlId = 'suivi_mail_'.$random;
+            $random = rand(11111111, 99999999);
+            $htmlId = 'suivi_mail_' . $random;
             $onclick = $this->getJsLoadModalCustomContent('renderSuiviMail', 'Suivi des mails');
-            $html .= '<span id="'.$htmlId.'" class="btn btn-default bs-popover"';
+            $html .= '<span id="' . $htmlId . '" class="btn btn-default bs-popover"';
             $html .= ' onclick="' . $onclick . '"';
             $html .= BimpRender::renderPopoverData('Suivi des mails');
             $html .= '>';
             $html .= BimpRender::renderIcon('fas_inbox');
             $html .= '</span>';
-            if($_GET['open'] == 'suivi_mail')
-                $html .= '<script>$(document).ready(function(){  $("#'.$htmlId.'").click();});</script>';
-            
+            if ($_GET['open'] == 'suivi_mail')
+                $html .= '<script>$(document).ready(function(){  $("#' . $htmlId . '").click();});</script>';
+
 
             $html .= '</div>';
             $html .= '</div>';
@@ -7422,7 +7490,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
         return '';
     }
-    
+
     public function renderSuiviMail()
     {
         $instance = BimpObject::getInstance('bimpcore', 'BimpMailLog');
@@ -8242,7 +8310,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 return $url;
             }
 
-            return DOL_URL_ROOT . '/bimpinterfaceclient/client.php';
+            return DOL_URL_ROOT . '/bimpinterfaceclient/client.php?';
         }
 
         return BimpCore::getConf('interface_client_base_url', '') . '?';
@@ -8415,8 +8483,8 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         } else {
             $url = $this->getUrl('private');
         }
-        
-        if(isset($params['after_link']))
+
+        if (isset($params['after_link']))
             $url .= $params['after_link'];
 
         if ($url) {
@@ -9213,11 +9281,15 @@ var options = {
 
     // Gestion statique des objets:
 
-    public static function createBimpObject($module, $object_name, $data, $force_create = false, &$errors = array(), &$warnings = array())
+    public static function createBimpObject($module, $object_name, $data, $force_create = false, &$errors = array(), &$warnings = array(), $no_transactions_db = false)
     {
         $instance = static::getInstance($module, $object_name);
 
         if (is_a($instance, 'BimpObject')) {
+            if ($no_transactions_db) {
+                $instance->useNoTransactionsDb();
+            }
+
             $create_warnings = array();
             $create_errors = $instance->validateArray($data);
 

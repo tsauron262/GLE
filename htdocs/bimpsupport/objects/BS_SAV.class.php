@@ -1525,6 +1525,7 @@ class BS_SAV extends BimpObject
 
     public function getPublicLink()
     {
+//        return BimpCore::getConf('interface_client_base_url', '');
         $id_user_client = (int) $this->getData('id_user_client');
         if (!$id_user_client) {
             $id_client = (int) $this->getData('id_client');
@@ -1541,9 +1542,9 @@ class BS_SAV extends BimpObject
                 return $url;
             }
         }
-
+        return BimpCore::getConf('interface_client_base_url', '')."?a=ss&serial=" . urlencode($this->getChildObject("equipment")->getData("serial")) . "&id_sav=" . $this->id . "&user_name=" . urlencode(str_replace(" ", "", substr($this->getChildObject("client")->dol_object->name, 0, 3))) . "#suivi-sav";
 //        return DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?serial=" . $this->getChildObject("equipment")->getData("serial") . "&id_sav=" . $this->id . "&user_name=" . substr($this->getChildObject("client")->dol_object->name, 0, 3);
-        return "https://www.bimp.fr/nos-services/?serial=" . urlencode($this->getChildObject("equipment")->getData("serial")) . "&id_sav=" . $this->id . "&user_name=" . urlencode(str_replace(" ", "", substr($this->getChildObject("client")->dol_object->name, 0, 3))) . "#suivi-sav";
+//        return "https://www.bimp.fr/nos-services/?serial=" . urlencode($this->getChildObject("equipment")->getData("serial")) . "&id_sav=" . $this->id . "&user_name=" . urlencode(str_replace(" ", "", substr($this->getChildObject("client")->dol_object->name, 0, 3))) . "#suivi-sav";
     }
 
     public function getIdContactSignataire()
@@ -3429,8 +3430,8 @@ class BS_SAV extends BimpObject
         if (is_null($centre)) {
             return array($error_msg . ' - Centre absent');
         }
-
-        $signature = BimpCache::getSignature('SAV LDLC', "Centre de Services Agréé Apple", $centre['tel']);
+        $signature = '';
+//        $signature = BimpCache::getSignature('SAV LDLC', "Centre de Services Agréé Apple", $centre['tel']);
 //        $signature = file_get_contents("https://www.bimp.fr/signatures/v3/supports/sign.php?prenomnom=BIMP%20SAV&job=Centre%20de%20Services%20Agr%C3%A9%C3%A9%20Apple&phone=" . urlencode($centre['tel']), false, stream_context_create(array(
 //            'http' => array(
 //                'timeout' => 2   // Timeout in seconds

@@ -147,7 +147,7 @@ class Bimp_Facture extends BimpComm
                 return 1;
 
             case 'deactivateRelancesForAMonth':
-                return (int) ($user->admin || $user->rights->bimpcommercial->deactivate_relances_one_month);
+                return (int) (($user->admin || $user->rights->bimpcommercial->deactivate_relances_one_month) && $user->login !== 'm.albert');
 
             case 'checkPaiements':
                 return 1;
@@ -202,6 +202,11 @@ class Bimp_Facture extends BimpComm
                     return 0;
                 }
                 break;
+                
+            case 'date_cfr':
+                if($user->admin || $user->rights->admin_financier)
+                    return 1;
+                return 0;
 
             case 'fk_mode_reglement':
                 if ($this->getData('fk_statut') > 0) {
@@ -270,7 +275,7 @@ class Bimp_Facture extends BimpComm
                     'relance_active', 'nb_relance', 'date_relance', 'date_next_relance',
                     'close_code', 'close_note',
                     'date_irrecouvrable', 'id_user_irrecouvrable',
-                    'prelevement', 'ef_type', 'fk_mode_reglement', 'pdf_nb_decimal', 'litige'
+                    'prelevement', 'ef_type', 'fk_mode_reglement', 'pdf_nb_decimal', 'litige', 'date_cfr'
                 ))) {
             return 1;
         }

@@ -1465,7 +1465,7 @@ class BimpComm extends BimpDolObject
             $line_alias = $main_alias . '___det';
             $joins[$line_alias] = array(
                 'table' => $line::$dol_line_table,
-                'alias' => 'det',
+                'alias' => $line_alias,
                 'on'    => $main_alias . '.rowid = ' . $line_alias . '.' . $line::$dol_line_parent_field
             );
 

@@ -666,6 +666,34 @@ class BContract_contrat extends BimpDolObject
     {
         return [0 => "Aucun", 1 => "Proposition", 2 => "Tacite"];
     }
+    
+    public function getRenouvellementNumberFromDate($date){
+        $datef = new DateTime();
+        $datef->setTimestamp(strtotime($date));
+
+        $debut = new DateTime();
+        $fin = new DateTime();
+        $Timestamp_debut = strtotime($this->getData('date_start'));
+//            echo $datef->format('d / m / Y').'<br/>';
+        $renouvellement = 0;
+        if ($Timestamp_debut > 0 && $this->getData('duree_mois') > 0){ 
+            $debut->setTimestamp($Timestamp_debut);
+            $fin->setTimestamp($Timestamp_debut);
+            for($i=0; $i <5; $i++){
+                $fin = $fin->add(new DateInterval("P" . $this->getData('duree_mois') . "M"));
+                $fin = $fin->sub(new DateInterval("P1D"));
+//                    echo($debut->format('d / m / Y').' '.$fin->format('d / m / Y').' '.$i.'av<br/>');
+                if($datef > $debut && $datef < $fin){
+                    $renouvellement = $i;
+                    break;
+                }
+                $debut = $debut->add(new DateInterval("P" . $this->getData('duree_mois') . "M"));
+//                    $fin = $fin->add(new DateInterval("P1D"));
+            }
+
+        }
+        return $renouvellement;
+    }
 
     public function displayRenouvellement()
     {
@@ -1792,7 +1820,7 @@ class BContract_contrat extends BimpDolObject
                     ))
                 );
             }
-            if (/* ($this->getData('tacite') == 12 || $this->getData('tacite') == 0) && */!$this->getData('next_contrat') && ($status == self::CONTRAT_STATUS_ACTIVER || $status == self::CONTRAT_STATUS_CLOS)) {
+            if (/* ($this->getData('tacite') == 12 || $this->getData('tacite') == 0) && */!$this->getData('next_contrat') && ($status == self::CONTRAT_STATUS_ACTIVER || $status == self::CONTRAT_STATUS_CLOS || $status == self::CONTRAT_STATUS_REFUSE)) {
                 $buttons[] = array(
                     'label'   => 'Renouveler par clonage du contrat (SN et sites inclus)',
                     'icon'    => 'fas_retweet',
@@ -2318,7 +2346,11 @@ class BContract_contrat extends BimpDolObject
     public function canEditField($field_name)
     {
         global $user;
-
+        
+        if($field_name == 'label' && $user->admin && $user->rights->bimpcontract->to_validate) {
+            return 1;
+        }
+        
         if ($this->getData('statut') == self::CONTRAT_STATUS_REFUSE)
             return 0;
 
@@ -3307,15 +3339,20 @@ class BContract_contrat extends BimpDolObject
 
     public function getCurrentTotal()
     {
+        return $this->getTotal($this->getData('current_renouvellement'));
+    }
+    
+    public function getTotal($renouvellement){
         $montant = 0;
         foreach ($this->dol_object->lines as $line) {
             $child = $this->getChildObject("lines", $line->id);
-            if ($child->getData('renouvellement') == $this->getData('current_renouvellement')) {
+            if ($child->getData('renouvellement') == $renouvellement) {
                 $montant += $line->total_ht;
             }
         }
 
         return $montant;
+        
     }
 
     public function getAddAmountAvenantProlongation()

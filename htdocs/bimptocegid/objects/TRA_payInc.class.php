@@ -92,7 +92,7 @@ class TRA_payInc {
         $structure['LETTRAGE']          = sizing("-XRI", 4);
         $structure['SENS']              = sizing('C', 1);
         
-        $ecriture .= implode("", $structure);
+        $ecriture .= implode("", $structure) . "\n";
         
         return $ecriture;
         

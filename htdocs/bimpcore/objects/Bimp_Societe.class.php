@@ -105,11 +105,12 @@ class Bimp_Societe extends BimpDolObject
         global $user;
         switch ($field_name) {
             case 'outstanding_limit_atradius':
+            case 'outstanding_limit_atradius':
             case 'outstanding_limit_icba':
             case 'outstanding_limit':
             case 'outstanding_limit_credit_check':
             case 'date_atradius':
-                if ($user->admin || $user->rights->bimpcommercial->admin_recouvrement) {
+                if ($user->admin || $user->rights->bimpcommercial->admin_recouvrement || $user->rights->bimpcommercial->admin_compta) {
                     return 1;
                 }
                 return 0;
@@ -146,21 +147,6 @@ class Bimp_Societe extends BimpDolObject
         }
 
         return parent::canEditField($field_name);
-    }
-
-    public function canViewField($field_name)
-    {
-        global $user;
-
-        switch ($field_name) {
-            case 'outstanding_limit_atradius':
-                if ($user->admin) {
-                    return 1;
-                }
-
-                return 0;
-        }
-        return parent::canViewField($field_name);
     }
 
     public function canSetAction($action)
@@ -606,23 +592,13 @@ class Bimp_Societe extends BimpDolObject
                     }
                 }
 
-                $sc_alias = $main_alias . '___soc_commercial';
-                $joins[$sc_alias] = array(
-                    'alias' => 'soc_commercial',
-                    'table' => $sc_alias,
-                    'on'    => $main_alias . '.rowid = ' . $sc_alias . '.fk_soc'
-                );
-
                 $sql = '';
 
                 $nbCommerciaux = 'SELECT COUNT(sc.rowid) FROM ' . MAIN_DB_PREFIX . 'societe_commerciaux sc WHERE sc.fk_soc = ' . $main_alias . '.rowid';
 
                 if (!empty($ids)) {
-                    if (!$excluded) {
-                        $sql = 'soc_commercial.fk_user IN (' . implode(',', $ids) . ')';
-                    } else {
-                        $sql = '(' . $nbCommerciaux . ' AND sc.fk_user IN (' . implode(',', $ids) . ')) = 0';
-                    }
+                    $sql .= '(' . $nbCommerciaux . ' AND sc.fk_user IN (' . implode(',', $ids) . ')) ';
+                    $sql .= ($excluded ? '=' : '>') . ' 0';
                 }
 
                 if ($empty) {

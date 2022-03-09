@@ -17,6 +17,9 @@ objects:
     avenant:
         instance:
             bimp_object: BContract_avenant
+    facturation:
+        instance:
+            bimp_object: FactureContrat
     
 sections:
     - type: tabs
@@ -57,6 +60,13 @@ sections:
                       panel: 1
                       object: avenant
                       name: all
+        facturation:
+            label: Facturation
+            sections:
+                - type: list
+                  list:
+                      panel: 1
+                      object: facturation
 #        deux:
 #    - type: nav_tabs
 #      nav_tabs: 

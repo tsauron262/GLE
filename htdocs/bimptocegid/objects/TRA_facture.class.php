@@ -6,6 +6,8 @@
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/functions/code_journal.php';
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/functions/sens.php';
     
+    require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_tiers.class.php';
+    
     class TRA_facture {
         
         protected $db;
@@ -13,12 +15,16 @@
         protected $compte_general_client;
         protected $sens_facture;
         public $rapport = [];
+        public $rapportTier = [];
+        protected $TRA_tiers;
         
-        function __construct($bimp_db) { $this->db = $bimp_db; }
+        function __construct($bimp_db, $tiers_file) { 
+            $this->db = $bimp_db; 
+            $this->TRA_tiers = new TRA_tiers($bimp_db, $tiers_file);
+        }
 
         public function constructTra(Bimp_Facture $facture) {
-            
-            // Définition  de si la facture est ignoré en compta
+                        
             for ($i = 0; $i < count($facture->dol_object->lines); $i++) {
                 if ($facture->dol_object->lines[$i]->desc == "Acompte" 
                         && $facture->dol_object->lines[$i]->multicurrency_total_ht == $facture->getData('total')) {
@@ -43,7 +49,8 @@
             $use_tva             = true;
             $use_d3e             = ($facture->getData('zone_vente') == 1) ? true : false;
             $TTC                 = $facture->getData('multicurrency_total_ttc');
-            $controlle_ttc       = round($TTC, 2);
+            $controlle_ttc       = round($TTC, 2);            
+            $code_compta         = $this->TRA_tiers->getCodeComptable($client);
             
             if ($client->getData('is_subsidiary')) {
                 $this->compte_general = $client->getData('accounting_account');
@@ -62,7 +69,7 @@
             $structure['TYPE_PIECE']            = sizing("FC", 2);
             $structure['COMPTE_GENERAL']        = sizing($this->compte_general, 17);
             $structure['TYPE_DE_COMPTE']        = sizing("X", 1);
-            $structure['CODE_AUXILIAIRE']       = sizing($client->getData('code_compta'), 16);
+            $structure['CODE_AUXILIAIRE']       = sizing($code_compta, 16);
             $structure['NEXT']                  = sizing("", 1);
             $structure['REF_INTERNE']           = sizing($facture->getData('facnumber'), 35);
             $structure['LABEL']                 = sizing(strtoupper(suppr_accents($client->getData('nom'))), 35);
@@ -116,6 +123,8 @@
             
             if(count($facture->dol_object->lines)) {
                 $count_lines = count($facture->dol_object->lines);
+                $compte_le_plus_grand = '';
+                $montant_le_plus_grand = '';
                 
                 foreach($facture->dol_object->lines as $line) {
                     
@@ -126,63 +135,116 @@
                     if($this->sens_facture == "C") { //c'est un avoir
                         $sens = ($line->multicurrency_total_ht > 0) ? "D" : "C";
                     }
-                    
+                    $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
                     if($line->multicurrency_total_ht != 0) {
-                        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
+                        
                         $current_montant = round($line->multicurrency_total_ht, 2);
                         if($use_d3e) {
                             $current_montant = round($line->multicurrency_total_ht, 2) - ($product->getData('deee') * $line->qty);
                             $total_deee += $product->getData('deee') * $line->qty;
                         }
                         $total_ht += round($current_montant, 2);
-                        $this->compte_general = $product->getCodeComptableVente($facture->getData('zone_vente'), ($product->getData('type_compta') == 0) ? -1 : $product->getData('type_compta'));
-                        $structure['SENS']                  = sizing(($line->multicurrency_total_ht > 0) ? "C" : "D",1);
+                        if($product->isLoaded() && $line->fk_product > 0)
+                            $this->compte_general = $product->getCodeComptableVente($facture->getData('zone_vente'), ($product->getData('type_compta') == 0) ? -1 : $product->getData('type_compta'));
+                        else
+                            $this->compte_general = '70600000';
+                        $structure['SENS']                  = sizing($this->getSens($line->multicurrency_total_ht),1, true);
                         $structure['COMPTE_GENERAL']        = sizing(sizing(interco_code($this->compte_general, $this->compte_general_client), 8, false, true) , 17);
                         $structure['TYPE_DE_COMPTE']        = sizing("", 1);
                         $structure['CODE_AUXILIAIRE']       = sizing("", 16);
                         $structure['MONTANT']               = sizing(abs(round($current_montant,2)), 20, true);
                         $structure['CONTRE_PARTIE']         = sizing($this->compte_general_client,17);
-                        $structure['REF_LIBRE']             = sizing($product->getRef(),35);
+                        $structure['REF_LIBRE']             = sizing(($product->isLoaded()) ? $product->getRef() : 'Ligne ' . $line->id,35);
                         $ecriture .= implode('', $structure) . "\n";
+                        
+                        if(abs($current_montant) > $montant_le_plus_grand) {
+                            $montant_le_plus_grand = abs($current_montant);
+                            $compte_le_plus_grand = $this->compte_general;
+                        }
+                        
                     }
                 }
-                if($use_d3e && $total_deee > 0) {
+                
+                if($use_d3e && $total_deee != 0) {
                     $this->compte_general = $product->getCodeComptableVenteDeee($facture->getData('zone_vente'));
                     $structure['COMPTE_GENERAL']        = sizing(sizing(interco_code($this->compte_general, $this->compte_general_client), 8, false, true) , 17);
-                    $structure['SENS']                  = sizing(($line->multicurrency_total_ht > 0) ? "C" : "D",1);
+                    $structure['SENS']                  = sizing($this->getSens($total_deee),1);
                     $structure['TYPE_DE_COMPTE']        = sizing("", 1);
                     $structure['CODE_AUXILIAIRE']       = sizing("", 16);
                     $structure['MONTANT']               = sizing(abs($total_deee), 20, true);
                     $structure['CONTRE_PARTIE']         = sizing($this->compte_general_client,17);
                     $structure['REF_LIBRE']             = sizing("DEEE",35);
-                    $ecriture .= implode('', $structure) . "\n";
-                } else {
-                    // erreur de correspondance DEEE
+                    $ecriture .= implode('', $structure);
+                    if(abs($total_tva) > 0) $ecriture .= "\n";
+                    
                 }
+                
                 if($facture->getData('zone_vente') == 1 || $facture->getData('zone_vente') == 2) {
-                    $this->compte_general = $product->getCodeComptableVenteTva($facture->getData('zone_vente'));
-                    $structure['COMPTE_GENERAL']        = sizing(sizing(interco_code($this->compte_general, $this->compte_general_client), 8, false, true) , 17);
+                    if($product->isLoaded())
+                        $this->compte_general = $product->getCodeComptableVenteTva($facture->getData('zone_vente'));
+                    else
+                        $this->compte_general = '44571000';
+                    $structure['COMPTE_GENERAL']        = sizing($this->compte_general , 17);
+                    $structure['SENS']                  = sizing($this->getSens($total_tva),1);
                     $structure['CONTRE_PARTIE']         = sizing($this->compte_general_client,17);
                     $structure['MONTANT']               = sizing(abs(round($facture->getData('multicurrency_total_tva'), 2)), 20, true);
                     $structure['CONTRE_PARTIE']         = sizing($this->compte_general_client,17);
                     $structure['REF_LIBRE']             = sizing("TVA",35);
                     $ecriture .= implode('', $structure) . "\n";
-                } else {
-                    // erreur de correspondance TVA
                 }
                 
-                $total_mis_en_ligne = round($total_deee + $total_tva + $total_ht, 2);
+                                
+                $total_mis_en_ligne =  (round($total_deee,2) + round($total_tva, 2) + round($total_ht, 2));
+                $controlle_ttc = (round($TTC, 2));
+                $reste = round($total_mis_en_ligne - $controlle_ttc,2);
                 
-                if($total_mis_en_ligne == $controlle_ttc) {
-                    $this->rapport['fails'][$facture->getRef()] = "Il y à un ecart de " . ($total_mis_en_ligne - $controlle_ttc) . '€';
+                if($reste != 0) {
+                    $structure['COMPTE_GENERAL']        = sizing($compte_le_plus_grand, 17);
+                    $structure['SENS']                  = sizing($this->getSensRectification($reste, $controlle_ttc),1);
+                    $structure['MONTANT']               = sizing(abs($reste), 20, true);
+                    $structure['REF_LIBRE']             = sizing($facture->getRef(),35);
+                    $ecriture .= implode('', $structure) . "\n";
                 }
                 
             } else {
                 $facture->updateField('exported',102);
-                $this->rapport['fails'][$facture->getRef()] = "La facture ne contient pas de ligne";
                 return 0;
             }
+            
+            $this->rapportTier = $this->TRA_tiers->rapport;
+            
             return $ecriture;
+        }
+        
+        private function getSensRectification($montant, $ttc_facture) {
+            
+            $is_avoir   = ($ttc_facture > 0) ? false : true;
+            $is_facture = ($ttc_facture > 0) ? true : false;
+            
+            if($is_avoir) {
+                if($montant < 0) return 'D';
+                return 'C';
+            }
+            
+            if($is_facture) {
+                if($montant < 0) return 'C';
+                return 'D';
+            }
+            
+        }
+        
+        private function getSens($montant) {            
+            
+            if($this->sens_facture == 'D') { // Facture standard : FA
+                if($montant < 0) return $this->sens_facture;
+                return 'C';
+            }
+            
+            if($this->sens_facture == 'C') { // Facture avoir : AV
+                if($montant > 0) return $this->sens_facture;
+                return 'D';
+            }
+            
         }
         
     }

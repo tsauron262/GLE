@@ -1303,46 +1303,48 @@ function activateSorting($list) {
 }
 
 function checkListWidth($list) {
-    var $panelBody = $list.findParentByClass('panel-body');
-
-    if (!$.isOk($panelBody)) {
-        return;
-    }
-
-    if ($(window).width() > 1270) {
-        var $filters = $list.find('.listFiltersPanelContainer');
-        var $table = $list.find('.objectlistTableContainer').children('.objectlistTable');
-
-        var width = 0;
-
-        if ($table.length) {
-            $table.parent().removeAttr('style');
-            width += $table.width() + 12;
-        }
-
-        if ($filters.length && $filters.css('display') !== 'none') {
-            $filters.removeAttr('style');
-
-            if ($filters.width() > 300) {
-                $filters.attr('style', 'width: 300px!important');
-            }
-
-            width += $filters.width() + 12;
-
-            $list.css({
-                'width': width + 'px'
-            });
-
-            if ($table.length) {
-                var table_width = width - $filters.width() - 24;
-                $table.parent().attr('style', 'width: ' + table_width + 'px!important');
-            }
-        } else {
-            $list.css({
-                'width': 'auto'
-            });
-        }
-    }
+    // A débugger...
+    // 
+//    var $panelBody = $list.findParentByClass('panel-body');
+//
+//    if (!$.isOk($panelBody)) {
+//        return;
+//    }
+//
+//    if ($(window).width() > 1270) {
+//        var $filters = $list.find('.listFiltersPanelContainer');
+//        var $table = $list.find('.objectlistTableContainer').children('.objectlistTable');
+//
+//        var width = 0;
+//
+//        if ($table.length) {
+//            $table.parent().removeAttr('style');
+//            width += $table.width() + 12;
+//        }
+//
+//        if ($filters.length && $filters.css('display') !== 'none') {
+//            $filters.removeAttr('style');
+//
+//            if ($filters.width() > 300) {
+//                $filters.attr('style', 'width: 300px!important');
+//            }
+//
+//            width += $filters.width() + 12;
+//
+//            $list.css({
+//                'width': width + 'px'
+//            });
+//
+//            if ($table.length) {
+//                var table_width = width - $filters.width() - 24;
+//                $table.parent().attr('style', 'width: ' + table_width + 'px!important');
+//            }
+//        } else {
+//            $list.css({
+//                'width': 'auto'
+//            });
+//        }
+//    }
 }
 
 // Gestion des inputs:

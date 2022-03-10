@@ -85,8 +85,11 @@ class BC_Input extends BimpComponent
         ),
         'search_user'                 => array(
             'include_current' => array('data_type' => 'bool', 'default' => 0),
-            'include_empty'   => array('data_type' => 'bool', 'default' => 0),
+            'include_empty'   => array('data_type' => 'bool', 'default' => 1),
             'empty_label'     => array('default' => '')
+        ),
+        'search_group'                => array(
+            'include_empty' => array('data_type' => 'bool', 'default' => 1)
         ),
         'search_product'              => array(
             'filter_type' => array('data_type' => 'any', 'default' => 0)
@@ -466,8 +469,12 @@ class BC_Input extends BimpComponent
 
             case 'search_user':
                 $options['include_current'] = isset($this->params['include_current']) ? $this->params['include_current'] : 0;
-                $options['include_empty'] = isset($this->params['include_empty']) ? $this->params['include_empty'] : 0;
+                $options['include_empty'] = isset($this->params['include_empty']) ? $this->params['include_empty'] : 1;
                 $options['empty_label'] = isset($this->params['empty_label']) ? $this->params['empty_label'] : '';
+                break;
+
+            case 'search_group':
+                $options['include_empty'] = isset($this->params['include_empty']) ? $this->params['include_empty'] : 1;
                 break;
 
             case 'search_product':

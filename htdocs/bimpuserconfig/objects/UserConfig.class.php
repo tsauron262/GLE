@@ -374,7 +374,15 @@ class UserConfig extends BimpObject
                 BimpObject::loadClass('bimpcore', 'Bimp_User');
                 $id_group = (int) $this->getData('id_owner');
                 if ($id_group) {
-                    return Bimp_User::displayUserGroup($id_group, ($nom_url ? 'nom_url' : 'nom'), true);
+                    $group = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_UserGroup', $id_group);
+
+                    if (BimpObject::objectLoaded($group)) {
+                        if ($nom_url) {
+                            $html .= ($html ? '<br/>' : '') . $group->getLink();
+                        } else {
+                            $html .= ($html ? '<br/>' : '') . $group->getName();
+                        }
+                    }
                 }
                 return '';
         }
@@ -425,13 +433,14 @@ class UserConfig extends BimpObject
                     continue;
                 }
 
-                $group_label = Bimp_User::displayUserGroup($id_group, ($nom_url ? 'nom_url' : 'nom'), true);
+                $group = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_UserGroup', $id_group);
 
-                if ($group_label) {
-                    if ($html) {
-                        $html .= '<br/>';
+                if (BimpObject::objectLoaded($group)) {
+                    if ($nom_url) {
+                        $html .= ($html ? '<br/>' : '') . $group->getLink();
+                    } else {
+                        $html .= ($html ? '<br/>' : '') . $group->getName();
                     }
-                    $html .= $group_label;
                 }
             }
         }

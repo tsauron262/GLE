@@ -84,8 +84,8 @@ class BC_Input extends BimpComponent
             'content' => array('default' => '')
         ),
         'search_user'                 => array(
-            'include_current' => array('data_type' => 'bool', 'default' => 1),
-            'include_empty'   => array('data_type' => 'bool', 'default' => 0),
+            'include_current' => array('data_type' => 'bool', 'default' => 0),
+            'include_empty'   => array('data_type' => 'bool', 'default' => 1),
             'empty_label'     => array('default' => '')
         ),
         'search_group'                => array(

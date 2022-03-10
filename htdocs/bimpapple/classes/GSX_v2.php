@@ -204,8 +204,6 @@ class GSX_v2 extends GSX_Const
                 $gsx_logout_mail_send = true;
             }
         }
-        else
-            BimpCore::addlog ('deconnexion GSX de '.$this->appleId.' sans reconnexion possible');
 
         $this->logged = false;
         $this->saveToken('acti', '');

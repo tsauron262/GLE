@@ -2708,7 +2708,10 @@ class BimpCache
             $dnsData = dns_get_record($host);
             $i = rand(0, count($dnsData) - 1);
             $ip = $dnsData[$i]['ip'];
-            self::$cache[$cache_key] = $ip;
+            if($ip && $ip != '')
+                self::$cache[$cache_key] = $ip;
+            else
+                self::$cache[$cache_key] = $host;
         }
 
         return self::$cache[$cache_key];

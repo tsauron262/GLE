@@ -4,7 +4,7 @@ class BimpRelanceClients extends BimpObject
 {
 
     public static $modes = array(
-        'cron' => array('label', 'Tâche planifiée', 'icon' => 'fas_clock'),
+        'cron'   => array('label' => 'Tâche planifiée', 'icon' => 'fas_clock'),
         'global' => array('label' => 'Globale', 'icon' => 'fas_users'),
         'indiv'  => array('label' => 'Individuelle', 'icon' => 'fas_user'),
         'free'   => array('label' => 'Libre', 'icon' => 'fas_pen')
@@ -254,7 +254,7 @@ class BimpRelanceClients extends BimpObject
                     if (!isset($status[$s])) {
                         $status[$s] = 0;
                     }
-                    $status[$s] ++;
+                    $status[$s]++;
                 }
 
                 foreach ($status as $s => $n) {
@@ -275,8 +275,12 @@ class BimpRelanceClients extends BimpObject
 
     // Traitements:
 
-    public function sendEmails($force_send = false, &$warnings = array())
+    public function sendEmails($force_send = false, &$warnings = array(), $bds_process = null)
     {
+        if (!is_null($bds_process) && !is_a($bds_process, 'BDS_RelancesClientsProcess')) {
+            $bds_process = null;
+        }
+
         $errors = array();
 
         BimpObject::loadClass('bimpcore', 'BimpRelanceClientsLine');
@@ -288,10 +292,20 @@ class BimpRelanceClients extends BimpObject
             $line_warnings = array();
             $line_errors = $line->sendRelanceEmail($line_warnings, $force_send);
             if (count($line_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($line_errors, $line->getRelanceLineLabel());
+                $msg = BimpTools::getMsgFromArray($line_errors, $line->getRelanceLineLabel());
+                $errors[] = $msg;
+
+                if (!is_null($bds_process)) {
+                    $client = $line->getChildObject('client');
+                    $bds_process->Alert($msg, $this, (BimpObject::objectLoaded($client) ? $client->getRef() : ''));
+                }
+            } elseif (!is_null($bds_process)) {
+                $client = $line->getChildObject('client');
+                $bds_process->Success($line->getRelanceLineLabel() . ' : envoi e-mail OK (' . BimpTools::cleanEmailsStr($line->getData('email')) . ')', $this, (BimpObject::objectLoaded($client) ? $client->getRef() : ''));
             }
             if (count($line_warnings)) {
-                $warnings[] = BimpTools::getMsgFromArray($line_warnings, $line->getRelanceLineLabel());
+                $msg = BimpTools::getMsgFromArray($line_warnings, $line->getRelanceLineLabel());
+                $warnings[] = $msg;
             }
         }
 

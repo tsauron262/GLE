@@ -178,7 +178,7 @@ class Bimp_Societe extends BimpDolObject
 
         global $user;
 
-        return (int) ($user->admin || $user->login == 'jc.cannet');
+        return (int) ($user->admin || $user->login == 'jc.cannet' || $user->rights->commande->supprimer);
     }
 
     // Getters booléens: 

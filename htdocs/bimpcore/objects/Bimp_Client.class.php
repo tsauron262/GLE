@@ -2137,10 +2137,10 @@ class Bimp_Client extends Bimp_Societe
         }
 
         if (empty($clients)) {
-            $errors[] = 'Aucune relance à effecture';
+            $errors[] = 'Aucune relance à effectuer';
 
             if (!is_null($bds_process)) {
-                $bds_process->Info('Aucune relance à effecture');
+                $bds_process->Info('Aucune relance à effectuer');
             }
         } else {
             global $user;

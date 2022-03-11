@@ -16,7 +16,7 @@ if($msgId != 0 && $msgId != ''){
         $result = BimpCache::findBimpObjectInstance('bimpcore', 'BimpMailLog', array('mail_to' => array(
                             'operator' => 'like',
                             'value'    => '%'.$json['email'].'%'
-                        ), 'mail_subject' => $json['subject'], 'msg_id' => ''), true);
+                        ), 'mail_subject' => addslashes($json['subject']), 'msg_id' => ''), true);
     }
     if($result && is_object($result)){
         if($result->getData('msg_id') == '')

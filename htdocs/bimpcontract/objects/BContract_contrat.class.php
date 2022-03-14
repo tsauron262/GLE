@@ -2347,7 +2347,7 @@ class BContract_contrat extends BimpDolObject
     {
         global $user;
         
-        if($field_name == 'label' && $user->admin && $user->rights->bimpcontract->to_validate) {
+        if($field_name == 'label' && ( $user->admin || $user->rights->bimpcontract->to_validate)) {
             return 1;
         }
         

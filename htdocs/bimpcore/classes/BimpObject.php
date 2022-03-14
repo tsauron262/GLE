@@ -5659,7 +5659,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         return null;
     }
 
-    public function getExtraFieldFilterKey($field, &$joins, $main_alias = '', &$filters = array())
+    public function getExtraFieldFilterKey($field, &$joins, $main_alias = 'a', &$filters = array())
     {
         // Retourner la clé de filtre SQl sous la forme alias_table.nom_champ_db 
         // Implémenter la jointure dans $joins en utilisant l'alias comme clé du tableau (pour éviter que la même jointure soit ajouté plusieurs fois à $joins). 
@@ -7727,7 +7727,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             } else {
                 $fl = false;
             }
-            $js .= $key . ': ' . (BimpTools::isNumericType($value) ? $value : '\'' . $value . '\'');
+            $js .= $key . ': ' . (BimpTools::isNumericType($value) ? $value : (is_array($value) ? htmlentities(json_encode($value)) : '\'' . $value . '\''));
         }
         $js .= '}, ';
         if (isset($params['form_name'])) {

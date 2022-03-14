@@ -27,7 +27,8 @@ class BDS_RelancesClientsProcess extends BDSProcess
                 
                 $warnings = array();
                 $pdf_url = '';
-                $errors = $client->relancePaiements(array(), 'cron', $warnings, $pdf_url, null, true, $this);
+//                relancePaiements($clients = array(), $mode = 'global', &$warnings = array(), &$pdf_url = '', $date_prevue = null, $send_emails = true, $bds_process = null)
+                $errors = $client->relancePaiements(array(), 'cron', $warnings, $pdf_url, null, false, $this);
                 break;
         }
 

@@ -11,7 +11,7 @@ class BDS_RelancesClientsProcess extends BDSProcess
     {
         $data['steps'] = array(
             'send_relmances' => array(
-                'label'    => 'Traitement des relances',
+                'label'    => 'Traitement des relancesss',
                 'on_error' => 'continue'
             )
         );

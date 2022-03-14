@@ -188,7 +188,7 @@ class GSX_v2 extends GSX_Const
 
         if ($this->appleId == self::$default_ids['apple_id']) {
             global $gsx_logout_mail_send, $phantomAuthTest;
-            if($phantomAuthTest < 10 && !$phantomAuthTest){
+            if($phantomAuthTest < 10 || !$phantomAuthTest){
                 $phantomAuthTest++;
                 $oldDate = new DateTime(BimpCore::getConf('old_date_reco_apple', '2020-01-01'));
                 $oldDate->add(new DateInterval('PT1M'));

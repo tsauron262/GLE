@@ -45,7 +45,7 @@
             $this->relance_demande();
             $this->tacite();
             $this->facturation_auto();
-            $this->notifDemainFacturation();
+            //$this->notifDemainFacturation();
             return "OK";
         }
         
@@ -176,13 +176,28 @@
                             $this->output .= "Contrat N°" . $contrats->getRef() . ' [Renouvellement TACITE]';
 
                             $commercial = BimpObject::getInstance('bimpcore', 'Bimp_User', $contrats->getData('fk_commercial_suivi'));
+                            $signataire = BimpObject::getBimpObjectInstance('bimpcore', 'Bimp_User', $contrat->getData('fk_commercial_signature'));
                             $client = BimpObject::getInstance('bimpcore', 'Bimp_Societe', $contrats->getData('fk_soc'));
                             $email_commercial = $commercial->getData('email');
                             if($commercial->getdata('statut') == 0) {
                                 $email_commercial = "debugerp@bimp.fr";
                             } 
                             $this->output .= $email_commercial . "<br />";
-                            mailSyn2("[Contrat] - Renouvellement tacite - " . $contrats->getRef(), "facturationclients@bimp.fr, $email_commercial", null, "Bonjour, le contrat N°" . $contrats->dol_object->getNomUrl() . " a été renouvellé tacitement. Il est de nouveau facturable. <br /> Client: " . $client->getData('code_client') . " " . $client->getName());
+                            
+                            $e = BimpCache::gtBimpObjectInstance('bimpcontract', 'BContract_echeancier');
+                            if($e->find(['id_contrat' => $contrat->id])) {
+                                if($e->getData('validate') == 1) {
+                                    $objet      = 'facturation Contrat ' . $contrat->getRef() . ' - Client ' . $client->getName();
+                                    $message    = 'Bonjour,<br />Le contrat N°'.$contrat->getNomUrl().' a été renouvelé tacitement.<br />Il est à nouveau facturable.';
+                                    $message   .= 'Suivi de contrat: ' . $commercial->getName() . '<br />';
+                                    $message   .= 'Commercial signataire du contrat: ' . $signataire->getName();
+                                    
+                                    mailSyn2($objet, "facturationclients@bimp.fr, $email_commercial", null, $message);
+                                    
+                                }
+                            }
+                            
+                            //mailSyn2("[Contrat] - Renouvellement tacite - " . $contrats->getRef(), "facturationclients@bimp.fr, $email_commercial", null, "Bonjour, le contrat N°" . $contrats->dol_object->getNomUrl() . " a été renouvellé tacitement. Il est de nouveau facturable. <br /> Client: " . $client->getData('code_client') . " " . $client->getName());
                         }
                     }
                 }

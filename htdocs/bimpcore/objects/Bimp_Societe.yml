@@ -36,6 +36,12 @@ objects:
                 module: bimpcontract
                 name: BContract_contrat
     
+    ficheInter:
+        instance:
+            bimp_object:
+                module: bimptechnique
+                name: BT_ficheInter
+    
     files:
         relation: hasMany
         delete: 1
@@ -1218,8 +1224,10 @@ forms:
               required: 1
               label: Date de début du relevé
               input:
-                  display_now: 1
                   type: date
+              value: 
+                  callback:
+                      method: getFirstDateContrat
               display_if:
                   field_name: by_date
                   show_values: 1

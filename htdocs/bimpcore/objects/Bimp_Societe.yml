@@ -1217,8 +1217,10 @@ forms:
             - custom: 1
               required: 1
               label: Date de début du relevé
+              value: 
+                   callback:
+                       method: getFirstDateContrat
               input:
-                  display_now: 1
                   type: date
               display_if:
                   field_name: by_date

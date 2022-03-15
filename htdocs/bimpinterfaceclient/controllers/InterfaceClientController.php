@@ -158,6 +158,15 @@ class InterfaceClientController extends BimpPublicController
         if (!BimpObject::objectLoaded($userClient)) {
             $html .= BimpRender::renderAlerts('Vous n\'avez pas la permission d\'accéder à ce contenu');
         } else {
+            
+            if ((int) BimpCore::getConf('sav_public_reservations', 0)) {
+                $html .= '<div class="buttonsContainer align-right" style="margin: 15px 0">';
+                $html .= '<span class="btn btn-default" onclick="window.location = \'' . BimpObject::getPublicBaseUrl() . 'fc=savForm\'">';
+                $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Nouvelle demande de réparation';
+                $html .= '</span>';
+                $html .= '</div>';
+            }
+            
             // Signatures en attentes:
             $signatures = BimpCache::getBimpObjectObjects('bimpcore', 'BimpSignature', array(
                         'id_client'  => (int) $userClient->getData('id_client'),

@@ -87,7 +87,7 @@ fields_tables:
                   type: file_upload
               value:
                 callback: displayAtradiusFile
-            - field: date_atradius
+            - field: date_depot_icba
               edit: 1
 
 views: 

@@ -482,7 +482,7 @@ fields:
         input:
             help: -1 = aucun demande<br/>Saisir O si encours refusé
         
-    date_atradius:
+    date_depot_icba:
         label: Date de dépôt du Rapport
         type: datetime
         

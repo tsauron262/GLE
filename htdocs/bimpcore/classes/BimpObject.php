@@ -5659,7 +5659,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         return null;
     }
 
-    public function getExtraFieldFilterKey($field, &$joins, $main_alias = 'a', &$filters = array())
+    public function getExtraFieldFilterKey($field, &$joins, $main_alias = '', &$filters = array())
     {
         // Retourner la clé de filtre SQl sous la forme alias_table.nom_champ_db 
         // Implémenter la jointure dans $joins en utilisant l'alias comme clé du tableau (pour éviter que la même jointure soit ajouté plusieurs fois à $joins). 
@@ -7727,7 +7727,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             } else {
                 $fl = false;
             }
-            $js .= $key . ': ' . (BimpTools::isNumericType($value) ? $value : (is_array($value) ? htmlentities(json_encode($value)) : '\'' . $value . '\''));
+            $js .= $key . ': ' . (BimpTools::isNumericType($value) ? $value : '\'' . $value . '\'');
         }
         $js .= '}, ';
         if (isset($params['form_name'])) {
@@ -9848,4 +9848,36 @@ var options = {
     {
         return (int) BimpCore::getConf("USE_ENTREPOT");
     }
+    
+    
+    public function getDefaultCodeCentre()
+    {
+        if (BimpTools::isSubmit('code_centre')) {
+            return BimpTools::getValue('code_centre');
+        } else {
+            global $user;
+            $userCentres = explode(' ', $user->array_options['options_apple_centre']);
+            foreach ($userCentres as $code) {
+                if (preg_match('/^ ?([A-Z]+) ?$/', $code, $matches)) {
+                    return $matches[1];
+                }
+            }
+
+            $id_entrepot = (int) $this->getData('id_entrepot');
+            if (!$id_entrepot) {
+                $id_entrepot = BimpTools::getValue('id_entrepot', 0);
+            }
+            if ($id_entrepot) {
+                global $tabCentre;
+                foreach ($tabCentre as $code_centre => $centre) {
+                    if ((int) $centre[8] === $id_entrepot) {
+                        return $code_centre;
+                    }
+                }
+            }
+        }
+
+        return '';
+    }
+
 }

@@ -18,7 +18,6 @@ class InvoiceStatementPDF extends BimpDocumentPDF
     public static $use_cgv = false;
     public $total_ttc = 0;
     public $total_rap = 0;
-    public $discounts = 0;
 
     public function __construct($db)
     {
@@ -38,33 +37,17 @@ class InvoiceStatementPDF extends BimpDocumentPDF
         $this->date_fin = new DateTime($this->object->borne_fin);
         $this->thirdparty = $this->object;
 
-        if (BimpObject::objectLoaded($this->object)) {
-            $filters = array(
-                'fk_soc'    => $this->object->id,
-                'fk_statut' => array(
-                    'in' => array(1, 2)
-                ),
-                'datef'     => array(
-                    'min' => $this->object->borne_debut,
-                    'max' => $this->object->borne_fin
-            ));
+        $filters = array(
+            'fk_soc'    => $this->object->id,
+            'fk_statut' => array(
+                'in' => array(1, 2)
+            ),
+            'datef'     => array(
+                'min' => $this->object->borne_debut,
+                'max' => $this->object->borne_fin
+        ));
 
-            $this->factures = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', $filters, 'datec', 'desc');
-
-            $sql = 'SELECT SUM(r.amount_ttc) as amount';
-            $sql .= ' FROM ' . MAIN_DB_PREFIX . 'societe_remise_except r';
-            $sql .= ' WHERE r.entity = 1';
-            $sql .= ' AND r.discount_type = 0';
-            $sql .= ' AND r.fk_soc = ' . (int) $this->object->id;
-            $sql .= ' AND (r.fk_facture IS NULL OR r.fk_facture = 0)';
-            $sql .= ' AND (r.fk_facture_line IS NULL OR r.fk_facture_line = 0)';
-
-            $result = $this->bimpDb->executeS($sql, 'array');
-            
-            if (isset($result[0]['amount'])) {
-                $this->discounts = (float) $result[0]['amount'];
-            }
-        }
+        $this->factures = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', $filters, 'datec', 'desc');
     }
 
     protected function initHeader()
@@ -78,7 +61,7 @@ class InvoiceStatementPDF extends BimpDocumentPDF
         $logo_width = 0;
         if (!file_exists($logo_file)) {
             $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
-        }
+        }        
         if (!file_exists($logo_file)) {
             $logo_file = '';
         } else {
@@ -114,7 +97,7 @@ class InvoiceStatementPDF extends BimpDocumentPDF
             'header_right'  => $header_right,
             'primary_color' => $this->primary,
             'doc_name'      => 'Relevé facturation',
-            'doc_ref'       => $docRef . '<br/><br/> Code client : ' . $this->object->code_client . '<br/> Code compta : ' . $this->object->code_compta,
+            'doc_ref'       => $docRef.'<br/><br/> Code client : '.$this->object->code_client.'<br/> Code compta : '.$this->object->code_compta,
             'ref_extra'     => ''
         );
     }
@@ -128,7 +111,7 @@ class InvoiceStatementPDF extends BimpDocumentPDF
     {
         
     }
-
+    
     public function renderLines()
     {
 
@@ -149,13 +132,14 @@ class InvoiceStatementPDF extends BimpDocumentPDF
             foreach ($this->factures as $facture) {
 //                if(stripos($facture->getData('facnumber'), 'ACC') !== false){
 //                echo $facture->printData();die;}
-                if ($facture->getData('type') == 3) {
+                if($facture->getData('type') == 3){
                     $this->total_acc += round((float) $facture->getData('total_ttc'), 2);
-                } else {
+                }
+                else{
                     $this->total_ttc += round((float) $facture->getData('total_ttc'), 2);
                 }
-
-
+                
+                
                 $rap = $facture->getRemainToPay();
                 $this->total_rap += $rap;
 
@@ -165,7 +149,7 @@ class InvoiceStatementPDF extends BimpDocumentPDF
                     'date'      => $facture->displayData('datef', 'default', false, true),
                     'echeance'  => $facture->displayData('date_lim_reglement', 'default', false, true),
                     'total_ttc' => BimpTools::displayMoneyValue($facture->getData("total_ttc"), 'EUR', 0, 0, 1, 2, 0, ',', 1),
-                    'remain'    => BimpTools::displayMoneyValue($rap, 'EUR', 0, 0, 1, 2, 0, ',', 1),
+                    'remain'      => BimpTools::displayMoneyValue($rap, 'EUR', 0, 0, 1, 2, 0, ',', 1),
                 );
 
                 if (isset(Bimp_Facture::$paiement_status[(int) $facture->getData('paiement_status')]['short'])) {
@@ -223,7 +207,7 @@ class InvoiceStatementPDF extends BimpDocumentPDF
 
         $html .= '<table style="width: 100%" cellpadding="5">';
 
-        if ($this->total_acc) {
+        if($this->total_acc > 0){
             $html .= '<tr>';
             $html .= '<td style="background-color: #F0F0F0;">Total acomptes</td>';
             $html .= '<td style="text-align: right;background-color: #F0F0F0;">';
@@ -231,7 +215,7 @@ class InvoiceStatementPDF extends BimpDocumentPDF
             $html .= '</td>';
             $html .= '</tr>';
         }
-
+        
         $html .= '<tr>';
         $html .= '<td style="background-color: #F0F0F0;">Total factures TTC</td>';
         $html .= '<td style="text-align: right;background-color: #F0F0F0;">';
@@ -246,21 +230,12 @@ class InvoiceStatementPDF extends BimpDocumentPDF
         $html .= '</td>';
         $html .= '</tr>';
 
-        if ($this->discounts) {
-            $html .= '<tr>';
-            $html .= '<td style="background-color: #F0F0F0;">Avoirs disponibles</td>';
-            $html .= '<td style="text-align: right;background-color: #F0F0F0;">';
-            $html .= BimpTools::displayMoneyValue($this->discounts, '', 0, 0, 1, 2);
-            $html .= '</td>';
-            $html .= '</tr>';
-
-            $html .= '<tr>';
-            $html .= '<td style="background-color: #DCDCDC;">Solde</td>';
-            $html .= '<td style="text-align: right;background-color: #DCDCDC;">';
-            $html .= BimpTools::displayMoneyValue($this->total_rap - $this->discounts, '', 0, 0, 1, 2);
-            $html .= '</td>';
-            $html .= '</tr>';
-        }
+//        $html .= '<tr>';
+//        $html .= '<td style="">Solde</td>';
+//        $html .= '<td style="text-align: right;">';
+//        $html .= BimpTools::displayMoneyValue($this->total_ttc - $this->total_paid, '', 0, 0, 1, 2);
+//        $html .= '</td>';
+//        $html .= '</tr>';
 
         $html .= '</table>';
 

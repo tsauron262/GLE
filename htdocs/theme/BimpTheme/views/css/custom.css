@@ -22,6 +22,8 @@
 
 }
 
+
+
 .dropdown-item {
 
     margin-left: 25px;
@@ -45,14 +47,8 @@
 
 }
 
-/*=> Ne jamais faire ça : cela affecte tous les selects quelque soit leur emplacement => il faut utiliser un sélecteur spécifique (.top-menu span.select2-container)
-span.select2-container {
-    min-width: 240px; 
-}
-*/
-
-.top-menu span.select2-container {
-    min-width: 240px; 
+span.select2-container{
+    min-width: 240px;
 }
 
 .lnMsg {
@@ -76,6 +72,7 @@ span.select2-container {
 }
 
 .footer {
+
     background-color: #fff;
 
 }

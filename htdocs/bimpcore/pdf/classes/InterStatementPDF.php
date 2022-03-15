@@ -38,14 +38,15 @@ class InterStatementPDF extends BimpDocumentPDF
         $this->thirdparty = $this->object;
         parent::initData();
         $this->date_document = new DateTime();
-        
-        $this->string_filters .= '<br/> Code client : '.$this->object->code_client.'<br/> Code compta : '.$this->object->code_compta;
+
         if($this->object->date_start_relever || $this->object->date_stop_relever) {
             $this->date_start = new DateTime($this->object->date_start_relever);
             $this->date_stop = new DateTime($this->object->date_stop_relever);
-            $this->string_filters .= 'Du ' . $this->date_start->format('d/m/Y') . ' au ' . $this->date_stop->format('d/m/Y') . '<br />';
+            $this->string_filters .= 'Du ' . $this->date_start->format('d/m/Y') . ' au ' . $this->date_stop->format('d/m/Y') . '<br /><br />';
             $this->filters['datei'] = array('min' => $this->object->date_start_relever, 'max' => $this->object->date_stop_relever);
         }
+        
+        $this->string_filters .= 'Code client : '.$this->object->code_client.'<br/>Code compta : '.$this->object->code_compta;
 
         if($this->object->id_tech > 0) {
             $this->tech = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $this->object->id_tech);
@@ -61,7 +62,7 @@ class InterStatementPDF extends BimpDocumentPDF
         if($this->object->id_contrat > 0) {
             $this->want_contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $this->object->id_contrat);
             $this->client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->want_contrat->getData('fk_soc'));
-            $this->string_filters .= 'Contrat: ' . $this->want_contrat->getRef() . '<br /><br />';
+            $this->string_filters .= '<br />Contrat: ' . $this->want_contrat->getRef() . '<br /><br />';
             $this->filters['fk_contrat'] = $this->want_contrat->id;
         }
         

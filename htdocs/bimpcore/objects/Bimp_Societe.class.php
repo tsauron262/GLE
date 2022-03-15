@@ -105,12 +105,11 @@ class Bimp_Societe extends BimpDolObject
         global $user;
         switch ($field_name) {
             case 'outstanding_limit_atradius':
-            case 'outstanding_limit_atradius':
             case 'outstanding_limit_icba':
             case 'outstanding_limit':
             case 'outstanding_limit_credit_check':
             case 'date_atradius':
-                if ($user->admin || $user->rights->bimpcommercial->admin_recouvrement || $user->rights->bimpcommercial->admin_compta) {
+                if ($user->admin || $user->rights->bimpcommercial->admin_recouvrement) {
                     return 1;
                 }
                 return 0;
@@ -147,6 +146,21 @@ class Bimp_Societe extends BimpDolObject
         }
 
         return parent::canEditField($field_name);
+    }
+
+    public function canViewField($field_name)
+    {
+        global $user;
+
+        switch ($field_name) {
+            case 'outstanding_limit_atradius':
+                if ($user->admin) {
+                    return 1;
+                }
+
+                return 0;
+        }
+        return parent::canViewField($field_name);
     }
 
     public function canSetAction($action)
@@ -360,19 +374,6 @@ class Bimp_Societe extends BimpDolObject
     }
 
     // Getters params: 
-    
-    public function getFirstDateContrat() {
-        
-        if($this->isLoaded()) {
-                        
-            $sql = 'SELECT MIN(date_start) FROM llx_contrat_extrafields LEFT JOIN llx_contrat ON llx_contrat.rowid = llx_contrat_extrafields.fk_object WHERE llx_contrat.fk_soc = ' . $this->id;
-            $res = $this->db->executeS($sql, 'array');
-            return $res[0]['MIN(date_start)'];
-        }
-        
-        return date('Y-m-d');
-        
-    }
 
     public function getFilesDir()
     {
@@ -397,6 +398,25 @@ class Bimp_Societe extends BimpDolObject
         $file = $this->id . '/' . $file_name;
 
         return DOL_URL_ROOT . '/' . $page . '.php?modulepart=societe&file=' . urlencode($file);
+    }
+    
+    public function getFirstDateContrat() {
+         
+         if($this->isLoaded()) {
+                         
+             $sql = 'SELECT MIN(date_start) FROM llx_contrat_extrafields LEFT JOIN llx_contrat ON llx_contrat.rowid = llx_contrat_extrafields.fk_object WHERE llx_contrat.fk_soc = ' . $this->id;
+             $res = $this->db->executeS($sql, 'array');
+             return $res[0]['MIN(date_start)'];
+         }
+         
+         return date('Y-m-d');
+         
+    }
+    
+    public function getContratsList() {
+        
+        return BimpCache::getBimpObjectObjects('bimpcontract', 'BContract_contrat', ['fk_soc' => $this->id], 'id', 'desc');
+
     }
 
     public function getActionsButtons()
@@ -463,7 +483,7 @@ class Bimp_Societe extends BimpDolObject
             }
 
             if ($this->isLoaded()) {
-                if ($user->admin) {
+                //if ($user->admin) {
                     $buttons[] = array(
                         'label'   => 'Relevé interventions',
                         'icon'    => 'fas_clipboard-list',
@@ -473,7 +493,7 @@ class Bimp_Societe extends BimpDolObject
                             'form_name' => 'releverInter'
                         ))
                     );
-                }
+                //}
 
                 $buttons[] = array(
                     'label'   => 'Demander ' . ((int) $this->getData('status') ? ' dés' : '') . 'activation du compte',
@@ -605,13 +625,23 @@ class Bimp_Societe extends BimpDolObject
                     }
                 }
 
+                $sc_alias = $main_alias . '___soc_commercial';
+                $joins[$sc_alias] = array(
+                    'alias' => 'soc_commercial',
+                    'table' => $sc_alias,
+                    'on'    => $main_alias . '.rowid = ' . $sc_alias . '.fk_soc'
+                );
+
                 $sql = '';
 
                 $nbCommerciaux = 'SELECT COUNT(sc.rowid) FROM ' . MAIN_DB_PREFIX . 'societe_commerciaux sc WHERE sc.fk_soc = ' . $main_alias . '.rowid';
 
                 if (!empty($ids)) {
-                    $sql .= '(' . $nbCommerciaux . ' AND sc.fk_user IN (' . implode(',', $ids) . ')) ';
-                    $sql .= ($excluded ? '=' : '>') . ' 0';
+                    if (!$excluded) {
+                        $sql = 'soc_commercial.fk_user IN (' . implode(',', $ids) . ')';
+                    } else {
+                        $sql = '(' . $nbCommerciaux . ' AND sc.fk_user IN (' . implode(',', $ids) . ')) = 0';
+                    }
                 }
 
                 if ($empty) {
@@ -1632,6 +1662,28 @@ class Bimp_Societe extends BimpDolObject
         }
 
         return $html;
+    }
+    
+    public function displayContratRefList() {
+        
+        $contrats   = $this->getContratsList();
+        $array      = [];
+        
+        if(count($contrats) > 0) {
+            
+            foreach($contrats as $contrat) {
+                if($contrat->getData('statut') != 0)
+                    
+                    $ref  = htmlentities ($contrat->getRef() . ' - ' . $contrat->displayData('statut'));
+                    $ref .= ($contrat->getData('label') ? ' - ' . $contrat->getData('label') : '');
+                
+                
+                    $array[$contrat->id] = $ref;
+            }
+            
+        }
+        
+        return $array;
     }
 
     public function displayCommercials($first = false, $link = true)

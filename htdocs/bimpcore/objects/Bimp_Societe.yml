@@ -1204,11 +1204,21 @@ forms:
               label: Contrat
               input_name: id_contrat
               input:
-                  type: search_object
-                  object: contrat
+                  type: select
+                  options:
+                      callback: displayContratRefList
               display_if:
                   field_name: by_contrat
                   show_values: 1
+#            - custom: 1
+#              label: Contrat
+#              input_name: id_contrat
+#              input:
+#                  type: search_object
+#                  object: contrat
+#              display_if:
+#                  field_name: by_contrat
+#                  show_values: 1
             - custom: 1
               label: Borner par date
               input_name: by_date
@@ -1217,8 +1227,10 @@ forms:
             - custom: 1
               required: 1
               label: Date de début du relevé
+              value: 
+                   callback:
+                       method: getFirstDateContrat
               input:
-                  display_now: 1
                   type: date
               display_if:
                   field_name: by_date

@@ -411,7 +411,15 @@ class Bimp_Societe extends BimpDolObject
          
          return date('Y-m-d');
          
-     }
+    }
+    
+    public function getContratsList($statut, $toSelect = false) {
+        
+        $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat');
+        
+        $filters = [];
+        
+    }
 
     public function getActionsButtons()
     {
@@ -477,7 +485,7 @@ class Bimp_Societe extends BimpDolObject
             }
 
             if ($this->isLoaded()) {
-                if ($user->admin) {
+                //if ($user->admin) {
                     $buttons[] = array(
                         'label'   => 'Relevé interventions',
                         'icon'    => 'fas_clipboard-list',
@@ -487,7 +495,7 @@ class Bimp_Societe extends BimpDolObject
                             'form_name' => 'releverInter'
                         ))
                     );
-                }
+                //}
 
                 $buttons[] = array(
                     'label'   => 'Demander ' . ((int) $this->getData('status') ? ' dés' : '') . 'activation du compte',

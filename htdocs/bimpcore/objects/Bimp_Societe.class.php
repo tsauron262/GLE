@@ -399,6 +399,19 @@ class Bimp_Societe extends BimpDolObject
 
         return DOL_URL_ROOT . '/' . $page . '.php?modulepart=societe&file=' . urlencode($file);
     }
+    
+    public function getFirstDateContrat() {
+         
+         if($this->isLoaded()) {
+                         
+             $sql = 'SELECT MIN(date_start) FROM llx_contrat_extrafields LEFT JOIN llx_contrat ON llx_contrat.rowid = llx_contrat_extrafields.fk_object WHERE llx_contrat.fk_soc = ' . $this->id;
+             $res = $this->db->executeS($sql, 'array');
+             return $res[0]['MIN(date_start)'];
+         }
+         
+         return date('Y-m-d');
+         
+     }
 
     public function getActionsButtons()
     {

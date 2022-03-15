@@ -23,13 +23,13 @@
         private $auto_paiements         = false;
         private $auto_achats            = false;
         private $auto_rib_mandats       = false;
-        private $auto_payni             = true;
+        private $auto_payni             = false;
         private $auto_importPaiement    = true;
         
         private $export_ventes          = true;
         private $export_paiements       = true;
         private $export_achats          = false;
-        private $export_payni           = true;
+        private $export_payni           = false;
         private $export_importPaiement  = true;
         
         public function automatique() {
@@ -39,9 +39,8 @@
             $this->export_class = new export($db);
             $this->export_class->create_daily_files();
             $this->files_for_ftp = $this->getFilesArrayForTranfert();
-            
-            
-            if($this->export_payni && $this->export_class->moment == 'AM')              $this->export_class->exportPayInc();
+                        
+            if($this->export_payni)                                                     $this->export_class->exportPayInc();
             if($this->export_ventes)                                                    $this->export_class->exportFacture();
             if($this->export_paiements)                                                 $this->export_class->exportPaiement();
             if($this->export_achats)                                                    $this->export_class->exportFactureFournisseur();

@@ -75,24 +75,6 @@
         
         public function exportFactureFournisseur($ref = ''):void {
             
-            switch($this->moment) {
-                case 'AM':
-                    $list = $this->bdb->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND (datec BETWEEN "'.$this->lastDateExported->format('Y-m-d') . ' 00:00:00" AND "'.$this->yesterday->format('Y-m-d').' 23:59:59" OR date_valid = BETWEEN "'.$this->lastDateExported->format('Y-m-d').'" AND "'.$this->yesterday->format('Y-m-d').'")');
-                    break;
-                case 'PM':
-                    $toDay = new DateTime();
-                    $list = $this->bdb->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND (datef BETWEEN "'.$toDay->format('Y-m-d').'" AND "'.$toDay->format('Y-m-d').'" OR date_valid BETWEEN "'.$toDay->format('Y-m-d').'" AND "'.$toDay->format('Y-m-d').'")');
-                    break;
-                default:
-                    $list = [];
-            }
-            
-            if(count($list) > 0) {
-                
-            } else {
-                $this->warn['ACHATS'] = 'Pas de facture fournisseur à exporter';
-            }
-
         }
         
         public function exportImportPaiement() {
@@ -114,7 +96,7 @@
                     }
                 }
             } else {
-                $this->warn['IP']['ImportPaiement'] = 'Pas d\'import de paiement à exporter en compta';
+                $this->warn['IP']['IP' . $instance->getParentId() . '-' . $instance->id] = 'Pas d\'import de paiement à exporter en compta';
             }
 
         }

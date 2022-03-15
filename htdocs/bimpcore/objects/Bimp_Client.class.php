@@ -776,7 +776,7 @@ class Bimp_Client extends Bimp_Societe
         return $total_unpaid;
     }
 
-    public function getTotalUnpayedTolerance($since = '2019-06-30', $euros_tolere = 2000, $day_tolere = 5)
+    public function getTotalUnpayedTolerance($since = '2019-06-30', $day_tolere = 14)
     {
         $factures = $this->getUnpaidFactures($since);
         $total_unpaid = 0;
@@ -798,7 +798,7 @@ class Bimp_Client extends Bimp_Societe
             }
         }
 
-        if ($has_retard or $euros_tolere < $total_unpaid)
+        if ($has_retard)
             return $total_unpaid;
 
         return 0;
@@ -2134,7 +2134,13 @@ class Bimp_Client extends Bimp_Societe
         if (empty($clients) && $mode == 'cron') {
             // Si liste de factures clients non fournie et si mode cron, on récup la liste complète des factures à relancer. 
             $clients = $this->getFacturesToRelanceByClients(true, null, array(), null, false, 'all');
+            
+            echo '<pre>';
+            print_r($clients);
+            exit;
         }
+        
+        die('la');
 
         if (empty($clients)) {
             $errors[] = 'Aucune relance à effectuer';
@@ -2165,6 +2171,7 @@ class Bimp_Client extends Bimp_Societe
                 }
                 $acomptes = array();
 
+                $n = 0;
                 foreach ($clients as $id_client => $client_data) {
                     if (!is_null($bds_process)) {
                         $bds_process->setCurrentObjectData('bimpcore', 'Bimp_Client');
@@ -2317,6 +2324,7 @@ class Bimp_Client extends Bimp_Societe
                             $relanceLine->set('factures', $relanceLine_factures);
                             $rl_warnings = array();
                             $rl_errors = $relanceLine->create($rl_warnings, true);
+
                             if (count($rl_errors)) {
                                 $err_label = 'Relance n°' . $relance_idx . ' - client: ' . $client->getRef() . ' ' . $client->getName();
                                 if (BimpObject::objectLoaded($contact)) {
@@ -2334,19 +2342,24 @@ class Bimp_Client extends Bimp_Societe
                             }
                         }
                     }
+
+                    $n++;
+
+                    if ($n > 10 && !is_null($bds_process)) {
+                        break;
+                    }
                 }
 
                 if ($date_prevue == $now) {
-                    if ($send_emails) {
-                        // Envoi des emails: 
-                        $mail_warnings = array();
-                        $mail_errors = $relance->sendEmails(false, $mail_warnings, $bds_process);
-                        $mail_errors = array_merge($mail_errors, $mail_warnings);
-                        if (count($mail_errors)) {
-                            $warnings[] = BimpTools::getMsgFromArray($mail_errors, 'Erreurs lors de l\'envoi des emails de relance');
-                        }
-                    }
-
+//                    if ($send_emails) {
+//                        // Envoi des emails: 
+//                        $mail_warnings = array();
+//                        $mail_errors = $relance->sendEmails(false, $mail_warnings, $bds_process);
+//                        $mail_errors = array_merge($mail_errors, $mail_warnings);
+//                        if (count($mail_errors)) {
+//                            $warnings[] = BimpTools::getMsgFromArray($mail_errors, 'Erreurs lors de l\'envoi des emails de relance');
+//                        }
+//                    }
                     // Génération des PDF à envoyer par courrier: 
                     $pdf_warnings = array();
                     $pdf_errors = $relance->generateRemainToSendPdf($pdf_url, $pdf_warnings);

@@ -1,6 +1,5 @@
 table: bimp_relance_clients
 common_fields: 0
-icon: fas_comment-dollar
 
 labels: 
     name: relance clients

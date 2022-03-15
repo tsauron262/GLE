@@ -348,178 +348,141 @@ class BContract_echeancier extends BimpObject {
     public function actionCreateFacture($data, &$success = '') {
         $errors = $warnings = [];
         
-        $division_par = BimpCore::getConf('bimpcontract_div_qty-OR-price');
+        if($this->isDejaFactured($data['date_start'], $data['date_end'])) {
+            return  array('errors' => array("Contrat déjà facturé pour cette période, merci de refresh la page pour voir cette facture dans l'échéancier"));
+        }
+
+        $parent = $this->getParentInstance();
+        $client = $this->getInstance('bimpcore', 'Bimp_Societe', $parent->getInitData('fk_soc'));
+
+        $linked_propal = $this->db->getValue('element_element', 'fk_source', 'targettype = "contrat" and fk_target = ' . $parent->id);
+
+        $propal = $this->getInstance('bimpcommercial', 'Bimp_Propal', $linked_propal);
+        $ef_type = ($propal->getData('ef_type') == "E") ? 'CTE': 'CTC';
+        $instance = $this->getInstance('bimpcommercial', 'Bimp_Facture');
+        $instance->set('fk_soc', ($parent->getData('fk_soc_facturation')) ? $parent->getData('fk_soc_facturation') : $parent->getData('fk_soc'));
         
-        if($division_par != 'qty' && $division_par != 'price' && BimpCore::getConf('bimpcontract_all_serv_in_facture'))
-            $errors[] = 'Erreur de configuration d\'action de division pour la création de la facture';
+        $bill_label = (isset($data['label'])? $data['label'].' ': '')."Facture " . $parent->getPeriodeString();
+        $bill_label.= " du contrat N°" . $parent->getData('ref');
+        $bill_label.= ' - ' . $parent->getData('label');
+        $instance->set('libelle', $bill_label);
+        $instance->set('type', 0);
+//        $instance->set('fk_account', 1);
         
-        if(!count($errors)) {
-            if($this->isDejaFactured($data['date_start'], $data['date_end'])) {
-                return  array('errors' => array("Contrat déjà facturé pour cette période, merci de refresh la page pour voir cette facture dans l'échéancier"));
+        if(!$parent->getData('entrepot') && $parent->useEntrepot()) {
+            return array('errors' => array("La facture ne peut pas être crée car le contrat n'a pas d'entrepôt"));
+        }
+        if($parent->useEntrepot())
+            $instance->set('entrepot', $parent->getData('entrepot'));
+        $instance->set('fk_cond_reglement', ($client->getData('cond_reglement')) ? $client->getData('cond_reglement') : 2);
+        $instance->set('fk_mode_reglement', ($parent->getData('moderegl')) ? $parent->getData('moderegl') : 2);
+        $instance->set('datef', date('Y-m-d H:i:s'));
+        $instance->set('ef_type', $ef_type);
+        $instance->set('model_pdf', 'bimpfact');
+        $instance->set('ref_client', $parent->getData('ref_customer'));
+            
+            
+        $errors = $instance->create($warnings, true);
+        $instance->copyContactsFromOrigin($parent);
+        
+        $lines = $this->getInstance('bimpcontract', 'BContract_contratLine');
+        $desc = "<b><u>Services du contrat :</b></u>" . "<br /><br />";
+        foreach ($lines->getList(['fk_contrat' => $parent->id,"renouvellement" => $parent->getData('current_renouvellement')]) as $idLine => $infos) {
+            $desc .= $infos['description'] . "<br /><br />";
+        }
+        $facture_ok = false;
+        if (!count($errors)) {
+            
+            $dateStart = new DateTime($data['date_start']);
+            $dateEnd = new DateTime($data['date_end']);
+            
+            $add_desc = "";
+            $parent->actionUpdateSyntec();
+            // Vérification si le contrat est un renouvellement
+            if($parent->getData('current_renouvellement') > 0) {
+                $current_syntec = $parent->getCurrentSyntecFromSyntecFr();
+                // Vérification de si il y à un indice syntec à la signature
+                if($parent->getData('syntec') > 0) {
+                    
+                    $add_desc .= "<br />";
+                    $add_desc .= "<b><u>Calcul de l’indice Syntec</u></b><br />";
+                    $add_desc .= "Revalorisation annuelle à la date d’effet du contrat<br />";
+                    $add_desc .= "Valeur du dernier indice connu à ce jour: <b>$current_syntec </b><br />";
+                    $add_desc .= "Valeur de l’indice d’origine: <b>" . $parent->getData('syntec') . "</b><br />";
+                    // Prix révisé : (xxx,xx / xxx,xx) X Prix de base
+                    $new_price = ($current_syntec / $parent->getData('syntec') * $parent->getTotalBeforeRenouvellement()); 
+                    $surreter_syntec = ($current_syntec / $parent->getData('syntec'));
+                    //$add_desc .= "Prix révisé: ($current_syntec / ".$parent->getData('syntec')." ) = $surreter_syntec x " . round($parent->getTotalBeforeRenouvellement(), 2) . " = <b>" . round($new_price, 2) . "€</b>";
+                    //$add_desc .= "<Prix révisé = (Prix de base ".$parent->getTotalBeforeRenouvellement()."€ ) X ($current_syntec / ".$parent->getData('syntec')." = ".round($surreter_syntec,6)." ) = ".round($new_price,2)."€";
+                    $add_desc .= "Prix révisé = (Prix de base ".$parent->getTotalBeforeRenouvellement()."€ ) X ($current_syntec / ".$parent->getData('syntec').") = ".$parent->getTotalBeforeRenouvellement()." X ".round($surreter_syntec,6)." = ".round($new_price,2)."€";
+
+                    
+                }
             }
-
-            $parent = $this->getParentInstance();
-            $client = $this->getInstance('bimpcore', 'Bimp_Societe', $parent->getInitData('fk_soc'));
-
-            $linked_propal = $this->db->getValue('element_element', 'fk_source', 'targettype = "contrat" and fk_target = ' . $parent->id);
-
-            $propal = $this->getInstance('bimpcommercial', 'Bimp_Propal', $linked_propal);
-            $ef_type = ($propal->getData('ef_type') == "E") ? 'CTE': 'CTC';
-            $instance = $this->getInstance('bimpcommercial', 'Bimp_Facture');
-            $instance->set('fk_soc', ($parent->getData('fk_soc_facturation')) ? $parent->getData('fk_soc_facturation') : $parent->getData('fk_soc'));
-
-            $bill_label = (isset($data['label'])? $data['label'].' ': '')."Facture " . $parent->getPeriodeString();
-            $bill_label.= " du contrat N°" . $parent->getData('ref');
-            $bill_label.= ' - ' . $parent->getData('label');
-            $instance->set('libelle', $bill_label);
-            $instance->set('type', 0);
-    //        $instance->set('fk_account', 1);
-
-            if(!$parent->getData('entrepot') && $parent->useEntrepot()) {
-                return array('errors' => array("La facture ne peut pas être crée car le contrat n'a pas d'entrepôt"));
-            }
-            if($parent->useEntrepot())
-                $instance->set('entrepot', $parent->getData('entrepot'));
-            $instance->set('fk_cond_reglement', ($client->getData('cond_reglement')) ? $client->getData('cond_reglement') : 2);
-            $instance->set('fk_mode_reglement', ($parent->getData('moderegl')) ? $parent->getData('moderegl') : 2);
-            $instance->set('datef', date('Y-m-d H:i:s'));
-            $instance->set('ef_type', $ef_type);
-            $instance->set('model_pdf', 'bimpfact');
-            $instance->set('ref_client', $parent->getData('ref_customer'));
-
-
-            $errors = $instance->create($warnings, true);
-            $instance->copyContactsFromOrigin($parent);
-
-            $lines = $this->getInstance('bimpcontract', 'BContract_contratLine');
-            $list_line = $lines->getList(['fk_contrat' => $parent->id,"renouvellement" => $parent->getData('current_renouvellement')]);
-            $desc = "<b><u>Services du contrat :</b></u>" . "<br /><br />";
-            foreach ($list_line as $idLine => $infos) {
-                $desc .= $infos['description'] . "<br /><br />";
-            }
-            $facture_ok = false;
+            
+            $description_total = $desc . $add_desc;
+            
+            addElementElement("contrat", "facture", $parent->id, $instance->id);
+            
+            
+            $new_first_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
+            $errors = BimpTools::merge_array($errors, $new_first_line->validateArray(array(
+                    'type' => ObjectLine::LINE_FREE,
+                    'id_obj' => (int) $instance->id
+                )));
+            if(!isset($data['labelLn']))
+                $new_first_line->desc = "Facturation pour la période du <b>" . $dateStart->format('d/m/Y') . "</b> au <b>" . $dateEnd->format('d/m/Y') . "</b>";
+            else
+                $new_first_line->desc = $data['labelLn'];
+            $new_first_line->date_from = $data['date_start'];
+            $new_first_line->date_to = $data['date_end'];
+            $new_first_line->pu_ht = (double) $data['total_ht'];
+            $new_first_line->tva_tx = 20;
+            $new_first_line->pa_ht = $data['pa'];
+            
+            
+            $errors = BimpTools::merge_array($errors, $new_first_line->create($warnings, true));
+            $new_first_line->date_from = $data['date_start'];
+            $new_first_line->update($warnings);
+            
             if (!count($errors)) {
 
-                $dateStart = new DateTime($data['date_start']);
-                $dateEnd = new DateTime($data['date_end']);
+                $new_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
+                $errors = BimpTools::merge_array($errors, $new_line->validateArray(array(
+                    'type' => ObjectLine::LINE_TEXT,
+                    'id_obj' => (int) $instance->id,
+                )));
 
-                $add_desc = "";
-                $parent->actionUpdateSyntec();
-                // Vérification si le contrat est un renouvellement
-                if($parent->getData('current_renouvellement') > 0) {
-                    $current_syntec = $parent->getCurrentSyntecFromSyntecFr();
-                    // Vérification de si il y à un indice syntec à la signature
-                    if($parent->getData('syntec') > 0) {
+                $new_line->desc = $description_total;
+                $errors = BimpTools::merge_array($errors,$new_line->create($warnings, true));
+                
+                $success = 'Facture créer avec succès';
+                $facture_ok = true;
 
-                        $add_desc .= "<br />";
-                        $add_desc .= "<b><u>Calcul de l’indice Syntec</u></b><br />";
-                        $add_desc .= "Revalorisation annuelle à la date d’effet du contrat<br />";
-                        $add_desc .= "Valeur du dernier indice connu à ce jour: <b>$current_syntec </b><br />";
-                        $add_desc .= "Valeur de l’indice d’origine: <b>" . $parent->getData('syntec') . "</b><br />";
-                        // Prix révisé : (xxx,xx / xxx,xx) X Prix de base
-                        $new_price = ($current_syntec / $parent->getData('syntec') * $parent->getTotalBeforeRenouvellement()); 
-                        $surreter_syntec = ($current_syntec / $parent->getData('syntec'));
-                        //$add_desc .= "Prix révisé: ($current_syntec / ".$parent->getData('syntec')." ) = $surreter_syntec x " . round($parent->getTotalBeforeRenouvellement(), 2) . " = <b>" . round($new_price, 2) . "€</b>";
-                        //$add_desc .= "<Prix révisé = (Prix de base ".$parent->getTotalBeforeRenouvellement()."€ ) X ($current_syntec / ".$parent->getData('syntec')." = ".round($surreter_syntec,6)." ) = ".round($new_price,2)."€";
-                        $add_desc .= "Prix révisé = (Prix de base ".$parent->getTotalBeforeRenouvellement()."€ ) X ($current_syntec / ".$parent->getData('syntec').") = ".$parent->getTotalBeforeRenouvellement()." X ".round($surreter_syntec,6)." = ".round($new_price,2)."€";
-
-
-                    }
-                }
-
-                $description_total = $desc . $add_desc;
-
-                addElementElement("contrat", "facture", $parent->id, $instance->id);
-
-                $new_first_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
-                $errors = BimpTools::merge_array($errors, $new_first_line->validateArray(array(
-                        'type' => ObjectLine::LINE_FREE,
-                        'id_obj' => (int) $instance->id
-                    )));
-                if(!isset($data['labelLn']))
-                    $new_first_line->desc = "Facturation pour la période du <b>" . $dateStart->format('d/m/Y') . "</b> au <b>" . $dateEnd->format('d/m/Y') . "</b>";
-                else
-                    $new_first_line->desc = $data['labelLn'];
-                $new_first_line->date_from = $data['date_start'];
-                $new_first_line->date_to = $data['date_end'];
-                $new_first_line->pu_ht = (BimpCore::getConf('bimpcontract_all_serv_in_facture')) ? 0 : (double) $data['total_ht'];
-                $new_first_line->tva_tx = 20;
-                $new_first_line->pa_ht = (BimpCore::getConf('bimpcontract_all_serv_in_facture')) ? 0 : $data['pa'];
-
-
-                $errors = BimpTools::merge_array($errors, $new_first_line->create($warnings, true));
-                $new_first_line->date_from = $data['date_start'];
-                $new_first_line->update($warnings);
-
-                if (!count($errors)) {
-                    $success = 'Facture créer avec succès';
-                    $facture_ok = true;
-                    
-                    $new_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
-                    
-                    if(BimpCore::getConf('bimpcontract_all_serv_in_facture') == 0) {
-                        
-                        $errors = BimpTools::merge_array($errors, $new_line->validateArray(array(
-                            'type' => ObjectLine::LINE_TEXT,
-                            'id_obj' => (int) $instance->id,
-                        )));
-
-                        $new_line->desc = $description_total;
-                        $errors = BimpTools::merge_array($errors,$new_line->create($warnings, true));
-
-                        
-
-                        $facture_send = count(getElementElement('contrat', 'facture', $parent->id));
-                        $total_facture_must = $parent->getData('duree_mois') / $parent->getData('periodicity');
-
-                        $this->switch_statut();
-
-                        if ($parent->reste_periode() == 0) {
-                            $this->updateField('next_facture_date', null);
-                        } else {
-                            $this->updateField('next_facture_date', $dateEnd->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00'));
-                        }
-                    } else {
-                        $nl = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine');
-                        
-                        $arrayPeriodicity = Array(1 => 12, 2 => 6, 3 => 4, 6 => 2, 12 => 1);
-                        
-                        foreach($list_line as $lLine => $infos) {
-                            $nl->id_product     = (int) $infos['fk_product'];
-                            $nl->desc           = $infos['description'];
-                            $nl->qty            = ($division_par == 'qty' && $parent->getData('periodicity') != 0 && $parent->getData('periodicity') != 1200) ? round(1 / $arrayPeriodicity[$parent->getData('periodicity')], 5) : 1;
-                            $nl->pu_ht          = ($division_par == 'price' && $parent->getData('periodicity') != 0 && $parent->getData('periodicity') != 1200) ? round($infos['subprice'] / $arrayPeriodicity[$parent->getData('periodicity')], 2) : $infos['subprice'];
-                            $nl->pa_ht          = $parent->getTotalPa() / $arrayPeriodicity[$parent->getData('periodicity')];
-                            
-                            $errors = BimpTools::merge_array($errors, $nl->validateArray(array(
-                                'type'          => ObjectLine::LINE_PRODUCT,
-                                'id_obj'        => (int) $instance->id,
-                            )));
-                            
-                            
-                            
-                            $errors = BimpTools::merge_array($errors,$nl->create($warnings, true));
-                        }
-
-                    }
-                    
-
-    //                if ($this->getData('validate') == 1) {
-    //                    $this->actionValidateFacture(Array('id_facture' => $instance->id));
-    //                }
-                    $parent->renderEcheancier();
-                    //$instance = null;
+                $facture_send = count(getElementElement('contrat', 'facture', $parent->id));
+                $total_facture_must = $parent->getData('duree_mois') / $parent->getData('periodicity');
+                
+                $this->switch_statut();
+                
+                if ($parent->reste_periode() == 0) {
+                    $this->updateField('next_facture_date', null);
                 } else {
-                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($instance->dol_object));
+                    $this->updateField('next_facture_date', $dateEnd->add(new DateInterval('P1D'))->format('Y-m-d 00:00:00'));
                 }
-            }
 
-            if(array_key_exists("origine", $data) && $facture_ok) {
-    //            return $instance->id;
+//                if ($this->getData('validate') == 1) {
+//                    $this->actionValidateFacture(Array('id_facture' => $instance->id));
+//                }
+                $parent->renderEcheancier();
+                //$instance = null;
+            } else {
+                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($instance->dol_object));
             }
         }
         
-        
+        if(array_key_exists("origine", $data) && $facture_ok) {
+//            return $instance->id;
+        }
 
         return Array(
             'success' => $success,

@@ -350,13 +350,6 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 $dateContrat = new DateTime($c->getData('date_start'));
                 $type = $c->$objet_contrat[$c->getData('objet_contrat')]['label'];
                 $pdf->SetFont('', '', 9);
-                if($this->avenant->getData('label')) {
-                    $pdf->Cell($W, 4, 'Objet de l\'avenant: ' . $this->avenant->getData('label'), "L", null, 'L', true);
-                    $pdf->SetFont('', 'B', 9);
-                    $pdf->Ln();
-                    $pdf->Ln();
-                }
-                
                 //$pdf->Cell($W, 4, "Les parties ont conclu un ".$objet_contrat[$c->getData('objet_contrat')]['label']."  en date du ".$dateContrat->format('d/m/Y')." (ci-après le « Contrat »).", "L", null, 'L', true);
                 $pdf->Cell($W, 4, "Les parties ont conclu un Contrat d'assistance et de maintenance informatique en date du ".$dateContrat->format('d/m/Y')." (ci-après le « Contrat »).", "L", null, 'L', true);
                 $pdf->SetFont('', 'B', 9);
@@ -364,13 +357,7 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 $pdf->Cell($W, 4, "IL EST AINSI CONVENU CE QUI SUIT", 0, null, 'L', true);
                 $pdf1->SetFont('', '', 9);
                 //$pdf1->Cell($W, 4, "Les parties ont conclu un ".$objet_contrat[$c->getData('objet_contrat')]['label']."  en date du ".$dateContrat->format('d/m/Y')." (ci-après le « Contrat »).", "L", null, 'L', true);
-                if($this->avenant->getData('label')) {
-                    $pdf1->Cell($W, 4, 'Objet de l\'avenant: ' . $this->avenant->getData('label'), "L", null, 'L', true);
-                    $pdf1->SetFont('', 'B', 9);
-                    $pdf1->Ln();
-                    $pdf1->Ln();
-                }
-                $pdf1->Cell($W, 4, "Les parties ont conclu un Contrat d'assistance et de maintenance informatique en date du ".$dateContrat->format('d/m/Y')." (ci-après le « Contrat »).", "L", null, 'L', true);
+                 $pdf1->Cell($W, 4, "Les parties ont conclu un Contrat d'assistance et de maintenance informatique en date du ".$dateContrat->format('d/m/Y')." (ci-après le « Contrat »).", "L", null, 'L', true);
                 $pdf1->SetFont('', 'B', 9);
                 $pdf1->Ln();
                 $pdf1->Cell($W, 4, "IL EST AINSI CONVENU CE QUI SUIT", 0, null, 'L', true);

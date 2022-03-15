@@ -796,12 +796,10 @@ class BC_ListTable extends BC_List
                         $row['params']['single_cell'] = true;
                     }
                 }
-                
                 $new_values = isset($this->new_values[(int) $item[$primary]]) ? $this->new_values[(int) $item[$primary]] : array();
                 if ($this->params['positions']) {
                     $row['params']['position'] = (int) $object->getData('position');
                 }
-                
                 foreach ($this->cols as $col_name => $col_params) {
                     if ($row['params']['single_cell'] && $col_name !== $this->params['single_cell']['col']) {
                         continue;
@@ -834,8 +832,8 @@ class BC_ListTable extends BC_List
                             $bc_field->display_name = $col_params['display'];
                             $bc_field->display_options = $col_params['display_options'];
 
-                            if (isset($new_values[$field_name])) {
-                                $bc_field->new_value = $new_values[$field_name];
+                            if (isset($new_values[$col_params['field']])) {
+                                $bc_field->new_value = $new_values[$col_params['field']];
                             }
 
                             $row_content = $bc_field->renderHtml();

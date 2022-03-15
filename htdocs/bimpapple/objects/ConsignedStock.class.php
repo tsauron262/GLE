@@ -9,7 +9,7 @@ class ConsignedStock extends BimpObject
     {
         global $user;
 
-        return (int) $user->admin;
+        return (int) 1;
     }
 
     public function canEdit()

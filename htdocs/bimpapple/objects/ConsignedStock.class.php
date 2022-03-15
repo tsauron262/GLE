@@ -808,6 +808,23 @@ class ConsignedStock extends BimpObject
             'warnings' => $warnings
         );
     }
+    
+    public function create(&$warnings = array(), $force_create = false) {
+        $list = BimpCache::getBimpObjectObjects($this->module, $this->object_name, array('code_centre' => $this->getData('code_centre'), 'part_number' => $this->getData('part_number')));
+        if(count($list))
+            $errors = array('Cette réf existe déja pour ce centre');
+        else{
+            $errors = parent::create($warnings, $force_create);
+            if(!count($errors) && !$this->getData('serialized')){
+                $qty = BimpTools::getValue('qty_tot');
+                if($qty > 0){
+                    $errors = $this->correctStock($qty, '', 'CREATION');
+                }
+            }
+        }
+        
+        return $errors;
+    }
 
     public function actionCreateShipment($data, &$success = '')
     {

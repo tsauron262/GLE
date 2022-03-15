@@ -1673,7 +1673,12 @@ class Bimp_Societe extends BimpDolObject
             
             foreach($contrats as $contrat) {
                 if($contrat->getData('statut') != 0)
-                    $array[$contrat->id] = htmlentities($contrat->getRef() . ' - ' . $contrat->displayData('statut'));
+                    
+                    $ref  = htmlentities ($contrat->getRef() . ' - ' . $contrat->displayData('statut'));
+                    $ref .= ($contrat->getData('label') ? ' - ' . $contrat->getData('label') : '');
+                
+                
+                    $array[$contrat->id] = $ref;
             }
             
         }

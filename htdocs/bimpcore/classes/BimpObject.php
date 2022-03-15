@@ -9848,4 +9848,36 @@ var options = {
     {
         return (int) BimpCore::getConf("USE_ENTREPOT");
     }
+    
+    
+    public function getDefaultCodeCentre()
+    {
+        if (BimpTools::isSubmit('code_centre')) {
+            return BimpTools::getValue('code_centre');
+        } else {
+            global $user;
+            $userCentres = explode(' ', $user->array_options['options_apple_centre']);
+            foreach ($userCentres as $code) {
+                if (preg_match('/^ ?([A-Z]+) ?$/', $code, $matches)) {
+                    return $matches[1];
+                }
+            }
+
+            $id_entrepot = (int) $this->getData('id_entrepot');
+            if (!$id_entrepot) {
+                $id_entrepot = BimpTools::getValue('id_entrepot', 0);
+            }
+            if ($id_entrepot) {
+                global $tabCentre;
+                foreach ($tabCentre as $code_centre => $centre) {
+                    if ((int) $centre[8] === $id_entrepot) {
+                        return $code_centre;
+                    }
+                }
+            }
+        }
+
+        return '';
+    }
+
 }

@@ -413,12 +413,10 @@ class Bimp_Societe extends BimpDolObject
          
     }
     
-    public function getContratsList($statut, $toSelect = false) {
+    public function getContratsList() {
         
-        $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat');
-        
-        $filters = [];
-        
+        return BimpCache::getBimpObjectObjects('bimpcontract', 'BContract_contrat', ['fk_soc' => $this->id], 'id', 'desc');
+
     }
 
     public function getActionsButtons()
@@ -1664,6 +1662,23 @@ class Bimp_Societe extends BimpDolObject
         }
 
         return $html;
+    }
+    
+    public function displayContratRefList() {
+        
+        $contrats   = $this->getContratsList();
+        $array      = [];
+        
+        if(count($contrats) > 0) {
+            
+            foreach($contrats as $contrat) {
+                if($contrat->getData('statut') != 0)
+                    $array[$contrat->id] = htmlentities($contrat->getRef() . ' - ' . $contrat->displayData('statut'));
+            }
+            
+        }
+        
+        return $array;
     }
 
     public function displayCommercials($first = false, $link = true)

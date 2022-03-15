@@ -920,8 +920,6 @@ class BimpRelanceClientsLine extends BimpObject
 
     public function sendRelanceEmail(&$warnings = array(), $force_send = false)
     {
-        die('ici');
-        return array();
         $errors = array();
         
         if ((int) $this->getData('status') !== self::RELANCE_ATTENTE_MAIL) {

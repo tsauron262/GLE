@@ -9,27 +9,58 @@ class BDS_RelancesClientsProcess extends BDSProcess
 
     public function initRelances(&$data, &$errors = array())
     {
-        $data['steps'] = array(
-            'send_relmances' => array(
-                'label'    => 'Traitement des relancesss',
-                'on_error' => 'continue'
-            )
-        );
+        $client = BimpObject::getInstance('bimpcore', 'Bimp_Client');
+        $clients = $client->getFacturesToRelanceByClients(true, null, array(), null, false, 'clients_list');
+
+        if (!empty($clients)) {
+            $this->setCurrentObjectData('bimpcommercial', 'BimpRelanceClients');
+            $this->incProcessed();
+
+            global $user;
+            $create_errors = array();
+            $create_warnings = array();
+
+            $relance = BimpObject::createBimpObject('bimpcommercial', 'BimpRelanceClients', array(
+                        'id_user'     => (BimpObject::objectLoaded($user) ? (int) $user->id : 1),
+                        'date'        => date('Y-m-d H:i:s'),
+                        'mode'        => 'cron',
+                        'date_prevue' => date('Y-m-d')
+                            ), true, $create_errors, $create_warnings);
+
+            if (BimpObject::objectLoaded($relance)) {
+                $this->incCreated();
+                $data['steps'] = array(
+                    'process_relance_' . $relance->id => array(
+                        'label'                  => 'Traitement des relances',
+                        'on_error'               => 'continue',
+                        'elements'               => $clients,
+                        'nbElementsPerIteration' => 10
+                    )
+                );
+            } else {
+                $this->incIgnored();
+                $msg = BimpTools::getMsgFromArray($create_errors, 'Echec de la création de la relance');
+                $this->Error($msg);
+                $errors[] = $msg;
+            }
+        } else {
+            $data['result_html'] = BimpRender::renderAlerts('Il n\'y a aucune facture impayée à relancer', 'warning');
+            $this->Alert('Aucun client à relancer');
+        }
     }
 
     // Exec opérations:
 
     public function executeRelances($step_name, &$errors = array())
     {
-        switch ($step_name) {
-            case 'send_relmances':
-                $client = BimpObject::getInstance('bimpcore', 'Bimp_Client');
-                
-                $warnings = array();
-                $pdf_url = '';
-//                relancePaiements($clients = array(), $mode = 'global', &$warnings = array(), &$pdf_url = '', $date_prevue = null, $send_emails = true, $bds_process = null)
-                $errors = $client->relancePaiements(array(), 'cron', $warnings, $pdf_url, null, false, $this);
-                break;
+        if (preg_match('/^process_relance_(\d+)$/', $step_name, $matches)) {
+            $id_relance = (int) $matches[1];
+
+            $client = BimpObject::getInstance('bimpcore', 'Bimp_Client');
+
+            $warnings = array();
+            $pdf_url = '';
+            $errors = $client->relancePaiements($this->references, 'cron', $warnings, $pdf_url, null, false, $this, $id_relance);
         }
 
         return array();

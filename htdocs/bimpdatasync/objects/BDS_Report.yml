@@ -93,6 +93,16 @@ lists:
         cols: 
             id_process: unset
             id_operation: unset
+            
+    relances_clients: 
+        extends: operation
+        list_filters: 
+            - name: id_process
+              filter: 
+                  conf: bds_relances_clients_id_process
+        cols: 
+            id_operation: unset
+        
     
     
         

@@ -1820,7 +1820,7 @@ class BContract_contrat extends BimpDolObject
                     ))
                 );
             }
-            if (/* ($this->getData('tacite') == 12 || $this->getData('tacite') == 0) && */!$this->getData('next_contrat') && ($status == self::CONTRAT_STATUS_ACTIVER || $status == self::CONTRAT_STATUS_CLOS || $status == self::CONTRAT_STATUS_REFUSE)) {
+            if (/* ($this->getData('tacite') == 12 || $this->getData('tacite') == 0) && */!$this->getData('next_contrat') && ($status == self::CONTRAT_STATUS_ACTIVER || $status == self::CONTRAT_STATUS_CLOS)) {
                 $buttons[] = array(
                     'label'   => 'Renouveler par clonage du contrat (SN et sites inclus)',
                     'icon'    => 'fas_retweet',
@@ -2346,11 +2346,7 @@ class BContract_contrat extends BimpDolObject
     public function canEditField($field_name)
     {
         global $user;
-        
-        if($field_name == 'label' && ( $user->admin || $user->rights->bimpcontract->to_validate)) {
-            return 1;
-        }
-        
+
         if ($this->getData('statut') == self::CONTRAT_STATUS_REFUSE)
             return 0;
 

@@ -191,7 +191,7 @@ class BIMP_Task extends BimpObject
     public function getListFiltre($type = "normal")
     {
         global $user;
-        $list = new BC_ListTable($this, 'default', 1, null, ($type == "my" ? 'Mes tâches assignées' : ($type == "byMy" ? 'Mes tâches créées' : 'Toutes les tâches')));
+        $list = new BC_ListTable($this, 'default', 1, null, ($type == "my" ? 'Mes tâches assignées' : ($type == "byMy" ? 'Mes tâches créer' : 'Toutes les tâches')));
         $list->addIdentifierSuffix($type);
         $tabFiltre = self::getFiltreDstRight($user);
         if($type == 'byMy')

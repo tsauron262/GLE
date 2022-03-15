@@ -1,7 +1,15 @@
 bootstrap: 1
 title: BimpCore Admin
 
-objects:            
+objects:
+    users:
+        instance: 
+            bimp_object: Bimp_User
+    
+    user_group:
+        instance:
+            bimp_object: Bimp_UserGroup
+            
     entrepots: 
         instance: 
             bimp_object: Bimp_Entrepot
@@ -17,6 +25,14 @@ objects:
     correctifs: 
         instance: 
             bimp_object: BimpCorrectif
+            
+    droitUser:
+        instance: 
+            bimp_object: Bimp_User_Rights
+            
+    droitGroupUser:
+        instance: 
+            bimp_object: Bimp_UserGroup_Rights
             
     lists_configs: 
         instance: 
@@ -59,7 +75,23 @@ objects:
 sections:
     - type: tabs
       tabs: 
-        default: 
+        default:
+            label: Utilisateurs
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: users
+        
+        user_group:
+            label: Groupe utilisateurs
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: user_group                     
+
+        entrepots: 
             label: Entrepôts
             sections: 
                 - type: list
@@ -115,6 +147,16 @@ sections:
                   list: 
                       object: files
                       name: globale
+        droit:
+            label: Droits
+            sections:
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderTabs
+                          params: 
+                            - renderRightsTab
+                            - droit
                             
         lists_configs: 
             label: Configuration des listes

@@ -17,14 +17,51 @@
 //$file = str_replace("\x0A\x20", '', $file);
 //die ($file);
 
-
 require("../main.inc.php");
-
 llxHeader();
 
+echo BimpCore::getConf('old_date_reco_apple', '');
+                $oldDate = new DateTime(BimpCore::getConf('old_date_reco_apple', '2020-01-01'));
+                $oldDate->add(new DateInterval('PT1M'));
+                $now = new DateTime (date ('Y-m-d H:i:s', time()));
+                if($oldDate < $now){
+                    BimpCore::setConf('old_date_reco_apple',date ('Y-m-d H:i:s', time()));
+                    die('reco');
+                    $phantomAuthTest = true;
+                    static::phantomAuth(self::$default_ids['apple_id'], self::$default_ids['apple_pword']);
+                }
+                else{
+                    die('trop frais');
+                }
+die;
 
-require_once DOL_DOCUMENT_ROOT.'/bimpapple/classes/GSX_v2.php';
-echo GSX_v2::phantomAuth();
+
+$json = json_decode(file_get_contents('php://input'));
+
+$html = print_r($json,1);
+
+$html = '<pre>'.$html.'</pre>';
+
+
+//echo file_get_contents( 'php://input' );
+
+//define("NOLOGIN", 1);
+require("../main.inc.php");
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+
+//die($html);
+//mailSyn2('webhook', 'tommy@bimp.fr', null, $html);
+
+$obj = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', 1235290);
+
+    $mail = new BimpMail(null, 'test parent null', "tommy@bimp.frd, peter@bimp.fr,t.sauron@ldlc.com", null, 'le message');
+    $mail->send();
+
+die('ok');
+
+
+//require_once DOL_DOCUMENT_ROOT.'/bimpapple/classes/GSX_v2.php';
+//echo GSX_v2::phantomAuth();
 //$ret = $out = '';
 //
 //$connection = ssh2_connect('10.192.20.152', 22);

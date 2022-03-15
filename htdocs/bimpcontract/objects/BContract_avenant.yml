@@ -84,9 +84,6 @@ fields:
     added_month:
         label: Nombre de mois ajoutés au contrat
         type: int
-    label:
-        label: Libellé
-        type: string
 
 lists:
     default:
@@ -94,16 +91,10 @@ lists:
         title: Liste des avenant du contrat
         add_form_name: add
         delete_btn: 1
-        edit_btn: 1
-        edit_form: edit_label
         inline_view: avenant
         extra_btn:
             callback: getExtraBtn
         cols:
-            labelAvenant:
-                label: Libellé
-                value:
-                    callback: displayLabel
             ref:
                 label: Référence
                 value:
@@ -135,9 +126,6 @@ lists:
             coup: unset
                 
 forms:
-    edit_label:
-        rows:
-            - field: label
     delete_avenant:
         title: Supprimer l'avenant
         rows:
@@ -160,7 +148,6 @@ forms:
     add:
         title: Création d'un avenant
         rows:
-            - field: label
             - field: type
             - field: date_effect
               display_if:

@@ -23,3 +23,5 @@
 /TODO_romain.txt
 /.gitignore
 /htdocs/theme/eldy/style.css.php
+/*/views/js/*_tms_*.js
+/*/views/css/*_tms_*.css

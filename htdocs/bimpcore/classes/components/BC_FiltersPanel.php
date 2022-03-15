@@ -142,12 +142,9 @@ class BC_FiltersPanel extends BC_Panel
         $errors = array();
 
         foreach ($this->bc_filters as $filter_name => $bc_filter) {
-            $new_filters = array();
-            $filter_errors = $bc_filter->getSqlFilters($new_filters, $joins);
+            $filter_errors = $bc_filter->getSqlFilters($filters, $joins);
             if (count($filter_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($filter_errors, 'Filtre "' . $bc_filter->params['label'] . '"');
-            } else {
-                $filters = BimpTools::mergeSqlFilters($filters, $new_filters);
             }
         }
 

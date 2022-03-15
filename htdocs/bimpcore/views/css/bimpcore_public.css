@@ -5775,8 +5775,8 @@ readers do not read off random characters that represent icons */
   font-style: normal;
   font-weight: normal;
   font-display: auto;
-  src: url("../fonts/fa5_old/fa-brands-400.eot");
-  src: url("../fonts/fa5/fa-brands-400.eot?#iefix") format("embedded-opentype"), url("../fonts/fa5_old/fa-brands-400.woff2") format("woff2"), url("../fonts/fa5_old/fa-brands-400.woff") format("woff"), url("../fonts/fa5_old/fa-brands-400.ttf") format("truetype"), url("../fonts/fa5/fa-brands-400.svg#fontawesome") format("svg"); }
+  src: url("../fonts/fa5/fa-brands-400.eot");
+  src: url("../fonts/fa5/fa-brands-400.eot?#iefix") format("embedded-opentype"), url("../fonts/fa5/fa-brands-400.woff2") format("woff2"), url("../fonts/fa5/fa-brands-400.woff") format("woff"), url("../fonts/fa5/fa-brands-400.ttf") format("truetype"), url("../fonts/fa5/fa-brands-400.svg#fontawesome") format("svg"); }
 /* line 20, ../scss/fontawesome5/_fa-brands.scss */
 .fab {
   font-family: 'FA5B'; }
@@ -5790,8 +5790,8 @@ readers do not read off random characters that represent icons */
   font-style: normal;
   font-weight: 400;
   font-display: auto;
-  src: url("../fonts/fa5_old/fa-regular-400.eot");
-  src: url("../fonts/fa5/fa-regular-400.eot?#iefix") format("embedded-opentype"), url("../fonts/fa5_old/fa-regular-400.woff2") format("woff2"), url("../fonts/fa5_old/fa-regular-400.woff") format("woff"), url("../fonts/fa5_old/fa-regular-400.ttf") format("truetype"), url("../fonts/fa5/fa-regular-400.svg#fontawesome") format("svg"); }
+  src: url("../fonts/fa5/fa-regular-400.eot");
+  src: url("../fonts/fa5/fa-regular-400.eot?#iefix") format("embedded-opentype"), url("../fonts/fa5/fa-regular-400.woff2") format("woff2"), url("../fonts/fa5/fa-regular-400.woff") format("woff"), url("../fonts/fa5/fa-regular-400.ttf") format("truetype"), url("../fonts/fa5/fa-regular-400.svg#fontawesome") format("svg"); }
 /* line 20, ../scss/fontawesome5/_fa-regular.scss */
 .far {
   font-family: 'FA5R';
@@ -5806,8 +5806,8 @@ readers do not read off random characters that represent icons */
   font-style: normal;
   font-weight: 900;
   font-display: auto;
-  src: url("../fonts/fa5_old/fa-solid-900.eot");
-  src: url("../fonts/fa5/fa-solid-900.eot?#iefix") format("embedded-opentype"), url("../fonts/fa5_old/fa-solid-900.woff2") format("woff2"), url("../fonts/fa5_old/fa-solid-900.woff") format("woff"), url("../fonts/fa5_old/fa-solid-900.ttf") format("truetype"), url("../fonts/fa5/fa-solid-900.svg#fontawesome") format("svg"); }
+  src: url("../fonts/fa5/fa-solid-900.eot");
+  src: url("../fonts/fa5/fa-solid-900.eot?#iefix") format("embedded-opentype"), url("../fonts/fa5/fa-solid-900.woff2") format("woff2"), url("../fonts/fa5/fa-solid-900.woff") format("woff"), url("../fonts/fa5/fa-solid-900.ttf") format("truetype"), url("../fonts/fa5/fa-solid-900.svg#fontawesome") format("svg"); }
 /* line 20, ../scss/fontawesome5/_fa-solid.scss */
 .fas {
   font-family: 'FA5S';

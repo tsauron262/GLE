@@ -1,1 +1,0 @@
-ALTER TABLE `llx_bcontract_avenant` ADD `label` VARCHAR(255) DEFAULT NULL;

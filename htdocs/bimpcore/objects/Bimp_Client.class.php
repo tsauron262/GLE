@@ -776,7 +776,7 @@ class Bimp_Client extends Bimp_Societe
         return $total_unpaid;
     }
 
-    public function getTotalUnpayedTolerance($since = '2019-06-30', $euros_tolere = 2000, $day_tolere = 5)
+    public function getTotalUnpayedTolerance($since = '2019-06-30', $day_tolere = 14)
     {
         $factures = $this->getUnpaidFactures($since);
         $total_unpaid = 0;
@@ -798,7 +798,7 @@ class Bimp_Client extends Bimp_Societe
             }
         }
 
-        if ($has_retard or $euros_tolere < $total_unpaid)
+        if ($has_retard)
             return $total_unpaid;
 
         return 0;

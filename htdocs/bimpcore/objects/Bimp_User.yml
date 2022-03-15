@@ -15,13 +15,8 @@ header_list_name: default
 header_edit_form: card
 header_delete_btn: 1
 
-header_btn: 
-    callback: getActionsButtons
-
 list_page_url: 
     controller: users
-    params: 
-        tab: default
     
 name_syntaxe: <firstname> <lastname>
 nom_url: 
@@ -41,7 +36,7 @@ objects:
         instance:
             bimp_object:
                 module: bimpcore
-                name: Bimp_UserRight
+                name: Bimp_User_Rights
                 
     resp_user:
         relation: hasOne
@@ -281,24 +276,8 @@ forms:
                   items: 
                       0: Valide
                       1: Non valide
-                      
-    interface_params: 
-        title: Paramètres interface
-        rows: 
-            - custom: 1
-              label: Thème
-              input_name: MAIN_THEME
-              input: 
-                  type: select
-                  options: 
-                      eldy: Thème classique (Eldy)
-                      BimpTheme: Thème BIMP
-              value: 
-                  callback: 
-                      method: getUserParamValue
-                      params: 
-                          - MAIN_THEME
-                          - eldy
+#              value: 
+#                  array: 0,1,2
               
 fields_tables: 
     identity:
@@ -446,6 +425,7 @@ filters_panel:
             firstname: 
             lastname: 
             login: 
+                
         
 lists:
     bygroup:

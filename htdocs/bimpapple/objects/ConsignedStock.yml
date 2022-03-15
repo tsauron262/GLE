@@ -30,6 +30,8 @@ fields:
         required: 1
         values: 
             array: centres
+        default_value: 
+            callback: getDefaultCodeCentre
             
     part_number: 
         label: Réf. composant

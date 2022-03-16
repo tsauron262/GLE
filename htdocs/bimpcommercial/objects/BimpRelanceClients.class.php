@@ -275,8 +275,12 @@ class BimpRelanceClients extends BimpObject
 
     // Traitements:
 
-    public function sendEmails($force_send = false, &$warnings = array())
+    public function sendEmails($force_send = false, &$warnings = array(), $bds_process = null)
     {
+        if (!is_null($bds_process) && !is_a($bds_process, 'BDS_RelancesClientsProcess')) {
+            $bds_process = null;
+        }
+
         $errors = array();
 
         BimpObject::loadClass('bimpcore', 'BimpRelanceClientsLine');
@@ -288,10 +292,27 @@ class BimpRelanceClients extends BimpObject
             $line_warnings = array();
             $line_errors = $line->sendRelanceEmail($line_warnings, $force_send);
             if (count($line_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($line_errors, $line->getRelanceLineLabel());
+                $msg = BimpTools::getMsgFromArray($line_errors, $line->getRelanceLineLabel());
+                $errors[] = $msg;
+
+                if (!is_null($bds_process)) {
+                    $client = $line->getChildObject('client');
+                    $bds_process->Error($msg, $this, (BimpObject::objectLoaded($client) ? $client->getRef() : ''));
+                }
+            } else {
+                if (!is_null($bds_process)) {
+                    $client = $line->getChildObject('client');
+                    $bds_process->Success('Relance n°'. (int) $line->getData('relance_idx').': envoi e-mail OK', $this, (BimpObject::objectLoaded($client) ? $client->getRef() : ''));
+                }
             }
             if (count($line_warnings)) {
-                $warnings[] = BimpTools::getMsgFromArray($line_warnings, $line->getRelanceLineLabel());
+                $msg = BimpTools::getMsgFromArray($line_warnings, $line->getRelanceLineLabel());
+                $warnings[] = $msg;
+
+                if (!is_null($bds_process)) {
+                    $client = $line->getChildObject('client');
+                    $bds_process->Alert($msg, $this, (BimpObject::objectLoaded($client) ? $client->getRef() : ''));
+                }
             }
         }
 

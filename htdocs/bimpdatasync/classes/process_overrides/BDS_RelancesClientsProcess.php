@@ -12,7 +12,7 @@ class BDS_RelancesClientsProcess extends BDSProcess
         $client = BimpObject::getInstance('bimpcore', 'Bimp_Client');
         $clients = $client->getFacturesToRelanceByClients(true, null, array(), null, false, 'clients_list');
 
-        if (!empty($clients)) {
+        if (!empty($clients)) {            
             $this->setCurrentObjectData('bimpcommercial', 'BimpRelanceClients');
             $this->incProcessed();
 

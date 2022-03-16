@@ -40,7 +40,7 @@
             $this->export_class->create_daily_files();
             $this->files_for_ftp = $this->getFilesArrayForTranfert();
                         
-            if($this->export_payni)                                                     $this->export_class->exportPayInc();
+            if($this->export_payni && $this->export_class->moment == 'AM')              $this->export_class->exportPayInc();
             if($this->export_ventes)                                                    $this->export_class->exportFacture();
             if($this->export_paiements)                                                 $this->export_class->exportPaiement();
             if($this->export_achats)                                                    $this->export_class->exportFactureFournisseur();

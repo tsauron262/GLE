@@ -157,8 +157,8 @@
                         $structure['REF_LIBRE']             = sizing(($product->isLoaded()) ? $product->getRef() : 'Ligne ' . $line->id,35);
                         $ecriture .= implode('', $structure) . "\n";
                         
-                        if($current_montant > $montant_le_plus_grand) {
-                            $montant_le_plus_grand = $current_montant;
+                        if(abs($current_montant) > abs($montant_le_plus_grand)) {
+                            $montant_le_plus_grand = abs($current_montant);
                             $compte_le_plus_grand = $this->compte_general;
                         }
                         
@@ -222,7 +222,7 @@
             $is_facture = ($ttc_facture > 0) ? true : false;
             
             if($is_avoir) {
-                if($montant < 0) return 'D';
+                if($montant > 0) return 'D';
                 return 'C';
             }
             

@@ -231,13 +231,13 @@ function getTotalNoReadMessage() {
     global $user;
     $messages = BimpObject::getInstance('bimpcore', "BimpNote");
     
-    return count($messages->getList(["fk_user_dest" => $user->id, "viewed" => 0]));
+    return count($messages->getList(["fk_user_dest" => $user->id, "viewed" => 0, "auto" => 0]));
 }
 
 function displayNoReadMessages() {
     global $user;
     $messages = BimpObject::getInstance('bimpcore', "BimpNote");
-    $list = $messages->getList(["fk_user_dest" => $user->id, "viewed" => 0], 5);
+    $list = $messages->getList(["fk_user_dest" => $user->id, "viewed" => 0, "auto" => 0], 5);
   
     
     $html = "";

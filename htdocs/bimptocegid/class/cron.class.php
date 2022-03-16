@@ -23,13 +23,13 @@
         private $auto_paiements         = false;
         private $auto_achats            = false;
         private $auto_rib_mandats       = false;
-        private $auto_payni             = false;
+        private $auto_payni             = true;
         private $auto_importPaiement    = true;
         
         private $export_ventes          = true;
         private $export_paiements       = true;
         private $export_achats          = false;
-        private $export_payni           = false;
+        private $export_payni           = true;
         private $export_importPaiement  = true;
         
         public function automatique() {

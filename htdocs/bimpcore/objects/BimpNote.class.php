@@ -356,7 +356,7 @@ class BimpNote extends BimpObject
         $messages = array();
         $messages['id_current_user'] = (int) $id_user;
 
-        $conversations = $this->getMyNewConversations($id_max, true, 30);
+        $conversations = $this->getMyNewConversations($id_max, true, 30, null, false, false);
 
         foreach ($conversations as $c) {
             $note = null;
@@ -364,11 +364,11 @@ class BimpNote extends BimpObject
             if (!$c['lu'])
                 $note = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $c['idNoteRef']);
             else {
-                if ($c['obj']->id) {
+                if ($c['id_obj']) {
                     $sql = 'SELECT MAX(id) AS id_max';
                     $sql .= ' FROM `' . MAIN_DB_PREFIX . 'bimpcore_note`';
-                    $sql .= ' WHERE `obj_type` = "bimp_object" AND `obj_module` = "' . $c['obj']->module . '"';
-                    $sql .= ' AND `obj_name` = "' . $c['obj']->object_name . '" AND `id_obj` = ' . $c['obj']->id;
+                    $sql .= ' WHERE `obj_type` = "bimp_object" AND `obj_module` = "' . $c['obj_module'] . '"';
+                    $sql .= ' AND `obj_name` = "' . $c['obj_name'] . '" AND `id_obj` = ' . $c['id_obj'];
                     $res = $this->db->db->query($sql);
                     if ($res) {
                         $ln = $this->db->db->fetch_object($res);
@@ -399,15 +399,16 @@ class BimpNote extends BimpObject
                 $msg['is_viewed'] = (int) $c['lu'];
 
                 // Obj
-                $msg['obj']['nom_url'] = $c['obj']->getLink(array('external_link'=>0, 'modal_view'=>0));
-                if (method_exists($c['obj'], "getChildObject")) {
+                $msg['obj']['nom_url'] = BimpCache::getBimpObjectLink($c['obj_module'], $c['obj_name'], $c['id_obj'], array('external_link'=>0, 'modal_view'=>0));
+//                $msg['obj']['nom_url'] = $c['obj']->getLink(array('external_link'=>0, 'modal_view'=>0));
+              /*  if (method_exists($c['obj'], "getChildObject")) {//ne fonctionne pas sans objet. Et obet trop lourd.
                     $soc = $c['obj']->getChildObject("societe");
                     if (!$soc or!$soc->isLoaded())
                         $soc = $c['obj']->getChildObject("client");
 
                     if ($soc && $soc->isLoaded())
                         $msg['obj']['client_nom_url'] = $soc->getLink(array('external_link'=>0, 'modal_view'=>0));
-                }
+                }*/
 
                 // Author
                 $author = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $note->getData('user_create'));
@@ -653,8 +654,12 @@ class BimpNote extends BimpObject
                             $data['obj'] = BimpCache::getBimpObjectInstance($ln->obj_module, $ln->obj_name, $ln->id_obj);
                             $tabFils[] = $data;
                         }
-                        elseif(!$withObject)
+                        elseif(!$withObject){
+                            $data['obj_module'] = $ln->obj_module;
+                            $data['obj_name'] = $ln->obj_name;
+                            $data['id_obj'] = $ln->id_obj;
                             $tabFils[] = $data;
+                        }
                     }
                 }
             }

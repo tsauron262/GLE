@@ -4,7 +4,7 @@ class BimpRelanceClients extends BimpObject
 {
 
     public static $modes = array(
-        'cron' => array('label', 'Tâche planifiée', 'icon' => 'fas_clock'),
+        'cron'   => array('label' => 'Tâche planifiée', 'icon' => 'fas_clock'),
         'global' => array('label' => 'Globale', 'icon' => 'fas_users'),
         'indiv'  => array('label' => 'Individuelle', 'icon' => 'fas_user'),
         'free'   => array('label' => 'Libre', 'icon' => 'fas_pen')
@@ -254,7 +254,7 @@ class BimpRelanceClients extends BimpObject
                     if (!isset($status[$s])) {
                         $status[$s] = 0;
                     }
-                    $status[$s] ++;
+                    $status[$s]++;
                 }
 
                 foreach ($status as $s => $n) {

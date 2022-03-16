@@ -9849,7 +9849,6 @@ var options = {
         return (int) BimpCore::getConf("USE_ENTREPOT");
     }
     
-    
     public function getDefaultCodeCentre()
     {
         if (BimpTools::isSubmit('code_centre')) {

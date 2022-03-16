@@ -193,7 +193,7 @@ class Bimp_Societe extends BimpDolObject
 
         global $user;
 
-        return (int) ($user->admin || $user->login == 'jc.cannet');
+        return (int) ($user->admin || $user->login == 'jc.cannet' || $user->rights->commande->supprimer);
     }
 
     // Getters booléens: 
@@ -400,6 +400,25 @@ class Bimp_Societe extends BimpDolObject
 
         return DOL_URL_ROOT . '/' . $page . '.php?modulepart=societe&file=' . urlencode($file);
     }
+    
+    public function getFirstDateContrat() {
+         
+         if($this->isLoaded()) {
+                         
+             $sql = 'SELECT MIN(date_start) FROM llx_contrat_extrafields LEFT JOIN llx_contrat ON llx_contrat.rowid = llx_contrat_extrafields.fk_object WHERE llx_contrat.fk_soc = ' . $this->id;
+             $res = $this->db->executeS($sql, 'array');
+             return $res[0]['MIN(date_start)'];
+         }
+         
+         return date('Y-m-d');
+         
+    }
+    
+    public function getContratsList() {
+        
+        return BimpCache::getBimpObjectObjects('bimpcontract', 'BContract_contrat', ['fk_soc' => $this->id], 'id', 'desc');
+
+    }
 
     public function getActionsButtons()
     {
@@ -465,7 +484,7 @@ class Bimp_Societe extends BimpDolObject
             }
 
             if ($this->isLoaded()) {
-                if ($user->admin) {
+                //if ($user->admin) {
                     $buttons[] = array(
                         'label'   => 'Relevé interventions',
                         'icon'    => 'fas_clipboard-list',
@@ -475,7 +494,7 @@ class Bimp_Societe extends BimpDolObject
                             'form_name' => 'releverInter'
                         ))
                     );
-                }
+                //}
 
                 $buttons[] = array(
                     'label'   => 'Demander ' . ((int) $this->getData('status') ? ' dés' : '') . 'activation du compte',
@@ -1644,6 +1663,28 @@ class Bimp_Societe extends BimpDolObject
         }
 
         return $html;
+    }
+    
+    public function displayContratRefList() {
+        
+        $contrats   = $this->getContratsList();
+        $array      = [];
+        
+        if(count($contrats) > 0) {
+            
+            foreach($contrats as $contrat) {
+                if($contrat->getData('statut') != 0)
+                    
+                    $ref  = htmlentities ($contrat->getRef() . ' - ' . $contrat->displayData('statut'));
+                    $ref .= ($contrat->getData('label') ? ' - ' . $contrat->getData('label') : '');
+                
+                
+                    $array[$contrat->id] = $ref;
+            }
+            
+        }
+        
+        return $array;
     }
 
     public function displayCommercials($first = false, $link = true)

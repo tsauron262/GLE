@@ -1729,7 +1729,10 @@ class Bimp_CommandeFourn extends BimpComm
 
                                     if ($commFourn->getData('edi_status') != $statusCode) {
                                         $commFourn->updateField('edi_status', (int) $statusCode);
-                                        $commFourn->addNote('Changement de statut EDI : ' . static::$edi_status[(int) $statusCode]['label']);
+                                        if(isset(static::$edi_status[(int) $statusCode]))
+                                            $commFourn->addNote('Changement de statut EDI : ' . static::$edi_status[(int) $statusCode]['label']);
+                                        else
+                                            BimpCore::addlog ('Status commande LDLC inconue. Code : '.$statusCode);
                                     }
 
 

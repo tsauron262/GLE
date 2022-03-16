@@ -1026,7 +1026,7 @@ class BimpConfig
     protected function getBimpcoreConfValue($bimpcoreConf, $path)
     {
         if (is_string($bimpcoreConf)) {
-            return BimpCore::getConf($bimpcoreConf);
+           return BimpCore::getConf($bimpcoreConf);
         }
 
         return null;

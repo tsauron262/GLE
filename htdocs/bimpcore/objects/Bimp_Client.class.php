@@ -525,7 +525,7 @@ class Bimp_Client extends Bimp_Societe
         $id_inc_entrepot = 0;
         $id_excl_entrepot = 0;
 
-        if (empty($allowed_clients) && !$this->isLoaded() && $display_mode !== 'all') {
+        if (empty($allowed_clients) && !$this->isLoaded() && !in_array($display_mode, array('all', 'clients_list'))) {
             if (preg_match('/^(.+)_WITHOUT_(\d+)$/', $display_mode, $matches)) {
                 $display_mode = $matches[1];
                 $id_excl_entrepot = (int) $matches[2];
@@ -537,6 +537,7 @@ class Bimp_Client extends Bimp_Societe
 
         BimpTools::loadDolClass('compta/facture', 'facture');
         $now = date('Y-m-d');
+        $joins = array();
 
         $where = 'a.type IN (' . Facture::TYPE_STANDARD . ',' . Facture::TYPE_DEPOSIT . ',' . Facture::TYPE_CREDIT_NOTE . ') AND a.paye = 0 AND a.fk_statut = 1 AND a.date_lim_reglement < \'' . $now . '\'';
         $where .= ' AND a.relance_active = 1';
@@ -585,9 +586,18 @@ class Bimp_Client extends Bimp_Societe
             $where .= ' AND fef.entrepot != ' . $id_excl_entrepot;
         }
 
-        $joins = array();
+        if ($display_mode == 'clients_list') {
+            $where .= ' AND s.relances_actives = 1';
+
+            $joins['s'] = array(
+                'table' => 'societe',
+                'alias' => 's',
+                'on'    => 's.rowid = a.fk_soc'
+            );
+        }
+
         if ($id_inc_entrepot || $id_excl_entrepot) {
-            $joins[] = array(
+            $joins['fef'] = array(
                 'table' => 'facture_extrafields',
                 'alias' => 'fef',
                 'on'    => 'fef.fk_object = a.rowid'
@@ -603,6 +613,12 @@ class Bimp_Client extends Bimp_Societe
             $excluded_modes_reglement = explode(',', BimpCore::getConf('relance_paiements_globale_excluded_modes_reglement', ''));
 
             foreach ($rows as $r) {
+                if ($display_mode === 'clients_list') {
+                    if (in_array((int) $r['fk_soc'], $clients)) {
+                        continue;
+                    }
+                }
+
                 if (!is_null($allowed_factures) && !in_array((int) $r['rowid'], $allowed_factures)) {
                     continue;
                 }
@@ -612,7 +628,14 @@ class Bimp_Client extends Bimp_Societe
                     continue;
                 }
 
-                $client_relances_actives = (int) $client->getData('relances_actives');
+                if ($display_mode === 'clients_list') {
+                    if (!(int) $client->getData('relances_actives')) {
+                        continue;
+                    }
+                }
+
+                if ($display_mode === '')
+                    $client_relances_actives = (int) $client->getData('relances_actives');
 
                 if ($display_mode !== 'all') {
                     if ($display_mode === 'relancables' && !$client_relances_actives) {
@@ -626,7 +649,27 @@ class Bimp_Client extends Bimp_Societe
 
                 $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['rowid']);
                 if (BimpObject::objectLoaded($fac)) {
+                    $dates = $fac->getRelanceDates($relance_delay);
+                    if ($to_process_only && (!$dates['next'] || $dates['next'] > $now)) {
+                        continue;
+                    }
+
+                    $nb_relances = (int) $fac->getData('nb_relance');
+                    $relance_idx = $nb_relances + 1;
+
+                    if ($relance_idx > self::$max_nb_relances) {
+                        continue;
+                    }
+
                     $fac->checkIsPaid();
+
+                    if ($display_mode === 'clients_list') {
+                        if ((float) $fac->getData('remain_to_pay') > 0) {
+                            $clients[] = (int) $r['fk_soc'];
+                        }
+                        continue;
+                    }
+
                     $remainToPay = $fac->getRemainToPay();
 
                     if ($remainToPay > 0) {
@@ -639,14 +682,6 @@ class Bimp_Client extends Bimp_Societe
                                 'paiements_inc'       => $client->getTotalPaiementsInconnus(),
                                 'relances'            => array()
                             );
-                        }
-
-                        $nb_relances = (int) $fac->getData('nb_relance');
-                        $relance_idx = $nb_relances + 1;
-                        $dates = $fac->getRelanceDates($relance_delay);
-
-                        if ($to_process_only && (!$dates['next'] || $dates['next'] > $now)) {
-                            continue;
                         }
 
                         if (!isset($clients[(int) $r['fk_soc']]['relances'][$relance_idx])) {
@@ -2119,7 +2154,7 @@ class Bimp_Client extends Bimp_Societe
 
     // Traitements:
 
-    public function relancePaiements($clients = array(), $mode = 'global', &$warnings = array(), &$pdf_url = '', $date_prevue = null, $send_emails = true, $bds_process = null)
+    public function relancePaiements($clients = array(), $mode = 'global', &$warnings = array(), &$pdf_url = '', $date_prevue = null, $send_emails = true, $bds_process = null, &$id_relance = null)
     {
         $errors = array();
 
@@ -2131,16 +2166,10 @@ class Bimp_Client extends Bimp_Societe
             $bds_process = null;
         }
 
-        if (empty($clients) && $mode == 'cron') {
-            // Si liste de factures clients non fournie et si mode cron, on récup la liste complète des factures à relancer. 
-            $clients = $this->getFacturesToRelanceByClients(true, null, array(), null, false, 'all');
-            
-            echo '<pre>';
-            print_r($clients);
-            exit;
+        if ($mode == 'cron') {
+            $clients = $this->getFacturesToRelanceByClients(true, null, $clients, null, false, 'all');
+            $bds_process->DebugData($clients, 'Données clients');
         }
-        
-        die('la');
 
         if (empty($clients)) {
             $errors[] = 'Aucune relance à effectuer';
@@ -2153,22 +2182,30 @@ class Bimp_Client extends Bimp_Societe
             $now = date('Y-m-d');
 
             // Création de la relance:
-            if (!is_null($bds_process)) {
-                $bds_process->setCurrentObjectData('bimpcommercial', 'BimpRelanceClients');
-                $bds_process->incProcessed();
+            if (!is_null($id_relance)) {
+                $relance = BimpCache::getBimpObjectInstance('bimpcommercial', 'BimpRelanceClients', $id_relance);
             }
 
-            $relance = BimpObject::createBimpObject('bimpcommercial', 'BimpRelanceClients', array(
-                        'id_user'     => (BimpObject::objectLoaded($user) ? (int) $user->id : 1),
-                        'date'        => date('Y-m-d H:i:s'),
-                        'mode'        => $mode,
-                        'date_prevue' => $date_prevue
-                            ), true, $errors, $warnings);
-
-            if (BimpObject::objectLoaded($relance)) {
+            if (!BimpObject::objectLoaded($relance)) {
                 if (!is_null($bds_process)) {
+                    $bds_process->setCurrentObjectData('bimpcommercial', 'BimpRelanceClients');
+                    $bds_process->incProcessed();
+                }
+
+                $relance = BimpObject::createBimpObject('bimpcommercial', 'BimpRelanceClients', array(
+                            'id_user'     => (BimpObject::objectLoaded($user) ? (int) $user->id : 1),
+                            'date'        => date('Y-m-d H:i:s'),
+                            'mode'        => $mode,
+                            'date_prevue' => $date_prevue
+                                ), true, $errors, $warnings);
+
+                if (BimpObject::objectLoaded($relance) && !is_null($bds_process)) {
                     $bds_process->incCreated();
                 }
+            }
+
+            if (BimpObject::objectLoaded($relance)) {
+                $id_relance = $relance->id;
                 $acomptes = array();
 
                 $n = 0;
@@ -2351,15 +2388,15 @@ class Bimp_Client extends Bimp_Societe
                 }
 
                 if ($date_prevue == $now) {
-//                    if ($send_emails) {
-//                        // Envoi des emails: 
-//                        $mail_warnings = array();
-//                        $mail_errors = $relance->sendEmails(false, $mail_warnings, $bds_process);
-//                        $mail_errors = array_merge($mail_errors, $mail_warnings);
-//                        if (count($mail_errors)) {
-//                            $warnings[] = BimpTools::getMsgFromArray($mail_errors, 'Erreurs lors de l\'envoi des emails de relance');
-//                        }
-//                    }
+                    if ($send_emails) {
+                        // Envoi des emails: 
+                        $mail_warnings = array();
+                        $mail_errors = $relance->sendEmails(false, $mail_warnings, $bds_process);
+                        $mail_errors = array_merge($mail_errors, $mail_warnings);
+                        if (count($mail_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($mail_errors, 'Erreurs lors de l\'envoi des emails de relance');
+                        }
+                    }
                     // Génération des PDF à envoyer par courrier: 
                     $pdf_warnings = array();
                     $pdf_errors = $relance->generateRemainToSendPdf($pdf_url, $pdf_warnings);

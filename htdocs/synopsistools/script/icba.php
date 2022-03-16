@@ -26,7 +26,7 @@ foreach($files1 as $fichier)
                 echo 'erreur siren introuvable '.$siren;
             else{
                 while($ln = $db->fetch_object($sql)){
-                    $db->query("UPDATE llx_societe SET date_atradius = '2021-01-01' WHERE rowid = ".$ln->rowid);
+                    $db->query("UPDATE llx_societe SET date_depot_icba = '2021-01-01' WHERE rowid = ".$ln->rowid);
     //                die(DOL_DATA_ROOT.'/societe/'.$ln->rowid.'/'.$fichier);
                     $new_dir = DOL_DATA_ROOT.'/societe/'.$ln->rowid.'/';
                     if(!is_dir($new_dir))

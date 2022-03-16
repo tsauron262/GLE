@@ -473,7 +473,15 @@ fields:
         default_value: -1
         input:
             help: -1 = aucun demande<br/>Saisir O si encours refusé
-     
+
+    date_atradius: 
+        label: Date d'expiration de la couverture Atradius
+        type: datetime
+
+    date_rappel_atradius: 
+        label: Date rappel expiration de la couverture Atradius
+        type: datetime
+        
     outstanding_limit_icba:
         label: Limite de crédit ICBA 
         type: money
@@ -482,7 +490,7 @@ fields:
         input:
             help: -1 = aucun demande<br/>Saisir O si encours refusé
         
-    date_atradius:
+    date_depot_icba:
         label: Date de dépôt du Rapport
         type: datetime
         
@@ -811,6 +819,8 @@ fields_tables:
             - field: outstanding_limit_credit_check
               edit: 1
             - field: outstanding_limit_atradius
+              edit: 1
+            - field: date_atradius
               edit: 1
  
     contact: 

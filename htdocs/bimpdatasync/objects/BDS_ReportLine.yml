@@ -51,6 +51,7 @@ lists:
         icon: fas_comment
         configurable: 1
         filters_panel: default
+        filters_panel_open: 1
         before_list_callback: renderBeforeListContent
         sort_field: id
         sort_way: desc

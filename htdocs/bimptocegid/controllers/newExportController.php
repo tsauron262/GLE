@@ -39,6 +39,7 @@ class newExportController extends BimpController {
                         $data['amount'] = $res[0]['price'];
                         $data['num']    = $res[0]['num'];
                         $data['date']   = $res[0]['date'];
+                        $data['name']   = $res[0]['name'];
                         $ecriture = $tra_constructor->constructTRA($data);
                         $opened_file = fopen($file, 'a+');
                         fwrite($opened_file, $ecriture);

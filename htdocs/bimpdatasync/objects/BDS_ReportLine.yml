@@ -32,11 +32,25 @@ lists_cols:
         display: alert
         min_width: 350
         
+filters_panels: 
+    default: 
+        filters: 
+            id_report: 
+            type: 
+            ref: 
+            msg: 
+                
+    report: 
+        extends: default
+        filters: 
+            id_report: unset
+            
 lists: 
     default: 
         title: Notifications
         icon: fas_comment
         configurable: 1
+        filters_panel: default
         before_list_callback: renderBeforeListContent
         sort_field: id
         sort_way: desc
@@ -52,6 +66,7 @@ lists:
     report: 
         extends: default
         configurable: 0
+        filters_panel: report
         cols: 
             id_report: unset
             

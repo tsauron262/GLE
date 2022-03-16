@@ -30,6 +30,12 @@ objects:
             bimp_object: 
                 module: bimpcommercial
                 name: BimpRelanceClientsLine
+                
+    relances_report: 
+        instance: 
+            bimp_object: 
+                module: bimpdatasync
+                name: BDS_Report
             
     suivi_rec: 
         instance: 
@@ -48,6 +54,7 @@ objects:
             bimp_object: 
                 module: bimpcore
                 name: Bimp_SocBankAccount
+                
     stats:
         instance:
             bimp_object: 
@@ -104,6 +111,13 @@ sections:
                   - type: list
                     list: 
                         object: relance_lines
+          relances_reports: 
+              label: Rapports relances auto
+              sections: 
+                  - type: list
+                    list: 
+                        name: relances_clients
+                        object: relances_report
           suivis_recouvrement: 
               label: Suivis recouvrements
               sections: 

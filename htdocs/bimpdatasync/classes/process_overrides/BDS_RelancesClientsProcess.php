@@ -60,7 +60,7 @@ class BDS_RelancesClientsProcess extends BDSProcess
 
             $warnings = array();
             $pdf_url = '';
-            $errors = $client->relancePaiements($this->references, 'cron', $warnings, $pdf_url, null, false, $this, $id_relance);
+            $errors = $client->relancePaiements($this->references, 'cron', $warnings, $pdf_url, null, true, $this, $id_relance);
         }
 
         return array();

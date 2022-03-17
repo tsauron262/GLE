@@ -231,6 +231,7 @@ class AbstractNotification {
     }
     
     formatDate(input) {
+        input = input.replace('-', '/').replace('-', '/');
         var m = new Date(input);
         return  ("0" + m.getDate()).slice(-2) + "/" +
                 ("0" + (m.getMonth()+1)).slice(-2) + "/" +

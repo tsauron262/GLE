@@ -43,6 +43,9 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
     public function addLogo(&$pdf, $size) {
         global $conf;
         $logo = $conf->mycompany->dir_output . '/logos/' . $this->emetteur->logo;
+        $testFile = str_replace(array(".jpg", ".png"), "_PRO.png", $logo);
+        if (is_file($testFile))
+            $logo = $testFile;
         if(is_file($logo)) {
             $pdf->Image($logo, 0, 10, 0, $size, '', '', '', false, 250, 'L');
         }

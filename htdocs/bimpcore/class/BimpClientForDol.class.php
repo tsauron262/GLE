@@ -136,11 +136,6 @@ class BimpClientForDol extends Bimp_Client{
                         BimpNote::BIMP_NOTE_MEMBERS, 0, 1, '',BimpNote::BN_AUTHOR_USER,
                         BimpNote::BN_DEST_USER, (int) $commercial->id)));
                 
-                // Email
-                $msg_mail = "Bonjour " . $commercial->getData('firstname') . ',<br/>';
-                $msg_mail .= $msg . '<br/>' . $c->getNomUrl();
-                mailSyn2("La couverture Atradius expire " . $c->getData('code_client'), $commercial->getData('email'), null, $msg_mail);
-
                 $c->updateField('date_rappel_atradius', date('Y-m-d h:i:s'));
                 $this->output .= $msg . '<br/>';
                 $nb_rappels++;

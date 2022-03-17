@@ -3749,7 +3749,7 @@ class Societe extends CommonObject
 					$paiement = $tmpobject->getSommePaiement();
 					$creditnotes = $tmpobject->getSumCreditNotesUsed();
 					$deposits = $tmpobject->getSumDepositsUsed();
-					$outstandingOpened+=$obj->total_ttc - $paiement - $creditnotes - $deposits;
+					$outstandingOpened+=$obj->total_ht - $paiement - $creditnotes - $deposits;
 				}
 			}
 			return array('opened'=>$outstandingOpened, 'total_ht'=>$outstandingTotal, 'total_ttc'=>$outstandingTotalIncTax);	// 'opened' is 'incl taxes'

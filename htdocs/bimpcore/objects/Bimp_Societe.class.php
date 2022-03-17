@@ -1229,7 +1229,7 @@ class Bimp_Societe extends BimpDolObject
                                 $facs_status[$id_facture] = (int) $this->db->getValue('facture', 'fk_statut', 'rowid = ' . $id_facture);
                             }
 
-                            if (in_array($facs_status[$id_facture], array(1, 2))) {
+                            if (in_array($facs_status[$id_facture], array(1, 2)) || $id_facture == -1) {
                                 $qty_billed += (float) $data['qty'];
                             }
                         }
@@ -1237,14 +1237,14 @@ class Bimp_Societe extends BimpDolObject
                 }
 
                 if ($full_qty - $qty_billed) {
-                    $pu_ttc = $r['subprice'];
+                    $pu = $r['subprice'];
 
                     if ($r['remise_percent']) {
-                        $pu_ttc -= ($pu_ttc * ($r['remise_percent'] / 100));
+                        $pu -= ($pu * ($r['remise_percent'] / 100));
                     }
 
-                    $pu_ttc *= (1 + ($r['tva_tx'] / 100));
-                    $encours += (($full_qty - $qty_billed) * $pu_ttc);
+//                    $pu *= (1 + ($r['tva_tx'] / 100));//PASSAGE EN HT
+                    $encours += (($full_qty - $qty_billed) * $pu);
                 }
             }
         }

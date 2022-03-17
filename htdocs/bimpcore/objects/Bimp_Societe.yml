@@ -789,7 +789,7 @@ fields_tables:
                   callback: iAmAdmin
                   
     encours: 
-        title: Encours
+        title: Encours HT
         icon: fas_search-dollar
         show: 
             callback: isClient

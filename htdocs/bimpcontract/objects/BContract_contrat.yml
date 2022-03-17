@@ -622,22 +622,22 @@ lists:
             ref:
             objet_contrat:
             signed:
-            datec:
+#            datec:
             statut:
-            entrepot:
+#            entrepot:
             fk_soc:
-            nb_renouvellement:
-                label: Renouvellement
-                value:
-                    callback: displayNumberRenouvellement
+#            nb_renouvellement:
+#                label: Renouvellement
+#                value:
+#                    callback: displayNumberRenouvellement
             date_start:
-            date_fin_contrat:
-                label: Date de fin
-                value: 
-                    callback: displayRealEndDate
-            fk_user_author:
+#            date_fin_contrat:
+#                label: Date de fin
+#                value: 
+#                    callback: displayRealEndDate
+#            fk_user_author:
             fk_commercial_suivi:
-            fk_commercial_signature:
+#            fk_commercial_signature:
             commercialclient:
 
     client:

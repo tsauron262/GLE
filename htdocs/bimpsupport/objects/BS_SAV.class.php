@@ -2479,7 +2479,7 @@ class BS_SAV extends BimpObject
                                 }
                             } elseif ((int) $stock->getData('qty') > 0) {
                                 $input = 'Qté disponible: ' . $stock->getData('qty') . '<br/>';
-                                $input .= BimpInput::renderInput('toggle', 'from_consigned_stock_' . $part->id, 0, array(
+                                $input .= BimpInput::renderInput('toggle', 'from_consigned_stock_' . $part->id, 1, array(
                                             'extra_class' => 'from_consigned_stock_check'
                                 ));
                             }

@@ -81,7 +81,7 @@
 
             $instance = BimpCache::getBimpObjectInstance('bimpfinanc', 'Bimp_ImportPaiementLine');
             
-            $list = $instance->getList(['exported' => 0, 'infos' => Array('in' => Array('C2BO', 'YOUNITED', 'ONEY'))]);
+            $list = $instance->getList(['exported' => 0, 'infos' => Array('in' => Array('C2BO'/*, 'YOUNITED', 'ONEY'*/))]);
             if(count($list) > 0) {
                 foreach($list as $import) {
                     $instance->fetch($import['id']);

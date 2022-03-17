@@ -384,6 +384,11 @@ class Bimp_Commande extends BimpComm
                             if (stripos($contactObj->email, "@") < 1) {
                                 $errors[] = 'Le contact facturation "' . $contactObj->getFullName($langs) . '" n\'a pas d\'email';
                             }
+                            if (stripos($contactObj->email, "chorusolys@bimp.fr") !== false) {
+                                $errors[] = 'Le contact facturation "chorusolys@bimp.fr" ne doit plus être utilisé.
+\nLe remplacer par le contact client facturation qui deviendra également par défaut le contact relance de paiement
+\nNB : si ces interlocuteurs sont différents, utiliser les champs prévus à cet effet';
+                            }
                         }
                     }
                 }

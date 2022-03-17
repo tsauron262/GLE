@@ -628,8 +628,8 @@ class Bimp_Societe extends BimpDolObject
 
                 $sc_alias = $main_alias . '___soc_commercial';
                 $joins[$sc_alias] = array(
-                    'alias' => 'soc_commercial',
-                    'table' => $sc_alias,
+                    'alias' => $sc_alias,
+                    'table' => 'societe_commerciaux',
                     'on'    => $main_alias . '.rowid = ' . $sc_alias . '.fk_soc'
                 );
 
@@ -639,9 +639,9 @@ class Bimp_Societe extends BimpDolObject
 
                 if (!empty($ids)) {
                     if (!$excluded) {
-                        $sql = 'soc_commercial.fk_user IN (' . implode(',', $ids) . ')';
+                        $sql = $sc_alias.'.fk_user IN (' . implode(',', $ids) . ')';
                     } else {
-                        $sql = '(' . $nbCommerciaux . ' AND sc.fk_user IN (' . implode(',', $ids) . ')) = 0';
+                        $sql = '(' . $nbCommerciaux . ' AND '.$sc_alias.'.fk_user IN (' . implode(',', $ids) . ')) = 0';
                     }
                 }
 

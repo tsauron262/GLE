@@ -750,7 +750,7 @@ class Bimp_Facture extends BimpComm
                         $errors[] = 'Le statut actuel ' . $this->getLabel('of_this') . ' ne permet pas cette opération';
                     } elseif (!$this->field_exists('chorus_status')) {
                         $errors[] = 'Le champ "Statut chorus" n\'est pas paramétré pour les factures';
-                    } elseif (!in_array((int) $this->getData('chorus_status'), array(-1, 0))) {
+                    } elseif (!in_array((int) $this->getData('chorus_status'), array(-1, 0, 1))) {
                         $errors[] = ucfirst($this->getLabel('this')) . ' n\'est pas en attente d\'export vers Chorus' . (int) $this->getData('chorus_status');
                     } else {
                         $client = $this->getChildObject('client');
@@ -967,7 +967,7 @@ class Bimp_Facture extends BimpComm
         // Export Chorus:
         if ($this->isActionAllowed('exportToChorus') && $this->canSetAction('exportToChorus')) {
             $buttons[] = array(
-                'label'   => 'Exporter vers Chorus',
+                'label'   => 'Exporter PDF vers Chorus',
                 'icon'    => 'fas_file-export',
                 'onclick' => $this->getJsActionOnclick('exportToChorus', array(), array(
                     'confirm_msg' => 'Veuillez confirmer l\\\'envoi du fichier PDF vers Chorus'

@@ -12,7 +12,7 @@ class BDS_RelancesClientsProcess extends BDSProcess
         $client = BimpObject::getInstance('bimpcore', 'Bimp_Client');
         $clients = $client->getFacturesToRelanceByClients(true, null, array(), null, false, 'clients_list');
 
-        if (!empty($clients)) {
+        if (!empty($clients)) {            
             $this->setCurrentObjectData('bimpcommercial', 'BimpRelanceClients');
             $this->incProcessed();
 
@@ -60,7 +60,7 @@ class BDS_RelancesClientsProcess extends BDSProcess
 
             $warnings = array();
             $pdf_url = '';
-            $errors = $client->relancePaiements($this->references, 'cron', $warnings, $pdf_url, null, false, $this, $id_relance);
+            $errors = $client->relancePaiements($this->references, 'cron', $warnings, $pdf_url, null, true, $this, $id_relance);
         }
 
         return array();

@@ -1476,7 +1476,13 @@ class Bimp_Client extends Bimp_Societe
             case 'relances':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'BimpRelanceClientsLine'), 'client', 1, null, 'Relances de paiement du client "' . $client_label . '"', 'fas_comment-dollar');
                 $list->addFieldFilterValue('id_client', (int) $this->id);
-                break;
+                $html .= $list->renderHtml();
+
+                $reportLine = BimpObject::getInstance('bimpdatasync', 'BDS_ReportLine');
+                $list = new BC_ListTable($reportLine, 'default', 1, null, 'Rapports des relances auto', 'fas_file-alt');
+                $list->addFieldFilterValue('ref', $this->getRef());
+                $html .= $list->renderHtml();
+                return $html;
 
             case 'tickets':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpsupport', 'BS_Ticket'), 'client_admin', 1, null, 'Tickets hotline du client "' . $client_label . '"', 'fas_headset');

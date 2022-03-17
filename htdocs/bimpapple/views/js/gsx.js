@@ -141,7 +141,7 @@ function gsx_loadRequestModalForm($button, title, requestName, data, params) {
 
     data.requestName = requestName;
 
-    if (requestName === 'repairCreate') {
+    if (requestName === 'repairCreate' && typeof (data.repairType) === 'undefined') {
         var $repairForm = $('#createRepairForm');
         if ($.isOk($repairForm)) {
             data.repairType = $repairForm.find('[name="repairType"]').val();
@@ -349,7 +349,7 @@ function gsx_loadAddPartsForm($button, id_issue) {
     });
 }
 
-function gsx_loadAddPartsTestForm($button, serial,  isIphone) {
+function gsx_loadAddPartsTestForm($button, serial, isIphone) {
     if ($.isOk($button) && $button.hasClass('disabled')) {
         return;
     }
@@ -833,9 +833,82 @@ function gsx_addAppleShipmentSelectedParts($button, id_shipment) {
     });
 }
 
+function gsx_LoadRepairConsignedStockForm($button, id_sav, serial) {
+    if ($.isOk($button) && $button.hasClass('disabled')) {
+        return;
+    }
+
+    var data = {
+        'id_sav': id_sav,
+        'serial': serial
+    };
+
+    var $repairForm = $('#createRepairForm');
+    if ($.isOk($repairForm)) {
+        data.repairType = $repairForm.find('[name="repairType"]').val();
+        if (!data.repairType) {
+            bimp_msg('Veuillez sélectionner un type de réparation', 'warning', null, true);
+            return;
+        }
+        data.coverageOption = $repairForm.find('[name="coverageOption"]').val();
+        data.consumerLaw = $repairForm.find('[name="consumerLaw"]').val();
+    }
+
+    loadModalForm($button, {
+        'module': 'bimpsupport',
+        'object_name': 'BS_SAV',
+        'id_object': id_sav,
+        'form_name': 'parts_consigned_stock'
+    }, 'Gestion du stock consigné', function ($form) {
+        if ($.isOk($form)) {
+            var modal_idx = parseInt($form.data('modal_idx'));
+            if (!modal_idx) {
+                bimp_msg('Erreur technique: index de la modale absent', 'danger', null, true);
+                return;
+            }
+
+            bimpModal.$footer.find('.save_object_button.modal_' + modal_idx).remove();
+            bimpModal.$footer.find('.objectViewLink.modal_' + modal_idx).remove();
+            bimpModal.addButton('Valider<i class="fa fa-arrow-circle-right iconRight"></i>', '', 'primary', 'set_action_button', modal_idx);
+            bimpModal.$footer.find('.set_action_button.modal_' + modal_idx).click(function () {
+                var parts = {};
+
+                $form.find('input.from_consigned_stock_check').each(function () {
+                    if (parseInt($(this).val())) {
+                        var id_part = parseInt($(this).findParentByClass('part_row').data('id_part'));
+
+                        if (id_part && !isNaN(id_part)) {
+                            parts[id_part] = 1;
+                        }
+                    }
+                });
+
+                $form.find('select.from_consigned_stock_serial').each(function () {
+                    var id_part = parseInt($(this).findParentByClass('part_row').data('id_part'));
+
+                    if (id_part && !isNaN(id_part)) {
+                        var serial = $(this).val();
+
+                        if (serial && serial !== 'none') {
+                            parts[id_part] = {'serial': serial};
+                        }
+                    }
+                });
+
+                data.parts_cs_data = parts;
+
+                setTimeout(function () {
+                    gsx_loadRequestModalForm($button, 'Création d\'une nouvelle réparation', 'repairCreate', data, {});
+                }, 500);
+            });
+        }
+    });
+}
+
 // GSX V1 / V2:
 
 var PM = [];
+
 function PartsManager(sufixe) {
     var ptr = this;
     this.sufixe = sufixe;
@@ -899,7 +972,7 @@ function PartsManager(sufixe) {
         var $result = this.$container.find('.partsSearchResult');
         var search = this.$container.find('.searchPartInput').val();
         if (!search) {
-            bimp_msg('Veuillez entrer un code produit'+ search, 'danger', null, true);
+            bimp_msg('Veuillez entrer un code produit' + search, 'danger', null, true);
             return;
         }
         if (!/[a-zA-Z0-9\-\_ ]+$/.test(search)) {

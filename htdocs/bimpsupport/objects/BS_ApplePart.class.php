@@ -31,8 +31,7 @@ class BS_ApplePart extends BimpObject
         'F' => 'iPad',
         'W' => 'Watch'
     );
-    
-    
+    public static $partsWithNonIssue = array('011-00212', '011-00214', '011-00213');
     public static $refLiee = array(array(array(
         "661-08937",
         "661-08932",
@@ -152,12 +151,18 @@ class BS_ApplePart extends BimpObject
 
     public function isFieldEditable($field, $force_edit = false)
     {
-        if (in_array($field, array('qty', 'stock_price', 'exchange_price', 'out_of_warranty', 'price_type', 'not_invoiced'))) {
+        if (in_array($field, array(/*'qty', */'stock_price', 'exchange_price', 'out_of_warranty', 'price_type', 'not_invoiced'))) {
             return (int) $this->isPropalEditable();
         }
         return (int) parent::isFieldEditable($field, $force_edit);
     }
 
+    public function isConsignedStockAllowed()
+    {
+        $issue = $this->getChildObject('issue');
+        return (int) !((BimpObject::objectLoaded($issue) && $issue->isTierPart()) || in_array($this->getData('part_number'), self::$partsWithNonIssue));
+    }
+    
     // Getters array: 
 
     public static function getCompTIACodes()
@@ -659,7 +664,7 @@ class BS_ApplePart extends BimpObject
                     $type = self::getCategProdApple($this->getData('part_number'), $this->getData('label'));
 
                     $line->desc = $label;
-                    $line->qty = (int) $this->getData('qty');
+                    $line->qty = 1; //(int) $this->getData('qty');
                     $line->tva_tx = 20;
 
                     $this->setPropalLinePrices($line);
@@ -784,7 +789,7 @@ class BS_ApplePart extends BimpObject
                         $label .= ' APPRO';
                     }
                     $line->desc = $label;
-                    $line->qty = (int) $this->getData('qty');
+                    $line->qty = 1;//(int) $this->getData('qty');
                     $line->tva_tx = 20;
 
                     $this->setPropalLinePrices($line);

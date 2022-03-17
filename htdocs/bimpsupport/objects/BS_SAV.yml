@@ -911,6 +911,14 @@ forms:
         rows: 
             - field: id_contact
               label: Contact signataire
+              
+    parts_consigned_stock: 
+        rows: 
+            - custom: 1
+              label: Composants
+              input_name: parts
+              content: 
+                  callback: renderPartsConsignedStockDataForm
         
 fields_tables: 
     infos: 

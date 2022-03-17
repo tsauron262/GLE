@@ -43,12 +43,12 @@ fields:
         values: 
             array: comptia_modifiers
         default_value: A
-    qty: 
-        label: Quantité
-        type: qty
-        unsigned: 1
-        min: 1
-        default_value: 1
+#    qty: 
+#        label: Quantité
+#        type: qty
+#        unsigned: 1
+#        min: 1
+#        default_value: 1
     component_code: 
         label: Code pièce
         values: 
@@ -106,8 +106,8 @@ fields_tables:
             - field: part_number
             - field: new_part_number
             - field: label
-            - field: qty
-              edit: 1
+#            - field: qty
+#              edit: 1
             - field: price_type
               edit: 1
             - field: out_of_warranty
@@ -158,10 +158,10 @@ lists:
             comptia_modifier: 
                 max_width: 180
                 edit: 1
-            qty: 
-                label: Qté
-                edit: 
-                    callback: isCartEditable
+#            qty: 
+#                label: Qté
+#                edit: 
+#                    callback: isCartEditable
             out_of_warranty: 
                 edit: 
                     callback: isCartEditable
@@ -193,10 +193,10 @@ lists:
                 label: Nom
             part_number: 
                 label: Réf.
-            qty: 
-                label: Qté
-                edit: 
-                    callback: isCartEditable
+#            qty: 
+#                label: Qté
+#                edit: 
+#                    callback: isCartEditable
             out_of_warranty: 
                 edit: 
                     callback: isCartEditable

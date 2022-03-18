@@ -1,6 +1,15 @@
 table: bimp_relance_clients
 common_fields: 0
 
+controller: relance_clients
+
+header_list_name: default
+list_page_url: 
+    module: bimpcore
+    controller: clients
+    url_params: 
+        tab: relances
+    
 labels: 
     name: relance clients
     name_plur: relances clients
@@ -127,6 +136,7 @@ lists:
             callback: getListExtraHeaderButtons
         edit_btn: 1
         edit_form: edit
+        page_btn: 1
         cols: 
             id_user: 
             date:

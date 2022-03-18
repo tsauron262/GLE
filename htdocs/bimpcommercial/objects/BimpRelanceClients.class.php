@@ -273,6 +273,50 @@ class BimpRelanceClients extends BimpObject
         return '';
     }
 
+    // Rendus HTML: 
+
+    public function renderPageView()
+    {
+        if (!$this->isLoaded()) {
+            return BimpRender::renderAlerts('ID de la relance absent absent');
+        }
+
+        $tabs = array();
+
+        $tabs[] = array(
+            'id'      => 'default',
+            'title'   => BimpRender::renderIcon('fas_file-alt', 'iconLeft') . 'Détail',
+            'content' => $this->renderView('default', false)
+        );
+
+        if ($this->getData('mode') == 'cron') {
+            $tabs[] = array(
+                'id'            => 'report_lines',
+                'title'         => BimpRender::renderIcon('fas_check', 'iconLeft') . 'Rapport relance auto',
+                'ajax'          => 1,
+                'ajax_callback' => $this->getJsLoadCustomContent('renderReportLinesList', '$(\'#report_lines .nav_tab_ajax_result\')', array(''), array('button' => ''))
+            );
+        }
+
+        return BimpRender::renderNavTabs($tabs);
+    }
+
+    public function renderReportLinesList()
+    {
+        if (!$this->isLoaded()) {
+            return BimpRender::renderAlerts('ID de la relance absent absent');
+        }
+
+        $reportLine = BimpObject::getInstance('bimpdatasync', 'BDS_ReportLine');
+        $list = new BC_ListTable($reportLine, 'linked_object', 1, null, 'Lignes du rapport des relances auto');
+
+        $list->addFieldFilterValue('obj_module', 'bimpcommercial');
+        $list->addFieldFilterValue('obj_name', 'BimpRelanceClients');
+        $list->addFieldFilterValue('id_obj', $this->id);
+
+        return $list->renderHtml();
+    }
+
     // Traitements:
 
     public function sendEmails($force_send = false, &$warnings = array(), $bds_process = null)
@@ -302,7 +346,7 @@ class BimpRelanceClients extends BimpObject
             } else {
                 if (!is_null($bds_process)) {
                     $client = $line->getChildObject('client');
-                    $bds_process->Success('Relance n°'. (int) $line->getData('relance_idx').': envoi e-mail OK', $this, (BimpObject::objectLoaded($client) ? $client->getRef() : ''));
+                    $bds_process->Success('Relance n°' . (int) $line->getData('relance_idx') . ': envoi e-mail OK', $this, (BimpObject::objectLoaded($client) ? $client->getRef() : ''));
                 }
             }
             if (count($line_warnings)) {

@@ -72,6 +72,11 @@ class Bimp_ImportPaiementLine extends BimpObject
                 }
             }
         }
+        
+        if(preg_match('/(DV)[0-9]{14}/', $this->getData('data'), $matches) || preg_match('/(FV)[0-9]{14}/', $this->getData('data'), $matches) || preg_match('/(TK)[0-9]{14}/', $this->getData('data'), $matches) || preg_match('/(CV)[0-9]{14}/', $this->getData('data'), $matches)){//C2BO
+            $this->set('traite', 1);
+            $this->set('infos', 'C2BO');
+        }
 
         $this->set('factures', array());
         $this->set('price', $price);

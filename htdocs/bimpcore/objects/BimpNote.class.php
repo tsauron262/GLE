@@ -328,6 +328,13 @@ class BimpNote extends BimpObject
                     'label'   => 'Répondre par mail',
                     'icon'    => 'far fa-paper-plane',
                     'onclick' => $this->getJsRepondre());
+            
+                if($this->i_am_dest() && $this->getData('viewed') == 0)
+                    $buttons[] = array(
+                        'label'       => 'Marqué comme vue',
+                        'icon'    => 'fas_envelope-open',
+                        'onclick' => $this->getJsActionOnclick('iAmViewed')
+                    );
         }
         return $buttons;
     }
@@ -476,6 +483,22 @@ class BimpNote extends BimpObject
         }
 
         return '';
+    }
+    
+     public function actionIAmViewed($data, &$success = '')
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Marqué comme vue';
+
+        
+        if(!$this->i_view())
+            $errors[] = 'Impossible';
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 
     public function displayChatmsg($style = '', $checkview = true)

@@ -416,6 +416,247 @@ function BimpUserRightsTable() {
 
 var BimpUserRightsTable = new BimpUserRightsTable();
 
+//UserGroupRights
+
+function BimpUserGroupRightsTable() {
+    var ptr = this;
+    this.getTable = function ($element) {
+        if (!$.isOk($element)) {
+            return null;
+        }
+
+//        return $element.findParentByClass('panel-body').find('table.bimp_user_rights_table'); // Attention à bien renommer les identifiants. 
+        return $element.findParentByClass('panel-body').find('table.bimp_usergroup_rights_table');
+    };
+
+    this.getRow = function ($table, id_right) {
+        if ($.isOk($table)) {
+            return $table.find('tr.bimp_list_table_row[data-id_right=' + id_right + ']');
+        }
+
+        return null;
+    };
+
+    // Nommer correctemenet les fonctions. Ici, l'objet sur lequel on travail c'est UserGroup, pas User. 
+//    this.addUserRights = function ($button, id_group, id_rights) {
+    this.addUserGroupRights = function ($button, id_group, id_rights) {
+        if ($button.hasClass('disabled')) {
+            return;
+        }
+
+        var $table = ptr.getTable($button);
+
+        setObjectAction($button, {
+            module: 'bimpcore',
+            object_name: 'Bimp_UserGroup',
+            id_object: id_group
+        }, 'addRight', {
+            id_rights: id_rights
+        }, '', null, function (result) {
+            if (typeof (result.results) !== 'undefined') {
+                for (var id_right in result.results) {
+                    if (parseInt(result.results[id_right])) {
+                        var $row = ptr.getRow($table, id_right);
+                        if ($.isOk($row)) {
+                            $row.find('.add_right_button').hide();
+                            $row.find('.remove_right_button').show();
+
+                            var $col = $row.find('td.col_active');
+
+                            if ($col.length) {
+                                $col.data('value', 'yes');
+                                $col.html('<span class="success"><i class="fas fa5-check iconLeft"></i>OUI</span>');
+                            }
+
+                            // On déselectionne toutes les lignes: 
+                            if (id_rights.length > 1) {
+                                BimpListTable.uncheckAll($table);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    };
+
+    this.removeUserGroupRights = function ($button, id_group, id_rights) {
+        if ($button.hasClass('disabled')) {
+            return;
+        }
+
+        var $table = ptr.getTable($button);
+
+        setObjectAction($button, {
+            module: 'bimpcore',
+            object_name: 'Bimp_UserGroup',
+            id_object: id_group
+        }, 'removeRight', {
+            id_rights: id_rights
+        }, '', null, function (result) {
+            if (typeof (result.results) !== 'undefined') {
+                for (var id_right in result.results) {
+                    if (parseInt(result.results[id_right])) {
+                        var $row = ptr.getRow($table, id_right);
+                        if ($.isOk($row)) {
+                            $row.find('.remove_right_button').hide();
+                            $row.find('.add_right_button').show();
+
+                            var $col = $row.find('td.col_active');
+
+                            if ($col.length) {
+                                $col.data('value', 'no');
+                                $col.html('<span class="danger"><i class="fas fa5-times iconLeft"></i>NON</span>');
+                            }
+
+                            // On déselectionne toutes les lignes: 
+                            if (id_rights.length > 1) {
+                                BimpListTable.uncheckAll($table);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+    };
+
+    this.addSelectedRights = function ($button, id_group) {
+        if ($button.hasClass('disabled')) {
+            return;
+        }
+
+        $button.addClass('disabled');
+        var $table = ptr.getTable($button);
+
+        if ($.isOk($table)) {
+            var $selected = $table.find('tbody').find('input.bimp_list_table_row_check:checked');
+
+            if (!$selected.length) {
+                bimp_msg('Aucun droit sélectionné', 'warning', null, true);
+                $button.removeClass('disabled');
+                return;
+            }
+
+            var id_rights = [];
+
+            $selected.each(function () {
+                var $row = $(this).findParentByClass('bimp_list_table_row');
+
+                if ($.isOk($row)) {
+                    var id_right = parseInt($row.data('id_right'));
+
+                    if (!isNaN(id_right) && id_right) {
+                        id_rights.push(id_right);
+                    }
+                }
+            });
+
+            $button.removeClass('disabled'); // On doit réactiver le bouton sinon la suite va planter.
+            ptr.addUserGroupRights($button, id_group, id_rights);
+        }
+    };
+
+    this.removeSelectedRights = function ($button, id_group) {
+        if ($button.hasClass('disabled')) {
+            return;
+        }
+
+        $button.addClass('disabled');
+        var $table = ptr.getTable($button);
+
+        if ($.isOk($table)) {
+            var $selected = $table.find('tbody').find('input.bimp_list_table_row_check:checked');
+
+            if (!$selected.length) {
+                bimp_msg('Aucun droit sélectionné', 'warning', null, true);
+                $button.removeClass('disabled');
+                return;
+            }
+
+            var id_rights = [];
+
+            $selected.each(function () {
+                var $row = $(this).findParentByClass('bimp_list_table_row');
+
+                if ($.isOk($row)) {
+                    var id_right = parseInt($row.data('id_right'));
+
+                    if (!isNaN(id_right) && id_right) {
+                        id_rights.push(id_right);
+                    }
+                }
+            });
+
+            $button.removeClass('disabled');
+            ptr.removeUserGroupRights($button, id_group, id_rights);
+        }
+    };
+}
+
+var BimpUserGroupRightsTable = new BimpUserGroupRightsTable();
+
+// UserGroup Users
+
+function BimpUsergroupUsersTable() {
+    var ptr = this;
+
+    this.getTable = function ($element) {
+        if (!$.isOk($element)) {
+            return null;
+        }
+
+        return $element.findParentByClass('panel').find('#group_users_list');
+    };
+
+    this.removeSelectedUsers = function ($button, id_group) {
+        if ($button.hasClass('disabled')) {
+            return;
+        }
+
+        $button.addClass('disabled');
+        var $table = ptr.getTable($button);
+
+        if ($.isOk($table)) {
+            var $selected = $table.find('tbody').find('input.bimp_list_table_row_check:checked');
+
+            if (!$selected.length) {
+                bimp_msg('Aucun utilisateur sélectionné', 'warning', null, true);
+                $button.removeClass('disabled');
+                return;
+            }
+
+            var ids_users = [];
+
+            $selected.each(function () {
+                var $row = $(this).findParentByClass('bimp_list_table_row');
+
+                if ($.isOk($row)) {
+                    var id_user = parseInt($row.data('id_user'));
+
+                    if (!isNaN(id_user) && id_user) {
+                        ids_users.push(id_user);
+                    }
+                }
+            });
+
+            if (ids_users.length) {
+                if (confirm('Veuillez confirmer la suppression de ' + ids_users.length + ' utilisateur(s)')) {
+                    $button.removeClass('disabled');
+                    setObjectAction($button, {
+                        module: 'bimpcore',
+                        object_name: 'Bimp_UserGroup',
+                        id_object: id_group
+                    }, 'removeUsers', {
+                        ids_users: ids_users
+                    });
+                }
+            }
+        }
+    };
+}
+
+var BimpUsergroupUsersTable = new BimpUsergroupUsersTable();
+
 // Divers: 
 
 function getBadge(text, size, style) {

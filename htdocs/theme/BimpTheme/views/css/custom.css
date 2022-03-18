@@ -1,5 +1,5 @@
- body {
-        font-size: 13px;
+body {
+    font-size: 13px;
 }
 
 .wrapper .header-top .top-menu .dropdown .dropdown-menu {
@@ -47,7 +47,11 @@
 
 }
 
-span.select2-container{
+/*span.select2-container{
+   min-width: 240px; => Ne jamais faire ça : cela affecte tous les selects quelque soit leur emplacement => il faut utiliser un sélecteur spécifique (ici: .top-menu)
+}*/
+
+.top-menu span.select2-container {
     min-width: 240px;
 }
 

@@ -4,7 +4,6 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSProcess.php');
 
 class BDS_RelancesClientsProcess extends BDSProcess
 {
-
     // Init opérations:
 
     public function initRelances(&$data, &$errors = array())

@@ -104,13 +104,14 @@ class BC_FieldsTable extends BC_Panel
                         }
                     }
 
+                    $isBaseObjectField = ($field_name == $row_params['field']);
                     $edit = 0;
 
-                    if ($field_name == $row_params['field'] && (int) $row_params['edit']) {
+                    if ($isBaseObjectField && (int) $row_params['edit']) {
                         $edit = 1;
                     }
 
-                    $field = new BC_Field($field_object, $field_name, (int) $row_params['edit']);
+                    $field = new BC_Field($field_object, $field_name, $edit);
                     $field->display_name = $row_params['display'];
 
                     if (!$field->params['show']) {
@@ -121,8 +122,8 @@ class BC_FieldsTable extends BC_Panel
                         continue;
                     }
 
-                    if (isset($this->new_values[$field_name])) {
-                        $field->new_value = $this->new_values[$field_name];
+                    if (isset($this->new_values[$row_params['field']])) {
+                        $field->new_value = $this->new_values[$row_params['field']];
                     }
 
                     if (!$label) {
@@ -131,7 +132,7 @@ class BC_FieldsTable extends BC_Panel
 
                     $content = $field->renderHtml();
 
-                    if ($field->edit && $field->isEditable()) {
+                    if ($edit && $field->isEditable()) {
                         $content .= $field->displayCreateObjectButton(true, true);
                     }
 

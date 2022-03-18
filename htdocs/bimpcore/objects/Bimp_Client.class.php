@@ -628,23 +628,18 @@ class Bimp_Client extends Bimp_Societe
                     continue;
                 }
 
-                if ($display_mode === 'clients_list') {
-                    if (!(int) $client->getData('relances_actives')) {
-                        continue;
-                    }
+                $client_relances_actives = (int) $client->getData('relances_actives');
+
+                if ($display_mode === 'clients_list' && !$client_relances_actives) {
+                    continue;
                 }
 
-                if ($display_mode === '')
-                    $client_relances_actives = (int) $client->getData('relances_actives');
+                if ($display_mode === 'relancables' && !$client_relances_actives) {
+                    continue;
+                }
 
-                if ($display_mode !== 'all') {
-                    if ($display_mode === 'relancables' && !$client_relances_actives) {
-                        continue;
-                    }
-
-                    if ($display_mode === 'not_relancables' && $client_relances_actives) {
-                        continue;
-                    }
+                if ($display_mode === 'not_relancables' && $client_relances_actives) {
+                    continue;
                 }
 
                 $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['rowid']);
@@ -2448,6 +2443,7 @@ class Bimp_Client extends Bimp_Societe
                 }
             } else {
                 if (!is_null($bds_process)) {
+                    $bds_process->setCurrentObjectData('bimpcommercial', 'BimpRelanceClients');
                     $bds_process->incIgnored();
                 }
             }

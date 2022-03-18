@@ -202,9 +202,9 @@ class Bimp_Facture extends BimpComm
                     return 0;
                 }
                 break;
-                
+
             case 'date_cfr':
-                if($user->admin || $user->rights->admin_financier)
+                if ($user->admin || $user->rights->admin_financier)
                     return 1;
                 return 0;
 
@@ -1998,40 +1998,60 @@ class Bimp_Facture extends BimpComm
         );
 
         if ($this->isLoaded()) {
+            $isComptant = ($this->dol_object->cond_reglement_code == 'RECEP');
+            $nextRelanceIdx = (int) $this->getData('nb_relance') + 1;
+
             $dates['lim'] = $this->getData('date_lim_reglement');
             if (!$dates['lim']) {
                 $dates['lim'] = $this->getData('datef');
             }
 
-            if ((int) $this->getData('nb_relance') > 0) {
-                if ((int) $this->getData('nb_relance') === 1) {
-                    $delay = 8;
-                } elseif (is_null($delay)) {
-                    $delay = BimpCore::getConf('relance_paiements_facture_delay_days', 15);
-                }
+            if ($nextRelanceIdx <= 5) {
+                if ($nextRelanceIdx > 1) {
+                    if ($isComptant) {
+                        $delays = array(
+                            2 => 4,
+                            3 => 3,
+                            4 => 4,
+                            5 => 5
+                        );
+                        $delay = $delays[$nextRelanceIdx];
+                    } else {
+                        if ($nextRelanceIdx == 2) {
+                            $delay = 8;
+                        } elseif (is_null($delay)) {
+                            $delay = BimpCore::getConf('relance_paiements_facture_delay_days', 15);
+                        }
+                    }
 
-                $dates['last'] = (string) $this->getData('date_relance');
-                if ($dates['last']) {
-                    $dt_relance = new DateTime($dates['last']);
+                    $dates['last'] = (string) $this->getData('date_relance');
+                    if ($dates['last']) {
+                        $dt_relance = new DateTime($dates['last']);
+                    } else {
+                        $dt_relance = new DateTime($dates['lim']);
+                    }
+                    $dt_relance->add(new DateInterval('P' . $delay . 'D'));
+                    $dates['next'] = $dt_relance->format('Y-m-d');
                 } else {
-                    $dt_relance = new DateTime($dates['lim']);
-                }
-                $dt_relance->add(new DateInterval('P' . $delay . 'D'));
-                $dates['next'] = $dt_relance->format('Y-m-d');
-            } else {
-                $delay = 7;
+                    if ($isComptant) {
+                        $delay = 3;
+                    } else {
+                        $delay = 7;
+                    }
+
 //                $client = $this->getChildObject('client');
 //                if (BimpObject::objectLoaded($client) && in_array((int) $client->getData('fk_typent'), explode(',', BimpCore::getConf('relance_paiements_extented_delay_type_ent', '')))) {
 //                    $delay = 15;
 //                }
-                $dt_relance = new DateTime($dates['lim']);
-                $dt_relance->add(new DateInterval('P' . $delay . 'D'));
-                $dates['next'] = $dt_relance->format('Y-m-d');
-            }
+                    $dt_relance = new DateTime($dates['lim']);
+                    $dt_relance->add(new DateInterval('P' . $delay . 'D'));
+                    $dates['next'] = $dt_relance->format('Y-m-d');
+                }
 
-            if ((string) $this->getData('date_next_relance')) {
-                if ($this->getData('date_next_relance') > $dates['next']) {
-                    $dates['next'] = $this->getData('date_next_relance');
+                if ((string) $this->getData('date_next_relance')) {
+                    if ($this->getData('date_next_relance') > $dates['next']) {
+                        $dates['next'] = $this->getData('date_next_relance');
+                    }
                 }
             }
         }
@@ -2051,6 +2071,7 @@ class Bimp_Facture extends BimpComm
                 }
             }
         }
+
         return $dates;
     }
 
@@ -4975,7 +4996,7 @@ class Bimp_Facture extends BimpComm
 
         if ($remainToPay > 0) {
             if (!$close_code) {
-                $errors[] = 'Veuillez sélectionner la raison pour classer ' . $this->getLabel('this') . ' payé' . $this->e().'. Diférence : '.$remainToPay;
+                $errors[] = 'Veuillez sélectionner la raison pour classer ' . $this->getLabel('this') . ' payé' . $this->e() . '. Diférence : ' . $remainToPay;
             }
         }
 

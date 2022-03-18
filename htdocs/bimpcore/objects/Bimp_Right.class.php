@@ -29,7 +29,7 @@ class Bimp_Right extends BimpObject
         if (!$this->isLoaded()) {
             return 1;
         }
-        
+
         if (!$force_edit) {
             return 0;
         }

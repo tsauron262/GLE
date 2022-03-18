@@ -832,8 +832,8 @@ class BC_ListTable extends BC_List
                             $bc_field->display_name = $col_params['display'];
                             $bc_field->display_options = $col_params['display_options'];
 
-                            if (isset($new_values[$col_params['field']])) {
-                                $bc_field->new_value = $new_values[$col_params['field']];
+                            if (isset($new_values[$field_name])) {
+                                $bc_field->new_value = $new_values[$field_name];
                             }
 
                             $row_content = $bc_field->renderHtml();

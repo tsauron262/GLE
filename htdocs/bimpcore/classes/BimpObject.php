@@ -1358,6 +1358,16 @@ class BimpObject extends BimpCache
         return BimpCore::isContextPrivate();
     }
 
+    public function isUserAdmin()
+    {
+        global $user;
+        if (BimpObject::objectLoaded($user)) {
+            return (int) $user->admin;
+        }
+
+        return 0;
+    }
+
     // Getters données: 
 
     public function getData($field)

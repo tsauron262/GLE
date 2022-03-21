@@ -1239,7 +1239,7 @@ class BL_CommandeFournReception extends BimpObject
         return $lines_data;
     }
 
-    public function checkLinesData($lines_data, &$code_config_errors = null)
+    public function checkLinesData($lines_data, &$code_config_errors = null, $force_equipments_attribution = false)
     {
         $errors = array();
 
@@ -1249,7 +1249,7 @@ class BL_CommandeFournReception extends BimpObject
                 $errors[] = 'La ligne de commande fournisseur d\'ID ' . $id_line . ' n\'existe pas';
             } else {
                 $code_config_serials_errors = array();
-                $line_errors = $line->checkReceptionData((int) $this->id, $line_data, $code_config_serials_errors);
+                $line_errors = $line->checkReceptionData((int) $this->id, $line_data, $code_config_serials_errors, $force_equipments_attribution);
                 if (count($line_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
                 } elseif (is_array($code_config_errors) && count($code_config_serials_errors)) {
@@ -1269,9 +1269,10 @@ class BL_CommandeFournReception extends BimpObject
         return $errors;
     }
 
-    public function saveLinesData($lines_data, &$warnings = array())
+    public function saveLinesData($lines_data, &$warnings = array(), $force_equipments_attribution = false)
     {
-        $errors = $this->checkLinesData($lines_data);
+        $codes = null;
+        $errors = $this->checkLinesData($lines_data, $codes, $force_equipments_attribution);
 
         if (count($errors)) {
             return $errors;
@@ -1281,7 +1282,7 @@ class BL_CommandeFournReception extends BimpObject
             $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', (int) $id_line);
             if (BimpObject::objectLoaded($line)) {
                 $line_warnings = array();
-                $line_errors = $line->setReceptionData((int) $this->id, $line_data, false, $line_warnings);
+                $line_errors = $line->setReceptionData((int) $this->id, $line_data, false, $line_warnings, $force_equipments_attribution);
 
                 if (count($line_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
@@ -1298,7 +1299,7 @@ class BL_CommandeFournReception extends BimpObject
         return $errors;
     }
 
-    public function validateReception($date_received = null, $check_data = true, $stock_out = false)
+    public function validateReception($date_received = null, $check_data = true, $stock_out = false, $force_equipments_attribution = false, $skip_equipments_place = false)
     {
         set_time_limit(1200);
         ignore_user_abort(true);
@@ -1343,7 +1344,7 @@ class BL_CommandeFournReception extends BimpObject
         $lines_done = array();
 
         foreach ($lines as $line) {
-            $line_errors = $line->validateReception((int) $this->id, $check_data, $stock_out);
+            $line_errors = $line->validateReception((int) $this->id, $check_data, $stock_out, $force_equipments_attribution, $skip_equipments_place);
 
             if (count($line_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
@@ -1522,12 +1523,14 @@ class BL_CommandeFournReception extends BimpObject
             $lines_data = $this->processLinesFormData($data, $errors);
 
             if (!count($errors)) {
+                $force_equipments_attribution = (int) BimpTools::getArrayValueFromPath($data, 'force_equipments_attribution', 0);
+                $skip_equipments_place = (int) BimpTools::getArrayValueFromPath($data, 'skip_equipments_place', 0);
                 $codes_config_errors = array();
-                $errors = $this->checkLinesData($lines_data, $codes_config_errors);
+                $errors = $this->checkLinesData($lines_data, $codes_config_errors, $force_equipments_attribution);
 
                 if (!count($errors) && count($codes_config_errors) && (!isset($data['force_validation']) || !(int) $data['force_validation'])) {
                     $data['force_validation'] = 1;
-                    $errors = $this->saveLinesData($lines_data);
+                    $errors = $this->saveLinesData($lines_data, $warnings, $force_equipments_attribution);
                     $onclick = $this->getJsActionOnclick('validateReception', $data, array(
                         'success_callback' => 'function() {bimpModal.clearCurrentContent();}'
                     ));
@@ -1544,7 +1547,7 @@ class BL_CommandeFournReception extends BimpObject
                 }
 
                 if (!count($errors)) {
-                    $errors = $this->saveLinesData($lines_data);
+                    $errors = $this->saveLinesData($lines_data, $warnings, $force_equipments_attribution);
 
                     if (!count($errors)) {
                         $is_sept = (isset($data['is_sept']) ? $data['is_sept'] : '');
@@ -1555,11 +1558,10 @@ class BL_CommandeFournReception extends BimpObject
                             $this->updateField('info', 'DECEMBRE 2020' . ($info ? "\n\n" . $info : ''));
                         }
                         // ************
-
+                        
                         $date_received = BimpTools::getArrayValueFromPath($data, 'date_received', date('Y-m-d'));
                         $stock_out = (BimpTools::getArrayValueFromPath($data, 'stock_out', 'non') == 'oui' ? 1 : 0);
-
-                        $errors = $this->validateReception($date_received, false, $stock_out);
+                        $errors = $this->validateReception($date_received, false, $stock_out, $force_equipments_attribution, $skip_equipments_place);
                     }
                 }
             }

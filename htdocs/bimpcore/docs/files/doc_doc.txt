@@ -1,0 +1,31 @@
+== Explication Doc
+=== Balise
+{code} {code} permet d'enlevé tous formatage pour inséré par exmple du code
+
+==== Italique
+{code} ''text'' pour mêttre en italique Ex: 
+{code}ceci est un ''italique''
+ceci est un ''italique''
+
+==== Gras
+{code} '''text''' pour mêttre en gras Ex:
+{code}ceci est un '''gras'''
+ceci est un '''gras'''
+
+==== Titre
+{code} == pour faire un titre principal Ex:
+{code} == Titre 1
+== Titre 1
+
+{code} === pour faire un titre secondaire Ex:
+{code} === Titre 2
+=== Titre 2
+
+{code} ==== pour faire un titre 3 Ex:
+{code} ==== Titre 3
+==== Titre 3
+
+==== Lien
+{code} {nomPage} Permet de faire un lien vers une autre page si elle existe et/ou un popover si le fihcier existe. Ex avec les deux:
+{code} {doc}
+{doc}

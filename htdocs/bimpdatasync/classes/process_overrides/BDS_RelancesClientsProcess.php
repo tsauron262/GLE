@@ -48,11 +48,7 @@ class BDS_RelancesClientsProcess extends BDSProcess
     // Exec opérations:
 
     public function executeRelances($step_name, &$errors = array(), $extra_data = array())
-    {
-        echo '<pre>';
-        print_r($extra_data);
-        exit;
-        
+    {        
         switch ($step_name) {
             case 'process_relance':
                 $client = BimpObject::getInstance('bimpcore', 'Bimp_Client');

@@ -8,7 +8,7 @@ class ConsignedStockMvt extends BimpObject
     public function canSetAction($action)
     {
         switch ($action) {
-            case 'cancel';
+            case 'cancel':
                 return $this->isUserAdmin();
         }
 

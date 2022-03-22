@@ -165,6 +165,14 @@ forms:
                           params: 
                               - 1
             - custom: 1
+              label: Status
+              input_name: status
+              input: 
+                  type: select
+                  options: 
+                      - Ouvertes
+                      - Toutes
+            - custom: 1
               label: N° de livraison
               input_name: deliveryNumber
               content: 
@@ -172,7 +180,7 @@ forms:
               display_if: 
                   field_name: code_centre
                   hide_values: ''
-              depends_on: code_centre
+              depends_on: code_centre,status
               value: ''
             - custom: 1
               label: Unités reçues

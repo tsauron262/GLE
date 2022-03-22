@@ -2267,6 +2267,9 @@ class Bimp_Client extends Bimp_Societe
                         continue;
                     }
 
+                    $client_url = $client->getUrl() . '&navtab-maintabs=commercial&navtab-commercial_view=client_relances_list_tab';
+                    $facs_warnings = array();
+
                     foreach ($client_data['relances'] as $relance_idx => $factures) {
                         if ($relance_idx > self::$max_nb_relances) {
                             continue;
@@ -2276,18 +2279,19 @@ class Bimp_Client extends Bimp_Societe
 
                         // Trie des factures par contact: 
                         foreach ($factures as $id_fac => $fac_data) {
-                            if ((int) $fac_data['id_cur_relance']) {
-                                continue;
-                            }
-
                             $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_fac);
                             if (!BimpObject::objectLoaded($fac)) {
                                 $msg = 'La facture d\'ID ' . $id_fac . ' n\'existe plus';
                                 $warnings[] = $msg;
+                                $facs_warnings[] = $msg;
+                                continue;
+                            }
 
-                                if (!is_null($bds_process)) {
-                                    $bds_process->Alert($msg, $relance, $client->getRef());
-                                }
+                            if ((int) $fac_data['id_cur_relance']) {
+                                $msg = 'La facture ' . $fac->getLink() . ' ne peut pas être relancée car il y a une ';
+                                $msg .= '<a href="'.$client_url.'" target="_blank">relance non envoyée en cours ';
+                                $msg .= BimpRender::renderIcon('fas_external-link-alt', 'iconRight').'</a>';
+                                $facs_warnings[] = $msg;
                                 continue;
                             }
 
@@ -2299,10 +2303,7 @@ class Bimp_Client extends Bimp_Societe
                             if ($now < $fac_data['date_next_relance']) {
                                 $msg = 'La facture "' . $fac->getRef() . '" n\'a pas été traitée car sa date de prochaine relance est ultérieure à la date du jour';
                                 $warnings[] = $msg;
-
-                                if (!is_null($bds_process)) {
-                                    $bds_process->Alert($msg, $relance, $client->getRef());
-                                }
+                                $facs_warnings[] = $msg;
                                 continue;
                             }
 
@@ -2317,6 +2318,17 @@ class Bimp_Client extends Bimp_Societe
                             }
 
                             $facturesByContacts[$id_contact][] = $fac;
+                        }
+
+                        if (!is_null($bds_process)) {
+                            if (!empty($facs_warnings)) {
+                                $bds_process->Alert(BimpTools::getMsgFromArray($facs_warnings), $relance, $client->getRef());
+                            }
+
+                            if (empty($facturesByContacts)) {
+                                $bds_process->incIgnored();
+                                continue;
+                            }
                         }
 
                         // Création des lignes de relance: 

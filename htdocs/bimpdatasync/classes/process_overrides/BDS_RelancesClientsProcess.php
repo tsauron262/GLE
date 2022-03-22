@@ -16,8 +16,6 @@ class BDS_RelancesClientsProcess extends BDSProcess
             if (!empty($clients)) {
                 $relance = $this->createRelance($errors);
                 if (BimpObject::objectLoaded($relance)) {
-                    $this->incCreated();
-
                     $data['data'] = array(
                         'id_relance' => $relance->id
                     );

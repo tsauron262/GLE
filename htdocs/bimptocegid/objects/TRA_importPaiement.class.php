@@ -20,6 +20,12 @@ class TRA_importPaiement {
         $bank = $this->db->getRow('bank_account', 'rowid = ' . $importPaiement->getData('banque'));
         $date = new DateTime($line->getData('date'));
         
+        $data['infos'] = '';
+        
+        if(preg_match('/(DV)[0-9]{14}/', $line->getData('data'), $matches) || preg_match('/(FV)[0-9]{14}/', $line->getData('data'), $matches) || preg_match('/(TK)[0-9]{14}/', $line->getData('data'), $matches) || preg_match('/(CV)[0-9]{14}/', $line->getData('data'), $matches)){//C2BO
+            $data['infos'] = $matches[0];
+        }
+        
         $structure = Array();
         $structure['JOURNAL']           = sizing(($line->getData('num') ? 'OD' : $bank->cegid_journal), 3);
         $structure['DATE']              = sizing($date->format('dmY'),8);
@@ -55,7 +61,7 @@ class TRA_importPaiement {
         $structure['QUANTITE_2']        = sizing("", 20);
         $structure['QUANTITE_QUALI_1']  = sizing("", 3);
         $structure['QUANTITE_QUALI_2']  = sizing("", 3);
-        $structure['REFERENCE_LIBRE']   = sizing("EXPORT " . ($line->getData('num') ? $line->getData('num') : 'IP' . $importPaiement->id . '-' . $line->id) . " BIMP-ERP", 35);
+        $structure['REFERENCE_LIBRE']   = sizing(($line->getData('num') ? $line->getData('num') : $data['infos']), 35);
         $structure['REGIME_TVA']        = sizing("-FRA", 4);
         $structure['TVA']               = sizing("", 3);
         $structure['TPF']               = sizing("", 3);

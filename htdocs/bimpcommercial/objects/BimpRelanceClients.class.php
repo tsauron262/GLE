@@ -336,7 +336,7 @@ class BimpRelanceClients extends BimpObject
             $line_warnings = array();
             $line_errors = $line->sendRelanceEmail($line_warnings, $force_send);
             if (count($line_errors)) {
-                $msg = BimpTools::getMsgFromArray($line_errors, $line->getRelanceLineLabel());
+                $msg = BimpTools::getMsgFromArray($line_errors, $line->getRelanceLineLabel() . ' - Echec envoi e-mail au client');
                 $errors[] = $msg;
 
                 if (!is_null($bds_process)) {

@@ -331,7 +331,7 @@ class BimpNote extends BimpObject
             
                 if($this->i_am_dest() && $this->getData('viewed') == 0)
                     $buttons[] = array(
-                        'label'       => 'Marqué comme vue',
+                        'label'       => 'Marquer comme vue',
                         'icon'    => 'fas_envelope-open',
                         'onclick' => $this->getJsActionOnclick('iAmViewed')
                     );

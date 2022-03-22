@@ -79,8 +79,9 @@ fields_tables:
               edit: 1
             - field: outstanding_limit_atradius
               edit: 1
-            - field: outstanding_limit
+            - field: outstanding_limit_manuel
               edit: 1
+            - field: outstanding_limit
             - label: PDF Rapport Assurance crédit
               input_name: send_emails
               input: 

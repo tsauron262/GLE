@@ -106,13 +106,17 @@ class Bimp_Societe extends BimpDolObject
         switch ($field_name) {
             case 'outstanding_limit_atradius':
             case 'outstanding_limit_icba':
-            case 'outstanding_limit':
+            case 'outstanding_limit_manuel':
             case 'outstanding_limit_credit_check':
             case 'date_depot_icba':
             case 'date_atradius':
                if ($user->admin || $user->rights->bimpcommercial->admin_recouvrement || $user->rights->bimpcommercial->admin_compta) {
                     return 1;
                 }
+                return 0;
+                
+                
+            case 'outstanding_limit':
                 return 0;
 
             case 'outstanding_limit_credit_safe':
@@ -3152,6 +3156,8 @@ class Bimp_Societe extends BimpDolObject
             $limit = $this->getData('outstanding_limit_icba');
         if ($this->getData('outstanding_limit_credit_check') > $limit)
             $limit = $this->getData('outstanding_limit_credit_check');
+        if ($this->getData('outstanding_limit_manuel') > $limit)
+            $limit = $this->getData('outstanding_limit_manuel');
         if ($limit > 0 && $limit != $this->getInitData('outstanding_limit'))
             $this->updateField('outstanding_limit', $limit);
 

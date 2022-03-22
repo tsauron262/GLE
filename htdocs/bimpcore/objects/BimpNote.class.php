@@ -489,7 +489,7 @@ class BimpNote extends BimpObject
     {
         $errors = array();
         $warnings = array();
-        $success = 'Marqué comme vue';
+        $success = 'Marquer comme vue';
 
         
         if(!$this->i_view())

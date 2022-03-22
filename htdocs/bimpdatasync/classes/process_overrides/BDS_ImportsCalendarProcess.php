@@ -62,7 +62,7 @@ class BDS_ImportsCalendarProcess extends BDSImportProcess {
 //        }
     }
 
-    public function executeUpdateCalendar($step_name, &$errors = array()) {
+    public function executeUpdateCalendar($step_name, &$errors = array(), $extra_data = array()) {
 
         $result = array();
 

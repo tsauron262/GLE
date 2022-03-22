@@ -172,7 +172,7 @@ class BDS_ImportsGSXReservationsProcess extends BDSImportProcess
 
     // Process opérations:
 
-    public function executeProcessReservations($step_name, &$errors = array())
+    public function executeProcessReservations($step_name, &$errors = array(), $extra_data = array())
     {
         $result = array();
 

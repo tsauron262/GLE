@@ -10,6 +10,7 @@ function BDS_OperationStep(name, data, $container) {
     this.status = 'waiting';
     this.is_done = 0;
     this.nbReset = 0;
+    this.step_data = {};
 
     this.on_error = 'stop';
     this.on_cancel = 'stop';
@@ -33,6 +34,9 @@ function BDS_OperationStep(name, data, $container) {
     }
     if (typeof (data.on_cancel) !== 'undefined') {
         this.on_cancel = data.on_cancel;
+    }
+    if (typeof (data.data) !== 'undefined') {
+        this.step_data = data.data;
     }
 
     // Gestion de la liste des éléments:
@@ -325,6 +329,11 @@ function BDS_ProcessOperation(data, options) {
 
     this.steps = [];
     this.status = 'init';
+    this.operation_data = {};
+    
+    if (typeof(data.data) !== 'undefined') {
+        this.operation_data = data.data;
+    }
 
     this.curStep = {
         'step': 0,
@@ -525,11 +534,19 @@ function BDS_ProcessOperation(data, options) {
             'options': operation.options,
             'step_options': {},
             'elements': {},
-            'iteration': 1
+            'iteration': 1,
+            'operation_data': {},
+            'step_data': {}
         };
 
         if (typeof (operation.curStep.step.options) !== 'undefined') {
             data.step_options = operation.curStep.step.options;
+        }
+        if (typeof (operation.operation_data) !== 'undefined') {
+            data.operation_data = operation.operation_data;
+        }
+        if (typeof (operation.curStep.step.step_data) !== 'undefined') {
+            data.step_data = operation.curStep.step.step_data;
         }
 
         if (operation.curStep.step.elements.list.length) {

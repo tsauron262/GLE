@@ -181,12 +181,19 @@ abstract class BDSProcess
                 }
 
                 if (!count($errors)) {
-                    // Exécution de l\'opération: 
-                    $this->{$method}($data, $errors);
-                    if (!count($errors) && $data['use_report']) {
+                    // Création du rapport. 
+                    if ($data['use_report']) {
                         $title = $this->process->getData('title') . ' - ' . $operation->getData('title') . ' du ' . date('d / m / Y');
                         $this->createReport($title, $this->options['mode'], $id_operation);
-                        $data['id_report'] = $this->report->id;
+                        if (BimpObject::objectLoaded($this->report)) {
+                            $data['id_report'] = $this->report->id;
+                        }
+                    }
+
+                    // Initialisation de l\'opération: 
+                    $this->{$method}($data, $errors);
+                    if (count($errors)) {
+                        $this->Error(BimpTools::getMsgFromArray($errors, 'Erreurs lors de l\'initialisation du processus'));
                     }
                 }
             }
@@ -234,9 +241,12 @@ abstract class BDSProcess
         }
 
         $data = $this->initOperation($id_operation, $errors);
-        $result['id_report'] = BimpTools::getArrayValueFromPath($data, 'id_report', 0);
 
+        $result['id_report'] = BimpTools::getArrayValueFromPath($data, 'id_report', 0);
         $debug = $data['debug_content'];
+        $extra_data = array(
+            'operation' => BimpTools::getArrayValueFromPath($data, 'data', array())
+        );
 
         if (!count($errors) && $this->options_ok) {
             if (isset($data['result_html'])) {
@@ -260,6 +270,8 @@ abstract class BDSProcess
                                 continue;
                             }
 
+                            $extra_data['step'] = BimpTools::getArrayValueFromPath($step_data, 'data', array());
+
                             $done = true;
                             $this->start();
                             $steps_done[] = $step_name;
@@ -278,7 +290,7 @@ abstract class BDSProcess
                             }
 
                             // Exécution de l'opération pour cette étape: 
-                            $step_result = $this->{$method}($step_name, $step_errors);
+                            $step_result = $this->{$method}($step_name, $step_errors, $extra_data);
 
 //                            $this->DebugData($step_result, 'Resultat étape');
 
@@ -329,7 +341,7 @@ abstract class BDSProcess
         return $result;
     }
 
-    public function executeOperationStep($id_operation, $step_name, $id_report = 0, $iteration = 0)
+    public function executeOperationStep($id_operation, $step_name, $id_report = 0, $iteration = 0, $extra_data = array())
     {
         $result = array();
         $errors = array();
@@ -375,7 +387,7 @@ abstract class BDSProcess
                     if (!method_exists($this, $method)) {
                         $errors[] = 'Erreur technique - Méthode "' . $method . '" inexistante';
                     } else {
-                        $result = $this->{$method}($step_name, $errors);
+                        $result = $this->{$method}($step_name, $errors, $extra_data);
                     }
                 }
             }
@@ -556,7 +568,7 @@ abstract class BDSProcess
     protected function ftpConnect($host, $login, $pword, $port = 21, $passive = true, &$errors = null)
     {
         $ssl = ($port == 22);
-        if($ssl){
+        if ($ssl) {
             $connection = ssh2_connect($host, $port);
             if (!ssh2_auth_password($connection, $login, $pword)) {
                 $msg = 'Echec de la connexion FTP - Identifiant ou mot de passe incorrect.';
@@ -568,7 +580,7 @@ abstract class BDSProcess
                 return false;
             }
 
-            if(!$ftp = ssh2_sftp($connection)){
+            if (!$ftp = ssh2_sftp($connection)) {
                 $msg = 'Echec de la connexion SFTP  avec le serveur "' . $host . '"';
                 $this->Error($msg);
                 if (!is_null($errors)) {
@@ -576,13 +588,11 @@ abstract class BDSProcess
                 }
                 return false;
             }
-                    
-        }
-        else{
+        } else {
             $ftp = ftp_connect($host, $port);
 
             if ($ftp === false) {
-                $msg = 'Echec de la connexion '.($ssl? 'S':'').'FTP avec le serveur "' . $host . '"';
+                $msg = 'Echec de la connexion ' . ($ssl ? 'S' : '') . 'FTP avec le serveur "' . $host . '"';
                 $this->Error($msg);
                 if (!is_null($errors)) {
                     $errors[] = $msg;
@@ -601,7 +611,7 @@ abstract class BDSProcess
             }
 
             if (defined('FTP_SORTANT_MODE_PASSIF')) {
-                $passive =  FTP_SORTANT_MODE_PASSIF;
+                $passive = FTP_SORTANT_MODE_PASSIF;
             }
 
             if ($passive) {

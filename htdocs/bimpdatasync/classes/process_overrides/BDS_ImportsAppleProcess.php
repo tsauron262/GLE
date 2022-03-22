@@ -88,7 +88,7 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
 
     // Exec opérations:
 
-    public function executeImportCsv($step_name, &$errors = array())
+    public function executeImportCsv($step_name, &$errors = array(), $extra_data = array())
     {
         $result = array();
 

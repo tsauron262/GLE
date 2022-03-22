@@ -106,7 +106,7 @@ class BDS_RgpdProcess extends BDSProcess
     {
         $errors[] = 'Désactivé pour l\'instant';
         return;
-        
+
         $data['steps'] = array();
 
         // Recherche des objets à supprimer: 
@@ -185,7 +185,7 @@ class BDS_RgpdProcess extends BDSProcess
 
     // Exec opérations:
 
-    public function executeDailyCheck($step_name, &$errors = array())
+    public function executeDailyCheck($step_name, &$errors = array(), $extra_data = array())
     {
         $result = array();
 

@@ -2908,6 +2908,11 @@ class BimpTools
                 , $dir . $file_name
                 , "L", 4, 2);
     }
+    
+    public static function displayBacktrace($nb_lines = 15)
+    {
+        return BimpRender::renderBacktrace(BimpTools::getBacktraceArray(debug_backtrace(null, $nb_lines)));
+    }
 
     // Gestion des couleurs: 
 

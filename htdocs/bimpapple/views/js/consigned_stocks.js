@@ -30,6 +30,7 @@ function ConsignedStocks() {
 
     this.onReceiveFormSubmit = function ($form, extra_data) {
         var parts = [];
+        var has_error = false;
 
         $form.find('tr.part_row').each(function () {
             var part = {
@@ -40,23 +41,46 @@ function ConsignedStocks() {
             if ($input.length) {
                 part.qty = parseInt($input.val());
             } else {
+                var serials = [];
+
                 var $check_list = $(this).find('.part_serials_check_list');
-
                 if ($check_list.length) {
-                    var serials = [];
-
                     $check_list.find('.check_list_item_input:checked').each(function () {
-                        serials.push($(this).val());
+                        serials.push({'serial': $(this).val(), 'manual': 0});
                     });
+                }
 
-                    if (serials.length) {
-                        part.serials = serials;
-                    }
+                var $inputs = $(this).find('input.part_serials_text_input');
+                if ($inputs.length) {
+                    $inputs.each(function () {
+                        var $input = $(this);
+                        $input.removeClass('error');
+                        var serial = $(this).val();
+                        if (serial) {
+                            for (var i in serials) {
+                                if (serials[i].serial === serial) {
+                                    $input.addClass('error');
+                                    bimp_msg('Le numéro de série "' + serial + '" a été sélectionné ou saisi 2 fois', 'danger');
+                                    has_error = true;
+                                    break;
+                                }
+                            }
+                            serials.push({'serial': serial, 'manual': 1});
+                        }
+                    });
+                }
+
+                if (serials.length) {
+                    part.serials = serials;
                 }
             }
 
             parts.push(part);
         });
+
+        if (has_error) {
+            return false;
+        }
 
         extra_data.parts = parts;
         return extra_data;

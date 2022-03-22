@@ -190,6 +190,26 @@ forms:
               value: ''
 
             - custom: 1
+              show: 
+                  callback: isUserAdmin
+              label: Forcer l'attribution des équipements
+              data_type: bool
+              input_name: force_equipments_attribution
+              input: 
+                  type: toggle
+                  help: POUR ADMIN SEULEMENT.<br/>Les équipement doivent déjà exister pour être attribués à cette réception
+              value: 0
+            - custom: 1
+              show: 
+                  callback: isUserAdmin
+              label: Ne pas changer l'emplacement actuel des équipements
+              data_type: bool
+              input_name: skip_equipments_place
+              input: 
+                  type: toggle
+                  help: POUR ADMIN SEULEMENT.<br/>A utiliser lorsque les équipements existent déjà et doivent êre conservés dans leur emplacement actuel. 
+              value: 0
+            - custom: 1
               label: Unités réceptionnées
               input_name: lines
               content: 

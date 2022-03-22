@@ -26,7 +26,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         }
     }
     
-    public function executeGetProducts($url, &$data, &$errors = array()){
+    public function executeGetProducts($url, &$data, &$errors = array(), $extra_data = array()){
         $ch = curl_init();
 
         $headers = array(
@@ -112,7 +112,7 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
         }
     }
 
-    public function executeExportCatalog($step_name, &$errors = array())
+    public function executeExportCatalog($step_name, &$errors = array(), $extra_data = array())
     {
         if ($step_name === 'end_export') {
             $err = $this->updateParameter('last_export_tms', time());

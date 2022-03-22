@@ -27,7 +27,7 @@ class BDS_RelancesSignaturesProcess extends BDSProcess
 
     // Exec opérations:
 
-    public function executeRelances($step_name, &$errors = array())
+    public function executeRelances($step_name, &$errors = array(), $extra_data = array())
     {
         $result = array();
 

@@ -522,8 +522,6 @@ class BimpCore
                     $id = (int) $object->id;
                 }
 
-                $bt = debug_backtrace(null, 15);
-
                 $datas = array(
                     'id_user'    => (BimpObject::objectLoaded($user) ? (int) $user->id : 1),
                     'obj_module' => $mod,

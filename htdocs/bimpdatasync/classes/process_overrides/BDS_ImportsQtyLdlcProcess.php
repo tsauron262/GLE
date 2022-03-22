@@ -28,7 +28,7 @@ class BDS_ImportsQtyLdlcProcess extends BDSImportFournCatalogProcess
         }
     }
 
-    public function executeUpdateFromFile($step_name, &$errors = array())
+    public function executeUpdateFromFile($step_name, &$errors = array(), $extra_data = array())
     {
         $result = array();
 

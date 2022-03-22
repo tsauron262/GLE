@@ -78,6 +78,7 @@ forms:
               display_if: 
                 field_name: serialized
                 show_values: 0
+                
     edit: 
         rows: 
             - field: serialized
@@ -234,6 +235,8 @@ lists:
         header_buttons: 
             callback: getListHeaderButtons
         add_form_name: default
+        add_btn: 
+            callback: isUserAdmin
         edit_btn: 1
         edit_form: edit
         extra_btn: 

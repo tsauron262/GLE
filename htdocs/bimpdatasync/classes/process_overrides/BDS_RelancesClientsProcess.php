@@ -48,7 +48,7 @@ class BDS_RelancesClientsProcess extends BDSProcess
     // Exec opérations:
 
     public function executeRelances($step_name, &$errors = array(), $extra_data = array())
-    {        
+    {
         switch ($step_name) {
             case 'process_relance':
                 $client = BimpObject::getInstance('bimpcore', 'Bimp_Client');
@@ -59,7 +59,7 @@ class BDS_RelancesClientsProcess extends BDSProcess
                         $this->Info('Aucun client à relancer');
                     } else {
                         $relance = $this->createRelance($errors);
-                        
+
                         if (BimpObject::objectLoaded($relance)) {
                             $id_relance = (int) $relance->id;
                         } else {
@@ -74,7 +74,7 @@ class BDS_RelancesClientsProcess extends BDSProcess
                         return array();
                     }
                 }
-
+                
                 if (!empty($this->references)) {
                     $warnings = array();
                     $pdf_url = '';

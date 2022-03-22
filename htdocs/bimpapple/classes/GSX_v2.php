@@ -1038,7 +1038,7 @@ class GSX_v2 extends GSX_Const
         return $this->exec('consignmentOrderLookup', $params);
     }
 
-    public function consignmentDeliveryLookup($deliveryNumber, $status = 'OPEN', $from = '', $to = '')
+    public function consignmentDeliveryLookup($deliveryNumber, $status = 'ALL', $from = '', $to = '')
     {
         $params = array(
             'deliveryNumber'          => $deliveryNumber,

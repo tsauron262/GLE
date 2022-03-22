@@ -41,7 +41,7 @@ abstract class BDSProcess
         BimpCore::setMaxExecutionTime(static::$max_execution_time);
         BimpCore::setMemoryLimit(static::$memory_limit);
 
-        global $db;
+        global $db, $user;
 
         $this->options = BimpTools::overrideArray($this->options, $options);
 
@@ -52,8 +52,6 @@ abstract class BDSProcess
         $this->start();
 
         $this->db = new BimpDb($db);
-
-        global $user;
 
         if (!BimpObject::objectLoaded($user)) {
             $user = new User($db);

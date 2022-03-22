@@ -47,7 +47,7 @@ class ConsignedStock extends BimpObject
     {
         switch ($action) {
             case 'correct':
-                return 1;
+                return $this->isUserAdmin();
 
             case 'createShipment':
                 return 1;

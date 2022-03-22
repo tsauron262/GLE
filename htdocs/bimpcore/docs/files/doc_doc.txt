@@ -18,8 +18,8 @@ ceci est un '''gras'''
 == Titre 1
 
 {code} === pour faire un titre secondaire Ex:
-{code} === Titre 2
-=== Titre 2
+{code} === Titre 2 avec ''italique'' et '''gras''' et pourquoi pas '''''les deux'''''
+=== Titre 2 avec ''italique'' et '''gras''' et pourquoi pas '''''les deux'''''
 
 {code} ==== pour faire un titre 3 Ex:
 {code} ==== Titre 3
@@ -29,3 +29,12 @@ ceci est un '''gras'''
 {code} {nomPage} Permet de faire un lien vers une autre page si elle existe et/ou un popover si le fihcier existe. Ex avec les deux:
 {code} {doc}
 {doc}
+Exemple avec des liens :
+{code} Page {propal}, page {list}
+Page {propal}, page {list}
+
+
+==== Html
+Il faut éviter d'utiliser directment du HTML, mais cela fonctionne :
+{code} <span class="alert" style="color:red">Une alert</div>
+<span class="alert" style="color:red">Une alert</div>

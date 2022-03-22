@@ -7,109 +7,134 @@ llxHeader();
 
 $file = $_GET['name'];
 
-$path = DOL_DOCUMENT_ROOT.'/bimpcore/docs/files/'.$file.'_doc.txt';
+$path = DOL_DOCUMENT_ROOT . '/bimpcore/docs/files/' . $file . '_doc.txt';
 $errors = array();
 
 
 echo '<a href="https://fr.wikipedia.org/wiki/BBCode#Listes_de_balises">Doc BBCode</a><br/><br/>';
 
 
+$BimpDoc = new BimpDoc();
 
-if($file == '')
+if ($file == '')
     $errors[] = 'Pas de doc spécifié';
-elseif(!is_file($path))
-    $errors[] = 'Doc '.$file.' introuvable';
-else{
-    echo traiteHtml($file.'_doc');
+elseif (!is_file($path))
+    $errors[] = 'Doc ' . $file . ' introuvable';
+else {
+    echo $BimpDoc->displayDoc($file);
 }
 //BimpTools::printBackTrace(null);
 
 
-if(count($errors))
+if (count($errors))
     echo BimpRender::renderAlerts($errors);
 
-
-
-
-function traiteHtml($file){
-    $data = file(DOL_DOCUMENT_ROOT.'/bimpcore/docs/files/'.$file.'.txt', FILE_IGNORE_NEW_LINES);
-    $content = array();
-    $menu = array();
-    foreach($data as $ln){
-        $isMenu = false;
-        $type = '';
-        if(preg_match('#\{code}([^\[]*) ?#', $ln, $matches)){
-            $ln = $matches[1];
-        }
-        elseif(preg_match('#(={1,4}) ?([^\[]*) ?#', $ln, $matches)){
-                $ln = $matches[2];
-                $type = 'h'.(strlen($matches[1])-1);
+class BimpDoc {
+    var $lines = array();
+    function initLines($file){
+        $data = file(DOL_DOCUMENT_ROOT . '/bimpcore/docs/files/' . $file . '.txt', FILE_IGNORE_NEW_LINES);
+        foreach ($data as $ln) {
+            $styleMenu = array();
+            $isMenu = false;
+            $type = '';
+            if (preg_match('#\{code}([^\[]*) ?#', $ln, $matches)) {
+                $ln = '<xmp>'.$matches[1].'</xmp>';
+            } elseif (preg_match('#(={2,4}) ?([^\[]*) ?#', $ln, $matches)) {
+                $ln = static::traiteLn($matches[2]);
+                $niveau = (strlen($matches[1]) - 1);
+                $type = 'h' . $niveau;
                 $isMenu = true;
+                if($niveau > 1)
+                    $styleMenu[] = 'text-indent: '.($niveau*10).'px;';
+            } else {
+                $ln = static::traiteLn($ln);
+            }
+
+            $this->lines[] = array('balise' => $type, 'value' => $ln, 'isMenu' => $isMenu, 'styleMenu' => $styleMenu);
         }
-        else{
-            $ln = BimpCode($ln);
-        }
+    }
+    
+    function displayDoc($file){
+        $this->initLines($file.'_doc');
+        $htmlMenu = $this->getMenu();
+        $htmlContent = $this->getCore();
         
-        $content[] = array('balise'=>$type, 'value'=>$ln, 'isMenu' => $isMenu);
-    }
-    
-    
-    
-    
-    //impression
-    $htmlMenu = $htmlContent = '';
-    foreach($content as $idM => $info){
-        if($info['balise'] != ''){
-            $htmlContent .= '<'.$info['balise'];
-            if($info['isMenu']){
-                $htmlMenu .= '<a href="#menu'.$idM.'"><'.$info['balise'].'>'.$info['value'].'</'.$info['balise'].'></a>';
-                $htmlContent .= ' id="menu'.$idM.'"';
-            }
-            $htmlContent .= '>'.$info['value'].'</'.$info['balise'].'>';
-        }
+        //impression
+
+
+        if ($htmlMenu != '')
+            return $htmlMenu . '<br/><br/>' . $htmlContent;
         else
-            $htmlContent .= $info['value'].'<br/>';
+            return $htmlContent;
     }
-
     
-    if($htmlMenu != '')
-        return $htmlMenu.'<br/><br/>'.$htmlContent;
-    else
-        return $htmlContent;
-}
-
-
-
-
-function BimpCode($chaine){
+    function displayInfoPop($name){
+        $this->initLines($name . '_pop');
+        return $this->getCore();
+    }
     
-    $lienDoc = DOL_URL_ROOT.'/bimpcore/docs/test.php?name=';
-    
-    
-    $chaine = preg_replace("#'''([^\[]*) ?'''#U", "<b>\\1</b>", $chaine);
-    $chaine = preg_replace("#''([^\[]*) ?''#U", "<i>\\1</i>", $chaine);
-    if(preg_match_all('#([^\[]*)?{([^\[]*)?}#U', $chaine, $matches)){
-        if(isset($matches[2])){
-            foreach($matches[2] as $replace){
-                $new = $replace;
-                
-                if(file_exists(DOL_DOCUMENT_ROOT.'/bimpcore/docs/files/'.$replace.'_pop.txt'))
-                    $new = '<span  class="bs-popover" '.BimpRender::renderPopoverData(traiteHtml($replace.'_pop'), 'right', true).'>'.$new.'</span>';
-                if(file_exists(DOL_DOCUMENT_ROOT.'/bimpcore/docs/files/'.$replace.'_doc.txt'))
-                    $chaine = str_replace('{'.$replace.'}', '<a href="'.$lienDoc.$replace.'">'.$new.'</a>', $chaine);
-                else
-                    $chaine = str_replace('{'.$replace.'}', $new, $chaine);
-                    
+    function getMenu(){
+        $html = '';
+        foreach ($this->lines as $idM => $info) {
+            if ($info['balise'] != '') {
+                $htmlContent .= '<' . $info['balise'];
+                if ($info['isMenu']) {
+                    $html .= '<a href="#menu' . $idM . '"'.(count($info['styleMenu'])? ' style="'.implode(' ', $info['styleMenu']).'"' : '').'><' . $info['balise'] . '>' . $info['value'] . '</' . $info['balise'] . '></a>';
+                }
             }
         }
+        return $html;
     }
     
-//    $chaine = preg_replace("#([^\[]*)?{([^\[]*)?}#U", "<i>\\1<a href='".$lienDoc."\\2'>\\2</a></i>", $chaine);
-    $chaine = nl2br($chaine);
-    
-    
-    return $chaine;
-}
+    function getCore(){
+        $html = '';
+        foreach ($this->lines as $idM => $info) {
+            if ($info['balise'] != '') {
+                $html .= '<' . $info['balise'];
+                if ($info['isMenu']) {
+                    $html .= ' id="menu' . $idM . '"';
+                }
+                $html .= '>' . $info['value'] . '</' . $info['balise'] . '>';
+            } else
+                $html .= $info['value'] . '<br/>';
+        }
+        return $html;
+    }
 
+    static function traiteLn($chaine) {
+        $chaine = preg_replace("#'''([^\[]*) ?'''#U", "<b>\\1</b>", $chaine);
+        $chaine = preg_replace("#''([^\[]*) ?''#U", "<i>\\1</i>", $chaine);
+        if (preg_match_all('#([^\[]*)?{([^\[]*)?}#U', $chaine, $matches)) {
+            if (isset($matches[2])) {
+                foreach ($matches[2] as $replace) {
+                    $new = static::traitePopOver($replace);
+                    $new = static::traiteLink($replace, $new);
+                    $chaine = str_replace('{' . $replace . '}', $new, $chaine);
+
+                }
+            }
+        }
+        $chaine = nl2br($chaine);
+
+
+        return $chaine;
+    }
+    
+    static function traitePopOver($str){
+        if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/docs/files/' . $str . '_pop.txt')){
+            $bimpDoc = new BimpDoc();
+            $str = '<span  class="bs-popover" ' . BimpRender::renderPopoverData($bimpDoc->displayInfoPop($str), 'right', true) . '>' . $str . '</span>';
+        }
+        return $str;
+    }
+    
+    static function traiteLink($str, $chaine){   
+        $lienDoc = DOL_URL_ROOT . '/bimpcore/docs/test.php?name=';
+        if (file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/docs/files/' . $str . '_doc.txt'))
+            $chaine = '<a href="' . $lienDoc . $str . '">' . $chaine . '</a>';
+        return $chaine;
+    }
+
+}
 
 ?>

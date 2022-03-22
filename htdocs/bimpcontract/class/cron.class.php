@@ -182,7 +182,7 @@
                                 $email_commercial = "debugerp@bimp.fr";
                             } 
                             $this->output .= $email_commercial . "<br />";
-                            mailSyn2("[Contrat] - Renouvellement tacite - " . $contrats->getRef(), "facturationclients@bimp.fr, $email_commercial", null, "Bonjour, le contrat N°" . $contrats->dol_object->getNomUrl() . " a été renouvellé tacitement. Il est de nouveau facturable. <br /> Client: " . $client->getData('code_client') . " " . $client->getName());
+                            mailSyn2("[Contrat] - Renouvellement tacite - " . $contrats->getRef(), $email_commercial, null, "Bonjour, le contrat N°" . $contrats->dol_object->getNomUrl() . " a été renouvellé tacitement.<br /> Client: " . $client->getData('code_client') . " " . $client->getName());
                         }
                     }
                 }

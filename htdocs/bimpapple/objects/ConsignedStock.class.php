@@ -151,7 +151,6 @@ class ConsignedStock extends BimpObject
 
             if (!count($errors)) {
                 $shipTo = BimpTools::getArrayValueFromPath($centre, 'shipTo', '');
-
                 if (!$shipTo) {
                     $errors[] = 'Aucun n° shipTo pour le centre ' . $centre['label'];
                 } else {
@@ -159,7 +158,8 @@ class ConsignedStock extends BimpObject
 
                     $gsx = new GSX_v2($shipTo);
 
-                    $result = $gsx->consignmentOrdersLookup('INCREASE', 'OPEN');
+                    $statusId = BimpTools::getPostFieldValue('status', 0);
+                    $result = $gsx->consignmentOrdersLookup('INCREASE', ($statusId == 1 ? 'ALL' : 'OPEN'));
 
                     if (!$gsx->logged) {
                         $html .= BimpRender::renderAlerts($gsx->displayNoLogged());

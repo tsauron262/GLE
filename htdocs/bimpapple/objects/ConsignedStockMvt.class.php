@@ -7,11 +7,9 @@ class ConsignedStockMvt extends BimpObject
 
     public function canSetAction($action)
     {
-        global $user;
-
         switch ($action) {
             case 'cancel';
-                return 1;
+                return $this->isUserAdmin();
         }
 
         return parent::canSetAction($action);
@@ -21,11 +19,11 @@ class ConsignedStockMvt extends BimpObject
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (in_array($action, array('cancel'))) {
-            if (!$this->isLoaded($errors)) {
-                return 0;
-            }
-        }
+//        if (in_array($action, array(''))) {
+//            if (!$this->isLoaded($errors)) {
+//                return 0;
+//            }
+//        }
 
         switch ($action) {
             case 'cancel':
@@ -58,6 +56,21 @@ class ConsignedStockMvt extends BimpObject
         return $buttons;
     }
 
+    public function getListsBulkActions()
+    {
+        $actions = array();
+
+        if ($this->canSetAction('cancel')) {
+            $actions[] = array(
+                'label'   => 'Annuler',
+                'icon'    => 'fas_times-circle',
+                'onclick' => 'setSelectedObjectsAction($(this), \'list_id\', \'cancel\', {}, null, \'Veuillez confirmer l\\\'annulation des mouvements de stock sélectionnés\', true)'
+            );
+        }
+
+        return $actions;
+    }
+
     // Affichages: 
 
     public function displayBadgeQty()
@@ -70,25 +83,61 @@ class ConsignedStockMvt extends BimpObject
     {
         $errors = array();
         $warnings = array();
-        $success = 'Mouvement inverse effectué avec succès';
 
-        $stock = $this->getChildObject('stock');
+        $ids = array();
 
-        if (BimpObject::objectLoaded($stock)) {
-            $serial = $this->getData('serial');
-            $qty = (int) $this->getData('qty') * -1;
-            if ($qty) {
-                $code_mvt = 'ANNUL_' . $this->id;
-                $desc = 'Annulation mouvement #' . $this->id . BimpRender::renderObjectIcons($this, false, 'default');
+        if ($this->isLoaded()) {
+            $ids[] = (int) $this->id;
+        } else {
+            $ids = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+        }
 
-                $errors = $stock->correctStock($qty, $serial, $code_mvt, $desc);
+        if (empty($ids)) {
+            $errors[] = 'Aucun mouvement à annuler sélectionné';
+        } else {
+            $nOk = 0;
+            foreach ($ids as $id_mvt) {
+                $mvt = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id_mvt);
 
-                if (!count($errors)) {
-                    $this->updateField('cancelled', 1);
+                if (BimpObject::objectLoaded($mvt)) {
+                    $mvt_errors = array();
+                    $stock = $mvt->getChildObject('stock');
+
+                    if (BimpObject::objectLoaded($stock)) {
+                        $serial = $mvt->getData('serial');
+                        $qty = (int) $mvt->getData('qty') * -1;
+                        if ($qty) {
+                            $code_mvt = 'ANNUL_' . $mvt->id;
+                            $desc = 'Annulation mouvement #' . $mvt->id . BimpRender::renderObjectIcons($mvt, false, 'default');
+
+                            $mvt_errors = $stock->correctStock($qty, $serial, $code_mvt, $desc);
+
+                            if (!count($errors)) {
+                                $mvt->updateField('cancelled', 1);
+                                $nOk++;
+                            }
+                        }
+                    } else {
+                        $mvt_errors[] = 'Le stock consigné correspondant n\'existe plus. Annulation impossible';
+                    }
+
+                    if (count($mvt_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($mvt_errors, 'Echec annulation mouvement #' . $id_mvt);
+                    }
+                } else {
+                    $warnings[] = 'Le mouvement de stock #' . $id_mvt . ' n\'existe plus';
                 }
             }
-        } else {
-            $errors[] = 'Le stock consigné correspondant n\'existe plus. Annulation impossible';
+
+            if ($nOk > 0) {
+                if ($nOk > 1) {
+                    $success = $nOk . ' mouvements inverses effectués avec succès';
+                } else {
+                    $success = 'Mouvement inverse effectué avec succès';
+                }
+            } elseif (empty($errors)) {
+                $errors[] = 'Aucune annulation n\'a été effectuée';
+            }
         }
 
         return array(

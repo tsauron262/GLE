@@ -7,9 +7,7 @@ class ConsignedStock extends BimpObject
 
     public function canCreate()
     {
-        global $user;
-
-        return (int) 1;
+        return 1;
     }
 
     public function canEdit()
@@ -270,6 +268,8 @@ class ConsignedStock extends BimpObject
                     if (empty($result)) {
                         return BimpRender::renderAlerts('Aucun stock consigné à réceptionner pour ce n° ShipTo', 'warning');
                     } elseif (isset($result[0]['parts']) && !empty($result[0]['parts'])) {
+                        $stocks_errors = array();
+
                         $html .= '<div class="buttonsContainer align-right" style="margin: 5px 0;">';
                         $html .= '<span class="btn btn-default" onclick="ConsignedStocks.receiveNone($(this))">';
                         $html .= BimpRender::renderIcon('fas_times', 'iconLeft') . 'Tout mettre à zéro';
@@ -310,6 +310,14 @@ class ConsignedStock extends BimpObject
                             $html .= '<td>';
                             if ($qty_to_receive > 0) {
                                 if ((bool) $part['serialized']) {
+                                    // Check stock existant: 
+
+                                    $cur_stock = self::getStockInstance($code_centre, $part['number']);
+                                    if (BimpObject::objectLoaded($cur_stock) && !((int) $cur_stock->getData('serialized')) && (int) $cur_stock->getData('qty')) {
+                                        $stocks_errors[] = 'Stock actuel non sérialisé pour le composant "' . $part['number'] . '"';
+                                        continue;
+                                    }
+
                                     $serials = array();
                                     $values = array();
 
@@ -362,10 +370,22 @@ class ConsignedStock extends BimpObject
                         $html .= '</tbody>';
 
                         $html .= '</table>';
+
+                        if (!empty($stocks_errors)) {
+                            $html = '';
+                            $html .= '<span class="danger">';
+                            $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+                            $html .= 'Des erreurs ont été détectées. Veuillez les corriger pour pouvoir effectuer cette réception';
+                            $html .= '</span>';
+                            $html .= BimpRender::renderAlerts($stocks_errors);
+
+                            BimpCore::addlog('Erreurs stock(s) consigné(s) à corriger', Bimp_Log::BIMP_LOG_URGENT, 'stock', $this, array(
+                                'Centre'       => $centre['label'],
+                                'N° réception' => $delivery_number,
+                                'Erreurs'      => $stocks_errors
+                            ));
+                        }
                     } else {
-//                        $html .= '<pre>';
-//                        $html .= print_r($result, 1);
-//                        $html .= '</pre>';
                         $errors[] = 'Aucune unité à réceptionner pour cette livraison';
                     }
                 }

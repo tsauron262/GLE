@@ -81,6 +81,11 @@ function ConsignedStocks() {
         if (has_error) {
             return false;
         }
+        
+        if (!parts.length) {
+            bimp_msg('Aucun compoosant à réceptionner', 'danger', null, true);
+            return false;
+        }
 
         extra_data.parts = parts;
         return extra_data;

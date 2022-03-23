@@ -37,7 +37,7 @@ Page {Propal}, page {list}, page {doc dev}
 ==== Inclusion
 {code} {{nomPage}} permet d'inclure une doc dans une doc
 
-== Image
+=== Image
 {code} {{nom de l'image[:largeur[:hauteur]]} affiche une image ex:
 {code} Voici une image {{config_list.png:120} elle est belle !!!
 {{config_list.png:120}

@@ -9,6 +9,7 @@ class BimpDoc {
     static $lang = 'fr_FR';
     var $menu = array();
     static $nbInstance = 0;
+    var $admin = true;
     
     function __construct($type, $name, &$menu = array()) {
         $this->name = $name;
@@ -21,16 +22,24 @@ class BimpDoc {
         }
     }
 
-    static function getPathFile($type, $name) {
-        return DOL_DOCUMENT_ROOT . '/bimpcore/docs/'.static::$lang.'/' . $name . '_' . $type . '.txt';
+    static function getPathFile($type, $name, $update_file = false) {
+        return DOL_DOCUMENT_ROOT . '/bimpcore/docs/'.static::$lang.'/' .($update_file?'upd_' : '') . $name . '_' . $type . '.txt';
     }
 
     function getThisPathFile() {
+        $file = static::getPathFile($this->type, $this->name, true);
+        if(is_file($file)){
+            if(preg_replace('~\R~u', "\r\n", file_get_contents($file)) == preg_replace('~\R~u', "\r\n", file_get_contents(static::getPathFile($this->type, $this->name)))){
+                unlink($file);
+            }
+            else
+                return $file;
+        }
         return static::getPathFile($this->type, $this->name);
     }
 
     function initLines($initNiveau = 0) {
-        $data = file($this->getThisPathFile($file), FILE_IGNORE_NEW_LINES);
+        $data = $this->getFileData('array');
         $niveau = 0;
         foreach ($data as $idL => $ln) {
             $styleMenu = array();
@@ -39,10 +48,17 @@ class BimpDoc {
             if (preg_match('#\{code}([^\[]*) ?#', $ln, $matches)) {
                 $ln = '<xmp>' . $matches[1] . '</xmp>';
             } elseif (preg_match('#([^\[]*)?{{([^\[]*)?}}#U', $ln, $matches) && isset($matches[2])) {
-                $child = new BimpDoc('doc', $matches[2], $this->menu);
-                $child->initLines($niveau);
-                $this->lines = BimpTools::merge_array($this->lines, $child->lines);
-                $this->errors = BimpTools::merge_array($this->errors, $child->errors);
+                if(is_file(static::getPathFile('doc', $matches[2]))){
+                    $child = new BimpDoc('doc', $matches[2], $this->menu);
+                    $child->initLines($niveau);
+                    if($this->admin)
+                        $this->lines[] = array('value' => static::btnEditer($matches[2]));
+                    $this->lines = BimpTools::merge_array($this->lines, $child->lines);
+                    $this->errors = BimpTools::merge_array($this->errors, $child->errors);
+                }
+                else{
+                    $this->lines[] = array('value' => static::btnEditer($matches[2]));
+                }
                 continue;
             } elseif (preg_match('#([^\[]*)?{{([^\[]*)?}#U', $ln, $matches) && isset($matches[2])) {
                 $datas = explode(':', $matches[2]);
@@ -88,21 +104,32 @@ class BimpDoc {
         $in = str_replace(' ', '_', $in);
         return $in;
     }
+    
+    function getFileData($type = 'text'){
+        if($type == 'text')
+            return file_get_contents($this->getThisPathFile());
+        elseif($type == 'array')
+            return file($this->getThisPathFile(), FILE_IGNORE_NEW_LINES);
+    }
 
     function getEditFormDoc() {
-        return '<form method="post"><textarea name="html" style="min-height: 501px;width: 100%;">' . file_get_contents($this->getThisPathFile()) . '</textarea>'
+        return '<form method="post"><textarea name="html" style="min-height: 501px;width: 100%;">' . $this->getFileData() . '</textarea>'
                 . '<br/><input type="submit" value="Valider"/>'
                 . '</form>';
     }
 
     function saveDoc($name, $value) {
-        return $this->saveFile($name . '_doc', $value);
+        return $this->saveFile('doc', $name, $value);
     }
 
-    function saveFile($name, $value) {
+    function saveFile($type, $name, $value) {
 //        die('fff'.DOL_DOCUMENT_ROOT . '/bimpcore/docs/files/' . $name . '.txt');
-        if(!file_put_contents(DOL_DOCUMENT_ROOT . '/bimpcore/docs/files/' . $name . '.txt', $value))
-                $this->errors[] = 'Enregistrement impossible';
+        if(!file_put_contents($this->getPathFile($type, $name, true), $value))
+                $this->errors[] = 'Enregistrement impossible : '.$this->getPathFile($type, $name, true);
+    }
+    
+    static function btnEditer($name){
+        return '<button onclick="window.location = \''.static::getLink($name, array('action'=>'edit')).'\'">'.BimpRender::renderIcon('fas_edit').'</button>';
     }
 
     function displayDoc() {
@@ -115,7 +142,8 @@ class BimpDoc {
         
         $sections = array();
         $sections[] = '';
-        $sections[] = '<button onclick="window.location = \''.$this->getLink(array('action'=>'edit')).'\'">Editer</button>';
+        if($this->admin)
+            $sections[] = static::btnEditer($this->name);
         
         $sections[] = $this->getMenu();
         $sections[] = $this->getCore();
@@ -132,8 +160,8 @@ class BimpDoc {
 //            return $htmlContent;
     }
     
-    function getLink($params = array()){
-        $params['name'] = $this->name;
+    static function getLink($name, $params = array()){
+        $params['name'] = $name;
         $newParams = array();
         foreach($params as $clef => $val){
             $newParams[] = $clef.'='.$val;

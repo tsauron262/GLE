@@ -1914,6 +1914,12 @@ class BimpComm extends BimpDolObject
             $html .= '<span class="warning" style="font-size: 15px">Annule et remplace ' . $this->getLabel('the') . ' "' . $this->getData('replaced_ref') . '" (données perdues)</span>';
             $html .= '</div>';
         }
+        
+        global $user;
+        if($user->admin){
+            $html .= $this->addBtnDoc('gle', 'Test pour les admin, doc compléte');
+            $html .= $this->addBtnDoc('propal', 'Test pour les admin, doc propal');
+        }
 
         return $html;
     }

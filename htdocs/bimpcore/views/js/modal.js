@@ -521,4 +521,9 @@ $(document).ready(function () {
         'content_removable': true,
         'max_contents': 10
     });
+    
+    docModal = new BimpModal($('#doc_modal'), 'docModal', '', {
+        'content_removable': true,
+        'max_contents': 5
+    });
 });

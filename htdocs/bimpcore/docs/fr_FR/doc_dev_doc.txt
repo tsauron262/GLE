@@ -37,8 +37,12 @@ Page {Propal}, page {list}, page {doc dev}
 ==== Inclusion
 {code} {{nomPage}} permet d'inclure une doc dans une doc
 
+== Image
+{code} {{nom de l'image[:largeur[:hauteur]]} affiche une image ex:
+{code} Voici une image {{config_list.png:120} elle est belle !!!
+Voici une image {{config_list.png:120} elle est belle !!!
 
-==== Html
+=== Html
 Il faut éviter d'utiliser directment du HTML, mais cela fonctionne :
 {code} <span class="alert" style="color:red">Une alert</span>
 <span class="alert" style="color:red">Une alert</span>

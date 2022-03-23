@@ -25,7 +25,10 @@ class BimpDoc {
     }
 
     static function getPathFile($type, $name, $update_file = false) {
-        return DOL_DOCUMENT_ROOT . '/bimpcore/docs/'.static::$lang.'/' .($update_file?'upd_' : '') . $name . '_' . $type . '.txt';
+        if($update_file)
+            return DOL_DATA_ROOT . '/bimpcore/docs/'.static::$lang.'/' .($update_file?'upd_' : '') . $name . '_' . $type . '.txt';
+        else
+            return DOL_DOCUMENT_ROOT . '/bimpcore/docs/'.static::$lang.'/' .($update_file?'upd_' : '') . $name . '_' . $type . '.txt';
     }
 
     function getThisPathFile() {
@@ -127,7 +130,6 @@ class BimpDoc {
     }
 
     function saveFile($type, $name, $value) {
-//        die('fff'.DOL_DOCUMENT_ROOT . '/bimpcore/docs/files/' . $name . '.txt');
         if(!file_put_contents($this->getPathFile($type, $name, true), $value))
                 $this->errors[] = 'Enregistrement impossible : '.$this->getPathFile($type, $name, true);
     }

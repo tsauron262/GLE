@@ -51,7 +51,7 @@ class BimpDoc {
                 /* gestion menu */
                 static::$menu[$niveau][] = $ln;
                 $pref = '';
-                for($i=1;$i<=6;$i++){
+                for($i=1;$i<=10;$i++){//10 niveau de titres
                     if($i<=$niveau)
                     $pref .= count(static::$menu[$i]).($i<$niveau ? '.' : '');
                     else

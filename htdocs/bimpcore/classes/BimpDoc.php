@@ -87,15 +87,17 @@ class BimpDoc {
                     }
                     $ln = $pref . ' '.$ln;
                     $hash = 'menu'.$pref;
-                    if ($niveau > 1)
+                    if ($niveau > 1){
                         $styleMenu[] = 'text-indent: ' . ($niveau * 10) . 'px;';
+                        $styleCore[] = 'padding-left: ' . ($niveau * 10) . 'px;';
+                    }
                 }
                 
             } else {
                 $ln = static::traiteLn($ln);
             }
 
-            $this->lines[] = array('balise' => $type, 'value' => $ln, 'styleMenu' => $styleMenu, 'hash' => $hash);
+            $this->lines[] = array('balise' => $type, 'value' => $ln, 'styleMenu' => $styleMenu, 'styleCore' => $styleCore, 'hash' => $hash);
         }
     }
     
@@ -190,9 +192,11 @@ class BimpDoc {
     }
 
     function getCore() {
-        $html = '';
+        $html = '<div>';
         foreach ($this->lines as $info) {
             if ($info['balise'] != '') {
+                $html .= '</div>';
+                $html .= "<div ".(isset($info['styleCore']) && count($info['styleCore']) ? ' style="' . implode(' ', $info['styleCore']) . '"' : '').">";
                 $html .= '<' . $info['balise'];
                 if ($info['hash']) {
                     $html .= ' id="' . $info['hash'] . '"';
@@ -201,6 +205,7 @@ class BimpDoc {
             } else
                 $html .= $info['value'] . '<br/>';
         }
+        $html .= '</div>';
         return $html;
     }
 

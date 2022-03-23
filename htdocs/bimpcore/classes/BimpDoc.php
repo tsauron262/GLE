@@ -10,6 +10,7 @@ class BimpDoc {
     var $menu = array();
     static $nbInstance = 0;
     var $admin = true;
+    var $mode = 'link';
     
     function __construct($type, $name, &$menu = array()) {
         $this->name = $name;
@@ -49,7 +50,7 @@ class BimpDoc {
                 $ln = '<xmp>' . $matches[1] . '</xmp>';
             } elseif (preg_match('#([^\[]*)?{{([^\[]*)?}}#U', $ln, $matches) && isset($matches[2])) {
                 if(is_file(static::getPathFile('doc', $matches[2]))){
-                    $child = new BimpDoc('doc', $matches[2], $this->menu);
+                    $child = new BimpDoc('doc', $matches[2], $this->menu, $this->mode);
                     $child->initLines($niveau);
                     if($this->admin)
                         $this->lines[] = array('value' => static::btnEditer($matches[2]));
@@ -71,7 +72,7 @@ class BimpDoc {
                 $html .= '/>';
                 $ln = str_replace('{{'.$matches[2].'}', $html, $ln);
             } elseif (preg_match('#(={2,4}) ?([^\[]*) ?#', $ln, $matches)) {
-                $ln = static::traiteLn($matches[2]);
+                $ln = $this->traiteLn($matches[2]);
                 $niveau = (strlen($matches[1]) - 1) + $initNiveau;
                 $type = 'h' . $niveau;
                 
@@ -94,7 +95,7 @@ class BimpDoc {
                 }
                 
             } else {
-                $ln = static::traiteLn($ln);
+                $ln = $this->traiteLn($ln);
             }
 
             $this->lines[] = array('balise' => $type, 'value' => $ln, 'styleMenu' => $styleMenu, 'styleCore' => $styleCore, 'hash' => $hash);
@@ -209,7 +210,7 @@ class BimpDoc {
         return $html;
     }
 
-    static function traiteLn($chaine) {
+    public function traiteLn($chaine) {
         $chaine = preg_replace("#'''([^\[]*) ?'''#U", "<b>\\1</b>", $chaine);
         $chaine = preg_replace("#''([^\[]*) ?''#U", "<i>\\1</i>", $chaine);
         if (preg_match_all('#([^\[]*)?{([^\[]*)?}#U', $chaine, $matches)) {
@@ -218,7 +219,7 @@ class BimpDoc {
                     $replaceInit = $replace;
                     $replace = static::convertTag($replace);
                     $new = static::traitePopOver($replace, $replaceInit);
-                    $new = static::traiteLink($replace, $new);
+                    $new = static::traiteLink($replace, $new, $this->mode);
                     $chaine = str_replace('{' . $replaceInit . '}', $new, $chaine);
                 }
             }
@@ -237,10 +238,15 @@ class BimpDoc {
         return $text;
     }
 
-    static function traiteLink($str, $chaine) {
+    static function traiteLink($str, $chaine, $mode = 'link') {
         $lienDoc = DOL_URL_ROOT . '/bimpcore/docs/test.php?name=';
         if (file_exists(static::getPathFile('doc', $str)))
-            $chaine = '<a href="' . $lienDoc . $str . '">' . $chaine . '</a>';
+            if($mode == 'modal'){
+                $onClick = "docModal.loadAjaxContent($(this), 'loadDoc', {name: '".$str."'}, 'Doc : ".$str."', 'Chargement', function (result, bimpAjax) {});";
+                $chaine = '<a onclick="'.$onClick.'">' . $chaine . '</a>';
+            }
+            else
+                $chaine = '<a href="' . $lienDoc . $str . '">' . $chaine . '</a>';
         return $chaine;
     }
 

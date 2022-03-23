@@ -8,10 +8,16 @@ class BimpDoc {
     var $name = '';
     static $lang = 'fr_FR';
     static $menu = array();
+    static $nbInstance = 0;
     
     function __construct($type, $name) {
         $this->name = $name;
         $this->type = $type;
+        static::$nbInstance++;
+        if(static::$nbInstance > 20){
+            BimpCore::addlog('Attention boucle dans DOC');
+            die('Probléme technique, contacté l\'équipe dév');
+        }
     }
 
     static function getPathFile($type, $name) {
@@ -34,7 +40,8 @@ class BimpDoc {
             } elseif (preg_match('#([^\[]*)?{{([^\[]*)?}}#U', $ln, $matches) && isset($matches[2])) {
                 $child = new BimpDoc('doc', $matches[2]);
                 $child->initLines($niveau);
-                $this->lines = array_merge($this->lines, $child->lines);
+                $this->lines = BimpTools::merge_array($this->lines, $child->lines);
+                $this->errors = BimpTools::merge_array($this->errors, $child->errors);
                 continue;
             } elseif (preg_match('#(={2,4}) ?([^\[]*) ?#', $ln, $matches)) {
                 $ln = static::traiteLn($matches[2]);

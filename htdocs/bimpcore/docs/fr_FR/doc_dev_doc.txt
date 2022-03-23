@@ -40,5 +40,5 @@ Page {Propal}, page {list}, page {doc dev}
 
 ==== Html
 Il faut éviter d'utiliser directment du HTML, mais cela fonctionne :
-{code} <span class="alert" style="color:red">Une alert</div>
-<span class="alert" style="color:red">Une alert</div>
+{code} <span class="alert" style="color:red">Une alert</span>
+<span class="alert" style="color:red">Une alert</span>

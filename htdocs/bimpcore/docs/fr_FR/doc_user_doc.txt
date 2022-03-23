@@ -1,4 +1,6 @@
-== Commande
-{{commande}}
 == Devis
 {{propal}}
+== Commande
+{{commande}}
+== Facture
+{{facture}}

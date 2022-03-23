@@ -40,7 +40,7 @@ Page {Propal}, page {list}, page {doc dev}
 == Image
 {code} {{nom de l'image[:largeur[:hauteur]]} affiche une image ex:
 {code} Voici une image {{config_list.png:120} elle est belle !!!
-Voici une image {{config_list.png:120} elle est belle !!!
+{{config_list.png:120}
 
 === Html
 Il faut éviter d'utiliser directment du HTML, mais cela fonctionne :

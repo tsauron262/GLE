@@ -28,8 +28,8 @@ ceci est un '''gras'''
 === Référence autre doc
 ==== Lien
 {code} {nomPage} Permet de faire un lien vers une autre page si elle existe et/ou un popover si le fihcier existe. Ex avec les deux:
-{code} {doc}
-{doc}
+{code} {doc dev}
+{doc dev}
 Exemple avec des liens :
 {code} Page {propal}, page {list}, page {Doc dev}
 Page {Propal}, page {list}, page {doc dev}

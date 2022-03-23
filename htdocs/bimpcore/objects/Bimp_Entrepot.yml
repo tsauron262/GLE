@@ -7,8 +7,7 @@ dol_object:
             
 table: entrepot
 primary: rowid
-#icon: fas_warehouse
-icon: fas_bacteria
+icon: fas_warehouse
 
 list_page_url: 
     controller: products

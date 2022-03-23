@@ -1,6 +1,9 @@
-== Devis
+== Piéce Commercial
+=== Devis
 {{propal}}
-== Commande
+=== Commande
 {{commande}}
-== Facture
+=== Facture
 {{facture}}
+== Fonctionnement des listes
+{{liste}}

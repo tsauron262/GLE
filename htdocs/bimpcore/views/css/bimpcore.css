@@ -6071,7 +6071,7 @@ readers do not read off random characters that represent icons */
   src: url("../fonts/fa5/fa-brands-400.eot?#iefix") format("embedded-opentype"), url("../fonts/fa5/fa-brands-400.woff2") format("woff2"), url("../fonts/fa5/fa-brands-400.woff") format("woff"), url("../fonts/fa5/fa-brands-400.ttf") format("truetype"), url("../fonts/fa5/fa-brands-400.svg#fontawesome") format("svg"); }
 /* line 20, ../scss/fontawesome5/_fa-brands.scss */
 .fab {
-  font-family: 'Font Awesome 5 Brands';
+  font-family: 'FA5B';
   font-weight: 400; }
 
 /*!
@@ -6087,7 +6087,7 @@ readers do not read off random characters that represent icons */
   src: url("../fonts/fa5/fa-regular-400.eot?#iefix") format("embedded-opentype"), url("../fonts/fa5/fa-regular-400.woff2") format("woff2"), url("../fonts/fa5/fa-regular-400.woff") format("woff"), url("../fonts/fa5/fa-regular-400.ttf") format("truetype"), url("../fonts/fa5/fa-regular-400.svg#fontawesome") format("svg"); }
 /* line 20, ../scss/fontawesome5/_fa-regular.scss */
 .far {
-  font-family: 'Font Awesome 5 Free';
+  font-family: 'FA5R';
   font-weight: 400; }
 
 /*!
@@ -6103,7 +6103,7 @@ readers do not read off random characters that represent icons */
   src: url("../fonts/fa5/fa-solid-900.eot?#iefix") format("embedded-opentype"), url("../fonts/fa5/fa-solid-900.woff2") format("woff2"), url("../fonts/fa5/fa-solid-900.woff") format("woff"), url("../fonts/fa5/fa-solid-900.ttf") format("truetype"), url("../fonts/fa5/fa-solid-900.svg#fontawesome") format("svg"); }
 /* line 20, ../scss/fontawesome5/_fa-solid.scss */
 .fas {
-  font-family: 'Font Awesome 5 Free';
+  font-family: 'FA5S';
   font-weight: 900; }
 
 /*!

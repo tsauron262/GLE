@@ -12,9 +12,10 @@ class BimpDoc {
     var $admin = true;
     var $mode = 'link';
     
-    function __construct($type, $name, &$menu = array()) {
+    function __construct($type, $name, $mode = 'link', &$menu = array()) {
         $this->name = $name;
         $this->type = $type;
+        $this->mode = $mode;
         $this->menu = &$menu;
         static::$nbInstance++;
         if(static::$nbInstance > 20){
@@ -50,7 +51,7 @@ class BimpDoc {
                 $ln = '<xmp>' . $matches[1] . '</xmp>';
             } elseif (preg_match('#([^\[]*)?{{([^\[]*)?}}#U', $ln, $matches) && isset($matches[2])) {
                 if(is_file(static::getPathFile('doc', $matches[2]))){
-                    $child = new BimpDoc('doc', $matches[2], $this->menu, $this->mode);
+                    $child = new BimpDoc('doc', $matches[2], $this->mode, $this->menu);
                     $child->initLines($niveau);
                     if($this->admin)
                         $this->lines[] = array('value' => static::btnEditer($matches[2]));

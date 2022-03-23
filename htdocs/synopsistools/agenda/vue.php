@@ -475,7 +475,7 @@ function printMenu($tabUser) {
     echo "<br/></div>";
 
     //que pour 2016
-    echo "<br/>ATTENTION sur l'année 2016 les numéros de semaines sont décalés de 1. (Il faut enlever 1 au numéro affiché)";
+    echo "<br/>ATTENTION sur l'année 2022 les numéros de semaines sont décalés de 1. (Il faut enlever 1 au numéro affiché)";
 }
 
 llxFooter();

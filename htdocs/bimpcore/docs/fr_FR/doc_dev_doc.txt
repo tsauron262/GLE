@@ -12,6 +12,11 @@ ceci est un ''italique''
 {code}ceci est un '''gras'''
 ceci est un '''gras'''
 
+==== Couleurs
+{code} #couleur#text# pemter de mêtre ne couleur
+{code} exmple : #green#mon '''text''' vert# mais aussi #red#mon ''text'' rouge#
+#green#mon '''text''' vert# mais aussi #red#mon ''text'' rouge#
+
 ==== Titre
 {code} == pour faire un titre principal Ex:
 {code} == Titre 1

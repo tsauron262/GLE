@@ -214,7 +214,7 @@ class BimpDoc {
     public function traiteLn($chaine) {
         $chaine = preg_replace("#'''([^\[]*) ?'''#U", "<b>\\1</b>", $chaine);
         $chaine = preg_replace("#''([^\[]*) ?''#U", "<i>\\1</i>", $chaine);
-        if (preg_match_all('#([^\[]*)?{([^\[]*)?}#U', $chaine, $matches)) {
+        if (preg_match_all('#([^\[]*)?{([^\[]*)?}#U', $chaine, $matches)) {//lien et popup
             if (isset($matches[2])) {
                 foreach ($matches[2] as $replace) {
                     $replaceInit = $replace;
@@ -222,6 +222,17 @@ class BimpDoc {
                     $new = static::traitePopOver($replace, $replaceInit);
                     $new = static::traiteLink($replace, $new, $this->mode);
                     $chaine = str_replace('{' . $replaceInit . '}', $new, $chaine);
+                }
+            }
+        }
+        if (preg_match_all('#([^\[]*)?\#([^\[]*)?\#([^\[]*)?\##U', $chaine, $matches)) {//couleur
+//            echo '<pre>';print_r($matches);
+//            die('ttt');
+            if (isset($matches[2])) {
+                foreach ($matches[2] as $idT => $couleur) {
+                    if(isset($matches[3][$idT])){
+                        $chaine = str_replace('#'.$matches[2][$idT].'#'.$matches[3][$idT].'#', '<span style="color:'.$matches[2][$idT].'">'.$matches[3][$idT].'</span>', $chaine);
+                    }
                 }
             }
         }

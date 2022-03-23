@@ -18,7 +18,7 @@ ceci est un '''gras'''
 == Titre 1
 
 {code} === pour faire un titre secondaire Ex:
-{code} === Titre 2 avec ''italique'' et '''gras''' et pourquoi pas '''''les deux'''''
+{code} === Titre 2 avec ''italique'' et '''gras''' et pourquoi pas '''''Les Deux'''''
 === Titre 2 avec ''italique'' et '''gras''' et pourquoi pas '''''les deux'''''
 
 {code} ==== pour faire un titre 3 Ex:
@@ -30,8 +30,8 @@ ceci est un '''gras'''
 {code} {doc}
 {doc}
 Exemple avec des liens :
-{code} Page {propal}, page {list}
-Page {propal}, page {list}
+{code} Page {propal}, page {list}, page {Doc dev}
+Page {Propal}, page {list}, page {doc dev}
 
 
 ==== Html

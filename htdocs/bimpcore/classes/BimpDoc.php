@@ -50,7 +50,7 @@ class BimpDoc {
             if (preg_match('#\{code}([^\[]*) ?#', $ln, $matches)) {
                 $ln = '<xmp>' . $matches[1] . '</xmp>';
             } elseif (preg_match('#([^\[]*)?{{([^\[]*)?}}#U', $ln, $matches) && isset($matches[2])) {
-                if(is_file(static::getPathFile('doc', $matches[2]))){
+                if(is_file(static::getPathFile('doc', $matches[2])) || is_file(static::getPathFile('doc', $matches[2], true))){
                     $child = new BimpDoc('doc', $matches[2], $this->mode, $this->menu);
                     $child->initLines($niveau);
                     if($this->admin)

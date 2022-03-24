@@ -44,7 +44,7 @@ class BC_FieldsTable extends BC_Panel
                     if ($param_name == 'field') {
                         continue;
                     }
-                    
+
                     $row[$param_name] = BimpTools::getArrayValueFromPath($defs, 'default', null);
                 }
                 $this->params['rows'][] = $row;
@@ -84,12 +84,12 @@ class BC_FieldsTable extends BC_Panel
         $has_content = false;
 
         foreach ($this->params['rows'] as $row) {
-            $rows_params = array();
-            
-            if (is_string($row)) {
-                $rows_params = $this->fetchParams($this->config_path . '/rows/' . $row, $this->row_params);
-            } elseif (is_array($row)) {
+            $row_params = array();
+
+            if (isset($row['field'])) {
                 $row_params = $row;
+            } else {
+                $row_params = $this->fetchParams($this->config_path . '/rows/' . $row, $this->row_params);
             }
 
             if (empty($row_params)) {

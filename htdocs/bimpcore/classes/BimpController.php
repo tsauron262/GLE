@@ -447,6 +447,7 @@ class BimpController
 
         if ($display_footer) {
             echo BimpRender::renderAjaxModal('page_modal');
+            echo BimpRender::renderAjaxModal('doc_modal');
 
             $html = '<div id="openModalBtn" onclick="bimpModal.show();" class="closed bs-popover"';
             $html .= BimpRender::renderPopoverData('Afficher la fenêtre popup', 'left');
@@ -2204,6 +2205,19 @@ class BimpController
             'list_id'            => $list_id,
             'modal_format'       => $modal_format,
             'request_id'         => BimpTools::getValue('request_id', 0)
+        );
+    }
+    
+    protected function ajaxProcessLoadDoc(){
+        require_once DOL_DOCUMENT_ROOT.'/bimpcore/classes/BimpDoc.php';
+        $BimpDoc = new BimpDoc('doc', BimpTools::getValue('name', ''), 'modal');
+        $html = $BimpDoc->displayDoc();
+        $errors = $BimpDoc->errors;
+
+        return array(
+            'errors'     => $errors,
+            'html'       => $html,
+            'request_id' => BimpTools::getValue('request_id', 0)
         );
     }
 

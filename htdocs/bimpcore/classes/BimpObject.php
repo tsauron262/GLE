@@ -7598,6 +7598,21 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         $js .= ');';
         return $js;
     }
+    
+       public static function addBtnDoc($name, $text = ''){
+        $onClickInit = "docModal.loadAjaxContent($(this), 'loadDoc', {name: '".$name."'}, 'Doc : ".$name."', 'Chargement', function (result, bimpAjax) {});";
+
+        $onClickInit .= 'docModal.show();';
+        
+        if($text == '')
+            $text = 'Doc : '.$name;
+           
+        $html .= '<span  class="bs-popover" ' . BimpRender::renderPopoverData($text, 'right', true) . '>' . '<button type="button" onclick="' . $onClickInit . '" class="btn btn-default">';
+        $html .= BimpRender::renderIcon('fas_info-circle');
+        $html .= '</button></span>';
+        
+        return $html;
+    }
 
     public function getJsActionOnclick($action, $data = array(), $params = array())
     {

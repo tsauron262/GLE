@@ -2209,10 +2209,9 @@ class BimpController
     }
     
     protected function ajaxProcessLoadDoc(){
-        require_once DOL_DOCUMENT_ROOT.'/bimpcore/classes/BimpDoc.php';
-        $BimpDoc = new BimpDoc('doc', BimpTools::getValue('name', ''), 'modal');
-        $html = $BimpDoc->displayDoc();
-        $errors = $BimpDoc->errors;
+        $BimpDocumentation = new BimpDocumentation('doc', BimpTools::getValue('name', ''), 'modal');
+        $html = $BimpDocumentation->displayDoc();
+        $errors = $BimpDocumentation->errors;
 
         return array(
             'errors'     => $errors,

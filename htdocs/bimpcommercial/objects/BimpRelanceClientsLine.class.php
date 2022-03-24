@@ -5,6 +5,7 @@ class BimpRelanceClientsLine extends BimpObject
 
     const RELANCE_ATTENTE_MAIL = 0;
     const RELANCE_ATTENTE_COURRIER = 1;
+    const RELANCE_ATTENTE_TEL = 2;
     const RELANCE_OK_MAIL = 10;
     const RELANCE_OK_COURRIER = 11;
     const RELANCE_CONTENTIEUX = 12;
@@ -14,6 +15,7 @@ class BimpRelanceClientsLine extends BimpObject
     public static $status_list = array(
         self::RELANCE_ATTENTE_MAIL     => array('label' => 'En attente d\'envoi par e-mail', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
         self::RELANCE_ATTENTE_COURRIER => array('label' => 'En attente d\'envoi par courrier', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
+        self::RELANCE_ATTENTE_TEL      => array('label' => 'En attente d\'appel téléphonique', 'icon' => 'fas_phone', 'classes' => array('important')),
         self::RELANCE_OK_MAIL          => array('label' => 'Envoyée', 'icon' => 'fas_check', 'classes' => array('success')),
         self::RELANCE_OK_COURRIER      => array('label' => 'Envoyée', 'icon' => 'fas_check', 'classes' => array('success')),
         self::RELANCE_CONTENTIEUX      => array('label' => 'Dépôt contentieux', 'icon' => 'fas_check', 'classes' => array('success')),
@@ -40,6 +42,7 @@ class BimpRelanceClientsLine extends BimpObject
             case 'generatePdf':
             case 'reopen':
             case 'cancelEmail':
+            case 'phoneCallDone':
                 if ($user->admin || (int) $user->id === 1237 ||
                         $user->rights->bimpcommercial->admin_relance_global ||
                         $user->rights->bimpcommercial->admin_relance_individuelle) {
@@ -136,8 +139,23 @@ class BimpRelanceClientsLine extends BimpObject
                 return 1;
 
             case 'editDateSend':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
+
                 if ($this->isLoaded() && (int) $this->getData('status') < 10) {
                     $errors[] = 'Le statut actuel de cette relance ne permet pas d\'éditer la date d\'envoi / abandon';
+                    return 0;
+                }
+                return 1;
+
+            case 'phoneCallDone':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
+
+                if ((int) $this->getData('status') !== self::RELANCE_ATTENTE_TEL) {
+                    $errors[] = 'Cette relance n\'est pas au statut "En attente d\'appel téléphonique"';
                     return 0;
                 }
                 return 1;
@@ -167,6 +185,21 @@ class BimpRelanceClientsLine extends BimpObject
             case self::RELANCE_ATTENTE_COURRIER:
                 if ($relance_idx > 4) {
                     $errors[] = $err_label . ': cette relance ne peut pas être envoyée par courrier';
+                    return 0;
+                }
+                if ($current_status === self::RELANCE_ATTENTE_TEL) {
+                    $errors[] = $err_label . ': veuillez d\'abord effectuer un appel téléphonique au client avant d\'envoyer le courrier de mise en demeure';
+                    return 0;
+                }
+                return 1;
+
+            case self::RELANCE_ATTENTE_TEL:
+                if ($relance_idx !== 4) {
+                    $errors[] = $err_label . ': seules les mises en demeure peuvent être mises en attente d\'appel téléphonique';
+                    return 0;
+                }
+                if (!in_array($current_status, array(self::RELANCE_ATTENTE_COURRIER, self::RELANCE_ABANDON, self::RELANCE_ANNULEE))) {
+                    $errors[] = $err_label . ': le statut actuel de cette relance ne permet pas de la remettre en attente d\'appel téléphonique';
                     return 0;
                 }
                 return 1;
@@ -320,6 +353,14 @@ class BimpRelanceClientsLine extends BimpObject
             $status = (int) $this->getData('status');
             $relance_idx = (int) $this->getData('relance_idx');
 
+            if ($this->isNewStatusAllowed(self::RELANCE_ATTENTE_TEL) && $this->canSetStatus(self::RELANCE_ATTENTE_TEL)) {
+                $buttons[] = array(
+                    'label'   => 'Remettre en attente d\'appel téléphonique',
+                    'icon'    => 'fas_undo',
+                    'onclick' => $this->getJsNewStatusOnclick(self::RELANCE_ATTENTE_TEL)
+                );
+            }
+
             if ($status < 10) {
                 if ($status === self::RELANCE_ATTENTE_MAIL) {
 
@@ -365,6 +406,16 @@ class BimpRelanceClientsLine extends BimpObject
                                 'onclick' => $this->getJsNewStatusOnclick(self::RELANCE_ATTENTE_MAIL)
                             );
                         }
+                    }
+                } elseif ($status === self::RELANCE_ATTENTE_TEL) {
+                    if ($this->isActionAllowed('phoneCallDone') && $this->canSetAction('phoneCallDone')) {
+                        $buttons[] = array(
+                            'label'   => 'Appel téléphonique effectué',
+                            'icon'    => 'fas_phone',
+                            'onclick' => $this->getJsActionOnclick('phoneCallDone', array(), array(
+                                'form_name' => 'phone_call_done'
+                            ))
+                        );
                     }
                 }
 
@@ -1076,7 +1127,6 @@ class BimpRelanceClientsLine extends BimpObject
         $errors = array();
         if ($this->isLoaded($errors)) {
             $factures = $this->getData('factures');
-            $init_date_send = $this->getData('date_send');
             $relance_idx = (int) $this->getData('relance_idx');
 
             if ($new_status >= 10) {
@@ -1101,16 +1151,19 @@ class BimpRelanceClientsLine extends BimpObject
                     foreach ($factures as $id_facture) {
                         $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
                         if (BimpObject::objectLoaded($facture)) {
-                            if ($this->isFactureRelancable($facture)) {
-                                $facture->updateField('nb_relance', $relance_idx, null, true);
-                                $facture->updateField('date_relance', $now, null, true);
-                            }
+                            $facture->updateField('nb_relance', $relance_idx, null, true);
+                            $facture->updateField('date_relance', $now, null, true);
                         }
                     }
                 }
             } else {
-                $this->set('date_send', '0000-00-00 00:00:00');
+                $this->set('date_send', null);
                 $this->set('id_user_send', 0);
+            }
+            
+            if ($new_status == self::RELANCE_ATTENTE_TEL) {
+                $this->set('id_user_phone_call', 0);
+                $this->set('date_phone_call', null);
             }
 
             $err = $this->update($warnings, true);
@@ -1120,22 +1173,9 @@ class BimpRelanceClientsLine extends BimpObject
                     foreach ($factures as $id_facture) {
                         $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
                         if (BimpObject::objectLoaded($facture)) {
-                            if ($init_date_send) {
-                                $dt = new DateTime($init_date_send);
-
-                                $delay = 5;
-                                if ($relance_idx > 2) {
-                                    $delay = BimpCore::getConf('relance_paiements_facture_delay_days', 15);
-                                } elseif ($relance_idx > 1) {
-                                    $delay = 10;
-                                }
-
-                                $dt->sub(new DateInterval('P' . $delay . 'D'));
-                                $date = $dt->format('Y-m-d');
-                                $facture->updateField('date_relance', $date, null, true);
+                            if ((int) $facture->getData('nb_relance') == $relance_idx) {
+                                $facture->cancelLastRelance();
                             }
-
-                            $facture->updateField('nb_relance', ($relance_idx - 1), null, true);
                         }
                     }
                 }
@@ -1579,6 +1619,51 @@ class BimpRelanceClientsLine extends BimpObject
         );
     }
 
+    public function actionPhoneCallDone($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $continue = BimpTools::getArrayValueFromPath($data, 'continue', null);
+
+        if (is_null($continue)) {
+            $errors[] = 'Poursuite de la mise en demeure non spécifiée';
+        } else {
+            $continue = (int) $continue;
+            global $user;
+
+            $this->set('id_user_phone_call', $user->id);
+            $this->set('date_phone_call', date('Y-m-d H:i:s'));
+
+            if ($continue) {
+                $this->set('status', self::RELANCE_ATTENTE_COURRIER);
+            } else {
+                $this->set('status', self::RELANCE_ABANDON);
+            }
+
+            $errors = $this->update($warnings, true);
+
+            if (!count($errors)) {
+                // Si non poursuite de la mise en demeure, on désactive les relances pour les factures concernées.
+                $factures = $this->getData('factures');
+
+                foreach ($factures as $id_facture) {
+                    $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+
+                    if (BimpObject::objectLoaded($fac)) {
+                        $fac->updateField('relance_active', 0);
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
     // Overrides: 
 
     public function validate()
@@ -1587,10 +1672,10 @@ class BimpRelanceClientsLine extends BimpObject
         if (!(int) $this->getData('status')) {
             if ($relance_idx === 5) {
                 $this->set('status', self::RELANCE_CONTENTIEUX);
+            } elseif ($relance_idx === 4) {
+                $this->set('status', self::RELANCE_ATTENTE_TEL);
             } elseif ($relance_idx <= 3) {
                 $this->set('status', self::RELANCE_ATTENTE_MAIL);
-            } else {
-                $this->set('status', self::RELANCE_ATTENTE_COURRIER);
             }
         }
 

@@ -1917,8 +1917,8 @@ class BimpComm extends BimpDolObject
         
         global $user;
         if($user->admin){
-            $html .= $this->addBtnDoc('gle', 'Test pour les admin, doc compléte');
-            $html .= $this->addBtnDoc('propal', 'Test pour les admin, doc propal');
+            $html .= BimpDocumentation::renderBtn('gle', 'Test pour les admin, doc compléte');
+            $html .= BimpDocumentation::renderBtn('propal', 'Test pour les admin, doc propal');
         }
 
         return $html;

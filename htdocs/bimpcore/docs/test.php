@@ -12,27 +12,24 @@ $errors = array();
 
 echo '<a href="https://fr.wikipedia.org/wiki/BBCode#Listes_de_balises">Doc BBCode</a><br/><br/>';
 
-
-require_once DOL_DOCUMENT_ROOT.'/bimpcore/classes/BimpDoc.php';
-
-$BimpDoc = new BimpDoc('doc', $file);
+$BimpDocumentation = new BimpDocumentation('doc', $file);
 
 
 if (isset($_POST['html'])) {
-    $BimpDoc->saveDoc($file, $_POST['html']);
+    $BimpDocumentation->saveDoc($file, $_POST['html']);
     $_GET['action'] = 'read';
 }
 
 if ($file == '')
     $errors[] = 'Pas de doc spécifié';
 elseif ($_GET['action'] == 'edit') {
-    echo $BimpDoc->getEditFormDoc();
+    echo $BimpDocumentation->getEditFormDoc();
 } else {
-    echo $BimpDoc->displayDoc();
+    echo $BimpDocumentation->displayDoc();
 }
 
 
-if (count($BimpDoc->errors))
-    echo BimpRender::renderAlerts($BimpDoc->errors);
+if (count($BimpDocumentation->errors))
+    echo BimpRender::renderAlerts($BimpDocumentation->errors);
 
 ?>

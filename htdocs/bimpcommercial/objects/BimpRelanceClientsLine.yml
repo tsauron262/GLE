@@ -175,7 +175,25 @@ forms:
                   type: toggle
                   help: Si NON, la mise en demeure sera abandonnée et les prochaines relances seront désactivées pour toutes les factures concernées.
               value: 1
-              
+     
+fields_tables: 
+    default: 
+        title: Informations
+        icon:  fas_info-circle
+        all_fields: 1
+        
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: default
+            
 filters_panels: 
     default: 
         filters: 
@@ -212,6 +230,7 @@ lists:
         edit_btn: 1
         edit_form: 
             callback: getEditForm
+        modal_view: default
         cols: 
             id_relance: 
             parent:mode:

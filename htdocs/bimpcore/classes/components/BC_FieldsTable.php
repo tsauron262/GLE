@@ -17,9 +17,10 @@ class BC_FieldsTable extends BC_Panel
         'history'     => array('data_type' => 'bool', 'default' => 0)
     );
 
-    public function __construct(BimpObject $object, $path, $content_only = false, $level = 1, $title = null, $icon = null)
+    public function __construct(BimpObject $object, $name, $content_only = false, $title = null, $icon = null)
     {
-        $this->params_def['rows'] = array('type' => 'keys');
+        $this->params_def['rows'] = array('type' => 'keys', 'default' => array());
+        $this->params_def['all_fields'] = array('data_type' => 'bool', 'default' => 0);
 
         global $current_bc;
         if (!is_object($current_bc)) {
@@ -28,22 +29,27 @@ class BC_FieldsTable extends BC_Panel
         $prev_bc = $current_bc;
         $current_bc = $this;
 
-        $name = $object->getConf($path . '/name', 'default');
+        parent::__construct($object, $name, '', $content_only, 1, $title, $icon);
 
-        if (!$object->config->isDefined($path . '/rows')) {
-            if (!$name || $name === 'default') {
-                if ($object->config->isDefined('fields_table')) {
-                    $path = 'fields_table';
-                } elseif ($object->config->isDefined('fields_tables/default')) {
-                    $path = 'fields_tables';
-                    $name = 'default';
+        if (empty($this->params['rows']) && $this->params['all_fields']) {
+            $fields = $this->object->getFieldsList(true, true, false);
+
+            $this->params['rows'] = array();
+
+            foreach ($fields as $field_name) {
+                $row = array(
+                    'field' => $field_name
+                );
+                foreach ($this->row_params as $param_name => $defs) {
+                    if ($param_name == 'field') {
+                        continue;
+                    }
+                    
+                    $row[$param_name] = BimpTools::getArrayValueFromPath($defs, 'default', null);
                 }
-            } else {
-                $path = 'fields_tables';
+                $this->params['rows'][] = $row;
             }
         }
-
-        parent::__construct($object, $name, $path, $content_only, $level, $title, $icon);
 
         if (!count($this->errors)) {
             if (!$this->object->can("view")) {
@@ -76,9 +82,19 @@ class BC_FieldsTable extends BC_Panel
         $html .= '<tbody>';
 
         $has_content = false;
-        
+
         foreach ($this->params['rows'] as $row) {
-            $row_params = $this->fetchParams($this->config_path . '/rows/' . $row, $this->row_params);
+            $rows_params = array();
+            
+            if (is_string($row)) {
+                $rows_params = $this->fetchParams($this->config_path . '/rows/' . $row, $this->row_params);
+            } elseif (is_array($row)) {
+                $row_params = $row;
+            }
+
+            if (empty($row_params)) {
+                continue;
+            }
 
             if (!(int) $row_params['show']) {
                 continue;
@@ -192,13 +208,13 @@ class BC_FieldsTable extends BC_Panel
             }
 
             $has_content = true;
-            
+
             $html .= '<tr>';
             $html .= '<th>' . $label . '</th>';
             $html .= '<td>' . $content . '</td>';
             $html .= '</tr>';
         }
-        
+
         $html .= '</tbody>';
         $html .= '</table>';
 
@@ -206,9 +222,9 @@ class BC_FieldsTable extends BC_Panel
             $this->params['show'] = 0;
             return '';
         }
-        
+
         $current_bc = $prev_bc;
-        
+
         return $html;
     }
 

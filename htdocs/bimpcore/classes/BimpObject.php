@@ -1004,6 +1004,29 @@ class BimpObject extends BimpCache
 
         return $fields;
     }
+    
+    public function getFieldsList($viewable_only = false, $active_only = true, $with_common_fields = true)
+    {
+        $fields = array();
+        
+        foreach ($this->params['fields'] as $field_name) {
+            if ($active_only && !$this->field_exists($field_name)) {
+                continue;
+            }
+            
+            if ($viewable_only && !$this->canViewField($field_name)) {
+                continue;
+            }
+            
+            if (!$with_common_fields == in_array($field_name, static::$common_fields)){
+                continue;
+            }
+            
+            $fields[] = $field_name;
+        }
+        
+        return $fields;
+    }
 
     // Getters boolééns: 
 

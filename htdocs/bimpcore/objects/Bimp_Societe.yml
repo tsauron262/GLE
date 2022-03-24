@@ -454,7 +454,7 @@ fields:
         edit: 0
         
     outstanding_limit_credit_check:    
-        label: Limite Crédit Chek
+        label: Limite Crédit Check
         type: money
         history: 1
         default_value: -1
@@ -669,6 +669,12 @@ fields:
     date_last_active:
         label: Date derniére activité
         type: date
+        
+    id_atradius:
+        label: Identifiant Atradius
+        type: int     
+        
+            
             
 #    *** Champs non gérés: ***
 #    entity
@@ -822,6 +828,9 @@ fields_tables:
               edit: 1
             - field: outstanding_limit_icba
               edit: 1
+            - label: Mettre à jour assurance Atradius
+              value: 
+                  callback: displayFormAtradius
             - field: outstanding_limit_credit_check
               edit: 1
             - field: outstanding_limit_atradius

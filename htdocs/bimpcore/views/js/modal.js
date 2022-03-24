@@ -522,7 +522,7 @@ $(document).ready(function () {
         'max_contents': 10
     });
     
-    docModal = new BimpModal($('#doc_modal'), 'docModal', '', {
+    docModal = new BimpModal($('#docu_modal'), 'docModal', '', {
         'content_removable': true,
         'max_contents': 5
     });

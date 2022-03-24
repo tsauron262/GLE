@@ -462,7 +462,7 @@ fields:
             help: -1 = aucun demande<br/>Saisir O si encours refusé
             
     outstanding_limit_manuel:    
-        label: Limite Crédit Manuel
+        label: Limite Crédit Manuelle
         type: money
         history: 1
         default_value: 0

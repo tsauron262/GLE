@@ -370,8 +370,9 @@ class BimpStruct
         }
 
         $panel = (int) $config->getFromCurrentPath('panel', 1, false, 'bool');
+        $name = $config->getFromCurrentPath('name', 'default');
 
-        $table = new BC_FieldsTable($object, $path, !$panel);
+        $table = new BC_FieldsTable($object, $name, !$panel);
 
         if (!is_null($parent_component)) {
             if (is_a($parent_component, 'BC_View')) {

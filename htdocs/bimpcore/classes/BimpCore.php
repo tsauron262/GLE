@@ -33,7 +33,8 @@ class BimpCore
             'table2csv'      => '/bimpcore/views/js/table2csv.js',
             'buc'            => '/bimpuserconfig/views/js/buc.js',
             'bimpcore'       => '/bimpcore/views/js/bimpcore.js',
-            'bimp_api'       => '/bimpapi/views/js/bimp_api.js'
+            'bimp_api'       => '/bimpapi/views/js/bimp_api.js',
+            'bimpDocuementation'=> '/bimpcore/views/js/BimpDocumentation.js'
         ),
         'css' => array(
             'jPicker'    => '/includes/jquery/plugins/jpicker/css/jPicker-1.1.6.css',

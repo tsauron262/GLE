@@ -2208,9 +2208,26 @@ class BimpController
         );
     }
     
-    protected function ajaxProcessLoadDoc(){
-        $BimpDocumentation = new BimpDocumentation('doc', BimpTools::getValue('name', ''), 'modal');
+    protected function ajaxProcessSaveBimpDocumentation(){
+        $BimpDocumentation = new BimpDocumentation('doc', BimpTools::getValue('name', ''), 'modal', BimpTools::getValue('idSection', ''));
+        $BimpDocumentation->saveDoc(BimpTools::getValue('name', ''), BimpTools::getValue('html', ''));
         $html = $BimpDocumentation->displayDoc();
+        $errors = $BimpDocumentation->errors;
+
+        return array(
+            'errors'     => $errors,
+            'html'       => $html,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        );
+        
+    }
+    
+    protected function ajaxProcessLoadDocumentation(){
+        $BimpDocumentation = new BimpDocumentation('doc', BimpTools::getValue('name', ''), 'modal', BimpTools::getValue('idSection', 'princ'));
+        if(BimpTools::getValue('mode', '') == 'edit')
+            $html = $BimpDocumentation->getDoc();    
+        else
+            $html = $BimpDocumentation->displayDoc();
         $errors = $BimpDocumentation->errors;
 
         return array(

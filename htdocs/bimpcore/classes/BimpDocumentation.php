@@ -11,12 +11,14 @@ class BimpDocumentation {
     static $nbInstance = 0;
     var $admin = true;
     var $mode = 'link';
+    var $idSection = '';
     
-    function __construct($type, $name, $mode = 'link', &$menu = array()) {
+    function __construct($type, $name, $mode = 'link', $idSection = 'princ', &$menu = array()) {
         $this->name = $name;
         $this->type = $type;
         $this->mode = $mode;
         $this->menu = &$menu;
+        $this->idSection = $idSection;
         static::$nbInstance++;
         if(static::$nbInstance > 20){
             BimpCore::addlog('Attention boucle dans DOC');
@@ -28,7 +30,7 @@ class BimpDocumentation {
 
     public static function renderBtn($name, $text = '')
     {
-        $onClickInit = "docModal.loadAjaxContent($(this), 'loadDoc', {name: '" . $name . "'}, 'Doc : " . $name . "', 'Chargement', function (result, bimpAjax) {});";
+        $onClickInit = "docModal.loadAjaxContent($(this), 'loadDocumentation', {name: '" . $name . "'}, 'Doc : " . $name . "', 'Chargement', function (result, bimpAjax) {});";
 
         $onClickInit .= 'docModal.show();';
 
@@ -65,23 +67,26 @@ class BimpDocumentation {
         $data = $this->getFileData('array');
         $niveau = 0;
         foreach ($data as $idL => $ln) {
-            $styleMenu = array();
+            $styleMenu = $styleCore = array();
             $type = '';
             $hash = '';
             if (preg_match('#\{code}([^\[]*) ?#', $ln, $matches)) {
                 $ln = '<xmp>' . $matches[1] . '</xmp>';
             } elseif (preg_match('#([^\[]*)?{{([^\[]*)?}}#U', $ln, $matches) && isset($matches[2])) {
+                $idSection = $this->idSection.'_'.count($this->lines);
+                $this->lines[] = array('div' => array('id'=>$idSection));
                 if(is_file(static::getPathFile('doc', $matches[2])) || is_file(static::getPathFile('doc', $matches[2], true))){
-                    $child = new BimpDocumentation('doc', $matches[2], $this->mode, $this->menu);
+                    $child = new BimpDocumentation('doc', $matches[2], $this->mode, $idSection, $this->menu);
                     $child->initLines($niveau);
                     if($this->admin)
-                        $this->lines[] = array('value' => static::btnEditer($matches[2]));
+                        $this->lines[] = array('value' => static::btnEditer($matches[2], $idSection));
                     $this->lines = BimpTools::merge_array($this->lines, $child->lines);
                     $this->errors = BimpTools::merge_array($this->errors, $child->errors);
                 }
                 else{
-                    $this->lines[] = array('value' => static::btnEditer($matches[2]));
+                    $this->lines[] = array('value' => static::btnEditer($matches[2], $idSection));
                 }
+                $this->lines[] = array('div' => array('close'=>true));
                 continue;
             } elseif (preg_match('#([^\[]*)?{{([^\[]*)?}#U', $ln, $matches) && isset($matches[2])) {
                 $datas = explode(':', $matches[2]);
@@ -152,8 +157,17 @@ class BimpDocumentation {
                 $this->errors[] = 'Enregistrement impossible : '.$this->getPathFile($type, $name, true);
     }
     
-    static function btnEditer($name){
-        return '<button onclick="window.location = \''.static::getLink($name, array('action'=>'edit')).'\'">'.BimpRender::renderIcon('fas_edit').'</button>';
+    function btnEditer($name, $idSection){
+        if($this->mode == 'modal')
+            $onClick = "editSection('".$idSection."', '".$name."');";
+        else
+            $onClick = 'window.location = \''.static::getLink($name, array('action'=>'edit')).'\'';
+        
+        return '<button onclick="'.$onClick.'">'.BimpRender::renderIcon('fas_edit').'</button>';
+    }
+    
+    function getDoc(){
+        return $this->getFileData();
     }
 
     function displayDoc() {
@@ -167,7 +181,7 @@ class BimpDocumentation {
         $sections = array();
         $sections[] = '';
         if($this->admin)
-            $sections[] = static::btnEditer($this->name);
+            $sections[] = static::btnEditer($this->name, $this->idSection);
         
         $sections[] = $this->getMenu();
         $sections[] = $this->getCore();
@@ -175,7 +189,7 @@ class BimpDocumentation {
 
         //impression
         $sections = array_filter($sections);
-        return implode('<br/><br/>', $sections);
+        return '<div id="'.$this->idSection.'">'.implode('<br/><br/>', $sections).'</div>';
 
 
 //        if ($htmlMenu != '')
@@ -214,11 +228,24 @@ class BimpDocumentation {
     }
 
     function getCore() {
+        $this->pOpen = true;
         $html = '<div>';
         foreach ($this->lines as $info) {
+            if(isset($info['div'])){
+                if($this->pOpen){
+                    $html .= '</div>';
+                    $this->pOpen = false;
+                }
+                $html .= '<'.(isset($info['div']['close'])? '/' : '').'div'.(isset($info['div']['id'])? ' id="'.$info['div']['id'].'"' : '').(isset($info['div']['class'])? ' id="'.$info['div']['class'].'"' : '').'>';
+            }
+            
+            
             if ($info['balise'] != '') {
-                $html .= '</div>';
-                $html .= "<div ".(isset($info['styleCore']) && count($info['styleCore']) ? ' style="' . implode(' ', $info['styleCore']) . '"' : '').">";
+                if($this->pOpen){
+                    $html .= '</div>';
+                }
+                $html .= "<div".(isset($info['styleCore']) && count($info['styleCore']) ? ' style="' . implode(' ', $info['styleCore']) . '"' : '').">";
+                $this->pOpen = true;
                 $html .= '<' . $info['balise'];
                 if ($info['hash']) {
                     $html .= ' id="' . $info['hash'] . '"';
@@ -274,7 +301,7 @@ class BimpDocumentation {
         $lienDoc = DOL_URL_ROOT . '/bimpcore/docs/test.php?name=';
         if (file_exists(static::getPathFile('doc', $str)))
             if($mode == 'modal'){
-                $onClick = "docModal.loadAjaxContent($(this), 'loadDoc', {name: '".$str."'}, 'Doc : ".$str."', 'Chargement', function (result, bimpAjax) {});";
+                $onClick = "docModal.loadAjaxContent($(this), 'loadDocumentation', {name: '".$str."'}, 'Doc : ".$str."', 'Chargement', function (result, bimpAjax) {});";
                 $chaine = '<a onclick="'.$onClick.'">' . $chaine . '</a>';
             }
             else

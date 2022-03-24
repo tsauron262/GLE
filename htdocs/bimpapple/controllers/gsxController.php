@@ -3510,17 +3510,17 @@ class gsxController extends BimpController
         $html .= '<i class="fa fa-plus-circle iconLeft"></i>Créer une nouvelle réparation</button>';
 
         if ($this->use_gsx_v2) {
-            if ($has_parts) {
+//            if ($has_parts) {
                 $onclick = '$(\'.gsxRepairViewForm\').hide();$(\'#testEligibilityForm\').slideDown(250);';
                 $html .= '<button type="button" class="btn btn-default" onclick="' . $onclick . '">';
                 $html .= BimpRender::renderIcon('fas_question-circle', 'iconLeft') . 'Tester éligibilité composants</button>';
-            }
-
-            if (isset(GSX_Const::$urls['gsx'][GSX_v2::$mode]) && GSX_Const::$urls['gsx'][GSX_v2::$mode]) {
-                $html .= '<a href="' . GSX_Const::$urls['gsx'][GSX_v2::$mode] . '" class="btn btn-default" target="_blank">';
-                $html .= 'GSX' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
-                $html .= '</a>';
-            }
+//            }
+//
+//            if (isset(GSX_Const::$urls['gsx'][GSX_v2::$mode]) && GSX_Const::$urls['gsx'][GSX_v2::$mode]) {
+//                $html .= '<a href="' . GSX_Const::$urls['gsx'][GSX_v2::$mode] . '" class="btn btn-default" target="_blank">';
+//                $html .= 'GSX' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
+//                $html .= '</a>';
+//            }
         }
 
         $html .= '</div>';

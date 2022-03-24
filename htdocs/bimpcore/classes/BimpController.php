@@ -447,7 +447,7 @@ class BimpController
 
         if ($display_footer) {
             echo BimpRender::renderAjaxModal('page_modal');
-            echo BimpRender::renderAjaxModal('doc_modal');
+            echo BimpRender::renderAjaxModal('docu_modal');
 
             $html = '<div id="openModalBtn" onclick="bimpModal.show();" class="closed bs-popover"';
             $html .= BimpRender::renderPopoverData('Afficher la fenêtre popup', 'left');

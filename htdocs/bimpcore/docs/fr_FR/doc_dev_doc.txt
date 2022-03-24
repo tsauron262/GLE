@@ -1,0 +1,53 @@
+== Explication Doc
+=== Balise
+{code} {code} permet d'enlevé tous formatage pour inséré par exmple du code
+
+==== Italique
+{code} ''text'' pour mêttre en italique Ex: 
+{code}ceci est un ''italique''
+ceci est un ''italique''
+
+==== Gras
+{code} '''text''' pour mêttre en gras Ex:
+{code}ceci est un '''gras'''
+ceci est un '''gras'''
+
+==== Couleurs
+{code} #couleur#text# pemter de mêtre ne couleur
+{code} exmple : #green#mon '''text''' vert# mais aussi #red#mon ''text'' rouge#
+#green#mon '''text''' vert# mais aussi #red#mon ''text'' rouge#
+
+==== Titre
+{code} == pour faire un titre principal Ex:
+{code} == Titre 1
+== Titre 1
+
+{code} === pour faire un titre secondaire Ex:
+{code} === Titre 2 avec ''italique'' et '''gras''' et pourquoi pas '''''Les Deux'''''
+=== Titre 2 avec ''italique'' et '''gras''' et pourquoi pas '''''les deux'''''
+
+{code} ==== pour faire un titre 3 Ex:
+{code} ==== Titre 3
+==== Titre 3
+
+=== Référence autre doc
+==== Lien
+{code} {nomPage} Permet de faire un lien vers une autre page si elle existe et/ou un popover si le fihcier existe. Ex avec les deux:
+{code} {doc dev}
+{doc dev}
+Exemple avec des liens :
+{code} Page {propal}, page {list}, page {Doc dev}
+Page {Propal}, page {list}, page {doc dev}
+
+==== Inclusion
+{code} {{nomPage}} permet d'inclure une doc dans une doc
+
+=== Image
+{code} {{nom de l'image[:largeur[:hauteur]]} affiche une image ex:
+{code} Voici une image {{config_list.png:120} elle est belle !!!
+{{config_list.png:120}
+
+=== Html
+Il faut éviter d'utiliser directment du HTML, mais cela fonctionne :
+{code} <span class="alert" style="color:red">Une alert</span>
+<span class="alert" style="color:red">Une alert</span>

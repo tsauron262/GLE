@@ -104,12 +104,21 @@ lists:
     default: 
         title: Mouvements stocks consignés Apple
         icon: fas_exchange-alt
+        checkboxes:
+            callback: isUserAdmin
         filters_panel: default
         sort_field: id
         sort_way: desc
         n: 50
         extra_btn: 
             callback: getListExtraButtons
+        bulk_actions: 
+            callback: getListsBulkActions
+        list_actions: 
+            - label: Annuler
+              icon: fas_times-circle
+              action: cancel
+              confirm_msg: Veuillez confirmer l\'annulation de tous les mouvements de stock filtrés
         cols: 
             id: 
             id_stock: 

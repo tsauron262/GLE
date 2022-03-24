@@ -1308,7 +1308,7 @@ class BimpTools
                     }
                     $sql .= '\'';
                     if ($escape_char) {
-                        $sql .= ' ESCAPE \'$\'';
+                        $sql .= ' ESCAPE \'' . $escape_char . '\'';
                     }
                 } elseif (isset($filter['in'])) {
                     if (is_array($filter['in'])) {
@@ -2908,7 +2908,7 @@ class BimpTools
                 , $dir . $file_name
                 , "L", 4, 2);
     }
-    
+
     public static function displayBacktrace($nb_lines = 15)
     {
         return BimpRender::renderBacktrace(BimpTools::getBacktraceArray(debug_backtrace(null, $nb_lines)));

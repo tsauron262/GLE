@@ -16,6 +16,12 @@ objects:
         instance: 
             id_object: 
                 field_value: id_user_send
+                
+    user_phone_call:
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_user_phone_call
     
 fields: 
     id_relance: 
@@ -97,6 +103,16 @@ fields:
         values: 
             array: methods
         default_value: 0
+        
+    id_user_phone_call: 
+        label: Appel téléphonique effectué par
+        type: id_object
+        object: user_phone_call
+        default_value: 0
+        
+    date_phone_call: 
+        label: Date appel téléphonique
+        type: datetime
                 
 forms: 
     edit: 
@@ -140,6 +156,7 @@ forms:
               input: 
                   type: toggle
               value: 0
+              
             - custom: 1
               label: Désactiver les relances pour le client
               input_name: deactivate_relances_client
@@ -148,6 +165,35 @@ forms:
                   type: toggle
               value: 0
               
+    phone_call_done: 
+        rows: 
+            - custom: 1
+              label: Poursuivre la mise en demeure
+              input_name: continue
+              data_type: bool
+              input: 
+                  type: toggle
+                  help: Si NON, la mise en demeure sera abandonnée et les prochaines relances seront désactivées pour toutes les factures concernées.
+              value: 1
+     
+fields_tables: 
+    default: 
+        title: Informations
+        icon:  fas_info-circle
+        all_fields: 1
+        
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: default
+            
 filters_panels: 
     default: 
         filters: 
@@ -184,6 +230,7 @@ lists:
         edit_btn: 1
         edit_form: 
             callback: getEditForm
+        modal_view: default
         cols: 
             id_relance: 
             parent:mode:

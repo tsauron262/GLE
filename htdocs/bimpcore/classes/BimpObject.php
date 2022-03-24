@@ -26,6 +26,7 @@ class BimpObject extends BimpCache
     public static $name_properties = array('public_name', 'name', 'nom', 'label', 'libelle', 'title', 'titre', 'description');
     public static $ref_properties = array('ref', 'reference', 'code', 'facnumber');
     public static $status_properties = array('status', 'fk_statut', 'statut');
+    public static $allowedDbNullValueDataTypes = array('date', 'datetime', 'time');
     public static $logo_properties = array('logo');
     public $use_commom_fields = false;
     public $use_positions = false;
@@ -134,141 +135,6 @@ class BimpObject extends BimpCache
         }
 
         return $instance;
-    }
-
-    public function getPdfNamePrincipal()
-    {
-        BimpCore::addlog('"getPdfNamePrincipal" n\'est pas redéfinit dans ' . $this->object_name);
-        return 'n_c.pdf';
-    }
-
-    public function actionGenerateBulkPdf($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Fichier généré avec succès';
-        $success_callback = '';
-
-        $id_objs = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
-
-        if (count($id_objs) > 70) {
-            $errors[] = 'Trop de PDF action impossible';
-            return array(
-                'errors'   => $errors,
-                'warnings' => $warnings
-            );
-        }
-
-        if (!is_array($id_objs) || empty($id_objs)) {
-            $errors[] = 'Aucune ' . $this->getLabel() . ' sélectionnée';
-        } else {
-            $files = array();
-
-            foreach ($id_objs as $id_obj) {
-                $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_obj);
-
-                if (!BimpObject::objectLoaded($obj)) {
-                    $warnings[] = ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_obj . ' n\'existe pas';
-                    continue;
-                }
-
-                $dir = $obj->getFilesDir();
-                $filename = $obj->getPdfNamePrincipal();
-
-                if (!file_exists($dir . $filename)) {
-                    $warnings[] = ucfirst($this->getLabel()) . ' ' . $obj->getLink() . ': fichier PDF absent (' . $dir . $filename . ')';
-                    continue;
-                }
-
-                $files[] = $dir . $filename;
-            }
-
-            if (!empty($files)) {
-                global $user;
-                require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpPDF.php';
-                $fileName = 'bulk_' . $this->dol_object->element . '_' . $user->id . '.pdf';
-                $dir = PATH_TMP . '/bimpcore/';
-
-                $pdf = new BimpConcatPdf();
-                $pdf->concatFiles($dir . $fileName, $files, 'F');
-
-                $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($fileName);
-                $success_callback = 'window.open(\'' . $url . '\');';
-            } else {
-                $errors[] = 'Aucun PDF trouvé';
-            }
-        }
-
-        return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
-            'success_callback' => $success_callback
-        );
-    }
-
-    public function actionGenerateZipPdf($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Fichier généré avec succès';
-        $success_callback = '';
-
-        $id_objs = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
-
-        if (count($id_objs) > 50) {
-            $errors[] = 'Trop de PDF action impossible';
-        } else {
-            if (!is_array($id_objs) || empty($id_objs)) {
-                $errors[] = 'Aucune ' . $this->getLabel() . ' sélectionnée';
-            } else {
-                $files = array();
-
-                foreach ($id_objs as $id_obj) {
-                    $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_obj);
-
-                    if (!BimpObject::objectLoaded($obj)) {
-                        $warnings[] = ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_obj . ' n\'existe pas';
-                        continue;
-                    }
-
-                    $dir = $obj->getFilesDir();
-                    $filename = $obj->getPdfNamePrincipal();
-
-                    if (!file_exists($dir . $filename)) {
-                        $warnings[] = ucfirst($this->getLabel()) . ' ' . $obj->getLink() . ': fichier PDF absent (' . $dir . $filename . ')';
-                        continue;
-                    }
-
-                    $files[] = array($dir . $filename, $filename);
-                }
-
-                if (!empty($files)) {
-                    global $user;
-                    $dir = PATH_TMP . '/bimpcore/';
-                    $fileName = 'zip_' . $this->dol_object->element . '_' . $user->id . '.zip';
-                    if (file_exists($dir . $fileName))
-                        unlink($dir . $fileName);
-                    $zip = new ZipArchive();
-                    if ($zip->open($dir . $fileName, ZipArchive::CREATE) === true) {
-                        foreach ($files as $tabFile) {
-                            $zip->addFile($tabFile[0], $tabFile[1]);
-                        }
-                    }
-                    $zip->close();
-
-                    $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($fileName);
-                    $success_callback = 'window.open(\'' . $url . '\');';
-                } else {
-                    $errors[] = 'Aucun PDF trouvé';
-                }
-            }
-        }
-
-        return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
-            'success_callback' => $success_callback
-        );
     }
 
     public static function getDolInstance($dol_object_params, $id_object = null)
@@ -1138,6 +1004,29 @@ class BimpObject extends BimpCache
 
         return $fields;
     }
+    
+    public function getFieldsList($viewable_only = false, $active_only = true, $with_common_fields = true)
+    {
+        $fields = array();
+        
+        foreach ($this->params['fields'] as $field_name) {
+            if ($active_only && !$this->field_exists($field_name)) {
+                continue;
+            }
+            
+            if ($viewable_only && !$this->canViewField($field_name)) {
+                continue;
+            }
+            
+            if (!$with_common_fields == in_array($field_name, static::$common_fields)){
+                continue;
+            }
+            
+            $fields[] = $field_name;
+        }
+        
+        return $fields;
+    }
 
     // Getters boolééns: 
 
@@ -1368,6 +1257,11 @@ class BimpObject extends BimpCache
         return 0;
     }
 
+    public function isLight_exportActif()
+    {
+        return $this->getConf('export_light', 1);
+    }
+
     // Getters données: 
 
     public function getData($field)
@@ -1541,12 +1435,11 @@ class BimpObject extends BimpCache
                 continue;
             }
 
-            if (!is_null($value)) {
-                $db_value = $this->getDbValue($field, $value);
-                if (!is_null($db_value)) {
-                    $this->checkFieldHistory($field, $value);
-                    $data[$field] = $db_value;
-                }
+            $db_value = $this->getDbValue($field, $value);
+            
+            if (!is_null($db_value) || (int) $this->getConf('fields/' . $field . '/null_allowed', 0)) {
+                $this->checkFieldHistory($field, $value);
+                $data[$field] = $db_value;
             }
         }
 
@@ -1909,6 +1802,12 @@ class BimpObject extends BimpCache
     public function getGraphDataPoint()
     {
         return '';
+    }
+
+    public function getPdfNamePrincipal()
+    {
+        BimpCore::addlog('"getPdfNamePrincipal" n\'est pas redéfinit dans ' . $this->object_name);
+        return 'n_c.pdf';
     }
 
     // Gestion des données:
@@ -3391,6 +3290,7 @@ class BimpObject extends BimpCache
 //    {
 //        $this->unsetChildrenListCache($child_name);
 //    }
+//    
     // Getters Listes
 
     public function getList($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null, $joins = array(), $extra_order_by = null, $extra_order_way = 'ASC')
@@ -7719,19 +7619,20 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         $js .= ');';
         return $js;
     }
-    
-       public static function addBtnDoc($name, $text = ''){
-        $onClickInit = "docModal.loadAjaxContent($(this), 'loadDoc', {name: '".$name."'}, 'Doc : ".$name."', 'Chargement', function (result, bimpAjax) {});";
+
+    public static function addBtnDoc($name, $text = '')
+    {
+        $onClickInit = "docModal.loadAjaxContent($(this), 'loadDoc', {name: '" . $name . "'}, 'Doc : " . $name . "', 'Chargement', function (result, bimpAjax) {});";
 
         $onClickInit .= 'docModal.show();';
-        
-        if($text == '')
-            $text = 'Doc : '.$name;
-           
+
+        if ($text == '')
+            $text = 'Doc : ' . $name;
+
         $html .= '<span  class="bs-popover" ' . BimpRender::renderPopoverData($text, 'right', true) . '>' . '<button type="button" onclick="' . $onClickInit . '" class="btn btn-default">';
         $html .= BimpRender::renderIcon('fas_info-circle');
         $html .= '</button></span>';
-        
+
         return $html;
     }
 
@@ -9037,11 +8938,6 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         );
     }
 
-    public function isLight_exportActif()
-    {
-        return $this->getConf('export_light', 1);
-    }
-
     public function actionGetGraphData($data, &$success)
     {
         global $modeCSV, $modeGraph;
@@ -9301,6 +9197,135 @@ var options = {
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
+        );
+    }
+
+    public function actionGenerateBulkPdf($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Fichier généré avec succès';
+        $success_callback = '';
+
+        $id_objs = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+
+        if (count($id_objs) > 70) {
+            $errors[] = 'Trop de PDF action impossible';
+            return array(
+                'errors'   => $errors,
+                'warnings' => $warnings
+            );
+        }
+
+        if (!is_array($id_objs) || empty($id_objs)) {
+            $errors[] = 'Aucune ' . $this->getLabel() . ' sélectionnée';
+        } else {
+            $files = array();
+
+            foreach ($id_objs as $id_obj) {
+                $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_obj);
+
+                if (!BimpObject::objectLoaded($obj)) {
+                    $warnings[] = ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_obj . ' n\'existe pas';
+                    continue;
+                }
+
+                $dir = $obj->getFilesDir();
+                $filename = $obj->getPdfNamePrincipal();
+
+                if (!file_exists($dir . $filename)) {
+                    $warnings[] = ucfirst($this->getLabel()) . ' ' . $obj->getLink() . ': fichier PDF absent (' . $dir . $filename . ')';
+                    continue;
+                }
+
+                $files[] = $dir . $filename;
+            }
+
+            if (!empty($files)) {
+                global $user;
+                require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpPDF.php';
+                $fileName = 'bulk_' . $this->dol_object->element . '_' . $user->id . '.pdf';
+                $dir = PATH_TMP . '/bimpcore/';
+
+                $pdf = new BimpConcatPdf();
+                $pdf->concatFiles($dir . $fileName, $files, 'F');
+
+                $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($fileName);
+                $success_callback = 'window.open(\'' . $url . '\');';
+            } else {
+                $errors[] = 'Aucun PDF trouvé';
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
+
+    public function actionGenerateZipPdf($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Fichier généré avec succès';
+        $success_callback = '';
+
+        $id_objs = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+
+        if (count($id_objs) > 50) {
+            $errors[] = 'Trop de PDF action impossible';
+        } else {
+            if (!is_array($id_objs) || empty($id_objs)) {
+                $errors[] = 'Aucune ' . $this->getLabel() . ' sélectionnée';
+            } else {
+                $files = array();
+
+                foreach ($id_objs as $id_obj) {
+                    $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $id_obj);
+
+                    if (!BimpObject::objectLoaded($obj)) {
+                        $warnings[] = ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_obj . ' n\'existe pas';
+                        continue;
+                    }
+
+                    $dir = $obj->getFilesDir();
+                    $filename = $obj->getPdfNamePrincipal();
+
+                    if (!file_exists($dir . $filename)) {
+                        $warnings[] = ucfirst($this->getLabel()) . ' ' . $obj->getLink() . ': fichier PDF absent (' . $dir . $filename . ')';
+                        continue;
+                    }
+
+                    $files[] = array($dir . $filename, $filename);
+                }
+
+                if (!empty($files)) {
+                    global $user;
+                    $dir = PATH_TMP . '/bimpcore/';
+                    $fileName = 'zip_' . $this->dol_object->element . '_' . $user->id . '.zip';
+                    if (file_exists($dir . $fileName))
+                        unlink($dir . $fileName);
+                    $zip = new ZipArchive();
+                    if ($zip->open($dir . $fileName, ZipArchive::CREATE) === true) {
+                        foreach ($files as $tabFile) {
+                            $zip->addFile($tabFile[0], $tabFile[1]);
+                        }
+                    }
+                    $zip->close();
+
+                    $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($fileName);
+                    $success_callback = 'window.open(\'' . $url . '\');';
+                } else {
+                    $errors[] = 'Aucun PDF trouvé';
+                }
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
         );
     }
 

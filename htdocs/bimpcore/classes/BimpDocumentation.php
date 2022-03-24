@@ -72,7 +72,7 @@ class BimpDocumentation {
                 $ln = '<xmp>' . $matches[1] . '</xmp>';
             } elseif (preg_match('#([^\[]*)?{{([^\[]*)?}}#U', $ln, $matches) && isset($matches[2])) {
                 if(is_file(static::getPathFile('doc', $matches[2])) || is_file(static::getPathFile('doc', $matches[2], true))){
-                    $child = new BimpDoc('doc', $matches[2], $this->mode, $this->menu);
+                    $child = new BimpDocumentation('doc', $matches[2], $this->mode, $this->menu);
                     $child->initLines($niveau);
                     if($this->admin)
                         $this->lines[] = array('value' => static::btnEditer($matches[2]));
@@ -264,8 +264,8 @@ class BimpDocumentation {
 
     static function traitePopOver($str, $text) {
         if (file_exists(static::getPathFile('pop', $str))) {
-            $bimpDoc = new BimpDoc('pop', $str);
-            $text = '<span  class="bs-popover" ' . BimpRender::renderPopoverData($bimpDoc->displayInfoPop(), 'right', true) . '>' . $text . '</span>';
+            $bimpDocumentation = new BimpDocumentation('pop', $str);
+            $text = '<span  class="bs-popover" ' . BimpRender::renderPopoverData($bimpDocumentation->displayInfoPop(), 'right', true) . '>' . $text . '</span>';
         }
         return $text;
     }

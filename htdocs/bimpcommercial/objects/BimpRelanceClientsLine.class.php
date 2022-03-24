@@ -143,7 +143,7 @@ class BimpRelanceClientsLine extends BimpObject
                     return 0;
                 }
 
-                if ($this->isLoaded() && (int) $this->getData('status') < 10) {
+                if ((int) $this->getData('status') < 10) {
                     $errors[] = 'Le statut actuel de cette relance ne permet pas d\'éditer la date d\'envoi / abandon';
                     return 0;
                 }

@@ -26,6 +26,7 @@ class BimpObject extends BimpCache
     public static $name_properties = array('public_name', 'name', 'nom', 'label', 'libelle', 'title', 'titre', 'description');
     public static $ref_properties = array('ref', 'reference', 'code', 'facnumber');
     public static $status_properties = array('status', 'fk_statut', 'statut');
+    public static $allowedDbNullValueDataTypes = array('date', 'datetime', 'time');
     public static $logo_properties = array('logo');
     public $use_commom_fields = false;
     public $use_positions = false;
@@ -1411,14 +1412,11 @@ class BimpObject extends BimpCache
                 continue;
             }
 
-            $data_type = $this->getConf('fields/' . $field . '/type', 'string');
-
-            if (!is_null($value) || in_array($data_type, array('date', 'datetime', 'time'))) {
-                $db_value = $this->getDbValue($field, $value);
-//                if (!is_null($db_value)) {
-                    $this->checkFieldHistory($field, $value);
-                    $data[$field] = $db_value;
-//                }
+            $db_value = $this->getDbValue($field, $value);
+            
+            if (!is_null($db_value) || (int) $this->getConf('fields/' . $field . '/null_allowed', 0)) {
+                $this->checkFieldHistory($field, $value);
+                $data[$field] = $db_value;
             }
         }
 
@@ -7598,19 +7596,20 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         $js .= ');';
         return $js;
     }
-    
-       public static function addBtnDoc($name, $text = ''){
-        $onClickInit = "docModal.loadAjaxContent($(this), 'loadDoc', {name: '".$name."'}, 'Doc : ".$name."', 'Chargement', function (result, bimpAjax) {});";
+
+    public static function addBtnDoc($name, $text = '')
+    {
+        $onClickInit = "docModal.loadAjaxContent($(this), 'loadDoc', {name: '" . $name . "'}, 'Doc : " . $name . "', 'Chargement', function (result, bimpAjax) {});";
 
         $onClickInit .= 'docModal.show();';
-        
-        if($text == '')
-            $text = 'Doc : '.$name;
-           
+
+        if ($text == '')
+            $text = 'Doc : ' . $name;
+
         $html .= '<span  class="bs-popover" ' . BimpRender::renderPopoverData($text, 'right', true) . '>' . '<button type="button" onclick="' . $onClickInit . '" class="btn btn-default">';
         $html .= BimpRender::renderIcon('fas_info-circle');
         $html .= '</button></span>';
-        
+
         return $html;
     }
 

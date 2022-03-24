@@ -39,9 +39,11 @@
             $this->export_class = new export($db);
             $this->export_class->create_daily_files();
             $this->files_for_ftp = $this->getFilesArrayForTranfert();
-                        
+            
+            $this->auto_payni = ($this->export_class->moment == 'AM') ? true : false;
+            
             if($this->export_payni && $this->export_class->moment == 'AM')              $this->export_class->exportPayInc();
-            if($this->export_ventes)                                                    $this->export_class->exportFacture();
+            if($this->export_ventes)                                                    $this->export_class->exportFacture()      ;
             if($this->export_paiements)                                                 $this->export_class->exportPaiement();
             if($this->export_achats)                                                    $this->export_class->exportFactureFournisseur();
             if($this->export_importPaiement && $this->export_class->moment == 'AM' )    $this->export_class->exportImportPaiement();
@@ -223,7 +225,7 @@
             
             
             
-            mailSyn2($sujet, $to, $from, "Bonjour, vous trouverez en pièce jointe le rapport des exports comptable de ce matin.", [PATH_TMP . '/' . 'exportCegid' . '/' . 'rapports' . '/' . date('d_m_Y') . '.log']);
+            mailSyn2($sujet, $to, $from, "Bonjour, vous trouverez en pièce jointe le rapport des exports comptable", [PATH_TMP . '/' . 'exportCegid' . '/' . 'rapports' . '/' . date('d_m_Y') . '.log']);
             
         }
         

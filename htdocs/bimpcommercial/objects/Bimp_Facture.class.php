@@ -2011,7 +2011,7 @@ class Bimp_Facture extends BimpComm
                     } else {
                         if ($nextRelanceIdx == 2) {
                             $delay = 8;
-                        } elseif (is_null($delay)) {
+                        } else {
                             $delay = $default_delay;
                         }
                     }

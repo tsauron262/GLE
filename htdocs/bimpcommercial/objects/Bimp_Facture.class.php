@@ -1991,6 +1991,8 @@ class Bimp_Facture extends BimpComm
     {
         $delay = 0;
 
+        echo $nextRelanceIdx . ': ' . $nextRelanceIdx;
+
         if (is_null($default_delay)) {
             $default_delay = (int) BimpCore::getConf('relance_paiements_facture_delay_days', 15);
         }
@@ -2011,7 +2013,7 @@ class Bimp_Facture extends BimpComm
                     } else {
                         if ($nextRelanceIdx == 2) {
                             $delay = 8;
-                        } elseif (is_null($delay)) {
+                        } else {
                             $delay = $default_delay;
                         }
                     }

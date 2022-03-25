@@ -14,7 +14,7 @@ function editDocumentation(idSection, name, serializedMenu){
                 var html = btnValid;
                 html += '<textarea id="edit_'+idSection+'" style="min-height: 501px;width: 100%;">'+result.html+'</textarea>';
                 html += btnValid;
-                html += '<div class="container"><form method="post" action="" enctype="multipart/form-data" id="myform"><input type="text" id="new_name"/><br/><input type="file" id="file" name="file" /><input type="button" onclick="uploadFile($(this).parent().parent());" class="button" value="Upload" id="but_upload"></form></div>';
+                html += '<div class="container"><form method="post" action="" enctype="multipart/form-data" id="myform">Nouveau nom :<input type="text" id="new_name"/><br/>Fichier :<input type="file" id="file" name="file" /><input type="button" onclick="uploadFile($(this).parent().parent());" class="button" value="Upload" id="but_upload"></form></div>';
                  $('#'+idSection).html(html);
             }
         });

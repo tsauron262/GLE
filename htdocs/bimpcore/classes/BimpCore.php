@@ -11,30 +11,30 @@ class BimpCore
     private static $logs_extra_data = array();
     public static $files = array(
         'js'  => array(
-            'jpicker'        => '/includes/jquery/plugins/jpicker/jpicker-1.1.6.js',
-            'SignaturePad'   => '/bimpcore/views/js/SignaturePad.object.js',
-            'moment'         => '/bimpcore/views/js/moment.min.js',
-            'bootstrap'      => '/bimpcore/views/js/bootstrap.min.js',
-            'datetimepicker' => '/bimpcore/views/js/bootstrap-datetimepicker.js',
-            'functions'      => '/bimpcore/views/js/functions.js',
-            'scroller'       => '/bimpcore/views/js/scroller.js',
-            'ajax'           => '/bimpcore/views/js/ajax.js',
+            'jpicker'            => '/includes/jquery/plugins/jpicker/jpicker-1.1.6.js',
+            'SignaturePad'       => '/bimpcore/views/js/SignaturePad.object.js',
+            'moment'             => '/bimpcore/views/js/moment.min.js',
+            'bootstrap'          => '/bimpcore/views/js/bootstrap.min.js',
+            'datetimepicker'     => '/bimpcore/views/js/bootstrap-datetimepicker.js',
+            'functions'          => '/bimpcore/views/js/functions.js',
+            'scroller'           => '/bimpcore/views/js/scroller.js',
+            'ajax'               => '/bimpcore/views/js/ajax.js',
 //            '/bimpcore/views/js/component.js',
-            'modal'          => '/bimpcore/views/js/modal.js',
-            'object'         => '/bimpcore/views/js/object.js',
-            'filters'        => '/bimpcore/views/js/filters.js',
-            'form'           => '/bimpcore/views/js/form.js',
-            'list'           => '/bimpcore/views/js/list.js',
-            'view'           => '/bimpcore/views/js/view.js',
-            'viewsList'      => '/bimpcore/views/js/viewsList.js',
-            'listCustom'     => '/bimpcore/views/js/listCustom.js',
-            'statsList'      => '/bimpcore/views/js/statsList.js',
-            'page'           => '/bimpcore/views/js/page.js',
-            'table2csv'      => '/bimpcore/views/js/table2csv.js',
-            'buc'            => '/bimpuserconfig/views/js/buc.js',
-            'bimpcore'       => '/bimpcore/views/js/bimpcore.js',
-            'bimp_api'       => '/bimpapi/views/js/bimp_api.js',
-            'bimpDocuementation'=> '/bimpcore/views/js/BimpDocumentation.js'
+            'modal'              => '/bimpcore/views/js/modal.js',
+            'object'             => '/bimpcore/views/js/object.js',
+            'filters'            => '/bimpcore/views/js/filters.js',
+            'form'               => '/bimpcore/views/js/form.js',
+            'list'               => '/bimpcore/views/js/list.js',
+            'view'               => '/bimpcore/views/js/view.js',
+            'viewsList'          => '/bimpcore/views/js/viewsList.js',
+            'listCustom'         => '/bimpcore/views/js/listCustom.js',
+            'statsList'          => '/bimpcore/views/js/statsList.js',
+            'page'               => '/bimpcore/views/js/page.js',
+            'table2csv'          => '/bimpcore/views/js/table2csv.js',
+            'buc'                => '/bimpuserconfig/views/js/buc.js',
+            'bimpcore'           => '/bimpcore/views/js/bimpcore.js',
+            'bimp_api'           => '/bimpapi/views/js/bimp_api.js',
+            'bimpDocuementation' => '/bimpcore/views/js/BimpDocumentation.js'
         ),
         'css' => array(
             'jPicker'    => '/includes/jquery/plugins/jpicker/css/jPicker-1.1.6.css',
@@ -498,8 +498,9 @@ class BimpCore
 
             $errors = array();
 
-            if (defined('ID_ERP'))
+            if (defined('ID_ERP')) {
                 $extra_data['id_erp'] = ID_ERP;
+            }
 
 
             $check = true;
@@ -522,13 +523,13 @@ class BimpCore
                     $obj = $object->object_name;
                     $id = (int) $object->id;
                 }
-
+                
                 $datas = array(
                     'id_user'    => (BimpObject::objectLoaded($user) ? (int) $user->id : 1),
                     'obj_module' => $mod,
                     'obj_name'   => $obj,
                     'id_object'  => $id,
-                    'backtrace'  => BimpTools::getBacktraceArray($bt)
+                    'backtrace'  => BimpTools::getBacktraceArray(debug_backtrace(null, 15))
                 );
 
                 if (!$id_current_log) {

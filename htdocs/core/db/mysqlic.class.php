@@ -1004,7 +1004,7 @@ class DoliDBMysqliC extends DoliDB
                 $thread_id = $this->getThreadId();
                 if($thread_id != $this->thread_id){//gros probléme id transaction changée
                     if(class_exists('BimpCore')){
-                        BimpCore::addlog('Gros probléme changement de thread Id', 4, 'sql', null, array('query' => $query, 'oldId' => $this->thread_id, 'newId' => $thread_id));
+                        BimpCore::addlog('Gros probléme changement de thread Id', 3, 'sql', null, array('query' => $query, 'oldId' => $this->thread_id, 'newId' => $thread_id));
                     }
                     $this->transaction_opened = 0;
                     static::stopAll();
@@ -1124,6 +1124,7 @@ class DoliDBMysqliC extends DoliDB
             $classLog = 'sql_duplicate';
         }
         
+        $timer = synopsisHook::getTime();
         
         $msg = get_class($this)."::query SQL Error message: ";
         $msg .= '<br/>Lasterrno : '.$this->lasterrno;
@@ -1137,13 +1138,33 @@ class DoliDBMysqliC extends DoliDB
         if($this->timeDebReq2 > 0)
             $msg .= '<br/>Time Req2 : '.(microtime(true) - $this->timeDebReq2);
         if(class_exists('synopsisHook'))
-            $msg .= '<br/>Time Depuis déb : '. synopsisHook::getTime();
+            $msg .= '<br/>Time Depuis déb : '. $timer;
 
         dol_syslog($msg, LOG_ERR);
-        if(class_exists('BimpCore'))
-            BimpCore::addlog($msg, 3,$classLog);
-        else
-            dol_syslog ('Erreur sql BimpCore non loade', LOG_ERR);
+        
+        if (class_exists('BimpCore')) {
+            $extra_data = array(
+                'Code erreur' => $this->lasterrno,
+                'Erreur SQL' => $this->lasterror,
+                'Serveur' => $this->database_host,
+                'Timer' => $timer
+            );
+
+            if ($this->timeDebReq > 0) {
+                $extra_data['Durée req 1'] = (microtime(true) - $this->timeDebReq);
+            }
+
+            if ($this->timeDebReq2 > 0) {
+                $extra_data['Durée req 2'] = (microtime(true) - $this->timeDebReq2);
+            }
+            
+            $extra_data['Requête'] = BimpRender::renderSql($query);
+            $extra_data['Exception'] = $e->getMessage();
+
+            BimpCore::addlog('ERREUR SQL', Bimp_Log::BIMP_LOG_ERREUR, $classLog, null, $extra_data);
+        }else{
+            dol_syslog ('Erreur sql BimpCore non loadé', LOG_ERR);
+        }
         if($deadLock){
             $this->transaction_opened = 0;
             static::stopAll ();

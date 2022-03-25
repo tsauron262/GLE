@@ -103,7 +103,7 @@ class BimpDocumentation {
             } elseif (preg_match('#^(\*+)([^\[]*) ?#', $ln, $matches)) {
                 $this->traiteUlLi($niveauList, strlen($matches[1]));
                 $niveauList = strlen($matches[1]);
-                $ln = $matches[2].' '.strlen($matches[1]);
+                $ln = $matches[2];
                 $balise = 'li';
                 $ln = $this->traiteLn($ln);
             } else {

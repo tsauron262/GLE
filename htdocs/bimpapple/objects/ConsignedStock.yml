@@ -160,10 +160,7 @@ forms:
               input: 
                   type: select
                   options: 
-                      callback: 
-                          method: getCentresArray
-                          params: 
-                              - 1
+                    array: centres
             - custom: 1
               label: Status
               input_name: status

@@ -190,7 +190,7 @@ $list->addFieldFilterValue('rcf.id_commande_fournisseur', (int) $id);
 $list->addJoin('br_reservation_cmd_fourn', 'rcf.id_reservation = a.id', 'rcf');
 print $list->renderHtml();
 
-echo BimpRender::renderAjaxModal('page_modal');
+echo BimpRender::renderAjaxModal('page_modal', 'bimpModal');
 echo '</div>';
 
 llxFooter();

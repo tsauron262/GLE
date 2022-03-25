@@ -609,7 +609,7 @@ class BimpRender
         return $html;
     }
 
-    public static function renderAjaxModal($modal_id, $ajaxName = 'bimpModal', $full_width = false)
+    public static function renderAjaxModal($modal_id, $modal_js_var_name, $full_width = false)
     {
         $html = '';
         $html .= '<div class="modal ajax-modal fade' . ($full_width ? ' full-window-modal' : '') . '" tabindex="-1" role="dialog" id="' . $modal_id . '">';
@@ -619,8 +619,8 @@ class BimpRender
         $html .= '<div class="modal-header">';
         $html .= '<div class="modal-nav-buttons">';
 
-        $html .= '<div class="modal-nav-prev disabled" onclick="' . $ajaxName . '.displayPrev();"><i class="fa fa-arrow-left"></i></div>';
-        $html .= '<div class="modal-nav-next disabled" onclick="' . $ajaxName . '.displayNext();"><i class="fa fa-arrow-right"></i></div>';
+        $html .= '<div class="modal-nav-prev disabled" onclick="' . $modal_js_var_name . '.displayPrev();"><i class="fa fa-arrow-left"></i></div>';
+        $html .= '<div class="modal-nav-next disabled" onclick="' . $modal_js_var_name . '.displayNext();"><i class="fa fa-arrow-right"></i></div>';
 
         $html .= '<div class="modal-nav-history btn-group">';
         $html .= '<div class="dropdown-toggle disabled"';
@@ -632,7 +632,7 @@ class BimpRender
         $html .= '</div>';
 
         $html .= '<h4 class="modal-titles_container"></h4>';
-        $html .= '<button type="button" class="close" onclick="' . $ajaxName . '.clearCurrentContent();" aria-label="Close">';
+        $html .= '<button type="button" class="close" onclick="' . $modal_js_var_name . '.clearCurrentContent();" aria-label="Close">';
         $html .= '<span aria-hidden="true">&times;</span>';
         $html .= '</button>';
         $html .= '</div>';
@@ -648,7 +648,7 @@ class BimpRender
         $html .= '</div>';
 
         $html .= '<div class="modal-footer">';
-        $html .= '<button type="button" class="btn btn-secondary" onclick="' . $ajaxName . '.clearCurrentContent();">';
+        $html .= '<button type="button" class="btn btn-secondary" onclick="' . $modal_js_var_name . '.clearCurrentContent();">';
         $html .= '<i class="fa fa-times iconLeft"></i>Fermer</button>';
         $html .= '</div>';
 

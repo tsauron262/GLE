@@ -25,7 +25,7 @@ class Bimp_user_client_controller extends BimpController {
                 require_once DOL_DOCUMENT_ROOT . "/bimpinterfaceclient/views/header.php";
                 parent::display();
 
-                echo BimpRender::renderAjaxModal('page_modal');
+                echo BimpRender::renderAjaxModal('page_modal', 'bimpModal');
 
                 llxFooter();
 

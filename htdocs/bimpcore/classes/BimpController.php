@@ -446,34 +446,7 @@ class BimpController
         echo '</div>';
 
         if ($display_footer) {
-            echo BimpRender::renderAjaxModal('page_modal');
-            echo BimpRender::renderAjaxModal('docu_modal', 'docModal');
-
-            $html = '<div id="openModalBtn" onclick="bimpModal.show();" class="closed bs-popover"';
-            $html .= BimpRender::renderPopoverData('Afficher la fenêtre popup', 'left');
-            $html .= ' data-modal_id="page_modal">';
-            $html .= BimpRender::renderIcon('far_window-restore');
-            $html .= '</div>';
-
-            echo $html;
-
-            if (BimpDebug::isActive()) {
-                BimpDebug::addDebugTime('Fin affichage page');
-
-                echo BimpRender::renderAjaxModal('debug_modal', 'BimpDebugModal');
-
-                $html = '<div id="openDebugModalBtn" onclick="BimpDebugModal.show();" class="closed bs-popover"';
-                $html .= BimpRender::renderPopoverData('Afficher la fenêtre debug', 'right');
-                $html .= ' data-modal_id="debug_modal">';
-                $html .= BimpRender::renderIcon('fas_info-circle');
-                $html .= '</div>';
-
-                echo $html;
-
-                echo '<div id="bimp_page_debug_content" style="display: none">';
-                echo BimpDebug::renderDebug();
-                echo '</div>';
-            }
+            echo self::renderBaseModals();
 
             $this->displayFooter();
         }
@@ -727,6 +700,38 @@ class BimpController
         }
 
         return 'fonction : "' . $fonction . '" inexistante';
+    }
+
+    public static function renderBaseModals()
+    {
+        $html = '';
+
+        $html .= BimpRender::renderAjaxModal('page_modal', 'bimpModal');
+        $html .= BimpRender::renderAjaxModal('docu_modal', 'docModal');
+
+        $html .= '<div id="openModalBtn" onclick="bimpModal.show();" class="closed bs-popover"';
+        $html .= BimpRender::renderPopoverData('Afficher la fenêtre popup', 'left');
+        $html .= ' data-modal_id="page_modal">';
+        $html .= BimpRender::renderIcon('far_window-restore');
+        $html .= '</div>';
+
+        if (BimpDebug::isActive()) {
+            BimpDebug::addDebugTime('Fin affichage page');
+
+            $html .= BimpRender::renderAjaxModal('debug_modal', 'BimpDebugModal');
+
+            $html .= '<div id="openDebugModalBtn" onclick="BimpDebugModal.show();" class="closed bs-popover"';
+            $html .= BimpRender::renderPopoverData('Afficher la fenêtre debug', 'right');
+            $html .= ' data-modal_id="debug_modal">';
+            $html .= BimpRender::renderIcon('fas_info-circle');
+            $html .= '</div>';
+
+            $html .= '<div id="bimp_page_debug_content" style="display: none">';
+            $html .= BimpDebug::renderDebug();
+            $html .= '</div>';
+        }
+
+        return $html;
     }
 
     // Traitements Ajax:
@@ -3019,7 +3024,7 @@ class BimpController
     }
 
     // Gestion BimpDocumentation: 
-    
+
     protected function ajaxProcessLoadDocumentation()
     {
         $BimpDocumentation = new BimpDocumentation('doc', BimpTools::getValue('name', ''), 'modal', BimpTools::getValue('idSection', 'princ'));
@@ -3037,7 +3042,7 @@ class BimpController
     }
 
     // Divers: 
-    
+
     protected function ajaxProcessLoadProductStocks()
     {
         $errors = array();

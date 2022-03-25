@@ -2208,12 +2208,33 @@ class BimpController
         );
     }
     
+    protected function ajaxProcessUploadBimpDocumentationFile(){
+        $errors = array();
+        if(isset($_FILES['file']['name'])){
+            $fileName = BimpTools::getValue('new_name', '');
+            if($fileName == '')
+                $fileName = $_FILES['file']['name'];
+            if(stripos($fileName, '.') === false)
+                $fileName .= '.'.pathinfo($_FILES['file']['name'],PATHINFO_EXTENSION);
+            $path = DOL_DATA_ROOT . '/bimpcore/docs/image/'.$fileName;
+            move_uploaded_file($_FILES['file']['tmp_name'],$path);
+        }
+
+        return array(
+            'errors'     => $errors,
+            'success_callback' => 'alert("lkklk");',
+            'html'       => '',
+            'request_id' => BimpTools::getValue('request_id', 0)
+        );
+        
+    }
+    
     protected function ajaxProcessSaveBimpDocumentation(){
         $BimpDocumentation = new BimpDocumentation('doc', BimpTools::getValue('name', ''), 'modal', BimpTools::getValue('idSection', ''), BimpTools::getValue('serializedMenu', ''));
         $BimpDocumentation->saveDoc(BimpTools::getValue('name', ''), BimpTools::getValue('html', ''));
         $return = $BimpDocumentation->displayDoc('array');
         $errors = $BimpDocumentation->errors;
-
+        
         return array(
             'errors'     => $errors,
             'html'       => $return['core'],

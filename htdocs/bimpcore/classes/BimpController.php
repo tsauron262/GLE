@@ -3018,8 +3018,8 @@ class BimpController
         );
     }
 
-    // Divers: 
-
+    // Gestion BimpDocumentation: 
+    
     protected function ajaxProcessLoadDocumentation()
     {
         $BimpDocumentation = new BimpDocumentation('doc', BimpTools::getValue('name', ''), 'modal', BimpTools::getValue('idSection', 'princ'));
@@ -3036,6 +3036,8 @@ class BimpController
         );
     }
 
+    // Divers: 
+    
     protected function ajaxProcessLoadProductStocks()
     {
         $errors = array();

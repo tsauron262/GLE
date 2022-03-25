@@ -111,6 +111,8 @@ class BimpDocumentation {
                     if ($this->admin)
                         $this->lines[] = array('value' => static::btnEditer($matches[2], $idSection, $pref));
                     $this->lines = BimpTools::merge_array($this->lines, $child->lines);
+                    $this->traiteIndent($niveau);
+                    $pref = $this->getPrefMenu($niveau);
                     $this->errors = BimpTools::merge_array($this->errors, $child->errors);
                 } elseif ($this->admin) {
                     $this->lines[] = array('value' => static::btnEditer($matches[2], $idSection, $pref));
@@ -131,6 +133,9 @@ class BimpDocumentation {
                 $ln = $this->traiteLn($matches[2]);
                 $niveau = (strlen($matches[1]) - 1) + $initNiveau;
                 $type = 'h' . $niveau;
+                
+                $this->traiteIndent($niveau);
+                
 
                 /* gestion menu */
                 if ($this->type == 'doc') {
@@ -140,7 +145,7 @@ class BimpDocumentation {
                     $hash = 'menu' . $pref;
                     if ($niveau > 1) {
                         $styleMenu[] = 'text-indent: ' . ($niveau * 10) . 'px;';
-                        $styleCore[] = 'padding-left: ' . ($niveau * 10) . 'px;';
+//                        $styleCore[] = 'padding-left: ' . ($niveau * 10) . 'px;';
                     }
                 }
             } else {
@@ -149,6 +154,17 @@ class BimpDocumentation {
 
             $this->lines[] = array('balise' => $type, 'value' => $ln, 'styleMenu' => $styleMenu, 'styleCore' => $styleCore, 'hash' => $hash);
         }
+    }
+    
+    function traiteIndent($niveau){
+        if($niveau > count($this->menu))//On descend d'un niveau
+            for($i=0; $i<($niveau-count($this->menu));$i++)
+                $this->lines[] = array('div' => array('class' => 'indent ident'.($i+1+count($this->menu))));
+//                $this->lines[] = array('value'=> '+++++' .count($this->menu).' '.$niveau);
+        elseif($niveau < count($this->menu))
+            for($i=0; $i<(count($this->menu) - $niveau);$i++)
+                $this->lines[] = array('div' => array('close' => true));
+//                $this->lines[] = array('value'=> '-------' .count($this->menu).' '.$niveau.' '.'indent ident'.$i+1);
     }
 
     static function convertTag($in) {
@@ -208,10 +224,21 @@ class BimpDocumentation {
         $this->initLines($this->initNiveau);
 
         $sections = array();
-        $sections['vide'] = '';
+        $sections['css'] = '<style>
+            .indent{
+               text-indent: -10px;
+               padding-left: 20px;
+            }
+            h6,h7,h8,h9,h10,h11{
+                display:block;
+            }
+            </style>';
 
         $sections['menu'] = $this->getMenu();
-        $sections['core'] = $this->getCore();
+        
+        
+        
+        $sections['core'] = $this->getCore(($mode == 'text'));
 
 
         //impression
@@ -261,36 +288,38 @@ class BimpDocumentation {
         return $html;
     }
 
-    function getCore() {
-        $this->pOpen = true;
-        $html = '<div id="' . $this->idSection . '">';
+    function getCore($withDivSection = true) {
+//        $this->pOpen = true;
+        if($withDivSection)
+            $html = '<div id="' . $this->idSection . '">';
         if ($this->admin)
             $html .= static::btnEditer($this->name, $this->idSection, $this->initPrefMenu) . '<br/>';
         foreach ($this->lines as $info) {
             if (isset($info['div'])) {
-                if ($this->pOpen) {
-                    $html .= '</div>';
-                    $this->pOpen = false;
-                }
-                $html .= '<' . (isset($info['div']['close']) ? '/' : '') . 'div' . (isset($info['div']['id']) ? ' id="' . $info['div']['id'] . '"' : '') . (isset($info['div']['class']) ? ' id="' . $info['div']['class'] . '"' : '') . '>';
+//                if ($this->pOpen) {
+//                    $html .= '</div>';
+//                    $this->pOpen = false;
+//                }
+                $html .= '<' . (isset($info['div']['close']) ? '/' : '') . 'div' . (isset($info['div']['id']) ? ' id="' . $info['div']['id'] . '"' : '') . (isset($info['div']['class']) ? ' class="' . $info['div']['class'] . '"' : '') . '>';
             }
 
 
             if ($info['balise'] != '') {
-                if ($this->pOpen) {
-                    $html .= '</div>';
-                }
-                $html .= "<div" . (isset($info['styleCore']) && count($info['styleCore']) ? ' style="' . implode(' ', $info['styleCore']) . '"' : '') . ">";
-                $this->pOpen = true;
+//                if ($this->pOpen) {
+//                    $html .= '</div>';
+//                }
+//                $html .= "<div" . (isset($info['styleCore']) && count($info['styleCore']) ? ' style="' . implode(' ', $info['styleCore']) . '"' : '') . ">";
+//                $this->pOpen = true;
                 $html .= '<' . $info['balise'];
                 if ($info['hash']) {
                     $html .= ' id="' . $info['hash'] . '"';
                 }
                 $html .= '>' . $info['value'] . '</' . $info['balise'] . '>';
-            } else
+            } elseif($info['value'] != '')
                 $html .= $info['value'] . '<br/>';
         }
-        $html .= '</div>';
+        if($withDivSection)
+            $html .= '</div>';
 //        $html .= '<pre>'.print_r($this->lines,1);
         return $html;
     }

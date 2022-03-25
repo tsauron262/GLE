@@ -42,7 +42,7 @@ class Transfer extends BimpDolObject
 
         switch ($action) {
             case 'addLinesFromCsv':
-                return (int) $user->admin;
+                return 1;//(int) $user->admin;
         }
 
         return parent::canSetAction($action);

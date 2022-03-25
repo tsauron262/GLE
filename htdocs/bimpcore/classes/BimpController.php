@@ -315,7 +315,7 @@ class BimpController
     public function displayHeaderFiles($echo = true)
     {
         $html = '';
-        $id_object = BimpTools::getValue('id'); 
+        $id_object = BimpTools::getValue('id');
 
         $prefixe = DOL_URL_ROOT;
         if ($prefixe == "/")
@@ -340,10 +340,10 @@ class BimpController
         $html .= '<script type="text/javascript">';
         $html .= '$(document).ready(function() {$(\'body\').trigger($.Event(\'bimp_ready\'));});';
         $html .= '</script>';
-        
+
         if ($echo)
             echo $html;
-        
+
         return $html;
     }
 
@@ -447,7 +447,7 @@ class BimpController
 
         if ($display_footer) {
             echo BimpRender::renderAjaxModal('page_modal');
-            echo BimpRender::renderAjaxModal('docu_modal');
+            echo BimpRender::renderAjaxModal('docu_modal', 'docModal');
 
             $html = '<div id="openModalBtn" onclick="bimpModal.show();" class="closed bs-popover"';
             $html .= BimpRender::renderPopoverData('Afficher la fenêtre popup', 'left');
@@ -2222,7 +2222,6 @@ class BimpController
 
         return array(
             'errors'     => $errors,
-            'success_callback' => 'alert("lkklk");',
             'html'       => '',
             'request_id' => BimpTools::getValue('request_id', 0)
         );
@@ -2239,22 +2238,6 @@ class BimpController
             'errors'     => $errors,
             'html'       => $return['core'],
             'htmlMenu'   => $return['menu'],
-            'request_id' => BimpTools::getValue('request_id', 0)
-        );
-        
-    }
-    
-    protected function ajaxProcessLoadDocumentation(){
-        $BimpDocumentation = new BimpDocumentation('doc', BimpTools::getValue('name', ''), 'modal', BimpTools::getValue('idSection', 'princ'));
-        if(BimpTools::getValue('mode', '') == 'edit')
-            $html = $BimpDocumentation->getDoc();    
-        else
-            $html = $BimpDocumentation->displayDoc();
-        $errors = $BimpDocumentation->errors;
-
-        return array(
-            'errors'     => $errors,
-            'html'       => $html,
             'request_id' => BimpTools::getValue('request_id', 0)
         );
     }
@@ -3054,8 +3037,26 @@ class BimpController
         );
     }
 
-    // Divers: 
+    // Gestion BimpDocumentation: 
+    
+    protected function ajaxProcessLoadDocumentation()
+    {
+        $BimpDocumentation = new BimpDocumentation('doc', BimpTools::getValue('name', ''), 'modal', BimpTools::getValue('idSection', 'princ'));
+        if (BimpTools::getValue('mode', '') == 'edit')
+            $html = $BimpDocumentation->getDoc();
+        else
+            $html = $BimpDocumentation->displayDoc();
+        $errors = $BimpDocumentation->errors;
 
+        return array(
+            'errors'     => $errors,
+            'html'       => $html,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        );
+    }
+
+    // Divers: 
+    
     protected function ajaxProcessLoadProductStocks()
     {
         $errors = array();

@@ -244,7 +244,7 @@ forms:
               label: Signature par le client
               input_name: create_signature
               data_type: bool
-              value: 1
+              value: 0
               input: 
                   type: toggle
                   help: En choisissant "NON", aucune signature ne sera demandée au client.<br/>Le statut "Signé" sera mis à "Non applicable" pour cette expédition

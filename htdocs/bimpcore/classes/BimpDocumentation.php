@@ -112,6 +112,7 @@ class BimpDocumentation {
                         $this->lines[] = array('value' => static::btnEditer($matches[2], $idSection, $pref));
                     $this->lines = BimpTools::merge_array($this->lines, $child->lines);
                     $this->traiteIndent($niveau);
+                    $pref = $this->getPrefMenu($niveau);
                     $this->errors = BimpTools::merge_array($this->errors, $child->errors);
                 } elseif ($this->admin) {
                     $this->lines[] = array('value' => static::btnEditer($matches[2], $idSection, $pref));
@@ -158,10 +159,12 @@ class BimpDocumentation {
     function traiteIndent($niveau){
         if($niveau > count($this->menu))//On descend d'un niveau
             for($i=0; $i<($niveau-count($this->menu));$i++)
-                $this->lines[] = array('div' => array('class' => 'indent ident'.$niveau));
+                $this->lines[] = array('div' => array('class' => 'indent ident'.($i+1+count($this->menu))));
+//                $this->lines[] = array('value'=> '+++++' .count($this->menu).' '.$niveau);
         elseif($niveau < count($this->menu))
             for($i=0; $i<(count($this->menu) - $niveau);$i++)
                 $this->lines[] = array('div' => array('close' => true));
+//                $this->lines[] = array('value'=> '-------' .count($this->menu).' '.$niveau.' '.'indent ident'.$i+1);
     }
 
     static function convertTag($in) {

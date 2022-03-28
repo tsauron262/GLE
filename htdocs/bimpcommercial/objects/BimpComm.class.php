@@ -1918,7 +1918,7 @@ class BimpComm extends BimpDolObject
         global $user;
         if($user->admin || $user->id = 226){
             $html .= BimpDocumentation::renderBtn('gle', 'Test pour les admin, doc compléte');
-            $html .= BimpDocumentation::renderBtn('propal', 'Test pour les admin, doc propal');
+            $html .= BimpDocumentation::renderBtn('liste', 'Test pour les admin, doc liste');
         }
 
         return $html;

@@ -450,19 +450,23 @@ class BimpCore
 
     public static function addLogs_extra_data($array)
     {
-        if (!is_array($array))
+        if (!is_array($array)) {
             $array = array($array);
+        }
+
         static::$logs_extra_data = BimpTools::merge_array(static::$logs_extra_data, $array);
     }
 
     public static function addlog($msg, $level = 1, $type = 'bimpcore', $object = null, $extra_data = array(), $force = false)
     {
-        // $bimp_logs_locked: Eviter boucles infinies 
+        // $bimp_logs_locked: Eviter boucles infinies
+
         global $bimp_logs_locked, $user;
 
         if (is_null($bimp_logs_locked)) {
             $bimp_logs_locked = 0;
         }
+
         if (!$bimp_logs_locked) {
             $bimp_logs_locked = 1;
             $extra_data = BimpTools::merge_array(static::$logs_extra_data, $extra_data);
@@ -498,11 +502,6 @@ class BimpCore
 
             $errors = array();
 
-            if (defined('ID_ERP')) {
-                $extra_data['id_erp'] = ID_ERP;
-            }
-
-
             $check = true;
             foreach (Bimp_Log::$exclude_msg_prefixes as $prefixe) {
                 if (strpos($msg, $prefixe) === 0) {
@@ -524,7 +523,7 @@ class BimpCore
                     $id = (int) $object->id;
                 }
 
-                $datas = array(
+                $data = array(
                     'id_user'    => (BimpObject::objectLoaded($user) ? (int) $user->id : 1),
                     'obj_module' => $mod,
                     'obj_name'   => $obj,
@@ -533,13 +532,17 @@ class BimpCore
                 );
 
                 if (!$id_current_log) {
-                    $datas = BimpTools::merge_array($datas, array(
+                    if (defined('ID_ERP')) {
+                        $extra_data['id_erp'] = ID_ERP;
+                    }
+
+                    $data = BimpTools::merge_array($data, array(
                                 'type'       => $type,
                                 'level'      => $level,
                                 'msg'        => $msg,
                                 'extra_data' => $extra_data,
                     ));
-                    $log = BimpObject::createBimpObject('bimpcore', 'Bimp_Log', $datas, true, $errors);
+                    $log = BimpObject::createBimpObject('bimpcore', 'Bimp_Log', $data, true, $errors);
 
                     if (BimpObject::objectLoaded($log)) {
                         BimpCache::addBimpLog((int) $log->id, $type, $level, $msg, $extra_data);
@@ -551,16 +554,35 @@ class BimpCore
                     if (BimpDebug::isActive()) {
                         BimpDebug::incCacheInfosCount('logs', false);
                     }
+
                     $log = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Log', $id_current_log);
                     $log->set('last_occurence', date('Y-m-d H:i:d'));
                     $log->set('nb_occurence', $log->getData('nb_occurence') + 1);
+
                     $warnings = array();
                     $errUpdate = $log->update($warnings, true);
-                    if (count($errUpdate))
-                        $datas['erreur_maj_log'] = $errUpdate;
-                    $datas['GET'] = $_GET;
-                    $datas['POST'] = $_POST;
-                    $log->addNote('<pre>' . print_r($datas, 1) . '</pre>');
+
+                    $data = array(); // inutile de mettre les data de bases (Type, level, msg, extra_data) qui sont forcéments identiques.
+                    
+                    if (defined('ID_ERP')) {
+                        $data['ID ERP'] = ID_ERP;
+                    }
+                    
+                    if (BimpObject::objectLoaded($user)) {
+                        $data['User'] = $user->getName();
+                    }
+                    
+                    if (BimpObject::objectLoaded($object)) {
+                        $data['Objet'] = BimpObject::getInstanceNomUrl($object);
+                    }
+                    
+                    if (count($errUpdate)) {
+                        $data['Erreurs Màj log'] = $errUpdate;
+                    }
+
+                    $data['GET'] = $_GET;
+                    $data['POST'] = $_POST;
+                    $log->addNote('<pre>' . print_r($data, 1) . '</pre>');
                 }
             }
 

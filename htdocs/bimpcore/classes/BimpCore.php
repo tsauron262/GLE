@@ -559,19 +559,19 @@ class BimpCore
                     $errUpdate = $log->update($warnings, true);
 
                     $data = array(); // inutile de mettre les data de bases (Type, level, msg, extra_data) qui sont forcéments identiques.
-                    
+
                     if (defined('ID_ERP')) {
                         $data['ID ERP'] = ID_ERP;
                     }
-                    
+
                     if (BimpObject::objectLoaded($user)) {
-                        $data['User'] = $user->getName();
+                        $data['User'] = '#' . $user->id;
                     }
-                    
+
                     if (BimpObject::objectLoaded($object)) {
                         $data['Objet'] = BimpObject::getInstanceNomUrl($object);
                     }
-                    
+
                     if (count($errUpdate)) {
                         $data['Erreurs Màj log'] = $errUpdate;
                     }

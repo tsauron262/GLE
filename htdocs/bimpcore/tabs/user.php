@@ -70,7 +70,7 @@ if ($droitModif) {
 
 if ($droitLire) {
     echo $view->renderHtml();
-    echo BimpRender::renderAjaxModal('page_modal');
+    echo BimpRender::renderAjaxModal('page_modal', 'bimpModal');
 } else
     echo BimpRender::renderAlerts('Vous n\'avez pas la permission de voir cette page');
 

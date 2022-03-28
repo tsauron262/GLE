@@ -697,7 +697,7 @@ class BimpComm extends BimpDolObject
 
                 global $user;
 
-                if ($user->admin) {
+                if ($user->admin || $user->id == 956) {
                     $buttons[] = array(
                         'label'   => 'Importer des lignes',
                         'icon'    => 'fas_download',

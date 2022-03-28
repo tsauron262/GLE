@@ -532,10 +532,6 @@ class BimpCore
                 );
 
                 if (!$id_current_log) {
-                    if (defined('ID_ERP')) {
-                        $extra_data['id_erp'] = ID_ERP;
-                    }
-
                     $data = BimpTools::merge_array($data, array(
                                 'type'       => $type,
                                 'level'      => $level,

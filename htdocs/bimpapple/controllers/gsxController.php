@@ -3575,14 +3575,14 @@ class gsxController extends BimpController
                             'onclick' => '$(\'#createRepairForm\').slideUp(250);'
             )));
 
-            if ($has_parts) {
+//            if ($has_parts) {
                 $onclick = 'gsx_LoadRepairConsignedStockForm($(this), ' . $sav->id . ', \'' . $serial . '\')';
-            } else {
-                $onclick = 'gsx_loadRequestModalForm($(this), \'Création d\\\'une nouvelle réparation\', \'repairCreate\', {';
-                $onclick .= 'id_sav: ' . $sav->id . ', ';
-                $onclick .= 'serial: \'' . $serial . '\'';
-                $onclick .= '}, {});';
-            }
+//            } else {
+//                $onclick = 'gsx_loadRequestModalForm($(this), \'Création d\\\'une nouvelle réparation\', \'repairCreate\', {';
+//                $onclick .= 'id_sav: ' . $sav->id . ', ';
+//                $onclick .= 'serial: \'' . $serial . '\'';
+//                $onclick .= '}, {});';
+//            }
 
             $buttons[] = BimpRender::renderButton(array(
                         'label'      => 'Valider',

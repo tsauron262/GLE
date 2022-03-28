@@ -37,53 +37,55 @@ class BimpNote extends BimpObject
         self::BN_DEST_USER  => 'Utilisateur',
         self::BN_DEST_GROUP => 'Group'
     );
-    
-    public static function cronNonLu(){
-        $listUser = BimpObject::getBimpObjectList('bimpcore', 'Bimp_User', array('statut'=>1));
-        
+
+    public static function cronNonLu()
+    {
+        $listUser = BimpObject::getBimpObjectList('bimpcore', 'Bimp_User', array('statut' => 1));
+
         global $db, $langs;
         $userT = new User($db);
 //        $listUser = array(242);
-        foreach($listUser as $idUser){
+        foreach ($listUser as $idUser) {
             $html = '';
             $notes = BimpNote::getMyNewConversations(0, true, 500, $idUser, true, false);
             $maxForMail = 20;
             $data = array();
-            foreach($notes as $note)
-                if($note['lu'] == 0 && count($data) < $maxForMail){
+            foreach ($notes as $note)
+                if ($note['lu'] == 0 && count($data) < $maxForMail) {
                     $noteObj = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNote', (int) $note['idNoteRef']);
-                    $data[] = 'Message de '.$noteObj->displayData('user_create', 'nom'). ' concernant ' .$noteObj->getParentLink(). ': <br/><i>'.$noteObj->getData('content').'</i>';
-            }
-            if(count($data) > 0){
+                    $data[] = 'Message de ' . $noteObj->displayData('user_create', 'nom') . ' concernant ' . $noteObj->getParentLink() . ': <br/><i>' . $noteObj->getData('content') . '</i>';
+                }
+            if (count($data) > 0) {
                 $userT->fetch($idUser);
                 $html = '';
-                $htmlTitre = '<h2>User : '.$userT->getFullName($langs).'</h3><br/>';
-                $html .= 'Bonjour vous avez '.count($notes).' message(s) non lu : <br/>';
-                if(count($data) >= $maxForMail)
-                    $html .= 'Voici les '.count($data).' dérniéres<br/>';
+                $htmlTitre = '<h2>User : ' . $userT->getFullName($langs) . '</h3><br/>';
+                $html .= 'Bonjour vous avez ' . count($notes) . ' message(s) non lu : <br/>';
+                if (count($data) >= $maxForMail)
+                    $html .= 'Voici les ' . count($data) . ' dérniéres<br/>';
                 $html .= '<br/>Pour désactiver cette relance, vous pouvez : <br/>- soit répondre au message de la pièce émettrice (dans les notes de pied de page) <br/>- soit cliquer sur la petite enveloppe "Message" en haut à droite de la page ERP.<br/><br/>';
-                
+
                 $html .= implode('<br/><br/>', $data);
                 mailSyn2('Message dans l\'erp', $userT->email, null, $html);
-                
-                echo $htmlTitre.$html;
+
+                echo $htmlTitre . $html;
             }
         }
 
         return '';
     }
-    
-    public function traiteContent(){
+
+    public function traiteContent()
+    {
         $note = $this->getData('content');
         $note = trim($note);
-        $tab = array(CHR(13).CHR(10) => "[saut]", CHR(13).CHR(10).' ' => "[saut]", CHR(10) => "[saut]" );
-        $tab2 = array("[saut][saut][saut][saut][saut][saut]" => CHR(13).CHR(10).CHR(13).CHR(10), "[saut][saut][saut][saut][saut]" => CHR(13).CHR(10).CHR(13).CHR(10), "[saut][saut][saut][saut]" => CHR(13).CHR(10).CHR(13).CHR(10), "[saut][saut][saut]" => CHR(13).CHR(10).CHR(13).CHR(10), "[saut]" => CHR(13).CHR(10));
-        $note = strtr($note,$tab);
-        $note = strtr($note,$tab2);
-        $note = strtr($note,$tab);
-        $note = strtr($note,$tab2);
-        $note = strtr($note,$tab);
-        $note = strtr($note,$tab2);
+        $tab = array(CHR(13) . CHR(10) => "[saut]", CHR(13) . CHR(10) . ' ' => "[saut]", CHR(10) => "[saut]");
+        $tab2 = array("[saut][saut][saut][saut][saut][saut]" => CHR(13) . CHR(10) . CHR(13) . CHR(10), "[saut][saut][saut][saut][saut]" => CHR(13) . CHR(10) . CHR(13) . CHR(10), "[saut][saut][saut][saut]" => CHR(13) . CHR(10) . CHR(13) . CHR(10), "[saut][saut][saut]" => CHR(13) . CHR(10) . CHR(13) . CHR(10), "[saut]" => CHR(13) . CHR(10));
+        $note = strtr($note, $tab);
+        $note = strtr($note, $tab2);
+        $note = strtr($note, $tab);
+        $note = strtr($note, $tab2);
+        $note = strtr($note, $tab);
+        $note = strtr($note, $tab2);
 //        die('<textarea>'.$note.'</textarea>');
         $this->set('content', $note);
     }
@@ -92,8 +94,6 @@ class BimpNote extends BimpObject
     {
         $this->traiteContent();
         $return = parent::create($warnings, $force_create);
-        
-        
 
         if (!count($return)) {
             $obj = $this->getParentInstance();
@@ -102,8 +102,9 @@ class BimpNote extends BimpObject
         }
         return $return;
     }
-    
-    public function update(&$warnings = array(), $force_update = false) {
+
+    public function update(&$warnings = array(), $force_update = false)
+    {
         $this->traiteContent();
         $return = parent::update($warnings, $force_update);
         return $return;
@@ -226,8 +227,9 @@ class BimpNote extends BimpObject
 
         return $this->parent;
     }
-    
-    public function getParentLink(){
+
+    public function getParentLink()
+    {
         $html = '';
         if (is_null($this->parent)) {
             $object_type = (string) $this->getData('obj_type');
@@ -328,13 +330,13 @@ class BimpNote extends BimpObject
                     'label'   => 'Répondre par mail',
                     'icon'    => 'far fa-paper-plane',
                     'onclick' => $this->getJsRepondre());
-            
-                if($this->i_am_dest() && $this->getData('viewed') == 0)
-                    $buttons[] = array(
-                        'label'       => 'Marquer comme vue',
-                        'icon'    => 'fas_envelope-open',
-                        'onclick' => $this->getJsActionOnclick('iAmViewed')
-                    );
+
+            if ($this->i_am_dest() && $this->getData('viewed') == 0)
+                $buttons[] = array(
+                    'label'   => 'Marquer comme vue',
+                    'icon'    => 'fas_envelope-open',
+                    'onclick' => $this->getJsActionOnclick('iAmViewed')
+                );
         }
         return $buttons;
     }
@@ -406,16 +408,21 @@ class BimpNote extends BimpObject
                 $msg['is_viewed'] = (int) $c['lu'];
 
                 // Obj
-                $msg['obj']['nom_url'] = BimpCache::getBimpObjectLink($c['obj_module'], $c['obj_name'], $c['id_obj'], array('external_link'=>0, 'modal_view'=>0));
-//                $msg['obj']['nom_url'] = $c['obj']->getLink(array('external_link'=>0, 'modal_view'=>0));
-              /*  if (method_exists($c['obj'], "getChildObject")) {//ne fonctionne pas sans objet. Et obet trop lourd.
-                    $soc = $c['obj']->getChildObject("societe");
-                    if (!$soc or!$soc->isLoaded())
-                        $soc = $c['obj']->getChildObject("client");
+                $obj = BimpCache::getBimpObjectInstance($c['obj_module'], $c['obj_name'], (int) $c['id_obj']);
 
-                    if ($soc && $soc->isLoaded())
-                        $msg['obj']['client_nom_url'] = $soc->getLink(array('external_link'=>0, 'modal_view'=>0));
-                }*/
+                if (BimpObject::objectLoaded($obj)) {
+                    $msg['obj']['nom_url'] = $obj->getLink();
+                }
+
+//                $msg['obj']['nom_url'] = $c['obj']->getLink(array('external_link'=>0, 'modal_view'=>0));
+                /*  if (method_exists($c['obj'], "getChildObject")) {//ne fonctionne pas sans objet. Et obet trop lourd.
+                  $soc = $c['obj']->getChildObject("societe");
+                  if (!$soc or!$soc->isLoaded())
+                  $soc = $c['obj']->getChildObject("client");
+
+                  if ($soc && $soc->isLoaded())
+                  $msg['obj']['client_nom_url'] = $soc->getLink(array('external_link'=>0, 'modal_view'=>0));
+                  } */
 
                 // Author
                 $author = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $note->getData('user_create'));
@@ -438,7 +445,7 @@ class BimpNote extends BimpObject
                 } elseif ($msg['is_grp'])
                     $msg['dest']['nom'] = $note->displayDestinataire(false, true);
             }
-            if(count($msg))
+            if (count($msg))
                 $messages['content'][] = $msg;
         }
 
@@ -484,15 +491,14 @@ class BimpNote extends BimpObject
 
         return '';
     }
-    
-     public function actionIAmViewed($data, &$success = '')
+
+    public function actionIAmViewed($data, &$success = '')
     {
         $errors = array();
         $warnings = array();
         $success = 'Marquer comme vue';
 
-        
-        if(!$this->i_view())
+        if (!$this->i_view())
             $errors[] = 'Impossible';
 
         return array(
@@ -636,7 +642,7 @@ class BimpNote extends BimpObject
 
     public static function getMyNewConversations($id_max = 0, $notViewedInFirst = true, $limit = 10, $idUser = null, $onlyNotViewed = false, $withObject = true)
     {
-        if(is_null($idUser)){
+        if (is_null($idUser)) {
             global $user;
             $idUser = $user->id;
         }
@@ -645,9 +651,9 @@ class BimpNote extends BimpObject
                 . " FROM `" . MAIN_DB_PREFIX . "bimpcore_note` "
                 . "WHERE auto = 0 AND id>" . $id_max . ' AND ';
         $where = "(type_dest = 1 AND fk_user_dest = " . $idUser . ") ";
-        if(count($listIdGr) > 0)
-        $where .=  "         OR (type_dest = 2 AND fk_group_dest IN ('" . implode("','", $listIdGr) . "'))";
-        $where .=   "         ";
+        if (count($listIdGr) > 0)
+            $where .= "         OR (type_dest = 2 AND fk_group_dest IN ('" . implode("','", $listIdGr) . "'))";
+        $where .= "         ";
 
         $reqFin = " GROUP BY `obj_type`,`obj_module`,`obj_name`,`id_obj`";
 //        if($notViewedInFirst)
@@ -659,7 +665,7 @@ class BimpNote extends BimpObject
         $tabNoDoublons = array();
         $tabReq = array();
         $tabReq[0] = $reqDeb . "(" . $where . ") AND viewed = 0 " . $reqFin;
-        if(!$onlyNotViewed)
+        if (!$onlyNotViewed)
             $tabReq[1] = $reqDeb . "(" . $where . " OR (type_author = 1 AND user_create = " . $idUser . ")) " . $reqFin;
 
 //        echo '<pre>';
@@ -676,8 +682,7 @@ class BimpNote extends BimpObject
                         if ($withObject && $ln->obj_type == "bimp_object") {
                             $data['obj'] = BimpCache::getBimpObjectInstance($ln->obj_module, $ln->obj_name, $ln->id_obj);
                             $tabFils[] = $data;
-                        }
-                        elseif(!$withObject){
+                        } elseif (!$withObject) {
                             $data['obj_module'] = $ln->obj_module;
                             $data['obj_name'] = $ln->obj_name;
                             $data['id_obj'] = $ln->id_obj;

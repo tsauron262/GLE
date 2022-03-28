@@ -126,7 +126,7 @@ class ActionsBimpcore
         $html = '';
         if (defined('BIMP_LIB')) {
             if (!defined('BIMP_CONTROLLER_INIT')) {
-                $html .= BimpRender::renderAjaxModal('page_modal');
+                $html .= BimpController::renderBaseModals();
             }
 //            if (is_object($this->bimp_fixe_tabs) && is_a($this->bimp_fixe_tabs, 'FixeTabs')) {              
 //                if($this->bimp_fixe_tabs->can("view"))

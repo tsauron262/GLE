@@ -315,7 +315,7 @@ class BimpController
     public function displayHeaderFiles($echo = true)
     {
         $html = '';
-        $id_object = BimpTools::getValue('id'); 
+        $id_object = BimpTools::getValue('id');
 
         $prefixe = DOL_URL_ROOT;
         if ($prefixe == "/")
@@ -340,10 +340,10 @@ class BimpController
         $html .= '<script type="text/javascript">';
         $html .= '$(document).ready(function() {$(\'body\').trigger($.Event(\'bimp_ready\'));});';
         $html .= '</script>';
-        
+
         if ($echo)
             echo $html;
-        
+
         return $html;
     }
 
@@ -446,34 +446,7 @@ class BimpController
         echo '</div>';
 
         if ($display_footer) {
-            echo BimpRender::renderAjaxModal('page_modal');
-            echo BimpRender::renderAjaxModal('docu_modal');
-
-            $html = '<div id="openModalBtn" onclick="bimpModal.show();" class="closed bs-popover"';
-            $html .= BimpRender::renderPopoverData('Afficher la fenêtre popup', 'left');
-            $html .= ' data-modal_id="page_modal">';
-            $html .= BimpRender::renderIcon('far_window-restore');
-            $html .= '</div>';
-
-            echo $html;
-
-            if (BimpDebug::isActive()) {
-                BimpDebug::addDebugTime('Fin affichage page');
-
-                echo BimpRender::renderAjaxModal('debug_modal', 'BimpDebugModal');
-
-                $html = '<div id="openDebugModalBtn" onclick="BimpDebugModal.show();" class="closed bs-popover"';
-                $html .= BimpRender::renderPopoverData('Afficher la fenêtre debug', 'right');
-                $html .= ' data-modal_id="debug_modal">';
-                $html .= BimpRender::renderIcon('fas_info-circle');
-                $html .= '</div>';
-
-                echo $html;
-
-                echo '<div id="bimp_page_debug_content" style="display: none">';
-                echo BimpDebug::renderDebug();
-                echo '</div>';
-            }
+            echo self::renderBaseModals();
 
             $this->displayFooter();
         }
@@ -727,6 +700,38 @@ class BimpController
         }
 
         return 'fonction : "' . $fonction . '" inexistante';
+    }
+
+    public static function renderBaseModals()
+    {
+        $html = '';
+
+        $html .= BimpRender::renderAjaxModal('page_modal', 'bimpModal');
+        $html .= BimpRender::renderAjaxModal('docu_modal', 'docModal');
+
+        $html .= '<div id="openModalBtn" onclick="bimpModal.show();" class="closed bs-popover"';
+        $html .= BimpRender::renderPopoverData('Afficher la fenêtre popup', 'left');
+        $html .= ' data-modal_id="page_modal">';
+        $html .= BimpRender::renderIcon('far_window-restore');
+        $html .= '</div>';
+
+        if (BimpDebug::isActive()) {
+            BimpDebug::addDebugTime('Fin affichage page');
+
+            $html .= BimpRender::renderAjaxModal('debug_modal', 'BimpDebugModal');
+
+            $html .= '<div id="openDebugModalBtn" onclick="BimpDebugModal.show();" class="closed bs-popover"';
+            $html .= BimpRender::renderPopoverData('Afficher la fenêtre debug', 'right');
+            $html .= ' data-modal_id="debug_modal">';
+            $html .= BimpRender::renderIcon('fas_info-circle');
+            $html .= '</div>';
+
+            $html .= '<div id="bimp_page_debug_content" style="display: none">';
+            $html .= BimpDebug::renderDebug();
+            $html .= '</div>';
+        }
+
+        return $html;
     }
 
     // Traitements Ajax:
@@ -2208,14 +2213,36 @@ class BimpController
         );
     }
     
-    protected function ajaxProcessLoadDoc(){
-        $BimpDocumentation = new BimpDocumentation('doc', BimpTools::getValue('name', ''), 'modal');
-        $html = $BimpDocumentation->displayDoc();
-        $errors = $BimpDocumentation->errors;
+    protected function ajaxProcessUploadBimpDocumentationFile(){
+        $errors = array();
+        if(isset($_FILES['file']['name'])){
+            $fileName = BimpTools::getValue('new_name', '');
+            if($fileName == '')
+                $fileName = $_FILES['file']['name'];
+            if(stripos($fileName, '.') === false)
+                $fileName .= '.'.pathinfo($_FILES['file']['name'],PATHINFO_EXTENSION);
+            $path = DOL_DATA_ROOT . '/bimpcore/docs/image/'.$fileName;
+            move_uploaded_file($_FILES['file']['tmp_name'],$path);
+        }
 
         return array(
             'errors'     => $errors,
-            'html'       => $html,
+            'html'       => '',
+            'request_id' => BimpTools::getValue('request_id', 0)
+        );
+        
+    }
+    
+    protected function ajaxProcessSaveBimpDocumentation(){
+        $BimpDocumentation = new BimpDocumentation('doc', BimpTools::getValue('name', ''), 'modal', BimpTools::getValue('idSection', ''), BimpTools::getValue('serializedMenu', ''));
+        $BimpDocumentation->saveDoc(BimpTools::getValue('name', ''), BimpTools::getValue('html', ''));
+        $return = $BimpDocumentation->displayDoc('array');
+        $errors = $BimpDocumentation->errors;
+        
+        return array(
+            'errors'     => $errors,
+            'html'       => $return['core'],
+            'htmlMenu'   => $return['menu'],
             'request_id' => BimpTools::getValue('request_id', 0)
         );
     }
@@ -3011,6 +3038,24 @@ class BimpController
             'errors'     => $errors,
             'html'       => $html,
             'list_id'    => $list_id,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        );
+    }
+
+    // Gestion BimpDocumentation: 
+
+    protected function ajaxProcessLoadDocumentation()
+    {
+        $BimpDocumentation = new BimpDocumentation('doc', BimpTools::getValue('name', ''), 'modal', BimpTools::getValue('idSection', 'princ'));
+        if (BimpTools::getValue('mode', '') == 'edit')
+            $html = $BimpDocumentation->getDoc();
+        else
+            $html = $BimpDocumentation->displayDoc();
+        $errors = $BimpDocumentation->errors;
+
+        return array(
+            'errors'     => $errors,
+            'html'       => $html,
             'request_id' => BimpTools::getValue('request_id', 0)
         );
     }

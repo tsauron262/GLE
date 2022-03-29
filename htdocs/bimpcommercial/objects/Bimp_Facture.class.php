@@ -1370,6 +1370,49 @@ class Bimp_Facture extends BimpComm
 
         return $actions;
     }
+    
+    public function actionCsvClient(){
+        $errors = $warnings = array();
+        $objEq = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLineEquipment');
+        $bcList = new BC_ListTable($objEq, 'forExport');
+        $bcList->addJoin('bimp_facture_line', 'a___parent.id = a.id_object_line', 'a___parent');
+        $bcList->addFieldFilterValue('a___parent.id_obj', $this->id);
+        $result = $bcList->renderCsvContent(";", array());
+        
+        $objLine = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine');
+        $bcList = new BC_ListTable($objLine, 'forExport');
+        $bcList->addJoin('facturedet', 'a___dol_line.rowid = a.id_line', 'a___dol_line');
+        $bcList->addJoin('product_extrafields', 'a___dol_line.fk_product = a___dol_line___product__ef.fk_object', 'a___dol_line___product__ef');
+        $bcList->addFieldFilterValue('id_obj', $this->id);
+        $bcList->addFieldFilterValue('a___dol_line___product__ef.serialisable', '0');
+        $result .= $bcList->renderCsvContent(";", array(), false);
+
+        
+        
+        $file = '/usr/local/data1/bimp8/data-nfs/bimpcore/tmp/tmp.csv';
+        $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=tmp/tmp.csv';
+        $success_callback = 'window.open(\'' . $url . '\')';
+        file_put_contents($file, $result);
+        
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+       
+    }
+    
+    
+    public function getLinesListHeaderExtraBtn()
+    {
+        $buttons = parent::getLinesListHeaderExtraBtn();
+        $buttons[] = array(
+            'label' => 'Export CSV Recap',
+            'incon' => 'fas_export',
+            'onclick' => $this->getJsActionOnclick('csvClient')
+        );
+        return $buttons;
+    }
 
     public function getListExtraListActions()
     {

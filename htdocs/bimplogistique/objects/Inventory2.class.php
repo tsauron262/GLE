@@ -1193,6 +1193,7 @@ HAVING scan_exp != scan_det";
         $sql .= ' WHERE inventorycode="inventory2-' . $this->getData('id') . '"';
 
         $result = $this->db->db->query($sql);
+        return $result;
 //        if ($result) {
 //            $this->db->db->commit();
 //            return true;

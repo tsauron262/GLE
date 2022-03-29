@@ -476,7 +476,7 @@ class Bimp_Product extends BimpObject
 
     public function isInContrat()
     {
-        return (in_array($this->getData('type2'), static::$sousTypeContrat));
+        return (in_array($this->getData('type2'), static::$sousTypeContrat) || $this->isDep());
     }
 
     public function hasFixePrices()

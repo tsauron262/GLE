@@ -665,7 +665,7 @@ class BimpFile extends BimpObject
         }
 
         if ((int) $this->getData('deleted')) {
-            return array($this->getLabel('this') . ' a déjà été supprimé');
+            return array(); //$this->getLabel('this') . ' a déjà été supprimé');
         }
 
         $errors = array();

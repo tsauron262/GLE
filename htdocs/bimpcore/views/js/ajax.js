@@ -58,6 +58,10 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
 
     this.contentType = 'application/x-www-form-urlencoded; charset=UTF-8';
     this.processData = true;
+    if (typeof data === 'object' && data instanceof FormData) {
+        this.processData = false;
+        this.contentType = false;
+    }
 
     this.processing_padding = 60;
 
@@ -389,6 +393,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                         }
 
                         if (result.success_callback && typeof (result.success_callback) === 'string') {
+                            console.log(result.success_callback);
                             eval(result.success_callback);
                         }
                     }

@@ -1158,8 +1158,7 @@ class DoliDBMysqliC extends DoliDB
                 $extra_data['Durée req 2'] = (microtime(true) - $this->timeDebReq2);
             }
             
-            $extra_data['Requête'] = BimpRender::renderSql($query);
-            $extra_data['Exception'] = $e->getMessage();
+            $extra_data['Requête'] = '<br/><br/>' . BimpRender::renderSql($query).'<br/><br/>';
 
             BimpCore::addlog('ERREUR SQL', Bimp_Log::BIMP_LOG_ERREUR, $classLog, null, $extra_data);
         }else{

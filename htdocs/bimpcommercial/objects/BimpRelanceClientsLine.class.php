@@ -166,10 +166,6 @@ class BimpRelanceClientsLine extends BimpObject
 
     public function isNewStatusAllowed($new_status, &$errors = array())
     {
-        if (!$this->isActionAllowed($errors)) {
-            return 0;
-        }
-
         $current_status = (int) $this->getData('status');
         $relance_idx = (int) $this->getData('relance_idx');
         $err_label = $this->getRelanceLineLabel();

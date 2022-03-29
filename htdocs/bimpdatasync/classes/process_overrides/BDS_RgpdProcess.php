@@ -5,6 +5,14 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSProcess.php');
 class BDS_RgpdProcess extends BDSProcess
 {
 
+    public static $object_default_params = array(
+        'date_field'        => 'date_create',
+        'date_create_field' => 'date_create',
+        'delete_drafts'     => 1,
+        'status_field'      => 'status',
+        'draft_value'       => 0,
+        'total_field'       => 'total_ttc'
+    );
     public static $objects = array(
         'propales'  => array(
             'module'            => 'bimpcommercial',
@@ -12,27 +20,46 @@ class BDS_RgpdProcess extends BDSProcess
             'date_field'        => 'datep',
             'date_create_field' => 'datec',
             'total_field'       => 'total',
-            'delete_drafts'     => 1,
-            'status_field'      => 'fk_statut',
-            'draft_value'       => 0,
+            'status_field'      => 'fk_statut'
         ),
         'commandes' => array(
             'module'            => 'bimpcommercial',
             'object_name'       => 'Bimp_Commande',
             'date_field'        => 'date_commande',
-            'total_field'       => 'total_ttc',
-            'date_create_field' => 'datec',
-            'delete_drafts'     => 1,
-            'status_field'      => 'fk_statut',
-            'draft_value'       => 0,
+            'date_create_field' => 'date_creation',
+            'status_field'      => 'fk_statut'
         ),
         'factures'  => array(
             'module'            => 'bimpcommercial',
             'object_name'       => 'Bimp_Facture',
             'date_field'        => 'datef',
             'date_create_field' => 'datec',
-            'total_field'       => 'total_ttc',
-            'delete_drafts'     => 0,
+            'status_field'      => 'fk_statut'
+        ),
+        'contrats'  => array(
+            'module'            => 'bimpcontract',
+            'object_name'       => 'BContract_contrat',
+            'date_field'        => 'date_contrat',
+            'date_create_field' => 'datec',
+            'status_field'      => 'statut'
+        ),
+        'sav'       => array(
+            'module'      => 'bimpsupport',
+            'object_name' => 'BS_SAV',
+            'total_field' => ''
+        ),
+        'tickets'   => array(
+            'module'      => 'bimpsupport',
+            'object_name' => 'BS_Ticket',
+            'draft_value' => 1
+        ),
+        'fi'        => array(
+            'module'            => 'bimptechnique',
+            'object_name'       => 'BT_ficheInter',
+            'date_field'        => 'datec',
+            'date_create_field' => 'datec',
+            'status_field'      => 'fk_statut',
+            'total_field'       => ''
         )
     );
 
@@ -42,59 +69,17 @@ class BDS_RgpdProcess extends BDSProcess
     {
         $html = '';
 
-        $dt_10_years = new DateTime();
-        $dt_10_years->sub(new DateInterval('P10Y'));
+        $data = $this->getElementsToProcess();
 
-        $dt_6_years = new DateTime();
-        $dt_6_years->sub(new DateInterval('P6Y'));
+        if (!empty($data['drafts'])) {
+            $html .= '<h3>Pièces brouillons à supprimer</h3>';
+            foreach ($data['drafts'] as $type => $elements) {
+                $instance = BimpObject::getInstance(self::$objects[$type]['module'], self::$objects[$type]['object_name']);
 
-        $dt_3_years = new DateTime();
-        $dt_3_years->sub(new DateInterval('P3Y'));
-
-        foreach (self::$objects as $type => $params) {
-            $instance = BimpObject::getInstance($params['module'], $params['object_name']);
-
-            if (!is_a($instance, $params['object_name'])) {
-                $html .= BimpRender::renderAlerts('Erreur de paramètres pour le type "' . $type . '" (nom ou module invalide)');
-                continue;
-            }
-
-            $rows = BimpCache::getBimpObjectList($params['module'], $params['object_name'], array(
-                        $params['date_field'] => array(
-                            'operator' => '<',
-                            'value'    => $dt_10_years->format('Y-m-d')
-                        )
-            ));
-
-            $html .= BimpTools::ucfirst($instance->getLabel()) . ' > 10 ans: <b>' . count($rows) . '</b><br/>';
-            $rows = BimpCache::getBimpObjectList($params['module'], $params['object_name'], array(
-                        $params['date_field']  => array(
-                            'and' => array(
-                                array(
-                                    'operator' => '<',
-                                    'value'    => $dt_6_years->format('Y-m-d')
-                                ),
-                                array(
-                                    'operator' => '>=',
-                                    'value'    => $dt_10_years->format('Y-m-d')
-                                )
-                            )
-                        ),
-                        $params['total_field'] => array(
-                            'operator' => '<',
-                            'value'    => 120
-                        )
-            ));
-
-            $html .= BimpTools::ucfirst($instance->getLabel()) . ' > 6 ans et < 120€: <b>' . count($rows) . '</b><br/><br/>';
-
-            if ((int) $params['delete_drafts']) {
-                $rows = BimpCache::getBimpObjectList($params['module'], $params['object_name'], array(
-                            $params['date_field']   => array(
-                                'operator' => '<',
-                                'value'    => $dt_3_years->format('Y-m-d')
-                            ),
-                            $params['status_field'] => $params['draft_value']
+                $title = BimpTools::ucfirst($instance->getLabel('name_plur')) . ' à supprimer (' . count($elements) . ')';
+                $html .= BimpRender::renderFoldableContainer($title, '<pre>' . print_r($elements, 1) . '</pre>', array(
+                            'open'        => false,
+                            'offset_left' => true
                 ));
             }
         }
@@ -104,81 +89,24 @@ class BDS_RgpdProcess extends BDSProcess
 
     public function initDailyCheck(&$data, &$errors = array())
     {
-        $errors[] = 'Désactivé pour l\'instant';
-        return;
+        $data = array(
+            'steps' => array()
+        );
 
-        $data['steps'] = array();
+        $elements = $this->getElementsToProcess();
 
-        // Recherche des objets à supprimer: 
-        $dt_10_years = new DateTime();
-        $dt_10_years->sub(new DateInterval('P10Y'));
+        if (isset($elements['drafs']) && !empty($elements['drafts'])) {
+            foreach ($elements['drafs'] as $type => $list) {
+                if (!empty($list)) {
+                    $instance = BimpObject::getInstance(self::$objects[$type]['module'], self::$objects[$type]['object_name']);
 
-        $dt_6_years = new DateTime();
-        $dt_6_years->sub(new DateInterval('P6Y'));
-
-        foreach (self::$objects as $type => $params) {
-            if (!(int) $this->options['process_' . $type]) {
-                continue;
-            }
-
-            $to_delete = array();
-
-            $instance = BimpObject::getInstance($params['module'], $params['object_name']);
-
-            if (!is_a($instance, $params['object_name'])) {
-                $errors[] = 'Erreur de paramètres pour le type "' . $type . '" (nom ou module invalide)';
-                continue;
-            }
-
-            $list = BimpCache::getBimpObjectList($params['module'], $params['object_name'], array(
-                        'datep' => array(
-                            'operator' => '<',
-                            'value'    => $dt_10_years->format('Y-m-d')
-                        )
-            ));
-
-            if (is_array($list) && !empty($list)) {
-                foreach ($list as $id) {
-                    if (!in_array((int) $id, $to_delete)) {
-                        $to_delete[] = (int) $id;
-                    }
+                    $data['steps']['delete_drafts_' . $type] = array(
+                        'label'                  => 'Suppression des ' . $instance->getLabel('name_plur') . ' brouillons',
+                        'on_error'               => 'continue',
+                        'elements'               => $list,
+                        'nbElementsPerIteration' => 10
+                    );
                 }
-            }
-
-            $list = BimpCache::getBimpObjectList($params['module'], $params['object_name'], array(
-                        $params['date_field']  => array(
-                            'and' => array(
-                                array(
-                                    'operator' => '<',
-                                    'value'    => $dt_6_years->format('Y-m-d')
-                                ),
-                                array(
-                                    'operator' => '>=',
-                                    'value'    => $dt_10_years->format('Y-m-d')
-                                )
-                            )
-                        ),
-                        $params['total_field'] => array(
-                            'operator' => '<',
-                            'value'    => 120
-                        )
-            ));
-
-            if (is_array($list) && !empty($list)) {
-                foreach ($list as $id) {
-                    if (!in_array((int) $id, $to_delete)) {
-                        $to_delete[] = (int) $id;
-                    }
-                }
-            }
-
-            if (!empty($to_delete)) {
-                $data['steps']['delete_' . $type] = array(
-                    'label'                  => 'Suppression des ' . $instance->getLabel('name_plur') . ' (' . count($to_delete) . ')',
-                    'on_error'               => 'stop',
-                    'elements'               => $to_delete,
-                    'nbElementsPerIteration' => 10
-                );
             }
         }
     }
@@ -189,58 +117,93 @@ class BDS_RgpdProcess extends BDSProcess
     {
         $result = array();
 
-        if (preg_match('/^delete_(.+)$/', $step_name, $matches)) {
-            $object_type = $matches[1];
+        if (preg_match('/^delete_drafts_(.+)$/', $step_name, $matches)) {
+            $type = $matches[1];
+        }
+        return $result;
+    }
 
-            if (isset(self::$objects[$object_type])) {
-                if (!empty($this->references)) {
-                    $obj = self::$objects[$object_type];
-                    $instance = BimpObject::getInstance($obj['module'], $obj['object_name']);
+    // Traitements: 
 
-                    $this->setCurrentObject($instance);
+    public function getElementsToProcess()
+    {
+        $data = array(
+            'drafts' => array()
+        );
 
-                    global $rgpd_delete;
-                    $rgpd_delete = true;
+        // Recherche des pièces brouillons à suppr. 
+        if ((int) BimpTools::getArrayValueFromPath($this->options, 'delete_drafts', 0)) {
+            $dt = new DateTime();
+            $dt->sub(new DateInterval(BimpTools::getArrayValueFromPath($this->params, 'drafts_delay_interval', 'P3Y')));
+            $date_delete_drafs = $dt->format('Y-m-d');
 
-                    foreach ($this->references as $id_object) {
-                        $name = BimpTools::ucfirst($instance->getLabel()) . ' #' . $id_object;
-                        $object = BimpObject::getBimpObjectInstance($obj['module'], $obj['object_name'], $id_object);
+            foreach (self::$objects as $type => $params) {
+                $params = BimpTools::overrideArray(self::$object_default_params, $params);
 
-                        if (BimpObject::objectLoaded($object)) {
-                            $ref = $object->getRef(false);
-                            if ($ref) {
-                                $name .= ' - ' . $ref;
-                            }
-
-                            $obj_warnings = array();
-                            $obj_errors = $object->delete($obj_warnings, true);
-
-                            if (count($obj_warnings)) {
-                                $this->Alert(BimpTools::getMsgFromArray($obj_warnings), $instance, $name);
-                            }
-
-                            if (count($obj_errors)) {
-                                $this->Error(BimpTools::getMsgFromArray($obj_errors, 'Echec suppression'), $instance, $name);
-                            } else {
-                                $this->incDeleted();
-                                $this->Success('Suppression effectuée', $instance, $name);
-                                continue;
-                            }
-                        } else {
-                            $this->Error(ucfirst($instance->getLabel('this')) . ' n\'existe pas', $instance, $name);
-                        }
-
-                        $this->incIgnored();
-                    }
-
-                    $rgpd_delete = false;
+                if (!(int) $params['delete_drafts'] || !(int) BimpTools::getArrayValueFromPath($this->options, 'process_' . $type, 0)) {
+                    continue;
                 }
-            } else {
-                $errors[] = 'Le type d\'objet "' . $object_type . '" n\'existe pas';
+
+                $obj = BimpObject::getInstance($params['module'], $params['object_name']);
+                $primary = $obj->getPrimary();
+
+                $where = $params['status_field'] . ' = ' . $params['draft_value'];
+                $where .= ' AND ' . $params['date_create_field'] . ' <= \'' . $date_delete_drafs . '\'';
+
+                $rows = $this->db->getRows($obj->getTable(), $where, null, 'array', array($primary));
+
+                if (is_array($rows)) {
+                    $data['drafts'][$type] = array();
+
+                    foreach ($rows as $r) {
+                        $data['drafts'][$type][] = (int) $r[$primary];
+
+                        if ((int) BimpTools::getArrayValueFromPath($this->options, 'test_one', 0)) {
+                            break;
+                        }
+                    }
+                }
             }
         }
 
-        return $result;
+        return $data;
+    }
+
+    public function deleteDrafts($type, $list, &$errors = array())
+    {
+        if (!(int) self::$objects[$type]['delete_drafts']) {
+            $errors[] = 'Les brouillons ne sont pas supprimables pour les objets de type "' . $type . '"';
+            return;
+        }
+
+        $instance = BimpObject::getInstance(self::$objects[$type]['module'], self::$objects[$type]['object_name']);
+        $this->setCurrentObject($instance);
+
+        foreach ($list as $id_object) {
+            $this->incProcessed();
+            $object = BimpCache::getBimpObjectInstance(self::$objects[$type]['module'], self::$objects[$type]['object_name'], $id_object);
+
+            if (!BimpObject::objectLoaded($object)) {
+                $this->incIgnored();
+                $this->Error(BimpTools::ucfirst($instance->getLabel('the')) . ' d\'ID ' . $id_object . ' n\'existe plus', $instance, '#' . $id_object);
+            } else {
+                $ref = $object->getRef(true);
+                $del_warnings = array();
+                $del_errors = $object->delete($del_warnings, true);
+
+                if (count($del_errors)) {
+                    $this->incIgnored();
+                    $this->Error(BimpTools::getMsgFromArray($del_errors, 'Echec de la suppression'), $object, $ref);
+                } else {
+                    $this->incDeleted();
+                    $this->Success('Suppression ' . $instance->getLabel('of_the') . ' #' . $id_object . ' effectuée avec succès', $instance, $ref);
+                }
+
+                if (count($del_warnings)) {
+                    $this->Alert(BimpTools::getMsgFromArray($del_warnings, 'Erreurs suite à la suppression ' . $instance->getLabel('of_the') . ' #' . $id_object), $instance, $ref);
+                }
+            }
+        }
     }
 
     // Install: 
@@ -258,7 +221,32 @@ class BDS_RgpdProcess extends BDSProcess
                         ), true, $errors, $warnings);
 
         if (BimpObject::objectLoaded($process)) {
+            // Paramètres: 
+
+            BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
+                'id_process' => (int) $process->id,
+                'name'       => 'drafts_delay_interval',
+                'label'      => 'Intervalle délai suppr. pièces brouillons',
+                'value'      => 'P3Y'
+                    ), true, $warnings, $warnings);
+
+            // options: 
+
             $options = array();
+
+            $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                        'id_process'    => (int) $process->id,
+                        'label'         => 'Traiter les brouillons à supprimer',
+                        'name'          => 'delete_drafts',
+                        'info'          => '',
+                        'type'          => 'toggle',
+                        'default_value' => '1',
+                        'required'      => 0
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($opt)) {
+                $options[] = (int) $opt->id;
+            }
 
             $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
                         'id_process'    => (int) $process->id,
@@ -302,12 +290,68 @@ class BDS_RgpdProcess extends BDSProcess
                 $options[] = (int) $opt->id;
             }
 
+            $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                        'id_process'    => (int) $process->id,
+                        'label'         => 'Traiter les contrats',
+                        'name'          => 'process_contrats',
+                        'info'          => '',
+                        'type'          => 'toggle',
+                        'default_value' => '1',
+                        'required'      => 0
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($opt)) {
+                $options[] = (int) $opt->id;
+            }
+
+            $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                        'id_process'    => (int) $process->id,
+                        'label'         => 'Traiter les SAV',
+                        'name'          => 'process_sav',
+                        'info'          => '',
+                        'type'          => 'toggle',
+                        'default_value' => '1',
+                        'required'      => 0
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($opt)) {
+                $options[] = (int) $opt->id;
+            }
+
+            $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                        'id_process'    => (int) $process->id,
+                        'label'         => 'Traiter les Tickets hotline',
+                        'name'          => 'process_tickets',
+                        'info'          => '',
+                        'type'          => 'toggle',
+                        'default_value' => '1',
+                        'required'      => 0
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($opt)) {
+                $options[] = (int) $opt->id;
+            }
+            
+            $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                        'id_process'    => (int) $process->id,
+                        'label'         => 'Tester un seul élément par type d\'objet',
+                        'name'          => 'test_one',
+                        'info'          => '',
+                        'type'          => 'toggle',
+                        'default_value' => '0',
+                        'required'      => 0
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($opt)) {
+                $options[] = (int) $opt->id;
+            }
+
             // Opérations: 
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                         'id_process'    => (int) $process->id,
                         'title'         => 'Vérifications quotidiennes',
                         'name'          => 'dailyCheck',
-                        'description'   => 'Suppression des pièces commerciales clients > 10 et > 6 ans si total ttc < 120 euros',
+                        'description'   => '',
                         'warning'       => 'Les pièces supprimées le seront de manière irréversible',
                         'active'        => 1,
                         'use_report'    => 1,
@@ -330,6 +374,10 @@ class BDS_RgpdProcess extends BDSProcess
                         'use_report'    => 0,
                         'reports_delay' => 0
                             ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($op) && !empty($options)) {
+                $warnings = array_merge($warnings, $op->addAssociates('options', $options));
+            }
         }
     }
 }

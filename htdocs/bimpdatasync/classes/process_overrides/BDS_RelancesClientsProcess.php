@@ -57,6 +57,7 @@ class BDS_RelancesClientsProcess extends BDSProcess
                     if (empty($this->references)) {
                         $this->Info('Aucun client à relancer');
                     } else {
+                        $this->info('Clients à traiter (une seule itération): ' . explode(', ', $this->references));
                         $relance = $this->createRelance($errors);
 
                         if (BimpObject::objectLoaded($relance)) {

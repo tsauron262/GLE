@@ -35,3 +35,16 @@ lists:
                 label: N° de série
             prix_achat: 
             pa_tva_tx:
+                
+    forExport:
+        extends: global
+        cols:
+            parent:parent:datef:
+            parent:parent:ref_client:
+            parent:parent:facnumber:
+            parent:parent:client:nom:
+            parent:dol_line:product:ref_short:
+            parent:dol_line:product:label:
+            qty1:
+            equipment:serial:
+            parent:pu_ht_remise:

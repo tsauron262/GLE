@@ -14,6 +14,7 @@ class BDS_RelancesClientsProcess extends BDSProcess
             $clients = $client->getFacturesToRelanceByClients(true, null, array(), null, false, 'clients_list');
 
             if (!empty($clients)) {
+                $this->Info('Clients à traiter: ' . explode(', ', $clients));
                 $relance = $this->createRelance($errors);
                 if (BimpObject::objectLoaded($relance)) {
                     $data['data'] = array(
@@ -72,7 +73,7 @@ class BDS_RelancesClientsProcess extends BDSProcess
                         return array();
                     }
                 }
-                
+
                 if (!empty($this->references)) {
                     $warnings = array();
                     $pdf_url = '';
@@ -114,10 +115,8 @@ class BDS_RelancesClientsProcess extends BDSProcess
 
             return null;
         }
-
-
+        
         $this->incCreated();
-
         return $relance;
     }
 

@@ -258,24 +258,33 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
 
                 // Recherche du produit: 
                 $id_product = $this->findIdProductFromLineData($line);
-                if ($id_product) {
-                    $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_product);
+                if ($id_product && isset($this->infoProdBimp[$id_product])) {
+                    $prod_data = $this->infoProdBimp[$id_product];
+//                    $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_product);
 
-                    if ($prod->getRef() === 'GEN-N/A') {
+                    if ($prod_data['ref'] === 'GEN-N/A') {
                         $this->incIgnored($this->pfp_instance);
                         continue;
                     }
 
-                    if ($line['url'] && $prod->getData('url') != $line['url']) {
-                        $prod->updateField('url', $line['url']);
+                    $new_prod_data = array();
+
+                    if ($line['url'] && $prod_data['url'] != $line['url']) {
+                        $new_prod_data['url'] = $line['url'];
                     }
-                    if ($line['ean'] && $prod->getData('barcode') != $line['ean']) {
-                        $prod->updateField('barcode', $line['ean']);
+
+                    if ($line['ean'] && $prod_data['barcode'] != $line['ean']) {
+                        $new_prod_data['barcode'] = $line['ean'];
                     }
+
+                    if (!empty($new_prod_data)) {
+                        $this->db->update('product', $new_prod_data, 'rowid = ' . $id_product);
+                    }
+
                     // recherche d'un pfp existant et check de la ref fourn: 
                     $id_pfp = 0;
-                    if (!empty($this->infoProdBimp[$id_product]['fourn_prices'])) {
-                        foreach ($this->infoProdBimp[$id_product]['fourn_prices'] as $id) {
+                    if (!empty($prod_data['fourn_prices'])) {
+                        foreach ($prod_data['fourn_prices'] as $id) {
                             if (isset($this->fournPrices[$id])) {
                                 if ($refFourn == $this->fournPrices[$id]['ref_fourn']) {
                                     $id_pfp = (int) $id;
@@ -285,9 +294,9 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                         }
 
                         if (!$id_pfp) {
-                            if (count($this->infoProdBimp[$id_product]['fourn_prices']) === 1) {
-                                if (isset($this->fournPrices[$this->infoProdBimp[$id_product]['fourn_prices'][0]])) {
-                                    $id_pfp = (int) $this->infoProdBimp[$id_product]['fourn_prices'][0];
+                            if (count($prod_data['fourn_prices']) === 1) {
+                                if (isset($this->fournPrices[$prod_data['fourn_prices'][0]])) {
+                                    $id_pfp = (int) $prod_data['fourn_prices'][0];
                                 }
                             } else {
                                 $this->Error('Plusieurs prix d\'achat enregistrés pour le produit #' . $id_product . ' mais aucun ne correspond à la ref "' . $refFourn . '"', $this->pfp_instance, $refFourn);
@@ -508,7 +517,7 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
             $rowid = (int) $this->db->getValue('product', 'rowid', 'barcode = "' . $line['ean'] . '"');
 
             if ($rowid) {
-                $tabOk[] = $ln->rowid;
+                $tabOk[] = $rowid;
             }
 
             if (count($tabOk) > 0) {
@@ -548,13 +557,15 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
     public function fetchProducts()
     {
         if (empty($this->refProdToIdProd)) {
-            $result = $this->db->getRows('product', '1', null, 'array', array('ref', 'rowid'));
+            $result = $this->db->getRows('product', '1', null, 'array', array('ref', 'rowid', 'url', 'barcode'));
 
             if (!is_null($result)) {
                 foreach ($result as $res) {
                     $this->refProdToIdProd[$res['ref']] = (int) $res['rowid'];
                     $this->infoProdBimp[(int) $res['rowid']] = array(
                         'ref'          => $res['ref'],
+                        'url'          => $res['url'],
+                        'barcode'      => $res['barcode'],
                         'fourn_prices' => array()
                     );
                 }
@@ -615,18 +626,6 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
         return true;
     }
 
-    function addPriceFourn($idProd, $prix, $tva_tx, $ref)
-    {
-        global $db;
-        if ($this->updateSql) {
-            if ($db->query("INSERT INTO " . MAIN_DB_PREFIX . "product_fournisseur_price (price, tva_tx, fk_product, ref_fourn, fk_soc) VALUES('" . $prix . "','" . $tva_tx . "','" . $idProd . "','" . $ref . "'," . $this->params['id_fourn'] . ")")) {
-                $this->incCreated($this->pfp_instance);
-            } else {
-                $this->SqlError('Echec ajout', $this->pfp_instance, $ref);
-            }
-        }
-    }
-
     function addTableProdFourn($refLdlc, $codeLdlc, $pu_ht, $tva_tx, $pa_ht, $marque, $lib, $refFabriquant, $data)
     {
         $this->incProcessed($this->prod_import_instance);
@@ -653,13 +652,11 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
 
     function majPriceFourn($id, $prix, $tva_tx, $ref = null)
     {
-        $text = 'Update PRICE ' . $id . " | " . round($prix, 2) . " ANCIEN " . round($this->fournPrices[$id]['price'], 2) . "|" . $ref;
+        $text = 'Update PRICE ' . $id . " | " . round($prix, 2) . " ANCIEN " . round($this->fournPrices[$id]['price'], 2) . " | " . $ref;
         $this->pfp_instance->id = $id;
 
         if (abs($prix) > 0.01) {
             if ($this->updateSql) {
-
-
                 if ($this->db->db->query("UPDATE " . MAIN_DB_PREFIX . "product_fournisseur_price SET quantity = '1',price = '" . $prix . "',unitprice = '" . $prix . "', tva_tx = '" . $tva_tx . "'" . ($ref ? ", ref_fourn = '" . $ref . "'" : "") . " WHERE fk_soc = " . $this->params['id_fourn'] . " AND rowid = " . $id)) {
                     $this->incUpdated($this->pfp_instance);
                     $this->Success($text, $this->pfp_instance, $ref);

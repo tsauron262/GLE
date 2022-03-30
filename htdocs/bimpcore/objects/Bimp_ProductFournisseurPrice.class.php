@@ -46,7 +46,7 @@ class Bimp_ProductFournisseurPrice extends BimpObject
             return $parent->isEditable($force_create, $errors);
         }
 
-        return 0;
+        return 1;
     }
 
     public function isEditable($force_edit = false, &$errors = array())
@@ -61,7 +61,7 @@ class Bimp_ProductFournisseurPrice extends BimpObject
             return $parent->isEditable($force_edit, $errors);
         }
 
-        return 0;
+        return 1;
     }
 
     public function getRefProperty()

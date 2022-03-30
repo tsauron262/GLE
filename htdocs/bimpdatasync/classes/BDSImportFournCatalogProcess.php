@@ -4,7 +4,6 @@ require_once DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSImportProcess.php';
 
 class BDSImportFournCatalogProcess extends BDSImportProcess
 {
-
     /* Champs pris en charge pour les prix fournisseurs: 
      * 
      *  ref_prod: Ref produit (telle que dans la table product) 
@@ -261,12 +260,12 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                 $id_product = $this->findIdProductFromLineData($line);
                 if ($id_product) {
                     $prod = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_product);
-                    
+
                     if ($prod->getRef() === 'GEN-N/A') {
                         $this->incIgnored($this->pfp_instance);
                         continue;
                     }
-                    
+
                     if ($line['url'] && $prod->getData('url') != $line['url']) {
                         $prod->updateField('url', $line['url']);
                     }
@@ -311,7 +310,6 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
                                 (is_null($stock) || (float) $stock === (float) $this->fournPrices[$id_pfp]['stock']) &&
                                 $refFourn == $this->fournPrices[$id_pfp]['ref_fourn']) {
                             // Pas de màj nécessaire: 
-//                            $this->Alert('Pas de maj', $this->pfp_instance, $refFourn);
                             $this->incIgnored($this->pfp_instance);
                             continue;
                         }
@@ -354,8 +352,9 @@ class BDSImportFournCatalogProcess extends BDSImportProcess
 
             if (!empty($fourn_prices)) {
                 $this->createBimpObjects('bimpcore', 'Bimp_ProductFournisseurPrice', $fourn_prices, $errors, array(
-                    'check_refs'       => false,
-                    'update_if_exists' => true
+                    'check_refs'             => false,
+                    'update_if_exists'       => true,
+                    'success_display_fields' => array('price')
                 ));
             }
         }

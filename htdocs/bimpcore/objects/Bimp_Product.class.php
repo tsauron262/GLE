@@ -122,10 +122,14 @@ class Bimp_Product extends BimpObject
 
     public function canEdit()
     {
-        global $user;
-        if ((int) $this->getData('lock_admin') && !$user->admin) {
-            return 0;
+        if ($this->isLoaded()) {
+            global $user;
+            if ((int) $this->getData('lock_admin') && !$user->admin) {
+                return 0;
+            }
         }
+
+        return 1;
     }
 
     public function canViewStock()
@@ -216,7 +220,7 @@ class Bimp_Product extends BimpObject
         if ($force_create) {
             return 1;
         }
-        
+
         global $user;
         if ($user->admin || $user->rights->produit->creer) {
             return 1;

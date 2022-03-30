@@ -14,7 +14,7 @@ class BDS_RelancesClientsProcess extends BDSProcess
             $clients = $client->getFacturesToRelanceByClients(true, null, array(), null, false, 'clients_list');
 
             if (!empty($clients)) {
-                $this->Info('Clients à traiter: ' . explode(', ', $clients));
+                $this->Info('Clients à traiter: ' . implode(', ', $clients));
                 $relance = $this->createRelance($errors);
                 if (BimpObject::objectLoaded($relance)) {
                     $data['data'] = array(
@@ -57,7 +57,7 @@ class BDS_RelancesClientsProcess extends BDSProcess
                     if (empty($this->references)) {
                         $this->Info('Aucun client à relancer');
                     } else {
-                        $this->info('Clients à traiter (une seule itération): ' . explode(', ', $this->references));
+                        $this->info('Clients à traiter (une seule itération): ' . implode(', ', $this->references));
                         $relance = $this->createRelance($errors);
 
                         if (BimpObject::objectLoaded($relance)) {

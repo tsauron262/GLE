@@ -1384,12 +1384,12 @@ class Bimp_Facture extends BimpComm
         $bcList->addJoin('facturedet', 'a___dol_line.rowid = a.id_line', 'a___dol_line');
         $bcList->addJoin('product_extrafields', 'a___dol_line.fk_product = a___dol_line___product__ef.fk_object', 'a___dol_line___product__ef');
         $bcList->addFieldFilterValue('id_obj', $this->id);
-        $bcList->addFieldFilterValue('a___dol_line___product__ef.serialisable', '0');
+        $bcList->addFieldFilterValue('a___dol_line___product__ef.serialisable', array('in'=> array('0', null)));
         $result .= $bcList->renderCsvContent(";", array(), false);
 
         
         
-        $file = '/usr/local/data1/bimp8/data-nfs/bimpcore/tmp/tmp.csv';
+        $file = DOL_DATA_ROOT.'/bimpcore/tmp/tmp.csv';
         $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=tmp/tmp.csv';
         $success_callback = 'window.open(\'' . $url . '\')';
         file_put_contents($file, $result);

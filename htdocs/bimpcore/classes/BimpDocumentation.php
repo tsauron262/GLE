@@ -211,6 +211,9 @@ class BimpDocumentation {
     }
 
     function saveFile($type, $name, $value) {
+        if(is_file($this->getPathFile($type, $name, true)))
+            rename($this->getPathFile($type, $name, true), str_replace(".txt", date("Y-m-d_H:i:s").".txt", $this->getPathFile($type, $name, true)));
+        
         if (!file_put_contents($this->getPathFile($type, $name, true), $value))
             $this->errors[] = 'Enregistrement impossible : ' . $this->getPathFile($type, $name, true);
     }

@@ -51,7 +51,7 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
     {
         $data['steps'] = array();
 
-//        $this->truncTableProdFourn($errors);
+        $this->truncTableProdFourn($errors);
         
         if (isset($this->options['update_files']) && (int) $this->options['update_files']) {
             $data['steps']['update_prices_file'] = array(
@@ -82,7 +82,7 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
                 if (isset($this->nameFile) && $this->nameFile) {
                     $fileName = $this->nameFile;
                     $this->downloadFtpFile($fileName, $errors);
-//                    die($fileName."mm");
+                    
                     if (!count($errors)) {
                         if ($this->options['debug']) {
                             error_reporting(E_ALL);

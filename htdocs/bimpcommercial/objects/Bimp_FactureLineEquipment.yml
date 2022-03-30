@@ -47,4 +47,5 @@ lists:
             parent:desc:
             qty1:
             equipment:serial:
+            equipment:imei:
             parent:pu_ht_remise:

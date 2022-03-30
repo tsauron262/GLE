@@ -561,6 +561,7 @@ fields:
     lock_admin:
         label: Blocage Admin
         type: bool
+        default_value: 0
         
     duree_i:
         label: Durée inter

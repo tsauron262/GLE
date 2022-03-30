@@ -117,12 +117,21 @@ class Bimp_Product extends BimpObject
 
     public function canCreate()
     {
-        return 1;
+        return $this->canEdit();
     }
 
     public function canEdit()
     {
-        return 1;
+        global $user;
+        if ($this->getData('lock_admin') && !$user->admin) {
+            return 0;
+        }
+
+        if ($user->admin || $user->rights->produit->creer) {
+            return 1;
+        }
+        
+        return 0;
     }
 
     public function canViewStock()
@@ -215,13 +224,23 @@ class Bimp_Product extends BimpObject
 
     public function isEditable($force_edit = false, &$errors = array())
     {
-        global $user;
-        if ($this->getData('lock_admin') && !$user->admin)
-            return 0;
+        // Attention : droits users = canEdit() et pas isEditable()
+        // De plus: attention à ce type de blocage, c'est potentiellement dangereux 
+        // (toute édition est bloquée y compris en php, or il faut toujours envisager qu'on veuille éditer une donnée quelconque).
 
-        if ($force_edit || $user->admin or $user->rights->produit->creer)
-            return 1;
-        return 0;
+        return 1;
+//
+//        global $user;
+//        if ($this->getData('lock_admin') && !$user->admin) {
+//            $errors[] = 'Edition réservée aux admin pour ce produit';
+//            return 0;
+//        }
+//
+//        if ($force_edit || $user->admin || $user->rights->produit->creer) {
+//            return 1;
+//        }
+//
+//        return 0;
     }
 
     public function isSerialisable()

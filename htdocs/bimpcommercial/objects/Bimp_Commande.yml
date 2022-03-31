@@ -446,11 +446,7 @@ forms:
               show: 
                   callback: isEditable
             - field: fk_cond_reglement
-              value: 
-                  callback: getCondReglementBySociete
             - field: fk_mode_reglement
-              value: 
-                  callback: getModeReglementBySociete
             - field: rib_client
             - custom: 1
               label: Paiement Comptant

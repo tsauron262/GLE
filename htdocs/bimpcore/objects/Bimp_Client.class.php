@@ -2210,7 +2210,6 @@ class Bimp_Client extends Bimp_Societe
                 $id_relance = $relance->id;
                 $acomptes = array();
 
-                $n = 0;
                 foreach ($clients as $id_client => $client_data) {
                     if (!is_null($bds_process)) {
                         $bds_process->setCurrentObjectData('bimpcore', 'Bimp_Client');
@@ -2392,12 +2391,6 @@ class Bimp_Client extends Bimp_Societe
                                 $bds_process->incCreated();
                             }
                         }
-                    }
-
-                    $n++;
-
-                    if ($n > 10 && !is_null($bds_process)) {
-                        break;
                     }
                 }
 

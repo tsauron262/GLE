@@ -250,7 +250,7 @@ class BimpCommission extends BimpObject
                         $sql .= ' AND e.has_users_commissions = 1';
 
                         if ($paid_only) {
-                            $sql .= ' AND f.paye = 1';
+                            $sql .= ' AND (f.paye = 1 OR f.remain_to_pay < 0)';
                         }
                     }
                     break;
@@ -269,7 +269,7 @@ class BimpCommission extends BimpObject
                         $sql .= ' AND e.rowid = ' . $id_entrepot;
 
                         if ($paid_only) {
-                            $sql .= ' AND f.paye = 1';
+                            $sql .= ' AND (f.paye = 1 OR f.remain_to_pay < 0)';
                         }
                         if ($secteur) {
                             $sql .= ' AND fef.type = \'' . $secteur . '\'';

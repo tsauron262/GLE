@@ -120,8 +120,20 @@ class BimpRender
                 $params['classes'][] = 'btn-default';
             }
         }
-
-        $html = '<' . $tag . self::displayTagAttrs($params) . '>';
+        
+        if (isset($params['disabled']) && (int) $params['disabled']) {
+            $params['classes'][] = 'disabled';
+        }
+        
+        if (isset($params['popover']) && $params['popover']) {
+            $params['classes'][] = 'bs-popover';
+        }
+        
+        $html = '<' . $tag . self::displayTagAttrs($params);
+        if (isset($params['popover']) && $params['popover']) {
+            $html .= BimpRender::renderPopoverData($params['popover']);
+        }
+        $html .= '>';
         $html .= (isset($params['icon_before']) ? self::renderIcon($params['icon_before'], isset($params['label']) ? 'iconLeft' : '') : '');
         $html .= (isset($params['label']) ? $params['label'] : '');
         $html .= (isset($params['icon_after']) ? self::renderIcon($params['icon_after'], isset($params['label']) ? 'iconRight' : '') : '');

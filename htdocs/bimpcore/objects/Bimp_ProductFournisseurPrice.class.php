@@ -11,15 +11,57 @@ class Bimp_ProductFournisseurPrice extends BimpObject
 
         parent::__construct($module, $object_name);
     }
-    
-    public function isCreatable($force_create = false, &$errors = array()): int {
+
+    public function canCreate()
+    {
         $parent = $this->getParentInstance();
-        return $parent->isEditable();
+
+        if (BimpObject::objectLoaded($parent)) {
+            return $parent->canCreate();
+        }
+
+        return parent::canCreate();
     }
-    
-    public function isEditable($force_edit = false, &$errors = array()): int {
+
+    public function canEdit()
+    {
         $parent = $this->getParentInstance();
-        return $parent->isEditable();
+
+        if (BimpObject::objectLoaded($parent)) {
+            return $parent->canEdit();
+        }
+
+        return parent::canEdit();
+    }
+
+    public function isCreatable($force_create = false, &$errors = array())
+    {
+        if ($force_create) {
+            return 1;
+        }
+
+        $parent = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($parent)) {
+            return $parent->isEditable($force_create, $errors);
+        }
+
+        return 1;
+    }
+
+    public function isEditable($force_edit = false, &$errors = array())
+    {
+        if ($force_edit) {
+            return 1;
+        }
+
+        $parent = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($parent)) {
+            return $parent->isEditable($force_edit, $errors);
+        }
+
+        return 1;
     }
 
     public function getRefProperty()
@@ -123,6 +165,9 @@ class Bimp_ProductFournisseurPrice extends BimpObject
                 }
                 $errors[] = $msg;
             } else {
+                if($this->getInitData('price') != $this->getData('price'))
+                    $this->history['price'] = $this->getData('price');
+                $this->saveHistory();
                 if ((int) BimpTools::getPostFieldValue('is_cur_pa', 0)) {
                     $prod = $this->getChildObject('product');
                     $curpa_errors = $prod->setCurrentPaHt($buyprice, (int) $result, 'fourn_price', (int) $result);

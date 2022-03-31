@@ -6437,7 +6437,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
 //                            mailSyn2($subject, $to, '', $msg);
                             $from = (isset($centres[$r['code_centre']]['mail']) ? $centres[$r['code_centre']]['mail'] : '');
-                            $bimpMail = new BimpMail($this, $subject, $to, $from, $msg);
+                            $bimpMail = new BimpMail($sav_instance, $subject, $to, $from, $msg);
                             $bimpMail->send();
 
 //                            BimpCore::addlog('Annulation auto SAV réservé', Bimp_Log::BIMP_LOG_NOTIF, 'bic', null, array(

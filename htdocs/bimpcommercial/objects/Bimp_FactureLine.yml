@@ -152,6 +152,12 @@ lists_cols:
         label: Lien Commission Apporteur
         value: 
             callback: displayCommissionApporteur
+    vide:
+        label: Vide
+        value: ''
+    vide2:
+        label: Vide
+        value: ''
         
 lists: 
     default: 
@@ -170,4 +176,18 @@ lists:
             callback: getListExtraBtnApporteur
         extra_btn: 
             callback: getListExtraBtnApporteur
+            
+    forExport:
+#        extends: global
+        cols:
+            parent:datef:
+            parent:ref_client:
+            parent:facnumber:
+            parent:client:nom:
+            dol_line:product:ref_short:
+            desc:
+            dol_line:qty:
+            vide:
+            vide2:
+            pu_ht_remise:
         

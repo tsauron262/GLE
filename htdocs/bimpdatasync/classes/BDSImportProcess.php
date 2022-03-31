@@ -42,11 +42,12 @@ abstract class BDSImportProcess extends BDSProcess
     public function createBimpObjects($module, $object_name, $objects_data, &$errors = array(), $params = array())
     {
         $params = BimpTools::overrideArray(array(
-                    'check_refs'       => true,
-                    'update_if_exists' => false, // Si check_refs == true ou si primary dans les data
-                    'report_success'   => true,
-                    'report_warning'   => true,
-                    'report_error'     => true
+                    'check_refs'             => true,
+                    'update_if_exists'       => false, // Si check_refs == true ou si primary dans les data
+                    'report_success'         => true,
+                    'report_warning'         => true,
+                    'report_error'           => true,
+                    'success_display_fields' => array()
                         ), $params);
 
         $instance = BimpObject::getInstance($module, $object_name);
@@ -126,7 +127,17 @@ abstract class BDSImportProcess extends BDSProcess
                         }
                     } else {
                         if ($params['report_success']) {
-                            $this->Success('Création effectuée avec succès', $obj, $obj->getRef());
+                            $msg = 'Création effectuée avec succès';
+
+                            if (!empty($params['success_display_fields'])) {
+                                foreach ($params['success_display_fields'] as $field_name) {
+                                    if ($obj->field_exists($field_name)) {
+                                        $msg .= '<br/>' . $obj->displayFieldName($field_name) . ' : ' . $obj->displayData($field_name, 'default', false);
+                                    }
+                                }
+                            }
+
+                            $this->Success($msg, $obj, $obj->getRef());
                         }
                         $this->incCreated();
                     }
@@ -148,7 +159,17 @@ abstract class BDSImportProcess extends BDSProcess
                         }
                     } else {
                         if ($params['report_success']) {
-                            $this->Success('Mise à jour effectuée avec succès', $obj, $obj->getRef());
+                            $msg = 'Mise à jour effectuée avec succès';
+
+                            if (!empty($params['success_display_fields'])) {
+                                foreach ($params['success_display_fields'] as $field_name) {
+                                    if ($obj->field_exists($field_name)) {
+                                        $msg .= '<br/>' . $obj->displayFieldName($field_name) . ' : ' . $obj->displayData($field_name, 'default', false);
+                                    }
+                                }
+                            }
+
+                            $this->Success($msg, $obj, $obj->getRef());
                         }
                         $this->incUpdated();
                     }
@@ -219,7 +240,7 @@ abstract class BDSImportProcess extends BDSProcess
                 return array();
             }
         }
-        $this->Success("Fichier utilisée : ".$file);
+        $this->Success("Fichier utilisée : " . $file);
 
         $data = array();
 
@@ -326,7 +347,7 @@ abstract class BDSImportProcess extends BDSProcess
                 }
             }
         } else {
-            $errors[] = 'Le fichier "' . pathinfo($file, PATHINFO_FILENAME) . '" n\'existe pas : '.$file;
+            $errors[] = 'Le fichier "' . pathinfo($file, PATHINFO_FILENAME) . '" n\'existe pas : ' . $file;
         }
 
 //        $this->DebugData($data, 'Données fichier');

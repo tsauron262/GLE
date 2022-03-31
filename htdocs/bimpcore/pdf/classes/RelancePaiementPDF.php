@@ -33,7 +33,7 @@ class RelancePaiementPDF extends BimpModelPDF
         $logo_width = 0;
         if (!file_exists($logo_file)) {
             $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
-        } 
+        }
 
         $logo_width = 0;
         if (!file_exists($logo_file)) {
@@ -276,7 +276,6 @@ class RelancePaiementPDF extends BimpModelPDF
                     $bottom .= 'Dans l\'attente, veuillez agréer, cher client, l\'assurance de nos sincères salutations.<br/><br/>';
                     break;
 
-
                 case 3:
                     $top .= '<span style="font-weight: bold;">3<sup>ème</sup> LETTRE DE RAPPEL</span><br/><br/>';
                     $top .= '<span style="font-weight: bold">Client: </span>' . $this->client->getRef() . ' - ' . $this->client->getName() . '<br/>';
@@ -429,6 +428,12 @@ class RelancePaiementPDF extends BimpModelPDF
         $html .= '<span style="font-weight: bold; color: #' . $this->primary . ';">';
         $html .= $label . ' :</span>';
 
+        $html .= '<br/><b>Service Recouvrement</b><br/>recouvrementolys@bimp.fr - 04 82 90 20 29';
+
+        if (!empty($users)) {
+            $html .= '<br/>et';
+        }
+
         foreach ($users as $id_user => $user_name) {
             $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
             if (BimpObject::objectLoaded($user)) {
@@ -442,10 +447,7 @@ class RelancePaiementPDF extends BimpModelPDF
             }
         }
 
-        if (!empty($users)) {
-            $html .= '<br/>et';
-        }
-        $html .= '<br/>Service Recouvrement<br/>recouvrementolys@bimp.fr - 04 82 90 20 29';
+
 
         $html .= '</div>';
 

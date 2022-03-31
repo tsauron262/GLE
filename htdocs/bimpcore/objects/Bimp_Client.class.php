@@ -2170,6 +2170,7 @@ class Bimp_Client extends Bimp_Societe
         if ($mode == 'cron') {
             $clients = $this->getFacturesToRelanceByClients(true, null, $clients, null, false, 'all');
             $bds_process->DebugData($clients, 'Données clients');
+            $bds_process->info('Factures à traiter: <pre>' . print_r($clients, 1) . '</pre>');
         }
 
         if (empty($clients)) {
@@ -2182,12 +2183,12 @@ class Bimp_Client extends Bimp_Societe
             global $user;
             $now = date('Y-m-d');
 
-            // Création de la relance:
             if (!is_null($id_relance)) {
                 $relance = BimpCache::getBimpObjectInstance('bimpcommercial', 'BimpRelanceClients', $id_relance);
             }
 
             if (!BimpObject::objectLoaded($relance)) {
+                // Création de la relance:
                 if (!is_null($bds_process)) {
                     $bds_process->setCurrentObjectData('bimpcommercial', 'BimpRelanceClients');
                     $bds_process->incProcessed();
@@ -2289,8 +2290,8 @@ class Bimp_Client extends Bimp_Societe
 
                             if ((int) $fac_data['id_cur_relance']) {
                                 $msg = 'La facture ' . $fac->getLink() . ' ne peut pas être relancée car il y a une ';
-                                $msg .= '<a href="'.$client_url.'" target="_blank">relance non envoyée en cours ';
-                                $msg .= BimpRender::renderIcon('fas_external-link-alt', 'iconRight').'</a>';
+                                $msg .= '<a href="' . $client_url . '" target="_blank">relance non envoyée en cours ';
+                                $msg .= BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
                                 $facs_warnings[] = $msg;
                                 continue;
                             }

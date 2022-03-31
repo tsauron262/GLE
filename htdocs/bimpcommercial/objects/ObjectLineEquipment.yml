@@ -46,6 +46,9 @@ lists_cols:
         label: Tx Tva achat
         value: 
             callback: displayPaTvatx
+    qty1:
+        label: Quantité
+        value: 1
 
 lists:
     default: 

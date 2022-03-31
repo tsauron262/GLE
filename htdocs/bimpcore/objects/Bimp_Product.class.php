@@ -122,6 +122,13 @@ class Bimp_Product extends BimpObject
 
     public function canEdit()
     {
+        if ($this->isLoaded()) {
+            global $user;
+            if ((int) $this->getData('lock_admin') && !$user->admin) {
+                return 0;
+            }
+        }
+
         return 1;
     }
 
@@ -210,18 +217,19 @@ class Bimp_Product extends BimpObject
 
     public function isCreatable($force_create = false, &$errors = array())
     {
-        return $this->isEditable($force_create, $errors);
+        if ($force_create) {
+            return 1;
+        }
+
+        global $user;
+        if ($user->admin || $user->rights->produit->creer) {
+            return 1;
+        }
     }
 
     public function isEditable($force_edit = false, &$errors = array())
     {
-        global $user;
-        if ($this->getData('lock_admin') && !$user->admin)
-            return 0;
-
-        if ($force_edit || $user->admin or $user->rights->produit->creer)
-            return 1;
-        return 0;
+        return 1;
     }
 
     public function isSerialisable()

@@ -766,7 +766,7 @@ class BContract_echeancier extends BimpObject {
                         $html .= '<td style="text-align:center; margin-right:10%">';
                 if ($firstDinamycLine && $can_create_next_facture) {
                     // ICI NE PAS AFFICHER QUAND LA FACTURE EST PAS VALIDER
-                    if ($user->rights->facture->creer && $this->canEdit() && !count($infos)) {
+                    if ($user->rights->facture->creer && $this->canEdit()) {
                         $html .= '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Facturer la période" onclick="' . $this->getJsActionOnclick("createFacture", array('date_start' => $dateTime_start_mkTime->format('Y-m-d'), 'date_end' => $dateTime_end_mkTime->format('Y-m-d'), 'total_ht' => $amount, 'pa' => $pa), array("success_callback" => $callback)) . '")"><i class="fa fa-plus" ></i></span>';
                         $html .= '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Solder la periode par une facture externe" onclick="' . $this->getJsActionOnclick("solderPeriodeByFactureExterne", array('date_start' => $dateTime_start_mkTime->format('Y-m-d'), 'date_end' => $dateTime_end_mkTime->format('Y-m-d'), 'total_ht' => $amount, 'pa' => $pa), array("success_callback" => $callback, "form_name" => 'addFactureForSoldPeriode')) . '")"><i class="fa fa-link" ></i></span>';
                         

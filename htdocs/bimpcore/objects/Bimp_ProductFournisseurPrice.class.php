@@ -165,6 +165,9 @@ class Bimp_ProductFournisseurPrice extends BimpObject
                 }
                 $errors[] = $msg;
             } else {
+                if($this->getInitData('price') != $this->getData('price'))
+                    $this->history['price'] = $this->getData('price');
+                $this->saveHistory();
                 if ((int) BimpTools::getPostFieldValue('is_cur_pa', 0)) {
                     $prod = $this->getChildObject('product');
                     $curpa_errors = $prod->setCurrentPaHt($buyprice, (int) $result, 'fourn_price', (int) $result);

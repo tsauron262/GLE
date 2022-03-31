@@ -2170,7 +2170,7 @@ class Bimp_Client extends Bimp_Societe
         if ($mode == 'cron') {
             $clients = $this->getFacturesToRelanceByClients(true, null, $clients, null, false, 'all');
             $bds_process->DebugData($clients, 'Données clients');
-            $bds_process->info('Factures à traiter: <pre>' . print_r($clients) . '</pre>');
+            $bds_process->info('Factures à traiter: <pre>' . print_r($clients, 1) . '</pre>');
         }
 
         if (empty($clients)) {

@@ -67,7 +67,10 @@ fields:
     old_to_new:
         label: Ancienne vers nouvelle version
         type: bool
-    
+    facturesExterne_soldePeriode:
+        label: Périodes soldée 
+        type: text
+        
 filters_panels: 
     default: 
         filters:
@@ -144,6 +147,15 @@ lists:
 
 
 forms:
+    addFactureForSoldPeriode:
+        rows:
+            - custom: 1
+              label: Numéro de facture externe
+              input_name: factureExterne
+              required: 1
+              input:
+                  type: text
+
     create_perso:
         rows:
             - field: next_facture_date

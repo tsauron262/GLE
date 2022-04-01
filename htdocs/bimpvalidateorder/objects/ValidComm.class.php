@@ -456,7 +456,7 @@ class ValidComm extends BimpObject
         $class = self::getObjectClass($object);
         
         // Valeur €
-        if(!$this->isContrat) {
+        if(!is_a($object, 'BContract_contrat')) {
             if((int) $object->getData('total_ht') > 0)
                 $val = (float) $object->getData('total_ht');
             else

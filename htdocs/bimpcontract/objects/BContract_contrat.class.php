@@ -2663,8 +2663,8 @@ class BContract_contrat extends BimpDolObject
             if (!$this->getData('entrepot') && (int) BimpCore::getConf("USE_ENTREPOT"))
                 $errors[] = "Il doit y avoir un entrepot pour le contrat";
             
-//            if(!count($errors))
-//                $this->tryToValidate($errors);
+            if(!count($errors))
+                $this->tryToValidate($errors);
             
             if (!count($errors)) {
                 $success = 'Validation demandée';

@@ -1180,9 +1180,13 @@ class Bimp_Societe extends BimpDolObject
                         'on'    => 'det.rowid = a.id_line'
                     )
         ));
+        
+        
         $sql .= BimpTools::getSqlWhere(array(
                     'c.fk_statut'      => 1,
-                    'c.fk_soc'         => $ids,
+//                    'c.fk_soc'         => $ids,
+//                    'c.id_client_facture'         => $ids,
+                    'custom'         => array('custom' => '(c.id_client_facture IN ('.implode(',', $ids).') || c.fk_soc IN ('.implode(',', $ids).'))'),
                     'c.invoice_status' => array(
                         'operator' => '!=',
                         'value'    => 2

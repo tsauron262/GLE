@@ -684,7 +684,7 @@ class Bimp_Client extends Bimp_Societe
                         }
 
                         // Recherche de relance en attente pour la facture: 
-                        $where = '`status` IN (' . BimpRelanceClientsLine::RELANCE_ATTENTE_MAIL . ',' . BimpRelanceClientsLine::RELANCE_ATTENTE_COURRIER . ')';
+                        $where = '`status` < 10';
                         $where .= ' AND `factures` LIKE \'%[' . $r['rowid'] . ']%\'';
                         $id_cur_relance = (int) $this->db->getValue('bimp_relance_clients_line', 'id_relance', $where);
 

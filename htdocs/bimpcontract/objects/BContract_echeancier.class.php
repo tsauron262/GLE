@@ -787,7 +787,7 @@ class BContract_echeancier extends BimpObject {
                 if(($user->admin) && $this->canEdit()) {
                     $html .= '<div class="btn-group"><button type="button" class="btn btn-danger bs-popover" '.BimpRender::renderPopoverData('Supprimer l\'échéancier').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick('delete') . '"><i class="fa fa-times"></i></button></div>';
                 }
-                if($user->admin) {
+                if($user->admin || $user->rights->facture->creer) {
                     $html .= '<div class="btn-group"><button type="button" class="btn btn-danger bs-popover" '.BimpRender::renderPopoverData('Refaire l\'échéancier suite à un avoir (ADMIN)').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick('unlinkLastFacture', [], ['form_name' => 'unlinkLastFacture']) . '"><i class="fa fa-times"></i> Refaire l\'échéancier suite à un avoir (ADMIN)</button></div>';
                 }
                 

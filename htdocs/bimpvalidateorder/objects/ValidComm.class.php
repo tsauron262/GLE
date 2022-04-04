@@ -1,7 +1,7 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
-
+require_once DOL_DOCUMENT_ROOT . '/bimpvalidateorder/objects/DemandeValidComm.class.php';
 
 class ValidComm extends BimpObject
 {
@@ -22,23 +22,26 @@ class ValidComm extends BimpObject
     );
   
     // Piece
-    const OBJ_ALL = -1;
-    const OBJ_DEVIS = 0;
-    const OBJ_FACTURE = 1;
-    const OBJ_COMMANDE = 2;
+    const OBJ_ALL       = -1;
+    const OBJ_DEVIS     = 0;
+    const OBJ_FACTURE   = 1;
+    const OBJ_COMMANDE  = 2;
+    const OBJ_CONTRAT   = 3;
     
-    public static $objets = Array(
-        self::OBJ_ALL      => Array('label' => 'Tous'),
-        self::OBJ_DEVIS    => Array('label' => 'Devis',    'icon' => 'fas_file-invoice'),
-        self::OBJ_FACTURE  => Array('label' => 'Facture',  'icon' => 'fas_file-invoice-dollar'),
-        self::OBJ_COMMANDE => Array('label' => 'Commande', 'icon' => 'fas_dolly')
-    );
+//    public static $objets = Array(
+//        self::OBJ_ALL      => Array('label' => 'Tous'),
+//        self::OBJ_DEVIS    => Array('label' => 'Devis',    'icon' => 'fas_file-invoice'),
+//        self::OBJ_FACTURE  => Array('label' => 'Facture',  'icon' => 'fas_file-invoice-dollar'),
+//        self::OBJ_COMMANDE => Array('label' => 'Commande', 'icon' => 'fas_dolly'),
+//        self::OBJ_CONTRAT  => Array('label' => 'Contrat', 'icon' => 'retweet')
+//    );
     
     // Only child
     const USER_ASK_ALL = 0;
     const USER_ASK_CHILD = 1;
     
     private $valideur = array();
+    private $isContrat = false;
     
     public function canEdit() {
         global $user;
@@ -106,13 +109,13 @@ class ValidComm extends BimpObject
             $errors =  parent::update($warnings, $force_update);
         return $errors;
     }
-
+    
     /**
      * Tente de valider un objet BimpComm
      * Si l'utilisateur ne peut pas, contacte quelqu'un de disponible
      * pour valider cet objet
      */
-    public function tryToValidate($bimp_object, $user, &$errors, &$success) {
+    public function tryToValidate($bimp_object, $user, &$errors, &$success){
         if (defined('NO_VALID_COMM') && NO_VALID_COMM) {
             return 1;
         }
@@ -121,14 +124,21 @@ class ValidComm extends BimpObject
         $valid_encours = 1;
         $valid_impaye = 1;
         
+        $this->isContrat = ($bimp_object->object_name == 'BContract_contrat') ? true : false;
+        
         // Object non géré
         if($this->getObjectClass($bimp_object) == -2)
             return 1;
         
         if(method_exists($bimp_object, 'getClientFacture'))
             $client = $bimp_object->getClientFacture();
-        else
-            $client = $bimp_object->getChildObject('client');
+        else {
+            if(!is_a($object, 'BContract_contrat'))
+                $client = $bimp_object->getChildObject('client');
+            else
+                $bimp_object->getData('fk_soc');
+        }
+            
         
 //        $errors = BimpTools::merge_array($errors, $this->updateCreditSafe($bimp_object));
         
@@ -152,14 +162,18 @@ class ValidComm extends BimpObject
 
         
         // Validation commerciale
-        if($percent_pv != 0 or $percent_marge != 0)
-            $valid_comm = (int) $this->tryValidateByType($user, self::TYPE_COMMERCIAL, $secteur, $class, $percent_pv, $bimp_object, $errors, array('sur_marge' => $percent_marge));
-        elseif(is_a($this->demandeExists($class, (int) $bimp_object->id, self::TYPE_COMMERCIAL), 'DemandeValidComm'))
-            $this->updateDemande($user->id, $class, $bimp_object->id, self::TYPE_COMMERCIAL,
-                    DemandeValidComm::STATUS_VALIDATED, DemandeValidComm::NO_VAL_COMM);
+        if(!is_a($object, 'BContract_contrat')) {
+            if($percent_pv != 0 or $percent_marge != 0) {
+                $valid_comm = (int) $this->tryValidateByType($user, self::TYPE_COMMERCIAL, $secteur, $class, $percent_pv, $bimp_object, $errors, array('sur_marge' => $percent_marge));
+            }
+            elseif(is_a($this->demandeExists($class, (int) $bimp_object->id, self::TYPE_COMMERCIAL), 'DemandeValidComm')) {
+                $this->updateDemande($user->id, $class, $bimp_object->id, self::TYPE_COMMERCIAL, DemandeValidComm::STATUS_VALIDATED, DemandeValidComm::NO_VAL_COMM);
+            }
+        }
         
         // Validation encours
         if($val_euros != 0 && $this->getObjectClass($bimp_object) != self::OBJ_DEVIS) {
+            
             if($bimp_object->field_exists('paiement_comptant') and $bimp_object->getData('paiement_comptant')) {
                 $success[] = "Validation encours forcée par le champ \"Paiement comptant\".";
                 $valid_encours = 1;
@@ -215,7 +229,10 @@ class ValidComm extends BimpObject
         else
             $success[] = "Validation d'impayé effectuée.";
         
-        $ret = ($valid_comm == 1 and $valid_encours == 1 and $valid_impaye  == 1);
+        if(!is_a($object, 'BContract_contrat'))
+            $ret = ($valid_comm == 1 and $valid_encours == 1 and $valid_impaye  == 1);
+        else
+            $ret = ($valid_encours == 1 && $valid_impaye == 1);
         
         
         // Mail si il y a eu au moins une demande de validation traitée
@@ -339,6 +356,10 @@ class ValidComm extends BimpObject
         return $actuel - $max;
     }
     
+    public function getTypePieceArray() {
+        return DemandeValidComm::$objets;
+    }
+    
     
     private function getErrorEncours($user, $bimp_object) {
         $id_user = (int) $user->id;
@@ -429,41 +450,51 @@ class ValidComm extends BimpObject
     public function getObjectParams($object, &$errors = array(), $withRtp = true) {
         
         // Secteur
-        $secteur = $object->getData('ef_type');
+        $secteur = (!is_a($object, 'BContract_contrat')) ? $object->getData('ef_type') : $object->getData('secteur');
         
         // Piece
         $class = self::getObjectClass($object);
         
         // Valeur €
-        if((int) $object->getData('total_ht') > 0)
-            $val = (float) $object->getData('total_ht');
-        else
-            $val = (float) $object->getData('total');
+        if(!is_a($object, 'BContract_contrat')) {
+            if((int) $object->getData('total_ht') > 0)
+                $val = (float) $object->getData('total_ht');
+            else
+                $val = (float) $object->getData('total');
+        } else {
+            $val = (float) $object->getCurrentTotal();
+        }
+        
                 
-        $infos_remises = $object->getRemisesInfos();
+        $infos_remises = (!is_a($object, 'BContract_contrat')) ? $object->getRemisesInfos() : [];
 
         // Percent prix de vente %
         $percent_pv = (float) $infos_remises['remise_total_percent'];
         
         // CRT
-        $lines = $object->getLines('not_text');
-        $remises_crt = 0;
-        foreach ($lines as $line) {
-            $remises_crt += (float) $line->getRemiseCRT() * (float) $line->qty;
+        if(!is_a($object, 'BContract_contrat')){
+            $lines = $object->getLines('not_text');
+            $remises_crt = 0;
+            foreach ($lines as $line) {
+                $remises_crt += (float) $line->getRemiseCRT() * (float) $line->qty;
+            }
+
+            // Percent de marge
+            $margin_infos = $object->getMarginInfosArray();
+            $marge_ini = $infos_remises['remise_total_amount_ht'] + $margin_infos['margin_on_products'] + $remises_crt;
+            if($infos_remises['remise_total_amount_ht'] == 0)
+                $percent_marge = 0;
+            else
+                $percent_marge = 100 * $infos_remises['remise_total_amount_ht'] / $marge_ini;
+            if($percent_marge > 100)
+                $percent_marge = 100;
         }
         
-        // Percent de marge
-        $margin_infos = $object->getMarginInfosArray();
-        $marge_ini = $infos_remises['remise_total_amount_ht'] + $margin_infos['margin_on_products'] + $remises_crt;
-        if($infos_remises['remise_total_amount_ht'] == 0)
-            $percent_marge = 0;
-        else
-            $percent_marge = 100 * $infos_remises['remise_total_amount_ht'] / $marge_ini;
-        if($percent_marge > 100)
-            $percent_marge = 100;
         // Impayé
-        if(method_exists($object, 'getClientFacture'))
+        if(method_exists($object, 'getClientFacture')) {
             $client = $object->getClientFacture();
+        }
+            
         else
             $client = $object->getChildObject('client');
         
@@ -480,7 +511,7 @@ class ValidComm extends BimpObject
         }
         if($rtp < 0)
             $rtp = 0;
-        
+        //die(print_r(array($secteur, $class, $percent_pv, $percent_marge, $val, $rtp)));
         return array($secteur, $class, $percent_pv, $percent_marge, $val, $rtp);
     }
     
@@ -488,11 +519,16 @@ class ValidComm extends BimpObject
 
         switch (get_class($object)) {
             case 'Bimp_Propal':
-                return self::OBJ_DEVIS;            
+                return self::OBJ_DEVIS; 
+                break;      
 //            case 'Bimp_Facture':
 //                return self::OBJ_FACTURE;             
             case 'Bimp_Commande':
-                return self::OBJ_COMMANDE;            
+                return self::OBJ_COMMANDE;  
+                break;     
+            case 'BContract_contrat':
+                return self::OBJ_CONTRAT; 
+                break;
         }
         
         return -2;
@@ -560,7 +596,7 @@ class ValidComm extends BimpObject
                 'val_comm_demande' => (int) $val_comm_demande,
                 'type' =>             (int) $type
             )));
-            
+
             $user_aff = BimpCache::getBimpObjectInstance("bimpcore", 'Bimp_User', $id_user_affected);
             $this->valideur[$type] = ucfirst($user_aff->getData('firstname')) . ' ' . ucfirst($user_aff->getData('lastname'));
 
@@ -664,7 +700,10 @@ class ValidComm extends BimpObject
             $filters['status'] = $status;
 
         $demandes = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filters);
-
+        
+//        if($type == self::TYPE_IMPAYE)
+//            die(BimpObject::getBdb()->db->lastquery);
+        
         if(!$return_all) {
             foreach($demandes as $key => $val)
                 return $demandes[$key];

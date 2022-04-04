@@ -358,13 +358,15 @@ class BC_Form extends BC_Panel
             }
         }
 
-        if (isset($params['value']) && is_array($params['value'])) {
-            if ($params['data_type'] === 'json') {
-                $params['value'] = json_encode($params['value']);
-            } else {
-                $params['value'] = implode(',', $params['value']);
+        if (isset($params['value'])) {
+            if (is_array($params['value'])) {
+                if ($params['data_type'] === 'json') {
+                    $params['value'] = json_encode($params['value']);
+                } else {
+                    $params['value'] = implode(',', $params['value']);
+                }
             }
-
+            
             $field->value = $params['value'];
         }
 
@@ -867,7 +869,7 @@ class BC_Form extends BC_Panel
                     $object->set($field_name, $value);
                 }
             }
-            
+
             if ($id_object && $object->canEdit() || (!$id_object && $object->canCreate())) {
                 $onclick = 'loadObjectFormFromForm(\'' . $title . '\', \'' . $result_input_name . '\', \'' . $parent_form_id . '\'';
                 $onclick .= ', \'' . $object->module . '\', \'' . $object->object_name . '\'';

@@ -477,6 +477,16 @@ class Bimp_Client extends Bimp_Societe
             );
         }
 
+        if ($this->canSetAction('listClientsToExcludeForCreditLimits')) {
+                $buttons[] = array(
+                    'label'   => 'Listes clients à exclure',
+                    'icon'    => 'fas_bars',
+                    'onclick' => $this->getJsActionOnclick('listClientsToExcludeForCreditLimits', array(), array(
+                        'form_name' => 'clients_to_exclude'
+                    ))
+                );
+            }
+            
         return $buttons;
     }
 

@@ -942,7 +942,7 @@ views:
                       name: default
                       panel: 0
                       
-forms:                   
+forms: 
     light: 
         title: Ajout d'une société
         rows: 
@@ -1277,6 +1277,15 @@ forms:
               display_if:
                   field_name: by_tech
                   show_values: 1
+                  
+    clients_to_exclude: 
+        rows: 
+            - custom: 1
+              label: Date max
+              data_type: date
+              input_name: date_max
+              input: 
+                  type: date
              
 filters: 
     accounting_account:

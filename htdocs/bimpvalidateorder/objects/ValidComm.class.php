@@ -857,7 +857,7 @@ class ValidComm extends BimpObject
                 }                
             }
         } else {
-            if(is_a($object, 'BContract_contrat'))
+            if(is_a($bimp_object, 'BContract_contrat'))
                 $m .= '<br /> L\'encours sur ce client a été accordé ou révisé, le contrat est passé au statut "en attente de validation"' ;
             else
                 $m .= '<br/>' . ucfirst($bimp_object->getLabel('the')) . " est maintenant validé" . ($bimp_object->isLabelFemale() ? 'e' : '');

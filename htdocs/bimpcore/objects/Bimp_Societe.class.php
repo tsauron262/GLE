@@ -3030,7 +3030,7 @@ class Bimp_Societe extends BimpDolObject
             $errors[] = 'Veuillez sélectionner une date max';
         } else {
             $dt = new DateTime($date);
-            $dt->sub(new DateInterval('P1D'));
+//            $dt->sub(new DateInterval('P1D'));
             $date = $dt->format('Y-m-d');
 
             if (!$date) {

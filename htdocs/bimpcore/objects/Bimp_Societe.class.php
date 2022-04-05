@@ -3073,7 +3073,7 @@ class Bimp_Societe extends BimpDolObject
 
                 $title = 'Liste des ID clients à exclure';
 
-                $scb = 'setTimeout(function() {bimpModal.newContent(\'' . $title . '\', \'' . str_replace("'", "\'", $html) . '\', false, \'\', $());}, 1000);';
+                $scb = 'setTimeout(function() {bimpModal.newContent(\'' . $title . '\', \'' . str_replace("'", "\'", $html) . '\', false, \'\', $());}, 500);';
             }
         }
         

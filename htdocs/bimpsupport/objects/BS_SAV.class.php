@@ -6464,7 +6464,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
         $rows = $bdb->executeS($sql, 'array');
 
-        if (is_array($rows)) {
+        if (is_array($rows)) {            
             foreach ($rows as $r) {
                 $to = '';
 
@@ -6502,12 +6502,12 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     }
 
                     $msg .= 'Vous pourrez néanmoins accéder à votre <a href="https://www.bimp.fr/espace-client/">espace personnel</a> sur notre site internet «  www.bimp.fr », et si besoin, faire une nouvelle demande d’intervention.' . "\n\n";
-
                     $msg .= 'L’équipe technique LDLC';
 
                     $from = (isset($centres[$r['code_centre']]['mail']) ? $centres[$r['code_centre']]['mail'] : '');
 
-                    $bimpMail = new BimpMail($this, $subject, $to, $from, $msg);
+                    $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', (int) $r['id']);
+                    $bimpMail = new BimpMail($sav, $subject, $to, $from, $msg);
                     $bimpMail->send();
 
 //                    BimpCore::addlog('Annulation auto SAV réservé', Bimp_Log::BIMP_LOG_NOTIF, 'bic', null, array(

@@ -3045,9 +3045,9 @@ class Bimp_Societe extends BimpDolObject
             'outstanding_limit_atradius'
                 ) as $field) {
                     $sql = "SELECT DISTINCT id_object as id FROM " . MAIN_DB_PREFIX . "bimpcore_history a WHERE a.object IN ('Bimp_Client', 'Bimp_Societe')";
-                    $sql .= " AND a.field = '" . $field . "' AND a.date > '" . $date . " 23:59:59' AND id_user != 0";
+                    $sql .= " AND a.field = '" . $field . "' AND a.date > '" . $date . " 23:59:59' AND a.id_user != 0 AND a.value != '-1'";
                     $sql .= " AND (SELECT COUNT(DISTINCT id) FROM " . MAIN_DB_PREFIX . "bimpcore_history b WHERE b.object IN ('Bimp_Client', 'Bimp_Societe')";
-                    $sql .= " AND b.field = '" . $field . "' AND a.id_object = b.id_object AND b.id_user = 0) = 0";
+                    $sql .= " AND b.field = '" . $field . "' AND a.id_object = b.id_object AND b.id_user = 0 AND b.value != '-1') = 0";
 
                     $rows = $this->db->executeS($sql, 'array');
                     $label = $this->getConf('fields/' . $field . '/label', $field);
@@ -3067,7 +3067,7 @@ class Bimp_Societe extends BimpDolObject
                             $html .= $r['id'];
                         }
                     } else {
-                        $html .= '<b>Aucun client à exclure trouvé</b>';
+                        $html .= '<b>Aucun client à exclure trouvé</b> - ' .  $this->db->err();
                     }
                 }
 
@@ -3076,7 +3076,7 @@ class Bimp_Societe extends BimpDolObject
                 $scb = 'setTimeout(function() {bimpModal.newContent(\'' . $title . '\', \'' . str_replace("'", "\'", $html) . '\', false, \'\', $());}, 500);';
             }
         }
-        
+
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,

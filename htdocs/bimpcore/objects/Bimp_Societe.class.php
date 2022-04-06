@@ -3067,7 +3067,7 @@ class Bimp_Societe extends BimpDolObject
                             $html .= $r['id'];
                         }
                     } else {
-                        $html .= '<b>Aucun client à exclure trouvé</b> - ' .  $this->db->err();
+                        $html .= '<b>Aucun client à exclure trouvé</b>';
                     }
                 }
 

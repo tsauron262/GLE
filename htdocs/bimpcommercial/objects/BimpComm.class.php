@@ -4124,8 +4124,10 @@ class BimpComm extends BimpDolObject
                                 $id_cur_commercial = $this->getCommercialId();
 
                                 if ($id_cur_commercial) {
-                                    $msg = 'Un commercial a déjà été attribué à ' . $this->getLabel('this') . '<br/>';
-                                    $msg .= 'Si vous souhaitez modifier le commercial, veuillez d\'abord supprimer celui-ci';
+                                    $list = $this->dol_object->liste_type_contact();
+                                    $label = (isset($list[$id_type_commercial]) ? $list[$id_type_commercial] : 'Responsable suivi ' . $this->getLabel());
+                                    $msg = 'Un "' . $label . '" a déjà été attribué à ' . $this->getLabel('this') . '<br/>';
+                                    $msg .= 'Si vous souhaitez modifier celui-ci, veuillez d\'abord le supprimer';
                                     $errors[] = $msg;
                                 }
                             }

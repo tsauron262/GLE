@@ -3047,12 +3047,16 @@ class Bimp_Societe extends BimpDolObject
                     $sql = "SELECT DISTINCT id_object as id FROM " . MAIN_DB_PREFIX . "bimpcore_history a WHERE a.object IN ('Bimp_Client', 'Bimp_Societe')";
                     $sql .= " AND a.field = '" . $field . "' AND a.date > '" . $date . " 23:59:59' AND a.id_user != 0 AND a.value != '-1'";
                     $sql .= " AND (SELECT COUNT(DISTINCT id) FROM " . MAIN_DB_PREFIX . "bimpcore_history b WHERE b.object IN ('Bimp_Client', 'Bimp_Societe')";
-                    $sql .= " AND b.field = '" . $field . "' AND a.id_object = b.id_object AND b.id_user = 0 AND b.value != '-1') = 0";
+                    $sql .= " AND b.field = '" . $field . "' AND a.id_object = b.id_object AND (b.id_user = 0 OR b.date <= '" . $date . " 23:59:59') AND b.value != '-1') = 0";
 
+                    
                     $rows = $this->db->executeS($sql, 'array');
                     $label = $this->getConf('fields/' . $field . '/label', $field);
 
                     $html .= ($html ? '<br/><br/>' : '') . '<h3>' . $label . '</h3>';
+                    
+//                    $html .= $sql;
+//                    $html .= '<br/><br/>';
 
                     if (is_array($rows) && !empty($rows)) {
                         $html .= '<b>' . count($rows) . ' client(s) à exclure</b><br/><br/>';

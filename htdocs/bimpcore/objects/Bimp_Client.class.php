@@ -184,7 +184,7 @@ class Bimp_Client extends Bimp_Societe
     }
 
     public function getActionsButtons()
-    {
+    {        
         global $user;
 
         $groups = array();

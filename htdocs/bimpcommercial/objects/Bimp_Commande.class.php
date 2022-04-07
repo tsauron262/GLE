@@ -491,6 +491,24 @@ class Bimp_Commande extends BimpComm
 
     // Getters:
 
+    public function getData($field)
+    {
+        // Pour mettre à jour mode et cond réglement dans le formulaire en cas de sélection d'un nouveau client ou client facturation.
+        if (in_array($field, array('fk_cond_reglement', 'fk_mode_reglement'))) {
+            if (BimpTools::getValue('action', '') === 'loadObjectInput' && in_array(BimpTools::getValue('field_name', ''), array('fk_cond_reglement', 'fk_mode_reglement'))) {
+                switch ($field) {
+                    case 'fk_cond_reglement':
+                        return $this->getCondReglementBySociete();
+
+                    case 'fk_mode_reglement':
+                        return $this->getModeReglementBySociete();
+                }
+            }
+        }
+
+        return parent::getData($field);
+    }
+
     public function getDefaultListExtraButtons()
     {
         $buttons = parent::getDefaultListExtraButtons();
@@ -947,6 +965,68 @@ class Bimp_Commande extends BimpComm
         }
 
         return array();
+    }
+
+    public function getCondReglementBySociete()
+    {
+        $id_soc = (int) BimpTools::getPostFieldValue('id_client_facture', 0);
+        if (!$id_soc) {
+            if ((int) $this->getData('id_client_facture')) {
+                $id_soc = (int) $this->getData('id_client_facture');
+            } else {
+                $id_soc = (int) BimpTools::getPostFieldValue('fk_soc', 0);
+                if (!$id_soc) {
+                    $id_soc = (int) BimpTools::getPostFieldValue('id_client', 0);
+                }
+                if (!$id_soc && $this->getData('fk_soc') > 0) {
+                    $id_soc = $this->getData('fk_soc');
+                }
+            }
+        }
+
+        if ($id_soc) {
+            $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $id_soc);
+            if (BimpObject::objectLoaded($soc)) {
+                return (int) $soc->getData('cond_reglement');
+            }
+        }
+
+        if (isset($this->data['fk_cond_reglement']) && (int) $this->data['fk_cond_reglement']) {
+            return (int) $this->data['fk_cond_reglement']; // pas getData() sinon boucle infinie (getCondReglementBySociete() étant définie en tant que callback du param default_value pour ce champ). 
+        }
+
+        return (int) BimpCore::getConf('societe_id_default_cond_reglement', 0);
+    }
+
+    public function getModeReglementBySociete()
+    {
+        $id_soc = (int) BimpTools::getPostFieldValue('id_client_facture', 0);
+        if (!$id_soc) {
+            if ((int) $this->getData('id_client_facture')) {
+                $id_soc = (int) $this->getData('id_client_facture');
+            } else {
+                $id_soc = (int) BimpTools::getPostFieldValue('fk_soc', 0);
+                if (!$id_soc) {
+                    $id_soc = (int) BimpTools::getPostFieldValue('id_client', 0);
+                }
+                if (!$id_soc && $this->getData('fk_soc') > 0) {
+                    $id_soc = $this->getData('fk_soc');
+                }
+            }
+        }
+
+        if ($id_soc) {
+            $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $id_soc);
+            if (BimpObject::objectLoaded($soc)) {
+                return (int) $soc->getData('mode_reglement');
+            }
+        }
+
+        if (isset($this->data['fk_mode_reglement']) && (int) $this->data['fk_mode_reglement']) {
+            return (int) $this->data['fk_mode_reglement']; // pas getData() sinon boucle infinie (getModeReglementBySociete() étant définie en tant que callback du param default_value pour ce champ). 
+        }
+
+        return BimpCore::getConf('societe_id_default_mode_reglement', 0);
     }
 
     // Rendus HTML: 

@@ -31,12 +31,14 @@ class DemandeValidComm extends BimpObject
     const OBJ_DEVIS = 0;
     const OBJ_FACTURE = 1;
     const OBJ_COMMANDE = 2;
+    const OBJ_CONTRAT = 3;
     
     public static $objets = Array(
         self::OBJ_ALL      => Array('label' => 'Tous'/*,     'icon' => 'fas_file-invoice'*/),
-        self::OBJ_DEVIS    => Array('label' => 'Devis',    'icon' => 'fas_file-invoice'),
-        self::OBJ_FACTURE  => Array('label' => 'Facture',  'icon' => 'fas_file-invoice-dollar'),
-        self::OBJ_COMMANDE => Array('label' => 'Commande', 'icon' => 'fas_dolly')
+        self::OBJ_DEVIS    => Array('label' => 'Devis',    'icon' => 'fas_file-invoice', 'module' => 'bimpcommercial', 'obj_name' => 'Bimp_Propal'),
+        self::OBJ_FACTURE  => Array('label' => 'Facture',  'icon' => 'fas_file-invoice-dollar', 'module' => 'bimpcommercial', 'obj_name' => 'Bimp_Facture'),
+        self::OBJ_COMMANDE => Array('label' => 'Commande', 'icon' => 'fas_dolly', 'module' => 'bimpcommercial', 'obj_name' => 'Bimp_Commande'),
+        self::OBJ_CONTRAT => Array('label' => 'Contrat', 'icon' => 'fas_retweet', 'module' => 'bimpcontract', 'obj_name' => 'BContract_contrat'),
     );
     
     const LIMIT_DEMANDE = 10;
@@ -54,20 +56,25 @@ class DemandeValidComm extends BimpObject
     public function getThisObject(){
         $obj = (int) $this->getData('type_de_piece');
         $id_obj = (int) $this->getData('id_piece');
-        if (!is_null($id_obj)) {
-            switch ($obj) {
-                case self::OBJ_DEVIS:
-                    $devis = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_obj);
-                    return $devis;
-
-                case self::OBJ_FACTURE:
-                    $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_obj);
-                    return $facture;
-                
-                case self::OBJ_COMMANDE:
-                    $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id_obj);
-                    return $commande;
-            }
+        if (!is_null($id_obj) && isset(self::$objets[$obj])) {
+//            switch ($obj) {
+//                case self::OBJ_DEVIS:
+//                    $devis = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_obj);
+//                    return $devis;
+//
+//                case self::OBJ_FACTURE:
+//                    $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_obj);
+//                    return $facsture;
+//                
+//                case self::OBJ_COMMANDE:
+//                    $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id_obj);
+//                    return $commande;
+//                
+//                case self::OBJ_CONTRAT:
+//                    $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $id_obj);
+//                    
+//            }
+            return BimpCache::getBimpObjectInstance(self::$objets[$obj]['module'], self::$objets[$obj]['obj_name'], $id_obj);
         } 
         return null;
     }
@@ -112,22 +119,29 @@ class DemandeValidComm extends BimpObject
         global $user;
         $errors = array();
         
-        switch ($this->getData('type_de_piece')) {
-            case self::OBJ_DEVIS:
-                $class = 'Bimp_Propal';
-                break;
-            case self::OBJ_FACTURE:
-                $class = 'Bimp_Facture';
-                break;
-            case self::OBJ_COMMANDE:
-                $class = 'Bimp_Commande';
-                break;
-            default:
-                $errors[] = "Type d'objet non reconnu ";
-                break;
-        }
+//        $module  = 'bimpcommercial';
+//        
+//        switch ($this->getData('type_de_piece')) {
+//            case self::OBJ_DEVIS:
+//                $class = 'Bimp_Propal';
+//                break;
+//            case self::OBJ_FACTURE:
+//                $class = 'Bimp_Facture';
+//                break;
+//            case self::OBJ_COMMANDE:
+//                $class = 'Bimp_Commande';
+//                break;
+//            case self::OBJ_CONTRAT:
+//                $module = 'bimpcontract';
+//                $class = 'BContract_contrat';
+//                break;
+//            default:
+//                $errors[] = "Type d'objet non reconnu ";
+//                break;
+//        }
         
-        $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', $class, (int) $this->getData('id_piece'));
+        //$bimp_object = BimpCache::getBimpObjectInstance($module, $class, (int) $this->getData('id_piece'));
+        $bimp_object = BimpCache::getBimpObjectInstance(self::$objets[$this->getData('type_de_piece')]['module'], self::$objets[$this->getData('type_de_piece')]['obj_name'], $this->getData('id_piece'));
         
         $subject = "Validation " . $bimp_object->getLabel() . ' '. $bimp_object->getData('ref');
         $message = "Merci de valider " . $bimp_object->getLabel('the') . ' ' . str_replace("fc=commande","fc=commande&navtab-maintabs=content", $bimp_object->getProvLink(1));
@@ -209,22 +223,22 @@ class DemandeValidComm extends BimpObject
     
     
     public static function getObject($object, $id_object) {
-        $class = '';
-        switch ($object) {
-            case self::OBJ_DEVIS:
-                $class = 'Bimp_Propal';
-                break;
-            case self::OBJ_FACTURE:
-                $class = 'Bimp_Facture';
-                break;
-            case self::OBJ_COMMANDE:
-                $class = 'Bimp_Commande';
-                break;
-            default:
-                break;
-        }
-        if($class != '' && $id_object > 0)
-            return  BimpCache::getBimpObjectInstance('bimpcommercial', $class, (int) $id_object);
+//        $class = '';
+//        switch ($object) {
+//            case self::OBJ_DEVIS:
+//                $class = 'Bimp_Propal';
+//                break;
+//            case self::OBJ_FACTURE:
+//                $class = 'Bimp_Facture';
+//                break;
+//            case self::OBJ_COMMANDE:
+//                $class = 'Bimp_Commande';
+//                break;
+//            default:
+//                break;
+//        }
+        if(/* $class != '' && */ $id_object > 0)
+            return BimpCache::getBimpObjectInstance(self::$objets[$object]['module'], self::$objets[$object]['obj_name'], $id_object);
         return null;
         
     }

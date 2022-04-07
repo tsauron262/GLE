@@ -156,6 +156,7 @@ class Bimp_Societe extends BimpDolObject
                 return 1;
 
             case 'revertAnonymization':
+            case 'listClientsToExcludeForCreditLimits':
                 return (int) $user->admin;
         }
 
@@ -388,28 +389,8 @@ class Bimp_Societe extends BimpDolObject
         return DOL_URL_ROOT . '/' . $page . '.php?modulepart=societe&file=' . urlencode($file);
     }
 
-    public function getFirstDateContrat()
-    {
-
-        if ($this->isLoaded()) {
-
-            $sql = 'SELECT MIN(date_start) FROM llx_contrat_extrafields LEFT JOIN llx_contrat ON llx_contrat.rowid = llx_contrat_extrafields.fk_object WHERE llx_contrat.fk_soc = ' . $this->id;
-            $res = $this->db->executeS($sql, 'array');
-            return $res[0]['MIN(date_start)'];
-        }
-
-        return date('Y-m-d');
-    }
-
-    public function getContratsList()
-    {
-
-        return BimpCache::getBimpObjectObjects('bimpcontract', 'BContract_contrat', ['fk_soc' => $this->id], 'id', 'desc');
-    }
-
     public function getActionsButtons()
     {
-        global $user;
         $buttons = array();
 
         if ($this->isLoaded()) {
@@ -1178,9 +1159,12 @@ class Bimp_Societe extends BimpDolObject
                         'on'    => 'det.rowid = a.id_line'
                     )
         ));
+
         $sql .= BimpTools::getSqlWhere(array(
                     'c.fk_statut'      => 1,
-                    'c.fk_soc'         => $ids,
+//                    'c.fk_soc'         => $ids,
+//                    'c.id_client_facture'         => $ids,
+                    'custom'           => array('custom' => '(c.id_client_facture IN (' . implode(',', $ids) . ') || c.fk_soc IN (' . implode(',', $ids) . '))'),
                     'c.invoice_status' => array(
                         'operator' => '!=',
                         'value'    => 2
@@ -1325,6 +1309,23 @@ class Bimp_Societe extends BimpDolObject
         }
 
         return 'nc';
+    }
+
+    public function getFirstDateContrat()
+    {
+
+        if ($this->isLoaded()) {
+            $sql = 'SELECT MIN(date_start) FROM llx_contrat_extrafields LEFT JOIN llx_contrat ON llx_contrat.rowid = llx_contrat_extrafields.fk_object WHERE llx_contrat.fk_soc = ' . $this->id;
+            $res = $this->db->executeS($sql, 'array');
+            return $res[0]['MIN(date_start)'];
+        }
+
+        return date('Y-m-d');
+    }
+
+    public function getContratsList()
+    {
+        return BimpCache::getBimpObjectObjects('bimpcontract', 'BContract_contrat', ['fk_soc' => $this->id], 'id', 'desc');
     }
 
     // Getters array: 
@@ -3194,6 +3195,76 @@ class Bimp_Societe extends BimpDolObject
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
+        );
+    }
+
+    public function actionListClientsToExcludeForCreditLimits($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $scb = '';
+
+        $date = BimpTools::getArrayValueFromPath($data, 'date_max');
+
+        if (is_null($date) || !strtotime($date)) {
+            $errors[] = 'Veuillez sélectionner une date max';
+        } else {
+            $dt = new DateTime($date);
+//            $dt->sub(new DateInterval('P1D'));
+            $date = $dt->format('Y-m-d');
+
+            if (!$date) {
+                $errors[] = 'Date max invalide';
+            } else {
+                $html = '';
+
+                foreach (array(
+            'outstanding_limit_credit_safe',
+            'outstanding_limit_icba',
+            'outstanding_limit_credit_check',
+            'outstanding_limit_atradius'
+                ) as $field) {
+                    $sql = "SELECT DISTINCT id_object as id FROM " . MAIN_DB_PREFIX . "bimpcore_history a WHERE a.object IN ('Bimp_Client', 'Bimp_Societe')";
+                    $sql .= " AND a.field = '" . $field . "' AND a.date > '" . $date . " 23:59:59' AND a.id_user != 0 AND a.value != '-1'";
+                    $sql .= " AND (SELECT COUNT(DISTINCT id) FROM " . MAIN_DB_PREFIX . "bimpcore_history b WHERE b.object IN ('Bimp_Client', 'Bimp_Societe')";
+                    $sql .= " AND b.field = '" . $field . "' AND a.id_object = b.id_object AND (b.id_user = 0 OR b.date <= '" . $date . " 23:59:59') AND b.value != '-1') = 0";
+
+                    $rows = $this->db->executeS($sql, 'array');
+                    $label = $this->getConf('fields/' . $field . '/label', $field);
+
+                    $html .= ($html ? '<br/><br/>' : '') . '<h3>' . $label . '</h3>';
+
+//                    $html .= $sql;
+//                    $html .= '<br/><br/>';
+
+                    if (is_array($rows) && !empty($rows)) {
+                        $html .= '<b>' . count($rows) . ' client(s) à exclure</b><br/><br/>';
+                        $fl = true;
+                        foreach ($rows as $r) {
+                            if (!$fl) {
+                                $html .= ';';
+                            } else {
+                                $fl = false;
+                            }
+
+                            $html .= $r['id'];
+                        }
+                    } else {
+                        $html .= '<b>Aucun client à exclure trouvé</b>';
+                    }
+                }
+
+                $title = 'Liste des ID clients à exclure';
+
+                $scb = 'setTimeout(function() {bimpModal.newContent(\'' . $title . '\', \'' . str_replace("'", "\'", $html) . '\', false, \'\', $());}, 500);';
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $scb
         );
     }
 

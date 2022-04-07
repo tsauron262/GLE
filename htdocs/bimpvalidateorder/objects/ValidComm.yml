@@ -5,7 +5,13 @@ icon: fas_check
 labels:
     name: Validation
     name_plur:  Validations
-        
+
+objects:
+    demandeValidComm:
+        instance:
+            bimp_object:
+                name: DemandeValidComm
+
 fields: 
     user: 
         label: Valideur
@@ -22,14 +28,14 @@ fields:
     type:
         label: Type
         type: int
-        values: 
+        values:
             array: types
             
     type_de_piece:
         label: Piece
         type: int
-        values: 
-            array: objets
+        values:
+            callback: getTypePieceArray
         default_value: -1
         
     val_min:

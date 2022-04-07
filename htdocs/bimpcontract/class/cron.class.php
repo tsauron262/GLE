@@ -51,12 +51,14 @@
         
         public function notifDemainFacturation() {
             $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat');
+            $echeancier = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_echeancier');
             $list = $contrat->getList(['statut' => self::CONTRAT_ACTIF]);
             $contratsFactureDemain = Array();
             $demain = new DateTime(); $demain->add(new DateInterval('P1D'));
             if(count($list) > 0) {
                 foreach($list as $infos) {
                     $contrat->fetch($infos['rowid']);
+                    $echeancier->find(['id_contrat' => $contrat->id], true);
                     if($contrat->isLoaded()) {
                         if($contrat->facturationIsDemainCron()) {
                             $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $contrat->getData('fk_soc'));
@@ -67,9 +69,11 @@
                                     . '<u>Informations</u><br />'
                                     . 'Référence du contrat: ' . $contrat->getNomUrl() . '<br />Client: ' . $client->getNomUrl() . ' ' . $client->getName() . '<br />'
                                     . 'Commercial suivi de contrat: ' . $commercial_suivi->getName() . '<br />Commercial signataire du contrat: ' . $commercial_signa->getName(); 
-
-                            mailSyn2($sujet, 'facturationclients@bimp.fr', null, $message);
-                            $this->output .= $contrat->getRef() . ' => FAIT: RELANCE FACTURATION DEMAIN';
+                            $mustSend = ($echeancier->isLoaded() && $echeancier->getData('validate')) ? false : true;
+                            if(($mustSend)) {
+                                mailSyn2($sujet, 'facturationclients@bimp.fr', null, $message);
+                                $this->output .= $contrat->getRef() . ' => FAIT: RELANCE FACTURATION DEMAIN';
+                            }
                         } 
                     }
                 }

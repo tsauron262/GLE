@@ -155,6 +155,9 @@ lists_cols:
     vide:
         label: Vide
         value: ''
+    vide2:
+        label: Vide
+        value: ''
         
 lists: 
     default: 
@@ -182,8 +185,9 @@ lists:
             parent:facnumber:
             parent:client:nom:
             dol_line:product:ref_short:
-            dol_line:product:label:
+            desc:
             dol_line:qty:
             vide:
+            vide2:
             pu_ht_remise:
         

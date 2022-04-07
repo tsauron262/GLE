@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bcontract_prelevement` ADD `facturesExterne_soldePeriode` TEXT  DEFAULT '{}';

@@ -520,6 +520,16 @@ class Bimp_Client extends Bimp_Societe
             );
         }
 
+        if ($this->canSetAction('listClientsToExcludeForCreditLimits')) {
+                $buttons[] = array(
+                    'label'   => 'Listes clients à exclure',
+                    'icon'    => 'fas_bars',
+                    'onclick' => $this->getJsActionOnclick('listClientsToExcludeForCreditLimits', array(), array(
+                        'form_name' => 'clients_to_exclude'
+                    ))
+                );
+            }
+            
         return $buttons;
     }
 
@@ -727,7 +737,7 @@ class Bimp_Client extends Bimp_Societe
                         }
 
                         // Recherche de relance en attente pour la facture: 
-                        $where = '`status` IN (' . BimpRelanceClientsLine::RELANCE_ATTENTE_MAIL . ',' . BimpRelanceClientsLine::RELANCE_ATTENTE_COURRIER . ')';
+                        $where = '`status` < 10';
                         $where .= ' AND `factures` LIKE \'%[' . $r['rowid'] . ']%\'';
                         $id_cur_relance = (int) $this->db->getValue('bimp_relance_clients_line', 'id_relance', $where);
 
@@ -2213,7 +2223,7 @@ class Bimp_Client extends Bimp_Societe
         if ($mode == 'cron') {
             $clients = $this->getFacturesToRelanceByClients(true, null, $clients, null, false, 'all');
             $bds_process->DebugData($clients, 'Données clients');
-            $bds_process->info('Factures à traiter: <pre>' . print_r($clients) . '</pre>');
+            $bds_process->info('Factures à traiter: <pre>' . print_r($clients, 1) . '</pre>');
         }
 
         if (empty($clients)) {
@@ -2253,7 +2263,6 @@ class Bimp_Client extends Bimp_Societe
                 $id_relance = $relance->id;
                 $acomptes = array();
 
-                $n = 0;
                 foreach ($clients as $id_client => $client_data) {
                     if (!is_null($bds_process)) {
                         $bds_process->setCurrentObjectData('bimpcore', 'Bimp_Client');
@@ -2435,12 +2444,6 @@ class Bimp_Client extends Bimp_Societe
                                 $bds_process->incCreated();
                             }
                         }
-                    }
-
-                    $n++;
-
-                    if ($n > 10 && !is_null($bds_process)) {
-                        break;
                     }
                 }
 

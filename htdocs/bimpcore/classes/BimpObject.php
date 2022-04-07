@@ -6149,7 +6149,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     public function renderNotesList($filter_by_user = true, $list_model = "default", $suffixe = "", $archive = false)
     {
         if ($this->isLoaded()) {
-            if($archive)
+            if ($archive)
                 $note = BimpObject::getInstance('bimpcore', 'BimpNoteArchive');
             else
                 $note = BimpObject::getInstance('bimpcore', 'BimpNote');
@@ -6167,12 +6167,14 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                     $list->addFieldFilterValue($field, $filter);
                 }
             }
-            
-            if(BimpCore::getConf('date_archive', '') != '')
-                $btnHisto = '<div id="lllm"><button class="btn btn-default" value="charr" onclick="'.$this->getJsLoadCustomContent('renderNotesList', "$('#lllm')", array($filter_by_user, $list_model, $suffixe, true)).'">'.BimpRender::renderIcon('fas_history').' Charger historique</button>';
-            
 
-            return $list->renderHtml(). ($archive == false ? $btnHisto : '');
+            if (BimpCore::getConf('date_archive', '') != '') {
+                $btnHisto = '<div id="lllm">';
+                $btnHisto .= '<button class="btn btn-default" value="charr" onclick="' . $this->getJsLoadCustomContent('renderNotesList', "$('#lllm')", array($filter_by_user, $list_model, $suffixe, true)) . '">' . BimpRender::renderIcon('fas_history') . ' Charger historique</button>';
+                $btnHisto .= '</div>';
+            }
+
+            return $list->renderHtml() . ($archive == false ? $btnHisto : '');
         }
 
         return BimpRender::renderAlerts('Impossible d\'afficher la liste des notes (ID ' . $this->getLabel('of_the') . ' absent)');

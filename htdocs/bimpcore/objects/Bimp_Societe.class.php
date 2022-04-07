@@ -1837,7 +1837,7 @@ class Bimp_Societe extends BimpDolObject
     }
 
     // Rendus HTML: 
-
+    
     public function renderHeaderExtraLeft()
     {
         $html = '';

@@ -6168,7 +6168,8 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 }
             }
             
-            $btnHisto = '<div id="lllm"><button class="btn btn-default" value="charr" onclick="'.$this->getJsLoadCustomContent('renderNotesList', "$('#lllm')", array($filter_by_user, $list_model, $suffixe, true)).'">'.BimpRender::renderIcon('fas_history').' Charger historique</button>';
+            if(BimpCore::getConf('date_archive', '') != '')
+                $btnHisto = '<div id="lllm"><button class="btn btn-default" value="charr" onclick="'.$this->getJsLoadCustomContent('renderNotesList', "$('#lllm')", array($filter_by_user, $list_model, $suffixe, true)).'">'.BimpRender::renderIcon('fas_history').' Charger historique</button>';
             
 
             return $list->renderHtml(). ($archive == false ? $btnHisto : '');

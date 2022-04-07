@@ -316,11 +316,13 @@ class BC_Panel extends BimpComponent
         elseif ($this->isObjectValid()) {
             $title = $this->object->getInstanceName();
         }
-        $date = '01/04/2021';
-        if($this->object::$modeArchive == 0)
-            $title .= ' (depuis le '.$date.')';
-        elseif($this->object::$modeArchive == 1)
-            $title .= ' (avant le '.$date.')';
+        $date = BimpCore::getConf('date_archive', '');
+        if($date != ''){
+            if($this->object::$modeArchive == 0)
+                $title .= ' (depuis le '.$date.')';
+            elseif($this->object::$modeArchive == 1)
+                $title .= ' (avant le '.$date.')';
+        }
 
         return $title;
     }

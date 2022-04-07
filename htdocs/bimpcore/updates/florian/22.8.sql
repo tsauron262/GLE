@@ -7,10 +7,3 @@ CREATE TABLE IF NOT EXISTS `llx_societe_saved_data` (
   `data` mediumtext NOT NULL,
   `date` date DEFAULT NULL
 );
-
-CREATE TABLE IF NOT EXISTS `llx_contact_saved_data` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `id_contact` int(11) NOT NULL DEFAULT 0,
-  `data` mediumtext NOT NULL,
-  `date` date DEFAULT NULL
-);

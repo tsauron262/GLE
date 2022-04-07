@@ -211,7 +211,7 @@ class BimpDb
         return $this->executeS($sql, $return);
     }
 
-    public function getRow($table, $where = '1', $fields = null, $return = 'object')
+    public function getRow($table, $where = '1', $fields = null, $return = 'object', $order_by = '', $order_way = 'ASC')
     {
         $sql = 'SELECT ';
 
@@ -230,7 +230,14 @@ class BimpDb
         }
 
         $sql .= ' FROM ' . MAIN_DB_PREFIX . $table;
-        $sql .= ' WHERE ' . $where . ' LIMIT 1';
+        $sql .= ' WHERE ' . $where;
+
+        if ($order_by) {
+            $sql .= ' ORDER BY `' . $order_by . '` ' . $order_way;
+        }
+
+        $sql .= ' LIMIT 1';
+
         $result = $this->db->query($sql);
         if ($result && $this->db->num_rows($result)) {
             if ($return === 'object') {

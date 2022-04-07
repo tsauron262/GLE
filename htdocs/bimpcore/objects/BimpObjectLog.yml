@@ -42,7 +42,7 @@ fields:
 lists: 
     object:
         sort_field: date
-        sort_way: asc
+        sort_way: desc
         n: 50
         cols: 
             date: 

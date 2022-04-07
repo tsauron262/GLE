@@ -156,6 +156,19 @@ class Bimp_Client extends Bimp_Societe
         return 0;
     }
 
+    public function isAnonymizable(&$errors = array())
+    {
+        $check = (int) parent::isAnonymizable($errors);
+
+        $unpaid = $this->getTotalUnpayed();
+        if ($unpaid) {
+            $errors[] = ucfirst($this->getLabel('this')) . ' dispose de factures impayées (' . BimpTools::displayMoneyValue($unpaid) . ')';
+            $check = 0;
+        }
+
+        return $check;
+    }
+
     // Getters params:
 
     public function getRefProperty()
@@ -344,6 +357,37 @@ class Bimp_Client extends Bimp_Societe
                 );
             }
 
+            if ($this->canSetAction('setActivity')) {
+                $errors = array();
+                if ($this->isActionAllowed('setActivity', $errors)) {
+                    $action_buttons[] = array(
+                        'label'   => 'Définir date de dernière activité',
+                        'icon'    => 'fas_calendar-check',
+                        'onclick' => $this->getJsActionOnclick('setActivity', array(), array(
+                            'form_name' => 'set_activity'
+                        ))
+                    );
+                } else {
+                    $action_buttons[] = array(
+                        'label'    => 'Définir date de dernière activité',
+                        'icon'     => 'fas_calendar-check',
+                        'onclick'  => '',
+                        'disabled' => 1,
+                        'popover'  => BimpTools::getMsgFromArray($errors)
+                    );
+                }
+            }
+
+            if ($this->canSetAction('anonymize') && $this->isActionAllowed('anonymize')) {
+                $action_buttons[] = array(
+                    'label'   => 'Anonymiser',
+                    'icon'    => 'fas_user-times',
+                    'onclick' => $this->getJsActionOnclick('anonymize', array(), array(
+                        'form_name' => 'anonymize'
+                    ))
+                );
+            }
+
             if ($this->canSetAction('revertAnonymization') && $this->isActionAllowed('revertAnonymization')) {
                 $action_buttons[] = array(
                     'label'   => 'Annuler l\'anonymisation',
@@ -521,15 +565,15 @@ class Bimp_Client extends Bimp_Societe
         }
 
         if ($this->canSetAction('listClientsToExcludeForCreditLimits')) {
-                $buttons[] = array(
-                    'label'   => 'Listes clients à exclure',
-                    'icon'    => 'fas_bars',
-                    'onclick' => $this->getJsActionOnclick('listClientsToExcludeForCreditLimits', array(), array(
-                        'form_name' => 'clients_to_exclude'
-                    ))
-                );
-            }
-            
+            $buttons[] = array(
+                'label'   => 'Listes clients à exclure',
+                'icon'    => 'fas_bars',
+                'onclick' => $this->getJsActionOnclick('listClientsToExcludeForCreditLimits', array(), array(
+                    'form_name' => 'clients_to_exclude'
+                ))
+            );
+        }
+
         return $buttons;
     }
 
@@ -2842,54 +2886,6 @@ class Bimp_Client extends Bimp_Societe
                             $activate = (int) BimpTools::getArrayValueFromPath($fac_data, 'activate_relances', 0);
                             $facture->updateField('relance_active', $activate);
                         }
-                    }
-                }
-            }
-        }
-
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
-    }
-
-    public function actionCheckLastActivity($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = '';
-
-        $clients = array();
-
-        if ($this->isLoaded()) {
-            $clients[] = $this->id;
-        } else {
-            $clients = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
-        }
-
-        if (empty($clients)) {
-            $errors[] = 'Aucun client sélectionné';
-        } else {
-            require_once DOL_DOCUMENT_ROOT . '/bimpdatasync/BDS_Lib.php';
-
-            $process = BDSProcess::createProcessByName('Rgpd', $errors);
-
-            if (!is_a($process, 'BDS_RgpdProcess') || !(int) $process->process->getData('active')) {
-                $errors[] = 'Cette opération n\'est pas disponible';
-            }
-
-            if (!count($errors)) {
-                $process->checkClientsActivity($clients, $errors, $warnings, $success);
-
-                if (!count($errors) && !$success) {
-                    if (!count($warnings)) {
-                        if (count($clients) > 1) {
-                            $success = 'Toutes les dates de dernières activités des clients sélectionnés sont à jour';
-                        } else {
-                            $success = 'La date de dernière activité du client est à jour';
-                        }
-                    } else {
-                        $success = 'Aucune mise à jour n\'a été faite';
                     }
                 }
             }

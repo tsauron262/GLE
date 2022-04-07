@@ -14,6 +14,7 @@ class BIC_UserClient extends BimpObject
     public static $langs_list = array(
         0 => "fr_FR"
     );
+    public static $anonymisation_fields = array('email');
 
     CONST USER_CLIENT_ROLE_ADMIN = 1;
     CONST USER_CLIENT_ROLE_USER = 0;
@@ -619,6 +620,101 @@ class BIC_UserClient extends BimpObject
 
         $bimpMail = new BimpMail($this, $subject, $this->getData('email'), '', $msg);
         $bimpMail->send($errors, $warnings);
+        return $errors;
+    }
+
+    public function anonymiseData($save_data = true)
+    {
+        $errors = array();
+
+        if (!$this->isLoaded($errors)) {
+            return $errors;
+        }
+
+        $data = array();
+        $saved_data = array();
+
+        foreach (self::$anonymisation_fields as $field) {
+            $saved_data[$field] = $this->getData($field);
+
+            if ($field === 'email') {
+                $data[$field] = '*****#' . $this->id;
+            } else {
+                if ((string) $saved_data[$field]) {
+                    $data[$field] = '*****';
+                } else {
+                    unset($saved_data[$field]);
+                }
+            }
+        }
+
+        if ($save_data) {
+            $id_cur_saved_data = (int) $this->db->getValue('societe_saved_data', 'id', 'type = \'user\' AND id_object = ' . (int) $this->id);
+
+            if ($id_cur_saved_data) {
+                if ($this->db->update('societe_saved_data', array(
+                            'date' => date('Y-m-d'),
+                            'data' => base64_encode(json_encode($saved_data))
+                                ), 'id = ' . $id_cur_saved_data) <= 0) {
+                    $errors[] = 'Echec de l\'enregistrement des données de sauvegarde. Pas d\'anonymisation - Erreur SQL ' . $this->db->err();
+                }
+            } else {
+                if ($this->db->insert('societe_saved_data', array(
+                            'type'      => 'user',
+                            'id_object' => (int) $this->id,
+                            'date'      => date('Y-m-d'),
+                            'data'      => base64_encode(json_encode($saved_data))
+                        )) <= 0) {
+                    $errors[] = 'Echec de l\'enregistrement des données de sauvegarde. Pas d\'anonymisation - Erreur SQL ' . $this->db->err();
+                }
+            }
+        }
+
+        if (!count($errors)) {
+            if (!empty($data)) {
+                // On fait un update direct en base pour contourner les validations de formats des données: 
+                if ($this->db->update('bic_user', $data, 'id = ' . (int) $this->id) <= 0) {
+                    $errors[] = 'Echec anonymisation des données - Erreur sql: ' . $this->db->err();
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function revertAnonymisedData()
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            $rows = $this->db->getRows('societe_saved_data', 'type = \'user\' AND id_object = ' . $this->id, 1, 'array', null, 'date', 'desc');
+
+            if (isset($rows[0]['data'])) {
+                $values = base64_decode($rows[0]['data']);
+
+                if ($values) {
+                    $values = json_decode($values, 1);
+                }
+
+                if (is_array($values) && !empty($values)) {
+                    foreach (self::$anonymisation_fields as $field) {
+                        if (isset($values[$field])) {
+                            $this->set($field, $values[$field]);
+                        }
+                    }
+
+                    $warnings = array();
+                    $errors = $this->update($warnings, true);
+
+                    if (!count($errors)) {
+                        if ((int) $rows[0]['id']) {
+                            $this->db->delete('societe_saved_data', 'id = ' . (int) $rows[0]['id']);
+                        }
+                    }
+                }
+            }
+        }
+
         return $errors;
     }
 

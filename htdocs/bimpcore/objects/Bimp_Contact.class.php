@@ -281,20 +281,21 @@ class Bimp_Contact extends BimpObject
         }
 
         if ($save_data) {
-            $id_cur_saved_data = (int) $this->db->getValue('contact_saved_data', 'id', 'id_contact = ' . (int) $this->id);
+            $id_cur_saved_data = (int) $this->db->getValue('societe_saved_data', 'id', 'type = \'contact\' AND id_object = ' . (int) $this->id);
 
             if ($id_cur_saved_data) {
-                if ($this->db->update('contact_saved_data', array(
+                if ($this->db->update('societe_saved_data', array(
                             'date' => date('Y-m-d'),
                             'data' => base64_encode(json_encode($saved_data))
                                 ), 'id = ' . $id_cur_saved_data) <= 0) {
                     $errors[] = 'Echec de l\'enregistrement des données de sauvegarde. Pas d\'anonymisation - Erreur SQL ' . $this->db->err();
                 }
             } else {
-                if ($this->db->insert('contact_saved_data', array(
-                            'id_contact' => (int) $this->id,
-                            'date'       => date('Y-m-d'),
-                            'data'       => base64_encode(json_encode($saved_data))
+                if ($this->db->insert('societe_saved_data', array(
+                            'type'      => 'contact',
+                            'id_object' => (int) $this->id,
+                            'date'      => date('Y-m-d'),
+                            'data'      => base64_encode(json_encode($saved_data))
                         )) <= 0) {
                     $errors[] = 'Echec de l\'enregistrement des données de sauvegarde. Pas d\'anonymisation - Erreur SQL ' . $this->db->err();
                 }
@@ -302,9 +303,11 @@ class Bimp_Contact extends BimpObject
         }
 
         if (!count($errors)) {
-            // On fait un update direct en base pour contourner les validations de formats des données: 
-            if ($this->db->update('socpeople', $data, 'rowid = ' . (int) $this->id) <= 0) {
-                $errors[] = 'Echec anonymisation des données - Erreur sql: ' . $this->db->err();
+            if (!empty($data)) {
+                // On fait un update direct en base pour contourner les validations de formats des données: 
+                if ($this->db->update('socpeople', $data, 'rowid = ' . (int) $this->id) <= 0) {
+                    $errors[] = 'Echec anonymisation des données - Erreur sql: ' . $this->db->err();
+                }
             }
         }
 
@@ -316,7 +319,7 @@ class Bimp_Contact extends BimpObject
         $errors = array();
 
         if ($this->isLoaded($errors)) {
-            $rows = $this->db->getRows('contact_saved_data', 'id_contact = ' . $this->id, 1, 'array', null, 'date', 'desc');
+            $rows = $this->db->getRows('societe_saved_data', 'type = \'contact\' AND id_object = ' . $this->id, 1, 'array', null, 'date', 'desc');
 
             if (isset($rows[0]['data'])) {
                 $values = base64_decode($rows[0]['data']);
@@ -337,7 +340,7 @@ class Bimp_Contact extends BimpObject
 
                     if (!count($errors)) {
                         if ((int) $rows[0]['id']) {
-                            $this->db->delete('contact_saved_data', 'id = ' . (int) $rows[0]['id']);
+                            $this->db->delete('societe_saved_data', 'id = ' . (int) $rows[0]['id']);
                         }
                     }
                 }

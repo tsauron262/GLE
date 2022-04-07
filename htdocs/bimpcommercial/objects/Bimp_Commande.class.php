@@ -485,7 +485,7 @@ class Bimp_Commande extends BimpComm
         if ((int) $this->getData('fk_statut') > 0) {
             return 0;
         }
-        
+
         return (int) parent::isDeletable($force_delete);
     }
 
@@ -3746,7 +3746,7 @@ class Bimp_Commande extends BimpComm
 
                     $success = 'Mail envoyé à l\'adresse ' . $data['user_ask_email'] . ' pour un total de ';
                     $success .= BimpTools::displayMoneyValue($total_rtp) . ' impayé.';
-                    $this->addNote($success.'<br/>'.$msg);
+                    $this->addNote($success . '<br/>' . $msg);
 
                     mailSyn2($subject, $data['user_ask_email'], null, $msg);
                 } else
@@ -3795,7 +3795,7 @@ class Bimp_Commande extends BimpComm
                 }
             }
         }
-        
+
         return $errors;
     }
 
@@ -4014,22 +4014,28 @@ class Bimp_Commande extends BimpComm
                     $this->copyRemisesGlobalesFromOrigin($propal, $warnings);
                 }
             }
+
+            $client = $this->getChildObject('client');
+            if (BimpObject::objectLoaded($client)) {
+                $client->setActivity('Création ' . $this->getLabel('of_the') . ' {{Commande:' . $this->id . '}}');
+            }
         }
 
         return $errors;
     }
-    
-    public function isPaiementComptant() {
+
+    public function isPaiementComptant()
+    {
         $cond_paiement_comptant = array('LIVRAISON', 'TIERFAC', 'TIERAV', 'RECEPCOM', 'HALFFAC', 'HALFAV', 'RECEP');
         $code_cond_paiement = self::getBdb()->getValue('c_payment_term', 'code', '`active` > 0 and rowid = ' . $this->getData('fk_cond_reglement'));
-        if((int) in_array($code_cond_paiement, $cond_paiement_comptant) == 1)
+        if ((int) in_array($code_cond_paiement, $cond_paiement_comptant) == 1)
             return 1;
-        
+
         // Prélèvement SEPA
         $code_mode_paiement = self::getBdb()->getValue('c_paiement', 'code', '`active` > 0 and id = ' . $this->getData('fk_mode_reglement'));
-        if($code_cond_paiement == '30D' and $code_mode_paiement == 'PRE')
+        if ($code_cond_paiement == '30D' and $code_mode_paiement == 'PRE')
             return 1;
-        
+
         return 0;
     }
 
@@ -4043,7 +4049,7 @@ class Bimp_Commande extends BimpComm
         $init_entrepot = (int) $this->getInitData('entrepot');
         $this->setPaiementComptant();
         $errors = parent::update($warnings, $force_update);
-        
+
         if (!count($errors)) {
             if ($init_entrepot !== (int) $this->getData('entrepot')) {
                 $sql = 'UPDATE `' . MAIN_DB_PREFIX . 'br_reservation` SET `id_entrepot` = ' . (int) $this->getData('entrepot');

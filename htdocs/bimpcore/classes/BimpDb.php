@@ -185,7 +185,7 @@ class BimpDb
                     $fl = false;
                 }
 
-                if (!preg_match('/\./', $field)) {
+                if (!preg_match('/[\. ]/', $field)) {
                     $sql .= '`' . $field . '`';
                 } else {
                     $sql .= $field;

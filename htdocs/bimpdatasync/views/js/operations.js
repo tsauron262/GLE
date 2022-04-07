@@ -214,12 +214,12 @@ function BDS_OperationStep(name, data, $container) {
         if (!$body.length) {
             var msg = 'Une erreur est survenue. Ajout de l\'étape ';
             msg += '"' + step.label + '" impossible (conteneur absent)';
-            bimp_display_msg(msg, $('#operationStepAjaxResult'), 'danger');
+            bimp_msg(msg, $('#operationStepAjaxResult'), 'danger');
             return false;
         }
 
         var html = '<tr id="step_' + step.name + '"';
-        html += ' class="operationStepRow ' + step.status + '"';
+        html += ' class="operationStepRow operationStepRow_' + step.name + ' ' + step.status + '"';
         html += '>';
 
         html += '<td class="stepLabel">' + step.label + '</td>';
@@ -229,7 +229,7 @@ function BDS_OperationStep(name, data, $container) {
             html += '<span class="nbStepElementsDone">';
             html += step.elements.nbDone;
             html += '</span>';
-            html += '&nbsp;/&nbsp;'
+            html += '&nbsp;/&nbsp;';
             html += '<span class="nbStepElementsTotal">';
             html += step.elements.nbTotal;
             html += '</span>';
@@ -249,11 +249,20 @@ function BDS_OperationStep(name, data, $container) {
 
         $body.append(html);
 
-        step.$row = $body.find('#step_' + step.name);
+        var id = 'step_' + step.name;
+        step.$row = $body.find('#' + id);
 
-        if (!step.$row.length) {
-            var msg = 'Echec de l\'insertion de l\'étape "' + step.label + '"';
-            bimp_display_msg(msg, $('#operationStepAjaxResult'), 'danger');
+        if (!$.isOk(step.$row)) {
+            var $rows = $body.find('tr');
+            $rows.each(function () {
+                if (id === $(this).attr('id')) {
+                    step.$row = $(this);
+                }
+            });
+        }
+
+        if (!$.isOk(step.$row)) {
+            bimp_msg('Echec de l\'insertion de l\'étape "' + step.label + '"', 'danger');
             return false;
         }
 
@@ -261,8 +270,12 @@ function BDS_OperationStep(name, data, $container) {
     };
 
     this.setRowVars = function (msg) {
-        if (!step.$row || !step.$row.length) {
-            return;
+        if (!$.isOk(step.$row)) {
+            step.$row = $('#operationStepsTable').find('tbody').find('tr.operationStepRow_' + step.name);
+
+            if (!$.isOk(step.$row)) {
+                return;
+            }
         }
 
         step.$row.attr('class', 'operationStepRow ' + step.status);
@@ -330,9 +343,14 @@ function BDS_ProcessOperation(data, options) {
     this.steps = [];
     this.status = 'init';
     this.operation_data = {};
-    
-    if (typeof(data.data) !== 'undefined') {
+    this.has_finalization = false;
+
+    if (typeof (data.data) !== 'undefined') {
         this.operation_data = data.data;
+    }
+
+    if (typeof (data.has_finalization) !== 'undefined') {
+        this.has_finalization = data.has_finalization;
     }
 
     this.curStep = {
@@ -519,7 +537,11 @@ function BDS_ProcessOperation(data, options) {
 
         if ((typeof (operation.curStep.step) === 'undefined') || 
                 !operation.curStep.step) {
-            operation.setSuccess('Opération terminée');
+            if (operation.has_finalization) {
+                operation.finalize();
+            } else {
+                operation.setSuccess('Opération terminée');
+            }
             return;
         }
 
@@ -656,7 +678,48 @@ function BDS_ProcessOperation(data, options) {
         }
         var html = '<div class="alert alert-warning">' + msg + '</div>';
         operation.$notification.html(html).show();
+    };
 
+    this.finalize = function () {
+        var data = {
+            'ajax': 1,
+            'action': 'finalizeOperationStep',
+            'id_process': operation.id_process,
+            'id_operation': operation.id_operation,
+            'use_report': operation.report.use,
+            'id_report': operation.report.id,
+            'options': operation.options,
+            'operation_data': operation.operation_data
+        };
+
+        BimpAjax('bds_finalizeOperationStep', data, operation.$notification, {
+            operation: operation,
+            url: bds_process_url,
+            display_success: true,
+            display_success_in_popup_only: false,
+            display_warnings_in_popup_only: false,
+            success_msg: 'Opération terminée',
+            display_processing: true,
+            processing_msg: 'Finalisation en cours',
+            processing_padding: 0,
+            success: function (result, bimpAjax) {
+                bimpAjax.operation.refreshReport();
+                bimpAjax.operation.$notification.show();
+
+                if (typeof (result.result.debug_content) !== 'undefined' && result.result.debug_content) {
+                    var $content = bimpAjax.operation.$container.find('#processDebugContent').children('.foldable_content').first();
+                    if ($.isOk($content)) {
+                        $content.append(result.result.debug_content);
+                        setCommonEvents($content);
+                    }
+                }
+
+                operation.setSuccess('Opération terminée');
+            },
+            error: function (result, bimpAjax) {
+                operation.setError('Echec de la finalisation');
+            }
+        });
     };
 
     this.retryOperationStep = function () {
@@ -724,7 +787,7 @@ function BDS_ProcessOperation(data, options) {
         var html = '<div class="alert alert-success">';
         html += msg;
         html += '</div>';
-        operation.$notification.append(html).show();
+        operation.$notification.html(html).show();
         operation.hideButtons();
         operation.buttons.$back.show();
     };

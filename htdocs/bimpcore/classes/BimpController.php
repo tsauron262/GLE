@@ -122,6 +122,12 @@ class BimpController
 
     public function handleError($level, $msg, $file, $line)
     {
+        global $bimp_errors_handle_locked;
+        
+        if ($bimp_errors_handle_locked) {
+            return;
+        }
+        
         ini_set('display_errors', 0); // Par précaution. 
 //        if(!in_array($level, array(E_NOTICE, E_DEPRECATED)))
 //            die('iiiii'.$level.$msg.$file.$line);

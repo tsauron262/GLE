@@ -2725,6 +2725,8 @@ class BT_ficheInter extends BimpDolObject
         $errors = parent::create($warnings, $force_create);
 
         if (!count($errors)) {
+            $client->setActivity('Création ' . $this->getLabel('of_the') . ' {{Fiche inter:' . $this->id . '}}');
+            
             $commandes = $this->getData('commandes');
             if (is_array($commandes)) {
                 foreach ($commandes as $id_commande) {

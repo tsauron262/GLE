@@ -174,13 +174,16 @@ class Bimp_Client extends Bimp_Societe
     {
         global $user;
 
-        $buttons = parent::getActionsButtons();
+        $groups = array();
+
+        $action_buttons = parent::getActionsButtons();
+        $new_objects_buttons = array();
 
         if ($this->isLoaded()) {
             // Nouvelle propale: 
             $instance = BimpObject::getInstance('bimpcommercial', 'Bimp_Propal');
             if ($instance->canCreate()) {
-                $buttons[] = array(
+                $new_objects_buttons[] = array(
                     'label'   => 'Nouvelle proposition commerciale',
                     'icon'    => $instance->params['icon'],
                     'onclick' => $instance->getJsLoadModalForm('default', 'Nouvelle proposition commerciale', array(
@@ -194,7 +197,7 @@ class Bimp_Client extends Bimp_Societe
             // Nouvelle commande: 
             $instance = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
             if ($instance->canCreate()) {
-                $buttons[] = array(
+                $new_objects_buttons[] = array(
                     'label'   => 'Nouvelle commande',
                     'icon'    => $instance->params['icon'],
                     'onclick' => $instance->getJsLoadModalForm('default', 'Nouvelle commande', array(
@@ -208,7 +211,7 @@ class Bimp_Client extends Bimp_Societe
             // Nouvelle facture: 
             $instance = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
             if ($instance->canCreate()) {
-                $buttons[] = array(
+                $new_objects_buttons[] = array(
                     'label'   => 'Nouvelle facture',
                     'icon'    => $instance->params['icon'],
                     'onclick' => $instance->getJsLoadModalForm('default', 'Nouvelle facture', array(
@@ -222,7 +225,7 @@ class Bimp_Client extends Bimp_Societe
             // Nouveau ticket hotline: 
             $instance = BimpObject::getInstance('bimpsupport', 'BS_Ticket');
             if ($instance->canCreate()) {
-                $buttons[] = array(
+                $new_objects_buttons[] = array(
                     'label'   => 'Nouveau ticket hotline',
                     'icon'    => $instance->params['icon'],
                     'onclick' => $instance->getJsLoadModalForm('default', 'Nouveau ticket hotline', array(
@@ -236,7 +239,7 @@ class Bimp_Client extends Bimp_Societe
             // Nouveau SAV: 
             $instance = BimpObject::getInstance('bimpsupport', 'BS_SAV');
             if ($instance->canCreate()) {
-                $buttons[] = array(
+                $new_objects_buttons[] = array(
                     'label'   => 'Nouveau SAV',
                     'icon'    => $instance->params['icon'],
                     'onclick' => $instance->getJsLoadModalForm('default', 'Nouveau SAV', array(
@@ -250,7 +253,7 @@ class Bimp_Client extends Bimp_Societe
             // Nouveau Prêt de matériel: 
             $instance = BimpObject::getInstance('bimpsupport', 'BS_Pret');
             if ($instance->canCreate()) {
-                $buttons[] = array(
+                $new_objects_buttons[] = array(
                     'label'   => 'Nouveau prêt de matériel',
                     'icon'    => $instance->params['icon'],
                     'onclick' => $instance->getJsLoadModalForm('default', 'Nouveau prêt de matériel', array(
@@ -264,7 +267,7 @@ class Bimp_Client extends Bimp_Societe
             // Nouvelle demande inter: 
             $instance = BimpObject::getInstance('bimpfichinter', 'Bimp_Demandinter');
             if ($instance->canCreate()) {
-                $buttons[] = array(
+                $new_objects_buttons[] = array(
                     'label'   => 'Nouvelle demande d\'intervention',
                     'icon'    => $instance->params['icon'],
                     'onclick' => $instance->getJsLoadModalForm('default', 'Nouvelle demande d\\\'intervention', array(
@@ -278,7 +281,7 @@ class Bimp_Client extends Bimp_Societe
             // Nouveau Prêt de matériel: 
             $instance = BimpObject::getInstance('bimpfichinter', 'Bimp_Fichinter');
             if ($instance->canCreate()) {
-                $buttons[] = array(
+                $new_objects_buttons[] = array(
                     'label'   => 'Nouvelle fiche intervention',
                     'icon'    => $instance->params['icon'],
                     'onclick' => $instance->getJsLoadModalForm('default', 'Nouvelle fiche intervention', array(
@@ -291,7 +294,7 @@ class Bimp_Client extends Bimp_Societe
 
             // Relances paiements: 
             if ($this->isActionAllowed('relancePaiements') && $this->canSetAction('relancePaiements') && $user->rights->bimpcommercial->admin_relance_individuelle) {
-                $buttons[] = array(
+                $action_buttons[] = array(
                     'label'   => 'Relance paiements',
                     'icon'    => 'fas_comment-dollar',
                     'onclick' => $this->getJsActionOnclick('relancePaiements', array(), array(
@@ -303,7 +306,7 @@ class Bimp_Client extends Bimp_Societe
             // Relances actives: 
             if ($this->canSetAction('setRelancesActives') && $this->isActionAllowed('setRelancesActives')) {
                 if ((int) $this->getData('relances_actives')) {
-                    $buttons[] = array(
+                    $action_buttons[] = array(
                         'label'   => 'Désactiver les relances',
                         'icon'    => 'fas_times-circle',
                         'onclick' => $this->getJsActionOnclick('setRelancesActives', array(
@@ -313,7 +316,7 @@ class Bimp_Client extends Bimp_Societe
                         ))
                     );
                 } else {
-                    $buttons[] = array(
+                    $action_buttons[] = array(
                         'label'   => 'Activer les relances',
                         'icon'    => 'fas_check-circle',
                         'onclick' => $this->getJsActionOnclick('setRelancesActives', array(
@@ -326,15 +329,55 @@ class Bimp_Client extends Bimp_Societe
             }
 
             if ($this->isActionAllowed('checkSolvabilite') && $this->canSetAction('checkSolvabilite')) {
-                $buttons[] = array(
+                $action_buttons[] = array(
                     'label'   => 'Vérifier le statut solvabilité',
                     'icon'    => 'fas_check-circle',
                     'onclick' => $this->getJsActionOnclick('checkSolvabilite')
                 );
             }
+
+            if ($this->isActionAllowed('checkLastActivity') && $this->canSetAction('checkLastActivity')) {
+                $action_buttons[] = array(
+                    'label'   => 'Vérifier la date de dernière activité',
+                    'icon'    => 'fas_check-circle',
+                    'onclick' => $this->getJsActionOnclick('checkLastActivity')
+                );
+            }
+
+            if ($this->canSetAction('revertAnonymization') && $this->isActionAllowed('revertAnonymization')) {
+                $action_buttons[] = array(
+                    'label'   => 'Annuler l\'anonymisation',
+                    'icon'    => 'fas_undo',
+                    'onclick' => $this->getJsActionOnclick('revertAnonymization', array(), array(
+                        'form_name' => 'revert_anonymisation'
+                    ))
+                );
+            }
         }
 
-        return $buttons;
+        if (!empty($action_buttons)) {
+            $groups[] = array(
+                'label'   => 'Actions',
+                'icon'    => 'fas_cogs',
+                'buttons' => $action_buttons
+            );
+        }
+
+        if (!empty($new_objects_buttons)) {
+            $groups[] = array(
+                'label'   => 'Créer',
+                'icon'    => 'fas_plus-circle',
+                'buttons' => $new_objects_buttons
+            );
+        }
+
+        if (!empty($groups)) {
+            return array(
+                'buttons_groups' => $groups
+            );
+        }
+
+        return array();
     }
 
     public function getListExtraBulkActions()
@@ -2796,6 +2839,54 @@ class Bimp_Client extends Bimp_Societe
                             $activate = (int) BimpTools::getArrayValueFromPath($fac_data, 'activate_relances', 0);
                             $facture->updateField('relance_active', $activate);
                         }
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionCheckLastActivity($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $clients = array();
+
+        if ($this->isLoaded()) {
+            $clients[] = $this->id;
+        } else {
+            $clients = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+        }
+
+        if (empty($clients)) {
+            $errors[] = 'Aucun client sélectionné';
+        } else {
+            require_once DOL_DOCUMENT_ROOT . '/bimpdatasync/BDS_Lib.php';
+
+            $process = BDSProcess::createProcessByName('Rgpd', $errors);
+
+            if (!is_a($process, 'BDS_RgpdProcess') || !(int) $process->process->getData('active')) {
+                $errors[] = 'Cette opération n\'est pas disponible';
+            }
+
+            if (!count($errors)) {
+                $process->checkClientsActivity($clients, $errors, $warnings, $success);
+
+                if (!count($errors) && !$success) {
+                    if (!count($warnings)) {
+                        if (count($clients) > 1) {
+                            $success = 'Toutes les dates de dernières activités des clients sélectionnés sont à jour';
+                        } else {
+                            $success = 'La date de dernière activité du client est à jour';
+                        }
+                    } else {
+                        $success = 'Aucune mise à jour n\'a été faite';
                     }
                 }
             }

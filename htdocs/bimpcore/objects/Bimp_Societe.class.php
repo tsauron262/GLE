@@ -2910,10 +2910,8 @@ class Bimp_Societe extends BimpDolObject
                 $origin = 'Non spécifiée';
             }
 
-            $this->set('date_last_activity', $date);
-            $this->set('last_activity_origin', $origin);
-
-            // Todo
+            $this->updateField('date_last_activity', $date);
+            $this->updateField('last_activity_origin', $origin);            
         }
 
         return $errors;

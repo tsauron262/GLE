@@ -81,7 +81,6 @@ class processController extends BimpController
         $id_process = (int) BimpTools::getPostFieldValue('id_process', 0);
         $id_operation = (int) BimpTools::getPostFieldValue('id_operation', 0);
 
-
         if (is_null($id_process) || !$id_process) {
             $errors[] = 'ID du processus absent';
         } else {
@@ -114,7 +113,7 @@ class processController extends BimpController
                 $step_name = BimpTools::getPostFieldValue('step_name', '');
                 $extra_data = array(
                     'operation' => BimpTools::getPostFieldValue('operation_data', array()),
-                    'step' => BimpTools::getPostFieldValue('step_data', array())
+                    'step'      => BimpTools::getPostFieldValue('step_data', array())
                 );
 
                 $result = $bds_process->executeOperationStep($id_operation, $step_name, $id_report, $iteration, $extra_data);
@@ -126,6 +125,56 @@ class processController extends BimpController
             'warnings'    => $warnings,
             'step_result' => $result,
             'request_id'  => BimpTools::getValue('request_id', 0)
+        );
+    }
+
+    public function ajaxProcessfinalizeOperationStep()
+    {
+        $errors = array();
+        $warnings = array();
+
+        $id_process = (int) BimpTools::getPostFieldValue('id_process', 0);
+        $id_operation = (int) BimpTools::getPostFieldValue('id_operation', 0);
+
+        if (is_null($id_process) || !$id_process) {
+            $errors[] = 'ID du processus absent';
+        } else {
+            $process = BimpCache::getBimpObjectInstance('bimpdatasync', 'BDS_Process', (int) $id_process);
+            if (!BimpObject::objectLoaded($process)) {
+                $errors[] = 'Le processus d\'ID ' . $id_process . ' n\'existe plus';
+            }
+        }
+
+        if (is_null($id_operation) || !$id_operation) {
+            $errors[] = 'ID de l\'opération absent';
+        } else {
+            $operation = BimpCache::getBimpObjectInstance('bimpdatasync', 'BDS_ProcessOperation', (int) $id_operation);
+            if (!BimpObject::objectLoaded($operation)) {
+                $errors[] = 'L\'opération d\'ID ' . $id_operation . ' n\'existe plus';
+            }
+        }
+
+        if (!count($errors)) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpdatasync/BDS_Lib.php';
+
+            $options = BimpTools::getPostFieldValue('options', array());
+            $options['mode'] = 'ajax';
+
+            $bds_process = BDSProcess::createProcessById($id_process, $errors, $options);
+
+            if (!is_null($bds_process)) {
+                $id_report = (int) BimpTools::getPostFieldValue('id_report', 0);
+                $operation_data = BimpTools::getPostFieldValue('operation_data', array());
+
+                $result = $bds_process->finalizeOperation($id_operation, $id_report, $operation_data, $errors);
+            }
+        }
+
+        return array(
+            'errors'     => $errors,
+            'warnings'   => $warnings,
+            'result'     => $result,
+            'request_id' => BimpTools::getValue('request_id', 0)
         );
     }
 }

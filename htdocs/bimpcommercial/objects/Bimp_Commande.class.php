@@ -4094,6 +4094,11 @@ class Bimp_Commande extends BimpComm
                     $this->copyRemisesGlobalesFromOrigin($propal, $warnings);
                 }
             }
+
+            $client = $this->getChildObject('client');
+            if (BimpObject::objectLoaded($client)) {
+                $client->setActivity('Création ' . $this->getLabel('of_the') . ' {{Commande:' . $this->id . '}}');
+            }
         }
 
         return $errors;

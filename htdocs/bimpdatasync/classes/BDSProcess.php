@@ -219,6 +219,62 @@ abstract class BDSProcess
         return $data;
     }
 
+    public function finalizeOperation($id_operation, $id_report, &$errors, $extra_data = array())
+    {
+        $result = array();
+
+        if (BimpObject::objectLoaded($this->process)) {
+            if ((int) $id_report && (!BimpObject::objectLoaded($this->report) || $this->report != $id_report)) {
+                $this->report = BimpCache::getBimpObjectInstance('bimpdatasync', 'BDS_Report', (int) $id_report);
+            }
+
+            $operation = BimpCache::getBimpObjectInstance('bimpdatasync', 'BDS_ProcessOperation', (int) $id_operation);
+            if (!BimpObject::objectLoaded($operation)) {
+                $msg = 'Erreur technique : l\'opération d\'ID ' . $id_operation . ' n\'existe plus';
+                $errors[] = $msg;
+            } else {
+                // Vérification des options: 
+                $options = $operation->getAssociatesObjects('options');
+                foreach ($options as $option) {
+                    if (!isset($this->options[$option->getData('name')])) {
+                        if ((int) $option->getData('required')) {
+                            $errors[] = 'Option obligatoire non spécifiée: "' . $option->getData('label') . '"';
+                            $this->options_ok = false;
+                        }
+                    }
+                }
+
+                if ($this->options_ok) {
+                    // Finalisation de l'opération: 
+                    $method = 'finalize';
+                    $words = explode('_', $operation->getData('name'));
+                    foreach ($words as $word) {
+                        $method .= ucfirst($word);
+                    }
+                    if (!method_exists($this, $method)) {
+                        $errors[] = 'Erreur technique - Méthode "' . $method . '" inexistante';
+                    } else {
+                        $result = $this->{$method}($errors, $extra_data);
+                    }
+                }
+            }
+        } else {
+            $errors[] = 'Erreur technique: Définitions du processus absentes';
+        }
+
+        if (count($errors)) {
+            $this->Error(BimpTools::getMsgFromArray($errors, 'Erreur(s) technique(s)'));
+        }
+
+        $this->end();
+
+        if ($this->debug_content) {
+            $result['debug_content'] = BimpRender::renderFoldableContainer('[FINALISATION]', $this->debug_content, array('open' => false, 'offset_left' => true));
+        }
+
+        return $result;
+    }
+
     public function executeFullOperation($id_operation, &$errors = array())
     {
         $result = array(
@@ -660,6 +716,82 @@ abstract class BDSProcess
         return $this->references;
     }
 
+    // Gestion des paramètres: 
+
+    public function getParam($param_name, $default_value = null)
+    {
+        if (isset($this->params[$param_name])) {
+            return $this->params[$param_name];
+        }
+
+        return $default_value;
+    }
+    
+    protected function checkParameter($name, $type = '', $required = true)
+    {
+        if (!isset($this->params[$name]) || !$this->params[$name]) {
+            if ($required) {
+                $this->Error('Paramètre "' . $name . '" absent');
+                return false;
+            }
+        }
+
+        if ($type) {
+            switch ($type) {
+                case 'int':
+                    if (!preg_match('/^\-?[0-9]+$/', $this->params[$name])) {
+                        $this->Error('Paramètre "' . $name . '" invalide (Doit être un nombre entier)');
+                        return false;
+                    }
+                    break;
+
+                case 'float':
+                    if (!preg_match('/^\-?[0-9]+\.?[0-9]*$/', $this->params[$name])) {
+                        $this->Error('Paramètre "' . $name . '" invalide (Doit être un nombre décimal)');
+                        return false;
+                    }
+                    break;
+            }
+        }
+        return true;
+    }
+
+    protected function updateParameter($name, $new_value)
+    {
+        $errors = array();
+
+        if (BimpObject::objectLoaded($this->process)) {
+            $param = BimpCache::findBimpObjectInstance('bimpdatasync', 'BDS_ProcessParam', array(
+                        'id_process' => (int) $this->process->id,
+                        'name'       => $name
+                            ), true);
+            
+            if (BimpObject::objectLoaded($param)) {
+                $errors = $param->updateField('value', $new_value);
+                if (!count($errors)) {
+                    $this->params[$name] = $new_value;
+                }
+            } else {
+                $errors[] = 'Le paramètre "' . $name . '" n\'existe pas';
+            }
+        } else {
+            $errors[] = 'ID du processus absent';
+        }
+
+        return $errors;
+    }
+
+    // Gestion des options: 
+
+    public function getOption($option_name, $default_value = null)
+    {
+        if (isset($this->options[$option_name])) {
+            return $this->options[$option_name];
+        }
+
+        return $default_value;
+    }
+
     // Outils divers
 
     public function curName()
@@ -919,9 +1051,8 @@ abstract class BDSProcess
 
     public static function createProcessByName($processName, &$errors = array(), $options = array(), $references = array())
     {
-        global $db;
-        $bdb = new BDSDb($db);
-
+        $bdb = BimpCache::getBdb();
+        
         $where = '`name` = \'' . $processName . '\'';
         $id_process = $bdb->getValue('bds_process', 'id', $where);
         if (is_null($id_process) || !$id_process) {
@@ -1122,59 +1253,5 @@ abstract class BDSProcess
             $object->errors = array();
         }
         return $msg;
-    }
-
-    protected function checkParameter($name, $type = '', $required = true)
-    {
-        if (!isset($this->params[$name]) || !$this->params[$name]) {
-            if ($required) {
-                $this->Error('Paramètre "' . $name . '" absent');
-                return false;
-            }
-        }
-
-        if ($type) {
-            switch ($type) {
-                case 'int':
-                    if (!preg_match('/^\-?[0-9]+$/', $this->params[$name])) {
-                        $this->Error('Paramètre "' . $name . '" invalide (Doit être un nombre entier)');
-                        return false;
-                    }
-                    break;
-
-                case 'float':
-                    if (!preg_match('/^\-?[0-9]+\.?[0-9]*$/', $this->params[$name])) {
-                        $this->Error('Paramètre "' . $name . '" invalide (Doit être un nombre décimal)');
-                        return false;
-                    }
-                    break;
-            }
-        }
-        return true;
-    }
-
-    protected function updateParameter($name, $new_value)
-    {
-        $errors = array();
-
-        if (BimpObject::objectLoaded($this->process)) {
-            $param = BimpCache::findBimpObjectInstance('bimpdatasync', 'BDS_ProcessParam', array(
-                        'id_process' => (int) $this->process->id,
-                        'name'       => $name
-                            ), true);
-
-            if (BimpObject::objectLoaded($param)) {
-                $errors = $param->updateField('value', $new_value);
-                if (!count($errors)) {
-                    $this->params[$name] = $new_value;
-                }
-            } else {
-                $errors[] = 'Le paramètre "' . $name . '" n\'existe pas';
-            }
-        } else {
-            $errors[] = 'ID du processus absent';
-        }
-
-        return $errors;
     }
 }

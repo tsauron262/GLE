@@ -1004,27 +1004,27 @@ class BimpObject extends BimpCache
 
         return $fields;
     }
-    
+
     public function getFieldsList($viewable_only = false, $active_only = true, $with_common_fields = true)
     {
         $fields = array();
-        
+
         foreach ($this->params['fields'] as $field_name) {
             if ($active_only && !$this->field_exists($field_name)) {
                 continue;
             }
-            
+
             if ($viewable_only && !$this->canViewField($field_name)) {
                 continue;
             }
-            
-            if (!$with_common_fields == in_array($field_name, static::$common_fields)){
+
+            if (!$with_common_fields == in_array($field_name, static::$common_fields)) {
                 continue;
             }
-            
+
             $fields[] = $field_name;
         }
-        
+
         return $fields;
     }
 
@@ -1436,7 +1436,7 @@ class BimpObject extends BimpCache
             }
 
             $db_value = $this->getDbValue($field, $value);
-            
+
             if (!is_null($db_value) || (int) $this->getConf('fields/' . $field . '/null_allowed', 0)) {
                 $this->checkFieldHistory($field, $value);
                 $data[$field] = $db_value;
@@ -2509,6 +2509,27 @@ class BimpObject extends BimpCache
                     }
                 }
             }
+        }
+
+        return $errors;
+    }
+
+    public function addObjectLog($msg, $code = '')
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            global $user;
+
+            BimpObject::createBimpObject('bimpcore', 'BimpObjectLog', array(
+                'obj_module' => $this->module,
+                'obj_name'   => $this->object_name,
+                'id_object'  => $this->id,
+                'msg'        => $msg,
+                'code'       => $code,
+                'date'       => date('Y-m-d H:i:s'),
+                'id_user'    => (BimpObject::objectLoaded($user) ? $user->id : 0)
+                    ), true, $errors);
         }
 
         return $errors;
@@ -6320,10 +6341,17 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             $html .= '<div class="header_buttons">';
 
             if (!empty($header_buttons)) {
-                $html .= BimpRender::renderButtonsGroup($header_buttons, array(
-                            'max'                 => 6,
-                            'dropdown_menu_right' => 1
-                ));
+                if (isset($header_buttons['buttons_groups'])) {
+                    $html .= BimpRender::renderButtonsGroups($header_buttons['buttons_groups'], array(
+                                'max'                 => 1,
+                                'dropdown_menu_right' => 1
+                    ));
+                } else {
+                    $html .= BimpRender::renderButtonsGroup($header_buttons, array(
+                                'max'                 => 6,
+                                'dropdown_menu_right' => 1
+                    ));
+                }
             }
 
             // Bouton édition: 
@@ -6354,6 +6382,16 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             $html .= BimpRender::renderPopoverData('Objets liés par citation');
             $html .= '>';
             $html .= BimpRender::renderIcon('fas_comments');
+            $html .= '</span>';
+
+            // Historique objet: 
+
+            $onclick = $this->getJsLoadModalCustomContent('renderLogsList', 'Historique');
+            $html .= '<span class="btn btn-default bs-popover"';
+            $html .= ' onclick="' . $onclick . '"';
+            $html .= BimpRender::renderPopoverData('Historique');
+            $html .= '>';
+            $html .= BimpRender::renderIcon('fas_history');
             $html .= '</span>';
 
             //Suivi mail
@@ -6503,10 +6541,17 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             // Boutons actions: 
             $header_buttons = $this->config->getCompiledParams('public_header_btn');
             if (!empty($header_buttons)) {
-                $html .= BimpRender::renderButtonsGroup($header_buttons, array(
-                            'max'                 => 6,
-                            'dropdown_menu_right' => 1
-                ));
+                if (isset($header_buttons['buttons_groups'])) {
+                    $html .= BimpRender::renderButtonsGroups($header_buttons['buttons_groups'], array(
+                                'max'                 => 1,
+                                'dropdown_menu_right' => 1
+                    ));
+                } else {
+                    $html .= BimpRender::renderButtonsGroup($header_buttons, array(
+                                'max'                 => 6,
+                                'dropdown_menu_right' => 1
+                    ));
+                }
             }
 
             $html .= '<div style="display: inline-block">';
@@ -7426,6 +7471,35 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         }
 
         return $list->renderHtml();
+    }
+
+    public function renderLogsList()
+    {
+        $html = '';
+
+        $errors = array();
+        if ($this->isLoaded($errors)) {
+            if (count($err)) {
+                $html .= '<pre>';
+                $html .= print_r($err, 1);
+                $html .= '</pre>';
+            }
+
+            $log = BimpObject::getInstance('bimpcore', 'BimpObjectLog');
+            $title = 'Historique ' . $this->getLabel('of_the') . ' ' . $this->getRef();
+            $list = new BC_ListTable($log, 'object', 1, null, $title, 'fas_history');
+            $list->addFieldFilterValue('obj_module', $this->module);
+            $list->addFieldFilterValue('obj_name', $this->object_name);
+            $list->addFieldFilterValue('id_object', $this->id);
+
+            $html .= $list->renderHtml();
+        }
+
+        if (count($errors)) {
+            $html .= BimpRender::renderAlerts($errors, 'danger');
+        }
+
+        return $html;
     }
 
     // Générations javascript: 

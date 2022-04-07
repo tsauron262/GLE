@@ -133,7 +133,7 @@ class ValidComm extends BimpObject
         if(method_exists($bimp_object, 'getClientFacture'))
             $client = $bimp_object->getClientFacture();
         else {
-            if(!$this->isContrat)
+            if(!is_a($object, 'BContract_contrat'))
                 $client = $bimp_object->getChildObject('client');
             else
                 $bimp_object->getData('fk_soc');
@@ -162,7 +162,7 @@ class ValidComm extends BimpObject
 
         
         // Validation commerciale
-        if(!$this->isContrat) {
+        if(!is_a($object, 'BContract_contrat')) {
             if($percent_pv != 0 or $percent_marge != 0) {
                 $valid_comm = (int) $this->tryValidateByType($user, self::TYPE_COMMERCIAL, $secteur, $class, $percent_pv, $bimp_object, $errors, array('sur_marge' => $percent_marge));
             }
@@ -229,7 +229,7 @@ class ValidComm extends BimpObject
         else
             $success[] = "Validation d'impayé effectuée.";
         
-        if(!$this->isContrat)
+        if(!is_a($object, 'BContract_contrat'))
             $ret = ($valid_comm == 1 and $valid_encours == 1 and $valid_impaye  == 1);
         else
             $ret = ($valid_encours == 1 && $valid_impaye == 1);
@@ -450,13 +450,13 @@ class ValidComm extends BimpObject
     public function getObjectParams($object, &$errors = array(), $withRtp = true) {
         
         // Secteur
-        $secteur = (!$this->isContrat) ? $object->getData('ef_type') : $object->getData('secteur');
+        $secteur = (!is_a($object, 'BContract_contrat')) ? $object->getData('ef_type') : $object->getData('secteur');
         
         // Piece
         $class = self::getObjectClass($object);
         
         // Valeur €
-        if(!$this->isContrat) {
+        if(!is_a($object, 'BContract_contrat')) {
             if((int) $object->getData('total_ht') > 0)
                 $val = (float) $object->getData('total_ht');
             else
@@ -466,13 +466,13 @@ class ValidComm extends BimpObject
         }
         
                 
-        $infos_remises = (!$this->isContrat) ? $object->getRemisesInfos() : [];
+        $infos_remises = (!is_a($object, 'BContract_contrat')) ? $object->getRemisesInfos() : [];
 
         // Percent prix de vente %
         $percent_pv = (float) $infos_remises['remise_total_percent'];
         
         // CRT
-        if(!$this->isContrat){
+        if(!is_a($object, 'BContract_contrat')){
             $lines = $object->getLines('not_text');
             $remises_crt = 0;
             foreach ($lines as $line) {
@@ -857,7 +857,10 @@ class ValidComm extends BimpObject
                 }                
             }
         } else {
-            $m .= '<br/>' . ucfirst($bimp_object->getLabel('the')) . " est maintenant validé" . ($bimp_object->isLabelFemale() ? 'e' : '');
+            if(is_a($bimp_object, 'BContract_contrat'))
+                $m .= '<br /> L\'encours sur ce client a été accordé ou révisé, le contrat est passé au statut "en attente de validation"' ;
+            else
+                $m .= '<br/>' . ucfirst($bimp_object->getLabel('the')) . " est maintenant validé" . ($bimp_object->isLabelFemale() ? 'e' : '');
         }
         
         $subject = "Validation " . count($demandes_valider) . '/' . (count($demandes_en_cours) + count($demandes_valider)) . ' ';

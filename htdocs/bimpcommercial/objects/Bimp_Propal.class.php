@@ -610,7 +610,7 @@ class Bimp_Propal extends BimpComm
                             } else {
                                 $params['confirm_msg'] = 'Veuillez confirmer la validation ' . $this->getLabel('of_this');
                             }
-                            
+
                             $buttons[] = array(
                                 'label'   => 'Valider',
                                 'icon'    => 'check',
@@ -1616,6 +1616,11 @@ class Bimp_Propal extends BimpComm
                         $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'enregistrement du commercial signataire');
                     }
                 }
+            }
+
+            $client = $this->getChildObject('client');
+            if (BimpObject::objectLoaded($client)) {
+                $client->setActivity('Création ' . $this->getLabel('of_the') . ' {{Devis:' . $this->id . '}}');
             }
         }
 

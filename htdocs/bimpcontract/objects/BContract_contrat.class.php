@@ -702,8 +702,9 @@ class BContract_contrat extends BimpDolObject
     {
         return [0 => "Aucun", 1 => "Proposition", 2 => "Tacite"];
     }
-    
-    public function getRenouvellementNumberFromDate($date){
+
+    public function getRenouvellementNumberFromDate($date)
+    {
         $datef = new DateTime();
         $datef->setTimestamp(strtotime($date));
 
@@ -712,21 +713,20 @@ class BContract_contrat extends BimpDolObject
         $Timestamp_debut = strtotime($this->getData('date_start'));
 //            echo $datef->format('d / m / Y').'<br/>';
         $renouvellement = 0;
-        if ($Timestamp_debut > 0 && $this->getData('duree_mois') > 0){ 
+        if ($Timestamp_debut > 0 && $this->getData('duree_mois') > 0) {
             $debut->setTimestamp($Timestamp_debut);
             $fin->setTimestamp($Timestamp_debut);
-            for($i=0; $i <5; $i++){
+            for ($i = 0; $i < 5; $i++) {
                 $fin = $fin->add(new DateInterval("P" . $this->getData('duree_mois') . "M"));
                 $fin = $fin->sub(new DateInterval("P1D"));
 //                    echo($debut->format('d / m / Y').' '.$fin->format('d / m / Y').' '.$i.'av<br/>');
-                if($datef > $debut && $datef < $fin){
+                if ($datef > $debut && $datef < $fin) {
                     $renouvellement = $i;
                     break;
                 }
                 $debut = $debut->add(new DateInterval("P" . $this->getData('duree_mois') . "M"));
 //                    $fin = $fin->add(new DateInterval("P1D"));
             }
-
         }
         return $renouvellement;
     }
@@ -2663,8 +2663,12 @@ class BContract_contrat extends BimpDolObject
             if (!$this->getData('entrepot') && (int) BimpCore::getConf("USE_ENTREPOT"))
                 $errors[] = "Il doit y avoir un entrepot pour le contrat";
             
-//            if(!count($errors))
-//                $this->tryToValidate($errors);
+            $modeReglementId = $this->db->getValue('c_paiement', 'id', 'code = "PRE"');
+
+            if(!count($errors) && $this->getData('periodicity') != self::CONTRAT_PERIOD_AUCUNE && $this->getData('moderegl') != $modeReglementId) {
+                $this->tryToValidate($errors);
+            }
+                
             
             if (!count($errors)) {
                 $success = 'Validation demandée';
@@ -3049,8 +3053,16 @@ class BContract_contrat extends BimpDolObject
                 $errors[] = 'Vous ne pouvez pas demander un renouvellement TACITE pour des périodes différentes de (12, 24 ou 36 mois)';
             }
         }
-        if (!count($errors))
+        if (!count($errors)) {
             $errors = parent::create($warnings, $force_create);
+
+            if (!count($errors)) {
+                $client = $this->getChildObject('client');
+                if (BimpObject::objectLoaded($client)) {
+                    $client->setActivity('Création ' . $this->getLabel('of_the') . ' {{Contrat:' . $this->id . '}}');
+                }
+            }
+        }
 
         return $errors;
     }
@@ -3449,8 +3461,9 @@ class BContract_contrat extends BimpDolObject
     {
         return $this->getTotal($this->getData('current_renouvellement'));
     }
-    
-    public function getTotal($renouvellement){
+
+    public function getTotal($renouvellement)
+    {
         $montant = 0;
         foreach ($this->dol_object->lines as $line) {
             $child = $this->getChildObject("lines", $line->id);
@@ -3460,7 +3473,6 @@ class BContract_contrat extends BimpDolObject
         }
 
         return $montant;
-        
     }
 
     public function getAddAmountAvenantProlongation()

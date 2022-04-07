@@ -100,19 +100,7 @@ class BimpDb
 
     public function execute($sql)
     {
-        $transac = (stripos(trim($sql), "SELECT") === 0) ? 0 : 1;
-//        if ($transac)
-//            $this->db->begin();
-
         $result = $this->db->query($sql);
-
-//        if ($transac) {
-//            if ($result > 0) {
-//                $this->db->commit();
-//            } else {
-//                $this->db->rollback();
-//            }
-//        }
         if (!$result)
             $this->logSqlError($sql);
 
@@ -185,7 +173,7 @@ class BimpDb
                     $fl = false;
                 }
 
-                if (!preg_match('/\./', $field)) {
+                if (!preg_match('/[\. ]/', $field)) {
                     $sql .= '`' . $field . '`';
                 } else {
                     $sql .= $field;

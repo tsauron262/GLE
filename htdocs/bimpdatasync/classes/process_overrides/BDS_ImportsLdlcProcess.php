@@ -30,23 +30,29 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
     {
         $data['steps'] = array();
 
-        $this->truncTableProdFourn($errors);
+//        $this->truncTableProdFourn($errors);
 
         if (isset($this->options['update_files']) && (int) $this->options['update_files']) {
             $data['steps']['update_prices_file'] = array(
                 'label'    => 'Téléchargement du fichier',
                 'on_error' => 'continue'
             );
-        } elseif (isset($this->options['process_full_file']) && (int) $this->options['process_full_file']) {
-            $data['steps']['process_prices'] = array(
-                'label'                  => 'Traitement des prix fourniseur',
-                'on_error'               => 'continue',
-                'nbElementsPerIteration' => 0
-            );
-        } else {
-            $data['steps']['make_prices_file_parts'] = array(
-                'label'    => 'Découpage du fichier',
-                'on_error' => 'continue'
+//        } elseif (isset($this->options['process_full_file']) && (int) $this->options['process_full_file']) {
+//            $data['steps']['process_prices'] = array(
+//                'label'                  => 'Traitement des prix fourniseur',
+//                'on_error'               => 'continue',
+//                'nbElementsPerIteration' => 0
+//            );
+//        } else {
+//            $data['steps']['make_prices_file_parts'] = array(
+//                'label'    => 'Découpage du fichier',
+//                'on_error' => 'continue'
+//            );
+        }
+        else{
+            $data['steps']['trunc_table_prod_fourn'] = array(
+                'label'    => 'Vidage de la table import',
+                'on_error' => 'stop'
             );
         }
     }
@@ -56,6 +62,23 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
         $result = array();
 
         switch ($step_name) {
+            case 'trunc_table_prod_fourn':
+                $this->truncTableProdFourn($errors);
+                if (isset($this->options['process_full_file']) && (int) $this->options['process_full_file']) {
+                    $result['new_steps']['process_prices'] = array(
+                        'label'                  => 'Traitement des prix fourniseur',
+                        'on_error'               => 'continue',
+                        'nbElementsPerIteration' => 0
+                    );
+                } else {
+                    $result['new_steps']['make_prices_file_parts'] = array(
+                        'label'    => 'Création des fichiers intermédiaires pour les prix fourniseur',
+                        'on_error' => 'continue'
+                    );
+                }
+                break;
+            
+            
             case 'update_prices_file':
                 if (isset($this->nameFile) && $this->nameFile) {
                     $fileName = $this->nameFile;
@@ -70,18 +93,10 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
                             error_reporting(E_ERROR);
                         }
 
-                        if (isset($this->options['process_full_file']) && (int) $this->options['process_full_file']) {
-                            $result['new_steps']['process_prices'] = array(
-                                'label'                  => 'Traitement des prix fourniseur',
-                                'on_error'               => 'continue',
-                                'nbElementsPerIteration' => 0
-                            );
-                        } else {
-                            $result['new_steps']['make_prices_file_parts'] = array(
-                                'label'    => 'Téléchargement du fichier',
-                                'on_error' => 'continue'
-                            );
-                        }
+                        $result['new_steps']['trunc_table_prod_fourn'] = array(
+                            'label'    => 'Vidage de la table import',
+                            'on_error' => 'stop'
+                        );
                     }
                 } else {
                     $errors[] = 'Nom du fichier stock fournisseur absent';

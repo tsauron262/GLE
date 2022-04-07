@@ -349,7 +349,7 @@ class Transfer extends BimpDolObject
                     if (!isset($data[0]) || !$data[0]) {
                         $errors[] = 'Ligne n° ' . $i . ': ref absente';
                     } elseif (!isset($data[1]) || !(float) $data[1]) {
-                        $errors[] = 'Ligne n° ' . $i . ': aucune quantité';
+                        $errors[] = 'Ligne n° ' . $i . ': aucune quantité '.$data[1];
                     } else {
                         $ref = $data[0];
                         $qty = (float) $data[1];

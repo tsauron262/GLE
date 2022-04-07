@@ -65,11 +65,19 @@ lists_cols:
         label: Entrepôt/Type
         value:
             callback: renderWarehouseTypeName
+            
+            
+filters_panel: 
+    default: 
+        filters: 
+            fk_warehouse_type:
 
 lists:
     default:
        objects_change_reload: Inventory2
        page_btn: 1
+       configurable: 1
+       filters_panel: default
        delete_btn:
            callback: isDeletable
        sort_field: id

@@ -460,7 +460,7 @@ class BimpCore
     public static function addlog($msg, $level = 1, $type = 'bimpcore', $object = null, $extra_data = array(), $force = false)
     {
         // $bimp_logs_locked: Eviter boucles infinies
-
+return '';
         global $bimp_logs_locked, $user;
 
         if (is_null($bimp_logs_locked)) {

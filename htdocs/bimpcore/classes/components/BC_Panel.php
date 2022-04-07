@@ -308,15 +308,21 @@ class BC_Panel extends BimpComponent
 
     public function getTitle()
     {
+        $title = '';
         if (isset($this->params['title'])) {
-            return $this->params['title'];
+            $title = $this->params['title'];
         }
 
-        if ($this->isObjectValid()) {
-            return $this->object->getInstanceName();
+        elseif ($this->isObjectValid()) {
+            $title = $this->object->getInstanceName();
         }
+        $date = '01/04/2021';
+        if($this->object::$modeArchive == 0)
+            $title .= ' (depuis le '.$date.')';
+        elseif($this->object::$modeArchive == 1)
+            $title .= ' (avant le '.$date.')';
 
-        return '';
+        return $title;
     }
 
     public function getIcon()

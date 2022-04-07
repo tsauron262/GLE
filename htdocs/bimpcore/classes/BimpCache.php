@@ -17,6 +17,7 @@ class BimpCache
 
     public static $bdb = null;
     public static $bdb_noTransac = null;
+    public static $modeArchive = -1;
     public static $cache = array();
     public static $cache_server = null;
     public static $nextBimpObjectCacheId = 1;
@@ -31,6 +32,19 @@ class BimpCache
     public static function getBdb($no_transactions = false)
     {
         global $db;
+        
+        if(static::$modeArchive == 1){
+            global $conf;
+            $dolibarr_main_db_port='3306';
+            $dolibarr_main_db_host='10.192.20.11';
+            $dolibarr_main_db_pass='IswAivwifCjOMZqASClegLWpBTGBuujW';
+            $dolibarr_main_db_name='ERP_PROD_BIMP_01042021';
+            $dolibarr_main_db_user='root';
+            $dolibarr_main_db_type='mysqli';
+            $db2 = getDoliDBInstance($dolibarr_main_db_type, $dolibarr_main_db_host, $dolibarr_main_db_user, $dolibarr_main_db_pass, $dolibarr_main_db_name, $dolibarr_main_db_port);
+            self::$bdb = new BimpDb($db2);
+            return self::$bdb;
+        }
 
         if (!$no_transactions) {
             if (is_null(self::$bdb)) {

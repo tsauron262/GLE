@@ -3053,10 +3053,10 @@ class BimpController
             $html = $BimpDocumentation->getDoc();
         else
             $html = $BimpDocumentation->displayDoc();
-        $errors = $BimpDocumentation->errors;
 
         return array(
-            'errors'     => $errors,
+            'errors'     => $BimpDocumentation->errors,
+            'warnings'     => $BimpDocumentation->warnings,
             'html'       => $html,
             'request_id' => BimpTools::getValue('request_id', 0)
         );

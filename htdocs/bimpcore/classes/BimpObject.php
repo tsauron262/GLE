@@ -7480,9 +7480,9 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
         $errors = array();
         if ($this->isLoaded($errors)) {
-            if (count($err)) {
+            if (count($errors)) {
                 $html .= '<pre>';
-                $html .= print_r($err, 1);
+                $html .= print_r($errors, 1);
                 $html .= '</pre>';
             }
 

@@ -35,7 +35,7 @@ class BimpCache
         global $db;
         
         if(static::$modeArchive == 1){
-            if (is_null(self::$bdb_noTransac)) {
+            if (is_null(self::$bdb_archive)) {
 
                 $dolibarr_main_db_port='3306';
                 $dolibarr_main_db_host='10.192.20.11';

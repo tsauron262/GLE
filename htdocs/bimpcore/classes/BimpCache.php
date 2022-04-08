@@ -18,7 +18,7 @@ class BimpCache
     public static $bdb = null;
     public static $bdb_noTransac = null;
     public static $bdb_archive = null;
-    public static $modeArchive = -1;
+    public $modeArchive = -1;
     public static $cache = array();
     public static $cache_server = null;
     public static $nextBimpObjectCacheId = 1;
@@ -30,11 +30,11 @@ class BimpCache
     
     public $j_semaine = array(0 => 'Dimanche', 1 => "Lundi", 2 => "Mardi", 3 => "Mercredi", 4 => "Jeudi", 5 => "Vendredi", 6 => "Samedi", 10 => "N/C");
 
-    public static function getBdb($no_transactions = false)
+    public static function getBdb($no_transactions = false, $mode_archive = -1)
     {
         global $db;
         
-        if(static::$modeArchive == 1){
+        if($mode_archive == 1){
             if (is_null(self::$bdb_archive)) {
 
                 $dolibarr_main_db_port='3306';

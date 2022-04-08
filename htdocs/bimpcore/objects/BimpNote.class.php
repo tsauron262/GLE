@@ -37,7 +37,6 @@ class BimpNote extends BimpObject
         self::BN_DEST_USER  => 'Utilisateur',
         self::BN_DEST_GROUP => 'Group'
     );
-    public static $modeArchive = 0;
 
     public static function cronNonLu()
     {
@@ -153,14 +152,14 @@ class BimpNote extends BimpObject
 
     public function isCreatable($force_create = false, &$errors = array())
     {
-        if(static::$modeArchive)
+        if($this->modeArchive)
             return 0;
         return (int) $this->isEditable($force_create, $errors);
     }
 
     public function isEditable($force_edit = false, &$errors = array())
     {
-        if(static::$modeArchive)
+        if($this->modeArchive)
             return 0;
         
         $parent = $this->getParentInstance();
@@ -174,7 +173,7 @@ class BimpNote extends BimpObject
 
     public function isDeletable($force_delete = false, &$errors = array())
     {
-        if(static::$modeArchive)
+        if($this->modeArchive)
             return 0;
         return (int) $this->isEditable($force_delete, $errors);
     }
@@ -332,7 +331,7 @@ class BimpNote extends BimpObject
     {
         global $user;
         $buttons = array();
-        if ($this->isLoaded() && !static::$modeArchive) {
+        if ($this->isLoaded() && !$this->modeArchive) {
             if ($this->getData('user_create') != $user->id)
                 $buttons[] = array(
                     'label'   => 'Répondre par mail',

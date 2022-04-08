@@ -127,6 +127,32 @@ class BimpObject extends BimpCache
         if (is_null($instance)) {
             $instance = new $className($module, $object_name);
         }
+        
+        
+        if($className == 'BimpObject' && $instance->config->isDefined('extends') && $instance->config->isDefined('extends/module') && $instance->config->isDefined('extends/object_name')){
+                    $module = $instance->getConf('extends/module');
+                    $object_nameP = $instance->getConf('extends/object_name');
+//            $module = 'bimpcore';
+//            $object_nameP = 'BimpNote';
+            $file = DOL_DOCUMENT_ROOT . '/' . $module . '/objects/' . $object_nameP . '.class.php';
+            if (file_exists($file)) {
+                if (!class_exists($object_nameP)) {
+                    require_once $file;
+                }
+                $className = $object_nameP;
+
+                $fileEx = PATH_EXTENDS . "/" . $module . '/objects/' . $object_nameP . '.class.php';
+                if (file_exists($fileEx)) {
+                    if (!class_exists($object_nameP . "Ex")) {
+                        require_once $fileEx;
+                    }
+                    $className = $object_nameP . "Ex";
+                }
+                $instance = new $className($module, $object_name);
+            }
+        }
+        
+        
 
         if (!is_null($id_object)) {
             $instance->fetch($id_object, $parent);
@@ -205,7 +231,7 @@ class BimpObject extends BimpCache
     {
         if ($mode < 0)
             $mode = (int) $this->getConf('no_transaction_db', 0, false, 'bool');
-        $this->db = self::getBdb($mode);
+        $this->db = self::getBdb($mode, $this->modeArchive);
     }
 
     public function __construct($module, $object_name)
@@ -214,6 +240,9 @@ class BimpObject extends BimpCache
         $this->object_name = $object_name;
 
         $this->config = new BimpConfig(DOL_DOCUMENT_ROOT . '/' . $module . '/objects/', $object_name, $this);
+        
+        if($this->config->isDefined('mode_archive'))
+            $this->modeArchive = $this->getConf('mode_archive');
 
         $this->initBdd();
 
@@ -6149,8 +6178,10 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     public function renderNotesList($filter_by_user = true, $list_model = "default", $suffixe = "", $archive = false)
     {
         if ($this->isLoaded()) {
-            if($archive)
+            if($archive){
+                BimpObject::loadClass('bimpcore', 'BimpNote');
                 $note = BimpObject::getInstance('bimpcore', 'BimpNoteArchive');
+            }
             else
                 $note = BimpObject::getInstance('bimpcore', 'BimpNote');
             $list = new BC_ListTable($note, $list_model);
@@ -6168,7 +6199,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 }
             }
             
-            if(BimpCore::getConf('date_archive', '') != '')
+            if(BimpCore::getConf('date_archive', '') != '' && $note->modeArchive > -1)
                 $btnHisto = '<div id="lllm"><button class="btn btn-default" value="charr" onclick="'.$this->getJsLoadCustomContent('renderNotesList', "$('#lllm')", array($filter_by_user, $list_model, $suffixe, true)).'">'.BimpRender::renderIcon('fas_history').' Charger historique</button>';
             
 

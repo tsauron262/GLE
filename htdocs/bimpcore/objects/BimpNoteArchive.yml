@@ -1,4 +1,4 @@
 extends: 
     module: bimpcore
     object_name: BimpNote
-bdd:
+mode_archive: 1

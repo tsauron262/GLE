@@ -2,6 +2,8 @@ table: bimpcore_note
 common_fields: 1
 icon: fas_sticky-note
 
+mode_archive: 0
+
 labels: 
     name: note
     is_female: 1

@@ -285,7 +285,7 @@ class BDS_RgpdProcess extends BDSProcess
         } else {
             $where = 'client IN (1,2,3) AND solvabilite_status = 0';
             if ((int) $this->getOption('null_only')) {
-                $where .= ' AND (date_last_activity IS NULL OR date_last_activity = \'0000-00-00\')';
+                $where .= ' AND (date_last_activity IS NULL)'; //OR date_last_activity = \'0000-00-00\')';
             }
 
             $nb_clients = (int) $this->db->getCount('societe', $where, 'rowid');
@@ -572,12 +572,13 @@ class BDS_RgpdProcess extends BDSProcess
             );
 
             if ((int) $this->getOption('null_only')) {
-                $filters['date_last_activity'] = array(
-                    'or_field' => array(
-                        'IS_NULL',
-                        '0000-00-00'
-                    )
-                );
+                $filters['date_last_activity'] = 'IS_NULL';
+//                $filters['date_last_activity'] = array(
+//                    'or_field' => array(
+//                        'IS_NULL',
+//                        '0000-00-00'
+//                    )
+//                );
             }
 
             $n = ((int) $this->getOption('test_one', 0) ? 1 : 100);
@@ -795,6 +796,8 @@ class BDS_RgpdProcess extends BDSProcess
 
             if ($date_last_activity) {
                 $date_last_activity = date('Y-m-d', strtotime($date_last_activity));
+            } else {
+                $date_last_activity = '0000-00-00';
             }
 
 //            $this->debug_content .= '<br/>Client #' . $id_client . ': date: ' . $date_last_activity . ' - Orgine: ' . $origin;

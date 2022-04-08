@@ -14,7 +14,7 @@ class BIC_UserClient extends BimpObject
     public static $langs_list = array(
         0 => "fr_FR"
     );
-    public static $anonymisation_fields = array('email');
+    public static $anonymization_fields = array('email');
 
     CONST USER_CLIENT_ROLE_ADMIN = 1;
     CONST USER_CLIENT_ROLE_USER = 0;
@@ -102,6 +102,19 @@ class BIC_UserClient extends BimpObject
 
     public function canEditField($field_name)
     {
+        if ($this->isLoaded()) {
+            $client = $this->getParentInstance();
+            
+            if (BimpObject::objectLoaded($client)) {
+                if ($client->isAnonymised()) {
+                    if (in_array($field_name, self::$anonymization_fields)) {
+                        // Champs anonymisés non éditables par user: doit utiliser action "Annuler anonymisation" (revertAnonymization) du client.
+                        return 0;
+                    }
+                }
+            }
+        }
+        
         if (BimpCore::isContextPublic()) {
             global $userClient;
             switch ($field_name) {
@@ -634,7 +647,7 @@ class BIC_UserClient extends BimpObject
         $data = array();
         $saved_data = array();
 
-        foreach (self::$anonymisation_fields as $field) {
+        foreach (self::$anonymization_fields as $field) {
             $saved_data[$field] = $this->getData($field);
 
             if ($field === 'email') {
@@ -697,7 +710,7 @@ class BIC_UserClient extends BimpObject
                 }
 
                 if (is_array($values) && !empty($values)) {
-                    foreach (self::$anonymisation_fields as $field) {
+                    foreach (self::$anonymization_fields as $field) {
                         if (isset($values[$field])) {
                             $this->set($field, $values[$field]);
                         }

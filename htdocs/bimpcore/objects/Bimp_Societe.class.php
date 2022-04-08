@@ -47,7 +47,7 @@ class Bimp_Societe extends BimpDolObject
         'PACA-Occitanie'   => array(79, 17, 86, 87, 16, 23, 19, 24, 47, 33, 40, 64, 65, 32, 31, 9, 82, 46, 81, 11, 66, 34, 12, 48, 30, 4, 5, 6, 13, 83, 84, '2A', '2B'),
         'Bourgogne-Centre' => array(62, 59, 80, 60, 2, 95, 78, 91, 77, 93, 75, 92, 94, 25, 39, 71, 58, 21, 89, 70, 37, 36, 18, 41, 28, 45, 50, 14, 61, 27, 76, 56, 22, 29, 35)
     );
-    public static $anonymisation_fields = array('nom', 'name_alias', 'address', 'zip', 'town', 'email', 'skype', 'url', 'phone', 'fax', 'siren', 'siret', 'ape', 'idprof4', 'idprof5', 'idprof6', 'tva_intra');
+    public static $anonymization_fields = array('nom', 'name_alias', 'address', 'zip', 'town', 'email', 'skype', 'url', 'phone', 'fax', 'siren', 'siret', 'ape', 'idprof4', 'idprof5', 'idprof6', 'tva_intra');
 
 //    public $fieldsWithAddNoteOnUpdate = array('solvabilite_status');
 
@@ -88,6 +88,13 @@ class Bimp_Societe extends BimpDolObject
 
     public function canEditField($field_name)
     {
+        if ($this->isLoaded() && $this->isAnonymised()) {
+            // Champs anonymisés non éditables par user: doit utiliser action "Annuler anonymisation" (revertAnonymization).
+            if (in_array($field_name, self::$anonymization_fields)) {
+                return 0;
+            }
+        }
+
         global $user;
         switch ($field_name) {
             case 'outstanding_limit_atradius':
@@ -423,25 +430,26 @@ class Bimp_Societe extends BimpDolObject
 
     public function isAnonymised()
     {
-        if ($this->isLoaded()) {
-            $cache_key = 'is_client_' . $this->id . '_anonymised';
-
-            if (!isset(self::$cache[$cache_key])) {
-                $log = BimpObjectLog::getLastObjectLogByCodes($this, array(
-                            'ANONYMISED', 'UNANONYMISED'
-                ));
-
-                if (BimpObject::objectLoaded($log) && $log->getData('code') === 'ANONYMISED') {
-                    self::$cache[$cache_key] = 1;
-                } else {
-                    self::$cache[$cache_key] = 0;
-                }
-            }
-
-            return self::$cache[$cache_key];
-        }
-
-        return 0;
+        return (int) $this->getData('is_anonymized');
+//        if ($this->isLoaded()) {
+//            $cache_key = 'is_client_' . $this->id . '_anonymised';
+//
+//            if (!isset(self::$cache[$cache_key])) {
+//                $log = BimpObjectLog::getLastObjectLogByCodes($this, array(
+//                            'ANONYMISED', 'UNANONYMISED'
+//                ));
+//
+//                if (BimpObject::objectLoaded($log) && $log->getData('code') === 'ANONYMISED') {
+//                    self::$cache[$cache_key] = 1;
+//                } else {
+//                    self::$cache[$cache_key] = 0;
+//                }
+//            }
+//
+//            return self::$cache[$cache_key];
+//        }
+//
+//        return 0;
     }
 
     // Getters params: 
@@ -1837,7 +1845,7 @@ class Bimp_Societe extends BimpDolObject
     }
 
     // Rendus HTML: 
-    
+
     public function renderHeaderExtraLeft()
     {
         $html = '';
@@ -2872,7 +2880,7 @@ class Bimp_Societe extends BimpDolObject
         $data = array();
         $saved_data = array();
 
-        foreach (self::$anonymisation_fields as $field) {
+        foreach (self::$anonymization_fields as $field) {
             $saved_data[$field] = $this->getData($field);
 
             if ((string) $saved_data[$field]) {
@@ -2906,6 +2914,8 @@ class Bimp_Societe extends BimpDolObject
 
         if (!count($errors)) {
             if (!empty($data)) {
+                $data['is_anonymized'] = 1;
+
                 // On fait un update direct en base pour contourner les validations de formats des données: 
                 if ($this->db->update('societe', $data, 'rowid = ' . (int) $this->id) <= 0) {
                     $errors[] = 'Echec anonymisation des données - Erreur sql: ' . $this->db->err();
@@ -2994,11 +3004,13 @@ class Bimp_Societe extends BimpDolObject
                     $this->set('last_activity_origin', $origin);
                 }
 
-                foreach (self::$anonymisation_fields as $field) {
+                foreach (self::$anonymization_fields as $field) {
                     if (isset($values[$field])) {
                         $this->set($field, $values[$field]);
                     }
                 }
+
+                $this->set('is_anonymised', 0);
 
                 $errors = $this->update($warnings, true);
 

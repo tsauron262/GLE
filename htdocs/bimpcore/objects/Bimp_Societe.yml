@@ -674,7 +674,12 @@ fields:
         label: Origine dernière activité
         type: text
         hashtags: 1
-            
+    
+    is_anonymized: 
+        label: Client anonymisé
+        type: bool
+        default_value: 0
+        
 #    *** Champs non gérés: ***
 #    entity
 #    ref_ext

@@ -153,8 +153,10 @@ class Bimp_Societe extends BimpDolObject
                 return $this->canEdit();
 
             case 'relancePaiement':
+            case 'setActivity':
                 return 1;
 
+            case 'anonymize':
             case 'revertAnonymization':
             case 'listClientsToExcludeForCreditLimits':
                 return (int) $user->admin;
@@ -256,19 +258,38 @@ class Bimp_Societe extends BimpDolObject
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (in_array($action, array('addCommercial', 'removeCommercial', 'merge', 'checkSolvabilite', 'releveFacturation', 'revertAnonymization'))) {
+        if (in_array($action, array('addCommercial', 'removeCommercial', 'merge', 'checkSolvabilite', 'releveFacturation', 'anonymize', 'revertAnonymization', 'setActivity'))) {
             if (!$this->isLoaded($errors)) {
                 return 0;
             }
         }
 
         switch ($action) {
+            case 'anonymize':
+                if ($this->isAnonymised()) {
+                    $errors[] = 'Ce client est déjà anonymisé';
+                    return 0;
+                }
+                return 1;
+
             case 'revertAnonymization':
-                $id_saved_data = (int) $this->db->getValue('societe_saved_data', 'id', 'id_client = ' . (int) $this->id);
+                if (!$this->isAnonymised()) {
+                    $errors[] = 'Ce client n\'est pas anonymisé';
+                    return 0;
+                }
+                $id_saved_data = (int) $this->db->getValue('societe_saved_data', 'id', 'type = \'societe\' AND id_object = ' . (int) $this->id);
                 if (!$id_saved_data) {
                     $errors[] = 'Pas de données sauvegardées';
                     return 0;
                 }
+                return 1;
+
+            case 'setActivity':
+                if ($this->isAnonymised()) {
+                    $errors[] = 'Ce client a été anonymisé';
+                    return 0;
+                }
+
                 return 1;
         }
 
@@ -357,6 +378,67 @@ class Bimp_Societe extends BimpDolObject
             if ($code) {
                 return (int) in_array($code, array('TE_ADMIN', 'TE_OTHER_ADM'));
             }
+        }
+
+        return 0;
+    }
+
+    public function isAnonymizable(&$errors = array())
+    {
+        $check = 1;
+        if ($this->isLoaded($errors)) {
+            if ($this->isAnonymised()) {
+                $errors[] = ucfirst($this->getLabel('this')) . ' est déjà anonymisé';
+                $check = 0;
+            }
+
+            if ((int) $this->getData('solvabilite_status') !== self::SOLV_SOLVABLE) {
+                $errors[] = ucfirst($this->getLabel('this')) . ' n\'est pas solvable';
+                $check = 0;
+            }
+
+            if (!count($errors)) {
+                $available_discounts = $this->getAvailableDiscountsAmounts();
+                if ($available_discounts) {
+                    $errors[] = ucfirst($this->getLabel('this')) . ' dispose de remises non consommées (' . BimpTools::displayMoneyValue($available_discounts) . ')';
+                    $check = 0;
+                }
+
+                $convertible_amounts = $this->getConvertibleToDiscountAmount();
+                if ($convertible_amounts) {
+                    $errors[] = ucfirst($this->getLabel('this')) . ' dispose de trop perçus non convertis en remise (' . BimpTools::displayMoneyValue($convertible_amounts) . ')';
+                    $check = 0;
+                }
+
+                $paiements_inc = $this->getTotalPaiementsInconnus();
+                if ($paiements_inc) {
+                    $errors[] = ucfirst($this->getLabel('this')) . ' dispose de paiements inconnus pour un montant de (' . BimpTools::displayMoneyValue($paiements_inc) . ')';
+                    $check = 0;
+                }
+            }
+        }
+
+        return $check;
+    }
+
+    public function isAnonymised()
+    {
+        if ($this->isLoaded()) {
+            $cache_key = 'is_client_' . $this->id . '_anonymised';
+
+            if (!isset(self::$cache[$cache_key])) {
+                $log = BimpObjectLog::getLastObjectLogByCodes($this, array(
+                            'ANONYMISED', 'UNANONYMISED'
+                ));
+
+                if (BimpObject::objectLoaded($log) && $log->getData('code') === 'ANONYMISED') {
+                    self::$cache[$cache_key] = 1;
+                } else {
+                    self::$cache[$cache_key] = 0;
+                }
+            }
+
+            return self::$cache[$cache_key];
         }
 
         return 0;
@@ -1755,24 +1837,28 @@ class Bimp_Societe extends BimpDolObject
     }
 
     // Rendus HTML: 
-
+    
     public function renderHeaderExtraLeft()
     {
         $html = '';
 
         if ($this->isLoaded()) {
-            $address = $this->displayFullAddress(true, true);
-            $contact = $this->displayFullContactInfos(true, true);
+            $isAnonymised = $this->isAnonymised();
 
-            if ($address || $contact) {
-                $html .= '<div style="margin-bottom: 8px">';
-                if ($address) {
-                    $html .= $address . ($contact ? '<br/>' : '');
+            if (!$isAnonymised) {
+                $address = $this->displayFullAddress(true, true);
+                $contact = $this->displayFullContactInfos(true, true);
+
+                if ($address || $contact) {
+                    $html .= '<div style="margin-bottom: 8px">';
+                    if ($address) {
+                        $html .= $address . ($contact ? '<br/>' : '');
+                    }
+                    if ($contact) {
+                        $html .= $contact;
+                    }
+                    $html .= '</div>';
                 }
-                if ($contact) {
-                    $html .= $contact;
-                }
-                $html .= '</div>';
             }
 
             $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat');
@@ -1827,6 +1913,19 @@ class Bimp_Societe extends BimpDolObject
                 }
 
                 $html .= '</div>';
+            }
+
+            if ($isAnonymised) {
+                $log = BimpObjectLog::getLastObjectLogByCodes($this, array('ANONYMISED'));
+
+                if (BimpObject::objectLoaded($log)) {
+                    $html .= '<div class="object_header_infos">';
+                    $html .= '<span class="danger">';
+                    $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
+                    $html .= ucfirst($this->getLabel()) . ' anonymisé le ' . date('d / m / Y', strtotime($log->getData('date')));
+                    $html .= '</span>';
+                    $html .= '</div>';
+                }
             }
         }
 
@@ -2762,11 +2861,11 @@ class Bimp_Societe extends BimpDolObject
         }
     }
 
-    public function anonymiseData($save_data = true, &$warnings = array())
+    public function anonymiseData($save_data = true, $reason = '', &$warnings = array())
     {
         $errors = array();
 
-        if (!$this->isLoaded($errors)) {
+        if (!$this->isAnonymizable($errors)) {
             return $errors;
         }
 
@@ -2784,7 +2883,7 @@ class Bimp_Societe extends BimpDolObject
         }
 
         if ($save_data) {
-            $id_cur_saved_data = (int) $this->db->getValue('societe_saved_data', 'id', 'id_client = ' . (int) $this->id);
+            $id_cur_saved_data = (int) $this->db->getValue('societe_saved_data', 'id', 'type = \'societe\' AND id_object = ' . (int) $this->id);
 
             if ($id_cur_saved_data) {
                 if ($this->db->update('societe_saved_data', array(
@@ -2795,7 +2894,8 @@ class Bimp_Societe extends BimpDolObject
                 }
             } else {
                 if ($this->db->insert('societe_saved_data', array(
-                            'id_client' => (int) $this->id,
+                            'type'      => 'societe',
+                            'id_object' => (int) $this->id,
                             'date'      => date('Y-m-d'),
                             'data'      => base64_encode(json_encode($saved_data))
                         )) <= 0) {
@@ -2805,14 +2905,39 @@ class Bimp_Societe extends BimpDolObject
         }
 
         if (!count($errors)) {
-            // On fait un update direct en base pour contourner les validations de formats des données: 
-            if ($this->db->update('societe', $data, 'rowid = ' . (int) $this->id) <= 0) {
-                $errors[] = 'Echec anonymisation des données - Erreur sql: ' . $this->db->err();
-            } else {
-                $this->addObjectLog('Effacement des données personelles du client.<br/>(Dernière activité le ' . date('d / m / Y', strtotime($this->getData('date_last_activity'))) . ')', 'ANONYMISED');
+            if (!empty($data)) {
+                // On fait un update direct en base pour contourner les validations de formats des données: 
+                if ($this->db->update('societe', $data, 'rowid = ' . (int) $this->id) <= 0) {
+                    $errors[] = 'Echec anonymisation des données - Erreur sql: ' . $this->db->err();
+                }
+            }
 
+
+            if (!count($errors)) {
+                $msg = 'Effacement des données personelles du client';
+                if ($reason) {
+                    $msg .= '<br/>(' . $reason . ')';
+                }
+                $this->addObjectLog($msg, 'ANONYMISED');
+
+                // Suppression des fichiers: 
+                $dir = $this->getFilesDir();
+                if (is_dir($dir)) {
+                    $files = scandir($data);
+
+                    foreach ($files as $f) {
+                        if (in_array($f, array('.', '..'))) {
+                            continue;
+                        }
+
+                        if (!unlink($dir . '/' . $f)) {
+                            $warnings[] = 'Echec suppression du fichier "' . $f . '"';
+                        }
+                    }
+                }
+
+                // Anonymisation des contacts: 
                 $contacts = $this->getContactsArray(false);
-
                 if (!empty($contacts)) {
                     foreach ($contacts as $id_contact => $contact_label) {
                         $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
@@ -2826,6 +2951,21 @@ class Bimp_Societe extends BimpDolObject
                         }
                     }
                 }
+
+                // Anonymisation des comptes utilisteurs: 
+                $bic_users = BimpCache::getBimpObjectObjects('bimpinterfaceclient', 'BIC_UserClient', array(
+                            'id_client' => $this->id
+                ));
+
+                foreach ($bic_users as $bic_user) {
+                    if (BimpObject::objectLoaded($bic_user)) {
+                        $user_errors = $bic_user->anonymiseData($save_data);
+
+                        if (count($user_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($user_errors, 'Erreurs anonymisation du compte utilisateur #' . $bic_user->id);
+                        }
+                    }
+                }
             }
         }
 
@@ -2836,7 +2976,7 @@ class Bimp_Societe extends BimpDolObject
     {
         $errors = array();
 
-        $rows = $this->db->getRows('societe_saved_data', 'id_client = ' . $this->id, 1, 'array', null, 'date', 'desc');
+        $rows = $this->db->getRows('societe_saved_data', 'type = \'societe\' AND id_object = ' . $this->id, 1, 'array', null, 'date', 'desc');
 
         if (isset($rows[0]['data'])) {
             $values = base64_decode($rows[0]['data']);
@@ -2868,14 +3008,14 @@ class Bimp_Societe extends BimpDolObject
                     if ($reason) {
                         $msg .= '<br/>Motif: ' . $reason;
                     }
-                    $this->addObjectLog($msg, 'UNANOMISED');
+                    $this->addObjectLog($msg, 'UNANONYMISED');
 
                     if ((int) $rows[0]['id']) {
                         $this->db->delete('societe_saved_data', 'id = ' . (int) $rows[0]['id']);
                     }
 
+                    // Annulation contacts: 
                     $contacts = $this->getContactsArray(false);
-
                     foreach ($contacts as $id_contact => $contact_label) {
                         $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
 
@@ -2884,6 +3024,21 @@ class Bimp_Societe extends BimpDolObject
 
                             if (count($contact_errors)) {
                                 $warnings[] = BimpTools::getMsgFromArray($contact_errors, 'Echec récupération des données du contact "' . $contact_label . '"');
+                            }
+                        }
+                    }
+
+                    // Annulation comptes utilisteurs: 
+                    $bic_users = BimpCache::getBimpObjectObjects('bimpinterfaceclient', 'BIC_UserClient', array(
+                                'id_client' => $this->id
+                    ));
+
+                    foreach ($bic_users as $bic_user) {
+                        if (BimpObject::objectLoaded($bic_user)) {
+                            $user_errors = $bic_user->revertAnonymisedData();
+
+                            if (count($user_errors)) {
+                                $warnings[] = BimpTools::getMsgFromArray($user_errors, 'Echec récupération des données du compte utilisateur #' . $bic_user->id);
                             }
                         }
                     }
@@ -2910,8 +3065,12 @@ class Bimp_Societe extends BimpDolObject
                 $origin = 'Non spécifiée';
             }
 
-            $this->updateField('date_last_activity', $date);
-            $this->updateField('last_activity_origin', $origin);            
+            $cur_date = (string) $this->getData('date_last_activity');
+
+            if (!strtotime($cur_date) || $cur_date < $date) {
+                $this->updateField('date_last_activity', $date);
+                $this->updateField('last_activity_origin', $origin);
+            }
         }
 
         return $errors;
@@ -3166,6 +3325,107 @@ class Bimp_Societe extends BimpDolObject
             'errors'           => $errors,
             'warnings'         => $warnings
         ];
+    }
+
+    public function actionCheckLastActivity($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $clients = array();
+
+        if ($this->isLoaded()) {
+            $clients[] = $this->id;
+        } else {
+            $clients = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+        }
+
+        if (empty($clients)) {
+            $errors[] = 'Aucun client sélectionné';
+        } else {
+            require_once DOL_DOCUMENT_ROOT . '/bimpdatasync/BDS_Lib.php';
+
+            $process = BDSProcess::createProcessByName('Rgpd', $errors);
+
+            if (!is_a($process, 'BDS_RgpdProcess') || !(int) $process->process->getData('active')) {
+                $errors[] = 'Cette opération n\'est pas disponible';
+            }
+
+            if (!count($errors)) {
+                $process->checkClientsActivity($clients, $errors, $warnings, $success);
+
+                if (!count($errors) && !$success) {
+                    if (!count($warnings)) {
+                        if (count($clients) > 1) {
+                            $success = 'Toutes les dates de dernières activités des clients sélectionnés sont à jour';
+                        } else {
+                            $success = 'La date de dernière activité du client est à jour';
+                        }
+                    } else {
+                        $success = 'Aucune mise à jour n\'a été faite';
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionSetActivity($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $date = BimpTools::getArrayValueFromPath($data, 'date_activity', '');
+        $origin = BimpTools::getArrayValueFromPath($data, 'activity_origin', '');
+
+        if (!$date) {
+            $errors[] = 'Veuillez sélectionner la date de dernière activité';
+        } elseif ($date > date('Y-m-d')) {
+            $errors[] = 'Vous ne pouvez pas saisir une date postérieure à aujourd\'hui';
+        }
+
+        if (!$origin) {
+            $errors[] = 'Veullez indiquer l\'origine de la dernière activité du client';
+        }
+
+        if (!count($errors)) {
+            $cur_date = (string) $this->getData('date_last_activity');
+
+            if (!strtotime($cur_date) || $date > $cur_date) {
+                $this->set('date_last_activity', $date);
+                $this->set('last_activity_origin', $origin);
+
+                $errors = $this->update($warnings, true);
+            } else {
+                $errors[] = 'La date indiquée est antérieure à la date de dernière activité actuellement enregistrée';
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionAnonymize($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Anonymisation effectuée avec succès';
+
+        $reason = BimpTools::getArrayValueFromPath($data, 'reason', '');
+        $errors = $this->anonymiseData(true, $reason, $warnings);
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 
     public function actionRevertAnonymization($data, &$success)

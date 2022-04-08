@@ -281,7 +281,7 @@ class BDS_RgpdProcess extends BDSProcess
     public function initCheckClientsActivity(&$data, &$errors = array())
     {
         if ((int) $this->getOption('test_one', 0)) {
-            $nb_clients = 100;
+            $nb_clients = 1;
         } else {
             $where = 'client IN (1,2,3) AND solvabilite_status = 0';
             if ((int) $this->getOption('null_only')) {
@@ -580,7 +580,8 @@ class BDS_RgpdProcess extends BDSProcess
                 );
             }
 
-            $rows = $soc_instance->getList($filters, 100, $p, 'rowid', 'ASC');
+            $n = ((int) $this->getOption('test_one', 0) ? 1 : 100);
+            $rows = $soc_instance->getList($filters, $n, $p, 'rowid', 'ASC');
 
             if (empty($rows)) {
                 $errors[] = 'Aucun client à traiter trouvé';
@@ -600,10 +601,12 @@ class BDS_RgpdProcess extends BDSProcess
 
     public function findClientsToAnonymise()
     {
-        $limit = (int) $this->getOption('clients_to_anonymise_limit', 0);
 
-        if ((int) $this->getOption('test_one', 0) && (!$limit || $limit > 50)) {
-            $limit = 50;
+
+        if ((int) $this->getOption('test_one', 0)) {
+            $limit = 1;
+        } else {
+            $limit = (int) $this->getOption('clients_to_anonymise_limit', 0);
         }
 
         $clients = array();
@@ -897,10 +900,10 @@ class BDS_RgpdProcess extends BDSProcess
 
                 // Anonymisation des données: 
                 $client_warnings = array();
-                $client_errors = $client->anonymiseData(true, $client_warnings);
+                $client_errors = $client->anonymiseData(true, 'Dernière activité le ' . date('d / m / Y', strtotime($date_last_activity)), $client_warnings);
 
                 if (count($client_errors)) {
-                    $this->Error('Erreurs anonymisation des données', $client, $client->getRef());
+                    $this->Error(BimpTools::getMsgFromArray($client_errors, 'Erreurs anonymisation des données'), $client, $client->getRef());
                     $this->incIgnored();
                 } else {
                     $this->Success('Anonymisation des données effectuée avec succès (Date dernière activité: ' . date('d / m / Y', strtotime($date_last_activity)) . ')', $client, $client->getRef());

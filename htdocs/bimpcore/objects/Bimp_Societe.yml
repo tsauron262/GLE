@@ -1288,33 +1288,49 @@ forms:
                   field_name: by_tech
                   show_values: 1
                   
-    revert_anonymisation: 
+    set_activity: 
+        rows: 
+            date: 
+                custom: 1
+                label: Nouvelle date de dernière activité
+                input_name: date_activity
+                data_type: date
+                input: 
+                    type: date
+                    display_now: 1
+                required: 1
+            origin: 
+                custom: 1
+                label: Origine dernière activité
+                input_name: activity_origin
+                data_type: text
+                input: 
+                    type: textarea
+                    hastags: 1
+                required: 1
+            
+    anonymize: 
         rows: 
             - custom: 1
-              label: Nouvelle date de dernière activité
-              input_name: date_activity
-              data_type: date
-              input: 
-                  type: date
-                  display_now: 1
-              required: 1
-            - custom: 1
-              label: Origine dernière activité
-              input_name: activity_origin
-              data_type: text
-              input: 
-                  type: textarea
-                  hastags: 1
-              required: 1
-            - custom: 1
-              label: Motif annulation anonymisation
+              label: Raison
               input_name: reason
               data_type: text
               input: 
                   type: textarea
-                  hashtags: 1
-              
-              
+              value: Demande du client
+    
+    revert_anonymisation: 
+        extends: set_activity
+        rows: 
+            reason: 
+                custom: 1
+                label: Motif annulation anonymisation
+                input_name: reason
+                data_type: text
+                input: 
+                    type: textarea
+                    hashtags: 1
+               
     clients_to_exclude: 
         rows: 
             - custom: 1

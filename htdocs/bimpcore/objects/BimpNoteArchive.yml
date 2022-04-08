@@ -1,0 +1,4 @@
+extends: 
+    module: bimpcore
+    object_name: BimpNote
+bdd:

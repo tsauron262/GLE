@@ -1914,9 +1914,9 @@ class BimpComm extends BimpDolObject
             $html .= '<span class="warning" style="font-size: 15px">Annule et remplace ' . $this->getLabel('the') . ' "' . $this->getData('replaced_ref') . '" (données perdues)</span>';
             $html .= '</div>';
         }
-        
+
         global $user;
-        if($user->admin || $user->id == 226){
+        if ($user->admin || $user->id == 226) {
             $html .= BimpDocumentation::renderBtn('gle', 'Test pour les admin, doc compléte');
             $html .= BimpDocumentation::renderBtn('liste', 'Test pour les admin, doc liste');
         }
@@ -4117,8 +4117,20 @@ class BimpComm extends BimpDolObject
                         }
 
                         $id_type_commercial = (int) $this->db->getValue('c_type_contact', 'rowid', 'source = \'internal\' AND element = \'' . $this->dol_object->element . '\' AND code = \'SALESREPFOLL\'');
-                        if ($type_contact == $id_type_commercial && !$this->canEditCommercial()) {
-                            $errors[] = 'Vous n\'avez pas la permission de changer le commercial ' . $this->getLabel('of_a');
+                        if ($type_contact == $id_type_commercial) {
+                            if (!$this->canEditCommercial()) {
+                                $errors[] = 'Vous n\'avez pas la permission de changer le commercial ' . $this->getLabel('of_a');
+                            } else {
+                                $id_cur_commercial = $this->getCommercialId();
+
+                                if ($id_cur_commercial) {
+                                    $list = $this->dol_object->liste_type_contact();
+                                    $label = (isset($list[$id_type_commercial]) ? $list[$id_type_commercial] : 'Responsable suivi ' . $this->getLabel());
+                                    $msg = 'Un "' . $label . '" a déjà été attribué à ' . $this->getLabel('this') . '<br/>';
+                                    $msg .= 'Si vous souhaitez modifier celui-ci, veuillez d\'abord le supprimer';
+                                    $errors[] = $msg;
+                                }
+                            }
                         }
 
                         if (!count($errors)) {

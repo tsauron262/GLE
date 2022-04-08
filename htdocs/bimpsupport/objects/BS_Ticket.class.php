@@ -978,6 +978,11 @@ class BS_Ticket extends BimpObject
             $errors = parent::create($warnings, $force_create);
 
             if (!count($errors)) {
+                $client = $this->getChildObject('client');
+                if (BimpObject::objectLoaded($client)) {
+                    $client->setActivity('Création ' . $this->getLabel('of_the') . ' {{Ticket hotline:' . $this->id . '}}');
+                }
+                
                 if ($isPublic) {
                     $liste_destinataires = Array($userClient->getData('email'));
                     $liste_destinataires = BimpTools::merge_array($liste_destinataires, Array('hotline@bimp.fr'));

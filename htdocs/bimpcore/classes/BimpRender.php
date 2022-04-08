@@ -340,6 +340,31 @@ class BimpRender
         return $html;
     }
 
+    public static function renderButtonsGroups($groups, $params)
+    {
+        $html = '';
+
+        $params = BimpTools::overrideArray(array(
+                    'max'                 => 0,
+                    'dropdown_menu_right' => 0
+                        ), $params);
+
+        foreach ($groups as $group) {
+            $buttons = BimpTools::getArrayValueFromPath($group, 'buttons', array());
+
+            if (!empty($buttons)) {
+                $html .= self::renderButtonsGroup($buttons, array(
+                            'max'                 => $params['max'],
+                            'dropdown_menu_right' => $params['dropdown_menu_right'],
+                            'dropdown_label'      => BimpTools::getArrayValueFromPath($group, 'label', 'Actions'),
+                            'dropdown_icon'       => BimpTools::getArrayValueFromPath($group, 'icon', 'fas_cogs')
+                ));
+            }
+        }
+
+        return $html;
+    }
+
     public static function renderPanel($title, $body_content, $footer_content = '', $params = array())
     {
         $html = '';

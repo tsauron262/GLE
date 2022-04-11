@@ -229,7 +229,7 @@ class BTC_export_facture_fourn extends BTC_export {
                     } elseif (in_array($produit->getData('ref'), self::$avoir_fournisseur)) {
                         switch ($zone_achat) {
                             case 1:
-                                $use_compte_general = BimpCore::getConf('BIMPTOCEGID_avoir_fournisseur_fr');
+                                $use_compte_general = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_avoir_fournisseur_fr'), $compte_general_401);
                                 break;
                             case 2:
                                 $use_compte_general = BimpCore::getConf('BIMPTOCEGID_avoir_fournisseur_ue');

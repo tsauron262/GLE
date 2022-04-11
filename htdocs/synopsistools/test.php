@@ -20,20 +20,20 @@
 require("../main.inc.php");
 llxHeader();
 
-echo BimpCore::getConf('old_date_reco_apple', '');
-                $oldDate = new DateTime(BimpCore::getConf('old_date_reco_apple', '2020-01-01'));
-                $oldDate->add(new DateInterval('PT1M'));
-                $now = new DateTime (date ('Y-m-d H:i:s', time()));
-                if($oldDate < $now){
-                    BimpCore::setConf('old_date_reco_apple',date ('Y-m-d H:i:s', time()));
-                    die('reco');
-                    $phantomAuthTest = true;
-                    static::phantomAuth(self::$default_ids['apple_id'], self::$default_ids['apple_pword']);
-                }
-                else{
-                    die('trop frais');
-                }
-die;
+//echo BimpCore::getConf('old_date_reco_apple', '');
+//                $oldDate = new DateTime(BimpCore::getConf('old_date_reco_apple', '2020-01-01'));
+//                $oldDate->add(new DateInterval('PT1M'));
+//                $now = new DateTime (date ('Y-m-d H:i:s', time()));
+//                if($oldDate < $now){
+//                    BimpCore::setConf('old_date_reco_apple',date ('Y-m-d H:i:s', time()));
+//                    die('reco');
+//                    $phantomAuthTest = true;
+//                    static::phantomAuth(self::$default_ids['apple_id'], self::$default_ids['apple_pword']);
+//                }
+//                else{
+//                    die('trop frais');
+//                }
+die('rrrrr');
 
 
 $json = json_decode(file_get_contents('php://input'));

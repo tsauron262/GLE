@@ -1,0 +1,1 @@
+ALTER TABLE `llx_societe` ADD `is_anonymized` tinyint(1) NOT NULL DEFAULT '0';

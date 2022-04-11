@@ -4,6 +4,7 @@ class BimpDocumentation {
 
     var $lines = array();
     var $errors = array();
+    var $warnings = array();
     var $pathFile = '';
     var $type = '';
     var $name = '';
@@ -15,6 +16,7 @@ class BimpDocumentation {
     var $idSection = '';
     var $initNiveau = 0;
     var $initPrefMenu = '';
+    static $memMenu = array();
 
     function __construct($type, $name, $mode = 'link', $idSection = 'princ', &$menu = array()) {
         if (!is_array($menu)) {
@@ -84,15 +86,31 @@ class BimpDocumentation {
         for ($i = 1; $i <= 10; $i++) {//10 niveau de titres
             if ($i <= $niveau)
                 $pref .= (isset($this->menu[$i]) ? count($this->menu[$i]) : 0) . ($i < $niveau ? '.' : '');
-            else
-                unset($this->menu[$i]);
+            else{//ce niveau n'est plus définit
+                if(isset($this->menu[$i])){//ce niveau était définit
+                    static::$memMenu[$i] = $this->menu[$i];//on garde au cas ou le niveau du titre 
+                    $this->supprMemoire($i+1);//mais on supprime la memoire des plus grand titre
+                    unset($this->menu[$i]);
+                }
+                else{//ce niveau n'etait plus definit on supprime donc toute la memoire de même niveau est plus
+                    $this->supprMemoire($i);//mais on supprime la memoire des plus grand titre
+                }
+            }
         }
         return $pref;
+    }
+    
+    function supprMemoire($niveau){
+        for ($j = $niveau; $j <= 12; $j++) {
+            if(isset(static::$memMenu[$j])){
+                unset(static::$memMenu[$j]);
+            }
+        }
     }
 
     function initLines($initNiveau = 0) {//Tout ce qui concernes les lignes entiéres
         $data = $this->getFileData('array');
-        $niveau = 0;
+        $niveau = $initNiveau;
         $niveauList = 0;
         foreach ($data as $idL => $ln) {
             $balise = '';
@@ -113,7 +131,7 @@ class BimpDocumentation {
                         $this->lines[] = array('div' => array('id' => $idSection));
                         if (is_file(static::getPathFile('doc', $matches[2])) || is_file(static::getPathFile('doc', $matches[2], true))) {
                             $child = new BimpDocumentation('doc', $matches[2], $this->mode, $idSection, $this->menu);
-                            $pref = $this->getPrefMenu($niveau + 1);
+                            $pref = $this->getPrefMenu($niveau);
     //                    echo '<pre>';print_r($this->menu);
 
                             $child->initLines($niveau);
@@ -123,6 +141,7 @@ class BimpDocumentation {
                             $this->traiteIndent($niveau);
                             $pref = $this->getPrefMenu($niveau);
                             $this->errors = BimpTools::merge_array($this->errors, $child->errors);
+                            $this->warnings = BimpTools::merge_array($this->warnings, $child->warnings);
                         } elseif ($this->admin) {
                             $this->lines[] = array('value' => static::btnEditer($matches[2], $idSection, $pref));
                         }
@@ -138,8 +157,11 @@ class BimpDocumentation {
 
                         /* gestion menu */
                         if ($this->type == 'doc') {
+                            if(!isset($this->menu[$niveau]) && isset(static::$memMenu[$niveau]))
+                                $this->menu[$niveau] = static::$memMenu[$niveau];
                             $this->menu[$niveau][] = '';
                             $pref = $this->getPrefMenu($niveau);
+                            static::$memMenu = array();
                             $ln = $pref . ' ' . $ln;
                             $hash = 'menu' . $pref;
                         }
@@ -173,12 +195,21 @@ class BimpDocumentation {
     }
 
     function traiteIndent($niveau) {
-        if ($niveau > count($this->menu))//On descend d'un niveau
-            for ($i = 0; $i < ($niveau - count($this->menu)); $i++)
-                $this->lines[] = array('div' => array('class' => 'indent ident' . ($i + 1 + count($this->menu))));
-        elseif ($niveau < count($this->menu))
-            for ($i = 0; $i < (count($this->menu) - $niveau); $i++)
+        $oldNiveau = 0;
+        foreach($this->menu as $clef => $inut)
+            $oldNiveau = $clef;
+        if($oldNiveau != count($this->menu))
+            $this->warnings[] = 'Probléme de logique de menu : Niveau actuelle : '.$oldNiveau. ' nombres de niveau : '.count($this->menu).' niveau souhaité '.$niveau;
+        
+        
+        if ($niveau > $oldNiveau)//On descend d'un niveau
+            for ($i = 0; $i < ($niveau - $oldNiveau); $i++){
+                $this->lines[] = array('div' => array('class' => 'indent ident' . ($i + 1 + $oldNiveau)));
+            }
+        elseif ($niveau < $oldNiveau)
+            for ($i = 0; $i < ($oldNiveau - $niveau); $i++){
                 $this->lines[] = array('div' => array('close' => true));
+            }
     }
 
     static function convertTag($in) {

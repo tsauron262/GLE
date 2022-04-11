@@ -318,9 +318,9 @@ class BC_Panel extends BimpComponent
         }
         $date = BimpCore::getConf('date_archive', '');
         if($date != ''){
-            if($this->object::$modeArchive == 0)
+            if($this->object->modeArchive == 0)
                 $title .= ' (depuis le '.$date.')';
-            elseif($this->object::$modeArchive == 1)
+            elseif($this->object->modeArchive == 1)
                 $title .= ' (avant le '.$date.')';
         }
 

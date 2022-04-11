@@ -7,7 +7,7 @@ class Bimp_Contact extends BimpObject
         0 => array('label' => 'Désactivé', 'icon' => 'fas_times', 'classes' => array('danger')),
         1 => array('label' => 'Actif', 'icon' => 'fas_check', 'classes' => array('success'))
     );
-    public static $anonymisation_fields = array('lastname', 'firstname', 'address', 'zip', 'town', 'email', 'phone', 'phone_perso', 'phone_mobile', 'fax', 'jabberid', 'skype', 'birthday');
+    public static $anonymization_fields = array('lastname', 'firstname', 'address', 'zip', 'town', 'email', 'phone', 'phone_perso', 'phone_mobile', 'fax', 'jabberid', 'skype', 'birthday');
 
     // Getters booléens: 
 
@@ -84,6 +84,23 @@ class Bimp_Contact extends BimpObject
         }
 
         return parent::canSetStatus($status);
+    }
+    
+    public function canEditField($field_name)
+    {
+        if ($this->isLoaded()) {
+            $client = $this->getParentInstance();
+            
+            if (BimpObject::objectLoaded($client)) {
+                if ($client->isAnonymised()) {
+                    if (in_array($field_name, self::$anonymization_fields)) {
+                        // Champs anonymisés non éditables par user: doit utiliser action "Annuler anonymisation" (revertAnonymization) du client.
+                        return 0;
+                    }
+                }
+            }
+        }
+        return parent::canEditField($field_name);
     }
 
     // Getters params: 
@@ -266,7 +283,7 @@ class Bimp_Contact extends BimpObject
         $data = array();
         $saved_data = array();
 
-        foreach (self::$anonymisation_fields as $field) {
+        foreach (self::$anonymization_fields as $field) {
             $saved_data[$field] = $this->getData($field);
 
             if ($field === 'birthday') {
@@ -329,7 +346,7 @@ class Bimp_Contact extends BimpObject
                 }
 
                 if (is_array($values) && !empty($values)) {
-                    foreach (self::$anonymisation_fields as $field) {
+                    foreach (self::$anonymization_fields as $field) {
                         if (isset($values[$field])) {
                             $this->set($field, $values[$field]);
                         }

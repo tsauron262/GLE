@@ -214,7 +214,7 @@ class BTC_export_facture_fourn extends BTC_export {
                         $is_rfa = true;
                         switch ($zone_achat) {
                             case 1:
-                                $use_compte_general = BimpCore::getConf('BIMPTOCEGID_rfa_fournisseur_fr');
+                                $use_compte_general = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_rfa_fournisseur_fr'), $compte_general_401);
                                 break;
                             case 2:
                                 $use_compte_general = BimpCore::getConf('BIMPTOCEGID_rfa_fournisseur_ue');

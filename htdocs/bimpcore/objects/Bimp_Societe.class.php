@@ -3670,7 +3670,7 @@ class Bimp_Societe extends BimpDolObject
         $init_outstanding_limit = $this->getInitData('outstanding_limit');
         $init_relance_actives = (int) $this->getInitData('relances_actives');
 
-        $limit = -1;
+        $limit = 0;
         if ($this->getData('outstanding_limit_atradius') > -1)
             $limit = $this->getData('outstanding_limit_atradius');
         if ($this->getData('outstanding_limit_icba') > $limit)
@@ -3679,7 +3679,7 @@ class Bimp_Societe extends BimpDolObject
             $limit = $this->getData('outstanding_limit_credit_check');
         if ($this->getData('outstanding_limit_manuel') > $limit)
             $limit = $this->getData('outstanding_limit_manuel');
-        if ($limit > 0 && $limit != $this->getInitData('outstanding_limit'))
+        if ($limit > -1 && $limit != $this->getInitData('outstanding_limit'))
             $this->updateField('outstanding_limit', $limit);
 
         if ($this->getInitData('fk_typent') != $this->getData('fk_typent') && !$this->canEditField('status')) {

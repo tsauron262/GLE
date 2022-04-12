@@ -868,14 +868,14 @@ class BimpRelanceClientsLine extends BimpObject
         // Total facture: 
         $facture_label = $facture->getData('libelle');
         $pdf_data['rows'][] = array(
-            'date'           => $facture->displayData('datef', 'default', false),
+            'date'           => date('d/m/Y', strtotime($facture->getData('datef'))),
             'fac'            => $facture->getRef(),
             'fac_ref_client' => $ref_cli,
 //            'comm'           => $comm_refs,
             'lib'            => BimpTools::ucfirst($facture->getLabel()) . ($facture_label ? ' "' . $facture_label . '"' : ''),
             'debit'          => ($fac_total > 0 ? BimpTools::displayMoneyValue($fac_total, '') . ' €' : ''),
             'credit'         => ($fac_total < 0 ? BimpTools::displayMoneyValue(abs($fac_total), '') . ' €' : ''),
-            'echeance'       => $facture->displayData('date_lim_reglement', 'default', false),
+            'echeance'       => date('d/m/Y', strtotime($facture->getData('date_lim_reglement'))),
             'retard'         => floor((strtotime(date('Y-m-d')) - strtotime($facture->getData('date_lim_reglement'))) / 86400)
         );
 
@@ -1156,7 +1156,7 @@ class BimpRelanceClientsLine extends BimpObject
                 $this->set('date_send', null);
                 $this->set('id_user_send', 0);
             }
-            
+
             if ($new_status == self::RELANCE_ATTENTE_TEL) {
                 $this->set('id_user_phone_call', 0);
                 $this->set('date_phone_call', null);

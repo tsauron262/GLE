@@ -146,7 +146,7 @@
                             $total_deee += $product->getData('deee') * $line->qty;
                         }
                         $total_ht += round($current_montant, 2);
-                        if($product->isLoaded() && $line->fk_product > 0)
+                        if($product->isLoaded())
                             $this->compte_general = $product->getCodeComptableVente($facture->getData('zone_vente'), ($product->getData('type_compta') == 0) ? -1 : $product->getData('type_compta'));
                         else
                             $this->compte_general = '70600000';

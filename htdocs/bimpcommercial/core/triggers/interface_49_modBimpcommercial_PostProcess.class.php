@@ -46,7 +46,7 @@ class InterfacePostProcess extends BimpCommTriggers
                 }
                 
                 if($action_name == 'VALIDATE'){
-                    $object->fetch($object->id);
+//                    $object->fetch($object->id);
                 }
                 else{
                     $bimpObject->dol_object = $object;

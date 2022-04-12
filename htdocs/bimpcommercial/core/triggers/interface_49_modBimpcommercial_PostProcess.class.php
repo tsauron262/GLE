@@ -49,8 +49,8 @@ class InterfacePostProcess extends BimpCommTriggers
 //                    $object->fetch($object->id);
                 }
                 else{
-                    $bimpObject->dol_object = $object;
-                    $BimpObject->hydrateDolObject();
+//                    $bimpObject->dol_object = $object;
+//                    $BimpObject->hydrateDolObject();
                 }
 
                 if (count($warnings)) {

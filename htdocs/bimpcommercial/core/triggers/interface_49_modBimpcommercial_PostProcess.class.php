@@ -90,6 +90,8 @@ class InterfacePostProcess extends BimpCommTriggers
         if (count($warnings)) {
             setEventMessages(BimpTools::getMsgFromArray($warnings), null, 'warnings');
         }
+        
+        $object->fetch($object->id);
 
         return 0;
     }

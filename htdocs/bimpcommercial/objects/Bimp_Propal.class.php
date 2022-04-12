@@ -723,6 +723,7 @@ class Bimp_Propal extends BimpComm
                                     'pdf_hide_ttc'       => $this->getData('pdf_hide_ttc'),
                                     'pdf_periodicity'    => $this->getData('pdf_periodicity'),
                                     'pdf_periods_number' => $this->getData('pdf_periods_number'),
+                                    'expertise'          => $this->getData('expertise'),
                                     'note_public'        => addslashes(htmlentities($this->getData('note_public'))),
                                     'note_private'       => addslashes(htmlentities($this->getData('note_private'))),
                                     'origin'             => 'propal',

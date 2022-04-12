@@ -146,10 +146,16 @@
                             $total_deee += $product->getData('deee') * $line->qty;
                         }
                         $total_ht += round($current_montant, 2);
-                        if($product->isLoaded())
+                        if($product->isLoaded()) {
                             $this->compte_general = $product->getCodeComptableVente($facture->getData('zone_vente'), ($product->getData('type_compta') == 0) ? -1 : $product->getData('type_compta'));
-                        else
+                            $debug['LOADED_PRODUCT_' . $line->id] = $product->getRef();
+                        }
+                            
+                        else {
                             $this->compte_general = '70600000';
+                            $debug['LOADED_PRODUCT_' . $line->id] = 'NULL';
+                        }
+                            
                         
                         $debug['CHOIX_COMPTE_' . $line->id] = $line->id . ' => ' . $this->compte_general;
                         $debug['ID_PRODUCT_' . $line->id] = $line->id . ' => ' . $line->fk_product;

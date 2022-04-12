@@ -4326,7 +4326,7 @@ class Bimp_Facture extends BimpComm
 
         // validation de l'avoir (sans trigger pour éviter les boucles infinies): 
         global $user;
-        if ($avoir->dol_object->validate($user, 0, 0, 1) <= 0) {
+        if ($avoir->dol_object->validate($user/*, 0, 0, 1*/) <= 0) {//attention si no triggers, pas de blockedlog
             $msg = 'Avoir créé avec succès mais échec de la validation';
             if ($convertToReduc) {
                 $msg .= '. La conversion en remise n\'a pas été effectuée';

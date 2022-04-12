@@ -3,6 +3,8 @@
 
 require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_factureFournisseur.class.php';
 require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_payInc.class.php';
+require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_importPaiement.class.php';
+require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/export.class.php';
 
 class newExportController extends BimpController {
     private $dir = "/exportCegid/BY_DATE/";
@@ -55,8 +57,29 @@ class newExportController extends BimpController {
                         
             }
             echo $msg . '<br /><br />';
-            mailSyn2("Import compta MANUEL", 'dev@bimp.fr', null, $msg);
+            mailSyn2("Export compta MANUEL", 'dev@bimp.fr', null, $msg);
 
+        }
+        
+        if($_GET['test'] == 'true') {
+            $TRA_Facture = new TRA_facture($bdd, PATH_TMP . "/exportCegid/TEST_TIERS.tra", true);
+            if($_GET['facture']) {
+                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $_GET['facture']);
+                $html .= '<pre>';
+                $html .= $TRA_Facture->constructTra($facture);
+                $html .= '</pre>';
+            }
+        }
+        
+        if($_GET['IP'] == 'true') {
+            
+            $data['infos'] = '';
+            
+            $export = new TRA_importPaiement($bdd);
+            $ipLine = BimpCache::getBimpObjectInstance('bimpfinanc', 'Bimp_ImportPaiementLine', 1);
+
+            echo '<pre>' . $export->constructTRA($ipLine)  ."\n" . print_r($data, 1) . '</pre>';
+            
         }
         
         return $html;

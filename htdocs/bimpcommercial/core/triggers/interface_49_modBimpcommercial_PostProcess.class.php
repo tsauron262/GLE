@@ -44,6 +44,14 @@ class InterfacePostProcess extends BimpCommTriggers
                         }
                         break;
                 }
+                
+                if($action_name == 'VALIDATE'){
+                    $object->fetch($object->id);
+                }
+                else{
+                    $bimpObject->dol_object = $object;
+                    $BimpObject->hydrateDolObject();
+                }
 
                 if (count($warnings)) {
                     setEventMessages(BimpTools::getMsgFromArray($warnings), null, 'warnings');
@@ -90,8 +98,6 @@ class InterfacePostProcess extends BimpCommTriggers
         if (count($warnings)) {
             setEventMessages(BimpTools::getMsgFromArray($warnings), null, 'warnings');
         }
-        
-//        $object->fetch($object->id);
 
         return 0;
     }

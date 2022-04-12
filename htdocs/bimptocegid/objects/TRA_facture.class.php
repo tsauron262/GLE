@@ -17,10 +17,12 @@
         public $rapport = [];
         public $rapportTier = [];
         protected $TRA_tiers;
+        protected $debug;
         
-        function __construct($bimp_db, $tiers_file) { 
+        function __construct($bimp_db, $tiers_file, $debug = false) { 
             $this->db = $bimp_db; 
             $this->TRA_tiers = new TRA_tiers($bimp_db, $tiers_file);
+            $this->debug = $debug;
         }
 
         public function constructTra(Bimp_Facture $facture) {
@@ -148,6 +150,9 @@
                             $this->compte_general = $product->getCodeComptableVente($facture->getData('zone_vente'), ($product->getData('type_compta') == 0) ? -1 : $product->getData('type_compta'));
                         else
                             $this->compte_general = '70600000';
+                        
+                        $debug['CHOIX_COMPTE_' . $line->id] = $line->id . ' => ' . $this->compte_general;
+                        
                         $structure['SENS']                  = sizing($this->getSens($line->multicurrency_total_ht),1, true);
                         $structure['COMPTE_GENERAL']        = sizing(sizing(interco_code($this->compte_general, $this->compte_general_client), 8, false, true) , 17);
                         $structure['TYPE_DE_COMPTE']        = sizing("", 1);
@@ -213,7 +218,15 @@
             
             $this->rapportTier = $this->TRA_tiers->rapport;
             
-            return $ecriture;
+            if(!$this->debug)
+                return $ecriture;
+            
+            $return = $ecriture;
+            $return.= '<br />' . print_r($structure, 1);
+            $return.= '<br />' . print_r($debug, 1);
+            
+            return $return;
+            
         }
         
         private function getSensRectification($montant, $ttc_facture) {

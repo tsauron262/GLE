@@ -150,7 +150,6 @@
                             $this->compte_general = $product->getCodeComptableVente($facture->getData('zone_vente'), ($product->getData('type_compta') == 0) ? -1 : $product->getData('type_compta'));
                             $debug['LOADED_PRODUCT_' . $line->id] = $product->getRef();
                         }
-                            
                         else {
                             $this->compte_general = '70600000';
                             $debug['LOADED_PRODUCT_' . $line->id] = 'NULL';
@@ -229,7 +228,6 @@
                 return $ecriture;
             
             $return = $ecriture;
-            $return.= '<br />' . print_r($structure, 1);
             $return.= '<br />' . print_r($debug, 1);
             
             return $return;

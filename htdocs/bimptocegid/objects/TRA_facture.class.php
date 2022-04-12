@@ -152,6 +152,7 @@
                             $this->compte_general = '70600000';
                         
                         $debug['CHOIX_COMPTE_' . $line->id] = $line->id . ' => ' . $this->compte_general;
+                        $debug['ID_PRODUCT_' . $line->id] = $line->id . ' => ' . $line->fk_product;
                         
                         $structure['SENS']                  = sizing($this->getSens($line->multicurrency_total_ht),1, true);
                         $structure['COMPTE_GENERAL']        = sizing(sizing(interco_code($this->compte_general, $this->compte_general_client), 8, false, true) , 17);

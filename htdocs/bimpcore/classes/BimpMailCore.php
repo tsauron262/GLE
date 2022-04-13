@@ -23,29 +23,27 @@ class BimpMailCore
     public $files = array();
     public $parent;
 
-    function __construct($parent, $subject, $to, $from, $msg = ''/*provisoire pour compatibilité*/, $reply_to = '', $addr_cc = '', $addr_bcc = '', $deliveryreceipt = 0, $errors_to = '')
+    function __construct($parent, $subject, $to, $from, $msg = ''/* provisoire pour compatibilité */, $reply_to = '', $addr_cc = '', $addr_bcc = '', $deliveryreceipt = 0, $errors_to = '')
     {
         global $dolibarr_main_url_root, $conf, $user;
-        
-        if(is_object($parent))
+
+        if (is_object($parent)) {
             $this->parent = $parent;
-        else{
-            BimpCore::addlog ('Pas d\'objet parent pour BimpMail');
-            
-            if(!is_null($parent)){
+        } elseif ($parent !== 'none') {
+            BimpCore::addlog('Pas d\'objet parent pour BimpMail');
+
+            if (!is_null($parent)) {
                 $paramtres = array('parent', 'subject', 'to', 'from', 'msg', 'reply_to', 'addr_cc', 'addr_bcc', 'deliveryreceipt', 'errors_to');
                 $oldParams = null;
-                foreach ($paramtres as $newParams){
-                    if($oldParams){
-                        eval('$'.$newParams.'tmp=$'.$oldParams.';');
+                foreach ($paramtres as $newParams) {
+                    if ($oldParams) {
+                        eval('$' . $newParams . 'tmp=$' . $oldParams . ';');
                     }
-
 
                     $oldParams = $newParams;
                 }
-                foreach ($paramtres as $newParams){
-                        eval('$'.$newParams.'=$'.$newParams.'tmp;');
-
+                foreach ($paramtres as $newParams) {
+                    eval('$' . $newParams . '=$' . $newParams . 'tmp;');
                 }
             }
         }
@@ -231,22 +229,21 @@ class BimpMailCore
 
             BimpCore::setConf('bimpcore_nb_mails_failed', $nMailsFailed);
             BimpCore::setConf('bimpcore_last_mail_failed_tms', $tms);
-        }
-        else{
+        } else {
             $instance = BimpObject::getInstance('bimpcore', 'BimpMailLog');
-            
+
             $data = array(
-                'mail_to'=>$this->to,
-                'mail_from'=>$this->from,
-                'mail_cc'=>$this->cc,
-                'msg'=>$this->msg,
-                'mail_subject'=>$this->subject,
-                'obj_type'  => 'bimp_object',
-                'obj_module' => $this->parent->module,
-                'obj_name' => $this->parent->object_name,
-                'id_obj' => $this->parent->id,
+                'mail_to'      => $this->to,
+                'mail_from'    => $this->from,
+                'mail_cc'      => $this->cc,
+                'msg'          => $this->msg,
+                'mail_subject' => $this->subject,
+                'obj_type'     => 'bimp_object',
+                'obj_module'   => $this->parent->module,
+                'obj_name'     => $this->parent->object_name,
+                'id_obj'       => $this->parent->id,
             );
-            
+
             $create_errors = $instance->validateArray($data);
 
             if (!count($create_errors)) {

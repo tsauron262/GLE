@@ -4196,15 +4196,15 @@ class Bimp_Facture extends BimpComm
             'fk_mode_reglement' => 1
         ));
 
+        $avoir->dol_object->fk_delivery_address = $this->dol_object->fk_delivery_address;
+
+        // objets liés
+        $avoir->dol_object->linked_objects = $this->dol_object->linked_objects;
+
+        $avoir_warnings = array();
+        $errors = $avoir->create($avoir_warnings, true);
+
         if (BimpObject::objectLoaded($avoir)) {
-            $avoir->dol_object->fk_delivery_address = $this->dol_object->fk_delivery_address;
-
-            // objets liés
-            $avoir->dol_object->linked_objects = $this->dol_object->linked_objects;
-
-            $avoir_warnings = array();
-            $errors = $avoir->create($avoir_warnings, true);
-
             if ($avoir->dol_object->copy_linked_contact($this->dol_object, 'internal') < 0) {
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($avoir->dol_object), 'Echec de la copie des contacts internes');
             }
@@ -4249,6 +4249,8 @@ class Bimp_Facture extends BimpComm
                     }
                 }
             }
+        } elseif (empty($errors)) {
+            $errors[] = 'Echec création de l\'avoir pour une raison inconnue';
         }
 
         if (count($errors)) {

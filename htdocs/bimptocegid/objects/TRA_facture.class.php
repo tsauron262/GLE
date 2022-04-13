@@ -129,7 +129,7 @@
                 $montant_le_plus_grand = '';
                 
                 foreach($facture->dol_object->lines as $line) {
-                    
+                    $debug['ZONE_VENTE_' . $line->id] = $facture->getData('zone_vente');
                     // Définition du seens comptable de la ligne
                     if($this->sens_facture == "D") { //c'est une facture
                         $sens = ($line->multicurrency_total_ht > 0) ? "C" : "D";

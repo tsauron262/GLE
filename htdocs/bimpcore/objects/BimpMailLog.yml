@@ -65,6 +65,8 @@ lists:
             msg:
             msg_id:
             old_trace:
+            user_create:
+            date_create:
                 
 fields_tables: 
     default: 

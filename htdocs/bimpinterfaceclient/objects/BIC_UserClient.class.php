@@ -601,7 +601,7 @@ class BIC_UserClient extends BimpObject
 
         $subject = 'Espace client BIMP - Changement de votre mot de passe';
 
-        $bimpMail = new BimpMail($this, $subject, $this->getData('email'), '', $msg);
+        $bimpMail = new BimpMail($this->getChildObject('client'), $subject, $this->getData('email'), '', $msg);
 
         if ($bimpMail->send($errors)) {
             $this->updateField('renew_required', 0);
@@ -631,7 +631,7 @@ class BIC_UserClient extends BimpObject
 //            $warnings[] = 'Echec de l\'envoi du mot de passe par e-mail';
 //        }
 
-        $bimpMail = new BimpMail($this, $subject, $this->getData('email'), '', $msg);
+        $bimpMail = new BimpMail($this->getChildObject('client'), $subject, $this->getData('email'), '', $msg);
         $bimpMail->send($errors, $warnings);
         return $errors;
     }
@@ -775,7 +775,7 @@ class BIC_UserClient extends BimpObject
 //                $warnings[] = 'Echec de l\'envoi du mot de passe par e-mail';
 //            }
 
-            $bimpMail = new BimpMail($this, $subject, $this->getData('email'), '', $msg);
+            $bimpMail = new BimpMail($this->getChildObject('client'), $subject, $this->getData('email'), '', $msg);
             $bimpMail->send($errors, $warnings);
         }
 
@@ -868,7 +868,7 @@ class BIC_UserClient extends BimpObject
                     $message .= "<a href='" . $url_notice . "'>Notice d'utilisation</a>";
 
 //                    mailSyn2($sujet, BimpTools::cleanEmailsStr($email), '', $message);
-                    $bimpMail = new BimpMail($this, $sujet, $this->getData('email'), '', $message);
+                    $bimpMail = new BimpMail($this->getChildObject('client'), $sujet, $this->getData('email'), '', $message);
                     $mail_errors = array();
                     $bimpMail->send($mail_errors);
 

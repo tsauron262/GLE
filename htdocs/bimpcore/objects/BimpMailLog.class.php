@@ -8,21 +8,24 @@ class BimpMailLog extends BimpObject
         'proxy_open' => 'Chargé par proxy',
         'soft_bounce' => 'Soft Bounce',
         'hard_bounce' => 'Hard Bounce',
-        'blocked'     => 'Bloqué'
+        'blocked'     => 'Bloqué',
+        'click'     => 'Cliqué'
     );
     static $statutError = array('soft_bounce', 'hard_bounce', 'blocked');
     
-    function changeStatut($info, $email){
+    function changeStatut($info, $email, $date){
         $str = $this->trad($info);
         if(strtolower($email) != strtolower($this->getData('mail_to')))
             $str .= ' Dest : '.$email;
         
         $this->updateField('old_trace', $str);
+        $note = null;
         if(in_array($info, static::$statutError)){
-            $this->addNote ($str, null, 0, 0, '', null, 1, null, $this->getData('user_create'));
+            $this->addNote ($str, null, 0, 0, '', null, 1, null, $this->getData('user_create'), $note);
         }
         else
-            $this->addNote($str);
+            $this->addNote($str, null, 0, 0, '', null, null, null, null, $note);
+        $note->updateField('date_create', $date);
     }
     
     function canViewField($field_name) {

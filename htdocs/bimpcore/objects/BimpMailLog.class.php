@@ -25,6 +25,13 @@ class BimpMailLog extends BimpObject
             $this->addNote($str);
     }
     
+    function canViewField($field_name) {
+        global $user;
+        if($field_name == 'msg' && !$user->admin && (stripos($this->getData('msg'), 'mdp') !== false || stripos($this->getData('msg'), 'mot de passe') !== false))
+            return 0;
+        return 1;
+    }
+    
     function getObjectUrl(){
         $instance = $this->getParentInstance();
         if($instance)

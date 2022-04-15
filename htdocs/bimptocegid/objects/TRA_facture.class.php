@@ -139,7 +139,7 @@
                     }
                     $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
                     if($line->multicurrency_total_ht != 0) {
-                        
+                        $debug['ZONE_VENTE_' . $line->id] = $facture->getData('zone_vente');
                         $current_montant = round($line->multicurrency_total_ht, 2);
                         if($use_d3e) {
                             $current_montant = round($line->multicurrency_total_ht, 2) - ($product->getData('deee') * $line->qty);

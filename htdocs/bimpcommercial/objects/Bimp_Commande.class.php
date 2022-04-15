@@ -489,6 +489,44 @@ class Bimp_Commande extends BimpComm
         return (int) parent::isDeletable($force_delete);
     }
 
+    public function isCommercialOrSup()
+    {
+        global $user;
+
+        if ($this->isLoaded()) {
+            $id_commercial = $this->getCommercialId();
+
+            if ((int) $id_commercial == 0)
+                $id_commercial = $this->dol_object->user_author_id;
+        }
+
+        // Check si il est admin ou le commercial de cette commande
+        if ($user->admin or (int) $id_commercial == (int) $user->id)
+            return 1;
+
+        $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_commercial);
+        // Check si il est le n+1 du commercial en charge de cette commande
+        if ((int) $commercial->getData('fk_user') == (int) $user->id)
+            return 1;
+
+        return 0;
+    }
+
+    public function isPaiementComptant()
+    {
+        $cond_paiement_comptant = array('LIVRAISON', 'TIERFAC', 'TIERAV', 'RECEPCOM', 'HALFFAC', 'HALFAV', 'RECEP');
+        $code_cond_paiement = self::getBdb()->getValue('c_payment_term', 'code', '`active` > 0 and rowid = ' . $this->getData('fk_cond_reglement'));
+        if ((int) in_array($code_cond_paiement, $cond_paiement_comptant) == 1)
+            return 1;
+
+        // Prélèvement SEPA
+        $code_mode_paiement = self::getBdb()->getValue('c_paiement', 'code', '`active` > 0 and id = ' . $this->getData('fk_mode_reglement'));
+        if ($code_cond_paiement == '30D' and $code_mode_paiement == 'PRE')
+            return 1;
+
+        return 0;
+    }
+
     // Getters:
 
     public function getData($field)
@@ -4104,30 +4142,11 @@ class Bimp_Commande extends BimpComm
         return $errors;
     }
 
-    public function isPaiementComptant()
-    {
-        $cond_paiement_comptant = array('LIVRAISON', 'TIERFAC', 'TIERAV', 'RECEPCOM', 'HALFFAC', 'HALFAV', 'RECEP');
-        $code_cond_paiement = self::getBdb()->getValue('c_payment_term', 'code', '`active` > 0 and rowid = ' . $this->getData('fk_cond_reglement'));
-        if ((int) in_array($code_cond_paiement, $cond_paiement_comptant) == 1)
-            return 1;
-
-        // Prélèvement SEPA
-        $code_mode_paiement = self::getBdb()->getValue('c_paiement', 'code', '`active` > 0 and id = ' . $this->getData('fk_mode_reglement'));
-        if ($code_cond_paiement == '30D' and $code_mode_paiement == 'PRE')
-            return 1;
-
-        return 0;
-    }
-
-    public function setPaiementComptant()
-    {
-        return $this->set('paiement_comptant', $this->isPaiementComptant());
-    }
-
     public function update(&$warnings = array(), $force_update = false)
     {
         $init_entrepot = (int) $this->getInitData('entrepot');
-        $this->setPaiementComptant();
+//        $this->setPaiementComptant(); // Eviter de créer des fonctions avec juste 1 ligne, les classes sont déjà bien assez surchargées en fonctions. 
+        $this->set('paiement_comptant', $this->isPaiementComptant());
         $errors = parent::update($warnings, $force_update);
 
         if (!count($errors)) {
@@ -4188,29 +4207,5 @@ class Bimp_Commande extends BimpComm
         }
         $this->resprints = "OK " . $ok . ' mails BAD ' . $err . ' mails dont ' . $mailDef . ' mail par default';
         return "OK " . $ok . ' mails BAD ' . $err . ' mails dont ' . $mailDef . ' mail par default';
-    }
-
-    public function isCommercialOrSup()
-    {
-
-        global $user;
-
-        if ($this->isLoaded()) {
-            $id_commercial = $this->getCommercialId();
-
-            if ((int) $id_commercial == 0)
-                $id_commercial = $this->dol_object->user_author_id;
-        }
-
-        // Check si il est admin ou le commercial de cette commande
-        if ($user->admin or (int) $id_commercial == (int) $user->id)
-            return 1;
-
-        $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_commercial);
-        // Check si il est le n+1 du commercial en charge de cette commande
-        if ((int) $commercial->getData('fk_user') == (int) $user->id)
-            return 1;
-
-        return 0;
     }
 }

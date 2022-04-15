@@ -1370,45 +1370,13 @@ class Bimp_Facture extends BimpComm
 
         return $actions;
     }
-    
-    public function actionCsvClient(){
-        $errors = $warnings = array();
-        $objEq = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLineEquipment');
-        $bcList = new BC_ListTable($objEq, 'forExport');
-        $bcList->addJoin('bimp_facture_line', 'a___parent.id = a.id_object_line', 'a___parent');
-        $bcList->addFieldFilterValue('a___parent.id_obj', $this->id);
-        $result = $bcList->renderCsvContent(";", array());
-        
-        $objLine = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine');
-        $bcList = new BC_ListTable($objLine, 'forExport');
-        $bcList->addJoin('facturedet', 'a___dol_line.rowid = a.id_line', 'a___dol_line');
-        $bcList->addJoin('product_extrafields', 'a___dol_line.fk_product = a___dol_line___product__ef.fk_object', 'a___dol_line___product__ef');
-        $bcList->addFieldFilterValue('id_obj', $this->id);
-        $bcList->addFieldFilterValue('a___dol_line___product__ef.serialisable', array('in'=> array('0', null)));
-        $result .= $bcList->renderCsvContent(";", array(), false);
 
-        
-        
-        $file = DOL_DATA_ROOT.'/bimpcore/tmp/tmp.csv';
-        $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=tmp/tmp.csv';
-        $success_callback = 'window.open(\'' . $url . '\')';
-        file_put_contents($file, $result);
-        
-        return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
-            'success_callback' => $success_callback
-        );
-       
-    }
-    
-    
     public function getLinesListHeaderExtraBtn()
     {
         $buttons = parent::getLinesListHeaderExtraBtn();
         $buttons[] = array(
-            'label' => 'Export CSV Recap',
-            'incon' => 'fas_export',
+            'label'   => 'Export CSV Recap',
+            'incon'   => 'fas_export',
             'onclick' => $this->getJsActionOnclick('csvClient')
         );
         return $buttons;
@@ -4236,51 +4204,54 @@ class Bimp_Facture extends BimpComm
         $avoir_warnings = array();
         $errors = $avoir->create($avoir_warnings, true);
 
-        if ($avoir->dol_object->copy_linked_contact($this->dol_object, 'internal') < 0) {
-            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($avoir->dol_object), 'Echec de la copie des contacts internes');
-        }
-        if ($avoir->dol_object->copy_linked_contact($this->dol_object, 'external') < 0) {
-            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($avoir->dol_object), 'Echec de la copie des contacts externes');
-        }
+        if (BimpObject::objectLoaded($avoir)) {
+            if ($avoir->dol_object->copy_linked_contact($this->dol_object, 'internal') < 0) {
+                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($avoir->dol_object), 'Echec de la copie des contacts internes');
+            }
+            if ($avoir->dol_object->copy_linked_contact($this->dol_object, 'external') < 0) {
+                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($avoir->dol_object), 'Echec de la copie des contacts externes');
+            }
 
-        if (count($errors)) {
-            return $errors;
-        }
+            if (count($errors)) {
+                return $errors;
+            }
 
-        // Ajout lignes
-        $this->db->db->begin();
+            // Ajout lignes
+            $this->db->db->begin();
 
-        foreach ($neg_lines as $line) {
-            $up_errors = $line->updateField('id_obj', (int) $avoir->id);
-            if (count($up_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour de la ligne n°' . $line->getData('position'));
-                break;
-            } else {
-                if ($this->db->update('facturedet', array(
-                            'fk_facture' => (int) $avoir->id
-                                ), '`rowid` = ' . (int) $line->getData('id_line')) <= 0) {
-                    $errors[] = 'Echec de la mise à jour de la ligne n°' . $line->getData('position') . ' - ' . $this->db->db->lasterror();
+            foreach ($neg_lines as $line) {
+                $up_errors = $line->updateField('id_obj', (int) $avoir->id);
+                if (count($up_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour de la ligne n°' . $line->getData('position'));
                     break;
+                } else {
+                    if ($this->db->update('facturedet', array(
+                                'fk_facture' => (int) $avoir->id
+                                    ), '`rowid` = ' . (int) $line->getData('id_line')) <= 0) {
+                        $errors[] = 'Echec de la mise à jour de la ligne n°' . $line->getData('position') . ' - ' . $this->db->db->lasterror();
+                        break;
+                    }
                 }
             }
-        }
 
-        if (!count($errors)) {
-            // Changement d'ID facture pour les lignes de commandes concernées.
-            foreach ($neg_lines as $line) {
-                if ($line->getData('linked_object_name') === 'commande_line') {
-                    $commLine = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $line->getData('linked_id_object'));
-                    if (BimpObject::objectLoaded($commLine)) {
-                        $line_errors = $commLine->changeIdFacture($this->id, $avoir->id);
-                        if (count($line_errors)) {
-                            $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la mise à jour de la ligne de commande associée (ID ' . $commLine->id . ')');
-                            break;
+            if (!count($errors)) {
+                // Changement d'ID facture pour les lignes de commandes concernées.
+                foreach ($neg_lines as $line) {
+                    if ($line->getData('linked_object_name') === 'commande_line') {
+                        $commLine = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $line->getData('linked_id_object'));
+                        if (BimpObject::objectLoaded($commLine)) {
+                            $line_errors = $commLine->changeIdFacture($this->id, $avoir->id);
+                            if (count($line_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la mise à jour de la ligne de commande associée (ID ' . $commLine->id . ')');
+                                break;
+                            }
                         }
                     }
                 }
             }
+        } elseif (empty($errors)) {
+            $errors[] = 'Echec création de l\'avoir pour une raison inconnue';
         }
-
 
         if (count($errors)) {
             $this->db->db->rollback();
@@ -4326,7 +4297,7 @@ class Bimp_Facture extends BimpComm
 
         // validation de l'avoir (sans trigger pour éviter les boucles infinies): 
         global $user;
-        if ($avoir->dol_object->validate($user/*, 0, 0, 1*/) <= 0) {//attention si no triggers, pas de blockedlog
+        if ($avoir->dol_object->validate($user/* , 0, 0, 1 */) <= 0) {//attention si no triggers, pas de blockedlog
             $msg = 'Avoir créé avec succès mais échec de la validation';
             if ($convertToReduc) {
                 $msg .= '. La conversion en remise n\'a pas été effectuée';
@@ -5707,6 +5678,35 @@ class Bimp_Facture extends BimpComm
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
+        );
+    }
+
+    public function actionCsvClient($data, &$success)
+    {
+        $errors = $warnings = array();
+        $objEq = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLineEquipment');
+        $bcList = new BC_ListTable($objEq, 'forExport');
+        $bcList->addJoin('bimp_facture_line', 'a___parent.id = a.id_object_line', 'a___parent');
+        $bcList->addFieldFilterValue('a___parent.id_obj', $this->id);
+        $result = $bcList->renderCsvContent(";", array());
+
+        $objLine = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine');
+        $bcList = new BC_ListTable($objLine, 'forExport');
+        $bcList->addJoin('facturedet', 'a___dol_line.rowid = a.id_line', 'a___dol_line');
+        $bcList->addJoin('product_extrafields', 'a___dol_line.fk_product = a___dol_line___product__ef.fk_object', 'a___dol_line___product__ef');
+        $bcList->addFieldFilterValue('id_obj', $this->id);
+        $bcList->addFieldFilterValue('a___dol_line___product__ef.serialisable', array('in' => array('0', null)));
+        $result .= $bcList->renderCsvContent(";", array(), false);
+
+        $file = DOL_DATA_ROOT . '/bimpcore/tmp/tmp.csv';
+        $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=tmp/tmp.csv';
+        $success_callback = 'window.open(\'' . $url . '\')';
+        file_put_contents($file, $result);
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
         );
     }
 

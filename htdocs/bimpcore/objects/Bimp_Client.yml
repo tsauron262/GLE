@@ -96,6 +96,8 @@ fields_tables:
                 callback: displayAtradiusFile
             - field: date_depot_icba
               edit: 1
+            - field: date_atradius
+              edit: 1
             
             
             

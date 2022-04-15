@@ -32,6 +32,12 @@ fields:
         
     mode_reglement_supplier: unset
     cond_reglement_supplier: unset
+    status_atradius:
+        label: Statut Atradius
+        type: int
+        values: 
+            array: status_atradius
+        default_value: 0
                     
 fields_tables: 
     public_infos: 
@@ -90,6 +96,13 @@ fields_tables:
                 callback: displayAtradiusFile
             - field: date_depot_icba
               edit: 1
+            
+            
+            
+    encours_infos:
+        rows: 
+            - field: id_atradius
+            - field: status_atradius
 
 views: 
     client:
@@ -331,6 +344,13 @@ forms:
                   type: file_upload
 #              value:
 #                callback: displayAtradiusFile
+    setOutstandingAtradius:
+        rows:
+            - custom: 1
+              label: Montant 
+              input_name: montant_atradius
+              input: 
+                  type: text
         
 filters: 
     nb_notes_suivi: 

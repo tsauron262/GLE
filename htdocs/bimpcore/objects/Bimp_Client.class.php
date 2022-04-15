@@ -7,6 +7,16 @@ class Bimp_Client extends Bimp_Societe
 
     public $soc_type = "client";
     public static $max_nb_relances = 5;
+    
+    const STATUS_ATRADIUS_OK = 0;
+    const STATUS_ATRADIUS_EN_ATTENTE = 1;
+    const STATUS_ATRADIUS_REFUSE = 2;
+    public static $status_atradius = array(
+        self::STATUS_ATRADIUS_OK         => array('label' => 'OK',                     'icon' => 'fas_check',              'classes' => array('success')),
+        self::STATUS_ATRADIUS_EN_ATTENTE => array('label' => "En attente d'arbitrage", 'icon' => 'fas_exclamation-circle', 'classes' => array('warning')),
+        self::STATUS_ATRADIUS_REFUSE     => array('label' => "Refusé",                 'icon' => 'fas_exclamation-circle', 'classes' => array('danger')),
+    );
+
 
     // Droits user:
 
@@ -2935,4 +2945,226 @@ class Bimp_Client extends Bimp_Societe
             }
         }
     }
+    
+    
+    public function displayFormAtradius() {
+        
+        
+        $html = '';
+        
+        if($this->isLoaded()) {
+            
+            if((int) $this->getData('id_atradius') == 0 and (int) !$this->isSirenValid()) {
+                $html .= BimpRender::renderAlerts('SIREN et identifiants Atradius non renseignés/invalides', 'info');
+                return $html;
+            }
+
+            // Rafraichissement encours
+            $onclick_reload = $this->getJsActionOnclick('refreshOutstandingAtradius');
+
+            $html .= '<div>';
+            $html .= '<span class="btn btn-default" onclick="' . $onclick_reload . '">';
+            $html .= BimpRender::renderIcon('fas fa5-redo', 'iconLeft') . 'Raffraifir Atradius';
+            $html .= '</span>';
+
+            
+            global $user;
+            
+            if($user->rights->bimpcommercial->gestion_recouvrement) {
+                // Demande d'encours
+                $onclick = $this->getJsActionOnclick('setOutstandingAtradius', array(), array('form_name' => 'setOutstandingAtradius'));
+
+                $html .= '<div style="margin-top: 10px">';
+                $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                $html .= BimpRender::renderIcon('fas_question-circle', 'iconLeft') . 'Interroger Atradius';
+                $html .= '</span>';
+                $html .= BimpRender::renderAlerts("Merci de ne pas fermer la fenêtre lors de la demande d'assurance", 'info');
+                $html .= '</div>';
+            }
+            
+        }
+        
+        return $html;
+    }
+    
+    public function actionSetOutstandingAtradius($data, &$success) {
+        $warnings = array();
+        $success_callback = '';
+        
+        
+        $errors = $this->setOutstandingAtradius($data['montant_atradius'], $warnings, $success);
+        
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+    
+    // Raffraichit depuis les données présentes dans l'API Atradius
+    public function actionRefreshOutstandingAtradius($data, &$success) {
+        
+        $errors = $warnings = $success_tab = array();
+        
+        if (!$this->isLoaded()) {
+            $errors[] = "Objet non chargé";
+        } else {
+            $errors = $this->syncroAtradius($warnings, $success_tab);
+            if(count($success_tab))
+                $success = implode('<br/>', $success_tab);
+            else
+                $success = "Aucune modification apportée";
+        }
+        
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+    
+    public function syncroAtradius(&$warnings = array(), &$success = array()) {
+        $errors = array();
+        $id_atradius = $this->getIdAtradius($errors);
+        if(0 < (int) $id_atradius) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+            $api = BimpAPI::getApiInstance('atradius');
+            if (is_a($api, 'AtradiusAPI')) {
+                $cover = $api->getCover(array('buyerId' => $id_atradius), $errors, $warnings);
+                
+                if(empty($cover)) {
+                    $warnings[] = "Aucune couverture pour ce client.";
+                    return $errors;
+                }
+
+                if(is_array($cover) and ! empty($cover)) {
+                    
+                    
+                    if(isset($cover['amount']) and (int) 0 <  $cover['amount']) {
+                        // Crédit Check
+                        if($cover['cover_type'] == AtradiusAPI::CREDIT_CHECK) {
+                            $err_update = empty(self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_credit_check', (int) $cover['amount']));
+
+                            if($err_update) {
+                                $success[] = $this->displayFieldName('outstanding_limit_credit_check') . " : " . (int) $cover['amount'];
+                            } else {
+                                $errors = BimpTools::merge_array($errors, $err_update);
+                            }
+
+                        // Crédit Limit
+                        } elseif($cover['cover_type'] == AtradiusAPI::CREDIT_LIMIT) {
+                            $err_update = self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_atradius', (int) $cover['amount']);
+                            if(empty($err_update)) {
+                                $success[] = $this->displayFieldName('outstanding_limit_atradius') . " : " . (int) $cover['amount'];
+                            } else {
+                                $errors = BimpTools::merge_array($errors, $err_update);
+                            }
+                        }
+                    }
+                    
+                    // Status de la demande
+                    
+                    if(isset($cover['status'])) {
+                        BimpTools::merge_array($errors, self::updateAtradiusValue($this->getData('siren'), 'status_atradius', (int) $cover['status']));
+                    }
+                    
+                }
+            } else {
+                $errors[] = "API non définit";
+            }
+        } else {
+            $errors[] = "Id atradius non définit";
+        }
+        
+        return $errors;
+    }
+    
+    private static function updateAtradiusValue($siren, $field, $value) {
+        $errors = array();
+        
+        // Tester sur ASS SAUVEGARDE ENFANCE ET ADOLESCENCE
+        
+        // On est en train de définir une limite de crédit => supression du crédit check
+        if($field == 'outstanding_limit_atradius' and 0 < $value)
+            self::updateAtradiusValue($siren, 'outstanding_limit_credit_check', -1);
+        
+        
+        $clients = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_Client', array('siren' => $siren));
+
+        foreach($clients as $c) {
+            if($c->field_exists($field))
+                $errors = BimpTools::merge_array ($errors, $c->updateField($field, $value));
+        }
+        
+        return $errors;
+    }
+    
+    /**
+     * La nature de la demande de couverture (credit check ou limit de crédit)
+     * est définit automatiquement dans la fonction
+     * Si $amount <= 7000: credit check
+     * Si 7000 <= $amount <= 12000: credit check + limite de credit
+     * Sinon: limite de crédit
+     * 
+     * Pas d'appel d'API ici juste on set (voir askOutstandingAtradius)
+     */
+    public function setOutstandingAtradius($amount = 7000, &$warnings = array(), &$success = 'OK') {
+        
+        $errors = array();
+                
+        $success = 'OK';
+        $id_atradius = $this->getIdAtradius($errors);
+        if(0 < (int) $id_atradius) {
+
+            require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+            $api = BimpAPI::getApiInstance('atradius');
+            
+            if (is_a($api, 'AtradiusAPI')) {
+            
+                $decisions = $api->setCovers(array(
+                    'buyerId'           => (int) $id_atradius,
+                    'creditLimitAmount' => (int) $amount,
+                    ), $errors, $warnings, $success);
+                
+            }
+            
+        }        
+        
+        return $errors;
+    }
+    
+    public function getIdAtradius(&$errors = array()) {
+        
+        if(0 < (int) $this->getData('id_atradius'))
+            return (int) $this->getData('id_atradius');
+        
+        if($this->isSirenValid()) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+            $api = BimpAPI::getApiInstance('atradius');
+            if (is_a($api, 'AtradiusAPI')) {
+                $id_atradius = (int) $api->getBuyerIdBySiren((string) $this->getData('siren'), $errors);
+                if(0 < (int) $id_atradius) {
+                    $this->updateField('id_atradius', $id_atradius);
+                } else {
+                    $errors[] = "Id Atradius introuvable";
+                }
+                return $id_atradius;
+            } else {
+                $errors[] = "API inatégniable";
+            }
+        }
+        
+        $errors[] = "Id adtradius non définie et SIREN erroné/non définit";
+        return 0;
+    }
+
+    /**
+     * Détermine si le SIREN est au bon format
+     */
+    public function isSirenValid() {
+        if ($this->isLoaded()) {
+            return (string)  $this->getData('siren') and (int) strlen($this->getData('siren')) == 9;
+        }
+
+        return 0;
+    }
+    
 }

@@ -23,7 +23,7 @@ class CronSynopsis {
         
         $sql = $this->db->query('SELECT rowid, SUM(`total_ttc`) as dif FROM `llx_facture` f WHERE `total_ttc` != (SELECT SUM(`total_ttc`) FROM `llx_facturedet` WHERE `fk_facture` = f.rowid GROUP BY `fk_facture`)');
         while ($ln = $this->db->fetch_object($sql)){
-            if($ln->dif > 0.02 || $ln->dif < -0.02)
+            if(($ln->dif > 0.02 || $ln->dif < -0.02) && $ln->rowid != 139472)
                 mailSyn2("prob  total fact", 'tommy@bimp.fr, f.martinez@bimp.fr', null, "ID facture total faux ".$ln->rowid);
         }
         

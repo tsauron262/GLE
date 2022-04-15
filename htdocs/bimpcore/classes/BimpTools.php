@@ -1516,6 +1516,8 @@ class BimpTools
 
         $sql .= self::getSqlOrderBy($params['order_by'], $params['order_way'], $params['default_alias'], $params['extra_order_by'], $params['extra_order_way']);
         $sql .= self::getSqlLimit($params['n'], $params['p']);
+        
+        return $sql;
     }
 
     // Gestion de données:

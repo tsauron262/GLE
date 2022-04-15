@@ -644,14 +644,20 @@ class Bimp_Log extends BimpObject
         $this->set('last_occurence', date('Y-m-d H:i:s'));
         $this->set('nb_occurence', 1);
         $this->set('url', $_SERVER['PHP_SELF']);
+        if (defined('ID_ERP')) {
+            $this->set('id_erp', ID_ERP);
+        }
 
         $params = array();
 
         $params['GET'] = $_GET;
         $params['POST'] = $_POST;
-        foreach (implode('&', $_REQUEST) as $param) {
-            if (preg_match('/^(.+)=(.+)$/', $param, $matches)) {
-                $params[$matches[1]] = $matches[2];
+
+        if (!empty($_REQUEST)) {
+            foreach (implode('&', $_REQUEST) as $param) {
+                if (preg_match('/^(.+)=(.+)$/', $param, $matches)) {
+                    $params[$matches[1]] = $matches[2];
+                }
             }
         }
 
@@ -684,8 +690,8 @@ class Bimp_Log extends BimpObject
                         }
                         $message .= "\n";
                     }
-                    
-                    $message .= "\n\n"."Extra Data : ".$this->displayExtraData();
+
+                    $message .= "\n\n" . "Extra Data : " . $this->displayExtraData();
 
                     mailSyn2("LOG URGENT", "dev@bimp.fr", null, $message);
                 }

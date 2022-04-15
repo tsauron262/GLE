@@ -358,13 +358,15 @@ class BC_Form extends BC_Panel
             }
         }
 
-        if (isset($params['value']) && is_array($params['value'])) {
-            if ($params['data_type'] === 'json') {
-                $params['value'] = json_encode($params['value']);
-            } else {
-                $params['value'] = implode(',', $params['value']);
+        if (isset($params['value'])) {
+            if (is_array($params['value'])) {
+                if ($params['data_type'] === 'json') {
+                    $params['value'] = json_encode($params['value']);
+                } else {
+                    $params['value'] = implode(',', $params['value']);
+                }
             }
-
+            
             $field->value = $params['value'];
         }
 
@@ -862,25 +864,44 @@ class BC_Form extends BC_Panel
 
             $html .= '<div style="text-align: right; float: right;">';
 
-            $onclick = '\'' . $title . '\', \'' . $result_input_name . '\', \'' . $parent_form_id . '\'';
-            $onclick .= ', \'' . $object->module . '\', \'' . $object->object_name . '\'';
-            $onclick .= ', \'' . $form_name . '\', ' . $id_parent;
-            $onclick .= ', ' . ($reload_input ? 'true' : 'false');
-            $onclick .= ', $(this)';
-            if (!is_null($form_values) && is_array($form_values)) {
-                $onclick .= ', \'' . htmlentities(json_encode($form_values)) . '\'';
-            } else {
-                $onclick .= ', null';
+            foreach (BimpTools::getArrayValueFromPath($form_values, 'fields', array()) as $field_name => $value) {
+                if ($object->field_exists($field_name)) {
+                    $object->set($field_name, $value);
+                }
             }
-            $onclick .= ', ' . $id_object;
-            $html .= BimpRender::renderButton(array(
-                        'icon_before' => ($id_object ? 'fas_edit' : 'fas_plus-circle'),
-                        'label'       => $label,
-                        'classes'     => array('btn', 'btn-light-default'),
-                        'attr'        => array(
-                            'onclick' => 'loadObjectFormFromForm(' . $onclick . ')'
-                        )
-            ));
+
+            if ($id_object && $object->canEdit() || (!$id_object && $object->canCreate())) {
+                $onclick = 'loadObjectFormFromForm(\'' . $title . '\', \'' . $result_input_name . '\', \'' . $parent_form_id . '\'';
+                $onclick .= ', \'' . $object->module . '\', \'' . $object->object_name . '\'';
+                $onclick .= ', \'' . $form_name . '\', ' . $id_parent;
+                $onclick .= ', ' . ($reload_input ? 'true' : 'false');
+                $onclick .= ', $(this)';
+                if (!is_null($form_values) && is_array($form_values)) {
+                    $onclick .= ', \'' . htmlentities(json_encode($form_values)) . '\'';
+                } else {
+                    $onclick .= ', null';
+                }
+                $onclick .= ', ' . $id_object;
+                $onclick .= ')';
+
+                $html .= BimpRender::renderButton(array(
+                            'icon_before' => ($id_object ? 'fas_edit' : 'fas_plus-circle'),
+                            'label'       => $label,
+                            'classes'     => array('btn', 'btn-light-default'),
+                            'attr'        => array(
+                                'onclick' => $onclick
+                            )
+                ));
+            } else {
+                $html .= BimpRender::renderButton(array(
+                            'icon'     => ($id_object ? 'fas_edit' : 'fas_plus-circle'),
+                            'label'    => $label,
+                            'type'     => 'light-default',
+                            'onclick'  => '',
+                            'disabled' => 1,
+                            'popover'  => 'Vous n\'avez pas la permission'
+                ));
+            }
 
             $html .= '</div>';
         }

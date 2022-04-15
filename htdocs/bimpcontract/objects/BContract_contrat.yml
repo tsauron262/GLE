@@ -574,6 +574,10 @@ filters_panels:
             negatif_positif:
                         
 lists_cols:
+    total:
+        label: Total actuel
+        value:
+            callback: getCurrentTotal
     margeInter:
         label: Marge Inters
         value:

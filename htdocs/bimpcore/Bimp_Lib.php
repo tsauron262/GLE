@@ -77,6 +77,7 @@ if (!defined('BIMP_LIB')) {
     BimpCore::setMemoryLimit(256);
 
     BimpObject::loadClass('bimpcore', 'Bimp_Log');
+    BimpObject::loadClass('bimpcore', 'BimpObjectLog');
 
     BimpConfig::initCacheServeur();
 }

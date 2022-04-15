@@ -11,64 +11,48 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
         'ShortDesignation'  => 'lib',
         'Brand'             => 'brand',
         'ManufacturerRef'   => 'ref_manuf',
-       /* 'IsAsleep'          => 'is_sleep',*/
+        /* 'IsAsleep'          => 'is_sleep', */
         'IsDeleted'         => 'is_delete',
         'PriceVatOff'       => 'pu_ht',
         'PriceVatOn'        => 'pu_ttc',
         'BuyingPriceVatOff' => 'pa_ht',
-        'Image01' => 'url'
+        'Image01'           => 'url'
     );
-    
     public $nameFile = '';
-    
+
     public function __construct(BDS_Process $process, $options = array(), $references = array())
     {
         parent::__construct($process, $options, $references);
-        
-        $file = date('Ymd') . '_catalog_ldlc_to_bimp.csv';
-
-//        if (!file_exists($this->local_dir . $file)) {
-//            $file = '';
-//            if (file_exists($this->local_dir) && is_dir($this->local_dir)) {
-//                $files = scandir($this->local_dir);
-//                arsort($files);
-//
-//                foreach ($files as $f) {
-//                    if (preg_match('/^[0-9]{8}_catalog_ldlc_to_bimp\.csv$/', $f)) {
-//                        $this->nameFile = $f;
-//                        break;
-//                    }
-//                }
-//            } else {
-//                $this->Alert('Dossier "' . $this->local_dir . '" absent');
-//            }
-//        }
-//        else
-            $this->nameFile = $file;
+        $this->nameFile = date('Ymd') . '_catalog_ldlc_to_bimp.csv';
     }
 
     public function initUpdateFromFile(&$data, &$errors = array())
     {
         $data['steps'] = array();
 
-        $this->truncTableProdFourn($errors);
-        
+//        $this->truncTableProdFourn($errors);
+
         if (isset($this->options['update_files']) && (int) $this->options['update_files']) {
             $data['steps']['update_prices_file'] = array(
                 'label'    => 'Téléchargement du fichier',
                 'on_error' => 'continue'
             );
+//        } elseif (isset($this->options['process_full_file']) && (int) $this->options['process_full_file']) {
+//            $data['steps']['process_prices'] = array(
+//                'label'                  => 'Traitement des prix fourniseur',
+//                'on_error'               => 'continue',
+//                'nbElementsPerIteration' => 0
+//            );
+//        } else {
+//            $data['steps']['make_prices_file_parts'] = array(
+//                'label'    => 'Découpage du fichier',
+//                'on_error' => 'continue'
+//            );
         }
-        elseif (isset($this->options['process_full_file']) && (int) $this->options['process_full_file']) {
-            $data['steps']['process_prices'] = array(
-                'label'                  => 'Traitement des prix fourniseur',
-                'on_error'               => 'continue',
-                'nbElementsPerIteration' => 0
-            );
-        } else {
-            $data['steps']['make_prices_file_parts'] = array(
-                'label'    => 'Découpage du fichier',
-                'on_error' => 'continue'
+        else{
+            $data['steps']['trunc_table_prod_fourn'] = array(
+                'label'    => 'Vidage de la table import',
+                'on_error' => 'stop'
             );
         }
     }
@@ -78,56 +62,47 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
         $result = array();
 
         switch ($step_name) {
+            case 'trunc_table_prod_fourn':
+                $this->truncTableProdFourn($errors);
+                if (isset($this->options['process_full_file']) && (int) $this->options['process_full_file']) {
+                    $result['new_steps']['process_prices'] = array(
+                        'label'                  => 'Traitement des prix fourniseur',
+                        'on_error'               => 'continue',
+                        'nbElementsPerIteration' => 0
+                    );
+                } else {
+                    $result['new_steps']['make_prices_file_parts'] = array(
+                        'label'    => 'Création des fichiers intermédiaires pour les prix fourniseur',
+                        'on_error' => 'continue'
+                    );
+                }
+                break;
+            
+            
             case 'update_prices_file':
                 if (isset($this->nameFile) && $this->nameFile) {
                     $fileName = $this->nameFile;
                     $this->downloadFtpFile($fileName, $errors);
-//                    die($fileName."mm");
+
                     if (!count($errors)) {
                         if ($this->options['debug']) {
                             error_reporting(E_ALL);
                         }
-                        
-//                        //supression des deux premiére lignes
-//                        $file = PATH_TMP."/".$this->params['local_dir']."/". $this->nameFile;
-//                        
-//                        $donnee = file($file);
-//                        $fichier=fopen($file, "w");
-//                        fputs('');
-//                        $i=0;
-//                        foreach($donnee as $d)
-//                        {
-//                                if($i!=0)
-//                                {
-//                                        fputs($fichier, $d);
-//                                }
-//                                $i++;
-//                        }
-//                        fclose($fichier);
-//                        $donnee = array();
-                        
+
                         if ($this->options['debug']) {
                             error_reporting(E_ERROR);
                         }
-                        
-                        if (isset($this->options['process_full_file']) && (int) $this->options['process_full_file']) {
-                            $result['new_steps']['process_prices'] = array(
-                                'label'                  => 'Traitement des prix fourniseur',
-                                'on_error'               => 'continue',
-                                'nbElementsPerIteration' => 0
-                            );
-                        } else {
-                            $result['new_steps']['make_prices_file_parts'] = array(
-                                'label'    => 'Téléchargement du fichier',
-                                'on_error' => 'continue'
-                            );
-                        }
+
+                        $result['new_steps']['trunc_table_prod_fourn'] = array(
+                            'label'    => 'Vidage de la table import',
+                            'on_error' => 'stop'
+                        );
                     }
                 } else {
                     $errors[] = 'Nom du fichier stock fournisseur absent';
                 }
                 break;
-                
+
             case 'make_prices_file_parts':
                 if (isset($this->nameFile) && $this->nameFile) {
                     $this->makeCsvFileParts($this->local_dir, $this->nameFile, $errors, 3000, 1);
@@ -165,7 +140,7 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
                     'part_file_idx' => $file_idx
                 ));
 
-//                $this->DebugData($file_data, 'Données fichier');
+                $this->DebugData($file_data, 'Données fichier');
 
                 if (!count($errors) && !empty($file_data)) {
                     $this->processFournPrices($file_data, $errors);
@@ -214,7 +189,7 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
                 'label'      => 'MDP',
                 'value'      => 'Yu5pTR?(3q99Aa'
                     ), true, $warnings, $warnings);
-            
+
             BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessParam', array(
                 'id_process' => (int) $process->id,
                 'name'       => 'ftp_dir',
@@ -251,7 +226,7 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
                     ), true, $warnings, $warnings);
 
             // Options: 
-            
+
             $opt1 = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
                         'id_process'    => (int) $process->id,
                         'label'         => 'Mettre à jour le fichier',

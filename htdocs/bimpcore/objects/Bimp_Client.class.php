@@ -166,6 +166,19 @@ class Bimp_Client extends Bimp_Societe
         return 0;
     }
 
+    public function isAnonymizable(&$errors = array())
+    {
+        $check = (int) parent::isAnonymizable($errors);
+
+        $unpaid = $this->getTotalUnpayed();
+        if ($unpaid) {
+            $errors[] = ucfirst($this->getLabel('this')) . ' dispose de factures impayées (' . BimpTools::displayMoneyValue($unpaid) . ')';
+            $check = 0;
+        }
+
+        return $check;
+    }
+
     // Getters params:
 
     public function getRefProperty()
@@ -181,16 +194,19 @@ class Bimp_Client extends Bimp_Societe
     }
 
     public function getActionsButtons()
-    {
+    {        
         global $user;
 
-        $buttons = parent::getActionsButtons();
+        $groups = array();
+
+        $action_buttons = parent::getActionsButtons();
+        $new_objects_buttons = array();
 
         if ($this->isLoaded()) {
             // Nouvelle propale: 
             $instance = BimpObject::getInstance('bimpcommercial', 'Bimp_Propal');
             if ($instance->canCreate()) {
-                $buttons[] = array(
+                $new_objects_buttons[] = array(
                     'label'   => 'Nouvelle proposition commerciale',
                     'icon'    => $instance->params['icon'],
                     'onclick' => $instance->getJsLoadModalForm('default', 'Nouvelle proposition commerciale', array(
@@ -204,7 +220,7 @@ class Bimp_Client extends Bimp_Societe
             // Nouvelle commande: 
             $instance = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
             if ($instance->canCreate()) {
-                $buttons[] = array(
+                $new_objects_buttons[] = array(
                     'label'   => 'Nouvelle commande',
                     'icon'    => $instance->params['icon'],
                     'onclick' => $instance->getJsLoadModalForm('default', 'Nouvelle commande', array(
@@ -218,7 +234,7 @@ class Bimp_Client extends Bimp_Societe
             // Nouvelle facture: 
             $instance = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
             if ($instance->canCreate()) {
-                $buttons[] = array(
+                $new_objects_buttons[] = array(
                     'label'   => 'Nouvelle facture',
                     'icon'    => $instance->params['icon'],
                     'onclick' => $instance->getJsLoadModalForm('default', 'Nouvelle facture', array(
@@ -232,7 +248,7 @@ class Bimp_Client extends Bimp_Societe
             // Nouveau ticket hotline: 
             $instance = BimpObject::getInstance('bimpsupport', 'BS_Ticket');
             if ($instance->canCreate()) {
-                $buttons[] = array(
+                $new_objects_buttons[] = array(
                     'label'   => 'Nouveau ticket hotline',
                     'icon'    => $instance->params['icon'],
                     'onclick' => $instance->getJsLoadModalForm('default', 'Nouveau ticket hotline', array(
@@ -246,7 +262,7 @@ class Bimp_Client extends Bimp_Societe
             // Nouveau SAV: 
             $instance = BimpObject::getInstance('bimpsupport', 'BS_SAV');
             if ($instance->canCreate()) {
-                $buttons[] = array(
+                $new_objects_buttons[] = array(
                     'label'   => 'Nouveau SAV',
                     'icon'    => $instance->params['icon'],
                     'onclick' => $instance->getJsLoadModalForm('default', 'Nouveau SAV', array(
@@ -260,7 +276,7 @@ class Bimp_Client extends Bimp_Societe
             // Nouveau Prêt de matériel: 
             $instance = BimpObject::getInstance('bimpsupport', 'BS_Pret');
             if ($instance->canCreate()) {
-                $buttons[] = array(
+                $new_objects_buttons[] = array(
                     'label'   => 'Nouveau prêt de matériel',
                     'icon'    => $instance->params['icon'],
                     'onclick' => $instance->getJsLoadModalForm('default', 'Nouveau prêt de matériel', array(
@@ -274,7 +290,7 @@ class Bimp_Client extends Bimp_Societe
             // Nouvelle demande inter: 
             $instance = BimpObject::getInstance('bimpfichinter', 'Bimp_Demandinter');
             if ($instance->canCreate()) {
-                $buttons[] = array(
+                $new_objects_buttons[] = array(
                     'label'   => 'Nouvelle demande d\'intervention',
                     'icon'    => $instance->params['icon'],
                     'onclick' => $instance->getJsLoadModalForm('default', 'Nouvelle demande d\\\'intervention', array(
@@ -288,7 +304,7 @@ class Bimp_Client extends Bimp_Societe
             // Nouveau Prêt de matériel: 
             $instance = BimpObject::getInstance('bimpfichinter', 'Bimp_Fichinter');
             if ($instance->canCreate()) {
-                $buttons[] = array(
+                $new_objects_buttons[] = array(
                     'label'   => 'Nouvelle fiche intervention',
                     'icon'    => $instance->params['icon'],
                     'onclick' => $instance->getJsLoadModalForm('default', 'Nouvelle fiche intervention', array(
@@ -301,7 +317,7 @@ class Bimp_Client extends Bimp_Societe
 
             // Relances paiements: 
             if ($this->isActionAllowed('relancePaiements') && $this->canSetAction('relancePaiements') && $user->rights->bimpcommercial->admin_relance_individuelle) {
-                $buttons[] = array(
+                $action_buttons[] = array(
                     'label'   => 'Relance paiements',
                     'icon'    => 'fas_comment-dollar',
                     'onclick' => $this->getJsActionOnclick('relancePaiements', array(), array(
@@ -313,7 +329,7 @@ class Bimp_Client extends Bimp_Societe
             // Relances actives: 
             if ($this->canSetAction('setRelancesActives') && $this->isActionAllowed('setRelancesActives')) {
                 if ((int) $this->getData('relances_actives')) {
-                    $buttons[] = array(
+                    $action_buttons[] = array(
                         'label'   => 'Désactiver les relances',
                         'icon'    => 'fas_times-circle',
                         'onclick' => $this->getJsActionOnclick('setRelancesActives', array(
@@ -323,7 +339,7 @@ class Bimp_Client extends Bimp_Societe
                         ))
                     );
                 } else {
-                    $buttons[] = array(
+                    $action_buttons[] = array(
                         'label'   => 'Activer les relances',
                         'icon'    => 'fas_check-circle',
                         'onclick' => $this->getJsActionOnclick('setRelancesActives', array(
@@ -336,15 +352,86 @@ class Bimp_Client extends Bimp_Societe
             }
 
             if ($this->isActionAllowed('checkSolvabilite') && $this->canSetAction('checkSolvabilite')) {
-                $buttons[] = array(
+                $action_buttons[] = array(
                     'label'   => 'Vérifier le statut solvabilité',
                     'icon'    => 'fas_check-circle',
                     'onclick' => $this->getJsActionOnclick('checkSolvabilite')
                 );
             }
+
+            if ($this->isActionAllowed('checkLastActivity') && $this->canSetAction('checkLastActivity')) {
+                $action_buttons[] = array(
+                    'label'   => 'Vérifier la date de dernière activité',
+                    'icon'    => 'fas_check-circle',
+                    'onclick' => $this->getJsActionOnclick('checkLastActivity')
+                );
+            }
+
+            if ($this->canSetAction('setActivity')) {
+                $errors = array();
+                if ($this->isActionAllowed('setActivity', $errors)) {
+                    $action_buttons[] = array(
+                        'label'   => 'Définir date de dernière activité',
+                        'icon'    => 'fas_calendar-check',
+                        'onclick' => $this->getJsActionOnclick('setActivity', array(), array(
+                            'form_name' => 'set_activity'
+                        ))
+                    );
+                } else {
+                    $action_buttons[] = array(
+                        'label'    => 'Définir date de dernière activité',
+                        'icon'     => 'fas_calendar-check',
+                        'onclick'  => '',
+                        'disabled' => 1,
+                        'popover'  => BimpTools::getMsgFromArray($errors)
+                    );
+                }
+            }
+
+            if ($this->canSetAction('anonymize') && $this->isActionAllowed('anonymize')) {
+                $action_buttons[] = array(
+                    'label'   => 'Anonymiser',
+                    'icon'    => 'fas_user-times',
+                    'onclick' => $this->getJsActionOnclick('anonymize', array(), array(
+                        'form_name' => 'anonymize'
+                    ))
+                );
+            }
+
+            if ($this->canSetAction('revertAnonymization') && $this->isActionAllowed('revertAnonymization')) {
+                $action_buttons[] = array(
+                    'label'   => 'Annuler l\'anonymisation',
+                    'icon'    => 'fas_undo',
+                    'onclick' => $this->getJsActionOnclick('revertAnonymization', array(), array(
+                        'form_name' => 'revert_anonymisation'
+                    ))
+                );
+            }
         }
 
-        return $buttons;
+        if (!empty($action_buttons)) {
+            $groups[] = array(
+                'label'   => 'Actions',
+                'icon'    => 'fas_cogs',
+                'buttons' => $action_buttons
+            );
+        }
+
+        if (!empty($new_objects_buttons)) {
+            $groups[] = array(
+                'label'   => 'Créer',
+                'icon'    => 'fas_plus-circle',
+                'buttons' => $new_objects_buttons
+            );
+        }
+
+        if (!empty($groups)) {
+            return array(
+                'buttons_groups' => $groups
+            );
+        }
+
+        return array();
     }
 
     public function getListExtraBulkActions()
@@ -484,6 +571,16 @@ class Bimp_Client extends Bimp_Societe
 //                        'on_form_submit' => 'function($form, extra_data) {return onRelanceClientsPaiementsFormSubmit($form, extra_data);}'
                     ))
                 )
+            );
+        }
+
+        if ($this->canSetAction('listClientsToExcludeForCreditLimits')) {
+            $buttons[] = array(
+                'label'   => 'Listes clients à exclure',
+                'icon'    => 'fas_bars',
+                'onclick' => $this->getJsActionOnclick('listClientsToExcludeForCreditLimits', array(), array(
+                    'form_name' => 'clients_to_exclude'
+                ))
             );
         }
 
@@ -694,7 +791,7 @@ class Bimp_Client extends Bimp_Societe
                         }
 
                         // Recherche de relance en attente pour la facture: 
-                        $where = '`status` IN (' . BimpRelanceClientsLine::RELANCE_ATTENTE_MAIL . ',' . BimpRelanceClientsLine::RELANCE_ATTENTE_COURRIER . ')';
+                        $where = '`status` < 10';
                         $where .= ' AND `factures` LIKE \'%[' . $r['rowid'] . ']%\'';
                         $id_cur_relance = (int) $this->db->getValue('bimp_relance_clients_line', 'id_relance', $where);
 
@@ -2180,6 +2277,7 @@ class Bimp_Client extends Bimp_Societe
         if ($mode == 'cron') {
             $clients = $this->getFacturesToRelanceByClients(true, null, $clients, null, false, 'all');
             $bds_process->DebugData($clients, 'Données clients');
+            $bds_process->info('Factures à traiter: <pre>' . print_r($clients, 1) . '</pre>');
         }
 
         if (empty($clients)) {
@@ -2192,12 +2290,12 @@ class Bimp_Client extends Bimp_Societe
             global $user;
             $now = date('Y-m-d');
 
-            // Création de la relance:
             if (!is_null($id_relance)) {
                 $relance = BimpCache::getBimpObjectInstance('bimpcommercial', 'BimpRelanceClients', $id_relance);
             }
 
             if (!BimpObject::objectLoaded($relance)) {
+                // Création de la relance:
                 if (!is_null($bds_process)) {
                     $bds_process->setCurrentObjectData('bimpcommercial', 'BimpRelanceClients');
                     $bds_process->incProcessed();
@@ -2219,7 +2317,6 @@ class Bimp_Client extends Bimp_Societe
                 $id_relance = $relance->id;
                 $acomptes = array();
 
-                $n = 0;
                 foreach ($clients as $id_client => $client_data) {
                     if (!is_null($bds_process)) {
                         $bds_process->setCurrentObjectData('bimpcore', 'Bimp_Client');
@@ -2299,8 +2396,8 @@ class Bimp_Client extends Bimp_Societe
 
                             if ((int) $fac_data['id_cur_relance']) {
                                 $msg = 'La facture ' . $fac->getLink() . ' ne peut pas être relancée car il y a une ';
-                                $msg .= '<a href="'.$client_url.'" target="_blank">relance non envoyée en cours ';
-                                $msg .= BimpRender::renderIcon('fas_external-link-alt', 'iconRight').'</a>';
+                                $msg .= '<a href="' . $client_url . '" target="_blank">relance non envoyée en cours ';
+                                $msg .= BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
                                 $facs_warnings[] = $msg;
                                 continue;
                             }
@@ -2401,12 +2498,6 @@ class Bimp_Client extends Bimp_Societe
                                 $bds_process->incCreated();
                             }
                         }
-                    }
-
-                    $n++;
-
-                    if ($n > 10 && !is_null($bds_process)) {
-                        break;
                     }
                 }
 

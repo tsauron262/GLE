@@ -7,6 +7,7 @@ class Bimp_Contact extends BimpObject
         0 => array('label' => 'Désactivé', 'icon' => 'fas_times', 'classes' => array('danger')),
         1 => array('label' => 'Actif', 'icon' => 'fas_check', 'classes' => array('success'))
     );
+    public static $anonymization_fields = array('lastname', 'firstname', 'address', 'zip', 'town', 'email', 'phone', 'phone_perso', 'phone_mobile', 'fax', 'jabberid', 'skype', 'birthday');
 
     // Getters booléens: 
 
@@ -83,6 +84,23 @@ class Bimp_Contact extends BimpObject
         }
 
         return parent::canSetStatus($status);
+    }
+    
+    public function canEditField($field_name)
+    {
+        if ($this->isLoaded()) {
+            $client = $this->getParentInstance();
+            
+            if (BimpObject::objectLoaded($client)) {
+                if ($client->isAnonymised()) {
+                    if (in_array($field_name, self::$anonymization_fields)) {
+                        // Champs anonymisés non éditables par user: doit utiliser action "Annuler anonymisation" (revertAnonymization) du client.
+                        return 0;
+                    }
+                }
+            }
+        }
+        return parent::canEditField($field_name);
     }
 
     // Getters params: 
@@ -252,6 +270,103 @@ class Bimp_Contact extends BimpObject
         return $html;
     }
 
+    // Traitements: 
+
+    public function anonymiseData($save_data = true)
+    {
+        $errors = array();
+
+        if (!$this->isLoaded($errors)) {
+            return $errors;
+        }
+
+        $data = array();
+        $saved_data = array();
+
+        foreach (self::$anonymization_fields as $field) {
+            $saved_data[$field] = $this->getData($field);
+
+            if ($field === 'birthday') {
+                $data[$field] = null;
+            } else {
+                if ((string) $saved_data[$field]) {
+                    $data[$field] = '*****';
+                } else {
+                    unset($saved_data[$field]);
+                }
+            }
+        }
+
+        if ($save_data) {
+            $id_cur_saved_data = (int) $this->db->getValue('societe_saved_data', 'id', 'type = \'contact\' AND id_object = ' . (int) $this->id);
+
+            if ($id_cur_saved_data) {
+                if ($this->db->update('societe_saved_data', array(
+                            'date' => date('Y-m-d'),
+                            'data' => base64_encode(json_encode($saved_data))
+                                ), 'id = ' . $id_cur_saved_data) <= 0) {
+                    $errors[] = 'Echec de l\'enregistrement des données de sauvegarde. Pas d\'anonymisation - Erreur SQL ' . $this->db->err();
+                }
+            } else {
+                if ($this->db->insert('societe_saved_data', array(
+                            'type'      => 'contact',
+                            'id_object' => (int) $this->id,
+                            'date'      => date('Y-m-d'),
+                            'data'      => base64_encode(json_encode($saved_data))
+                        )) <= 0) {
+                    $errors[] = 'Echec de l\'enregistrement des données de sauvegarde. Pas d\'anonymisation - Erreur SQL ' . $this->db->err();
+                }
+            }
+        }
+
+        if (!count($errors)) {
+            if (!empty($data)) {
+                // On fait un update direct en base pour contourner les validations de formats des données: 
+                if ($this->db->update('socpeople', $data, 'rowid = ' . (int) $this->id) <= 0) {
+                    $errors[] = 'Echec anonymisation des données - Erreur sql: ' . $this->db->err();
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function revertAnonymisedData()
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            $rows = $this->db->getRows('societe_saved_data', 'type = \'contact\' AND id_object = ' . $this->id, 1, 'array', null, 'date', 'desc');
+
+            if (isset($rows[0]['data'])) {
+                $values = base64_decode($rows[0]['data']);
+
+                if ($values) {
+                    $values = json_decode($values, 1);
+                }
+
+                if (is_array($values) && !empty($values)) {
+                    foreach (self::$anonymization_fields as $field) {
+                        if (isset($values[$field])) {
+                            $this->set($field, $values[$field]);
+                        }
+                    }
+
+                    $warnings = array();
+                    $errors = $this->update($warnings, true);
+
+                    if (!count($errors)) {
+                        if ((int) $rows[0]['id']) {
+                            $this->db->delete('societe_saved_data', 'id = ' . (int) $rows[0]['id']);
+                        }
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
     // Overrides: 
 
     public function validate()
@@ -259,7 +374,7 @@ class Bimp_Contact extends BimpObject
         $civility = (string) $this->getData('civility');
         $fistname = (string) $this->getData('firstname');
         $errors = array();
-        
+
         if ($civility !== 'SERVIC' && !$fistname) {
             $errors[] = 'Le prénom est obligatoire pour les contacts de type autre que "Service"';
         }

@@ -748,11 +748,23 @@ class gsxController extends BimpController
                     $is_tier_part = (!(string) $issue->getData('category_code')) ? 1 : 0;
 
                 $result = $this->gsx_v2->partsSummaryBySerialAndIssue($serial, $issue);
-                if ($is_tier_part == -1 || $is_tier_part == 1)
-                    $result = BimpTools::merge_array($result, $this->gsx_v2->partsSummaryBySerialAndIssue($serial, $issue, array('Recovery Kit', 'box')));
                 $errors = $this->gsx_v2->getErrors();
 
                 if (empty($errors) && is_array($result)) {
+                    if ($is_tier_part == -1 || $is_tier_part == 1) {
+                        $this->gsx_v2->resetErrors();
+                        $result2 = $this->gsx_v2->partsSummaryBySerialAndIssue($serial, $issue, array('Recovery Kit', 'box'));
+                        $res2_errors = $this->gsx_v2->getErrors();
+
+                        if (!empty($res2_errors)) {
+                            $errors = array(
+                                BimpTools::getMsgFromArray($res2_errors, 'Echec obtention composants tiers')
+                            );
+                        } elseif (is_array($result2)) {
+                            $result = BimpTools::merge_array($result, $result2);
+                        }
+                    }
+
                     $parts = array();
                     foreach ($result as $part) {
                         if ($is_tier_part == 1 && $part['type'] !== 'CNTC' && $part['type'] !== 'BOX') {
@@ -3575,14 +3587,14 @@ class gsxController extends BimpController
                             'onclick' => '$(\'#createRepairForm\').slideUp(250);'
             )));
 
-            if ($has_parts) {
-                $onclick = 'gsx_LoadRepairConsignedStockForm($(this), ' . $sav->id . ', \'' . $serial . '\')';
-            } else {
-                $onclick = 'gsx_loadRequestModalForm($(this), \'Création d\\\'une nouvelle réparation\', \'repairCreate\', {';
-                $onclick .= 'id_sav: ' . $sav->id . ', ';
-                $onclick .= 'serial: \'' . $serial . '\'';
-                $onclick .= '}, {});';
-            }
+//            if ($has_parts) {
+            $onclick = 'gsx_LoadRepairConsignedStockForm($(this), ' . $sav->id . ', \'' . $serial . '\')';
+//            } else {
+//                $onclick = 'gsx_loadRequestModalForm($(this), \'Création d\\\'une nouvelle réparation\', \'repairCreate\', {';
+//                $onclick .= 'id_sav: ' . $sav->id . ', ';
+//                $onclick .= 'serial: \'' . $serial . '\'';
+//                $onclick .= '}, {});';
+//            }
 
             $buttons[] = BimpRender::renderButton(array(
                         'label'      => 'Valider',

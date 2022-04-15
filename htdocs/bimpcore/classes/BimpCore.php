@@ -11,29 +11,30 @@ class BimpCore
     private static $logs_extra_data = array();
     public static $files = array(
         'js'  => array(
-            'jpicker'        => '/includes/jquery/plugins/jpicker/jpicker-1.1.6.js',
-            'SignaturePad'   => '/bimpcore/views/js/SignaturePad.object.js',
-            'moment'         => '/bimpcore/views/js/moment.min.js',
-            'bootstrap'      => '/bimpcore/views/js/bootstrap.min.js',
-            'datetimepicker' => '/bimpcore/views/js/bootstrap-datetimepicker.js',
-            'functions'      => '/bimpcore/views/js/functions.js',
-            'scroller'       => '/bimpcore/views/js/scroller.js',
-            'ajax'           => '/bimpcore/views/js/ajax.js',
+            'jpicker'           => '/includes/jquery/plugins/jpicker/jpicker-1.1.6.js',
+            'SignaturePad'      => '/bimpcore/views/js/SignaturePad.object.js',
+            'moment'            => '/bimpcore/views/js/moment.min.js',
+            'bootstrap'         => '/bimpcore/views/js/bootstrap.min.js',
+            'datetimepicker'    => '/bimpcore/views/js/bootstrap-datetimepicker.js',
+            'functions'         => '/bimpcore/views/js/functions.js',
+            'scroller'          => '/bimpcore/views/js/scroller.js',
+            'ajax'              => '/bimpcore/views/js/ajax.js',
 //            '/bimpcore/views/js/component.js',
-            'modal'          => '/bimpcore/views/js/modal.js',
-            'object'         => '/bimpcore/views/js/object.js',
-            'filters'        => '/bimpcore/views/js/filters.js',
-            'form'           => '/bimpcore/views/js/form.js',
-            'list'           => '/bimpcore/views/js/list.js',
-            'view'           => '/bimpcore/views/js/view.js',
-            'viewsList'      => '/bimpcore/views/js/viewsList.js',
-            'listCustom'     => '/bimpcore/views/js/listCustom.js',
-            'statsList'      => '/bimpcore/views/js/statsList.js',
-            'page'           => '/bimpcore/views/js/page.js',
-            'table2csv'      => '/bimpcore/views/js/table2csv.js',
-            'buc'            => '/bimpuserconfig/views/js/buc.js',
-            'bimpcore'       => '/bimpcore/views/js/bimpcore.js',
-            'bimp_api'       => '/bimpapi/views/js/bimp_api.js'
+            'modal'             => '/bimpcore/views/js/modal.js',
+            'object'            => '/bimpcore/views/js/object.js',
+            'filters'           => '/bimpcore/views/js/filters.js',
+            'form'              => '/bimpcore/views/js/form.js',
+            'list'              => '/bimpcore/views/js/list.js',
+            'view'              => '/bimpcore/views/js/view.js',
+            'viewsList'         => '/bimpcore/views/js/viewsList.js',
+            'listCustom'        => '/bimpcore/views/js/listCustom.js',
+            'statsList'         => '/bimpcore/views/js/statsList.js',
+            'page'              => '/bimpcore/views/js/page.js',
+            'table2csv'         => '/bimpcore/views/js/table2csv.js',
+            'buc'               => '/bimpuserconfig/views/js/buc.js',
+            'bimpcore'          => '/bimpcore/views/js/bimpcore.js',
+            'bimp_api'          => '/bimpapi/views/js/bimp_api.js',
+            'bimpDocumentation' => '/bimpcore/views/js/BimpDocumentation.js'
         ),
         'css' => array(
             'jPicker'    => '/includes/jquery/plugins/jpicker/css/jPicker-1.1.6.css',
@@ -449,19 +450,23 @@ class BimpCore
 
     public static function addLogs_extra_data($array)
     {
-        if (!is_array($array))
+        if (!is_array($array)) {
             $array = array($array);
+        }
+
         static::$logs_extra_data = BimpTools::merge_array(static::$logs_extra_data, $array);
     }
 
     public static function addlog($msg, $level = 1, $type = 'bimpcore', $object = null, $extra_data = array(), $force = false)
     {
-        // $bimp_logs_locked: Eviter boucles infinies 
+        // $bimp_logs_locked: Eviter boucles infinies
+
         global $bimp_logs_locked, $user;
 
         if (is_null($bimp_logs_locked)) {
             $bimp_logs_locked = 0;
         }
+
         if (!$bimp_logs_locked) {
             $bimp_logs_locked = 1;
             $extra_data = BimpTools::merge_array(static::$logs_extra_data, $extra_data);
@@ -497,10 +502,6 @@ class BimpCore
 
             $errors = array();
 
-            if (defined('ID_ERP'))
-                $extra_data['id_erp'] = ID_ERP;
-
-
             $check = true;
             foreach (Bimp_Log::$exclude_msg_prefixes as $prefixe) {
                 if (strpos($msg, $prefixe) === 0) {
@@ -522,22 +523,22 @@ class BimpCore
                     $id = (int) $object->id;
                 }
 
-                $datas = array(
+                $data = array(
                     'id_user'    => (BimpObject::objectLoaded($user) ? (int) $user->id : 1),
                     'obj_module' => $mod,
                     'obj_name'   => $obj,
                     'id_object'  => $id,
-                    'backtrace'  => BimpTools::getBacktraceArray($bt)
+                    'backtrace'  => BimpTools::getBacktraceArray(debug_backtrace(null, 15))
                 );
 
                 if (!$id_current_log) {
-                    $datas = BimpTools::merge_array($datas, array(
+                    $data = BimpTools::merge_array($data, array(
                                 'type'       => $type,
                                 'level'      => $level,
                                 'msg'        => $msg,
                                 'extra_data' => $extra_data,
                     ));
-                    $log = BimpObject::createBimpObject('bimpcore', 'Bimp_Log', $datas, true, $errors);
+                    $log = BimpObject::createBimpObject('bimpcore', 'Bimp_Log', $data, true, $errors);
 
                     if (BimpObject::objectLoaded($log)) {
                         BimpCache::addBimpLog((int) $log->id, $type, $level, $msg, $extra_data);
@@ -549,16 +550,35 @@ class BimpCore
                     if (BimpDebug::isActive()) {
                         BimpDebug::incCacheInfosCount('logs', false);
                     }
+
                     $log = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Log', $id_current_log);
                     $log->set('last_occurence', date('Y-m-d H:i:d'));
                     $log->set('nb_occurence', $log->getData('nb_occurence') + 1);
+
                     $warnings = array();
                     $errUpdate = $log->update($warnings, true);
-                    if (count($errUpdate))
-                        $datas['erreur_maj_log'] = $errUpdate;
-                    $datas['GET'] = $_GET;
-                    $datas['POST'] = $_POST;
-                    $log->addNote('<pre>' . print_r($datas, 1) . '</pre>');
+
+                    $data = array(); // inutile de mettre les data de bases (Type, level, msg, extra_data) qui sont forcéments identiques.
+
+                    if (defined('ID_ERP')) {
+                        $data['ID ERP'] = ID_ERP;
+                    }
+
+                    if (BimpObject::objectLoaded($user)) {
+                        $data['User'] = '#' . $user->id;
+                    }
+
+                    if (BimpObject::objectLoaded($object)) {
+                        $data['Objet'] = BimpObject::getInstanceNomUrl($object);
+                    }
+
+                    if (count($errUpdate)) {
+                        $data['Erreurs Màj log'] = $errUpdate;
+                    }
+
+                    $data['GET'] = $_GET;
+                    $data['POST'] = $_POST;
+                    $log->addNote('<pre>' . print_r($data, 1) . '</pre>');
                 }
             }
 

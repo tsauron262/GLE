@@ -333,6 +333,15 @@ HAVING scan_exp != scan_det";
         $buttons = array();
         if (!$this->isLoaded())
             return $buttons;
+        
+        
+        if ($this->getData('status') == self::STATUS_OPEN && $this->isActionAllowed('addLinesFromCsv') && $this->canSetAction('addLinesFromCsv')) {
+            $buttons[] = array(
+                'label'   => 'Import CSV scan',
+                'icon'    => 'fas_file-download',
+                'onclick' => $this->getJsLoadModalForm('csv', 'Import refs depuis CSV')
+            );
+        }
 
         if ($this->getData('status') == self::STATUS_DRAFT) {
             $buttons[] = array(
@@ -406,7 +415,9 @@ HAVING scan_exp != scan_det";
     }
     
     public function update(&$warnings = array(), $force_update = false) {
-        
+        if (isset($_FILES['csv_file'])) {
+            return $this->addLinesFromCsv($warnings);
+        }
 
         $errors = array();
         
@@ -797,6 +808,173 @@ HAVING scan_exp != scan_det";
             'warnings' => $warnings
         );
     }
+    
+    
+    public function addLinesFromCsv(&$warnings = array())
+    {
+        $errors = array();
+
+        if (!$this->isActionAllowed('addlinesFromCsv', $errors)) {
+            return $errors;
+        }
+
+        if (!$this->canSetAction('addLinesFromCsv')) {
+            $errors[] = 'Vous n\'avez pas la permission';
+            return $errors;
+        }
+
+        if (!isset($_FILES['csv_file'])) {
+            $errors[] = 'Fichier CSV absent ou non transmis';
+        } else {
+            $lines = file($_FILES['csv_file']['tmp_name'], FILE_SKIP_EMPTY_LINES | FILE_IGNORE_NEW_LINES);
+
+            if (!is_array($lines) || empty($lines)) {
+                $errors[] = 'Aucune ligne dans le fichier';
+            } else {
+                $separator = BimpTools::getPostFieldValue('separator', ';');
+                $test_only = (int) BimpTools::getPostFieldValue('test_only', 0);
+
+                $i = 0;
+                foreach ($lines as $line) {
+                    $i++;
+                    if($i > 1){
+
+                        $data = explode($separator, $line);
+                        foreach($data as $j => $ln){
+                            $data[$j] = str_replace('"', '', $ln);
+                        }
+                        if (!isset($data[0]) || !$data[0]) {
+                            $errors[] = 'Ligne n° ' . $i . ': ref absente';
+                        } elseif (!isset($data[2]) || !(float) $data[2]) {
+                            $errors[] = 'Ligne n° ' . $i . ': aucune quantité : '.$data[2];
+                        } else {
+                            $ref = $data[0];
+                            $serial = $data[1];
+                            $quantity_input = (float) $data[2];
+//                            print_r($data);die;
+                            if($serial != '')
+                                $input = $serial;
+                            else {
+                                $input = $ref;
+                            }
+
+
+
+
+                            $warnings = array();
+                            $inventory = BimpCache::getBimpObjectInstance($this->module, 'Inventory2', $this->id);
+                            $inventory_line = BimpObject::getInstance($this->module, 'InventoryLine2');
+                            $id_product = 0;
+                            $id_equipment = 0;
+                            $msg = '';
+
+                            $errors = $inventory_line->checkInput($input, $id_product, $id_equipment);
+
+                            if(!empty($errors)) {
+                                die(json_encode(array(
+                                    'errors'     => $errors,
+                                    'data'       => array(),
+                                    'request_id' => BimpTools::getValue('request_id', 0)
+                                )));
+                            }
+
+                            if (!$test_only) {
+                                if((int) $id_equipment > 0)
+                                    $inventory_line_ids = $inventory->insertLineEquipment($id_product, $id_equipment, $errors);
+                                elseif($quantity_input != 0)
+                                    $inventory_line_ids = $inventory->insertLineProduct($id_product, $quantity_input, $errors);
+                                else
+                                    $errors[] = "Quantité égale à zéro. ".$input;
+
+                                if($quantity_input < 0 and empty($errors))
+                                    $warnings[] = "Vous venez d'insérer une quantité négative.";
+                            }
+
+
+//                        $prod = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
+//                                    'ref' => $ref
+//                                        ), true);
+//
+//                        if (!BimpObject::objectLoaded($prod)) {
+//                            $errors[] = 'Ligne n° ' . $i . ': aucun produit trouvé pour la réf "' . $ref . '"';
+//                        } else {
+//                            if ($prod->isSerialisable()) {
+//                                if ($recup_serials) {
+//                                    $sql = BimpTools::getSqlSelect(array('a.id', 'a.serial'));
+//                                    $sql .= BimpTools::getSqlFrom('be_equipment', array(
+//                                                'p' => array(
+//                                                    'alias' => 'p',
+//                                                    'table' => 'be_equipment_place',
+//                                                    'on'    => 'p.id_equipment = a.id'
+//                                                )
+//                                    ));
+//                                    $sql .= BimpTools::getSqlWhere(array(
+//                                                'a.id_product'  => $prod->id,
+//                                                'p.position'    => 1,
+//                                                'p.id_entrepot' => $id_entrepot
+//                                    ));
+//
+//                                    $rows = $this->db->executeS($sql, 'array');
+//
+//                                    if (is_array($rows) && !empty($rows)) {
+//                                        if (count($rows) != $qty) {
+//                                            $warnings[] = 'Ligne n°' . $i . ': le nombre d\'équipements en stock ne correspond pas (attendu: ' . $qty . ' / en stock: ' . count($rows) . ')';
+//                                        } else {
+//                                            foreach ($rows as $r) {
+//                                                if (!$test_only) {
+//                                                    if ($this->db->insert('bt_transfer_det', array(
+//                                                                'id_transfer'   => $this->id,
+//                                                                'id_product'    => $prod->id,
+//                                                                'id_equipment'  => $r['id'],
+//                                                                'quantity_sent' => 1,
+//                                                                'user_create'   => $user->id,
+//                                                                'user_update'   => $user->id,
+//                                                                'date_create'   => $now,
+//                                                                'date_update'   => $now
+//                                                            )) <= 0) {
+//                                                        $errors[] = 'Ligne n° ' . $i . ': échec ajout serial "' . $r['serial'] . '" - ' . $this->db->err();
+//                                                    }
+//                                                }
+//                                            }
+//                                        }
+//                                    } else {
+//                                        $warnings[] = 'Ligne n° ' . $i . ': aucun équipement trouvé - ' . $prod->getLink();
+//                                    }
+//                                } else {
+//                                    // todo (3è colonne serials) 
+//                                }
+//                            } else {
+//                                // recherche d'une ligne existante pour le produit: 
+//                                if ((int) $this->db->getCount('bt_transfer_det', 'id_transfer = ' . $this->id . ' AND id_product = ' . (int) $prod->id) > 0) {
+//                                    $warnings[] = 'Ligne n° ' . $i . ': il y a déjà une ligne de transfert pour le produit "' . $ref . '"';
+//                                    continue;
+//                                } else {
+//                                    if (!$test_only) {
+//                                        if ($this->db->insert('bt_transfer_det', array(
+//                                                    'id_transfer'   => $this->id,
+//                                                    'id_product'    => $prod->id,
+//                                                    'quantity_sent' => $qty,
+//                                                    'user_create'   => $user->id,
+//                                                    'user_update'   => $user->id,
+//                                                    'date_create'   => $now,
+//                                                    'date_update'   => $now
+//                                                )) <= 0) {
+//                                            $errors[] = 'Ligne n° ' . $i . ': échec ajout - ' . $this->db->err();
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+                        }
+                    }
+                }
+            }
+        }
+
+
+        return $errors;
+    }
+
     
     public function canCreate() {
         return $this->isAdmin();
@@ -1193,6 +1371,7 @@ HAVING scan_exp != scan_det";
         $sql .= ' WHERE inventorycode="inventory2-' . $this->getData('id') . '"';
 
         $result = $this->db->db->query($sql);
+        return $result;
 //        if ($result) {
 //            $this->db->db->commit();
 //            return true;

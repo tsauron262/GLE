@@ -59,6 +59,7 @@ fields:
         type: money
         required: 1
         decimals: 4
+        history: 1
         
     tva_tx: 
         label: Taux de TVA

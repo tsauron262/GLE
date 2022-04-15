@@ -100,19 +100,7 @@ class BimpDb
 
     public function execute($sql)
     {
-        $transac = (stripos(trim($sql), "SELECT") === 0) ? 0 : 1;
-//        if ($transac)
-//            $this->db->begin();
-
         $result = $this->db->query($sql);
-
-//        if ($transac) {
-//            if ($result > 0) {
-//                $this->db->commit();
-//            } else {
-//                $this->db->rollback();
-//            }
-//        }
         if (!$result)
             $this->logSqlError($sql);
 
@@ -185,7 +173,7 @@ class BimpDb
                     $fl = false;
                 }
 
-                if (!preg_match('/\./', $field)) {
+                if (!preg_match('/[\. ]/', $field)) {
                     $sql .= '`' . $field . '`';
                 } else {
                     $sql .= $field;
@@ -223,7 +211,7 @@ class BimpDb
         return $this->executeS($sql, $return);
     }
 
-    public function getRow($table, $where = '1', $fields = null, $return = 'object')
+    public function getRow($table, $where = '1', $fields = null, $return = 'object', $order_by = '', $order_way = 'ASC')
     {
         $sql = 'SELECT ';
 
@@ -242,7 +230,14 @@ class BimpDb
         }
 
         $sql .= ' FROM ' . MAIN_DB_PREFIX . $table;
-        $sql .= ' WHERE ' . $where . ' LIMIT 1';
+        $sql .= ' WHERE ' . $where;
+
+        if ($order_by) {
+            $sql .= ' ORDER BY `' . $order_by . '` ' . $order_way;
+        }
+
+        $sql .= ' LIMIT 1';
+
         $result = $this->db->query($sql);
         if ($result && $this->db->num_rows($result)) {
             if ($return === 'object') {

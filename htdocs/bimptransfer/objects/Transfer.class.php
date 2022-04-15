@@ -36,6 +36,18 @@ class Transfer extends BimpDolObject
         return parent::canEditField($field_name);
     }
 
+    public function canSetAction($action)
+    {
+        global $user;
+
+        switch ($action) {
+            case 'addLinesFromCsv':
+                return 1;//(int) $user->admin;
+        }
+
+        return parent::canSetAction($action);
+    }
+
     // Getters booléens: 
 
     public function isEditable($force_edit = false, &$errors = array())
@@ -56,6 +68,25 @@ class Transfer extends BimpDolObject
             }
         }
         return 1;
+    }
+
+    public function isActionAllowed($action, &$errors = []): int
+    {
+        if (in_array($action, array('setSatut', 'doTransfer', 'close', 'addLinesFromCsv'))) {
+            if (!$this->isLoaded($errors)) {
+                return 0;
+            }
+        }
+
+        switch ($action) {
+            case 'addLinesFromCsv':
+                if ((int) $this->getData('status') !== self::STATUS_SENDING) {
+                    $errors[] = 'Ce tranfert n\'est pas en cours d\'envoi';
+                    return 0;
+                }
+                return 1;
+        }
+        return parent::isActionAllowed($action, $errors);
     }
 
     public function isGood()
@@ -103,10 +134,20 @@ class Transfer extends BimpDolObject
 
     public function getActionsButtons()
     {
+        if (!$this->isLoaded()) {
+            return array();
+        }
+
         global $user;
         $buttons = array();
-        if (!$this->isLoaded())
-            return $buttons;
+
+        if ($this->isActionAllowed('addLinesFromCsv') && $this->canSetAction('addLinesFromCsv')) {
+            $buttons[] = array(
+                'label'   => 'Import CSV',
+                'icon'    => 'fas_file-download',
+                'onclick' => $this->getJsLoadModalForm('csv', 'Import refs depuis CSV')
+            );
+        }
 
         if ($this->getData('status') == Transfer::STATUS_RECEPTING) {
             if ($user->rights->bimptransfer->admin || $this->isGood()) {
@@ -222,13 +263,12 @@ class Transfer extends BimpDolObject
         global $user;
         $html = '';
 
-
         if (!$this->isEditable())
             return '';
         // status
 
         if ($this->isLoaded()) {
-            if ($this->getData('status') == Transfer::STATUS_CLOSED and ! $user->rights->bimptransfer->admin) {
+            if ($this->getData('status') == Transfer::STATUS_CLOSED and!$user->rights->bimptransfer->admin) {
                 $html .= '<p>Le statut du transfert ne permet pas d\'ajouter des lignes</p>';
             } else {
                 $header_table .= '<span style="margin-left: 100px">Ajouter</span>';
@@ -269,6 +309,130 @@ class Transfer extends BimpDolObject
         }
 
         $this->updateField('user_valid', (int) $user->id);
+
+        return $errors;
+    }
+
+    public function addLinesFromCsv(&$warnings = array())
+    {
+        $errors = array();
+
+        if (!$this->isActionAllowed('addlinesFromCsv', $errors)) {
+            return $errors;
+        }
+
+        if (!$this->canSetAction('addLinesFromCsv')) {
+            $errors[] = 'Vous n\'avez pas la permission';
+            return $errors;
+        }
+
+        if (!isset($_FILES['csv_file'])) {
+            $errors[] = 'Fichier CSV absent ou non transmis';
+        } else {
+            $lines = file($_FILES['csv_file']['tmp_name'], FILE_SKIP_EMPTY_LINES | FILE_IGNORE_NEW_LINES);
+
+            if (!is_array($lines) || empty($lines)) {
+                $errors[] = 'Aucune ligne dans le fichier';
+            } else {
+                global $user;
+                $now = date('Y-m-d H:i:s');
+                $separator = BimpTools::getPostFieldValue('separator', ';');
+                $recup_serials = 1; //(int) BimpTools::getPostFieldValue('recup_serials', 1);
+                $test_only = (int) BimpTools::getPostFieldValue('test_only', 0);
+                $id_entrepot = (int) $this->getData('id_warehouse_source');
+
+                $i = 0;
+                foreach ($lines as $line) {
+                    $i++;
+
+                    $data = explode($separator, $line);
+                    if (!isset($data[0]) || !$data[0]) {
+                        $errors[] = 'Ligne n° ' . $i . ': ref absente';
+                    } elseif (!isset($data[1]) || !(float) $data[1]) {
+                        $errors[] = 'Ligne n° ' . $i . ': aucune quantité '.$data[1];
+                    } else {
+                        $ref = $data[0];
+                        $qty = (float) $data[1];
+
+                        $prod = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
+                                    'ref' => $ref
+                                        ), true);
+
+                        if (!BimpObject::objectLoaded($prod)) {
+                            $errors[] = 'Ligne n° ' . $i . ': aucun produit trouvé pour la réf "' . $ref . '"';
+                        } else {
+                            if ($prod->isSerialisable()) {
+                                if ($recup_serials) {
+                                    $sql = BimpTools::getSqlSelect(array('a.id', 'a.serial'));
+                                    $sql .= BimpTools::getSqlFrom('be_equipment', array(
+                                                'p' => array(
+                                                    'alias' => 'p',
+                                                    'table' => 'be_equipment_place',
+                                                    'on'    => 'p.id_equipment = a.id'
+                                                )
+                                    ));
+                                    $sql .= BimpTools::getSqlWhere(array(
+                                                'a.id_product'  => $prod->id,
+                                                'p.position'    => 1,
+                                                'p.id_entrepot' => $id_entrepot
+                                    ));
+
+                                    $rows = $this->db->executeS($sql, 'array');
+
+                                    if (is_array($rows) && !empty($rows)) {
+                                        if (count($rows) != $qty) {
+                                            $warnings[] = 'Ligne n°' . $i . ': le nombre d\'équipements en stock ne correspond pas (attendu: ' . $qty . ' / en stock: ' . count($rows) . ')';
+                                        } else {
+                                            foreach ($rows as $r) {
+                                                if (!$test_only) {
+                                                    if ($this->db->insert('bt_transfer_det', array(
+                                                                'id_transfer'   => $this->id,
+                                                                'id_product'    => $prod->id,
+                                                                'id_equipment'  => $r['id'],
+                                                                'quantity_sent' => 1,
+                                                                'user_create'   => $user->id,
+                                                                'user_update'   => $user->id,
+                                                                'date_create'   => $now,
+                                                                'date_update'   => $now
+                                                            )) <= 0) {
+                                                        $errors[] = 'Ligne n° ' . $i . ': échec ajout serial "' . $r['serial'] . '" - ' . $this->db->err();
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        $warnings[] = 'Ligne n° ' . $i . ': aucun équipement trouvé - ' . $prod->getLink();
+                                    }
+                                } else {
+                                    // todo (3è colonne serials) 
+                                }
+                            } else {
+                                // recherche d'une ligne existante pour le produit: 
+                                if ((int) $this->db->getCount('bt_transfer_det', 'id_transfer = ' . $this->id . ' AND id_product = ' . (int) $prod->id) > 0) {
+                                    $warnings[] = 'Ligne n° ' . $i . ': il y a déjà une ligne de transfert pour le produit "' . $ref . '"';
+                                    continue;
+                                } else {
+                                    if (!$test_only) {
+                                        if ($this->db->insert('bt_transfer_det', array(
+                                                    'id_transfer'   => $this->id,
+                                                    'id_product'    => $prod->id,
+                                                    'quantity_sent' => $qty,
+                                                    'user_create'   => $user->id,
+                                                    'user_update'   => $user->id,
+                                                    'date_create'   => $now,
+                                                    'date_update'   => $now
+                                                )) <= 0) {
+                                            $errors[] = 'Ligne n° ' . $i . ': échec ajout - ' . $this->db->err();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
 
         return $errors;
     }
@@ -343,16 +507,16 @@ class Transfer extends BimpDolObject
         $errors = array();
 
         $status = (int) $this->getData('status');
-        
+
         if (!$status) {
             $status = self::STATUS_SENDING;
         }
-        
+
         if (!array_key_exists($status, self::$status_list)) {
             $errors[] = 'Statut invalide';
         } else {
             $init_status = (int) $this->getInitData('status');
-            
+
             if ($init_status !== $status) {
                 if ($status == self::STATUS_SENDING) {
                     $this->set("date_opening", '');
@@ -371,5 +535,14 @@ class Transfer extends BimpDolObject
         }
 
         return $errors;
+    }
+
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        if (isset($_FILES['csv_file'])) {
+            return $this->addLinesFromCsv($warnings);
+        }
+
+        return parent::update($warnings, $force_update);
     }
 }

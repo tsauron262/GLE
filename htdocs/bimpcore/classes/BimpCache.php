@@ -17,6 +17,8 @@ class BimpCache
 
     public static $bdb = null;
     public static $bdb_noTransac = null;
+    public static $bdb_archive = null;
+    public $modeArchive = -1;
     public static $cache = array();
     public static $cache_server = null;
     public static $nextBimpObjectCacheId = 1;
@@ -28,9 +30,24 @@ class BimpCache
     
     public $j_semaine = array(0 => 'Dimanche', 1 => "Lundi", 2 => "Mardi", 3 => "Mercredi", 4 => "Jeudi", 5 => "Vendredi", 6 => "Samedi", 10 => "N/C");
 
-    public static function getBdb($no_transactions = false)
+    public static function getBdb($no_transactions = false, $mode_archive = -1)
     {
         global $db;
+        
+        if($mode_archive == 1){
+            if (is_null(self::$bdb_archive)) {
+
+                $dolibarr_main_db_port='3306';
+                $dolibarr_main_db_host='10.192.20.11';
+                $dolibarr_main_db_pass='llkjfvklfdvgukfdvfppdz';
+                $dolibarr_main_db_name='ERP_PROD_BIMP_ARCHIVE';
+                $dolibarr_main_db_user='archive';
+                $dolibarr_main_db_type='mysqli';
+                $db2 = getDoliDBInstance($dolibarr_main_db_type, $dolibarr_main_db_host, $dolibarr_main_db_user, $dolibarr_main_db_pass, $dolibarr_main_db_name, $dolibarr_main_db_port);
+                self::$bdb_archive = new BimpDb($db2);
+            }
+            return self::$bdb_archive;
+        }
 
         if (!$no_transactions) {
             if (is_null(self::$bdb)) {
@@ -2908,8 +2925,6 @@ class BimpCache
         if (isset($logs[$type][$level])) {
             foreach ($logs[$type][$level] as $id_log => $log_data) {
                 if (isset($log_data['msg']) && $log_data['msg'] === (string) $msg) {
-//                    unset($log_data['extra_data']['id_erp']);
-//                    unset($extra_data['id_erp']);
                     if (isset($log_data['extra_data']) && $log_data['extra_data'] === (is_array($extra_data) ? json_encode($extra_data) : (string) $extra_data)) {
                         return (int) $id_log;
                     }

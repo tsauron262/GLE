@@ -485,11 +485,67 @@ class Bimp_Commande extends BimpComm
         if ((int) $this->getData('fk_statut') > 0) {
             return 0;
         }
-        
+
         return (int) parent::isDeletable($force_delete);
     }
 
+    public function isCommercialOrSup()
+    {
+        global $user;
+
+        if ($this->isLoaded()) {
+            $id_commercial = $this->getCommercialId();
+
+            if ((int) $id_commercial == 0)
+                $id_commercial = $this->dol_object->user_author_id;
+        }
+
+        // Check si il est admin ou le commercial de cette commande
+        if ($user->admin or (int) $id_commercial == (int) $user->id)
+            return 1;
+
+        $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_commercial);
+        // Check si il est le n+1 du commercial en charge de cette commande
+        if ((int) $commercial->getData('fk_user') == (int) $user->id)
+            return 1;
+
+        return 0;
+    }
+
+    public function isPaiementComptant()
+    {
+        $cond_paiement_comptant = array('LIVRAISON', 'TIERFAC', 'TIERAV', 'RECEPCOM', 'HALFFAC', 'HALFAV', 'RECEP');
+        $code_cond_paiement = self::getBdb()->getValue('c_payment_term', 'code', '`active` > 0 and rowid = ' . $this->getData('fk_cond_reglement'));
+        if ((int) in_array($code_cond_paiement, $cond_paiement_comptant) == 1)
+            return 1;
+
+        // Prélèvement SEPA
+        $code_mode_paiement = self::getBdb()->getValue('c_paiement', 'code', '`active` > 0 and id = ' . $this->getData('fk_mode_reglement'));
+        if ($code_cond_paiement == '30D' and $code_mode_paiement == 'PRE')
+            return 1;
+
+        return 0;
+    }
+
     // Getters:
+
+    public function getData($field)
+    {
+        // Pour mettre à jour mode et cond réglement dans le formulaire en cas de sélection d'un nouveau client ou client facturation.
+        if (in_array($field, array('fk_cond_reglement', 'fk_mode_reglement'))) {
+            if (BimpTools::getValue('action', '') === 'loadObjectInput' && in_array(BimpTools::getValue('field_name', ''), array('fk_cond_reglement', 'fk_mode_reglement'))) {
+                switch ($field) {
+                    case 'fk_cond_reglement':
+                        return $this->getCondReglementBySociete();
+
+                    case 'fk_mode_reglement':
+                        return $this->getModeReglementBySociete();
+                }
+            }
+        }
+
+        return parent::getData($field);
+    }
 
     public function getDefaultListExtraButtons()
     {
@@ -947,6 +1003,68 @@ class Bimp_Commande extends BimpComm
         }
 
         return array();
+    }
+
+    public function getCondReglementBySociete()
+    {
+        $id_soc = (int) BimpTools::getPostFieldValue('id_client_facture', 0);
+        if (!$id_soc) {
+            if ((int) $this->getData('id_client_facture')) {
+                $id_soc = (int) $this->getData('id_client_facture');
+            } else {
+                $id_soc = (int) BimpTools::getPostFieldValue('fk_soc', 0);
+                if (!$id_soc) {
+                    $id_soc = (int) BimpTools::getPostFieldValue('id_client', 0);
+                }
+                if (!$id_soc && $this->getData('fk_soc') > 0) {
+                    $id_soc = $this->getData('fk_soc');
+                }
+            }
+        }
+
+        if ($id_soc) {
+            $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $id_soc);
+            if (BimpObject::objectLoaded($soc)) {
+                return (int) $soc->getData('cond_reglement');
+            }
+        }
+
+        if (isset($this->data['fk_cond_reglement']) && (int) $this->data['fk_cond_reglement']) {
+            return (int) $this->data['fk_cond_reglement']; // pas getData() sinon boucle infinie (getCondReglementBySociete() étant définie en tant que callback du param default_value pour ce champ). 
+        }
+
+        return (int) BimpCore::getConf('societe_id_default_cond_reglement', 0);
+    }
+
+    public function getModeReglementBySociete()
+    {
+        $id_soc = (int) BimpTools::getPostFieldValue('id_client_facture', 0);
+        if (!$id_soc) {
+            if ((int) $this->getData('id_client_facture')) {
+                $id_soc = (int) $this->getData('id_client_facture');
+            } else {
+                $id_soc = (int) BimpTools::getPostFieldValue('fk_soc', 0);
+                if (!$id_soc) {
+                    $id_soc = (int) BimpTools::getPostFieldValue('id_client', 0);
+                }
+                if (!$id_soc && $this->getData('fk_soc') > 0) {
+                    $id_soc = $this->getData('fk_soc');
+                }
+            }
+        }
+
+        if ($id_soc) {
+            $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $id_soc);
+            if (BimpObject::objectLoaded($soc)) {
+                return (int) $soc->getData('mode_reglement');
+            }
+        }
+
+        if (isset($this->data['fk_mode_reglement']) && (int) $this->data['fk_mode_reglement']) {
+            return (int) $this->data['fk_mode_reglement']; // pas getData() sinon boucle infinie (getModeReglementBySociete() étant définie en tant que callback du param default_value pour ce champ). 
+        }
+
+        return BimpCore::getConf('societe_id_default_mode_reglement', 0);
     }
 
     // Rendus HTML: 
@@ -3746,7 +3864,7 @@ class Bimp_Commande extends BimpComm
 
                     $success = 'Mail envoyé à l\'adresse ' . $data['user_ask_email'] . ' pour un total de ';
                     $success .= BimpTools::displayMoneyValue($total_rtp) . ' impayé.';
-                    $this->addNote($success.'<br/>'.$msg);
+                    $this->addNote($success . '<br/>' . $msg);
 
                     mailSyn2($subject, $data['user_ask_email'], null, $msg);
                 } else
@@ -3795,7 +3913,7 @@ class Bimp_Commande extends BimpComm
                 }
             }
         }
-        
+
         return $errors;
     }
 
@@ -4014,36 +4132,23 @@ class Bimp_Commande extends BimpComm
                     $this->copyRemisesGlobalesFromOrigin($propal, $warnings);
                 }
             }
+
+            $client = $this->getChildObject('client');
+            if (BimpObject::objectLoaded($client)) {
+                $client->setActivity('Création ' . $this->getLabel('of_the') . ' {{Commande:' . $this->id . '}}');
+            }
         }
 
         return $errors;
-    }
-    
-    public function isPaiementComptant() {
-        $cond_paiement_comptant = array('LIVRAISON', 'TIERFAC', 'TIERAV', 'RECEPCOM', 'HALFFAC', 'HALFAV', 'RECEP');
-        $code_cond_paiement = self::getBdb()->getValue('c_payment_term', 'code', '`active` > 0 and rowid = ' . $this->getData('fk_cond_reglement'));
-        if((int) in_array($code_cond_paiement, $cond_paiement_comptant) == 1)
-            return 1;
-        
-        // Prélèvement SEPA
-        $code_mode_paiement = self::getBdb()->getValue('c_paiement', 'code', '`active` > 0 and id = ' . $this->getData('fk_mode_reglement'));
-        if($code_cond_paiement == '30D' and $code_mode_paiement == 'PRE')
-            return 1;
-        
-        return 0;
-    }
-
-    public function setPaiementComptant()
-    {
-        return $this->set('paiement_comptant', $this->isPaiementComptant());
     }
 
     public function update(&$warnings = array(), $force_update = false)
     {
         $init_entrepot = (int) $this->getInitData('entrepot');
-        $this->setPaiementComptant();
+//        $this->setPaiementComptant(); // Eviter de créer des fonctions avec juste 1 ligne, les classes sont déjà bien assez surchargées en fonctions. 
+        $this->set('paiement_comptant', $this->isPaiementComptant());
         $errors = parent::update($warnings, $force_update);
-        
+
         if (!count($errors)) {
             if ($init_entrepot !== (int) $this->getData('entrepot')) {
                 $sql = 'UPDATE `' . MAIN_DB_PREFIX . 'br_reservation` SET `id_entrepot` = ' . (int) $this->getData('entrepot');
@@ -4102,29 +4207,5 @@ class Bimp_Commande extends BimpComm
         }
         $this->resprints = "OK " . $ok . ' mails BAD ' . $err . ' mails dont ' . $mailDef . ' mail par default';
         return "OK " . $ok . ' mails BAD ' . $err . ' mails dont ' . $mailDef . ' mail par default';
-    }
-
-    public function isCommercialOrSup()
-    {
-
-        global $user;
-
-        if ($this->isLoaded()) {
-            $id_commercial = $this->getCommercialId();
-
-            if ((int) $id_commercial == 0)
-                $id_commercial = $this->dol_object->user_author_id;
-        }
-
-        // Check si il est admin ou le commercial de cette commande
-        if ($user->admin or (int) $id_commercial == (int) $user->id)
-            return 1;
-
-        $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_commercial);
-        // Check si il est le n+1 du commercial en charge de cette commande
-        if ((int) $commercial->getData('fk_user') == (int) $user->id)
-            return 1;
-
-        return 0;
     }
 }

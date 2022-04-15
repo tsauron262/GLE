@@ -50,7 +50,7 @@ class TRA_importPaiement {
         $structure['ETABLISSEMENT']     = sizing("001", 3);
         $structure['AXE']               = sizing("", 2);
         $structure['NUM_ECHEANCE']      = sizing("0", 2);
-        $structure['FACTURE']           = sizing("", 35);
+        $structure['REF_EXTERNE']       = sizing(($line->getData('num') ? $line->getData('num') : $data['infos']), 35);
         $structure['DATE_REF_EXTERNE']  = sizing("01011900", 8);
         $structure['DATE_CREATION']     = sizing($date->format('dmY'), 8);
         $structure['SOCIETE']           = sizing("", 3);

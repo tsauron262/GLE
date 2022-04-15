@@ -151,7 +151,43 @@ class BContract_contrat extends BimpDolObject
         $this->email_facturation = BimpCore::getConf('bimpcontract_email_facturation');
         return parent::__construct($module, $object_name);
     }
+    
+    public function tryToValidate(&$errors) {
+        
+        global $user;
+        $success = [];
+        $validComm = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+        $validComm->tryToValidate($this, $user, $errors, $success);
 
+        return $errors;
+     
+    }
+    
+    public function getProvLink() {
+        return str_replace($this->getRef(), '(PROV' . $this->id . ')', $this->getLink());
+    }
+    
+    public function getClientFacture()
+    {
+        if ((int) $this->getData('fk_soc_facturation')) {
+            $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $this->getData('fk_soc_facturation'));
+            if (BimpObject::objectLoaded($client)) {
+                return $client;
+            }
+        }
+
+        if ((int) $this->getData('fk_soc')) {
+            $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $this->getData('fk_soc'));
+            if (BimpObject::objectLoaded($client)) {
+                return $client;
+            }
+        }
+
+        return null;
+    }
+    
+    
+    
     public function canShowAdmin()
     {
         global $user;
@@ -666,8 +702,9 @@ class BContract_contrat extends BimpDolObject
     {
         return [0 => "Aucun", 1 => "Proposition", 2 => "Tacite"];
     }
-    
-    public function getRenouvellementNumberFromDate($date){
+
+    public function getRenouvellementNumberFromDate($date)
+    {
         $datef = new DateTime();
         $datef->setTimestamp(strtotime($date));
 
@@ -676,21 +713,20 @@ class BContract_contrat extends BimpDolObject
         $Timestamp_debut = strtotime($this->getData('date_start'));
 //            echo $datef->format('d / m / Y').'<br/>';
         $renouvellement = 0;
-        if ($Timestamp_debut > 0 && $this->getData('duree_mois') > 0){ 
+        if ($Timestamp_debut > 0 && $this->getData('duree_mois') > 0) {
             $debut->setTimestamp($Timestamp_debut);
             $fin->setTimestamp($Timestamp_debut);
-            for($i=0; $i <5; $i++){
+            for ($i = 0; $i < 5; $i++) {
                 $fin = $fin->add(new DateInterval("P" . $this->getData('duree_mois') . "M"));
                 $fin = $fin->sub(new DateInterval("P1D"));
 //                    echo($debut->format('d / m / Y').' '.$fin->format('d / m / Y').' '.$i.'av<br/>');
-                if($datef > $debut && $datef < $fin){
+                if ($datef > $debut && $datef < $fin) {
                     $renouvellement = $i;
                     break;
                 }
                 $debut = $debut->add(new DateInterval("P" . $this->getData('duree_mois') . "M"));
 //                    $fin = $fin->add(new DateInterval("P1D"));
             }
-
         }
         return $renouvellement;
     }
@@ -909,17 +945,83 @@ class BContract_contrat extends BimpDolObject
         }
     }
 
+    
+    
+    
+    /*
+     * 
+     * test
+     * 
+     */
+    
+    public function checkContacts()
+    {
+        $errors = array();
+
+        if (in_array($this->object_name, array('Bimp_Propal', 'Bimp_Commande', 'Bimp_Facture'))) {
+            global $user;
+            $client = $this->getChildObject('client');
+            if (BimpObject::objectLoaded($client)) {
+                // Vérif commercial suivi: 
+                $tabConatact = $this->dol_object->getIdContact('internal', 'SALESREPFOLL');
+//                print_r($tabConatact);
+                if (count($tabConatact) < 1) {
+                    $ok = false;
+                    $tabComm = $client->dol_object->getSalesRepresentatives($user);
+
+                    // Il y a un commercial pour ce client
+                    if (count($tabComm) > 0) {
+//                        die('AAAAAAAAAAAAAAAA');
+                        $this->dol_object->add_contact($tabComm[0]['id'], 'SALESREPFOLL', 'internal');
+                        $ok = true;
+
+                        // Il y a un commercial définit par défaut (bimpcore)
+                    } elseif ((int) BimpCore::getConf('user_as_default_commercial', 1)) {
+                        $this->dol_object->add_contact($user->id, 'SALESREPFOLL', 'internal');
+                        $ok = true;
+//                        die('CCCCCCCCCCCCCCCC');
+                        // L'objet est une facture et elle a une facture d'origine
+                    } elseif ($this->object_name === 'Bimp_Facture' && (int) $this->getData('fk_facture_source')) {
+                        $fac_src = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $this->getData('fk_facture_source'));
+                        if (BimpObject::objectLoaded($fac_src)) {
+                            $contacts = $fac_src->dol_object->getIdContact('internal', 'SALESREPFOLL');
+                            if (count($contacts) > 0) {
+                                $this->dol_object->add_contact($contacts[0]['id'], 'SALESREPFOLL', 'internal');
+                                $ok = true;
+                            }
+                        }
+                    }
+
+                    if (!$ok) {
+                        $errors[] = 'Pas de Commercial Suivi';
+                    }
+                }
+
+                // Vérif contact signataire: 
+                $tabConatact = $this->dol_object->getIdContact('internal', 'SALESREPSIGN');
+                if (count($tabConatact) < 1) {
+//                                            die('DDDDDDDDDDDDDD');
+
+                    $this->dol_object->add_contact($user->id, 'SALESREPSIGN', 'internal');
+                }
+            }
+        }
+        return $errors;
+    }
+    
     public function actionTestContrat($data, &$success)
     {
         $errors = [];
         $warnings = [];
 
-        $this->closeContratChildWhenActivateRenewManual(true);
+        $this->tryToValidate($errors);
+        
+        
 
         return Array('errors' => $errors, 'warnings' => $warnings, 'success' => $success);
     }
 
-    public function closeContratChildWhenActivateRenewManual($fromCron = false)
+    public function closeContratChildWhenActivateRenewManual($fromCron = false):bool
     {
 
         global $user;
@@ -1754,7 +1856,7 @@ class BContract_contrat extends BimpDolObject
         global $conf, $langs, $user;
         $buttons = Array();
 
-        if ($user->id == 460) {
+        if ($user->admin) {
             $buttons[] = array(
                 'label'   => 'TEST EN COURS',
                 'icon'    => 'fas_retweet',
@@ -2496,74 +2598,88 @@ class BContract_contrat extends BimpDolObject
     public function actionDemandeValidation($data, &$success)
     {
         $errors = [];
-        $id_contact_type = $this->db->getValue('c_type_contact', 'rowid', 'code = "SITE" AND element = "contrat"');
-        $id_contact_suivi_contrat = $this->db->getValue('c_type_contact', 'rowid', 'code = "CUSTOMER" AND element = "contrat"');
-        $id_contact_facturation_email = $this->db->getValue('c_type_contact', 'rowid', 'code = "BILLING2" AND element = "contrat"');
+        
+        
+        
+        if(!count($errors)) {
+            $id_contact_type = $this->db->getValue('c_type_contact', 'rowid', 'code = "SITE" AND element = "contrat"');
+            $id_contact_suivi_contrat = $this->db->getValue('c_type_contact', 'rowid', 'code = "CUSTOMER" AND element = "contrat"');
+            $id_contact_facturation_email = $this->db->getValue('c_type_contact', 'rowid', 'code = "BILLING2" AND element = "contrat"');
 
-        $have_contact = ($this->db->getValue('element_contact', 'rowid', 'element_id = ' . $this->id . ' AND fk_c_type_contact = ' . $id_contact_type)) ? true : false;
-        $have_contact_suivi = ($this->db->getValue('element_contact', 'rowid', 'element_id = ' . $this->id . ' AND fk_c_type_contact = ' . $id_contact_suivi_contrat)) ? true : false;
-        $have_facturation_email = ($this->db->getValue('element_contact', 'rowid', 'element_id = ' . $this->id . ' AND fk_c_type_contact = ' . $id_contact_facturation_email)) ? true : false;
-        $verif_contact_suivi = true;
+            $have_contact = ($this->db->getValue('element_contact', 'rowid', 'element_id = ' . $this->id . ' AND fk_c_type_contact = ' . $id_contact_type)) ? true : false;
+            $have_contact_suivi = ($this->db->getValue('element_contact', 'rowid', 'element_id = ' . $this->id . ' AND fk_c_type_contact = ' . $id_contact_suivi_contrat)) ? true : false;
+            $have_facturation_email = ($this->db->getValue('element_contact', 'rowid', 'element_id = ' . $this->id . ' AND fk_c_type_contact = ' . $id_contact_facturation_email)) ? true : false;
+            $verif_contact_suivi = true;
 
-        if (!$have_contact) {
-            $errors[] = "Il doit y avoir au moin un site d'intervention associé au contrat";
-        } else {
-            $liste_contact_site = $this->db->getRows('element_contact', 'element_id = ' . $this->id . ' AND fk_c_type_contact = ' . $id_contact_type);
-            foreach ($liste_contact_site as $contact => $infos) {
-                $contact_site = $this->getInstance('bimpcore', 'Bimp_Contact', $infos->fk_socpeople);
-                if (!$contact_site->getData('address'))
-                    $errors[] = "Il n'y a pas d'adresse pour le site d'intervention. Merci d'en renseigner une. <br /> Contact: <a target='_blank' href='" . $contact_site->getUrl() . "'>#" . $contact_site->id . "</a>";
+            if (!$have_contact) {
+                $errors[] = "Il doit y avoir au moin un site d'intervention associé au contrat";
+            } else {
+                $liste_contact_site = $this->db->getRows('element_contact', 'element_id = ' . $this->id . ' AND fk_c_type_contact = ' . $id_contact_type);
+                foreach ($liste_contact_site as $contact => $infos) {
+                    $contact_site = $this->getInstance('bimpcore', 'Bimp_Contact', $infos->fk_socpeople);
+                    if (!$contact_site->getData('address'))
+                        $errors[] = "Il n'y a pas d'adresse pour le site d'intervention. Merci d'en renseigner une. <br /> Contact: <a target='_blank' href='" . $contact_site->getUrl() . "'>#" . $contact_site->id . "</a>";
+                }
+            }
+            if (!$have_facturation_email) {
+                $errors[] = "Le contrat ne compte pas de contact facturation email";
+            }
+            if (!$have_contact_suivi) {
+                $verif_contact_suivi = false;
+                $errors[] = "Le contrat ne compte pas de contact client de suivi du contrat";
+            }
+
+            if ($verif_contact_suivi) {
+                $contact = $this->getInstance('bimpcore', 'Bimp_Contact', $this->db->getValue('element_contact', 'fk_socpeople', 'element_id = ' . $this->id . ' AND fk_c_type_contact = ' . $id_contact_suivi_contrat));
+                if (!$contact->getData('email') || (!$contact->getData('phone') && !$contact->getData('phone_mobile'))) {
+                    $errors[] = "L'email et le numéro de téléphone du contact est obligatoire pour demander la validation du contrat <br />Contact: <a target='_blank' href='" . $contact->getUrl() . "'>#" . $contact->id . "</a>";
+                }
+            }
+
+    //        $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
+    //        if(!$client->getData('email') || !$client->getData('phone')) {
+    //            $errors[] = "L'email et le numéro de téléphone du client sont obligatoire pour demander la validation du contrat <br /> Contact: <a target='_blank' href='".$client->getUrl()."'>#".$client->getData('code_client')."</a>";
+    //        }
+    //        if($this->dol_object->add_contact(1, 'SALESREPFOLL', 'internal') <= 0) {
+    //            $errors[] = "Impossible d'ajouter un contact principal au contrat";
+    //        }
+
+            $have_serial = false;
+            $serials = [];
+
+            $contrat_lines = $this->getInstance('bimpcontract', 'BContract_contratLine');
+            $lines = $contrat_lines->getList(['fk_contrat' => $this->id]);
+
+            foreach ($lines as $line) {
+
+                $serials = BimpTools::json_decode_array($line['serials']);
+
+                if (count($serials))
+                    $have_serial = true;
+            }
+
+            if (!$have_serial)
+                $errors[] = "Il doit y avoir au moin un numéro de série dans une des lignes du contrat";
+            if (!$this->getData('entrepot') && (int) BimpCore::getConf("USE_ENTREPOT"))
+                $errors[] = "Il doit y avoir un entrepot pour le contrat";
+            
+            $modeReglementId = $this->db->getValue('c_paiement', 'id', 'code = "PRE"');
+
+            if(!count($errors) && $this->getData('periodicity') != self::CONTRAT_PERIOD_AUCUNE && $this->getData('moderegl') != $modeReglementId) {
+                $this->tryToValidate($errors);
+            }
+                
+            
+            if (!count($errors)) {
+                $success = 'Validation demandée';
+                $this->updateField('statut', self::CONTRAT_STATUS_WAIT);
+                $msg = "Un contrat est en attente de validation de votre part. Merci de faire le nécessaire <br />Contrat : " . $this->getNomUrl();
+                $this->addLog("Demande de validation");
+                $this->mail($this->email_group, self::MAIL_DEMANDE_VALIDATION);
             }
         }
-        if (!$have_facturation_email) {
-            $errors[] = "Le contrat ne compte pas de contact facturation email";
-        }
-        if (!$have_contact_suivi) {
-            $verif_contact_suivi = false;
-            $errors[] = "Le contrat ne compte pas de contact client de suivi du contrat";
-        }
-
-        if ($verif_contact_suivi) {
-            $contact = $this->getInstance('bimpcore', 'Bimp_Contact', $this->db->getValue('element_contact', 'fk_socpeople', 'element_id = ' . $this->id . ' AND fk_c_type_contact = ' . $id_contact_suivi_contrat));
-            if (!$contact->getData('email') || (!$contact->getData('phone') && !$contact->getData('phone_mobile'))) {
-                $errors[] = "L'email et le numéro de téléphone du contact est obligatoire pour demander la validation du contrat <br />Contact: <a target='_blank' href='" . $contact->getUrl() . "'>#" . $contact->id . "</a>";
-            }
-        }
-
-//        $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
-//        if(!$client->getData('email') || !$client->getData('phone')) {
-//            $errors[] = "L'email et le numéro de téléphone du client sont obligatoire pour demander la validation du contrat <br /> Contact: <a target='_blank' href='".$client->getUrl()."'>#".$client->getData('code_client')."</a>";
-//        }
-//        if($this->dol_object->add_contact(1, 'SALESREPFOLL', 'internal') <= 0) {
-//            $errors[] = "Impossible d'ajouter un contact principal au contrat";
-//        }
-
-        $have_serial = false;
-        $serials = [];
-
-        $contrat_lines = $this->getInstance('bimpcontract', 'BContract_contratLine');
-        $lines = $contrat_lines->getList(['fk_contrat' => $this->id]);
-
-        foreach ($lines as $line) {
-
-            $serials = BimpTools::json_decode_array($line['serials']);
-
-            if (count($serials))
-                $have_serial = true;
-        }
-
-        if (!$have_serial)
-            $errors[] = "Il doit y avoir au moin un numéro de série dans une des lignes du contrat";
-        if (!$this->getData('entrepot') && (int) BimpCore::getConf("USE_ENTREPOT"))
-            $errors[] = "Il doit y avoir un entrepot pour le contrat";
-
-        if (!count($errors)) {
-            $success = 'Validation demandée';
-            $this->updateField('statut', self::CONTRAT_STATUS_WAIT);
-            $msg = "Un contrat est en attente de validation de votre part. Merci de faire le nécessaire <br />Contrat : " . $this->getNomUrl();
-            $this->addLog("Demande de validation");
-            $this->mail($this->email_group, self::MAIL_DEMANDE_VALIDATION);
-        }
+        
+        
 
         return [
             'success'  => $success,
@@ -2937,8 +3053,16 @@ class BContract_contrat extends BimpDolObject
                 $errors[] = 'Vous ne pouvez pas demander un renouvellement TACITE pour des périodes différentes de (12, 24 ou 36 mois)';
             }
         }
-        if (!count($errors))
+        if (!count($errors)) {
             $errors = parent::create($warnings, $force_create);
+
+            if (!count($errors)) {
+                $client = $this->getChildObject('client');
+                if (BimpObject::objectLoaded($client)) {
+                    $client->setActivity('Création ' . $this->getLabel('of_the') . ' {{Contrat:' . $this->id . '}}');
+                }
+            }
+        }
 
         return $errors;
     }
@@ -3337,8 +3461,9 @@ class BContract_contrat extends BimpDolObject
     {
         return $this->getTotal($this->getData('current_renouvellement'));
     }
-    
-    public function getTotal($renouvellement){
+
+    public function getTotal($renouvellement)
+    {
         $montant = 0;
         foreach ($this->dol_object->lines as $line) {
             $child = $this->getChildObject("lines", $line->id);
@@ -3348,7 +3473,6 @@ class BContract_contrat extends BimpDolObject
         }
 
         return $montant;
-        
     }
 
     public function getAddAmountAvenantProlongation()
@@ -4412,5 +4536,26 @@ class BContract_contrat extends BimpDolObject
         }
 
         return $buttons;
+    }
+    
+    public function renderDemandesList()
+    {
+        if ($this->isLoaded()) {
+            BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
+            $objectName = ValidComm::getObjectClass($this);
+            if ($objectName != -2) {
+                BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
+                $demande = BimpObject::getInstance('bimpvalidateorder', 'DemandeValidComm');
+                $list = new BC_ListTable($demande);
+                $list->addFieldFilterValue('type_de_piece', $objectName);
+                $list->addFieldFilterValue('id_piece', (int) $this->id);
+ 
+                return $list->renderHtml();
+            } else {
+                return '';
+            }
+        }
+ 
+        return BimpRender::renderAlerts('Impossible d\'afficher la liste des demande de validation (ID ' . $this->getLabel('of_the') . ' absent)');
     }
 }

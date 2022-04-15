@@ -666,16 +666,25 @@ fields:
         default_value: 1
         dol_extra_field: 1
         
-    date_last_active:
-        label: Date derniére activité
+    date_last_activity:
+        label: Date dernière activité
         type: date
+        
+    last_activity_origin: 
+        label: Origine dernière activité
+        type: text
+        hashtags: 1
+    
+    is_anonymized: 
+        label: Client anonymisé
+        type: bool
+        default_value: 0
         
     id_atradius:
         label: Identifiant Atradius
         type: int     
         
-            
-            
+        
 #    *** Champs non gérés: ***
 #    entity
 #    ref_ext
@@ -799,6 +808,12 @@ fields_tables:
             - field: validation_impaye
               edit:
                   callback: iAmAdmin
+            - field: date_last_activity
+              show: 
+                  callback: isClient
+            - field: last_activity_origin
+              show: 
+                  callback: isClient
                   
     encours: 
         title: Encours HT
@@ -882,7 +897,6 @@ fields_tables:
             - field: note_public
             - field: note_private
 
-
 views: 
     default:
         title: nom
@@ -951,7 +965,7 @@ views:
                       name: default
                       panel: 0
                       
-forms:                   
+forms: 
     light: 
         title: Ajout d'une société
         rows: 
@@ -1286,6 +1300,58 @@ forms:
               display_if:
                   field_name: by_tech
                   show_values: 1
+                  
+    set_activity: 
+        rows: 
+            date: 
+                custom: 1
+                label: Nouvelle date de dernière activité
+                input_name: date_activity
+                data_type: date
+                input: 
+                    type: date
+                    display_now: 1
+                required: 1
+            origin: 
+                custom: 1
+                label: Origine dernière activité
+                input_name: activity_origin
+                data_type: text
+                input: 
+                    type: textarea
+                    hastags: 1
+                required: 1
+            
+    anonymize: 
+        rows: 
+            - custom: 1
+              label: Raison
+              input_name: reason
+              data_type: text
+              input: 
+                  type: textarea
+              value: Demande du client
+    
+    revert_anonymisation: 
+        extends: set_activity
+        rows: 
+            reason: 
+                custom: 1
+                label: Motif annulation anonymisation
+                input_name: reason
+                data_type: text
+                input: 
+                    type: textarea
+                    hashtags: 1
+               
+    clients_to_exclude: 
+        rows: 
+            - custom: 1
+              label: Date max
+              data_type: date
+              input_name: date_max
+              input: 
+                  type: date
              
 filters: 
     accounting_account:

@@ -1,1 +1,1 @@
-ALTER TABLE `llx_societe` ADD `status_atradius` INT NOT NULL DEFAULT '0';
+ALTER TABLE `llx_societe` ADD `id_atradius` INT NOT NULL DEFAULT '0';

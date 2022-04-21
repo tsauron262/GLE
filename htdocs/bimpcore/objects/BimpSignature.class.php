@@ -610,7 +610,7 @@ class BimpSignature extends BimpObject
             }
 
             if (empty($users)) {
-                $msg .= 'Le client ne dispose d\'aucun compte utilisateur valide pour la signature à distance de ce document via l\'espace client BIMP.<br/>';
+                $msg .= 'Le client ne dispose d\'aucun compte utilisateur valide pour la signature à distance de ce document via l\'espace client LDLC Apple.<br/>';
                 $msg .= 'En sélectionnant "OUI" un compte utilisateur client sera automatiquement créé pour l\'adresse e-mail indiquée dans le champ ci-dessous.';
             } else {
                 $msg .= 'En sélectionnant "OUI" l\'accès à la signature électronique à distance pour ce document sera automatiquement ouvert pour tous les comptes utilisateurs de ce client ayant le rôle d\'administrateur';
@@ -1455,7 +1455,7 @@ class BimpSignature extends BimpObject
                                 $doc_label,
                                 $obj->getLabel('the'),
                                 $obj->getRef(),
-                                '<a href="' . $url . '">espace client BIMP</a>'
+                                '<a href="' . $url . '">espace client LDLC Apple</a>'
                                     ), $email_content);
 
                             $bimpMail = new BimpMail($this->getObj(), $subject, BimpTools::cleanEmailsStr($emails), '', $email_content, $comm_email);

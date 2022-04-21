@@ -590,7 +590,7 @@ class BIC_UserClient extends BimpObject
 
         $url = BimpCore::getConf('interface_client_base_url', '');
         $msg = 'Bonjour, ' . "\n\n";
-        $msg .= 'Le mot de passe de votre <a href="' . $url . '">espace client BIMP</a> a été changé.' . "\n";
+        $msg .= 'Le mot de passe de votre <a href="' . $url . '">espace client LDLC Apple</a> a été changé.' . "\n";
         $msg .= 'Si vous n\'êtes pas à l\'origine de cette action veuillez contacter votre ';
 
         if ($this->isAdmin()) {
@@ -599,7 +599,7 @@ class BIC_UserClient extends BimpObject
             $msg .= 'l\'administrateur de votre compte client BIMP.';
         }
 
-        $subject = 'Espace client BIMP - Changement de votre mot de passe';
+        $subject = 'Espace client LDLC Apple - Changement de votre mot de passe';
 
         $bimpMail = new BimpMail($this->getChildObject('client'), $subject, $this->getData('email'), '', $msg);
 
@@ -622,8 +622,8 @@ class BIC_UserClient extends BimpObject
 
         if (!count($errors)) {
             $url = BimpCore::getConf('interface_client_base_url', '');
-            $subject = 'Espace client BIMP - Nouveau mot de passe';
-            $msg = 'Bonjour,<br/><br/>Le mot de passe pour votre accès à votre <a href="' . $url . '">espace client BIMP</a> a été réinitialisé.<br/><br/>';
+            $subject = 'Espace client LDLC Apple - Nouveau mot de passe';
+            $msg = 'Bonjour,<br/><br/>Le mot de passe pour votre accès à votre <a href="' . $url . '">espace client LDLC Apple</a> a été réinitialisé.<br/><br/>';
             $msg .= '<b>Nouveau mot de passe : </b>' . $mdp_clear;
         }
 

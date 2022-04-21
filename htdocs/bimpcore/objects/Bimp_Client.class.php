@@ -3042,9 +3042,7 @@ class Bimp_Client extends Bimp_Societe
         
         
         $html = '';
-        
-        return $html;
-        
+                
         if($this->isLoaded()) {
             
             if((int) $this->getData('id_atradius') == 0 and (int) !$this->isSirenValid()) {
@@ -3154,7 +3152,6 @@ class Bimp_Client extends Bimp_Societe
                     }
                     
                     // Status de la demande
-                    
                     if(isset($cover['status'])) {
                         BimpTools::merge_array($errors, self::updateAtradiusValue($this->getData('siren'), 'status_atradius', (int) $cover['status']));
                     }

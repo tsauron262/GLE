@@ -1692,7 +1692,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
                         $eq_errors = $equipment->validateArray(array(
                             'id_product'    => $product->id,
-                            'type'          => 1, // Dans produits? à sélectionner ? 
+                            'type'          => 1,
                             'serial'        => $serial_data['serial'],
                             'date_purchase' => $commande_fourn->getData('date_commande'),
                             'prix_achat'    => $pu_ht,

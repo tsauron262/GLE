@@ -654,9 +654,12 @@ class Bimp_Log extends BimpObject
         $params['POST'] = $_POST;
 
         if (!empty($_REQUEST)) {
-            foreach (implode('&', $_REQUEST) as $param) {
-                if (preg_match('/^(.+)=(.+)$/', $param, $matches)) {
-                    $params[$matches[1]] = $matches[2];
+            $req_params = implode('&', $_REQUEST);
+            if(is_array($req_params)) {
+                foreach ($req_params as $param) {
+                    if (preg_match('/^(.+)=(.+)$/', $param, $matches)) {
+                        $params[$matches[1]] = $matches[2];
+                    }
                 }
             }
         }

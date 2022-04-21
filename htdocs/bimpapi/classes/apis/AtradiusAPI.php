@@ -12,7 +12,7 @@ class AtradiusAPI extends BimpAPI {
     public static $include_debug_json = false;
     public static $urls_bases = array(
         'default' => array(
-            'prod' => 'https://api.atradius.com',
+            'prod' => 'https://aoi.atradius.com',
             'test' => 'https://api-uat.atradius.com'
         ),
         'auth' => array(
@@ -75,19 +75,19 @@ class AtradiusAPI extends BimpAPI {
     // customerId est définit automatiquement
     public function getCover($filters = array(), &$errors = array(), &$warnings = array()) {
                 
-        BimpObject::loadClass('bimpcore', 'Bimp_Societe');
+        BimpObject::loadClass('bimpcore', 'Bimp_Client');
         
         $response = $this->execCurl('getCover', array(
             'url_params' => $filters
                 ), $errors, $header, $code);
 
 
-        $status = (int) Bimp_Societe::STATUS_ATRADIUS_OK;
+        $status = (int) Bimp_Client::STATUS_ATRADIUS_OK;
         foreach($response['data'] as $k => $c) {
             
             // Il y a une demande en cours d'arbitrage
             if(isset($c['coverStatus']) and $c['coverStatus'] == 'REFERRED') {
-                $status = (int) Bimp_Societe::STATUS_ATRADIUS_EN_ATTENTE;
+                $status = (int) Bimp_Client::STATUS_ATRADIUS_EN_ATTENTE;
                 $warnings[] = "Une demande pour un montant de " . $c['creditLimitApplicationAmountInPolicyCurrency'] . " euros est en cours d'arbitrage";
             }
             
@@ -163,7 +163,7 @@ class AtradiusAPI extends BimpAPI {
             ), $errors, $response_headers, $code, array(), $success);
         
         
-        BimpObject::loadClass('bimpcore', 'Bimp_Societe');
+        BimpObject::loadClass('bimpcore', 'Bimp_Client');
         
         if($params['coverType'] == self::CREDIT_CHECK)
             $cover_type = "La demande de crédit check";
@@ -173,15 +173,15 @@ class AtradiusAPI extends BimpAPI {
         // Statut de la demande
         switch ($code) {
             case 201:
-                $data['status'] = (int) Bimp_Societe::STATUS_ATRADIUS_OK;
+                $data['status'] = (int) Bimp_Client::STATUS_ATRADIUS_OK;
                 $success[] = $cover_type . " a été créer";
                 break;
             case 202:
-                $data['status'] = (int) Bimp_Societe::STATUS_ATRADIUS_EN_ATTENTE;
+                $data['status'] = (int) Bimp_Client::STATUS_ATRADIUS_EN_ATTENTE;
                 $warnings[] = $cover_type . " est en cours d'arbitrage";
                 break;
             default:
-                $data['status'] = (int) Bimp_Societe::STATUS_ATRADIUS_REFUSE;
+                $data['status'] = (int) Bimp_Client::STATUS_ATRADIUS_REFUSE;
                 $errors[] = $cover_type . " a été refusé";
                 break;
         }
@@ -212,20 +212,20 @@ class AtradiusAPI extends BimpAPI {
             'curl_options' => array()
             ), $errors, $response_headers, $code, array(), $success);
         
-        BimpObject::loadClass('bimpcore', 'Bimp_Societe');
+        BimpObject::loadClass('bimpcore', 'Bimp_Client');
 
         // Statut de la demande
         switch ($code) {
             case 201:
-                $data['status'] = (int) Bimp_Societe::STATUS_ATRADIUS_OK;
+                $data['status'] = (int) Bimp_Client::STATUS_ATRADIUS_OK;
                 $warnings[] = "La demande a été mise à jour";
                 break;
             case 202:
-                $data['status'] = (int) Bimp_Societe::STATUS_ATRADIUS_EN_ATTENTE;
+                $data['status'] = (int) Bimp_Client::STATUS_ATRADIUS_EN_ATTENTE;
                 $warnings[] = "Demande en cours d'arbitrage";
                 break;
             default:
-                $data['status'] = (int) Bimp_Societe::STATUS_ATRADIUS_REFUSE;
+                $data['status'] = (int) Bimp_Client::STATUS_ATRADIUS_REFUSE;
                 $errors[] = "Demande refusée";
                 break;
         }
@@ -462,10 +462,10 @@ class AtradiusAPI extends BimpAPI {
     
     public function testRequest(&$errors = array(), &$warnings = array()) {
         
-        $this->deleteCover(array(
+        $this->getCover(array(
 //              'buyerId' => 53242955,
             'buyerId' => $this->getBuyerIdBySiren(389271214),
-            'coverType' => self::CREDIT_LIMIT
+//            'coverType' => self::CREDIT_LIMIT
 //            'coverType' => self::CREDIT_LIMIT
                 ), $errors);
 

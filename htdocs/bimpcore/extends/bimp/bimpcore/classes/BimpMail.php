@@ -5,6 +5,7 @@ class BimpMail extends BimpMailCore
 
     public $title = 'LDLC';
     public $subtitle = 'Apple';
+    public $url = 'www.ldlc.com';
 
     function getHeader()
     {
@@ -88,8 +89,7 @@ class BimpMail extends BimpMailCore
             $html .= '</div>';
         }
 
-//        $url = (isset($mysoc->url) ? $mysoc->url : '');
-        $url = 'www.ldlc.com';
+        $url = ((isset($this->url) && $this->url) ? $this->url : (isset($mysoc->url) ? $mysoc->url : ''));
 
         if ($url) {
             $html .= '<div style="font-size: 12px;">';

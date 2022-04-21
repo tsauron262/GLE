@@ -20,6 +20,7 @@ class BimpMailCore
     public $send_context = 'standard';
     public $title = '';
     public $subtitle = '';
+    public $url = '';
     public $files = array();
     public $parent;
 

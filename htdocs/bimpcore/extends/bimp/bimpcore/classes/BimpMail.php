@@ -39,8 +39,10 @@ class BimpMail extends BimpMailCore
         }
         $html .= '</td>';
         $html .= '<td style="width: 50%; text-align: right">';
-        if (isset($mysoc->url) && $mysoc->url) {
-            $html .= '<a href="' . $mysoc->url . '" style="font-size: 16px; color: #FFFFFF; font-weight: bold">www.bimp.fr</a>';
+        if (isset($this->url) && $this->url) {
+            $html .= '<a href="' . $this->url . '" style="font-size: 16px; color: #FFFFFF; font-weight: bold">' . $this->url . '</a>';
+        } elseif (isset($mysoc->url) && $mysoc->url) {
+            $html .= '<a href="' . $mysoc->url . '" style="font-size: 16px; color: #FFFFFF; font-weight: bold">' . $mysoc->url . '</a>';
         }
         $html .= '</td>';
         $html .= '</tr>';

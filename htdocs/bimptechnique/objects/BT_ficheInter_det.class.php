@@ -264,7 +264,7 @@ class BT_ficheInter_det extends BimpDolObject
                                         } else {
                                             $services['commande_' . $line->id] = $tp[$product->getRef()] . ' (' . price($line->getTotalHT(true)) . ' € HT) - <b>' . $commande->getRef() . '</b> <br />' . $line->desc;
                                         }
-                                    } elseif ($product->getData('price') != 0) {
+                                    } else {
                                         if ($bimp_line_commande->getData('force_qty_1')) {
                                             $services['commande_' . $line->id] = $product->getRef() . ' (AU FORFAIT - ' . price($line->getTotalHT(true)) . ' € HT) - <b>' . $commande->getRef() . '</b> <br />' . $line->desc . $addAuForfait;
                                         } else {

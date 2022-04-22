@@ -142,6 +142,7 @@ fields:
             callback: getCondReglementBySociete
         depends_on: fk_soc
         required: 1
+        history: 1
     fk_mode_reglement: 
         label: Mode de règlement
         dol_prop: mode_reglement_id

@@ -153,7 +153,7 @@ class InterfaceClientController extends BimpPublicController
     {
         global $userClient;
 
-        $html = '<h2>Bienvenue dans votre espace client BIMP</h2><br/>';
+        $html = '<h2>Bienvenue dans votre espace client LDLC Apple</h2><br/>';
 
         if (!BimpObject::objectLoaded($userClient)) {
             $html .= BimpRender::renderAlerts('Vous n\'avez pas la permission d\'accéder à ce contenu');

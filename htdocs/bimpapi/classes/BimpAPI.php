@@ -312,7 +312,7 @@ abstract class BimpAPI
 
     // Traitements des requêtes CURL:
 
-    public function execCurl($request_name, $params = array(), &$errors = array(), &$response_headers = array())
+    public function execCurl($request_name, $params = array(), &$errors = array(), &$response_headers = array(), &$response_code = -1)
     {
         $return = '';
 
@@ -356,7 +356,7 @@ abstract class BimpAPI
                 if (is_array($params['url_params']) && !empty($params['url_params'])) {
                     $url .= '?' . BimpTools::makeUrlParamsFromArray($params['url_params']);
                 }
-
+                
                 // Initalisation:
                 $infos .= '<b>Initialisation: </b>' . $url . ': ';
                 $ch = curl_init($url);
@@ -446,6 +446,10 @@ abstract class BimpAPI
                     switch ($params['type']) {
                         case 'GET':
                             $curl_options[CURLOPT_HTTPGET] = true;
+                            break;
+                        case 'PUT':
+                            $curl_options[CURLOPT_CUSTOMREQUEST] = 'PUT';
+                            $curl_options[CURLOPT_HTTPHEADER][] = 'Content-Length: ' . strlen($curl_options[CURLOPT_POSTFIELDS]);
                             break;
                     }
 

@@ -573,7 +573,7 @@ class Bimp_Product extends BimpObject
     {
         // ACHAT DE D3E juste pour la france
         // ACHAT DE TVA JUSTe PAR AUTOLIQUIDATION - si on a un numéro intracom sur un pro UE
-
+        
         if ($force_type == -1) {
             if (!$this->isLoaded())
                 return '';
@@ -593,10 +593,15 @@ class Bimp_Product extends BimpObject
             elseif ($zone_vente == 3)
                 return BimpCore::getConf('BIMPTOCEGID_vente_produit_ex');
         } elseif ($type == 1) {//service
-            if ($zone_vente == 1)
+            if ($zone_vente == 1) {
+                if ($this->getData('tva_tx') == 0) {
+                    return BimpCore::getConf('BIMPTOCEGID_vente_tva_null');
+                }
                 return BimpCore::getConf('BIMPTOCEGID_vente_service_fr');
-            elseif ($zone_vente == 2 || $zone_vente == 4)
+            }
+            elseif ($zone_vente == 2 || $zone_vente == 4) {
                 return BimpCore::getConf('BIMPTOCEGID_vente_service_ue');
+            }
             elseif ($zone_vente == 3)
                 return BimpCore::getConf('BIMPTOCEGID_vente_service_ex');
         } elseif ($type == 2) {//Port

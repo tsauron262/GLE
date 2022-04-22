@@ -189,7 +189,6 @@ fields:
         label: Facture source
         type: id_object
         object: facture_source
-#        type: id
     statut_export:
         label: Statut export
         type: int

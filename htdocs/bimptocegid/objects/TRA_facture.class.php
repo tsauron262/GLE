@@ -17,10 +17,12 @@
         public $rapport = [];
         public $rapportTier = [];
         protected $TRA_tiers;
+        protected $debug;
         
-        function __construct($bimp_db, $tiers_file) { 
+        function __construct($bimp_db, $tiers_file, $debug = false) { 
             $this->db = $bimp_db; 
             $this->TRA_tiers = new TRA_tiers($bimp_db, $tiers_file);
+            $this->debug = $debug;
         }
 
         public function constructTra(Bimp_Facture $facture) {
@@ -137,17 +139,26 @@
                     }
                     $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
                     if($line->multicurrency_total_ht != 0) {
-                        
+                        $debug['ZONE_VENTE_' . $line->id] = $facture->getData('zone_vente');
                         $current_montant = round($line->multicurrency_total_ht, 2);
                         if($use_d3e) {
                             $current_montant = round($line->multicurrency_total_ht, 2) - ($product->getData('deee') * $line->qty);
                             $total_deee += $product->getData('deee') * $line->qty;
                         }
                         $total_ht += round($current_montant, 2);
-                        if($product->isLoaded() && $line->fk_product > 0)
+                        if($product->isLoaded()) {
                             $this->compte_general = $product->getCodeComptableVente($facture->getData('zone_vente'), ($product->getData('type_compta') == 0) ? -1 : $product->getData('type_compta'));
-                        else
+                            $debug['LOADED_PRODUCT_' . $line->id] = $product->getRef();
+                        }
+                        else {
                             $this->compte_general = '70600000';
+                            $debug['LOADED_PRODUCT_' . $line->id] = 'NULL';
+                        }
+                            
+                        
+                        $debug['CHOIX_COMPTE_' . $line->id] = $line->id . ' => ' . $this->compte_general;
+                        $debug['ID_PRODUCT_' . $line->id] = $line->id . ' => ' . $line->fk_product;
+                        
                         $structure['SENS']                  = sizing($this->getSens($line->multicurrency_total_ht),1, true);
                         $structure['COMPTE_GENERAL']        = sizing(sizing(interco_code($this->compte_general, $this->compte_general_client), 8, false, true) , 17);
                         $structure['TYPE_DE_COMPTE']        = sizing("", 1);
@@ -213,7 +224,14 @@
             
             $this->rapportTier = $this->TRA_tiers->rapport;
             
-            return $ecriture;
+            if(!$this->debug)
+                return $ecriture;
+            
+            $return = $ecriture;
+            $return.= '<br />' . print_r($debug, 1);
+            
+            return $return;
+            
         }
         
         private function getSensRectification($montant, $ttc_facture) {

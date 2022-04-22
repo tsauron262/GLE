@@ -175,7 +175,7 @@ class BimpPublicController extends BimpController
     public function displayPublicForm($form_name, $params = array(), $form_errors = array())
     {
         $params = BimpTools::overrideArray(array(
-                    'page_title'     => 'BIMP - Espace client',
+                    'page_title'     => 'LDLC Apple - Espace client',
                     'main_title'     => 'Espace client',
                     'sub_title'      => 'Votre identifiant et mot de passe sont différents de votre compte client LDLC.',
                     'submit_label'   => 'Valider',

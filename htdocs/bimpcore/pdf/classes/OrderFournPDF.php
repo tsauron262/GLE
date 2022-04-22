@@ -101,7 +101,7 @@ class OrderFournPDF extends BimpDocumentPDF
                     $entrepot = $this->bimpCommObject->getChildObject('entrepot');
                     if (BimpObject::objectLoaded($entrepot)) {
                         if ($entrepot->address) {
-                            $html .= $entrepot->address . '<br/>';
+                            $html .= 'BIMP<br/>'.$entrepot->address . '<br/>';
                             if ($entrepot->zip) {
                                 $html .= $entrepot->zip . ' ';
                             } else {

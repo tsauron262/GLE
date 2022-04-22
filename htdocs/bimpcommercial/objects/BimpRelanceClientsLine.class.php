@@ -1156,7 +1156,7 @@ class BimpRelanceClientsLine extends BimpObject
                 $this->set('date_send', null);
                 $this->set('id_user_send', 0);
             }
-            
+
             if ($new_status == self::RELANCE_ATTENTE_TEL) {
                 $this->set('id_user_phone_call', 0);
                 $this->set('date_phone_call', null);
@@ -1641,14 +1641,16 @@ class BimpRelanceClientsLine extends BimpObject
             $errors = $this->update($warnings, true);
 
             if (!count($errors)) {
-                // Si non poursuite de la mise en demeure, on désactive les relances pour les factures concernées.
-                $factures = $this->getData('factures');
+                if (!$continue) {
+                    // Si non poursuite de la mise en demeure, on désactive les relances pour les factures concernées.
+                    $factures = $this->getData('factures');
 
-                foreach ($factures as $id_facture) {
-                    $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+                    foreach ($factures as $id_facture) {
+                        $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
 
-                    if (BimpObject::objectLoaded($fac)) {
-                        $fac->updateField('relance_active', 0);
+                        if (BimpObject::objectLoaded($fac)) {
+                            $fac->updateField('relance_active', 0);
+                        }
                     }
                 }
             }

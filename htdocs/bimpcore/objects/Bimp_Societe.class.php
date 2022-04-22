@@ -2869,7 +2869,7 @@ class Bimp_Societe extends BimpDolObject
         }
     }
 
-    public function anonymiseData($save_data = true, $reason = '', &$warnings = array())
+    public function anonymiseData($save_data = true, $reason = '', &$warnings = array(), &$rgpd_process = null)
     {
         $errors = array();
 
@@ -2930,7 +2930,7 @@ class Bimp_Societe extends BimpDolObject
                 }
                 $this->addObjectLog($msg, 'ANONYMISED');
 
-                // Suppression des fichiers: 
+                // Suppression des fichiers du client: 
                 $dir = $this->getFilesDir();
                 if (is_dir($dir)) {
                     $files = scandir($data);
@@ -2962,7 +2962,7 @@ class Bimp_Societe extends BimpDolObject
                     }
                 }
 
-                // Anonymisation des comptes utilisteurs: 
+                // Anonymisation des comptes utilisateurs: 
                 $bic_users = BimpCache::getBimpObjectObjects('bimpinterfaceclient', 'BIC_UserClient', array(
                             'id_client' => $this->id
                 ));
@@ -2975,6 +2975,49 @@ class Bimp_Societe extends BimpDolObject
                             $warnings[] = BimpTools::getMsgFromArray($user_errors, 'Erreurs anonymisation du compte utilisateur #' . $bic_user->id);
                         }
                     }
+                }
+
+                // Traitement fichiers client: 
+                $dir = $this->getFilesDir();
+                if (preg_match('/^(.+)\/+$/', $dir, $matches)) {
+                    $dir = $matches[1];
+                }
+
+                if (is_dir($dir)) {
+                    if (count(scandir($dir)) > 2) {
+                        // Renommage dossier: 
+                        global $bimp_errors_handle_locked;
+                        $bimp_errors_handle_locked = true;
+                        error_reporting(E_ALL);
+                        ini_set('display_errors', 1);
+
+                        error_clear_last();
+                        if (!rename($dir, $dir . '_anonymized')) {
+                            $err = error_get_last();
+                            $warnings[] = 'Echec renommage du dossier "' . $dir . '" en "' . $dir . '_anonymized"' . (isset($err['message']) ? ' - ' . $err['message'] : '');
+                        } else {
+                            $warnings[] = 'Rename ' . $dir . ' => ' . $dir . '_anonymized';
+                        }
+
+                        $bimp_errors_handle_locked = false;
+                    }
+                }
+
+                // Traitement fichiers des pièces liées:
+                $files_errors = array();
+                if (is_null($rgpd_process)) {
+                    if (!class_exists('BDS_RgpdProcess')) {
+                        require_once DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/process_overrides/BDS_RgpdProcess.php';
+                    }
+                    $rgpd_process = BDSProcess::createProcessByName('Rgpd', $files_errors);
+                }
+
+                if (!count($files_errors)) {
+                    $files_errors = $rgpd_process->onClientAnonymised($this);
+                }
+
+                if (count($files_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($files_errors, 'Erreurs lors du traitement des fichiers client');
                 }
             }
         }
@@ -3010,7 +3053,7 @@ class Bimp_Societe extends BimpDolObject
                     }
                 }
 
-                $this->set('is_anonymised', 0);
+                $this->set('is_anonymized', 0);
 
                 $errors = $this->update($warnings, true);
 
@@ -3040,7 +3083,7 @@ class Bimp_Societe extends BimpDolObject
                         }
                     }
 
-                    // Annulation comptes utilisteurs: 
+                    // Annulation comptes utilisateurs: 
                     $bic_users = BimpCache::getBimpObjectObjects('bimpinterfaceclient', 'BIC_UserClient', array(
                                 'id_client' => $this->id
                     ));
@@ -3053,6 +3096,21 @@ class Bimp_Societe extends BimpDolObject
                                 $warnings[] = BimpTools::getMsgFromArray($user_errors, 'Echec récupération des données du compte utilisateur #' . $bic_user->id);
                             }
                         }
+                    }
+
+                    // Traitement fichiers des pièces liées:
+                    $files_errors = array();
+                    if (!class_exists('BDS_RgpdProcess')) {
+                        require_once DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/process_overrides/BDS_RgpdProcess.php';
+                    }
+                    $rgpd_process = BDSProcess::createProcessByName('Rgpd', $files_errors);
+
+                    if (!count($files_errors)) {
+                        $files_errors = $rgpd_process->onClientUnAnonymised($this);
+                    }
+
+                    if (count($files_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($files_errors, 'Erreurs lors du traitement des fichiers client');
                     }
                 }
             } else {

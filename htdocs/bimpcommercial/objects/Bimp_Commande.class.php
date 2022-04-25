@@ -3241,17 +3241,41 @@ class Bimp_Commande extends BimpComm
             if (!BimpObject::objectLoaded($client)) {
                 $errors[] = 'Client absent';
             } else {
-                $ref = $this->getRef();
-                if (preg_match('/^[\(]?PROV/i', $ref) || $ref) {
-                    $ref = $this->dol_object->getNextNumRef($client->dol_object);
-                    $this->set('ref', $ref);
+                $old_ref = $this->getRef();
+                if (preg_match('/^[\(]?PROV/i', $old_ref)) {
+                    $new_ref = $this->dol_object->getNextNumRef($client->dol_object);
+                    $this->set('ref', $new_ref);
+                } else {
+                    $new_ref = $old_ref;
                 }
                 $comm_errors = $this->onValidate($comm_warnings);
 
                 if (!count($comm_errors)) {
                     $result = 1;
-                    $this->updateField('ref', $ref);
+                    $this->updateField('ref', $new_ref);
                     $this->updateField('fk_statut', 1);
+                    $this->updateField('date_valid', date('Y-m-d H:i:s'));
+                    $this->updateField('fk_user_valid', $user->id);
+
+                    if (preg_match('/^[\(]?PROV/i', $old_ref)) {
+                        require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+
+                        $dirsource = $conf->commande->dir_output . '/' . $old_ref;
+                        $dirdest = $conf->commande->dir_output . '/' . $new_ref;
+                        if (file_exists($dirsource)) {
+                            if (@rename($dirsource, $dirdest)) {
+                                // Rename docs starting with $oldref with $newref
+                                $listoffiles = dol_dir_list($conf->commande->dir_output . '/' . $new_ref, 'files', 1, '^' . preg_quote($old_ref, '/'));
+                                foreach ($listoffiles as $fileentry) {
+                                    $dirsource = $fileentry['name'];
+                                    $dirdest = preg_replace('/^' . preg_quote($old_ref, '/') . '/', $new_ref, $dirsource);
+                                    $dirsource = $fileentry['path'] . '/' . $dirsource;
+                                    $dirdest = $fileentry['path'] . '/' . $dirdest;
+                                    @rename($dirsource, $dirdest);
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

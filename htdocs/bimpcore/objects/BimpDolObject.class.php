@@ -4,6 +4,8 @@ if (!defined('BIMP_LIB')) {
     require_once __DIR__ . '/../Bimp_Lib.php';
 }
 
+require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/viewEcriture.class.php';
+
 class BimpDolObject extends BimpObject
 {
 
@@ -371,9 +373,9 @@ class BimpDolObject extends BimpObject
 
         $id_main_pdf_file = (int) $this->getDocumentFileId();
 
-        if($id_main_pdf_file < 1)
+        if ($id_main_pdf_file < 1)
             BimpController::addAjaxWarnings('Attention fichier PDF introuvable');
-        
+
         if (!in_array($id_main_pdf_file, $values)) {
             $values[] = $id_main_pdf_file;
         }
@@ -496,6 +498,7 @@ class BimpDolObject extends BimpObject
     public function renderExtraFile()
     {
         $html = "";
+
         $objects = $this->getBimpObjectsLinked();
         foreach ($objects as $obj)
             $html .= $this->renderListFileForObject($obj);

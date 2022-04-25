@@ -204,6 +204,7 @@ lists:
         n: 10
         extra_btn:
             callback: getDefaultListExtraButtons
+        before_list_callback: displayAnonymizedFiles
         cols:
             type: 
             file_name:

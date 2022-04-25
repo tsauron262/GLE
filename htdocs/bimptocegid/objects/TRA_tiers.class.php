@@ -10,16 +10,17 @@
         protected $db;
         public $rapport = [];
         private $exclude_charaters = ["'", '"', "-", "(", ")", ".", ";", ':', "/", "!", "_", "+", "=","é", "à", "è", "&", "ç", "?", "ù", "%", "*", ",", '#', '@'];
-        private $tier;
+        public $tier;
         private $file;
         private $tiers_type_client = [8 => 'P', 5 => 'A'];
         private $type_tier;
+        public $justView = false;
         
         function __construct($bimp_db, $file) { 
             $this->db = $bimp_db; 
             $this->file = $file;
         }
-        
+
         public function cleanString($string) {
             
             $string = suppr_accents($string);
@@ -32,13 +33,18 @@
             
         }
         
-        public function getCodeComptable($tier, $field = 'code_compta') {
-            if($tier->getData('exported') && $tier->getData($field)) {
-                return $tier->getData($field);
+        public function getCodeComptable($tier, $field = 'code_compta', $createTiers = true) {
+            if($createTiers) {
+                if($tier->getData('exported') && $tier->getData($field)) {
+                    return $tier->getData($field);
+                } else {
+                    $this->tier = $tier;
+                    return $this->constructTra($field);
+                }
             } else {
-                $this->tier = $tier;
-                return $this->constructTra($field);
+                return ($tier->getData($field)) ? $tier->getData($field) : 'xxxxxxxxxxxxxxxx';
             }
+            
         }
         
         public function define_code_aux($field) {
@@ -103,7 +109,7 @@
             return $this->db->getRow('c_country', '`rowid` = ' . $this->tier->getData('fk_pays'));
         }
                 
-        protected function constructTra($field) {
+        public function constructTra($field) {
             
             $commercial = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $this->getCommercialId());
             $country = $this->getCountry();
@@ -157,12 +163,17 @@
             $structure['VIDE_6']          = sizing('', 6);
             $structure['CONF']            = sizing('0', 1);
             $structure['VIDE_7']          = sizing('', 156);
-
-            $this->write(implode('', $structure), $structure['AUXILIAIRE']);
             
-            $this->rapport[$structure['AUXILIAIRE']] = 'Créé dans le fichier ' . $this->file;
-            $this->tier->updateField($field, $structure['AUXILIAIRE']);
-            return $structure['AUXILIAIRE'];
+            if(!$this->justView) {
+                $this->write(implode('', $structure), $structure['AUXILIAIRE']);
+            
+                $this->rapport[$structure['AUXILIAIRE']] = 'Créé dans le fichier ' . $this->file;
+                $this->tier->updateField($field, $structure['AUXILIAIRE']);
+                return $structure['AUXILIAIRE'];
+            } else {
+                return implode('', $structure);
+            }
+            
         }
         
         protected function write($ecriture) {

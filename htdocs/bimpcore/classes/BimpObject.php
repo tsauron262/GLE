@@ -128,7 +128,6 @@ class BimpObject extends BimpCache
             $instance = new $className($module, $object_name);
         }
         
-        
         if($className == 'BimpObject' && $instance->config->isDefined('extends') && $instance->config->isDefined('extends/module') && $instance->config->isDefined('extends/object_name')){
                     $module = $instance->getConf('extends/module');
                     $object_nameP = $instance->getConf('extends/object_name');
@@ -152,8 +151,6 @@ class BimpObject extends BimpCache
             }
         }
         
-        
-
         if (!is_null($id_object)) {
             $instance->fetch($id_object, $parent);
         } else {

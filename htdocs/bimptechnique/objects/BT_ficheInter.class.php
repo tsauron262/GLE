@@ -1093,7 +1093,7 @@ class BT_ficheInter extends BimpDolObject
                 if ($product->isLoaded() && !$product->isDep() && ($line->product_type == 1 || $product->getData('fk_product_type'))) {
                     if (array_key_exists($product->getData('ref'), $tp)) {
                         $services['commande_' . $line->id] = $tp[$product->getRef()] . ' (' . price($line->total_ht) . ' € HT) - <b>' . $commande->ref . '</b> <br />' . $line->description;
-                    } elseif ($product->getData('price') != 0) {
+                    } else {
                         $services['commande_' . $line->id] = $product->getRef() . ' (' . price($line->total_ht) . ' € HT) - <b>' . $commande->ref . '</b> <br />' . $line->description;
                     }
                 }

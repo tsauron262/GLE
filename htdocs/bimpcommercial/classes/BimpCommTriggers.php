@@ -33,6 +33,9 @@ abstract class BimpCommTriggers extends DolibarrTriggers
                         $bimpObject->checkLines();
                     }
                 }
+                // On alimente $bimpObject avec les données de $object: 
+                $bimpObject->dol_object = $object;
+                $bimpObject->hydrateFromDolObject();
             } else {
                 if (is_object($bimpObject)) {
                     $errors[] = BimpTools::ucfirst($bimpObject->getLabel('the')) . ' d\'ID ' . $object->id . ' n\'existe plus';

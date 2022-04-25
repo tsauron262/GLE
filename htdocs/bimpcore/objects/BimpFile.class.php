@@ -74,7 +74,7 @@ class BimpFile extends BimpObject
         if (!$force_delete && !(int) $this->getData('is_deletable')) {
             return 0;
         }
-        
+
         return (int) (!(int) $this->getData('deleted'));
     }
 
@@ -257,6 +257,39 @@ class BimpFile extends BimpObject
         return '';
     }
 
+    public function displayAnonymizedFiles($bc_list)
+    {
+        $html = '';
+        $dir = $this->getFileDir();
+
+        if ($dir) {
+            if (preg_match('/^(.+)\/+$/', $dir, $matches)) {
+                $dir = $matches[1];
+            }
+
+            $dir .= '_anonymized';
+
+            if (file_exists($dir) && is_dir($dir)) {
+                $files = scandir($dir);
+
+                if (count($files) > 2) {
+                    $html .= '<h3>Fichiers anonymisés (non accessibles)</h3>';
+
+                    foreach ($files as $f) {
+                        if (in_array($f, array('.', '..'))) {
+                            continue;
+                        }
+                        $html .= ' - ' . $f . '<br/>';
+                    }
+
+                    $html .= '<br/>';
+                }
+            }
+        }
+        
+        return $html;
+    }
+
     // Traitements: 
 
     public function uploadFile()
@@ -395,14 +428,16 @@ class BimpFile extends BimpObject
                     }
                 }
             }
+        } else {
+            $files = array();
+        }
 
-            foreach ($current_files as $id_file => $file_name) {
-                if (!in_array($file_name, $files)) {
-                    if ($this->fetch((int) $id_file)) {
-                        $warnings = array();
-                        $this->delete($warnings, true);
-                        $this->reset();
-                    }
+        foreach ($current_files as $id_file => $file_name) {
+            if (!in_array($file_name, $files)) {
+                if ($this->fetch((int) $id_file)) {
+                    $warnings = array();
+                    $this->delete($warnings, true);
+                    $this->reset();
                 }
             }
         }

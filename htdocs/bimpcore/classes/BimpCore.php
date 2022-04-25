@@ -131,9 +131,7 @@ class BimpCore
         
         $debug = false;
         
-        global $userClient;
-        
-        if (BimpObject::objectLoaded($userClient) && $userClient->getData('email') == 'f.martinez@bimp.fr') {
+        if ($_SERVER['HTTP_X_REAL_IP'] == '25.254.131.41') {
             $debug = true;
         }
 

@@ -128,6 +128,14 @@ class BimpCore
     public static function getFileUrl($file_path, $use_tms = true)
     {
         $url = '';
+        
+//        $debug = false;
+//        
+//        global $userClient;
+        
+//        if (BimpObject::objectLoaded($userClient) && $userClient->getData('email') == 'f.martinez@bimp.fr') {
+//            $debug = true;
+//        }
 
         if (preg_match('/^\/+(.+)$/', $file_path, $matches)) {
             $file_path = $matches[1];

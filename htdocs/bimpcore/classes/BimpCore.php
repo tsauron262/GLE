@@ -131,12 +131,12 @@ class BimpCore
         
         $debug = false;
         
-        if ($_SERVER['HTTP_X_REAL_IP'] == '25.254.131.41') {
+        if ($_SERVER['HTTP_X_REAL_IP'] == '10.192.20.148') {
             $debug = true;
         } else {
-            echo '<pre>';
-            print_r($_SERVER);
-            exit;
+//            echo '<pre>';
+//            print_r($_SERVER);
+//            exit;
         }
 
         if (preg_match('/^\/+(.+)$/', $file_path, $matches)) {

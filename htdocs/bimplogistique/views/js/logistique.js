@@ -200,12 +200,7 @@ function addReceivedEquipmentsToReservation($btn, equipments) {
 
             if ($select.length && $add_button.length) {
                 var $parent = $btn.parent();
-
                 var $qty = $parent.find('span.added_qty');
-                
-                if (!$qty.length) {
-                    bimp_msg('FAIL');
-                }
                 var done = 0;
 
                 for (var i in equipments) {

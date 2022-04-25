@@ -314,7 +314,7 @@ class BimpPublicController extends BimpController
 
         $html .= '<p style="text-align: center">';
         $html .= 'Si vous souhaitez prendre un rendez-vous en ligne dans un de nos centres SAV pour la réparation de votre matériel et que ';
-        $html .= 'vous ne disposez pas de compte client LDLC Apple, veuillez <a href="' . BimpObject::getPublicBaseUrl() . 'fc=savForm">cliquer ici</a>';
+        $html .= 'vous ne disposez pas de compte client LDLC Apple, veuillez <a href="' . BimpObject::getPublicBaseUrl() . 'fc=savForm" style="color: #00BEE5">cliquer ici</a>';
         $html .= '</p>';
         
         return $html;

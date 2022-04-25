@@ -785,12 +785,21 @@ class Bimp_Paiement extends BimpObject
         $errors = array();
         $warnings = array();
         $success = 'Paiement transféré avec succès';
-
+        
+        
+        
+        
         $id_facture_from = isset($data['id_facture_from']) ? (int) $data['id_facture_from'] : 0;
         $id_facture_to = isset($data['id_facture_to']) ? (int) $data['id_facture_to'] : 0;
         $amount = isset($data['amount_to_move']) ? $data['amount_to_move'] : 0;
         $id_discount = 0;
-
+        
+        $for_mvt = new stdClass();
+        $for_mvt->id_paiement = $this->id;
+        $for_mvt->id_facture_from = $id_facture_from;
+        $for_mvt->id_facture_to = $id_facture_to;
+        $for_mvt->montant = $amount;
+        
         if (!$id_facture_from) {
             $errors[] = 'Veuillez sélectionner la facture d\'origine';
         } else {
@@ -924,11 +933,22 @@ class Bimp_Paiement extends BimpObject
                                 $mail .= "\t" . 'Montant initial du paiement: ' . BimpTools::displayFloatValue($init_dest_amount) . ' €' . "\n";
                                 $mail .= "\t" . 'Nouveau montant du paiement: ' . BimpTools::displayFloatValue($new_dest_amount) . ' €' . "\n\n";
 
-                                if ($paiement_exported) {
-                                    $mail_to = BimpCore::getConf('email_compta', '');
-                                    if ($mail_to) {
-                                        mailSyn2('Modification d\'un paiement exporté en compta', $mail_to, '', $mail);
+                                if ($this->getData('exported')) {
+
+                                    if($facFrom->getData('fk_soc') != $facTo->getData('fk_soc')) {
+                                        if($this->db->insert('mvt_paiement', ['datas' => json_encode($for_mvt), 'date' => date('Y-m-d')]) <= 0) {
+                                            $errors[] = 'Echec de l\'enregistrement du changement de facture du paiement dans la table d\'export';
+                                        }
                                     }
+                                    if(!count($errors)) {
+                                        $mail_to = BimpCore::getConf('email_compta', '');
+                                        if ($mail_to) {
+                                            mailSyn2('Modification d\'un paiement exporté en compta, l\'écriture correspondante sera importée dans cégid lors du prochain export.', $mail_to, '', $mail);
+                                        }
+                                    } else {
+                                        mailSyn2('COMPTA URGENT', 'dev@bimp.fr', null, $msg);
+                                    }
+                                    
                                 }
                             }
                         }

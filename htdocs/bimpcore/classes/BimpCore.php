@@ -129,19 +129,22 @@ class BimpCore
     {
         $url = '';
         
-//        $debug = false;
-//        
-//        global $userClient;
+        $debug = false;
         
-//        if (BimpObject::objectLoaded($userClient) && $userClient->getData('email') == 'f.martinez@bimp.fr') {
-//            $debug = true;
-//        }
+        global $userClient;
+        
+        if (BimpObject::objectLoaded($userClient) && $userClient->getData('email') == 'f.martinez@bimp.fr') {
+            $debug = true;
+        }
 
         if (preg_match('/^\/+(.+)$/', $file_path, $matches)) {
             $file_path = $matches[1];
         }
 
         if (file_exists(DOL_DOCUMENT_ROOT . '/' . $file_path)) {
+            if ($debug) {
+                echo 'ICI: ' . DOL_DOCUMENT_ROOT . '/' . $file_path;
+            }
             if ($use_tms && (int) BimpCore::getConf('use_files_tms')) {
                 $pathinfo = pathinfo($file_path);
 
@@ -182,6 +185,10 @@ class BimpCore
 
             if (!$url) {
                 $url = $file_path;
+            }
+        } else {
+            if ($debug) {
+                echo 'FAIL: ' . DOL_DOCUMENT_ROOT . '/' . $file_path;
             }
         }
 

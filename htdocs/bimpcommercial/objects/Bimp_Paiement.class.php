@@ -946,7 +946,7 @@ class Bimp_Paiement extends BimpObject
                                             mailSyn2('Modification d\'un paiement exporté en compta, l\'écriture correspondante sera importée dans cégid lors du prochain export.', $mail_to, '', $mail);
                                         }
                                     } else {
-                                        mailSyn2('COMPTA URGENT', 'dev@bimp.fr', null, $msg);
+                                        mailSyn2('COMPTA URGENT', 'dev@bimp.fr', null, 'PB enregistrement déplacement paiements ' . $this->getNomUrl());
                                     }
                                     
                                 }

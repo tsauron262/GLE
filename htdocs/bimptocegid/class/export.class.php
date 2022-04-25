@@ -108,7 +108,7 @@
             global $db;
             $errors = [];
             $file = PATH_TMP . $this->dir . $this->getMyFile('deplacementPaiements');
-            echo '<pre>';
+            
             $list = $this->bdb->getRows('mvt_paiement', 'traite = 0 AND date BETWEEN "'.$this->lastDateExported->format('Y-m-d').'" AND "'.$this->yesterday->format('Y-m-d').'"');
             
             if(count($list) > 0)  {
@@ -128,7 +128,7 @@
 
                     $ecriture = "";
                 }
-                echo $ecriture;
+                
             }
             
             $this->tiers = $this->TRA_deplacementPaiement->rapportTier;

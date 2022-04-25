@@ -659,7 +659,7 @@ class BimpComm extends BimpDolObject
                 'onclick' => $this->getJsLoadModalForm('logs', 'Editer les logs')
             );
         }
-
+        
         return $buttons;
     }
 
@@ -2320,6 +2320,34 @@ class BimpComm extends BimpDolObject
             }
         }
 
+        return $html;
+    }
+    
+    public function renderEcritureTra() {
+        $html = '';
+        
+        switch($this->object_name) {
+            case 'Bimp_Facture':
+                $statutField = 'fk_statut';
+                break;
+            case 'Bimp_Paiement':
+                $statutField = 'statut';
+                break;
+        }
+        
+        if($this->getData($statutField) > 0) {
+            viewEcriture::setCurrentObject($this);
+            $html .= viewEcriture::display();
+        } else {
+            $html .= BimpRender::renderAlerts($this->getRef() . ' n\'est pas validé' . (($this->isLabelFemale()) ? 'e' : ''), 'info', false);
+        }
+        
+        return $html;
+    }
+    
+    public function renderExportedField() {        
+        $html = $this->displayData('exported');
+        $html .= ' <i class="far fa5-eye rowButton bs-popover" onClick="'.$this->getJsLoadModalCustomContent('renderEcritureTra', 'Ecriture TRA de ' . $this->getRef()).'" ></i>';
         return $html;
     }
 

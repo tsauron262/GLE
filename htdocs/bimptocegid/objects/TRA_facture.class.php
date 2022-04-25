@@ -25,7 +25,7 @@
             $this->debug = $debug;
         }
 
-        public function constructTra(Bimp_Facture $facture) {
+        public function constructTra(Bimp_Facture $facture, $createTiers = true) {
                         
             for ($i = 0; $i < count($facture->dol_object->lines); $i++) {
                 if ($facture->dol_object->lines[$i]->desc == "Acompte" 
@@ -52,7 +52,7 @@
             $use_d3e             = ($facture->getData('zone_vente') == 1) ? true : false;
             $TTC                 = $facture->getData('multicurrency_total_ttc');
             $controlle_ttc       = round($TTC, 2);            
-            $code_compta         = $this->TRA_tiers->getCodeComptable($client);
+            $code_compta         = $this->TRA_tiers->getCodeComptable($client, 'code_compta', $createTiers);
             
             if ($client->getData('is_subsidiary')) {
                 $this->compte_general = $client->getData('accounting_account');

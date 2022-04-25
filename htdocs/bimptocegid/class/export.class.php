@@ -5,6 +5,7 @@
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_payInc.class.php';
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_paiement.class.php';
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_importPaiement.class.php';
+    require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_deplacementPaiement.class.php';
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/functions/sizing.php';
     
     class export {
@@ -35,6 +36,7 @@
             $this->TRA_facture = new TRA_facture($this->bdb, PATH_TMP . $this->dir . $this->getMyFile("tiers"));
             $this->TRA_payInc = new TRA_payInc($this->bdb);
             $this->TRA_paiement = new TRA_paiement($this->bdb, PATH_TMP . $this->dir . $this->getMyFile("tiers"));
+            $this->TRA_deplacementPaiement = new TRA_deplacementPaiement($this->bdb, PATH_TMP . $this->dir . $this->getMyFile("tiers"));
             $this->TRA_importPaiement = new TRA_importPaiement($this->bdb);
         }
         
@@ -101,6 +103,38 @@
 
         }
         
+        public function exportDeplacementPaiament($ref  = ''):void {
+            
+            global $db;
+            $errors = [];
+            $file = PATH_TMP . $this->dir . $this->getMyFile('deplacementPaiements');
+            
+            $list = $this->bdb->getRows('mvt_paiement', 'traite = 0 AND date BETWEEN "'.$this->lastDateExported->format('Y-m-d').'" AND "'.$this->yesterday->format('Y-m-d').'"');
+            
+            if(count($list) > 0)  {
+                foreach ($list as $line)  {
+
+                    $datas = json_decode($line->datas);
+                    
+                    $paiement = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Paiement', (int) $datas->id_paiement);
+                    $datas->code = $paiement->getData('fk_paiement');
+                    if($this->bdb->getValue('c_paiement', 'code', 'id = ' . $paiement->getData('fk_paiement')) != 'NO_COM') {
+                        if($this->write_tra($this->TRA_deplacementPaiement->constructTra($paiement, $datas), $file)) {
+                            $this->good['DP'][$paiement->getRef()] = 'Ok dans le fichier ' . $file;
+                        } else {
+                            $this->fails['DP'][$paiement->getRef()] = 'Erreur de déplacemùent de ce paiement';
+                        }
+                    }
+
+                    $ecriture = "";
+                }
+                
+            }
+            
+            $this->tiers = $this->TRA_deplacementPaiement->rapportTier;
+            
+        }
+        
         public function exportPaiement($ref = ''):void  {
             global $db;
             $errors = [];
@@ -118,22 +152,22 @@
 
             foreach($list as $pay) {
                 $reglement = $this->bdb->getRow('c_paiement', 'id = ' . $pay->fk_paiement);
-                if($reglement->code != 'NO_COM') {
-                    $paiement = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Paiement', $pay->rowid);
-                    $liste_transactions = $this->bdb->getRows('paiement_facture', 'fk_paiement = ' . $pay->rowid);
-                    foreach($liste_transactions as $transaction) {
-                        $ecriture .= $this->TRA_paiement->constructTra($transaction, $paiement, $pay);
-                        if($this->write_tra($ecriture, $file)) {
-                            $this->good['PAY'][$pay->ref] = "Ok dans le fichier " . $file;
-                            $paiement->updateField('exported', 1);
-                        } else {
-                            $this->fails['PAY'][$pay->ref] = "Erreur lors de l'écriture dans le fichier";
+                    if($reglement->code != 'NO_COM') {
+                        $paiement = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Paiement', $pay->rowid);
+                        $liste_transactions = $this->bdb->getRows('paiement_facture', 'fk_paiement = ' . $pay->rowid);
+                        foreach($liste_transactions as $transaction) {
+                            $ecriture .= $this->TRA_paiement->constructTra($transaction, $paiement, $pay);
+                            if($this->write_tra($ecriture, $file)) {
+                                $this->good['PAY'][$pay->ref] = "Ok dans le fichier " . $file;
+                                $paiement->updateField('exported', 1);
+                            } else {
+                                $this->fails['PAY'][$pay->ref] = "Erreur lors de l'écriture dans le fichier";
+                            }
+                            $ecriture = "";
                         }
-                        $ecriture = "";
-                    }
-                } else {
-                    $this->warn['PAY'][$pay->ref] = 'Non exporté car mode de reglement NO_COM';
-                }
+                    } /* else {
+                        $this->warn['PAY'][$pay->ref] = 'Non exporté car mode de reglement NO_COM';
+                    } */
             }
 
             $this->tiers = $this->TRA_paiement->rapportTier;
@@ -208,6 +242,7 @@
                 case 'ribs': $number  = 4; break;
                 case 'mandats': $number  = 5; break;
                 case 'payni': $number  = 6; break;
+                case 'deplacementPaiements': $number = 7; break;
             }
             
             return $number . "_" . $entitie ."_(" . strtoupper($type) . ")_" .$year . '-' . $month . '-' . $day . '-' . $this->moment . '_' . $version_tra . $extention;

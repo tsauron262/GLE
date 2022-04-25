@@ -62,7 +62,7 @@ fields:
     exported:
         label: Comptabilisée
         type: bool
-        
+
 #    Champs extra: 
     type: 
         label: Type

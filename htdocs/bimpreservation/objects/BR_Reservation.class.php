@@ -949,6 +949,9 @@ class BR_Reservation extends BimpObject
                                         $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft');
                                         $html .= 'Ajouter tous les équipements reçus (' . count($cf_equipments) . ') de la commande fournisseur ' . $comm_fourn->getLink();
                                         $html .= '</span>';
+                                        $html .= '<p class="process_msg" style="display: none">';
+                                        $html .= 'Equipements ajoutés: <span class="added_qty">0</span>';
+                                        $html .= '</p>';
                                         $html .= '</div>';
                                     }
                                 }

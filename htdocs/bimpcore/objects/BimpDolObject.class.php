@@ -4,6 +4,8 @@ if (!defined('BIMP_LIB')) {
     require_once __DIR__ . '/../Bimp_Lib.php';
 }
 
+require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/viewEcriture.class.php';
+
 class BimpDolObject extends BimpObject
 {
 

@@ -270,7 +270,7 @@
             }
             if($this->auto_payni)                                                   $files[] = "6_" . $this->entitie . '_(PAYNI)_' . '*' . '_' . $this->version_tra . '.tra';
             if($this->auto_importPaiement && $this->export_class->moment == 'AM')   $files[] = 'IP*.tra';
-            if($this->auto_deplacementPay())                                        $files[] = "7_" . $this->entitie . '_(DEPLACEMENTPAIEMENTS)' . '*' . '_' . $this->version_tra . '.tra';
+            if($this->auto_deplacementPay)                                          $files[] = "7_" . $this->entitie . '_(DEPLACEMENTPAIEMENTS)' . '*' . '_' . $this->version_tra . '.tra';
             
             $this->rapport['FILES_FTP'] = 'Liste des fichiers transférés automatiquement sur le FTP de LDLC' . "\n"
                     . implode("\n", $files) . "\n";

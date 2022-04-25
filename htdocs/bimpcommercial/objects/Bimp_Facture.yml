@@ -725,7 +725,9 @@ fields_tables:
 #            - label: Zone de vente
 #              value:
 #                  callback: displayZoneVenteField
-            - field: exported
+            - label: Etat comptable
+              value:
+                  callback: renderExportedField
             - field: ignore_compta
             - field: statut_export
               edit: 1

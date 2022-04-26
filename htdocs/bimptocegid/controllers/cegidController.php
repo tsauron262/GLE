@@ -6,7 +6,7 @@ class cegidController extends BimpController {
     
     protected $version_tra;
     protected $entitie;
-    protected $local_path    = PATH_TMP . "/" . 'exportCegid' . '/' . 'imported_auto' . '/';
+    protected $local_path    = PATH_TMP . "/" . 'exportCegid' . '/' . 'BY_DATE' . '/' . 'imported_auto' . '/';
 
     public function renderHeader() {
         

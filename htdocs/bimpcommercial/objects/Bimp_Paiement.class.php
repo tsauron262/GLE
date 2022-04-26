@@ -1215,6 +1215,7 @@ class Bimp_Paiement extends BimpObject
                 // Check paiements factures: 
                 foreach ($this->dol_object->amounts as $id_facture => $amount) {
                     if (BimpObject::objectLoaded($factures[(int) $id_facture])) {
+                        $factures[(int) $id_facture]->fetch((int) $id_facture);
                         $factures[(int) $id_facture]->checkIsPaid();
                     }
                 }
@@ -1324,6 +1325,7 @@ class Bimp_Paiement extends BimpObject
                 $errors = parent::create($warnings, $force_create);
 
                 if (!count($errors) && BimpObject::objectLoaded($facture)) {
+                    $facture->fetch($facture->id);
                     $facture->checkIsPaid();
                 }
             }

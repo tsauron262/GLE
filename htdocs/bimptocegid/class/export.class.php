@@ -126,7 +126,6 @@
                         }
                     }
 
-                    $ecriture = "";
                 }
                 
             }
@@ -193,7 +192,7 @@
             }
             
             
-            //echo '<pre>' . print_r($this->good) . print_r($this->fails);
+            
         }
         
         protected function head_tra():string {
@@ -287,6 +286,7 @@
                 $this->getMyFile('ribs'),
                 $this->getMyFile('mandats'),
                 $this->getMyFile('payni'),
+                $this->getMyFile('deplacementPaiements')
             );
                         
             foreach($files as $file) {

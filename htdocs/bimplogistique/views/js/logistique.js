@@ -183,6 +183,49 @@ function onAddReturnsFromLinesFormSubmit($form, extra_data) {
     return extra_data;
 }
 
+function addReceivedEquipmentsToReservation($btn, equipments) {
+    var check = false;
+
+    if ($.isOk($btn)) {
+        if ($btn.hasClass('disabled')) {
+            return;
+        }
+
+        $btn.addClass('disabled');
+        var $container = $btn.findParentByClass('equipments_inputContainer');
+
+        if ($.isOk($container)) {
+            var $add_button = $container.find('.addValueBtn');
+            var $select = $container.find('select[name="equipments_add_value"]');
+
+            if ($select.length && $add_button.length) {
+                var $parent = $btn.parent();
+                var $qty = $parent.find('span.added_qty');
+                var done = 0;
+
+                for (var i in equipments) {
+                    var $option = $select.find('option[value="' + equipments[i] + '"]');
+
+                    if ($option.length && $option.css('display') !== 'none') {
+                        $select.val(equipments[i]);
+                        $add_button.click();
+                        done++;
+                        $qty.text(done);
+                    }
+                }
+                
+                $parent.find('.process_msg').show();
+                check = true;
+            }
+        }
+    }
+
+    if (!check) {
+        $btn.removeClass('disabled').show();
+        bimp_msg('Une erreur est survenue. Impossible d\'effectuer cette opération', 'danger');
+    }
+}
+
 // Expéditions commande client: 
 
 function addSelectedCommandeLinesToShipment($button, list_id, id_commande) {

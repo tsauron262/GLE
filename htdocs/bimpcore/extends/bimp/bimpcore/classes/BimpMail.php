@@ -5,6 +5,7 @@ class BimpMail extends BimpMailCore
 
     public $title = 'LDLC';
     public $subtitle = 'Apple';
+    public $from_name = 'LDLC Apple';
     public $url = 'www.ldlc.com';
 
     function getHeader()

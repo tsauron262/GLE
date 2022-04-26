@@ -36,13 +36,12 @@ class savFormController extends BimpPublicController
         $acId = BimpTools::getValue('ac', '');
         $reservation = null;
         $errors = array();
-        
 
         if ($res_id) {
-            
+
             if (!$shipto) {
                 $errors[] = 'Identifiant du centre BIMP absent';
-            } elseif(!count($errors)) {
+            } elseif (!count($errors)) {
                 $shipto = BimpTools::addZeros($shipto, 10);
                 $centres = BimpCache::getCentres();
                 $centre = null;
@@ -206,11 +205,11 @@ class savFormController extends BimpPublicController
                 }
             }
 
-            if (BimpObject::objectLoaded($userClient)) {
-                $html .= '<div style="margin-top: 15px; text-align: center">';
-                $html .= '<p><a href="' . BimpObject::getPublicBaseUrl() . '">Retour à l\'espace client</a></p>';
-                $html .= '</div>';
-            }
+            $html .= '<div style="margin-top: 15px; text-align: center">';
+            $html .= '<p><a href="' . BimpObject::getPublicBaseUrl() . '">';
+            $html .= 'Retour à l\'espace client';
+            $html .= '</a></p>';
+            $html .= '</div>';
         }
 
         $html .= '</div>';
@@ -1633,9 +1632,9 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
                         }
 
                         $result = GSX_Reservation::createReservation(1442050, $centre['shipTo'], $params, $req_errors, $debug);
-                        
-                        if(is_array($req_errors) && isset($req_errors[0])){
-                            if(stripos($req_errors[0],'DEVICE_INFORMATION_INVALID') !== false){
+
+                        if (is_array($req_errors) && isset($req_errors[0])) {
+                            if (stripos($req_errors[0], 'DEVICE_INFORMATION_INVALID') !== false) {
                                 unset($params['device']);
                                 unset($req_errors[0]);
                                 $result = GSX_Reservation::createReservation(1442050, $centre['shipTo'], $params, $req_errors, $debug);

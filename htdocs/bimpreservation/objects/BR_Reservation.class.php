@@ -51,7 +51,7 @@ class BR_Reservation extends BimpObject
         return (int) $user->admin;
 //        return 0;
     }
-    
+
 //    public function getList($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null, $joins = array(), $extra_order_by = null, $extra_order_way = 'ASC'): array {
 //        if($return == 'array' &&count($filters) == 3 && isset($filters['type']) && isset($filters['id_commande_client']) && isset($filters['id_commande_client_line'])){
 ////            $bt = debug_backtrace(null, 600);
@@ -913,6 +913,51 @@ class BR_Reservation extends BimpObject
                     $html .= 'Pour le produit ' . $product->getNomUrl(1) . '</h4><br/>';
 
                     $html .= BimpInput::renderMultipleValuesInput($this, $input_name, $content, $values, '', false, false, false, $max_values);
+
+                    if ((int) $this->getData('id_commande_client_line')) {
+                        $cf_lines = BimpCache::getBimpObjectObjects('bimpcommercial', 'Bimp_CommandeFournLine', array(
+                                    'linked_object_name' => 'commande_line',
+                                    'linked_id_object'   => $this->getData('id_commande_client_line')
+                        ));
+
+                        if (!empty($cf_lines)) {
+                            foreach ($cf_lines as $cf_line) {
+                                $comm_fourn = $cf_line->getParentInstance();
+
+                                if (BimpObject::objectLoaded($comm_fourn)) {
+                                    $cf_equipments = array();
+                                    $receptions = $cf_line->getData('receptions');
+
+                                    foreach ($receptions as $id_recep => $recep_data) {
+                                        if (isset($recep_data['equipments']) && is_array($recep_data['equipments'])) {
+                                            foreach ($recep_data['equipments'] as $id_eq => $eq_data) {
+                                                if (isset($equipments[$id_eq]) && !in_array((int) $id_eq, $cf_equipments)) {
+                                                    $cf_equipments[] = $id_eq;
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if (!empty($cf_equipments)) {
+                                        $eqs_str = '[';
+                                        foreach ($cf_equipments as $id_eq) {
+                                            $eqs_str .= ($eqs_str !== '[' ? ', ' : '') . $id_eq;
+                                        }
+                                        $eqs_str .= ']';
+                                        $html .= '<div style="margin-top: 15px; text-align: center">';
+                                        $html .= '<span class="btn btn-default" onclick="addReceivedEquipmentsToReservation($(this), ' . $eqs_str . ')">';
+                                        $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft');
+                                        $html .= 'Ajouter tous les équipements reçus (' . count($cf_equipments) . ') de la commande fournisseur ' . $comm_fourn->getLink();
+                                        $html .= '</span>';
+                                        $html .= '<p class="process_msg" style="display: none">';
+                                        $html .= 'Equipements ajoutés: <span class="added_qty">0</span>';
+                                        $html .= '</p>';
+                                        $html .= '</div>';
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -1727,8 +1772,7 @@ class BR_Reservation extends BimpObject
                     $errors[] = 'Le produit sélectionné ne correspond pas à la ligne de commande sélectionnée';
                 }
             }
-        }
-        else{
+        } else {
             $errors[] = 'ID de la ligne de commande client invalide';
             return $errors;
         }

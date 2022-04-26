@@ -20,6 +20,7 @@ class BimpMailCore
     public $send_context = 'standard';
     public $title = '';
     public $subtitle = '';
+    public $from_name = '';
     public $url = '';
     public $files = array();
     public $parent;
@@ -65,7 +66,7 @@ class BimpMailCore
         }
 
         if ($from == '') {
-            $from = 'Application BIMP-ERP ' . $conf->global->MAIN_INFO_SOCIETE_NOM . ' <';
+            $from = '';
 
             if (isset($conf->global->MAIN_MAIL_EMAIL_FROM)) {
                 $from .= $conf->global->MAIN_MAIL_EMAIL_FROM;
@@ -78,8 +79,6 @@ class BimpMailCore
                 }
             }
 
-            $from .= '>';
-
             if ($reply_to === 'none') {
                 $reply_to = '';
             } elseif (!$reply_to) {
@@ -89,6 +88,8 @@ class BimpMailCore
                     $reply_to = $user->email;
                 }
             }
+        } else {
+            $this->from_name = '';
         }
 
         if (defined('MOD_DEV_SYN_MAIL')) {
@@ -188,7 +189,7 @@ class BimpMailCore
         $html = str_replace("\n", "<br/>", $html);
 
         $to = BimpTools::cleanEmailsStr($this->to);
-        $from = BimpTools::cleanEmailsStr($this->from);
+        $from = BimpTools::cleanEmailsStr($this->from, $this->from_name);
         $cc = BimpTools::cleanEmailsStr($this->cc);
         $bcc = BimpTools::cleanEmailsStr($this->bcc);
         $replyTo = BimpTools::cleanEmailsStr($this->reply_to);

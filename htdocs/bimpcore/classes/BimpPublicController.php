@@ -312,6 +312,11 @@ class BimpPublicController extends BimpController
         $html .= '<input id="bic_login_pw" type="password" name="bic_login_pw" placeholder="Mot de passe"><br/>';
         $html .= '<p style="text-align: center"><a href="javascript: var email = document.getElementById(\'bic_login_email\').value; window.location = \'' . BimpObject::getPublicBaseUrl() . 'display_public_form=1&public_form=reinitPw\' + (email ? \'&email=\' + email : \'\');">Mot de passe oublié</a></p>';
 
+        $html .= '<p style="text-align: center">';
+        $html .= 'Si vous souhaitez prendre un rendez-vous en ligne dans un de nos centres SAV pour la réparation de votre matériel et que ';
+        $html .= 'vous ne disposez pas de compte client LDLC Apple, veuillez <a href="' . BimpObject::getPublicBaseUrl() . 'fc=savForm" style="color: #00BEE5">cliquer ici</a>';
+        $html .= '</p>';
+        
         return $html;
     }
 

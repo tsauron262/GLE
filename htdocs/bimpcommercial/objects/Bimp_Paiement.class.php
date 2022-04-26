@@ -1325,6 +1325,7 @@ class Bimp_Paiement extends BimpObject
                 $errors = parent::create($warnings, $force_create);
 
                 if (!count($errors) && BimpObject::objectLoaded($facture)) {
+                    $facture->fetch($facture->id);
                     $facture->checkIsPaid();
                 }
             }

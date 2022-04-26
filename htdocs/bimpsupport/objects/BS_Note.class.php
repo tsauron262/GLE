@@ -238,7 +238,7 @@ class BS_Note extends BimpObject
                 $cc = '';
             }
             if ($to) {
-                $subject = 'BIMP - Nouveau message sur votre ticket support' . (BimpObject::objectLoaded($ticket) ? ' ' . $ticket->getData('ticket_number') : '');
+                $subject = 'Nouveau message sur votre ticket support' . (BimpObject::objectLoaded($ticket) ? ' ' . $ticket->getData('ticket_number') : '');
                 $msg = 'Bonjour,<br/><br/>';
                 $msg = 'Nouveau message sur votre ticket support n° ' . $ticket->getData('ticket_number') . '<br/><br/>';
 

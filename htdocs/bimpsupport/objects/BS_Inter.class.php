@@ -21,7 +21,7 @@ class BS_Inter extends BimpObject
         return 1;
     }
 
-    // Getters: 
+    // Getters booléens: 
 
     public function isCreatable($force_create = false, &$errors = array())
     {
@@ -208,15 +208,15 @@ class BS_Inter extends BimpObject
                 $userClient = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClient', $ticket->getData('id_user_client'));
                 $to = $userClient->getData('email');
                 $cc = implode(',', $userClient->get_dest('admin'));
-                $subject = 'BIMP - Intervention sur votre ticket ' . $ticket->getData('ticket_number');
-                
+                $subject = 'Intervention sur votre ticket ' . $ticket->getData('ticket_number');
+
                 $msg = 'Bonjour,<br/><br/>';
                 $msg .= 'Une intervention a été créée sur votre ';
-                
+
                 if ($url) {
                     '<a href="' . $url . '">';
                 }
-                
+
                 $msg .= 'ticket support N° ' . $ticket->getData('ticket_number');
 
                 if ($url) {

@@ -27,22 +27,21 @@ class BimpCache
     protected static $memoryMax = null;
     public static $objects_keys = array();
     public static $objects_keys_removed = array();
-    
     public $j_semaine = array(0 => 'Dimanche', 1 => "Lundi", 2 => "Mardi", 3 => "Mercredi", 4 => "Jeudi", 5 => "Vendredi", 6 => "Samedi", 10 => "N/C");
 
     public static function getBdb($no_transactions = false, $mode_archive = -1)
     {
         global $db;
-        
-        if($mode_archive == 1){
+
+        if ($mode_archive == 1) {
             if (is_null(self::$bdb_archive)) {
 
-                $dolibarr_main_db_port='3306';
-                $dolibarr_main_db_host='10.192.20.11';
-                $dolibarr_main_db_pass='llkjfvklfdvgukfdvfppdz';
-                $dolibarr_main_db_name='ERP_PROD_BIMP_ARCHIVE';
-                $dolibarr_main_db_user='archive';
-                $dolibarr_main_db_type='mysqli';
+                $dolibarr_main_db_port = '3306';
+                $dolibarr_main_db_host = '10.192.20.11';
+                $dolibarr_main_db_pass = 'llkjfvklfdvgukfdvfppdz';
+                $dolibarr_main_db_name = 'ERP_PROD_BIMP_ARCHIVE';
+                $dolibarr_main_db_user = 'archive';
+                $dolibarr_main_db_type = 'mysqli';
                 $db2 = getDoliDBInstance($dolibarr_main_db_type, $dolibarr_main_db_host, $dolibarr_main_db_user, $dolibarr_main_db_pass, $dolibarr_main_db_name, $dolibarr_main_db_port);
                 self::$bdb_archive = new BimpDb($db2);
             }
@@ -185,8 +184,9 @@ class BimpCache
     {
         return self::cacheExists('bimp_object_' . $module . '_' . $object_name . '_' . $id_object);
     }
-    
-    public static function getBimpObjectLink($module, $object_name, $id_object, $params = array()){
+
+    public static function getBimpObjectLink($module, $object_name, $id_object, $params = array())
+    {
         $coll = BimpCollection::getInstance($module, $object_name);
         return $coll->getLink($id_object, $params);
     }
@@ -1657,7 +1657,7 @@ class BimpCache
                 if ($include_empty) {
                     $result[''] = '';
                 }
-                
+
                 $userCentres = explode(' ', str_replace(',', ' ', $user->array_options['options_apple_centre']));
                 $centres = self::getCentres();
                 if (count($userCentres) > 1 || $userCentres[0] != '') {
@@ -1793,7 +1793,7 @@ class BimpCache
         return self::$cache[$cache_key];
     }
 
-        // Définitions des droits: 
+    // Définitions des droits: 
 
     public static function getRightsDefData()
     {
@@ -1958,7 +1958,7 @@ class BimpCache
 
         return '';
     }
-    
+
     // MySoc: 
 
     public static function getBankAccountsArray($include_empty = false)
@@ -2700,10 +2700,10 @@ class BimpCache
         if (!BimpCore::getConf("USE_SECTEUR", 0)) {
             return array();
         }
-        
+
         $cache_key = 'secteurs_array';
         if (!isset(self::$cache[$cache_key])) {
-            self::$cache['secteurs_array'] = array();
+            self::$cache[$cache_key] = array();
 
             $rows = self::getBdb()->getRows('bimp_c_secteur');
 
@@ -2715,6 +2715,31 @@ class BimpCache
         }
 
         return self::getCacheArray($cache_key, $include_empty, '', '');
+    }
+
+    public static function getSecteursData()
+    {
+        if (!BimpCore::getConf("USE_SECTEUR", 0)) {
+            return array();
+        }
+
+        $cache_key = 'secteurs_data';
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            $rows = self::getBdb()->getRows('bimp_c_secteur');
+
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    self::$cache[$cache_key][$r->clef] = array(
+                        'valeur'     => $r->valeur,
+                        'email_from' => $r->email_from
+                    );
+                }
+            }
+        }
+
+        return self::$cache[$cache_key];
     }
 
     public static function getIpFromDns($host)

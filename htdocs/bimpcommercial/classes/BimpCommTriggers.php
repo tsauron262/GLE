@@ -28,15 +28,27 @@ abstract class BimpCommTriggers extends DolibarrTriggers
 
             if (BimpObject::objectLoaded($bimpObject)) {
                 if (!$bimpObject->noFetchOnTrigger) { // noFetchOnTrigger : true lorsqu'on fait un create / update depuis le bimpObject => dans ce cas ne pas re-fetcher l'objet sinon écrasement des données. 
+//                    echo '------------------------- <br/>';
+//                    echo 'ICI: ' . $bimpObject->object_name . ' #' . $bimpObject->id . ' - ' . $action_name . ' - ' . $object_name . ' <br/>';
+//                    echo BimpTools::displayBacktrace();
+                    
+//                    echo 'BEFORE <br/>' . $bimpObject->printData();
+                    
                     $bimpObject->fetch((int) $object->id);
+
+//                    echo 'AFTER 1<br/>' . $bimpObject->printData();
                     
                     // On alimente $bimpObject avec les données de $object: 
                     $bimpObject->dol_object = $object;
                     $bimpObject->hydrateFromDolObject();
-
+//
+//                    echo 'AFTER 2<br/>' . $bimpObject->printData();
+                    
                     if (method_exists($bimpObject, 'checkLines')) {
                         $bimpObject->checkLines();
                     }
+                    
+//                    echo '------------------------- <br/>';
                 }
             } else {
                 if (is_object($bimpObject)) {

@@ -43,9 +43,9 @@ class TRA extends BimpObject {
                         $traiteTiers[] = $aux;
                         if($instance->find(['code_compta' => $aux], 1) || $instance->find(['code_compta_fournisseur' => $aux], 1)) {
                             $card = new BC_Card($instance);
-                            $html .= BimpRender::renderPanel('<b>' . $instance->getName() . '</b>' . ' ' . $aux, $card->renderHtml(), '', Array('open' => 0));
+                            $html .= BimpRender::renderPanel('<b>' . $instance->getName() . '</b>' . ' ' . $aux . ' ' . '<b>' . 'Ligne #' . ($index+1) . '</b>', $card->renderHtml(), '', Array('open' => 0));
                         } else {
-                            $html .= BimpRender::renderAlerts('Impossible de charger le tiers avec le code auxiliaire ' . $aux, 'danger', false);
+                            $html .= BimpRender::renderAlerts('Impossible de charger le tiers avec le code auxiliaire ' . $aux . ' à la ligne#' . ($index+1), 'danger', false);
                         }
                     }
                 }

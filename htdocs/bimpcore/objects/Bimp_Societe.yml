@@ -446,7 +446,7 @@ fields:
         history: 1
         history_user: 1
         input: 
-            help: Remplissage automatique selon données des 3 champs "Limite de crédit"<br/>Faire saisie manuelle si encours accordé hors assurance
+            help: Remplissage automatique selon données des 3 champs "Limite de crédit". 
             
     outstanding_limit_credit_safe: 
         label: Limite recommandée par Crédit SAFE

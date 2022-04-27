@@ -4232,4 +4232,52 @@ class Bimp_Commande extends BimpComm
         $this->resprints = "OK " . $ok . ' mails BAD ' . $err . ' mails dont ' . $mailDef . ' mail par default';
         return "OK " . $ok . ' mails BAD ' . $err . ' mails dont ' . $mailDef . ' mail par default';
     }
+
+    public static function checkLinesEcheances()
+    {
+        $bdb = self::getBdb(true);
+        
+        $dt = new DateTime();
+        $dt->add(new DateInterval('P30D'));
+        $dt_str = $dt->format('Y-m-d');
+
+        $fields = array('c.rowid', 'a.date_end');
+        $filters = array(
+            'a.date_end'             => array(
+                'and' => array(
+                    'IS_NOT_NULL',
+                    array(
+                        'operator' => '>=',
+                        'value'    => date('Y-m-d')
+                    ),
+                    array(
+                        'operator' => '<=',
+                        'value'    => $dt_str
+                    )
+                )
+            ),
+            'bl.echeance_notif_send' => 0,
+            'c.fk_statut'            => array(
+                'operator' => '>',
+                'value'    => 0
+            )
+        );
+        $joins = array(
+            'c'  => array(
+                'table' => 'commande',
+                'on'    => 'c.rowid = a.fk_commande'
+            ),
+            'bl' => array(
+                'table' => 'bimp_commande_line',
+                'on'    => 'bl.id_line = a.rowid'
+            )
+        );
+        $sql = BimpTools::getSqlFullSelectQuery('commandedet', $fields, $filters, $joins);
+        
+        $rows = $bdb->executeS($sql, 'array');
+        
+        echo '<pre>';
+        print_r($rows);
+        exit;
+    }
 }

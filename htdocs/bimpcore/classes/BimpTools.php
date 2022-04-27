@@ -1116,9 +1116,10 @@ class BimpTools
             $sql = ' FROM ' . MAIN_DB_PREFIX . $table . ($default_alias ? ' ' . $default_alias : '');
 
             if (!is_null($joins) && is_array($joins) && count($joins)) {
-                foreach ($joins as $join) {
-                    if (isset($join['table']) && isset($join['alias']) && isset($join['on'])) {
-                        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . $join['table'] . ' ' . $join['alias'] . ' ON ' . $join['on'];
+                foreach ($joins as $key => $join) {
+                    $alias = (isset($join['alias']) ? $join['alias'] : $key);
+                    if (isset($join['table']) && isset($join['on'])) {
+                        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . $join['table'] . ' ' . $alias . ' ON ' . $join['on'];
                     }
                 }
             }
@@ -1516,7 +1517,7 @@ class BimpTools
 
         $sql .= self::getSqlOrderBy($params['order_by'], $params['order_way'], $params['default_alias'], $params['extra_order_by'], $params['extra_order_way']);
         $sql .= self::getSqlLimit($params['n'], $params['p']);
-        
+
         return $sql;
     }
 

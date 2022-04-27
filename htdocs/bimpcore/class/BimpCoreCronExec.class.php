@@ -96,6 +96,7 @@ class BimpCoreCronExec
         Bimp_Client::checkRelancesDeactivatedToNotify();
 
         // Vérifs des licenses arrivées à échéance: 
+         
 //        BimpObject::loadClass('bimpcommercial', 'Bimp_Commande');
 //        Bimp_Commande::checkLinesEcheances();
         

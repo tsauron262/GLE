@@ -184,6 +184,10 @@ class Bimp_CommandeLine extends ObjectLine
 
     public function isFieldEditable($field, $force_edit = false)
     {
+        if (in_array($field, array('echeance_notif_send'))) {
+            return 1;
+        }
+        
         if (in_array($field, array('exp_periodicity', 'exp_nb_periods', 'exp_periods_start'))) {
             if (!$this->isPeriodicityAllowed()) {
                 return 0;

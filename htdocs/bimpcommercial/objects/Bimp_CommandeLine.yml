@@ -271,6 +271,12 @@ fields:
         type: id_object
         object: propal_renouv
         
+    echeance_notif_send: 
+        label: Alerte échéance envoyée
+        type: bool
+        default_value: 0
+        user_edit: 1
+        
 forms: 
     commande_fourn: 
         title: Ajouter à une commande fournisseur

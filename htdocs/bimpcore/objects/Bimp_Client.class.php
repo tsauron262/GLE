@@ -7,16 +7,16 @@ class Bimp_Client extends Bimp_Societe
 
     public $soc_type = "client";
     public static $max_nb_relances = 5;
-    
+
     const STATUS_ATRADIUS_OK = 0;
     const STATUS_ATRADIUS_EN_ATTENTE = 1;
     const STATUS_ATRADIUS_REFUSE = 2;
-    public static $status_atradius = array(
-        self::STATUS_ATRADIUS_OK         => array('label' => 'OK',                     'icon' => 'fas_check',              'classes' => array('success')),
-        self::STATUS_ATRADIUS_EN_ATTENTE => array('label' => "En attente d'arbitrage", 'icon' => 'fas_exclamation-circle', 'classes' => array('warning')),
-        self::STATUS_ATRADIUS_REFUSE     => array('label' => "Refusé",                 'icon' => 'fas_exclamation-circle', 'classes' => array('danger')),
-    );
 
+    public static $status_atradius = array(
+        self::STATUS_ATRADIUS_OK         => array('label' => 'OK', 'icon' => 'fas_check', 'classes' => array('success')),
+        self::STATUS_ATRADIUS_EN_ATTENTE => array('label' => "En attente d'arbitrage", 'icon' => 'fas_exclamation-circle', 'classes' => array('warning')),
+        self::STATUS_ATRADIUS_REFUSE     => array('label' => "Refusé", 'icon' => 'fas_exclamation-circle', 'classes' => array('danger')),
+    );
 
     // Droits user:
 
@@ -194,7 +194,7 @@ class Bimp_Client extends Bimp_Societe
     }
 
     public function getActionsButtons()
-    {        
+    {
         global $user;
 
         $groups = array();
@@ -612,10 +612,17 @@ class Bimp_Client extends Bimp_Societe
     }
 
     // Getters données:
-
-    public function getFacturesToRelanceByClients($to_process_only = false, $allowed_factures = null, $allowed_clients = array(), $relance_idx_allowed = null, $exclude_paid_partially = false, $display_mode = null)
+    public function getFacturesToRelanceByClients($params = array())
     {
         $clients = array();
+
+        // Ne jamais modifier les params par défaut ci-dessous: 
+        $to_process_only = BimpTools::getArrayValueFromPath($params, 'to_process_only', false);
+        $allowed_factures = BimpTools::getArrayValueFromPath($params, 'allowed_factures', null);
+        $allowed_clients = BimpTools::getArrayValueFromPath($params, 'allowed_clients', array());
+        $relance_idx_allowed = BimpTools::getArrayValueFromPath($params, 'relance_idx_allowed', null);
+        $exclude_paid_partially = BimpTools::getArrayValueFromPath($params, 'exclude_paid_partially', false);
+        $display_mode = BimpTools::getArrayValueFromPath($params, 'display_mode', null);
 
         if (is_null($display_mode)) {
             $display_mode = BimpTools::getPostFieldValue('display_mode', '');
@@ -625,6 +632,11 @@ class Bimp_Client extends Bimp_Societe
             }
         }
 
+        if ($display_mode === 'notif_commerciaux') {
+            $to_process_only = true;
+            $relance_idx_allowed = array(1);
+        }
+
         if ($this->isLoaded()) {
             $allowed_clients[] = $this->id;
         }
@@ -632,7 +644,7 @@ class Bimp_Client extends Bimp_Societe
         $id_inc_entrepot = 0;
         $id_excl_entrepot = 0;
 
-        if (empty($allowed_clients) && !$this->isLoaded() && !in_array($display_mode, array('all', 'clients_list'))) {
+        if (empty($allowed_clients) && !$this->isLoaded() && !in_array($display_mode, array('all', 'clients_list', 'notif_commerciaux'))) {
             if (preg_match('/^(.+)_WITHOUT_(\d+)$/', $display_mode, $matches)) {
                 $display_mode = $matches[1];
                 $id_excl_entrepot = (int) $matches[2];
@@ -646,7 +658,9 @@ class Bimp_Client extends Bimp_Societe
         $now = date('Y-m-d');
         $joins = array();
 
-        $where = 'a.type IN (' . Facture::TYPE_STANDARD . ',' . Facture::TYPE_DEPOSIT . ',' . Facture::TYPE_CREDIT_NOTE . ') AND a.paye = 0 AND a.fk_statut = 1 AND a.date_lim_reglement < \'' . $now . '\'';
+        $where = 'a.type IN (' . Facture::TYPE_STANDARD . ',' . Facture::TYPE_DEPOSIT . ',' . Facture::TYPE_CREDIT_NOTE . ')';
+        $where .= ' AND a.paye = 0 AND a.fk_statut = 1';
+        $where .= ' AND a.date_lim_reglement < \'' . $now . '\'';
         $where .= ' AND a.relance_active = 1';
         $where .= ' AND (a.nb_relance > 0 OR a.datec > \'2019-06-30\')';
 
@@ -693,7 +707,7 @@ class Bimp_Client extends Bimp_Societe
             $where .= ' AND fef.entrepot != ' . $id_excl_entrepot;
         }
 
-        if ($display_mode == 'clients_list') {
+        if (in_array($display_mode, array('clients_list', 'notif_commerciaux'))) {
             $where .= ' AND s.relances_actives = 1';
 
             $joins['s'] = array(
@@ -737,7 +751,7 @@ class Bimp_Client extends Bimp_Societe
 
                 $client_relances_actives = (int) $client->getData('relances_actives');
 
-                if ($display_mode === 'clients_list' && !$client_relances_actives) {
+                if (in_array($display_mode, array('clients_list', 'notif_commerciaux')) && !$client_relances_actives) {
                     continue;
                 }
 
@@ -751,39 +765,65 @@ class Bimp_Client extends Bimp_Societe
 
                 $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['rowid']);
                 if (BimpObject::objectLoaded($fac)) {
-                    $dates = $fac->getRelanceDates($relance_delay);
-                    if ($to_process_only && (!$dates['next'] || $dates['next'] > $now)) {
-                        continue;
-                    }
-
                     $nb_relances = (int) $fac->getData('nb_relance');
                     $relance_idx = $nb_relances + 1;
+
+                    if ($display_mode === 'notif_commerciaux' && $relance_idx !== 1) {
+                        continue;
+                    }
 
                     if ($relance_idx > self::$max_nb_relances) {
                         continue;
                     }
 
-                    $fac->checkIsPaid();
+                    $dates = $fac->getRelanceDates($relance_delay);
 
-                    if ($display_mode === 'clients_list') {
-                        if ((float) $fac->getData('remain_to_pay') > 0) {
-                            $clients[] = (int) $r['fk_soc'];
-                        }
+                    if ($display_mode !== 'notif_commerciaux' && $to_process_only && (!$dates['next'] || $dates['next'] > $now)) {
                         continue;
                     }
 
+                    if ($display_mode === 'notif_commerciaux' && (string) $dates['next']) {
+                        $dt = new DateTime($dates['next']);
+                        $dt->sub(new DateInterval('P2D'));
+                        if ($dt->format('Y-m-d') != $now) {
+                            continue;
+                        }
+                    }
+
+                    $fac->checkIsPaid();
                     $remainToPay = $fac->getRemainToPay();
 
                     if ($remainToPay > 0) {
+                        if ($display_mode === 'clients_list') {
+                            $clients[] = (int) $r['fk_soc'];
+                            continue;
+                        }
+
                         if (!isset($clients[(int) $r['fk_soc']])) {
-                            $clients[(int) $r['fk_soc']] = array(
-                                'relances_actives'    => (int) $client->getData('relances_actives'),
-                                'relances_infos'      => $client->getData('relances_infos'),
-                                'available_discounts' => $client->getAvailableDiscountsAmounts(),
-                                'convertible_amounts' => $client->getConvertibleToDiscountAmount(),
-                                'paiements_inc'       => $client->getTotalPaiementsInconnus(),
-                                'relances'            => array()
-                            );
+                            $available_discounts = $client->getAvailableDiscountsAmounts();
+                            $convertible_amounts = $client->getConvertibleToDiscountAmount();
+                            $paiements_inc = $client->getTotalPaiementsInconnus();
+                            $relances_actives = (int) $client->getData('relances_actives');
+
+                            if ($display_mode === 'notif_commerciaux') {
+                                if (!$relances_actives ||
+                                        (float) $available_discounts ||
+                                        (float) $convertible_amounts ||
+                                        (float) $paiements_inc) {
+                                    continue;
+                                }
+
+                                $clients[(int) $r['fk_soc']] = array();
+                            } else {
+                                $clients[(int) $r['fk_soc']] = array(
+                                    'relances_actives'    => $relances_actives,
+                                    'relances_infos'      => $client->getData('relances_infos'),
+                                    'available_discounts' => $available_discounts,
+                                    'convertible_amounts' => $convertible_amounts,
+                                    'paiements_inc'       => $paiements_inc,
+                                    'relances'            => array()
+                                );
+                            }
                         }
 
                         if (!isset($clients[(int) $r['fk_soc']]['relances'][$relance_idx])) {
@@ -795,16 +835,29 @@ class Bimp_Client extends Bimp_Societe
                         $where .= ' AND `factures` LIKE \'%[' . $r['rowid'] . ']%\'';
                         $id_cur_relance = (int) $this->db->getValue('bimp_relance_clients_line', 'id_relance', $where);
 
-                        $clients[(int) $r['fk_soc']]['relances'][$relance_idx][(int) $r['rowid']] = array(
-                            'total_ttc'         => (float) $fac->getData('total_ttc'),
-                            'remain_to_pay'     => $remainToPay,
-                            'nb_relances'       => $nb_relances,
-                            'date_lim'          => $dates['lim'],
-                            'retard'            => $dates['retard'],
-                            'date_last_relance' => $dates['last'],
-                            'date_next_relance' => $dates['next'],
-                            'id_cur_relance'    => $id_cur_relance
-                        );
+                        if ($display_mode === 'notif_commerciaux') {
+                            if ($id_cur_relance) {
+                                continue;
+                            }
+                            
+                            $clients[(int) $r['fk_soc']][(int) $r['rowid']] = array(
+                                'total_ttc'         => (float) $fac->getData('total_ttc'),
+                                'remain_to_pay'     => $remainToPay,
+                                'date_lim'          => $dates['lim'],
+                                'date_next_relance' => $dates['next']
+                            );
+                        } else {
+                            $clients[(int) $r['fk_soc']]['relances'][$relance_idx][(int) $r['rowid']] = array(
+                                'total_ttc'         => (float) $fac->getData('total_ttc'),
+                                'remain_to_pay'     => $remainToPay,
+                                'nb_relances'       => $nb_relances,
+                                'date_lim'          => $dates['lim'],
+                                'retard'            => $dates['retard'],
+                                'date_last_relance' => $dates['last'],
+                                'date_next_relance' => $dates['next'],
+                                'id_cur_relance'    => $id_cur_relance
+                            );
+                        }
                     }
                 }
             }
@@ -1631,8 +1684,10 @@ class Bimp_Client extends Bimp_Societe
         $html = '';
 
         if (is_null($clients)) {
-            $allowed_clients = BimpTools::getPostFieldValue('id_objects', array()); // Cas des clients sélectionnés dans liste. 
-            $clients = $this->getFacturesToRelanceByClients(false, null, $allowed_clients);
+            $allowed_clients = BimpTools::getPostFieldValue('id_objects', array()); // Cas des clients sélectionnés dans liste.
+            $clients = $this->getFacturesToRelanceByClients(array(
+                'allowed_clients' => $allowed_clients
+            ));
         }
 
         $html .= '<div class="factures_to_relance_inputs">';
@@ -2275,7 +2330,12 @@ class Bimp_Client extends Bimp_Societe
         }
 
         if ($mode == 'cron') {
-            $clients = $this->getFacturesToRelanceByClients(true, null, $clients, null, false, 'all');
+            $clients = $this->getFacturesToRelanceByClients(array(
+                'to_process_only' => true,
+                'allowed_clients' => $clients,
+                'display_mode'    => 'all'
+            ));
+
             $bds_process->DebugData($clients, 'Données clients');
             $bds_process->info('Factures à traiter: <pre>' . print_r($clients, 1) . '</pre>');
         }
@@ -2637,7 +2697,10 @@ class Bimp_Client extends Bimp_Societe
             if (!is_array($factures) || empty($factures)) {
                 $errors[] = 'Aucune facture à relancer spécifiée';
             } else {
-                $clients = $this->getFacturesToRelanceByClients(true, $factures);
+                $clients = $this->getFacturesToRelanceByClients(array(
+                    'to_process_only'  => true,
+                    'allowed_factures' => $factures
+                ));
                 $pdf_url = '';
                 $errors = $this->relancePaiements($clients, $mode, $warnings, $pdf_url, $date_prevue, $send_emails);
 
@@ -3036,16 +3099,16 @@ class Bimp_Client extends Bimp_Societe
             }
         }
     }
-    
-    
-    public function displayFormAtradius() {
-        
-        
+
+    public function displayFormAtradius()
+    {
+
+
         $html = '';
-                
-        if($this->isLoaded()) {
-            
-            if((int) $this->getData('id_atradius') == 0 and (int) !$this->isSirenValid()) {
+
+        if ($this->isLoaded()) {
+
+            if ((int) $this->getData('id_atradius') == 0 and (int) !$this->isSirenValid()) {
                 $html .= BimpRender::renderAlerts('SIREN et identifiants Atradius non renseignés/invalides', 'info');
                 return $html;
             }
@@ -3058,10 +3121,9 @@ class Bimp_Client extends Bimp_Societe
             $html .= BimpRender::renderIcon('fas fa5-redo', 'iconLeft') . 'Raffraifir Atradius';
             $html .= '</span>';
 
-            
             global $user;
-            
-            if($user->rights->bimpcommercial->gestion_recouvrement) {
+
+            if ($user->rights->bimpcommercial->gestion_recouvrement) {
                 // Demande d'encours
                 $onclick = $this->getJsActionOnclick('setOutstandingAtradius', array(), array('form_name' => 'setOutstandingAtradius'));
 
@@ -3072,90 +3134,90 @@ class Bimp_Client extends Bimp_Societe
                 $html .= BimpRender::renderAlerts("Merci de ne pas fermer la fenêtre lors de la demande d'assurance", 'info');
                 $html .= '</div>';
             }
-            
         }
-        
+
         return $html;
     }
-    
-    public function actionSetOutstandingAtradius($data, &$success) {
+
+    public function actionSetOutstandingAtradius($data, &$success)
+    {
         $warnings = array();
         $success_callback = '';
-        
-        
+
         $errors = $this->setOutstandingAtradius($data['montant_atradius'], $warnings, $success);
-        
+
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
         );
     }
-    
+
     // Raffraichit depuis les données présentes dans l'API Atradius
-    public function actionRefreshOutstandingAtradius($data, &$success) {
-        
+    public function actionRefreshOutstandingAtradius($data, &$success)
+    {
+
         $errors = $warnings = $success_tab = array();
-        
+
         if (!$this->isLoaded()) {
             $errors[] = "Objet non chargé";
         } else {
             $errors = $this->syncroAtradius($warnings, $success_tab);
-            if(count($success_tab))
+            if (count($success_tab))
                 $success = implode('<br/>', $success_tab);
             else
                 $success = "Aucune modification apportée";
         }
-        
+
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
         );
     }
-    
-    public function syncroAtradius(&$warnings = array(), &$success = array()) {
+
+    public function syncroAtradius(&$warnings = array(), &$success = array())
+    {
         $errors = array();
         $id_atradius = $this->getIdAtradius($errors);
-        if(0 < (int) $id_atradius) {
+        if (0 < (int) $id_atradius) {
             require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
             $api = BimpAPI::getApiInstance('atradius');
             if (is_a($api, 'AtradiusAPI')) {
                 $cover = $api->getCover(array('buyerId' => $id_atradius), $errors, $warnings);
-                
-                if(empty($cover)) {
+
+                if (empty($cover)) {
                     $warnings[] = "Aucune couverture pour ce client.";
                     return $errors;
                 }
 
-                if(is_array($cover) and ! empty($cover)) {
-                    
-                    
-                    if(isset($cover['amount']) and (int) 0 <  $cover['amount']) {
+                if (is_array($cover) and!empty($cover)) {
+
+
+                    if (isset($cover['amount']) and (int) 0 < $cover['amount']) {
                         // Crédit Check
-                        if($cover['cover_type'] == AtradiusAPI::CREDIT_CHECK) {
+                        if ($cover['cover_type'] == AtradiusAPI::CREDIT_CHECK) {
                             $err_update = empty(self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_credit_check', (int) $cover['amount']));
 
-                            if($err_update) {
+                            if ($err_update) {
                                 $success[] = $this->displayFieldName('outstanding_limit_credit_check') . " : " . (int) $cover['amount'];
                             } else {
                                 $errors = BimpTools::merge_array($errors, $err_update);
                             }
 
-                        // Crédit Limit
-                        } elseif($cover['cover_type'] == AtradiusAPI::CREDIT_LIMIT) {
+                            // Crédit Limit
+                        } elseif ($cover['cover_type'] == AtradiusAPI::CREDIT_LIMIT) {
                             $err_update = self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_atradius', (int) $cover['amount']);
-                            if(empty($err_update)) {
+                            if (empty($err_update)) {
                                 $success[] = $this->displayFieldName('outstanding_limit_atradius') . " : " . (int) $cover['amount'];
                             } else {
                                 $errors = BimpTools::merge_array($errors, $err_update);
                             }
                         }
                     }
-                    
+
                     // Status de la demande
-                    if(isset($cover['status'])) {
+                    if (isset($cover['status'])) {
                         BimpTools::merge_array($errors, self::updateAtradiusValue($this->getData('siren'), 'status_atradius', (int) $cover['status']));
                     }
-                    
                 }
             } else {
                 $errors[] = "API non définit";
@@ -3163,30 +3225,30 @@ class Bimp_Client extends Bimp_Societe
         } else {
             $errors[] = "Id atradius non définit";
         }
-        
+
         return $errors;
     }
-    
-    private static function updateAtradiusValue($siren, $field, $value) {
+
+    private static function updateAtradiusValue($siren, $field, $value)
+    {
         $errors = array();
-        
+
         // Tester sur ASS SAUVEGARDE ENFANCE ET ADOLESCENCE
-        
         // On est en train de définir une limite de crédit => supression du crédit check
-        if($field == 'outstanding_limit_atradius' and 0 < $value)
+        if ($field == 'outstanding_limit_atradius' and 0 < $value)
             self::updateAtradiusValue($siren, 'outstanding_limit_credit_check', -1);
-        
-        
+
+
         $clients = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_Client', array('siren' => $siren));
 
-        foreach($clients as $c) {
-            if($c->field_exists($field))
-                $errors = BimpTools::merge_array ($errors, $c->updateField($field, $value));
+        foreach ($clients as $c) {
+            if ($c->field_exists($field))
+                $errors = BimpTools::merge_array($errors, $c->updateField($field, $value));
         }
-        
+
         return $errors;
     }
-    
+
     /**
      * La nature de la demande de couverture (credit check ou limit de crédit)
      * est définit automatiquement dans la fonction
@@ -3196,42 +3258,42 @@ class Bimp_Client extends Bimp_Societe
      * 
      * Pas d'appel d'API ici juste on set (voir askOutstandingAtradius)
      */
-    public function setOutstandingAtradius($amount = 7000, &$warnings = array(), &$success = 'OK') {
-        
+    public function setOutstandingAtradius($amount = 7000, &$warnings = array(), &$success = 'OK')
+    {
+
         $errors = array();
-                
+
         $success = 'OK';
         $id_atradius = $this->getIdAtradius($errors);
-        if(0 < (int) $id_atradius) {
+        if (0 < (int) $id_atradius) {
 
             require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
             $api = BimpAPI::getApiInstance('atradius');
-            
+
             if (is_a($api, 'AtradiusAPI')) {
-            
+
                 $decisions = $api->setCovers(array(
                     'buyerId'           => (int) $id_atradius,
                     'creditLimitAmount' => (int) $amount,
-                    ), $errors, $warnings, $success);
-                
+                        ), $errors, $warnings, $success);
             }
-            
-        }        
-        
+        }
+
         return $errors;
     }
-    
-    public function getIdAtradius(&$errors = array()) {
-        
-        if(0 < (int) $this->getData('id_atradius'))
+
+    public function getIdAtradius(&$errors = array())
+    {
+
+        if (0 < (int) $this->getData('id_atradius'))
             return (int) $this->getData('id_atradius');
-        
-        if($this->isSirenValid()) {
+
+        if ($this->isSirenValid()) {
             require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
             $api = BimpAPI::getApiInstance('atradius');
             if (is_a($api, 'AtradiusAPI')) {
                 $id_atradius = (int) $api->getBuyerIdBySiren((string) $this->getData('siren'), $errors);
-                if(0 < (int) $id_atradius) {
+                if (0 < (int) $id_atradius) {
                     $this->updateField('id_atradius', $id_atradius);
                 } else {
                     $errors[] = "Id Atradius introuvable";
@@ -3241,7 +3303,7 @@ class Bimp_Client extends Bimp_Societe
                 $errors[] = "API inatégniable";
             }
         }
-        
+
         $errors[] = "Id adtradius non définie et SIREN erroné/non définit";
         return 0;
     }
@@ -3249,12 +3311,12 @@ class Bimp_Client extends Bimp_Societe
     /**
      * Détermine si le SIREN est au bon format
      */
-    public function isSirenValid() {
+    public function isSirenValid()
+    {
         if ($this->isLoaded()) {
-            return (string)  $this->getData('siren') and (int) strlen($this->getData('siren')) == 9;
+            return (string) $this->getData('siren') and (int) strlen($this->getData('siren')) == 9;
         }
 
         return 0;
     }
-    
 }

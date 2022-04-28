@@ -9,38 +9,52 @@ class BDS_RelancesClientsProcess extends BDSProcess
 
     public function initRelances(&$data, &$errors = array())
     {
-        if ((int) BimpTools::getArrayValueFromPath($this->options, 'multiple_iterations', 1)) {
-            $client = BimpObject::getInstance('bimpcore', 'Bimp_Client');
-            $clients = $client->getFacturesToRelanceByClients(true, null, array(), null, false, 'clients_list');
-
-            if (!empty($clients)) {
-                $this->Info('Clients à traiter: ' . implode(', ', $clients));
-                $relance = $this->createRelance($errors);
-                if (BimpObject::objectLoaded($relance)) {
-                    $data['data'] = array(
-                        'id_relance' => $relance->id
-                    );
-
-                    $data['steps'] = array(
-                        'process_relance' => array(
-                            'label'                  => 'Traitement des relances',
-                            'on_error'               => 'continue',
-                            'elements'               => $clients,
-                            'nbElementsPerIteration' => 10
-                        )
-                    );
-                }
-            } else {
-                $data['result_html'] = BimpRender::renderAlerts('Il n\'y a aucune facture impayée à relancer', 'warning');
-                $this->Alert('Aucun client à relancer');
-            }
-        } else {
+        if ((int) BimpTools::getArrayValueFromPath($this->options, 'process_notifs', 1)) {
             $data['steps'] = array(
-                'process_relance' => array(
-                    'label'    => 'Traitement des relances',
+                'process_notifs' => array(
+                    'label'    => 'Traitement des notifications à envoyer aux commerciaux',
                     'on_error' => 'continue'
                 )
             );
+        }
+
+        if ((int) BimpTools::getArrayValueFromPath($this->options, 'process_clients', 1)) {
+            if ((int) BimpTools::getArrayValueFromPath($this->options, 'multiple_iterations', 1)) {
+                $client = BimpObject::getInstance('bimpcore', 'Bimp_Client');
+                $clients = $client->getFacturesToRelanceByClients(array(
+                    'to_process_only' => true,
+                    'display_mode'    => 'clients_list'
+                ));
+
+                if (!empty($clients)) {
+                    $this->Info('Clients à traiter: ' . implode(', ', $clients));
+                    $relance = $this->createRelance($errors);
+                    if (BimpObject::objectLoaded($relance)) {
+                        $data['data'] = array(
+                            'id_relance' => $relance->id
+                        );
+
+                        $data['steps'] = array(
+                            'process_relance' => array(
+                                'label'                  => 'Traitement des relances',
+                                'on_error'               => 'continue',
+                                'elements'               => $clients,
+                                'nbElementsPerIteration' => 10
+                            )
+                        );
+                    }
+                } else {
+                    $data['result_html'] = BimpRender::renderAlerts('Il n\'y a aucune facture impayée à relancer', 'warning');
+                    $this->Alert('Aucun client à relancer');
+                }
+            } else {
+                $data['steps'] = array(
+                    'process_relance' => array(
+                        'label'    => 'Traitement des relances',
+                        'on_error' => 'continue'
+                    )
+                );
+            }
         }
     }
 
@@ -49,10 +63,22 @@ class BDS_RelancesClientsProcess extends BDSProcess
     public function executeRelances($step_name, &$errors = array(), $extra_data = array())
     {
         switch ($step_name) {
+            case 'process_notifs':
+                $client = BimpObject::getInstance('bimpcore', 'Bimp_Client');
+                $clients = $client->getFacturesToRelanceByClients(array(
+                    'display_mode' => 'notif_commerciaux'
+                ));
+
+                $this->DebugData($clients, 'Clients');
+                break;
+
             case 'process_relance':
                 $client = BimpObject::getInstance('bimpcore', 'Bimp_Client');
                 if (!(int) BimpTools::getArrayValueFromPath($this->options, 'multiple_iterations', 1)) {
-                    $this->references = $client->getFacturesToRelanceByClients(true, null, array(), null, false, 'clients_list');
+                    $this->references = $client->getFacturesToRelanceByClients(array(
+                        'to_process_only' => true,
+                        'display_mode'    => 'clients_list'
+                    ));
 
                     if (empty($this->references)) {
                         $this->Info('Aucun client à relancer');
@@ -116,7 +142,7 @@ class BDS_RelancesClientsProcess extends BDSProcess
 
             return null;
         }
-        
+
         $this->incCreated();
         return $relance;
     }
@@ -136,6 +162,34 @@ class BDS_RelancesClientsProcess extends BDSProcess
 
         if (BimpObject::objectLoaded($process)) {
             $options = array();
+
+            $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                        'id_process'    => (int) $process->id,
+                        'label'         => 'Traiter les notifications à envoyer aux commerciaux',
+                        'name'          => 'process_notifs',
+                        'info'          => 'Envoi d\'une alerte 2 jours avant la première relance',
+                        'type'          => 'toggle',
+                        'default_value' => 1,
+                        'required'      => 0
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($opt)) {
+                $options[] = (int) $opt->id;
+            }
+
+            $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                        'id_process'    => (int) $process->id,
+                        'label'         => 'Traiter les clients à relancer',
+                        'name'          => 'process_clients',
+                        'info'          => '',
+                        'type'          => 'toggle',
+                        'default_value' => 1,
+                        'required'      => 0
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($opt)) {
+                $options[] = (int) $opt->id;
+            }
 
             $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
                         'id_process'    => (int) $process->id,

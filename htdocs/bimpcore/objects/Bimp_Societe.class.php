@@ -2480,6 +2480,14 @@ class Bimp_Societe extends BimpDolObject
                     $warnings[] = 'Le service CreditSafe semble indisponible. Le n° ' . $field . ' ne peut pas être vérifié pour le moment';
                 } elseif (stripos($result->header->reportinformation->reporttype, "Error") !== false) {
                     $warnings[] = 'Erreur lors de la vérification du n° ' . ($siret ? 'SIRET' : 'SIREN') . ' (Code: ' . $result->body->errors->errordetail->code . ')';
+
+                    global $user;
+
+                    if ($user->admin) {
+                        echo '<pre>';
+                        print_r($result->body->errors);
+                        exit;
+                    }
                 } else {
                     $ville = '';
                     $codeP = '';

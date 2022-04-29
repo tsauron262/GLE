@@ -4328,6 +4328,7 @@ class Bimp_Commande extends BimpComm
                                         $nProds++;
                                         $lines_done[] = $line->id;
 
+                                        $body .= '<tr>';
                                         $body .= '<td style="padding: 5px; width: 300px">';
                                         $body .= $line->displayLineData('desc_light');
                                         $body .= '</td>';
@@ -4339,6 +4340,7 @@ class Bimp_Commande extends BimpComm
                                         $body .= '<td style="padding: 5px">';
                                         $body .= date('d / m / Y', strtotime($line->date_to));
                                         $body .= '</td>';
+                                        $body .= '</tr>';
                                     }
                                 }
 
@@ -4366,7 +4368,7 @@ class Bimp_Commande extends BimpComm
                         $msg .= $html;
 
                         $email = 'f.martinez@bimp.fr';
-                        if (mailSyn2($subject, $email, '', $msg)) {                            
+                        if (mailSyn2($subject, $email, '', $msg)) {
                             $bdb->update('bimp_commande_line', array(
                                 'echeance_notif_send' => 1
                                     ), 'id IN (' . implode(',', $lines_done) . ')');

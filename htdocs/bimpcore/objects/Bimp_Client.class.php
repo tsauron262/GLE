@@ -783,8 +783,20 @@ class Bimp_Client extends Bimp_Societe
                     }
 
                     if ($display_mode === 'notif_commerciaux' && (string) $dates['next']) {
-                        $dt = new DateTime($dates['next']);
-                        $dt->sub(new DateInterval('P2D'));
+                        $notif_comm_delay = 2;
+//                        $dt = new DateTime($dates['next']);
+//                        
+//                        switch ($dt->format('N')) {
+//                            case 1: 
+//                                break;
+//                            
+//                            case 2: 
+//                                break;
+//                            
+//                            case 7: 
+//                                break;
+//                        }
+                        $dt->sub(new DateInterval('P' . $notif_comm_delay . 'D'));
                         if ($dt->format('Y-m-d') != $now) {
                             continue;
                         }
@@ -826,7 +838,7 @@ class Bimp_Client extends Bimp_Societe
                             }
                         }
 
-                        if (!isset($clients[(int) $r['fk_soc']]['relances'][$relance_idx])) {
+                        if ($display_mode !== 'notif_commerciaux' && !isset($clients[(int) $r['fk_soc']]['relances'][$relance_idx])) {
                             $clients[(int) $r['fk_soc']]['relances'][$relance_idx] = array();
                         }
 
@@ -839,12 +851,13 @@ class Bimp_Client extends Bimp_Societe
                             if ($id_cur_relance) {
                                 continue;
                             }
-                            
+
                             $clients[(int) $r['fk_soc']][(int) $r['rowid']] = array(
                                 'total_ttc'         => (float) $fac->getData('total_ttc'),
                                 'remain_to_pay'     => $remainToPay,
                                 'date_lim'          => $dates['lim'],
-                                'date_next_relance' => $dates['next']
+                                'date_next_relance' => $dates['next'],
+                                'retard'            => $dates['retard'],
                             );
                         } else {
                             $clients[(int) $r['fk_soc']]['relances'][$relance_idx][(int) $r['rowid']] = array(

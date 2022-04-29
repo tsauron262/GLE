@@ -2485,7 +2485,7 @@ class Bimp_Societe extends BimpDolObject
 
                     if ($user->admin) {
                         echo '<pre>';
-                        print_r($result->body->errors);
+                        print_r($result->body);
                         exit;
                     }
                 } else {

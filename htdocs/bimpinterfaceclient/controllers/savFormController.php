@@ -1137,7 +1137,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
 
 //        $email = BimpTools::cleanEmailsStr($email);
 //        return mailSyn2('RDV SAV BIMP - Confirmation', $email, '', $msg, $tabFile, $tabFile2, $tabFile3);
-        $bimpMail = new BimpMail($sav, 'BIMP - Confirmation de votre RDV SAV', $email, '', $msg, (isset($centre['mail']) ? $centre['mail'] : ''));
+        $bimpMail = new BimpMail($sav, 'Confirmation de votre RDV SAV', $email, '', $msg, (isset($centre['mail']) ? $centre['mail'] : ''));
         $bimpMail->addFiles($files);
         return $bimpMail->send();
     }

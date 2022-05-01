@@ -4517,7 +4517,6 @@ class Bimp_Facture extends BimpComm
                     }
 
                     if (count($errors)) {
-                        print_r($errors);
                         BimpCore::addlog('Echec facture classée payée', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcomm', $this, array(
                             'Erreurs' => $errors
                         ));

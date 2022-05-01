@@ -664,8 +664,11 @@ class BimpRelanceClientsLine extends BimpObject
         $client = $this->getChildObject('client');
 
         if (BimpObject::objectLoaded($client)) {
-            $clients_factures = $client->getFacturesToRelanceByClients(true, null, array(), array((int) $this->getData('relance_idx')));
-
+            $client->getFacturesToRelanceByClients(array(
+                'to_process_only'     => true,
+                'relance_idx_allowed' => array((int) $this->getData('relance_idx'))
+            ));
+            
             foreach ($clients_factures as $id_client => $client_data) {
                 if ((int) $id_client !== (int) $client->id) {
                     continue;

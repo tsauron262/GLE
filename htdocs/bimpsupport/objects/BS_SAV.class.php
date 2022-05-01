@@ -1253,6 +1253,11 @@ class BS_SAV extends BimpObject
 
         return DOL_URL_ROOT . '/' . $page . '.php?modulepart=bimpcore&file=' . urlencode($file);
     }
+    
+    public function getEmailClientFromType()
+    {
+        return 'ldlc';
+    }
 
     // Getters array: 
 

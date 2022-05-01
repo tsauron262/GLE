@@ -4232,4 +4232,151 @@ class Bimp_Commande extends BimpComm
         $this->resprints = "OK " . $ok . ' mails BAD ' . $err . ' mails dont ' . $mailDef . ' mail par default';
         return "OK " . $ok . ' mails BAD ' . $err . ' mails dont ' . $mailDef . ' mail par default';
     }
+
+    public static function checkLinesEcheances()
+    {
+        $bdb = self::getBdb(true);
+
+        $dt = new DateTime();
+        $dt->add(new DateInterval('P30D'));
+        $dt_str = $dt->format('Y-m-d');
+
+        $fields = array('bl.id as id_line', 'c.rowid as id_commande', 'a.date_end');
+        $filters = array(
+            'a.date_end'             => array(
+                'and' => array(
+                    'IS_NOT_NULL',
+                    array(
+                        'operator' => '>=',
+                        'value'    => date('Y-m-d')
+                    ),
+                    array(
+                        'operator' => '<=',
+                        'value'    => $dt_str
+                    )
+                )
+            ),
+            'bl.echeance_notif_send' => 0,
+            'c.fk_statut'            => array(
+                'operator' => '>',
+                'value'    => 0
+            )
+        );
+        $joins = array(
+            'c'  => array(
+                'table' => 'commande',
+                'on'    => 'c.rowid = a.fk_commande'
+            ),
+            'bl' => array(
+                'table' => 'bimp_commande_line',
+                'on'    => 'bl.id_line = a.rowid'
+            )
+        );
+        $sql = BimpTools::getSqlFullSelectQuery('commandedet', $fields, $filters, $joins);
+
+        $rows = $bdb->executeS($sql, 'array');
+
+        if (is_array($rows)) {
+            // Trie par commerciaux et commandes: 
+            $data = array();
+            foreach ($rows as $r) {
+                if ((int) $r['id_commande']) {
+                    $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $r['id_commande']);
+
+                    if (BimpObject::objectLoaded($commande)) {
+                        $id_commercial = $commande->getCommercialId();
+
+                        if ($id_commercial) {
+                            if (!isset($data[$id_commercial])) {
+                                $data[$id_commercial] = array();
+                            }
+
+                            if (!isset($data[$id_commercial][(int) $r['id_commande']])) {
+                                $data[$id_commercial][(int) $r['id_commande']] = array();
+                            }
+
+                            $data[$id_commercial][(int) $r['id_commande']][] = (int) $r['id_line'];
+                        }
+                    }
+                }
+            }
+
+            // Envoi des e-mails:
+            foreach ($data as $id_commercial => $commandes) {
+                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_commercial);
+
+                if (BimpObject::objectLoaded($user)) {
+                    $email = $user->getData('email');
+
+                    if ($email) {
+                        $subject = 'Produits à durée limitée arrivant bientôt à échéance';
+                        $html = '';
+                        $nProds = 0;
+                        $lines_done = array();
+
+                        foreach ($commandes as $id_commande => $lines) {
+                            $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id_commande);
+
+                            if (BimpObject::objectLoaded($commande)) {
+                                $body = '';
+                                $nLines = 0;
+                                foreach ($lines as $id_line) {
+                                    $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $id_line);
+
+                                    if (BimpObject::objectLoaded($line)) {
+                                        $nLines++;
+                                        $nProds++;
+                                        $lines_done[] = $line->id;
+
+                                        $body .= '<tr>';
+                                        $body .= '<td style="padding: 5px; width: 300px">';
+                                        $body .= $line->displayLineData('desc_light');
+                                        $body .= '</td>';
+
+                                        $body .= '<td style="padding: 5px">';
+                                        $body .= $line->getFullQty();
+                                        $body .= '</td>';
+
+                                        $body .= '<td style="padding: 5px">';
+                                        $body .= date('d / m / Y', strtotime($line->date_to));
+                                        $body .= '</td>';
+                                        $body .= '</tr>';
+                                    }
+                                }
+
+                                $html .= '<br/><br/><h3>Commande ' . $commande->getLink() . ' (' . $nLines . ' ligne(s) de commande)</h3><br/><br/>';
+
+                                $html .= '<table>';
+                                $html .= '<thead>';
+                                $html .= '<tr>';
+                                $html .= '<th style="padding: 5px; font-weight: bold; border-bottom: 1px solid #000; background-color: #DCDCDC">Description</th>';
+                                $html .= '<th style="padding: 5px; font-weight: bold; border-bottom: 1px solid #000; background-color: #DCDCDC">Qté</th>';
+                                $html .= '<th style="padding: 5px; font-weight: bold; border-bottom: 1px solid #000; background-color: #DCDCDC">Echéance</th>';
+                                $html .= '</tr>';
+                                $html .= '</thead>';
+
+                                $html .= '<tbody>';
+                                $html .= $body;
+                                $html .= '</tbody>';
+                                $html .= '</table>';
+                            }
+                        }
+
+                        $msg = 'Bonjour,<br/><br/>';
+                        $msg .= 'Il y a <b>' . $nProds . '</b> produit(s) vendu(s) à durée limitée qui arrivent à échéance dans 30 jours ou moins.<br/>';
+                        $msg .= 'Note: vous ne recevrez pas d\'autre alerte pour les produits listés ci-dessous.<br/><br/>';
+                        $msg .= $html;
+
+                        $email = 'f.martinez@bimp.fr';
+                        if (mailSyn2($subject, $email, '', $msg)) {
+                            $bdb->update('bimp_commande_line', array(
+                                'echeance_notif_send' => 1
+                                    ), 'id IN (' . implode(',', $lines_done) . ')');
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
 }

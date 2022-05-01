@@ -1,0 +1,15 @@
+bootstrap: 1
+
+sections:
+    - type: custom
+      custom:
+        callback: renderHeader
+    - type: nav_tabs
+      nav_tabs:
+        - id: tiers
+          title: TIERS
+          struct:
+            type: custom
+            custom:
+                callback: renderTiersTab
+              

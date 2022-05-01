@@ -127,10 +127,10 @@ class BimpObject extends BimpCache
         if (is_null($instance)) {
             $instance = new $className($module, $object_name);
         }
-        
-        if($className == 'BimpObject' && $instance->config->isDefined('extends') && $instance->config->isDefined('extends/module') && $instance->config->isDefined('extends/object_name')){
-                    $module = $instance->getConf('extends/module');
-                    $object_nameP = $instance->getConf('extends/object_name');
+
+        if ($className == 'BimpObject' && $instance->config->isDefined('extends') && $instance->config->isDefined('extends/module') && $instance->config->isDefined('extends/object_name')) {
+            $module = $instance->getConf('extends/module');
+            $object_nameP = $instance->getConf('extends/object_name');
 //            $module = 'bimpcore';
 //            $object_nameP = 'BimpNote';
             $file = DOL_DOCUMENT_ROOT . '/' . $module . '/objects/' . $object_nameP . '.class.php';
@@ -150,7 +150,7 @@ class BimpObject extends BimpCache
                 $instance = new $className($module, $object_name);
             }
         }
-        
+
         if (!is_null($id_object)) {
             $instance->fetch($id_object, $parent);
         } else {
@@ -237,8 +237,8 @@ class BimpObject extends BimpCache
         $this->object_name = $object_name;
 
         $this->config = new BimpConfig(DOL_DOCUMENT_ROOT . '/' . $module . '/objects/', $object_name, $this);
-        
-        if($this->config->isDefined('mode_archive'))
+
+        if ($this->config->isDefined('mode_archive'))
             $this->modeArchive = $this->getConf('mode_archive');
 
         $this->initBdd();

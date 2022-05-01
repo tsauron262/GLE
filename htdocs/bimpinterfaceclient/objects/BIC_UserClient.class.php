@@ -602,6 +602,7 @@ class BIC_UserClient extends BimpObject
         $subject = 'Espace client LDLC Apple - Changement de votre mot de passe';
 
         $bimpMail = new BimpMail($this->getChildObject('client'), $subject, $this->getData('email'), '', $msg);
+        $bimpMail->setFromType('ldlc');
 
         if ($bimpMail->send($errors)) {
             $this->updateField('renew_required', 0);
@@ -632,6 +633,8 @@ class BIC_UserClient extends BimpObject
 //        }
 
         $bimpMail = new BimpMail($this->getChildObject('client'), $subject, $this->getData('email'), '', $msg);
+        $bimpMail->setFromType('ldlc');
+        
         $bimpMail->send($errors, $warnings);
         return $errors;
     }
@@ -776,6 +779,8 @@ class BIC_UserClient extends BimpObject
 //            }
 
             $bimpMail = new BimpMail($this->getChildObject('client'), $subject, $this->getData('email'), '', $msg);
+            $bimpMail->setFromType('ldlc');
+            
             $bimpMail->send($errors, $warnings);
         }
 
@@ -869,6 +874,8 @@ class BIC_UserClient extends BimpObject
 
 //                    mailSyn2($sujet, BimpTools::cleanEmailsStr($email), '', $message);
                     $bimpMail = new BimpMail($this->getChildObject('client'), $sujet, $this->getData('email'), '', $message);
+                    $bimpMail->setFromType('ldlc');
+                    
                     $mail_errors = array();
                     $bimpMail->send($mail_errors);
 

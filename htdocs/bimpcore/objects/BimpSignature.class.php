@@ -1438,7 +1438,7 @@ class BimpSignature extends BimpObject
                         if ($emails) {
                             $comm_email = BimpTools::cleanEmailsStr($this->getCommercialEmail());
                             $doc_label = $this->displayDocType() . ' ' . $this->displayDocRef();
-                            $subject = 'BIMP - Signature en attente - Document: ' . $doc_label;
+                            $subject = 'Signature en attente - Document: ' . $doc_label;
 
                             if (!$email_content) {
                                 $email_content = $this->getDefaultSignDistEmailContent();

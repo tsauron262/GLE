@@ -973,7 +973,7 @@ class BimpController
             }
 
             $result = $object->saveFromPost();
-
+            
             if (!count($result['errors'])) {
                 $id_object = $object->id;
                 $url = BimpObject::getInstanceUrl($object);

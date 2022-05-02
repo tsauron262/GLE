@@ -648,6 +648,9 @@ fields:
     date_relances_deactivated: 
         label: Date de désactivation des relances
         type: date
+        display_if:
+            field_name: relances_actives
+            show_values: 0
         
     id_user_status_demand: 
         label: Utilisateur demande changement statut
@@ -791,6 +794,10 @@ fields_tables:
             - field: relances_actives
               show: 
                   callback: isClient
+            - field: date_relances_deactivated
+              show: 
+                  callback: isClient
+              
             - field: relances_infos
               edit: 1
               show: 

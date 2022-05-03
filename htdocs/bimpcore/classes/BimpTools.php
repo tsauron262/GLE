@@ -3364,4 +3364,20 @@ class BimpTools
 
         return $errors;
     }
+    
+    
+    public static function getDataLightWithPopover($data, $lenght = 5){
+        global $modeCSV;
+        if ($modeCSV) {
+            return $data;
+        }
+        else{
+            $return = '<span class=" bs-popover"';
+            $return .= BimpRender::renderPopoverData($data, 'top', true);
+            $return .= '>';
+            $return .= substr($data, 0, $lenght) . '...';
+            $return .= '</span>';
+            return $data;
+        }
+    }
 }

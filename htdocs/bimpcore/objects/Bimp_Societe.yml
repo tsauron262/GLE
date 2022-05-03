@@ -859,6 +859,8 @@ fields_tables:
               edit: 1
             - field: outstanding_limit_manuel
               edit: 1
+            - field: id_atradius
+            - field: status_atradius
  
     contact: 
         title: Informations de contact

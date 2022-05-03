@@ -108,7 +108,7 @@ class InterfaceClientController extends BimpPublicController
         $html .= '<ul class="nav navbar-nav navbar-right">';
         if (BimpObject::objectLoaded($userClient)) {
             $html .= '<li><a href="">' . $langs->trans('loggedAs') . ' : <span class="user_login" style="color: #' . BimpCore::getParam('interface_client/primary', '000000') . ';">' . $userClient->getData('email') . '</span></a></li>';
-            $html .= '<li><a href="client.php?bic_logout=1">' . BimpRender::renderIcon('pe_power', 'iconLeft') . '<span class="icon">' . $langs->trans('deconnexion') . '</span></a></li>';
+            $html .= '<li><a href="'.BimpObject::getPublicBaseUrl().'bic_logout=1">' . BimpRender::renderIcon('pe_power', 'iconLeft') . '<span class="icon">' . $langs->trans('deconnexion') . '</span></a></li>';
         }
         $html .= '</ul>';
         $html .= '</div>';

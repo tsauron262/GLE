@@ -57,8 +57,9 @@ page.open(url, function (status) {
         if (page.injectJs("injectme.js")) {
             console.log('ap inclusion');
             
-            var idCode = getCode(0, function (codeSMS) {});
-            console.log('ID ancien Code '+idCode);
+            var idCode = 0;
+            getCode(1, function (codeSMS) {idCode = codeSMS; console.log('ID ancien Code '+idCode);});
+            
             
             page.evaluate(function (log, paw) {
                 setTimeout(function () {
@@ -151,7 +152,11 @@ function getCode(id, onSuccess) {
             setTimeout(function () {
                 getCode(tabResult[1], onSuccess);
             }, 3000);
-        } else {
+        } else if(id == 1){
+            console.log('ancien ID code : ' + tabResult[1]);
+            onSuccess(tabResult[1]);
+        }
+        else{
             console.log('code OK : ' + tabResult[0]);
             onSuccess(tabResult[0]);
         }

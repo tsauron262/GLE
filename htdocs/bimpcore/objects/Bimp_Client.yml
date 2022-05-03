@@ -99,12 +99,7 @@ fields_tables:
             - field: date_atradius
               edit: 1
             
-            
-            
-    encours_infos:
-        rows: 
-            - field: id_atradius
-            - field: status_atradius
+           
 
 views: 
     client:

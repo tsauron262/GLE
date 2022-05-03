@@ -4,6 +4,25 @@ header('x-frame-options: ALLOWALL',false);
 define('ALLOW_ALL_IFRAME', true);
 $_REQUEST['bimp_context'] = 'public';
 
+
+
+if(isset($_SERVER['HTTP_REFERER'])){
+    $result = parse_url($_SERVER['HTTP_REFERER']);
+//    if(isset($result['host']) && $result['host'] == 'ldlc.com'){
+    if(isset($result['host']) && $result['host'] == 'erp2.bimp.fr'){
+        if(stripos($_SERVER['HTTP_USER_AGENT'], 'Chrome') < 1 && stripos($_SERVER['HTTP_USER_AGENT'], 'Firefox') < 1){
+            if((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https'))   
+                 $url = "https://";   
+            else  
+                $url = "http://";     
+            $url.= $_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];   
+
+            echo '<h1>Votre navigateur n\'est pas compatible.</h1><h2> <a href="'.$url.'" target="popup">Merci de cliquer ici</a></h2>';
+            die;
+        }
+    }
+}
+
 require_once '../bimpcore/main.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 

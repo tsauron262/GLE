@@ -12,11 +12,12 @@ class AtradiusAPI extends BimpAPI {
     public static $include_debug_json = false;
     public static $urls_bases = array(
         'default' => array(
-            'prod' => 'https://aoi.atradius.com',
+            'prod' => 'https://api.atradius.com',
             'test' => 'https://api-uat.atradius.com'
         ),
         'auth' => array(
             'prod' => 'https://api.atradius.com/authenticate/v2/tokens',
+            'prod' => 'https://api-uat.atradius.com/authenticate/v1/tokens',
             'test' => 'https://api-uat.atradius.com/authenticate/v1/tokens'
         )
     );
@@ -235,6 +236,8 @@ class AtradiusAPI extends BimpAPI {
 
     public function getBuyerIdBySiren($siren, &$errors = array()) {
         
+//        $this->connect($errors);
+//        die('rr');
         // Définir id atra pour le client
         $params_get = array(
             'country' => 'FRA',
@@ -414,15 +417,16 @@ class AtradiusAPI extends BimpAPI {
     }
     
     private function getError($response, &$errors) {
-        
-        foreach($response['errors'] as $k => $e) {
+        if(isset($response['errors'])){
+            foreach($response['errors'] as $k => $e) {
 
-            if(isset($e['source']['parameter']))
-                $errors[] = $e['detail'] . " pour le paramètre " . $e['source']['parameter'];
-            else
-                $errors[] = $this->translateError($e['detail']);
-            
-            
+                if(isset($e['source']['parameter']))
+                    $errors[] = $e['detail'] . " pour le paramètre " . $e['source']['parameter'];
+                else
+                    $errors[] = $this->translateError($e['detail']);
+
+
+            }
         }
         
         return $response;
@@ -543,21 +547,26 @@ class AtradiusAPI extends BimpAPI {
             if ($this->options['mode'] === 'test') {
                 $client_id = BimpTools::getArrayValueFromPath($this->params, 'test_oauth_client_id', '');
                 $client_secret = BimpTools::getArrayValueFromPath($this->params, 'test_oauth_client_secret', '');
+                $apiKey = BimpTools::getArrayValueFromPath($this->params, 'test_api_key', '');
             } else {
                 $client_id = BimpTools::getArrayValueFromPath($this->params, 'prod_oauth_client_id', '');
                 $client_secret = BimpTools::getArrayValueFromPath($this->params, 'prod_oauth_client_secret', '');
+                $apiKey = BimpTools::getArrayValueFromPath($this->params, 'prod_api_key', '');
             }
 
             if ($client_id && $client_secret) {
                 if ($request_name == 'authenticate') {
+                $client_id = BimpTools::getArrayValueFromPath($this->params, 'test_oauth_client_id', '');
+                $client_secret = BimpTools::getArrayValueFromPath($this->params, 'test_oauth_client_secret', '');
+                $apiKey = BimpTools::getArrayValueFromPath($this->params, 'test_api_key', '');
                     return array(
-                        'Atradius-App-Key' => BimpTools::getArrayValueFromPath($this->params, 'test_api_key', ''),
+                        'Atradius-App-Key' => $apiKey,
                         'Authorization' => 'Basic ' . base64_encode($client_id . ':' . $client_secret)
                     );
                 } else {
                     return array(
                         'Authorization' => 'Bearer ' . $this->userAccount->getToken('access'),
-                        'Atradius-App-Key' => BimpTools::getArrayValueFromPath($this->params, 'test_api_key', '')
+                        'Atradius-App-Key' => $apiKey
                     );
                 }
             }

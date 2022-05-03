@@ -3243,8 +3243,10 @@ class Bimp_Client extends Bimp_Societe
         $clients = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_Client', array('siren' => $siren));
 
         foreach ($clients as $c) {
-            if ($c->field_exists($field))
-                $errors = BimpTools::merge_array($errors, $c->updateField($field, $value));
+            if ($c->field_exists($field)) {
+                if($c->getInitData($field) != $value)
+                    $errors = BimpTools::merge_array($errors, $c->updateField($field, $value));
+            }
         }
 
         return $errors;

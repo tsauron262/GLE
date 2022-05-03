@@ -56,6 +56,10 @@ page.open(url, function (status) {
     if (status === "success") {
         if (page.injectJs("injectme.js")) {
             console.log('ap inclusion');
+            
+            var idCode = getCode(0, function (codeSMS) {});
+            console.log('ID ancien Code '+idCode);
+            
             page.evaluate(function (log, paw) {
                 setTimeout(function () {
                     console.log('Page loadé');
@@ -76,7 +80,7 @@ page.open(url, function (status) {
 
                 debug('Passaga a l\'etape ' + etape);
                 if (etape == 2) {
-                    getCode(0, function (codeSMS) {
+                    getCode(idCode, function (codeSMS) {
                         page.evaluate(function (codeSMS) {
                             traiteCode(codeSMS);
                         }, codeSMS);
@@ -156,6 +160,7 @@ function getCode(id, onSuccess) {
             getCode(id, onSuccess);
         }, 3000);
     });
+    return id;
 }
 
 function sendToken(token) {

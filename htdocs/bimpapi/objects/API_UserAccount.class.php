@@ -40,6 +40,10 @@ class API_UserAccount extends BimpObject
         }
         return parent::isActionAllowed($action, $errors);
     }
+    
+    public function getTokenLight(){
+        return BimpTools::getDataLightWithPopover($this->displayTokens(), 50);
+    }
 
     public function isUserIn($id_user = 0)
     {

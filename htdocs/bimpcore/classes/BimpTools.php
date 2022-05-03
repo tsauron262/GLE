@@ -3377,7 +3377,7 @@ class BimpTools
             $return .= '>';
             $return .= substr($data, 0, $lenght) . '...';
             $return .= '</span>';
-            return $data;
+            return $return;
         }
     }
 }

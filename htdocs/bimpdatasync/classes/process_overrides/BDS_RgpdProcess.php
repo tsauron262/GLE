@@ -514,58 +514,58 @@ class BDS_RgpdProcess extends BDSProcess
             $primary = $instance->getPrimary();
 
             // Recherche pièces de + de 10 ans >= 120 euros:
-//            if ($params['total_field']) {
-//                $where = 'a.' . $params['date_create_field'] . ' > \'' . $date_from_10y . '\' AND ' . 'a.' . $params['date_create_field'] . ' <= \'' . $date_to_10y . '\'';
-//                $where .= ' AND a.' . $params['total_field'] . ' >= 120 AND s.is_anonymized = 1';
-//
-//                $rows = $this->db->getRows($table . ' a', $where, null, 'array', array($primary), null, null, array(
-//                    's' => array(
-//                        'table' => 'societe',
-//                        'on'    => 'a.' . $params['client_field'] . ' = s.rowid',
-//                        'alias' => 's'
-//                    )
-//                ));
-//
-//                if (is_array($rows)) {
-//                    foreach ($rows as $r) {
-//                        $data[$type][] = (int) $r[$primary];
-//
-//                        if ($test_one) {
-//                            break;
-//                        }
-//                    }
-//                } else {
-//                    die($this->db->err());
-//                }
-//            }
-//
-//            // Recherche pièces de + de 6 ans < 120 euros ou pas de montant:
-//            $where = 'a.' . $params['date_create_field'] . ' > \'' . $date_from_6y . '\' AND a.' . $params['date_create_field'] . ' <= \'' . $date_to_6y . '\'';
-//            $where .= ' AND s.is_anonymized = 1';
-//
-//            if ($params['total_field']) {
-//                $where .= ' AND a.' . $params['total_field'] . ' < 120';
-//            }
-//
-//            $rows = $this->db->getRows($table . ' a', $where, null, 'array', array($primary), null, null, array(
-//                's' => array(
-//                    'table' => 'societe',
-//                    'on'    => 'a.' . $params['client_field'] . ' = s.rowid',
-//                    'alias' => 's'
-//                )
-//            ));
-//
-//            if (is_array($rows)) {
-//                foreach ($rows as $r) {
-//                    $data[$type][] = (int) $r[$primary];
-//
-//                    if ($test_one) {
-//                        break;
-//                    }
-//                }
-//            } else {
-//                die($this->db->err());
-//            }
+            if ($params['total_field']) {
+                $where = 'a.' . $params['date_create_field'] . ' > \'' . $date_from_10y . '\' AND ' . 'a.' . $params['date_create_field'] . ' <= \'' . $date_to_10y . '\'';
+                $where .= ' AND a.' . $params['total_field'] . ' >= 120 AND s.is_anonymized = 1';
+
+                $rows = $this->db->getRows($table . ' a', $where, null, 'array', array($primary), null, null, array(
+                    's' => array(
+                        'table' => 'societe',
+                        'on'    => 'a.' . $params['client_field'] . ' = s.rowid',
+                        'alias' => 's'
+                    )
+                ));
+
+                if (is_array($rows)) {
+                    foreach ($rows as $r) {
+                        $data[$type][] = (int) $r[$primary];
+
+                        if ($test_one) {
+                            break;
+                        }
+                    }
+                } else {
+                    die($this->db->err());
+                }
+            }
+
+            // Recherche pièces de + de 6 ans < 120 euros ou pas de montant:
+            $where = 'a.' . $params['date_create_field'] . ' > \'' . $date_from_6y . '\' AND a.' . $params['date_create_field'] . ' <= \'' . $date_to_6y . '\'';
+            $where .= ' AND s.is_anonymized = 1';
+
+            if ($params['total_field']) {
+                $where .= ' AND a.' . $params['total_field'] . ' < 120';
+            }
+
+            $rows = $this->db->getRows($table . ' a', $where, null, 'array', array($primary), null, null, array(
+                's' => array(
+                    'table' => 'societe',
+                    'on'    => 'a.' . $params['client_field'] . ' = s.rowid',
+                    'alias' => 's'
+                )
+            ));
+
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    $data[$type][] = (int) $r[$primary];
+
+                    if ($test_one) {
+                        break;
+                    }
+                }
+            } else {
+                die($this->db->err());
+            }
 
             if ($type === 'propales') {
                 // Propales refusées de + de 3 ans : 

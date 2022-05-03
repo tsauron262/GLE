@@ -783,20 +783,8 @@ class Bimp_Client extends Bimp_Societe
                     }
 
                     if ($display_mode === 'notif_commerciaux' && (string) $dates['next']) {
-                        $notif_comm_delay = 2;
-//                        $dt = new DateTime($dates['next']);
-//                        
-//                        switch ($dt->format('N')) {
-//                            case 1: 
-//                                break;
-//                            
-//                            case 2: 
-//                                break;
-//                            
-//                            case 7: 
-//                                break;
-//                        }
-                        $dt->sub(new DateInterval('P' . $notif_comm_delay . 'D'));
+                        $dt = new DateTime($dates['next']);
+                        $dt->sub(new DateInterval('P5D'));
                         if ($dt->format('Y-m-d') != $now) {
                             continue;
                         }

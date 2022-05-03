@@ -215,11 +215,11 @@ class BDS_RelancesClientsProcess extends BDSProcess
                     $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client);
 
                     if (BimpObject::objectLoaded($client)) {
-                        $subject = 'Lettre de rappel sous 48 h au client ' . $client->getRef() . ' - ' . $client->getName();
+                        $subject = 'Lettre de rappel sous 5 jours au client ' . $client->getRef() . ' - ' . $client->getName();
 
                         $html = 'Bonjour,<br/><br/>';
 
-                        $html .= 'le client ' . $client->getLink() . ' va recevoir sous 48 h une lettre de rappel concernant les retards de réglement ci-après.<br/><br/>';
+                        $html .= 'le client ' . $client->getLink() . ' va recevoir sous 5 jours une lettre de rappel concernant les retards de réglement ci-après.<br/><br/>';
 
                         $html .= '<b>Si vous pensez que cette relance n\'a pas lieu d\'être, merci d\'en informer immédiatement ';
                         $html .= '<a href="mailto:recouvrementolys@bimp.fr">Recouvrement Olys</a>';
@@ -229,7 +229,7 @@ class BDS_RelancesClientsProcess extends BDSProcess
                         $html .= '<table>';
                         $html .= '<thead>';
                         $html .= '<tr>';
-                        $html .= '<th style="padding: 5px; font-weight: bold; border-bottom: 1px solid #000; background-color: #DCDCDC">Date</th>';
+                        $html .= '<th style="padding: 5px; font-weight: bold; border-bottom: 1px solid #000; background-color: #DCDCDC">Date facture</th>';
                         $html .= '<th style="padding: 5px; font-weight: bold; border-bottom: 1px solid #000; background-color: #DCDCDC">Facture</th>';
                         $html .= '<th style="padding: 5px; font-weight: bold; border-bottom: 1px solid #000; background-color: #DCDCDC">Total TTC</th>';
                         $html .= '<th style="padding: 5px; font-weight: bold; border-bottom: 1px solid #000; background-color: #DCDCDC">Reste à payer</th>';
@@ -279,9 +279,8 @@ class BDS_RelancesClientsProcess extends BDSProcess
                         $html .= '</table>';
                         
                         $html .= '<br/>Origine To: ' . $email;
-
-                        $email = 'f.martinez@bimp.fr';
-                        if (mailSyn2($subject, $email, '', $html)) {
+                        
+                        if (mailSyn2($subject, $email, '', $html, array(), array(), array(), 'f.martinez@bimp.fr')) {
                             $this->Success('Envoi alerte au commercial OK (' . $email . ')', $client, $facs_refs);
                         } else {
                             $this->Error('Echec envoi alerte au commercial (' . $email . ')', $client, $facs_refs);
@@ -312,7 +311,7 @@ class BDS_RelancesClientsProcess extends BDSProcess
                         'id_process'    => (int) $process->id,
                         'label'         => 'Traiter les notifications à envoyer aux commerciaux',
                         'name'          => 'process_notifs',
-                        'info'          => 'Envoi d\'une alerte 2 jours avant la première relance',
+                        'info'          => 'Envoi d\'une alerte 5 jours avant la première relance',
                         'type'          => 'toggle',
                         'default_value' => 1,
                         'required'      => 0

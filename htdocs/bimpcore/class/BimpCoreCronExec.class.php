@@ -97,8 +97,8 @@ class BimpCoreCronExec
 
         // Vérifs des licenses arrivées à échéance: 
          
-//        BimpObject::loadClass('bimpcommercial', 'Bimp_Commande');
-//        Bimp_Commande::checkLinesEcheances();
+        BimpObject::loadClass('bimpcommercial', 'Bimp_Commande');
+        Bimp_Commande::checkLinesEcheances();
         
         return 'OK';
     }

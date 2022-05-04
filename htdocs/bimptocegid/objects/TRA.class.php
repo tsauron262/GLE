@@ -66,7 +66,7 @@ class TRA extends BimpObject {
             
             $ref = str_replace(' ', '', substr($line, $startChar, $strlen));
             
-            if(!in_array($ref, $traitedObject) && $index > 0) {
+            if(!in_array($ref, $traitedObject) && $index > 0 && $ref != '') {
                 $traitedObject[] = $ref;
                 $card = new BC_Card($instance);
 

@@ -3193,7 +3193,7 @@ class Bimp_Client extends Bimp_Societe
                 if (is_array($cover) and!empty($cover)) {
 
 
-                    if (isset($cover['amount']) and (int) 0 < $cover['amount']) {
+                    if (isset($cover['amount'])) {
                         // Crédit Check
                         if ($cover['cover_type'] == AtradiusAPI::CREDIT_CHECK) {
                             $err_update = empty(self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_credit_check', (int) $cover['amount']));
@@ -3243,8 +3243,10 @@ class Bimp_Client extends Bimp_Societe
         $clients = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_Client', array('siren' => $siren));
 
         foreach ($clients as $c) {
-            if ($c->field_exists($field))
-                $errors = BimpTools::merge_array($errors, $c->updateField($field, $value));
+            if ($c->field_exists($field)) {
+                if($c->getInitData($field) != $value)
+                    $errors = BimpTools::merge_array($errors, $c->updateField($field, $value));
+            }
         }
 
         return $errors;

@@ -278,8 +278,6 @@ class BDS_RelancesClientsProcess extends BDSProcess
                         $html .= '</tbody>';
                         $html .= '</table>';
                         
-                        $html .= '<br/>Origine To: ' . $email;
-                        
                         if (mailSyn2($subject, $email, '', $html, array(), array(), array(), 'f.martinez@bimp.fr')) {
                             $this->Success('Envoi alerte au commercial OK (' . $email . ')', $client, $facs_refs);
                         } else {

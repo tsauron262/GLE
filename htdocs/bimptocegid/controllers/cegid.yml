@@ -19,6 +19,12 @@ sections:
               type: custom
               custom:
                   callback: renderVentesTab
+        - id: paiements
+          title: PAIEMENTS
+          struct:
+              type: custom
+              custom:
+                  callback: renderPaiementsTab
         - id: search
           title: Recherche
           struct:

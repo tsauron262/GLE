@@ -60,10 +60,10 @@ class TRA extends BimpObject {
         
         $html = '';
         $traitedObject = Array();
-        $instance = BimpCache::getBimpObjectInstance($module, $object);
+        
         
         foreach($this->getLinesOfFile($file) as $index => $line) {
-            
+            $instance = BimpCache::getBimpObjectInstance($module, $object);
             $ref = str_replace(' ', '', substr($line, $startChar, $strlen));
             
             if(!in_array($ref, $traitedObject) && $index > 0 && $ref != '') {

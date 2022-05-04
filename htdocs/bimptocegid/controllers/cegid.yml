@@ -1,5 +1,6 @@
 bootstrap: 1
-
+js: 
+    1: /bimptocegid/js/search.js
 sections:
     - type: custom
       custom:
@@ -12,4 +13,21 @@ sections:
             type: custom
             custom:
                 callback: renderTiersTab
-              
+        - id: facture
+          title: FACTURES
+          struct:
+              type: custom
+              custom:
+                  callback: renderVentesTab
+        - id: search
+          title: Recherche
+          struct:
+            type: custom
+            custom:
+                callback: renderSearchTab
+        - id: config
+          title: Configurations
+          struct:
+              type: custom
+              custom: 
+                  callback: renderConfigTab

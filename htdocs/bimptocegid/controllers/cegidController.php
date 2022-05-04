@@ -145,7 +145,7 @@ class cegidController extends BimpController {
             }
             if($typeFile == 'paiements') {
                 $buttons .= BimpRender::renderRowButton('Voir la liste des tiers du fichier', 'fas_user', $tra->getJsLoadModalCustomContent('getObjectFromFile', 'Liste des tiers du fichier ' . basename($file), Array('file' => $file, 'object' => 'Bimp_Societe', 'module' => 'bimpcore', 'startChar' => 31, 'strlen' => 17)));
-                $buttons .= BimpRender::renderRowButton('Voir la liste des factures du fichier', 'fas_file-invoice', $tra->getJsLoadModalCustomContent('getObjectFromFile', 'Liste des factures du fichier ' . basename($file), Array('file' => $file, 'object' => 'Bimp_Facture', 'module' => 'bimpcommercial', 'startChar' => 222, 'strlen' => 35)));
+                $buttons .= BimpRender::renderRowButton('Voir la liste des factures du fichier', 'fas_file-invoice', $tra->getJsLoadModalCustomContent('getObjectFromFile', 'Liste des factures du fichier ' . basename($file), Array('file' => $file, 'object' => 'Bimp_Facture', 'module' => 'bimpcommercial', 'startChar' => 221, 'strlen' => 35)));
                 $buttons .= BimpRender::renderRowButton('Voir la liste des paiements du fichier', 'fas_euro', $tra->getJsLoadModalCustomContent('getObjectFromFile', 'Liste des paiements du fichier ' . basename($file), Array('file' => $file, 'object' => 'Bimp_Paiement', 'module' => 'bimpcommercial', 'startChar' => 48, 'strlen' => 35)));
             }
             $buttons .= BimpRender::renderRowButton('Vérifier la structure du fichier TRA', 'fas_question', $tra->getJsActionOnclick('verify', Array('file' => $file), Array()));

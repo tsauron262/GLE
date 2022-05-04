@@ -272,6 +272,8 @@ fields:
         label: Date de dépot CFR
         dol_extra_field: 1
         type: datetime
+    fk_mode_reglement: 
+        history: 1
 #    rib_client:
 #        label: Rib Client
 #        dol_extra_field: 1

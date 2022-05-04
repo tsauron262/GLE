@@ -56,6 +56,11 @@ page.open(url, function (status) {
     if (status === "success") {
         if (page.injectJs("injectme.js")) {
             console.log('ap inclusion');
+            
+            var idCode = 0;
+            getCode(1, function (codeSMS) {idCode = codeSMS; console.log('ID ancien Code '+idCode);});
+            
+            
             page.evaluate(function (log, paw) {
                 setTimeout(function () {
                     console.log('Page loadé');
@@ -76,7 +81,7 @@ page.open(url, function (status) {
 
                 debug('Passaga a l\'etape ' + etape);
                 if (etape == 2) {
-                    getCode(0, function (codeSMS) {
+                    getCode(idCode, function (codeSMS) {
                         page.evaluate(function (codeSMS) {
                             traiteCode(codeSMS);
                         }, codeSMS);
@@ -147,7 +152,11 @@ function getCode(id, onSuccess) {
             setTimeout(function () {
                 getCode(tabResult[1], onSuccess);
             }, 3000);
-        } else {
+        } else if(id == 1){
+            console.log('ancien ID code : ' + tabResult[1]);
+            onSuccess(tabResult[1]);
+        }
+        else{
             console.log('code OK : ' + tabResult[0]);
             onSuccess(tabResult[0]);
         }
@@ -156,6 +165,7 @@ function getCode(id, onSuccess) {
             getCode(id, onSuccess);
         }, 3000);
     });
+    return id;
 }
 
 function sendToken(token) {

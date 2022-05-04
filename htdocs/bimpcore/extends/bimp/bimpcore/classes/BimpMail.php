@@ -3,10 +3,40 @@
 class BimpMail extends BimpMailCore
 {
 
-    public $title = 'LDLC';
-    public $subtitle = 'Apple';
-    public $from_name = 'LDLC Apple';
+    public $title = 'BIMP';
+    public $subtitle = 'Groupe LDLC';
+    public $from_name = 'BIMP';
     public $url = 'www.ldlc.com';
+
+    function __construct($parent, $subject, $to, $from, $msg = '', $reply_to = '', $addr_cc = '', $addr_bcc = '', $deliveryreceipt = 0, $errors_to = '')
+    {
+        $type = '';
+
+        if ($from === 'ldlc') {
+            $type = 'ldlc';
+        } elseif (is_object($parent) && method_exists($parent, 'getEmailClientFromType')) {
+            $type = $parent->getEmailClientFromType();
+        }
+
+        parent::__construct($parent, $subject, $to, $from, $msg, $reply_to, $addr_cc, $addr_bcc, $deliveryreceipt, $errors_to);
+    }
+
+    public function setFromType($type)
+    {
+        if ($type == 'ldlc') {
+            $this->title = 'LDLC';
+            $this->subtitle = 'Apple';
+            if ($this->from_name) {
+                $this->from_name = 'LDLC Apple';
+            }
+        } else {
+            $this->title = 'BIMP';
+            $this->subtitle = 'Groupe LDLC';
+            if ($this->from_name) {
+                $this->from_name = 'BIMP';
+            }
+        }
+    }
 
     function getHeader()
     {

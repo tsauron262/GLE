@@ -52,7 +52,8 @@ if (!$action) {
         'correct_tickets_serials'                   => 'Récupérer serials tickets depuis sujet',
         'convert_fi'                                => 'Convertir FI',
         'check_margin_commande'                     => 'Marge commande',
-        'convert_sql_field_for_items_braces'        => 'Convertir champ "Items_list" avec utilisation des crochets'
+        'convert_sql_field_for_items_braces'        => 'Convertir champ "Items_list" avec utilisation des crochets',
+        'checkLinesEcheances'                       => 'Vérifier échéances produits limités'
     );
 
     $path = pathinfo(__FILE__);
@@ -296,7 +297,7 @@ switch ($action) {
         $bdb = new BimpDb($db);
         $rows = $bdb->getRows($table, $where, null, 'array', array($primary, $field));
 
-        echo 'NB Lignes: ' . count($rows).'<br/>';
+        echo 'NB Lignes: ' . count($rows) . '<br/>';
         if (is_array($rows)) {
             foreach ($rows as $r) {
                 if (strpos($r[$field], $delimiter) !== false) {
@@ -320,13 +321,17 @@ switch ($action) {
 
         break;
 
+    case 'checkLinesEcheances':
+        BimpObject::loadClass('bimpcommercial', 'Bimp_Commande');
+        Bimp_Commande::checkLinesEcheances();
+        break;
+
     default:
         echo 'Action invalide';
         break;
 }
 
 echo '<br/>FIN';
-
 echo '</body></html>';
 
 // FONCTIONS: 

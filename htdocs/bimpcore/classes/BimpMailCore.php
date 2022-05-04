@@ -25,7 +25,7 @@ class BimpMailCore
     public $files = array();
     public $parent;
 
-    function __construct($parent, $subject, $to, $from, $msg = ''/* provisoire pour compatibilité */, $reply_to = '', $addr_cc = '', $addr_bcc = '', $deliveryreceipt = 0, $errors_to = '')
+    function __construct($parent, $subject, $to, $from, $msg = '', $reply_to = '', $addr_cc = '', $addr_bcc = '', $deliveryreceipt = 0, $errors_to = '')
     {
         global $dolibarr_main_url_root, $conf, $user;
 
@@ -146,6 +146,11 @@ class BimpMailCore
         }
 
         $this->files[] = $file;
+    }
+
+    public function setFromType($type)
+    {
+        
     }
 
     public function send(&$errors = array(), &$warnings = array())

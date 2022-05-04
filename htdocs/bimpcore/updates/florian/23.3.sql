@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimp_commande_line` ADD `echeance_notif_send` tinyint(1) NOT NULL DEFAULT 0;

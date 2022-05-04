@@ -813,6 +813,7 @@ L’équipe BIMP";
                 $this->debug_content .= 'Envoi e-mail client à ' . $to . ': ';
 
                 $bimpMail = new BimpMail((is_object($client) ? $client : 'none'), "Votre rendez-vous SAV BIMP", $to, $from, str_replace("\n", "<br/>", $messageClient));
+                $bimpMail->setFromType('ldlc');
                 $mail_errors = array();
 
                 if ($bimpMail->send($mail_errors)) {

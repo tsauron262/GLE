@@ -410,17 +410,7 @@ class Bimp_ImportPaiementLine extends BimpObject
 
     function getDataInfo()
     {
-        global $modeCSV;
-        if ($modeCSV) {
-            return $this->getData('data');
-        } else {
-            $return = '<span class=" bs-popover"';
-            $return .= BimpRender::renderPopoverData($this->getData('data'), 'top', true);
-            $return .= '>';
-            $return .= substr($this->getData('data'), 0, 5) . '...';
-            $return .= '</span>';
-            return $return;
-        }
+        return BimpTools::getDataLightWithPopover($this->getData('data'));
     }
 
     function getFactReconnue()

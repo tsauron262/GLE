@@ -150,6 +150,10 @@ lists_cols:
         label: Connecté
         value: 
             callback: displayLogged
+    tokens_light:
+        label: Token
+        value:
+            callback: getTokenLight
             
 lists: 
     default: 
@@ -174,7 +178,7 @@ lists:
             id_api: 
             name:    
             users: 
-            tokens: 
+            tokens_light:
             logged:
             logged_end: 
                 

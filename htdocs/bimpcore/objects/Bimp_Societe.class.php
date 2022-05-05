@@ -3738,7 +3738,7 @@ class Bimp_Societe extends BimpDolObject
         if ($this->getData('outstanding_limit_manuel') > $limit)
             $limit = $this->getData('outstanding_limit_manuel');
         if ($limit > -1 && $limit != $this->getInitData('outstanding_limit'))
-            $this->updateField('outstanding_limit', $limit);
+            $this->set('outstanding_limit', $limit);
 
         if ($this->getInitData('fk_typent') != $this->getData('fk_typent') && !$this->canEditField('status')) {
 //            if (stripos($this->getData('code_compta'), 'P') === 0 && $this->getData('fk_typent') != 8)

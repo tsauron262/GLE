@@ -25,12 +25,12 @@ class Bimp_Fournisseur extends Bimp_Societe
     }
 
     // Affichages: 
-     
+
     public function displayOutstanding()
     {
         return '';
     }
-    
+
     // Rendus HTML: 
 
     public function renderHeaderExtraRight()
@@ -188,7 +188,7 @@ class Bimp_Fournisseur extends Bimp_Societe
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFourn'), 'fourn', 1, null, 'Factures du fournisseur "' . $fourn_label . '"', 'fas_file-invoice-dollar');
                 $list->addFieldFilterValue('fk_soc', (int) $this->id);
                 break;
-            
+
             case 'products_fourn':
                 $list = new BC_ListTable(BimpObject::getInstance('bimpcore', 'Bimp_ProductFournisseurPrice'), 'fourn', 1, null, 'Produits du fournisseur "' . $fourn_label . '"', 'fas_file-invoice-dollar');
                 $list->addFieldFilterValue('fk_soc', (int) $this->id);
@@ -205,4 +205,5 @@ class Bimp_Fournisseur extends Bimp_Societe
 
         return $html;
     }
+
 }

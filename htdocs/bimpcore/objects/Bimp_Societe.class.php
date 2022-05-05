@@ -3822,12 +3822,12 @@ class Bimp_Societe extends BimpDolObject
 
             $nb = $this->db->getCount('bs_ticket', 'id_client = ' . (int) $this->id, 'id');
             if ($nb) {
-                $count_errors[] = $nb . ' contrat(s) créé(s)';
+                $count_errors[] = $nb . ' ticket(s) hotline créé(s)';
             }
 
             $nb = $this->db->getCount('fichinter', 'fk_soc = ' . (int) $this->id, 'rowid');
             if ($nb) {
-                $count_errors[] = $nb . ' ticket(s) hotline créé(s)';
+                $count_errors[] = $nb . ' fiche(s) d\'intervention créée(s)';
             }
             
             // Vérifs Fournisseurs:

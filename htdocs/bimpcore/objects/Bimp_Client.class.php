@@ -3029,6 +3029,55 @@ class Bimp_Client extends Bimp_Societe
         return parent::update($warnings, $force_update);
     }
 
+    public function delete(&$warnings = [], $force_delete = false)
+    {
+        $errors = array();
+        $count_errors = array();
+        
+        $nb = $this->db->getCount('propal', 'fk_soc = ' . (int) $this->id, 'rowid');
+        if ($nb) {
+            $count_errors[] = $nb . ' proposition(s) commerciale(s) créée(s)';
+        }
+        
+        $nb = $this->db->getCount('commande', 'fk_soc = ' . (int) $this->id .' OR id_client_facture = ' . $this->id, 'rowid');
+        if ($nb) {
+            $count_errors[] = $nb . ' commande(s) créée(s)';
+        }
+        
+        $nb = $this->db->getCount('facture', 'fk_soc = ' . (int) $this->id, 'rowid');
+        if ($nb) {
+            $count_errors[] = $nb . ' facture(s) créée(s)';
+        }
+        
+        $nb = $this->db->getCount('contrat', 'fk_soc = ' . (int) $this->id, 'rowid');
+        if ($nb) {
+            $count_errors[] = $nb . ' contrat(s) créé(s)';
+        }
+        
+        $nb = $this->db->getCount('bs_sav', 'id_client = ' . (int) $this->id, 'id');
+        if ($nb) {
+            $count_errors[] = $nb . ' sav(s) créé(s)';
+        }
+        
+        $nb = $this->db->getCount('bs_ticket', 'id_client = ' . (int) $this->id, 'id');
+        if ($nb) {
+            $count_errors[] = $nb . ' contrat(s) créé(s)';
+        }
+        
+        $nb = $this->db->getCount('fichinter', 'fk_soc = ' . (int) $this->id, 'rowid');
+        if ($nb) {
+            $count_errors[] = $nb . ' ticket(s) hotline créé(s)';
+        }
+        
+        if (count($count_errors)) {
+            $errors[] = BimpTools::getMsgFromArray($count_errors, 'Impossible de supprimer ce client');
+        } else {
+            $errors = parent::delete($warnings, $force_delete);
+        }
+        
+        return $errors;
+    }
+
     // Méthodes statiques: 
 
     public static function checkRelancesDeactivatedToNotify()
@@ -3244,7 +3293,7 @@ class Bimp_Client extends Bimp_Societe
 
         foreach ($clients as $c) {
             if ($c->field_exists($field)) {
-                if($c->getInitData($field) != $value){
+                if ($c->getInitData($field) != $value) {
                     $errors = BimpTools::merge_array($errors, $c->set($field, $value));
                     $errors = BimpTools::merge_array($errors, $c->update());
                 }
@@ -3313,9 +3362,6 @@ class Bimp_Client extends Bimp_Societe
         return 0;
     }
 
-    /**
-     * Détermine si le SIREN est au bon format
-     */
     public function isSirenValid()
     {
         if ($this->isLoaded()) {

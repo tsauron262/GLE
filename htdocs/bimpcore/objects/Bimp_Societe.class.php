@@ -83,7 +83,7 @@ class Bimp_Societe extends BimpDolObject
     {
         global $user;
 
-        return (int) $user->admin;
+        return (int) ($user->admin/* || $user->rights->societe->supprimer*/);
     }
 
     public function canEditField($field_name)

@@ -115,7 +115,7 @@ class ValidComm extends BimpObject
      * Si l'utilisateur ne peut pas, contacte quelqu'un de disponible
      * pour valider cet objet
      */
-    public function tryToValidate($bimp_object, $user, &$errors, &$success){
+    public function tryToValidate($bimp_object, $user, &$errors, &$success, $validations = array()){
         if (defined('NO_VALID_COMM') && NO_VALID_COMM) {
             return 1;
         }
@@ -123,6 +123,10 @@ class ValidComm extends BimpObject
         $valid_comm = 1;
         $valid_encours = 1;
         $valid_impaye = 1;
+        
+        // Si on ne précise pas le type de validations a effectué => on les fait toutes
+        if(empty($validations))
+            $validations = array_keys (self::$types);
         
         $this->isContrat = ($bimp_object->object_name == 'BContract_contrat') ? true : false;
         
@@ -138,13 +142,7 @@ class ValidComm extends BimpObject
             else
                 $bimp_object->getData('fk_soc');
         }
-            
-        
-//        $errors = BimpTools::merge_array($errors, $this->updateCreditSafe($bimp_object));
-        
-        
-//        return 1;
-                       
+                
 
        global $conf;
         $this->db2 = getDoliDBInstance($conf->db->type,$conf->db->host,$conf->db->user,$this->db->db->database_pass,$conf->db->name,$conf->db->port);
@@ -163,7 +161,7 @@ class ValidComm extends BimpObject
         
         // Validation commerciale
         if(!is_a($object, 'BContract_contrat')) {
-            if($percent_pv != 0 or $percent_marge != 0) {
+            if(($percent_pv != 0 or $percent_marge != 0) and in_array(self::TYPE_COMMERCIAL, $validations)) {
                 $valid_comm = (int) $this->tryValidateByType($user, self::TYPE_COMMERCIAL, $secteur, $class, $percent_pv, $bimp_object, $errors, array('sur_marge' => $percent_marge));
             }
             elseif(is_a($this->demandeExists($class, (int) $bimp_object->id, self::TYPE_COMMERCIAL), 'DemandeValidComm')) {
@@ -172,7 +170,7 @@ class ValidComm extends BimpObject
         }
         
         // Validation encours
-        if($val_euros != 0 && $this->getObjectClass($bimp_object) != self::OBJ_DEVIS) {
+        if($val_euros != 0 && $this->getObjectClass($bimp_object) != self::OBJ_DEVIS and in_array(self::TYPE_ENCOURS, $validations)) {
             
             if($bimp_object->field_exists('paiement_comptant') and $bimp_object->getData('paiement_comptant')) {
                 $success[] = "Validation encours forcée par le champ \"Paiement comptant\".";
@@ -188,7 +186,7 @@ class ValidComm extends BimpObject
         }
             
         // Validation impayé
-        if($rtp != 0 && $this->getObjectClass($bimp_object) != self::OBJ_DEVIS) {
+        if($rtp != 0 && $this->getObjectClass($bimp_object) != self::OBJ_DEVIS and in_array(self::TYPE_IMPAYE, $validations)) {
             
             if(!$client) {
                 if(method_exists($bimp_object, 'getClientFacture'))
@@ -212,13 +210,13 @@ class ValidComm extends BimpObject
         if(!$valid_comm)
                 $errors[] = "Vous ne pouvez pas valider commercialement " 
                 . $bimp_object->getLabel('this') . '. La demande de validation commerciale a été adressée à ' . $this->valideur[self::TYPE_COMMERCIAL] . '.<br/>';
-        else
+        elseif(in_array(self::TYPE_COMMERCIAL, $validations))
             $success[] = "Validation commerciale effectuée.";
         
         // Encours
         if(!$valid_encours)
                 $errors[] = $this->getErrorEncours($user, $bimp_object);
-        else
+        elseif(in_array(self::TYPE_ENCOURS, $validations))
             $success[] = "Validation encours effectuée.";
         
         // Impayé
@@ -226,7 +224,7 @@ class ValidComm extends BimpObject
                 $errors[] = "Votre " . $bimp_object->getLabel() .  
                 " n'est pas encore validée car le compte client présente des retards de paiement " .
                 '. La demande de validation d\'impayé a été adressée à ' . $this->valideur[self::TYPE_IMPAYE] . '.<br/>';
-        else
+        elseif(in_array(self::TYPE_IMPAYE, $validations))
             $success[] = "Validation d'impayé effectuée.";
         
         if(!is_a($object, 'BContract_contrat'))
@@ -243,7 +241,7 @@ class ValidComm extends BimpObject
     }
     
     
-    private function tryValidateByType($user, $type, $secteur, $class, $val, $bimp_object, &$errors, $options = array()) {        
+    public function tryValidateByType($user, $type, $secteur, $class, $val, $bimp_object, &$errors, $options = array()) {        
         global $conf;
         if (!isset($conf->global->MAIN_MODULE_BIMPVALIDATEORDER)) // Utiliser bimpcore_conf pour les vars de conf des modules BIMP !! 
             return 1;

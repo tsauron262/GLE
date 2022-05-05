@@ -3280,6 +3280,7 @@ class Bimp_Client extends Bimp_Societe
                 $decisions = $api->setCovers(array(
                     'buyerId'           => (int) $id_atradius,
                     'creditLimitAmount' => (int) $amount,
+                    'customerRefNumber' => $this->getData('code_client')
                         ), $errors, $warnings, $success);
             }
         }

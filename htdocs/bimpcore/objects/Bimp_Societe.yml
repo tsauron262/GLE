@@ -848,19 +848,6 @@ fields_tables:
             - field: date_check_credit_safe
             - field: outstanding_limit_credit_safe
               edit: 1
-            - field: outstanding_limit_icba
-              edit: 1
-            - label: Mettre à jour assurance Atradius
-              value: 
-                  callback: displayFormAtradius
-            - field: outstanding_limit_credit_check
-              edit: 1
-            - field: outstanding_limit_atradius
-              edit: 1
-            - field: outstanding_limit_manuel
-              edit: 1
-            - field: id_atradius
-            - field: status_atradius
  
     contact: 
         title: Informations de contact

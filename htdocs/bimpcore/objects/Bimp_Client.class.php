@@ -3119,7 +3119,7 @@ class Bimp_Client extends Bimp_Societe
 
             $html .= '<div>';
             $html .= '<span class="btn btn-default" onclick="' . $onclick_reload . '">';
-            $html .= BimpRender::renderIcon('fas fa5-redo', 'iconLeft') . 'Raffraifir Atradius';
+            $html .= BimpRender::renderIcon('fas fa5-redo', 'iconLeft') . 'Raffraichir Atradius';
             $html .= '</span>';
 
             global $user;
@@ -3190,7 +3190,7 @@ class Bimp_Client extends Bimp_Societe
                     return $errors;
                 }
 
-                if (is_array($cover) and!empty($cover)) {
+                if (is_array($cover) and !empty($cover)) {
 
 
                     if (isset($cover['amount'])) {
@@ -3276,7 +3276,7 @@ class Bimp_Client extends Bimp_Societe
             $api = BimpAPI::getApiInstance('atradius');
 
             if (is_a($api, 'AtradiusAPI')) {
-
+                
                 $decisions = $api->setCovers(array(
                     'buyerId'           => (int) $id_atradius,
                     'creditLimitAmount' => (int) $amount,

@@ -61,7 +61,7 @@ class AtradiusAPI extends BimpAPI {
         $filters['country'] = 'FRA';
         $filters['lang'] = 'FR';
         
-        $data = $this->execCurl('getBuyer', array(
+        $data = $this->execCurlCustom('getBuyer', array(
             'url_params' => $filters
                 ), $errors, $header, $code, array('customerId', 'policyId'));
 
@@ -78,7 +78,7 @@ class AtradiusAPI extends BimpAPI {
                 
         BimpObject::loadClass('bimpcore', 'Bimp_Client');
         
-        $response = $this->execCurl('getCover', array(
+        $response = $this->execCurlCustom('getCover', array(
             'url_params' => $filters
                 ), $errors, $header, $code);
 
@@ -158,7 +158,7 @@ class AtradiusAPI extends BimpAPI {
         if(!isset($params['currencyCode']) and $params['coverType'] != self::CREDIT_CHECK)
             $params['currencyCode'] = 'EUR';
 
-        $data = $this->execCurl('createCover', array(
+        $data = $this->execCurlCustom('createCover', array(
             'fields' => $params,
             'type' => 'POST'
             ), $errors, $response_headers, $code, array(), $success);
@@ -207,7 +207,7 @@ class AtradiusAPI extends BimpAPI {
         if(!isset($params['currencyCode']))
             $params['currencyCode'] = 'EUR';
 
-        $data = $this->execCurl('updateCover', array(
+        $data = $this->execCurlCustom('updateCover', array(
             'fields' => $params,
             'type' => 'PUT',
             'curl_options' => array()
@@ -244,7 +244,7 @@ class AtradiusAPI extends BimpAPI {
             'uid'     => $siren,
             'uidType' => 'SN'
         );
-        $data = $this->execCurl('getBuyer', array(
+        $data = $this->execCurlCustom('getBuyer', array(
             'url_params' => $params_get
                 ), $errors, $response_headers, $response_code, array('customerId', 'policyId'));
         if (isset($data['data']) && isset($data['data'][0]) && isset($data['data'][0]) && isset($data['data'][0]['buyerId'])) {
@@ -263,7 +263,7 @@ class AtradiusAPI extends BimpAPI {
         
         if (!count($errors)) {
             
-            $data = $this->execCurl('deleteCover', array(
+            $data = $this->execCurlCustom('deleteCover', array(
                 'fields' => $params,
                 'type' => 'PUT',
                 'curl_options' => array()
@@ -478,7 +478,7 @@ class AtradiusAPI extends BimpAPI {
 
     // Overrides: 
     
-    public function execCurl($request_name, $params = array(), &$errors = array(), &$response_headers = array(), &$response_code = -1, $dont_set = array(), &$success = array()) {
+    public function execCurlCustom($request_name, $params = array(), &$errors = array(), &$response_headers = array(), &$response_code = -1, $dont_set = array(), &$success = array()) {
         
         // URL FIELD
         if(isset($params['url_params'])) {
@@ -510,7 +510,7 @@ class AtradiusAPI extends BimpAPI {
             
         }
         
-        $return = parent:: execCurl($request_name, $params, $errors, $response_headers, $response_code);
+        $return = $this->execCurl($request_name, $params, $errors, $response_headers, $response_code);
         
         $this->getSuccess($response_code, $success);
                 
@@ -520,7 +520,7 @@ class AtradiusAPI extends BimpAPI {
 
     public function connect(&$errors = array(), &$warnings = array()) {
         if (!count($errors)) {
-            $result = $this->execCurl('authenticate', array(
+            $result = $this->execCurlCustom('authenticate', array(
                 'fields' => array('inut' => 'inut')), $errors);
 
             if (is_string($result)) {

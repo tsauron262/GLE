@@ -83,7 +83,7 @@ class Bimp_Societe extends BimpDolObject
     {
         global $user;
 
-        return (int) $user->admin;
+        return (int) ($user->admin/* || $user->rights->societe->supprimer*/);
     }
 
     public function canEditField($field_name)
@@ -3738,7 +3738,7 @@ class Bimp_Societe extends BimpDolObject
         if ($this->getData('outstanding_limit_manuel') > $limit)
             $limit = $this->getData('outstanding_limit_manuel');
         if ($limit > -1 && $limit != $this->getInitData('outstanding_limit'))
-            $this->updateField('outstanding_limit', $limit);
+            $this->set('outstanding_limit', $limit);
 
         if ($this->getInitData('fk_typent') != $this->getData('fk_typent') && !$this->canEditField('status')) {
 //            if (stripos($this->getData('code_compta'), 'P') === 0 && $this->getData('fk_typent') != 8)
@@ -3787,6 +3787,70 @@ class Bimp_Societe extends BimpDolObject
         return $errors;
     }
 
+    public function delete(&$warnings = [], $force_delete = false)
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            $count_errors = array();
+
+            // Vérifs clients: 
+            $nb = $this->db->getCount('propal', 'fk_soc = ' . (int) $this->id, 'rowid');
+            if ($nb) {
+                $count_errors[] = $nb . ' proposition(s) commerciale(s) créée(s)';
+            }
+
+            $nb = $this->db->getCount('commande', 'fk_soc = ' . (int) $this->id . ' OR id_client_facture = ' . $this->id, 'rowid');
+            if ($nb) {
+                $count_errors[] = $nb . ' commande(s) créée(s)';
+            }
+
+            $nb = $this->db->getCount('facture', 'fk_soc = ' . (int) $this->id, 'rowid');
+            if ($nb) {
+                $count_errors[] = $nb . ' facture(s) créée(s)';
+            }
+
+            $nb = $this->db->getCount('contrat', 'fk_soc = ' . (int) $this->id, 'rowid');
+            if ($nb) {
+                $count_errors[] = $nb . ' contrat(s) créé(s)';
+            }
+
+            $nb = $this->db->getCount('bs_sav', 'id_client = ' . (int) $this->id, 'id');
+            if ($nb) {
+                $count_errors[] = $nb . ' sav(s) créé(s)';
+            }
+
+            $nb = $this->db->getCount('bs_ticket', 'id_client = ' . (int) $this->id, 'id');
+            if ($nb) {
+                $count_errors[] = $nb . ' ticket(s) hotline créé(s)';
+            }
+
+            $nb = $this->db->getCount('fichinter', 'fk_soc = ' . (int) $this->id, 'rowid');
+            if ($nb) {
+                $count_errors[] = $nb . ' fiche(s) d\'intervention créée(s)';
+            }
+            
+            // Vérifs Fournisseurs:
+            $nb = $this->db->getCount('commande_fournisseur', 'fk_soc = ' . (int) $this->id, 'rowid');
+            if ($nb) {
+                $count_errors[] = $nb . ' commande(s) fournisseur(s) créée(s)';
+            }
+            
+            $nb = $this->db->getCount('facture_fourn', 'fk_soc = ' . (int) $this->id, 'rowid');
+            if ($nb) {
+                $count_errors[] = $nb . ' facture(s) fournisseur(s) créée(s)';
+            }
+
+            if (count($count_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($count_errors, 'Impossible de supprimer ce tiers');
+            } else {
+                $errors = parent::delete($warnings, $force_delete);
+            }
+        }
+
+        return $errors;
+    }
+    
     // Méthodes statiques: 
 
     public static function checkSolvabiliteStatusAll()

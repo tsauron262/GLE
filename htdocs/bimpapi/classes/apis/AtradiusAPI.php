@@ -298,7 +298,8 @@ class AtradiusAPI extends BimpAPI {
             
             $params_cc = array(
                 'coverType' => (string) $params_cc['coverType'] = self::CREDIT_CHECK,
-                'buyerId'   => (int)    $params['buyerId']
+                'buyerId'   => (int)    $params['buyerId'],
+                'customerRefNumber' => $params['customerRefNumber']
             );
             
             $new_cover = $this->setCover($params_cc, $errors, $warnings, $success);
@@ -312,7 +313,8 @@ class AtradiusAPI extends BimpAPI {
             $params_cl = array(
                 'coverType'         => (string) $params['coverType'] = self::CREDIT_LIMIT,
                 'creditLimitAmount' => (int)    $params['creditLimitAmount'],
-                'buyerId'           => (int)    $params['buyerId']
+                'buyerId'           => (int)    $params['buyerId'],
+                'customerRefNumber' => $params['customerRefNumber']
             );
             
             $new_cover = $this->setCover($params_cl, $errors, $warnings);
@@ -362,7 +364,8 @@ class AtradiusAPI extends BimpAPI {
                 'action'            => 'supersede',
                 'creditLimitAmount' => $params['creditLimitAmount'],
                 'buyerId'           => $params['buyerId'],
-                'coverType'         => $params['coverType']
+                'coverType'         => $params['coverType'],
+                'customerRefNumber' => $params['customerRefNumber']
             );
 
             return $this->updateCover($params_cl, $errors, $success);
@@ -374,7 +377,8 @@ class AtradiusAPI extends BimpAPI {
                 'action'            => 'reduce',
                 'creditLimitAmount' => $params['creditLimitAmount'],
                 'buyerId'           => $params['buyerId'],
-                'coverType'         => $params['coverType']
+                'coverType'         => $params['coverType'],
+                'customerRefNumber' => $params['customerRefNumber']
             );
 
             return $this->updateCover($params_cl, $errors, $success);

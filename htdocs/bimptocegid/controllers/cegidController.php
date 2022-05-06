@@ -39,11 +39,15 @@ class cegidController extends BimpController {
         $instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Paiement');
         
         $html .= $this->getExportedFilesArray('paiements');
+        $html .= $this->getExportedFilesArray('deplacementpaiements');
+        $html .= $this->getExportedFilesArray('payni');
+        $html .= $this->getExportedFilesArray('ip');
         
         $list = new BC_ListTable($instance, 'default', 1, null, 'Liste des paiements exportées');
         $list->addFieldFilterValue('exported', 1);
         
         $html .= $list->renderHtml();
+        
         
         return $html;
     }
@@ -112,13 +116,23 @@ class cegidController extends BimpController {
         
         $tra = BimpCache::getBimpObjectInstance('bimptocegid', 'TRA');
         
+        
         switch($type) {
             case 'tiers': $number = '0'; $typeFile = 'tiers'; break;
             case 'ventes': $number = '1'; $typeFile = 'ventes'; break;
             case 'paiements': $number = '2'; $typeFile = 'paiements'; break;
+            case 'deplacementpaiements': $number = '7'; $typeFile = 'deplacementpaiements'; break;
+            case 'payni': $number = '6'; $typeFile = 'payni'; break;
+            case 'ip': $number = null; $typeFile = 'ip'; break;
         }
         
-        $pattern = $number . '_' . $this->entitie . '_(' . strtoupper($typeFile) . ')_' . '*' . '_' . $this->version_tra . '.tra';
+        if($typeFile == 'ip') {
+            $pattern = 'IP' . '*' . '.tra';
+        } else {
+            $pattern = $number . '_' . $this->entitie . '_(' . strtoupper($typeFile) . ')_' . '*' . '_' . $this->version_tra . '.tra';
+        }
+        
+        
         
         $headerList = [
             'name'      => 'Nom du fichier',
@@ -143,16 +157,24 @@ class cegidController extends BimpController {
                 $buttons .= BimpRender::renderRowButton('Voir la liste des tiers du fichier', 'fas_user', $tra->getJsLoadModalCustomContent('getObjectFromFile', 'Liste des tiers du fichier ' . basename($file), Array('file' => $file, 'object' => 'Bimp_Societe', 'module' => 'bimpcore', 'startChar' => 31, 'strlen' => 17)));
                 $buttons .= BimpRender::renderRowButton('Voir la liste des factures du fichier', 'fas_file-invoice', $tra->getJsLoadModalCustomContent('getObjectFromFile', 'Liste des factures du fichier ' . basename($file), Array('file' => $file, 'object' => 'Bimp_Facture', 'module' => 'bimpcommercial', 'startChar' => 48, 'strlen' => 35)));
             }
-            if($typeFile == 'paiements') {
+            if($typeFile == 'paiements' || $typeFile == 'deplacementpaiements') {
                 $buttons .= BimpRender::renderRowButton('Voir la liste des tiers du fichier', 'fas_user', $tra->getJsLoadModalCustomContent('getObjectFromFile', 'Liste des tiers du fichier ' . basename($file), Array('file' => $file, 'object' => 'Bimp_Societe', 'module' => 'bimpcore', 'startChar' => 31, 'strlen' => 17)));
                 $buttons .= BimpRender::renderRowButton('Voir la liste des factures du fichier', 'fas_file-invoice', $tra->getJsLoadModalCustomContent('getObjectFromFile', 'Liste des factures du fichier ' . basename($file), Array('file' => $file, 'object' => 'Bimp_Facture', 'module' => 'bimpcommercial', 'startChar' => 221, 'strlen' => 35)));
-                $buttons .= BimpRender::renderRowButton('Voir la liste des paiements du fichier', 'fas_euro', $tra->getJsLoadModalCustomContent('getObjectFromFile', 'Liste des paiements du fichier ' . basename($file), Array('file' => $file, 'object' => 'Bimp_Paiement', 'module' => 'bimpcommercial', 'startChar' => 48, 'strlen' => 35)));
+                $buttons .= BimpRender::renderRowButton('Voir la liste des paiements du fichier', 'fas_euro-sign', $tra->getJsLoadModalCustomContent('getObjectFromFile', 'Liste des paiements du fichier ' . basename($file), Array('file' => $file, 'object' => 'Bimp_Paiement', 'module' => 'bimpcommercial', 'startChar' => 48, 'strlen' => 35)));
             }
             $buttons .= BimpRender::renderRowButton('Vérifier la structure du fichier TRA', 'fas_question', $tra->getJsActionOnclick('verify', Array('file' => $file), Array()));
             $rows[] = ['name' => basename($file), 'date' => $dateFichier->format('d/m/Y'), 'size' => filesize($file), 'buttons' => $buttons];
         }
+        $forOpenPanel0 = Array(2, 7, 6);
         
-        $html .= BimpRender::renderPanel('Liste des fichiers ' . $type . ' exportés dans cégid', BimpRender::renderBimpListTable(array_reverse($rows), $headerList, Array('pagination' => 1, 'n' => 10)));
+        $panelContent = '';
+        if(count($rows) > 0) {
+            $panelContent = BimpRender::renderBimpListTable(array_reverse($rows), $headerList, Array('pagination' => 1, 'n' => 10));
+        } else {
+            $panelContent = BimpRender::renderAlerts('Pas de fichiers', 'warning', false);
+        }
+        
+        $html .= BimpRender::renderPanel('Liste des fichiers ' . $type . ' exportés dans cégid ('.count($rows).' fichiers)', $panelContent,'', Array('open' => (in_array($number, $forOpenPanel0) || $typeFile == 'ip') ? 0 : 1));
                 
         return $html;
         

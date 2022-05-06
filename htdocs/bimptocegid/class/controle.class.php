@@ -14,6 +14,9 @@
         private static $startChar_alignementFacture     = 385;
         private static $numbChar_alignementFacture      = 5;
         private static $mustInChar_alignementFacture    = '-CEET';
+        private static $startChar_alignementPaiement    = 446;
+        private static $numbChar_alignementPaiement     = 24;
+        private static $mustInChar_alignementPaiement   = '010119000101190001011900';
         
         
         public static function tra($file, $lines, $type) { 
@@ -22,6 +25,9 @@
             
             if(strpos(self::$file, '_(TIERS)_') > 0) self::$type = 'tiers';
             if(strpos(self::$file, '_(VENTES)_') > 0) self::$type = 'ventes';
+            if(strpos(self::$file, '_(PAIEMENTS)_') > 0) self::$type = 'paiements';
+            if(strpos(self::$file, '_(DEPLACEMENTPAIEMENTS)_') > 0) self::$type = 'paiements';
+            if(strpos(self::$file, '_(PAYNI)_') > 0) self::$type = 'paiements';
             
             return Array('header' => self::controleHeader(), 'alignement' => self::controleAlignement());
             
@@ -51,6 +57,11 @@
                     $strlen = self::$numbChar_alignementFacture;
                     $equal  = self::$mustInChar_alignementFacture;
                     break;
+                case 'paiements':
+                    $start  = self::$startChar_alignementPaiement;
+                    $strlen = self::$numbChar_alignementPaiement;
+                    $equal  = self::$mustInChar_alignementPaiement;
+                    break;
                 default:
                     $start  = 0;
                     $strlen = 0;
@@ -58,7 +69,6 @@
                     break;
             }
             
-            //echo $equal;
             if($strlen > 0) {
                 
                 foreach(self::$lines as $index => $line) {

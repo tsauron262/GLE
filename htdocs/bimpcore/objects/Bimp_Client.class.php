@@ -3244,7 +3244,7 @@ class Bimp_Client extends Bimp_Societe
 
         foreach ($clients as $c) {
             if ($c->field_exists($field)) {
-                if($c->getInitData($field) != $value)
+                if ($c->getInitData($field) != $value)
                     $errors = BimpTools::merge_array($errors, $c->updateField($field, $value));
             }
         }

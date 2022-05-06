@@ -1,0 +1,32 @@
+bootstrap: 1
+forms:
+    search:
+        title: Recherche
+        on_submit: function($form) {return onSearchFormSubmit($form);}
+        rows:
+            - custom: 1
+              label: Chercher par
+              input_name: serachBy
+              input:
+                  type: select
+                  options:
+                      array: searchBy
+            - custom: 1
+              display_if:
+                  field_name: serachBy
+                  show_values: 0
+              label: Code auxiliaire
+              input_name: auxiliare
+              required: 1
+              input:
+                  type: text
+            - custom: 1
+              display_if:
+                  field_name: serachBy
+                  show_values: 1
+              label: Numéro de facture
+              input_name: facture
+              required: 1
+              input:
+                  type: text
+                  

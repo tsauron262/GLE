@@ -32,7 +32,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_tiers.class.php';
             if(self::$bimpObject->getData('exported')) {
                 $html .= 'Cette pièce est exportée en compta';
             } else {
-                $html .= 'Cette pièce est exportée en compta';
+                $html .= 'Cette pièce n\'est pas exportée en compta';
             }
 
             switch(self::$bimpObject->object_name) {

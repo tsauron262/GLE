@@ -3119,7 +3119,7 @@ class Bimp_Client extends Bimp_Societe
 
             $html .= '<div>';
             $html .= '<span class="btn btn-default" onclick="' . $onclick_reload . '">';
-            $html .= BimpRender::renderIcon('fas fa5-redo', 'iconLeft') . 'Raffraifir Atradius';
+            $html .= BimpRender::renderIcon('fas fa5-redo', 'iconLeft') . 'Raffraichir Atradius';
             $html .= '</span>';
 
             global $user;
@@ -3244,8 +3244,10 @@ class Bimp_Client extends Bimp_Societe
 
         foreach ($clients as $c) {
             if ($c->field_exists($field)) {
-                if ($c->getInitData($field) != $value)
-                    $errors = BimpTools::merge_array($errors, $c->updateField($field, $value));
+                if ($c->getInitData($field) != $value) {
+                    $errors = BimpTools::merge_array($errors, $c->set($field, $value));
+                    $errors = BimpTools::merge_array($errors, $c->update());
+                }
             }
         }
 
@@ -3278,6 +3280,7 @@ class Bimp_Client extends Bimp_Societe
                 $decisions = $api->setCovers(array(
                     'buyerId'           => (int) $id_atradius,
                     'creditLimitAmount' => (int) $amount,
+                    'customerRefNumber' => $this->getData('code_client')
                         ), $errors, $warnings, $success);
             }
         }
@@ -3311,9 +3314,6 @@ class Bimp_Client extends Bimp_Societe
         return 0;
     }
 
-    /**
-     * Détermine si le SIREN est au bon format
-     */
     public function isSirenValid()
     {
         if ($this->isLoaded()) {

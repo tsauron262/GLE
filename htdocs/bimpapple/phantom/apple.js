@@ -7,6 +7,7 @@ var url = 'https://login-partner-connect.apple.com/api/login';
 
 setTimeout(function(){
     console.log('timeout script ');
+    page.render('apple_time_out.png');
     phantom.exit(0);
 }, 180000);
 

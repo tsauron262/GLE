@@ -33,6 +33,22 @@ class cegidController extends BimpController {
         . '</div>';
     }
     
+    private function renderObjectList($instance, $title) {
+        
+        $list = new BC_ListTable($instance, 'default', 1, null, $title);
+        $list->addFieldFilterValue('exported', 1);
+        $list->setParam('open', 0);
+        
+        return $list->renderHtml();
+        
+    }
+    
+    private function getNbExported($table, $primary) {
+        
+        return $this->traClass->db->getCount($table, 'exported = 1', $primary);
+        
+    }
+    
     public function renderPaiementsTab() {
         $html = '';
         
@@ -42,12 +58,8 @@ class cegidController extends BimpController {
         $html .= $this->getExportedFilesArray('deplacementpaiements');
         $html .= $this->getExportedFilesArray('payni');
         $html .= $this->getExportedFilesArray('ip');
-        
-        $list = new BC_ListTable($instance, 'default', 1, null, 'Liste des paiements exportées');
-        $list->addFieldFilterValue('exported', 1);
-        
-        $html .= $list->renderHtml();
-        
+
+        $html .= $this->renderObjectList($instance, 'Liste des paiements exportés ('.$this->getNbExported('paiement', 'rowid').')');
         
         return $html;
     }
@@ -59,10 +71,19 @@ class cegidController extends BimpController {
         
         $html .= $this->getExportedFilesArray('ventes');
         
-        $list = new BC_ListTable($instance, 'default', 1, null, 'Liste des factures exportées');
-        $list->addFieldFilterValue('exported', 1);
-//        
-        $html .= $list->renderHtml();
+        $html .= $this->renderObjectList($instance, 'Liste des factures exportées ('.$this->getNbExported('facture', 'rowid').')');
+        
+        return $html;
+    }
+    
+    public function renderAchatsTab() {
+        $html = '';
+        
+        $instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn');
+        
+        $html .= $this->getExportedFilesArray('achats');
+        
+        $html .= $this->renderObjectList($instance, 'Liste des factures fournisseur exportées ('.$this->getNbExported('facture_fourn', 'rowid').')');
         
         return $html;
     }
@@ -74,10 +95,7 @@ class cegidController extends BimpController {
         
         $html .= $this->getExportedFilesArray('tiers');
         
-        $list = new BC_ListTable($instance, 'default', 1, null, 'Liste des sociétés exportées');
-        $list->addFieldFilterValue('exported', 1);
-        
-        $html .= $list->renderHtml();
+        $html .= $this->renderObjectList($instance, 'Liste des tiers exportés ('.$this->getNbExported('societe', 'rowid').')');
         
         return $html;
     }
@@ -120,6 +138,7 @@ class cegidController extends BimpController {
         switch($type) {
             case 'tiers': $number = '0'; $typeFile = 'tiers'; break;
             case 'ventes': $number = '1'; $typeFile = 'ventes'; break;
+            case 'achats': $number = '3'; $typeFile = 'achats'; break;
             case 'paiements': $number = '2'; $typeFile = 'paiements'; break;
             case 'deplacementpaiements': $number = '7'; $typeFile = 'deplacementpaiements'; break;
             case 'payni': $number = '6'; $typeFile = 'payni'; break;
@@ -153,7 +172,7 @@ class cegidController extends BimpController {
             if($typeFile == 'tiers') {
                 $buttons .= BimpRender::renderRowButton('Voir la liste des tiers du fichier', 'fas_user', $tra->getJsLoadModalCustomContent('getObjectFromFile', 'Liste des tiers du fichier ' . basename($file), Array('file' => $file, 'object' => 'Bimp_Societe', 'module' => 'bimpcore', 'startChar' => 6, 'strlen' => 17)));
             }
-            if($typeFile == 'ventes') {
+            if($typeFile == 'ventes' || $typeFile = 'achats') {
                 $buttons .= BimpRender::renderRowButton('Voir la liste des tiers du fichier', 'fas_user', $tra->getJsLoadModalCustomContent('getObjectFromFile', 'Liste des tiers du fichier ' . basename($file), Array('file' => $file, 'object' => 'Bimp_Societe', 'module' => 'bimpcore', 'startChar' => 31, 'strlen' => 17)));
                 $buttons .= BimpRender::renderRowButton('Voir la liste des factures du fichier', 'fas_file-invoice', $tra->getJsLoadModalCustomContent('getObjectFromFile', 'Liste des factures du fichier ' . basename($file), Array('file' => $file, 'object' => 'Bimp_Facture', 'module' => 'bimpcommercial', 'startChar' => 48, 'strlen' => 35)));
             }
@@ -174,7 +193,7 @@ class cegidController extends BimpController {
             $panelContent = BimpRender::renderAlerts('Pas de fichiers', 'warning', false);
         }
         
-        $html .= BimpRender::renderPanel('Liste des fichiers ' . $type . ' exportés dans cégid ('.count($rows).' fichiers)', $panelContent,'', Array('open' => (in_array($number, $forOpenPanel0) || $typeFile == 'ip') ? 0 : 1));
+        $html .= BimpRender::renderPanel('Liste des fichiers ' . $type . ' exportés dans cégid ('.count($rows).' fichiers)', $panelContent,'', Array('open' => 0));
                 
         return $html;
         

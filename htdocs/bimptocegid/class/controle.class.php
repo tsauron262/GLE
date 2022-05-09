@@ -17,6 +17,9 @@
         private static $startChar_alignementPaiement    = 446;
         private static $numbChar_alignementPaiement     = 24;
         private static $mustInChar_alignementPaiement   = '010119000101190001011900';
+//        private static $startChar_alignementPaiement    = 446;
+//        private static $numbChar_alignementPaiement     = 24;
+//        private static $mustInChar_alignementPaiement   = '010119000101190001011900';
         
         
         public static function tra($file, $lines, $type) { 

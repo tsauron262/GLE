@@ -7,6 +7,12 @@ sections:
         callback: renderHeader
     - type: nav_tabs
       nav_tabs:
+        - id: repertoire_export
+          title: En attente d'envois à cégid
+          struct:
+            type: custom
+            custom:
+                callback: renderCurrentTab
         - id: tiers
           title: TIERS
           struct:

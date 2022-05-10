@@ -917,7 +917,7 @@ class BS_SAV extends BimpObject
                 }
 
                 // Réparation en cours: 
-                if (in_array($status, array(self::BS_SAV_DEVIS_ACCEPTE))) {
+//                if (in_array($status, array(self::BS_SAV_DEVIS_ACCEPTE))) {
                     if (!is_null($propal) && $propal_status > 0) {
                         if ($propal->isSigned()) {
                             $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_REP_EN_COURS . ', 0)';
@@ -936,7 +936,7 @@ class BS_SAV extends BimpObject
                             );
                         }
                     }
-                }
+//                }
 
                 // Réparation terminée: 
                 if ($this->isActionAllowed('toRestitute')) {
@@ -2655,7 +2655,7 @@ class BS_SAV extends BimpObject
                 break;
 
             case self::BS_SAV_REP_EN_COURS:
-                if (!in_array($current_status, array(self::BS_SAV_DEVIS_ACCEPTE, self::BS_SAV_ATT_PIECE))) {
+                if (!in_array($current_status, array(self::BS_SAV_DEVIS_ACCEPTE, self::BS_SAV_ATT_PIECE, self::BS_SAV_EXAM_EN_COURS))) {
                     $errors[] = $error_msg . ' (Statut actuel invalide)';
                 } else {
                     if ($current_status === self::BS_SAV_ATT_PIECE) {

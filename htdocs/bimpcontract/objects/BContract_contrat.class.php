@@ -48,6 +48,7 @@ class BContract_contrat extends BimpDolObject
     CONST CONTRAT_RENOUVELLEMENT_5_FOIS = 5; // 105
     CONST CONTRAT_RENOUVELLEMENT_6_FOIS = 7; // 106
     CONST CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION = 12; // 112
+    CONST CONTRAT_RENOUVELLEMENT_AD_VITAM_ETERNAM = 666; 
     // Contrat dénoncé
     CONST CONTRAT_DENOUNCE_NON = 0;
     CONST CONTRAT_DENOUNCE_OUI_DANS_LES_TEMPS = 1;
@@ -105,6 +106,7 @@ class BContract_contrat extends BimpDolObject
         self::CONTRAT_RENOUVELLEMENT_4_FOIS          => 'Tacite 4 fois',
         self::CONTRAT_RENOUVELLEMENT_5_FOIS          => 'Tacite 5 fois',
         self::CONTRAT_RENOUVELLEMENT_6_FOIS          => 'Tacite 6 fois',
+        self::CONTRAT_RENOUVELLEMENT_AD_VITAM_ETERNAM=> 'Durée indéterminée',
         self::CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION => 'Sur proposition',
         self::CONTRAT_RENOUVELLEMENT_NON             => 'Non',
     );

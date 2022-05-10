@@ -1176,7 +1176,7 @@ class Bimp_Societe extends BimpDolObject
             $code = 'TE_PRIVATE';
         }
         if ($code != '') {
-            if ($code === 'TE_ADMIN') {
+            if (in_array($code, array('TE_ADMIN', 'TE_OTHER_ADM'))) {
                 return BimpCore::getConf('societe_id_default_cond_reglement_admin', BimpCore::getConf('societe_id_default_cond_reglement', 0));
             }
             if ($code === 'TE_PRIVATE') {

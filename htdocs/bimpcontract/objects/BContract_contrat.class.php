@@ -118,6 +118,7 @@ class BContract_contrat extends BimpDolObject
         self::CONTRAT_RENOUVELLEMENT_4_FOIS          => 'Tacite 4 fois',
         self::CONTRAT_RENOUVELLEMENT_5_FOIS          => 'Tacite 5 fois',
         self::CONTRAT_RENOUVELLEMENT_6_FOIS          => 'Tacite 6 fois',
+        self::CONTRAT_RENOUVELLEMENT_AD_VITAM_ETERNAM=> 'Durée indéterminée',
         self::CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION => 'Sur proposition'
     );
     public static $renouvellement_edit = Array(
@@ -128,6 +129,7 @@ class BContract_contrat extends BimpDolObject
         self::CONTRAT_RENOUVELLEMENT_4_FOIS          => 'Tacite 4 fois',
         self::CONTRAT_RENOUVELLEMENT_5_FOIS          => 'Tacite 5 fois',
         self::CONTRAT_RENOUVELLEMENT_6_FOIS          => 'Tacite 6 fois',
+        self::CONTRAT_RENOUVELLEMENT_AD_VITAM_ETERNAM=> 'Durée indéterminée',
         self::CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION => 'Sur proposition'
     );
     public static $objet_contrat = [

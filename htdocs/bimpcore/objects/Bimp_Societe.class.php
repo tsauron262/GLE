@@ -1254,7 +1254,7 @@ class Bimp_Societe extends BimpDolObject
                     'c.fk_statut'      => 1,
 //                    'c.fk_soc'         => $ids,
 //                    'c.id_client_facture'         => $ids,
-                    'custom'           => array('custom' => '(c.id_client_facture IN (' . implode(',', $ids) . ') || c.fk_soc IN (' . implode(',', $ids) . '))'),
+                    'custom'           => array('custom' => '(c.id_client_facture IN (' . implode(',', $ids) . ') || (c.fk_soc IN (' . implode(',', $ids) . ') && c.id_client_facture = 0))'),
                     'c.invoice_status' => array(
                         'operator' => '!=',
                         'value'    => 2

@@ -372,7 +372,7 @@ class BimpNote extends BimpObject
         $messages = array();
         $messages['id_current_user'] = (int) $id_user;
 
-        $conversations = $this->getMyNewConversations($id_max, true, 30, null, false, false);
+        $conversations = $this->getMyNewConversations($id_max, true, 20, null, false, false);
 
         foreach ($conversations as $c) {
             $note = null;

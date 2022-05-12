@@ -419,6 +419,8 @@ class BimpNote extends BimpObject
 
                 if (BimpObject::objectLoaded($obj)) {
                     $msg['obj']['nom_url'] = $obj->getLink();
+                } else {
+                    $msg['introuvable'] = $c['obj_module'] . ' ' . $c['obj_name'] . ' ' . $c['id_obj'];
                 }
 
 //                $msg['obj']['nom_url'] = $c['obj']->getLink(array('external_link'=>0, 'modal_view'=>0));

@@ -62,8 +62,9 @@ class bimp_note extends AbstractNotification {
         var author_initiale = this.getInitiales(element.author.nom);
         if (element.is_user_or_grp)
             var dest_initiale = this.getInitiales(element.dest.nom);
-        if(element.obj == undefined)
+        if(element.obj == undefined) {
             console.log(element);
+        }
         // Client
         html += element.obj.nom_url;
         if(typeof element.obj.client_nom_url !== 'undefined')

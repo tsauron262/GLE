@@ -161,7 +161,7 @@
             $liste = $contrat->getList(Array('statut' => self::CONTRAT_ACTIF));
             foreach($liste as $index => $infos) {
                 $contrat->fetch($infos['rowid']);
-                if((int) $contrat->getJourRestantReel() <= 0 && ($contrat->getData('tacite') == 0 || $contrat->getData('tacite') == 12)) {
+                if((int) $contrat->getJourRestantReel() < 0 && ($contrat->getData('tacite') == 0 || $contrat->getData('tacite') == 12)) {
                     $contrat->closeFromCron();
                     $this->output .= $contrat->getRef() . " : " . (int) $contrat->getJourRestantReel() . ' => FERMé<br/>';
                 }

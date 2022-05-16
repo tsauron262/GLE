@@ -372,7 +372,7 @@ class BimpNote extends BimpObject
         $messages = array();
         $messages['id_current_user'] = (int) $id_user;
 
-        $conversations = $this->getMyNewConversations($id_max, true, 30, null, false, false);
+        $conversations = $this->getMyNewConversations($id_max, true, 30, $id_user, false, false);
 
         foreach ($conversations as $c) {
             $note = null;
@@ -419,6 +419,8 @@ class BimpNote extends BimpObject
 
                 if (BimpObject::objectLoaded($obj)) {
                     $msg['obj']['nom_url'] = $obj->getLink();
+                } else {
+                    $msg['introuvable'] = $c['obj_module'] . ' ' . $c['obj_name'] . ' ' . $c['id_obj'];
                 }
 
 //                $msg['obj']['nom_url'] = $c['obj']->getLink(array('external_link'=>0, 'modal_view'=>0));

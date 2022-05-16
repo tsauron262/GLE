@@ -75,7 +75,7 @@ class AtradiusAPI extends BimpAPI {
      */
     // customerId est définit automatiquement
     public function getCover($filters = array(), &$errors = array(), &$warnings = array()) {
-                
+        
         BimpObject::loadClass('bimpcore', 'Bimp_Client');
         
         $response = $this->execCurlCustom('getCover', array(
@@ -147,7 +147,7 @@ class AtradiusAPI extends BimpAPI {
 
 
     // Ne pas utiliser directement ! Passer par setCovers
-    private function createCover($params = array(), &$errors = array(), &$warnings = array(), &$success = array()) {
+    private function createCover($params = array(), &$errors = array(), &$warnings = array(), &$success = '') {
         
         global $user;
             
@@ -175,15 +175,15 @@ class AtradiusAPI extends BimpAPI {
         switch ($code) {
             case 201:
                 $data['status'] = (int) Bimp_Client::STATUS_ATRADIUS_OK;
-                $success[] = $cover_type . " a été créer";
+                $success .= $cover_type . " a été créer<br/>";
                 break;
             case 202:
                 $data['status'] = (int) Bimp_Client::STATUS_ATRADIUS_EN_ATTENTE;
-                $warnings[] = $cover_type . " est en cours d'arbitrage";
+                $warnings .= $cover_type . " est en cours d'arbitrage<br/>";
                 break;
             default:
                 $data['status'] = (int) Bimp_Client::STATUS_ATRADIUS_REFUSE;
-                $errors[] = $cover_type . " a été refusé";
+                $errors .= $cover_type . " a été refusé<br/>";
                 break;
         }
 
@@ -191,7 +191,7 @@ class AtradiusAPI extends BimpAPI {
     }
 
     // Ne pas utiliser directement ! Passer par setCovers
-    private function updateCover($params = array(), &$errors = array(), &$success = array()) {
+    private function updateCover($params = array(), &$errors = array(), &$success = '') {
         
         global $user;
             
@@ -257,7 +257,7 @@ class AtradiusAPI extends BimpAPI {
         return 0;
     }
     
-    private function deleteCover($params = array(), &$errors = array(), &$success = array()) {
+    private function deleteCover($params = array(), &$errors = array(), &$success = '') {
         
         $params['action'] = 'cancel';
         
@@ -275,7 +275,7 @@ class AtradiusAPI extends BimpAPI {
 
     
     // Interface
-    public function setCovers($params, &$errors = array(), &$warnings = array(), &$success = array()) {
+    public function setCovers($params, &$errors = array(), &$warnings = array(), &$success = '') {
         
         $decisions = array();
         $now = new DateTime();
@@ -317,17 +317,17 @@ class AtradiusAPI extends BimpAPI {
                 'customerRefNumber' => $params['customerRefNumber']
             );
             
-            $new_cover = $this->setCover($params_cl, $errors, $warnings);
+            $new_cover = $this->setCover($params_cl, $errors, $warnings, $success);
             if(count($new_cover))
                 $decisions[] = $new_cover;
         }
         
-        
+
         
         return $decisions;
     }
     
-    private function setCover($params, &$errors = array(), &$warnings = array(), &$success = array()) {
+    private function setCover($params, &$errors = array(), &$warnings = array(), &$success = '') {
         
         // TODO ajouter currency code si CL
         $params_get = array(
@@ -352,7 +352,7 @@ class AtradiusAPI extends BimpAPI {
         }
         
         // Il n'y a pas encore d'assurance pour ce client, on le créer
-        if(empty($cover) or (int) $cover['amount'] < 1) {
+        if(empty($cover) /* bloque lorsqu'il y a une assaurance retiré or (int) $cover['amount'] < 1*/) {
             
             return $this->createCover($params, $errors);
             
@@ -384,23 +384,26 @@ class AtradiusAPI extends BimpAPI {
             return $this->updateCover($params_cl, $errors, $success);
             
         } else {
-            $warnings[] = "Tentative de changer la limite de crédit pour la même somme, ou MAJ d'un crédit check";
+            if($params['coverType'] == self::CREDIT_CHECK)
+                $warnings[] = "Tentative de mettre à jour un crédit check";
+            else
+                $warnings[] = "Tentative de changer la limite de crédit pour la même somme";
         }
                 
     }
     
     
     // Tools
-    private function getSuccess($response_code, &$success) {
+    private function getSuccess($response_code, &$success = '') {
         switch ($response_code) {
             case 200:
-                $success[] = "Action réussi";
+                $success .= "Action réussi<br/>";
                 break;
             case 201:
-                $success[] = "Action réussi, assurance créée";
+                $success .= "Action réussi, assurance créée<br/>";
                 break;
             case 202:
-                $success[] = "Action réussi, en attente d'approbation";
+                $success .= "Action réussi, en attente d'approbation<br/>";
                 break;
         }
     }
@@ -482,7 +485,7 @@ class AtradiusAPI extends BimpAPI {
 
     // Overrides: 
     
-    public function execCurlCustom($request_name, $params = array(), &$errors = array(), &$response_headers = array(), &$response_code = -1, $dont_set = array(), &$success = array()) {
+    public function execCurlCustom($request_name, $params = array(), &$errors = array(), &$response_headers = array(), &$response_code = -1, $dont_set = array(), &$success = '') {
         
         // URL FIELD
         if(isset($params['url_params'])) {

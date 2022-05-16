@@ -29,10 +29,12 @@
         CONST CONTRAT_RENOUVELLEMENT_5_FOIS = 5;
         CONST CONTRAT_RENOUVELLEMENT_6_FOIS = 7;
         CONST CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION = 12;
+        CONST CONTRAT_RENOUVELLEMENT_AD_VITAM_ETERNAM = 666;
         
         public $arrayTacite = [
             self::CONTRAT_RENOUVELLEMENT_1_FOIS, self::CONTRAT_RENOUVELLEMENT_2_FOIS, self::CONTRAT_RENOUVELLEMENT_3_FOIS,
-            self::CONTRAT_RENOUVELLEMENT_4_FOIS, self::CONTRAT_RENOUVELLEMENT_5_FOIS, self::CONTRAT_RENOUVELLEMENT_6_FOIS
+            self::CONTRAT_RENOUVELLEMENT_4_FOIS, self::CONTRAT_RENOUVELLEMENT_5_FOIS, self::CONTRAT_RENOUVELLEMENT_6_FOIS,
+            self::CONTRAT_RENOUVELLEMENT_AD_VITAM_ETERNAM
         ];
         
         function zu_gehen() {
@@ -159,7 +161,7 @@
             $liste = $contrat->getList(Array('statut' => self::CONTRAT_ACTIF));
             foreach($liste as $index => $infos) {
                 $contrat->fetch($infos['rowid']);
-                if((int) $contrat->getJourRestantReel() <= 0 && ($contrat->getData('tacite') == 0 || $contrat->getData('tacite') == 12)) {
+                if((int) $contrat->getJourRestantReel() < 0 && ($contrat->getData('tacite') == 0 || $contrat->getData('tacite') == 12)) {
                     $contrat->closeFromCron();
                     $this->output .= $contrat->getRef() . " : " . (int) $contrat->getJourRestantReel() . ' => FERMé<br/>';
                 }
@@ -307,7 +309,7 @@
             $filters = [
                 'statut' => 11,
                 'tacite' => Array(
-                    'in' => Array(1,3,6,4,5,7)
+                    'in' => Array(1,3,6,4,5,7,666)
                 )
             ];
             

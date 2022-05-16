@@ -45,7 +45,14 @@ class Bimp_ImportPaiementLine extends BimpObject
                 $type = 'vir';
                 if(isset($data[1]['price'])){
                     if($data[1]['price'] == 'methode2'){
-                        if(preg_match('/0417806000000669EUR2E04161357044C2[0-9 A-Z]*(00000)([0-9\.,}{]+)/', $this->getData('data'), $matches)){
+                        if(preg_match('/0417806000000669EUR2E04161357044C2[0-9 A-Z]*(00000)([0-9\.,}{]+)([A-Z]{1,1})/', $this->getData('data'), $matches)){
+                            $price = $matches[2];
+                            $lettre = $matches[3];
+                            $price .= $this->lettreToChiffre($lettre);
+                            $price = $price / 100;
+
+                        }
+                        elseif(preg_match('/0417806000000669EUR2E04161357044C2[0-9 A-Z]*(00000)([0-9\.,}{]+)/', $this->getData('data'), $matches)){
                             $price = $matches[2];
                             $lettre = substr($price, -1,1);
                             $price = intval(str_replace($lettre, $this->lettreToChiffre(str_replace('{', '}', $lettre)), $price)) / 100;
@@ -57,7 +64,6 @@ class Bimp_ImportPaiementLine extends BimpObject
                         }
                     }
                 }
-
 
 
 

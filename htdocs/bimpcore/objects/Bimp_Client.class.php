@@ -3083,7 +3083,7 @@ class Bimp_Client extends Bimp_Societe
 //                                    $html .= 'Pour ne plus recevoir de type de notification pour ce client, il est nécessaire de lui attribuer un commercial attitré';
 //                                }
 
-                                mailSyn2($subject, $email . ',f.martinez@bimp.fr', '', $html);
+                                mailSyn2($subject, $email, '', $html);
                             }
                         }
                         break;

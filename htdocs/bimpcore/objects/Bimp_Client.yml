@@ -137,6 +137,7 @@ views:
                       
     atradius:
         title: Assurance crédit
+        objects_change_reload: Bimp_Client
         rows: 
             - cols: 
                 - type: fields_table

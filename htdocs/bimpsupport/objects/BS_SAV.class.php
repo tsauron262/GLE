@@ -4620,7 +4620,7 @@ class BS_SAV extends BimpObject
                     $besoin = $encoursActu + $propal->dol_object->total_ht;
                     
                     if($besoin > ($authorisation+1))
-                        $errors[] = 'Le client doit payer comptant, son encours autorisé ('.price($authorisation).' €) est inférieur au besoin ('.price($besoin).' €)'; 
+                        $errors[] = 'Le client doit payer comptant (Carte bancaire, A réception de facture), son encours autorisé ('.price($authorisation).' €) est inférieur au besoin ('.price($besoin).' €)'; 
                 }
                 
                 

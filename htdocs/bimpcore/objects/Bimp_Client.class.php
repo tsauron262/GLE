@@ -3083,7 +3083,7 @@ class Bimp_Client extends Bimp_Societe
 //                                    $html .= 'Pour ne plus recevoir de type de notification pour ce client, il est nécessaire de lui attribuer un commercial attitré';
 //                                }
 
-                                mailSyn2($subject, $email . ',f.martinez@bimp.fr', '', $html);
+                                mailSyn2($subject, $email, '', $html);
                             }
                         }
                         break;
@@ -3119,7 +3119,7 @@ class Bimp_Client extends Bimp_Societe
 
             $html .= '<div>';
             $html .= '<span class="btn btn-default" onclick="' . $onclick_reload . '">';
-            $html .= BimpRender::renderIcon('fas fa5-redo', 'iconLeft') . 'Raffraichir Atradius';
+            $html .= BimpRender::renderIcon('fas fa5-redo', 'iconLeft') . 'Rafraîchir Atradius';
             $html .= '</span>';
 
             global $user;
@@ -3143,7 +3143,6 @@ class Bimp_Client extends Bimp_Societe
     public function actionSetOutstandingAtradius($data, &$success)
     {
         $warnings = array();
-        $success_callback = '';
 
         $errors = $this->setOutstandingAtradius($data['montant_atradius'], $warnings, $success);
 
@@ -3157,16 +3156,14 @@ class Bimp_Client extends Bimp_Societe
     public function actionRefreshOutstandingAtradius($data, &$success)
     {
 
-        $errors = $warnings = $success_tab = array();
+        $errors = $warnings = array();
 
         if (!$this->isLoaded()) {
             $errors[] = "Objet non chargé";
         } else {
-            $errors = $this->syncroAtradius($warnings, $success_tab);
-            if (count($success_tab))
-                $success = implode('<br/>', $success_tab);
-            else
-                $success = "Aucune modification apportée";
+            $errors = $this->syncroAtradius($warnings, $success);
+            if($success == '')
+                $success .= "Aucune modification apportée";
         }
 
         return array(
@@ -3175,8 +3172,10 @@ class Bimp_Client extends Bimp_Societe
         );
     }
 
-    public function syncroAtradius(&$warnings = array(), &$success = array())
+    public function syncroAtradius(&$warnings = array(), &$success = '')
     {
+        $success.='ok fonction';
+        $warnings[] = "ok fonction";
         $errors = array();
         $id_atradius = $this->getIdAtradius($errors);
         if (0 < (int) $id_atradius) {
@@ -3199,7 +3198,7 @@ class Bimp_Client extends Bimp_Societe
                             $err_update = empty(self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_credit_check', (int) $cover['amount']));
 
                             if ($err_update) {
-                                $success[] = $this->displayFieldName('outstanding_limit_credit_check') . " : " . (int) $cover['amount'];
+                                $success .= $this->displayFieldName('outstanding_limit_credit_check') . " : " . (int) $cover['amount'] . '<br/>';
                             } else {
                                 $errors = BimpTools::merge_array($errors, $err_update);
                             }
@@ -3208,7 +3207,7 @@ class Bimp_Client extends Bimp_Societe
                         } elseif ($cover['cover_type'] == AtradiusAPI::CREDIT_LIMIT) {
                             $err_update = self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_atradius', (int) $cover['amount']);
                             if (empty($err_update)) {
-                                $success[] = $this->displayFieldName('outstanding_limit_atradius') . " : " . (int) $cover['amount'];
+                                $success .= $this->displayFieldName('outstanding_limit_atradius') . " : " . (int) $cover['amount'] . '<br/>';
                             } else {
                                 $errors = BimpTools::merge_array($errors, $err_update);
                             }
@@ -3263,12 +3262,12 @@ class Bimp_Client extends Bimp_Societe
      * 
      * Pas d'appel d'API ici juste on set (voir askOutstandingAtradius)
      */
-    public function setOutstandingAtradius($amount = 7000, &$warnings = array(), &$success = 'OK')
+    public function setOutstandingAtradius($amount = 7000, &$warnings = array(), &$success = '')
     {
 
         $errors = array();
 
-        $success = 'OK';
+//        $success = 'OK';
         $id_atradius = $this->getIdAtradius($errors);
         if (0 < (int) $id_atradius) {
 
@@ -3276,12 +3275,18 @@ class Bimp_Client extends Bimp_Societe
             $api = BimpAPI::getApiInstance('atradius');
 
             if (is_a($api, 'AtradiusAPI')) {
+                
+                $warnings_doublon = array();
 
                 $decisions = $api->setCovers(array(
                     'buyerId'           => (int) $id_atradius,
                     'creditLimitAmount' => (int) $amount,
                     'customerRefNumber' => $this->getData('code_client')
                         ), $errors, $warnings, $success);
+                
+                if(!empty($decisions)) {
+                    $this->syncroAtradius ($warnings_doublon, $success);
+                }
             }
         }
 

@@ -452,11 +452,15 @@ class ObjectLine extends BimpObject
     public function hasEquipmentToAttribute()
     {
         if ($this->isLoaded()) {
-            $lines = $this->getEquipmentLines();
-            if (count($lines)) {
-                foreach ($lines as $line) {
-                    if (!(int) $line->getData('id_equipment')) {
-                        return 1;
+            $product = $this->getProduct();
+
+            if (is_a($product, 'Bimp_Product') && $product->isSerialisable()) {
+                $lines = $this->getEquipmentLines();
+                if (count($lines)) {
+                    foreach ($lines as $line) {
+                        if (!(int) $line->getData('id_equipment')) {
+                            return 1;
+                        }
                     }
                 }
             }

@@ -4611,6 +4611,8 @@ class BS_SAV extends BimpObject
                 $this->addNote('Devis envoyé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
                 $new_status = self::BS_SAV_ATT_CLIENT;
                 
+                if($propal->dol_object->cond_reglement_id == 20)
+                    $propal->dol_object->cond_reglement_id = 1;
                 if($propal->dol_object->cond_reglement_id != $this->id_cond_reglement_def || $propal->dol_object->mode_reglement_id != $this->id_mode_reglement_def){
                     //on vérifie encours
                     $client = $this->getChildObject('client');

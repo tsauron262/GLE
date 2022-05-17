@@ -236,6 +236,14 @@ fields:
             callback: getModeReglementClient
         values:
             array: modeReglements
+    condregl:
+        label: Condition de règlement
+        type: int
+        dol_extra_field: 1
+        default_value: 
+            callback: getConditionReglementClient
+        values:
+            array: condReglements
     objet_contrat:
         label: Type du contrat
         dol_extra_field: 1
@@ -424,6 +432,8 @@ fields_tables:
               edit: 0
             - field: facturation_echu
             - field: moderegl
+              edit: 0
+            - field: condregl
               edit: 0
             - label: Date de début de prochaine période de facturation
               value:
@@ -1127,6 +1137,7 @@ forms:
             - field: periodicity
             - field: facturation_echu
             - field: moderegl
+            - field: condregl
             - field: gti
             - field: syntec
             - field: fk_commercial_suivi

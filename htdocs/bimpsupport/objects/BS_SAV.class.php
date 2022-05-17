@@ -4619,7 +4619,7 @@ class BS_SAV extends BimpObject
                     $authorisation = $client->getData('outstanding_limit');
                     $besoin = $encoursActu + $propal->dol_object->total_ht;
                     
-                    if($besoin > $authorisation)
+                    if($besoin > ($authorisation+1))
                         $errors[] = 'Le client doit payer comptant, son encours autorisé ('.price($authorisation).' €) est inférieur au besoin ('.price($besoin).' €)'; 
                 }
                 
@@ -4944,7 +4944,7 @@ class BS_SAV extends BimpObject
             $authorisation = $client->getData('outstanding_limit');
             $besoin = $encoursActu + $impayee;
 
-            if($besoin > $authorisation)
+            if($besoin > 1 && $besoin > $authorisation)
                 $errors[] = 'Le client doit payer comptant, son encours autorisé ('.price($authorisation).' €) est inférieur au besoin ('.price($besoin).' €)'; 
 
         }

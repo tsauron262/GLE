@@ -5613,12 +5613,12 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         $code = static::getCodeApple($idMax, $newIdMax);
 
         $success_callback = "setTimeout(function(){checkCode();}, 2000);";
-        if ($code != '') {
+//        if ($code != '') {
             if ($idMax == 0)
-                $success_callback .= 'idMaxMesg = ' . $ln->id . ';';
+                $success_callback .= 'idMaxMesg = ' . $newIdMax . ';';
             elseif ($idMax < $newIdMax)
                 $success_callback = "text = '" . urlencode($code) . "'; alert(text); const notification = new Notification('Code Apple', { body: text });";
-        }
+//        }
 
         return array(
             'errors'           => array(),

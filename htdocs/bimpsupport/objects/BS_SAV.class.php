@@ -4936,7 +4936,7 @@ class BS_SAV extends BimpObject
         
         $propal = $this->getChildObject('propal');
         $impayee = $propal->dol_object->total_ttc - $data['paid'];
-        if($impayee > 0){
+        if($impayee > 1){
             //on vérifie encours
             $client = $this->getChildObject('client');
 
@@ -4944,7 +4944,7 @@ class BS_SAV extends BimpObject
             $authorisation = $client->getData('outstanding_limit');
             $besoin = $encoursActu + $impayee;
 
-            if($besoin > 1 && $besoin > $authorisation)
+            if($besoin > $authorisation)
                 $errors[] = 'Le client doit payer comptant, son encours autorisé ('.price($authorisation).' €) est inférieur au besoin ('.price($besoin).' €)'; 
 
         }

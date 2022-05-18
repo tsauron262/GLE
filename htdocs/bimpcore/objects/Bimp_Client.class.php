@@ -3174,8 +3174,7 @@ class Bimp_Client extends Bimp_Societe
 
     public function syncroAtradius(&$warnings = array(), &$success = '')
     {
-        $success.='ok fonction';
-        $warnings[] = "ok fonction";
+        $success.='';
         $errors = array();
         $id_atradius = $this->getIdAtradius($errors);
         if (0 < (int) $id_atradius) {

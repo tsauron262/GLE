@@ -61,6 +61,29 @@
                 foreach($list as $facture) {
                     $instance= BimpCache::getBimpObjectInstance("bimpcommercial", "Bimp_Facture", $facture->rowid); 
                     $ecriture .= $this->TRA_facture->constructTra($instance);
+                    
+                    if($facture->getData('fk_mode_reglement') == 3) {
+
+                        if($facture->getData('rib_client')) {
+                            $ribANDmandat = BimpCache::getBimpObjectInstance('bimptocegid', "BTC_exportRibAndMandat");
+                            $societe = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $facture->getData('fk_soc'));
+                            $ecriture_rib = $ribANDmandat->export_rib($facture, $societe);
+                            $ecriture_mdt = $ribANDmandat->export_mandat($facture, $societe);
+                            if(!empty($ecriture_mdt) && !empty($ecriture_rib)) {
+                                $this->write_tra($ecriture_rib, PATH_TMP . $this->dir . $this->getMyFile("ribs"));
+                                $this->write_tra($ecriture_mdt, PATH_TMP . $this->dir . $this->getMyFile("mandats"));
+                                $ribANDmandat->passTo_exported($facture);
+                            }
+
+
+                        }  else {
+                            $subject = "EXPORT COMPTA - RIB MANQUANT";
+                            $msg = "La facture " . $facture->getNomUrl() . " a été exportée avec comme mode de règlement mandat de prélèvement SEPA mais n'a pas de RIB";
+                            $mail = new BimpMail(null, $subject, "dev@bimp.fr", null, $msg);
+                            $mail->send();
+                        }
+                    }
+                    
                     if($this->write_tra($ecriture, $file)) {
                         $instance->updateField('exported', 1);
                         $this->good['VENTES'][$instance->getRef()]= "Ok dans le fichier TRA " . $file;
@@ -122,7 +145,7 @@
                         if($this->write_tra($this->TRA_deplacementPaiement->constructTra($paiement, $datas), $file)) {
                             $this->good['DP'][$paiement->getRef()] = 'Ok dans le fichier ' . $file;
                         } else {
-                            $this->fails['DP'][$paiement->getRef()] = 'Erreur de déplacemùent de ce paiement';
+                            $this->fails['DP'][$paiement->getRef()] = 'Erreur de déplacement de ce paiement';
                         }
                     }
 

@@ -4367,7 +4367,7 @@ class Bimp_Commande extends BimpComm
                         $msg .= 'Note: vous ne recevrez pas d\'autre alerte pour les produits listés ci-dessous.<br/><br/>';
                         $msg .= $html;
 
-                        if (mailSyn2($subject, $email, '', $msg, array(), array(), array(), 'f.martinez@bimp.fr')) {
+                        if (mailSyn2($subject, $email, '', $msg)) {
                             $bdb->update('bimp_commande_line', array(
                                 'echeance_notif_send' => 1
                                     ), 'id IN (' . implode(',', $lines_done) . ')');

@@ -1,20 +1,25 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . 'bimptocegid/class/export.class.php';
+require_once DOL_DOCUMENT_ROOT . 'bimptocegid/class/controle.class.php';
 require_once DOL_DOCUMENT_ROOT . 'bimptocegid/objects/TRA.class.php';
 
 class cegidController extends BimpController {
     
     protected $version_tra;
     protected $entitie;
-    protected $local_path = PATH_TMP . "/" . 'exportCegid' . '/' . 'BY_DATE' . '/' . 'imported_auto' . '/';
+    protected $local_path;
     protected $traClass;
+    protected $exportClass;
 
     public function renderHeader() {
+        
+        global $db;
         
         $this->version_tra = BimpCore::getConf('BIMPTOCEGID_version_tra');
         $this->entitie = BimpCore::getConf('BIMPTOCEGID_file_entity');
         $this->traClass = BimpCache::getBimpObjectInstance('bimptocegid', 'TRA');
+        $this->exportClass = new export($db);
         
         return 
         '<div id="bimptocegid__header" class="object_header container-fluid" style="height: auto;">'
@@ -33,17 +38,33 @@ class cegidController extends BimpController {
         . '</div>';
     }
     
+    private function renderObjectList($instance, $title) {
+        
+        $list = new BC_ListTable($instance, 'default', 1, null, $title);
+        $list->addFieldFilterValue('exported', 1);
+        $list->setParam('open', 0);
+        
+        return $list->renderHtml();
+        
+    }
+    
+    private function getNbExported($table, $primary) {
+        
+        return $this->traClass->db->getCount($table, 'exported = 1', $primary);
+        
+    }
+    
     public function renderPaiementsTab() {
         $html = '';
         
         $instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Paiement');
         
         $html .= $this->getExportedFilesArray('paiements');
-        
-        $list = new BC_ListTable($instance, 'default', 1, null, 'Liste des paiements exportées');
-        $list->addFieldFilterValue('exported', 1);
-        
-        $html .= $list->renderHtml();
+        $html .= $this->getExportedFilesArray('deplacementpaiements');
+        $html .= $this->getExportedFilesArray('payni');
+        $html .= $this->getExportedFilesArray('ip');
+
+        $html .= $this->renderObjectList($instance, 'Liste des paiements exportés ('.$this->getNbExported('paiement', 'rowid').')');
         
         return $html;
     }
@@ -55,10 +76,19 @@ class cegidController extends BimpController {
         
         $html .= $this->getExportedFilesArray('ventes');
         
-        $list = new BC_ListTable($instance, 'default', 1, null, 'Liste des factures exportées');
-        $list->addFieldFilterValue('exported', 1);
-//        
-        $html .= $list->renderHtml();
+        $html .= $this->renderObjectList($instance, 'Liste des factures exportées ('.$this->getNbExported('facture', 'rowid').')');
+        
+        return $html;
+    }
+    
+    public function renderAchatsTab() {
+        $html = '';
+        
+        $instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn');
+        
+        $html .= $this->getExportedFilesArray('achats');
+        
+        $html .= $this->renderObjectList($instance, 'Liste des factures fournisseur exportées ('.$this->getNbExported('facture_fourn', 'rowid').')');
         
         return $html;
     }
@@ -70,11 +100,16 @@ class cegidController extends BimpController {
         
         $html .= $this->getExportedFilesArray('tiers');
         
-        $list = new BC_ListTable($instance, 'default', 1, null, 'Liste des sociétés exportées');
-        $list->addFieldFilterValue('exported', 1);
+        $html .= $this->renderObjectList($instance, 'Liste des tiers exportés ('.$this->getNbExported('societe', 'rowid').')');
         
-        $html .= $list->renderHtml();
-        
+        return $html;
+    }
+    
+    public function renderCurrentTab() {
+        $html = '';
+                
+        $html .= $this->getExportedFilesArray();
+                
         return $html;
     }
     
@@ -106,27 +141,69 @@ class cegidController extends BimpController {
         return $html;
     }
     
-    private function getExportedFilesArray($type) {
+    private function displayStructureState($file) {
+        $checkStructure = controle::tra($file, file($file), '');
+        $html = '';
+        $errors = Array();
+        
+        if($checkStructure['header'] != '')
+            $errors[] = $checkStructure['header'];
+        if(count($checkStructure['alignement'])) {
+            foreach($checkStructure['alignement'] as $erreur) {
+                $errors[] = $erreur;
+            }
+        }
+        
+        if(count($errors) > 0) {
+            $html .= '<i class=\'fas fa5-times bs-popover danger\' '.BimpRender::renderPopoverData(implode('</br >', $errors), 'top', true).' ></i>';
+        } else {
+            $html .= '<i class=\'fas fa5-check success \' ></i>';
+        }
+        
+        return $html;
+        
+    }
+    
+    private function getExportedFilesArray($type = '') {
         
         $html = '';
         
         $tra = BimpCache::getBimpObjectInstance('bimptocegid', 'TRA');
+        $this->local_path = PATH_TMP . "/" . 'exportCegid' . '/' . 'BY_DATE' . '/' . 'imported_auto' . '/';
+        $open = false;
         
-        switch($type) {
-            case 'tiers': $number = '0'; $typeFile = 'tiers'; break;
-            case 'ventes': $number = '1'; $typeFile = 'ventes'; break;
-            case 'paiements': $number = '2'; $typeFile = 'paiements'; break;
+        if($type != '') {
+            switch($type) {
+                case 'tiers': $number = '0'; $typeFile = 'tiers'; break;
+                case 'ventes': $number = '1'; $typeFile = 'ventes'; break;
+                case 'achats': $number = '3'; $typeFile = 'achats'; break;
+                case 'paiements': $number = '2'; $typeFile = 'paiements'; break;
+                case 'deplacementpaiements': $number = '7'; $typeFile = 'deplacementpaiements'; break;
+                case 'payni': $number = '6'; $typeFile = 'payni'; break;
+                case 'ip': $number = null; $typeFile = 'ip'; break;
+            }
+
+            if($typeFile == 'ip') {
+                $pattern = 'IP' . '*' . '.tra';
+            } else {
+                $pattern = $number . '_' . $this->entitie . '_(' . strtoupper($typeFile) . ')_' . '*' . '_' . $this->version_tra . '.tra';
+            }
+        } else {
+            $open = true;
+            $this->local_path = PATH_TMP . "/" . 'exportCegid' . '/' . 'BY_DATE' . '/';
+            $pattern = '*' . '.tra';
         }
         
-        $pattern = $number . '_' . $this->entitie . '_(' . strtoupper($typeFile) . ')_' . '*' . '_' . $this->version_tra . '.tra';
+        
+        
         
         $headerList = [
             'name'      => 'Nom du fichier',
             'date'      => 'Date du fichier',
             'size'      => 'Taille du fichier',
+            'struct'    => 'Structure',
             'buttons'   => ['label' => '', 'col_style' => 'text-align: right']
         ];
-        
         $rows = [];
         
         $dateFichier = new DateTime();
@@ -143,16 +220,39 @@ class cegidController extends BimpController {
                 $buttons .= BimpRender::renderRowButton('Voir la liste des tiers du fichier', 'fas_user', $tra->getJsLoadModalCustomContent('getObjectFromFile', 'Liste des tiers du fichier ' . basename($file), Array('file' => $file, 'object' => 'Bimp_Societe', 'module' => 'bimpcore', 'startChar' => 31, 'strlen' => 17)));
                 $buttons .= BimpRender::renderRowButton('Voir la liste des factures du fichier', 'fas_file-invoice', $tra->getJsLoadModalCustomContent('getObjectFromFile', 'Liste des factures du fichier ' . basename($file), Array('file' => $file, 'object' => 'Bimp_Facture', 'module' => 'bimpcommercial', 'startChar' => 48, 'strlen' => 35)));
             }
-            if($typeFile == 'paiements') {
+            if($typeFile == 'achats') {
+                $buttons .= BimpRender::renderRowButton('Voir la liste des tiers du fichier', 'fas_user', $tra->getJsLoadModalCustomContent('getObjectFromFile', 'Liste des tiers du fichier ' . basename($file), Array('file' => $file, 'object' => 'Bimp_Societe', 'module' => 'bimpcore', 'startChar' => 31, 'strlen' => 17)));
+                $buttons .= BimpRender::renderRowButton('Voir la liste des factures du fichier', 'fas_file-invoice', $tra->getJsLoadModalCustomContent('getObjectFromFile', 'Liste des factures du fichier ' . basename($file), Array('file' => $file, 'object' => 'Bimp_FactureFourn', 'module' => 'bimpcommercial', 'startChar' => 48, 'strlen' => 35)));
+            }
+            if($typeFile == 'paiements' || $typeFile == 'deplacementpaiements') {
                 $buttons .= BimpRender::renderRowButton('Voir la liste des tiers du fichier', 'fas_user', $tra->getJsLoadModalCustomContent('getObjectFromFile', 'Liste des tiers du fichier ' . basename($file), Array('file' => $file, 'object' => 'Bimp_Societe', 'module' => 'bimpcore', 'startChar' => 31, 'strlen' => 17)));
                 $buttons .= BimpRender::renderRowButton('Voir la liste des factures du fichier', 'fas_file-invoice', $tra->getJsLoadModalCustomContent('getObjectFromFile', 'Liste des factures du fichier ' . basename($file), Array('file' => $file, 'object' => 'Bimp_Facture', 'module' => 'bimpcommercial', 'startChar' => 221, 'strlen' => 35)));
-                $buttons .= BimpRender::renderRowButton('Voir la liste des paiements du fichier', 'fas_euro', $tra->getJsLoadModalCustomContent('getObjectFromFile', 'Liste des paiements du fichier ' . basename($file), Array('file' => $file, 'object' => 'Bimp_Paiement', 'module' => 'bimpcommercial', 'startChar' => 48, 'strlen' => 35)));
+                $buttons .= BimpRender::renderRowButton('Voir la liste des paiements du fichier', 'fas_euro-sign', $tra->getJsLoadModalCustomContent('getObjectFromFile', 'Liste des paiements du fichier ' . basename($file), Array('file' => $file, 'object' => 'Bimp_Paiement', 'module' => 'bimpcommercial', 'startChar' => 48, 'strlen' => 35)));
             }
-            $buttons .= BimpRender::renderRowButton('Vérifier la structure du fichier TRA', 'fas_question', $tra->getJsActionOnclick('verify', Array('file' => $file), Array()));
-            $rows[] = ['name' => basename($file), 'date' => $dateFichier->format('d/m/Y'), 'size' => filesize($file), 'buttons' => $buttons];
+            //$buttons .= BimpRender::renderRowButton('Vérifier la structure du fichier TRA', 'fas_question', $tra->getJsActionOnclick('verify', Array('file' => $file), Array()));
+            $rows[] = [
+                'name' => basename($file), 
+                'date' => $dateFichier->format('d/m/Y'), 
+                'size' => filesize($file), 
+                'buttons' => $buttons,
+                'struct'=>$this->displayStructureState($file),
+            ];
+            
+            
         }
         
-        $html .= BimpRender::renderPanel('Liste des fichiers ' . $type . ' exportés dans cégid', BimpRender::renderBimpListTable(array_reverse($rows), $headerList, Array('pagination' => 1, 'n' => 10)));
+        $panelTitle = ($type != '') ?  'Liste des fichiers ' . $type . ' exportés dans cégid ('.count($rows).' fichiers)' : 'Liste des fichiers en attente d\'envois vers cégid';
+        
+        $forOpenPanel0 = Array(2, 7, 6);
+        
+        $panelContent = '';
+        if(count($rows) > 0) {
+            $panelContent = BimpRender::renderBimpListTable(array_reverse($rows), $headerList, Array('pagination' => 1, 'n' => 10));
+        } else {
+            $panelContent = BimpRender::renderAlerts('Pas de fichiers', 'warning', false);
+        }
+        
+        $html .= BimpRender::renderPanel($panelTitle, $panelContent,'', Array('open' => $open));
                 
         return $html;
         

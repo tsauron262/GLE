@@ -1,12 +1,14 @@
 var page = require('webpage').create();
+page.settings.userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36';
 var system = require('system');
 
-var debugScreen = false;
+var debugScreen = true;
 var url = 'https://login-partner-connect.apple.com/api/login';
 
 
 setTimeout(function(){
     console.log('timeout script ');
+    page.render('apple_time_out.png');
     phantom.exit(0);
 }, 180000);
 

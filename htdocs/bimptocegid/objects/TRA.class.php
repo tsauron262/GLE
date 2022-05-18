@@ -61,36 +61,41 @@ class TRA extends BimpObject {
         $html = '';
         $traitedObject = Array();
         
+        $lines = $this->getLinesOfFile($file);
         
-        foreach($this->getLinesOfFile($file) as $index => $line) {
-            $instance = BimpCache::getBimpObjectInstance($module, $object);
-            $ref = str_replace(' ', '', substr($line, $startChar, $strlen));
-            
-            if(!in_array($ref, $traitedObject) && $index > 0 && $ref != '') {
-                $traitedObject[] = $ref;
-                $card = new BC_Card($instance);
+        if(count($lines) > 1) {
+            foreach($lines as $index => $line) {
+                $instance = BimpCache::getBimpObjectInstance($module, $object);
+                $ref = str_replace(' ', '', substr($line, $startChar, $strlen));
 
-                if($object == 'Bimp_Societe') {
-                    if($instance->find(Array('code_compta' => $ref), 1) || $instance->find(Array('code_compta_fournisseur' => $ref), 1)) {
-                        $html .= BimpRender::renderPanel('<b>' . $instance->getName() . '</b>', $card->renderHtml(), '', Array('open' => 0));
+                if(!in_array($ref, $traitedObject) && $index > 0 && $ref != '') {
+                    $traitedObject[] = $ref;
+                    $card = new BC_Card($instance);
+
+                    if($object == 'Bimp_Societe') {
+                        if($instance->find(Array('code_compta' => $ref), 1) || $instance->find(Array('code_compta_fournisseur' => $ref), 1)) {
+                            $html .= BimpRender::renderPanel('<b>' . $instance->getName() . '</b>', $card->renderHtml(), '', Array('open' => 0));
+                        } else {
+                            $html .= BimpRender::renderAlerts('Impossible de charger la societé avec le code auxiliaire ' . $ref . ' à la ligne #' . ($index+1), 'danger', false);
+                        }
                     } else {
-                        $html .= BimpRender::renderAlerts('Impossible de charger la societé avec le code auxiliaire ' . $ref . ' à la ligne #' . ($index+1), 'danger', false);
+                        $refField = 'ref';
+                        if($object == 'Bimp_Facture') $refField = 'facnumber';
+
+                        if($instance->find(Array($refField => $ref), 1)) {
+                            $html .= BimpRender::renderPanel('<b>' . $instance->getref() . '</b>' . ' Ligne #' . ($index+1), $card->renderHtml(), '', Array('open' => 0));
+                        } else {
+                            $html .= BimpRender::renderAlerts('Impossible de charger la pièce avec la référence ' . $ref . ' à la ligne #' . ($index+1), 'danger', false);
+                        }
                     }
-                } else {
-                    $refField = 'ref';
-                    if($object == 'Bimp_Facture') $refField = 'facnumber';
-                    
-                    if($instance->find(Array($refField => $ref), 1)) {
-                        $html .= BimpRender::renderPanel('<b>' . $instance->getref() . '</b>' . ' Ligne #' . ($index+1), $card->renderHtml(), '', Array('open' => 0));
-                    } else {
-                        $html .= BimpRender::renderAlerts('Impossible de charger la pièce avec la référence ' . $ref . ' à la ligne #' . ($index+1), 'danger', false);
-                    }
+
                 }
-                
+
             }
-            
+        } else {
+            $html = BimpRender::renderAlerts('Aucune ligne dans ce fichier', 'danger', false);
         }
-        
+
         return $html;
         
     }

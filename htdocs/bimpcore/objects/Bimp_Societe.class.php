@@ -83,7 +83,7 @@ class Bimp_Societe extends BimpDolObject
     {
         global $user;
 
-        return (int) ($user->admin/* || $user->rights->societe->supprimer*/);
+        return (int) ($user->admin || $user->rights->societe->supprimer);
     }
 
     public function canEditField($field_name)
@@ -1172,17 +1172,17 @@ class Bimp_Societe extends BimpDolObject
         if ((int) $this->getData('fk_typent')) {
             $code = $this->db->getValue('c_typent', 'code', 'id = ' . (int) $this->getData('fk_typent'));
         }
-        if (BimpTools::getPostFieldValue('is_company') == '0')
+        if (BimpTools::getPostFieldValue('is_company') == '0') {
             $code = 'TE_PRIVATE';
+        }
         if ($code != '') {
-            if ($code === 'TE_ADMIN') {
+            if (in_array($code, array('TE_ADMIN', 'TE_OTHER_ADM'))) {
                 return BimpCore::getConf('societe_id_default_cond_reglement_admin', BimpCore::getConf('societe_id_default_cond_reglement', 0));
             }
             if ($code === 'TE_PRIVATE') {
                 return BimpCore::getConf('particulier_id_default_cond_reglement', BimpCore::getConf('societe_id_default_cond_reglement', 0));
             }
         }
-//            die($code.'pppppp');
 
         return BimpCore::getConf('societe_id_default_cond_reglement', 0);
     }
@@ -1254,7 +1254,7 @@ class Bimp_Societe extends BimpDolObject
                     'c.fk_statut'      => 1,
 //                    'c.fk_soc'         => $ids,
 //                    'c.id_client_facture'         => $ids,
-                    'custom'           => array('custom' => '(c.id_client_facture IN (' . implode(',', $ids) . ') || c.fk_soc IN (' . implode(',', $ids) . '))'),
+                    'custom'           => array('custom' => '(c.id_client_facture IN (' . implode(',', $ids) . ') || (c.fk_soc IN (' . implode(',', $ids) . ') && c.id_client_facture = 0))'),
                     'c.invoice_status' => array(
                         'operator' => '!=',
                         'value'    => 2
@@ -3829,13 +3829,13 @@ class Bimp_Societe extends BimpDolObject
             if ($nb) {
                 $count_errors[] = $nb . ' fiche(s) d\'intervention créée(s)';
             }
-            
+
             // Vérifs Fournisseurs:
             $nb = $this->db->getCount('commande_fournisseur', 'fk_soc = ' . (int) $this->id, 'rowid');
             if ($nb) {
                 $count_errors[] = $nb . ' commande(s) fournisseur(s) créée(s)';
             }
-            
+
             $nb = $this->db->getCount('facture_fourn', 'fk_soc = ' . (int) $this->id, 'rowid');
             if ($nb) {
                 $count_errors[] = $nb . ' facture(s) fournisseur(s) créée(s)';
@@ -3850,7 +3850,7 @@ class Bimp_Societe extends BimpDolObject
 
         return $errors;
     }
-    
+
     // Méthodes statiques: 
 
     public static function checkSolvabiliteStatusAll()

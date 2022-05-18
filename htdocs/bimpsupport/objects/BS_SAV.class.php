@@ -12,6 +12,9 @@ class BS_SAV extends BimpObject
     public static $idProdPrio = 3422;
     private $allGarantie = true;
     public $useCaisseForPayments = false;
+    
+    public $id_cond_reglement_def = 1;
+    public $id_mode_reglement_def = 6;
 
     const BS_SAV_RESERVED = -1;
     const BS_SAV_CANCELED_BY_CUST = -2;
@@ -917,7 +920,7 @@ class BS_SAV extends BimpObject
                 }
 
                 // Réparation en cours: 
-                if (in_array($status, array(self::BS_SAV_DEVIS_ACCEPTE))) {
+//                if (in_array($status, array(self::BS_SAV_DEVIS_ACCEPTE))) {
                     if (!is_null($propal) && $propal_status > 0) {
                         if ($propal->isSigned()) {
                             $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_REP_EN_COURS . ', 0)';
@@ -936,7 +939,7 @@ class BS_SAV extends BimpObject
                             );
                         }
                     }
-                }
+//                }
 
                 // Réparation terminée: 
                 if ($this->isActionAllowed('toRestitute')) {
@@ -2655,7 +2658,7 @@ class BS_SAV extends BimpObject
                 break;
 
             case self::BS_SAV_REP_EN_COURS:
-                if (!in_array($current_status, array(self::BS_SAV_DEVIS_ACCEPTE, self::BS_SAV_ATT_PIECE))) {
+                if (!in_array($current_status, array(self::BS_SAV_DEVIS_ACCEPTE, self::BS_SAV_ATT_PIECE, self::BS_SAV_EXAM_EN_COURS))) {
                     $errors[] = $error_msg . ' (Statut actuel invalide)';
                 } else {
                     if ($current_status === self::BS_SAV_ATT_PIECE) {
@@ -2834,11 +2837,11 @@ class BS_SAV extends BimpObject
             $id_mode_reglement = (int) $client->getData('mode_reglement');
 
             if (!$id_cond_reglement) {
-                $id_cond_reglement = 1;
+                $id_cond_reglement = $this->id_cond_reglement_def;
             }
 
             if (!$id_mode_reglement) {
-                $id_mode_reglement = 6;
+                $id_mode_reglement = $this->id_mode_reglement_def;
             }
 
             BimpTools::loadDolClass('comm/propal', 'propal');
@@ -4607,20 +4610,40 @@ class BS_SAV extends BimpObject
             } else {
                 $this->addNote('Devis envoyé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
                 $new_status = self::BS_SAV_ATT_CLIENT;
-
-                if ($propal->dol_object->valid($user) < 1) {
-                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($propal->dol_object, array(), $langs), 'Echec de la validation du devis');
+                
+                if($propal->dol_object->cond_reglement_id == 20){
+                    $propal->dol_object->cond_reglement_id = 1;
+                    global $user;
+                    $propal->dol_object->update($user);
                 }
+                if($propal->dol_object->cond_reglement_id != $this->id_cond_reglement_def || $propal->dol_object->mode_reglement_id != $this->id_mode_reglement_def){
+                    //on vérifie encours
+                    $client = $this->getChildObject('client');
+                    
+                    $encoursActu = $client->getAllEncoursForSiret(true)['total'];
+                    $authorisation = $client->getData('outstanding_limit');
+                    $besoin = $encoursActu + $propal->dol_object->total_ht;
+                    
+                    if($besoin > ($authorisation+1))
+                        $errors[] = 'Le client doit payer comptant (Carte bancaire, A réception de facture), son encours autorisé ('.price($authorisation).' €) est inférieur au besoin ('.price($besoin).' €)'; 
+                }
+                
+                
+                if (!count($errors)){
+                    if ($propal->dol_object->valid($user) < 1) {
+                        $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($propal->dol_object, array(), $langs), 'Echec de la validation du devis');
+                    }
 
-                if (!count($errors) && !$propal->dol_object->generateDocument(self::$propal_model_pdf, $langs)) {
-                    $errors[] = "Impossible de générer le PDF validation impossible";
-                    $propal->dol_object->reopen($user, 0);
-                } elseif ($create_signature) {
-                    $email_content = BimpTools::getArrayValueFromPath($data, 'email_content', $this->getDefaultSignDistEmailContent());
-                    $signature_errors = $propal->createSignature(true, (int) $this->getData('id_contact'), $email_content);
+                    if (!count($errors) && !$propal->dol_object->generateDocument(self::$propal_model_pdf, $langs)) {
+                        $errors[] = "Impossible de générer le PDF validation impossible";
+                        $propal->dol_object->reopen($user, 0);
+                    } elseif ($create_signature) {
+                        $email_content = BimpTools::getArrayValueFromPath($data, 'email_content', $this->getDefaultSignDistEmailContent());
+                        $signature_errors = $propal->createSignature(true, (int) $this->getData('id_contact'), $email_content);
 
-                    if (count($signature_errors)) {
-                        $warnings[] = BimpTools::getMsgFromArray($signature_errors, 'Echec de la création de la fiche signature');
+                        if (count($signature_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($signature_errors, 'Echec de la création de la fiche signature');
+                        }
                     }
                 }
             }
@@ -4915,6 +4938,22 @@ class BS_SAV extends BimpObject
 //                $errors[] = 'Le prêt "' . $pret->getData('ref') . '" n\'est pas restitué';
 //            }
 //        }
+        
+        $propal = $this->getChildObject('propal');
+        $impayee = $propal->dol_object->total_ttc - $data['paid'];
+        if($impayee > 1){
+            //on vérifie encours
+            $client = $this->getChildObject('client');
+
+            $encoursActu = $client->getAllEncoursForSiret(true)['total'];
+            $authorisation = $client->getData('outstanding_limit');
+            $besoin = $encoursActu + $impayee;
+
+            if($besoin > $authorisation)
+                $errors[] = 'Le client doit payer comptant, son encours autorisé ('.price($authorisation).' €) est inférieur au besoin ('.price($besoin).' €)'; 
+
+        }
+        
 
         if ($payment_set) {
             if ($this->useCaisseForPayments) {
@@ -5574,12 +5613,12 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         $code = static::getCodeApple($idMax, $newIdMax);
 
         $success_callback = "setTimeout(function(){checkCode();}, 2000);";
-        if ($code != '') {
+//        if ($code != '') {
             if ($idMax == 0)
-                $success_callback .= 'idMaxMesg = ' . $ln->id . ';';
+                $success_callback .= 'idMaxMesg = ' . $newIdMax . ';';
             elseif ($idMax < $newIdMax)
                 $success_callback = "text = '" . urlencode($code) . "'; alert(text); const notification = new Notification('Code Apple', { body: text });";
-        }
+//        }
 
         return array(
             'errors'           => array(),

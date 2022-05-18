@@ -426,9 +426,6 @@ fields:
                 method: getModeReglements
                 params:
                     - 1
-#        input: 
-#            type: select_payment
-#            include_empty: 1
             
     cond_reglement_supplier:
         label: Conditions de réglement
@@ -1007,6 +1004,14 @@ forms:
                 display_if: 
                     field_name: is_company
                     show_values: 1
+            mode_reglement: 
+                field: mode_reglement
+            cond_reglement: 
+                field: cond_reglement
+            mode_reglement_supplier: 
+                field: mode_reglement_supplier
+            cond_reglement_supplier: 
+                field: cond_reglement_supplier
             siret: 
                 field: siret
                 display_if: 
@@ -1067,14 +1072,6 @@ forms:
             # ce type de champ (item_list) n'est pas filtrable pour l'instant. 
 #            secteur: 
 #                field: secteuractivite
-            mode_reglement: 
-                field: mode_reglement
-            cond_reglement: 
-                field: cond_reglement
-            mode_reglement_supplier: 
-                field: mode_reglement_supplier
-            cond_reglement_supplier: 
-                field: cond_reglement_supplier
             tva_assuj: 
                 field: tva_assuj
             tva_intra: 

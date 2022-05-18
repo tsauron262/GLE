@@ -3754,10 +3754,10 @@ class Bimp_Societe extends BimpDolObject
             }
         }
 
-        if ($this->getData('fk_typent') == 5) {
-            $this->set('mode_reglement', 63);
-            $this->set('cond_reglement', 7);
-        }
+//        if ($this->getData('fk_typent') == 5) { // Géré via bimpcore_conf (via getDefaultCondReglement)
+//            $this->set('mode_reglement', 63);
+//            $this->set('cond_reglement', 7);
+//        }
 
         $errors = parent::update($warnings, $force_update);
 

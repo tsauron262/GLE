@@ -12,9 +12,8 @@ class BS_SAV extends BimpObject
     public static $idProdPrio = 3422;
     private $allGarantie = true;
     public $useCaisseForPayments = false;
-    
-    public $id_cond_reglement_def = 1;
-    public $id_mode_reglement_def = 6;
+    public $id_cond_reglement_def = 1; // Obsolète, ne plus utiliser
+    public $id_mode_reglement_def = 6; // Idem
 
     const BS_SAV_RESERVED = -1;
     const BS_SAV_CANCELED_BY_CUST = -2;
@@ -921,26 +920,25 @@ class BS_SAV extends BimpObject
 
                 // Réparation en cours: 
 //                if (in_array($status, array(self::BS_SAV_DEVIS_ACCEPTE))) {
-                    if (!is_null($propal) && $propal_status > 0) {
-                        if ($propal->isSigned()) {
-                            $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_REP_EN_COURS . ', 0)';
-                            $buttons[] = array(
-                                'label'   => 'Réparation en cours',
-                                'icon'    => 'wrench',
-                                'onclick' => $this->getJsActionOnclick('startRepair')
-                            );
-                        } else {
-                            $buttons[] = array(
-                                'label'    => 'Réparation en cours',
-                                'icon'     => 'wrench',
-                                'onclick'  => '',
-                                'disabled' => 1,
-                                'popover'  => 'Devis non signé'
-                            );
-                        }
+                if (!is_null($propal) && $propal_status > 0) {
+                    if ($propal->isSigned()) {
+                        $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_REP_EN_COURS . ', 0)';
+                        $buttons[] = array(
+                            'label'   => 'Réparation en cours',
+                            'icon'    => 'wrench',
+                            'onclick' => $this->getJsActionOnclick('startRepair')
+                        );
+                    } else {
+                        $buttons[] = array(
+                            'label'    => 'Réparation en cours',
+                            'icon'     => 'wrench',
+                            'onclick'  => '',
+                            'disabled' => 1,
+                            'popover'  => 'Devis non signé'
+                        );
                     }
+                }
 //                }
-
                 // Réparation terminée: 
                 if ($this->isActionAllowed('toRestitute')) {
                     if (in_array($status, array(self::BS_SAV_REP_EN_COURS))) {
@@ -1256,7 +1254,7 @@ class BS_SAV extends BimpObject
 
         return DOL_URL_ROOT . '/' . $page . '.php?modulepart=bimpcore&file=' . urlencode($file);
     }
-    
+
     public function getEmailClientFromType()
     {
         return 'ldlc';
@@ -2716,13 +2714,17 @@ class BS_SAV extends BimpObject
                 $id_mode_paiement = (int) BimpTools::getValue('mode_paiement_acompte', 0);
             }
 
+            if (!(int) $id_mode_paiement) {
+                $id_mode_paiement = (int) BimpCore::getConf('sav_mode_reglement', 6);
+            }
+
             // Création de la facture: 
             BimpTools::loadDolClass('compta/facture', 'facture');
             $factureA = new Facture($this->db->db);
             $factureA->type = 3;
             $factureA->date = dol_now();
             $factureA->socid = $this->getData('id_client');
-            $factureA->cond_reglement_id = 1;
+            $factureA->cond_reglement_id = BimpCore::getConf('sav_cond_reglement', 1);
             $factureA->modelpdf = self::$facture_model_pdf;
             $factureA->array_options['options_type'] = "S";
             $factureA->array_options['options_entrepot'] = $this->getData('id_entrepot');
@@ -2833,16 +2835,8 @@ class BS_SAV extends BimpObject
         if (!count($errors)) {
             global $user, $langs;
 
-            $id_cond_reglement = (int) $client->getData('cond_reglement');
-            $id_mode_reglement = (int) $client->getData('mode_reglement');
-
-            if (!$id_cond_reglement) {
-                $id_cond_reglement = $this->id_cond_reglement_def;
-            }
-
-            if (!$id_mode_reglement) {
-                $id_mode_reglement = $this->id_mode_reglement_def;
-            }
+            $id_cond_reglement = (int) BimpCore::getConf('sav_cond_reglement', $client->getData('cond_reglement'));
+            $id_mode_reglement = (int) BimpCore::getConf('sav_mode_reglement', $client->getData('mode_reglement'));
 
             BimpTools::loadDolClass('comm/propal', 'propal');
             $prop = new Propal($this->db->db);
@@ -4610,26 +4604,26 @@ class BS_SAV extends BimpObject
             } else {
                 $this->addNote('Devis envoyé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
                 $new_status = self::BS_SAV_ATT_CLIENT;
-                
-                if($propal->dol_object->cond_reglement_id == 20){
+
+                if ($propal->dol_object->cond_reglement_id == 20) {
                     $propal->dol_object->cond_reglement_id = 1;
                     global $user;
                     $propal->dol_object->update($user);
                 }
-                if($propal->dol_object->cond_reglement_id != $this->id_cond_reglement_def || $propal->dol_object->mode_reglement_id != $this->id_mode_reglement_def){
+                if ($propal->dol_object->cond_reglement_id != $this->id_cond_reglement_def || $propal->dol_object->mode_reglement_id != $this->id_mode_reglement_def) {
                     //on vérifie encours
                     $client = $this->getChildObject('client');
-                    
+
                     $encoursActu = $client->getAllEncoursForSiret(true)['total'];
                     $authorisation = $client->getData('outstanding_limit');
                     $besoin = $encoursActu + $propal->dol_object->total_ht;
-                    
-                    if($besoin > ($authorisation+1))
-                        $errors[] = 'Le client doit payer comptant (Carte bancaire, A réception de facture), son encours autorisé ('.price($authorisation).' €) est inférieur au besoin ('.price($besoin).' €)'; 
+
+                    if ($besoin > ($authorisation + 1))
+                        $errors[] = 'Le client doit payer comptant (Carte bancaire, A réception de facture), son encours autorisé (' . price($authorisation) . ' €) est inférieur au besoin (' . price($besoin) . ' €)';
                 }
-                
-                
-                if (!count($errors)){
+
+
+                if (!count($errors)) {
                     if ($propal->dol_object->valid($user) < 1) {
                         $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($propal->dol_object, array(), $langs), 'Echec de la validation du devis');
                     }
@@ -4938,10 +4932,10 @@ class BS_SAV extends BimpObject
 //                $errors[] = 'Le prêt "' . $pret->getData('ref') . '" n\'est pas restitué';
 //            }
 //        }
-        
+
         $propal = $this->getChildObject('propal');
         $impayee = $propal->dol_object->total_ttc - $data['paid'];
-        if($impayee > 1){
+        if ($impayee > 1) {
             //on vérifie encours
             $client = $this->getChildObject('client');
 
@@ -4949,11 +4943,10 @@ class BS_SAV extends BimpObject
             $authorisation = $client->getData('outstanding_limit');
             $besoin = $encoursActu + $impayee;
 
-            if($besoin > $authorisation)
-                $errors[] = 'Le client doit payer comptant, son encours autorisé ('.price($authorisation).' €) est inférieur au besoin ('.price($besoin).' €)'; 
-
+            if ($besoin > $authorisation)
+                $errors[] = 'Le client doit payer comptant, son encours autorisé (' . price($authorisation) . ' €) est inférieur au besoin (' . price($besoin) . ' €)';
         }
-        
+
 
         if ($payment_set) {
             if ($this->useCaisseForPayments) {
@@ -5140,14 +5133,24 @@ class BS_SAV extends BimpObject
                                 global $db;
                                 $facture = new Facture($db);
 
-                                if ((int) $propal->dol_object->cond_reglement_id) {
-                                    $cond_reglement = (int) $propal->dol_object->cond_reglement_id;
-                                } else {
-                                    $client = $this->getChildObject('client');
+                                $cond_reglement = (int) BimpCore::getConf('sav_cond_reglement', 0);
 
-                                    if (BimpObject::objectLoaded($client)) {
-                                        $cond_reglement = (int) $client->getData('cond_reglement');
+                                if (!$cond_reglement) {
+                                    if ((int) $propal->dol_object->cond_reglement_id) {
+                                        $cond_reglement = (int) $propal->dol_object->cond_reglement_id;
+                                    } else {
+                                        $client = $this->getChildObject('client');
+
+                                        if (BimpObject::objectLoaded($client)) {
+                                            $cond_reglement = (int) $client->getData('cond_reglement');
+                                        }
                                     }
+                                }
+
+                                $mode_reglement = (int) BimpTools::getArrayValueFromPath($data, 'mode_paiement', (int) $propal->dol_object->mode_reglement_id);
+
+                                if (!$mode_reglement) {
+                                    $mode_reglement = (int) BimpCore::getConf('sav_mode_reglement', 6);
                                 }
 
                                 $facture->date = dol_now();
@@ -5155,7 +5158,7 @@ class BS_SAV extends BimpObject
                                 $facture->socid = (int) $this->getData('id_client');
                                 $facture->fk_project = $propal->dol_object->fk_project;
                                 $facture->cond_reglement_id = $cond_reglement;
-                                $facture->mode_reglement_id = (isset($data['mode_paiement']) ? (int) $data['mode_paiement'] : $propal->dol_object->mode_reglement_id);
+                                $facture->mode_reglement_id = $mode_reglement;
                                 $facture->availability_id = $propal->dol_object->availability_id;
                                 $facture->demand_reason_id = $propal->dol_object->demand_reason_id;
                                 $facture->date_livraison = $propal->dol_object->date_livraison;
@@ -5614,10 +5617,10 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
         $success_callback = "setTimeout(function(){checkCode();}, 2000);";
 //        if ($code != '') {
-            if ($idMax == 0)
-                $success_callback .= 'idMaxMesg = ' . $newIdMax . ';';
-            elseif ($idMax < $newIdMax)
-                $success_callback = "text = '" . urlencode($code) . "'; alert(text); const notification = new Notification('Code Apple', { body: text });";
+        if ($idMax == 0)
+            $success_callback .= 'idMaxMesg = ' . $newIdMax . ';';
+        elseif ($idMax < $newIdMax)
+            $success_callback = "text = '" . urlencode($code) . "'; alert(text); const notification = new Notification('Code Apple', { body: text });";
 //        }
 
         return array(
@@ -6261,7 +6264,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     }
                 }
             }
-            
+
             if (BimpObject::objectLoaded($client)) {
                 $client->setActivity('Création ' . $this->getLabel('of_the') . ' {{SAV:' . $this->id . '}}');
             }
@@ -6515,7 +6518,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
         $rows = $bdb->executeS($sql, 'array');
 
-        if (is_array($rows)) {            
+        if (is_array($rows)) {
             foreach ($rows as $r) {
                 $to = '';
 

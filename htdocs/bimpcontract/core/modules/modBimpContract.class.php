@@ -141,6 +141,7 @@ class modBimpContract extends DolibarrModules {
         $extrafields->addExtraField('end_date_reel', 'Date réelle de fin', 'date', 104, 100, 'contrat');
         $extrafields->addExtraField('anticipate_close_note', 'Note de cloture anticipée', 'varchar', 104, 255, 'contrat');
         $extrafields->addExtraField('show_fact_line_in_pdf', 'Afficher ligne facturation PDF', 'boolean', 0, 0, 'contrat', 0, 0, 1);
+        $extrafields->addExtraField('condregl', 'Condition de règlement', 'int', 104, 11, 'contrat');
         //$extrafields->addExtraField('nb_materiel', 'Nombre de machines couvertes', 'int', 105, 100, 'contratdet');
         //$extrafields->addExtraField('serials', 'Numéros de série', 'text', 106, 100, 'contratdet');
         //$extrafields->update('service_content', 'Services Compris', 'chkbxlst', null, 'product', 0, 0, 103, 'a:1:{s:7:"options";a:1:{s:44:"bcontract_productservices:titre:id::use_in_contract=1";N;}}', 1, '', 1);

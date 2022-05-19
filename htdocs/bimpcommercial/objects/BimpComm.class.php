@@ -768,7 +768,7 @@ class BimpComm extends BimpDolObject
 
         if ($secteur) {
             $secteurs = BimpCache::getSecteursData();
-            
+
             if (isset($secteurs[$secteur]['email_from'])) {
                 return $secteurs[$secteur]['email_from'];
             }
@@ -3124,6 +3124,11 @@ class BimpComm extends BimpDolObject
         $id_caisse = 0;
 
         $type_paiement = $id_mode_paiement;
+        $id_mode_paiement = (int) $this->db->getValue('c_paiement', 'id', '`code` = \'' . $id_mode_paiement . '\'');
+
+        if (!$id_mode_paiement) {
+            $id_mode_paiement = (int) $this->getData('fk_mode_reglement');
+        }
 
         if (!$this->useCaisseForPayments) {
             $use_caisse = false;
@@ -3195,7 +3200,7 @@ class BimpComm extends BimpDolObject
             $factureA->date = ($date_paiement) ? strtotime($date_paiement) : dol_now();
             $factureA->socid = $id_client;
             $factureA->cond_reglement_id = 1;
-            $factureA->mode_reglement_id = $this->getData('fk_mode_reglement');
+            $factureA->mode_reglement_id = $id_mode_paiement;
             $factureA->ref_client = $this->getData('ref_client');
             $factureA->modelpdf = 'bimpfact';
             $factureA->fk_account = $id_bank_account;
@@ -3226,7 +3231,6 @@ class BimpComm extends BimpDolObject
                     $payement->amounts = array($factureA->id => $amount);
                     $payement->ref = $refPaiement;
                     $payement->datepaye = ($date_paiement ? BimpTools::getDateForDolDate($date_paiement) : dol_now());
-                    $id_mode_paiement = $this->db->getValue('c_paiement', 'id', '`code` = \'' . $id_mode_paiement . '\'');
                     $payement->paiementid = (int) $id_mode_paiement;
                     $payement->num_paiement = $num_paiement;
                     if ($payement->create($user) <= 0) {

@@ -221,6 +221,7 @@ params:
         
     use_cache_for_extrafields: 
         label: Utiliser le cache pour le extrafields Dolibarr
+        cat: cache
         type: bool
         def: 0
         warning: Ne pas activer pour le moment, la fonctionnalité semble ne pas fonctionner correctement

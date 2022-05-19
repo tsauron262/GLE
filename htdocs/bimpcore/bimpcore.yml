@@ -87,8 +87,7 @@ params:
     public_base_url: 
         label: Base URL Publique
         info: Base de l'URL pour l'accès public à certaines pages de l'ERP.
-        warning: Différent de l'URL de l'espace client (cf bimpinterfaceclient) 
-        
+        warning: Différent de l'URL de l'espace client (cf bimpinterfaceclient)
     date_archive: 
         label: Date archive
         def: ''
@@ -164,43 +163,35 @@ params:
         cat: tiers
         type: bool
         def: 0
-        
     societe_default_outstanding_limit: 
         label: Limite par défaut des encours clients
         cat: tiers
         def: 4000
-        
     siren_required: 
         label: N° SIREN obligatoire pour les entreprises
         cat: tiers
         type: bool
         def: 0
-        
     societe_id_default_cond_reglement: 
         label: Conditions de réglement par défaut
         cat: tiers
         def: 0
-        
     societe_id_default_mode_reglement: 
         label: Mode de réglement par défaut
         cat: tiers
         def: 0
-        
     particulier_id_default_cond_reglement: 
         label: Conditions de réglement par défaut pour les particuliers
         cat: tiers
         def: 0
-        
     particulier_id_default_mode_reglement: 
         label: Mode de réglement par défaut pour les particuliers
         cat: tiers
         def: 0
-        
     societe_id_default_cond_reglement_admin: 
         label: Conditions de réglement par défaut pour les administrations
         cat: tiers
         def: 0
-        
     societe_id_default_mode_reglement_admin: 
         label: Mode de réglement par défaut pour les administrations
         cat: tiers
@@ -212,20 +203,17 @@ params:
         cat: cache
         info: 'La classe doit étendre "BimpCacheServer" et être présente dans "bimpcore/classes"'
         help: laisser vide pour déactiver le cache server
-        
     bimpcache_check_memory_enabled: 
         label: Vérification de la mémoire vive activée
         cat: cache
         type: bool
         def: 1
-        
     use_cache_for_extrafields: 
         label: Utiliser le cache pour le extrafields Dolibarr
         cat: cache
         type: bool
         def: 0
         warning: Ne pas activer pour le moment, la fonctionnalité semble ne pas fonctionner correctement
-        
     use_cache_for_cards: 
         label: Mettre les cards (mini-fiche) en cache pour les BimpObjects
         cat: cache

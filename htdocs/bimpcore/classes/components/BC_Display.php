@@ -1072,7 +1072,7 @@ class BC_Display extends BimpComponent
                                 }
 
                                 if (!$this->no_html) {
-                                    if ($this->params['card'] && !BimpCore::getConf('bimpcore_mode_eco', 0)) {
+                                    if ($this->params['card'] && !BimpCore::getConf('mode_eco', 0)) {
                                         global $no_bimp_object_link_cards;
                                         $no_bimp_object_link_cards = true;
 
@@ -1132,7 +1132,7 @@ class BC_Display extends BimpComponent
                                 }
 
                                 if (!$this->no_html) {
-                                    if ($this->params['card'] && !BimpCore::getConf('bimpcore_mode_eco', 0)) {
+                                    if ($this->params['card'] && !BimpCore::getConf('mode_eco', 0)) {
                                         $card_content = '';
                                         if (is_a($instance, 'BimpObject')) {
                                             $card_content = BimpCache::getBimpObjectCardHtml($instance, $this->params['card'], false);

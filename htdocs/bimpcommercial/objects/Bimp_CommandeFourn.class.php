@@ -1470,7 +1470,7 @@ class Bimp_CommandeFourn extends BimpComm
                 $success2 = '';
                 $result2 = $this->setObjectAction('approve', 0, array(), $success2);
                 if (count($result2['errors'])) {
-                    if((int) BimpCore::getConf('bimpcore_use_db_transactions', 0)){
+                    if((int) BimpCore::getConf('use_db_transactions', 0)){
                         $result['errors'][] = 'Echec de l\'approbation ' . $this->getLabel('of_the');
                         $result['errors'] = BimpTools::merge_array($result['errors'], $result2['errors']);  
                     }

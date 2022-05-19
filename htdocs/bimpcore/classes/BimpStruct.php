@@ -457,10 +457,11 @@ class BimpStruct
     public static function renderNavTabs(BimpConfig $config, $path, &$parent_component = null)
     {
         $tabs = array();
-
+        
         if ($config->isDefined($path . '/tabs')) {
             $tabs_id = $config->get($path . '/tabs_id', 'maintabs');
             $nav_tabs = $config->getParams($path . '/tabs');
+            $path .= '/tabs';
         } else {
             $nav_tabs = $config->getParams($path);
             $tabs_id = 'maintabs';

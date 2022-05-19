@@ -1200,7 +1200,7 @@ class Equipment extends BimpObject
             'warning'           => ''
         );
 
-        $use_gsx_v2 = (int) BimpCore::getConf('use_gsx_v2');
+        $use_gsx_v2 = (int) BimpCore::getConf('use_gsx_v2', 1, 'bimpapple');
 
         if (!$use_gsx_v2) { // V2 => gsxController::gsxGetEquipmentInfos(). 
             $gsx = new GSX($isIphone);
@@ -1536,7 +1536,7 @@ class Equipment extends BimpObject
             'imei2'  => '',
             'meid'   => ''
         );
-        if ((int) BimpCore::getConf('use_gsx_v2', 0)) {
+        if ((int) BimpCore::getConf('use_gsx_v2', 1, 'bimpapple')) {
             if (preg_match('/^S(.+)$/', $serial, $matches)) {
                 $serial = $matches[1];
             }

@@ -669,7 +669,7 @@ class Bimp_Client extends Bimp_Societe
         } elseif ($this->isLoaded()) {
             $where .= ' AND a.fk_soc = ' . (int) $this->id;
         } else {
-            $from_date_lim_reglement = BimpCore::getConf('relance_paiements_globale_date_lim', '');
+            $from_date_lim_reglement = BimpCore::getConf('relance_paiements_globale_date_lim', '', 'bimpcommercial');
 
             if ($from_date_lim_reglement) {
                 $where .= ' AND a.date_lim_reglement > \'' . $from_date_lim_reglement . '\'';
@@ -680,7 +680,7 @@ class Bimp_Client extends Bimp_Societe
         $where .= ' AND a.paiement_status != 5';
 
         if (!$this->isLoaded()) {
-            $excluded_modes_reglement = BimpCore::getConf('relance_paiements_globale_excluded_modes_reglement', '');
+            $excluded_modes_reglement = BimpCore::getConf('relance_paiements_globale_excluded_modes_reglement', '', 'bimpcommercial');
 
             if ($excluded_modes_reglement) {
                 $where .= ' AND (a.nb_relance > 0 OR a.fk_mode_reglement NOT IN (' . $excluded_modes_reglement . '))';
@@ -731,7 +731,7 @@ class Bimp_Client extends Bimp_Societe
             require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/RelancePaiementPDF.php';
             BimpObject::loadClass('bimpcommercial', 'BimpRelanceClientsLine');
             $relance_delay = BimpCore::getConf('relance_paiements_facture_delay_days', 15);
-            $excluded_modes_reglement = explode(',', BimpCore::getConf('relance_paiements_globale_excluded_modes_reglement', ''));
+            $excluded_modes_reglement = explode(',', BimpCore::getConf('relance_paiements_globale_excluded_modes_reglement', '', 'bimpcommercial'));
 
             foreach ($rows as $r) {
                 if ($display_mode === 'clients_list') {
@@ -897,7 +897,7 @@ class Bimp_Client extends Bimp_Societe
 
     public function getDefaultRelancesDisplayMode()
     {
-        $entrepots = BimpCore::getConf('bimpcore_relances_clients_entrepots_speciaux', '');
+        $entrepots = BimpCore::getConf('relances_clients_entrepots_speciaux', '', 'bimpcommercial');
 
         if ($entrepots) {
             $entrepots = explode(',', $entrepots);
@@ -1092,7 +1092,7 @@ class Bimp_Client extends Bimp_Societe
 
     public function getRelancesDisplayModesArray()
     {
-        $entrepots = BimpCore::getConf('bimpcore_relances_clients_entrepots_speciaux', '');
+        $entrepots = BimpCore::getConf('relances_clients_entrepots_speciaux', '', 'bimpcommercial');
 
         if ($entrepots) {
             $options = array(
@@ -2016,7 +2016,7 @@ class Bimp_Client extends Bimp_Societe
         } else {
             $rows = array();
             $now = date('Y-m-d');
-            $excluded_modes_reglement = explode(',', BimpCore::getConf('relance_paiements_globale_excluded_modes_reglement', ''));
+            $excluded_modes_reglement = explode(',', BimpCore::getConf('relance_paiements_globale_excluded_modes_reglement', '', 'bimpcommercial'));
             foreach ($factures as $fac) {
                 $fac->checkIsPaid();
                 $rtp = (float) $fac->getRemainToPay(true);
@@ -3244,7 +3244,7 @@ class Bimp_Client extends Bimp_Societe
 
         foreach ($clients as $c) {
             if ($c->field_exists($field)) {
-                if($c->getInitData($field) != $value)
+                if ($c->getInitData($field) != $value)
                     $errors = BimpTools::merge_array($errors, $c->updateField($field, $value));
             }
         }

@@ -291,7 +291,7 @@ class Bimp_Log extends BimpObject
         return $html;
     }
 
-    public function renderBeforeListContent()
+    public static function renderBeforeListContent()
     {
         $html = '';
         $panel1 = '';
@@ -312,11 +312,11 @@ class Bimp_Log extends BimpObject
                     'a.level' => 4
                         ), 1, 0) . ') as nb_urgents';
 
-        $sql .= BimpTools::getSqlFrom($this->getTable());
+        $sql .= BimpTools::getSqlFrom('bimpcore_log');
         $sql .= BimpTools::getSqlWhere(array('a.processed' => 0, 'a.ignored' => 0, 'a.send_to' => ''));
         $sql .= ' GROUP BY a.type';
 
-        $rows = $this->db->executeS($sql, 'array');
+        $rows = self::getBdb()->executeS($sql, 'array');
 //        
         if (!empty($rows)) {
             $content = '<table class="bimp_list_table">';
@@ -386,11 +386,11 @@ class Bimp_Log extends BimpObject
                     'a.level' => 4
                         ), 1, 0) . ') as nb_urgents';
 
-        $sql .= BimpTools::getSqlFrom($this->getTable());
+        $sql .= BimpTools::getSqlFrom('bimpcore_log');
         $sql .= BimpTools::getSqlWhere(array('a.processed' => 0, 'a.ignored' => 0, 'a.send_to' => array('operator' => '!=', 'value' => '')));
         $sql .= ' GROUP BY a.send_to';
 
-        $rows = $this->db->executeS($sql, 'array');
+        $rows = self::getBdb()->executeS($sql, 'array');
 //        
         if (!empty($rows)) {
             $content = '<table class="bimp_list_table">';
@@ -655,7 +655,7 @@ class Bimp_Log extends BimpObject
 
         if (!empty($_REQUEST)) {
             $req_params = implode('&', $_REQUEST);
-            if(is_array($req_params)) {
+            if (is_array($req_params)) {
                 foreach ($req_params as $param) {
                     if (preg_match('/^(.+)=(.+)$/', $param, $matches)) {
                         $params[$matches[1]] = $matches[2];
@@ -670,7 +670,7 @@ class Bimp_Log extends BimpObject
 
         if (!count($errors)) {
             if ((int) $this->getData('level') === self::BIMP_LOG_URGENT) {
-                if ((int) BimpCore::getConf('bimpcore_logs_urgents_send_email', 0)) {
+                if ((int) BimpCore::getConf('bimp_log_urgent_send_email')) {
                     $message = 'Une nouvelle entrée dans les logs à traiter d\'urgence' . "\n\n";
                     $message .= DOL_URL_ROOT . '/bimpcore/index.php?fc=log&id=' . $this->id . "\n\n";
                     $message .= 'Message: ' . $this->getData('msg') . "\n";

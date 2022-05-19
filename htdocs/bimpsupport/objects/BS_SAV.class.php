@@ -1500,7 +1500,6 @@ class BS_SAV extends BimpObject
 
     public function getPublicLink()
     {
-//        return BimpCore::getConf('interface_client_base_url', '');
         $id_user_client = (int) $this->getData('id_user_client');
         if (!$id_user_client) {
             $id_client = (int) $this->getData('id_client');
@@ -1517,7 +1516,7 @@ class BS_SAV extends BimpObject
                 return $url;
             }
         }
-        return BimpCore::getConf('interface_client_base_url', '') . "?a=ss&serial=" . urlencode($this->getChildObject("equipment")->getData("serial")) . "&id_sav=" . $this->id . "&user_name=" . urlencode(str_replace(" ", "", substr($this->getChildObject("client")->dol_object->name, 0, 3))) . "#suivi-sav";
+        return BimpCore::getConf('base_url', '', 'bimpinterfaceclient') . "?a=ss&serial=" . urlencode($this->getChildObject("equipment")->getData("serial")) . "&id_sav=" . $this->id . "&user_name=" . urlencode(str_replace(" ", "", substr($this->getChildObject("client")->dol_object->name, 0, 3))) . "#suivi-sav";
 //        return DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?serial=" . $this->getChildObject("equipment")->getData("serial") . "&id_sav=" . $this->id . "&user_name=" . substr($this->getChildObject("client")->dol_object->name, 0, 3);
 //        return "https://www.bimp.fr/nos-services/?serial=" . urlencode($this->getChildObject("equipment")->getData("serial")) . "&id_sav=" . $this->id . "&user_name=" . urlencode(str_replace(" ", "", substr($this->getChildObject("client")->dol_object->name, 0, 3))) . "#suivi-sav";
     }
@@ -2269,7 +2268,7 @@ class BS_SAV extends BimpObject
 
         $html = '';
 
-        if (BimpCore::getConf('use_gsx_v2')) {
+        if (BimpCore::getConf('use_gsx_v2', 1, 'bimpapple')) {
             $issue = BimpObject::getInstance('bimpsupport', 'BS_Issue');
             $list = new BC_ListTable($issue, 'default', 1, $this->id);
             if ($suffixe) {
@@ -2310,7 +2309,7 @@ class BS_SAV extends BimpObject
 
     public function renderLoadPartsButton($serial = null, $suffixe = "")
     {
-        if ((int) BimpCore::getConf('use_gsx_v2')) {
+        if ((int) BimpCore::getConf('use_gsx_v2', 1, 'bimpapple')) {
             return '';
         }
 
@@ -2742,7 +2741,7 @@ class BS_SAV extends BimpObject
                         if ($this->useCaisseForPayments) {
                             $id_account = (int) $caisse->getData('id_account');
                         } else {
-                            $id_account = (int) BimpCore::getConf('bimpcaisse_id_default_account');
+                            $id_account = (int) BimpCore::getConf('id_default_bank_account', 0);
                         }
 
                         // Ajout du paiement au compte bancaire: 
@@ -2848,7 +2847,7 @@ class BS_SAV extends BimpObject
             $prop->date = dol_now();
             $prop->cond_reglement_id = $id_cond_reglement;
             $prop->mode_reglement_id = $id_mode_reglement;
-            $prop->fk_account = BimpCore::getConf('bimpcaisse_id_default_account');
+            $prop->fk_account = BimpCore::getConf('id_default_bank_account', 0);
 
             if ($prop->create($user) <= 0) {
                 $errors[] = 'Echec de la création de la propale';
@@ -4348,7 +4347,7 @@ class BS_SAV extends BimpObject
 //            return array('Le devis est validé. Modification des lignes du devis impossible');
 //        }
 
-        if ((int) BimpCore::getConf('use_gsx_v2')) {
+        if ((int) BimpCore::getConf('use_gsx_v2', 1, 'bimpapple')) {
             if ($this->isLoaded()) {
                 foreach ($this->getChildrenObjects('apple_parts') as $part) {
                     $part_errors = $part->onSavPartsChange();
@@ -5129,7 +5128,7 @@ class BS_SAV extends BimpObject
                                 $facture->origin = $propal->dol_object->element;
                                 $facture->origin_id = $propal->id;
 
-                                $facture->fk_account = ((int) $propal->dol_object->fk_account ? $propal->dol_object->fk_account : BimpCore::getConf('bimpcaisse_id_default_account', 0));
+                                $facture->fk_account = ((int) $propal->dol_object->fk_account ? $propal->dol_object->fk_account : BimpCore::getConf('id_default_bank_account', 0));
 
                                 // get extrafields from original line
                                 $propal->dol_object->fetch_optionals($propal->id);
@@ -5225,7 +5224,7 @@ class BS_SAV extends BimpObject
                                                         if ($this->useCaisseForPayments) {
                                                             $id_account = (int) $caisse->getData('id_account');
                                                         } else {
-                                                            $id_account = (int) BimpCore::getConf('bimpcaisse_id_default_account');
+                                                            $id_account = (int) BimpCore::getConf('id_default_bank_account', 0);
                                                         }
                                                         if ($payement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_account, '', '') < 0) {
                                                             $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Echec de l\'ajout du paiement n°' . $payement->id . ' au compte bancaire d\'ID ' . $id_account);
@@ -5644,7 +5643,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             if ($this->useCaisseForPayments && BimpObject::objectLoaded($caisse)) {
                 $id_account = (int) $caisse->getData('id_account');
             } else {
-                $id_account = (int) BimpCore::getConf('bimpcaisse_id_default_account');
+                $id_account = (int) BimpCore::getConf('id_default_bank_account', 0);
             }
 
             if (!$id_account) {
@@ -6444,7 +6443,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                                 $msg .= '<b>Référence: </b>' . $r['ref'] . "\n\n";
                             }
 
-                            $msg .= 'Si vous avez toujours besoin d’une assistance, n’hésitez pas à reprendre un rendez vous sur votre <a href="' . BimpCore::getConf('interface_client_base_url', '') . '">espace personnel</a> de notre site internet « www.bimp.fr »' . "\n\n";
+                            $msg .= 'Si vous avez toujours besoin d’une assistance, n’hésitez pas à reprendre un rendez vous sur votre <a href="' . BimpCore::getConf('base_url', '', 'bimpinterfaceclient') . '">espace personnel</a> de notre site internet « www.bimp.fr »' . "\n\n";
                             $msg .= 'L’équipe technique LDLC';
 
 //                            mailSyn2($subject, $to, '', $msg);

@@ -7,7 +7,7 @@ class savFormController extends BimpPublicController
 
     public function renderHtml()
     {
-        if (!(int) BimpCore::getConf('sav_public_reservations', 0)) {
+        if (!(int) BimpCore::getConf('sav_public_reservations', 0, 'bimpsupport')) {
             return BimpRender::renderAlerts('Les demandes de réparations en ligne ne sont actuellement pas disponibles');
         }
 
@@ -59,7 +59,7 @@ class savFormController extends BimpPublicController
                 $fetch_errors = array();
                 $result = GSX_Reservation::fetchReservation(1442050, $shipto, $res_id, $fetch_errors);
 
-                if ((int) BimpCore::getConf('use_gsx_v2_for_reservations', 0)) {
+                if ((int) BimpCore::getConf('use_gsx_v2_for_reservations', null, 'bimpapple')) {
                     if (isset($result['errors'])) {
                         foreach ($result['errors'] as $error) {
                             $fetch_errors[] = $error['message'] . ' (Code: ' . $error['code'] . ')';
@@ -443,7 +443,7 @@ class savFormController extends BimpPublicController
         }
 
         if (!is_null($reservation)) {
-            if ((int) BimpCore::getConf('use_gsx_v2_for_reservations', 0)) {
+            if ((int) BimpCore::getConf('use_gsx_v2_for_reservations', null, 'bimpapple')) {
                 if (isset($reservation['customer']['firstName']) && $reservation['customer']['firstName']) {
                     $firstname = $reservation['customer']['firstName'];
                 }
@@ -1014,7 +1014,7 @@ class savFormController extends BimpPublicController
         $base_url = '';
 
         if ($reservationId || BimpObject::objectLoaded($sav)) {
-            $base_url = BimpCore::getConf('interface_client_base_url', '');
+            $base_url = BimpCore::getConf('base_url', '', 'bimpinterfaceclient');
 
             if ($base_url) {
                 $cancel_url = $base_url . '?fc=savForm&cancel_rdv=1';
@@ -1239,7 +1239,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
 
             $slots = array();
             $timeZone = 'Europe/Paris';
-            $use_gsx_v2 = (int) BimpCore::getConf('use_gsx_v2_for_reservations', 0);
+            $use_gsx_v2 = (int) BimpCore::getConf('use_gsx_v2_for_reservations', null, 'bimpapple');
             $correlationId = '';
 
             if (isset($centres[$code_centre])) {
@@ -1394,7 +1394,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
         $isImei = false;
         $isCompany = false;
 
-        $use_gsx_v2 = (int) BimpCore::getConf('use_gsx_v2_for_reservations', 0);
+        $use_gsx_v2 = (int) BimpCore::getConf('use_gsx_v2_for_reservations', null, 'bimpapple');
 
         BimpObject::loadClass('bimpequipment', 'Equipment');
         BimpObject::loadClass('bimpsupport', 'BS_SAV');
@@ -2344,7 +2344,7 @@ Celui-ci sera 29 euros si votre matériel concerne un IPhone, iPad ou un produit
 
                             $result = GSX_Reservation::cancelReservation(1442050, $centre['ship_to'], $reservation_id, $errors);
 
-                            if ((int) BimpCore::getConf('use_gsx_v2_for_reservations', 0)) {
+                            if ((int) BimpCore::getConf('use_gsx_v2_for_reservations', null, 'bimpapple')) {
                                 if (isset($result['errors']) && !empty($result['errors'])) {
                                     $request_errors = array();
                                     foreach ($result['errors'] as $error) {

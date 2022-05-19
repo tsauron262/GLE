@@ -331,7 +331,7 @@ Abstract class BimpModelPDF
             $html .= '<span style="font-style: italic">' . $this->langs->transnoentities('PaymentByTransferOnThisBankAccount') . ':</span><br/><br/>';
         }
 
-        $date_new_account = BimpCore::getConf('new_bank_account_date', '');
+        $date_new_account = BimpCore::getConf('new_bank_account_date', '', 'bimpcommercial');
 
         if ($date_new_account) {
             $html .= '<span style="color: #A00000; font-weight: bold">';
@@ -528,7 +528,7 @@ Abstract class BimpModelPDF
 
     public static function cleanHtml($html)
     {
-        if ((int) BimpCore::getConf('bimpcore_pdf_use_html_purifier', 0)) {
+        if ((int) BimpCore::getConf('pdf_use_html_purifier')) {
 //            echo 'AVANT: <br/>'; 
 //            echo htmlentities($html);
             

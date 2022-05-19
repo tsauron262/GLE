@@ -283,7 +283,7 @@ class Bimp_PaiementFourn extends Bimp_Paiement
         if ($id_account) {
             BimpTools::loadDolClass('compta/bank', 'account');
             $account = new Account($db);
-            $account->fetch((int) BimpCore::getConf('bimpcaisse_id_default_account'));
+            $account->fetch((int) BimpCore::getConf('id_default_bank_account', 0));
 
             if (!BimpObject::objectLoaded($account)) {
                 $errors[] = 'Compte bancaire invalide';

@@ -211,7 +211,7 @@ class BimpCollection
         }
 
         // Traitement des sous-enfants affichés dans les cards demandées: 
-        if (!(int) BimpCore::getConf('bimpcore_mode_eco', 0)) {
+        if (!(int) BimpCore::getConf('mode_eco', 0)) {
             $cards = array();
             if ($needs['card']) {
                 $cards[] = $needs['card'];

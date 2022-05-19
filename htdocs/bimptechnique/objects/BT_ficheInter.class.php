@@ -223,7 +223,7 @@ class BT_ficheInter extends BimpDolObject
                 }
 
                 if (in_array($field, array('fk_contrat', 'commandes'))) {
-                    if (in_array($this->getData('fk_soc'), explode(',', BimpCore::getConf('bimptechnique_id_societe_auto_terminer', '')))) {
+                    if (in_array($this->getData('fk_soc'), explode(',', BimpCore::getConf('id_societe_auto_terminer', '', 'bimptechnique')))) {
                         return 0;
                     }
                 }
@@ -1076,12 +1076,12 @@ class BT_ficheInter extends BimpDolObject
     {
         $services = [];
         BimpTools::loadDolClass("commande");
-        $codes = json_decode(BimpCore::getConf("bimptechnique_ref_deplacement", ''));
+//        $codes = json_decode(BimpCore::getConf("bimptechnique_ref_deplacement", '')); // Non utilisé apparemment (var de conf supprimée de la base)
 
         $commande = New Commande($this->db->db);
         $product = $this->getInstance('bimpcore', 'Bimp_Product');
         $allCommandes = ($this->getData('commandes')) ? BimpTools::json_decode_array($this->getData('commandes')) : [];
-        $array = explode(',', BimpCore::getConf('bimptechnique_ref_temps_passe'));
+        $array = explode(',', BimpCore::getConf('ref_temps_passe', '', 'bimptechnique'));
         $tp = [];
         foreach ($array as $code) {
             $tp[$code] = "Temps passé de niveau " . substr($code, -1, 1);
@@ -1157,7 +1157,7 @@ class BT_ficheInter extends BimpDolObject
     {
         $children = $this->getChildrenList('inters', ["type" => $type]);
 
-        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', ($type == 3) ? BimpCore::getConf('bimptechnique_id_dep') : BimpCore::getConf('bimptechnique_id_serv19'));
+        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', ($type == 3) ? BimpCore::getConf('id_dep', 0, 'bimptechnique') : BimpCore::getConf('id_serv19', 0, 'bimptechnique'));
         $services = [];
         $index = 1;
         if (count($children)) {
@@ -1220,7 +1220,7 @@ class BT_ficheInter extends BimpDolObject
         unset($types[0]);
 
         global $user;
-        $interne = explode(",", BimpCore::getConf("bimptechnique_id_societe_auto_terminer", ''));
+        $interne = explode(",", BimpCore::getConf('id_societe_auto_terminer', '', 'bimptechnique'));
 
         if (in_array($this->getData('fk_soc'), $interne) && !$user->admin) {
             unset($types[1]);
@@ -1276,7 +1276,7 @@ class BT_ficheInter extends BimpDolObject
     {
         if ((int) $this->getData('new_fi')) {
             $renta = [];
-            $coup_technicien = BimpCore::getConf("bimptechnique_coup_horaire_technicien");
+            $coup_technicien = BimpCore::getConf('cout_horaire_technicien', null, 'bimptechnique');
 
             $commandes = $this->getData('commandes');
             if (is_array($commandes) && !empty($commandes)) {
@@ -1896,7 +1896,7 @@ class BT_ficheInter extends BimpDolObject
                 $actioncomm->label = $fi->getRef();
                 $actioncomm->note = $fi->getData('description');
                 $actioncomm->punctual = 1;
-                $actioncomm->userownerid = BimpCore::getConf('bimptechnique_default_user_actionComm', 0);
+                $actioncomm->userownerid = BimpCore::getConf('default_id_user_actioncomm', null, 'bimptechnique');
                 $actioncomm->elementtype = 'fichinter';
                 $actioncomm->type_id = (int) BimpTools::getArrayValueFromPath($data, 'type_planning', 0);
                 $actioncomm->datep = $data['le'] . " " . $data['de'];
@@ -2010,7 +2010,7 @@ class BT_ficheInter extends BimpDolObject
                     }
 
                     // Fermeture auto: 
-                    $auto_terminer = in_array((int) $this->getData('fk_soc'), explode(',', BimpCore::getConf('bimptechnique_id_societe_auto_terminer', ''))) ? true : false;
+                    $auto_terminer = in_array((int) $this->getData('fk_soc'), explode(',', BimpCore::getConf('id_societe_auto_terminer', '', 'bimptechnique'))) ? true : false;
 
                     if ($auto_terminer) {
                         $this->updateField('fk_statut', self::STATUT_TERMINER);
@@ -2118,7 +2118,7 @@ class BT_ficheInter extends BimpDolObject
                         }
                     }
                     if (!count($this->getData('commandes')) && !$this->getData('fk_contrat')) {
-                        if (!in_array($this->getData('fk_soc'), explode(',', BimpCore::getConf('bimptechnique_id_societe_auto_terminer')))) {
+                        if (!in_array($this->getData('fk_soc'), explode(',', BimpCore::getConf('id_societe_auto_terminer', '', 'bimptechnique')))) {
                             $task = BimpCache::getBimpObjectInstance("bimptask", "BIMP_Task");
                             $data = array(
                                 "dst"        => "dispatch@bimp.fr",
@@ -2600,7 +2600,7 @@ class BT_ficheInter extends BimpDolObject
                                         'id_obj' => (int) $new_facture->id)
                             )
             );
-            $service_de_reference = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', BimpCore::getConf('bimptechnique_id_serv19'));
+            $service_de_reference = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', BimpCore::getConf('id_serv19', 0, 'bimptechnique'));
             if ($service_de_reference->isLoaded()) {
                 $new_factureLine->pu_ht = $service_de_reference->getData('price');
 
@@ -2618,7 +2618,7 @@ class BT_ficheInter extends BimpDolObject
                 $new_factureLine->qty = $qty;
                 $new_factureLine->id_product = $service_de_reference->id;
                 $new_factureLine->tva_tx = 20;
-                $new_factureLine->pa_ht = $qty * BimpCore::getConf('bimptechnique_coup_horaire_technicien');
+                $new_factureLine->pa_ht = $qty * BimpCore::getConf('cout_horaire_technicien', null, 'bimptechnique');
                 $errors = BimpTools::merge_array($errors, $new_factureLine->create($warnings, true));
             }
 

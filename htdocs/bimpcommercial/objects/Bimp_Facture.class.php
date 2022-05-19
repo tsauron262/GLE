@@ -901,7 +901,7 @@ class Bimp_Facture extends BimpComm
 
             if ($mode_relance !== 'indiv') {
                 if (!(int) $this->getData('nb_relance')) { // Si au moins une relance a déjà été effectuée, on ne tient pas compte du mode de règlement. 
-                    $excluded_modes_reglement = BimpCore::getConf('relance_paiements_globale_excluded_modes_reglement', '');
+                    $excluded_modes_reglement = BimpCore::getConf('relance_paiements_globale_excluded_modes_reglement', '', 'bimpcommercial');
                     if ($excluded_modes_reglement && in_array((int) $this->getData('fk_mode_reglement'), explode(',', $excluded_modes_reglement))) {
                         $errors[] = 'Le mode de paiement de cette facture ne permet pas sa relance';
                         return 0;
@@ -2574,7 +2574,7 @@ class Bimp_Facture extends BimpComm
     public function displayPDFButton($display_generate = true, $with_ref = true, $btn_label = '')
     {
         global $user;
-        if ($this->getData('fk_statut') > 0 && !in_array($user->login, array('admin', 't.sauron', 'f.martinez', 'a.delauzun')) && BimpCore::getConf('BLOQUE_GENERATE_FACT_PDF', 0)) {
+        if ($this->getData('fk_statut') > 0 && !in_array($user->login, array('admin', 't.sauron', 'f.martinez', 'a.delauzun')) && BimpCore::getConf('BLOQUE_GENERATE_FACT_PDF', 0, 'bimpcommercial')) {
             $ref = dol_sanitizeFileName($this->getRef());
             if ($this->getFileUrl($ref . '.pdf') != '')
                 $display_generate = false;
@@ -3449,7 +3449,7 @@ class Bimp_Facture extends BimpComm
     {
         if (!$this->isLoaded()) {
             $html = '';
-            if (BimpCore::getConf('force_use_commande')) {
+            if (BimpCore::getConf('commande_required_for_factures', null, 'bimpcommercial')) {
                 $html = '<p style="font-size: 16px">';
                 $html .= '<span style="font-size: 24px">';
                 $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
@@ -3544,7 +3544,7 @@ class Bimp_Facture extends BimpComm
             $total_marge = $total_pv - $total_pa;
             $tx = 0;
 
-            if (BimpCore::getConf('bimpcomm_tx_marque')) {
+            if ((int) BimpCore::getConf('use_tx_marque', 1, 'bimpcommercial')) {
                 if ($total_pv) {
                     $tx = ($total_marge / $total_pv) * 100;
                 }
@@ -4497,7 +4497,7 @@ class Bimp_Facture extends BimpComm
 
             $remain_to_pay = round($remain_to_pay, 2);
 
-            $max_rtp = (float) BimpCore::getConf('bimpcommercial_max_rtp_for_classify_paid', 0);
+            $max_rtp = (float) BimpCore::getConf('max_rtp_for_classify_paid', null, 'bimpcommercial');
             if (!$remain_to_pay || ($max_rtp > 0 && $remain_to_pay > 0 && $remain_to_pay < $max_rtp)) {
                 $paiement_status = 2; // Entièrement payé. 
                 if (!$paiement_status_only && !$paye) {
@@ -5373,7 +5373,7 @@ class Bimp_Facture extends BimpComm
         $this->addNote('Relance désactivée pour un mois');
 
         if (!count($errors)) {
-            $to = BimpCore::getConf('email_for_relances_deactivated_notification', '');
+            $to = BimpCore::getConf('email_for_relances_deactivated_notification', '', 'bimpcommercial');
 
             if ($to) {
                 global $user, $langs;

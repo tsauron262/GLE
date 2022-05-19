@@ -3327,7 +3327,7 @@ class Bimp_Commande extends BimpComm
             } else {
                 $nOk = 0;
 
-                $use_db_transactions = (int) BimpCore::getConf('bimpcore_use_db_transactions', 0);
+                $use_db_transactions = (int) BimpCore::getConf('use_db_transactions');
                 if ($use_db_transactions) {
                     $this->db->db->commit();
                 }

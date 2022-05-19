@@ -1102,7 +1102,7 @@ class ObjectLine extends BimpObject
             return 0;
         }
 
-        if ((int) BimpCore::getConf('bimpcomm_tx_marque')) {
+        if ((int) BimpCore::getConf('use_tx_marque', 1, 'bimpcommercial')) {
             if (!$pu) {
                 return 0;
             }
@@ -1119,7 +1119,7 @@ class ObjectLine extends BimpObject
 
     public function getMarginLabel()
     {
-        if ((int) BimpCore::getConf('bimpcomm_tx_marque')) {
+        if ((int) BimpCore::getConf('use_tx_marque', 1, 'bimpcommercial')) {
             return 'Marge (Tx marque)';
         }
         return 'Marge (Tx marge)';
@@ -2154,7 +2154,7 @@ class ObjectLine extends BimpObject
                     $margin_rate = 0;
                     if ($margin !== 0.0) {
                         $price = 0;
-                        if ((int) BimpCore::getConf('bimpcomm_tx_marque')) {
+                        if ((int) BimpCore::getConf('use_tx_marque', 1, 'bimpcommercial')) {
                             $price = (float) $this->pu_ht;
                             if (!is_null($this->remise) && (float) $this->remise != 0) {
                                 $price -= ($price * ((float) $this->remise / 100));
@@ -4411,7 +4411,7 @@ class ObjectLine extends BimpObject
         $totalMarginRate = '&infin;';
         $tx_label = '';
 
-        if ((int) BimpCore::getConf('bimpcomm_tx_marque')) {
+        if ((int) BimpCore::getConf('use_tx_marque', 1, 'bimpcommercial')) {
             $tx_label = 'Taux de marque';
             if ($lineMargin && $line_pu && $line_qty) {
                 $lineMarginRate = round(($lineMargin / ($line_pu * $line_qty)) * 100, 4) . ' %';

@@ -181,11 +181,11 @@ class BimpComm extends BimpDolObject
 
     public function isFieldActivated($field_name)
     {
-        if ($field_name == "marge" && !BimpCore::getConf("USE_MARGE_IN_PARENT_BIMPCOMM"))
+        if ($field_name == "marge" && !BimpCore::getConf('use_marges_in_parent_bimpcomm', 0, 'bimpcommercial'))
             return 0;
-        if (in_array($field_name, array('statut_export', 'douane_number')) && !BimpCore::getConf("USE_STATUT_EXPORT"))
+        if (in_array($field_name, array('statut_export', 'douane_number')) && !BimpCore::getConf('use_statut_export', 0, 'bimpcommercial'))
             return 0;
-        if (in_array($field_name, array('statut_relance', 'nb_relance')) && !BimpCore::getConf("USE_RELANCE"))
+        if (in_array($field_name, array('statut_relance', 'nb_relance')) && !BimpCore::getConf('use_relances_paiements_clients', 0, 'bimpcommercial'))
             return 0;
 
         return parent::isFieldActivated($field_name);
@@ -270,10 +270,9 @@ class BimpComm extends BimpDolObject
                 if (!BimpObject::objectLoaded($client)) {
                     $errors[] = 'Client absent';
                 } else {
-                    if (BimpCore::getConf('fk_typent_REQUIRED', 0) && $client->getData('fk_typent') == 0)
+                    if (BimpCore::getConf('typent_required', 0, 'bimpcommercial') && $client->getData('fk_typent') == 0)
                         $errors[] = 'Type de tier obligatoire';
-
-
+                    
                     // Module de validation activé
                     if ((int) $conf->global->MAIN_MODULE_BIMPVALIDATEORDER == 1) {
                         BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
@@ -768,7 +767,7 @@ class BimpComm extends BimpDolObject
 
         if ($secteur) {
             $secteurs = BimpCache::getSecteursData();
-            
+
             if (isset($secteurs[$secteur]['email_from'])) {
                 return $secteurs[$secteur]['email_from'];
             }
@@ -1970,7 +1969,7 @@ class BimpComm extends BimpDolObject
 
             if (!empty($marginInfo)) {
                 global $conf;
-                $conf_tx_marque = (int) BimpCore::getConf('bimpcomm_tx_marque');
+                $conf_tx_marque = (int) BimpCore::getConf('use_tx_marque', 1, 'bimpcommercial');
 
                 $html .= '<table class="bimp_list_table">';
 
@@ -2078,7 +2077,7 @@ class BimpComm extends BimpDolObject
                 $total_marge = $total_pv - $total_pa;
                 $tx = 0;
 
-                if (BimpCore::getConf('bimpcomm_tx_marque')) {
+                if ((int) BimpCore::getConf('use_tx_marque', 1, 'bimpcommercial')) {
                     if ($total_pv) {
                         $tx = ($total_marge / $total_pv) * 100;
                     }
@@ -3156,7 +3155,7 @@ class BimpComm extends BimpDolObject
                 $id_bank_account = (int) $caisse->getData('id_account');
             }
             if (!$id_bank_account) {
-                $id_bank_account = (int) BimpCore::getConf('bimpcaisse_id_default_account');
+                $id_bank_account = (int) BimpCore::getConf('id_default_bank_account', 0);
             }
         }
 
@@ -3831,7 +3830,7 @@ class BimpComm extends BimpDolObject
     public function checkValidationSolvabilite($client, &$errors = array())
     {
         if ($this->isLoaded()) {
-            $emails = BimpCore::getConf('bimpcomm_solvabilite_validation_emails', '');
+            $emails = BimpCore::getConf('solvabilite_validation_emails', '');
 
             if ($emails) {
                 if (BimpObject::objectLoaded($client) && is_a($client, 'Bimp_Societe')) {

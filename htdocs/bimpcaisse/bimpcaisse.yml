@@ -1,0 +1,9 @@
+
+params: 
+    default_id_client: 
+        label: ID Client par défaut
+        info: Compte client utilisé pour les ventes en caisse sans client enregistré
+        def: 0
+    id_cond_reglement_default: 
+        label: ID conditions de réglements par défaut
+        def: 0

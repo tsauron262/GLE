@@ -5,5 +5,3 @@ CREATE TABLE `llx_bimp_php_session` (
     `update` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id_session`)
 );
-
-INSERT INTO `llx_bimpcore_conf`(`name`, `value`) VALUES ('date_debut_exercice', '2020-04-01');

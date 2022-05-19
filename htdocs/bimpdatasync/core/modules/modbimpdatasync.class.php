@@ -165,7 +165,7 @@ class modbimpdatasync extends DolibarrModules
             require_once DOL_DOCUMENT_ROOT . '/cron/class/cronjob.class.php';
             global $db, $user;
 
-            $id_cronjob = (int) BimpCore::getConf('bds_clean_reports_id_cronjob', 0);
+            $id_cronjob = (int) BimpCore::getConf('clean_reports_id_cronjob', 0, 'bimpdatasync');
 
             $cronJob = new Cronjob($db);
 
@@ -193,7 +193,7 @@ class modbimpdatasync extends DolibarrModules
 
                 $id_cronjob = $cronJob->create($user);
                 if ($id_cronjob > 0) {
-                    BimpCore::setConf('bds_clean_reports_id_cronjob', $id_cronjob);
+                    BimpCore::setConf('clean_reports_id_cronjob', $id_cronjob, 'bimpdatasync');
                 }
             }
 
@@ -212,7 +212,7 @@ class modbimpdatasync extends DolibarrModules
         $sql = array();
         if ($this->_remove($sql, $options)) {
             require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
-            $id_cronjob = (int) BimpCore::getConf('bds_clean_reports_id_cronjob', 0);
+            $id_cronjob = (int) BimpCore::getConf('clean_reports_id_cronjob', 0, 'bimpdatasync');
 
             if ($id_cronjob) {
                 require_once DOL_DOCUMENT_ROOT . '/cron/class/cronjob.class.php';

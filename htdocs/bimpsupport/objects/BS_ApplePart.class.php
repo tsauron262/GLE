@@ -485,7 +485,7 @@ class BS_ApplePart extends BimpObject
 
     public function checkIsNotInvoiced()
     {
-        if (!BimpCore::getConf('use_gsx_v2')) {
+        if (!BimpCore::getConf('use_gsx_v2', 1, 'bimpapple')) {
             return 0;
         }
 
@@ -597,7 +597,7 @@ class BS_ApplePart extends BimpObject
     {
         $this->checkPrice(true);
 
-        if (BimpCore::getConf('use_gsx_v2')) {
+        if (BimpCore::getConf('use_gsx_v2', 1, 'bimpapple')) {
             $is_tier = 0;
             if ((int) $this->getData('id_issue')) {
                 $issue = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_Issue', (int) $this->getData('id_issue'));

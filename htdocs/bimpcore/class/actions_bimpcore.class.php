@@ -58,7 +58,7 @@ class ActionsBimpcore
     function incrementNbReq(){
         $mode_eco = true;
         if (defined('BIMP_LIB')) {
-            $mode_eco = (int) BimpCore::getConf('bimpcore_mode_eco', 1);
+            $mode_eco = (int) BimpCore::getConf('mode_eco', 1);
         }
         if(!$mode_eco){
             if(defined('ID_ERP'))

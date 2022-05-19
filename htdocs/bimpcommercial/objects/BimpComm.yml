@@ -554,7 +554,9 @@ forms:
               input: 
                   type: hidden
               value: 
-                  conf: use_caisse_for_payments
+                  conf: 
+                      module: bimpcore
+                      name: use_caisse_for_payments
             - custom: 1
               label: Payée
               input_name: payee

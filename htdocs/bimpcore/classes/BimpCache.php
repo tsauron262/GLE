@@ -102,12 +102,12 @@ class BimpCache
     public static function initCacheServeur()
     {
         if (is_null(self::$cache_server)) {
-            $className = BimpCore::getConf('bimpcore_cache_server_classname', '');
-
+            $className = BimpCore::getConf('cache_server_classname', '');
+            
             if (!$className || !file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/classes/' . $className . '.php')) {
                 $className = 'BimpCacheServer';
             }
-
+            
             if (!class_exists($className)) {
                 require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/' . $className . '.php';
             }
@@ -2279,6 +2279,41 @@ class BimpCache
 
     // Divers: 
 
+    public static function getBimpModulesArray($active_only = false, $include_empty = false, $empty_value = '')
+    {
+        $cache_key = 'bimp_modules_array';
+
+        if ($active_only) {
+            $cache_key .= '_active_only';
+        }
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            foreach (scandir(DOL_DOCUMENT_ROOT) as $file) {
+                if (in_array($file, array('.', '..'))) {
+                    continue;
+                }
+
+                if (!is_dir(DOL_DOCUMENT_ROOT . '/' . $file)) {
+                    continue;
+                }
+
+                if (!preg_match('/^bimp.+$/', $file)) {
+                    continue;
+                }
+
+                if ($active_only && $file !== 'bimpcore' && !(float) BimpCore::getConf('module_version_' . $file, 0)) {
+                    continue;
+                }
+
+                self::$cache[$cache_key][$file] = $file;
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty, $empty_value, $empty_value);
+    }
+
     public static function getTaxes($id_country = 1, $active_only = true, $include_empty = false, $key_field = 'rowid')
     {
         $id_country = (int) $id_country;
@@ -2989,7 +3024,7 @@ class BimpCache
 
     public static function checkMemory()
     {
-        if (!BimpCore::getConf('bimpcache_check_memory_enabled', 1)) {
+        if (!BimpCore::getConf('bimpcache_check_memory_enabled')) {
             return;
         }
 

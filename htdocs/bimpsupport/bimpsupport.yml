@@ -1,0 +1,5 @@
+params: 
+    sav_public_reservations: 
+        label: Réservations SAV en ligne activées
+        type: bool
+        def: 0

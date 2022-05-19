@@ -217,7 +217,11 @@ fields:
         dol_extra_field: 1
         values: 
             array: secteurs
-      
+    is_dev: 
+        label: Développeur
+        type: bool
+        default_value: 0
+        
 forms:
     light: 
         rows:

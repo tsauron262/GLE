@@ -175,7 +175,7 @@ class BT_ficheInter_det extends BimpDolObject
         $fi = $this->getParentInstance();
 
         if (BimpObject::objectLoaded($fi)) {
-            $array_serv_interne = explode(",", BimpCore::getConf('bimptechnique_id_societe_auto_terminer', ''));
+            $array_serv_interne = explode(",", BimpCore::getConf('id_societe_auto_terminer', '', 'bimptechnique'));
             if (in_array((int) $fi->getData('fk_soc'), $array_serv_interne)) {
                 return Array(
                     (int) self::TYPE_INTERNE => self::$types[self::TYPE_INTERNE]
@@ -237,7 +237,7 @@ class BT_ficheInter_det extends BimpDolObject
         $services = [];
         $tp = [];
 
-        foreach (explode(',', BimpCore::getConf('bimptechnique_ref_temps_passe', '')) as $code) {
+        foreach (explode(',', BimpCore::getConf('ref_temps_passe', '', 'bimptechnique')) as $code) {
             $tp[$code] = "Temps passé de niveau " . substr($code, -1, 1);
         }
 
@@ -1002,7 +1002,7 @@ class BT_ficheInter_det extends BimpDolObject
                         if ($value != 7) {
                             $for_or[] = $value;
                         } else {
-                            $intern_societe = explode(',', BimpCore::getConf("bimptechnique_id_societe_auto_terminer"));
+                            $intern_societe = explode(',', BimpCore::getConf('id_societe_auto_terminer', '', 'bimptechnique'));
                             foreach ($intern_societe as $id) {
                                 $for_or[] = $id;
                             }

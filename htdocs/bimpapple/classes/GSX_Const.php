@@ -272,7 +272,7 @@ class GSX_Const
 
         $html = '<script type="text/javascript">';
         $html .= 'use_gsx = ' . $use_gsx . ';';
-        $html .= 'use_gsx_v2 = ' . ((int) BimpCore::getConf('use_gsx_v2') ? 'true' : 'false') . ';';
+        $html .= 'use_gsx_v2 = ' . ((int) BimpCore::getConf('use_gsx_v2', 1, 'bimpapple') ? 'true' : 'false') . ';';
         $html .= 'gsx_login_url = \'' . self::$urls['login'][self::$mode] . '\';';
         $html .= '</script>';
 

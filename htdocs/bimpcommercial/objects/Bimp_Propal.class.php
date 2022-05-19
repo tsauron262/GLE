@@ -299,7 +299,7 @@ class Bimp_Propal extends BimpComm
                     return 0;
                 }
 
-                if ((int) $this->getData('id_signature') && (int) BimpCore::getConf('bimp_propal_use_signatures', 0)) {
+                if ((int) $this->getData('id_signature') && (int) BimpCore::getConf('propal_use_signatures', null, 'bimpcommercial')) {
                     $errors[] = 'Utiliser la fiche signature';
                     return 0;
                 }
@@ -336,7 +336,7 @@ class Bimp_Propal extends BimpComm
     {
         $clef = $this->id . 'isServiceAutorisedInContrat' . $return_array;
         if (!isset(BimpCache::$cache[$clef])) {
-            if (!BimpCore::getConf('bimpcontract_use_autorised_service'))
+            if (!BimpCore::getConf('use_autorised_service', 1, 'bimpcontract'))
                 BimpCache::$cache[$clef] = 1;
             else {
                 $children = $this->getChildrenList('lines');
@@ -438,7 +438,7 @@ class Bimp_Propal extends BimpComm
     {
         $array = $this->isServiceAutorisedInContrat(true);
         $msgs = [];
-        if (count($array) > 0 && BimpCore::getConf('bimpcontract_use_autorised_service')) {
+        if (count($array) > 0 && BimpCore::getConf('use_autorised_service', 1, 'bimpcontract')) {
 
             $content = "<h4><b>Vous ne pouvez pas créer de contrat à partir de ce devis car certains services ne sont pas autorisés dans un contrat<br /><br />";
             if (count($array) > 1) {
@@ -595,7 +595,7 @@ class Bimp_Propal extends BimpComm
             );
 
             $status = $this->getData('fk_statut');
-            $use_signature = (int) BimpCore::getConf('bimp_propal_use_signatures', 0);
+            $use_signature = (int) BimpCore::getConf('propal_use_signatures', null, 'bimpcommercial');
 
             if (!is_null($status)) {
                 $status = (int) $status;
@@ -746,7 +746,7 @@ class Bimp_Propal extends BimpComm
                         // Créer facture: 
                         if ($this->isActionAllowed('createInvoice') && $this->canSetAction('createInvoice')) {
                             $onclick = '';
-                            if (!BimpCore::getConf('force_use_commande')) {
+                            if (!BimpCore::getConf('commande_required_for_factures', null, 'bimpcommercial')) {
                                 $clientFact = $this->getClientFacture();
                                 $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
                                 $values = array(
@@ -1195,7 +1195,7 @@ class Bimp_Propal extends BimpComm
 
     public function actionValidate($data, &$success)
     {
-        $use_signature = (int) BimpCore::getConf('bimp_propal_use_signatures', 0);
+        $use_signature = (int) BimpCore::getConf('propal_use_signatures', null, 'bimpcommercial');
 
         if ($use_signature) {
             $id_contact = (int) BimpTools::getArrayValueFromPath($data, 'id_contact_signature', 0);

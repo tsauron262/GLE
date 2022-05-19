@@ -1390,7 +1390,7 @@ class Bimp_Product extends BimpObject
             if (!$this->hasFixePa()) {
                 return 0;
             }
-            if ((int) BimpCore::getConf('use_new_cur_pa_method')) {
+            if ((int) BimpCore::getConf('use_products_cur_pa_history')) {
                 // Nouvelle méthode: 
                 $curPa = $this->getCurrentPaObject(true, $date);
                 if (BimpObject::objectLoaded($curPa)) {
@@ -1419,7 +1419,7 @@ class Bimp_Product extends BimpObject
             return 0;
         }
 
-        if (BimpCore::getConf('use_new_cur_pa_method')) {
+        if (BimpCore::getConf('use_products_cur_pa_history')) {
             self::loadClass('bimpcore', 'BimpProductCurPa');
             $curPa = BimpProductCurPa::getProductCurPa($this->id, (string) $date);
 
@@ -1541,7 +1541,7 @@ class Bimp_Product extends BimpObject
 
             $pa_ht = 0;
 
-            if (BimpCore::getConf('use_new_cur_pa_method')) {
+            if (BimpCore::getConf('use_products_cur_pa_history')) {
                 $pa_ht = (float) $this->getCurrentPaHt();
             } else {
                 if ((float) $this->getData('cur_pa_ht')) {
@@ -1643,7 +1643,7 @@ class Bimp_Product extends BimpObject
     {
         $errors = array();
         if ($this->isLoaded($errors)) {
-            if (BimpCore::getConf('use_new_cur_pa_method')) {
+            if (BimpCore::getConf('use_products_cur_pa_history')) {
                 $curPa = $this->getCurrentPaObject(false);
                 if (!BimpObject::objectLoaded($curPa) ||
                         ((float) $curPa->getData('amount') !== (float) $pa_ht || (int) $curPa->getData('id_fourn_price') !== (int) $id_fourn_price)) {
@@ -1819,7 +1819,7 @@ class Bimp_Product extends BimpObject
         $html = '';
 
         if ($this->isLoaded()) {
-            if (BimpCore::getConf('use_new_cur_pa_method')) {
+            if (BimpCore::getConf('use_products_cur_pa_history')) {
                 $curPa = $this->getCurrentPaObject();
                 if (BimpObject::objectLoaded($curPa)) {
                     $html .= '<span style="font-size: 16px; font-style: bold">' . BimpTools::displayMoneyValue((float) $curPa->getData('amount')) . '</span><br/>';

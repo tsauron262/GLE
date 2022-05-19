@@ -3001,7 +3001,6 @@ class Bimp_Client extends Bimp_Societe
     public function update(&$warnings = array(), $force_update = false)
     {
         $name = 'file';
-        $success = 'Fichier uploadé';
         $errors = array();
 
         if (file_exists($_FILES[$name]["tmp_name"])) {

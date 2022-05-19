@@ -3,10 +3,12 @@
     require_once __DIR__ . '/../../bimpcore/Bimp_Lib.php';
     require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';    
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/export.class.php';
+    require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/controle.class.php';
     
     class Cron {
         
         protected $export_class  = null;
+        protected $stopCompta    = false;
         protected $rapport       = [];
         protected $files_for_ftp = [];
         protected $entitie       = null;
@@ -278,14 +280,14 @@
             return $files;
         }
         
-        protected function FTP() {
+        public function FTP() {
             
             $files = [];
-                        
+
             foreach ($this->files_for_ftp as $pattern) {
                 $files = array_merge($files, glob($this->local_path . $pattern));
             }
-            
+                                    
             $ftp = ftp_connect($this->ldlc_ftp_host, 21);
             if($ftp === false) { $this->rapport['FTP'][] = "Erreur de connexion au FTP LDLC";} else { $this->rapport['FTP'][] = 'Connexion avec le FTP LDLC Ok'; }
             if(!ftp_login($ftp, $this->ldlc_ftp_user, $this->ldlc_ftp_pass)){ $this->rapport['FTP'][] = 'Erreur de login FTP LDLC'; } else { $this->rapport['FTP'][] = 'Login avec le FTP LDLC Ok'; }
@@ -295,6 +297,11 @@
             if(count($files) > 0) {
                 foreach($files as $file_path) {
                     $filename = basename($file_path);
+//                    
+//                    $patrolArray = controle::tra($file_path, file($file_path), '');
+//                    
+//                    print_r($patrolArray);
+//                    die('yyryryrr');
                     if(!in_array($this->ldlc_ftp_path . $filename, $present_sur_ftp_ldlc)) {
                         if(filesize($file_path) > $this->size_vide_tra) {
                             if(ftp_put($ftp, $this->ldlc_ftp_path . $filename, $this->local_path . $filename, FTP_ASCII)) {

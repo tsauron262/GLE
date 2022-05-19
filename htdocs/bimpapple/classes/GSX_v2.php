@@ -177,6 +177,7 @@ class GSX_v2 extends GSX_Const
         if (isset($result['authToken'])) {
             $this->displayDebug('OK (Auth token ' . $result['authToken'] . ')');
             $this->saveToken('auth', $result['authToken']);
+            $this->saveToken('acti', $result['authToken']);
 //            global $user, $langs;
 //            mailSyn2('auth GSX', 'tommy@bimp.fr', null, $user->getFullName($langs).' id : '.$this->appleId.' auth OK' . date('l jS \of F Y h:i:s A'));
             $this->logged = true;
@@ -187,25 +188,25 @@ class GSX_v2 extends GSX_Const
         $this->initError('Echec authentification (token ' . $this->acti_token . ')');
 
         if ($this->appleId == self::$default_ids['apple_id']) {
-            global $gsx_logout_mail_send, $phantomAuthTest;
-            if($phantomAuthTest < 10 || !$phantomAuthTest){
-                $oldDate = new DateTime(BimpCore::getConf('old_date_reco_apple', '2020-01-01'));
-                $oldDate->add(new DateInterval('PT4M'));
-                $now = new DateTime (date ('Y-m-d H:i:s', time()));
-                if($oldDate < $now || $phantomAuthTest){
-                    BimpCore::setConf('old_date_reco_apple',date ('Y-m-d H:i:s', time()));
-                    $phantomAuthTest = true;
-                    static::phantomAuth(self::$default_ids['apple_id'], self::$default_ids['apple_pword']);
-                }
-                else{
-                    sleep(10);
-                }
-                $phantomAuthTest++;
-                global $user;
-                $user->fetch_optionals();
-                $this->__construct($this->shipTo);
-                return 1;
-            }
+//            global $gsx_logout_mail_send, $phantomAuthTest;
+//            if($phantomAuthTest < 10 || !$phantomAuthTest){
+//                $oldDate = new DateTime(BimpCore::getConf('old_date_reco_apple', '2020-01-01'));
+//                $oldDate->add(new DateInterval('PT4M'));
+//                $now = new DateTime (date ('Y-m-d H:i:s', time()));
+//                if($oldDate < $now || $phantomAuthTest){
+//                    BimpCore::setConf('old_date_reco_apple',date ('Y-m-d H:i:s', time()));
+//                    $phantomAuthTest = true;
+//                    static::phantomAuth(self::$default_ids['apple_id'], self::$default_ids['apple_pword']);
+//                }
+//                else{
+//                    sleep(10);
+//                }
+//                $phantomAuthTest++;
+//                global $user;
+//                $user->fetch_optionals();
+//                $this->__construct($this->shipTo);
+//                return 1;
+//            }
 
             if (!$gsx_logout_mail_send) {
                 global $user, $langs;

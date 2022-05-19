@@ -9,12 +9,13 @@ class BDS_RelancesClientsProcess extends BDSProcess
 
     public function initRelances(&$data, &$errors = array())
     {
+        $data['steps'] = array();
+        $data['data'] = array();
+
         if ((int) BimpTools::getArrayValueFromPath($this->options, 'process_notifs', 1)) {
-            $data['steps'] = array(
-                'process_notifs' => array(
-                    'label'    => 'Traitement des notifications à envoyer aux commerciaux',
-                    'on_error' => 'continue'
-                )
+            $data['steps']['process_notifs'] = array(
+                'label'    => 'Traitement des notifications à envoyer aux commerciaux',
+                'on_error' => 'continue'
             );
         }
 
@@ -30,17 +31,13 @@ class BDS_RelancesClientsProcess extends BDSProcess
                     $this->Info('Clients à traiter: ' . implode(', ', $clients));
                     $relance = $this->createRelance($errors);
                     if (BimpObject::objectLoaded($relance)) {
-                        $data['data'] = array(
-                            'id_relance' => $relance->id
-                        );
+                        $data['data']['id_relance'] = $relance->id;
 
-                        $data['steps'] = array(
-                            'process_relance' => array(
-                                'label'                  => 'Traitement des relances',
-                                'on_error'               => 'continue',
-                                'elements'               => $clients,
-                                'nbElementsPerIteration' => 10
-                            )
+                        $data['steps']['process_relance'] = array(
+                            'label'                  => 'Traitement des relances',
+                            'on_error'               => 'continue',
+                            'elements'               => $clients,
+                            'nbElementsPerIteration' => 10
                         );
                     }
                 } else {
@@ -48,11 +45,9 @@ class BDS_RelancesClientsProcess extends BDSProcess
                     $this->Alert('Aucun client à relancer');
                 }
             } else {
-                $data['steps'] = array(
-                    'process_relance' => array(
-                        'label'    => 'Traitement des relances',
-                        'on_error' => 'continue'
-                    )
+                $data['steps']['process_relance'] = array(
+                    'label'    => 'Traitement des relances',
+                    'on_error' => 'continue'
                 );
             }
         }
@@ -202,7 +197,7 @@ class BDS_RelancesClientsProcess extends BDSProcess
         }
 
         $this->DebugData($data, 'Trie par commerciaux');
-        
+
         if (!empty($data)) {
             $dt_relance = new DateTime();
             $dt_relance->add(new DateInterval('P2D'));
@@ -250,7 +245,7 @@ class BDS_RelancesClientsProcess extends BDSProcess
                                 $html .= '<td style="padding: 5px">';
                                 $html .= date('d / m / Y', strtotime($facture->getData('datef')));
                                 $html .= '</td>';
-                                
+
                                 $html .= '<td style="padding: 5px; width: 300px">';
                                 $html .= $facture->getLink() . '<br/>';
                                 $html .= $facture->getData('libelle');
@@ -277,8 +272,8 @@ class BDS_RelancesClientsProcess extends BDSProcess
 
                         $html .= '</tbody>';
                         $html .= '</table>';
-                        
-                        if (mailSyn2($subject, $email, '', $html, array(), array(), array(), 'f.martinez@bimp.fr')) {
+
+                        if (mailSyn2($subject, $email, '', $html)) {
                             $this->Success('Envoi alerte au commercial OK (' . $email . ')', $client, $facs_refs);
                         } else {
                             $this->Error('Echec envoi alerte au commercial (' . $email . ')', $client, $facs_refs);

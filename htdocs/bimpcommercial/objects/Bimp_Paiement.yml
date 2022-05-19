@@ -18,6 +18,16 @@ objects:
         instance: 
             id_object: 
                 field_value: fk_user_creat
+cards: 
+    default: 
+        title: 
+            field_value: ref
+        status: fk_statut
+        view_btn: 1
+        fields: 
+            - field: amount
+            - field: datep
+            - field: type
 
 fields: 
 #    Champs en base
@@ -358,4 +368,4 @@ lists:
         extends: default
         cols: 
             client: unset
-                
+

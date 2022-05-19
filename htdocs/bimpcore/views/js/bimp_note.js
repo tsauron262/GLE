@@ -64,9 +64,11 @@ class bimp_note extends AbstractNotification {
             var dest_initiale = this.getInitiales(element.dest.nom);
         
         // Client
-        html += element.obj.nom_url;
-        if(typeof element.obj.client_nom_url !== 'undefined')
-            html += ' - ' + element.obj.client_nom_url;
+        if(element.obj == undefined || element.obj.nom_url == undefined) {
+            html += "Pièce supprimée, aucun URL n'est disponible";
+        } else {
+            html += element.obj.nom_url;
+        }
         
         var callback_set_as_viewed = 'bimp_note.setAsViewed("' + element.obj_type +'", "' + element.obj_module +'", "' + element.obj_name +'", "' + element.id_obj + '", "' + key + '")';
         

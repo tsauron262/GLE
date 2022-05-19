@@ -48,6 +48,7 @@ class BContract_contrat extends BimpDolObject
     CONST CONTRAT_RENOUVELLEMENT_5_FOIS = 5; // 105
     CONST CONTRAT_RENOUVELLEMENT_6_FOIS = 7; // 106
     CONST CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION = 12; // 112
+    CONST CONTRAT_RENOUVELLEMENT_AD_VITAM_ETERNAM = 666; 
     // Contrat dénoncé
     CONST CONTRAT_DENOUNCE_NON = 0;
     CONST CONTRAT_DENOUNCE_OUI_DANS_LES_TEMPS = 1;
@@ -105,6 +106,7 @@ class BContract_contrat extends BimpDolObject
         self::CONTRAT_RENOUVELLEMENT_4_FOIS          => 'Tacite 4 fois',
         self::CONTRAT_RENOUVELLEMENT_5_FOIS          => 'Tacite 5 fois',
         self::CONTRAT_RENOUVELLEMENT_6_FOIS          => 'Tacite 6 fois',
+        self::CONTRAT_RENOUVELLEMENT_AD_VITAM_ETERNAM=> 'Durée indéterminée',
         self::CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION => 'Sur proposition',
         self::CONTRAT_RENOUVELLEMENT_NON             => 'Non',
     );
@@ -116,6 +118,7 @@ class BContract_contrat extends BimpDolObject
         self::CONTRAT_RENOUVELLEMENT_4_FOIS          => 'Tacite 4 fois',
         self::CONTRAT_RENOUVELLEMENT_5_FOIS          => 'Tacite 5 fois',
         self::CONTRAT_RENOUVELLEMENT_6_FOIS          => 'Tacite 6 fois',
+        self::CONTRAT_RENOUVELLEMENT_AD_VITAM_ETERNAM=> 'Durée indéterminée',
         self::CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION => 'Sur proposition'
     );
     public static $renouvellement_edit = Array(
@@ -126,6 +129,7 @@ class BContract_contrat extends BimpDolObject
         self::CONTRAT_RENOUVELLEMENT_4_FOIS          => 'Tacite 4 fois',
         self::CONTRAT_RENOUVELLEMENT_5_FOIS          => 'Tacite 5 fois',
         self::CONTRAT_RENOUVELLEMENT_6_FOIS          => 'Tacite 6 fois',
+        self::CONTRAT_RENOUVELLEMENT_AD_VITAM_ETERNAM=> 'Durée indéterminée',
         self::CONTRAT_RENOUVELLEMENT_SUR_PROPOSITION => 'Sur proposition'
     );
     public static $objet_contrat = [
@@ -1208,6 +1212,21 @@ class BContract_contrat extends BimpDolObject
         $client = new Societe($db);
         $client->fetch($this->getData('fk_soc'));
         return $client->mode_reglement_id;
+    }
+    
+    public function getConditionReglementClient() {
+        global $db;
+        BimpTools::loadDolClass('societe');
+        $client = new Societe($db);
+        $client->fetch($this->getData('fk_soc'));
+        return $client->cond_reglement_id;
+    }
+    
+    public function getConditionReglementsArray() {
+        
+        
+        
+        return $cond;
     }
 
     public function getEndDate()
@@ -3882,6 +3901,7 @@ class BContract_contrat extends BimpDolObject
             $duree_mois = $source->getData('duree_mois');
             $tacite = 12;
             $mode_reglement = $source->getData('moderegl');
+            $cond_reglement = $source->getData('condregl');
             $note_public = $source->getData('note_public') . "\n" . $data['note_public'];
             $note_private = $source->getData('note_private') . "\n" . $data['note_private'];
             $ref_ext = $source->getData('ref_ext');
@@ -3906,6 +3926,7 @@ class BContract_contrat extends BimpDolObject
             $duree_mois = $data['duree_mois'];
             $tacite = $data['re_new'];
             $mode_reglement = $data['fk_mode_reglement'];
+            $cond_reglement = $data['fk_cond_reglement'];
             $note_public = $data['note_public'];
             $note_private = $data['note_private'];
             $ref_ext = $data['ref_ext'];
@@ -3929,6 +3950,7 @@ class BContract_contrat extends BimpDolObject
         $new_contrat->set('duree_mois', $duree_mois);
         $new_contrat->set('tacite', $tacite);
         $new_contrat->set('moderegl', $mode_reglement);
+        $new_contrat->set('condregl', $cond_reglement);
         $new_contrat->set('note_public', $note_public);
         $new_contrat->set('note_private', $note_private);
         $new_contrat->set('ref_ext', $ref_ext);

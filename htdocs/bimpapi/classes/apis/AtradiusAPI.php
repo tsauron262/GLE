@@ -61,7 +61,7 @@ class AtradiusAPI extends BimpAPI {
         $filters['country'] = 'FRA';
         $filters['lang'] = 'FR';
         
-        $data = $this->execCurl('getBuyer', array(
+        $data = $this->execCurlCustom('getBuyer', array(
             'url_params' => $filters
                 ), $errors, $header, $code, array('customerId', 'policyId'));
 
@@ -75,10 +75,10 @@ class AtradiusAPI extends BimpAPI {
      */
     // customerId est définit automatiquement
     public function getCover($filters = array(), &$errors = array(), &$warnings = array()) {
-                
+        
         BimpObject::loadClass('bimpcore', 'Bimp_Client');
         
-        $response = $this->execCurl('getCover', array(
+        $response = $this->execCurlCustom('getCover', array(
             'url_params' => $filters
                 ), $errors, $header, $code);
 
@@ -147,7 +147,7 @@ class AtradiusAPI extends BimpAPI {
 
 
     // Ne pas utiliser directement ! Passer par setCovers
-    private function createCover($params = array(), &$errors = array(), &$warnings = array(), &$success = array()) {
+    private function createCover($params = array(), &$errors = array(), &$warnings = array(), &$success = '') {
         
         global $user;
             
@@ -158,7 +158,7 @@ class AtradiusAPI extends BimpAPI {
         if(!isset($params['currencyCode']) and $params['coverType'] != self::CREDIT_CHECK)
             $params['currencyCode'] = 'EUR';
 
-        $data = $this->execCurl('createCover', array(
+        $data = $this->execCurlCustom('createCover', array(
             'fields' => $params,
             'type' => 'POST'
             ), $errors, $response_headers, $code, array(), $success);
@@ -175,15 +175,15 @@ class AtradiusAPI extends BimpAPI {
         switch ($code) {
             case 201:
                 $data['status'] = (int) Bimp_Client::STATUS_ATRADIUS_OK;
-                $success[] = $cover_type . " a été créer";
+                $success .= $cover_type . " a été créer<br/>";
                 break;
             case 202:
                 $data['status'] = (int) Bimp_Client::STATUS_ATRADIUS_EN_ATTENTE;
-                $warnings[] = $cover_type . " est en cours d'arbitrage";
+                $warnings .= $cover_type . " est en cours d'arbitrage<br/>";
                 break;
             default:
                 $data['status'] = (int) Bimp_Client::STATUS_ATRADIUS_REFUSE;
-                $errors[] = $cover_type . " a été refusé";
+                $errors .= $cover_type . " a été refusé<br/>";
                 break;
         }
 
@@ -191,7 +191,7 @@ class AtradiusAPI extends BimpAPI {
     }
 
     // Ne pas utiliser directement ! Passer par setCovers
-    private function updateCover($params = array(), &$errors = array(), &$success = array()) {
+    private function updateCover($params = array(), &$errors = array(), &$success = '') {
         
         global $user;
             
@@ -207,7 +207,7 @@ class AtradiusAPI extends BimpAPI {
         if(!isset($params['currencyCode']))
             $params['currencyCode'] = 'EUR';
 
-        $data = $this->execCurl('updateCover', array(
+        $data = $this->execCurlCustom('updateCover', array(
             'fields' => $params,
             'type' => 'PUT',
             'curl_options' => array()
@@ -244,7 +244,7 @@ class AtradiusAPI extends BimpAPI {
             'uid'     => $siren,
             'uidType' => 'SN'
         );
-        $data = $this->execCurl('getBuyer', array(
+        $data = $this->execCurlCustom('getBuyer', array(
             'url_params' => $params_get
                 ), $errors, $response_headers, $response_code, array('customerId', 'policyId'));
         if (isset($data['data']) && isset($data['data'][0]) && isset($data['data'][0]) && isset($data['data'][0]['buyerId'])) {
@@ -257,13 +257,13 @@ class AtradiusAPI extends BimpAPI {
         return 0;
     }
     
-    private function deleteCover($params = array(), &$errors = array(), &$success = array()) {
+    private function deleteCover($params = array(), &$errors = array(), &$success = '') {
         
         $params['action'] = 'cancel';
         
         if (!count($errors)) {
             
-            $data = $this->execCurl('deleteCover', array(
+            $data = $this->execCurlCustom('deleteCover', array(
                 'fields' => $params,
                 'type' => 'PUT',
                 'curl_options' => array()
@@ -275,7 +275,7 @@ class AtradiusAPI extends BimpAPI {
 
     
     // Interface
-    public function setCovers($params, &$errors = array(), &$warnings = array(), &$success = array()) {
+    public function setCovers($params, &$errors = array(), &$warnings = array(), &$success = '') {
         
         $decisions = array();
         $now = new DateTime();
@@ -298,7 +298,8 @@ class AtradiusAPI extends BimpAPI {
             
             $params_cc = array(
                 'coverType' => (string) $params_cc['coverType'] = self::CREDIT_CHECK,
-                'buyerId'   => (int)    $params['buyerId']
+                'buyerId'   => (int)    $params['buyerId'],
+                'customerRefNumber' => $params['customerRefNumber']
             );
             
             $new_cover = $this->setCover($params_cc, $errors, $warnings, $success);
@@ -312,20 +313,21 @@ class AtradiusAPI extends BimpAPI {
             $params_cl = array(
                 'coverType'         => (string) $params['coverType'] = self::CREDIT_LIMIT,
                 'creditLimitAmount' => (int)    $params['creditLimitAmount'],
-                'buyerId'           => (int)    $params['buyerId']
+                'buyerId'           => (int)    $params['buyerId'],
+                'customerRefNumber' => $params['customerRefNumber']
             );
             
-            $new_cover = $this->setCover($params_cl, $errors, $warnings);
+            $new_cover = $this->setCover($params_cl, $errors, $warnings, $success);
             if(count($new_cover))
                 $decisions[] = $new_cover;
         }
         
-        
+
         
         return $decisions;
     }
     
-    private function setCover($params, &$errors = array(), &$warnings = array(), &$success = array()) {
+    private function setCover($params, &$errors = array(), &$warnings = array(), &$success = '') {
         
         // TODO ajouter currency code si CL
         $params_get = array(
@@ -350,7 +352,7 @@ class AtradiusAPI extends BimpAPI {
         }
         
         // Il n'y a pas encore d'assurance pour ce client, on le créer
-        if(empty($cover) or (int) $cover['amount'] < 1) {
+        if(empty($cover) /* bloque lorsqu'il y a une assaurance retiré or (int) $cover['amount'] < 1*/) {
             
             return $this->createCover($params, $errors);
             
@@ -362,7 +364,8 @@ class AtradiusAPI extends BimpAPI {
                 'action'            => 'supersede',
                 'creditLimitAmount' => $params['creditLimitAmount'],
                 'buyerId'           => $params['buyerId'],
-                'coverType'         => $params['coverType']
+                'coverType'         => $params['coverType'],
+                'customerRefNumber' => $params['customerRefNumber']
             );
 
             return $this->updateCover($params_cl, $errors, $success);
@@ -374,29 +377,33 @@ class AtradiusAPI extends BimpAPI {
                 'action'            => 'reduce',
                 'creditLimitAmount' => $params['creditLimitAmount'],
                 'buyerId'           => $params['buyerId'],
-                'coverType'         => $params['coverType']
+                'coverType'         => $params['coverType'],
+                'customerRefNumber' => $params['customerRefNumber']
             );
 
             return $this->updateCover($params_cl, $errors, $success);
             
         } else {
-            $warnings[] = "Tentative de changer la limite de crédit pour la même somme, ou MAJ d'un crédit check";
+            if($params['coverType'] == self::CREDIT_CHECK)
+                $warnings[] = "Tentative de mettre à jour un crédit check";
+            else
+                $warnings[] = "Tentative de changer la limite de crédit pour la même somme";
         }
                 
     }
     
     
     // Tools
-    private function getSuccess($response_code, &$success) {
+    private function getSuccess($response_code, &$success = '') {
         switch ($response_code) {
             case 200:
-                $success[] = "Action réussi";
+                $success .= "Action réussi<br/>";
                 break;
             case 201:
-                $success[] = "Action réussi, assurance créée";
+                $success .= "Action réussi, assurance créée<br/>";
                 break;
             case 202:
-                $success[] = "Action réussi, en attente d'approbation";
+                $success .= "Action réussi, en attente d'approbation<br/>";
                 break;
         }
     }
@@ -478,7 +485,7 @@ class AtradiusAPI extends BimpAPI {
 
     // Overrides: 
     
-    public function execCurl($request_name, $params = array(), &$errors = array(), &$response_headers = array(), &$response_code = -1, $dont_set = array(), &$success = array()) {
+    public function execCurlCustom($request_name, $params = array(), &$errors = array(), &$response_headers = array(), &$response_code = -1, $dont_set = array(), &$success = '') {
         
         // URL FIELD
         if(isset($params['url_params'])) {
@@ -510,7 +517,7 @@ class AtradiusAPI extends BimpAPI {
             
         }
         
-        $return = parent:: execCurl($request_name, $params, $errors, $response_headers, $response_code);
+        $return = $this->execCurl($request_name, $params, $errors, $response_headers, $response_code);
         
         $this->getSuccess($response_code, $success);
                 
@@ -520,7 +527,7 @@ class AtradiusAPI extends BimpAPI {
 
     public function connect(&$errors = array(), &$warnings = array()) {
         if (!count($errors)) {
-            $result = $this->execCurl('authenticate', array(
+            $result = $this->execCurlCustom('authenticate', array(
                 'fields' => array('inut' => 'inut')), $errors);
 
             if (is_string($result)) {

@@ -426,19 +426,76 @@ class DemandeValidComm extends BimpObject
     public function getDemandeValidCommExtraButtons() {
         $buttons = array();
         
+        if (!$this->isLoaded())
+            return $buttons;
+        
+        // Valider cette demande
+        // TODO faire contrat
+        if((int) $this->getData('status') == self::STATUS_PROCESSING and $this->getData('type_de_piece') != self::OBJ_CONTRAT) {
+            $buttons[] = array(
+                'label'   => 'Valider cette demande',
+                'icon'    => 'fas_check',
+                'onclick' => $this->getJsActionOnclick('validateDemande')
+            );
+        }
+        
+        // Afficher règle de validation
         if($this->getData('val_comm_demande') or $this->getData('val_comm_validation')) {
-            if ($this->isLoaded()) {
-                            $buttons[] = array(
-                    'label'   => 'Validation',
-                    'icon'    => 'fas_check',
-                    'onclick' => $this->getJsLoadModalView('valid_comm', 'Règle de validation appliquée pour cette demande')
-                );
-            }
+            $buttons[] = array(
+                'label'   => 'Règle de validation',
+                'icon'    => 'info-circle',
+                'onclick' => $this->getJsLoadModalView('valid_comm', 'Règle de validation appliquée pour cette demande')
+            );
         }
         
         return $buttons;
     }
     
+    
+    public function actionValidateDemande($data, &$success) {
+        
+        global $user;
+        $errors = $warnings = array();
+        
+        if (!$this->isLoaded()) {
+            $errors[] = "Objet non chargé";
+        } else {
+            $validateur = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
+            $object = self::getObject($this->getData('type_de_piece'), $this->getData('id_piece'));
+            $success_tab = array();
+            $can_validate = (int) $validateur->tryToValidate($object, $user, $errors, $success_tab, array($this->getData('type')));
+            $success = str_replace(',', '<br/>', $success_tab);
+            
+            $filter = array(
+                'type_de_piece' => (int) $this->getData('type_de_piece'),
+                'id_piece'      => (int) $this->getData('id_piece'),
+                'status'        => self::STATUS_PROCESSING
+            );
+            
+            $demande_en_cours = BimpCache::getBimpObjectObjects('bimpvalidateorder', 'DemandeValidComm', $filter);
+            
+            // Il n'y a pas de demande en cours pour cet objet, on essaye de tout valider
+            if(empty($demande_en_cours)) {
+                // TODO faire contrat
+                if(is_a($object, 'BimpComm')) {
+                    $data = array();
+                    $return = $object->actionValidate($data, $success);
+                } else {
+                    $errors[] = 'Non implément';
+                }
+                
+            }
+        }
+        
+        if(isset($return) and is_array($return))
+            return $return;
+        else
+            return array(
+                'errors'   => $errors,
+                'warnings' => $warnings
+            );
+        
+    }
     
     public function renderValidComm() {
         if($this->getData('val_comm_demande') or $this->getData('val_comm_validation')) {

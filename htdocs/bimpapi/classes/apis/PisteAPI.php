@@ -356,10 +356,10 @@ class PisteAPI extends BimpAPI
                                     'modePaiement'  => $mode_paiement
                                 ),
                                 'montantTotal'          => array(
-                                    'montantHtTotal'  => round($facture->dol_object->total_ht, 2),
-                                    'montantTVA'      => round($facture->dol_object->total_tva, 2),
-                                    'montantTtcTotal' => round($facture->dol_object->total_ttc, 2),
-                                    'montantAPayer'   => $facture->getRemainToPay(false, true)
+                                    'montantHtTotal'  => $facture->dol_object->total_ht,
+                                    'montantTVA'      => $facture->dol_object->total_tva,
+                                    'montantTtcTotal' => round($facture->dol_object->total_ttc, 3),
+                                    'montantAPayer'   => round($facture->getRemainToPay(false, false), 3)
                                 ),
                                 'cadreDeFacturation'    => array(
                                     'codeCadreFacturation' => ((int) $facture->getData('paye') ? 'A2_FACTURE_FOURNISSEUR_DEJA_PAYEE' : 'A1_FACTURE_FOURNISSEUR')

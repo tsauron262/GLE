@@ -101,8 +101,8 @@ class BimpStatsFacture {
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav as fs ON f.rowid = fs.id_facture';// || f.rowid = fs.id_facture_avoir || f.rowid = fs.id_facture_acompte';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav as fs2 ON f.rowid = fs2.id_facture_acompte';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav as fs3 ON f.rowid = fs3.id_facture_avoir';
-        $sql .= ' WHERE f.date_valid >= "' . $this->db->idate($dateStart).'"';
-        $sql .= ' AND   f.date_valid <= "' . $this->db->idate($dateEnd).'"';
+        $sql .= ' WHERE f.datef >= "' . $this->db->idate($dateStart).'"';
+        $sql .= ' AND   f.datef <= "' . $this->db->idate($dateEnd).'"';
 
         if (!empty($types) and in_array('NRS', $types)) {   // Non renseigné inclut selected
             $sql .= ' AND (e.type IN (\'' . implode("','", $types) . '\', "0", "1")';

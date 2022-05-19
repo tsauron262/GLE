@@ -392,6 +392,9 @@ forms:
             - field: fk_mode_reglement
               show:
                   callback: isServiceAutorisedInContrat
+            - field: fk_cond_reglement
+              show:
+                  callback: isServiceAutorisedInContrat
             - custom: 1
               show: 
                   callback: isNotRenouvellementContrat

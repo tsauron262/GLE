@@ -76,7 +76,8 @@ class Bimp_CommandeFourn extends BimpComm
     );
     public static $delivery_mode = array(
         0 => 'Normal',
-        1 => 'Interne région Lyonnaise'
+        1 => 'Interne région Lyonnaise',
+        2 => 'Siège LDLC'
     );
     protected static $types_entrepot = array();
 
@@ -1844,6 +1845,8 @@ class Bimp_CommandeFourn extends BimpComm
             $shipping_mode = "";
             if($this->getData('methode_liv') == 1)
                 $shipping_mode = 'PNS1';
+            if($this->getData('methode_liv') == 2)
+                $shipping_mode = 'PNSSI';
 //            if (in_array($this->getData('delivery_type'), array(Bimp_CommandeFourn::DELIV_ENTREPOT, Bimp_CommandeFourn::DELIV_SIEGE)))
 //                $shipping_mode = "PNS6";
             $tab = array(

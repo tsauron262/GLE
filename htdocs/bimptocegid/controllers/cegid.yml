@@ -1,15 +1,51 @@
 bootstrap: 1
-
+js: 
+    1: /bimptocegid/js/search.js
 sections:
     - type: custom
       custom:
         callback: renderHeader
     - type: nav_tabs
       nav_tabs:
+        - id: repertoire_export
+          title: En attente d'envois à cégid
+          struct:
+            type: custom
+            custom:
+                callback: renderCurrentTab
         - id: tiers
           title: TIERS
           struct:
             type: custom
             custom:
                 callback: renderTiersTab
-              
+        - id: facture
+          title: FACTURES
+          struct:
+              type: custom
+              custom:
+                  callback: renderVentesTab
+        - id: achat
+          title: ACHATS
+          struct:
+              type: custom
+              custom:
+                  callback: renderAchatsTab
+        - id: paiements
+          title: PAIEMENTS
+          struct:
+              type: custom
+              custom:
+                  callback: renderPaiementsTab
+        - id: search
+          title: Recherche
+          struct:
+            type: custom
+            custom:
+                callback: renderSearchTab
+        - id: config
+          title: Configurations
+          struct:
+              type: custom
+              custom: 
+                  callback: renderConfigTab

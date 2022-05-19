@@ -36,7 +36,7 @@ class Bimp_ImportPaiementLine extends BimpObject
 
         $type = '';
         
-        $codes = array(array('0517806000000669EUR2E0416135704405'), array('0417806000000669EUR2E04161357044C2', array('price' => 'methode2'))/*virement trés peut d'info*/);
+        $codes = array(array('0517806000000669EUR2E0416135704405'), array('0417806000000669EUR2E04161357044C2', array('price' => 'methode2'))/*virement trés peut d'info (surement virement instentannée)*/);
         
         foreach ($codes as $data){
             $code = $data[0];
@@ -45,12 +45,28 @@ class Bimp_ImportPaiementLine extends BimpObject
                 $type = 'vir';
                 if(isset($data[1]['price'])){
                     if($data[1]['price'] == 'methode2'){
-                        $price = (substr(trim($this->getData('data')), -10, 10));
-                        $lettre = substr($price, -1,1);
-                        $price = intval(str_replace($lettre, $this->lettreToChiffre($lettre), $price)) / 100;
+                        if(preg_match('/0417806000000669EUR2E04161357044C2[0-9 A-Z]*(00000)([0-9\.,}{]+)([A-Z]{1,1})/', $this->getData('data'), $matches)){
+                            $price = $matches[2];
+                            $lettre = $matches[3];
+                            $price .= $this->lettreToChiffre($lettre);
+                            $price = $price / 100;
+//die('un');
+                        }
+                        elseif(preg_match('/0417806000000669EUR2E04161357044C2[0-9 .A-Z]*(00000)([0-9A-Z\.,}{]+)/', $this->getData('data'), $matches)){
+//                            print_r($matches);
+                            $price = $matches[2];
+                            $lettre = substr($price, -1,1);
+                            $price = intval(str_replace($lettre, $this->lettreToChiffre(str_replace('{', '}', $lettre)), $price)) / 100;
+//                            die('deux');
+                        }
+                        else{
+                            $price = (substr(trim($this->getData('data')), -10, 10));
+                            $lettre = substr($price, -1,1);
+                            $price = intval(str_replace($lettre, $this->lettreToChiffre($lettre), $price)) / 100;
+//                            die('trois');
+                        }
                     }
                 }
-
 
 
 

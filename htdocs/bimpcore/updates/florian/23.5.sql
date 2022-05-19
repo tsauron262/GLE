@@ -13,6 +13,8 @@ UPDATE `llx_bimpcore_conf_new` SET `name` = 'use_db_transactions', `module` = 'b
 UPDATE `llx_bimpcore_conf_new` SET `name` = 'cache_server_classname', `module` = 'bimpcore' WHERE `name` = 'bimpcore_cache_server_classname' AND `module` = 'bimpcore';
 UPDATE `llx_bimpcore_conf_new` SET `name` = 'log_actions_rollbacks', `module` = 'bimpcore' WHERE `name` = 'bimpcore_log_actions_rollbacks' AND `module` = 'bimpcore';
 UPDATE `llx_bimpcore_conf_new` SET `name` = 'pdf_use_html_purifier', `module` = 'bimpcore' WHERE `name` = 'bimpcore_pdf_use_html_purifier' AND `module` = 'bimpcore';
+UPDATE `llx_bimpcore_conf_new` SET `name` = 'use_cache_for_cards', `module` = 'bimpcore' WHERE `name` = 'bimpcore_user_cache_for_cards' AND `module` = 'bimpcore';
+UPDATE `llx_bimpcore_conf_new` SET `name` = 'default_id_entrepot', `module` = 'bimpcore' WHERE `name` = 'default_entrepot' AND `module` = 'bimpcore';
 
 UPDATE `llx_bimpcore_conf_new` SET `name` = 'pdf_add_cgv', `module` = 'bimpcommercial' WHERE `name` = 'CGV_BIMP' AND `module` = 'bimpcore';
 UPDATE `llx_bimpcore_conf_new` SET `name` = 'use_tx_marque', `module` = 'bimpcommercial' WHERE `name` = 'bimpcomm_tx_marque' AND `module` = 'bimpcore';
@@ -33,6 +35,16 @@ UPDATE `llx_bimpcore_conf_new` SET `name` = 'max_rtp_for_classify_paid', `module
 UPDATE `llx_bimpcore_conf_new` SET `name` = 'propal_pdf_chorus_mention', `module` = 'bimpcommercial' WHERE `name` = 'propal_pdf_chorus_mention' AND `module` = 'bimpcore';
 UPDATE `llx_bimpcore_conf_new` SET `name` = 'new_bank_account_date', `module` = 'bimpcommercial' WHERE `name` = 'new_bank_account_date' AND `module` = 'bimpcore';
 UPDATE `llx_bimpcore_conf_new` SET `name` = 'typent_required', `module` = 'bimpcommercial' WHERE `name` = 'fk_typent_REQUIRED' AND `module` = 'bimpcore';
+UPDATE `llx_bimpcore_conf_new` SET `name` = 'id_user_mail_comm_line_expire', `module` = 'bimpcommercial' WHERE `name` = 'id_user_mail_comm_line_expire' AND `module` = 'bimpcore';
+UPDATE `llx_bimpcore_conf_new` SET `name` = 'tva_tx_for_acomptes', `module` = 'bimpcommercial' WHERE `name` = 'tva_acompte' AND `module` = 'bimpcore';
+UPDATE `llx_bimpcore_conf_new` SET `name` = 'user_as_default_commercial', `module` = 'bimpcommercial' WHERE `name` = 'user_as_default_commercial' AND `module` = 'bimpcore';
+UPDATE `llx_bimpcore_conf_new` SET `name` = 'contact_facturation_required_for_commandes', `module` = 'bimpcommercial', `value` = '0' WHERE `name` = 'NOT_FORCE_CONTACT' AND `module` = 'bimpcore' AND `value` = '1';
+UPDATE `llx_bimpcore_conf_new` SET `name` = 'contact_facturation_required_for_commandes', `module` = 'bimpcommercial', `value` = '1' WHERE `name` = 'NOT_FORCE_C`ONTACT' AND `module` = 'bimpcore' AND `value` = '0';
+UPDATE `llx_bimpcore_conf_new` SET `name` = 'default_relance_paiements_delay_days', `module` = 'bimpcommercial' WHERE `name` = 'relance_paiements_facture_delay_days' AND `module` = 'bimpcore';
+UPDATE `llx_bimpcore_conf_new` SET `name` = 'allow_pdf_regeneration_after_validation', `module` = 'bimpcommercial', `value` = '0' WHERE `name` = 'BLOQUE_GENERATE_FACT_PDF' AND `module` = 'bimpcore' AND `value` = '1';
+UPDATE `llx_bimpcore_conf_new` SET `name` = 'allow_pdf_regeneration_after_validation', `module` = 'bimpcommercial', `value` = '1' WHERE `name` = 'BLOQUE_GENERATE_FACT_PDF' AND `module` = 'bimpcore' AND `value` = '0';
+UPDATE `llx_bimpcore_conf_new` SET `name` = 'use_free_objectline', `module` = 'bimpcommercial' WHERE `name` = 'use_freeline' AND `module` = 'bimpcore';
+UPDATE `llx_bimpcore_conf_new` SET `value` = '1' WHERE `name` = 'use_free_objectline' AND `module` = 'bimpcommercial' AND `value` = '0' AND (SELECT COUNT(`id`) FROM `llx_bimpcore_conf_new` WHERE `name` = 'LINE_FREE_ACTIVE' AND `module` = 'bimpcore' AND `value` = 1) > '1';
 
 UPDATE `llx_bimpcore_conf_new` SET `name` = 'email_groupe', `module` = 'bimpcontract' WHERE `name` = 'bimpcontract_email_groupe' AND `module` = 'bimpcore';
 UPDATE `llx_bimpcore_conf_new` SET `name` = 'email_facturation', `module` = 'bimpcontract' WHERE `name` = 'bimpcontract_email_facturation' AND `module` = 'bimpcore';
@@ -55,6 +67,8 @@ UPDATE `llx_bimpcore_conf_new` SET `name` = 'id_cond_reglement_default', `module
 UPDATE `llx_bimpcore_conf_new` SET `name` = 'secteur_code', `module` = 'bimpcaisse' WHERE `name` = 'bimpcaisse_secteur_code' AND `module` = 'bimpcore';
 
 UPDATE `llx_bimpcore_conf_new` SET `name` = 'sav_public_reservations', `module` = 'bimpsupport' WHERE `name` = 'sav_public_reservations' AND `module` = 'bimpcore';
+UPDATE `llx_bimpcore_conf_new` SET `name` = 'sav_mode_reglement', `module` = 'bimpsupport' WHERE `name` = 'sav_mode_reglement' AND `module` = 'bimpcore';
+UPDATE `llx_bimpcore_conf_new` SET `name` = 'sav_cond_reglement', `module` = 'bimpsupport' WHERE `name` = 'sav_cond_reglement' AND `module` = 'bimpcore';
 
 UPDATE `llx_bimpcore_conf_new` SET `name` = 'use_gsx_v2', `module` = 'bimpapple' WHERE `name` = 'use_gsx_v2' AND `module` = 'bimpcore';
 UPDATE `llx_bimpcore_conf_new` SET `name` = 'use_gsx_v2_for_reservations', `module` = 'bimpapple' WHERE `name` = 'use_gsx_v2_for_reservations' AND `module` = 'bimpcore';
@@ -63,4 +77,3 @@ UPDATE `llx_bimpcore_conf_new` SET `name` = 'clean_reports_id_cronjob', `module`
 UPDATE `llx_bimpcore_conf_new` SET `name` = 'relances_clients_id_process', `module` = 'bimpdatasync' WHERE `name` = 'bds_relances_clients_id_process' AND `module` = 'bimpcore';
 
 UPDATE `llx_bimpcore_conf_new` SET `name` = 'base_url', `module` = 'bimpinterfaceclient' WHERE `name` = 'interface_client_base_url' AND `module` = 'bimpcore';
-

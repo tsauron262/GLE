@@ -141,7 +141,7 @@ switch ($type) {
         $types = Bimp_Facture::$types;
         $secteurs_act = BimpObject::getListExtrafield('secteuractivite', 'societe');
 
-        $def_encours = BimpCore::getConf('societe_default_outstanding_limit', 4000);
+        $def_encours = (float) BimpCore::getConf('societe_default_outstanding_limit');
         $clients = array();
 
         foreach ($result as $r) {

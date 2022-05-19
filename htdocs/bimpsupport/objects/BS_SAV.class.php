@@ -142,7 +142,7 @@ class BS_SAV extends BimpObject
 
         define("NOT_VERIF", true);
 
-        $this->useCaisseForPayments = BimpCore::getConf('use_caisse_for_payments');
+        $this->useCaisseForPayments = (int) BimpCore::getConf('use_caisse_for_payments');
     }
 
     // Gestion des droits et autorisations: 
@@ -2269,7 +2269,7 @@ class BS_SAV extends BimpObject
 
         $html = '';
 
-        if (BimpCore::getConf('use_gsx_v2', 1, 'bimpapple')) {
+        if ((int) BimpCore::getConf('use_gsx_v2', null, 'bimpapple')) {
             $issue = BimpObject::getInstance('bimpsupport', 'BS_Issue');
             $list = new BC_ListTable($issue, 'default', 1, $this->id);
             if ($suffixe) {
@@ -2310,7 +2310,7 @@ class BS_SAV extends BimpObject
 
     public function renderLoadPartsButton($serial = null, $suffixe = "")
     {
-        if ((int) BimpCore::getConf('use_gsx_v2', 1, 'bimpapple')) {
+        if ((int) BimpCore::getConf('use_gsx_v2', null, 'bimpapple')) {
             return '';
         }
 
@@ -2710,11 +2710,11 @@ class BS_SAV extends BimpObject
         }
         if ($acompte > 0 && !count($errors)) {
             if (is_null($id_mode_paiement)) {
-                $id_mode_paiement = (int) BimpTools::getValue('mode_paiement_acompte', 0);
+                $id_mode_paiement = (int) BimpTools::getValue('mode_paiement_acompte', null, 'bimpsupport');
             }
 
             if (!(int) $id_mode_paiement) {
-                $id_mode_paiement = (int) BimpCore::getConf('sav_mode_reglement', 6);
+                $id_mode_paiement = (int) BimpCore::getConf('sav_mode_reglement', null, 'bimpsupport');
             }
 
             // Création de la facture: 
@@ -2723,7 +2723,7 @@ class BS_SAV extends BimpObject
             $factureA->type = 3;
             $factureA->date = dol_now();
             $factureA->socid = $this->getData('id_client');
-            $factureA->cond_reglement_id = BimpCore::getConf('sav_cond_reglement', 1);
+            $factureA->cond_reglement_id = (int) BimpCore::getConf('sav_cond_reglement', null, 'bimpsupport');
             $factureA->modelpdf = self::$facture_model_pdf;
             $factureA->array_options['options_type'] = "S";
             $factureA->array_options['options_entrepot'] = $this->getData('id_entrepot');
@@ -2746,7 +2746,7 @@ class BS_SAV extends BimpObject
                         if ($this->useCaisseForPayments) {
                             $id_account = (int) $caisse->getData('id_account');
                         } else {
-                            $id_account = (int) BimpCore::getConf('id_default_bank_account', 0);
+                            $id_account = (int) BimpCore::getConf('id_default_bank_account');
                         }
 
                         // Ajout du paiement au compte bancaire: 
@@ -2834,8 +2834,8 @@ class BS_SAV extends BimpObject
         if (!count($errors)) {
             global $user, $langs;
 
-            $id_cond_reglement = (int) BimpCore::getConf('sav_cond_reglement', $client->getData('cond_reglement'));
-            $id_mode_reglement = (int) BimpCore::getConf('sav_mode_reglement', $client->getData('mode_reglement'));
+            $id_cond_reglement = (int) BimpCore::getConf('sav_cond_reglement', $client->getData('cond_reglement'), 'bimpsupport');
+            $id_mode_reglement = (int) BimpCore::getConf('sav_mode_reglement', $client->getData('mode_reglement'), 'bimpsupport');
 
             BimpTools::loadDolClass('comm/propal', 'propal');
             $prop = new Propal($this->db->db);
@@ -2844,7 +2844,7 @@ class BS_SAV extends BimpObject
             $prop->date = dol_now();
             $prop->cond_reglement_id = $id_cond_reglement;
             $prop->mode_reglement_id = $id_mode_reglement;
-            $prop->fk_account = BimpCore::getConf('id_default_bank_account', 0);
+            $prop->fk_account = (int) BimpCore::getConf('id_default_bank_account');
 
             if ($prop->create($user) <= 0) {
                 $errors[] = 'Echec de la création de la propale';
@@ -4344,7 +4344,7 @@ class BS_SAV extends BimpObject
 //            return array('Le devis est validé. Modification des lignes du devis impossible');
 //        }
 
-        if ((int) BimpCore::getConf('use_gsx_v2', 1, 'bimpapple')) {
+        if ((int) BimpCore::getConf('use_gsx_v2', null, 'bimpapple')) {
             if ($this->isLoaded()) {
                 foreach ($this->getChildrenObjects('apple_parts') as $part) {
                     $part_errors = $part->onSavPartsChange();
@@ -5132,7 +5132,7 @@ class BS_SAV extends BimpObject
                                 global $db;
                                 $facture = new Facture($db);
 
-                                $cond_reglement = (int) BimpCore::getConf('sav_cond_reglement', 0);
+                                $cond_reglement = (int) BimpCore::getConf('sav_cond_reglement', null, 'bimpsupport');
 
                                 if (!$cond_reglement) {
                                     if ((int) $propal->dol_object->cond_reglement_id) {
@@ -5149,7 +5149,7 @@ class BS_SAV extends BimpObject
                                 $mode_reglement = (int) BimpTools::getArrayValueFromPath($data, 'mode_paiement', (int) $propal->dol_object->mode_reglement_id);
 
                                 if (!$mode_reglement) {
-                                    $mode_reglement = (int) BimpCore::getConf('sav_mode_reglement', 6);
+                                    $mode_reglement = (int) BimpCore::getConf('sav_mode_reglement', null, 'bimpsupport');
                                 }
 
                                 $facture->date = dol_now();
@@ -5170,7 +5170,7 @@ class BS_SAV extends BimpObject
                                 $facture->origin = $propal->dol_object->element;
                                 $facture->origin_id = $propal->id;
 
-                                $facture->fk_account = ((int) $propal->dol_object->fk_account ? $propal->dol_object->fk_account : BimpCore::getConf('id_default_bank_account', 0));
+                                $facture->fk_account = ((int) $propal->dol_object->fk_account ? $propal->dol_object->fk_account : (int) BimpCore::getConf('id_default_bank_account'));
 
                                 // get extrafields from original line
                                 $propal->dol_object->fetch_optionals($propal->id);
@@ -5266,7 +5266,7 @@ class BS_SAV extends BimpObject
                                                         if ($this->useCaisseForPayments) {
                                                             $id_account = (int) $caisse->getData('id_account');
                                                         } else {
-                                                            $id_account = (int) BimpCore::getConf('id_default_bank_account', 0);
+                                                            $id_account = (int) BimpCore::getConf('id_default_bank_account');
                                                         }
                                                         if ($payement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_account, '', '') < 0) {
                                                             $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Echec de l\'ajout du paiement n°' . $payement->id . ' au compte bancaire d\'ID ' . $id_account);
@@ -5371,7 +5371,7 @@ class BS_SAV extends BimpObject
             }
         }
 
-        $use_db_transactions = (int) BimpCore::getConf('bimpcore_use_db_transactions', 0);
+        $use_db_transactions = (int) BimpCore::getConf('bimpcore_use_db_transactions');
 
         if (!count($errors)) {
             if ($use_db_transactions) {
@@ -5685,7 +5685,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             if ($this->useCaisseForPayments && BimpObject::objectLoaded($caisse)) {
                 $id_account = (int) $caisse->getData('id_account');
             } else {
-                $id_account = (int) BimpCore::getConf('id_default_bank_account', 0);
+                $id_account = (int) BimpCore::getConf('id_default_bank_account');
             }
 
             if (!$id_account) {
@@ -5952,7 +5952,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                             'cancelReason' => BimpTools::getArrayValueFromPath($data, 'cancel_reason', 'CUSTOMER_CANCELLED')
                 ));
 
-                if ((int) BimpCore::getConf('use_gsx_v2_for_reservations', 0)) {
+                if ((int) BimpCore::getConf('use_gsx_v2_for_reservations')) {
                     if (isset($result['errors']) && !empty($result['errors'])) {
                         $request_errors = array();
                         foreach ($result['errors'] as $error) {
@@ -6194,7 +6194,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $fac_errors = $this->createAccompte((float) $this->getData('acompte'), false);
                     if (count($fac_errors)) {
                         $fac_errors = BimpTools::merge_array(array('Des erreurs sont survenues lors de la création de la facture d\'acompte'), $fac_errors);
-                        if ((int) BimpCore::getConf('bimpcore_use_db_transactions', 0))
+                        if ((int) BimpCore::getConf('bimpcore_use_db_transactions'))
                             $errors = BimpTools::merge_array($errors, $fac_errors);
                         else
                             $warnings = BimpTools::merge_array($warnings, $fac_errors);
@@ -6207,7 +6207,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         $prop_errors = $this->createPropal();
                         if (count($prop_errors)) {
                             $prop_errors = BimpTools::merge_array(array('Des erreurs sont survenues lors de la création de la proposition commerciale'), $prop_errors);
-                            if ((int) BimpCore::getConf('bimpcore_use_db_transactions', 0))
+                            if ((int) BimpCore::getConf('bimpcore_use_db_transactions'))
                                 $errors = BimpTools::merge_array($errors, $prop_errors);
                             else
                                 $warnings = BimpTools::merge_array($warnings, $prop_errors);

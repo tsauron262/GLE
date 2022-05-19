@@ -45,7 +45,7 @@ class gsxController extends BimpController
 
     public function __construct($module, $controller = 'index')
     {
-        $this->use_gsx_v2 = BimpCore::getConf('use_gsx_v2', 1, 'bimpapple');
+        $this->use_gsx_v2 = (int) BimpCore::getConf('use_gsx_v2', 1, 'bimpapple');
 
         if ($this->use_gsx_v2) {
             if (!class_exists('GSX_v2')) {

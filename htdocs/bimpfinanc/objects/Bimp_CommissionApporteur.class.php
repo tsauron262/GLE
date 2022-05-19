@@ -44,12 +44,10 @@ class Bimp_CommissionApporteur extends BimpObject
                     'table' => 'facturedet',
                     'alias' => 'f',
                     'on'    => 'a.id_line = f.rowid'));
-            
-            
+
             $filterObj = new BC_FiltersPanel($factureLine);
             $filterObj->setFilters($filtreObj->getData('filter'));
             $errors = BimpTools::merge_array($errors, $filterObj->getSqlFilters($filters, $joins));
-
 
             $list = $factureLine->getList($filters, null, null, null, null, 'array', null, $joins);
 
@@ -139,7 +137,7 @@ class Bimp_CommissionApporteur extends BimpObject
         $filtres = $parent->getChildrenObjects('filtres', array(), 'position', 'ASC');
 
         $new_facture->startLineTransaction();
-        
+
         foreach ($filtres as $filtre) {
             if ($filtre->isLoaded()) {
                 if ($filtre->getData('commition') != 0) {
@@ -152,7 +150,7 @@ class Bimp_CommissionApporteur extends BimpObject
                     foreach ($lines as $line) {
                         if ((float) $line->qty && (float) $filtre->getData('commition')) {
                             $amount = (float) $line->getTotalHTWithRemises(true) / (float) $line->qty * (float) $filtre->getData('commition') / 100;
-                            
+
                             if ($amount != 0) {
                                 $errors = BimpTools::merge_array($errors, $this->createFactureFournLine($line, $new_facture, $amount));
                                 $errors = BimpTools::merge_array($errors, $this->createRevalorisation($line, $amount));
@@ -163,11 +161,10 @@ class Bimp_CommissionApporteur extends BimpObject
             } else
                 $errors[] = "Erreur avec un des filtres de la commission";
         }
-        
-        $new_facture->stopLineTransaction();
-        
-        $this->updateField('id_facture_fourn', $new_facture->id);
 
+        $new_facture->stopLineTransaction();
+
+        $this->updateField('id_facture_fourn', $new_facture->id);
 
 //        if (count($errors))
 //            $errors = BimpTools::merge_array($errors, $new_facture->delete());
@@ -207,8 +204,14 @@ class Bimp_CommissionApporteur extends BimpObject
 
         // TODO rajouter dan imp conf
 
+        $id_entrepot = (int) BimpCore::getConf('default_id_entrepot');
+
+        if (!$id_entrepot) {
+            $warnings[] = 'Attention, Aucun entrepôt par défaut défini dans la configuration';
+        }
+
         $errors = $new_facture->validateArray(array(
-            'entrepot'          => BimpCore::getConf('default_entrepot'),
+            'entrepot'          => $id_entrepot,
             'ef_type'           => 'C',
             'fk_soc'            => $fourn->id,
             'fk_cond_reglement' => (int) $new_facture->getCondReglementBySociete(),
@@ -273,7 +276,6 @@ class Bimp_CommissionApporteur extends BimpObject
 
         return $errors;
     }
-
 
     public function calcTotal()
     {

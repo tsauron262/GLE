@@ -49,6 +49,7 @@ params:
     solvabilite_validation_emails: 
         label: Adresse e-mail pour demandes de validation d'une pièce pour les clients non solvables
         help: Laisser vide pour désactiver vérification de la solvabilité des clients lors de la validation des pièces
+        def: ''
         
     max_rtp_for_classify_paid: 
         label: Reste à payer maximum pour classer payées les factures
@@ -56,17 +57,39 @@ params:
         def: 0.01
         help: Indiquer une valeur numérique décimale
         
+    tva_tx_for_acomptes:
+        label: Taux de TVA pour les acomptes
+        help: En pourcentage
+        def: 0
+        
+    user_as_default_commercial: 
+        label: Définir utilisateur connecté comme commercial par défaut des pièces
+        warning: Seulement pour les pièces n'ayant aucun commercial attribué
+        type: bool
+        def: 1
+        
+    contact_facturation_required_for_commandes: 
+        label: Contact facturation obligatoire pour les commandes
+        type: bool
+        def: 1        
+        
+    use_free_objectline: 
+        label: Autoriser les lignes libres dans les pièces
+        info: Pour les utilisateurs seulement, les lignes libres peuvent toujours être ajoutées en PHP
+        type: bool
+        def: 0
+        
     # PDFs: 
     pdf_add_cgv: 
         label: Ajouter CGV dans les docs PDF
         cat: pdfs
         type: bool
         def: 0
-    BLOQUE_GENERATE_FACT_PDF: 
-        label: Bloquer la régénération des PDF pour les pièces validées
+    allow_pdf_regeneration_after_validation: 
+        label: Autoriser la régénération des pdf des pièces après validation
         cat: pdfs
         type: bool
-        def: 0
+        def: 1
     propal_pdf_chorus_mention: 
         label: Mention Chorus dans le PDF des propales
         cat: pdfs
@@ -86,8 +109,14 @@ params:
               params: 
                   email_for_relances_deactivated_notification: 
                       label: Adresse e-mail pour la notification des relances désactivées
+                  default_relance_paiements_delay_days: 
+                      label: Délai par défaut pour déclencher les relances
+                      help: en nombre de jours
+                      info: Délai à partir de la date d'échéance des factures. 
+                      def: 15
                   relance_paiements_globale_date_lim: 
                       label: Date limite pour les relances globales
+                      info: Date des factures à partir de laquelle les relances doivent être effectuées
                   relance_paiements_id_bank_account: 
                       label: ID Compte bancaire pour les relances de paiements
                   relance_paiements_extented_delay_type_ent: 

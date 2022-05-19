@@ -86,10 +86,18 @@ params:
         info: Utile pour différencier les onglets des versions de l'ERP (dev / prod / etc.).<br/><b>Pour les admins seulement</b>
     public_base_url: 
         label: Base URL Publique
+        info: Base de l'URL pour l'accès public à certaines pages de l'ERP.
+        warning: Différent de l'URL de l'espace client (cf bimpinterfaceclient) 
+        
     date_archive: 
         label: Date archive
+        def: ''
     
     # Defaults: 
+    default_id_entrepot: 
+        label: ID Entrepôt par défaut
+        cat: defaults
+        required: 1
     id_default_tva_tx: 
         label: ID du taux de TVA par défaut
         cat: defaults
@@ -116,19 +124,27 @@ params:
         def: 0
         
     # E-mails: 
+    public_default_reply_to_email: 
+        label: reply_to par défaut pour les e-mails publics
+        cat: emails
+        def: ''
     email_compta: 
         label: Adresse e-mail service comptabilité
         cat: emails
+        def: ''
     emails_notify_status_client_change: 
         label: Adresses e-mail pour la notification du changement de statut des clients
         cat: emails
         help: Laisser vide pour désactiver cette notification
+        def: ''
     emails_notify_solvabilite_client_change_man: 
         label: Adresse e-mail pour notification changement de solvabilité client (manuelle)
         cat: emails
+        def: ''
     emails_notify_solvabilite_client_change_auto: 
         label: Adresse e-mail pour notification changement de solvabilité client (auto)
         cat: emails
+        def: ''
         
     # Produits
     use_valid_product: 
@@ -202,3 +218,16 @@ params:
         cat: cache
         type: bool
         def: 1
+        
+    use_cache_for_extrafields: 
+        label: Utiliser le cache pour le extrafields Dolibarr
+        type: bool
+        def: 0
+        warning: Ne pas activer pour le moment, la fonctionnalité semble ne pas fonctionner correctement
+        
+    use_cache_for_cards: 
+        label: Mettre les cards (mini-fiche) en cache pour les BimpObjects
+        cat: cache
+        type: bool
+        def: 0
+        

@@ -1896,7 +1896,7 @@ class BT_ficheInter extends BimpDolObject
                 $actioncomm->label = $fi->getRef();
                 $actioncomm->note = $fi->getData('description');
                 $actioncomm->punctual = 1;
-                $actioncomm->userownerid = BimpCore::getConf('default_id_user_actioncomm', null, 'bimptechnique');
+                $actioncomm->userownerid = (int) BimpCore::getConf('default_id_user_actioncomm', null, 'bimptechnique');
                 $actioncomm->elementtype = 'fichinter';
                 $actioncomm->type_id = (int) BimpTools::getArrayValueFromPath($data, 'type_planning', 0);
                 $actioncomm->datep = $data['le'] . " " . $data['de'];
@@ -2600,7 +2600,7 @@ class BT_ficheInter extends BimpDolObject
                                         'id_obj' => (int) $new_facture->id)
                             )
             );
-            $service_de_reference = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', BimpCore::getConf('id_serv19', 0, 'bimptechnique'));
+            $service_de_reference = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) BimpCore::getConf('id_serv19', 0, 'bimptechnique'));
             if ($service_de_reference->isLoaded()) {
                 $new_factureLine->pu_ht = $service_de_reference->getData('price');
 
@@ -2618,7 +2618,7 @@ class BT_ficheInter extends BimpDolObject
                 $new_factureLine->qty = $qty;
                 $new_factureLine->id_product = $service_de_reference->id;
                 $new_factureLine->tva_tx = 20;
-                $new_factureLine->pa_ht = $qty * BimpCore::getConf('cout_horaire_technicien', null, 'bimptechnique');
+                $new_factureLine->pa_ht = $qty * (float) BimpCore::getConf('cout_horaire_technicien', null, 'bimptechnique');
                 $errors = BimpTools::merge_array($errors, $new_factureLine->create($warnings, true));
             }
 

@@ -445,7 +445,7 @@ class Bimp_Product extends BimpObject
 
     public function isVendable(&$errors, $urgent = false, $mail = true)
     {
-        if (BimpCore::getConf('use_valid_product') && $this->dol_field_exists('validate')) {
+        if ((int) BimpCore::getConf('use_valid_product') && $this->dol_field_exists('validate')) {
             if (!(int) $this->getData('validate')) {
                 $errors[] = 'Le produit "' . $this->getRef() . ' - ' . $this->getData('label') . '" n\'est pas validé';
                 if ($mail) {
@@ -1419,7 +1419,7 @@ class Bimp_Product extends BimpObject
             return 0;
         }
 
-        if (BimpCore::getConf('use_products_cur_pa_history')) {
+        if ((int) BimpCore::getConf('use_products_cur_pa_history')) {
             self::loadClass('bimpcore', 'BimpProductCurPa');
             $curPa = BimpProductCurPa::getProductCurPa($this->id, (string) $date);
 
@@ -1541,7 +1541,7 @@ class Bimp_Product extends BimpObject
 
             $pa_ht = 0;
 
-            if (BimpCore::getConf('use_products_cur_pa_history')) {
+            if ((int) BimpCore::getConf('use_products_cur_pa_history')) {
                 $pa_ht = (float) $this->getCurrentPaHt();
             } else {
                 if ((float) $this->getData('cur_pa_ht')) {
@@ -1643,7 +1643,7 @@ class Bimp_Product extends BimpObject
     {
         $errors = array();
         if ($this->isLoaded($errors)) {
-            if (BimpCore::getConf('use_products_cur_pa_history')) {
+            if ((int) BimpCore::getConf('use_products_cur_pa_history')) {
                 $curPa = $this->getCurrentPaObject(false);
                 if (!BimpObject::objectLoaded($curPa) ||
                         ((float) $curPa->getData('amount') !== (float) $pa_ht || (int) $curPa->getData('id_fourn_price') !== (int) $id_fourn_price)) {
@@ -1819,7 +1819,7 @@ class Bimp_Product extends BimpObject
         $html = '';
 
         if ($this->isLoaded()) {
-            if (BimpCore::getConf('use_products_cur_pa_history')) {
+            if ((int) BimpCore::getConf('use_products_cur_pa_history')) {
                 $curPa = $this->getCurrentPaObject();
                 if (BimpObject::objectLoaded($curPa)) {
                     $html .= '<span style="font-size: 16px; font-style: bold">' . BimpTools::displayMoneyValue((float) $curPa->getData('amount')) . '</span><br/>';

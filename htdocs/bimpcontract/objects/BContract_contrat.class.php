@@ -149,9 +149,8 @@ class BContract_contrat extends BimpDolObject
 
     function __construct($module, $object_name)
     {
-        global $user, $db;
         $this->redirectMode = 4;
-        $this->email_group = BimpCore::getConf('email_groupe', '', 'bimpcontract');
+        $this->email_group = BimpCore::getConf('email_groupe', '', 'bimpcontract'); // A éviter, faire getConf() à chaque fois que nécessaire
         $this->email_facturation = BimpCore::getConf('email_facturation', '', 'bimpcontract');
         return parent::__construct($module, $object_name);
     }
@@ -980,7 +979,7 @@ class BContract_contrat extends BimpDolObject
                         $ok = true;
 
                         // Il y a un commercial définit par défaut (bimpcore)
-                    } elseif ((int) BimpCore::getConf('user_as_default_commercial', 1)) {
+                    } elseif ((int) BimpCore::getConf('user_as_default_commercial', null, 'bimpcommercial')) {
                         $this->dol_object->add_contact($user->id, 'SALESREPFOLL', 'internal');
                         $ok = true;
 //                        die('CCCCCCCCCCCCCCCC');
@@ -1318,15 +1317,21 @@ class BContract_contrat extends BimpDolObject
 
     public function getName($withGeneric = true)
     {
+        // getName() doit renvoyer le nom sans aucun formatage html
         $objet = $this->getData('objet_contrat');
-        $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
+//        $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
         return "<span><i class='fas fa-" . self::$objet_contrat[$objet]['icon'] . "' ></i> " . self::$objet_contrat[$objet]['label'] . "</span>";
 
-        return self::$objet_contrat[$this->getData('objet_contrat')];
+//        return self::$objet_contrat[$this->getData('objet_contrat')];
     }
 
     public function getIndiceSyntec()
     {
+        // Eviter ce genre de fonction inutile (on ne va pas créer une fonction pour chaque param de conf!)
+        // Pour rappel : pas besoin de callback dans les yml, utiliser:
+        //   conf: 
+        //      module: ...
+        //      name: ...
         return BimpCore::getConf('current_indice_syntec');
     }
 
@@ -1582,7 +1587,7 @@ class BContract_contrat extends BimpDolObject
         $this->actionUpdateSyntec();
         $for_date_end = new DateTime($this->displayRealEndDate("Y-m-d"));
         $new_contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
-        if (BimpCore::getConf('USE_ENTREPOT'))
+        if ((int) BimpCore::getConf('USE_ENTREPOT'))
             $new_contrat->set('entrepot', $this->getData('entrepot'));
         $new_contrat->set('fk_soc', $this->getData('fk_soc'));
         $new_contrat->set('date_contrat', null);
@@ -3937,7 +3942,7 @@ class BContract_contrat extends BimpDolObject
         $commercial_for_entrepot = $this->getInstance('bimpcore', 'Bimp_User', $data['commercial_suivi']);
 
         $new_contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
-        if (BimpCore::getConf('USE_ENTREPOT'))
+        if ((int) BimpCore::getConf('USE_ENTREPOT'))
             $new_contrat->set('entrepot', ($commercial_for_entrepot->getData('defaultentrepot')) ? $commercial_for_entrepot->getData('defaultentrepot') : $propal->getData('entrepot'));
         $new_contrat->set('fk_soc', $fk_soc);
         $new_contrat->set('date_contrat', null);

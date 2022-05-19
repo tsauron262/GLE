@@ -40,7 +40,7 @@ class GSX_Repair extends BimpObject
 
     public function __construct($module, $object_name)
     {
-        $this->use_gsx_v2 = BimpCore::getConf('use_gsx_v2', 1, 'bimpapple');
+        $this->use_gsx_v2 = (int) BimpCore::getConf('use_gsx_v2', 1, 'bimpapple');
 
         parent::__construct($module, $object_name);
     }

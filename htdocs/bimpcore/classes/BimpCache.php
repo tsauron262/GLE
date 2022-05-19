@@ -1062,7 +1062,7 @@ class BimpCache
             $with_buttons = $object->getConf('cards/' . $card_name . '/view_btn', 0);
         }
 
-        if (BimpCore::getConf('bimpcore_user_cache_for_cards', 0)) {
+        if (BimpCore::getConf('use_cache_for_cards')) {
             $cache_key = 'bimp_object_' . $object->module . '_' . $object->object_name . '_' . $object->id . '_popover_card_' . $card_name;
 
             if ($with_buttons) {
@@ -1119,7 +1119,7 @@ class BimpCache
             }
         }
 
-        if (BimpCore::getConf('bimpcore_user_cache_for_cards', 0)) {
+        if (BimpCore::getConf('use_cache_for_cards')) {
             $cache_key = 'dol_object_' . get_class($dolObject) . '_' . $dolObject->id . '_popover_card_' . $card_name;
 
             if ($with_buttons) {
@@ -2732,7 +2732,7 @@ class BimpCache
 
     public static function getSecteursArray($include_empty = true)
     {
-        if (!BimpCore::getConf("USE_SECTEUR", 0)) {
+        if (!(int) BimpCore::getConf("USE_SECTEUR")) {
             return array();
         }
 
@@ -2754,7 +2754,7 @@ class BimpCache
 
     public static function getSecteursData()
     {
-        if (!BimpCore::getConf("USE_SECTEUR", 0)) {
+        if (!(int) BimpCore::getConf("USE_SECTEUR")) {
             return array();
         }
 
@@ -2817,7 +2817,7 @@ class BimpCache
     public function getSecteurAllArray()
     {
         // Comme getSecteursArray avec l'option "Tous" en plus
-        if (!BimpCore::getConf("USE_SECTEUR")) {
+        if (!(int) BimpCore::getConf("USE_SECTEUR")) {
             return array();
         }
 
@@ -2939,7 +2939,7 @@ class BimpCache
 
                 // Check du nombre de logs: 
                 if (!BimpCore::isModeDev()) {
-                    $mail_send = BimpCore::getConf('bimpcore_to_much_logs_email_send', 0);
+                    $mail_send = (int) BimpCore::getConf('bimpcore_to_much_logs_email_send', 0);
                     if (count($rows) > 500) {
                         if (!$mail_send) {
                             $message = 'Il y a plus de 500 entrées à traiter dans les logs.' . "\n\n";
@@ -3024,7 +3024,7 @@ class BimpCache
 
     public static function checkMemory()
     {
-        if (!BimpCore::getConf('bimpcache_check_memory_enabled')) {
+        if (!(int) BimpCore::getConf('bimpcache_check_memory_enabled')) {
             return;
         }
 

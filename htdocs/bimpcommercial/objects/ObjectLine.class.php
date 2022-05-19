@@ -56,18 +56,6 @@ class ObjectLine extends BimpObject
     public $bimp_line_only = false;
     protected $remises_total_infos = null;
 
-    public function __construct($module, $object_name)
-    {
-        global $use_freeline;
-        global $use_freelineOK;
-        if (!isset($use_freelineOK) || $use_freelineOK != true) {
-            $use_freeline = (BimpCore::getConf("use_freeline") || BimpCore::getConf("LINE_FREE_ACTIVE"));
-            $use_freelineOK = true;
-        }
-
-        return parent::__construct($module, $object_name);
-    }
-
     // Gestion des droits utilisateurs:
 
     public function canEditField($field_name)
@@ -557,7 +545,7 @@ class ObjectLine extends BimpObject
             self::LINE_SUB_TOTAL => 'Sous-total'
         );
 
-        if (BimpCore::getConf('LINE_FREE_ACTIVE') || BimpCore::getConf("use_freeline")) {
+        if ((int) BimpCore::getConf('use_free_objectline', null, 'bimpcommercial')) {
             $types[self::LINE_FREE] = 'Ligne libre';
         }
 

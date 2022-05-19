@@ -730,7 +730,7 @@ class Bimp_Client extends Bimp_Societe
         if (!is_null($rows)) {
             require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/RelancePaiementPDF.php';
             BimpObject::loadClass('bimpcommercial', 'BimpRelanceClientsLine');
-            $relance_delay = BimpCore::getConf('relance_paiements_facture_delay_days', 15);
+            $relance_delay = (int) BimpCore::getConf('default_relance_paiements_delay_days', null, 'bimpcommercial');
             $excluded_modes_reglement = explode(',', BimpCore::getConf('relance_paiements_globale_excluded_modes_reglement', '', 'bimpcommercial'));
 
             foreach ($rows as $r) {

@@ -921,7 +921,7 @@ E-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72
                 $pdf1->Cell($W, 8, "", 1, null, 'L', true);
                 $pdf1->Cell($W, 8, "Signature", 1, null, 'L', true);
                 
-                $signed = (($contrat->statut == 1 || $contrat->statut == 11) && BimpCore::getConf('pdf_use_signature', 1, 'bimpcontract')) ? true : false;
+                $signed = (($contrat->statut == 1 || $contrat->statut == 11) && (int) BimpCore::getConf('pdf_use_signature', null, 'bimpcontract')) ? true : false;
                 
                 if($signed) {
                     $choosed_signature = ($bimp_contract->getData('secteur') == "CTE") ? "signed_education.png" : "signed_contrat.png";

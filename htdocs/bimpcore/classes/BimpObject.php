@@ -949,7 +949,7 @@ class BimpObject extends BimpCache
             }
         }
 
-        if ($with_card && !(int) BimpCore::getConf('mode_eco', 0)) {
+        if ($with_card && !(int) BimpCore::getConf('mode_eco')) {
             $card = BimpTools::getArrayValueFromPath($this->params, 'nom_url/card', '');
 
             if ($card) {
@@ -1806,7 +1806,7 @@ class BimpObject extends BimpCache
 
     public function getTaxeIdDefault()
     {
-        return (int) BimpCore::getConf('id_default_tva_tx', 0);
+        return (int) BimpCore::getConf('id_default_tva_tx');
     }
 
     public function getDefaultTva()
@@ -2043,7 +2043,7 @@ class BimpObject extends BimpCache
             if (isset($result['errors']) && count($result['errors'])) {
                 $instance->db->db->rollback();
 
-                if ((int) BimpCore::getConf('log_actions_rollbacks', 0)) {
+                if ((int) BimpCore::getConf('log_actions_rollbacks')) {
                     BimpCore::addlog('Rollback suite à action', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $instance, array(
                         'Action'  => $action,
                         'Erreurs' => $result['errors']
@@ -4234,7 +4234,7 @@ class BimpObject extends BimpCache
                 if (count($errors)) {
                     $this->db->db->rollback();
 
-                    if ((int) BimpCore::getConf('log_actions_rollbacks', 0)) {
+                    if ((int) BimpCore::getConf('log_actions_rollbacks')) {
                         BimpCore::addlog('Rollback Save from post', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $this, array(
                             'Erreurs' => $errors
                                 ), true);
@@ -8475,7 +8475,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
         global $no_bimp_object_link_cards;
 
-        if (!$no_bimp_object_link_cards && !BimpCore::getConf('mode_eco', 0)) {
+        if (!$no_bimp_object_link_cards && !(int) BimpCore::getConf('mode_eco')) {
             $no_bimp_object_link_cards = true;
             $card_name = '';
 

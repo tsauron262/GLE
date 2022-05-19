@@ -548,7 +548,7 @@ class BimpCore
         if (!$bimp_logs_locked) {
             $bimp_logs_locked = 1;
             $extra_data = BimpTools::merge_array(static::$logs_extra_data, $extra_data);
-            if (BimpCore::isModeDev() && (int) self::getConf('print_bimp_logs', 1) && !defined('NO_BIMPLOG_PRINTS')) {
+            if (BimpCore::isModeDev() && (int) self::getConf('print_bimp_logs') && !defined('NO_BIMPLOG_PRINTS')) {
                 $bt = debug_backtrace(null, 30);
 
                 $html = 'LOG ' . Bimp_Log::$levels[$level]['label'] . '<br/><br/>';
@@ -570,11 +570,11 @@ class BimpCore
                 die($html);
             }
 
-            if (!$force && $level < Bimp_Log::BIMP_LOG_ERREUR && (int) BimpCore::getConf('mode_eco', 0)) {
+            if (!$force && $level < Bimp_Log::BIMP_LOG_ERREUR && (int) BimpCore::getConf('mode_eco')) {
                 return array();
             }
 
-            if (!(int) BimpCore::getConf('use_bimp_logs', 0) && !(int) BimpTools::getValue('use_logs', 0)) {
+            if (!(int) BimpCore::getConf('use_bimp_logs') && !(int) BimpTools::getValue('use_logs', 0)) {
                 return array();
             }
 

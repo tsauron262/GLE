@@ -370,7 +370,7 @@ class Bimp_Commande extends BimpComm
             }
 
             if (!count($errors) && !defined('NOT_VERIF')) {
-                if ($this->getData('ef_type') !== 'M' && !(int) BimpCore::getConf('NOT_FORCE_CONTACT')) {
+                if ($this->getData('ef_type') !== 'M' && (int) BimpCore::getConf('contact_facturation_required_for_commandes', null, 'bimpcommercial')) {
                     // Vérif du contact facturation: 
                     $tabConatact = $this->dol_object->getIdContact('external', 'BILLING2');
                     if (count($tabConatact) < 1) {
@@ -1064,7 +1064,7 @@ class Bimp_Commande extends BimpComm
             return (int) $this->data['fk_mode_reglement']; // pas getData() sinon boucle infinie (getModeReglementBySociete() étant définie en tant que callback du param default_value pour ce champ). 
         }
 
-        return BimpCore::getConf('societe_id_default_mode_reglement', 0);
+        return (int) BimpCore::getConf('societe_id_default_mode_reglement', 0);
     }
 
     // Rendus HTML: 

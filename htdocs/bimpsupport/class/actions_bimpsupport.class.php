@@ -69,7 +69,7 @@ class ActionsBimpsupport
 
         $mode_eco = true;
         if (defined('BIMP_LIB')) {
-            $mode_eco = (int) BimpCore::getConf('mode_eco', 0);
+            $mode_eco = (int) BimpCore::getConf('mode_eco');
         } else {
             $res = $db->query('SELECT value FROM llx_bimpcore_conf WHERE name = \'mode_eco\' AND module = \'bimpcore\'');
             if ($res && $db->num_rows($res)) {

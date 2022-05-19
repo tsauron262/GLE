@@ -117,7 +117,7 @@ class histoNavigation
         }
 
         if (defined('BIMP_LIB')) {
-            self::$mode_eco = (int) BimpCore::getConf('mode_eco', 0);
+            self::$mode_eco = (int) BimpCore::getConf('mode_eco');
         } else {
             global $db;
             $res = $db->query('SELECT value FROM llx_bimpcore_conf WHERE name = \'mode_eco\' AND module = \'bimpcore\'');

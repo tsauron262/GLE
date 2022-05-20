@@ -86,6 +86,11 @@ params:
         type: bool
         def: 0
         
+    use_link_achat_fourn_equipment: 
+        label: Equipements sélectionnables à la création des commandes fournisseur
+        type: bool
+        def: 0
+        
     # PDFs: 
     pdf_add_cgv: 
         label: Ajouter CGV dans les docs PDF

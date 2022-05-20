@@ -110,7 +110,9 @@ sections:
                 custom:
                     callback: renderAchats
             show:
-                  conf: useLinkAchatFournEquipment
+                  conf: 
+                      module: bimpcommercial
+                      name: use_link_achat_fourn_equipment
                     
           - id: divers
             title: Divers (admin)

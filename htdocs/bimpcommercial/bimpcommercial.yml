@@ -5,6 +5,13 @@ categories:
         label: Relances clients
         
 params: 
+    test_val_base: 
+        label: test_val_base
+    test_def_val: 
+        label: test_def_val
+        def: DEF VAL YML OK
+    test_no_val: 
+        label: test_no_val
     date_debut_exercice: 
         label: Date début exercice
         def: 2020-04-01

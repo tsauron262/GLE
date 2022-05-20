@@ -1284,3 +1284,35 @@ searches:
         extends: default
         filters: 
             a.tobuy: 1
+
+test_val_base:
+    conf: 
+        module: bimpcommercial
+        name: test_val_base
+        
+test_def_yml: 
+    conf: 
+        module: bimpcommercial
+        name: test_def_val
+        
+test_def_conf: 
+    conf: 
+        module: bimpcommercial
+        name: test_def_val
+        def: CONF VAL OK
+        
+test_no_val: 
+    conf: 
+        module: bimpcommercial
+        name: test_no_val
+        
+test_no_param: 
+    conf: 
+        module: bimpcommercial
+        name: dskjhdjf
+        
+test_module: 
+    conf: 
+        module: bimpcore
+        name: test_val_base
+    

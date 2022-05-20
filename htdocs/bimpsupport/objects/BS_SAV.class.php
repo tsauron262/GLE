@@ -4933,7 +4933,7 @@ class BS_SAV extends BimpObject
 //        }
 
         $propal = $this->getChildObject('propal');
-        $impayee = $propal->dol_object->total_ttc - $data['paid'];
+        $impayee = $propal->dol_object->total_ttc - (float) BimpTools::getArrayValueFromPath($data, 'paid', 0);
         if ($impayee > 1) {
             //on vérifie encours
             $client = $this->getChildObject('client');

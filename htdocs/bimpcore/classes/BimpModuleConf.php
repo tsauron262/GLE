@@ -6,8 +6,8 @@ class BimpModuleConf
     public $module = '';
     public $config = null;
     public static $category_def = array(
-        'label'      => array('label' => 'Nom', 'required' => 1),
-        'desc'       => array('label' => 'Description', 'default' => ''),
+        'label' => array('label' => 'Nom', 'required' => 1),
+        'desc'  => array('label' => 'Description', 'default' => ''),
     );
     public static $param_def = array(
         'label'    => array('label' => 'Nom', 'required' => 1),
@@ -436,7 +436,7 @@ class BimpModuleConf
         $params = $conf->getFullParamsData();
 
         if ($log_param_unfound && !isset($params[$name])) {
-            BimpCore::addlog('Paramètre de conf non trouvé', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
+            BimpCore::addlog('Paramètre de conf non trouvé: ' . $name . ' (' . $module . ')', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
                 'Module'    => $module,
                 'Paramètre' => $name
                     ), 1);

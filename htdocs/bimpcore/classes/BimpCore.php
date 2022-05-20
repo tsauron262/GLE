@@ -237,6 +237,7 @@ class BimpCore
         // on retourne null sinon. 
         // Le système de cache permet de vérifier une seule fois la valeur en base et la valeur par défaut du YML. 
 
+
         if (!$module) {
             $module = 'bimpcore';
         }
@@ -244,8 +245,12 @@ class BimpCore
         $cache = self::getConfCache();
 
         if (isset($cache[$module][$name])) {
+//            echo '<br/>OK: ' . $name . ': ' . $cache[$module][$name];
             return $cache[$module][$name];
-        }
+        } 
+//        else {
+//            echo '<br/>FAIL: ' . $name;
+//        }
 
         // Check éventuelle erreur sur le module: 
         foreach ($cache as $module_name => $params) {

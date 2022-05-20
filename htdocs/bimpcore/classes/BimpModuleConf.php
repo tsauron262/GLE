@@ -57,14 +57,16 @@ class BimpModuleConf
         if (!is_null($this->config)) {
             $params = $this->config->getCompiledParams('params');
 
-            foreach ($params as $name => $param_def) {
-                $category = BimpTools::getArrayValueFromPath($param_def, 'cat', '');
+            if (is_array($params) && !empty($params)) {
+                foreach ($params as $name => $param_def) {
+                    $category = BimpTools::getArrayValueFromPath($param_def, 'cat', '');
 
-                if (!isset($categories[$category])) {
-                    $categories[$category] = array();
+                    if (!isset($categories[$category])) {
+                        $categories[$category] = array();
+                    }
+
+                    $categories[$category][$name] = $param_def;
                 }
-
-                $categories[$category][$name] = $param_def;
             }
         }
 

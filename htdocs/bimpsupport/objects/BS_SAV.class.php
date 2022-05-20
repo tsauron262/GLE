@@ -5371,7 +5371,7 @@ class BS_SAV extends BimpObject
             }
         }
 
-        $use_db_transactions = (int) BimpCore::getConf('bimpcore_use_db_transactions');
+        $use_db_transactions = (int) BimpCore::getConf('use_db_transactions');
 
         if (!count($errors)) {
             if ($use_db_transactions) {
@@ -6194,7 +6194,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                     $fac_errors = $this->createAccompte((float) $this->getData('acompte'), false);
                     if (count($fac_errors)) {
                         $fac_errors = BimpTools::merge_array(array('Des erreurs sont survenues lors de la création de la facture d\'acompte'), $fac_errors);
-                        if ((int) BimpCore::getConf('bimpcore_use_db_transactions'))
+                        if ((int) BimpCore::getConf('use_db_transactions'))
                             $errors = BimpTools::merge_array($errors, $fac_errors);
                         else
                             $warnings = BimpTools::merge_array($warnings, $fac_errors);
@@ -6207,7 +6207,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         $prop_errors = $this->createPropal();
                         if (count($prop_errors)) {
                             $prop_errors = BimpTools::merge_array(array('Des erreurs sont survenues lors de la création de la proposition commerciale'), $prop_errors);
-                            if ((int) BimpCore::getConf('bimpcore_use_db_transactions'))
+                            if ((int) BimpCore::getConf('use_db_transactions'))
                                 $errors = BimpTools::merge_array($errors, $prop_errors);
                             else
                                 $warnings = BimpTools::merge_array($warnings, $prop_errors);

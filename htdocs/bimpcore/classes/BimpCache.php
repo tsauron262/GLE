@@ -2732,9 +2732,9 @@ class BimpCache
 
     public static function getSecteursArray($include_empty = true)
     {
-//        if (!(int) BimpCore::getConf('USE_SECTEUR')) {
-//            return array();
-//        }
+        if (!(int) BimpCore::getConf("USE_SECTEUR")) {
+            return array();
+        }
 
         $cache_key = 'secteurs_array';
         if (!isset(self::$cache[$cache_key])) {
@@ -2754,9 +2754,9 @@ class BimpCache
 
     public static function getSecteursData()
     {
-//        if (!(int) BimpCore::getConf("USE_SECTEUR")) {
-//            return array();
-//        }
+        if (!(int) BimpCore::getConf("USE_SECTEUR")) {
+            return array();
+        }
 
         $cache_key = 'secteurs_data';
         if (!isset(self::$cache[$cache_key])) {
@@ -2817,9 +2817,9 @@ class BimpCache
     public function getSecteurAllArray()
     {
         // Comme getSecteursArray avec l'option "Tous" en plus
-//        if (!(int) BimpCore::getConf("USE_SECTEUR")) {
-//            return array();
-//        }
+        if (!(int) BimpCore::getConf("USE_SECTEUR")) {
+            return array();
+        }
 
         if (!isset(self::$cache['secteurs_all_array'])) {
             self::$cache['secteurs_all_array'] = array(

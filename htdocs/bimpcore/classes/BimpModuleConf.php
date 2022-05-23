@@ -238,7 +238,7 @@ class BimpModuleConf
             $html .= '<table class="bimp_list_table module_conf_params">';
             $html .= '<tbody>';
 
-            $can_edit = BimpCore::isModeDev();
+            $can_edit = BimpCore::isUserDev();
 
             foreach ($params as $name => $param_defs) {
                 $type = BimpTools::getArrayValueFromPath($param_defs, 'type', 'string');

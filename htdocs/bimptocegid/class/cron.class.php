@@ -38,8 +38,8 @@
         
         public function automatique() {
             global $db;
-            $this->version_tra = BimpCore::getConf('BIMPTOCEGID_version_tra');
-            $this->entitie = BimpCore::getConf('BIMPTOCEGID_file_entity');
+            $this->version_tra = BimpCore::getConf('version_tra');
+            $this->entitie = BimpCore::getConf('file_entity');
             $this->export_class = new export($db);
             $this->export_class->create_daily_files();
             $this->files_for_ftp = $this->getFilesArrayForTranfert();
@@ -240,7 +240,7 @@
                 $logs .= implode("\n", $this->rapport['MENAGE']);
             }
             
-           // BimpCore::setConf('BIMPTOCEGID_last_export_date', date('Y-m-d'));
+           // BimpCore::setConf('last_export_date', date('Y-m-d'));
 
             $logs .= "\n\nListe des factures en cas d'erreurs: \n" . implode(',' , $saveArrayFacture) . "\n";
             $logs .= "Liste des paiement en cas d'erreurs: \n" . implode(',' , $saveArrayPaiement) . "\n";

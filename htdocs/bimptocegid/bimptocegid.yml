@@ -1,0 +1,53 @@
+categories:
+    ventes:
+        label: Ventes (Compte 7)
+    achats:
+        label: Achats (Compte 6)
+    autre:
+        label: Autres configurations du module
+
+params:
+    # Les ventes
+    vente_dee_fr:
+        label: Compte vente D3E (France)
+        required: 1
+        cat: ventes
+    vente_dee_ue:
+        label: Compte vente D3E (Europe)
+        required: 1
+        cat: ventes
+    vente_produit_fr:
+        label: Compte vente de produit (France)
+        required: 1
+        cat: ventes
+    vente_service_fr:
+        label: Compte vente de service (France)
+        required: 1
+        cat: ventes
+    vente_produit_ue:
+        label: Compte vente de produit (Europe)
+        required: 1
+        cat: ventes
+    vente_service_ue:
+        label: Compte vente de service (Europe)
+        required: 1
+        cat: ventes
+        
+    # Les achats
+    achat_dee_fr:
+        label: Compte achat D3E (France)
+        required: 1
+        cat: achats
+    achat_dee_ue:
+        label: Compte achat D3E (Europe)
+        required: 1
+        cat: achats
+    achat_produit_fr:
+        label: Compte achat de produit (France)
+        required: 1
+        cat: achats
+    achat_service_fr:
+        label: Compte achat de service (France)
+        required: 1
+        cat: achats
+        

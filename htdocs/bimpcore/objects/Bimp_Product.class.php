@@ -541,31 +541,31 @@ class Bimp_Product extends BimpObject
             if ($zone_vente == 1) {
                 if ($tvaTaux == 0 ||
                         ($tvaTaux == 1 && $this->getData('tva_tx') == 0)) {
-                    return BimpCore::getConf('BIMPTOCEGID_achat_tva_null');
+                    return BimpCore::getConf('achat_tva_null');
                 }
-                return BimpCore::getConf('BIMPTOCEGID_achat_produit_fr');
+                return BimpCore::getConf('achat_produit_fr');
             } elseif ($zone_vente == 2 || $zone_vente == 4)
-                return BimpCore::getConf('BIMPTOCEGID_achat_produit_ue');
+                return BimpCore::getConf('achat_produit_ue');
             elseif ($zone_vente == 3)
-                return BimpCore::getConf('BIMPTOCEGID_achat_produit_ex');
+                return BimpCore::getConf('achat_produit_ex');
         } elseif ($type == 1) { // Service
             if ($zone_vente == 1) {
                 if ($tvaTaux == 0 ||
                         ($tvaTaux == 1 && $this->getData('tva_tx') == 0)) {
-                    return BimpCore::getConf('BIMPTOCEGID_achat_tva_null_service');
+                    return BimpCore::getConf('achat_tva_null_service');
                 }
-                return BimpCore::getConf('BIMPTOCEGID_achat_service_fr');
+                return BimpCore::getConf('achat_service_fr');
             } elseif ($zone_vente == 2 || $zone_vente == 4)
-                return BimpCore::getConf('BIMPTOCEGID_achat_service_ue');
+                return BimpCore::getConf('achat_service_ue');
             elseif ($zone_vente == 3)
-                return BimpCore::getConf('BIMPTOCEGID_achat_service_ex');
+                return BimpCore::getConf('achat_service_ex');
         } elseif ($type == 2) { // Frais de port
             if ($zone_vente == 1)
-                return BimpCore::getConf('BIMPTOCEGID_frais_de_port_achat_fr');
+                return BimpCore::getConf('frais_de_port_achat_fr');
             elseif ($zone_vente == 2 || $zone_vente == 4)
-                return BimpCore::getConf('BIMPTOCEGID_frais_de_port_achat_ue');
+                return BimpCore::getConf('frais_de_port_achat_ue');
             elseif ($zone_vente == 3)
-                return BimpCore::getConf('BIMPTOCEGID_frais_de_port_achat_ex');
+                return BimpCore::getConf('frais_de_port_achat_ex');
         }
     }
 
@@ -585,39 +585,39 @@ class Bimp_Product extends BimpObject
         if ($type == 0) {//Produit
             if ($zone_vente == 1) {
                 if ($this->getData('tva_tx') == 0) {
-                    return BimpCore::getConf('BIMPTOCEGID_vente_tva_null');
+                    return BimpCore::getConf('vente_tva_null');
                 }
-                return BimpCore::getConf('BIMPTOCEGID_vente_produit_fr');
+                return BimpCore::getConf('vente_produit_fr');
             } elseif ($zone_vente == 2 || $zone_vente == 4)
-                return BimpCore::getConf('BIMPTOCEGID_vente_produit_ue');
+                return BimpCore::getConf('vente_produit_ue');
             elseif ($zone_vente == 3)
-                return BimpCore::getConf('BIMPTOCEGID_vente_produit_ex');
+                return BimpCore::getConf('vente_produit_ex');
         } elseif ($type == 1) {//service
             if ($zone_vente == 1) {
                 if ($this->getData('tva_tx') == 0) {
-                    return BimpCore::getConf('BIMPTOCEGID_vente_tva_null');
+                    return BimpCore::getConf('vente_tva_null');
                 }
-                return BimpCore::getConf('BIMPTOCEGID_vente_service_fr');
+                return BimpCore::getConf('vente_service_fr');
             }
             elseif ($zone_vente == 2 || $zone_vente == 4) {
-                return BimpCore::getConf('BIMPTOCEGID_vente_service_ue');
+                return BimpCore::getConf('vente_service_ue');
             }
             elseif ($zone_vente == 3)
-                return BimpCore::getConf('BIMPTOCEGID_vente_service_ex');
+                return BimpCore::getConf('vente_service_ex');
         } elseif ($type == 2) {//Port
             if ($zone_vente == 1)
-                return BimpCore::getConf('BIMPTOCEGID_frais_de_port_vente_fr');
+                return BimpCore::getConf('frais_de_port_vente_fr');
             elseif ($zone_vente == 2 || $zone_vente == 4)
-                return BimpCore::getConf('BIMPTOCEGID_frais_de_port_vente_ue');
+                return BimpCore::getConf('frais_de_port_vente_ue');
             elseif ($zone_vente == 3)
-                return BimpCore::getConf('BIMPTOCEGID_frais_de_port_vente_ex');
+                return BimpCore::getConf('frais_de_port_vente_ex');
         } elseif ($type == 3) {//commission
             if ($zone_vente == 1)
-                return BimpCore::getConf('BIMPTOCEGID_comissions_fr');
+                return BimpCore::getConf('comissions_fr');
             elseif ($zone_vente == 2 || $zone_vente == 4)
-                return BimpCore::getConf('BIMPTOCEGID_comissions_ue');
+                return BimpCore::getConf('comissions_ue');
             elseif ($zone_vente == 3)
-                return BimpCore::getConf('BIMPTOCEGID_comissions_ex');
+                return BimpCore::getConf('comissions_ex');
         }
         return false;
     }
@@ -625,18 +625,18 @@ class Bimp_Product extends BimpObject
     public function getCodeComptableVenteTva($zone_vente = 1)
     {
         if ($zone_vente == 1)
-            return BimpCore::getConf('BIMPTOCEGID_vente_tva_fr');
+            return BimpCore::getConf('vente_tva_fr');
         elseif ($zone_vente == 2 || $zone_vente == 4)
-            return BimpCore::getConf('BIMPTOCEGID_vente_tva_ue');
+            return BimpCore::getConf('vente_tva_ue');
         return false;
     }
 
     public function getCodeComptableVenteDeee($zone_vente = 1)
     {
         if ($zone_vente == 1)
-            return BimpCore::getConf('BIMPTOCEGID_vente_dee_fr');
+            return BimpCore::getConf('vente_dee_fr');
 //        elseif($zone_vente == 2 || $zone_vente == 4)
-//            return BimpCore::getConf('BIMPTOCEGID_vente_dee_ue');
+//            return BimpCore::getConf('vente_dee_ue');
         return false;
     }
 

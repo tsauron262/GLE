@@ -59,78 +59,78 @@ class modBimptocegid extends DolibarrModules {
         $sql = array();
 
         // DEEE
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_vente_dee_fr", 70882000)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_vente_dee_ue", 70882000)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_achat_dee_fr", 61111000)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_achat_dee_ue", 61113000)';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("vente_dee_fr", 70882000, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("vente_dee_ue", 70882000, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("achat_dee_fr", 61111000, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("achat_dee_ue", 61113000, "bimptocegid")';
         // France
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_vente_produit_fr", 70700000)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_vente_service_fr", 70600000)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_achat_produit_fr", 60700000)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_achat_service_fr", 60410000)';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("vente_produit_fr", 70700000, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("vente_service_fr", 70600000, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("achat_produit_fr", 60700000, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("achat_service_fr", 60410000, "bimptocegid")';
         // Europe
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_vente_produit_ue", 70792000)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_vente_service_ue", 70692100)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_achat_produit_ue", 60794000)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_achat_service_ue", 60492100)';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("vente_produit_ue", 70792000, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("vente_service_ue", 70692100, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("achat_produit_ue", 60794000, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("achat_service_ue", 60492100, "bimptocegid")';
         // Export
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_vente_produit_ex", 70790000)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_vente_service_ex", 70691100)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_achat_produit_ex", 60790000)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_achat_service_ex", 60491100)';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("vente_produit_ex", 70790000, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("vente_service_ex", 70691100, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("achat_produit_ex", 60790000, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("achat_service_ex", 60491100, "bimptocegid")';
         //TVA
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_autoliquidation_tva_666", 44566600)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_autoliquidation_tva_711", 44571100)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_vente_tva_fr", 44571000)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_vente_tva_ue", 44571200)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_vente_tva_null", 70750100)';
-        //$sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_vente_tva_null_service", 70650100)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_achat_tva_fr", 44566100)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_achat_tva_null", 60780000)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_achat_tva_null_service", 60480000)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_achat_tva_france_01", 44560100)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_achat_tva_france_02", 44560200)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_achat_tva_france_03", 44560300)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_achat_tva_france_04", 44560400)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_achat_tva_france_05", 44560500)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_achat_tva_france_06", 44560600)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_achat_tva_france_07", 44560700)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_achat_tva_france_08", 44560800)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_achat_tva_france_09", 44560900)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_achat_tva_france_10", 44561000)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_achat_tva_france_11", 44561100)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_achat_tva_france_12", 44561200)';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("autoliquidation_tva_666", 44566600, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("autoliquidation_tva_711", 44571100, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("vente_tva_fr", 44571000, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("vente_tva_ue", 44571200, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES (vente_tva_null", 70750100, "bimptocegid")';
+        //$sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("vente_tva_null_service", 70650100)';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("achat_tva_fr", 44566100, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("achat_tva_null", 60780000, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("achat_tva_null_service", 60480000, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("achat_tva_france_01", 44560100, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("achat_tva_france_02", 44560200, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("achat_tva_france_03", 44560300, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("achat_tva_france_04", 44560400, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("achat_tva_france_05", 44560500, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("achat_tva_france_06", 44560600, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("achat_tva_france_07", 44560700, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("achat_tva_france_08", 44560800, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("achat_tva_france_09", 44560900, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("achat_tva_france_10", 44561000, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("achat_tva_france_11", 44561100, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("achat_tva_france_12", 44561200, "bimptocegid")';
         // Remise fournisseur
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_avoir_fournisseur_fr", 60700000)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_avoir_fournisseur_ue", 60794000)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_avoir_fournisseur_ex", 60790000)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_rfa_fournisseur_fr", 60970000)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_rfa_fournisseur_ue", 60973000)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_rfa_fournisseur_ex", 60974000)';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("avoir_fournisseur_fr", 60700000, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("avoir_fournisseur_ue", 60794000, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("avoir_fournisseur_ex", 60790000, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("rfa_fournisseur_fr", 60970000, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("rfa_fournisseur_ue", 60973000, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("rfa_fournisseur_ex", 60974000, "bimptocegid")';
         // Ca   s particulier Apple
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_achat_fournisseur_apple", 60793000)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_avoir_fournisseur_apple", 60793000)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_rfa_fournisseur_apple", 60973000)';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("achat_fournisseur_apple", 60793000, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("avoir_fournisseur_apple", 60793000, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("rfa_fournisseur_apple", 60973000, "bimptocegid")';
         // Frais de port achat
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_frais_de_port_achat_fr", 62410000)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_frais_de_port_achat_ue", 62413000)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_frais_de_port_achat_ex", 62419000)';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("frais_de_port_achat_fr", 62410000, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("frais_de_port_achat_ue", 62413000, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("frais_de_port_achat_ex", 62419000, "bimptocegid")';
         // Frais de port vente
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_frais_de_port_vente_fr", 70850000)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_frais_de_port_vente_ue", 70859300)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_frais_de_port_vente_ex", 70859000)';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("frais_de_port_vente_fr", 70850000, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("frais_de_port_vente_ue", 70859300, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("frais_de_port_vente_ex", 70859000, "bimptocegid")';
         // Commissions
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_comissions_fr", 70820000)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_comissions_ue", 70829100)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_comissions_ex", 70829000)';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("comissions_fr", 70820000, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("comissions_ue", 70829100, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("comissions_ex", 70829000, "bimptocegid")';
         //refacturation filliales
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_refacturation_ht", 79100000)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_refacturation_ttc", 79119000)';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("refacturation_ht", 79100000, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("refacturation_ttc", 79119000, "bimptocegid")';
         
         //Config
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPTOCEGID_code_fournisseur_apple", "0000001000000000")';
-        $sql[] = 'INSERT INTO `'. MAIN_DB_PREFIX . 'bimpcore_conf` (`name`, `value`) VALUES ("BIMPTOCEGID_default_entrepot", 50)';
-        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("BIMPtoCEGID_start_current_trimestre", "2019-07-01")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("code_fournisseur_apple", "0000001000000000", "bimptocegid")';
+        $sql[] = 'INSERT INTO `'. MAIN_DB_PREFIX . 'bimpcore_conf` (`name`, `value`, module) VALUES ("default_entrepot", 50, "bimptocegid")';
+        $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value, module) VALUES ("start_current_trimestre", "2019-07-01", "bimptocegid")';
         
         
         $extrafields = new ExtraFields($this->db);

@@ -1,0 +1,112 @@
+categories:
+    ventes:
+        label: Ventes (Compte 7)
+    achats:
+        label: Achats (Compte 6)
+    tva:
+        label: Configuration liée à la TVA
+    fourn:
+        label: Fournisseurs
+    autre:
+        label: Autres configurations du module
+
+params:
+    # Les ventes
+    vente_dee_fr:
+        label: Compte vente D3E (France)
+        required: 1
+        cat: ventes
+    vente_dee_ue:
+        label: Compte vente D3E (Europe)
+        required: 1
+        cat: ventes
+    vente_produit_fr:
+        label: Compte vente de produit (France)
+        required: 1
+        cat: ventes
+    vente_service_fr:
+        label: Compte vente de service (France)
+        required: 1
+        cat: ventes
+    vente_produit_ue:
+        label: Compte vente de produit (Europe)
+        required: 1
+        cat: ventes
+    vente_service_ue:
+        label: Compte vente de service (Europe)
+        required: 1
+        cat: ventes
+    vente_produit_ex:
+        label: Compte vente de produit (Export)
+        required: 1
+        cat: ventes
+    vente_service_ex:
+        label: Compte vente de service (Export)
+        required: 1
+        cat: ventes
+        
+    # Les achats
+    achat_dee_fr:
+        label: Compte achat D3E (France)
+        required: 1
+        cat: achats
+    achat_dee_ue:
+        label: Compte achat D3E (Europe)
+        required: 1
+        cat: achats
+    achat_produit_fr:
+        label: Compte achat de produit (France)
+        required: 1
+        cat: achats
+    achat_service_fr:
+        label: Compte achat de service (France)
+        required: 1
+        cat: achats
+    achat_produit_ue:
+        label: Compte achat de produit (Europe)
+        required: 1
+        cat: achats
+    achat_service_ue:
+        label: Compte achat de service (Europe)
+        required: 1
+        cat: achats
+    achat_produit_ex:
+        label: Compte achat de produit (Export)
+        required: 1
+        cat: achats
+    achat_service_ex:
+        label: Compte achat de service (Export)
+        required: 1
+        cat: achats
+    
+    # La TVA
+    autoliquidation_tva_666:
+        label: Compte d'autoliquidation d'achat de TVA
+        required: 1
+        cat: tva
+    autoliquidation_tva_711:
+        label: Compte d'autoliquidation de vente de TVA
+        required: 1
+        cat: tva
+    vente_tva_fr:
+        label: Compte vente de TVA (France)
+        required: 1
+        cat: tva
+    vente_tva_ue:
+        label: Compte vente de TVA (Europe)
+        required: 1
+        cat: tva
+    achat_tva_null:
+        label: Compte achat de produits avec TVA 0% (France)
+        required: 1
+        cat: tva
+    achat_tva_null_service:
+        label: Compte achat de service avec TVA 0% (France)
+        required: 1
+        cat: tva
+    
+    # Fournisseurs
+    avoir_fournisseur_fr:
+        label: Compte d'avoir fournisseur (France)
+        required: 1
+        cat: fourn

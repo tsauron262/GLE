@@ -25,10 +25,10 @@ class controlleController extends BimpController {
                 if ($extention == 'tra') {
                     if (filesize($tra) > 148) {
                         $for_version = explode('_', $_REQUEST['tra']);
-                        if($for_version[4] == BimpCore::getConf('BIMPTOCEGID_version_tra') . '.tra') {
+                        if($for_version[4] == BimpCore::getConf('version_tra') . '.tra') {
                             $this->controlle(file($tra));
                         } else {
-                            echo BimpRender::renderAlerts("Le fichier <b>" . $_REQUEST['tra'] . "</b> n'est pas en version " . BimpCore::getConf('BIMPTOCEGID_version_tra'), 'danger', false);
+                            echo BimpRender::renderAlerts("Le fichier <b>" . $_REQUEST['tra'] . "</b> n'est pas en version " . BimpCore::getConf('version_tra'), 'danger', false);
                         }
                     } else {
                         echo BimpRender::renderAlerts("Le fichier <b>" . $_REQUEST['tra'] . "</b> ne comporte aucune écriture", 'danger', false);

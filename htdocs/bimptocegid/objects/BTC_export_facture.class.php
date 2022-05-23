@@ -45,36 +45,36 @@ class BTC_export_facture extends BTC_export
             $is_client_interco = true;
         }
 
-        $compte_general_tva_null = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_vente_tva_null'), $compte_general_411);
-        $compte_refact_ht = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_refacturation_ht'), $compte_general_411);
-        $compte_refact_ttc = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_refacturation_ttc'), $compte_general_411);
+        $compte_general_tva_null = $this->convertion_to_interco_code(BimpCore::getConf('vente_tva_null'), $compte_general_411);
+        $compte_refact_ht = $this->convertion_to_interco_code(BimpCore::getConf('refacturation_ht'), $compte_general_411);
+        $compte_refact_ttc = $this->convertion_to_interco_code(BimpCore::getConf('refacturation_ttc'), $compte_general_411);
         
         switch ($facture->getData('zone_vente')) {
             case 1:
-                $compte_general_produit = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_vente_produit_fr'), $compte_general_411);
-                $compte_general_service = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_vente_service_fr'), $compte_general_411);
-                $compte_general_tva = BimpCore::getConf('BIMPTOCEGID_vente_tva_fr');
-                $compte_general_d3e = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_vente_dee_fr'), $compte_general_411);
-                $compte_general_port = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_frais_de_port_vente_fr'), $compte_general_411);
-                $compte_general_comissions = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_comissions_fr'), $compte_general_411);
+                $compte_general_produit = $this->convertion_to_interco_code(BimpCore::getConf('vente_produit_fr'), $compte_general_411);
+                $compte_general_service = $this->convertion_to_interco_code(BimpCore::getConf('vente_service_fr'), $compte_general_411);
+                $compte_general_tva = BimpCore::getConf('vente_tva_fr');
+                $compte_general_d3e = $this->convertion_to_interco_code(BimpCore::getConf('vente_dee_fr'), $compte_general_411);
+                $compte_general_port = $this->convertion_to_interco_code(BimpCore::getConf('frais_de_port_vente_fr'), $compte_general_411);
+                $compte_general_comissions = $this->convertion_to_interco_code(BimpCore::getConf('comissions_fr'), $compte_general_411);
                 break;
             case 2:
                 $use_d3e = false;
                 $use_tva = ($societe->getData('tva_intra')) ? false : true;
-                $compte_general_produit = BimpCore::getConf('BIMPTOCEGID_vente_produit_ue');
-                $compte_general_service = BimpCore::getConf('BIMPTOCEGID_vente_service_ue');
-                $compte_general_tva = BimpCore::getConf('BIMPTOCEGID_vente_tva_ue');
-                $compte_general_d3e = BimpCore::getConf('BIMPTOCEGID_vente_dee_ue');
-                $compte_general_port = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_frais_de_port_vente_ue'), $compte_general_411);
-                $compte_general_comissions = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_comissions_ue'), $compte_general_411);
+                $compte_general_produit = BimpCore::getConf('vente_produit_ue');
+                $compte_general_service = BimpCore::getConf('vente_service_ue');
+                $compte_general_tva = BimpCore::getConf('vente_tva_ue');
+                $compte_general_d3e = BimpCore::getConf('vente_dee_ue');
+                $compte_general_port = $this->convertion_to_interco_code(BimpCore::getConf('frais_de_port_vente_ue'), $compte_general_411);
+                $compte_general_comissions = $this->convertion_to_interco_code(BimpCore::getConf('comissions_ue'), $compte_general_411);
                 break;
             case 3:
                 $use_d3e = false;
                 $use_tva = false;
-                $compte_general_produit = BimpCore::getConf('BIMPTOCEGID_vente_produit_ex');
-                $compte_general_service = BimpCore::getConf('BIMPTOCEGID_vente_service_ex');
-                $compte_general_port = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_frais_de_port_vente_ex'), $compte_general_411);
-                $compte_general_comissions = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_comissions_ex'), $compte_general_411);
+                $compte_general_produit = BimpCore::getConf('vente_produit_ex');
+                $compte_general_service = BimpCore::getConf('vente_service_ex');
+                $compte_general_port = $this->convertion_to_interco_code(BimpCore::getConf('frais_de_port_vente_ex'), $compte_general_411);
+                $compte_general_comissions = $this->convertion_to_interco_code(BimpCore::getConf('comissions_ex'), $compte_general_411);
                 break;
         }
 
@@ -458,7 +458,7 @@ class BTC_export_facture extends BTC_export
             $compte_general_411 = $societe->getData('accounting_account');
             $is_client_interco = true;
         }
-        $compte_general_tva_null = $this->convertion_to_interco_code(BimpCore::getConf('BIMPTOCEGID_vente_tva_null'), $compte_general_411);
+        $compte_general_tva_null = $this->convertion_to_interco_code(BimpCore::getConf('vente_tva_null'), $compte_general_411);
     }
 
     public function export_v3($id_facture, $forced, $confFile)
@@ -525,7 +525,7 @@ class BTC_export_facture extends BTC_export
             $id_entrepot = $bc_vente->getData('id_entrepot'); // Id de l'entrepot est égale à l'id de l'entrepot de la vente 
         } else {
             $id_entrepot = $facture->getData('entrepot');
-            //$id_entrepot = BimpCore::getConf('BIMPTOCEGID_default_entrepot'); // Sinon on met l'id de l'entrepot par défaut de la conf du module
+            //$id_entrepot = BimpCore::getConf('default_entrepot'); // Sinon on met l'id de l'entrepot par défaut de la conf du module
         }
 
         if ($id_entrepot < 1) {

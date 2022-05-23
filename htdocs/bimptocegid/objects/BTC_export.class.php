@@ -214,7 +214,7 @@ class BTC_export extends BimpObject {
     protected function create_daily_file($element = null, $date = null, $complementFileName = '', $complementDirectory = '') {
         
         $daily_files = [];
-        $entitie = BimpCore::getConf('file_entity');
+        $entitie = BimpCore::getConf('file_entity', null, "bimptocegid");
         if(empty($complementDirectory) && empty($complementFileName)) {
             if(isset($_REQUEST['date']) && !empty($_REQUEST['date']) || !is_null($date)) {
                 $complementFileName = isset($_REQUEST['date']) ? $_REQUEST['date'] : $date;
@@ -235,25 +235,25 @@ class BTC_export extends BimpObject {
         
         switch($element) {
             case 'vente':
-                $file = '1_'.$entitie.'_(VENTES)_' . $complementFileName . "_" . BimpCore::getConf('version_tra') . ".tra";
+                $file = '1_'.$entitie.'_(VENTES)_' . $complementFileName . "_" . BimpCore::getConf('version_tra', null, "bimptocegid") . ".tra";
                 break;
             case 'tier':
-                $file = '0_'.$entitie.'_(TIERS)_' . $complementFileName . "_" . BimpCore::getConf('version_tra') . ".tra";
+                $file = '0_'.$entitie.'_(TIERS)_' . $complementFileName . "_" . BimpCore::getConf('version_tra', null, "bimptocegid") . ".tra";
                 break;
             case 'achat':
-                $file = '3_'.$entitie.'_(ACHATS)_' . $complementFileName . "_" . BimpCore::getConf('version_tra') . ".tra";
+                $file = '3_'.$entitie.'_(ACHATS)_' . $complementFileName . "_" . BimpCore::getConf('version_tra', null, "bimptocegid") . ".tra";
                 break;
             case 'paiement':
-                $file = '2_'.$entitie.'_(PAIEMENTS)_' . $complementFileName . "_" . BimpCore::getConf('version_tra') . ".tra";
+                $file = '2_'.$entitie.'_(PAIEMENTS)_' . $complementFileName . "_" . BimpCore::getConf('version_tra', null, "bimptocegid") . ".tra";
                 break;
             case 'rib':
-                $file = '4_'.$entitie.'_(RIBS)_' . $complementFileName . "_" . BimpCore::getConf('version_tra') . ".tra";
+                $file = '4_'.$entitie.'_(RIBS)_' . $complementFileName . "_" . BimpCore::getConf('version_tra', null, "bimptocegid") . ".tra";
                 break;
             case 'mandat':
-                $file = '5_'.$entitie.'_(MANDATS)_' . $complementFileName . "_" . BimpCore::getConf('version_tra') . ".tra";
+                $file = '5_'.$entitie.'_(MANDATS)_' . $complementFileName . "_" . BimpCore::getConf('version_tra', null, "bimptocegid") . ".tra";
                 break;
             case 'payni':
-                $file = '6_'.$entitie.'_(PAYNI)_' . $complementFileName . "_" . BimpCore::getConf('version_tra') . ".tra";
+                $file = '6_'.$entitie.'_(PAYNI)_' . $complementFileName . "_" . BimpCore::getConf('version_tra', null, "bimptocegid") . ".tra";
                 break;
         }
         
@@ -396,7 +396,7 @@ class BTC_export extends BimpObject {
         if(!is_null($ref)) {
             return $this->db->getRows('paiement', 'ref = "' . $ref . '"');
         } elseif($since) {
-            return $this->db->getRows('paiement', 'exported = 0 AND datec BETWEEN "'.BimpCore::getConf("start_current_trimestre").' 00:00:00" AND "'.date("Y-m-d").' 23:59:59"', $this->sql_limit);
+            return $this->db->getRows('paiement', 'exported = 0 AND datec BETWEEN "'.BimpCore::getConf("start_current_trimestre", null, "bimptocegid").' 00:00:00" AND "'.date("Y-m-d").' 23:59:59"', $this->sql_limit);
         } else {
             return $this->db->getRows('paiement', 'exported = 0 AND datec BETWEEN "'.$this->date_export.' 00:00:00" AND "'.$this->date_export.' 23:59:59"', $this->sql_limit);
         }
@@ -409,9 +409,9 @@ class BTC_export extends BimpObject {
         } elseif($since) {
             $hier = new DateTime(date('Y-m-d') . '23:59:59');
             $hier->sub(new DateInterval("P1D"));
-            //echo 'exported = 0 AND fk_statut IN(1,2) AND datec BETWEEN "'.BimpCore::getConf("start_current_trimestre").' 00:00:00" AND "'.$hier->format('Y-m-d H:i:s') . '"';
+            //echo 'exported = 0 AND fk_statut IN(1,2) AND datec BETWEEN "'.BimpCore::getConf("start_current_trimestre", null, "bimptocegid").' 00:00:00" AND "'.$hier->format('Y-m-d H:i:s') . '"';
             //die();
-            return $this->db->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND datec BETWEEN "'.BimpCore::getConf("start_current_trimestre").' 00:00:00" AND "'.$hier->format('Y-m-d').'"', $this->sql_limit);
+            return $this->db->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND datec BETWEEN "'.BimpCore::getConf("start_current_trimestre", null, "bimptocegid").' 00:00:00" AND "'.$hier->format('Y-m-d').'"', $this->sql_limit);
         } else {
             return $this->db->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND (datec BETWEEN "'.$this->date_export.' 00:00:00" AND "'.$this->date_export.' 23:59:59" OR date_valid = "'.$this->date_export.'")', $this->sql_limit);
         }
@@ -421,7 +421,7 @@ class BTC_export extends BimpObject {
         if(!is_null($ref)) {
             return $this->db->getRows('facture', 'facnumber="'.$ref.'"');
         } elseif ($since) {
-            return $this->db->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND datef BETWEEN "'.BimpCore::getConf("start_current_trimestre").'" AND "'.date("Y-m-d").'"', $this->sql_limit);            
+            return $this->db->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND datef BETWEEN "'.BimpCore::getConf("start_current_trimestre", null, "bimptocegid").'" AND "'.date("Y-m-d").'"', $this->sql_limit);            
         } else {
             return $this->db->getRows('facture', 'exported = 0 AND fk_statut IN(1,2) AND type != 3 AND (datef BETWEEN "'.$this->date_export.'" AND "'.$this->date_export.'" OR date_valid LIKE "'.$this->date_export.'%" )', $this->sql_limit);
         }
@@ -598,7 +598,7 @@ class BTC_export extends BimpObject {
     }
 
     public function isApple($code_compta_fournisseur) {
-        if($code_compta_fournisseur == BimpCore::getConf('code_fournisseur_apple')) {
+        if($code_compta_fournisseur == BimpCore::getConf('code_fournisseur_apple', null, "bimptocegid")) {
             return true;
         }
         return false;

@@ -38,8 +38,8 @@
         
         public function automatique() {
             global $db;
-            $this->version_tra = BimpCore::getConf('version_tra');
-            $this->entitie = BimpCore::getConf('file_entity');
+            $this->version_tra = BimpCore::getConf('version_tra', null, "bimptocegid");
+            $this->entitie = BimpCore::getConf('file_entity', null, "bimptocegid");
             $this->export_class = new export($db);
             $this->export_class->create_daily_files();
             $this->files_for_ftp = $this->getFilesArrayForTranfert();

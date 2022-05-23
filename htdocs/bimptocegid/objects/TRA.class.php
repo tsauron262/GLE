@@ -7,9 +7,12 @@ class TRA extends BimpObject {
     public static $searchIn = Array('tiers' => "Tiers");
     public static $searchBy = Array(0 => "Tiers", 1 => "Facture");
     public static $searchAux;
+    public static $versionTra;
+    public static $fileEntiy;
     
     public function displayTraFile($file, $lineInBold = 0, $displayFileName = false) {
-        $html = '';
+        
+        $html  = '';
         
         $lines = $this->getLinesOfFile($file);
         
@@ -19,7 +22,7 @@ class TRA extends BimpObject {
         
         $htmlPanel .= '</pre>';
         
-        $htmlPanel .= '<pre id=\'file\'>';
+        $htmlPanel .= '<pre id=\'file\'>' . print_r($mysoc, 1); 
         
         
         
@@ -182,8 +185,8 @@ class TRA extends BimpObject {
         
         $html = '';        
         
-        $pattern_tiers  = 0 . '_' . BimpCore::getConf('file_entity') . '_(TIERS)_' . '*' . '_' . BimpCore::getConf('version_tra') . '.tra';
-        $pattern_ventes = 1 . '_' . BimpCore::getConf('file_entity') . '_(VENTES)_' . '*' . '_' . BimpCore::getConf('version_tra') . '.tra';
+        $pattern_tiers  = 0 . '_' . BimpCore::getConf('file_entity', null, "bimptocegid") . '_(TIERS)_' . '*' . '_' . BimpCore::getConf('version_tra', null, "bimptocegid") . '.tra';
+        $pattern_ventes = 1 . '_' . BimpCore::getConf('file_entity', null, "bimptocegid") . '_(VENTES)_' . '*' . '_' . BimpCore::getConf('version_tra', null, "bimptocegid") . '.tra';
         $files = glob(PATH_TMP . "/" . 'exportCegid' . '/' . 'BY_DATE' . '/' . 'imported_auto' . '/' . $pattern_tiers);
         
         if($searchBy == 0) {

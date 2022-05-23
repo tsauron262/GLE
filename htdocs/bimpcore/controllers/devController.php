@@ -17,7 +17,8 @@ class devController extends BimpController
 
     public function can($right)
     {
-        return BimpCore::isUserDev();
+        return 1;
+//        return BimpCore::isUserDev();
     }
 
     // Rendus HTML: 

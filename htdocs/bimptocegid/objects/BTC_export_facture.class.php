@@ -45,36 +45,36 @@ class BTC_export_facture extends BTC_export
             $is_client_interco = true;
         }
 
-        $compte_general_tva_null = $this->convertion_to_interco_code(BimpCore::getConf('vente_tva_null'), $compte_general_411);
-        $compte_refact_ht = $this->convertion_to_interco_code(BimpCore::getConf('refacturation_ht'), $compte_general_411);
-        $compte_refact_ttc = $this->convertion_to_interco_code(BimpCore::getConf('refacturation_ttc'), $compte_general_411);
+        $compte_general_tva_null = $this->convertion_to_interco_code(BimpCore::getConf('vente_tva_null', null, "bimptocegid"), $compte_general_411);
+        $compte_refact_ht = $this->convertion_to_interco_code(BimpCore::getConf('refacturation_ht', null, "bimptocegid"), $compte_general_411);
+        $compte_refact_ttc = $this->convertion_to_interco_code(BimpCore::getConf('refacturation_ttc', null, "bimptocegid"), $compte_general_411);
         
         switch ($facture->getData('zone_vente')) {
             case 1:
-                $compte_general_produit = $this->convertion_to_interco_code(BimpCore::getConf('vente_produit_fr'), $compte_general_411);
-                $compte_general_service = $this->convertion_to_interco_code(BimpCore::getConf('vente_service_fr'), $compte_general_411);
-                $compte_general_tva = BimpCore::getConf('vente_tva_fr');
-                $compte_general_d3e = $this->convertion_to_interco_code(BimpCore::getConf('vente_dee_fr'), $compte_general_411);
-                $compte_general_port = $this->convertion_to_interco_code(BimpCore::getConf('frais_de_port_vente_fr'), $compte_general_411);
-                $compte_general_comissions = $this->convertion_to_interco_code(BimpCore::getConf('comissions_fr'), $compte_general_411);
+                $compte_general_produit = $this->convertion_to_interco_code(BimpCore::getConf('vente_produit_fr', null, "bimptocegid"), $compte_general_411);
+                $compte_general_service = $this->convertion_to_interco_code(BimpCore::getConf('vente_service_fr', null, "bimptocegid"), $compte_general_411);
+                $compte_general_tva = BimpCore::getConf('vente_tva_fr', null, "bimptocegid");
+                $compte_general_d3e = $this->convertion_to_interco_code(BimpCore::getConf('vente_dee_fr', null, "bimptocegid"), $compte_general_411);
+                $compte_general_port = $this->convertion_to_interco_code(BimpCore::getConf('frais_de_port_vente_fr', null, "bimptocegid"), $compte_general_411);
+                $compte_general_comissions = $this->convertion_to_interco_code(BimpCore::getConf('comissions_fr', null, "bimptocegid"), $compte_general_411);
                 break;
             case 2:
                 $use_d3e = false;
                 $use_tva = ($societe->getData('tva_intra')) ? false : true;
-                $compte_general_produit = BimpCore::getConf('vente_produit_ue');
-                $compte_general_service = BimpCore::getConf('vente_service_ue');
-                $compte_general_tva = BimpCore::getConf('vente_tva_ue');
-                $compte_general_d3e = BimpCore::getConf('vente_dee_ue');
-                $compte_general_port = $this->convertion_to_interco_code(BimpCore::getConf('frais_de_port_vente_ue'), $compte_general_411);
-                $compte_general_comissions = $this->convertion_to_interco_code(BimpCore::getConf('comissions_ue'), $compte_general_411);
+                $compte_general_produit = BimpCore::getConf('vente_produit_ue', null, "bimptocegid");
+                $compte_general_service = BimpCore::getConf('vente_service_ue', null, "bimptocegid");
+                $compte_general_tva = BimpCore::getConf('vente_tva_ue', null, "bimptocegid");
+                $compte_general_d3e = BimpCore::getConf('vente_dee_ue', null, "bimptocegid");
+                $compte_general_port = $this->convertion_to_interco_code(BimpCore::getConf('frais_de_port_vente_ue', null, "bimptocegid"), $compte_general_411);
+                $compte_general_comissions = $this->convertion_to_interco_code(BimpCore::getConf('comissions_ue', null, "bimptocegid"), $compte_general_411);
                 break;
             case 3:
                 $use_d3e = false;
                 $use_tva = false;
-                $compte_general_produit = BimpCore::getConf('vente_produit_ex');
-                $compte_general_service = BimpCore::getConf('vente_service_ex');
-                $compte_general_port = $this->convertion_to_interco_code(BimpCore::getConf('frais_de_port_vente_ex'), $compte_general_411);
-                $compte_general_comissions = $this->convertion_to_interco_code(BimpCore::getConf('comissions_ex'), $compte_general_411);
+                $compte_general_produit = BimpCore::getConf('vente_produit_ex', null, "bimptocegid");
+                $compte_general_service = BimpCore::getConf('vente_service_ex', null, "bimptocegid");
+                $compte_general_port = $this->convertion_to_interco_code(BimpCore::getConf('frais_de_port_vente_ex', null, "bimptocegid"), $compte_general_411);
+                $compte_general_comissions = $this->convertion_to_interco_code(BimpCore::getConf('comissions_ex', null, "bimptocegid"), $compte_general_411);
                 break;
         }
 

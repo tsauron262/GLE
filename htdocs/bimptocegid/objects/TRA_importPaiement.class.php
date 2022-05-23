@@ -14,7 +14,7 @@ class TRA_importPaiement {
     
     public function constructTRA($line) {
         
-        $raisonArray = (array) json_decode(BimpCore::getConf('BIMPTOCEGID_comptes_importPaiement'));
+        $raisonArray = (array) json_decode(BimpCore::getConf('comptes_importPaiement'));
         
         $importPaiement = $line->getParentInstance();
         $bank = $this->db->getRow('bank_account', 'rowid = ' . $importPaiement->getData('banque'));

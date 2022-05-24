@@ -31,7 +31,7 @@
             
             $this->yesterday = $hier->sub(new DateInterval("P1D"));
 
-            $this->lastDateExported = new DateTime(BimpCore::getConf("BIMPTOCEGID_last_export_date"));
+            $this->lastDateExported = new DateTime(BimpCore::getConf("last_export_date", null, "bimptocegid"));
             $this->bdb = new BimpDb($db);
             $this->TRA_facture = new TRA_facture($this->bdb, PATH_TMP . $this->dir . $this->getMyFile("tiers"));
             $this->TRA_payInc = new TRA_payInc($this->bdb);
@@ -247,11 +247,11 @@
             $dateTime = new DateTime();
             $dateTime->sub(new DateInterval("P1D"));
             
-            $entitie        = BimpCore::getConf('BIMPTOCEGID_file_entity');
+            $entitie        = BimpCore::getConf('file_entity', null, "bimptocegid");
             $day            = $dateTime->format('d');
             $month          = $dateTime->format('m');
             $year           = $dateTime->format('Y');
-            $version_tra    = BimpCore::getConf('BIMPTOCEGID_version_tra');
+            $version_tra    = BimpCore::getConf('version_tra', null, "bimptocegid");
             $extention      = ".tra";
             $files_dir      = PATH_TMP . $this->dir;
             $number         = null;

@@ -80,7 +80,7 @@ class BimpCommandeForDol extends Bimp_Commande{
         $now = new DateTime();
         $tot_l = 0;
         
-        $id_user_def = (int) BimpCore::getConf('id_user_mail_comm_line_expire');
+        $id_user_def = (int) BimpCore::getConf('id_user_mail_comm_line_expire', null, 'bimpcommercial');
         
         // User
         foreach($user_line as $id_user_in => $commandes) {

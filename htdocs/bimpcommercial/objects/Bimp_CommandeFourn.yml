@@ -269,7 +269,9 @@ forms:
             - association: achatsCommFourn_Equipments
               edit: 1
               show:
-                  conf: useLinkAchatFournEquipment
+                  conf: 
+                      module: bimpcommercial
+                      name: use_link_achat_fourn_equipment
             
     make_order: 
         rows: 
@@ -548,7 +550,9 @@ fields_tables:
             - association: achatsCommFourn_Equipments
               edit: 1
               show:
-                  conf: useLinkAchatFournEquipment
+                  conf: 
+                      module: bimpcommercial
+                      name: use_link_achat_fourn_equipment
     
     fournisseur: 
         title: Fournisseur

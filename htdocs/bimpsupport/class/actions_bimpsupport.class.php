@@ -69,9 +69,9 @@ class ActionsBimpsupport
 
         $mode_eco = true;
         if (defined('BIMP_LIB')) {
-            $mode_eco = (int) BimpCore::getConf('bimpcore_mode_eco', 0);
+            $mode_eco = (int) BimpCore::getConf('mode_eco');
         } else {
-            $res = $db->query('SELECT value FROM llx_bimpcore_conf WHERE name = \'bimpcore_mode_eco\'');
+            $res = $db->query('SELECT value FROM llx_bimpcore_conf WHERE name = \'mode_eco\' AND module = \'bimpcore\'');
             if ($res && $db->num_rows($res)) {
                 $obj = $db->fetch_object($res);
                 $mode_eco = (int) $obj->value;
@@ -101,7 +101,6 @@ class ActionsBimpsupport
 //        $groupSav->fetch('', "XX SAV");
         if (isset($conf->global->MAIN_MODULE_BIMPSUPPORT) && (userInGroupe("XX Sav", $user->id)) || userInGroupe("XX Sav MyMu", $user->id)) {
             $hrefFin = "";
-
 
             require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
             global $tabCentre;
@@ -160,7 +159,7 @@ class ActionsBimpsupport
                     ' . img_object("SAV", "drap0@synopsistools") . ' ' . $ligne3['label'] . '</a></span><br/>';
 
                 foreach ($tabStatutSav as $idStat => $tabStat) {
-                    if($idStat >= -1){
+                    if ($idStat >= -1) {
                         if ($mode_eco) {
                             $nb = '';
                         } else {
@@ -211,7 +210,6 @@ class ActionsBimpsupport
                     ' . img_object("Hotline", "phoning") . ' Appel </a><br></div>';
             $return .= '<div class="menu_contenu">';
             $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 5");
-
 
             $result2 = $db->query("SELECT COUNT(id) as nb, Etat as EtatVal FROM `" . MAIN_DB_PREFIX . "synopsischrono_chrono_100` group by Etat");
             $tabResult = array();

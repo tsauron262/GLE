@@ -72,7 +72,7 @@ class BimpDebug
         if (is_null(self::$user_checked)) {
             global $user;
             if (BimpObject::objectLoaded($user)) {
-                if ($user->admin) {// || in_array((int) $user->id, explode(',', BimpCore::getConf('bimp_debug_users', '')))) {
+                if ($user->admin) {
                     self::$user_checked = 1;
                 } else {
                     self::$user_checked = 0;

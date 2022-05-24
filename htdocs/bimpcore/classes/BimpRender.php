@@ -27,12 +27,12 @@ class BimpRender
         return '<i class="' . self::renderIconClass($icon) . ($class ? ' ' . $class : '') . '"></i>';
     }
 
-    public static function renderInfoIcon($icon, $info)
+    public static function renderInfoIcon($info, $icon = 'fas_question-circle', $placement = 'bottom')
     {
         $html = '';
 
         $html .= '<span class="infoIcon bs-popover"';
-        $html .= self::renderPopoverData($info, 'top', true);
+        $html .= self::renderPopoverData($info, $placement, 'true');
         $html .= '>';
         $html .= self::renderIcon($icon);
         $html .= '</span>';
@@ -120,15 +120,15 @@ class BimpRender
                 $params['classes'][] = 'btn-default';
             }
         }
-        
+
         if (isset($params['disabled']) && (int) $params['disabled']) {
             $params['classes'][] = 'disabled';
         }
-        
+
         if (isset($params['popover']) && $params['popover']) {
             $params['classes'][] = 'bs-popover';
         }
-        
+
         $html = '<' . $tag . self::displayTagAttrs($params);
         if (isset($params['popover']) && $params['popover']) {
             $html .= BimpRender::renderPopoverData($params['popover']);
@@ -454,6 +454,13 @@ class BimpRender
 
     public static function renderNavTabs($tabs, $tabs_id = 'maintabs', $params = array())
     {
+        $params = BimpTools::overrideArray(array(
+                    'content_only'        => false,
+                    'nav_only'            => false,
+                    'ul_extra_class'      => '',
+                    'li_extra_class'      => '',
+                    'content_extra_class' => ''
+                        ), $params);
         $html = '';
 
         if (is_array($tabs) && count($tabs)) {
@@ -464,19 +471,14 @@ class BimpRender
             }
         }
 
-        if (!isset($params['content_only']) || !(int) $params['content_only']) {
-            $html .= '<ul id="navtabs_' . $tabs_id . '" class="nav nav-tabs" role="tablist" data-navtabs_id="' . $tabs_id . '">';
+        if (!(int) $params['content_only']) {
+            $html .= '<ul id="navtabs_' . $tabs_id . '" class="nav nav-tabs' . ($params['ul_extra_class'] ? ' ' . $params['ul_extra_class'] : '') . '" role="tablist" data-navtabs_id="' . $tabs_id . '">';
 
             foreach ($tabs as $tab) {
-                $html .= '<li role="presentation"' . ($tab['id'] === $active ? ' class="active"' : '') . ' data-navtab_id="' . $tab['id'] . '">';
-//                $paramsUrl2 = array();
-//                if ($tabs_id === 'maintabs' && !BimpTools::isSubmit('ajax')) {
-//                    $paramsUrl = $_GET;
-//                    $paramsUrl['navtab'] = $tab['id'];
-//                    foreach ($paramsUrl as $clef => $val)
-//                        $paramsUrl2[] = $clef . '=' . $val;
-//                }
-                $html .= '<a href="' . /* (count($paramsUrl2) > 0 ? '?' . implode('&', $paramsUrl2) : '') . */ '#' . $tab['id'] . '" aria-controls="' . $tab['id'] . '" role="tab" data-toggle="tab"';
+                $html .= '<li role="presentation" class="' . ($tab['id'] === $active ? ' active' : '');
+                $html .= ($params['li_extra_class'] ? ' ' . $params['li_extra_class'] : '');
+                $html .= '" data-navtab_id="' . $tab['id'] . '">';
+                $html .= '<a href="#' . $tab['id'] . '" aria-controls="' . $tab['id'] . '" role="tab" data-toggle="tab"';
                 if (isset($tab['ajax']) && (int) $tab['ajax']) {
                     $html .= ' data-ajax="1"';
                 }
@@ -491,10 +493,12 @@ class BimpRender
             $html .= '</ul>';
         }
 
-        if (!isset($params['nav_only']) || !(int) $params['nav_only']) {
+        if (!(int) $params['nav_only']) {
             $html .= '<div id="navtabs_content_' . $tabs_id . '" class="tab-content">';
             foreach ($tabs as $tab) {
-                $html .= '<div class="tab-pane fade' . ($tab['id'] === $active ? ' in active' : '') . '" role="tabpanel" id="' . $tab['id'] . '">';
+                $html .= '<div class="tab-pane fade' . ($tab['id'] === $active ? ' in active' : '');
+                $html .= ($params['content_extra_class'] ? ' ' . $params['content_extra_class'] : '') . '"';
+                $html .= ' role="tabpanel" id="' . $tab['id'] . '">';
                 if (!isset($tab['ajax']) || !(int) $tab['ajax']) {
                     if (isset($tab['content'])) {
                         $html .= $tab['content'];

@@ -31,7 +31,7 @@
             
             $this->yesterday = $hier->sub(new DateInterval("P1D"));
 
-            $this->lastDateExported = new DateTime(BimpCore::getConf("BIMPTOCEGID_last_export_date"));
+            $this->lastDateExported = new DateTime(BimpCore::getConf("last_export_date", null, "bimptocegid"));
             $this->bdb = new BimpDb($db);
             $this->TRA_facture = new TRA_facture($this->bdb, PATH_TMP . $this->dir . $this->getMyFile("tiers"));
             $this->TRA_payInc = new TRA_payInc($this->bdb);
@@ -62,23 +62,23 @@
                     $instance= BimpCache::getBimpObjectInstance("bimpcommercial", "Bimp_Facture", $facture->rowid); 
                     $ecriture .= $this->TRA_facture->constructTra($instance);
                     
-                    if($facture->getData('fk_mode_reglement') == 3) {
+                    if($instance->getData('fk_mode_reglement') == 3) {
 
-                        if($facture->getData('rib_client')) {
+                        if($instance->getData('rib_client')) {
                             $ribANDmandat = BimpCache::getBimpObjectInstance('bimptocegid', "BTC_exportRibAndMandat");
-                            $societe = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $facture->getData('fk_soc'));
-                            $ecriture_rib = $ribANDmandat->export_rib($facture, $societe);
-                            $ecriture_mdt = $ribANDmandat->export_mandat($facture, $societe);
+                            $societe = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $instance->getData('fk_soc'));
+                            $ecriture_rib = $ribANDmandat->export_rib($instance, $societe);
+                            $ecriture_mdt = $ribANDmandat->export_mandat($instance, $societe);
                             if(!empty($ecriture_mdt) && !empty($ecriture_rib)) {
                                 $this->write_tra($ecriture_rib, PATH_TMP . $this->dir . $this->getMyFile("ribs"));
                                 $this->write_tra($ecriture_mdt, PATH_TMP . $this->dir . $this->getMyFile("mandats"));
-                                $ribANDmandat->passTo_exported($facture);
+                                $ribANDmandat->passTo_exported($instance);
                             }
 
 
                         }  else {
                             $subject = "EXPORT COMPTA - RIB MANQUANT";
-                            $msg = "La facture " . $facture->getNomUrl() . " a été exportée avec comme mode de règlement mandat de prélèvement SEPA mais n'a pas de RIB";
+                            $msg = "La facture " . $instance->getNomUrl() . " a été exportée avec comme mode de règlement mandat de prélèvement SEPA mais n'a pas de RIB";
                             $mail = new BimpMail(null, $subject, "dev@bimp.fr", null, $msg);
                             $mail->send();
                         }
@@ -247,11 +247,11 @@
             $dateTime = new DateTime();
             $dateTime->sub(new DateInterval("P1D"));
             
-            $entitie        = BimpCore::getConf('BIMPTOCEGID_file_entity');
+            $entitie        = BimpCore::getConf('file_entity', null, "bimptocegid");
             $day            = $dateTime->format('d');
             $month          = $dateTime->format('m');
             $year           = $dateTime->format('Y');
-            $version_tra    = BimpCore::getConf('BIMPTOCEGID_version_tra');
+            $version_tra    = BimpCore::getConf('version_tra', null, "bimptocegid");
             $extention      = ".tra";
             $files_dir      = PATH_TMP . $this->dir;
             $number         = null;

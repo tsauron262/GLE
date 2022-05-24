@@ -4,7 +4,7 @@ class BimpCore
 {
 
     public static $conf_cache = null;
-    public static $conf_cache_not_exist = array();
+    public static $conf_cache_def_values = array();
     private static $context = '';
     private static $max_execution_time = 0;
     private static $memory_limit = 0;
@@ -128,9 +128,9 @@ class BimpCore
     public static function getFileUrl($file_path, $use_tms = true)
     {
         $url = '';
-        
+
         $debug = false;
-        
+
 //        if ($_SERVER['HTTP_X_REAL_IP'] == '10.192.20.148') {
 //            $debug = true;
 //        }
@@ -212,54 +212,98 @@ class BimpCore
             $rows = BimpCache::getBdb()->getRows('bimpcore_conf');
 
             foreach ($rows as $r) {
-                self::$conf_cache[$r->name] = $r->value;
+                $module = $r->module;
+
+                if (!$module) {
+                    $module = 'bimpcore';
+                }
+
+                if (!isset(self::$conf_cache[$module])) {
+                    self::$conf_cache[$module] = array();
+                }
+
+                self::$conf_cache[$module][$r->name] = $r->value;
             }
         }
 
         return self::$conf_cache;
     }
 
-    public static function getConf($name, $default = null)
+    public static function getConf($name, $default = null, $module = 'bimpcore')
     {
+        // Si le paramètre n'est pas enregistré en base, on retourne en priorité la valeur par défaut
+        // passée en argument de la fonction. 
+        // si cette argument est null on retourne la valeur par défaut définie dans le YML de la config du module (si elle est existe)
+        // on retourne null sinon. 
+        // Le système de cache permet de vérifier une seule fois la valeur en base et la valeur par défaut du YML. 
+
+
+        if (!$module) {
+            $module = 'bimpcore';
+        }
+
         $cache = self::getConfCache();
 
-        if (isset(self::$conf_cache_not_exist[$name])) {
-            return $default;
-        }
+        if (isset($cache[$module][$name])) {
+//            echo '<br/>OK: ' . $name . ': ' . $cache[$module][$name];
+            return $cache[$module][$name];
+        } 
+//        else {
+//            echo '<br/>FAIL: ' . $name;
+//        }
 
-        if (!isset($cache[$name])) {
-            $value = BimpCache::getBdb()->getValue('bimpcore_conf', 'value', '`name` = \'' . $name . '\'');
-            if (!is_null($value)) {
-                self::$conf_cache[$name] = $value;
-                return $value;
-            } else {
-                self::$conf_cache_not_exist[$name] = $name;
+        // Check éventuelle erreur sur le module: 
+        foreach ($cache as $module_name => $params) {
+            if (isset($params[$name])) {
+                BimpCore::addlog('BimpCore::getConf() - Erreur module possible', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
+                    'Paramètre'                                  => $name,
+                    'Module demandé'                             => $module,
+                    'Module trouvé (tel que enregistré en base)' => $module_name
+                        ), true);
+                break;
             }
+        }
 
+        if (!is_null($default)) {
             return $default;
         }
 
-        return self::$conf_cache[$name];
+        if (!isset(self::$conf_cache_def_values[$module][$name])) {
+            self::$conf_cache_def_values[$module][$name] = BimpModuleConf::getParamDefaultValue($name, $module, true);
+        }
+
+        return self::$conf_cache_def_values[$module][$name];
     }
 
-    public static function setConf($name, $value)
+    public static function setConf($name, $value, $module = 'bimpcore')
     {
-        $current_val = self::getConf($name);
+        if (!$module) {
+            $module = 'bimpcore';
+        }
+
+        $errors = array();
+
+        $current_val = (isset(self::$conf_cache[$module][$name]) ? self::$conf_cache[$module][$name] : null);
 
         $bdb = BimpCache::getBdb();
 
         if (is_null($current_val)) {
-            $bdb->insert('bimpcore_conf', array(
-                'name'  => $name,
-                'value' => $value
-            ));
+            if ($bdb->insert('bimpcore_conf', array(
+                        'name'   => $name,
+                        'value'  => $value,
+                        'module' => $module
+                    )) <= 0) {
+                $errors[] = 'Echec de l\'insertion du paramètre "' . $name . '" (Module ' . $module . ') - ' . $bdb->err();
+            }
         } else {
-            $bdb->update('bimpcore_conf', array(
-                'value' => $value
-                    ), '`name` = \'' . $name . '\'');
+            if ($bdb->update('bimpcore_conf', array(
+                        'value' => $value
+                            ), '`name` = \'' . $name . '\' AND `module` = \'' . $module . '\'') <= 0) {
+                $errors[] = 'Echec de la mise à jour du paramètre "' . $name . '" (Module ' . $module . ') - ' . $bdb->err();
+            }
         }
 
-        self::$conf_cache[$name] = $value;
+        self::$conf_cache[$module][$name] = $value;
     }
 
     public static function getVersion($dev = '')
@@ -395,6 +439,21 @@ class BimpCore
         return 0;
     }
 
+    public static function isUserDev()
+    {
+        global $user;
+
+        if (BimpObject::objectLoaded($user)) {
+            $bimpUser = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $user->id);
+
+            if ((int) $bimpUser->getData('is_dev')) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
     // Gestion ini: 
 
     public static function setMaxExecutionTime($time)
@@ -413,6 +472,17 @@ class BimpCore
             ini_set('memory_limit', $limit . 'M');
             self::$memory_limit = $limit;
         }
+    }
+
+    // Gestion extends: 
+
+    public static function getEntity()
+    {
+        if (defined('BIMP_ENTITY')) {
+            return BIMP_ENTITY;
+        }
+
+        return '';
     }
 
     // Gestion du contexte:
@@ -483,7 +553,7 @@ class BimpCore
         if (!$bimp_logs_locked) {
             $bimp_logs_locked = 1;
             $extra_data = BimpTools::merge_array(static::$logs_extra_data, $extra_data);
-            if (BimpCore::isModeDev() && (int) self::getConf('bimpcore_print_logs', 1) && !defined('NO_BIMPLOG_PRINTS')) {
+            if (BimpCore::isModeDev() && (int) self::getConf('print_bimp_logs') && !defined('NO_BIMPLOG_PRINTS')) {
                 $bt = debug_backtrace(null, 30);
 
                 $html = 'LOG ' . Bimp_Log::$levels[$level]['label'] . '<br/><br/>';
@@ -505,11 +575,11 @@ class BimpCore
                 die($html);
             }
 
-            if (!$force && $level < Bimp_Log::BIMP_LOG_ERREUR && (int) BimpCore::getConf('bimpcore_mode_eco', 0)) {
+            if (!$force && $level < Bimp_Log::BIMP_LOG_ERREUR && (int) BimpCore::getConf('mode_eco')) {
                 return array();
             }
 
-            if (!(int) BimpCore::getConf('bimpcore_use_logs', 0) && !(int) BimpTools::getValue('use_logs', 0)) {
+            if (!(int) BimpCore::getConf('use_bimp_logs') && !(int) BimpTools::getValue('use_logs', 0)) {
                 return array();
             }
 

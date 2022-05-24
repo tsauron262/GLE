@@ -572,7 +572,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                     $pdf->SetTextColor(255,0,0);
                     $pdf1->SetTextColor(255,0,0);
                 } else {
-                    $title = BimpCore::getConf('bimpcontract_pdf_title');
+                    $title = BimpCore::getConf('pdf_title', null, 'bimpcontract');
                     $ref = "N° " . $propref;
                 }
 
@@ -885,10 +885,10 @@ E-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72
                 $pdf->Cell($W, 8, "POUR LE CLIENT", 1, null, 'L', true);
                 $pdf->MultiCell($W, 6, '', 0, 'L');
                 $pdf->SetFont('', '', 7);
-                $pdf->Cell($W, 8, "Nom du signataire : " . BimpCore::getConf('bimpcontract_pdf_signataire'), 1, null, 'L', true);
+                $pdf->Cell($W, 8, "Nom du signataire : " . BimpCore::getConf('pdf_signataire', '', 'bimpcontract'), 1, null, 'L', true);
                 $pdf->Cell($W, 8, "Nom, fonction et cachet du signataire :", 1, null, 'L', true);
                 $pdf->MultiCell($W, 6, '', 0, 'L');
-                $pdf->Cell($W, 8, "Fonction du signataire: " . BimpCore::getConf('bimpcontract_pdf_signataire_function'), 1, null, 'L', true);
+                $pdf->Cell($W, 8, "Fonction du signataire: " . BimpCore::getConf('pdf_signataire_function', '', 'bimpcontract'), 1, null, 'L', true);
                 $pdf->Cell($W, 8, "Précédé de la mention 'Lu et approuvé' + Paraphe de toutes les pages", 1, null, 'L', true);
                 $pdf->MultiCell($W, 6, '', 0, 'L');
                 $pdf->Cell($W, 8, "Date : " . date('d / m / Y'), 1, null, 'L', true);
@@ -906,7 +906,7 @@ E-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72
                 $pdf1->Cell($W, 8, "POUR LE CLIENT", 1, null, 'L', true);
                 $pdf1->MultiCell($W, 6, '', 0, 'L');
                 $pdf1->SetFont('', '', 7);
-                $pdf1->Cell($W, 8, "Nom et fonction du signataire : " . BimpCore::getConf('bimpcontract_pdf_signataire'), 1, null, 'L', true);
+                $pdf1->Cell($W, 8, "Nom et fonction du signataire : " . BimpCore::getConf('pdf_signataire', '', 'bimpcontract'), 1, null, 'L', true);
                 $pdf1->Cell($W, 8, "Nom, fonction et cachet du signataire :", 1, null, 'L', true);
                 $pdf1->MultiCell($W, 6, '', 0, 'L');
                 $pdf1->Cell($W, 8, "Date : " . date('d / m / Y'), 1, null, 'L', true);
@@ -921,7 +921,7 @@ E-mail ou courriel : hotline@bimp.fr -téléphone (numéro non surtaxé) : 04 72
                 $pdf1->Cell($W, 8, "", 1, null, 'L', true);
                 $pdf1->Cell($W, 8, "Signature", 1, null, 'L', true);
                 
-                $signed = (($contrat->statut == 1 || $contrat->statut == 11) && BimpCore::getConf('bimpcontract_pdf_use_signature')) ? true : false;
+                $signed = (($contrat->statut == 1 || $contrat->statut == 11) && (int) BimpCore::getConf('pdf_use_signature', null, 'bimpcontract')) ? true : false;
                 
                 if($signed) {
                     $choosed_signature = ($bimp_contract->getData('secteur') == "CTE") ? "signed_education.png" : "signed_contrat.png";

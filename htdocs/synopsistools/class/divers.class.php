@@ -207,16 +207,40 @@ class synopsisHook {//FA1506-0369
         global $db, $langs, $isMobile, $conf, $user;
         static::initDeb();
         
+        
+        //version avec bimpcore
+        require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+        
         $admin = false;
+        $ipAdmin = BimpCore::getConf('IP_ADMIN', null);
+        if($ipAdmin && !defined('IP_ADMIN2')){
+            define('IP_ADMIN2', json_decode($ipAdmin));
+        }
+        $CLOSE_DATE = BimpCore::getConf('CLOSE_DATE', null);
+        if($CLOSE_DATE && !defined('CLOSE_DATE')){
+            define('CLOSE_DATE', $CLOSE_DATE);
+        }
+        
+        $admin = false;
+        $ipUser = static::getUserIp();
         if(defined('IP_ADMIN')){
             if(is_array(IP_ADMIN)){
-                $ipUser = static::getUserIp();
                 foreach(IP_ADMIN as $ip){
                     if($ip == $ipUser)
                         $admin =true;
                 }
             }
             elseif(IP_ADMIN == $ipUser)
+                $admin = true;
+        }        
+        if(defined('IP_ADMIN2')){
+            if(is_array(IP_ADMIN2)){
+                foreach(IP_ADMIN2 as $ip){
+                    if($ip == $ipUser)
+                        $admin =true;
+                }
+            }
+            elseif(IP_ADMIN2 == $ipUser)
                 $admin = true;
         }
 
@@ -226,7 +250,7 @@ class synopsisHook {//FA1506-0369
             require (DOL_DOCUMENT_ROOT . "/synopsistools/public/close.php");
             die;
         }
-        
+             
 //        if (isset($conf->file->main_force_https) && $conf->file->main_force_https != "" && stripos($_SERVER["SCRIPT_URI"], str_replace("https://", "", $conf->file->main_force_https)) === false) {
         if (defined("REDIRECT_DOMAINE") && REDIRECT_DOMAINE != "" && stripos($_SERVER["HTTP_HOST"], str_replace(array("https://", "http://"), "", REDIRECT_DOMAINE)) === false) {
 

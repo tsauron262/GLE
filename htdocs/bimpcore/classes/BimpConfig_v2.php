@@ -79,6 +79,7 @@ class BimpConfig
 
         // Chargement des paramètres depuis le fichier: 
         if (!file_exists($dir . $file_name)) {
+            $this->errors[] = 'Fichier de configuration "' . $file_name . '" absent';
             $this->logConfigError('Erreur technique: le fichier de configuration "' . $file_name . '" n\'existe pas');
             return false;
         }
@@ -1012,21 +1013,25 @@ class BimpConfig
 
     protected function getConfValue($conf, $path)
     {
-        if (is_array($conf)) {
-            $conf = $this->getvalue($conf, $path);
-        }
-
-        if (is_string($conf)) {
-            return BimpCore::getConf($conf, 0);
-        }
-
-        return null;
+        return $this->getBimpcoreConfValue($conf, $path);
     }
 
     protected function getBimpcoreConfValue($bimpcoreConf, $path)
     {
+        $name = '';
+        $module = 'bimpcore';
+        $default = null;
+                
         if (is_string($bimpcoreConf)) {
-           return BimpCore::getConf($bimpcoreConf);
+            $name = $bimpcoreConf;
+        } elseif (is_array($bimpcoreConf)) {
+            $module = $this->get($path . '/module', 'bimpcore');
+            $name = $this->get($path . '/name', '', true);
+            $default = $this->get($path . '/def', null);
+        }
+
+        if ($name) {
+            return BimpCore::getConf($name, $default, $module);
         }
 
         return null;

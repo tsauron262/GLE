@@ -7,13 +7,24 @@ class TRA extends BimpObject {
     public static $searchIn = Array('tiers' => "Tiers");
     public static $searchBy = Array(0 => "Tiers", 1 => "Facture");
     public static $searchAux;
+    public static $versionTra;
+    public static $fileEntiy;
     
     public function displayTraFile($file, $lineInBold = 0, $displayFileName = false) {
-        $html = '';
         
-        $htmlPanel .= '<pre>';
+        $html  = '';
         
         $lines = $this->getLinesOfFile($file);
+        
+        $htmlPanel = '<pre id=\'fileEdit\' style=\'display: none; padding-top:20px; padding-bottom: 30px\'>';
+        
+        $htmlPanel .= implode('', $lines);
+        
+        $htmlPanel .= '</pre>';
+        
+        $htmlPanel .= '<pre id=\'file\'>' . print_r($mysoc, 1); 
+        
+        
         
         if($displayFileName)
             $htmlPanel .= '<u>' . basename ($file) . '</u><br />';
@@ -46,6 +57,10 @@ class TRA extends BimpObject {
         }
         
         $htmlPanel .= '<br /></pre>';
+        
+        $htmlPanel .= '<div id=\'button_edit\' >' . '<button onClick=\'editingClick()\' class=\'btn btn-info\' ><i class=\'fas fa5-edit\' ></i> &Eacute;diter le fichier</button>' . '</div>';
+        
+        $htmlPanel .= '<div id=\'button_cancel\' style=\'display:none\' >' . '<button onClick=\'cancelClick()\' class=\'btn btn-danger\' ><i class=\'fas fa5-times\' ></i> Annuler les modifications</button>' . ' ' . BimpRender::renderButton(['icon' => 'fas_save', 'label' => 'Sauvegarder le fichier', 'onclick' => 'savingClick()']) . '</div>';
         
         $html .= BimpRender::renderPanel(basename($file), $htmlPanel, '', ['open' => (count($lines) > 100) ? false : true]);
         
@@ -170,8 +185,8 @@ class TRA extends BimpObject {
         
         $html = '';        
         
-        $pattern_tiers  = 0 . '_' . BimpCore::getConf('BIMPTOCEGID_file_entity') . '_(TIERS)_' . '*' . '_' . BimpCore::getConf('BIMPTOCEGID_version_tra') . '.tra';
-        $pattern_ventes = 1 . '_' . BimpCore::getConf('BIMPTOCEGID_file_entity') . '_(VENTES)_' . '*' . '_' . BimpCore::getConf('BIMPTOCEGID_version_tra') . '.tra';
+        $pattern_tiers  = 0 . '_' . BimpCore::getConf('file_entity', null, "bimptocegid") . '_(TIERS)_' . '*' . '_' . BimpCore::getConf('version_tra', null, "bimptocegid") . '.tra';
+        $pattern_ventes = 1 . '_' . BimpCore::getConf('file_entity', null, "bimptocegid") . '_(VENTES)_' . '*' . '_' . BimpCore::getConf('version_tra', null, "bimptocegid") . '.tra';
         $files = glob(PATH_TMP . "/" . 'exportCegid' . '/' . 'BY_DATE' . '/' . 'imported_auto' . '/' . $pattern_tiers);
         
         if($searchBy == 0) {

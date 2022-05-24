@@ -324,7 +324,7 @@ class Bimp_Societe extends BimpDolObject
             return 0;
         }
 
-        if (!BimpCore::getConf('siren_required', 0)) {
+        if (!(int) BimpCore::getConf('siren_required')) {
             return 0;
         }
 
@@ -1028,7 +1028,7 @@ class Bimp_Societe extends BimpDolObject
             return $users;
 
         if ($with_default) {
-            $default_id_commercial = (int) BimpCore::getConf('default_id_commercial', 0);
+            $default_id_commercial = (int) BimpCore::getConf('default_id_commercial');
             if ($default_id_commercial) {
                 $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $default_id_commercial);
                 if (BimpObject::objectLoaded($user)) {
@@ -1156,14 +1156,14 @@ class Bimp_Societe extends BimpDolObject
             $code = 'TE_PRIVATE';
         if ($code != '') {
             if ($code == 'TE_ADMIN') {
-                return BimpCore::getConf('societe_id_default_mode_reglement_admin', BimpCore::getConf('societe_id_default_mode_reglement', 0));
+                return (int) BimpCore::getConf('societe_id_default_mode_reglement_admin', BimpCore::getConf('societe_id_default_mode_reglement', 0));
             }
             if ($code === 'TE_PRIVATE') {
-                return BimpCore::getConf('particulier_id_default_mode_reglement', BimpCore::getConf('societe_id_default_mode_reglement', 0));
+                return (int) BimpCore::getConf('particulier_id_default_mode_reglement', BimpCore::getConf('societe_id_default_mode_reglement', 0));
             }
         }
 
-        return BimpCore::getConf('societe_id_default_mode_reglement', 0);
+        return (int) BimpCore::getConf('societe_id_default_mode_reglement', 0);
     }
 
     public function getDefaultCondReglement()
@@ -1177,14 +1177,14 @@ class Bimp_Societe extends BimpDolObject
         }
         if ($code != '') {
             if (in_array($code, array('TE_ADMIN', 'TE_OTHER_ADM'))) {
-                return BimpCore::getConf('societe_id_default_cond_reglement_admin', BimpCore::getConf('societe_id_default_cond_reglement', 0));
+                return (int) BimpCore::getConf('societe_id_default_cond_reglement_admin', BimpCore::getConf('societe_id_default_cond_reglement', 0));
             }
             if ($code === 'TE_PRIVATE') {
-                return BimpCore::getConf('particulier_id_default_cond_reglement', BimpCore::getConf('societe_id_default_cond_reglement', 0));
+                return (int) BimpCore::getConf('particulier_id_default_cond_reglement', BimpCore::getConf('societe_id_default_cond_reglement', 0));
             }
         }
 
-        return BimpCore::getConf('societe_id_default_cond_reglement', 0);
+        return (int) BimpCore::getConf('societe_id_default_cond_reglement', 0);
     }
 
     public function getEncours($withOtherSiret = true)

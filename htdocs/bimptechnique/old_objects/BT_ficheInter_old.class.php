@@ -286,7 +286,7 @@ class BT_ficheInter extends BimpDolObject
         $statut = $this->getData('fk_statut');
 
         if (!$this->isOldFi()) {
-            $interne_soc = explode(',', BimpCore::getConf('bimptechnique_id_societe_auto_terminer'));
+            $interne_soc = explode(',', BimpCore::getConf('id_societe_auto_terminer', '', 'bimptechnique'));
 
             $children = $this->getChildrenList("inters");
 
@@ -898,7 +898,7 @@ class BT_ficheInter extends BimpDolObject
         $commande = New Commande($this->db->db);
         $product = $this->getInstance('bimpcore', 'Bimp_Product');
         $allCommandes = ($this->getData('commandes')) ? BimpTools::json_decode_array($this->getData('commandes')) : [];
-        $array = explode(',', BimpCore::getConf('bimptechnique_ref_temps_passe'));
+        $array = explode(',', BimpCore::getConf('ref_temps_passe', '', 'bimptechnique'));
         $tp = [];
         foreach ($array as $code) {
             $tp[$code] = "Temps passé de niveau " . substr($code, -1, 1);
@@ -963,7 +963,7 @@ class BT_ficheInter extends BimpDolObject
     {
         $children = $this->getChildrenList('inters', ["type" => $type]);
 
-        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', ($type == 3) ? BimpCore::getConf('bimptechnique_id_dep') : BimpCore::getConf('bimptechnique_id_serv19'));
+        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', ($type == 3) ? BimpCore::getConf('id_dep', 0, 'bimptechnique') : BimpCore::getConf('id_serv19', 0, 'bimptechnique'));
         $services = [];
         $index = 1;
         if (count($children)) {
@@ -1042,7 +1042,7 @@ class BT_ficheInter extends BimpDolObject
             $service = $this->getInstance('bimpcore', 'Bimp_Product');
             $renta = [];
 
-            $coup_technicien = BimpCore::getConf("bimptechnique_coup_horaire_technicien");
+            $coup_technicien = BimpCore::getConf('cout_horaire_technicien', null, 'bimptechnique');
 
             if (is_array($commandes) && count($commandes) > 0) {
                 foreach ($commandes as $id_commande) {
@@ -1397,7 +1397,7 @@ class BT_ficheInter extends BimpDolObject
                     $info = "<b>" . BimpRender::renderIcon('warning') . "</b> Si vous avez des tickets support et que vous ne les voyez pas dans le formulaire, rechargez la page en cliquant sur le bouton suivant: <a href='" . DOL_URL_ROOT . "/bimptechnique/?fc=fi&id=" . $this->id . "&navtab-maintabs=signature'><button class='btn btn-default'>Rafraîchire la page</button></a>";
                     $html .= "<h4>$info</h4>";
 
-                    $interne = explode(",", BimpCore::getConf("bimptechnique_id_societe_auto_terminer"));
+                    $interne = explode(",", BimpCore::getConf('id_societe_auto_terminer', '', 'bimptechnique'));
 
                     $html .= "<h3><u>Type de signature</u></h3>";
                     $html .= '<h3><div class="check_list_item" id="checkList" >'
@@ -1837,7 +1837,7 @@ class BT_ficheInter extends BimpDolObject
                 $actioncomm->label = $instance->getRef();
                 $actioncomm->note = $data['description'];
                 $actioncomm->punctual = 1;
-                $actioncomm->userownerid = BimpCore::getConf('bimptechnique_default_user_actionComm');
+                $actioncomm->userownerid = BimpCore::getConf('default_id_user_actioncomm', null, 'bimptechnique');
                 $actioncomm->elementtype = 'fichinter';
                 $actioncomm->type_id = $data['type_planning'];
                 $actioncomm->datep = $data['le'] . " " . $data['de'];

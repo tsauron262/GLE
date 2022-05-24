@@ -998,7 +998,7 @@ class BimpDocumentPDF extends BimpModelPDF
 //        $html .= '<p style="font-size: 6px; font-weight: bold; font-style: italic">RÉSERVES DE PROPRIÉTÉ : applicables selon la loi n°80.335 du 12 mai';
 //        $html .= ' 1980 et de l\'article L624-16 du code de commerce. Seul le Tribunal de Lyon est compétent.</p>';
 
-        if (BimpCore::getConf("CGV_BIMP") && static::$use_cgv) {
+        if (BimpCore::getConf('pdf_add_cgv', 0, 'bimpcommercial') && static::$use_cgv) {
             $html .= '<span style="font-weight: bold;">';
             if ($this->pdf->addCgvPages)
                 $html .= 'La signature de ce document vaut acceptation de nos Conditions Générales de Vente annexées et consultables sur le site www.bimp-pro.fr pour les professionnels et sur www.bimp.fr pour les particuliers.';
@@ -1578,7 +1578,7 @@ class BimpDocumentPDF extends BimpModelPDF
           } */
 
         if (is_a($this->bimpCommObject, 'BimpComm') && in_array($this->bimpCommObject->object_name, array('Bimp_Propal', 'BS_SavPropal')) &&
-                $this->bimpCommObject->getData('ef_type') != 'M' && (int) BimpCore::getConf('propal_pdf_chorus_mention', 0)) {
+                $this->bimpCommObject->getData('ef_type') != 'M' && (int) BimpCore::getConf('propal_pdf_chorus_mention', null, 'bimpcommercial')) {
             $html .= '<tr>';
             $html .= '<td colspan="2">';
             $html .= '<span style="font-weight: bold; color: #EF7D00">NB : les administrations publiques doivent obligatoirement fournir les informations nécessaires au dépôt de la facture <br/>sur le portail Chorus</span>';

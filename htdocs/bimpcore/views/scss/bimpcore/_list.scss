@@ -84,6 +84,11 @@ table.objectlistTable {
                 display: none;
             }
 
+            .inputGroupContainer, 
+            .input-group {
+                width: 100%;
+            }
+
             input, textarea, select {
                 width: 100%;
                 color: $input-color;
@@ -143,6 +148,16 @@ table.objectlistTable {
             }
         }
 
+        &.has_errors {
+            background-color: #FFE6E5!important;
+            border-color: #E62119!important;
+
+            & > td {
+                background-color: #FFE6E5!important;
+                border-color: #E62119!important;
+            }
+        }
+
         &:hover {
             background-color: #FAFAFA!important;
 
@@ -172,6 +187,14 @@ table.objectlistTable {
 
             & > td {
                 background-color: #CDEFFF!important;
+            }
+        }
+
+        &.has_errors:hover {
+            background-color: #FFC4C2!important;
+
+            & > td {
+                background-color: #FFC4C2!important;
             }
         }
     }
@@ -899,7 +922,7 @@ td.buttons {
                 &.no-buttons {
                     padding-right: 5px;
                 }
-                
+
                 .remove_btn {
                     margin-left: 5px;
                     cursor: pointer;

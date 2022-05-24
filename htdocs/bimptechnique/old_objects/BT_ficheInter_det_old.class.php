@@ -76,7 +76,7 @@ class BT_ficheInter_det extends BimpDolObject
 
     public function __construct($module, $object_name)
     {
-        $this->coup_horaire_tech = BimpCore::getConf('bimptechnique_coup_horaire_technicien'); // A eviter, c'est inutile. Faire simplement BimpCore::getConf() à chaque fois que nécessaire. 
+        $this->coup_horaire_tech = BimpCore::getConf('cout_horaire_technicien', null, 'bimptechnique');
         return parent::__construct($module, $object_name);
     }
 
@@ -179,7 +179,7 @@ class BT_ficheInter_det extends BimpDolObject
     public function getTypeArray()
     {
         $parent = $this->getInstance('bimptechnique', 'BT_ficheInter', $_REQUEST['id']);
-        $array_serv_interne = explode(",", BimpCore::getConf('bimptechnique_id_societe_auto_terminer'));
+        $array_serv_interne = explode(",", BimpCore::getConf('id_societe_auto_terminer', '', 'bimptechnique'));
         $this_soc = $parent->getData('fk_soc');
         if (in_array($this_soc, $array_serv_interne)) {
             return Array(

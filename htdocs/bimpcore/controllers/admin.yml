@@ -47,11 +47,6 @@ objects:
             bimp_object: 
                 module: bimpsupport
                 name: BS_Remote_Token
-    log: 
-        instance: 
-            bimp_object: 
-                module: bimpcore
-                name: Bimp_Log
     alert: 
         instance: 
             bimp_object: 
@@ -110,13 +105,6 @@ sections:
 #                      object: vente
 #                      name: default
                       
-        scripts: 
-            label: Scripts
-            sections: 
-                - type: custom
-                  custom: 
-                      callback: renderScriptsTabContent
-                      
         files: 
             label: Tous les Fichiers
             sections: 
@@ -150,6 +138,7 @@ sections:
                   list: 
                       panel: 1
                       object: remote_token
+                      
         testSpeed:
             label: Test SPEED
             sections:
@@ -160,13 +149,7 @@ sections:
                           params: 
                             - renderTestTab
                             - testSpeed
-        logs:
-            label: Logs BimpCore
-            sections:
-                - type: list
-                  list: 
-                      panel: 1
-                      object: log
+        
         alert:
             label: Alert
             sections:

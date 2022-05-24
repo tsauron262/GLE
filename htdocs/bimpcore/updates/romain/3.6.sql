@@ -1,1 +1,0 @@
-INSERT INTO `llx_bimpcore_conf` (`name`, `value`) VALUES ('id_user_mail_comm_line_expire', 232)

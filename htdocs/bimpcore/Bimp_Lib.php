@@ -62,6 +62,7 @@ if (!defined('BIMP_LIB')) {
     require_once $dir . 'BimpController.php';
     require_once $dir . 'BimpPublicController.php';
     require_once $dir . 'BimpMailCore.php';
+    require_once $dir . 'BimpModuleConf.php';
 
     if (defined('PATH_EXTENDS')) {
         if (file_exists(PATH_EXTENDS . '/bimpcore/classes/BimpMail.php')) {
@@ -97,7 +98,7 @@ function checkBimpCoreVersion()
         return;
     }
 
-    if ((int) BimpCore::getConf('bimp_core_check_versions_lock', 0)) {
+    if ((int) BimpCore::getConf('check_versions_lock', 0)) {
         return;
     }
 
@@ -157,7 +158,7 @@ function checkBimpCoreVersion()
             $bdb = BimpCache::getBdb();
 
             if (!empty($updates) || !empty($modules_updates)) {
-                BimpCore::setConf('bimp_core_check_versions_lock', 1);
+                BimpCore::setConf('check_versions_lock', 1);
             }
 
             if (!empty($updates)) {
@@ -230,7 +231,7 @@ function checkBimpCoreVersion()
                 }
             }
 
-            BimpCore::setConf('bimp_core_check_versions_lock', 0);
+            BimpCore::setConf('check_versions_lock', 0);
 
             $url = str_replace('bimpcore_update_confirm=1', '', $_SERVER['REQUEST_URI']);
             echo '<br/><button type="button" onclick="window.location = \'' . $url . '\'">OK</button>';

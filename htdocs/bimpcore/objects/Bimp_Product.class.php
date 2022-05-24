@@ -445,7 +445,7 @@ class Bimp_Product extends BimpObject
 
     public function isVendable(&$errors, $urgent = false, $mail = true)
     {
-        if (BimpCore::getConf('use_valid_product') && $this->dol_field_exists('validate')) {
+        if ((int) BimpCore::getConf('use_valid_product') && $this->dol_field_exists('validate')) {
             if (!(int) $this->getData('validate')) {
                 $errors[] = 'Le produit "' . $this->getRef() . ' - ' . $this->getData('label') . '" n\'est pas validé';
                 if ($mail) {
@@ -541,31 +541,31 @@ class Bimp_Product extends BimpObject
             if ($zone_vente == 1) {
                 if ($tvaTaux == 0 ||
                         ($tvaTaux == 1 && $this->getData('tva_tx') == 0)) {
-                    return BimpCore::getConf('BIMPTOCEGID_achat_tva_null');
+                    return BimpCore::getConf('achat_tva_null', null, "bimptocegid");
                 }
-                return BimpCore::getConf('BIMPTOCEGID_achat_produit_fr');
+                return BimpCore::getConf('achat_produit_fr', null, "bimptocegid");
             } elseif ($zone_vente == 2 || $zone_vente == 4)
-                return BimpCore::getConf('BIMPTOCEGID_achat_produit_ue');
+                return BimpCore::getConf('achat_produit_ue', null, "bimptocegid");
             elseif ($zone_vente == 3)
-                return BimpCore::getConf('BIMPTOCEGID_achat_produit_ex');
+                return BimpCore::getConf('achat_produit_ex', null, "bimptocegid");
         } elseif ($type == 1) { // Service
             if ($zone_vente == 1) {
                 if ($tvaTaux == 0 ||
                         ($tvaTaux == 1 && $this->getData('tva_tx') == 0)) {
-                    return BimpCore::getConf('BIMPTOCEGID_achat_tva_null_service');
+                    return BimpCore::getConf('achat_tva_null_service', null, "bimptocegid");
                 }
-                return BimpCore::getConf('BIMPTOCEGID_achat_service_fr');
+                return BimpCore::getConf('achat_service_fr', null, "bimptocegid");
             } elseif ($zone_vente == 2 || $zone_vente == 4)
-                return BimpCore::getConf('BIMPTOCEGID_achat_service_ue');
+                return BimpCore::getConf('achat_service_ue', null, "bimptocegid");
             elseif ($zone_vente == 3)
-                return BimpCore::getConf('BIMPTOCEGID_achat_service_ex');
+                return BimpCore::getConf('achat_service_ex', null, "bimptocegid");
         } elseif ($type == 2) { // Frais de port
             if ($zone_vente == 1)
-                return BimpCore::getConf('BIMPTOCEGID_frais_de_port_achat_fr');
+                return BimpCore::getConf('frais_de_port_achat_fr', null, "bimptocegid");
             elseif ($zone_vente == 2 || $zone_vente == 4)
-                return BimpCore::getConf('BIMPTOCEGID_frais_de_port_achat_ue');
+                return BimpCore::getConf('frais_de_port_achat_ue', null, "bimptocegid");
             elseif ($zone_vente == 3)
-                return BimpCore::getConf('BIMPTOCEGID_frais_de_port_achat_ex');
+                return BimpCore::getConf('frais_de_port_achat_ex', null, "bimptocegid");
         }
     }
 
@@ -585,39 +585,39 @@ class Bimp_Product extends BimpObject
         if ($type == 0) {//Produit
             if ($zone_vente == 1) {
                 if ($this->getData('tva_tx') == 0) {
-                    return BimpCore::getConf('BIMPTOCEGID_vente_tva_null');
+                    return BimpCore::getConf('vente_tva_null', null, "bimptocegid");
                 }
-                return BimpCore::getConf('BIMPTOCEGID_vente_produit_fr');
+                return BimpCore::getConf('vente_produit_fr', null, "bimptocegid");
             } elseif ($zone_vente == 2 || $zone_vente == 4)
-                return BimpCore::getConf('BIMPTOCEGID_vente_produit_ue');
+                return BimpCore::getConf('vente_produit_ue', null, "bimptocegid");
             elseif ($zone_vente == 3)
-                return BimpCore::getConf('BIMPTOCEGID_vente_produit_ex');
+                return BimpCore::getConf('vente_produit_ex', null, "bimptocegid");
         } elseif ($type == 1) {//service
             if ($zone_vente == 1) {
                 if ($this->getData('tva_tx') == 0) {
-                    return BimpCore::getConf('BIMPTOCEGID_vente_tva_null');
+                    return BimpCore::getConf('vente_tva_null', null, "bimptocegid");
                 }
-                return BimpCore::getConf('BIMPTOCEGID_vente_service_fr');
+                return BimpCore::getConf('vente_service_fr', null, "bimptocegid");
             }
             elseif ($zone_vente == 2 || $zone_vente == 4) {
-                return BimpCore::getConf('BIMPTOCEGID_vente_service_ue');
+                return BimpCore::getConf('vente_service_ue', null, "bimptocegid");
             }
             elseif ($zone_vente == 3)
-                return BimpCore::getConf('BIMPTOCEGID_vente_service_ex');
+                return BimpCore::getConf('vente_service_ex', null, "bimptocegid");
         } elseif ($type == 2) {//Port
             if ($zone_vente == 1)
-                return BimpCore::getConf('BIMPTOCEGID_frais_de_port_vente_fr');
+                return BimpCore::getConf('frais_de_port_vente_fr', null, "bimptocegid");
             elseif ($zone_vente == 2 || $zone_vente == 4)
-                return BimpCore::getConf('BIMPTOCEGID_frais_de_port_vente_ue');
+                return BimpCore::getConf('frais_de_port_vente_ue', null, "bimptocegid");
             elseif ($zone_vente == 3)
-                return BimpCore::getConf('BIMPTOCEGID_frais_de_port_vente_ex');
+                return BimpCore::getConf('frais_de_port_vente_ex', null, "bimptocegid");
         } elseif ($type == 3) {//commission
             if ($zone_vente == 1)
-                return BimpCore::getConf('BIMPTOCEGID_comissions_fr');
+                return BimpCore::getConf('comissions_fr', null, "bimptocegid");
             elseif ($zone_vente == 2 || $zone_vente == 4)
-                return BimpCore::getConf('BIMPTOCEGID_comissions_ue');
+                return BimpCore::getConf('comissions_ue', null, "bimptocegid");
             elseif ($zone_vente == 3)
-                return BimpCore::getConf('BIMPTOCEGID_comissions_ex');
+                return BimpCore::getConf('comissions_ex', null, "bimptocegid");
         }
         return false;
     }
@@ -625,18 +625,18 @@ class Bimp_Product extends BimpObject
     public function getCodeComptableVenteTva($zone_vente = 1)
     {
         if ($zone_vente == 1)
-            return BimpCore::getConf('BIMPTOCEGID_vente_tva_fr');
+            return BimpCore::getConf('vente_tva_fr', null, "bimptocegid");
         elseif ($zone_vente == 2 || $zone_vente == 4)
-            return BimpCore::getConf('BIMPTOCEGID_vente_tva_ue');
+            return BimpCore::getConf('vente_tva_ue', null, "bimptocegid");
         return false;
     }
 
     public function getCodeComptableVenteDeee($zone_vente = 1)
     {
         if ($zone_vente == 1)
-            return BimpCore::getConf('BIMPTOCEGID_vente_dee_fr');
+            return BimpCore::getConf('vente_dee_fr', null, "bimptocegid");
 //        elseif($zone_vente == 2 || $zone_vente == 4)
-//            return BimpCore::getConf('BIMPTOCEGID_vente_dee_ue');
+//            return BimpCore::getConf('vente_dee_ue', null, "bimptocegid");
         return false;
     }
 
@@ -1390,7 +1390,7 @@ class Bimp_Product extends BimpObject
             if (!$this->hasFixePa()) {
                 return 0;
             }
-            if ((int) BimpCore::getConf('use_new_cur_pa_method')) {
+            if ((int) BimpCore::getConf('use_products_cur_pa_history')) {
                 // Nouvelle méthode: 
                 $curPa = $this->getCurrentPaObject(true, $date);
                 if (BimpObject::objectLoaded($curPa)) {
@@ -1419,7 +1419,7 @@ class Bimp_Product extends BimpObject
             return 0;
         }
 
-        if (BimpCore::getConf('use_new_cur_pa_method')) {
+        if ((int) BimpCore::getConf('use_products_cur_pa_history')) {
             self::loadClass('bimpcore', 'BimpProductCurPa');
             $curPa = BimpProductCurPa::getProductCurPa($this->id, (string) $date);
 
@@ -1541,7 +1541,7 @@ class Bimp_Product extends BimpObject
 
             $pa_ht = 0;
 
-            if (BimpCore::getConf('use_new_cur_pa_method')) {
+            if ((int) BimpCore::getConf('use_products_cur_pa_history')) {
                 $pa_ht = (float) $this->getCurrentPaHt();
             } else {
                 if ((float) $this->getData('cur_pa_ht')) {
@@ -1643,7 +1643,7 @@ class Bimp_Product extends BimpObject
     {
         $errors = array();
         if ($this->isLoaded($errors)) {
-            if (BimpCore::getConf('use_new_cur_pa_method')) {
+            if ((int) BimpCore::getConf('use_products_cur_pa_history')) {
                 $curPa = $this->getCurrentPaObject(false);
                 if (!BimpObject::objectLoaded($curPa) ||
                         ((float) $curPa->getData('amount') !== (float) $pa_ht || (int) $curPa->getData('id_fourn_price') !== (int) $id_fourn_price)) {
@@ -1819,7 +1819,7 @@ class Bimp_Product extends BimpObject
         $html = '';
 
         if ($this->isLoaded()) {
-            if (BimpCore::getConf('use_new_cur_pa_method')) {
+            if ((int) BimpCore::getConf('use_products_cur_pa_history')) {
                 $curPa = $this->getCurrentPaObject();
                 if (BimpObject::objectLoaded($curPa)) {
                     $html .= '<span style="font-size: 16px; font-style: bold">' . BimpTools::displayMoneyValue((float) $curPa->getData('amount')) . '</span><br/>';

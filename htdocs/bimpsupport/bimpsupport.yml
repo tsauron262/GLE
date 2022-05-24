@@ -1,0 +1,11 @@
+params: 
+    sav_mode_reglement: 
+        label: Mode de réglement par défaut du SAV
+        required: 1
+    sav_cond_reglement: 
+        label: Conditions de règlement par défaut du SAV
+        required: 1
+    sav_public_reservations: 
+        label: Réservations SAV en ligne activées
+        type: bool
+        def: 0

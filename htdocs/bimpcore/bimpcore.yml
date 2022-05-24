@@ -1,0 +1,222 @@
+
+categories: 
+    defaults: 
+        label: Valeurs par défaut
+    emails: 
+        label: E-mails
+    products: 
+        label: Produits
+    tiers: 
+        label: Tiers
+        desc: Societés (Client / Fournisseurs) - Contacts / Comptes utilisateurs clients, etc.
+    cache: 
+        label: Cache
+        
+params: 
+    # Principaux:
+    mode_eco: 
+        label: Activer mode éco
+        type: bool
+        def: 0
+    check_versions_lock: 
+        label: Vérouillage des mises à jours automatiques
+        info: Indispensable pour éviter l'exécution multiple des màj
+        warning: <b>En cas de plantage lors d'une mise à jour, le vérouillage doit être désactivé manuellement.</b>
+        type: bool
+        def: 0
+    mode_securlogin: 
+        label: Mode Secure Login
+        type: select
+        values: 
+            0: Pas de vérifs
+            1: Code SMS écran
+            2: Normal
+        def: 0
+    use_bimp_logs: 
+        label: Activer les logs Bimp
+        type: bool
+        def: 1
+        sub_params: 
+            - if: 1
+              params: 
+                  bimp_log_urgent_send_email: 
+                      label: Envoyer un e-mail aux devs pour chaque nouveau log urgent
+                      type: bool
+                      def: 1
+                  log_actions_rollbacks: 
+                      label: Logguer les rollbacks des actions des BimpObject
+                      type: bool
+                      def: 0
+    print_bimp_logs: 
+        label: Afficher directement les logs Bimp
+        type: bool
+        def: 0
+        warning: Activer uniquement sur les versions de dev
+    use_bimp_object_instances_clones: 
+        label: cloner les instances de base des BimpObject
+        type: bool
+        def: 1
+    use_files_tms: 
+        label: Inclure les timestamps dans les fichiers js et css
+        type: bool
+        def: 1
+    use_db_transactions: 
+        label: Utiliser les transactions DB
+        type: bool
+        def: 0
+    USE_ENTREPOT: 
+        label: Utiliser les entrepôts
+        type: bool
+        def: 1
+    USE_SECTEUR: 
+        label: Utiliser les secteurs
+        type: bool
+        def: 0
+    use_caisse_for_payments: 
+        label: Utiliser la caisse pour les paiements
+        type: bool
+        def: 0
+    pdf_use_html_purifier: 
+        label: Utiliser HTML Purifier pour les PDF
+        info: Permet le nettoyage du HTML intégrer dans les PDF
+        type: bool
+        def: 0
+    pages_titles_prefix: 
+        label: Préfixe des titres de pages
+        info: Utile pour différencier les onglets des versions de l'ERP (dev / prod / etc.).<br/><b>Pour les admins seulement</b>
+    public_base_url: 
+        label: Base URL Publique
+        info: Base de l'URL pour l'accès public à certaines pages de l'ERP.
+        warning: Différent de l'URL de l'espace client (cf bimpinterfaceclient)
+    date_archive: 
+        label: Date archive
+        def: ''
+    
+    # Defaults: 
+    default_id_entrepot: 
+        label: ID Entrepôt par défaut
+        cat: defaults
+        required: 1
+    id_default_tva_tx: 
+        label: ID du taux de TVA par défaut
+        cat: defaults
+        def: 0
+    id_default_bank_account: 
+        label: ID Compte bancaire par défaut
+        cat: defaults
+        def: 0
+    default_id_commercial: 
+        label: ID Commerical par défaut
+        cat: defaults
+        def: 0
+    default_id_country: 
+        label: ID Pays par défaut
+        cat: defaults
+        def: 1
+    default_id_mode_paiement: 
+        label: ID Mode de paiement par défaut
+        cat: defaults
+        def: 0
+    defective_id_entrepot: 
+        label: ID Entrepôt produits défectueux
+        cat: defaults
+        def: 0
+        
+    # E-mails: 
+    public_default_reply_to_email: 
+        label: reply_to par défaut pour les e-mails publics
+        cat: emails
+        def: ''
+    email_compta: 
+        label: Adresse e-mail service comptabilité
+        cat: emails
+        def: ''
+    emails_notify_status_client_change: 
+        label: Adresses e-mail pour la notification du changement de statut des clients
+        cat: emails
+        help: Laisser vide pour désactiver cette notification
+        def: ''
+    emails_notify_solvabilite_client_change_man: 
+        label: Adresse e-mail pour notification changement de solvabilité client (manuelle)
+        cat: emails
+        def: ''
+    emails_notify_solvabilite_client_change_auto: 
+        label: Adresse e-mail pour notification changement de solvabilité client (auto)
+        cat: emails
+        def: ''
+        
+    # Produits
+    use_valid_product: 
+        label: Validation produits obligatoire
+        cat: products
+        type: bool
+        def: 0
+    use_products_cur_pa_history:
+        label: Activer l'historique des prix d'achat courants
+        cat: products
+        type: bool
+        def: 0
+        
+    # Tiers:
+    check_solvabilite_client: 
+        label: Vérifier la solvabilité des clients
+        cat: tiers
+        type: bool
+        def: 0
+    societe_default_outstanding_limit: 
+        label: Limite par défaut des encours clients
+        cat: tiers
+        def: 4000
+    siren_required: 
+        label: N° SIREN obligatoire pour les entreprises
+        cat: tiers
+        type: bool
+        def: 0
+    societe_id_default_cond_reglement: 
+        label: Conditions de réglement par défaut
+        cat: tiers
+        def: 0
+    societe_id_default_mode_reglement: 
+        label: Mode de réglement par défaut
+        cat: tiers
+        def: 0
+    particulier_id_default_cond_reglement: 
+        label: Conditions de réglement par défaut pour les particuliers
+        cat: tiers
+        def: 0
+    particulier_id_default_mode_reglement: 
+        label: Mode de réglement par défaut pour les particuliers
+        cat: tiers
+        def: 0
+    societe_id_default_cond_reglement_admin: 
+        label: Conditions de réglement par défaut pour les administrations
+        cat: tiers
+        def: 0
+    societe_id_default_mode_reglement_admin: 
+        label: Mode de réglement par défaut pour les administrations
+        cat: tiers
+        def: 0
+        
+    # Cache: 
+    cache_server_classname: 
+        label: Nom de la classe pour le cache serveur
+        cat: cache
+        info: 'La classe doit étendre "BimpCacheServer" et être présente dans "bimpcore/classes"'
+        help: laisser vide pour déactiver le cache server
+    bimpcache_check_memory_enabled: 
+        label: Vérification de la mémoire vive activée
+        cat: cache
+        type: bool
+        def: 1
+    use_cache_for_extrafields: 
+        label: Utiliser le cache pour le extrafields Dolibarr
+        cat: cache
+        type: bool
+        def: 0
+        warning: Ne pas activer pour le moment, la fonctionnalité semble ne pas fonctionner correctement
+    use_cache_for_cards: 
+        label: Mettre les cards (mini-fiche) en cache pour les BimpObjects
+        cat: cache
+        type: bool
+        def: 0
+        

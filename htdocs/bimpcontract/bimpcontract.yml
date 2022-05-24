@@ -1,0 +1,41 @@
+categories: 
+    pdf: 
+        label: Fichiers PDF
+        
+params: 
+    email_groupe: 
+        label: Adrese e-mail groupe
+    email_facturation:
+        label: Adresse e-mail facturation
+    use_autorised_service: 
+        label: Utiliser les services autorisés
+        type: bool
+        def: 1
+    autorised_service_codes: 
+        label: Codes services autorisés
+        def: []
+    just_code_service: 
+        label: Afficher uniquement les codes services
+        type: bool
+        def: 0
+        
+    # PDF: 
+    pdf_use_signature: 
+        label: Activer les signatures PDF
+        cat: pdf
+        type: bool
+        def: 1
+    pdf_title: 
+        label: Titre des PDF
+        cat: pdf
+        def: Contrat d'assistance et de maintenance informatique
+    pdf_signataire: 
+        label: Signataire des contrats
+        cat: pdf
+        def: ''
+    pdf_signataire_function: 
+        label: Fonction signataire
+        cat: pdf
+        def: ''
+    
+        

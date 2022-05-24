@@ -1,0 +1,5 @@
+params: 
+    clean_reports_id_cronjob: 
+        label: ID Tâche cron pour le nettoyage des rapports
+        def: 0
+        warning: Déterminé automatiquement à l'install du module

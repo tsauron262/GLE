@@ -149,10 +149,9 @@ class BContract_contrat extends BimpDolObject
 
     function __construct($module, $object_name)
     {
-        global $user, $db;
         $this->redirectMode = 4;
-        $this->email_group = BimpCore::getConf('bimpcontract_email_groupe');
-        $this->email_facturation = BimpCore::getConf('bimpcontract_email_facturation');
+        $this->email_group = BimpCore::getConf('email_groupe', '', 'bimpcontract'); // A éviter, faire getConf() à chaque fois que nécessaire
+        $this->email_facturation = BimpCore::getConf('email_facturation', '', 'bimpcontract');
         return parent::__construct($module, $object_name);
     }
     
@@ -371,7 +370,7 @@ class BContract_contrat extends BimpDolObject
     public function getTotalFi($tms)
     {
         $ficheInter = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter');
-        return $ficheInter->time_to_qty($ficheInter->timestamp_to_time($tms)) * BimpCore::getConf("bimptechnique_coup_horaire_technicien");
+        return $ficheInter->time_to_qty($ficheInter->timestamp_to_time($tms)) * BimpCore::getConf('cout_horaire_technicien', null, 'bimptechnique');
     }
 
     public function getMargePrevisionnel($total_fis)
@@ -468,7 +467,7 @@ class BContract_contrat extends BimpDolObject
             $html .= "Nombre de FI: " . count($fis) . '<br />';
             $html .= "Nombre d'heures dans le contrat: " . $ficheInter->timestamp_to_time($total_tms) . '<br />';
             $html .= "Nombre d'heures hors du contrat: " . $ficheInter->timestamp_to_time($total_tms_not_contrat) . ' (non pris en compte)<br />';
-            $html .= "Coût technique: " . price($total_fis) . " € (" . BimpCore::getConf("bimptechnique_coup_horaire_technicien") . " €/h * " . $ficheInter->timestamp_to_time($total_tms) . ")<br />";
+            $html .= "Coût technique: " . price($total_fis) . " € (" . BimpCore::getConf('cout_horaire_technicien', null, 'bimptechnique') . " €/h * " . $ficheInter->timestamp_to_time($total_tms) . ")<br />";
             $html .= "Coût prévisionel: " . price($previsionelle) . " €<br />";
             $html .= "Vendu: " . "<strong class='warning'>" . price($this->getTotalContrat()) . "€</strong><br />";
             $html .= "Marge: " . "<strong class='$class'>" . BimpRender::renderIcon($icone) . " " . price($marge) . "€</strong><br />";
@@ -980,7 +979,7 @@ class BContract_contrat extends BimpDolObject
                         $ok = true;
 
                         // Il y a un commercial définit par défaut (bimpcore)
-                    } elseif ((int) BimpCore::getConf('user_as_default_commercial', 1)) {
+                    } elseif ((int) BimpCore::getConf('user_as_default_commercial', null, 'bimpcommercial')) {
                         $this->dol_object->add_contact($user->id, 'SALESREPFOLL', 'internal');
                         $ok = true;
 //                        die('CCCCCCCCCCCCCCCC');
@@ -1318,15 +1317,21 @@ class BContract_contrat extends BimpDolObject
 
     public function getName($withGeneric = true)
     {
+        // getName() doit renvoyer le nom sans aucun formatage html
         $objet = $this->getData('objet_contrat');
-        $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
+//        $client = $this->getInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
         return "<span><i class='fas fa-" . self::$objet_contrat[$objet]['icon'] . "' ></i> " . self::$objet_contrat[$objet]['label'] . "</span>";
 
-        return self::$objet_contrat[$this->getData('objet_contrat')];
+//        return self::$objet_contrat[$this->getData('objet_contrat')];
     }
 
     public function getIndiceSyntec()
     {
+        // Eviter ce genre de fonction inutile (on ne va pas créer une fonction pour chaque param de conf!)
+        // Pour rappel : pas besoin de callback dans les yml, utiliser:
+        //   conf: 
+        //      module: ...
+        //      name: ...
         return BimpCore::getConf('current_indice_syntec');
     }
 
@@ -1582,7 +1587,7 @@ class BContract_contrat extends BimpDolObject
         $this->actionUpdateSyntec();
         $for_date_end = new DateTime($this->displayRealEndDate("Y-m-d"));
         $new_contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
-        if (BimpCore::getConf('USE_ENTREPOT'))
+        if ((int) BimpCore::getConf('USE_ENTREPOT'))
             $new_contrat->set('entrepot', $this->getData('entrepot'));
         $new_contrat->set('fk_soc', $this->getData('fk_soc'));
         $new_contrat->set('date_contrat', null);
@@ -3937,7 +3942,7 @@ class BContract_contrat extends BimpDolObject
         $commercial_for_entrepot = $this->getInstance('bimpcore', 'Bimp_User', $data['commercial_suivi']);
 
         $new_contrat = BimpObject::getInstance('bimpcontract', 'BContract_contrat');
-        if (BimpCore::getConf('USE_ENTREPOT'))
+        if ((int) BimpCore::getConf('USE_ENTREPOT'))
             $new_contrat->set('entrepot', ($commercial_for_entrepot->getData('defaultentrepot')) ? $commercial_for_entrepot->getData('defaultentrepot') : $propal->getData('entrepot'));
         $new_contrat->set('fk_soc', $fk_soc);
         $new_contrat->set('date_contrat', null);
@@ -3969,7 +3974,7 @@ class BContract_contrat extends BimpDolObject
         if (!count($errors)) {
             foreach ($propal->dol_object->lines as $line) {
                 $produit = $this->getInstance('bimpcore', 'Bimp_Product', $line->fk_product);
-                if ($produit->getData('fk_product_type') == 1 || !BimpCore::getConf('bimpcontract_just_code_service') || $line->pa_ht == 0) {
+                if ($produit->getData('fk_product_type') == 1 || !BimpCore::getConf('just_code_service', null, 'bimpcontract') || $line->pa_ht == 0) {
                     $description = ($line->desc) ? $line->desc : $line->libelle;
                     $end_date = new DateTime($data['valid_start']);
                     $end_date->add(new DateInterval("P" . $duree_mois . "M"));

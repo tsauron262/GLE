@@ -53,7 +53,7 @@
         }
         if($have_au_moin_un_renouvellement) {
             $this->output .= $message;
-            //mailSyn2("[Contrats] - Renouvellement automatique", BimpCore::getConf('bimpcontract_email_groupe'), null, $message);
+            //mailSyn2("[Contrats] - Renouvellement automatique", BimpCore::getConf('email_groupe', '', 'bimpcontract'), null, $message);
         }
     } 
  }

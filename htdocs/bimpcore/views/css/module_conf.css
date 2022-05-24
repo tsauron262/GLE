@@ -1,0 +1,28 @@
+/* line 3, ../scss/module_conf.scss */
+#moduleConf .module_select_container {
+  padding: 15px;
+  margin-bottom: 15px;
+  font-size: 14px;
+  background-color: #F2F2F2;
+  border-bottom: 1px solid #000; }
+/* line 11, ../scss/module_conf.scss */
+#moduleConf .all_modules_search_result_container {
+  display: none; }
+/* line 15, ../scss/module_conf.scss */
+#moduleConf .category_params_container {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #000; }
+/* line 21, ../scss/module_conf.scss */
+#moduleConf .module_params_header {
+  margin-bottom: 15px; }
+/* line 25, ../scss/module_conf.scss */
+#moduleConf .sub_params_container {
+  margin-left: 10px;
+  padding-left: 10px;
+  border-left: 3px solid #676565; }
+/* line 31, ../scss/module_conf.scss */
+#moduleConf .all_modules_search_input,
+#moduleConf .cur_module_search_input {
+  border: 1px solid #999999;
+  width: 300px; }

@@ -26,7 +26,3 @@ ALTER TABLE `llx_fichinterdet` ADD `id_line_commande` INT(11) DEFAULT NULL;
 ALTER TABLE `llx_fichinterdet` ADD `id_line_contrat` INT(11) DEFAULT NULL;
 ALTER TABLE `llx_fichinterdet` ADD `id_set_facturable` INT(11) DEFAULT '0';
 ALTER TABLE `llx_fichinterdet` ADD `total_ht` FLOAT DEFAULT '0';
-INSERT INTO `llx_bimpcore_conf` (`name`, `value`) VALUES ('bimptechnique_ref_deplacement', 'SERV-FD01');
-INSERT INTO `llx_bimpcore_conf` (`name`, `value`) VALUES ('bimptechnique_coup_horaire_technicien', '40');
-INSERT INTO `llx_bimpcore_conf` (`name`, `value`) VALUES ('bimptechnique_ref_depassement', 'SERV19-FPR-DEP');
-INSERT INTO `llx_bimpcore_conf` (`name`, `value`) VALUES ('bimptechnique_default_user_actionComm', '375');

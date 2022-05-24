@@ -114,7 +114,7 @@ class BimpObject extends BimpCache
 
         $instance = null;
 
-        if ($module && $object_name && (int) BimpCore::getConf('bimpcore_use_bimp_object_instances_clones', 0)) {
+        if ($module && $object_name && (int) BimpCore::getConf('use_bimp_object_instances_clones')) {
             $cache_key = $module . '_' . $object_name . '_base_instance';
             if (!isset(self::$cache[$cache_key])) {
                 self::$cache[$cache_key] = new $className($module, $object_name);
@@ -949,7 +949,7 @@ class BimpObject extends BimpCache
             }
         }
 
-        if ($with_card && !(int) BimpCore::getConf('bimpcore_mode_eco', 0)) {
+        if ($with_card && !(int) BimpCore::getConf('mode_eco')) {
             $card = BimpTools::getArrayValueFromPath($this->params, 'nom_url/card', '');
 
             if ($card) {
@@ -1801,12 +1801,12 @@ class BimpObject extends BimpCache
             }
         }
 
-        return (int) BimpCore::getConf('bimpcaisse_id_default_account');
+        return (int) BimpCore::getConf('id_default_bank_account');
     }
 
     public function getTaxeIdDefault()
     {
-        return (int) BimpCore::getConf("tva_default");
+        return (int) BimpCore::getConf('id_default_tva_tx');
     }
 
     public function getDefaultTva()
@@ -1991,7 +1991,7 @@ class BimpObject extends BimpCache
             $instance = $this;
         }
 
-        $use_db_transactions = (int) BimpCore::getConf('bimpcore_use_db_transactions', 0);
+        $use_db_transactions = (int) BimpCore::getConf('use_db_transactions');
 
         if ($use_db_transactions) {
             $instance->db->db->begin();
@@ -2043,7 +2043,7 @@ class BimpObject extends BimpCache
             if (isset($result['errors']) && count($result['errors'])) {
                 $instance->db->db->rollback();
 
-                if ((int) BimpCore::getConf('bimpcore_log_actions_rollbacks', 0)) {
+                if ((int) BimpCore::getConf('log_actions_rollbacks')) {
                     BimpCore::addlog('Rollback suite à action', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $instance, array(
                         'Action'  => $action,
                         'Erreurs' => $result['errors']
@@ -4149,7 +4149,7 @@ class BimpObject extends BimpCache
         $force_edit = (int) BimpTools::getPostFieldValue('force_edit', 0);
 
         if (!count($errors)) {
-            $use_db_transactions = (int) BimpCore::getConf('bimpcore_use_db_transactions', 0);
+            $use_db_transactions = (int) BimpCore::getConf('use_db_transactions');
 
             if ($use_db_transactions) {
                 $this->db->db->begin();
@@ -4198,7 +4198,7 @@ class BimpObject extends BimpCache
 
             if (!count($errors)) {
                 // Associations: 
-                if ((int) BimpCore::getConf('bimpcore_use_db_transactions', 0))
+                if ((int) BimpCore::getConf('use_db_transactions'))
                     $errors = BimpTools::merge_array($errors, $this->saveAssociationsFromPost());
                 else
                     $warnings = BimpTools::merge_array($warnings, $this->saveAssociationsFromPost());
@@ -4206,7 +4206,7 @@ class BimpObject extends BimpCache
                 // Sous-objets ajoutés: 
                 $sub_result = $this->checkSubObjectsPost($force_edit);
                 if (count($sub_result['errors'])) {
-                    if ((int) BimpCore::getConf('bimpcore_use_db_transactions', 0))
+                    if ((int) BimpCore::getConf('use_db_transactions'))
                         $errors = BimpTools::merge_array($errors, $sub_result['errors']);
                     else
                         $warnings = BimpTools::merge_array($warnings, $sub_result['errors']);
@@ -4219,7 +4219,7 @@ class BimpObject extends BimpCache
                     // Champs des sous-objets mis à jour: 
                     $sub_result = $this->checkChildrenUpdatesFromPost();
                     if (count($sub_result['errors'])) {
-                        if ((int) BimpCore::getConf('bimpcore_use_db_transactions', 0))
+                        if ((int) BimpCore::getConf('use_db_transactions'))
                             $errors = BimpTools::merge_array($errors, $sub_result['errors']);
                         else
                             $warnings = BimpTools::merge_array($warnings, $sub_result['errors']);
@@ -4234,7 +4234,7 @@ class BimpObject extends BimpCache
                 if (count($errors)) {
                     $this->db->db->rollback();
 
-                    if ((int) BimpCore::getConf('bimpcore_log_actions_rollbacks', 0)) {
+                    if ((int) BimpCore::getConf('log_actions_rollbacks')) {
                         BimpCore::addlog('Rollback Save from post', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore', $this, array(
                             'Erreurs' => $errors
                                 ), true);
@@ -8332,7 +8332,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
             return DOL_URL_ROOT . '/bimpinterfaceclient/client.php?';
         }
 
-        return BimpCore::getConf('interface_client_base_url', '') . '?';
+        return BimpCore::getConf('base_url', '', 'bimpinterfaceclient') . '?';
     }
 
     public function getPublicUrl($internal = true)
@@ -8475,7 +8475,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
         global $no_bimp_object_link_cards;
 
-        if (!$no_bimp_object_link_cards && !BimpCore::getConf('bimpcore_mode_eco', 0)) {
+        if (!$no_bimp_object_link_cards && !(int) BimpCore::getConf('mode_eco')) {
             $no_bimp_object_link_cards = true;
             $card_name = '';
 

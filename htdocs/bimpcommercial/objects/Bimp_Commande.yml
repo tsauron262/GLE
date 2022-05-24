@@ -607,7 +607,7 @@ forms:
                   field_name: id_facture
                   show_values: 0
               value: 
-                  conf: bimpcaisse_id_default_account
+                  conf: id_default_bank_account
             - custom: 1
               label: Avoirs client à utiliser
               input_name: id_remises_list

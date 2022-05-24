@@ -1,0 +1,4 @@
+params: 
+    base_url: 
+        label: Base URL de l'espace client
+        required: 1

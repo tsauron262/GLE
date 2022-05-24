@@ -40,7 +40,7 @@ class GSX_Repair extends BimpObject
 
     public function __construct($module, $object_name)
     {
-        $this->use_gsx_v2 = BimpCore::getConf('use_gsx_v2');
+        $this->use_gsx_v2 = (int) BimpCore::getConf('use_gsx_v2', 1, 'bimpapple');
 
         parent::__construct($module, $object_name);
     }
@@ -1106,9 +1106,7 @@ class GSX_Repair extends BimpObject
 
         $this->partsPending = array();
 
-        if ((int) BimpCore::getConf('use_gsx_v2')) {
-            
-        } else {
+        if (!(int) BimpCore::getConf('use_gsx_v2', 1, 'bimpapple')) {
             if (is_null($this->gsx) || $this->isIphone != $this->gsx->isIphone) {
                 $this->gsx = new GSX($this->isIphone);
             }

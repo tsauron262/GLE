@@ -161,7 +161,7 @@ class BC_Caisse extends BimpObject
 
     public function getSecteur_code_default()
     {
-        return BimpCore::getConf('bimpcaisse_secteur_code');
+        return BimpCore::getConf('secteur_code', 'X', 'bimpcaisse');
     }
 
     // Rendu HTML

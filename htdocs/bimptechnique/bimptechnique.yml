@@ -1,0 +1,20 @@
+
+params: 
+    cout_horaire_technicien: 
+        label: Coût horaire technicien
+        required: 1
+    default_id_user_actioncomm: 
+        label: ID utilisateur par défaut pour les actioncomm
+        def: 0
+    ref_temps_passe: 
+        label: Réf(s) temps passé
+    id_societe_auto_terminer: 
+        label: ID Société auto terminer
+        def: ''
+        info: Plusieurs ID possible (séparer par une virgule sans espace)
+    id_serv19: 
+        label: ID serv19
+        def: 0
+    id_dep: 
+        label: ID dep
+        def: 0

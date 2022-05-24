@@ -2001,9 +2001,9 @@ class BC_Filter extends BimpComponent
     public static function getConvertedValues($filter_type, $values)
     {
         foreach ($values as $idx => $value) {
-            if ($value == '') {
-                unset($values[$idx]);
-            }
+//            if ($value == '') { => SURTOUT PAS!! C'est fréquent que l'on veuille filtrer sur une chaîne vide. 
+//                unset($values[$idx]);
+//            }
 
 
             switch ($filter_type) {

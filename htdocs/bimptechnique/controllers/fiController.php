@@ -57,7 +57,7 @@ class fiController extends BimpController
 //            $errors[] = "Vous ne pouvez pas faire signer une fiche d'intervention sans intervention";
 //        }
 //
-//        $auto_terminer = in_array($instance->getData('fk_soc'), explode(',', BimpCore::getConf('bimptechnique_id_societe_auto_terminer'))) ? true : false;
+//        $auto_terminer = in_array($instance->getData('fk_soc'), explode(',', BimpCore::getConf('id_societe_auto_terminer', null, 'bimptechnique'))) ? true : false;
 //
 //        if (!count($errors)) {
 //            

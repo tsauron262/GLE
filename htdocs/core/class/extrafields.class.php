@@ -789,7 +789,7 @@ class ExtraFields
 //		dol_syslog("fetch_name_optionals_label elementtype=".$elementtype);
 
                 /*moddrsi*/
-                if ($elementtype && defined('BIMP_LIB') && BimpCore::getConf('use_cache_for_extrafields', 0)) {
+                if ($elementtype && defined('BIMP_LIB') && (int) BimpCore::getConf('use_cache_for_extrafields')) {
                     $cache_key = 'dol_object_' . $elementtype . '_extrafields';
                     
                     $result = BimpCache::getCacheServeur($cache_key);
@@ -900,8 +900,9 @@ class ExtraFields
                                     }
                                 }
                                 
-                                if(BimpCore::getConf('use_cache_for_extrafields', 0))
+                                if((int) BimpCore::getConf('use_cache_for_extrafields'))
                                     BimpCache::setCacheServeur($cache_key, $rows);
+                                
                             }
                         }
                         /*fmoddrsi*/

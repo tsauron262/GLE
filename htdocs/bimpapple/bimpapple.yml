@@ -1,0 +1,11 @@
+
+params: 
+    use_gsx_v2: 
+        label: Utiliser GSX V2
+        type: bool
+        def: 1
+        
+    use_gsx_v2_for_reservations:
+        label: Utiliser GSX V2 pour les réservations
+        type: bool
+        def: 1

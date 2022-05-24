@@ -1,0 +1,23 @@
+table: bimpcore_conf
+common_fields: 0
+
+label: 
+    name: variable de conf
+    name_plur: variables de conf
+    
+fields: 
+    name: 
+        label: Nom
+        
+    value: 
+        label: value
+        type: text
+        
+    module: 
+        label: Module
+        
+    category: 
+        label: Catégorie
+        
+    
+    

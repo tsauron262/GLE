@@ -1,0 +1,1 @@
+UPDATE `llx_bimpcore_conf` SET `name` = 'use_link_achat_fourn_equipment', `module` = 'bimpcommercial' WHERE `name` = 'useLinkAchatFournEquipment' AND `module` = 'bimpcore';

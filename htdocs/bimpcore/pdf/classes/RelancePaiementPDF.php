@@ -220,7 +220,7 @@ class RelancePaiementPDF extends BimpModelPDF
             $penalites .= 'sans écarter la possibilité d’appliquer une indemnisation complémentaire.';
             $penalites .= '</div>';
 
-            $id_account = (int) BimpCore::getConf('relance_paiements_id_bank_account', 0);
+            $id_account = (int) BimpCore::getConf('relance_paiements_id_bank_account', 0, 'bimpcommercial');
 
             $paiement_infos = '';
             if ($id_account) {

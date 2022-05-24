@@ -383,11 +383,15 @@ fields_tables:
             - association: achatsCommFourn_Equipments
               edit: 1
               show:
-                  conf: useLinkAchatFournEquipment
+                  conf: 
+                      module: bimpcommercial
+                      name: use_link_achat_fourn_equipment
             - association: achatsFactFourn_Equipments
               edit: 1
               show:
-                  conf: useLinkAchatFournEquipment
+                  conf: 
+                      module: bimpcommercial
+                      name: use_link_achat_fourn_equipment
     
     vente: 
         show: 

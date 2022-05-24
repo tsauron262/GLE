@@ -83,7 +83,7 @@ class BimpMailCore
                 $reply_to = '';
             } elseif (!$reply_to) {
                 if (BimpCore::isContextPublic()) {
-                    $reply_to = BimpCore::getConf('public_default_reply_to_email', '');
+                    $reply_to = BimpCore::getConf('public_default_reply_to_email');
                 } else {
                     $reply_to = $user->email;
                 }

@@ -1,0 +1,143 @@
+categories: 
+    pdfs: 
+        label: PDFs
+    relances: 
+        label: Relances clients
+        
+params: 
+    test_val_base: 
+        label: test_val_base
+    test_def_val: 
+        label: test_def_val
+        def: DEF VAL YML OK
+    test_no_val: 
+        label: test_no_val
+    date_debut_exercice: 
+        label: Date début exercice
+        def: 2020-04-01
+        
+    new_bank_account_date: 
+        label: Date d'enregistrement du compte bancaire actuel
+        info: 'Si renseignée, affiche la mention: <br/> "Attention: NOS COORDONNEES BANCAIRES depuis le [Date]" sur les PDF des pièces'
+        
+    use_tx_marque: 
+        label: Utiliser taux de marque
+        info: 'NON: Taux de marge utilisé'
+        type: bool
+        def: 1
+        
+    propal_use_signatures: 
+        label: Activer les signatures pour les propales
+        type: bool
+        def: 0
+        
+    typent_required: 
+        label: Type du client obligatoire pour la validation des pièces
+        type: bool
+        def:  0
+    
+    commande_required_for_factures: 
+        label: Commande obligatoire pour les factures
+        type: bool
+        def: 0
+                  
+    use_marge_in_parent_bimpcomm: 
+        label: Enregistrer les marges totales dans les pièces commerciales
+        type: bool
+        def: 0
+        info: Active le champ "marge" pour tous les BimpComm
+        
+    use_statut_export: 
+        label: Enregistrer le statut d'export
+        type: bool
+        def: 0
+        info: Active les champs "statut_export" et "douane_number" pour tous les BimpComm
+        
+    solvabilite_validation_emails: 
+        label: Adresse e-mail pour demandes de validation d'une pièce pour les clients non solvables
+        help: Laisser vide pour désactiver vérification de la solvabilité des clients lors de la validation des pièces
+        def: ''
+        
+    max_rtp_for_classify_paid: 
+        label: Reste à payer maximum pour classer payées les factures
+        info: Les factures dont le reste à payer est inférieur au montant indiqué seront classées payées. 
+        def: 0.01
+        help: Indiquer une valeur numérique décimale
+        
+    tva_tx_for_acomptes:
+        label: Taux de TVA pour les acomptes
+        help: En pourcentage
+        def: 0
+        
+    user_as_default_commercial: 
+        label: Définir utilisateur connecté comme commercial par défaut des pièces
+        warning: Seulement pour les pièces n'ayant aucun commercial attribué
+        type: bool
+        def: 1
+        
+    contact_facturation_required_for_commandes: 
+        label: Contact facturation obligatoire pour les commandes
+        type: bool
+        def: 1        
+        
+    use_free_objectline: 
+        label: Autoriser les lignes libres dans les pièces
+        info: Pour les utilisateurs seulement, les lignes libres peuvent toujours être ajoutées en PHP
+        type: bool
+        def: 0
+        
+    use_link_achat_fourn_equipment: 
+        label: Equipements sélectionnables à la création des commandes fournisseur
+        type: bool
+        def: 0
+        
+    # PDFs: 
+    pdf_add_cgv: 
+        label: Ajouter CGV dans les docs PDF
+        cat: pdfs
+        type: bool
+        def: 0
+    allow_pdf_regeneration_after_validation: 
+        label: Autoriser la régénération des pdf des pièces après validation
+        cat: pdfs
+        type: bool
+        def: 1
+    propal_pdf_chorus_mention: 
+        label: Mention Chorus dans le PDF des propales
+        cat: pdfs
+        type: bool
+        def: 0
+        info: 'Ajoute la mention "NB : les administrations publiques doivent obligatoirement fournir les informations nécessaires au dépôt de la facture <br/>sur le portail Chorus"'
+    
+    # Relances: 
+    use_relances_paiements_clients: 
+        label: Relances de paiement activées
+        cat: relances
+        type: bool
+        def: 0
+        info: Active les relances et les champs "statut_relance" et "nb_relance" pour les factures
+        sub_params: 
+            - if: 1
+              params: 
+                  email_for_relances_deactivated_notification: 
+                      label: Adresse e-mail pour la notification des relances désactivées
+                  default_relance_paiements_delay_days: 
+                      label: Délai par défaut pour déclencher les relances
+                      help: en nombre de jours
+                      info: Délai à partir de la date d'échéance des factures. 
+                      def: 15
+                  relance_paiements_globale_date_lim: 
+                      label: Date limite pour les relances globales
+                      info: Date des factures à partir de laquelle les relances doivent être effectuées
+                  relance_paiements_id_bank_account: 
+                      label: ID Compte bancaire pour les relances de paiements
+                  relance_paiements_extented_delay_type_ent: 
+                      label: ID des types clients disposant d'un délai supplémentaire pour les relances
+                  relance_paiements_globale_excluded_modes_reglement: 
+                      label: ID modes de réglement exclus des relances globales
+                      info: Si plusieurs, séparer par une virgule
+                  relances_clients_entrepots_speciaux: 
+                      label: ID Entrepôts spéciaux pour les relances
+                      info: Liste des entrepôts à relancer séparément lors des relances globales
+                    
+                  

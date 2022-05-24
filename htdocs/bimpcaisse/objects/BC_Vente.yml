@@ -144,7 +144,10 @@ fields:
         values: 
             array: cond_reglements
         default_value: 
-            bimpcore_conf: bimpcaisse_id_cond_reglement_default
+            bimpcore_conf:
+                module: bimpcaisse
+                name: id_cond_reglement_default
+                def: 23
             
     id_facture: 
         label: Facture

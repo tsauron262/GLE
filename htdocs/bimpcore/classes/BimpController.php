@@ -19,7 +19,7 @@ class BimpController
     static public $ajax_warnings = array();
 
     public static function getInstance($module, $controller = null)
-    {
+    {        
         $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/controllers/';
 
         if (is_null($controller)) {
@@ -31,11 +31,12 @@ class BimpController
         }
 
         $controllerClass = $controller . 'Controller';
-
+        
         if (file_exists($dir . $controllerClass . '.php')) {
             if (!class_exists($controllerClass)) {
                 require_once $dir . $controllerClass . '.php';
             }
+            
             return new $controllerClass($module, $controller);
         }
 
@@ -48,11 +49,7 @@ class BimpController
 
     public function __construct($module, $controller = 'index')
     {
-        ini_set('display_errors', 0);
-        error_reporting(E_ERROR);
-
         $this->initErrorsHandler();
-
         global $main_controller;
 
         if (is_null($main_controller)) {
@@ -62,12 +59,13 @@ class BimpController
         if (BimpDebug::isActive()) {
             BimpDebug::addDebugTime('Début controller');
         }
+        
 
         $this->module = $module;
         $this->controller = $controller;
 
         global $user, $bimpUser;
-
+        
         if (BimpObject::objectLoaded($user)) {
             $bimpUser = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $user->id);
         }
@@ -81,7 +79,7 @@ class BimpController
         if ($this->config->errors) {
             $this->errors = BimpTools::merge_array($this->errors, $this->config->errors);
         }
-
+        
         $this->init();
 
         $this->addJsFile('/bimpcore/views/js/controller.js');
@@ -123,11 +121,11 @@ class BimpController
     public function handleError($level, $msg, $file, $line)
     {
         global $bimp_errors_handle_locked;
-        
+
         if ($bimp_errors_handle_locked) {
             return;
         }
-        
+
         ini_set('display_errors', 0); // Par précaution. 
 //        if(!in_array($level, array(E_NOTICE, E_DEPRECATED)))
 //            die('iiiii'.$level.$msg.$file.$line);
@@ -973,7 +971,7 @@ class BimpController
             }
 
             $result = $object->saveFromPost();
-            
+
             if (!count($result['errors'])) {
                 $id_object = $object->id;
                 $url = BimpObject::getInstanceUrl($object);
@@ -1787,7 +1785,7 @@ class BimpController
                         $field = new BC_Field($object, $field_name, true);
                         $field->name_prefix = $field_prefix;
                         $field->display_card_mode = 'visible';
-                        
+
                         if ($field->params['type'] === 'id_object' || ($field->params['type'] === 'items_list' && $field->params['items_data_type'] === 'id_object')) {
                             if ($field->params['create_form'])
                                 $html .= BC_Form::renderLoadFormObjectButton($object, $form_id, $field->params['object'], $field_prefix . $field_name, $field->params['create_form'], $field->params['create_form_values'], $field->params['create_form_label'], true);
@@ -2214,17 +2212,18 @@ class BimpController
             'request_id'         => BimpTools::getValue('request_id', 0)
         );
     }
-    
-    protected function ajaxProcessUploadBimpDocumentationFile(){
+
+    protected function ajaxProcessUploadBimpDocumentationFile()
+    {
         $errors = array();
-        if(isset($_FILES['file']['name'])){
+        if (isset($_FILES['file']['name'])) {
             $fileName = BimpTools::getValue('new_name', '');
-            if($fileName == '')
+            if ($fileName == '')
                 $fileName = $_FILES['file']['name'];
-            if(stripos($fileName, '.') === false)
-                $fileName .= '.'.pathinfo($_FILES['file']['name'],PATHINFO_EXTENSION);
-            $path = DOL_DATA_ROOT . '/bimpcore/docs/image/'.$fileName;
-            move_uploaded_file($_FILES['file']['tmp_name'],$path);
+            if (stripos($fileName, '.') === false)
+                $fileName .= '.' . pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
+            $path = DOL_DATA_ROOT . '/bimpcore/docs/image/' . $fileName;
+            move_uploaded_file($_FILES['file']['tmp_name'], $path);
         }
 
         return array(
@@ -2232,15 +2231,15 @@ class BimpController
             'html'       => '',
             'request_id' => BimpTools::getValue('request_id', 0)
         );
-        
     }
-    
-    protected function ajaxProcessSaveBimpDocumentation(){
+
+    protected function ajaxProcessSaveBimpDocumentation()
+    {
         $BimpDocumentation = new BimpDocumentation('doc', BimpTools::getValue('name', ''), 'modal', BimpTools::getValue('idSection', ''), BimpTools::getValue('serializedMenu', ''));
         $BimpDocumentation->saveDoc(BimpTools::getValue('name', ''), BimpTools::getValue('html', ''));
         $return = $BimpDocumentation->displayDoc('array');
         $errors = $BimpDocumentation->errors;
-        
+
         return array(
             'errors'     => $errors,
             'html'       => $return['core'],
@@ -3056,7 +3055,7 @@ class BimpController
 
         return array(
             'errors'     => $BimpDocumentation->errors,
-            'warnings'     => $BimpDocumentation->warnings,
+            'warnings'   => $BimpDocumentation->warnings,
             'html'       => $html,
             'request_id' => BimpTools::getValue('request_id', 0)
         );

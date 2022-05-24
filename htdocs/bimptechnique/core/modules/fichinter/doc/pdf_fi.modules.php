@@ -551,7 +551,7 @@ class pdf_fi
 
                         $pdf->SetFont(''/* 'Arial' */, '', 9);
                         // Tarif
-                        $id_service = ($child->getData('type') == 3) ? BimpCore::getConf('bimptechnique_id_dep') : BimpCore::getConf('bimptechnique_id_serv19');
+                        $id_service = ($child->getData('type') == 3) ? BimpCore::getConf('id_dep', 0, 'bimptechnique') : BimpCore::getConf('id_serv19', 0, 'bimptechnique');
                         $servicePlus = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Product", $id_service);
 
                         $time = $fiche->timestamp_to_time($child->getData('duree'));

@@ -261,7 +261,7 @@ class BC_Vente extends BimpObject
         }
 
         $paiement_differe = 0;
-        $id_cond_default = (int) BimpCore::getConf('bimpcaisse_id_cond_reglement_default');
+        $id_cond_default = (int) BimpCore::getConf('id_cond_reglement_default', 0, 'bimpcaisse');
 
         if ((int) $this->getData('id_cond_reglement') !== $id_cond_default) {
             $paiement_differe = 1;
@@ -1111,7 +1111,7 @@ class BC_Vente extends BimpObject
         $id_cond = (int) $this->getData('id_cond_reglement');
         $html .= '<div id="condReglement" style="font-size: 14px">';
         $html .= '<span style="font-weight: bold">Condition de réglement : </span>';
-        $html .= '<select id="condReglementSelect" name="condReglementSelect"  ' . (!BimpCore::getConf('use_mode_reglement_caisse') ? 'disabled' : '') . '>';
+        $html .= '<select id="condReglementSelect" name="condReglementSelect"  ' . (!(int) BimpCore::getConf('use_mode_reglement_caisse', null, 'bimpcaisse') ? 'disabled' : '') . '>';
         foreach ($this->getCond_reglementsArray() as $id => $label) {
             $html .= '<option value="' . $id . '"' . ((int) $id === $id_cond ? ' selected=""' : '') . '>' . $label . '</option>';
         }
@@ -2236,7 +2236,7 @@ class BC_Vente extends BimpObject
 
             // Gestion des stocks et emplacement des produits retournés: 
             if (count($returns)) {
-                $id_defective_entrepot = BimpCore::getConf('defective_id_entrepot');
+                $id_defective_entrepot = (int) BimpCore::getConf('defective_id_entrepot');
                 $i = 1;
 
                 foreach ($returns as $return) {
@@ -2331,7 +2331,7 @@ class BC_Vente extends BimpObject
         $id_account = (int) $caisse->getData('id_account');
 
         if (!$id_account) {
-            $id_account = BimpCore::getConf('bimpcaisse_id_default_account', 0);
+            $id_account = (int) BimpCore::getConf('id_default_bank_account');
         }
         
         $account = $caisse->getChildObject('account');
@@ -2362,7 +2362,7 @@ class BC_Vente extends BimpObject
             $id_client = (int) $this->getData('id_client');
             $id_contact = (int) $this->getData('id_client_contact');
         } else {
-            $id_client = (int) BimpCore::getConf('default_id_client');
+            $id_client = (int) BimpCore::getConf('default_id_client', 0, 'bimpcaisse');
             $id_contact = 0;
         }
 

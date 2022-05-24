@@ -649,10 +649,10 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 $pdf->Cell($W, 8, "POUR LE CLIENT", 1, null, 'L', true);
                 $pdf->MultiCell($W, 6, '', 0, 'L');
                 $pdf->SetFont('', '', 7);
-                $pdf->Cell($W, 8, "Nom du signataire : " . BimpCore::getConf('bimpcontract_pdf_signataire'), 1, null, 'L', true);
+                $pdf->Cell($W, 8, "Nom du signataire : " . BimpCore::getConf('pdf_signataire', '', 'bimpcontract'), 1, null, 'L', true);
                 $pdf->Cell($W, 8, "Nom, fonction et cachet du signataire :", 1, null, 'L', true);
                 $pdf->MultiCell($W, 6, '', 0, 'L');
-                $pdf->Cell($W, 8, "Fonction du signataire " . BimpCore::getConf('bimpcontract_pdf_signataire_function'), 1, null, 'L', true);
+                $pdf->Cell($W, 8, "Fonction du signataire " . BimpCore::getConf('pdf_signataire_function', '', 'bimpcontract'), 1, null, 'L', true);
                 $pdf->Cell($W, 8, "Précédé de la mention 'Lu et approuvé'", 1, null, 'L', true);
                 $pdf->MultiCell($W, 6, '', 0, 'L');
                 $pdf->Cell($W, 8, "Date : " . date('d / m / Y'), 1, null, 'L', true);
@@ -670,10 +670,10 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 $pdf1->Cell($W, 8, "POUR LE CLIENT", 1, null, 'L', true);
                 $pdf1->MultiCell($W, 6, '', 0, 'L');
                 $pdf1->SetFont('', '', 7);
-                $pdf1->Cell($W, 8, "Nom du signataire : " . BimpCore::getConf('bimpcontract_pdf_signataire'), 1, null, 'L', true);
+                $pdf1->Cell($W, 8, "Nom du signataire : " . BimpCore::getConf('pdf_signataire', '', 'bimpcontract'), 1, null, 'L', true);
                 $pdf1->Cell($W, 8, "Nom, fonction et cachet du signataire :", 1, null, 'L', true);
                 $pdf1->MultiCell($W, 6, '', 0, 'L');
-                $pdf1->Cell($W, 8, "Fonction du signataire " . BimpCore::getConf('bimpcontract_pdf_signataire_function'), 1, null, 'L', true);
+                $pdf1->Cell($W, 8, "Fonction du signataire " . BimpCore::getConf('pdf_signataire_function', '', 'bimpcontract'), 1, null, 'L', true);
                 $pdf1->Cell($W, 8, "Précédé de la mention 'Lu et approuvé'", 1, null, 'L', true);
                 $pdf1->MultiCell($W, 6, '', 0, 'L');
                 $pdf1->Cell($W, 8, "Date : " . date('d / m / Y'), 1, null, 'L', true);

@@ -1013,7 +1013,7 @@ class Bimp_Paiement extends BimpObject
         $account = null;
         $use_caisse = false;
 
-        $date_debut_ex = BimpCore::getConf('date_debut_exercice');
+        $date_debut_ex = BimpCore::getConf('date_debut_exercice', '', 'bimpcommercial');
         if ($date_debut_ex) {
             if ($this->getData('datep') < $date_debut_ex)
                 $errors[] = 'Date antérieure au début d\'exercice';

@@ -102,12 +102,12 @@ class BimpCache
     public static function initCacheServeur()
     {
         if (is_null(self::$cache_server)) {
-            $className = BimpCore::getConf('bimpcore_cache_server_classname', '');
-
+            $className = BimpCore::getConf('cache_server_classname', '');
+            
             if (!$className || !file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/classes/' . $className . '.php')) {
                 $className = 'BimpCacheServer';
             }
-
+            
             if (!class_exists($className)) {
                 require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/' . $className . '.php';
             }
@@ -1062,7 +1062,7 @@ class BimpCache
             $with_buttons = $object->getConf('cards/' . $card_name . '/view_btn', 0);
         }
 
-        if (BimpCore::getConf('bimpcore_user_cache_for_cards', 0)) {
+        if (BimpCore::getConf('use_cache_for_cards')) {
             $cache_key = 'bimp_object_' . $object->module . '_' . $object->object_name . '_' . $object->id . '_popover_card_' . $card_name;
 
             if ($with_buttons) {
@@ -1119,7 +1119,7 @@ class BimpCache
             }
         }
 
-        if (BimpCore::getConf('bimpcore_user_cache_for_cards', 0)) {
+        if (BimpCore::getConf('use_cache_for_cards')) {
             $cache_key = 'dol_object_' . get_class($dolObject) . '_' . $dolObject->id . '_popover_card_' . $card_name;
 
             if ($with_buttons) {
@@ -2279,6 +2279,41 @@ class BimpCache
 
     // Divers: 
 
+    public static function getBimpModulesArray($active_only = false, $include_empty = false, $empty_value = '')
+    {
+        $cache_key = 'bimp_modules_array';
+
+        if ($active_only) {
+            $cache_key .= '_active_only';
+        }
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            foreach (scandir(DOL_DOCUMENT_ROOT) as $file) {
+                if (in_array($file, array('.', '..'))) {
+                    continue;
+                }
+
+                if (!is_dir(DOL_DOCUMENT_ROOT . '/' . $file)) {
+                    continue;
+                }
+
+                if (!preg_match('/^bimp.+$/', $file)) {
+                    continue;
+                }
+
+                if ($active_only && $file !== 'bimpcore' && !(float) BimpCore::getConf('module_version_' . $file, 0)) {
+                    continue;
+                }
+
+                self::$cache[$cache_key][$file] = $file;
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty, $empty_value, $empty_value);
+    }
+
     public static function getTaxes($id_country = 1, $active_only = true, $include_empty = false, $key_field = 'rowid')
     {
         $id_country = (int) $id_country;
@@ -2697,7 +2732,7 @@ class BimpCache
 
     public static function getSecteursArray($include_empty = true)
     {
-        if (!BimpCore::getConf("USE_SECTEUR", 0)) {
+        if (!(int) BimpCore::getConf("USE_SECTEUR")) {
             return array();
         }
 
@@ -2719,7 +2754,7 @@ class BimpCache
 
     public static function getSecteursData()
     {
-        if (!BimpCore::getConf("USE_SECTEUR", 0)) {
+        if (!(int) BimpCore::getConf("USE_SECTEUR")) {
             return array();
         }
 
@@ -2782,7 +2817,7 @@ class BimpCache
     public function getSecteurAllArray()
     {
         // Comme getSecteursArray avec l'option "Tous" en plus
-        if (!BimpCore::getConf("USE_SECTEUR")) {
+        if (!(int) BimpCore::getConf("USE_SECTEUR")) {
             return array();
         }
 
@@ -2904,7 +2939,7 @@ class BimpCache
 
                 // Check du nombre de logs: 
                 if (!BimpCore::isModeDev()) {
-                    $mail_send = BimpCore::getConf('bimpcore_to_much_logs_email_send', 0);
+                    $mail_send = (int) BimpCore::getConf('bimpcore_to_much_logs_email_send', 0);
                     if (count($rows) > 500) {
                         if (!$mail_send) {
                             $message = 'Il y a plus de 500 entrées à traiter dans les logs.' . "\n\n";
@@ -2989,7 +3024,7 @@ class BimpCache
 
     public static function checkMemory()
     {
-        if (!BimpCore::getConf('bimpcache_check_memory_enabled', 1)) {
+        if (!(int) BimpCore::getConf('bimpcache_check_memory_enabled')) {
             return;
         }
 

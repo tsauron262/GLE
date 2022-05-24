@@ -3,8 +3,12 @@
 class BimpConfig
 {
 
-    public $dir;
-    public $file;
+    public static $debug = false;
+    public $dir = '';
+    public $file = '';
+    public $module = '';
+    public $module_dir = '';
+    public $file_name = '';
     public $instance = null;
     public $objects = array();
     public $current_path = '';
@@ -18,32 +22,59 @@ class BimpConfig
     public static $cache_mode = 'per_file'; // per_file / full
     public static $params_cache = array();
     public static $values_cache = array();
+    public static $files_cache = array();
     public static $params_cache_changes = array();
     public static $values_cache_changes = array();
+    public static $files_cache_changes = array();
 
-    public function __construct($dir, $file_name, $instance)
+    public static function getObjectConfigInstance($module, $object_name, $instance = null)
+    {
+        return new BimpConfig($module, 'objects', $object_name, $instance);
+    }
+
+    public static function getControllerConfigInstance($module, $controller, $instance = null)
+    {
+        return new BimpConfig($module, 'controllers', $controller, $instance);
+    }
+
+    public static function getModuleConfigInstance($module, $instance = null)
+    {
+        // Note: $instance est mis ici en prévision d'une possible création de classes modules. 
+
+        return new BimpConfig($module, '', $module, $instance);
+    }
+
+    public function __construct($module, $module_dir, $file_name, $instance)
     {
         $this->errors = array();
 
+        $this->module = $module;
+        $this->module_dir = $module_dir;
+        $this->file_name = $file_name;
         $this->instance = $instance;
 
+        if (!$module) {
+            $this->errors[] = 'Module non spécifié';
+        }
+
         if (!$file_name) {
-            $this->errors[] = 'Aucun fichier YML spécifié';
+            $this->errors[] = 'Fichier YML spécifié';
+        }
+
+        if (count($this->errors)) {
+            BimpCore::addlog('Erreur paramètre de construction BimpConfig', Bimp_Log::BIMP_LOG_URGENT, 'yml', $instance, array(
+                'Erreurs' => $this->errors
+                    ), 1);
             return false;
         }
 
-        if ($file_name && !preg_match('/^.+\.yml$/', $file_name)) {
-            $file_name .= '.yml';
+        if (preg_match('/^(.+)\.yml$/', $this->file_name, $matches)) {
+            $this->file_name = $matches[1];
         }
 
-        $this->file = $file_name;
-
-        if (!preg_match('/^.+\/$/', $dir)) {
-            $dir .= '/';
-        }
-        $this->dir = $dir;
-
-        $this->cache_key = str_replace(DOL_DOCUMENT_ROOT . '/', '', $dir) . str_replace('.yml', '', $file_name);
+        $this->dir = DOL_DOCUMENT_ROOT . '/' . $module . ($module_dir ? '/' . $module_dir : '') . '/';
+        $this->file = $this->dir . $file_name . '.yml';
+        $this->cache_key = $this->module . ($this->module_dir ? '/' . $this->module_dir : '') . '/' . $this->file_name;
 
         // Chargements depuis le cache serveur: 
         if (self::$cache_mode === 'per_file') {
@@ -78,9 +109,9 @@ class BimpConfig
         }
 
         // Chargement des paramètres depuis le fichier: 
-        if (!file_exists($dir . $file_name)) {
-            $this->errors[] = 'Fichier de configuration "' . $file_name . '" absent';
-            $this->logConfigError('Erreur technique: le fichier de configuration "' . $file_name . '" n\'existe pas');
+        if (!file_exists($this->file)) {
+            $this->errors[] = 'Fichier de configuration "' . $this->file_name . '" absent';
+            $this->logConfigError('Erreur technique: le fichier de configuration "' . $this->file_name . '.yml" n\'existe pas');
             return false;
         }
 
@@ -88,11 +119,11 @@ class BimpConfig
 
         if (!is_null($this->instance) && is_a($this->instance, 'BimpObject')) {
             if (!isset(self::$params_cache['BimpObject'])) {
-                self::$params_cache['BimpObject'] = $this->getParamsFromFile(DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpObject.yml');
+                self::$params_cache['BimpObject'] = $this->getParamsFromFile('bimpcore', 'objects', 'BimpObject', $this->errors, false);
             }
             self::$params[$this->cache_key] = self::$params_cache['BimpObject'];
         }
-        self::$params[$this->cache_key] = $this->mergeParams(self::$params[$this->cache_key], $this->getParamsFromFile($dir . $file_name, $this->errors));
+        self::$params[$this->cache_key] = $this->mergeParams(self::$params[$this->cache_key], $this->getParamsFromFile($this->module, $this->module_dir, $this->file_name, $this->errors, true));
 
         if (is_array(self::$params[$this->cache_key]) && count(self::$params[$this->cache_key])) {
             foreach (self::$params[$this->cache_key] as $param_name => $param) {
@@ -109,81 +140,200 @@ class BimpConfig
         }
 
         self::$params[$this->cache_key] = array();
-        $this->logConfigError('Echec du chargement de la configuration depuis le fichier YAML "' . $file_name . '"');
+        $this->logConfigError('Echec du chargement de la configuration depuis le fichier YML "' . $file_name . '"');
 
         return false;
     }
 
-    public function getParamsFromFile($file, &$errors = array(), $findInExtends = true)
+    public function extendsOverride($params)
     {
-        $params = array();
-
-        if (!file_exists($file)) {
-            $errors[] = 'Le fichier de configuration "' . $file . '" n\existe pas';
-        } else {
-
-            $fileEx = str_replace(DOL_DOCUMENT_ROOT, PATH_EXTENDS, $file);
-            if ($findInExtends && file_exists($fileEx)) {
-                $params = spyc_load_file($fileEx);
-            } else {
-                $params = spyc_load_file($file);
-            }
-
-            if (isset($params['extends'])) {
-                $sub_dir = '';
-                if (!is_null($this->instance)) {
-                    if (is_a($this->instance, 'BimpObject')) {
-                        $sub_dir = 'objects';
-                    } elseif (is_a($this->instance, 'BimpController')) {
-                        $sub_dir = 'controllers';
-                    }
-                }
-                $parent_file = DOL_DOCUMENT_ROOT . '/';
-                $extends_module = '';
-                $extends_object = '';
-
-                if (isset($params['extends']['module'])) {
-                    $extends_module = $params['extends']['module'];
-                    if (isset($params['extends']['object_name']) && $params['extends']['object_name']) {
-                        $extends_object = $params['extends']['object_name'];
-                    } else {
-                        $errors[] = 'Nom du fichier d\'extension absent dans le fichier "' . $file . '"';
-                    }
-                } elseif (is_string($params['extends']) && isset($this->instance->module)) {
-                    $extends_module = $this->instance->module;
-                    $extends_object = $params['extends'];
-                } else {
-                    $errors[] = 'Nom du module absent du fichier de configuration "' . $file . '"';
-                }
-
-                if ($extends_module && $extends_object) {
-                    $parent_file .= $extends_module . '/' . $sub_dir . '/' . $extends_object . '.yml';
-                    if (is_file($parent_file)) {
-                        if (isset($params['extends']['findInExtends']) && $params['extends']['findInExtends'] == 'false') {
-                            $findInExtends = false;
-                        }
-                        if ($parent_file == $file) {
-                            $findInExtends = false;
-                        }
-                        $parent_params = $this->getParamsFromFile($parent_file, $errors, $findInExtends);
-                        $params = $this->mergeParams($parent_params, $params);
-
-                        if (is_object($this->instance) && property_exists($this->instance, 'extends')) {
-                            $this->instance->extends[] = array(
-                                'module'      => $extends_module,
-                                'object_name' => $extends_object
-                            );
-                        }
-                    } else {
-                        $errors[] = 'Le fichier étendu "' . $parent_file . '" n\'existe pas';
-                    }
-                }
-            }
-        }
-        return $params;
+        
     }
 
-    public static function mergeParams(Array $parent_params, Array $child_params)
+    public function getParamsFromFile($module, $module_dir, $file_name, &$errors = array(), $check_extends = true)
+    {
+        // $check_extensions: true pour les fichiers de base (core) / false pour les fichiers versions et entité. 
+
+        if (!$module) {
+            $errors[] = 'Module non spécifié';
+        }
+
+        if (!$file_name) {
+            $errors[] = 'Nom du fichier non psécifié';
+        }
+
+        if (count($errors)) {
+            return array();
+        }
+
+        if (preg_match('/^(.+)\.yml$/', $file_name, $matches)) {
+            $file_name = $matches[1];
+        }
+
+        $cache_key = $module . ($module_dir ? '/' . $module_dir : '') . '/' . $file_name;
+
+        if (!isset(self::$files_cache[$cache_key])) {
+            $title = 'GET PARAMS - ' . $module . ' - ' . $module_dir . ' - ' . $file_name;
+            $html = '';
+            $params = array();
+
+            $file = DOL_DOCUMENT_ROOT . '/' . $module . ($module_dir ? '/' . $module_dir : '') . '/' . $file_name . '.yml';
+
+            if (!file_exists($file)) {
+                $errors[] = 'Le fichier de configuration "' . $file . '" n\'existe pas';
+            } else {
+                $params = spyc_load_file($file);
+
+                if (self::$debug) {
+                    $html .= BimpRender::renderFoldableContainer('BASE PARAMS', '<pre>' . print_r($params, 1) . '</pre>', array(
+                                'open'        => false,
+                                'offset_left' => true
+                    ));
+                }
+
+                // Surcharges version:
+                $override_params = array();
+                if (defined('BIMP_EXTENDS_VERSION')) {
+                    $version_module_dir = 'extends/versions/' . BIMP_EXTENDS_VERSION . ($module_dir ? '/' . $module_dir : '');
+                    $version_file = DOL_DOCUMENT_ROOT . '/' . $module . '/' . $version_module_dir . '/' . $file_name . '.yml';
+                    if (file_exists($version_file)) {
+                        $version_params = $this->getParamsFromFile($module, $version_module_dir, $file_name, $errors, false);
+
+                        if (!empty($version_params)) {
+                            if (self::$debug) {
+                                $html .= BimpRender::renderFoldableContainer('VERSION PARAMS', '<pre>' . print_r($version_params, 1) . '</pre>', array(
+                                            'open'        => false,
+                                            'offset_left' => true
+                                ));
+                            }
+
+                            $override_params = $this->mergeParams($override_params, $version_params, false);
+                        }
+                    }
+                }
+
+                // Surcharge entité: 
+                if (defined('BIMP_EXTENDS_ENTITY')) {
+                    $entity_module_dir = 'extends/entities/' . BIMP_EXTENDS_ENTITY . ($module_dir ? '/' . $module_dir : '');
+                    $entity_file = DOL_DOCUMENT_ROOT . '/' . $module . '/' . $entity_module_dir . '/' . $file_name . '.yml';
+                    if (file_exists($entity_file)) {
+                        $entity_params = $this->getParamsFromFile($module, $entity_module_dir, $file_name, $errors, false);
+
+                        if (!empty($entity_params)) {
+                            if (self::$debug) {
+                                $html .= BimpRender::renderFoldableContainer('ENTITY PARAMS', '<pre>' . print_r($entity_params, 1) . '</pre>', array(
+                                            'open'        => false,
+                                            'offset_left' => true
+                                ));
+                            }
+
+                            $override_params = $this->mergeParams($override_params, $entity_params, false);
+                        }
+                    }
+                }
+
+                if (!empty($override_params)) {
+                    if (self::$debug) {
+                        $html .= BimpRender::renderFoldableContainer('ALL OVERRIDE PARAMS', '<pre>' . print_r($override_params, 1) . '</pre>', array(
+                                    'open'        => false,
+                                    'offset_left' => true
+                        ));
+                    }
+
+                    $params = $this->mergeParams($params, $override_params, true);
+
+                    if (self::$debug) {
+                        $html .= BimpRender::renderFoldableContainer('PARAMS AFTER OVERRIDE', '<pre>' . print_r($params, 1) . '</pre>', array(
+                                    'open'        => false,
+                                    'offset_left' => true
+                        ));
+                    }
+                }
+
+                // Traitement des fichiers étendus: 
+                if ($check_extends && isset($params['extends'])) {
+                    $sub_dir = '';
+                    if (!is_null($this->instance)) {
+                        if (is_a($this->instance, 'BimpObject')) {
+                            $sub_dir = 'objects';
+                        } elseif (is_a($this->instance, 'BimpController')) {
+                            $sub_dir = 'controllers';
+                        }
+                    }
+                    $parent_file = DOL_DOCUMENT_ROOT . '/';
+                    $extends_module = '';
+                    $extends_object = '';
+
+                    if (isset($params['extends']['module'])) {
+                        $extends_module = $params['extends']['module'];
+                        if (isset($params['extends']['object_name']) && $params['extends']['object_name']) {
+                            $extends_object = $params['extends']['object_name'];
+                        } else {
+                            $errors[] = 'Nom du fichier d\'extension absent dans le fichier "' . $file . '"';
+                        }
+                    } elseif (is_string($params['extends']) && isset($this->instance->module)) {
+                        $extends_module = $this->instance->module;
+                        $extends_object = $params['extends'];
+                    } else {
+                        $errors[] = 'Nom du module absent du fichier de configuration "' . $file . '"';
+                    }
+
+                    if ($extends_module && $extends_object) {
+                        $parent_file .= $extends_module . '/' . $sub_dir . '/' . $extends_object . '.yml';
+                        if (is_file($parent_file)) {
+                            $parent_params = $this->getParamsFromFile($extends_module, $sub_dir, $extends_object, $errors, true);
+
+                            if (!empty($parent_params)) {
+                                if (self::$debug) {
+                                    $html .= BimpRender::renderFoldableContainer('PARENT PARAMS', '<pre>' . print_r($parent_params, 1) . '</pre>', array(
+                                                'open'        => false,
+                                                'offset_left' => true
+                                    ));
+                                }
+
+                                $params = $this->mergeParams($parent_params, $params, false);
+
+                                if (self::$debug) {
+                                    $html .= BimpRender::renderFoldableContainer('PARAMS AFTER PARENT EXTENDS', '<pre>' . print_r($entity_params, 1) . '</pre>', array(
+                                                'open'        => false,
+                                                'offset_left' => true
+                                    ));
+                                }
+                            }
+
+                            if (is_object($this->instance) && property_exists($this->instance, 'extends')) {
+                                $this->instance->extends[] = array(
+                                    'module'      => $extends_module,
+                                    'object_name' => $extends_object
+                                );
+                            }
+                        } else {
+                            $errors[] = 'Le fichier étendu "' . $parent_file . '" n\'existe pas';
+                        }
+                    }
+                }
+            }
+
+            if (self::$debug) {
+                $html .= BimpRender::renderFoldableContainer('FINAL PARAMS', '<pre>' . print_r($params, 1) . '</pre>', array(
+                            'open'        => false,
+                            'offset_left' => true
+                ));
+
+                echo BimpRender::renderFoldableContainer($title, $html, array(
+                    'open'        => false,
+                    'offset_left' => true
+                ));
+            }
+
+            self::$files_cache[$cache_key] = $params;
+            self::$files_cache_changes[$cache_key] = 1;
+        }
+
+        return self::$files_cache[$cache_key];
+    }
+
+    public static function mergeParams(Array $parent_params, Array $child_params, $keep_unset = false)
     {
         foreach ($child_params as $key => $values) {
             if (isset($parent_params[$key]) && is_array($values) && is_array($parent_params[$key])) {
@@ -191,11 +341,13 @@ class BimpConfig
                     unset($values['unextends']);
                     $parent_params[$key] = $values;
                 } else {
-                    $parent_params[$key] = self::mergeParams($parent_params[$key], $values);
+                    $parent_params[$key] = self::mergeParams($parent_params[$key], $values, $keep_unset);
                 }
             } else {
                 if (is_string($values) && $values === 'unset') {
-                    if (isset($parent_params[$key])) {
+                    if ($keep_unset) {
+                        $parent_params[$key] = 'unset';
+                    } elseif (isset($parent_params[$key])) {
                         unset($parent_params[$key]);
                     }
                 } else {
@@ -232,6 +384,7 @@ class BimpConfig
             if (!is_null($cacheVal)) {
                 self::$params_cache = $cacheVal[0];
                 self::$values_cache = $cacheVal[1];
+                self::$files_cache = $cacheVal[2];
             }
         }
     }
@@ -254,10 +407,15 @@ class BimpConfig
                         BimpCache::setCacheServeur('bimp_config_values_' . $cache_key, self::$values_cache[$cache_key]);
                     }
                 }
+                foreach (self::$files_cache_changes as $cache_key => $value) {
+                    if ($value && isset(self::$files_cache[$cache_key])) {
+                        BimpCache::setCacheServeur('bimp_config_files_' . $cache_key, self::$files_cache[$cache_key]);
+                    }
+                }
                 return;
 
             case 'full':
-                BimpCache::setCacheServeur('bimpconfig', array(self::$params_cache, self::$values_cache));
+                BimpCache::setCacheServeur('bimpconfig', array(self::$params_cache, self::$values_cache, self::$files_cache));
                 return;
         }
     }
@@ -414,10 +572,10 @@ class BimpConfig
         return $this->getCompiledParams($this->current_path . $path_from_current);
     }
 
-    public function getParams($full_path)
+    public function getParams($full_path = '')
     {
         if (is_null($full_path) || !$full_path) {
-            return null;
+            return self::$params[$this->cache_key];
         }
 
         $path = explode('/', $full_path);
@@ -1021,7 +1179,7 @@ class BimpConfig
         $name = '';
         $module = 'bimpcore';
         $default = null;
-                
+
         if (is_string($bimpcoreConf)) {
             $name = $bimpcoreConf;
         } elseif (is_array($bimpcoreConf)) {
@@ -1495,7 +1653,7 @@ class BimpConfig
 
         if (BimpCore::isModeDev() || $user->id == 1) { // Pour éviter trop de logs... 
             BimpCore::addlog('Erreur config YML: ' . $msg, Bimp_Log::BIMP_LOG_ALERTE, 'yml', (is_a($this->instance, 'BimpObject') ? $this->instance : null), array(
-                'Fichier' => $this->dir . $this->file
+                'Fichier' => $this->file
             ));
         }
     }

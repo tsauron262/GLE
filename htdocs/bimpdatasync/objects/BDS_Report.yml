@@ -99,7 +99,9 @@ lists:
         list_filters: 
             - name: id_process
               filter: 
-                  conf: bds_relances_clients_id_process
+                  conf: 
+                      module: bimpdatasync
+                      name: relances_clients_id_process
         cols: 
             id_operation: unset
         

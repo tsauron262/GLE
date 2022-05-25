@@ -5952,7 +5952,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                             'cancelReason' => BimpTools::getArrayValueFromPath($data, 'cancel_reason', 'CUSTOMER_CANCELLED')
                 ));
 
-                if ((int) BimpCore::getConf('use_gsx_v2_for_reservations')) {
+                if ((int) BimpCore::getConf('use_gsx_v2_for_reservations', null, 'bimpapple')) {
                     if (isset($result['errors']) && !empty($result['errors'])) {
                         $request_errors = array();
                         foreach ($result['errors'] as $error) {

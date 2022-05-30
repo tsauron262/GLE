@@ -44,8 +44,32 @@ params:
         label: Compte vente de service (Export)
         required: 1
         cat: ventes
+    frais_de_port_vente_fr:
+        label: Compte vente frais de port (France)
+        required: 1
+        cat: ventes
+    frais_de_port_vente_ue:
+        label: Compte vente frais de port (Europe)
+        required: 1
+        cat: ventes
+    frais_de_port_vente_ex:
+        label: Compte vente frais de port (Export)
+        required: 1
+        cat: ventes
         
     # Les achats
+    frais_de_port_achat_fr:
+        label: Compte achat frais de port (France)
+        required: 1
+        cat: achats
+    frais_de_port_achat_ue:
+        label: Compte achat frais de port (Europe)
+        cat: achats
+        required: 1
+    frais_de_port_achat_ex:
+        label: Compte achat frais de port (Export)
+        required: 1
+        cat: achats
     achat_dee_fr:
         label: Compte achat D3E (France)
         required: 1
@@ -78,6 +102,11 @@ params:
         label: Compte achat de service (Export)
         required: 1
         cat: achats
+    achat_fournisseur_apple:
+        label: Compte achat pour le fournisseur APPLE
+        required: 1
+        cat: achats
+    
     
     # La TVA
     autoliquidation_tva_666:
@@ -110,3 +139,83 @@ params:
         label: Compte d'avoir fournisseur (France)
         required: 1
         cat: fourn
+    avoir_fournisseur_ue:
+        label: Compte d'avoir fournisseur (Europe)
+        required: 1
+        cat: fourn
+    avoir_fournisseur_ex:
+        label: Compte d'avoir fournisseur (Export)
+        required: 1
+        cat: fourn
+    rfa_fournisseur_fr:
+        label: Compte RFA (France)
+        required: 1
+        cat: fourn
+    rfa_fournisseur_ue:
+        label: Compte RFA (Europe)
+        required: 1
+        cat: fourn
+    rfa_fournisseur_ex:
+        label: Compte RFA (Export)
+        required: 1
+        cat: fourn
+    avoir_fournisseur_apple:
+        label: Compte d'avoir pour le fournisseur APPLE
+        required: 1
+        cat: fourn
+    rfa_fournisseur_apple:
+        label: Compte RFA pour le fournisseur APPLE
+        required: 1
+        cat: fourn    
+    code_fournisseur_apple:
+        label: Compte fournisseur APPLE
+        required: 1
+        cat: fourn
+    
+    #Autres
+    comissions_fr:
+        label: Compte commission (France)
+        required: 1
+        cat: autre
+    comissions_ue:
+        label: Compte commission (Europe)
+        required: 1
+        cat: autre
+    comissions_ex:
+        label: Compte commission (Export)
+        required: 1
+        cat: autre
+    refacturation_ht:
+        label: Compte de refacturation HT
+        required: 1
+        cat: autre
+    refacturation_ttc:
+        label: Compte de refacturation TTC
+        required: 1
+        cat: autre
+    start_current_trimestre:
+        label: Debut du trimestre omptable en cours
+        required: 1
+        def: 2022-01-01
+        cat: autre
+    file_entity:
+        label: Propriétaire des fichiers TRA
+        required: 1
+        cat: autre
+    version_tra:
+        label: Version courrante des fichiers TRA
+        required: 1
+        cat: autre
+    last_export_date:
+        label: Dernière date d'export
+        required: 1
+        cat: autre
+        def: 2002-01-01
+    minimum_date_export_pay:
+        label: Date butoire d'export des paiements
+        required: 0
+        cat: autre
+    comptes_importPaiement:
+        label: Liste des comptes spécifique pour les imports de paiements
+        required: 1
+        cat: autre

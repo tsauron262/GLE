@@ -168,6 +168,7 @@ class GSX_v2 extends GSX_Const
         }
 
         $this->displayDebug('Tentative d\'authentification (token ' . $this->acti_token . ') : ');
+        static::debug($this->appleId, 'Tentative d\'authentification (token ' . $this->acti_token . ') : ');
 
         $result = $this->exec('authenticate', array(
             'userAppleId' => $this->appleId,

@@ -2822,6 +2822,8 @@ class BS_SAV extends BimpObject
 
         $client = $this->getChildObject('client');
         $id_contact = (int) $this->getData('id_contact');
+        
+        
 
         if (!BimpObject::objectLoaded($client)) {
             if (!(int) $this->getData('id_client')) {
@@ -2845,11 +2847,13 @@ class BS_SAV extends BimpObject
             $prop->cond_reglement_id = $id_cond_reglement;
             $prop->mode_reglement_id = $id_mode_reglement;
             $prop->fk_account = (int) BimpCore::getConf('id_default_bank_account');
+            
 
             if ($prop->create($user) <= 0) {
                 $errors[] = 'Echec de la création de la propale';
                 BimpTools::getErrorsFromDolObject($prop, $errors, $langs);
             } else {
+                $prop->set_ref_client($user, $this->getData('prestataire_number'));
                 $prop->array_options['options_type'] = "S";
                 $prop->array_options['options_entrepot'] = (int) $this->getData("id_entrepot");
                 $prop->array_options['options_libelle'] = $this->getRef();

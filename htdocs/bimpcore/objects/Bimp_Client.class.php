@@ -3173,8 +3173,7 @@ class Bimp_Client extends Bimp_Societe
 
     public function syncroAtradius(&$warnings = array(), &$success = '')
     {
-        $success.='ok fonction';
-        $warnings[] = "ok fonction";
+        $success.='';
         $errors = array();
         $id_atradius = $this->getIdAtradius($errors);
         if (0 < (int) $id_atradius) {
@@ -3325,5 +3324,64 @@ class Bimp_Client extends Bimp_Societe
         }
 
         return 0;
+    }
+    
+    
+    public static function updateAtradiusStatus(&$errors = array(), &$warnings = array(), &$success = '') {
+        
+        $nb_update = 0;
+        
+        require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+        $api = BimpAPI::getApiInstance('atradius');
+        if (!is_a($api, 'AtradiusAPI')) {
+            $errors[] = 'Impossible de trouver la classe AtradiusAPI';
+            return $nb_update;
+        }
+        
+        $filters = array(
+            'status_atradius' => self::STATUS_ATRADIUS_EN_ATTENTE
+        );
+        $clients = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_Client', $filters);
+        
+        foreach($clients as $c) {
+            
+            $id_atradius = $c->getIdAtradius($errors);
+            $init_status = $c->getData('status_atradius');
+            $init_limit = $c->getData('outstanding_limit_atradius');
+
+            // Table-header
+            $success .= "<table class='table table-bordered table-hover'><thead>";
+            $success .= "<tr><th>" . $c->getNomUrl() . "</th><th>Satus</th><th>Limite</th></tr></thead>";
+            
+            // Ligne avant MAJ
+            $success .= "<tbody><tr><td>Avant MAJ</td><td>" . $c->displayData('status_atradius') . '</td><td>'  . BimpTools::displayMoneyValue((float) $c->getData('outstanding_limit_atradius')) . '</td></tr>';
+            
+            // MAJ
+            $c->syncroAtradius($warnings);
+            
+            // Ligne avant MAJ
+            $success .= "<tr><td>Après MAJ</td><td>" . $c->displayData('status_atradius') . '</td><td>'  . BimpTools::displayMoneyValue((float) $c->getData('outstanding_limit_atradius')) . '</td></tr></tbody></table>';
+
+            $new_status = $c->getData('status_atradius');
+            $new_limit = $c->getData('outstanding_limit_atradius');
+            if((int) $init_status != (int) $new_status or (int) $init_limit != $new_limit) {
+                $c->sendMessageAtradiusUpdate();
+                $nb_update++;
+            }
+            
+        }
+        
+        return $nb_update;
+    }
+    
+    private function sendMessageAtradiusUpdate() {
+        $msg  = "Le status Atradius de ce client est passé de " . $this->displayInitData('status_atradius') . ' (avec une limite de: ' . BimpTools::displayMoneyValue((float) $this->getInitData('outstanding_limit_atradius')) .') ';
+        $msg .= " à " . $this->displayData('status_atradius') . ' (avec une limite de: ' . BimpTools::displayMoneyValue((float) $this->getData('outstanding_limit_atradius')) .') ';
+        
+        BimpObject::loadClass('bimpcore', 'BimpNote');
+        
+        return $this->addNote($msg,
+                BimpNote::BIMP_NOTE_MEMBERS, 0, 1, '',BimpNote::BN_AUTHOR_USER,
+                BimpNote::BN_DEST_GROUP, BimpNote::BN_GROUPID_ATRADIUS);        
     }
 }

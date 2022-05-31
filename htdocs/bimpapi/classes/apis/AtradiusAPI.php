@@ -7,7 +7,9 @@ class AtradiusAPI extends BimpAPI {
     const CREDIT_CHECK = 'credit-check'; // Limité à 7000 euros
     const CREDIT_LIMIT = 'credit-limit'; // Utilisé à partir de + de 7000 euros
     
-
+    const STATUS_VALID    = 'DECISION';
+    const STATUS_EN_COURS = 'REFERRED';
+    
     public static $name = 'atradius';
     public static $include_debug_json = false;
     public static $urls_bases = array(
@@ -87,13 +89,13 @@ class AtradiusAPI extends BimpAPI {
         foreach($response['data'] as $k => $c) {
             
             // Il y a une demande en cours d'arbitrage
-            if(isset($c['coverStatus']) and $c['coverStatus'] == 'REFERRED') {
+            if(isset($c['coverStatus']) and $c['coverStatus'] == self::STATUS_EN_COURS) {
                 $status = (int) Bimp_Client::STATUS_ATRADIUS_EN_ATTENTE;
                 $warnings[] = "Une demande pour un montant de " . $c['creditLimitApplicationAmountInPolicyCurrency'] . " euros est en cours d'arbitrage";
             }
             
             // Il y a une décision prise pour cet acheteur
-            if(isset($c['coverStatus']) and $c['coverStatus'] == 'DECISION')
+            if(isset($c['coverStatus']) and $c['coverStatus'] == self::STATUS_VALID)
                 $cover = $response['data'][$k];
             
             
@@ -106,7 +108,7 @@ class AtradiusAPI extends BimpAPI {
             
         }
 
-        // Pas de couverture trouvé => on force TODO test   
+        // Pas de couverture trouvé => on force TODO test
         if(!is_array($cover))
             $cover = $response['data'][0];
         
@@ -392,7 +394,7 @@ class AtradiusAPI extends BimpAPI {
                 
     }
     
-    
+
     // Tools
     private function getSuccess($response_code, &$success = '') {
         switch ($response_code) {

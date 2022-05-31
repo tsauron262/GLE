@@ -5,7 +5,7 @@ icon: fas_book-medical
 
 controller: log
 list_page_url:
-    controller: admin
+    controller: dev
     url_params: 
         tab: logs
 

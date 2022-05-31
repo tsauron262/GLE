@@ -168,6 +168,7 @@ class GSX_v2 extends GSX_Const
         }
 
         $this->displayDebug('Tentative d\'authentification (token ' . $this->acti_token . ') : ');
+        static::debug($this->appleId, 'Tentative d\'authentification (token ' . $this->acti_token . ') : ');
 
         $result = $this->exec('authenticate', array(
             'userAppleId' => $this->appleId,
@@ -216,12 +217,19 @@ class GSX_v2 extends GSX_Const
             }
         }
         else
-            BimpCore::addlog ('deconnexion GSX de '.$this->appleId.' sans reconnexion possible');
+            static::debug($this->appleId, 'deconnexion GSX de '.$this->appleId.' sans reconnexion possible');
 
         $this->logged = false;
         $this->saveToken('acti', '');
 
         return 0;
+    }
+    
+    public static function debug($appleId, $msg){
+        if($appleId == self::$default_ids['apple_id']){
+            BimpCore::addlog ($msg);
+        }
+        
     }
     
     public static function phantomAuth($login, $mdp){
@@ -260,6 +268,7 @@ class GSX_v2 extends GSX_Const
 
     public function reauthenticate()
     {
+        static::debug($this->appleId, 'reauthentification');
         if ($this->auth_token) {
             $this->saveToken('auth', '');
         }
@@ -271,6 +280,7 @@ class GSX_v2 extends GSX_Const
 
     public function saveToken($type, $token)
     {
+        static::debug($this->appleId, 'enregistrement token '.$type. ' : '.$token);
         $field = '';
         switch ($type) {
             case 'acti':

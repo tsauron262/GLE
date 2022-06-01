@@ -9,8 +9,12 @@ include_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
 
 if(!defined('PATH_TMP'))
     define('PATH_TMP', DOL_DATA_ROOT);
-if(!defined('PATH_EXTENDS'))
-    define('PATH_EXTENDS', DOL_DOCUMENT_ROOT."/bimpcore/extends/dev/");
+
+if(!defined('BIMP_EXTENDS_VERSION'))
+    define('BIMP_EXTENDS_VERSION', 'dev');
+
+if(!defined('BIMP_EXTENDS_ENTITY'))
+    define('BIMP_EXTENDS_ENTITY', 'dev');
 
 class synopsisHook {//FA1506-0369
 

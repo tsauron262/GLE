@@ -5,7 +5,7 @@ js:
     - /bimpcore/views/js/dev.js
     
 css: 
-    - /bimpcore/views/css/module_conf.css
+    - /bimpcore/views/css/dev.css
     
 objects: 
     log: 
@@ -61,6 +61,13 @@ sections:
                 - type: custom
                   custom: 
                       callback: renderModulesConfTab
+        yml: 
+            label: Gestionnaire YML
+            icon: fas_stream 
+            sections: 
+                - type: custom
+                  custom: 
+                      callback: renderYmlTab
         scripts: 
             label: Scripts
             icon: fas_code

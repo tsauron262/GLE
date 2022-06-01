@@ -396,20 +396,20 @@ i.iconRight {
 
 .btn-large {
     /*@media (min-width: $screen-xs-max) {*/
-        font-size: 14px;
-        padding: 12px 20px;
+    font-size: 14px;
+    padding: 12px 20px;
 
-        i {
-            font-size: 18px;
+    i {
+        font-size: 18px;
 
-            &.iconLeft {
-                margin-right: 12px;
-            }
-
-            &.iconRight {
-                margin-left: 12px;
-            }
+        &.iconLeft {
+            margin-right: 12px;
         }
+
+        &.iconRight {
+            margin-left: 12px;
+        }
+    }
     /*}*/
 }
 
@@ -862,7 +862,10 @@ i.iconRight {
         font-weight: bold;
         padding: 5px;
         margin-bottom: 3px;
-        background-color: #F0F0F0;
+
+        &.grey_bk {
+            background-color: #F0F0F0;   
+        }
 
         cursor: pointer;
 

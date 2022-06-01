@@ -2864,7 +2864,12 @@ function setInputsEvents($container) {
                             html += '<i class="' + $option.data('icon_class') + ' iconLeft"></i>';
                         }
 
-                        html += data.text + '</span>';
+                        var text = data.text;
+
+                        text = text.replace('[bold]', '<b>');
+                        text = text.replace('[/bold]', '</b>');
+
+                        html += text + '</span>';
                         return html;
                     },
                     templateSelection: function (selection) {
@@ -2878,7 +2883,11 @@ function setInputsEvents($container) {
                             html += '<i class="' + $option.data('icon_class') + ' iconLeft"></i>';
                         }
 
-                        html += selection.text + '</span>';
+                        var text = selection.text;
+                        text = text.replace('[bold]', '<b>');
+                        text = text.replace('[/bold]', '</b>')
+
+                        html += text + '</span>';
                         return html;
                     },
                     escapeMarkup: function (markup) {

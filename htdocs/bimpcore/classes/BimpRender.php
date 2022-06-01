@@ -1091,14 +1091,19 @@ class BimpRender
     public static function renderFoldableContainer($title, $content, $params = array())
     {
         $params = BimpTools::overrideArray(array(
-                    'id'          => '',
-                    'open'        => true,
-                    'offset_left' => false
+                    'id'                  => '',
+                    'open'                => true,
+                    'offset_left'         => false,
+                    'grey_bk'             => 1
                         ), $params);
 
         $html = '';
 
-        $html .= '<div ' . ($params['id'] ? 'id="' . $params['id'] . '" ' : '') . 'class="foldable_container ' . ($params['open'] ? 'open' : 'closed') . ($params['offset_left'] ? ' offset_left' : '') . '">';
+        $html .= '<div' . ($params['id'] ? ' id="' . $params['id'] . '"' : '');
+        $html .= ' class="foldable_container ' . ($params['open'] ? 'open' : 'closed');
+        $html .= ($params['offset_left'] ? ' offset_left' : '');
+        $html .= ((int) $params['grey_bk'] ? ' grey_bk' : '');
+        $html .= '">';
         $html .= '<div class="foldable_caption">';
         $html .= $title;
         $html .= '<span class="foldable-caret"></span>';

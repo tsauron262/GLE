@@ -32,8 +32,7 @@ class devController extends BimpController
 
         $html = '';
 
-        // ToolsBar: 
-
+        // ToolsBar:
         $html .= '<div class="buttonsContainer align-right" style="padding-bottom: 15px; margin-bottom: 15px; border-bottom: 1px solid #000000">';
         if (BimpCore::isModuleActive('bimpapple')) {
             $html .= '<a class="btn btn-default" href="' . DOL_URL_ROOT . '/synopsistools/phantomApple.php" target="_blank">';
@@ -154,6 +153,70 @@ class devController extends BimpController
         return $html;
     }
 
+    public function renderYmlTab()
+    {
+        require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpYml.php';
+        $html = '';
+
+        $html .= '<div id="bimpYmlManager">';
+
+        $html .= '<div style="margin-bottom: 10px;font-size: 14px">';
+        $html .= 'Version: ';
+        if (defined('BIMP_EXTENDS_VERSION')) {
+            $html .= '<b>' . BIMP_EXTENDS_VERSION . '</b>';
+        } else {
+            $html .= '<span class="danger">Aucune</span>';
+        }
+        $html .= ' - Entité: ';
+        if (defined('BIMP_EXTENDS_ENTITY')) {
+            $html .= '<b>' . BIMP_EXTENDS_ENTITY . '</b>';
+        } else {
+            $html .= '<span class="danger">Aucune</span>';
+        }
+        $html .= '</div>';
+
+        $html .= '<div class="mainToolsBar">';
+        $html .= '<div class="toolsBarInput typeSelectContainer">';
+        $html .= '<label>Type</label>';
+        $html .= BimpInput::renderInput('select', 'yml_type_select', 'all', array(
+                    'options' => array(
+                        'all'         => 'Tous',
+                        'objects'     => 'Objets',
+                        'controllers' => 'Controllers',
+                        'configs'     => 'Config modules',
+                    )
+        ));
+        $html .= '</div>';
+
+        $html .= '<div class="toolsBarInput moduleSelectContainer">';
+        $html .= '<label>Module</label>';
+        $html .= BimpInput::renderInput('select', 'yml_module_select', 'all', array(
+                    'options' => BimpCache::getBimpModulesArray(false, true, 'all', 'Tous')
+        ));
+        $html .= '</div>';
+
+        $html .= '<div class="toolsBarInput fileSelectContainer">';
+        $html .= '<label>Fichier: </label>';
+        $html .= BimpInput::renderInput('select', 'yml_file_select', ''/* htmlentities(json_encode(array(
+                          'type'   => 'object',
+                          'module' => 'bimpcore',
+                          'name'   => 'objExt2'
+                          ))) */, array(
+                    'options' => BimpYml::getYmlFilesArray()
+        ));
+        $html .= '</div>';
+        $html .= '<span class="btn btn-default" onclick="BimpYMLManager.loadYmlFileManagerContent();" style="float: right">';
+        $html .= BimpRender::renderIcon('fas_redo', 'iconLeft') . 'Actualiser';
+        $html .= '</span>';
+        $html .= '</div>';
+
+        $html .= '<div class="fileYmlManagerContent" style="display: none"></div>';
+
+        $html .= '</div>';
+
+        return $html;
+    }
+
     public function renderScriptsTabContent()
     {
         if (!$this->can('view')) {
@@ -186,6 +249,7 @@ class devController extends BimpController
     }
 
     // Ajax processes: 
+    // Config modules: 
 
     public function ajaxProcessLoadModuleConfForm()
     {
@@ -240,13 +304,88 @@ class devController extends BimpController
 
     public function ajaxProcessSearchModulesConfParams()
     {
+        return array(
+            'errors'     => array(),
+            'warnings'   => array(),
+            'html'       => BimpModuleConf::renderSearchParamsResults(BimpTools::getValue('search', '')),
+            'request_id' => BimpTools::getValue('request_id', 0)
+        );
+    }
+
+    // Gestionnaire YML: 
+
+    public function ajaxProcessLoadYmlFilesSelect()
+    {
+        $errors = array();
+        $html = '';
+
+        $type = BimpTools::getValue('type', '');
+
+        if (!$type) {
+            $errors[] = 'Type absent';
+        }
+
+        $module = BimpTools::getValue('module', '');
+
+        if (!$module) {
+            $errors[] = 'Module absent';
+        }
+
+        if (!count($errors)) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpYml.php';
+
+            $html .= '<label>Fichier: </label>';
+            $html .= BimpInput::renderInput('select', 'yml_file_select', '', array(
+                        'options' => BimpYml::getYmlFilesArray($type, $module, true)
+            ));
+        }
+
+        return array(
+            'errors'     => $errors,
+            'warnings'   => array(),
+            'html'       => $html,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        );
+    }
+
+    public function ajaxProcessLoadYmlFileManagerContent()
+    {
         $errors = array();
         $warnings = array();
+        $html = '';
+
+        $file_data = BimpTools::getValue('file_data', '');
+
+        if (!$file_data) {
+            $errors[] = 'Données du fichier à afficher absentes';
+        } else {
+            $file_data = BimpTools::json_decode_array($file_data, $errors);
+
+            $type = BimpTools::getArrayValueFromPath($file_data, 'type', '');
+            if (!$type) {
+                $errors[] = 'Type de fichier absent';
+            }
+
+            $module = BimpTools::getArrayValueFromPath($file_data, 'module', '');
+            if (!$module) {
+                $errors[] = 'Module non spécifié';
+            }
+
+            $name = BimpTools::getArrayValueFromPath($file_data, 'name', '');
+            if (!$name) {
+                $errors[] = 'Nom du fichier absent';
+            }
+        }
+
+        if (!count($errors)) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpYml.php';
+            $html = BimpYml::renderYmlFileAnalyser($type, $module, $name);
+        }
 
         return array(
             'errors'     => $errors,
             'warnings'   => $warnings,
-            'html'       => BimpModuleConf::renderSearchParamsResults(BimpTools::getValue('search', '')),
+            'html'       => $html,
             'request_id' => BimpTools::getValue('request_id', 0)
         );
     }

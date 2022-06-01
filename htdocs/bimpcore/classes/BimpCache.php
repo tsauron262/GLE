@@ -2279,7 +2279,7 @@ class BimpCache
 
     // Divers: 
 
-    public static function getBimpModulesArray($active_only = false, $include_empty = false, $empty_value = '')
+    public static function getBimpModulesArray($active_only = false, $include_empty = false, $empty_value = '', $empty_label = '')
     {
         $cache_key = 'bimp_modules_array';
 
@@ -2311,7 +2311,7 @@ class BimpCache
             }
         }
 
-        return self::getCacheArray($cache_key, $include_empty, $empty_value, $empty_value);
+        return self::getCacheArray($cache_key, $include_empty, $empty_value, ($empty_label ? $empty_label : $empty_value));
     }
 
     public static function getTaxes($id_country = 1, $active_only = true, $include_empty = false, $key_field = 'rowid')

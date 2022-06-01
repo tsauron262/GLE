@@ -1,0 +1,22 @@
+
+extends: 
+    module: bimpcore
+    object_name: objBase
+    
+label: Obj Ext 1
+
+params: 
+    param_ext1: 
+        label: Param Ext 1
+        
+    param_ext1_to_unset_by_ext_2:
+        label: Param Ext 1 à désactiver par ext2
+        
+    param_ext1_to_unset_by_version:
+        label: Param Ext 1 à désactiver par obj Ext 1 version
+        
+    param_ext1_to_unset_by_entity:
+        label: Param Ext 1 à désactiver par obj Ext 1 entité
+        
+        
+    param_base_to_unset_by_ext_1: unset

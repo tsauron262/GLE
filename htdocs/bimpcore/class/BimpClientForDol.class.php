@@ -11,7 +11,8 @@ class BimpClientForDol extends Bimp_Client{
         return parent::__construct('bimpcore', 'Bimp_Client');
     }
     
-    // Pour les client couverts par ICBA
+    // Envoie des notes pour indiquer les client dont les couvertures ICBA
+    // arrivent à expiration
     public function rappelValiditeICBA($days = 30) {
         $this->error = '';        
         $clients = $this->getClientsFinValiditeICBA($days);
@@ -73,7 +74,8 @@ class BimpClientForDol extends Bimp_Client{
     
     
     
-    // Pour les client d'Atradius avec une date d'expiration
+    // Envoie des notes pour indiquer les client dont les couvertures Atradius
+    // arrivent à expiration
     public function rappelValiditeAtradius($days = 30, $interval = 7) {
         $this->error = '';        
         $clients = $this->getClientsFinValiditeAtradius($days, $interval);
@@ -147,7 +149,19 @@ class BimpClientForDol extends Bimp_Client{
     }
     
     private function addError($error_msg) {
-        $this->error .= '<br/><strong style="color: red">' . $error_msg . '</strong>';
+        $this->output .= '<br/><strong style="color: red">' . $error_msg . '</strong>';
     }
     
+
+    // Vérifie si les demandes en cours (vérification manuelle) ont été traité
+    public function updateAtradius() {
+        $this->error = '';
+        $success = '';
+        BimpObject::loadClass('bimpcore', 'Bimp_Client');
+        $errors = $warnings = array();
+        $nb_update = Bimp_Client::updateAtradiusStatus($errors, $warnings, $success);
+        $this->output .= "Nombre de clients mis à jour : " . $nb_update . "<br/><br/>" . $success;
+        $this->addError(implode(',', $errors));
+        return $nb_update;
+    }
 }

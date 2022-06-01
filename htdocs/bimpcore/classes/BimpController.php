@@ -3181,11 +3181,8 @@ class BimpController
         $notifs = BimpTools::getPostFieldValue('notificationActive');
 
         $notification = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
-        if ((int) $user->id == 330) // TODO remove (debug)
-            $notifs_for_user = $notification->getNotificationForUser(40, $notifs, $errors);
-        else
-            $notifs_for_user = $notification->getNotificationForUser((int) $user->id, $notifs, $errors);
-
+        $notifs_for_user = $notification->getNotificationForUser((int) $user->id, $notifs, $errors);
+        
         return array(
             'errors'        => $errors,
             'notifications' => $notifs_for_user,

@@ -3729,6 +3729,7 @@ class Bimp_Societe extends BimpDolObject
         $init_relance_actives = (int) $this->getInitData('relances_actives');
 
         $limit = 0;
+        
         if ($this->getData('outstanding_limit_atradius') > -1)
             $limit = $this->getData('outstanding_limit_atradius');
         if ($this->getData('outstanding_limit_icba') > $limit)

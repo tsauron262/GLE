@@ -249,19 +249,16 @@ class BimpCache
 //            $curMem = memory_get_usage();
             $instance = BimpObject::getInstance($module, $object_name, $id_object, $parent);
             
-//            if ($id_object == 151718) {
-//                 die ('<br/>ICI: ' . get_class($instance) . ' - ' . $instance->object_name . ' - ' . $instance->id);
-//            }
 //            $newMem = memory_get_usage();
 //            $obj_memory = $newMem - $curMem;
 
             // Ajout au cache
             self::$cache[$cache_key] = $instance;
-//            if (BimpObject::objectLoaded(self::$cache[$cache_key])) {
+            if (BimpObject::objectLoaded(self::$cache[$cache_key])) {
 //                self::$cache[$cache_key]->cache_id = self::$nextBimpObjectCacheId;
 //                self::$nextBimpObjectCacheId++;
-//                self::$cache[$cache_key]->checkObject('fetch');
-//            }
+                self::$cache[$cache_key]->checkObject('fetch');
+            }
         }
 
 //        if (is_a(self::$cache[$cache_key], 'BimpObject')) {

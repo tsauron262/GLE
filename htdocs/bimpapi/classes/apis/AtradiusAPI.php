@@ -58,14 +58,12 @@ class AtradiusAPI extends BimpAPI {
     );
 
     // Requêtes: 
-    public function getBuyer($filters, &$errors = array()) {
-                
-        $filters['country'] = 'FRA';
-        $filters['lang'] = 'FR';
+    public function getMyBuyer($filters, &$errors = array()) {
+
         
-        $data = $this->execCurlCustom('getBuyer', array(
+        $data = $this->execCurlCustom('getMyBuyer', array(
             'url_params' => $filters
-                ), $errors, $header, $code, array('customerId', 'policyId'));
+                ), $errors);
 
         return $data;
     }
@@ -76,10 +74,10 @@ class AtradiusAPI extends BimpAPI {
      * si pas buyerId => utilise siren
      */
     // customerId est définit automatiquement
-    public function getCover($filters = array(), &$errors = array(), &$warnings = array()) {
+    public function getCover($filters = array(), &$errors = array(), &$warnings = array(), $format_output = true) {
         
         BimpObject::loadClass('bimpcore', 'Bimp_Client');
-        
+                
         $response = $this->execCurlCustom('getCover', array(
             'url_params' => $filters
                 ), $errors, $header, $code);

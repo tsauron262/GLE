@@ -514,7 +514,7 @@ class Bimp_Commande extends BimpComm
 
     public function isPaiementComptant()
     {
-        $cond_paiement_comptant = array('LIVRAISON', 'TIERFAC', 'TIERAV', 'RECEPCOM', 'HALFFAC', 'HALFAV', 'RECEP');
+        $cond_paiement_comptant = array('LIVRAISON', 'TIERFAC', 'TIERAV', 'RECEPCOM', 'HALFFAC', 'HALFAV');
         $code_cond_paiement = self::getBdb()->getValue('c_payment_term', 'code', '`active` > 0 and rowid = ' . $this->getData('fk_cond_reglement'));
         if ((int) in_array($code_cond_paiement, $cond_paiement_comptant) == 1)
             return 1;

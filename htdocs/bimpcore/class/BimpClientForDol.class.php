@@ -163,5 +163,22 @@ class BimpClientForDol extends Bimp_Client{
         $this->output .= "Nombre de clients mis à jour : " . $nb_update . "<br/><br/>" . $success;
         $this->addError(implode(',', $errors));
         return $nb_update;
+    }    
+
+    // MAJ de tous les profil Atradius de nos clients
+    public function syncroAllAtradius() {
+        $this->error = '';
+        $success = '';
+        BimpObject::loadClass('bimpcore', 'Bimp_Client');
+        $errors = $warnings = array();
+        
+        $from = new DateTime();
+//        $from->sub(new DateInterval('PT1H')); TODO
+        $from->sub(new DateInterval('P1Y'));
+                
+        $nb_update = Bimp_Client::updateAllAtradius($from->format('Y-m-d\TH:i:s'), $errors, $warnings, $success);
+        $this->output .= "Nombre de clients mis à jour : " . $nb_update . "<br/><br/>" . $success;
+        $this->addError(implode(',', $errors));
+        return $nb_update;
     }
 }

@@ -323,8 +323,130 @@ function BimpModuleConf() {
     };
 }
 
+function BimpYMLManager() {
+    var bym = this;
+    this.$container = null;
+    this.$content = null;
+
+    // Chargement fichier: 
+    this.init = function () {
+        bym.$container = $('#bimpYmlManager');
+        if (bym.$container.length) {
+            bym.$content = bym.$container.children('.fileYmlManagerContent');
+
+            if (!parseInt(bym.$container.data('events_init'))) {
+                bym.$container.find('select[name="yml_type_select"]').add('select[name="yml_module_select"]').change(function () {
+                    bym.reloadFilesSelect();
+                });
+
+                bym.setFileSelectEvents();
+                bym.$container.data('events_init', 1);
+            }
+        }
+    };
+    this.reloadFilesSelect = function () {
+        var type = bym.$container.find('select[name="yml_type_select"]').val();
+        var module = bym.$container.find('select[name="yml_module_select"]').val();
+
+        BimpAjax('loadYmlFilesSelect', {
+            type: type,
+            module: module
+        }, bym.$container.find('.fileSelectContainer'), {
+            display_success: false,
+            display_processing: true,
+            display_warnings_in_popup_only: false,
+            append_html: true,
+            processing_msg: '',
+            processing_padding: 0,
+            success: function (result, bimpAjax) {
+                bym.setFileSelectEvents();
+            }
+        });
+    };
+    this.setFileSelectEvents = function () {
+        var $select = bym.$container.find('select[name="yml_file_select"]');
+
+        if ($select.length) {
+            if (!parseInt($select.data('yml_events_init'))) {
+                $select.data('yml_events_init', 1);
+                $select.change(function () {
+                    bym.loadYmlFileManagerContent();
+                });
+            }
+        }
+    };
+
+    this.loadYmlFileManagerContent = function () {
+        var $select = bym.$container.find('select[name="yml_file_select"]');
+
+        if ($select.length) {
+            var file = $select.val();
+            if (file) {
+                BimpAjax('loadYmlFileManagerContent', {
+                    file_data: file
+                }, bym.$content, {
+                    display_success: false,
+                    display_processing: true,
+                    display_warnings_in_popup_only: false,
+                    append_html: true,
+                    processing_msg: 'Chargement',
+                    success: function (result, bimpAjax) {
+                        bym.setYmlAnalyserEvents();
+                    }
+                });
+            } else {
+                bym.$content.slideUp(250, function () {
+                    $(this).html('');
+                });
+            }
+        }
+    };
+
+    // Gestion analyseur:
+    this.setYmlAnalyserEvents = function () {
+        var $container = bym.$container.find('.yml_analyser_params_container');
+
+        if ($container.length) {
+            if (!parseInt($container.data('yml_analyser_events_init'))) {
+                $container.data('yml_analyser_events_init', 1);
+
+                $container.find('.yml_analyser_section').click(function () {
+                    bym.showYmlAnalyserSection($(this).data('section'));
+                });
+            }
+        }
+    };
+
+    this.toggleYmlAnalyserFileDisplay = function () {
+
+    };
+
+    this.showYmlAnalyserSection = function (section) {
+        var $active_section = bym.$container.find('.yml_analyser_section.active');
+
+        if ($active_section.length) {
+            var active_section = $active_section.data('section');
+            if (active_section === section) {
+                return;
+            }
+            $active_section.removeClass('active');
+            bym.$container.find('.yml_analyser_section[data-section="' + section + '"]').addClass('active');
+
+            bym.$container.find('.yml_analyser_section_' + active_section + '_params').stop().fadeOut(250, function () {
+                bym.$container.find('.yml_analyser_section_' + section + '_params').stop().fadeIn(250);
+            });
+        } else {
+            bym.$container.find('.yml_analyser_section_params').hide();
+            bym.$container.find('.yml_analyser_section[data-section="' + section + '"]').addClass('active');
+            bym.$container.find('.yml_analyser_section_' + section + '_params').stop().fadeIn(250);
+        }
+    };
+}
+
 var BimpModuleConf = new BimpModuleConf();
+var BimpYMLManager = new BimpYMLManager();
 
 $(document).ready(function () {
     BimpModuleConf.init();
+    BimpYMLManager.init();
 });

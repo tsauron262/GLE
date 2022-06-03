@@ -2574,8 +2574,7 @@ class Bimp_Facture extends BimpComm
     public function displayPDFButton($display_generate = true, $with_ref = true, $btn_label = '')
     {
         global $user;
-        if ($this->getData('fk_statut') > 0 && !in_array($user->login, array('admin', 't.sauron', 'f.martinez', 'a.delauzun')) 
-                && (int) BimpCore::getConf('allow_pdf_regeneration_after_validation', null, 'bimpcommercial')) {
+        if ($this->getData('fk_statut') > 0 && !in_array($user->login, array('admin', 't.sauron', 'f.martinez', 'a.delauzun')) && (int) BimpCore::getConf('allow_pdf_regeneration_after_validation', null, 'bimpcommercial')) {
             $ref = dol_sanitizeFileName($this->getRef());
             if ($this->getFileUrl($ref . '.pdf') != '')
                 $display_generate = false;
@@ -6038,13 +6037,13 @@ class Bimp_Facture extends BimpComm
         while ($ln = $this->db->db->fetch_object($sql)) {
             $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $ln->rowid);
             $userCreate = new User($this->db->db);
-            
+
             $idComm = $obj->getIdContact($type = 'internal', $code = 'SALESREPSIGN');
-            if($idComm > 0)
+            if ($idComm > 0)
                 $userCreate->fetch((int) $idComm);
             else
                 $userCreate->fetch((int) $obj->getData('fk_user_author'));
-            
+
 
             $mail = $userCreate->email;
             if ($mail == '')
@@ -6294,25 +6293,20 @@ class Bimp_Facture extends BimpComm
         return $errors;
     }
 
-    public static function checkMarginAll()
+    public static function checkMarginAll($from = '2019-07-01 00:00:00')
     {
         ini_set('max_execution_time', 3600);
 
         $errors = array();
-        $rows = self::getBdb()->getRows('facture', "`datec` > '2021-10-01 00:00:00'", null, 'array', array('rowid', 'marge_finale_ok', 'total_achat_reval_ok'), 'rowid', 'desc');
+        $rows = self::getBdb()->getRows('facture', "`datec` >= '" . $from . "'", null, 'array', array('rowid', 'marge_finale_ok', 'total_achat_reval_ok'), 'rowid', 'desc');
 
         if (is_array($rows)) {
             $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
             foreach ($rows as $r) {
                 if ($facture->fetch((int) $r['rowid'])) {
                     $fac_errors = array();
-
-//                    if (!(float) $r['marge_finale_ok']) {
                     $fac_errors = $facture->checkMargin(true);
-//                    }
-//                    if (!(float) $r['total_achat_reval_ok']) {
                     $fac_errors = BimpTools::merge_array($fac_errors, $facture->checkTotalAchat(true));
-//                    }
 
                     if (count($fac_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Fac #' . $r['rowid']);

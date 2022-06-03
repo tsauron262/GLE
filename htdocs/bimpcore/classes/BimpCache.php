@@ -246,27 +246,28 @@ class BimpCache
         }
 
         if (!isset(self::$cache[$cache_key])) {
-            $curMem = memory_get_usage();
+//            $curMem = memory_get_usage();
             $instance = BimpObject::getInstance($module, $object_name, $id_object, $parent);
-            $newMem = memory_get_usage();
-            $obj_memory = $newMem - $curMem;
+            
+//            $newMem = memory_get_usage();
+//            $obj_memory = $newMem - $curMem;
 
             // Ajout au cache
             self::$cache[$cache_key] = $instance;
             if (BimpObject::objectLoaded(self::$cache[$cache_key])) {
-                self::$cache[$cache_key]->cache_id = self::$nextBimpObjectCacheId;
-                self::$nextBimpObjectCacheId++;
+//                self::$cache[$cache_key]->cache_id = self::$nextBimpObjectCacheId;
+//                self::$nextBimpObjectCacheId++;
                 self::$cache[$cache_key]->checkObject('fetch');
             }
         }
 
-        if (is_a(self::$cache[$cache_key], 'BimpObject')) {
-            self::addObjectKey($cache_key, $obj_memory);
-
-            if (BimpDebug::isActive()) {
-                BimpDebug::addCacheObjectInfos($module, $object_name, $is_fetched);
-            }
-        }
+//        if (is_a(self::$cache[$cache_key], 'BimpObject')) {
+//            self::addObjectKey($cache_key, $obj_memory);
+//
+//            if (BimpDebug::isActive()) {
+//                BimpDebug::addCacheObjectInfos($module, $object_name, $is_fetched);
+//            }
+//        }
 
         return self::$cache[$cache_key];
     }
@@ -2279,7 +2280,7 @@ class BimpCache
 
     // Divers: 
 
-    public static function getBimpModulesArray($active_only = false, $include_empty = false, $empty_value = '')
+    public static function getBimpModulesArray($active_only = false, $include_empty = false, $empty_value = '', $empty_label = '')
     {
         $cache_key = 'bimp_modules_array';
 
@@ -2311,7 +2312,7 @@ class BimpCache
             }
         }
 
-        return self::getCacheArray($cache_key, $include_empty, $empty_value, $empty_value);
+        return self::getCacheArray($cache_key, $include_empty, $empty_value, ($empty_label ? $empty_label : $empty_value));
     }
 
     public static function getTaxes($id_country = 1, $active_only = true, $include_empty = false, $key_field = 'rowid')

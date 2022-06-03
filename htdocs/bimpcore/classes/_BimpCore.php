@@ -129,20 +129,11 @@ class BimpCore
     {
         $url = '';
 
-        $debug = false;
-
-//        if ($_SERVER['HTTP_X_REAL_IP'] == '10.192.20.148') {
-//            $debug = true;
-//        }
-
         if (preg_match('/^\/+(.+)$/', $file_path, $matches)) {
             $file_path = $matches[1];
         }
 
         if (file_exists(DOL_DOCUMENT_ROOT . '/' . $file_path)) {
-            if ($debug) {
-                echo 'ICI: ' . DOL_DOCUMENT_ROOT . '/' . $file_path;
-            }
             if ($use_tms && (int) BimpCore::getConf('use_files_tms')) {
                 $pathinfo = pathinfo($file_path);
 
@@ -184,12 +175,8 @@ class BimpCore
             if (!$url) {
                 $url = $file_path;
             }
-        } else {
-            if ($debug) {
-                echo 'FAIL: ' . DOL_DOCUMENT_ROOT . '/' . $file_path;
-            }
         }
-
+        
         if ($url) {
             $prefixe = DOL_URL_ROOT;
             if ($prefixe == "/")
@@ -247,11 +234,10 @@ class BimpCore
         if (isset($cache[$module][$name])) {
 //            echo '<br/>OK: ' . $name . ': ' . $cache[$module][$name];
             return $cache[$module][$name];
-        } 
+        }
 //        else {
 //            echo '<br/>FAIL: ' . $name;
 //        }
-
         // Check éventuelle erreur sur le module: 
         foreach ($cache as $module_name => $params) {
             if (isset($params[$name])) {
@@ -371,11 +357,7 @@ class BimpCore
     public static function getParam($full_path, $default_value = '', $type = 'string')
     {
         if (is_null(self::$config)) {
-            if (defined('PATH_EXTENDS') && file_exists(PATH_EXTENDS . '/bimpcore/config.yml')) {
-                self::$config = new BimpConfig(PATH_EXTENDS . '/bimpcore/', 'config.yml', new BimpObject('', ''));
-            } elseif (file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/default_config.yml')) {
-                self::$config = new BimpConfig(DOL_DOCUMENT_ROOT . '/bimpcore/', 'default_config.yml', new BimpObject('', ''));
-            }
+            self::$config = new BimpConfig('bimpcore', '', 'config');
         }
 
         if (!is_null(self::$config)) {

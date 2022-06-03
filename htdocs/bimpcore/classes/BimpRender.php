@@ -946,12 +946,26 @@ class BimpRender
     {
         $html = '';
 
-        $no_html = BimpTools::getArrayValueFromPath($params, 'no_html', false);
-        $title = BimpTools::getArrayValueFromPath($params, 'title', '');
+        $params = BimpTools::overrideArray(array(
+                    'no_html'   => false,
+                    'title'     => '',
+                    'foldable'  => 0,
+                    'open'      => 1,
+                    'nTabs'     => 0,
+                    'max_depth' => 100
+                        ), $params);
+
+        $no_html = $params['no_html'];
+        $title = $params['title'];
+        $max_depth = (int) $params['max_depth'];
+
+        if ($max_depth <= 0) {
+            return '';
+        }
 
         if (!$no_html) {
-            $foldable = (int) BimpTools::getArrayValueFromPath($params, 'foldable', 0);
-            $open = (int) BimpTools::getArrayValueFromPath($params, 'open', 1);
+            $foldable = (int) $params['foldable'];
+            $open = (int) $params['open'];
 
             $html .= '<div class="array_content_container' . (($foldable && $title) ? ' foldable ' . ($open ? 'open' : 'closed') : '') . '">';
 
@@ -973,9 +987,10 @@ class BimpRender
                 foreach ($array as $label => $value) {
                     if (is_array($value)) {
                         $html .= self::renderRecursiveArrayContent($value, array(
-                                    'foldable' => $foldable,
-                                    'title'    => $label,
-                                    'open'     => $open
+                                    'foldable'  => $foldable,
+                                    'title'     => $label,
+                                    'open'      => $open,
+                                    'max_depth' => ($max_depth - 1)
                         ));
                     } else {
                         $html .= '<div class="array_content_row">';
@@ -991,7 +1006,8 @@ class BimpRender
             $html .= '</div>';
             $html .= '</div>';
         } else {
-            $nTabs = BimpTools::getArrayValueFromPath($params, 'nTabs', 0);
+            $nTabs = (int) $params['nTabs'];
+            ;
 
             if ($title) {
                 if ($nTabs) {
@@ -1012,9 +1028,10 @@ class BimpRender
                     }
                     if (is_array($value)) {
                         $html .= self::renderRecursiveArrayContent($value, array(
-                                    'no_html' => true,
-                                    'title'   => $label,
-                                    'nTabs'   => $nTabs
+                                    'no_html'   => true,
+                                    'title'     => $label,
+                                    'nTabs'     => $nTabs,
+                                    'max_depth' => ($max_depth - 1)
                         ));
                     } else {
                         $html .= $label . ': ' . $value . "\n";
@@ -1093,12 +1110,17 @@ class BimpRender
         $params = BimpTools::overrideArray(array(
                     'id'          => '',
                     'open'        => true,
-                    'offset_left' => false
+                    'offset_left' => false,
+                    'grey_bk'     => 1
                         ), $params);
 
         $html = '';
 
-        $html .= '<div ' . ($params['id'] ? 'id="' . $params['id'] . '" ' : '') . 'class="foldable_container ' . ($params['open'] ? 'open' : 'closed') . ($params['offset_left'] ? ' offset_left' : '') . '">';
+        $html .= '<div' . ($params['id'] ? ' id="' . $params['id'] . '"' : '');
+        $html .= ' class="foldable_container ' . ($params['open'] ? 'open' : 'closed');
+        $html .= ($params['offset_left'] ? ' offset_left' : '');
+        $html .= ((int) $params['grey_bk'] ? ' grey_bk' : '');
+        $html .= '">';
         $html .= '<div class="foldable_caption">';
         $html .= $title;
         $html .= '<span class="foldable-caret"></span>';

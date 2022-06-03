@@ -43,6 +43,7 @@ objects:
     
     contrat:
         instance:
+            dol_object: unset
             bimp_object:
                 module: bimpcontract
                 name: BContract_contrat

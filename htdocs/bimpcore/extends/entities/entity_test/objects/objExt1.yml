@@ -1,0 +1,8 @@
+
+label: Obj Ext1 Entité
+
+fields: 
+    param_ext1_entity: 
+        label: Param ext1 entité
+        
+    param_ext1_to_unset_by_entity: unset

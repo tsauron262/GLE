@@ -19,7 +19,7 @@ class BimpController
     static public $ajax_warnings = array();
 
     public static function getInstance($module, $controller = null)
-    {        
+    {
         $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/controllers/';
 
         if (is_null($controller)) {
@@ -30,21 +30,51 @@ class BimpController
             $controller = 'public_' . $controller;
         }
 
-        $controllerClass = $controller . 'Controller';
-        
-        if (file_exists($dir . $controllerClass . '.php')) {
-            if (!class_exists($controllerClass)) {
-                require_once $dir . $controllerClass . '.php';
+        $controllerClassBase = $controller . 'Controller';
+        $className = 'BimpController';
+        $instance = null;
+
+        if (file_exists($dir . $controllerClassBase . '.php')) {
+            $className = $controllerClassBase;
+            if (!class_exists($controllerClassBase)) {
+                require_once $dir . $controllerClassBase . '.php';
             }
-            
-            return new $controllerClass($module, $controller);
         }
 
-        if (BimpCore::getContext() == 'public') {
-            return new BimpPublicController($module, $controller);
+        // Surcharge Version: 
+        if (defined('BIMP_EXTENDS_VERSION')) {
+            $version_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BIMP_EXTENDS_VERSION . '/controllers/' . $controllerClassBase . '.php';
+            if (file_exists($version_file)) {
+                $className = $controllerClassBase . '_ExtVersion';
+                if (!class_exists($className)) {
+                    require_once $version_file;
+                }
+            }
         }
 
-        return new BimpController($module, $controller);
+        // Surcharge entité: 
+        if (defined('BIMP_EXTENDS_ENTITY')) {
+            $entity_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BIMP_EXTENDS_ENTITY . '/controllers/' . $controllerClassBase . '.php';
+            if (file_exists($entity_file)) {
+                $className = $controllerClassBase . '_ExtEntity';
+                if (!class_exists($className)) {
+                    require_once $entity_file;
+                }
+            }
+        }
+
+        if ($className && class_exists($className)) {
+            $instance = new $className($module, $controller);
+        }
+
+        if (is_null($instance)) {
+            if (BimpCore::getContext() == 'public') {
+                $instance = new BimpPublicController($module, $controller);
+            }
+            $instance = new BimpController($module, $controller);
+        }
+
+        return $instance;
     }
 
     public function __construct($module, $controller = 'index')
@@ -59,27 +89,24 @@ class BimpController
         if (BimpDebug::isActive()) {
             BimpDebug::addDebugTime('Début controller');
         }
-        
+
 
         $this->module = $module;
         $this->controller = $controller;
 
         global $user, $bimpUser;
-        
+
         if (BimpObject::objectLoaded($user)) {
             $bimpUser = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $user->id);
         }
 
-        $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/controllers/';
-
         $this->current_tab = BimpTools::getValue('tab', 'default');
-
-        $this->config = new BimpConfig($dir, $this->controller, $this);
+        $this->config = BimpConfig::getControllerConfigInstance($this->module, $this->controller, $this);
 
         if ($this->config->errors) {
             $this->errors = BimpTools::merge_array($this->errors, $this->config->errors);
         }
-        
+
         $this->init();
 
         $this->addJsFile('/bimpcore/views/js/controller.js');
@@ -3139,13 +3166,6 @@ class BimpController
         );
     }
 
-    // Callbacks:
-
-    protected function getObjectIdFromPost($object_name)
-    {
-        return BimpTools::getValue('id_' . $object_name, null);
-    }
-
     protected function ajaxProcessGetNotification()
     {
         global $user;
@@ -3155,12 +3175,19 @@ class BimpController
 
         $notification = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
         $notifs_for_user = $notification->getNotificationForUser((int) $user->id, $notifs, $errors);
-        
+
         return array(
             'errors'        => $errors,
             'notifications' => $notifs_for_user,
             'request_id'    => BimpTools::getValue('request_id', 0)
         );
+    }
+
+    // Callbacks:
+
+    protected function getObjectIdFromPost($object_name)
+    {
+        return BimpTools::getValue('id_' . $object_name, null);
     }
 
     public static function bimp_shutdown()

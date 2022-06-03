@@ -184,6 +184,7 @@ class BimpYml
         $html = '';
         $html .= '<h3 style="font-weight: normal">Module "<b>' . $module . '</b>" - Objet "<b>' . $name . '</b>"</h3>';
 
+        $tabs = array();
         $params = array();
         $errors = array();
 
@@ -191,11 +192,7 @@ class BimpYml
         $cur_name = $name;
 
         $i = 0;
-        while (1) {
-//            if ($cur_name === 'BimpObject') {
-//                break;
-//            }
-
+        while ($i < 10) {// protection boucles infinies
             $i++;
             $idx = ($i < 10 ? '0' : '') . $i;
 
@@ -275,7 +272,7 @@ class BimpYml
                 }
             }
 
-            if ($next_module && $next_name) {
+            if ($next_module && $next_name && !($cur_module === $next_module && $cur_name === $next_name)) {
                 $cur_module = $next_module;
                 $cur_name = $next_name;
                 continue;
@@ -294,7 +291,32 @@ class BimpYml
             $html .= BimpRender::renderAlerts($errors);
         }
 
-        $html .= self::renderAnalyserContent($params, 'objects');
+        $tabs[] = array(
+            'id'      => 'analyser',
+            'title'   => 'Analyseur YML',
+            'content' => self::renderAnalyserContent($params, 'objects')
+        );
+
+        $instance = BimpObject::getInstance($module, $name);
+        $full_params = $instance->config->getParams('');
+        
+        $tabs[] = array(
+            'id'      => 'full_params_formates',
+            'title'   => 'Tous les paramètres (formaté)',
+            'content' => BimpRender::renderRecursiveArrayContent($full_params, array(
+                'title'    => 'Tous les paramètres après fusion',
+                'foldable' => 1,
+                'open'     => 0
+            ))
+        );
+
+        $tabs[] = array(
+            'id'      => 'full_params_bruts',
+            'title'   => 'Tous les paramètres (brut)',
+            'content' => '<pre>' . print_r($full_params, 1) . '</pre>'
+        );
+
+        $html .= BimpRender::renderNavTabs($tabs, 'yml_analyser');
 
         return $html;
     }
@@ -304,6 +326,7 @@ class BimpYml
         $html = '';
         $html .= '<h3 style="font-weight: normal">Module "<b>' . $module . '</b>" - Controller "<b>' . $name . '</b>"</h3>';
 
+        $tabs = array();
         $params = array();
         $errors = array();
 
@@ -403,7 +426,27 @@ class BimpYml
             $html .= BimpRender::renderAlerts($errors);
         }
 
-        $html .= self::renderAnalyserContent($params, 'controllers');
+        $tabs[] = array(
+            'id'      => 'default',
+            'title'   => 'Analyseur YML',
+            'content' => self::renderAnalyserContent($params, 'controllers')
+        );
+
+        $controller = BimpController::getInstance($module, $name);
+        $full_params = $controller->config->getParams('');
+
+        $tabs[] = array(
+            'id'      => 'full_params',
+            'title'   => 'Tous les paramètres',
+            'content' => '<pre>' . print_r($full_params, 1) . '</pre>'
+//            'content' => BimpRender::renderRecursiveArrayContent($full_params, array(
+//                'title'    => 'Tous les paramètres finaux',
+//                'foldable' => 1,
+//                'open'     => 1
+//            ))
+        );
+
+        $html .= BimpRender::renderNavTabs($tabs, 'yml_analyser');
 
         return $html;
     }
@@ -686,7 +729,7 @@ class BimpYml
                 if (isset($params[$section]) && !empty($params[$section])) {
                     $html .= '<div class="yml_analyser_section' . ($default_section === $section ? ' active' : '') . '"';
                     $html .= ' data-section="' . $section . '">';
-                    $html .= $section_label;
+                    $html .= $section_label . ($section !== 'root' ? ' - <span class="section_name">' . $section . '</span>' : '');
                     $html .= '</div>';
                 }
             }
@@ -699,7 +742,7 @@ class BimpYml
                 $html .= ' data-section="' . $section . '">';
                 $section_title = BimpTools::getArrayValueFromPath($sections, $section, 'Section "' . $section . '"');
 
-                $html .= '<h4>' . $section_title . '</h4>';
+                $html .= '<h4>' . $section_title . ($section !== 'root' ? ' - <span class="section_name">' . $section . '</span>' : '') . '</h4>';
 
                 foreach ($section_params as $param_name => $param_data) {
                     if (isset($param_data['file_idx'])) {
@@ -730,6 +773,9 @@ class BimpYml
                         $html .= '<div class="yml_analyser_param">';
                         $html .= $param_title;
                         if (isset($param_data['values']) && !empty($param_data['values'])) {
+                            if (count($param_data['values']) > 1) {
+                                $html .= '<span class="bold">*</span>';
+                            }
                             $html .= ' : ' . self::renderYmlAnalyserParamValues($param_data['values'], $max_idx, $files);
                         }
                         $html .= '</div>';
@@ -777,13 +823,16 @@ class BimpYml
                 $html .= '</div>';
             } elseif (isset($param_data['sub_params']) && !empty($param_data['sub_params'])) {
                 $html .= '<div class="yml_analyser_param">';
-                $html .= $param_title;
+                $html .= $param_title . ' : ';
                 $html .= '</div>';
                 $html .= self::renderYmlAnalyserSubParamsContent($param_data['sub_params'], $max_idx, $files);
             } else {
                 $html .= '<div class="yml_analyser_param">';
                 $html .= $param_title;
                 if (isset($param_data['values']) && !empty($param_data['values'])) {
+                    if (count($param_data['values']) > 1) {
+                        $html .= '<span class="bold">*</span>';
+                    }
                     $html .= ' : ' . self::renderYmlAnalyserParamValues($param_data['values'], $max_idx, $files);
                 }
                 $html .= '</div>';
@@ -831,14 +880,14 @@ class BimpYml
             }
 
             $html .= '<span class="bs-popover"' . ($popover ? BimpRender::renderPopoverData($popover, 'bottom', true) : '') . '>';
-            $html .= $value;
+            $html .= htmlentities($value);
             $html .= '</span>';
             return $html;
         }
 
         foreach ($values as $idx => $value) {
             $param_file_idx = $idx;
-            return (string) $value;
+            return htmlentities($value);
         }
     }
 
@@ -847,9 +896,10 @@ class BimpYml
         $html = '<style>';
 
         $hue_idx = 0;
-        $lum_base = 35;
+        $lum_base = 30;
         $sat_base = 100;
         $sat_modifier = 0;
+        $hue_modifier = 0;
         $lum_extends_modifier = 20;
 
         foreach ($params as $idx => $data) {
@@ -858,7 +908,10 @@ class BimpYml
                 $color_version = '666666';
                 $color_entity = '999999';
             } else {
-                $hue = self::$hues[$hue_idx];
+                $hue = self::$hues[$hue_idx] + $hue_modifier;
+                if ($hue > 360) {
+                    $hue -= 360;
+                }
                 $sat = $sat_base - $sat_modifier;
                 if ($sat < 0) {
                     $sat = 0;
@@ -866,7 +919,7 @@ class BimpYml
                 $lum = $lum_base;
                 $color_base = BimpTools::hslToHex(array($hue / 360, $sat / 100, $lum / 100));
                 $color_version = BimpTools::hslToHex(array($hue / 360, $sat / 100, ($lum + $lum_extends_modifier) / 100));
-                $color_entity = BimpTools::hslToHex(array($hue / 360, $sat / 100, ($lum + ($lum_extends_modifier * 2)) / 100));
+                $color_entity = BimpTools::hslToHex(array($hue / 360, ($sat - 50) / 100, ($lum + ($lum_extends_modifier * 1.5)) / 100));
             }
 
             $html .= '.idx_' . $idx . ' {';
@@ -885,7 +938,8 @@ class BimpYml
                 $hue_idx++;
                 if (!isset(self::$hues[$hue_idx])) {
                     $hue_idx = 0;
-                    $sat_modifier += 30;
+                    $sat_modifier += 20;
+                    $hue_modifier += 20;
                 }
             }
         }

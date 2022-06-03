@@ -1,9 +1,7 @@
 extends: 
     module: bimpcommercial
     object_name: Bimp_Propal
-
-primary: newid
-
+    
 labels: 
     name: devis SAV
     name_plur: devis SAV

@@ -1,2 +1,9 @@
 
 label: Obj Base entité
+
+fields: 
+    param_base_entity: 
+        label: Param base entité
+        
+    param_base_to_unset_by_entity: unset
+    param_base_version_to_unset_by_entity: unset

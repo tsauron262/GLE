@@ -129,20 +129,11 @@ class BimpCore
     {
         $url = '';
 
-        $debug = false;
-
-//        if ($_SERVER['HTTP_X_REAL_IP'] == '10.192.20.148') {
-//            $debug = true;
-//        }
-
         if (preg_match('/^\/+(.+)$/', $file_path, $matches)) {
             $file_path = $matches[1];
         }
 
         if (file_exists(DOL_DOCUMENT_ROOT . '/' . $file_path)) {
-            if ($debug) {
-                echo 'ICI: ' . DOL_DOCUMENT_ROOT . '/' . $file_path;
-            }
             if ($use_tms && (int) BimpCore::getConf('use_files_tms')) {
                 $pathinfo = pathinfo($file_path);
 
@@ -184,12 +175,8 @@ class BimpCore
             if (!$url) {
                 $url = $file_path;
             }
-        } else {
-            if ($debug) {
-                echo 'FAIL: ' . DOL_DOCUMENT_ROOT . '/' . $file_path;
-            }
         }
-
+        
         if ($url) {
             $prefixe = DOL_URL_ROOT;
             if ($prefixe == "/")

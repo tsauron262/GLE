@@ -123,6 +123,12 @@
     .yml_analyser_params_container {
         margin-top: 15px;
         padding: 5px;
+
+        .section_name {
+            font-weight: normal;
+            font-style: italic;
+            color: #7F7F80;
+        }
     }
 
     .yml_analyser_sections {
@@ -144,11 +150,20 @@
             &.active:hover {
                 background-color: #3388FF;
                 color: #fff;
+
+                .section_name {
+                    color: #fff;
+                }
             }
         }
     }
 
     .yml_analyser_params {
+        .foldable_content {
+            border-left: none;
+            margin-left: 0;
+            padding-left: 0;
+        }
         .yml_analyser_section_params {
             h4 {
                 margin-top: 0;
@@ -174,6 +189,7 @@
         .foldable_caption {
             padding: 3px 5px;
             margin-bottom: 0;
+            background-color: #F5F9FF;
 
             &:hover {
                 background-color: #E5F0FF;
@@ -185,7 +201,9 @@
         }
 
         .yml_anayser_sub_params {
-            padding-left: 20px;
+            padding-left: 25px;
+            margin-left: 5px;
+            border-left: 1px dotted #999999;
         }
     }
 }

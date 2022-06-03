@@ -93,11 +93,16 @@
 #bimpYmlManager .yml_analyser_params_container {
   margin-top: 15px;
   padding: 5px; }
-/* line 128, ../scss/dev.scss */
+  /* line 127, ../scss/dev.scss */
+  #bimpYmlManager .yml_analyser_params_container .section_name {
+    font-weight: normal;
+    font-style: italic;
+    color: #7F7F80; }
+/* line 134, ../scss/dev.scss */
 #bimpYmlManager .yml_analyser_sections {
   border: 1px solid #999;
   padding: 0; }
-  /* line 132, ../scss/dev.scss */
+  /* line 138, ../scss/dev.scss */
   #bimpYmlManager .yml_analyser_sections .yml_analyser_section {
     -webkit-transition: all 0.3s ease;
     -o-transition: all 0.3s ease;
@@ -106,39 +111,50 @@
     font-weight: bold;
     font-size: 14px;
     padding: 8px 5px; }
-    /* line 139, ../scss/dev.scss */
+    /* line 145, ../scss/dev.scss */
     #bimpYmlManager .yml_analyser_sections .yml_analyser_section:hover {
       background-color: #E5F0FF; }
-    /* line 143, ../scss/dev.scss */
+    /* line 149, ../scss/dev.scss */
     #bimpYmlManager .yml_analyser_sections .yml_analyser_section.active, #bimpYmlManager .yml_analyser_sections .yml_analyser_section.active:hover {
       background-color: #3388FF;
       color: #fff; }
-/* line 153, ../scss/dev.scss */
+      /* line 154, ../scss/dev.scss */
+      #bimpYmlManager .yml_analyser_sections .yml_analyser_section.active .section_name, #bimpYmlManager .yml_analyser_sections .yml_analyser_section.active:hover .section_name {
+        color: #fff; }
+/* line 162, ../scss/dev.scss */
+#bimpYmlManager .yml_analyser_params .foldable_content {
+  border-left: none;
+  margin-left: 0;
+  padding-left: 0; }
+/* line 168, ../scss/dev.scss */
 #bimpYmlManager .yml_analyser_params .yml_analyser_section_params h4 {
   margin-top: 0;
   margin-bottom: 15px;
   padding-bottom: 10px;
   border-bottom: 1px solid #000000; }
-/* line 161, ../scss/dev.scss */
+/* line 176, ../scss/dev.scss */
 #bimpYmlManager .yml_analyser_params .unset {
   text-decoration: line-through; }
-/* line 165, ../scss/dev.scss */
+/* line 180, ../scss/dev.scss */
 #bimpYmlManager .yml_analyser_params .yml_analyser_param {
   padding: 3px 5px;
   margin: 0; }
-  /* line 169, ../scss/dev.scss */
+  /* line 184, ../scss/dev.scss */
   #bimpYmlManager .yml_analyser_params .yml_analyser_param .name {
     font-weight: bold; }
-/* line 174, ../scss/dev.scss */
+/* line 189, ../scss/dev.scss */
 #bimpYmlManager .yml_analyser_params .foldable_caption {
   padding: 3px 5px;
-  margin-bottom: 0; }
-  /* line 178, ../scss/dev.scss */
+  margin-bottom: 0;
+  background-color: #F5F9FF; }
+  /* line 194, ../scss/dev.scss */
   #bimpYmlManager .yml_analyser_params .foldable_caption:hover {
     background-color: #E5F0FF; }
-  /* line 182, ../scss/dev.scss */
+  /* line 198, ../scss/dev.scss */
   #bimpYmlManager .yml_analyser_params .foldable_caption > .foldable-caret {
     float: none; }
-/* line 187, ../scss/dev.scss */
+/* line 203, ../scss/dev.scss */
 #bimpYmlManager .yml_analyser_params .yml_anayser_sub_params {
-  padding-left: 20px; }
+  padding-left: 25px;
+  margin-left: 5px;
+  border-left: 1px dotted #999999; }

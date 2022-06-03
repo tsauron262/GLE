@@ -1,2 +1,11 @@
 
 label: Obj Base version
+
+fields: 
+    param_base_version: 
+        label: Param base version
+        
+    param_base_version_to_unset_by_entity: 
+        label: Param base version à désactiver par entité
+        
+    param_base_to_unset_by_version: unset

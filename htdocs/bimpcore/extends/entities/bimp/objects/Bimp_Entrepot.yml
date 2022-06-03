@@ -1,8 +1,5 @@
-#BIMP
 
-extends: 
-    module: bimpcore
-    object_name: Bimp_Entrepot
+#BIMP
     
 objects: 
     entrepot_pro:

@@ -154,12 +154,23 @@ class BimpObject extends BimpCache
             if ($object_name !== 'BimpObject') {
                 $ext_instance = $instance;
                 $ext_className = $className;
-                while ($ext_className === 'BimpObject') {
-                    if ($ext_instance->config->isDefined('extends') && $ext_instance->config->isDefined('extends/module') && $ext_instance->config->isDefined('extends/object_name')) {
-                        $ext_module = $instance->getConf('extends/module', '');
-                        $ext_object_name = $instance->getConf('extends/object_name', '');
+                $ext_module = $module;
+                $ext_object_name = $object_name;
+                $n = 0;
 
-                        if ($ext_module && $ext_object_name) {
+                while ($ext_className === 'BimpObject') {
+                    $n++;
+                    if ($n > 100) {
+                        break; // Protection boucle infinie
+                    }
+                    
+                    if ($ext_instance->config->isDefined('extends') && $ext_instance->config->isDefined('extends/module') && $ext_instance->config->isDefined('extends/object_name')) {
+                        $prev_module = $ext_module;
+                        $prev_object_name = $ext_object_name;
+                        $ext_module = $ext_instance->getConf('extends/module', '');
+                        $ext_object_name = $ext_instance->getConf('extends/object_name', '');
+
+                        if ($ext_module && $ext_object_name && !($ext_module === $prev_module && $ext_object_name === $prev_object_name)) {
                             $ext_file = DOL_DOCUMENT_ROOT . '/' . $ext_module . '/objects/' . $ext_object_name . '.class.php';
                             if (file_exists($ext_file)) {
                                 $ext_className = $ext_object_name;
@@ -189,7 +200,6 @@ class BimpObject extends BimpCache
                                     }
                                 }
                             }
-
                             $ext_instance = new $ext_className($ext_module, $ext_object_name);
                             continue;
                         }

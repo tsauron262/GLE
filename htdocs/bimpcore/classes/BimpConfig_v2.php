@@ -44,7 +44,7 @@ class BimpConfig
         return new BimpConfig($module, '', $module, $instance);
     }
 
-    public function __construct($module, $module_dir, $file_name, $instance)
+    public function __construct($module, $module_dir, $file_name, $instance = null)
     {
         $this->errors = array();
 

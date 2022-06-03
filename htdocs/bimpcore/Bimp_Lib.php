@@ -64,6 +64,21 @@ if (!defined('BIMP_LIB')) {
     require_once $dir . 'BimpMailCore.php';
     require_once $dir . 'BimpModuleConf.php';
 
+    if (!defined('BIMP_EXTENDS_ENTITY') && defined('PATH_EXTENDS')) {
+        if (preg_match('/^.*\/([a-zA-Z0-1\-_]+)$/', PATH_EXTENDS, $matches)) {
+            if ($matches[1]) {
+                define('BIMP_EXTENDS_ENTITY', $matches[1]);
+
+                global $user;
+
+                if (BimpObject::objectLoaded($user) && $user->admin) {
+                    $msg = 'ATTENTION : Remplacer dans fichier de conf PATH_EXTENDS par BIMP_EXTENDS_ENTITY avec la valeur: "' . BIMP_EXTENDS_ENTITY . '"';
+                    setEventMessages($msg, null, 'errors');
+                }
+            }
+        }
+    }
+
     if (defined('BIMP_EXTENDS_VERSION')) {
         $dir_version = DOL_DOCUMENT_ROOT . '/bimpcore/extends/versions/' . BIMP_EXTENDS_VERSION . '/';
         if (file_exists($dir_version . 'classes/BimpMail.php')) {

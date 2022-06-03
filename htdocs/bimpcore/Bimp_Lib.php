@@ -65,7 +65,7 @@ if (!defined('BIMP_LIB')) {
     require_once $dir . 'BimpModuleConf.php';
 
     if (!defined('BIMP_EXTENDS_ENTITY') && defined('PATH_EXTENDS')) {
-        if (preg_match('/^.*\/([a-zA-Z0-1\-_]+\/?)$/', PATH_EXTENDS, $matches)) {
+        if (preg_match('/^.*\/([a-zA-Z0-1\-_]+)\/?$/', PATH_EXTENDS, $matches)) {
             if ($matches[1]) {
                 define('BIMP_EXTENDS_ENTITY', $matches[1]);
 

@@ -415,13 +415,13 @@ class BimpNote extends BimpObject
                 $msg['is_viewed'] = (int) $c['lu'];
 
                 // Obj
-                $obj = BimpCache::getBimpObjectInstance($c['obj_module'], $c['obj_name'], (int) $c['id_obj']);
-
-                if (BimpObject::objectLoaded($obj)) {
-                    $msg['obj']['nom_url'] = $obj->getLink();
-                } else {
+//                $obj = BimpCache::getBimpObjectInstance($c['obj_module'], $c['obj_name'], (int) $c['id_obj']);
+//
+//                if (BimpObject::objectLoaded($obj)) {
+//                    $msg['obj']['nom_url'] = $obj->getLink();
+//                } else {
                     $msg['introuvable'] = $c['obj_module'] . ' ' . $c['obj_name'] . ' ' . $c['id_obj'];
-                }
+//                }
 
 //                $msg['obj']['nom_url'] = $c['obj']->getLink(array('external_link'=>0, 'modal_view'=>0));
                 /*  if (method_exists($c['obj'], "getChildObject")) {//ne fonctionne pas sans objet. Et obet trop lourd.

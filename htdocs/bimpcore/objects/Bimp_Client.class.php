@@ -3202,12 +3202,12 @@ class Bimp_Client extends Bimp_Societe
                     if (isset($cover['amount'])) {
                         // Crédit Check
                         if ($cover['cover_type'] == AtradiusAPI::CREDIT_CHECK) {
-                            $err_update = empty(self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_credit_check', (int) $cover['amount']));
+                            $err_update = self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_credit_check', (int) $cover['amount']);
                             
                             if (empty($err_update)) {
                                 $success .= $this->displayFieldName('outstanding_limit_credit_check') . " : " . (int) $cover['amount'] . '<br/>';
                                 // Il y a un crédit check, donc la limite de crédit n'existe pas/plus
-                                $err_update = empty(self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_atradius', 0));
+                                $err_update = self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_atradius', 0);
 
                             } else {
                                 $errors = BimpTools::merge_array($errors, $err_update);

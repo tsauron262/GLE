@@ -3166,13 +3166,6 @@ class BimpController
         );
     }
 
-    // Callbacks:
-
-    protected function getObjectIdFromPost($object_name)
-    {
-        return BimpTools::getValue('id_' . $object_name, null);
-    }
-
     protected function ajaxProcessGetNotification()
     {
         global $user;
@@ -3182,12 +3175,19 @@ class BimpController
 
         $notification = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
         $notifs_for_user = $notification->getNotificationForUser((int) $user->id, $notifs, $errors);
-        
+
         return array(
             'errors'        => $errors,
             'notifications' => $notifs_for_user,
             'request_id'    => BimpTools::getValue('request_id', 0)
         );
+    }
+
+    // Callbacks:
+
+    protected function getObjectIdFromPost($object_name)
+    {
+        return BimpTools::getValue('id_' . $object_name, null);
     }
 
     public static function bimp_shutdown()

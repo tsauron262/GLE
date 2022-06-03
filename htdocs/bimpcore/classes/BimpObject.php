@@ -151,66 +151,66 @@ class BimpObject extends BimpCache
 
             // Si pas de classe définie pour l'objet, on vérifie toutes les 
             // éventuelles extension pour instancier la première classe trouvée
-            if ($object_name !== 'BimpObject') {
-                $ext_instance = $instance;
-                $ext_className = $className;
-                $ext_module = $module;
-                $ext_object_name = $object_name;
-                $n = 0;
-
-                while ($ext_className === 'BimpObject') {
-                    $n++;
-                    if ($n > 100) {
-                        break; // Protection boucle infinie
-                    }
-                    
-                    if ($ext_instance->config->isDefined('extends') && $ext_instance->config->isDefined('extends/module') && $ext_instance->config->isDefined('extends/object_name')) {
-                        $prev_module = $ext_module;
-                        $prev_object_name = $ext_object_name;
-                        $ext_module = $ext_instance->getConf('extends/module', '');
-                        $ext_object_name = $ext_instance->getConf('extends/object_name', '');
-
-                        if ($ext_module && $ext_object_name && !($ext_module === $prev_module && $ext_object_name === $prev_object_name)) {
-                            $ext_file = DOL_DOCUMENT_ROOT . '/' . $ext_module . '/objects/' . $ext_object_name . '.class.php';
-                            if (file_exists($ext_file)) {
-                                $ext_className = $ext_object_name;
-                                if (!class_exists($ext_className)) {
-                                    require_once $ext_file;
-                                }
-                            }
-
-                            // Surcharge version:
-                            if (defined('BIMP_EXTENDS_VERSION')) {
-                                $ext_version_file = DOL_DOCUMENT_ROOT . '/' . $ext_module . '/extends/versions/' . BIMP_EXTENDS_VERSION . '/objects/' . $ext_object_name . '.class.php';
-                                if (file_exists($ext_version_file)) {
-                                    $ext_className = $ext_object_name . '_ExtVersion';
-                                    if (!class_exists($ext_className)) {
-                                        require_once $ext_version_file;
-                                    }
-                                }
-                            }
-
-                            // Surcharge entité: 
-                            if (defined('BIMP_EXTENDS_ENTITY')) {
-                                $ext_entity_file = DOL_DOCUMENT_ROOT . '/' . $ext_module . '/extends/entities/' . BIMP_EXTENDS_ENTITY . '/objects/' . $ext_object_name . '.class.php';
-                                if (file_exists($ext_entity_file)) {
-                                    $ext_className = $ext_object_name . '_ExtEntity';
-                                    if (!class_exists($ext_className)) {
-                                        require_once $ext_entity_file;
-                                    }
-                                }
-                            }
-                            $ext_instance = new $ext_className($ext_module, $ext_object_name);
-                            continue;
-                        }
-                    }
-                    break;
-                }
-
-                if ($className !== $ext_className) {
-                    $instance = new $ext_className($module, $object_name);
-                }
-            }
+//            if ($object_name !== 'BimpObject') {
+//                $ext_instance = $instance;
+//                $ext_className = $className;
+//                $ext_module = $module;
+//                $ext_object_name = $object_name;
+//                $n = 0;
+//
+//                while ($ext_className === 'BimpObject') {
+//                    $n++;
+//                    if ($n > 100) {
+//                        break; // Protection boucle infinie
+//                    }
+//                    
+//                    if ($ext_instance->config->isDefined('extends') && $ext_instance->config->isDefined('extends/module') && $ext_instance->config->isDefined('extends/object_name')) {
+//                        $prev_module = $ext_module;
+//                        $prev_object_name = $ext_object_name;
+//                        $ext_module = $ext_instance->getConf('extends/module', '');
+//                        $ext_object_name = $ext_instance->getConf('extends/object_name', '');
+//
+//                        if ($ext_module && $ext_object_name && !($ext_module === $prev_module && $ext_object_name === $prev_object_name)) {
+//                            $ext_file = DOL_DOCUMENT_ROOT . '/' . $ext_module . '/objects/' . $ext_object_name . '.class.php';
+//                            if (file_exists($ext_file)) {
+//                                $ext_className = $ext_object_name;
+//                                if (!class_exists($ext_className)) {
+//                                    require_once $ext_file;
+//                                }
+//                            }
+//
+//                            // Surcharge version:
+//                            if (defined('BIMP_EXTENDS_VERSION')) {
+//                                $ext_version_file = DOL_DOCUMENT_ROOT . '/' . $ext_module . '/extends/versions/' . BIMP_EXTENDS_VERSION . '/objects/' . $ext_object_name . '.class.php';
+//                                if (file_exists($ext_version_file)) {
+//                                    $ext_className = $ext_object_name . '_ExtVersion';
+//                                    if (!class_exists($ext_className)) {
+//                                        require_once $ext_version_file;
+//                                    }
+//                                }
+//                            }
+//
+//                            // Surcharge entité: 
+//                            if (defined('BIMP_EXTENDS_ENTITY')) {
+//                                $ext_entity_file = DOL_DOCUMENT_ROOT . '/' . $ext_module . '/extends/entities/' . BIMP_EXTENDS_ENTITY . '/objects/' . $ext_object_name . '.class.php';
+//                                if (file_exists($ext_entity_file)) {
+//                                    $ext_className = $ext_object_name . '_ExtEntity';
+//                                    if (!class_exists($ext_className)) {
+//                                        require_once $ext_entity_file;
+//                                    }
+//                                }
+//                            }
+//                            $ext_instance = new $ext_className($ext_module, $ext_object_name);
+//                            continue;
+//                        }
+//                    }
+//                    break;
+//                }
+//
+//                if ($className !== $ext_className) {
+//                    $instance = new $ext_className($module, $object_name);
+//                }
+//            }
 
             if ((int) BimpCore::getConf('use_bimp_object_instances_clones')) {
                 $cache_key = $module . '_' . $object_name . '_base_instance';

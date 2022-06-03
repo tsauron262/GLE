@@ -53,7 +53,8 @@ if (!$action) {
         'convert_fi'                                => 'Convertir FI',
         'check_margin_commande'                     => 'Marge commande',
         'convert_sql_field_for_items_braces'        => 'Convertir champ "Items_list" avec utilisation des crochets',
-        'checkLinesEcheances'                       => 'Vérifier échéances produits limités'
+        'checkLinesEcheances'                       => 'Vérifier échéances produits limités',
+        'maj_id_atradius'                           => 'Vérifier id atradius',
     );
 
     $path = pathinfo(__FILE__);
@@ -71,6 +72,17 @@ if (!$action) {
 BimpCore::setMaxExecutionTime(2400);
 
 switch ($action) {
+    case 'maj_id_atradius':
+        global $db;
+        $warnings = array();
+        $sql = $db->query("SELECT rowid FROM `llx_societe` WHERE (`outstanding_limit_atradius` > '0' || `outstanding_limit_credit_check` > 0) && id_atradius < 1 LIMIT 0,10000;");
+        while ($ln = $db->fetch_object($sql)) {
+            $cli = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $ln->rowid);
+            $cli->syncroAtradius($warnings);
+        }
+        print_r($warnings);
+        break;
+    
     case 'secteur_facture_fourn_with_commande_fourn':
         global $db;
         $sql = $db->query("SELECT c.rowid, ref, ce.type, cfe.type as newType FROM `llx_facture_fourn` c, llx_facture_fourn_extrafields ce LEFT JOIN llx_element_element ee ON ee.sourcetype = 'order_supplier' AND targettype = 'invoice_supplier' AND ee.fk_target = ce.fk_object LEFT JOIN llx_commande_fournisseur_extrafields cfe ON ee.fk_source = cfe.fk_object WHERE c.rowid = ce.fk_object AND ce.type IS null AND c.`datec` > '2019-07-01' AND cfe.type != '';");

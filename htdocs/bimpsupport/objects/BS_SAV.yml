@@ -674,6 +674,20 @@ forms:
               value: 
                   callback: getFactureAmountToPay
             - custom: 1
+              label: Mode de deuxième paiement
+              input_name: mode_paiement2
+              input: 
+                  type: select_payment
+                  include_empty: 1
+              value: 4
+            - custom: 1
+              label: Montant payé deuxième paiement
+              input_name: paid2
+              data_type: money
+              input: 
+                  type: text
+              value: 0
+            - custom: 1
               label: Notifier le client
               input_name: send_msg
               data_type: bool

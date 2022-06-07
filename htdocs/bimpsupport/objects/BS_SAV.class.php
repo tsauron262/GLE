@@ -5136,7 +5136,7 @@ class BS_SAV extends BimpObject
                                 global $db;
                                 $facture = new Facture($db);
 
-                                $cond_reglement = (int) BimpCore::getConf('sav_cond_reglement', null, 'bimpsupport');
+                                $cond_reglement = null;
 
                                 if (!$cond_reglement) {
                                     if ((int) $propal->dol_object->cond_reglement_id) {
@@ -5149,6 +5149,8 @@ class BS_SAV extends BimpObject
                                         }
                                     }
                                 }
+                                if(!$cond_reglement)
+                                    $cond_reglement = (int) BimpCore::getConf('sav_cond_reglement', null, 'bimpsupport');
 
                                 $mode_reglement = (int) BimpTools::getArrayValueFromPath($data, 'mode_paiement', (int) $propal->dol_object->mode_reglement_id);
 

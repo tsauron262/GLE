@@ -69,10 +69,11 @@ if (!defined('BIMP_LIB')) {
                 define('BIMP_EXTENDS_ENTITY', $matches[1]);
 
 //                global $user;
-
+//
 //                if (BimpObject::objectLoaded($user) && $user->admin) {
-//                    $msg = 'ATTENTION : Remplacer dans fichier de conf PATH_EXTENDS par BIMP_EXTENDS_ENTITY avec la valeur: "' . BIMP_EXTENDS_ENTITY . '"';
-//                    setEventMessages($msg, null, 'errors');
+//                    if (BimpCore::getConf('')) {
+//                        
+//                    }
 //                }
             }
         }

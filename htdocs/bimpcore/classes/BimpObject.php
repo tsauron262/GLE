@@ -95,19 +95,23 @@ class BimpObject extends BimpCache
         $className = '';
         $instance = null;
 
-        if ($module && $object_name) {
-            $cache_key = $module . '_' . $object_name . '_base_instance';
+        if (!$module || !$object_name) {
+            $module = 'bimpcore';
+            $object_name = 'BimpObject';
+        }
 
-            if ((int) BimpCore::getConf('use_bimp_object_instances_clones')) {
-                if (isset(self::$cache[$cache_key]) && is_a(self::$cache[$cache_key], 'BimpObject') && (int) self::$cache[$cache_key]->params['use_clones']) {
-                    $instance = clone self::$cache[$cache_key];
-                    $className = get_class($instance);
-                }
+        $use_clones = (int) BimpCore::getConf('use_bimp_object_instances_clones');
+        $cache_key = $module . '_' . $object_name . '_base_instance';
+
+        if ($use_clones) {
+            if (isset(self::$cache[$cache_key]) && is_a(self::$cache[$cache_key], 'BimpObject') && (int) self::$cache[$cache_key]->params['use_clones']) {
+                $instance = clone self::$cache[$cache_key];
+                $className = get_class($instance);
             }
         }
 
         if (is_null($instance)) {
-            if ($module && $object_name) {
+            if ($object_name !== 'BimpObject') {
                 $file = DOL_DOCUMENT_ROOT . '/' . $module . '/objects/' . $object_name . '.class.php';
                 if (file_exists($file)) {
                     if (!class_exists($object_name)) {
@@ -137,9 +141,6 @@ class BimpObject extends BimpCache
                         }
                     }
                 }
-            } else {
-                $module = 'bimpcore';
-                $object_name = 'BimpObject';
             }
 
             // Si Aucune classe trouvée on utilise la classe BimpObject: 
@@ -150,7 +151,7 @@ class BimpObject extends BimpCache
             $instance = new $className($module, $object_name);
 
             // Si pas de classe définie pour l'objet, on vérifie toutes les 
-            // éventuelles extension pour instancier la première classe trouvée
+            // éventuelles extensions pour instancier la première classe trouvée
             if ($className === 'BimpObject' && $object_name !== 'BimpObject') {
                 $ext_instance = $instance;
                 $ext_className = $className;
@@ -200,6 +201,7 @@ class BimpObject extends BimpCache
                                     }
                                 }
                             }
+                            
                             $ext_instance = new $ext_className($ext_module, $ext_object_name);
                             continue;
                         }
@@ -212,7 +214,7 @@ class BimpObject extends BimpCache
                 }
             }
 
-            if ((int) BimpCore::getConf('use_bimp_object_instances_clones') && (int) $instance->params['use_clones']) {
+            if ($use_clones && (int) $instance->params['use_clones']) {
                 $cache_key = $module . '_' . $object_name . '_base_instance';
                 self::$cache[$cache_key] = $instance;
                 $instance = clone self::$cache[$cache_key];

@@ -36,7 +36,7 @@ class BimpModuleConf
     public function __construct($module)
     {
         $this->module = $module;
-        $this->config = new BimpConfig(DOL_DOCUMENT_ROOT . '/' . $module, $module, $this);
+        $this->config = BimpConfig::getModuleConfigInstance($module, $this);
     }
 
     public function canView()

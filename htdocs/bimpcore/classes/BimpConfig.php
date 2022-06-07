@@ -145,11 +145,6 @@ class BimpConfig
         return false;
     }
 
-    public function extendsOverride($params)
-    {
-        
-    }
-
     public function getParamsFromFile($module, $module_dir, $file_name, &$errors = array(), $check_extends = true)
     {
         // $check_extensions: true pour les fichiers de base (core) / false pour les fichiers versions et entité. 
@@ -927,7 +922,6 @@ class BimpConfig
                     if (is_null($module_name) || is_null($object_name)) {
                         return null;
                     }
-
                     return BimpCache::getBimpObjectInstance($module_name, $object_name, $id_object);
                 } elseif (isset($params['dol_object'])) {
                     $module = null;

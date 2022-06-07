@@ -206,7 +206,7 @@ class ConsignedStock extends BimpObject
                                 }
 
                                 $html .= BimpInput::renderInput('select', 'deliveryNumber', '', array(
-                                            'options' => $options
+                                            'options' => array_reverse($options, true)
                                 ));
 
                                 return $html;

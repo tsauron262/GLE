@@ -930,7 +930,7 @@ class indexController extends BimpController
                             // Remplacé par un log urgent
 //                            $msg = 'Erreurs suite à la validation de la vente #' . $vente->id . "\n\n";
 //                            $msg .= print_r($validate_errors, 1);
-//                            mailSyn2('ERREURS VENTE', 'dev@bimp.fr', '', $msg);
+//                            mailSyn2('ERREURS VENTE', BimpCore::getConf('devs_email'), '', $msg);
                         }
                     }
 //                    }

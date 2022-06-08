@@ -573,7 +573,7 @@ class Bimp_Product extends BimpObject
     {
         // ACHAT DE D3E juste pour la france
         // ACHAT DE TVA JUSTe PAR AUTOLIQUIDATION - si on a un numéro intracom sur un pro UE
-        
+
         if ($force_type == -1) {
             if (!$this->isLoaded())
                 return '';
@@ -598,11 +598,9 @@ class Bimp_Product extends BimpObject
                     return BimpCore::getConf('vente_tva_null', null, "bimptocegid");
                 }
                 return BimpCore::getConf('vente_service_fr', null, "bimptocegid");
-            }
-            elseif ($zone_vente == 2 || $zone_vente == 4) {
+            } elseif ($zone_vente == 2 || $zone_vente == 4) {
                 return BimpCore::getConf('vente_service_ue', null, "bimptocegid");
-            }
-            elseif ($zone_vente == 3)
+            } elseif ($zone_vente == 3)
                 return BimpCore::getConf('vente_service_ex', null, "bimptocegid");
         } elseif ($type == 2) {//Port
             if ($zone_vente == 1)
@@ -3060,7 +3058,7 @@ class Bimp_Product extends BimpObject
     {
         global $user;
         if ($urgent) {
-            $mail = "XX_Achats@bimp.fr,dev@bimp.fr";
+            $mail = "XX_Achats@bimp.fr," . BimpCore::getConf('devs_email');
             $msg = 'Bonjour, ' . "\n\n";
             $msg .= 'Le produit ' . $this->getNomUrl(0) . ' a été ajouté à une vente en caisse alors qu\'il n\'est pas validé.' . "\n";
             $msg .= 'Une validation d\'urgence est nécessaire pour finaliser la vente' . "\n\n";

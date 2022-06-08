@@ -145,7 +145,7 @@ class InventoryExpected extends BimpObject
         }
         if (count($ids_equipments) > 0 && $this->getData('qty_scanned') != $qteScan) {
             $html = '<span class="error">ATTENTION INCOHERENCE DES DONNEE</span>' . $html;
-            mailSyn2('Incohérence inventaire', 'dev@bimp.fr', null, "Bonjour il y a une onchérence dans la ligne d'exected " . $this->id . ' ' . $qteScan . " num de serie scanné pour " . $this->getData('qty_scanned'));
+            mailSyn2('Incohérence inventaire', BimpCore::getConf('devs_email'), null, "Bonjour il y a une onchérence dans la ligne d'exected " . $this->id . ' ' . $qteScan . " num de serie scanné pour " . $this->getData('qty_scanned'));
         }
         return $html;
     }

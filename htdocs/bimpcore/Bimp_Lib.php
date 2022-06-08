@@ -68,13 +68,14 @@ if (!defined('BIMP_LIB')) {
             if ($matches[1]) {
                 define('BIMP_EXTENDS_ENTITY', $matches[1]);
 
-//                global $user;
-//
-//                if (BimpObject::objectLoaded($user) && $user->admin) {
-//                    if (BimpCore::getConf('')) {
-//                        
-//                    }
-//                }
+                $date_email = BimpCore::getConf('obsolete_extends_notif_date_send', '');
+                if (!$date_email || $date_email < date('Y-m-d')) {
+                    $msg = 'Dans conf, constante PATH_EXTENDS à remplacer par BIMP_EXTENDS_ENTITY avec la valeur "' . BIMP_EXTENDS_ENTITY . '"';
+                    $msg .= '<br/><br/>';
+                    $msg .= 'ERP: <b>' . DOL_URL_ROOT . '</b>';
+                    mailSyn2('PATH_ENTENDS à modifier', BimpCore::getConf('devs_email'), '', $msg);
+                    BimpCore::setConf('obsolete_extends_notif_date_send', date('Y-m-d'));
+                }
             }
         }
     }

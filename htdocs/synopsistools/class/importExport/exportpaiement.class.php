@@ -49,7 +49,7 @@ class exportpaiement extends export8sens {
       global $tabCentre;
       if (isset($tabCentre[$centre][3]) && $tabCentre[$centre][3] > 0)
       return $tabCentre[$centre][3];
-      mailSyn2("Impossible de trouvé un id8sens", "dev@bimp.fr, jc.cannet@bimp.fr", null, "Bonjour impossible de trouver d'id 8sens Centre : " . $centre);
+      mailSyn2("Impossible de trouvé un id8sens", BimpCore::getConf('devs_email') . ", jc.cannet@bimp.fr", null, "Bonjour impossible de trouver d'id 8sens Centre : " . $centre);
       return 0;
       } */
 

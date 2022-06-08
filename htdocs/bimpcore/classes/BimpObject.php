@@ -349,7 +349,7 @@ class BimpObject extends BimpCache
             $this->config = BimpConfig::getObjectConfigInstance($this->module, $this->object_name, $this);
             $this->addCommonFieldsConfig();
             $this->addConfigExtraParams();
-//            mailSyn2('Config inexistant', 'dev@bimp.fr', null, 'Config inexistant dans ' . get_class($this));
+//            mailSyn2('Config inexistant', BimpCore::getConf('devs_email'), null, 'Config inexistant dans ' . get_class($this));
         }
     }
 

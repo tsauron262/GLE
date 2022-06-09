@@ -1,159 +1,162 @@
-    table: usergroup
-    primary: rowid
-    common_fields: 0
-    icon: fas_users
-    controller: userGroup
+table: usergroup
+primary: rowid
+common_fields: 0
+icon: fas_users
+controller: userGroup
 
-    list_page_url: 
-        controller: users
-        params: 
-            tab: user_group
+header_btn: 
+    callback: getActionsButtons
 
-    header_list_name: default
+list_page_url: 
+    controller: users
+    params: 
+        tab: user_group
 
-    dol_object: 
-        instance: 
-            dol_object: 
-                module: user
-                file: usergroup
-                class: UserGroup
-                
-    labels: 
-        name: Groupe d'utilisateur
-        name_plur: Groupes d'utilisateurs
-        
-    objects:
-        user:
-            instance:
-                bimp_object:
-                    module: bimpcore
-                    name: Bimp_User
-        user_group_rights:
-            instance:
-                bimp_object:
-                    module: bimpcore
-                    name: Bimp_UserGroupRight
-        files:
-            relation: hasMany
-            delete: 1
-            instance:
-                bimp_object:
-                    module: bimpcore
-                    name: BimpFile
-            list: 
-                filters:
-                    parent_module: bimpcore
-                    parent_object_name: Bimp_UserGroup
-                    deleted: 0      
-        
-    nom_url: 
-        syntaxe: <nom>
-        modal_view: ''
-        
-    fields: 
-        nom: 
-            label: Nom
-            dol_prop: name
-            
-        note: 
-            label: Note
-            type: text
-            
-        mail: 
-            label: Mail principal
-            dol_extra_field: 1
-            
-        alias: 
-            label: Alias mail
-            dol_extra_field: 1
-            
-        displayedinglobaladdressbook: 
-            label: Dans l'annuaire
-            type: bool
-            dol_extra_field: 1
-            default_value: 0
-            
-        secteur: 
-            label: Secteur
-            dol_extra_field: 1
-            values: 
-                array: secteurs
-            
-    forms: 
-        add_user: 
-            rows: 
-                ids_users: 
-                    custom: 1
-                    label: Utilisateurs
-                    input_name: ids_users
-                    input: 
-                        multiple: 1
-                        type: search_user
-                
-            
-    fields_tables:
-        infos:
-            icon: fas_info-circle
-            title: informations
-            rows:
-                - field: nom
-                - field: mail
-                - field: alias
-                - field: secteur
-                - field: note
-         
-    views:
-        default: 
-            panel: 0
-            rows:
-                - cols:
-                    - type: fields_table
-                      col_lg: 6
-                      col_md: 6
-                      fields_table:
-                          name: infos
-                - cols: 
-                    - type: custom
-                      custom: 
-                          callback: renderUsersList
-                                  
-    filters_panels: 
-        default: 
-            filters: 
-                nom: 
-                mail: 
-                alias: 
-                note: 
-                secteur:
-        
-    lists: 
-        default: 
-            configurable: 1
-            filters_panel: default
-            sort_field: rowid
-            sort_way: desc
-            n: 10
-            page_btn: 1
-            cols: 
-                nom:
-                mail: 
-                alias: 
-                secteur: 
-                note:
-                    
-        user: 
-            extends: default
-            joins: 
-                - table: usergroup_user
-                  on: ugu.fk_usergroup = a.rowid
-                  alias: ugu
-            extra_btn: 
-                callback: getUserListExtraButtons
-                
-    searches: 
-        default: 
-            fields_search: 
-                - a.nom
-            fields_return: 
-                - a.nom
-            label_syntaxe: '<a.nom>'
+header_list_name: default
+
+dol_object: 
+    instance: 
+        dol_object: 
+            module: user
+            file: usergroup
+            class: UserGroup
+
+labels: 
+    name: Groupe d'utilisateur
+    name_plur: Groupes d'utilisateurs
+
+objects:
+    user:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_User
+    user_group_rights:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_UserGroupRight
+    files:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpFile
+        list: 
+            filters:
+                parent_module: bimpcore
+                parent_object_name: Bimp_UserGroup
+                deleted: 0      
+
+nom_url: 
+    syntaxe: <nom>
+    modal_view: ''
+
+fields: 
+    nom: 
+        label: Nom
+        dol_prop: name
+
+    note: 
+        label: Note
+        type: text
+
+    mail: 
+        label: Mail principal
+        dol_extra_field: 1
+
+    alias: 
+        label: Alias mail
+        dol_extra_field: 1
+
+    displayedinglobaladdressbook: 
+        label: Dans l'annuaire
+        type: bool
+        dol_extra_field: 1
+        default_value: 0
+
+    secteur: 
+        label: Secteur
+        dol_extra_field: 1
+        values: 
+            array: secteurs
+
+forms: 
+    add_user: 
+        rows: 
+            ids_users: 
+                custom: 1
+                label: Utilisateurs
+                input_name: ids_users
+                input: 
+                    multiple: 1
+                    type: search_user
+
+
+fields_tables:
+    infos:
+        icon: fas_info-circle
+        title: informations
+        rows:
+            - field: nom
+            - field: mail
+            - field: alias
+            - field: secteur
+            - field: note
+
+views:
+    default: 
+        panel: 0
+        rows:
+            - cols:
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table:
+                      name: infos
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderUsersList
+
+filters_panels: 
+    default: 
+        filters: 
+            nom: 
+            mail: 
+            alias: 
+            note: 
+            secteur:
+
+lists: 
+    default: 
+        configurable: 1
+        filters_panel: default
+        sort_field: rowid
+        sort_way: desc
+        n: 10
+        page_btn: 1
+        cols: 
+            nom:
+            mail: 
+            alias: 
+            secteur: 
+            note:
+
+    user: 
+        extends: default
+        joins: 
+            - table: usergroup_user
+              on: ugu.fk_usergroup = a.rowid
+              alias: ugu
+        extra_btn: 
+            callback: getUserListExtraButtons
+
+searches: 
+    default: 
+        fields_search: 
+            - a.nom
+        fields_return: 
+            - a.nom
+        label_syntaxe: '<a.nom>'

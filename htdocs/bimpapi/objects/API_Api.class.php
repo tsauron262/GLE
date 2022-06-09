@@ -14,18 +14,29 @@ class API_Api extends BimpObject
 
     public function canView()
     {
-        global $user;
-        return (int) $user->admin;
+        if ($this->isLoaded()) {
+            global $user;
+            if ($this->getData('name') === 'piste') {
+                if (!empty($user->rights->bimpcommercial->chorus_exports)) {
+                    return 1;
+                }
+            }
+
+            return (int) $user->admin;
+        }
+
+        return 1;
     }
 
     public function canCreate()
     {
-        return $this->canView();
+        global $user;
+        return (int) $user->admin;
     }
 
     public function canSetAction($action)
     {
-        return $this->canView();
+        return $this->canCreate();
     }
 
     // Getters params:
@@ -94,7 +105,7 @@ class API_Api extends BimpObject
 
         $apis_classes = BimpAPI::getApisClassesArray();
         $installed_apis = self::getApisArray(false, false);
-        
+
         foreach ($apis_classes as $api_name => $api_class_name) {
             if (array_key_exists($api_name, $installed_apis)) {
                 continue;

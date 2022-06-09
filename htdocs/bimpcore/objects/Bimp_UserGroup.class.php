@@ -49,7 +49,7 @@ class Bimp_UserGroup extends BimpObject
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (in_array($action, array('removeUsers', 'addUsers', 'addRight', 'removeRight'))) {
+        if (in_array($action, array('removeUsers', 'addUsers', 'addRight', 'removeRight', 'getAllEmails'))) {
             if (!$this->isLoaded($errors)) {
                 return 0;
             }
@@ -86,6 +86,21 @@ class Bimp_UserGroup extends BimpObject
         return $buttons;
     }
 
+    public function getActionsButtons()
+    {
+        $buttons = array();
+
+        if ($this->isActionAllowed('getAllEmails') && $this->canSetAction('getAllEmails')) {
+            $buttons[] = array(
+                'label'   => 'Liste des adresses e-mail',
+                'icon'    => 'fas_at',
+                'onclick' => $this->getJsActionOnclick('getAllEmails')
+            );
+        }
+
+        return $buttons;
+    }
+
     public function getPageTitle()
     {
         return 'Groupe ' . $this->getName();
@@ -93,14 +108,19 @@ class Bimp_UserGroup extends BimpObject
 
     // Getters données: 
 
-    public function getUserGroupUsers()
+    public function getUserGroupUsers($active_only = false)
     {
         $list = BimpCache::getGroupUsersList($this->id);
 
         $users = array();
 
         foreach ($list as $id_user) {
-            $users[$id_user] = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+            $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+            if (BimpObject::objectLoaded($user)) {
+                if (!$active_only || (int) $user->getData('statut')) {
+                    $users[$id_user] = $user;
+                }
+            }
         }
 
         return $users;
@@ -894,6 +914,40 @@ class Bimp_UserGroup extends BimpObject
             'errors'   => $errors,
             'warnings' => $warnings,
             'results'  => $results
+        );
+    }
+
+    public function actionGetAllEmails($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $active_only = (int) BimpTools::getArrayValueFromPath($data, 'active_only', 1);
+
+        $users = $this->getUserGroupUsers($active_only);
+        $emails = '';
+
+        foreach ($users as $user) {
+            $email = BimpTools::cleanEmailsStr($user->getData('email'));
+            $emails .= ($emails ? ',' : '') . $email;
+        }
+
+        $title = 'Liste des adresses e-mails du groupe "' . $this->getName() . '"';
+        $html = '';
+
+        if (!$emails) {
+            $html .= BimpRender::renderAlerts('Aucune adresse e-mail trouvée', 'warning');
+        } else {
+            $html .= '<pre>' . $emails . '</pre>';
+        }
+
+        $sc = 'setTimeout(function() {bimpModal.newContent(\'' . $title . '\', \'' . $html . '\');}, 500)';
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $sc
         );
     }
 }

@@ -2836,7 +2836,7 @@ class BContract_contrat extends BimpDolObject
                         $msg .= "Client : " . $s->dol_object->getNomUrl() . '<br />';
                         $msg .= "Contrat : " . $contrat->dol_object->getNomUrl() . "<br/>Commercial : " . $comm->getNomUrl() . "<br />";
                         $msg .= "Facture : " . $f->dol_object->getNomUrl();
-                        mailSyn2("Facturation Contrat [" . $contrat->getRef() . "]", $this->email_facturation, 'dev@bimp.fr', $msg);
+                        mailSyn2("Facturation Contrat [" . $contrat->getRef() . "]", $this->email_facturation, BimpCore::getConf('devs_email'), $msg);
                         $success = "Le contrat " . $contrat->getRef() . " a été facturé avec succès";
                     }
                 } else {
@@ -4488,9 +4488,9 @@ class BContract_contrat extends BimpDolObject
 
         //print_r(['dest' => $destinataire, 'sujet' => $sujet, 'type' => $type, 'msg' => $extra]);
         if ($cc == "")
-            mailSyn2($sujet, $destinataire, 'dev@bimp.fr', $extra);
+            mailSyn2($sujet, $destinataire, BimpCore::getConf('devs_email'), $extra);
         else
-            mailSyn2($sujet, $destinataire, 'dev@bimp.fr', $extra, array(), array(), array(), $cc);
+            mailSyn2($sujet, $destinataire, BimpCore::getConf('devs_email'), $extra, array(), array(), array(), $cc);
     }
 
     // Public: 

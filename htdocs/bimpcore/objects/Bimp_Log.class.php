@@ -696,7 +696,7 @@ class Bimp_Log extends BimpObject
 
                     $message .= "\n\n" . "Extra Data : " . $this->displayExtraData();
 
-                    mailSyn2("LOG URGENT", "dev@bimp.fr", null, $message);
+                    mailSyn2("LOG URGENT", BimpCore::getConf('devs_email'), null, $message);
                 }
             }
         }

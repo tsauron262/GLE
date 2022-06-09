@@ -2946,7 +2946,7 @@ class BimpCache
                             $message = 'Il y a plus de 500 entrées à traiter dans les logs.' . "\n\n";
                             $message .= DOL_URL_ROOT . '/bimpcore/index.php?fc=admin&tab=logs' . "\n\n";
 
-                            mailSyn2("TROP DE LOGS", "dev@bimp.fr", null, $message);
+                            mailSyn2("TROP DE LOGS", BimpCore::getConf('devs_email'), null, $message);
                             BimpCore::setConf('bimpcore_to_much_logs_email_send', 1);
                         }
                     } elseif ($mail_send) {

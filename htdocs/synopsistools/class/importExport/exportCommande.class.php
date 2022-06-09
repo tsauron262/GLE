@@ -33,7 +33,7 @@ class exportCommande extends export8sens {
                     $nbFilesErr++;
         if($nbFiles > 5){
             $this->addTaskAlert("commande import OFF");
-//            mailSyn2("Synchro 8Sens OFF", "dev@bimp.fr, gsx@bimp.fr", null, "Dossier : ".$this->pathExport." <br/><br/>Nb files : ".$nbFiles);
+//            mailSyn2("Synchro 8Sens OFF", BimpCore::getConf('devs_email'), gsx@bimp.fr", null, "Dossier : ".$this->pathExport." <br/><br/>Nb files : ".$nbFiles);
         }
         if($nbFilesErr > 0){
 //            mailSyn2("Synchro 8Sens FICHIER ERREURS", "tommy@bimp.fr", null, "Dossier : ".$this->pathExport." <br/><br/>Nb files : ".$nbFilesErr);
@@ -107,7 +107,7 @@ class exportCommande extends export8sens {
         }
         if ($comms != "")
             if(!defined("MODE_TEST"))
-                mailSyn2("Commande non export", "dev@bimp.fr, jc.cannet@bimp.fr", null, "Bonjour voici les commande non exporté " . $comms);
+                mailSyn2("Commandes non exportées", BimpCore::getConf('devs_email') . ", jc.cannet@bimp.fr", null, "Bonjour voici les commandes non exportées " . $comms);
     }
     
     function extract($id) {

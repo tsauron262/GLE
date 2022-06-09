@@ -57,7 +57,7 @@ class newExportController extends BimpController {
                         
             }
             echo $msg . '<br /><br />';
-            mailSyn2("Export compta MANUEL", 'dev@bimp.fr', null, $msg);
+            mailSyn2("Export compta MANUEL", BimpCore::getConf('devs_email'), null, $msg);
 
         }
         

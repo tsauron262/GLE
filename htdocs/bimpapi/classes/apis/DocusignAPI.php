@@ -49,8 +49,10 @@ class DocusignAPI extends BimpAPI {
         if($tentative > 4)
             die('boucle infinit');
         $code = $this->userAccount->getToken('code');
-        if($code.'x' == 'x')
+        if($code.'x' == 'x'){
+            $_SESSION['id_user_docusign'] = $this->userAccount->id;
             $errors[] = "<a target='_blank' href='https://account-d.docusign.com/oauth/auth?response_type=code&scope=signature&client_id=3b602db6-78eb-47f2-8a61-454fcb21836e&redirect_uri=".$urlRedirect."/bimpapi/retour/RetDocuSign.php'>cliquez ici pour conecter</a>";
+        }
         else {
             
 //            // Get code

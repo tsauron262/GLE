@@ -9,6 +9,7 @@ include_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
 
 if(!defined('PATH_TMP'))
     define('PATH_TMP', DOL_DATA_ROOT);
+
 if(!defined('PATH_EXTENDS'))
     define('PATH_EXTENDS', DOL_DOCUMENT_ROOT."/bimpcore/extends/dev/");
 

@@ -406,16 +406,16 @@ class BS_ApplePart extends BimpObject
 
     public static function convertPrixStatic($type, $prix, $ref, $isIphone, $price_type = 'STOCK')
     {
-        if($prix == 0)
+        if($prix < 1)
             return 0;
         //xception 
 //        $tabException1 = array("F661", "AB661", "SF661","B661",  "J661", "E661");
 //        foreach($tabException1 as $exception1){
-        if (/* stripos($ref, $exception1) !== false && */ $prix == 130.63)
-            return (209 / 1.2);
+        if (/* stripos($ref, $exception1) !== false && */ $prix == 143.12)
+            return (229 / 1.2);
 //        }
-        if ($prix == 86.87)
-            return (139 / 1.2);
+        if ($prix == 93.13)
+            return (149 / 1.2);
         if ($prix == 65.87)
             return 82.5;
 

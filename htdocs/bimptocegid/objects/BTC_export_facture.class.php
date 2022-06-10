@@ -416,7 +416,7 @@ class BTC_export_facture extends BTC_export
             }  else {
                 $subject = "EXPORT COMPTA - RIB MANQUANT";
                 $msg = "La facture " . $facture->getNomUrl() . " a été exportée avec comme mode de règlement mandat de prélèvement SEPA mais n'a pas de RIB";
-                $mail = new BimpMail(null, $subject, "dev@bimp.fr", null, $msg);
+                $mail = new BimpMail(null, $subject, BimpCore::getConf('devs_email'), null, $msg);
                 $mail->send();
             }
         }
@@ -506,7 +506,7 @@ class BTC_export_facture extends BTC_export
             if ($ignore_compta) {
                 $facture->updateField('ignore_compta', 1);
                 $facture->updateField('exported', 204);
-                mailSyn2("BIMPtoCEGID - Facture ignorée en compta", 'dev@bimp.fr', null, 'Bonjour, la facture ' . $facture->getNomUrl(1) . " à été passée en ignorée en compta");
+                mailSyn2("BIMPtoCEGID - Facture ignorée en compta", BimpCore::getConf('devs_email'), null, 'Bonjour, la facture ' . $facture->getNomUrl(1) . " à été passée en ignorée en compta");
             }
         }
 
@@ -758,7 +758,7 @@ class BTC_export_facture extends BTC_export
         }
 
         if (count($errors)) {
-            mailSyn2("Erreur EXPORT CEGID", "dev@bimp.fr", null, "Facture :" . $facture->getNomUrl() . print_r($errors, 1));
+            mailSyn2("Erreur EXPORT CEGID", BimpCore::getConf('devs_email'), null, "Facture :" . $facture->getNomUrl() . print_r($errors, 1));
         } else {
             
         }

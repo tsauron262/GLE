@@ -79,7 +79,7 @@
                         }  else {
                             $subject = "EXPORT COMPTA - RIB MANQUANT";
                             $msg = "La facture " . $instance->getNomUrl() . " a été exportée avec comme mode de règlement mandat de prélèvement SEPA mais n'a pas de RIB";
-                            $mail = new BimpMail(null, $subject, "dev@bimp.fr", null, $msg);
+                            $mail = new BimpMail(null, $subject, BimpCore::getConf('devs_email'), null, $msg);
                             $mail->send();
                         }
                     }

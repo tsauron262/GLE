@@ -2822,6 +2822,8 @@ class BS_SAV extends BimpObject
 
         $client = $this->getChildObject('client');
         $id_contact = (int) $this->getData('id_contact');
+        
+        
 
         if (!BimpObject::objectLoaded($client)) {
             if (!(int) $this->getData('id_client')) {
@@ -2845,11 +2847,13 @@ class BS_SAV extends BimpObject
             $prop->cond_reglement_id = $id_cond_reglement;
             $prop->mode_reglement_id = $id_mode_reglement;
             $prop->fk_account = (int) BimpCore::getConf('id_default_bank_account');
+            
 
             if ($prop->create($user) <= 0) {
                 $errors[] = 'Echec de la création de la propale';
                 BimpTools::getErrorsFromDolObject($prop, $errors, $langs);
             } else {
+                $prop->set_ref_client($user, $this->getData('prestataire_number'));
                 $prop->array_options['options_type'] = "S";
                 $prop->array_options['options_entrepot'] = (int) $this->getData("id_entrepot");
                 $prop->array_options['options_libelle'] = $this->getRef();
@@ -4933,7 +4937,7 @@ class BS_SAV extends BimpObject
 //        }
 
         $propal = $this->getChildObject('propal');
-        $impayee = $propal->dol_object->total_ttc - (float) BimpTools::getArrayValueFromPath($data, 'paid', 0);
+        $impayee = $propal->dol_object->total_ttc - (float) BimpTools::getArrayValueFromPath($data, 'paid', 0) - (float) BimpTools::getArrayValueFromPath($data, 'paid2', 0);
         if ($impayee > 1) {
             //on vérifie encours
             $client = $this->getChildObject('client');
@@ -5132,7 +5136,7 @@ class BS_SAV extends BimpObject
                                 global $db;
                                 $facture = new Facture($db);
 
-                                $cond_reglement = (int) BimpCore::getConf('sav_cond_reglement', null, 'bimpsupport');
+                                $cond_reglement = null;
 
                                 if (!$cond_reglement) {
                                     if ((int) $propal->dol_object->cond_reglement_id) {
@@ -5145,6 +5149,8 @@ class BS_SAV extends BimpObject
                                         }
                                     }
                                 }
+                                if(!$cond_reglement)
+                                    $cond_reglement = (int) BimpCore::getConf('sav_cond_reglement', null, 'bimpsupport');
 
                                 $mode_reglement = (int) BimpTools::getArrayValueFromPath($data, 'mode_paiement', (int) $propal->dol_object->mode_reglement_id);
 
@@ -5259,6 +5265,34 @@ class BS_SAV extends BimpObject
                                                     $payement->amounts = array($facture->id => (float) $data['paid']);
                                                     $payement->datepaye = dol_now();
                                                     $payement->paiementid = (int) $data['mode_paiement'];
+                                                    if ($payement->create($user) <= 0) {
+                                                        $warnings[] = 'Echec de l\'ajout du paiement de la facture';
+                                                    } else {
+                                                        // Ajout du paiement au compte bancaire: 
+                                                        if ($this->useCaisseForPayments) {
+                                                            $id_account = (int) $caisse->getData('id_account');
+                                                        } else {
+                                                            $id_account = (int) BimpCore::getConf('id_default_bank_account');
+                                                        }
+                                                        if ($payement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_account, '', '') < 0) {
+                                                            $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Echec de l\'ajout du paiement n°' . $payement->id . ' au compte bancaire d\'ID ' . $id_account);
+                                                        }
+
+                                                        if ($this->useCaisseForPayments) {
+                                                            $warnings = BimpTools::merge_array($warnings, $caisse->addPaiement($payement, $bimpFacture->id));
+                                                        }
+                                                    }
+                                                }
+                                                
+                                                //Ajout deuxième paiement
+            
+                
+                                                if(isset($data['paid2']) && (float) $data['paid2'] > 0){
+                                                    require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
+                                                    $payement = new Paiement($this->db->db);
+                                                    $payement->amounts = array($facture->id => (float) $data['paid2']);
+                                                    $payement->datepaye = dol_now();
+                                                    $payement->paiementid = (int) $data['mode_paiement2'];
                                                     if ($payement->create($user) <= 0) {
                                                         $warnings[] = 'Echec de l\'ajout du paiement de la facture';
                                                     } else {

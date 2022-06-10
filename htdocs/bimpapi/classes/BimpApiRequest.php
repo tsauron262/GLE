@@ -50,7 +50,7 @@ class BimpApiRequest
         if (!file_exists($dir . '/' . $file_name)) {
             $this->addError('Erreur: le fichier "' . $dir . '/' . $file_name . '" n\'existe pas.', true, Bimp_Log::BIMP_LOG_URGENT);
         } else {
-            $this->config = new BimpConfig($dir, $file_name, $this);
+            $this->config = new BimpConfig('bimpapi', 'forms/' . $this->api::$name, $request_name, $this);
 
             if (count($this->config->errors)) {
                 $this->addError(BimpTools::getMsgFromArray($this->config->errors, 'Echec du chargement du fichier yml "' . $file_name . '"'), true, Bimp_Log::BIMP_LOG_URGENT);
@@ -385,7 +385,7 @@ class BimpApiRequest
                     }
                 }
                 break;
-                
+
             case 'money':
                 $value = (float) $value;
                 break;
@@ -419,7 +419,6 @@ class BimpApiRequest
 //                    $value = null;
 //                }
 //                break;
-
 //            case 'datetime':
 //                if (preg_match('/^(\d{4}\-\d{2}\-\d{2}) (\d{2}:\d{2}:\d{2})$/', $value, $matches)) {
 //                    $value = $matches[1] . 'T' . $matches[2] . 'Z';

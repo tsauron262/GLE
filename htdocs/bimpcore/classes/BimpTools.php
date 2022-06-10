@@ -3003,6 +3003,8 @@ class BimpTools
     {
         list($h, $s, $l) = $hsl;
 
+//        echo $h . ', ' . $s . ', ' . $l . '<br/>';
+        
         if ($s == 0) {
             $r = $g = $b = 1;
         } else {
@@ -3012,6 +3014,8 @@ class BimpTools
             $r = self::hue2rgb($p, $q, $h + 1 / 3);
             $g = self::hue2rgb($p, $q, $h);
             $b = self::hue2rgb($p, $q, $h - 1 / 3);
+
+//            echo $r . ', ' . $g . ', ' . $b . '<br/>';
         }
 
         return self::rgb2hex($r) . self::rgb2hex($g) . self::rgb2hex($b);
@@ -3206,7 +3210,7 @@ class BimpTools
 //                $msg = 'Fichier deja existant';
 //            //conflit
 //            global $user;
-//            mailSyn2("Conflit de ref évité", "dev@bimp.fr", null, $user->login."  Attention : Un conflit de ref de type " . $type . " a été évité : ".$msg);
+//            mailSyn2("Conflit de ref évité", BimpCore::getConf('devs_email'), null, $user->login."  Attention : Un conflit de ref de type " . $type . " a été évité : ".$msg);
 //            $nb++;
 //            if ($nb > static::$nbMax)
 //                die('On arrete tout erreur 445834834857');
@@ -3364,14 +3368,13 @@ class BimpTools
 
         return $errors;
     }
-    
-    
-    public static function getDataLightWithPopover($data, $lenght = 5){
+
+    public static function getDataLightWithPopover($data, $lenght = 5)
+    {
         global $modeCSV;
         if ($modeCSV) {
             return $data;
-        }
-        else{
+        } else {
             $return = '<span class=" bs-popover"';
             $return .= BimpRender::renderPopoverData($data, 'top', true);
             $return .= '>';

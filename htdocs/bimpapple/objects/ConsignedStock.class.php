@@ -206,7 +206,7 @@ class ConsignedStock extends BimpObject
                                 }
 
                                 $html .= BimpInput::renderInput('select', 'deliveryNumber', '', array(
-                                            'options' => $options
+                                            'options' => array_reverse($options, true)
                                 ));
 
                                 return $html;
@@ -876,7 +876,7 @@ class ConsignedStock extends BimpObject
                         }
 
                         if ($nFails) {
-                            mailSyn2('ERREURS STOCKS CONSIGNES APPLE', 'dev@bimp.fr', '', $nFails . ' erreur(s) à corriger manuellement  - Voir les logs');
+                            mailSyn2('ERREURS STOCKS CONSIGNES APPLE', BimpCore::getConf('devs_email'), '', $nFails . ' erreur(s) à corriger manuellement  - Voir les logs');
                         }
                     }
                 }

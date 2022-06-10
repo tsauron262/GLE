@@ -372,6 +372,13 @@ lists_cols:
         align: center
         value: 
             callback: displayNbNotesSuivi
+    icba_file:
+      label: PDF Rapport Assurance crédit ICBA
+      value:
+        callback: 
+            method: displayAtradiusFile
+            params:
+                - 1
             
 lists:
     default: 

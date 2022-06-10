@@ -14,7 +14,7 @@ class BDS_RelancesSignaturesProcess extends BDSProcess
         $signatures_ids = $this->getSignaturesToRelance();
 
         if (!empty($signatures_ids)) {
-            $data['steps']['send_relmances'] = array(
+            $data['steps']['send_relances'] = array(
                 'label'                  => 'Envoi des relances',
                 'on_error'               => 'continue',
                 'elements'               => $signatures_ids,
@@ -32,7 +32,7 @@ class BDS_RelancesSignaturesProcess extends BDSProcess
         $result = array();
 
         switch ($step_name) {
-            case 'send_relmances':
+            case 'send_relances':
                 if (!empty($this->references)) {
                     foreach ($this->references as $id_signature) {
                         $this->processRelance($id_signature, $errors);

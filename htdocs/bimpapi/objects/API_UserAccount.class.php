@@ -5,6 +5,38 @@ require_once DOL_DOCUMENT_ROOT . '/bimpapi/classes/BimpAPI.php';
 class API_UserAccount extends BimpObject
 {
 
+    // Droits users:
+
+    public function canViewField($field_name)
+    {
+        global $user;
+
+        if ($user->admin) {
+            return 1;
+        }
+
+        if (in_array($field_name, array('pword', 'tokens'))) {
+            return $this->isUserIn();
+        }
+
+        return 1;
+    }
+
+    public function canSetAction($action)
+    {
+        global $user;
+
+        if ($user->admin) {
+            return 1;
+        }
+
+        switch ($action) {
+            case 'connect':
+                return ($this->isUserIn() || $this->isDefaultUserAccount()); // Tous les users peuvent connecter le compte par défaut. 
+        }
+        return parent::canSetAction($action);
+    }
+
     // Getters booléens: 
 
     public function isLogged()
@@ -40,10 +72,6 @@ class API_UserAccount extends BimpObject
         }
         return parent::isActionAllowed($action, $errors);
     }
-    
-    public function getTokenLight(){
-        return BimpTools::getDataLightWithPopover($this->displayTokens(), 50);
-    }
 
     public function isUserIn($id_user = 0)
     {
@@ -72,38 +100,6 @@ class API_UserAccount extends BimpObject
         }
 
         return 0;
-    }
-
-    // Droits users:
-
-    public function canViewField($field_name)
-    {
-        global $user;
-
-        if ($user->admin) {
-            return 1;
-        }
-
-        if (in_array($field_name, array('pword', 'tokens'))) {
-            return $this->isUserIn();
-        }
-
-        return 1;
-    }
-
-    public function canSetAction($action)
-    {
-        global $user;
-
-        if ($user->admin) {
-            return 1;
-        }
-
-        switch ($action) {
-            case 'connect':
-                return ($this->isUserIn() || $this->isDefaultUserAccount()); // Tous les users peuvent connecter le compte par défaut. 
-        }
-        return parent::canSetAction($action);
     }
 
     // Getters params:
@@ -208,6 +204,11 @@ class API_UserAccount extends BimpObject
         }
 
         return '';
+    }
+
+    public function getTokenLight()
+    {
+        return BimpTools::getDataLightWithPopover($this->displayTokens(), 50);
     }
 
     // Affichages: 

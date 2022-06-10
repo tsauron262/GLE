@@ -62,7 +62,7 @@
         protected function send_rapport() {
             
             $sujet = "Rapport export comptable du " . date('d/m/Y');
-            $to = 'dev@bimp.fr';
+            $to = BimpCore::getConf('devs_email');
             $from = null;
             
             // Message type de pièce automatique

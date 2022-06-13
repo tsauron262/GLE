@@ -16,6 +16,7 @@
         private $caisse;
         private $TRA_tiers;
         public $rapportTier;
+        private $sensFacture;
         
         public static $rfa = Array('GEN-CRT', 'GEN-RFA', 'GEN-IPH', 'REMISE', 'GEN-RETROCESSION', 'GEN-AVOIR', 'GEN-AVOIR-6097000', 'GEN-PUB', 'GEN-INCENTIVE', 'GEN-PROTECTPRIX', 'GEN-REBATE', 'GEN-AVOIR-PRESTATION', 'GEN-DEMO');
         
@@ -32,7 +33,24 @@
             $code_compta            = $this->TRA_tiers->getCodeComptable($fournisseur, 'code_compta_fournisseur');
             $use_autoliquidation    = ($facture->getData('zone_vente') == 2 || $facture->getData('zone_vente') == 4) ? true : false;
             $datec                  = new DateTime($facture->getData('datec'));
-
+            $reglement              = $this->db->getRow('c_paiement', 'id = ' . $facture->getData('fk_mode_reglement'));
+            $TTC                    = $facture->getData('total_ttc');
+            $this->sensFacture      = ($TTC > 0) ? "C" : "D";
+            if ($facture->getData('date_lim_reglement')) {
+                $date_echeance = new DateTime($facture->getData('date_lim_reglement'));
+            } else {
+                $cond = $facture->getData('fk_cond_reglement');
+                $date_echeance = new DateTime($facture->getData('datef'));
+                if ($cond == 48) {
+                    $date_echeance->add(new DateInterval("P60D"));
+                } elseif ($conf == 52) {
+                    $date_echeance->add(new DateInterval("P30D"));
+                } elseif ($cond == 7) {
+                    $date_echeance->add(new DateInterval("P45D"));
+                }
+                $date_echeance->add(new DateInterval("P1D"));
+            }
+            
             $structure = array();
             $structure['JOURNAL']                   = sizing(code_journal($facture->getData('ef_type'), 'A', $interco), 3);
             $structure['DATE']                      = sizing($datec->format('dmY'), 8);
@@ -42,6 +60,48 @@
             $structure['CODE_COMPTA']               = sizing($code_compta, 16);
             $structure['NEXT']                      = sizing('', 1);
             $structure['REF_INTERNE']               = sizing($facture->getref(), 35);
+            $structure['LEBAL']                     = sizing(strtoupper(suppr_accents($fournisseur->getData('nom'))), 35);
+            $structure['REGLEMENT']                 = sizing(($reglement->code == 'LIQ') ? 'ESP' : $reglement->code, 3);
+            $structure['ECHEANCE']                  = sizing($date_echeance->format('dmY'), 8);
+            $structure['SENS']                      = sizing($this->sensFacture, 1);
+            $structure['MONTANT']                   = sizing(abs(round($TTC, 2)), 20, true);
+            $structure['TYPE_ECRITURE']             = sizing('N', 1);
+            $structure['NUMERO_PIECE']              = sizing($facture->id, 8, true);
+            $structure['DEVISE']                    = sizing('EUR', 3);
+            $structure['TAUX_DEV']                  = sizing('1', 10);
+            $structure['TAUX_DEV']                  = sizing('1', 10);
+            $structure['CODE_MONTANT']              = sizing('E--', 3);
+            $structure['MONTANT_2']                 = sizing("", 20);
+            $structure['MONTANT_3']                 = sizing("", 20);
+            $structure['ETABLISSEMENT']             = sizing('001', 3);
+            $structure['AXE']                       = sizing('A1',2);
+            $structure['NUMRO_ECHEANCE']            = sizing("1", 2);
+            $structure['REF_EXTERNE']               = sizing($facture->getData('ref_supplier'), 35);
+            $structure['DATE_REF_EXTERNE']          = sizing('01011900', 8);
+            $structure['DATE_CREATION']             = sizing($datec->format('dmY'), 8);
+            $structure['SOCIETE']                   = sizing("",3);
+            $structure['AFFAIRE']                   = sizing("",17);
+            $structure['DATE_TAUX_DEV']             = sizing("01011900",8);
+            $structure['NOUVEAU_ECRAN']             = sizing("N",3);
+            $structure['QUANTITE_1']                = sizing("",20);
+            $structure['QUANTITE_2']                = sizing("",20);
+            $structure['QUANTITE_QUALIF_1']         = sizing("",3);
+            $structure['QUANTITE_QUALIF_2']         = sizing("",3);
+            $structure['REF_LIBRE']                 = sizing(suppr_accents($facture->getData('libelle')),35);
+            $structure['TVA_ENCAISSEMENT']          = sizing("-",1);
+            $structure['REGIME_TVA']                = sizing("CEE",3);
+            $structure['TVA']                       = sizing("T",3);
+            $structure['TPF']                       = sizing("",3);
+            $structure['CONTRE_PARTIE']             = sizing("",17);
+            $structure['VIDE']                      = sizing("",606);
+            $structure['LETTRAGE_DEV']              = sizing("-",1);
+            $structure['LETTRAGE_EURO']             = sizing("X",1);
+            $structure['ETAT_LETTRAGE']             = sizing("AL",2);
+            $structure['VIDE_2']                    = sizing("",153);
+            $structure['VALIDE']                    = sizing("-",1);
+            $structure['BEFORE']                    = sizing("",1);
+            $structure['DATE_DEBUT']                = sizing("",8);
+            $structure['DATE_FIN']                  = sizing("",8);
             
             $ecriture = implode('', $structure) . "\n";
             

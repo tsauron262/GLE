@@ -13,12 +13,12 @@ if(!isset($_REQUEST['no_menu']))
 
 
 $dir    = '/tmp';
-$files1 = scandir(PATH_TMP . "/" . 'exportCegid' . '/' . 'BY_DATE' . '/imported');
+$files1 = scandir(PATH_TMP . "/" . 'exportCegid' . '/' . 'BY_DATE' . '/');
 
 print_r($files1);
 
-
-echo '<br/><br/>'.nl2br(file_get_contents(PATH_TMP . "/" . 'exportCegid' . '/' . 'BY_DATE' . '/'.$_GET['file']));
+if(isset($_GET['file']))
+    echo '<br/><br/>'.nl2br(file_get_contents(PATH_TMP . "/" . 'exportCegid' . '/' . 'BY_DATE' . '/'.$_GET['file']));
 die;
 
 //Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36

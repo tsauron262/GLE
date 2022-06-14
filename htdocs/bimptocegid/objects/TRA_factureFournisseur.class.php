@@ -105,6 +105,27 @@
             
             $ecriture = implode('', $structure) . "\n";
             
+            if(count($facture->dol_object->lines)) {
+                $total_tva = 0;
+                foreach($facture->dol_object->lines as $line) {
+                    
+                    if($line->total_ht != 0) {
+                        $total_tva .= $line->tva;
+                        $sens = ($this->sensFacture == 'C') ? ($line->total_ht > 0) ? 'D' : 'C' : ($TTC < 0) ? 'C' : 'D';
+                    
+                        $structure['TYPE_DE_COMPTE']            = sizing('', 1);
+                        $structure['CODE_COMPTA']               = sizing("", 16);
+                        $structure['SENS']                      = sizing($sens, 1);
+                        $structure['MONTANT']                   = sizing(abs(round($line->total_ht, 2)), 20, true);
+                        
+                        
+                        $ecriture .= implode('', $structure) . "\n";
+                    }
+
+                }
+                
+            }
+            
             return $ecriture;
             
         }

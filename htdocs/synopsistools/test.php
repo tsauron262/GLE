@@ -13,7 +13,7 @@ if(!isset($_REQUEST['no_menu']))
 
 
 $dir    = '/tmp';
-$files1 = scandir(PATH_TMP . "/" . 'exportCegid' . '/' . 'BY_DATE' . '/');
+$files1 = scandir(PATH_TMP . "/" . 'exportCegid' . '/' . 'BY_DATE' . '/imported');
 
 print_r($files1);
 

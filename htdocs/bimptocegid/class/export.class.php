@@ -23,6 +23,7 @@
         public $warn = Array();
         public $tiers = Array();
         public $moment;
+        public $rollBack = false;
         
         function __construct($db) {
             $hier = new DateTime();
@@ -244,8 +245,7 @@
         
         public function getMyFile($type):string {
             
-            $dateTime = new DateTime();
-            $dateTime->sub(new DateInterval("P1D"));
+            $dateTime = $this->yesterday;
             
             $entitie        = BimpCore::getConf('file_entity', null, "bimptocegid");
             $day            = $dateTime->format('d');
@@ -329,6 +329,7 @@
             if(fwrite($opened_file, $ecriture)) {
                 return true;
             } else {
+                $this->rollBack = true;
                 return false;
             }
         }

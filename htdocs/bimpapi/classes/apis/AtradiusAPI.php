@@ -126,7 +126,7 @@ class AtradiusAPI extends BimpAPI {
         }
 
         if((string) $cover['coverType'] == self::CREDIT_CHECK)
-            $amount = 7000;
+            $amount = $cover['totalDecision']['decisionAmtInPolicyCurrency'];
         elseif(isset($cover['totalDecision']) and isset($cover['totalDecision']['decisionAmtInPolicyCurrency']))
             $amount = (int) $cover['totalDecision']['decisionAmtInPolicyCurrency'];
         else

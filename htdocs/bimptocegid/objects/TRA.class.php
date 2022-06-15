@@ -18,13 +18,11 @@ class TRA extends BimpObject {
         
         $htmlPanel = '<pre id=\'fileEdit\' style=\'display: none; padding-top:20px; padding-bottom: 30px\'>';
         
-        $htmlPanel .= implode('', $lines);
+        $htmlPanel .=file_get_contents($file);
         
         $htmlPanel .= '</pre>';
         
-        $htmlPanel .= '<pre id=\'file\'>' . print_r($mysoc, 1); 
-        
-        
+        $htmlPanel .= '<pre original-tra=\''. file_get_contents($file).'\' id=\'file\'>'; 
         
         if($displayFileName)
             $htmlPanel .= '<u>' . basename ($file) . '</u><br />';

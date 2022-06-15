@@ -3386,7 +3386,7 @@ class Bimp_Client extends Bimp_Societe
     }
     
     private function sendMessageAtradiusUpdate() {
-        $msg  = "Le status Atradius de ce client est passé de " . $this->displayInitData('status_atradius') . ' (avec une limite de: ' . BimpTools::displayMoneyValue((float) $this->getInitData('outstanding_limit_atradius')) .') ';
+        $msg  = "Le statut Atradius de ce client est passé de " . $this->displayInitData('status_atradius') . ' (avec une limite de: ' . BimpTools::displayMoneyValue((float) $this->getInitData('outstanding_limit_atradius')) .') ';
         $msg .= " à " . $this->displayData('status_atradius') . ' (avec une limite de: ' . BimpTools::displayMoneyValue((float) $this->getData('outstanding_limit_atradius')) .') ';
         
         BimpObject::loadClass('bimpcore', 'BimpNote');

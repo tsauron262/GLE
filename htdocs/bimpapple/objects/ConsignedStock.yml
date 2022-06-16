@@ -30,6 +30,13 @@ fields:
         required: 1
         values: 
             array: centres
+        input: 
+            type: select
+            options: 
+                callback: 
+                    method: getCentresArray
+                    params: 
+                        - 0
         default_value: 
             callback: getDefaultCodeCentre
             
@@ -160,7 +167,10 @@ forms:
               input: 
                   type: select
                   options: 
-                    array: centres
+                      callback: 
+                          method: getCentresArray
+                          params: 
+                              - 0
             - custom: 1
               label: Status
               input_name: status

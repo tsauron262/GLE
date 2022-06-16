@@ -87,7 +87,10 @@ class DemandeValidComm extends BimpObject
                 $client = $obj->getClientFacture();
             else
                 $client = $obj->getChildObject('client');
-            $html .= $client->getLink();
+            
+            if (BimpObject::objectLoaded($client)) {
+                $html .= $client->getLink();    
+            }
         }
         
         return $html;

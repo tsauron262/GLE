@@ -573,7 +573,15 @@ class Bimp_Product extends BimpObject
     {
         // ACHAT DE D3E juste pour la france
         // ACHAT DE TVA JUSTe PAR AUTOLIQUIDATION - si on a un numéro intracom sur un pro UE
-
+        
+        // Condition spécifique surpassant absolument TOUT
+        
+        
+        
+        if(preg_match('.(applecare).', strtolower($this->getData('label')))){
+            return BimpCore::getConf('applecare_compte', null, 'bimptocegid');
+        }
+        
         if ($force_type == -1) {
             if (!$this->isLoaded())
                 return '';

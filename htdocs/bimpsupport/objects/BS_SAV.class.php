@@ -2098,7 +2098,7 @@ class BS_SAV extends BimpObject
     {
         $html = '';
         if ((int) $this->isLoaded()) {
-            $list = new BC_ListTable(BimpObject::getInstance('bimpcore', 'BimpFile'), 'default', 1, null, 'Fichiers joint SAV');
+            $list = new BC_ListTable(BimpObject::getInstance('bimpsupport', 'BS_SavFile'), 'default', 1, null, 'Fichiers joint SAV');
             $list->addFieldFilterValue('parent_module', 'bimpsupport');
             $list->addFieldFilterValue('parent_object_name', 'BS_SAV');
             $list->addFieldFilterValue('id_parent', $this->id);
@@ -2822,8 +2822,6 @@ class BS_SAV extends BimpObject
 
         $client = $this->getChildObject('client');
         $id_contact = (int) $this->getData('id_contact');
-        
-        
 
         if (!BimpObject::objectLoaded($client)) {
             if (!(int) $this->getData('id_client')) {
@@ -2847,7 +2845,6 @@ class BS_SAV extends BimpObject
             $prop->cond_reglement_id = $id_cond_reglement;
             $prop->mode_reglement_id = $id_mode_reglement;
             $prop->fk_account = (int) BimpCore::getConf('id_default_bank_account');
-            
 
             if ($prop->create($user) <= 0) {
                 $errors[] = 'Echec de la création de la propale';
@@ -4481,6 +4478,15 @@ class BS_SAV extends BimpObject
         }
     }
 
+    public function addFacEmailFile($id_file)
+    {
+        $errors = array();
+
+        $errors[] = 'OK: ' . $id_file;
+
+        return $errors;
+    }
+
     // Actions:
 
     public function actionWaitClient($data, &$success)
@@ -5149,7 +5155,7 @@ class BS_SAV extends BimpObject
                                         }
                                     }
                                 }
-                                if(!$cond_reglement)
+                                if (!$cond_reglement)
                                     $cond_reglement = (int) BimpCore::getConf('sav_cond_reglement', null, 'bimpsupport');
 
                                 $mode_reglement = (int) BimpTools::getArrayValueFromPath($data, 'mode_paiement', (int) $propal->dol_object->mode_reglement_id);
@@ -5283,11 +5289,11 @@ class BS_SAV extends BimpObject
                                                         }
                                                     }
                                                 }
-                                                
+
                                                 //Ajout deuxième paiement
-            
-                
-                                                if(isset($data['paid2']) && (float) $data['paid2'] > 0){
+
+
+                                                if (isset($data['paid2']) && (float) $data['paid2'] > 0) {
                                                     require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
                                                     $payement = new Paiement($this->db->db);
                                                     $payement->amounts = array($facture->id => (float) $data['paid2']);

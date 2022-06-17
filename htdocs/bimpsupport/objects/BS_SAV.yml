@@ -511,6 +511,12 @@ fields:
         label: Heure de la restitution
         extra: 1
         type: int
+    in_fac_emails_files: 
+        label: Fichier à joindre à l\'e-mail de facturation
+        type: items_list
+        items_braces: 1
+        items_data_type: id_object
+        object: file
         
 forms: 
     default:

@@ -17,7 +17,7 @@ class BS_SavFile extends BimpFile
 
                 if (!in_array((int) $this->id, $files)) {
                     $buttons[] = array(
-                        'label'   => 'Ajouter aux fichiers à jondre à la facture',
+                        'label'   => 'Ajouter aux fichiers à joindre à la facture',
                         'icon'    => 'fas_plus-circle',
                         'onclick' => $this->getJsActionOnclick('addToSavFacEmail')
                     );

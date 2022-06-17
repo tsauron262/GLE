@@ -82,6 +82,7 @@ class DemandeValidComm extends BimpObject
     public function displayClient(){
         $html = '';
         $obj = $this->getThisObject();
+        
         if($obj){
             if(method_exists($obj, 'getClientFacture'))
                 $client = $obj->getClientFacture();

@@ -512,7 +512,7 @@ fields:
         extra: 1
         type: int
     in_fac_emails_files: 
-        label: Fichier à joindre à l\'e-mail de facturation
+        label: Fichier à joindre à l'e-mail de facturation
         type: items_list
         items_braces: 1
         items_data_type: id_object
@@ -635,6 +635,7 @@ forms:
             - field: login_admin
             - field: pword_admin
             - field: sacs
+            - field: in_fac_emails_files
             
     public_edit: 
         rows: 
@@ -996,6 +997,7 @@ fields_tables:
               display: card
               show: 
                   field_value: id_facture
+            - field: in_fac_emails_files
                   
     sac:
         title: Emballage

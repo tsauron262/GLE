@@ -8,6 +8,11 @@ parent_object:
     field_value: parent_object_name
 parent_id_property: id_parent
     
+nom_url: 
+    syntaxe: <file_name>.<file_ext>
+    modal_view: ''
+name_syntaxe: <file_name>.<file_ext>
+        
 labels: 
     name: fichier
 
@@ -96,8 +101,7 @@ fields:
         label: Suppression autorisée
         type: bool
         default_value: 1
-                
-
+          
 forms:
     upload: 
         rows:

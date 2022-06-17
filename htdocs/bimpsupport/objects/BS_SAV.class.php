@@ -3607,6 +3607,26 @@ class BS_SAV extends BimpObject
                 } else {
                     $errors[] = $error_msg . ' - Fichier PDF de la facture absent';
                 }
+
+                $extra_files = $this->getData('in_fac_emails_files');
+
+                if (!empty($extra_files)) {
+                    foreach ($extra_files as $id_file) {
+                        $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', $id_file);
+
+                        if (BimpObject::objectLoaded($file)) {
+                            $file_path = $file->getFilePath();
+
+                            if (is_file($file_path)) {
+                                $file_name = $file->getData('file_name') . '.' . $file->getData('file_ext');
+                                $files[] = array($file_path, dol_mimetype($file_name), $file_name);
+                            } else {
+                                $errors[] = 'Fichier "' . $file->getName() . '" non trouvé';
+                            }
+                        }
+                    }
+                }
+
                 $subject = "Fermeture du dossier " . $this->getData('ref');
                 $mail_msg = 'Nous vous remercions d\'avoir choisi Bimp pour votre ' . $nomMachine . "\n";
                 $mail_msg .= 'Dans les prochains jours, vous allez peut-être recevoir une enquête satisfaction de la part d\'APPLE, votre retour est important afin d\'améliorer la qualité de notre Centre de Services.' . "\n";
@@ -4482,7 +4502,12 @@ class BS_SAV extends BimpObject
     {
         $errors = array();
 
-        $errors[] = 'OK: ' . $id_file;
+        $files = $this->getData('in_fac_emails_files');
+
+        if (!in_array((int) $id_file, $files)) {
+            $files[] = $id_file;
+            $errors = $this->updateField('in_fac_emails_files', $files);
+        }
 
         return $errors;
     }

@@ -1,4 +1,4 @@
-
+ 
 /* Autre que BimpTheme */
 .login_block {
     max-width: 200px !important;
@@ -67,12 +67,16 @@ a.nav-link.dropdown-toggle:not(.notif_white) > i {
 
 /* Demande de validations */
 div.dropdown-menu.bimp_notification_dropdown[aria-labelledby="dropdown_demande_valid_comm"] {
-    width: 270px;
+    min-width: 300px!important;
 }
 
 /* Bimp message */
 div.dropdown-menu.bimp_notification_dropdown[aria-labelledby="dropdown_bimp_note"] {
-    width: 400px;
+    min-width: 400px!important;
+}
+
+div.dropdown-menu.bimp_notification_dropdown[aria-labelledby="dropdown_notif_task"] {
+    min-width: 800px!important;
 }
 
 

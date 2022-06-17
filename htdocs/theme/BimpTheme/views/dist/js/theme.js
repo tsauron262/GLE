@@ -87,7 +87,7 @@
         }), i(s).on("click", function(e) {
             i(e.target).closest(".list-item").length || i(".list-item").removeClass("quick-view-opened")
         }), "undefined" != typeof screenfull && screenfull.enabled && i(s).on(screenfull.raw.fullscreenchange, function() {
-            screenfull.isFullscreen ? i("#navbar-fullscreen").find("i").toggleClass("ik-minimize ik-maximize") : i("#navbar-fullscreen").find("i").toggleClass("ik-maximize ik-minimize")
+//            screenfull.isFullscreen ? i("#navbar-fullscreen").find("i").toggleClass("ik-minimize ik-maximize") : i("#navbar-fullscreen").find("i").toggleClass("ik-maximize ik-minimize")
         }), i(".minimize-widget").on("click", function() {
             var e = i(this),
                 s = i(e.parents(".widget"));

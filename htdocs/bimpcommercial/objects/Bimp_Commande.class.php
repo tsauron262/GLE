@@ -118,6 +118,7 @@ class Bimp_Commande extends BimpComm
 //                $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
 //                return (int) $facture->can('create');
                 return $user->rights->bimpcommercial->factureAnticipe;
+                
             case 'sendMailLatePayment':
                 $vc = BimpCache::getBimpObjectInstance('bimpvalidateorder', 'ValidComm');
                 $demande = $vc->demandeExists(ValidComm::OBJ_COMMANDE, (int) $this->id, ValidComm::TYPE_ENCOURS);

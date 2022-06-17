@@ -20,8 +20,8 @@ class bimp_note extends AbstractNotification {
             else
                 var notif_white = '';
 
-            var html = '<a class="nav-link dropdown-toggle ' + notif_white + '" id="' + this.dropdown_id + '" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">';
-            html +='<i class="fa fa-envelope atoplogin"></i></a>';
+            var html = '<a class="nav-link dropdown-toggle header-icon' + notif_white + '" id="' + this.dropdown_id + '" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">';
+            html +='<i class="fas fa5-comments atoplogin"></i></a>';
             html += '<div class="dropdown-menu dropdown-menu-right notification-dropdown bimp_notification_dropdown" aria-labelledby="' + this.dropdown_id +'">';
             html += '<h4 class="header">Messages' + this.getBoutonReload(this.dropdown_id) + '</h4>';
             html += '<div class="notifications-wrap list_notification ' + this.nom + '">';

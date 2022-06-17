@@ -62,6 +62,7 @@ if (!defined('BIMP_LIB')) {
     require_once $dir . 'BimpPublicController.php';
     require_once $dir . 'BimpMailCore.php';
     require_once $dir . 'BimpModuleConf.php';
+    require_once $dir . 'BimpLayout.php';
 
     if (!defined('BIMP_EXTENDS_ENTITY') && defined('PATH_EXTENDS')) {
         if (preg_match('/^.*\/([a-zA-Z0-1\-_]+)\/?$/', PATH_EXTENDS, $matches)) {
@@ -262,10 +263,4 @@ function checkBimpCoreVersion()
             exit;
         }
     }
-}
-
-function hookDebutFiche()
-{
-    BimpObject::loadClass('bimpcore', 'BimpAlert');
-    echo BimpAlert::getMsgs();
 }

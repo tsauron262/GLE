@@ -39,8 +39,7 @@ class BimpCore
         'css' => array(
             'jPicker'    => '/includes/jquery/plugins/jpicker/css/jPicker-1.1.6.css',
             'bimpcore'   => '/bimpcore/views/css/bimpcore.css',
-            'userConfig' => '/bimpuserconfig/views/css/userConfig.css',
-//            '/theme/BimpTheme/views/dist/css/theme.css' // TODO remove
+            'userConfig' => '/bimpuserconfig/views/css/userConfig.css'
         )
     );
     public static $filesInit = false;
@@ -65,6 +64,10 @@ class BimpCore
 
         if (BimpTools::getContext() != 'public') {
             self::$files['js'][] = '/bimpcore/views/js/notification.js';
+
+            if ($conf->theme == "BimpTheme") {
+                self::$files['css']['bimptheme'] = '/bimpcore/views/css/bimptheme.css';
+            }
         } else {
             self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public.css';
         }
@@ -105,7 +108,7 @@ class BimpCore
             $html .= '};';
 
             // Fin inclusion notifications
-            $html .= 'var theme="' . (isset($user->conf->MAIN_THEME) ? $user->conf->MAIN_THEME : $conf->global->MAIN_THEME) . '";';
+            $html .= 'var theme = "' . (isset($user->conf->MAIN_THEME) ? $user->conf->MAIN_THEME : $conf->global->MAIN_THEME) . '";';
             $html .= '</script>';
 
             foreach (self::$files['js'] as $js_file) {
@@ -176,7 +179,7 @@ class BimpCore
                 $url = $file_path;
             }
         }
-        
+
         if ($url) {
             $prefixe = DOL_URL_ROOT;
             if ($prefixe == "/")
@@ -398,6 +401,8 @@ class BimpCore
                 }
             }
         }
+
+        exit;
 
         return $updates;
     }

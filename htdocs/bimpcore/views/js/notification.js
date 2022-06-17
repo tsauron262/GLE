@@ -424,7 +424,8 @@ function BimpNotification() {
     
     this.addButtonAllowNotification = function () {
         if($('#allow_notif').length === 0) {
-            var button = '<span id="allow_notif" class="headerIconButton bs-popover" data-toggle="popover" data-trigger="hover" data-container="body" data-placement="bottom" data-content="Autoriser les notifications" style="cursor: pointer;"><i style="color: #A00000" class="fas fa-warning"></i></span>';
+            var button = '<span id="allow_notif" class="headerIconButton header-icon bs-popover" data-toggle="popover" data-trigger="hover" data-container="body" data-placement="bottom" data-content="Autoriser les notifications">';
+            button += '<i style="color: #A00000" class="fas fa5-exclamation-triangle"></i></span>';
             $('div.login_block_other').prepend(button);
         }
         $('#allow_notif').click(function() {

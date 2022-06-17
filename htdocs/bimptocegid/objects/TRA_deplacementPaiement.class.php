@@ -117,10 +117,10 @@
             
             // Toujours FactureFrom
             $structure = Array();
-            $structure['JOURNAL']           = sizing((array_key_exists($reglement->code, $compteByModeReglementFrom) ? $codeJournalByModeReglementFrom[$reglement->code] : $entrepotFrom->code_journal_compta), 3);
+            $structure['JOURNAL']           = sizing('OD', 3);
             $structure['DATEP']             = sizing($datep->format('dmY'), 8);
             $structure['TYPE_PIECE']        = sizing('RC', 2);
-            $structure['COMPTE']            = sizing((array_key_exists($reglement->code, $compteByModeReglementFrom) ? $compteByModeReglementFrom[$reglement->code] : $entrepotFrom->compte_comptable ), 17);
+            $structure['COMPTE']            = sizing('41100000', 17);
             $structure['TYPE_COMPTE']       = sizing('X', 1);
             $structure['CODE_COMPTA']       = sizing($codeComptaFrom, 16);
             $structure['NEXT']              = sizing('', 1);
@@ -174,8 +174,6 @@
             $ecriture .= implode('', $structure) . "\n";
             
             // Toujours FactureTo
-            $structure['JOURNAL']           = sizing((array_key_exists($reglement->code, $compteByModeReglementTo) ? $codeJournalByModeReglementTo[$reglement->code] : $entrepotTo->code_journal_compta), 3);
-            $structure['COMPTE']            = sizing((array_key_exists($reglement->code, $compteByModeReglementTo) ? $compteByModeReglementTo[$reglement->code] : $entrepotTo->compte_comptable ), 17);
             $structure['CODE_COMPTA']       = sizing($codeComptaTo, 16);
             $structure['SENS']              = sizing(($rmb) ? 'D' : 'C', 1);
             $structure['CONTRE_PARTIE']     = sizing($this->compteGeneralFrom, 17);

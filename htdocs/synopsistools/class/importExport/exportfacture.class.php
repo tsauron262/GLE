@@ -33,7 +33,7 @@ class exportfacture extends export8sens {
             if(stripos($file, ".ER8"))
                     $nbFilesErr++;
         if($nbFiles > 5){
-//            mailSyn2("Synchro 8Sens OFF", "dev@bimp.fr, gsx@bimp.fr", null, "Dossier : ".$this->pathExport." <br/><br/>Nb files : ".$nbFiles);
+//            mailSyn2("Synchro 8Sens OFF", BimpCore::getConf('devs_email') . ", gsx@bimp.fr", null, "Dossier : ".$this->pathExport." <br/><br/>Nb files : ".$nbFiles);
             $this->addTaskAlert("facture import OFF");
         }
         if($nbFilesErr > 0){
@@ -74,7 +74,7 @@ class exportfacture extends export8sens {
         if (isset($tabCentre[$centre][3]) && $tabCentre[$centre][3] > 0)
             return $tabCentre[$centre][3];
         if(!defined("MODE_TEST"))
-            mailSyn2("Impossible de trouvé un id8sens", "dev@bimp.fr, jc.cannet@bimp.fr", null, "Bonjour impossible de trouver d'id 8sens Centre : " . $centre);
+            mailSyn2("Impossible de trouvé un id8sens", BimpCore::getConf('devs_email') . ", jc.cannet@bimp.fr", null, "Bonjour impossible de trouver d'id 8sens Centre : " . $centre);
         return 0;
     }
 
@@ -84,7 +84,7 @@ class exportfacture extends export8sens {
         if (isset($tabCentre[$centre][3]) && $tabCentre[$centre][3] > 0)
             return $tabCentre[$centre][3];
         if(!defined("MODE_TEST"))
-            mailSyn2("Impossible de trouvé un id8sens", "dev@bimp.fr, jc.cannet@bimp.fr", null, "Bonjour impossible de trouver d'id 8sens Centre : " . $centre);
+            mailSyn2("Impossible de trouvé un id8sens", BimpCore::getConf('devs_email') . ", jc.cannet@bimp.fr", null, "Bonjour impossible de trouver d'id 8sens Centre : " . $centre);
         return 0;
     }
 
@@ -197,7 +197,7 @@ WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture
         }
         if ($facts != "")
             if(!defined("MODE_TEST"))
-                mailSyn2("Facture non export", "dev@bimp.fr, jc.cannet@bimp.fr", null, "Bonjour voici les facture non exporté " . $facts);
+                mailSyn2("Facture non export", BimpCore::getConf('devs_email') .  ", jc.cannet@bimp.fr", null, "Bonjour voici les facture non exporté " . $facts);
     }
     
     function extract($id) {

@@ -1,24 +1,25 @@
 <?php
 
+if(isset($_REQUEST['nolog']) && $_REQUEST['nolog'] == 'ujgjhkhkfghgkvgkfdkshfiohf5453FF454FFDzelef'){
+    define("NOLOGIN", 1);
+    header('x-frame-options: ALLOWALL',true);
+}
 
-//$chaine = file_get_contents("/data/synchro/test.txt");
-//
-//        $chaine = str_replace("\x0D\x0A\x20", '', $chaine);
-//
-////$chaine = str_replace(array("\x0A\x20", "\x0D\x0A\x20"), "", $chaine);
-//
-//echo "<textarea>".$chaine."</textarea>";
-//
-//
-//die('ll');
-//
-//
-//$file = file_get_contents("/Users/tommy/Downloads/2f332e25-97d0-bc4b-b143-a4af33e58bd8.ics");
-//$file = str_replace("\x0A\x20", '', $file);
-//die ($file);
+require_once('../main.inc.php');
 
-require("../main.inc.php");
-llxHeader();
+if(!isset($_REQUEST['no_menu']))
+    llxHeader();
+
+
+
+$dir    = '/tmp';
+$files1 = scandir(PATH_TMP . "/" . 'exportCegid' . '/' . 'BY_DATE' . '/');
+
+print_r($files1);
+
+if(isset($_GET['file']))
+    echo '<br/><br/>'.nl2br(file_get_contents(PATH_TMP . "/" . 'exportCegid' . '/' . 'BY_DATE' . '/'.$_GET['file']));
+die;
 
 //Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36
 //Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.4 Safari/605.1.15

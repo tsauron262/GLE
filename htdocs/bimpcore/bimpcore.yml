@@ -123,6 +123,10 @@ params:
         def: 0
         
     # E-mails: 
+    devs_email: 
+        label: Adresse e-mail tous les devs
+        cat: emails
+        def: dev@bimp.fr
     public_default_reply_to_email: 
         label: reply_to par défaut pour les e-mails publics
         cat: emails

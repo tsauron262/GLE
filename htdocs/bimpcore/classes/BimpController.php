@@ -186,7 +186,7 @@ class BimpController
                         $txt .= '<pre>' . print_r($_POST, 1) . '</pre>';
                     }
 
-                    mailSyn2('ERREUR FATALE - ' . str_replace('/', '', DOL_URL_ROOT), "dev@bimp.fr", null, $txt);
+                    mailSyn2('ERREUR FATALE - ' . str_replace('/', '', DOL_URL_ROOT), BimpCore::getConf('devs_email'), null, $txt);
                 }
 
                 if (strpos($msg, 'Allowed memory size') !== false) {

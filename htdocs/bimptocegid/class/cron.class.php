@@ -38,6 +38,13 @@
         
         public function automatique() {
             global $db;
+            $this->fichiersToRollback();
+            
+            //ID_ERP == 2
+            
+            if(defined('ID_ERP') && ID_ERP == 2) {
+                $db->begin(); //Ouvre la transaction
+            
             $this->version_tra = BimpCore::getConf('version_tra', null, "bimptocegid");
             $this->entitie = BimpCore::getConf('file_entity', null, "bimptocegid");
             $this->export_class = new export($db);
@@ -55,14 +62,39 @@
             
             $this->FTP();
             $this->menage();
+            
+            if($this->export_class->rollBack) {
+                $db->rollback(); // Annule la transaction
+                $this->fichiersToRollback();
+                mailSyn2("URGENT - ROLLBACK COMPTA", 'dev@bimp.fr', null, 'Problème export compta');
+            } else {
+                $db->commit(); // Valide la transaction
+            }
+            
             $this->send_rapport();
+            } else {
+                
+                die('Pas sur la bonne instance de l\'ERP');
+                
+            }
+            
+        }
+        
+        protected function fichiersToRollback():void {
+            // TODO
+            
+            $listFichierLocal = scandir($this->local_path);
+            
+            $this->output .= print_r($listFichierLocal, 1);
             
         }
 
         protected function send_rapport() {
             
+            
+            
             $sujet = "Rapport export comptable du " . date('d/m/Y');
-            $to = 'dev@bimp.fr';
+            $to = BimpCore::getConf('devs_email');
             $from = null;
             
             // Message type de pièce automatique
@@ -240,8 +272,6 @@
                 $logs .= implode("\n", $this->rapport['MENAGE']);
             }
             
-           // BimpCore::setConf('last_export_date', date('Y-m-d'));
-
             $logs .= "\n\nListe des factures en cas d'erreurs: \n" . implode(',' , $saveArrayFacture) . "\n";
             $logs .= "Liste des paiement en cas d'erreurs: \n" . implode(',' , $saveArrayPaiement) . "\n";
             $logs .= "Liste des import paiement en cas d'erreurs: \n" . implode(',' , $saveArrayPaiementImport) . "\n";
@@ -249,13 +279,14 @@
             
             $this->output .= $logs;
             
-            $log_file = fopen(PATH_TMP . '/' . 'exportCegid' . '/' . 'rapports' . '/' . date('d_m_Y') . '.log', 'w');
-            fwrite($log_file, $logs);
+            $filePath = PATH_TMP . '/' . 'exportCegid' . '/' . 'rapports' . '/';
+            $fileName = date('d_m_Y') . '.log';
+            
+            $log_file = fopen($filePath . $fileName, 'a');
+            fwrite($log_file, $logs . "\n\n");
             fclose($log_file);
-            
-            
-            
-            mailSyn2($sujet, $to, $from, "Bonjour, vous trouverez en pièce jointe le rapport des exports comptable", [PATH_TMP . '/' . 'exportCegid' . '/' . 'rapports' . '/' . date('d_m_Y') . '.log']);
+
+            mailSyn2($sujet, $to, $from, "Bonjour, vous trouverez en pièce jointe le rapport des exports comptable", array($filePath . $fileName),array('text/plain'), array($fileName));
             
         }
         
@@ -297,11 +328,6 @@
             if(count($files) > 0) {
                 foreach($files as $file_path) {
                     $filename = basename($file_path);
-//                    
-//                    $patrolArray = controle::tra($file_path, file($file_path), '');
-//                    
-//                    print_r($patrolArray);
-//                    die('yyryryrr');
                     if(!in_array($this->ldlc_ftp_path . $filename, $present_sur_ftp_ldlc)) {
                         if(filesize($file_path) > $this->size_vide_tra) {
                             if(ftp_put($ftp, $this->ldlc_ftp_path . $filename, $this->local_path . $filename, FTP_ASCII)) {

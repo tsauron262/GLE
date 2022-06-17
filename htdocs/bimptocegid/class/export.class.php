@@ -23,6 +23,7 @@
         public $warn = Array();
         public $tiers = Array();
         public $moment;
+        public $rollBack = false;
         
         function __construct($db) {
             $hier = new DateTime();
@@ -79,7 +80,7 @@
                         }  else {
                             $subject = "EXPORT COMPTA - RIB MANQUANT";
                             $msg = "La facture " . $instance->getNomUrl() . " a été exportée avec comme mode de règlement mandat de prélèvement SEPA mais n'a pas de RIB";
-                            $mail = new BimpMail(null, $subject, "dev@bimp.fr", null, $msg);
+                            $mail = new BimpMail(null, $subject, BimpCore::getConf('devs_email'), null, $msg);
                             $mail->send();
                         }
                     }
@@ -244,8 +245,7 @@
         
         public function getMyFile($type):string {
             
-            $dateTime = new DateTime();
-            $dateTime->sub(new DateInterval("P1D"));
+            $dateTime = $this->yesterday;
             
             $entitie        = BimpCore::getConf('file_entity', null, "bimptocegid");
             $day            = $dateTime->format('d');
@@ -329,6 +329,7 @@
             if(fwrite($opened_file, $ecriture)) {
                 return true;
             } else {
+                $this->rollBack = true;
                 return false;
             }
         }

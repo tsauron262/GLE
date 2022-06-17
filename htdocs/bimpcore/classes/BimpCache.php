@@ -2391,19 +2391,25 @@ class BimpCache
 
     public static function getCentresArray($activ_only = false, $label_key = 'label', $include_empty = true)
     {
-        if (!isset(self::$cache['centres_array'])) {
-            self::$cache['centres_array'] = array();
+        $cache_key = 'centres_array';
+        
+        if ($activ_only) {
+            $cache_key .= '_active_only';
+        }
+        
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
 
             foreach (self::getCentres() as $code => $centre) {
-                if ($activ_only && !$centre['active']) {
+                if ($activ_only && !(int) $centre['active']) {
                     continue;
                 }
 
-                self::$cache['centres_array'][$code] = $centre[$label_key];
+                self::$cache[$cache_key][$code] = $centre[$label_key];
             }
         }
 
-        return self::getCacheArray('centres_array', $include_empty, '', '');
+        return self::getCacheArray($cache_key, $include_empty, '', '');
     }
 
     public static function getEntrepotsArray($include_empty = false, $has_commissions_only = false)
@@ -2946,7 +2952,7 @@ class BimpCache
                             $message = 'Il y a plus de 500 entrées à traiter dans les logs.' . "\n\n";
                             $message .= DOL_URL_ROOT . '/bimpcore/index.php?fc=admin&tab=logs' . "\n\n";
 
-                            mailSyn2("TROP DE LOGS", "dev@bimp.fr", null, $message);
+                            mailSyn2("TROP DE LOGS", BimpCore::getConf('devs_email'), null, $message);
                             BimpCore::setConf('bimpcore_to_much_logs_email_send', 1);
                         }
                     } elseif ($mail_send) {

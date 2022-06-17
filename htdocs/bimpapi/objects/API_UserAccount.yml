@@ -30,8 +30,10 @@ fields:
         label: API
         type: id_parent
         required: 1
-        values: 
-            array: apis
+        input: 
+            type: select
+            options: 
+                array: apis
         search: 
             input: 
                 type: select

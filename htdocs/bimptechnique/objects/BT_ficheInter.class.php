@@ -327,6 +327,12 @@ class BT_ficheInter extends BimpDolObject
             'icon'    => 'fas_file-pdf',
             'onclick' => $this->getJsBulkActionOnclick('generateBulkPdf', array(), array('single_action' => true))
         );
+        
+//        $actions[] = array(
+//            'label'       => 'Facture unique',
+//            'icon'        => 'fas_file-invoice-dollar',
+//            'onclick'     => $this->getJsBulkActionOnclick('generateBulkUf', array(), array('single_action' => true))
+//        );
 
         return $actions;
     }
@@ -341,7 +347,6 @@ class BT_ficheInter extends BimpDolObject
             'action'      => 'generateBulkPdf',
             'confirm_msg' => "Etes-vous sûr d\'avoir sélectionné les bons filtres"
         );
-
         return $actions;
     }
 
@@ -2439,6 +2444,70 @@ class BT_ficheInter extends BimpDolObject
             'errors'   => $errors,
             'warnings' => $warnings
         );
+    }
+    
+    private $tmpClientId = 0;
+    
+    public function actionGenerateBulkUf($data, &$success) {
+        
+        $errors = Array();
+        $warnings = Array();
+        
+        $id_objs = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+
+        if(count($id_objs) > 0) {
+
+            if(!count($errors)) {
+                $factureLabel = '';
+                $facture = BimpCache::getBimPObjectInstance('bimpcommercial', 'Bimp_Facture');
+                foreach($id_objs as $id) {
+                
+                    $instance = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter', $id);
+
+                    if (!BimpObject::objectLoaded($instance)) {
+                        $warnings[] = ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_obj . ' n\'existe pas';
+                        continue;
+                    }
+                    
+                    
+                    $client  = BimPCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $instance->getData('fk_soc'));
+                    
+                    if((!$instance->getData('signed')) && $instance->getData('fk_statut') != self::STATUT_TERMINER || $instance->getData('fk_statut') != self::STATUT_VALIDER) {
+                        $errors[] = 'Vous ne pouvez pas facturer des FI non signées';
+                        break;
+                    }
+                        
+                    
+                    if(!count($errors)) {
+                        if($this->tmpClientId == 0)
+                            $this->tmpClientId = $client->id;
+
+                        if($client->id == $this->tmpClientId) {
+                            $tech = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $instance->getData('fk_user_tech'));
+                            $factureLabel .= ($factureLabel == '') ? 'Facturation ' . $instance->getRef() : ', ' . $instance->getRef();
+                            $entrepotForFacturation = $tech->getData('defaultentrepot');
+                            $ef_type = $instance->getData('ef_type');
+                        } else {
+                            $errors[] = 'Il n\'est pas possible de facturer plusieurs FI avec des clients différents';
+                            break;
+                        }
+                    }
+                }
+                $facture->set('libelle', $factureLabel);
+                $facture->set('fk_soc', $client->id);
+                $facture->set('type', 0);
+                $facture->set('entrepot', $entrepotForFacturation);
+                $facture->set('datef', date('Y-m-d H:i:s'));
+                $facture->set('ef_type', $ef_type);
+                $facture->set('model_pdf', 'bimpfact');
+                $facture->set('ref_client', $factureLabel);
+                $errors[] = $facture->printData();
+            }
+
+        }
+        
+        return Array('success' => $success, 'errors' => $errors, 'warnings' => $warnings);
+        
     }
 
     public function actionGenerateBulkPdf($data, &$success)

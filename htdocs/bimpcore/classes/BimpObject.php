@@ -4263,7 +4263,7 @@ class BimpObject extends BimpCache
                 }
 
                 if (!count($errors)) {
-                    $success = 'Création ' . $this->getLabel('of_the') . ' effectuée avec succès';
+                    $success = 'Création ' . $this->getLabel('of_the') . ' effectuée avec succès : '.$this->getLink();
                     if (method_exists($this, 'getCreateJsCallback')) {
                         $success_callback = $this->getCreateJsCallback();
                     }

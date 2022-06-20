@@ -17,7 +17,7 @@
         private $TRA_tiers;
         public $rapportTier;
         private $sensFacture;
-        private $zoneAchat = ['france' => 1,'UE' => 2, 'HorsUE' => 3];
+        private $zoneAchat = ['france' => 1,'UE' => 2, 'HorsUE' => 3, 'europe' => 4];
         
         public static $rfa = Array('GEN-CRT', 'GEN-RFA', 'GEN-IPH', 'REMISE', 'GEN-RETROCESSION', 'GEN-AVOIR', 'GEN-AVOIR-6097000', 'GEN-PUB', 'GEN-INCENTIVE', 'GEN-PROTECTPRIX', 'GEN-REBATE', 'GEN-AVOIR-PRESTATION', 'GEN-DEMO');
         
@@ -115,26 +115,13 @@
                     
                     if($line->total_ht != 0) {
                         $produit = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
-                        $total_tva += $line->tva;
+                        if($line->tva_tx > 0)
+                            $total_tva += $line->tva;
                         $total_d3e += $produit->getData('deee') * $line->qty;
                         $sens = ($this->sensFacture == 'C') ? ($line->total_ht > 0) ? 'D' : 'C' : ($TTC < 0) ? 'C' : 'D';
-                        
-                        if($this->sensFacture == 'C') {
-                            if($line->total_ht > 0) {
-                                $sens = 'D';
-                            } else {
-                                $sens = 'C';
-                            }
-                        } else {
-                            if($line->total_ht > 0) {
-                                $sens = 'C';
-                            } else {
-                                $sens = 'D';
-                            }
-                        }
-                        
+                       
                         if($fournisseur->getData('code_compta_fournisseur') == BimpCore::getConf('code_fournisseur_apple', null, "bimptocegid")) {
-                            $compteLigne = BimpCore::getConf('code_fournisseur_apple');
+                            $compteLigne = BimpCore::getConf('achat_fournisseur_apple', null, 'bimptocegid');
                         }elseif(in_array($produit->getRef(), self::$rfa)) {
                             $compteLigne = Bimpcore::getConf('rfa_fournisseur_fr', null, 'bimptocegid');
                         } else {
@@ -145,7 +132,7 @@
                         $structure['COMPTE_GENERAL']            = sizing($compteLigne, 17);
                         $structure['TYPE_DE_COMPTE']            = sizing('', 1);
                         $structure['CODE_COMPTA']               = sizing("", 16);
-                        $structure['SENS']                      = sizing($sens, 1);
+                        $structure['SENS']                      = sizing($this->getSens(abs(round($line->total_ht - ($produit->getData('deee') * $line->qty), 2))), 1);
                         $structure['MONTANT']                   = sizing(abs(round($line->total_ht - ($produit->getData('deee') * $line->qty), 2)), 20, true);
                         
                         $ecriture .= implode('', $structure) . "\n";
@@ -169,6 +156,16 @@
                     }
                     
                 }
+
+                if($facture->getData('zone_vente') == $this->zoneAchat['UE'] || $facture->getData('zone_vente') == $this->zoneAchat['europe']) {
+                    $structure['COMPTE_GENERAL']                = sizing(BimpCore::getConf('autoliquidation_tva_666', null, 'bimptocegid'), 17);
+                    $structure['SENS']                          = sizing($this->getSens(abs(round(20*$TTC / 100))), 1);
+                    $structure['MONTANT']                       = sizing(abs(round(20*$TTC / 100)), 20, true);
+                    $ecriture .= implode('', $structure) . "\n";
+                    $structure['COMPTE_GENERAL']                = sizing(BimpCore::getConf('autoliquidation_tva_711', null, 'bimptocegid'), 17);
+                    $structure['SENS']                          = sizing($this->sensFacture, 1);
+                    $ecriture .= implode('', $structure) . "\n";
+                }
                 
             }
             
@@ -182,6 +179,24 @@
                 case 3: return 'OF'; break;
                 default: return 'FF'; break;
             }
+        }
+        
+        private function getSens($ht) {
+            if($this->sensFacture == 'C') {
+                if($ht > 0) {
+                    return 'D';
+                } else {
+                    return 'C';
+                }
+            } else {
+                if($ht > 0) {
+                    return 'C';
+                } else {
+                    return'D';
+                }
+            }
+            
+            return 0;
         }
         
     }

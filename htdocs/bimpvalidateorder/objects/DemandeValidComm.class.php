@@ -106,6 +106,15 @@ class DemandeValidComm extends BimpObject
         return $html;
     }
     
+    public function displayMontantHT() {
+        $obj = $this->getThisObject();
+        if($obj->field_exists('total_ht')) {
+            return BimpTools::displayMoneyValue($obj->getData('total_ht'));
+        }
+        
+        return '';
+    }
+    
     public function create(&$warnings = array(), $force_create = false) {
         
         if($this->getData('id_user_affected') == 1414)

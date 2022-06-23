@@ -148,6 +148,16 @@ class AtradiusAPI extends BimpAPI {
         else
             $amount = 0;
         
+        global $user;
+        if($user->id == 330) {
+            $warnings[] = print_r(array(
+            'cover_type'        => (string) $cover['coverType'],
+            'has_special_limit' => (int) $has_special_limit,
+            'code_return'       => (int) $code,
+            'amount'            => (int) $amount,
+            'date_expire'       => (string) $date_expire->format('Y-m-d H:i:s'),
+            'status'            => (int) $status), 1);
+        }
 
         return array(
             'cover_type'        => (string) $cover['coverType'],

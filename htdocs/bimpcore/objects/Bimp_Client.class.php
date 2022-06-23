@@ -3224,7 +3224,7 @@ class Bimp_Client extends Bimp_Societe
                         }
                         
                         // Couverture limitée dans le temps
-                        if(isset($cover['has_special_limit']) and $cover['has_special_limit'] and isset($cover['date_expire'])) {
+                        if(isset($cover['date_expire'])) {
                             $err_update = self::updateAtradiusValue($this->getData('siren'), 'date_atradius', $cover['date_expire']);
                             if (empty($err_update)) {
                                 $success .= $this->displayFieldName('date_expire') . " : " . $this->displayData('date_atradius') . '<br/>';

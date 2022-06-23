@@ -3132,7 +3132,7 @@ class Bimp_Client extends Bimp_Societe
 
             global $user;
 
-            if ($user->rights->bimpcommercial->gestion_recouvrement) {
+            if ($user->rights->bimpcommercial->admin_financier) {
                 // Demande d'encours
                 $onclick = $this->getJsActionOnclick('setOutstandingAtradius', array(), array('form_name' => 'setOutstandingAtradius'));
 
@@ -3224,10 +3224,10 @@ class Bimp_Client extends Bimp_Societe
                         }
                         
                         // Couverture limitée dans le temps
-                        if($cover['has_special_limit']) {
+                        if(isset($cover['date_expire'])) {
                             $err_update = self::updateAtradiusValue($this->getData('siren'), 'date_atradius', $cover['date_expire']);
                             if (empty($err_update)) {
-                                $success .= $this->displayFieldName('date_expire') . " : " . $this->getData('date_atradius') . '<br/>';
+                                $success .= $this->displayFieldName('date_expire') . " : " . $this->displayData('date_atradius') . '<br/>';
                             } else {
                                 $errors = BimpTools::merge_array($errors, $err_update);
                             }

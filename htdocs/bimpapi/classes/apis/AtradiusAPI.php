@@ -82,7 +82,6 @@ class AtradiusAPI extends BimpAPI {
             'url_params' => $filters
                 ), $errors, $header, $code);
 
-
         $status = (int) Bimp_Client::STATUS_ATRADIUS_OK;
         foreach($response['data'] as $k => $c) {
             
@@ -93,8 +92,23 @@ class AtradiusAPI extends BimpAPI {
             }
             
             // Il y a une décision prise pour cet acheteur
-            if(isset($c['coverStatus']) and $c['coverStatus'] == self::STATUS_VALID)
+            if(isset($c['coverStatus']) and $c['coverStatus'] == self::STATUS_VALID) {
                 $cover = $response['data'][$k];
+                
+                // Date expire
+                // A une date d'expiration réduite
+                if(isset($c['firstAmtDecision']) and isset($c['firstAmtDecision']['decisionExpiryDate'])) {
+                    $has_special_limit = 1;
+                    $date_expire = new DateTime($c['firstAmtDecision']['decisionExpiryDate']);
+
+                // Pas de date d'expiration spécifique => 1 an
+                } else {
+                    $has_special_limit = 0;
+                    $date_expire = new DateTime($c['decisionDate']);
+                    $date_expire->add(new DateInterval('P1Y'));
+                }
+                
+            } 
             
             
             if(isset($c['firstAmtDecision']) and isset($c['firstAmtDecision']['decisionConditions'])) {
@@ -102,8 +116,8 @@ class AtradiusAPI extends BimpAPI {
                 foreach($c['firstAmtDecision']['decisionConditions'] as $cond)
                     $warnings[] = $cond['conditionDescription'];
                     
-            }  
-            
+            }
+
         }
 
         // Pas de couverture trouvé => on force TODO test
@@ -114,19 +128,6 @@ class AtradiusAPI extends BimpAPI {
             return array();
         }
         
-        
-        // Date expire
-        $has_special_limit = isset($cover['firstAmtDecision']) and isset($cover['firstAmtDecision']['decisionExpiryDate']);
-        
-        // A une date d'expiration réduite
-        if($has_special_limit) {
-            $date_expire = new DateTime($cover['firstAmtDecision']['decisionExpiryDate']);
-
-        // Pas de date d'expiration spécifique => 1 an
-        } else {
-            $date_expire = new DateTime($cover['decisionDate']);
-            $date_expire->add(new DateInterval('P1Y'));
-        }
         
 //        // Date expire
 //        $has_special_limit = (int) isset($cover['withdrawalDate']);
@@ -146,6 +147,16 @@ class AtradiusAPI extends BimpAPI {
         else
             $amount = 0;
         
+        global $user;
+        if($user->id == 330) {
+            $warnings[] = print_r(array(
+            'cover_type'        => (string) $cover['coverType'],
+            'has_special_limit' => (int) $has_special_limit,
+            'code_return'       => (int) $code,
+            'amount'            => (int) $amount,
+            'date_expire'       => (string) $date_expire->format('Y-m-d H:i:s'),
+            'status'            => (int) $status), 1);
+        }
 
         return array(
             'cover_type'        => (string) $cover['coverType'],

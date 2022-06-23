@@ -82,7 +82,7 @@ class AtradiusAPI extends BimpAPI {
             'url_params' => $filters
                 ), $errors, $header, $code);
 
-
+        $date_expire = new DateTime();
         $status = (int) Bimp_Client::STATUS_ATRADIUS_OK;
         foreach($response['data'] as $k => $c) {
             

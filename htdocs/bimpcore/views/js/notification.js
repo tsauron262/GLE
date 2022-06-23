@@ -383,7 +383,6 @@ function BimpNotification() {
                     bn.$refreshBtn.show();
                     
                     if (result.notifications) {
-                        console.log(result.notifications);
                         for (const [nom, value] of Object.entries(result.notifications)) {
                             eval('bn.notificationActive.' + nom + '.obj.addElement(value);');
                         }                     

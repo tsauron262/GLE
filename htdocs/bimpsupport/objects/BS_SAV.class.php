@@ -5713,6 +5713,20 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             'warnings' => $warnings
         );
     }
+    
+    public function unlinkAcompte($data, &$success){
+        $errors = array();
+        $warnings = array();
+        $this->updateField('acompte', 0, null, true);
+        $this->updateField('id_discount', 0, null, true);
+        $this->updateField('id_facture_acompte', 0, null, true);
+
+        $success = "Acompte déliée avec succés.";
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
 
     public function actionCorrectAcompteModePaiement($data, &$success)
     {

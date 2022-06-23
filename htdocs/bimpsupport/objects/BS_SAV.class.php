@@ -5001,23 +5001,20 @@ class BS_SAV extends BimpObject
                 }
             }
 
+            $type_paiement = '';
+
             if ($payment_1_set) {
                 $type_paiement = $this->db->getValue('c_paiement', 'code', '`id` = ' . (int) $data['mode_paiement']);
-                if ($type_paiement === 'VIR') {
-                    BimpObject::loadClass('bimpcommercial', 'Bimp_Paiement');
-                    if (!Bimp_Paiement::canCreateVirement()) {
-                        $errors[] = 'Vous n\'avez pas la permission d\'enregistrer des paiements par virement';
-                    }
-                }
             }
 
-            if ($payment_2_set) {
+            if ($payment_2_set && $type_paiement !== 'VIR') {
                 $type_paiement = $this->db->getValue('c_paiement', 'code', '`id` = ' . (int) $data['mode_paiement2']);
-                if ($type_paiement === 'VIR') {
-                    BimpObject::loadClass('bimpcommercial', 'Bimp_Paiement');
-                    if (!Bimp_Paiement::canCreateVirement()) {
-                        $errors[] = 'Vous n\'avez pas la permission d\'enregistrer des paiements par virement';
-                    }
+            }
+
+            if ($type_paiement === 'VIR') {
+                BimpObject::loadClass('bimpcommercial', 'Bimp_Paiement');
+                if (!Bimp_Paiement::canCreateVirement()) {
+                    $errors[] = 'Vous n\'avez pas la permission d\'enregistrer des paiements par virement';
                 }
             }
         }

@@ -36,9 +36,12 @@ class Bimp_CommissionApporteur extends BimpObject
         $factureLine = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
 
         foreach ($tabsFiltres as $filtreObj) {
+            $filtreFact = "SELECT rowid FROM llx_facture WHERE fk_statut IN (1, 2)";
+            if($filtreObj->getData('contact_apporteur'))
+                $filtreFact .= " AND rowid IN (SELECT DISTINCT(`element_id`) FROM `llx_element_contact` WHERE `fk_c_type_contact` = (SELECT rowid FROM `llx_c_type_contact`  WHERE `code` = 'APPORTEUR' and `source` = 'external' AND `element` = 'facture') AND `fk_socpeople` IN (SELECT `rowid` FROM `llx_socpeople` WHERE `fk_soc` = " . $parent->getData('id_fourn') . ")) ";
             $filters = array(
                 'commission_apporteur' => array('<' => '0'),
-                'f.fk_facture'         => array('IN' => "SELECT rowid FROM llx_facture WHERE rowid IN (SELECT DISTINCT(`element_id`) FROM `llx_element_contact` WHERE `fk_c_type_contact` = (SELECT rowid FROM `llx_c_type_contact`  WHERE `code` = 'APPORTEUR' and `source` = 'external' AND `element` = 'facture') AND `fk_socpeople` IN (SELECT `rowid` FROM `llx_socpeople` WHERE `fk_soc` = " . $parent->getData('id_fourn') . ")) and fk_statut IN (1, 2)")
+                'f.fk_facture'         => array('IN' => $filtreFact)
             );
             $joins = array('f' => array(
                     'table' => 'facturedet',
@@ -149,7 +152,11 @@ class Bimp_CommissionApporteur extends BimpObject
 
                     foreach ($lines as $line) {
                         if ((float) $line->qty && (float) $filtre->getData('commition')) {
-                            $amount = (float) $line->getTotalHTWithRemises(true) / (float) $line->qty * (float) $filtre->getData('commition') / 100;
+                            if($filtre->getData('sur_marge'))
+                                $amount = (float) $line->getMargePrevue();
+                            else        
+                                $amount = (float) $line->getTotalHTWithRemises(true);
+                            $amount = $amount / (float) $line->qty * (float) $filtre->getData('commition') / 100;
 
                             if ($amount != 0) {
                                 $errors = BimpTools::merge_array($errors, $this->createFactureFournLine($line, $new_facture, $amount));
@@ -284,7 +291,10 @@ class Bimp_CommissionApporteur extends BimpObject
         $tabsFiltres = $parent->getChildrenObjects('filtres', array(), 'position', 'ASC');
         $tot = 0;
         foreach ($tabsFiltres as $filtre) {
-            $res = $this->db->executeS("SELECT SUM(total_ht) as tot FROM `llx_facturedet` f, llx_bimp_facture_line bf WHERE bf.`id_line` = f.rowid AND `commission_apporteur` = '" . $this->id . "-" . $filtre->id . "'");
+            $champ = 'total_ht';
+            if($filtre->getData('sur_marge'))
+                $champ = '(total_ht - buy_price_ht * qty)';
+            $res = $this->db->executeS("SELECT SUM(".$champ.") as tot FROM `llx_facturedet` f, llx_bimp_facture_line bf WHERE bf.`id_line` = f.rowid AND `commission_apporteur` = '" . $this->id . "-" . $filtre->id . "'");
             $tot += $res[0]->tot * $filtre->getData('commition') / 100;
         }
         $errors = BimpTools::merge_array($errors, $this->updateField('total', $tot));

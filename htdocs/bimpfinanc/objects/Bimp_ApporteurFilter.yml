@@ -35,6 +35,13 @@ fields:
         label: Commission
         type: percent
         default_value: 0
+    sur_marge:
+        label: Sur marge
+        type: bool
+    contact_apporteur:
+        label: Contact Apporteur configurée
+        type: bool
+        default_value: 1
     
 forms:
     default: 
@@ -42,6 +49,8 @@ forms:
             - field: libelle
             - field: filter
             - field: commition
+            - field: sur_marge
+            - field: contact_apporteur
     
 filters_panels: 
     default: 
@@ -73,6 +82,8 @@ lists:
                 label: Nb Prod
                 value: 
                     callback: getNbRsult 
+            sur_marge:
+            contact_apporteur:
     
 
                       

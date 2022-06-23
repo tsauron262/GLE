@@ -2343,6 +2343,7 @@ class BimpComm extends BimpDolObject
 
         switch ($this->object_name) {
             case 'Bimp_Facture':
+            case 'Bimp_FactureFourn':
                 $statutField = 'fk_statut';
                 break;
             case 'Bimp_Paiement':

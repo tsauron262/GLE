@@ -93,8 +93,23 @@ class AtradiusAPI extends BimpAPI {
             }
             
             // Il y a une décision prise pour cet acheteur
-            if(isset($c['coverStatus']) and $c['coverStatus'] == self::STATUS_VALID)
+            if(isset($c['coverStatus']) and $c['coverStatus'] == self::STATUS_VALID) {
                 $cover = $response['data'][$k];
+                
+                // Date expire
+                $has_special_limit = isset($cover['firstAmtDecision']) and isset($cover['firstAmtDecision']['decisionExpiryDate']);
+
+                // A une date d'expiration réduite
+                if($has_special_limit) {
+                    $date_expire = new DateTime($cover['firstAmtDecision']['decisionExpiryDate']);
+
+                // Pas de date d'expiration spécifique => 1 an
+                } else {
+                    $date_expire = new DateTime($cover['decisionDate']);
+                    $date_expire->add(new DateInterval('P1Y'));
+                }
+                
+            } 
             
             
             if(isset($c['firstAmtDecision']) and isset($c['firstAmtDecision']['decisionConditions'])) {
@@ -102,8 +117,8 @@ class AtradiusAPI extends BimpAPI {
                 foreach($c['firstAmtDecision']['decisionConditions'] as $cond)
                     $warnings[] = $cond['conditionDescription'];
                     
-            }  
-            
+            }
+
         }
 
         // Pas de couverture trouvé => on force TODO test
@@ -114,19 +129,6 @@ class AtradiusAPI extends BimpAPI {
             return array();
         }
         
-        
-        // Date expire
-        $has_special_limit = isset($cover['firstAmtDecision']) and isset($cover['firstAmtDecision']['decisionExpiryDate']);
-        
-        // A une date d'expiration réduite
-        if($has_special_limit) {
-            $date_expire = new DateTime($cover['firstAmtDecision']['decisionExpiryDate']);
-
-        // Pas de date d'expiration spécifique => 1 an
-        } else {
-            $date_expire = new DateTime($cover['decisionDate']);
-            $date_expire->add(new DateInterval('P1Y'));
-        }
         
 //        // Date expire
 //        $has_special_limit = (int) isset($cover['withdrawalDate']);

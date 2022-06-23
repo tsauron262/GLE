@@ -150,6 +150,10 @@ lists_cols:
         label: Pièce
         value: 
             callback: displayObject
+    total: 
+        label: Total Ht
+        value: 
+            callback: displayTotal
     client: 
         label: Client
         value: 
@@ -172,7 +176,8 @@ lists:
         cols:
             type:
             status:
-            piece:   
+            piece: 
+            total:
             client:
             id_user_ask: 
             id_user_affected: 

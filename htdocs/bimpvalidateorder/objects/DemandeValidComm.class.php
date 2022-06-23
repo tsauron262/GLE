@@ -106,6 +106,15 @@ class DemandeValidComm extends BimpObject
         return $html;
     }
     
+    public function displayTotal(){
+        $html = '';
+        $obj = $this->getThisObject();
+        if($obj)
+            $html .= price($obj->getData('total_ht')).' €';
+        
+        return $html;
+    }
+    
     public function create(&$warnings = array(), $force_create = false) {
         
         if($this->getData('id_user_affected') == 1414)

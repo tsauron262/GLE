@@ -3132,7 +3132,7 @@ class Bimp_Client extends Bimp_Societe
 
             global $user;
 
-            if ($user->rights->bimpcommercial->gestion_recouvrement) {
+            if ($user->rights->bimpcommercial->admin_financier) {
                 // Demande d'encours
                 $onclick = $this->getJsActionOnclick('setOutstandingAtradius', array(), array('form_name' => 'setOutstandingAtradius'));
 

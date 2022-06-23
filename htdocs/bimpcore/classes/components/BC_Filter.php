@@ -1208,6 +1208,7 @@ class BC_Filter extends BimpComponent
             // Type recherche d'objet: 
             $html .= '<div class="bimp_filter_type_container bimp_filter_type_">';
 
+            $field_params['required'] = 0;
             $bc_input = new BC_Input($this->object, $this->params['data_type'], $input_name, $input_path, null, $field_params);
             $bc_input->addInputExtraClass('bimp_filter_input');
             $html .= $bc_input->renderHtml();

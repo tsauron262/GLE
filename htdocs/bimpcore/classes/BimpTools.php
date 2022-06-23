@@ -2845,7 +2845,7 @@ class BimpTools
             $errors[] = 'Erreur décodage JSON: ' . json_last_error_msg();
             return array();
         }
-
+        
         if ($result == '') {
             return array();
         }
@@ -3004,7 +3004,7 @@ class BimpTools
         list($h, $s, $l) = $hsl;
 
 //        echo $h . ', ' . $s . ', ' . $l . '<br/>';
-        
+
         if ($s == 0) {
             $r = $g = $b = 1;
         } else {

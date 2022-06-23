@@ -3227,7 +3227,7 @@ class Bimp_Client extends Bimp_Societe
                         if($cover['has_special_limit']) {
                             $err_update = self::updateAtradiusValue($this->getData('siren'), 'date_atradius', $cover['date_expire']);
                             if (empty($err_update)) {
-                                $success .= $this->displayFieldName('date_expire') . " : " . $this->displayField('date_atradius') . '<br/>';
+                                $success .= $this->displayFieldName('date_expire') . " : " . $this->getData('date_atradius') . '<br/>';
                             } else {
                                 $errors = BimpTools::merge_array($errors, $err_update);
                             }

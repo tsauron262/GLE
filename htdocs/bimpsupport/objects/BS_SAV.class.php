@@ -4993,7 +4993,7 @@ class BS_SAV extends BimpObject
                     $errors[] = 'Veuillez vous <a href="' . DOL_URL_ROOT . '/bimpcaisse/index.php" target="_blank">connecter à une caisse</a> pour l\'enregistrement du paiement de la facture';
                 } else {
                     $caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
-                    if (BimpObject::objectLoaded($caisse)) {
+                    if (!BimpObject::objectLoaded($caisse)) {
                         $errors[] = 'La caisse à laquelle vous êtes connecté est invalide.';
                     } else {
                         $caisse->isValid($errors);

@@ -2736,7 +2736,7 @@ class BimpController
 
                 if (!count($errors)) {
                     $errors = $object->setObjectAction($object_action, $id_object, $extra_data, $success);
-                    BimpCore::unlockObject($module, $object_name, $id_object);
+//                    BimpCore::unlockObject($module, $object_name, $id_object);
                 }
             }
         }

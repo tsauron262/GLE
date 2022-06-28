@@ -1618,21 +1618,21 @@ class BimpDocumentPDF extends BimpModelPDF
                 $html .= '</tr>';
 
                 $html .= '<tr>';
-                $html .= '<td>Nom :</td>';
+                $html .= '<td>Nom du signataire :</td>';
 
                 $html .= '<td rowspan="4" style="border-top-color: #505050; border-left-color: #505050; border-right-color: #505050; border-bottom-color: #505050;"><br/><br/><br/><br/><br/></td>';
                 $html .= '</tr>';
 
                 $html .= '<tr>';
-                $html .= '<td>Prénom :</td>';
+                $html .= '<td>Prénom du signataire :</td>';
                 $html .= '</tr>';
 
                 $html .= '<tr>';
-                $html .= '<td>Fonction :</td>';
+                $html .= '<td>Fonction du signataire :</td>';
                 $html .= '</tr>';
 
                 $html .= '<tr>';
-                $html .= '<td>Date :</td>';
+                $html .= '<td>Date de signature :</td>';
 
                 $yPosOffset = 7;
                 $this->signature_params = array(

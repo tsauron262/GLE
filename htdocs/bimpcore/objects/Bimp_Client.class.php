@@ -3222,12 +3222,12 @@ class Bimp_Client extends Bimp_Societe
                                 $errors = BimpTools::merge_array($errors, $err_update);
                             }
                         }
-                        
+
                         // Couverture limitée dans le temps
-                        if(isset($cover['date_expire'])) {
+                        if(key_exists('date_expire', $cover)) {
                             $err_update = self::updateAtradiusValue($this->getData('siren'), 'date_atradius', $cover['date_expire']);
                             if (empty($err_update)) {
-                                $success .= $this->displayFieldName('date_expire') . " : " . $this->displayData('date_atradius') . '<br/>';
+                                $success .= $this->displayFieldName('date_atradius') . " : " . $this->displayData('date_atradius') . '<br/>';
                             } else {
                                 $errors = BimpTools::merge_array($errors, $err_update);
                             }
@@ -3251,12 +3251,11 @@ class Bimp_Client extends Bimp_Societe
 
     private static function updateAtradiusValue($siren, $field, $value)
     {
-        $errors = array();
+        $errors = $warnings = array();
 
-        // Tester sur ASS SAUVEGARDE ENFANCE ET ADOLESCENCE
         // On est en train de définir une limite de crédit => supression du crédit check
         if ($field == 'outstanding_limit_atradius' and 0 < $value)
-            self::updateAtradiusValue($siren, 'outstanding_limit_credit_check', -1);
+            $errors = self::updateAtradiusValue($siren, 'outstanding_limit_credit_check', -1);
 
 
         $clients = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_Client', array('siren' => $siren));
@@ -3264,12 +3263,17 @@ class Bimp_Client extends Bimp_Societe
         foreach ($clients as $c) {
             if ($c->field_exists($field)) {
                 if ($c->getInitData($field) != $value) {
-                    $errors = BimpTools::merge_array($errors, $c->set($field, $value));
-                    $errors = BimpTools::merge_array($errors, $c->update());
+                    if($field == 'date_atradius') {
+                        $errors = BimpTools::merge_array($errors, $c->updateField($field, $value));
+                    } else {
+                        $errors = BimpTools::merge_array($errors, $c->set($field, $value));
+                        $errors = BimpTools::merge_array($errors, $c->update($warnings, true));
+                    }
                 }
             }
         }
 
+        $errors = BimpTools::merge_array($errors, $warnings);
         return $errors;
     }
 
@@ -3395,7 +3399,7 @@ class Bimp_Client extends Bimp_Societe
         return $nb_update;
     }
     
-    private function sendMessageAtradiusUpdate() {
+    private function sendMessageAtradiusUpdate($init_status, $new_status, $init_limit, $new_limit) {
         $msg  = "Le statut Atradius de ce client est passé de " . $this->displayInitData('status_atradius') . ' (avec une limite de: ' . BimpTools::displayMoneyValue((float) $this->getInitData('outstanding_limit_atradius')) .') ';
         $msg .= " à " . $this->displayData('status_atradius') . ' (avec une limite de: ' . BimpTools::displayMoneyValue((float) $this->getData('outstanding_limit_atradius')) .') ';
         

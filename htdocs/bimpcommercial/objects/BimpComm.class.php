@@ -2561,6 +2561,9 @@ class BimpComm extends BimpDolObject
         if (($this->isLoaded())) {
             $dol_lines = array();
             $bimp_lines = array();
+            
+            if (method_exists($this->dol_object, 'fetch_lines'))
+                $this->dol_object->fetch_lines();
 
             foreach ($this->dol_object->lines as $line) {
                 $dol_lines[(int) $line->id] = $line;

@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimpcore_signature` ADD `signed_doc_ext` VARCHAR(5) NOT NULL DEFAULT 'pdf';

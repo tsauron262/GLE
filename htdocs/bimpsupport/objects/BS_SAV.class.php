@@ -4958,7 +4958,8 @@ class BS_SAV extends BimpObject
         $success_callback = '';
 
         $caisse = null;
-        $payment_set = (isset($data['paid']) && (float) $data['paid'] && (isset($data['mode_paiement']) && (int) $data['mode_paiement'] > 0 && (int) $data['mode_paiement'] != 56));
+        $payment_1_set = (isset($data['paid']) && (float) $data['paid'] && (isset($data['mode_paiement']) && (int) $data['mode_paiement'] > 0 && (int) $data['mode_paiement'] != 56));
+        $payment_2_set = (isset($data['paid2']) && (float) $data['paid2'] > 0);
 
 //        $prets = $this->getChildrenObjects('prets');
 //        foreach ($prets as $pret) {
@@ -4982,7 +4983,7 @@ class BS_SAV extends BimpObject
         }
 
 
-        if ($payment_set) {
+        if ($payment_1_set || $payment_2_set) {
             if ($this->useCaisseForPayments) {
                 global $user;
 
@@ -4992,14 +4993,24 @@ class BS_SAV extends BimpObject
                     $errors[] = 'Veuillez vous <a href="' . DOL_URL_ROOT . '/bimpcaisse/index.php" target="_blank">connecter à une caisse</a> pour l\'enregistrement du paiement de la facture';
                 } else {
                     $caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
-                    if (!$caisse->isLoaded()) {
+                    if (!BimpObject::objectLoaded($caisse)) {
                         $errors[] = 'La caisse à laquelle vous êtes connecté est invalide.';
                     } else {
                         $caisse->isValid($errors);
                     }
                 }
             }
-            $type_paiement = $this->db->getValue('c_paiement', 'code', '`id` = ' . (int) $data['mode_paiement']);
+
+            $type_paiement = '';
+
+            if ($payment_1_set) {
+                $type_paiement = $this->db->getValue('c_paiement', 'code', '`id` = ' . (int) $data['mode_paiement']);
+            }
+
+            if ($payment_2_set && $type_paiement !== 'VIR') {
+                $type_paiement = $this->db->getValue('c_paiement', 'code', '`id` = ' . (int) $data['mode_paiement2']);
+            }
+
             if ($type_paiement === 'VIR') {
                 BimpObject::loadClass('bimpcommercial', 'Bimp_Paiement');
                 if (!Bimp_Paiement::canCreateVirement()) {
@@ -5290,7 +5301,7 @@ class BS_SAV extends BimpObject
                                                 $bimpFacture->fetch($facture->id);
 
                                                 // Ajout du paiement: 
-                                                if ($payment_set) {
+                                                if ($payment_1_set) {
                                                     require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
                                                     $payement = new Paiement($this->db->db);
                                                     $payement->amounts = array($facture->id => (float) $data['paid']);
@@ -5315,10 +5326,9 @@ class BS_SAV extends BimpObject
                                                     }
                                                 }
 
-                                                //Ajout deuxième paiement
+                                                // Ajout deuxième paiement
 
-
-                                                if (isset($data['paid2']) && (float) $data['paid2'] > 0) {
+                                                if ($payment_2_set) {
                                                     require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
                                                     $payement = new Paiement($this->db->db);
                                                     $payement->amounts = array($facture->id => (float) $data['paid2']);
@@ -5713,8 +5723,9 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             'warnings' => $warnings
         );
     }
-    
-    public function unlinkAcompte($data, &$success){
+
+    public function unlinkAcompte($data, &$success)
+    {
         $errors = array();
         $warnings = array();
         $this->updateField('acompte', 0, null, true);

@@ -797,7 +797,14 @@ class BimpSignature extends BimpObject
 
             if ($this->isObjectValid($errors, $obj)) {
                 if (method_exists($obj, 'getSignatureDocFileName')) {
-                    return $obj->getSignatureDocFileName($doc_type, $signed);
+                    $file_name = $obj->getSignatureDocFileName($doc_type, $signed);
+                    $file_ext = $this->getData('signed_doc_ext');
+
+                    if ($file_ext && $file_ext !== 'pdf') {
+                        $file_name = pathinfo($file_name, PATHINFO_FILENAME) . '.' . $file_ext;
+                    }
+
+                    return $file_name;
                 }
             }
         }
@@ -815,7 +822,17 @@ class BimpSignature extends BimpObject
 
             if ($this->isObjectValid($errors, $obj)) {
                 if (method_exists($obj, 'getSignatureDocFileUrl')) {
-                    return $obj->getSignatureDocFileUrl($doc_type, $forced_context, $signed);
+                    $url = $obj->getSignatureDocFileUrl($doc_type, $forced_context, $signed);
+
+                    if ($url && $signed) {
+                        $file_ext = $this->getData('signed_doc_ext');
+
+                        if ($file_ext && $file_ext !== 'pdf') {
+                            $url = str_replace('.pdf', '.' . $file_ext, $url);
+                        }
+                    }
+
+                    return $url;
                 }
             }
         }
@@ -1100,7 +1117,7 @@ class BimpSignature extends BimpObject
 
         $file = $this->getDocumentFilePath();
         $file_signed = $this->getDocumentFilePath(true);
-
+        
         $file_url = '';
         $file_signed_url = '';
 
@@ -1748,6 +1765,11 @@ class BimpSignature extends BimpObject
                         $errors[] = 'Le document signé existe déjà. Si vous souhaitez le remplacer, veuillez le supprimer manuellement (Nom: ' . $file_name . ')';
                     } else {
                         require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+
+                        $file_ext = pathinfo($_FILES['file_signed']['name'], PATHINFO_EXTENSION);
+                        $file_name = pathinfo($file_name, PATHINFO_FILENAME) . '.' . $file_ext;
+                        $this->set('signed_doc_ext', $file_ext);
+
                         $_FILES['file_signed']['name'] = $file_name;
 
                         $ret = dol_add_file_process($dir, 0, 0, 'file_signed');

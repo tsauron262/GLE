@@ -899,7 +899,7 @@ class BimpInput
                     $value = json_encode($value);
                 }
 
-                $html .= self::renderInput('hidden', $field_name, htmlentities($value), $options, $form, $option, $input_id);
+                $html .= self::renderInput('hidden', $field_name, $value, $options, $form, $option, $input_id);
 
                 $html .= '</div>';
                 break;

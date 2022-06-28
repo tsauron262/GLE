@@ -474,7 +474,7 @@ class BC_FiltersPanel extends BC_Panel
                 }
 
                 if ($filters_html) {
-                    $html .= '<div class="filter_active_values" data-filter_name="' . $filter_name . '">';
+                    $html .= '<div class="filter_active_values" data-filter_name="' . (($context == 'filters_input') ? str_replace(':', '___', $filter_name) : $filter_name) . '">';
                     $html .= '<div class="filter_label">';
                     $err = array();
                     $html .= $bc_filter->getFilterTitle($bc_filter->base_object, $bc_filter->name, $err, false);

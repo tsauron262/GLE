@@ -150,6 +150,10 @@ lists_cols:
         label: Pièce
         value: 
             callback: displayObject
+    montant_ht: 
+        label: Montant HT
+        value: 
+            callback: displayMontantHT
     client: 
         label: Client
         value: 
@@ -172,13 +176,15 @@ lists:
         cols:
             type:
             status:
-            piece:   
+            piece: 
+            total:
             client:
             id_user_ask: 
             id_user_affected: 
             id_user_valid: 
             date_create:
             date_valid:
+            montant_ht:
             
     my_demand:
         extends: default
@@ -196,5 +202,7 @@ lists:
             id_user_valid: unset
             date_valid: unset
             date_create:
+            montant_ht: unset
+
             
             

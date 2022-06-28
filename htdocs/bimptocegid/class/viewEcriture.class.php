@@ -2,6 +2,7 @@
     
 require_once __DIR__ . '/../../bimpcore/Bimp_Lib.php';
 require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_facture.class.php';
+require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_factureFournisseur.class.php';
 require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_paiement.class.php';
 require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_tiers.class.php';
 
@@ -40,6 +41,10 @@ require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_tiers.class.php';
                     $function   = 'getEcriturePieceClient';
                     $field      = 'code_compta'; 
                     break;
+                case 'Bimp_FactureFourn':
+                    $function   = 'getEcriturePieceClient';
+                    $field      = 'code_compta_fournisseur'; 
+                    break;
             }
 
             $html .= '<br /><br />' . '<pre><b class=\'danger\'>Facture</b><br />' . self::$function() . '<br /><br />';
@@ -67,6 +72,9 @@ require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_tiers.class.php';
             switch(self::$bimpObject->object_name) {
                 case 'Bimp_Facture':
                     $tra = new TRA_facture(self::$bimpObject->db, '');
+                    break;
+                case 'Bimp_FactureFourn':
+                    $tra = new TRA_factureFournisseur(self::$bimpObject->db, '');
                     break;
                 default: return BimpRender::renderAlerts('Erreur lors du chargement de l\'écriture TRA', 'danger', false); break;
             }

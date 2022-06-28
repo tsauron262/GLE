@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bs_sav` ADD `in_fac_emails_files` TEXT NOT NULL DEFAULT '';

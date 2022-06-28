@@ -82,6 +82,7 @@ class DemandeValidComm extends BimpObject
     public function displayClient(){
         $html = '';
         $obj = $this->getThisObject();
+        
         if($obj){
             if(method_exists($obj, 'getClientFacture'))
                 $client = $obj->getClientFacture();
@@ -103,6 +104,15 @@ class DemandeValidComm extends BimpObject
             $html .= $obj->getLink();
         
         return $html;
+    }
+    
+    public function displayMontantHT() {
+        $obj = $this->getThisObject();
+        if($obj->field_exists('total_ht')) {
+            return BimpTools::displayMoneyValue($obj->getData('total_ht'));
+        }
+        
+        return '';
     }
     
     public function create(&$warnings = array(), $force_create = false) {

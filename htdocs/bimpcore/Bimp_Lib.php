@@ -64,6 +64,12 @@ if (!defined('BIMP_LIB')) {
     require_once $dir . 'BimpModuleConf.php';
     require_once $dir . 'BimpLayout.php';
 
+    BimpCore::setMaxExecutionTime(600);
+    BimpCore::setMemoryLimit(256);
+
+    BimpObject::loadClass('bimpcore', 'Bimp_Log');
+    BimpObject::loadClass('bimpcore', 'BimpObjectLog');
+
     if (!defined('BIMP_EXTENDS_ENTITY') && defined('PATH_EXTENDS')) {
         if (preg_match('/^.*\/([a-zA-Z0-1\-_]+)\/?$/', PATH_EXTENDS, $matches)) {
             if ($matches[1]) {
@@ -98,12 +104,6 @@ if (!defined('BIMP_LIB')) {
     if (!class_exists('BimpMail')) {
         require_once $dir . 'BimpMail.php';
     }
-
-    BimpCore::setMaxExecutionTime(600);
-    BimpCore::setMemoryLimit(256);
-
-    BimpObject::loadClass('bimpcore', 'Bimp_Log');
-    BimpObject::loadClass('bimpcore', 'BimpObjectLog');
 
     BimpConfig::initCacheServeur();
 }

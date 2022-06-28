@@ -296,10 +296,10 @@ class BimpCore
 
     public static function getVersion($dev = '')
     {
-        self::getConfCache();
-        if (!isset(self::$conf_cache['bimpcore_version']) || ($dev && !isset(self::$conf_cache['bimpcore_version'][$dev]))) {
-            global $db;
-            $bdb = new BimpDb($db);
+        $cache = self::getConfCache();
+
+        if (!isset($cache['bimpcore']['bimpcore_version']) || ($dev && !isset($cache['bimpcore']['bimpcore_version'][$dev]))) {
+            $bdb = BimpCache::getBdb();
 
             $value = $bdb->getValue('bimpcore_conf', 'value', '`name` = \'bimpcore_version\'');
 
@@ -322,18 +322,18 @@ class BimpCore
             if ($update) {
                 $bdb->update('bimpcore_conf', array(
                     'value' => json_encode($versions)
-                        ), '`name` = \'bimpcore_version\'');
+                        ), '`name` = \'bimpcore_version\' AND `module` = \'bimpcore\'');
             }
 
 
-            self::$conf_cache['bimpcore_version'] = $versions;
+            self::$conf_cache['bimpcore']['bimpcore_version'] = $versions;
         }
 
         if ($dev) {
-            return self::$conf_cache['bimpcore_version'][$dev];
+            return self::$conf_cache['bimpcore']['bimpcore_version'][$dev];
         }
 
-        return self::$conf_cache['bimpcore_version'];
+        return self::$conf_cache['bimpcore']['bimpcore_version'];
     }
 
     public static function setVersion($dev, $version)
@@ -341,19 +341,12 @@ class BimpCore
         $versions = self::getVersion();
 
         if (!isset($versions[$dev])) {
-            $versions[$dev] = array();
+            $versions[$dev] = 0;
         }
 
         $versions[$dev] = $version;
 
-        self::$conf_cache['bimpcore_version'] = $versions;
-
-        global $db;
-        $bdb = new BimpDb($db);
-
-        $bdb->update('bimpcore_conf', array(
-            'value' => json_encode($versions)
-                ), '`name` = \'bimpcore_version\'');
+        self::setConf('bimpcore_version', $versions);
     }
 
     public static function getParam($full_path, $default_value = '', $type = 'string')
@@ -375,25 +368,27 @@ class BimpCore
 
         $cache = self::getConfCache();
 
-        foreach ($cache as $name => $value) {
-            if (preg_match('/^module_version_(.+)$/', $name, $matches)) {
-                $module = $matches[1];
+        if (isset($cache['bimpcore'])) {
+            foreach ($cache['bimpcore'] as $name => $value) {
+                if (preg_match('/^module_version_(.+)$/', $name, $matches)) {
+                    $module = $matches[1];
 
-                $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/sql';
-                if (file_exists($dir) && is_dir($dir)) {
-                    $files = scandir($dir);
+                    $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/sql';
+                    if (file_exists($dir) && is_dir($dir)) {
+                        $files = scandir($dir);
 
-                    foreach ($files as $f) {
-                        if (in_array($f, array('.', '..'))) {
-                            continue;
-                        }
+                        foreach ($files as $f) {
+                            if (in_array($f, array('.', '..'))) {
+                                continue;
+                            }
 
-                        if (preg_match('/^(\d+\.\d)\.sql$/', $f, $matches2)) {
-                            if ((float) $matches2[1] > (float) $value) {
-                                if (!isset($updates[$module])) {
-                                    $updates[$module] = array();
+                            if (preg_match('/^(\d+\.\d)\.sql$/', $f, $matches2)) {
+                                if ((float) $matches2[1] > (float) $value) {
+                                    if (!isset($updates[$module])) {
+                                        $updates[$module] = array();
+                                    }
+                                    $updates[$module][] = (float) $matches2[1];
                                 }
-                                $updates[$module][] = (float) $matches2[1];
                             }
                         }
                     }
@@ -601,11 +596,11 @@ class BimpCore
                 );
 
                 if (!$id_current_log) {
-                    
+
                     if (defined('ID_ERP')) {
                         $extra_data['ID ERP'] = ID_ERP;
                     }
-                    
+
                     $data = BimpTools::merge_array($data, array(
                                 'type'       => $type,
                                 'level'      => $level,
@@ -657,6 +652,114 @@ class BimpCore
             }
 
             $bimp_logs_locked = 0;
+        }
+
+        return $errors;
+    }
+
+    // Gestion des locks 
+
+    public static function checkObjectLock($object)
+    {
+        if (!(int) self::getConf('use_objects_locks')) {
+            return false;
+        }
+
+        if (!is_a($object, 'BimpObject') || !BimpObject::objectLoaded($object)) {
+            return false;
+        }
+
+        global $user;
+
+        $bdb = BimpCache::getBdb(true);
+
+        $where = 'obj_module = \'' . $object->module . '\'';
+        $where .= ' AND obj_name = \'' . $object->object_name . '\'';
+        $where .= ' AND id_object = ' . $object->id;
+
+        $row = $bdb->getRow('bimpcore_object_lock', $where, array('tms', 'id_user'), 'array', 'tms', 'DESC');
+
+        if (!is_null($row) && (int) $row['tms'] < time() - 720) {
+            // Si locké depuis + de 12 minutes
+            $bdb->update('bimpcore_object_lock', array(
+                'id_user' => $user->id,
+                'tms'     => time()
+                    ), $where);
+            return false;
+        }
+
+        if (is_null($row)) {
+            $bdb->insert('bimpcore_object_lock', array(
+                'obj_module' => $object->module,
+                'obj_name'   => $object->object_name,
+                'id_object'  => $object->id,
+                'tms'        => time(),
+                'id_user'    => $user->id
+            ));
+            return false;
+        }
+
+        global $user;
+
+        $msg = '';
+
+        if ((int) $user->id === (int) $row['id_user']) {
+            $msg = 'Vous avez déjà lancé une opération sur ' . $object->getLabel('the') . ' ' . $object->getRef(true) . '<br/>';
+            $msg .= 'Veuillez attendre que l\'opération en cours soit terminée avant de relancer l\'enregistrement.<br/>';
+            $msg .= 'Si vous êtes <b>sûr</b> de n\'avoir aucune opération en cours sur ' . $object->getLabel('this') . ', ';
+            $msg .= 'vous pouvez en forcer le dévérouillage en cliquant sur le bouton ci-dessous: ';
+            $msg .= '<div style="margin: 15px 0; text-align: center">';
+            $msg .= '<span class="btn btn-default" onclick="forceBimpObjectUnlock($(this), ' . $object->getJsObjectData() . ')">';
+            $msg .= 'Forcer le dévérouillage ' . $object->getLabel('of_the') . ' ' . $object->getRef(true);
+            $msg .= '</span>';
+            $msg .= '</div>';
+        } else {
+            $lock_user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $row['id_user']);
+
+            $msg = 'Une opération est déjà en cours sur ' . $object->getLabel('the') . ' ' . $object->getRef(true);
+            if (BimpObject::objectLoaded($lock_user)) {
+                $msg .= ' par l\'utilisateur ' . $lock_user->getLink();
+            }
+            $msg .= '<br/>';
+            $msg .= 'Il est nécessaire d\'attendre que celle-ci soit terminée pour éviter un conflit sur l\'enregistrement des données.<br/>';
+            $msg .= 'Merci de réessayer ultérieurement.<br/>';
+            $msg .= '<b>Etant donné qu\'il est possible que les données de ' . $object->getLabel('this') . ' aient été modifiées, il est recommandé ';
+            $msg .= ' <a href="javascript:bimp_reloadPage()">d\'actualiser la page</a> avant de retenter l\'opération</b>';
+        }
+
+        return $msg;
+    }
+
+    public static function unlockObject($module, $object_name, $id_object)
+    {
+        if (!(int) self::getConf('use_objects_locks')) {
+            return array();
+        }
+
+        $errors = array();
+
+        if (!$module) {
+            $errors = 'Module absent';
+        }
+
+        if (!$object_name) {
+            $errors[] = 'Type d\'objet absent';
+        }
+
+        if (!$id_object) {
+            $errors[] = 'ID objet absent';
+        }
+
+        if (!count($errors)) {
+            $bdb = BimpCache::getBdb(true);
+
+            $where = 'obj_module = \'' . $module . '\'';
+            $where .= ' AND obj_name = \'' . $object_name . '\'';
+            $where .= ' AND id_object = ' . $id_object;
+
+            if ($bdb->delete('bimpcore_object_lock', $where) <= 0) {
+                $errors[] = 'Echec de la suppression du vérouillage - ' . $bdb->err();
+            }
         }
 
         return $errors;

@@ -244,7 +244,9 @@ fields_tables:
                   field_value: fk_facture_source
             - field: zone_vente
               edit: 1
-            - field: exported
+            - label: Etat comptable
+              value:
+                  callback: renderExportedField
             - association: achatsFourn_Equipments
               edit: 1
               show:

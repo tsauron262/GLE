@@ -2098,7 +2098,7 @@ class BS_SAV extends BimpObject
     {
         $html = '';
         if ((int) $this->isLoaded()) {
-            $list = new BC_ListTable(BimpObject::getInstance('bimpcore', 'BimpFile'), 'default', 1, null, 'Fichiers joint SAV');
+            $list = new BC_ListTable(BimpObject::getInstance('bimpsupport', 'BS_SavFile'), 'default', 1, null, 'Fichiers joint SAV');
             $list->addFieldFilterValue('parent_module', 'bimpsupport');
             $list->addFieldFilterValue('parent_object_name', 'BS_SAV');
             $list->addFieldFilterValue('id_parent', $this->id);
@@ -2822,8 +2822,6 @@ class BS_SAV extends BimpObject
 
         $client = $this->getChildObject('client');
         $id_contact = (int) $this->getData('id_contact');
-        
-        
 
         if (!BimpObject::objectLoaded($client)) {
             if (!(int) $this->getData('id_client')) {
@@ -2847,7 +2845,6 @@ class BS_SAV extends BimpObject
             $prop->cond_reglement_id = $id_cond_reglement;
             $prop->mode_reglement_id = $id_mode_reglement;
             $prop->fk_account = (int) BimpCore::getConf('id_default_bank_account');
-            
 
             if ($prop->create($user) <= 0) {
                 $errors[] = 'Echec de la création de la propale';
@@ -3610,6 +3607,26 @@ class BS_SAV extends BimpObject
                 } else {
                     $errors[] = $error_msg . ' - Fichier PDF de la facture absent';
                 }
+
+                $extra_files = $this->getData('in_fac_emails_files');
+
+                if (!empty($extra_files)) {
+                    foreach ($extra_files as $id_file) {
+                        $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', $id_file);
+
+                        if (BimpObject::objectLoaded($file)) {
+                            $file_path = $file->getFilePath();
+
+                            if (is_file($file_path)) {
+                                $file_name = $file->getData('file_name') . '.' . $file->getData('file_ext');
+                                $files[] = array($file_path, dol_mimetype($file_name), $file_name);
+                            } else {
+                                $errors[] = 'Fichier "' . $file->getName() . '" non trouvé';
+                            }
+                        }
+                    }
+                }
+
                 $subject = "Fermeture du dossier " . $this->getData('ref');
                 $mail_msg = 'Nous vous remercions d\'avoir choisi Bimp pour votre ' . $nomMachine . "\n";
                 $mail_msg .= 'Dans les prochains jours, vous allez peut-être recevoir une enquête satisfaction de la part d\'APPLE, votre retour est important afin d\'améliorer la qualité de notre Centre de Services.' . "\n";
@@ -4481,6 +4498,20 @@ class BS_SAV extends BimpObject
         }
     }
 
+    public function addFacEmailFile($id_file)
+    {
+        $errors = array();
+
+        $files = $this->getData('in_fac_emails_files');
+
+        if (!in_array((int) $id_file, $files)) {
+            $files[] = $id_file;
+            $errors = $this->updateField('in_fac_emails_files', $files);
+        }
+
+        return $errors;
+    }
+
     // Actions:
 
     public function actionWaitClient($data, &$success)
@@ -4927,7 +4958,8 @@ class BS_SAV extends BimpObject
         $success_callback = '';
 
         $caisse = null;
-        $payment_set = (isset($data['paid']) && (float) $data['paid'] && (isset($data['mode_paiement']) && (int) $data['mode_paiement'] > 0 && (int) $data['mode_paiement'] != 56));
+        $payment_1_set = (isset($data['paid']) && (float) $data['paid'] && (isset($data['mode_paiement']) && (int) $data['mode_paiement'] > 0 && (int) $data['mode_paiement'] != 56));
+        $payment_2_set = (isset($data['paid2']) && (float) $data['paid2'] > 0);
 
 //        $prets = $this->getChildrenObjects('prets');
 //        foreach ($prets as $pret) {
@@ -4951,7 +4983,7 @@ class BS_SAV extends BimpObject
         }
 
 
-        if ($payment_set) {
+        if ($payment_1_set || $payment_2_set) {
             if ($this->useCaisseForPayments) {
                 global $user;
 
@@ -4961,14 +4993,24 @@ class BS_SAV extends BimpObject
                     $errors[] = 'Veuillez vous <a href="' . DOL_URL_ROOT . '/bimpcaisse/index.php" target="_blank">connecter à une caisse</a> pour l\'enregistrement du paiement de la facture';
                 } else {
                     $caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
-                    if (!$caisse->isLoaded()) {
+                    if (!BimpObject::objectLoaded($caisse)) {
                         $errors[] = 'La caisse à laquelle vous êtes connecté est invalide.';
                     } else {
                         $caisse->isValid($errors);
                     }
                 }
             }
-            $type_paiement = $this->db->getValue('c_paiement', 'code', '`id` = ' . (int) $data['mode_paiement']);
+
+            $type_paiement = '';
+
+            if ($payment_1_set) {
+                $type_paiement = $this->db->getValue('c_paiement', 'code', '`id` = ' . (int) $data['mode_paiement']);
+            }
+
+            if ($payment_2_set && $type_paiement !== 'VIR') {
+                $type_paiement = $this->db->getValue('c_paiement', 'code', '`id` = ' . (int) $data['mode_paiement2']);
+            }
+
             if ($type_paiement === 'VIR') {
                 BimpObject::loadClass('bimpcommercial', 'Bimp_Paiement');
                 if (!Bimp_Paiement::canCreateVirement()) {
@@ -5149,7 +5191,7 @@ class BS_SAV extends BimpObject
                                         }
                                     }
                                 }
-                                if(!$cond_reglement)
+                                if (!$cond_reglement)
                                     $cond_reglement = (int) BimpCore::getConf('sav_cond_reglement', null, 'bimpsupport');
 
                                 $mode_reglement = (int) BimpTools::getArrayValueFromPath($data, 'mode_paiement', (int) $propal->dol_object->mode_reglement_id);
@@ -5259,7 +5301,7 @@ class BS_SAV extends BimpObject
                                                 $bimpFacture->fetch($facture->id);
 
                                                 // Ajout du paiement: 
-                                                if ($payment_set) {
+                                                if ($payment_1_set) {
                                                     require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
                                                     $payement = new Paiement($this->db->db);
                                                     $payement->amounts = array($facture->id => (float) $data['paid']);
@@ -5283,11 +5325,10 @@ class BS_SAV extends BimpObject
                                                         }
                                                     }
                                                 }
-                                                
-                                                //Ajout deuxième paiement
-            
-                
-                                                if(isset($data['paid2']) && (float) $data['paid2'] > 0){
+
+                                                // Ajout deuxième paiement
+
+                                                if ($payment_2_set) {
                                                     require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
                                                     $payement = new Paiement($this->db->db);
                                                     $payement->amounts = array($facture->id => (float) $data['paid2']);
@@ -5677,6 +5718,21 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             } else
                 $success = "Acompte créer avec succés.";
         }
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function unlinkAcompte($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $this->updateField('acompte', 0, null, true);
+        $this->updateField('id_discount', 0, null, true);
+        $this->updateField('id_facture_acompte', 0, null, true);
+
+        $success = "Acompte déliée avec succés.";
         return array(
             'errors'   => $errors,
             'warnings' => $warnings

@@ -3132,7 +3132,7 @@ class Bimp_Client extends Bimp_Societe
 
             global $user;
 
-            if ($user->rights->bimpcommercial->gestion_recouvrement) {
+            if ($user->rights->bimpcommercial->admin_financier) {
                 // Demande d'encours
                 $onclick = $this->getJsActionOnclick('setOutstandingAtradius', array(), array('form_name' => 'setOutstandingAtradius'));
 
@@ -3218,6 +3218,16 @@ class Bimp_Client extends Bimp_Societe
                             $err_update = self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_atradius', (int) $cover['amount']);
                             if (empty($err_update)) {
                                 $success .= $this->displayFieldName('outstanding_limit_atradius') . " : " . (int) $cover['amount'] . '<br/>';
+                            } else {
+                                $errors = BimpTools::merge_array($errors, $err_update);
+                            }
+                        }
+                        
+                        // Couverture limitée dans le temps
+                        if(isset($cover['date_expire'])) {
+                            $err_update = self::updateAtradiusValue($this->getData('siren'), 'date_atradius', $cover['date_expire']);
+                            if (empty($err_update)) {
+                                $success .= $this->displayFieldName('date_expire') . " : " . $this->displayData('date_atradius') . '<br/>';
                             } else {
                                 $errors = BimpTools::merge_array($errors, $err_update);
                             }
@@ -3375,7 +3385,7 @@ class Bimp_Client extends Bimp_Societe
 
             $new_status = $c->getData('status_atradius');
             $new_limit = $c->getData('outstanding_limit_atradius');
-            if((int) $init_status != (int) $new_status or (int) $init_limit != $new_limit) {
+            if((int) $init_status != (int) $new_status or (int) $init_limit != (int) $new_limit) {
                 $c->sendMessageAtradiusUpdate();
                 $nb_update++;
             }

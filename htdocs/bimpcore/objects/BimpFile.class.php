@@ -83,7 +83,7 @@ class BimpFile extends BimpObject
         return 1;
     }
 
-    // Getters: 
+    // Getters:
 
     public function getFilePath()
     {

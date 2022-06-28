@@ -3550,14 +3550,14 @@ class BContract_contrat extends BimpDolObject
                         if ($field == 'total')
                             $montant += $instance->getData('total');
                         elseif ($field == 'pa')
-                            $montant += $instance->getData('total') - $instance->getData('marge');
+                            $montant += $instance->getData('total_achat_reval_ok');
                     }
                 } else {
                     if ($instance->getData('type') == 0) {
                         if ($field == 'total')
                             $montant += $instance->getData('total');
                         elseif ($field == 'pa')
-                            $montant += $instance->getData('total') - $instance->getData('marge');
+                            $montant += $instance->getData('total_achat_reval_ok');
                     }
                 }
             }

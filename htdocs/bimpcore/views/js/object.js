@@ -497,3 +497,20 @@ function loadModalObjectCustomContent($button, object_data, method, method_param
         params: method_params
     }, title, 'Chargement', success_callback, {}, modal_format);
 }
+
+function forceBimpObjectUnlock($button, object_data, $resultContainer) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    if (typeof ($resultContainer)) {
+        $resultContainer = $button.findParentByClass('ajaxResultContainer');
+    }
+
+    BimpAjax('forceBimpObjectUnlock', object_data, $resultContainer, {
+        $button: $button,
+        display_processing: true,
+        processing_padding: 15,
+        success_msg: 'Dévérouillage effectué avec succès'
+    });
+}

@@ -653,6 +653,112 @@ class BimpCore
         return $errors;
     }
 
+    // Gestion des locks 
+
+    public static function checkObjectLock($object)
+    {
+        if (!(int) self::getConf('use_objects_locks')) {
+            return false;
+        }
+
+        if (!is_a($object, 'BimpObject') || !BimpObject::objectLoaded($object)) {
+            return false;
+        }
+
+        global $user;
+
+        $bdb = BimpCache::getBdb(true);
+
+        $where = 'obj_module = \'' . $object->module . '\'';
+        $where .= ' AND obj_name = \'' . $object->object_name . '\'';
+        $where .= ' AND id_object = ' . $object->id;
+
+        $row = $bdb->getRow('bimpcore_object_lock', $where, array('tms', 'id_user'), 'array', 'tms', 'DESC');
+
+        if (!is_null($row) && (int) $row['tms'] < time() - 720) {
+            // Si locké depuis + de 12 minutes
+            $bdb->update('bimpcore_object_lock', array(
+                'id_user' => $user->id,
+                'tms'     => time()
+                    ), $where);
+            return false;
+        }
+
+        if (is_null($row)) {
+            $bdb->insert('bimpcore_object_lock', array(
+                'obj_module' => $object->module,
+                'obj_name'   => $object->object_name,
+                'id_object'  => $object->id,
+                'tms'        => time(),
+                'id_user'    => $user->id
+            ));
+            return false;
+        }
+
+        global $user;
+
+        $msg = '';
+
+        if ((int) $user->id === (int) $row['id_user']) {
+            $msg = 'Vous avez déjà lancé une opération sur ' . $object->getLabel('the') . ' ' . $object->getRef(true) . '<br/>';
+            $msg .= 'Veuillez attendre que l\'opération en cours soit terminée avant de relancer l\'enregistrement.<br/>';
+            $msg .= 'Si vous êtes <b>sûr</b> de n\'avoir aucune opération en cours sur ' . $object->getLabel('this') . ', ';
+            $msg .= 'vous pouvez en forcer le dévérouillage en cliquant sur le bouton ci-dessous: ';
+            $msg .= '<div style="margin: 15px 0; text-align: center">';
+            $msg .= '<span class="btn btn-default" onclick="forceBimpObjectUnlock($(this), ' . $object->getJsObjectData() . ')">';
+            $msg .= 'Forcer le dévérouillage ' . $object->getLabel('of_the') . ' ' . $object->getRef(true);
+            $msg .= '</span>';
+            $msg .= '</div>';
+        } else {
+            $lock_user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $row['id_user']);
+
+            $msg = 'Une opération est déjà en cours sur ' . $object->getLabel('the') . ' ' . $object->getRef(true);
+            if (BimpObject::objectLoaded($lock_user)) {
+                $msg .= ' par l\'utilisateur ' . $lock_user->getLink();
+            }
+            $msg .= '<br/>';
+            $msg .= 'Il est nécessaire d\'attendre que celle-ci soit terminée pour éviter un conflit sur l\'enregistrement des données.<br/>';
+            $msg .= '<b>Merci de réessayer ultérieurement</b>';
+        }
+
+        return $msg;
+    }
+
+    public static function unlockObject($module, $object_name, $id_object)
+    {
+        if (!(int) self::getConf('use_objects_locks')) {
+            return array();
+        }
+
+        $errors = array();
+
+        if (!$module) {
+            $errors = 'Module absent';
+        }
+
+        if (!$object_name) {
+            $errors[] = 'Type d\'objet absent';
+        }
+
+        if (!$id_object) {
+            $errors[] = 'ID objet absent';
+        }
+
+        if (!count($errors)) {
+            $bdb = BimpCache::getBdb(true);
+
+            $where = 'obj_module = \'' . $module . '\'';
+            $where .= ' AND obj_name = \'' . $object_name . '\'';
+            $where .= ' AND id_object = ' . $id_object;
+
+            if ($bdb->delete('bimpcore_object_lock', $where) <= 0) {
+                $errors[] = 'Echec de la suppression du vérouillage - ' . $bdb->err();
+            }
+        }
+
+        return $errors;
+    }
+
     // Chargements librairies:
 
     public static function loadPhpExcel()

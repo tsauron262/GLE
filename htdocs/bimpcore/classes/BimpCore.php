@@ -719,7 +719,7 @@ class BimpCore
             $msg .= '<br/>';
             $msg .= 'Il est nécessaire d\'attendre que celle-ci soit terminée pour éviter un conflit sur l\'enregistrement des données.<br/>';
             $msg .= 'Merci de réessayer ultérieurement.<br/>';
-            $msg .= '<b>Etant donné qu\'il possible que les données de ' . $object->getLabel('this') . ' aient été modifiées, il est recommandé ';
+            $msg .= '<b>Etant donné qu\'il est possible que les données de ' . $object->getLabel('this') . ' aient été modifiées, il est recommandé ';
             $msg .= ' <a href="javascript:bimp_reloadPage()">d\'actualiser la page</a> avant de retenter l\'opération</b>';
         }
 

@@ -1835,10 +1835,18 @@ class BimpTools
         return $return;
     }
 
-    public static function displayTimefromSeconds($total_seconds)
+    public static function displayTimefromSeconds($total_seconds, $withDay = true, $withSecondes = true)
     {
-        $timer = self::getTimeDataFromSeconds((int) $total_seconds);
         $html = '<span class="timer">';
+        if($total_seconds < 0){
+            $html .= '-';
+            $total_seconds = $total_seconds*-1;
+        }
+        $timer = self::getTimeDataFromSeconds((int) $total_seconds);
+        if(!$withDay){
+            $timer['hours'] += 24 * $timer['days'];
+            $timer['days'] = 0;
+        }
         if ($timer['days'] > 0) {
             $html .= $timer['days'] . ' j ';
             $html .= $timer['hours'] . ' h ';
@@ -1849,7 +1857,8 @@ class BimpTools
         } elseif ($timer['minutes'] > 0) {
             $html .= $timer['minutes'] . ' min ';
         }
-        $html .= $timer['secondes'] . ' sec ';
+        if($withSecondes && $timer['secondes'])
+            $html .= $timer['secondes'] . ' sec ';
         $html .= '</span>';
         return $html;
     }

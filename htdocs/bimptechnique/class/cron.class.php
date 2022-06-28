@@ -59,9 +59,9 @@ class Cron
                 $email .= '<br /><br />Ceci est un mail de redirection de ' . $tech->getData('email') . ' vers ' . $this->sendEmailDefault;
             }
             
-//            global $langs;
-//            echo '<h1>'.$tech->dol_object->getFullName($langs).'</h1><br/>'.$mail;
-//            mailSyn2($sujet, $emailSendTo, null, $mail);
+            global $langs;
+            echo '<h1>'.$tech->dol_object->getFullName($langs).'</h1><br/>'.$mail;
+            mailSyn2($sujet, $emailSendTo, null, $mail);
         }
     }
 }

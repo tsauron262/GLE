@@ -17,8 +17,8 @@ class BT_ficheInter_det extends BimpDolObject
     public static $types = [
         self::TYPE_INTER               => ['label' => "Intervention vendue", 'icon' => 'fas_check', 'classes' => ['success']],
         self::TYPE_DEPLACEMENT_VENDU   => ['label' => "Déplacement vendu", 'icon' => 'fas_car', 'classes' => ['success']],
-        self::TYPE_PLUS                => ['label' => "Intervention non prévue", 'icon' => 'fas_plus', 'classes' => ['warning']],
-        self::TYPE_DEPLA               => ['label' => "Déplacement non prévu", 'icon' => 'fas_car', 'classes' => ['warning']],
+        self::TYPE_PLUS                => ['label' => "Intervention à facturer", 'icon' => 'fas_plus', 'classes' => ['warning']],
+        self::TYPE_DEPLA               => ['label' => "Déplacement à facturer", 'icon' => 'fas_car', 'classes' => ['warning']],
         self::TYPE_DEPLACEMENT_CONTRAT => ['label' => "Déplacement sous contrat", 'icon' => 'fas_car', 'classes' => ['success']],
         self::TYPE_IMPON               => ['label' => "Impondérable", 'icon' => 'fas_cogs', 'classes' => ['important']],
         self::TYPE_LIBRE               => ['label' => "Ligne libre", 'icon' => 'fas_paper-plane', 'classes' => ['info']],

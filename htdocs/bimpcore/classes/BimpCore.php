@@ -58,7 +58,6 @@ class BimpCore
         global $noBootstrap, $conf;
 
         if ($noBootstrap) {
-//            unset(static::$files['js'][2]);
             self::$files['js'] = BimpTools::unsetArrayValue(self::$files['js'], '/bimpcore/views/js/bootstrap.min.js');
         }
 

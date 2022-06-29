@@ -172,29 +172,6 @@ class BimpClientForDol extends Bimp_Client{
         BimpObject::loadClass('bimpcore', 'Bimp_Client');
         $errors = $warnings = array();
         
-        $sql .=" SELECT id_object FROM llx_bimpcore_history WHERE field IN('outstanding_limit_atradius', 'outstanding_limit_credit_check') AND date LIKE '2022-06-29%'";
-        $res = $this->db->executeS($sql, 'array');
-        $arr = array();
-        foreach($res as $r) {
-            $arr[] = $r['id_object'];
-        }
-        
-        $filters = array(
-            'rowid' => $arr
-        );
-        
-        
-        
-        $clients = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_Client', $filters);
-        foreach($clients as $c) {
-            $s = $c->displayData('date_atradius');
-            $c->syncroAtradius();
-            $s .= ' => ' . $c->displayData('date_atradius');
-            $this->output .= $s . ' ' . $c->getNomUrl() . '<br/>';
-        }
-        
-        return sizeof($clients);
-        
         $from = new DateTime();
 //        $from->sub(new DateInterval('PT1H')); TODO
         $from->sub(new DateInterval('P2D'));

@@ -172,11 +172,15 @@ class BimpClientForDol extends Bimp_Client{
         BimpObject::loadClass('bimpcore', 'Bimp_Client');
         $errors = $warnings = array();
         
+        $sql .=" SELECT id_object FROM llx_bimpcore_history WHERE field IN('outstanding_limit_atradius', 'outstanding_limit_credit_check') AND date LIKE '2022-06-29%'";
+        $res = $this->db->executeS($sql, 'array');
+        $arr = array();
+        foreach($res as $r) {
+            $arr[] = $r['id_object'];
+        }
+        
         $filters = array(
-            'date_atradius' => array(
-                'operator' => '!=',
-                'value'    => 'NULL'
-            )
+            'rowid' => $arr
         );
         
         

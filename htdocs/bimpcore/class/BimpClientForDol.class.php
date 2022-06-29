@@ -172,6 +172,25 @@ class BimpClientForDol extends Bimp_Client{
         BimpObject::loadClass('bimpcore', 'Bimp_Client');
         $errors = $warnings = array();
         
+        $filters = array(
+            'date_atradius' => array(
+                'operator' => '!=',
+                'value'    => 'NULL'
+            )
+        );
+        
+        
+        
+        $clients = BimpCache::getBimpObjectObjects('bimpcore', 'Bimp_Client', $filters);
+        foreach($clients as $c) {
+            $s = $c->displayData('date_atradius');
+            $c->syncroAtradius();
+            $s .= ' => ' . $c->displayData('date_atradius');
+            $this->output .= $s . ' ' . $c->getNomUrl() . '<br/>';
+        }
+        
+        return sizeof($clients);
+        
         $from = new DateTime();
 //        $from->sub(new DateInterval('PT1H')); TODO
         $from->sub(new DateInterval('P2D'));

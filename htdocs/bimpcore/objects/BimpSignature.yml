@@ -157,6 +157,13 @@ fields:
         type: bool
         default_value: 1
         
+    dist_type: 
+        label: Type de signature à distance
+        type: int
+        values: 
+            array: distTypes
+        default_value: 0
+        
     allow_no_scan: 
         label: Signature papier sans scan autorisée
         type: bool
@@ -439,6 +446,9 @@ fields_tables:
             - field: id_client
             - field: id_contact
             - field: allow_elec
+            - field: dist_type
+              show: 
+                  field_value: allow_elec
             - field: allow_no_scan
             - field: signed
             

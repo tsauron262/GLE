@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimpcore_signature` ADD `dist_type` int(11) NOT NULL DEFAULT 0 AFTER `allow_dist`;

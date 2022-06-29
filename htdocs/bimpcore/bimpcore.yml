@@ -64,6 +64,11 @@ params:
         label: Utiliser les transactions DB
         type: bool
         def: 0
+    use_objects_locks: 
+        label: Activer le vérouillage des objets
+        type: bool
+        def: 1
+        info: Permet d'éviter 2 opérations ajax simultanées sur un même objet
     USE_ENTREPOT: 
         label: Utiliser les entrepôts
         type: bool

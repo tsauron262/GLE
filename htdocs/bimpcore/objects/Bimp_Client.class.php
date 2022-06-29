@@ -3390,7 +3390,16 @@ class Bimp_Client extends Bimp_Societe
             $new_status = $c->getData('status_atradius');
             $new_limit = $c->getData('outstanding_limit_atradius');
             if((int) $init_status != (int) $new_status or (int) $init_limit != (int) $new_limit) {
-                $c->sendMessageAtradiusUpdate();
+                                
+                $msg  = "Le statut Atradius de ce client est passé de " . self::displayAtradiusStatus($init_status) . ' (avec une limite de: ' . BimpTools::displayMoneyValue((float) $init_limit) .') ';
+                $msg .= " à " . self::displayAtradiusStatus($new_status) . ' (avec une limite de: ' . BimpTools::displayMoneyValue((float) $new_limit) .') ';
+                
+                BimpObject::loadClass('bimpcore', 'BimpNote');
+        
+                $c->addNote($msg,
+                    BimpNote::BIMP_NOTE_MEMBERS, 0, 1, '',BimpNote::BN_AUTHOR_USER,
+                    BimpNote::BN_DEST_GROUP, BimpNote::BN_GROUPID_ATRADIUS);  
+
                 $nb_update++;
             }
             
@@ -3399,17 +3408,11 @@ class Bimp_Client extends Bimp_Societe
         return $nb_update;
     }
     
-    private function sendMessageAtradiusUpdate($init_status, $new_status, $init_limit, $new_limit) {
-        $msg  = "Le statut Atradius de ce client est passé de " . $this->displayInitData('status_atradius') . ' (avec une limite de: ' . BimpTools::displayMoneyValue((float) $this->getInitData('outstanding_limit_atradius')) .') ';
-        $msg .= " à " . $this->displayData('status_atradius') . ' (avec une limite de: ' . BimpTools::displayMoneyValue((float) $this->getData('outstanding_limit_atradius')) .') ';
-        
-        BimpObject::loadClass('bimpcore', 'BimpNote');
-        
-        return $this->addNote($msg,
-                BimpNote::BIMP_NOTE_MEMBERS, 0, 1, '',BimpNote::BN_AUTHOR_USER,
-                BimpNote::BN_DEST_GROUP, BimpNote::BN_GROUPID_ATRADIUS);        
+    private static function displayAtradiusStatus($value) {
+        return '<span class="' . self::$status_atradius[$value]['classes'][0] . '">' . self::$status_atradius[$value]['label'] . '</span>';
     }
-    
+
+
     public static function updateAllAtradius($from, &$errors = array(), &$warnings = array(), &$success = '') {
         
         $nb_update = 0;

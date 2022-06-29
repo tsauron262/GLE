@@ -102,11 +102,8 @@ class AtradiusAPI extends BimpAPI {
                     $date_expire = new DateTime($c['firstAmtDecision']['decisionExpiryDate']);
 
                 // Pas de date d'expiration spécifique => 1 an
-                } else {
+                } else
                     $has_special_limit = 0;
-                    $date_expire = new DateTime($c['decisionDate']);
-                    $date_expire->add(new DateInterval('P1Y'));
-                }
                 
             } 
             
@@ -140,11 +137,9 @@ class AtradiusAPI extends BimpAPI {
             'has_special_limit' => (int) $has_special_limit,
             'code_return'       => (int) $code,
             'amount'            => (int) $amount,
-            'date_expire'       => (string) $date_expire->format('Y-m-d H:i:s'),
+            'date_expire'       => (is_a($date_expire, 'DateTime')) ? (string) $date_expire->format('Y-m-d H:i:s') : null,
             'status'            => (int) $status
         );
-
-        
     }
 
 
@@ -713,8 +708,4 @@ class AtradiusAPI extends BimpAPI {
 
         return $errors;
     }
-    
-    
-    // Les requêtes
-
 }

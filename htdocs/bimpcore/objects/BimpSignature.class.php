@@ -1117,7 +1117,6 @@ class BimpSignature extends BimpObject
 
         $file = $this->getDocumentFilePath();
         $file_signed = $this->getDocumentFilePath(true);
-        
         $file_url = '';
         $file_signed_url = '';
 

@@ -35,10 +35,10 @@ class DemandeValidComm extends BimpObject
     
     public static $objets = Array(
         self::OBJ_ALL      => Array('label' => 'Tous'/*,     'icon' => 'fas_file-invoice'*/),
-        self::OBJ_DEVIS    => Array('label' => 'Devis',    'icon' => 'fas_file-invoice', 'module' => 'bimpcommercial', 'obj_name' => 'Bimp_Propal'),
-        self::OBJ_FACTURE  => Array('label' => 'Facture',  'icon' => 'fas_file-invoice-dollar', 'module' => 'bimpcommercial', 'obj_name' => 'Bimp_Facture'),
-        self::OBJ_COMMANDE => Array('label' => 'Commande', 'icon' => 'fas_dolly', 'module' => 'bimpcommercial', 'obj_name' => 'Bimp_Commande'),
-        self::OBJ_CONTRAT => Array('label' => 'Contrat', 'icon' => 'fas_retweet', 'module' => 'bimpcontract', 'obj_name' => 'BContract_contrat'),
+        self::OBJ_DEVIS    => Array('label' => 'Devis',    'icon' => 'fas_file-invoice', 'module' => 'bimpcommercial', 'obj_name' => 'Bimp_Propal', 'table' => 'propal'),
+        self::OBJ_FACTURE  => Array('label' => 'Facture',  'icon' => 'fas_file-invoice-dollar', 'module' => 'bimpcommercial', 'obj_name' => 'Bimp_Facture', 'table' => 'facture'),
+        self::OBJ_COMMANDE => Array('label' => 'Commande', 'icon' => 'fas_dolly', 'module' => 'bimpcommercial', 'obj_name' => 'Bimp_Commande', 'table' => 'commande'),
+        self::OBJ_CONTRAT => Array('label' => 'Contrat', 'icon' => 'fas_retweet', 'module' => 'bimpcontract', 'obj_name' => 'BContract_contrat', 'table' => 'contrat'),
     );
     
     const LIMIT_DEMANDE = 10;
@@ -51,6 +51,49 @@ class DemandeValidComm extends BimpObject
             return 1;
         
         return 0;
+    }
+    
+     public function getClientSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
+    {
+        if ((int) $value) {
+            
+            
+            
+//            $filters['typecont.element'] = static::$dol_module;
+//            $filters['typecont.source'] = 'internal';
+//            $filters['typecont.code'] = 'SALESREPFOLL';
+//            $filters['elemcont.fk_socpeople'] = (int) $value;
+
+        $obj = (int) $this->getData('type_de_piece');
+        
+        $filtreTab = array();
+        foreach(self::$objets as $idType => $infoObj){
+            if(isset($infoObj['table'])){
+                $joins[$infoObj['table']] = array(
+                    'table' => $infoObj['table'],
+                    'on'    => $infoObj['table'].'.rowid = ' . $main_alias . '.id_piece',
+                    'alias' => $infoObj['table']
+                );
+                $filtreTab[] = $main_alias . '.type_de_piece = '. $idType .' AND '.$infoObj['table'].'.fk_soc = '.$value;
+            }
+        }
+        
+        
+        $filters['custom'] = array('custom' => '(('. implode(') || (', $filtreTab).'))');
+//        echo '<pre>';
+//        print_r($filters);
+//            die(self::$objets[$obj]['table']);
+//            $joins['elemcont'] = array(
+//                'table' => 'element_contact',
+//                'on'    => 'elemcont.element_id = ' . $main_alias . '.rowid',
+//                'alias' => 'elemcont'
+//            );
+//            $joins['typecont'] = array(
+//                'table' => 'c_type_contact',
+//                'on'    => 'elemcont.fk_c_type_contact = typecont.rowid',
+//                'alias' => 'typecont'
+//            );
+        }
     }
     
     public function getThisObject(){

@@ -980,8 +980,7 @@ class BimpController
 
         if (!$object_name) {
             if (empty($_POST)) {
-                $errors[] = 'Echec de la reqête (aucune donnée reçue par le serveur). Si vous tentez d\'envoyer un fichier, veuillez vérifier qu\'il n\'est pas trop volumineux (> 8 Mo)';
-//                BimpCore::addlog('Echec Save Object ($_POST vide)', Bimp_Log::BIMP_LOG_ALERTE, 'bimpcore');
+                $errors[] = 'Echec de la requête (aucune donnée reçue par le serveur). Si vous tentez d\'envoyer un fichier, veuillez vérifier qu\'il n\'est pas trop volumineux (> 8 Mo)';
             } else {
                 $errors[] = 'Type de l\'objet à enregistrer absent';
                 BimpCore::addlog('Echec Save Object (Type objet absent)', Bimp_Log::BIMP_LOG_ERREUR, 'bimpcore', null, array(
@@ -995,15 +994,27 @@ class BimpController
 
             if (!is_null($id_object) && (int) $id_object) {
                 $object->fetch($id_object);
+
+                if ($object->isLoaded($errors)) {
+                    $lock_msg = BimpCore::checkObjectLock($object);
+
+                    if ($lock_msg) {
+                        $errors[] = $lock_msg;
+                    }
+                }
             }
 
-            $result = $object->saveFromPost();
+            if (!count($errors)) {
+                $result = $object->saveFromPost();
 
-            if (!count($result['errors'])) {
-                $id_object = $object->id;
-                $url = BimpObject::getInstanceUrl($object);
-            } else {
-                $errors = $result['errors'];
+                if (!count($result['errors'])) {
+                    $id_object = $object->id;
+                    $url = BimpObject::getInstanceUrl($object);
+                } else {
+                    $errors = $result['errors'];
+                }
+                
+                BimpCore::unlockObject($object_module, $object_name, $id_object);
             }
         }
 
@@ -1413,6 +1424,21 @@ class BimpController
             'errors'     => $errors,
             'success'    => 'Associations correctement enregistrées',
             'done'       => $done,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        );
+    }
+
+    protected function ajaxProcessForceBimpObjectUnlock()
+    {
+        $module = BimpTools::getValue('module', '');
+        $id_object = BimpTools::getValue('id_object');
+        $object_name = BimpTools::getValue('object_name', '');
+
+        $errors = BimpCore::unlockObject($module, $object_name, $id_object);
+
+        return array(
+            'errors'     => $errors,
+            'warnings'   => array(),
             'request_id' => BimpTools::getValue('request_id', 0)
         );
     }
@@ -2696,7 +2722,22 @@ class BimpController
             if (is_null($object)) {
                 $errors[] = 'Type d\'objet invalide';
             } else {
-                $errors = $object->setObjectAction($object_action, $id_object, $extra_data, $success);
+                if ((int) $id_object) {
+                    $object->fetch($id_object);
+
+                    if ($object->isLoaded($errors)) {
+                        $lock_msg = BimpCore::checkObjectLock($object);
+
+                        if ($lock_msg) {
+                            $errors[] = $lock_msg;
+                        }
+                    }
+                }
+
+                if (!count($errors)) {
+                    $errors = $object->setObjectAction($object_action, $id_object, $extra_data, $success);
+                    BimpCore::unlockObject($module, $object_name, $id_object);
+                }
             }
         }
 

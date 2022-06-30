@@ -103,7 +103,7 @@ class Bimp_Societe extends BimpDolObject
             case 'outstanding_limit_credit_check':
             case 'date_depot_icba':
             case 'date_atradius':
-                if ($user->admin || $user->rights->bimpcommercial->admin_recouvrement || $user->rights->bimpcommercial->admin_compta) {
+                if ($user->admin || $user->rights->bimpcommercial->admin_recouvrement || $user->rights->bimpcommercial->admin_compta || $user->rights->bimpcommercial->admin_financier) {
                     return 1;
                 }
                 return 0;

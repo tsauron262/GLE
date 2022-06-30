@@ -353,18 +353,7 @@ filters_panels:
           parent:datei:
           parent:fk_user_tech:
           parent:fk_soc:
-          type_of:
-              label: Type d'intervention
-              type: check_list
-              items:
-                    0: Intervention vendue
-                    1: Impondérable
-                    2: Ligne libre
-                    3: Déplacement non vendu
-                    4: Intervention non vendue
-                    5: Déplacement sous contrat
-                    6: Déplacement vendu
-                    7: Intervention en interne
+          type_intervention:
           facturable:
 lists:
     all:

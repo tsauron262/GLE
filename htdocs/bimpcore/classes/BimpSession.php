@@ -6,8 +6,10 @@ class Session {
     private static $sessionBase = array();
     private $sessionId = '';
     private $db = null;
+    private $timeDeb = 0;
     // Initialisation de la session lors de l'appel de la classe
     public function __construct($db){
+        $this->timeDeb = hrtime(true);
 //         Ouverture de la connexion à la BDD et association de cette connexion à la variable $_Connexion_BDD
 //        $this->_Connexion_BDD = $this->general_connexion_bdd($dolibarr_main_db_host, $dolibarr_main_db_name, $dolibarr_main_db_user, $dolibarr_main_db_pass, $dolibarr_main_db_port);
         // Paramétrage des sessions
@@ -95,6 +97,8 @@ class Session {
     // Ecriture des sessions
     public function session_ecriture($sessionID, $sessionData) {
         $datetime_actuel = new DateTime("now", new DateTimeZone('Europe/Paris'));
+        $time = (hrtime(true)-$this->timeDeb) / 1000000000;
+        $_SESSION['time']['erp'.ID_ERP] += $time;
 //        $sessionData = addslashes($sessionData);
 //        $this->db->query("INSERT INTO ".$this->table." (`id_session`, `data`, `update`) VALUES ('".$sessionID."', '".$sessionData."', '".$datetime_actuel->format('Y-m-d H:i:s')."') ON DUPLICATE KEY UPDATE `data` = '".$sessionData."'");
         
@@ -104,6 +108,10 @@ class Session {
         unset($diff2['newtoken']);
         unset($diff1['token']);
         unset($diff2['token']);
+        if($time < 0.5){
+            unset($diff1['time']);
+            unset($diff2['time']);
+        }
         
         if(count($diff1) > 0 || count($diff2) > 0){
 
@@ -112,7 +120,7 @@ class Session {
             unset($data['dol_login']);
             $data = addslashes(json_encode($data));
             if((isset($login) && $login != '') || (isset($_SESSION['userClient']) && $_SESSION['userClient'] != ''))
-                $this->db->query("INSERT INTO ".$this->table." (`id_session`, `data`, login, `update`) VALUES ('".$sessionID."', '".$data."', '".$login."', '".$datetime_actuel->format('Y-m-d H:i:s')."') ON DUPLICATE KEY UPDATE login = '".$login."', `data` = '".$data."'");
+                $this->db->query("INSERT INTO ".$this->table." (`id_session`, `data`, login, `update`, data_time) VALUES ('".$sessionID."', '".$data."', '".$login."', '".$datetime_actuel->format('Y-m-d H:i:s')."', '".$time."') ON DUPLICATE KEY UPDATE login = '".$login."', `data` = '".$data."', data_time = data_time + '".$time."'");
     //        else{
     //            echo '<pre>ecriture';print_r($_SESSION);
     //        }

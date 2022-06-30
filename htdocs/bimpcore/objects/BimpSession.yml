@@ -1,0 +1,46 @@
+table: bimp_php_session
+icon: fas_signature
+public_icon: pe_pen
+common_fields: 0
+
+    
+    
+labels:
+    name: session
+    is_female: 1
+    
+
+                
+fields:     
+    id_session: 
+        label: Id session
+        required: 1
+
+    data: 
+        label: Data
+        type: json
+    data_time: 
+        label: Data time
+        type: float
+        
+        
+    creation: 
+        label: Date creation
+        type: date
+    update: 
+        label: Date mis a jour
+        type: date
+        
+    login:
+        label: Login
+     
+             
+lists: 
+    default: 
+        cols: 
+            id_session: 
+            login: 
+            data: 
+            data_time:
+            creation: 
+            update: 

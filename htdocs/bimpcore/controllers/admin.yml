@@ -57,6 +57,11 @@ objects:
             bimp_object: 
                 module: bimpcore
                 name: BimpMailLog
+    session: 
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpSession
     
                 
 sections:
@@ -165,6 +170,13 @@ sections:
                   list: 
                       panel: 1
                       object: mail_log
+        session:
+            label: Session
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: session
                       
 #        test: 
 #            label: Tests views list

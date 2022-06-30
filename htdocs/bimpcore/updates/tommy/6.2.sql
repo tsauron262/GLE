@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimp_php_session` ADD `id` int(11) NOT NULL AUTO_INCREMENT, ADD UNIQUE KEY `id` (`id`), ADD `data_time` float DEFAULT 0;

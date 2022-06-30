@@ -13,6 +13,7 @@ class BT_ficheInter_det extends BimpDolObject
     CONST TYPE_DEPLACEMENT_CONTRAT = 5;
     CONST TYPE_DEPLACEMENT_VENDU = 6;
     const TYPE_INTERNE = 7;
+    const TYPE_OFFERT = 11;
 
     public static $types = [
         self::TYPE_INTER               => ['label' => "Intervention vendue", 'icon' => 'fas_check', 'classes' => ['success']],
@@ -22,7 +23,8 @@ class BT_ficheInter_det extends BimpDolObject
         self::TYPE_DEPLACEMENT_CONTRAT => ['label' => "Déplacement sous contrat", 'icon' => 'fas_car', 'classes' => ['success']],
         self::TYPE_IMPON               => ['label' => "Impondérable", 'icon' => 'fas_cogs', 'classes' => ['important']],
         self::TYPE_LIBRE               => ['label' => "Ligne libre", 'icon' => 'fas_paper-plane', 'classes' => ['info']],
-        self::TYPE_INTERNE             => ['label' => "Intervention en interne", 'icon' => 'fas_inbox', 'classes' => ['success']]
+        self::TYPE_INTERNE             => ['label' => "Intervention en interne", 'icon' => 'fas_inbox', 'classes' => ['success']],
+        self::TYPE_OFFERT             => ['label' => "Intervention offerte", 'icon' => 'fas_gift', 'classes' => ['success']]
     ];
 
     CONST MODE_FACT_AUCUN__ = 0;
@@ -185,6 +187,9 @@ class BT_ficheInter_det extends BimpDolObject
 
         $types = self::$types;
         unset($types[self::TYPE_INTERNE]);
+        
+        if($fi->getData('fk_statut') < 1)
+            unset($types[self::TYPE_OFFERT]);
 
         return $types;
     }

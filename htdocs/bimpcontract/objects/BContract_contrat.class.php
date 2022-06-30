@@ -189,6 +189,15 @@ class BContract_contrat extends BimpDolObject
         return null;
     }
     
+    public function getDurreeVendu(){
+        $tot = 0;
+        $lines = $this->getChildrenObjects('lines');
+        foreach($lines as $line){
+            $prod = $line->getChildObject('produit');
+            $tot += $prod->getData('duree_i') * $line->getData('qty');
+        }
+        return $tot;
+    }
     
     
     public function canShowAdmin()

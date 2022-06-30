@@ -177,6 +177,13 @@ class InterStatementPDF extends BimpDocumentPDF
             $table->write();
         }
         
+        
+        if(isset($this->want_contrat) && is_object($this->want_contrat)){
+            $vendue = $this->want_contrat->getDurreeVendu();
+        }
+        $html = $this->getTotauxRowsHtml($this->total_time, $vendue);
+        $this->writeContent($html);
+        
         $inters_valid_nok = $intervention->getList(BimpTools::merge_array($this->filters, Array('fk_statut' => array('operator' => '=', 'value' => 0))));
             
             if(!count($inters_valid_nok)) {
@@ -195,7 +202,7 @@ class InterStatementPDF extends BimpDocumentPDF
                 foreach($inters_valid_nok as $data) {
                     $instance = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter', $data['rowid']);
 
-                    $this->total_time += $instance->getData('duree');
+//                    $this->total_time += $instance->getData('duree');
 
                     if($instance->getData('fk_contrat')){
                         $this->contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $instance->getData('fk_contrat'));
@@ -218,7 +225,6 @@ class InterStatementPDF extends BimpDocumentPDF
 
     public function getBottomRightHtml()
     {
-        $html = $this->getTotauxRowsHtml();
 
         return $html;
     }
@@ -228,18 +234,38 @@ class InterStatementPDF extends BimpDocumentPDF
         
     }
 
-    public function getTotauxRowsHtml()
+    public function getTotauxRowsHtml($realisee, $vendue = 0)
     {
         $html = "";
+        $reste = 0;
+        
+        
 
         $html .= '<table style="width: 100%" cellpadding="5">';
 
+        if($vendue > 0){
+            $html .= '<tr>';
+            $html .= '<td style="background-color: #F0F0F0;">Vendue</td>';
+            $html .= '<td style="text-align: center;background-color: #F0F0F0;">';
+            $html .= BimpTools::displayTimefromSeconds($vendue, 0);
+            $html .= '</td>';
+            $html .= '</tr>';
+            $reste = $vendue - $realisee;
+        }
         $html .= '<tr>';
         $html .= '<td style="background-color: #F0F0F0;">Temps total consommé</td>';
         $html .= '<td style="text-align: center;background-color: #F0F0F0;">';
-        $html .= BimpTools::displayTimefromSeconds($this->total_time, '', 0, 0, 1, 2);
+        $html .= BimpTools::displayTimefromSeconds($realisee, 0);
         $html .= '</td>';
         $html .= '</tr>';
+        if($reste != 0){
+            $html .= '<tr>';
+            $html .= '<td style="background-color: #F0F0F0;">Restant</td>';
+            $html .= '<td style="text-align: center;background-color: #F0F0F0;">';
+            $html .= BimpTools::displayTimefromSeconds($reste, 0);
+            $html .= '</td>';
+            $html .= '</tr>';
+        }
 
         $html .= '</table>';
 

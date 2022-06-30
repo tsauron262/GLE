@@ -74,7 +74,7 @@ class AtradiusAPI extends BimpAPI {
      * si pas buyerId => utilise siren
      */
     // customerId est définit automatiquement
-    public function getCover($filters = array(), &$errors = array(), &$warnings = array(), $format_output = true) {
+    public function getCover($filters = array(), &$errors = array(), &$warnings = array()) {
         
         BimpObject::loadClass('bimpcore', 'Bimp_Client');
                 
@@ -95,26 +95,59 @@ class AtradiusAPI extends BimpAPI {
             if(isset($c['coverStatus']) and $c['coverStatus'] == self::STATUS_VALID) {
                 $cover = $response['data'][$k];
                 
-                // Date expire
-                // A une date d'expiration réduite
-                if(isset($c['firstAmtDecision']) and isset($c['firstAmtDecision']['decisionExpiryDate'])) {
-                    $has_special_limit = 1;
-                    $date_expire = new DateTime($c['firstAmtDecision']['decisionExpiryDate']);
-
-                // Pas de date d'expiration spécifique => 1 an
-                } else
-                    $has_special_limit = 0;
-                
-            } 
-            
-            
-            if(isset($c['firstAmtDecision']) and isset($c['firstAmtDecision']['decisionConditions'])) {
-                
-                foreach($c['firstAmtDecision']['decisionConditions'] as $cond)
-                    $warnings[] = $cond['conditionDescription'];
+                // Il y a 2 décisions prises
+                if(isset($c['firstAmtDecision'])  and is_array($c['firstAmtDecision'])
+               and isset($c['secondAmtDecision']) and is_array($c['secondAmtDecision'])) {
                     
-            }
+                    
+                    /* Date d'expiration */
+                    // Les 2 décisions ont une date d'expiration
+                    if(isset($c['firstAmtDecision']['decisionExpiryDate']) and isset($c['secondAmtDecision']['decisionExpiryDate'])) {
+                        $date_first = new DateTime($c['firstAmtDecision']['decisionExpiryDate']);
+                        $date_secon = new DateTime($c['secondAmtDecision']['decisionExpiryDate']);
+                        
+                        if($date_first < $date_secon)
+                            $date_expire = $date_first;
+                        else
+                            $date_expire = $date_secon;
+                        
+                        $has_special_limit = 1;
+                        
+                    // Une seule décision a une date d'expiration
+                    } elseif(isset($c['firstAmtDecision']['decisionExpiryDate']) or isset($c['secondAmtDecision']['decisionExpiryDate'])) {
+                        if(isset($c['firstAmtDecision']['decisionExpiryDate']))
+                            $date_expire = new DateTime($c['firstAmtDecision']['decisionExpiryDate']);
+                        else
+                            $date_expire = new DateTime($c['secondAmtDecision']['decisionExpiryDate']);
+                        $has_special_limit = 1;
+                        
+                    // Décision sans limite dans le temps
+                    } else
+                        $has_special_limit = 0;
+                    
+                    
+                    /* Commentaires */
+                    $warnings[] = $this->getCommentaires($c['firstAmtDecision'], 'première');
+                    $warnings[] = $this->getCommentaires($c['secondAmtDecision'], 'seconde');
 
+                    
+                // Il y a 1 décisions prise
+                } elseif (isset($c['firstAmtDecision']) and is_array($c['firstAmtDecision'])) {
+                    
+                    /* Date d'expiration */
+                    if(isset($c['firstAmtDecision']['decisionExpiryDate'])) {
+                        $has_special_limit = 1;
+                        $date_expire = new DateTime($c['firstAmtDecision']['decisionExpiryDate']);
+                    } else
+                        $has_special_limit = 0;
+                    
+                    
+                    /* Commentaires */
+                    
+                    $warnings[] = $this->getCommentaires($c['firstAmtDecision']);
+                
+                }
+            }
         }
 
         // Pas de couverture trouvé => on force TODO test
@@ -128,7 +161,7 @@ class AtradiusAPI extends BimpAPI {
         if((string) $cover['coverType'] == self::CREDIT_CHECK)
             $amount = $cover['totalDecision']['decisionAmtInPolicyCurrency'];
         elseif(isset($cover['totalDecision']) and isset($cover['totalDecision']['decisionAmtInPolicyCurrency']))
-            $amount = (int) $cover['totalDecision']['decisionAmtInPolicyCurrency'];
+                $amount = (int) $cover['totalDecision']['decisionAmtInPolicyCurrency'];
         else
             $amount = 0;
 
@@ -271,7 +304,8 @@ class AtradiusAPI extends BimpAPI {
     }
 
     
-    // Interface
+    // Interface:
+    
     public function setCovers($params, &$errors = array(), &$warnings = array(), &$success = '') {
         
         $decisions = array();
@@ -390,7 +424,8 @@ class AtradiusAPI extends BimpAPI {
     }
     
 
-    // Tools
+    // Tools:
+    
     private function getSuccess($response_code, &$success = '') {
         switch ($response_code) {
             case 200:
@@ -455,18 +490,29 @@ class AtradiusAPI extends BimpAPI {
         return $msg;
     }
     
-    
-    // Settings
+    private function getCommentaires($data, $num_decision = '') {
+        $commentaires = '';
+        
+        if(isset($data['decisionConditions'])) {
+            foreach($data['decisionConditions'] as $cond)
+                $commentaires .= $cond['conditionDescription'] . '<br/>';
 
-    // SIREN
-    // crédit check + limit : 501759088
-    // date limit : 445248149
-    // crédit check tout seul : 320916109
+        }
+        
+        if($num_decision != '') {
+            $title_comm = 'La ' . $num_decision . ' décision avec un montant de ' . BimpTools::displayMoneyValue($data['decisionAmtInPolicyCurrency']) . ' ';
+            if(isset($data['decisionExpiryDate'])) {
+                $date_expire = new DateTime($data['decisionExpiryDate']);
+                $title_comm . ' qui expire le ' . $date_expire->format('d/m/Y');
+            }
+            $commentaires = $title_comm . ' :<br/>' . $commentaires;
+        }
+        
+        return $commentaires;
+    }
     
-    // BUYER ID
-    // CC tout seul 37838620
-    // CL tout seul 4239457
-    // Les 2 ? 82576511
+    
+    // Settings:
     
     public function testRequest(&$errors = array(), &$warnings = array()) {
         

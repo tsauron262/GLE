@@ -99,6 +99,9 @@ class Session {
         $datetime_actuel = new DateTime("now", new DateTimeZone('Europe/Paris'));
         $time = (hrtime(true)-$this->timeDeb) / 1000000000;
         $_SESSION['time']['erp'.ID_ERP] += $time;
+        $timeTot = 0;
+        for($i=0;$i<10;$i++)
+            $timeTot +=$_SESSION['time']['erp'.$i];
 //        $sessionData = addslashes($sessionData);
 //        $this->db->query("INSERT INTO ".$this->table." (`id_session`, `data`, `update`) VALUES ('".$sessionID."', '".$sessionData."', '".$datetime_actuel->format('Y-m-d H:i:s')."') ON DUPLICATE KEY UPDATE `data` = '".$sessionData."'");
         
@@ -120,7 +123,7 @@ class Session {
             unset($data['dol_login']);
             $data = addslashes(json_encode($data));
             if((isset($login) && $login != '') || (isset($_SESSION['userClient']) && $_SESSION['userClient'] != ''))
-                $this->db->query("INSERT INTO ".$this->table." (`id_session`, `data`, login, `update`, data_time) VALUES ('".$sessionID."', '".$data."', '".$login."', '".$datetime_actuel->format('Y-m-d H:i:s')."', '".$time."') ON DUPLICATE KEY UPDATE login = '".$login."', `data` = '".$data."', data_time = data_time + '".$time."'");
+                $this->db->query("INSERT INTO ".$this->table." (`id_session`, `data`, login, `update`, data_time) VALUES ('".$sessionID."', '".$data."', '".$login."', '".$datetime_actuel->format('Y-m-d H:i:s')."', '".$timeTot."') ON DUPLICATE KEY UPDATE login = '".$login."', `data` = '".$data."', data_time = '".$timeTot."'");
     //        else{
     //            echo '<pre>ecriture';print_r($_SESSION);
     //        }

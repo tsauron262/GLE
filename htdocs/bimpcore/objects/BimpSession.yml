@@ -26,10 +26,10 @@ fields:
         
     creation: 
         label: Date creation
-        type: date
+        type: datetime
     update: 
         label: Date mis a jour
-        type: date
+        type: datetime
         
     login:
         label: Login

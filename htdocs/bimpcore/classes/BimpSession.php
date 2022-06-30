@@ -108,7 +108,7 @@ class Session {
         unset($diff2['newtoken']);
         unset($diff1['token']);
         unset($diff2['token']);
-        if($time < 0.5){
+        if($time < 1){
             unset($diff1['time']);
             unset($diff2['time']);
         }

@@ -404,6 +404,11 @@ class Bimp_Commande extends BimpComm
 //                        $errors[] = 'Cette commande ne peut pas être validée';
 //                    }
 //                }
+                
+                $id_cond_a_la_commande = self::getBdb()->getValue('c_payment_term', 'rowid', '`active` > 0 and code = "RECEPCOM"');
+                if($client_facture->getData('outstanding_limit') < 1 and (int) $id_cond_a_la_commande != (int) $this->getData('fk_cond_reglement')) {
+                    $errors[] = "Les clients sans encours doivent régler à la commande";
+                }
             }
         }
 

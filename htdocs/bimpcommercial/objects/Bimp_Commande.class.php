@@ -632,7 +632,7 @@ class Bimp_Commande extends BimpComm
                         $errors[] = 'Vous n\'avez pas la permission';
                     }
 
-                    if (in_array($user->login, array('admin', 'f.martinez', 't.sauron'))) {
+                    if (in_array($user->login, array('admin', 'f.martinez', 't.sauron', 'a.delauzun'))) {
                         $buttons[] = array(
                             'label'   => 'Forcer Validation (no triggers)',
                             'icon'    => 'fas_check',

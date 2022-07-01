@@ -107,7 +107,7 @@ class BimpDb
         return $result;
     }
 
-    public function executeS($sql, $return = 'object')
+    public function executeS($sql, $return = 'object', $field = null)
     {
         $result = $this->db->query($sql);
 
@@ -121,7 +121,12 @@ class BimpDb
                         break;
 
                     case 'array':
-                        $rows[] = $this->db->fetch_array($result);
+                        if(is_null($field))
+                            $rows[] = $this->db->fetch_array($result);
+                        else{
+                            $res = $this->db->fetch_array($result);
+                            $rows[] = $res[$field];
+                        }
                         break;
                 }
             }

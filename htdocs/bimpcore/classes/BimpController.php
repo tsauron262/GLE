@@ -385,6 +385,14 @@ class BimpController
 
     public function displayFooter()
     {
+        
+    $alert = BimpObject::getBimpObjectInstance('bimpcore', 'BimpAlert');
+    echo $alert::getMsgs();
+    
+    $obj = $alert->getNextAlert();
+    if($obj)
+        echo '<script>$(document).ready(function () {'.$alert->getPopup($obj->id, $obj->getData('label')).'});</script>';
+        
         llxFooter();
     }
 
@@ -739,6 +747,7 @@ class BimpController
 
         $html .= BimpRender::renderAjaxModal('page_modal', 'bimpModal');
         $html .= BimpRender::renderAjaxModal('docu_modal', 'docModal');
+        $html .= BimpRender::renderAjaxModal('alert_modal', 'alertModal');
 
         $html .= '<div id="openModalBtn" onclick="bimpModal.show();" class="closed bs-popover"';
         $html .= BimpRender::renderPopoverData('Afficher la fenêtre popup', 'left');
@@ -3121,6 +3130,20 @@ class BimpController
         else
             $html = $BimpDocumentation->displayDoc();
 
+        return array(
+            'errors'     => $BimpDocumentation->errors,
+            'warnings'   => $BimpDocumentation->warnings,
+            'html'       => $html,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        );
+    }
+
+    protected function ajaxProcessLoadAlertModal()
+    {
+        $obj = BimpCache::getBimpObjectInstance('bimpcore', 'BimpAlert', $_REQUEST['id']);
+        
+        $html = $obj->getMsg();
+        
         return array(
             'errors'     => $BimpDocumentation->errors,
             'warnings'   => $BimpDocumentation->warnings,

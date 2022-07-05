@@ -107,8 +107,8 @@ class BimpAlert extends BimpObject
             $callback = 'bimpModal.clearCurrentContent()';
         
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings,
+            'errors'   => array(),
+            'warnings' => array(),
             'success_callback' => $callback
         );
     }

@@ -36,7 +36,14 @@ fields:
             array: niveaux
     msg: 
         label: Message
-        hashtags: 1        
+        hashtags: 1  
+        type: text
+    type:
+        label: Type
+        type: int
+        values:
+            - Message
+            - Popup
         
 lists:
     default:
@@ -55,4 +62,5 @@ lists:
             label:
             niveau:
             msg:
+            type:
                 

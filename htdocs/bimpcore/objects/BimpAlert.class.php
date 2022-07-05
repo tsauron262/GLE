@@ -73,16 +73,35 @@ class BimpAlert extends BimpObject
         $msg = $this->getData('msg');
         if($this->getData('execution') != '')
             eval($this->getData('execution'));
-        $msg = nl2br($msg);
+        if(stripos($msg, '/>') === false && stripos($msg, '</') === false)
+            $msg = nl2br($msg);
         return $msg;
     }
     
-    public function getPopup($id, $titre){
-        $onclick = $this->getJsActionOnclick('isViewed', array('id' => $id));
+    public function getPopup($id, $titre, $withBtn = true){
         $return = "bimpModal.loadAjaxContent($(this), 'loadAlertModal', {id: '$id'}, '".$titre."', 'Chargement', function (result, bimpAjax) {});bimpModal.show();";
-        $return .= "bimpModal.addButton('Ok', \"".$onclick."\", 'primary', 'is_viewed', modal_idx);";
+        if($withBtn){
+            $onclick = $this->getJsActionOnclick('isViewed', array('id' => $id));
+            $return .= "bimpModal.addButton('Ok', \"".$onclick."\", 'primary', 'is_viewed', modal_idx);";
+        }
         return $return;
-        return '<script>$(document).ready(function () {'.$return.'});</script>';
+    }
+    
+    public function getListExtraButtons()
+    {
+        $buttons = array();
+        if ($this->isLoaded()) {
+
+            if ((int) $this->getData('type') == 1) {
+                $buttons[] = array(
+                        'label'   => 'Voir',
+                        'icon'    => 'fas_eye',
+                        'onclick' => $this->getPopup($this->id, $this->getData('label'), false)
+                    );
+            }
+        }
+
+        return $buttons;
     }
     
     public function actionIsViewed($data, &$success){

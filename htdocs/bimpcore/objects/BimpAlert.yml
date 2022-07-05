@@ -48,6 +48,8 @@ fields:
 lists:
     default:
         positions: 1
+        extra_btn: 
+            callback: getListExtraButtons
         positions_open: 1
         title: Alerts
         add_form_name: default

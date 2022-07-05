@@ -21,7 +21,6 @@ class BimpAlert extends BimpObject
     public static function getNextAlert($id = 0, $type = 'popup'){
         if($id == 0){
             global $user;
-            print_r($user->array_options['options_popup_alert_id']); 
             $id = $user->array_options['options_popup_alert_id'];
         }
         

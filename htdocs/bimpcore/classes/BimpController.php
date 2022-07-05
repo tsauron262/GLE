@@ -281,6 +281,8 @@ class BimpController
     public function onExit()
     {
         $error = error_get_last();
+        // On cache les identifiants de la base
+        $error = preg_replace('/mysqli->real_connect(.*)3306/', 'mysqli->real_connect(adresse_caché, login_caché, mdp_caché, bdd_caché, port_caché', $error);
 
         if (isset($error['type']) && in_array($error['type'], array(E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR))) {
             $this->handleError(E_ERROR, $error['message'], $error['file'], $error['line']);

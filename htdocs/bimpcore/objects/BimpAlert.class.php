@@ -94,6 +94,7 @@ class BimpAlert extends BimpObject
     public function actionIsViewed($data, &$success){
         
         $success = 'Vue';
+        $errors = $warnings = array();
         
         global $user;
         $user->array_options['options_popup_alert_id'] = $data['id'];

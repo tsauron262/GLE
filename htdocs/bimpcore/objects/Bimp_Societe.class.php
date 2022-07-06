@@ -1503,10 +1503,10 @@ class Bimp_Societe extends BimpDolObject
         return self::$effectifs_list;
     }
 
-    public function getCommerciauxArray($include_empty = false, $with_default = true)
+    public function getCommerciauxArray($include_empty = false, $with_default = true, $active_only = false)
     {
         if ($this->isLoaded()) {
-            return self::getSocieteCommerciauxArray($this->id, $include_empty, $with_default);
+            return self::getSocieteCommerciauxArray($this->id, $include_empty, $with_default, $active_only);
         }
 
         return array();

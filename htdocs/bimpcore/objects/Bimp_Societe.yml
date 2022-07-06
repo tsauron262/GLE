@@ -485,6 +485,11 @@ fields:
         label: Date rappel expiration de la couverture Atradius
         type: datetime
         
+
+    date_demande_atradius: 
+        label: Date de demande de couverture Atradius
+        type: datetime
+        
     outstanding_limit_icba:
         label: Limite de crédit ICBA 
         type: money

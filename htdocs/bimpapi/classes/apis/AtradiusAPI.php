@@ -127,8 +127,13 @@ class AtradiusAPI extends BimpAPI {
                     
                     
                     /* Commentaires */
-                    $warnings[] = $this->getCommentaires($c['firstAmtDecision'], 'première');
-                    $warnings[] = $this->getCommentaires($c['secondAmtDecision'], 'seconde');
+                    $warn_first = $this->getCommentaires($c['firstAmtDecision'], 'première');
+                    $warn_secon = $this->getCommentaires($c['secondAmtDecision'], 'seconde');
+                    
+                    if($warn_first)
+                        $warnings[] = $warn_first;
+                    if($warn_secon)
+                        $warnings[] = $warn_secon;
 
                     
                 // Il y a 1 décisions prise
@@ -143,8 +148,9 @@ class AtradiusAPI extends BimpAPI {
                     
                     
                     /* Commentaires */
-                    
-                    $warnings[] = $this->getCommentaires($c['firstAmtDecision']);
+                    $warn = $this->getCommentaires($c['firstAmtDecision']);
+                    if($warn)
+                        $warnings[] = $warn;
                 
                 }
             }

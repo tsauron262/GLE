@@ -3291,7 +3291,6 @@ class Bimp_Client extends Bimp_Societe
 
         $errors = array();
 
-//        $success = 'OK';
         $id_atradius = $this->getIdAtradius($errors);
         if (0 < (int) $id_atradius) {
 
@@ -3307,6 +3306,16 @@ class Bimp_Client extends Bimp_Societe
                     'creditLimitAmount' => (int) $amount,
                     'customerRefNumber' => $this->getData('code_client')
                         ), $errors, $warnings, $success);
+                
+                
+                foreach($decisions as $d) {
+                    if(in_array($d['status'], array(self::STATUS_ATRADIUS_OK, self::STATUS_ATRADIUS_EN_ATTENTE))) {
+                        $err_update = self::updateAtradiusValue($this->getData('siren'), 'date_demande_atradius', date('Y-m-d H:i:s'));
+                        $errors = BimpTools::merge_array($errors, $err_update);
+                        break;
+                    }
+                }
+                
                 
                 if(!empty($decisions)) {
                     $this->syncroAtradius ($warnings_doublon, $success);

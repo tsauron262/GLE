@@ -417,7 +417,7 @@ class RelancePaiementPDF extends BimpModelPDF
         $users = array();
 
         if (BimpObject::objectLoaded($this->client)) {
-            $users = $this->client->getCommerciauxArray(false, true);
+            $users = $this->client->getCommerciauxArray(false, true, true);
         }
 
         $nUsers = (count($users) + 1);

@@ -1472,11 +1472,16 @@ class BimpCache
         return self::$cache[$cache_key];
     }
 
-    public static function getSocieteCommerciauxArray($id_societe, $include_empty = false, $with_default = true)
+    public static function getSocieteCommerciauxArray($id_societe, $include_empty = false, $with_default = true, $active_only = false)
     {
         $cache_key = 'societe_' . $id_societe . '_commerciaux_array';
+        
         if ($with_default)
-            $cache_key .= 'with_default';
+            $cache_key .= '_with_default';
+        
+        if ($active_only) {
+            $cache_key .= '_active_only';
+        }
 
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
@@ -1484,6 +1489,10 @@ class BimpCache
             $sql = 'SELECT u.rowid as id_user, u.firstname,u.lastname FROM ' . MAIN_DB_PREFIX . 'societe_commerciaux sc';
             $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'user u ON u.rowid = sc.fk_user';
             $sql .= ' WHERE sc.fk_soc = ' . (int) $id_societe;
+            
+            if ($active_only) {
+                $sql .= ' AND u.statut = 1';
+            }
 
             $rows = self::getBdb()->executeS($sql, 'array');
             if (!is_null($rows)) {

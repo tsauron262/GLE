@@ -1222,7 +1222,7 @@ class Bimp_Client extends Bimp_Societe
                             'operator' => 'like',
                             'value'    => '%licite pour ce client un encours%'
                         ), "obj_type"   => "bimp_object", "obj_module" => $this->module, "obj_name"   => $this->object_name, "id_obj"     => $this->id));
-
+            
             if (count($list) == 0) {
                 $buttons[] = array(
                     'label'   => 'Demander encours',
@@ -1230,7 +1230,6 @@ class Bimp_Client extends Bimp_Societe
                     'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => 680, "content" => "Bonjour, " . $user->getFullName($langs) . " sollicite pour ce client un encours à XX XXX  €\\n\\nNB : si ce client est une Administration publique (son Siren commence par 1 ou par 2) ou si vous pensez qu\'il fait partie des Autres Administrations et Institution demandez 50 000 € d\'encours\\nCette information sera vérifiée par l\'équipe en charge de l\'attribution des encours"), array('form_name' => 'rep'))
                 );
             } else {
-//                print_r($list);die;
                 $noteT = current($list);
                 $buttons[] = array(
                     'label'   => 'Refus d\'encours',
@@ -1239,14 +1238,14 @@ class Bimp_Client extends Bimp_Societe
                 );
             }
             
-//            if($this->getData('outstanding_limit')) {
-//                $msg = 'test';
-//                $buttons[] = array(
-//                    'label'   => 'Nouveau client',
-//                    'icon'    => 'user-plus',
-//                    'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_USER, "fk_user_dest" => 330, "content" => $msg), array('form_name' => 'rep'))
-//                );
-//            }
+            if($this->getData('outstanding_limit') and $user->rights->bimpcommercial->admin_financier) {
+                $buttons[] = array(
+                    'label'   => 'Nouveau client',
+                    'icon'    => 'user-plus',
+                    'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_USER, "fk_user_dest" => $noteT->getData('user_create'), "content" => "Bonjour\\n\\nSauf erreur de notre part, cette demande concerne un nouveau client\\n\\nIl convient donc d\'appliquer la règle en vigueur, à savoir :\\n\\n- La 1ère commande du client devra être réglée au comptant à la commande\\n\\n- Si aucun incident n\'a été relevé (rejet de paiement ou litige commercial) la 2ème commande devra faire l\'objet d\'une demande d\'encours\\nCet encours sera défini selon décision des Assurance-crédit, et la facture devra être réglée à 30 jours date de facture\\nNB : si aucun encours n\'est obtenu, cette 2ème commande devra également être réglée au comptant\\n\\nPour les facturations suivantes nous pourrons demander à Atradius une révision de leur décision, dans la mesure où nous serons en mesure de leur fournir les éléments financiers du client"
+                        ), array('form_name' => 'rep'))
+                );
+            }
         }
         else{
             $html .= 'nonnonnonnon';

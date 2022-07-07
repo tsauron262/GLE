@@ -1235,9 +1235,18 @@ class Bimp_Client extends Bimp_Societe
                 $buttons[] = array(
                     'label'   => 'Refus d\'encours',
                     'icon'    => 'far_paper-plane',
-                    'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_USER, "fk_user_dest" => $noteT->getData('user_create'), "content" => "Bonjour\\n\\nVotre demande d\'encours pour le client " . addslashes($this->getName()) . " a été refusée\\n\\nNous pouvons toutefois solliciter Atradius pour une révision de cette décision \\n\\nPour cela nous devons fournir un maximum d\'éléments prouvant la bonne santé financière de cette entreprise (dernier bilan, compte de résultats, etc)\\n\\nMerci de bien vouloir les demander à votre client puis les transmettre à GDS-OLYS-atradiusolys@ldlc.com \\n\\nDans l\'attente de cette éventuelle révision, les commandes ne peuvent être traitées que sur application de l\'une des solutions suivantes :\\nsoit le client nous règle au comptant, c\'est à dire à la commande ou avant livraison ou à réception de facture (ce dernier choix implique un règlement immédiat à date de facture)\\nsoit il accepte qu\'on le prélève à 30 jours date de factures (dans ce cas-là il nous faut un Mandat SEPA accepté et un RIB)\\nNB : la solution du prélèvement concernerait toutes ses factures, et si nous rencontrons le moindre incident de paiement, par exemple un prélèvement rejeté, nous reviendrons obligatoirement à la solution du paiement au comptant"), array('form_name' => 'rep'))
+                    'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_USER, "fk_user_dest" => $noteT->getData('user_create'), "content" => "Bonjour\\n\\nLa demande d\'encours pour ce client a été refusée.\\n\\nNous pourrons tenter une demande de révision en fonction des nouvelles informations financières qu\'il nous communiquera.\\n\\nÀ ce jour, ses commandes ne peuvent être traitées que s\'il nous règle au comptant lors de la commande."), array('form_name' => 'rep'))
                 );
             }
+            
+//            if($this->getData('outstanding_limit')) {
+//                $msg = 'test';
+//                $buttons[] = array(
+//                    'label'   => 'Nouveau client',
+//                    'icon'    => 'user-plus',
+//                    'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_USER, "fk_user_dest" => 330, "content" => $msg), array('form_name' => 'rep'))
+//                );
+//            }
         }
         else{
             $html .= 'nonnonnonnon';

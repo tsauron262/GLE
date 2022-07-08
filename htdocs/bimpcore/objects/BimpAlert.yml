@@ -37,7 +37,9 @@ fields:
     msg: 
         label: Message
         hashtags: 1  
-        type: text
+        type: html
+        input:
+            type: html
     type:
         label: Type
         type: int

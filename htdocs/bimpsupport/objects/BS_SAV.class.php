@@ -6391,8 +6391,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             $errors[] = 'Facture d\'acompte, impossible de changer de client';
             return $errors;
         }
-
-
+        
         if (!count($errors)) {
             $errors = parent::update($warnings, $force_update);
         }
@@ -6407,7 +6406,6 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 //todo gestion des contacts.
             }
 
-
             if (!is_null($centre)) {
                 $this->set('id_entrepot', (int) $centre['id_entrepot']);
             }
@@ -6416,6 +6414,9 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             if ((int) $this->getData('id_propal')) {
                 $propal = $this->getChildObject('propal');
                 if (BimpObject::objectLoaded($propal)) {
+                    if ($propal->getData('ref_client') != $this->getData('prestataire_number')) {
+                        $propal->updateField('ref_client', $this->getData('prestataire_number'));
+                    }
                     if ((int) $propal->getData('fk_statut') === 0) {
                         // Mise à jour des lignes propale:
                         $prop_errors = $this->generatePropalLines();

@@ -35,7 +35,9 @@ class balController extends BimpController {
             
             $list->addFieldFilterValue('viewed', 0);
             $list->params['title'] = 'Non Lue';
+            $lis->identifier = 'nl';
             $list2->params['title'] = 'Tous';
+            $list2->identifier = 'tous';
             $html = $list->renderHtml(). $list2->renderHtml();
             return $html;
     }

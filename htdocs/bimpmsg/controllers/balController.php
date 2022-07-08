@@ -27,6 +27,7 @@ class balController extends BimpController {
                 }
                 else{
                     $list->addFieldFilterValue('user_create', $balValue);
+                    $list->addFieldFilterValue('type_dest', array('operator'=>">", "value"=>0));
                 }
             }
             else{

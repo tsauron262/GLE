@@ -48,7 +48,9 @@ class balController extends BimpController {
 
         global $user, $db;
         
-        $idsUsers = array($user->id=>$user->getFullName($langs), 1=>'Admin');
+        $idsUsers = array($user->id=>$user->getFullName($langs));
+        if($user->admin)
+            $idsUsers[1] = 'Admin';
         foreach($idsUsers as $idUser=>$name){
             $filters = array('type_dest'=>1, 'fk_user_dest'=>$idUser, 'viewed'=>0);
             $list = BimpCache::getBimpObjectList('bimpcore', 'BimpNote', $filters);
@@ -63,7 +65,7 @@ class balController extends BimpController {
             $html .= BimpRender::renderButton($button).'<br/>';
         }
         
-        $idsGroups = array(490=>'Facturation', 408=>'Facturation Client');
+        $idsGroups = array();
                 
         $sql = $db->query('SELECT rowid, nom FROM llx_usergroup WHERE rowid IN (SELECT fk_usergroup FROM llx_usergroup_user WHERE fk_user = 242 AND fk_usergroup IN (SELECT DISTINCT(fk_group_dest) FROM `llx_bimpcore_note` WHERE viewed = 0));');
         while ($ln = $db->fetch_object($sql))

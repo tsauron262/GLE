@@ -390,7 +390,7 @@ class Bimp_Stat_Date extends BimpObject
                     'nb_new_propales'                  => 'Nb nouveaux devis',
                     'nb_new_commandes'                 => 'Nb nouvelles commandes',
                     'nb_new_commandes_for_new_clients' => 'Nb nouvelles commandes des nouveaux clients',
-                    'ca_ttc'                           => 'CA TTC',
+                    'ca_ht'                            => 'CA HT',
                     'marges'                           => 'Total Marges',
                     'tx_marque'                        => 'Taux de marque'
                 );
@@ -450,11 +450,11 @@ class Bimp_Stat_Date extends BimpObject
                 }
 
                 $data_types = array(
-                    'ca_ttc'                           => 'CA TTC',
-                    'marges'                           => 'Total Marges',
-                    'tx_marque'                        => 'Taux de marque'
+                    'ca_ht'     => 'CA HT',
+                    'marges'    => 'Total Marges',
+                    'tx_marque' => 'Taux de marque'
                 );
-                
+
                 // Données par métiers: 
                 $sheet = $excel->createSheet();
                 $sheet->setTitle('Métiers');

@@ -5,7 +5,7 @@ class balController extends BimpController {
     public function renderHtml() {
         $balType = BimpTools::getValue('bal_type');
         $balValue = BimpTools::getValue('bal_value');
-        $dest = BimpTools::getValue('dest', false);
+        $dest = BimpTools::getValue('dest', true);
         
         $html = '';
 //        if(!isset($balType) || !$balType || !isset($balValue) || !$balValue)

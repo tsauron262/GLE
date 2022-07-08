@@ -32,7 +32,38 @@ fields:
     filter:
         label: Filtre JSON
         type: text
-            
+       
+forms: 
+    monthy_report: 
+        rows: 
+            - custom: 1
+              label: Mois
+              input_name: month
+              input: 
+                  type: select
+                  options: 
+                      array: 
+                          1: Janvier
+                          2: Février 
+                          3: Mars
+                          4: Avril
+                          5: Mai
+                          6: Juin
+                          7: Juillet
+                          8: Août 
+                          9: Septembre
+                          10: Octobre
+                          11: Novembre
+                          12: Décembre
+                          
+            - custom: 1
+              label: Année
+              input_name: Year
+              input: 
+                  type: select
+                  options: 
+                      array: reportYears
+        
 filters: 
     ec_fk_socpeople:
         label: Commecial
@@ -89,8 +120,8 @@ lists:
         sort_field: date
         sort_way: desc
         filters_panel: default
-#        header_buttons:
-#            callback: getListHeaderButtons
+        header_buttons:
+            callback: getListHeaderButtons
         cols: 
             dateCust: 
                 label: Date

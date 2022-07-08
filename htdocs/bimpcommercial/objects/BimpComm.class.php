@@ -272,7 +272,7 @@ class BimpComm extends BimpDolObject
                 } else {
                     if ((int) BimpCore::getConf('typent_required', 0, 'bimpcommercial') && $client->getData('fk_typent') == 0)
                         $errors[] = 'Type de tier obligatoire';
-                    
+
                     // Module de validation activé
                     if ((int) $conf->global->MAIN_MODULE_BIMPVALIDATEORDER == 1) {
                         BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
@@ -2561,7 +2561,7 @@ class BimpComm extends BimpDolObject
         if (($this->isLoaded())) {
             $dol_lines = array();
             $bimp_lines = array();
-            
+
             if (method_exists($this->dol_object, 'fetch_lines'))
                 $this->dol_object->fetch_lines();
 
@@ -3938,6 +3938,337 @@ class BimpComm extends BimpDolObject
         }
 
         return $errors;
+    }
+
+    public static function getMonthlyReportData($month, $year)
+    {
+        $data = array(
+            'total'   => array(
+                'nb_new_clients'                   => 0,
+                'nb_new_propales'                  => 0,
+                'nb_new_commandes'                 => 0,
+                'nb_new_commandes_for_new_clients' => 0,
+                'ca_ttc'                           => 0,
+                'ca_ht'                            => 0,
+                'marges'                           => 0,
+                'achats'                           => 0,
+                'tx_marque'                        => ''
+            ),
+            'users'   => array(),
+            'metiers' => array(),
+            'regions' => array()
+        );
+
+        BimpObject::loadClass('bimpcore', 'Bimp_Societe');
+        $bdb = BimpCache::getBdb();
+        $date_min = $year . '-' . ($month < 10 ? '0' : '') . $month . '-01 00:00:00';
+        $dt = new DateTime($date_min);
+        $dt->add(new DateInterval('P1M'));
+        $date_max = $dt->format('Y-m-d H:i:s');
+
+        // Nb new clients: 
+        $where = 'datec >= \'' . $date_min . '\' AND datec < \'' . $date_max . '\'';
+        $where .= ' AND client > 0';
+        $data['total']['nb_new_clients'] = (int) $bdb->getCount('societe', $where, 'rowid');
+
+        // Nb new clients / users
+        $sql = 'SELECT sc.fk_user as id_user, COUNT(DISTINCT s.rowid) as nb_clients';
+        $sql .= BimpTools::getSqlFrom('societe', array(
+                    'sc' => array(
+                        'table' => 'societe_commerciaux',
+                        'on'    => 'sc.fk_soc = s.rowid'
+                    )
+                        ), 's');
+        $sql .= ' WHERE';
+        $sql .= ' s.datec >= \'' . $date_min . '\' AND s.datec < \'' . $date_max . '\'';
+        $sql .= ' AND s.client > 0';
+        $sql .= ' GROUP BY sc.fk_user';
+        $rows = $bdb->executeS($sql, 'array');
+
+        foreach ($rows as $r) {
+            if (!isset($data['users'][(int) $r['id_user']])) {
+                $data['users'][(int) $r['id_user']] = array();
+            }
+            
+            $data['users'][(int) $r['id_user']]['nb_new_clients'] = (int) $r['nb_clients'];
+        }
+        // Nb new Devis: 
+        $where = 'datec >= \'' . $date_min . '\' AND datec < \'' . $date_max . '\'';
+        $where .= ' AND fk_statut IN (1,2,4)';
+        $data['total']['nb_new_propales'] = (int) $bdb->getCount('propal', $where, 'rowid');
+        
+        // Nb new Devis / users
+        $sql = 'SELECT ec.fk_socpeople as id_user, COUNT(DISTINCT p.rowid) as nb_propales';
+        $sql .= BimpTools::getSqlFrom('propal', array(
+                    'ec' => array(
+                        'table' => 'element_contact',
+                        'on'    => 'ec.element_id = p.rowid'
+                    )
+                        ), 'p');
+        $sql .= ' WHERE';
+        $sql .= ' ec.fk_c_type_contact IN (SELECT tc.rowid';
+        $sql .= BimpTools::getSqlFrom('c_type_contact', null, 'tc');
+        $sql .= BimpTools::getSqlWhere(array(
+                    'element' => 'propal',
+                    'source'  => 'internal',
+                    'code'    => 'SALESREPFOLL'
+                        ), 'tc');
+        $sql .= ')';
+        $sql .= ' AND p.datec >= \'' . $date_min . '\' AND p.datec < \'' . $date_max . '\'';
+        $sql .= ' AND p.fk_statut IN (1,2,4)';
+        $sql .= ' GROUP BY ec.fk_socpeople';
+        $rows = $bdb->executeS($sql, 'array');
+
+        foreach ($rows as $r) {
+            if (!isset($data['users'][(int) $r['id_user']])) {
+                $data['users'][(int) $r['id_user']] = array();
+            }
+
+            $data['users'][(int) $r['id_user']]['nb_new_propales'] = (int) $r['nb_propales'];
+        }
+        
+        // Nb new Commandes: 
+        $where = 'date_creation >= \'' . $date_min . '\' AND date_creation < \'' . $date_max . '\'';
+        $where .= ' AND fk_statut > 0';
+        $data['total']['nb_new_commandes'] = (int) $bdb->getCount('commande', $where, 'rowid');
+        
+        // Nb new Commandes / users
+        $sql = 'SELECT ec.fk_socpeople as id_user, COUNT(DISTINCT c.rowid) as nb_commandes';
+        $sql .= BimpTools::getSqlFrom('commande', array(
+                    'ec' => array(
+                        'table' => 'element_contact',
+                        'on'    => 'ec.element_id = c.rowid'
+                    )
+                        ), 'c');
+        $sql .= ' WHERE';
+        $sql .= ' ec.fk_c_type_contact IN (SELECT tc.rowid';
+        $sql .= BimpTools::getSqlFrom('c_type_contact', null, 'tc');
+        $sql .= BimpTools::getSqlWhere(array(
+                    'element' => 'commande',
+                    'source'  => 'internal',
+                    'code'    => 'SALESREPFOLL'
+                        ), 'tc');
+        $sql .= ')';
+        $sql .= ' AND c.date_creation >= \'' . $date_min . '\' AND c.date_creation < \'' . $date_max . '\'';
+        $sql .= ' AND c.fk_statut > 0';
+        $sql .= ' GROUP BY ec.fk_socpeople';
+        $rows = $bdb->executeS($sql, 'array');
+
+        foreach ($rows as $r) {
+            if (!isset($data['users'][(int) $r['id_user']])) {
+                $data['users'][(int) $r['id_user']] = array();
+            }
+
+            $data['users'][(int) $r['id_user']]['nb_new_commandes'] = (int) $r['nb_commandes'];
+        }
+        
+        // Nb new Commandes / new clients: 
+        $where = 'date_creation >= \'' . $date_min . '\' AND date_creation < \'' . $date_max . '\'';
+        $where .= ' AND fk_statut > 0';
+        $where .= ' AND fk_soc IN (';
+        $where .= 'SELECT DISTINCT s.rowid FROM ' . MAIN_DB_PREFIX . 'societe s WHERE ';
+        $where .= 's.datec >= \'' . $date_min . '\' AND s.datec < \'' . $date_max . '\'';
+        $where .= ' AND s.client > 0';
+        $where .= ')';
+        $data['total']['nb_new_commandes_for_new_clients'] = (int) $bdb->getCount('commande', $where, 'rowid');
+
+        // Nb new Commandes / new clients / users
+        $sql = 'SELECT ec.fk_socpeople as id_user, COUNT(DISTINCT c.rowid) as nb_commandes';
+        $sql .= BimpTools::getSqlFrom('commande', array(
+                    'ec' => array(
+                        'table' => 'element_contact',
+                        'on'    => 'ec.element_id = c.rowid'
+                    )
+                        ), 'c');
+        $sql .= ' WHERE';
+        $sql .= ' ec.fk_c_type_contact IN (SELECT tc.rowid';
+        $sql .= BimpTools::getSqlFrom('c_type_contact', null, 'tc');
+        $sql .= BimpTools::getSqlWhere(array(
+                    'element' => 'commande',
+                    'source'  => 'internal',
+                    'code'    => 'SALESREPFOLL'
+                        ), 'tc');
+        $sql .= ')';
+        $sql .= ' AND c.date_creation >= \'' . $date_min . '\' AND c.date_creation < \'' . $date_max . '\'';
+        $sql .= ' AND c.fk_statut > 0';
+        $sql .= ' AND c.fk_soc IN (';
+        $sql .= 'SELECT DISTINCT s.rowid FROM ' . MAIN_DB_PREFIX . 'societe s WHERE ';
+        $sql .= 's.datec >= \'' . $date_min . '\' AND s.datec < \'' . $date_max . '\'';
+        $sql .= ' AND s.client > 0';
+        $sql .= ')';
+        $sql .= ' GROUP BY ec.fk_socpeople';
+        $rows = $bdb->executeS($sql, 'array');
+
+        foreach ($rows as $r) {
+            if (!isset($data['users'][(int) $r['id_user']])) {
+                $data['users'][(int) $r['id_user']] = array();
+            }
+
+            $data['users'][(int) $r['id_user']]['nb_new_commandes_for_new_clients'] = (int) $r['nb_commandes'];
+        }
+        
+        // CA / marges: 
+        $fields = array(
+            'f.total_ttc',
+            'f.total as total_ht',
+            'f.marge_finale_ok',
+            'f.total_achat_reval_ok',
+            'fef.expertise',
+            'ec.fk_socpeople as id_user',
+            's.zip',
+            's.fk_pays'
+        );
+
+        $filters = array(
+            'f.datef'              => array(
+                'and' => array(
+                    array(
+                        'operator' => '>=',
+                        'value'    => $date_min
+                    ),
+                    array(
+                        'operator' => '<',
+                        'value'    => $date_max
+                    )
+                )
+            ),
+            'f.fk_statut'          => array(
+                'in' => array(1, 2)
+            ),
+            'f.type'               => array(
+                'in' => array(0, 1, 2)
+            ),
+            'ec.fk_c_type_contact' => array(
+                'in' => BimpTools::getSqlFullSelectQuery('c_type_contact', array('rowid'), array(
+                    'element' => 'facture',
+                    'source'  => 'internal',
+                    'code'    => 'SALESREPFOLL'
+                        ), array(
+                    'default_alias' => 'tc'
+                ))
+            )
+        );
+        $joins = array(
+            'fef' => array(
+                'table' => 'facture_extrafields',
+                'on'    => 'fef.fk_object = f.rowid'
+            ),
+            'ec'  => array(
+                'table' => 'element_contact',
+                'on'    => 'ec.element_id = f.rowid'
+            ),
+            's'   => array(
+                'table' => 'societe',
+                'on'    => 's.rowid = f.fk_soc'
+            )
+        );
+
+        $sql = BimpTools::getSqlFullSelectQuery('facture', $fields, $filters, $joins, array(
+                    'default_alias' => 'f'
+        ));
+
+        $rows = $bdb->executeS($sql, 'array');
+
+        foreach ($rows as $r) {
+            $data['total']['ca_ttc'] += (float) $r['total_ttc'];
+            $data['total']['ca_ht'] += (float) $r['total_ht'];
+            $data['total']['marges'] += (float) $r['marge_finale_ok'];
+            $data['total']['achats'] += (float) $r['total_achat_reval_ok'];
+
+            // CA par user: 
+            if ((int) $r['id_user']) {
+                $id_user = (int) $r['id_user'];
+
+                if (!isset($data['users'][$id_user])) {
+                    $data['users'][$id_user] = array();
+                }
+
+                if (!isset($data['users'][$id_user]['ca_ttc'])) {
+                    $data['users'][$id_user]['ca_ttc'] = 0;
+                }
+                $data['users'][$id_user]['ca_ttc'] += (float) $r['total_ttc'];
+
+                if (!isset($data['users'][$id_user]['ca_ht'])) {
+                    $data['users'][$id_user]['ca_ht'] = 0;
+                }
+                $data['users'][$id_user]['ca_ht'] += (float) $r['total_ht'];
+
+                if (!isset($data['users'][$id_user]['marges'])) {
+                    $data['users'][$id_user]['marges'] = 0;
+                }
+                $data['users'][$id_user]['marges'] += (float) $r['marge_finale_ok'];
+
+                if (!isset($data['users'][$id_user]['achats'])) {
+                    $data['users'][$id_user]['achats'] = 0;
+                }
+                $data['users'][$id_user]['achats'] += (float) $r['total_achat_reval_ok'];
+            }
+
+            // CA par région: 
+            $region = Bimp_Societe::getRegionCsvValue($r);
+            if (!isset($data['regions'][$region])) {
+                $data['regions'][$region] = array(
+                    'ca_ttc'    => 0,
+                    'ca_ht'     => 0,
+                    'marges'    => 0,
+                    'achats'    => 0,
+                    'tx_marque' => ''
+                );
+            }
+
+            $data['regions'][$region]['ca_ttc'] += (float) $r['total_ttc'];
+            $data['regions'][$region]['ca_ht'] += (float) $r['total_ht'];
+            $data['regions'][$region]['marges'] += (float) $r['marge_finale_ok'];
+            $data['regions'][$region]['achats'] += (float) $r['total_achat_reval_ok'];
+
+            // Ca par métier: 
+            $exp = (int) $r['expertise'];
+            if (!isset($data['metiers'][$exp])) {
+                $data['metiers'][$exp] = array(
+                    'ca_ttc'    => 0,
+                    'ca_ht'     => 0,
+                    'marges'    => 0,
+                    'achats'    => 0,
+                    'tx_marque' => ''
+                );
+            }
+
+            $data['metiers'][$exp]['ca_ttc'] += (float) $r['total_ttc'];
+            $data['metiers'][$exp]['ca_ht'] += (float) $r['total_ht'];
+            $data['metiers'][$exp]['marges'] += (float) $r['marge_finale_ok'];
+            $data['metiers'][$exp]['achats'] += (float) $r['total_achat_reval_ok'];
+        }
+
+        // Calcul Tx Marque: 
+        if ((float) $data['total']['ca_ht']) {
+            $data['total']['tx_marque'] = ($data['total']['marges'] / $data['total']['ca_ht']) * 100;
+        }
+
+        foreach ($data['users'] as $id_user => &$user_data) {
+            if (isset($user_data['ca_ht']) && (float) $user_data['ca_ht']) {
+                $user_data['tx_marque'] = ($user_data['marges'] / $user_data['ca_ht']) * 100;
+            } else {
+                $user_data['tx_marque'] = 'Inf.';
+            }
+        }
+
+        foreach ($data['regions'] as $region => &$region_data) {
+            if (isset($region_data['ca_ht']) && (float) $region_data['ca_ht']) {
+                $region_data['tx_marque'] = ($region_data['marges'] / $region_data['ca_ht']) * 100;
+            } else {
+                $region_data['tx_marque'] = 'Inf.';
+            }
+        }
+
+        foreach ($data['metiers'] as $metier => &$metier_data) {
+            if (isset($metier_data['ca_ht']) && (float) $metier_data['ca_ht']) {
+                $metier_data['tx_marque'] = ($metier_data['marges'] / $metier_data['ca_ht']) * 100;
+            } else {
+                $metier_data['tx_marque'] = 'Inf.';
+            }
+        }
+        
+        return $data;
     }
 
     // post process: 

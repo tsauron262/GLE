@@ -217,6 +217,9 @@ div.mainmenu.synopsisficheinter {
 div.mainmenu.bimpequipment {
     background-image: url(../../bimpequipment/img/logistique.png);
 }
+div.mainmenu.bimpmsg {
+    background-image: url(../../theme/eldy/img/menus/mail_over.png);
+}
 
 
 

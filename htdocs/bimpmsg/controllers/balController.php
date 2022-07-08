@@ -75,7 +75,7 @@ class balController extends BimpController {
             $filters = array('type_dest'=>1, 'fk_user_dest'=>$idUser, 'viewed'=>0);
             $list = BimpCache::getBimpObjectList('bimpcore', 'BimpNote', $filters);
             $button = array(
-                'label'   => 'Boite Envoie '.$name.' '.BimpTools::getBadge(count($list)),
+                'label'   => 'Boite Envoie '.$name,
                 'icon'    => 'fas_comment',
                 'onclick' => 'window.location.href = \'?fc=bal&bal_type=user&dest=0&bal_value='.$idUser.'\';',
                 'url'     => 'google.com'

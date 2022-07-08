@@ -5,23 +5,29 @@ class balController extends BimpController {
     public function renderHtml() {
         $balType = BimpTools::getValue('bal_type');
         $balValue = BimpTools::getValue('bal_value');
+        $dest = BimpTools::getValue('dest', false);
         
         $html = '';
 //        if(!isset($balType) || !$balType || !isset($balValue) || !$balValue)
             $html .= BimpRender::renderPanel('Menu', $this->menu());
             
         if(isset($balType) && $balType && isset($balValue) && $balValue)
-            $html .= BimpRender::renderPanel('Messages', $this->getListBal($balType, $balValue));
+            $html .= BimpRender::renderPanel('Messages', $this->getListBal($balType, $balValue, $dest));
          
         return $html;
     }
     
-    public function getListBal($balType, $balValue){
+    public function getListBal($balType, $balValue, $dest = true){
             $note = BimpObject::getInstance('bimpcore', 'BimpNote');
             $list = new BC_ListTable($note, 'bal');
             if($balType == 'user'){
-                $list->addFieldFilterValue('type_dest', 1);
-                $list->addFieldFilterValue('fk_user_dest', $balValue);
+                if($dest){
+                    $list->addFieldFilterValue('type_dest', 1);
+                    $list->addFieldFilterValue('fk_user_dest', $balValue);
+                }
+                else{
+                    $list->addFieldFilterValue('user_create', $balValue);
+                }
             }
             else{
                 $list->addFieldFilterValue('type_dest', 2);
@@ -62,7 +68,19 @@ class balController extends BimpController {
                 'onclick' => 'window.location.href = \'?fc=bal&bal_type=user&bal_value='.$idUser.'\';',
                 'url'     => 'google.com'
             );
-            if($idUser == BimpTools::getValue('bal_value') && BimpTools::getValue('bal_type') == 'user')
+            if($idUser == BimpTools::getValue('bal_value') && BimpTools::getValue('bal_type') == 'user' && BimpTools::getValue('dest', true) == 1)
+                $button['classes'] = array('btn-primary');
+            $html .= BimpRender::renderButton($button).'<br/>';
+            
+            $filters = array('type_dest'=>1, 'fk_user_dest'=>$idUser, 'viewed'=>0);
+            $list = BimpCache::getBimpObjectList('bimpcore', 'BimpNote', $filters);
+            $button = array(
+                'label'   => 'Boite Envoie '.$name.' '.BimpTools::getBadge(count($list)),
+                'icon'    => 'fas_comment',
+                'onclick' => 'window.location.href = \'?fc=bal&bal_type=user&dest=0&bal_value='.$idUser.'\';',
+                'url'     => 'google.com'
+            );
+            if($idUser == BimpTools::getValue('bal_value') && BimpTools::getValue('bal_type') == 'user' && BimpTools::getValue('dest', true) == 0)
                 $button['classes'] = array('btn-primary');
             $html .= BimpRender::renderButton($button).'<br/>';
         }

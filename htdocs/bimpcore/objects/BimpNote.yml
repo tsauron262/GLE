@@ -185,6 +185,10 @@ lists_cols:
         label: Destinataire(s)
         value: 
             callback: displayChatmsg
+    parent:
+        label: Objet liée
+        value:
+            callback: getParentLink
                     
 lists:
     default: 
@@ -261,6 +265,11 @@ lists:
                 label: Destinataire(s)
                 value: 
                     callback: displayChatmsg
+                    
+    bal:
+        extends: default
+        cols:
+            parent:
             
 searches: 
     default: 

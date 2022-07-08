@@ -251,6 +251,9 @@ class BimpNote extends BimpObject
                 }
             }
         }
+        else{
+            return $this->parent->getLink();
+        }
 
         return $html;
     }

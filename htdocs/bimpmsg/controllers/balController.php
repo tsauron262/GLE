@@ -1,0 +1,95 @@
+<?php
+
+class balController extends BimpController {
+
+    public function renderHtml() {
+        $balType = BimpTools::getValue('bal_type');
+        $balValue = BimpTools::getValue('bal_value');
+        
+        $html = '';
+//        if(!isset($balType) || !$balType || !isset($balValue) || !$balValue)
+            $html .= BimpRender::renderPanel('Menu', $this->menu());
+            
+        if(isset($balType) && $balType && isset($balValue) && $balValue)
+            $html .= BimpRender::renderPanel('Messages', $this->getListBal($balType, $balValue));
+         
+        return $html;
+    }
+    
+    public function getListBal($balType, $balValue){
+            $note = BimpObject::getInstance('bimpcore', 'BimpNote');
+            $list = new BC_ListTable($note, 'bal');
+            if($balType == 'user'){
+                $list->addFieldFilterValue('type_dest', 1);
+                $list->addFieldFilterValue('fk_user_dest', $balValue);
+            }
+            else{
+                $list->addFieldFilterValue('type_dest', 2);
+                $list->addFieldFilterValue('fk_group_dest', $balValue);
+            }
+            
+            $list2 = clone($list);
+            
+            
+            
+            
+            $list->addFieldFilterValue('viewed', 0);
+            $list->params['title'] = 'Non Lue';
+            $list2->params['title'] = 'Tous';
+            $html = $list->renderHtml(). $list2->renderHtml();
+            return $html;
+    }
+    
+    
+    public function menu(){
+        $html = '';
+        
+        $button = array();
+
+        global $user, $db;
+        
+        $idsUsers = array($user->id=>$user->getFullName($langs), 1=>'Admin');
+        foreach($idsUsers as $idUser=>$name){
+            $filters = array('type_dest'=>1, 'fk_user_dest'=>$idUser, 'viewed'=>0);
+            $list = BimpCache::getBimpObjectList('bimpcore', 'BimpNote', $filters);
+            $button = array(
+                'label'   => 'Boite Personnel '.$name.' '.BimpTools::getBadge(count($list)),
+                'icon'    => 'fas_comment',
+                'onclick' => 'window.location.href = \'?fc=bal&bal_type=user&bal_value='.$idUser.'\';',
+                'url'     => 'google.com'
+            );
+            if($idUser == BimpTools::getValue('bal_value') && BimpTools::getValue('bal_type') == 'user')
+                $button['classes'] = array('btn-primary');
+            $html .= BimpRender::renderButton($button).'<br/>';
+        }
+        
+        $idsGroups = array(490=>'Facturation', 408=>'Facturation Client');
+                
+        $sql = $db->query('SELECT rowid, nom FROM llx_usergroup WHERE rowid IN (SELECT fk_usergroup FROM llx_usergroup_user WHERE fk_user = 242 AND fk_usergroup IN (SELECT DISTINCT(fk_group_dest) FROM `llx_bimpcore_note` WHERE viewed = 0));');
+        while ($ln = $db->fetch_object($sql))
+                $idsGroups[$ln->rowid] = $ln->nom;
+        
+        foreach($idsGroups as $idGroupe=>$name){
+            $filters = array('type_dest'=>2, 'fk_group_dest'=>$idGroupe, 'viewed'=>0);
+            $list = BimpCache::getBimpObjectList('bimpcore', 'BimpNote', $filters);
+            $button = array(
+                'label'   => 'Boite Personnel '.$name.' '.BimpTools::getBadge(count($list)),
+                'icon'    => 'fas_comment',
+                'onclick' => 'window.location.href = \'?fc=bal&bal_type=group&bal_value='.$idGroupe.'\';',
+                'url'     => 'google.com'
+            );
+            if($idGroupe == BimpTools::getValue('bal_value') && BimpTools::getValue('bal_type') == 'group')
+                $button['classes'] = array('btn-primary');
+            $html .= BimpRender::renderButton($button).'<br/>';
+        }
+        
+        
+        
+//        $html .= BimpRender::renderButtonsGroup($button, $params);
+        
+        
+        return $html;
+    }
+
+
+}

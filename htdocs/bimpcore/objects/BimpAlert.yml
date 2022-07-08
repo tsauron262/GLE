@@ -67,4 +67,11 @@ lists:
             niveau:
             msg:
             type:
+            nb:
+                
+lists_cols:
+    nb:
+        label: Nombre de vue
+        value: 
+            callback: getNbView
                 

@@ -43,6 +43,14 @@ class BimpAlert extends BimpObject
         return null;
     }
     
+    public function getNbView(){
+        if($this->isLoaded() && $this->getData('type') == 1){
+            $sql = $this->db->db->query('SELECT count(*) as nb FROM `'.MAIN_DB_PREFIX.'user_extrafields` WHERE popup_alert_id >= '.$this->id);
+            $ln = $this->db->db->fetch_object($sql);
+            return $ln->nb;
+        }
+    }
+    
     
     public static function getMsgs(){
         if(!BimpTools::getValue('ajax')){

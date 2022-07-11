@@ -2787,9 +2787,10 @@ class BT_ficheInter extends BimpDolObject
             return array('Client invalide');
         }
 
-        $this->set('ref', $this->getNextNumRef());
+        $this->set('ref', "(PROV$this->id)");
 
         $errors = parent::create($warnings, $force_create);
+        $this->set('ref', "(PROV$this->id)");
 
         if (!count($errors)) {
             $client->setActivity('Création ' . $this->getLabel('of_the') . ' {{Fiche inter:' . $this->id . '}}');

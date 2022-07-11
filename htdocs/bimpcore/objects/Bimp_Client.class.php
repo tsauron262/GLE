@@ -1237,7 +1237,7 @@ class Bimp_Client extends Bimp_Societe
                     'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_USER, "fk_user_dest" => $noteT->getData('user_create'), "content" => "Bonjour\\n\\nLa demande d\'encours pour ce client a été refusée.\\n\\nNous pourrons tenter une demande de révision en fonction des nouvelles informations financières qu\'il nous communiquera.\\n\\nÀ ce jour, ses commandes ne peuvent être traitées que s\'il nous règle au comptant lors de la commande."), array('form_name' => 'rep'))
                 );
             
-                if($this->getData('outstanding_limit') and $user->rights->bimpcommercial->admin_financier) {
+                if($this->getData('outstanding_limit') == 0 and $user->rights->bimpcommercial->admin_financier and is_a($noteT, 'BimpNote')) {
                     $buttons[] = array(
                         'label'   => 'Nouveau client',
                         'icon'    => 'user-plus',

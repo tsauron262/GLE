@@ -30,11 +30,7 @@ class BimpAlert extends BimpObject
         $objs = BimpCache::getBimpObjectObjects('bimpcore', 'BimpAlert', $filtre, 'id', 'asc');
         $html = '';
         foreach($objs as $alert){
-            if($alert->getData('conditionExec') != '')
-                $exec = 0;
-            else
-                $exec = 1;
-            eval($alert->getData('conditionExec'));
+            $exec = $alert->isOp();
             if($exec){
                 return $alert;
             }
@@ -51,17 +47,40 @@ class BimpAlert extends BimpObject
         }
     }
     
+    public function isOp(){
+        if($this->isLoaded()){
+            //Condition du filtre user
+                if(is_array($this->getData('filter')) && count($this->getData('filter'))){
+                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User');
+                $filterObj = new BC_FiltersPanel($user);
+                $filterObj->setFilters($this->getData('filter'));
+                $errors = BimpTools::merge_array($errors, $filterObj->getSqlFilters($filters, $joins));
+
+                $list = BimpCache::getBimpObjectList('bimpcore', 'Bimp_User', $filters);
+                global $user;
+                if(!in_array($user->id, $list))
+                        return 0;
+            }
+        
+            //Condition de du filtre exec
+            if($this->getData('conditionExec') != '')
+                $exec = 0;
+            else
+                $exec = 1;
+            eval($this->getData('conditionExec'));
+            if(!$exec)
+                return 0;
+        }
+        return 1;
+    }
+    
     
     public static function getMsgs(){
         if(!BimpTools::getValue('ajax')){
             $objs = BimpCache::getBimpObjectObjects('bimpcore', 'BimpAlert', array('status'=>1, 'type'=>0), 'position');
             $html = '';
             foreach($objs as $alert){
-                if($alert->getData('conditionExec') != '')
-                    $exec = 0;
-                else
-                    $exec = 1;
-                eval($alert->getData('conditionExec'));
+                $exec = $alert->isOp();
                 if($exec){
                     $msg = $alert->getData('msg');
                     if($alert->getData('execution') != '')

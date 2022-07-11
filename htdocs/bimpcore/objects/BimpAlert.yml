@@ -46,6 +46,12 @@ fields:
         values:
             - Message
             - Popup
+    filter:
+        label: Filtre
+#        type: text
+        type: object_filters
+        obj_module: bimpcore
+        obj_name: Bimp_User
         
 lists:
     default:
@@ -67,6 +73,7 @@ lists:
             niveau:
             msg:
             type:
+            filter:
             nb:
                 
 lists_cols:

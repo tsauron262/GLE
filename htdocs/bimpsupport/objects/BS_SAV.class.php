@@ -4642,21 +4642,24 @@ class BS_SAV extends BimpObject
                 $this->addNote('Devis envoyé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs), 4);
                 $new_status = self::BS_SAV_ATT_CLIENT;
 
-                if ($propal->dol_object->cond_reglement_id == 20) {
+                if ($propal->dol_object->cond_reglement_id == 20 && $propal->dol_object->mode_reglement_id != 2) {
                     $propal->dol_object->cond_reglement_id = 1;
                     global $user;
                     $propal->dol_object->update($user);
                 }
                 if ($propal->dol_object->cond_reglement_id != $this->id_cond_reglement_def || $propal->dol_object->mode_reglement_id != $this->id_mode_reglement_def) {
-                    //on vérifie encours
-                    $client = $this->getChildObject('client');
+                    //exception pour les virement bencaire a la commande 
+                    if($propal->dol_object->cond_reglement_id != 20 || $propal->dol_object->mode_reglement_id != 2){
+                        //on vérifie encours
+                        $client = $this->getChildObject('client');
 
-                    $encoursActu = $client->getAllEncoursForSiret(true)['total'];
-                    $authorisation = $client->getData('outstanding_limit');
-                    $besoin = $encoursActu + $propal->dol_object->total_ht;
+                        $encoursActu = $client->getAllEncoursForSiret(true)['total'];
+                        $authorisation = $client->getData('outstanding_limit');
+                        $besoin = $encoursActu + $propal->dol_object->total_ht;
 
-                    if ($besoin > ($authorisation + 1))
-                        $errors[] = 'Le client doit payer comptant (Carte bancaire, A réception de facture), son encours autorisé (' . price($authorisation) . ' €) est inférieur au besoin (' . price($besoin) . ' €)';
+                        if ($besoin > ($authorisation + 1))
+                            $errors[] = 'Le client doit payer comptant (Carte bancaire, A réception de facture), son encours autorisé (' . price($authorisation) . ' €) est inférieur au besoin (' . price($besoin) . ' €)';
+                    }
                 }
 
 

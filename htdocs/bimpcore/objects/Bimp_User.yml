@@ -442,6 +442,18 @@ filters_panel:
             firstname: 
             lastname: 
             login: 
+            group:
+                
+                
+filters: 
+    group: 
+        label: Group
+        data_type: id_object
+        type: user_group
+        input: 
+            type: search_group
+            include_empty: 1
+            empty_label: Aucun
                 
         
 lists:

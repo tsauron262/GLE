@@ -385,6 +385,48 @@ class Bimp_User extends BimpObject
 
         return $filters;
     }
+    
+    
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
+    {
+        switch ($field_name) {
+            case 'group':
+
+                $elem_alias = $main_alias . '___usergroupuser';
+                $joins[$elem_alias] = array(
+                    'table' => 'usergroup_user',
+                    'on'    => $elem_alias . '.fk_user = ' . $main_alias . '.rowid',
+                    'alias' => $elem_alias
+                );
+                $key = 'in';
+                if ($excluded) {
+                    $key = 'not_in';
+                }
+                $filters[$elem_alias . '.fk_usergroup'] = array(
+                    $key => $values
+                );
+                break;
+        }
+
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
+    }
+    
+    
+//    public function getCustomFilterValueLabel($field_name, $value)
+//    {
+//        die($field_name.'mm');
+//        switch ($field_name) {
+//            case 'group':
+//                die('rrrrr');
+//                $group = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_UserGroup', (int) $value);
+//                if (BimpObject::ObjectLoaded($group)) {
+//                    return $group->getRef();
+//                }
+//                break;
+//        }
+//
+//        return parent::getCustomFilterValueLabel($field_name, $value);
+//    }
 
     // Affichage: 
 

@@ -4617,16 +4617,23 @@ class BimpComm extends BimpDolObject
 
         if (method_exists($this->dol_object, 'update_price')) {
             $initial_brouillon = null;
-            $initial_brouillon = isset($this->dol_object->brouillon) ? $this->dol_object->brouillon : null;
-            $this->dol_object->brouillon = 1;
+
+            if ($this->object_name !== 'Bimp_Facture') {
+                $initial_brouillon = isset($this->dol_object->brouillon) ? $this->dol_object->brouillon : null;
+                $this->dol_object->brouillon = 1;
+            }
 
             $this->dol_object->update_price();
 
-            if (is_null($initial_brouillon)) {
-                unset($this->dol_object->brouillon);
-            } else {
-                $this->dol_object->brouillon = $initial_brouillon;
+            if ($this->object_name !== 'Bimp_Facture') {
+                if (is_null($initial_brouillon)) {
+                    unset($this->dol_object->brouillon);
+                } else {
+                    $this->dol_object->brouillon = $initial_brouillon;
+                }
             }
+        } else {
+            $errors[] = 'Vérification du total non disponible pour ce type de pièce commerciale';
         }
 
         return array(

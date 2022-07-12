@@ -997,7 +997,7 @@ class BimpCache
         return self::$cache[$cache_key];
     }
 
-    public static function getBimpObjectList($module, $object_name, $filters = array())
+    public static function getBimpObjectList($module, $object_name, $filters = array(), $joins = array())
     {
         $instance = BimpObject::getInstance($module, $object_name);
 
@@ -1006,7 +1006,7 @@ class BimpCache
         }
 
         $primary = $instance->getPrimary();
-        $rows = $instance->getList($filters, null, null, 'id', 'asc', 'array', array($primary));
+        $rows = $instance->getList($filters, null, null, 'id', 'asc', 'array', array($primary), $joins);
 
         $list = array();
 

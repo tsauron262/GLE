@@ -709,18 +709,18 @@ class BimpCore
             $secs = $diff - ($min * 60);
 
             $msg .= '<div style="margin-top: 15px; font-weight: bold;">';
-            $msg .= 'Si l\'opération en cours sur '.$object->getLabel('this').' a échoué (erreur fatale, problème réseau, etc.), ';
+            $msg .= 'Si l\'opération en cours sur ' . $object->getLabel('this') . ' a échoué (erreur fatale, problème réseau, etc.), ';
             $msg .= 'le vérouillage sera automatiquement désactivé dans ';
             $msg .= ($min ? $min . ' min. ' . ($secs ? 'et ' : '') : '') . ($secs ? $secs . ' sec.' : '');
             $msg .= '</div>';
 
-//            $msg .= 'Si vous êtes <b>sûr</b> de n\'avoir aucune opération en cours sur ' . $object->getLabel('this') . ', ';
-//            $msg .= 'vous pouvez en forcer le dévérouillage en cliquant sur le bouton ci-dessous: ';
-//            $msg .= '<div style="margin: 15px 0; text-align: center">';
-//            $msg .= '<span class="btn btn-default" onclick="forceBimpObjectUnlock($(this), ' . $object->getJsObjectData() . ')">';
-//            $msg .= 'Forcer le dévérouillage ' . $object->getLabel('of_the') . ' ' . $object->getRef(true);
-//            $msg .= '</span>';
-//            $msg .= '</div>';
+            if ($user->admin) {
+                $msg .= '<div style="margin: 15px 0; text-align: center">';
+                $msg .= '<span class="btn btn-default" onclick="forceBimpObjectUnlock($(this), ' . $object->getJsObjectData() . ')">';
+                $msg .= 'Forcer le dévérouillage (Admins seulement)';
+                $msg .= '</span>';
+                $msg .= '</div>';
+            }
         } else {
             $lock_user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $row['id_user']);
 

@@ -11,9 +11,7 @@ class BimpComm extends BimpDolObject
     const BC_ZONE_UE_SANS_TVA = 4;
 
     public static $dont_check_parent_on_update = false;
-    public static $element_name = '';
-    public static $external_contact_type_required = true;
-    public static $internal_contact_type_required = true;
+    
     public static $discount_lines_allowed = true;
     public static $use_zone_vente_for_tva = true;
     public static $cant_edit_zone_vente_secteurs = array('M');
@@ -90,27 +88,6 @@ class BimpComm extends BimpDolObject
         }
 
         return (int) parent::canEditField($field_name);
-    }
-
-    public function canEditCommercial()
-    {
-        if ($this->object_name === 'Bimp_Facture') {
-            global $user;
-
-            $secteur = $this->getData('ef_type');
-
-            if ($secteur && in_array($secteur, array('M'))) {
-                return 1;
-            }
-
-            if ($user->admin || $user->rights->bimpcommercial->edit_commercial) {
-                return 1;
-            }
-
-            return 0;
-        }
-
-        return 1;
     }
 
     public function canClientView()
@@ -1365,18 +1342,6 @@ class BimpComm extends BimpDolObject
         return $zone;
     }
 
-    public function getCommercialId()
-    {
-        if ($this->isLoaded()) {
-            $contacts = $this->dol_object->getIdContact('internal', 'SALESREPFOLL');
-            if (isset($contacts[0]) && $contacts[0]) {
-                return (int) $contacts[0];
-            }
-        }
-
-        return 0;
-    }
-
     public function getCommercial()
     {
         $id_comm = (int) $this->getCommercialId();
@@ -2411,82 +2376,6 @@ class BimpComm extends BimpDolObject
         ));
     }
 
-    public function renderContactsList()
-    {
-        $html = '';
-
-        $list = array();
-
-        if ($this->isLoaded() && method_exists($this->dol_object, 'liste_contact')) {
-            $list_int = $this->dol_object->liste_contact(-1, 'internal');
-            $list_ext = $this->dol_object->liste_contact(-1, 'external');
-            $list = BimpTools::merge_array($list_int, $list_ext);
-        }
-
-        if (count($list)) {
-            global $conf;
-            BimpTools::loadDolClass('societe');
-            BimpTools::loadDolClass('contact');
-
-            $list_id = $this->object_name . ((int) $this->id ? '_' . $this->id : '') . '_contacts_list';
-
-            foreach ($list as $item) {
-                $html .= '<tr>';
-                switch ($item['source']) {
-                    case 'internal':
-                        $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $item['id']);
-                        $html .= '<td>Utilisateur</td>';
-                        $html .= '<td>' . $conf->global->MAIN_INFO_SOCIETE_NOM . '</td>';
-                        $html .= '<td>';
-                        if (BimpObject::objectLoaded($user)) {
-                            $html .= $user->getLink();
-                        } else {
-                            $html .= '<span class="danger">L\'utilisateur #' . $item['id'] . ' n\'existe plus</span>';
-                        }
-                        $html .= '</td>';
-                        break;
-
-                    case 'external':
-                        $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $item['socid']);
-                        $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', (int) $item['id']);
-
-                        $html .= '<td>Contact tiers</td>';
-                        $html .= '<td>';
-                        if (BimpObject::objectLoaded($soc)) {
-                            $html .= $soc->getLink();
-                        } else {
-                            $html .= '<span class="danger">Le tiers #' . $item['socid'] . ' n\'existe plus</span>';
-                        }
-                        $html .= '</td>';
-                        $html .= '<td>';
-                        if (BimpObject::objectLoaded($contact)) {
-                            $html .= $contact->getLink();
-                        } else {
-                            $html .= '<span class="danger">Le contact #' . $item['id'] . ' n\'existe plus</span>';
-                        }
-                        $html .= '</td>';
-                        break;
-                }
-                $html .= '<td>' . $item['libelle'] . '</td>';
-                $html .= '<td style="text-align: right">';
-                $html .= BimpRender::renderRowButton('Supprimer le contact', 'trash', $this->getJsActionOnclick('removeContact', array('id_contact' => (int) $item['rowid']), array(
-                                    'confirm_msg'      => 'Etes-vous sûr de vouloir supprimer ce contact?',
-                                    'success_callback' => 'function(result) {if (result.contact_list_html) {$(\'#' . $list_id . '\').html(result.contact_list_html);}}'
-                )));
-                $html .= '</td>';
-                $html .= '</tr>';
-            }
-        } else {
-            $html .= '<tr>';
-            $html .= '<td colspan="5">';
-            $html .= BimpRender::renderAlerts('Aucun contact enregistré', 'info');
-            $html .= '</td>';
-            $html .= '</tr>';
-        }
-
-        return $html;
-    }
-
     public function renderContentExtraLeft()
     {
         return '';
@@ -2531,6 +2420,27 @@ class BimpComm extends BimpDolObject
         }
 
         return $html;
+    }
+
+    public function renderDemandesList()
+    {
+        if ($this->isLoaded()) {
+            BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
+            $objectName = ValidComm::getObjectClass($this);
+            if ($objectName != -2) {
+                BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
+                $demande = BimpObject::getInstance('bimpvalidateorder', 'DemandeValidComm');
+                $list = new BC_ListTable($demande);
+                $list->addFieldFilterValue('type_de_piece', $objectName);
+                $list->addFieldFilterValue('id_piece', (int) $this->id);
+
+                return $list->renderHtml();
+            } else {
+                return '';
+            }
+        }
+
+        return BimpRender::renderAlerts('Impossible d\'afficher la liste des demande de validation (ID ' . $this->getLabel('of_the') . ' absent)');
     }
 
     // Traitements:
@@ -3989,14 +3899,14 @@ class BimpComm extends BimpDolObject
             if (!isset($data['users'][(int) $r['id_user']])) {
                 $data['users'][(int) $r['id_user']] = array();
             }
-            
+
             $data['users'][(int) $r['id_user']]['nb_new_clients'] = (int) $r['nb_clients'];
         }
         // Nb new Devis: 
         $where = 'datec >= \'' . $date_min . '\' AND datec < \'' . $date_max . '\'';
         $where .= ' AND fk_statut IN (1,2,4)';
         $data['total']['nb_new_propales'] = (int) $bdb->getCount('propal', $where, 'rowid');
-        
+
         // Nb new Devis / users
         $sql = 'SELECT ec.fk_socpeople as id_user, COUNT(DISTINCT p.rowid) as nb_propales';
         $sql .= BimpTools::getSqlFrom('propal', array(
@@ -4026,12 +3936,12 @@ class BimpComm extends BimpDolObject
 
             $data['users'][(int) $r['id_user']]['nb_new_propales'] = (int) $r['nb_propales'];
         }
-        
+
         // Nb new Commandes: 
         $where = 'date_creation >= \'' . $date_min . '\' AND date_creation < \'' . $date_max . '\'';
         $where .= ' AND fk_statut > 0';
         $data['total']['nb_new_commandes'] = (int) $bdb->getCount('commande', $where, 'rowid');
-        
+
         // Nb new Commandes / users
         $sql = 'SELECT ec.fk_socpeople as id_user, COUNT(DISTINCT c.rowid) as nb_commandes';
         $sql .= BimpTools::getSqlFrom('commande', array(
@@ -4061,7 +3971,7 @@ class BimpComm extends BimpDolObject
 
             $data['users'][(int) $r['id_user']]['nb_new_commandes'] = (int) $r['nb_commandes'];
         }
-        
+
         // Nb new Commandes / new clients: 
         $where = 'date_creation >= \'' . $date_min . '\' AND date_creation < \'' . $date_max . '\'';
         $where .= ' AND fk_statut > 0';
@@ -4106,7 +4016,7 @@ class BimpComm extends BimpDolObject
 
             $data['users'][(int) $r['id_user']]['nb_new_commandes_for_new_clients'] = (int) $r['nb_commandes'];
         }
-        
+
         // CA / marges: 
         $fields = array(
             'f.total_ttc',
@@ -4267,7 +4177,7 @@ class BimpComm extends BimpDolObject
                 $metier_data['tx_marque'] = 'Inf.';
             }
         }
-        
+
         return $data;
     }
 
@@ -4455,81 +4365,6 @@ class BimpComm extends BimpDolObject
             'errors'           => $errors,
             'warnings'         => $warnings,
             'success_callback' => 'bimp_reloadPage();'
-        );
-    }
-
-    public function actionAddContact($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Ajout du contact effectué avec succès' . $success;
-
-        if (!$this->isLoaded()) {
-            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
-        } else {
-            if (!isset($data['type']) || !(int) $data['type']) {
-                $errors[] = 'Nature du contact absent';
-            } else {
-                switch ((int) $data['type']) {
-                    case 1:
-                        $id_contact = isset($data['id_contact']) ? (int) $data['id_contact'] : 0;
-                        $type_contact = isset($data['tiers_type_contact']) ? (int) $data['tiers_type_contact'] : 0;
-                        if (!$id_contact) {
-                            $errors[] = 'Contact non spécifié';
-                        }
-                        if (!$type_contact && static::$external_contact_type_required) {
-                            $errors[] = 'Type de contact non spécifié';
-                        }
-
-                        if (!count($errors)) {
-                            if ($this->dol_object->add_contact($id_contact, $type_contact, 'external') <= 0) {
-                                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du contact');
-                            }
-                        }
-                        break;
-
-                    case 2:
-                        $id_user = isset($data['id_user']) ? (int) $data['id_user'] : 0;
-                        $type_contact = isset($data['user_type_contact']) ? (int) $data['user_type_contact'] : 0;
-                        if (!$id_user) {
-                            $errors[] = 'Utilisateur non spécifié';
-                        }
-
-                        if (!$type_contact && static::$internal_contact_type_required) {
-                            $errors[] = 'Type de contact non spécifié';
-                        }
-
-                        $id_type_commercial = (int) $this->db->getValue('c_type_contact', 'rowid', 'source = \'internal\' AND element = \'' . $this->dol_object->element . '\' AND code = \'SALESREPFOLL\'');
-                        if ($type_contact == $id_type_commercial) {
-                            if (!$this->canEditCommercial()) {
-                                $errors[] = 'Vous n\'avez pas la permission de changer le commercial ' . $this->getLabel('of_a');
-                            } else {
-                                $id_cur_commercial = $this->getCommercialId();
-
-                                if ($id_cur_commercial) {
-                                    $list = $this->dol_object->liste_type_contact();
-                                    $label = (isset($list[$id_type_commercial]) ? $list[$id_type_commercial] : 'Responsable suivi ' . $this->getLabel());
-                                    $msg = 'Un "' . $label . '" a déjà été attribué à ' . $this->getLabel('this') . '<br/>';
-                                    $msg .= 'Si vous souhaitez modifier celui-ci, veuillez d\'abord le supprimer';
-                                    $errors[] = $msg;
-                                }
-                            }
-                        }
-
-                        if (!count($errors)) {
-                            if ($this->dol_object->add_contact($id_user, $type_contact, 'internal') <= 0) {
-                                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du contact');
-                            }
-                        }
-                        break;
-                }
-            }
-        }
-
-        return array(
-            'errors'            => $errors,
-            'warnings'          => $warnings,
-            'contact_list_html' => $this->renderContactsList()
         );
     }
 
@@ -4978,26 +4813,5 @@ class BimpComm extends BimpDolObject
             $sortie .= '<br/>fin ' . $i . ' / ' . $tot . ' corrections de ' . $info[1];
         }
         return $errors;
-    }
-
-    public function renderDemandesList()
-    {
-        if ($this->isLoaded()) {
-            BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
-            $objectName = ValidComm::getObjectClass($this);
-            if ($objectName != -2) {
-                BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
-                $demande = BimpObject::getInstance('bimpvalidateorder', 'DemandeValidComm');
-                $list = new BC_ListTable($demande);
-                $list->addFieldFilterValue('type_de_piece', $objectName);
-                $list->addFieldFilterValue('id_piece', (int) $this->id);
-
-                return $list->renderHtml();
-            } else {
-                return '';
-            }
-        }
-
-        return BimpRender::renderAlerts('Impossible d\'afficher la liste des demande de validation (ID ' . $this->getLabel('of_the') . ' absent)');
     }
 }

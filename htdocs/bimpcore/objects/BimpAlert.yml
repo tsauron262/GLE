@@ -12,7 +12,7 @@ fields:
     label: 
         label: Titre
     status:
-        label: Status
+        label: Statut
         type: int
         values: 
             array: status_list

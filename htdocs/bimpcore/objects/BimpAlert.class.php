@@ -43,20 +43,30 @@ class BimpAlert extends BimpObject
         if($this->isLoaded() && $this->getData('type') == 1){
             $sql = $this->db->db->query('SELECT count(*) as nb FROM `'.MAIN_DB_PREFIX.'user_extrafields` WHERE popup_alert_id >= '.$this->id);
             $ln = $this->db->db->fetch_object($sql);
-            return $ln->nb;
+            if(is_array($this->getData('filter')) && count($this->getData('filter')))
+                $tot = count($this->getListUserFiltre ());
+            else
+                $tot = 'tous';
+            return $ln->nb . " / " .$tot;
         }
+    }
+    
+    public function getListUserFiltre(){
+        
+        $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User');
+        $filterObj = new BC_FiltersPanel($user);
+        $filterObj->setFilters($this->getData('filter'));
+        $filters = $joins = array();
+        $errors = BimpTools::merge_array($errors, $filterObj->getSqlFilters($filters, $joins));
+
+        return BimpCache::getBimpObjectList('bimpcore', 'Bimp_User', $filters, $joins);
     }
     
     public function isOp(){
         if($this->isLoaded()){
             //Condition du filtre user
-                if(is_array($this->getData('filter')) && count($this->getData('filter'))){
-                $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User');
-                $filterObj = new BC_FiltersPanel($user);
-                $filterObj->setFilters($this->getData('filter'));
-                $errors = BimpTools::merge_array($errors, $filterObj->getSqlFilters($filters, $joins));
-
-                $list = BimpCache::getBimpObjectList('bimpcore', 'Bimp_User', $filters);
+            if(is_array($this->getData('filter')) && count($this->getData('filter'))){
+                $list = $this->getListUserFiltre();
                 global $user;
                 if(!in_array($user->id, $list))
                         return 0;

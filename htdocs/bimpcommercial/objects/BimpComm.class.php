@@ -11,7 +11,6 @@ class BimpComm extends BimpDolObject
     const BC_ZONE_UE_SANS_TVA = 4;
 
     public static $dont_check_parent_on_update = false;
-    
     public static $discount_lines_allowed = true;
     public static $use_zone_vente_for_tva = true;
     public static $cant_edit_zone_vente_secteurs = array('M');
@@ -379,6 +378,12 @@ class BimpComm extends BimpDolObject
                     return 0;
                 }
                 return 1;
+
+            case 'checkTotal':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
+                return 1;
         }
 
         return parent::isActionAllowed($action, $errors);
@@ -633,6 +638,14 @@ class BimpComm extends BimpDolObject
                 'label'   => 'Editer logs',
                 'icon'    => 'fas_history',
                 'onclick' => $this->getJsLoadModalForm('logs', 'Editer les logs')
+            );
+        }
+
+        if ($this->canSetAction('checkTotal') && $this->isActionAllowed('checkTotal')) {
+            $buttons[] = array(
+                'label'   => 'Vérifier le total',
+                'icon'    => 'fas_check',
+                'onclick' => $this->getJsActionOnclick('checkTotal')
             );
         }
 
@@ -2533,7 +2546,14 @@ class BimpComm extends BimpDolObject
                 $tot = $this->getData('total');
             if (round((float) $tot, 2) != round($totalHt, 2)) {
                 $this->erreurFatal++;
-                $errors[] = 'Ecart entre le total des lignes et le total ' . $this->getLabel('of_the') . '. Total lignes : ' . round($totalHt, 3) . ', total ' . $this->getLabel() . ': ' . round($tot, 3);
+                $msg = 'Ecart entre le total des lignes et le total ' . $this->getLabel('of_the') . '. Total lignes : ' . round($totalHt, 3) . ', total ' . $this->getLabel() . ': ' . round($tot, 3);
+                $msg .= '<div style="margin-top: 10px">';
+                $msg .= '<span class="btn btn-default" onclick="' . $this->getJsActionOnclick('checkTotal') . '">';
+                $msg .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Vérifier le total';
+                $msg .= '</span>';
+                $msg .= '</div>';
+
+                $errors[] = $msg;
             }
 
             // Création des lignes absentes de l'objet bimp: 
@@ -4587,6 +4607,33 @@ class BimpComm extends BimpDolObject
             'errors'           => $errors,
             'warnings'         => array()
         ];
+    }
+
+    public function actionCheckTotal($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Vérification du total effectuée';
+
+        if (method_exists($this->dol_object, 'update_price')) {
+            $initial_brouillon = null;
+            $initial_brouillon = isset($this->dol_object->brouillon) ? $this->dol_object->brouillon : null;
+            $this->dol_object->brouillon = 1;
+
+            $this->dol_object->update_price();
+
+            if (is_null($initial_brouillon)) {
+                unset($this->dol_object->brouillon);
+            } else {
+                $this->dol_object->brouillon = $initial_brouillon;
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => 'bimp_reloadPage();'
+        );
     }
 
     // Overrides BimpObject:

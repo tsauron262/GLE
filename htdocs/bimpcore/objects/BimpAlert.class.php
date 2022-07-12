@@ -58,6 +58,7 @@ class BimpAlert extends BimpObject
         $filterObj->setFilters($this->getData('filter'));
         $filters = $joins = array();
         $errors = BimpTools::merge_array($errors, $filterObj->getSqlFilters($filters, $joins));
+        $filters['statut'] = 1;
 
         return BimpCache::getBimpObjectList('bimpcore', 'Bimp_User', $filters, $joins);
     }

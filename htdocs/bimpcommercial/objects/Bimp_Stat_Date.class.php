@@ -321,6 +321,27 @@ class Bimp_Stat_Date extends BimpObject
     {
         $buttons = array();
 
+        $dt = new DateTime();
+        $dow = (int) $dt->format('w');
+        if ($dow > 0) {
+            $dt->sub(new DateInterval('P' . $dow . 'D')); // Premier dimanche précédent. 
+        }
+        $date_to = $dt->format('Y-m-d');
+
+        $dt->sub(new DateInterval('P7D'));
+        $date_from = $dt->format('Y-m-d');
+
+        $buttons[] = array(
+            'label'   => 'Rapports hebdomadaires',
+            'icon'    => 'fas_file-excel',
+            'onclick' => $this->getJsActionOnclick('generateMonthlyReport', array(
+                'date_from' => $date_from,
+                'date_to'   => $date_to
+                    ), array(
+                'form_name' => 'weekly_report'
+            ))
+        );
+
         $buttons[] = array(
             'label'   => 'Rapports mensuels',
             'icon'    => 'fas_file-excel',
@@ -358,22 +379,53 @@ class Bimp_Stat_Date extends BimpObject
         $success = '';
         $sc = '';
 
-        $month = (int) BimpTools::getArrayValueFromPath($data, 'month', 0);
-        if (!$month) {
-            $errors[] = 'Mois absent';
-        }
+        $include_ca_details_by_users = (int) BimpTools::getArrayValueFromPath($data, 'include_ca_details_by_users', 0);
+        $date_from = '';
+        $date_to = '';
 
-        $year = (int) BimpTools::getArrayValueFromPath($data, 'year', 0);
-        if (!$year) {
-            $errors[] = 'Année absente';
+        switch (BimpTools::getArrayValueFromPath($data, 'report_type', '')) {
+            case 'weekly':
+                $date_from = BimpTools::getArrayValueFromPath($data, 'date_from', '');
+                if (!$date_from) {
+                    $errors[] = 'Veuillez sélectionner une date de début';
+                }
+
+                $date_to = BimpTools::getArrayValueFromPath($data, 'date_to', '');
+                if (!$date_to) {
+                    $errors[] = 'Veuillez sélectionner une date de fin';
+                }
+                break;
+
+            case 'monthly':
+                $month = (int) BimpTools::getArrayValueFromPath($data, 'month', 0);
+                if (!$month) {
+                    $errors[] = 'Mois absent';
+                }
+
+                $year = (int) BimpTools::getArrayValueFromPath($data, 'year', 0);
+                if (!$year) {
+                    $errors[] = 'Année absente';
+                }
+
+                if (!count($errors)) {
+                    $date_from = $year . '-' . ($month < 10 ? '0' : '') . $month . '-01';
+                    $dt = new DateTime($date_from);
+                    $dt->add(new DateInterval('P1M'));
+                    $date_to = $dt->format('Y-m-d');
+                }
+                break;
+
+            default:
+                $errors[] = 'Type de rapport absent';
+                break;
         }
 
         if (!count($errors)) {
             BimpCore::loadPhpExcel();
             $excel = new PHPExcel();
 
-            $file_name = 'rapport_commercial_mensuel_' . $month . '_' . $year;
-            $dir = DOL_DATA_ROOT . '/bimpcommercial/monthly_reports';
+            $file_name = 'rapport_commercial_' . $date_from . '_' . $date_to;
+            $dir = DOL_DATA_ROOT . '/bimpcommercial/reports';
             $file_path = $dir . '/' . $file_name . '.xlsx';
 
             if (!is_dir($dir)) {
@@ -396,138 +448,141 @@ class Bimp_Stat_Date extends BimpObject
                 );
                 BimpObject::loadClass('bimpcommercial', 'BimpComm');
 
-                $data = BimpComm::getMonthlyReportData($month, $year);
+                $data = BimpComm::getReportData($date_from, $date_to, array(
+                            'include_ca_details_by_users' => $include_ca_details_by_users
+                                ), $errors);
 
-                // Données globales: 
-                $sheet = $excel->getActiveSheet();
-                $sheet->setTitle('Données globales');
+                if (!count($errors)) {
+                    // Données globales: 
+                    $sheet = $excel->getActiveSheet();
+                    $sheet->setTitle('Données globales');
 
-                $sheet->setCellValueByColumnAndRow(0, 1, 'Donnée');
-                $sheet->setCellValueByColumnAndRow(1, 1, 'Valeur');
+                    $sheet->setCellValueByColumnAndRow(0, 1, 'Donnée');
+                    $sheet->setCellValueByColumnAndRow(1, 1, 'Valeur');
 
-                $row = 1;
-                foreach ($data_types as $name => $label) {
-                    $row++;
-                    $sheet->setCellValueByColumnAndRow(0, $row, $label);
-                    $sheet->setCellValueByColumnAndRow(1, $row, $data['total'][$name]);
-                }
-
-
-                // Données par utilisateurs: 
-                $sheet = $excel->createSheet();
-                $sheet->setTitle('Commerciaux');
-
-                $col = 0;
-                $row = 1;
-                $sheet->setCellValueByColumnAndRow($col, $row, 'Commercial');
-
-                foreach ($data_types as $name => $label) {
-                    $col++;
-                    $sheet->setCellValueByColumnAndRow($col, $row, $label);
-                }
-
-
-                foreach ($data['users'] as $id_user => $user_data) {
-                    $row++;
-                    $col = 0;
-
-                    $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
-                    $user_name = '';
-                    if (BimpObject::objectLoaded($user)) {
-                        $user_name = $user->getName();
-                    } else {
-                        $user_name = 'Utilisateur #' . $id_user;
+                    $row = 1;
+                    foreach ($data_types as $name => $label) {
+                        $row++;
+                        $sheet->setCellValueByColumnAndRow(0, $row, $label);
+                        $sheet->setCellValueByColumnAndRow(1, $row, (isset($data['total'][$name]) ? $data['total'][$name] : ''));
                     }
-                    $sheet->setCellValueByColumnAndRow($col, $row, $user_name);
+
+
+                    // Données par utilisateurs: 
+                    $sheet = $excel->createSheet();
+                    $sheet->setTitle('Commerciaux');
+
+                    $col = 0;
+                    $row = 1;
+                    $sheet->setCellValueByColumnAndRow($col, $row, 'Commercial');
+
+                    if ($include_ca_details_by_users) {
+                        $data_types['ca_ht_products'] = 'CA HT (Produits)';
+                        $data_types['ca_ht_services'] = 'CA HT (Services)';
+                        $data_types['marges_products'] = 'Marges (Produits)';
+                        $data_types['marges_services'] = 'Marges (Services)';
+                        $data_types['tx_marque_products'] = 'Tx Marque (Produits)';
+                        $data_types['tx_marque_services'] = 'Tx Marque (Services)';
+                    }
 
                     foreach ($data_types as $name => $label) {
                         $col++;
-
-                        if (isset($user_data[$name])) {
-                            $sheet->setCellValueByColumnAndRow($col, $row, $user_data[$name]);
-                        }
+                        $sheet->setCellValueByColumnAndRow($col, $row, $label);
                     }
-                }
 
-                $data_types = array(
-                    'ca_ht'     => 'CA HT',
-                    'marges'    => 'Total Marges',
-                    'tx_marque' => 'Taux de marque'
-                );
+                    foreach ($data['users'] as $id_user => $user_data) {
+                        $row++;
+                        $col = 0;
 
-                // Données par métiers: 
-                $sheet = $excel->createSheet();
-                $sheet->setTitle('Métiers');
-
-                $col = 0;
-                $row = 1;
-                $sheet->setCellValueByColumnAndRow($col, $row, 'Métier');
-
-                foreach ($data_types as $name => $label) {
-                    $col++;
-                    $sheet->setCellValueByColumnAndRow($col, $row, $label);
-                }
-
-                $metiers = BimpComm::$expertise;
-                foreach ($data['metiers'] as $metier => $metier_data) {
-                    $row++;
-                    $col = 0;
-
-                    $metier_name = '';
-                    if ($metier) {
-                        if (isset($metiers[$metier])) {
-                            $metier_name = $metiers[$metier];
+                        $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $id_user);
+                        $user_name = '';
+                        if (BimpObject::objectLoaded($user)) {
+                            $user_name = $user->getName();
                         } else {
-                            $metier_name = 'Inconnu (' . $id_user . ')';
+                            $user_name = 'Utilisateur #' . $id_user;
                         }
-                    } else {
-                        $metier_name = 'Non Spécifié';
-                    }
+                        $sheet->setCellValueByColumnAndRow($col, $row, $user_name);
 
-                    $sheet->setCellValueByColumnAndRow($col, $row, $metier_name);
-
-                    foreach ($data_types as $name => $label) {
-                        $col++;
-
-                        if (isset($metier_data[$name])) {
-                            $sheet->setCellValueByColumnAndRow($col, $row, $metier_data[$name]);
+                        foreach ($data_types as $name => $label) {
+                            $col++;
+                            $sheet->setCellValueByColumnAndRow($col, $row, (isset($user_data[$name]) ? $user_data[$name] : ''));
                         }
                     }
-                }
 
-                // Données par région: 
-                $sheet = $excel->createSheet();
-                $sheet->setTitle('Régions');
+                    $data_types = array(
+                        'ca_ht'     => 'CA HT',
+                        'marges'    => 'Total Marges',
+                        'tx_marque' => 'Taux de marque'
+                    );
 
-                $col = 0;
-                $row = 1;
-                $sheet->setCellValueByColumnAndRow($col, $row, 'Région');
+                    // Données par métiers: 
+                    $sheet = $excel->createSheet();
+                    $sheet->setTitle('Métiers');
 
-                foreach ($data_types as $name => $label) {
-                    $col++;
-                    $sheet->setCellValueByColumnAndRow($col, $row, $label);
-                }
-
-                foreach ($data['regions'] as $region => $region_data) {
-                    $row++;
                     $col = 0;
-
-                    $sheet->setCellValueByColumnAndRow($col, $row, $region);
+                    $row = 1;
+                    $sheet->setCellValueByColumnAndRow($col, $row, 'Métier');
 
                     foreach ($data_types as $name => $label) {
                         $col++;
+                        $sheet->setCellValueByColumnAndRow($col, $row, $label);
+                    }
 
-                        if (isset($region_data[$name])) {
-                            $sheet->setCellValueByColumnAndRow($col, $row, $region_data[$name]);
+                    $metiers = BimpComm::$expertise;
+                    foreach ($data['metiers'] as $metier => $metier_data) {
+                        $row++;
+                        $col = 0;
+
+                        $metier_name = '';
+                        if ($metier) {
+                            if (isset($metiers[$metier])) {
+                                $metier_name = $metiers[$metier];
+                            } else {
+                                $metier_name = 'Inconnu (' . $id_user . ')';
+                            }
+                        } else {
+                            $metier_name = 'Non Spécifié';
+                        }
+
+                        $sheet->setCellValueByColumnAndRow($col, $row, $metier_name);
+
+                        foreach ($data_types as $name => $label) {
+                            $col++;
+                            $sheet->setCellValueByColumnAndRow($col, $row, (isset($metier_data[$name]) ? $metier_data[$name] : ''));
                         }
                     }
+
+                    // Données par région: 
+                    $sheet = $excel->createSheet();
+                    $sheet->setTitle('Régions');
+
+                    $col = 0;
+                    $row = 1;
+                    $sheet->setCellValueByColumnAndRow($col, $row, 'Région');
+
+                    foreach ($data_types as $name => $label) {
+                        $col++;
+                        $sheet->setCellValueByColumnAndRow($col, $row, $label);
+                    }
+
+                    foreach ($data['regions'] as $region => $region_data) {
+                        $row++;
+                        $col = 0;
+
+                        $sheet->setCellValueByColumnAndRow($col, $row, $region);
+
+                        foreach ($data_types as $name => $label) {
+                            $col++;
+                            $sheet->setCellValueByColumnAndRow($col, $row, (isset($region_data[$name]) ? $region_data[$name] : ''));
+                        }
+                    }
+
+                    $writer = PHPExcel_IOFactory::createWriter($excel, 'Excel2007');
+                    $writer->save($file_path);
+
+                    $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcommercial&file=' . htmlentities('reports/' . $file_name . '.xlsx');
+                    $sc = 'window.open(\'' . $url . '\')';
                 }
-
-                $writer = PHPExcel_IOFactory::createWriter($excel, 'Excel2007');
-                $writer->save($file_path);
-
-                $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcommercial&file=' . htmlentities('monthly_reports/' . $file_name . '.xlsx');
-                $sc = 'window.open(\'' . $url . '\')';
             }
         }
 

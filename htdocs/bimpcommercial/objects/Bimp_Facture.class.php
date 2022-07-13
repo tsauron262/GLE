@@ -9,6 +9,7 @@ $langs->load('errors');
 $cacheInstance = array();
 
 class Bimp_Facture extends BimpComm
+
 {
 
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
@@ -1880,13 +1881,23 @@ class Bimp_Facture extends BimpComm
         return BimpTools::getValue('id_facture_to_correct', BimpTools::getValue('param_values/fields/id_facture_to_correct', 0));
     }
 
-    public function getTotalRevalorisations($recalculate = false)
+    public function getTotalRevalorisations($recalculate = false, $with_product_type_details = false)
     {
         $clef = "bimp_facture_" . $this->id . '_total_revalorisations';
+
+        if ($with_product_type_details) {
+            $clef .= '_with_prouct_type_details';
+        }
 
         if (!$recalculate && isset(BimpCache::$cache[$clef])) {
             return BimpCache::$cache[$clef];
         }
+
+        $types = array(
+            0 => 'attente',
+            1 => 'accepted',
+            2 => 'refused'
+        );
 
         $totals = array(
             'attente'  => 0,
@@ -1894,24 +1905,37 @@ class Bimp_Facture extends BimpComm
             'refused'  => 0
         );
 
+        if ($with_product_type_details) {
+            $totals['products'] = array(
+                'attente'  => 0,
+                'accepted' => 0,
+                'refused'  => 0
+            );
+            $totals['services'] = array(
+                'attente'  => 0,
+                'accepted' => 0,
+                'refused'  => 0
+            );
+        }
+
         if ($this->isLoaded()) {
             $revals = BimpCache::getBimpObjectObjects('bimpfinanc', 'BimpRevalorisation', array(
                         'id_facture' => (int) $this->id
             ));
 
             foreach ($revals as $reval) {
-                switch ((int) $reval->getData('status')) {
-                    case 0:
-                        $totals['attente'] += $reval->getTotal();
-                        break;
+                $total = $reval->getTotal();
+                $status = (int) $reval->getData('status');
+                $totals[$types[$status]] += $total;
 
-                    case 1:
-                        $totals['accepted'] += $reval->getTotal();
-                        break;
+                if ($with_product_type_details) {
+                    $line = $reval->getChildObject('facture_line');
 
-                    case 2:
-                        $totals['refused'] += $reval->getTotal();
-                        break;
+                    if ($line->isService()) {
+                        $totals['services'][$types[$status]] += $total;
+                    } else {
+                        $totals['products'][$types[$status]] += $total;
+                    }
                 }
             }
         }

@@ -648,6 +648,14 @@ class BimpComm extends BimpDolObject
                 'onclick' => $this->getJsActionOnclick('checkTotal')
             );
         }
+        
+        if ($this->canSetAction('checkMarge') && $this->isActionAllowed('checkMarge')) {
+            $buttons[] = array(
+                'label'   => 'Vérifier la marge',
+                'icon'    => 'fas_check',
+                'onclick' => $this->getJsActionOnclick('checkMarge')
+            );
+        }
 
         return $buttons;
     }
@@ -1192,17 +1200,13 @@ class BimpComm extends BimpDolObject
             $lines = $this->getChildrenObjects('lines');
             foreach ($lines as $bimp_line) {
                 $line = $bimp_line->getChildObject('line');
-
-//        foreach ($object->lines as $line) {
                 if (empty($line->pa_ht) && isset($line->fk_fournprice) && !$force_price) {
                     require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.product.class.php';
                     $product = new ProductFournisseur($db);
                     if ($product->fetch_product_fournisseur_price($line->fk_fournprice))
                         $line->pa_ht = $product->fourn_unitprice * (1 - $product->fourn_remise_percent / 100);
                 }
-//            if ($bimp_line->getData("remise_pa") > 0) {
-//                $line->pa_ht = $line->pa_ht * (100 - $bimp_line->getData("remise_pa")) / 100;
-//            }
+
                 // si prix d'achat non renseigné et devrait l'être, alors prix achat = prix vente
                 if ((!isset($line->pa_ht) || $line->pa_ht == 0) && $line->subprice > 0 && (isset($conf->global->ForceBuyingPriceIfNull) && $conf->global->ForceBuyingPriceIfNull == 1)) {
                     $line->pa_ht = $line->subprice * (1 - ($line->remise_percent / 100));
@@ -3791,6 +3795,28 @@ class BimpComm extends BimpDolObject
         return 1;
     }
 
+    public function checkMarge(&$success = '')
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            if ($this->field_exists('marge')) {
+                $margins = $this->getMarginInfosArray();
+                $marge = $margins['total_margin'];
+
+                if ($marge != (float) $this->getData('marge')) {
+                    $errors = $this->updateField('marge', $marge);
+
+                    if (!count($errors)) {
+                        $success = 'Marge mise à jour: ' . $marge;
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
     public function importLinesFromFile(&$warnings = array(), &$success = '')
     {
         $errors = array();
@@ -4705,6 +4731,49 @@ class BimpComm extends BimpDolObject
             }
         } else {
             $errors[] = 'Vérification du total non disponible pour ce type de pièce commerciale';
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => 'bimp_reloadPage();'
+        );
+    }
+
+    public function actionCheckMarge($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        if ($this->isLoaded()) {
+            $errors = $this->checkMarge($success);
+            if (!$success) {
+                $success = 'Marge déjà à jour';
+            }
+        } else {
+            $ids = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+
+            if (!empty($ids)) {
+                $errors[] = 'Aucun' . $this->e() . ' ' . $this->getLabel() . ' sélectionné' . $this->e();
+            } else {
+                foreach ($ids as $id_obj) {
+                    $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id_obj);
+
+                    if (BimpObject::objectLoaded($obj)) {
+                        $obj_success = '';
+                        $obj_errors = $obj->checkMarge($obj_success);
+
+                        if (count($obj_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($obj_errors, ucfirst($obj->getLabel()) . ' ' . $obj->getRef());
+                        } elseif ($obj_success) {
+                            $success .= ($success ? '<br/>' : '') . ucfirst($obj->getLabel()) . ' ' . $obj->getRef() . ': ' . $obj_success;
+                        }
+                    } else {
+                        $warnings[] = ucfirst($this->getLabel('the')) . ' #' . $id_obj . ' n\'existe plus';
+                    }
+                }
+            }
         }
 
         return array(

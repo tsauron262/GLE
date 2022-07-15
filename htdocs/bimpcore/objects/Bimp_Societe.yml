@@ -1411,6 +1411,18 @@ lists_cols:
         label: Commercial
         value: 
             callback: displayCommercials
+        csv_needed_fields:
+            - rowid
+            
+    codeClientName:
+        label: Code Client + nom
+        value:
+            callback: displayCodeClientNom
+        csv_needed_fields:
+            - code_client
+            - name
+            
+            
     full_address: 
         label: Adresse
         value: 

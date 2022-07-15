@@ -1379,6 +1379,23 @@ class Bimp_Societe extends BimpDolObject
 
         return $encours;
     }
+    
+    public static function getCommercialCsvValue($needed_fields = array()){
+        global $db;
+        
+        $list = static::getCommercialClients();
+        
+        if(isset($list[$needed_fields['rowid']]))
+            return implode("\n", $list[$needed_fields['rowid']]);
+        return '';
+    }
+    public static function getCodeClientNameCsvValue($needed_fields = array()){
+        return $needed_fields['code_client']. ' '. $needed_fields['nom'];
+    }
+    
+    public function displayCodeClientNom(){
+        return $this->getData('code_client').' '.$this->getData('nom');
+    }
 
     public static function getRegionCsvValue($needed_fields = array())
     {

@@ -407,6 +407,23 @@ class BimpCache
             return self::$cache[$cache_key];
         }
     }
+    
+    public static function getCommercialClients(){
+        $cache_key = 'commercial_client';
+
+        $result = static::getCacheServeur($cache_key);
+        if (!$result) {
+            $result = array();
+            global $db;
+            
+            $sql = $db->query("SELECT u.lastname, u.firstname, sc.fk_soc FROM `".MAIN_DB_PREFIX."societe_commerciaux` sc, ".MAIN_DB_PREFIX."user u WHERE sc.fk_user = u.rowid");
+            while ($ln = $db->fetch_object($sql)){
+                $result[$ln->fk_soc][] = $ln->lastname.' '.$ln->firstname;
+            }
+            static::setCacheServeur($cache_key, $result, 2 * 60);
+        }
+        return $result;
+    }
 
     public static function getDureeMoySav($nbJ = 30, $ios = false)
     {

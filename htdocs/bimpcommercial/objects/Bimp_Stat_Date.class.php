@@ -447,6 +447,7 @@ class Bimp_Stat_Date extends BimpObject
                     'tx_marque'                        => 'Taux de marque'
                 );
                 BimpObject::loadClass('bimpcommercial', 'BimpComm');
+                $metiers = BimpComm::$expertise;
 
                 $data = BimpComm::getReportData($date_from, $date_to, array(
                             'include_ca_details_by_users' => $include_ca_details_by_users
@@ -490,6 +491,30 @@ class Bimp_Stat_Date extends BimpObject
                         $sheet->setCellValueByColumnAndRow($col, $row, $label);
                     }
 
+                    $user_metier_data_type = array(
+                        'ca_ht'     => 'CA HT',
+                        'marges'    => 'Marges',
+                        'tx_marque' => 'Tx marque'
+                    );
+
+                    foreach ($data['metiers'] as $metier => $metier_data) {
+                        $metier_name = '';
+                        if ($metier) {
+                            if (isset($metiers[$metier])) {
+                                $metier_name = $metiers[$metier];
+                            } else {
+                                $metier_name = 'inconnu (code: ' . $metier . ')';
+                            }
+                        } else {
+                            $metier_name = 'non Spécifié';
+                        }
+
+                        foreach ($user_metier_data_type as $name => $label) {
+                            $col++;
+                            $sheet->setCellValueByColumnAndRow($col, $row, $label . ' métier "' . $metier_name . '"');
+                        }
+                    }
+
                     foreach ($data['users'] as $id_user => $user_data) {
                         $row++;
                         $col = 0;
@@ -506,6 +531,13 @@ class Bimp_Stat_Date extends BimpObject
                         foreach ($data_types as $name => $label) {
                             $col++;
                             $sheet->setCellValueByColumnAndRow($col, $row, (isset($user_data[$name]) ? $user_data[$name] : ''));
+                        }
+
+                        foreach ($data['metiers'] as $metier => $metier_data) {
+                            foreach ($user_metier_data_type as $data_name => $label) {
+                                $col++;
+                                $sheet->setCellValueByColumnAndRow($col, $row, isset($user_data['metiers'][$metier][$data_name]) ? $user_data['metiers'][$metier][$data_name] : '');
+                            }
                         }
                     }
 
@@ -528,7 +560,6 @@ class Bimp_Stat_Date extends BimpObject
                         $sheet->setCellValueByColumnAndRow($col, $row, $label);
                     }
 
-                    $metiers = BimpComm::$expertise;
                     foreach ($data['metiers'] as $metier => $metier_data) {
                         $row++;
                         $col = 0;
@@ -538,7 +569,7 @@ class Bimp_Stat_Date extends BimpObject
                             if (isset($metiers[$metier])) {
                                 $metier_name = $metiers[$metier];
                             } else {
-                                $metier_name = 'Inconnu (' . $id_user . ')';
+                                $metier_name = 'Inconnu (' . $metier . ')';
                             }
                         } else {
                             $metier_name = 'Non Spécifié';

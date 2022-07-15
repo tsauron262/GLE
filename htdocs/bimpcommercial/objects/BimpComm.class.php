@@ -648,7 +648,7 @@ class BimpComm extends BimpDolObject
                 'onclick' => $this->getJsActionOnclick('checkTotal')
             );
         }
-        
+
         if ($this->canSetAction('checkMarge') && $this->isActionAllowed('checkMarge')) {
             $buttons[] = array(
                 'label'   => 'Vérifier la marge',
@@ -4216,6 +4216,27 @@ class BimpComm extends BimpDolObject
                     $data['users'][$id_user]['marges_services'] -= $margin_infos['pa_services'];
                     $data['users'][$id_user]['marges_services'] += $revals['services']['accepted'];
                 }
+
+                // Ca par métier par user: 
+                if (!isset($data['users'][$id_user]['metiers'])) {
+                    $data['users'][$id_user]['metiers'] = array();
+                }
+
+                $exp = (int) $r['expertise'];
+                if (!isset($data['users'][$id_user]['metiers'])) {
+                    $data['users'][$id_user]['metiers'][$exp] = array(
+                        'ca_ttc'    => 0,
+                        'ca_ht'     => 0,
+                        'marges'    => 0,
+                        'achats'    => 0,
+                        'tx_marque' => ''
+                    );
+                }
+
+                $data['users'][$id_user]['metiers'][$exp]['ca_ttc'] += (float) $r['total_ttc'];
+                $data['users'][$id_user]['metiers'][$exp]['ca_ht'] += (float) $r['total_ht'];
+                $data['users'][$id_user]['metiers'][$exp]['marges'] += (float) $r['marge_finale_ok'];
+                $data['users'][$id_user]['metiers'][$exp]['achats'] += (float) $r['total_achat_reval_ok'];
             }
 
             // CA par région: 
@@ -4235,7 +4256,7 @@ class BimpComm extends BimpDolObject
             $data['regions'][$region]['marges'] += (float) $r['marge_finale_ok'];
             $data['regions'][$region]['achats'] += (float) $r['total_achat_reval_ok'];
 
-            // Ca par métier: 
+            // CA par métier: 
             $exp = (int) $r['expertise'];
             if (!isset($data['metiers'][$exp])) {
                 $data['metiers'][$exp] = array(
@@ -4275,6 +4296,16 @@ class BimpComm extends BimpDolObject
                     $user_data['tx_marque_services'] = ($user_data['marges_services'] / $user_data['ca_ht_services']) * 100;
                 } else {
                     $user_data['tx_marque_servcies'] = 'Inf.';
+                }
+            }
+
+            if (isset($user_data['metiers']) && !empty($user_data['metiers'])) {
+                foreach ($user_data['metiers'] as $metier => &$metier_data) {
+                    if (isset($metier_data['ca_ht']) && (float) $user_data['$metier_data']) {
+                        $metier_data['tx_marque'] = ($metier_data['marges'] / $metier_data['ca_ht']) * 100;
+                    } else {
+                        $metier_data['tx_marque'] = 'Inf.';
+                    }
                 }
             }
         }

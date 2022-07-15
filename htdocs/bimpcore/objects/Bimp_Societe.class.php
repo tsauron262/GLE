@@ -1390,11 +1390,11 @@ class Bimp_Societe extends BimpDolObject
         return '';
     }
     public static function getCodeClientNameCsvValue($needed_fields = array()){
-        return $needed_fields['code_client']. ' '. $needed_fields['nom'];
+        return $needed_fields['code_client']. ' - '. $needed_fields['nom'];
     }
     
     public function displayCodeClientNom(){
-        return $this->getData('code_client').' '.$this->getData('nom');
+        return $this->getData('code_client').' - '.$this->getData('nom');
     }
 
     public static function getRegionCsvValue($needed_fields = array())

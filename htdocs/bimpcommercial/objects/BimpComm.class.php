@@ -4745,16 +4745,19 @@ class BimpComm extends BimpDolObject
         $errors = array();
         $warnings = array();
         $success = '';
+        $sc = '';
 
         if ($this->isLoaded()) {
             $errors = $this->checkMarge($success);
             if (!$success) {
                 $success = 'Marge déjà à jour';
+            } else {
+                $sc = 'bimp_reloadPage();';
             }
         } else {
             $ids = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
 
-            if (!empty($ids)) {
+            if (empty($ids)) {
                 $errors[] = 'Aucun' . $this->e() . ' ' . $this->getLabel() . ' sélectionné' . $this->e();
             } else {
                 foreach ($ids as $id_obj) {
@@ -4779,7 +4782,7 @@ class BimpComm extends BimpDolObject
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
-            'success_callback' => 'bimp_reloadPage();'
+            'success_callback' => $sc
         );
     }
 

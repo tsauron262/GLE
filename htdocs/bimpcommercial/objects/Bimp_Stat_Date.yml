@@ -34,35 +34,84 @@ fields:
         type: text
        
 forms: 
-    monthy_report: 
+    report: 
         rows: 
-            - custom: 1
-              label: Mois
-              input_name: month
-              input: 
-                  type: select
-                  options: 
-                      array: 
-                          1: Janvier
-                          2: Février 
-                          3: Mars
-                          4: Avril
-                          5: Mai
-                          6: Juin
-                          7: Juillet
-                          8: Août 
-                          9: Septembre
-                          10: Octobre
-                          11: Novembre
-                          12: Décembre
+           0: 
+                custom: 1
+                label: Inclure la répartition produits / services du CA pour les collaborateurs
+                input_name: include_ca_details_by_users
+                data_type: bool
+                input: 
+                    type: toggle
+                value: 0
+    
+    weekly_report: 
+        extends: report
+        rows: 
+            1: 
+                custom: 1
+                hidden: 1
+                input_name: report_type
+                input: 
+                    type: hidden
+                value: weekly
+                
+            2: 
+                custom: 1
+                label: Semaine du
+                input_name: date_from
+                data_type: date
+                input: 
+                    type: date
+                    
+            3: 
+                custom: 1
+                label: Au
+                input_name: date_to
+                data_type: date
+                input: 
+                    type: date
+            
+    monthy_report: 
+        extends: report
+        rows: 
+            1: 
+                custom: 1
+                hidden: 1
+                input_name: report_type
+                input: 
+                    type: hidden
+                value: monthly
+            2:
+                custom: 1
+                label: Mois
+                input_name: month
+                input: 
+                    type: select
+                    options: 
+                        array: 
+                            1: Janvier
+                            2: Février 
+                            3: Mars
+                            4: Avril
+                            5: Mai
+                            6: Juin
+                            7: Juillet
+                            8: Août 
+                            9: Septembre
+                            10: Octobre
+                            11: Novembre
+                            12: Décembre
                           
-            - custom: 1
-              label: Année
-              input_name: Year
-              input: 
-                  type: select
-                  options: 
-                      array: reportYears
+            3: 
+                custom: 1
+                label: Année
+                input_name: Year
+                input: 
+                    type: select
+                    options: 
+                        array: reportYears
+                      
         
 filters: 
     ec_fk_socpeople:

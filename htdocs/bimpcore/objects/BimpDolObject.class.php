@@ -343,7 +343,6 @@ class BimpDolObject extends BimpObject
                     }
                     if ($class != "") {
                         $objT = BimpCache::getBimpObjectInstance($module, $class, $id);
-//                        if ($objT->isLoaded()) { // Ne jamais faire ça: BimpCache renvoie null si l'objet n'existe pas => erreur fatale. 
                         if (BimpObject::objectLoaded($objT)) {
                             $clef = $item['type'] . $objT->id;
                             if ($not_for != $clef) {
@@ -762,6 +761,39 @@ class BimpDolObject extends BimpObject
         return $html;
     }
 
+    public function renderMailExtraFilesInput($input_name)
+    {
+        $html = '';
+
+        $linked_objects = $this->getFullLinkedObjetsArray(true);
+
+        if (!empty($linked_objects)) {
+            $files = array();
+            foreach ($linked_objects as $obj_data => $obj_label) {
+                $obj_data = json_decode($obj_data, 1);
+                $obj = BimpCache::getBimpObjectInstance($obj_data['module'], $obj_data['object_name'], $obj_data['id_object']);
+
+                if (BimpObject::objectLoaded($obj)) {
+                    $obj_files = $obj->getFilesArray();
+
+                    if (!empty($obj_files)) {
+                        foreach ($obj_files as $id_file => $file_label) {
+                            $files[$id_file] = $obj_label . ' : ' . $file_label;
+                        }
+                    }
+                }
+            }
+
+            $html .= BimpInput::renderInput('check_list', $input_name, '', array(
+                        'items' => $files
+            ));
+        } else {
+            $html .= BimpRender::renderAlerts('Aucun objet lié trouvé', 'warning');
+        }
+
+        return $html;
+    }
+
     public function renderContactsList()
     {
         $html = '';
@@ -895,7 +927,7 @@ class BimpDolObject extends BimpObject
     }
 
     public function actionSendEMail($data, &$success)
-    {
+    {        
         $errors = array();
         $warnings = array();
         $success = 'Email envoyé avec succès';
@@ -977,8 +1009,29 @@ class BimpDolObject extends BimpObject
             $mimetype_list = array();
             $mimefilename_list = array();
 
+            // Fichiers joints: 
             if (isset($data['join_files']) && is_array($data['join_files'])) {
                 foreach ($data['join_files'] as $id_file) {
+                    $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', (int) $id_file);
+                    if ($file->isLoaded()) {
+                        $file_path = $file->getFilePath();
+                        $file_name = $file->getData('file_name') . '.' . $file->getData('file_ext');
+                        if (!file_exists($file_path)) {
+                            $errors[] = 'Le fichier "' . $file_name . '" n\'existe pas';
+                        } else {
+                            $filename_list[] = $file_path;
+                            $mimetype_list[] = dol_mimetype($file_name);
+                            $mimefilename_list[] = $file_name;
+                        }
+                    } else {
+                        $errors[] = 'Le fichier d\'ID ' . $id_file . ' n\'existe pas';
+                    }
+                }
+            }
+            
+            // Fichiers joints des objets liés: 
+            if (isset($data['extra_joins_files']) && is_array($data['extra_joins_files'])) {
+                foreach ($data['extra_joins_files'] as $id_file) {
                     $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', (int) $id_file);
                     if ($file->isLoaded()) {
                         $file_path = $file->getFilePath();

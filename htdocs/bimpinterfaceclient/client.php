@@ -8,7 +8,7 @@ $_REQUEST['bimp_context'] = 'public';
 if(isset($_SERVER['HTTP_REFERER'])){
     $result = parse_url($_SERVER['HTTP_REFERER']);
     if(isset($result['host']) && stripos($result['host'],'ldlc.com') !== false){
-        if(stripos($_SERVER['HTTP_USER_AGENT'], 'Chrome') < 1 && stripos($_SERVER['HTTP_USER_AGENT'], 'Firefox') < 1){
+        if(stripos($_SERVER['HTTP_USER_AGENT'], 'Chrome') < 1 && stripos($_SERVER['HTTP_USER_AGENT'], 'Mobile') < 1  && stripos($_SERVER['HTTP_USER_AGENT'], 'Firefox') < 1){
             if((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https'))   
                  $url = "https://";   
             else  

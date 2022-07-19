@@ -81,6 +81,12 @@ objects:
         instance: 
             id_object: 
                 field_value: fk_user_creat
+    
+    user_update:
+        extends: user
+        instance: 
+            id_object: 
+                field_value: fk_user_modif
                 
 fields: 
     datec: 
@@ -91,6 +97,18 @@ fields:
         label: Créée par
         type: id_object
         object: user_author
+        input: 
+            type: hidden
+        search: 
+            input: 
+                type: search_user
+        filter: 
+            type: user
+            
+    fk_user_modif:
+        label: Modifié par
+        type: id_object
+        object: user_modif
         input: 
             type: hidden
         search: 

@@ -13,17 +13,17 @@ class newExportController extends BimpController {
         global $db, $user;
         $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $user->id);
         $bdd = new BimpDb($db);
-//        $tra = new TRA_factureFournisseur(new BimpDb($db),  PATH_TMP . $this->dir . 'tiers.tra');
+        $tra = new TRA_factureFournisseur(new BimpDb($db),  PATH_TMP . $this->dir . 'tiers.tra');
 //
         $html = '';
         
         $html .= '<h2 style=\'color:orange;\' >BIMP<sup style=\'color:grey\'>export comptable</sup></h2>';
 //        
-//        $html .= '<pre>';
+        $html .= '<pre>';
 //        
-//        $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', 15420);
+        $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', 15417 /*15420*/);
 //        
-//        $html .= $tra->constructTra($facture);
+        $html .= $tra->constructTra($facture);
         
         if($_GET['PAYNI']) {
             $tra_constructor = new TRA_payInc($bdd);

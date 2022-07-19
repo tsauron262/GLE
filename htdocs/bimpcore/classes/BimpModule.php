@@ -9,4 +9,9 @@ class BimpModule {
      {
          
      }
+     
+     public function onConfigChange($param_name)
+     {
+         
+     }
 }

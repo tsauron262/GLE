@@ -1,79 +1,241 @@
 <?php
 
-
 class BimpLayout
 {
 
-    public static function displayHeaderTop()
+    protected static $instance = null;
+    public $no_js = 0;
+    public $no_head = 0;
+    public $js_files = array();
+    public $css_files = array();
+    public $js_vars = array();
+    public $page_title = '';
+    public $extra_head = '';
+    public $body_id = 'mainbody';
+    public $body_classes = array();
+    public $menu_target = '';
+    public $menu_morequerystring = '';
+    public $main_area_html = '';
+    public $help_url = '';
+
+    // Gestion Instance: 
+
+    public static function getInstance()
     {
-        global $hookmanager, $langs, $db;
+        if (is_null(self::$instance)) {
+            global $conf, $main_controller;
 
-        echo '<header class="header-top" header-theme="light">';
+            if (is_a($main_controller, 'BimpController')) {
+                $layout_module = $main_controller->layout_module;
+                $layout_name = $main_controller->layout_name;
+            }
 
-        echo '<div class="container-fluid" >';
-        echo '<div class="d-flex justify-content-between">';
+            if (!$layout_module || !$layout_name) {
+                $layout_module = 'bimpcore';
+                $layout_name = 'BimpLayout';
+            }
 
-        // Toolbar left: 
-        echo '<div class="top-menu d-flex align-items-center pull-left">';
-        // Bouton menu responsive:
-        echo '<button type="button" id="responsiveButton" class="btn-icon mobile-nav-toggle"><span></span></button>';
+            if ($layout_module === 'bimpcore' && $layout_name === 'BimpLayout') { // Si le controller n'a pas défini un layout différent. 
+                if ($conf->theme == "BimpTheme") {
+                    $layout_module = 'bimptheme';
+                    $layout_name = 'BimpThemeLayout';
+                }
+            }
 
-        echo '<a href="' . DOL_URL_ROOT . '/" class="nav-link bs-popover header-icon"';
-        echo BimpRender::renderPopoverData('Accueil', 'bottom');
-        echo '>';
-        echo BimpRender::renderIcon('fas_home');
-        echo '</a>';
+            $layout_class = $layout_name;
 
-        echo '<button id="navbar-fullscreen" class="nav-link bs-popover header-icon"';
-        echo BimpRender::renderPopoverData('Plein écran', 'bottom') . '>';
-        echo BimpRender::renderIcon('fas_expand');
-        echo '</button>';
+            if (!class_exists($layout_class)) {
+                if (file_exists(DOL_DOCUMENT_ROOT . '/' . $layout_module . '/classes/' . $layout_name . '.php')) {
+                    require_once DOL_DOCUMENT_ROOT . '/' . $layout_module . '/classes/' . $layout_name . '.php';
+                } else {
+                    BimpCore::addlog('LAYOUT ABSENT: ' . $layout_module . '/' . $layout_name, Bimp_Log::BIMP_LOG_URGENT, 'bimpcore');
+                    $layout_module = 'bimpcore';
+                    $layout_name = 'BimpLayout';
+                }
+            }
 
-        echo '<button class="nav-link header-icon bs-popover"';
-        echo BimpRender::renderPopoverData('Historique de navigation', 'bottom');
-        echo '>';
-        echo BimpRender::renderIcon('fas_history');
-        echo '</button>';
+            // Véfication des extensions: 
+            if (defined('BIMP_EXTENDS_VERSION')) {
+                if (file_exists(DOL_DOCUMENT_ROOT . '/' . $layout_module . '/extends/versions/' . BIMP_EXTENDS_VERSION . '/classes/' . $layout_name . '.php')) {
+                    require_once DOL_DOCUMENT_ROOT . '/' . $layout_module . '/extends/versions/' . BIMP_EXTENDS_VERSION . '/classes/' . $layout_name . '.php';
+                    $layout_class = $layout_name . '_ExtVersion';
+                }
+            }
 
-        $form = new Form($db);
-        $selected = -1;
-        $usedbyinclude = 1;
-        include_once DOL_DOCUMENT_ROOT . '/core/ajax/selectsearchbox.php';
-        echo $form->selectArrayAjax('searchselectcombo', DOL_URL_ROOT . '/core/ajax/selectsearchbox.php', $selected, '', '', 0, 1, 'vmenusearchselectcombo', 1, $langs->trans("Search"), 1);
+            if (defined('BIMP_EXTENDS_ENTITY')) {
+                if (file_exists(DOL_DOCUMENT_ROOT . '/' . $layout_module . '/extends/entities/' . BIMP_EXTENDS_ENTITY . '/classes/' . $layout_name . '.php')) {
+                    require_once DOL_DOCUMENT_ROOT . '/' . $layout_module . '/extends/entities/' . BIMP_EXTENDS_ENTITY . '/classes/' . $layout_name . '.php';
+                    $layout_class = $layout_name . '_ExtEntity';
+                }
+            }
 
-        echo '</div>';
+            if (class_exists($layout_class)) {
+                self::$instance = new $layout_class();
+            } else {
+                BimpCore::addlog('CLASSE LAYOUT ABSENTE: ' . $layout_class, Bimp_Log::BIMP_LOG_URGENT, 'bimpcore');
+                self::$instance = new BimpLayout();
+            }
+        }
 
-        echo '<div class="modifMenuTopRight">';
-        echo '<div class="top-menu d-flex align-items-center pull-right">';
-
-        echo displayMessageIcone();
-        echo displayAcountIcone();
-
-        echo '</div>';
-        echo '</div>';
-        echo '</div>';
-        echo '</header>';
+        return self::$instance;
     }
 
-    public static function renderFooter()
+    public static function hasInstance()
+    {
+        return is_a(self::$instance, 'BimpLayout');
+    }
+
+    // Gestion du contenu: 
+
+    public function addJsFile($file)
+    {
+        if ($file && !in_array($file, $this->js_files)) {
+            $this->js_files[] = $file;
+        }
+    }
+
+    public function addCssFile($file)
+    {
+        if ($file && !in_array($file, $this->css_files)) {
+            $this->css_files[] = $file;
+        }
+    }
+
+    public function addJsVar($name, $value)
+    {
+        $this->js_vars[$name] = $value;
+    }
+
+    public function addJsVars($js_vars)
+    {
+        if (is_array($js_vars) && !empty($js_vars)) {
+            foreach ($js_vars as $var_name => $var_value) {
+                $this->js_vars[$var_name] = $var_value;
+            }
+        }
+    }
+
+    // Traitements:
+
+    public function initHead()
+    {
+        global $bimp_layout_js_vars;
+        $bimp_layout_js_vars = '';
+
+        if (!empty($this->js_vars)) {
+            $bimp_layout_js_vars .= "\n" . '<!-- VARS JS -->' . "\n";
+            $bimp_layout_js_vars .= '<script type="text/javascript">' . "\n";
+
+            foreach ($this->js_vars as $var_name => $var_value) {
+                $bimp_layout_js_vars .= "\t" . 'var ' . $var_name . ' = ';
+                $bimp_layout_js_vars .= $var_value;
+                $bimp_layout_js_vars .= ';' . "\n";
+            }
+
+            $bimp_layout_js_vars .= '</script>' . "\n";
+        }
+    }
+
+    public function begin()
+    {
+        $this->displayHead();
+
+        echo '<body id="' . $this->body_id . '"' . (!empty($this->body_classes) ? ' class="' . implode(' ', $this->body_classes) . '"' : '') . '>' . "\n";
+
+        $this->displayTop();
+        $this->displayLeft();
+        $this->displayMainArea();
+    }
+
+    public function end()
+    {
+        $this->displayRight();
+        $this->displayBottom();
+
+        echo $this->renderModals();
+
+        // Ce script doit figurer en toute fin de page (on cherche à être sûr que tout le js bimpcore est chargé): 
+        echo '<script type="text/javascript">';
+        echo '$(document).ready(function() {$(\'body\').trigger($.Event(\'bimp_ready\'));});';
+        echo '</script>' . "\n\n";
+    }
+
+    // Affichages: 
+
+    public function displayHead()
+    {
+        $this->initHead();
+        top_htmlhead($this->extra_head, $this->page_title, $this->no_js, $this->no_head, $this->js_files, $this->css_files);
+    }
+
+    public function displayTop()
+    {
+        global $conf;
+        if (empty($conf->dol_hide_topmenu) || GETPOST('dol_invisible_topmenu', 'int')) {
+            top_menu($this->extra_head, $this->page_title, $this->menu_target, 0, 0, $this->js_files, $this->css_files, '', $this->help_url);
+        }
+    }
+
+    public function displayLeft()
+    {
+        global $conf;
+        if (empty($conf->dol_hide_leftmenu)) {
+            left_menu('', $this->help_url, '', '', 1, $this->page_title, 1);
+        }
+    }
+
+    public function displayMainArea()
+    {
+        if ($this->main_area_html) {
+            echo $this->main_area_html;
+            return;
+        }
+
+        main_area($this->page_title);
+    }
+
+    public function displayRight()
     {
         
     }
 
-    protected static function renderTop()
+    public function displayBottom()
     {
-        $html = '';
-
-//        BimpObject::loadClass('bimpcore', 'BimpAlert'); // A placer correctement... 
-//        $html .= BimpAlert::getMsgs();
-
-        return $html;
+        
     }
 
-    protected function renderMenu()
+    // Rendus HTML: 
+
+    public function renderModals()
     {
         $html = '';
 
+        $html .= BimpRender::renderAjaxModal('page_modal', 'bimpModal');
+        $html .= BimpRender::renderAjaxModal('docu_modal', 'docModal');
+
+        $html .= '<div id="openModalBtn" onclick="bimpModal.show();" class="closed bs-popover"';
+        $html .= BimpRender::renderPopoverData('Afficher la fenêtre popup', 'left');
+        $html .= ' data-modal_id="page_modal">';
+        $html .= BimpRender::renderIcon('far_window-restore');
+        $html .= '</div>' . "\n";
+
+        if (BimpDebug::isActive()) {
+            BimpDebug::addDebugTime('Fin affichage page');
+
+            $html .= BimpRender::renderAjaxModal('debug_modal', 'BimpDebugModal');
+
+            $html .= '<div id="openDebugModalBtn" onclick="BimpDebugModal.show();" class="closed bs-popover"';
+            $html .= BimpRender::renderPopoverData('Afficher la fenêtre debug', 'right');
+            $html .= ' data-modal_id="debug_modal">';
+            $html .= BimpRender::renderIcon('fas_info-circle');
+            $html .= '</div>' . "\n";
+
+            $html .= '<div id="bimp_page_debug_content" style="display: none">';
+            $html .= BimpDebug::renderDebug();
+            $html .= '</div>' . "\n";
+        }
+
+        $html .= "\n";
         return $html;
     }
 }

@@ -7,6 +7,8 @@ class BimpController
     public $module = '';
     public $controller = '';
     public $current_tab = '';
+    public $layout_module = 'bimpcore';
+    public $layout_name = 'BimpLayout';
     public $config = null;
     public $errors = array();
     public $msgs = array();
@@ -133,6 +135,33 @@ class BimpController
     public function init()
     {
         
+    }
+
+    public function initLayout()
+    {
+        $id_object = BimpTools::getValue('id');
+        $layout = BimpLayout::getInstance();
+
+        if (0) {
+            $layout = new BimpLayout();
+        }
+
+        $root = DOL_URL_ROOT;
+        if ($root == "/") {
+            $root = "";
+        } elseif (preg_match('/^(.+)\/$/', $root, $matches)) {
+            $root = $matches[1];
+        }
+
+        $layout->addJsVar('ajaxRequestsUrl', '\'' . $root . "/" . $this->module . '/index.php?fc=' . $this->controller . (!is_null($id_object) ? '&id=' . $id_object : '') . '\'');
+
+        foreach ($this->cssFiles as $css_file) {
+            $layout->addCssFile(BimpCore::getFileUrl($css_file, true, false));
+        }
+
+        foreach ($this->jsFiles as $js_file) {
+            $layout->addJsFile(BimpCore::getFileUrl($js_file, true, false));
+        }
     }
 
     public function initErrorsHandler()
@@ -343,41 +372,6 @@ class BimpController
 
     // Affichages:
 
-    public function displayHeaderFiles($echo = true)
-    {
-        $html = '';
-        $id_object = BimpTools::getValue('id');
-
-        $prefixe = DOL_URL_ROOT;
-        if ($prefixe == "/")
-            $prefixe = "";
-        elseif ($prefixe != "")
-            $prefixe .= "/";
-
-        $html .= '<script type="text/javascript">';
-        $html .= 'ajaxRequestsUrl = \'' . $prefixe . "/" . $this->module . '/index.php?fc=' . $this->controller . (!is_null($id_object) ? '&id=' . $id_object : '') . '\';';
-        $html .= '</script>';
-
-        $html .= BimpCore::displayHeaderFiles(false);
-
-        foreach ($this->cssFiles as $css_file) {
-            $html .= '<link type="text/css" rel="stylesheet" href="' . BimpCore::getFileUrl($css_file) . '"/>';
-        }
-
-        foreach ($this->jsFiles as $js_file) {
-            $html .= '<script type="text/javascript" src="' . BimpCore::getFileUrl($js_file) . '"></script>';
-        }
-
-        $html .= '<script type="text/javascript">';
-        $html .= '$(document).ready(function() {$(\'body\').trigger($.Event(\'bimp_ready\'));});';
-        $html .= '</script>';
-
-        if ($echo)
-            echo $html;
-
-        return $html;
-    }
-
     public function displayHeader()
     {
         llxHeader('', $this->getPageTitle(), '', false, false, false);
@@ -402,10 +396,10 @@ class BimpController
         $display_footer = false;
 
         if (!defined('BIMP_CONTROLLER_INIT')) {
+            ini_set('display_errors', 1);
+            error_reporting(E_ALL);
+
             define('BIMP_CONTROLLER_INIT', 1);
-            if (BimpDebug::isActive()) {
-                BimpDebug::addDebugTime('Début affichage page');
-            }
 
             if (!(int) $this->config->get('content_only', 0, false, 'bool')) {
                 $this->displayHeader();
@@ -433,7 +427,7 @@ class BimpController
             }
         }
 
-        echo '<div class="bimp_controller_content">';
+        echo '<div class="bimp_controller_content">' . "\n";
         if (!BimpObject::objectLoaded($user)) {
             if (!BimpCore::isContextPublic()) {
                 echo BimpRender::renderAlerts('Aucun utilisateur connecté. Veuillez vous <a href="' . DOL_URL_ROOT . '">authentifier</a>');
@@ -474,11 +468,9 @@ class BimpController
             }
         }
 
-        echo '</div>';
+        echo '</div><!-- End .bimp_controller_content -->' . "\n";
 
         if ($display_footer) {
-            echo self::renderBaseModals();
-
             $this->displayFooter();
         }
     }
@@ -735,34 +727,7 @@ class BimpController
 
     public static function renderBaseModals()
     {
-        $html = '';
-
-        $html .= BimpRender::renderAjaxModal('page_modal', 'bimpModal');
-        $html .= BimpRender::renderAjaxModal('docu_modal', 'docModal');
-
-        $html .= '<div id="openModalBtn" onclick="bimpModal.show();" class="closed bs-popover"';
-        $html .= BimpRender::renderPopoverData('Afficher la fenêtre popup', 'left');
-        $html .= ' data-modal_id="page_modal">';
-        $html .= BimpRender::renderIcon('far_window-restore');
-        $html .= '</div>';
-
-        if (BimpDebug::isActive()) {
-            BimpDebug::addDebugTime('Fin affichage page');
-
-            $html .= BimpRender::renderAjaxModal('debug_modal', 'BimpDebugModal');
-
-            $html .= '<div id="openDebugModalBtn" onclick="BimpDebugModal.show();" class="closed bs-popover"';
-            $html .= BimpRender::renderPopoverData('Afficher la fenêtre debug', 'right');
-            $html .= ' data-modal_id="debug_modal">';
-            $html .= BimpRender::renderIcon('fas_info-circle');
-            $html .= '</div>';
-
-            $html .= '<div id="bimp_page_debug_content" style="display: none">';
-            $html .= BimpDebug::renderDebug();
-            $html .= '</div>';
-        }
-
-        return $html;
+        
     }
 
     // Traitements Ajax:
@@ -1013,7 +978,7 @@ class BimpController
                 } else {
                     $errors = $result['errors'];
                 }
-                
+
                 BimpCore::unlockObject($object_module, $object_name, $id_object);
             }
         }

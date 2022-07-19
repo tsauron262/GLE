@@ -1,0 +1,52 @@
+table: menu
+primary: rowid
+controller: propal
+icon: fas_bars
+
+labels: 
+    name: ligne de menu
+    name_plur: lignes de menu
+    is_female: 1
+    
+fields: 
+    fk_menu: 
+        label: Ligne parente
+        type: id
+        default_value: -1
+        
+    titre: 
+        label: Titre
+        required: 1
+        
+    langs: 
+        label: Langues
+        
+    url: 
+        label: URL
+        
+    perms:
+        label: Permissions
+        
+    enabled: 
+        label: Paramètre d'activation
+        
+    usertype: 
+        label: Type utilisateur
+        type: int
+        values: 
+            array: userTypes
+        default_value: 0
+        
+    bimp_icon: 
+        label: Icône
+        
+    bimp_object: 
+        label: BimpObject lié
+        input: 
+            help: 'Saisir: "nom_module/nom_objet"'
+        
+    
+
+        
+    
+    

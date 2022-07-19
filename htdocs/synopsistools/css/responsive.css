@@ -408,13 +408,10 @@ and open the template in the editor.
         left: 0px!important;
 
     }
-    
-
 
     #id-right{
         display: table-cell!important;
     }
-
 
     .vmenu{
         height: auto;

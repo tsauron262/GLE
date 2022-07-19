@@ -24,6 +24,7 @@
         public $tiers = Array();
         public $moment;
         public $rollBack = false;
+        public $excludeArrayScanDire = Array('..', '.', 'imported_auto', 'auto', 'rollback');
         
         function __construct($db) {
             $hier = new DateTime();
@@ -75,8 +76,6 @@
                                 $this->write_tra($ecriture_mdt, PATH_TMP . $this->dir . $this->getMyFile("mandats"));
                                 $ribANDmandat->passTo_exported($instance);
                             }
-
-
                         }  else {
                             $subject = "EXPORT COMPTA - RIB MANQUANT";
                             $msg = "La facture " . $instance->getNomUrl() . " a été exportée avec comme mode de règlement mandat de prélèvement SEPA mais n'a pas de RIB";
@@ -145,6 +144,7 @@
                     if($this->bdb->getValue('c_paiement', 'code', 'id = ' . $paiement->getData('fk_paiement')) != 'NO_COM') {
                         if($this->write_tra($this->TRA_deplacementPaiement->constructTra($paiement, $datas), $file)) {
                             $this->good['DP'][$paiement->getRef()] = 'Ok dans le fichier ' . $file;
+                            $this->bdb->update('mvt_paiement', Array('traite' => 1), 'id = ' . $line->id);
                         } else {
                             $this->fails['DP'][$paiement->getRef()] = 'Erreur de déplacement de ce paiement';
                         }
@@ -296,6 +296,7 @@
             if(!is_dir($files_dir)) {
                 mkdir($files_dir, 0777, true);
                 mkdir($files_dir . "imported/", 0777, true);
+                mkdir($files_dir . "rollback/", 0777, true);
                 mkdir($files_dir, 0777, true);
             }
             
@@ -322,6 +323,7 @@
                     $this->warn['FILES'][$file] = 'Le fichier existe déjà';
                 }
             }
+            
         }
         
         protected function write_tra($ecriture, $file):bool {

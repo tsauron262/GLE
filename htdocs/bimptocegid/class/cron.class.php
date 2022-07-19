@@ -43,7 +43,7 @@
             global $db;
             
             //ID_ERP == 2
-            define('ID_ERP', 2);
+            //define('ID_ERP', 2);
             if(defined('ID_ERP') && ID_ERP == 2) {
                 $db->begin(); //Ouvre la transaction
             

@@ -1427,6 +1427,12 @@ lists_cols:
         label: Adresse
         value: 
             callback: displayFullAddress
+        csv_needed_fields:
+            - address
+            - zip
+            - town
+            - fk_dep
+            - fk_pays
     infos_contact: 
         label: Infos contact
         value: 

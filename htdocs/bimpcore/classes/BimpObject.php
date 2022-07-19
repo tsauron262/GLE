@@ -8823,6 +8823,11 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         return self::getObjectLinkedObjectsArray($this, $include_empty);
     }
+    
+    public function getFullLinkedObjetsArray($include_empty = false)
+    {
+        return self::getObjectFullLinkedObjetsArray($this, $include_empty);
+    }
 
     public function getListChidrenArray($include_empty = false)
     {

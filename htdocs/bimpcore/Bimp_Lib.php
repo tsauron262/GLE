@@ -107,9 +107,9 @@ if (!defined('BIMP_LIB')) {
     BimpConfig::initCacheServeur();
 }
 
-if (stripos($_SERVER['PHP_SELF'], 'bimpinterfaceclient') === false) {
-    BimpCore::setContext("private");
-}
+//if (stripos($_SERVER['PHP_SELF'], 'bimpinterfaceclient') === false) {
+//    BimpCore::setContext("private");
+//}
 
 function checkBimpCoreVersion()
 {

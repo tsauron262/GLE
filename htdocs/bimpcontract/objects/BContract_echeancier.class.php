@@ -648,7 +648,7 @@ class BContract_echeancier extends BimpObject {
                 $html .= '<td style="text-align:center"><b>' . price($facture->getData('total')) . ' €</b> </td>'
                         . '<td style="text-align:center"><b>' . price($facture->getData('tva')) . ' € </b></td>'
                         . '<td style="text-align:center"><b>' . price($facture->getData('total_ttc')) . ' €</b> </td>'
-                        . '<td style="text-align:center"><b>' . price($facture->getData('total') - $facture->getData('marge')) . ' €</b></td>'
+                        . '<td style="text-align:center"><b>' . price($facture->getData('total') - $facture->getData('marge_finale_ok')) . ' €</b></td>'
                         . '<td style="text-align:center">' . $facture->getNomUrl(1) . '</td>'
                         . '<td style="text-align:center">' . $paye . '</td>'
                         . '<td style="text-align:center">' . $displayAppatenance . '</td>'

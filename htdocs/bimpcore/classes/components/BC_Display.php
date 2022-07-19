@@ -125,6 +125,9 @@ class BC_Display extends BimpComponent
         'time'        => array(
             'format' => array('default' => 'H:i:s', 'values' => array())
         ),
+        'timer'        => array(
+            'with_day' => array('data_type'=>'bool', 'default' => 1)
+        ),
         'datetime'    => array(
             'format'    => array('default' => 'd / m / Y H:i:s', 'values' => array()),
             'show_hour' => array('data_type' => 'bool', 'default' => 0, 'label' => 'Afficher l\'heure')
@@ -975,7 +978,7 @@ class BC_Display extends BimpComponent
                     break;
 
                 case 'timer':
-                    $html .= BimpTools::displayTimefromSeconds($this->value);
+                    $html .= BimpTools::displayTimefromSeconds($this->value, $this->getParam('with_day', 1));
                     break;
 
                 case 'yes_no':

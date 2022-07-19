@@ -9,6 +9,7 @@
         
         protected $export_class  = null;
         protected $stopCompta    = false;
+        protected $filesNotFtp   = [];
         protected $rapport       = [];
         protected $files_for_ftp = [];
         protected $entitie       = null;
@@ -19,80 +20,171 @@
         protected $ldlc_ftp_path = '/FTP-BIMP-ERP/accounting/'; // Bien penssé a changer pour les test à /FTP-BIMP-ERP/accountingtest/
         protected $local_path    = PATH_TMP . "/" . 'exportCegid' . '/' . 'BY_DATE' . '/';
         protected $size_vide_tra = 149;
-        
-        private $auto_tiers             = false;
-        private $auto_ventes            = false;
-        private $auto_paiements         = false;
-        private $auto_achats            = false;
-        private $auto_rib_mandats       = false;
+        protected $rollback = false;
+        protected $copyErrors = Array();
+
+        private $auto_tiers             = true;
+        private $auto_ventes            = true;
+        private $auto_paiements         = true;
+        private $auto_achats            = true;
+        private $auto_rib_mandats       = true;
         private $auto_payni             = true;
         private $auto_importPaiement    = true;
-        private $auto_deplacementPay    = false;
+        private $auto_deplacementPay    = true;
         
         private $export_ventes          = true;
         private $export_paiements       = true;
-        private $export_achats          = false;
+        private $export_achats          = true;
         private $export_payni           = true;
         private $export_importPaiement  = true;
         private $export_deplacementPay  = true;
         
         public function automatique() {
             global $db;
-            $this->fichiersToRollback();
             
             //ID_ERP == 2
-            
+            //define('ID_ERP', 2);
             if(defined('ID_ERP') && ID_ERP == 2) {
                 $db->begin(); //Ouvre la transaction
             
-            $this->version_tra = BimpCore::getConf('version_tra', null, "bimptocegid");
-            $this->entitie = BimpCore::getConf('file_entity', null, "bimptocegid");
-            $this->export_class = new export($db);
-            $this->export_class->create_daily_files();
-            $this->files_for_ftp = $this->getFilesArrayForTranfert();
-            
-            $this->auto_payni = ($this->export_class->moment == 'AM') ? true : false;
-            
-            if($this->export_payni && $this->export_class->moment == 'AM')              $this->export_class->exportPayInc();
-            if($this->export_ventes)                                                    $this->export_class->exportFacture();
-            if($this->export_paiements)                                                 $this->export_class->exportPaiement();
-            if($this->export_achats)                                                    $this->export_class->exportFactureFournisseur();
-            if($this->export_importPaiement && $this->export_class->moment == 'AM' )    $this->export_class->exportImportPaiement();
-            if($this->export_deplacementPay)                                            $this->export_class->exportDeplacementPaiament();
-            
-            $this->FTP();
-            $this->menage();
-            
-            if($this->export_class->rollBack) {
-                $db->rollback(); // Annule la transaction
-                $this->fichiersToRollback();
-                mailSyn2("URGENT - ROLLBACK COMPTA", 'dev@bimp.fr', null, 'Problème export compta');
+                $this->version_tra = BimpCore::getConf('version_tra', null, "bimptocegid");
+                $this->entitie = BimpCore::getConf('file_entity', null, "bimptocegid");
+                $this->export_class = new export($db);
+                $this->export_class->create_daily_files();
+                $this->files_for_ftp = $this->getFilesArrayForTranfert();
+
+                $this->auto_payni = ($this->export_class->moment == 'AM') ? true : false;
+
+                if($this->export_payni && $this->export_class->moment == 'AM' && !$this->export_class->rollBack)              $this->export_class->exportPayInc();
+                if($this->export_ventes && !$this->export_class->rollBack)                                                    $this->export_class->exportFacture();
+                if($this->export_paiements && !$this->export_class->rollBack)                                                 $this->export_class->exportPaiement();
+                if($this->export_achats && !$this->export_class->rollBack)                                                    $this->export_class->exportFactureFournisseur();
+                if($this->export_importPaiement && $this->export_class->moment == 'AM' && !$this->export_class->rollBack)     $this->export_class->exportImportPaiement();
+                if($this->export_deplacementPay && !$this->export_class->rollBack)                                            $this->export_class->exportDeplacementPaiament();
+
+                $this->checkFiles();
+
+                if(!$this->stopCompta && !$this->export_class->rollBack) {
+                    $this->FTP();
+                    $this->menage();
+                    $db->commit();
+                    $this->send_rapport();
+                } else {
+                    if($this->export_class->rollBack) {
+                        $db->rollback(); // Annule la transaction
+                        $this->fichiersToRollback();
+                        
+                        $message = 'Bonjour, ROLLBACK de la compta. Aucune action n\'à été faites pour remonter la compta d\'Aujourd\'hui, les fichiers ont étés tran sférés  dans le dossier rollback';
+
+                        if(count($this->copyErrors) > 0) {
+                            $message .= ' SAUF: ';
+                            foreach($this->copyErrors as $file) {
+                                $message .= $file . ',';
+                            }
+                        }
+                        mailSyn2("Urgent - COMPTA ROLLBACK", 'dev@bimp.fr', null, htmlentities($message));
+                    }
+                }
             } else {
-                $db->commit(); // Valide la transaction
-            }
-            
-            $this->send_rapport();
-            } else {
-                
                 die('Pas sur la bonne instance de l\'ERP');
-                
             }
-            
+        }
+        
+        protected function checkFiles():void {
+            $files = $this->getFilesArrayForTranfert();
+            $checkControle = Array();
+            $nbFileInError = 0;
+            if(count($files) > 0) {
+                foreach($files as $pattern) {
+                    $transfertFiles = glob($this->local_path . $pattern);
+                    if(count($transfertFiles) > 0) {
+                        foreach($transfertFiles as $file) {
+                            if(filesize($file) > $this->size_vide_tra) {
+                                $controle = controle::tra($file, file($file));
+                                $checkControle[basename($file)] = (object) $controle;
+                            }
+                        }
+                    }
+                }
+                
+                if(count($checkControle) > 0)  {
+                    $mustSend = false;
+                    foreach($checkControle as $fileName => $controle) {
+                        $explodedFileName = explode('_', basename($file));
+                        if(in_array('(TIERS)', $fileName)) {
+                            $this->stopCompta = true;
+                        }
+                        $message .= '<b>' . $fileName . '</b><br />';
+                        if($controle->header != '') {
+                            if(!in_array($fileName, $this->filesNotFtp)) $this->filesNotFtp[] = $fileName;
+                            $mustSend = (!$mustSend) ? true : $mustSend;
+                            $message .= 'Erreur sur le header  du fichier<br />';
+                        }
+                        if(count($controle->alignement) > 0) {
+                            if(!in_array($fileName, $this->filesNotFtp)) $this->filesNotFtp[] = $fileName;
+                            $mustSend = (!$mustSend) ? true : $mustSend;
+                            $message .= 'Erreur d\'alignement: <br />';
+                            foreach($controle->alignement as $line)  {
+                                $message .= $line . '<br />';
+                            }
+                        }
+                        if(count($controle->balance) > 0) {
+                            if(!in_array($fileName, $this->filesNotFtp)) $this->filesNotFtp[] = $fileName;
+                            $mustSend = (!$mustSend) ? true : $mustSend;
+                            $message .= 'Erreur de balance: <br />';
+                            foreach($controle->balance as $facture => $i) {
+                                if((int)$i['LINE'] > 0) {
+                                    $ecart = (float) $i['TTC'] - (float) $i['CONTROLE'];
+                                    if($ecart > 0) $ecart = '<b style="color:green">+' . round($ecart, 2) . '</b>';
+                                    else $ecart = '<b style="color:red">'.round($ecart,2).'</b>';
+
+                                    $message .='TRA<b>#' . $i['LINE'] . '</b> ' . $facture . ': TTC = ' . $i['TTC'] . '€, TOTAL DES LIGNES: ' . $i['CONTROLE'] . '€ Merci de faire un '.$ecart.'€ sur la ligne service ou produit de la facture</b><br />';
+
+                                }
+                            }
+                        }
+                        $message .= '<br /><br />';
+                        
+                    }
+                    
+                    if($this->stopCompta) {
+                        $message .= 'Une erreur à été détectée dans le fichier TIERS donc AUCUN fichier n\'a été transféré en compta';
+                    } else {
+                        $message .= 'Seul les fichiers mentionnés ci_dessous ne sont pas transférés en compta<br />';
+                        $message .= implode("\n", $this->filesNotFtp);
+                    }
+                }
+                
+                if($mustSend) {
+                    mailSyn2('Urgent - Fichiers TRA non conformes', 'dev@bimp.fr', null, $message);
+                }
+ 
+            }
         }
         
         protected function fichiersToRollback():void {
             // TODO
+            $listFichierLocal = array_diff(scandir($this->local_path), $this->export_class->excludeArrayScanDire);
             
-            $listFichierLocal = scandir($this->local_path);
+            $copyErrors = Array();
             
-            $this->output .= print_r($listFichierLocal, 1);
+            foreach($listFichierLocal as $fileName){
+                if(!is_dir($this->local_path . 'rollback/' . date('Y-m-d'))) {
+                    mkdir($this->local_path . "rollback/" . date('Y-m-d'), 0777, true);
+                }
+                if(copy($this->local_path . $fileName, $this->local_path . 'rollback/' . date('Y-m-d') . '/' . $fileName . '--' . date('H:i:s') . '.tra'))  {
+                    unlink($this->local_path . $fileName);
+                } else{
+                    $copyErrors[] = $fileName;
+                }
+            }
+            
+            $this->copyErrors = $copyErrors;
             
         }
 
         protected function send_rapport() {
-            
-            
-            
+
             $sujet = "Rapport export comptable du " . date('d/m/Y');
             $to = BimpCore::getConf('devs_email');
             $from = null;
@@ -280,13 +372,13 @@
             $this->output .= $logs;
             
             $filePath = PATH_TMP . '/' . 'exportCegid' . '/' . 'rapports' . '/';
-            $fileName = date('d_m_Y') . '.log';
+            $fileName = date('d_m_Y') . '_'.$this->export_class->moment.'.log';
             
             $log_file = fopen($filePath . $fileName, 'a');
             fwrite($log_file, $logs . "\n\n");
             fclose($log_file);
 
-            mailSyn2($sujet, $to, $from, "Bonjour, vous trouverez en pièce jointe le rapport des exports comptable", array($filePath . $fileName),array('text/plain'), array($fileName));
+            //mailSyn2($sujet, $to, $from, "Bonjour, vous trouverez en pièce jointe le rapport des exports comptable", array($filePath . $fileName),array('text/plain'), array($fileName));
             
         }
         
@@ -312,7 +404,7 @@
         }
         
         public function FTP() {
-            
+
             $files = [];
 
             foreach ($this->files_for_ftp as $pattern) {
@@ -328,22 +420,24 @@
             if(count($files) > 0) {
                 foreach($files as $file_path) {
                     $filename = basename($file_path);
-                    if(!in_array($this->ldlc_ftp_path . $filename, $present_sur_ftp_ldlc)) {
-                        if(filesize($file_path) > $this->size_vide_tra) {
-                            if(ftp_put($ftp, $this->ldlc_ftp_path . $filename, $this->local_path . $filename, FTP_ASCII)) {
-                                $this->rapport['FTP'][] = $filename . " transféré avec succès sur le FTP de LDLC";
-                                unlink($file_path);
+                    if(!in_array($filename, $this->filesNotFtp)) {
+                        if(!in_array($this->ldlc_ftp_path . $filename, $present_sur_ftp_ldlc)) {
+                            if(filesize($file_path) > $this->size_vide_tra) {
+                                if(ftp_put($ftp, $this->ldlc_ftp_path . $filename, $this->local_path . $filename, FTP_ASCII)) {
+                                    $this->rapport['FTP'][] = $filename . " transféré avec succès sur le FTP de LDLC";
+                                    copy($file_path, $this->local_path . 'imported_auto/' . $filename);
+                                    unlink($file_path);
+                                } else {
+                                    $this->rapport['FTP'][] = $filename . " non transféré sur le FTP de LDLC";
+                                }
                             } else {
-                                $this->rapport['FTP'][] = $filename . " non transféré sur le FTP de LDLC";
+                                $this->rapport['FTP'][] = $filename . " non transféré sur le FTP de LDLC car il est vide (fichier supprimé automatiquement)";
+                                unlink($file_path);
                             }
                         } else {
-                            $this->rapport['FTP'][] = $filename . " non transféré sur le FTP de LDLC car il est vide (fichier supprimé automatiquement)";
-                            unlink($file_path);
+                            $this->rapport['FTP'][] = $filename . ' déjà présent sur le FTP de LDLC';
                         }
-                    } else {
-                        $this->rapport['FTP'][] = $filename . ' déjà présent sur le FTP de LDLC';
                     }
-
                 }
             } else {
                 $this->rapport['FTP'][] = "Aucun fichiers à transférer";

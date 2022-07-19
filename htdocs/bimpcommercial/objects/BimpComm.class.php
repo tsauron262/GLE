@@ -3915,6 +3915,7 @@ class BimpComm extends BimpDolObject
         $data = array(
             'total'   => array(
                 'nb_new_clients'                   => 0,
+                'nb_new_clients_by_commerciaux'    => 0,
                 'nb_new_propales'                  => 0,
                 'nb_new_commandes'                 => 0,
                 'nb_new_commandes_for_new_clients' => 0,
@@ -3936,101 +3937,110 @@ class BimpComm extends BimpDolObject
         BimpObject::loadClass('bimpcore', 'Bimp_Societe');
         $bdb = BimpCache::getBdb();
 
-//        // Nb new clients: 
-//        $where = 'datec >= \'' . $date_min . '\' AND datec <= \'' . $date_max . '\'';
-//        $where .= ' AND client > 0';
-//        $data['total']['nb_new_clients'] = (int) $bdb->getCount('societe', $where, 'rowid');
-//
-//        // Nb new clients / users
-//        $sql = 'SELECT sc.fk_user as id_user, COUNT(DISTINCT s.rowid) as nb_clients';
-//        $sql .= BimpTools::getSqlFrom('societe', array(
-//                    'sc' => array(
-//                        'table' => 'societe_commerciaux',
-//                        'on'    => 'sc.fk_soc = s.rowid'
-//                    )
-//                        ), 's');
-//        $sql .= ' WHERE';
-//        $sql .= ' s.datec >= \'' . $date_min . '\' AND s.datec <= \'' . $date_max . '\'';
-//        $sql .= ' AND s.client > 0';
-//        $sql .= ' GROUP BY sc.fk_user';
-//        $rows = $bdb->executeS($sql, 'array');
-//
-//        foreach ($rows as $r) {
-//            if (!isset($data['users'][(int) $r['id_user']])) {
-//                $data['users'][(int) $r['id_user']] = array();
-//            }
-//
-//            $data['users'][(int) $r['id_user']]['nb_new_clients'] = (int) $r['nb_clients'];
-//        }
-//        // Nb new Devis: 
-//        $where = 'datec >= \'' . $date_min . '\' AND datec <= \'' . $date_max . '\'';
-//        $where .= ' AND fk_statut IN (1,2,4)';
-//        $data['total']['nb_new_propales'] = (int) $bdb->getCount('propal', $where, 'rowid');
-//
-//        // Nb new Devis / users
-//        $sql = 'SELECT ec.fk_socpeople as id_user, COUNT(DISTINCT p.rowid) as nb_propales';
-//        $sql .= BimpTools::getSqlFrom('propal', array(
-//                    'ec' => array(
-//                        'table' => 'element_contact',
-//                        'on'    => 'ec.element_id = p.rowid'
-//                    )
-//                        ), 'p');
-//        $sql .= ' WHERE';
-//        $sql .= ' ec.fk_c_type_contact IN (SELECT tc.rowid';
-//        $sql .= BimpTools::getSqlFrom('c_type_contact', null, 'tc');
-//        $sql .= BimpTools::getSqlWhere(array(
-//                    'element' => 'propal',
-//                    'source'  => 'internal',
-//                    'code'    => 'SALESREPFOLL'
-//                        ), 'tc');
-//        $sql .= ')';
-//        $sql .= ' AND p.datec >= \'' . $date_min . '\' AND p.datec <= \'' . $date_max . '\'';
-//        $sql .= ' AND p.fk_statut IN (1,2,4)';
-//        $sql .= ' GROUP BY ec.fk_socpeople';
-//        $rows = $bdb->executeS($sql, 'array');
-//
-//        foreach ($rows as $r) {
-//            if (!isset($data['users'][(int) $r['id_user']])) {
-//                $data['users'][(int) $r['id_user']] = array();
-//            }
-//
-//            $data['users'][(int) $r['id_user']]['nb_new_propales'] = (int) $r['nb_propales'];
-//        }
-//
-//        // Nb new Commandes: 
-//        $where = 'date_creation >= \'' . $date_min . '\' AND date_creation <= \'' . $date_max . '\'';
-//        $where .= ' AND fk_statut > 0';
-//        $data['total']['nb_new_commandes'] = (int) $bdb->getCount('commande', $where, 'rowid');
-//
-//        // Nb new Commandes / users
-//        $sql = 'SELECT ec.fk_socpeople as id_user, COUNT(DISTINCT c.rowid) as nb_commandes';
-//        $sql .= BimpTools::getSqlFrom('commande', array(
-//                    'ec' => array(
-//                        'table' => 'element_contact',
-//                        'on'    => 'ec.element_id = c.rowid'
-//                    )
-//                        ), 'c');
-//        $sql .= ' WHERE';
-//        $sql .= ' ec.fk_c_type_contact IN (SELECT tc.rowid';
-//        $sql .= BimpTools::getSqlFrom('c_type_contact', null, 'tc');
-//        $sql .= BimpTools::getSqlWhere(array(
-//                    'element' => 'commande',
-//                    'source'  => 'internal',
-//                    'code'    => 'SALESREPFOLL'
-//                        ), 'tc');
-//        $sql .= ')';
-//        $sql .= ' AND c.date_creation >= \'' . $date_min . '\' AND c.date_creation <= \'' . $date_max . '\'';
-//        $sql .= ' AND c.fk_statut > 0';
-//        $sql .= ' GROUP BY ec.fk_socpeople';
-//        $rows = $bdb->executeS($sql, 'array');
-//
-//        foreach ($rows as $r) {
-//            if (!isset($data['users'][(int) $r['id_user']])) {
-//                $data['users'][(int) $r['id_user']] = array();
-//            }
-//
-//            $data['users'][(int) $r['id_user']]['nb_new_commandes'] = (int) $r['nb_commandes'];
-//        }
+        // Nb new clients: 
+        $where = 'datec >= \'' . $date_min . '\' AND datec <= \'' . $date_max . '\'';
+        $where .= ' AND client > 0';
+        $data['total']['nb_new_clients'] = (int) $bdb->getCount('societe', $where, 'rowid');
+
+        // Nb new clients créés par les commerciaux
+        $sql = 'SELECT COUNT(DISTINCT s.rowid) as nb_rows';
+        $sql .= ' FROM llx_societe s, llx_usergroup_user u';
+        $sql .= ' WHERE u.fk_usergroup IN ("2")';
+        $sql .= ' AND s.client > 0 AND (s.datec >= \'' . $date_min . '\' AND s.datec <= \'' . $date_max . '\') ';
+        $sql .= ' AND u.fk_user = s.fk_user_modif';
+        $result = $bdb->executeS($sql, 'array');
+        $data['total']['nb_new_clients_by_commerciaux'] = (int) (isset($result[0]['nb_rows']) ? $result[0]['nb_rows'] : 0);
+
+        // Nb new clients / users
+        $sql = 'SELECT sc.fk_user as id_user, COUNT(DISTINCT s.rowid) as nb_clients';
+        $sql .= BimpTools::getSqlFrom('societe', array(
+                    'sc' => array(
+                        'table' => 'societe_commerciaux',
+                        'on'    => 'sc.fk_soc = s.rowid'
+                    )
+                        ), 's');
+        $sql .= ' WHERE';
+        $sql .= ' s.datec >= \'' . $date_min . '\' AND s.datec <= \'' . $date_max . '\'';
+        $sql .= ' AND s.client > 0';
+        $sql .= ' GROUP BY sc.fk_user';
+        $rows = $bdb->executeS($sql, 'array');
+
+        foreach ($rows as $r) {
+            if (!isset($data['users'][(int) $r['id_user']])) {
+                $data['users'][(int) $r['id_user']] = array();
+            }
+
+            $data['users'][(int) $r['id_user']]['nb_new_clients'] = (int) $r['nb_clients'];
+        }
+        // Nb new Devis: 
+        $where = 'datec >= \'' . $date_min . '\' AND datec <= \'' . $date_max . '\'';
+        $where .= ' AND fk_statut IN (1,2,4)';
+        $data['total']['nb_new_propales'] = (int) $bdb->getCount('propal', $where, 'rowid');
+
+        // Nb new Devis / users
+        $sql = 'SELECT ec.fk_socpeople as id_user, COUNT(DISTINCT p.rowid) as nb_propales';
+        $sql .= BimpTools::getSqlFrom('propal', array(
+                    'ec' => array(
+                        'table' => 'element_contact',
+                        'on'    => 'ec.element_id = p.rowid'
+                    )
+                        ), 'p');
+        $sql .= ' WHERE';
+        $sql .= ' ec.fk_c_type_contact IN (SELECT tc.rowid';
+        $sql .= BimpTools::getSqlFrom('c_type_contact', null, 'tc');
+        $sql .= BimpTools::getSqlWhere(array(
+                    'element' => 'propal',
+                    'source'  => 'internal',
+                    'code'    => 'SALESREPFOLL'
+                        ), 'tc');
+        $sql .= ')';
+        $sql .= ' AND p.datec >= \'' . $date_min . '\' AND p.datec <= \'' . $date_max . '\'';
+        $sql .= ' AND p.fk_statut IN (1,2,4)';
+        $sql .= ' GROUP BY ec.fk_socpeople';
+        $rows = $bdb->executeS($sql, 'array');
+
+        foreach ($rows as $r) {
+            if (!isset($data['users'][(int) $r['id_user']])) {
+                $data['users'][(int) $r['id_user']] = array();
+            }
+
+            $data['users'][(int) $r['id_user']]['nb_new_propales'] = (int) $r['nb_propales'];
+        }
+
+        // Nb new Commandes: 
+        $where = 'date_creation >= \'' . $date_min . '\' AND date_creation <= \'' . $date_max . '\'';
+        $where .= ' AND fk_statut > 0';
+        $data['total']['nb_new_commandes'] = (int) $bdb->getCount('commande', $where, 'rowid');
+
+        // Nb new Commandes / users
+        $sql = 'SELECT ec.fk_socpeople as id_user, COUNT(DISTINCT c.rowid) as nb_commandes';
+        $sql .= BimpTools::getSqlFrom('commande', array(
+                    'ec' => array(
+                        'table' => 'element_contact',
+                        'on'    => 'ec.element_id = c.rowid'
+                    )
+                        ), 'c');
+        $sql .= ' WHERE';
+        $sql .= ' ec.fk_c_type_contact IN (SELECT tc.rowid';
+        $sql .= BimpTools::getSqlFrom('c_type_contact', null, 'tc');
+        $sql .= BimpTools::getSqlWhere(array(
+                    'element' => 'commande',
+                    'source'  => 'internal',
+                    'code'    => 'SALESREPFOLL'
+                        ), 'tc');
+        $sql .= ')';
+        $sql .= ' AND c.date_creation >= \'' . $date_min . '\' AND c.date_creation <= \'' . $date_max . '\'';
+        $sql .= ' AND c.fk_statut > 0';
+        $sql .= ' GROUP BY ec.fk_socpeople';
+        $rows = $bdb->executeS($sql, 'array');
+
+        foreach ($rows as $r) {
+            if (!isset($data['users'][(int) $r['id_user']])) {
+                $data['users'][(int) $r['id_user']] = array();
+            }
+
+            $data['users'][(int) $r['id_user']]['nb_new_commandes'] = (int) $r['nb_commandes'];
+        }
 
         // Nb new Commandes / new clients: 
         $where = 'date_creation >= \'' . $date_min . '\' AND date_creation <= \'' . $date_max . '\'';

@@ -439,6 +439,7 @@ class Bimp_Stat_Date extends BimpObject
             if (!count($errors)) {
                 $data_types = array(
                     'nb_new_clients'                   => 'Nb nouveaux clients',
+                    'nb_new_clients_by_commerciaux'    => 'Nb nouveaux clients créés par commerciaux',
                     'nb_new_propales'                  => 'Nb nouveaux devis',
                     'nb_new_commandes'                 => 'Nb nouvelles commandes',
                     'nb_new_commandes_for_new_clients' => 'Nb nouvelles commandes des nouveaux clients',
@@ -468,6 +469,7 @@ class Bimp_Stat_Date extends BimpObject
                         $sheet->setCellValueByColumnAndRow(1, $row, (isset($data['total'][$name]) ? $data['total'][$name] : ''));
                     }
 
+                    unset($data_types['nb_new_clients_by_commerciaux']);
 
                     // Données par utilisateurs: 
                     $sheet = $excel->createSheet();

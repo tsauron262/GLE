@@ -81,6 +81,12 @@ objects:
         instance: 
             id_object: 
                 field_value: fk_user_creat
+    
+    user_update:
+        extends: user
+        instance: 
+            id_object: 
+                field_value: fk_user_modif
                 
 fields: 
     datec: 
@@ -91,6 +97,18 @@ fields:
         label: Créée par
         type: id_object
         object: user_author
+        input: 
+            type: hidden
+        search: 
+            input: 
+                type: search_user
+        filter: 
+            type: user
+            
+    fk_user_modif:
+        label: Modifié par
+        type: id_object
+        object: user_modif
         input: 
             type: hidden
         search: 
@@ -1411,10 +1429,28 @@ lists_cols:
         label: Commercial
         value: 
             callback: displayCommercials
+        csv_needed_fields:
+            - rowid
+            
+    codeClientName:
+        label: Code Client + nom
+        value:
+            callback: displayCodeClientNom
+        csv_needed_fields:
+            - code_client
+            - name
+            
+            
     full_address: 
         label: Adresse
         value: 
             callback: displayFullAddress
+        csv_needed_fields:
+            - address
+            - zip
+            - town
+            - fk_dep
+            - fk_pays
     infos_contact: 
         label: Infos contact
         value: 

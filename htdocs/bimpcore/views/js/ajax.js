@@ -1,7 +1,7 @@
 if (!ajaxRequestsUrl) {
     var ajaxRequestsUrl = dol_url_root + '/bimpcore/index.php';
 }
-
+ajaxRequestsUrl = ajaxRequestsUrl.replace('//', '/', ajaxRequestsUrl);
 var bimp_requests = [];
 var bimp_nologged_requests = [];
 var bimp_is_logged = true;
@@ -441,7 +441,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
             bimp_is_logged = false;
 
             if (typeof (bimp_context) === 'string' && bimp_context == "public") {
-                bimp_reloadPage();
+//                bimp_reloadPage();
                 return;
             }
 

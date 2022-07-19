@@ -68,6 +68,7 @@ fields:
         displays:
             default:
                 type: timer
+                with_day: 0
             
     date:
         label: Date

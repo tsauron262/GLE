@@ -2960,7 +2960,7 @@ div.pagination li.paginationafterarrows {
     /*background: rgb(<?php echo $colorbacklinepairhover; ?>) !important;   */     /* Must be background to be stronger than background of odd or even */
     background: #bdbebf !important; /* other colour */
     font-weight: bold;
-    color: white !important;
+    /*color: white !important;*/
         <?php } ?>
 }
 .nohover:hover {

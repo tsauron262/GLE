@@ -413,6 +413,12 @@ class BContract_avenant extends BContract_contrat {
     }
     
     public function canCreate() {
+      $parent = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getdata('id_contrat'));
+      
+      if($parent->getData('statut') != 11) {
+          return 0;
+      }
+      
       return 1;
     }
     

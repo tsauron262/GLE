@@ -463,21 +463,8 @@ class BContract_avenant extends BContract_contrat {
                     'form_name' => "signed"
                 ))
             );
-        }
-        
-        if($this->getData('type') == 0) {
-            if($this->getData('statut') == 0) {
-                $buttons[] = array(
-                    'label'   => 'Ajouter une ligne à l\'avenant',
-                    'icon'    => 'fas_list',
-                    'onclick' => $this->getJsActionOnclick('addLine', array(), array(
-                        'form_name' => 'addLine'
-                    ))
-                );
-            }
             
-            if($this->getData('statut') == 1) {
-                $buttons[] = array(
+            $buttons[] = array(
                     'label'   => 'Abandonner',
                     'icon'    => 'fas_stop-circle',
                     'onclick' => $this->getJsActionOnclick('abort', array(), array(
@@ -489,6 +476,17 @@ class BContract_avenant extends BContract_contrat {
                     'icon'    => 'fas_times',
                     'onclick' => $this->getJsActionOnclick('close', array(), array(
 
+                    ))
+                );
+        }
+        
+        if($this->getData('type') == 0) {
+            if($this->getData('statut') == 0) {
+                $buttons[] = array(
+                    'label'   => 'Ajouter une ligne à l\'avenant',
+                    'icon'    => 'fas_list',
+                    'onclick' => $this->getJsActionOnclick('addLine', array(), array(
+                        'form_name' => 'addLine'
                     ))
                 );
             }

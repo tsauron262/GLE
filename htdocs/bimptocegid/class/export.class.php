@@ -2,6 +2,7 @@
     require_once __DIR__ . '/../../bimpcore/Bimp_Lib.php';
     require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_facture.class.php';
+    require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_factureFournisseur.class.php';
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_payInc.class.php';
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_paiement.class.php';
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_importPaiement.class.php';
@@ -17,6 +18,7 @@
         private $TRA_payInc;
         private $TRA_paiement;
         private $TRA_importPaiement;
+        private $TRA_factureFournisseur;
         private $dir = "/exportCegid/BY_DATE/";
         public $fails = Array();
         public $good = Array();
@@ -28,20 +30,49 @@
         
         function __construct($db) {
             $hier = new DateTime();
-            
             $this->moment = ((int)$hier->format('H') < 12) ? 'AM' : 'PM'; 
-            
             $this->yesterday = $hier->sub(new DateInterval("P1D"));
-
             $this->lastDateExported = new DateTime(BimpCore::getConf("last_export_date", null, "bimptocegid"));
             $this->bdb = new BimpDb($db);
             $this->TRA_facture = new TRA_facture($this->bdb, PATH_TMP . $this->dir . $this->getMyFile("tiers"));
+            $this->TRA_factureFournisseur = new TRA_factureFournisseur($this->bdb, PATH_TMP . $this->dir . $this->getMyFile("tiers"));
             $this->TRA_payInc = new TRA_payInc($this->bdb);
             $this->TRA_paiement = new TRA_paiement($this->bdb, PATH_TMP . $this->dir . $this->getMyFile("tiers"));
             $this->TRA_deplacementPaiement = new TRA_deplacementPaiement($this->bdb, PATH_TMP . $this->dir . $this->getMyFile("tiers"));
             $this->TRA_importPaiement = new TRA_importPaiement($this->bdb);
         }
         
+        public function exportFactureFournisseur($ref = ''):void {
+            global $db;
+            $errors = Array();
+            switch($this->moment) {
+                case 'AM':
+                    $list = $this->bdb->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND (datec BETWEEN "'.$this->lastDateExported->format('Y-m-d').' 00:00:00" AND "'.$this->yesterday->format('Y-m-d').' 23:59:59" OR date_valid BETWEEN "'.$this->lastDateExported->format('Y-m-d').'" AND "'.$this->yesterday->format('Y-m-d').'")');
+                    break;
+                case 'PM':
+                    $toDay = new DateTime();
+                    $list = $this->bdb->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND (datec BETWEEN "'.$toDay->format('Y-m-d').' 00:00:00" AND "'.$toDay->format('Y-m-d').' 23:59:59" OR date_valid BETWEEN "'.$toDay->format('Y-m-d').'" AND "'.$toDay->format('Y-m-d').'")');
+                    break;
+                default:
+                    $list = [];
+            }
+            $file = PATH_TMP . $this->dir . $this->getMyFile("achats");
+            if(count($list) > 0) {
+                foreach($list as $facture) {
+                    $instance= BimpCache::getBimpObjectInstance("bimpcommercial", "Bimp_FactureFourn", $facture->rowid);
+                    $ecriture .= $this->TRA_factureFournisseur->constructTra($instance);
+                    if($this->write_tra($ecriture, $file)) {
+                        $instance->updateField('exported', 1);
+                        $this->good['ACHATS'][$instance->getRef()]= "Ok dans le fichier TRA " . $file;
+                    } else {
+                        $this->fails['ACHATS'][$instance->getRef()] = "Non écrit dans le TRA " . $file;
+                    }
+                    $ecriture = "";
+                }
+            } else {
+                $this->warn['ACHATS']['bimptocegid'] = "Pas de nouvelles factures à exportés";
+            }
+        }
       
         public function exportFacture($ref = ""):void {
             global $db;
@@ -88,7 +119,7 @@
                         $instance->updateField('exported', 1);
                         $this->good['VENTES'][$instance->getRef()]= "Ok dans le fichier TRA " . $file;
                     } else {
-                        $this->fails['VENTES'][$instance->getRef()] = "Nom écrit dans le TRA " . $file;
+                        $this->fails['VENTES'][$instance->getRef()] = "Non écrit dans le TRA " . $file;
                     }
                     $ecriture = "";
                 }
@@ -97,11 +128,7 @@
                 $this->warn['VENTES']['bimptocegid'] = "Pas de nouvelles factures à exportés";
             }
         }
-        
-        public function exportFactureFournisseur($ref = ''):void {
-            
-        }
-        
+
         public function exportImportPaiement() {
 
             $instance = BimpCache::getBimpObjectInstance('bimpfinanc', 'Bimp_ImportPaiementLine');

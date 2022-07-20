@@ -504,7 +504,7 @@ class BContract_avenant extends BContract_contrat {
         
         $errors = $this->updateField('statut', 4);
         if(!count($errors))
-            $success = "Avenant abandonner avec succès";
+            $success = "Avenant abandonné avec succès";
         
         return [
             'success' => $success,

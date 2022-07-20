@@ -927,7 +927,7 @@ class BimpDolObject extends BimpObject
     }
 
     public function actionSendEMail($data, &$success)
-    {        
+    {
         $errors = array();
         $warnings = array();
         $success = 'Email envoyé avec succès';
@@ -1005,10 +1005,10 @@ class BimpDolObject extends BimpObject
                 }
             }
 
-            $filename_list = array();
-            $mimetype_list = array();
-            $mimefilename_list = array();
-
+            $files = array();
+//            $filename_list = array();
+//            $mimetype_list = array();
+//            $mimefilename_list = array();
             // Fichiers joints: 
             if (isset($data['join_files']) && is_array($data['join_files'])) {
                 foreach ($data['join_files'] as $id_file) {
@@ -1019,16 +1019,17 @@ class BimpDolObject extends BimpObject
                         if (!file_exists($file_path)) {
                             $errors[] = 'Le fichier "' . $file_name . '" n\'existe pas';
                         } else {
-                            $filename_list[] = $file_path;
-                            $mimetype_list[] = dol_mimetype($file_name);
-                            $mimefilename_list[] = $file_name;
+                            $files[] = array($file_path, dol_mimetype($file_name), $file_name);
+//                            $filename_list[] = $file_path;
+//                            $mimetype_list[] = dol_mimetype($file_name);
+//                            $mimefilename_list[] = $file_name;
                         }
                     } else {
                         $errors[] = 'Le fichier d\'ID ' . $id_file . ' n\'existe pas';
                     }
                 }
             }
-            
+
             // Fichiers joints des objets liés: 
             if (isset($data['extra_joins_files']) && is_array($data['extra_joins_files'])) {
                 foreach ($data['extra_joins_files'] as $id_file) {
@@ -1039,9 +1040,10 @@ class BimpDolObject extends BimpObject
                         if (!file_exists($file_path)) {
                             $errors[] = 'Le fichier "' . $file_name . '" n\'existe pas';
                         } else {
-                            $filename_list[] = $file_path;
-                            $mimetype_list[] = dol_mimetype($file_name);
-                            $mimefilename_list[] = $file_name;
+                            $files[] = array($file_path, dol_mimetype($file_name), $file_name);
+//                            $filename_list[] = $file_path;
+//                            $mimetype_list[] = dol_mimetype($file_name);
+//                            $mimefilename_list[] = $file_name;
                         }
                     } else {
                         $errors[] = 'Le fichier d\'ID ' . $id_file . ' n\'existe pas';
@@ -1068,9 +1070,11 @@ class BimpDolObject extends BimpObject
                     $langs->tab_translate['InvoiceSentByEMail'] .= ' modéle : ' . $template['label'];
                 }
 
-
                 $deliveryreceipt = (isset($data['confirm_reception']) ? (int) $data['confirm_reception'] : 0);
-                if (mailSyn2($mail_object, $to, $from, $data['msg_html'], $filename_list, $mimetype_list, $mimefilename_list, $cc, '', $deliveryreceipt)) {
+                $bimpMail = new BimpMail($this, $mail_object, $to, $from, $data['msg_html'], '', $cc, '', $deliveryreceipt);
+                $bimpMail->addFiles($files);
+//                if (mailSyn2($mail_object, $to, $from, $data['msg_html'], $filename_list, $mimetype_list, $mimefilename_list, $cc, '', $deliveryreceipt)) {
+                if ($bimpMail->send($errors)) {
                     if (static::$mail_event_code) {
                         include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
                         global $user, $langs, $conf;
@@ -1080,7 +1084,7 @@ class BimpDolObject extends BimpObject
                         }
                     }
                 } else {
-                    $errors[] = 'Echec de l\'envoi du mail';
+                    $errors[] = 'Echec envoi de l\'e-mail';
                 }
             }
         }

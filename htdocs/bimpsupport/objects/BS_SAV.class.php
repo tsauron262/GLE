@@ -2837,8 +2837,12 @@ class BS_SAV extends BimpObject
         if (!count($errors)) {
             global $user, $langs;
 
-            $id_cond_reglement = (int) BimpCore::getConf('sav_cond_reglement', $client->getData('cond_reglement'), 'bimpsupport');
-            $id_mode_reglement = (int) BimpCore::getConf('sav_mode_reglement', $client->getData('mode_reglement'), 'bimpsupport');
+            $id_cond_reglement = $client->getData('cond_reglement');
+            if(!$id_cond_reglement)
+                $id_cond_reglement = (int) BimpCore::getConf('sav_cond_reglement', $client->getData('cond_reglement'), 'bimpsupport');
+            $id_mode_reglement = $client->getData('mode_reglement');
+            if(!$id_mode_reglement)
+                $id_mode_reglement = (int) BimpCore::getConf('sav_mode_reglement', $client->getData('mode_reglement'), 'bimpsupport');
 
             BimpTools::loadDolClass('comm/propal', 'propal');
             $prop = new Propal($this->db->db);

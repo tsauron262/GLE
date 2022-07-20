@@ -444,17 +444,16 @@ filters_panel:
             login: 
             group:
                 
-                
 filters: 
     group: 
-        label: Group
+        label: Groupe
         data_type: id_object
-        type: user_group
+        object: user_group
+        type: value
         input: 
             type: search_group
             include_empty: 1
-            empty_label: Aucun
-                
+            empty_label: Aucun        
         
 lists:
     bygroup:

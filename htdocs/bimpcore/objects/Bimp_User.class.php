@@ -391,7 +391,6 @@ class Bimp_User extends BimpObject
     {
         switch ($field_name) {
             case 'group':
-
                 $elem_alias = $main_alias . '___usergroupuser';
                 $joins[$elem_alias] = array(
                     'table' => 'usergroup_user',
@@ -412,21 +411,19 @@ class Bimp_User extends BimpObject
     }
     
     
-//    public function getCustomFilterValueLabel($field_name, $value)
-//    {
-//        die($field_name.'mm');
-//        switch ($field_name) {
-//            case 'group':
-//                die('rrrrr');
-//                $group = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_UserGroup', (int) $value);
-//                if (BimpObject::ObjectLoaded($group)) {
-//                    return $group->getRef();
-//                }
-//                break;
-//        }
-//
-//        return parent::getCustomFilterValueLabel($field_name, $value);
-//    }
+    public function getCustomFilterValueLabel($field_name, $value)
+    {
+        switch ($field_name) {
+            case 'group':
+                $group = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_UserGroup', (int) $value);
+                if (BimpObject::ObjectLoaded($group)) {
+                    return $group->getName();
+                }
+                break;
+        }
+
+        return parent::getCustomFilterValueLabel($field_name, $value);
+    }
 
     // Affichage: 
 

@@ -9,9 +9,35 @@ require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/viewEcriture.class.php';
 class BimpDolObject extends BimpObject
 {
 
+    public static $element_name = '';
     public static $dol_module = '';
     public static $mail_event_code = '';
     public static $email_type = '';
+    public static $external_contact_type_required = true;
+    public static $internal_contact_type_required = true;
+
+    // Droits user: 
+
+    public function canEditCommercial()
+    {
+        if ($this->object_name === 'Bimp_Facture') {
+            global $user;
+
+            $secteur = $this->getData('ef_type');
+
+            if ($secteur && in_array($secteur, array('M'))) {
+                return 1;
+            }
+
+            if ($user->admin || $user->rights->bimpcommercial->edit_commercial) {
+                return 1;
+            }
+
+            return 0;
+        }
+
+        return 1;
+    }
 
     // Getters array:
 
@@ -317,7 +343,6 @@ class BimpDolObject extends BimpObject
                     }
                     if ($class != "") {
                         $objT = BimpCache::getBimpObjectInstance($module, $class, $id);
-//                        if ($objT->isLoaded()) { // Ne jamais faire ça: BimpCache renvoie null si l'objet n'existe pas => erreur fatale. 
                         if (BimpObject::objectLoaded($objT)) {
                             $clef = $item['type'] . $objT->id;
                             if ($not_for != $clef) {
@@ -442,6 +467,18 @@ class BimpDolObject extends BimpObject
         }
 
         return '';
+    }
+
+    public function getCommercialId()
+    {
+        if ($this->isLoaded()) {
+            $contacts = $this->dol_object->getIdContact('internal', 'SALESREPFOLL');
+            if (isset($contacts[0]) && $contacts[0]) {
+                return (int) $contacts[0];
+            }
+        }
+
+        return 0;
     }
 
     // Affichages: 
@@ -724,6 +761,115 @@ class BimpDolObject extends BimpObject
         return $html;
     }
 
+    public function renderMailExtraFilesInput($input_name)
+    {
+        $html = '';
+
+        $linked_objects = $this->getFullLinkedObjetsArray(true);
+
+        if (!empty($linked_objects)) {
+            $files = array();
+            foreach ($linked_objects as $obj_data => $obj_label) {
+                $obj_data = json_decode($obj_data, 1);
+                $obj = BimpCache::getBimpObjectInstance($obj_data['module'], $obj_data['object_name'], $obj_data['id_object']);
+
+                if (BimpObject::objectLoaded($obj)) {
+                    $obj_files = $obj->getFilesArray();
+
+                    if (!empty($obj_files)) {
+                        foreach ($obj_files as $id_file => $file_label) {
+                            $files[$id_file] = $obj_label . ' : ' . $file_label;
+                        }
+                    }
+                }
+            }
+
+            $html .= BimpInput::renderInput('check_list', $input_name, '', array(
+                        'items' => $files
+            ));
+        } else {
+            $html .= BimpRender::renderAlerts('Aucun objet lié trouvé', 'warning');
+        }
+
+        return $html;
+    }
+
+    public function renderContactsList()
+    {
+        $html = '';
+
+        $list = array();
+
+        if ($this->isLoaded() && method_exists($this->dol_object, 'liste_contact')) {
+            $list_int = $this->dol_object->liste_contact(-1, 'internal');
+            $list_ext = $this->dol_object->liste_contact(-1, 'external');
+            $list = BimpTools::merge_array($list_int, $list_ext);
+        }
+
+        if (count($list)) {
+            global $conf;
+            BimpTools::loadDolClass('societe');
+            BimpTools::loadDolClass('contact');
+
+            $list_id = $this->object_name . ((int) $this->id ? '_' . $this->id : '') . '_contacts_list';
+
+            foreach ($list as $item) {
+                $html .= '<tr>';
+                switch ($item['source']) {
+                    case 'internal':
+                        $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $item['id']);
+                        $html .= '<td>Utilisateur</td>';
+                        $html .= '<td>' . $conf->global->MAIN_INFO_SOCIETE_NOM . '</td>';
+                        $html .= '<td>';
+                        if (BimpObject::objectLoaded($user)) {
+                            $html .= $user->getLink();
+                        } else {
+                            $html .= '<span class="danger">L\'utilisateur #' . $item['id'] . ' n\'existe plus</span>';
+                        }
+                        $html .= '</td>';
+                        break;
+
+                    case 'external':
+                        $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $item['socid']);
+                        $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', (int) $item['id']);
+
+                        $html .= '<td>Contact tiers</td>';
+                        $html .= '<td>';
+                        if (BimpObject::objectLoaded($soc)) {
+                            $html .= $soc->getLink();
+                        } else {
+                            $html .= '<span class="danger">Le tiers #' . $item['socid'] . ' n\'existe plus</span>';
+                        }
+                        $html .= '</td>';
+                        $html .= '<td>';
+                        if (BimpObject::objectLoaded($contact)) {
+                            $html .= $contact->getLink();
+                        } else {
+                            $html .= '<span class="danger">Le contact #' . $item['id'] . ' n\'existe plus</span>';
+                        }
+                        $html .= '</td>';
+                        break;
+                }
+                $html .= '<td>' . $item['libelle'] . '</td>';
+                $html .= '<td style="text-align: right">';
+                $html .= BimpRender::renderRowButton('Supprimer le contact', 'trash', $this->getJsActionOnclick('removeContact', array('id_contact' => (int) $item['rowid']), array(
+                                    'confirm_msg'      => 'Etes-vous sûr de vouloir supprimer ce contact?',
+                                    'success_callback' => 'function(result) {if (result.contact_list_html) {$(\'#' . $list_id . '\').html(result.contact_list_html);}}'
+                )));
+                $html .= '</td>';
+                $html .= '</tr>';
+            }
+        } else {
+            $html .= '<tr>';
+            $html .= '<td colspan="5">';
+            $html .= BimpRender::renderAlerts('Aucun contact enregistré', 'info');
+            $html .= '</td>';
+            $html .= '</tr>';
+        }
+
+        return $html;
+    }
+
     // Actions: 
 
     public function actionGeneratePdf($data, &$success = '', $errors = array(), $warnings = array())
@@ -859,10 +1005,11 @@ class BimpDolObject extends BimpObject
                 }
             }
 
-            $filename_list = array();
-            $mimetype_list = array();
-            $mimefilename_list = array();
-
+            $files = array();
+//            $filename_list = array();
+//            $mimetype_list = array();
+//            $mimefilename_list = array();
+            // Fichiers joints: 
             if (isset($data['join_files']) && is_array($data['join_files'])) {
                 foreach ($data['join_files'] as $id_file) {
                     $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', (int) $id_file);
@@ -872,9 +1019,31 @@ class BimpDolObject extends BimpObject
                         if (!file_exists($file_path)) {
                             $errors[] = 'Le fichier "' . $file_name . '" n\'existe pas';
                         } else {
-                            $filename_list[] = $file_path;
-                            $mimetype_list[] = dol_mimetype($file_name);
-                            $mimefilename_list[] = $file_name;
+                            $files[] = array($file_path, dol_mimetype($file_name), $file_name);
+//                            $filename_list[] = $file_path;
+//                            $mimetype_list[] = dol_mimetype($file_name);
+//                            $mimefilename_list[] = $file_name;
+                        }
+                    } else {
+                        $errors[] = 'Le fichier d\'ID ' . $id_file . ' n\'existe pas';
+                    }
+                }
+            }
+
+            // Fichiers joints des objets liés: 
+            if (isset($data['extra_joins_files']) && is_array($data['extra_joins_files'])) {
+                foreach ($data['extra_joins_files'] as $id_file) {
+                    $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', (int) $id_file);
+                    if ($file->isLoaded()) {
+                        $file_path = $file->getFilePath();
+                        $file_name = $file->getData('file_name') . '.' . $file->getData('file_ext');
+                        if (!file_exists($file_path)) {
+                            $errors[] = 'Le fichier "' . $file_name . '" n\'existe pas';
+                        } else {
+                            $files[] = array($file_path, dol_mimetype($file_name), $file_name);
+//                            $filename_list[] = $file_path;
+//                            $mimetype_list[] = dol_mimetype($file_name);
+//                            $mimefilename_list[] = $file_name;
                         }
                     } else {
                         $errors[] = 'Le fichier d\'ID ' . $id_file . ' n\'existe pas';
@@ -901,9 +1070,11 @@ class BimpDolObject extends BimpObject
                     $langs->tab_translate['InvoiceSentByEMail'] .= ' modéle : ' . $template['label'];
                 }
 
-
                 $deliveryreceipt = (isset($data['confirm_reception']) ? (int) $data['confirm_reception'] : 0);
-                if (mailSyn2($mail_object, $to, $from, $data['msg_html'], $filename_list, $mimetype_list, $mimefilename_list, $cc, '', $deliveryreceipt)) {
+                $bimpMail = new BimpMail($this, $mail_object, $to, $from, $data['msg_html'], '', $cc, '', $deliveryreceipt);
+                $bimpMail->addFiles($files);
+//                if (mailSyn2($mail_object, $to, $from, $data['msg_html'], $filename_list, $mimetype_list, $mimefilename_list, $cc, '', $deliveryreceipt)) {
+                if ($bimpMail->send($errors)) {
                     if (static::$mail_event_code) {
                         include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
                         global $user, $langs, $conf;
@@ -913,7 +1084,7 @@ class BimpDolObject extends BimpObject
                         }
                     }
                 } else {
-                    $errors[] = 'Echec de l\'envoi du mail';
+                    $errors[] = 'Echec envoi de l\'e-mail';
                 }
             }
         }
@@ -921,6 +1092,81 @@ class BimpDolObject extends BimpObject
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
+        );
+    }
+
+    public function actionAddContact($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Ajout du contact effectué avec succès' . $success;
+
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+        } else {
+            if (!isset($data['type']) || !(int) $data['type']) {
+                $errors[] = 'Nature du contact absent';
+            } else {
+                switch ((int) $data['type']) {
+                    case 1:
+                        $id_contact = isset($data['id_contact']) ? (int) $data['id_contact'] : 0;
+                        $type_contact = isset($data['tiers_type_contact']) ? (int) $data['tiers_type_contact'] : 0;
+                        if (!$id_contact) {
+                            $errors[] = 'Contact non spécifié';
+                        }
+                        if (!$type_contact && static::$external_contact_type_required) {
+                            $errors[] = 'Type de contact non spécifié';
+                        }
+
+                        if (!count($errors)) {
+                            if ($this->dol_object->add_contact($id_contact, $type_contact, 'external') <= 0) {
+                                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du contact');
+                            }
+                        }
+                        break;
+
+                    case 2:
+                        $id_user = isset($data['id_user']) ? (int) $data['id_user'] : 0;
+                        $type_contact = isset($data['user_type_contact']) ? (int) $data['user_type_contact'] : 0;
+                        if (!$id_user) {
+                            $errors[] = 'Utilisateur non spécifié';
+                        }
+
+                        if (!$type_contact && static::$internal_contact_type_required) {
+                            $errors[] = 'Type de contact non spécifié';
+                        }
+
+                        $id_type_commercial = (int) $this->db->getValue('c_type_contact', 'rowid', 'source = \'internal\' AND element = \'' . $this->dol_object->element . '\' AND code = \'SALESREPFOLL\'');
+                        if ($type_contact == $id_type_commercial) {
+                            if (!$this->canEditCommercial()) {
+                                $errors[] = 'Vous n\'avez pas la permission de changer le commercial ' . $this->getLabel('of_a');
+                            } else {
+                                $id_cur_commercial = $this->getCommercialId();
+
+                                if ($id_cur_commercial) {
+                                    $list = $this->dol_object->liste_type_contact();
+                                    $label = (isset($list[$id_type_commercial]) ? $list[$id_type_commercial] : 'Responsable suivi ' . $this->getLabel());
+                                    $msg = 'Un "' . $label . '" a déjà été attribué à ' . $this->getLabel('this') . '<br/>';
+                                    $msg .= 'Si vous souhaitez modifier celui-ci, veuillez d\'abord le supprimer';
+                                    $errors[] = $msg;
+                                }
+                            }
+                        }
+
+                        if (!count($errors)) {
+                            if ($this->dol_object->add_contact($id_user, $type_contact, 'internal') <= 0) {
+                                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du contact');
+                            }
+                        }
+                        break;
+                }
+            }
+        }
+
+        return array(
+            'errors'            => $errors,
+            'warnings'          => $warnings,
+            'contact_list_html' => $this->renderContactsList()
         );
     }
 

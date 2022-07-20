@@ -52,6 +52,7 @@ if (!$action) {
         'correct_tickets_serials'                   => 'Récupérer serials tickets depuis sujet',
         'convert_fi'                                => 'Convertir FI',
         'check_margin_commande'                     => 'Marge commande',
+        'check_margin_propal'                       => 'Marge propal',
         'convert_sql_field_for_items_braces'        => 'Convertir champ "Items_list" avec utilisation des crochets',
         'checkLinesEcheances'                       => 'Vérifier échéances produits limités',
         'maj_id_atradius'                           => 'Vérifier id atradius',
@@ -98,6 +99,15 @@ switch ($action) {
         while ($ln = $db->fetch_object($sql)) {
             $db->query("UPDATE llx_commandedet SET test = 1 WHERE fk_commande = " . $ln->rowid);
         }
+        break;
+    case 'check_margin_propal':
+        global $db;
+        $sql = $db->query('SELECT c.rowid, c.marge, SUM(cd.total_ht - (cd.buy_price_ht * cd.qty)) as margeCalc FROM llx_propal c LEFT JOIN llx_propaldet cd ON cd.`fk_propal` = c.`rowid` WHERE 1 GROUP BY c.rowid HAVING SUM(cd.total_ht - (cd.buy_price_ht * cd.qty)) - c.marge > 1 || SUM(cd.total_ht - (cd.buy_price_ht * cd.qty)) - c.marge < -1');
+
+        while ($ln = $db->fetch_object($sql)) {
+            $db->query("UPDATE llx_propaldet SET test = 1 WHERE fk_propal = " . $ln->rowid);
+        }
+        break;
 
     case 'check_limit_client':
         $errors = array();

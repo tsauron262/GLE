@@ -203,7 +203,7 @@ class BDS_ExportsComptaProcess extends BDSImportProcess
                 $on_ftp_ldlc = ftp_nlist($ftp, $this->params['ftp_dir']);
                 $local_folder = PATH_TMP . '/exportCegid/BY_DATE/';
                 $this->Info($local_folder, $this, "LOCAL");
-                $scanned_directory = array_diff(scandir($local_folder), array('..', '.', 'imported', 'imported_auto'));
+                $scanned_directory = array_diff(scandir($local_folder), array('..', '.', 'imported', 'imported_auto', 'rollback'));
                 $this->Info(implode("<br />", $on_ftp_ldlc), $this, "FICHIERS DISTANT AVANT TRANSFERT");
                 $this->Info(implode("<br />", $scanned_directory), $this, "FICHIERS LOCAUX AVANT TRANSFERT");
                 foreach ($scanned_directory as $file) {
@@ -231,7 +231,7 @@ class BDS_ExportsComptaProcess extends BDSImportProcess
                     }
                 }
                 $this->Info(implode("<br />", ftp_nlist($ftp, $this->params['ftp_dir'])), $this, "FICHIERS DISTANT APRES TRANSFERT");
-                $this->Info(implode("<br />", array_diff(scandir($local_folder), array('..', '.', 'imported', 'imported_auto'))), $this, "FICHIERS LOCAUX APRES TRANSFERT");
+                $this->Info(implode("<br />", array_diff(scandir($local_folder), array('..', '.', 'imported', 'imported_auto', 'rollback'))), $this, "FICHIERS LOCAUX APRES TRANSFERT");
             }
         }
 

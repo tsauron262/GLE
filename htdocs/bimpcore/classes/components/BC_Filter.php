@@ -1130,7 +1130,6 @@ class BC_Filter extends BimpComponent
         switch ($this->params['type']) {
             case 'user':
             case 'value':
-            case 'user_group':
                 $html .= $this->renderValueInput($input_name, $add_btn_html, $input_path, $field_params, $context);
                 break;
 

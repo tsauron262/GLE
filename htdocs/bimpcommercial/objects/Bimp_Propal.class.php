@@ -578,7 +578,6 @@ class Bimp_Propal extends BimpComm
             );
         }
 
-
         return $actions;
     }
 

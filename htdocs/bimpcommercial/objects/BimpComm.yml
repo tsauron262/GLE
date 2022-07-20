@@ -543,6 +543,16 @@ forms:
                           prop: object_name
                       id_parent: 
                           prop: id
+            - custom: 1
+              label: Fichiers des objets liés à joindre
+              input_name: extra_joins_files
+              data_type: id_object
+              object: files
+              content: 
+                  callback: 
+                      method: renderMailExtraFilesInput
+                      params: 
+                          - extra_joins_files
                           
     acompte: 
         title: Ajouter un acompte

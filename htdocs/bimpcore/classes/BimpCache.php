@@ -103,11 +103,11 @@ class BimpCache
     {
         if (is_null(self::$cache_server)) {
             $className = BimpCore::getConf('cache_server_classname', '');
-            
+
             if (!$className || !file_exists(DOL_DOCUMENT_ROOT . '/bimpcore/classes/' . $className . '.php')) {
                 $className = 'BimpCacheServer';
             }
-            
+
             if (!class_exists($className)) {
                 require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/' . $className . '.php';
             }
@@ -248,7 +248,7 @@ class BimpCache
         if (!isset(self::$cache[$cache_key])) {
             $curMem = memory_get_usage();
             $instance = BimpObject::getInstance($module, $object_name, $id_object, $parent);
-            
+
             $newMem = memory_get_usage();
             $obj_memory = $newMem - $curMem;
 
@@ -407,6 +407,23 @@ class BimpCache
             return self::$cache[$cache_key];
         }
     }
+    
+    public static function getCommercialClients(){
+        $cache_key = 'commercial_client';
+
+        $result = static::getCacheServeur($cache_key);
+        if (!$result) {
+            $result = array();
+            global $db;
+            
+            $sql = $db->query("SELECT u.lastname, u.firstname, sc.fk_soc FROM `".MAIN_DB_PREFIX."societe_commerciaux` sc, ".MAIN_DB_PREFIX."user u WHERE sc.fk_user = u.rowid");
+            while ($ln = $db->fetch_object($sql)){
+                $result[$ln->fk_soc][] = $ln->lastname.' '.$ln->firstname;
+            }
+            static::setCacheServeur($cache_key, $result, 2 * 60);
+        }
+        return $result;
+    }
 
     public static function getDureeMoySav($nbJ = 30, $ios = false)
     {
@@ -521,6 +538,117 @@ class BimpCache
                                     self::$cache[$cache_key][$child_name] = $field_label;
                                 }
                             }
+                        }
+                    }
+                }
+            }
+
+            return self::getCacheArray($cache_key, $include_empty, '', '');
+        }
+
+        return array();
+    }
+
+    public static function getObjectFullLinkedObjetsArray($object, $include_empty = false)
+    {
+        if (!is_null($object) && is_a($object, 'BimpObject') && $object->isLoaded()) {
+            $cache_key = $object->module . '_' . $object->object_name . '_linked_objects_array';
+            if (!isset(self::$cache[$cache_key])) {
+                self::$cache[$cache_key] = array();
+
+                // Objet parent: 
+                $parent_id_property = $object->getConf('parent_id_property', '');
+                if ($parent_id_property && $object->field_exists($parent_id_property) && (int) $object->getData($parent_id_property)) {
+                    $parent = $object->getParentInstance();
+
+                    if (BimpObject::objectLoaded($parent)) {
+                        $field_label = $object->getConf('fields/' . $parent_id_property . '/label', '') . $parent->display('ref_nom');
+                        self::$cache[$cache_key][json_encode(array(
+                                    'module'      => $parent->module,
+                                    'object_name' => $parent->object_name,
+                                    'id_object'   => $parent->id
+                                ))] = $field_label;
+                    }
+                }
+
+                // Objets liés enfants:
+                $objects = $object->getConf('objects', array(), false, 'array');
+                if (is_array($objects)) {
+                    foreach ($objects as $child_name => $params) {
+                        $path = 'objects/' . $child_name . '/';
+                        $relation = $object->getConf($path . 'relation', '');
+                        if ($relation === 'hasOne') {
+                            $field_name = $object->getConf('objects/' . $child_name . '/instance/id_object/field_value', '');
+                            if ($field_name && $object->field_exists($field_name) && (int) $object->getData($field_name)) {
+                                $instance = $object->getChildObject($child_name);
+                                if (is_a($instance, 'BimpObject') && $instance->isLoaded()) {
+                                    $field_label = $object->getConf('fields/' . $field_name . '/label', '', true);
+                                    if (!$field_label) {
+                                        $field_label = BimpTools::ucfirst($instance->getLabel());
+                                    }
+                                    $field_label .= ' ' . $instance->display('ref_nom');
+                                    self::$cache[$cache_key][json_encode(array(
+                                                'module'      => $instance->module,
+                                                'object_name' => $instance->object_name,
+                                                'id_object'   => $instance->id
+                                            ))] = $field_label;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Objets liés parents:
+                foreach (self::getBimpObjectsArray(false, false, false, false) as $obj_data => $obj_label) {
+                    if (preg_match('/^(.+)\-(.+)$/', $obj_data, $matches)) {
+                        $obj_module = $matches[1];
+                        $obj_name = $matches[2];
+
+                        if ($obj_name !== 'BS_SAV') {
+                            continue;
+                        }
+                        $obj = BimpObject::getInstance($obj_module, $obj_name);
+                        foreach ($obj->config->getParams('objects') as $child_name => $child_params) {
+                            if (isset($child_params['instance']['bimp_object']) && !empty($child_params['instance']['bimp_object'])) {
+                                $field_name = BimpTools::getArrayValueFromPath($child_params, 'instance/id_object/field_value', '');
+                                if ($field_name && $obj->field_exists($field_name)) {
+                                    $child_module = BimpTools::getArrayValueFromPath($child_params, 'instance/bimp_object/module', $obj->module);
+                                    $child_object_name = BimpTools::getArrayValueFromPath($child_params, 'instance/bimp_object/name');
+                                    if ($child_module && $child_module === $object->module &&
+                                            $child_object_name && $child_object_name === $object->object_name) {
+                                        $linked_parents = BimpCache::getBimpObjectObjects($obj_module, $obj_name, array(
+                                                    $field_name => $object->id
+                                        ));
+
+                                        if (!empty($linked_parents)) {
+                                            foreach ($linked_parents as $linked_parent) {
+                                                self::$cache[$cache_key][json_encode(array(
+                                                            'module'      => $linked_parent->module,
+                                                            'object_name' => $linked_parent->object_name,
+                                                            'id_object'   => $linked_parent->id
+                                                        ))] = BimpTools::ucfirst($linked_parent->getLabel()) . ' ' . $linked_parent->display('ref_nom');
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Objets associés: 
+                // todo ...
+                // Liaisons element-element: 
+                if (is_a($object, 'BimpDolObject')) {
+                    $objects = $object->getBimpObjectsLinked();
+                    foreach ($objects as $linked_object) {
+                        if (BimpObject::objectLoaded($linked_object) && is_a($linked_object, 'BimpObject')) {
+                            self::$cache[$cache_key][json_encode(array(
+                                        'module'      => $linked_object->module,
+                                        'object_name' => $linked_object->object_name,
+                                        'id_object'   => $linked_object->id
+                                    ))] = BimpTools::ucfirst($linked_object->getLabel()) . ' ' . $linked_object->display('ref_nom');
+                            ;
                         }
                     }
                 }
@@ -997,7 +1125,7 @@ class BimpCache
         return self::$cache[$cache_key];
     }
 
-    public static function getBimpObjectList($module, $object_name, $filters = array())
+    public static function getBimpObjectList($module, $object_name, $filters = array(), $joins = array())
     {
         $instance = BimpObject::getInstance($module, $object_name);
 
@@ -1006,7 +1134,7 @@ class BimpCache
         }
 
         $primary = $instance->getPrimary();
-        $rows = $instance->getList($filters, null, null, 'id', 'asc', 'array', array($primary));
+        $rows = $instance->getList($filters, null, null, 'id', 'asc', 'array', array($primary), $joins);
 
         $list = array();
 
@@ -1475,10 +1603,10 @@ class BimpCache
     public static function getSocieteCommerciauxArray($id_societe, $include_empty = false, $with_default = true, $active_only = false)
     {
         $cache_key = 'societe_' . $id_societe . '_commerciaux_array';
-        
+
         if ($with_default)
             $cache_key .= '_with_default';
-        
+
         if ($active_only) {
             $cache_key .= '_active_only';
         }
@@ -1489,7 +1617,7 @@ class BimpCache
             $sql = 'SELECT u.rowid as id_user, u.firstname,u.lastname FROM ' . MAIN_DB_PREFIX . 'societe_commerciaux sc';
             $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'user u ON u.rowid = sc.fk_user';
             $sql .= ' WHERE sc.fk_soc = ' . (int) $id_societe;
-            
+
             if ($active_only) {
                 $sql .= ' AND u.statut = 1';
             }
@@ -2401,11 +2529,11 @@ class BimpCache
     public static function getCentresArray($activ_only = false, $label_key = 'label', $include_empty = true)
     {
         $cache_key = 'centres_array';
-        
+
         if ($activ_only) {
             $cache_key .= '_active_only';
         }
-        
+
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
 

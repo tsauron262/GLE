@@ -68,6 +68,7 @@ fields:
         displays:
             default:
                 type: timer
+                with_day: 0
             
     date:
         label: Date
@@ -159,7 +160,7 @@ forms:
                 input: 
                     type: timer
                     with_secondes: 0
-                    help: Mettre le temps de trajet total sur la journée (Allé/Retour)
+                    help: Mettre le temps de trajet total sur la journée (Aller/Retour)
                 display_if:
                   field_name: type
                   show_values: 5,3,6

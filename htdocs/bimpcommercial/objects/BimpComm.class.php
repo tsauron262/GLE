@@ -11,9 +11,6 @@ class BimpComm extends BimpDolObject
     const BC_ZONE_UE_SANS_TVA = 4;
 
     public static $dont_check_parent_on_update = false;
-    public static $element_name = '';
-    public static $external_contact_type_required = true;
-    public static $internal_contact_type_required = true;
     public static $discount_lines_allowed = true;
     public static $use_zone_vente_for_tva = true;
     public static $cant_edit_zone_vente_secteurs = array('M');
@@ -90,27 +87,6 @@ class BimpComm extends BimpDolObject
         }
 
         return (int) parent::canEditField($field_name);
-    }
-
-    public function canEditCommercial()
-    {
-        if ($this->object_name === 'Bimp_Facture') {
-            global $user;
-
-            $secteur = $this->getData('ef_type');
-
-            if ($secteur && in_array($secteur, array('M'))) {
-                return 1;
-            }
-
-            if ($user->admin || $user->rights->bimpcommercial->edit_commercial) {
-                return 1;
-            }
-
-            return 0;
-        }
-
-        return 1;
     }
 
     public function canClientView()
@@ -402,6 +378,12 @@ class BimpComm extends BimpDolObject
                     return 0;
                 }
                 return 1;
+
+            case 'checkTotal':
+                if (!$this->isLoaded($errors)) {
+                    return 0;
+                }
+                return 1;
         }
 
         return parent::isActionAllowed($action, $errors);
@@ -656,6 +638,22 @@ class BimpComm extends BimpDolObject
                 'label'   => 'Editer logs',
                 'icon'    => 'fas_history',
                 'onclick' => $this->getJsLoadModalForm('logs', 'Editer les logs')
+            );
+        }
+
+        if ($this->canSetAction('checkTotal') && $this->isActionAllowed('checkTotal')) {
+            $buttons[] = array(
+                'label'   => 'Vérifier le total',
+                'icon'    => 'fas_check',
+                'onclick' => $this->getJsActionOnclick('checkTotal')
+            );
+        }
+
+        if ($this->canSetAction('checkMarge') && $this->isActionAllowed('checkMarge')) {
+            $buttons[] = array(
+                'label'   => 'Vérifier la marge',
+                'icon'    => 'fas_check',
+                'onclick' => $this->getJsActionOnclick('checkMarge')
             );
         }
 
@@ -1202,17 +1200,13 @@ class BimpComm extends BimpDolObject
             $lines = $this->getChildrenObjects('lines');
             foreach ($lines as $bimp_line) {
                 $line = $bimp_line->getChildObject('line');
-
-//        foreach ($object->lines as $line) {
                 if (empty($line->pa_ht) && isset($line->fk_fournprice) && !$force_price) {
                     require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.product.class.php';
                     $product = new ProductFournisseur($db);
                     if ($product->fetch_product_fournisseur_price($line->fk_fournprice))
                         $line->pa_ht = $product->fourn_unitprice * (1 - $product->fourn_remise_percent / 100);
                 }
-//            if ($bimp_line->getData("remise_pa") > 0) {
-//                $line->pa_ht = $line->pa_ht * (100 - $bimp_line->getData("remise_pa")) / 100;
-//            }
+
                 // si prix d'achat non renseigné et devrait l'être, alors prix achat = prix vente
                 if ((!isset($line->pa_ht) || $line->pa_ht == 0) && $line->subprice > 0 && (isset($conf->global->ForceBuyingPriceIfNull) && $conf->global->ForceBuyingPriceIfNull == 1)) {
                     $line->pa_ht = $line->subprice * (1 - ($line->remise_percent / 100));
@@ -1220,7 +1214,6 @@ class BimpComm extends BimpDolObject
 
                 $pv = $line->qty * $line->subprice * (1 - $line->remise_percent / 100);
                 $pa_ht = $line->pa_ht;
-
                 $pa = $line->qty * $pa_ht;
 
                 // calcul des marges
@@ -1363,18 +1356,6 @@ class BimpComm extends BimpDolObject
         }
 
         return $zone;
-    }
-
-    public function getCommercialId()
-    {
-        if ($this->isLoaded()) {
-            $contacts = $this->dol_object->getIdContact('internal', 'SALESREPFOLL');
-            if (isset($contacts[0]) && $contacts[0]) {
-                return (int) $contacts[0];
-            }
-        }
-
-        return 0;
     }
 
     public function getCommercial()
@@ -2411,82 +2392,6 @@ class BimpComm extends BimpDolObject
         ));
     }
 
-    public function renderContactsList()
-    {
-        $html = '';
-
-        $list = array();
-
-        if ($this->isLoaded() && method_exists($this->dol_object, 'liste_contact')) {
-            $list_int = $this->dol_object->liste_contact(-1, 'internal');
-            $list_ext = $this->dol_object->liste_contact(-1, 'external');
-            $list = BimpTools::merge_array($list_int, $list_ext);
-        }
-
-        if (count($list)) {
-            global $conf;
-            BimpTools::loadDolClass('societe');
-            BimpTools::loadDolClass('contact');
-
-            $list_id = $this->object_name . ((int) $this->id ? '_' . $this->id : '') . '_contacts_list';
-
-            foreach ($list as $item) {
-                $html .= '<tr>';
-                switch ($item['source']) {
-                    case 'internal':
-                        $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $item['id']);
-                        $html .= '<td>Utilisateur</td>';
-                        $html .= '<td>' . $conf->global->MAIN_INFO_SOCIETE_NOM . '</td>';
-                        $html .= '<td>';
-                        if (BimpObject::objectLoaded($user)) {
-                            $html .= $user->getLink();
-                        } else {
-                            $html .= '<span class="danger">L\'utilisateur #' . $item['id'] . ' n\'existe plus</span>';
-                        }
-                        $html .= '</td>';
-                        break;
-
-                    case 'external':
-                        $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', (int) $item['socid']);
-                        $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', (int) $item['id']);
-
-                        $html .= '<td>Contact tiers</td>';
-                        $html .= '<td>';
-                        if (BimpObject::objectLoaded($soc)) {
-                            $html .= $soc->getLink();
-                        } else {
-                            $html .= '<span class="danger">Le tiers #' . $item['socid'] . ' n\'existe plus</span>';
-                        }
-                        $html .= '</td>';
-                        $html .= '<td>';
-                        if (BimpObject::objectLoaded($contact)) {
-                            $html .= $contact->getLink();
-                        } else {
-                            $html .= '<span class="danger">Le contact #' . $item['id'] . ' n\'existe plus</span>';
-                        }
-                        $html .= '</td>';
-                        break;
-                }
-                $html .= '<td>' . $item['libelle'] . '</td>';
-                $html .= '<td style="text-align: right">';
-                $html .= BimpRender::renderRowButton('Supprimer le contact', 'trash', $this->getJsActionOnclick('removeContact', array('id_contact' => (int) $item['rowid']), array(
-                                    'confirm_msg'      => 'Etes-vous sûr de vouloir supprimer ce contact?',
-                                    'success_callback' => 'function(result) {if (result.contact_list_html) {$(\'#' . $list_id . '\').html(result.contact_list_html);}}'
-                )));
-                $html .= '</td>';
-                $html .= '</tr>';
-            }
-        } else {
-            $html .= '<tr>';
-            $html .= '<td colspan="5">';
-            $html .= BimpRender::renderAlerts('Aucun contact enregistré', 'info');
-            $html .= '</td>';
-            $html .= '</tr>';
-        }
-
-        return $html;
-    }
-
     public function renderContentExtraLeft()
     {
         return '';
@@ -2531,6 +2436,27 @@ class BimpComm extends BimpDolObject
         }
 
         return $html;
+    }
+
+    public function renderDemandesList()
+    {
+        if ($this->isLoaded()) {
+            BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
+            $objectName = ValidComm::getObjectClass($this);
+            if ($objectName != -2) {
+                BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
+                $demande = BimpObject::getInstance('bimpvalidateorder', 'DemandeValidComm');
+                $list = new BC_ListTable($demande);
+                $list->addFieldFilterValue('type_de_piece', $objectName);
+                $list->addFieldFilterValue('id_piece', (int) $this->id);
+
+                return $list->renderHtml();
+            } else {
+                return '';
+            }
+        }
+
+        return BimpRender::renderAlerts('Impossible d\'afficher la liste des demande de validation (ID ' . $this->getLabel('of_the') . ' absent)');
     }
 
     // Traitements:
@@ -2623,7 +2549,14 @@ class BimpComm extends BimpDolObject
                 $tot = $this->getData('total');
             if (round((float) $tot, 2) != round($totalHt, 2)) {
                 $this->erreurFatal++;
-                $errors[] = 'Ecart entre le total des lignes et le total ' . $this->getLabel('of_the') . '. Total lignes : ' . round($totalHt, 3) . ', total ' . $this->getLabel() . ': ' . round($tot, 3);
+                $msg = 'Ecart entre le total des lignes et le total ' . $this->getLabel('of_the') . '. Total lignes : ' . round($totalHt, 3) . ', total ' . $this->getLabel() . ': ' . round($tot, 3);
+                $msg .= '<div style="margin-top: 10px">';
+                $msg .= '<span class="btn btn-default" onclick="' . $this->getJsActionOnclick('checkTotal') . '">';
+                $msg .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Vérifier le total';
+                $msg .= '</span>';
+                $msg .= '</div>';
+
+                $errors[] = $msg;
             }
 
             // Création des lignes absentes de l'objet bimp: 
@@ -3862,6 +3795,28 @@ class BimpComm extends BimpDolObject
         return 1;
     }
 
+    public function checkMarge(&$success = '')
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            if ($this->field_exists('marge')) {
+                $margins = $this->getMarginInfosArray();
+                $marge = $margins['total_margin'];
+
+                if ($marge != (float) $this->getData('marge')) {
+                    $errors = $this->updateField('marge', $marge);
+
+                    if (!count($errors)) {
+                        $success = 'Marge mise à jour: ' . $marge;
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
     public function importLinesFromFile(&$warnings = array(), &$success = '')
     {
         $errors = array();
@@ -3940,11 +3895,27 @@ class BimpComm extends BimpDolObject
         return $errors;
     }
 
-    public static function getMonthlyReportData($month, $year)
+    public static function getReportData($date_min, $date_max, $options = array(), &$errors = array())
     {
+        if (!$date_min) {
+            $errors[] = 'Date de début absente';
+        }
+
+        if (!$date_max) {
+            $errors[] = 'Date de fin absente';
+        }
+
+        if (!count($errors) && $date_max < $date_min) {
+            $errors[] = 'La date de fin ne peut être inférieure à la date de début';
+        }
+
+        $options = BimpTools::overrideArray(array(
+                    'include_ca_details_by_users' => false
+                        ), $options);
         $data = array(
             'total'   => array(
                 'nb_new_clients'                   => 0,
+                'nb_new_clients_by_commerciaux'    => 0,
                 'nb_new_propales'                  => 0,
                 'nb_new_commandes'                 => 0,
                 'nb_new_commandes_for_new_clients' => 0,
@@ -3959,17 +3930,26 @@ class BimpComm extends BimpDolObject
             'regions' => array()
         );
 
+        if (count($errors)) {
+            return $data;
+        }
+
         BimpObject::loadClass('bimpcore', 'Bimp_Societe');
         $bdb = BimpCache::getBdb();
-        $date_min = $year . '-' . ($month < 10 ? '0' : '') . $month . '-01 00:00:00';
-        $dt = new DateTime($date_min);
-        $dt->add(new DateInterval('P1M'));
-        $date_max = $dt->format('Y-m-d H:i:s');
 
         // Nb new clients: 
-        $where = 'datec >= \'' . $date_min . '\' AND datec < \'' . $date_max . '\'';
+        $where = 'datec >= \'' . $date_min . '\' AND datec <= \'' . $date_max . '\'';
         $where .= ' AND client > 0';
         $data['total']['nb_new_clients'] = (int) $bdb->getCount('societe', $where, 'rowid');
+
+        // Nb new clients créés par les commerciaux
+        $sql = 'SELECT COUNT(DISTINCT s.rowid) as nb_rows';
+        $sql .= ' FROM llx_societe s, llx_usergroup_user u';
+        $sql .= ' WHERE u.fk_usergroup IN ("2")';
+        $sql .= ' AND s.client > 0 AND (s.datec >= \'' . $date_min . '\' AND s.datec <= \'' . $date_max . '\') ';
+        $sql .= ' AND u.fk_user = s.fk_user_modif';
+        $result = $bdb->executeS($sql, 'array');
+        $data['total']['nb_new_clients_by_commerciaux'] = (int) (isset($result[0]['nb_rows']) ? $result[0]['nb_rows'] : 0);
 
         // Nb new clients / users
         $sql = 'SELECT sc.fk_user as id_user, COUNT(DISTINCT s.rowid) as nb_clients';
@@ -3980,7 +3960,7 @@ class BimpComm extends BimpDolObject
                     )
                         ), 's');
         $sql .= ' WHERE';
-        $sql .= ' s.datec >= \'' . $date_min . '\' AND s.datec < \'' . $date_max . '\'';
+        $sql .= ' s.datec >= \'' . $date_min . '\' AND s.datec <= \'' . $date_max . '\'';
         $sql .= ' AND s.client > 0';
         $sql .= ' GROUP BY sc.fk_user';
         $rows = $bdb->executeS($sql, 'array');
@@ -3989,14 +3969,14 @@ class BimpComm extends BimpDolObject
             if (!isset($data['users'][(int) $r['id_user']])) {
                 $data['users'][(int) $r['id_user']] = array();
             }
-            
+
             $data['users'][(int) $r['id_user']]['nb_new_clients'] = (int) $r['nb_clients'];
         }
         // Nb new Devis: 
-        $where = 'datec >= \'' . $date_min . '\' AND datec < \'' . $date_max . '\'';
+        $where = 'datec >= \'' . $date_min . '\' AND datec <= \'' . $date_max . '\'';
         $where .= ' AND fk_statut IN (1,2,4)';
         $data['total']['nb_new_propales'] = (int) $bdb->getCount('propal', $where, 'rowid');
-        
+
         // Nb new Devis / users
         $sql = 'SELECT ec.fk_socpeople as id_user, COUNT(DISTINCT p.rowid) as nb_propales';
         $sql .= BimpTools::getSqlFrom('propal', array(
@@ -4014,7 +3994,7 @@ class BimpComm extends BimpDolObject
                     'code'    => 'SALESREPFOLL'
                         ), 'tc');
         $sql .= ')';
-        $sql .= ' AND p.datec >= \'' . $date_min . '\' AND p.datec < \'' . $date_max . '\'';
+        $sql .= ' AND p.datec >= \'' . $date_min . '\' AND p.datec <= \'' . $date_max . '\'';
         $sql .= ' AND p.fk_statut IN (1,2,4)';
         $sql .= ' GROUP BY ec.fk_socpeople';
         $rows = $bdb->executeS($sql, 'array');
@@ -4026,12 +4006,12 @@ class BimpComm extends BimpDolObject
 
             $data['users'][(int) $r['id_user']]['nb_new_propales'] = (int) $r['nb_propales'];
         }
-        
+
         // Nb new Commandes: 
-        $where = 'date_creation >= \'' . $date_min . '\' AND date_creation < \'' . $date_max . '\'';
+        $where = 'date_creation >= \'' . $date_min . '\' AND date_creation <= \'' . $date_max . '\'';
         $where .= ' AND fk_statut > 0';
         $data['total']['nb_new_commandes'] = (int) $bdb->getCount('commande', $where, 'rowid');
-        
+
         // Nb new Commandes / users
         $sql = 'SELECT ec.fk_socpeople as id_user, COUNT(DISTINCT c.rowid) as nb_commandes';
         $sql .= BimpTools::getSqlFrom('commande', array(
@@ -4049,7 +4029,7 @@ class BimpComm extends BimpDolObject
                     'code'    => 'SALESREPFOLL'
                         ), 'tc');
         $sql .= ')';
-        $sql .= ' AND c.date_creation >= \'' . $date_min . '\' AND c.date_creation < \'' . $date_max . '\'';
+        $sql .= ' AND c.date_creation >= \'' . $date_min . '\' AND c.date_creation <= \'' . $date_max . '\'';
         $sql .= ' AND c.fk_statut > 0';
         $sql .= ' GROUP BY ec.fk_socpeople';
         $rows = $bdb->executeS($sql, 'array');
@@ -4061,13 +4041,13 @@ class BimpComm extends BimpDolObject
 
             $data['users'][(int) $r['id_user']]['nb_new_commandes'] = (int) $r['nb_commandes'];
         }
-        
+
         // Nb new Commandes / new clients: 
-        $where = 'date_creation >= \'' . $date_min . '\' AND date_creation < \'' . $date_max . '\'';
+        $where = 'date_creation >= \'' . $date_min . '\' AND date_creation <= \'' . $date_max . '\'';
         $where .= ' AND fk_statut > 0';
         $where .= ' AND fk_soc IN (';
         $where .= 'SELECT DISTINCT s.rowid FROM ' . MAIN_DB_PREFIX . 'societe s WHERE ';
-        $where .= 's.datec >= \'' . $date_min . '\' AND s.datec < \'' . $date_max . '\'';
+        $where .= 's.datec >= \'' . $date_min . '\' AND s.datec <= \'' . $date_max . '\'';
         $where .= ' AND s.client > 0';
         $where .= ')';
         $data['total']['nb_new_commandes_for_new_clients'] = (int) $bdb->getCount('commande', $where, 'rowid');
@@ -4089,11 +4069,11 @@ class BimpComm extends BimpDolObject
                     'code'    => 'SALESREPFOLL'
                         ), 'tc');
         $sql .= ')';
-        $sql .= ' AND c.date_creation >= \'' . $date_min . '\' AND c.date_creation < \'' . $date_max . '\'';
+        $sql .= ' AND c.date_creation >= \'' . $date_min . '\' AND c.date_creation <= \'' . $date_max . '\'';
         $sql .= ' AND c.fk_statut > 0';
         $sql .= ' AND c.fk_soc IN (';
         $sql .= 'SELECT DISTINCT s.rowid FROM ' . MAIN_DB_PREFIX . 'societe s WHERE ';
-        $sql .= 's.datec >= \'' . $date_min . '\' AND s.datec < \'' . $date_max . '\'';
+        $sql .= 's.datec >= \'' . $date_min . '\' AND s.datec <= \'' . $date_max . '\'';
         $sql .= ' AND s.client > 0';
         $sql .= ')';
         $sql .= ' GROUP BY ec.fk_socpeople';
@@ -4106,9 +4086,9 @@ class BimpComm extends BimpDolObject
 
             $data['users'][(int) $r['id_user']]['nb_new_commandes_for_new_clients'] = (int) $r['nb_commandes'];
         }
-        
         // CA / marges: 
         $fields = array(
+            'f.rowid as id_fac',
             'f.total_ttc',
             'f.total as total_ht',
             'f.marge_finale_ok',
@@ -4127,7 +4107,7 @@ class BimpComm extends BimpDolObject
                         'value'    => $date_min
                     ),
                     array(
-                        'operator' => '<',
+                        'operator' => '<=',
                         'value'    => $date_max
                     )
                 )
@@ -4202,6 +4182,125 @@ class BimpComm extends BimpDolObject
                     $data['users'][$id_user]['achats'] = 0;
                 }
                 $data['users'][$id_user]['achats'] += (float) $r['total_achat_reval_ok'];
+
+                // Répartition produits / services: 
+                if ($options['include_ca_details_by_users']) {
+                    $fields = array(
+                        'fdet.subprice as pu_ht',
+                        'fdet.qty',
+                        'fdet.remise_percent',
+                        'fdet.buy_price_ht as pa_ht',
+                        'fdet.product_type as prod_type_line',
+                        'fl.id as id_bimp_line',
+                        'p.fk_product_type as prod_type'
+                    );
+
+                    $filters = array(
+                        'fdet.fk_facture' => (int) $r['id_fac']
+                    );
+
+                    $joins = array(
+                        'fl' => array(
+                            'table' => 'bimp_facture_line',
+                            'on'    => 'fl.id_line = fdet.rowid'
+                        ),
+                        'p'  => array(
+                            'table' => 'product',
+                            'on'    => 'p.rowid = fdet.fk_product'
+                        )
+                    );
+
+                    $sql = BimpTools::getSqlFullSelectQuery('facturedet', $fields, $filters, $joins, array(
+                                'default_alias' => 'fdet'
+                    ));
+
+                    $lines = $bdb->executeS($sql, 'array');
+
+                    $pv_products = 0;
+                    $pv_services = 0;
+                    $pa_products = 0;
+                    $pa_services = 0;
+
+                    if (is_array($lines)) {
+                        foreach ($lines as $l) {
+                            $pv = (float) $l['qty'] * (float) $l['pu_ht'] * (1 - (float) $l['remise_percent'] / 100);
+                            $pa = (float) $l['qty'] * (float) $l['pa_ht'];
+
+                            $revals = $bdb->executeS(BimpTools::getSqlFullSelectQuery('bimp_revalorisation', array(
+                                        'SUM(a.qty * a.amount) as revals'
+                                            ), array(
+                                        'a.status'          => array('in' => array(1, 10)),
+                                        'a.id_facture_line' => (int) $l['id_bimp_line']
+                                    )), 'array');
+
+                            if ((float) $revals[0]['revals']) {
+                                $pa -= (float) $revals[0]['revals'];
+                            }
+
+                            $prod_type = (isset($l['prod_type']) && !is_null($l['prod_type']) ? (int) $l['prod_type'] : $l['prod_type_line']);
+                            if ($prod_type == 1) {
+                                $pv_services += $pv;
+                                $pa_services += $pa;
+                            } else {
+                                $pv_products += $pv;
+                                $pa_products += $pa;
+                            }
+                        }
+                    }
+
+                    if (!isset($data['users'][$id_user]['ca_ht_products'])) {
+                        $data['users'][$id_user]['ca_ht_products'] = 0;
+                    }
+                    $data['users'][$id_user]['ca_ht_products'] += $pv_products;
+
+                    if (!isset($data['users'][$id_user]['ca_ht_services'])) {
+                        $data['users'][$id_user]['ca_ht_services'] = 0;
+                    }
+                    $data['users'][$id_user]['ca_ht_services'] += $pv_services;
+
+                    if (!isset($data['users'][$id_user]['achats_products'])) {
+                        $data['users'][$id_user]['achats_products'] = 0;
+                    }
+                    $data['users'][$id_user]['achats_products'] += $pa_products;
+
+                    if (!isset($data['users'][$id_user]['achats_services'])) {
+                        $data['users'][$id_user]['achats_services'] = 0;
+                    }
+                    $data['users'][$id_user]['achats_services'] += $pa_services;
+
+                    if (!isset($data['users'][$id_user]['marges_products'])) {
+                        $data['users'][$id_user]['marges_products'] = 0;
+                    }
+                    $data['users'][$id_user]['marges_products'] += $pv_products;
+                    $data['users'][$id_user]['marges_products'] -= $pa_products;
+
+                    if (!isset($data['users'][$id_user]['marges_services'])) {
+                        $data['users'][$id_user]['marges_services'] = 0;
+                    }
+                    $data['users'][$id_user]['marges_services'] += $pv_services;
+                    $data['users'][$id_user]['marges_services'] -= $pa_services;
+                }
+
+                // Ca par métier par user: 
+                if (!isset($data['users'][$id_user]['metiers'])) {
+                    $data['users'][$id_user]['metiers'] = array();
+                }
+
+                $exp = (int) $r['expertise'];
+                if (!isset($data['users'][$id_user]['metiers'])) {
+                    $data['users'][$id_user]['metiers'][$exp] = array(
+                        'ca_ttc'    => 0,
+                        'ca_ht'     => 0,
+                        'marges'    => 0,
+                        'achats'    => 0,
+                        'tx_marque' => ''
+                    );
+                }
+
+                $data['users'][$id_user]['metiers'][$exp]['ca_ttc'] += (float) $r['total_ttc'];
+                $data['users'][$id_user]['metiers'][$exp]['ca_ht'] += (float) $r['total_ht'];
+                $data['users'][$id_user]['metiers'][$exp]['marges'] += (float) $r['marge_finale_ok'];
+                $data['users'][$id_user]['metiers'][$exp]['achats'] += (float) $r['total_achat_reval_ok'];
             }
 
             // CA par région: 
@@ -4221,7 +4320,7 @@ class BimpComm extends BimpDolObject
             $data['regions'][$region]['marges'] += (float) $r['marge_finale_ok'];
             $data['regions'][$region]['achats'] += (float) $r['total_achat_reval_ok'];
 
-            // Ca par métier: 
+            // CA par métier: 
             $exp = (int) $r['expertise'];
             if (!isset($data['metiers'][$exp])) {
                 $data['metiers'][$exp] = array(
@@ -4250,6 +4349,29 @@ class BimpComm extends BimpDolObject
             } else {
                 $user_data['tx_marque'] = 'Inf.';
             }
+
+            if ($options['include_ca_details_by_users']) {
+                if (isset($user_data['ca_ht_products']) && (float) $user_data['ca_ht_products']) {
+                    $user_data['tx_marque_products'] = ($user_data['marges_products'] / $user_data['ca_ht_products']) * 100;
+                } else {
+                    $user_data['tx_marque_products'] = 'Inf.';
+                }
+                if (isset($user_data['ca_ht_services']) && (float) $user_data['ca_ht_services']) {
+                    $user_data['tx_marque_services'] = ($user_data['marges_services'] / $user_data['ca_ht_services']) * 100;
+                } else {
+                    $user_data['tx_marque_servcies'] = 'Inf.';
+                }
+            }
+
+            if (isset($user_data['metiers']) && !empty($user_data['metiers'])) {
+                foreach ($user_data['metiers'] as $metier => &$metier_data) {
+                    if (isset($metier_data['ca_ht']) && (float) $user_data['ca_ht']) {
+                        $metier_data['tx_marque'] = ($metier_data['marges'] / $metier_data['ca_ht']) * 100;
+                    } else {
+                        $metier_data['tx_marque'] = 'Inf.';
+                    }
+                }
+            }
         }
 
         foreach ($data['regions'] as $region => &$region_data) {
@@ -4267,7 +4389,7 @@ class BimpComm extends BimpDolObject
                 $metier_data['tx_marque'] = 'Inf.';
             }
         }
-        
+
         return $data;
     }
 
@@ -4455,81 +4577,6 @@ class BimpComm extends BimpDolObject
             'errors'           => $errors,
             'warnings'         => $warnings,
             'success_callback' => 'bimp_reloadPage();'
-        );
-    }
-
-    public function actionAddContact($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Ajout du contact effectué avec succès' . $success;
-
-        if (!$this->isLoaded()) {
-            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
-        } else {
-            if (!isset($data['type']) || !(int) $data['type']) {
-                $errors[] = 'Nature du contact absent';
-            } else {
-                switch ((int) $data['type']) {
-                    case 1:
-                        $id_contact = isset($data['id_contact']) ? (int) $data['id_contact'] : 0;
-                        $type_contact = isset($data['tiers_type_contact']) ? (int) $data['tiers_type_contact'] : 0;
-                        if (!$id_contact) {
-                            $errors[] = 'Contact non spécifié';
-                        }
-                        if (!$type_contact && static::$external_contact_type_required) {
-                            $errors[] = 'Type de contact non spécifié';
-                        }
-
-                        if (!count($errors)) {
-                            if ($this->dol_object->add_contact($id_contact, $type_contact, 'external') <= 0) {
-                                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du contact');
-                            }
-                        }
-                        break;
-
-                    case 2:
-                        $id_user = isset($data['id_user']) ? (int) $data['id_user'] : 0;
-                        $type_contact = isset($data['user_type_contact']) ? (int) $data['user_type_contact'] : 0;
-                        if (!$id_user) {
-                            $errors[] = 'Utilisateur non spécifié';
-                        }
-
-                        if (!$type_contact && static::$internal_contact_type_required) {
-                            $errors[] = 'Type de contact non spécifié';
-                        }
-
-                        $id_type_commercial = (int) $this->db->getValue('c_type_contact', 'rowid', 'source = \'internal\' AND element = \'' . $this->dol_object->element . '\' AND code = \'SALESREPFOLL\'');
-                        if ($type_contact == $id_type_commercial) {
-                            if (!$this->canEditCommercial()) {
-                                $errors[] = 'Vous n\'avez pas la permission de changer le commercial ' . $this->getLabel('of_a');
-                            } else {
-                                $id_cur_commercial = $this->getCommercialId();
-
-                                if ($id_cur_commercial) {
-                                    $list = $this->dol_object->liste_type_contact();
-                                    $label = (isset($list[$id_type_commercial]) ? $list[$id_type_commercial] : 'Responsable suivi ' . $this->getLabel());
-                                    $msg = 'Un "' . $label . '" a déjà été attribué à ' . $this->getLabel('this') . '<br/>';
-                                    $msg .= 'Si vous souhaitez modifier celui-ci, veuillez d\'abord le supprimer';
-                                    $errors[] = $msg;
-                                }
-                            }
-                        }
-
-                        if (!count($errors)) {
-                            if ($this->dol_object->add_contact($id_user, $type_contact, 'internal') <= 0) {
-                                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du contact');
-                            }
-                        }
-                        break;
-                }
-            }
-        }
-
-        return array(
-            'errors'            => $errors,
-            'warnings'          => $warnings,
-            'contact_list_html' => $this->renderContactsList()
         );
     }
 
@@ -4752,6 +4799,86 @@ class BimpComm extends BimpDolObject
             'errors'           => $errors,
             'warnings'         => array()
         ];
+    }
+
+    public function actionCheckTotal($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Vérification du total effectuée';
+
+        if (method_exists($this->dol_object, 'update_price')) {
+            $initial_brouillon = null;
+
+            if ($this->object_name !== 'Bimp_Facture') {
+                $initial_brouillon = isset($this->dol_object->brouillon) ? $this->dol_object->brouillon : null;
+                $this->dol_object->brouillon = 1;
+            }
+
+            $this->dol_object->update_price();
+
+            if ($this->object_name !== 'Bimp_Facture') {
+                if (is_null($initial_brouillon)) {
+                    unset($this->dol_object->brouillon);
+                } else {
+                    $this->dol_object->brouillon = $initial_brouillon;
+                }
+            }
+        } else {
+            $errors[] = 'Vérification du total non disponible pour ce type de pièce commerciale';
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => 'bimp_reloadPage();'
+        );
+    }
+
+    public function actionCheckMarge($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $sc = '';
+
+        if ($this->isLoaded()) {
+            $errors = $this->checkMarge($success);
+            if (!$success) {
+                $success = 'Marge déjà à jour';
+            } else {
+                $sc = 'bimp_reloadPage();';
+            }
+        } else {
+            $ids = BimpTools::getArrayValueFromPath($data, 'id_objects', array());
+
+            if (empty($ids)) {
+                $errors[] = 'Aucun' . $this->e() . ' ' . $this->getLabel() . ' sélectionné' . $this->e();
+            } else {
+                foreach ($ids as $id_obj) {
+                    $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id_obj);
+
+                    if (BimpObject::objectLoaded($obj)) {
+                        $obj_success = '';
+                        $obj_errors = $obj->checkMarge($obj_success);
+
+                        if (count($obj_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($obj_errors, ucfirst($obj->getLabel()) . ' ' . $obj->getRef());
+                        } elseif ($obj_success) {
+                            $success .= ($success ? '<br/>' : '') . ucfirst($obj->getLabel()) . ' ' . $obj->getRef() . ': ' . $obj_success;
+                        }
+                    } else {
+                        $warnings[] = ucfirst($this->getLabel('the')) . ' #' . $id_obj . ' n\'existe plus';
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $sc
+        );
     }
 
     // Overrides BimpObject:
@@ -4978,26 +5105,5 @@ class BimpComm extends BimpDolObject
             $sortie .= '<br/>fin ' . $i . ' / ' . $tot . ' corrections de ' . $info[1];
         }
         return $errors;
-    }
-
-    public function renderDemandesList()
-    {
-        if ($this->isLoaded()) {
-            BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
-            $objectName = ValidComm::getObjectClass($this);
-            if ($objectName != -2) {
-                BimpObject::loadClass('bimpvalidateorder', 'ValidComm');
-                $demande = BimpObject::getInstance('bimpvalidateorder', 'DemandeValidComm');
-                $list = new BC_ListTable($demande);
-                $list->addFieldFilterValue('type_de_piece', $objectName);
-                $list->addFieldFilterValue('id_piece', (int) $this->id);
-
-                return $list->renderHtml();
-            } else {
-                return '';
-            }
-        }
-
-        return BimpRender::renderAlerts('Impossible d\'afficher la liste des demande de validation (ID ' . $this->getLabel('of_the') . ' absent)');
     }
 }

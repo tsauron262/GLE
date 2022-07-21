@@ -2677,13 +2677,42 @@ class BT_ficheInter extends BimpDolObject
                 if (count($children) > 0) {
                     foreach ($children as $id_child) {
                         $child = $this->getChildObject('inters', $id_child);
-                        if ($child->getData('type') == 3 || $child->getData('type') == 4)
+                        if ($child->getData('type') == 4)
                             $qty += $this->time_to_qty($this->timestamp_to_time($child->getData('duree')));
                     }
                 }
 
                 $new_factureLine->qty = $qty;
                 $new_factureLine->id_product = $service_de_reference->id;
+                $new_factureLine->tva_tx = 20;
+                $new_factureLine->pa_ht = $qty * (float) BimpCore::getConf('cout_horaire_technicien', null, 'bimptechnique');
+                $errors = BimpTools::merge_array($errors, $new_factureLine->create($warnings, true));
+            }
+            
+            $new_factureLine = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
+            $errors = BimpTools::merge_array($errors, $new_factureLine->validateArray(
+                                    array(
+                                        'type'   => ObjectLine::LINE_FREE,
+                                        'id_obj' => (int) $new_facture->id)
+                            )
+            );
+            $dep_de_reference = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) BimpCore::getConf('id_dep', 0, 'bimptechnique'));
+            if ($dep_de_reference->isLoaded()) {
+                $new_factureLine->pu_ht = $dep_de_reference->getData('price');
+
+                $qty = 0;
+
+                $children = $this->getChildrenList('inters');
+                if (count($children) > 0) {
+                    foreach ($children as $id_child) {
+                        $child = $this->getChildObject('inters', $id_child);
+                        if ($child->getData('type') == 3)
+                            $qty += $this->time_to_qty($this->timestamp_to_time($child->getData('duree')));
+                    }
+                }
+
+                $new_factureLine->qty = $qty;
+                $new_factureLine->id_product = $dep_de_reference->id;
                 $new_factureLine->tva_tx = 20;
                 $new_factureLine->pa_ht = $qty * (float) BimpCore::getConf('cout_horaire_technicien', null, 'bimptechnique');
                 $errors = BimpTools::merge_array($errors, $new_factureLine->create($warnings, true));

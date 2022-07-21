@@ -3302,6 +3302,8 @@ class Bimp_Facture extends BimpComm
             if ($type_extra) {
                 $html .= '<div style="font-size: 18px">' . $type_extra . '</div>';
             }
+            
+            
 
             $html .= '<div class="object_header_infos">';
 //            $html .= 'Créée le <strong title="' . date('d/m/Y H:m:s', $this->dol_object->date_creation) . '">' . date('d / m / Y', $this->dol_object->date_creation) . '</strong>';
@@ -3334,6 +3336,8 @@ class Bimp_Facture extends BimpComm
 
         $client = $this->getChildObject('client');
         if (BimpObject::objectLoaded($client)) {
+            if($client->getData('msg_fact') != '')
+                $html .= BimpRender::renderAlerts('Message facturation : '.$client->getData('msg_fact'));
             $html .= '<div style="margin-top: 10px">';
             $html .= '<strong>Client: </strong>';
             $html .= $client->getLink();

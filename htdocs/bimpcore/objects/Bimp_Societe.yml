@@ -705,7 +705,11 @@ fields:
         
     id_atradius:
         label: Identifiant Atradius
-        type: int     
+        type: int   
+        
+    msg_fact:
+        label: Message Facturation
+        type: text
         
         
 #    *** Champs non gérés: ***
@@ -814,6 +818,8 @@ fields_tables:
             - field: relances_actives
               show: 
                   callback: isClient
+            - field: msg_fact
+              edit: 1
             - field: date_relances_deactivated
               show: 
                   callback: isClient

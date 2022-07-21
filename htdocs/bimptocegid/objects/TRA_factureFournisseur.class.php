@@ -117,7 +117,10 @@
                         $produit = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $line->fk_product);
                         if($line->tva_tx > 0)
                             $total_tva += $line->tva;
-                        $total_d3e += $produit->getData('deee') * $line->qty;
+                        if($facture->getData('zone_vente') == $this->zoneAchat['france']){
+                            $total_d3e += $produit->getData('deee') * $line->qty;
+                        }
+                            
                         $sens = ($this->sensFacture == 'C') ? ($line->total_ht > 0) ? 'D' : 'C' : ($TTC < 0) ? 'C' : 'D';
                        
                         if($fournisseur->getData('code_compta_fournisseur') == BimpCore::getConf('code_fournisseur_apple', null, "bimptocegid")) {
@@ -142,13 +145,15 @@
                 }
                 
                 if($facture->getData('zone_vente') == $this->zoneAchat['france']) {
-                    if($total_d3e > 0) {
+                    if($total_d3e != 0) {
+                        $structure['SENS']                      = sizing($this->getSens(abs(round($total_d3e, 2))), 1);
                         $structure['REF_LIBRE']                 = sizing('DEEE',35);
                         $structure['COMPTE_GENERAL']            = sizing(Bimpcore::getConf('achat_dee_fr', null, 'bimptocegid'), 17);
                         $structure['MONTANT']                   = sizing(abs(round($total_d3e, 2)), 20, true);
                         $ecriture .= implode('', $structure) . "\n";
                     }
-                    if($total_tva > 0) {
+                    if($total_tva != 0) {
+                        $structure['SENS']                      = sizing($this->getSens(abs(round($total_tva, 2))), 1);
                         $structure['REF_LIBRE']                 = sizing('TVA',35);
                         $structure['COMPTE_GENERAL']            = sizing(Bimpcore::getConf('achat_tva_fr', null, 'bimptocegid'), 17);
                         $structure['MONTANT']                   = sizing(abs(round($total_tva, 2)), 20, true);

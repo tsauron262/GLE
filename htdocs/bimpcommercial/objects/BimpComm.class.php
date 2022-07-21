@@ -3924,6 +3924,7 @@ class BimpComm extends BimpDolObject
         $data = array(
             'total'   => array(
                 'nb_new_clients'                   => 0,
+                'nb_new_clients_by_commerciaux'    => 0,
                 'nb_new_propales'                  => 0,
                 'nb_new_commandes'                 => 0,
                 'nb_new_commandes_for_new_clients' => 0,
@@ -3949,6 +3950,15 @@ class BimpComm extends BimpDolObject
         $where = 'datec >= \'' . $date_min . '\' AND datec <= \'' . $date_max . '\'';
         $where .= ' AND client > 0';
         $data['total']['nb_new_clients'] = (int) $bdb->getCount('societe', $where, 'rowid');
+
+        // Nb new clients créés par les commerciaux
+        $sql = 'SELECT COUNT(DISTINCT s.rowid) as nb_rows';
+        $sql .= ' FROM llx_societe s, llx_usergroup_user u';
+        $sql .= ' WHERE u.fk_usergroup IN ("2")';
+        $sql .= ' AND s.client > 0 AND (s.datec >= \'' . $date_min . '\' AND s.datec <= \'' . $date_max . '\') ';
+        $sql .= ' AND u.fk_user = s.fk_user_modif';
+        $result = $bdb->executeS($sql, 'array');
+        $data['total']['nb_new_clients_by_commerciaux'] = (int) (isset($result[0]['nb_rows']) ? $result[0]['nb_rows'] : 0);
 
         // Nb new clients / users
         $sql = 'SELECT sc.fk_user as id_user, COUNT(DISTINCT s.rowid) as nb_clients';
@@ -4085,7 +4095,6 @@ class BimpComm extends BimpDolObject
 
             $data['users'][(int) $r['id_user']]['nb_new_commandes_for_new_clients'] = (int) $r['nb_commandes'];
         }
-
         // CA / marges: 
         $fields = array(
             'f.rowid as id_fac',
@@ -4185,45 +4194,100 @@ class BimpComm extends BimpDolObject
 
                 // Répartition produits / services: 
                 if ($options['include_ca_details_by_users']) {
-                    $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['id_fac']);
-                    $margin_infos = $fac->getMarginInfosArray();
-                    $revals = $fac->getTotalRevalorisations(false, true);
+                    $fields = array(
+                        'fdet.subprice as pu_ht',
+                        'fdet.qty',
+                        'fdet.remise_percent',
+                        'fdet.buy_price_ht as pa_ht',
+                        'fdet.product_type as prod_type_line',
+                        'fl.id as id_bimp_line',
+                        'p.fk_product_type as prod_type'
+                    );
+
+                    $filters = array(
+                        'fdet.fk_facture' => (int) $r['id_fac']
+                    );
+
+                    $joins = array(
+                        'fl' => array(
+                            'table' => 'bimp_facture_line',
+                            'on'    => 'fl.id_line = fdet.rowid'
+                        ),
+                        'p'  => array(
+                            'table' => 'product',
+                            'on'    => 'p.rowid = fdet.fk_product'
+                        )
+                    );
+
+                    $sql = BimpTools::getSqlFullSelectQuery('facturedet', $fields, $filters, $joins, array(
+                                'default_alias' => 'fdet'
+                    ));
+
+                    $lines = $bdb->executeS($sql, 'array');
+
+                    $pv_products = 0;
+                    $pv_services = 0;
+                    $pa_products = 0;
+                    $pa_services = 0;
+
+                    if (is_array($lines)) {
+                        foreach ($lines as $l) {
+                            $pv = (float) $l['qty'] * (float) $l['pu_ht'] * (1 - (float) $l['remise_percent'] / 100);
+                            $pa = (float) $l['qty'] * (float) $l['pa_ht'];
+
+                            $revals = $bdb->executeS(BimpTools::getSqlFullSelectQuery('bimp_revalorisation', array(
+                                        'SUM(a.qty * a.amount) as revals'
+                                            ), array(
+                                        'a.status'          => array('in' => array(1, 10)),
+                                        'a.id_facture_line' => (int) $l['id_bimp_line']
+                                    )), 'array');
+
+                            if ((float) $revals[0]['revals']) {
+                                $pa -= (float) $revals[0]['revals'];
+                            }
+
+                            $prod_type = (isset($l['prod_type']) && !is_null($l['prod_type']) ? (int) $l['prod_type'] : $l['prod_type_line']);
+                            if ($prod_type == 1) {
+                                $pv_services += $pv;
+                                $pa_services += $pa;
+                            } else {
+                                $pv_products += $pv;
+                                $pa_products += $pa;
+                            }
+                        }
+                    }
 
                     if (!isset($data['users'][$id_user]['ca_ht_products'])) {
                         $data['users'][$id_user]['ca_ht_products'] = 0;
                     }
-                    $data['users'][$id_user]['ca_ht_products'] += $margin_infos['pv_products'];
+                    $data['users'][$id_user]['ca_ht_products'] += $pv_products;
 
                     if (!isset($data['users'][$id_user]['ca_ht_services'])) {
                         $data['users'][$id_user]['ca_ht_services'] = 0;
                     }
-                    $data['users'][$id_user]['ca_ht_services'] += $margin_infos['pv_services'];
+                    $data['users'][$id_user]['ca_ht_services'] += $pv_services;
 
                     if (!isset($data['users'][$id_user]['achats_products'])) {
                         $data['users'][$id_user]['achats_products'] = 0;
                     }
-                    $data['users'][$id_user]['achats_products'] += $margin_infos['pa_products'];
-                    $data['users'][$id_user]['achats_products'] -= $revals['products']['accepted'];
+                    $data['users'][$id_user]['achats_products'] += $pa_products;
 
                     if (!isset($data['users'][$id_user]['achats_services'])) {
                         $data['users'][$id_user]['achats_services'] = 0;
                     }
-                    $data['users'][$id_user]['achats_services'] += $margin_infos['pa_services'];
-                    $data['users'][$id_user]['achats_services'] -= $revals['services']['accepted'];
+                    $data['users'][$id_user]['achats_services'] += $pa_services;
 
                     if (!isset($data['users'][$id_user]['marges_products'])) {
                         $data['users'][$id_user]['marges_products'] = 0;
                     }
-                    $data['users'][$id_user]['marges_products'] += $margin_infos['pv_products'];
-                    $data['users'][$id_user]['marges_products'] -= $margin_infos['pa_products'];
-                    $data['users'][$id_user]['marges_products'] += $revals['products']['accepted'];
+                    $data['users'][$id_user]['marges_products'] += $pv_products;
+                    $data['users'][$id_user]['marges_products'] -= $pa_products;
 
                     if (!isset($data['users'][$id_user]['marges_services'])) {
                         $data['users'][$id_user]['marges_services'] = 0;
                     }
-                    $data['users'][$id_user]['marges_services'] += $margin_infos['pv_services'];
-                    $data['users'][$id_user]['marges_services'] -= $margin_infos['pa_services'];
-                    $data['users'][$id_user]['marges_services'] += $revals['services']['accepted'];
+                    $data['users'][$id_user]['marges_services'] += $pv_services;
+                    $data['users'][$id_user]['marges_services'] -= $pa_services;
                 }
 
                 // Ca par métier par user: 
@@ -4310,7 +4374,7 @@ class BimpComm extends BimpDolObject
 
             if (isset($user_data['metiers']) && !empty($user_data['metiers'])) {
                 foreach ($user_data['metiers'] as $metier => &$metier_data) {
-                    if (isset($metier_data['ca_ht']) && (float) $user_data['$metier_data']) {
+                    if (isset($metier_data['ca_ht']) && (float) $user_data['ca_ht']) {
                         $metier_data['tx_marque'] = ($metier_data['marges'] / $metier_data['ca_ht']) * 100;
                     } else {
                         $metier_data['tx_marque'] = 'Inf.';

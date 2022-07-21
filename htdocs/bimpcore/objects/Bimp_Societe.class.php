@@ -1394,7 +1394,7 @@ class Bimp_Societe extends BimpDolObject
     }
     
     public static function getFull_addressCsvValue($needed_fields = array()){
-        return static::concatAdresse($needed_fields['address'], $needed_fields['zip'], $needed_fields['town'], $needed_fields['fk_dep'], $needed_fields['fk_pays'], );
+        return static::concatAdresse($needed_fields['address'], $needed_fields['zip'], $needed_fields['town'], $needed_fields['fk_dep'], $needed_fields['fk_pays']);
     }
     
     public function displayCodeClientNom(){

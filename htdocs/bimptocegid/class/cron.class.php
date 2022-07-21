@@ -265,6 +265,31 @@
             
             $logs .= "\n";
             
+            $saveArrayFacture = Array();
+            // message pour les ventes
+            if(array_key_exists("ACHATS", $this->export_class->good)) {
+                $logs .= "ACHATS (Succès)\n";
+                
+                foreach($this->export_class->good['ACHATS'] as $name => $log) {
+                    $logs .= ''.$name.': ' . $log . "\n";
+                    $saveArrayFacture[] = $name;
+                }
+            }
+            if(array_key_exists("ACHATS", $this->export_class->fails)) {
+                $logs .= "\ACHATS (Erreurs)\n";
+                foreach($this->export_class->fails['ACHATS'] as $name => $log) {
+                    $logs .= ''.$name.': ' . $log . "\n";
+                }
+            }
+            if(array_key_exists("ACHATS", $this->export_class->warn)) {
+                $logs .= "\ACHATS (Informations)\n";
+                foreach($this->export_class->warn['ACHATS'] as $name => $log) {
+                    $logs .= ''.$name.': ' . $log . "\n";
+                }
+            }
+            
+            $logs .= "\n";
+            
             $saveArrayPaiement = Array();
             // message pour les paiements
             if(array_key_exists("PAY", $this->export_class->good)) {

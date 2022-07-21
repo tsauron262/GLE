@@ -20,8 +20,14 @@ class newExportController extends BimpController {
         $html .= '<h2 style=\'color:orange;\' >BIMP<sup style=\'color:grey\'>export comptable</sup></h2>';
 //        
         $html .= '<pre>';
-//        
-        $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', 15417 /*15420*/);
+//      
+        if(isset($_GET['id_facture_fourn'])){
+            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', $_GET['id_facture_fourn'] /*15420*/);
+        } else{
+            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', 1 /*15420*/);
+        }
+        
+        
 //        
         $html .= $tra->constructTra($facture);
         

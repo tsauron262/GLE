@@ -322,7 +322,7 @@ class BimpDb
     {
         $sql = 'SELECT COUNT(DISTINCT `' . $primary . '`) as nb_rows FROM ' . MAIN_DB_PREFIX . $table;
         $sql .= ' WHERE ' . $where;
-
+        
         $result = $this->executeS($sql, 'array');
 
         if (isset($result[0]['nb_rows'])) {

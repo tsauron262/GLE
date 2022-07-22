@@ -3193,6 +3193,7 @@ class Bimp_Client extends Bimp_Societe
         $success.='';
         $errors = array();
         $id_atradius = $this->getIdAtradius($errors);
+        BimpObject::loadClass('bimpcore', 'BimpNote');
         if (0 < (int) $id_atradius) {
             require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
             $api = BimpAPI::getApiInstance('atradius');
@@ -3216,7 +3217,14 @@ class Bimp_Client extends Bimp_Societe
                                 $success .= $this->displayFieldName('outstanding_limit_credit_check') . " : " . (int) $cover['amount'] . '<br/>';
                                 // Il y a un crédit check, donc la limite de crédit n'existe pas/plus
                                 $err_update = self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_atradius', 0);
-
+                                if((int) $cover['amount'] != $this->getData('outstanding_limit_credit_check')) {
+                                    foreach($this->getCommerciauxArray() as $id_commercial => $inut) {
+                                        $this->addNote($success,
+                                                BimpNote::BIMP_NOTE_MEMBERS, 0, 1, '',BimpNote::BN_AUTHOR_USER,
+                                                BimpNote::BN_DEST_USER, 0, (int) $id_commercial);
+                                        break;
+                                    }
+                                }
                             } else {
                                 $errors = BimpTools::merge_array($errors, $err_update);
                             }
@@ -3226,6 +3234,14 @@ class Bimp_Client extends Bimp_Societe
                             $err_update = self::updateAtradiusValue($this->getData('siren'), 'outstanding_limit_atradius', (int) $cover['amount']);
                             if (empty($err_update)) {
                                 $success .= $this->displayFieldName('outstanding_limit_atradius') . " : " . (int) $cover['amount'] . '<br/>';
+                                if((int) $cover['amount'] != $this->getData('outstanding_limit_atradius')) {
+                                    foreach($this->getCommerciauxArray() as $id_commercial => $inut) {
+                                        $this->addNote($success,
+                                                BimpNote::BIMP_NOTE_MEMBERS, 0, 1, '',BimpNote::BN_AUTHOR_USER,
+                                                BimpNote::BN_DEST_USER, 0, (int) $id_commercial);
+                                        break;
+                                    }
+                                }
                             } else {
                                 $errors = BimpTools::merge_array($errors, $err_update);
                             }

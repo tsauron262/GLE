@@ -191,7 +191,7 @@ class BContract_contrat extends BimpDolObject
         $return = Array();
         
         $hourInDay = 7;
-        $services = Array('SERV19-DP1', 'SERV19-DP2', 'SERV19-DP3', 'SAV-NIVEAU_5');
+        $services = Array('SERV19-DP1', 'SERV19-DP2', 'SERV19-DP3', 'SAV-NIVEAU_5', 'SERV22-DPI-AAPEI');
         $instance = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product');
         $children = $this->getChildrenList('lines');
         

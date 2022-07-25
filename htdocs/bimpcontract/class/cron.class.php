@@ -38,16 +38,16 @@
         ];
         
         function zu_gehen() {
-            $this->autoClose();
-            $this->mailJourActivation();
-            $this->relanceActivationProvisoire();
-            $this->relance_brouillon();
-            $this->echeance_contrat();
-            $this->relance_echeance_tacite();
-            $this->relance_demande();
-            $this->tacite();
+//            $this->autoClose();
+//            $this->mailJourActivation();
+//            $this->relanceActivationProvisoire();
+//            $this->relance_brouillon();
+//            $this->echeance_contrat();
+//            $this->relance_echeance_tacite();
+//            $this->relance_demande();
+//            $this->tacite();
             $this->facturation_auto();
-            $this->notifDemainFacturation();
+//            $this->notifDemainFacturation();
             return "OK";
         }
         
@@ -197,6 +197,7 @@
         
         function facturation_auto() {
             global $langs;
+            
             $echeanciers = BimpObject::getInstance('bimpcontract', 'BContract_echeancier');
             $today = new DateTime();
             $list = $echeanciers->getList(['validate' => 1, 'next_facture_date' => ['min' => '2000-01-01', 'max' => "now()"]]);
@@ -240,7 +241,21 @@
                         $msg.= "Contrat : " . $c->dol_object->getNomUrl() . "<br/>Commercial : ".$comm->dol_object->getFullName($langs)."<br />";
                         //$msg.= "Facture : " . $f->getRef();
                         //$this->output .= $msg;
-                        mailSyn2("Facturation Contrat [".$c->getRef()."] client " . $s->getRef() . " ". $s->getName(), "facturationclients@bimp.fr", null, $msg);
+                        
+                        $note = BimpCache::getBimPObjectInstance('bimpcore', 'BimpNote');
+                        $note->set('obj_type', 'bimp_object');
+                        $note->set('obj_module', 'bimpcontract');
+                        $note->set('obj_name', 'BContract_contrat');
+                        $note->set('id_obj', 7345);
+                        $note->set('type_author', $note::BN_AUTHOR_USER);
+                        $note->set('type_dest', $note::BN_DEST_GROUP);
+                        $note->set('fk_group_dest', $note::BN_GROUPID_FACT);
+                        $note->set('content', $msg);
+            
+                        $errors = $note->create();
+                        
+                        if(count($errors) > 0)
+                            mailSyn2("Facturation Contrat [".$c->getRef()."] client " . $s->getRef() . " ". $s->getName(), "facturationclients@bimp.fr", null, $msg);
                     }
                 }
             }

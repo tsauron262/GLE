@@ -180,6 +180,113 @@ class BContract_contrat extends BimpDolObject
         return parent::__construct($module, $object_name);
     }
     
+    public function isContratDelegation():bool {
+        
+        return (substr($this->getRef(), 0, 3) == 'CDP') ? 1 : 0;
+                
+    }
+        
+    public function getTotalHeureDelegation():array {
+        
+        $return = Array();
+        
+        $hourInDay = 7;
+        $services = Array('SERV19-DP1', 'SERV19-DP2', 'SERV19-DP3', 'SAV-NIVEAU_5', 'SERV22-DPI-AAPEI');
+        $instance = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product');
+        $children = $this->getChildrenList('lines');
+        
+        foreach($children as $id_child) {
+            
+            $child = $this->getChildObject('lines', $id_child);
+            $instance->fetch($child->getData('fk_product'));            
+            
+            if(in_array($instance->getRef(), $services)) {
+                
+                $return[$instance->getRef() . '_' . $id_child] += (float) $child->getData('qty') * $hourInDay;
+            }
+                        
+        }
+        
+        return $return;
+    }
+    
+    public function getHeuresDelegationFromInterByService():array {
+        $return = Array();
+        
+        $instance = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter');
+        $list = $instance->getList(Array('fk_contrat' => $this->id));
+        
+        if(count($list) > 0) {
+            
+            foreach($list as $index) {
+                $child = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter_det');
+                $children = $child->getList(array('fk_fichinter' => $index['rowid']));
+                if(count($children) > 0) {
+                    foreach($children as $i) {
+                        if($index['fk_statut'] > 0) {
+                            $childContrat = $this->getChildObject('lines', $i['id_line_contrat']);
+                            $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $childContrat->getData('fk_product'));
+                            $return[$product->getRef() . '_' . $childContrat->id] += $i['duree'] / 3600;
+                        }
+                    }                    
+                }
+            }
+            
+        }
+        
+        return $return;
+    }
+    
+    public function displayTotalHeureDelegationVendu():string {
+        
+        $array = $this->getTotalHeureDelegation();
+        $html = '<table class="objectlistTable" style="border: none; min-width: 640px" width="100%">'
+                . '<thead class="listTableHead">'
+                . '<tr class="headerRow">'
+                . '<th style="" data-col_name="type" data-field_name="type">Service</th>'
+                . '<th style="" data-col_name="type" data-field_name="type">heures vendues</th>'
+                . '<th style="" data-col_name="type" data-field_name="type">heures consommées</th>'
+                . '<th style="" data-col_name="type" data-field_name="type">Reste</th>'
+                . '</tr>'
+                . '</thead>'
+                . '<tbody class="listRows" >';
+        $total = 0;
+        
+        $inInters = $this->getHeuresDelegationFromInterByService();
+        
+        foreach($array as $code => $temps) {
+            
+            $html .= '<tr class="objectListItemRow">';
+            $html .= '<td>'.$code.'</td>';
+            $html .= '<td>'.$temps.' heures</td>';
+            $html .= '<td>'.$inInters[$code].' heures</td>';
+            
+            $balance = $temps - $inInters[$code];
+            
+            $class = 'warning';
+            $icon = 'equal';
+            
+            if($balance < 0) {
+                $class = 'danger';
+                $icon = 'arrow-down';
+            } elseif($balance > 0) {
+                $class = 'success';
+                $icon   = 'arrow-up';
+            }
+            
+            $html .= '<td class="'.$class.'" >' . BimpRender::renderIcon($icon) . ' ' .$balance.' heures</td>';
+            
+            $html .= '</tr>';
+            
+        }
+        
+        $html .= '</tbody>'
+                . '</table>';
+                
+        return $html;
+        
+    }
+    
     public function tryToValidate(&$errors) {
         
         global $user;

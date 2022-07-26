@@ -224,7 +224,7 @@ class BContract_contrat extends BimpDolObject
                 if(count($children) > 0) {
                     foreach($children as $i) {
 //                        if($index['fk_statut'] > 0) {
-                        if($index['type'] == 5) {
+                        if($i['type'] == 5) {
                             $return['AUTRE'] += $i['duree'] / 3600;
                         } else {
                             $childContrat = $this->getChildObject('lines', $i['id_line_contrat']);

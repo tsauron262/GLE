@@ -1026,7 +1026,7 @@ class BimpController
                     $errors = $result['errors'];
                 }
 
-//                BimpCore::unlockObject($object_module, $object_name, $id_object);
+                BimpCore::unlockObject($object_module, $object_name, $id_object);
             }
         }
 

@@ -223,11 +223,11 @@ class BContract_contrat extends BimpDolObject
                 $children = $child->getList(array('fk_fichinter' => $index['rowid']));
                 if(count($children) > 0) {
                     foreach($children as $i) {
-                        if($index['fk_statut'] > 0) {
+//                        if($index['fk_statut'] > 0) {
                             $childContrat = $this->getChildObject('lines', $i['id_line_contrat']);
                             $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $childContrat->getData('fk_product'));
                             $return[$product->getRef() . '_' . $childContrat->id] += $i['duree'] / 3600;
-                        }
+//                        }
                     }                    
                 }
             }

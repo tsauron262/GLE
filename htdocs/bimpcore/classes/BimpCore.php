@@ -679,7 +679,7 @@ class BimpCore
             }
             $row = $bdb->getRow('bimpcore_object_lock', $where, array('tms', 'id_user'), 'array', 'tms', 'DESC');
 
-            if (!is_null($row) && (int) $row['tms'] < time() - 720) {
+            if (!is_null($row) && (int) $row['tms'] < time() - 600) {
                 // Si locké depuis + de 12 minutes
                 $bdb->update('bimpcore_object_lock', array(
                     'id_user' => $user->id,

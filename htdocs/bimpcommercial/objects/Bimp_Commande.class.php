@@ -406,10 +406,9 @@ class Bimp_Commande extends BimpComm
 //                }
                 global $user;
 
-                
                 $id_cond_a_la_commande = self::getBdb()->getValue('c_payment_term', 'rowid', '`active` > 0 and code = "RECEPCOM"');
-                if($client_facture->getData('outstanding_limit') < 1 and (int) $id_cond_a_la_commande != (int) $this->getData('fk_cond_reglement')) {
-                    if((int) $user->id != 232)
+                if ($client_facture->getData('outstanding_limit') < 1 and (int) $id_cond_a_la_commande != (int) $this->getData('fk_cond_reglement')) {
+                    if ((int) $user->id != 232)
                         $errors[] = "Les clients sans encours doivent régler à la commande";
                 }
             }
@@ -2928,8 +2927,12 @@ class Bimp_Commande extends BimpComm
                                     if (BimpObject::objectLoaded($fac_line)) {
                                         $fac_line_rate = $lines_rate;
 
-                                        if ((float) $fac_line->pu_ht !== (float) $line->pu_ht) {
-                                            $fac_line_rate = (((float) $line->pu_ht * ($lines_rate / 100)) / (float) $fac_line->pu_ht) * 100;
+                                        if ((float) $fac_line->pu_ht) {
+                                            if ((float) $fac_line->pu_ht !== (float) $line->pu_ht) {
+                                                $fac_line_rate = (((float) $line->pu_ht * ($lines_rate / 100)) / (float) $fac_line->pu_ht) * 100;
+                                            }
+                                        } else {
+                                            $fac_line_rate = 0;
                                         }
 
                                         $fac_line_remise = BimpCache::findBimpObjectInstance('bimpcommercial', 'ObjectLineRemise', array(

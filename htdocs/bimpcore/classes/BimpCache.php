@@ -29,7 +29,7 @@ class BimpCache
     public static $objects_keys_removed = array();
     public $j_semaine = array(0 => 'Dimanche', 1 => "Lundi", 2 => "Mardi", 3 => "Mercredi", 4 => "Jeudi", 5 => "Vendredi", 6 => "Samedi", 10 => "N/C");
 
-    public static function getBdb($no_transactions = false, $mode_archive = -1)
+    public static function getBdb($no_transactions = false, $mode_archive = -1, $force_new = false)
     {
         global $db;
 
@@ -56,10 +56,15 @@ class BimpCache
             return self::$bdb;
         }
 
-        if (is_null(self::$bdb_noTransac)) {
+        if (is_null(self::$bdb_noTransac) || $force_new) {
             global $conf;
             $db2 = getDoliDBInstance($conf->db->type, $conf->db->host, $conf->db->user, $db->database_pass, $conf->db->name, $conf->db->port);
             $db2->noTransaction = true;
+
+            if ($force_new) {
+                return new BimpDb($db2);
+            }
+            
             self::$bdb_noTransac = new BimpDb($db2);
         }
 
@@ -407,18 +412,19 @@ class BimpCache
             return self::$cache[$cache_key];
         }
     }
-    
-    public static function getCommercialClients(){
+
+    public static function getCommercialClients()
+    {
         $cache_key = 'commercial_client';
 
         $result = static::getCacheServeur($cache_key);
         if (!$result) {
             $result = array();
             global $db;
-            
-            $sql = $db->query("SELECT u.lastname, u.firstname, sc.fk_soc FROM `".MAIN_DB_PREFIX."societe_commerciaux` sc, ".MAIN_DB_PREFIX."user u WHERE sc.fk_user = u.rowid");
-            while ($ln = $db->fetch_object($sql)){
-                $result[$ln->fk_soc][] = $ln->lastname.' '.$ln->firstname;
+
+            $sql = $db->query("SELECT u.lastname, u.firstname, sc.fk_soc FROM `" . MAIN_DB_PREFIX . "societe_commerciaux` sc, " . MAIN_DB_PREFIX . "user u WHERE sc.fk_user = u.rowid");
+            while ($ln = $db->fetch_object($sql)) {
+                $result[$ln->fk_soc][] = $ln->lastname . ' ' . $ln->firstname;
             }
             static::setCacheServeur($cache_key, $result, 2 * 60);
         }

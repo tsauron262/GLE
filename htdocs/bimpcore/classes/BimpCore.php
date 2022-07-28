@@ -673,26 +673,32 @@ class BimpCore
         $where .= ' AND obj_name = \'' . $object->object_name . '\'';
         $where .= ' AND id_object = ' . $object->id;
 
-        $row = $bdb->getRow('bimpcore_object_lock', $where, array('tms', 'id_user'), 'array', 'tms', 'DESC');
+        for ($i = 0; $i < 10; $i++) {
+            if ($i > 0) {
+                sleep(1);
+            }
+            $row = $bdb->getRow('bimpcore_object_lock', $where, array('tms', 'id_user'), 'array', 'tms', 'DESC');
 
-        if (!is_null($row) && (int) $row['tms'] < time() - 720) {
-            // Si locké depuis + de 12 minutes
-            $bdb->update('bimpcore_object_lock', array(
-                'id_user' => $user->id,
-                'tms'     => time()
-                    ), $where);
-            return false;
-        }
+            if (!is_null($row) && (int) $row['tms'] < time() - 600) {
+                // Si locké depuis + de 12 minutes
+                $bdb->update('bimpcore_object_lock', array(
+                    'id_user' => $user->id,
+                    'tms'     => time()
+                        ), $where);
+                return false;
+            }
 
-        if (is_null($row)) {
-            $bdb->insert('bimpcore_object_lock', array(
-                'obj_module' => $object->module,
-                'obj_name'   => $object->object_name,
-                'id_object'  => $object->id,
-                'tms'        => time(),
-                'id_user'    => $user->id
-            ));
-            return false;
+            if (is_null($row)) {
+                global $bimp_object_locked_id;
+                $bimp_object_locked_id = $bdb->insert('bimpcore_object_lock', array(
+                    'obj_module' => $object->module,
+                    'obj_name'   => $object->object_name,
+                    'id_object'  => $object->id,
+                    'tms'        => time(),
+                    'id_user'    => $user->id
+                        ), true);
+                return false;
+            }
         }
 
         global $user;
@@ -704,7 +710,6 @@ class BimpCore
             $msg .= 'Veuillez attendre que l\'opération en cours soit terminée avant de relancer l\'enregistrement.<br/>';
 
             $diff = ((int) $row['tms'] + 720) - time();
-
             $min = floor($diff / 60);
             $secs = $diff - ($min * 60);
 
@@ -730,7 +735,7 @@ class BimpCore
             }
             $msg .= '<br/>';
             $msg .= 'Il est nécessaire d\'attendre que celle-ci soit terminée pour éviter un conflit sur l\'enregistrement des données.<br/>';
-            $msg .= 'Merci de réessayer ultérieurement.<br/>';
+            $msg .= 'Merci d\'attendre une dizaine de secondes et de réessayer.<br/>';
             $msg .= '<b>Etant donné qu\'il est possible que les données de ' . $object->getLabel('this') . ' aient été modifiées, il est recommandé ';
             $msg .= ' <a href="javascript:bimp_reloadPage()">d\'actualiser la page</a> avant de retenter l\'opération</b>';
         }
@@ -771,6 +776,16 @@ class BimpCore
         }
 
         return $errors;
+    }
+
+    public static function forceUnlockCurrentObject()
+    {
+        global $bimp_object_locked_id;
+
+        if ((int) $bimp_object_locked_id) {
+            $bdb = BimpCache::getBdb(true, -1, true);
+            $bdb->delete('bimpcore_object_lock', 'id = ' . $bimp_object_locked_id);
+        }
     }
 
     // Chargements librairies:

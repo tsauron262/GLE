@@ -191,7 +191,7 @@ class BContract_contrat extends BimpDolObject
         $return = Array();
         
         $hourInDay = 7;
-        $services = Array('SERV19-DP1', 'SERV19-DP2', 'SERV19-DP3', 'SAV-NIVEAU_5', 'SERV22-DPI-AAPEI');
+        $services = Array('SERV19-DP1', 'SERV19-DP2', 'SERV19-DP3', 'SAV-NIVEAU_5', 'SERV22-DPI-AAPEI', 'SERV19-FD01', 'AUTRE');
         $instance = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product');
         $children = $this->getChildrenList('lines');
         
@@ -223,11 +223,16 @@ class BContract_contrat extends BimpDolObject
                 $children = $child->getList(array('fk_fichinter' => $index['rowid']));
                 if(count($children) > 0) {
                     foreach($children as $i) {
-                        if($index['fk_statut'] > 0) {
+//                        if($index['fk_statut'] > 0) {
+                        if($index['type'] == 5) {
+                            $return['AUTRE'] += $i['duree'] / 3600;
+                        } else {
                             $childContrat = $this->getChildObject('lines', $i['id_line_contrat']);
                             $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $childContrat->getData('fk_product'));
                             $return[$product->getRef() . '_' . $childContrat->id] += $i['duree'] / 3600;
                         }
+                            
+//                        }
                     }                    
                 }
             }

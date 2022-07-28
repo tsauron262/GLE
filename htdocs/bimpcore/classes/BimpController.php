@@ -160,6 +160,7 @@ class BimpController
             case E_ERROR:
             case E_CORE_ERROR:
             case E_COMPILE_ERROR:
+                BimpCore::forceUnlockCurrentObject();
                 if (!BimpCore::isModeDev()) {
                     global $user, $langs;
                     $txt = '';
@@ -387,14 +388,14 @@ class BimpController
 
     public function displayFooter()
     {
-        
-    $alert = BimpObject::getBimpObjectInstance('bimpcore', 'BimpAlert');
-    echo $alert::getMsgs();
-    
-    $obj = $alert->getNextAlert();
-    if($obj)
-        echo '<script>$(document).ready(function () {'.$alert->getPopup($obj->id, $obj->getData('label')).'});</script>';
-        
+
+        $alert = BimpObject::getBimpObjectInstance('bimpcore', 'BimpAlert');
+        echo $alert::getMsgs();
+
+        $obj = $alert->getNextAlert();
+        if ($obj)
+            echo '<script>$(document).ready(function () {' . $alert->getPopup($obj->id, $obj->getData('label')) . '});</script>';
+
         llxFooter();
     }
 
@@ -1024,7 +1025,7 @@ class BimpController
                 } else {
                     $errors = $result['errors'];
                 }
-                
+
                 BimpCore::unlockObject($object_module, $object_name, $id_object);
             }
         }
@@ -3143,9 +3144,9 @@ class BimpController
     protected function ajaxProcessLoadAlertModal()
     {
         $obj = BimpCache::getBimpObjectInstance('bimpcore', 'BimpAlert', $_REQUEST['id']);
-        
+
         $html = $obj->getMsg();
-        
+
         return array(
             'errors'     => $BimpDocumentation->errors,
             'warnings'   => $BimpDocumentation->warnings,

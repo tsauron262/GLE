@@ -2364,8 +2364,38 @@ class BContract_contrat extends BimpDolObject
             $api = BimpAPI::getApiInstance('docusign');
             if (is_a($api, 'DocusignAPI')) {
                 $params = array();
-                $api->getEnvelopeFile($params, $id_envelope);
+                $pdf_bin = $api->getEnvelopeFile($params, $id_envelope);
                 
+                $file_name = $this->getSignatureDocFileName('contrat', true);
+                $tmp_name = $this->getSignatureDocFileDir('contrat') . $file_name;
+                file_put_contents($tmp_name, $pdf_bin);
+
+                
+                $file_obj = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile');
+                $values = array(
+                    'parent_module'      => 'bimpcontract',
+                    'parent_object_name' => 'BContract_contrat',
+                    'id_parent'          => (int) $this->id,
+                    'file_name'          => str_replace('.pdf', '', $file_name)
+                );
+                
+                $errors = $file_obj->validateArray($values);
+                
+                
+                if(!count($errors)) {
+                    $_FILES['file'] = array(
+                        'name' => $file_name,
+                        'type' => 'application/pdf',
+                        'tmp_name' => $tmp_name,
+                        'error' => '',
+                        'size' => sizeof($pdf_bin),
+                    );
+                    $file_obj->dontCreate = true;
+
+                    $errors = $file_obj->create();
+                } else {
+                    $errors[] = "Paramètre de création du fichier contrat signé non valide" . print_r($values);
+                }
             }
         }
         

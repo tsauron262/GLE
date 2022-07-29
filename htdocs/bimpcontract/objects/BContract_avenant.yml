@@ -84,6 +84,9 @@ fields:
     added_month:
         label: Nombre de mois ajoutés au contrat
         type: int
+    by_month:
+        label: Prolongtion par mois ?
+        type: int
 
 lists:
     default:
@@ -145,6 +148,24 @@ forms:
                   callback: getNbYears
               input:
                   type: qty
+              show:
+                  callback: 
+                      method: by
+                      params:
+                          - a
+            - custom: 1
+              label: Nombre de mois de prolongation
+              input_name: month
+              value: 
+                  callback: getNbMois
+              input:
+                  type: qty
+              show:
+                  callback: 
+                      method: by
+                      params:
+                          - m
+              
     add:
         title: Création d'un avenant
         rows:
@@ -154,7 +175,15 @@ forms:
                   field_name: type
                   show_values: 0
             - custom: 1
-              label: Nombre d'année de de prolongation
+              label: Ajout en nombre de moi ?
+              input_name: enMois
+              input:
+                  type: toggle
+              display_if:
+                  field_name: type
+                  show_values: 1
+            - custom: 1
+              label: Quantitée
               input_name: years
               value: 1
               input:

@@ -1837,6 +1837,21 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         return "<a target='_blank' href='" . $this->getPublicLink() . "'><i class='fas fa5-external-link-alt'></i></a>";
     }
 
+    public function dispayRepairsNumbers()
+    {
+        $html = '';
+
+        $rows = $this->db->getRows('bimp_gsx_repair', 'id_sav = ' . (int) $this->id, null, 'array', array('repair_number'));
+
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $html .= ($html ? '<br/>' : '') . $r['repair_number'];
+            }
+        }
+
+        return $html;
+    }
+
     // Rendus HTML: 
 
     public function renderHeaderExtraLeft()
@@ -5009,7 +5024,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
 //        $id_client_fac = (int) BimpTools::getArrayValueFromPath($data, 'id_client', $this->getData('id_client'));
 //        $id_contact_fac = (int) BimpTools::getArrayValueFromPath($data, 'id_contact', $this->getData('id_contact'));
-        
+
         $id_client_fac = (int) $this->getData('id_client');
         $id_contact_fac = (int) $this->getData('id_contact');
 

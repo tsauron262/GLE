@@ -223,8 +223,9 @@ class BContract_contrat extends BimpDolObject
                 $children = $child->getList(array('fk_fichinter' => $index['rowid']));
                 if(count($children) > 0) {
                     foreach($children as $i) {
+                        
 //                        if($index['fk_statut'] > 0) {
-                        if($i['type'] == 5) {
+                        if($i['type'] == 3) {
                             $return['AUTRE'] += $i['duree'] / 3600;
                         } else {
                             $childContrat = $this->getChildObject('lines', $i['id_line_contrat']);
@@ -3777,10 +3778,6 @@ class BContract_contrat extends BimpDolObject
             $date = new DateTime($this->getData('date_contrat'));
             $extra .= '<br/><span class="important">' . BimpRender::renderIcon('fas_signature', 'iconLeft') . 'Contrat marqué comme signé</span> depuis le ' . $date->format('d/m/Y');
         }
-//        if (!is_null($this->getData('end_date_reel')) && !is_null($this->getData('anticipate_close_note'))) {
-//            $date = new DateTime($this->getData('end_date_reel'));
-//            $extra .= "<br /><span>Cloture anticipée en date du <strong>" . $date->format('d/m/Y') . "</strong></span>";
-//        }
 
         if ($this->isFactAuto()) {
             $extra .= "<br /><span class='info' >Facturation automatique activée</strong></span>";
@@ -3797,7 +3794,7 @@ class BContract_contrat extends BimpDolObject
             );
             $extra .= "<br /><strong>Renouvellement N°</strong><strong>" . $this->getData('current_renouvellement') . "/" . $arrayTacite[$this->getData('initial_renouvellement')] . "</strong>";
         }
-
+                
         return $extra;
     }
 

@@ -58,6 +58,7 @@ class BS_SAV extends BimpObject
         8  => "Apple Care non enregistré",
         9  => "Litige client",
         10 => "Contre façon - réparation impossible",
+        11 => "Mail-In Apple",
         99 => "Autre",
     );
     public static $status_opened = array(self::BS_SAV_RESERVED, self::BS_SAV_NEW, self::BS_SAV_ATT_PIECE, self::BS_SAV_ATT_CLIENT, self::BS_SAV_DEVIS_ACCEPTE, self::BS_SAV_REP_EN_COURS, self::BS_SAV_EXAM_EN_COURS, self::BS_SAV_DEVIS_REFUSE, self::BS_SAV_ATT_CLIENT_ACTION, self::BS_SAV_A_RESTITUER);

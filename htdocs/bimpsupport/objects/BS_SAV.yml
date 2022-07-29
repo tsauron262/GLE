@@ -1290,7 +1290,7 @@ lists_cols:
     id_equipment: 
         display: custom
     repairs_numbers: 
-        label: Num Réparations
+        label: Commande Apple
         value: 
             callback: dispayRepairsNumbers
 lists: 

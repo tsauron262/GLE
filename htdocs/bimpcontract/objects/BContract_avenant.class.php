@@ -101,8 +101,36 @@ class BContract_avenant extends BContract_contrat {
             
         }
         
+        if(BimpTools::getPostFieldValue("month")) {
+            
+            $nombre_months = BimpTools::getPostFieldValue('month');
+            $end = new DateTime($this->getData('date_end'));
+            $end->add(new DateInterval('P' . $nombre_months . 'M'));
+            $end->sub(new DateInterval('P1D'));
+            
+            $errors = $this->updateField('want_end_date', $end->format('Y-m-d'));
+            BimpTools::merge_array($errors, $this->updateField('added_month', $nombre_months));
+            
+        }
+        
         return $errors;
         
+    }
+    
+    public function by($by):bool {
+        
+        switch($by) {
+            
+            case 'm':
+                return ($this->getData('by_month')) ? 1 : 0;
+                break;
+            case 'a':
+                return (!$this->getData('by_month')) ? 1 : 0;
+                break;
+            
+        }
+        
+        return 0;
     }
 
     public function validatePost() {
@@ -115,10 +143,13 @@ class BContract_avenant extends BContract_contrat {
          
          if(BimpTools::getPostFieldValue('type') && BimpTools::getPostFieldValue('type') == 1) $conserne_date_end_avp = true;
          if(BimpTools::getPostFieldValue('years')) $conserne_date_end_avp = true;
-         
+         if(BimpTools::getPostFieldValue('month')) $conserne_date_end_avp = true;
          
          if($conserne_date_end_avp) {            
-            if(BimpTools::getPostFieldValue('years') == 0) $errors[] = 'Vous ne pouvez pas choisir 0 année de prolongation';
+            if(!$this->getData('by_month'))
+                if(BimpTools::getPostFieldValue('years') == 0) $errors[] = 'Vous ne pouvez pas choisir 0 année de prolongation';
+            if($this->getData('by_month'))
+                if(BimpTools::getPostFieldValue('month') == 0) $errors[] = 'Vous ne pouvez pas choisir 0 mois de prolongation';
         }
          
          return $errors;
@@ -160,7 +191,13 @@ class BContract_avenant extends BContract_contrat {
                 $this->updateField('date_end', $parent->displayRealEndDate("Y-m-d"));
             } elseif(!count($errors) && $this->getData('type') == 1) {
                 
-                $months = BimpTools::getPostFieldValue('years') * 12;
+                if(BimpTools::getPostFieldValue('enMois')) {
+                    $months = BimpTools::getPostFieldValue('years');
+                    $this->updateField('by_month', 1);
+                } else {
+                    $months = BimpTools::getPostFieldValue('years') * 12;
+                }
+                
                 $errors = $this->updateField('added_month', $months);
                 
                 $date_de_fin = new DateTime($parent->displayRealEndDate("Y-m-d"));
@@ -190,6 +227,15 @@ class BContract_avenant extends BContract_contrat {
         }
         return 1;
     }
+    
+    public function getNbMois() {
+        if($this->isLoaded()) {
+            return $this->getData('added_month');
+        }
+        
+        return 0;
+    }
+    
     
     public function actionValidate() {
         

@@ -9,7 +9,6 @@ $langs->load('errors');
 $cacheInstance = array();
 
 class Bimp_Facture extends BimpComm
-
 {
 
     public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
@@ -2808,6 +2807,36 @@ class Bimp_Facture extends BimpComm
         return $html;
     }
 
+    public function displayPaiements()
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+            $rows = $this->db->getRows('paiement_facture', '`fk_facture` = ' . (int) $this->id, null, 'array');
+            if (!is_null($rows) && count($rows)) {
+                $mult = ((int) $this->getData('type') === Facture::TYPE_CREDIT_NOTE ? -1 : 1);
+                $html .= '<table class="bimp_list_table">';
+                $html .= '<tbody>';
+
+                foreach ($rows as $r) {
+                    $paiement = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Paiement', (int) $r['fk_paiement']);
+                    if ($paiement->isLoaded()) {
+                        $html .= '<tr>';
+                        $html .= '<td style="min-width: 135px">' . $paiement->dol_object->getNomUrl(1) . '</td>';
+                        $html .= '<td style="min-width: 100px">' . $paiement->displayData('datep') . '</td>';
+                        $html .= '<td>' . $paiement->displayType() . '</td>';
+                        $html .= '<td style="min-width: 120px">' . $paiement->displayAmount($this->id, $mult) . '</td>';
+                        $html .= '</tr>';
+                    }
+                }
+                $html .= '</tbody>';
+                $html .= '</table>';
+            }
+        }
+
+        return $html;
+    }
+
     //Rendus HTML: 
 
     public function renderContentExtraLeft()
@@ -3302,8 +3331,8 @@ class Bimp_Facture extends BimpComm
             if ($type_extra) {
                 $html .= '<div style="font-size: 18px">' . $type_extra . '</div>';
             }
-            
-            
+
+
 
             $html .= '<div class="object_header_infos">';
 //            $html .= 'Créée le <strong title="' . date('d/m/Y H:m:s', $this->dol_object->date_creation) . '">' . date('d / m / Y', $this->dol_object->date_creation) . '</strong>';
@@ -3336,8 +3365,8 @@ class Bimp_Facture extends BimpComm
 
         $client = $this->getChildObject('client');
         if (BimpObject::objectLoaded($client)) {
-            if($client->getData('msg_fact') != '')
-                $html .= BimpRender::renderAlerts('Message facturation : '.$client->getData('msg_fact'));
+            if ($client->getData('msg_fact') != '')
+                $html .= BimpRender::renderAlerts('Message facturation : ' . $client->getData('msg_fact'));
             $html .= '<div style="margin-top: 10px">';
             $html .= '<strong>Client: </strong>';
             $html .= $client->getLink();

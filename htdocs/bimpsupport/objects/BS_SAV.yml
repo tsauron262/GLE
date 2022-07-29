@@ -629,7 +629,6 @@ forms:
             - field: prioritaire
             - field: id_contrat
             - field: prestataire_number
-#            - field: id_propal
             - field: id_user_tech
             - field: system
             - field: login_admin
@@ -665,6 +664,11 @@ forms:
     restitute:
         title: Restituer
         rows: 
+            # Pour plus tard: 
+#            - field: id_client
+#              label: Client facturation
+#            - field: id_contact
+#              label: Contact facturation
             - custom: 1
               label: Mode de paiement
               input_name: mode_paiement

@@ -1,0 +1,1 @@
+ALTER TABLE `llx_user` ADD `id_docusign` VARCHAR(63) NULL DEFAULT NULL AFTER `is_dev`; 

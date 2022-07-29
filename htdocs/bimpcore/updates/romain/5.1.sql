@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimpcore_signature` ADD `id_envelope_docu_sign` VARCHAR(63) NULL DEFAULT NULL AFTER `signed_doc_ext`; 

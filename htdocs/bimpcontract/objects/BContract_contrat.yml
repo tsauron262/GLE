@@ -115,6 +115,16 @@ objects:
             bimp_object:
                 module: bimptechnique
                 name: BT_ficheInter
+                
+    signature: 
+        relation: hasOne
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpSignature
+            id_object: 
+                field_value: id_signature
 
 fields:
     # Champs du contrat
@@ -172,6 +182,15 @@ fields:
     note_private:
         label: Note privée
         type: html
+    id_signature: 
+        label: Signature
+        type: id_object
+        object: signature
+        displays: 
+            default: 
+                label: Lien signature
+                type: callback
+                method: displaySignature
         
     # Extrafields
     date_start:
@@ -522,6 +541,15 @@ fields_tables:
             - field: fk_commercial_suivi
             - field: fk_commercial_signature
             - field: relance_renouvellement
+            
+    signature: 
+        title: Signature
+        icon: fas_signature
+        show: 
+            field_value: id_signature
+        rows: 
+            - field: id_signature
+#              display: card
           
 filters:
     end_date:
@@ -1322,6 +1350,24 @@ forms:
                   field_name: type
                   show_values: 2 
                   
+    create_signature: 
+        title: Création de la signature
+        rows: 
+            - custom: 1
+              label: Contact signataire
+              data_type: id_object
+              input_name: id_contact_signature
+              input: 
+                  type: select
+                  options: 
+                      callback: 
+                          method: getSocieteContactsArray
+                          params: 
+                              - field_value: fk_soc
+                  help: 'Contact signataire obligatoire.<br/><b>Si aucun contact enregistré pour ce client, veuillez en créer un.</b>'
+              value: 
+                  callback: getDefaultSignatureContact
+                  
 views:
     default:
         extends: fiche_contrat 
@@ -1354,6 +1400,10 @@ views:
                             col_lg: 12
                             fields_table: 
                                 name: facturation
+                          - type: fields_table
+                            col_lg: 12
+                            fields_table: 
+                                name: signature
                           
                 - type: rows
                   col_lg: 6
@@ -1501,7 +1551,7 @@ searches:
 #            - ef.objet_contrat
 #        label_syntaxe: '<a.ref> (<s.nom>) - <ef.objet_contrat>'
         label_syntaxe: '<a.ref> (<s.nom>)'
-
+        
 cards:
     default:
         title: 

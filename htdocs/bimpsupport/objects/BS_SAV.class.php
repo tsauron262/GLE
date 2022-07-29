@@ -1551,6 +1551,10 @@ class BS_SAV extends BimpObject
         $id_client = (int) BimpTools::getPostFieldValue('id_client', (int) $this->getData('id_client'));
 
         if ($id_client) {
+            if ($this->isLoaded() && (int) $this->getData('id_client') === $id_client) {
+                return (int) $this->getData('id_contact');
+            }
+
             $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client);
 
             if (BimpObject::objectLoaded($client)) {
@@ -1567,6 +1571,40 @@ class BS_SAV extends BimpObject
         }
 
         return 0;
+    }
+
+    public static function getCodeApple($idMax = 0, &$newIdMax = 0)
+    {
+        $code = '';
+        $db = BimpCache::getBdb();
+        $result = $db->executeS("SELECT *
+FROM " . MAIN_DB_PREFIX . "bimpcore_note a
+WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 'BIMP_Task' AND a.id_obj = '25350' ORDER by id DESC");
+        if (isset($result[0])) {
+            $ln = $result[0];
+            $newIdMax = $ln->id;
+            if ($idMax != 0 && $newIdMax > $idMax) {
+                $code = $ln->content;
+                $tabCode = explode('votre identifiant Apple est :', $code);
+                if (isset($tabCode[1]))
+                    $code = $tabCode[1];
+                else {
+                    $tabCode = explode('Your Apple ID Code is: ', $code);
+                    if (isset($tabCode[1]))
+                        $code = $tabCode[1];
+                }
+                $tabCode = explode('. Ne le', $code);
+                if (isset($tabCode[1]))
+                    $code = $tabCode[0];
+                else {
+                    $tabCode = explode('. Don', $code);
+                    if (isset($tabCode[1]))
+                        $code = $tabCode[0];
+                }
+                $code = str_replace(" ", "", $code);
+            }
+        }
+        return $code;
     }
 
     // Affichage:
@@ -2838,10 +2876,10 @@ class BS_SAV extends BimpObject
             global $user, $langs;
 
             $id_cond_reglement = $client->getData('cond_reglement');
-            if(!$id_cond_reglement)
+            if (!$id_cond_reglement)
                 $id_cond_reglement = (int) BimpCore::getConf('sav_cond_reglement', $client->getData('cond_reglement'), 'bimpsupport');
             $id_mode_reglement = $client->getData('mode_reglement');
-            if(!$id_mode_reglement)
+            if (!$id_mode_reglement)
                 $id_mode_reglement = (int) BimpCore::getConf('sav_mode_reglement', $client->getData('mode_reglement'), 'bimpsupport');
 
             BimpTools::loadDolClass('comm/propal', 'propal');
@@ -4284,7 +4322,7 @@ class BS_SAV extends BimpObject
         return $errors;
     }
 
-    public function updateClient(&$warnings = array(), $id = 0)
+    public function onClientUpdate(&$warnings = array(), $init_id_client = 0, $init_id_contact = 0)
     {
         $errors = array();
 
@@ -4292,68 +4330,42 @@ class BS_SAV extends BimpObject
             return $errors;
         }
 
-        if (!$id) {
-            $errors[] = 'ID du nouveau client absent';
-            return $errors;
-        }
+        $id_client = (int) $this->getData('id_client');
+        $id_contact = (int) $this->getData('id_contact');
+        $id_propal = (int) $this->getData('id_propal');
 
-        $new_client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id);
-
-        if (!BimpObject::objectLoaded($new_client)) {
-            $errors[] = 'Le client d\'ID ' . $id . ' n\'existe pas';
-        } else {
-            if (!(int) $new_client->getData('status')) {
-                $errors[] = 'Ce client est désactivé';
-            } elseif (!$new_client->isSolvable($this->object_name, $warnings)) {
-                $errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $new_client->getData('solvabilite_status')]['label'] . ')';
+        if ($id_client !== (int) $init_id_client) {
+            // Maj propale:
+            if ($id_propal) {
+                if ($this->db->update('propal', array(
+                            'fk_soc' => $id_client
+                                ), 'rowid = ' . $id_propal) <= 0) {
+                    $errors[] = 'Echec du changement de client du devis - ' . $this->db->err();
+                    return $errors;
+                }
             }
+
+            // Maj prêts:
+            $this->db->update('bs_pret', array(
+                'id_client' => $id_client
+                    ), 'id_sav = ' . (int) $this->id);
         }
 
-        if (count($errors)) {
-            return $errors;
-        }
-
-        if ($this->getData("id_facture_acompte") > 0) {
-            $fact = $this->getChildObject("facture_acompte");
-            $fact->set("fk_soc", $id);
-            $errors = $fact->update($warnings, true);
-        }
-
-        if ($this->getData("id_discount") > 0 && !count($errors)) {
-            $this->db->db->query("UPDATE " . MAIN_DB_PREFIX . "societe_remise_except SET `fk_soc` = " . $id . " WHERE rowid = " . $this->getData("id_discount"));
-        }
-
-        if ($this->getData("id_propal") > 0 && !count($errors)) {
-            // Mise à jour du client de la propale: 
-            $prop = $this->getChildObject("propal");
-            $prop->set('fk_soc', (int) $id);
-            $w = array();
-            $prop_errors = $prop->update($w, true);
-            if (count($prop_errors)) {
-                $warnings[] = BimpTools::getMsgFromArray($prop_errors, 'Des erreurs sont survenues lors du changement de client du devis');
+        // Maj contacts propale:
+        if ($id_contact !== (int) $init_id_contact) {
+            $where = 'element = \'propal\' AND source = \'external\'';
+            $rows = $this->db->getRows('c_type_contact', $where, null, 'array', array('rowid'));
+            if (is_array($rows)) {
+                $types_contacts = array();
+                foreach ($rows as $r) {
+                    $types_contacts[] = (int) $r['rowid'];
+                }
+                $where = 'element_id = ' . $id_propal;
+                $where .= ' AND fk_c_type_contact IN (' . implode(',', $types_contacts) . ')';
+                $this->db->update('element_contact', array(
+                    'fk_socpeople' => $id_contact
+                        ), $where);
             }
-//            $prop->set("fk_soc", $id);
-//            $errors = $prop->updateDolObject($warnings, true);
-//            $this->db->db->query("UPDATE ".MAIN_DB_PREFIX."propal SET `fk_soc` = ".$id." WHERE rowid = ".$this->getData("id_propal"));
-        }
-
-        // Changement du client pour les prêts:
-        $prets = BimpCache::getBimpObjectObjects('bimpsupport', 'BS_Pret', array(
-                    'id_sav' => (int) $this->id
-        ));
-        foreach ($prets as $pret) {
-            $pret->set('id_client', (int) $id);
-            $w = array();
-            $pret_errors = $pret->update($w, true);
-            if (count($pret_errors)) {
-                $warnings[] = BimpTools::getMsgFromArray($pret_errors, 'Des erreurs sont survenues lors de la mise à jour du prêt "' . $pret->getData('ref') . '"');
-            }
-        }
-
-        if ($this->getData("id_facture") > 0) {
-            $fact = $this->getChildObject("facture");
-            $fact->set("fk_soc", $id);
-            $errors = $fact->update($warnings, true);
         }
 
         return $errors;
@@ -4519,6 +4531,31 @@ class BS_SAV extends BimpObject
         return $errors;
     }
 
+    public function unlinkAcompte($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $this->updateField('acompte', 0, null, true);
+        $this->updateField('id_discount', 0, null, true);
+        $this->updateField('id_facture_acompte', 0, null, true);
+
+        $success = "Acompte déliée avec succés.";
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public static function setGsxActiToken($token, $login = '')
+    {
+        require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
+
+        $gsx = new GSX_v2();
+
+        $errors = $gsx->setActivationToken($token, $login);
+        return $errors;
+    }
+
     // Actions:
 
     public function actionWaitClient($data, &$success)
@@ -4653,7 +4690,7 @@ class BS_SAV extends BimpObject
                 }
                 if ($propal->dol_object->cond_reglement_id != $this->id_cond_reglement_def || $propal->dol_object->mode_reglement_id != $this->id_mode_reglement_def) {
                     //exception pour les virement bencaire a la commande 
-                    if($propal->dol_object->cond_reglement_id != 20 || $propal->dol_object->mode_reglement_id != 2){
+                    if ($propal->dol_object->cond_reglement_id != 20 || $propal->dol_object->mode_reglement_id != 2) {
                         //on vérifie encours
                         $client = $this->getChildObject('client');
 
@@ -4967,32 +5004,56 @@ class BS_SAV extends BimpObject
         $success = 'SAV Fermé avec succès';
         $success_callback = '';
 
+        $id_client_sav = (int) $this->getData('id_client');
+
+//        $id_client_fac = (int) BimpTools::getArrayValueFromPath($data, 'id_client', $this->getData('id_client'));
+//        $id_contact_fac = (int) BimpTools::getArrayValueFromPath($data, 'id_contact', $this->getData('id_contact'));
+        
+        $id_client_fac = (int) $this->getData('id_client');
+        $id_contact_fac = (int) $this->getData('id_contact');
+
+        $client_fac = null;
+        $propal = $this->getChildObject('propal');
+        $impayee = $propal->dol_object->total_ttc - (float) BimpTools::getArrayValueFromPath($data, 'paid', 0) - (float) BimpTools::getArrayValueFromPath($data, 'paid2', 0);
+
+        // Vérification du client facturé: 
+        if (!$id_client_fac) {
+            $errors[] = 'Aucun client de facturation sélectionné';
+        } else {
+            $client_fac = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client_fac);
+
+            if ($id_client_fac !== $id_client_sav) {
+                if (!BimpObject::objectLoaded($client_fac)) {
+                    $errors[] = 'Le client de facturation sélectionné n\'existe plus';
+                } else {
+                    if (!(int) $client_fac->getData('status')) {
+                        $errors[] = 'Ce client est désactivé';
+                    } elseif (!$client_fac->isSolvable($this->object_name, $warnings)) {
+                        $errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $new_client->getData('solvabilite_status')]['label'] . ')';
+                    }
+                }
+            }
+
+            if ($impayee > 1) {
+                //on vérifie encours
+                $encoursActu = $client_fac->getAllEncoursForSiret(true)['total'];
+                $authorisation = $client_fac->getData('outstanding_limit');
+                $besoin = $encoursActu + $impayee;
+
+                if ($besoin > $authorisation) {
+                    $errors[] = 'Le client doit payer comptant, son encours autorisé (' . price($authorisation) . ' €) est inférieur au besoin (' . price($besoin) . ' €)';
+                }
+            }
+        }
+
+        if (count($errors)) {
+            return array('errors' => $errors, 'warnings' => $warnings);
+        }
+
+        // Vérifs paiements: 
         $caisse = null;
         $payment_1_set = (isset($data['paid']) && (float) $data['paid'] && (isset($data['mode_paiement']) && (int) $data['mode_paiement'] > 0 && (int) $data['mode_paiement'] != 56));
         $payment_2_set = (isset($data['paid2']) && (float) $data['paid2'] > 0);
-
-//        $prets = $this->getChildrenObjects('prets');
-//        foreach ($prets as $pret) {
-//            if (!(int) $pret->getData('returned')) {
-//                $errors[] = 'Le prêt "' . $pret->getData('ref') . '" n\'est pas restitué';
-//            }
-//        }
-
-        $propal = $this->getChildObject('propal');
-        $impayee = $propal->dol_object->total_ttc - (float) BimpTools::getArrayValueFromPath($data, 'paid', 0) - (float) BimpTools::getArrayValueFromPath($data, 'paid2', 0);
-        if ($impayee > 1) {
-            //on vérifie encours
-            $client = $this->getChildObject('client');
-
-            $encoursActu = $client->getAllEncoursForSiret(true)['total'];
-            $authorisation = $client->getData('outstanding_limit');
-            $besoin = $encoursActu + $impayee;
-
-            if ($besoin > $authorisation)
-                $errors[] = 'Le client doit payer comptant, son encours autorisé (' . price($authorisation) . ' €) est inférieur au besoin (' . price($besoin) . ' €)';
-        }
-
-
         if ($payment_1_set || $payment_2_set) {
             if ($this->useCaisseForPayments) {
                 global $user;
@@ -5036,8 +5097,6 @@ class BS_SAV extends BimpObject
         $current_status = (int) $this->getInitData('status');
 
         if ((int) $this->getData('id_propal')) {
-            $propal = $this->getChildObject('propal');
-
             if (!isset($data['restitute']) || !$data['restitute']) {
                 $errors[] = 'Vous devez utiliser le bouton "Restituer" pour fermer ce SAV';
             }
@@ -5054,7 +5113,6 @@ class BS_SAV extends BimpObject
                 $errors[] = 'Certains produits nécessitent encore l\'attribution d\'un équipement';
             }
 
-
             if (!count($errors)) {
                 $propal_status = (int) $propal->getData('fk_statut');
 
@@ -5067,7 +5125,6 @@ class BS_SAV extends BimpObject
 
                     if (!count($errors)) {
                         // Gestion des stocks et emplacements: 
-                        $id_client = (int) $this->getData('id_client');
                         $centre_data = $this->getCentreData(true);
                         $id_entrepot = (int) BimpTools::getArrayValueFromPath($centre_data, 'id_entrepot', 0);
                         $codemove = 'SAV' . $this->id . '_';
@@ -5087,7 +5144,7 @@ class BS_SAV extends BimpObject
                                             if (!BimpObject::objectLoaded($equipment)) {
                                                 $eq_line_errors[] = 'Erreur: cet équipment n\'existe plus';
                                             }
-                                            $eq_line_errors = BimpTools::merge_array($eq_line_errors, $equipment->moveToPlace(BE_Place::BE_PLACE_CLIENT, (int) $id_client, $codemove . 'LN' . $line->id . '_EQ' . (int) $eq_line->getData('id_equipment'), 'Vente ' . $this->getRef(), 1, date('Y-m-d H:i:s'), 'sav', $this->id));
+                                            $eq_line_errors = BimpTools::merge_array($eq_line_errors, $equipment->moveToPlace(BE_Place::BE_PLACE_CLIENT, (int) $id_client_sav, $codemove . 'LN' . $line->id . '_EQ' . (int) $eq_line->getData('id_equipment'), 'Vente ' . $this->getRef(), 1, date('Y-m-d H:i:s'), 'sav', $this->id));
                                         }
                                     }
                                     if (count($eq_line_errors)) {
@@ -5147,7 +5204,7 @@ class BS_SAV extends BimpObject
                                         $place_errors = $place->validateArray(array(
                                             'id_equipment' => (int) $this->getData('id_equipment'),
                                             'type'         => BE_Place::BE_PLACE_CLIENT,
-                                            'id_client'    => (int) $this->getData('id_client'),
+                                            'id_client'    => $id_client_sav,
                                             'infos'        => 'Restitution ' . $this->getData('ref') . ' (Remise au client)',
                                             'date'         => date('Y-m-d H:i:s'),
                                             'code_mvt'     => $codemove . 'CLOSE_EQ' . (int) $this->getData('id_equipment'),
@@ -5194,15 +5251,15 @@ class BS_SAV extends BimpObject
                                     if ((int) $propal->dol_object->cond_reglement_id) {
                                         $cond_reglement = (int) $propal->dol_object->cond_reglement_id;
                                     } else {
-                                        $client = $this->getChildObject('client');
-
-                                        if (BimpObject::objectLoaded($client)) {
-                                            $cond_reglement = (int) $client->getData('cond_reglement');
+                                        if (BimpObject::objectLoaded($client_fac)) {
+                                            $cond_reglement = (int) $client_fac->getData('cond_reglement');
                                         }
                                     }
                                 }
-                                if (!$cond_reglement)
+
+                                if (!$cond_reglement) {
                                     $cond_reglement = (int) BimpCore::getConf('sav_cond_reglement', null, 'bimpsupport');
+                                }
 
                                 $mode_reglement = (int) BimpTools::getArrayValueFromPath($data, 'mode_paiement', (int) $propal->dol_object->mode_reglement_id);
 
@@ -5212,7 +5269,7 @@ class BS_SAV extends BimpObject
 
                                 $facture->date = dol_now();
                                 $facture->source = 0;
-                                $facture->socid = (int) $this->getData('id_client');
+                                $facture->socid = $id_client_fac;
                                 $facture->fk_project = $propal->dol_object->fk_project;
                                 $facture->cond_reglement_id = $cond_reglement;
                                 $facture->mode_reglement_id = $mode_reglement;
@@ -5220,7 +5277,7 @@ class BS_SAV extends BimpObject
                                 $facture->demand_reason_id = $propal->dol_object->demand_reason_id;
                                 $facture->date_livraison = $propal->dol_object->date_livraison;
                                 $facture->fk_delivery_address = $propal->dol_object->fk_delivery_address;
-                                $facture->contact_id = $propal->dol_object->contact_id;
+                                $facture->contact_id = $id_contact_fac;
                                 $facture->ref_client = $propal->dol_object->ref_client;
                                 $facture->note_private = '';
                                 $facture->note_public = '';
@@ -5657,40 +5714,6 @@ class BS_SAV extends BimpObject
         );
     }
 
-    public static function getCodeApple($idMax = 0, &$newIdMax = 0)
-    {
-        $code = '';
-        $db = BimpCache::getBdb();
-        $result = $db->executeS("SELECT *
-FROM " . MAIN_DB_PREFIX . "bimpcore_note a
-WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 'BIMP_Task' AND a.id_obj = '25350' ORDER by id DESC");
-        if (isset($result[0])) {
-            $ln = $result[0];
-            $newIdMax = $ln->id;
-            if ($idMax != 0 && $newIdMax > $idMax) {
-                $code = $ln->content;
-                $tabCode = explode('votre identifiant Apple est :', $code);
-                if (isset($tabCode[1]))
-                    $code = $tabCode[1];
-                else {
-                    $tabCode = explode('Your Apple ID Code is: ', $code);
-                    if (isset($tabCode[1]))
-                        $code = $tabCode[1];
-                }
-                $tabCode = explode('. Ne le', $code);
-                if (isset($tabCode[1]))
-                    $code = $tabCode[0];
-                else {
-                    $tabCode = explode('. Don', $code);
-                    if (isset($tabCode[1]))
-                        $code = $tabCode[0];
-                }
-                $code = str_replace(" ", "", $code);
-            }
-        }
-        return $code;
-    }
-
     public function actionGetCodeApple($data, &$success)
     {
         $idMax = $data['idMax'];
@@ -5728,21 +5751,6 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             } else
                 $success = "Acompte créer avec succés.";
         }
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
-    }
-
-    public function unlinkAcompte($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $this->updateField('acompte', 0, null, true);
-        $this->updateField('id_discount', 0, null, true);
-        $this->updateField('id_facture_acompte', 0, null, true);
-
-        $success = "Acompte déliée avec succés.";
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
@@ -5842,16 +5850,6 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             'errors'   => $errors,
             'warnings' => $warnings
         );
-    }
-
-    public static function setGsxActiToken($token, $login = '')
-    {
-        require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX_v2.php';
-
-        $gsx = new GSX_v2();
-
-        $errors = $gsx->setActivationToken($token, $login);
-        return $errors;
     }
 
     public function actionSetGsxActiToken($data, &$success)
@@ -6393,30 +6391,56 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         $errors = array();
 
         $centre = $this->getCentreData();
+        $init_id_client = (int) $this->getInitData('id_client');
+        $init_id_contact = (int) $this->getInitData('id_contact');
 
-        if ($this->getData("id_facture_acompte") > 0 && (int) $this->getData('id_client') !== (int) $this->getInitData('id_client')) {
-            $errors[] = 'Facture d\'acompte, impossible de changer de client';
-            return $errors;
-        }
-        
-        if (!count($errors)) {
-            $errors = parent::update($warnings, $force_update);
-        }
+        $id_client = (int) $this->getData('id_client');
 
-
-        if (!count($errors)) {
-            if ((int) $this->getData('id_client') !== (int) $this->getInitData('id_client')) {
-                $errors = $this->updateClient($warnings, $this->getData("id_client"));
+        if ($id_client !== $init_id_client) {
+            if ((int) $this->getData('id_facture') || (int) $this->getData('id_facture_avoir')) {
+                $errors[] = 'Ce SAV a déjà été facturé, impossible de changer le client ou le contact';
+                return $errors;
             }
 
-            if ((int) $this->getData('id_contact') !== (int) $this->getInitData('id_contact')) {
-                //todo gestion des contacts.
+            if (!$id_client) {
+                $errors[] = 'ID du nouveau client absent';
+                return $errors;
+            }
+            $new_client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client);
+
+            if (!BimpObject::objectLoaded($new_client)) {
+                $errors[] = 'Le client d\'ID ' . $id_client . ' n\'existe pas';
+            } else {
+                if (!(int) $new_client->getData('status')) {
+                    $errors[] = 'Ce client est désactivé';
+                } elseif (!$new_client->isSolvable($this->object_name, $warnings)) {
+                    $errors[] = 'Il n\'est pas possible de créer une pièce pour ce client (' . Bimp_Societe::$solvabilites[(int) $new_client->getData('solvabilite_status')]['label'] . ')';
+                }
+            }
+        }
+
+        if (count($errors)) {
+            return $errors;
+        }
+
+//        if ($this->getData("id_facture_acompte") > 0 && (int) $this->getData('id_client') !== (int) $this->getInitData('id_client')) {
+//            $errors[] = 'Facture d\'acompte, impossible de changer de client';
+//            return $errors;
+//        }
+//
+//        if (!count($errors)) {
+        $errors = parent::update($warnings, $force_update);
+//        }
+
+        if (!count($errors)) {
+            if (((int) $this->getData('id_client') !== $init_id_client) ||
+                    (int) $this->getData('id_contact') !== $init_id_contact) {
+                $errors = $this->onClientUpdate($warnings, $init_id_client, $init_id_contact);
             }
 
             if (!is_null($centre)) {
                 $this->set('id_entrepot', (int) $centre['id_entrepot']);
             }
-
 
             if ((int) $this->getData('id_propal')) {
                 $propal = $this->getChildObject('propal');

@@ -131,6 +131,10 @@ class BC_Filter extends BimpComponent
         }
 
         $items = null;
+        
+        
+        $type_path = 'filters/' . $this->filter_name . '/type';
+        $this->params['type'] = $this->object->getConf($type_path, '');
 
         if (!is_null($this->bc_field)) {
             $field_params = $this->bc_field->params;
@@ -160,6 +164,8 @@ class BC_Filter extends BimpComponent
                 }
             }
         }
+        
+        
 
         if (is_null($this->params['type']) || !(string) $this->params['type']) {
             if (!is_null($this->bc_field)) {

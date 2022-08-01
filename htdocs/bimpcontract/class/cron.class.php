@@ -48,7 +48,52 @@
             $this->tacite();
             $this->facturation_auto();
             $this->notifDemainFacturation();
+            $this->relanceAvenantProvisoir();
             return "OK";
+        }
+        
+        public function relanceAvenantProvisoir() {
+            
+            $avenant = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_avenant');
+            $list = $avenant->getList(Array('statut' => 5));
+            $now = new DateTime();
+            
+            $this->output .= print_r($now, 1);
+            
+            foreach($list as $av) {
+                $avenant->fetch($av['id']);
+                $contrat = $avenant->getParentInstance();
+                $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $contrat->getData('fk_soc'));
+                $commercial = $contrat->getCommercialClient(true);
+                $dateEffect = new DateTime($avenant->getData('date_activate'));
+                $diff = $dateEffect->diff($now);
+                
+                if($diff->days >= 5) {
+                    if($diff->days > 15) {
+                        // On supprime
+                        $avenant->updateField('statut', 4);
+                        $avenant->updateField('private_close_note', 'Delais de signature dépassé');
+                        $subject = 'ABANDON ' . $avenant->getRefAv() . ' ' . $client->getName();
+                        $msg = 'Bonjour ' . $commercial->getName();
+                        $msg.= '<br />L\'avenant ' . $avenant->getRefAv() . ' a été abandoné car il n\'a pas été signé dans le 15 jours qui ont suivi son activation.';
+                        
+                    } else {
+                        // On relance le commercial
+                        $subject = 'Avenant non signé ' . $avenant->getRefAv() . ' ' . $client->getName();
+                        $msg = 'Bonjour ' . $commercial->getName();
+                        $reste = (15 - (int) $diff->days);
+                        $msg.= '<br />L\'avenant ' . $avenant->getRefAv() . ' n\'est pas signé, il vous reste ' . $reste . ' avant son abandon automatique';
+                    }
+                    
+                    $msg .= '<br ><br />Contrat: ' . $contrat->getLink();
+                    mailSyn2($subject, $commercial->getData('email'), null, $msg);
+                }
+                
+                $this->output .= '<pre>'.print_r($diff,1).'</pre>';
+            }
+            
+            
+            
         }
         
         public function notifDemainFacturation() {

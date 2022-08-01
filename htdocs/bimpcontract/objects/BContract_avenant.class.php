@@ -10,13 +10,21 @@ class BContract_avenant extends BContract_contrat {
         2 => "Changement du lieu d'intervention",
         3 => "Changement d'un numéro de série"
     ];
+    
+    CONST AVENANT_STATUT_BROUILLON      = 0;
+    CONST AVENANT_STATUT_ATTENTE_SIGN   = 1;
+    CONST AVENANT_STATUT_ACTIF          = 2;
+    CONST AVENANT_STATUT_CLOS           = 3;
+    CONST AVENANT_STATUT_ABANDON        = 4;
+    CONST AVENANT_STATUT_PROVISOIR      = 5;
    
     public static $statut_list = [
-        0 => ['label' => 'Brouillon', 'icon' => 'trash', 'classes' => ['warning']],
-        1 => ['label' => 'Attente de signature', 'icon' => 'refresh', 'classes' => ['success']],
-        2 => ['label' => 'Pris en compte', 'icon' => 'play', 'classes' => ['important']],
-        3 => ['label' => 'Clos', 'icon' => 'times', 'classes' => ['danger']],
-        4 => ['label' => 'Abandonné', 'icon' => 'times', 'classes' => ['danger']]
+        self::AVENANT_STATUT_BROUILLON      => ['label' => 'Brouillon', 'icon' => 'trash', 'classes' => ['warning']],
+        self::AVENANT_STATUT_ATTENTE_SIGN   => ['label' => 'Attente de signature', 'icon' => 'refresh', 'classes' => ['success']],
+        self::AVENANT_STATUT_ACTIF          => ['label' => 'Pris en compte', 'icon' => 'play', 'classes' => ['important']],
+        self::AVENANT_STATUT_CLOS           => ['label' => 'Clos', 'icon' => 'times', 'classes' => ['danger']],
+        self::AVENANT_STATUT_ABANDON        => ['label' => 'Abandonné', 'icon' => 'times', 'classes' => ['danger']],
+        self::AVENANT_STATUT_PROVISOIR      => ['label' => 'Activation provisoire', 'icon' => 'retweet', 'classes' => ['important']]
     ];
     
     public function getTypeAvenantArray() {
@@ -301,6 +309,46 @@ class BContract_avenant extends BContract_contrat {
             'success_callback' => $success_callback
         );
     }
+        
+    public function actionActivation($data, &$success) {
+        $data = (object) $data;
+        $errors = Array();
+        $warnings = Array();
+        
+        $success = '';
+        
+        $haveSignature = $data->haveSignature;
+        
+        if($this->getData('statut') == self::AVENANT_STATUT_PROVISOIR && !$haveSignature) {
+            $errors[] = 'Cet avenant est déjà activé provisoirement';
+        }
+        
+        if(!count($errors)) {
+            if($haveSignature) {
+                $this->actionSigned(Array('date_signed' => $data->dateSignature), $success);
+            } else {
+                $parent = $this->getParentInstance();
+                $commercial = $parent->getCommercialClient(true);
+                $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $parent->getdata('fk_soc'));
+                $sujet = 'AVENANT ' . $this->getRefAv() . ' - ACTIVATION PROVISOIRE - ' . $client->getName();
+                $dest = $commercial->getData('email');
+
+                $message = 'Bonjour ' . $commercial->getName() . '<br />';
+                $message .= 'L\'avenant N°' . $this->getRefAv() . ' a été activé provisoirement. Vous disposez de 15 jours pour le faire signé par le client, après ce délais, l\'avenant sera abandonné automatiquement. Vous receverez une alerte par jour, à partir des derniers 5 jours de l\'activation provisoire';
+                $message .= '<br /><br />Client: ' . $client->getLink() . '<br />Contrat: ' . $parent->getLink();
+                mailSyn2($sujet, $dest, null, $message);
+                $this->updateField('date_activate', date('Y-m-d'));
+                $this->updateField('statut', self::AVENANT_STATUT_PROVISOIR);
+
+            }
+        }
+        
+        return Array(
+            'errors' => $errors, 
+            'warnings' => $warnings, 
+            'success' => $success
+        );
+    }
     
     public function actionSigned($data, &$success) {
         $errors = [];
@@ -498,17 +546,18 @@ class BContract_avenant extends BContract_contrat {
             );
         }
         
+        if($this->getData('statut') == self::AVENANT_STATUT_ATTENTE_SIGN || $this->getData('statut') == self::AVENANT_STATUT_PROVISOIR) {
+            $buttons[] = array(
+                'label'   => 'Activer l\'avenant',
+                'icon'    => 'fas_play',
+                'onclick' => $this->getJsActionOnclick('activation', array(), array('form_name' => 'activate'
+                ))
+            );
+        }
+        
         if($this->getData('statut') == 1) {
             
             $action = ($this->getData('type') == 1) ? 'signedProlongation' : 'signed';
-            
-            $buttons[] = array(
-                'label'   => 'Signer',
-                'icon'    => 'fas_signature',
-                'onclick' => $this->getJsActionOnclick($action, array(), array(
-                    'form_name' => "signed"
-                ))
-            );
             
             $buttons[] = array(
                     'label'   => 'Abandonner',

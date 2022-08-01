@@ -3466,7 +3466,7 @@ class BContract_contrat extends BimpDolObject
                     return BimpRender::renderAlerts('Le contrat n\'est pas activé', 'danger', false);
                 }
                 if (!$this->getData('date_start') || !$this->getData('periodicity') || !$this->getData('duree_mois')) {
-                    return BimpRender::renderAlerts("Le contrat a été facturé avec l'ancienne méthode donc il ne comporte pas d'échéancier", 'warning', false);
+                    return BimpRender::renderAlerts("Le contrat a été facturé à partir d'une commande, il ne comporte donc pas d'échéancier", 'warning', false);
                 }
             }
 

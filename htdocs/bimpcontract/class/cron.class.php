@@ -38,16 +38,16 @@
         ];
         
         function zu_gehen() {
-//            $this->autoClose();
-//            $this->mailJourActivation();
-//            $this->relanceActivationProvisoire();
-//            $this->relance_brouillon();
-//            $this->echeance_contrat();
-//            $this->relance_echeance_tacite();
-//            $this->relance_demande();
-//            $this->tacite();
+            $this->autoClose();
+            $this->mailJourActivation();
+            $this->relanceActivationProvisoire();
+            $this->relance_brouillon();
+            $this->echeance_contrat();
+            $this->relance_echeance_tacite();
+            $this->relance_demande();
+            $this->tacite();
             $this->facturation_auto();
-//            $this->notifDemainFacturation();
+            $this->notifDemainFacturation();
             return "OK";
         }
         

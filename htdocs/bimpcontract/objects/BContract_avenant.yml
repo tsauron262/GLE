@@ -73,6 +73,12 @@ fields:
     date_create:
         label: Créé le
         type: datetime
+    date_activate:
+        label: Activé le
+        type: date
+    private_close_note:
+        label: Private
+        type: text
     type:
         label: Type de l'avenant
         type: int
@@ -129,6 +135,24 @@ lists:
             coup: unset
                 
 forms:
+    activate:
+        title: Activation de l'avenant
+        rows:
+            - custom: 1
+              label: Avenant signé
+              input:
+                  type: toggle
+              input_name: haveSignature
+            - custom: 1
+              label: Date de signature
+              input:
+                  type: date
+                  display_now: 1
+              input_name: dateSignature
+              display_if:
+                  field_name: haveSignature
+                  show_values: 1
+        
     delete_avenant:
         title: Supprimer l'avenant
         rows:

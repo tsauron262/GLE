@@ -5764,8 +5764,13 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             $fac_errors = $this->createAccompte((float) $this->getData('acompte'), false);
             if (count($fac_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
-            } else
+            } else{
+                $client = $this->getChildObject('client');
+                $centre = $this->getCentreData();
+                $toMail = "SAV LDLC<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@bimp.fr') . ">";
+                mailSyn2('Acompte enregistré '.$this->getData('ref'), 'tommy@bimp.fr', null, 'Un acompte de '.$this->getData('acompte').'€ du client '.$client->getData('code_client').' - '.$client->getData('nom').' à été ajouté au '.$this->getLink().$toMail);
                 $success = "Acompte créer avec succés.";
+            }
         }
         return array(
             'errors'   => $errors,

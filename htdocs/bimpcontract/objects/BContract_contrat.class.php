@@ -4340,6 +4340,11 @@ class BContract_contrat extends BimpDolObject
                     $renderAlert = false;
                     $hold = true;
                 }
+                
+                
+                if(count($this->getChildrenList('avenant', ['statut' => 5])) > 0) {
+                    $html .= BimpRender::renderAlerts('ATTENTION. Il y a un avenant en activation provisoir sur ce contrat', 'info', false);
+                }
 //
 //                    if ($renderAlert)
 //                        $html .= BimpRender::renderAlerts('Ce contrat expire dans <strong>' . $intervale_days . ' jours</strong>', $alerte_type, false);

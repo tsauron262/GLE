@@ -2815,6 +2815,10 @@ class BContract_contrat extends BimpDolObject
             case 'label':
                 return 1;
                 break;
+            case 'condregl':
+                if($user->rights->bimpcontract->change_periodicity)
+                    return 1;
+                break;
             default:
                 return 0;
                 break;

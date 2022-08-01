@@ -94,7 +94,7 @@ lists:
         title: Liste des avenant du contrat
         add_form_name: add
         delete_btn: 1
-        inline_view: avenant
+        modal_view: avenant
         extra_btn:
             callback: getExtraBtn
         cols:
@@ -175,7 +175,7 @@ forms:
                   field_name: type
                   show_values: 0
             - custom: 1
-              label: Ajout en nombre de moi ?
+              label: Ajout en nombre de mois ?
               input_name: enMois
               input:
                   type: toggle

@@ -3015,9 +3015,11 @@ class BT_ficheInter extends BimpDolObject
             }
 
             if (!$changement_de_tech && $changement_horaire) {
+                $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
                 $sujet = 'FI ' . $this->getRef() . ' - Modification horaire';
                 $message = 'Bonjour,<br />La fiche d\'intervention N°' . $this->getNomUrl() . ' à été modifiée au niveau des horaires.<br />';
                 $message .= 'Nouveaux horaires: ' . '<strong class=\'danger\'>Du ' . $dateTime_debut->format('d/m/Y H:i') . ' au ' . $dateTime_fin->format('d/m/Y H:i') . '</strong>';
+                $message .= 'Client: ' . $client->getNomUrl() . ' ' . $client->getName();
                 $tech = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $this->getData('fk_user_tech'));
 
                 mailSyn2($sujet, $tech->getData('email'), null, $message);

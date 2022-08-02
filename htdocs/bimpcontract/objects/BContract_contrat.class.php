@@ -223,8 +223,9 @@ class BContract_contrat extends BimpDolObject
                 $children = $child->getList(array('fk_fichinter' => $index['rowid']));
                 if(count($children) > 0) {
                     foreach($children as $i) {
+                        
 //                        if($index['fk_statut'] > 0) {
-                        if($index['type'] == 5) {
+                        if($i['type'] == 3) {
                             $return['AUTRE'] += $i['duree'] / 3600;
                         } else {
                             $childContrat = $this->getChildObject('lines', $i['id_line_contrat']);
@@ -2811,6 +2812,10 @@ class BContract_contrat extends BimpDolObject
             case 'label':
                 return 1;
                 break;
+            case 'condregl':
+                if($user->rights->bimpcontract->change_periodicity)
+                    return 1;
+                break;
             default:
                 return 0;
                 break;
@@ -3462,7 +3467,7 @@ class BContract_contrat extends BimpDolObject
                     return BimpRender::renderAlerts('Le contrat n\'est pas activé', 'danger', false);
                 }
                 if (!$this->getData('date_start') || !$this->getData('periodicity') || !$this->getData('duree_mois')) {
-                    return BimpRender::renderAlerts("Le contrat a été facturé avec l'ancienne méthode donc il ne comporte pas d'échéancier", 'warning', false);
+                    return BimpRender::renderAlerts("Le contrat a été facturé à partir d'une commande, il ne comporte donc pas d'échéancier", 'warning', false);
                 }
             }
 
@@ -3864,10 +3869,6 @@ class BContract_contrat extends BimpDolObject
             $date = new DateTime($this->getData('date_contrat'));
             $extra .= '<br/><span class="important">' . BimpRender::renderIcon('fas_signature', 'iconLeft') . 'Contrat marqué comme signé</span> depuis le ' . $date->format('d/m/Y');
         }
-//        if (!is_null($this->getData('end_date_reel')) && !is_null($this->getData('anticipate_close_note'))) {
-//            $date = new DateTime($this->getData('end_date_reel'));
-//            $extra .= "<br /><span>Cloture anticipée en date du <strong>" . $date->format('d/m/Y') . "</strong></span>";
-//        }
 
         if ($this->isFactAuto()) {
             $extra .= "<br /><span class='info' >Facturation automatique activée</strong></span>";
@@ -3884,7 +3885,7 @@ class BContract_contrat extends BimpDolObject
             );
             $extra .= "<br /><strong>Renouvellement N°</strong><strong>" . $this->getData('current_renouvellement') . "/" . $arrayTacite[$this->getData('initial_renouvellement')] . "</strong>";
         }
-
+                
         return $extra;
     }
 
@@ -4335,6 +4336,11 @@ class BContract_contrat extends BimpDolObject
                     $html .= BimpRender::renderAlerts('<h5>Ceci est un ancien contrat dont la date d\'expiration est le : <b> ' . $date_fin->format('d / m / Y') . ' </b></h5> ', 'info', false);
                     $renderAlert = false;
                     $hold = true;
+                }
+                
+                
+                if(count($this->getChildrenList('avenant', ['statut' => 5])) > 0) {
+                    $html .= BimpRender::renderAlerts('ATTENTION. Il y a un avenant en activation provisoir sur ce contrat', 'info', false);
                 }
 //
 //                    if ($renderAlert)

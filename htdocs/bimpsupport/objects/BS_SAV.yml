@@ -1289,7 +1289,10 @@ lists_cols:
         label: Centre (Rép.)
     id_equipment: 
         display: custom
-        
+    repairs_numbers: 
+        label: Commande Apple
+        value: 
+            callback: dispayRepairsNumbers
 lists: 
     default: 
         title: Liste des SAV

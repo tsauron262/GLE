@@ -3032,6 +3032,14 @@ class BT_ficheInter extends BimpDolObject
         $id_fi = (int) $this->id;
         $id_soc = (int) $this->getData('fk_soc');
         $id_tech = (int) $this->getData('fk_user_tech');
+        
+        $ids_commande = ($this->getData('commandes')) ? $this->getData('commandes') : [];
+        
+        $id_contrat = $this->getData('fk_contrat');
+
+        $refLink = $this->getLink();
+        $ref = $this->getRef();
+        $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
 
         $errors = parent::delete($warnings, $force_delete);
 
@@ -3050,10 +3058,33 @@ class BT_ficheInter extends BimpDolObject
                 $actionCommClass->delete();
             }
 
-            $message = "Bonjour,<br />La fiche d'intervention " . $this->getLink() . " à été supprimé par " . $user->getNomUrl() . " ainsi que le ou les évènements dans l'agenda.<br/><br/>";
+            $message = "Bonjour,<br />La fiche d'intervention " . $refLink . " à été supprimé par " . $user->getNomUrl() . " ainsi que le ou les évènements dans l'agenda.<br/><br/>Infos:<br />"
+                    . "Client: " . $client->getName() . '<br /><br />'
+                    . "Commandes: ";
+            
+            if(count($ids_commande) > 0) {
+                foreach($ids_commande as $id_commande) {
+                    $commande = BimpCache::getBimpObjectInstance('bimpcommercial','Bimp_Commande', $id_commande);
+                    $message .= $commande->getLink() . ',';
+                }
+            } else {
+                $message .= 'Pas de commandes';
+            }
+            
+            $message .= '<br /><br />';
+            
+            
+            if($id_contrat > 0) {
+                $message .= 'Contrat<br />';
+                $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $id_contrat);
+                $message .= $contrat->getLink();
+            } else {
+                $message .= 'pas de contrat';
+            }
+            
             $to = ($tech->getData('email') != $emailControl) ? $tech->getData('email') . ',' . $emailControl : $tech->getData('email');
 
-            mailSyn2("[FI] " . $this->getRef() . " supprimée", $to, null, $message);
+            mailSyn2("[FI] " . $ref . " supprimée - " . $client->getName(), $to, null, $message);
         }
 
         return $errors;

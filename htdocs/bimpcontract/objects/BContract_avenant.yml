@@ -73,6 +73,12 @@ fields:
     date_create:
         label: Créé le
         type: datetime
+    date_activate:
+        label: Activé le
+        type: date
+    private_close_note:
+        label: Private
+        type: text
     type:
         label: Type de l'avenant
         type: int
@@ -84,6 +90,9 @@ fields:
     added_month:
         label: Nombre de mois ajoutés au contrat
         type: int
+    by_month:
+        label: Prolongtion par mois ?
+        type: int
 
 lists:
     default:
@@ -91,7 +100,7 @@ lists:
         title: Liste des avenant du contrat
         add_form_name: add
         delete_btn: 1
-        inline_view: avenant
+        modal_view: avenant
         extra_btn:
             callback: getExtraBtn
         cols:
@@ -126,6 +135,24 @@ lists:
             coup: unset
                 
 forms:
+    activate:
+        title: Activation de l'avenant
+        rows:
+            - custom: 1
+              label: Avenant signé
+              input:
+                  type: toggle
+              input_name: haveSignature
+            - custom: 1
+              label: Date de signature
+              input:
+                  type: date
+                  display_now: 1
+              input_name: dateSignature
+              display_if:
+                  field_name: haveSignature
+                  show_values: 1
+        
     delete_avenant:
         title: Supprimer l'avenant
         rows:
@@ -145,6 +172,24 @@ forms:
                   callback: getNbYears
               input:
                   type: qty
+              show:
+                  callback: 
+                      method: by
+                      params:
+                          - a
+            - custom: 1
+              label: Nombre de mois de prolongation
+              input_name: month
+              value: 
+                  callback: getNbMois
+              input:
+                  type: qty
+              show:
+                  callback: 
+                      method: by
+                      params:
+                          - m
+              
     add:
         title: Création d'un avenant
         rows:
@@ -154,7 +199,15 @@ forms:
                   field_name: type
                   show_values: 0
             - custom: 1
-              label: Nombre d'année de de prolongation
+              label: Ajout en nombre de mois ?
+              input_name: enMois
+              input:
+                  type: toggle
+              display_if:
+                  field_name: type
+                  show_values: 1
+            - custom: 1
+              label: Quantitée
               input_name: years
               value: 1
               input:

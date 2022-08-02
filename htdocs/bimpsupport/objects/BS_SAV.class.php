@@ -58,6 +58,7 @@ class BS_SAV extends BimpObject
         8  => "Apple Care non enregistré",
         9  => "Litige client",
         10 => "Contre façon - réparation impossible",
+        11 => "Mail-In Apple",
         99 => "Autre",
     );
     public static $status_opened = array(self::BS_SAV_RESERVED, self::BS_SAV_NEW, self::BS_SAV_ATT_PIECE, self::BS_SAV_ATT_CLIENT, self::BS_SAV_DEVIS_ACCEPTE, self::BS_SAV_REP_EN_COURS, self::BS_SAV_EXAM_EN_COURS, self::BS_SAV_DEVIS_REFUSE, self::BS_SAV_ATT_CLIENT_ACTION, self::BS_SAV_A_RESTITUER);
@@ -1834,6 +1835,21 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
     public function displayPublicLink()
     {
         return "<a target='_blank' href='" . $this->getPublicLink() . "'><i class='fas fa5-external-link-alt'></i></a>";
+    }
+
+    public function dispayRepairsNumbers()
+    {
+        $html = '';
+
+        $rows = $this->db->getRows('bimp_gsx_repair', 'id_sav = ' . (int) $this->id, null, 'array', array('repair_number'));
+
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $html .= ($html ? '<br/>' : '') . $r['repair_number'];
+            }
+        }
+
+        return $html;
     }
 
     // Rendus HTML: 
@@ -5008,7 +5024,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
 //        $id_client_fac = (int) BimpTools::getArrayValueFromPath($data, 'id_client', $this->getData('id_client'));
 //        $id_contact_fac = (int) BimpTools::getArrayValueFromPath($data, 'id_contact', $this->getData('id_contact'));
-        
+
         $id_client_fac = (int) $this->getData('id_client');
         $id_contact_fac = (int) $this->getData('id_contact');
 
@@ -5748,8 +5764,13 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             $fac_errors = $this->createAccompte((float) $this->getData('acompte'), false);
             if (count($fac_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
-            } else
+            } else{
+                $client = $this->getChildObject('client');
+                $centre = $this->getCentreData();
+                $toMail = "SAV LDLC<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@bimp.fr') . ">";
+                mailSyn2('Acompte enregistré '.$this->getData('ref'), $toMail, null, 'Un acompte de '.$this->getData('acompte').'€ du client '.$client->getData('code_client').' - '.$client->getData('nom').' à été ajouté au '.$this->getLink());
                 $success = "Acompte créer avec succés.";
+            }
         }
         return array(
             'errors'   => $errors,

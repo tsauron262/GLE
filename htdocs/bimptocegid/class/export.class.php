@@ -88,7 +88,7 @@
                 default:
                     $list = [];
             }
-                        
+                                    
             $file = PATH_TMP . $this->dir . $this->getMyFile("ventes");
             if(count($list) > 0) {
                 foreach($list as $facture) {
@@ -185,7 +185,7 @@
             
         }
         
-        public function exportPaiement($ref = ''):void  {
+        public function exportPaiement($ref = '', $want = Array()):void  {
             global $db;
             $errors = [];
             $file = PATH_TMP . $this->dir . $this->getMyFile("paiements");

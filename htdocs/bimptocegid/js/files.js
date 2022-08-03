@@ -1,14 +1,32 @@
 let hookEditing = false;
+let originalFile = "";
 
 function editingClick() {
     hookEditing = true;
+    originalFile = $('#fileEdit').html();
+    
     setStateButton();
 }
 
 function cancelClick() {
     hookEditing = false;
     setStateButton();
+}
+
+function savingClick() {
     
+    BimpAjax('saveFile', {
+        originalTRA: originalFile,
+        newTRA: $('#fileEdit').html(),
+        fichier: $('#fileEdit').attr('fichier'),
+    }, '', {display_processing: true}, {
+        success: function (result, bimpAjax) {
+            hookEditing = false;
+            setStateButton();
+        }, error: function (result, bimpAjax) {
+            console.log(result);
+        }
+    });
 }
 
 function setStateButton() {
@@ -18,7 +36,7 @@ function setStateButton() {
     var $buttonEditing = $('#button_edit');
     var $buttonCancel = $('#button_cancel');
     
-    $preEditing.text($pre.attr('original-tra'));
+    $preEditing.text(originalFile);
     
     // Etat quand la fenetre s'ouvre
     var cssDisplayEditingButton     = 'block';

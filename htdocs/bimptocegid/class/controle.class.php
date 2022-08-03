@@ -5,6 +5,7 @@
         private static $file;
         private static $lines;
         private static $type;
+        private static $justeLineNumber;
         private static $startChar_header                    = 0;
         private static $numbChar_header                     = 14;
         private static $mustInChar_header                   = '***S5CLIJRLETE';
@@ -19,10 +20,11 @@
         private static $mustInChar_alignementPaiement       = '010119000101190001011900';
         
         
-        public static function tra($file, $lines = '', $type = '') { 
+        public static function tra($file, $lines = '', $type = '', $justeLineNumber = false) { 
             
             self::$file  = basename($file);
             self::$lines = $lines;
+            self::$justeLineNumber = $justeLineNumber;
             
             if(strpos(self::$file, '_(TIERS)_') > 0) self::$type = 'tiers';
             if(strpos(self::$file, '_(VENTES)_') > 0) self::$type = 'ventes';
@@ -38,8 +40,12 @@
         
         private static function controleHeader() {
             
-            if(substr(self::$lines[0], self::$startChar_header, self::$numbChar_header) != self::$mustInChar_header)
-                return '<b>Ligne #1</b> : la zone de controle retourne " ' . substr(self::$lines[0], self::$startChar_header, self::$numbChar_header) . ' " au lieu de ' . self::$mustInChar_header;
+            if(substr(self::$lines[0], self::$startChar_header, self::$numbChar_header) != self::$mustInChar_header) {
+                if(self::$justeLineNumber)
+                    return 1;
+                else
+                    return '<b>Ligne #1</b> : la zone de controle retourne " ' . substr(self::$lines[0], self::$startChar_header, self::$numbChar_header) . ' " au lieu de ' . self::$mustInChar_header;
+            }
             
             return '';
             
@@ -56,10 +62,12 @@
             if(self::$type == 'ventes') {
                 foreach(self::$lines as $index => $line) {
                     if($index > 0) {
+                        
                         $ttcControle = 0;
                         $htControle  = 0;
                         $isTTC = (substr($line, $charControleLigneTTC, 1) == 'X') ? true : false;
                         if($isTTC){
+                            $sens = substr($line, $charControleSens, 1);
                             $ttcControle = (float) (substr($line, $startTraCharAmout, 20));
                             $factures[str_replace(' ', '', substr($line, $charRefFacture, 35))]['#'] = $index+1;
                             $factures[str_replace(' ', '', substr($line, $charRefFacture, 35))]['TTC'] = $ttcControle;
@@ -67,11 +75,19 @@
                         } else {
                             $htControle = (float) (substr($line, $startTraCharAmout, 20));
                             
-                            if(substr($line, 0, 1) == 'A') {
-                                if(substr($line, $charControleSens, 1) == 'D') {
-                                    $factures[str_replace(' ', '', substr($line, $charRefFacture, 35))]['HT#' . ($index+1)] += $htControle;
+                            if(substr($line, 0, 1) == 'A') {                                
+                                if($sens == 'D') {
+                                    if(substr($line, $charControleSens, 1) == 'D') {
+                                        $factures[str_replace(' ', '', substr($line, $charRefFacture, 35))]['HT#' . ($index+1)] -= abs($htControle);
+                                    } else {
+                                        $factures[str_replace(' ', '', substr($line, $charRefFacture, 35))]['HT#' . ($index+1)] += abs($htControle);
+                                    }
                                 } else {
-                                    $factures[str_replace(' ', '', substr($line, $charRefFacture, 35))]['HT#' . ($index+1)] -= $htControle;
+                                    if(substr($line, $charControleSens, 1) == 'D') {
+                                        $factures[str_replace(' ', '', substr($line, $charRefFacture, 35))]['HT#' . ($index+1)] += abs($htControle);
+                                    } else {
+                                        $factures[str_replace(' ', '', substr($line, $charRefFacture, 35))]['HT#' . ($index+1)] -= abs($htControle);
+                                    }
                                 }
                             } else {
                                 if(substr($line, $charRefFacture, 1) == 'A') {
@@ -89,6 +105,10 @@
                         }
                     }
                 }
+                
+//                if($fact) {
+//                    echo '<pre>'; die(print_r($factures, 1));
+//                }
                 
                 $return = Array();
                 
@@ -145,10 +165,15 @@
                     
                     
                     if($index > 0) {
-
-                        if(substr($line, $start, $strlen) != $equal)
-                            $errors[] = '<b>Ligne #' . ($index + 1) . '</b>';
                         
+                            if(substr($line, $start, $strlen) != $equal){
+                                if(self::$justeLineNumber) {
+                                    $errors[] = ($index + 1);
+                                } else {
+                                    $errors[] = '<b>Ligne #' . ($index + 1) . '</b>';
+                                }
+                            }
+
                     }
                     
                 }

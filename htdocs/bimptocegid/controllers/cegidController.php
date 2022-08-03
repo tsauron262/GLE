@@ -115,14 +115,7 @@ class cegidController extends BimpController {
         $html = '';
                 
         $html .= $this->getExportedFilesArray();
-        
-        if($user->admin) {
-            $instance = BimpCache::getBimpObjectInstance('bimptocegid', 'TRA_log');
-        
-            $html .= $instance->renderList();
-        }
-       
-        
+
         return $html;
     }
     

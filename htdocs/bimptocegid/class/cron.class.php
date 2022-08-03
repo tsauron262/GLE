@@ -82,7 +82,7 @@
                                 $message .= $file . ',';
                             }
                         }
-                        mailSyn2("Urgent - COMPTA ROLLBACK", 'dev@bimp.fr', null, htmlentities($message));
+                        mailSyn2("Urgent - COMPTA ROLLBACK", 'dev@bimp.fr', null, $message);
                     }
                 }
             } else {
@@ -154,7 +154,7 @@
                         $message .= implode("\n", $this->filesNotFtp);
                     }
                 }
-                
+
                 if($mustSend) {
                     mailSyn2('Urgent - Fichiers TRA non conformes', 'dev@bimp.fr', null, $message);
                 }

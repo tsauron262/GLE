@@ -3,6 +3,7 @@
 require_once DOL_DOCUMENT_ROOT . 'bimptocegid/class/export.class.php';
 require_once DOL_DOCUMENT_ROOT . 'bimptocegid/class/controle.class.php';
 require_once DOL_DOCUMENT_ROOT . 'bimptocegid/objects/TRA.class.php';
+require_once DOL_DOCUMENT_ROOT . 'bimpcore/classes/BimpDocumentation.php';
 
 class cegidController extends BimpController {
     
@@ -21,6 +22,8 @@ class cegidController extends BimpController {
         $this->traClass = BimpCache::getBimpObjectInstance('bimptocegid', 'TRA');
         $this->exportClass = new export($db);
         
+        $doc = new BimpDocumentation('doc', 'compta');
+        
         return 
         '<div id="bimptocegid__header" class="object_header container-fluid" style="height: auto;">'
             . '<div class="row">'
@@ -34,7 +37,7 @@ class cegidController extends BimpController {
                     . '</div>'
                 . '</div>'
             . '</div>'
-            . '<div class="row header_bottom"></div>'
+            . '<div class="row header_bottom">'.$doc->renderBtn('compta').'</div>'
         . '</div>';
     }
     
@@ -106,10 +109,20 @@ class cegidController extends BimpController {
     }
     
     public function renderCurrentTab() {
+        
+        global $user;
+        
         $html = '';
                 
         $html .= $this->getExportedFilesArray();
-                
+        
+        if($user->admin) {
+            $instance = BimpCache::getBimpObjectInstance('bimptocegid', 'TRA_log');
+        
+            $html .= $instance->renderList();
+        }
+       
+        
         return $html;
     }
     
@@ -210,9 +223,15 @@ class cegidController extends BimpController {
         
         foreach(glob($this->local_path . $pattern) as $file) {
             $dateFichier->setTimestamp(fileatime($file));
+            
+            $controle = controle::tra($file, file($file), '', true);
+            
+            $lineInBold = $controle['alignement'];
+            if($controle['header'] > 0)
+                $lineInBold[] = $controle['header'];
 
             $buttons = '';
-            $buttons .= BimpRender::renderRowButton('Voir le contenue du fichier', 'fas_eye', $tra->getJsLoadModalCustomContent('displayTraFile', basename($file), Array('file' => $file)));
+            $buttons .= BimpRender::renderRowButton('Voir le contenue du fichier', 'fas_eye', $tra->getJsLoadModalCustomContent('displayTraFile', basename($file), Array('file' => $file, 'lineInBold' => $lineInBold)));
             if($typeFile == 'tiers') {
                 $buttons .= BimpRender::renderRowButton('Voir la liste des tiers du fichier', 'fas_user', $tra->getJsLoadModalCustomContent('getObjectFromFile', 'Liste des tiers du fichier ' . basename($file), Array('file' => $file, 'object' => 'Bimp_Societe', 'module' => 'bimpcore', 'startChar' => 6, 'strlen' => 17)));
             }
@@ -258,7 +277,46 @@ class cegidController extends BimpController {
         
     }
     
-    
+    protected function ajaxProcessSaveFile() {
+        
+        global $user;
+        $errors = Array();
+        
+        $originalTRA = BimpTools::getPostFieldValue('originalTRA');
+        $newTRA = BimpTools::getPostFieldValue('newTRA');
+        $fichier = BimpTools::getPostFieldValue('fichier');
+        
+        $editingFileName = str_replace('.tra', '.editing', $fichier);
+        
+        if(copy($fichier, $editingFileName)) {
+            if($file = fopen($editingFileName, 'w+')) {
+                if(fwrite($file, $newTRA)) {
+                    if(unlink($fichier)) {
+                        rename($editingFileName, str_replace('.editing', '.tra', $editingFileName));
+                    } else {
+                        unlink($editingFileName);
+                        $errors[] = 'Erreur lors de la suppression du fichier d\'origine';
+                    }
+                } else {
+                    unlink($editingFileName);
+                    $errors[] = 'Impossible d\'écrire la correction dans le fichier d\'édition ' . print_r(error_get_last(), 1);
+                }
+            } else {
+                unlink($editingFileName);
+                $errors[] = 'Erreur lors de l\'ouverture du fichier ' . basename($editingFileName);
+            }
+        } else {
+            $errors[] = 'Impossible de créer une sauvegarde temporaire du fichier';
+        }
+
+        die(json_encode(array(
+            'success_callback' => 'bimp_reloadPage()',
+            'request_id'       => BimpTools::getValue('request_id', 0),
+            'errors'           => $errors
+        )));
+    }
+
+
     protected function ajaxProcessSearch(){
         
         if(BimpTools::getPostFieldValue('facture') && BimpTools::getPostFieldValue('searchBy') == 1) {

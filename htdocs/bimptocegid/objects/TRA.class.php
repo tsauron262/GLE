@@ -16,7 +16,7 @@ class TRA extends BimpObject {
         
         $lines = $this->getLinesOfFile($file);
         
-        $htmlPanel = '<pre id=\'fileEdit\' style=\'display: none; padding-top:20px; padding-bottom: 30px\'>';
+        $htmlPanel = '<pre id=\'fileEdit\' fichier=\''.$file.'\' style=\'display: none; padding-top:20px; padding-bottom: 30px\'>';
         
         $htmlPanel .=file_get_contents($file);
         
@@ -56,8 +56,12 @@ class TRA extends BimpObject {
         
         $htmlPanel .= '<br /></pre>';
         
-        $htmlPanel .= '<div id=\'button_edit\' >' . '<button onClick=\'editingClick()\' class=\'btn btn-info\' ><i class=\'fas fa5-edit\' ></i> &Eacute;diter le fichier</button>' . '</div>';
+        $arrayDontCanEditing = Array('imported_auto', 'imported');
         
+        if(!in_array('imported_auto', explode('/', $file))) {
+            $htmlPanel .= '<div id=\'button_edit\' >' . '<button onClick=\'editingClick()\' class=\'btn btn-info\' ><i class=\'fas fa5-edit\' ></i> &Eacute;diter le fichier</button>' . '</div>';
+        }
+                
         $htmlPanel .= '<div id=\'button_cancel\' style=\'display:none\' >' . '<button onClick=\'cancelClick()\' class=\'btn btn-danger\' ><i class=\'fas fa5-times\' ></i> Annuler les modifications</button>' . ' ' . BimpRender::renderButton(['icon' => 'fas_save', 'label' => 'Sauvegarder le fichier', 'onclick' => 'savingClick()']) . '</div>';
         
         $html .= BimpRender::renderPanel(basename($file), $htmlPanel, '', ['open' => (count($lines) > 100) ? false : true]);

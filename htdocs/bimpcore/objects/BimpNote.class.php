@@ -589,9 +589,9 @@ class BimpNote extends BimpObject
             switch ((int) $this->getData('type_author')) {
                 case self::BN_AUTHOR_USER:
                     if ($this->isLoaded()) {
-                        if (!(int) $this->getData('user_create')) {
-                            $errors[] = 'ID de l\'utilisateur absent';
-                        }
+//                        if (!(int) $this->getData('user_create')) {
+//                            $errors[] = 'ID de l\'utilisateur absent';
+//                        }
                     }
                     break;
 

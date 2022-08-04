@@ -204,7 +204,8 @@ class BimpNote extends BimpObject
     public function i_view()
     {
         if (!$this->getData("viewed") && $this->i_am_dest()) {
-            if (empty($this->updateField('viewed', 1)))
+            $this->set('viewed', 1);
+            if (empty($this->update()))
                 return 1;
         }
 

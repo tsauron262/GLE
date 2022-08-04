@@ -205,7 +205,8 @@ class BimpNote extends BimpObject
     {
         if (!$this->getData("viewed") && $this->i_am_dest()) {
             $this->set('viewed', 1);
-            if (empty($this->update()))
+            $warn = array();
+            if (empty($this->update($warn, true)))
                 return 1;
         }
 

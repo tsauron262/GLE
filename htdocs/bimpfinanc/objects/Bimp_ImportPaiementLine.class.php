@@ -337,7 +337,7 @@ class Bimp_ImportPaiementLine extends BimpObject
     function getRowStyle()
     {
         if ($this->ok)
-            return 'background-color:green!important;opacity: 0.2;';
+            return 'background-color:green!important;opacity: 0.5;';
     }
 
     function getFactPossible()

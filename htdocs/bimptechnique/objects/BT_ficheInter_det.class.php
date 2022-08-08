@@ -627,7 +627,8 @@ class BT_ficheInter_det extends BimpDolObject
             foreach ($actionCommList as $id_actionComm) {
                 if ($id_actionComm > 0) {
                     $actionCommClass->fetch($id_actionComm);
-                    $actionCommClass->delete();
+                    if($actionCommClass->id > 0)
+                        $actionCommClass->delete();
                 }
             }
         }

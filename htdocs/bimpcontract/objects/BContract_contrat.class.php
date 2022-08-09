@@ -185,13 +185,13 @@ class BContract_contrat extends BimpDolObject
         return (substr($this->getRef(), 0, 3) == 'CDP') ? 1 : 0;
                 
     }
-        
+          
     public function getTotalHeureDelegation():array {
         
         $return = Array();
         
         $hourInDay = 7;
-        $services = Array('SERV19-DP1', 'SERV19-DP2', 'SERV19-DP3', 'SAV-NIVEAU_5', 'SERV22-DPI-AAPEI', 'SERV19-FD01', 'AUTRE');
+        //$services = Array('SERV19-DP1', 'SERV19-DP2', 'SERV19-DP3', 'SAV-NIVEAU_5', 'SERV22-DPI-AAPEI', 'SERV19-FD01', 'AUTRE');
         $instance = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product');
         $children = $this->getChildrenList('lines');
         
@@ -200,10 +200,10 @@ class BContract_contrat extends BimpDolObject
             $child = $this->getChildObject('lines', $id_child);
             $instance->fetch($child->getData('fk_product'));            
             
-            if(in_array($instance->getRef(), $services)) {
+            //if(in_array($instance->getRef(), $services)) {
                 
                 $return[$instance->getRef() . '_' . $id_child] += (float) $child->getData('qty') * $hourInDay;
-            }
+            //}
                         
         }
         
@@ -2203,7 +2203,7 @@ class BContract_contrat extends BimpDolObject
                     ))
                 );
             }
-            if (($status == self::CONTRAT_STATUS_ACTIVER || $status == self::CONTRAT_STATUS_ACTIVER_TMP || $status == self::CONTRAT_STATUT_WAIT_ACTIVER) && $user->rights->bimpcontract->to_reopen) {
+            if (($status == self::CONTRAT_STATUS_ACTIVER || $status == self::CONTRAT_STATUS_REFUSE || $status == self::CONTRAT_STATUS_CLOS || $status == self::CONTRAT_STATUS_ACTIVER_TMP || $status == self::CONTRAT_STATUT_WAIT_ACTIVER) && $user->rights->bimpcontract->to_reopen) {
                 $buttons[] = array(
                     'label'   => 'Réouvrir le contrat',
                     'icon'    => 'fas_folder-open',

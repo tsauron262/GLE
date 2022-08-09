@@ -186,14 +186,14 @@ class BContract_contrat extends BimpDolObject
                 
     }
           
-    public function getTotalHeureDelegation():array {
+    public function getTotalHeureDelegation($justActif = false):array {
         
         $return = Array();
         
         $hourInDay = 7;
         //$services = Array('SERV19-DP1', 'SERV19-DP2', 'SERV19-DP3', 'SAV-NIVEAU_5', 'SERV22-DPI-AAPEI', 'SERV19-FD01', 'AUTRE');
         $instance = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product');
-        $children = $this->getChildrenList('lines');
+        $children = $this->getChildrenList('lines', ($justActif) ? Array('statut' => 4) : Array());
         
         foreach($children as $id_child) {
             
@@ -2203,7 +2203,7 @@ class BContract_contrat extends BimpDolObject
                     ))
                 );
             }
-            if (($status == self::CONTRAT_STATUS_ACTIVER || $status == self::CONTRAT_STATUS_REFUSE || $status == self::CONTRAT_STATUS_CLOS || $status == self::CONTRAT_STATUS_ACTIVER_TMP || $status == self::CONTRAT_STATUT_WAIT_ACTIVER) && $user->rights->bimpcontract->to_reopen) {
+            if (($status == self::CONTRAT_STATUS_ACTIVER || $status == self::CONTRAT_STATUT_ABORT || $status == self::CONTRAT_STATUS_CLOS || $status == self::CONTRAT_STATUS_ACTIVER_TMP || $status == self::CONTRAT_STATUT_WAIT_ACTIVER) && $user->rights->bimpcontract->to_reopen) {
                 $buttons[] = array(
                     'label'   => 'Réouvrir le contrat',
                     'icon'    => 'fas_folder-open',

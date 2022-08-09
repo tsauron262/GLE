@@ -1521,9 +1521,9 @@ class BContract_contrat extends BimpDolObject
 
     public function actionReopen($data, &$success)
     {
-        if (count(getElementElement('contrat', 'facture', $this->id))) {
-            $errors[] = "Vous ne pouvez pas supprimer cet échéancier car il y à une facture dans celui-ci";
-        }
+//        if (count(getElementElement('contrat', 'facture', $this->id))) {
+//            $errors[] = "Vous ne pouvez pas supprimer cet échéancier car il y a une facture dans celui-ci";
+//        }
         if (!count($errors)) {
             $success = "Contrat ré-ouvert avec succès";
             $this->updateField('statut', self::CONTRAT_STATUS_WAIT);

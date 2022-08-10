@@ -200,10 +200,13 @@ class BContract_contrat extends BimpDolObject
                 $infoLigne = explode(':::::', $code);
                 
                 $instanceFiDet = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter_det');
-                if($instanceFiDet->find(array('id_line_contrat' => $infoLigne[1]), 1)) {
-                    $totalHeuresFaites += $instanceFiDet->getData('duree') / 3600;
+                $list = $instanceFiDet->getList(array('id_line_contrat' => $infoLigne[1]));
+                if(count($list) > 0) {
+                    foreach($list as $det) {
+                         $totalHeuresFaites += $det['duree'] / 3600;
+                    }
                 }
-                
+                   
                 $totalHeuresVendues += $time;
             }
         }
@@ -270,55 +273,6 @@ class BContract_contrat extends BimpDolObject
         return $return;
     }
     
-    public function displayTotalHeureDelegationVendu():string {
-        
-        $array = $this->getTotalHeureDelegation();
-        $html = '<table class="objectlistTable" style="border: none; min-width: 640px" width="100%">'
-                . '<thead class="listTableHead">'
-                . '<tr class="headerRow">'
-                . '<th style="" data-col_name="type" data-field_name="type">Service</th>'
-                . '<th style="" data-col_name="type" data-field_name="type">heures vendues</th>'
-                . '<th style="" data-col_name="type" data-field_name="type">heures consommées</th>'
-                . '<th style="" data-col_name="type" data-field_name="type">Reste</th>'
-                . '</tr>'
-                . '</thead>'
-                . '<tbody class="listRows" >';
-        $total = 0;
-        
-        $inInters = $this->getHeuresDelegationFromInterByService();
-        
-        foreach($array as $code => $temps) {
-            
-            $html .= '<tr class="objectListItemRow">';
-            $html .= '<td>'.$code.'</td>';
-            $html .= '<td>'.$temps.' heures</td>';
-            $html .= '<td>'.$inInters[$code].' heures</td>';
-            
-            $balance = $temps - $inInters[$code];
-            
-            $class = 'warning';
-            $icon = 'equal';
-            
-            if($balance < 0) {
-                $class = 'danger';
-                $icon = 'arrow-down';
-            } elseif($balance > 0) {
-                $class = 'success';
-                $icon   = 'arrow-up';
-            }
-            
-            $html .= '<td class="'.$class.'" >' . BimpRender::renderIcon($icon) . ' ' .$balance.' heures</td>';
-            
-            $html .= '</tr>';
-            
-        }
-        
-        $html .= '</tbody>'
-                . '</table>';
-                
-        return $html;
-        
-    }
     
     public function tryToValidate(&$errors) {
         
@@ -4003,7 +3957,7 @@ class BContract_contrat extends BimpDolObject
     public function createFromClient($data)
     {
         global $user;
-
+        
         $serials = explode("\n", $data->note);
 
         $nombreServices = count($data->services);

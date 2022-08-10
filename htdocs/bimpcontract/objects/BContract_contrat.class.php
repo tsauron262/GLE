@@ -1508,7 +1508,7 @@ class BContract_contrat extends BimpDolObject
         $errors = Array();
         if (!count($errors)) {
             $success = "Contrat ré-ouvert avec succès";
-            $this->updateField('statut', self::CONTRAT_STATUT_WAIT_ACTIVER);
+            $this->updateField('statut', self::CONTRAT_STATUS_ACTIVER);
             $this->addLog('Contrat ré-ouvert');
             foreach ($this->dol_object->lines as $line) {
                 $the_line = $this->getInstance('bimpcontract', 'BContract_contratLine', $line->id);

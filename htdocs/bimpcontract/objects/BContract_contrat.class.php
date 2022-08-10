@@ -185,6 +185,34 @@ class BContract_contrat extends BimpDolObject
         return (substr($this->getRef(), 0, 3) == 'CDP') ? 1 : 0;
                 
     }
+    
+    public function getHeuresRestantesDelegation() {
+        
+        $reste = 0;
+        $totalHeuresVendues = 0;
+        $totalHeuresFaites  = 0;
+        
+        $arrayHeuresVendues = $this->getTotalHeureDelegation(true);
+        
+        if(count($arrayHeuresVendues) > 0) {
+            foreach($arrayHeuresVendues as $code => $time) {
+                
+                $infoLigne = explode(':::::', $code);
+                
+                $instanceFiDet = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter_det');
+                if($instanceFiDet->find(array('id_line_contrat' => $infoLigne[1]), 1)) {
+                    $totalHeuresFaites += $instanceFiDet->getData('duree') / 3600;
+                }
+                
+                $totalHeuresVendues += $time;
+            }
+        }
+                        
+        $reste = $totalHeuresVendues - $totalHeuresFaites;
+        
+        return $reste;
+        
+    }
           
     public function getTotalHeureDelegation($justActif = false):array {
         
@@ -201,8 +229,7 @@ class BContract_contrat extends BimpDolObject
             $instance->fetch($child->getData('fk_product'));            
             
             //if(in_array($instance->getRef(), $services)) {
-                
-                $return[$instance->getRef() . '_' . $id_child] += (float) $child->getData('qty') * $hourInDay;
+                $return[$instance->getRef() . ':::::' . $id_child] += (float) $child->getData('qty') * $hourInDay;
             //}
                         
         }

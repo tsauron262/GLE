@@ -610,7 +610,7 @@ class BContract_echeancier extends BimpObject {
             foreach ($data->factures_send as $element_element) {
                 $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $element_element['d']);                
                 
-                if($facture->getData('type') != 3 && !$have_avoir && $facture->getData('type') != 2) {
+                if($facture->getData('type') != 3) {
                 
                 // Définition de si c'est une facture de l'échéancier ou non
                 $has_facture_of_echeancier = true;

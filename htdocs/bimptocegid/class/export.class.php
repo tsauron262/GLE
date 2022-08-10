@@ -7,6 +7,7 @@
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_paiement.class.php';
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_importPaiement.class.php';
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_deplacementPaiement.class.php';
+    require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_bordereauCHK.class.php';
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/functions/sizing.php';
     
     class export {
@@ -19,6 +20,7 @@
         private $TRA_paiement;
         private $TRA_importPaiement;
         private $TRA_factureFournisseur;
+        private $TRA_bordereauCHK;
         private $dir = "/exportCegid/BY_DATE/";
         public $fails = Array();
         public $good = Array();
@@ -40,6 +42,7 @@
             $this->TRA_paiement = new TRA_paiement($this->bdb, PATH_TMP . $this->dir . $this->getMyFile("tiers"));
             $this->TRA_deplacementPaiement = new TRA_deplacementPaiement($this->bdb, PATH_TMP . $this->dir . $this->getMyFile("tiers"));
             $this->TRA_importPaiement = new TRA_importPaiement($this->bdb);
+            $this->TRA_bordereauCHK = new TRA_bordereauCHK($this->bdb);
         }
         
         public function exportFactureFournisseur($ref = ''):void {
@@ -185,6 +188,28 @@
             
         }
         
+        public function exportBordereauxCHK($ref = '', $want = Array()) {
+            global $db;
+            $errors = [];
+            $file = PATH_TMP . $this->dir . $this->getMyFile('bordereauxCHK');
+            
+            $bordereaux = $this->bdb->getRows('bordereau_cheque', 'exported = 0');
+            
+            if(count($bordereaux) > 0) {
+                foreach($bordereaux as $bordereau) {
+                    
+                    $chks = $this->bdb->getRows('bank', 'fk_bordereau = ' . $bordereau->rowid);
+                    
+                    if($this->write_tra($this->TRA_bordereauCHK->constructTra($bordereau, $chks), $file)) {
+                        $this->bdb->update('bordereau_cheque', Array('exported' => 1), 'rowid = ' . $bordereau->rowid);
+                    }
+                    
+                }
+                
+            }
+                        
+        }
+        
         public function exportPaiement($ref = '', $want = Array()):void  {
             global $db;
             $errors = [];
@@ -292,6 +317,7 @@
                 case 'mandats': $number  = 5; break;
                 case 'payni': $number  = 6; break;
                 case 'deplacementPaiements': $number = 7; break;
+                case 'bordereauxCHK': $number = 8;
             }
             
             return $number . "_" . $entitie ."_(" . strtoupper($type) . ")_" .$year . '-' . $month . '-' . $day . '-' . $this->moment . '_' . $version_tra . $extention;
@@ -337,7 +363,8 @@
                 $this->getMyFile('ribs'),
                 $this->getMyFile('mandats'),
                 $this->getMyFile('payni'),
-                $this->getMyFile('deplacementPaiements')
+                $this->getMyFile('deplacementPaiements'),
+                $this->getMyFile('bordereauxCHK')
             );
                         
             foreach($files as $file) {

@@ -37,8 +37,8 @@ class cegidController extends BimpController {
                     . '</div>'
                 . '</div>'
             . '</div>'
-            . '<div class="row header_bottom">'.$doc->renderBtn('compta').'</div>'
-        . '</div>';
+            . '<div class="row header_bottom">'.$doc->renderBtn('compta').'</div>';
+        $html .= '</div>';
     }
     
     private function renderObjectList($instance, $title) {

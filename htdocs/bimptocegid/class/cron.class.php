@@ -31,6 +31,7 @@
         private $auto_payni             = true;
         private $auto_importPaiement    = true;
         private $auto_deplacementPay    = true;
+        private $auto_bordereauCHK      = true;
         
         private $export_ventes          = true;
         private $export_paiements       = true;
@@ -38,6 +39,7 @@
         private $export_payni           = true;
         private $export_importPaiement  = true;
         private $export_deplacementPay  = true;
+        private $export_bordereauCHK    = true;
         
         public function automatique() {
             global $db;
@@ -61,6 +63,7 @@
                 if($this->export_achats && !$this->export_class->rollBack)                                                    $this->export_class->exportFactureFournisseur();
                 if($this->export_importPaiement && $this->export_class->moment == 'AM' && !$this->export_class->rollBack)     $this->export_class->exportImportPaiement();
                 if($this->export_deplacementPay && !$this->export_class->rollBack)                                            $this->export_class->exportDeplacementPaiament();
+                if($this->export_bordereauCHK && !$this->export_class->rollBack)                                              $this->export_class->exportBordereauxCHK();
 
                 $this->checkFiles();
 
@@ -421,6 +424,7 @@
             if($this->auto_payni)                                                   $files[] = "6_" . $this->entitie . '_(PAYNI)_' . '*' . '_' . $this->version_tra . '.tra';
             if($this->auto_importPaiement && $this->export_class->moment == 'AM')   $files[] = 'IP*.tra';
             if($this->auto_deplacementPay)                                          $files[] = "7_" . $this->entitie . '_(DEPLACEMENTPAIEMENTS)' . '*' . '_' . $this->version_tra . '.tra';
+            if($this->auto_bordereauCHK)                                            $files[] = "8_" . $this->entitie . '_(BORDEREAUXCHK)' . '*' . '_' . $this->version_tra . '.tra';
             
             $this->rapport['FILES_FTP'] = 'Liste des fichiers transférés automatiquement sur le FTP de LDLC' . "\n"
                     . implode("\n", $files) . "\n";

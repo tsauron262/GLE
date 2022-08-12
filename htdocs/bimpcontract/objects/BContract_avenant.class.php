@@ -334,7 +334,7 @@ class BContract_avenant extends BContract_contrat {
                 $dest = $commercial->getData('email');
 
                 $message = 'Bonjour ' . $commercial->getName() . '<br />';
-                $message .= 'L\'avenant N°' . $this->getRefAv() . ' a été activé provisoirement. Vous disposez de 15 jours pour le faire signé par le client, après ce délais, l\'avenant sera abandonné automatiquement. Vous receverez une alerte par jour, à partir des derniers 5 jours de l\'activation provisoire';
+                $message .= 'L\'avenant N°' . $this->getRefAv() . ' a été activé provisoirement. Vous disposez de 15 jours pour le faire signer par le client, après ce délai, l\'avenant sera abandonné automatiquement. Vous recevrez une alerte par jour, à partir des derniers 5 jours de l\'activation provisoire.';
                 $message .= '<br /><br />Client: ' . $client->getLink() . '<br />Contrat: ' . $parent->getLink();
                 mailSyn2($sujet, $dest, null, $message);
                 $this->updateField('date_activate', date('Y-m-d'));

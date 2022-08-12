@@ -24,7 +24,7 @@
         private static $startChar_alignementMANDAT          = 256;
         private static $numbChar_alignementMANDAT           = 3;
         private static $mustInChar_alignementMANDAT         = '1FI';
-        
+
         
         public static function tra($file, $lines = '', $type = '', $justeLineNumber = false) { 
             
@@ -40,6 +40,7 @@
             if(strpos(self::$file, '_(PAIEMENTS)_') > 0) self::$type = 'paiements';
             if(strpos(self::$file, '_(DEPLACEMENTPAIEMENTS)_') > 0) self::$type = 'paiements';
             if(strpos(self::$file, '_(PAYNI)_') > 0) self::$type = 'paiements';
+            if(strpos(self::$file, '_(BORDEREAUXCHK)_') > 0) self::$type = 'paiements';
             if(strpos(self::$file, 'IP') === 0) self::$type = 'paiements';
             
             return Array('header' => self::controleHeader(), 'alignement' => self::controleAlignement(), 'balance' => self::controleBalanceFactures());

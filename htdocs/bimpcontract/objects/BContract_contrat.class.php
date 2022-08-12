@@ -185,25 +185,55 @@ class BContract_contrat extends BimpDolObject
         return (substr($this->getRef(), 0, 3) == 'CDP') ? 1 : 0;
                 
     }
+    
+    public function getHeuresRestantesDelegation() {
         
-    public function getTotalHeureDelegation():array {
+        $reste = 0;
+        $totalHeuresVendues = 0;
+        $totalHeuresFaites  = 0;
+        
+        $arrayHeuresVendues = $this->getTotalHeureDelegation(true);
+        
+        if(count($arrayHeuresVendues) > 0) {
+            foreach($arrayHeuresVendues as $code => $time) {
+                
+                $infoLigne = explode(':::::', $code);
+                
+                $instanceFiDet = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter_det');
+                $list = $instanceFiDet->getList(array('id_line_contrat' => $infoLigne[1]));
+                if(count($list) > 0) {
+                    foreach($list as $det) {
+                         $totalHeuresFaites += $det['duree'] / 3600;
+                    }
+                }
+                   
+                $totalHeuresVendues += $time;
+            }
+        }
+                        
+        $reste = $totalHeuresVendues - $totalHeuresFaites;
+        
+        return $reste;
+        
+    }
+          
+    public function getTotalHeureDelegation($justActif = false):array {
         
         $return = Array();
         
         $hourInDay = 7;
-        $services = Array('SERV19-DP1', 'SERV19-DP2', 'SERV19-DP3', 'SAV-NIVEAU_5', 'SERV22-DPI-AAPEI', 'SERV19-FD01', 'AUTRE');
+        //$services = Array('SERV19-DP1', 'SERV19-DP2', 'SERV19-DP3', 'SAV-NIVEAU_5', 'SERV22-DPI-AAPEI', 'SERV19-FD01', 'AUTRE');
         $instance = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product');
-        $children = $this->getChildrenList('lines');
+        $children = $this->getChildrenList('lines', ($justActif) ? Array('statut' => 4) : Array());
         
         foreach($children as $id_child) {
             
             $child = $this->getChildObject('lines', $id_child);
             $instance->fetch($child->getData('fk_product'));            
             
-            if(in_array($instance->getRef(), $services)) {
-                
-                $return[$instance->getRef() . '_' . $id_child] += (float) $child->getData('qty') * $hourInDay;
-            }
+            //if(in_array($instance->getRef(), $services)) {
+                $return[$instance->getRef() . ':::::' . $id_child] += (float) $child->getData('qty') * $hourInDay;
+            //}
                         
         }
         
@@ -243,55 +273,6 @@ class BContract_contrat extends BimpDolObject
         return $return;
     }
     
-    public function displayTotalHeureDelegationVendu():string {
-        
-        $array = $this->getTotalHeureDelegation();
-        $html = '<table class="objectlistTable" style="border: none; min-width: 640px" width="100%">'
-                . '<thead class="listTableHead">'
-                . '<tr class="headerRow">'
-                . '<th style="" data-col_name="type" data-field_name="type">Service</th>'
-                . '<th style="" data-col_name="type" data-field_name="type">heures vendues</th>'
-                . '<th style="" data-col_name="type" data-field_name="type">heures consommées</th>'
-                . '<th style="" data-col_name="type" data-field_name="type">Reste</th>'
-                . '</tr>'
-                . '</thead>'
-                . '<tbody class="listRows" >';
-        $total = 0;
-        
-        $inInters = $this->getHeuresDelegationFromInterByService();
-        
-        foreach($array as $code => $temps) {
-            
-            $html .= '<tr class="objectListItemRow">';
-            $html .= '<td>'.$code.'</td>';
-            $html .= '<td>'.$temps.' heures</td>';
-            $html .= '<td>'.$inInters[$code].' heures</td>';
-            
-            $balance = $temps - $inInters[$code];
-            
-            $class = 'warning';
-            $icon = 'equal';
-            
-            if($balance < 0) {
-                $class = 'danger';
-                $icon = 'arrow-down';
-            } elseif($balance > 0) {
-                $class = 'success';
-                $icon   = 'arrow-up';
-            }
-            
-            $html .= '<td class="'.$class.'" >' . BimpRender::renderIcon($icon) . ' ' .$balance.' heures</td>';
-            
-            $html .= '</tr>';
-            
-        }
-        
-        $html .= '</tbody>'
-                . '</table>';
-                
-        return $html;
-        
-    }
     
     public function tryToValidate(&$errors) {
         
@@ -1521,12 +1502,13 @@ class BContract_contrat extends BimpDolObject
 
     public function actionReopen($data, &$success)
     {
-        if (count(getElementElement('contrat', 'facture', $this->id))) {
-            $errors[] = "Vous ne pouvez pas supprimer cet échéancier car il y à une facture dans celui-ci";
-        }
+//        if (count(getElementElement('contrat', 'facture', $this->id))) {
+//            $errors[] = "Vous ne pouvez pas supprimer cet échéancier car il y a une facture dans celui-ci";
+//        }
+        $errors = Array();
         if (!count($errors)) {
             $success = "Contrat ré-ouvert avec succès";
-            $this->updateField('statut', self::CONTRAT_STATUS_WAIT);
+            $this->updateField('statut', self::CONTRAT_STATUS_ACTIVER);
             $this->addLog('Contrat ré-ouvert');
             foreach ($this->dol_object->lines as $line) {
                 $the_line = $this->getInstance('bimpcontract', 'BContract_contratLine', $line->id);
@@ -2203,7 +2185,7 @@ class BContract_contrat extends BimpDolObject
                     ))
                 );
             }
-            if (($status == self::CONTRAT_STATUS_ACTIVER || $status == self::CONTRAT_STATUS_ACTIVER_TMP || $status == self::CONTRAT_STATUT_WAIT_ACTIVER) && $user->rights->bimpcontract->to_reopen) {
+            if (($status == self::CONTRAT_STATUS_ACTIVER || $status == self::CONTRAT_STATUT_ABORT || $status == self::CONTRAT_STATUS_CLOS) && $user->rights->bimpcontract->to_reopen) {
                 $buttons[] = array(
                     'label'   => 'Réouvrir le contrat',
                     'icon'    => 'fas_folder-open',
@@ -3975,7 +3957,7 @@ class BContract_contrat extends BimpDolObject
     public function createFromClient($data)
     {
         global $user;
-
+        
         $serials = explode("\n", $data->note);
 
         $nombreServices = count($data->services);

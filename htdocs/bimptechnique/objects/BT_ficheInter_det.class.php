@@ -1026,7 +1026,10 @@ class BT_ficheInter_det extends BimpDolObject
                         $errors[] = 'Aucune ligne de commande sélectionnée pour le déplacement vendu';
                     }
                 } elseif ($type == self::TYPE_PLUS) {
-                    $errors[] = 'Il n\'est plus possible de faire ce choix. Merci de voir dans la liste quel est le choix le mieux adapté';
+                    
+                    //pourquoi ?
+                    //  
+//                    $errors[] = 'Il n\'est plus possible de faire ce choix. Merci de voir dans la liste quel est le choix le mieux adapté';
                     
                 }
 

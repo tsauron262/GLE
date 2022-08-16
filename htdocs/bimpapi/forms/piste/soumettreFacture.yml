@@ -156,3 +156,27 @@ fields:
             pieceJointePrincipaleDesignation: 
                 label: Nom Fichier
                 edit: 0
+                
+    pieceJointeComplementaire:
+        label: Piece Jointe Complementaire
+        type: fields_group
+        multiple: 1
+        fields: 
+            pieceJointeComplementaireDesignation:
+                label: Designation
+            pieceJointeComplementaireId:
+                label: Identifiant Chorus fichier
+                type: int
+                edit: 0
+            pieceJointeComplementaireType: 
+                label: Type
+                values: 
+                    callback: getTypePj
+#                    BC: Bon de commande
+#                    BL: Bon de livraison
+#                    BORDEREAU_SUIVI: Bordereau de suivi
+#                    BORDEREAU_SUIVI_VALIDATION: Bordereau de suivi de validation
+#                    DIVERS: Document annexe
+#                    FACTURE_PDF: Facture PDF
+#                    FACTURE_XML: Facture XML
+                

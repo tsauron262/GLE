@@ -162,7 +162,7 @@ class Bimp_ImportPaiement extends BimpObject
             $dataMsg[] = $payin->getData('date').' '.$payin->getData('name').' - '.$payin->getData('price').' €';
         }
         if(count($dataMsg))
-            mailSyn2('Paiements non identifiés', 'tommy@bimp.fr', null, 'Bonjour,<br/><br/>Les paiements suivants n\'ont pu être identifiés :<br/><br/>'.implode('<br/>', $dataMsg).'<br/><br/>Si vous pensez savoir à quoi ils correspondent merci de bien vouloir en informer @Reglements Olys<br/><br/>Votre aide permettra d\'éviter des recherches et des relances non justifiées');
+            mailSyn2('Paiements non identifiés', 'CommerciauxBimp@bimp.fr, boutiquesbimp@bimp.fr', null, 'Bonjour,<br/><br/>Les paiements suivants n\'ont pu être identifiés :<br/><br/>'.implode('<br/>', $dataMsg).'<br/><br/>Si vous pensez savoir à quoi ils correspondent merci de bien vouloir en informer @Reglements Olys<br/><br/>Votre aide permettra d\'éviter des recherches et des relances non justifiées');
         
         return $return;
     }

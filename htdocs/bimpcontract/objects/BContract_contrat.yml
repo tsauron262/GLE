@@ -715,6 +715,8 @@ lists:
             fk_commercial_suivi:
 
 forms:
+    pdfEcheancier:
+        title: Informations à afficher dans le PDF         
     redefineEcheancier:
         title: Re-define Echeancier ADMIN
         rows:

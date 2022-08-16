@@ -415,6 +415,12 @@ class Bimp_Commande extends BimpComm
                     }
                 }
             }
+            
+            
+            //ref externe si consigne
+            if($client->getData('consigne_ref_ext') != '' && $this->getData('ref_client') == ''){
+                $errors[] = 'Attention la réf client ne peut pas être vide : <br/>'.nl2br($client->getData('consigne_ref_ext'));
+            }
         }
 
 

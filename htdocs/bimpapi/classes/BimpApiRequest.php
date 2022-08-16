@@ -545,6 +545,11 @@ class BimpApiRequest
 
         return $value;
     }
+    
+    
+    public function getTypePj(){
+        return $this->api->getTypePj();
+    }
 
     public function processRequestForm()
     {

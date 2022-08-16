@@ -687,6 +687,15 @@ forms:
               content: 
                   callback: renderClientSelectChorusServicesInput
               depends_on: id_structure
+            - custom: 1
+              label: Fichier a joindre
+              input_name: files_compl
+              content:
+                  callback: 
+                    method: renderMailExtraFilesInput
+                    params:
+                        - files_compl
+                      
                   
 fields_tables: 
     infos: 

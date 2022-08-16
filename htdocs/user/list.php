@@ -27,6 +27,11 @@
 
 require '../main.inc.php';
 
+
+require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+$bObj = BimpObject::getInstance("bimpcore", "Bimp_User", $_REQUEST['id']);
+$htmlRedirect = $bObj->processRedirect();
+
 if (! $user->rights->user->user->lire && ! $user->admin)
 	accessforbidden();
 
@@ -251,6 +256,7 @@ if ($num == 1 && ! empty($conf->global->MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE) && 
 }
 
 llxHeader('',$langs->trans("ListOfUsers"));
+echo $htmlRedirect;
 
 $param='';
 if (! empty($contextpage) && $contextpage != $_SERVER["PHP_SELF"]) $param.='&contextpage='.$contextpage;

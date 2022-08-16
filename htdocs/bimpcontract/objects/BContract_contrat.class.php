@@ -25,6 +25,8 @@ class BContract_contrat extends BimpDolObject
     public $email_group = "";
     public $email_facturation = "";
     public static $element_name = "contract";
+    public static $dol_module = 'contrat';
+    public static $files_module_part = 'contract';
 
     // Les status
     CONST CONTRAT_STATUT_ABORT = -1;
@@ -156,7 +158,6 @@ class BContract_contrat extends BimpDolObject
         'facture_fourn' => 'Facture fournisseur',
             //'propal' => 'Proposition commercial'
     ];
-    public static $dol_module = 'contract';
     
     // Recherche auto dans DocuSign
     public static $default_signature_params = array(
@@ -2077,6 +2078,8 @@ class BContract_contrat extends BimpDolObject
                     ))
                 );
             }
+            
+            $buttons[] = Array('label' => 'Générer le PDF de l\'échéancier', 'icon' => 'fas_file-pdf', 'onclick' => $this->getJsActionOnclick('generatePdfEcheancier', array(), /* array('form_name' => 'pdfEcheancier') */ array()));
 
             if ($status == self::CONTRAT_STATUS_ACTIVER && $user->rights->bimpcontract->auto_billing) {
                 if ($this->is_not_finish() && $this->reste_a_payer() > 0) {
@@ -3269,6 +3272,7 @@ class BContract_contrat extends BimpDolObject
     {
         global $langs;
         $success = "PDF de l'échéancier généré avec succès";
+        $this->dol_object->generateDocument('echeancierContrat', $langs);
     }
     /* OTHERS FUNCTIONS */
 

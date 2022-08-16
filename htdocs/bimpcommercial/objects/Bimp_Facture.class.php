@@ -2829,6 +2829,11 @@ class Bimp_Facture extends BimpComm
             $html .= ($html ? '<br/>' : '') . '<b>Certificat d\'export: </b>' . $data['certif'];
         }
 
+        if (isset($data['pj']) && $data['pj']) {
+            foreach($data['pj'] as $pjId => $pjName)
+            $html .= ($html ? '<br/>' : '') . '<b>Fichier Joint : </b>' . $pjName.' Id Chorus : '.$pjId;
+        }
+
         return $html;
     }
 
@@ -5727,6 +5732,24 @@ class Bimp_Facture extends BimpComm
         if (!count($errors)) {
             $params = '{id_facture: ' . $this->id . ', id_struture: \'' . $id_structure . '\', code_service: \'' . $code_service . '\'});}';
             $success_callback = 'setTimeout(function() {BimpApi.loadRequestModalForm(null, \'Validation du fichier PDF sur Chorus\', \'piste\', \'soumettreFacture\', {}, ' . $params . ', 500);';
+        }
+        
+        if (!count($errors) && isset($data['files_compl']) && count($data['files_compl'])){
+            $api = BimpAPI::getApiInstance('piste');
+            $chorus_data = $this->getData('chorus_data');
+            foreach($data['files_compl'] as $idF){
+                $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', $idF);
+                
+                $name = $file->getData('file_name').'.'.$file->getData('file_ext');
+                $id = $api->uploadFile($file->getFileDir(), $name);
+                if($id > 0)
+                $chorus_data['pj'][$id] = $file->getData('file_name').$file->getData('file_ext');
+                else
+                    $errors[] = 'Fichier '.$name.' non envoyé vers Chorus';
+                
+            }
+            $this->set('chorus_data', $chorus_data);
+            $errors = BimpTools::merge_array($errors, $this->update($warnings));
         }
 
         return array(

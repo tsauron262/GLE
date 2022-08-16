@@ -297,6 +297,31 @@ class Bimp_Facture extends BimpComm
 
         return parent::isFieldEditable($field, $force_edit);
     }
+    
+    
+
+    public function isValidatable(&$errors = array())
+    {
+        parent::isValidatable($errors);
+        if (!count($errors)) {
+            $this->areLinesValid($errors);
+
+            $client = $this->getChildObject('client');
+            $client_facture = $this->getClientFacture();
+            if (!BimpObject::objectLoaded($client)) {
+                $errors[] = 'Client absent';
+            }
+            
+            
+            //ref externe si consigne
+            if($client->getData('consigne_ref_ext') != '' && $this->getData('ref_client') == ''){
+                $errors[] = 'Attention la réf client ne peut pas être vide : <br/>'.nl2br($client->getData('consigne_ref_ext'));
+            }
+        }
+
+
+        return (count($errors) ? 0 : 1);
+    }
 
     public function isActionAllowed($action, &$errors = array())
     {

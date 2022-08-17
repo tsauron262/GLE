@@ -18,7 +18,13 @@
         private static $startChar_alignementPaiement        = 446;
         private static $numbChar_alignementPaiement         = 24;
         private static $mustInChar_alignementPaiement       = '010119000101190001011900';
-        
+        private static $startChar_alignementRIB             = 153;
+        private static $numbChar_alignementRIB              = 6;
+        private static $mustInChar_alignementRIB            = '001---';
+        private static $startChar_alignementMANDAT          = 256;
+        private static $numbChar_alignementMANDAT           = 3;
+        private static $mustInChar_alignementMANDAT         = '1FI';
+
         
         public static function tra($file, $lines = '', $type = '', $justeLineNumber = false) { 
             
@@ -27,11 +33,14 @@
             self::$justeLineNumber = $justeLineNumber;
             
             if(strpos(self::$file, '_(TIERS)_') > 0) self::$type = 'tiers';
+            if(strpos(self::$file, '_(RIBS)_') > 0) self::$type = 'ribs';
+            if(strpos(self::$file, '_(MANDATS)_') > 0) self::$type = 'mandats';
             if(strpos(self::$file, '_(VENTES)_') > 0) self::$type = 'ventes';
             if(strpos(self::$file, '_(ACHATS)_') > 0) self::$type = 'ventes';
             if(strpos(self::$file, '_(PAIEMENTS)_') > 0) self::$type = 'paiements';
             if(strpos(self::$file, '_(DEPLACEMENTPAIEMENTS)_') > 0) self::$type = 'paiements';
             if(strpos(self::$file, '_(PAYNI)_') > 0) self::$type = 'paiements';
+            if(strpos(self::$file, '_(BORDEREAUXCHK)_') > 0) self::$type = 'paiements';
             if(strpos(self::$file, 'IP') === 0) self::$type = 'paiements';
             
             return Array('header' => self::controleHeader(), 'alignement' => self::controleAlignement(), 'balance' => self::controleBalanceFactures());
@@ -151,6 +160,16 @@
                     $start  = self::$startChar_alignementPaiement;
                     $strlen = self::$numbChar_alignementPaiement;
                     $equal  = self::$mustInChar_alignementPaiement;
+                    break;
+                case 'ribs':
+                    $start  = self::$startChar_alignementRIB;
+                    $strlen = self::$numbChar_alignementRIB;
+                    $equal  = self::$mustInChar_alignementRIB;
+                    break;
+                case 'mandats':
+                    $start  = self::$startChar_alignementMANDAT;
+                    $strlen = self::$numbChar_alignementMANDAT;
+                    $equal  = self::$mustInChar_alignementMANDAT;
                     break;
                 default:
                     $start  = 0;

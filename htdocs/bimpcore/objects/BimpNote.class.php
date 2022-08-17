@@ -204,7 +204,9 @@ class BimpNote extends BimpObject
     public function i_view()
     {
         if (!$this->getData("viewed") && $this->i_am_dest()) {
-            if (empty($this->updateField('viewed', 1)))
+            $this->set('viewed', 1);
+            $warn = array();
+            if (empty($this->update($warn, true)))
                 return 1;
         }
 
@@ -587,9 +589,9 @@ class BimpNote extends BimpObject
             switch ((int) $this->getData('type_author')) {
                 case self::BN_AUTHOR_USER:
                     if ($this->isLoaded()) {
-                        if (!(int) $this->getData('user_create')) {
-                            $errors[] = 'ID de l\'utilisateur absent';
-                        }
+//                        if (!(int) $this->getData('user_create')) {
+//                            $errors[] = 'ID de l\'utilisateur absent';
+//                        }
                     }
                     break;
 

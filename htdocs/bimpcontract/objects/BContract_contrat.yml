@@ -396,12 +396,6 @@ fields_tables:
             - field: ref
               label: Référence du contrat
               edit: 0
-            - custom: 1
-              label: Temps total délégation vendu
-              value:
-                  callback: displayTotalHeureDelegationVendu
-              show:
-                  callback: isContratDelegation
             - field: next_contrat
               edit: 0
               show:
@@ -721,6 +715,8 @@ lists:
             fk_commercial_suivi:
 
 forms:
+    pdfEcheancier:
+        title: Informations à afficher dans le PDF         
     redefineEcheancier:
         title: Re-define Echeancier ADMIN
         rows:

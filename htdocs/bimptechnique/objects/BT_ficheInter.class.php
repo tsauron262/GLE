@@ -889,6 +889,7 @@ class BT_ficheInter extends BimpDolObject
 
     public function actionReattach_an_object($data, &$success)
     {
+        global $user;
         $warnings = [];
         $errors = [];
         $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
@@ -898,14 +899,18 @@ class BT_ficheInter extends BimpDolObject
                 $errors[] = "Vous ne pouvez pas rattacher aucun objet";
                 break;
             case 1:
-                $instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $data['fk_facture']);
-                if ($this->getData('fk_soc') == $instance->getData('fk_soc')) {
-                    $this->set('fk_facture', $data['fk_facture']);
-                    addElementElement('fichinter', 'facture', $this->id, $data['fk_facture']);
+                if($user->rights->bimptechnique->billing) {
+                    $instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $data['fk_facture']);
+                    if ($this->getData('fk_soc') == $instance->getData('fk_soc')) {
+                        $this->set('fk_facture', $data['fk_facture']);
+                        addElementElement('fichinter', 'facture', $this->id, $data['fk_facture']);
+                    } else {
+                        $errors[] = "La facture sélectionnée n'est pas à ce client";
+                    }
+                    $errors = BimpTools::merge_array($errors, $this->update($warnings, true));
                 } else {
-                    $errors[] = "La facture sélectionnée n'est pas à ce client";
+                    $errors[] = 'Vous n\'avez pas les droits pour rattacher une facture à une fiche d\'intervention';
                 }
-                $errors = BimpTools::merge_array($errors, $this->update($warnings, true));
                 break;
             case 2:
                 $instance = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $data['id_contrat']);
@@ -2619,8 +2624,10 @@ class BT_ficheInter extends BimpDolObject
             foreach ($children as $id_child) {
 
                 $child = $this->getChildObject('inters', $id_child);
-
-                if ($child->getData('type') == 3 || $child->getData('type') == 4)
+                
+                $facturableType = Array(3,4,12,13,14);
+                
+                if (in_array($child->getData('type'), $facturableType))
                     return 1;
             }
         }
@@ -2632,7 +2639,6 @@ class BT_ficheInter extends BimpDolObject
     {
         $errors = [];
         $warnings = [];
-
         if (isset($data['ef_type']))
             $this->updateField('ef_type', $data['ef_type']);
         $data = (object) $data;
@@ -2660,62 +2666,65 @@ class BT_ficheInter extends BimpDolObject
         if (!count($errors)) {
             $this->updateField('fk_facture', $new_facture->id);
             addElementElement("fichinter", "facture", $this->id, $new_facture->id);
-            $new_factureLine = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
-            $errors = BimpTools::merge_array($errors, $new_factureLine->validateArray(
-                                    array(
-                                        'type'   => ObjectLine::LINE_FREE,
-                                        'id_obj' => (int) $new_facture->id)
-                            )
-            );
-            $service_de_reference = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) BimpCore::getConf('id_serv19', 0, 'bimptechnique'));
-            if ($service_de_reference->isLoaded()) {
-                $new_factureLine->pu_ht = $service_de_reference->getData('price');
-
-                $qty = 0;
-
-                $children = $this->getChildrenList('inters');
-                if (count($children) > 0) {
-                    foreach ($children as $id_child) {
-                        $child = $this->getChildObject('inters', $id_child);
-                        if ($child->getData('type') == 4)
-                            $qty += $this->time_to_qty($this->timestamp_to_time($child->getData('duree')));
+            
+            $children = $this->getChildrenList('inters');
+            if(count($children) > 0) {
+                $haveDep = false;
+                $haveSurSite = false;
+                foreach($children as $id_child) {
+                    $child = $this->getChildObject('inters', $id_child);
+                    $arrayCode = $child->getArrayServiceForBilling();
+                    $product = BimpCache::getBimpObjectInstance('bimpcore','Bimp_Product');
+                    if($product->find(Array('ref' => $arrayCode[$child->getData('type')]))) {
+                        if($product->getRef() == 'SERV19-FPR-1') $haveSurSite = true;
+                        if($product->getRef() == 'SERV19-FD01') $haveDep = true;
+                        $new_factureLine = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
+                        $errors = BimpTools::merge_array($errors, $new_factureLine->validateArray(
+                                                array(
+                                                    'type'   => ObjectLine::LINE_FREE,
+                                                    'id_obj' => (int) $new_facture->id)
+                                        )
+                        );
+                        $new_factureLine->pu_ht = $product->getData('price');
+                        $new_factureLine->qty = $this->time_to_qty($this->timestamp_to_time($child->getData('duree')));
+                        $new_factureLine->id_product = $product->id;
+                        $new_factureLine->tva_tx = 20;
+                        $new_factureLine->pa_ht = ($this->time_to_qty($this->timestamp_to_time($child->getData('duree')))) * (float) BimpCore::getConf('cout_horaire_technicien', null, 'bimptechnique');
+                        $errors = BimpTools::merge_array($errors, $new_factureLine->create($warnings, true));
                     }
                 }
-
-                $new_factureLine->qty = $qty;
-                $new_factureLine->id_product = $service_de_reference->id;
-                $new_factureLine->tva_tx = 20;
-                $new_factureLine->pa_ht = $qty * (float) BimpCore::getConf('cout_horaire_technicien', null, 'bimptechnique');
-                $errors = BimpTools::merge_array($errors, $new_factureLine->create($warnings, true));
+                
             }
             
-            $new_factureLine = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
-            $errors = BimpTools::merge_array($errors, $new_factureLine->validateArray(
-                                    array(
-                                        'type'   => ObjectLine::LINE_FREE,
-                                        'id_obj' => (int) $new_facture->id)
-                            )
-            );
-            $dep_de_reference = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) BimpCore::getConf('id_dep', 0, 'bimptechnique'));
-            if ($dep_de_reference->isLoaded()) {
-                $new_factureLine->pu_ht = $dep_de_reference->getData('price');
+            if(!$haveDep && $haveSurSite) {
+                $new_factureLine = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
+                $errors = BimpTools::merge_array($errors, $new_factureLine->validateArray(
+                                        array(
+                                            'type'   => ObjectLine::LINE_FREE,
+                                            'id_obj' => (int) $new_facture->id)
+                                )
+                );
+                $dep_de_reference = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) BimpCore::getConf('id_dep', 0, 'bimptechnique'));
+                if ($dep_de_reference->isLoaded()) {
+                    $new_factureLine->pu_ht = $dep_de_reference->getData('price');
 
-                $qty = 0;
+                    $qty = 1;
 
-                $children = $this->getChildrenList('inters');
-                if (count($children) > 0) {
-                    foreach ($children as $id_child) {
-                        $child = $this->getChildObject('inters', $id_child);
-                        if ($child->getData('type') == 3)
-                            $qty += $this->time_to_qty($this->timestamp_to_time($child->getData('duree')));
+                    $children = $this->getChildrenList('inters');
+                    if (count($children) > 0) {
+                        foreach ($children as $id_child) {
+                            $child = $this->getChildObject('inters', $id_child);
+                            if ($child->getData('type') == 3)
+                                $qty += $this->time_to_qty($this->timestamp_to_time($child->getData('duree')));
+                        }
                     }
+                    
+                    $new_factureLine->qty = $qty;
+                    $new_factureLine->id_product = $dep_de_reference->id;
+                    $new_factureLine->tva_tx = 20;
+                    $new_factureLine->pa_ht = $qty * (float) BimpCore::getConf('cout_horaire_technicien', null, 'bimptechnique');
+                    $errors = BimpTools::merge_array($errors, $new_factureLine->create($warnings, true));
                 }
-
-                $new_factureLine->qty = $qty;
-                $new_factureLine->id_product = $dep_de_reference->id;
-                $new_factureLine->tva_tx = 20;
-                $new_factureLine->pa_ht = $qty * (float) BimpCore::getConf('cout_horaire_technicien', null, 'bimptechnique');
-                $errors = BimpTools::merge_array($errors, $new_factureLine->create($warnings, true));
             }
 
             if (!count($errors)) {
@@ -2803,87 +2812,123 @@ class BT_ficheInter extends BimpDolObject
     public function create(&$warnings = array(), $force_create = false)
     {
         global $user;
-        $this->set('new_fi', 1);
-        $this->set('fk_user_author', (int) $user->id);
-
-        if (!(int) $this->getData('fk_user_tech')) {
-            $this->set('fk_user_tech', $user->id);
-        }
-
-        $client = $this->getChildObject('client');
-
-        if (!BimpObject::objectLoaded($client)) {
-            return array('Client invalide');
-        }
-
-        $this->set('ref', "(PROV$this->id)");
-
-        $errors = parent::create($warnings, $force_create);
-        $this->set('ref', "(PROV$this->id)");
-
-        if (!count($errors)) {
-            $client->setActivity('Création ' . $this->getLabel('of_the') . ' {{Fiche inter:' . $this->id . '}}');
+        
+        $errors = Array();
+        
+        if((int) $this->getData('fk_contrat')) {
+            $verifContrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', (int) $this->getData('fk_contrat'));
+            $heuresRestantes = $verifContrat->getHeuresRestantesDelegation();
+            if($verifContrat->isContratDelegation()) {
+                $totalHeuresVendu = 0;           
+                
+                foreach($verifContrat->getTotalHeureDelegation(true) as $heure) {
+                    $totalHeuresVendu += $heure;
+                }
+                
+                $from   = new DateTime($this->getData('datei') . " " . $this->getData('time_from'));
+                $to     = new DateTime($this->getData('datei') . " " . $this->getData('time_to'));
+                $diff   = $from->diff($to);
+    
+                $heuresDemander = $diff->h + ($diff->i / 60);
+                if($heuresDemander > $totalHeuresVendu) {
+                    $errors[] = 'Vous ne pouvez pas programmer une intervention avec un nombre d\'heures suppérieur à ce qu\'il a été vendue (VENDU:'.$totalHeuresVendu.' heures, PROGRAMMER:'.$heuresDemander.' heures)' ;
+                }
+                
+                if($heuresRestantes <= 0) {
+                    $errors[] = 'Vous ne pouvez pas programmer une intervention sur ce contrat. Cause: Nombre d\'heures vendues dépassée';
+                }
+                
+            }
             
-            $commandes = $this->getData('commandes');
-            if (is_array($commandes)) {
-                foreach ($commandes as $id_commande) {
-                    addElementElement("commande", "fichinter", $id_commande, $this->id);
+        }
+        
+        //$errors[] = 'secu';
+        if(!count($errors)) {
+            
+            $this->set('new_fi', 1);
+            $this->set('fk_user_author', (int) $user->id);
+
+            if (!(int) $this->getData('fk_user_tech')) {
+                $this->set('fk_user_tech', $user->id);
+            }
+
+            $client = $this->getChildObject('client');
+
+            if (!BimpObject::objectLoaded($client)) {
+                return array('Client invalide');
+            }
+
+            $this->set('ref', "(PROV$this->id)");
+
+            $errors = parent::create($warnings, $force_create);
+            $this->set('ref', "(PROV$this->id)");
+
+            if (!count($errors)) {
+                $client->setActivity('Création ' . $this->getLabel('of_the') . ' {{Fiche inter:' . $this->id . '}}');
+
+                $commandes = $this->getData('commandes');
+                if (is_array($commandes)) {
+                    foreach ($commandes as $id_commande) {
+                        addElementElement("commande", "fichinter", $id_commande, $this->id);
+                    }
                 }
-            }
 
-            $tickets = $this->getData('tickets');
-            if (is_array($tickets)) {
-                foreach ($tickets as $id_ticket) {
-                    addElementElement('bimp_ticket', 'fichinter', $id_ticket, $this->id);
+                $tickets = $this->getData('tickets');
+                if (is_array($tickets)) {
+                    foreach ($tickets as $id_ticket) {
+                        addElementElement('bimp_ticket', 'fichinter', $id_ticket, $this->id);
+                    }
                 }
-            }
 
-            if ((int) $this->getData('fk_contrat')) {
-                addElementElement('contrat', 'fichinter', $this->getData('fk_contrat'), $this->id);
-            }
+                if ((int) $this->getData('fk_contrat')) {
+                    addElementElement('contrat', 'fichinter', $this->getData('fk_contrat'), $this->id);
+                }
 
-            // Création actionComm: 
-            BimpTools::loadDolClass('comm/action/', 'actioncomm', 'ActionComm');
+                // Création actionComm: 
+                BimpTools::loadDolClass('comm/action/', 'actioncomm', 'ActionComm');
 
-            $actioncomm = new ActionComm($this->db->db);
+                $actioncomm = new ActionComm($this->db->db);
 
-            //$actioncomm->userassigned = Array($data->techs);
-            $actioncomm->label = "(PROV$this->id)";
-            $actioncomm->note = '';
-            $actioncomm->punctual = 1;
-            $actioncomm->userownerid = (int) $this->getData('fk_user_tech');
-            $actioncomm->elementtype = 'fichinter';
-            $actioncomm->type_id = BimpTools::getValue('type_planning', 0);
-            $actioncomm->datep = strtotime($this->getData('datei') . " " . $this->getData('time_from'));
-            $actioncomm->datef = strtotime($this->getData('datei') . " " . $this->getData('time_to'));
-            $actioncomm->socid = $this->getData('fk_soc');
-            $actioncomm->fk_element = $this->id;
-            $actioncomm->create($user);
+                //$actioncomm->userassigned = Array($data->techs);
+                $actioncomm->label = "(PROV$this->id)";
+                $actioncomm->note = '';
+                $actioncomm->punctual = 1;
+                $actioncomm->userownerid = (int) $this->getData('fk_user_tech');
+                $actioncomm->elementtype = 'fichinter';
+                $actioncomm->type_id = BimpTools::getValue('type_planning', 0);
+                $actioncomm->datep = strtotime($this->getData('datei') . " " . $this->getData('time_from'));
+                $actioncomm->datef = strtotime($this->getData('datei') . " " . $this->getData('time_to'));
+                $actioncomm->socid = $this->getData('fk_soc');
+                $actioncomm->fk_element = $this->id;
+                $actioncomm->create($user);
 
-            // Envoi mail au tech: 
+                // Envoi mail au tech: 
 
-            $tech = $this->getChildObject('user_tech');
-            if (BimpObject::objectLoaded($tech)) {
-                $de = new DateTime($this->getData('datei') . " " . $this->getData('time_from'));
-                $a = new DateTime($this->getData('datei') . " " . $this->getData('time_to'));
+                $tech = $this->getChildObject('user_tech');
+                if (BimpObject::objectLoaded($tech)) {
+                    $de = new DateTime($this->getData('datei') . " " . $this->getData('time_from'));
+                    $a = new DateTime($this->getData('datei') . " " . $this->getData('time_to'));
 
-                $client = $this->getChildObject('client');
+                    $client = $this->getChildObject('client');
 
-                $sujet = "[FI] " . $this->getRef() . (BimpObject::objectLoaded($client) ? ' - Client: ' . $client->getData('code_client') . ' - ' . $client->getName() : '');
+                    $sujet = "[FI] " . $this->getRef() . (BimpObject::objectLoaded($client) ? ' - Client: ' . $client->getData('code_client') . ' - ' . $client->getName() : '');
 
-                $message = "<h4><strong style='color:#EF7D00'>Bimp</strong><strong style='color:black' >Technique</strong> - <strong style='color:grey' >Fiches d'interventions</strong></h4>";
-                $message .= "Bonjour,<br />Une fiche d'intervention vous a été attribuée";
-                $message .= "<br /><br />";
-                $message .= 'Fiche d\'intervention: ' . $this->getLink() . '<br />';
-                $message .= 'Date prévue de l\'intervention: <strong>Le ' . $de->format('d/m/Y H:i') . ' au ' . $a->format('d/m/Y H:i') . '</strong>';
-                $message .= '<br/><br/>';
+                    $message = "<h4><strong style='color:#EF7D00'>Bimp</strong><strong style='color:black' >Technique</strong> - <strong style='color:grey' >Fiches d'interventions</strong></h4>";
+                    $message .= "Bonjour,<br />Une fiche d'intervention vous a été attribuée";
+                    $message .= "<br /><br />";
+                    $message .= 'Fiche d\'intervention: ' . $this->getLink() . '<br />';
+                    $message .= 'Date prévue de l\'intervention: <strong>Le ' . $de->format('d/m/Y H:i') . ' au ' . $a->format('d/m/Y H:i') . '</strong>';
+                    $message .= '<br/><br/>';
 
-                $this->addLog("Fiche d'intervention créée");
-                mailSyn2($sujet, BimpTools::cleanEmailsStr($tech->getData('email')), "gle@bimp.fr", $message);
-            } else {
-                $warnings[] = 'L\'e-mail n\'a pas pu être envoyé au technicien (Technicien sélectionné invalide)';
+                    $this->addLog("Fiche d'intervention créée");
+                    mailSyn2($sujet, BimpTools::cleanEmailsStr($tech->getData('email')), "gle@bimp.fr", $message);
+                } else {
+                    $warnings[] = 'L\'e-mail n\'a pas pu être envoyé au technicien (Technicien sélectionné invalide)';
+                }
             }
         }
+        
+        
 
         return $errors;
     }

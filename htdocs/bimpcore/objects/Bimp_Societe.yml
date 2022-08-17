@@ -711,6 +711,10 @@ fields:
         label: Message Facturation
         type: text
         
+    consigne_ref_ext:
+        label: Consigne référence externe
+        type: text
+        
         
 #    *** Champs non gérés: ***
 #    entity
@@ -847,6 +851,7 @@ fields_tables:
             - field: last_activity_origin
               show: 
                   callback: isClient
+            - field: consigne_ref_ext
                   
     encours: 
         title: Encours HT
@@ -1180,6 +1185,8 @@ forms:
                     callback: isClient
             parent:
                 field: parent
+            consigne_ref_ext:
+                field: consigne_ref_ext
                 
     logo: 
         title: Changer le logo

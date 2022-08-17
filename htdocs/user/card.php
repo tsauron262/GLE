@@ -34,6 +34,13 @@
  */
 
 require '../main.inc.php';
+
+
+require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+$bObj = BimpObject::getInstance("bimpcore", "Bimp_User", $_REQUEST['id']);
+$htmlRedirect = $bObj->processRedirect();
+
+
 require_once DOL_DOCUMENT_ROOT.'/user/class/user.class.php';
 require_once DOL_DOCUMENT_ROOT.'/user/class/usergroup.class.php';
 require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
@@ -621,6 +628,7 @@ $formcompany = new FormCompany($db);
 $formfile = new FormFile($db);
 
 llxHeader('',$langs->trans("UserCard"));
+echo $htmlRedirect;
 
 if ($action == 'create' || $action == 'adduserldap')
 {

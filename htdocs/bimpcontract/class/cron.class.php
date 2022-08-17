@@ -75,14 +75,14 @@
                         $avenant->updateField('private_close_note', 'Delais de signature dépassé');
                         $subject = 'ABANDON ' . $avenant->getRefAv() . ' ' . $client->getName();
                         $msg = 'Bonjour ' . $commercial->getName();
-                        $msg.= '<br />L\'avenant ' . $avenant->getRefAv() . ' a été abandoné car il n\'a pas été signé dans le 15 jours qui ont suivi son activation.';
+                        $msg.= '<br />L\'avenant ' . $avenant->getRefAv() . ' a été abandonné car il n\'a pas été signé dans les 15 jours qui ont suivi son activation.';
                         
                     } else {
                         // On relance le commercial
                         $subject = 'Avenant non signé ' . $avenant->getRefAv() . ' ' . $client->getName();
                         $msg = 'Bonjour ' . $commercial->getName();
                         $reste = (15 - (int) $diff->days);
-                        $msg.= '<br />L\'avenant ' . $avenant->getRefAv() . ' n\'est pas signé, il vous reste ' . $reste . ' avant son abandon automatique';
+                        $msg.= '<br />L\'avenant ' . $avenant->getRefAv() . ' n\'est pas signé, il vous reste ' . $reste . ' jours avant son abandon automatique';
                     }
                     
                     $msg .= '<br ><br />Contrat: ' . $contrat->getLink();

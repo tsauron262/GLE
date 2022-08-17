@@ -12,19 +12,33 @@ class BT_ficheInter_det extends BimpDolObject
     CONST TYPE_PLUS = 4;
     CONST TYPE_DEPLACEMENT_CONTRAT = 5;
     CONST TYPE_DEPLACEMENT_VENDU = 6;
-    const TYPE_INTERNE = 7;
-    const TYPE_OFFERT = 11;
+    CONST TYPE_INTERNE = 7;
+    CONST TYPE_OFFERT = 11;
+    CONST TYPE_PLUS_ATELIER = 12;
+    CONST TYPE_PLUS_TELEMAINTENANCE = 13;
+    CONST TYPE_PLUS_SUR_SITE = 14; // Si ce code service (Automatiquement mettre un deplacement)
+    CONST TYPE_DEPLA_OFFERT = 15;
+    
+    public static $servicesForFacturation = Array(
+        self::TYPE_PLUS_ATELIER         => 'SERV19-FPR-ATE',
+        self::TYPE_PLUS_SUR_SITE        => 'SERV19-FPR-1',
+        self::TYPE_PLUS_TELEMAINTENANCE => 'SERV19-FPR-TELE',
+        self::TYPE_DEPLA                => 'SERV19-FD01'
+    );
 
     public static $types = [
-        self::TYPE_INTER               => ['label' => "Intervention vendue", 'icon' => 'fas_check', 'classes' => ['success']],
-        self::TYPE_DEPLACEMENT_VENDU   => ['label' => "Déplacement vendu", 'icon' => 'fas_car', 'classes' => ['success']],
-        self::TYPE_PLUS                => ['label' => "Intervention à facturer", 'icon' => 'fas_plus', 'classes' => ['warning']],
-        self::TYPE_DEPLA               => ['label' => "Déplacement à facturer", 'icon' => 'fas_car', 'classes' => ['warning']],
-        self::TYPE_DEPLACEMENT_CONTRAT => ['label' => "Déplacement sous contrat", 'icon' => 'fas_car', 'classes' => ['success']],
-        self::TYPE_IMPON               => ['label' => "Impondérable", 'icon' => 'fas_cogs', 'classes' => ['important']],
-        self::TYPE_LIBRE               => ['label' => "Ligne libre", 'icon' => 'fas_paper-plane', 'classes' => ['info']],
-        self::TYPE_INTERNE             => ['label' => "Intervention en interne", 'icon' => 'fas_inbox', 'classes' => ['success']],
-        self::TYPE_OFFERT             => ['label' => "Intervention offerte", 'icon' => 'fas_gift', 'classes' => ['success']]
+        self::TYPE_INTER                => ['label' => "Intervention vendue", 'icon' => 'fas_check', 'classes' => ['success']],
+        self::TYPE_DEPLACEMENT_VENDU    => ['label' => "Déplacement vendu", 'icon' => 'fas_car', 'classes' => ['success']],
+        self::TYPE_PLUS                 => ['label' => "Intervention à facturer", 'icon' => 'fas_plus', 'classes' => ['warning']],
+        self::TYPE_DEPLA                => ['label' => "Déplacement à facturer", 'icon' => 'fas_car', 'classes' => ['warning']],
+        self::TYPE_DEPLACEMENT_CONTRAT  => ['label' => "Déplacement sous contrat", 'icon' => 'fas_car', 'classes' => ['success']],
+        self::TYPE_IMPON                => ['label' => "Impondérable", 'icon' => 'fas_cogs', 'classes' => ['important']],
+        self::TYPE_LIBRE                => ['label' => "Ligne libre", 'icon' => 'fas_paper-plane', 'classes' => ['info']],
+        self::TYPE_INTERNE              => ['label' => "Intervention en interne", 'icon' => 'fas_inbox', 'classes' => ['success']],
+        self::TYPE_OFFERT               => ['label' => "Intervention offerte", 'icon' => 'fas_gift', 'classes' => ['success']],
+        self::TYPE_PLUS_ATELIER         => ['label' => "Intervention en atelier à facturer", 'icon' => 'fas_plus', 'classes' => ['warning']],
+        self::TYPE_PLUS_TELEMAINTENANCE => ['label' => "Intervention en télémaintenance à facturer", 'icon' => 'fas_plus', 'classes' => ['warning']],
+        self::TYPE_PLUS_SUR_SITE        => ['label' => "Intervention sur site à facturer", 'icon' => 'fas_plus', 'classes' => ['warning']]
     ];
 
     CONST MODE_FACT_AUCUN__ = 0;
@@ -38,7 +52,11 @@ class BT_ficheInter_det extends BimpDolObject
     ];
 
     // Getters booléens: 
-
+    
+    public function getArrayServiceForBilling() {
+        return self::$servicesForFacturation;
+    }
+    
     public function isCreatable($force_create = false, &$errors = [])
     {
         $fi = $this->getParentInstance();
@@ -885,14 +903,105 @@ class BT_ficheInter_det extends BimpDolObject
 
         return $errors;
     }
+    
+    function convertTime($dec):string
+    {
+        $hour = floor($dec);
+        $min = round(60*($dec - $hour));
+        
+        return $hour . 'h' . $min . 'm';
+    }
+
 
     public function validate()
     {
+        global $user;
+        
         $errors = parent::validate();
-
+        
+        $fi = $this->getParentInstance();
+        
+        if (!BimpObject::objectLoaded($fi)) {
+            $errors[] = 'ID de la Fiche Inter absent';
+        } else {
+            
+            $contrat = BimpCache::getBimpObjectInstance('bimpcontract','BContract_contrat', (int) $fi->getData('fk_contrat'));
+            $heuresVendu = $contrat->getTotalHeureDelegation(true);
+            
+            if($contrat->isContratDelegation()) {
+                
+                $typeVerifInter = Array(
+                    self::TYPE_INTER, 
+                    self::TYPE_PLUS_ATELIER, 
+                    self::TYPE_PLUS_SUR_SITE, 
+                    self::TYPE_PLUS_TELEMAINTENANCE,
+                    self::TYPE_IMPON
+                );
+                
+                $typeVerifDep = Array(
+                    self::TYPE_DEPLA,
+                    self::TYPE_DEPLACEMENT_CONTRAT,
+                    self::TYPE_DEPLACEMENT_VENDU
+                );
+                
+                $totalHeuresFaites = 0;
+                $totalHeuresVendue = 0;
+                if(count($heuresVendu)) {
+                    foreach($heuresVendu as $time) {
+                        $totalHeuresVendue += $time;
+                    }
+                }
+                
+                $heuresRestantes = $contrat->getHeuresRestantesDelegation();
+                
+                if(in_array(BimpTools::getPostFieldValue('type'),$typeVerifInter)) {
+                    if(BimpTools::getPostFieldValue('am_pm')) {
+                        $from1  = new DateTime(BimpTools::getPostFieldValue('date') . ' ' . BimpTools::getPostFieldValue("arrived_am_time"));
+                        $to1    = new DateTime(BimpTools::getPostFieldValue('date') . ' ' . BimpTools::getPostFieldValue("departure_am_time"));
+                        $from2  = new DateTime(BimpTools::getPostFieldValue('date') . ' ' . BimpTools::getPostFieldValue("arrived_pm_time"));
+                        $to2    = new DateTime(BimpTools::getPostFieldValue('date') . ' ' . BimpTools::getPostFieldValue("departure_pm_time"));
+                        
+                        $diff1 = $from1->diff($to1);
+                        $diff2 = $from2->diff($to2);
+                        $heuresFaites = ($diff1->h + ($diff1->i / 60)) + ($diff2->h + ($diff2->i / 60)); 
+                        
+                    } else {
+                        $from = new DateTime(BimpTools::getPostFieldValue('date') . ' ' . BimpTools::getPostFieldValue("arrived_time"));
+                        $to   = new DateTime(BimpTools::getPostFieldValue('date') . ' ' . BimpTools::getPostFieldValue("departure_time"));
+                        $diff = $from->diff($to);
+                        $heuresFaites = $diff->h + ($diff->i /60);
+                    }
+                }
+                
+                if(in_array(BimpTools::getPostFieldValue('type'), $typeVerifDep)) {
+                                        
+                    $heuresFaites = BimpTools::getPostFieldValue("temps_trajet") / 3600;
+                    
+                }
+                
+                if($heuresFaites > $heuresRestantes) {
+                    $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $contrat->getData('fk_soc'));
+                    $sujet = 'Dépassement d\'heure contrat de délégation ' . $contrat->getRef() . ' - ' . $client->getName();
+                    $commercial = $contrat->getCommercialClient(true);
+                    
+                    $message     = 'Bonjour ' . $commercial->getName() . ',<br />';
+                    $message    .= $user->firstname . ' ' . $user->lastname . ' a renseigné une ligne dans sa fiche d\'intervention qui crée un dépassement des heures prévues dans le contrat.';
+                    $message    .= '<br />Contrat: ' . $contrat->getNomUrl() . '<br />Client: ' . $client->getNomUrl() . ' ' . $client->getName() . '<br />Fiche: ' . $fi->getNomUrl();
+                    $message    .= '<br /><br />Détails:<br />';
+                    
+                    $message    .= 'Heures restantes dans le contrat: ' . $this->convertTime($heuresRestantes);
+                    $message    .= '<br />Heures renseignées dans le contrat: ' . $this->convertTime($heuresFaites);
+                    $message    .= '<br />Type: ' . self::$types[BimpTools::getPostFieldValue('type')]['label'];
+                    mailSyn2($sujet, $commercial->getData('email') . ', contrat@bimp.fr', null, $message);
+                    
+                }
+                
+            }
+            
+        }
+                
         if (!count($errors)) {
-            $fi = $this->getParentInstance();
-
+            
             if (!BimpObject::objectLoaded($fi)) {
                 $errors[] = 'ID de la Fiche Inter absent';
             } else {
@@ -916,6 +1025,12 @@ class BT_ficheInter_det extends BimpDolObject
                     if (!(int) $this->getData('id_line_commande')) {
                         $errors[] = 'Aucune ligne de commande sélectionnée pour le déplacement vendu';
                     }
+                } elseif ($type == self::TYPE_PLUS) {
+                    
+                    //pourquoi ?
+                    //  
+//                    $errors[] = 'Il n\'est plus possible de faire ce choix. Merci de voir dans la liste quel est le choix le mieux adapté';
+                    
                 }
 
                 $forfait = 0;

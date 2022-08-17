@@ -275,7 +275,7 @@ class Bimp_Facture extends BimpComm
                     'relance_active', 'nb_relance', 'date_relance', 'date_next_relance',
                     'close_code', 'close_note',
                     'date_irrecouvrable', 'id_user_irrecouvrable',
-                    'prelevement', 'ef_type', 'fk_mode_reglement', 'pdf_nb_decimal', 'litige'
+                    'prelevement', 'ef_type', 'fk_mode_reglement', 'fk_cond_reglement', 'pdf_nb_decimal', 'litige'
                 ))) {
             return 1;
         }
@@ -296,6 +296,31 @@ class Bimp_Facture extends BimpComm
         }
 
         return parent::isFieldEditable($field, $force_edit);
+    }
+    
+    
+
+    public function isValidatable(&$errors = array())
+    {
+        parent::isValidatable($errors);
+        if (!count($errors)) {
+            $this->areLinesValid($errors);
+
+            $client = $this->getChildObject('client');
+            $client_facture = $this->getClientFacture();
+            if (!BimpObject::objectLoaded($client)) {
+                $errors[] = 'Client absent';
+            }
+            
+            
+            //ref externe si consigne
+            if($client->getData('consigne_ref_ext') != '' && $this->getData('ref_client') == ''){
+                $errors[] = 'Attention la réf client ne peut pas être vide : <br/>'.nl2br($client->getData('consigne_ref_ext'));
+            }
+        }
+
+
+        return (count($errors) ? 0 : 1);
     }
 
     public function isActionAllowed($action, &$errors = array())
@@ -2802,6 +2827,11 @@ class Bimp_Facture extends BimpComm
 
         if (isset($data['certif']) && $data['certif']) {
             $html .= ($html ? '<br/>' : '') . '<b>Certificat d\'export: </b>' . $data['certif'];
+        }
+
+        if (isset($data['pj']) && $data['pj']) {
+            foreach($data['pj'] as $pjId => $pjName)
+            $html .= ($html ? '<br/>' : '') . '<b>Fichier Joint : </b>' . $pjName.' Id Chorus : '.$pjId;
         }
 
         return $html;
@@ -5702,6 +5732,24 @@ class Bimp_Facture extends BimpComm
         if (!count($errors)) {
             $params = '{id_facture: ' . $this->id . ', id_struture: \'' . $id_structure . '\', code_service: \'' . $code_service . '\'});}';
             $success_callback = 'setTimeout(function() {BimpApi.loadRequestModalForm(null, \'Validation du fichier PDF sur Chorus\', \'piste\', \'soumettreFacture\', {}, ' . $params . ', 500);';
+        }
+        
+        if (!count($errors) && isset($data['files_compl']) && count($data['files_compl'])){
+            $api = BimpAPI::getApiInstance('piste');
+            $chorus_data = $this->getData('chorus_data');
+            foreach($data['files_compl'] as $idF){
+                $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', $idF);
+                
+                $name = $file->getData('file_name').'.'.$file->getData('file_ext');
+                $id = $api->uploadFile($file->getFileDir(), $name);
+                if($id > 0)
+                $chorus_data['pj'][$id] = $file->getData('file_name').$file->getData('file_ext');
+                else
+                    $errors[] = 'Fichier '.$name.' non envoyé vers Chorus';
+                
+            }
+            $this->set('chorus_data', $chorus_data);
+            $errors = BimpTools::merge_array($errors, $this->update($warnings));
         }
 
         return array(

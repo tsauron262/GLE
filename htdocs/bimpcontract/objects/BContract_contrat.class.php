@@ -2306,10 +2306,12 @@ class BContract_contrat extends BimpDolObject
                 'form_name' => 'create_signature'
             )));        
         
-        $buttons[] = array(
-            'label'   => 'Télécharger contrat signé DocuSign',
-            'icon'    => 'fas_file-download',
+//        if(file_exists($this->getSignatureDocFileUrl('contrat'))) {
+            $buttons[] = array(
+                'label'   => 'Télécharger contrat signé DocuSign',
+                'icon'    => 'fas_file-download',
             'onclick' => $this->getJsActionOnclick('downloadSignature'));
+//        }
         
         return $buttons;
     }
@@ -2369,35 +2371,16 @@ class BContract_contrat extends BimpDolObject
             require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
             $api = BimpAPI::getApiInstance('docusign');
             if (is_a($api, 'DocusignAPI')) {
-                $params = array();
-                $pdf_bin = $api->getEnvelopeFile($params, $id_envelope);
-                
-                $file_name = $this->getSignatureDocFileName('contrat', true);
-                $tmp_name = $this->getSignatureDocFileDir('contrat') . $file_name;
-                file_put_contents($tmp_name, $pdf_bin);
-
-                // Création de l'object BimpFile
-                $file_obj = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile');
-                $values = array(
-                    'parent_module'      => 'bimpcontract',
-                    'parent_object_name' => 'BContract_contrat',
-                    'id_parent'          => (int) $this->id,
-                    'file_name'          => str_replace('.pdf', '', $file_name)
+                $params = array(
+                    'id_envelope' => $id_envelope
                 );
-                $errors = $file_obj->validateArray($values);
+                $pdf_bin = base64_decode($api->getEnvelopeFile($params, $errors));
+                
                 if(!count($errors)) {
-                    $_FILES['file'] = array(
-                        'name' => $file_name,
-                        'type' => 'application/pdf',
-                        'tmp_name' => $tmp_name,
-                        'error' => '',
-                        'size' => sizeof($pdf_bin),
-                    );
-                    $file_obj->dontCreate = true;
+                    $file_name = $this->getSignatureDocFileName('contrat', true);
+                    $file_dir = $this->getSignatureDocFileDir('contrat');
 
-                    $errors = $file_obj->create();
-                } else {
-                    $errors[] = "Paramètre de création du fichier contrat signé non valide" . print_r($values);
+                    file_put_contents($file_dir . $file_name, $pdf_bin);
                 }
             }
         }
@@ -4794,7 +4777,7 @@ class BContract_contrat extends BimpDolObject
         return $this->getFilesDir();
     }
 
-    public function getSignatureDocFileName($doc_type, $signed = false)
+    public function getSignatureDocFileName($doc_type = 'contrat', $signed = false)
     {
         switch ($doc_type) {
             case 'contrat':
@@ -4805,7 +4788,6 @@ class BContract_contrat extends BimpDolObject
         return '';
     }
     
-    // TODO
     public function getSignatureDocFileUrl($doc_type, $forced_context = '', $signed = false)
     {
         if (!$this->isLoaded()) {
@@ -4822,7 +4804,7 @@ class BContract_contrat extends BimpDolObject
         if ($file_name) {
             switch ($doc_type) {
                 case 'contrat':
-                    return BimpObject::getPublicBaseUrl() . '?modulepart=contract&file=' . $this->getRef() . $this->getPdfNamePrincipal($signed);
+                    return $this->getFileUrl($file_name);
                     break;
             }
         }
@@ -4846,7 +4828,7 @@ class BContract_contrat extends BimpDolObject
         return BimpTools::overrideArray(self::$default_signature_params, (array) $this->getData('signature_params'));
     }
     
-    // TODO
+
     public function onSigned($bimpSignature, $data)
     {
         $errors = array();
@@ -4861,17 +4843,17 @@ class BContract_contrat extends BimpDolObject
 //
 //        return $errors;
     }
-    // TODO
+
     public function onSignatureCancelled($bimpSignature)
     {
         return;
     }
-    // TODO
+
     public function isSignatureReopenable($doc_type, &$errors = array())
     {
         return;
     }
-    // TODO
+
     public function onSignatureReopened($bimpSignature)
     {
         return;
@@ -4933,7 +4915,6 @@ class BContract_contrat extends BimpDolObject
         return $errors;
     }
     
-    // TODO 
     public function getDefaultSignDistEmailContent() {
         $email  = "Bonjour,<br/>";
         $email .= "Veuillez trouver ci-joint notre contrat pour validation<br/>";

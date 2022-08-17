@@ -16,7 +16,7 @@
 
             $this->langs->load("bills");
             $this->langs->load("products");
-            $this->typeObject = "contrat";
+            $this->typeObject = "contract";
         }
 
         protected function initData() {

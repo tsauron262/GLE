@@ -25,7 +25,7 @@ class BContract_contrat extends BimpDolObject
     public $email_group = "";
     public $email_facturation = "";
     public static $element_name = "contract";
-    public static $dol_module = 'contract';
+    public static $dol_module = 'contrat';
     public static $files_module_part = 'contract';
 
     // Les status

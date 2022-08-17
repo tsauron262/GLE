@@ -181,6 +181,11 @@ class BContract_contrat extends BimpDolObject
         return parent::__construct($module, $object_name);
     }
     
+    public function getDirOutput() {
+        global $conf;
+        return $conf->contract->dir_output;
+    }
+    
     public function isContratDelegation():bool {
         
         return (substr($this->getRef(), 0, 3) == 'CDP') ? 1 : 0;

@@ -17,7 +17,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimptechnique/objects/BT_ficheInter.class.php
      * - Gérer le droit canClientView() pour la visualisation du document sur l'espace public. 
      */
 
-class BContract_contrat extends BimpDolObject
+class BContract_contrat extends BimpDolObject 
 {
 
     //public $redirectMode = 4;
@@ -27,6 +27,7 @@ class BContract_contrat extends BimpDolObject
     public static $element_name = "contract";
     public static $dol_module = 'contrat';
     public static $files_module_part = 'contract';
+    public static $modulepart = 'contract';
 
     // Les status
     CONST CONTRAT_STATUT_ABORT = -1;

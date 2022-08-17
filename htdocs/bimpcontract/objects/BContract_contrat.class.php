@@ -4769,22 +4769,7 @@ class BContract_contrat extends BimpDolObject
         return $file_name;
     }
     
-    public function getFileUrl($file_name, $page = 'document') // A VERIFIER POUR LE PDF
-    {
-        $dir = $this->getFilesDir();
-        if ($dir) {
-            if (file_exists($dir . $file_name)) {
-                if (isset(static::$files_module_part)) {
-                    $module_part = static::$files_module_part;
-                } else {
-                    $module_part = static::$dol_module;
-                }
-                return DOL_URL_ROOT . '/' . $page . '.php?modulepart=' . $module_part . '&file=' . urlencode($this->getRef()) . '/' . urlencode($file_name);
-            }
-        }
 
-        return '';
-    }
     
     
     public function getSignatureDocFileDir($doc_type)

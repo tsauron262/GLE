@@ -35,7 +35,7 @@
 
         protected function initHeader()
         {
-            $docRef = $this->contrat->getRef();
+            $docRef = $this->contrat->getRef() . '<br />&Eacute;tat au ' . date('d/m/Y');
 
             global $conf;
             $logo_file = $conf->mycompany->dir_output . '/logos/' . str_replace('.png', '_PRO.png', $this->fromCompany->logo);

@@ -3271,8 +3271,10 @@ class BContract_contrat extends BimpDolObject
     public function actionGeneratePdfEcheancier($data, &$success)
     {
         global $langs;
+        $errors = $warnings = array();
         $success = "PDF de l'échéancier généré avec succès";
         $this->dol_object->generateDocument('echeancierContrat', $langs);
+        return array('errors' => $errors, 'warnings' => $warnings);
     }
     /* OTHERS FUNCTIONS */
 

@@ -889,6 +889,7 @@ class BT_ficheInter extends BimpDolObject
 
     public function actionReattach_an_object($data, &$success)
     {
+        global $user;
         $warnings = [];
         $errors = [];
         $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));

@@ -847,6 +847,84 @@ class BContract_echeancier extends BimpObject {
         
         
     }
+    
+    public function getAllPeriodes():array {
+        
+        $periodes = Array();
+        
+        $parentInstance         = $this->getParentInstance();
+        $dateStartEcheancier    = new DateTime($parentInstance->getData('date_start'));
+        $dateStopEcheancier     = new DateTime($parentInstance->getData('end_date_contrat'));
+        $dureeEnMois            = $parentInstance->getData('duree_mois');
+        $periodicity            = $parentInstance->getData('periodicity');
+        
+        $dureePeriodeIncomplette  = $dureeEnMois % $periodicity;
+        $dureePeriodesComplettes  = $dureeEnMois - $dureePeriodeIncomplette;
+        $nombrePeriodesComplettes = $dureePeriodesComplettes / $periodicity;
+
+        $periodes['infos'] = Array(
+            'nombre_periodes' => $nombrePeriodesComplettes, 
+            'periode_incomplette_mois' => $dureePeriodeIncomplette
+        );
+        
+        $i = 1;
+        $haveOtherPeriodes = false;
+        $alternateStartDate = $dateStartEcheancier;
+        
+        $resteAPayer = $parentInstance->reste_a_payer();
+        
+        if($nombrePeriodesComplettes > 0) {
+            while($i <= $nombrePeriodesComplettes) {
+                if(!count($periodes['periodes'])) {
+                    $haveOtherPeriodes = true;
+                    $startDate = $dateStartEcheancier->format('d/m/Y');
+                    $stopDate = $dateStartEcheancier;
+                } else {
+                    $startDate = $stopDate->add(new DateInterval('P1D'))->format('d/m/Y');
+                }
+
+                $stopDate = $alternateStartDate->add(new DateInterval('P' . $periodicity . 'M'));
+                $stopDate->sub(new DateInterval('P1D'));
+                $periodes['periodes'][] = Array(
+                    'START' => $startDate,
+                    'STOP'  => $stopDate->format('d/m/Y'),
+                    'DATE_FACTURATION' => ($parentInstance->getData('facturation_echu')) ? $stopDate->format('d/m/Y') : $startDate,
+                    'HT' => $resteAPayer
+                );
+
+                $alternateStartDate = $stopDate;
+
+                $i++;
+            }
+        }
+        
+        if($dureePeriodeIncomplette > 0) {
+            
+            if(!$haveOtherPeriodes) {
+                $resteStart     = $alternateStartDate->format('d/m/Y');
+                $resteStopDT = $alternateStartDate->add(new DateInterval('P' . $dureePeriodeIncomplette . 'M'))->sub(new DateInterval('P1D'));
+                $resteStop  = $resteStopDT->format('d/m/Y');
+            } else {
+                $resteStartDT = $stopDate->add(new DateInterval('P1D'));
+                $resteStart = $resteStartDT->format('d/m/Y');
+                $resteStopDT = $resteStartDT->add(new DateInterval('P' . $dureePeriodeIncomplette . 'M'));
+                $resteStopDT->sub(new DateInterval('P1D'));
+                $resteStop  = $resteStopDT->format('d/m/Y');
+            }
+            
+            $periodes['periodes'][] = Array(
+                'START' => $resteStart,
+                'STOP'  => $resteStop,
+                'DATE_FACTURATION' => ($parentInstance->getData('facturation_echu')) ? $resteStop : $resteStart,
+                'HT' => $resteAPayer
+            );
+            
+        }
+        
+
+        return $periodes;
+        
+    }
 
     public function actionDeleteFacture($data, &$success) {
 

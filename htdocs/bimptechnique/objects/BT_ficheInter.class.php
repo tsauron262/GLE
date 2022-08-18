@@ -889,6 +889,7 @@ class BT_ficheInter extends BimpDolObject
 
     public function actionReattach_an_object($data, &$success)
     {
+        global $user;
         $warnings = [];
         $errors = [];
         $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $this->getData('fk_soc'));
@@ -898,14 +899,18 @@ class BT_ficheInter extends BimpDolObject
                 $errors[] = "Vous ne pouvez pas rattacher aucun objet";
                 break;
             case 1:
-                $instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $data['fk_facture']);
-                if ($this->getData('fk_soc') == $instance->getData('fk_soc')) {
-                    $this->set('fk_facture', $data['fk_facture']);
-                    addElementElement('fichinter', 'facture', $this->id, $data['fk_facture']);
+                if($user->rights->bimptechnique->billing) {
+                    $instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $data['fk_facture']);
+                    if ($this->getData('fk_soc') == $instance->getData('fk_soc')) {
+                        $this->set('fk_facture', $data['fk_facture']);
+                        addElementElement('fichinter', 'facture', $this->id, $data['fk_facture']);
+                    } else {
+                        $errors[] = "La facture sélectionnée n'est pas à ce client";
+                    }
+                    $errors = BimpTools::merge_array($errors, $this->update($warnings, true));
                 } else {
-                    $errors[] = "La facture sélectionnée n'est pas à ce client";
+                    $errors[] = 'Vous n\'avez pas les droits pour rattacher une facture à une fiche d\'intervention';
                 }
-                $errors = BimpTools::merge_array($errors, $this->update($warnings, true));
                 break;
             case 2:
                 $instance = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $data['id_contrat']);

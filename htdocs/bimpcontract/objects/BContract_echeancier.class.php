@@ -848,6 +848,24 @@ class BContract_echeancier extends BimpObject {
         
     }
     
+    public function getDureeMoisPeriode($dateStart, $dateStop):int {
+        $mois = 0;
+        
+        $start = new DateTime($dateStart . ' 00:00:00');
+        $stop  = new DateTime($dateStop . ' 00:00:00');
+        $mois = $start->diff($stop)->m;
+        
+        return $mois + 1;
+    }
+    
+    public function getAmountByMonth() {
+        $parentInstance = $this->getParentInstance();
+        $reste_a_payer = $parentInstance->reste_a_payer() / $parentInstance->getData('duree_mois');
+        
+        return $reste_a_payer;
+        
+    }
+    
     public function getAllPeriodes():array {
         
         $periodes = Array();
@@ -863,8 +881,9 @@ class BContract_echeancier extends BimpObject {
         $nombrePeriodesComplettes = $dureePeriodesComplettes / $periodicity;
 
         $periodes['infos'] = Array(
-            'nombre_periodes' => $nombrePeriodesComplettes, 
-            'periode_incomplette_mois' => $dureePeriodeIncomplette
+            'nombre_periodes'           => $nombrePeriodesComplettes, 
+            'periode_incomplette_mois'  => $dureePeriodeIncomplette,
+            'tarif_au_mois'             => $this->getAmountByMonth()
         );
         
         $i = 1;
@@ -878,18 +897,26 @@ class BContract_echeancier extends BimpObject {
                 if(!count($periodes['periodes'])) {
                     $haveOtherPeriodes = true;
                     $startDate = $dateStartEcheancier->format('d/m/Y');
+                    $startDateForPeriode = $dateStartEcheancier->format('Y-m-d');
                     $stopDate = $dateStartEcheancier;
                 } else {
                     $startDate = $stopDate->add(new DateInterval('P1D'))->format('d/m/Y');
+                    $startDateForPeriode = $stopDate->add(new DateInterval('P1D'))->format('Y-m-d');
                 }
-
+                
                 $stopDate = $alternateStartDate->add(new DateInterval('P' . $periodicity . 'M'));
                 $stopDate->sub(new DateInterval('P1D'));
+                
+                $price = $this->getDureeMoisPeriode($startDateForPeriode, $stopDate->format('Y-m-d')) * $periodes['infos']['tarif_au_mois'];
+                
                 $periodes['periodes'][] = Array(
                     'START' => $startDate,
                     'STOP'  => $stopDate->format('d/m/Y'),
                     'DATE_FACTURATION' => ($parentInstance->getData('facturation_echu')) ? $stopDate->format('d/m/Y') : $startDate,
-                    'HT' => $resteAPayer
+                    'HT' => $resteAPayer,
+                    'DUREE_MOIS' => $this->getDureeMoisPeriode($startDateForPeriode, $stopDate->format('Y-m-d')),
+                    'PRICE' => $price,
+                    'TVA' => $price * 0.2
                 );
 
                 $alternateStartDate = $stopDate;
@@ -912,14 +939,20 @@ class BContract_echeancier extends BimpObject {
                 $resteStop  = $resteStopDT->format('d/m/Y');
             }
             
+            $price = $this->getDureeMoisPeriode($resteStartDT->format('Y-m-d'), $resteStopDT->format('Y-m-d')) * $periodes['infos']['tarif_au_mois'];
+            
             $periodes['periodes'][] = Array(
                 'START' => $resteStart,
                 'STOP'  => $resteStop,
                 'DATE_FACTURATION' => ($parentInstance->getData('facturation_echu')) ? $resteStop : $resteStart,
-                'HT' => $resteAPayer
+                'HT' => $resteAPayer,
+                'DUREE_MOIS' => $this->getDureeMoisPeriode($resteStartDT->format('Y-m-d'), $resteStopDT->format('Y-m-d')),
+                'PRICE' => $price,
+                'TVA' => $price * 0.2
             );
             
         }
+        
         
 
         return $periodes;

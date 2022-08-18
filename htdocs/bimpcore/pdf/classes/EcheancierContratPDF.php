@@ -16,7 +16,7 @@
 
             $this->langs->load("bills");
             $this->langs->load("products");
-            $this->typeObject = "contrat";
+            $this->typeObject = "contract";
         }
 
         protected function initData() {
@@ -35,7 +35,7 @@
 
         protected function initHeader()
         {
-            $docRef = 'test';
+            $docRef = $this->contrat->getRef() . '<br />&Eacute;tat au ' . date('d/m/Y');
 
             global $conf;
             $logo_file = $conf->mycompany->dir_output . '/logos/' . str_replace('.png', '_PRO.png', $this->fromCompany->logo);
@@ -82,7 +82,7 @@
                 'header_infos'  => $this->getSenderInfosHtml(),
                 'header_right'  => $header_right,
                 'primary_color' => $this->primary,
-                'doc_name'      => 'Relevé d\'interventions',
+                'doc_name'      => '&Eacute;chéancier',
                 'doc_ref'       => $docRef,
                 'ref_extra'     => ''
             );
@@ -106,116 +106,45 @@
             $allPeriodes = $this->echeancier->getAllPeriodes();
             
             if(count($allPeriodes['periodes']) > 0) {
-                $this->writeContent('<p style="font-weight: bold; font-size: 12px">Echéancier pour ' . $allPeriodes['infos']['nombre_periodes'] . ' ' . (($allPeriodes['infos']['nombre_periodes'] > 0) ? 'périodes' : 'periode') . '</p>');
+                $this->writeContent('<p style="font-weight: bold; font-size: 12px">Echéancier pour ' . ($allPeriodes['infos']['nombre_periodes'] + $allPeriodes['infos']['periode_incomplette_mois'] ) . ' ' . (($allPeriodes['infos']['nombre_periodes'] + $allPeriodes['infos']['periode_incomplette_mois'] > 1) ? 'périodes' : 'periode') . '</p>');
                 $table = new BimpPDF_Table($this->pdf);
             
                 $table->addCol('periode', 'Période de référence', 20, 'text-align: left;', '', 'text-align: left;');
                 $table->addCol('datePrelevement', 'Date de prélèvement', 20, 'text-align: center;', '', 'text-align: center;');
                 $table->addCol('ht', 'Montant HT', 20, 'text-align: center;', '', 'text-align: center;');
                 $table->addCol('tva', 'Montant TVA', 20, 'text-align: center;', '', 'text-align: center;');
-                $table->addCol('ht', 'Montant TTC', 20, 'text-align: center;', '', 'text-align: center;');
+                $table->addCol('ttc', 'Montant TTC', 20, 'text-align: center;', '', 'text-align: center;');
                 
                 foreach($allPeriodes['periodes'] as $periode) {
+                    $total_ht += round($periode['PRICE'], 2);
+                    $total_tva += round($periode['TVA'], 2);
+                    $total_ttc += (round($periode['PRICE'], 2) + round($periode['TVA'], 2));
                     $table->rows[] = array(
-                        'periode'           => 'Du ' . $periode['START'] . ' au ' . $periode['STOP'],
+                        'periode'           => 'Du ' . $periode['START'] . ' au ' . $periode['STOP'] . ' ('.$periode['DUREE_MOIS'].' mois) ',
                         'datePrelevement'   => $periode['DATE_FACTURATION'],
-                        'ht'                => $periode['HT']
+                        'ht'                => round($periode['PRICE'], 2) . '€',
+                        'tva'               => round($periode['TVA'], 2) . '€',
+                        'ttc'               => (round($periode['PRICE'], 2) + round($periode['TVA'], 2)). '€'
                     );
+                    
                 }
                 
+                $table->rows[] = array(
+                    'periode'           => '',
+                    'datePrelevement'   => '<b style="text-align:right" >TOTAL</b>',
+                    'ht'                => '<b>'.$total_ht.'€</b>',
+                    'tva'               => '<b>'.$total_tva.'€</b>',
+                    'ttc'               => '<b>'.$total_ttc.'€</b>',
+                );
                 
 
                 $table->write();
+//                $html = $this->getTotauxRowsHtml($total_ht);
+//                $this->writeContent($html);
             } else {
                 $this->writeContent('<p style="font-weight: bold; font-size: 12px">Aucune période pour ce contrat</p>');
             }
             
-            
-            
-//            $intervention = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter');
-//            $inters_valid = $intervention->getList(BimpTools::merge_array($this->filters, Array('fk_statut' => array('operator' => '>', 'value' => 0))));
-//
-//            if (!count($inters_valid)) {
-//                $this->writeContent('<p style="font-weight: bold; font-size: 12px">Aucune intervention effectuées</p>');
-//            } else {
-//
-//                $this->writeContent('<h3>Interventions effectuées</h3>');
-//
-//                $table = new BimpPDF_Table($this->pdf);
-//
-//                $table->addCol('ref', 'N° fiche intervention', 20, 'text-align: left;', '', 'text-align: left;');
-//                $table->addCol('contrat', 'Contrat', 20, 'text-align: left;', '', 'text-align: left;');
-//                $table->addCol('tech', 'Intervenant', 28, 'text-align: left;', '', 'text-align: left;');
-//                $table->addCol('date', 'Date d\'intervention', 20, 'text-align: center;', '', 'text-align: center;');
-//                $table->addCol('urgent', 'Intervention urgente', 23, 'text-align: center;', '', 'text-align: center;');
-//                $table->addCol('temps_passer', 'Temps passé', 25, 'text-align: center;', '', 'text-align: center;');
-//
-//                foreach($inters_valid as $data) {
-//                    $instance = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter', $data['rowid']);
-//
-//                    $this->total_time += $instance->getData('duree');
-//
-//                    if($instance->getData('fk_contrat')){
-//                        $this->contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $instance->getData('fk_contrat'));
-//                    }
-//
-//                    $table->rows[] = array(
-//                        'ref'           => $instance->getRef(),
-//                        'contrat'       => ($this->contrat) ? $this->contrat->getRef() . ' (' . $this->contrat->displayData('statut') . ')' : 'Non liée',
-//                        'tech'          => $instance->displayData('fk_user_tech', 'default', false, true),
-//                        'date'          => $instance->displayData('datei', 'default', false, true),
-//                        'urgent'        => $instance->displayData('urgent', 'default', false, true),
-//                        'temps_passer'  => BimpTools::displayTimefromSeconds($instance->getData('duree'), '', 0, 0, 1, 2),
-//                    );
-//                    $this->contrat = null;
-//                }
-//                $table->write();
-//            }
-//
-//
-//            if(isset($this->want_contrat) && is_object($this->want_contrat)){
-//                $vendue = $this->want_contrat->getDurreeVendu();
-//            }
-//            $html = $this->getTotauxRowsHtml($this->total_time, $vendue);
-//            $this->writeContent($html);
-//
-//            $inters_valid_nok = $intervention->getList(BimpTools::merge_array($this->filters, Array('fk_statut' => array('operator' => '=', 'value' => 0))));
-//
-//                if(!count($inters_valid_nok)) {
-//                    $this->writeContent('<br /><p style="font-weight: bold; font-size: 12px">Aucune intervention à venir / en cours</p>');
-//                } else {
-//                    $this->writeContent('<br /><h3>Interventions à venir / en cours</h3>');
-//                    $table2 = new BimpPDF_Table($this->pdf);
-//
-//                    $table2->addCol('ref', 'N° fiche intervention', 20, 'text-align: left;', '', 'text-align: left;');
-//                    $table2->addCol('contrat', 'Contrat', 20, 'text-align: left;', '', 'text-align: left;');
-//                    $table2->addCol('tech', 'Intervenant', 28, 'text-align: left;', '', 'text-align: left;');
-//                    $table2->addCol('date', 'Date d\'intervention', 20, 'text-align: center;', '', 'text-align: center;');
-//                    $table2->addCol('urgent', 'Intervention urgente', 23, 'text-align: center;', '', 'text-align: center;');
-//                    $table2->addCol('temps_passer', 'Temps passé', 25, 'text-align: center;', '', 'text-align: center;');
-//
-//                    foreach($inters_valid_nok as $data) {
-//                        $instance = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter', $data['rowid']);
-//
-//    //                    $this->total_time += $instance->getData('duree');
-//
-//                        if($instance->getData('fk_contrat')){
-//                            $this->contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $instance->getData('fk_contrat'));
-//                        }
-//
-//                        $table2->rows[] = array(
-//                            'ref'           => $instance->getRef(),
-//                            'contrat'       => ($this->contrat) ? $this->contrat->getRef() . ' (' . $this->contrat->displayData('statut') . ')' : 'Non liée',
-//                            'tech'          => $instance->displayData('fk_user_tech', 'default', false, true),
-//                            'date'          => $instance->displayData('datei', 'default', false, true),
-//                            'urgent'        => $instance->displayData('urgent', 'default', false, true),
-//                            'temps_passer'  => BimpTools::displayTimefromSeconds($instance->getData('duree'), '', 0, 0, 1, 2),
-//                        );
-//                        $this->contrat = null;
-//                    }
-//
-//                    $table2->write();
-//                }
         }
 
         public function getBottomRightHtml()
@@ -229,7 +158,7 @@
 
         }
 
-        public function getTotauxRowsHtml($realisee, $vendue = 0)
+        public function getTotauxRowsHtml($montant)
         {
             $html = "";
             $reste = 0;
@@ -237,31 +166,12 @@
 
 
             $html .= '<table style="width: 100%" cellpadding="5">';
-
-            if($vendue > 0){
-                $html .= '<tr>';
-                $html .= '<td style="background-color: #F0F0F0;">Vendue</td>';
-                $html .= '<td style="text-align: center;background-color: #F0F0F0;">';
-                $html .= BimpTools::displayTimefromSeconds($vendue, 0);
-                $html .= '</td>';
-                $html .= '</tr>';
-                $reste = $vendue - $realisee;
-            }
             $html .= '<tr>';
-            $html .= '<td style="background-color: #F0F0F0;">Temps total consommé</td>';
+            $html .= '<td style="background-color: #F0F0F0;">Total HT</td>';
             $html .= '<td style="text-align: center;background-color: #F0F0F0;">';
-            $html .= BimpTools::displayTimefromSeconds($realisee, 0);
+            $html .= $montant;
             $html .= '</td>';
             $html .= '</tr>';
-            if($reste != 0){
-                $html .= '<tr>';
-                $html .= '<td style="background-color: #F0F0F0;">Restant</td>';
-                $html .= '<td style="text-align: center;background-color: #F0F0F0;">';
-                $html .= BimpTools::displayTimefromSeconds($reste, 0);
-                $html .= '</td>';
-                $html .= '</tr>';
-            }
-
             $html .= '</table>';
 
             return $html;

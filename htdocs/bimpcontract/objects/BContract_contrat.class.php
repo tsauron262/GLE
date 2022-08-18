@@ -17,16 +17,17 @@ require_once DOL_DOCUMENT_ROOT . '/bimptechnique/objects/BT_ficheInter.class.php
      * - Gérer le droit canClientView() pour la visualisation du document sur l'espace public. 
      */
 
-class BContract_contrat extends BimpDolObject
+class BContract_contrat extends BimpDolObject 
 {
 
     //public $redirectMode = 4;
     public static $email_type = 'contract';
     public $email_group = "";
     public $email_facturation = "";
-    public static $element_name = "contract";
+    public static $element_name = "contrat";
     public static $dol_module = 'contrat';
     public static $files_module_part = 'contract';
+    public static $modulepart = 'contract';
 
     // Les status
     CONST CONTRAT_STATUT_ABORT = -1;
@@ -179,6 +180,11 @@ class BContract_contrat extends BimpDolObject
         $this->email_group = BimpCore::getConf('email_groupe', '', 'bimpcontract'); // A éviter, faire getConf() à chaque fois que nécessaire
         $this->email_facturation = BimpCore::getConf('email_facturation', '', 'bimpcontract');
         return parent::__construct($module, $object_name);
+    }
+    
+    public function getDirOutput() {
+        global $conf;
+        return $conf->contract->dir_output;
     }
     
     public function isContratDelegation():bool {
@@ -451,13 +457,6 @@ class BContract_contrat extends BimpDolObject
     public function getPeriodeString()
     {
         return self::$period[$this->getData('periodicity')];
-    }
-
-    public function getDirOutput()
-    {
-        global $conf;
-
-        return $conf->contrat->dir_output;
     }
 
     public function actionCreateFi($data, &$success)
@@ -3271,8 +3270,10 @@ class BContract_contrat extends BimpDolObject
     public function actionGeneratePdfEcheancier($data, &$success)
     {
         global $langs;
+        $errors = $warnings = array();
         $success = "PDF de l'échéancier généré avec succès";
         $this->dol_object->generateDocument('echeancierContrat', $langs);
+        return array('errors' => $errors, 'warnings' => $warnings);
     }
     /* OTHERS FUNCTIONS */
 
@@ -4773,6 +4774,8 @@ class BContract_contrat extends BimpDolObject
 
         return $file_name;
     }
+    
+
     
     
     public function getSignatureDocFileDir($doc_type)

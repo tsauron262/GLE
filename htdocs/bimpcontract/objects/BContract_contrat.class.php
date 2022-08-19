@@ -2291,13 +2291,23 @@ class BContract_contrat extends BimpDolObject
                 'form_name' => 'create_signature'
             )));        
         
-//        if(file_exists($this->getSignatureDocFileUrl('contrat'))) {
-            $buttons[] = array(
-                'label'   => 'Télécharger contrat signé DocuSign',
-                'icon'    => 'fas_file-download',
-            'onclick' => $this->getJsActionOnclick('downloadSignature'));
-//        }
-        
+        if($this->getData('id_signature')) {
+            $file_name = $this->getSignatureDocFileName('contrat', true);
+            $file_dir = $this->getSignatureDocFileDir('contrat');
+            if(file_exists($file_dir . $file_name)) {
+                $button_download = array(
+                    'label'   => 'Télécharger contrat signé DocuSign',
+                    'icon'    => 'fas_file-download',
+                    'onclick' => $this->getJsActionOnclick('downloadSignature', array(), array('confirm_msg' => "Le fichier existe déjà, remplacer ?")));
+            } else {
+                $button_download = array(
+                    'label'   => 'Télécharger contrat signé DocuSign',
+                    'icon'    => 'fas_file-download',
+                    'onclick' => $this->getJsActionOnclick('downloadSignature'));
+            }
+            $buttons[] = $button_download;
+        }
+                    
         return $buttons;
     }
     
@@ -2364,8 +2374,17 @@ class BContract_contrat extends BimpDolObject
                 if(!count($errors)) {
                     $file_name = $this->getSignatureDocFileName('contrat', true);
                     $file_dir = $this->getSignatureDocFileDir('contrat');
-
-                    file_put_contents($file_dir . $file_name, $pdf_bin);
+                    
+                    // Supression de l'ancien fichier si il existe
+                    if(file_exists($file_dir . $file_name)){
+                        if(unlink($file_dir . $file_name))
+                            $warnings[] = "Ancien fichier supprimé avec succès";
+                        else
+                            $warnings[] = "Ancien fichier non supprimé";
+                    }
+                    
+                    if(!file_put_contents($file_dir . $file_name, $pdf_bin))
+                        $errors[] = "Erreur lors du déplacement du fichier";
                 }
             }
         }

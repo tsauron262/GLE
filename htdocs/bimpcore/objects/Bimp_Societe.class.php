@@ -1463,7 +1463,7 @@ class Bimp_Societe extends BimpDolObject
         if ($this->isLoaded()) {
             global $conf;
 
-            $sql = 'SELECT r.rowid as id, r.description, r.amount_ttc as amount';
+            $sql = 'SELECT r.rowid as id, r.description, r.amount_ttc as amount, r.fk_facture';
             $sql .= ' FROM ' . MAIN_DB_PREFIX . 'societe_remise_except r';
             $sql .= ' WHERE r.entity = ' . $conf->entity;
             $sql .= ' AND r.discount_type = ' . ($is_fourn ? 1 : 0);
@@ -1480,9 +1480,16 @@ class Bimp_Societe extends BimpDolObject
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
                     $disabled_label = static::getDiscountUsedLabel((int) $r['id'], false, $allowed);
+                    
+                    $label = BimpTools::getRemiseExceptLabel($r['description']);
+                    if($r['fk_facture'] > 0){
+                        $fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $r['fk_facture']);
+                        $label .= ' '.$fact->getData('facnumber');
+                    }
+                    $label .= ' (' . BimpTools::displayMoneyValue((float) $r['amount'], '') . ' TTC)' . ($disabled_label ? ' - ' . $disabled_label : '');
 
                     $discounts[(int) $r['id']] = array(
-                        'label'    => BimpTools::getRemiseExceptLabel($r['description']) . ' (' . BimpTools::displayMoneyValue((float) $r['amount'], '') . ' TTC)' . ($disabled_label ? ' - ' . $disabled_label : ''),
+                        'label'    =>  $label,
                         'disabled' => ($disabled_label ? 1 : 0),
                         'data'     => array(
                             'amount_ttc' => (float) $r['amount']

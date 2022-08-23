@@ -52,7 +52,8 @@ class Bimp_Facture extends BimpComm
         1  => array('label' => 'PDF en attente de validation', 'icon' => 'fas_hourglass-half', 'classes' => array('warning')),
         2  => array('label' => 'Export terminé', 'icon' => 'fas_check', 'classes' => array('success')),
         3  => array('label' => 'Echec export', 'icon' => 'fas_exclamation-circle', 'classes' => array('danger')),
-        4  => array('label' => 'Exporté via L\'interface Chorus Pro', 'icon' => 'fas_check', 'classes' => array('success'))
+        4  => array('label' => 'Exporté via L\'interface Chorus Pro', 'icon' => 'fas_check', 'classes' => array('success')),
+        5  => array('label' => 'Envoyé par e-mail sans export Chorus', 'icon' => 'fas_check', 'classes' => array('success'))
     );
 
     // Gestion des droits: 
@@ -163,6 +164,7 @@ class Bimp_Facture extends BimpComm
             case 'exportToChorus':
             case 'confirmChorusExport':
             case 'forceChorusExported':
+            case 'markSendNoChorusExport':
                 return ($user->admin || !empty($user->rights->bimpcommercial->chorus_exports));
         }
 
@@ -297,8 +299,6 @@ class Bimp_Facture extends BimpComm
 
         return parent::isFieldEditable($field, $force_edit);
     }
-    
-    
 
     public function isValidatable(&$errors = array())
     {
@@ -311,11 +311,11 @@ class Bimp_Facture extends BimpComm
             if (!BimpObject::objectLoaded($client)) {
                 $errors[] = 'Client absent';
             }
-            
-            
+
+
             //ref externe si consigne
-            if($client->getData('consigne_ref_ext') != '' && $this->getData('ref_client') == ''){
-                $errors[] = 'Attention la réf client ne peut pas être vide : <br/>'.nl2br($client->getData('consigne_ref_ext'));
+            if ($client->getData('consigne_ref_ext') != '' && $this->getData('ref_client') == '') {
+                $errors[] = 'Attention la réf client ne peut pas être vide : <br/>' . nl2br($client->getData('consigne_ref_ext'));
             }
         }
 
@@ -812,6 +812,7 @@ class Bimp_Facture extends BimpComm
                 return (count($errors) ? 0 : 1);
 
             case 'forceChorusExported':
+            case 'markSendNoChorusExport':
                 require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
 
                 if (!BimpAPI::isApiActive('piste')) {
@@ -1018,6 +1019,17 @@ class Bimp_Facture extends BimpComm
                 'icon'    => 'fas_file-export',
                 'onclick' => $this->getJsActionOnclick('forceChorusExported', array(), array(
                     'confirm_msg' => 'Veuillez confirmer que la facture a bien été déposée manuellement sur Chorus'
+                ))
+            );
+        }
+
+        // Marquer envoyé par e-mail sans export Chorus: 
+        if ($this->isActionAllowed('markSendNoChorusExport') && $this->canSetAction('markSendNoChorusExport')) {
+            $buttons[] = array(
+                'label'   => 'Marquer envoyé par e-mail sans export CHORUS',
+                'icon'    => 'fas_file-export',
+                'onclick' => $this->getJsActionOnclick('markSendNoChorusExport', array(), array(
+                    'confirm_msg' => 'Veuillez confirmer que la facture a bien été envoyée par e-mail sans eport CHORUS'
                 ))
             );
         }
@@ -2830,8 +2842,8 @@ class Bimp_Facture extends BimpComm
         }
 
         if (isset($data['pj']) && $data['pj']) {
-            foreach($data['pj'] as $pjId => $pjName)
-            $html .= ($html ? '<br/>' : '') . '<b>Fichier Joint : </b>' . $pjName.' Id Chorus : '.$pjId;
+            foreach ($data['pj'] as $pjId => $pjName)
+                $html .= ($html ? '<br/>' : '') . '<b>Fichier Joint : </b>' . $pjName . ' Id Chorus : ' . $pjId;
         }
 
         return $html;
@@ -5733,20 +5745,19 @@ class Bimp_Facture extends BimpComm
             $params = '{id_facture: ' . $this->id . ', id_struture: \'' . $id_structure . '\', code_service: \'' . $code_service . '\'});}';
             $success_callback = 'setTimeout(function() {BimpApi.loadRequestModalForm(null, \'Validation du fichier PDF sur Chorus\', \'piste\', \'soumettreFacture\', {}, ' . $params . ', 500);';
         }
-        
-        if (!count($errors) && isset($data['files_compl']) && count($data['files_compl'])){
+
+        if (!count($errors) && isset($data['files_compl']) && count($data['files_compl'])) {
             $api = BimpAPI::getApiInstance('piste');
             $chorus_data = $this->getData('chorus_data');
-            foreach($data['files_compl'] as $idF){
+            foreach ($data['files_compl'] as $idF) {
                 $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', $idF);
-                
-                $name = $file->getData('file_name').'.'.$file->getData('file_ext');
+
+                $name = $file->getData('file_name') . '.' . $file->getData('file_ext');
                 $id = $api->uploadFile($file->getFileDir(), $name);
-                if($id > 0)
-                $chorus_data['pj'][$id] = $file->getData('file_name').$file->getData('file_ext');
+                if ($id > 0)
+                    $chorus_data['pj'][$id] = $file->getData('file_name') . $file->getData('file_ext');
                 else
-                    $errors[] = 'Fichier '.$name.' non envoyé vers Chorus';
-                
+                    $errors[] = 'Fichier ' . $name . ' non envoyé vers Chorus';
             }
             $this->set('chorus_data', $chorus_data);
             $errors = BimpTools::merge_array($errors, $this->update($warnings));
@@ -5774,6 +5785,26 @@ class Bimp_Facture extends BimpComm
         }
 
         $errors = $this->updateField('chorus_status', 4);
+
+        if (!count($errors)) {
+            $this->addLog($log);
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionMarkSendNoChorusExport($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = BimpTools::ucfirst($this->getLabel()) . ' marqué' . $this->e() . ' evoyé' . $this->e() . ' par e-mail sans export vers Chorus';
+
+        $log = 'Export Chorus non effectué - ' . $this->getLabel() . ' envoyé' . $this->e() . ' par e-mail';
+
+        $errors = $this->updateField('chorus_status', 5);
 
         if (!count($errors)) {
             $this->addLog($log);

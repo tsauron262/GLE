@@ -34,6 +34,7 @@
             $code_compta            = $this->TRA_tiers->getCodeComptable($fournisseur, 'code_compta_fournisseur');
             $use_autoliquidation    = ($facture->getData('zone_vente') == 2 || $facture->getData('zone_vente') == 4) ? true : false;
             $datec                  = new DateTime($facture->getData('datec'));
+            $datef                  = new DateTime($facture->getData('datef'));
             $reglement              = $this->db->getRow('c_paiement', 'id = ' . $facture->getData('fk_mode_reglement'));
             $TTC                    = $facture->getData('total_ttc');
             $this->sensFacture      = ($TTC > 0) ? "C" : "D";
@@ -56,7 +57,7 @@
             
             $structure = array();
             $structure['JOURNAL']                   = sizing(code_journal($facture->getData('ef_type'), 'A', $interco), 3);
-            $structure['DATE']                      = sizing($datec->format('dmY'), 8);
+            $structure['DATE']                      = sizing($datef->format('dmY'), 8);
             $structure['TYPE_PIECE']                = sizing($this->getTypePiece($facture->getData('type')), 2);
             $structure['COMPTE_GENERAL']            = sizing($this->compte_general, 17);
             $structure['TYPE_DE_COMPTE']            = sizing('X', 1);

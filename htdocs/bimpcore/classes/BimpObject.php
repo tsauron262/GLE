@@ -2111,9 +2111,9 @@ class BimpObject extends BimpCache
         $result['errors'] = BimpTools::merge_array($result['errors'], BimpTools::getDolEventsMsgs(array('errors')));
 
 //        BimpLog::actionEnd('bimpobject_action', (isset($errors['errors']) ? $errors['errors'] : $errors), (isset($errors['warnings']) ? $errors['warnings'] : array()));
-
+        global $dont_rollback;
         if ($use_db_transactions) {
-            if (isset($result['errors']) && count($result['errors'])) {
+            if (isset($result['errors']) && count($result['errors']) and !isset($dont_rollback)) {
                 $instance->db->db->rollback();
 
                 if ((int) BimpCore::getConf('log_actions_rollbacks')) {

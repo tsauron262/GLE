@@ -2283,12 +2283,12 @@ class BContract_contrat extends BimpDolObject
         }
         
         
-        $buttons[] = array(
-            'label'   => 'Créer signature',
-            'icon'    => 'fas_play',
-            'onclick' => $this->getJsActionOnclick('createSignature', array(), array(
-                'form_name' => 'create_signature'
-            )));        
+//        $buttons[] = array(
+//            'label'   => 'Créer signature',
+//            'icon'    => 'fas_play',
+//            'onclick' => $this->getJsActionOnclick('createSignature', array(), array(
+//                'form_name' => 'create_signature'
+//            )));        
         
         if($this->getData('id_signature')) {
             $file_name = $this->getSignatureDocFileName('contrat', true);
@@ -4910,8 +4910,8 @@ class BContract_contrat extends BimpDolObject
                             'doc_type'   => 'contrat',
                             'id_client'  => $this->getData('fk_soc'),
                             'id_contact' => $id_contact,
-//                            'allow_dist' => 1,
-                            'dist_type'  => BimpSignature::DIST_DOCUSIGN
+                            'dist_type'  => BimpSignature::DIST_DOCUSIGN,
+                            'type'       => BimpSignature::TYPE_ELEC
                                 ), true, $errors);
 
                 if (!count($errors) && BimpObject::objectLoaded($signature)) {

@@ -1,7 +1,7 @@
 table: bimpcore_conf
 common_fields: 0
 
-label: 
+labels: 
     name: variable de conf
     name_plur: variables de conf
     

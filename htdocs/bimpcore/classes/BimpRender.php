@@ -780,6 +780,7 @@ class BimpRender
         if (is_null($modal_view)) {
             $modal_view = '';
         }
+        
         $html = '';
         if ($page_link) {
             if (is_null($url)) {
@@ -800,7 +801,8 @@ class BimpRender
                 }
             }
         }
-        if ($modal_view && is_a($object, 'BimpObject')) {
+        
+        if ($modal_view && is_a($object, 'BimpObject') && $object->config->isDefined('views/' . $modal_view)) {
             $title = $object->getInstanceName();
             $title = str_replace('\'', '\\\'', $title);
             $title = str_replace('"', '\\\'\\\'', $title);

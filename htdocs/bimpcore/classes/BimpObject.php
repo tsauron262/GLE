@@ -2,7 +2,7 @@
 
 class BimpObject extends BimpCache
 {
-
+    
     public $db = null;
     public $cache_id = 0;
     public $module = '';
@@ -201,7 +201,7 @@ class BimpObject extends BimpCache
                                     }
                                 }
                             }
-                            
+
                             $ext_instance = new $ext_className($ext_module, $ext_object_name);
                             continue;
                         }
@@ -2113,7 +2113,7 @@ class BimpObject extends BimpCache
 //        BimpLog::actionEnd('bimpobject_action', (isset($errors['errors']) ? $errors['errors'] : $errors), (isset($errors['warnings']) ? $errors['warnings'] : array()));
         global $dont_rollback;
         if ($use_db_transactions) {
-            if (isset($result['errors']) && count($result['errors']) and !isset($dont_rollback)) {
+            if (isset($result['errors']) && count($result['errors']) and!isset($dont_rollback)) {
                 $instance->db->db->rollback();
 
                 if ((int) BimpCore::getConf('log_actions_rollbacks')) {
@@ -4263,7 +4263,7 @@ class BimpObject extends BimpCache
                 }
 
                 if (!count($errors)) {
-                    $success = 'Création ' . $this->getLabel('of_the') . ' effectuée avec succès : '.$this->getLink();
+                    $success = 'Création ' . $this->getLabel('of_the') . ' effectuée avec succès : ' . $this->getLink();
                     if (method_exists($this, 'getCreateJsCallback')) {
                         $success_callback = $this->getCreateJsCallback();
                     }
@@ -8488,6 +8488,10 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
         $label = (isset($params['syntaxe']) && (string) $params['syntaxe'] ? $params['syntaxe'] : $default_syntaxe);
 
+        if ($label === '<ref> - <name>' && !$ref_prop) {
+            $label = '<name>';
+        }
+
         $n = 0;
         while (preg_match('/<(.+)>/U', $label, $matches)) {
             $field = $matches[1];
@@ -8823,7 +8827,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         return self::getObjectLinkedObjectsArray($this, $include_empty);
     }
-    
+
     public function getFullLinkedObjetsArray($include_empty = false)
     {
         return self::getObjectFullLinkedObjetsArray($this, $include_empty);

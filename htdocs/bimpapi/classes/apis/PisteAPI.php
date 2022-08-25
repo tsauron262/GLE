@@ -18,28 +18,28 @@ class PisteAPI extends BimpAPI
         )
     );
     public static $requests = array(
-        'authenticate'       => array(
+        'authenticate'              => array(
             'label'         => 'Authentification',
             'url_base_type' => 'auth',
             'post_mode'     => 'string'
         ),
-        'rechercheStructure' => array(
+        'rechercheStructure'        => array(
             'label' => 'Recherche stucture',
             'url'   => '/cpro/structures/v1/rechercher'
         ),
-        'consulterStructure' => array(
+        'consulterStructure'        => array(
             'label' => 'Consulter une structure',
             'url'   => '/cpro/structures/v1/consulter'
         ),
-        'rechercheService'   => array(
+        'rechercheService'          => array(
             'label' => 'Recherche service',
             'url'   => '/cpro/structures/v1/rechercher/services'
         ),
-        'deposerPdfFacture'  => array(
+        'deposerPdfFacture'         => array(
             'label' => 'Dépôt PDF facture',
             'url'   => '/cpro/factures/v1/deposer/pdf'
         ),
-        'soumettreFacture'   => array(
+        'soumettreFacture'          => array(
             'label' => 'Envoi données facture',
             'url'   => '/cpro/factures/v1/soumettre'
         ),
@@ -47,7 +47,7 @@ class PisteAPI extends BimpAPI
             'label' => 'Ajouter Fichier Dans Systeme',
             'url'   => '/cpro/transverses/v1/ajouter/fichier'
         ),
-        'typepj'             => array(
+        'typepj'                    => array(
             'label' => 'Type piéce jointe',
             'url'   => '/cpro/transverses/v1/recuperer/typespj'
         )
@@ -63,7 +63,7 @@ class PisteAPI extends BimpAPI
         if ($this->options['mode'] == 'test') {
             $siret = '12345678200051';
         }
-        
+
         $params = BimpTools::overrideArray(array(
                     'fields' => array(
                         'structure' => array(
@@ -100,7 +100,7 @@ class PisteAPI extends BimpAPI
     {
         $params = BimpTools::overrideArray(array(
                     'fields' => array(
-                        'idStructure' => (int) $id_structure,
+                        'idStructure'                           => (int) $id_structure,
                         'parametresRechercherServicesStructure' => array(
                             'nbResultatsParPage' => 3000
                         )
@@ -144,6 +144,24 @@ class PisteAPI extends BimpAPI
         }
 
         return null;
+    }
+
+    public function getTypePj(&$errors = array(), $type = 'FACTURE')
+    {
+        $data = $this->execCurl('typepj', array('fields' => array(
+                "typeObjet"  => $type,
+                "codeLangue" => "fr"
+            )), $errors);
+
+        $return = array();
+
+        if (isset($data['listeTypePieceJointe'])) {
+            foreach ($data['listeTypePieceJointe'] as $typedata) {
+                $return[$typedata['codeTypePieceJointe']] = $typedata['libelleTypePieceJointe'];
+            }
+        }
+
+        return $return;
     }
 
     // Overrides: 
@@ -255,70 +273,49 @@ class PisteAPI extends BimpAPI
 
         return $return;
     }
-    
-    public function getTypePj(&$errors = array(), $type = 'FACTURE'){
-        
-//        return array('jhhkjh'=>'kjjljklj');
-        $data = $this->execCurl('typepj', array('fields' => array(
-             "typeObjet"=> $type,
-             "codeLangue"=> "fr"
-        )), $errors);
-        
-        $return = array();
-        if(isset($data['listeTypePieceJointe']))
-            foreach($data['listeTypePieceJointe'] as $typedata){
-                $return[$typedata['codeTypePieceJointe']] = $typedata['libelleTypePieceJointe'];
-            }
-        return $return;
-    }
 
     public function testRequest(&$errors = array(), &$warnings = array())
     {
 
         $data = array('fields' => array(
-             "typeObjet"=> "FACTURE",
-             "codeLangue"=> "fr"
+                "typeObjet"  => "FACTURE",
+                "codeLangue" => "fr"
         ));
 //        print_r($this->execCurl('ajouterFichierDansSysteme', $data, $errors));
 //        die;
-        
-        return $this->execCurl('typepj', $data, $errors);
-        
-        
-        
-        
-        
-            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', 1090967);
 
-                $file_name = dol_sanitizeFileName($facture->getRef()) . '.pdf';
-                $dir = $facture->getFilesDir();
-        
+        return $this->execCurl('typepj', $data, $errors);
+
+        $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', 1090967);
+
+        $file_name = dol_sanitizeFileName($facture->getRef()) . '.pdf';
+        $dir = $facture->getFilesDir();
+
         $data = array('fields' => array(
-            
-            "idUtilisateurCourant"=> 0,
-            "pieceJointeFichier"=> base64_encode(file_get_contents($dir . '/' . $file_name)),
-            "pieceJointeNom"=> 'bis-'.$file_name,
-            "pieceJointeTypeMime"=> mime_content_type($dir . '/' . $file_name),
-            "pieceJointeExtension"=> pathinfo($dir . '/' . $file_name, PATHINFO_EXTENSION),
+                "idUtilisateurCourant" => 0,
+                "pieceJointeFichier"   => base64_encode(file_get_contents($dir . '/' . $file_name)),
+                "pieceJointeNom"       => 'bis-' . $file_name,
+                "pieceJointeTypeMime"  => mime_content_type($dir . '/' . $file_name),
+                "pieceJointeExtension" => pathinfo($dir . '/' . $file_name, PATHINFO_EXTENSION),
         ));
 //        print_r($this->execCurl('ajouterFichierDansSysteme', $data, $errors));
 //        die;
-        
+
         return $this->execCurl('ajouterFichierDansSysteme', $data, $errors);
     }
-    
-    public function uploadFile($dir, $file_name){
+
+    public function uploadFile($dir, $file_name)
+    {
         $data = array('fields' => array(
-            
-            "idUtilisateurCourant"=> 0,
-            "pieceJointeFichier"=> base64_encode(file_get_contents($dir . '/' . $file_name)),
-            "pieceJointeNom"=> $file_name,
-            "pieceJointeTypeMime"=> mime_content_type($dir . '/' . $file_name),
-            "pieceJointeExtension"=> pathinfo($dir . '/' . $file_name, PATHINFO_EXTENSION),
+                "idUtilisateurCourant" => 0,
+                "pieceJointeFichier"   => base64_encode(file_get_contents($dir . '/' . $file_name)),
+                "pieceJointeNom"       => $file_name,
+                "pieceJointeTypeMime"  => mime_content_type($dir . '/' . $file_name),
+                "pieceJointeExtension" => pathinfo($dir . '/' . $file_name, PATHINFO_EXTENSION),
         ));
-        
+
         $data = $this->execCurl('ajouterFichierDansSysteme', $data, $errors);
-        if(isset($data['pieceJointeId']))
+        if (isset($data['pieceJointeId']))
             return $data['pieceJointeId'];
         return 0;
     }
@@ -436,13 +433,13 @@ class PisteAPI extends BimpAPI
                                     )
                                 )
                             );
-                            
-                            if(isset($chorus_data['pj']) && count($chorus_data['pj'])){
-                                foreach($chorus_data['pj'] as $pjId => $pjName){
+
+                            if (isset($chorus_data['pj']) && count($chorus_data['pj'])) {
+                                foreach ($chorus_data['pj'] as $pjId => $pjName) {
                                     $fields['pieceJointeComplementaire'][] = array(
                                         'pieceJointeComplementaireDesignation' => dol_sanitizeFileName($pjName),
                                         'pieceJointeComplementaireId'          => (int) $pjId,
-                                        'pieceJointeComplementaireType'     => ''
+                                        'pieceJointeComplementaireType'        => ''
                                     );
                                 }
                             }
@@ -454,7 +451,6 @@ class PisteAPI extends BimpAPI
 
         return $fields;
     }
-    
 
     public function onRequestFormSuccess($request_name, $result, &$warnings = array())
     {

@@ -44,6 +44,12 @@ objects:
                 module: bimpapi
                 name: API_UserAccount
                 
+    bws_profiles: 
+        instance: 
+            bimp_object: 
+                module: bimpwebservice
+                name: BWS_Profile
+                
 sections:
     - type: tabs
       tabs: 
@@ -79,6 +85,9 @@ sections:
         logs:
             label: Logs BimpCore
             icon: fas_book-medical
+            show:
+                conf: 
+                    name: use_bimp_logs
             sections:
                 - type: list
                   list: 
@@ -88,6 +97,10 @@ sections:
         processes: 
             label: Processus
             icon: fas_cogs
+            show:
+                conf: 
+                    name: module_version_bimpdatasync
+                    def: 0
             sections: 
                 - type: nav_tabs
                   nav_tabs: 
@@ -115,6 +128,10 @@ sections:
         apis: 
             label: APIs
             icon: fas_project-diagram
+            show:
+                conf: 
+                    name: module_version_bimpapi
+                    def: 0
             sections: 
                 - type: nav_tabs
                   nav_tabs: 
@@ -132,6 +149,25 @@ sections:
                                 type: list
                                 list: 
                                     object: api_user
+                                    
+        ws: 
+            label: Webservice
+            icon: fas_globe
+            show:
+                conf: 
+                    name: module_version_bimpwebservice
+                    def: 0
+            sections: 
+                - type: nav_tabs
+                  nav_tabs: 
+                      tabs_id: processes
+                      tabs: 
+                          - id: profiles
+                            title: Profiles
+                            struct: 
+                                type: list
+                                list: 
+                                    object: bws_profiles
                                     
                             
                       

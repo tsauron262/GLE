@@ -1,0 +1,112 @@
+table: bws_profile_right
+icon: fas_user-check
+common_fields: 0
+
+parent_module: bimpwebservice
+parent_object: BWS_Profile
+parent_id_property: id_profile
+
+labels: 
+    name: droit profil webservice
+    name_plur: droits profil webservice
+
+fields: 
+    id_profile: 
+        label: Profil
+        type: id_parent
+        required: 1
+    request_name: 
+        label: Requête
+        values: 
+            array: requests
+        required: 1
+    obj_module: 
+        label: Module
+        values: 
+            callback: 
+                method: getBimpModulesArray
+                params: 
+                    - 1
+                    - 1
+    obj_name: 
+        label: Objet
+        values: 
+            callback: 
+                method: getBimpModuleObjectsArray
+                params: 
+                    - field_value: obj_module
+                    - 1
+        search: 
+            input: 
+                type: text
+        depends_on: obj_module
+        display_if: 
+            field_name: obj_module
+            hide_values: ''
+    obj_filters: 
+        label: Filtres
+        type: object_filters
+        obj_module: 
+            field_value: obj_module
+        obj_name: 
+            field_value: obj_name
+        depends_on: obj_module,obj_name
+        display_if: 
+            fields_names: obj_module,obj_name
+            obj_module: 
+                hide_values: ''
+            obj_name: 
+                hide_values: ''
+                
+forms: 
+    default: 
+        rows: 
+            id_profile: 
+                field: id_profile
+            request_name: 
+                field: request_name
+            obj_module: 
+                field: obj_module
+            obj_name:
+                field: obj_name
+            obj_filters: 
+                field: obj_filters
+        
+    profile: 
+        extends: default
+        rows: 
+            id_profile: 
+                edit: 0
+                
+lists: 
+    default: 
+        sort_field: id
+        sort_way: desc
+        n: 10
+        add_btn: 1
+        add_form_name: default
+        edit_btn: 1
+        edit_form: default
+        delete_btn: 1
+        bulk_actions:
+            - label: supprimer les droits sélectionnés
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        extra_btn: 
+            callback: getListExtraBtn
+        cols: 
+            id_profile: 
+            request_name: 
+            obj_module: 
+            obj_name:
+            obj_filters:
+                
+    profile: 
+        extends: default
+        title: 
+            callback: getProfileListTitle
+        add_form_name: profile
+        edit_form: profile
+        cols: 
+            id_profile: unset
+        

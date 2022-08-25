@@ -402,7 +402,7 @@ class GSX_v2 extends GSX_Const
         curl_setopt($this->ch, CURLOPT_CONNECTTIMEOUT, 10);
         curl_setopt($this->ch, CURLOPT_TIMEOUT, 30);
         curl_setopt($this->ch, CURLOPT_HEADER, true);
-//    die($this->certPath);
+        
         return 1;
     }
 

@@ -76,9 +76,15 @@ abstract class BimpComponent
         return (!is_null($this->object) && is_a($this->object, 'BimpObject'));
     }
 
-    public function isOk()
+    public function isOk(&$errors = array())
     {
-        if (!empty($this->errors) || (!(string) $this->config_path && static::$config_required)) {
+        if (!empty($this->errors)) {
+            $errors = array_merge($errors, $this->errors);
+            return false;
+        }
+
+        if (!(string) $this->config_path && static::$config_required) {
+            $errors[] = 'Chemin des paramètres de configuration non défini';
             return false;
         }
 

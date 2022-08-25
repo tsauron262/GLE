@@ -1136,7 +1136,6 @@ class BC_ListTable extends BC_List
 
     public function renderHtmlContent()
     {
-
         ini_set('memory_limit', '1024M');
 
         $html = '';
@@ -1267,147 +1266,163 @@ class BC_ListTable extends BC_List
 
         $html = '';
 
-        if ($this->isOk() && count($this->cols)) {
-            $this->search = false;
-            $default_sort_way = $this->params['sort_way'];
+        $row_errors = array();
+        if ($this->isOk($row_errors)) {
+            if (count($this->cols)) {
+                $this->search = false;
+                $default_sort_way = $this->params['sort_way'];
 
-            $html .= '<tr class="headerRow">';
+                $html .= '<tr class="headerRow">';
 
-            $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">';
-            if ($this->params['checkboxes']) {
-                $html .= '<input type="checkbox" id="' . $this->identifier . '_checkall" onchange="toggleCheckAll(\'' . $this->identifier . '\', $(this));"/>';
-            }
-            $html .= '</th>';
-
-            if ($this->params['total_row']) {
-                $html .= '<th style="width: 45px; min-width: 45px"></th>';
-            }
-
-            if ($this->params['positions']) {
-                $html .= '<th class="positionHandle"' . (!$this->params['positions_open'] ? ' style="display: none"' : '') . '></th>';
-            }
-
-            $cols_errors = array();
-
-            foreach ($this->cols as $col_name => $col_params) {
-                $col_errors = array();
-                $field_name = '';
-                $field_object = self::getColFieldObject($this->object, $col_name, $field_name, $col_errors);
-
-                if (!empty($col_errors)) {
-                    $cols_errors[] = BimpTools::getMsgFromArray($col_errors, 'Colonne "' . $col_name . '"');
-                    continue;
-                }
-
-                $col_label = BimpTools::getArrayValueFromPath($col_params, 'label', '');
-                $sortable = false;
-
-                if ($this->params['enable_sort']) {
-                    if ($field_object->field_exists($field_name)) {
-                        if ($field_object->getConf('fields/' . $field_name . '/sortable', 1, false, 'bool')) {
-                            $sortable = true;
-                        }
-                    }
-                }
-
-                $html .= '<th';
-                if (isset($col_params['width']) && !is_null($col_params['width'])) {
-                    $html .= ' width="' . $col_params['width'] . '"';
-                }
-
-                $html .= ' style="';
-                if (isset($col_params['min_width']) && !is_null($col_params['min_width'])) {
-                    $html .= 'min-width: ' . $col_params['min_width'] . ';';
-                }
-                if (isset($col_params['max_width']) && !is_null($col_params['max_width'])) {
-                    $html .= 'max-width: ' . $col_params['max_width'] . ';';
-                }
-                $html .= '"';
-
-                $html .= ' data-col_name="' . $col_name . '"';
-                $html .= ' data-field_name="' . $field_name . '"';
-                $html .= '>';
-
-                if ($sortable) {
-                    $html .= '<span id="' . str_replace(':', '___', $col_name) . '_sortTitle" class="sortTitle sorted-';
-
-                    if ($this->params['sort_field'] === $col_name) {
-                        $html .= strtolower($this->params['sort_way']);
-                        if (!$this->params['positions_open']) {
-                            $html .= ' active';
-                        }
-                    } else {
-                        $html .= strtolower($default_sort_way);
-                    }
-                    if ($this->params['positions_open']) {
-                        $html .= ' deactivated';
-                    }
-                    $html .= '" onclick="if (!$(this).hasClass(\'deactivated\')) { sortList(\'' . $this->identifier . '\', \'' . $col_name . '\'); }">';
-
-                    $html .= $col_label . '</span>';
-                } else {
-                    $html .= $col_label;
+                $html .= '<th class="th_checkboxes" width="40px" style="text-align: center">';
+                if ($this->params['checkboxes']) {
+                    $html .= '<input type="checkbox" id="' . $this->identifier . '_checkall" onchange="toggleCheckAll(\'' . $this->identifier . '\', $(this));"/>';
                 }
                 $html .= '</th>';
 
-                if (!$this->search) {
-                    if ($this->object->getConf('fields/' . $field_name . '/searchable', 1, false, 'any')) {
-                        $this->search = true;
+                if ($this->params['total_row']) {
+                    $html .= '<th style="width: 45px; min-width: 45px"></th>';
+                }
+
+                if ($this->params['positions']) {
+                    $html .= '<th class="positionHandle"' . (!$this->params['positions_open'] ? ' style="display: none"' : '') . '></th>';
+                }
+
+                $cols_errors = array();
+
+                foreach ($this->cols as $col_name => $col_params) {
+                    $col_errors = array();
+                    $field_name = '';
+                    $field_object = self::getColFieldObject($this->object, $col_name, $field_name, $col_errors);
+
+                    if (!empty($col_errors)) {
+                        $cols_errors[] = BimpTools::getMsgFromArray($col_errors, 'Colonne "' . $col_name . '"');
+                        continue;
+                    }
+
+                    $col_label = BimpTools::getArrayValueFromPath($col_params, 'label', '');
+                    $sortable = false;
+
+                    if ($this->params['enable_sort']) {
+                        if ($field_object->field_exists($field_name)) {
+                            if ($field_object->getConf('fields/' . $field_name . '/sortable', 1, false, 'bool')) {
+                                $sortable = true;
+                            }
+                        }
+                    }
+
+                    $html .= '<th';
+                    if (isset($col_params['width']) && !is_null($col_params['width'])) {
+                        $html .= ' width="' . $col_params['width'] . '"';
+                    }
+
+                    $html .= ' style="';
+                    if (isset($col_params['min_width']) && !is_null($col_params['min_width'])) {
+                        $html .= 'min-width: ' . $col_params['min_width'] . ';';
+                    }
+                    if (isset($col_params['max_width']) && !is_null($col_params['max_width'])) {
+                        $html .= 'max-width: ' . $col_params['max_width'] . ';';
+                    }
+                    $html .= '"';
+
+                    $html .= ' data-col_name="' . $col_name . '"';
+                    $html .= ' data-field_name="' . $field_name . '"';
+                    $html .= '>';
+
+                    if ($sortable) {
+                        $html .= '<span id="' . str_replace(':', '___', $col_name) . '_sortTitle" class="sortTitle sorted-';
+
+                        if ($this->params['sort_field'] === $col_name) {
+                            $html .= strtolower($this->params['sort_way']);
+                            if (!$this->params['positions_open']) {
+                                $html .= ' active';
+                            }
+                        } else {
+                            $html .= strtolower($default_sort_way);
+                        }
+                        if ($this->params['positions_open']) {
+                            $html .= ' deactivated';
+                        }
+                        $html .= '" onclick="if (!$(this).hasClass(\'deactivated\')) { sortList(\'' . $this->identifier . '\', \'' . $col_name . '\'); }">';
+
+                        $html .= $col_label . '</span>';
+                    } else {
+                        $html .= $col_label;
+                    }
+                    $html .= '</th>';
+
+                    if (!$this->search) {
+                        if ($this->object->getConf('fields/' . $field_name . '/searchable', 1, false, 'any')) {
+                            $this->search = true;
+                        }
                     }
                 }
-            }
 
-            $tools_width = 64;
-            $tools_html = '<div class="headerTools">';
-            $tools_html .= '<span class="fa-spin loadingIcon"></span>';
+                $tools_width = 64;
+                $tools_html = '<div class="headerTools">';
+                $tools_html .= '<span class="fa-spin loadingIcon"></span>';
 
-            if (!is_null($this->params['filters_panel'])) {
-                $tools_html .= '<span class="headerButton openFiltersPanelButton open-close action-' . ($this->params['filters_panel_open'] ? 'close' : 'open') . '"></span>';
-                $tools_width += 44;
-            }
-            if ($this->search && $this->params['enable_search']) {
-                $tools_html .= '<span class="headerButton openSearchRowButton open-close action-' . ($this->params['search_open'] ? 'close' : 'open') . '"></span>';
-                $tools_width += 44;
-            }
-            if ($this->params['add_object_row']) {
-                $tools_html .= '<span class="headerButton openAddObjectRowButton open-close action-' . ($this->params['add_object_row_open'] ? 'close' : 'open') . '"></span>';
-                $tools_width += 44;
-            }
-            if ($this->params['positions']) {
-                $tools_html .= '<span class="headerButton activatePositionsButton bs-popover open-close action-' . ($this->params['positions_open'] ? 'close' : 'open') . '"';
-                $tools_html .= '></span>';
-                $tools_width += 44;
-            }
-            if ($this->params['checkboxes'] && (count($this->params['bulk_actions']) || count($this->params['extra_bulk_actions']))) {
-                $tools_html .= '<span class="headerButton displayPopupButton openBulkActionsPopupButton"';
-                $tools_html .= ' data-popup_id="' . $this->identifier . '_bulkActionsPopup"></span>';
-                $tools_html .= $this->renderBulkActionsPopup();
-                $tools_width += 32;
-            }
+                if (!is_null($this->params['filters_panel'])) {
+                    $tools_html .= '<span class="headerButton openFiltersPanelButton open-close action-' . ($this->params['filters_panel_open'] ? 'close' : 'open') . '"></span>';
+                    $tools_width += 44;
+                }
+                if ($this->search && $this->params['enable_search']) {
+                    $tools_html .= '<span class="headerButton openSearchRowButton open-close action-' . ($this->params['search_open'] ? 'close' : 'open') . '"></span>';
+                    $tools_width += 44;
+                }
+                if ($this->params['add_object_row']) {
+                    $tools_html .= '<span class="headerButton openAddObjectRowButton open-close action-' . ($this->params['add_object_row_open'] ? 'close' : 'open') . '"></span>';
+                    $tools_width += 44;
+                }
+                if ($this->params['positions']) {
+                    $tools_html .= '<span class="headerButton activatePositionsButton bs-popover open-close action-' . ($this->params['positions_open'] ? 'close' : 'open') . '"';
+                    $tools_html .= '></span>';
+                    $tools_width += 44;
+                }
+                if ($this->params['checkboxes'] && (count($this->params['bulk_actions']) || count($this->params['extra_bulk_actions']))) {
+                    $tools_html .= '<span class="headerButton displayPopupButton openBulkActionsPopupButton"';
+                    $tools_html .= ' data-popup_id="' . $this->identifier . '_bulkActionsPopup"></span>';
+                    $tools_html .= $this->renderBulkActionsPopup();
+                    $tools_width += 32;
+                }
 
-            $parametersPopUpHtml = $this->renderParametersPopup();
-            if ($parametersPopUpHtml) {
-                $tools_html .= '<div style="display: inline-block">';
-                $tools_html .= '<span class="headerButton displayPopupButton openParametersPopupButton"';
-                $tools_html .= ' data-popup_id="' . $this->identifier . '_parametersPopup"></span>';
-                $tools_html .= $parametersPopUpHtml;
+                $parametersPopUpHtml = $this->renderParametersPopup();
+                if ($parametersPopUpHtml) {
+                    $tools_html .= '<div style="display: inline-block">';
+                    $tools_html .= '<span class="headerButton displayPopupButton openParametersPopupButton"';
+                    $tools_html .= ' data-popup_id="' . $this->identifier . '_parametersPopup"></span>';
+                    $tools_html .= $parametersPopUpHtml;
+                    $tools_html .= '</div>';
+                    $tools_width += 32;
+                }
+
+                if ($this->params['enable_refresh']) {
+                    $tools_html .= '<span class="headerButton refreshListButton bs-popover"';
+                    $tools_html .= BimpRender::renderPopoverData('Actualiser les lignes', 'left', false, '#' . $this->identifier);
+                    $tools_html .= '></span>';
+                    $tools_width += 32;
+                }
+
                 $tools_html .= '</div>';
-                $tools_width += 32;
+
+                $html .= '<th class="th_tools" style="min-width: ' . $tools_width . 'px">';
+                $html .= $tools_html;
+                $html .= '</th>';
+
+                $html .= '</tr>';
+            } else {
+                echo $this->name . '<pre>';
+                print_r($this->params);
+                exit;
+                $row_errors[] = 'Aucune colonne configurée pour cette liste';
             }
+        }
 
-            if ($this->params['enable_refresh']) {
-                $tools_html .= '<span class="headerButton refreshListButton bs-popover"';
-                $tools_html .= BimpRender::renderPopoverData('Actualiser les lignes', 'left', false, '#' . $this->identifier);
-                $tools_html .= '></span>';
-                $tools_width += 32;
-            }
-
-            $tools_html .= '</div>';
-
-            $html .= '<th class="th_tools" style="min-width: ' . $tools_width . 'px">';
-            $html .= $tools_html;
-            $html .= '</th>';
-
+        if (count($row_errors)) {
+            $html .= '<tr>';
+            $html .= '<td>';
+            $html .= BimpRender::renderAlerts($row_errors);
+            $html .= '</td>';
             $html .= '</tr>';
         }
 

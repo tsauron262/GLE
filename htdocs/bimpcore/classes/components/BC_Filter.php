@@ -265,7 +265,7 @@ class BC_Filter extends BimpComponent
                         }
                         $this->bc_field->value = $value;
                         $this->bc_field->no_html = true;
-                        $label = $this->bc_field->displayValue();
+                        $label = $this->bc_field->displayValue(true);
                     }
                 } else {
                     $label = $this->object->getCustomFilterValueLabel($this->filter_name, $value);

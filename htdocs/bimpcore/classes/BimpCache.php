@@ -64,7 +64,7 @@ class BimpCache
             if ($force_new) {
                 return new BimpDb($db2);
             }
-            
+
             self::$bdb_noTransac = new BimpDb($db2);
         }
 
@@ -1285,6 +1285,78 @@ class BimpCache
         return '';
     }
 
+    public static function getBimpModulesArray($active_only = false, $include_empty = false, $empty_value = '', $empty_label = '')
+    {
+        $cache_key = 'bimp_modules_array';
+
+        if ($active_only) {
+            $cache_key .= '_active_only';
+        }
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            foreach (scandir(DOL_DOCUMENT_ROOT) as $file) {
+                if (in_array($file, array('.', '..'))) {
+                    continue;
+                }
+
+                if (!is_dir(DOL_DOCUMENT_ROOT . '/' . $file)) {
+                    continue;
+                }
+
+                if (!preg_match('/^bimp.+$/', $file)) {
+                    continue;
+                }
+
+                if ($active_only && $file !== 'bimpcore' && !(float) BimpCore::getConf('module_version_' . $file, 0)) {
+                    continue;
+                }
+
+                self::$cache[$cache_key][$file] = $file;
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty, $empty_value, ($empty_label ? $empty_label : $empty_value));
+    }
+
+    public static function getBimpModuleObjectsArray($module, $include_empty = false, $empty_value = '', $empty_label = '')
+    {
+        if (!(string) $module) {
+            if ($include_empty) {
+                return array(
+                    $empty_value => $empty_label
+                );
+            }
+            return array();
+        }
+
+        $cache_key = 'bimp_module_' . $module . '_objects_array';
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/objects';
+            if (is_dir($dir)) {
+                foreach (scandir($dir) as $file) {
+                    if (in_array($file, array('.', '..'))) {
+                        continue;
+                    }
+
+                    if (pathinfo($file, PATHINFO_EXTENSION) !== 'yml') {
+                        continue;
+                    }
+
+                    $object_name = pathinfo($file, PATHINFO_FILENAME);
+
+                    self::$cache[$cache_key][$object_name] = $object_name;
+                }
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty, $empty_value, $empty_label);
+    }
+
     // Objets Dolibarr: 
 
     public static function getDolObjectInstance($id_object, $module, $file = null, $class = null)
@@ -2422,41 +2494,6 @@ class BimpCache
     }
 
     // Divers: 
-
-    public static function getBimpModulesArray($active_only = false, $include_empty = false, $empty_value = '', $empty_label = '')
-    {
-        $cache_key = 'bimp_modules_array';
-
-        if ($active_only) {
-            $cache_key .= '_active_only';
-        }
-
-        if (!isset(self::$cache[$cache_key])) {
-            self::$cache[$cache_key] = array();
-
-            foreach (scandir(DOL_DOCUMENT_ROOT) as $file) {
-                if (in_array($file, array('.', '..'))) {
-                    continue;
-                }
-
-                if (!is_dir(DOL_DOCUMENT_ROOT . '/' . $file)) {
-                    continue;
-                }
-
-                if (!preg_match('/^bimp.+$/', $file)) {
-                    continue;
-                }
-
-                if ($active_only && $file !== 'bimpcore' && !(float) BimpCore::getConf('module_version_' . $file, 0)) {
-                    continue;
-                }
-
-                self::$cache[$cache_key][$file] = $file;
-            }
-        }
-
-        return self::getCacheArray($cache_key, $include_empty, $empty_value, ($empty_label ? $empty_label : $empty_value));
-    }
 
     public static function getTaxes($id_country = 1, $active_only = true, $include_empty = false, $key_field = 'rowid')
     {

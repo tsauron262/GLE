@@ -620,6 +620,14 @@ fields:
         values: 
             array: contacts
             
+    id_contact_shipment: 
+        label: Contact par défaut pour les livraisons
+        type: id_object
+        object: contact_shipments
+        default_value: 0
+        values: 
+            array: contacts
+            
     id_contact_relances: 
         label: Contact pour les relances de paiement
         type: id_object
@@ -802,11 +810,16 @@ fields_tables:
             - field: contact_default
               show: 
                   callback: isClient
-              display: nom_url
+              edit: 1
+            - field: id_contact_shipment
+              edit: 1
+              show: 
+                  callback: isClient
             - field: id_contact_relances
               show: 
                   callback: isClient
               display: nom_url
+              edit: 1
             - field: remise_client
               show: 
                   callback: isClient

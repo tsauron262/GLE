@@ -527,8 +527,10 @@ forms:
               input: 
                   type: check_list
                   items: 
-                      callback: getAllFiles
-#                      array: files
+                      callback: 
+                          method: getAllFiles
+                          params: 
+                              - 0
               value: 
                   callback: getJoinFilesValues
               depends_on: id_model

@@ -26,7 +26,7 @@
         private $auto_tiers             = true;
         private $auto_ventes            = true;
         private $auto_paiements         = true;
-        private $auto_achats            = true;
+        private $auto_achats            = false;
         private $auto_rib_mandats       = true;
         private $auto_payni             = true;
         private $auto_importPaiement    = true;
@@ -35,7 +35,7 @@
         
         private $export_ventes          = true;
         private $export_paiements       = true;
-        private $export_achats          = true;
+        private $export_achats          = false;
         private $export_payni           = true;
         private $export_importPaiement  = true;
         private $export_deplacementPay  = true;

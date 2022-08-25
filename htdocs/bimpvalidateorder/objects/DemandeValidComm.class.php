@@ -448,7 +448,7 @@ class DemandeValidComm extends BimpObject
         $obj = $this->getThisObject();
         
         $name = $obj->getLabel().' '.$obj->getLink();
-        $errorsVal = $obj->actionValidate(array(), $sucessPiece);
+        $errorsVal = $obj->actionValidation(array(), $sucessPiece);
         $sucess .= '<br/>'.$sucessPiece;
         if(count($errorsVal['errors'])){
             $errors[] = 'Validation '.$name.' impossible';

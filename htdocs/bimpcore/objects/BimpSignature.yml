@@ -185,6 +185,12 @@ fields:
         label: Extension fichier signé
         default_value: pdf
         
+    id_envelope_docu_sign:
+        label: Id de l'envelope DocuSign
+    
+    id_account_docu_sign:
+        label: Id du compte utilisateur DocuSign
+        
 forms:
     edit: 
         rows: 
@@ -306,6 +312,49 @@ forms:
                   check_mentions: 
                       callback: getCheckMentions
             
+    sign_docu_sign: 
+        title: Signature DocuSign
+        icon: fas_file-signature
+        values: 
+            fields:
+                email_signataire: 
+                    callback: getDefaultEmailSignataire
+                fonction_signataire: 
+                    callback: getDefaultFonctionSignataire
+                    
+        rows: 
+            - custom: 1
+              label: Récapitulatif
+              input_name: doc_infos
+              content: 
+                  callback: displayDocInfos
+            - custom: 1
+              label: Nom du signataire
+              input_name: nom_signataire
+              input: 
+                  value:
+                    callback: getDefaultContactInfo
+              value: 
+                  callback: 
+                    method: getDefaultContactInfo
+                    params:
+                        - lastname
+            - custom: 1
+              label: Prénom du signataire
+              input_name: prenom_signataire
+              input: 
+                  value:
+                    callback: getDefaultContactInfo
+              value: 
+                  callback: 
+                    method: getDefaultContactInfo
+                    params:
+                        - firstname
+            - field: email_signataire
+            - field: fonction_signataire
+              show: 
+                  callback: isClientCompany
+
     sign_dist: 
         title: Signature à distance
         icon: fas_file-signature

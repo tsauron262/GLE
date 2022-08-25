@@ -223,6 +223,9 @@ fields:
         type: bool
         default_value: 0
         
+    id_docusign: 
+        label: Identifiant DocuSign
+        
 forms:
     light: 
         rows:

@@ -419,6 +419,19 @@ class BimpDolObject extends BimpObject
         if ($idSepa > 0 && $idSepaSigne < 1)
             $values[] = $idSepa;
 
+        $files = $this->getFilesArray();
+
+        foreach ($files as $id_file => $file_name) {
+            if (!in_array($id_file, array($values))) {
+                $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', $id_file);
+                if (BimpObject::objectLoaded($file)) {
+                    if ((int) $file->getData('in_emails')) {
+                        $values[] = (int) $id_file;
+                    }
+                }
+            }
+        }
+
         return $values;
     }
 
@@ -769,6 +782,8 @@ class BimpDolObject extends BimpObject
 
         if (!empty($linked_objects)) {
             $files = array();
+            $values = array();
+
             foreach ($linked_objects as $obj_data => $obj_label) {
                 $obj_data = json_decode($obj_data, 1);
                 $obj = BimpCache::getBimpObjectInstance($obj_data['module'], $obj_data['object_name'], $obj_data['id_object']);
@@ -779,12 +794,21 @@ class BimpDolObject extends BimpObject
                     if (!empty($obj_files)) {
                         foreach ($obj_files as $id_file => $file_label) {
                             $files[$id_file] = $obj_label . ' : ' . $file_label;
+
+                            if (!in_array($id_file, $values)) {
+                                $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', $id_file);
+                                if (BimpObject::objectLoaded($file)) {
+                                    if ($file->getData('in_emails')) {
+                                        $values[] = $id_file;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
 
-            $html .= BimpInput::renderInput('check_list', $input_name, '', array(
+            $html .= BimpInput::renderInput('check_list', $input_name, $values, array(
                         'items' => $files
             ));
         } else {

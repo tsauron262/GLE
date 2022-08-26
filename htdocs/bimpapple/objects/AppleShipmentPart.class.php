@@ -540,7 +540,7 @@ class AppleShipmentPart extends BimpObject
                         $response = $gsx->updateReturn($shipment->getData('ship_to'), $shipment->getData('gsx_return_id'), array(
                             array(
                                 'action'            => 'DELETE',
-                                'overPackId'        => (string) $this->getData('pack_number'),
+//                                'overPackId'        => $this->getData('pack_number'),
                                 'partNumber'        => $this->getData('part_number'),
                                 'repairId'          => $this->getData('repair_number'),
                                 'returnOrderNumber' => $this->getData('return_order_number'),

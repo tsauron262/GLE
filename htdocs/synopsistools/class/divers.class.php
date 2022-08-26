@@ -213,11 +213,11 @@ class synopsisHook {//FA1506-0369
         require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
         
         $admin = false;
-        $ipAdmin = BimpCore::getConf('IP_ADMIN', null);
+        $ipAdmin = BimpCore::getConf('IP_ADMIN', '');
         if($ipAdmin && !defined('IP_ADMIN2')){
             define('IP_ADMIN2', json_decode($ipAdmin));
         }
-        $CLOSE_DATE = BimpCore::getConf('CLOSE_DATE', null);
+        $CLOSE_DATE = BimpCore::getConf('CLOSE_DATE', '');
         if($CLOSE_DATE && !defined('CLOSE_DATE')){
             define('CLOSE_DATE', $CLOSE_DATE);
         }

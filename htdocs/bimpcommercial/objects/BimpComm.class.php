@@ -601,13 +601,12 @@ class BimpComm extends BimpDolObject
         );
 
         // Message facturation: 
-        
         // SERV19-FPR
         $msg = "Bonjour, merci de bien vouloir facturer cette commande.";
-        foreach($this->getLines() as $line){
+        foreach ($this->getLines() as $line) {
             $prod = $line->getChildObject('product');
-            if(stripos($prod->getData('ref'), 'SERV19-FPR') !== false){
-                $msg .= '\n'.$prod->getData('ref').' en quantités '.$line->qty;
+            if (stripos($prod->getData('ref'), 'SERV19-FPR') !== false) {
+                $msg .= '\n' . $prod->getData('ref') . ' en quantités ' . $line->qty;
             }
         }
         $buttons[] = array(
@@ -4968,21 +4967,31 @@ class BimpComm extends BimpDolObject
                 case 'Bimp_Propal':
                 case 'Bimp_Facture':
                 case 'Bimp_Commande':
-                    // Billing2
-                    $contacts_suivi = $this->dol_object->liste_contact(-1, 'external', 0, 'BILLING2');
+                    // Ajout des contacts clients: 
+                    $id_client = $this->getAddContactIdClient();
+                    if ($id_client > 0) {
+                        $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', $id_client);
+                        if (BimpObject::objectLoaded($client)) {
+                            // BILLING2: 
+                            $contacts_suivi = $this->dol_object->liste_contact(-1, 'external', 0, 'BILLING2');
+                            if (!count($contacts_suivi)) {
+                                $id_contact = (int) $client->getData('contact_default');
+                                if ($id_contact) {
+                                    if ($this->dol_object->add_contact($id_contact, 'BILLING2', 'external') <= 0) {
+                                        $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du contact');
+                                    }
+                                }
+                            }
 
-                    if (count($contacts_suivi) == 0) {
-                        // Get id of the default contact
-                        global $db;
-                        $id_client = $this->getAddContactIdClient();
-                        if ($id_client > 0) {
-                            $soc = new Societe($db);
-                            $soc->fetch_optionals($id_client);
-                            $contact_default = (int) $soc->array_options['options_contact_default'];
-
-                            if (!count($errors) && $contact_default > 0) {
-                                if ($this->dol_object->add_contact($contact_default, 'BILLING2', 'external') <= 0)
-                                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du contact');
+                            // SHIPPING: 
+                            $contacts_livraison = $this->dol_object->liste_contact(-1, 'external', 1, 'SHIPPING');
+                            if (!count($contacts_livraison)) {
+                                $id_contact = (int) $client->getData('id_contact_shipment');
+                                if ($id_contact) {
+                                    if ($this->dol_object->add_contact($id_contact, 'SHIPPING', 'external') <= 0) {
+                                        $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du contact');
+                                    }
+                                }
                             }
                         }
                     }

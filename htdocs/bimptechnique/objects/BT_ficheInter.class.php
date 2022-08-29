@@ -886,6 +886,33 @@ class BT_ficheInter extends BimpDolObject
         }
         return $array;
     }
+    
+    public function actionDeleteLinkedFacture($data, &$success) {
+        
+        global $user;
+        
+        $errors = $warnings = Array();
+        
+        if($user->rights->bimptechnique->billing) {
+            
+            $instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $this->getData('fk_facture'));
+            
+            if(delElementElement('fichinter', 'facture', $this->id, $this->getData('fk_facture'))) {
+                $success = 'Facture dé-liée avec succès';
+                $this->addLog('DELINK FACTURE: ' . $instance->getRef());
+                $this->updatefield('fk_facture', 0);
+                
+            } else {
+                $errors[] = 'Une erreur est survenue lors de l\'opération';
+            }
+            
+        } else {
+            $errors[] = 'Vous n\'avez aps les droits pour dé-lier une facture d\'une fiche d\'intervention';
+        }
+        
+        return ['errors' => $errors, 'warnings' => $warnings, 'success' => $success];
+        
+    }
 
     public function actionReattach_an_object($data, &$success)
     {
@@ -903,6 +930,7 @@ class BT_ficheInter extends BimpDolObject
                     $instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $data['fk_facture']);
                     if ($this->getData('fk_soc') == $instance->getData('fk_soc')) {
                         $this->set('fk_facture', $data['fk_facture']);
+                        $this->addLog('LINK FACTURE: ' . $instance->getRef());
                         addElementElement('fichinter', 'facture', $this->id, $data['fk_facture']);
                     } else {
                         $errors[] = "La facture sélectionnée n'est pas à ce client";
@@ -1806,11 +1834,22 @@ class BT_ficheInter extends BimpDolObject
     public function renderHeaderStatusExtra()
     {
         $html = '';
-
+        
+        
         if ($this->getData('fk_facture') > 0) {
             $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $this->getData('fk_facture'));
             if ($facture->isLoaded()) {
-                $html .= '<div><strong>Facturée avec' . $facture->getNomUrl() . '</strong></div>';
+                $html .= '<div><strong>Facturée avec' . $facture->getNomUrl();
+                
+                $button = array(
+                    'label'   => 'Dé-linker la facture',
+                    'icon'    => 'fas_times',
+                    'onclick' => $this->getJsActionOnclick('deleteLinkedFacture', array(), array('confirm_msg' => 'Etes-vous sûr ? cette action est irréverssible'))
+                );
+                
+                $html .= BimpRender::renderButton($button);
+                
+                $html .= '</strong></div>';
             }
         }
 

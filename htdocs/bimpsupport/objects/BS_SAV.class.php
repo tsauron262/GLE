@@ -14,6 +14,7 @@ class BS_SAV extends BimpObject
     public $useCaisseForPayments = false;
     public $id_cond_reglement_def = 1; // Obsolète, ne plus utiliser
     public $id_mode_reglement_def = 6; // Idem
+    public $allow_force_unlock = true;
 
     const BS_SAV_RESERVED = -1;
     const BS_SAV_CANCELED_BY_CUST = -2;

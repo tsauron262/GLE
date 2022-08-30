@@ -125,6 +125,23 @@ class BContract_avenant extends BContract_contrat {
         
     }
     
+    public function getThisAddingAmountForTypeProlongation() {
+        
+        $return = 0.0;
+        
+        $parentInstance = $this->getParentInstance();
+        $totalContratEnCours = $parentInstance->getCurrentTotal();
+        $totalByMonth = $totalContratEnCours / $parentInstance->getData('duree_mois');
+        
+        $nbMonthAdding = $this->getData('added_month');
+        
+        $return = $totalByMonth * $nbMonthAdding;
+        
+        return $return;
+        
+        
+    }
+    
     public function by($by):bool {
         
         switch($by) {

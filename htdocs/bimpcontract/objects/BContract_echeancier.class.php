@@ -853,7 +853,8 @@ class BContract_echeancier extends BimpObject {
         
         $start = new DateTime($dateStart . ' 00:00:00');
         $stop  = new DateTime($dateStop . ' 00:00:00');
-        $mois = $start->diff($stop)->m + $start->diff($stop)->y * 12;
+        $mois = $start->diff($stop)->m;
+        $mois += $start->diff($stop)->y * 12;
         
         if($start->diff($stop)->y > 0)
             return $mois;
@@ -943,7 +944,7 @@ class BContract_echeancier extends BimpObject {
         return $return;
     }
 
-    public function getAllPeriodes():array {
+        public function getAllPeriodes():array {
         
         $periodes = Array();
         
@@ -953,6 +954,7 @@ class BContract_echeancier extends BimpObject {
             $dateStopEcheancier     = new DateTime($parentInstance->getData('date_end_renouvellement'));
         } else {
             $dateStopEcheancier     = new DateTime($parentInstance->getData('end_date_contrat'));
+            $dateStopEcheancier = $dateStopEcheancier->add(new DateInterval('P1D'));
         }
         
         $diff = $dateStartEcheancier->diff($dateStopEcheancier);
@@ -965,6 +967,9 @@ class BContract_echeancier extends BimpObject {
         //die($dureeEnMois . ' kcodsp');
         $periodicity            = $parentInstance->getData('periodicity');
         
+        if($periodicity == 1200){
+            $periodicity = $dureeEnMois;
+        }
         $dureePeriodeIncomplette  = $dureeEnMois % $periodicity;
         $dureePeriodesComplettes  = $dureeEnMois - $dureePeriodeIncomplette;
         $nombrePeriodesComplettes = $dureePeriodesComplettes / $periodicity;
@@ -991,7 +996,7 @@ class BContract_echeancier extends BimpObject {
                     $stopDate = $dateStartEcheancier;
                 } else {
                     $startDate = $stopDate->add(new DateInterval('P1D'))->format('d/m/Y');
-                    $startDateForPeriode = $stopDate->add(new DateInterval('P1D'))->format('Y-m-d');
+                    $startDateForPeriode = $stopDate->format('Y-m-d');
                 }
                 
                 $stopDate = $alternateStartDate->add(new DateInterval('P' . $periodicity . 'M'));
@@ -1013,7 +1018,6 @@ class BContract_echeancier extends BimpObject {
                         'FACTURE' => ''
                     );
                 } else {
-                    
                     $periodes['periodes'][] = Array(
                         'START' => $factured['dateStart'],
                         'STOP'  => $factured['dateEnd'],

@@ -110,37 +110,42 @@
                 $table = new BimpPDF_Table($this->pdf);
             
                 $table->addCol('periode', 'Période de référence', 20, 'text-align: left;', '', 'text-align: left;');
+                $table->addCol('facture', 'Facture', 20, 'text-align: center;', '', 'text-align: center;');
                 $table->addCol('datePrelevement', 'Date de prélèvement', 20, 'text-align: center;', '', 'text-align: center;');
                 $table->addCol('ht', 'Montant HT', 20, 'text-align: center;', '', 'text-align: center;');
                 $table->addCol('tva', 'Montant TVA', 20, 'text-align: center;', '', 'text-align: center;');
                 $table->addCol('ttc', 'Montant TTC', 20, 'text-align: center;', '', 'text-align: center;');
                 
+                                
                 foreach($allPeriodes['periodes'] as $periode) {
                     $total_ht += round($periode['PRICE'], 2);
                     $total_tva += round($periode['TVA'], 2);
                     $total_ttc += (round($periode['PRICE'], 2) + round($periode['TVA'], 2));
                     $table->rows[] = array(
                         'periode'           => 'Du ' . $periode['START'] . ' au ' . $periode['STOP'] . ' ('.$periode['DUREE_MOIS'].' mois) ',
+                        'facture'           => ($periode['FACTURE'] != '') ? $periode['FACTURE'] : 'Periode non facturée',
                         'datePrelevement'   => $periode['DATE_FACTURATION'],
                         'ht'                => round($periode['PRICE'], 2) . '€',
                         'tva'               => round($periode['TVA'], 2) . '€',
-                        'ttc'               => (round($periode['PRICE'], 2) + round($periode['TVA'], 2)). '€'
+                        'ttc'               => (round($periode['PRICE'], 2) + round($periode['TVA'], 2)). '€',
                     );
                     
                 }
                 
-                $table->rows[] = array(
-                    'periode'           => '',
-                    'datePrelevement'   => '<b style="text-align:right" >TOTAL</b>',
-                    'ht'                => '<b>'.$total_ht.'€</b>',
-                    'tva'               => '<b>'.$total_tva.'€</b>',
-                    'ttc'               => '<b>'.$total_ttc.'€</b>',
-                );
-                
+                if($this->object->afficher_total) {
+                    $table->rows[] = array(
+                        'periode'           => '',
+                        'facture'           => '',
+                        'datePrelevement'   => '<b style="text-align:right" >TOTAL</b>',
+                        'ht'                => '<b>'.$total_ht.'€</b>',
+                        'tva'               => '<b>'.$total_tva.'€</b>',
+                        'ttc'               => '<b>'.$total_ttc.'€</b>',
+                    );
+                }
 
                 $table->write();
 //                $html = $this->getTotauxRowsHtml($total_ht);
-//                $this->writeContent($html);
+//                $this->writeContent(print_r($allPeriodes['infos']['factures'], 1));
             } else {
                 $this->writeContent('<p style="font-weight: bold; font-size: 12px">Aucune période pour ce contrat</p>');
             }

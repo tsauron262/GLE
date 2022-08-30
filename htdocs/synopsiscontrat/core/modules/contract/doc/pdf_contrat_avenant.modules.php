@@ -626,16 +626,16 @@ class pdf_contrat_avenant extends ModeleSynopsiscontrat {
                 $pdf->ln();
                 $pdf->SetFont('', '', 8);
                 $pdf->Cell($W*5, 4, "Les autres dispositions du Contrat qui n’ont pas été modifiées par le présent avenant demeurent inchangées.", 0, null, 'L', false);
-                $pdf->ln();
-                $pdf->Cell($W*5, 4, "Ce contrat et ses avenants portent à ce jour sur un montant de " . $bContract->getCurrentTotal() . ' € HT', 0, null, 'L', false);
-                $pdf1->setY($pdf1->getY() + 5);
-                $pdf1->SetFont('', '', 8);
-                $pdf1->Cell($W, 4, "Article " . $current_article, "L", null, 'C', true);
-                $pdf1->ln();
-                $pdf1->SetFont('', '', 8);
-                $pdf1->Cell($W*5, 4, "Les autres dispositions du Contrat qui n’ont pas été modifiées par le présent avenant demeurent inchangées.", 0, null, 'L', false);
-                $pdf1->ln();
-                $pdf1->Cell($W*5, 4, "Ce contrat et ses avenants portent à ce jour sur un montant de " . $bContract->getCurrentTotal() . ' € HT', 0, null, 'L', false);
+//                $pdf->ln();
+//                $pdf->Cell($W*5, 4, "Ce contrat et ses avenants portent à ce jour sur un montant de " . $bContract->getCurrentTotal() . ' € HT', 0, null, 'L', false);
+//                $pdf1->setY($pdf1->getY() + 5);
+//                $pdf1->SetFont('', '', 8);
+//                $pdf1->Cell($W, 4, "Article " . $current_article, "L", null, 'C', true);
+//                $pdf1->ln();
+//                $pdf1->SetFont('', '', 8);
+//                $pdf1->Cell($W*5, 4, "Les autres dispositions du Contrat qui n’ont pas été modifiées par le présent avenant demeurent inchangées.", 0, null, 'L', false);
+//                $pdf1->ln();
+//                $pdf1->Cell($W*5, 4, "Ce contrat et ses avenants portent à ce jour sur un montant de " . $bContract->getCurrentTotal() . ' € HT', 0, null, 'L', false);
                 $current_article++;
                 
                 

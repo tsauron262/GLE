@@ -1023,7 +1023,7 @@ class BContract_echeancier extends BimpObject {
                     );
                     
                     $stopDate = new DateTime($factured['dateEnd']);
-                    //$stopDate->sub(new DateInterval('P1D'));
+                    $stopDate->sub(new DateInterval('P1D'));
                 }
 
                 

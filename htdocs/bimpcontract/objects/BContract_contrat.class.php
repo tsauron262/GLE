@@ -3632,7 +3632,7 @@ class BContract_contrat extends BimpDolObject
         if ($facture_delivred) {
             foreach ($facture_delivred as $link) {
                 $instance = $this->getInstance('bimpcommercial', 'Bimp_Facture', $link['d']);
-                if ($instance->getData('type') == 0)
+                if (/*$instance->getData('type') == 0*/1)
                     $montant += $instance->getData('total');
             }
             $return = $this->getTotalContrat() - $montant;
@@ -3772,7 +3772,7 @@ class BContract_contrat extends BimpDolObject
                             $montant += $instance->getData('total_achat_reval_ok');
                     }
                 } else {
-                    if ($instance->getData('type') == 0) {
+                    if (/*$instance->getData('type') == 0*/1) {
                         if ($field == 'total')
                             $montant += $instance->getData('total');
                         elseif ($field == 'pa')

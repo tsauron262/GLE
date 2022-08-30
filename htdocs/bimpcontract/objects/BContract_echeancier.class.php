@@ -851,19 +851,23 @@ class BContract_echeancier extends BimpObject {
     public function getDureeMoisPeriode($dateStart, $dateStop):int {
         $mois = 0;
         
-        $start = new DateTime($dateStart . ' 00:00:00');
-        $stop  = new DateTime($dateStop . ' 00:00:00');
-        $mois = $start->diff($stop)->m;
-        $mois += $start->diff($stop)->y * 12;
+        $start = new DateTime($dateStart);
+        $stop  = new DateTime($dateStop);
+//        $start->sub(new dateInterval('P1D'));
+//        $stop->add(new dateInterval('P1D'));
+        $interval = $start->diff($stop);
+        $mois = $interval->m;
+        $mois += $interval->y * 12;
+        if($interval->d > 27)
+            $mois ++;
         
-        if($start->diff($stop)->y > 0)
-            return $mois;
-        return $mois + 1;
+        
+        return $mois;
     }
     
     public function getAmountByMonth() {
         $parentInstance = $this->getParentInstance();
-        $reste_a_payer = $parentInstance->reste_a_payer() / $parentInstance->reste_periode();
+        $reste_a_payer = $parentInstance->reste_a_payer() / $parentInstance->reste_periode() / $parentInstance->getData('periodicity');
         
         return $reste_a_payer;
         
@@ -944,7 +948,7 @@ class BContract_echeancier extends BimpObject {
         return $return;
     }
 
-        public function getAllPeriodes():array {
+    public function getAllPeriodes():array {
         
         $periodes = Array();
         
@@ -1065,6 +1069,17 @@ class BContract_echeancier extends BimpObject {
                 'TVA' => $price * 0.2
             );
             
+        }
+        
+        
+        //Vérif
+        $tot = 0;
+        foreach($periodes['periodes'] as $periode){
+            $tot += $periode['PRICE'];
+        }
+        if($tot != $parentInstance->getTotalContrat()){
+            BimpCore::addlog('PRobléme Technique contrat '.$parentInstance->id.' pdf exheancier totP '.$tot.' totCt '.$parentInstance->getTotalContrat());
+            die('PRobléme Technique');
         }
         
         

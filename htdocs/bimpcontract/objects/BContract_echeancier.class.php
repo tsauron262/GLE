@@ -1021,8 +1021,8 @@ class BContract_echeancier extends BimpObject {
                         'TVA' => $periodes['infos']['factures'][$factured['index']]['ht'] * 0.2,
                         'FACTURE' => $periodes['infos']['factures'][$factured['index']]['ref']
                     );
-                    
-                    $stopDate->add(new DateInterval('P1D'));
+                    $stopDate = new DateTime($factured['dateEnd']);
+                    //$stopDate->add(new DateInterval('P1D'));
                 }
 
                 $alternateStartDate = $stopDate;

@@ -853,8 +853,10 @@ class BContract_echeancier extends BimpObject {
         
         $start = new DateTime($dateStart . ' 00:00:00');
         $stop  = new DateTime($dateStop . ' 00:00:00');
-        $mois = $start->diff($stop)->m;
+        $mois = $start->diff($stop)->m + $start->diff($stop)->y * 12;
         
+        if($start->diff($stop)->y > 0)
+            return $mois;
         return $mois + 1;
     }
     
@@ -948,7 +950,6 @@ class BContract_echeancier extends BimpObject {
         $parentInstance         = $this->getParentInstance();
         $dateStartEcheancier    = new DateTime($parentInstance->getData('date_start'));
         if($parentInstance->getData('date_end_renouvellement')) {
-            
             $dateStopEcheancier     = new DateTime($parentInstance->getData('date_end_renouvellement'));
         } else {
             $dateStopEcheancier     = new DateTime($parentInstance->getData('end_date_contrat'));
@@ -956,10 +957,12 @@ class BContract_echeancier extends BimpObject {
         
         $diff = $dateStartEcheancier->diff($dateStopEcheancier);
         
-        $dureeEnMois            = $parentInstance->getData('duree_mois');
-        $dureeEnMois            = $diff->m + ($diff->y * 12);
+//        $dureeEnMois            = $parentInstance->getData('duree_mois');
+//        $dureeEnMois            = $diff->m + ($diff->y * 12) + 1;
         
-        //die(print_r($diff, 1) . ' kcodsp');
+        $dureeEnMois            = $this->getDureeMoisPeriode($dateStartEcheancier->format('Y-m-d'), $dateStopEcheancier->format('Y-m-d'));
+        
+        //die($dureeEnMois . ' kcodsp');
         $periodicity            = $parentInstance->getData('periodicity');
         
         $dureePeriodeIncomplette  = $dureeEnMois % $periodicity;

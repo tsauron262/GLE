@@ -2078,7 +2078,7 @@ class BContract_contrat extends BimpDolObject
                 );
             }
             
-            $buttons[] = Array('label' => 'Générer le PDF de l\'échéancier', 'icon' => 'fas_file-pdf', 'onclick' => $this->getJsActionOnclick('generatePdfEcheancier', array(), /* array('form_name' => 'pdfEcheancier') */ array()));
+            $buttons[] = Array('label' => 'Générer le PDF de l\'échéancier', 'icon' => 'fas_file-pdf', 'onclick' => $this->getJsActionOnclick('generatePdfEcheancier', array(), array('form_name' => 'pdfEcheancier')));
 
             if ($status == self::CONTRAT_STATUS_ACTIVER && $user->rights->bimpcontract->auto_billing) {
                 if ($this->is_not_finish() && $this->reste_a_payer() > 0) {
@@ -3272,10 +3272,13 @@ class BContract_contrat extends BimpDolObject
     public function actionGeneratePdfEcheancier($data, &$success)
     {
         global $langs;
+        $this->dol_object->afficher_total = $data['total_lines'];
+        $url = DOL_URL_ROOT . '/document.php?modulepart=' . static::$dol_module . '&file=' . $this->getRef() . '/Echeancier.pdf';
         $errors = $warnings = array();
         $success = "PDF de l'échéancier généré avec succès";
+        $success_callback = 'window.open("' . $url . '")';
         $this->dol_object->generateDocument('echeancierContrat', $langs);
-        return array('errors' => $errors, 'warnings' => $warnings);
+        return array('errors' => $errors, 'warnings' => $warnings, 'success_callback' => $success_callback);
     }
     /* OTHERS FUNCTIONS */
 

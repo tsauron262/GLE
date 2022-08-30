@@ -716,7 +716,13 @@ lists:
 
 forms:
     pdfEcheancier:
-        title: Informations à afficher dans le PDF         
+        title: Informations à afficher dans le PDF
+        rows:
+            - custom: 1
+              label: Total des lignes
+              input_name: total_lines
+              input:
+                  type: toggle
     redefineEcheancier:
         title: Re-define Echeancier ADMIN
         rows:

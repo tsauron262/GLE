@@ -110,11 +110,11 @@
                 $table = new BimpPDF_Table($this->pdf);
             
                 $table->addCol('periode', 'Période de référence', 20, 'text-align: left;', '', 'text-align: left;');
-                $table->addCol('facture', 'Facture', 20, 'text-align: center;', '', 'text-align: center;');
                 $table->addCol('datePrelevement', 'Date de prélèvement', 20, 'text-align: center;', '', 'text-align: center;');
                 $table->addCol('ht', 'Montant HT', 20, 'text-align: center;', '', 'text-align: center;');
                 $table->addCol('tva', 'Montant TVA', 20, 'text-align: center;', '', 'text-align: center;');
                 $table->addCol('ttc', 'Montant TTC', 20, 'text-align: center;', '', 'text-align: center;');
+                $table->addCol('facture', 'Facture', 20, 'text-align: center;', '', 'text-align: center;');
                 
                                 
                 foreach($allPeriodes['periodes'] as $periode) {

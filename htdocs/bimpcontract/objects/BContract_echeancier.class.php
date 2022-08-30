@@ -858,9 +858,14 @@ class BContract_echeancier extends BimpObject {
         $interval = $start->diff($stop);
         $mois = $interval->m;
         $mois += $interval->y * 12;
-        if($interval->d > 27)
+        if($interval->d > 26)
             $mois ++;
         
+        
+        
+//        echo '<br/><br/>'.$start->format('Y-m-d').' '.$stop->format('Y-m-d');
+//        echo '<pre>';
+//        print_r($interval);
         
         return $mois;
     }
@@ -1010,31 +1015,35 @@ class BContract_echeancier extends BimpObject {
                 //print_r($factured);
                 if(!count($factured)) {
                     $price = $this->getDureeMoisPeriode($startDateForPeriode, $stopDate->format('Y-m-d')) * $periodes['infos']['tarif_au_mois']; 
-                
-                    $periodes['periodes'][] = Array(
-                        'START' => $startDate,
-                        'STOP'  => $stopDate->format('d/m/Y'),
-                        'DATE_FACTURATION' => ($parentInstance->getData('facturation_echu')) ? $stopDate->format('d/m/Y') : $startDate,
-                        'HT' => $resteAPayer,
-                        'DUREE_MOIS' => $this->getDureeMoisPeriode($startDateForPeriode, $stopDate->format('Y-m-d')),
-                        'PRICE' => $price,
-                        'TVA' => $price * 0.2,
-                        'FACTURE' => ''
-                    );
+                    $startDateStr = $startDate;
+                    $stopDateStr = $stopDate->format('d/m/Y');
+                    $factureStr = '';
                 } else {
-                    $periodes['periodes'][] = Array(
-                        'START' => $factured['dateStart'],
-                        'STOP'  => $factured['dateEnd'],
-                        'DATE_FACTURATION' => ($parentInstance->getData('facturation_echu')) ? $stopDate->format('d/m/Y') : $startDate,
-                        'HT' => $periodes['infos']['factures'][$factured['index']]['ht'],
-                        'DUREE_MOIS' => $this->getDureeMoisPeriode($startDateForPeriode, $stopDate->format('Y-m-d')),
-                        'PRICE' => $periodes['infos']['factures'][$factured['index']]['ht'],
-                        'TVA' => $periodes['infos']['factures'][$factured['index']]['ht'] * 0.2,
-                        'FACTURE' => $periodes['infos']['factures'][$factured['index']]['ref']
-                    );
+                    $startDate = new DateTime($factured['dateStart']);
+                    $startDateStr = $startDate->format('d/m/Y');
+                    $stopDate = new DateTime($factured['dateEnd']);
+                    $stopDateStr = $stopDate->format('d/m/Y');
+                    
+                    $resteAPayer = $periodes['infos']['factures'][$factured['index']]['ht'];
+                    $factureStr = $periodes['infos']['factures'][$factured['index']]['ref'];
+                    $price = $periodes['infos']['factures'][$factured['index']]['ht'];
+                    
+                    
                     $stopDate = new DateTime($factured['dateEnd']);
                     //$stopDate->add(new DateInterval('P1D'));
                 }
+                
+                
+                $periodes['periodes'][] = Array(
+                    'START' => $startDateStr,
+                    'STOP'  => $stopDateStr,
+                    'DATE_FACTURATION' => ($parentInstance->getData('facturation_echu')) ? $stopDateStr : $startDateStr,
+                    'HT' => $resteAPayer,
+                    'DUREE_MOIS' => $this->getDureeMoisPeriode($startDateForPeriode, $stopDate->format('Y-m-d')),
+                    'PRICE' => $price,
+                    'TVA' => $price * 0.2,
+                    'FACTURE' => $factureStr
+                );
 
                 $alternateStartDate = $stopDate;
 

@@ -995,7 +995,7 @@ class BContract_echeancier extends BimpObject {
                 $stopDate->sub(new DateInterval('P1D'));
                 
                 $factured = $this->periodeIsFactured($startDate, $stopDate->format('d/m/Y'), $periodes['infos']['factures']);
-                
+                //print_r($factured);
                 if(!count($factured)) {
                     $price = $this->getDureeMoisPeriode($startDateForPeriode, $stopDate->format('Y-m-d')) * $periodes['infos']['tarif_au_mois']; 
                 
@@ -1022,12 +1022,8 @@ class BContract_echeancier extends BimpObject {
                         'FACTURE' => $periodes['infos']['factures'][$factured['index']]['ref']
                     );
                     
-                    $stopDate = new DateTime($factured['dateEnd']);
-                    //$stopDate->sub(new DateInterval('P1D'));
+                    $stopDate->add(new DateInterval('P1D'));
                 }
-
-                
-                
 
                 $alternateStartDate = $stopDate;
 
@@ -1038,6 +1034,7 @@ class BContract_echeancier extends BimpObject {
         if($dureePeriodeIncomplette > 0) {
             
             if(!$haveOtherPeriodes) {
+                $resteStartDT   = $alternateStartDate;
                 $resteStart     = $alternateStartDate->format('d/m/Y');
                 $resteStopDT = $alternateStartDate->add(new DateInterval('P' . $dureePeriodeIncomplette . 'M'))->sub(new DateInterval('P1D'));
                 $resteStop  = $resteStopDT->format('d/m/Y');

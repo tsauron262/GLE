@@ -947,8 +947,16 @@ class BContract_echeancier extends BimpObject {
         
         $parentInstance         = $this->getParentInstance();
         $dateStartEcheancier    = new DateTime($parentInstance->getData('date_start'));
-        $dateStopEcheancier     = new DateTime($parentInstance->getData('end_date_contrat'));
-        $dureeEnMois            = $parentInstance->getData('duree_mois');
+        if($parentInstance->getData('date_end_renouvellement')) {
+            $dateStopEcheancier     = new DateTime($parentInstance->getData('date_end_renouvellement'));
+        } else {
+            $dateStopEcheancier     = new DateTime($parentInstance->getData('end_date_contrat'));
+        }
+        
+        $diff = $dateStartEcheancier->diff($dateStopEcheancier);
+        
+        //$dureeEnMois            = $parentInstance->getData('duree_mois');
+        $dureeEnMois            = $diff->m;
         $periodicity            = $parentInstance->getData('periodicity');
         
         $dureePeriodeIncomplette  = $dureeEnMois % $periodicity;

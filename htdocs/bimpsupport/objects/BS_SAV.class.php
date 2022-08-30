@@ -14,6 +14,7 @@ class BS_SAV extends BimpObject
     public $useCaisseForPayments = false;
     public $id_cond_reglement_def = 1; // Obsolète, ne plus utiliser
     public $id_mode_reglement_def = 6; // Idem
+    public $allow_force_unlock = true;
 
     const BS_SAV_RESERVED = -1;
     const BS_SAV_CANCELED_BY_CUST = -2;
@@ -5977,6 +5978,12 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         $warnings[] = BimpTools::getMsgFromArray($fac_errors, 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
                     } else {
                         $this->updateField('acompte', (float) $data['acompte']);
+                        
+                        $client = $this->getChildObject('client');
+                        $centre = $this->getCentreData();
+                        $toMail = "SAV LDLC<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@bimp.fr') . ">";
+                        mailSyn2('Acompte enregistré '.$this->getData('ref'), $toMail, null, 'Un acompte de '.$this->getData('acompte').'€ du client '.$client->getData('code_client').' - '.$client->getData('nom').' à été ajouté au '.$this->getLink());
+                        $success = "Acompte créer avec succés.";
                     }
                 }
             }

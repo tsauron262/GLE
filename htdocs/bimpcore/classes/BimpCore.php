@@ -708,6 +708,7 @@ class BimpCore
         if ((int) $user->id === (int) $row['id_user']) {
             $msg = 'Vous avez déjà lancé une opération sur ' . $object->getLabel('the') . ' ' . $object->getRef(true) . '<br/>';
             $msg .= 'Veuillez attendre que l\'opération en cours soit terminée avant de relancer l\'enregistrement.<br/>';
+            $msg .= '<b>Note: ceci est une protection volontaire pour éviter un écrasement de données. Il ne s\'agit pas d\'un bug</b>'; 
 
             $diff = ((int) $row['tms'] + 720) - time();
             $min = floor($diff / 60);
@@ -719,10 +720,21 @@ class BimpCore
             $msg .= ($min ? $min . ' min. ' . ($secs ? 'et ' : '') : '') . ($secs ? $secs . ' sec.' : '');
             $msg .= '</div>';
 
-            if ($user->admin) {
+            if ($user->admin || (isset($object->allow_force_unlock) && $object->allow_force_unlock)) {
                 $msg .= '<div style="margin: 15px 0; text-align: center">';
+                if (!$user->admin) {
+                    $msg .= 'Si vous êtes sûr de n\'avoir aucune opération en cours, vous pouvez cliquer sur le bouton ci-dessous.<br/>';
+                    $msg .= 'Une fois fois le dévéroullage effectué, relancez l\'opération qui a été bloquée (en cliquant à nouveau sur le bouton "Enregistrer" ou "Valider")';
+                    $msg .= '<br/>';
+                }
+                
                 $msg .= '<span class="btn btn-default" onclick="forceBimpObjectUnlock($(this), ' . $object->getJsObjectData() . ')">';
-                $msg .= 'Forcer le dévérouillage (Admins seulement)';
+                
+                if ($user->admin) {
+                    $msg .= 'Forcer le dévérouillage (Admins seulement)';
+                } else {
+                    $msg .= 'Dévérouiller';
+                }
                 $msg .= '</span>';
                 $msg .= '</div>';
             }
@@ -737,7 +749,8 @@ class BimpCore
             $msg .= 'Il est nécessaire d\'attendre que celle-ci soit terminée pour éviter un conflit sur l\'enregistrement des données.<br/>';
             $msg .= 'Merci d\'attendre une dizaine de secondes et de réessayer.<br/>';
             $msg .= '<b>Etant donné qu\'il est possible que les données de ' . $object->getLabel('this') . ' aient été modifiées, il est recommandé ';
-            $msg .= ' <a href="javascript:bimp_reloadPage()">d\'actualiser la page</a> avant de retenter l\'opération</b>';
+            $msg .= ' <a href="javascript:bimp_reloadPage()">d\'actualiser la page</a> avant de retenter l\'opération</b><br/><br/>';
+            $msg .= '<b>Note: ceci est une protection volontaire pour éviter un écrasement de données. Il ne s\'agit pas d\'un bug</b>'; 
         }
 
         return $msg;

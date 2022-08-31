@@ -5743,7 +5743,7 @@ class Bimp_Facture extends BimpComm
 
         if (!count($errors)) {
             $params = '{id_facture: ' . $this->id . ', id_struture: \'' . $id_structure . '\', code_service: \'' . $code_service . '\'});}';
-            $success_callback = 'setTimeout(function() {BimpApi.loadRequestModalForm(null, \'Validation du fichier PDF sur Chorus\', \'piste\', \'soumettreFacture\', {}, ' . $params . ', 500);';
+            $success_callback = 'setTimeout(function() {BimpApi.loadRequestModalForm(null, \'Validation du fichier PDF sur Chorus\', \'piste\', 0, \'soumettreFacture\', {}, ' . $params . ', 500);';
         }
 
         if (!count($errors) && isset($data['files_compl']) && count($data['files_compl'])) {

@@ -1327,7 +1327,7 @@ class BimpController
                         $del_warnings = array();
                         $del_errors = $instance->delete($del_warnings);
                         if (!is_array($del_errors)) {
-                            BimpCore::addlog('Retour d\'erreurs invalide pour la fonction delete()', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $instance);
+                            BimpCore::addlog('Retour d\'erreurs invalide pour la fonction delete() : '.print_r($del_errors), Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $instance);
                         } elseif (count($del_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($del_errors, 'Echec de la suppression ' . $instance->getLabel('of_the') . ' d\'ID ' . $id_object);
                         }

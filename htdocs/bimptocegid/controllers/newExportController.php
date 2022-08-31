@@ -2,6 +2,7 @@
 //
 
 require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_factureFournisseur.class.php';
+require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_bordereauCHK.class.php';
 require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_payInc.class.php';
 require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_importPaiement.class.php';
 require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/export.class.php';
@@ -13,7 +14,7 @@ class newExportController extends BimpController {
         global $db, $user;
         $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $user->id);
         $bdd = new BimpDb($db);
-        $tra = new TRA_factureFournisseur(new BimpDb($db),  PATH_TMP . $this->dir . 'tiers.tra');
+        $tra = new TRA_bordereauCHK(new BimpDb($db));
 //
         $html = '';
         
@@ -21,15 +22,12 @@ class newExportController extends BimpController {
 //        
         $html .= '<pre>';
 //      
-        if(isset($_GET['id_facture_fourn'])){
-            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', $_GET['id_facture_fourn'] /*15420*/);
-        } else{
-            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', 1 /*15420*/);
-        }
+        $bordereau = null;
+        $cheques      = null;
+//      
+        $export = new export($db);
         
-        
-//        
-        $html .= $tra->constructTra($facture);
+        $html .= $export->exportBordereauxCHK();
         
         if($_GET['PAYNI']) {
             $tra_constructor = new TRA_payInc($bdd);

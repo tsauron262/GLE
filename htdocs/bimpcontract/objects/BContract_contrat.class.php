@@ -2077,8 +2077,6 @@ class BContract_contrat extends BimpDolObject
                     ))
                 );
             }
-            
-            $buttons[] = Array('label' => 'Générer le PDF de l\'échéancier', 'icon' => 'fas_file-pdf', 'onclick' => $this->getJsActionOnclick('generatePdfEcheancier', array(), /* array('form_name' => 'pdfEcheancier') */ array()));
 
             if ($status == self::CONTRAT_STATUS_ACTIVER && $user->rights->bimpcontract->auto_billing) {
                 if ($this->is_not_finish() && $this->reste_a_payer() > 0) {
@@ -3269,14 +3267,7 @@ class BContract_contrat extends BimpDolObject
         return array('errors' => $errors, 'warnings' => $warnings);
     }
 
-    public function actionGeneratePdfEcheancier($data, &$success)
-    {
-        global $langs;
-        $errors = $warnings = array();
-        $success = "PDF de l'échéancier généré avec succès";
-        $this->dol_object->generateDocument('echeancierContrat', $langs);
-        return array('errors' => $errors, 'warnings' => $warnings);
-    }
+    
     /* OTHERS FUNCTIONS */
 
     public function create(&$warnings = array(), $force_create = false)
@@ -3629,7 +3620,7 @@ class BContract_contrat extends BimpDolObject
         if ($facture_delivred) {
             foreach ($facture_delivred as $link) {
                 $instance = $this->getInstance('bimpcommercial', 'Bimp_Facture', $link['d']);
-                if ($instance->getData('type') == 0)
+                if (/*$instance->getData('type') == 0*/1)
                     $montant += $instance->getData('total');
             }
             $return = $this->getTotalContrat() - $montant;
@@ -3769,7 +3760,7 @@ class BContract_contrat extends BimpDolObject
                             $montant += $instance->getData('total_achat_reval_ok');
                     }
                 } else {
-                    if ($instance->getData('type') == 0) {
+                    if (/*$instance->getData('type') == 0*/1) {
                         if ($field == 'total')
                             $montant += $instance->getData('total');
                         elseif ($field == 'pa')

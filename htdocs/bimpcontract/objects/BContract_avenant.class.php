@@ -125,6 +125,23 @@ class BContract_avenant extends BContract_contrat {
         
     }
     
+    public function getThisAddingAmountForTypeProlongation() {
+        
+        $return = 0.0;
+        
+        $parentInstance = $this->getParentInstance();
+        $totalContratEnCours = $parentInstance->getCurrentTotal();
+        $totalByMonth = $totalContratEnCours / $parentInstance->getData('duree_mois');
+        
+        $nbMonthAdding = $this->getData('added_month');
+        
+        $return = $totalByMonth;
+        
+        return $return;
+        
+        
+    }
+    
     public function by($by):bool {
         
         switch($by) {
@@ -325,7 +342,11 @@ class BContract_avenant extends BContract_contrat {
         
         if(!count($errors)) {
             if($haveSignature) {
-                $this->actionSigned(Array('date_signed' => $data->dateSignature), $success);
+                if($this->getData('type') == 1) {
+                    $this->actionSignedProlongation(Array('date_signed' => $data->dateSignature), $success);
+                } else {
+                    $this->actionSigned(Array('date_signed' => $data->dateSignature), $success);
+                }
             } else {
                 $parent = $this->getParentInstance();
                 $commercial = $parent->getCommercialClient(true);

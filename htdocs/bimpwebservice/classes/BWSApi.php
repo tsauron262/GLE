@@ -14,7 +14,8 @@ class BWSApi
                 'module'      => array('label' => 'Nom du module', 'require' => 1),
                 'object_name' => array('label' => 'Nom de l\'objet', 'required' => 1),
                 'id'          => array('label' => 'ID de l\'objet', 'data_type' => 'id', 'require_if_missing' => 'ref'),
-                'ref'         => array('label' => 'Référence de l\'objet', 'require_if_missing' => 'id')
+                'ref'         => array('label' => 'Référence de l\'objet', 'require_if_missing' => 'id'),
+                'children'    => array('label' => 'Objets enfants à retourner')
             )
         ),
         'getObjectValue' => array(
@@ -105,7 +106,7 @@ class BWSApi
     {
         // check requête: 
         if (!isset(self::$requests[$this->request_name])) {
-            $this->addError('REQUEST_INVALID', 'La reqête "' . $this->request_name . '" n\'existe pas');
+            $this->addError('REQUEST_INVALID', 'La requête "' . $this->request_name . '" n\'existe pas');
             return false;
         }
 
@@ -140,7 +141,7 @@ class BWSApi
         $object_name = BimpTools::getArrayValueFromPath($this->params, 'object_name', 'any');
 
         if (!$this->ws_user->hasRight($this->request_name, $module, $object_name)) {
-            $this->addError('UNAUTHORIZED', 'Opération non permise - ' . $module . ' - ' . $object_name);
+            $this->addError('UNAUTHORIZED', 'Opération non permise');
             return false;
         }
 
@@ -251,6 +252,8 @@ class BWSApi
             $obj_instance = $this->getObjectInstance();
         }
 
+        $object = null;
+        $id_object = 0;
         if (isset(self::$requests[$this->request_name]['params']['id'])) {
             $id_object = (int) BimpTools::getArrayValueFromPath($this->params, 'id', 0);
 
@@ -261,14 +264,13 @@ class BWSApi
                     $this->addError('UNFOUND', 'Aucun' . $obj_instance->e() . ' ' . $obj_instance->getLabel() . ' trouvé' . $obj_instance->e() . ' pour l\'ID ' . $id_object);
                     return null;
                 }
-                return $object;
             } elseif (BimpTools::getArrayValueFromPath(self::$requests, $this->request_name . '/params/id/required', 0)) {
                 $this->addError('OBJECT_IDENTIFIER_MISSING', 'Veuillez renseigner l\'identifiant de l\'objet demandé');
                 return null;
             }
         }
 
-        if (isset(self::$requests[$this->request_name]['params']['ref'])) {
+        if (!$id_object && isset(self::$requests[$this->request_name]['params']['ref'])) {
             $ref_object = BimpTools::getArrayValueFromPath($this->params, 'ref', '');
 
             if ($ref_object) {
@@ -293,11 +295,58 @@ class BWSApi
             }
         }
 
-        if (!count($this->errors)) {
+        if (BimpObject::objectLoaded($object)) {
+            // Check objet selon les filtres autorisés:
+            $ids = $this->checkObjectRightFilters($object, array($object->id));
+            if (empty($ids)) {
+                if (!count($this->errors)) {
+                    $this->addError('UNAUTHORIZED', 'Vous n\'avez pas la permission d\'obtenir les données ' . $object->getLabel('of_the') . ' ' . $object->getRef(true));
+                }
+                return null;
+            }
+            return $object;
+        } elseif (!count($this->errors)) {
             $this->addError('UNFOUND', 'Aucun' . $obj_instance->e() . ' ' . $obj_instance->getLabel() . ' trouvé' . $obj_instance->e());
         }
 
         return null;
+    }
+
+    protected function checkObjectRightFilters($obj_instance, $ids_objects)
+    {
+        $valid_ids = array();
+
+        if (is_a($this->ws_user, 'BWS_User') && is_a($obj_instance, 'BimpObject')) {
+            $id_right = $this->ws_user->getRightId($this->request_name, $obj_instance->module, $obj_instance->object_name);
+            if ($id_right) {
+                $right = BimpCache::getBimpObjectInstance('bimpwebservice', 'BWS_ProfileRight', $id_right);
+                if (BimpObject::objectLoaded($right)) {
+                    $filters = $right->getData('obj_filters');
+                    if (!empty($filters)) {
+                        $filters_errors = array();
+                        $bc_filters = new BC_FiltersPanel($obj_instance);
+                        $bc_filters->setFilters($filters);
+                        $valid_ids = $bc_filters->applyFiltersToObjectIds($ids_objects, $filters_errors);
+
+                        if (count($filters_errors)) {
+                            $this->addError('INTERNAL_ERROR', 'Erreur interne - opération non disponible actuellement');
+                            BimpCore::addlog('ERREUR WEBSERVICE', Bimp_Log::BIMP_LOG_URGENT, 'ws', $right, array(
+                                'Message' => 'Erreurs lors de l\'application des filtres du droit webservice #' . $right->id,
+                                'Requête' => $this->request_name,
+                                'Module'  => $obj_instance->module,
+                                'Objet'   => $obj_instance->object_name,
+                                'Erreurs' => $filters_errors
+                                    ), true);
+                            return array();
+                        }
+                    } else {
+                        $valid_ids = $ids_objects;
+                    }
+                }
+            }
+        }
+
+        return $valid_ids;
     }
 
     public function handleError($level, $msg, $file, $line)
@@ -334,7 +383,7 @@ class BWSApi
                     $txt .= '<pre>' . print_r($this->params, 1) . '</pre>';
                 }
 
-                mailSyn2('ERREUR FATALE WEBSERVICE - ' . str_replace('/', '', DOL_URL_ROOT), BimpCore::getConf('devs_email'), 'f.martinez@bimp.fr', $txt);
+                mailSyn2('ERREUR FATALE WEBSERVICE - ' . str_replace('/', '', DOL_URL_ROOT), BimpCore::getConf('devs_email', 'f.martinez@bimp.fr'), '', $txt);
 
                 BimpCore::addlog('ERREUR FATALE WEBSERVICE - ' . $msg, Bimp_Log::BIMP_LOG_URGENT, 'ws', null, array(
                     'Requête' => $this->request_name,
@@ -374,7 +423,37 @@ class BWSApi
         if (!count($this->errors)) {
             $object = $this->findObject();
             if (BimpObject::objectLoaded($object)) {
-                $response = array('object_data' => $object->getDataArray(true));
+                // Check des children: 
+                $children = BimpTools::getArrayValueFromPath($this->params, 'children', '');
+                if ($children) {
+                    $children = json_decode($children);
+                }
+
+                $children_data = array();
+                if (!empty($children)) {
+                    foreach ($children as $child_name) {
+                        if (!$object->config->isDefined('objects/' . $child_name) || ($object->config->get('objects/' . $child_name . '/relation', '') !== 'hasMany')) {
+                            $this->addError('INVALID_PARAMETER', 'L\'objet enfant "' . $child_name . '" n\'existe pas pour les ' . $object->getLabel('name_plur'));
+                        } else {
+                            $child = $object->getChildObject($child_name);
+                            if (!is_a($child, 'BimpObject')) {
+                                $this->addError('INVALID_PARAMETER', 'L\'obtention des données des objets enfants "' . $child_name . '" n\'est pas possible');
+                            } elseif (!$this->ws_user->hasRight($this->request_name, $child->module, $child->object_name)) {
+                                $this->addError('UNAUTHORIZED', 'Vous n\'avez pas la permission d\'obtenir les données des objets enfants "' . $child_name . '"');
+                            } else {
+                                $children_data[$child_name] = array();
+                                foreach ($object->getChildrenObjects($child_name) as $child_object) {
+                                    $children_data[$child_name][] = $child_object->getDataArray(true);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                $response = array(
+                    'object_data' => $object->getDataArray(true),
+                    'children'    => $children_data
+                );
             }
         }
 
@@ -436,6 +515,9 @@ class BWSApi
                     $list[] = (int) $r[$primary];
                 }
             }
+
+            // Check liste: 
+            $list = $this->checkObjectRightFilters($obj_instance, $list);
 
             $response['list'] = $list;
         }

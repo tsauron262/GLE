@@ -107,7 +107,7 @@ class BimpDb
         return $result;
     }
 
-    public function executeS($sql, $return = 'object', $field = null)
+    public function executeS($sql, $return = 'object', $returned_field = null)
     {
         $result = $this->db->query($sql);
 
@@ -121,11 +121,11 @@ class BimpDb
                         break;
 
                     case 'array':
-                        if(is_null($field))
+                        if (is_null($returned_field)) {
                             $rows[] = $this->db->fetch_array($result);
-                        else{
+                        } else {
                             $res = $this->db->fetch_array($result);
-                            $rows[] = $res[$field];
+                            $rows[] = $res[$returned_field];
                         }
                         break;
                 }
@@ -322,7 +322,7 @@ class BimpDb
     {
         $sql = 'SELECT COUNT(DISTINCT `' . $primary . '`) as nb_rows FROM ' . MAIN_DB_PREFIX . $table;
         $sql .= ' WHERE ' . $where;
-        
+
         $result = $this->executeS($sql, 'array');
 
         if (isset($result[0]['nb_rows'])) {

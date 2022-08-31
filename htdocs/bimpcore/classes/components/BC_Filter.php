@@ -130,7 +130,6 @@ class BC_Filter extends BimpComponent
             $this->is_default = true;
         }
 
-        $items = null;
         
         
         $type_path = 'filters/' . $this->filter_name . '/type';

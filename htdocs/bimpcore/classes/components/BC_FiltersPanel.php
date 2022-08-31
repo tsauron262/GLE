@@ -518,4 +518,15 @@ class BC_FiltersPanel extends BC_Panel
 
         return $list;
     }
+
+    public static function renderJsonFilters($object, $filters, $context = 'filters_input')
+    {
+        if (!is_array($filters)) {
+            $filters = json_decode($filters, 1);
+        }
+
+        $bc_panel = new BC_FiltersPanel($object);
+        $bc_panel->setFilters($filters);
+        return $bc_panel->renderActiveFilters(false, false, $context);
+    }
 }

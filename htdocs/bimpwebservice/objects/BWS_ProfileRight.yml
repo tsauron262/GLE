@@ -78,8 +78,50 @@ forms:
             id_profile: 
                 edit: 0
                 
+    add_muliple: 
+        rows: 
+            profile:
+                field: id_profile
+                edit: 0
+            requests: 
+                custom: 1
+                label: Requêtes
+                input_name: requests
+                input: 
+                    type: check_list
+                    items: 
+                        array: requests
+            objects: 
+                custom: 1
+                label: Objets
+                input_name: objects
+                input: 
+                    multiple: 1
+                    type: select
+                    options: 
+                        array: bimpObjects
+         
+filters: 
+    obj_name: 
+        type: value
+        
+filters_panels: 
+    default: 
+        filters: 
+            id_profile: 
+            request_name: 
+            obj_module: 
+            obj_name: 
+                
+    profile: 
+        extends: default
+        filters: 
+            id_profile: unset
+       
 lists: 
     default: 
+        checkboxes: 1
+        filters_panel: default
         sort_field: id
         sort_way: desc
         n: 10
@@ -103,10 +145,13 @@ lists:
                 
     profile: 
         extends: default
+        filters_panel: profile
         title: 
             callback: getProfileListTitle
         add_form_name: profile
         edit_form: profile
+        header_buttons: 
+            callback: getProfileListExtraHeaderButtons
         cols: 
             id_profile: unset
         

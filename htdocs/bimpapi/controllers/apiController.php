@@ -6,17 +6,19 @@ class apiController extends BimpController
 {
 
     public $api_name = '';
+    public $api_idx = 0;
     public $api = null;
 
-    public function setApi($api_name, &$errors = array())
+    public function setApi($api_name, $api_idx = 0, &$errors = array())
     {
-        if (!is_null($this->api) && $this->api->name !== $api_name) {
+        if (!is_null($this->api) && ($this->api->name !== $api_name || $this->api->idx !== $api_idx)) {
             $this->api = null;
         }
 
         if (is_null($this->api)) {
             $this->api_name = $api_name;
-            $this->api = BimpAPI::getApiInstance($api_name);
+            $this->api_idx = $api_idx;
+            $this->api = BimpAPI::getApiInstance($api_name, $api_idx);
         }
 
         return $this->isApiOk($errors);
@@ -41,7 +43,7 @@ class apiController extends BimpController
 
     // Reqêtes
 
-    public function apiRequest($api_name, $request_name, $method, $params, $options)
+    public function apiRequest($api_name, $api_idx, $request_name, $method, $params, $options)
     {
         $errors = array();
 
@@ -60,7 +62,7 @@ class apiController extends BimpController
         }
 
         if (!count($errors)) {
-            if ($this->setApi($api_name, $errors)) {
+            if ($this->setApi($api_name, $api_idx, $errors)) {
                 if ((int) BimpTools::getArrayValueFromPath($options, 'need_connection', 1)) {
                     if (!$this->api->isLogged()) {
                         $this->api->connect($errors);
@@ -147,6 +149,7 @@ class apiController extends BimpController
     {
         // Point d'entrée de toutes les requêtes ajax nécessitant une connexion à une API
         $api_name = BimpTools::getValue('api_name', '');
+        $api_idx = (int) BimpTools::getValue('api_idx', 0);
         $request_name = BimpTools::getValue('api_requestName', '');
         $method = BimpTools::getValue('api_method', 'apiRequest');
         $params = BimpTools::getValue('api_params', array());
@@ -168,7 +171,7 @@ class apiController extends BimpController
             }
         }
 
-        $result = $this->apiRequest($api_name, $request_name, $method, $params, $options);
+        $result = $this->apiRequest($api_name, $api_idx, $request_name, $method, $params, $options);
 
         if ((int) BimpTools::getArrayValueFromPath($options, 'need_connection', 1) && $this->isApiOk() && !$this->api->isLogged()) {
             return array(
@@ -187,11 +190,12 @@ class apiController extends BimpController
         $warnings = array();
 
         $api_name = BimpTools::getValue('api_name', '');
+        $api_idx = BimpTools::getValue('api_idx', 0);
 
         if (!$api_name) {
             $errors[] = 'Type d\'API absent';
         } else {
-            if ($this->setApi($api_name, $errors)) {
+            if ($this->setApi($api_name, $api_idx, $errors)) {
                 $errors = $this->api->logout($warnings);
             }
         }

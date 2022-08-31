@@ -490,81 +490,75 @@ class PisteAPI extends BimpAPI
 
     // Install: 
 
-    public function install(&$warnings = array())
+    public function install($title = '', &$warnings = array())
     {
         $errors = array();
 
-        $bdb = BimpCache::getBdb();
+        $api = BimpObject::createBimpObject('bimpapi', 'API_Api', array(
+                    'name'  => 'piste',
+                    'title' => ($title ? $title : $this->getDefaultApiTitle())
+                        ), true, $errors, $warnings);
 
-        if ((int) $bdb->getValue('bimpapi_api', 'id', 'name = \'piste\'')) {
-            $errors[] = 'Cette API a déjà été installée';
-        } else {
-            $api = BimpObject::createBimpObject('bimpapi', 'API_Api', array(
-                        'name'  => 'piste',
-                        'title' => 'Piste'
-                            ), true, $errors, $warnings);
+        if (BimpObject::objectLoaded($api)) {
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+                        'id_api' => $api->id,
+                        'name'   => 'prod_oauth_client_id',
+                        'title'  => 'ID Client OAuth en mode production'
+                            ), true, $warnings, $warnings);
 
-            if (BimpObject::objectLoaded($api)) {
-                $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
-                            'id_api' => $api->id,
-                            'name'   => 'prod_oauth_client_id',
-                            'title'  => 'ID Client OAuth en mode production'
-                                ), true, $warnings, $warnings);
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+                        'id_api' => $api->id,
+                        'name'   => 'prod_oauth_client_secret',
+                        'title'  => 'Secret client OAuth en mode production'
+                            ), true, $warnings, $warnings);
 
-                $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
-                            'id_api' => $api->id,
-                            'name'   => 'prod_oauth_client_secret',
-                            'title'  => 'Secret client OAuth en mode production'
-                                ), true, $warnings, $warnings);
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+                        'id_api' => $api->id,
+                        'name'   => 'prod_api_key',
+                        'title'  => 'Clé API en mode production'
+                            ), true, $warnings, $warnings);
 
-                $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
-                            'id_api' => $api->id,
-                            'name'   => 'prod_api_key',
-                            'title'  => 'Clé API en mode production'
-                                ), true, $warnings, $warnings);
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+                        'id_api' => $api->id,
+                        'name'   => 'prod_api_secret',
+                        'title'  => 'Secret API en mode production'
+                            ), true, $warnings, $warnings);
 
-                $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
-                            'id_api' => $api->id,
-                            'name'   => 'prod_api_secret',
-                            'title'  => 'Secret API en mode production'
-                                ), true, $warnings, $warnings);
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+                        'id_api' => $api->id,
+                        'name'   => 'prod_id_fournisseur',
+                        'title'  => 'Identifiant fournisseur en mode production'
+                            ), true, $warnings, $warnings);
 
-                $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
-                            'id_api' => $api->id,
-                            'name'   => 'prod_id_fournisseur',
-                            'title'  => 'Identifiant fournisseur en mode production'
-                                ), true, $warnings, $warnings);
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+                        'id_api' => $api->id,
+                        'name'   => 'test_oauth_client_id',
+                        'title'  => 'ID Client OAuth en mode test'
+                            ), true, $warnings, $warnings);
 
-                $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
-                            'id_api' => $api->id,
-                            'name'   => 'test_oauth_client_id',
-                            'title'  => 'ID Client OAuth en mode test'
-                                ), true, $warnings, $warnings);
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+                        'id_api' => $api->id,
+                        'name'   => 'test_oauth_client_secret',
+                        'title'  => 'Secret client OAuth en mode test'
+                            ), true, $warnings, $warnings);
 
-                $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
-                            'id_api' => $api->id,
-                            'name'   => 'test_oauth_client_secret',
-                            'title'  => 'Secret client OAuth en mode test'
-                                ), true, $warnings, $warnings);
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+                        'id_api' => $api->id,
+                        'name'   => 'test_api_key',
+                        'title'  => 'Clé API en mode test'
+                            ), true, $warnings, $warnings);
 
-                $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
-                            'id_api' => $api->id,
-                            'name'   => 'test_api_key',
-                            'title'  => 'Clé API en mode test'
-                                ), true, $warnings, $warnings);
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+                        'id_api' => $api->id,
+                        'name'   => 'test_api_secret',
+                        'title'  => 'Secret API en mode test'
+                            ), true, $warnings, $warnings);
 
-                $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
-                            'id_api' => $api->id,
-                            'name'   => 'test_api_secret',
-                            'title'  => 'Secret API en mode test'
-                                ), true, $warnings, $warnings);
-
-                $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
-                            'id_api' => $api->id,
-                            'name'   => 'test_id_fournisseur',
-                            'title'  => 'Identifiant fournisseur en mode test'
-                                ), true, $warnings, $warnings);
-            }
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+                        'id_api' => $api->id,
+                        'name'   => 'test_id_fournisseur',
+                        'title'  => 'Identifiant fournisseur en mode test'
+                            ), true, $warnings, $warnings);
         }
 
         return $errors;

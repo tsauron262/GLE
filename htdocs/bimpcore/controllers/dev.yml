@@ -50,6 +50,18 @@ objects:
                 module: bimpwebservice
                 name: BWS_Profile
                 
+    bws_user: 
+        instance: 
+            bimp_object: 
+                module: bimpwebservice
+                name: BWS_User
+                
+    bws_profile_right: 
+        instance: 
+            bimp_object: 
+                module: bimpwebservice
+                name: BWS_ProfileRight
+                
 sections:
     - type: tabs
       tabs: 
@@ -160,7 +172,7 @@ sections:
             sections: 
                 - type: nav_tabs
                   nav_tabs: 
-                      tabs_id: processes
+                      tabs_id: ws
                       tabs: 
                           - id: profiles
                             title: Profiles
@@ -168,6 +180,18 @@ sections:
                                 type: list
                                 list: 
                                     object: bws_profiles
+                          - id: users
+                            title: Utilisateurs
+                            struct:
+                                type: list
+                                list: 
+                                    object: bws_user
+                          - id: rights
+                            title: Tous les droits
+                            struct:
+                                type: list
+                                list: 
+                                    object: bws_profile_right
                                     
                             
                       

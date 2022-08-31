@@ -97,6 +97,25 @@ class API_Api extends BimpObject
         return 'name';
     }
 
+    public function getApiToInstallDefaultTitle()
+    {
+        $api_name = BimpTools::getPostFieldValue('api_name');
+        $class_name = ucfirst($api_name) . 'API';
+
+        if (!class_exists($class_name)) {
+            $file = DOL_DOCUMENT_ROOT . '/bimpapi/classes/apis/' . $class_name . '.php';
+            if (file_exists($file)) {
+                require_once $file;
+            }
+        }
+
+        if (class_exists($class_name)) {
+            return $class_name::getDefaultApiTitle();
+        }
+
+        return '';
+    }
+
     // Getters Array: 
 
     public function getApisToInstallArray()
@@ -107,7 +126,11 @@ class API_Api extends BimpObject
         $installed_apis = self::getApisArray(false, false);
 
         foreach ($apis_classes as $api_name => $api_class_name) {
-            if (array_key_exists($api_name, $installed_apis)) {
+            if (!class_exists($api_class_name)) {
+                continue;
+            }
+
+            if (!$api_class_name::$allow_multiple_instances && array_key_exists($api_class_name::$name . '_0', $installed_apis)) {
                 continue;
             }
 
@@ -134,12 +157,13 @@ class API_Api extends BimpObject
 
             $rows = self::getBdb()->getRows('bimpapi_api', ($active_only ? 'active = 1' : '1'), null, 'array', array(
                 $key,
+                'api_idx',
                 'title'
             ));
 
             if (is_array($rows)) {
                 foreach ($rows as $r) {
-                    self::$cache[$cache_key][$r[$key]] = $r['libelle'];
+                    self::$cache[$cache_key][$r[$key] . ($key === 'name' ? '_' . (int) $r['api_idx'] : '')] = $r['libelle'];
                 }
             }
         }
@@ -204,7 +228,7 @@ class API_Api extends BimpObject
         $api_name = $this->getData('name');
 
         if ($api_name) {
-            return BimpAPI::getApiInstance($api_name);
+            return BimpAPI::getApiInstance($api_name, (int) $this->getData('api_idx'));
         }
 
         return null;
@@ -421,6 +445,7 @@ class API_Api extends BimpObject
         $success = 'API installée avec succès';
 
         $api_name = BimpTools::getArrayValueFromPath($data, 'api_name', '');
+        $api_title = BimpTools::getArrayValueFromPath($data, 'api_title', '');
 
         if (!$api_name) {
             $errors[] = 'Aucune API à installer sélectionnée';
@@ -430,7 +455,7 @@ class API_Api extends BimpObject
             if (!is_a($api, 'BimpAPI') || !method_exists($api, 'install')) {
                 $errors[] = 'L\'API sélectionnée est invalide';
             } else {
-                $errors = $api->install($warnings);
+                $errors = $api->install($api_title, $warnings);
             }
         }
 
@@ -438,5 +463,42 @@ class API_Api extends BimpObject
             'errors'   => $errors,
             'warnings' => $warnings
         );
+    }
+
+    // Overrides: 
+
+    public function create(&$warnings = array(), $force_create = false)
+    {
+        $errors = array();
+
+        $api_name = $this->getData('name');
+        $api_class_name = ucfirst($api_name) . 'API';
+
+        if (!class_exists($api_class_name)) {
+            $file = DOL_DOCUMENT_ROOT . '/bimpapi/classes/apis/' . $api_class_name . '.php';
+            if (file_exists($file)) {
+                require_once $file;
+            }
+        }
+
+        if (class_exists($api_class_name)) {
+            $idx = $this->db->getMax('bimpapi_api', 'api_idx', 'name = \'' . $api_name . '\'');
+
+            if ($api_class_name::$allow_multiple_instances) {
+                $idx = (int) $idx;
+                $idx += 1;
+                $this->set('api_idx', $idx);
+            } elseif (!is_null($idx)) {
+                $errors[] = 'Une instance existe déjà pour l\'API "' . $api_name . '" (création d\'instances multiples non permise pour cette API)';
+            }
+        } else {
+            $errors[] = 'La classe API "' . $api_class_name . '" n\'existe pas';
+        }
+
+        if (!count($errors)) {
+            $errors = parent::create($warnings, $force_create);
+        }
+
+        return $errors;
     }
 }

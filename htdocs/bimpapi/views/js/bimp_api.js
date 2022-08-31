@@ -2,7 +2,7 @@ var next_bimpapi_ajax_id = 1;
 var bimpapi_logged = [];
 var bimpapi_nologged_requests = [];
 
-function BimpApiAjax(api_name, method, request_name, api_params, $resultContainer, request_options, ajax_params) {
+function BimpApiAjax(api_name, api_idx, method, request_name, api_params, $resultContainer, request_options, ajax_params) {
     if (typeof (ajax_params.confirm_msg) !== 'undefined' && ajax_params.confirm_msg) {
         if (!confirm(ajax_params.confirm_msg)) {
             return;
@@ -12,6 +12,7 @@ function BimpApiAjax(api_name, method, request_name, api_params, $resultContaine
     var apiAjax = this;
     this.id = next_bimpapi_ajax_id;
     this.api_name = api_name;
+    this.api_idx = api_idx;
     next_bimpapi_ajax_id++;
 
     if (typeof (api_params) === 'undefined') {
@@ -35,6 +36,7 @@ function BimpApiAjax(api_name, method, request_name, api_params, $resultContaine
     if (method !== 'apiProcessRequestForm') {
         this.data = {
             api_name: api_name,
+            api_idx: api_idx,
             api_method: method,
             api_requestName: request_name,
             api_options: request_options,
@@ -84,12 +86,12 @@ function BimpApiAjax(api_name, method, request_name, api_params, $resultContaine
 
 function BimpApi() {
 
-    this.ajaxRequest = function ($button, api_name, request_name, fields, $result_container, options, success_callback, confirm_msg) {
+    this.ajaxRequest = function ($button, api_name, api_idx, request_name, fields, $result_container, options, success_callback, confirm_msg) {
         if ($button.hasClass('disabled')) {
             return;
         }
 
-        BimpApiAjax(api_name, 'apiProcessRequest', request_name, {'fields': fields}, $result_container, options, {
+        BimpApiAjax(api_name, api_idx, 'apiProcessRequest', request_name, {'fields': fields}, $result_container, options, {
             $button: $button,
             success: success_callback
         });
@@ -101,7 +103,7 @@ function BimpApi() {
         }
     };
 
-    this.loadRequestModalForm = function ($button, title, api_name, request_name, ajax_data, api_params, request_options, success_callback) {
+    this.loadRequestModalForm = function ($button, title, api_name, api_idx, request_name, ajax_data, api_params, request_options, success_callback) {
         if ($.isOk($button) && $button.hasClass('disabled')) {
             return;
         }
@@ -156,7 +158,7 @@ function BimpApi() {
             ajax_params.load_request_form_success = success_callback;
         }
 
-        BimpApiAjax(api_name, 'apiLoadRequestForm', request_name, api_params, $container, request_options, ajax_params);
+        BimpApiAjax(api_name, api_idx, 'apiLoadRequestForm', request_name, api_params, $container, request_options, ajax_params);
     };
 
     this.processRequestModalForm = function ($button) {
@@ -175,9 +177,10 @@ function BimpApi() {
                     if ($form.length) {
                         var data = new FormData($form.get(0));
                         var api_name = $form.data('api_name');
+                        var api_idx = $form.data('api_idx');
                         var request_name = $form.data('api_requestName');
 
-                        BimpApiAjax(api_name, 'apiProcessRequestForm', request_name, data, $form.find('.ajaxResultContainer'), {}, {
+                        BimpApiAjax(api_name, api_idx, 'apiProcessRequestForm', request_name, data, $form.find('.ajaxResultContainer'), {}, {
                             modal_idx: modal_idx,
                             $button: $button,
                             display_processing: true,

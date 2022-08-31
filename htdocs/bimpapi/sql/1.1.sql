@@ -14,7 +14,8 @@ CREATE TABLE IF NOT EXISTS `llx_bimpapi_api` (
   `notify_defuser_unauth` int(1) NOT NULL DEFAULT 0
 );
 
-ALTER TABLE `llx_bimpapi_api` ADD INDEX(`id_default_user_account`); 
+ALTER TABLE `llx_bimpapi_api` ADD INDEX(`id_default_user_account_test`);
+ALTER TABLE `llx_bimpapi_api` ADD INDEX(`id_default_user_account_prod`);
 
 CREATE TABLE IF NOT EXISTS `llx_bimpapi_api_param` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -35,9 +36,7 @@ CREATE TABLE IF NOT EXISTS `llx_bimpapi_user_account` (
   `login` varchar(255) NOT NULL DEFAULT '',
   `pword` varchar(255) NOT NULL DEFAULT '',
   `tokens` TEXT NOT NULL DEFAULT '',
-  `logged_end` datetime DEFAULT NULL,
-  KEY `id_api` (`id_api`),
-  KEY `id_user` (`id_user`)
+  `logged_end` datetime DEFAULT NULL
 );
 
-ALTER TABLE `llx_bimpapi_user_account` ADD INDEX(`id_api`); 
+ALTER TABLE `llx_bimpapi_user_account` ADD INDEX(`id_api`);

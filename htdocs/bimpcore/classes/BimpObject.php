@@ -3494,7 +3494,7 @@ class BimpObject extends BimpCache
         if (!$extra_order_by && $order_by != 'a.' . $primary) {
             $extra_order_by = 'a.' . $primary;
         }
-
+        
         $sql = '';
         $sql .= BimpTools::getSqlSelect($fields);
         $sql .= BimpTools::getSqlFrom($table, $joins);
@@ -9507,7 +9507,7 @@ var options = {
 
     // Gestion statique des objets:
 
-    public static function createBimpObject($module, $object_name, $data, $force_create = false, &$errors = array(), &$warnings = array(), $no_transactions_db = false)
+    public static function createBimpObject($module, $object_name, $data, $force_create = false, &$errors = array(), &$warnings = array(), $no_transactions_db = false, $no_html = false)
     {
         $instance = static::getInstance($module, $object_name);
 
@@ -9531,11 +9531,11 @@ var options = {
             }
 
             if (count($create_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($create_errors, 'Echec de la création ' . $label);
+                $errors[] = BimpTools::getMsgFromArray($create_errors, 'Echec de la création ' . $label, $no_html);
             }
 
             if (count($create_warnings)) {
-                $warnings[] = BimpTools::getMsgFromArray($create_warnings, 'Erreurs suite à la création ' . $label);
+                $warnings[] = BimpTools::getMsgFromArray($create_warnings, 'Erreurs suite à la création ' . $label, $no_html);
             }
 
             return $instance;

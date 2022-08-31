@@ -670,50 +670,49 @@ class DocusignAPI extends BimpAPI {
         return parent::fetchUserAccount($id_user_account);
     }
 
+    public static function getDefaultApiTitle()
+    {
+        return self::$title;
+    }
     // Install: 
 
-    public function install(&$warnings = array()) {
+    public function install($title = '', &$warnings = array()) {
         $errors = array();
 
-        $bdb = BimpCache::getBdb();
+        $api = BimpObject::createBimpObject('bimpapi', 'API_Api', array(
+                    'name'  => self::$name,
+                    'title' => ($title ? $title : $this->getDefaultApiTitle())
+                        ), true, $errors, $warnings);
 
-        if ((int) $bdb->getValue('bimpapi_api', 'id', 'name = \'' . self::$name . '\'')) {
-            $errors[] = 'Cette API a déjà été installée';
-        } else {
-            $api = BimpObject::createBimpObject('bimpapi', 'API_Api', array(
-                        'name'  => self::$name,
-                        'title' => self::$title
-                            ), true, $errors, $warnings);
+        if (BimpObject::objectLoaded($api)) {
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+                        'id_api' => $api->id,
+                        'name' => 'test_oauth_client_secret',
+                        'title' => 'Secret client OAuth en mode test',
+                        'value' => 'd4a8e30b-7dff-433b-9c8d-4208e0f8cbc2'
+                            ), true, $warnings, $warnings);
 
-            if (BimpObject::objectLoaded($api)) {
-                $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
-                            'id_api' => $api->id,
-                            'name' => 'test_oauth_client_secret',
-                            'title' => 'Secret client OAuth en mode test',
-                            'value' => 'd4a8e30b-7dff-433b-9c8d-4208e0f8cbc2'
-                                ), true, $warnings, $warnings);
-                
-                $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
-                            'id_api' => $api->id,
-                            'name' => 'test_oauth_client_id',
-                            'title' => 'ID Client OAuth en mode test',
-                            'value' => '4214323f-c281-4a0e-80f7-37b3ea7d8665'
-                                ), true, $warnings, $warnings);
-                
-                $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
-                            'id_api' => $api->id,
-                            'name' => 'prod_oauth_client_secret',
-                            'title' => 'Secret client OAuth en mode test',
-                            'value' => ''
-                                ), true, $warnings, $warnings);
-                
-                $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
-                            'id_api' => $api->id,
-                            'name' => 'prod_oauth_client_id',
-                            'title' => 'ID Client OAuth en mode test',
-                            'value' => ''
-                                ), true, $warnings, $warnings);
-                
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+                        'id_api' => $api->id,
+                        'name' => 'test_oauth_client_id',
+                        'title' => 'ID Client OAuth en mode test',
+                        'value' => '4214323f-c281-4a0e-80f7-37b3ea7d8665'
+                            ), true, $warnings, $warnings);
+
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+                        'id_api' => $api->id,
+                        'name' => 'prod_oauth_client_secret',
+                        'title' => 'Secret client OAuth en mode test',
+                        'value' => ''
+                            ), true, $warnings, $warnings);
+
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+                        'id_api' => $api->id,
+                        'name' => 'prod_oauth_client_id',
+                        'title' => 'ID Client OAuth en mode test',
+                        'value' => ''
+                            ), true, $warnings, $warnings);
+
 //                $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
 //                            'id_api' => $api->id,
 //                            'name' => 'url_redirect',
@@ -721,7 +720,6 @@ class DocusignAPI extends BimpAPI {
 //                            'value' => DOL_URL_ROOT . '/'
 //                                ), true, $warnings, $warnings);
 
-            }
         }
 
         return $errors;

@@ -13,11 +13,13 @@ abstract class BimpAPI
     public static $default_post_mode = 'json'; // json / string / array
     public static $default_accept = 'application/json';
     public static $include_debug_json = false;
+    public static $allow_multiple_instances = false;
 
     # Caches: 
     public static $instances = array();
 
     # Objets:
+    public $idx = 0;
     public $userAccount = null;
     public $apiObject = null;
 
@@ -31,11 +33,13 @@ abstract class BimpAPI
 
     // Gestion instance:
 
-    public function __construct($id_user_account = 0, $debug_mode = false)
+    public function __construct($api_idx = 0, $id_user_account = 0, $debug_mode = false)
     {
         $this->debug_mode = $debug_mode;
+        $this->idx = $api_idx;
         $this->apiObject = BimpCache::findBimpObjectInstance('bimpapi', 'API_Api', array(
-                    'name' => static::$name
+                    'name'    => static::$name,
+                    'api_idx' => $api_idx
                         ), false);
 
         if ($this->isApiOk($this->errors)) {
@@ -97,7 +101,9 @@ abstract class BimpAPI
                 'mode'                  => $this->apiObject->getData('mode'),
                 'log_errors'            => (int) $this->apiObject->getData('log_errors'),
                 'log_requests'          => (int) $this->apiObject->getData('log_requests'),
-                'notify_defuser_unauth' => (int) $this->apiObject->getData('notify_defuser_unauth')
+                'notify_defuser_unauth' => (int) $this->apiObject->getData('notify_defuser_unauth'),
+                'connect_timeout'       => (int) $this->apiObject->getData('connect_timeout'),
+                'timeout'               => (int) $this->apiObject->getData('exec_timeout'),
             );
         } else {
             $this->options = array(
@@ -105,7 +111,9 @@ abstract class BimpAPI
                 'public_name'           => '',
                 'log_errors'            => 1,
                 'log_requests'          => 0,
-                'notify_defuser_unauth' => 0
+                'notify_defuser_unauth' => 0,
+                'connect_timeout'       => 10,
+                'exec_timeout'          => 30,
             );
         }
     }
@@ -181,9 +189,9 @@ abstract class BimpAPI
         return $errors;
     }
 
-    public static function getApiInstance($api_name)
+    public static function getApiInstance($api_name, $api_idx = 0)
     {
-        if (!isset(self::$instances[$api_name])) {
+        if (!isset(self::$instances[$api_name][$api_idx])) {
             $api_class = ucfirst($api_name) . 'API';
 
             if (!class_exists($api_class)) {
@@ -193,13 +201,18 @@ abstract class BimpAPI
             }
 
             if (class_exists($api_class)) {
-                self::$instances[$api_name] = new $api_class();
+                self::$instances[$api_name][$api_idx] = new $api_class($api_idx);
             } else {
                 return null;
             }
         }
 
-        return self::$instances[$api_name];
+        return self::$instances[$api_name][$api_idx];
+    }
+
+    public static function getDefaultApiTitle()
+    {
+        return ucfirst(static::$name);
     }
 
     // Gestion Authentification:
@@ -337,7 +350,12 @@ abstract class BimpAPI
                         'allow_reconnect' => true
                             ), $params, false, true);
 
-            $url = BimpTools::getArrayValueFromPath(static::$urls_bases, $params['url_base_type'] . '/' . $this->options['mode'], '');
+            $url = '';
+            if (isset(static::$urls_bases[$params['url_base_type']])) {
+                $url = BimpTools::getArrayValueFromPath(static::$urls_bases, $params['url_base_type'] . '/' . $this->options['mode'], '');
+            } elseif (isset($this->params['url_base_' . $params['url_base_type'] . '_' . $this->options['mode']])) {
+                $url = $this->params['url_base_' . $params['url_base_type'] . '_' . $this->options['mode']];
+            }
 
             if (!$url) {
                 $errors[] = 'Base de l\'URL non définie';
@@ -356,7 +374,7 @@ abstract class BimpAPI
                 if (is_array($params['url_params']) && !empty($params['url_params'])) {
                     $url .= '?' . BimpTools::makeUrlParamsFromArray($params['url_params']);
                 }
-                
+
                 // Initalisation:
                 $infos .= '<b>Initialisation: </b>' . $url . ': ';
                 $ch = curl_init($url);
@@ -483,13 +501,21 @@ abstract class BimpAPI
                             $infos .= '<span class="danger">AUCUNE REPONSE</span><br/>';
                             $errors[] = 'Aucune réponse reçue - Code HTTP: ' . $response_code;
                         } else {
-                            $response_header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-                            $response_header_str = substr($response, 0, $response_header_size);
-                            $response_body = substr($response, $response_header_size);
+                            if ($params['header_out']) {
+                                $response_header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+                                $response_header_str = substr($response, 0, $response_header_size);
+                                $response_body = substr($response, $response_header_size);
+                            } else {
+                                $response_header_size = 0;
+                                $response_header_str = '';
+                                $response_body = $response;
+                            }
 
-                            foreach (explode("\r\n", $response_header_str) as $header) {
-                                if (preg_match('/^([a-zA-Z0-9\-]+): (.+)$/', $header, $matches)) {
-                                    $response_headers[$matches[1]] = $matches[2];
+                            if ($response_header_str) {
+                                foreach (explode("\r\n", $response_header_str) as $header) {
+                                    if (preg_match('/^([a-zA-Z0-9\-]+): (.+)$/', $header, $matches)) {
+                                        $response_headers[$matches[1]] = $matches[2];
+                                    }
                                 }
                             }
 
@@ -606,7 +632,7 @@ abstract class BimpAPI
 
     public function getJsApiRequestOnClick($request_name, $fields = array(), $params = array())
     {
-        $js = 'BimpApi.ajaxRequest($(this), \'' . static::$name . '\', \'' . $request_name . '\', ';
+        $js = 'BimpApi.ajaxRequest($(this), \'' . static::$name . '\', ' . $this->idx . ', \'' . $request_name . '\', ';
 
         $js .= htmlentities(json_encode($fields)) . ', ';
         $js .= BimpTools::getArrayValueFromPath($params, 'result_container', 'null') . ', ';
@@ -663,11 +689,12 @@ abstract class BimpAPI
         return $apis;
     }
 
-    public static function isApiActive($api_name, &$api = null)
+    public static function isApiActive($api_name, &$api = null, $api_idx = 0)
     {
         if (is_null($api) && $api_name) {
             $api = BimpCache::findBimpObjectInstance('bimpapi', 'API_Api', array(
-                        'name' => $api_name
+                        'name'    => $api_name,
+                        'api_idx' => (int) $api_idx
                             ), true, false);
         }
 

@@ -780,7 +780,7 @@ class BimpRender
         if (is_null($modal_view)) {
             $modal_view = '';
         }
-        
+
         $html = '';
         if ($page_link) {
             if (is_null($url)) {
@@ -801,7 +801,7 @@ class BimpRender
                 }
             }
         }
-        
+
         if ($modal_view && is_a($object, 'BimpObject') && $object->config->isDefined('views/' . $modal_view)) {
             $title = $object->getInstanceName();
             $title = str_replace('\'', '\\\'', $title);
@@ -1286,8 +1286,8 @@ class BimpRender
         foreach ($rows as $row) {
             $html .= '<tr class="bimp_list_table_row"';
             $html .= (isset($row['row_data']) ? BimpRender::renderTagData($row['row_data']) : '');
-//            $html .= (isset($row['row_style']) ? ' style="' . $row['row_style'] . '"' : '');
             $html .= '>';
+
             if ($empty_first_col) {
                 $html .= '<td' . (isset($row['row_style']) ? ' style="' . $row['row_style'] . '"' : '') . '>';
                 if ($params['checkboxes'] && (!isset($row['item_checkbox']) || (int) $row['item_checkbox'])) {
@@ -1296,33 +1296,43 @@ class BimpRender
                 $html .= '</td>';
             }
 
-            foreach ($headers as $col_name => $header) {
-                $html .= '<' . $header['cel_tag'];
-                $html .= ' class="col_' . $col_name . '"';
-                $html .= ' data-col="' . $col_name . '"';
-                if (is_array($row[$col_name]) && isset($row[$col_name]['value'])) {
-                    $html .= ' data-value="' . htmlentities($row[$col_name]['value']) . '"';
-                }
-                $html .= ' style="' . ($header['align'] !== 'left' ? 'text-align: ' . $header['align'] . ';' : '');
-                if ($header['col_style']) {
-                    $html .= ' ' . $header['col_style'] . ';';
-                }
+            if (isset($row['full_row_content'])) {
+                $html .= '<td colspan="' . count($headers) . '"';
                 if (isset($row['row_style'])) {
-                    $html .= ' ' . $row['row_style'];
+                    $html .= ' style="' . $row['row_style'] . '"';
                 }
-                $html .= '">';
-                if (isset($row[$col_name])) {
-                    if (is_array($row[$col_name])) {
-                        if (isset($row[$col_name]['content'])) {
-                            $html .= $row[$col_name]['content'];
-                        } elseif (isset($row[$col_name]['value'])) {
-                            $html .= $row[$col_name]['value'];
-                        }
-                    } else {
-                        $html .= $row[$col_name];
+                $html .= '>';
+                $html .= $row['full_row_content'];
+                $html .= '</td>';
+            } else {
+                foreach ($headers as $col_name => $header) {
+                    $html .= '<' . $header['cel_tag'];
+                    $html .= ' class="col_' . $col_name . '"';
+                    $html .= ' data-col="' . $col_name . '"';
+                    if (is_array($row[$col_name]) && isset($row[$col_name]['value'])) {
+                        $html .= ' data-value="' . htmlentities($row[$col_name]['value']) . '"';
                     }
+                    $html .= ' style="' . ($header['align'] !== 'left' ? 'text-align: ' . $header['align'] . ';' : '');
+                    if ($header['col_style']) {
+                        $html .= ' ' . $header['col_style'] . ';';
+                    }
+                    if (isset($row['row_style'])) {
+                        $html .= ' ' . $row['row_style'];
+                    }
+                    $html .= '">';
+                    if (isset($row[$col_name])) {
+                        if (is_array($row[$col_name])) {
+                            if (isset($row[$col_name]['content'])) {
+                                $html .= $row[$col_name]['content'];
+                            } elseif (isset($row[$col_name]['value'])) {
+                                $html .= $row[$col_name]['value'];
+                            }
+                        } else {
+                            $html .= $row[$col_name];
+                        }
+                    }
+                    $html .= '</' . $header['cel_tag'] . '>';
                 }
-                $html .= '</' . $header['cel_tag'] . '>';
             }
             $html .= '</tr>';
         }

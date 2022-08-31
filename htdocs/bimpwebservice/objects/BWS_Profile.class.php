@@ -26,6 +26,11 @@ class BWS_Profile extends BimpObject
         return BimpCore::isUserDev();
     }
 
+    public function canSetAction($action): int
+    {
+        return BimpCore::isUserDev();
+    }
+
     // Getters booléens: 
 
     public function isActionAllowed($action, &$errors = array())
@@ -69,6 +74,25 @@ class BWS_Profile extends BimpObject
             }
         }
         return $buttons;
+    }
+
+    // Rendus HTML: 
+
+    public function renderUsersList()
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+            $ws_user = BimpObject::getInstance('bimpwebservice', 'BWS_User');
+            $list = new BC_ListTable($ws_user, 'default', 1, null, 'Utilisateurs ws associés au profile "' . $this->getName() . '"', 'fas_users');
+            $list->addFieldFilterValue('a.profiles', array(
+                'part_type' => 'middle',
+                'part'      => '[' . $this->id . ']'
+            ));
+            $html .= $list->renderHtml();
+        }
+
+        return $html;
     }
 
     // Actions: 

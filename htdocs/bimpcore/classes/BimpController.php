@@ -160,7 +160,6 @@ class BimpController
             case E_ERROR:
             case E_CORE_ERROR:
             case E_COMPILE_ERROR:
-                BimpCore::forceUnlockCurrentObject();
                 if (!BimpCore::isModeDev()) {
                     global $user, $langs;
                     $txt = '';

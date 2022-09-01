@@ -135,7 +135,7 @@ class BContract_avenant extends BContract_contrat {
         
         $nbMonthAdding = $this->getData('added_month');
         
-        $return = $totalByMonth * $nbMonthAdding;
+        $return = $totalByMonth;
         
         return $return;
         
@@ -342,7 +342,11 @@ class BContract_avenant extends BContract_contrat {
         
         if(!count($errors)) {
             if($haveSignature) {
-                $this->actionSigned(Array('date_signed' => $data->dateSignature), $success);
+                if($this->getData('type') == 1) {
+                    $this->actionSignedProlongation(Array('date_signed' => $data->dateSignature), $success);
+                } else {
+                    $this->actionSigned(Array('date_signed' => $data->dateSignature), $success);
+                }
             } else {
                 $parent = $this->getParentInstance();
                 $commercial = $parent->getCommercialClient(true);

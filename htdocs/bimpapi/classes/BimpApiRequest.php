@@ -343,10 +343,12 @@ class BimpApiRequest
         $html .= '<div class="container-fluid">';
         $html .= '<form id="api' . $this->api::$name . '_form_' . $this->requestName . '" class="bimp_api_request_form" enctype="multipart/form-data"';
         $html .= ' data-api_name="' . $this->api::$name . '"';
+        $html .= ' data-api_idx="' . $this->api->idx . '"';
         $html .= '>';
 
         $html .= '<input name="api_requestForm" type="hidden" value="1"/>';
         $html .= '<input name="api_name" type="hidden" value="' . $this->api::$name . '"/>';
+        $html .= '<input name="api_idx" type="hidden" value="' . (int) $this->api->idx . '"/>';
         $html .= '<input name="api_method" type="hidden" value="apiProcessRequestForm"/>';
         $html .= '<input name="api_requestName" type="hidden" value="' . $this->requestName . '"/>';
         $html .= '<input name="api_options" type="hidden" value="' . htmlentities(json_encode($request_options)) . '"/>';
@@ -545,9 +547,9 @@ class BimpApiRequest
 
         return $value;
     }
-    
-    
-    public function getTypePj(){
+
+    public function getTypePj()
+    {
         return $this->api->getTypePj();
     }
 

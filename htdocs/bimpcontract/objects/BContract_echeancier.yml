@@ -147,6 +147,14 @@ lists:
 
 
 forms:
+    pdfEcheancier:
+        title: Informations à afficher dans le PDF
+        rows:
+            - custom: 1
+              label: Total des lignes
+              input_name: total_lines
+              input:
+                  type: toggle
     addFactureForSoldPeriode:
         rows:
             - custom: 1

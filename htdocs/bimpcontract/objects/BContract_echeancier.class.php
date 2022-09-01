@@ -789,6 +789,8 @@ class BContract_echeancier extends BimpObject {
                     $html .= '<div class="btn-group"><button type="button" class="btn btn-primary bs-popover" '.BimpRender::renderPopoverData('Refaire l\'échéancier suite à un avoir').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick('unlinkLastFacture', [], ['form_name' => 'unlinkLastFacture']) . '"><i class="fa fa-times"></i> Refaire l\'échéancier suite à un avoir</button></div>';
                 }
                 
+                // 
+                $html .= '<div class="btn-group"><button type="button" class="btn bs-popover" '.BimpRender::renderPopoverData('Générer le PDF').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick('generatePdfEcheancier', array(), array('form_name' => 'pdfEcheancier')) . '">Générer le PDF</button></div>';
 //                        $html .= '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Facturer la période" onclick="' . $this->getJsActionOnclick("createFacture", array('total_ht' => $parent->getTotalContrat() - $parent->getTotalDejaPayer(), 'pa' => ($parent->getTotalPa() - $parent->getTotalDejaPayer(false, 'pa'))), array("success_callback" => $callback)) . '")"><i class="fa fa-plus" >Facturation suplémentaire</i></span>';
 //                if($this->canEdit()) {
                   if($user->admin) {
@@ -846,6 +848,20 @@ class BContract_echeancier extends BimpObject {
             return $html;
         
         
+    }
+    
+    public function actionGeneratePdfEcheancier($data, &$success)
+    {
+        global $langs;
+        $parent = $this->getParentInstance();
+        $this->dol_object->id_contrat = $this->getData('id_contrat');
+        $this->dol_object->afficher_total = $data['total_lines'];
+        $url = DOL_URL_ROOT . '/document.php?modulepart=' . 'contrat' . '&file=' . $parent->getRef() . '/Echeancier.pdf';
+        $errors = $warnings = array();
+        $success = "PDF de l'échéancier généré avec succès";
+        $success_callback = 'window.open("' . $url . '")';
+        $parent->dol_object->generateDocument('echeancierContrat', $langs);
+        return array('errors' => $errors, 'warnings' => $warnings, 'success_callback' => $success_callback);
     }
     
     public function getDureeMoisPeriode($dateStart, $dateStop):int {

@@ -2,7 +2,7 @@
 
 class BimpObject extends BimpCache
 {
-
+    
     public $db = null;
     public $cache_id = 0;
     public $module = '';
@@ -201,7 +201,7 @@ class BimpObject extends BimpCache
                                     }
                                 }
                             }
-                            
+
                             $ext_instance = new $ext_className($ext_module, $ext_object_name);
                             continue;
                         }
@@ -2113,7 +2113,7 @@ class BimpObject extends BimpCache
 //        BimpLog::actionEnd('bimpobject_action', (isset($errors['errors']) ? $errors['errors'] : $errors), (isset($errors['warnings']) ? $errors['warnings'] : array()));
         global $dont_rollback;
         if ($use_db_transactions) {
-            if (isset($result['errors']) && count($result['errors']) and !isset($dont_rollback)) {
+            if (isset($result['errors']) && count($result['errors']) and!isset($dont_rollback)) {
                 $instance->db->db->rollback();
 
                 if ((int) BimpCore::getConf('log_actions_rollbacks')) {
@@ -3494,7 +3494,7 @@ class BimpObject extends BimpCache
         if (!$extra_order_by && $order_by != 'a.' . $primary) {
             $extra_order_by = 'a.' . $primary;
         }
-
+        
         $sql = '';
         $sql .= BimpTools::getSqlSelect($fields);
         $sql .= BimpTools::getSqlFrom($table, $joins);
@@ -4263,7 +4263,7 @@ class BimpObject extends BimpCache
                 }
 
                 if (!count($errors)) {
-                    $success = 'Création ' . $this->getLabel('of_the') . ' effectuée avec succès : '.$this->getLink();
+                    $success = 'Création ' . $this->getLabel('of_the') . ' effectuée avec succès : ' . $this->getLink();
                     if (method_exists($this, 'getCreateJsCallback')) {
                         $success_callback = $this->getCreateJsCallback();
                     }
@@ -8488,6 +8488,10 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
 
         $label = (isset($params['syntaxe']) && (string) $params['syntaxe'] ? $params['syntaxe'] : $default_syntaxe);
 
+        if ($label === '<ref> - <name>' && !$ref_prop) {
+            $label = '<name>';
+        }
+
         $n = 0;
         while (preg_match('/<(.+)>/U', $label, $matches)) {
             $field = $matches[1];
@@ -8823,7 +8827,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
     {
         return self::getObjectLinkedObjectsArray($this, $include_empty);
     }
-    
+
     public function getFullLinkedObjetsArray($include_empty = false)
     {
         return self::getObjectFullLinkedObjetsArray($this, $include_empty);
@@ -9503,7 +9507,7 @@ var options = {
 
     // Gestion statique des objets:
 
-    public static function createBimpObject($module, $object_name, $data, $force_create = false, &$errors = array(), &$warnings = array(), $no_transactions_db = false)
+    public static function createBimpObject($module, $object_name, $data, $force_create = false, &$errors = array(), &$warnings = array(), $no_transactions_db = false, $no_html = false)
     {
         $instance = static::getInstance($module, $object_name);
 
@@ -9527,11 +9531,11 @@ var options = {
             }
 
             if (count($create_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($create_errors, 'Echec de la création ' . $label);
+                $errors[] = BimpTools::getMsgFromArray($create_errors, 'Echec de la création ' . $label, $no_html);
             }
 
             if (count($create_warnings)) {
-                $warnings[] = BimpTools::getMsgFromArray($create_warnings, 'Erreurs suite à la création ' . $label);
+                $warnings[] = BimpTools::getMsgFromArray($create_warnings, 'Erreurs suite à la création ' . $label, $no_html);
             }
 
             return $instance;

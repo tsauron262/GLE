@@ -319,7 +319,7 @@ class BC_Field extends BimpComponent
 
     // Affichages: 
 
-    public function displayValue()
+    public function displayValue($label_only = false)
     {
         if (!$this->params['viewable'] || !$this->object->canViewField($this->name)) {
             return BimpRender::renderAlerts('Vous n\'avez pas la permission de voir ce champ', 'warning');
@@ -339,7 +339,7 @@ class BC_Field extends BimpComponent
         }
 
         $history_html = '';
-        if ($this->params['history'] && BimpCore::isContextPrivate()) {
+        if (!$label_only && $this->params['history'] && BimpCore::isContextPrivate()) {
             $history_user = (int) $this->object->getConf('fields/' . $this->name . '/history_user', 0, false, 'bool');
             $history_html = BimpRender::renderObjectFieldHistoryPopoverButton($this->object, $this->name, 15, $history_user);
         }
@@ -351,7 +351,7 @@ class BC_Field extends BimpComponent
             $html .= '</div>';
         }
 
-        if ($this->display_input_value) {
+        if (!$label_only && $this->display_input_value) {
             $value = $this->value;
             if (is_array($value)) {
                 if ($this->params['type'] === 'json') {

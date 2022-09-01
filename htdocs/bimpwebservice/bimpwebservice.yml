@@ -1,0 +1,4 @@
+params: 
+    id_default_user: 
+        label: Utilisateur ERP par défaut
+        required: 1

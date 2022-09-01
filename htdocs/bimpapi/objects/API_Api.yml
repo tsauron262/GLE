@@ -69,6 +69,12 @@ fields:
         
     title: 
         label: Intitulé
+        
+    api_idx: 
+        label: Index API
+        type: int
+        default: 0
+        unsigned: 1
     
     id_default_user_account_test: 
         label: Compte utilisateur par défaut (Test)
@@ -150,6 +156,17 @@ forms:
                   type: select
                   options: 
                       array: apisToInstall
+            - custom: 1
+              label: Nom public
+              input_name: api_title
+              input: 
+                  type: text
+              value: 
+                  callback: getApiToInstallDefaultTitle
+              depends_on: api_name
+              diplsya_if: 
+                  field_name: api_name
+                  hide_values: ''
                       
     edit: 
         rows: 
@@ -172,6 +189,7 @@ fields_tables:
         rows: 
             - field: name
             - field: title
+            - field: api_idx
             - field: id_default_user_account_test
             - field: id_default_user_account_prod
             - field: processes
@@ -237,6 +255,7 @@ lists:
         cols: 
             name: 
             title: 
+            api_idx: 
             mode: 
                 edit: 1
             active:

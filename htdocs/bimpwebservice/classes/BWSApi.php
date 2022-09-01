@@ -7,6 +7,7 @@ class BWSApi
     protected $ws_user = null;
     protected $params = array();
     protected $errors = array();
+    protected $check_erp_user_rights = true;
     public static $requests = array(
         'getObjectData'  => array(
             'desc'   => 'Retourne toutes les données d\'un objet',
@@ -73,6 +74,7 @@ class BWSApi
     {
         $this->request_name = $request_name;
         $this->params = $params;
+        $this->check_erp_user_rights = BimpCore::getConf('check_erp_user_rights', null, 'bimpwebservice');
 
         ini_set('display_errors', 0);
         error_reporting(E_ERROR);
@@ -287,7 +289,6 @@ class BWSApi
                         $this->addError('UNFOUND', 'Aucun' . $obj_instance->e() . ' ' . $obj_instance->getLabel() . ' trouvé' . $obj_instance->e() . ' pour la référence "' . $ref_object . '"');
                         return null;
                     }
-                    return $object;
                 }
             } else {
                 $this->addError('OBJECT_IDENTIFIER_MISSING', 'Veuillez renseigner l\'identifiant ou la référence de l\'objet demandé');
@@ -296,6 +297,12 @@ class BWSApi
         }
 
         if (BimpObject::objectLoaded($object)) {
+            if ($this->check_erp_user_rights) {
+                if (!$object->can('view')) {
+                    $this->addError('UNAUTHORIZED', 'Vous n\'avez pas la permission d\'obtenir les données ' . $object->getLabel('of_the') . ' ' . $object->getRef(true));
+                    return null;
+                }
+            }
             // Check objet selon les filtres autorisés:
             $ids = $this->checkObjectRightFilters($object, array($object->id));
             if (empty($ids)) {
@@ -438,12 +445,13 @@ class BWSApi
                             $child = $object->getChildObject($child_name);
                             if (!is_a($child, 'BimpObject')) {
                                 $this->addError('INVALID_PARAMETER', 'L\'obtention des données des objets enfants "' . $child_name . '" n\'est pas possible');
-                            } elseif (!$this->ws_user->hasRight($this->request_name, $child->module, $child->object_name)) {
+                            } elseif (!$this->ws_user->hasRight($this->request_name, $child->module, $child->object_name) ||
+                                    ($this->check_erp_user_rights && !$child->can('view'))) {
                                 $this->addError('UNAUTHORIZED', 'Vous n\'avez pas la permission d\'obtenir les données des objets enfants "' . $child_name . '"');
                             } else {
                                 $children_data[$child_name] = array();
                                 foreach ($object->getChildrenObjects($child_name) as $child_object) {
-                                    $children_data[$child_name][] = $child_object->getDataArray(true);
+                                    $children_data[$child_name][] = $child_object->getDataArray(true, $this->check_erp_user_rights);
                                 }
                             }
                         }
@@ -451,7 +459,7 @@ class BWSApi
                 }
 
                 $response = array(
-                    'object_data' => $object->getDataArray(true),
+                    'object_data' => $object->getDataArray(true, $this->check_erp_user_rights),
                     'children'    => $children_data
                 );
             }
@@ -475,9 +483,13 @@ class BWSApi
                 } else {
                     $object = $this->findObject($obj_instance);
                     if (BimpObject::objectLoaded($object)) {
-                        $response = array(
-                            $field => $object->getData($field)
-                        );
+                        if ($this->check_erp_user_rights && !$object->canViewField($field)) {
+                            $this->addError('UNAUTHORIZED', 'Vous n\'avez pas la permission d\'obtenir la valeur du champ "' . $field . '"');
+                        } else {
+                            $response = array(
+                                $field => $object->getData($field)
+                            );
+                        }
                     }
                 }
             }
@@ -501,23 +513,28 @@ class BWSApi
                 $this->addError('INVALID_PARAMETERS', 'Vous devez obligatoirement spécifier au moins un filtre');
             }
 
-            $obj_instance = $this->getObjectInstance();
-            $primary = $obj_instance->getPrimary();
-
-            $order_by = BimpTools::getArrayValueFromPath($this->params, 'order_by', $primary);
-            $order_way = BimpTools::getArrayValueFromPath($this->params, 'order_way', 'ASC');
-
-            $rows = $obj_instance->getList($filters, null, null, $order_by, $order_way, 'array', array($primary));
             $list = array();
+            $obj_instance = $this->getObjectInstance();
 
-            if (!empty($rows)) {
-                foreach ($rows as $r) {
-                    $list[] = (int) $r[$primary];
+            if ($this->check_erp_user_rights && !$obj_instance->can('view')) {
+                $this->addError('UNAUTHORIZED', 'Vous n\'avez pas la permission d\'obtenir une liste ' . $obj_instance->getLabel('of_plur'));
+            } else {
+                $primary = $obj_instance->getPrimary();
+
+                $order_by = BimpTools::getArrayValueFromPath($this->params, 'order_by', $primary);
+                $order_way = BimpTools::getArrayValueFromPath($this->params, 'order_way', 'ASC');
+
+                $rows = $obj_instance->getList($filters, null, null, $order_by, $order_way, 'array', array($primary));
+
+                if (!empty($rows)) {
+                    foreach ($rows as $r) {
+                        $list[] = (int) $r[$primary];
+                    }
                 }
-            }
 
-            // Check liste: 
-            $list = $this->checkObjectRightFilters($obj_instance, $list);
+                // Check liste: 
+                $list = $this->checkObjectRightFilters($obj_instance, $list);
+            }
 
             $response['list'] = $list;
         }
@@ -543,7 +560,7 @@ class BWSApi
 
             $errors = array();
             $warnings = array();
-            $obj = BimpObject::createBimpObject($obj_instance->module, $obj_instance->object_name, $data, true, $errors, $warnings, false, true);
+            $obj = BimpObject::createBimpObject($obj_instance->module, $obj_instance->object_name, $data, ($this->check_erp_user_rights ? false : true), $errors, $warnings, false, true);
 
             if (!BimpObject::objectLoaded($obj)) {
                 $this->addError('FAIL', BimpTools::getMsgFromArray($errors, null, true));
@@ -575,7 +592,7 @@ class BWSApi
                     $errors = $object->validateArray($data);
                     if (!count($errors)) {
                         $warnings = array();
-                        $errors = $object->update($warnings, true);
+                        $errors = $object->update($warnings, ($this->check_erp_user_rights ? false : true));
                     }
 
                     if (count($errors)) {
@@ -600,7 +617,7 @@ class BWSApi
             if (BimpObject::objectLoaded($object)) {
                 $ref_object = $object->getRef(true);
                 $warnings = array();
-                $errors = $object->delete($warnings, true);
+                $errors = $object->delete($warnings, ($this->check_erp_user_rights ? false : true));
 
                 if (count($errors)) {
                     $this->addError('FAIL', BimpTools::getMsgFromArray($errors, 'Echec de la suppression ' . $obj_instance->getLabel('of_the') . ' ' . $ref_object, true));

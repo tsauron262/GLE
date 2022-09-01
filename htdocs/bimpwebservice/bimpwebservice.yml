@@ -1,4 +1,10 @@
 params: 
+    check_erp_user_rights: 
+        label: Vérifier les droits de l\'utilisateur ERP   
+        warning: A désactiver uniquement pour les test
+        type: bool
+        def: 1
+    
     id_default_user: 
         label: Utilisateur ERP par défaut
         required: 1

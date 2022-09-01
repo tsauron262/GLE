@@ -1413,7 +1413,7 @@ class BimpObject extends BimpCache
         return $this->getConf('fields/' . $field . '/default_value', null, false, 'any');
     }
 
-    public function getDataArray($include_id = false)
+    public function getDataArray($include_id = false, $check_user_rights = false)
     {
         if (!count($this->params['fields'])) {
             return array();
@@ -1422,6 +1422,11 @@ class BimpObject extends BimpCache
         $data = array();
 
         foreach ($this->params['fields'] as $field) {
+            if ($check_user_rights) {
+                if (!$this->canViewField($field)) {
+                    continue;
+                }
+            }
             if (isset($this->data[$field])) {
                 $data[$field] = $this->data[$field];
             } else {

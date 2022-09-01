@@ -74,7 +74,7 @@ class BWSApi
     {
         $this->request_name = $request_name;
         $this->params = $params;
-        $this->check_erp_user_rights = BimpCore::getConf('check_erp_user_rights', null, 'bimpwebservice');
+        $this->check_erp_user_rights = (int) BimpCore::getConf('check_erp_user_rights', null, 'bimpwebservice');
 
         ini_set('display_errors', 0);
         error_reporting(E_ERROR);
@@ -565,6 +565,7 @@ class BWSApi
             if (!BimpObject::objectLoaded($obj)) {
                 $this->addError('FAIL', BimpTools::getMsgFromArray($errors, null, true));
             } else {
+                $obj->addObjectLog('Créé par utilisateur webservice: ' . $this->ws_user->getLink());
                 $response = array('success' => 1, 'id' => $obj->id);
             }
         }
@@ -598,6 +599,7 @@ class BWSApi
                     if (count($errors)) {
                         $this->addError('FAIL', BimpTools::getMsgFromArray($errors, 'Echec de la mise à jour ' . $object->getLabel('of_the') . ' ' . $object->getRef(true), true));
                     } else {
+                        $object->addObjectLog('Edition par utilisateur webservice: ' . $this->ws_user->getLink() . '<br/><br/>Données mises à jour: <pre>' . print_r($data) . '</pre>');
                         $response = array('success' => 1, 'id' => $object->id);
                     }
                 }

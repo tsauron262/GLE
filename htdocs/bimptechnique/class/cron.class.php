@@ -122,10 +122,10 @@ FROM llx_fichinterdet a LEFT JOIN llx_fichinter a___parent ON a___parent.rowid =
             $mail .= "<br />Si la régularisation a été faite entre temps, merci de ne pas tenir compte de cet email.<br />Cordialement.";
             
             $emailSendTo = BimpTools::cleanEmailsStr($tech->getData('email'));
-            $sujet = 'Fiches d\'intervention en brouillon';
+            $sujet = 'Fiches d\'intervention(s) posant problème';
             
             if(in_array($id_tech, $this->idTechForVanina)) {
-                $sujet = 'Fiche d\'intervention en brouillon de ' . $tech->getName();
+                $sujet = 'Fiche d\'intervention(s) posant problème de ' . $tech->getName();
                 $emailSendTo = $this->sendEmailDefault;
                 $email .= '<br /><br />Ceci est un mail de redirection de ' . $tech->getData('email') . ' vers ' . $this->sendEmailDefault;
             }

@@ -311,7 +311,7 @@ class Equipment extends BimpObject
         }
 
         $place = $this->getCurrentPlace();
-        if ((int) $place->getData('type') === BE_Place::BE_PLACE_ENTREPOT) {
+        if (BimpObject::objectLoaded($place) && (int) $place->getData('type') === BE_Place::BE_PLACE_ENTREPOT) {
             if (!$id_entrepot || (int) $place->getData('id_entrepot') === (int) $id_entrepot) {
                 return 1;
             }

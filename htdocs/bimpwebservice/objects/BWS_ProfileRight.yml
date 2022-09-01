@@ -37,8 +37,7 @@ fields:
                     - field_value: obj_module
                     - 1
         search: 
-            input: 
-                type: text
+            type: value_part
         depends_on: obj_module
         display_if: 
             field_name: obj_module

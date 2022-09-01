@@ -2,7 +2,7 @@
 
 class BimpObject extends BimpCache
 {
-    
+
     public $db = null;
     public $cache_id = 0;
     public $module = '';
@@ -273,9 +273,33 @@ class BimpObject extends BimpCache
             $file = DOL_DOCUMENT_ROOT . '/' . $module . '/objects/' . $object_name . '.class.php';
             if (file_exists($file)) {
                 require_once $file;
+
+                // Vérif surcharges (nécessaire car certaine surcharge peuvent affecter les variables statiques des classes de base)
+                // Version:
+                if (defined('BIMP_EXTENDS_VERSION')) {
+                    $version_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BIMP_EXTENDS_VERSION . '/objects/' . $object_name . '.class.php';
+                    if (file_exists($version_file)) {
+                        $className = $object_name . '_ExtVersion';
+                        if (!class_exists($className)) {
+                            require_once $version_file;
+                        }
+                    }
+                }
+
+                // Entité: 
+                if (defined('BIMP_EXTENDS_ENTITY')) {
+                    $entity_file = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BIMP_EXTENDS_ENTITY . '/objects/' . $object_name . '.class.php';
+                    if (file_exists($entity_file)) {
+                        $className = $object_name . '_ExtEntity';
+                        if (!class_exists($className)) {
+                            require_once $entity_file;
+                        }
+                    }
+                }
                 return true;
             }
         }
+
         return false;
     }
 
@@ -1389,7 +1413,7 @@ class BimpObject extends BimpCache
         return $this->getConf('fields/' . $field . '/default_value', null, false, 'any');
     }
 
-    public function getDataArray($include_id = false)
+    public function getDataArray($include_id = false, $check_user_rights = false)
     {
         if (!count($this->params['fields'])) {
             return array();
@@ -1398,6 +1422,11 @@ class BimpObject extends BimpCache
         $data = array();
 
         foreach ($this->params['fields'] as $field) {
+            if ($check_user_rights) {
+                if (!$this->canViewField($field)) {
+                    continue;
+                }
+            }
             if (isset($this->data[$field])) {
                 $data[$field] = $this->data[$field];
             } else {
@@ -3494,7 +3523,7 @@ class BimpObject extends BimpCache
         if (!$extra_order_by && $order_by != 'a.' . $primary) {
             $extra_order_by = 'a.' . $primary;
         }
-        
+
         $sql = '';
         $sql .= BimpTools::getSqlSelect($fields);
         $sql .= BimpTools::getSqlFrom($table, $joins);

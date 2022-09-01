@@ -33,7 +33,7 @@ class ErpAPI extends BimpAPI
 
     // Requêtes: 
 
-    public function getObjectData($module, $object_name, $id_object = null, $ref_object = null, &$errors = array(), &$warnings = array())
+    public function getObjectData($module, $object_name, $id_object = null, $ref_object = null, $children = array(), &$errors = array(), &$warnings = array())
     {
         if (!(int) $id_object && !(string) $ref_object) {
             $errors[] = 'Identifiant de l\'objet absent (ID ou référence)';
@@ -49,12 +49,14 @@ class ErpAPI extends BimpAPI
             )
         );
 
+        if (!empty($children)) {
+            $params['fields']['children'] = json_encode($children);
+        }
+
         $response = $this->execCurl('getObjectData', $params, $errors);
 
         if (!count($errors)) {
-            if (isset($response['object_data'])) {
-                return $response['object_data'];
-            }
+            return $response;
         }
 
         return null;
@@ -194,7 +196,13 @@ class ErpAPI extends BimpAPI
 
     public function testRequest(&$errors = array(), &$warnings = array())
     {
-        return $this->deleteObject('bimpequipment', 'Equipment', 507791, $errors, $warnings);
+//        return $this->getObjectData('bimpcore', 'Bimp_Client', 454033, null, array('contacts'), $errors, $warnings);
+        return $this->getObjectsList('bimpcore', 'Bimp_Client', array(
+                    'nom' => array(
+                        'part_type' => 'middle',
+                        'part'      => 'TEST'
+                    )
+                        ), '', '', $errors, $warnings);
     }
 
     // Overrides: 

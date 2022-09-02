@@ -82,7 +82,7 @@
             if(strlen($auxName) < 10)
                 $auxName = sizing($auxName, 10, false, true, false);
             
-            $classement = $this->db->getCount('societe', 'code_compta LIKE "'. $first . $zip . $auxName .'"', 'rowid');
+            $classement = $this->db->getCount('societe', 'code_compta LIKE "'. $first . $zip . $auxName .'%"', 'rowid');
             
             return $first . $zip . $auxName . sizing($classement, 3, false, false, true);
             

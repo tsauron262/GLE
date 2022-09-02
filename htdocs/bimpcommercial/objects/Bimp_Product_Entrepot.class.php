@@ -15,7 +15,7 @@ class Bimp_Product_Entrepot extends BimpObject
         BimpCore::setMemoryLimit(1024);
 
 //        $this->dateBilan = date('2019-10-01 00:00:01');
-        $this->dateBilan = date(BimpCore::getConf('date_bilan', '', 'bimpcore').' 00:00:01');
+        $this->dateBilan = date($this->getDateBilan().' 00:00:01');
 //        $this->dateBilan = date('2019-06-30 00:00:01');
         if (is_null(static::$product_instance)) {
             static::$product_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');
@@ -25,7 +25,7 @@ class Bimp_Product_Entrepot extends BimpObject
     }
     
     public function getDateBilan(){
-        return '2022-07-01';
+        return BimpCore::getConf('date_bilan', '', 'bimpcore');
     }
     
     public function actionChangeDateBilan($data, &$success){
@@ -35,7 +35,7 @@ class Bimp_Product_Entrepot extends BimpObject
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
-            'success_callback' => 'bimp_reloadPage();'
+//            'success_callback' => 'bimp_reloadPage();'
         );
     }
     

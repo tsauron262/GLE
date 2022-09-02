@@ -290,6 +290,8 @@ class BimpCore
         }
 
         self::$conf_cache[$module][$name] = $value;
+        
+        return $errors;
     }
 
     public static function getVersion($dev = '')

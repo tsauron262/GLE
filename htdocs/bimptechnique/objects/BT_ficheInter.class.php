@@ -2403,12 +2403,14 @@ class BT_ficheInter extends BimpDolObject
 
     public function actionSetStatusAdmin($data, &$success = '')
     {
+        global $user;
         $errors = $warnings = array();
         $success = 'Mise à jour du statut effectuée avec succès';
 
         if ((int) $data['status'] == self::STATUT_BROUILLON) {
             $this->updateField('old_status', $this->getData('fk_statut'));
         }
+        $this->addNote('Repassé au statut brouillon par '.$user->getNomUrl());
 
         $this->updateField('fk_statut', (int) $data['status']);
 

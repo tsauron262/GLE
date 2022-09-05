@@ -36,7 +36,7 @@
 require '../main.inc.php';
 
 
-if(!isset($_REQUEST['action']) || $_REQUEST['action'] != 'create'){
+if(!isset($_REQUEST['action']) || ($_REQUEST['action'] != 'create' && $_REQUEST['action'] != 'add')){
     require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
     $bObj = BimpObject::getInstance("bimpcore", "Bimp_User", $_REQUEST['id']);
     $htmlRedirect = $bObj->processRedirect();

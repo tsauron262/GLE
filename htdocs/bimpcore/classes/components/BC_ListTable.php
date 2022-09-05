@@ -1545,6 +1545,9 @@ class BC_ListTable extends BC_List
                         case 'timer':
                             $html .= BimpTools::displayTimefromSeconds($this->totals[$col_name]['value']);
                             break;
+                        case 'timer_with_not_day':
+                            $html .= BimpTools::displayTimefromSeconds($this->totals[$col_name]['value'], false, false);
+                            break;
 
                         case 'percent':
                             $html .= BimpTools::displayFloatValue($this->totals[$col_name]['value'], 2, ',', 0, 0, 0, 1, 1) . '%';

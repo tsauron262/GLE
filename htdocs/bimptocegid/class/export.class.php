@@ -33,7 +33,6 @@
         function __construct($db) {
             $hier = new DateTime();
             $this->moment = ((int)$hier->format('H') < 12) ? 'AM' : 'PM'; 
-            $this->moment = 'AM';
             $this->yesterday = $hier->sub(new DateInterval("P1D"));
             $this->lastDateExported = new DateTime(BimpCore::getConf("last_export_date", null, "bimptocegid"));
             $this->bdb = new BimpDb($db);

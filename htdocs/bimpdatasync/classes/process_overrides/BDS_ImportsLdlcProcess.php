@@ -5,6 +5,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSImportFournCatalogPro
 class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
 {
 
+    public static $default_public_title = 'Imports FTP LDLC';
     public static $price_keys = array(
         'Reference'         => 'ref_fourn',
         'EAN'               => 'ean',
@@ -48,8 +49,7 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
 //                'label'    => 'Découpage du fichier',
 //                'on_error' => 'continue'
 //            );
-        }
-        else{
+        } else {
             $data['steps']['trunc_table_prod_fourn'] = array(
                 'label'    => 'Vidage de la table import',
                 'on_error' => 'stop'
@@ -77,8 +77,7 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
                     );
                 }
                 break;
-            
-            
+
             case 'update_prices_file':
                 if (isset($this->nameFile) && $this->nameFile) {
                     $fileName = $this->nameFile;
@@ -153,13 +152,13 @@ class BDS_ImportsLdlcProcess extends BDSImportFournCatalogProcess
 
     // Install: 
 
-    public static function install(&$errors = array(), &$warnings = array())
+    public static function install(&$errors = array(), &$warnings = array(), $title = '')
     {
         // Process: 
 
         $process = BimpObject::createBimpObject('bimpdatasync', 'BDS_Process', array(
                     'name'        => 'ImportsLdlc',
-                    'title'       => 'Imports FTP LDLC',
+                    'title'       => ($title ? $title : static::$default_public_title),
                     'description' => '',
                     'type'        => 'import',
                     'active'      => 1

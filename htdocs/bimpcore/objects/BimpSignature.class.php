@@ -743,20 +743,21 @@ class BimpSignature extends BimpObject
         );
     }
 
-    public function getCommercialEmail()
+    public function getCommercialEmail(&$use_as_from = false)
     {
         $obj = $this->getObj();
 
         $errors = array();
         if ($this->isObjectValid($errors, $obj)) {
             if (method_exists($obj, 'getSignatureCommercialEmail')) {
-                return $obj->getSignatureCommercialEmail($this->getData('doc_type'));
+                return $obj->getSignatureCommercialEmail($this->getData('doc_type'), $use_as_from);
             }
         }
 
         $client = $this->getChildObject('client');
 
         if (BimpObject::objectLoaded($client)) {
+            $use_as_from = false;
             return $client->getCommercialEmail(false);
         }
 
@@ -1497,7 +1498,8 @@ class BimpSignature extends BimpObject
                         }
 
                         if ($emails) {
-                            $comm_email = BimpTools::cleanEmailsStr($this->getCommercialEmail());
+                            $use_comm_email_as_from = false;
+                            $comm_email = BimpTools::cleanEmailsStr($this->getCommercialEmail($use_comm_email_as_from));
                             $doc_label = $this->displayDocType() . ' ' . $this->displayDocRef();
                             $subject = 'Signature en attente - Document: ' . $doc_label;
 
@@ -1519,7 +1521,8 @@ class BimpSignature extends BimpObject
                                 '<a href="' . $url . '">espace client LDLC Apple</a>'
                                     ), $email_content);
 
-                            $bimpMail = new BimpMail($this->getObj(), $subject, BimpTools::cleanEmailsStr($emails), '', $email_content, $comm_email);
+                            $from = ($use_comm_email_as_from ? $comm_email : '');
+                            $bimpMail = new BimpMail($this->getObj(), $subject, BimpTools::cleanEmailsStr($emails), $from, $email_content, $comm_email);
 
                             $filePath = $this->getDocumentFilePath();
                             $fileName = $this->getDocumentFileName();
@@ -1680,7 +1683,8 @@ class BimpSignature extends BimpObject
             if (!$emails) {
                 $errors[] = 'Aucune adresse e-mail valide pour envoi de la relance';
             } else {
-                $commercial_email = $this->getCommercialEmail();
+                $use_commerical_email_as_from = false;
+                $commercial_email = $this->getCommercialEmail($use_commerical_email_as_from);
                 $date_open = $this->getData('date_open');
                 $doc_label = $this->displayDocType() . ' ' . $this->displayDocRef();
                 $url = self::getPublicBaseUrl(false);
@@ -1699,7 +1703,8 @@ class BimpSignature extends BimpObject
                 $filePath = $this->getDocumentFilePath();
                 $fileName = $this->getDocumentFileName();
 
-                $bimpMail = new BimpMail($this->getObj(), $subject, $emails, '', $msg, $commercial_email, $commercial_email);
+                $from = ($use_commerical_email_as_from ? $commercial_email : '');
+                $bimpMail = new BimpMail($this->getObj(), $subject, $emails, $from, $msg, $commercial_email, $commercial_email);
 
                 if (file_exists($filePath)) {
                     $bimpMail->addFile(array($filePath, 'application/pdf', $fileName));

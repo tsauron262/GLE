@@ -1,0 +1,9 @@
+# Entité: bimp
+
+fields: 
+    df_status: 
+        label: Statut demande de financement
+        type: int
+        default_value: 0
+        values: 
+            array: df_status_list

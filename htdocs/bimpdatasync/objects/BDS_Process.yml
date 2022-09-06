@@ -85,6 +85,29 @@ forms:
                   type: select
                   options: 
                       array: installableProcesses
+            - custom: 1
+              label: Nom système
+              input_name: name
+              input: 
+                  type: text
+              edit: 0
+              depends_on: classname
+              value: 
+                  callback: getDefaultProcessToInstallName
+              display_if: 
+                  field_name: classname
+                  hide_values: ''
+            - custom: 1
+              label: Nom public
+              input_name: title
+              input: 
+                  type: text
+              depends_on: classname
+              value: 
+                  callback: getDefaultProcessToInstallTitle
+              display_if: 
+                  field_name: classname
+                  hide_values: ''
         
 fields_tables: 
     default:

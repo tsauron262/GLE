@@ -26,6 +26,7 @@ class BimpObject extends BimpCache
     public static $name_properties = array('public_name', 'name', 'nom', 'label', 'libelle', 'title', 'titre', 'description');
     public static $ref_properties = array('ref', 'reference', 'code', 'facnumber');
     public static $status_properties = array('status', 'fk_statut', 'statut');
+    public static $date_update_properties = array('date_update', 'tms');
     public static $allowedDbNullValueDataTypes = array('date', 'datetime', 'time');
     public static $logo_properties = array('logo');
     public $use_commom_fields = false;
@@ -740,6 +741,17 @@ class BimpObject extends BimpCache
     public function getRefProperty()
     {
         foreach (static::$ref_properties as $prop) {
+            if ($this->field_exists($prop)) {
+                return $prop;
+            }
+        }
+
+        return '';
+    }
+    
+    public function getDateUpdateProperty()
+    {
+        foreach (static::$date_update_properties as $prop) {
             if ($this->field_exists($prop)) {
                 return $prop;
             }

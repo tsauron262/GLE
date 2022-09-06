@@ -1,0 +1,6 @@
+
+params: 
+    allow_df_from_propal: 
+        label: Activer les demandes de financement LDLC Pro Lease depuis les devis
+        type: bool
+        def: 0

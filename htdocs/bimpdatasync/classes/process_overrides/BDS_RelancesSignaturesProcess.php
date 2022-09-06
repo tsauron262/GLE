@@ -5,6 +5,8 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSProcess.php');
 class BDS_RelancesSignaturesProcess extends BDSProcess
 {
 
+    public static $default_public_title = 'Relances signatures';
+    
     // Init opérations:
 
     public function initRelances(&$data, &$errors = array())
@@ -154,7 +156,7 @@ class BDS_RelancesSignaturesProcess extends BDSProcess
 
     // Install: 
 
-    public static function install(&$errors = array(), &$warnings = array())
+    public static function install(&$errors = array(), &$warnings = array(), $title = '')
     {
         // Process: 
 

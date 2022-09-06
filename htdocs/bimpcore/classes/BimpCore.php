@@ -397,6 +397,56 @@ class BimpCore
         return $updates;
     }
 
+    public static function getModulesExtendsUpdates()
+    {
+        if (!defined('BIMP_EXTENDS_VERSION') && !defined('BIMP_EXTENDS_ENTITY')) {
+            return array();
+        }
+        $updates = array();
+
+        $cache = self::getConfCache();
+
+        if (isset($cache['bimpcore'])) {
+            foreach ($cache['bimpcore'] as $name => $value) {
+                if (preg_match('/^module_version_(.+)$/', $name, $matches)) {
+                    $module = $matches[1];
+
+                    if (defined('BIMP_EXTENDS_VERSION')) {
+                        $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BIMP_EXTENDS_VERSION . '/sql';
+                        if (file_exists($dir) && is_dir($dir)) {
+                            $files = scandir($dir);
+
+                            foreach ($files as $f) {
+                                if (in_array($f, array('.', '..'))) {
+                                    continue;
+                                }
+
+                                if (preg_match('/^(\d+\.\d)\.sql$/', $f, $matches2)) {
+                                    if ((float) $matches2[1] > (float) $value) {
+                                        if (!isset($updates[$module])) {
+                                            $updates[$module] = array();
+                                        }
+                                        if (!isset($updates[$module]['version'])) {
+                                            $updates[$module]['version'] = array();
+                                        }
+                                        
+                                        $updates[$module]['version'][] = (float) $matches2[1];
+                                        
+                                        
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+
+        return $updates;
+    }
+
     public static function setModuleVersion($module, $version)
     {
         
@@ -708,7 +758,7 @@ class BimpCore
         if ((int) $user->id === (int) $row['id_user']) {
             $msg = 'Vous avez déjà lancé une opération sur ' . $object->getLabel('the') . ' ' . $object->getRef(true) . '<br/>';
             $msg .= 'Veuillez attendre que l\'opération en cours soit terminée avant de relancer l\'enregistrement.<br/>';
-            $msg .= '<b>Note: ceci est une protection volontaire pour éviter un écrasement de données. Il ne s\'agit pas d\'un bug</b>'; 
+            $msg .= '<b>Note: ceci est une protection volontaire pour éviter un écrasement de données. Il ne s\'agit pas d\'un bug</b>';
 
             $diff = ((int) $row['tms'] + 720) - time();
             $min = floor($diff / 60);
@@ -727,9 +777,9 @@ class BimpCore
                     $msg .= 'Une fois fois le dévéroullage effectué, relancez l\'opération qui a été bloquée (en cliquant à nouveau sur le bouton "Enregistrer" ou "Valider")';
                     $msg .= '<br/>';
                 }
-                
+
                 $msg .= '<span class="btn btn-default" onclick="forceBimpObjectUnlock($(this), ' . $object->getJsObjectData() . ')">';
-                
+
                 if ($user->admin) {
                     $msg .= 'Forcer le dévérouillage (Admins seulement)';
                 } else {
@@ -750,7 +800,7 @@ class BimpCore
             $msg .= 'Merci d\'attendre une dizaine de secondes et de réessayer.<br/>';
             $msg .= '<b>Etant donné qu\'il est possible que les données de ' . $object->getLabel('this') . ' aient été modifiées, il est recommandé ';
             $msg .= ' <a href="javascript:bimp_reloadPage()">d\'actualiser la page</a> avant de retenter l\'opération</b><br/><br/>';
-            $msg .= '<b>Note: ceci est une protection volontaire pour éviter un écrasement de données. Il ne s\'agit pas d\'un bug</b>'; 
+            $msg .= '<b>Note: ceci est une protection volontaire pour éviter un écrasement de données. Il ne s\'agit pas d\'un bug</b>';
         }
 
         return $msg;

@@ -14,6 +14,7 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSExportProcess.php');
 
 class BDS_ExportsYounitedProcess extends BDSExportProcess
 {
+    public static $default_public_title = 'Exports Younited';
     
     // Opérations: 
 
@@ -423,13 +424,13 @@ class BDS_ExportsYounitedProcess extends BDSExportProcess
 
     // Install: 
 
-    public static function install(&$errors = array(), &$warnings = array())
+    public static function install(&$errors = array(), &$warnings = array(), $title = '')
     {
         // Process: 
 
         $process = BimpObject::createBimpObject('bimpdatasync', 'BDS_Process', array(
                     'name'        => 'ExportsYounited',
-                    'title'       => 'Exports Younited',
+                    'title'       => ($title ? $title : static::$default_public_title),
                     'description' => 'Exports vers Younited via API',
                     'type'        => 'export',
                     'active'      => 1

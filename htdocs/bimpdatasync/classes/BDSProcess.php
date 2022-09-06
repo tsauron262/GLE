@@ -7,9 +7,13 @@ abstract class BDSProcess
 
     public static $debug = false;
     public static $process_name = null;
+    public static $default_public_title = '';
+    public static $allow_multiple_instances = false;
     public static $files_dir_name = '';
     public static $memory_limit = '1000M';
     public static $max_execution_time = 3600;
+    
+    
     public static $objects = array();
     public $db = null;
     public $user = null;
@@ -726,7 +730,7 @@ abstract class BDSProcess
 
         return $default_value;
     }
-    
+
     protected function checkParameter($name, $type = '', $required = true)
     {
         if (!isset($this->params[$name]) || !$this->params[$name]) {
@@ -765,7 +769,7 @@ abstract class BDSProcess
                         'id_process' => (int) $this->process->id,
                         'name'       => $name
                             ), true);
-            
+
             if (BimpObject::objectLoaded($param)) {
                 $errors = $param->updateField('value', $new_value);
                 if (!count($errors)) {
@@ -1052,7 +1056,7 @@ abstract class BDSProcess
     public static function createProcessByName($processName, &$errors = array(), $options = array(), $references = array())
     {
         $bdb = BimpCache::getBdb();
-        
+
         $where = '`name` = \'' . $processName . '\'';
         $id_process = $bdb->getValue('bds_process', 'id', $where);
         if (is_null($id_process) || !$id_process) {
@@ -1100,15 +1104,9 @@ abstract class BDSProcess
         $process = BimpCache::getBimpObjectInstance('bimpdatasync', 'BDS_Process', (int) $id_process);
 
         if (BimpObject::objectLoaded($process)) {
-            $name = $process->getData('name');
-            if ($name) {
-                $className = 'BDS_' . $name . 'Process';
-                if (!class_exists($className)) {
-                    self::loadProcessClass($className);
-                    if (!class_exists($className)) {
-                        $className = null;
-                    }
-                }
+            $className = $process->getProcessClassName(true);
+            if (!class_exists($className)) {
+                $className = null;
             }
         }
 

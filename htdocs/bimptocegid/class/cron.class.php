@@ -57,11 +57,11 @@
 
                 $this->auto_payni = ($this->export_class->moment == 'AM') ? true : false;
 
-                //if($this->export_payni && $this->export_class->moment == 'AM' && !$this->export_class->rollBack)              $this->export_class->exportPayInc();
+                if($this->export_payni && $this->export_class->moment == 'AM' && !$this->export_class->rollBack)              $this->export_class->exportPayInc();
                 if($this->export_ventes && !$this->export_class->rollBack)                                                    $this->export_class->exportFacture();
                 if($this->export_paiements && !$this->export_class->rollBack)                                                 $this->export_class->exportPaiement();
                 if($this->export_achats && !$this->export_class->rollBack)                                                    $this->export_class->exportFactureFournisseur();
-                //if($this->export_importPaiement && $this->export_class->moment == 'AM' && !$this->export_class->rollBack)     $this->export_class->exportImportPaiement();
+                if($this->export_importPaiement && $this->export_class->moment == 'AM' && !$this->export_class->rollBack)     $this->export_class->exportImportPaiement();
                 if($this->export_deplacementPay && !$this->export_class->rollBack)                                            $this->export_class->exportDeplacementPaiament();
                 if($this->export_bordereauCHK && !$this->export_class->rollBack)                                              $this->export_class->exportBordereauxCHK();
 

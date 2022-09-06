@@ -6865,7 +6865,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         return array('Lu et approuvé');
     }
 
-    public function getSignatureCommercialEmail($doc_type, $use_as_from = false)
+    public function getSignatureCommercialEmail($doc_type, &$use_as_from = false)
     {
         $centre = $this->getCentreData();
 

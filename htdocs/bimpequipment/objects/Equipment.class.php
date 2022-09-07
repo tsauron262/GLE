@@ -1612,6 +1612,7 @@ class Equipment extends BimpObject
                             $identifiers['date_purchase'] = $dt->format('Y-m-d H:i:s');
                         }
 
+                        /* obsolete
                         if (preg_match('/^.+(.{4})$/', $identifiers['serial'], $matches)) {
                             $product = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
                                         'code_config' => $matches[1],
@@ -1623,7 +1624,7 @@ class Equipment extends BimpObject
                             if (BimpObject::objectLoaded($product)) {
                                 $identifiers['id_product'] = (int) $product->id;
                             }
-                        }
+                        }*/
                     }
                 }
             } else

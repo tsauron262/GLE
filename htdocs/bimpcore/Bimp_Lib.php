@@ -156,8 +156,9 @@ function checkBimpCoreVersion()
     }
 
     $modules_updates = BimpCore::getModulesUpdates();
+    $modules_extends_updates = BimpCore::getModulesExtendsUpdates();
 
-    if (!empty($updates) || !empty($modules_updates)) {
+    if (!empty($updates) || !empty($modules_updates) || !empty($modules_extends_updates)) {
         if (!BimpTools::isSubmit('bimpcore_update_confirm')) {
             $url = $_SERVER['REQUEST_URI'];
             if (empty($_SERVER['QUERY_STRING'])) {
@@ -167,14 +168,20 @@ function checkBimpCoreVersion()
             }
             $url .= 'bimpcore_update_confirm=1';
             echo 'Le module BimpCore doit etre mis a jour<br/><br/>';
-            echo 'Liste des mise à jour: ';
+            echo 'Liste des mise à jour: <br/><br/>';
             if (!empty($updates)) {
-                echo '<pre>';
+                echo 'Màj SQL bimpcore: <pre>';
                 print_r($updates);
                 echo '</pre>';
-            } elseif (!empty($modules_updates)) {
-                echo '<pre>';
+            }
+            if (!empty($modules_updates)) {
+                echo 'Màj SQL modules: <pre>';
                 print_r($modules_updates);
+                echo '</pre>';
+            }
+            if (!empty($modules_extends_updates)) {
+                echo 'Màj SQL extensions modules: <pre>';
+                print_r($modules_extends_updates);
                 echo '</pre>';
             }
             echo '<button type="button" onclick="window.location = \'' . $url . '\'">OK</button>';
@@ -182,7 +189,7 @@ function checkBimpCoreVersion()
         } else {
             $bdb = BimpCache::getBdb();
 
-            if (!empty($updates) || !empty($modules_updates)) {
+            if (!empty($updates) || !empty($modules_updates) || !empty($modules_extends_updates)) {
                 BimpCore::setConf('check_versions_lock', 1);
             }
 
@@ -252,6 +259,82 @@ function checkBimpCoreVersion()
 
                     if ($new_version) {
                         BimpCore::setConf('module_version_' . $module, $new_version);
+                    }
+                }
+            }
+
+            if (!empty($modules_extends_updates)) {
+                foreach ($modules_extends_updates as $module => $extends_updates) {
+                    if (defined('BIMP_EXTENDS_VERSION') && isset($extends_updates['version'])) {
+                        $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BIMP_EXTENDS_VERSION . '/sql/';
+                        if (!file_exists($dir) || !is_dir($dir)) {
+                            continue;
+                        }
+
+                        sort($extends_updates['version']);
+                        $new_version = 0;
+
+                        foreach ($extends_updates['version'] as $extend_version) {
+                            $new_version = $extend_version;
+                            $extend_version = (string) $extend_version;
+
+                            if (!file_exists($dir . $extend_version . '.sql') && preg_match('/^[0-9]+$/', $extend_version)) {
+                                if (file_exists($dir . $extend_version . '.0.sql')) {
+                                    $extend_version .= '.0';
+                                }
+                            }
+                            if (!file_exists($dir . $extend_version . '.sql')) {
+                                echo 'FICHIER ABSENT: ' . $dir . $extend_version . '.sql <br/>';
+                                continue;
+                            }
+                            echo 'Mise a jour du module "' . $module . '" à la version: ' . $extend_version . ' (extension de la version "' . BIMP_EXTENDS_VERSION . '"';
+                            if ($bdb->executeFile($dir . $extend_version . '.sql')) {
+                                echo ' [OK]<br/>';
+                            } else {
+                                echo ' [ECHEC] - ' . $bdb->db->error() . '<br/>';
+                            }
+                        }
+                        echo '<br/>';
+
+                        if ($new_version) {
+                            BimpCore::setConf('module_sql_version_' . $module . '_version_' . BIMP_EXTENDS_VERSION, $new_version);
+                        }
+                    }
+
+                    if (defined('BIMP_EXTENDS_ENTITY') && isset($extends_updates['entity'])) {
+                        $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BIMP_EXTENDS_ENTITY . '/sql/';
+                        if (!file_exists($dir) || !is_dir($dir)) {
+                            continue;
+                        }
+
+                        sort($extends_updates['entity']);
+                        $new_version = 0;
+
+                        foreach ($extends_updates['entity'] as $extend_version) {
+                            $new_version = $extend_version;
+                            $extend_version = (string) $extend_version;
+
+                            if (!file_exists($dir . $extend_version . '.sql') && preg_match('/^[0-9]+$/', $extend_version)) {
+                                if (file_exists($dir . $extend_version . '.0.sql')) {
+                                    $extend_version .= '.0';
+                                }
+                            }
+                            if (!file_exists($dir . $extend_version . '.sql')) {
+                                echo 'FICHIER ABSENT: ' . $dir . $extend_version . '.sql <br/>';
+                                continue;
+                            }
+                            echo 'Mise a jour du module "' . $module . '" à la version: ' . $extend_version . ' (extension de l\'entité "' . BIMP_EXTENDS_ENTITY . '"';
+                            if ($bdb->executeFile($dir . $extend_version . '.sql')) {
+                                echo ' [OK]<br/>';
+                            } else {
+                                echo ' [ECHEC] - ' . $bdb->db->error() . '<br/>';
+                            }
+                        }
+                        echo '<br/>';
+
+                        if ($new_version) {
+                            BimpCore::setConf('module_sql_version_' . $module . '_entity_' . BIMP_EXTENDS_ENTITY, $new_version);
+                        }
                     }
                 }
             }

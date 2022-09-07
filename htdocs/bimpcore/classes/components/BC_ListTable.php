@@ -290,6 +290,9 @@ class BC_ListTable extends BC_List
         } else {
             $col_params = self::getObjectConfigColParams($this->object, $col_name, $this->name);
         }
+        
+        if($col_name == $this->object->getRefProperty())
+            $col_params['object_link'] = 1;
 
         if ($this->params['configurable'] && BimpObject::objectLoaded($this->userConfig)) {
             $user_cols = $this->userConfig->getData('cols');
@@ -1541,6 +1544,9 @@ class BC_ListTable extends BC_List
 
                         case 'timer':
                             $html .= BimpTools::displayTimefromSeconds($this->totals[$col_name]['value']);
+                            break;
+                        case 'timer_with_not_day':
+                            $html .= BimpTools::displayTimefromSeconds($this->totals[$col_name]['value'], false, false);
                             break;
 
                         case 'percent':

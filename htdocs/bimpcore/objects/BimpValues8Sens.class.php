@@ -37,6 +37,7 @@ class BimpValues8Sens extends BimpObject
         $success = 'Supprimer avec succés';
         
         $this->db->db->query("UPDATE ".MAIN_DB_PREFIX."product_extrafields SET ".$this->getData('type')." = ".$data['replace']." WHERE ".$this->getData('type')." = ".$this->id."");
-        $this->delete();
+        $errors = $this->delete();
+        return array('errors' => $errors, 'warnings' => array());
     }
 }

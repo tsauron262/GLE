@@ -160,7 +160,6 @@ class BimpController
             case E_ERROR:
             case E_CORE_ERROR:
             case E_COMPILE_ERROR:
-                BimpCore::forceUnlockCurrentObject();
                 if (!BimpCore::isModeDev()) {
                     global $user, $langs;
                     $txt = '';
@@ -281,6 +280,7 @@ class BimpController
 
     public function onExit()
     {
+        BimpCore::forceUnlockCurrentObject();
         $error = error_get_last();
         // On cache les identifiants de la base
         $error = preg_replace('/mysqli->real_connect(.*)3306/', 'mysqli->real_connect(adresse_caché, login_caché, mdp_caché, bdd_caché, port_caché', $error);

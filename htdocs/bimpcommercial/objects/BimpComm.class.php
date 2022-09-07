@@ -3503,14 +3503,12 @@ class BimpComm extends BimpDolObject
             if (BimpObject::objectLoaded($client)) {
                 // Vérif commercial suivi: 
                 $tabConatact = $this->dol_object->getIdContact('internal', 'SALESREPFOLL');
-//                print_r($tabConatact);
                 if (count($tabConatact) < 1) {
                     $ok = false;
                     $tabComm = $client->dol_object->getSalesRepresentatives($user);
 
                     // Il y a un commercial pour ce client
                     if (count($tabComm) > 0) {
-//                        die('AAAAAAAAAAAAAAAA');
                         $this->dol_object->add_contact($tabComm[0]['id'], 'SALESREPFOLL', 'internal');
                         $ok = true;
 
@@ -3518,7 +3516,6 @@ class BimpComm extends BimpDolObject
                     } elseif ((int) BimpCore::getConf('user_as_default_commercial', null, 'bimpcommercial')) {
                         $this->dol_object->add_contact($user->id, 'SALESREPFOLL', 'internal');
                         $ok = true;
-//                        die('CCCCCCCCCCCCCCCC');
                         // L'objet est une facture et elle a une facture d'origine
                     } elseif ($this->object_name === 'Bimp_Facture' && (int) $this->getData('fk_facture_source')) {
                         $fac_src = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $this->getData('fk_facture_source'));
@@ -3539,8 +3536,6 @@ class BimpComm extends BimpDolObject
                 // Vérif contact signataire: 
                 $tabConatact = $this->dol_object->getIdContact('internal', 'SALESREPSIGN');
                 if (count($tabConatact) < 1) {
-//                                            die('DDDDDDDDDDDDDD');
-
                     $this->dol_object->add_contact($user->id, 'SALESREPSIGN', 'internal');
                 }
             }

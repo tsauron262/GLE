@@ -7,3 +7,22 @@ fields:
         default_value: 0
         values: 
             array: df_status_list
+            
+forms: 
+    demande_financement: 
+        title: Demande de financement
+        rows: 
+            - custom: 1
+              label: Contact destinataire du devis de financement
+              input_name: id_contact
+              required: 1
+              input: 
+                  type: select
+                  options:
+                      callback: 
+                          method: getSocieteContactsArray
+                          params: 
+                              - field_value: fk_soc
+                              - 1
+              value: 
+                  callbac: getDefaultIdContactForDF

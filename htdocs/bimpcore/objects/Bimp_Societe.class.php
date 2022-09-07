@@ -150,6 +150,8 @@ class Bimp_Societe extends BimpDolObject
         global $user;
 
         switch ($action) {
+            case 'deleteInCompta':
+                return ($user->id == 460) ? 1 : 0;
             case 'bulkEditField':
                 // admin_recouvrement: autorisé pour le champ "solvabilite_status"
                 return ($user->admin/* || $user->rights->bimpcommercial->admin_recouvrement */ ? 1 : 0);
@@ -484,6 +486,15 @@ class Bimp_Societe extends BimpDolObject
         $buttons = array();
 
         if ($this->isLoaded()) {
+            
+            if($this->canSetAction('deleteInCompta')) {
+                $buttons[] = array(
+                    'label'   => 'DeleteInCompta',
+                    'icon'    => 'fas_time',
+                    'onclick' => $this->getJsActionOnclick('deleteInCompta')
+                );
+            }
+            
             if ($this->can('edit') && $this->isEditable()) {
                 $buttons[] = array(
                     'label'   => 'Changer le logo',
@@ -3230,6 +3241,21 @@ class Bimp_Societe extends BimpDolObject
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
+        );
+    }
+    
+    public function actionDeleteInCompta($data, &$success) {
+        $errors = Array();
+        $warnings = Array();
+        
+        $errors = $this->updateField('code_compta', '');
+        $errors = BimpTools::merge_array($errors, $this->updateField('code_compta_fournisseur', ''));
+        $errors = BimpTools::merge_array($errors, $this->updateField('exported', 0));
+        
+        return Array(
+            'errors' => $errors,
+            'warnings' => $wawrnings,
+            'success' => $success
         );
     }
 

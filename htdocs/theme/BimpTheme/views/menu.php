@@ -312,7 +312,7 @@ function displayMenuAndSubMenu($id, $niveau = 1) {
             $menu_icon = (!is_null($res->icon)) ? $res->icon : "bars";
             
             $htmlSub .= '<div class="submenu-content">';
-            $htmlSub .= '<a class="menu-item" href="' . DOL_URL_ROOT . '/' . $res->url . '"><span> ' . $langs->trans($res->titre) . '</span></a>';
+            $htmlSub .= '<a class="menu-item" href="' . DOL_URL_ROOT . '' . $res->url . '"><span> ' . $langs->trans($res->titre) . '</span></a>';
             
             while ($res2 = $db->fetch_object($sql2)) {
                 $htmlSub .= displayMenuAndSubMenu($res2->rowid, $niveau + 1);

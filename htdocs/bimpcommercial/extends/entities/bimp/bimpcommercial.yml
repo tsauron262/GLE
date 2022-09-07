@@ -4,3 +4,7 @@ params:
         label: Activer les demandes de financement LDLC Pro Lease depuis les devis
         type: bool
         def: 0
+        
+    id_api_webservice_ldlc_pro_lease: 
+        label: ID API Webservice LDLC PRO LEASE
+        def: 0

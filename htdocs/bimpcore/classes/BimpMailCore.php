@@ -255,8 +255,7 @@ class BimpMailCore
 
             if (!count($create_errors)) {
                 $create_warnings = array();
-
-                $create_errors = $instance->create($create_warnings);
+                $create_errors = $instance->create($create_warnings, true);
             }
         }
 

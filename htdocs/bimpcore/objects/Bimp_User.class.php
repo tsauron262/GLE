@@ -386,8 +386,7 @@ class Bimp_User extends BimpObject
 
         return $filters;
     }
-    
-    
+
     public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
     {
         switch ($field_name) {
@@ -410,8 +409,7 @@ class Bimp_User extends BimpObject
 
         parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
     }
-    
-    
+
     public function getCustomFilterValueLabel($field_name, $value)
     {
         switch ($field_name) {
@@ -1817,7 +1815,18 @@ class Bimp_User extends BimpObject
             $this->dol_object->oldcopy = clone $this->dol_object;
         }
 
-        return parent::update($warnings, $force_update);
+        $init_statut = (int) $this->getInitData('statut');
+        $statut = (int) $this->getData('statut');
+
+        $errors = parent::update($warnings, $force_update);
+
+        if (!count($errors)) {
+            if ($init_statut !== $statut) {
+                $this->updateField('statut', $statut);
+            }
+        }
+        
+        return $errors;
     }
 
     // Méthodes statiques: 

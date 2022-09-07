@@ -74,7 +74,7 @@ class Bimp_UserGroup extends BimpObject
                         'label'   => 'Retirer l\'utilisateur du groupe',
                         'icon'    => 'fas_unlink',
                         'onclick' => $this->getJsActionOnclick('removeUsers', array(
-                            'id_user' => $id_user
+                            'ids_users' => array($id_user)
                                 ), array(
                             'confirm_msg' => htmlentities('Veuillez confirmer le retrait de l\\\'utilisateur "' . $user->getName() . '" du groupe "' . $this->getName() . '"')
                         ))
@@ -156,69 +156,6 @@ class Bimp_UserGroup extends BimpObject
         return self::$cache[$cache_key];
     }
 
-    // Toutes les fonctions commentées sont à supprimer après lecture des commentaires. 
-    //    public function getLibelleForRight()
-    //    {
-    // Eviter complètement ce genre de truc (on doit minimiser au maximum le nombre de requêtes SQL): 
-    // Il faut donc passer par la fonction BimpCache::getRightDefLibelle($id_right). 
-    //        return $this->db->getValue('rights_def', 'libelle', 'id = ' . $this->getData('fk_id'));
-    //    }
-    //    
-    // Actions: 
-    // Ces fonction existent déjà dans Bimp_User, inutile de les redéfinir ici (à suppr): 
-    //    public function getRights()
-    //    {
-    //        if ($this->isLoaded()) {
-    //            return self::getUserRights($this->id);
-    //        }
-    //
-    //        return array();
-    //    }
-    //
-    //    public function getAllRights()
-    //    {
-    //        return array(
-    //            'rights'        => $this->getRights(),
-    //            'groups_rights' => $this->getGroupsRights());
-    //    }
-    //    public static function getUserRights($id_user)
-    //    {
-    //        if ((int) $id_user) {
-    //            $cache_key = 'user_' . $id_user . '_rights';
-    //
-    //            if (!isset(self::$cache[$cache_key])) {
-    //                self::$cache[$cache_key] = array();
-    //
-    //                $rows = self::getBdb()->getRows('usergroup_rights', 'fk_usergroup = ' . $id_user, null, 'array', array('fk_id'));
-    //
-    //                if (is_array($rows)) {
-    //                    foreach ($rows as $r) {
-    //                        self::$cache[$cache_key][] = (int) $r['fk_id'];
-    //                    }
-    //                }
-    //            }
-    //
-    //            return self::$cache[$cache_key];
-    //        }
-    //
-    //        return array();
-    //    }
-    //  
-    //
-    //    public function getFilterByGroup()
-    //    {
-    //        // Eviter de créer une fonction pour ce genre de truc.
-    //        // Les filtres cont généralement variables selon le context, il faut donc les définir en direct selon les besoins. 
-    //        $id_group = $_REQUEST['id']; // Ne jamais faire ça : toutes les fonctions d'un BimpObject doivent être indépendantes du contexte (Utiliser $this->id à la place).  
-    //        $filters = array();
-    //        $filters[] = [
-    //            'name'   => 'fk_usergroup',
-    //            'filter' => $id_group
-    //        ];
-    //
-    //        return $filters;
-    //    }
-    //
     // Getters Statics: 
 
     public static function getUserGroupsRights($id_user)
@@ -711,8 +648,6 @@ class Bimp_UserGroup extends BimpObject
             $nOk = 0;
 
             foreach ($ids_users as $id_user) {
-                // Grosse erreur !! 
-                //            $where = 'fk_usergroup = ' . $id_user . ' AND fk_usergroup = ' . $this->id;
                 if ($this->db->delete('usergroup_user', 'fk_user = ' . (int) $id_user . ' AND fk_usergroup = ' . $this->id) <= 0) {
                     $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $id_user);
                     $errors[] = 'Echec du retrait de l\'utilisateur ' . (BimpObject::objectLoaded($user) ? '"' . $user->getName() . '"' : '#' . $id_user) . ' - ' . $this->db->err();

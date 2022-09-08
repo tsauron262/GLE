@@ -105,7 +105,7 @@ class BDS_ImportsAppleProcess extends BDSImportProcess
                 if (!count($errors)) {
                     switch ($step_name) {
                         case 'import_products':
-                            $this->createBimpObjects('bimpcore', 'Bimp_Product', $file_data, $errors, array('update_if_exists' => true));
+                            $this->createBimpObjects('bimpcore', 'Bimp_Product', $file_data, $errors, array('update_if_exists' => true, 'success_display_fields' => ''));
                             break;
 
                         case 'validate_products':

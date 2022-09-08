@@ -1695,16 +1695,17 @@ class Bimp_Propal extends BimpComm
         return BimpTools::overrideArray(self::$default_signature_params, (array) $this->getData('signature_params'));
     }
 
-    public function getSignatureCommercialEmail($doc_type)
+    public function getSignatureCommercialEmail($doc_type, &$use_as_from = false)
     {
         $sav = $this->getSav();
         if (BimpObject::objectLoaded($sav)) {
-            return $sav->getSignatureCommercialEmail($doc_type);
+            return $sav->getSignatureCommercialEmail($doc_type, $use_as_from);
         }
 
         $client = $this->getChildObject('client');
 
         if (BimpObject::objectLoaded($client)) {
+            $use_as_from = false;
             return $client->getCommercialEmail(false);
         }
 

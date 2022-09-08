@@ -1175,6 +1175,20 @@ class Bimp_Client extends Bimp_Societe
             $html .= '</span>';
             $html .= '</div>';
             $html .= '</div>';
+            
+            
+            // Detail calcul: 
+            $html .= '<div style="margin: 10px 0; padding: 10px; border: 1px solid #737373">';
+            $html .= '<b>Détail du calcul: </b>';
+            $html .= '<div id="client_' . $this->id . '_encours_detail"></div>';
+            $onclick = $this->getJsLoadCustomContent('displayEncoursDetail', '$(\'#client_' . $this->id . '_encours_detail' . '\')');
+
+            $html .= '<div style="margin-top: 10px; text-align: center">';
+            $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+            $html .= BimpRender::renderIcon('fas_info', 'iconLeft') . 'Détail';
+            $html .= '</span>';
+            $html .= '</div>';
+            $html .= '</div>';
 
             // Bouton aperçu: 
             $html .= '<div class="buttonsContainer align-right">';

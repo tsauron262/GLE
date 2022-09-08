@@ -48,6 +48,8 @@ class Bimp_Societe extends BimpDolObject
         'Bourgogne-Centre' => array(62, 59, 80, 60, 2, 95, 78, 91, 77, 93, 75, 92, 94, 25, 39, 71, 58, 21, 89, 70, 37, 36, 18, 41, 28, 45, 50, 14, 61, 27, 76, 56, 22, 29, 35)
     );
     public static $anonymization_fields = array('nom', 'name_alias', 'address', 'zip', 'town', 'email', 'skype', 'url', 'phone', 'fax', 'siren', 'siret', 'ape', 'idprof4', 'idprof5', 'idprof6', 'tva_intra');
+    
+    private $debug = array();
 
 //    public $fieldsWithAddNoteOnUpdate = array('solvabilite_status');
 
@@ -1246,8 +1248,10 @@ class Bimp_Societe extends BimpDolObject
         }
         $debug .= '<br/> Total encours : '.BimpTools::displayMoneyValue($encours);
 
-        if($first)
+        if($first){
+            $this->debug[] = $debug;
             BimpDebug::addDebug('divers', 'Calcul de l\'encours', $debug, array('open'=>1)); 
+        }
         return $encours;
     }
 
@@ -1891,6 +1895,12 @@ class Bimp_Societe extends BimpDolObject
 
         return 'nc';
     }
+    
+    public function displayEncoursDetail()
+    {
+        $this->displayEncoursNonFacture();
+        return implode($this->debug, '<br/><br/>');
+    }
 
     public function displayEncoursNonFacture()
     {
@@ -1932,6 +1942,7 @@ class Bimp_Societe extends BimpDolObject
             $html .= '<br/><b>Total encours</b> : ' . BimpTools::displayMoneyValue($encours['total']);
         }
         
+        $this->debug[] = $debug;
         BimpDebug::addDebug('divers', 'Calcul de l\'encours sur les commandes', $debug, array('open'=>1)); 
 
         return $html;

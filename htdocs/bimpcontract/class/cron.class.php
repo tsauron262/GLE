@@ -291,7 +291,7 @@
                         $note->set('obj_type', 'bimp_object');
                         $note->set('obj_module', 'bimpcontract');
                         $note->set('obj_name', 'BContract_contrat');
-                        $note->set('id_obj', 7345);
+                        $note->set('id_obj', $c->id);
                         $note->set('type_author', $note::BN_AUTHOR_USER);
                         $note->set('type_dest', $note::BN_DEST_GROUP);
                         $note->set('fk_group_dest', $note::BN_GROUPID_FACT);

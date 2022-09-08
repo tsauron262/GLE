@@ -3822,7 +3822,6 @@ class Bimp_Product extends BimpObject
         $new_price_ht = (float) $this->getData('price');
         $init_price_ttc = (float) $this->getInitData('price_ttc');
         $new_price_ttc = (float) $this->getData('price_ttc');
-        $new_price_ht = (float) $this->getData('price');
         $init_tva_tx = (float) $this->getInitData('tva_tx');
         $new_tva_tx = (float) $this->getData('tva_tx');
         $updateToSerilisable = ($this->getInitData('serialisable') == 0 && $this->getData('serialisable') == 1);

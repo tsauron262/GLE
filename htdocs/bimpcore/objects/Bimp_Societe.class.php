@@ -1197,27 +1197,55 @@ class Bimp_Societe extends BimpDolObject
 
         return (int) BimpCore::getConf('societe_id_default_cond_reglement', 0);
     }
+    
+    public function getRemainToPay($true_value = false, $round = true){
+        $amount = 0;
+        $facts = BimpObject::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', array('fk_soc'=>$this->id, 'paye'=>0));
+        foreach($facts as $fact){
+            $amount += $fact->getRemainToPay($true_value = false, $round = true);
+        }
+        return $amount;
+    }
 
-    public function getEncours($withOtherSiret = true)
+    public function getEncours($withOtherSiret = true, &$debug = '')
     {
         $encours = 0;
-
+        $first = false;
+        if($debug == ''){
+            $debug = '<h3>Calcul de l\'encours client : '.$this->getLink().'</h3>';
+            $first = true;
+        }
         if ($withOtherSiret && $this->getData('siren') . 'x' != 'x' && strlen($this->getData('siren')) == 9) {
             $lists = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array('siren' => $this->getData('siren')));
+                $debug .= '<br/>Autre clients<br/>';
             foreach ($lists as $idO => $obj) {
-                $encours += $obj->getEncours(false);
+                $encoursTmp = $obj->getEncours(false, $debug);
+                $debug .= $obj->getLink().' - '.$encoursTmp.'<br/>';
+                $encours += $encoursTmp;
             }
         } else {
-            $values = $this->dol_object->getOutstandingBills();
+//            $values = $this->dol_object->getOutstandingBills();
+//
+//            if (isset($values['opened'])) {
+//                $encours = $values['opened'];
+//            }
+            $encoursFact = $this->getRemainToPay(true, false);
 
-            if (isset($values['opened'])) {
-                $encours = $values['opened'];
-            }
-
-            $encours -= (float) $this->getTotalPaiementsInconnus();
-            $encours -= (float) $this->getAvailableDiscountsAmounts();
+            $encoursPAYNI = (float) $this->getTotalPaiementsInconnus();
+            $encoursDicsount = (float) $this->getAvailableDiscountsAmounts();
+            
+            
+            $encours = $encoursFact - $encoursPAYNI - $encoursDicsount;
+            
+            
+            $debug .= '<br/>Encours du client sur les factures impayée :'.BimpTools::displayMoneyValue($encoursFact);
+            $debug .= '<br/> - Paiment Inconue : '.BimpTools::displayMoneyValue($encoursPAYNI);
+            $debug .= '<br/> - Reduction dispo : '.BimpTools::displayMoneyValue($encoursDicsount);
         }
+        $debug .= '<br/> Total encours : '.BimpTools::displayMoneyValue($encours);
 
+        if($first)
+            BimpDebug::addDebug('divers', 'Calcul de l\'encours', $debug, array('open'=>1)); 
         return $encours;
     }
 
@@ -1314,7 +1342,7 @@ class Bimp_Societe extends BimpDolObject
         return $encours;
     }
 
-    public function getAllEncoursForSiret($with_commandes_non_facturees = false)
+    public function getAllEncoursForSiret($with_commandes_non_facturees = false, $details = false)
     {
         $encours = array(
             'factures'  => array(

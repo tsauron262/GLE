@@ -1198,11 +1198,13 @@ class Bimp_Societe extends BimpDolObject
         return (int) BimpCore::getConf('societe_id_default_cond_reglement', 0);
     }
     
-    public function getRemainToPay($true_value = false, $round = true){
+    public function getRemainToPay($true_value = false, $round = true, &$debug = ''){
         $amount = 0;
         $facts = BimpObject::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', array('fk_soc'=>$this->id, 'paye'=>0));
         foreach($facts as $fact){
-            $amount += $fact->getRemainToPay($true_value = false, $round = true);
+            $value = $fact->getRemainToPay($true_value = false, $round = true);
+            $debug .= '<br/>Fact : '.$fact->getLink() . ' '. BimpTools::displayMoneyValue($value);
+            $amount += $value;
         }
         return $amount;
     }
@@ -1229,7 +1231,7 @@ class Bimp_Societe extends BimpDolObject
 //            if (isset($values['opened'])) {
 //                $encours = $values['opened'];
 //            }
-            $encoursFact = $this->getRemainToPay(true, false);
+            $encoursFact = $this->getRemainToPay(true, false, $debug);
 
             $encoursPAYNI = (float) $this->getTotalPaiementsInconnus();
             $encoursDicsount = (float) $this->getAvailableDiscountsAmounts();
@@ -1249,7 +1251,7 @@ class Bimp_Societe extends BimpDolObject
         return $encours;
     }
 
-    public function getEncoursNonFacture($withOtherSiret = true)
+    public function getEncoursNonFacture($withOtherSiret = true, &$debug)
     {
         if (!$this->isLoaded()) {
             return 0;
@@ -1275,7 +1277,7 @@ class Bimp_Societe extends BimpDolObject
             }
         }
 
-        $sql = BimpTools::getSqlSelect(array('a.qty_modif', 'a.factures', 'det.qty', 'det.subprice', 'det.tva_tx', 'det.remise_percent'));
+        $sql = BimpTools::getSqlSelect(array('a.qty_modif', 'a.factures', 'det.qty', 'det.subprice', 'det.tva_tx', 'det.remise_percent', 'a.id_obj', 'a.position'));
         $sql .= BimpTools::getSqlFrom('bimp_commande_line', array(
                     'c'   => array(
                         'table' => 'commande',
@@ -1333,8 +1335,12 @@ class Bimp_Societe extends BimpDolObject
                         $pu -= ($pu * ($r['remise_percent'] / 100));
                     }
 
-//                    $pu *= (1 + ($r['tva_tx'] / 100));//PASSAGE EN HT
-                    $encours += (($full_qty - $qty_billed) * $pu);
+                    $pu *= (1 + ($r['tva_tx'] / 100));//PASSAGE EN TTC
+                    $totLn = (($full_qty - $qty_billed) * $pu);
+                    $encours += $totLn;
+                    
+                    if($totLn != 0)
+                    $debug .= '<br/>Commande : <a href="'.DOL_URL_ROOT.'/commande/card.php?id='.$r['id_obj'].'" target="_blanck">'.$r['id_obj'].'</a> ln : '.$r['position'].' ('.($full_qty - $qty_billed) .' X '. BimpTools::displayMoneyValue($pu) . ') = '.BimpTools::displayMoneyValue(($full_qty - $qty_billed) * $pu);
                 }
             }
         }
@@ -1342,7 +1348,7 @@ class Bimp_Societe extends BimpDolObject
         return $encours;
     }
 
-    public function getAllEncoursForSiret($with_commandes_non_facturees = false, $details = false)
+    public function getAllEncoursForSiret($with_commandes_non_facturees = false, $details = false, &$debug = '')
     {
         $encours = array(
             'factures'  => array(
@@ -1370,7 +1376,7 @@ class Bimp_Societe extends BimpDolObject
             }
 
             if ($with_commandes_non_facturees) {
-                $value = $this->getEncoursNonFacture(false);
+                $value = $this->getEncoursNonFacture(false, $debug);
 
                 if ($value) {
                     $encours['commandes']['socs'][$this->id] += $value;
@@ -1891,8 +1897,9 @@ class Bimp_Societe extends BimpDolObject
         if (!$this->isLoaded()) {
             return '';
         }
+        $debug = '';
 
-        $encours = $this->getAllEncoursForSiret(true);
+        $encours = $this->getAllEncoursForSiret(true, false, $debug);
 
         $html .= BimpTools::displayMoneyValue($encours['commandes']['socs'][$this->id]);
 
@@ -1924,6 +1931,8 @@ class Bimp_Societe extends BimpDolObject
         if ($encours['commandes']['total'] && $encours['factures']['total']) {
             $html .= '<br/><b>Total encours</b> : ' . BimpTools::displayMoneyValue($encours['total']);
         }
+        
+        BimpDebug::addDebug('divers', 'Calcul de l\'encours sur les commandes', $debug, array('open'=>1)); 
 
         return $html;
     }

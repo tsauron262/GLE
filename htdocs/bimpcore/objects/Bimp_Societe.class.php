@@ -1251,7 +1251,7 @@ class Bimp_Societe extends BimpDolObject
         return $encours;
     }
 
-    public function getEncoursNonFacture($withOtherSiret = true, &$debug)
+    public function getEncoursNonFacture($withOtherSiret = true, &$debug = '')
     {
         if (!$this->isLoaded()) {
             return 0;

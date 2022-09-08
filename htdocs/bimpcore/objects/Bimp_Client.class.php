@@ -1131,7 +1131,7 @@ class Bimp_Client extends Bimp_Societe
 
         if ($this->isLoaded()) {
             $encours = $this->getAllEncoursForSiret(false);
-            if ($encours['total'] > 0) {
+            if ($encours['total'] != 0) {
                 $html .= '<b>Encours sur factures restant dues: </b>';
                 $html .= BimpTools::displayMoneyValue($encours['factures']['socs'][$this->id]);
 
@@ -1139,7 +1139,7 @@ class Bimp_Client extends Bimp_Societe
                     $html .= '<br/>';
 
                     foreach ($encours['factures']['socs'] as $id_soc => $soc_encours) {
-                        if ($id_soc == $this->id) {
+                        if ($id_soc == $this->id || $soc_encours == 0) {
                             continue;
                         }
 
@@ -1172,6 +1172,20 @@ class Bimp_Client extends Bimp_Societe
             $html .= '<div style="margin-top: 10px; text-align: center">';
             $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
             $html .= BimpRender::renderIcon('fas_calculator', 'iconLeft') . 'Calculer';
+            $html .= '</span>';
+            $html .= '</div>';
+            $html .= '</div>';
+            
+            
+            // Detail calcul: 
+            $html .= '<div style="margin: 10px 0; padding: 10px; border: 1px solid #737373">';
+            $html .= '<b>Détail du calcul: </b>';
+            $html .= '<div id="client_' . $this->id . '_encours_detail"></div>';
+            $onclick = $this->getJsLoadCustomContent('displayEncoursDetail', '$(\'#client_' . $this->id . '_encours_detail' . '\')');
+
+            $html .= '<div style="margin-top: 10px; text-align: center">';
+            $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+            $html .= BimpRender::renderIcon('fas_info', 'iconLeft') . 'Détail';
             $html .= '</span>';
             $html .= '</div>';
             $html .= '</div>';

@@ -21,7 +21,8 @@ class BimpDebug
         'params'      => 'Paramètres requête',
         'ajax_result' => 'Réponse ajax',
         'gsx'         => 'GSX',
-        'api'         => 'API'
+        'api'         => 'API',
+        'divers'      => 'Divers'
     );
     public static $times = array();
     public static $sql_count = array();

@@ -97,6 +97,7 @@ class BDS_VerifsProcess extends BDSProcess
         $date_to = $this->getOption('date_to', '');
         $nbElementsPerIteration = $this->getOption('nb_elements_per_iterations', 100);
         $not_classified_only = $this->getOption('not_classified_only', 1);
+        $zero_only = $this->getOption('rtp_zero_only', 0);
 
         if (!preg_match('/^[0-9]+$/', $nbElementsPerIteration) || !(int) $nbElementsPerIteration) {
             $errors[] = 'Le nombre d\'élements par itération doit être un nombre entier positif';
@@ -118,6 +119,10 @@ class BDS_VerifsProcess extends BDSProcess
 
             if ($not_classified_only) {
                 $where .= ' AND paye = 0';
+            }
+
+            if ($zero_only) {
+                $where .= ' and remain_to_pay = 0';
             }
 
             $rows = $this->db->getRows('facture', $where, null, 'array', array('rowid'), 'rowid', 'desc');
@@ -143,7 +148,7 @@ class BDS_VerifsProcess extends BDSProcess
             }
         }
     }
-    
+
     public function executeCheckFacsRtp($step_name, &$errors = array(), $extra_data = array())
     {
         $result = array();
@@ -251,9 +256,24 @@ class BDS_VerifsProcess extends BDSProcess
             if (BimpObject::objectLoaded($opt)) {
                 $options['not_classified_only'] = (int) $opt->id;
             }
+            
+            $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                        'id_process'    => (int) $process->id,
+                        'label'         => 'Restes à payer à 0 seulement',
+                        'name'          => 'rtp_zero_only',
+                        'info'          => '',
+                        'type'          => 'bool',
+                        'default_value' => '0',
+                        'required'      => 0
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($opt)) {
+                $options['rtp_zero_only'] = (int) $opt->id;
+            }
 
             // Opérations: 
 
+            // Vérifs marges factures: 
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                         'id_process'  => (int) $process->id,
                         'title'       => 'Vérifier les marges + revals OK des factures',
@@ -280,6 +300,7 @@ class BDS_VerifsProcess extends BDSProcess
                 $warnings = array_merge($warnings, $op->addAssociates('options', $op_options));
             }
 
+            // Vérifs restes à payer factures: 
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                         'id_process'  => (int) $process->id,
                         'title'       => 'Vérifier les restes à payer des factures',
@@ -304,6 +325,9 @@ class BDS_VerifsProcess extends BDSProcess
                 }
                 if (isset($options['not_classified_only'])) {
                     $op_options[] = $options['not_classified_only'];
+                }
+                if (isset($options['rtp_zero_only'])) {
+                    $op_options[] = $options['rtp_zero_only'];
                 }
 
                 $warnings = array_merge($warnings, $op->addAssociates('options', $op_options));

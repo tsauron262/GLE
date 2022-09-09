@@ -4101,6 +4101,9 @@ class Bimp_Facture extends BimpComm
                 }
             }
 
+            // A ce stade on est censé être sûr que la facture sera bien validée (Cette méthode doit être appellée par le dernier trigger) 
+            // Le statut doit être à 1 pour les vérifs qui suivent. 
+            $this->set('fk_statut', 1); 
             $this->checkIsPaid();
             $this->checkRemisesGlobales();
             $this->checkMargin(true);

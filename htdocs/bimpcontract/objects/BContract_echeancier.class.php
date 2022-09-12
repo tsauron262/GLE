@@ -785,9 +785,9 @@ class BContract_echeancier extends BimpObject {
                 if(($user->admin) && $this->canEdit()) {
                     $html .= '<div class="btn-group"><button type="button" class="btn btn-danger bs-popover" '.BimpRender::renderPopoverData('Supprimer l\'échéancier').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick('delete') . '"><i class="fa fa-times"></i></button></div>';
                 }
-                if($user->admin || $user->rights->facture->creer) {
-                    $html .= '<div class="btn-group"><button type="button" class="btn btn-primary bs-popover" '.BimpRender::renderPopoverData('Refaire l\'échéancier suite à un avoir').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick('unlinkLastFacture', [], ['form_name' => 'unlinkLastFacture']) . '"><i class="fa fa-times"></i> Refaire l\'échéancier suite à un avoir</button></div>';
-                }
+//                if($user->admin || $user->rights->facture->creer) {
+//                    $html .= '<div class="btn-group"><button type="button" class="btn btn-primary bs-popover" '.BimpRender::renderPopoverData('Refaire l\'échéancier suite à un avoir').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick('unlinkLastFacture', [], ['form_name' => 'unlinkLastFacture']) . '"><i class="fa fa-times"></i> Refaire l\'échéancier suite à un avoir</button></div>';
+//                }
                 
                 // 
                 $html .= '<div class="btn-group"><button type="button" class="btn bs-popover" '.BimpRender::renderPopoverData('Générer le PDF').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick('generatePdfEcheancier', array(), array('form_name' => 'pdfEcheancier')) . '">Générer le PDF</button></div>';

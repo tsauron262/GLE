@@ -78,7 +78,7 @@ sections:
                     list: 
                         object: contact
           user_client: 
-              label: Compte utilisateur clients
+              label: Comptes espace client
               sections: 
                   - type: list
                     list: 

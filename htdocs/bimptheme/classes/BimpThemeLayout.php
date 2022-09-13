@@ -54,7 +54,11 @@ class BimpThemeLayout extends BimpLayout
 
         // Toolbar left: 
         $html .= '<div class="top-menu d-flex align-items-center pull-left">';
-//        $html .= '<button type="button" id="responsiveButton" class="btn-icon mobile-nav-toggle"><span></span></button>';
+        $html .= '<span class="mobile-visible">';
+        $html .= '<button type="button" id="openSideBarButton" class="nav-link header-icon" onclick=""><span>';
+        $html .= BimpRender::renderIcon('fas_bars');
+        $html .= '</span></button>';
+        $html .= '</span>';
         $html .= $this->top_nav_html;
         $html .= $this->top_search_html;
         $html .= '</div>';
@@ -97,18 +101,9 @@ class BimpThemeLayout extends BimpLayout
         $html .= '<div class="nav-container">' . "\n";
         $html .= '<nav id="main-menu-navigation" class="navigation-main">' . "\n";
 
-        global $db, $langs;
-        $tableLangs = ["commercial"];
-
-        foreach ($tableLangs as $nomLang) {
-            $langs->load($nomLang);
-        }
-
-        $sql = $db->query('SELECT * FROM `' . MAIN_DB_PREFIX . 'menu` WHERE `type` = "top" ORDER BY `position`');
-
-        while ($ln = $db->fetch_object($sql)) {
-            $html .= $this->renderMenuAndSubMenu($ln->rowid, 1);
-        }
+        BimpObject::loadClass('bimptheme', 'Bimp_Menu');
+        $items = Bimp_Menu::getMenuItems(0, true, true, true);
+        $html .= $this->renderMenuItems($items, 1);
 
         $html .= ' </nav><!-- End #main-menu-navigation -->' . "\n";
         $html .= '</div><!-- End .nav-container-->' . "\n";
@@ -118,52 +113,51 @@ class BimpThemeLayout extends BimpLayout
         return $html;
     }
 
-    protected function renderMenuAndSubMenu($id, $niveau = 1)
+    protected function renderMenuItems($items)
     {
-        global $db, $langs;
+        $html = '';
+        global $langs;
 
-        $html = $htmlSub = "";
-
-        $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "menu WHERE rowid = " . $id);
-        if ($db->num_rows($sql) > 0) {
-            $res = $db->fetch_object($sql);
-
-            if ($res->perms != '') {
-                $test = 'if(' . $res->perms . ') {  }else{ return ""; }';
-
-                eval($test);
+        foreach ($items as $item_data) {
+            $language = BimpTools::getArrayValueFromPath($item_data, 'langs', '');
+            if ($language) {
+                $langs->load($language);
             }
 
-            if ($res->langs != '')
-                $langs->load($res->langs);
+            $titre = $langs->trans($item_data['titre']);
 
-            $sql2 = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "menu WHERE fk_menu = " . $id . " ORDER BY position ASC");
-            if ($db->num_rows($sql2) > 0) {
-                $menu_icon = (!is_null($res->icon)) ? $res->icon : "bars";
+            if (isset($item_data['sub_items']) && !empty($item_data['sub_items'])) {
+                $html .= '<div class="nav-item has-sub">';
+                $html .= '<a class="menu-item" href="javascript:void(0)">';
+                $html .= BimpRender::renderIcon(BimpTools::getArrayValueFromPath($item_data, 'bimp_icon', 'fas_bars'));
+                $html .= '<span> ' . $titre . '</span>';
+                $html .= '</a>';
 
-                $htmlSub .= '<div class="submenu-content">';
-                $htmlSub .= '<a class="menu-item" href="' . DOL_URL_ROOT . '/' . $res->url . '"><span> ' . $langs->trans($res->titre) . '</span></a>';
-
-                while ($res2 = $db->fetch_object($sql2)) {
-                    $htmlSub .= $this->renderMenuAndSubMenu($res2->rowid, $niveau + 1);
+                $html .= '<div class="submenu-content">';
+                $url = BimpTools::getArrayValueFromPath($item_data, 'url', '');
+                if ($url) {
+                    $url = DOL_URL_ROOT . (!preg_match('/^\/.+$/', $url) ? '/' : '') . $url;
+                    $html .= '<a class="menu-item" href="' . $url . '">';
+                    $html .= '<span> ' . $titre . '</span>' . BimpRender::renderIcon('fas_arrow-circle-right', 'iconRight');
+                    $html .= '</a>';
                 }
 
-                $htmlSub .= '</div>';
+                $html .= $this->renderMenuItems($item_data['sub_items']);
 
-                $html .= '<div class="nav-item has-sub">';
-                $html .= '<a class="menu-item" href="javascript:void(0)">' . BimpRender::renderIcon($menu_icon) . '<span> ' . $langs->trans($res->titre) . '</span></a>';
-
-                $html .= $htmlSub;
+                $html .= '</div>';
                 $html .= '</div>';
             } else {
-                $menu_icon = (!is_null($res->icon)) ? BimpRender::renderIcon($res->icon) : "";
-
+                $url = BimpTools::getArrayValueFromPath($item_data, 'url', '');
+                if ($url) {
+                    $url = DOL_URL_ROOT . (!preg_match('/^\/.+$/', $url) ? '/' : '') . $url;
+                }
                 $html .= '<div class="nav-item">';
-                $html .= '<a class="menu-item" href="' . DOL_URL_ROOT . '/' . $res->url . '">' . $menu_icon . '<span>' . $langs->trans($res->titre) . '</span></a>';
+                $html .= '<a class="menu-item" href="' . $url . '">';
+                $html .= BimpRender::renderIcon(BimpTools::getArrayValueFromPath($item_data, 'bimp_icon', 'fas_bars'));
+                $html .= '<span>' . $titre . '</span></a>';
                 $html .= '</div>';
             }
         }
-
         return $html;
     }
 }

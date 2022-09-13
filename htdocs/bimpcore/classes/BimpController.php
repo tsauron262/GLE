@@ -1132,10 +1132,11 @@ class BimpController
         if (!count($errors)) {
             $object = BimpObject::getInstance($module, $object_name);
             if ($object->fetch((int) $id_object)) {
-                if ($object->setPosition($position)) {
+                $pos_errors = array();
+                if ($object->setPosition($position, $pos_errors)) {
                     $success = 'Position ' . $object->getLabel('of_the') . ' ' . $id_object . ' mise à jour avec succès';
                 } else {
-                    $errors[] = 'Echec de la mise à jour de la position ' . $object->getLabel('of_the') . ' ' . $id_object;
+                    $errors[] = BimpTools::getMsgFromArray($pos_errors, 'Echec de la mise à jour de la position ' . $object->getLabel('of_the') . ' ' . $id_object);
                 }
             } else {
                 $errors[] = BimpTools::ucfirst($object->getLabel()) . ' d\'ID ' . $id_object . ' non trouvé' . ($object->isLabelFemale() ? 'e' : '');

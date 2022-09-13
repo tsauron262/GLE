@@ -1,6 +1,3 @@
-// JS Spécifique BimpTheme
-
-//The Bimp logo is hidden when the user close menu
 function hideBimpLogo(ajax = true) {
     let logo = document.getElementById("logo-img");
     if (logo.style.display === "none") {
@@ -42,13 +39,13 @@ function bimpInit(i) {
 //Hide the responsive button for the menu when the screen is > at 992px
 function displayResponsiveButton(mobileScreen) {
 
-    if (mobileScreen.matches) {
-        if (parseInt($('#responsiveButton').length) != 0)
-            document.getElementById("responsiveButton").style.visibility = 'visible';
-    } else {
-        if (parseInt($('#responsiveButton').length) != 0)
-            document.getElementById("responsiveButton").style.visibility = 'hidden';
-    }
+//    if (mobileScreen.matches) {
+//        if (parseInt($('#responsiveButton').length) != 0)
+//            document.getElementById("responsiveButton").style.visibility = 'visible';
+//    } else {
+//        if (parseInt($('#responsiveButton').length) != 0)
+//            document.getElementById("responsiveButton").style.visibility = 'hidden';
+//    }
 
     if (mobileScreen.matches) {
         if (parseInt($('#logo-img').length) != 0)
@@ -78,5 +75,11 @@ function isInFrame() {
         $('.main-content').css('padding', '0');
         $('.main-content').css('margin', '0');
     }
-
 }
+
+$(document).ready(function () {
+    $('#openSideBarButton').click(function (e) {
+        $('.app-sidebar').removeClass('hide-sidebar');
+        e.stopPropagation();
+    });
+});

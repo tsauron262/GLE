@@ -490,7 +490,9 @@ function bimp_on_login_success() {
 }
 
 function setSessionConf(name, value) {
-    BimpAjax("setSessionConf", {name, value}, $("existepas"), []);
+    BimpAjax("setSessionConf", {name, value}, null, {
+        display_success: false
+    });
 }
 
 window.addEventListener('beforeunload', function (e) {

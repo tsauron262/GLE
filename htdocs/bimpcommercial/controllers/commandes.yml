@@ -34,17 +34,13 @@ sections:
                           params: 
                             - renderCommandesTab
                             - default
-        receptions: 
+        shipments: 
             label: Expéditions
             sections: 
                 - type: custom
                   custom: 
-                      callback: 
-                          method: renderTabs
-                          params: 
-                            - renderShipmentsTab
-                            - receptions
-
+                      callback: renderShipmentsTab
+                      
         prods: 
             label: Produits en commande
             sections: 

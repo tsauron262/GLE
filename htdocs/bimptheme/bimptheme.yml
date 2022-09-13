@@ -1,0 +1,8 @@
+params: 
+    menu_handler: 
+        label: Type de menu
+        type: select
+        def: auguria
+        values: 
+            auguria: Auguria (classique)
+            bimptheme: BimpThème

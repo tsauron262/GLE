@@ -9,7 +9,8 @@ class BimpTheme
             'bimptheme' => '/bimptheme/views/css/bimptheme.css'
         ),
         'js'  => array(
-            'theme'      => '/bimptheme/views/js/theme.min.js',
+            'theme'      => '/bimptheme/views/js/theme.js',
+//            'theme'      => '/bimptheme/views/js/theme.min.js',
             'scrollbar'  => '/bimptheme/views/js/perfect-scrollbar.min.js',
             'screenfull' => '/bimptheme/views/js/screenfull.js',
             'bimptheme'  => '/bimptheme/views/js/bimptheme.js'
@@ -42,6 +43,7 @@ class BimpTheme
 
     public static function initTopNavHtml(BimpThemeLayout $layout)
     {
+        global $conf;
         $layout->top_nav_html .= '<a href="' . DOL_URL_ROOT . '/" class="nav-link bs-popover header-icon"';
         $layout->top_nav_html .= BimpRender::renderPopoverData('Accueil', 'bottom');
         $layout->top_nav_html .= '>';
@@ -53,11 +55,35 @@ class BimpTheme
         $layout->top_nav_html .= BimpRender::renderIcon('fas_expand');
         $layout->top_nav_html .= '</button>';
 
-        $layout->top_nav_html .= '<button class="nav-link header-icon bs-popover"';
-        $layout->top_nav_html .= BimpRender::renderPopoverData('Historique de navigation', 'bottom');
-        $layout->top_nav_html .= '>';
-        $layout->top_nav_html .= BimpRender::renderIcon('fas_history');
-        $layout->top_nav_html .= '</button>';
+//        $layout->top_nav_html .= '<button class="nav-link header-icon bs-popover"';
+//        $layout->top_nav_html .= BimpRender::renderPopoverData('Historique de navigation', 'bottom');
+//        $layout->top_nav_html .= '>';
+//        $layout->top_nav_html .= BimpRender::renderIcon('fas_history');
+//        $layout->top_nav_html .= '</button>';
+
+        if (isset($conf->global->MAIN_MODULE_SYNOPSISHISTO)) {
+            $content = '';
+
+            if (!class_exists('histoNavigation')) {
+                require_once DOL_DOCUMENT_ROOT . '/synopsishisto/class/actions_synopsishisto.class.php';
+            }
+
+            $tabElem = getTypeAndId();
+            $element_type = $tabElem[0];
+            $element_id = $tabElem[1];
+
+            histoNavigation::saveHisto($element_type, $element_id);
+            $content .= '<div class="userHistoContent">';
+            $content .= histoNavigation::getBlocHisto(0);
+            $content .= '</div>';
+
+            $label = BimpRender::renderIcon('fas_history');
+            $layout->top_nav_html .= BimpRender::renderDropDownContent('userNavHistory', $label, $content, array(
+                        'type'        => 'span',
+                        'extra_class' => 'nav-link header-icon',
+                        'side'        => 'left'
+            ));
+        }
     }
 
     public static function initTopSearchHtml(BimpThemeLayout $layout)
@@ -105,13 +131,51 @@ class BimpTheme
     public static function initTopAccountHtml(BimpThemeLayout $layout)
     {
         global $user;
-        $label = '<img class="avatar" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=userphoto&entity=1&file=' . substr($user->id, -1) . "/" . substr($user->id, -2, 1) . "/" . $user->photo . '" alt="">';
+        $label = Form::showphoto('userphoto', $user, 28, 28, 0, '', 'mini', 0);
+//        $label = '<img class="avatar" src="' . DOL_URL_ROOT . '/viewimage.php?modulepart=userphoto&entity=1&file=' . $user->photo . '" alt="" style="display: inline-block; margin-right: 12px">';
+        $label .= '<span class="mobile-hidden">' . $user->firstname . ' ' . $user->lastname . '</span>';
 
         $content = '';
-        $content .= '<a class="dropdown-item" href="' . DOL_URL_ROOT . '/user/card.php?id=' . $user->id . '"><i class="ik ik-user dropdown-icon"></i> Mon profil</a>';
-        $content .= '<a class="dropdown-item" href="' . DOL_URL_ROOT . '/user/logout.php"><i class="ik ik-power dropdown-icon"></i> Se déconnecter</a>';
+        $content .= '<div style="padding: 15px;">';
 
+        // Mon profile: 
+        $content .= '<div style="margin-bottom: 12px">';
+        $content .= '<a href="' . DOL_URL_ROOT . '/bimpcore/index.php?fc=user&id=' . $user->id . '">';
+        $content .= BimpRender::renderIcon('fas_user', 'iconLeft') . 'Mon profil';
+        $content .= '</a>';
+        $content .= '</div>';
+
+        // Mon agenda: 
+        $content .= '<div style="margin-bottom: 12px">';
+        $content .= '<a href="' . DOL_URL_ROOT . '/synopsistools/agenda/vue.php">';
+        $content .= BimpRender::renderIcon('fas_calendar-alt', 'iconLeft') . 'Mon Agenda';
+        $content .= '</a>';
+        $content .= '</div>';
+
+        // Ma messagerie: 
+        $content .= '<div style="margin-bottom: 12px">';
+        $content .= '<a href="' . DOL_URL_ROOT . '/bimpmsg/index.php?fc=bal">';
+        $content .= BimpRender::renderIcon('fas_envelope-open-text', 'iconLeft') . 'Ma messagerie';
+        $content .= '</a>';
+        $content .= '</div>';
+
+        // Toutes mes tâches:
+        $content .= '<div style="margin-bottom: 12px">';
+        $content .= '<a href="' . DOL_URL_ROOT . '/bimpcore/index.php?fc=user&id=1&navtab-maintabs=tasks&navtab-tasks=my_tasks">';
+        $content .= BimpRender::renderIcon('fas_tasks', 'iconLeft') . 'Toutes mes tâches';
+        $content .= '</a>';
+        $content .= '</div>';
+
+        // Logout: 
+        $content .= '<div style="margin-top: 10px; text-align: center">';
+        $content .= '<a class="btn btn-danger" href="' . DOL_URL_ROOT . '/user/logout.php">';
+        $content .= BimpRender::renderIcon('fas_power-off', 'iconLeft') . 'Se déconnecter';
+        $content .= '</a>';
+        $content .= '</div>';
+
+        $content .= '</div>';
         $layout->top_account_html .= BimpRender::renderDropDownContent('userDropdown', $label, $content, array(
+                    'type'        => 'span',
                     'extra_class' => 'dropdown-profile modifDropdown'
         ));
     }

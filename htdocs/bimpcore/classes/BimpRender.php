@@ -269,26 +269,38 @@ class BimpRender
     {
         $params = BimpTools::overrideArray(array(
                     'extra_class' => '',
-                    'button'      => 0
+                    'type'        => 'a',
+                    'side'        => 'right'
                         ), $params);
         $html = '';
 
         $html .= '<div class="dropdown' . ($params['extra_class'] ? ' ' . $params['extra_class'] : '') . '">';
-        if ((int) $params['button']) {
-            $html .= '<span class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
-            $html .= $label_html;
-            $html .= '</span>';
-        } else {
-            $html .= '<a class="dropdown-toggle" href="#" id="' . $id . '" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
-            $html .= $label_html;
-            $html .= '</a>';
+
+        switch ($params['type']) {
+            case 'button':
+                $html .= '<span class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                $html .= $label_html;
+                $html .= '</span>';
+                break;
+
+            case 'span':
+                $html .= '<span class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                $html .= $label_html;
+                $html .= '</span>';
+                break;
+
+            case 'a':
+                $html .= '<a class="dropdown-toggle" href="#" id="' . $id . '" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                $html .= $label_html;
+                $html .= '</a>';
+                break;
         }
 
-        $html .= '<div class="dropdown-menu dropdown-menu-right" aria-labelledby="' . $id . '">';
+        $html .= '<div class="dropdown-menu dropdown-menu-' . $params['side'] . '" aria-labelledby="' . $id . '">';
         $html .= $content_html;
         $html .= '</div>';
         $html .= '</div>';
-        
+
         return $html;
     }
 

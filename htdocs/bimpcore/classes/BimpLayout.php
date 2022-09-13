@@ -212,6 +212,7 @@ class BimpLayout
 
         $html .= BimpRender::renderAjaxModal('page_modal', 'bimpModal');
         $html .= BimpRender::renderAjaxModal('docu_modal', 'docModal');
+        $html .= BimpRender::renderAjaxModal('alert_modal', 'alertModal');
 
         $html .= '<div id="openModalBtn" onclick="bimpModal.show();" class="closed bs-popover"';
         $html .= BimpRender::renderPopoverData('Afficher la fenêtre popup', 'left');

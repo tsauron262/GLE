@@ -298,7 +298,7 @@ class BimpCore
     {
         $versions = self::getConf('bimpcore_version');
 
-        if (!is_array($versions)) {
+        if (!is_array($versions) || empty($versions)) {
             if ((string) $versions) {
                 $versions = json_decode($versions, 1);
             }
@@ -339,10 +339,12 @@ class BimpCore
         }
 
         if ($update) {
-            $bdb->update('bimpcore_conf', array(
-                'value' => json_encode($versions)
-                    ), '`name` = \'bimpcore_version\' AND `module` = \'bimpcore\'');
-            self::$conf_cache['bimpcore']['bimpcore_version'] = json_encode($versions);
+            if (!empty($versions)) { // Pour éviter un écrasement... 
+                $bdb->update('bimpcore_conf', array(
+                    'value' => json_encode($versions)
+                        ), '`name` = \'bimpcore_version\' AND `module` = \'bimpcore\'');
+                self::$conf_cache['bimpcore']['bimpcore_version'] = json_encode($versions);
+            }
         }
 
         if ($dev) {
@@ -489,11 +491,6 @@ class BimpCore
 
 
         return $updates;
-    }
-
-    public static function setModuleVersion($module, $version)
-    {
-        
     }
 
     public static function isModuleActive($module)

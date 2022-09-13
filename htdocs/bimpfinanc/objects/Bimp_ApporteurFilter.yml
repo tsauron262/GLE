@@ -39,7 +39,7 @@ fields:
         label: Sur marge
         type: bool
     contact_apporteur:
-        label: Contact Apporteur configurée
+        label: Contact Apporteur configuré
         type: bool
         default_value: 1
     

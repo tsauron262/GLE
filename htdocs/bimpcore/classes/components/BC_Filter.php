@@ -130,7 +130,10 @@ class BC_Filter extends BimpComponent
             $this->is_default = true;
         }
 
-        $items = null;
+        
+        
+        $type_path = 'filters/' . $this->filter_name . '/type';
+        $this->params['type'] = $this->object->getConf($type_path, '');
 
         if (!is_null($this->bc_field)) {
             $field_params = $this->bc_field->params;
@@ -160,6 +163,8 @@ class BC_Filter extends BimpComponent
                 }
             }
         }
+        
+        
 
         if (is_null($this->params['type']) || !(string) $this->params['type']) {
             if (!is_null($this->bc_field)) {
@@ -259,7 +264,7 @@ class BC_Filter extends BimpComponent
                         }
                         $this->bc_field->value = $value;
                         $this->bc_field->no_html = true;
-                        $label = $this->bc_field->displayValue();
+                        $label = $this->bc_field->displayValue(true);
                     }
                 } else {
                     $label = $this->object->getCustomFilterValueLabel($this->filter_name, $value);

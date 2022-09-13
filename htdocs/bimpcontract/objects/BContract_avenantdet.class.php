@@ -48,6 +48,10 @@ class BContract_avenantdet extends BContract_avenant {
         }
     }
     
+    public function canCreate() {
+        return 1;
+    }
+    
     public function getCoup($display = true) {
         $html = '<strong>';
         $priceForOne = $this->getCurrentPriceForQty();

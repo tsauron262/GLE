@@ -2,10 +2,12 @@
     require_once __DIR__ . '/../../bimpcore/Bimp_Lib.php';
     require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_facture.class.php';
+    require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_factureFournisseur.class.php';
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_payInc.class.php';
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_paiement.class.php';
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_importPaiement.class.php';
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_deplacementPaiement.class.php';
+    require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_bordereauCHK.class.php';
     require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/functions/sizing.php';
     
     class export {
@@ -17,6 +19,8 @@
         private $TRA_payInc;
         private $TRA_paiement;
         private $TRA_importPaiement;
+        private $TRA_factureFournisseur;
+        private $TRA_bordereauCHK;
         private $dir = "/exportCegid/BY_DATE/";
         public $fails = Array();
         public $good = Array();
@@ -24,23 +28,54 @@
         public $tiers = Array();
         public $moment;
         public $rollBack = false;
+        public $excludeArrayScanDire = Array('..', '.', 'imported_auto', 'auto', 'rollback');
         
         function __construct($db) {
             $hier = new DateTime();
-            
             $this->moment = ((int)$hier->format('H') < 12) ? 'AM' : 'PM'; 
-            
             $this->yesterday = $hier->sub(new DateInterval("P1D"));
-
             $this->lastDateExported = new DateTime(BimpCore::getConf("last_export_date", null, "bimptocegid"));
             $this->bdb = new BimpDb($db);
             $this->TRA_facture = new TRA_facture($this->bdb, PATH_TMP . $this->dir . $this->getMyFile("tiers"));
+            $this->TRA_factureFournisseur = new TRA_factureFournisseur($this->bdb, PATH_TMP . $this->dir . $this->getMyFile("tiers"));
             $this->TRA_payInc = new TRA_payInc($this->bdb);
             $this->TRA_paiement = new TRA_paiement($this->bdb, PATH_TMP . $this->dir . $this->getMyFile("tiers"));
             $this->TRA_deplacementPaiement = new TRA_deplacementPaiement($this->bdb, PATH_TMP . $this->dir . $this->getMyFile("tiers"));
             $this->TRA_importPaiement = new TRA_importPaiement($this->bdb);
+            $this->TRA_bordereauCHK = new TRA_bordereauCHK($this->bdb);
         }
         
+        public function exportFactureFournisseur($ref = ''):void {
+            global $db;
+            $errors = Array();
+            switch($this->moment) {
+                case 'AM':
+                    $list = $this->bdb->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND (datec BETWEEN "'.$this->lastDateExported->format('Y-m-d').' 00:00:00" AND "'.$this->yesterday->format('Y-m-d').' 23:59:59" OR date_valid BETWEEN "'.$this->lastDateExported->format('Y-m-d').'" AND "'.$this->yesterday->format('Y-m-d').'")');
+                    break;
+                case 'PM':
+                    $toDay = new DateTime();
+                    $list = $this->bdb->getRows('facture_fourn', 'exported = 0 AND fk_statut IN(1,2) AND (datec BETWEEN "'.$toDay->format('Y-m-d').' 00:00:00" AND "'.$toDay->format('Y-m-d').' 23:59:59" OR date_valid BETWEEN "'.$toDay->format('Y-m-d').'" AND "'.$toDay->format('Y-m-d').'")');
+                    break;
+                default:
+                    $list = [];
+            }
+            $file = PATH_TMP . $this->dir . $this->getMyFile("achats");
+            if(count($list) > 0) {
+                foreach($list as $facture) {
+                    $instance= BimpCache::getBimpObjectInstance("bimpcommercial", "Bimp_FactureFourn", $facture->rowid);
+                    $ecriture .= $this->TRA_factureFournisseur->constructTra($instance);
+                    if($this->write_tra($ecriture, $file)) {
+                        $instance->updateField('exported', 1);
+                        $this->good['ACHATS'][$instance->getRef()]= "Ok dans le fichier TRA " . $file;
+                    } else {
+                        $this->fails['ACHATS'][$instance->getRef()] = "Non écrit dans le TRA " . $file;
+                    }
+                    $ecriture = "";
+                }
+            } else {
+                $this->warn['ACHATS']['bimptocegid'] = "Pas de nouvelles factures à exportés";
+            }
+        }
       
         public function exportFacture($ref = ""):void {
             global $db;
@@ -56,7 +91,7 @@
                 default:
                     $list = [];
             }
-                        
+                                    
             $file = PATH_TMP . $this->dir . $this->getMyFile("ventes");
             if(count($list) > 0) {
                 foreach($list as $facture) {
@@ -75,8 +110,6 @@
                                 $this->write_tra($ecriture_mdt, PATH_TMP . $this->dir . $this->getMyFile("mandats"));
                                 $ribANDmandat->passTo_exported($instance);
                             }
-
-
                         }  else {
                             $subject = "EXPORT COMPTA - RIB MANQUANT";
                             $msg = "La facture " . $instance->getNomUrl() . " a été exportée avec comme mode de règlement mandat de prélèvement SEPA mais n'a pas de RIB";
@@ -89,7 +122,7 @@
                         $instance->updateField('exported', 1);
                         $this->good['VENTES'][$instance->getRef()]= "Ok dans le fichier TRA " . $file;
                     } else {
-                        $this->fails['VENTES'][$instance->getRef()] = "Nom écrit dans le TRA " . $file;
+                        $this->fails['VENTES'][$instance->getRef()] = "Non écrit dans le TRA " . $file;
                     }
                     $ecriture = "";
                 }
@@ -98,11 +131,7 @@
                 $this->warn['VENTES']['bimptocegid'] = "Pas de nouvelles factures à exportés";
             }
         }
-        
-        public function exportFactureFournisseur($ref = ''):void {
-            
-        }
-        
+
         public function exportImportPaiement() {
 
             $instance = BimpCache::getBimpObjectInstance('bimpfinanc', 'Bimp_ImportPaiementLine');
@@ -145,6 +174,7 @@
                     if($this->bdb->getValue('c_paiement', 'code', 'id = ' . $paiement->getData('fk_paiement')) != 'NO_COM') {
                         if($this->write_tra($this->TRA_deplacementPaiement->constructTra($paiement, $datas), $file)) {
                             $this->good['DP'][$paiement->getRef()] = 'Ok dans le fichier ' . $file;
+                            $this->bdb->update('mvt_paiement', Array('traite' => 1), 'id = ' . $line->id);
                         } else {
                             $this->fails['DP'][$paiement->getRef()] = 'Erreur de déplacement de ce paiement';
                         }
@@ -158,7 +188,29 @@
             
         }
         
-        public function exportPaiement($ref = ''):void  {
+        public function exportBordereauxCHK($ref = '', $want = Array()) {
+            global $db;
+            $errors = [];
+            $file = PATH_TMP . $this->dir . $this->getMyFile('bordereauxCHK');
+            
+            $bordereaux = $this->bdb->getRows('bordereau_cheque', 'exported = 0');
+            
+            if(count($bordereaux) > 0) {
+                foreach($bordereaux as $bordereau) {
+                    
+                    $chks = $this->bdb->getRows('bank', 'fk_bordereau = ' . $bordereau->rowid);
+                    
+                    if($this->write_tra($this->TRA_bordereauCHK->constructTra($bordereau, $chks), $file)) {
+                        $this->bdb->update('bordereau_cheque', Array('exported' => 1), 'rowid = ' . $bordereau->rowid);
+                    }
+                    
+                }
+                
+            }
+                        
+        }
+        
+        public function exportPaiement($ref = '', $want = Array()):void  {
             global $db;
             $errors = [];
             $file = PATH_TMP . $this->dir . $this->getMyFile("paiements");
@@ -265,6 +317,7 @@
                 case 'mandats': $number  = 5; break;
                 case 'payni': $number  = 6; break;
                 case 'deplacementPaiements': $number = 7; break;
+                case 'bordereauxCHK': $number = 8;
             }
             
             return $number . "_" . $entitie ."_(" . strtoupper($type) . ")_" .$year . '-' . $month . '-' . $day . '-' . $this->moment . '_' . $version_tra . $extention;
@@ -296,6 +349,7 @@
             if(!is_dir($files_dir)) {
                 mkdir($files_dir, 0777, true);
                 mkdir($files_dir . "imported/", 0777, true);
+                mkdir($files_dir . "rollback/", 0777, true);
                 mkdir($files_dir, 0777, true);
             }
             
@@ -309,7 +363,8 @@
                 $this->getMyFile('ribs'),
                 $this->getMyFile('mandats'),
                 $this->getMyFile('payni'),
-                $this->getMyFile('deplacementPaiements')
+                $this->getMyFile('deplacementPaiements'),
+                $this->getMyFile('bordereauxCHK')
             );
                         
             foreach($files as $file) {
@@ -322,6 +377,7 @@
                     $this->warn['FILES'][$file] = 'Le fichier existe déjà';
                 }
             }
+            
         }
         
         protected function write_tra($ecriture, $file):bool {

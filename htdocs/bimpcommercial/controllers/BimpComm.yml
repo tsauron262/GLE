@@ -95,8 +95,6 @@ sections:
                                       callback: 
                                           method: renderBimpOjectDivers
                                           object: bimp_comm
-                                              
-                                  
                     - type: custom
                       custom: 
                           callback: 
@@ -104,7 +102,6 @@ sections:
                               object: bimp_comm
                               params:
                                   - 1
-                                  
                     - type: custom
                       custom: 
                           callback: 

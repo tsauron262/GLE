@@ -612,6 +612,8 @@ class BimpCore
         }
 
         self::$conf_cache[$module][$name] = $value;
+        
+        return $errors;
     }
 
     // Gestion params yml globaux: 
@@ -905,26 +907,32 @@ class BimpCore
         $where .= ' AND obj_name = \'' . $object->object_name . '\'';
         $where .= ' AND id_object = ' . $object->id;
 
-        $row = $bdb->getRow('bimpcore_object_lock', $where, array('tms', 'id_user'), 'array', 'tms', 'DESC');
+        for ($i = 0; $i < 10; $i++) {
+            if ($i > 0) {
+                sleep(1);
+            }
+            $row = $bdb->getRow('bimpcore_object_lock', $where, array('tms', 'id_user'), 'array', 'tms', 'DESC');
 
-        if (!is_null($row) && (int) $row['tms'] < time() - 720) {
-            // Si locké depuis + de 12 minutes
-            $bdb->update('bimpcore_object_lock', array(
-                'id_user' => $user->id,
-                'tms'     => time()
-                    ), $where);
-            return false;
-        }
+            if (!is_null($row) && (int) $row['tms'] < time() - 600) {
+                // Si locké depuis + de 12 minutes
+                $bdb->update('bimpcore_object_lock', array(
+                    'id_user' => $user->id,
+                    'tms'     => time()
+                        ), $where);
+                return false;
+            }
 
-        if (is_null($row)) {
-            $bdb->insert('bimpcore_object_lock', array(
-                'obj_module' => $object->module,
-                'obj_name'   => $object->object_name,
-                'id_object'  => $object->id,
-                'tms'        => time(),
-                'id_user'    => $user->id
-            ));
-            return false;
+            if (is_null($row)) {
+                global $bimp_object_locked_id;
+                $bimp_object_locked_id = $bdb->insert('bimpcore_object_lock', array(
+                    'obj_module' => $object->module,
+                    'obj_name'   => $object->object_name,
+                    'id_object'  => $object->id,
+                    'tms'        => time(),
+                    'id_user'    => $user->id
+                        ), true);
+                return false;
+            }
         }
 
         global $user;
@@ -934,13 +942,36 @@ class BimpCore
         if ((int) $user->id === (int) $row['id_user']) {
             $msg = 'Vous avez déjà lancé une opération sur ' . $object->getLabel('the') . ' ' . $object->getRef(true) . '<br/>';
             $msg .= 'Veuillez attendre que l\'opération en cours soit terminée avant de relancer l\'enregistrement.<br/>';
-            $msg .= 'Si vous êtes <b>sûr</b> de n\'avoir aucune opération en cours sur ' . $object->getLabel('this') . ', ';
-            $msg .= 'vous pouvez en forcer le dévérouillage en cliquant sur le bouton ci-dessous: ';
-            $msg .= '<div style="margin: 15px 0; text-align: center">';
-            $msg .= '<span class="btn btn-default" onclick="forceBimpObjectUnlock($(this), ' . $object->getJsObjectData() . ')">';
-            $msg .= 'Forcer le dévérouillage ' . $object->getLabel('of_the') . ' ' . $object->getRef(true);
-            $msg .= '</span>';
+            $msg .= '<b>Note: ceci est une protection volontaire pour éviter un écrasement de données. Il ne s\'agit pas d\'un bug</b>'; 
+
+            $diff = ((int) $row['tms'] + 720) - time();
+            $min = floor($diff / 60);
+            $secs = $diff - ($min * 60);
+
+            $msg .= '<div style="margin-top: 15px; font-weight: bold;">';
+            $msg .= 'Si l\'opération en cours sur ' . $object->getLabel('this') . ' a échoué (erreur fatale, problème réseau, etc.), ';
+            $msg .= 'le vérouillage sera automatiquement désactivé dans ';
+            $msg .= ($min ? $min . ' min. ' . ($secs ? 'et ' : '') : '') . ($secs ? $secs . ' sec.' : '');
             $msg .= '</div>';
+
+            if ($user->admin || (isset($object->allow_force_unlock) && $object->allow_force_unlock)) {
+                $msg .= '<div style="margin: 15px 0; text-align: center">';
+                if (!$user->admin) {
+                    $msg .= 'Si vous êtes sûr de n\'avoir aucune opération en cours, vous pouvez cliquer sur le bouton ci-dessous.<br/>';
+                    $msg .= 'Une fois fois le dévéroullage effectué, relancez l\'opération qui a été bloquée (en cliquant à nouveau sur le bouton "Enregistrer" ou "Valider")';
+                    $msg .= '<br/>';
+                }
+                
+                $msg .= '<span class="btn btn-default" onclick="forceBimpObjectUnlock($(this), ' . $object->getJsObjectData() . ')">';
+                
+                if ($user->admin) {
+                    $msg .= 'Forcer le dévérouillage (Admins seulement)';
+                } else {
+                    $msg .= 'Dévérouiller';
+                }
+                $msg .= '</span>';
+                $msg .= '</div>';
+            }
         } else {
             $lock_user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $row['id_user']);
 
@@ -950,9 +981,10 @@ class BimpCore
             }
             $msg .= '<br/>';
             $msg .= 'Il est nécessaire d\'attendre que celle-ci soit terminée pour éviter un conflit sur l\'enregistrement des données.<br/>';
-            $msg .= 'Merci de réessayer ultérieurement.<br/>';
+            $msg .= 'Merci d\'attendre une dizaine de secondes et de réessayer.<br/>';
             $msg .= '<b>Etant donné qu\'il est possible que les données de ' . $object->getLabel('this') . ' aient été modifiées, il est recommandé ';
-            $msg .= ' <a href="javascript:bimp_reloadPage()">d\'actualiser la page</a> avant de retenter l\'opération</b>';
+            $msg .= ' <a href="javascript:bimp_reloadPage()">d\'actualiser la page</a> avant de retenter l\'opération</b><br/><br/>';
+            $msg .= '<b>Note: ceci est une protection volontaire pour éviter un écrasement de données. Il ne s\'agit pas d\'un bug</b>'; 
         }
 
         return $msg;
@@ -991,6 +1023,16 @@ class BimpCore
         }
 
         return $errors;
+    }
+
+    public static function forceUnlockCurrentObject()
+    {
+        global $bimp_object_locked_id;
+
+        if ((int) $bimp_object_locked_id) {
+            $bdb = BimpCache::getBdb(true, -1, true);
+            $bdb->delete('bimpcore_object_lock', 'id = ' . $bimp_object_locked_id);
+        }
     }
 
     // Chargements librairies:

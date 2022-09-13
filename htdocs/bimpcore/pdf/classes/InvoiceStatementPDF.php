@@ -174,23 +174,27 @@ class InvoiceStatementPDF extends BimpDocumentPDF
                     $row['paiement'] = Bimp_Facture::$paiement_status[(int) $facture->getData('paiement_status')]['label'];
                 }
 
-                $id_contacts = $this->bimpDb->getValues('bl_commande_shipment', 'id_contact', 'id_facture = ' . $facture->id);
+                $id_BLS = $this->bimpDb->getValues('bl_commande_shipment', 'id', 'id_facture = ' . $facture->id);
 
-                if (is_array($id_contacts) && count($id_contacts) > 0) {
+                if (is_array($id_BLS) && count($id_BLS) > 0) {
                     $fl = true;
-                    foreach ($id_contacts as $id_contact) {
-                        if ($id_contact > 0) {
+                    foreach ($id_BLS as $id_BL) {
+                        if ($id_BL > 0) {
                             if (!$fl) {
                                 $row['livraison'] .= '<br/>';
                             } else {
                                 $fl = false;
                             }
-
-                            $socp = $this->bimpDb->getRow('socpeople', 'rowid = ' . $id_contact);
-                            if (!is_null($socp)) {
-                                $row['livraison'] .= ' - ' . $socp->lastname . ' ' . $socp->firstname;
-                            } else {
-                                $row['livraison'] .= ' - Contact #' . $id_contact . ' supprimé';
+                            
+                            $BL = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', $id_BL);
+                            $id_contact = $BL->getcontact();
+                            if($id_contact){
+                                $socp = $this->bimpDb->getRow('socpeople', 'rowid = ' . $id_contact);
+                                if (!is_null($socp)) {
+                                    $row['livraison'] .= ' - ' . $socp->lastname . ' ' . $socp->firstname;
+                                } else {
+                                    $row['livraison'] .= ' - Contact #' . $id_contact . ' supprimé';
+                                }
                             }
                         }
                     }
@@ -200,7 +204,7 @@ class InvoiceStatementPDF extends BimpDocumentPDF
 
                 $table->rows[] = $row;
             }
-
+            
             $table->write();
         }
     }

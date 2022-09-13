@@ -153,12 +153,22 @@ class Bimp_ImportPaiement extends BimpObject
     
     public static function toCompteAttente(){
         $return = array();
+        $yesterday = new DateTime();$yesterday->sub(new DateInterval('P1D'));
         $list = BimpCache::getBimpObjectObjects('bimpfinanc', 'Bimp_ImportPaiementLine', array('traite' => 0, 'type' => 'vir', 'num' => ''));
+        $dataMsg = array();
         foreach ($list as $payin){
-            $num = BimpTools::getNextRef('Bimp_ImportPaiementLine', 'num', 'PAYNI{AA}{MM}-', 5);
-            $payin->updateField('num', $num);
-            $return[] = array('num' => $num, 'amount' => $payin->getData('price'), 'date' => $payin->getData('date'), 'name' => $payin->getData('name'), 'id' => $payin->id);
+            $parent = $payin->getParentInstance();
+            $date = new DateTime($parent->getData('date_create'));
+            if($date->format('Y-m-d') <= $yesterday->format('Y-m-d')) {
+                $num = BimpTools::getNextRef('Bimp_ImportPaiementLine', 'num', 'PAYNI{AA}{MM}-', 5);
+                $payin->updateField('num', $num);
+                $return[] = array('num' => $num, 'amount' => $payin->getData('price'), 'date' => $payin->getData('date'), 'name' => $payin->getData('name'), 'id' => $payin->id);
+                $dataMsg[] = $payin->getData('date').' '.$payin->getData('name').' - '.$payin->getData('price').' €';
+            }
         }
+        if(count($dataMsg))
+            mailSyn2('Paiements non identifiés', 'CommerciauxBimp@bimp.fr, boutiquesbimp@bimp.fr', null, 'Bonjour,<br/><br/>Les paiements suivants n\'ont pu être identifiés :<br/><br/>'.implode('<br/>', $dataMsg).'<br/><br/>Si vous pensez savoir à quoi ils correspondent merci de bien vouloir en informer @Reglements Olys et @Recouvrement Olys<br/><br/>Votre aide permettra d\'éviter des recherches et des relances non justifiées');
+        
         return $return;
     }
 

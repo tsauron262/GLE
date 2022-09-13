@@ -486,6 +486,15 @@ class pdf_fi
                         case 6:
                             $type = "Déplacement vendu";
                             break;
+                        case 12:
+                            $type = "Intervention en atelier à facturer";
+                            break;
+                        case 13:
+                            $type = "Télémaintenance à facturer";
+                            break;
+                        case 14:
+                            $type = "Intervention sur site à facturer";
+                            break;
                         default:
                             $type = "Service en interne";
                             break;
@@ -569,6 +578,18 @@ class pdf_fi
                             $pareteze = "";
                             $price = "Sous contrat";
                         }
+                        
+                        $arrayAutre = Array(12,13,14);
+                        
+                        if(in_array($child->getData('type'), $arrayAutre)) {
+                            $servicePlus = BimpCache::getBimpObjectInstance("bimpcore", "Bimp_Product");
+                            $arrayCode = $child->getArrayServiceForBilling();
+                            if($servicePlus->find(array('ref' => $arrayCode[$child->getData('type')]))) {
+                                $pareteze = "(" . $servicePlus->getData('price') . "€HT/H)";
+                                $price = ($servicePlus->getData('price') * $qty) . "€";
+                            }
+                        }
+                        
                         if($child->getData('forfait') == 1 || $child->getData('type') == 0)
                             $pdf->Cell($W, 6, "", 1, 0, 'C', 1);
                         else {

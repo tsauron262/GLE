@@ -52,9 +52,11 @@ if (!$action) {
         'correct_tickets_serials'                   => 'Récupérer serials tickets depuis sujet',
         'convert_fi'                                => 'Convertir FI',
         'check_margin_commande'                     => 'Marge commande',
+        'check_margin_propal'                       => 'Marge propal',
         'convert_sql_field_for_items_braces'        => 'Convertir champ "Items_list" avec utilisation des crochets',
         'checkLinesEcheances'                       => 'Vérifier échéances produits limités',
         'maj_id_atradius'                           => 'Vérifier id atradius',
+        'repare_id_contrat_note'                    => 'Reparé id contat dans note'
     );
 
     $path = pathinfo(__FILE__);
@@ -82,6 +84,27 @@ switch ($action) {
         }
         print_r($warnings);
         break;
+    case 'repare_id_contrat_note':
+        global $db;
+        $warnings = array();
+        $sql = $db->query("SELECT * FROM `llx_bimpcore_note` WHERE `id_obj` = '7345' AND `content` LIKE 'Une facture a été créée automatiqueme%';");
+        while ($ln = $db->fetch_object($sql)) {
+            echo $ln->content;
+            $patern = '/^.*'.preg_quote('bimp8/contrat/card.php?id=', "/").'(\d+)".*$/';
+            if(preg_match($patern, $ln->content, $result))
+                echo $result[1].'|';
+            else
+                echo 'probléme'.$patern;
+            
+            echo '<br/>';
+            $db->query('UPDATE llx_bimpcore_note SET id_obj ="'.$result[1].'" WHERE id = '.$ln->id);
+            echo '<br/><br/><br/>';
+        }
+        print_r($warnings);
+        break;
+        
+        
+
     
     case 'secteur_facture_fourn_with_commande_fourn':
         global $db;
@@ -98,6 +121,15 @@ switch ($action) {
         while ($ln = $db->fetch_object($sql)) {
             $db->query("UPDATE llx_commandedet SET test = 1 WHERE fk_commande = " . $ln->rowid);
         }
+        break;
+    case 'check_margin_propal':
+        global $db;
+        $sql = $db->query('SELECT c.rowid, c.marge, SUM(cd.total_ht - (cd.buy_price_ht * cd.qty)) as margeCalc FROM llx_propal c LEFT JOIN llx_propaldet cd ON cd.`fk_propal` = c.`rowid` WHERE 1 GROUP BY c.rowid HAVING SUM(cd.total_ht - (cd.buy_price_ht * cd.qty)) - c.marge > 1 || SUM(cd.total_ht - (cd.buy_price_ht * cd.qty)) - c.marge < -1');
+
+        while ($ln = $db->fetch_object($sql)) {
+            $db->query("UPDATE llx_propaldet SET test = 1 WHERE fk_propal = " . $ln->rowid);
+        }
+        break;
 
     case 'check_limit_client':
         $errors = array();

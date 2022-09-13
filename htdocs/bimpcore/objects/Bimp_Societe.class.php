@@ -48,6 +48,8 @@ class Bimp_Societe extends BimpDolObject
         'Bourgogne-Centre' => array(62, 59, 80, 60, 2, 95, 78, 91, 77, 93, 75, 92, 94, 25, 39, 71, 58, 21, 89, 70, 37, 36, 18, 41, 28, 45, 50, 14, 61, 27, 76, 56, 22, 29, 35)
     );
     public static $anonymization_fields = array('nom', 'name_alias', 'address', 'zip', 'town', 'email', 'skype', 'url', 'phone', 'fax', 'siren', 'siret', 'ape', 'idprof4', 'idprof5', 'idprof6', 'tva_intra');
+    
+    private $debug = array();
 
 //    public $fieldsWithAddNoteOnUpdate = array('solvabilite_status');
 
@@ -103,7 +105,7 @@ class Bimp_Societe extends BimpDolObject
             case 'outstanding_limit_credit_check':
             case 'date_depot_icba':
             case 'date_atradius':
-                if ($user->admin || $user->rights->bimpcommercial->admin_recouvrement || $user->rights->bimpcommercial->admin_compta) {
+                if ($user->admin || $user->rights->bimpcommercial->admin_recouvrement || $user->rights->bimpcommercial->admin_compta || $user->rights->bimpcommercial->admin_financier) {
                     return 1;
                 }
                 return 0;
@@ -150,6 +152,8 @@ class Bimp_Societe extends BimpDolObject
         global $user;
 
         switch ($action) {
+            case 'deleteInCompta':
+                return ($user->id == 460) ? 1 : 0;
             case 'bulkEditField':
                 // admin_recouvrement: autorisé pour le champ "solvabilite_status"
                 return ($user->admin/* || $user->rights->bimpcommercial->admin_recouvrement */ ? 1 : 0);
@@ -484,6 +488,15 @@ class Bimp_Societe extends BimpDolObject
         $buttons = array();
 
         if ($this->isLoaded()) {
+            
+            if($this->canSetAction('deleteInCompta')) {
+                $buttons[] = array(
+                    'label'   => 'DeleteInCompta',
+                    'icon'    => 'fas_time',
+                    'onclick' => $this->getJsActionOnclick('deleteInCompta')
+                );
+            }
+            
             if ($this->can('edit') && $this->isEditable()) {
                 $buttons[] = array(
                     'label'   => 'Changer le logo',
@@ -1186,31 +1199,63 @@ class Bimp_Societe extends BimpDolObject
 
         return (int) BimpCore::getConf('societe_id_default_cond_reglement', 0);
     }
+    
+    public function getRemainToPay($true_value = false, $round = true, &$debug = ''){
+        $amount = 0;
+        $facts = BimpObject::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', array('fk_soc'=>$this->id, 'paye'=>0));
+        foreach($facts as $fact){
+            $value = $fact->getRemainToPay($true_value = false, $round = true);
+            $debug .= '<br/>Fact : '.$fact->getLink() . ' '. BimpTools::displayMoneyValue($value);
+            $amount += $value;
+        }
+        return $amount;
+    }
 
-    public function getEncours($withOtherSiret = true)
+    public function getEncours($withOtherSiret = true, &$debug = '')
     {
         $encours = 0;
-
+        $first = false;
+        if($debug == ''){
+            $debug = '<h3>Calcul de l\'encours client : '.$this->getLink().'</h3>';
+            $first = true;
+        }
         if ($withOtherSiret && $this->getData('siren') . 'x' != 'x' && strlen($this->getData('siren')) == 9) {
             $lists = BimpObject::getBimpObjectObjects($this->module, $this->object_name, array('siren' => $this->getData('siren')));
+                $debug .= '<br/>Autre clients<br/>';
             foreach ($lists as $idO => $obj) {
-                $encours += $obj->getEncours(false);
+                $encoursTmp = $obj->getEncours(false, $debug);
+                $debug .= $obj->getLink().' - '.$encoursTmp.'<br/>';
+                $encours += $encoursTmp;
             }
         } else {
-            $values = $this->dol_object->getOutstandingBills();
+//            $values = $this->dol_object->getOutstandingBills();
+//
+//            if (isset($values['opened'])) {
+//                $encours = $values['opened'];
+//            }
+            $encoursFact = $this->getRemainToPay(true, false, $debug);
 
-            if (isset($values['opened'])) {
-                $encours = $values['opened'];
-            }
-
-            $encours -= (float) $this->getTotalPaiementsInconnus();
-            $encours -= (float) $this->getAvailableDiscountsAmounts();
+            $encoursPAYNI = (float) $this->getTotalPaiementsInconnus();
+            $encoursDicsount = (float) $this->getAvailableDiscountsAmounts();
+            
+            
+            $encours = $encoursFact - $encoursPAYNI - $encoursDicsount;
+            
+            
+            $debug .= '<br/>Encours du client sur les factures impayée :'.BimpTools::displayMoneyValue($encoursFact);
+            $debug .= '<br/> - Paiment Inconue : '.BimpTools::displayMoneyValue($encoursPAYNI);
+            $debug .= '<br/> - Reduction dispo : '.BimpTools::displayMoneyValue($encoursDicsount);
         }
+        $debug .= '<br/> Total encours : '.BimpTools::displayMoneyValue($encours);
 
+        if($first){
+            $this->debug[] = $debug;
+            BimpDebug::addDebug('divers', 'Calcul de l\'encours', $debug, array('open'=>1)); 
+        }
         return $encours;
     }
 
-    public function getEncoursNonFacture($withOtherSiret = true)
+    public function getEncoursNonFacture($withOtherSiret = true, &$debug = '')
     {
         if (!$this->isLoaded()) {
             return 0;
@@ -1236,7 +1281,7 @@ class Bimp_Societe extends BimpDolObject
             }
         }
 
-        $sql = BimpTools::getSqlSelect(array('a.qty_modif', 'a.factures', 'det.qty', 'det.subprice', 'det.tva_tx', 'det.remise_percent'));
+        $sql = BimpTools::getSqlSelect(array('a.qty_modif', 'a.factures', 'det.qty', 'det.subprice', 'det.tva_tx', 'det.remise_percent', 'a.id_obj', 'a.position'));
         $sql .= BimpTools::getSqlFrom('bimp_commande_line', array(
                     'c'   => array(
                         'table' => 'commande',
@@ -1294,8 +1339,12 @@ class Bimp_Societe extends BimpDolObject
                         $pu -= ($pu * ($r['remise_percent'] / 100));
                     }
 
-//                    $pu *= (1 + ($r['tva_tx'] / 100));//PASSAGE EN HT
-                    $encours += (($full_qty - $qty_billed) * $pu);
+                    $pu *= (1 + ($r['tva_tx'] / 100));//PASSAGE EN TTC
+                    $totLn = (($full_qty - $qty_billed) * $pu);
+                    $encours += $totLn;
+                    
+                    if($totLn != 0)
+                    $debug .= '<br/>Commande : <a href="'.DOL_URL_ROOT.'/commande/card.php?id='.$r['id_obj'].'" target="_blanck">'.$r['id_obj'].'</a> ln : '.$r['position'].' ('.($full_qty - $qty_billed) .' X '. BimpTools::displayMoneyValue($pu) . ') = '.BimpTools::displayMoneyValue(($full_qty - $qty_billed) * $pu);
                 }
             }
         }
@@ -1303,7 +1352,7 @@ class Bimp_Societe extends BimpDolObject
         return $encours;
     }
 
-    public function getAllEncoursForSiret($with_commandes_non_facturees = false)
+    public function getAllEncoursForSiret($with_commandes_non_facturees = false, $details = false, &$debug = '')
     {
         $encours = array(
             'factures'  => array(
@@ -1331,7 +1380,7 @@ class Bimp_Societe extends BimpDolObject
             }
 
             if ($with_commandes_non_facturees) {
-                $value = $this->getEncoursNonFacture(false);
+                $value = $this->getEncoursNonFacture(false, $debug);
 
                 if ($value) {
                     $encours['commandes']['socs'][$this->id] += $value;
@@ -1378,6 +1427,27 @@ class Bimp_Societe extends BimpDolObject
         }
 
         return $encours;
+    }
+    
+    public static function getCommercialCsvValue($needed_fields = array()){
+        global $db;
+        
+        $list = static::getCommercialClients();
+        
+        if(isset($list[$needed_fields['rowid']]))
+            return implode("\n", $list[$needed_fields['rowid']]);
+        return '';
+    }
+    public static function getCodeClientNameCsvValue($needed_fields = array()){
+        return $needed_fields['code_client']. ' - '. $needed_fields['nom'];
+    }
+    
+    public static function getFull_addressCsvValue($needed_fields = array()){
+        return static::concatAdresse($needed_fields['address'], $needed_fields['zip'], $needed_fields['town'], $needed_fields['fk_dep'], $needed_fields['fk_pays']);
+    }
+    
+    public function displayCodeClientNom(){
+        return $this->getData('code_client').' - '.$this->getData('nom');
     }
 
     public static function getRegionCsvValue($needed_fields = array())
@@ -1442,7 +1512,7 @@ class Bimp_Societe extends BimpDolObject
         if ($this->isLoaded()) {
             global $conf;
 
-            $sql = 'SELECT r.rowid as id, r.description, r.amount_ttc as amount';
+            $sql = 'SELECT r.rowid as id, r.description, r.amount_ttc as amount, r.fk_facture';
             $sql .= ' FROM ' . MAIN_DB_PREFIX . 'societe_remise_except r';
             $sql .= ' WHERE r.entity = ' . $conf->entity;
             $sql .= ' AND r.discount_type = ' . ($is_fourn ? 1 : 0);
@@ -1459,9 +1529,16 @@ class Bimp_Societe extends BimpDolObject
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
                     $disabled_label = static::getDiscountUsedLabel((int) $r['id'], false, $allowed);
+                    
+                    $label = BimpTools::getRemiseExceptLabel($r['description']);
+                    if($r['fk_facture'] > 0){
+                        $fact = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $r['fk_facture']);
+                        $label .= ' '.$fact->getData('facnumber');
+                    }
+                    $label .= ' (' . BimpTools::displayMoneyValue((float) $r['amount'], '') . ' TTC)' . ($disabled_label ? ' - ' . $disabled_label : '');
 
                     $discounts[(int) $r['id']] = array(
-                        'label'    => BimpTools::getRemiseExceptLabel($r['description']) . ' (' . BimpTools::displayMoneyValue((float) $r['amount'], '') . ' TTC)' . ($disabled_label ? ' - ' . $disabled_label : ''),
+                        'label'    =>  $label,
                         'disabled' => ($disabled_label ? 1 : 0),
                         'data'     => array(
                             'amount_ttc' => (float) $r['amount']
@@ -1503,10 +1580,10 @@ class Bimp_Societe extends BimpDolObject
         return self::$effectifs_list;
     }
 
-    public function getCommerciauxArray($include_empty = false, $with_default = true)
+    public function getCommerciauxArray($include_empty = false, $with_default = true, $active_only = false)
     {
         if ($this->isLoaded()) {
-            return self::getSocieteCommerciauxArray($this->id, $include_empty, $with_default);
+            return self::getSocieteCommerciauxArray($this->id, $include_empty, $with_default, $active_only);
         }
 
         return array();
@@ -1552,10 +1629,8 @@ class Bimp_Societe extends BimpDolObject
 
         return '';
     }
-
-    public function displayCountry()
-    {
-        $id = (int) $this->getData('fk_pays');
+    
+    public static function staticDisplayCountry($id){
         if ($id) {
             $countries = BimpCache::getCountriesArray();
             if (isset($countries[$id])) {
@@ -1565,11 +1640,16 @@ class Bimp_Societe extends BimpDolObject
         return '';
     }
 
-    public function displayDepartement()
+    public function displayCountry($id = 0)
     {
-        $fk_dep = (int) $this->getData('fk_departement');
+        if(!$id)
+            $id = (int) $this->getData('fk_pays');
+        return self::staticDisplayCountry($id);
+    }
+    
+    public static function staticDisplayDepartement($fk_dep, $fk_pays){
         if ((int) $fk_dep) {
-            $deps = BimpCache::getStatesArray((int) $this->getData('fk_pays'));
+            $deps = BimpCache::getStatesArray((int) $fk_pays);
             if (isset($deps[$fk_dep])) {
                 return $deps[$fk_dep];
             }
@@ -1577,36 +1657,45 @@ class Bimp_Societe extends BimpDolObject
         return '';
     }
 
-    public function displayFullAddress($icon = false, $single_line = false)
+    public function displayDepartement($fk_dep = 0, $fk_pays = 0)
     {
+        if(!$fk_dep)
+            $fk_dep = (int) $this->getData('fk_departement');
+        if(!$fk_pays)
+            $fk_pays = (int) $this->getData('fk_pays');
+        return static::staticDisplayDepartement($fk_dep, $fk_pays);
+    }
+    
+    public static function concatAdresse($address, $zip, $town, $fk_dep = 0, $fk_pays = 0, $icon = false, $single_line = false){
+        
         $html = '';
 
-        if ($this->getData('address')) {
-            $html .= $this->getData('address') . ($single_line ? ' - ' : '<br/>');
+        if ($address) {
+            $html .= $address . ($single_line ? ' - ' : '<br/>');
         }
 
-        if ($this->getData('zip')) {
-            $html .= $this->getData('zip');
+        if ($zip) {
+            $html .= $zip;
 
-            if ($this->getData('town')) {
-                $html .= ' ' . $this->getData('town');
+            if ($town) {
+                $html .= ' ' . $town;
             }
             $html .= ($single_line ? '' : '<br/>');
-        } elseif ($this->getData('town')) {
-            $html .= $this->getData('town') . ($single_line ? '' : '<br/>');
+        } elseif ($town) {
+            $html .= $town . ($single_line ? '' : '<br/>');
         }
 
-        if (!$single_line && $this->getData('fk_departement')) {
-            $html .= $this->displayDepartement();
+        if (!$single_line && $fk_dep) {
+            $html .= static::staticDisplayDepartement($fk_dep, $fk_pays);
 
-            if ($this->getData('fk_pays')) {
-                $html .= ' - ' . $this->displayCountry();
+            if ($fk_pays) {
+                $html .= ' - ' . static::staticDisplayCountry($fk_pays);
             }
-        } elseif ($this->getData('fk_pays')) {
+        } elseif ($fk_pays) {
             if ($single_line) {
                 $html .= ' - ';
             }
-            $html .= $this->displayCountry();
+            $html .= static::staticDisplayCountry($fk_pays);
         }
 
         if ($html && $icon) {
@@ -1614,6 +1703,11 @@ class Bimp_Societe extends BimpDolObject
         }
 
         return $html;
+    }
+
+    public function displayFullAddress($icon = false, $single_line = false)
+    {
+        return static::concatAdresse($this->getData('address'), $this->getData('zip'), $this->getData('town'), $this->getData('fk_departement'), $this->getData('fk_pays'), $icon, $single_line);
     }
 
     public function displayFullContactInfos($icon = true, $single_line = false)
@@ -1801,14 +1895,21 @@ class Bimp_Societe extends BimpDolObject
 
         return 'nc';
     }
+    
+    public function displayEncoursDetail()
+    {
+        $this->displayEncoursNonFacture();
+        return implode($this->debug, '<br/><br/>');
+    }
 
     public function displayEncoursNonFacture()
     {
         if (!$this->isLoaded()) {
             return '';
         }
+        $debug = '';
 
-        $encours = $this->getAllEncoursForSiret(true);
+        $encours = $this->getAllEncoursForSiret(true, false, $debug);
 
         $html .= BimpTools::displayMoneyValue($encours['commandes']['socs'][$this->id]);
 
@@ -1840,6 +1941,9 @@ class Bimp_Societe extends BimpDolObject
         if ($encours['commandes']['total'] && $encours['factures']['total']) {
             $html .= '<br/><b>Total encours</b> : ' . BimpTools::displayMoneyValue($encours['total']);
         }
+        
+        $this->debug[] = $debug;
+        BimpDebug::addDebug('divers', 'Calcul de l\'encours sur les commandes', $debug, array('open'=>1)); 
 
         return $html;
     }
@@ -3185,6 +3289,21 @@ class Bimp_Societe extends BimpDolObject
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
+        );
+    }
+    
+    public function actionDeleteInCompta($data, &$success) {
+        $errors = Array();
+        $warnings = Array();
+        
+        $errors = $this->updateField('code_compta', '');
+        $errors = BimpTools::merge_array($errors, $this->updateField('code_compta_fournisseur', ''));
+        $errors = BimpTools::merge_array($errors, $this->updateField('exported', 0));
+        
+        return Array(
+            'errors' => $errors,
+            'warnings' => $wawrnings,
+            'success' => $success
         );
     }
 

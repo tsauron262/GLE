@@ -1,0 +1,1 @@
+INSERT INTO `llx_const` (`rowid`, `name`, `entity`, `value`, `type`, `visible`, `note`) VALUES (NULL, 'MAIN_MODULE_BIMPCONTRACT_MODELS', '1', '1', 'chaine', '0', NULL);

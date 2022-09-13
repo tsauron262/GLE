@@ -1,0 +1,1 @@
+ALTER TABLE llx_societe ADD `id_contact_shipment` int(11) NOT NULL DEFAULT 0;

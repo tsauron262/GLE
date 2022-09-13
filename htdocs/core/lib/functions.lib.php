@@ -1017,7 +1017,7 @@ function dol_strtoupper($utf8_string)
  *  @param	string		$restricttologhandler	Output log only for this log handler
  *  @return	void
  */
-function dol_syslog($message, $level = LOG_INFO, $ident = 0, $suffixinfilename='', $restricttologhandler='')
+function dol_syslog($message, $level = LOG_INFO, $ident = 0, $suffixinfilename='', $restricttologhandler='', $backTrace = true)
 {
 	global $conf, $user;
 
@@ -1027,7 +1027,7 @@ function dol_syslog($message, $level = LOG_INFO, $ident = 0, $suffixinfilename='
         
         /*mod drsi*/
         if(! empty($message)){
-            if(function_exists("synGetDebug"))
+            if(function_exists("synGetDebug") && $backTrace)
                 $message .= synGetDebug();
             if(stripos($message, "deprecated") !== false){
                 $suffixinfilename = "_deprecated";

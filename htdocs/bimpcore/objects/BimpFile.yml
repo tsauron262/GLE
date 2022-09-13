@@ -101,6 +101,12 @@ fields:
         label: Suppression autorisée
         type: bool
         default_value: 1
+        
+    in_emails: 
+        label: Inclure aux envois par e-mail des pièces commerciales liées (devis / commandes / factures)
+        type: bool
+        default_value: 0
+        user_edit: 1
           
 forms:
     upload: 
@@ -132,6 +138,8 @@ forms:
                 data_type: bool
                 input: 
                     type: toggle
+            in_mails: 
+                field: in_emails
                   
     public_upload: 
         extends: upload
@@ -156,6 +164,7 @@ forms:
             - field: visibility
               edit:
                   callback: currentContext
+            - field: in_emails
       
 filters_panels: 
     global: 
@@ -215,7 +224,10 @@ lists:
             file_size: 
             date_create:
             description:
-            visibility:                    
+            visibility:      
+            in_emails: 
+                label: Incl. dans e-mails
+                edit: 1
         
     globale:
         title: Tous les Fichiers

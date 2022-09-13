@@ -98,6 +98,7 @@ fields_tables:
               edit: 1
             - field: date_atradius
               edit: 1
+            - field: date_demande_atradius
             - label: Mettre à jour assurance Atradius
               value: 
                   callback: displayFormAtradius

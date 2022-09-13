@@ -16,6 +16,7 @@
         public $caisse;
         private $TRA_tiers;
         public $rapportTier;
+        protected $compteCheque = '51124000';
         
         
         function __construct($bimp_db, $tiers_file) { 
@@ -52,7 +53,7 @@
             
             $codeJournalByModeReglementFrom = [
                 'LIQ'       => $entrepotFrom->code_journal_compta,
-                'CHQ'       => $entrepotFrom->code_journal_compta,
+                'CHQ'       => $this->compteCheque,
                 'CB'        => $entrepotFrom->code_journal_compta,
                 'AE'        => $entrepotFrom->code_journal_compta,
                 'VIR'       => $compte_bancaire->cegid_journal,
@@ -66,7 +67,7 @@
             
             $compteByModeReglementFrom = [
                 'LIQ'       => $entrepotFrom->compte_comptable,
-                'CHQ'       => $entrepotFrom->compte_comptable_banque,
+                'CHQ'       => $this->compteCheque,
                 'CB'        => $entrepotFrom->compte_comptable_banque,
                 'AE'        => $entrepotFrom->compte_comptable_banque,
                 'VIR'       => $compte_bancaire->compte_compta,
@@ -80,7 +81,7 @@
 
             $codeJournalByModeReglementTo = [
                 'LIQ'       => $entrepotTo->code_journal_compta,
-                'CHQ'       => $entrepotTo->code_journal_compta,
+                'CHQ'       => $this->compteCheque,
                 'CB'        => $entrepotTo->code_journal_compta,
                 'AE'        => $entrepotTo->code_journal_compta,
                 'VIR'       => $compte_bancaire->cegid_journal,
@@ -94,7 +95,7 @@
             
             $compteByModeReglementTo = [
                 'LIQ'       => $entrepotTo->compte_comptable,
-                'CHQ'       => $entrepotTo->compte_comptable_banque,
+                'CHQ'       => $this->compteCheque,
                 'CB'        => $entrepotTo->compte_comptable_banque,
                 'AE'        => $entrepotTo->compte_comptable_banque,
                 'VIR'       => $compte_bancaire->compte_compta,

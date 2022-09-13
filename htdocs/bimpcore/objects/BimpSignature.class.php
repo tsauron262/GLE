@@ -42,6 +42,14 @@ class BimpSignature extends BimpObject
         self::TYPE_ELEC           => array('label' => 'Signature électronique', 'icon' => 'fas_file-signature'),
         self::TYPE_PAPIER_NO_SCAN => array('label' => 'Signature papier sans document scanné', 'icon' => 'fas_file-contract')
     );
+
+    const DIST_STANDARD = 0;
+    const DIST_DOCUSIGN = 1;
+
+    public static $distTypes = array(
+        self::DIST_STANDARD => 'Standard',
+        self::DIST_DOCUSIGN => 'DocuSign'
+    );
     public static $empty_base_64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyYAAAFeCAYAAABw2Qu3AAAEXElEQVR4nO3BAQEAAACCIP+vbkhAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMC7ATotAAEPLajTAAAAAElFTkSuQmCC';
 
     // Droits users:
@@ -162,6 +170,7 @@ class BimpSignature extends BimpObject
             case 'signDist':
             case 'signElec':
             case 'sendSmsCode':
+            case 'signDocuSign':
                 if ((int) $this->getData('signed')) {
                     $errors[] = 'Signature déjà effectuée';
                     return 0;
@@ -182,15 +191,22 @@ class BimpSignature extends BimpObject
                     case 'signDistAccess':
                     case 'signDist':
                     case 'sendSmsCode':
-                        if (!(int) $this->getData('allow_dist')) {
+                        if (!(int) $this->getData('allow_dist') or!(int) $this->getData('dist_type') == self::DIST_STANDARD) {
                             $errors[] = 'Signature à distance non autorisée pour cette signature';
                             return 0;
                         }
                         break;
 
                     case 'signElec':
-                        if (!(int) $this->getData('allow_elec')) {
+                        if (!(int) $this->getData('allow_elec') or!(int) $this->getData('dist_type') == self::DIST_STANDARD) {
                             $errors[] = 'Signature éléctronique non autorisée pour cette signature';
+                            return 0;
+                        }
+                        break;
+
+                    case 'signDocuSign':
+                        if (!(int) $this->getData('allow_elec') or!(int) $this->getData('dist_type') == self::DIST_DOCUSIGN) {
+                            $errors[] = 'Cette signature n\'est pas du type "DocuSign"';
                             return 0;
                         }
                         break;
@@ -329,6 +345,23 @@ class BimpSignature extends BimpObject
                 ))
             );
         }
+
+        if ($this->isActionAllowed('signDocuSign') && $this->canSetAction('signDocuSign')) {
+            $buttons[] = array(
+                'label'   => 'Signature DocuSign',
+                'icon'    => 'fas_paper-plane',
+                'onclick' => $this->getJsActionOnclick('signDocuSign', array(), array(
+                    'form_name' => 'sign_docu_sign'
+                ))
+            );
+
+            $buttons[] = array(
+                'label'   => 'MAJ DocuSign',
+                'icon'    => 'refresh',
+                'onclick' => $this->getJsActionOnclick('refreshDocuSign')
+            );
+        }
+
 
         if ($this->isActionAllowed('signPapierNoScan') && $this->canSetAction('signPapierNoScan')) {
             $buttons[] = array(
@@ -559,6 +592,17 @@ class BimpSignature extends BimpObject
         return '';
     }
 
+    public function getDefaultContactInfo($field)
+    {
+
+        $contact = $this->getChildObject('contact');
+        if (BimpObject::objectLoaded($contact)) {
+            return $contact->getData($field);
+        }
+
+        return '';
+    }
+
     public static function getDefaultSignDistEmailContent()
     {
         $message = 'Bonjour, <br/><br/>';
@@ -698,20 +742,21 @@ class BimpSignature extends BimpObject
         );
     }
 
-    public function getCommercialEmail()
+    public function getCommercialEmail(&$use_as_from = false)
     {
         $obj = $this->getObj();
 
         $errors = array();
         if ($this->isObjectValid($errors, $obj)) {
             if (method_exists($obj, 'getSignatureCommercialEmail')) {
-                return $obj->getSignatureCommercialEmail($this->getData('doc_type'));
+                return $obj->getSignatureCommercialEmail($this->getData('doc_type'), $use_as_from);
             }
         }
 
         $client = $this->getChildObject('client');
 
         if (BimpObject::objectLoaded($client)) {
+            $use_as_from = false;
             return $client->getCommercialEmail(false);
         }
 
@@ -1452,7 +1497,8 @@ class BimpSignature extends BimpObject
                         }
 
                         if ($emails) {
-                            $comm_email = BimpTools::cleanEmailsStr($this->getCommercialEmail());
+                            $use_comm_email_as_from = false;
+                            $comm_email = BimpTools::cleanEmailsStr($this->getCommercialEmail($use_comm_email_as_from));
                             $doc_label = $this->displayDocType() . ' ' . $this->displayDocRef();
                             $subject = 'Signature en attente - Document: ' . $doc_label;
 
@@ -1474,7 +1520,8 @@ class BimpSignature extends BimpObject
                                 '<a href="' . $url . '">espace client LDLC Apple</a>'
                                     ), $email_content);
 
-                            $bimpMail = new BimpMail($this->getObj(), $subject, BimpTools::cleanEmailsStr($emails), '', $email_content, $comm_email);
+                            $from = ($use_comm_email_as_from ? $comm_email : '');
+                            $bimpMail = new BimpMail($this->getObj(), $subject, BimpTools::cleanEmailsStr($emails), $from, $email_content, $comm_email);
 
                             $filePath = $this->getDocumentFilePath();
                             $fileName = $this->getDocumentFileName();
@@ -1635,7 +1682,8 @@ class BimpSignature extends BimpObject
             if (!$emails) {
                 $errors[] = 'Aucune adresse e-mail valide pour envoi de la relance';
             } else {
-                $commercial_email = $this->getCommercialEmail();
+                $use_comm_email_as_from = false;
+                $commercial_email = $this->getCommercialEmail($use_comm_email_as_from);
                 $date_open = $this->getData('date_open');
                 $doc_label = $this->displayDocType() . ' ' . $this->displayDocRef();
                 $url = self::getPublicBaseUrl(false);
@@ -1654,7 +1702,16 @@ class BimpSignature extends BimpObject
                 $filePath = $this->getDocumentFilePath();
                 $fileName = $this->getDocumentFileName();
 
-                $bimpMail = new BimpMail($this->getObj(), $subject, $emails, '', $msg, $commercial_email, $commercial_email);
+                $from = ($use_comm_email_as_from ? $commercial_email : '');
+                
+                $obj = $this->getObj();
+                if (is_a($obj, 'Bimp_Propal')) {
+                    $sav = $obj->getSav();
+                    if (BimpObject::objectLoaded($sav)) {
+                        $obj = $sav;
+                    }
+                }
+                $bimpMail = new BimpMail($obj, $subject, $emails, $from, $msg, $commercial_email, $commercial_email);
 
                 if (file_exists($filePath)) {
                     $bimpMail->addFile(array($filePath, 'application/pdf', $fileName));
@@ -1700,6 +1757,45 @@ class BimpSignature extends BimpObject
                 }
             }
         }
+    }
+
+    public function refreshDocuSign(&$errors = array(), &$warnings = array(), &$success = '')
+    {
+
+        $id_account = $this->getData('id_account_docu_sign');
+        $id_envelope = $this->getData('id_envelope_docu_sign');
+
+        if (!$id_account)
+            $user = 'ID du compte utilisateur DocuSign absent';
+        if (!$id_envelope)
+            $user = 'ID de l\'envelope DocuSign absent';
+
+        require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+        $api = BimpAPI::getApiInstance('docusign');
+        if (!is_a($api, 'DocusignAPI'))
+            $errors[] = 'ID de l\'API absent';
+
+        if (!count($errors)) {
+            $params = array(
+                'id_account'  => $id_account,
+                'id_envelope' => $id_envelope,
+            );
+            $envelope = $api->getEnvelope($params, $errors, $warnings);
+
+            if (!count($errors)) {
+                if (isset($envelope['completedDateTime'])) {
+                    $date_sign = new DateTime($envelope['completedDateTime']);
+                    date_timezone_set($date_sign, timezone_open('Europe/Paris'));
+                    $success .= "Document signé le " . (string) $date_sign->format('d/m/Y \à H:i:s') . '<br/>';
+                    $this->set('date_signed', (string) $date_sign->format('d/m/Y \à H:i:s'));
+                    $this->set('signed', 1);
+                    $errors = $this->update();
+                } else
+                    $warnings[] = 'L\'enveloppe n\'a pas encore été signée';
+            }
+        }
+
+        return count($errors);
     }
 
     // Actions: 
@@ -1886,7 +1982,7 @@ class BimpSignature extends BimpObject
             if (BimpObject::objectLoaded($client)) {
                 if ($client->isCompany()) {
                     if (!$fonction) {
-                        $errors[] = 'Veuillez saisir la fonction du signatraire';
+                        $errors[] = 'Veuillez saisir la fonction du signataire';
                     }
                 }
             }
@@ -1918,9 +2014,142 @@ class BimpSignature extends BimpObject
                         $warnings = array_merge($warnings, $obj->onSigned($this, $data));
                     }
 
-//                    $this->sendOnSignedCommercialEmail();
+                    //                    $this->sendOnSignedCommercialEmail();
                 }
             }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
+
+    public function actionSignDocuSign($data, &$success)
+    {
+        global $user;
+        $errors = array();
+        $warnings = array();
+        $success = 'Signature électronique effectuée avec succès';
+        $success_callback = '';
+
+        $obj = $this->getObj();
+
+        if ($this->isObjectValid($errors, $obj)) {
+            $nom_client = BimpTools::getArrayValueFromPath($data, 'nom_signataire', '');
+            $prenom_client = BimpTools::getArrayValueFromPath($data, 'prenom_signataire', '');
+            $fonction_client = BimpTools::getArrayValueFromPath($data, 'fonction_signataire', '');
+            $email_client = BimpTools::getArrayValueFromPath($data, 'email_signataire', '');
+
+            if (!$nom_client) {
+                $errors[] = 'Veuillez saisir le nom du signataire';
+            }
+
+            if (!$prenom_client) {
+                $errors[] = 'Veuillez saisir le prénom du signataire';
+            }
+
+            if (!$email_client) {
+                $errors[] = 'Veuillez saisir l\'adresse e-mail du signataire';
+            }
+
+            $client = $this->getChildObject('client');
+
+            if (BimpObject::objectLoaded($client)) {
+                if ($client->isCompany()) {
+                    if (!$fonction_client) {
+                        $errors[] = 'Veuillez saisir la fonction du signataire';
+                    }
+                }
+            } else {
+                $errors[] = 'ID du client absent';
+            }
+
+            $comm = $this->getInstance('bimpcore', 'Bimp_User', (int) $user->id);
+            if (BimpObject::objectLoaded($comm)) {
+                $nom_comm = $comm->getData('lastname');
+                $prenom_comm = $comm->getData('firstname');
+                $email_comm = $comm->getData('email');
+                $fonction_comm = $comm->getData('job');
+
+                if (!$nom_comm) {
+                    $errors[] = 'Nom de l\'utilisateur courant absent';
+                }
+
+                if (!$prenom_comm) {
+                    $errors[] = 'Prénom de l\'utilisateur courant absent';
+                }
+
+                if (!$email_comm) {
+                    $errors[] = 'Email de l\'utilisateur courant absent';
+                }
+
+                if (!$fonction_comm) {
+                    $errors[] = 'Fonction de l\'utilisateur courant absent';
+                }
+            } else {
+                $errors[] = 'ID de l\'utilisateur courant absent';
+            }
+
+
+            if (!count($errors)) {
+
+                require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+                $api = BimpAPI::getApiInstance('docusign');
+                if (is_a($api, 'DocusignAPI')) {
+
+                    $dir = $obj->getSignatureDocFileDir($this->getData('doc_type'));
+                    $file_name = $obj->getSignatureDocFileName($this->getData('doc_type'), (int) $this->getData('signed'));
+                    $file = $dir . $file_name;
+
+                    $params = array(
+                        'file'   => $file,
+                        'client' => array(
+                            'nom'      => $nom_client,
+                            'prenom'   => $prenom_client,
+                            'fonction' => $fonction_client,
+                            'email'    => $email_client
+                        ),
+                        'comm'   => array(
+                            'nom'      => $nom_comm,
+                            'prenom'   => $prenom_comm,
+                            'fonction' => $fonction_comm,
+                            'email'    => $email_comm
+                        )
+                    );
+                    $envelope = $api->createEnvelope($params, $obj, $errors, $warnings);
+
+                    if (!count($errors) and!count($warnings)) {
+                        $this->set('nom_signataire', $prenom_client . ' ' . $nom_client);
+                        $this->set('fonction_signataire', $fonction_client);
+                        $this->set('email_signataire', $email_client);
+                        $this->set('id_envelope_docu_sign', $envelope['envelopeId']);
+                        $this->set('id_account_docu_sign', $comm->getData('id_docusign'));
+                        $this->update($warnings);
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
+
+    public function actionRefreshDocuSign($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $success_callback = '';
+
+        $obj = $this->getObj();
+
+        if ($this->isObjectValid($errors, $obj)) {
+            $this->refreshDocuSign($errors, $warnings, $success);
         }
 
         return array(

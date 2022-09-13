@@ -309,7 +309,10 @@ class BimpController
 
     public function onExit()
     {
+        BimpCore::forceUnlockCurrentObject();
         $error = error_get_last();
+        // On cache les identifiants de la base
+        $error = preg_replace('/mysqli->real_connect(.*)3306/', 'mysqli->real_connect(adresse_caché, login_caché, mdp_caché, bdd_caché, port_caché', $error);
 
         if (isset($error['type']) && in_array($error['type'], array(E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR))) {
             $this->handleError(E_ERROR, $error['message'], $error['file'], $error['line']);
@@ -379,6 +382,14 @@ class BimpController
 
     public function displayFooter()
     {
+
+        $alert = BimpObject::getBimpObjectInstance('bimpcore', 'BimpAlert');
+        echo $alert::getMsgs();
+
+        $obj = $alert->getNextAlert();
+        if ($obj)
+            echo '<script>$(document).ready(function () {' . $alert->getPopup($obj->id, $obj->getData('label')) . '});</script>';
+
         llxFooter();
     }
 
@@ -727,7 +738,35 @@ class BimpController
 
     public static function renderBaseModals()
     {
-        
+        $html = '';
+
+        $html .= BimpRender::renderAjaxModal('page_modal', 'bimpModal');
+        $html .= BimpRender::renderAjaxModal('docu_modal', 'docModal');
+        $html .= BimpRender::renderAjaxModal('alert_modal', 'alertModal');
+
+        $html .= '<div id="openModalBtn" onclick="bimpModal.show();" class="closed bs-popover"';
+        $html .= BimpRender::renderPopoverData('Afficher la fenêtre popup', 'left');
+        $html .= ' data-modal_id="page_modal">';
+        $html .= BimpRender::renderIcon('far_window-restore');
+        $html .= '</div>';
+
+        if (BimpDebug::isActive()) {
+            BimpDebug::addDebugTime('Fin affichage page');
+
+            $html .= BimpRender::renderAjaxModal('debug_modal', 'BimpDebugModal');
+
+            $html .= '<div id="openDebugModalBtn" onclick="BimpDebugModal.show();" class="closed bs-popover"';
+            $html .= BimpRender::renderPopoverData('Afficher la fenêtre debug', 'right');
+            $html .= ' data-modal_id="debug_modal">';
+            $html .= BimpRender::renderIcon('fas_info-circle');
+            $html .= '</div>';
+
+            $html .= '<div id="bimp_page_debug_content" style="display: none">';
+            $html .= BimpDebug::renderDebug();
+            $html .= '</div>';
+        }
+
+        return $html;
     }
 
     // Traitements Ajax:
@@ -1281,7 +1320,7 @@ class BimpController
                         $del_warnings = array();
                         $del_errors = $instance->delete($del_warnings);
                         if (!is_array($del_errors)) {
-                            BimpCore::addlog('Retour d\'erreurs invalide pour la fonction delete()', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $instance);
+                            BimpCore::addlog('Retour d\'erreurs invalide pour la fonction delete() : '.print_r($del_errors), Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', $instance);
                         } elseif (count($del_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($del_errors, 'Echec de la suppression ' . $instance->getLabel('of_the') . ' d\'ID ' . $id_object);
                         }
@@ -3086,6 +3125,20 @@ class BimpController
             $html = $BimpDocumentation->getDoc();
         else
             $html = $BimpDocumentation->displayDoc();
+
+        return array(
+            'errors'     => $BimpDocumentation->errors,
+            'warnings'   => $BimpDocumentation->warnings,
+            'html'       => $html,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        );
+    }
+
+    protected function ajaxProcessLoadAlertModal()
+    {
+        $obj = BimpCache::getBimpObjectInstance('bimpcore', 'BimpAlert', $_REQUEST['id']);
+
+        $html = $obj->getMsg();
 
         return array(
             'errors'     => $BimpDocumentation->errors,

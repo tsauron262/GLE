@@ -2,6 +2,7 @@
 //
 
 require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_factureFournisseur.class.php';
+require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_bordereauCHK.class.php';
 require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_payInc.class.php';
 require_once DOL_DOCUMENT_ROOT . '/bimptocegid/objects/TRA_importPaiement.class.php';
 require_once DOL_DOCUMENT_ROOT . '/bimptocegid/class/export.class.php';
@@ -13,17 +14,20 @@ class newExportController extends BimpController {
         global $db, $user;
         $u = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $user->id);
         $bdd = new BimpDb($db);
-//        $tra = new TRA_factureFournisseur(new BimpDb($db),  PATH_TMP . $this->dir . 'tiers.tra');
+        $tra = new TRA_bordereauCHK(new BimpDb($db));
 //
         $html = '';
         
         $html .= '<h2 style=\'color:orange;\' >BIMP<sup style=\'color:grey\'>export comptable</sup></h2>';
 //        
-//        $html .= '<pre>';
-//        
-//        $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', 15420);
-//        
-//        $html .= $tra->constructTra($facture);
+        $html .= '<pre>';
+//      
+        $bordereau = null;
+        $cheques      = null;
+//      
+        $export = new export($db);
+        
+        $html .= $export->exportBordereauxCHK();
         
         if($_GET['PAYNI']) {
             $tra_constructor = new TRA_payInc($bdd);

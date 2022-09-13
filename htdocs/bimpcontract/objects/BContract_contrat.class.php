@@ -6,14 +6,28 @@ require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
 require_once DOL_DOCUMENT_ROOT . '/user/class/usergroup.class.php';
 require_once DOL_DOCUMENT_ROOT . '/bimptechnique/objects/BT_ficheInter.class.php';
 
-class BContract_contrat extends BimpDolObject
+    /*
+     * *** Mémo ajout signature pour un objet: ***
+
+     * - Gérer l'enregistrement des paramètres de position de la signature sur le PDF au moment de sa génération (Si besoin) / ou régler par défaut pour les PDF fixes
+     * - Intégrer selon le context: marqueur signé (champ booléen ou statut) / indicateur signature dans l'en-tête / etc. 
+     * - Gérer Annulation signature si besoin
+     * - Gérer Duplication / Révision / Etc. 
+     * - Gérer la visualisation du docuement sur l'interface publique (bimpinterfaceclient > docController) 
+     * - Gérer le droit canClientView() pour la visualisation du document sur l'espace public. 
+     */
+
+class BContract_contrat extends BimpDolObject 
 {
 
     //public $redirectMode = 4;
     public static $email_type = 'contract';
     public $email_group = "";
     public $email_facturation = "";
-    public static $element_name = "contract";
+    public static $element_name = "contrat";
+    public static $dol_module = 'contrat';
+    public static $files_module_part = 'contract';
+    public static $modulepart = 'contract';
 
     // Les status
     CONST CONTRAT_STATUT_ABORT = -1;
@@ -145,7 +159,20 @@ class BContract_contrat extends BimpDolObject
         'facture_fourn' => 'Facture fournisseur',
             //'propal' => 'Proposition commercial'
     ];
-    public static $dol_module = 'contract';
+    
+    // Recherche auto dans DocuSign
+    public static $default_signature_params = array(
+        'x_pos'             => 0,
+        'width'             => 0,
+        'date_x_offset'     => 0,
+        'date_y_offset'     => 0,
+        'nom_x_offset'      => 0,
+        'nom_y_offset'      => 0,
+        'nom_width'         => 0,
+        'fonction_x_offset' => 0,
+        'fonction_y_offset' => 0,
+        'fonction_width'    => 0
+    );
 
     function __construct($module, $object_name)
     {
@@ -154,6 +181,105 @@ class BContract_contrat extends BimpDolObject
         $this->email_facturation = BimpCore::getConf('email_facturation', '', 'bimpcontract');
         return parent::__construct($module, $object_name);
     }
+    
+    public function getDirOutput() {
+        global $conf;
+        return $conf->contract->dir_output;
+    }
+    
+    public function isContratDelegation():bool {
+        
+        return (substr($this->getRef(), 0, 3) == 'CDP') ? 1 : 0;
+                
+    }
+    
+    public function getHeuresRestantesDelegation() {
+        
+        $reste = 0;
+        $totalHeuresVendues = 0;
+        $totalHeuresFaites  = 0;
+        
+        $arrayHeuresVendues = $this->getTotalHeureDelegation(true);
+        
+        if(count($arrayHeuresVendues) > 0) {
+            foreach($arrayHeuresVendues as $code => $time) {
+                
+                $infoLigne = explode(':::::', $code);
+                
+                $instanceFiDet = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter_det');
+                $list = $instanceFiDet->getList(array('id_line_contrat' => $infoLigne[1]));
+                if(count($list) > 0) {
+                    foreach($list as $det) {
+                         $totalHeuresFaites += $det['duree'] / 3600;
+                    }
+                }
+                   
+                $totalHeuresVendues += $time;
+            }
+        }
+                        
+        $reste = $totalHeuresVendues - $totalHeuresFaites;
+        
+        return $reste;
+        
+    }
+          
+    public function getTotalHeureDelegation($justActif = false):array {
+        
+        $return = Array();
+        
+        $hourInDay = 7;
+        //$services = Array('SERV19-DP1', 'SERV19-DP2', 'SERV19-DP3', 'SAV-NIVEAU_5', 'SERV22-DPI-AAPEI', 'SERV19-FD01', 'AUTRE');
+        $instance = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product');
+        $children = $this->getChildrenList('lines', ($justActif) ? Array('statut' => 4) : Array());
+        
+        foreach($children as $id_child) {
+            
+            $child = $this->getChildObject('lines', $id_child);
+            $instance->fetch($child->getData('fk_product'));            
+            
+            //if(in_array($instance->getRef(), $services)) {
+                $return[$instance->getRef() . ':::::' . $id_child] += (float) $child->getData('qty') * $hourInDay;
+            //}
+                        
+        }
+        
+        return $return;
+    }
+    
+    public function getHeuresDelegationFromInterByService():array {
+        $return = Array();
+        
+        $instance = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter');
+        $list = $instance->getList(Array('fk_contrat' => $this->id));
+        
+        if(count($list) > 0) {
+            
+            foreach($list as $index) {
+                $child = BimpCache::getBimpObjectInstance('bimptechnique', 'BT_ficheInter_det');
+                $children = $child->getList(array('fk_fichinter' => $index['rowid']));
+                if(count($children) > 0) {
+                    foreach($children as $i) {
+                        
+//                        if($index['fk_statut'] > 0) {
+                        if($i['type'] == 3) {
+                            $return['AUTRE'] += $i['duree'] / 3600;
+                        } else {
+                            $childContrat = $this->getChildObject('lines', $i['id_line_contrat']);
+                            $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $childContrat->getData('fk_product'));
+                            $return[$product->getRef() . '_' . $childContrat->id] += $i['duree'] / 3600;
+                        }
+                            
+//                        }
+                    }                    
+                }
+            }
+            
+        }
+        
+        return $return;
+    }
+    
     
     public function tryToValidate(&$errors) {
         
@@ -189,6 +315,15 @@ class BContract_contrat extends BimpDolObject
         return null;
     }
     
+    public function getDurreeVendu(){
+        $tot = 0;
+        $lines = $this->getChildrenObjects('lines');
+        foreach($lines as $line){
+            $prod = $line->getChildObject('produit');
+            $tot += $prod->getData('duree_i') * $line->getData('qty');
+        }
+        return $tot;
+    }
     
     
     public function canShowAdmin()
@@ -322,13 +457,6 @@ class BContract_contrat extends BimpDolObject
     public function getPeriodeString()
     {
         return self::$period[$this->getData('periodicity')];
-    }
-
-    public function getDirOutput()
-    {
-        global $conf;
-
-        return $conf->contrat->dir_output;
     }
 
     public function actionCreateFi($data, &$success)
@@ -966,15 +1094,13 @@ class BContract_contrat extends BimpDolObject
             $client = $this->getChildObject('client');
             if (BimpObject::objectLoaded($client)) {
                 // Vérif commercial suivi: 
-                $tabConatact = $this->dol_object->getIdContact('internal', 'SALESREPFOLL');
-//                print_r($tabConatact);
-                if (count($tabConatact) < 1) {
+                $tabContact = $this->dol_object->getIdContact('internal', 'SALESREPFOLL');
+                if (count($tabContact) < 1) {
                     $ok = false;
                     $tabComm = $client->dol_object->getSalesRepresentatives($user);
 
                     // Il y a un commercial pour ce client
                     if (count($tabComm) > 0) {
-//                        die('AAAAAAAAAAAAAAAA');
                         $this->dol_object->add_contact($tabComm[0]['id'], 'SALESREPFOLL', 'internal');
                         $ok = true;
 
@@ -982,7 +1108,6 @@ class BContract_contrat extends BimpDolObject
                     } elseif ((int) BimpCore::getConf('user_as_default_commercial', null, 'bimpcommercial')) {
                         $this->dol_object->add_contact($user->id, 'SALESREPFOLL', 'internal');
                         $ok = true;
-//                        die('CCCCCCCCCCCCCCCC');
                         // L'objet est une facture et elle a une facture d'origine
                     } elseif ($this->object_name === 'Bimp_Facture' && (int) $this->getData('fk_facture_source')) {
                         $fac_src = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $this->getData('fk_facture_source'));
@@ -1001,10 +1126,8 @@ class BContract_contrat extends BimpDolObject
                 }
 
                 // Vérif contact signataire: 
-                $tabConatact = $this->dol_object->getIdContact('internal', 'SALESREPSIGN');
-                if (count($tabConatact) < 1) {
-//                                            die('DDDDDDDDDDDDDD');
-
+                $tabContact = $this->dol_object->getIdContact('internal', 'SALESREPSIGN');
+                if (count($tabContact) < 1) {
                     $this->dol_object->add_contact($user->id, 'SALESREPSIGN', 'internal');
                 }
             }
@@ -1177,6 +1300,32 @@ class BContract_contrat extends BimpDolObject
                     $errors[] = $echeancier->updateField("next_facture_date", BimpTools::getValue('date_start') . ' 00:00:00');
                 }
                 $this->addLog("Date d'effet du contrat changer à " . BimpTools::getValue('date_start'));
+            }
+            
+            // Maj de la signature si nécessaire: 
+            if ((int) $this->getData('id_signature')) {
+                $signature = $this->getChildObject('signature');
+
+//                if (BimpObject::objectLoaded($signature)) {
+//                    if (!(int) $signature->getData('signed')) {
+//                        $id_contact = $this->getcontact();
+//
+//                        if ($id_contact != (int) $signature->getData('id_contact')) {
+//                            $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
+//                            if (BimpObject::objectLoaded($contact)) {
+//                                $id_client = (int) $contact->getData('fk_soc');
+//
+//                                if ((int) $signature->getData('id_contact') != $id_contact or
+//                                        (int) $signature->getData('id_client') != $id_client) {
+//                                    $signature->set('id_contact', $id_contact);
+//                                    $signature->set('id_client', $id_client);
+//                                    $sw = array();
+//                                    $signature->update($sw, true);
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
             }
 
             return parent::update($warnings, $force_update);
@@ -1353,12 +1502,13 @@ class BContract_contrat extends BimpDolObject
 
     public function actionReopen($data, &$success)
     {
-        if (count(getElementElement('contrat', 'facture', $this->id))) {
-            $errors[] = "Vous ne pouvez pas supprimer cet échéancier car il y à une facture dans celui-ci";
-        }
+//        if (count(getElementElement('contrat', 'facture', $this->id))) {
+//            $errors[] = "Vous ne pouvez pas supprimer cet échéancier car il y a une facture dans celui-ci";
+//        }
+        $errors = Array();
         if (!count($errors)) {
             $success = "Contrat ré-ouvert avec succès";
-            $this->updateField('statut', self::CONTRAT_STATUS_WAIT);
+            $this->updateField('statut', self::CONTRAT_STATUS_ACTIVER);
             $this->addLog('Contrat ré-ouvert');
             foreach ($this->dol_object->lines as $line) {
                 $the_line = $this->getInstance('bimpcontract', 'BContract_contratLine', $line->id);
@@ -2035,7 +2185,7 @@ class BContract_contrat extends BimpDolObject
                     ))
                 );
             }
-            if (($status == self::CONTRAT_STATUS_ACTIVER || $status == self::CONTRAT_STATUS_ACTIVER_TMP || $status == self::CONTRAT_STATUT_WAIT_ACTIVER) && $user->rights->bimpcontract->to_reopen) {
+            if (($status == self::CONTRAT_STATUS_ACTIVER || $status == self::CONTRAT_STATUT_ABORT || $status == self::CONTRAT_STATUS_CLOS) && $user->rights->bimpcontract->to_reopen) {
                 $buttons[] = array(
                     'label'   => 'Réouvrir le contrat',
                     'icon'    => 'fas_folder-open',
@@ -2129,9 +2279,119 @@ class BContract_contrat extends BimpDolObject
                 'onclick' => $this->getJsActionOnclick('addAcompte', array(), array("form_name" => "addAcc"))
             );
         }
-
+        
+        
+//        $buttons[] = array(
+//            'label'   => 'Créer signature',
+//            'icon'    => 'fas_play',
+//            'onclick' => $this->getJsActionOnclick('createSignature', array(), array(
+//                'form_name' => 'create_signature'
+//            )));        
+        
+        if($this->getData('id_signature')) {
+            $file_name = $this->getSignatureDocFileName('contrat', true);
+            $file_dir = $this->getSignatureDocFileDir('contrat');
+            if(file_exists($file_dir . $file_name)) {
+                $button_download = array(
+                    'label'   => 'Télécharger contrat signé DocuSign',
+                    'icon'    => 'fas_file-download',
+                    'onclick' => $this->getJsActionOnclick('downloadSignature', array(), array('confirm_msg' => "Le fichier existe déjà, remplacer ?")));
+            } else {
+                $button_download = array(
+                    'label'   => 'Télécharger contrat signé DocuSign',
+                    'icon'    => 'fas_file-download',
+                    'onclick' => $this->getJsActionOnclick('downloadSignature'));
+            }
+            $buttons[] = $button_download;
+        }
+                    
         return $buttons;
     }
+    
+    public function actionCreateSignature($data, &$success)
+    {
+        
+        
+        // TODO Test des conditions de validation du crontrat
+        
+        $errors = array();
+        $warnings = array();
+        $success = 'Signature créée avec succès';
+        $url = '';
+
+        $id_contact = (int) BimpTools::getArrayValueFromPath($data, 'id_contact_signature', 0);
+
+        if (!$id_contact)
+            $errors[] = 'Contact signataire obligatoire';
+
+        if (!count($errors)) {
+            $errors = $this->createSignature($id_contact, $warnings);
+
+            if (!count($errors)) {
+                $signature = $this->getChildObject('signature');
+
+                if (BimpObject::objectLoaded($signature)) {
+                    $url = $signature->getUrl();
+                }
+            }
+        }
+        
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $callback
+        );
+    }
+    
+    public function actionDownloadSignature($data, &$success)
+    {
+        $errors = $warnings = array();
+        $callback = '';
+        
+        $signature = $this->getChildObject('signature');
+        if (!BimpObject::objectLoaded($signature)) {
+            $errors[] = 'La facture d\'ID ' . $this->getData('id_signature') . ' n\'existe pas';
+        }
+        
+        $id_envelope = $signature->getData('id_envelope_docu_sign');
+        if(!$id_envelope){
+            $errors[] = 'L\'ID de l\'envelope n\'est pas définit dans la signature';
+        }
+        
+        if(!count($errors)) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpapi/BimpApi_Lib.php';
+            $api = BimpAPI::getApiInstance('docusign');
+            if (is_a($api, 'DocusignAPI')) {
+                $params = array(
+                    'id_envelope' => $id_envelope
+                );
+                $pdf_bin = base64_decode($api->getEnvelopeFile($params, $errors));
+                
+                if(!count($errors)) {
+                    $file_name = $this->getSignatureDocFileName('contrat', true);
+                    $file_dir = $this->getSignatureDocFileDir('contrat');
+                    
+                    // Supression de l'ancien fichier si il existe
+                    if(file_exists($file_dir . $file_name)){
+                        if(unlink($file_dir . $file_name))
+                            $warnings[] = "Ancien fichier supprimé avec succès";
+                        else
+                            $warnings[] = "Ancien fichier non supprimé";
+                    }
+                    
+                    if(!file_put_contents($file_dir . $file_name, $pdf_bin))
+                        $errors[] = "Erreur lors du déplacement du fichier";
+                }
+            }
+        }
+        
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $callback
+        );
+    }    
 
     public function getLinesContrat()
     {
@@ -2536,6 +2796,10 @@ class BContract_contrat extends BimpDolObject
             case 'label':
                 return 1;
                 break;
+            case 'condregl':
+                if($user->rights->bimpcontract->change_periodicity)
+                    return 1;
+                break;
             default:
                 return 0;
                 break;
@@ -2923,65 +3187,12 @@ class BContract_contrat extends BimpDolObject
         return $actions;
     }
 
-    public function getPdfNamePrincipal()
+    public function getPdfNamePrincipal($signed = false)
     {
+        if($signed)
+            return 'Contrat_' . $this->getRef() . '_Ex_OLYS_signed.pdf';
+        
         return 'Contrat_' . $this->getRef() . '_Ex_OLYS.pdf';
-    }
-
-    public function actionAddContact($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Ajout du contact effectué avec succès';
-
-        if (!$this->isLoaded()) {
-            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
-        } else {
-            if (!isset($data['type']) || !(int) $data['type']) {
-                $errors[] = 'Nature du contact absent';
-            } else {
-                switch ((int) $data['type']) {
-                    case 1:
-                        $id_contact = isset($data['id_contact']) ? (int) $data['id_contact'] : 0;
-                        $type_contact = isset($data['tiers_type_contact']) ? (int) $data['tiers_type_contact'] : 0;
-                        if (!$id_contact) {
-                            $errors[] = 'Contact non spécifié';
-                        }
-                        if (!$type_contact) {
-                            $errors[] = 'Type de contact non spécifié';
-                        }
-
-                        if (!count($errors)) {
-                            if ($this->dol_object->add_contact($id_contact, $type_contact, 'external') <= 0) {
-                                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du contact');
-                            }
-                        }
-                        break;
-
-                    case 2:
-                        $id_user = isset($data['id_user']) ? (int) $data['id_user'] : 0;
-                        $type_contact = isset($data['user_type_contact']) ? (int) $data['user_type_contact'] : 0;
-                        if (!$id_user) {
-                            $errors[] = 'Utilisateur non spécifié';
-                        }
-                        if (!$type_contact && static::$internal_contact_type_required) {
-                            $errors[] = 'Type de contact non spécifié';
-                        }
-                        if (!count($errors)) {
-                            if ($this->dol_object->add_contact($id_user, $type_contact, 'internal') <= 0) {
-                                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du contact');
-                            }
-                        }
-                        break;
-                }
-            }
-        }
-
-        return array(
-            'errors'            => $errors,
-            'warnings'          => $warnings,
-            'contact_list_html' => $this->renderContactsList()
-        );
     }
 
     public function isCommercialOfContrat()
@@ -3038,7 +3249,7 @@ class BContract_contrat extends BimpDolObject
         global $langs;
 
         $success = "PDF contrat généré avec Succes";
-        $this->dol_object->generateDocument('contrat_BIMP_maintenance', $langs);
+            $this->dol_object->generateDocument('contrat_BIMP_maintenance', $langs);
 
         return [
             'errors'   => $errors,
@@ -3056,11 +3267,7 @@ class BContract_contrat extends BimpDolObject
         return array('errors' => $errors, 'warnings' => $warnings);
     }
 
-    public function actionGeneratePdfEcheancier($data, &$success)
-    {
-        global $langs;
-        $success = "PDF de l'échéancier généré avec succès";
-    }
+    
     /* OTHERS FUNCTIONS */
 
     public function create(&$warnings = array(), $force_create = false)
@@ -3240,7 +3447,7 @@ class BContract_contrat extends BimpDolObject
                     return BimpRender::renderAlerts('Le contrat n\'est pas activé', 'danger', false);
                 }
                 if (!$this->getData('date_start') || !$this->getData('periodicity') || !$this->getData('duree_mois')) {
-                    return BimpRender::renderAlerts("Le contrat a été facturé avec l'ancienne méthode donc il ne comporte pas d'échéancier", 'warning', false);
+                    return BimpRender::renderAlerts("Le contrat a été facturé à partir d'une commande, il ne comporte donc pas d'échéancier", 'warning', false);
                 }
             }
 
@@ -3413,7 +3620,7 @@ class BContract_contrat extends BimpDolObject
         if ($facture_delivred) {
             foreach ($facture_delivred as $link) {
                 $instance = $this->getInstance('bimpcommercial', 'Bimp_Facture', $link['d']);
-                if ($instance->getData('type') == 0)
+                if (/*$instance->getData('type') == 0*/1)
                     $montant += $instance->getData('total');
             }
             $return = $this->getTotalContrat() - $montant;
@@ -3553,7 +3760,7 @@ class BContract_contrat extends BimpDolObject
                             $montant += $instance->getData('total_achat_reval_ok');
                     }
                 } else {
-                    if ($instance->getData('type') == 0) {
+                    if (/*$instance->getData('type') == 0*/1) {
                         if ($field == 'total')
                             $montant += $instance->getData('total');
                         elseif ($field == 'pa')
@@ -3608,75 +3815,6 @@ class BContract_contrat extends BimpDolObject
         ));
     }
 
-    public function renderContactsList()
-    {
-        $html = '';
-
-        $list = array();
-
-        if ($this->isLoaded() && method_exists($this->dol_object, 'liste_contact')) {
-            $list_int = $this->dol_object->liste_contact(-1, 'internal');
-            $list_ext = $this->dol_object->liste_contact(-1, 'external');
-            $list = BimpTools::merge_array($list_int, $list_ext);
-        }
-
-        if (count($list)) {
-            global $conf;
-            BimpTools::loadDolClass('societe');
-            BimpTools::loadDolClass('contact');
-
-            $soc = new Societe($this->db->db);
-            $user = new User($this->db->db);
-            $contact = new Contact($this->db->db);
-
-            $list_id = $this->object_name . ((int) $this->id ? '_' . $this->id : '') . '_contacts_list';
-
-            foreach ($list as $item) {
-                $html .= '<tr>';
-                switch ($item['source']) {
-                    case 'internal':
-                        $user->id = $item['id'];
-                        $user->lastname = $item['lastname'];
-                        $user->firstname = $item['firstname'];
-                        $user->photo = $item['photo'];
-                        $user->login = $item['login'];
-
-                        $html .= '<td>Utilisateur</td>';
-                        $html .= '<td>' . $conf->global->MAIN_INFO_SOCIETE_NOM . '</td>';
-                        $html .= '<td>' . $user->getNomUrl(-1) . BimpRender::renderObjectIcons($user) . '</td>';
-                        break;
-
-                    case 'external':
-                        $soc->fetch((int) $item['socid']);
-                        $contact->id = $item['id'];
-                        $contact->lastname = $item['lastname'];
-                        $contact->firstname = $item['firstname'];
-
-                        $html .= '<td>Contact tiers</td>';
-                        $html .= '<td>' . $soc->getNomUrl(1) . BimpRender::renderObjectIcons($soc) . '</td>';
-                        $html .= '<td>' . $contact->getNomUrl(1) . BimpRender::renderObjectIcons($contact) . '</td>';
-                        break;
-                }
-                $html .= '<td>' . $item['libelle'] . '</td>';
-                $html .= '<td style="text-align: right">';
-                $html .= BimpRender::renderRowButton('Supprimer le contact', 'trash', $this->getJsActionOnclick('removeContact', array('id_contact' => (int) $item['rowid']), array(
-                                    'confirm_msg'      => 'Etes-vous sûr de vouloir supprimer ce contact?',
-                                    'success_callback' => 'function(result) {if (result.contact_list_html) {$(\'#' . $list_id . '\').html(result.contact_list_html);}}'
-                )));
-                $html .= '</td>';
-                $html .= '</tr>';
-            }
-        } else {
-            $html .= '<tr>';
-            $html .= '<td colspan="5">';
-            $html .= BimpRender::renderAlerts('Aucun contact enregistré', 'info');
-            $html .= '</td>';
-            $html .= '</tr>';
-        }
-
-        return $html;
-    }
-
     public function displayNumberRenouvellement()
     {
         $html = "";
@@ -3711,10 +3849,6 @@ class BContract_contrat extends BimpDolObject
             $date = new DateTime($this->getData('date_contrat'));
             $extra .= '<br/><span class="important">' . BimpRender::renderIcon('fas_signature', 'iconLeft') . 'Contrat marqué comme signé</span> depuis le ' . $date->format('d/m/Y');
         }
-//        if (!is_null($this->getData('end_date_reel')) && !is_null($this->getData('anticipate_close_note'))) {
-//            $date = new DateTime($this->getData('end_date_reel'));
-//            $extra .= "<br /><span>Cloture anticipée en date du <strong>" . $date->format('d/m/Y') . "</strong></span>";
-//        }
 
         if ($this->isFactAuto()) {
             $extra .= "<br /><span class='info' >Facturation automatique activée</strong></span>";
@@ -3731,7 +3865,7 @@ class BContract_contrat extends BimpDolObject
             );
             $extra .= "<br /><strong>Renouvellement N°</strong><strong>" . $this->getData('current_renouvellement') . "/" . $arrayTacite[$this->getData('initial_renouvellement')] . "</strong>";
         }
-
+                
         return $extra;
     }
 
@@ -3821,7 +3955,7 @@ class BContract_contrat extends BimpDolObject
     public function createFromClient($data)
     {
         global $user;
-
+        
         $serials = explode("\n", $data->note);
 
         $nombreServices = count($data->services);
@@ -4183,6 +4317,11 @@ class BContract_contrat extends BimpDolObject
                     $renderAlert = false;
                     $hold = true;
                 }
+                
+                
+                if(count($this->getChildrenList('avenant', ['statut' => 5])) > 0) {
+                    $html .= BimpRender::renderAlerts('ATTENTION. Il y a un avenant en activation provisoir sur ce contrat', 'info', false);
+                }
 //
 //                    if ($renderAlert)
 //                        $html .= BimpRender::renderAlerts('Ce contrat expire dans <strong>' . $intervale_days . ' jours</strong>', $alerte_type, false);
@@ -4200,6 +4339,37 @@ class BContract_contrat extends BimpDolObject
         }
         return $html;
     }
+    
+    
+    public function renderHeaderExtraRight()
+    {
+        
+        $hmtl = '';
+
+            if ((int) $this->getData('id_signature')) {
+                $signature = $this->getChildObject('signature');
+
+                if (BimpObject::objectLoaded($signature)) {
+                    $url = $signature->getUrl();
+
+                    if ($url) {
+                        $html .= BimpRender::renderButton(array(
+                                    'classes'     => array('btn', 'btn-default'),
+                                    'label'       => 'Signature',
+                                    'icon_before' => 'fas_signature',
+                                    'icon_after'  => 'fas_external-link-alt',
+                                    'attr'        => array(
+                                        'href'   => $url,
+                                        'target' => '_blank',
+                                    )
+                                        ), "a");
+                    }
+                }
+            }
+        
+            return $html;
+    }
+
 
     public function displayMessagesFormActivate()
     {
@@ -4585,4 +4755,202 @@ class BContract_contrat extends BimpDolObject
  
         return BimpRender::renderAlerts('Impossible d\'afficher la liste des demande de validation (ID ' . $this->getLabel('of_the') . ' absent)');
     }
+    
+    // Signature DocuSign
+    
+    // TODO
+    public function getPdfFileName(&$errors = array(), $signed = false)
+    {
+        $file_name = '';
+
+        
+
+        return $file_name;
+    }
+    
+
+    
+    
+    public function getSignatureDocFileDir($doc_type)
+    {
+        return $this->getFilesDir();
+    }
+
+    public function getSignatureDocFileName($doc_type = 'contrat', $signed = false)
+    {
+        switch ($doc_type) {
+            case 'contrat':
+                $errors = array();
+                return $this->getPdfNamePrincipal($signed);
+        }
+
+        return '';
+    }
+    
+    public function getSignatureDocFileUrl($doc_type, $forced_context = '', $signed = false)
+    {
+        if (!$this->isLoaded()) {
+            return '';
+        }
+        $context = BimpCore::getContext();
+
+        if ($forced_context) {
+            $context = $forced_context;
+        }
+
+        $file_name = $this->getSignatureDocFileName($doc_type, $signed);
+
+        if ($file_name) {
+            switch ($doc_type) {
+                case 'contrat':
+                    return $this->getFileUrl($file_name);
+                    break;
+            }
+        }
+
+        return '';
+    }
+    
+    
+    public function getSignatureDocRef($doc_type)
+    {
+        switch ($doc_type) {
+            case 'contrat':
+                break;
+        }
+
+        return $this->getRef();
+    }
+    
+    public function getSignatureParams($doc_type = 'contrat')
+    {
+        return BimpTools::overrideArray(self::$default_signature_params, (array) $this->getData('signature_params'));
+    }
+    
+
+    public function onSigned($bimpSignature, $data)
+    {
+        $errors = array();
+        return $errors;
+
+//        if ($this->isLoaded($errors)) {
+//            $this->set('date_contrat', date('Y-m-d HH:ii:ss'));
+//
+//            $warnings = array();
+//            $errors = $this->update($warnings, true);
+//        }
+//
+//        return $errors;
+    }
+
+    public function onSignatureCancelled($bimpSignature)
+    {
+        return;
+    }
+
+    public function isSignatureReopenable($doc_type, &$errors = array())
+    {
+        return;
+    }
+
+    public function onSignatureReopened($bimpSignature)
+    {
+        return;
+    }
+    
+    public function createSignature($id_contact)
+    {
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+
+            if ((int) $this->getData('id_signature')) {
+                $signature = $this->getChildObject('signature');
+                if (BimpObject::objectLoaded($signature)) {
+                    $errors[] = "Il existe déjà une signature pour ce contrat";
+                    return $errors;
+                }
+            }
+            
+            if ($id_contact) {
+                $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
+
+                if (BimpObject::objectLoaded($contact)) {
+                    $id_client = (int) $contact->getData('fk_soc');
+                } else {
+                    $id_contact = 0;
+                }
+            }
+            
+            $file = $this->getSignatureDocFileDir('contrat') . $this->getSignatureDocFileName('contrat');
+            if(!file_exists($file)) {
+                global $langs;
+                $this->dol_object->generateDocument('contrat_BIMP_maintenance', $langs);
+                $errors = BimpTools::merge_array($errors, $this->dol_object->errors);
+                if(!file_exists($file)) {
+                    $errors[] = "Merci de générer le pdf avant de créer la signature";
+                }
+            }
+            
+            if (!count($errors)) {
+                BimpObject::loadClass('bimpcore', 'BimpSignature');
+                $signature = BimpObject::createBimpObject('bimpcore', 'BimpSignature', array(
+                            'obj_module' => 'bimpcontract',
+                            'obj_name'   => 'BContract_contrat',
+                            'id_obj'     => $this->id,
+                            'doc_type'   => 'contrat',
+                            'id_client'  => $this->getData('fk_soc'),
+                            'id_contact' => $id_contact,
+                            'dist_type'  => BimpSignature::DIST_DOCUSIGN,
+                            'type'       => BimpSignature::TYPE_ELEC
+                                ), true, $errors);
+
+                if (!count($errors) && BimpObject::objectLoaded($signature)) {
+                    $errors = $this->updateField('id_signature', (int) $signature->id);
+                }
+            }
+        }
+
+        return $errors;
+    }
+    
+    public function getDefaultSignDistEmailContent() {
+        $email  = "Bonjour,<br/>";
+        $email .= "Veuillez trouver ci-joint notre contrat pour validation<br/>";
+        $email .= "Merci de bien vouloir le signer électroniquement en suivant les instructions DocuSign<br/>";
+        $email .= "Vous en remerciant par avance, nous restons à votre disposition pour tout complément d'information. <br/>";
+        $email .= " Très courtoisement. BIMP Groupe Olys - 2 rue des Erables - CS 21055 - 69760 LIMONEST<br/>";
+        return $email;
+    }
+    
+
+    public function displaySignature()
+    {
+        $html = '';
+
+        if ((int) $this->getData('id_signature') === -1) {
+            if ($this->isActionAllowed('createSignature') && $this->canSetAction('createSignature')) {
+                $onclick = $this->getJsActionOnclick('createSignature', array(), array(
+                    'confirm_msg' => 'Veuillez confirmer'
+                ));
+
+                $html .= '<span class="warning">Non applicable</span>';
+                $html .= '&nbsp;&nbsp;';
+                $html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Créer signature';
+                $html .= '</span>';
+            }
+        }
+
+        if ((int) $this->getData('id_signature') > 0) {
+            $signature = $this->getChildObject('signature');
+
+            if (BimpObject::objectLoaded($signature)) {
+                $html .= $signature->getLink();
+            }
+        }
+
+        return $html;
+    }
+
 }

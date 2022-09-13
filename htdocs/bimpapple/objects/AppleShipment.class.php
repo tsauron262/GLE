@@ -940,8 +940,6 @@ class AppleShipment extends BimpObject
         $warnings = array();
         $success = 'Mise à jour des informations du retour sur GSX effectuée avec succès';
 
-//        global $user;
-//        if ($user->id == 270) {
         $gsx = GSX_v2::getInstance();
         if (!$gsx->logged) {
             $errors[] = $gsx->displayNoLogged();
@@ -977,9 +975,6 @@ class AppleShipment extends BimpObject
                 $warnings = BimpTools::merge_array($warnings, $up_errors);
             }
         }
-//        } else {
-//            $errors[] = 'Fonction en cours de développement';
-//        }
 
         return array(
             'errors'   => $errors,

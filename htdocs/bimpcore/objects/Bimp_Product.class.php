@@ -3820,6 +3820,8 @@ class Bimp_Product extends BimpObject
     {
         $init_price_ht = (float) $this->getInitData('price');
         $new_price_ht = (float) $this->getData('price');
+        $init_price_ttc = (float) $this->getInitData('price_ttc');
+        $new_price_ttc = (float) $this->getData('price_ttc');
         $init_tva_tx = (float) $this->getInitData('tva_tx');
         $new_tva_tx = (float) $this->getData('tva_tx');
         $updateToSerilisable = ($this->getInitData('serialisable') == 0 && $this->getData('serialisable') == 1);
@@ -3827,6 +3829,10 @@ class Bimp_Product extends BimpObject
         $errors = parent::update($warnings, $force_update);
 
         if (!count($errors)) {
+            // Si un nouveau prix TTC a été défini sans que le HT n'ait été modifié (en principe cela peut arriver pour les imports bimpdatasync) 
+            if ($init_price_ht === $new_price_ht && $init_price_ttc !== $new_price_ttc) {
+                $new_price_ht = BimpTools::calculatePriceTaxEx($new_price_ttc, (float) $new_tva_tx);
+            }
             if ($init_price_ht !== $new_price_ht || $init_tva_tx !== $new_tva_tx) {
                 global $user;
                 BimpTools::resetDolObjectErrors($this->dol_object);

@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimpcore_alert` ADD `filter` VARCHAR(1000);

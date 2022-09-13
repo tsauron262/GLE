@@ -49,7 +49,7 @@ class modBimpApi extends DolibarrModules
 
 		// Id for module (must be unique).
 		// Use here a free id (See in Home -> System information -> Dolibarr for list of used modules id).
-		$this->numero = 3500001;		// TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
+		$this->numero = 3501000;		// TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
 		// Key text used to identify module (for permissions, menus, etc...)
 		$this->rights_class = 'bimpapi';
 
@@ -87,7 +87,7 @@ class modBimpApi extends DolibarrModules
 
 		// Data directories to create when module is enabled.
 		// Example: this->dirs = array("/mymodule/temp","/mymodule/subdir");
-		$this->dirs = array("/bimpcommercial/data");
+		$this->dirs = array("/bimpapi/data");
 
 		// Config pages. Put here list of php page, stored into mymodule/admin directory, to use to setup module.
 		//$this->config_page_url = array("setup.php@mymodule");
@@ -99,7 +99,7 @@ class modBimpApi extends DolibarrModules
 		$this->conflictwith = array();	// List of module class names as string this module is in conflict with
 		$this->phpmin = array(5,0);					// Minimum version of PHP required by module
 		$this->need_dolibarr_version = array(4,0);	// Minimum version of Dolibarr required by module
-		$this->langfiles = array("bimpcommercial@bimpcommercial");
+		$this->langfiles = array("bimpapi@bimpapi");
 		$this->warnings_activation = array();                     // Warning to show when we activate module. array('always'='text') or array('FR'='textfr','ES'='textes'...)
 		$this->warnings_activation_ext = array();                 // Warning to show when we activate an external module. array('always'='text') or array('FR'='textfr','ES'='textes'...)
 

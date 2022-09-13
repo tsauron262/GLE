@@ -16,6 +16,7 @@
         private $caisse;
         private $TRA_tiers;
         public $rapportTier;
+        protected $compteCheque = '51124000';
         
         
         function __construct($bimp_db, $tiers_file) { 
@@ -43,7 +44,7 @@
             
             $codeJournalByModeReglement = [
                 'LIQ'       => $entrepot->code_journal_compta,
-                'CHQ'       => $entrepot->code_journal_compta,
+                'CHQ'       => $this->compteCheque,
                 'CB'        => $entrepot->code_journal_compta,
                 'AE'        => $entrepot->code_journal_compta,
                 'VIR'       => $compte_bancaire->cegid_journal,
@@ -57,7 +58,7 @@
             
             $compteByModeReglement = [
                 'LIQ'       => $entrepot->compte_comptable,
-                'CHQ'       => $entrepot->compte_comptable_banque,
+                'CHQ'       => $this->compteCheque,
                 'CB'        => $entrepot->compte_comptable_banque,
                 'AE'        => $entrepot->compte_comptable_banque,
                 'VIR'       => $compte_bancaire->compte_compta,

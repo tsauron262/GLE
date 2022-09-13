@@ -183,6 +183,7 @@ fields:
         displays:
             default:
                 type: timer
+                with_day: 0
     
     description:
         label: Description
@@ -654,7 +655,7 @@ views:
 lists_cols: 
     duree:
         has_total: 1
-        total_type: timer
+        total_type: timer_with_not_day
     nombre_inter:
         label: Nb d'interventions
         value:

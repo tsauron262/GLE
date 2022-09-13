@@ -158,6 +158,9 @@ lists_cols:
         label: Client
         value: 
             callback: displayClient
+        search: 
+            input: 
+                type: search_societe
             
 lists:
     default:

@@ -45,7 +45,7 @@ class BDS_VerifsProcess extends BDSProcess
                 $data['steps'] = array(
                     'check_margins' => array(
                         'label'                  => 'Vérifications des marges',
-                        'on_error'               => 'retry',
+                        'on_error'               => 'continue',
                         'elements'               => $elements,
                         'nbElementsPerIteration' => (int) $nbElementsPerIteration
                     )
@@ -80,6 +80,100 @@ class BDS_VerifsProcess extends BDSProcess
                         } else {
                             $this->incUpdated();
                             $this->Success('Vérif marges OK', $fac, $id_fac);
+                        }
+                    }
+                }
+                break;
+        }
+
+        return $result;
+    }
+
+    // Vérifs Restes à payer factures: 
+
+    public function initCheckFacsRtp(&$data, &$errors = array())
+    {
+        $date_from = $this->getOption('date_from', '');
+        $date_to = $this->getOption('date_to', '');
+        $nbElementsPerIteration = $this->getOption('nb_elements_per_iterations', 100);
+        $not_classified_only = $this->getOption('not_classified_only', 1);
+        $zero_only = $this->getOption('rtp_zero_only', 0);
+
+        if (!preg_match('/^[0-9]+$/', $nbElementsPerIteration) || !(int) $nbElementsPerIteration) {
+            $errors[] = 'Le nombre d\'élements par itération doit être un nombre entier positif';
+        }
+
+        if ($date_from && $date_to && $date_from > $date_to) {
+            $errors[] = 'La date de début doit être inférieure à la date de fin';
+        }
+
+        if (!count($errors)) {
+            $where = 'fk_statut > 0';
+
+            if ($date_from) {
+                $where .= ' AND date_valid >= \'' . $date_from . ' 00:00:00\'';
+            }
+            if ($date_to) {
+                $where .= ' AND date_valid <= \'' . $date_to . ' 00:00:00\'';
+            }
+
+            if ($not_classified_only) {
+                $where .= ' AND paye = 0';
+            }
+
+            if ($zero_only) {
+                $where .= ' and remain_to_pay = 0';
+            }
+
+            $rows = $this->db->getRows('facture', $where, null, 'array', array('rowid'), 'rowid', 'desc');
+            $elements = array();
+
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    $elements[] = (int) $r['rowid'];
+                }
+            }
+
+            if (empty($elements)) {
+                $errors[] = 'Aucune facture a traiter trouvée';
+            } else {
+                $data['steps'] = array(
+                    'check_rtp' => array(
+                        'label'                  => 'Vérifications des restes à payer',
+                        'on_error'               => 'continue',
+                        'elements'               => $elements,
+                        'nbElementsPerIteration' => (int) $nbElementsPerIteration
+                    )
+                );
+            }
+        }
+    }
+
+    public function executeCheckFacsRtp($step_name, &$errors = array(), $extra_data = array())
+    {
+        $result = array();
+
+        switch ($step_name) {
+            case 'check_rtp':
+                if (!empty($this->references)) {
+                    $this->setCurrentObjectData('bimpcommercial', 'Bimp_Facture');
+                    foreach ($this->references as $id_fac) {
+                        $this->incProcessed();
+                        $fac_errors = array();
+                        $fac = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_fac);
+
+                        if (BimpObject::objectLoaded($fac)) {
+                            $fac_errors = $fac->checkIsPaid(false);
+                        } else {
+                            $fac_errors[] = 'Fac #' . $id_fac . ' non trouvée';
+                        }
+
+                        if (count($fac_errors)) {
+                            $this->incIgnored();
+                            $this->Error(BimpTools::getMsgFromArray($fac_errors, 'Fac #' . $id_fac), $fac, $id_fac);
+                        } else {
+                            $this->incUpdated();
+                            $this->Success('Vérif Reste à payer OK', $fac, $id_fac);
                         }
                     }
                 }
@@ -149,8 +243,37 @@ class BDS_VerifsProcess extends BDSProcess
                 $options['nb_elements_per_iterations'] = (int) $opt->id;
             }
 
+            $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                        'id_process'    => (int) $process->id,
+                        'label'         => 'Vérifier seulement les factures non classées payées',
+                        'name'          => 'not_classified_only',
+                        'info'          => '',
+                        'type'          => 'bool',
+                        'default_value' => '1',
+                        'required'      => 0
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($opt)) {
+                $options['not_classified_only'] = (int) $opt->id;
+            }
+            
+            $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
+                        'id_process'    => (int) $process->id,
+                        'label'         => 'Restes à payer à 0 seulement',
+                        'name'          => 'rtp_zero_only',
+                        'info'          => '',
+                        'type'          => 'bool',
+                        'default_value' => '0',
+                        'required'      => 0
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($opt)) {
+                $options['rtp_zero_only'] = (int) $opt->id;
+            }
+
             // Opérations: 
 
+            // Vérifs marges factures: 
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                         'id_process'  => (int) $process->id,
                         'title'       => 'Vérifier les marges + revals OK des factures',
@@ -172,6 +295,39 @@ class BDS_VerifsProcess extends BDSProcess
                 }
                 if (isset($options['nb_elements_per_iterations'])) {
                     $op_options[] = $options['nb_elements_per_iterations'];
+                }
+
+                $warnings = array_merge($warnings, $op->addAssociates('options', $op_options));
+            }
+
+            // Vérifs restes à payer factures: 
+            $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
+                        'id_process'  => (int) $process->id,
+                        'title'       => 'Vérifier les restes à payer des factures',
+                        'name'        => 'checkFacsRtp',
+                        'description' => '',
+                        'warning'     => '',
+                        'active'      => 1,
+                        'use_report'  => 0,
+                            ), true, $warnings, $warnings);
+
+            if (BimpObject::objectLoaded($op)) {
+                $op_options = array();
+
+                if (isset($options['date_from'])) {
+                    $op_options[] = $options['date_from'];
+                }
+                if (isset($options['date_to'])) {
+                    $op_options[] = $options['date_to'];
+                }
+                if (isset($options['nb_elements_per_iterations'])) {
+                    $op_options[] = $options['nb_elements_per_iterations'];
+                }
+                if (isset($options['not_classified_only'])) {
+                    $op_options[] = $options['not_classified_only'];
+                }
+                if (isset($options['rtp_zero_only'])) {
+                    $op_options[] = $options['rtp_zero_only'];
                 }
 
                 $warnings = array_merge($warnings, $op->addAssociates('options', $op_options));

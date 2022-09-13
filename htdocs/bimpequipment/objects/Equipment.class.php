@@ -311,7 +311,7 @@ class Equipment extends BimpObject
         }
 
         $place = $this->getCurrentPlace();
-        if ((int) $place->getData('type') === BE_Place::BE_PLACE_ENTREPOT) {
+        if (BimpObject::objectLoaded($place) && (int) $place->getData('type') === BE_Place::BE_PLACE_ENTREPOT) {
             if (!$id_entrepot || (int) $place->getData('id_entrepot') === (int) $id_entrepot) {
                 return 1;
             }
@@ -1612,6 +1612,7 @@ class Equipment extends BimpObject
                             $identifiers['date_purchase'] = $dt->format('Y-m-d H:i:s');
                         }
 
+                        /* obsolete
                         if (preg_match('/^.+(.{4})$/', $identifiers['serial'], $matches)) {
                             $product = BimpCache::findBimpObjectInstance('bimpcore', 'Bimp_Product', array(
                                         'code_config' => $matches[1],
@@ -1623,7 +1624,7 @@ class Equipment extends BimpObject
                             if (BimpObject::objectLoaded($product)) {
                                 $identifiers['id_product'] = (int) $product->id;
                             }
-                        }
+                        }*/
                     }
                 }
             } else

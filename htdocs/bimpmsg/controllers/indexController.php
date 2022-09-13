@@ -5,7 +5,7 @@ class indexController extends BimpController
 
     protected function ajaxProcessSetAsViewed()
     {
-        $errors = array();
+        $errors = $warnings = array();
         $nb_set_as_viewed = 0;
 
         $filters = array(
@@ -22,6 +22,7 @@ class indexController extends BimpController
                 
         $ret = array(
             'errors'        => $errors,
+            'warnings'      => $warnings,
             'nb_set_as_viewed' => $nb_set_as_viewed,
             'request_id'    => BimpTools::getValue('request_id', 0)
         );

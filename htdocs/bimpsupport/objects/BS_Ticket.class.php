@@ -992,7 +992,7 @@ class BS_Ticket extends BimpObject
                     $contrat = BimpCache::getBimpObjectInstance('bimpcontract', 'BContract_contrat', $this->getData('id_contrat'));
                     $liste_destinataire_interne_contrat_spare = '';
                     if (BimpObject::objectLoaded($contrat) && $contrat->getData('objet_contrat') == 'CSP') {
-                        $liste_destinataire_interne_contrat_spare = 'j.garnier@bimp.fr, l.gay@bimp.fr, tt.cao@bimp.fr, d.debarnaud@bimp.fr, v.gaillard@bimp.fr ';
+                        $liste_destinataire_interne_contrat_spare = 'c.conort@bimp.fr, l.gay@bimp.fr, tt.cao@bimp.fr, d.debarnaud@bimp.fr, v.gaillard@bimp.fr ';
                     }
 
                     $subject = 'BIMP-CLIENT : Création Ticket Support N°' . $this->getData('ticket_number');

@@ -157,6 +157,13 @@ fields:
         type: bool
         default_value: 1
         
+    dist_type: 
+        label: Type de signature à distance
+        type: int
+        values: 
+            array: distTypes
+        default_value: 0
+        
     allow_no_scan: 
         label: Signature papier sans scan autorisée
         type: bool
@@ -177,6 +184,12 @@ fields:
     signed_doc_ext: 
         label: Extension fichier signé
         default_value: pdf
+        
+    id_envelope_docu_sign:
+        label: Id de l'envelope DocuSign
+    
+    id_account_docu_sign:
+        label: Id du compte utilisateur DocuSign
         
 forms:
     edit: 
@@ -299,6 +312,49 @@ forms:
                   check_mentions: 
                       callback: getCheckMentions
             
+    sign_docu_sign: 
+        title: Signature DocuSign
+        icon: fas_file-signature
+        values: 
+            fields:
+                email_signataire: 
+                    callback: getDefaultEmailSignataire
+                fonction_signataire: 
+                    callback: getDefaultFonctionSignataire
+                    
+        rows: 
+            - custom: 1
+              label: Récapitulatif
+              input_name: doc_infos
+              content: 
+                  callback: displayDocInfos
+            - custom: 1
+              label: Nom du signataire
+              input_name: nom_signataire
+              input: 
+                  value:
+                    callback: getDefaultContactInfo
+              value: 
+                  callback: 
+                    method: getDefaultContactInfo
+                    params:
+                        - lastname
+            - custom: 1
+              label: Prénom du signataire
+              input_name: prenom_signataire
+              input: 
+                  value:
+                    callback: getDefaultContactInfo
+              value: 
+                  callback: 
+                    method: getDefaultContactInfo
+                    params:
+                        - firstname
+            - field: email_signataire
+            - field: fonction_signataire
+              show: 
+                  callback: isClientCompany
+
     sign_dist: 
         title: Signature à distance
         icon: fas_file-signature
@@ -439,6 +495,9 @@ fields_tables:
             - field: id_client
             - field: id_contact
             - field: allow_elec
+            - field: dist_type
+              show: 
+                  field_value: allow_elec
             - field: allow_no_scan
             - field: signed
             

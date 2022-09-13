@@ -3,6 +3,7 @@
 class Bimp_User extends BimpObject
 {
 
+    public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public static $status_list = array(
         0 => array('label' => 'Désactivé', 'icon' => 'fas_times', 'classes' => array('danger')),
         1 => array('label' => 'Actif', 'icon' => 'fas_check', 'classes' => array('success'))
@@ -342,7 +343,7 @@ class Bimp_User extends BimpObject
             return 'light';
         }
 
-        return null;
+        return 'light';
     }
 
     public function getDefaultListHeaderButton()
@@ -392,6 +393,43 @@ class Bimp_User extends BimpObject
         ];
 
         return $filters;
+    }
+
+    public function getCustomFilterSqlFilters($field_name, $values, &$filters, &$joins, $main_alias = 'a', &$errors = array(), $excluded = false)
+    {
+        switch ($field_name) {
+            case 'group':
+                $elem_alias = $main_alias . '___usergroupuser';
+                $joins[$elem_alias] = array(
+                    'table' => 'usergroup_user',
+                    'on'    => $elem_alias . '.fk_user = ' . $main_alias . '.rowid',
+                    'alias' => $elem_alias
+                );
+                $key = 'in';
+                if ($excluded) {
+                    $key = 'not_in';
+                }
+                $filters[$elem_alias . '.fk_usergroup'] = array(
+                    $key => $values
+                );
+                break;
+        }
+
+        parent::getCustomFilterSqlFilters($field_name, $values, $filters, $joins, $main_alias, $errors, $excluded);
+    }
+
+    public function getCustomFilterValueLabel($field_name, $value)
+    {
+        switch ($field_name) {
+            case 'group':
+                $group = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_UserGroup', (int) $value);
+                if (BimpObject::ObjectLoaded($group)) {
+                    return $group->getName();
+                }
+                break;
+        }
+
+        return parent::getCustomFilterValueLabel($field_name, $value);
     }
 
     // Affichage: 
@@ -1878,7 +1916,18 @@ class Bimp_User extends BimpObject
             $this->dol_object->oldcopy = clone $this->dol_object;
         }
 
-        return parent::update($warnings, $force_update);
+        $init_statut = (int) $this->getInitData('statut');
+        $statut = (int) $this->getData('statut');
+
+        $errors = parent::update($warnings, $force_update);
+
+        if (!count($errors)) {
+            if ($init_statut !== $statut) {
+                $this->updateField('statut', $statut);
+            }
+        }
+        
+        return $errors;
     }
 
     // Méthodes statiques: 

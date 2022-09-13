@@ -15,7 +15,8 @@ class adminController extends apiController
             $html .= BimpRender::renderAlerts('Aucune API active', 'warning');
         } else {
             $headers = array(
-                'name' => 'Nom système',
+                'name'        => 'Nom système',
+                'idx'         => 'Index',
                 'name_public' => 'Nom public',
             );
             $rows = array();

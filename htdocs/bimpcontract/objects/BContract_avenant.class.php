@@ -10,13 +10,21 @@ class BContract_avenant extends BContract_contrat {
         2 => "Changement du lieu d'intervention",
         3 => "Changement d'un numéro de série"
     ];
+    
+    CONST AVENANT_STATUT_BROUILLON      = 0;
+    CONST AVENANT_STATUT_ATTENTE_SIGN   = 1;
+    CONST AVENANT_STATUT_ACTIF          = 2;
+    CONST AVENANT_STATUT_CLOS           = 3;
+    CONST AVENANT_STATUT_ABANDON        = 4;
+    CONST AVENANT_STATUT_PROVISOIR      = 5;
    
     public static $statut_list = [
-        0 => ['label' => 'Brouillon', 'icon' => 'trash', 'classes' => ['warning']],
-        1 => ['label' => 'Attente de signature', 'icon' => 'refresh', 'classes' => ['success']],
-        2 => ['label' => 'Pris en compte', 'icon' => 'play', 'classes' => ['important']],
-        3 => ['label' => 'Clos', 'icon' => 'times', 'classes' => ['danger']],
-        4 => ['label' => 'Abandonné', 'icon' => 'times', 'classes' => ['danger']]
+        self::AVENANT_STATUT_BROUILLON      => ['label' => 'Brouillon', 'icon' => 'trash', 'classes' => ['warning']],
+        self::AVENANT_STATUT_ATTENTE_SIGN   => ['label' => 'Attente de signature', 'icon' => 'refresh', 'classes' => ['success']],
+        self::AVENANT_STATUT_ACTIF          => ['label' => 'Pris en compte', 'icon' => 'play', 'classes' => ['important']],
+        self::AVENANT_STATUT_CLOS           => ['label' => 'Clos', 'icon' => 'times', 'classes' => ['danger']],
+        self::AVENANT_STATUT_ABANDON        => ['label' => 'Abandonné', 'icon' => 'times', 'classes' => ['danger']],
+        self::AVENANT_STATUT_PROVISOIR      => ['label' => 'Activation provisoire', 'icon' => 'retweet', 'classes' => ['important']]
     ];
     
     public function getTypeAvenantArray() {
@@ -101,8 +109,53 @@ class BContract_avenant extends BContract_contrat {
             
         }
         
+        if(BimpTools::getPostFieldValue("month")) {
+            
+            $nombre_months = BimpTools::getPostFieldValue('month');
+            $end = new DateTime($this->getData('date_end'));
+            $end->add(new DateInterval('P' . $nombre_months . 'M'));
+            $end->sub(new DateInterval('P1D'));
+            
+            $errors = $this->updateField('want_end_date', $end->format('Y-m-d'));
+            BimpTools::merge_array($errors, $this->updateField('added_month', $nombre_months));
+            
+        }
+        
         return $errors;
         
+    }
+    
+    public function getThisAddingAmountForTypeProlongation() {
+        
+        $return = 0.0;
+        
+        $parentInstance = $this->getParentInstance();
+        $totalContratEnCours = $parentInstance->getCurrentTotal();
+        $totalByMonth = $totalContratEnCours / $parentInstance->getData('duree_mois');
+        
+        $nbMonthAdding = $this->getData('added_month');
+        
+        $return = $totalByMonth;
+        
+        return $return;
+        
+        
+    }
+    
+    public function by($by):bool {
+        
+        switch($by) {
+            
+            case 'm':
+                return ($this->getData('by_month')) ? 1 : 0;
+                break;
+            case 'a':
+                return (!$this->getData('by_month')) ? 1 : 0;
+                break;
+            
+        }
+        
+        return 0;
     }
 
     public function validatePost() {
@@ -115,10 +168,13 @@ class BContract_avenant extends BContract_contrat {
          
          if(BimpTools::getPostFieldValue('type') && BimpTools::getPostFieldValue('type') == 1) $conserne_date_end_avp = true;
          if(BimpTools::getPostFieldValue('years')) $conserne_date_end_avp = true;
-         
+         if(BimpTools::getPostFieldValue('month')) $conserne_date_end_avp = true;
          
          if($conserne_date_end_avp) {            
-            if(BimpTools::getPostFieldValue('years') == 0) $errors[] = 'Vous ne pouvez pas choisir 0 année de prolongation';
+            if(!$this->getData('by_month'))
+                if(BimpTools::getPostFieldValue('years') == 0) $errors[] = 'Vous ne pouvez pas choisir 0 année de prolongation';
+            if($this->getData('by_month'))
+                if(BimpTools::getPostFieldValue('month') == 0) $errors[] = 'Vous ne pouvez pas choisir 0 mois de prolongation';
         }
          
          return $errors;
@@ -160,7 +216,13 @@ class BContract_avenant extends BContract_contrat {
                 $this->updateField('date_end', $parent->displayRealEndDate("Y-m-d"));
             } elseif(!count($errors) && $this->getData('type') == 1) {
                 
-                $months = BimpTools::getPostFieldValue('years') * 12;
+                if(BimpTools::getPostFieldValue('enMois')) {
+                    $months = BimpTools::getPostFieldValue('years');
+                    $this->updateField('by_month', 1);
+                } else {
+                    $months = BimpTools::getPostFieldValue('years') * 12;
+                }
+                
                 $errors = $this->updateField('added_month', $months);
                 
                 $date_de_fin = new DateTime($parent->displayRealEndDate("Y-m-d"));
@@ -190,6 +252,15 @@ class BContract_avenant extends BContract_contrat {
         }
         return 1;
     }
+    
+    public function getNbMois() {
+        if($this->isLoaded()) {
+            return $this->getData('added_month');
+        }
+        
+        return 0;
+    }
+    
     
     public function actionValidate() {
         
@@ -253,6 +324,50 @@ class BContract_avenant extends BContract_contrat {
             'errors'           => array(),
             'warnings'         => array(),
             'success_callback' => $success_callback
+        );
+    }
+        
+    public function actionActivation($data, &$success) {
+        $data = (object) $data;
+        $errors = Array();
+        $warnings = Array();
+        
+        $success = '';
+        
+        $haveSignature = $data->haveSignature;
+        
+        if($this->getData('statut') == self::AVENANT_STATUT_PROVISOIR && !$haveSignature) {
+            $errors[] = 'Cet avenant est déjà activé provisoirement';
+        }
+        
+        if(!count($errors)) {
+            if($haveSignature) {
+                if($this->getData('type') == 1) {
+                    $this->actionSignedProlongation(Array('date_signed' => $data->dateSignature), $success);
+                } else {
+                    $this->actionSigned(Array('date_signed' => $data->dateSignature), $success);
+                }
+            } else {
+                $parent = $this->getParentInstance();
+                $commercial = $parent->getCommercialClient(true);
+                $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $parent->getdata('fk_soc'));
+                $sujet = 'AVENANT ' . $this->getRefAv() . ' - ACTIVATION PROVISOIRE - ' . $client->getName();
+                $dest = $commercial->getData('email');
+
+                $message = 'Bonjour ' . $commercial->getName() . '<br />';
+                $message .= 'L\'avenant N°' . $this->getRefAv() . ' a été activé provisoirement. Vous disposez de 15 jours pour le faire signer par le client, après ce délai, l\'avenant sera abandonné automatiquement. Vous recevrez une alerte par jour, à partir des derniers 5 jours de l\'activation provisoire.';
+                $message .= '<br /><br />Client: ' . $client->getLink() . '<br />Contrat: ' . $parent->getLink();
+                mailSyn2($sujet, $dest, null, $message);
+                $this->updateField('date_activate', date('Y-m-d'));
+                $this->updateField('statut', self::AVENANT_STATUT_PROVISOIR);
+
+            }
+        }
+        
+        return Array(
+            'errors' => $errors, 
+            'warnings' => $warnings, 
+            'success' => $success
         );
     }
     
@@ -413,6 +528,12 @@ class BContract_avenant extends BContract_contrat {
     }
     
     public function canCreate() {
+      $parent = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getdata('id_contrat'));
+      
+      if($parent->getData('statut') != 11) {
+          return 0;
+      }
+      
       return 1;
     }
     
@@ -446,32 +567,20 @@ class BContract_avenant extends BContract_contrat {
             );
         }
         
+        if($this->getData('statut') == self::AVENANT_STATUT_ATTENTE_SIGN || $this->getData('statut') == self::AVENANT_STATUT_PROVISOIR) {
+            $buttons[] = array(
+                'label'   => 'Activer l\'avenant',
+                'icon'    => 'fas_play',
+                'onclick' => $this->getJsActionOnclick('activation', array(), array('form_name' => 'activate'
+                ))
+            );
+        }
+        
         if($this->getData('statut') == 1) {
             
             $action = ($this->getData('type') == 1) ? 'signedProlongation' : 'signed';
             
             $buttons[] = array(
-                'label'   => 'Signer',
-                'icon'    => 'fas_signature',
-                'onclick' => $this->getJsActionOnclick($action, array(), array(
-                    'form_name' => "signed"
-                ))
-            );
-        }
-        
-        if($this->getData('type') == 0) {
-            if($this->getData('statut') == 0) {
-                $buttons[] = array(
-                    'label'   => 'Ajouter une ligne à l\'avenant',
-                    'icon'    => 'fas_list',
-                    'onclick' => $this->getJsActionOnclick('addLine', array(), array(
-                        'form_name' => 'addLine'
-                    ))
-                );
-            }
-            
-            if($this->getData('statut') == 1) {
-                $buttons[] = array(
                     'label'   => 'Abandonner',
                     'icon'    => 'fas_stop-circle',
                     'onclick' => $this->getJsActionOnclick('abort', array(), array(
@@ -483,6 +592,17 @@ class BContract_avenant extends BContract_contrat {
                     'icon'    => 'fas_times',
                     'onclick' => $this->getJsActionOnclick('close', array(), array(
 
+                    ))
+                );
+        }
+        
+        if($this->getData('type') == 0) {
+            if($this->getData('statut') == 0) {
+                $buttons[] = array(
+                    'label'   => 'Ajouter une ligne à l\'avenant',
+                    'icon'    => 'fas_list',
+                    'onclick' => $this->getJsActionOnclick('addLine', array(), array(
+                        'form_name' => 'addLine'
                     ))
                 );
             }
@@ -500,7 +620,7 @@ class BContract_avenant extends BContract_contrat {
         
         $errors = $this->updateField('statut', 4);
         if(!count($errors))
-            $success = "Avenant abandonner avec succès";
+            $success = "Avenant abandonné avec succès";
         
         return [
             'success' => $success,

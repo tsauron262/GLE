@@ -29,6 +29,25 @@ class Bimp_Contact extends BimpObject
 
         return 0;
     }
+    
+    public function getNomCompletCsvValue($needed_fields = array())
+    {
+        $return = $needed_fields['firstname'];
+        if($needed_fields['lastname'] != '' && $needed_fields['firstname'] != '')
+            $return .= ' ';
+        $return .= $needed_fields['lastname'];
+
+        return $return;
+    }
+    
+    public function displayNomComplet(){
+        $return = $this->getData('firstname');
+        if($this->getData('lastname') != '' && $this->getData('firstname') != '')
+            $return .= ' ';
+        $return .= $this->getData('lastname');
+
+        return $return;
+    }
 
     public function canClientCreate()
     {

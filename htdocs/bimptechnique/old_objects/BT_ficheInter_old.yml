@@ -621,7 +621,7 @@ forms:
               input:
                   display_now: 0
                   type: timer
-                  help: Les secondes ne seront pas pris en compte - Mettre le temps de trajet total sur la journée (Allé/Retour)
+                  help: Les secondes ne seront pas pris en compte - Mettre le temps de trajet total sur la journée (Aller/Retour)
               display_if:
                   field_name: inter_0_type
                   show_values: 5,3,6

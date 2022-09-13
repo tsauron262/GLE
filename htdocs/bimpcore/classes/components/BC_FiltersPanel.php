@@ -51,6 +51,8 @@ class BC_FiltersPanel extends BC_Panel
         $current_bc = $prev_bc;
     }
 
+    // Traitements: 
+
     public function fetchFilters()
     {
         $this->bc_filters = array();
@@ -78,7 +80,6 @@ class BC_FiltersPanel extends BC_Panel
         $this->filters = array();
 
         foreach ($filters as $filter_name => $filter) {
-
             $filter_name = str_replace('___', ':', $filter_name);
             $this->filters[$filter_name] = $filter;
         }
@@ -156,6 +157,40 @@ class BC_FiltersPanel extends BC_Panel
         return $errors;
     }
 
+    public function applyFiltersToObjectIds($ids, &$errors = array())
+    {
+        $filters = array();
+        $joins = array();
+        $filters_errors = $this->getSqlFilters($filters, $joins);
+
+        if (count($filters_errors)) {
+            $errors = BimpTools::merge_array($errors, $filters_errors);
+            return array();
+        }
+
+        if (empty($filters)) {
+            return $ids;
+        }
+
+        $primary = $this->object->getPrimary();
+        $filters = BimpTools::mergeSqlFilters($filters, array($primary => array('in' => $ids)));
+
+        $sql = BimpTools::getSqlFullSelectQuery($this->object->getTable(), array($primary), $filters, $joins);
+        $rows = BimpCache::getBdb()->executeS($sql, 'array');
+        
+        if (is_array($rows)) {
+            $valid_ids = array();
+            foreach ($rows as $r) {
+                $valid_ids[] = (int) $r[$primary];
+            }
+
+            return $valid_ids;
+        }
+
+        return array();
+    }
+
+    // Rendus HTML: 
     public function renderHtmlContent()
     {
         $html = parent::renderHtmlContent();
@@ -517,5 +552,16 @@ class BC_FiltersPanel extends BC_Panel
         }
 
         return $list;
+    }
+
+    public static function renderJsonFilters($object, $filters, $context = 'filters_input')
+    {
+        if (!is_array($filters)) {
+            $filters = json_decode($filters, 1);
+        }
+
+        $bc_panel = new BC_FiltersPanel($object);
+        $bc_panel->setFilters($filters);
+        return $bc_panel->renderActiveFilters(false, false, $context);
     }
 }

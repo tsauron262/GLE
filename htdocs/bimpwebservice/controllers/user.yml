@@ -1,0 +1,21 @@
+bootstrap: 1
+
+title: 
+    callback: 
+        object: ws_user
+        method: getPageTitle
+
+objects: 
+    ws_user: 
+        instance: 
+            bimp_object: 
+                module: bimpwebservice
+                name: BWS_User
+            id_object: 
+                request: id
+                
+sections:
+    - type: view
+      view: 
+          name: default
+          object: ws_user

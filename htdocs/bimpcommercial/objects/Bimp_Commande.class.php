@@ -405,6 +405,22 @@ class Bimp_Commande extends BimpComm
 //                        $errors[] = 'Cette commande ne peut pas être validée';
 //                    }
 //                }
+                global $user;
+
+                $id_cond_a_la_commande = self::getBdb()->getValue('c_payment_term', 'rowid', '`active` > 0 and code = "RECEPCOM"');
+                if ($client_facture->getData('outstanding_limit') < 1 and (int) $id_cond_a_la_commande != (int) $this->getData('fk_cond_reglement')) {
+                    if (!in_array($user->id, array(232, 97))) {
+                        $available_discounts = (float) $client_facture->getAvailableDiscountsAmounts();
+                        if($available_discounts < $this->getData('total_ttc'))
+                            $errors[] = "Les clients sans encours doivent régler à la commande";
+                    }
+                }
+            }
+            
+            
+            //ref externe si consigne
+            if($client->getData('consigne_ref_ext') != '' && $this->getData('ref_client') == ''){
+                $errors[] = 'Attention la réf client ne peut pas être vide : <br/>'.nl2br($client->getData('consigne_ref_ext'));
             }
         }
 
@@ -2921,8 +2937,12 @@ class Bimp_Commande extends BimpComm
                                     if (BimpObject::objectLoaded($fac_line)) {
                                         $fac_line_rate = $lines_rate;
 
-                                        if ((float) $fac_line->pu_ht !== (float) $line->pu_ht) {
-                                            $fac_line_rate = (((float) $line->pu_ht * ($lines_rate / 100)) / (float) $fac_line->pu_ht) * 100;
+                                        if ((float) $fac_line->pu_ht) {
+                                            if ((float) $fac_line->pu_ht !== (float) $line->pu_ht) {
+                                                $fac_line_rate = (((float) $line->pu_ht * ($lines_rate / 100)) / (float) $fac_line->pu_ht) * 100;
+                                            }
+                                        } else {
+                                            $fac_line_rate = 0;
                                         }
 
                                         $fac_line_remise = BimpCache::findBimpObjectInstance('bimpcommercial', 'ObjectLineRemise', array(

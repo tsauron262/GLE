@@ -136,7 +136,7 @@ class BimpClientForDol extends Bimp_Client{
                 // Note
                 $this->addError(implode('', $c->addNote($msg,
                         BimpNote::BIMP_NOTE_MEMBERS, 0, 1, '',BimpNote::BN_AUTHOR_USER,
-                        BimpNote::BN_DEST_USER, (int) $commercial->id)));
+                        BimpNote::BN_DEST_USER, 0, (int) $commercial->id)));
                 
                 $c->updateField('date_rappel_atradius', date('Y-m-d h:i:s'));
                 $this->output .= $msg . '<br/>';

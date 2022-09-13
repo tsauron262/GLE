@@ -1,6 +1,7 @@
 bootstrap: 1
 js: 
     1: /bimptocegid/js/search.js
+    2: /bimptocegid/js/files.js
 sections:
     - type: custom
       custom:
@@ -8,7 +9,7 @@ sections:
     - type: nav_tabs
       nav_tabs:
         - id: repertoire_export
-          title: En attente d'envois à cégid
+          title: Export
           struct:
             type: custom
             custom:

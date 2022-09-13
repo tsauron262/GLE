@@ -45,6 +45,20 @@ objects:
         instance: 
             id_object: 
                 field_value: gamme
+              
+forms: 
+    date_bilan:
+        title: Date sotck a date
+        rows: 
+            - custom: 1
+              label: Date
+              input_name: date
+              input: 
+                  type: date
+              value:
+                  callback: getDateBilan
+                  
+        
                 
 fields: 
     fk_entrepot: 
@@ -247,6 +261,7 @@ lists:
     default: 
         title: 
             callback: displayTitre
+        before_list_callback: renderHeaderList
         icon: fas_box-open
         checkboxes: 1
         configurable: 1

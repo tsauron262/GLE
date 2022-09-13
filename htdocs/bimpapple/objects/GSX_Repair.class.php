@@ -1850,6 +1850,9 @@ class GSX_Repair extends BimpObject
 
                             foreach ($this->repairLookUp['parts'] as $repairPart) {
                                 $savPart = null;
+                                
+                                if(stripos($repairPart['number'], 'ACSH') !== false)
+                                    continue;
 
                                 if (isset($repairPart['number']) && $repairPart['number']) {
                                     $savPart = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_ApplePart', array(

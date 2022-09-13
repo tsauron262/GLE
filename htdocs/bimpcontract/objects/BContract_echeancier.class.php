@@ -610,7 +610,7 @@ class BContract_echeancier extends BimpObject {
             foreach ($data->factures_send as $element_element) {
                 $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $element_element['d']);                
                 
-                if($facture->getData('type') != 3 && !$have_avoir && $facture->getData('type') != 2) {
+                if($facture->getData('type') != 3) {
                 
                 // Définition de si c'est une facture de l'échéancier ou non
                 $has_facture_of_echeancier = true;
@@ -622,7 +622,7 @@ class BContract_echeancier extends BimpObject {
                 //        $has_facture_of_echeancier = false;
                 //    }
                 //}
-
+                 
                 if ($facture->getData('fk_statut') == 0) {
                     $can_create_next_facture = false;
                 }
@@ -648,7 +648,7 @@ class BContract_echeancier extends BimpObject {
                 $html .= '<td style="text-align:center"><b>' . price($facture->getData('total')) . ' €</b> </td>'
                         . '<td style="text-align:center"><b>' . price($facture->getData('tva')) . ' € </b></td>'
                         . '<td style="text-align:center"><b>' . price($facture->getData('total_ttc')) . ' €</b> </td>'
-                        . '<td style="text-align:center"><b>' . price($facture->getData('total') - $facture->getData('marge')) . ' €</b></td>'
+                        . '<td style="text-align:center"><b>' . price($facture->getData('total') - $facture->getData('marge_finale_ok')) . ' €</b></td>'
                         . '<td style="text-align:center">' . $facture->getNomUrl(1) . '</td>'
                         . '<td style="text-align:center">' . $paye . '</td>'
                         . '<td style="text-align:center">' . $displayAppatenance . '</td>'
@@ -785,10 +785,12 @@ class BContract_echeancier extends BimpObject {
                 if(($user->admin) && $this->canEdit()) {
                     $html .= '<div class="btn-group"><button type="button" class="btn btn-danger bs-popover" '.BimpRender::renderPopoverData('Supprimer l\'échéancier').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick('delete') . '"><i class="fa fa-times"></i></button></div>';
                 }
-                if($user->admin || $user->rights->facture->creer) {
-                    $html .= '<div class="btn-group"><button type="button" class="btn btn-primary bs-popover" '.BimpRender::renderPopoverData('Refaire l\'échéancier suite à un avoir').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick('unlinkLastFacture', [], ['form_name' => 'unlinkLastFacture']) . '"><i class="fa fa-times"></i> Refaire l\'échéancier suite à un avoir</button></div>';
-                }
+//                if($user->admin || $user->rights->facture->creer) {
+//                    $html .= '<div class="btn-group"><button type="button" class="btn btn-primary bs-popover" '.BimpRender::renderPopoverData('Refaire l\'échéancier suite à un avoir').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick('unlinkLastFacture', [], ['form_name' => 'unlinkLastFacture']) . '"><i class="fa fa-times"></i> Refaire l\'échéancier suite à un avoir</button></div>';
+//                }
                 
+                // 
+                $html .= '<div class="btn-group"><button type="button" class="btn bs-popover" '.BimpRender::renderPopoverData('Générer le PDF').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick('generatePdfEcheancier', array(), array('form_name' => 'pdfEcheancier')) . '">Générer le PDF</button></div>';
 //                        $html .= '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Facturer la période" onclick="' . $this->getJsActionOnclick("createFacture", array('total_ht' => $parent->getTotalContrat() - $parent->getTotalDejaPayer(), 'pa' => ($parent->getTotalPa() - $parent->getTotalDejaPayer(false, 'pa'))), array("success_callback" => $callback)) . '")"><i class="fa fa-plus" >Facturation suplémentaire</i></span>';
 //                if($this->canEdit()) {
                   if($user->admin) {
@@ -799,7 +801,9 @@ class BContract_echeancier extends BimpObject {
 //                    $html .= '<div class="btn-group"><button type="button" class="btn btn-default" aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsLoadModalForm('create_perso', "Créer une facture personnalisée ou une facturation de plusieurs périodes") . '"><i class="fa fa-plus-square-o iconLeft"></i>Créer une facture personalisée ou une facturation de plusieurs périodes</button></div>';
 //                }
             }
-            if(($user->rights->facture->creer && $reste_periodeEntier == 0 && round($parent->getCurrentTotal(), 2) - round($parent->getTotalDejaPayer(), 2) > 0) && $parent->getData('statut') == 11)
+            
+            
+            if(($user->rights->facture->creer && $reste_periodeEntier == 0 && round($parent->getCurrentTotal(), 2) - round($parent->getTotalDejaPayer(), 2) != 0) && $parent->getData('statut') == 11)
                 $html .= '<div class="btn-group"><button type="button" class="btn btn-default bs-popover" '.BimpRender::renderPopoverData('Facturation supplémentaire').' aria-haspopup="true" aria-expanded="false" onclick="' . $this->getJsActionOnclick("createFacture", array('labelLn'=> 'Facturation supplémentaire', 'label'=> 'Complément à', 'total_ht' => $parent->getTotalContrat() - $parent->getTotalDejaPayer(), 'pa' => ($parent->getTotalPa() - $parent->getTotalDejaPayer(false, 'pa'))), array("success_callback" => $callback)) . '"><i class="fa fa-plus"></i> Facturation supplémentaire</button></div>';
             $html .= '</div>';
         }
@@ -843,6 +847,269 @@ class BContract_echeancier extends BimpObject {
         if($display)
             return $html;
         
+        
+    }
+    
+    public function actionGeneratePdfEcheancier($data, &$success)
+    {
+        global $langs;
+        $parent = $this->getParentInstance();
+        $this->dol_object->id_contrat = $this->getData('id_contrat');
+        $this->dol_object->afficher_total = $data['total_lines'];
+        $url = DOL_URL_ROOT . '/document.php?modulepart=' . 'contrat' . '&file=' . $parent->getRef() . '/Echeancier.pdf';
+        $errors = $warnings = array();
+        $success = "PDF de l'échéancier généré avec succès";
+        $success_callback = 'window.open("' . $url . '")';
+        $parent->dol_object->generateDocument('echeancierContrat', $langs);
+        return array('errors' => $errors, 'warnings' => $warnings, 'success_callback' => $success_callback);
+    }
+    
+    public function getDureeMoisPeriode($dateStart, $dateStop):int {
+        $mois = 0;
+        
+        $start = new DateTime($dateStart);
+        $stop  = new DateTime($dateStop);
+//        $start->sub(new dateInterval('P1D'));
+//        $stop->add(new dateInterval('P1D'));
+        $interval = $start->diff($stop);
+        $mois = $interval->m;
+        $mois += $interval->y * 12;
+        if($interval->d > 26)
+            $mois ++;
+        
+        
+        
+//        echo '<br/><br/>'.$start->format('Y-m-d').' '.$stop->format('Y-m-d');
+//        echo '<pre>';
+//        print_r($interval);
+        
+        return $mois;
+    }
+    
+    public function getAmountByMonth() {
+        $parentInstance = $this->getParentInstance();
+        $reste_a_payer = $parentInstance->reste_a_payer() / $parentInstance->reste_periode() / $parentInstance->getData('periodicity');
+        
+        return $reste_a_payer;
+        
+    }
+    
+    private $endDateTimeFactured = 0;
+    
+    public function getAllFactures() {
+        
+        $parent = $this->getParentInstance();
+        $facturesElementElement = getElementElement('contrat', 'facture', $parent->id);
+        $factures = Array();
+        
+        if(count($facturesElementElement) > 0) {
+            
+            foreach($facturesElementElement as $index => $data) {
+                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $data['d']);
+                $laLigne = $facture->dol_object->lines[0];
+                $factures[] = Array(
+                    'ref'       => $facture->getRef(),
+                    'ht'        => $facture->getData('total'),
+                    'tva'       => $facture->getData('tva'),
+                    'ttc'       => $facture->getData('total_ttc'),
+                    'dateStart' => $laLigne->date_start, 
+                    'dateEnd'   => $laLigne->date_end
+                );
+                
+                if($laLigne->date_end > $this->endDateTimeFactured) $this->endDateTimeFactured = $laLigne->date_end;
+                
+            }
+            
+        }
+        
+        return $factures;
+        
+    }
+    
+    public function periodeIsFactured($debut, $fin, $factures):array {
+        
+        if(count($factures) > 0) {
+        
+            $dateStartFacturation   = new DateTime();
+            $dateStopFacturation    = new DateTime(); 
+            
+            foreach($factures as $index => $data) {
+                
+                $dateStartFacturation->setTimestamp($data['dateStart']);
+                $dateStopFacturation->setTimestamp($data['dateEnd']);
+                
+                if($dateStartFacturation->format('d/m/Y') == $debut && $dateStopFacturation->format('d/m/Y') == $fin) {
+                    return Array(
+                        'dateStart' => $dateStartFacturation->format('Y-m-d'),
+                        'dateEnd' => $dateStopFacturation->format('Y-m-d'),
+                        'index' => $index
+                    );
+                    
+                }
+                
+            }
+            
+        }
+        
+        return Array();
+                
+    }
+    
+    public function getTotalFactured($factures):float {
+        $return = 0.0;
+        
+        if(count($factures) > 0) {
+            foreach($factures as $index => $data) {
+                
+                $return += $data['ht'];
+                
+            }
+        }
+        
+        return $return;
+    }
+
+    public function getAllPeriodes():array {
+        
+        $periodes = Array();
+        
+        $parentInstance         = $this->getParentInstance();
+        $dateStartEcheancier    = new DateTime($parentInstance->getData('date_start'));
+        if($parentInstance->getData('date_end_renouvellement')) {
+            $dateStopEcheancier     = new DateTime($parentInstance->getData('date_end_renouvellement'));
+        } else {
+            $dateStopEcheancier     = new DateTime($parentInstance->getData('end_date_contrat'));
+            $dateStopEcheancier = $dateStopEcheancier->add(new DateInterval('P1D'));
+        }
+        
+        $diff = $dateStartEcheancier->diff($dateStopEcheancier);
+        
+//        $dureeEnMois            = $parentInstance->getData('duree_mois');
+//        $dureeEnMois            = $diff->m + ($diff->y * 12) + 1;
+        
+        $dureeEnMois            = $this->getDureeMoisPeriode($dateStartEcheancier->format('Y-m-d'), $dateStopEcheancier->format('Y-m-d'));
+        
+        //die($dureeEnMois . ' kcodsp');
+        $periodicity            = $parentInstance->getData('periodicity');
+        
+        if($periodicity == 1200){
+            $periodicity = $dureeEnMois;
+        }
+        $dureePeriodeIncomplette  = $dureeEnMois % $periodicity;
+        $dureePeriodesComplettes  = $dureeEnMois - $dureePeriodeIncomplette;
+        $nombrePeriodesComplettes = $dureePeriodesComplettes / $periodicity;
+
+        $periodes['infos'] = Array(
+            'nombre_periodes'           => $nombrePeriodesComplettes, 
+            'periode_incomplette_mois'  => $dureePeriodeIncomplette,
+            'tarif_au_mois'             => $this->getAmountByMonth(),
+            'factures'                  => $this->getAllFactures()
+        );
+        
+        $i = 1;
+        $haveOtherPeriodes = false;
+        $alternateStartDate = $dateStartEcheancier;
+        
+        $resteAPayer = $parentInstance->reste_a_payer();
+        
+        if($nombrePeriodesComplettes > 0) {
+            while($i <= $nombrePeriodesComplettes) {
+                if(!count($periodes['periodes'])) {
+                    $haveOtherPeriodes = true;
+                    $startDate = $dateStartEcheancier->format('d/m/Y');
+                    $startDateForPeriode = $dateStartEcheancier->format('Y-m-d');
+                    $stopDate = $dateStartEcheancier;
+                } else {
+                    $startDate = $stopDate->add(new DateInterval('P1D'))->format('d/m/Y');
+                    $startDateForPeriode = $stopDate->format('Y-m-d');
+                }
+                
+                $stopDate = $alternateStartDate->add(new DateInterval('P' . $periodicity . 'M'));
+                $stopDate->sub(new DateInterval('P1D'));
+                
+                $factured = $this->periodeIsFactured($startDate, $stopDate->format('d/m/Y'), $periodes['infos']['factures']);
+                //print_r($factured);
+                if(!count($factured)) {
+                    $price = $this->getDureeMoisPeriode($startDateForPeriode, $stopDate->format('Y-m-d')) * $periodes['infos']['tarif_au_mois']; 
+                    $startDateStr = $startDate;
+                    $stopDateStr = $stopDate->format('d/m/Y');
+                    $factureStr = '';
+                } else {
+                    $startDate = new DateTime($factured['dateStart']);
+                    $startDateStr = $startDate->format('d/m/Y');
+                    $stopDate = new DateTime($factured['dateEnd']);
+                    $stopDateStr = $stopDate->format('d/m/Y');
+                    
+                    $resteAPayer = $periodes['infos']['factures'][$factured['index']]['ht'];
+                    $factureStr = $periodes['infos']['factures'][$factured['index']]['ref'];
+                    $price = $periodes['infos']['factures'][$factured['index']]['ht'];
+                    
+                    
+                    $stopDate = new DateTime($factured['dateEnd']);
+                    //$stopDate->add(new DateInterval('P1D'));
+                }
+                
+                
+                $periodes['periodes'][] = Array(
+                    'START' => $startDateStr,
+                    'STOP'  => $stopDateStr,
+                    'DATE_FACTURATION' => ($parentInstance->getData('facturation_echu')) ? $stopDateStr : $startDateStr,
+                    'HT' => $resteAPayer,
+                    'DUREE_MOIS' => $this->getDureeMoisPeriode($startDateForPeriode, $stopDate->format('Y-m-d')),
+                    'PRICE' => $price,
+                    'TVA' => $price * 0.2,
+                    'FACTURE' => $factureStr
+                );
+
+                $alternateStartDate = $stopDate;
+
+                $i++;
+            }
+        }
+        
+        if($dureePeriodeIncomplette > 0) {
+            
+            if(!$haveOtherPeriodes) {
+                $resteStartDT   = $alternateStartDate;
+                $resteStart     = $alternateStartDate->format('d/m/Y');
+                $resteStopDT = $alternateStartDate->add(new DateInterval('P' . $dureePeriodeIncomplette . 'M'))->sub(new DateInterval('P1D'));
+                $resteStop  = $resteStopDT->format('d/m/Y');
+            } else {
+                $resteStartDT = $stopDate->add(new DateInterval('P1D'));
+                $resteStart = $resteStartDT->format('d/m/Y');
+                $resteStopDT = $resteStartDT->add(new DateInterval('P' . $dureePeriodeIncomplette . 'M'));
+                $resteStopDT->sub(new DateInterval('P1D'));
+                $resteStop  = $resteStopDT->format('d/m/Y');
+            }
+            
+            $price = $this->getDureeMoisPeriode($resteStartDT->format('Y-m-d'), $resteStopDT->format('Y-m-d')) * $periodes['infos']['tarif_au_mois'];
+            
+            $periodes['periodes'][] = Array(
+                'START' => $resteStart,
+                'STOP'  => $resteStop,
+                'DATE_FACTURATION' => ($parentInstance->getData('facturation_echu')) ? $resteStop : $resteStart,
+                'HT' => $resteAPayer,
+                'DUREE_MOIS' => $this->getDureeMoisPeriode($resteStartDT->format('Y-m-d'), $resteStopDT->format('Y-m-d')),
+                'PRICE' => $price,
+                'TVA' => $price * 0.2
+            );
+            
+        }
+        
+        
+        //Vérif
+        $tot = 0;
+        foreach($periodes['periodes'] as $periode){
+            $tot += $periode['PRICE'];
+        }
+        if($tot != $parentInstance->getTotalContrat()){
+            BimpCore::addlog('PRobléme Technique contrat '.$parentInstance->id.' pdf exheancier totP '.$tot.' totCt '.$parentInstance->getTotalContrat());
+            die('PRobléme Technique');
+        }
+        
+        
+
+        return $periodes;
         
     }
 

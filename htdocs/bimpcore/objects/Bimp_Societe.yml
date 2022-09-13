@@ -81,6 +81,12 @@ objects:
         instance: 
             id_object: 
                 field_value: fk_user_creat
+    
+    user_update:
+        extends: user
+        instance: 
+            id_object: 
+                field_value: fk_user_modif
                 
 fields: 
     datec: 
@@ -91,6 +97,18 @@ fields:
         label: Créée par
         type: id_object
         object: user_author
+        input: 
+            type: hidden
+        search: 
+            input: 
+                type: search_user
+        filter: 
+            type: user
+            
+    fk_user_modif:
+        label: Modifié par
+        type: id_object
+        object: user_modif
         input: 
             type: hidden
         search: 
@@ -485,6 +503,11 @@ fields:
         label: Date rappel expiration de la couverture Atradius
         type: datetime
         
+
+    date_demande_atradius: 
+        label: Date de demande de couverture Atradius
+        type: datetime
+        
     outstanding_limit_icba:
         label: Limite de crédit ICBA 
         type: money
@@ -597,6 +620,14 @@ fields:
         values: 
             array: contacts
             
+    id_contact_shipment: 
+        label: Contact par défaut pour les livraisons
+        type: id_object
+        object: contact_shipments
+        default_value: 0
+        values: 
+            array: contacts
+            
     id_contact_relances: 
         label: Contact pour les relances de paiement
         type: id_object
@@ -682,7 +713,15 @@ fields:
         
     id_atradius:
         label: Identifiant Atradius
-        type: int     
+        type: int   
+        
+    msg_fact:
+        label: Message Facturation
+        type: text
+        
+    consigne_ref_ext:
+        label: Consigne référence externe
+        type: text
         
         
 #    *** Champs non gérés: ***
@@ -771,11 +810,16 @@ fields_tables:
             - field: contact_default
               show: 
                   callback: isClient
-              display: nom_url
+              edit: 1
+            - field: id_contact_shipment
+              edit: 1
+              show: 
+                  callback: isClient
             - field: id_contact_relances
               show: 
                   callback: isClient
               display: nom_url
+              edit: 1
             - field: remise_client
               show: 
                   callback: isClient
@@ -791,6 +835,8 @@ fields_tables:
             - field: relances_actives
               show: 
                   callback: isClient
+            - field: msg_fact
+              edit: 1
             - field: date_relances_deactivated
               show: 
                   callback: isClient
@@ -818,6 +864,7 @@ fields_tables:
             - field: last_activity_origin
               show: 
                   callback: isClient
+            - field: consigne_ref_ext
                   
     encours: 
         title: Encours HT
@@ -1151,6 +1198,8 @@ forms:
                     callback: isClient
             parent:
                 field: parent
+            consigne_ref_ext:
+                field: consigne_ref_ext
                 
     logo: 
         title: Changer le logo
@@ -1406,10 +1455,28 @@ lists_cols:
         label: Commercial
         value: 
             callback: displayCommercials
+        csv_needed_fields:
+            - rowid
+            
+    codeClientName:
+        label: Code Client + nom
+        value:
+            callback: displayCodeClientNom
+        csv_needed_fields:
+            - code_client
+            - name
+            
+            
     full_address: 
         label: Adresse
         value: 
             callback: displayFullAddress
+        csv_needed_fields:
+            - address
+            - zip
+            - town
+            - fk_dep
+            - fk_pays
     infos_contact: 
         label: Infos contact
         value: 

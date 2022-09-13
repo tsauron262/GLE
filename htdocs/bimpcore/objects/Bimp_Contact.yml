@@ -334,6 +334,14 @@ lists_cols:
         label: Infos contact
         value: 
             callback: displayContactInfos
+            
+    nomComplet:
+        label: Nom Complet  
+        value: 
+            callback: displayNomComplet
+        csv_needed_fields: 
+            - lastname
+            - firstname
         
 lists: 
     default: 

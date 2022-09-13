@@ -12,7 +12,8 @@ header_btn:
     callback: getActionsButtons
     
 header_list_name: default
-header_edit_form: card
+header_edit_form: 
+    callback: getEditFormName
 header_delete_btn: 1
 
 list_page_url: 
@@ -223,6 +224,9 @@ fields:
         default_value: 0
     photo:
         label: photo
+        
+    id_docusign: 
+        label: Identifiant DocuSign
         
 forms:
     light: 
@@ -464,7 +468,18 @@ filters_panel:
             firstname: 
             lastname: 
             login: 
+            group:
                 
+filters: 
+    group: 
+        label: Groupe
+        data_type: id_object
+        object: user_group
+        type: value
+        input: 
+            type: search_group
+            include_empty: 1
+            empty_label: Aucun        
         
 lists:
     bygroup:

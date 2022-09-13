@@ -12,7 +12,7 @@ fields:
     label: 
         label: Titre
     status:
-        label: Status
+        label: Statut
         type: int
         values: 
             array: status_list
@@ -36,11 +36,28 @@ fields:
             array: niveaux
     msg: 
         label: Message
-        hashtags: 1        
+        hashtags: 1  
+        type: html
+        input:
+            type: html
+    type:
+        label: Type
+        type: int
+        values:
+            - Message
+            - Popup
+    filter:
+        label: Filtre
+#        type: text
+        type: object_filters
+        obj_module: bimpcore
+        obj_name: Bimp_User
         
 lists:
     default:
         positions: 1
+        extra_btn: 
+            callback: getListExtraButtons
         positions_open: 1
         title: Alerts
         add_form_name: default
@@ -55,4 +72,13 @@ lists:
             label:
             niveau:
             msg:
+            type:
+            filter:
+            nb:
+                
+lists_cols:
+    nb:
+        label: Nombre de vue
+        value: 
+            callback: getNbView
                 

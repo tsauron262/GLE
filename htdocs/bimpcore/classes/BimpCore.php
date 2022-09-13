@@ -3,6 +3,7 @@
 class BimpCore
 {
 
+    public static $is_init = false;
     public static $conf_cache = null;
     public static $conf_cache_def_values = array();
     private static $context = '';
@@ -39,11 +40,12 @@ class BimpCore
         'css' => array(
             'jPicker'    => '/includes/jquery/plugins/jpicker/css/jPicker-1.1.6.css',
             'bimpcore'   => '/bimpcore/views/css/bimpcore.css',
-            'userConfig' => '/bimpuserconfig/views/css/userConfig.css',
-//            '/theme/BimpTheme/views/dist/css/theme.css' // TODO remove
+            'userConfig' => '/bimpuserconfig/views/css/userConfig.css'
         )
     );
+    public static $js_vars = array();
     public static $filesInit = false;
+    public static $layoutInit = false;
     public static $config = null;
     public static $dev_mails = array(
         'tommy'   => 't.sauron@bimp.fr',
@@ -54,78 +56,140 @@ class BimpCore
     );
     public static $html_purifier = null;
 
+    // Initialisation: 
+
+    public static function init()
+    {
+        if (!self::$is_init) {
+            self::$is_init = true;
+
+            global $noBootstrap, $conf;
+
+            if (BimpDebug::isActive()) {
+                BimpDebug::addDebugTime('Début affichage page');
+            }
+
+            if (stripos($_SERVER['PHP_SELF'], 'bimpinterfaceclient') === false) {
+                self::setContext("private"); // Todo: trouver meilleure solution (Le contexte privé / public doit être indépendant du module) 
+            }
+
+            if ($noBootstrap) {
+                self::$files['js'] = BimpTools::unsetArrayValue(self::$files['js'], '/bimpcore/views/js/bootstrap.min.js');
+            }
+
+            if (self::isContextPrivate()) {
+                self::$files['js'][] = '/bimpcore/views/js/notification.js';
+            } else {
+                self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public.css';
+            }
+
+            BimpConfig::initCacheServeur();
+            self::checkSqlUpdates();
+        }
+    }
+
+    // Gestion Layout / js / css: 
+
+    public static function initLayout()
+    {
+        if (!self::$layoutInit) {
+            self::$layoutInit = true;
+        }
+
+        $layout = BimpLayout::getInstance();
+
+        // Ajout fichiers CSS BimpCore:
+        foreach (self::$files['css'] as $css_file) {
+            $layout->addCssFile(self::getFileUrl($css_file, true, false));
+        }
+
+        // Ajout fichiers JS BimpCore: 
+        foreach (self::$files['js'] as $js_file) {
+            $layout->addJsFile(self::getFileUrl($js_file, true, false));
+        }
+
+        // Ajouts variables JS: 
+        $layout->addJsVars(self::getJsVars());
+
+        self::$filesInit = true;
+    }
+
+    public static function getJsVars()
+    {
+        global $user, $conf;
+        $vars = array(
+            'dol_url_root'    => '\'' . DOL_URL_ROOT . '\'',
+            'id_user'         => (BimpObject::objectLoaded($user) ? $user->id : 0),
+            'bimp_context'    => '\'' . self::getContext() . '\'',
+            'theme'           => '\'' . (isset($user->conf->MAIN_THEME) ? $user->conf->MAIN_THEME : $conf->global->MAIN_THEME) . '\'',
+            'sessionHideMenu' => (BimpController::getSessionConf('hideMenu') == "true" ? 1 : 0)
+        );
+
+        $notifs = '{';
+        if (self::isContextPrivate()) {
+            $notification = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
+            $config_notification = $notification->getList();
+
+            foreach ($config_notification as $cn) {
+                $notifs .= $cn['nom'] . ": {";
+                $notifs .= "module: '" . $cn['module'] . "', ";
+                $notifs .= "class: '" . $cn['class'] . "', ";
+                $notifs .= "method: '" . $cn['method'] . "', ";
+                $notifs .= "obj: null},";
+            }
+        }
+        $notifs .= '}';
+
+        $vars['notificationActive'] = $notifs;
+
+        return $vars;
+    }
+
     public static function displayHeaderFiles($echo = true)
     {
-        global $noBootstrap, $conf;
-
-        if ($noBootstrap) {
-//            unset(static::$files['js'][2]);
-            self::$files['js'] = BimpTools::unsetArrayValue(self::$files['js'], '/bimpcore/views/js/bootstrap.min.js');
-        }
-
-        if (BimpTools::getContext() != 'public') {
-            self::$files['js'][] = '/bimpcore/views/js/notification.js';
-        } else {
-            self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public.css';
-        }
-
         $html = '';
         if (!self::$filesInit) {
             foreach (self::$files['css'] as $css_file) {
                 $url = self::getFileUrl($css_file);
-
                 if ($url) {
-                    $html .= '<link type="text/css" rel="stylesheet" href="' . $url . '"/>';
+                    $html .= '<link type="text/css" rel="stylesheet" href="' . $url . '"/>' . "\n";
                 }
             }
 
-            global $user;
+            $js_vars = self::getJsVars();
 
-            $html .= '<script type="text/javascript">';
-            $html .= ' var dol_url_root = \'' . DOL_URL_ROOT . '\';';
-            $html .= ' var id_user = ' . (BimpObject::objectLoaded($user) ? $user->id : 0) . ';';
-            $html .= ' var bimp_context = "' . self::getContext() . '";';
-
-            // Inclusion notifications
-            $html .= 'var notificationActive = {';
-
-            if (self::isContextPrivate()) {
-                $notification = BimpCache::getBimpObjectInstance('bimpcore', 'BimpNotification');
-                $config_notification = $notification->getList();
-
-                foreach ($config_notification as $cn) {
-                    $html .= $cn['nom'] . ": {";
-                    $html .= "module: '" . $cn['module'] . "',";
-                    $html .= "class: '" . $cn['class'] . "' ,";
-                    $html .= "method: '" . $cn['method'] . "' ,";
-                    $html .= "obj: null},";
+            if (!empty($js_vars)) {
+                $html .= "\n" . '<script type="text/javascript">' . "\n";
+                foreach ($js_vars as $var_name => $var_value) {
+                    $html .= "\t" . 'var ' . $var_name . ' = ';
+                    if (BimpTools::isNumericType($var_value)) {
+                        $html .= $var_value;
+                    } else {
+                        $html .= '\'' . $var_value . '\'';
+                    }
+                    $html .= ';' . "\n";
                 }
+                $html .= '</script>' . "\n\n";
             }
-
-            $html .= '};';
-
-            // Fin inclusion notifications
-            $html .= 'var theme="' . (isset($user->conf->MAIN_THEME) ? $user->conf->MAIN_THEME : $conf->global->MAIN_THEME) . '";';
-            $html .= '</script>';
 
             foreach (self::$files['js'] as $js_file) {
                 $url = self::getFileUrl($js_file);
-
                 if ($url) {
-                    $html .= '<script type="text/javascript" src="' . $url . '"></script>';
+                    $html .= '<script type="text/javascript" src="' . $url . '"></script>' . "\n";
                 }
             }
 
             self::$filesInit = true;
         }
 
-        if ($echo)
+        if ($echo) {
             echo $html;
+        }
 
         return $html;
     }
 
-    public static function getFileUrl($file_path, $use_tms = true)
+    public static function getFileUrl($file_path, $use_tms = true, $include_root = true)
     {
         $url = '';
 
@@ -178,206 +242,259 @@ class BimpCore
         }
 
         if ($url) {
-            $prefixe = DOL_URL_ROOT;
-            if ($prefixe == "/")
-                $prefixe = "";
-            elseif ($prefixe != "")
-                $prefixe .= "/";
+            if ($include_root) {
+                $prefixe = DOL_URL_ROOT;
+                if ($prefixe == "/")
+                    $prefixe = "";
+                elseif ($prefixe != "")
+                    $prefixe .= "/";
 
-            return $prefixe . $url;
+                return $prefixe . $url;
+            }
+            return $url;
         }
 
         BimpCore::addlog('FICHIER ABSENT: "' . DOL_DOCUMENT_ROOT . '/' . $file_path . '"', Bimp_Log::BIMP_LOG_ERREUR);
         return '';
     }
 
-    public static function getConfCache()
+    // Gestion Versions et mises à jours: 
+
+    public static function checkSqlUpdates()
     {
-        if (is_null(self::$conf_cache)) {
-            self::$conf_cache = array();
-
-            $rows = BimpCache::getBdb()->getRows('bimpcore_conf');
-
-            foreach ($rows as $r) {
-                $module = $r->module;
-
-                if (!$module) {
-                    $module = 'bimpcore';
-                }
-
-                if (!isset(self::$conf_cache[$module])) {
-                    self::$conf_cache[$module] = array();
-                }
-
-                self::$conf_cache[$module][$r->name] = $r->value;
-            }
+        if (BimpTools::isSubmit('ajax')) {
+            return;
         }
 
-        return self::$conf_cache;
-    }
+        global $user;
 
-    public static function getConf($name, $default = null, $module = 'bimpcore')
-    {
-        // Si le paramètre n'est pas enregistré en base, on retourne en priorité la valeur par défaut
-        // passée en argument de la fonction. 
-        // si cette argument est null on retourne la valeur par défaut définie dans le YML de la config du module (si elle est existe)
-        // on retourne null sinon. 
-        // Le système de cache permet de vérifier une seule fois la valeur en base et la valeur par défaut du YML. 
-
-
-        if (!$module) {
-            $module = 'bimpcore';
+        if (!$user->admin) {
+            return;
         }
 
-        $cache = self::getConfCache();
-
-        if (isset($cache[$module][$name])) {
-//            echo '<br/>OK: ' . $name . ': ' . $cache[$module][$name];
-            return $cache[$module][$name];
-        }
-//        else {
-//            echo '<br/>FAIL: ' . $name;
-//        }
-        // Check éventuelle erreur sur le module: 
-        foreach ($cache as $module_name => $params) {
-            if (isset($params[$name])) {
-                BimpCore::addlog('BimpCore::getConf() - Erreur module possible', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
-                    'Paramètre'                                  => $name,
-                    'Module demandé'                             => $module,
-                    'Module trouvé (tel que enregistré en base)' => $module_name
-                        ), true);
-                break;
-            }
+        if ((int) BimpCore::getConf('check_versions_lock', 0)) {
+            return;
         }
 
-        if (!is_null($default)) {
-            return $default;
-        }
-
-        if (!isset(self::$conf_cache_def_values[$module][$name])) {
-            self::$conf_cache_def_values[$module][$name] = BimpModuleConf::getParamDefaultValue($name, $module, true);
-        }
-
-        return self::$conf_cache_def_values[$module][$name];
-    }
-
-    public static function setConf($name, $value, $module = 'bimpcore')
-    {
-        if (!$module) {
-            $module = 'bimpcore';
-        }
-
-        $errors = array();
-
-        $current_val = (isset(self::$conf_cache[$module][$name]) ? self::$conf_cache[$module][$name] : null);
-
-        $bdb = BimpCache::getBdb();
-
-        if (is_null($current_val)) {
-            if ($bdb->insert('bimpcore_conf', array(
-                        'name'   => $name,
-                        'value'  => $value,
-                        'module' => $module
-                    )) <= 0) {
-                $errors[] = 'Echec de l\'insertion du paramètre "' . $name . '" (Module ' . $module . ') - ' . $bdb->err();
-            }
-        } else {
-            if ($bdb->update('bimpcore_conf', array(
-                        'value' => $value
-                            ), '`name` = \'' . $name . '\' AND `module` = \'' . $module . '\'') <= 0) {
-                $errors[] = 'Echec de la mise à jour du paramètre "' . $name . '" (Module ' . $module . ') - ' . $bdb->err();
-            }
-        }
-
-        self::$conf_cache[$module][$name] = $value;
-
-        return $errors;
-    }
-
-    public static function getVersion($dev = '')
-    {
-        $versions = self::getConf('bimpcore_version');
-
-        if (!is_array($versions) || empty($versions)) {
-            if ((string) $versions) {
-                $versions = json_decode($versions, 1);
+        $dir = DOL_DOCUMENT_ROOT . '/bimpcore/updates';
+        $updates = array();
+        foreach (scandir($dir) as $subDir) {
+            if (in_array($subDir, array('.', '..'))) {
+                continue;
             }
 
-            $update = false;
-
-            if (empty($versions)) {
-                // On vérifie valeur en base:
-                $bdb = BimpCache::getBdb();
-                $value = $bdb->getValue('bimpcore_conf', 'value', '`name` = \'bimpcore_version\'');
-
-                if (!(string) $value) {
-                    $bdb->insert('bimpcore_conf', array(
-                        'value' => json_encode(array(
-                            'florian' => 0,
-                            'tommy'   => 0,
-                            'romain'  => 0,
-                            'alexis'  => 0
-                        )),
-                    ));
-                } else {
-                    if (preg_match('/^[0-9]+(\.[0-9])*$/', $value)) {
-                        // Pour compat:
-                        $versions = array(
-                            'florian' => (float) $value
-                        );
-                        $update = true;
-                    } else {
-                        $versions = json_decode($value, 1);
+            if (preg_match('/^[a-z]+$/', $subDir) && is_dir($dir . '/' . $subDir)) {
+                $current_version = (float) BimpCore::getVersion($subDir);
+                foreach (scandir($dir . '/' . $subDir) as $f) {
+                    if (in_array($f, array('.', '..'))) {
+                        continue;
+                    }
+                    if (preg_match('/^(\d+(\.\d{1})*)\.sql$/', $f, $matches)) {
+                        if ((float) $matches[1] > (float) $current_version) {
+                            if (!isset($updates[$subDir])) {
+                                $updates[$subDir] = array();
+                            }
+                            $updates[$subDir][] = (float) $matches[1];
+                        }
                     }
                 }
+                if (isset($updates[$subDir])) {
+                    sort($updates[$subDir]);
+                }
             }
         }
 
-        if ($dev && !isset($versions[$dev])) {
-            $versions[$dev] = 0;
-            $update = true;
-        }
+        $modules_updates = BimpCore::getModulesUpdates();
+        $modules_extends_updates = BimpCore::getModulesExtendsUpdates();
 
-        if ($update) {
-            if (!empty($versions)) { // Pour éviter un écrasement... 
-                $bdb->update('bimpcore_conf', array(
-                    'value' => json_encode($versions)
-                        ), '`name` = \'bimpcore_version\' AND `module` = \'bimpcore\'');
-                self::$conf_cache['bimpcore']['bimpcore_version'] = json_encode($versions);
+        if (!empty($updates) || !empty($modules_updates) || !empty($modules_extends_updates)) {
+            if (!BimpTools::isSubmit('bimpcore_update_confirm')) {
+                $url = $_SERVER['REQUEST_URI'];
+                if (empty($_SERVER['QUERY_STRING'])) {
+                    $url .= '?';
+                } else {
+                    $url .= '&';
+                }
+                $url .= 'bimpcore_update_confirm=1';
+                echo 'Le module BimpCore doit etre mis a jour<br/><br/>';
+                echo 'Liste des mise à jour: <br/><br/>';
+                if (!empty($updates)) {
+                    echo 'Màj SQL bimpcore: <pre>';
+                    print_r($updates);
+                    echo '</pre>';
+                }
+                if (!empty($modules_updates)) {
+                    echo 'Màj SQL modules: <pre>';
+                    print_r($modules_updates);
+                    echo '</pre>';
+                }
+                if (!empty($modules_extends_updates)) {
+                    echo 'Màj SQL extensions modules: <pre>';
+                    print_r($modules_extends_updates);
+                    echo '</pre>';
+                }
+                echo '<button type="button" onclick="window.location = \'' . $url . '\'">OK</button>';
+                exit;
+            } else {
+                $bdb = BimpCache::getBdb();
+
+                if (!empty($updates) || !empty($modules_updates) || !empty($modules_extends_updates)) {
+                    BimpCore::setConf('check_versions_lock', 1);
+                }
+
+                if (!empty($updates)) {
+                    foreach ($updates as $dev => $dev_updates) {
+                        sort($dev_updates);
+                        $new_version = 0;
+                        $dev_dir = DOL_DOCUMENT_ROOT . '/bimpcore/updates/' . $dev . '/';
+                        foreach ($dev_updates as $version) {
+                            $new_version = $version;
+                            $version = (string) $version;
+                            if (!file_exists($dev_dir . $version . '.sql') && preg_match('/^[0-9]+$/', $version)) {
+                                if (file_exists($dev_dir . $version . '.0.sql')) {
+                                    $version .= '.0';
+                                }
+                            }
+                            if (!file_exists($dev_dir . $version . '.sql')) {
+                                echo 'FICHIER ABSENT: ' . $dev_dir . $version . '.sql <br/>';
+                                continue;
+                            }
+                            echo 'Mise a jour du module bimpcore a la version: ' . $dev . '/' . $version;
+                            if ($bdb->executeFile($dev_dir . $version . '.sql')) {
+                                echo ' [OK]<br/>';
+                            } else {
+                                echo ' [ECHEC] - ' . $bdb->db->error() . '<br/>';
+                            }
+                        }
+                        echo '<br/>';
+
+                        BimpCore::setVersion($dev, $new_version);
+                    }
+                }
+
+                if (!empty($modules_updates)) {
+                    foreach ($modules_updates as $module => $module_updates) {
+                        $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/sql/';
+
+                        if (!file_exists($dir) || !is_dir($dir)) {
+                            echo 'ERREUR. Le dossier de mise à jour du module "' . $module . '" n\'existe pas <br/><br/>';
+                            continue;
+                        }
+
+                        sort($module_updates);
+                        $new_version = 0;
+
+                        foreach ($module_updates as $version) {
+                            $new_version = $version;
+                            $version = (string) $version;
+
+                            if (!file_exists($dir . $version . '.sql') && preg_match('/^[0-9]+$/', $version)) {
+                                if (file_exists($dir . $version . '.0.sql')) {
+                                    $version .= '.0';
+                                }
+                            }
+                            if (!file_exists($dir . $version . '.sql')) {
+                                echo 'FICHIER ABSENT: ' . $dir . $version . '.sql <br/>';
+                                continue;
+                            }
+                            echo 'Mise a jour du module "' . $module . '" à la version: ' . $version;
+                            if ($bdb->executeFile($dir . $version . '.sql')) {
+                                echo ' [OK]<br/>';
+                            } else {
+                                echo ' [ECHEC] - ' . $bdb->db->error() . '<br/>';
+                            }
+                        }
+                        echo '<br/>';
+
+                        if ($new_version) {
+                            BimpCore::setConf('module_version_' . $module, $new_version);
+                        }
+                    }
+                }
+
+                if (!empty($modules_extends_updates)) {
+                    foreach ($modules_extends_updates as $module => $extends_updates) {
+                        if (defined('BIMP_EXTENDS_VERSION') && isset($extends_updates['version'])) {
+                            $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BIMP_EXTENDS_VERSION . '/sql/';
+                            if (!file_exists($dir) || !is_dir($dir)) {
+                                continue;
+                            }
+
+                            sort($extends_updates['version']);
+                            $new_version = 0;
+
+                            foreach ($extends_updates['version'] as $extend_version) {
+                                $new_version = $extend_version;
+                                $extend_version = (string) $extend_version;
+
+                                if (!file_exists($dir . $extend_version . '.sql') && preg_match('/^[0-9]+$/', $extend_version)) {
+                                    if (file_exists($dir . $extend_version . '.0.sql')) {
+                                        $extend_version .= '.0';
+                                    }
+                                }
+                                if (!file_exists($dir . $extend_version . '.sql')) {
+                                    echo 'FICHIER ABSENT: ' . $dir . $extend_version . '.sql <br/>';
+                                    continue;
+                                }
+                                echo 'Mise a jour du module "' . $module . '" à la version: ' . $extend_version . ' (extension de la version "' . BIMP_EXTENDS_VERSION . '"';
+                                if ($bdb->executeFile($dir . $extend_version . '.sql')) {
+                                    echo ' [OK]<br/>';
+                                } else {
+                                    echo ' [ECHEC] - ' . $bdb->db->error() . '<br/>';
+                                }
+                            }
+                            echo '<br/>';
+
+                            if ($new_version) {
+                                BimpCore::setConf('module_sql_version_' . $module . '_version_' . BIMP_EXTENDS_VERSION, $new_version);
+                            }
+                        }
+
+                        if (defined('BIMP_EXTENDS_ENTITY') && isset($extends_updates['entity'])) {
+                            $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/entities/' . BIMP_EXTENDS_ENTITY . '/sql/';
+                            if (!file_exists($dir) || !is_dir($dir)) {
+                                continue;
+                            }
+
+                            sort($extends_updates['entity']);
+                            $new_version = 0;
+
+                            foreach ($extends_updates['entity'] as $extend_version) {
+                                $new_version = $extend_version;
+                                $extend_version = (string) $extend_version;
+
+                                if (!file_exists($dir . $extend_version . '.sql') && preg_match('/^[0-9]+$/', $extend_version)) {
+                                    if (file_exists($dir . $extend_version . '.0.sql')) {
+                                        $extend_version .= '.0';
+                                    }
+                                }
+                                if (!file_exists($dir . $extend_version . '.sql')) {
+                                    echo 'FICHIER ABSENT: ' . $dir . $extend_version . '.sql <br/>';
+                                    continue;
+                                }
+                                echo 'Mise a jour du module "' . $module . '" à la version: ' . $extend_version . ' (extension de l\'entité "' . BIMP_EXTENDS_ENTITY . '"';
+                                if ($bdb->executeFile($dir . $extend_version . '.sql')) {
+                                    echo ' [OK]<br/>';
+                                } else {
+                                    echo ' [ECHEC] - ' . $bdb->db->error() . '<br/>';
+                                }
+                            }
+                            echo '<br/>';
+
+                            if ($new_version) {
+                                BimpCore::setConf('module_sql_version_' . $module . '_entity_' . BIMP_EXTENDS_ENTITY, $new_version);
+                            }
+                        }
+                    }
+                }
+
+                BimpCore::setConf('check_versions_lock', 0);
+
+                $url = str_replace('bimpcore_update_confirm=1', '', $_SERVER['REQUEST_URI']);
+                echo '<br/><button type="button" onclick="window.location = \'' . $url . '\'">OK</button>';
+                exit;
             }
         }
-
-        if ($dev) {
-            return (float) BimpTools::getArrayValueFromPath($versions, $dev, 0);
-        }
-
-        return $versions;
-    }
-
-    public static function setVersion($dev, $version)
-    {
-        $versions = self::getVersion();
-
-        if (!isset($versions[$dev])) {
-            $versions[$dev] = 0;
-        }
-
-        $versions[$dev] = $version;
-
-        self::setConf('bimpcore_version', $versions);
-    }
-
-    public static function getParam($full_path, $default_value = '', $type = 'string')
-    {
-        if (is_null(self::$config)) {
-            self::$config = new BimpConfig('bimpcore', '', 'config');
-        }
-
-        if (!is_null(self::$config)) {
-            return self::$config->get($full_path, $default_value, false, $type);
-        }
-
-        return $default_value;
     }
 
     public static function getModulesUpdates()
@@ -492,6 +609,201 @@ class BimpCore
 
         return $updates;
     }
+
+    public static function getVersion($dev = '')
+    {
+        $versions = self::getConf('bimpcore_version');
+
+        if (!is_array($versions) || empty($versions)) {
+            if ((string) $versions) {
+                $versions = json_decode($versions, 1);
+            }
+
+            $update = false;
+
+            if (empty($versions)) {
+                // On vérifie valeur en base:
+                $bdb = BimpCache::getBdb();
+                $value = $bdb->getValue('bimpcore_conf', 'value', '`name` = \'bimpcore_version\'');
+
+                if (!(string) $value) {
+                    $bdb->insert('bimpcore_conf', array(
+                        'value' => json_encode(array(
+                            'florian' => 0,
+                            'tommy'   => 0,
+                            'romain'  => 0,
+                            'alexis'  => 0
+                        )),
+                    ));
+                } else {
+                    if (preg_match('/^[0-9]+(\.[0-9])*$/', $value)) {
+                        // Pour compat:
+                        $versions = array(
+                            'florian' => (float) $value
+                        );
+                        $update = true;
+                    } else {
+                        $versions = json_decode($value, 1);
+                    }
+                }
+            }
+        }
+
+        if ($dev && !isset($versions[$dev])) {
+            $versions[$dev] = 0;
+            $update = true;
+        }
+
+        if ($update) {
+            if (!empty($versions)) { // Pour éviter un écrasement... 
+                $bdb->update('bimpcore_conf', array(
+                    'value' => json_encode($versions)
+                        ), '`name` = \'bimpcore_version\' AND `module` = \'bimpcore\'');
+                self::$conf_cache['bimpcore']['bimpcore_version'] = json_encode($versions);
+            }
+        }
+
+        if ($dev) {
+            return (float) BimpTools::getArrayValueFromPath($versions, $dev, 0);
+        }
+
+        return $versions;
+    }
+
+    public static function setVersion($dev, $version)
+    {
+        $versions = self::getVersion();
+
+        if (!isset($versions[$dev])) {
+            $versions[$dev] = 0;
+        }
+
+        $versions[$dev] = $version;
+
+        self::setConf('bimpcore_version', $versions);
+    }
+
+    // Gestion BimpCore Conf: 
+
+    public static function getConfCache()
+    {
+        if (is_null(self::$conf_cache)) {
+            self::$conf_cache = array();
+
+            $rows = BimpCache::getBdb()->getRows('bimpcore_conf');
+
+            foreach ($rows as $r) {
+                $module = $r->module;
+
+                if (!$module) {
+                    $module = 'bimpcore';
+                }
+
+                if (!isset(self::$conf_cache[$module])) {
+                    self::$conf_cache[$module] = array();
+                }
+
+                self::$conf_cache[$module][$r->name] = $r->value;
+            }
+        }
+
+        return self::$conf_cache;
+    }
+
+    public static function getConf($name, $default = null, $module = 'bimpcore')
+    {
+        // Si le paramètre n'est pas enregistré en base, on retourne en priorité la valeur par défaut
+        // passée en argument de la fonction. 
+        // si cette argument est null on retourne la valeur par défaut définie dans le YML de la config du module (si elle est existe)
+        // on retourne null sinon. 
+        // Le système de cache permet de vérifier une seule fois la valeur en base et la valeur par défaut du YML. 
+
+
+        if (!$module) {
+            $module = 'bimpcore';
+        }
+
+        $cache = self::getConfCache();
+
+        if (isset($cache[$module][$name])) {
+//            echo '<br/>OK: ' . $name . ': ' . $cache[$module][$name];
+            return $cache[$module][$name];
+        }
+//        else {
+//            echo '<br/>FAIL: ' . $name;
+//        }
+        // Check éventuelle erreur sur le module: 
+        foreach ($cache as $module_name => $params) {
+            if (isset($params[$name])) {
+                BimpCore::addlog('BimpCore::getConf() - Erreur module possible', Bimp_Log::BIMP_LOG_URGENT, 'bimpcore', null, array(
+                    'Paramètre'                                  => $name,
+                    'Module demandé'                             => $module,
+                    'Module trouvé (tel que enregistré en base)' => $module_name
+                        ), true);
+                break;
+            }
+        }
+
+        if (!is_null($default)) {
+            return $default;
+        }
+
+        if (!isset(self::$conf_cache_def_values[$module][$name])) {
+            self::$conf_cache_def_values[$module][$name] = BimpModuleConf::getParamDefaultValue($name, $module, true);
+        }
+
+        return self::$conf_cache_def_values[$module][$name];
+    }
+
+    public static function setConf($name, $value, $module = 'bimpcore')
+    {
+        if (!$module) {
+            $module = 'bimpcore';
+        }
+
+        $errors = array();
+
+        $current_val = (isset(self::$conf_cache[$module][$name]) ? self::$conf_cache[$module][$name] : null);
+
+        $bdb = BimpCache::getBdb();
+
+        if (is_null($current_val)) {
+            if ($bdb->insert('bimpcore_conf', array(
+                        'name'   => $name,
+                        'value'  => $value,
+                        'module' => $module
+                    )) <= 0) {
+                $errors[] = 'Echec de l\'insertion du paramètre "' . $name . '" (Module ' . $module . ') - ' . $bdb->err();
+            }
+        } else {
+            if ($bdb->update('bimpcore_conf', array(
+                        'value' => $value
+                            ), '`name` = \'' . $name . '\' AND `module` = \'' . $module . '\'') <= 0) {
+                $errors[] = 'Echec de la mise à jour du paramètre "' . $name . '" (Module ' . $module . ') - ' . $bdb->err();
+            }
+        }
+
+        self::$conf_cache[$module][$name] = $value;
+
+        return $errors;
+    }
+
+    // Gestion params yml globaux: 
+
+    public static function getParam($full_path, $default_value = '', $type = 'string')
+    {
+        if (is_null(self::$config)) {
+            self::$config = new BimpConfig('bimpcore', '', 'config');
+        }
+
+        if (!is_null(self::$config)) {
+            return self::$config->get($full_path, $default_value, false, $type);
+        }
+
+        return $default_value;
+    }
+
+    // Getters booléens: 
 
     public static function isModuleActive($module)
     {
@@ -683,7 +995,6 @@ class BimpCore
                 );
 
                 if (!$id_current_log) {
-
                     if (defined('ID_ERP')) {
                         $extra_data['ID ERP'] = ID_ERP;
                     }
@@ -701,6 +1012,10 @@ class BimpCore
                         if (BimpDebug::isActive()) {
                             BimpDebug::incCacheInfosCount('logs', true);
                         }
+                    } else {
+                        echo '<pre>';
+                        print_r($errors);
+                        exit;
                     }
                 } else {
                     if (BimpDebug::isActive()) {

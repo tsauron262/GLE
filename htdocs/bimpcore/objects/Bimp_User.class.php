@@ -308,6 +308,14 @@ class Bimp_User extends BimpObject
     {
         $buttons = array();
 
+        if ($this->can('edit') && $this->isEditable()) {
+            $buttons[] = array(
+                'label'   => 'Changer la photo',
+                'icon'    => 'fas_file-image',
+                'onclick' => $this->getJsLoadModalForm('photo', 'Changer la photo')
+            );
+        }
+
         if ($this->isActionAllowed('editInterfaceParams') && $this->canSetAction('editInterfaceParams')) {
             $buttons[] = array(
                 'label'   => 'Paramètres interface',
@@ -536,6 +544,15 @@ class Bimp_User extends BimpObject
     }
 
     // Rendus HTML: 
+
+    public function renderLogo($format = 'mini', $preview = false)
+    {
+        $html = '<div class="bimp_img_container">';
+        $html .= Form::showphoto('userphoto', $this->dol_object, 100, 100, 0, '', $format, 0);
+        $html .= '</div>';
+
+        return $html;
+    }
 
     public function renderHeaderExtraLeft()
     {
@@ -1450,6 +1467,79 @@ class Bimp_User extends BimpObject
         return $errors;
     }
 
+    public function processPhotoUpload()
+    {
+        if (!isset($_FILES['photo'])) {
+            return array();
+        }
+
+        $errors = array();
+
+        if ($this->isLoaded($errors)) {
+            if ((int) BimpTools::getValue('no_photo', 0)) {
+                if ($this->db->update($this->getTable(), array(
+                            'photo' => ''
+                                ), 'rowid = ' . (int) $this->id) <= 0) {
+                    $errors[] = 'Echec de la suppression de la photo - ' . $this->db->err();
+                } else {
+                    $this->set('photo', '');
+                }
+            } elseif (is_uploaded_file($_FILES['photo']['tmp_name'])) {
+                global $maxwidthsmall, $maxheightsmall, $maxwidthmini, $maxheightmini, $quality;
+
+                require_once DOL_DOCUMENT_ROOT . '/core/lib/images.lib.php';
+                require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+
+                if (image_format_supported($_FILES['photo']['name'])) {
+                    global $conf;
+                    $dir = $conf->user->dir_output;
+                    dol_mkdir($dir);
+
+                    if (is_dir($dir)) {
+                        if (!preg_match('/^.+\/$/', $dir)) {
+                            $dir .= '/';
+                        }
+                        $file_name = dol_sanitizeFileName($_FILES['photo']['name']);
+                        $file_path = $dir . $file_name;
+                        if (dol_move_uploaded_file($_FILES['photo']['tmp_name'], $file_path, 1) > 0) {
+                            $this->updateField('photo', $file_name);
+                            $this->dol_object->photo = $file_name;
+//                            $this->dol_object->addThumbs($file_path);
+
+                            $file_osencoded = dol_osencode($file_path);
+                            if (file_exists($file_osencoded)) {
+                                vignette($file_osencoded, $maxwidthsmall, $maxheightsmall, '_small', $quality);
+                                vignette($file_osencoded, $maxwidthmini, $maxheightmini, '_mini', $quality);
+                            }
+                        } else {
+                            $errors[] = 'Echec de l\'enregistrement du fichierr';
+                        }
+                    } else {
+                        $errors[] = 'Echec de la création du dossier de destination de la photo';
+                    }
+                } else {
+                    $errors[] = 'Format non supporté';
+                }
+            } else {
+                switch ($_FILES['photo']['error']) {
+                    case 1:
+                    case 2:
+                        $errors[] = "Fichier trop volumineux";
+                        break;
+                    case 3:
+                        $errors[] = "Echec du téléchargement du fichier";
+                        break;
+
+                    default:
+                        $errors[] = 'Echec du téléchargement pour une raison inconnue';
+                        break;
+                }
+            }
+        }
+
+        return $errors;
+    }
+
     // Actions: 
 
     public function actionExportConges($data, &$success = '')
@@ -1773,7 +1863,7 @@ class Bimp_User extends BimpObject
         );
     }
 
-    public function action($data, &$success)
+    public function actionEditInterfaceParams($data, &$success)
     {
         $errors = array();
         $warnings = array();
@@ -1808,6 +1898,17 @@ class Bimp_User extends BimpObject
     }
 
     // Overrides
+
+    public function onSave(&$errors = array(), &$warnings = array())
+    {
+        $logo_errors = $this->processPhotoUpload();
+
+        if (count($logo_errors)) {
+            $warnings[] = BimpTools::getMsgFromArray($logo_errors, 'Photo');
+        }
+
+        parent::onSave($errors, $warnings);
+    }
 
     public function update(&$warnings = array(), $force_update = false)
     {

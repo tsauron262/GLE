@@ -974,6 +974,11 @@ if (empty($conf->browser->firefox)) {
 
 $heightforframes = 48;
 
+/*moddrsi*/
+// Initialisation BimpCore
+$hookmanager->executeHooks('bimpcoreInit', array());
+/*fmoddrsi*/
+
 // Init menu manager
 if (!defined('NOREQUIREMENU')) {
     if (empty($user->societe_id)) {    // If internal user or not defined
@@ -1401,6 +1406,14 @@ function top_htmlhead($head, $title = '', $disablejs = 0, $disablehead = 0, $arr
                     }
                 }
             }
+            
+            /*moddrsi*/
+            global $bimp_layout_js_vars; 
+            if ($bimp_layout_js_vars) {
+                print $bimp_layout_js_vars;
+            }
+            /*fmoddrsi*/
+            
             // JS forced by page in top_htmlhead (relative url starting with /)
             if (is_array($arrayofjs)) {
                 print '<!-- Includes JS added by page -->' . "\n";
@@ -1414,7 +1427,6 @@ function top_htmlhead($head, $title = '', $disablejs = 0, $disablehead = 0, $arr
                     }
                 }
             }
-
         }
 
         if (!empty($head))
@@ -2042,7 +2054,11 @@ if (!function_exists("llxFooter")) {
         print "\n<!-- A div to allow dialog popup -->\n";
         print '<div id="dialogforpopup" style="display: none;"></div>' . "\n";
 
-
+        /*moddrsi*/
+        if (class_exists('BimpLayout') && BimpLayout::hasInstance()) {
+            BimpLayout::getInstance()->end();
+        }
+        /*fmoddrsi*/
 
         print "</body>\n";
         print "</html>\n";

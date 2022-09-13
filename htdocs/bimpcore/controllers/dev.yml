@@ -161,6 +161,13 @@ sections:
                                 type: list
                                 list: 
                                     object: api_user
+        menu: 
+            label: Menu BimpTheme
+            icon: fas_bars
+            sections: 
+                - type: custom
+                  custom: 
+                      callback: renderBimpThemeMenuList
                                     
         ws: 
             label: Webservice

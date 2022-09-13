@@ -241,13 +241,7 @@ class devController extends BimpController
         if (!$this->can('view')) {
             return BimpRender::renderAlerts('Vous n\'avez pas la permission d\'accéder à ce contenu', 'danger');
         }
-
-        global $user;
-
-        if (!$user->admin) {
-            return BimpRender::renderAlerts('Vous n\'avez pas la permission d\'accéder à cet onglet');
-        }
-
+        
         $files = scandir(DOL_DOCUMENT_ROOT . '/bimpcore/scripts/');
 
         $html = '';
@@ -265,6 +259,16 @@ class devController extends BimpController
         }
 
         return $html;
+    }
+
+    public function renderBimpThemeMenuList()
+    {
+        if (!$this->can('view')) {
+            return BimpRender::renderAlerts('Vous n\'avez pas la permission d\'accéder à ce contenu', 'danger');
+        }
+        
+        $menu = BimpObject::getInstance('bimptheme', 'Bimp_Menu');
+        return $menu->renderItemsList();
     }
 
     // Ajax processes: 

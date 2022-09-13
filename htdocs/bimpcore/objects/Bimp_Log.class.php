@@ -24,7 +24,8 @@ class Bimp_Log extends BimpObject
         'deadLock'      => 'DeadLock',
         'sql_duplicate' => 'Doublons champ bdd',
         'api'           => 'API',
-        'gsx'           => 'GSX'
+        'gsx'           => 'GSX',
+        'ws'            => 'Webservice'
     );
     public static $levels = array(
         self::BIMP_LOG_NOTIF  => array('label' => 'Notification', 'classes' => array('info')),

@@ -9,6 +9,12 @@ class BWSApi
     protected $errors = array();
     protected $check_erp_user_rights = true;
     public static $requests = array(
+        'authenticate'   => array(
+            'desc'   => 'Authentification',
+            'params' => array(
+                'pword' => array('label' => 'Mot de passe', 'required' => 1)
+            )
+        ),
         'getObjectData'  => array(
             'desc'   => 'Retourne toutes les données d\'un objet',
             'params' => array(
@@ -70,6 +76,33 @@ class BWSApi
         )
     );
 
+    public static function getInstance($request_name, $params)
+    {
+        $class_name = 'BWSApi';
+
+        if (defined('BIMP_EXTENDS_VERSION')) {
+            if (file_exists(DOL_DOCUMENT_ROOT . '/bimpwebservice/extends/version/' . BIMP_EXTENDS_VERSION . '/classes/BWSApi.php')) {
+                $class_name = 'BWSApi_ExtVersion';
+
+                if (!class_exists($class_name)) {
+                    require_once DOL_DOCUMENT_ROOT . '/bimpwebservice/extends/version/' . BIMP_EXTENDS_VERSION . '/classes/BWSApi.php';
+                }
+            }
+        }
+
+        if (defined('BIMP_EXTENDS_ENTITY')) {
+            if (file_exists(DOL_DOCUMENT_ROOT . '/bimpwebservice/extends/entities/' . BIMP_EXTENDS_ENTITY . '/classes/BWSApi.php')) {
+                $class_name = 'BWSApi_ExtEntity';
+
+                if (!class_exists($class_name)) {
+                    require_once DOL_DOCUMENT_ROOT . '/bimpwebservice/extends/entities/' . BIMP_EXTENDS_ENTITY . '/classes/BWSApi.php';
+                }
+            }
+        }
+
+        return new $class_name($request_name, $params);
+    }
+
     public function __construct($request_name, $params)
     {
         $this->request_name = $request_name;
@@ -88,7 +121,7 @@ class BWSApi
     {
         $requests = array();
 
-        foreach (self::$requests as $name => $data) {
+        foreach (static::$requests as $name => $data) {
             $requests[$name] = $name;
         }
 
@@ -97,6 +130,11 @@ class BWSApi
 
     // Getters: 
 
+    public function getParam($param_name, $default_value = null)
+    {
+        return BimpTools::getArrayValueFromPath($this->params, $param_name, $default_value);
+    }
+
     public function getErrors()
     {
         return $this->errors;
@@ -104,7 +142,7 @@ class BWSApi
 
     // Traitements: 
 
-    public function init($login, $pword)
+    public function init($login, $token)
     {
         // check requête: 
         if (!isset(self::$requests[$this->request_name])) {
@@ -119,18 +157,22 @@ class BWSApi
         }
 
         // check user: 
+        $login = base64_decode($login);
         $this->ws_user = BimpCache::findBimpObjectInstance('bimpwebservice', 'BWS_User', array(
                     'email' => $login
         ));
 
         if (!BimpObject::objectLoaded($this->ws_user)) {
-            $this->addError('LOGIN_INVALIDE', 'Identifiant ou mot de passe du compte utilisateur invalide');
+            $this->addError('LOGIN_INVALIDE', 'Identifiant ou mot de passe du compte utilisateur invalide (L: ' . $login . ')');
             return false;
         }
 
-        if (!$this->ws_user->checkPWord($pword)) {
-            $this->addError('LOGIN_INVALIDE', 'Identifiant ou mot de passe du compte utilisateur invalide');
-            return false;
+        if ($this->request_name !== 'authenticate') {
+            $token = base64_decode($token);
+            if (!$this->ws_user->checkToken($token)) {
+                $this->addError('TOKEN_INVALIDE', 'Token invalide ou arrivé à expiration');
+                return false;
+            }
         }
 
         // check params:
@@ -139,12 +181,14 @@ class BWSApi
         }
 
         // check droit requête:
-        $module = BimpTools::getArrayValueFromPath($this->params, 'module', 'any');
-        $object_name = BimpTools::getArrayValueFromPath($this->params, 'object_name', 'any');
+        if ($this->request_name !== 'authenticate') {
+            $module = BimpTools::getArrayValueFromPath($this->params, 'module', 'any');
+            $object_name = BimpTools::getArrayValueFromPath($this->params, 'object_name', 'any');
 
-        if (!$this->ws_user->hasRight($this->request_name, $module, $object_name)) {
-            $this->addError('UNAUTHORIZED', 'Opération non permise');
-            return false;
+            if (!$this->ws_user->hasRight($this->request_name, $module, $object_name)) {
+                $this->addError('UNAUTHORIZED', 'Opération non permise');
+                return false;
+            }
         }
 
         // Init USER 
@@ -238,6 +282,7 @@ class BWSApi
                 }
             }
         }
+        
         return $check;
     }
 
@@ -401,8 +446,10 @@ class BWSApi
 
                 die(json_encode(array(
                     'errors' => array(
-                        'code'    => 'INTERNAL_ERROR',
-                        'message' => 'Erreur interne - opération indisponible pour le moment'
+                        array(
+                            'code'    => 'INTERNAL_ERROR',
+                            'message' => 'Erreur interne - opération indisponible pour le moment'
+                        )
                     )
                 )));
                 break;
@@ -423,7 +470,32 @@ class BWSApi
 
     // Requêtes: 
 
-    public function wsRequest_getObjectData()
+    protected function wsRequest_authenticate()
+    {
+        $response = array();
+
+        if (!count($this->errors)) {
+            $pword = base64_decode($this->getParam('pword', ''));
+
+            if (!$this->ws_user->checkPWord($pword)) {
+                $this->addError('LOGIN_INVALIDE', 'Identifiant ou mot de passe du compte utilisateur invalide - (PW)');
+            } else {
+                $errors = array();
+                $response = $this->ws_user->generateToken($errors);
+
+                if (count($errors)) {
+                    BimpCore::addlog('Erreur lors de la génération d\'un token d\'authentification', Bimp_Log::BIMP_LOG_ERREUR, 'ws', $this->ws_user, array(
+                        'Erreurs' => $errors
+                    ));
+                    $this->addError('INTERNAL_ERROR', 'Une erreur est survenue - échec de l\'authentification');
+                }
+            }
+        }
+
+        return $response;
+    }
+
+    protected function wsRequest_getObjectData()
     {
         $response = array();
 
@@ -468,7 +540,7 @@ class BWSApi
         return $response;
     }
 
-    public function wsRequest_getObjectValue()
+    protected function wsRequest_getObjectValue()
     {
         $response = array();
 
@@ -498,7 +570,7 @@ class BWSApi
         return $response;
     }
 
-    public function wsRequest_getObjectsList()
+    protected function wsRequest_getObjectsList()
     {
         $response = array();
 
@@ -542,7 +614,7 @@ class BWSApi
         return $response;
     }
 
-    public function wsRequest_createObject()
+    protected function wsRequest_createObject()
     {
         $response = array();
 
@@ -573,7 +645,7 @@ class BWSApi
         return $response;
     }
 
-    public function wsRequest_updateObject()
+    protected function wsRequest_updateObject()
     {
         $response = array();
 
@@ -609,7 +681,7 @@ class BWSApi
         return $response;
     }
 
-    public function wsRequest_deleteObject()
+    protected function wsRequest_deleteObject()
     {
         $response = array();
 

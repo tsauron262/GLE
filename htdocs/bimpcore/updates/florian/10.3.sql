@@ -11,6 +11,4 @@ CREATE TABLE IF NOT EXISTS `llx_bimp_commande_fourn_line` (
   `linked_object_name` varchar(256) NOT NULL,
   `remise` decimal(24,8) NOT NULL DEFAULT '0.00000000',
   `position` INT NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-ALTER TABLE `llx_bf_demande_line` ADD `commandes_fourn` TEXT NOT NULL DEFAULT '' AFTER `position`;
+);

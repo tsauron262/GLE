@@ -1,4 +1,10 @@
 bootstrap: 1
+
+title: 
+    callback: 
+        object: demande
+        method: getPageTitle
+
 objects:
     demande: 
         instance: 
@@ -10,17 +16,17 @@ sections:
     - type: object_header
       object_header: 
           object: demande
+          
     - type: nav_tabs
       nav_tabs: 
           - id: card
-            title: Fiche demande
+            title: Fiche
             struct: 
                 type: view
                 view: 
                     panel: 1
                     name: demande
                     object: demande
-                    
           - id: elements
             title: Elements financés
             struct: 
@@ -29,32 +35,14 @@ sections:
                     name: default
                     object: demande
                     children: lines
-          
-          - id: montants
-            title: Montants
-            struct:
-                type: view
-                view: 
-                    panel: 1
-                    name: montants
-                    object: demande
-          
-          - id: fournisseurs
-            title: Commandes fournisseurs
+          - id: refinanceurs
+            title: Demandes refinanceurs
             struct: 
-                type: view
-                view: 
-                    panel: 0
-                    name: fournisseurs
+                type: list
+                list: 
+                    name: default
                     object: demande
-          - id: factures
-            title: Factures
-            struct: 
-                type: view
-                view: 
-                    object: demande
-                    name: factures
-                    panel: 0
+                    children: refinanceurs
           - id: files
             title: Fichiers joints
             struct:
@@ -65,17 +53,11 @@ sections:
                     panel: 1
                     object: demande
                     children: files
-    - type: list
-      list:
-          panel: 1
-          object: demande
-          children: comments
-          
-    - type: buttons
-      buttons:
-          - label: Liste des demandes de financement
-            url:
-                controller: index
-            icon_before: chevron-left
-            classes: 
-                array: btn,btn-primary
+                    
+    - type: custom
+      custom: 
+          callback: 
+              method: renderNotesList
+              object: demande
+              params:
+                  - 1

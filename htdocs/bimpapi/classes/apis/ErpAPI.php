@@ -11,6 +11,9 @@ class ErpAPI extends BimpAPI
     public static $default_post_mode = 'array';
     public static $urls_bases = array();
     public static $requests = array(
+        'authenticate'   => array(
+            'label' => 'Authentification'
+        ),
         'getObjectData'  => array(
             'label' => 'Obtenir les données d\'un objet'
         ),
@@ -28,7 +31,7 @@ class ErpAPI extends BimpAPI
         ),
         'deleteObject'   => array(
             'label' => 'Supprimer un objet'
-        ),
+        )
     );
 
     // Requêtes: 
@@ -113,6 +116,8 @@ class ErpAPI extends BimpAPI
         if (!count($errors)) {
             if (isset($response['list'])) {
                 return $response['list'];
+            } else {
+                $errors[] = 'Aucune réponse reçue';
             }
         }
 
@@ -209,10 +214,30 @@ class ErpAPI extends BimpAPI
 
     public function connect(&$errors = array(), &$warnings = array())
     {
-        if ($this->isUserAccountOk()) {
-            $this->userAccount->updateField('logged_end', '2099-12-31 23:59:59');
+        if (!count($errors) && $this->isUserAccountOk($errors)) {
+            $pword = $this->userAccount->getData('pword');
+            $result = $this->execCurl('authenticate', array(
+                'fields' => array(
+                    'pword' => base64_encode($pword)
+                )
+                    ), $errors);
+
+            if (isset($result['token']) && (string) $result['token']) {
+                $expire = BimpTools::getArrayValueFromPath($result, 'expire', '');
+
+                if (!$expire) {
+                    $dt_now = new DateTime();
+                    $dt_now->add(new DateInterval('PT720M'));
+                    $expire = $dt_now->format('Y-m-d H:i:s');
+                }
+
+                $this->saveToken('auth', $result['token'], $expire);
+            } else {
+                $errors[] = 'Echec de la connexion pour une raison inconnue';
+            }
         }
-        return true;
+
+        return (!count($errors));
     }
 
     public function getDefaultRequestsHeaders($request_name, &$errors = array())
@@ -221,19 +246,21 @@ class ErpAPI extends BimpAPI
 
         if ($this->isUserAccountOk($errors)) {
             $login = $this->userAccount->getData('login');
-            $pw = $this->userAccount->getData('pword');
 
             if (!$login) {
                 $errors[] = 'Login utilisateur absent';
-            }
-
-            if (!$pw) {
-                $errors[] = 'Mot de passe utilisateur absent';
-            }
-
-            if (!count($errors)) {
+            } else {
                 $headers['BWS-LOGIN'] = base64_encode($login);
-                $headers['BWS-PW'] = base64_encode($pw);
+            }
+
+            if ($request_name !== 'authenticate') {
+                $token = $this->userAccount->getToken('auth');
+
+                if (!$token) {
+                    $errors[] = 'Token absent';
+                } else {
+                    $headers['BWS-TOKEN'] = base64_encode($token);
+                }
             }
         }
 
@@ -294,6 +321,12 @@ class ErpAPI extends BimpAPI
                         'id_api' => $api->id,
                         'name'   => 'url_base_default_prod',
                         'title'  => 'Base URL Prod'
+                            ), true, $warnings, $warnings);
+
+            $param = BimpObject::createBimpObject('bimpapi', 'API_ApiParam', array(
+                        'id_api' => $api->id,
+                        'name'   => 'external_erp_name',
+                        'title'  => 'Nom ERP Externe'
                             ), true, $warnings, $warnings);
         }
 

@@ -153,7 +153,6 @@ class modbimpdatasync extends DolibarrModules
         // Se fais que lors de l'installation du module
         if (BimpCore::getConf($name, '') == "") {
             BimpCore::setConf($name, floatval($this->version));
-
             BimpCache::getBdb()->executeFile(DOL_DOCUMENT_ROOT . '/' . $this->name . '/sql/install.sql');
         }
 

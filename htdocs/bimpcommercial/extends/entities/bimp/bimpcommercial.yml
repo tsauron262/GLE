@@ -1,4 +1,5 @@
 
+# Entité : bimp
 params: 
     allow_df_from_propal: 
         label: Activer les demandes de financement LDLC Pro Lease depuis les devis
@@ -8,3 +9,10 @@ params:
     id_api_webservice_ldlc_pro_lease: 
         label: ID API Webservice LDLC PRO LEASE
         def: 0
+        
+# Entité: prolease (à déplacer) 
+
+    id_api_webservice_bimp: 
+        label: ID API Webservice BIMP
+        def: 0
+

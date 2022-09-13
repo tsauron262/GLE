@@ -90,35 +90,6 @@ fields:
             show_values: 1,2
         depends_on: id_product
         
-    id_fourn_price: 
-        label: Prix d'achat fournisseur
-        type: id_object
-        object: fourn_price
-        values: 
-            array: fournPrices
-        display_if: 
-            field_name: type
-            show_values: 1
-        default_value: 0
-        depends_on: id_product
-        
-    id_fournisseur: 
-        label: Fournisseur
-        type: id_object
-        object: fournisseur
-        input: 
-            type: search_societe
-            societe_type: supplier
-            help: Entrez le nom ou la référence d'un fournisseur
-        create_form: default
-        display_if: 
-            fields_names: type,id_fourn_price
-            type: 
-                hide_values: 3
-            id_fourn_price: 
-                show_values: 0
-        default_value: 0
-        
     pa_ht: 
         label: Prix d'achat HT
         type: money
@@ -175,9 +146,6 @@ fields:
         default_value: 1  
                 
 lists_cols:
-#    in_contrat: ==> Pas de callback 
-#        label: Afficher dans le contrat
-#        type: bool
     label:
         label: Désignation
         value: 
@@ -206,9 +174,7 @@ lists_cols:
     total_ttc: 
         label: Total TTC
         value: 
-            callback: displayTotalTTC    
-    in_contrat:
-        edit: 1
+            callback: displayTotalTTC
 
 lists: 
     default: 

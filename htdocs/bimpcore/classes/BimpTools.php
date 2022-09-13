@@ -1794,6 +1794,45 @@ class BimpTools
         return $value;
     }
 
+    public static function displayAddress($address, $zip, $town, $dept, $pays, $icon = false, $single_line = false)
+    {
+        $html = '';
+
+        if ($address) {
+            $html .= $address . ($single_line ? ' - ' : '<br/>');
+        }
+
+        if ($zip) {
+            $html .= $zip;
+
+            if ($town) {
+                $html .= ' ' . $town;
+            }
+            $html .= ($single_line ? '' : '<br/>');
+        } elseif ($town) {
+            $html .= $town . ($single_line ? '' : '<br/>');
+        }
+
+        if (!$single_line && $dept) {
+            $html .= $dept;
+
+            if ($pays) {
+                $html .= ' - ' . $pays;
+            }
+        } elseif ($pays) {
+            if ($single_line) {
+                $html .= ' - ';
+            }
+            $html .= $pays;
+        }
+
+        if ($html && $icon) {
+            $html = BimpRender::renderIcon('fas_map-marker-alt', 'iconLeft') . $html;
+        }
+
+        return $html;
+    }
+
     // Gestion des durées:
 
     public static function getTimeDataFromSeconds($total_seconds)
@@ -1838,12 +1877,12 @@ class BimpTools
     public static function displayTimefromSeconds($total_seconds, $withDay = true, $withSecondes = true)
     {
         $html = '<span class="timer">';
-        if($total_seconds < 0){
+        if ($total_seconds < 0) {
             $html .= '-';
-            $total_seconds = $total_seconds*-1;
+            $total_seconds = $total_seconds * -1;
         }
         $timer = self::getTimeDataFromSeconds((int) $total_seconds);
-        if(!$withDay){
+        if (!$withDay) {
             $timer['hours'] += 24 * $timer['days'];
             $timer['days'] = 0;
         }
@@ -1857,7 +1896,7 @@ class BimpTools
         } elseif ($timer['minutes'] > 0) {
             $html .= $timer['minutes'] . ' min ';
         }
-        if($withSecondes && $timer['secondes'])
+        if ($withSecondes && $timer['secondes'])
             $html .= $timer['secondes'] . ' sec ';
         $html .= '</span>';
         return $html;
@@ -2854,7 +2893,7 @@ class BimpTools
             $errors[] = 'Erreur décodage JSON: ' . json_last_error_msg();
             return array();
         }
-        
+
         if ($result == '') {
             return array();
         }
@@ -3394,78 +3433,69 @@ class BimpTools
     }
 }
 
+if (!function_exists('mime_content_type')) {
 
-if(!function_exists('mime_content_type')) {
-
-    function mime_content_type($filename) {
+    function mime_content_type($filename)
+    {
 
         $mime_types = array(
-
-            'txt' => 'text/plain',
-            'htm' => 'text/html',
+            'txt'  => 'text/plain',
+            'htm'  => 'text/html',
             'html' => 'text/html',
-            'php' => 'text/html',
-            'css' => 'text/css',
-            'js' => 'application/javascript',
+            'php'  => 'text/html',
+            'css'  => 'text/css',
+            'js'   => 'application/javascript',
             'json' => 'application/json',
-            'xml' => 'application/xml',
-            'swf' => 'application/x-shockwave-flash',
-            'flv' => 'video/x-flv',
-
+            'xml'  => 'application/xml',
+            'swf'  => 'application/x-shockwave-flash',
+            'flv'  => 'video/x-flv',
             // images
-            'png' => 'image/png',
-            'jpe' => 'image/jpeg',
+            'png'  => 'image/png',
+            'jpe'  => 'image/jpeg',
             'jpeg' => 'image/jpeg',
-            'jpg' => 'image/jpeg',
-            'gif' => 'image/gif',
-            'bmp' => 'image/bmp',
-            'ico' => 'image/vnd.microsoft.icon',
+            'jpg'  => 'image/jpeg',
+            'gif'  => 'image/gif',
+            'bmp'  => 'image/bmp',
+            'ico'  => 'image/vnd.microsoft.icon',
             'tiff' => 'image/tiff',
-            'tif' => 'image/tiff',
-            'svg' => 'image/svg+xml',
+            'tif'  => 'image/tiff',
+            'svg'  => 'image/svg+xml',
             'svgz' => 'image/svg+xml',
-
             // archives
-            'zip' => 'application/zip',
-            'rar' => 'application/x-rar-compressed',
-            'exe' => 'application/x-msdownload',
-            'msi' => 'application/x-msdownload',
-            'cab' => 'application/vnd.ms-cab-compressed',
-
+            'zip'  => 'application/zip',
+            'rar'  => 'application/x-rar-compressed',
+            'exe'  => 'application/x-msdownload',
+            'msi'  => 'application/x-msdownload',
+            'cab'  => 'application/vnd.ms-cab-compressed',
             // audio/video
-            'mp3' => 'audio/mpeg',
-            'qt' => 'video/quicktime',
-            'mov' => 'video/quicktime',
-
+            'mp3'  => 'audio/mpeg',
+            'qt'   => 'video/quicktime',
+            'mov'  => 'video/quicktime',
             // adobe
-            'pdf' => 'application/pdf',
-            'psd' => 'image/vnd.adobe.photoshop',
-            'ai' => 'application/postscript',
-            'eps' => 'application/postscript',
-            'ps' => 'application/postscript',
-
+            'pdf'  => 'application/pdf',
+            'psd'  => 'image/vnd.adobe.photoshop',
+            'ai'   => 'application/postscript',
+            'eps'  => 'application/postscript',
+            'ps'   => 'application/postscript',
             // ms office
-            'doc' => 'application/msword',
-            'rtf' => 'application/rtf',
-            'xls' => 'application/vnd.ms-excel',
-            'ppt' => 'application/vnd.ms-powerpoint',
-
+            'doc'  => 'application/msword',
+            'rtf'  => 'application/rtf',
+            'xls'  => 'application/vnd.ms-excel',
+            'ppt'  => 'application/vnd.ms-powerpoint',
             // open office
-            'odt' => 'application/vnd.oasis.opendocument.text',
-            'ods' => 'application/vnd.oasis.opendocument.spreadsheet',
+            'odt'  => 'application/vnd.oasis.opendocument.text',
+            'ods'  => 'application/vnd.oasis.opendocument.spreadsheet',
         );
 
-        $ext = strtolower(array_pop(explode('.',$filename)));
+        $ext = strtolower(array_pop(explode('.', $filename)));
         if (array_key_exists($ext, $mime_types)) {
             return $mime_types[$ext];
-        }
-        elseif (function_exists('finfo_open')) {
+        } elseif (function_exists('finfo_open')) {
             $finfo = finfo_open(FILEINFO_MIME);
             $mimetype = finfo_file($finfo, $filename);
             finfo_close($finfo);
             return $mimetype;
-        }
-        else {
+        } else {
             return 'application/octet-stream';
         }
     }

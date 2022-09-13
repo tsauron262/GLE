@@ -296,44 +296,60 @@ class BimpCore
 
     public static function getVersion($dev = '')
     {
-        $cache = self::getConfCache();
+        $versions = self::getConf('bimpcore_version');
 
-        if (!isset($cache['bimpcore']['bimpcore_version']) || ($dev && !isset($cache['bimpcore']['bimpcore_version'][$dev]))) {
-            $bdb = BimpCache::getBdb();
-
-            $value = $bdb->getValue('bimpcore_conf', 'value', '`name` = \'bimpcore_version\'');
+        if (!is_array($versions)) {
+            if ((string) $versions) {
+                $versions = json_decode($versions, 1);
+            }
 
             $update = false;
 
-            if (preg_match('/^[0-9]+(\.[0-9])*$/', $value)) {
-                $versions = array(
-                    'florian' => (float) $value
-                );
-                $update = true;
-            } else {
-                $versions = json_decode($value, 1);
+            if (empty($versions)) {
+                // On vérifie valeur en base:
+                $bdb = BimpCache::getBdb();
+                $value = $bdb->getValue('bimpcore_conf', 'value', '`name` = \'bimpcore_version\'');
+
+                if (!(string) $value) {
+                    $bdb->insert('bimpcore_conf', array(
+                        'value' => json_encode(array(
+                            'florian' => 0,
+                            'tommy'   => 0,
+                            'romain'  => 0,
+                            'alexis'  => 0
+                        )),
+                    ));
+                } else {
+                    if (preg_match('/^[0-9]+(\.[0-9])*$/', $value)) {
+                        // Pour compat:
+                        $versions = array(
+                            'florian' => (float) $value
+                        );
+                        $update = true;
+                    } else {
+                        $versions = json_decode($value, 1);
+                    }
+                }
             }
+        }
 
-            if ($dev && !isset($versions[$dev])) {
-                $versions[$dev] = 0;
-                $update = true;
-            }
+        if ($dev && !isset($versions[$dev])) {
+            $versions[$dev] = 0;
+            $update = true;
+        }
 
-            if ($update) {
-                $bdb->update('bimpcore_conf', array(
-                    'value' => json_encode($versions)
-                        ), '`name` = \'bimpcore_version\' AND `module` = \'bimpcore\'');
-            }
-
-
-            self::$conf_cache['bimpcore']['bimpcore_version'] = $versions;
+        if ($update) {
+            $bdb->update('bimpcore_conf', array(
+                'value' => json_encode($versions)
+                    ), '`name` = \'bimpcore_version\' AND `module` = \'bimpcore\'');
+            self::$conf_cache['bimpcore']['bimpcore_version'] = json_encode($versions);
         }
 
         if ($dev) {
-            return self::$conf_cache['bimpcore']['bimpcore_version'][$dev];
+            return (float) BimpTools::getArrayValueFromPath($versions, $dev, 0);
         }
 
-        return self::$conf_cache['bimpcore']['bimpcore_version'];
+        return $versions;
     }
 
     public static function setVersion($dev, $version)
@@ -417,7 +433,7 @@ class BimpCore
                         $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/extends/versions/' . BIMP_EXTENDS_VERSION . '/sql';
                         if (file_exists($dir) && is_dir($dir)) {
                             $current_version = (float) BimpCore::getConf('module_sql_version_' . $module . '_version_' . BIMP_EXTENDS_VERSION, 0);
-                            $files = scandir($dir);                            
+                            $files = scandir($dir);
 
                             foreach ($files as $f) {
                                 if (in_array($f, array('.', '..'))) {
@@ -452,7 +468,7 @@ class BimpCore
                                 }
 
                                 if (preg_match('/^(\d+\.\d)\.sql$/', $f, $matches2)) {
-                                    if ((float) $matches2[1] >  $current_version) {
+                                    if ((float) $matches2[1] > $current_version) {
                                         if (!isset($updates[$module])) {
                                             $updates[$module] = array();
                                         }

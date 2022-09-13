@@ -4100,7 +4100,7 @@ class Bimp_Facture extends BimpComm
                     $prop->classifybilled($user);
                 }
             }
-
+            
             $this->checkIsPaid();
             $this->checkRemisesGlobales();
             $this->checkMargin(true);
@@ -4653,6 +4653,7 @@ class Bimp_Facture extends BimpComm
                 $this->updateField('paiement_status', $paiement_status);
             }
 
+            echo 'ICI - ';
             $this->checkRemainToPay($amount_removed);
         }
 
@@ -4677,7 +4678,9 @@ class Bimp_Facture extends BimpComm
                 }
                 $remain_to_pay = round($remain_to_pay, 2);
             }
+            echo 'LA - ';
             if ($remain_to_pay !== (float) $this->getData('remain_to_pay')) {
+                echo 'HERE: ' . $remain_to_pay;
                 $this->updateField('remain_to_pay', $remain_to_pay, null, true);
             }
         }

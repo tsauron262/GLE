@@ -7,7 +7,9 @@ positions: 1
 position_insert: before
 
 labels:
-    name: Refinanceur
+    name: demande refinanceur
+    name_plur: demandes refinanceurs
+    is_female: 1
     
 objects: 
     refinanceur: 
@@ -41,45 +43,6 @@ fields:
         default_value: 1
         required: 1
         
-    rate:
-        label: Taux
-        type: percent
-        
-    coef:
-        label: Coéficient
-        type: float
-        decimals: 5
-            
-    quantity: 
-        label: Nombre
-        type: qty
-        min: 0
-        default_value: 0
-        decimals: 0
-        required: 1
-        
-    amount_ht:
-        label: Montant HT
-        type: money
-        required: 0
-        
-    payment:
-        label: Règlement
-        type: int
-        values: 
-            array: payments
-        
-    periodicity:
-        label: Périodicité
-        type: int
-        values: 
-            array: periodicities
-            
-    periode2:
-        label: Seconde période
-        type: bool
-        default_value: 0
-        
     comment:
         label: Commentaire
         type: text
@@ -87,50 +50,31 @@ fields:
             rows: 1
             auto_expand: 1
         
-lists_cols: 
-    amount2: 
-        label: Loyer calculé
-        value: 
-            callback: displayLoyerSuggest
-        show: 
-            callback: isEditable
-list:
-    checkboxes: 
-        callback: isDeletable
-    positions: 1
-    title: Refinanceurs
-    icon: bank
-    bulk_actions: 
-        - label: Supprimer les lignes sélectionnées
-          icon: fas_trash-alt
-          onclick: deleteSelectedObjects('list_id', $(this));
-          btn_class: deleteSelectedObjects
-    update_btn: 1
-    delete_btn: 1
-    edit_btn: 1
-    add_form_name: default
-    edit_form: default
-    sort_field: position
-    sort_way: asc
-    n: 10
-    cols:
-        id_refinanceur: 
-        status: 
-            edit: 1
-        rate: 
-            edit: 1
-        coef: 
-            edit: 1
-        quantity: 
-            edit: 1
-        amount_ht: 
-            label: Loyer
-            edit: 1
-        amount2: 
-        periodicity:
-            edit: 1
-        periode2:
-            edit: 1        
+lists:
+    default: 
+        checkboxes: 
+            callback: isDeletable
+        positions: 1
+        title: Demandes Refinanceurs
+        icon: bank
+        bulk_actions: 
+            - label: Supprimer les lignes sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this));
+              btn_class: deleteSelectedObjects
+        delete_btn: 1
+        edit_btn: 1
+        add_form_name: default
+        edit_form: default
+        sort_field: position
+        sort_way: asc
+        n: 10
+        cols:
+            id_refinanceur: 
+            status: 
+                edit: 1
+            comment: 
+                edit: 1
             
             
         

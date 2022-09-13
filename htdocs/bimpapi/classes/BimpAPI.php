@@ -193,6 +193,7 @@ abstract class BimpAPI
     {
         if (!isset(self::$instances[$api_name][$api_idx])) {
             $api_class = ucfirst($api_name) . 'API';
+            $final_class = $api_class;
 
             if (!class_exists($api_class)) {
                 if (file_exists(DOL_DOCUMENT_ROOT . '/bimpapi/classes/apis/' . $api_class . '.php')) {
@@ -200,8 +201,22 @@ abstract class BimpAPI
                 }
             }
 
-            if (class_exists($api_class)) {
-                self::$instances[$api_name][$api_idx] = new $api_class($api_idx);
+            if (defined('BIMP_EXTENDS_VERSION')) {
+                if (file_exists(DOL_DOCUMENT_ROOT . '/bimpapi/extends/version/' . BIMP_EXTENDS_VERSION . '/classes/apis/' . $api_class . '.php')) {
+                    $final_class = $api_class . '_ExtVersion';
+                    require_once DOL_DOCUMENT_ROOT . '/bimpapi/extends/version/' . BIMP_EXTENDS_VERSION . '/classes/apis/' . $api_class . '.php';
+                }
+            }
+
+            if (defined('BIMP_EXTENDS_ENTITY')) {
+                if (file_exists(DOL_DOCUMENT_ROOT . '/bimpapi/extends/entities/' . BIMP_EXTENDS_ENTITY . '/classes/apis/' . $api_class . '.php')) {
+                    $final_class = $api_class . '_ExtEntity';
+                    require_once DOL_DOCUMENT_ROOT . '/bimpapi/extends/entities/' . BIMP_EXTENDS_ENTITY . '/classes/apis/' . $api_class . '.php';
+                }
+            }
+
+            if (class_exists($final_class)) {
+                self::$instances[$api_name][$api_idx] = new $final_class($api_idx);
             } else {
                 return null;
             }
@@ -213,6 +228,16 @@ abstract class BimpAPI
     public static function getDefaultApiTitle()
     {
         return ucfirst(static::$name);
+    }
+
+    public function getParam($param_name, $default_value = null)
+    {
+        return BimpTools::getArrayValueFromPath($this->params, $param_name, $default_value);
+    }
+
+    public function getOption($option_name, $default_value = null)
+    {
+        return BimpTools::getArrayValueFromPath($this->options, $option_name, $default_value);
     }
 
     // Gestion Authentification:
@@ -385,7 +410,7 @@ abstract class BimpAPI
                 } else {
                     $infos .= '<span class="success">[OK]</span><br/><br/>';
 
-                    $infos .= '<pre>' . print_r($params, 1) . '</pre><br/><br/>';
+                    $infos .= '<pre>Paramètres requête: ' . print_r($params, 1) . '</pre><br/><br/>';
 
                     $headers = BimpTools::overrideArray($this->getDefaultRequestsHeaders($request_name, $errors), $params['headers']);
                     $curl_options = BimpTools::overrideArray($this->getDefaultCurlOptions($request_name, $errors), $params['curl_options']);
@@ -432,6 +457,7 @@ abstract class BimpAPI
                     }
 
                     if (!empty($headers)) {
+                        $infos .= 'Headers: <pre>' . print_r($headers, 1) . '</pre><br/><br/>';
                         $headers_str = array();
                         foreach ($headers as $header_name => $header_value) {
                             $headers_str[] = $header_name . ': ' . $header_value;

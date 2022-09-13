@@ -39,6 +39,7 @@ objects:
 fields: 
     name: 
         label: Nom
+        required: 1
         
     description: 
         label: Description
@@ -56,6 +57,18 @@ fields:
             type: search_user
             help: Utilisateur erp utilisé par défaut pour les utilisatuers ws lié à ce profile
         
+    token_expire_delay: 
+        label: Délai d'expiration des tokens (Min.)
+        type: int
+        decimals: 0
+        unsigned: 1
+        input: 
+            help: Indiquer un nombre de minutes
+        default_value: 
+            conf: 
+                module: bimpwebservice
+                name: default_tokens_expire_delay
+            
     active: 
         label: Actif
         type: bool
@@ -138,5 +151,6 @@ lists:
             name: 
             description: 
             id_user_def:
+            token_expire_delay: 
             active:
                 edit: 1

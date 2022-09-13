@@ -82,7 +82,7 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
         if ($this->isActionAllowed('createDemandeFinancement') && $this->canSetAction('createDemandeFinancement')) {
             $buttons[] = array(
                 'label'   => 'Demande de financement',
-                'icon'    => 'fas_hand-holding-usd',
+                'icon'    => 'fas_comment-dollar',
                 'onclick' => $this->getJsActionOnclick('createDemandeFinancement', array(), array(
                     'form_name' => 'demande_financement'
 //                    'confirm_msg' => 'Veuillez confirmer la création d\\\'une demande de financement auprès de LDLC Pro Lease pour ce devis'
@@ -109,6 +109,26 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
         return 0;
     }
 
+    // Getters array: 
+
+    public function getDFDurationsArray()
+    {
+        BimpObject::loadClass('bimpfinancement', 'BF_Demande');
+        return BF_Demande::$durations;
+    }
+
+    public function getDFPeriodicitiesArray()
+    {
+        BimpObject::loadClass('bimpfinancement', 'BF_Demande');
+        return BF_Demande::$periodicities;
+    }
+
+    public function getDFCalcModesArray()
+    {
+        BimpObject::loadClass('bimpfinancement', 'BF_Demande');
+        return BF_Demande::$calc_modes;
+    }
+
     // Rendus HTML
 
     public function renderHeaderStatusExtra()
@@ -131,46 +151,70 @@ class Bimp_Propal_ExtEntity extends Bimp_Propal
         $success = 'Demande de financement effectuée avec succès';
 
         $api = null;
-        $client = null;
-        $contact = null;
-
-        $id_contact = BimpTools::getArrayValueFromPath($data, 'id_contact', 0);
-        if (!$id_contact) {
-            $errors[] = 'Veuillez sélectionner un contact';
-        } else {
-            $contact = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Contact', $id_contact);
-            if (!BimpObject::objectLoaded($contact)) {
-                $errors[] = 'Le contact #' . $id_contact . ' n\'existe pas';
-            }
-        }
         $id_api = (int) BimpCore::getConf('id_api_webservice_ldlc_pro_lease', null, 'bimpcommercial');
 
         if (!$id_api) {
             $errors[] = 'ID API non configuré';
         } else {
-            $api = BimpCache::getBimpObjectInstance('bimpapi', 'API_Api', $id_api);
-            if (!BimpObject::objectLoaded($api)) {
+            $api_obj = BimpCache::getBimpObjectInstance('bimpapi', 'API_Api', $id_api);
+            if (!BimpObject::objectLoaded($api_obj)) {
                 $errors[] = 'ID de l\'API invalide';
             }
         }
 
-        $client = $this->getChildObject('client');
-        if (!BimpObject::objectLoaded($client)) {
-            $errors[] = 'Client absent ou invalide';
+        $id_contact = BimpTools::getArrayValueFromPath($data, 'id_contact', 0);
+        if (!$id_contact) {
+            $errors[] = 'Veuillez sélectionner un contact client';
         }
 
         if (!count($errors)) {
-            // Vérification de l'existence du client dans la table de synchro
-            $sync = BimpCache::findBimpObjectInstance('bimpdatasync', 'BDS_SyncObject', array(
-                        'obj_module' => 'bimpcore',
-                        'obj_name'   => 'Bimp_Client',
-                        'id_loc'     => $client->id
-            ));
+            $api = $api_obj->getApiInstance();
+
+            if (is_a($api, 'BimpAPI')) {
+                if ($api->isOk($errors)) {
+                    $extra_data = array(
+                        'duration'    => BimpTools::getArrayValueFromPath($data, 'duration'),
+                        'periodicity' => BimpTools::getArrayValueFromPath($data, 'periodicity'),
+                        'mode_calcul' => BimpTools::getArrayValueFromPath($data, 'calc_mode')
+                    );
+
+                    $req_errors = array();
+                    $result = $api->addDemandeFinancement($this, (int) $this->getData('fk_soc'), $id_contact, $extra_data, $req_errors, $warnings);
+
+                    if (isset($result['id_demande']) && (int) $result['id_demande']) {
+                        $this->addObjectLog('Création de la demande de financement sur LDLC PRO LEASE effectuée avec succès');
+                        $this->set('id_df_prolease', (int) $result['id_demande']);
+                        $this->set('df_status', 1);
+                        $up_errors = $this->update($warnings, true);
+
+                        if (count($up_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Création de la demande de financement ok mais échec de la mise à jour du devis');
+                        }
+                    } elseif (count($req_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($req_errors, 'Echec de la création de la demande de financement sur LDLC PRO LEASE');
+                        $this->addObjectLog(BimpTools::getMsgFromArray($req_errors, 'Echec de la création de la demande de financement sur LDLC PRO LEASE'));
+                    } else {
+                        $errors[] = 'Echec de la requête (Aucune réponse reçue)';
+                        $this->addObjectLog('Echec de la création de la demande de financement sur LDLC PRO LEASE (Aucune réponse reçue suite à la requ^)');
+                    }
+                }
+            } else {
+                $errors[] = 'Erreur de configuration : API invalide (' . $api_obj->getName() . ')';
+            }
         }
 
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
         );
+    }
+    
+    // Overrides: 
+    
+    public function duplicate($new_data = [], &$warnings = [], $force_create = false)
+    {
+        $new_data['df_status'] = 0;
+        $new_data['id_df_prolease'] = 0;
+        return parent::duplicate($new_data, $warnings, $force_create);
     }
 }

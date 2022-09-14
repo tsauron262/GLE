@@ -582,7 +582,7 @@ class Bimp_Menu extends BimpObject
         return $errors;
     }
 
-    public function update($warnings = array(), $force_update = false)
+    public function update(&$warnings = array(), $force_update = false)
     {
         $init_code_path = $this->getInitData('code_path');
 

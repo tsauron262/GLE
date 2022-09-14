@@ -3138,13 +3138,13 @@ class BimpCache
                     } elseif ($mail_send) {
                         BimpCore::setConf('bimpcore_to_much_logs_email_send', 0);
                     }
+                }
 
-                    if (count($rows) > 5000) {
-                        // Saturation, on suppr. les logs pas importants: 
-                        $bdb = self::getBdb(true);
-                        $bdb->delete('bimpcore_log', 'level < 3');
-                        $bdb->delete('bimpcore_note', 'obj_name = \'Bimp_Log\'');
-                    }
+                if (count($rows) > 5000) {
+                    // Saturation, on suppr. les logs pas importants: 
+                    $bdb = self::getBdb(true);
+                    $bdb->delete('bimpcore_log', 'level < 3');
+                    $bdb->delete('bimpcore_note', 'obj_name = \'Bimp_Log\'');
                 }
             }
         }

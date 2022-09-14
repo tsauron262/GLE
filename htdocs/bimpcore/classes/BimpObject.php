@@ -6195,7 +6195,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 }
 
                 if ($check) {
-                    // on Attribue la position finale à l'élément déplacé (qui a normalement été libérée
+                    // on Attribue la position finale à l'élément déplacé (qui a normalement été libérée)
                     if ($this->db->update($table, array(
                                 'position' => $new_position
                                     ), '`' . $primary . '` = ' . $this->id) <= 0) {

@@ -3138,6 +3138,13 @@ class BimpCache
                     } elseif ($mail_send) {
                         BimpCore::setConf('bimpcore_to_much_logs_email_send', 0);
                     }
+
+                    if (count($rows) > 5000) {
+                        // Saturation, on suppr. les logs pas importants: 
+                        $bdb = self::getBdb(true);
+                        $bdb->delete('bimpcore_log', 'level < 3');
+                        $bdb->delete('bimpcore_note', 'obj_name = \'Bimp_Log\'');
+                    }
                 }
             }
         }
@@ -3148,6 +3155,10 @@ class BimpCache
     public static function addBimpLog($id_log, $type, $level, $msg, $extra_data)
     {
         $cache_key = 'bimp_logs_data';
+
+        if (isset($extra_data['ID ERP'])) {
+            unset($extra_data['ID ERP']);
+        }
 
         if (isset(self::$cache[$cache_key]) && !isset(self::$cache[$cache_key][$type][$level][$id_log])) {
             if (!isset(self::$cache[$cache_key][$type])) {
@@ -3167,6 +3178,10 @@ class BimpCache
 
     public static function bimpLogExists($type, $level, $msg, $extra_data)
     {
+        if (isset($extra_data['ID ERP'])) {
+            unset($extra_data['ID ERP']);
+        }
+
         $logs = self::getBimpLogsData();
 
         if (isset($logs[$type][$level])) {
@@ -3175,8 +3190,9 @@ class BimpCache
                     if ($level < 3) {
                         return (int) $id_log;
                     }
-                    
-                    if (isset($log_data['extra_data']) && $log_data['extra_data'] === (is_array($extra_data) ? json_encode($extra_data) : (string) $extra_data)) {
+
+                    if (empty($extra_data) ||
+                            (isset($log_data['extra_data']) && $log_data['extra_data'] && $log_data['extra_data'] === (is_array($extra_data) ? json_encode($extra_data) : (string) $extra_data))) {
                         return (int) $id_log;
                     }
                 }

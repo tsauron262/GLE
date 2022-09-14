@@ -2582,7 +2582,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         global $conf, $user, $db;
         $mode_eco = (int) BimpCore::getConf('mode_eco');
 
-        if (BImpCore::isUserDev() || (isset($conf->global->MAIN_MODULE_BIMPSUPPORT) && (userInGroupe("XX Sav", $user->id)) || userInGroupe("XX Sav MyMu", $user->id))) {
+        if (isset($conf->global->MAIN_MODULE_BIMPSUPPORT) && (userInGroupe("XX Sav", $user->id)) || userInGroupe("XX Sav MyMu", $user->id)) {
             $hrefFin = "";
 
             require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';

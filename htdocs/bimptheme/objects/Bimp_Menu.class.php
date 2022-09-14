@@ -340,18 +340,6 @@ class Bimp_Menu extends BimpObject
 
         if (BimpCore::getConf('use_cache_server_for_menu', null, 'bimptheme')) {
             $items = BimpCache::getCacheServeur('bimpmenu_' . $handler . '_items');
-
-            global $user;
-            if ((int) $user->id === 270) {
-                if (!empty($items)) {
-                    echo '<div style="padding: 200px">';
-                    echo 'MENU CACHE: <pre>';
-                    print_r($items);
-                    echo '</pre>';
-                    echo '</div>';
-                    die();
-                }
-            }
         }
 
         if (empty($items)) {
@@ -363,13 +351,6 @@ class Bimp_Menu extends BimpObject
         }
 
         if (!empty($items)) {
-            global $user;
-            if ((int) $user->id === 270) {
-                echo '<div style="padding: 100px">';
-                echo 'ITEMS MIS EN CACHE: <pre>';
-                print_r($items);
-                echo '</div>';
-            }
             $items = self::checkItems($items, $active_only, $enabled, $check_perms);
         }
 

@@ -255,7 +255,7 @@ class Bimp_Menu extends BimpObject
 
     public static function getMenuItems($id_parent = 0, $active_only = true, $enabled = true, $check_perms = true)
     {
-        $handler = BimpCore::getConf('menu_handler', 'bimptheme', 'bimptheme');
+        $handler = BimpCore::getConf('menu_handler', null, 'bimptheme');
         $handlers = array($handler);
 
         if ($handler === 'auguria') {

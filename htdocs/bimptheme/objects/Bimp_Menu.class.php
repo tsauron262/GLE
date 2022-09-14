@@ -343,16 +343,14 @@ class Bimp_Menu extends BimpObject
 
             global $user;
             if ((int) $user->id === 270) {
-                echo '<div style="padding: 200px">';
                 if (!empty($items)) {
+                    echo '<div style="padding: 200px">';
                     echo 'MENU CACHE: <pre>';
                     print_r($items);
                     echo '</pre>';
-                } else {
-                    echo 'FAIL';
+                    echo '</div>';
+                    die();
                 }
-                echo '</div>';
-                die();
             }
         }
 
@@ -365,6 +363,13 @@ class Bimp_Menu extends BimpObject
         }
 
         if (!empty($items)) {
+            global $user;
+            if ((int) $user->id === 270) {
+                echo '<div style="padding: 100px">';
+                echo 'ITEMS MIS EN CACHE: <pre>';
+                print_r($items);
+                echo '</div>';
+            }
             $items = self::checkItems($items, $active_only, $enabled, $check_perms);
         }
 

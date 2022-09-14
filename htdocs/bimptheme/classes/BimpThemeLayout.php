@@ -105,6 +105,10 @@ class BimpThemeLayout extends BimpLayout
         $items = Bimp_Menu::getMenuItems(0, true, true, true);
         $html .= $this->renderMenuItems($items, 1);
 
+        // todo: à refondre: 
+        BimpObject::loadClass('bimpsupport', 'BS_SAV');
+        $html .= BS_SAV::renderMenuQuickAccess();
+
         $html .= ' </nav><!-- End #main-menu-navigation -->' . "\n";
         $html .= '</div><!-- End .nav-container-->' . "\n";
         $html .= '</div><!-- End .sidebar-content -->' . "\n";

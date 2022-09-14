@@ -2575,6 +2575,113 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
         return $html;
     }
 
+    public static function renderMenuQuickAccess()
+    {
+        $html = '';
+
+        global $conf, $user, $db;
+        $mode_eco = (int) BimpCore::getConf('mode_eco');
+
+        if (BImpCore::isUserDev() || (isset($conf->global->MAIN_MODULE_BIMPSUPPORT) && (userInGroupe("XX Sav", $user->id)) || userInGroupe("XX Sav MyMu", $user->id))) {
+            $hrefFin = "";
+
+            require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
+            global $tabCentre;
+            if ($user->array_options['options_apple_centre'] == "") {//Ajout de tous les centre
+                $centreUser = array();
+                foreach ($tabCentre as $idT2 => $tabCT)
+                    $centreUser[] = $idT2;
+            } else {
+                $centreUser = explode(" ", trim($user->array_options['options_apple_centre'])); //Transforme lettre centre en id centre
+                foreach ($centreUser as $idT => $CT) {//Va devenir inutille
+                    foreach ($tabCentre as $idT2 => $tabCT)
+                        if ($tabCT[8] == $CT)
+                            $centreUser[$idT] = $idT2;
+                }
+            }
+
+            $tabGroupe = array();
+
+            $urlAcces = DOL_URL_ROOT . '/bimpsupport/?tab=sav';
+            if (count($centreUser) > 1) {
+                $tabGroupe = array(array('label' => "Tous", 'valeur' => 'Tous', 'forUrl' => implode($centreUser, "-")));
+                $urlAcces = DOL_URL_ROOT . "/bimpsupport/?fc=index&tab=sav&code_centre=" . implode($centreUser, "-");
+            }
+
+            foreach ($tabCentre as $idGr => $tabOneCentr) {
+                if (count($centreUser) == 0 || in_array($idGr, $centreUser))
+                    $tabGroupe[] = array("label" => $tabOneCentr[2], "valeur" => $idGr, "forUrl" => $idGr);
+            }
+            $tabResult = array();
+
+            if (!$mode_eco) {
+                $result2 = $db->query("SELECT COUNT(id) as nb, code_centre as CentreVal, status as EtatVal FROM `" . MAIN_DB_PREFIX . "bs_sav` WHERE status >= -1 " . (count($centreUser) > 0 ? "AND code_centre IN ('" . implode($centreUser, "','") . "')" : "") . " GROUP BY code_centre, status");
+                while ($ligne2 = $db->fetch_object($result2)) {
+                    $tabResult[$ligne2->CentreVal][$ligne2->EtatVal] = $ligne2->nb;
+                    if (!isset($tabResult['Tous'][$ligne2->EtatVal]))
+                        $tabResult['Tous'][$ligne2->EtatVal] = 0;
+                    $tabResult['Tous'][$ligne2->EtatVal] += $ligne2->nb;
+                }
+            }
+
+            require_once DOL_DOCUMENT_ROOT . "/bimpsupport/objects/BS_SAV.class.php";
+            $tabStatutSav = BS_SAV::$status_list;
+
+            if (!empty($tabGroupe)) {
+                $html .= '<div class="bimptheme_menu_extra_sections_title">';
+                $html .= 'Accès rapides SAV:';
+                $html .= '</div>';
+                
+                foreach ($tabGroupe as $ligne3) {
+                    $html .= '<div class="bimptheme_menu_extra_section' . ($ligne3['valeur'] != "Tous" ? ' menu_contenueCache2' : '') . '">';
+
+                    $centre = $ligne3['valeur'];
+                    $href = DOL_URL_ROOT . '/bimpsupport/?fc=index&tab=sav' . ($ligne3['valeur'] ? '&code_centre=' . $ligne3['forUrl'] : "");
+
+                    $html .= '<div class="title">';
+                    $html .= '<a href="' . $href . $hrefFin . '">' . BimpRender::renderIcon('fas_flag', 'iconLeft') . $ligne3['label'] . '</a>';
+                    $html .= '</div>';
+
+                    foreach ($tabStatutSav as $idStat => $tabStat) {
+                        if ($idStat >= -1) {
+                            if ($mode_eco) {
+                                $nb = '';
+                            } else {
+                                $nb = (isset($tabResult[$centre]) && isset($tabResult[$centre][$idStat]) ? $tabResult[$centre][$idStat] : 0);
+                                if ($nb == "")
+                                    $nb = "0";
+                            }
+
+                            $html .= '<span href="#" class="item" style="font-size: 10px; margin-left:12px">';
+                            if ($mode_eco) {
+                                $nbStr = '';
+                            } else {
+                                $nbStr = "<span style='width: 33px; display: inline-block; text-align:right'>" . $nb . "</span> : ";
+                            }
+                            $html .= "<a href='" . $href . "&status=" . urlencode($idStat) . $hrefFin . "'>" . $nbStr . $tabStat['label'] . "</a>";
+                            $html .= "</span><br/>";
+                        }
+                    }
+                    $html .= '</div>';
+                }
+
+                if (count($tabGroupe) > 2) {
+                    $html .= "<div style='width:100%;text-align:center;'><span id='showDetailChrono2'>(...)</span></div>";
+
+                    $html .= "<script type='text/javascript'>$(document).ready(function(){bimp_msg('ICI'); "
+                            . "$('.menu_contenueCache2').hide();"
+                            . "$('#showDetailChrono2').click(function(){"
+                            . "$('.menu_contenueCache2').show();"
+                            . "$(this).hide();"
+                            . "});"
+                            . "});</script>";
+                }
+            }
+        }
+
+        return $html;
+    }
+
     // Traitements:
 
     public function checkObject($context = '', $field = '')
@@ -5765,11 +5872,11 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
             $fac_errors = $this->createAccompte((float) $this->getData('acompte'), false);
             if (count($fac_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
-            } else{
+            } else {
                 $client = $this->getChildObject('client');
                 $centre = $this->getCentreData();
                 $toMail = "SAV LDLC<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@bimp.fr') . ">";
-                mailSyn2('Acompte enregistré '.$this->getData('ref'), $toMail, null, 'Un acompte de '.$this->getData('acompte').'€ du client '.$client->getData('code_client').' - '.$client->getData('nom').' à été ajouté au '.$this->getLink());
+                mailSyn2('Acompte enregistré ' . $this->getData('ref'), $toMail, null, 'Un acompte de ' . $this->getData('acompte') . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink());
                 $success = "Acompte créer avec succés.";
             }
         }
@@ -5978,11 +6085,11 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                         $warnings[] = BimpTools::getMsgFromArray($fac_errors, 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
                     } else {
                         $this->updateField('acompte', (float) $data['acompte']);
-                        
+
                         $client = $this->getChildObject('client');
                         $centre = $this->getCentreData();
                         $toMail = "SAV LDLC<" . ($centre['mail'] ? $centre['mail'] : 'no-reply@bimp.fr') . ">";
-                        mailSyn2('Acompte enregistré '.$this->getData('ref'), $toMail, null, 'Un acompte de '.$this->getData('acompte').'€ du client '.$client->getData('code_client').' - '.$client->getData('nom').' à été ajouté au '.$this->getLink());
+                        mailSyn2('Acompte enregistré ' . $this->getData('ref'), $toMail, null, 'Un acompte de ' . $this->getData('acompte') . '€ du client ' . $client->getData('code_client') . ' - ' . $client->getData('nom') . ' à été ajouté au ' . $this->getLink());
                         $success = "Acompte créer avec succés.";
                     }
                 }

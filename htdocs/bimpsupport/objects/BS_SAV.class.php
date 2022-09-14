@@ -2629,7 +2629,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
 
             if (!empty($tabGroupe)) {
                 $html .= '<div class="bimptheme_menu_extra_sections_title">';
-                $html .= 'Accès rapides SAV:';
+                $html .= 'Accès rapides SAV';
                 $html .= '</div>';
                 
                 foreach ($tabGroupe as $ligne3) {

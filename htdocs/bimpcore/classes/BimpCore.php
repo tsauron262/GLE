@@ -1018,38 +1018,40 @@ class BimpCore
                         exit;
                     }
                 } else {
-                    if (BimpDebug::isActive()) {
-                        BimpDebug::incCacheInfosCount('logs', false);
-                    }
-
-                    $log = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Log', $id_current_log);
-                    $log->set('last_occurence', date('Y-m-d H:i:d'));
-                    $log->set('nb_occurence', $log->getData('nb_occurence') + 1);
-
-                    $warnings = array();
-                    $errUpdate = $log->update($warnings, true);
-
-                    $data = array(); // inutile de mettre les data de bases (Type, level, msg, extra_data) qui sont forcéments identiques.
-
-                    if (defined('ID_ERP')) {
-                        $data['ID ERP'] = ID_ERP;
-                    }
-
-                    if (BimpObject::objectLoaded($user)) {
-                        $data['User'] = '#' . $user->id;
-                    }
-
-                    if (BimpObject::objectLoaded($object)) {
-                        $data['Objet'] = BimpObject::getInstanceNomUrl($object);
-                    }
-
-                    if (count($errUpdate)) {
-                        $data['Erreurs Màj log'] = $errUpdate;
-                    }
-
-                    $data['GET'] = $_GET;
-                    $data['POST'] = $_POST;
-                    $log->addNote('<pre>' . print_r($data, 1) . '</pre>');
+                    // Ca prend trop de ressources pour pas grand chose... 
+                     
+//                    if (BimpDebug::isActive()) {
+//                        BimpDebug::incCacheInfosCount('logs', false);
+//                    }
+//
+//                    $log = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Log', $id_current_log);
+//                    $log->set('last_occurence', date('Y-m-d H:i:d'));
+//                    $log->set('nb_occurence', $log->getData('nb_occurence') + 1);
+//
+//                    $warnings = array();
+//                    $errUpdate = $log->update($warnings, true);
+//
+//                    $data = array(); // inutile de mettre les data de bases (Type, level, msg, extra_data) qui sont forcéments identiques.
+//
+//                    if (defined('ID_ERP')) {
+//                        $data['ID ERP'] = ID_ERP;
+//                    }
+//
+//                    if (BimpObject::objectLoaded($user)) {
+//                        $data['User'] = '#' . $user->id;
+//                    }
+//
+//                    if (BimpObject::objectLoaded($object)) {
+//                        $data['Objet'] = BimpObject::getInstanceNomUrl($object);
+//                    }
+//
+//                    if (count($errUpdate)) {
+//                        $data['Erreurs Màj log'] = $errUpdate;
+//                    }
+//
+//                    $data['GET'] = $_GET;
+//                    $data['POST'] = $_POST;
+//                    $log->addNote('<pre>' . print_r($data, 1) . '</pre>');
                 }
             }
 

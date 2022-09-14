@@ -352,6 +352,7 @@ class Bimp_Menu extends BimpObject
                     die('FAIL');
                 }
                 echo '</div>';
+                die();
             }
         }
 

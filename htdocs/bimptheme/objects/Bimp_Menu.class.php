@@ -347,9 +347,9 @@ class Bimp_Menu extends BimpObject
                 if (!empty($items)) {
                     echo 'MENU CACHE: <pre>';
                     print_r($items);
-                    exit;
+                    echo '</pre>';
                 } else {
-                    die('FAIL');
+                    echo 'FAIL';
                 }
                 echo '</div>';
                 die();

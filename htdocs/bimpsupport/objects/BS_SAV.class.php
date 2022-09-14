@@ -2668,7 +2668,7 @@ WHERE a.obj_type = 'bimp_object' AND a.obj_module = 'bimptask' AND a.obj_name = 
                 if (count($tabGroupe) > 2) {
                     $html .= "<div style='width:100%;text-align:center;'><span id='showDetailChrono2'>(...)</span></div>";
 
-                    $html .= "<script type='text/javascript'>$(document).ready(function(){bimp_msg('ICI'); "
+                    $html .= "<script type='text/javascript'>$(document).ready(function(){"
                             . "$('.menu_contenueCache2').hide();"
                             . "$('#showDetailChrono2').click(function(){"
                             . "$('.menu_contenueCache2').show();"

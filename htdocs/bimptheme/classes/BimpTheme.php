@@ -157,7 +157,7 @@ class BimpTheme
 
         // Toutes mes tâches:
         $content .= '<div style="margin-bottom: 12px">';
-        $content .= '<a href="' . DOL_URL_ROOT . '/bimpcore/index.php?fc=user&id=1&navtab-maintabs=tasks&navtab-tasks=my_tasks">';
+        $content .= '<a href="' . DOL_URL_ROOT . '/bimpcore/index.php?fc=user&id=' . $user->id . '&navtab-maintabs=tasks&navtab-tasks=my_tasks">';
         $content .= BimpRender::renderIcon('fas_tasks', 'iconLeft') . 'Toutes mes tâches';
         $content .= '</a>';
         $content .= '</div>';

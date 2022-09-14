@@ -3168,10 +3168,6 @@ class BimpCache
     public static function bimpLogExists($type, $level, $msg, $extra_data)
     {
         $logs = self::getBimpLogsData();
-        
-        echo '<pre>';
-        print_r($logs);
-        exit;
 
         if (isset($logs[$type][$level])) {
             foreach ($logs[$type][$level] as $id_log => $log_data) {

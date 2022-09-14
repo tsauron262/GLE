@@ -412,7 +412,7 @@ class Bimp_Menu extends BimpObject
                     $line_errors = array();
                     $insert_sql = $menu->getInsertSql($line_errors);
                     if ($insert_sql) {
-                        $sql .= $insert_sql . "\n";
+                        $sql .= $insert_sql;
                     }
 
                     if (count($line_errors)) {

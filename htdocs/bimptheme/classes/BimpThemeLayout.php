@@ -101,8 +101,9 @@ class BimpThemeLayout extends BimpLayout
         $html .= '<div class="nav-container">' . "\n";
         $html .= '<nav id="main-menu-navigation" class="navigation-main">' . "\n";
 
+        
         BimpObject::loadClass('bimptheme', 'Bimp_Menu');
-        $items = Bimp_Menu::getMenuItems(0, true, true, true);
+        $items = Bimp_Menu::getFullMenu(null, true, true, true);
         $html .= $this->renderMenuItems($items, 1);
 
         // todo: à refondre: 

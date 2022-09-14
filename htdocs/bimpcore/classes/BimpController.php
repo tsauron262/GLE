@@ -134,17 +134,12 @@ class BimpController
 
     public function init()
     {
-        
     }
 
     public function initLayout()
     {
         $id_object = BimpTools::getValue('id');
         $layout = BimpLayout::getInstance();
-
-        if (0) {
-            $layout = new BimpLayout();
-        }
 
         $root = DOL_URL_ROOT;
         if ($root == "/") {

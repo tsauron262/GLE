@@ -105,7 +105,7 @@ if (!defined('BIMP_LIB')) {
         require_once $dir . 'BimpMail.php';
     }
 
-    BimpConfig::initCacheServeur();
+//    BimpConfig::initCacheServeur();
 }
 
 //if (stripos($_SERVER['PHP_SELF'], 'bimpinterfaceclient') === false) {

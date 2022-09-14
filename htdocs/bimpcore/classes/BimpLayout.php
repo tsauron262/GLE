@@ -35,10 +35,12 @@ class BimpLayout
                 $layout_name = 'BimpLayout';
             }
 
-            if ($layout_module === 'bimpcore' && $layout_name === 'BimpLayout') { // Si le controller n'a pas défini un layout différent. 
-                if ($conf->theme == "BimpTheme") {
-                    $layout_module = 'bimptheme';
-                    $layout_name = 'BimpThemeLayout';
+            if (!BimpCore::isContextPublic()) {
+                if ($layout_module === 'bimpcore' && $layout_name === 'BimpLayout') { // Si le controller n'a pas défini un layout différent. 
+                    if ($conf->theme == "BimpTheme") {
+                        $layout_module = 'bimptheme';
+                        $layout_name = 'BimpThemeLayout';
+                    }
                 }
             }
 

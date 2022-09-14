@@ -4,17 +4,12 @@ function initBimpHeader()
 {
     if (!defined('NOREQUIREHTML')) {
         if (!function_exists('llxHeader')) {
-
             function llxHeader($head = '', $title = '', $help_url = '', $target = '', $disablejs = 0, $disablehead = 0, $arrayofjs = '', $arrayofcss = '', $morequerystring = '', $morecssonbody = '', $replacemainareaby = '')
             {
                 global $hookmanager;
 
                 // Création et initialisation du BimpLayout: 
                 $layout = BimpLayout::getInstance();
-
-                if (0) {
-                    $layout = new BimpLayout();
-                }
 
                 $layout->extra_head .= $head;
                 $layout->body_classes[] = $morecssonbody;

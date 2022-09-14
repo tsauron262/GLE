@@ -342,7 +342,7 @@ class Bimp_Menu extends BimpObject
             $items = BimpCache::getCacheServeur('bimpmenu_' . $handler . '_items');
 
             global $user;
-            if ($user->id === 270) {
+            if ((int) $user->id === 270) {
                 echo '<div style="padding: 200px">';
                 if (!empty($items)) {
                     echo 'MENU CACHE: <pre>';

@@ -813,8 +813,8 @@ lists:
             total_ttc:
     client: 
         extends: default
-        cols: 
-            fk_soc: unset
+#        cols: 
+#            fk_soc: unset
             
 cards: 
     default: 

@@ -976,6 +976,7 @@ $heightforframes = 48;
 
 /*moddrsi*/
 // Initialisation BimpCore
+$hookmanager->initHooks(array('bimpcoreInit'));
 $hookmanager->executeHooks('bimpcoreInit', array());
 /*fmoddrsi*/
 

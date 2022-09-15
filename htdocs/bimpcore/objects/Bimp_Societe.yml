@@ -867,7 +867,7 @@ fields_tables:
             - field: consigne_ref_ext
                   
     encours: 
-        title: Encours HT
+        title: Encours TTC
         icon: fas_search-dollar
         show: 
             callback: isClient

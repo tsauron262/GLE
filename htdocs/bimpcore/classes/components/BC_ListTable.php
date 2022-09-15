@@ -1055,7 +1055,7 @@ class BC_ListTable extends BC_List
                 }
                 $content = BimpRender::renderAlerts($col_errors);
             } else {
-                if ($field_object->field_exists($field_name)) {
+                if ($field_object->field_exists($field_name) && !$field_object->getConf('fields/'.$field_name.'/extra', 0, false, 'bool')) {
                     $bc_field = new BC_Field($field_object, $field_name);
                     if (!$label) {
                         $label = $bc_field->getParam('label', $field_name);

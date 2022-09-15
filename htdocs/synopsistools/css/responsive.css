@@ -145,8 +145,9 @@ and open the template in the editor.
         /*font-size: 15px!important;*/
     }
 
-    a img, td img{
-        height: 15px!important;
+    #id-right a img, #id-right td img{
+        height: 25px!important;
+        width: auto!important;
     }
 
     /*    .topmenuimage, .mainmenu.tmenudisabled{
@@ -408,13 +409,10 @@ and open the template in the editor.
         left: 0px!important;
 
     }
-    
-
 
     #id-right{
         display: table-cell!important;
     }
-
 
     .vmenu{
         height: auto;

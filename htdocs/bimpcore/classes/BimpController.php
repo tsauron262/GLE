@@ -7,6 +7,8 @@ class BimpController
     public $module = '';
     public $controller = '';
     public $current_tab = '';
+    public $layout_module = 'bimpcore';
+    public $layout_name = 'BimpLayout';
     public $config = null;
     public $errors = array();
     public $msgs = array();
@@ -132,7 +134,29 @@ class BimpController
 
     public function init()
     {
-        
+    }
+
+    public function initLayout()
+    {
+        $id_object = BimpTools::getValue('id');
+        $layout = BimpLayout::getInstance();
+
+        $root = DOL_URL_ROOT;
+        if ($root == "/") {
+            $root = "";
+        } elseif (preg_match('/^(.+)\/$/', $root, $matches)) {
+            $root = $matches[1];
+        }
+
+        $layout->addJsVar('ajaxRequestsUrl', '\'' . $root . "/" . $this->module . '/index.php?fc=' . $this->controller . (!is_null($id_object) ? '&id=' . $id_object : '') . '\'');
+
+        foreach ($this->cssFiles as $css_file) {
+            $layout->addCssFile(BimpCore::getFileUrl($css_file, true, false));
+        }
+
+        foreach ($this->jsFiles as $js_file) {
+            $layout->addJsFile(BimpCore::getFileUrl($js_file, true, false));
+        }
     }
 
     public function initErrorsHandler()
@@ -346,41 +370,6 @@ class BimpController
 
     // Affichages:
 
-    public function displayHeaderFiles($echo = true)
-    {
-        $html = '';
-        $id_object = BimpTools::getValue('id');
-
-        $prefixe = DOL_URL_ROOT;
-        if ($prefixe == "/")
-            $prefixe = "";
-        elseif ($prefixe != "")
-            $prefixe .= "/";
-
-        $html .= '<script type="text/javascript">';
-        $html .= 'ajaxRequestsUrl = \'' . $prefixe . "/" . $this->module . '/index.php?fc=' . $this->controller . (!is_null($id_object) ? '&id=' . $id_object : '') . '\';';
-        $html .= '</script>';
-
-        $html .= BimpCore::displayHeaderFiles(false);
-
-        foreach ($this->cssFiles as $css_file) {
-            $html .= '<link type="text/css" rel="stylesheet" href="' . BimpCore::getFileUrl($css_file) . '"/>';
-        }
-
-        foreach ($this->jsFiles as $js_file) {
-            $html .= '<script type="text/javascript" src="' . BimpCore::getFileUrl($js_file) . '"></script>';
-        }
-
-        $html .= '<script type="text/javascript">';
-        $html .= '$(document).ready(function() {$(\'body\').trigger($.Event(\'bimp_ready\'));});';
-        $html .= '</script>';
-
-        if ($echo)
-            echo $html;
-
-        return $html;
-    }
-
     public function displayHeader()
     {
         llxHeader('', $this->getPageTitle(), '', false, false, false);
@@ -413,10 +402,10 @@ class BimpController
         $display_footer = false;
 
         if (!defined('BIMP_CONTROLLER_INIT')) {
+            ini_set('display_errors', 1);
+            error_reporting(E_ALL);
+
             define('BIMP_CONTROLLER_INIT', 1);
-            if (BimpDebug::isActive()) {
-                BimpDebug::addDebugTime('Début affichage page');
-            }
 
             if (!(int) $this->config->get('content_only', 0, false, 'bool')) {
                 $this->displayHeader();
@@ -444,7 +433,7 @@ class BimpController
             }
         }
 
-        echo '<div class="bimp_controller_content">';
+        echo '<div class="bimp_controller_content">' . "\n";
         if (!BimpObject::objectLoaded($user)) {
             if (!BimpCore::isContextPublic()) {
                 echo BimpRender::renderAlerts('Aucun utilisateur connecté. Veuillez vous <a href="' . DOL_URL_ROOT . '">authentifier</a>');
@@ -485,11 +474,9 @@ class BimpController
             }
         }
 
-        echo '</div>';
+        echo '</div><!-- End .bimp_controller_content -->' . "\n";
 
         if ($display_footer) {
-            echo self::renderBaseModals();
-
             $this->displayFooter();
         }
     }
@@ -1179,10 +1166,11 @@ class BimpController
         if (!count($errors)) {
             $object = BimpObject::getInstance($module, $object_name);
             if ($object->fetch((int) $id_object)) {
-                if ($object->setPosition($position)) {
+                $pos_errors = array();
+                if ($object->setPosition($position, $pos_errors)) {
                     $success = 'Position ' . $object->getLabel('of_the') . ' ' . $id_object . ' mise à jour avec succès';
                 } else {
-                    $errors[] = 'Echec de la mise à jour de la position ' . $object->getLabel('of_the') . ' ' . $id_object;
+                    $errors[] = BimpTools::getMsgFromArray($pos_errors, 'Echec de la mise à jour de la position ' . $object->getLabel('of_the') . ' ' . $id_object);
                 }
             } else {
                 $errors[] = BimpTools::ucfirst($object->getLabel()) . ' d\'ID ' . $id_object . ' non trouvé' . ($object->isLabelFemale() ? 'e' : '');

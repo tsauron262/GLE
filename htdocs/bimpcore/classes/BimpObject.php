@@ -4561,6 +4561,9 @@ class BimpObject extends BimpCache
                         $errors[] = 'Fichier de configuration invalide (table non renseignée)';
                         $result = 0;
                     } else {
+                        if ($this->getConf('positions', false, false, 'bool')) {
+                            $this->set('position', $this->getNextPosition());
+                        }
                         $result = $this->db->insert($table, $this->getDbData(), true);
                     }
                 }
@@ -4581,10 +4584,6 @@ class BimpObject extends BimpCache
                         switch ($insert_mode) {
                             case 'before':
                                 $this->setPosition(1);
-                                break;
-
-                            case 'after':
-                                $this->setPosition((int) $this->getNextPosition());
                                 break;
                         }
                     }
@@ -6067,13 +6066,18 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         }
     }
 
-    public function setPosition($position)
+    public function setPosition($new_position, &$errors = array())
     {
-        if (!isset($this->id) || !(int) $this->id) {
+        if (!$this->isLoaded($errors)) {
             return false;
         }
 
         if ($this->getConf('positions', false, false, 'bool')) {
+            $old_position = (int) $this->getInitData('position');
+            if ($old_position === $new_position) {
+                return true;
+            }
+
             if (method_exists($this, 'getPositionsFilters')) {
                 $filters = $this->getPositionsFilters();
                 if (is_null($filters)) {
@@ -6091,41 +6095,122 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
                 $filters[$parent_id_property] = $id_parent;
             }
 
+
             $table = $this->getTable();
             $primary = $this->getPrimary();
-
-            $items = $this->getList($filters, null, null, 'position', 'asc', 'array', array($primary, 'position'));
-
             $check = true;
 
+            // Modifié pour compat avec Bimp_Menu (nécessaire pour contourner un index unique sur le champ position) 
+//            $items = $this->getList($filters, null, null, 'position', 'desc', 'array', array($primary, 'position'));
+//            if ($this->db->update($table, array(
+//                        'position' => (int) $position
+//                            ), '`' . $primary . '` = ' . (int) $this->id) <= 0) {
+//                $check = false;
+//            }
+//
+//            if ($check) {
+//                $this->set('position', (int) $position);
+//                $i = 1;
+//                foreach ($items as $item) {
+//                    if ($i === (int) $position) {
+//                        $i++;
+//                    }
+//
+//                    if ((int) $item[$primary] === (int) $this->id) {
+//                        continue;
+//                    }
+//
+//                    if ((int) $item['position'] !== (int) $i) {
+//                        if ($this->db->update($table, array(
+//                                    'position' => (int) $i
+//                                        ), '`' . $primary . '` = ' . (int) $item[$primary]) <= 0) {
+//                            $check = false;
+//                        }
+//                    }
+//                    $i++;
+//                }
+//            }
+//            
+            $this->db->db->begin();
+
+            // On attribue temporairement la position suivante à l'élément déplacé pour libérer sa position actuelle.
             if ($this->db->update($table, array(
-                        'position' => (int) $position
-                            ), '`' . $primary . '` = ' . (int) $this->id) <= 0) {
+                        'position' => (int) $this->getNextPosition()
+                            ), '`' . $primary . '` = ' . $this->id) <= 0) {
+                $errors[] = $this->db->err();
                 $check = false;
             }
 
             if ($check) {
-                $this->set('position', (int) $position);
-                $i = 1;
-                foreach ($items as $item) {
-                    if ($i === (int) $position) {
-                        $i++;
-                    }
-
-                    if ((int) $item[$primary] === (int) $this->id) {
-                        continue;
-                    }
-
-                    if ((int) $item['position'] !== (int) $i) {
-                        if ($this->db->update($table, array(
-                                    'position' => (int) $i
-                                        ), '`' . $primary . '` = ' . (int) $item[$primary]) <= 0) {
-                            $check = false;
+                // On décale une par une les positions des éléments affectés: 
+                $items_filters = $filters;
+                if ($new_position > $old_position) {
+                    $items_filters['position'] = array(
+                        'and' => array(
+                            array(
+                                'operator' => '>',
+                                'value'    => $old_position
+                            ),
+                            array(
+                                'operator' => '<=',
+                                'value'    => $new_position
+                            )
+                        )
+                    );
+                    $items = $this->getList($items_filters, null, null, 'position', 'asc', 'array', array($primary, 'position'));
+                    foreach ($items as $item) {
+                        if ($check) {
+                            if ($this->db->update($table, array(
+                                        'position' => ((int) $item['position'] - 1)
+                                            ), '`' . $primary . '` = ' . (int) $item[$primary]) <= 0) {
+                                $errors[] = $this->db->err();
+                                $check = false;
+                            }
                         }
                     }
-                    $i++;
+                } else {
+                    $items_filters['position'] = array(
+                        'and' => array(
+                            array(
+                                'operator' => '>=',
+                                'value'    => $new_position
+                            ),
+                            array(
+                                'operator' => '<',
+                                'value'    => $old_position
+                            )
+                        )
+                    );
+                    $items = $this->getList($items_filters, null, null, 'position', 'desc', 'array', array($primary, 'position'));
+                    foreach ($items as $item) {
+                        if ($check) {
+                            if ($this->db->update($table, array(
+                                        'position' => ((int) $item['position'] + 1)
+                                            ), '`' . $primary . '` = ' . (int) $item[$primary]) <= 0) {
+                                $errors[] = $this->db->err();
+                                $check = false;
+                            }
+                        }
+                    }
+                }
+
+                if ($check) {
+                    // on Attribue la position finale à l'élément déplacé (qui a normalement été libérée)
+                    if ($this->db->update($table, array(
+                                'position' => $new_position
+                                    ), '`' . $primary . '` = ' . $this->id) <= 0) {
+                        $errors[] = $this->db->err();
+                        $check = false;
+                    }
+                }
+
+                if ($check) {
+                    $this->db->db->commit();
+                } else {
+                    $this->db->db->rollback();
                 }
             }
+
             return $check;
         }
 
@@ -7755,7 +7840,7 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         } else {
             $js .= '{}, ';
         }
-        $js .= '\'' . $title . '\', ';
+        $js .= '\'' . htmlentities($title) . '\', ';
         $js .= $success_callback . ', ';
         $js .= '\'' . $modal_format . '\'';
 

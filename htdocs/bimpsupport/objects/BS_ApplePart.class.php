@@ -31,96 +31,94 @@ class BS_ApplePart extends BimpObject
     );
     public static $partsWithNonIssue = array('011-00212', '011-00214', '011-00213');
     public static $refLiee = array(array(array(
-        "661-08937",
-        "661-08932",
-        "923-01962",
-        "923-01966",
-        "661-10566",
-        "923-02609",
-        "923-02592",
-        "661-10565",
-        "661-11036",
-        "923-02649",
-        "923-02682",
-        "661-11035",
-        "923-02609",
-        "661-10851",
-        "923-02610",
-        "661-10850",
-        "661-15741",
-        "661-15742",
-        "923-04089",
-        "923-04080",
-        "661-13575",
-        "923-03512",
-        "923-03506",
-        "661-13574",
-        "661-13570",
-        "923-03479",
-        "923-03470",
-        "661-13569",
-        "923-03535",
-        "923-03537",
-        "661-13624",
-        "661-13572",
-        "661-17939",
-        "923-04999",
-        "923-05011",
-        "661-17920 ",
-        "923-04979",
-        "923-0415",
-        "661-18428",
-        "923-05036",
-        "923-05104",
-        "661-22374",
-        "923-06682",
-        "923-06692",
-        "661-21991",
-        "923-06237",
-        "923-06235",
-        "661-21996",
-        "923-06258",
-        "923-06256",
-        "661-22294",
-        "923-06643",
-        "923-06648",
-        "661-08935",
-        "661-08936",
-        "923-01983",
-        "652-00230",
-        "661-08918",
-        "923-02056",
-        "923-01925", "661-02553"
-       ), array("011-00212"=>"SVC,TRACK USAGE,DISPLAY SCREW KIT", "011-00213"=>"SVC,TRACK USAGE,DOCK SCREWS","011-00214"=>"SVC,TRACK USAGE,PSA")),
+                "661-08937",
+                "661-08932",
+                "923-01962",
+                "923-01966",
+                "661-10566",
+                "923-02609",
+                "923-02592",
+                "661-10565",
+                "661-11036",
+                "923-02649",
+                "923-02682",
+                "661-11035",
+                "923-02609",
+                "661-10851",
+                "923-02610",
+                "661-10850",
+                "661-15741",
+                "661-15742",
+                "923-04089",
+                "923-04080",
+                "661-13575",
+                "923-03512",
+                "923-03506",
+                "661-13574",
+                "661-13570",
+                "923-03479",
+                "923-03470",
+                "661-13569",
+                "923-03535",
+                "923-03537",
+                "661-13624",
+                "661-13572",
+                "661-17939",
+                "923-04999",
+                "923-05011",
+                "661-17920 ",
+                "923-04979",
+                "923-0415",
+                "661-18428",
+                "923-05036",
+                "923-05104",
+                "661-22374",
+                "923-06682",
+                "923-06692",
+                "661-21991",
+                "923-06237",
+                "923-06235",
+                "661-21996",
+                "923-06258",
+                "923-06256",
+                "661-22294",
+                "923-06643",
+                "923-06648",
+                "661-08935",
+                "661-08936",
+                "923-01983",
+                "652-00230",
+                "661-08918",
+                "923-02056",
+                "923-01925", "661-02553"
+            ), array("011-00212" => "SVC,TRACK USAGE,DISPLAY SCREW KIT", "011-00213" => "SVC,TRACK USAGE,DOCK SCREWS", "011-00214" => "SVC,TRACK USAGE,PSA")),
         array(array(
-        "661-13114",
-        "661-10608",
-        "661-11037",
-        "661-11232",
-        "661-15743",
-        "661-14098",
-        "661-14096",
-        "661-14099",
-        "661-17940",
-        "661-18503",
-        "661-18504",
-        "661-18466",
-        "661-22311",
-        "661-21988",
-        "661-21993",
-        "661-22309",
-        "661-08933",
-        "661-08934",
-        "661-09081",
-        "661-10102",
-        "661-09032",
-        "661-09033",
-        "661-09034",
-        "661-10103"), 
-        array("011-00213"=>"SVC,TRACK USAGE,DOCK SCREWS","011-00214"=>"SVC,TRACK USAGE,PSA"))
+                "661-13114",
+                "661-10608",
+                "661-11037",
+                "661-11232",
+                "661-15743",
+                "661-14098",
+                "661-14096",
+                "661-14099",
+                "661-17940",
+                "661-18503",
+                "661-18504",
+                "661-18466",
+                "661-22311",
+                "661-21988",
+                "661-21993",
+                "661-22309",
+                "661-08933",
+                "661-08934",
+                "661-09081",
+                "661-10102",
+                "661-09032",
+                "661-09033",
+                "661-09034",
+                "661-10103"),
+            array("011-00213" => "SVC,TRACK USAGE,DOCK SCREWS", "011-00214" => "SVC,TRACK USAGE,PSA"))
     );
-    
-    
     protected static $compTIACodes = null;
 
     // Droits user: 
@@ -149,7 +147,7 @@ class BS_ApplePart extends BimpObject
 
     public function isFieldEditable($field, $force_edit = false)
     {
-        if (in_array($field, array(/*'qty', */'stock_price', 'exchange_price', 'out_of_warranty', 'price_type', 'not_invoiced'))) {
+        if (in_array($field, array(/* 'qty', */'stock_price', 'exchange_price', 'out_of_warranty', 'price_type', 'not_invoiced'))) {
             return (int) $this->isPropalEditable();
         }
         return (int) parent::isFieldEditable($field, $force_edit);
@@ -160,7 +158,7 @@ class BS_ApplePart extends BimpObject
         $issue = $this->getChildObject('issue');
         return (int) !((BimpObject::objectLoaded($issue) && $issue->isTierPart()) || in_array($this->getData('part_number'), self::$partsWithNonIssue));
     }
-    
+
     // Getters array: 
 
     public static function getCompTIACodes()
@@ -270,15 +268,15 @@ class BS_ApplePart extends BimpObject
     }
 
     // Getters données
-    
-    public function getThisCategProdApple(){
+
+    public function getThisCategProdApple()
+    {
         return $this->getCategProdApple($this->getData('part_number'), $this->getData('label'));
     }
 
     public static function getCategProdApple($ref, $desc)
     {
         $type = "autre";
-
 
         //Premier cas les ios
         foreach (self::$tabDescCommenceIos as $val)//desc commence par rajout 45€
@@ -297,12 +295,12 @@ class BS_ApplePart extends BimpObject
                         $type = "ios";
             }
         }
-        
-        
+
+
         //rer systéme 
         if (stripos($desc, 'REAR SYSTEM') !== false)
             $type = "rear";
-        
+
 
 
         //deuxieme cas les Batterie
@@ -404,7 +402,7 @@ class BS_ApplePart extends BimpObject
 
     public static function convertPrixStatic($type, $prix, $ref, $isIphone, $price_type = 'STOCK')
     {
-        if($prix < 1)
+        if ($prix < 1)
             return 0;
         //xception 
 //        $tabException1 = array("F661", "AB661", "SF661","B661",  "J661", "E661");
@@ -414,8 +412,17 @@ class BS_ApplePart extends BimpObject
 //        }
         if ($prix == 93.13)
             return (149 / 1.2);
+
         if ($prix == 65.87)
             return 82.5;
+
+        if ($prix == 86.29) { // Batterie IPad
+            return 107.5;
+        }
+
+        if ($prix == 76.72) {
+            return 99.16667;
+        }
 
         $coefPrix = 1;
         $constPrix = 0;
@@ -718,15 +725,15 @@ class BS_ApplePart extends BimpObject
                 }
             }
         }
-        
-        if(!count($errors)){
-            foreach(self::$refLiee as $data){
+
+        if (!count($errors)) {
+            foreach (self::$refLiee as $data) {
 //                echo '<pre>';print_r($data);
-                foreach($data[0] as $ref){
-                    if($this->getData('part_number') == $ref){
-                        foreach($data[1] as $refAJ => $libAj){
+                foreach ($data[0] as $ref) {
+                    if ($this->getData('part_number') == $ref) {
+                        foreach ($data[1] as $refAJ => $libAj) {
                             $obj = BimpCache::getBimpObjectInstance($this->module, $this->object_name);
-                            $obj->validateArray(array('part_number'=>$refAJ, 'id_sav'=>$this->getData('id_sav'), 'id_issue'=>$this->getData('id_issue'), 'label'=> $libAj. '. Pour : '.$ref));
+                            $obj->validateArray(array('part_number' => $refAJ, 'id_sav' => $this->getData('id_sav'), 'id_issue' => $this->getData('id_issue'), 'label' => $libAj . '. Pour : ' . $ref));
                             $errors = BimpTools::merge_array($errors, $obj->create());
                         }
                     }
@@ -787,7 +794,7 @@ class BS_ApplePart extends BimpObject
                         $label .= ' APPRO';
                     }
                     $line->desc = $label;
-                    $line->qty = 1;//(int) $this->getData('qty');
+                    $line->qty = 1; //(int) $this->getData('qty');
                     $line->tva_tx = 20;
 
                     $this->setPropalLinePrices($line);

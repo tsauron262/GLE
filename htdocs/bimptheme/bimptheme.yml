@@ -1,0 +1,13 @@
+params: 
+    menu_handler: 
+        label: Type de menu
+        type: select
+        def: auguria
+        values: 
+            auguria: Auguria (classique)
+            bimptheme: BimpThème
+
+    use_cache_server_for_menu: 
+        label: Mettre le menu en cache serveur
+        type: bool
+        def: 0

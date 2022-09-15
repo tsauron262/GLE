@@ -217,7 +217,7 @@ class BContract_contrat extends BimpDolObject
                 $totalHeuresVendues += $time;
             }
         }
-                        
+        
         $reste = $totalHeuresVendues - $totalHeuresFaites;
         
         return $reste;
@@ -228,7 +228,6 @@ class BContract_contrat extends BimpDolObject
         
         $return = Array();
         
-        $hourInDay = 7;
         //$services = Array('SERV19-DP1', 'SERV19-DP2', 'SERV19-DP3', 'SAV-NIVEAU_5', 'SERV22-DPI-AAPEI', 'SERV19-FD01', 'AUTRE');
         $instance = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product');
         $children = $this->getChildrenList('lines', ($justActif) ? Array('statut' => 4) : Array());
@@ -236,10 +235,9 @@ class BContract_contrat extends BimpDolObject
         foreach($children as $id_child) {
             
             $child = $this->getChildObject('lines', $id_child);
-            $instance->fetch($child->getData('fk_product'));            
-            
+            $instance->fetch($child->getData('fk_product'));       
             //if(in_array($instance->getRef(), $services)) {
-                $return[$instance->getRef() . ':::::' . $id_child] += (float) $child->getData('qty') * $hourInDay;
+                $return[$instance->getRef() . ':::::' . $id_child] += (float) $child->getData('qty') * $instance->getData('duree_i')/3600;
             //}
                         
         }

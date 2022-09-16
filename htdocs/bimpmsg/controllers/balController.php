@@ -9,7 +9,7 @@ class balController extends BimpController {
         
         $html = '<div class="row">';
 //        if(!isset($balType) || !$balType || !isset($balValue) || !$balValue)
-            $html .= '<div class="col-5 col-sm-4 col-md-3 col-xl-2">'.BimpRender::renderPanel('Menu', $this->menu()).'</div>';
+            $html .= '<div class="col-sm-4 col-md-3">'.BimpRender::renderPanel('Menu', $this->menu()).'</div>';
             
         if(isset($balType) && $balType && isset($balValue) && $balValue)
             $html .= '<div class="col-sm-12 col-md-9">'.BimpRender::renderPanel('Messages', $this->getListBal($balType, $balValue, $dest)).'</div>';

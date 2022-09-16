@@ -9,6 +9,8 @@ class Bimp_Product_Entrepot extends BimpObject
     public static $modeStockDate = false;
     public static $modeStockShowRoom = false;
     public static $modeVentes = false;
+    
+    public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
 
     public function __construct($module, $object_name)
     {

@@ -8,6 +8,11 @@ labels:
     name_plur: Stocks par entrepôt
     is_female: 0
     
+    
+list_page_url:
+    controller: stocks
+    module: bimpcore
+    
 objects:   
     product: 
         instance: 

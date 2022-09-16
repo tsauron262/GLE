@@ -2193,6 +2193,8 @@ class BL_CommandeShipment extends BimpObject
                 }
             }
         }
+        
+        $commande->addNote('Bonjour, le BL : '.$this->getSignatureDocRef('bl').' est expédié.', null, 0, 1, '', 1, 2, 'BN_GROUPID_ACHAT');
 
         return $errors;
     }

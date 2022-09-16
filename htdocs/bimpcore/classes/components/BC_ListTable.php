@@ -2389,7 +2389,7 @@ class BC_ListTable extends BC_List
                 $field_object = self::getColFieldObject($this->object, $col_name, $field_name);
 
                 if ($light_export) {
-                    if (!is_a($field_object, 'BimpObject') || (!$field_object->field_exists($field_name) && !method_exists($field_object, 'get' . ucfirst($field_name) . 'csvValue'))) {
+                    if (!is_a($field_object, 'BimpObject') || ((!$field_object->field_exists($field_name)  ||  $field_object->getConf('fields/'.$field_name.'/extra', 0, false, 'bool')) && !method_exists($field_object, 'get' . ucfirst($field_name) . 'csvValue'))) {
                         continue;
                     }
                 }
@@ -2511,7 +2511,7 @@ class BC_ListTable extends BC_List
                 $base_col_name = $col_name;
                 $col_name = str_replace(':', '___', $col_name);
 
-                if (is_a($field_object, 'BimpObject') && $field_object->field_exists($field_name)) {
+                if (is_a($field_object, 'BimpObject') && $field_object->field_exists($field_name) && !$field_object->getConf('fields/'.$field_name.'/extra', 0, false, 'bool')) {
                     $sqlKey = '';
 
                     if (method_exists($this->object, 'get' . ucfirst($col_name) . 'SqlKey')) {

@@ -6326,6 +6326,12 @@ Nouvel : ' . $this->displayData($champAddNote, 'default', false, true));
         $note = BimpObject::getInstance('bimpcore', 'BimpNote');
         $note->initBdd($this->getConf('no_transaction_db', 0, false, 'bool'));
 
+        
+        if(is_string($fk_group_dest))
+            eval('if(BimpNote::'.$fk_group_dest.' != null) $fk_group_dest = BimpNote::'.$fk_group_dest.';');
+        if(is_string($fk_user_dest))
+            eval('if(BimpNote::'.$fk_user_dest.' != null) $fk_user_dest = BimpNote::'.$fk_user_dest.';');
+        
         if (is_null($visibility)) {
             $visibility = BimpNote::BIMP_NOTE_MEMBERS;
         }

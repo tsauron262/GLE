@@ -872,8 +872,6 @@ fields_tables:
         show: 
             callback: isClient
         rows: 
-            - field: outstanding_limit
-              edit: 1
             - label: Encours autorisé
               value: 
                   callback: displayOutstandingLimitTtc

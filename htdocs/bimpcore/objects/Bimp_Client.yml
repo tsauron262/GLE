@@ -137,7 +137,7 @@ views:
                       children: contacts
                       
     atradius:
-        title: Assurance crédit
+        title: Assurance crédit HT
         objects_change_reload: Bimp_Client
         rows: 
             - cols: 

@@ -2748,6 +2748,21 @@ class Bimp_Facture extends BimpComm
 
         return $html;
     }
+    
+    public function displayClientsCommandes(){
+        if($this->isLoaded()){
+            $return = array();
+            $list = getElementElement('commande', 'facture', null, $this->id);
+            foreach($list as $data){
+                $comm = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $data['s']);
+                if($comm->getData('fk_soc') != $this->getData('fk_soc')){
+                    $return[$comm->getData('fk_soc')] = $comm->displayData('fk_soc');
+                }
+            }
+            return implode('<br/>', $return);
+    //        die;
+        }
+    }
 
     public function displayIrrecouvrableInfos($with_note = true)
     {

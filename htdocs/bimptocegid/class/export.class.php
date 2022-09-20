@@ -320,7 +320,7 @@
                 case 'bordereauxCHK': $number = 8;
             }
             
-            return $number . "_" . $entitie ."_(" . strtoupper($type) . ")_" .$year . '-' . $month . '-' . $day . '-' . $this->moment . '_' . $version_tra . $extention;
+            return $number . "_" . $entitie ."_(" . strtoupper($type) . ")_" .$year . '-' . $month . '-' . $day . '-' . $this->moment . '-' . date('His') . '_' . $version_tra . $extention;
             
         }
         

@@ -137,7 +137,12 @@
                         $structure['TYPE_DE_COMPTE']            = sizing('', 1);
                         $structure['CODE_COMPTA']               = sizing("", 16);
                         $structure['SENS']                      = sizing($this->getSens(abs(round($line->total_ht - ($produit->getData('deee') * $line->qty), 2))), 1);
-                        $structure['MONTANT']                   = sizing(abs(round($line->total_ht - ($produit->getData('deee') * $line->qty), 2)), 20, true);
+                       if($facture->getData('zone_vente') == $this->zoneAchat['france']) {
+                           $structure['MONTANT']                   = sizing(abs(round($line->total_ht - ($produit->getData('deee') * $line->qty), 2)), 20, true);
+                       } else {
+                           $structure['MONTANT']                   = sizing(abs(round($line->total_ht, 2)), 20, true);
+                       }
+                        
                         
                         $ecriture .= implode('', $structure) . "\n";
 

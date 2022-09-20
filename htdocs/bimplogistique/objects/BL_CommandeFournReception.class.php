@@ -1469,7 +1469,7 @@ class BL_CommandeFournReception extends BimpObject
                 $update = true;
             }
 
-            if ((float) round($this->getInitData('total_ttc'), 5) !== round($total_ttc, 5)) {
+            if ((float) round($this->getInitData('total_ttc'), 5) !== (float) round($total_ttc, 5)) {
                 $this->set('total_ttc', $total_ttc);
                 $update = true;
             }

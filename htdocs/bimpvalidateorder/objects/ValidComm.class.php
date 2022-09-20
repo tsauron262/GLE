@@ -346,7 +346,7 @@ class ValidComm extends BimpObject
             $client = $bimp_object->getClientFacture();
         else
             $client = $bimp_object->getChildObject('client');
-        $max = $client->getData('outstanding_limit');
+        $max = $client->getData('outstanding_limit') * 1.2;
         
         $actuel = $client->getEncours();
         $actuel += $client->getEncoursNonFacture();

@@ -148,7 +148,14 @@ class BimpPublicController extends BimpController
 
     public function displayHeader()
     {
-        top_htmlhead('', $this->getPageTitle());
+        global $hookmanager;
+
+        // Création et initialisation du BimpLayout: 
+        $layout = BimpLayout::getInstance();
+        $layout->page_title = $this->getPageTitle();
+
+        $hookmanager->executeHooks('initBimpLayout', array());
+        $layout->displayHead();
     }
 
     public function displayFooter()
@@ -317,7 +324,7 @@ class BimpPublicController extends BimpController
         $html .= 'Si vous souhaitez prendre un rendez-vous en ligne dans un de nos centres SAV pour la réparation de votre matériel et que ';
         $html .= 'vous ne disposez pas de compte client LDLC Apple, veuillez <a href="' . BimpObject::getPublicBaseUrl() . 'fc=savForm" style="color: #00BEE5">cliquer ici</a>';
         $html .= '</p>';
-        
+
         return $html;
     }
 

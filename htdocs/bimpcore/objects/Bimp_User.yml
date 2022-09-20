@@ -222,6 +222,8 @@ fields:
         label: Développeur
         type: bool
         default_value: 0
+    photo:
+        label: photo
         
     id_docusign: 
         label: Identifiant DocuSign
@@ -299,6 +301,26 @@ forms:
                       params: 
                           - MAIN_THEME
                           - eldy
+                          
+    photo: 
+        title: Changer la photo
+        rows: 
+            no_photo: 
+                custom: 1
+                label: Aucune photo
+                input_name: no_photo
+                input: 
+                    type: toggle
+                value: 0
+            logo: 
+                custom: 1
+                input_name: photo
+                label: Fichier
+                input: 
+                    type: file_upload
+                display_if: 
+                    field_name: no_photo
+                    show_values: 0
               
 fields_tables: 
     identity:

@@ -1202,7 +1202,7 @@ class Bimp_Societe extends BimpDolObject
     
     public function getRemainToPay($true_value = false, $round = true, &$debug = ''){
         $amount = 0;
-        $facts = BimpObject::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', array('fk_soc'=>$this->id, 'paye'=>0));
+        $facts = BimpObject::getBimpObjectObjects('bimpcommercial', 'Bimp_Facture', array('fk_soc'=>$this->id, 'paye'=>0, 'fk_statut' => 1));
         foreach($facts as $fact){
             $value = $fact->getRemainToPay($true_value = false, $round = true);
             $debug .= '<br/>Fact : '.$fact->getLink() . ' '. BimpTools::displayMoneyValue($value);

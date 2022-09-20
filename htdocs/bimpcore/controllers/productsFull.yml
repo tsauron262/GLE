@@ -1,0 +1,199 @@
+bootstrap: 1
+title: Produits
+
+js: 
+    - /bimplogistique/views/js/create_inventory2.js
+    
+objects:
+    productentrepot: 
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_Product_Entrepot
+                
+    productldlc:
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Product_Ldlc
+            
+    product: 
+        instance: 
+            bimp_object: Bimp_Product
+            
+    equipment: 
+        instance: 
+            bimp_object: 
+                module: bimpequipment
+                name: Equipment
+            
+    vente:
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_Vente
+                
+    achat: 
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_Achat
+                
+    prod_achats: 
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_ProductAchats
+                
+    package: 
+        instance: 
+            bimp_object: 
+                module: bimpequipment
+                name: BE_Package
+            
+    immos: 
+        instance: 
+            bimp_object: 
+                module: bimpequipment
+                name: BE_ProductImmos
+    
+    BimpProductMouvement:
+        instance:
+            bimp_object: BimpProductMouvement
+            
+    inventory: 
+        instance: 
+            bimp_object: 
+                module: bimplogistique
+                name: Inventory2   
+    entrepots: 
+        instance: 
+            bimp_object: Bimp_Entrepot     
+    values8sens: 
+        instance: 
+            bimp_object: BimpValues8Sens     
+    productfourn: 
+        instance: 
+            bimp_object: Bimp_ProductFournisseurPrice 
+            
+sections:
+    - type: tabs
+      tabs: 
+        default: 
+            label: Produits
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: product
+                      name: default
+        equipments:
+            label: Equipements
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: equipment
+#        productentrepot:
+#            label: Stock / Entrepot
+#            sections: 
+#                - type: list
+#                  list: 
+#                      panel: 1
+#                      object: productentrepot
+#                      name: default
+        productfourn:
+            label: Produits Fournisseurs
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: productfourn
+                      name: default
+                      
+        productentrepotcustom:
+            label: Stock / Entrepot
+            sections: 
+                - type: custom
+                  custom: 
+                      callback: renderProductEntrepot
+                      
+        productldlc:
+            label: Imports produits Fournisseurs
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: productldlc
+                      name: default
+            
+        ventes:
+              label: Stats ventes
+              sections: 
+                  - type: list
+                    list: 
+                        panel: 1
+                        object: vente
+        achats:
+              label: Détails achats
+              sections: 
+                  - type: list
+                    list: 
+                        panel: 1
+                        object: achat
+                        
+        prod_achats: 
+            label: Achats par produits
+            sections: 
+                  - type: list
+                    list: 
+                        panel: 1
+                        object: prod_achats
+                        name: achats
+                        
+        packages:
+            label: Packages
+            sections: 
+                - type: list
+                  list: 
+                      object: package  
+        immos:
+            label: Equipements + Package
+            sections: 
+                - type: list
+                  list: 
+                      object: immos
+                      name: immos
+                      
+        mouvement:
+            label: Mouvements de stock
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: BimpProductMouvement  
+                      
+        inventory:
+            label: Inventaires
+            sections:
+                - type: list
+                  list: 
+#                      panel: 1
+                      object: inventory
+        entrepots: 
+            label: Entrepôts
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: entrepots
+                      name: default
+                      
+        values8sens: 
+            label: Tags 8sens
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: values8sens
+                      name: default

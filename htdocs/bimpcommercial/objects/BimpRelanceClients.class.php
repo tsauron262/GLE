@@ -21,7 +21,7 @@ class BimpRelanceClients extends BimpObject
             case 'allSent':
             case 'generateRemainToSendPdf':
             case 'abandonneAll':
-                if ($user->admin || (int) $user->id === 1237 ||
+                if ($user->admin || $user->login === 'c.fioravanti' ||
                         $user->rights->bimpcommercial->admin_relance_global ||
                         $user->rights->bimpcommercial->admin_relance_individuelle) {
                     return 1;

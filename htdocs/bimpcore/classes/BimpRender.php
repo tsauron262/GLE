@@ -265,6 +265,45 @@ class BimpRender
         return $html;
     }
 
+    public static function renderDropDownContent($id, $label_html, $content_html, $params = array())
+    {
+        $params = BimpTools::overrideArray(array(
+                    'extra_class' => '',
+                    'type'        => 'a',
+                    'side'        => 'right'
+                        ), $params);
+        $html = '';
+
+        $html .= '<div class="dropdown' . ($params['extra_class'] ? ' ' . $params['extra_class'] : '') . '">';
+
+        switch ($params['type']) {
+            case 'button':
+                $html .= '<span class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                $html .= $label_html;
+                $html .= '</span>';
+                break;
+
+            case 'span':
+                $html .= '<span class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                $html .= $label_html;
+                $html .= '</span>';
+                break;
+
+            case 'a':
+                $html .= '<a class="dropdown-toggle" href="#" id="' . $id . '" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+                $html .= $label_html;
+                $html .= '</a>';
+                break;
+        }
+
+        $html .= '<div class="dropdown-menu dropdown-menu-' . $params['side'] . '" aria-labelledby="' . $id . '">';
+        $html .= $content_html;
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
     public static function renderButtonsGroup($buttons, $params)
     {
         $html = '';

@@ -1,6 +1,6 @@
 <?php
 
-class facturesFournController extends BimpController
+class achatsController extends BimpController
 {
 
     var $socid = "";

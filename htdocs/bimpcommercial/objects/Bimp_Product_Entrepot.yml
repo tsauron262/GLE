@@ -8,6 +8,11 @@ labels:
     name_plur: Stocks par entrepôt
     is_female: 0
     
+    
+list_page_url:
+    controller: stocks
+    module: bimpcore
+    
 objects:   
     product: 
         instance: 
@@ -163,10 +168,6 @@ fields:
         values: 
             array: gammesMateriel
         
-    type_materiel: 
-        label: Type matériel
-        value: 
-            callback: displayTypeMateriel
 
 filters: 
     stockDateDifZero:
@@ -256,6 +257,10 @@ lists_cols:
         label: Dernier PA HT réel
         value: 
             callback: getLastTruePaHt
+    type_materiel: 
+        label: Type matériel
+        value: 
+            callback: displayTypeMateriel
                 
 lists: 
     default: 

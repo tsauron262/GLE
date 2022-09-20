@@ -867,13 +867,14 @@ fields_tables:
             - field: consigne_ref_ext
                   
     encours: 
-        title: Encours HT
+        title: Encours TTC
         icon: fas_search-dollar
         show: 
             callback: isClient
         rows: 
-            - field: outstanding_limit
-              edit: 1
+            - label: Encours autorisé
+              value: 
+                  callback: displayOutstandingLimitTtc
             - label: Encours actuels
               value: 
                   callback: displayOutstanding

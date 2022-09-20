@@ -1842,7 +1842,7 @@ class Bimp_CommandeFourn extends BimpComm
             );
 
             $portHt = $portTtc = 0;
-            $shipping_mode = "";
+            $shipping_mode = "CH6";
             if($this->getData('methode_liv') == 1)
                 $shipping_mode = 'PNS1';
             if($this->getData('methode_liv') == 2)

@@ -104,7 +104,9 @@ class ActionsBimpsupport
 
             require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
             global $tabCentre;
+            $allCentre = false;
             if ($user->array_options['options_apple_centre'] == "") {//Ajout de tous les centre
+                $allCentre = true;
                 $centreUser = array();
                 foreach ($tabCentre as $idT2 => $tabCT)
                     $centreUser[] = $idT2;
@@ -121,8 +123,8 @@ class ActionsBimpsupport
 
             $urlAcces = DOL_URL_ROOT . '/bimpsupport/?tab=sav';
             if (count($centreUser) > 1) {
-                $tabGroupe = array(array('label' => "Tous", 'valeur' => 'Tous', 'forUrl' => implode($centreUser, "-")));
-                $urlAcces = DOL_URL_ROOT . "/bimpsupport/?fc=index&tab=sav&code_centre=" . implode($centreUser, "-");
+                $tabGroupe = array(array('label' => "Tous", 'valeur' => 'Tous', 'forUrl' => ($allCentre ? '' : implode($centreUser, "-"))));
+                $urlAcces = DOL_URL_ROOT . "/bimpsupport/?fc=index&tab=sav" . ($allCentre ? '' : '&code_centre='.implode($centreUser, "-"));
             }
 
 
@@ -154,7 +156,7 @@ class ActionsBimpsupport
 
             foreach ($tabGroupe as $ligne3) {
                 $centre = $ligne3['valeur'];
-                $href = DOL_URL_ROOT . '/bimpsupport/?fc=index&tab=sav' . ($ligne3['valeur'] ? '&code_centre=' . $ligne3['forUrl'] : "");
+                $href = DOL_URL_ROOT . '/bimpsupport/?fc=index&tab=sav' . ($ligne3['valeur'] && $ligne3['forUrl'] != '' ? '&code_centre=' . $ligne3['forUrl'] : "");
                 $return .= '<div class="menu_contenu ' . ($ligne3['valeur'] != "Tous" ? 'menu_contenueCache2' : '') . '"><span><a class="vsmenu" href="' . $href . $hrefFin . '">
                     ' . img_object("SAV", "drap0@synopsistools") . ' ' . $ligne3['label'] . '</a></span><br/>';
 
@@ -243,8 +245,8 @@ class ActionsBimpsupport
 
 
 
-        echo $return;
-//        $this->resprints = $return;   Bug ???????
+//        echo $return;
+        $this->resprints = $return;  // Bug ???????
         return 0;
     }
 }

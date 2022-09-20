@@ -1,55 +1,27 @@
-body {
-    font-size: 13px;
-}
-
 .wrapper .header-top .top-menu .dropdown .dropdown-menu {
-
     margin-top: 14px;
-
 }
 
 .dropdown-menu {
-
     width: auto;
     height: auto;
-
 }
 
 .dropdown-menu .dropdown-item {
-
     padding: 5px 15px;
     border-radius: 0px;
-
 }
 
-
-
 .dropdown-item {
-
     margin-left: 25px;
     margin-right: 20px;
     padding: 7px;
-
 }
 
 .dropdown-menu .dropdown-item:hover, 
 .dropdown-menu .dropdown-item:focus {
-
     background-color:  #fff !important;
-
 }
-
-.modifMenuTopRight {
-
-    margin-left: auto !important;
-    float: right;
-    display: inline-block;
-
-}
-
-/*span.select2-container{
-   min-width: 240px; => Ne jamais faire ça : cela affecte tous les selects quelque soit leur emplacement => il faut utiliser un sélecteur spécifique (ici: .top-menu)
-}*/
 
 .top-menu span.select2-container {
     min-width: 240px;
@@ -72,13 +44,10 @@ body {
     width: 17px !important;
     font-weight: 800;
     color: #fff;
-
 }
 
 .footer {
-
     background-color: #fff;
-
 }
 
 
@@ -106,17 +75,10 @@ body {
 }
 
 @media (max-device-width: 940px){
-
     a img, td img {
-
         height: 25px!important;
-
     }
-
     .footer {
-
         background-color: #fff;
-
     }
-
 }

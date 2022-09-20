@@ -15,7 +15,7 @@ table: facture_fourn
 controller: factureFourn
 icon: fas_file-invoice-dollar
 list_page_url: 
-    controller: facturesFourn
+    controller: achats
 
 force_extrafields_update: 1
 

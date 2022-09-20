@@ -243,8 +243,8 @@ class ActionsBimpsupport
 
 
 
-        echo $return;
-//        $this->resprints = $return;   Bug ???????
+//        echo $return;
+        $this->resprints = $return;  // Bug ???????
         return 0;
     }
 }

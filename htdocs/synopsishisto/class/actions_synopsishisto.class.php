@@ -20,7 +20,7 @@ class ActionsSynopsisHisto
 
     function printMenuAfter($parameters, &$object, &$action, $hookmanager)
     {
-        if (!$this->menuOk) {
+        if (!histoNavigation::$menu_ok) {
             $this->afficherMenu(0);
             $this->menuOk = true;
         }
@@ -29,7 +29,7 @@ class ActionsSynopsisHisto
 
     function printLeftBlock($parameters, &$object, &$action, $hookmanager)
     {
-        if (!$this->menuOk) {
+        if (!histoNavigation::$menu_ok) {
             $this->afficherMenu(1);
             $this->menuOk = true;
         }
@@ -109,6 +109,7 @@ class histoNavigation
 {
 
     public static $mode_eco = null;
+    public static $menu_ok = false;
 
     public static function isModeEco()
     {
@@ -138,6 +139,7 @@ class histoNavigation
     static function getBlocHisto($context)
     {
         global $db, $user, $conf, $langs;
+        static::$menu_ok = true;
         $langs->load("histo@synopsishisto");
 //        if ($conf->global->MAIN_MODULE_SYNOPSISHISTO && $user->rights->MiniHisto->all->Afficher) {
         $return .= '<div class="blockvmenufirst blockvmenupair' . ($context == 1 ? ' vmenu' : '') . '">';

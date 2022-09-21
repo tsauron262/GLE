@@ -3,8 +3,11 @@
 class BDSRender
 {
 
-    public static function renderOperationProcess($data)
+    public static function renderOperationProcess($data, $params = array())
     {
+        $params = BimpTools::overrideArray(array(
+                    'back_button_type' => 'operations_page' // operations_page / close_madale
+                        ), $params);
         $html = '';
         $process = null;
         $operation = null;
@@ -67,7 +70,6 @@ class BDSRender
             }
             $html .= '</div>';
 
-
             $html .= '<div class="row">';
             $html .= '<div class="operationStepAjaxResult col-xs-12 col-md-6">';
             if (isset($data['result_content'])) {
@@ -100,10 +102,20 @@ class BDSRender
             $html .= BimpRender::renderIcon('fas_play', 'iconLeft') . 'Reprendre';
             $html .= '</span>';
 
-            $backUrl = DOL_URL_ROOT . '/bimpdatasync/index.php?fc=process&id=' . (int) $data['id_process'] . '&tab=operations';
-            $html .= '<span id="bds_backButton" class="btn btn-default" onclick="window.location = \'' . $backUrl . '\';" style="display: none">';
-            $html .= BimpRender::renderIcon('fas_reply', 'iconLeft') . 'Retour';
-            $html .= '</span>';
+            switch ($params['back_button_type']) {
+                case 'operations_page':
+                    $backUrl = DOL_URL_ROOT . '/bimpdatasync/index.php?fc=process&id=' . (int) $data['id_process'] . '&tab=operations';
+                    $html .= '<span id="bds_backButton" class="btn btn-default" onclick="window.location = \'' . $backUrl . '\';" style="display: none">';
+                    $html .= BimpRender::renderIcon('fas_reply', 'iconLeft') . 'Retour';
+                    $html .= '</span>';
+                    break;
+                
+                case 'close_madale':
+                    $html .= '<span id="bds_backButton" class="btn btn-default" onclick="bimpModal.clearCurrentContent();" style="display: none">';
+                    $html .= BimpRender::renderIcon('fas_times', 'iconLeft') . 'Fermer';
+                    $html .= '</span>';
+                    break;
+            }
             $html .= '</div>';
 
             if (isset($data['debug_content']) && $data['debug_content']) {
@@ -125,6 +137,7 @@ class BDSRender
                     $html .= '<span id="bds_enableReportButton" class="btn btn-default" onclick="if (typeof(bds_operations[' . $operation->id . ']) === \'object\') bds_operations[' . $operation->id . '].enableReport();" style="display: none">';
                     $html .= BimpRender::renderIcon('fas_eye', 'iconLeft') . 'Afficher le rapport';
                     $html .= '</span>';
+
                     $html .= '<span id="bds_disableReportButton" class="btn btn-default" onclick="if (typeof(bds_operations[' . $operation->id . ']) === \'object\') bds_operations[' . $operation->id . '].disableReport();">';
                     $html .= BimpRender::renderIcon('fas_eye-slash', 'iconLeft') . 'Masquer le rapport';
                     $html .= '</span>';

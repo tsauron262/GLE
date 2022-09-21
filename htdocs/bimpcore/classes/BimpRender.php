@@ -728,7 +728,7 @@ class BimpRender
         $html .= '</div>';
 
         $html .= '<div class="modal-footer">';
-        $html .= '<button type="button" class="btn btn-secondary" onclick="' . $modal_js_var_name . '.clearCurrentContent();">';
+        $html .= '<button type="button" class="btn btn-secondary closeModalButton" onclick="' . $modal_js_var_name . '.clearCurrentContent();">';
         $html .= '<i class="fa fa-times iconLeft"></i>Fermer</button>';
         $html .= '</div>';
 

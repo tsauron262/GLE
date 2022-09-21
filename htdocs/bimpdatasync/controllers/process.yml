@@ -4,8 +4,8 @@ bootstrap: 1
 js: 
     - /bimpdatasync/views/js/operations.js
     
-css: 
-    - /bimpdatasync/views/css/operations.css
+#css:
+#    - /bimpdatasync/views/css/operations.css => Déplacé dans BimpCore.php
     
 title: 
     callback: 

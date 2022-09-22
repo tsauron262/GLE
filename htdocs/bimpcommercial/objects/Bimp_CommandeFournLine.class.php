@@ -1631,9 +1631,6 @@ class Bimp_CommandeFournLine extends FournObjectLine
                 if (!isset($reception_data['equipments'])) {
                     $reception_data['equipments'] = array();
                 }
-                echo '<pre>';
-                print_r($reception_data['serials']);
-                echo '</pre>';
                 foreach ($reception_data['serials'] as $idx => $serial_data) {
                     if (isset($serial_data['r']) && (int) $serial_data['r']) {
                         continue;
@@ -1853,10 +1850,6 @@ class Bimp_CommandeFournLine extends FournObjectLine
             }
         }
 
-        echo '<pre>';
-        print_r($reception_data['serials']);
-        echo '</pre>';
-
         if (!$isReturn && $this->getData('linked_object_name') === 'commande_line') {
             $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('linked_id_object'));
             if (!BimpObject::objectLoaded($line)) {
@@ -1897,10 +1890,6 @@ class Bimp_CommandeFournLine extends FournObjectLine
                 }
             }
         }
-
-        echo '<pre>';
-        print_r($reception_data['serials']);
-        echo '</pre>';
 
         $reception_data['received'] = $full_received;
 

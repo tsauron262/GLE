@@ -1083,7 +1083,7 @@ class BimpCore
 
         global $user;
 
-        $bdb = BimpCache::getBdb();
+        $bdb = BimpCache::getBdb(true);
 
         $where = 'obj_module = \'' . $object->module . '\'';
         $where .= ' AND obj_name = \'' . $object->object_name . '\'';

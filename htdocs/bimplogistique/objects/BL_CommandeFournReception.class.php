@@ -231,7 +231,8 @@ class BL_CommandeFournReception extends BimpObject
                 'onclick' => $this->getJsActionOnclick('validateReception', array(), array(
                     'form_name'        => 'validate',
                     'on_form_submit'   => 'function($form, extra_data) {return onReceptionValidationFormSubmit($form, extra_data);}',
-                    'success_callback' => $success_callback
+                    'success_callback' => $success_callback,
+//                    'use_bimpdatasync' => 1
                 ))
             );
         }
@@ -1464,7 +1465,7 @@ class BL_CommandeFournReception extends BimpObject
 
             $update = false;
 
-            if ((float) round($this->getInitData('total_ht'), 5) !== (float)round($total_ht, 5)) {
+            if ((float) round($this->getInitData('total_ht'), 5) !== (float) round($total_ht, 5)) {
                 $this->set('total_ht', $total_ht);
                 $update = true;
             }
@@ -1558,7 +1559,7 @@ class BL_CommandeFournReception extends BimpObject
                             $this->updateField('info', 'DECEMBRE 2020' . ($info ? "\n\n" . $info : ''));
                         }
                         // ************
-                        
+
                         $date_received = BimpTools::getArrayValueFromPath($data, 'date_received', date('Y-m-d'));
                         $stock_out = (BimpTools::getArrayValueFromPath($data, 'stock_out', 'non') == 'oui' ? 1 : 0);
                         $errors = $this->validateReception($date_received, false, $stock_out, $force_equipments_attribution, $skip_equipments_place);
@@ -1777,6 +1778,22 @@ class BL_CommandeFournReception extends BimpObject
             'errors'   => $errors,
             'warnings' => $warnings
         );
+    }
+
+    // Actions BDS: 
+
+    public function initBdsActionValidateReception(&$action_data = array(), &$errors = array(), $extra_data = array())
+    {
+        $action_data['operation_title'] = 'Validation de la réception';
+//
+//        $action_data['steps'] = array(
+//            'create_equipments' => array(
+//                'label'                  => 'Etape test',
+//                'on_error'               => 'continue',
+//                'elements'               => array(1, 2, 3, 4, 5, 6),
+//                'nbElementsPerIteration' => 1
+//            )
+//        );
     }
 
     // Overrides: 

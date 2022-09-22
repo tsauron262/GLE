@@ -892,6 +892,62 @@ function bds_initProcessOperation($button, id_process, id_operation) {
     });
 }
 
+function bds_initObjectActionProcess($button, data, modal_title, $resultContainer) {
+    var success_callback = function (result, bimpAjax) {
+        if (typeof (result.process_html) !== 'undefined' && result.process_html) {
+            var $container = bimpAjax.$resultContainer;
+
+            if ($.isOk($container) && !bimpAjax.$resultContainer.hasClass('modal_content')) {
+                $container = bimpAjax.$resultContainer.findParentByClass('modal_content');
+            }
+
+            if (!$.isOk($container)) {
+                bimp_msg('Erreur technique - opération impossible (conteneur absent)');
+                return;
+            }
+
+            var modal_idx = parseInt($container.data('idx'));
+
+            bimpModal.removeComponentContent('stepsProgressionContainer');
+            $container.slideUp(250, function () {
+                $container.html(result.process_html);
+                $container.slideDown(250, function () {
+                    bimpModal.disableContentCloseButton(modal_idx);
+                    bimpModal.removeExtraButtons(modal_idx);
+
+                    $(this).attr('style', '');
+                    $('body').trigger($.Event('contentLoaded', {
+                        $container: $container
+                    }));
+
+                    bds_operations[bimpAjax.id_operation] = new BDS_ProcessOperation(result.operation_data, result.operation_options);
+                    bds_operations[bimpAjax.id_operation].start();
+                });
+            });
+        }
+    };
+
+    if ($.isOk($resultContainer)) {
+        // Si on dans un form:
+        BimpAjax('bds_initObjectActionProcess', data, $resultContainer, {
+            $button: $button,
+            url: bds_process_url,
+            display_success: false,
+            display_processing: true,
+            processing_msg: 'Initialisation de l\'opération en cours',
+            processing_padding: 30,
+            append_html: true,
+            modal_scroll_bottom: true,
+            success: success_callback
+        });
+    } else {
+        // Sinon: 
+        bimpModal.loadAjaxContent($button, 'bds_initObjectActionProcess', data, modal_title, 'Initialisation de l\'opération en cours', success_callback, {
+            url: bds_process_url
+        });
+    }
+}
+
 function endOperation() {
     $('#bds_cancelOperationButton').hide();
     $('#bds_holdOperationButton').hide();

@@ -2454,11 +2454,6 @@ class Bimp_CommandeFournLine extends FournObjectLine
             return $errors;
         }
 
-//        if ((int) $commande_fourn->isBilled()) {
-//            $errors[] = 'Une facture a été créée pour cette commande fournisseur';
-//            return $errors;
-//        }
-
         $is_extra_line = false;
         $current_commande_status = (int) $commande_fourn->getData('fk_statut');
 

@@ -72,6 +72,80 @@ class processController extends BimpController
         );
     }
 
+    public function ajaxProcessBds_initObjectActionProcess()
+    {
+        $errors = array();
+        $warnings = array();
+        $html = '';
+        $process_html = '';
+        $modal_idx = BimpTools::getValue('modal_idx', 0);
+
+        $operation_data = array();
+        $operation_options = array(
+            'module'            => BimpTools::getValue('module', ''),
+            'object_name'       => BimpTools::getValue('object_name', ''),
+            'id_object'         => (int) BimpTools::getValue('id_object', 0),
+            'action'            => BimpTools::getValue('object_action', ''),
+            'action_extra_data' => BimpTools::getValue('extra_data', ''),
+            'mode'              => 'ajax',
+            'debug'             => BimpCore::isUserDev()
+        );
+
+        require_once DOL_DOCUMENT_ROOT . '/bimpdatasync/BDS_Lib.php';
+
+        $process = BDSProcess::createProcessByName('ObjectsActions', $errors, $operation_options);
+
+        if (!count($errors)) {
+            $where = 'id_process = ' . (int) $process->process->id . ' AND name = \'ObjectAction\'';
+
+            $id_operation = BimpCache::getBdb()->getValue('bds_process_operation', 'id', $where);
+
+            if (!$id_operation) {
+                $errors[] = 'ID de l\'opération absente';
+            } else {
+                $operation_data = $process->initOperation($id_operation, $errors);
+
+                if (!count($errors) && is_a($process, 'BDSProcess')) {
+                    $operation_options = $process->options;
+
+                    if (isset($operation_data['result_html'])) {
+                        $html = $operation_data['result_html'];
+
+                        if ($process->options['debug'] && isset($operation_data['debug_content']) && (string) $operation_data['debug_content']) {
+                            $html .= $operation_data['debug_content'];
+                        }
+                    } else {
+                        $temp_html = BDSRender::renderOperationProcess($operation_data, array(
+                                    'back_button_type' => 'close_madale'
+                        ));
+
+                        if ($temp_html) {
+                            $alert = '<span style="font-size: 16px; font-weight: bold">';
+                            $alert .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft') . 'Attention: veuillez ne pas fermer cette fenêtre avant la fin des opérations';
+                            $alert .= '</span>';
+
+                            $process_html = '<div style="margin-bottom: 15px; text-align: center">';
+                            $process_html .= BimpRender::renderAlerts($alert, 'warning');
+                            $process_html .= '</div>';
+                            $process_html .= $temp_html;
+                        }
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'            => $errors,
+            'warnings'          => $warnings,
+            'html'              => $html,
+            'operation_data'    => $operation_data,
+            'operation_options' => $operation_options,
+            'process_html'      => $process_html,
+            'modal_idx'         => $modal_idx,
+            'request_id'        => BimpTools::getValue('request_id', 0)
+        );
+    }
+
     public function ajaxProcessExecuteOperationStep()
     {
         $errors = array();
@@ -128,7 +202,7 @@ class processController extends BimpController
         );
     }
 
-    public function ajaxProcessfinalizeOperationStep()
+    public function ajaxProcessFinalizeOperationStep()
     {
         $errors = array();
         $warnings = array();

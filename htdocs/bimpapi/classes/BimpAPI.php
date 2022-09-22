@@ -497,7 +497,7 @@ abstract class BimpAPI
                         }
 
                         $infos .= '<b>Code réponse: </b>' . $response_code . '<br/><br/>';
-                        if (!$response) {
+                        if (!$response && empty($response)) {
                             $infos .= '<span class="danger">AUCUNE REPONSE</span><br/>';
                             $errors[] = 'Aucune réponse reçue - Code HTTP: ' . $response_code;
                         } else {

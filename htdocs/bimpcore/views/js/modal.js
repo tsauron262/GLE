@@ -32,12 +32,15 @@ function BimpModal($modal, var_name, open_btn_id, params) {
         modal[name] = params[name];
     }
 
-    this.newContent = function (title, content_html, show_loading, loading_text, $button, format, show) {
+    this.newContent = function (title, content_html, show_loading, loading_text, $button, format, show, allow_close) {
         if (typeof (format) === 'undefined') {
             format = 'medium';
         }
         if (typeof (show) === 'undefined') {
             show = true;
+        }
+        if (typeof (allow_close) === 'undefined') {
+            allow_close = true;
         }
 
         hidePopovers(modal.$modal);
@@ -85,7 +88,11 @@ function BimpModal($modal, var_name, open_btn_id, params) {
             }
         });
 
-        var html = '<div class="modal_content" id="modal_content_' + modal.idx + '" data-idx="' + modal.idx + '" data-format="' + format + '" data-width="">';
+        var html = '<div class="modal_content" id="modal_content_' + modal.idx + '" data-idx="' + modal.idx + '" data-format="' + format + '" data-width=""';
+        if (!allow_close) {
+            html += ' data-no_close_button="1"';
+        }
+        html += '>';
         html += content_html;
         html += '</div>';
 
@@ -455,6 +462,16 @@ function BimpModal($modal, var_name, open_btn_id, params) {
         modal.$footer.append(html);
     };
 
+    this.removeExtraButtons = function (idx) {
+        if (!idx) {
+            idx = modal.idx;
+        }
+
+        if (idx) {
+            modal.$footer.find('.extra_button.modal_' + idx).remove();
+        }
+    };
+
     this.setContentFormat = function (idx, format) {
         var $content = modal.$contents.find('#modal_content_' + idx);
         if ($content.length) {
@@ -464,31 +481,57 @@ function BimpModal($modal, var_name, open_btn_id, params) {
         modal.checkCurrentContentFormat();
     };
 
+    this.disableContentCloseButton = function (idx) {
+        var $content = modal.$contents.find('#modal_content_' + idx);
+        if ($content.length) {
+            $content.data('no_close_button', 1);
+        }
+
+        modal.checkCurrentContentFormat();
+    };
+
+    this.enableContentCloseButton = function (idx) {
+        var $content = modal.$contents.find('#modal_content_' + idx);
+        if ($content.length) {
+            $content.data('no_close_button', 0);
+        }
+
+        modal.checkCurrentContentFormat();
+    };
+
     this.checkCurrentContentFormat = function () {
         var $content = modal.$contents.find('#modal_content_' + modal.idx);
         var $dialog = modal.$modal.find('.modal-dialog');
-        if ($content.length && $dialog.length) {
-            var format = $content.data('format');
+        if ($content.length) {
+            var no_close_button = $content.data('no_close_button');
+            if (typeof (no_close_button) !== 'undefined' && parseInt(no_close_button)) {
+                modal.$footer.find('.closeModalButton').hide();
+            } else {
+                modal.$footer.find('.closeModalButton').show();
+            }
+            if ($dialog.length) {
+                var format = $content.data('format');
 
-            switch (format) {
-                case 'small':
-                    $dialog.removeClass('modal-lg');
-                    $dialog.removeClass('modal-md');
-                    $dialog.addClass('modal-sm');
-                    break;
+                switch (format) {
+                    case 'small':
+                        $dialog.removeClass('modal-lg');
+                        $dialog.removeClass('modal-md');
+                        $dialog.addClass('modal-sm');
+                        break;
 
-                default:
-                case 'medium':
-                    $dialog.removeClass('modal-lg');
-                    $dialog.removeClass('modal-sm');
-                    $dialog.addClass('modal-ms');
-                    break;
+                    default:
+                    case 'medium':
+                        $dialog.removeClass('modal-lg');
+                        $dialog.removeClass('modal-sm');
+                        $dialog.addClass('modal-ms');
+                        break;
 
-                case 'large':
-                    $dialog.removeClass('modal-sm');
-                    $dialog.removeClass('modal-md');
-                    $dialog.addClass('modal-lg');
-                    break;
+                    case 'large':
+                        $dialog.removeClass('modal-sm');
+                        $dialog.removeClass('modal-md');
+                        $dialog.addClass('modal-lg');
+                        break;
+                }
             }
         }
     };

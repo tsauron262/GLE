@@ -107,8 +107,20 @@ class BimpThemeLayout extends BimpLayout
         $html .= $this->renderMenuItems($items, 1);
 
         // todo: à refondre: 
-        BimpObject::loadClass('bimpsupport', 'BS_SAV');
-        $html .= BS_SAV::renderMenuQuickAccess();
+//        BimpObject::loadClass('bimpsupport', 'BS_SAV');
+//        $html .= BS_SAV::renderMenuQuickAccess();
+        
+        // Execute hook printLeftBlock
+        $html .= '<div class="bimptheme_menu_extra_section">';
+        global $hookmanager;
+        $parameters = array();
+        $reshook = $hookmanager->executeHooks('printLeftBlock', $parameters);    // Note that $action and $object may have been modified by some hooks
+        $html .= $hookmanager->resPrint;
+        
+        $parameters = array();
+        $reshook = $hookmanager->executeHooks('printMenuAfter', $parameters);    // Note that $action and $object may have been modified by some hooks
+        $html .= $hookmanager->resPrint;
+        $html .= '</div>';
 
         $html .= ' </nav><!-- End #main-menu-navigation -->' . "\n";
         $html .= '</div><!-- End .nav-container-->' . "\n";

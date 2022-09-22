@@ -35,12 +35,14 @@ class BimpCore
             'buc'               => '/bimpuserconfig/views/js/buc.js',
             'bimpcore'          => '/bimpcore/views/js/bimpcore.js',
             'bimp_api'          => '/bimpapi/views/js/bimp_api.js',
-            'bimpDocumentation' => '/bimpcore/views/js/BimpDocumentation.js'
+            'bimpDocumentation' => '/bimpcore/views/js/BimpDocumentation.js',
+            'bds_operations'    => '/bimpdatasync/views/js/operations.js'
         ),
         'css' => array(
-            'jPicker'    => '/includes/jquery/plugins/jpicker/css/jPicker-1.1.6.css',
-            'bimpcore'   => '/bimpcore/views/css/bimpcore.css',
-            'userConfig' => '/bimpuserconfig/views/css/userConfig.css'
+            'jPicker'        => '/includes/jquery/plugins/jpicker/css/jPicker-1.1.6.css',
+            'bimpcore'       => '/bimpcore/views/css/bimpcore.css',
+            'userConfig'     => '/bimpuserconfig/views/css/userConfig.css',
+            'bds_operations' => '/bimpdatasync/views/css/operations.css'
         )
     );
     public static $js_vars = array();
@@ -81,6 +83,11 @@ class BimpCore
                 self::$files['js'][] = '/bimpcore/views/js/notification.js';
             } else {
                 self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public.css';
+            }
+
+            if (!self::isModuleActive('bimpdatasync')) {
+                unset(self::$files['css']['bds_operations']);
+                unset(self::$files['js']['bds_operations']);
             }
 
             BimpConfig::initCacheServeur();
@@ -1019,7 +1026,6 @@ class BimpCore
                     }
                 } else {
                     // Ca prend trop de ressources pour pas grand chose... 
-                     
 //                    if (BimpDebug::isActive()) {
 //                        BimpDebug::incCacheInfosCount('logs', false);
 //                    }

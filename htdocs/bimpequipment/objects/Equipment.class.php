@@ -59,7 +59,7 @@ class Equipment extends BimpObject
         }
 
         global $user;
-        return (int) $user->admin;
+        return (int) ($user->admin || $user->login == 'l.gay');
     }
 
     public function isCreatable($force_create = false, &$errors = array())

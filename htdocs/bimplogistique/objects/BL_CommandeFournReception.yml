@@ -231,6 +231,7 @@ fields_tables:
               display: card
             - field: ref
             - field: status
+            - field: validation_status
             - field: id_user_resp
               edit: 1
             - field: num_reception

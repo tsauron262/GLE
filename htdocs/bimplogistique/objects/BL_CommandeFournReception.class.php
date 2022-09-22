@@ -1470,6 +1470,7 @@ class BL_CommandeFournReception extends BimpObject
                 $date_received = date('Y-m-d');
             }
             $this->set('status', self::BLCFR_RECEPTIONNEE);
+            $this->set('validation_status', 2);
             $this->set('date_received', $date_received);
             $this->set('stock_out', (int) $stock_out);
             $up_warnings = array();

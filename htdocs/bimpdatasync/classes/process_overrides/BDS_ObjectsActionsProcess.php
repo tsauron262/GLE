@@ -75,8 +75,12 @@ class BDS_ObjectsActionsProcess extends BDSProcess
 
                 if (count($errors)) {
                     if (BimpObject::objectLoaded($object)) {
-                        BimpCore::unlockObject($object->module, $object->object_name, $object->id, $token);
+                        BimpCore::unlockObject($object->module, $object->object_name, $object->id, $this->getOption('process_token', ''));
                     }
+                } else {
+                    // On a été jusqu'au bout: on empêche le forçage du déblocage du lock (de lock doit être maintenu durant les éxécutions en ajax)
+                    global $no_force_current_object_unlock;
+                    $no_force_current_object_unlock = true;
                 }
                 return $result;
             }

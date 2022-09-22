@@ -61,8 +61,8 @@ class BL_CommandeFournReception extends BimpObject
                 if (!$this->isLoaded($errors)) {
                     return 0;
                 }
-                if ((int) $this->getData('status') !== self::BLCFR_RECEPTIONNEE) {
-                    $errors[] = 'La réception n\'a pas le statut "réceptionnée"';
+                if (((int) $this->getData('status') !== self::BLCFR_RECEPTIONNEE) && !(int) $this->getData('validation_status')) {
+                    $errors[] = 'La réception n\'est pas réceptionnée ou partiellement réceptionnée';
                     return 0;
                 }
                 if ((int) $this->getData('id_facture')) {
@@ -590,7 +590,8 @@ class BL_CommandeFournReception extends BimpObject
 
         $commandeFourn = $this->getParentInstance();
 
-        $edit = ($this->getData('status') === self::BLCFR_BROUILLON);
+        $validation_status = (int) $this->getData('validation_status');
+        $edit = (($this->getData('status') === self::BLCFR_BROUILLON) && !$validation_status);
 
         if (!BimpObject::objectLoaded($commandeFourn)) {
             return BimpRender::renderAlerts('ID de la commande fournisseur absent');
@@ -683,7 +684,6 @@ class BL_CommandeFournReception extends BimpObject
 
                     if (!$isReturn) {
                         // *** Edition / ajout des nouveaux numéros de série: ***
-
                         $code_config = '';
 
                         if (preg_match('/^APP\-.+$/', $product->getRef())) {
@@ -928,39 +928,93 @@ class BL_CommandeFournReception extends BimpObject
                         // *** Affichage équipements reçus: ***
                         $html .= '<tr>';
                         $html .= '<td colspan="4">';
-                        if (is_array($reception_data['equipments']) && count($reception_data['equipments'])) {
-                            $html .= '<span class="bold">' . count($reception_data['equipments']) . ' équipements ajouté(s)</span>';
+                        if (!$validation_status) {
+                            if (is_array($reception_data['equipments']) && count($reception_data['equipments'])) {
+                                $html .= '<span class="bold">' . count($reception_data['equipments']) . ' équipements ajouté(s)</span>';
+                            } else {
+                                $html .= BimpRender::renderAlerts('Aucun équipement ajouté', 'info');
+                            }
                         } else {
-                            $html .= BimpRender::renderAlerts('Aucun équipement ajouté', 'info');
+                            $n_eq = (is_array($reception_data['equipments']) ? count($reception_data['equipments']) : 0);
+                            $n_tot = (is_array($reception_data['serials']) ? count($reception_data['serials']) : 0);
+                            $html .= '<span class="' . ($n_eq == $n_tot ? 'success' : ($n_eq > 0 ? 'warning' : 'danger')) . '">';
+                            $html .= $n_eq . ' équipements réceptionné(s) sur ' . $n_tot;
+                            $html .= '</span>';
                         }
                         $html .= '</td>';
                         $html .= '</tr>';
-                        if (isset($reception_data['equipments']) && is_array($reception_data['equipments'])) {
-                            foreach ($reception_data['equipments'] as $id_equipment => $equipment_data) {
-                                $html .= '<tr>';
-                                $html .= '<td style="width: 220px">';
-                                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-                                if (BimpObject::objectLoaded($equipment)) {
-                                    $html .= $equipment->getNomUrl(1, 1, 1);
-                                } else {
-                                    $html .= BimpRender::renderAlerts('L\'équipement #' . $id_equipment . ' n\'existe plus');
-                                }
-                                $html .= '</td>';
 
-                                $html .= '<td style="width: 120px">' . BimpTools::displayMoneyValue((float) isset($equipment_data['pu_ht']) ? $equipment_data['pu_ht'] : $line_pu_ht) . '</td>';
-                                $html .= '<td style="width: 120px">' . BimpTools::displayFloatValue((float) isset($equipment_data['tva_tx']) ? $equipment_data['tva_tx'] : $line->tva_tx, 3) . '%</td>';
-                                $html .= '<td></td>';
-                                $html .= '</tr>';
+                        if ($validation_status === 1) {
+                            if (isset($reception_data['serials']) && is_array($reception_data['serials'])) {
+                                foreach ($reception_data['serials'] as $serial_data) {
+                                    $html .= '<tr>';
+                                    $html .= '<td style="width: 220px">';
+                                    $id_equipment = BimpTools::getArrayValueFromPath($serial_data, 'id_eq', 0);
+                                    if ($id_equipment) {
+                                        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                                        if (BimpObject::objectLoaded($equipment)) {
+                                            $html .= $equipment->getLink();
+                                        } else {
+                                            $html .= BimpRender::renderAlerts('L\'équipement #' . $id_equipment . ' n\'existe plus');
+                                        }
+                                    } else {
+                                        $html .= BimpTools::getArrayValueFromPath($serial_data, 'serial', '<span class="danger">Aucun n° de série</span>');
+                                    }
+                                    $html .= '</td>';
+
+                                    $html .= '<td style="width: 120px">' . BimpTools::displayMoneyValue((float) isset($serial_data['pu_ht']) ? $serial_data['pu_ht'] : $line_pu_ht) . '</td>';
+                                    $html .= '<td style="width: 120px">' . BimpTools::displayFloatValue((float) isset($serial_data['tva_tx']) ? $serial_data['tva_tx'] : $line->tva_tx, 3) . '%</td>';
+                                    $html .= '<td>';
+                                    if (isset($serial_data['r']) && (int) $serial_data['r']) {
+                                        $html .= '<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Réceptionné</span>';
+                                    } else {
+                                        $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Non réceptionné</span>';
+                                    }
+                                    $html .= '</td>';
+                                    $html .= '</tr>';
+                                }
+                            }
+                        } else {
+                            if (isset($reception_data['equipments']) && is_array($reception_data['equipments'])) {
+                                foreach ($reception_data['equipments'] as $id_equipment => $equipment_data) {
+                                    $html .= '<tr>';
+                                    $html .= '<td style="width: 220px">';
+                                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                                    if (BimpObject::objectLoaded($equipment)) {
+                                        $html .= $equipment->getLink();
+                                    } else {
+                                        $html .= BimpRender::renderAlerts('L\'équipement #' . $id_equipment . ' n\'existe plus');
+                                    }
+                                    $html .= '</td>';
+
+                                    $html .= '<td style="width: 120px">' . BimpTools::displayMoneyValue((float) isset($equipment_data['pu_ht']) ? $equipment_data['pu_ht'] : $line_pu_ht) . '</td>';
+                                    $html .= '<td style="width: 120px">' . BimpTools::displayFloatValue((float) isset($equipment_data['tva_tx']) ? $equipment_data['tva_tx'] : $line->tva_tx, 3) . '%</td>';
+                                    $html .= '<td></td>';
+                                    $html .= '</tr>';
+                                }
                             }
                         }
                     } else {
                         // *** Affichage équipements retournés: ***
                         $html .= '<tr>';
                         $html .= '<td colspan="4">';
-                        if (count($reception_data['return_equipments'])) {
-                            $html .= '<tr><td colspan="4"><span class="danger">' . count($reception_data['return_equipments']) . ' équipements retournés</span></td></tr>';
+                        if (!$validation_status) {
+                            if (count($reception_data['return_equipments'])) {
+                                $html .= '<span class="danger">' . count($reception_data['return_equipments']) . ' équipement(s) retourné(s)</span>';
+                            } else {
+                                $html .= BimpRender::renderAlerts('Aucun équipement à retourner ajouté', 'info');
+                            }
                         } else {
-                            $html .= BimpRender::renderAlerts('Aucun équipement à retourner ajouté', 'info');
+                            $n_eq = 0;
+                            $n_tot = count($reception_data['return_equipments']);
+                            foreach ($reception_data['return_equipments'] as $id_equipment => $equipment_data) {
+                                if ((int) BimpTools::getArrayValueFromPath($equipment_data, 'r', 0)) {
+                                    $n_eq++;
+                                }
+                            }
+                            $html .= '<span class="' . ($n_eq == $n_tot ? 'success' : ($n_eq > 0 ? 'warning' : 'danger')) . '">';
+                            $html .= $n_eq . ' équipements retourné(s) sur ' . $n_tot;
+                            $html .= '</span>';
                         }
                         $html .= '</td>';
                         $html .= '</tr>';
@@ -969,7 +1023,7 @@ class BL_CommandeFournReception extends BimpObject
                             $html .= '<td style="width: 220px">';
                             $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
                             if (BimpObject::objectLoaded($equipment)) {
-                                $html .= $equipment->getNomUrl(1, 1, 1);
+                                $html .= $equipment->getLink();
                             } else {
                                 $html .= BimpRender::renderAlerts('L\'équipement #' . $id_equipment . ' n\'existe plus');
                             }
@@ -977,7 +1031,15 @@ class BL_CommandeFournReception extends BimpObject
 
                             $html .= '<td style="width: 120px">' . BimpTools::displayMoneyValue((float) isset($equipment_data['pu_ht']) ? $equipment_data['pu_ht'] : $line_pu_ht) . '</td>';
                             $html .= '<td style="width: 120px">' . BimpTools::displayFloatValue((float) isset($equipment_data['tva_tx']) ? $equipment_data['tva_tx'] : $line->tva_tx, 3) . '%</td>';
-                            $html .= '<td></td>';
+                            $html .= '<td>';
+                            if ($validation_status === 1) {
+                                if ((int) BimpTools::getArrayValueFromPath($equipment_data, 'r', 0)) {
+                                    $html .= '<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Retour effectué</span>';
+                                } else {
+                                    $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Retour non effectué</span>';
+                                }
+                            }
+                            $html .= '</td>';
                             $html .= '</tr>';
                         }
                     }
@@ -987,7 +1049,15 @@ class BL_CommandeFournReception extends BimpObject
                         $html .= '<td style="width: 220px">' . $qty_data['qty'] . '</td>';
                         $html .= '<td style="width: 120px">' . BimpTools::displayMoneyValue((float) isset($qty_data['pu_ht']) ? $qty_data['pu_ht'] : $line_pu_ht) . '</td>';
                         $html .= '<td style="width: 120px">' . BimpTools::displayFloatValue((float) isset($qty_data['tva_tx']) ? $qty_data['tva_tx'] : $line->tva_tx, 3) . '%</td>';
-                        $html .= '<td></td>';
+                        $html .= '<td>';
+                        if ($validation_status === 1) {
+                            if ((int) BimpTools::getArrayValueFromPath($reception_data, 'received', 0)) {
+                                $html .= '<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Réceptionné</span>';
+                            } else {
+                                $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Non réceptionné</span>';
+                            }
+                        }
+                        $html .= '</td>';
                         $html .= '</tr>';
                     }
 
@@ -2001,7 +2071,7 @@ class BL_CommandeFournReception extends BimpObject
                 'label'                  => 'Traitement des retours d\'équipements',
                 'on_error'               => 'continue',
                 'elements'               => $lines_return_equipments,
-                'nbElementsPerIteration' => 50
+                'nbElementsPerIteration' => 10
             );
         }
 

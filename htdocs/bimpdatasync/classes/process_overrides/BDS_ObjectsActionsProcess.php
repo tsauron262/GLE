@@ -17,9 +17,28 @@ class BDS_ObjectsActionsProcess extends BDSProcess
             $object = $this->getObjectInstance($errors);
 
             if (!count($errors)) {
+                $data['has_finalization'] = 1;
+
+                $token = '';
+
+                if (BimpObject::objectLoaded($object)) {
+                    $msg = BimpCore::checkObjectLock($object, $token);
+                    if ($msg) {
+                        $errors[] = $msg;
+                        return;
+                    }
+                }
+
+                $this->options['process_token'] = $token;
                 $extra_data = $this->getOption('action_extra_data', array());
                 $force_action = (int) $this->getOption('force_action', 0);
                 $object->initBdsAction($action, $data, $errors, $extra_data, $force_action);
+
+                if (!count($errors)) {
+                    // On a été jusqu'au bout: on empêche le forçage du déblocage du lock (de lock doit être maintenu durant les éxécutions en ajax)
+                    global $no_force_current_object_unlock;
+                    $no_force_current_object_unlock = true;
+                }
             }
         }
     }
@@ -36,11 +55,58 @@ class BDS_ObjectsActionsProcess extends BDSProcess
             $object = $this->getObjectInstance($errors);
 
             if (!count($errors)) {
+                if (BimpObject::objectLoaded($object)) {
+                    $token = $this->getOption('process_token', '');
+                    if (!$token) {
+                        $errors[] = 'Token absent';
+                        return array();
+                    }
+
+                    $msg = BimpCore::checkObjectLock($object, $token);
+                    if ($msg) {
+                        $errors[] = $msg;
+                        return array();
+                    }
+                }
+
                 $action_extra_data = $this->getOption('action_extra_data', array());
                 $force_action = (int) $this->getOption('force_action', 0);
-                $object->executeBdsAction($action, $step_name, $errors, $operation_extra_data, $action_extra_data, $force_action);
+                $result = $object->executeBdsAction($action, $step_name, $this->references, $errors, $operation_extra_data, $action_extra_data, $force_action);
+
+                if (count($errors)) {
+                    if (BimpObject::objectLoaded($object)) {
+                        BimpCore::unlockObject($object->module, $object->object_name, $object->id, $token);
+                    }
+                }
+                return $result;
             }
         }
+
+        return array();
+    }
+
+    public function finalizeObjectAction(&$errors = array(), $extra_data = array())
+    {
+        $object = $this->getObjectInstance($errors);
+
+        if (!count($errors)) {
+            if (BimpObject::objectLoaded($object)) {
+                $token = $this->getOption('process_token', '');
+                if (!$token) {
+                    $errors[] = 'Token absent';
+                    return array();
+                }
+
+                $errors = BimpCore::unlockObject($object->module, $object->object_name, $object->id, $token);
+            }
+        }
+
+        return array();
+    }
+
+    public function cancelObjectAction(&$errors = array(), $extra_data = array())
+    {
+        return $this->finalizeObjectAction($errors, $extra_data);
     }
 
     // Traitements: 

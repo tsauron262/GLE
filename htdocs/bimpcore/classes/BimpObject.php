@@ -2184,7 +2184,7 @@ class BimpObject extends BimpCache
         }
     }
 
-    public function executeBdsAction($action, $step_name, &$errors = array(), $operation_extra_data = array(), $action_extra_data = array(), $force_action = false)
+    public function executeBdsAction($action, $step_name, $elements = array(), &$errors = array(), $operation_extra_data = array(), $action_extra_data = array(), $force_action = false)
     {
         $method = 'executeBdsAction' . ucfirst($action);
 
@@ -2198,7 +2198,7 @@ class BimpObject extends BimpCache
             }
 
             if (!count($errors)) {
-                $this->{$method}($step_name, $errors, $operation_extra_data, $action_extra_data);
+                $this->{$method}($step_name, $elements, $errors, $operation_extra_data, $action_extra_data);
             }
         }
     }

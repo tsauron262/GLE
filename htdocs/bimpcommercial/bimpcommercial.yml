@@ -84,6 +84,11 @@ params:
         type: bool
         def: 0
         
+    use_bds_for_receptions: 
+        label: Utiliser bimpdatasync pour la validation des réceptions
+        type: bool
+        def: 0
+        
     # PDFs: 
     pdf_add_cgv: 
         label: Ajouter CGV dans les docs PDF

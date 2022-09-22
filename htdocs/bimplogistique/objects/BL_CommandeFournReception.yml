@@ -65,6 +65,13 @@ fields:
             array: status_list
         default_value: 0
             
+    validation_status: 
+        label: Etat validation
+        typel: int
+        value: 
+            array: validation_status_list
+        default_value: 0
+        
     num_reception:
         label: Numéro de réception
         type: int

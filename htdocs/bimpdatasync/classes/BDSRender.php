@@ -6,7 +6,8 @@ class BDSRender
     public static function renderOperationProcess($data, $params = array())
     {
         $params = BimpTools::overrideArray(array(
-                    'back_button_type' => 'operations_page' // operations_page / close_madale
+                    'back_button_type'     => 'operations_page', // operations_page / close_modale
+                    'back_button_callback' => ''
                         ), $params);
         $html = '';
         $process = null;
@@ -78,16 +79,9 @@ class BDSRender
             $html .= '</div>';
             $html .= '</div>';
 
-//            $html .= '<div id="cancelNotification" style="display: none">
-//                  <p class="alert alert-warning">Annulation du processus en cours. Attente de la fin de traitement du paquet en cours.</p>
-//              </div>
-//              <div id="holdNotification" style="display: none">
-//                  <p>Processus Suspendu</p>
-//              </div>';
-
             $html .= '<div class="formSubmit">';
             $html .= '<span id="bds_cancelOperationButton" class="btn btn-danger" onclick="if (typeof(bds_operations[' . $operation->id . ']) === \'object\') bds_operations[' . $operation->id . '].cancel();" style="display: none">';
-            $html .= BimpRender::renderIcon('fas_times', 'iconLeft') . 'Annuler';
+            $html .= BimpRender::renderIcon('fas_times', 'iconLeft') . 'Arrêter';
             $html .= '</span>';
 
             $html .= '<span id="bds_holdOperationButton" class="btn btn-warning" onclick="if (typeof(bds_operations[' . $operation->id . ']) === \'object\') bds_operations[' . $operation->id . '].hold();" style="display: none">';
@@ -109,9 +103,13 @@ class BDSRender
                     $html .= BimpRender::renderIcon('fas_reply', 'iconLeft') . 'Retour';
                     $html .= '</span>';
                     break;
-                
-                case 'close_madale':
-                    $html .= '<span id="bds_backButton" class="btn btn-default" onclick="bimpModal.clearCurrentContent();" style="display: none">';
+
+                case 'close_modale':
+                    $html .= '<span id="bds_backButton" class="btn btn-default" onclick="bimpModal.clearCurrentContent();';
+                    if ($params['back_button_callback']) {
+                        $html .= $params['back_button_callback'];
+                    }
+                    $html .= '" style="display: none">';
                     $html .= BimpRender::renderIcon('fas_times', 'iconLeft') . 'Fermer';
                     $html .= '</span>';
                     break;

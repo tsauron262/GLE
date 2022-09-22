@@ -68,7 +68,7 @@ fields:
     validation_status: 
         label: Etat validation
         typel: int
-        value: 
+        values: 
             array: validation_status_list
         default_value: 0
         
@@ -376,6 +376,11 @@ lists:
             num_reception:
             ref:
             status:
+            validation_status:
+                show: 
+                    conf: 
+                        module: bimpcommercial
+                        name: use_bds_for_receptions
             date_received: 
             total_ht: 
             id_entrepot:

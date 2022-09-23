@@ -434,9 +434,42 @@ function BDS_ProcessOperation(data, options) {
         }
 
         if (operation.status === 'cancelled') {
-            var html = '<div class="alert alert-danger">Opération annulée</div>';
-            operation.$notification.html(html).show();
             operation.curStep.step.cancel();
+            operation.hideButtons();
+            var data = {
+                'id_process': operation.id_process,
+                'id_operation': operation.id_operation,
+                'use_report': operation.report.use,
+                'id_report': operation.report.id,
+                'options': operation.options,
+                'operation_data': operation.operation_data
+            };
+
+            BimpAjax('bds_cancelOperation', data, operation.$notification, {
+                operation: operation,
+                url: bds_process_url,
+                display_success: true,
+                display_success_in_popup_only: false,
+                display_warnings_in_popup_only: false,
+                display_processing: true,
+                processing_msg: 'Arrêt en cours',
+                success_msg: 'Arrêt effectué',
+                processing_padding: 0,
+                success: function (result, bimpAjax) {
+                    bimpAjax.operation.refreshReport();
+                    bimpAjax.operation.$notification.show();
+                    bimpAjax.operation.buttons.$back.show();
+
+                    if (typeof (result.result.debug_content) !== 'undefined' && result.result.debug_content) {
+                        var $content = bimpAjax.operation.$container.find('#processDebugContent').children('.foldable_content').first();
+                        if ($.isOk($content)) {
+                            $content.append(result.result.debug_content);
+                            setCommonEvents($content);
+                        }
+                    }
+                }
+            });
+            return;
         }
 
         if ((operation.status !== 'processing') || !operation.curStep.step) {
@@ -475,8 +508,6 @@ function BDS_ProcessOperation(data, options) {
             switch (operation.curStep.step.on_cancel) {
                 case 'stop':
                     operation.status = 'stoped';
-                    var html = '<div class="alert alert-danger">Opération annulée</div>';
-                    operation.$notification.append(html).show();
                     operation.hideButtons();
                     operation.buttons.$back.show();
                     return;
@@ -546,8 +577,6 @@ function BDS_ProcessOperation(data, options) {
         }
 
         var data = {
-            'ajax': 1,
-            'action': 'executeOperationStep',
             'id_process': operation.id_process,
             'id_operation': operation.id_operation,
             'step_name': operation.curStep.step.name,
@@ -671,10 +700,10 @@ function BDS_ProcessOperation(data, options) {
         operation.buttons.$back.show();
         var msg = '';
         if (operation.curStep.ajax_processing) {
-            msg = 'Opération en cours d\'annulation';
+            msg = 'Arrêt du processus après la fin du traitement du paquet en cours.';
         } else {
             operation.curStep.step.cancel();
-            msg = 'Opération annulée';
+            msg = 'Arrêt du processus';
         }
         var html = '<div class="alert alert-warning">' + msg + '</div>';
         operation.$notification.html(html).show();
@@ -682,8 +711,6 @@ function BDS_ProcessOperation(data, options) {
 
     this.finalize = function () {
         var data = {
-            'ajax': 1,
-            'action': 'finalizeOperationStep',
             'id_process': operation.id_process,
             'id_operation': operation.id_operation,
             'use_report': operation.report.use,
@@ -920,8 +947,8 @@ function bds_initObjectActionProcess($button, data, modal_title, $resultContaine
                         $container: $container
                     }));
 
-                    bds_operations[bimpAjax.id_operation] = new BDS_ProcessOperation(result.operation_data, result.operation_options);
-                    bds_operations[bimpAjax.id_operation].start();
+                    bds_operations[result.id_operation] = new BDS_ProcessOperation(result.operation_data, result.operation_options);
+                    bds_operations[result.id_operation].start();
                 });
             });
         }

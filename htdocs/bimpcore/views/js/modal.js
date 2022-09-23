@@ -106,7 +106,7 @@ function BimpModal($modal, var_name, open_btn_id, params) {
         html = '<li id="modal_history_' + modal.idx + '"><span class="btn btn-light-primary" onclick="' + modal.var_name + '.displayContent(' + modal.idx + ')">' + title + '</span></li>';
         modal.$history.prepend(html);
         modal.checkContents();
-        modal.checkCurrentContentFormat();
+        modal.checkCurrentContent();
     };
 
     this.clearCurrentContent = function () {
@@ -258,7 +258,7 @@ function BimpModal($modal, var_name, open_btn_id, params) {
         }
 
         modal.checkContents();
-        modal.checkCurrentContentFormat();
+        modal.checkCurrentContent();
     };
 
     this.displayPrev = function () {
@@ -478,7 +478,7 @@ function BimpModal($modal, var_name, open_btn_id, params) {
             $content.data('format', format);
         }
 
-        modal.checkCurrentContentFormat();
+        modal.checkCurrentContent();
     };
 
     this.disableContentCloseButton = function (idx) {
@@ -487,7 +487,7 @@ function BimpModal($modal, var_name, open_btn_id, params) {
             $content.data('no_close_button', 1);
         }
 
-        modal.checkCurrentContentFormat();
+        modal.checkCurrentContent();
     };
 
     this.enableContentCloseButton = function (idx) {
@@ -496,20 +496,26 @@ function BimpModal($modal, var_name, open_btn_id, params) {
             $content.data('no_close_button', 0);
         }
 
-        modal.checkCurrentContentFormat();
+        modal.checkCurrentContent();
     };
 
-    this.checkCurrentContentFormat = function () {
+    this.checkCurrentContent = function () {
         var $content = modal.$contents.find('#modal_content_' + modal.idx);
         var $dialog = modal.$modal.find('.modal-dialog');
         if ($content.length) {
-            var no_close_button = $content.data('no_close_button');
-            if (typeof (no_close_button) !== 'undefined' && parseInt(no_close_button)) {
-                modal.$footer.find('.closeModalButton').hide();
-            } else {
-                modal.$footer.find('.closeModalButton').show();
-            }
             if ($dialog.length) {
+                
+                // check affichage boutons de fermeture: 
+                var no_close_button = $content.data('no_close_button');
+                if (typeof (no_close_button) !== 'undefined' && parseInt(no_close_button)) {
+                    $dialog.find('.modal-header').find('button.close').hide();
+                    modal.$footer.find('.closeModalButton').hide();
+                } else {
+                    $dialog.find('.modal-header').find('button.close').show();
+                    modal.$footer.find('.closeModalButton').show();
+                }
+
+                // Check format modal: 
                 var format = $content.data('format');
 
                 switch (format) {

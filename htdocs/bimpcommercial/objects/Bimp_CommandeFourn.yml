@@ -241,7 +241,6 @@ fields:
     replaced_ref: unset
     expertise: unset
         
-    
 forms: 
     default: 
         rows: 
@@ -609,7 +608,13 @@ views:
     content_infos: 
         objects_change_reload: Bimp_CommandeFournLine,ObjectLineRemise,BimpFile
     full: 
-        objects_change_reload: Bimp_CommandeFournLine,ObjectLineRemise,BimpFile                 
+        objects_change_reload: Bimp_CommandeFournLine,ObjectLineRemise,BimpFile    
+        
+    header_only: 
+        objects_change_reload: Bimp_CommandeFournLine,ObjectLineRemise,BimpFile,BL_CommandeFournReception
+        rows: 
+            - cols: 
+                - type: object_header
     
 filters_panels: 
     default: 

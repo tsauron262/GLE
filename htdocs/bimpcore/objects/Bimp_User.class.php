@@ -326,32 +326,7 @@ class Bimp_User extends BimpObject
             );
         }
 
-        global $user;
-        if (BimpCore::isModeDev() || $user->login === 'f.martinez') {
-            $buttons[] = array(
-                'label'   => 'TEST BDS',
-                'icon'    => 'fas_cogs',
-                'onclick' => $this->getJsActionOnclick('test_bds', array(), array(
-                    'use_bimpdatasync' => 1
-                ))
-            );
-        }
-
         return $buttons;
-    }
-
-    public function initBdsActionTest_bds(&$action_data, &$errors, $extra_data)
-    {
-        $action_data['operation_title'] = 'TEST BDS';
-
-        $action_data['steps'] = array(
-            'check_margins' => array(
-                'label'                  => 'Etape test',
-                'on_error'               => 'continue',
-                'elements'               => array(1, 2, 3, 4, 5, 6),
-                'nbElementsPerIteration' => 1
-            )
-        );
     }
 
     public function getEditFormName()

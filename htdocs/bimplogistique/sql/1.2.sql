@@ -1,0 +1,2 @@
+ALTER TABLE `llx_bl_commande_fourn_reception` ADD `validation_status` int(11) NOT NULL DEFAULT 0 AFTER `status`;
+UPDATE `llx_bl_commande_fourn_reception` SET `validation_status` = 2 WHERE `status` = 1;

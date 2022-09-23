@@ -43,7 +43,7 @@
             $fatcure_source      = $facture->getChildObject('facture_source');
             $is_client_interco   = false;
             $date_facture        = new DateTime($facture->getData('datef'));
-            $date_facture_source = new DateTime($fatcure_source->getData('datef'));
+            $date_facture_source = new DateTime($fatcure_source->getData('datef')); // Soit la date de la facture source soit la date du jour.
             $date_creation       = new dateTime($facture->getData('datec'));
             $date_echeance       = new DateTime($facture->getData('date_lim_reglement'));
             $id_reglement        = ($facture->getData('fk_mode_reglement') > 0) ? $facture->getData('fk_mode_reglement') : 6;

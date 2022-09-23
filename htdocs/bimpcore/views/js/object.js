@@ -313,7 +313,6 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
                 return;
             }
 
-            bimp_msg('ICI');
             bds_initObjectActionProcess($button, data, modal_title, $resultContainer);
         } else {
             BimpAjax('setObjectAction', data, $resultContainer, {

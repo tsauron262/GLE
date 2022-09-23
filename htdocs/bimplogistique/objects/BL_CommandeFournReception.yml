@@ -65,6 +65,13 @@ fields:
             array: status_list
         default_value: 0
             
+    validation_status: 
+        label: Etat validation
+        typel: int
+        values: 
+            array: validation_status_list
+        default_value: 0
+        
     num_reception:
         label: Numéro de réception
         type: int
@@ -224,6 +231,7 @@ fields_tables:
               display: card
             - field: ref
             - field: status
+            - field: validation_status
             - field: id_user_resp
               edit: 1
             - field: num_reception
@@ -369,6 +377,11 @@ lists:
             num_reception:
             ref:
             status:
+            validation_status:
+                show: 
+                    conf: 
+                        module: bimpcommercial
+                        name: use_bds_for_receptions
             date_received: 
             total_ht: 
             id_entrepot:

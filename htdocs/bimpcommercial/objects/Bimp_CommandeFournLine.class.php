@@ -1271,8 +1271,6 @@ class Bimp_CommandeFournLine extends FournObjectLine
             } else {
                 $errors = $this->checkReceptionQty((float) $data['qty'], $id_reception);
             }
-        } else {
-            // todo
         }
 
         return $errors;
@@ -1566,13 +1564,16 @@ class Bimp_CommandeFournLine extends FournObjectLine
         return $errors;
     }
 
-    public function validateReception($id_reception, $check_data = true, $stock_out = false, $force_equipments_attribution = false, $skip_equipments_place = false)
+    public function validateReception($id_reception, $check_data = true, $stock_out = false, $force_equipments_attribution = false, $skip_equipments_place = false, $to_process = null)
     {
         $errors = array();
-
         $reception_data = $this->getReceptionData((int) $id_reception);
 
         if (!isset($reception_data['qty']) || !(float) $reception_data['qty']) {
+            return array();
+        }
+
+        if (isset($reception_data['received']) && (int) $reception_data['received']) {
             return array();
         }
 
@@ -1613,8 +1614,6 @@ class Bimp_CommandeFournLine extends FournObjectLine
             return $errors;
         }
 
-        $id_fourn = (int) $commande_fourn->getData('fk_soc');
-
         if ($check_data) {
             $errors = $this->checkReceptionData($id_reception, $reception_data, null, $force_equipments_attribution);
             if (count($errors)) {
@@ -1622,15 +1621,27 @@ class Bimp_CommandeFournLine extends FournObjectLine
             }
         }
 
-        $equipments = array();
+        $equipments_done = array();
 
         $stock_label = 'Réception n°' . $reception->getData('num_reception') . ' BR: ' . $reception->getData('ref') . ' - Commande fournisseur: ' . $commande_fourn->getData('ref');
         $code_mvt = 'CMDF' . $commande_fourn->id . '_LN' . $this->id . '_RECEP' . $reception->id;
 
         if ($isSerialisable) {
             if (!$isReturn) {
-                $reception_data['equipments'] = array();
-                foreach ($reception_data['serials'] as $serial_data) {
+                if (!isset($reception_data['equipments'])) {
+                    $reception_data['equipments'] = array();
+                }
+                foreach ($reception_data['serials'] as $idx => $serial_data) {
+                    if (isset($serial_data['r']) && (int) $serial_data['r']) {
+                        continue;
+                    }
+
+                    if (is_array($to_process)) {
+                        if (!in_array($serial_data['serial'], $to_process)) {
+                            continue;
+                        }
+                    }
+
                     // Création de l'équipement: 
                     $eq_errors = array();
                     $eq_warnings = array();
@@ -1658,8 +1669,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
                     if (BimpObject::objectLoaded($equipment)) {
 //                        $current_place = $equipment->getCurrentPlace();
-                        $place_check = true;
-
+//                        $place_check = true;
 //                        if (BimpObject::objectLoaded($current_place)) {
 //                            if ($current_place->getData('type') == BE_Place::BE_PLACE_CLIENT) {
 //                                if ((int) $current_place->getData('id_client') != $id_fourn) {
@@ -1669,16 +1679,15 @@ class Bimp_CommandeFournLine extends FournObjectLine
 //                                $place_check = false;
 //                            }
 //                        }
+//                        if (!$place_check) {
+//                            $eq_errors[] = 'L\'équipement ' . $equipment->getLink() . ' existe déjà mais n\'est pas enregistré comme étant chez le fournisseur de cette commande';
+//                        } else {
+                        $equipment->set('date_purchase', $commande_fourn->getData('date_commande'));
+                        $equipment->set('prix_achat', $pu_ht);
+                        $equipment->set('achat_tva_tx', $tva_tx);
 
-                        if (!$place_check) {
-                            $eq_errors[] = 'L\'équipement ' . $equipment->getLink() . ' existe déjà mais n\'est pas enregistré comme étant chez le fournisseur de cette commande';
-                        } else {
-                            $equipment->set('date_purchase', $commande_fourn->getData('date_commande'));
-                            $equipment->set('prix_achat', $pu_ht);
-                            $equipment->set('achat_tva_tx', $tva_tx);
-
-                            $eq_errors = $equipment->update($eq_warnings, true);
-                        }
+                        $eq_errors = $equipment->update($eq_warnings, true);
+//                        }
 
                         if (count($eq_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($eq_errors, 'Echec de la mise à jour de l\'équipement "' . $serial_data['serial'] . '"');
@@ -1715,7 +1724,8 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
 
                     if (!count($eq_errors)) {
-                        $equipments[] = $equipment->id;
+                        $reception_data['serials'][$idx]['id_eq'] = $equipment->id;
+                        $equipments_done[] = $equipment->id;
                         $reception_data['equipments'][(int) $equipment->id] = array(
                             'pu_ht'  => $pu_ht,
                             'tva_tx' => $tva_tx
@@ -1742,6 +1752,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                             if (count($pl_errors)) {
                                 $errors[] = BimpTools::getMsgFromArray($pl_errors, 'Echec de la création de l\'emplacement pour le numéro de série "' . $equipment->getData('serial') . '"');
                             } else {
+                                $reception_data['serials'][$idx]['r'] = 1; // r pour received
                                 if ($stock_out) {
                                     $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
                                     $pl_errors = $place->validateArray(array(
@@ -1779,6 +1790,16 @@ class Bimp_CommandeFournLine extends FournObjectLine
                 }
 
                 foreach ($reception_data['return_equipments'] as $id_equipment => $equipment_data) {
+                    if (isset($equipment_data['r']) && (int) $equipment_data['r']) {
+                        continue;
+                    }
+
+                    if (is_array($to_process)) {
+                        if (!in_array((int) $id_equipment, $to_process)) {
+                            continue;
+                        }
+                    }
+
                     $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
 
                     if (!BimpObject::objectLoaded($equipment)) {
@@ -1809,8 +1830,11 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
                         if (count($pl_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($pl_errors, 'Echec de la création de l\'emplacement pour l\'équipement retourné "' . $equipment->getData('serial') . '"');
+                            continue;
                         }
                     }
+
+                    $reception_data['return_equipments'][$id_equipment]['r'] = 1; // r pour "returned"
                 }
             }
         } else {
@@ -1833,7 +1857,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
             } else {
                 if ($isSerialisable && isset($reception_data['assign_to_commande_client']) && (int) $reception_data['assign_to_commande_client']) {
                     // Attribution des équipements si serialisable.
-                    $line->addEquipments($equipments);
+                    $line->addEquipments($equipments_done);
                 } else {
                     if (isset($reception_data['assign_to_commande_client']) && (int) $reception_data['assign_to_commande_client']) {
                         $new_status = 200;
@@ -1847,21 +1871,41 @@ class Bimp_CommandeFournLine extends FournObjectLine
             }
         }
 
-        $reception_data['received'] = 1;
+        $full_received = 1;
+
+        if (is_array($to_process) && $isSerialisable) {
+            if (!$isReturn) {
+                foreach ($reception_data['serials'] as $serial_data) {
+                    if (!isset($serial_data['r']) || !(int) $serial_data['r']) {
+                        $full_received = 0;
+                        break;
+                    }
+                }
+            } else {
+                foreach ($reception_data['return_equipments'] as $id_equipment => $equipment_data) {
+                    if (!isset($equipment_data['r']) || !(int) $equipment_data['r']) {
+                        $full_received = 0;
+                        break;
+                    }
+                }
+            }
+        }
+
+        $reception_data['received'] = $full_received;
 
         $receptions = $this->getData('receptions');
-
         $receptions[(int) $reception->id] = $reception_data;
-
         $up_errors = $this->updateField('receptions', $receptions);
 
         if (count($up_errors)) {
             $errors[] = BimpTools::getMsgFromArray($up_errors, 'Erreurs lors de la mise à jour de la ligne de commande fournisseur');
-        } elseif (!$isReturn) {
+        } elseif (!$isReturn && $full_received) {
             $this->checkFactureClientLinesPA();
         }
 
-        $this->checkQties();
+        if ($full_received) {
+            $this->checkQties();
+        }
 
         return $errors;
     }
@@ -1873,168 +1917,133 @@ class Bimp_CommandeFournLine extends FournObjectLine
         $reception_data = $this->getReceptionData($id_reception);
         $isReturn = ((float) $this->getFullQty() < 0);
 
-        if ((int) $reception_data['received']) {
-            $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_reception);
-            if (!BimpObject::objectLoaded($reception)) {
-                $errors = 'La réception d\'ID ' . $id_reception . ' n\'existe pas';
-                return $errors;
+        $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_reception);
+        if (!BimpObject::objectLoaded($reception)) {
+            $errors = 'La réception d\'ID ' . $id_reception . ' n\'existe pas';
+            return $errors;
+        }
+
+        $commande_line = null;
+        $id_commande_client_line = 0;
+
+        if (!$isReturn && $this->getData('linked_object_name') === 'commande_line') {
+            $commande_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('linked_id_object'));
+            if (BimpObject::objectLoaded($commande_line)) {
+                $id_commande_client_line = (int) $commande_line->id;
             }
+        }
 
-            $commande_line = null;
-            $id_commande_client_line = 0;
+        $product = $this->getProduct();
+        $commande_fourn = $this->getParentInstance();
+        $id_entrepot = (int) $reception->getData('id_entrepot');
 
-            if (!$isReturn && $this->getData('linked_object_name') === 'commande_line') {
-                $commande_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('linked_id_object'));
-                if (BimpObject::objectLoaded($commande_line)) {
-                    $id_commande_client_line = (int) $commande_line->id;
+        $stock_label = 'Annulation réception n°' . $reception->getData('num_reception') . ' BR: ' . $reception->getData('ref') . ' - Commande fournisseur: ' . $commande_fourn->getData('ref');
+        $code_mvt = 'ANNUL_CMDF' . $commande_fourn->id . '_LN' . $this->id . '_RECEP' . $reception->id;
+
+        if (($this->isProductSerialisable())) {
+            if (!$isReturn) {
+                foreach ($reception_data['serials'] as $idx => $serial_data) {
+                    if (isset($serial_data['r'])) {
+                        $reception_data['serials'][$idx]['r'] = 0;
+                        $reception_data['serials'][$idx]['id_eq'] = 0;
+                    }
                 }
-            }
 
-            $product = $this->getProduct();
-            $commande_fourn = $this->getParentInstance();
-            $id_entrepot = (int) $reception->getData('id_entrepot');
+                // Annulation équipements reçus: 
+                if (isset($reception_data['equipments']) && is_array($reception_data['equipments'])) {
+                    foreach ($reception_data['equipments'] as $id_equipment => $equipment_data) {
+                        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                        if (BimpObject::objectLoaded($equipment)) {
+                            $place = $equipment->getCurrentPlace();
+                            if (BimpObject::objectLoaded($place)) {
+                                if ((int) $place->getData('type') === BE_Place::BE_PLACE_ENTREPOT && (int) $place->getData('id_entrepot') === $id_entrepot ||
+                                        ($stock_out && (int) $place->getData('type') === BE_Place::BE_PLACE_FREE && $place->getData('place_name') === 'Stock boutique')) {
+                                    // Remise au statut "en attente de réception" de la réservation correspondante: 
+                                    $reservation = BimpCache::findBimpObjectInstance('bimpreservation', 'BR_Reservation', array(
+                                                'id_equipment'            => (int) $equipment->id,
+                                                'status'                  => 200,
+                                                'id_commande_client_line' => array(
+                                                    'operator' => '>',
+                                                    'value'    => 0
+                                                )
+                                                    ), true);
 
-            $stock_label = 'Annulation réception n°' . $reception->getData('num_reception') . ' BR: ' . $reception->getData('ref') . ' - Commande fournisseur: ' . $commande_fourn->getData('ref');
-            $code_mvt = 'ANNUL_CMDF' . $commande_fourn->id . '_LN' . $this->id . '_RECEP' . $reception->id;
-
-            if (($this->isProductSerialisable())) {
-                if (!$isReturn) {
-                    // Annulation équipements reçus: 
-                    if (isset($reception_data['equipments']) && is_array($reception_data['equipments'])) {
-                        foreach ($reception_data['equipments'] as $id_equipment => $equipment_data) {
-                            $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-                            if (BimpObject::objectLoaded($equipment)) {
-
-                                $place = $equipment->getCurrentPlace();
-                                if (BimpObject::objectLoaded($place)) {
-                                    if ((int) $place->getData('type') === BE_Place::BE_PLACE_ENTREPOT && (int) $place->getData('id_entrepot') === $id_entrepot ||
-                                            ($stock_out && (int) $place->getData('type') === BE_Place::BE_PLACE_FREE && $place->getData('place_name') === 'Stock boutique')) {
-                                        // Remise au statut "en attente de réception" de la réservation correspondante: 
-                                        $reservation = BimpCache::findBimpObjectInstance('bimpreservation', 'BR_Reservation', array(
-                                                    'id_equipment'            => (int) $equipment->id,
-                                                    'status'                  => 200,
-                                                    'id_commande_client_line' => array(
-                                                        'operator' => '>',
-                                                        'value'    => 0
-                                                    )
-                                                        ), true);
-
-                                        if (BimpObject::objectLoaded($reservation)) {
-                                            if ($id_commande_client_line && ((int) $reservation->getData('id_commande_client_line') === (int) $id_commande_client_line)) {
-                                                $new_status = 100;
-                                            } else {
-                                                $new_status = 2;
-                                            }
-                                            $res_errors = $reservation->setNewStatus($new_status);
-
-                                            if (count($res_errors)) {
-                                                $warnings[] = BimpTools::getMsgFromArray($res_errors, 'Echec de la mise à jour de la réservation pour l\'équipement "' . $equipment->getData('serial') . '" (ID: ' . $equipment->id . ')');
-                                            }
-                                        }
-
-                                        // Check de l'existance d'un emplacement précédant: 
-                                        $recep_code_mvt = 'CMDF' . $commande_fourn->id . '_LN' . $this->id . '_RECEP' . $id_reception;
-                                        $recep_place_position = (int) $this->db->getValue('be_equipment_place', 'position', 'id_equipment = ' . $id_equipment . ' AND code_mvt = \'' . $recep_code_mvt . '\'');
-
-                                        $prev_place_id = 0;
-                                        if ($recep_place_position) {
-                                            $prev_place_id = (int) $this->db->getValue('be_equipment_place', 'id', 'id_equipment = ' . $id_equipment . ' AND position = ' . ($recep_place_position + 1));
-                                        }
-
-                                        if ($prev_place_id) {
-                                            // Remise sur l'emplacement précédant: 
-                                            $prev_place = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Place', $prev_place_id);
-
-                                            if (BimpObject::objectLoaded($prev_place)) {
-                                                $new_place = BimpObject::getInstance('bimpequipment', 'BE_Place');
-                                                $eq_errors = $new_place->validateArray(array(
-                                                    'id_equipment' => $id_equipment,
-                                                    'type'         => $prev_place->getData('type'),
-                                                    'date'         => date('Y-m-d H:i:s'),
-                                                    'id_client'    => (int) $prev_place->getData('id_client'),
-                                                    'id_contact'   => (int) $prev_place->getData('id_contact'),
-                                                    'id_entrepot'  => (int) $prev_place->getData('id_entrepot'),
-                                                    'id_user'      => (int) $prev_place->getData('id_user'),
-                                                    'place_name'   => $prev_place->getData('place_name'),
-                                                    'code_centre'  => $prev_place->getData('code_centre'),
-                                                    'infos'        => 'Annulation réception ' . $reception->getRef() . ' - Commande Fourn ' . $commande_fourn->getRef(),
-                                                    'code_mvt'     => $code_mvt,
-                                                    'origin'       => 'order_supplier',
-                                                    'id_origin'    => (int) $commande_fourn->id
-                                                ));
-
-                                                $eq_warnings = array();
-                                                if (!count($eq_errors)) {
-                                                    $eq_errors = $new_place->create($eq_warnings);
-                                                }
-
-                                                if (count($eq_warnings)) {
-                                                    $warnings[] = BimpTools::getMsgFromArray($eq_warnings, 'Equipement "' . $equipment->getData('serial') . '" - erreurs lors de la remise dans l\'emplacement précédant');
-                                                }
-
-                                                if (count($eq_errors)) {
-                                                    $errors[] = BimpTools::getMsgFromArray($eq_errors, 'Equipement "' . $equipment->getData('serial') . '": échec de la remise dans l\'emplacement précédant');
-                                                }
-                                            }
+                                    if (BimpObject::objectLoaded($reservation)) {
+                                        if ($id_commande_client_line && ((int) $reservation->getData('id_commande_client_line') === (int) $id_commande_client_line)) {
+                                            $new_status = 100;
                                         } else {
-                                            // Suppr de l'équipement 
-                                            $eq_warnings = array();
-                                            $equipment->delete_origin = 'order_supplier';
-                                            $equipment->delete_id_origin = (int) $commande_fourn->id;
-                                            $eq_errors = $equipment->delete($eq_warnings, true);
+                                            $new_status = 2;
+                                        }
+                                        $res_errors = $reservation->setNewStatus($new_status);
 
-                                            if (count($eq_errors)) {
-                                                $msg = BimpTools::getMsgFromArray($eq_errors, 'Echec de la suppression de l\'équipement "' . $equipment->getData('serial') . '" (ID: ' . $equipment->id . ')');
-                                                $errors[] = $msg;
-                                                BimpCore::addlog('Echec suppr équipement suite annulation réception', Bimp_Log::BIMP_LOG_ERREUR, 'logistique', $commande_fourn, array(
-                                                    'Erreurs'    => $eq_errors,
-                                                    'Equipement' => $equipment->getLink(),
-                                                    'Recéption'  => $reception->getLink()
-                                                ));
+                                        if (count($res_errors)) {
+                                            $warnings[] = BimpTools::getMsgFromArray($res_errors, 'Echec de la mise à jour de la réservation pour l\'équipement "' . $equipment->getData('serial') . '" (ID: ' . $equipment->id . ')');
+                                        }
+                                    }
+
+                                    // Check de l'existance d'un emplacement précédant: 
+                                    $recep_code_mvt = 'CMDF' . $commande_fourn->id . '_LN' . $this->id . '_RECEP' . $id_reception;
+                                    $recep_place_position = (int) $this->db->getValue('be_equipment_place', 'position', 'id_equipment = ' . $id_equipment . ' AND code_mvt = \'' . $recep_code_mvt . '\'');
+
+                                    $prev_place_id = 0;
+                                    if ($recep_place_position) {
+                                        $prev_place_id = (int) $this->db->getValue('be_equipment_place', 'id', 'id_equipment = ' . $id_equipment . ' AND position = ' . ($recep_place_position + 1));
+                                    }
+
+                                    if ($prev_place_id) {
+                                        // Remise sur l'emplacement précédant: 
+                                        $prev_place = BimpCache::getBimpObjectInstance('bimpequipment', 'BE_Place', $prev_place_id);
+
+                                        if (BimpObject::objectLoaded($prev_place)) {
+                                            $new_place = BimpObject::getInstance('bimpequipment', 'BE_Place');
+                                            $eq_errors = $new_place->validateArray(array(
+                                                'id_equipment' => $id_equipment,
+                                                'type'         => $prev_place->getData('type'),
+                                                'date'         => date('Y-m-d H:i:s'),
+                                                'id_client'    => (int) $prev_place->getData('id_client'),
+                                                'id_contact'   => (int) $prev_place->getData('id_contact'),
+                                                'id_entrepot'  => (int) $prev_place->getData('id_entrepot'),
+                                                'id_user'      => (int) $prev_place->getData('id_user'),
+                                                'place_name'   => $prev_place->getData('place_name'),
+                                                'code_centre'  => $prev_place->getData('code_centre'),
+                                                'infos'        => 'Annulation réception ' . $reception->getRef() . ' - Commande Fourn ' . $commande_fourn->getRef(),
+                                                'code_mvt'     => $code_mvt,
+                                                'origin'       => 'order_supplier',
+                                                'id_origin'    => (int) $commande_fourn->id
+                                            ));
+
+                                            $eq_warnings = array();
+                                            if (!count($eq_errors)) {
+                                                $eq_errors = $new_place->create($eq_warnings);
                                             }
 
                                             if (count($eq_warnings)) {
-                                                $warnings[] = BimpTools::getMsgFromArray($eq_warnings, 'Erreurs lors de la suppression de l\'équipement "' . $equipment->getData('serial') . '" (ID: ' . $equipment->id . ')');
+                                                $warnings[] = BimpTools::getMsgFromArray($eq_warnings, 'Equipement "' . $equipment->getData('serial') . '" - erreurs lors de la remise dans l\'emplacement précédant');
+                                            }
+
+                                            if (count($eq_errors)) {
+                                                $errors[] = BimpTools::getMsgFromArray($eq_errors, 'Equipement "' . $equipment->getData('serial') . '": échec de la remise dans l\'emplacement précédant');
                                             }
                                         }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    // Annulation équipements retournés: 
-                    if (isset($reception_data['return_equipments']) && is_array($reception_data['return_equipments'])) {
-                        foreach ($reception_data['return_equipments'] as $id_equipment => $equipment_data) {
-                            $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-                            if (BimpObject::objectLoaded($equipment)) {
+                                    } else {
+                                        // Suppr de l'équipement 
+                                        $eq_warnings = array();
+                                        $equipment->delete_origin = 'order_supplier';
+                                        $equipment->delete_id_origin = (int) $commande_fourn->id;
+                                        $eq_errors = $equipment->delete($eq_warnings, true);
 
-                                $place = $equipment->getCurrentPlace();
-                                $eq_warnings = array();
-
-                                if (BimpObject::objectLoaded($place)) {
-                                    if ((int) $place->getData('type') === BE_Place::BE_PLACE_FREE) {
-                                        $new_place = BimpObject::getInstance('bimpequipment', 'BE_Place');
-                                        $eq_errors = $new_place->validateArray(array(
-                                            'id_equipment' => (int) $equipment->id,
-                                            'type'         => BE_Place::BE_PLACE_ENTREPOT,
-                                            'date'         => date('Y-m-d H:i:s'),
-                                            'id_entrepot'  => (int) $id_entrepot,
-                                            'infos'        => '(Retour fournisseur) ' . $stock_label,
-                                            'code_mvt'     => $code_mvt,
-                                            'origin'       => 'order_supplier',
-                                            'id_origin'    => (int) $commande_fourn->id
-                                        ));
-                                        if (!count($eq_errors)) {
-                                            $eq_errors = $new_place->create($eq_warnings);
+                                        if (count($eq_errors)) {
+                                            $msg = BimpTools::getMsgFromArray($eq_errors, 'Echec de la suppression de l\'équipement "' . $equipment->getData('serial') . '" (ID: ' . $equipment->id . ')');
+                                            $errors[] = $msg;
+                                            BimpCore::addlog('Echec suppr équipement suite annulation réception', Bimp_Log::BIMP_LOG_ERREUR, 'logistique', $commande_fourn, array(
+                                                'Erreurs'    => $eq_errors,
+                                                'Equipement' => $equipment->getLink(),
+                                                'Recéption'  => $reception->getLink()
+                                            ));
                                         }
 
                                         if (count($eq_warnings)) {
-                                            $warnings[] = BimpTools::getMsgFromArray($eq_warnings, 'Equipement retourné "' . $equipment->getData('serial') . '"');
-                                        }
-
-                                        if (count($eq_errors)) {
-                                            $errors[] = BimpTools::getMsgFromArray($eq_errors, 'Equipement retourné "' . $equipment->getData('serial') . '": échec de la création de l\'emplacement');
+                                            $warnings[] = BimpTools::getMsgFromArray($eq_warnings, 'Erreurs lors de la suppression de l\'équipement "' . $equipment->getData('serial') . '" (ID: ' . $equipment->id . ')');
                                         }
                                     }
                                 }
@@ -2043,58 +2052,105 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     }
                 }
             } else {
-                if ((float) $reception_data['qty'] > 0 || (float) $reception_data['qty'] < 0) {
-                    // Traitement de la réservation correspondante: 
-                    if ($id_commande_client_line) {
-                        if (isset($reception_data['assign_to_commande_client']) && (int) $reception_data['assign_to_commande_client']) {
-                            $status = 200;
-                        } else {
-                            $status = 101;
-                        }
-
-                        $reservation = BimpCache::findBimpObjectInstance('bimpreservation', 'BR_Reservation', array(
-                                    'id_commande_client_line' => (int) $id_commande_client_line,
-                                    'status'                  => $status
-                                        ), true);
-                        if (BimpObject::objectLoaded($reservation)) {
-                            $res_errors = $reservation->setNewStatus(100, array(
-                                'qty' => (int) $reception_data['qty'],
-                            ));
-
-                            if (count($errors)) {
-                                $errors[] = BimpTools::getMsgFromArray($res_errors, 'Erreurs lors de la mise à jour de la réservation correspondante');
+                // Annulation équipements retournés: 
+                if (isset($reception_data['return_equipments']) && is_array($reception_data['return_equipments'])) {
+                    foreach ($reception_data['return_equipments'] as $id_equipment => $equipment_data) {
+                        if (isset($equipment_data['r'])) {
+                            if (!(int) $equipment_data['r']) {
+                                continue;
                             }
+                        } elseif (!(int) $reception_data['received']) {
+                            continue;
                         }
-                    }
+                        $reception_data['return_equipments'][$id_equipment]['r'] = 0;
+                        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                        if (BimpObject::objectLoaded($equipment)) {
 
-                    if (!count($errors) && !$stock_out) {
-                        // Retrait du stock:
-                        if (BimpObject::objectLoaded($product)) {
-                            $stock_label = 'Annulation réception n°' . $reception->getData('num_reception') . ((float) $reception_data['qty'] < 0 ? ' (Retour au fournisseur)' : '') . ' BR: ' . $reception->getData('ref') . ' - Commande fournisseur: ' . $commande_fourn->getData('ref');
-                            $code_mvt = 'ANNUL_CMDF_' . $commande_fourn->id . '_LN_' . $this->id . '_RECEP_' . $reception->id;
-                            $stock_errors = $product->correctStocks($id_entrepot, (int) $reception_data['qty'], Bimp_Product::STOCK_OUT, $code_mvt, $stock_label, 'order_supplier', $commande_fourn->id);
-                            if (count($stock_errors)) {
-                                $errors[] = BimpTools::getMsgFromArray($stock_errors);
+                            $place = $equipment->getCurrentPlace();
+                            $eq_warnings = array();
+
+                            if (BimpObject::objectLoaded($place)) {
+                                if ((int) $place->getData('type') === BE_Place::BE_PLACE_FREE) {
+                                    $new_place = BimpObject::getInstance('bimpequipment', 'BE_Place');
+                                    $eq_errors = $new_place->validateArray(array(
+                                        'id_equipment' => (int) $equipment->id,
+                                        'type'         => BE_Place::BE_PLACE_ENTREPOT,
+                                        'date'         => date('Y-m-d H:i:s'),
+                                        'id_entrepot'  => (int) $id_entrepot,
+                                        'infos'        => '(Retour fournisseur) ' . $stock_label,
+                                        'code_mvt'     => $code_mvt,
+                                        'origin'       => 'order_supplier',
+                                        'id_origin'    => (int) $commande_fourn->id
+                                    ));
+                                    if (!count($eq_errors)) {
+                                        $eq_errors = $new_place->create($eq_warnings);
+                                    }
+
+                                    if (count($eq_warnings)) {
+                                        $warnings[] = BimpTools::getMsgFromArray($eq_warnings, 'Equipement retourné "' . $equipment->getData('serial') . '"');
+                                    }
+
+                                    if (count($eq_errors)) {
+                                        $errors[] = BimpTools::getMsgFromArray($eq_errors, 'Equipement retourné "' . $equipment->getData('serial') . '": échec de la création de l\'emplacement');
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
+        } elseif ((int) $reception_data['received']) {
+            if ((float) $reception_data['qty'] > 0 || (float) $reception_data['qty'] < 0) {
+                // Traitement de la réservation correspondante: 
+                if ($id_commande_client_line) {
+                    if (isset($reception_data['assign_to_commande_client']) && (int) $reception_data['assign_to_commande_client']) {
+                        $status = 200;
+                    } else {
+                        $status = 101;
+                    }
 
-            if (!count($errors)) {
-                $receptions = $this->getData('receptions');
+                    $reservation = BimpCache::findBimpObjectInstance('bimpreservation', 'BR_Reservation', array(
+                                'id_commande_client_line' => (int) $id_commande_client_line,
+                                'status'                  => $status
+                                    ), true);
+                    if (BimpObject::objectLoaded($reservation)) {
+                        $res_errors = $reservation->setNewStatus(100, array(
+                            'qty' => (int) $reception_data['qty'],
+                        ));
 
-                $reception_data['received'] = 0;
-                $reception_data['equipments'] = array();
-                $receptions[(int) $id_reception] = $reception_data;
-
-                $up_errors = $this->updateField('receptions', $receptions);
-
-                if (count($up_errors)) {
-                    $errors[] = BimpTools::getMsgFromArray($up_errors);
-                } elseif (!$isReturn) {
-                    $this->checkFactureClientLinesPA();
+                        if (count($errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($res_errors, 'Erreurs lors de la mise à jour de la réservation correspondante');
+                        }
+                    }
                 }
+
+                if (!count($errors) && !$stock_out) {
+                    // Retrait du stock:
+                    if (BimpObject::objectLoaded($product)) {
+                        $stock_label = 'Annulation réception n°' . $reception->getData('num_reception') . ((float) $reception_data['qty'] < 0 ? ' (Retour au fournisseur)' : '') . ' BR: ' . $reception->getData('ref') . ' - Commande fournisseur: ' . $commande_fourn->getData('ref');
+                        $code_mvt = 'ANNUL_CMDF_' . $commande_fourn->id . '_LN_' . $this->id . '_RECEP_' . $reception->id;
+                        $stock_errors = $product->correctStocks($id_entrepot, (int) $reception_data['qty'], Bimp_Product::STOCK_OUT, $code_mvt, $stock_label, 'order_supplier', $commande_fourn->id);
+                        if (count($stock_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($stock_errors);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!count($errors)) {
+            $receptions = $this->getData('receptions');
+
+            $reception_data['received'] = 0;
+            $reception_data['equipments'] = array();
+            $receptions[(int) $id_reception] = $reception_data;
+
+            $up_errors = $this->updateField('receptions', $receptions);
+
+            if (count($up_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($up_errors);
+            } elseif (!$isReturn) {
+                $this->checkFactureClientLinesPA();
             }
         }
 

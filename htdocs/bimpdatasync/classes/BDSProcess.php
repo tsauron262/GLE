@@ -275,6 +275,60 @@ abstract class BDSProcess
         return $result;
     }
 
+    public function cancelOperation($id_operation, $id_report, &$errors, $extra_data = array())
+    {
+        $result = array();
+        if (BimpObject::objectLoaded($this->process)) {
+            if ((int) $id_report && (!BimpObject::objectLoaded($this->report) || $this->report != $id_report)) {
+                $this->report = BimpCache::getBimpObjectInstance('bimpdatasync', 'BDS_Report', (int) $id_report);
+            }
+
+            $operation = BimpCache::getBimpObjectInstance('bimpdatasync', 'BDS_ProcessOperation', (int) $id_operation);
+            if (!BimpObject::objectLoaded($operation)) {
+                $msg = 'Erreur technique : l\'opération d\'ID ' . $id_operation . ' n\'existe plus';
+                $errors[] = $msg;
+            } else {
+                $method = 'cancel';
+                $words = explode('_', $operation->getData('name'));
+                foreach ($words as $word) {
+                    $method .= ucfirst($word);
+                }
+
+                if (method_exists($this, $method)) { // Méthode non obligatoire
+                    // Vérification des options: 
+                    $options = $operation->getAssociatesObjects('options');
+                    foreach ($options as $option) {
+                        if (!isset($this->options[$option->getData('name')])) {
+                            if ((int) $option->getData('required')) {
+                                $errors[] = 'Option obligatoire non spécifiée: "' . $option->getData('label') . '"';
+                                $this->options_ok = false;
+                            }
+                        }
+                    }
+
+                    if ($this->options_ok) {
+                        // Finalisation de l'opération: 
+                        $result = $this->{$method}($errors, $extra_data);
+                    }
+                }
+            }
+        } else {
+            $errors[] = 'Erreur technique: Définitions du processus absentes';
+        }
+
+        if (count($errors)) {
+            $this->Error(BimpTools::getMsgFromArray($errors, 'Erreur(s) technique(s)'));
+        }
+
+        $this->end();
+
+        if ($this->debug_content) {
+            $result['debug_content'] = BimpRender::renderFoldableContainer('[ANNULATION]', $this->debug_content, array('open' => false, 'offset_left' => true));
+        }
+
+        return $result;
+    }
+
     public function executeFullOperation($id_operation, &$errors = array())
     {
         $result = array(
@@ -726,7 +780,7 @@ abstract class BDSProcess
 
         return $default_value;
     }
-    
+
     protected function checkParameter($name, $type = '', $required = true)
     {
         if (!isset($this->params[$name]) || !$this->params[$name]) {
@@ -765,7 +819,7 @@ abstract class BDSProcess
                         'id_process' => (int) $this->process->id,
                         'name'       => $name
                             ), true);
-            
+
             if (BimpObject::objectLoaded($param)) {
                 $errors = $param->updateField('value', $new_value);
                 if (!count($errors)) {
@@ -1052,7 +1106,7 @@ abstract class BDSProcess
     public static function createProcessByName($processName, &$errors = array(), $options = array(), $references = array())
     {
         $bdb = BimpCache::getBdb();
-        
+
         $where = '`name` = \'' . $processName . '\'';
         $id_process = $bdb->getValue('bds_process', 'id', $where);
         if (is_null($id_process) || !$id_process) {

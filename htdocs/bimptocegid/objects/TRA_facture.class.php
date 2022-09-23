@@ -253,16 +253,8 @@
         
         private function getSens($montant) {            
             
-            if($this->sens_facture == 'D') { // Facture standard : FA
-                if($montant < 0) return $this->sens_facture;
-                return 'C';
-            }
-            
-            if($this->sens_facture == 'C') { // Facture avoir : AV
-                if($montant > 0) return $this->sens_facture;
-                return 'D';
-            }
-            
+            return ($montant > 0) ? 'C' : 'D';
+   
         }
         
     }

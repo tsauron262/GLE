@@ -66,9 +66,9 @@
                 if($this->export_importPaiement &&  !$this->export_class->rollBack)                                           $this->export_class->exportImportPaiement();
                 if($this->export_deplacementPay && !$this->export_class->rollBack)                                            $this->export_class->exportDeplacementPaiament();
                 if($this->export_bordereauCHK && !$this->export_class->rollBack)                                              $this->export_class->exportBordereauxCHK();
-
-                $this->checkFiles();
+                
                 $this->renameFileAvantFTP();
+                $this->checkFiles();
                 
                 if(!$this->stopCompta && !$this->export_class->rollBack) {
                     $this->FTP();

@@ -7,6 +7,8 @@
     
     class Cron {
         
+        protected $modeTest      = false;
+        
         protected $export_class  = null;
         protected $stopCompta    = false;
         protected $filesNotFtp   = [];
@@ -44,9 +46,11 @@
         public function automatique() {
             global $db;
             
-            //ID_ERP == 2
-            //define('ID_ERP', 2);
-            if(defined('ID_ERP') && ID_ERP == 2) {
+            if($this->modeTest) {
+                $this->ldlc_ftp_path = '/FTP-BIMP-ERP/accountingtest/';
+            }
+            
+            if((defined('ID_ERP') && ID_ERP == 2) || $this->modeTest) {
                 $db->begin(); //Ouvre la transaction
             
                 $this->version_tra = BimpCore::getConf('version_tra', null, "bimptocegid");

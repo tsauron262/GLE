@@ -195,21 +195,7 @@
         }
         
         private function getSens($ht) {
-            if($this->sensFacture == 'C') {
-                if($ht > 0) {
-                    return 'D';
-                } else {
-                    return 'C';
-                }
-            } else {
-                if($ht > 0) {
-                    return 'C';
-                } else {
-                    return'D';
-                }
-            }
-            
-            return 0;
+            return ($ht > 0) ? 'D' : 'C';
         }
         
     }

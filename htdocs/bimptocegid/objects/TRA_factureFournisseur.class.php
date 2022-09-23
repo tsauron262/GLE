@@ -127,7 +127,11 @@
                         }elseif(in_array($produit->getRef(), self::$rfa)) {
                             $compteLigne = Bimpcore::getConf('rfa_fournisseur_fr', null, 'bimptocegid');
                         } else {
-                            $compteLigne = $produit->getCodeComptableAchat($facture->getData('zone_vente'));
+                            if($interco) {
+                                $compteLigne = sizing(interco_code($produit->getCodeComptableAchat($facture->getData('zone_vente')), $this->compte_general), 8, false, true);
+                            } else {
+                                $compteLigne = $produit->getCodeComptableAchat($facture->getData('zone_vente'));
+                            }
                         }
                         
                         $structure['REF_LIBRE']                 = sizing(suppr_accents($produit->getRef()),35);

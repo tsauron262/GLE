@@ -121,15 +121,7 @@
                         if($facture->getData('zone_vente') == $this->zoneAchat['france']){
                             $total_d3e += $produit->getData('deee') * $line->qty;
                         }
-                            
-                        //$sens = ($this->sensFacture == 'C') ? ($line->total_ht > 0) ? 'D' : 'C' : ($line->total < 0) ? 'C' : 'D';
-                       
-                        if($this->sensFacture == 'C') {
-                            $sens = ($line->total_ht > 0) ? 'D' : 'C';
-                        } else {
-                            $sens = ($line->total_ht < 0) ? 'D' : 'C';
-                        }
-                        
+
                         if($fournisseur->getData('code_compta_fournisseur') == BimpCore::getConf('code_fournisseur_apple', null, "bimptocegid")) {
                             $compteLigne = BimpCore::getConf('achat_fournisseur_apple', null, 'bimptocegid');
                         }elseif(in_array($produit->getRef(), self::$rfa)) {
@@ -142,7 +134,7 @@
                         $structure['COMPTE_GENERAL']            = sizing($compteLigne, 17);
                         $structure['TYPE_DE_COMPTE']            = sizing('', 1);
                         $structure['CODE_COMPTA']               = sizing("", 16);
-                        $structure['SENS']                      = sizing($this->getSens(abs(round($line->total_ht - ($produit->getData('deee') * $line->qty), 2))), 1);
+                        $structure['SENS']                      = sizing($this->getSens($line->total_ht), 1);
                        if($facture->getData('zone_vente') == $this->zoneAchat['france']) {
                            $structure['MONTANT']                   = sizing(abs(round($line->total_ht - ($produit->getData('deee') * $line->qty), 2)), 20, true);
                        } else {

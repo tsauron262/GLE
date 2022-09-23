@@ -54,19 +54,18 @@
                 $this->export_class = new export($db);
                 $this->export_class->create_daily_files();
                 $this->files_for_ftp = $this->getFilesArrayForTranfert();
-
-                $this->auto_payni = ($this->export_class->moment == 'AM') ? true : false;
-
-                if($this->export_payni && $this->export_class->moment == 'AM' && !$this->export_class->rollBack)              $this->export_class->exportPayInc();
+                
+                if($this->export_payni && !$this->export_class->rollBack)                                                     $this->export_class->exportPayInc();
                 if($this->export_ventes && !$this->export_class->rollBack)                                                    $this->export_class->exportFacture();
                 if($this->export_paiements && !$this->export_class->rollBack)                                                 $this->export_class->exportPaiement();
                 if($this->export_achats && !$this->export_class->rollBack)                                                    $this->export_class->exportFactureFournisseur();
-                if($this->export_importPaiement && $this->export_class->moment == 'AM' && !$this->export_class->rollBack)     $this->export_class->exportImportPaiement();
+                if($this->export_importPaiement &&  !$this->export_class->rollBack)                                           $this->export_class->exportImportPaiement();
                 if($this->export_deplacementPay && !$this->export_class->rollBack)                                            $this->export_class->exportDeplacementPaiament();
                 if($this->export_bordereauCHK && !$this->export_class->rollBack)                                              $this->export_class->exportBordereauxCHK();
 
                 $this->checkFiles();
-
+                $this->renameFileAvantFTP();
+                
                 if(!$this->stopCompta && !$this->export_class->rollBack) {
                     $this->FTP();
                     $this->menage();
@@ -430,6 +429,27 @@
                     . implode("\n", $files) . "\n";
             
             return $files;
+        }
+        
+        public function renameFileAvantFTP() {
+            $renamed = Array();
+            foreach($this->files_for_ftp as $file) {
+                if($file[0] != 'I') {
+                    $renamed = glob($this->local_path . $file);
+                    if(count($renamed) > 0) {
+                        $i = 1;
+                        foreach($renamed as $filePath) {
+                            $fileName = basename($filePath);
+                            $exploded = explode('_', $fileName);
+                            $newFileName = $exploded[0] . '_' . $exploded[1] . '_' . $exploded[2] . '_' . $exploded[3] . '-' . date('his') . '-' . $i . '_' . 'Y2.tra';
+                            if(!rename($filePath, $this->local_path . $newFileName)) {
+                                $this->stopCompta = true;
+                            }
+                            $i++;
+                        }
+                    }
+                }
+            }
         }
         
         public function FTP() {

@@ -122,8 +122,14 @@
                             $total_d3e += $produit->getData('deee') * $line->qty;
                         }
                             
-                        $sens = ($this->sensFacture == 'C') ? ($line->total_ht > 0) ? 'D' : 'C' : ($TTC < 0) ? 'C' : 'D';
+                        //$sens = ($this->sensFacture == 'C') ? ($line->total_ht > 0) ? 'D' : 'C' : ($line->total < 0) ? 'C' : 'D';
                        
+                        if($this->sensFacture == 'C') {
+                            $sens = ($line->total_ht > 0) ? 'D' : 'C';
+                        } else {
+                            $sens = ($line->total_ht < 0) ? 'D' : 'C';
+                        }
+                        
                         if($fournisseur->getData('code_compta_fournisseur') == BimpCore::getConf('code_fournisseur_apple', null, "bimptocegid")) {
                             $compteLigne = BimpCore::getConf('achat_fournisseur_apple', null, 'bimptocegid');
                         }elseif(in_array($produit->getRef(), self::$rfa)) {

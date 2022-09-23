@@ -1093,11 +1093,15 @@ class BimpCore
             if ($i > 0) {
                 sleep(1);
             }
-            $row = $bdb->getRow('bimpcore_object_lock', $where, array('tms', 'id_user', 'token'), 'array', 'tms', 'DESC');
+            $row = $bdb->getRow('bimpcore_object_lock', $where, array('id', 'tms', 'id_user', 'token'), 'array', 'tms', 'DESC');
 
             if (!is_null($row)) {
                 if ($token && $token == $row['token']) {
                     // Si token fourni et correspond au lock en cours : pas de blocage, on conserve le lock actuel
+                    // On réinitialise tout de même le tms: 
+                    $bdb->update('bimpcore_object_lock', array(
+                        'tms' => time()
+                            ), 'id = ' . (int) $row['id']);
                     return false;
                 }
 
@@ -1110,7 +1114,7 @@ class BimpCore
                         'id_user' => $user->id,
                         'tms'     => time(),
                         'token'   => $token
-                            ), $where);
+                            ), 'id = ' . (int) $row['id']);
                     return false;
                 }
             }

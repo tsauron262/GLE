@@ -1805,22 +1805,22 @@ class Equipment extends BimpObject
             }
         }
 
-        $init_serial = (string) $this->getInitData('serial');
+//        $init_serial = (string) $this->getInitData('serial');
 
-        if ($serial &&
-                (!(string) $this->getData('imei') || ($init_serial && $serial != $init_serial)) && !$this->majGsx) {
-//            $identifiers = self::gsxFetchIdentifiers($serial);
-//            $this->set('imei', $identifiers['imei']);
-//            $this->set('imei2', $identifiers['imei2']);
-//            $this->set('meid', $identifiers['meid']);
-//
-//            if ($identifiers['serial']) {
-//                $this->set('serial', $identifiers['serial']);
-//                $serial = $identifiers['serial'];
-//            }
-            $war = array();
-            $this->majWithGsx($war, false);
-        }
+//        if ($serial &&
+//                (!(string) $this->getData('imei') || ($init_serial && $serial != $init_serial)) && !$this->majGsx) {
+////            $identifiers = self::gsxFetchIdentifiers($serial);
+////            $this->set('imei', $identifiers['imei']);
+////            $this->set('imei2', $identifiers['imei2']);
+////            $this->set('meid', $identifiers['meid']);
+////
+////            if ($identifiers['serial']) {
+////                $this->set('serial', $identifiers['serial']);
+////                $serial = $identifiers['serial'];
+////            }
+//            $war = array();
+//            $this->majWithGsx($war, false);
+//        }
 
         if (!$id_product && $serial && (!$this->getInitData('serial') || $this->getInitData('serial') !== $serial)) {
             // Pas de correction du id_product pour l'instant car trop dangereux (stocks, incohérences commandes / factures, etc.)

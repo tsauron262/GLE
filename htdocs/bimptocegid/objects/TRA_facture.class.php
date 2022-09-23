@@ -207,11 +207,11 @@
                                 
                 $total_mis_en_ligne =  (round($total_deee,2) + round($total_tva, 2) + round($total_ht, 2));
                 $controlle_ttc = (round($TTC, 2));
-                $reste = round($total_mis_en_ligne - $controlle_ttc,2);
+                $reste = round($controlle_ttc - $total_mis_en_ligne,2);
                 
                 if($reste != 0) {
                     $structure['COMPTE_GENERAL']        = sizing($compte_le_plus_grand, 17);
-                    $structure['SENS']                  = sizing($this->getSensRectification($reste, $controlle_ttc),1);
+                    $structure['SENS']                  = sizing($this->getSens($reste),1);
                     $structure['MONTANT']               = sizing(abs($reste), 20, true);
                     $structure['REF_LIBRE']             = sizing($facture->getRef(),35);
                     $ecriture .= implode('', $structure) . "\n";
@@ -231,23 +231,6 @@
             $return.= '<br />' . print_r($debug, 1);
             
             return $return;
-            
-        }
-        
-        private function getSensRectification($montant, $ttc_facture) {
-            
-            $is_avoir   = ($ttc_facture > 0) ? false : true;
-            $is_facture = ($ttc_facture > 0) ? true : false;
-            
-            if($is_avoir) {
-                if($montant > 0) return 'D';
-                return 'C';
-            }
-            
-            if($is_facture) {
-                if($montant < 0) return 'C';
-                return 'D';
-            }
             
         }
         

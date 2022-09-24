@@ -242,7 +242,7 @@ class BDS_VerifsProcess extends BDSProcess
             $entrepots = BimpCache::getEntrepotsArray(false, false, true);
 
             foreach ($this->references as $id_r) {
-                $where = 'inventorycode LIKE \'%_RECEP' . $id_r . '\'';
+                $where = '(inventorycode LIKE \'%$_RECEP' . $id_r . '\' ESCAPE \'$\' OR inventorycode LIKE \'%$_RECEP$_' . $id_r . '\' ESCAPE \'$\')';
                 $mvts = $this->db->getRows('stock_mouvement a', $where, null, 'array', array('a.*', 'p.serialisable'), null, null, array(
                     array(
                         'alias' => 'p',
@@ -251,7 +251,9 @@ class BDS_VerifsProcess extends BDSProcess
                     )
                 ));
 
-                if (!empty($mvts)) {
+                $this->DebugData($mvts, 'MVTS');
+
+                if (is_array($mvts)) {
                     $lines = array();
 
                     // Trie par ligne: 
@@ -320,8 +322,59 @@ class BDS_VerifsProcess extends BDSProcess
                             }
                         }
                     }
+                } else {
+                    $this->Error($this->db->err());
                 }
             }
+        }
+    }
+
+    // Correction code mouvements annulations réceptions: 
+
+    public function initCorrectCodeMvt(&$data, &$errors = array())
+    {
+        $where = 'inventorycode LIKE \'%$_RECEP$_%\' ESCAPE \'$\'';
+        $rows = $this->db->getRows('stock_mouvement', $where, null, 'array', array('rowid'), 'rowid', 'asc');
+
+        if (is_array($rows)) {
+            $elements = array();
+            foreach ($rows as $r) {
+                $elements[] = (int) $r['rowid'];
+            }
+            $data['steps'] = array(
+                'correct' => array(
+                    'label'                  => 'Correction des codes mouvement',
+                    'on_error'               => 'continue',
+                    'elements'               => $elements,
+                    'nbElementsPerIteration' => (int) 100
+                )
+            );
+        } else {
+            $errors[] = $this->db->err();
+        }
+    }
+
+    public function executeCorrectCodeMvt($step_name, &$errors = array(), $extra_data = array())
+    {
+        $rows = $this->db->getRows('stock_mouvement', 'rowid IN (' . implode(',', $this->references) . ')', null, 'array', array('rowid', 'inventorycode'));
+
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                if (preg_match('/^(ANNUL_)?CMDF_(\d+)_LN_(\d+)_RECEP_(\d+)$/', $r['inventorycode'], $matches)) {
+                    $code = $matches[1] . 'CMDF' . $matches[2] . '_LN' . $matches[3] . '_RECEP' . $matches[4];
+                    if ($this->db->update('stock_mouvement', array(
+                                'inventorycode' => $code
+                                    ), 'rowid = ' . (int) $r['rowid']) <= 0) {
+                        $this->Error('ECHEC - ' . $this->db->err(), null, $r['inventorycode']);
+                    } else {
+                        $this->Success('Code corrigé: ' . $code, null, $r['inventorycode']);
+                    }
+                } else {
+                    $this->Alert('Code incorrect: ' . $r['inventorycode']);
+                }
+            }
+        } else {
+            $this->Error($this->db->err());
         }
     }
 

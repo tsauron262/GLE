@@ -251,7 +251,7 @@ class BDS_VerifsProcess extends BDSProcess
                     )
                 ));
 
-                $this->DebugData($mvts, 'MVTS');
+//                $this->DebugData($mvts, 'MVTS'); 
 
                 if (is_array($mvts)) {
                     $lines = array();

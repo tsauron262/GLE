@@ -296,19 +296,33 @@ class BDS_VerifsProcess extends BDSProcess
                         $this->incProcessed();
                         foreach ($lines as $id_comm => $comm_lines) {
                             foreach ($comm_lines as $id_line => $line) {
+                                $lineObj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', $id_line);
+                                $shipmentData = $lineObj->getReceptionData($id_r);
+//                                if($id_r == 257587){
+//                                print_r($shipmentData);die;
+//                                }
+                                $qtyAttendu = $shipmentData['received'] ? $shipmentData['qty'] : 0;
+                                $qtyMvt = 0;
+                                foreach($line['recep'] as $m){
+                                    $qtyMvt += $m['value'];
+                                }
+                                foreach($line['annul'] as $m){
+                                    $qtyMvt += $m['value'];//car eja inversé
+                                }
+                                $diffQty = $qtyAttendu - $qtyMvt;
                                 $diff = count($line['recep']) - count($line['annul']);
-                                if ($diff != 1) {
+                                if ($diffQty != 0) {
                                     $prod_instance->id = (int) $line['id_prod'];
                                     $title = '<a target="_blank" href="' . DOL_URL_ROOT . '/bimplogistique/index.php?fc=commandeFourn&id=' . $id_comm . '">';
                                     $title .= (isset($entrepots[(int) $m['fk_entrepot']]) ? $entrepots[(int) $m['fk_entrepot']] : 'Entrepôt #' . $m['fk_entrepot']) . ' - ';
                                     $title .= 'Réception #' . $id_r . ': ';
                                     $title .= '</a>';
-                                    $html = '<br/><br/>';
+                                    $html = '<br/><br/>Attendu '.$qtyAttendu.' Mouvement '.$qtyMvt.'<br/>';
                                     foreach (array('recep' => 'réception(s)', 'annul' => 'annulation(s)') as $code => $label) {
                                         if (count($line[$code])) {
                                             $html .= '<b>' . count($line[$code]) . ' ' . $label . '</b><br/>';
                                             foreach ($line[$code] as $m) {
-                                                $html .= '   - <b>' . ((int) $m['type_mouvement'] ? 'Sortie' : 'Entrée') . '</b> : ' . $m['value'] . '<br/>';
+                                                $html .= '   - <b>' . ((int) $m['type_mouvement'] ? 'Sortie' : 'Entrée') . '</b> : ' . $m['value'] . ' - '.$m['rowid'].'<br/>';
                                             }
                                         }
                                     }

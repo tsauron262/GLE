@@ -199,6 +199,11 @@ class BDS_VerifsProcess extends BDSProcess
         }
 
         if (!count($errors)) {
+            
+            
+            $this->db->execute('TRUNCATE TABLE llx_stock_mouvement_reverse;');
+            $this->db->execute('INSERT INTO llx_stock_mouvement_reverse (SELECT *, REVERSE(inventorycode) as inventorycodereverse FROM llx_stock_mouvement'.($date_from? ' WHERE datem >= \'' . $date_from . ' 00:00:00\'' : '').');');
+
 
             $elements = array();
 
@@ -284,7 +289,8 @@ class BDS_VerifsProcess extends BDSProcess
                     $reception_status_label = BimpTools::getArrayValueFromPath(BL_CommandeFournReception::$status_list[$reception_status], 'label', 'Statut #' . $reception_status);
                 }
                 $where = '(inventorycode LIKE \'%$_RECEP' . $id_r . '\' ESCAPE \'$\' OR inventorycode LIKE \'%$_RECEP$_' . $id_r . '\' ESCAPE \'$\')';
-                $mvts = $this->db->getRows('stock_mouvement a', $where, null, 'array', array('a.*', 'p.serialisable'), null, null, array(
+                $where = '(inventorycodereverse LIKE REVERSE(\'%_RECEP' . $id_r . '\') ESCAPE \'$\' OR inventorycodereverse LIKE REVERSE(\'%_RECEP_' . $id_r . '\') ESCAPE \'$\')';
+                $mvts = $this->db->getRows('stock_mouvement_reverse a', $where, null, 'array', array('a.*', 'p.serialisable'), null, null, array(
                     array(
                         'alias' => 'p',
                         'table' => 'product_extrafields',

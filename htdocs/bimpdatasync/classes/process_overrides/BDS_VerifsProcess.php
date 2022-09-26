@@ -199,36 +199,70 @@ class BDS_VerifsProcess extends BDSProcess
         }
 
         if (!count($errors)) {
-            $where = 'status = 1';
 
+            $elements = array();
+
+            // Recherche par réception existantes: 
+//             $where = 'status = 1';
+//            if ($date_from) {
+//                $where .= ' AND date_received >= \'' . $date_from . ' 00:00:00\'';
+//            }
+//            if ($date_to) {
+//                $where .= ' AND date_received <= \'' . $date_from . ' 23:59:59\'';
+//            }
+//            $rows = $this->db->getRows('bl_commande_fourn_reception', $where, null, 'array', array('id'), 'id', 'asc');
+//            if (is_array($rows)) {
+//                $elements = array();
+//                foreach ($rows as $r) {
+//                    $elements[] = (int) $r['id'];
+//                }
+//            } else {
+//                $errors[] = $this->db->err();
+//            }
+            // Recherche par codes mouvements: 
+            $where = 'a.inventorycode LIKE \'%$_RECEP%\' ESCAPE \'$\'';
+            $where .= ' AND p.serialisable = 0';
             if ($date_from) {
-                $where .= ' AND date_received >= \'' . $date_from . ' 00:00:00\'';
+                $where .= ' AND a?datem >= \'' . $date_from . ' 00:00:00\'';
             }
 
             if ($date_to) {
-                $where .= ' AND date_received <= \'' . $date_from . ' 23:59:59\'';
+                $where .= ' AND a.datem <= \'' . $date_from . ' 23:59:59\'';
             }
+            $rows = $this->db->getRows('stock_mouvement a', $where, null, 'array', array('a.rowid', 'a.inventorycode'), null, null, array(
+                array(
+                    'alias' => 'p',
+                    'table' => 'product_extrafields',
+                    'on'    => 'p.fk_object = a.fk_product'
+                )
+            ));
 
-            $rows = $this->db->getRows('bl_commande_fourn_reception', $where, null, 'array', array('id'), 'id', 'asc');
             if (is_array($rows)) {
-                $elements = array();
                 foreach ($rows as $r) {
-                    $elements[] = (int) $r['id'];
-                }
-                if (empty($elements)) {
-                    $errors[] = 'Aucune réception a traiter trouvée';
-                } else {
-                    $data['steps'] = array(
-                        'check_receptions' => array(
-                            'label'                  => 'Vérifications des réceptions',
-                            'on_error'               => 'continue',
-                            'elements'               => $elements,
-                            'nbElementsPerIteration' => (int) $nbElementsPerIteration
-                        )
-                    );
+                    if (preg_match('/^(ANNUL_)?CMDF(\d+)_LN(\d+)_RECEP(\d+)$/', $r['inventorycode'], $matches)) {
+                        $id_reception = (int) $matches[4];
+                        if ($id_reception && !in_array($id_reception, $elements)) {
+                            $elements[] = $id_reception;
+                        }
+                    } else {
+                        $this->Alert('Code inventaire incorrect', null, $r['inventorycode']);
+                    }
                 }
             } else {
                 $errors[] = $this->db->err();
+            }
+
+            if (empty($elements)) {
+                $errors[] = 'Aucune réception a traiter trouvée';
+            } else {
+                $data['steps'] = array(
+                    'check_receptions' => array(
+                        'label'                  => 'Vérifications des réceptions',
+                        'on_error'               => 'continue',
+                        'elements'               => $elements,
+                        'nbElementsPerIteration' => (int) $nbElementsPerIteration
+                    )
+                );
             }
         }
     }
@@ -242,6 +276,13 @@ class BDS_VerifsProcess extends BDSProcess
             $entrepots = BimpCache::getEntrepotsArray(false, false, true);
 
             foreach ($this->references as $id_r) {
+                $reception_status = $this->db->getValue('bl_commande_fourn_reception', 'status', 'id = ' . (int) $id_r);
+                if (is_null($reception_status)) {
+                    $reception_status_label = 'Supprimée';
+                } else {
+                    $reception_status = (int) $reception_status;
+                    $reception_status_label = BimpTools::getArrayValueFromPath(BL_CommandeFournReception::$status_list[$reception_status], 'label', 'Statut #' . $reception_status);
+                }
                 $where = '(inventorycode LIKE \'%$_RECEP' . $id_r . '\' ESCAPE \'$\' OR inventorycode LIKE \'%$_RECEP$_' . $id_r . '\' ESCAPE \'$\')';
                 $mvts = $this->db->getRows('stock_mouvement a', $where, null, 'array', array('a.*', 'p.serialisable'), null, null, array(
                     array(
@@ -301,8 +342,8 @@ class BDS_VerifsProcess extends BDSProcess
                                     $prod_instance->id = (int) $line['id_prod'];
                                     $title = '<a target="_blank" href="' . DOL_URL_ROOT . '/bimplogistique/index.php?fc=commandeFourn&id=' . $id_comm . '">';
                                     $title .= (isset($entrepots[(int) $m['fk_entrepot']]) ? $entrepots[(int) $m['fk_entrepot']] : 'Entrepôt #' . $m['fk_entrepot']) . ' - ';
-                                    $title .= 'Réception #' . $id_r . ': ';
-                                    $title .= '</a>';
+                                    $title .= 'Réception #' . $id_r . ' (' . $reception_status_label . ')';
+                                    $title .= '</a> : ';
                                     $html = '<br/><br/>';
                                     foreach (array('recep' => 'réception(s)', 'annul' => 'annulation(s)') as $code => $label) {
                                         if (count($line[$code])) {

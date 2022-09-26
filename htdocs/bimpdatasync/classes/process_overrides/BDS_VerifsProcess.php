@@ -467,6 +467,7 @@ class BDS_VerifsProcess extends BDSProcess
     {
         if (!empty($this->references)) {
             $prod_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');
+            $commande_instance = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
             $this->setCurrentObject(BimpObject::getInstance('bimplogistique', 'BL_CommandeShipment'));
 
             $entrepots = BimpCache::getEntrepotsArray(false, false, true);
@@ -493,6 +494,7 @@ class BDS_VerifsProcess extends BDSProcess
 
             // Traitement par commande: 
             foreach ($commandes as $id_cmd => $cmd_data) {
+                $commande_instance->id = $id_cmd;
                 // Calcul qty attendues par produits: 
                 $lines = $this->db->getRows('commandedet det', 'det.fk_commande = ' . $id_cmd . ' AND det.fk_product > 0 AND pef.serialisable = 0 AND p.fk_product_type = 0', null, 'array', array('l.id', 'l.shipments', 'det.fk_product'), null, null, array(
                     array(
@@ -513,28 +515,32 @@ class BDS_VerifsProcess extends BDSProcess
                 ));
 
                 if (is_array($lines)) {
-                    foreach ($lines as $line) {
-                        $id_prod = (int) $line['fk_product'];
-                        if (!isset($commandes[$id_cmd]['prods'][$id_prod])) {
-                            $commandes[$id_cmd]['prods'][$id_prod] = array();
-                        }
+                    if (empty($lines)) {
+                        $this->Alert('Aucunes lignes', $commande_instance);
+                    } else {
+                        foreach ($lines as $line) {
+                            $id_prod = (int) $line['fk_product'];
+                            if (!isset($commandes[$id_cmd]['prods'][$id_prod])) {
+                                $commandes[$id_cmd]['prods'][$id_prod] = array();
+                            }
 
-                        if ($line['shipments']) {
-                            $line_shipments = json_decode($line['shipments'], 1);
+                            if ($line['shipments']) {
+                                $line_shipments = json_decode($line['shipments'], 1);
 
-                            if (is_array($line_shipments)) {
-                                foreach ($line_shipments as $id_shipment => $shipment_data) {
-                                    if (!in_array($id_shipment, $cmd_data['exps'])) {
-                                        continue;
-                                    }
-                                    if (!isset($commandes[$id_cmd]['prods'][$id_prod][$id_shipment])) {
-                                        $commandes[$id_cmd]['prods'][$id_prod][$id_shipment] = array(
-                                            'qty_attendue' => 0,
-                                            'qty_mvts'     => 0
-                                        );
-                                    }
-                                    if ((int) BimpTools::getArrayValueFromPath($shipment_data, 'shipped', 0)) {
-                                        $commandes[$id_cmd]['prods'][$id_prod][$id_shipment]['qty_attendue'] += (float) BimpTools::getArrayValueFromPath($shipment_data, 'qty', 0);
+                                if (is_array($line_shipments)) {
+                                    foreach ($line_shipments as $id_shipment => $shipment_data) {
+                                        if (!in_array($id_shipment, $cmd_data['exps'])) {
+                                            continue;
+                                        }
+                                        if (!isset($commandes[$id_cmd]['prods'][$id_prod][$id_shipment])) {
+                                            $commandes[$id_cmd]['prods'][$id_prod][$id_shipment] = array(
+                                                'qty_attendue' => 0,
+                                                'qty_mvts'     => 0
+                                            );
+                                        }
+                                        if ((int) BimpTools::getArrayValueFromPath($shipment_data, 'shipped', 0)) {
+                                            $commandes[$id_cmd]['prods'][$id_prod][$id_shipment]['qty_attendue'] += (float) BimpTools::getArrayValueFromPath($shipment_data, 'qty', 0);
+                                        }
                                     }
                                 }
                             }

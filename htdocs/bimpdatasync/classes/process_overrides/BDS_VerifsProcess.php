@@ -223,7 +223,7 @@ class BDS_VerifsProcess extends BDSProcess
             $where = 'a.inventorycode LIKE \'%$_RECEP%\' ESCAPE \'$\'';
             $where .= ' AND p.serialisable = 0';
             if ($date_from) {
-                $where .= ' AND a?datem >= \'' . $date_from . ' 00:00:00\'';
+                $where .= ' AND a.datem >= \'' . $date_from . ' 00:00:00\'';
             }
 
             if ($date_to) {

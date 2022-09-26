@@ -234,7 +234,7 @@ class BL_CommandeFournReception extends BimpObject
         }
 
         if ($this->isActionAllowed('validateReception') && $this->canSetAction('validateReception')) {
-            $use_bds = ((int) BimpCore::getConf('use_bds_for_receptions', null, 'bimpcommercial') && BimpCore::isUserDev());
+            $use_bds = ((int) BimpCore::getConf('use_bds_for_receptions', null, 'bimpcommercial'));
 
             if (!$use_bds || (int) $this->getData('validation_status') === 0) {
                 $buttons[] = array(

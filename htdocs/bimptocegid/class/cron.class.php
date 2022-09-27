@@ -51,7 +51,7 @@
             }
                         
             if(((defined('ID_ERP') && ID_ERP == 2) || $this->modeTest)) {
-                if(count(scandir($this->local_path, $this->export_class->excludeArrayScanDire)) > 0) {
+                if(!count(scandir($this->local_path, $this->export_class->excludeArrayScanDire))) {
                     $db->begin(); //Ouvre la transaction
 
                     $this->version_tra = BimpCore::getConf('version_tra', null, "bimptocegid");

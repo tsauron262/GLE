@@ -57,9 +57,11 @@
             if(!count($errors)) {
                 $this->renameFileAvantFTP();
                 $this->checkFiles();
-                $this->FTP();
-                $this->menage();
-                $success = 'Fichiers transférés avec succès';
+                if(!$this->stopCompta) {
+                    $this->FTP();
+                    $this->menage();
+                    $success = 'Fichiers transférés avec succès';
+                }
             }
                         
             return Array('success' => $success, 'errors' => $errors, 'warnings' => $warnings);

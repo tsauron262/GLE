@@ -243,6 +243,12 @@ class BimpDb
 
         $sql .= ' LIMIT 1';
 
+//        if ($table == 'stock_mouvement') {
+//            die($sql);
+//        }
+
+
+
         $result = $this->db->query($sql);
         if ($result && $this->db->num_rows($result)) {
             if ($return === 'object') {

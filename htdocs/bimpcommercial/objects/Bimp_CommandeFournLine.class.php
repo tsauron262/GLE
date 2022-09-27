@@ -2030,7 +2030,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                                         $eq_warnings = array();
                                         $equipment->delete_origin = 'order_supplier';
                                         $equipment->delete_id_origin = (int) $commande_fourn->id;
-                                        $equipment->delete_label_mvt = 'Annulation réception ' . $reception->getRef() . ' - Commande Fourn ' . $commande_fourn->getRef();
+                                        $equipment->delete_label_mvt = 'Annulation réception ' . $reception->getRef() . ' - Commande Fourn ' . $commande_fourn->getRef() . ' - Serial: ' . $equipment->getData('serial');
                                         $equipment->delete_code_mvt = $code_mvt;
                                         $eq_errors = $equipment->delete($eq_warnings, true);
 

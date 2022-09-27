@@ -1137,7 +1137,7 @@ class Bimp_Client extends Bimp_Societe
             $encours = $this->getAllEncoursForSiret(false);
             if ($encours['total'] != 0) {
                 $html .= '<b>Encours sur factures restant dues: </b>';
-                $html .= BimpTools::displayMoneyValue($encours['factures']['socs'][$this->id]);
+                $html .= BimpTools::displayMoneyValue($encours['factures']['socs'][$this->id]).' TTC';
 
                 if (count($encours['factures']['socs']) > 1) {
                     $html .= '<br/>';

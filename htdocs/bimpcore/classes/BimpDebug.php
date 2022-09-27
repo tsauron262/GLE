@@ -3,7 +3,7 @@
 class BimpDebug
 {
 
-    public static $active = false;
+    public static $active = true;
     protected static $user_checked = null;
     public static $maxDebugPerType = 1000;
     public static $debugs = array();

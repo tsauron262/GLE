@@ -640,7 +640,7 @@ lists_cols:
         search:
             input: 
                 type: search_user
-
+                
 lists: 
     default:
         title: Contrat
@@ -1362,6 +1362,35 @@ forms:
               value: 
                   callback: getDefaultSignatureContact
                   
+    create_signature_docu_sign: 
+        title: Signature DocuSign
+        icon: fas_file-signature
+        rows: 
+            - custom: 1
+              label: Contact
+              type: id_object
+              object: contact
+              input_name: id_contact
+              input:
+                  type: select
+                  options: 
+                      callback: 
+                          method: getSocieteContactsArray
+                          params: 
+                            0: 
+                                field_value: fk_soc
+                                  
+#            - custom: 1
+#              label: Informations contact
+#              input_name: inut
+#              depends_on: id_contact
+#              content:
+#                callback: 
+#                     method: getContactInfo
+#                     params: 
+#                            - request: id_contact
+            
+
 views:
     default:
         extends: fiche_contrat 

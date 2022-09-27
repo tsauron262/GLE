@@ -45,8 +45,11 @@
         
         public function manualSendTRA() {
             $errors = $warnings = Array();
-                        
-            $this->ldlc_ftp_path = '/FTP-BIMP-ERP/accountingtest/';
+            
+            if($this->modeTest) {
+                $this->ldlc_ftp_path = '/FTP-BIMP-ERP/accountingtest/';
+            }
+            
             $this->version_tra = BimpCore::getConf('version_tra', null, "bimptocegid");
             $this->entitie = BimpCore::getConf('file_entity', null, "bimptocegid");
             $this->files_for_ftp = $this->getFilesArrayForTranfert();

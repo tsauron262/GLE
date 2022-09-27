@@ -155,11 +155,11 @@ class BDS_ProcessOperation extends BimpObject
             }
         }
 
-        if (BimpObject::objectLoaded($user) && $user->admin) {
+        if (BimpObject::objectLoaded($user) && BimpCore::isUserDev()) {
             $label = 'Mode débug';
             $field_name = 'operation_' . $this->id . '_debug_active';
-            $input = BimpInput::renderInput('toggle', $field_name, 1);
-            $input = BimpInput::renderInputContainer($field_name, 1, $input);
+            $input = BimpInput::renderInput('toggle', $field_name, 0);
+            $input = BimpInput::renderInputContainer($field_name, 0, $input);
             $op_html .= BimpForm::renderFormRow(array(
                         'label'       => $label,
                         'content'     => $input,

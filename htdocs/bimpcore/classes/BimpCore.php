@@ -35,12 +35,14 @@ class BimpCore
             'buc'               => '/bimpuserconfig/views/js/buc.js',
             'bimpcore'          => '/bimpcore/views/js/bimpcore.js',
             'bimp_api'          => '/bimpapi/views/js/bimp_api.js',
-            'bimpDocumentation' => '/bimpcore/views/js/BimpDocumentation.js'
+            'bimpDocumentation' => '/bimpcore/views/js/BimpDocumentation.js',
+            'bds_operations'    => '/bimpdatasync/views/js/operations.js'
         ),
         'css' => array(
-            'jPicker'    => '/includes/jquery/plugins/jpicker/css/jPicker-1.1.6.css',
-            'bimpcore'   => '/bimpcore/views/css/bimpcore.css',
-            'userConfig' => '/bimpuserconfig/views/css/userConfig.css'
+            'jPicker'        => '/includes/jquery/plugins/jpicker/css/jPicker-1.1.6.css',
+            'bimpcore'       => '/bimpcore/views/css/bimpcore.css',
+            'userConfig'     => '/bimpuserconfig/views/css/userConfig.css',
+            'bds_operations' => '/bimpdatasync/views/css/operations.css'
         )
     );
     public static $js_vars = array();
@@ -81,6 +83,11 @@ class BimpCore
                 self::$files['js'][] = '/bimpcore/views/js/notification.js';
             } else {
                 self::$files['css']['bimpcore'] = '/bimpcore/views/css/bimpcore_public.css';
+            }
+
+            if (!self::isModuleActive('bimpdatasync')) {
+                unset(self::$files['css']['bds_operations']);
+                unset(self::$files['js']['bds_operations']);
             }
 
             BimpConfig::initCacheServeur();
@@ -1019,7 +1026,6 @@ class BimpCore
                     }
                 } else {
                     // Ca prend trop de ressources pour pas grand chose... 
-                     
 //                    if (BimpDebug::isActive()) {
 //                        BimpDebug::incCacheInfosCount('logs', false);
 //                    }
@@ -1063,8 +1069,10 @@ class BimpCore
 
     // Gestion des locks 
 
-    public static function checkObjectLock($object)
+    public static function checkObjectLock($object, &$token = '')
     {
+        // On retourne un message d'erreur si blocage nécessaire. false sinon.
+
         if (!(int) self::getConf('use_objects_locks')) {
             return false;
         }
@@ -1085,25 +1093,45 @@ class BimpCore
             if ($i > 0) {
                 sleep(1);
             }
-            $row = $bdb->getRow('bimpcore_object_lock', $where, array('tms', 'id_user'), 'array', 'tms', 'DESC');
+            $row = $bdb->getRow('bimpcore_object_lock', $where, array('id', 'tms', 'id_user', 'token'), 'array', 'tms', 'DESC');
 
-            if (!is_null($row) && (int) $row['tms'] < time() - 600) {
-                // Si locké depuis + de 12 minutes
-                $bdb->update('bimpcore_object_lock', array(
-                    'id_user' => $user->id,
-                    'tms'     => time()
-                        ), $where);
-                return false;
+            if (!is_null($row)) {
+                if ($token && $token == $row['token']) {
+                    // Si token fourni et correspond au lock en cours : pas de blocage, on conserve le lock actuel
+                    // On réinitialise tout de même le tms: 
+                    $bdb->update('bimpcore_object_lock', array(
+                        'tms' => time()
+                            ), 'id = ' . (int) $row['id']);
+                    return false;
+                }
+
+                if ((int) $row['tms'] < time() - 600) {
+                    // Si locké depuis + de 12 minutes
+                    if (!$token) {
+                        $token = BimpTools::randomPassword(12);
+                    }
+                    $bdb->update('bimpcore_object_lock', array(
+                        'id_user' => $user->id,
+                        'tms'     => time(),
+                        'token'   => $token
+                            ), 'id = ' . (int) $row['id']);
+                    return false;
+                }
             }
 
             if (is_null($row)) {
+                // Pa de lock en cours, on en créé un: 
+                if (!$token) {
+                    $token = BimpTools::randomPassword(12);
+                }
                 global $bimp_object_locked_id;
                 $bimp_object_locked_id = $bdb->insert('bimpcore_object_lock', array(
                     'obj_module' => $object->module,
                     'obj_name'   => $object->object_name,
                     'id_object'  => $object->id,
                     'tms'        => time(),
-                    'id_user'    => $user->id
+                    'id_user'    => $user->id,
+                    'token'      => $token
                         ), true);
                 return false;
             }
@@ -1164,7 +1192,7 @@ class BimpCore
         return $msg;
     }
 
-    public static function unlockObject($module, $object_name, $id_object)
+    public static function unlockObject($module, $object_name, $id_object, $token = '')
     {
         if (!(int) self::getConf('use_objects_locks')) {
             return array();
@@ -1190,6 +1218,10 @@ class BimpCore
             $where = 'obj_module = \'' . $module . '\'';
             $where .= ' AND obj_name = \'' . $object_name . '\'';
             $where .= ' AND id_object = ' . $id_object;
+
+            if ($token) {
+                $where .= ' AND token = \'' . $token . '\'';
+            }
 
             if ($bdb->delete('bimpcore_object_lock', $where) <= 0) {
                 $errors[] = 'Echec de la suppression du vérouillage - ' . $bdb->err();

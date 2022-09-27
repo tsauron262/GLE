@@ -882,7 +882,8 @@ class BContract_echeancier extends BimpObject {
 //        echo '<br/><br/>'.$start->format('Y-m-d').' '.$stop->format('Y-m-d');
 //        echo '<pre>';
 //        print_r($interval);
-        
+//        die('<pre>' . $mois);
+//        die($dateStart . ' - ' . $dateStop);
         return $mois;
     }
     
@@ -978,9 +979,16 @@ class BContract_echeancier extends BimpObject {
         if($parentInstance->getData('date_end_renouvellement')) {
             $dateStopEcheancier     = new DateTime($parentInstance->getData('date_end_renouvellement'));
         } else {
-            $dateStopEcheancier     = new DateTime($parentInstance->getData('end_date_contrat'));
-            $dateStopEcheancier = $dateStopEcheancier->add(new DateInterval('P1D'));
+            if($parentInstance->getData('end_date_contrat')) {
+                $dateStopEcheancier     = new DateTime($parentInstance->getData('end_date_contrat'));
+            } else {
+                $dateStopEcheancier  = new DateTime($parentInstance->getData('date_start'));
+                $dateStopEcheancier->add(new DateInterval('P' . $parentInstance->getData('duree_mois') . 'M'));
+            }
+            $dateStopEcheancier = $dateStopEcheancier->sub(new DateInterval('P1D'));
         }
+        
+        //die('date de fin du contrat ' . $dateStopEcheancier->format('Y-m-d'));
         
         $diff = $dateStartEcheancier->diff($dateStopEcheancier);
         
@@ -1082,27 +1090,26 @@ class BContract_echeancier extends BimpObject {
                 $resteStop  = $resteStopDT->format('d/m/Y');
             }
             
-            $price = $this->getDureeMoisPeriode($resteStartDT->format('Y-m-d'), $resteStopDT->format('Y-m-d')) * $periodes['infos']['tarif_au_mois'];
-            
+            $price = $dureePeriodeIncomplette * $periodes['infos']['tarif_au_mois'];
             $periodes['periodes'][] = Array(
                 'START' => $resteStart,
                 'STOP'  => $resteStop,
                 'DATE_FACTURATION' => ($parentInstance->getData('facturation_echu')) ? $resteStop : $resteStart,
                 'HT' => $resteAPayer,
-                'DUREE_MOIS' => $this->getDureeMoisPeriode($resteStartDT->format('Y-m-d'), $resteStopDT->format('Y-m-d')),
+                'DUREE_MOIS' => $dureePeriodeIncomplette,
                 'PRICE' => $price,
                 'TVA' => $price * 0.2
             );
             
         }
-        
-        
+                
         //Vérif
         $tot = 0;
         foreach($periodes['periodes'] as $periode){
             $tot += $periode['PRICE'];
         }
-        if($tot != $parentInstance->getTotalContrat()){
+        if(price($tot) != price($parentInstance->getTotalContrat())){
+            die('PRobléme Technique contrat '.$parentInstance->id.' pdf exheancier totP '.$tot.' totCt '.$parentInstance->getTotalContrat());
             BimpCore::addlog('PRobléme Technique contrat '.$parentInstance->id.' pdf exheancier totP '.$tot.' totCt '.$parentInstance->getTotalContrat());
             die('PRobléme Technique');
         }

@@ -190,7 +190,7 @@ function setObjectNewStatus($button, object_data, new_status, extra_data, $resul
     });
 }
 
-function setObjectAction($button, object_data, action, extra_data, form_name, $resultContainer, successCallback, confirm_msg, on_form_submit, no_triggers, modal_format, modal_scroll_bottom, modal_title) {
+function setObjectAction($button, object_data, action, extra_data, form_name, $resultContainer, successCallback, confirm_msg, on_form_submit, no_triggers, modal_format, modal_scroll_bottom, modal_title, use_bimpdatasync) {
     if (typeof (confirm_msg) === 'string') {
         if (!confirm(confirm_msg.replace(/&quote;/g, '"'))) {
             return;
@@ -213,33 +213,34 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
         modal_scroll_bottom = false;
     }
 
+    if (typeof (use_bimpdatasync) === 'undefined') {
+        use_bimpdatasync = false;
+    }
+
+    if (typeof (modal_title) === 'undefined' || !modal_title) {
+        if ($.isOk($button)) {
+            if ($button.hasClass('rowButton')) {
+                modal_title = $button.data('content');
+            } else {
+                modal_title = $button.text();
+            }
+        } else {
+            modal_title = 'Action "' + action + '"';
+        }
+    }
+
     if (typeof (form_name) === 'string' && form_name) {
         if (typeof (modal_format) !== 'string') {
             modal_format = 'medium';
         }
 
         object_data.form_name = form_name;
-        var title = '';
-
-        if (typeof (modal_title) !== 'undefined' && modal_title) {
-            title = modal_title;
-        } else {
-            if ($.isOk($button)) {
-                if ($button.hasClass('rowButton')) {
-                    title = $button.data('content');
-                } else {
-                    title = $button.text();
-                }
-            } else {
-                title = 'Action "' + action + '"';
-            }
-        }
 
         object_data.param_values = {
             fields: extra_data
         };
 
-        loadModalForm($button, object_data, title, function ($form) {
+        loadModalForm($button, object_data, modal_title, function ($form) {
             if ($.isOk($form)) {
                 var modal_idx = parseInt($form.data('modal_idx'));
                 if (!modal_idx) {
@@ -288,7 +289,7 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
                             if (typeof (successCallback) === 'function') {
                                 successCallback(result);
                             }
-                        }, null, null, no_triggers, '', true);
+                        }, null, null, no_triggers, '', true, modal_title, use_bimpdatasync);
                     }
                 });
             }
@@ -302,36 +303,49 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
             extra_data: extra_data
         };
 
-        BimpAjax('setObjectAction', data, $resultContainer, {
-            $button: $button,
-            display_success_in_popup_only: true,
-            display_warnings_in_popup_only: true,
-            module: object_data.module,
-            object_name: object_data.object_name,
-            id_object: object_data.id_object,
-            display_processing: true,
-            processing_padding: 10,
-            append_html: true,
-            modal_scroll_bottom: modal_scroll_bottom,
-            success: function (result, bimpAjax) {
-                if (typeof (successCallback) === 'function') {
-                    successCallback(result);
-                }
+        if (use_bimpdatasync) {
+            if (typeof (bds_initObjectActionProcess) !== 'function') {
+                $('body').append('<script type="text/javascript" src="' + dol_url_root + '/bimpdatasync/views/js/operations.js"></script>');
+            }
 
-                if (!no_triggers) {
-                    if (typeof (result.success_callback) !== 'string' ||
-                            !/window\.location/.test(result.success_callback)) {
-                        if (!$.isOk($resultContainer) || (typeof (result.html) === 'undefined') || !result.html) {
-                            $('body').trigger($.Event('objectChange', {
-                                module: bimpAjax.module,
-                                object_name: bimpAjax.object_name,
-                                id_object: bimpAjax.id_object
-                            }));
+            if (typeof (bds_initObjectActionProcess) !== 'function') {
+                bimp_msg('Erreur: fonction d\'initialisation du processus absente', 'danger');
+                return;
+            }
+
+            bds_initObjectActionProcess($button, data, modal_title, $resultContainer);
+        } else {
+            BimpAjax('setObjectAction', data, $resultContainer, {
+                $button: $button,
+                display_success_in_popup_only: true,
+                display_warnings_in_popup_only: true,
+                module: object_data.module,
+                object_name: object_data.object_name,
+                id_object: object_data.id_object,
+                display_processing: true,
+                processing_padding: 10,
+                append_html: true,
+                modal_scroll_bottom: modal_scroll_bottom,
+                success: function (result, bimpAjax) {
+                    if (typeof (successCallback) === 'function') {
+                        successCallback(result);
+                    }
+
+                    if (!no_triggers) {
+                        if (typeof (result.success_callback) !== 'string' ||
+                                !/window\.location/.test(result.success_callback)) {
+                            if (!$.isOk($resultContainer) || (typeof (result.html) === 'undefined') || !result.html) {
+                                $('body').trigger($.Event('objectChange', {
+                                    module: bimpAjax.module,
+                                    object_name: bimpAjax.object_name,
+                                    id_object: bimpAjax.id_object
+                                }));
+                            }
                         }
                     }
                 }
-            }
-        });
+            });
+        }
     }
 }
 

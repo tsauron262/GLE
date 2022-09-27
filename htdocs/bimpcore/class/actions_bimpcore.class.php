@@ -4,6 +4,7 @@ function initBimpHeader()
 {
     if (!defined('NOREQUIREHTML')) {
         if (!function_exists('llxHeader')) {
+
             function llxHeader($head = '', $title = '', $help_url = '', $target = '', $disablejs = 0, $disablehead = 0, $arrayofjs = '', $arrayofcss = '', $morequerystring = '', $morecssonbody = '', $replacemainareaby = '')
             {
                 global $hookmanager;
@@ -44,6 +45,7 @@ function initBimpHeader()
                     }
                 }
 
+                $hookmanager->initHooks(array('initBimpLayout'));
                 $hookmanager->executeHooks('initBimpLayout', array());
                 $layout->begin();
             }
@@ -61,14 +63,18 @@ class ActionsBimpcore
 
     function bimpcoreInit($parameters, &$object, &$action, $hookmanager)
     {
-        require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+        if (!defined('BIMPCORE_INIT')) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
-        if (!BimpCore::$is_init) {
-            BimpCore::init();
+            if (!BimpCore::$is_init) {
+                BimpCore::init();
+            }
+
+            initBimpHeader();
+            $this->incrementNbReq();
+
+            define('BIMPCORE_INIT', 1);
         }
-
-        initBimpHeader();
-        $this->incrementNbReq();
     }
 
     function initBimpLayout($parameters, &$object, &$action, $hookmanager)

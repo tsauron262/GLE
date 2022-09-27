@@ -434,9 +434,10 @@ function BDS_ProcessOperation(data, options) {
         }
 
         if (operation.status === 'cancelled') {
-            var html = '<div class="alert alert-danger">Opération annulée</div>';
-            operation.$notification.html(html).show();
             operation.curStep.step.cancel();
+            operation.hideButtons();
+            operation.onCancel();
+            return;
         }
 
         if ((operation.status !== 'processing') || !operation.curStep.step) {
@@ -475,8 +476,6 @@ function BDS_ProcessOperation(data, options) {
             switch (operation.curStep.step.on_cancel) {
                 case 'stop':
                     operation.status = 'stoped';
-                    var html = '<div class="alert alert-danger">Opération annulée</div>';
-                    operation.$notification.append(html).show();
                     operation.hideButtons();
                     operation.buttons.$back.show();
                     return;
@@ -546,8 +545,6 @@ function BDS_ProcessOperation(data, options) {
         }
 
         var data = {
-            'ajax': 1,
-            'action': 'executeOperationStep',
             'id_process': operation.id_process,
             'id_operation': operation.id_operation,
             'step_name': operation.curStep.step.name,
@@ -671,19 +668,56 @@ function BDS_ProcessOperation(data, options) {
         operation.buttons.$back.show();
         var msg = '';
         if (operation.curStep.ajax_processing) {
-            msg = 'Opération en cours d\'annulation';
+            msg = 'Arrêt du processus après la fin du traitement du paquet en cours.';
+            var html = '<div class="alert alert-warning">' + msg + '</div>';
+            operation.$notification.html(html).show();
         } else {
             operation.curStep.step.cancel();
-            msg = 'Opération annulée';
+            msg = 'Arrêt du processus';
+            var html = '<div class="alert alert-warning">' + msg + '</div>';
+            operation.$notification.html(html).show();
+            operation.onCancel();
         }
-        var html = '<div class="alert alert-warning">' + msg + '</div>';
-        operation.$notification.html(html).show();
+    };
+
+    this.onCancel = function () {
+        var data = {
+            'id_process': operation.id_process,
+            'id_operation': operation.id_operation,
+            'use_report': operation.report.use,
+            'id_report': operation.report.id,
+            'options': operation.options,
+            'operation_data': operation.operation_data
+        };
+
+        BimpAjax('bds_cancelOperation', data, operation.$notification, {
+            operation: operation,
+            url: bds_process_url,
+            display_success: true,
+            display_success_in_popup_only: false,
+            display_warnings_in_popup_only: false,
+            display_processing: true,
+            processing_msg: 'Arrêt en cours',
+            success_msg: 'Arrêt effectué',
+            processing_padding: 0,
+            success: function (result, bimpAjax) {
+                bimpAjax.operation.refreshReport();
+                bimpAjax.operation.$notification.show();
+                bimpAjax.operation.buttons.$back.show();
+
+                if (typeof (result.result.debug_content) !== 'undefined' && result.result.debug_content) {
+                    var $content = bimpAjax.operation.$container.find('#processDebugContent').children('.foldable_content').first();
+                    if ($.isOk($content)) {
+                        $content.append(result.result.debug_content);
+                        setCommonEvents($content);
+                    }
+                }
+            }
+        });
     };
 
     this.finalize = function () {
         var data = {
-            'ajax': 1,
-            'action': 'finalizeOperationStep',
             'id_process': operation.id_process,
             'id_operation': operation.id_operation,
             'use_report': operation.report.use,
@@ -890,6 +924,62 @@ function bds_initProcessOperation($button, id_process, id_operation) {
             $processContainer.find('.executeProcessOperationBtn').removeClass('disabled');
         }
     });
+}
+
+function bds_initObjectActionProcess($button, data, modal_title, $resultContainer) {
+    var success_callback = function (result, bimpAjax) {
+        if (typeof (result.process_html) !== 'undefined' && result.process_html) {
+            var $container = bimpAjax.$resultContainer;
+
+            if ($.isOk($container) && !bimpAjax.$resultContainer.hasClass('modal_content')) {
+                $container = bimpAjax.$resultContainer.findParentByClass('modal_content');
+            }
+
+            if (!$.isOk($container)) {
+                bimp_msg('Erreur technique - opération impossible (conteneur absent)');
+                return;
+            }
+
+            var modal_idx = parseInt($container.data('idx'));
+
+            bimpModal.removeComponentContent('stepsProgressionContainer');
+            $container.slideUp(250, function () {
+                $container.html(result.process_html);
+                $container.slideDown(250, function () {
+                    bimpModal.disableContentCloseButton(modal_idx);
+                    bimpModal.removeExtraButtons(modal_idx);
+
+                    $(this).attr('style', '');
+                    $('body').trigger($.Event('contentLoaded', {
+                        $container: $container
+                    }));
+
+                    bds_operations[result.id_operation] = new BDS_ProcessOperation(result.operation_data, result.operation_options);
+                    bds_operations[result.id_operation].start();
+                });
+            });
+        }
+    };
+
+    if ($.isOk($resultContainer)) {
+        // Si on dans un form:
+        BimpAjax('bds_initObjectActionProcess', data, $resultContainer, {
+            $button: $button,
+            url: bds_process_url,
+            display_success: false,
+            display_processing: true,
+            processing_msg: 'Initialisation de l\'opération en cours',
+            processing_padding: 30,
+            append_html: true,
+            modal_scroll_bottom: true,
+            success: success_callback
+        });
+    } else {
+        // Sinon: 
+        bimpModal.loadAjaxContent($button, 'bds_initObjectActionProcess', data, modal_title, 'Initialisation de l\'opération en cours', success_callback, {
+            url: bds_process_url
+        });
+    }
 }
 
 function endOperation() {

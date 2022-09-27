@@ -12,6 +12,11 @@ class BL_CommandeFournReception extends BimpObject
         self::BLCFR_RECEPTIONNEE => array('label' => 'Réceptionnée', 'icon' => 'check', 'classes' => array('success')),
         self::BLCFR_ANNULEE      => array('label' => 'Annulée', 'icon' => 'times', 'classes' => array('danger'))
     );
+    public static $validation_status_list = array(
+        0 => array('label' => 'Non commencée', 'classes' => array('info')),
+        1 => array('label' => 'Commencée', 'classes' => array('warning')),
+        2 => array('label' => 'Terminée', 'classes' => array('success'))
+    );
 
     // Droits user: 
 
@@ -56,8 +61,8 @@ class BL_CommandeFournReception extends BimpObject
                 if (!$this->isLoaded($errors)) {
                     return 0;
                 }
-                if ((int) $this->getData('status') !== self::BLCFR_RECEPTIONNEE) {
-                    $errors[] = 'La réception n\'a pas le statut "réceptionnée"';
+                if (((int) $this->getData('status') !== self::BLCFR_RECEPTIONNEE) && !(int) $this->getData('validation_status')) {
+                    $errors[] = 'La réception n\'est pas réceptionnée ou partiellement réceptionnée';
                     return 0;
                 }
                 if ((int) $this->getData('id_facture')) {
@@ -77,6 +82,10 @@ class BL_CommandeFournReception extends BimpObject
                 }
                 if ((int) $this->getData('id_facture')) {
                     $errors[] = 'Cette réception a été facturée';
+                    return 0;
+                }
+                if ((int) $this->getData('validation_status') === 1) {
+                    $errors[] = 'Veuillez finaliser la validation de cette réception';
                     return 0;
                 }
                 return 1;
@@ -225,15 +234,28 @@ class BL_CommandeFournReception extends BimpObject
         }
 
         if ($this->isActionAllowed('validateReception') && $this->canSetAction('validateReception')) {
-            $buttons[] = array(
-                'label'   => 'Valider la réception',
-                'icon'    => 'fas_check-circle',
-                'onclick' => $this->getJsActionOnclick('validateReception', array(), array(
-                    'form_name'        => 'validate',
-                    'on_form_submit'   => 'function($form, extra_data) {return onReceptionValidationFormSubmit($form, extra_data);}',
-                    'success_callback' => $success_callback
-                ))
-            );
+            $use_bds = ((int) BimpCore::getConf('use_bds_for_receptions', null, 'bimpcommercial'));
+
+            if (!$use_bds || (int) $this->getData('validation_status') === 0) {
+                $buttons[] = array(
+                    'label'   => 'Valider la réception',
+                    'icon'    => 'fas_check-circle',
+                    'onclick' => $this->getJsActionOnclick('validateReception', array(), array(
+                        'form_name'        => 'validate',
+                        'on_form_submit'   => 'function($form, extra_data) {return onReceptionValidationFormSubmit($form, extra_data);}',
+                        'success_callback' => $success_callback,
+                        'use_bimpdatasync' => $use_bds
+                    ))
+                );
+            } elseif ($use_bds) {
+                $buttons[] = array(
+                    'label'   => 'Finaliser la validation de la réception',
+                    'icon'    => 'fas_check-circle',
+                    'onclick' => $this->getJsActionOnclick('validateReception', array(), array(
+                        'use_bimpdatasync' => 1
+                    ))
+                );
+            }
         }
 
         if ($this->isActionAllowed('cancelReception') && $this->canSetAction('cancelReception')) {
@@ -568,7 +590,8 @@ class BL_CommandeFournReception extends BimpObject
 
         $commandeFourn = $this->getParentInstance();
 
-        $edit = ($this->getData('status') === self::BLCFR_BROUILLON);
+        $validation_status = (int) $this->getData('validation_status');
+        $edit = (($this->getData('status') === self::BLCFR_BROUILLON) && !$validation_status);
 
         if (!BimpObject::objectLoaded($commandeFourn)) {
             return BimpRender::renderAlerts('ID de la commande fournisseur absent');
@@ -661,7 +684,6 @@ class BL_CommandeFournReception extends BimpObject
 
                     if (!$isReturn) {
                         // *** Edition / ajout des nouveaux numéros de série: ***
-
                         $code_config = '';
 
                         if (preg_match('/^APP\-.+$/', $product->getRef())) {
@@ -906,39 +928,93 @@ class BL_CommandeFournReception extends BimpObject
                         // *** Affichage équipements reçus: ***
                         $html .= '<tr>';
                         $html .= '<td colspan="4">';
-                        if (is_array($reception_data['equipments']) && count($reception_data['equipments'])) {
-                            $html .= '<span class="bold">' . count($reception_data['equipments']) . ' équipements ajouté(s)</span>';
+                        if (!$validation_status) {
+                            if (is_array($reception_data['equipments']) && count($reception_data['equipments'])) {
+                                $html .= '<span class="bold">' . count($reception_data['equipments']) . ' équipements ajouté(s)</span>';
+                            } else {
+                                $html .= BimpRender::renderAlerts('Aucun équipement ajouté', 'info');
+                            }
                         } else {
-                            $html .= BimpRender::renderAlerts('Aucun équipement ajouté', 'info');
+                            $n_eq = (is_array($reception_data['equipments']) ? count($reception_data['equipments']) : 0);
+                            $n_tot = (is_array($reception_data['serials']) ? count($reception_data['serials']) : 0);
+                            $html .= '<span class="' . ($n_eq == $n_tot ? 'success' : ($n_eq > 0 ? 'warning' : 'danger')) . '">';
+                            $html .= $n_eq . ' équipements réceptionné(s) sur ' . $n_tot;
+                            $html .= '</span>';
                         }
                         $html .= '</td>';
                         $html .= '</tr>';
-                        if (isset($reception_data['equipments']) && is_array($reception_data['equipments'])) {
-                            foreach ($reception_data['equipments'] as $id_equipment => $equipment_data) {
-                                $html .= '<tr>';
-                                $html .= '<td style="width: 220px">';
-                                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-                                if (BimpObject::objectLoaded($equipment)) {
-                                    $html .= $equipment->getNomUrl(1, 1, 1);
-                                } else {
-                                    $html .= BimpRender::renderAlerts('L\'équipement #' . $id_equipment . ' n\'existe plus');
-                                }
-                                $html .= '</td>';
 
-                                $html .= '<td style="width: 120px">' . BimpTools::displayMoneyValue((float) isset($equipment_data['pu_ht']) ? $equipment_data['pu_ht'] : $line_pu_ht) . '</td>';
-                                $html .= '<td style="width: 120px">' . BimpTools::displayFloatValue((float) isset($equipment_data['tva_tx']) ? $equipment_data['tva_tx'] : $line->tva_tx, 3) . '%</td>';
-                                $html .= '<td></td>';
-                                $html .= '</tr>';
+                        if ($validation_status === 1) {
+                            if (isset($reception_data['serials']) && is_array($reception_data['serials'])) {
+                                foreach ($reception_data['serials'] as $serial_data) {
+                                    $html .= '<tr>';
+                                    $html .= '<td style="width: 220px">';
+                                    $id_equipment = BimpTools::getArrayValueFromPath($serial_data, 'id_eq', 0);
+                                    if ($id_equipment) {
+                                        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                                        if (BimpObject::objectLoaded($equipment)) {
+                                            $html .= $equipment->getLink();
+                                        } else {
+                                            $html .= BimpRender::renderAlerts('L\'équipement #' . $id_equipment . ' n\'existe plus');
+                                        }
+                                    } else {
+                                        $html .= BimpTools::getArrayValueFromPath($serial_data, 'serial', '<span class="danger">Aucun n° de série</span>');
+                                    }
+                                    $html .= '</td>';
+
+                                    $html .= '<td style="width: 120px">' . BimpTools::displayMoneyValue((float) isset($serial_data['pu_ht']) ? $serial_data['pu_ht'] : $line_pu_ht) . '</td>';
+                                    $html .= '<td style="width: 120px">' . BimpTools::displayFloatValue((float) isset($serial_data['tva_tx']) ? $serial_data['tva_tx'] : $line->tva_tx, 3) . '%</td>';
+                                    $html .= '<td>';
+                                    if (isset($serial_data['r']) && (int) $serial_data['r']) {
+                                        $html .= '<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Réceptionné</span>';
+                                    } else {
+                                        $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Non réceptionné</span>';
+                                    }
+                                    $html .= '</td>';
+                                    $html .= '</tr>';
+                                }
+                            }
+                        } else {
+                            if (isset($reception_data['equipments']) && is_array($reception_data['equipments'])) {
+                                foreach ($reception_data['equipments'] as $id_equipment => $equipment_data) {
+                                    $html .= '<tr>';
+                                    $html .= '<td style="width: 220px">';
+                                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                                    if (BimpObject::objectLoaded($equipment)) {
+                                        $html .= $equipment->getLink();
+                                    } else {
+                                        $html .= BimpRender::renderAlerts('L\'équipement #' . $id_equipment . ' n\'existe plus');
+                                    }
+                                    $html .= '</td>';
+
+                                    $html .= '<td style="width: 120px">' . BimpTools::displayMoneyValue((float) isset($equipment_data['pu_ht']) ? $equipment_data['pu_ht'] : $line_pu_ht) . '</td>';
+                                    $html .= '<td style="width: 120px">' . BimpTools::displayFloatValue((float) isset($equipment_data['tva_tx']) ? $equipment_data['tva_tx'] : $line->tva_tx, 3) . '%</td>';
+                                    $html .= '<td></td>';
+                                    $html .= '</tr>';
+                                }
                             }
                         }
                     } else {
                         // *** Affichage équipements retournés: ***
                         $html .= '<tr>';
                         $html .= '<td colspan="4">';
-                        if (count($reception_data['return_equipments'])) {
-                            $html .= '<tr><td colspan="4"><span class="danger">' . count($reception_data['return_equipments']) . ' équipements retournés</span></td></tr>';
+                        if (!$validation_status) {
+                            if (count($reception_data['return_equipments'])) {
+                                $html .= '<span class="danger">' . count($reception_data['return_equipments']) . ' équipement(s) retourné(s)</span>';
+                            } else {
+                                $html .= BimpRender::renderAlerts('Aucun équipement à retourner ajouté', 'info');
+                            }
                         } else {
-                            $html .= BimpRender::renderAlerts('Aucun équipement à retourner ajouté', 'info');
+                            $n_eq = 0;
+                            $n_tot = count($reception_data['return_equipments']);
+                            foreach ($reception_data['return_equipments'] as $id_equipment => $equipment_data) {
+                                if ((int) BimpTools::getArrayValueFromPath($equipment_data, 'r', 0)) {
+                                    $n_eq++;
+                                }
+                            }
+                            $html .= '<span class="' . ($n_eq == $n_tot ? 'success' : ($n_eq > 0 ? 'warning' : 'danger')) . '">';
+                            $html .= $n_eq . ' équipements retourné(s) sur ' . $n_tot;
+                            $html .= '</span>';
                         }
                         $html .= '</td>';
                         $html .= '</tr>';
@@ -947,7 +1023,7 @@ class BL_CommandeFournReception extends BimpObject
                             $html .= '<td style="width: 220px">';
                             $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
                             if (BimpObject::objectLoaded($equipment)) {
-                                $html .= $equipment->getNomUrl(1, 1, 1);
+                                $html .= $equipment->getLink();
                             } else {
                                 $html .= BimpRender::renderAlerts('L\'équipement #' . $id_equipment . ' n\'existe plus');
                             }
@@ -955,7 +1031,15 @@ class BL_CommandeFournReception extends BimpObject
 
                             $html .= '<td style="width: 120px">' . BimpTools::displayMoneyValue((float) isset($equipment_data['pu_ht']) ? $equipment_data['pu_ht'] : $line_pu_ht) . '</td>';
                             $html .= '<td style="width: 120px">' . BimpTools::displayFloatValue((float) isset($equipment_data['tva_tx']) ? $equipment_data['tva_tx'] : $line->tva_tx, 3) . '%</td>';
-                            $html .= '<td></td>';
+                            $html .= '<td>';
+                            if ($validation_status === 1) {
+                                if ((int) BimpTools::getArrayValueFromPath($equipment_data, 'r', 0)) {
+                                    $html .= '<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Retour effectué</span>';
+                                } else {
+                                    $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Retour non effectué</span>';
+                                }
+                            }
+                            $html .= '</td>';
                             $html .= '</tr>';
                         }
                     }
@@ -965,7 +1049,15 @@ class BL_CommandeFournReception extends BimpObject
                         $html .= '<td style="width: 220px">' . $qty_data['qty'] . '</td>';
                         $html .= '<td style="width: 120px">' . BimpTools::displayMoneyValue((float) isset($qty_data['pu_ht']) ? $qty_data['pu_ht'] : $line_pu_ht) . '</td>';
                         $html .= '<td style="width: 120px">' . BimpTools::displayFloatValue((float) isset($qty_data['tva_tx']) ? $qty_data['tva_tx'] : $line->tva_tx, 3) . '%</td>';
-                        $html .= '<td></td>';
+                        $html .= '<td>';
+                        if ($validation_status === 1) {
+                            if ((int) BimpTools::getArrayValueFromPath($reception_data, 'received', 0)) {
+                                $html .= '<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Réceptionné</span>';
+                            } else {
+                                $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Non réceptionné</span>';
+                            }
+                        }
+                        $html .= '</td>';
                         $html .= '</tr>';
                     }
 
@@ -1305,6 +1397,10 @@ class BL_CommandeFournReception extends BimpObject
         ignore_user_abort(true);
 
         $errors = array();
+        if (BimpCore::getConf('use_bds_for_receptions', null, 'bimpcommercial')) {
+            $errors[] = 'La validation directe des réceptions n\'est pas possible selon la configuration actuelle de l\'ERP';
+            return $errors;
+        }
 
         if (!(int) $this->getData('status') === self::BLCFR_BROUILLON) {
             $errors[] = 'La réception ne peut pas être validée car elle n\'a pas le statut "brouillon"';
@@ -1374,6 +1470,7 @@ class BL_CommandeFournReception extends BimpObject
                 $date_received = date('Y-m-d');
             }
             $this->set('status', self::BLCFR_RECEPTIONNEE);
+            $this->set('validation_status', 2);
             $this->set('date_received', $date_received);
             $this->set('stock_out', (int) $stock_out);
             $up_warnings = array();
@@ -1443,6 +1540,7 @@ class BL_CommandeFournReception extends BimpObject
 
         if (!count($errors)) {
             $this->set('status', self::BLCFR_BROUILLON);
+            $this->set('validation_status', 0);
             $this->set('stock_out', 0);
             $errors = BimpTools::merge_array($errors, $this->update());
         }
@@ -1464,7 +1562,7 @@ class BL_CommandeFournReception extends BimpObject
 
             $update = false;
 
-            if ((float) round($this->getInitData('total_ht'), 5) !== (float)round($total_ht, 5)) {
+            if ((float) round($this->getInitData('total_ht'), 5) !== (float) round($total_ht, 5)) {
                 $this->set('total_ht', $total_ht);
                 $update = true;
             }
@@ -1515,6 +1613,7 @@ class BL_CommandeFournReception extends BimpObject
     {
         $errors = array();
         $warnings = array();
+
         $success = 'Validation de la réception effectuée avec succès';
 
         if (!$this->isLoaded()) {
@@ -1558,7 +1657,7 @@ class BL_CommandeFournReception extends BimpObject
                             $this->updateField('info', 'DECEMBRE 2020' . ($info ? "\n\n" . $info : ''));
                         }
                         // ************
-                        
+
                         $date_received = BimpTools::getArrayValueFromPath($data, 'date_received', date('Y-m-d'));
                         $stock_out = (BimpTools::getArrayValueFromPath($data, 'stock_out', 'non') == 'oui' ? 1 : 0);
                         $errors = $this->validateReception($date_received, false, $stock_out, $force_equipments_attribution, $skip_equipments_place);
@@ -1777,6 +1876,337 @@ class BL_CommandeFournReception extends BimpObject
             'errors'   => $errors,
             'warnings' => $warnings
         );
+    }
+
+    // Validation via BimpDataSync
+
+    public function initBdsActionValidateReception(&$action_data = array(), &$errors = array(), $extra_data = array())
+    {
+        $action_data['operation_title'] = 'Validation de la réception';
+
+        if (!$this->isLoaded($errors)) {
+            return;
+        }
+
+        if (!(int) $this->getData('status') === self::BLCFR_BROUILLON) {
+            $errors[] = 'La réception ne peut pas être validée car elle n\'a pas le statut "brouillon"';
+            return;
+        }
+
+        $commande = $this->getParentInstance();
+        if (!BimpObject::objectLoaded($commande)) {
+            $errors[] = 'ID de la commande fournisseur absent';
+            return;
+        }
+
+        $warnings = array();
+
+        if ((int) BimpCore::getConf('use_db_transactions')) {
+            $this->db->db->begin();
+        }
+
+        $validation_status = (int) $this->getData('validation_status');
+
+        if (!$validation_status) {
+            $lines_data = $this->processLinesFormData($extra_data, $errors);
+
+            if (!count($errors)) {
+                $codes_config_errors = array();
+                $errors = $this->checkLinesData($lines_data, $codes_config_errors, false);
+
+                if (!count($errors) && count($codes_config_errors) && (!isset($extra_data['force_validation']) || !(int) $extra_data['force_validation'])) {
+                    $extra_data['force_validation'] = 1;
+                    $errors = $this->saveLinesData($lines_data, $warnings, false);
+                    $onclick = $this->getJsActionOnclick('validateReception', $extra_data, array(
+                        'success_callback' => 'function() {bimpModal.clearCurrentContent();}'
+                    ));
+
+                    $msg = BimpTools::getMsgFromArray($codes_config_errors);
+                    $msg .= '<br/><span class="btn btn-default" onclick="' . $onclick . '">';
+                    $msg .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Forcer la validation';
+                    $msg .= '</span>';
+                    $msg .= '<br/><span style="font-weight: bold">';
+                    $msg .= 'ATTENTION: si vous effectuez une modification, veuillez utiliser le bouton "Valider" ci-dessous';
+                    $msg .= '</span>';
+
+                    $errors[] = $msg;
+                }
+            }
+
+            if (!count($errors)) {
+                $errors = $this->saveLinesData($lines_data, $warnings, false);
+
+                if (!count($errors)) {
+                    $is_sept = (isset($extra_data['is_sept']) ? $extra_data['is_sept'] : '');
+                    // Temporaire:
+                    if ($is_sept === 'oui') {
+                        $info = $this->getData('info');
+                        $this->updateField('info', 'DECEMBRE 2020' . ($info ? "\n\n" . $info : ''));
+                    }
+                    // ************
+
+                    $date_received = BimpTools::getArrayValueFromPath($extra_data, 'date_received', date('Y-m-d'));
+                    $stock_out = (BimpTools::getArrayValueFromPath($extra_data, 'stock_out', 'non') == 'oui' ? 1 : 0);
+
+                    if ($stock_out) {
+                        $lines = $commande->getChildrenObjects('lines', array(
+                            'type' => array(
+                                'in' => array(ObjectLine::LINE_PRODUCT, ObjectLine::LINE_FREE)
+                            )
+                        ));
+
+                        foreach ($lines as $line) {
+                            $line_prod = $line->getProduct();
+
+                            if (BimpObject::objectLoaded($line_prod) && $line_prod->isTypeProduct()) {
+                                $reception_data = $line->getReceptionData((int) $this->id);
+
+                                if (isset($reception_data['assign_to_commande_client']) && (int) $reception_data['assign_to_commande_client']) {
+                                    if (isset($reception_data['qty']) && (float) $reception_data['qty'] > 0 && $line->getData('linked_object_name') === 'commande_line') {
+                                        $errors[] = 'Cette réception ne peut pas être validée avec déplacement vers stock boutique car il y a au moins une ligne associée à une commande client';
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (!count($errors)) {
+                        if (is_null($date_received) || !(string) $date_received) {
+                            $date_received = date('Y-m-d');
+                        }
+                        $this->set('validation_status', 1);
+                        $this->set('date_received', $date_received);
+                        $this->set('stock_out', (int) $stock_out);
+                        $up_warnings = array();
+                        $up_errors = $this->update($up_warnings, true);
+                        if (count($up_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour de la réception');
+                        } else {
+                            $action_data['steps'] = $this->getBdsValidationSteps($errors);
+                        }
+                    }
+                }
+            }
+        } elseif ($validation_status > 1) {
+            $errors[] = 'La validation de cette réception a déjà été finalisée';
+        } else {
+            $action_data['steps'] = $this->getBdsValidationSteps($errors);
+        }
+
+        if ((int) BimpCore::getConf('use_db_transactions')) {
+            if (count($errors)) {
+                $this->db->db->rollback();
+            } else {
+                $this->db->db->commit();
+            }
+        }
+    }
+
+    protected function getBdsValidationSteps(&$errors = array())
+    {
+        $commande = $this->getParentInstance();
+        $lines = $commande->getChildrenObjects('lines', array(
+            'type' => array(
+                'in' => array(ObjectLine::LINE_PRODUCT, ObjectLine::LINE_FREE)
+            )
+        ));
+
+        $not_serialized_lines = array();
+        $lines_serials = array();
+        $lines_return_equipments = array();
+
+        foreach ($lines as $line) {
+            $line_prod = $line->getProduct();
+            if (BimpObject::objectLoaded($line_prod) && $line_prod->isTypeProduct()) {
+                $reception_data = $line->getReceptionData($this->id);
+
+                if ((int) $reception_data['received']) {
+                    continue;
+                }
+
+                $isSerialisable = $line_prod->isSerialisable();
+                $isReturn = ((float) $line->getFullQty() < 0);
+
+                if ($isSerialisable) {
+                    if (!$isReturn) {
+                        foreach ($reception_data['serials'] as $serial_data) {
+                            if (!isset($serial_data['r']) || !(int) $serial_data['r']) {
+                                $lines_serials[] = 'LINE_' . $line->id . '_SERIAL_' . $serial_data['serial'];
+                            }
+                        }
+                    } else {
+                        foreach ($reception_data['return_equipments'] as $id_equipment => $equipment_data) {
+                            if (!isset($equipment_data['r']) || !(int) $equipment_data['r']) {
+                                $lines_return_equipments[] = 'LINE_' . $line->id . '_EQ_' . $id_equipment;
+                            }
+                        }
+                    }
+                } else {
+                    if (isset($reception_data['qty']) && (float) $reception_data['qty']) {
+                        $not_serialized_lines[] = $line->id;
+                    }
+                }
+            }
+        }
+
+        $steps = array();
+
+        if (!empty($not_serialized_lines)) {
+            $steps['process_not_serialized_lines'] = array(
+                'label'                  => 'Traitement des produits non sérialisés',
+                'on_error'               => 'continue',
+                'elements'               => $not_serialized_lines,
+                'nbElementsPerIteration' => 50
+            );
+        }
+        if (!empty($lines_serials)) {
+            $steps['process_lines_serials'] = array(
+                'label'                  => 'Traitement des produits sérialisés',
+                'on_error'               => 'continue',
+                'elements'               => $lines_serials,
+                'nbElementsPerIteration' => 10
+            );
+        }
+        if (!empty($lines_return_equipments)) {
+            $steps['process_return_equipments'] = array(
+                'label'                  => 'Traitement des retours d\'équipements',
+                'on_error'               => 'continue',
+                'elements'               => $lines_return_equipments,
+                'nbElementsPerIteration' => 10
+            );
+        }
+
+        $steps['finalize'] = array(
+            'label'    => 'Vérifications et finalisation',
+            'on_error' => 'stop'
+        );
+
+        return $steps;
+    }
+
+    public function executeBdsActionValidateReception($step_name, $elements = array(), &$errors = array(), $operation_extra_data = array(), $action_extra_data = array())
+    {
+        if ((int) BimpCore::getConf('use_db_transactions')) {
+            $this->db->db->begin();
+        }
+
+        switch ($step_name) {
+            case 'process_not_serialized_lines':
+                if (!empty($elements)) {
+                    $stock_out = (int) $this->getData('stock_out');
+                    foreach ($elements as $id_line) {
+                        $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', $id_line);
+                        if (BimpObject::objectLoaded($line)) {
+                            $line->validateReception($this->id, false, $stock_out, false, false, null);
+                        }
+                    }
+                }
+                break;
+
+            case 'process_lines_serials':
+                if (!empty($elements)) {
+                    $lines = array();
+                    $stock_out = (int) $this->getData('stock_out');
+                    foreach ($elements as $element) {
+                        if (preg_match('/^LINE_(\d+)_SERIAL_(.+)$/', $element, $matches)) {
+                            $id_line = (int) $matches[1];
+                            $serial = $matches[2];
+
+                            if ($id_line && $serial) {
+                                if (!isset($lines[$id_line])) {
+                                    $lines[$id_line] = array();
+                                }
+                                $lines[$id_line][] = $serial;
+                            }
+                        }
+                    }
+
+                    foreach ($lines as $id_line => $serials) {
+                        $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', $id_line);
+                        if (BimpObject::objectLoaded($line)) {
+                            $line->validateReception($this->id, false, $stock_out, false, false, $serials);
+                        }
+                    }
+                }
+                break;
+
+            case 'process_return_equipments':
+                if (!empty($elements)) {
+                    $lines = array();
+                    $stock_out = (int) $this->getData('stock_out');
+                    foreach ($elements as $element) {
+                        if (preg_match('/^LINE_(\d+)_EQ_(\d+)$/', $element, $matches)) {
+                            $id_line = (int) $matches[1];
+                            $id_eq = (int) $matches[2];
+
+                            if ($id_line && $id_eq) {
+                                if (!isset($lines[$id_line])) {
+                                    $lines[$id_line] = array();
+                                }
+                                $lines[$id_line][] = $id_eq;
+                            }
+                        }
+                    }
+
+                    foreach ($lines as $id_line => $equipments) {
+                        $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', $id_line);
+                        if (BimpObject::objectLoaded($line)) {
+                            $line->validateReception($this->id, false, $stock_out, false, false, $equipments);
+                        }
+                    }
+                }
+                break;
+
+            case 'finalize':
+                $commande = $this->getParentInstance();
+                $lines = $commande->getChildrenObjects('lines', array(
+                    'type' => array(
+                        'in' => array(ObjectLine::LINE_PRODUCT, ObjectLine::LINE_FREE)
+                    )
+                ));
+
+                $all_received = 1;
+                foreach ($lines as $line) {
+                    $line_prod = $line->getProduct();
+                    if (BimpObject::objectLoaded($line_prod) && $line_prod->isTypeProduct()) {
+                        $r_data = $line->getReceptionData($this->id);
+
+                        if (!isset($r_data['qty']) || !(int) $r_data['qty']) {
+                            continue;
+                        }
+
+                        if (!isset($r_data['received']) || !(int) $r_data['received']) {
+                            $all_received = 0;
+                            break;
+                        }
+                    }
+                }
+
+                if (!$all_received) {
+                    $errors[] = 'La réception n\'est pas complète.<br/>Veillez relancer à nouveau ce processus.<br/>Si le problème persiste, veuillez contacter debugerp@bimp.fr';
+                } else {
+                    $this->set('status', self::BLCFR_RECEPTIONNEE);
+                    $this->set('validation_status', 2);
+
+                    $warnings = array();
+                    $up_errors = $this->update($warnings, true);
+
+                    if (count($up_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour de la réception.<br/>Veillez relancer à nouveau ce processus.<br/>Si le problème persiste, veuillez contacter debugerp@bimp.fr');
+                    } else {
+                        $commande->checkReceptionStatus();
+                    }
+                }
+                break;
+        }
+
+        if ((int) BimpCore::getConf('use_db_transactions')) {
+            if (count($errors)) {
+                $this->db->db->rollback();
+            } else {
+                $this->db->db->commit();
+            }
+        }
     }
 
     // Overrides: 

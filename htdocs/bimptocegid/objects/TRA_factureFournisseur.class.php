@@ -112,6 +112,10 @@
             if(count($facture->dol_object->lines)) {
                 $total_tva = 0;
                 $total_d3e = 0;
+                $total_ht  = 0;
+                
+                $compte_le_plus_grand = '';
+                $montant_le_plus_grand = '';
                 foreach($facture->dol_object->lines as $line) {
                     
                     if($line->total_ht != 0) {
@@ -121,30 +125,42 @@
                         if($facture->getData('zone_vente') == $this->zoneAchat['france']){
                             $total_d3e += $produit->getData('deee') * $line->qty;
                         }
-                            
-                        $sens = ($this->sensFacture == 'C') ? ($line->total_ht > 0) ? 'D' : 'C' : ($TTC < 0) ? 'C' : 'D';
-                       
+
                         if($fournisseur->getData('code_compta_fournisseur') == BimpCore::getConf('code_fournisseur_apple', null, "bimptocegid")) {
                             $compteLigne = BimpCore::getConf('achat_fournisseur_apple', null, 'bimptocegid');
                         }elseif(in_array($produit->getRef(), self::$rfa)) {
                             $compteLigne = Bimpcore::getConf('rfa_fournisseur_fr', null, 'bimptocegid');
                         } else {
-                            $compteLigne = $produit->getCodeComptableAchat($facture->getData('zone_vente'));
+                            if($interco) {
+                                $compteLigne = sizing(interco_code($produit->getCodeComptableAchat($facture->getData('zone_vente')), $this->compte_general), 8, false, true);
+                            } else {
+                                $compteLigne = $produit->getCodeComptableAchat($facture->getData('zone_vente'));
+                            }
                         }
                         
                         $structure['REF_LIBRE']                 = sizing(suppr_accents($produit->getRef()),35);
                         $structure['COMPTE_GENERAL']            = sizing($compteLigne, 17);
                         $structure['TYPE_DE_COMPTE']            = sizing('', 1);
                         $structure['CODE_COMPTA']               = sizing("", 16);
-                        $structure['SENS']                      = sizing($this->getSens(abs(round($line->total_ht - ($produit->getData('deee') * $line->qty), 2))), 1);
+                        $structure['SENS']                      = sizing($this->getSens($line->total_ht), 1);
                        if($facture->getData('zone_vente') == $this->zoneAchat['france']) {
-                           $structure['MONTANT']                   = sizing(abs(round($line->total_ht - ($produit->getData('deee') * $line->qty), 2)), 20, true);
+                           $montant = round($line->total_ht - ($produit->getData('deee') * $line->qty), 2);
+//                           $structure['MONTANT']                   = sizing(abs(round($line->total_ht - ($produit->getData('deee') * $line->qty), 2)), 20, true);
                        } else {
-                           $structure['MONTANT']                   = sizing(abs(round($line->total_ht, 2)), 20, true);
+                           $montant = round($line->total_ht - ($produit->getData('deee') * $line->qty), 2);
+//                           $structure['MONTANT']                   = sizing(abs(round($line->total_ht, 2)), 20, true);
                        }
+                        $structure['MONTANT']                   = sizing(abs($montant), 20, true);
+                        $total_ht += $montant;
                         
                         
                         $ecriture .= implode('', $structure) . "\n";
+                        
+                        
+                        if(abs($montant) > abs($montant_le_plus_grand)) {
+                            $montant_le_plus_grand = abs($montant);
+                            $compte_le_plus_grand = $compteLigne;
+                        }
 
                     }
 
@@ -152,14 +168,14 @@
                 
                 if($facture->getData('zone_vente') == $this->zoneAchat['france']) {
                     if($total_d3e != 0) {
-                        $structure['SENS']                      = sizing($this->getSens(abs(round($total_d3e, 2))), 1);
+                        $structure['SENS']                      = sizing($this->getSens($total_d3e, 2), 1);
                         $structure['REF_LIBRE']                 = sizing('DEEE',35);
                         $structure['COMPTE_GENERAL']            = sizing(Bimpcore::getConf('achat_dee_fr', null, 'bimptocegid'), 17);
                         $structure['MONTANT']                   = sizing(abs(round($total_d3e, 2)), 20, true);
                         $ecriture .= implode('', $structure) . "\n";
                     }
                     if($total_tva != 0) {
-                        $structure['SENS']                      = sizing($this->getSens(abs(round($total_tva, 2))), 1);
+                        $structure['SENS']                      = sizing($this->getSens($total_tva, 2), 1);
                         $structure['REF_LIBRE']                 = sizing('TVA',35);
                         $structure['COMPTE_GENERAL']            = sizing(Bimpcore::getConf('achat_tva_fr', null, 'bimptocegid'), 17);
                         $structure['MONTANT']                   = sizing(abs(round($total_tva, 2)), 20, true);
@@ -175,6 +191,18 @@
                     $ecriture .= implode('', $structure) . "\n";
                     $structure['COMPTE_GENERAL']                = sizing(BimpCore::getConf('autoliquidation_tva_711', null, 'bimptocegid'), 17);
                     $structure['SENS']                          = sizing($this->sensFacture, 1);
+                    $ecriture .= implode('', $structure) . "\n";
+                }
+                                
+                $total_mis_en_ligne =  (round($total_d3e,2) + round($total_tva, 2) + round($total_ht, 2));
+                $controlle_ttc = (round($TTC, 2));
+                $reste = round($controlle_ttc - $total_mis_en_ligne,2);
+                
+                if($reste != 0) {
+                    $structure['COMPTE_GENERAL']        = sizing($compte_le_plus_grand, 17);
+                    $structure['SENS']                  = sizing($this->getSens($reste),1);
+                    $structure['MONTANT']               = sizing(abs($reste), 20, true);
+                    $structure['REF_LIBRE']             = sizing($facture->getRef(),35);
                     $ecriture .= implode('', $structure) . "\n";
                 }
                 
@@ -193,21 +221,7 @@
         }
         
         private function getSens($ht) {
-            if($this->sensFacture == 'C') {
-                if($ht > 0) {
-                    return 'D';
-                } else {
-                    return 'C';
-                }
-            } else {
-                if($ht > 0) {
-                    return 'C';
-                } else {
-                    return'D';
-                }
-            }
-            
-            return 0;
+            return ($ht > 0) ? 'D' : 'C';
         }
         
     }

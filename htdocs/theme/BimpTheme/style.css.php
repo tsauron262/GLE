@@ -5778,6 +5778,12 @@ div.tabsElem a.tab {
         min-width: auto;
         font-size: 12px;
     }
+    
+}
+
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #444!important;
 }
  
 <?php

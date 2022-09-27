@@ -1911,7 +1911,7 @@ class Bimp_Societe extends BimpDolObject
 
         $encours = $this->getAllEncoursForSiret(true, false, $debug);
 
-        $html .= BimpTools::displayMoneyValue($encours['commandes']['socs'][$this->id]);
+        $html .= BimpTools::displayMoneyValue($encours['commandes']['socs'][$this->id]).' TTC';
 
         if (count($encours['commandes']['socs']) > 1) {
             $html .= '<br/>';
@@ -1939,7 +1939,7 @@ class Bimp_Societe extends BimpDolObject
         }
 
         if ($encours['commandes']['total'] && $encours['factures']['total']) {
-            $html .= '<br/><b>Total encours</b> : ' . BimpTools::displayMoneyValue($encours['total']);
+            $html .= '<br/><b>Total encours</b> : ' . BimpTools::displayMoneyValue($encours['total']).' TTC';
         }
         
         $this->debug[] = $debug;

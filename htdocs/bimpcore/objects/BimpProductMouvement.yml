@@ -51,7 +51,6 @@ objects:
             id_object: 
                 field_value: fk_user_author
         
-                
 fields: 
     fk_entrepot: 
         label: Entrepot
@@ -167,7 +166,6 @@ filters_panels:
         extends: default
         filters: 
             fk_product: unset
-            
             
 lists_cols:
     rowid: 

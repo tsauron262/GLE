@@ -28,7 +28,7 @@
         public $tiers = Array();
         public $moment;
         public $rollBack = false;
-        public $excludeArrayScanDire = Array('..', '.', 'imported_auto', 'auto', 'rollback');
+        public $excludeArrayScanDire = Array('..', '.', 'imported_auto', 'auto', 'rollback', 'a importer');
         
         function __construct($db) {
             $hier = new DateTime();

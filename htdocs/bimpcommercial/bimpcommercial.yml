@@ -137,5 +137,9 @@ params:
                   relances_clients_entrepots_speciaux: 
                       label: ID Entrepôts spéciaux pour les relances
                       info: Liste des entrepôts à relancer séparément lors des relances globales
+                      
+    entrepots_ld:
+        label: Entrepots en livraison direct
+        info: Tableau json de type [1,2]
                     
                   

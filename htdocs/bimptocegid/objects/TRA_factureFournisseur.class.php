@@ -112,6 +112,10 @@
             if(count($facture->dol_object->lines)) {
                 $total_tva = 0;
                 $total_d3e = 0;
+                $total_ht  = 0;
+                
+                $compte_le_plus_grand = '';
+                $montant_le_plus_grand = '';
                 foreach($facture->dol_object->lines as $line) {
                     
                     if($line->total_ht != 0) {
@@ -140,13 +144,23 @@
                         $structure['CODE_COMPTA']               = sizing("", 16);
                         $structure['SENS']                      = sizing($this->getSens($line->total_ht), 1);
                        if($facture->getData('zone_vente') == $this->zoneAchat['france']) {
-                           $structure['MONTANT']                   = sizing(abs(round($line->total_ht - ($produit->getData('deee') * $line->qty), 2)), 20, true);
+                           $montant = round($line->total_ht - ($produit->getData('deee') * $line->qty), 2);
+//                           $structure['MONTANT']                   = sizing(abs(round($line->total_ht - ($produit->getData('deee') * $line->qty), 2)), 20, true);
                        } else {
-                           $structure['MONTANT']                   = sizing(abs(round($line->total_ht, 2)), 20, true);
+                           $montant = round($line->total_ht - ($produit->getData('deee') * $line->qty), 2);
+//                           $structure['MONTANT']                   = sizing(abs(round($line->total_ht, 2)), 20, true);
                        }
+                        $structure['MONTANT']                   = sizing(abs($montant), 20, true);
+                        $total_ht += $montant;
                         
                         
                         $ecriture .= implode('', $structure) . "\n";
+                        
+                        
+                        if(abs($montant) > abs($montant_le_plus_grand)) {
+                            $montant_le_plus_grand = abs($montant);
+                            $compte_le_plus_grand = $compteLigne;
+                        }
 
                     }
 
@@ -177,6 +191,18 @@
                     $ecriture .= implode('', $structure) . "\n";
                     $structure['COMPTE_GENERAL']                = sizing(BimpCore::getConf('autoliquidation_tva_711', null, 'bimptocegid'), 17);
                     $structure['SENS']                          = sizing($this->sensFacture, 1);
+                    $ecriture .= implode('', $structure) . "\n";
+                }
+                                
+                $total_mis_en_ligne =  (round($total_d3e,2) + round($total_tva, 2) + round($total_ht, 2));
+                $controlle_ttc = (round($TTC, 2));
+                $reste = round($controlle_ttc - $total_mis_en_ligne,2);
+                
+                if($reste != 0) {
+                    $structure['COMPTE_GENERAL']        = sizing($compte_le_plus_grand, 17);
+                    $structure['SENS']                  = sizing($this->getSens($reste),1);
+                    $structure['MONTANT']               = sizing(abs($reste), 20, true);
+                    $structure['REF_LIBRE']             = sizing($facture->getRef(),35);
                     $ecriture .= implode('', $structure) . "\n";
                 }
                 

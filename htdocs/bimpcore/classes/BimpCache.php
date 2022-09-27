@@ -2592,12 +2592,17 @@ class BimpCache
         return self::getCacheArray($cache_key, $include_empty, '', '');
     }
 
-    public static function getEntrepotsArray($include_empty = false, $has_commissions_only = false)
+    public static function getEntrepotsArray($include_empty = false, $has_commissions_only = false, $ref_only = false)
     {
         $cache_key = 'entrepots';
         if ($has_commissions_only) {
             $cache_key .= '_has_commissions_only';
         }
+
+        if ($ref_only) {
+            $cache_key .= '_ref_only';
+        }
+
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
 
@@ -2612,7 +2617,7 @@ class BimpCache
             $rows = self::getBdb()->getRows('entrepot', $where, null, 'object', array('rowid', 'ref', 'lieu'), 'ref', 'asc');
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
-                    self::$cache[$cache_key][(int) $r->rowid] = $r->ref . ' - ' . $r->lieu;
+                    self::$cache[$cache_key][(int) $r->rowid] = $r->ref . (!$ref_only ? ' - ' . $r->lieu : '');
                 }
             }
         }

@@ -57,7 +57,7 @@ class modBimptheme extends DolibarrModules {
         
         
         $this->module_parts = array(
-            'hooks' => array('main')
+            'hooks' => array('main', 'initBimpLayout')
         );
         
         $r = 0;

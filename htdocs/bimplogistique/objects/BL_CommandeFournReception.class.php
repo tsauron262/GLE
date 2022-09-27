@@ -234,7 +234,7 @@ class BL_CommandeFournReception extends BimpObject
         }
 
         if ($this->isActionAllowed('validateReception') && $this->canSetAction('validateReception')) {
-            $use_bds = ((int) BimpCore::getConf('use_bds_for_receptions', null, 'bimpcommercial') && BimpCore::isUserDev());
+            $use_bds = ((int) BimpCore::getConf('use_bds_for_receptions', null, 'bimpcommercial'));
 
             if (!$use_bds || (int) $this->getData('validation_status') === 0) {
                 $buttons[] = array(
@@ -2086,6 +2086,10 @@ class BL_CommandeFournReception extends BimpObject
 
     public function executeBdsActionValidateReception($step_name, $elements = array(), &$errors = array(), $operation_extra_data = array(), $action_extra_data = array())
     {
+        if ((int) BimpCore::getConf('use_db_transactions')) {
+            $this->db->db->begin();
+        }
+
         switch ($step_name) {
             case 'process_not_serialized_lines':
                 if (!empty($elements)) {
@@ -2194,6 +2198,14 @@ class BL_CommandeFournReception extends BimpObject
                     }
                 }
                 break;
+        }
+
+        if ((int) BimpCore::getConf('use_db_transactions')) {
+            if (count($errors)) {
+                $this->db->db->rollback();
+            } else {
+                $this->db->db->commit();
+            }
         }
     }
 

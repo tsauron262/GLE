@@ -436,39 +436,7 @@ function BDS_ProcessOperation(data, options) {
         if (operation.status === 'cancelled') {
             operation.curStep.step.cancel();
             operation.hideButtons();
-            var data = {
-                'id_process': operation.id_process,
-                'id_operation': operation.id_operation,
-                'use_report': operation.report.use,
-                'id_report': operation.report.id,
-                'options': operation.options,
-                'operation_data': operation.operation_data
-            };
-
-            BimpAjax('bds_cancelOperation', data, operation.$notification, {
-                operation: operation,
-                url: bds_process_url,
-                display_success: true,
-                display_success_in_popup_only: false,
-                display_warnings_in_popup_only: false,
-                display_processing: true,
-                processing_msg: 'Arrêt en cours',
-                success_msg: 'Arrêt effectué',
-                processing_padding: 0,
-                success: function (result, bimpAjax) {
-                    bimpAjax.operation.refreshReport();
-                    bimpAjax.operation.$notification.show();
-                    bimpAjax.operation.buttons.$back.show();
-
-                    if (typeof (result.result.debug_content) !== 'undefined' && result.result.debug_content) {
-                        var $content = bimpAjax.operation.$container.find('#processDebugContent').children('.foldable_content').first();
-                        if ($.isOk($content)) {
-                            $content.append(result.result.debug_content);
-                            setCommonEvents($content);
-                        }
-                    }
-                }
-            });
+            operation.onCancel();
             return;
         }
 
@@ -701,12 +669,51 @@ function BDS_ProcessOperation(data, options) {
         var msg = '';
         if (operation.curStep.ajax_processing) {
             msg = 'Arrêt du processus après la fin du traitement du paquet en cours.';
+            var html = '<div class="alert alert-warning">' + msg + '</div>';
+            operation.$notification.html(html).show();
         } else {
             operation.curStep.step.cancel();
             msg = 'Arrêt du processus';
+            var html = '<div class="alert alert-warning">' + msg + '</div>';
+            operation.$notification.html(html).show();
+            operation.onCancel();
         }
-        var html = '<div class="alert alert-warning">' + msg + '</div>';
-        operation.$notification.html(html).show();
+    };
+
+    this.onCancel = function () {
+        var data = {
+            'id_process': operation.id_process,
+            'id_operation': operation.id_operation,
+            'use_report': operation.report.use,
+            'id_report': operation.report.id,
+            'options': operation.options,
+            'operation_data': operation.operation_data
+        };
+
+        BimpAjax('bds_cancelOperation', data, operation.$notification, {
+            operation: operation,
+            url: bds_process_url,
+            display_success: true,
+            display_success_in_popup_only: false,
+            display_warnings_in_popup_only: false,
+            display_processing: true,
+            processing_msg: 'Arrêt en cours',
+            success_msg: 'Arrêt effectué',
+            processing_padding: 0,
+            success: function (result, bimpAjax) {
+                bimpAjax.operation.refreshReport();
+                bimpAjax.operation.$notification.show();
+                bimpAjax.operation.buttons.$back.show();
+
+                if (typeof (result.result.debug_content) !== 'undefined' && result.result.debug_content) {
+                    var $content = bimpAjax.operation.$container.find('#processDebugContent').children('.foldable_content').first();
+                    if ($.isOk($content)) {
+                        $content.append(result.result.debug_content);
+                        setCommonEvents($content);
+                    }
+                }
+            }
+        });
     };
 
     this.finalize = function () {

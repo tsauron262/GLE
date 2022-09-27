@@ -5,7 +5,7 @@ require_once(DOL_DOCUMENT_ROOT . '/bimpdatasync/classes/BDSProcess.php');
 class BDS_VerifsProcess extends BDSProcess
 {
 
-    // Vérifs marges factures : 
+    // Vérifs marges factures:
 
     public function initCheckFacsMargin(&$data, &$errors = array())
     {
@@ -27,7 +27,7 @@ class BDS_VerifsProcess extends BDSProcess
                 $where .= 'datec >= \'' . $date_from . ' 00:00:00\'';
             }
             if ($date_to) {
-                $where .= ($where ? ' AND ' : '') . 'datec <= \'' . $date_to . ' 00:00:00\'';
+                $where .= ($where ? ' AND ' : '') . 'datec <= \'' . $date_to . ' 23:59:59\'';
             }
 
             $rows = $this->db->getRows('facture', $where, null, 'array', array('rowid'), 'rowid', 'desc');
@@ -114,7 +114,7 @@ class BDS_VerifsProcess extends BDSProcess
                 $where .= ' AND date_valid >= \'' . $date_from . ' 00:00:00\'';
             }
             if ($date_to) {
-                $where .= ' AND date_valid <= \'' . $date_to . ' 00:00:00\'';
+                $where .= ' AND date_valid <= \'' . $date_to . ' 23:59:59\'';
             }
 
             if ($not_classified_only) {
@@ -181,6 +181,472 @@ class BDS_VerifsProcess extends BDSProcess
         }
 
         return $result;
+    }
+
+    // Vérifs réceptions: 
+
+    public function initCheckReceptions(&$data, &$errors = array())
+    {
+        $date_from = $this->getOption('date_from', '');
+        $date_to = $this->getOption('date_to', '');
+        $nbElementsPerIteration = $this->getOption('nb_elements_per_iterations', 100);
+        if (!preg_match('/^[0-9]+$/', $nbElementsPerIteration) || !(int) $nbElementsPerIteration) {
+            $errors[] = 'Le nombre d\'élements par itération doit être un nombre entier positif';
+        }
+
+        if ($date_from && $date_to && $date_from > $date_to) {
+            $errors[] = 'La date de début doit être inférieure à la date de fin';
+        }
+
+        if (!count($errors)) {
+            
+            
+            $this->db->execute('TRUNCATE TABLE llx_stock_mouvement_reverse;');
+            $this->db->execute('INSERT INTO llx_stock_mouvement_reverse (SELECT *, REVERSE(inventorycode) as inventorycodereverse FROM llx_stock_mouvement'.($date_from? ' WHERE datem >= \'' . $date_from . ' 00:00:00\'' : '').');');
+
+
+            $elements = array();
+
+            // Recherche par réception existantes: 
+//             $where = 'status = 1';
+//            if ($date_from) {
+//                $where .= ' AND date_received >= \'' . $date_from . ' 00:00:00\'';
+//            }
+//            if ($date_to) {
+//                $where .= ' AND date_received <= \'' . $date_from . ' 23:59:59\'';
+//            }
+//            $rows = $this->db->getRows('bl_commande_fourn_reception', $where, null, 'array', array('id'), 'id', 'asc');
+//            if (is_array($rows)) {
+//                $elements = array();
+//                foreach ($rows as $r) {
+//                    $elements[] = (int) $r['id'];
+//                }
+//            } else {
+//                $errors[] = $this->db->err();
+//            }
+            // Recherche par codes mouvements: 
+            $where = 'a.inventorycode LIKE \'%$_RECEP%\' ESCAPE \'$\'';
+            $where .= ' AND p.serialisable = 0';
+            if ($date_from) {
+                $where .= ' AND a.datem >= \'' . $date_from . ' 00:00:00\'';
+            }
+
+            if ($date_to) {
+                $where .= ' AND a.datem <= \'' . $date_from . ' 23:59:59\'';
+            }
+            $rows = $this->db->getRows('stock_mouvement a', $where, null, 'array', array('a.rowid', 'a.inventorycode'), null, null, array(
+                array(
+                    'alias' => 'p',
+                    'table' => 'product_extrafields',
+                    'on'    => 'p.fk_object = a.fk_product'
+                )
+            ));
+
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    if (preg_match('/^(ANNUL_)?CMDF(\d+)_LN(\d+)_RECEP(\d+)$/', $r['inventorycode'], $matches)) {
+                        $id_reception = (int) $matches[4];
+                        if ($id_reception && !in_array($id_reception, $elements)) {
+                            $elements[] = $id_reception;
+                        }
+                    } else {
+                        $this->Alert('Code inventaire incorrect', null, $r['inventorycode']);
+                    }
+                }
+            } else {
+                $errors[] = $this->db->err();
+            }
+
+            if (empty($elements)) {
+                $errors[] = 'Aucune réception a traiter trouvée';
+            } else {
+                $data['steps'] = array(
+                    'check_receptions' => array(
+                        'label'                  => 'Vérifications des réceptions',
+                        'on_error'               => 'continue',
+                        'elements'               => $elements,
+                        'nbElementsPerIteration' => (int) $nbElementsPerIteration
+                    )
+                );
+            }
+        }
+    }
+
+    public function executeCheckReceptions($step_name, &$errors = array(), $extra_data = array())
+    {
+        if (!empty($this->references)) {
+            $prod_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');
+            $this->setCurrentObject(BimpObject::getInstance('bimplogistique', 'BL_CommandeFournReception'));
+
+            $entrepots = BimpCache::getEntrepotsArray(false, false, true);
+
+            foreach ($this->references as $id_r) {
+                $reception_status = $this->db->getValue('bl_commande_fourn_reception', 'status', 'id = ' . (int) $id_r);
+                if (is_null($reception_status)) {
+                    $reception_status_label = 'Supprimée';
+                } else {
+                    $reception_status = (int) $reception_status;
+                    $reception_status_label = BimpTools::getArrayValueFromPath(BL_CommandeFournReception::$status_list[$reception_status], 'label', 'Statut #' . $reception_status);
+                }
+                $where = '(inventorycode LIKE \'%$_RECEP' . $id_r . '\' ESCAPE \'$\' OR inventorycode LIKE \'%$_RECEP$_' . $id_r . '\' ESCAPE \'$\')';
+                $where = '(inventorycodereverse LIKE REVERSE(\'%_RECEP' . $id_r . '\') ESCAPE \'$\' OR inventorycodereverse LIKE REVERSE(\'%_RECEP_' . $id_r . '\') ESCAPE \'$\')';
+                $mvts = $this->db->getRows('stock_mouvement_reverse a', $where, null, 'array', array('a.*', 'p.serialisable'), null, null, array(
+                    array(
+                        'alias' => 'p',
+                        'table' => 'product_extrafields',
+                        'on'    => 'p.fk_object = a.fk_product'
+                    )
+                ));
+
+//                $this->DebugData($mvts, 'MVTS'); 
+
+                if (is_array($mvts)) {
+                    $lines = array();
+
+                    // Trie par ligne: 
+                    foreach ($mvts as $m) {
+                        if ((int) $m['serialisable']) {
+                            continue;
+                        }
+                        $prod_instance->id = (int) $m['fk_product'];
+
+                        if ($m['inventorycode']) {
+                            if (preg_match('/^(ANNUL_)?CMDF(\d+)_LN(\d+)_RECEP' . $id_r . '$/', $m['inventorycode'], $matches)) {
+                                $id_cmd = (int) $matches[2];
+                                $id_line = (int) $matches[3];
+
+                                if (!isset($lines[$id_cmd])) {
+                                    $lines[$id_cmd] = array();
+                                }
+                                if (!isset($lines[$id_cmd][$id_line])) {
+                                    $lines[$id_cmd][$id_line] = array(
+                                        'recep'   => array(),
+                                        'annul'   => array(),
+                                        'id_prod' => (int) $m['fk_product']
+                                    );
+                                }
+
+                                if ($matches[1]) {
+                                    $lines[$id_cmd][$id_line]['annul'][] = $m;
+                                } else {
+                                    $lines[$id_cmd][$id_line]['recep'][] = $m;
+                                }
+                            } else {
+                                $this->Alert('RECEP #' . $id_r . ' - MVT #' . $m['rowid'] . ': CODE INCORRECT: ' . $m['inventorycode'], $prod_instance);
+                            }
+                        } else {
+                            $this->Alert('RECEP #' . $id_r . ' - MVT #' . $m['rowid'] . ': AUCUN CODE', $prod_instance);
+                        }
+                    }
+
+                    if (!empty($lines)) {
+                        $this->incProcessed();
+                        foreach ($lines as $id_comm => $comm_lines) {
+                            foreach ($comm_lines as $id_line => $line) {
+                                $lineObj = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', $id_line);
+                                $shipmentData = $lineObj->getReceptionData($id_r);
+//                                if($id_r == 257587){
+//                                print_r($shipmentData);die;
+//                                }
+                                $qtyAttendu = (isset($shipmentData['received']) && $shipmentData['received'] ? $shipmentData['qty'] : 0);
+                                $qtyMvt = 0;
+                                foreach ($line['recep'] as $m) {
+                                    $qtyMvt += $m['value'];
+                                }
+                                foreach ($line['annul'] as $m) {
+                                    $qtyMvt += $m['value']; //car deja inversé
+                                }
+                                $diffQty = $qtyAttendu - $qtyMvt;
+                                $diff = count($line['recep']) - count($line['annul']);
+                                if ($diffQty != 0) {
+                                    $prod_instance->id = (int) $line['id_prod'];
+                                    $title = '<a target="_blank" href="' . DOL_URL_ROOT . '/bimplogistique/index.php?fc=commandeFourn&id=' . $id_comm . '">';
+                                    $title .= (isset($entrepots[(int) $m['fk_entrepot']]) ? $entrepots[(int) $m['fk_entrepot']] : 'Entrepôt #' . $m['fk_entrepot']) . ' - ';
+                                    $title .= 'Réception #' . $id_r . ' (' . $reception_status_label . ')';
+                                    $title .= '</a> : ';
+                                    $html = '<br/><br/>';
+                                    $title .= 'Réception #' . $id_r . ': ';
+                                    $title .= '</a>';
+                                    $html .= '<br/><br/>Attendu ' . $qtyAttendu . ' Mouvement ' . $qtyMvt . '<br/>';
+
+                                    foreach (array('recep' => 'réception(s)', 'annul' => 'annulation(s)') as $code => $label) {
+                                        if (count($line[$code])) {
+                                            $html .= '<b>' . count($line[$code]) . ' ' . $label . '</b><br/>';
+                                            foreach ($line[$code] as $m) {
+                                                $html .= '   - <b>' . ((int) $m['type_mouvement'] ? 'Sortie' : 'Entrée') . '</b> : ' . $m['value'] . ' - ' . $m['rowid'] . '<br/>';
+                                            }
+                                        }
+                                    }
+
+                                    if (!$diff) {
+                                        $this->Alert($title . 'tous les mouvements annulés.' . $html, $prod_instance, $m['inventorycode']);
+                                    } else {
+                                        $this->Error($title . 'incohérence trouvée.' . $html, $prod_instance, $m['inventorycode']);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    $this->Error($this->db->err());
+                }
+            }
+        }
+    }
+
+    // Vérifs expéditions: 
+
+    public function initCheckShipments(&$data, &$errors = array())
+    {
+        $date_from = $this->getOption('date_from', '');
+        $date_to = $this->getOption('date_to', '');
+        $nbElementsPerIteration = $this->getOption('nb_elements_per_iterations', 100);
+        if (!preg_match('/^[0-9]+$/', $nbElementsPerIteration) || !(int) $nbElementsPerIteration) {
+            $errors[] = 'Le nombre d\'élements par itération doit être un nombre entier positif';
+        }
+
+        if ($date_from && $date_to && $date_from > $date_to) {
+            $errors[] = 'La date de début doit être inférieure à la date de fin';
+        }
+
+        if (!count($errors)) {
+
+            $elements = array();
+
+            // Recherche par codes mouvements: 
+            $where = 'a.inventorycode LIKE \'CO%$_EXP%\' ESCAPE \'$\'';
+            $where .= ' AND p.serialisable = 0';
+            if ($date_from) {
+                $where .= ' AND a.datem >= \'' . $date_from . ' 00:00:00\'';
+            }
+
+            if ($date_to) {
+                $where .= ' AND a.datem <= \'' . $date_from . ' 23:59:59\'';
+            }
+            $rows = $this->db->getRows('stock_mouvement a', $where, null, 'array', array('a.rowid', 'a.inventorycode'), null, null, array(
+                array(
+                    'alias' => 'p',
+                    'table' => 'product_extrafields',
+                    'on'    => 'p.fk_object = a.fk_product'
+                )
+            ));
+
+            if (is_array($rows)) {
+                $this->debug_content .= 'Nombre de mouvements à traiter: ' . count($rows) . '<br/>';
+                foreach ($rows as $r) {
+                    if (preg_match('/^CO(\d+)_EXP(\d+)(_ANNUL)?$/', $r['inventorycode'], $matches)) {
+                        $id_cmd = (int) $matches[1];
+                        $id_shipment = (int) $matches[2];
+                        if ($id_cmd && $id_shipment && !in_array($id_cmd . '_' . $id_shipment, $elements)) {
+                            $elements[] = $id_cmd . '_' . $id_shipment;
+                        }
+                    } else {
+                        $this->Alert('Code inventaire incorrect', null, $r['inventorycode']);
+                    }
+                }
+            } else {
+                $errors[] = $this->db->err();
+            }
+
+            if (empty($elements)) {
+                $errors[] = 'Aucune expédition a traiter trouvée';
+            } else {
+                $data['steps'] = array(
+                    'check_shipments' => array(
+                        'label'                  => 'Vérifications des expéditions',
+                        'on_error'               => 'continue',
+                        'elements'               => $elements,
+                        'nbElementsPerIteration' => (int) $nbElementsPerIteration
+                    )
+                );
+            }
+        }
+    }
+
+    public function executeCheckShipments($step_name, &$errors = array(), $extra_data = array())
+    {
+        if (!empty($this->references)) {
+            $prod_instance = BimpObject::getInstance('bimpcore', 'Bimp_Product');
+            $commande_instance = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
+            $this->setCurrentObject(BimpObject::getInstance('bimplogistique', 'BL_CommandeShipment'));
+
+            $entrepots = BimpCache::getEntrepotsArray(false, false, true);
+
+            // Trie par commande et expéditions: 
+            $commandes = array();
+            foreach ($this->references as $ref) {
+                if (preg_match('/^(\d+)_(\d+)$/', $ref, $matches)) {
+                    $id_cmd = (int) $matches[1];
+                    $id_exp = (int) $matches[2];
+                }
+
+                if (!isset($commandes[$id_cmd])) {
+                    $commandes[$id_cmd] = array(
+                        'prods' => array(),
+                        'exps'  => array()
+                    );
+                }
+
+                if (!in_array($id_exp, $commandes[$id_cmd]['exps'])) {
+                    $commandes[$id_cmd]['exps'][] = $id_exp;
+                }
+            }
+
+            // Traitement par commande: 
+            foreach ($commandes as $id_cmd => $cmd_data) {
+                $commande_instance->id = $id_cmd;
+                // Calcul qty attendues par produits: 
+                $lines = $this->db->getRows('commandedet det', 'det.fk_commande = ' . $id_cmd . ' AND det.fk_product > 0 AND pef.serialisable = 0 AND p.fk_product_type = 0', null, 'array', array('l.id', 'l.shipments', 'det.fk_product'), null, null, array(
+                    array(
+                        'alias' => 'l',
+                        'table' => 'bimp_commande_line',
+                        'on'    => 'l.id_line = det.rowid'
+                    ),
+                    array(
+                        'alias' => 'p',
+                        'table' => 'product',
+                        'on'    => 'p.rowid = det.fk_product'
+                    ),
+                    array(
+                        'alias' => 'pef',
+                        'table' => 'product_extrafields',
+                        'on'    => 'pef.fk_object = det.fk_product'
+                    )
+                ));
+
+                if (is_array($lines)) {
+                    if (empty($lines)) {
+                        $this->Alert('Aucunes lignes', $commande_instance);
+                    } else {
+                        foreach ($lines as $line) {
+                            $id_prod = (int) $line['fk_product'];
+                            if (!isset($commandes[$id_cmd]['prods'][$id_prod])) {
+                                $commandes[$id_cmd]['prods'][$id_prod] = array();
+                            }
+
+                            if ($line['shipments']) {
+                                $line_shipments = json_decode($line['shipments'], 1);
+
+                                if (is_array($line_shipments)) {
+                                    foreach ($line_shipments as $id_shipment => $shipment_data) {
+                                        if (!in_array($id_shipment, $cmd_data['exps'])) {
+                                            continue;
+                                        }
+                                        if (!isset($commandes[$id_cmd]['prods'][$id_prod][$id_shipment])) {
+                                            $commandes[$id_cmd]['prods'][$id_prod][$id_shipment] = array(
+                                                'qty_attendue' => 0,
+                                                'qty_mvts'     => 0
+                                            );
+                                        }
+                                        if ((int) BimpTools::getArrayValueFromPath($shipment_data, 'shipped', 0)) {
+                                            $commandes[$id_cmd]['prods'][$id_prod][$id_shipment]['qty_attendue'] += (float) BimpTools::getArrayValueFromPath($shipment_data, 'qty', 0);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    $errors[] = $this->db->err();
+                    return;
+                }
+            }
+
+            // Calcul qty mouvements par produits: 
+            foreach ($commandes as $id_cmd => $cmd_data) {
+                foreach ($cmd_data['prods'] as $id_prod => $prod_shipments) {
+                    foreach ($prod_shipments as $id_shipment => $qties) {
+                        $where = '(inventorycode LIKE \'CO' . $id_cmd . '$_EXP' . $id_shipment . '\' ESCAPE \'$\'';
+                        $where .= ' OR inventorycode LIKE \'CO' . $id_cmd . '$_EXP' . $id_shipment . '$_ANNUL\' ESCAPE \'$\')';
+                        $where .= ' AND fk_product = ' . $id_prod;
+                        $mvts = $this->db->getRows('stock_mouvement a', $where, null, 'array');
+
+                        if (is_array($mvts)) {
+                            foreach ($mvts as $m) {
+                                $commandes[$id_cmd]['prods'][$id_prod][$id_shipment]['qty_mvts'] -= (float) $m['value'];
+                            }
+                        } else {
+                            $errors[] = $this->db->err();
+                            return;
+                        }
+                    }
+                }
+            }
+
+            $this->DebugData($commandes, 'DONNEES COMMANDES');
+
+            // Comparaisons: 
+            foreach ($commandes as $id_cmd => $cmd_data) {
+                foreach ($cmd_data['prods'] as $id_prod => $prod_shipments) {
+                    foreach ($prod_shipments as $id_shipment => $qties) {
+                        $this->incProcessed();
+                        if ((float) $qties['qty_attendue'] !== (float) $qties['qty_mvts']) {
+                            $prod_instance->id = $id_prod;
+                            $id_entrepot = (int) $this->db->getValue('commande_extrafields', 'entrepot', 'fk_object = ' . $id_cmd);
+
+                            $html = '<a target="_blank" href="' . DOL_URL_ROOT . '/bimplogistique/index.php?fc=commande&id=' . $id_cmd . '">';
+                            $html .= (isset($entrepots[$id_entrepot]) ? $entrepots[$id_entrepot] : 'Entrepôt #' . $id_entrepot) . ' - ';
+                            $html .= 'Expédition #' . $id_shipment;
+                            $html .= '</a> : ';
+                            $html .= '<br/>';
+                            $html .= 'Attendu : <b>' . $qties['qty_attendue'] . '</b><br/>Mouvements : <b>' . $qties['qty_mvts'] . '</b><br/>';
+                            $html .= '<a target="_blank" href="' . DOL_URL_ROOT . '/bimpcore/index.php?fc=product&id=' . $id_prod . '&navtab-maintabs=stock&navtab-stocks_view=stocks_mvts_tab">Mouvements produit ' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight') . '</a>';
+
+                            $this->Error($html, $prod_instance, 'CO' . $id_cmd . '_EXP' . $id_shipment);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Correction code mouvements annulations réceptions: 
+
+    public function initCorrectCodeMvt(&$data, &$errors = array())
+    {
+        $where = 'inventorycode LIKE \'%$_RECEP$_%\' ESCAPE \'$\'';
+        $rows = $this->db->getRows('stock_mouvement', $where, null, 'array', array('rowid'), 'rowid', 'asc');
+
+        if (is_array($rows)) {
+            $elements = array();
+            foreach ($rows as $r) {
+                $elements[] = (int) $r['rowid'];
+            }
+            $data['steps'] = array(
+                'correct' => array(
+                    'label'                  => 'Correction des codes mouvement',
+                    'on_error'               => 'continue',
+                    'elements'               => $elements,
+                    'nbElementsPerIteration' => (int) 100
+                )
+            );
+        } else {
+            $errors[] = $this->db->err();
+        }
+    }
+
+    public function executeCorrectCodeMvt($step_name, &$errors = array(), $extra_data = array())
+    {
+        $rows = $this->db->getRows('stock_mouvement', 'rowid IN (' . implode(',', $this->references) . ')', null, 'array', array('rowid', 'inventorycode'));
+
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                if (preg_match('/^(ANNUL_)?CMDF_(\d+)_LN_(\d+)_RECEP_(\d+)$/', $r['inventorycode'], $matches)) {
+                    $code = $matches[1] . 'CMDF' . $matches[2] . '_LN' . $matches[3] . '_RECEP' . $matches[4];
+                    if ($this->db->update('stock_mouvement', array(
+                                'inventorycode' => $code
+                                    ), 'rowid = ' . (int) $r['rowid']) <= 0) {
+                        $this->Error('ECHEC - ' . $this->db->err(), null, $r['inventorycode']);
+                    } else {
+                        $this->Success('Code corrigé: ' . $code, null, $r['inventorycode']);
+                    }
+                } else {
+                    $this->Alert('Code incorrect: ' . $r['inventorycode']);
+                }
+            }
+        } else {
+            $this->Error($this->db->err());
+        }
     }
 
     // Install: 
@@ -256,7 +722,7 @@ class BDS_VerifsProcess extends BDSProcess
             if (BimpObject::objectLoaded($opt)) {
                 $options['not_classified_only'] = (int) $opt->id;
             }
-            
+
             $opt = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOption', array(
                         'id_process'    => (int) $process->id,
                         'label'         => 'Restes à payer à 0 seulement',
@@ -272,7 +738,6 @@ class BDS_VerifsProcess extends BDSProcess
             }
 
             // Opérations: 
-
             // Vérifs marges factures: 
             $op = BimpObject::createBimpObject('bimpdatasync', 'BDS_ProcessOperation', array(
                         'id_process'  => (int) $process->id,

@@ -49,47 +49,51 @@
             if($this->modeTest) {
                 $this->ldlc_ftp_path = '/FTP-BIMP-ERP/accountingtest/';
             }
-            
-            if((defined('ID_ERP') && ID_ERP == 2) || $this->modeTest) {
-                $db->begin(); //Ouvre la transaction
-            
-                $this->version_tra = BimpCore::getConf('version_tra', null, "bimptocegid");
-                $this->entitie = BimpCore::getConf('file_entity', null, "bimptocegid");
-                $this->export_class = new export($db);
-                $this->export_class->create_daily_files();
-                $this->files_for_ftp = $this->getFilesArrayForTranfert();
-                
-                if($this->export_payni && !$this->export_class->rollBack)                                                     $this->export_class->exportPayInc();
-                if($this->export_ventes && !$this->export_class->rollBack)                                                    $this->export_class->exportFacture();
-                if($this->export_paiements && !$this->export_class->rollBack)                                                 $this->export_class->exportPaiement();
-                if($this->export_achats && !$this->export_class->rollBack)                                                    $this->export_class->exportFactureFournisseur();
-                if($this->export_importPaiement &&  !$this->export_class->rollBack)                                           $this->export_class->exportImportPaiement();
-                if($this->export_deplacementPay && !$this->export_class->rollBack)                                            $this->export_class->exportDeplacementPaiament();
-                if($this->export_bordereauCHK && !$this->export_class->rollBack)                                              $this->export_class->exportBordereauxCHK();
-                
-                $this->renameFileAvantFTP();
-                $this->checkFiles();
-                
-                if(!$this->stopCompta && !$this->export_class->rollBack) {
-                    $this->FTP();
-                    $this->menage();
-                    $db->commit();
-                    $this->send_rapport();
-                } else {
-                    //if($this->export_class->rollBack) {
-                        $db->rollback(); // Annule la transaction
-                        $this->fichiersToRollback();
                         
-                        $message = 'Bonjour, ROLLBACK de la compta. Aucune action n\'à été faites pour remonter la compta d\'Aujourd\'hui, les fichiers ont étés tran sférés  dans le dossier rollback';
+            if(((defined('ID_ERP') && ID_ERP == 2) || $this->modeTest)) {
+                if(count(scandir($this->local_path, $this->export_class->excludeArrayScanDire)) > 0) {
+                    $db->begin(); //Ouvre la transaction
 
-                        if(count($this->copyErrors) > 0) {
-                            $message .= ' SAUF: ';
-                            foreach($this->copyErrors as $file) {
-                                $message .= $file . ',';
+                    $this->version_tra = BimpCore::getConf('version_tra', null, "bimptocegid");
+                    $this->entitie = BimpCore::getConf('file_entity', null, "bimptocegid");
+                    $this->export_class = new export($db);
+                    $this->export_class->create_daily_files();
+                    $this->files_for_ftp = $this->getFilesArrayForTranfert();
+
+                    if($this->export_payni && !$this->export_class->rollBack)                                                     $this->export_class->exportPayInc();
+                    if($this->export_ventes && !$this->export_class->rollBack)                                                    $this->export_class->exportFacture();
+                    if($this->export_paiements && !$this->export_class->rollBack)                                                 $this->export_class->exportPaiement();
+                    if($this->export_achats && !$this->export_class->rollBack)                                                    $this->export_class->exportFactureFournisseur();
+                    if($this->export_importPaiement &&  !$this->export_class->rollBack)                                           $this->export_class->exportImportPaiement();
+                    if($this->export_deplacementPay && !$this->export_class->rollBack)                                            $this->export_class->exportDeplacementPaiament();
+                    if($this->export_bordereauCHK && !$this->export_class->rollBack)                                              $this->export_class->exportBordereauxCHK();
+
+                    $this->renameFileAvantFTP();
+                    $this->checkFiles();
+
+                    if(!$this->stopCompta && !$this->export_class->rollBack) {
+                        $this->FTP();
+                        $this->menage();
+                        $db->commit();
+                        $this->send_rapport();
+                    } else {
+                        //if($this->export_class->rollBack) {
+                            $db->rollback(); // Annule la transaction
+                            $this->fichiersToRollback();
+
+                            $message = 'Bonjour, ROLLBACK de la compta. Aucune action n\'à été faites pour remonter la compta d\'Aujourd\'hui, les fichiers ont étés tran sférés  dans le dossier rollback';
+
+                            if(count($this->copyErrors) > 0) {
+                                $message .= ' SAUF: ';
+                                foreach($this->copyErrors as $file) {
+                                    $message .= $file . ',';
+                                }
                             }
-                        }
-                        mailSyn2("Urgent - COMPTA ROLLBACK", 'dev@bimp.fr', null, $message);
-                    //}
+                            mailSyn2("Urgent - COMPTA ROLLBACK", 'dev@bimp.fr', null, $message);
+                        //}
+                    }
+                } else {
+                    mailSyn2('URGENT COMPTA', 'dev@bimp.fr', null, 'Dossier d\'export non vide. Rien à été fait');
                 }
             } else {
                 die('Pas sur la bonne instance de l\'ERP');

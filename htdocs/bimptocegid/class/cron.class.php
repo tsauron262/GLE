@@ -43,6 +43,25 @@
         private $export_deplacementPay  = true;
         private $export_bordereauCHK    = true;
         
+        public function manualSendTRA() {
+            $errors = $warnings = Array();
+                        
+            $this->ldlc_ftp_path = '/FTP-BIMP-ERP/accountingtest/';
+            $this->version_tra = BimpCore::getConf('version_tra', null, "bimptocegid");
+            $this->entitie = BimpCore::getConf('file_entity', null, "bimptocegid");
+            $this->files_for_ftp = $this->getFilesArrayForTranfert();
+            
+            if(!count($errors)) {
+                $this->renameFileAvantFTP();
+                $this->checkFiles();
+                $this->FTP();
+                $this->menage();
+                $success = 'Fichiers transférés avec succès';
+            }
+                        
+            return Array('success' => $success, 'errors' => $errors, 'warnings' => $warnings);
+        }
+        
         public function automatique() {
             global $db;
             

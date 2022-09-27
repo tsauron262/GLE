@@ -76,7 +76,7 @@
                     $db->commit();
                     $this->send_rapport();
                 } else {
-                    if($this->export_class->rollBack) {
+                    //if($this->export_class->rollBack) {
                         $db->rollback(); // Annule la transaction
                         $this->fichiersToRollback();
                         
@@ -89,7 +89,7 @@
                             }
                         }
                         mailSyn2("Urgent - COMPTA ROLLBACK", 'dev@bimp.fr', null, $message);
-                    }
+                    //}
                 }
             } else {
                 die('Pas sur la bonne instance de l\'ERP');
@@ -115,20 +115,18 @@
                 
                 if(count($checkControle) > 0)  {
                     $mustSend = false;
-                    foreach($checkControle as $fileName => $controle) {
-                        $explodedFileName = explode('_', basename($file));
-                        if(in_array('(TIERS)', $fileName)) {
-                            $this->stopCompta = true;
-                        }
+                    foreach($checkControle as $fileName => $controle) {                       
+                        $error = 0;
+                        
                         $message .= '<b>' . $fileName . '</b><br />';
                         if($controle->header != '') {
                             if(!in_array($fileName, $this->filesNotFtp)) $this->filesNotFtp[] = $fileName;
-                            $mustSend = (!$mustSend) ? true : $mustSend;
+                            $error++;
                             $message .= 'Erreur sur le header  du fichier<br />';
                         }
                         if(count($controle->alignement) > 0) {
                             if(!in_array($fileName, $this->filesNotFtp)) $this->filesNotFtp[] = $fileName;
-                            $mustSend = (!$mustSend) ? true : $mustSend;
+                            $error++;
                             $message .= 'Erreur d\'alignement: <br />';
                             foreach($controle->alignement as $line)  {
                                 $message .= $line . '<br />';
@@ -136,7 +134,7 @@
                         }
                         if(count($controle->balance) > 0) {
                             if(!in_array($fileName, $this->filesNotFtp)) $this->filesNotFtp[] = $fileName;
-                            $mustSend = (!$mustSend) ? true : $mustSend;
+                            $error++;
                             $message .= 'Erreur de balance: <br />';
                             foreach($controle->balance as $facture => $i) {
                                 if((int)$i['LINE'] > 0) {
@@ -150,6 +148,13 @@
                             }
                         }
                         $message .= '<br /><br />';
+                        
+                        if($error) {
+                            $mustSend = true;
+                            if(stripos($fileName, '(TIERS)')) {
+                                $this->stopCompta = true;
+                            }
+                        }
                         
                     }
                     
@@ -478,8 +483,11 @@
                             if(filesize($file_path) > $this->size_vide_tra) {
                                 if(ftp_put($ftp, $this->ldlc_ftp_path . $filename, $this->local_path . $filename, FTP_ASCII)) {
                                     $this->rapport['FTP'][] = $filename . " transféré avec succès sur le FTP de LDLC";
-                                    copy($file_path, $this->local_path . 'imported_auto/' . $filename);
-                                    unlink($file_path);
+                                    if(copy($file_path, $this->local_path . 'imported_auto/' . $filename)) {
+                                        unlink($file_path);
+                                    } else {
+                                        mailSyn2("Compta - Erreur de copie", 'dev@bimP.fr', null, 'Le fichier ' . $filename . ' ne c\'est pas copié dans ledossier d\'import');
+                                    }
                                 } else {
                                     $this->rapport['FTP'][] = $filename . " non transféré sur le FTP de LDLC";
                                 }

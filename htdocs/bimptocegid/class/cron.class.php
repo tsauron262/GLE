@@ -456,7 +456,7 @@
                 $files[] = "5_" . $this->entitie . '_(MANDATS)_' . '*' . '_' . $this->version_tra . '.tra';
             }
             if($this->auto_payni)                                                   $files[] = "6_" . $this->entitie . '_(PAYNI)_' . '*' . '_' . $this->version_tra . '.tra';
-            if($this->auto_importPaiement && $this->export_class->moment == 'AM')   $files[] = 'IP*.tra';
+            if($this->auto_importPaiement)                                          $files[] = 'IP*.tra';
             if($this->auto_deplacementPay)                                          $files[] = "7_" . $this->entitie . '_(DEPLACEMENTPAIEMENTS)' . '*' . '_' . $this->version_tra . '.tra';
             if($this->auto_bordereauCHK)                                            $files[] = "8_" . $this->entitie . '_(BORDEREAUXCHK)' . '*' . '_' . $this->version_tra . '.tra';
             

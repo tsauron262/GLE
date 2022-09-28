@@ -655,7 +655,7 @@ class Bimp_Menu extends BimpObject
                     $html .= $sql;
                     $html .= '</pre>';
                 } else {
-                    BimpCore::setConf('full_menu_file_version', $version, 'bimptheme');
+                    BimpCore::setConf('full_menu_version', $version, 'bimptheme');
                     $html .= '<div class = "warning" style = "font-size: 16px; margin: 60px 0; text-align: center">';
                     $html .= BimpRender::renderIcon('fas_exclamation-triangle', 'iconLeft');
                     $html .= 'IMPORTANT: ne pas oublier de télécharger le fichier "fullmenu_' . $version . '.sql" du serveur et de supprimer tous les autres fichiers "fullmenu_xxx.sql" des sources';
@@ -737,7 +737,7 @@ class Bimp_Menu extends BimpObject
     public static function getFullMenuUpdateVersion()
     {
         if ((int) BimpCore::getConf('use_full_menu', null, 'bimptheme')) {
-            $cur_version = (int) BimpCore::getConf('full_menu_file_version', 0, 'bimptheme');
+            $cur_version = (int) BimpCore::getConf('full_menu_version', 0, 'bimptheme');
 
             $dir = DOL_DOCUMENT_ROOT . '/bimptheme/sql';
             if (is_dir($dir)) {
